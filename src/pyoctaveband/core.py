@@ -34,6 +34,8 @@ class OctaveFilterBank:
         plot_file: str | None = None,
         calibration_factor: float = 1.0,
         dbfs: bool = False,
+        stateful: bool = False,
+        steady_ic: bool = False,
     ) -> None:
         """
         Initialize the Octave Filter Bank.
@@ -49,6 +51,8 @@ class OctaveFilterBank:
         :param plot_file: Path to save the filter response plot.
         :param calibration_factor: Calibration factor for SPL calculation.
         :param dbfs: If True, calculate SPL in dBFS.
+        :param stateful: If True, carry filter state between calls. Useful for block processing.
+        :param steady_ic: If True, calculate steady state initial conditions for filter.
         """
         if fs <= 0:
             raise ValueError("Sample rate 'fs' must be positive.")
@@ -78,6 +82,7 @@ class OctaveFilterBank:
         self.attenuation = attenuation
         self.calibration_factor = calibration_factor
         self.dbfs = dbfs
+        self.stateful = stateful
 
         # Generate frequencies
         self.freq, self.freq_d, self.freq_u = _genfreqs(limits, fraction, fs)
@@ -89,6 +94,15 @@ class OctaveFilterBank:
             self.freq, self.freq_d, self.freq_u, fs, order, self.factor, 
             filter_type, ripple, attenuation, show, plot_file
         )
+
+        # Calculate initial conditions for filter state
+        if self.stateful:
+            self.zi = [None for _ in range(self.num_bands)]
+            for idx in range(self.num_bands):
+                self.zi[idx] = signal.sosfilt_zi(self.sos[idx])
+                if not steady_ic:
+                    # set all initial conditions to 0, but keep the shape
+                    self.zi[idx].fill(0)
 
     def __repr__(self) -> str:
         return (
@@ -202,9 +216,14 @@ class OctaveFilterBank:
             sd = signal.resample_poly(x, 1, self.factor[idx], axis=-1)
         else:
             sd = x
-        
+
+        if self.stateful:
+            y, self.zi[idx] = signal.sosfilt(self.sos[idx], sd, axis=-1, zi=self.zi[idx])
+        else:
+            y = signal.sosfilt(self.sos[idx], sd, axis=-1)
+
         # sosfilt supports axis=-1 by default
-        return cast(np.ndarray, signal.sosfilt(self.sos[idx], sd, axis=-1))
+        return cast(np.ndarray, y)
 
     def _calculate_level(self, y: np.ndarray, mode: str) -> float | np.ndarray:
         """Calculate the level (RMS or Peak) in dB."""

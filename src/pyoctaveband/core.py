@@ -36,6 +36,7 @@ class OctaveFilterBank:
         dbfs: bool = False,
         stateful: bool = False,
         steady_ic: bool = False,
+        resample: bool = True,
     ) -> None:
         """
         Initialize the Octave Filter Bank.
@@ -53,6 +54,7 @@ class OctaveFilterBank:
         :param dbfs: If True, calculate SPL in dBFS.
         :param stateful: If True, carry filter state between calls. Useful for block processing.
         :param steady_ic: If True, calculate steady state initial conditions for filter.
+        :param resample: If True, resampling is performed.
         """
         if fs <= 0:
             raise ValueError("Sample rate 'fs' must be positive.")
@@ -73,6 +75,10 @@ class OctaveFilterBank:
         if filter_type not in valid_filters:
             raise ValueError(f"Invalid filter_type. Must be one of {valid_filters}")
 
+        if resample and stateful:
+            raise ValueError("Resampling and stateful behaviour (block processing) are not supported.")
+            # a stateful resampling algorithm would be required...
+
         self.fs = fs
         self.fraction = fraction
         self.order = order
@@ -88,8 +94,13 @@ class OctaveFilterBank:
         self.freq, self.freq_d, self.freq_u = _genfreqs(limits, fraction, fs)
         self.num_bands = len(self.freq)
 
+
         # Calculate factors and design SOS
-        self.factor = _downsamplingfactor(self.freq_u, fs)
+        if resample:
+            self.factor = _downsamplingfactor(self.freq_u, fs)
+        else:
+            self.factor = [1 for _ in range(self.num_bands)]
+
         self.sos = _design_sos_filter(
             self.freq, self.freq_d, self.freq_u, fs, order, self.factor, 
             filter_type, ripple, attenuation, show, plot_file
@@ -99,10 +110,12 @@ class OctaveFilterBank:
         if self.stateful:
             self.zi = [None for _ in range(self.num_bands)]
             for idx in range(self.num_bands):
-                self.zi[idx] = signal.sosfilt_zi(self.sos[idx])
                 if not steady_ic:
-                    # set all initial conditions to 0, but keep the shape
-                    self.zi[idx].fill(0)
+                    self.zi[idx] = np.zeros((self.sos[idx].shape[0], 1, 2))
+                else:
+                    zi = signal.sosfilt_zi(self.sos[idx])
+                    self.zi[idx] = zi[:, np.newaxis, :] # add a dimension since we are filtering along an axis in a 2D-array
+
 
     def __repr__(self) -> str:
         return (
@@ -129,12 +142,36 @@ class OctaveFilterBank:
         detrend: bool = True
     ) -> Tuple[np.ndarray, List[float], List[np.ndarray]]: ...
 
+    # New overloads with calculate_level
+    @overload
+    def filter(
+            self,
+            x: List[float] | np.ndarray,
+            sigbands: Literal[False] = False,
+            mode: str = "rms",
+            detrend: bool = True,
+            calculate_level: Literal[False] = False
+    ) -> Tuple[np.ndarray, List[float]]:
+        ...
+
+    @overload
+    def filter(
+            self,
+            x: List[float] | np.ndarray,
+            sigbands: Literal[True],
+            mode: str = "rms",
+            detrend: bool = True,
+            calculate_level: Literal[False] = False
+    ) -> Tuple[np.ndarray, List[float], List[np.ndarray]]:
+        ...
+
     def filter(
         self, 
         x: List[float] | np.ndarray, 
         sigbands: bool = False,
         mode: str = "rms",
-        detrend: bool = True
+        detrend: bool = True,
+        calculate_level: bool =True
     ) -> Tuple[np.ndarray, List[float]] | Tuple[np.ndarray, List[float], List[np.ndarray]]:
         """
         Apply the pre-designed filter bank to a signal.
@@ -143,6 +180,7 @@ class OctaveFilterBank:
         :param sigbands: If True, also return the signal in the time domain divided into bands.
         :param mode: 'rms' for energy-based level, 'peak' for peak-holding level.
         :param detrend: If True, remove DC offset from signal before filtering (Default: True).
+        :param calculate_level: If True, calculate SPL
         :return: A tuple containing (SPL_array, Frequencies_list) or (SPL_array, Frequencies_list, signals).
         """
         
@@ -151,6 +189,8 @@ class OctaveFilterBank:
 
         # Handle DC offset removal
         if detrend:
+            if self.stateful:
+                raise Warning("You should not detrend when doing block processing!")
             # Axis -1 handles both 1D and 2D arrays correctly
             x_proc = signal.detrend(x_proc, axis=-1, type='constant')
 
@@ -162,7 +202,7 @@ class OctaveFilterBank:
         num_channels = x_proc.shape[0]
 
         # Process signal across all bands and channels
-        spl, xb = self._process_bands(x_proc, num_channels, sigbands, mode=mode)
+        spl, xb = self._process_bands(x_proc, num_channels, sigbands, mode=mode, calculate_level=calculate_level)
 
         # Format output based on input dimensionality
         if not is_multichannel:
@@ -180,8 +220,9 @@ class OctaveFilterBank:
         x_proc: np.ndarray,
         num_channels: int,
         sigbands: bool,
-        mode: str = "rms"
-    ) -> Tuple[np.ndarray, List[np.ndarray] | None]:
+        mode: str = "rms",
+        calculate_level: bool = True
+    ) -> Tuple[np.ndarray | None, List[np.ndarray] | None]:
         """
         Process signal through each frequency band.
 
@@ -189,25 +230,31 @@ class OctaveFilterBank:
         :param num_channels: Number of channels.
         :param sigbands: If True, return filtered bands.
         :param mode: 'rms' or 'peak'.
+        :param calculate_level: If True, calculate SPL
         :return: A tuple containing (SPL_array, Optional_List_of_filtered_signals).
         """
-        spl = np.zeros([num_channels, self.num_bands])
+        if calculate_level:
+            spl = np.zeros([num_channels, self.num_bands])
+        else:
+            spl = None
         xb: List[np.ndarray] | None = [np.array([]) for _ in range(self.num_bands)] if sigbands else None
 
         for idx in range(self.num_bands):
             # Vectorized processing for all channels
             filtered_signal = self._filter_and_resample(x_proc, idx)
 
-            # Sound Level Calculation (returns array of shape [num_channels])
-            spl[:, idx] = self._calculate_level(filtered_signal, mode)
+            if calculate_level:
+                # Sound Level Calculation (returns array of shape [num_channels])
+                spl[:, idx] = self._calculate_level(filtered_signal, mode)
 
             if sigbands and xb is not None:
                 # Restore original length
                 # filtered_signal is [channels, downsampled_samples]
                 y_resampled = _resample_to_length(filtered_signal, int(self.factor[idx]), x_proc.shape[1])
                 xb[idx] = y_resampled
-                
+
         return spl, xb
+
 
     def _filter_and_resample(self, x: np.ndarray, idx: int) -> np.ndarray:
         """Resample and filter for a specific band (vectorized)."""

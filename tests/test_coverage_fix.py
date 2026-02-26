@@ -148,3 +148,11 @@ def test_calculate_level_invalid():
     # This should hit core.py:218
     with pytest.raises(ValueError):
         bank._calculate_level(np.array([1.0]), "invalid_mode")
+
+def test_dont_calculate_level():
+    from pyoctaveband.core import OctaveFilterBank
+    bank = OctaveFilterBank(48000)
+    x = np.zeros((bank.num_bands, 100))
+    spl, y = bank._process_bands(x, num_channels=bank.num_bands, calculate_level=False, sigbands=True)
+    assert spl is None
+    assert y is not None

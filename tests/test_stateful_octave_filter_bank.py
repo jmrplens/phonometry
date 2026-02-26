@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-
-def test_block_processing_matches_full_signal():
+@pytest.mark.parametrize("block_size", [8, 256, 1024])
+def test_block_processing_matches_full_signal(block_size: int):
     from pyoctaveband import OctaveFilterBank
     """
     Ensure that block-wise processing with preserved filter state
@@ -12,7 +12,7 @@ def test_block_processing_matches_full_signal():
     rng = np.random.default_rng(42)
 
     fs = 48000
-    duration = 2.0
+    duration = 0.2
     n_samples = int(fs * duration)
 
     # Random signal (deterministic via seed)
@@ -25,7 +25,6 @@ def test_block_processing_matches_full_signal():
     # --- Block-wise processing ---
     block_filter = OctaveFilterBank(fs=fs, resample=False, stateful=True, steady_ic=False)
 
-    block_size = 1024
     outputs = []
 
     for start in range(0, n_samples, block_size):

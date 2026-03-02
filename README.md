@@ -16,7 +16,6 @@ Now available on [PyPI](https://pypi.org/project/PyOctaveBand/).
 1. [🚀 Getting Started](#-getting-started)
     - [Installation](#installation)
     - [Basic Usage](#basic-usage-13-octave-analysis)
-    - []
 2. [🛠️ Filter Architectures](#️-filter-architectures)
     - [Filter Comparison and Zoom](#filter-comparison-and-zoom)
     - [Gallery of Responses](#gallery-of-filter-bank-responses)

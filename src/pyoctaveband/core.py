@@ -80,7 +80,7 @@ class OctaveFilterBank:
         self.dbfs = dbfs
 
         # Generate frequencies
-        self.freq, self.freq_d, self.freq_u = _genfreqs(limits, fraction, fs)
+        self.freq, self.freq_d, self.freq_u, self.nominal_freq = _genfreqs(limits, fraction, fs)
         self.num_bands = len(self.freq)
 
         # Calculate factors and design SOS
@@ -99,29 +99,52 @@ class OctaveFilterBank:
 
     @overload
     def filter(
-        self, 
-        x: List[float] | np.ndarray, 
+        self,
+        x: List[float] | np.ndarray,
         sigbands: Literal[False] = False,
         mode: str = "rms",
-        detrend: bool = True
+        detrend: bool = True,
+        nominal: Literal[False] = False,
     ) -> Tuple[np.ndarray, List[float]]: ...
 
     @overload
     def filter(
-        self, 
-        x: List[float] | np.ndarray, 
+        self,
+        x: List[float] | np.ndarray,
         sigbands: Literal[True],
         mode: str = "rms",
-        detrend: bool = True
+        detrend: bool = True,
+        nominal: Literal[False] = False,
     ) -> Tuple[np.ndarray, List[float], List[np.ndarray]]: ...
 
+    @overload
     def filter(
-        self, 
-        x: List[float] | np.ndarray, 
+        self,
+        x: List[float] | np.ndarray,
+        sigbands: Literal[False],
+        mode: str = "rms",
+        detrend: bool = True,
+        nominal: Literal[True] = ...,
+    ) -> Tuple[np.ndarray, List[str]]: ...
+
+    @overload
+    def filter(
+        self,
+        x: List[float] | np.ndarray,
+        sigbands: Literal[True],
+        mode: str = "rms",
+        detrend: bool = True,
+        nominal: Literal[True] = ...,
+    ) -> Tuple[np.ndarray, List[str], List[np.ndarray]]: ...
+
+    def filter(
+        self,
+        x: List[float] | np.ndarray,
         sigbands: bool = False,
         mode: str = "rms",
-        detrend: bool = True
-    ) -> Tuple[np.ndarray, List[float]] | Tuple[np.ndarray, List[float], List[np.ndarray]]:
+        detrend: bool = True,
+        nominal: bool = False,
+    ) -> Tuple[np.ndarray, List[float]] | Tuple[np.ndarray, List[str]] | Tuple[np.ndarray, List[float], List[np.ndarray]] | Tuple[np.ndarray, List[str], List[np.ndarray]]:
         """
         Apply the pre-designed filter bank to a signal.
 
@@ -129,6 +152,7 @@ class OctaveFilterBank:
         :param sigbands: If True, also return the signal in the time domain divided into bands.
         :param mode: 'rms' for energy-based level, 'peak' for peak-holding level.
         :param detrend: If True, remove DC offset from signal before filtering (Default: True).
+        :param nominal: If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats.
         :return: A tuple containing (SPL_array, Frequencies_list) or (SPL_array, Frequencies_list, signals).
         """
         
@@ -156,10 +180,12 @@ class OctaveFilterBank:
             if sigbands and xb is not None:
                 xb = [band[0] for band in xb]
 
+        freq_out = self.nominal_freq if nominal else self.freq
+
         if sigbands and xb is not None:
-            return spl, self.freq, xb
+            return spl, freq_out, xb
         else:
-            return spl, self.freq
+            return spl, freq_out
 
     def _process_bands(
         self,

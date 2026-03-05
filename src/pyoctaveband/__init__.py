@@ -52,6 +52,7 @@ def octavefilter(
     calibration_factor: float = 1.0,
     dbfs: bool = False,
     mode: str = "rms",
+    nominal: bool = False,
 ) -> Tuple[np.ndarray, List[float]]: ...
 
 
@@ -72,6 +73,7 @@ def octavefilter(
     calibration_factor: float = 1.0,
     dbfs: bool = False,
     mode: str = "rms",
+    nominal: bool = False,
 ) -> Tuple[np.ndarray, List[float], List[np.ndarray]]: ...
 
 
@@ -91,7 +93,8 @@ def octavefilter(
     calibration_factor: float = 1.0,
     dbfs: bool = False,
     mode: str = "rms",
-) -> Tuple[np.ndarray, List[float]] | Tuple[np.ndarray, List[float], List[np.ndarray]]:
+    nominal: bool = False,
+) -> Tuple[np.ndarray, List[float]] | Tuple[np.ndarray, List[str]] | Tuple[np.ndarray, List[float], List[np.ndarray]] | Tuple[np.ndarray, List[str], List[np.ndarray]]:
     """
     Filter a signal with octave or fractional octave filter bank.
 
@@ -125,6 +128,7 @@ def octavefilter(
     :param calibration_factor: Calibration factor for SPL calculation. Default: 1.0.
     :param dbfs: If True, return results in dBFS. Default: False.
     :param mode: 'rms' or 'peak'. Default: 'rms'.
+    :param nominal: If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats.
     :return: A tuple containing (SPL_array, Frequencies_list) or (SPL_array, Frequencies_list, signals).
     :rtype: Union[Tuple[np.ndarray, List[float]], Tuple[np.ndarray, List[float], List[np.ndarray]]]
     """
@@ -145,6 +149,6 @@ def octavefilter(
     )
     
     if sigbands:
-        return filter_bank.filter(x, sigbands=True, mode=mode, detrend=detrend)
+        return filter_bank.filter(x, sigbands=True, mode=mode, detrend=detrend, nominal=nominal)
     else:
-        return filter_bank.filter(x, sigbands=False, mode=mode, detrend=detrend)
+        return filter_bank.filter(x, sigbands=False, mode=mode, detrend=detrend, nominal=nominal)

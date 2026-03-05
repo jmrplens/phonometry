@@ -139,7 +139,7 @@ def test_octavefilter_limits_none():
     spl, freq = octavefilter(np.random.randn(1000), 1000, limits=None)
     assert len(spl) > 0
     # Also directly call it
-    f1, f2, f3 = getansifrequencies(1, limits=None)
+    f1, f2, f3, labels = getansifrequencies(1, limits=None)
     assert len(f1) > 0
 
 def test_calculate_level_invalid():

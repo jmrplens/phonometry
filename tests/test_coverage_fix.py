@@ -139,8 +139,10 @@ def test_octavefilter_limits_none():
     spl, freq = octavefilter(np.random.randn(1000), 1000, limits=None)
     assert len(spl) > 0
     # Also directly call it
-    f1, f2, f3 = getansifrequencies(1, limits=None)
+    f1, f2, f3, labels = getansifrequencies(1, limits=None)
     assert len(f1) > 0
+    assert len(f1) == len(f2) == len(f3) == len(labels)
+    assert all(isinstance(label, str) for label in labels)
 
 def test_calculate_level_invalid():
     from pyoctaveband.core import OctaveFilterBank

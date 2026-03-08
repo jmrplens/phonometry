@@ -56,7 +56,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-        pip install .
+        pip install -e .
     - name: Run tests
       env:
         NUMBA_DISABLE_JIT: 1
@@ -84,9 +84,9 @@ jobs:
       with:
         name: test-results-ubuntu-latest-3.13
     - name: SonarCloud Scan
-      uses: SonarSource/sonarqube-scan-action@master
+      uses: SonarSource/sonarqube-scan-action@v7
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN_GH }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   pr-comment:

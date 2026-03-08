@@ -19,7 +19,7 @@ from .parametric_filters import WeightingFilter, linkwitz_riley, time_weighting,
 # Use non-interactive backend for plots
 matplotlib.use("Agg")
 
-__version__ = "1.1.2"
+__version__ = "1.1.4"
 
 # Public methods
 __all__ = [

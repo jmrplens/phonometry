@@ -91,6 +91,30 @@ class WeightingFilter:
             self.zi = np.array([])
             self._steady_ic = steady_ic
 
+    def _init_filter_state(self, x_proc: np.ndarray) -> None:
+        """Allocate or reallocate ``zi`` to match the input shape."""
+        n_sections = self.sos.shape[0]
+        if x_proc.ndim == 1:
+            if self._steady_ic:
+                self.zi = signal.sosfilt_zi(self.sos)
+            else:
+                self.zi = np.zeros((n_sections, 2))
+        else:
+            n_channels = x_proc.shape[0]
+            if self._steady_ic:
+                zi_base = signal.sosfilt_zi(self.sos)
+                self.zi = np.tile(zi_base[:, np.newaxis, :], (1, n_channels, 1))
+            else:
+                self.zi = np.zeros((n_sections, n_channels, 2))
+
+    def _needs_zi_reinit(self, x_proc: np.ndarray) -> bool:
+        """Check whether ``zi`` must be (re)allocated for *x_proc*."""
+        if self.zi.size == 0:
+            return True
+        if x_proc.ndim == 1:
+            return self.zi.ndim != 2
+        return self.zi.ndim != 3 or self.zi.shape[1] != x_proc.shape[0]
+
     def filter(self, x: List[float] | np.ndarray) -> np.ndarray:
         """
         Apply the weighting filter to a signal.
@@ -103,27 +127,8 @@ class WeightingFilter:
             return x_proc
 
         if self.stateful:
-            # Lazy init: allocate zi with correct shape on first call
-            n_sections = self.sos.shape[0]
-            needs_init = self.zi.size == 0
-            if not needs_init:
-                if x_proc.ndim == 1:
-                    needs_init = self.zi.ndim != 2
-                else:
-                    needs_init = self.zi.ndim != 3 or self.zi.shape[1] != x_proc.shape[0]
-            if needs_init:
-                if x_proc.ndim == 1:
-                    if not self._steady_ic:
-                        self.zi = np.zeros((n_sections, 2))
-                    else:
-                        self.zi = signal.sosfilt_zi(self.sos)
-                else:
-                    n_channels = x_proc.shape[0]
-                    if not self._steady_ic:
-                        self.zi = np.zeros((n_sections, n_channels, 2))
-                    else:
-                        zi_base = signal.sosfilt_zi(self.sos)
-                        self.zi = np.tile(zi_base[:, np.newaxis, :], (1, n_channels, 1))
+            if self._needs_zi_reinit(x_proc):
+                self._init_filter_state(x_proc)
             y, self.zi = signal.sosfilt(self.sos, x_proc, axis=-1, zi=self.zi)
         else:
             y = signal.sosfilt(self.sos, x_proc, axis=-1)

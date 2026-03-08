@@ -106,8 +106,11 @@ class WeightingFilter:
             # Lazy init: allocate zi with correct shape on first call
             n_sections = self.sos.shape[0]
             needs_init = self.zi.size == 0
-            if not needs_init and x_proc.ndim > 1:
-                needs_init = self.zi.ndim < 3 or self.zi.shape[1] != x_proc.shape[0]
+            if not needs_init:
+                if x_proc.ndim == 1:
+                    needs_init = self.zi.ndim != 2
+                else:
+                    needs_init = self.zi.ndim != 3 or self.zi.shape[1] != x_proc.shape[0]
             if needs_init:
                 if x_proc.ndim == 1:
                     if not self._steady_ic:

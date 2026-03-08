@@ -38,6 +38,9 @@ ignore_missing_imports = true
 [tool.bandit]
 exclude_dirs = ["tests", ".venv"]
 
+[tool.coverage.run]
+relative_files = true
+
 [tool.pytest.ini_options]
 filterwarnings = [
     "ignore:Low sampling rate:UserWarning",

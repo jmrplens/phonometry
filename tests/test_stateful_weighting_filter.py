@@ -55,6 +55,25 @@ def test_weighting_filter_steady_ic_initialization():
     assert wf.zi.shape == (n_sections, 2)
 
 
+def test_weighting_filter_multichannel_to_mono_transition():
+    from pyoctaveband import WeightingFilter
+    """zi must reinit when input switches from multichannel to 1D."""
+    rng = np.random.default_rng(77)
+    fs = 48000
+    wf = WeightingFilter(fs, "A", stateful=True)
+
+    # First call: multichannel (4 channels)
+    x_multi = rng.standard_normal((4, 1200))
+    wf.filter(x_multi)
+    assert wf.zi.ndim == 3
+
+    # Second call: 1D — must not crash
+    x_mono = rng.standard_normal(1200)
+    y = wf.filter(x_mono)
+    assert wf.zi.ndim == 2
+    assert y.shape == x_mono.shape
+
+
 def test_weighting_filter_multichannel():
     from pyoctaveband import WeightingFilter
     """Stateful block-wise multichannel weighting must match full-signal processing."""

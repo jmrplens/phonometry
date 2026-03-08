@@ -113,14 +113,13 @@ class OctaveFilterBank:
 
 
     def _init_filter_state(self, steady_ic: bool) -> None:
-        """Initialize filter state (zi) for stateful block-wise processing."""
+        """Initialize filter state (zi) for stateful block-wise processing.
+
+        Uses lazy initialization: zi arrays are allocated on first use in
+        _filter_and_resample() so the channel count matches the actual input.
+        """
         self.zi: List[np.ndarray] = [np.array([]) for _ in range(self.num_bands)]
-        for idx in range(self.num_bands):
-            if not steady_ic:
-                self.zi[idx] = np.zeros((self.sos[idx].shape[0], 1, 2))
-            else:
-                zi = signal.sosfilt_zi(self.sos[idx])
-                self.zi[idx] = zi[:, np.newaxis, :] # add a dimension since we are filtering along an axis in a 2D-array
+        self._steady_ic = steady_ic
 
 
     def __repr__(self) -> str:
@@ -277,6 +276,15 @@ class OctaveFilterBank:
             sd = x
 
         if self.stateful:
+            n_channels = sd.shape[0]
+            # Lazy init: allocate zi with correct channel count on first use
+            if self.zi[idx].ndim < 3 or self.zi[idx].shape[1] != n_channels:
+                n_sections = self.sos[idx].shape[0]
+                if not self._steady_ic:
+                    self.zi[idx] = np.zeros((n_sections, n_channels, 2))
+                else:
+                    zi_base = signal.sosfilt_zi(self.sos[idx])
+                    self.zi[idx] = np.tile(zi_base[:, np.newaxis, :], (1, n_channels, 1))
             y, self.zi[idx] = signal.sosfilt(self.sos[idx], sd, axis=-1, zi=self.zi[idx])
         else:
             y = signal.sosfilt(self.sos[idx], sd, axis=-1)

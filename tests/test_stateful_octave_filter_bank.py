@@ -62,15 +62,46 @@ def test_stateful_steady_ic_initialization():
         resample=False  # avoid the resampling branch
     )
 
+    # With lazy initialization, zi is allocated on first filter() call.
+    # Verify zi is properly initialized after processing a block.
+    rng = np.random.default_rng(42)
+    test_signal = rng.standard_normal(1024)
+    bank.filter(test_signal)
+
     # Check that zi is a list of numpy arrays with the expected shape
     for idx, zi in enumerate(bank.zi):
-        # zi should have 3 dimensions: (n_sections, 1, 2)
+        # zi should have 3 dimensions: (n_sections, n_channels, 2)
         assert isinstance(zi, np.ndarray)
         assert zi.ndim == 3
         n_sections = bank.sos[idx].shape[0]
         assert zi.shape[0] == n_sections
-        assert zi.shape[1] == 1
+        assert zi.shape[1] == 1  # single-channel input
         assert zi.shape[2] == 2
+
+def test_stateful_multichannel():
+    """Test that stateful processing works with multichannel (e.g. stereo) input."""
+    from pyoctaveband.core import OctaveFilterBank
+    rng = np.random.default_rng(42)
+    n_channels = 4
+    fs = 48000
+    block_size = 1024
+
+    bank = OctaveFilterBank(
+        fs=fs, stateful=True, steady_ic=True,
+        order=2, fraction=1, resample=False,
+    )
+    stereo_block = rng.standard_normal((n_channels, block_size))
+    spl, _ = bank.filter(stereo_block, detrend=False)
+
+    # zi must have correct multichannel shape after first call
+    for idx, zi in enumerate(bank.zi):
+        n_sections = bank.sos[idx].shape[0]
+        assert zi.shape == (n_sections, n_channels, 2)
+
+    # Second block should work without error (state reused)
+    spl2, _ = bank.filter(rng.standard_normal((n_channels, block_size)), detrend=False)
+    assert spl2 is not None
+    assert spl2.shape[0] == n_channels
 
 def test_detrend_stateful_warning():
     from pyoctaveband.core import OctaveFilterBank

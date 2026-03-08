@@ -21,21 +21,27 @@ class WeightingFilter:
     Allows pre-calculating and reusing filter coefficients.
     """
 
-    def __init__(self, fs: int, curve: str = "A") -> None:
+    def __init__(self, fs: int, curve: str = "A",
+                 stateful: bool = False, steady_ic: bool = False) -> None:
         """
         Initialize the weighting filter.
 
         :param fs: Sample rate in Hz.
         :param curve: 'A', 'C' or 'Z'.
+        :param stateful: If True, the weighting filter is stateful. Useful for block processing.
+        :param steady_ic: If True, calculate steady state initial conditions for filter.
         """
         if fs <= 0:
             raise ValueError("Sample rate 'fs' must be positive.")
 
         self.fs = fs
         self.curve = curve.upper()
+        self.stateful = stateful
 
         if self.curve == "Z":
             self.sos = np.array([])
+            if self.stateful:
+                self.zi = np.array([])
             return
 
         if self.curve not in ["A", "C"]:
@@ -78,6 +84,13 @@ class WeightingFilter:
         zd, pd, kd = signal.bilinear_zpk(z, p, k, fs)
         self.sos = signal.zpk2sos(zd, pd, kd)
 
+        # Calculate initial conditions for filter state
+        if self.stateful:
+            if not steady_ic:
+                self.zi = np.zeros((self.sos.shape[0], 2))
+            else:
+                self.zi = signal.sosfilt_zi(self.sos)
+
     def filter(self, x: List[float] | np.ndarray) -> np.ndarray:
         """
         Apply the weighting filter to a signal.
@@ -88,7 +101,13 @@ class WeightingFilter:
         x_proc = _typesignal(x)
         if self.curve == "Z":
             return x_proc
-        return cast(np.ndarray, signal.sosfilt(self.sos, x_proc, axis=-1))
+
+        if self.stateful:
+            y, self.zi = signal.sosfilt(self.sos, x_proc, axis=-1, zi=self.zi)
+        else:
+            y = signal.sosfilt(self.sos, x_proc, axis=-1)
+
+        return cast(np.ndarray, y)
 
 
 def weighting_filter(x: List[float] | np.ndarray, fs: int, curve: str = "A") -> np.ndarray:

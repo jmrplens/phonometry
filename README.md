@@ -130,6 +130,38 @@ PyOctaveBand natively supports multichannel signals (e.g., Stereo, 5.1, Micropho
 
 *Simultaneous analysis of a Stereo signal: Left Channel (Pink Noise) vs Right Channel (Log Sine Sweep).*
 
+### Block processing
+
+The `OctaveFilterBank` and `WeightingFilter` (for A, C, or Z-weighting) support block processing. 
+Create a stateful filter bank with `stateful=True`. The internal state is zero-initialized by default 
+but may be initialized for step-response steady-state (like `scipy.signal.sosfilt_zi`) with `steady_ic=True`.
+Notes when using a stateful `OctaveFilterBank`:
+- Detrending should be disabled during block processing (`detrend=False`), as it can introduce discontinuities between blocks.
+- Resampling is not supported for block processing, so you need to set `resample=False`.
+
+Example
+```python
+import soundfile as sf
+from pyoctaveband import OctaveFilterBank, WeightingFilter
+
+fs = 48000
+octavefilter = OctaveFilterBank(fs, 1, stateful=True, resample=False)
+afilter = WeightingFilter(fs, "A", stateful=True)
+
+for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
+
+    # Apply A-filter
+    weighted = afilter.filter(block)
+
+    # Split into octave bands
+    block_spl, _, block_output = octavefilter.filter(weighted, sigbands=True, detrend=False)
+
+    # further signal processing
+    ...
+
+```
+
+
 ---
 
 ## 🛠️ Filter Architectures

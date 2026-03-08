@@ -19,7 +19,7 @@ from .parametric_filters import WeightingFilter, linkwitz_riley, time_weighting,
 # Use non-interactive backend for plots
 matplotlib.use("Agg")
 
-__version__ = "1.1.4"
+__version__ = "1.2.0"
 
 # Public methods
 __all__ = [
@@ -52,7 +52,7 @@ def octavefilter(
     calibration_factor: float = 1.0,
     dbfs: bool = False,
     mode: str = "rms",
-    nominal: bool = False,
+    nominal: Literal[False] = False,
 ) -> Tuple[np.ndarray, List[float]]: ...
 
 
@@ -73,8 +73,50 @@ def octavefilter(
     calibration_factor: float = 1.0,
     dbfs: bool = False,
     mode: str = "rms",
-    nominal: bool = False,
+    nominal: Literal[False] = False,
 ) -> Tuple[np.ndarray, List[float], List[np.ndarray]]: ...
+
+
+@overload
+def octavefilter(
+    x: List[float] | np.ndarray,
+    fs: int,
+    fraction: float = 1,
+    order: int = 6,
+    limits: List[float] | None = None,
+    show: bool = False,
+    sigbands: Literal[False] = False,
+    plot_file: str | None = None,
+    detrend: bool = True,
+    filter_type: str = "butter",
+    ripple: float = 0.1,
+    attenuation: float = 60.0,
+    calibration_factor: float = 1.0,
+    dbfs: bool = False,
+    mode: str = "rms",
+    nominal: Literal[True] = ...,
+) -> Tuple[np.ndarray, List[str]]: ...
+
+
+@overload
+def octavefilter(
+    x: List[float] | np.ndarray,
+    fs: int,
+    fraction: float = 1,
+    order: int = 6,
+    limits: List[float] | None = None,
+    show: bool = False,
+    sigbands: Literal[True] = True,
+    plot_file: str | None = None,
+    detrend: bool = True,
+    filter_type: str = "butter",
+    ripple: float = 0.1,
+    attenuation: float = 60.0,
+    calibration_factor: float = 1.0,
+    dbfs: bool = False,
+    mode: str = "rms",
+    nominal: Literal[True] = ...,
+) -> Tuple[np.ndarray, List[str], List[np.ndarray]]: ...
 
 
 def octavefilter(
@@ -130,7 +172,10 @@ def octavefilter(
     :param mode: 'rms' or 'peak'. Default: 'rms'.
     :param nominal: If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats.
     :return: A tuple containing (SPL_array, Frequencies_list) or (SPL_array, Frequencies_list, signals).
-    :rtype: Union[Tuple[np.ndarray, List[float]], Tuple[np.ndarray, List[float], List[np.ndarray]]]
+        When *nominal=True*, the frequency list contains ``List[str]`` labels instead of floats.
+    :rtype: Union[Tuple[np.ndarray, List[float]], Tuple[np.ndarray, List[str]],
+        Tuple[np.ndarray, List[float], List[np.ndarray]],
+        Tuple[np.ndarray, List[str], List[np.ndarray]]]
     """
     
     # Use the class-based implementation
@@ -148,7 +193,4 @@ def octavefilter(
         dbfs=dbfs
     )
     
-    if sigbands:
-        return filter_bank.filter(x, sigbands=True, mode=mode, detrend=detrend, nominal=nominal)
-    else:
-        return filter_bank.filter(x, sigbands=False, mode=mode, detrend=detrend, nominal=nominal)
+    return filter_bank.filter(x, sigbands=sigbands, mode=mode, detrend=detrend, nominal=nominal)  # type: ignore[call-overload,no-any-return]

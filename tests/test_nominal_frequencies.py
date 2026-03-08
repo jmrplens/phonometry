@@ -4,7 +4,6 @@ Tests for IEC 61260-1 nominal frequency helpers and opt-in nominal label support
 """
 
 import numpy as np
-import pytest
 
 from pyoctaveband.frequencies import (
     _format_nominal_freq,
@@ -66,7 +65,7 @@ def test_format_1k_and_above():
 def test_getansifrequencies_returns_labels():
     freq, fd, fu, labels = getansifrequencies(fraction=3)
     assert isinstance(labels, list)
-    assert all(isinstance(l, str) for l in labels)
+    assert all(isinstance(label, str) for label in labels)
     assert len(labels) == len(freq)
     assert "1k" in labels
     assert "31.5" in labels
@@ -84,7 +83,7 @@ def test_filterbank_nominal_freq_attribute():
     fb = OctaveFilterBank(fs=48000, fraction=1)
     assert hasattr(fb, "nominal_freq")
     assert isinstance(fb.nominal_freq, list)
-    assert all(isinstance(l, str) for l in fb.nominal_freq)
+    assert all(isinstance(label, str) for label in fb.nominal_freq)
     assert "1k" in fb.nominal_freq
     assert len(fb.nominal_freq) == fb.num_bands
 

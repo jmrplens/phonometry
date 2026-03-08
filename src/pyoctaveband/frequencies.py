@@ -6,6 +6,7 @@ Frequency calculation logic according to ANSI/IEC standards.
 from __future__ import annotations
 
 import warnings
+from functools import lru_cache
 from typing import List, Tuple
 
 import numpy as np
@@ -121,9 +122,10 @@ def _genfreqs(
     :param fs: Sample rate.
     :return: Tuple of center, lower, upper frequencies, and nominal labels.
     """
-    freq, freq_d, freq_u, _ = getansifrequencies(fraction, limits)
+    freq, freq_d, freq_u, labels = getansifrequencies(fraction, limits)
     freq, freq_d, freq_u = _deleteouters(freq, freq_d, freq_u, fs)
-    labels = [_format_nominal_freq(_nominal_freq_for_band(f, fraction)) for f in freq]
+    # _deleteouters only removes trailing bands above Nyquist, so slice labels
+    labels = labels[: len(freq)]
     return freq, freq_d, freq_u, labels
 
 
@@ -137,12 +139,23 @@ def _iec_e3_round(f: float) -> float:
     return round(f / step) * step
 
 
+@lru_cache(maxsize=4)
+def _extended_preferred(frac: int) -> List[float]:
+    """Cached expansion of the IEC preferred frequency table across decades."""
+    base = normalizedfreq(frac)
+    return [f * (10 ** d) for d in range(-3, 4) for f in base]
+
+
 def _nominal_freq_for_band(exact_freq: float, fraction: float) -> float:
-    """Return IEC 61260-1 nominal frequency (float) for an exact mid-band frequency."""
+    """Return IEC 61260-1 nominal frequency (float) for an exact mid-band frequency.
+
+    For standard fractions (1, 3), snaps to the IEC preferred table via
+    ``normalizedfreq``.  For non-standard fractions, falls back to Annex E.3
+    significant-figure rounding (``_iec_e3_round``).
+    """
     frac = round(fraction)
-    if frac in (1, 3):
-        base = normalizedfreq(frac)
-        extended = [f * (10 ** d) for d in range(-3, 4) for f in base]
+    if np.isclose(fraction, frac) and frac in (1, 3):
+        extended = _extended_preferred(frac)
         return min(extended, key=lambda f: abs(np.log(f / exact_freq)))
     return _iec_e3_round(exact_freq)
 

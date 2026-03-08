@@ -5,6 +5,7 @@ Core processing logic and FilterBank class for pyoctaveband.
 
 from __future__ import annotations
 
+import warnings
 from typing import List, Tuple, cast, overload, Literal
 
 import numpy as np
@@ -151,7 +152,7 @@ class OctaveFilterBank:
             mode: str = "rms",
             detrend: bool = True,
             calculate_level: Literal[False] = False
-    ) -> Tuple[np.ndarray, List[float]]:
+    ) -> Tuple[None, List[float]]:
         ...
 
     @overload
@@ -162,7 +163,7 @@ class OctaveFilterBank:
             mode: str = "rms",
             detrend: bool = True,
             calculate_level: Literal[False] = False
-    ) -> Tuple[np.ndarray, List[float], List[np.ndarray]]:
+    ) -> Tuple[None, List[float], List[np.ndarray]]:
         ...
 
     def filter(
@@ -172,7 +173,7 @@ class OctaveFilterBank:
         mode: str = "rms",
         detrend: bool = True,
         calculate_level: bool =True
-    ) -> Tuple[np.ndarray, List[float]] | Tuple[np.ndarray, List[float], List[np.ndarray]]:
+    ) -> Tuple[np.ndarray | None, List[float]] | Tuple[np.ndarray | None, List[float], List[np.ndarray]]:
         """
         Apply the pre-designed filter bank to a signal.
 
@@ -190,7 +191,12 @@ class OctaveFilterBank:
         # Handle DC offset removal
         if detrend:
             if self.stateful:
-                raise Warning("You should not detrend when doing block processing!")
+                warnings.warn(
+                    "Detrending is not recommended during block processing "
+                    "as it can introduce discontinuities between blocks.",
+                    UserWarning,
+                    stacklevel=2,
+                )
             # Axis -1 handles both 1D and 2D arrays correctly
             x_proc = signal.detrend(x_proc, axis=-1, type='constant')
 
@@ -206,7 +212,8 @@ class OctaveFilterBank:
 
         # Format output based on input dimensionality
         if not is_multichannel:
-            spl = spl[0]
+            if spl is not None:
+                spl = spl[0]
             if sigbands and xb is not None:
                 xb = [band[0] for band in xb]
 

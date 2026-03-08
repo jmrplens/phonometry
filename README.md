@@ -136,11 +136,11 @@ The `OctaveFilterBank` and `WeightingFilter` (for A, C, or Z-weighting) support 
 Create a stateful filter bank with `stateful=True`. The internal state is zero-initialized by default 
 but may be initialized for step-response steady-state (like `scipy.signal.sosfilt_zi`) with `steady_ic=True`.
 Notes when using a stateful `OctaveFilterBank`:
-- You should not remove the DC-content when block processing (`detrend=False`).
+- Detrending should be disabled during block processing (`detrend=False`), as it can introduce discontinuities between blocks.
 - Resampling is not supported for block processing, so you need to set `resample=False`.
 
 Example
-```
+```python
 import soundfile as sf
 from pyoctaveband import OctaveFilterBank, WeightingFilter
 

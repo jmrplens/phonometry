@@ -47,7 +47,7 @@ def test_block_processing_matches_full_signal(block_size: int):
 def test_resample_and_stateful():
     from pyoctaveband.core import OctaveFilterBank
     with pytest.raises(ValueError):
-        bank = OctaveFilterBank(48000, resample=True, stateful=True)
+        OctaveFilterBank(48000, resample=True, stateful=True)
 
 
 def test_stateful_steady_ic_initialization():
@@ -84,6 +84,6 @@ def test_detrend_stateful_warning():
     signal = rng.standard_normal(n_samples)
 
     bank = OctaveFilterBank(fs, stateful=True, resample=False)
-    with pytest.raises(Warning):
+    with pytest.warns(UserWarning, match="block processing"):
         bank.filter(signal, detrend=True)
 

@@ -100,7 +100,7 @@ class OctaveFilterBank:
         if resample:
             self.factor = _downsamplingfactor(self.freq_u, fs)
         else:
-            self.factor = [1 for _ in range(self.num_bands)]
+            self.factor = np.ones(self.num_bands, dtype=int)
 
         self.sos = _design_sos_filter(
             self.freq, self.freq_d, self.freq_u, fs, order, self.factor, 
@@ -109,13 +109,18 @@ class OctaveFilterBank:
 
         # Calculate initial conditions for filter state
         if self.stateful:
-            self.zi = [None for _ in range(self.num_bands)]
-            for idx in range(self.num_bands):
-                if not steady_ic:
-                    self.zi[idx] = np.zeros((self.sos[idx].shape[0], 1, 2))
-                else:
-                    zi = signal.sosfilt_zi(self.sos[idx])
-                    self.zi[idx] = zi[:, np.newaxis, :] # add a dimension since we are filtering along an axis in a 2D-array
+            self._init_filter_state(steady_ic)
+
+
+    def _init_filter_state(self, steady_ic: bool) -> None:
+        """Initialize filter state (zi) for stateful block-wise processing."""
+        self.zi: List[np.ndarray] = [np.array([]) for _ in range(self.num_bands)]
+        for idx in range(self.num_bands):
+            if not steady_ic:
+                self.zi[idx] = np.zeros((self.sos[idx].shape[0], 1, 2))
+            else:
+                zi = signal.sosfilt_zi(self.sos[idx])
+                self.zi[idx] = zi[:, np.newaxis, :] # add a dimension since we are filtering along an axis in a 2D-array
 
 
     def __repr__(self) -> str:
@@ -250,7 +255,7 @@ class OctaveFilterBank:
             # Vectorized processing for all channels
             filtered_signal = self._filter_and_resample(x_proc, idx)
 
-            if calculate_level:
+            if calculate_level and spl is not None:
                 # Sound Level Calculation (returns array of shape [num_channels])
                 spl[:, idx] = self._calculate_level(filtered_signal, mode)
 

@@ -131,52 +131,51 @@ class OctaveFilterBank:
 
     @overload
     def filter(
-        self, 
-        x: List[float] | np.ndarray, 
+        self,
+        x: List[float] | np.ndarray,
         sigbands: Literal[False] = False,
         mode: str = "rms",
-        detrend: bool = True
+        detrend: bool = True,
+        calculate_level: Literal[True] = True,
     ) -> Tuple[np.ndarray, List[float]]: ...
 
     @overload
     def filter(
-        self, 
-        x: List[float] | np.ndarray, 
+        self,
+        x: List[float] | np.ndarray,
         sigbands: Literal[True],
         mode: str = "rms",
-        detrend: bool = True
+        detrend: bool = True,
+        calculate_level: Literal[True] = True,
     ) -> Tuple[np.ndarray, List[float], List[np.ndarray]]: ...
 
-    # New overloads with calculate_level
     @overload
     def filter(
-            self,
-            x: List[float] | np.ndarray,
-            sigbands: Literal[False] = False,
-            mode: str = "rms",
-            detrend: bool = True,
-            calculate_level: Literal[False] = False
-    ) -> Tuple[None, List[float]]:
-        ...
+        self,
+        x: List[float] | np.ndarray,
+        sigbands: Literal[False] = False,
+        mode: str = "rms",
+        detrend: bool = True,
+        calculate_level: Literal[False] = False,
+    ) -> Tuple[None, List[float]]: ...
 
     @overload
     def filter(
-            self,
-            x: List[float] | np.ndarray,
-            sigbands: Literal[True],
-            mode: str = "rms",
-            detrend: bool = True,
-            calculate_level: Literal[False] = False
-    ) -> Tuple[None, List[float], List[np.ndarray]]:
-        ...
+        self,
+        x: List[float] | np.ndarray,
+        sigbands: Literal[True],
+        mode: str = "rms",
+        detrend: bool = True,
+        calculate_level: Literal[False] = False,
+    ) -> Tuple[None, List[float], List[np.ndarray]]: ...
 
     def filter(
-        self, 
-        x: List[float] | np.ndarray, 
+        self,
+        x: List[float] | np.ndarray,
         sigbands: bool = False,
         mode: str = "rms",
         detrend: bool = True,
-        calculate_level: bool =True
+        calculate_level: bool = True,
     ) -> Tuple[np.ndarray | None, List[float]] | Tuple[np.ndarray | None, List[float], List[np.ndarray]]:
         """
         Apply the pre-designed filter bank to a signal.

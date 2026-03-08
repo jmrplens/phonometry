@@ -84,18 +84,18 @@ class WeightingFilter:
         zd, pd, kd = signal.bilinear_zpk(z, p, k, fs)
         self.sos = signal.zpk2sos(zd, pd, kd)
 
-        # Calculate initial conditions for filter state
+        # Initialize filter state for stateful block-wise processing.
+        # Uses lazy allocation: zi is sized on first filter() call so that
+        # the channel dimension matches the actual input shape.
         if self.stateful:
-            if not steady_ic:
-                self.zi = np.zeros((self.sos.shape[0], 2))
-            else:
-                self.zi = signal.sosfilt_zi(self.sos)
+            self.zi = np.array([])
+            self._steady_ic = steady_ic
 
     def filter(self, x: List[float] | np.ndarray) -> np.ndarray:
         """
         Apply the weighting filter to a signal.
 
-        :param x: Input signal.
+        :param x: Input signal (1D or 2D [channels, samples]).
         :return: Weighted signal.
         """
         x_proc = _typesignal(x)
@@ -103,6 +103,24 @@ class WeightingFilter:
             return x_proc
 
         if self.stateful:
+            # Lazy init: allocate zi with correct shape on first call
+            n_sections = self.sos.shape[0]
+            needs_init = self.zi.size == 0
+            if not needs_init and x_proc.ndim > 1:
+                needs_init = self.zi.ndim < 3 or self.zi.shape[1] != x_proc.shape[0]
+            if needs_init:
+                if x_proc.ndim == 1:
+                    if not self._steady_ic:
+                        self.zi = np.zeros((n_sections, 2))
+                    else:
+                        self.zi = signal.sosfilt_zi(self.sos)
+                else:
+                    n_channels = x_proc.shape[0]
+                    if not self._steady_ic:
+                        self.zi = np.zeros((n_sections, n_channels, 2))
+                    else:
+                        zi_base = signal.sosfilt_zi(self.sos)
+                        self.zi = np.tile(zi_base[:, np.newaxis, :], (1, n_channels, 1))
             y, self.zi = signal.sosfilt(self.sos, x_proc, axis=-1, zi=self.zi)
         else:
             y = signal.sosfilt(self.sos, x_proc, axis=-1)

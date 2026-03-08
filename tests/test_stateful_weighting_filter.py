@@ -44,8 +44,39 @@ def test_weighting_filter_steady_ic_initialization():
     # Create a stateful weighting filter with steady_ic=True
     wf = WeightingFilter(fs=48000, stateful=True, steady_ic=True)
 
-    # Check that zi has the expected shape
+    # Lazy init: zi is empty until first filter() call
+    assert wf.zi.size == 0
+
+    # Trigger lazy init with 1D signal
+    x = np.zeros(100)
+    wf.filter(x)
+
     n_sections = wf.sos.shape[0]
-    assert wf.zi.shape[0] == n_sections
-    assert wf.zi.shape[1] == 2
+    assert wf.zi.shape == (n_sections, 2)
+
+
+def test_weighting_filter_multichannel():
+    from pyoctaveband import WeightingFilter
+    """Stateful block-wise multichannel weighting must match full-signal processing."""
+    rng = np.random.default_rng(99)
+    fs = 48000
+    n_channels = 4
+    n_samples = 4800
+    block_size = 1200
+
+    x = rng.standard_normal((n_channels, n_samples))
+
+    # Full-signal reference (stateless)
+    ref_wf = WeightingFilter(fs, "A")
+    ref_out = ref_wf.filter(x)
+
+    # Block-wise stateful
+    stateful_wf = WeightingFilter(fs, "A", stateful=True)
+    blocks = []
+    for start in range(0, n_samples, block_size):
+        block = x[:, start:start + block_size]
+        blocks.append(stateful_wf.filter(block))
+
+    stateful_out = np.concatenate(blocks, axis=-1)
+    np.testing.assert_allclose(stateful_out, ref_out, rtol=1e-10, atol=1e-12)
 

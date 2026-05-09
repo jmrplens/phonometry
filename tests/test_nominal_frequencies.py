@@ -4,6 +4,7 @@ Tests for IEC 61260-1 nominal frequency helpers and opt-in nominal label support
 """
 
 import numpy as np
+import pytest
 
 from pyoctaveband.frequencies import (
     _format_nominal_freq,
@@ -11,7 +12,7 @@ from pyoctaveband.frequencies import (
     _nominal_freq_for_band,
     getansifrequencies,
 )
-from pyoctaveband import OctaveFilterBank, octavefilter
+from pyoctaveband import OctaveFilterBank, normalizedfreq, octavefilter
 
 
 # --- _iec_e3_round ---
@@ -128,3 +129,11 @@ def test_octavefilter_nominal_false_default():
     x = np.zeros(4800)
     _, freq = octavefilter(x, fs=48000, fraction=3)
     assert all(isinstance(f, float) for f in freq)
+
+
+def test_normalizedfreq_fraction1_and_invalid_fraction() -> None:
+    freq = normalizedfreq(1)
+    assert 1000 in freq
+
+    with pytest.raises(ValueError):
+        normalizedfreq(5)

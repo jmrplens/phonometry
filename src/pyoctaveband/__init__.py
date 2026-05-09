@@ -15,14 +15,14 @@ from .calibration import calculate_sensitivity
 from .core import OctaveFilterBank
 from .frequencies import getansifrequencies, normalizedfreq
 from .parametric_filters import WeightingFilter, linkwitz_riley, time_weighting, weighting_filter
+from ._version import __version__
 
 # Use non-interactive backend for plots
 matplotlib.use("Agg")
 
-__version__ = "1.2.0"
-
 # Public methods
 __all__ = [
+    "__version__",
     "octavefilter",
     "getansifrequencies",
     "normalizedfreq",

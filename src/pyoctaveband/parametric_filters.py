@@ -154,6 +154,7 @@ def _prepare_time_weighting_initial_state(
     initial_state: str | float | np.ndarray | None,
 ) -> np.ndarray:
     """Return the previous output state ``y[-1]`` for time weighting."""
+    invalid_initial_state_message = "initial_state must be None, 'zero', 'first', a scalar, or an array"
     state_shape = x_sq.shape[:-1]
 
     if initial_state is None:
@@ -164,8 +165,10 @@ def _prepare_time_weighting_initial_state(
         if state_name == "zero":
             return np.zeros(state_shape, dtype=x_sq.dtype)
         if state_name == "first":
+            if x_sq.shape[-1] == 0:
+                raise ValueError(invalid_initial_state_message)
             return np.asarray(np.take(x_sq, 0, axis=-1), dtype=x_sq.dtype).copy()
-        raise ValueError("initial_state must be None, 'zero', 'first', a scalar, or an array")
+        raise ValueError(invalid_initial_state_message)
 
     state = np.asarray(initial_state, dtype=x_sq.dtype)
     if state.shape == ():
@@ -219,6 +222,8 @@ def time_weighting(
     :return: Time-weighted squared signal (sound pressure level envelope).
     """
     x_proc = _typesignal(x)
+    if fs <= 0:
+        raise ValueError("Sample rate 'fs' must be positive.")
     x_sq = x_proc**2
     initial = _prepare_time_weighting_initial_state(x_sq, initial_state)
     

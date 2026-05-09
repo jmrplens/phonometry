@@ -246,6 +246,36 @@ def test_time_weighting_initial_state_custom() -> None:
     np.testing.assert_allclose(y, expected, rtol=1e-12, atol=1e-12)
 
 
+def test_time_weighting_initial_state_zero_matches_default() -> None:
+    """Verify explicit zero initialization matches the default rest state."""
+    fs = 1000
+    x = np.array([2.0, 0.5, -1.0, 0.0])
+
+    y_default = time_weighting(x, fs, mode="fast")
+    y_zero = time_weighting(x, fs, mode="fast", initial_state="zero")
+
+    np.testing.assert_allclose(y_zero, y_default, rtol=1e-12, atol=1e-12)
+
+
+def test_time_weighting_initial_state_array_per_channel() -> None:
+    """Verify array initial state is applied per input channel."""
+    fs = 1000
+    tau = 0.125
+    alpha = 1 - np.exp(-1 / (fs * tau))
+    x = np.vstack([np.ones(4), 2 * np.ones(4)])
+    initial_state = np.array([0.25, 4.0])
+
+    y = time_weighting(x, fs, mode="fast", initial_state=initial_state)
+
+    expected = np.empty_like(x)
+    current = initial_state.copy()
+    for idx in range(x.shape[-1]):
+        current = alpha * x[:, idx] ** 2 + (1 - alpha) * current
+        expected[:, idx] = current
+
+    np.testing.assert_allclose(y, expected, rtol=1e-12, atol=1e-12)
+
+
 def test_time_weighting_initial_state_multichannel_first() -> None:
     """
     Verify initial_state='first' is applied independently per channel.
@@ -268,6 +298,22 @@ def test_time_weighting_initial_state_invalid() -> None:
 
     with pytest.raises(ValueError, match="initial_state"):
         time_weighting(x, fs, mode="fast", initial_state="invalid")
+
+    with pytest.raises(ValueError, match="broadcastable"):
+        time_weighting(np.ones((2, 10)), fs, mode="fast", initial_state=np.ones(3))
+
+
+def test_time_weighting_initial_state_first_rejects_empty_input() -> None:
+    """Verify initial_state='first' requires at least one sample."""
+    with pytest.raises(ValueError, match="initial_state"):
+        time_weighting(np.array([]), 1000, mode="fast", initial_state="first")
+
+
+@pytest.mark.parametrize("mode", ["fast", "slow", "impulse"])
+def test_time_weighting_rejects_non_positive_sample_rate(mode: str) -> None:
+    """Verify time weighting rejects non-positive sample rates before coefficient math."""
+    with pytest.raises(ValueError, match="Sample rate 'fs' must be positive"):
+        time_weighting(np.ones(10), 0, mode=mode)
 
 
 def test_time_weighting_impulse_multichannel() -> None:

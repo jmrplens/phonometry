@@ -18,13 +18,13 @@ from pyoctaveband import OctaveFilterBank, normalizedfreq, octavefilter
 # --- _iec_e3_round ---
 
 def test_iec_e3_round_msd_1_to_4():
-    assert _iec_e3_round(1234.5) == 1230.0   # MSD=1, step=10
-    assert _iec_e3_round(456.7) == 457.0     # MSD=4, step=1
+    assert _iec_e3_round(1234.5) == pytest.approx(1230.0)
+    assert _iec_e3_round(456.7) == pytest.approx(457.0)
 
 
 def test_iec_e3_round_msd_5_to_9():
-    assert _iec_e3_round(5678.0) == 5700.0   # MSD=5, step=100
-    assert _iec_e3_round(99.1) == 99.0       # MSD=9, step=10
+    assert _iec_e3_round(5678.0) == pytest.approx(5700.0)
+    assert _iec_e3_round(99.1) == pytest.approx(99.0)
 
 
 def test_iec_e3_round_nonpositive():
@@ -35,17 +35,17 @@ def test_iec_e3_round_nonpositive():
 # --- _nominal_freq_for_band ---
 
 def test_nominal_freq_fraction1():
-    assert _nominal_freq_for_band(15.849, 1) == 16.0
-    assert _nominal_freq_for_band(997.2, 1) == 1000.0
+    assert _nominal_freq_for_band(15.849, 1) == pytest.approx(16.0)
+    assert _nominal_freq_for_band(997.2, 1) == pytest.approx(1000.0)
 
 
 def test_nominal_freq_fraction3():
-    assert _nominal_freq_for_band(12.589, 3) == 12.5
-    assert _nominal_freq_for_band(1995.3, 3) == 2000.0
+    assert _nominal_freq_for_band(12.589, 3) == pytest.approx(12.5)
+    assert _nominal_freq_for_band(1995.3, 3) == pytest.approx(2000.0)
 
 
 def test_nominal_freq_other_fraction():
-    assert _nominal_freq_for_band(706.0, 2) == 710.0   # MSD=7 → 2 sig figs
+    assert _nominal_freq_for_band(706.0, 2) == pytest.approx(710.0)
 
 
 # --- _format_nominal_freq ---
@@ -64,7 +64,7 @@ def test_format_1k_and_above():
 # --- getansifrequencies — 4-tuple ---
 
 def test_getansifrequencies_returns_labels():
-    freq, fd, fu, labels = getansifrequencies(fraction=3)
+    freq, _, _, labels = getansifrequencies(fraction=3)
     assert isinstance(labels, list)
     assert all(isinstance(label, str) for label in labels)
     assert len(labels) == len(freq)
@@ -73,7 +73,7 @@ def test_getansifrequencies_returns_labels():
 
 
 def test_getansifrequencies_fraction1_labels():
-    freq, fd, fu, labels = getansifrequencies(fraction=1)
+    freq, _, _, labels = getansifrequencies(fraction=1)
     assert "1k" in labels
     assert len(labels) == len(freq)
 

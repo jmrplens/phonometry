@@ -37,7 +37,7 @@ __all__ = [
 
 @overload
 def octavefilter(
-    x: List[float] | np.ndarray,
+    x: List[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
     order: int = 6,
@@ -58,7 +58,7 @@ def octavefilter(
 
 @overload
 def octavefilter(
-    x: List[float] | np.ndarray,
+    x: List[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
     order: int = 6,
@@ -79,7 +79,7 @@ def octavefilter(
 
 @overload
 def octavefilter(
-    x: List[float] | np.ndarray,
+    x: List[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
     order: int = 6,
@@ -100,7 +100,7 @@ def octavefilter(
 
 @overload
 def octavefilter(
-    x: List[float] | np.ndarray,
+    x: List[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
     order: int = 6,
@@ -120,7 +120,7 @@ def octavefilter(
 
 
 def octavefilter(
-    x: List[float] | np.ndarray,
+    x: List[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
     order: int = 6,

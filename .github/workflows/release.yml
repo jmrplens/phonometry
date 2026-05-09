@@ -2,12 +2,8 @@ name: Publish to PyPI and Release
 
 on:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - 'README.md'
-      - '.github/**'
-  workflow_dispatch:
+    tags:
+      - "v*"
 
 permissions:
   contents: write
@@ -15,12 +11,11 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: github.repository == 'jmrplens/PyOctaveBand' && !contains(github.event.head_commit.message, 'skip ci')
+    if: github.repository == 'jmrplens/PyOctaveBand'
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.TOKEN_GH }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,40 +27,41 @@ jobs:
           python -m pip install --upgrade pip
           pip install build twine
 
-      - name: Bump version
-        id: bump
+      - name: Validate tag version
+        id: version
         run: |
-          # Read current version from pyproject.toml
-          # Look for 'version =' specifically in the [project] section or at line start
-          CURRENT_VERSION=$(grep -m 1 -oP '^version\s*=\s*"\K[^"]+' pyproject.toml)
-          echo "Current version: $CURRENT_VERSION"
-          
-          # Increment patch version
-          IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
-          NEW_PATCH=$((patch + 1))
-          NEW_VERSION="$major.$minor.$NEW_PATCH"
-          echo "New version: $NEW_VERSION"
-          
-          # Update pyproject.toml
-          sed -i "s/^version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" pyproject.toml
-          
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          PACKAGE_VERSION=$(python - <<'PY'
+          import ast
+          from pathlib import Path
 
-      - name: Commit and push changes
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add pyproject.toml
-          git commit -m "chore: bump version to ${{ steps.bump.outputs.version }} [skip ci]"
-          git push origin main
+          version_file = Path("src/pyoctaveband/_version.py")
+          module = ast.parse(version_file.read_text(encoding="utf-8"))
 
-      - name: Create Git Tag
-        run: |
-          git tag v${{ steps.bump.outputs.version }}
-          git push origin v${{ steps.bump.outputs.version }}
+          for node in module.body:
+              if isinstance(node, ast.Assign):
+                  for target in node.targets:
+                      if isinstance(target, ast.Name) and target.id == "__version__":
+                          print(ast.literal_eval(node.value))
+                          raise SystemExit(0)
+
+          raise SystemExit("Unable to find __version__ in src/pyoctaveband/_version.py")
+          PY
+          )
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package version ${PACKAGE_VERSION}"
+            exit 1
+          fi
+
+          echo "version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Build package
         run: python -m build
+
+      - name: Check package
+        run: python -m twine check dist/*
 
       - name: Publish to PyPI
         env:
@@ -76,11 +72,11 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.bump.outputs.version }}
-          name: Release v${{ steps.bump.outputs.version }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
           body: |
-            Automated release for version v${{ steps.bump.outputs.version }}
+            Automated release for version ${{ steps.version.outputs.version }}
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GH }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

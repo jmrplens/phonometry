@@ -1,6 +1,6 @@
-ruff
-mypy
-bandit
-types-setuptools
-pytest
-pytest-cov
+ruff>=0.15.12
+mypy>=2.0.0
+bandit>=1.9.4
+types-setuptools>=82.0.0.20260508
+pytest>=9.0.3
+pytest-cov>=7.1.0

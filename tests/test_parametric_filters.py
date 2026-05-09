@@ -4,8 +4,9 @@ Tests for parametric filters: Weighting (A, C), Time Weighting and Linkwitz-Rile
 """
 
 import numpy as np
+import pytest
 
-from pyoctaveband import calculate_sensitivity, linkwitz_riley, octavefilter, time_weighting, weighting_filter
+from pyoctaveband import WeightingFilter, calculate_sensitivity, linkwitz_riley, octavefilter, time_weighting, weighting_filter
 
 
 def test_calibration_logic() -> None:
@@ -155,6 +156,37 @@ def test_c_weighting_response() -> None:
         assert abs(gain_db - expected) < 1.0, f"C-weighting at {f}Hz failed. Got {gain_db:.1f}dB, expected {expected}dB"
 
 
+def test_weighting_filter_c_output_shape() -> None:
+    """Verify C-weighting preserves signal length."""
+    fs = 48000
+    rng = np.random.default_rng(42)
+    x = rng.standard_normal(fs)
+
+    y = weighting_filter(x, fs, curve="C")
+
+    assert y.shape == x.shape
+
+
+def test_weighting_filter_class_direct_use() -> None:
+    """Verify direct WeightingFilter usage, Z bypass, and constructor validation."""
+    fs = 48000
+    rng = np.random.default_rng(42)
+    x = rng.standard_normal((2, fs))
+
+    wf = WeightingFilter(fs, curve="A")
+    y = wf.filter(x)
+    assert y.shape == x.shape
+
+    wf_z = WeightingFilter(fs, curve="Z")
+    y_z = wf_z.filter(x)
+    np.testing.assert_allclose(y_z, x)
+
+    with pytest.raises(ValueError):
+        WeightingFilter(0)
+    with pytest.raises(ValueError):
+        WeightingFilter(fs, curve="invalid")
+
+
 def test_time_weighting_fast() -> None:
     """
     Verify Fast (125ms) time weighting response to a step.
@@ -179,6 +211,131 @@ def test_time_weighting_fast() -> None:
     idx_tau = int(fs * tau)
     # Expected: 1 - exp(-1) approx 0.632
     assert abs(y[idx_tau] - 0.632) < 0.05
+
+
+def test_time_weighting_initial_state_first() -> None:
+    """
+    Verify that initial_state='first' starts the integrator from the first energy value.
+    """
+    fs = 1000
+    x = np.ones(fs)
+
+    y = time_weighting(x, fs, mode="fast", initial_state="first")
+
+    np.testing.assert_allclose(y, np.ones_like(y), rtol=1e-12, atol=1e-12)
+
+
+def test_time_weighting_initial_state_custom() -> None:
+    """
+    Verify custom initial_state matches the recursive equation with y[-1] set.
+    """
+    fs = 1000
+    tau = 0.125
+    alpha = 1 - np.exp(-1 / (fs * tau))
+    x = np.array([2.0, 0.5, -1.0, 0.0])
+    initial_state = 0.25
+
+    y = time_weighting(x, fs, mode="fast", initial_state=initial_state)
+
+    expected = np.zeros_like(x)
+    current = initial_state
+    for idx, value in enumerate(x**2):
+        current = alpha * value + (1 - alpha) * current
+        expected[idx] = current
+
+    np.testing.assert_allclose(y, expected, rtol=1e-12, atol=1e-12)
+
+
+def test_time_weighting_initial_state_zero_matches_default() -> None:
+    """Verify explicit zero initialization matches the default rest state."""
+    fs = 1000
+    x = np.array([2.0, 0.5, -1.0, 0.0])
+
+    y_default = time_weighting(x, fs, mode="fast")
+    y_zero = time_weighting(x, fs, mode="fast", initial_state="zero")
+
+    np.testing.assert_allclose(y_zero, y_default, rtol=1e-12, atol=1e-12)
+
+
+def test_time_weighting_initial_state_array_per_channel() -> None:
+    """Verify array initial state is applied per input channel."""
+    fs = 1000
+    tau = 0.125
+    alpha = 1 - np.exp(-1 / (fs * tau))
+    x = np.vstack([np.ones(4), 2 * np.ones(4)])
+    initial_state = np.array([0.25, 4.0])
+
+    y = time_weighting(x, fs, mode="fast", initial_state=initial_state)
+
+    expected = np.empty_like(x)
+    current = initial_state.copy()
+    for idx in range(x.shape[-1]):
+        current = alpha * x[:, idx] ** 2 + (1 - alpha) * current
+        expected[:, idx] = current
+
+    np.testing.assert_allclose(y, expected, rtol=1e-12, atol=1e-12)
+
+
+def test_time_weighting_initial_state_multichannel_first() -> None:
+    """
+    Verify initial_state='first' is applied independently per channel.
+    """
+    fs = 1000
+    x = np.vstack([np.ones(fs), 2 * np.ones(fs)])
+
+    y = time_weighting(x, fs, mode="fast", initial_state="first")
+
+    expected = x**2
+    np.testing.assert_allclose(y, expected, rtol=1e-12, atol=1e-12)
+
+
+def test_time_weighting_initial_state_invalid() -> None:
+    """
+    Verify invalid initial_state names are rejected.
+    """
+    fs = 1000
+    x = np.ones(fs)
+
+    with pytest.raises(ValueError, match="initial_state"):
+        time_weighting(x, fs, mode="fast", initial_state="invalid")
+
+    with pytest.raises(ValueError, match="broadcastable"):
+        time_weighting(np.ones((2, 10)), fs, mode="fast", initial_state=np.ones(3))
+
+
+def test_time_weighting_initial_state_first_rejects_empty_input() -> None:
+    """Verify initial_state='first' requires at least one sample."""
+    with pytest.raises(ValueError, match="initial_state"):
+        time_weighting(np.array([]), 1000, mode="fast", initial_state="first")
+
+
+@pytest.mark.parametrize("mode", ["fast", "slow", "impulse"])
+def test_time_weighting_rejects_non_positive_sample_rate(mode: str) -> None:
+    """Verify time weighting rejects non-positive sample rates before coefficient math."""
+    with pytest.raises(ValueError, match="Sample rate 'fs' must be positive"):
+        time_weighting(np.ones(10), 0, mode=mode)
+
+
+def test_time_weighting_impulse_multichannel() -> None:
+    """Verify impulse time weighting supports multichannel input."""
+    fs = 1000
+    x = np.zeros((2, fs))
+    x[:, 0] = 1.0
+
+    y = time_weighting(x, fs, mode="impulse")
+
+    assert y.shape == x.shape
+    assert y[0, 100] < y[0, 0]
+
+
+def test_time_weighting_impulse_initial_state_first_1d() -> None:
+    """Verify impulse time weighting can start from the first sample energy."""
+    fs = 1000
+    x = np.ones(fs)
+
+    y = time_weighting(x, fs, mode="impulse", initial_state="first")
+
+    np.testing.assert_allclose(y, np.ones_like(y), rtol=1e-12, atol=1e-12)
 
 
 def test_linkwitz_riley_sum() -> None:

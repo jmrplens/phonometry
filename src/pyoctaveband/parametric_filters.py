@@ -149,11 +149,49 @@ def weighting_filter(x: List[float] | np.ndarray, fs: int, curve: str = "A") -> 
     return wf.filter(x)
 
 
+def _prepare_time_weighting_initial_state(
+    x_sq: np.ndarray,
+    initial_state: str | float | np.ndarray | None,
+) -> np.ndarray:
+    """Return the previous output state ``y[-1]`` for time weighting."""
+    invalid_initial_state_message = "initial_state must be None, 'zero', 'first', a scalar, or an array"
+    state_shape = x_sq.shape[:-1]
+
+    if initial_state is None:
+        return np.zeros(state_shape, dtype=x_sq.dtype)
+
+    if isinstance(initial_state, str):
+        state_name = initial_state.lower()
+        if state_name == "zero":
+            return np.zeros(state_shape, dtype=x_sq.dtype)
+        if state_name == "first":
+            if x_sq.shape[-1] == 0:
+                raise ValueError(invalid_initial_state_message)
+            return np.asarray(np.take(x_sq, 0, axis=-1), dtype=x_sq.dtype).copy()
+        raise ValueError(invalid_initial_state_message)
+
+    state = np.asarray(initial_state, dtype=x_sq.dtype)
+    if state.shape == ():
+        return np.full(state_shape, state.item(), dtype=x_sq.dtype)
+
+    try:
+        return np.broadcast_to(state, state_shape).astype(x_sq.dtype, copy=True)
+    except ValueError as exc:
+        raise ValueError(
+            "initial_state must be scalar or broadcastable to the input shape without the time axis"
+        ) from exc
+
+
 @jit(nopython=True, cache=True)  # type: ignore
-def _apply_impulse_kernel(x_t: np.ndarray, alpha_rise: float, alpha_fall: float) -> np.ndarray:
+def _apply_impulse_kernel(
+    x_t: np.ndarray,
+    alpha_rise: float,
+    alpha_fall: float,
+    initial_state: np.ndarray,
+) -> np.ndarray:
     """Numba-optimized kernel for asymmetric time weighting."""
     y_t = np.zeros_like(x_t)
-    curr_y = np.zeros(x_t.shape[1:])
+    curr_y = initial_state.copy()
     
     for i in range(x_t.shape[0]):
         val = x_t[i]
@@ -166,17 +204,28 @@ def _apply_impulse_kernel(x_t: np.ndarray, alpha_rise: float, alpha_fall: float)
         
     return y_t
 
-def time_weighting(x: List[float] | np.ndarray, fs: int, mode: str = "fast") -> np.ndarray:
+def time_weighting(
+    x: List[float] | np.ndarray,
+    fs: int,
+    mode: str = "fast",
+    initial_state: str | float | np.ndarray | None = None,
+) -> np.ndarray:
     """
     Apply time weighting to a signal (Exponential averaging).
     
     :param x: Input signal (raw pressure/voltage). The function squares it internally.
     :param fs: Sample rate.
     :param mode: 'fast' (125ms), 'slow' (1000ms), 'impulse' (35ms rise, 1500ms fall).
+    :param initial_state: Previous mean-square output state ``y[-1]``. Use None/'zero' for
+        zero initialization (default), 'first' to initialize from the first input energy,
+        or a scalar/array broadcastable to the input shape without the time axis.
     :return: Time-weighted squared signal (sound pressure level envelope).
     """
     x_proc = _typesignal(x)
+    if fs <= 0:
+        raise ValueError("Sample rate 'fs' must be positive.")
     x_sq = x_proc**2
+    initial = _prepare_time_weighting_initial_state(x_sq, initial_state)
     
     mode_lower = mode.lower()
     
@@ -186,7 +235,9 @@ def time_weighting(x: List[float] | np.ndarray, fs: int, mode: str = "fast") -> 
         b = [alpha]
         a = [1, -(1 - alpha)]
         # We apply the weighting to the squared signal to get the Mean Square value
-        return cast(np.ndarray, signal.lfilter(b, a, x_sq, axis=-1))
+        zi = np.expand_dims((1 - alpha) * initial, axis=-1)
+        y, _ = signal.lfilter(b, a, x_sq, axis=-1, zi=zi)
+        return cast(np.ndarray, y)
         
     elif mode_lower == "impulse":
         # IEC 61672-1: 35ms for rising, 1500ms for falling
@@ -201,7 +252,8 @@ def time_weighting(x: List[float] | np.ndarray, fs: int, mode: str = "fast") -> 
         
         # Ensure contiguous array for Numba
         x_t = np.ascontiguousarray(x_t)
-        y_t = _apply_impulse_kernel(x_t, alpha_rise, alpha_fall)
+        initial_kernel = initial if initial.ndim == 0 else np.ascontiguousarray(initial)
+        y_t = _apply_impulse_kernel(x_t, alpha_rise, alpha_fall, initial_kernel)
             
         # Move time axis back
         return np.moveaxis(y_t, 0, -1)

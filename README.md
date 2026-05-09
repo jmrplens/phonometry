@@ -90,7 +90,7 @@ All core functionality can be imported directly from the `pyoctaveband` package.
 | `octavefilter` | `function` | **High-level analysis.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc. (Default: 1)<br>• `order`: Filter order (Default: 6)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: 'butter', 'cheby1', 'cheby2', 'ellip', 'bessel' (Default: 'butter')<br>• `sigbands`: Return time signals (Default: False)<br>• `detrend`: Remove DC offset (Default: True)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS instead of dB SPL (Default: False)<br>• `mode`: 'rms' or 'peak' (Default: 'rms')<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save plot (Default: None)<br>• `ripple`: Passband ripple [dB] (for cheby1/ellip)<br>• `attenuation`: Stopband atten. [dB] (for cheby2/ellip) | `spl, freq = octavefilter(x, fs, ...)`<br>• `spl`: levels [dB]<br>• `freq`: frequencies [Hz]<br><br>**With `sigbands=True`:**<br>`spl, freq, xb = octavefilter(x, fs, sigbands=True)`<br>• `xb`: List of filtered signals (one per band)<br><br>**Calibrated usage:**<br>`spl, f = octavefilter(x, fs, calibration_factor=0.05)` |
 | `OctaveFilterBank` | `class` | **Efficient bank implementation.**<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc.<br>• `order`: Filter order<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: Architecture name<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save plot (Default: None)<br>• `calibration_factor`: Sensitivity multiplier<br>• `dbfs`: Use dBFS (Default: False)<br>• `ripple`: Passband ripple [dB]<br>• `attenuation`: Stopband attenuation [dB] | `bank = OctaveFilterBank(fs=48000, fraction=3, order=6, filter_type='butter', show=True)`<br>`spl, f = bank.filter(x, sigbands=False, mode='rms', detrend=True)`<br><br>• `bank`: Instance of the filter bank |
 | `weighting_filter` | `function` | **Acoustic weighting.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `curve`: 'A', 'C', or 'Z' (Default: 'A') | `y = weighting_filter(x, fs, curve='A')`<br><br>• `y`: 1D array of weighted signal |
-| `time_weighting` | `function` | **Energy capture.**<br>• `x`: Raw signal array (squared internally)<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', or 'impulse' | `env = time_weighting(x, fs, mode='fast')`<br><br>• `env`: 1D array of energy envelope (Mean Square) |
+| `time_weighting` | `function` | **Energy capture.**<br>• `x`: Raw signal array (squared internally; time is the last axis)<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', or 'impulse'<br>• `initial_state`: None, 'zero', 'first', scalar, or array (Default: None)<br>• `None`: use the default rest state (`y[-1] = 0`)<br>• `'zero'`: explicitly initialize `y[-1]` to zero<br>• scalar: broadcast to every channel<br>• array: must match/broadcast to `x.shape[:-1]`; for `x.shape == (n_channels, n_samples)`, use shape `(n_channels,)` | `env = time_weighting(x, fs, mode='fast', initial_state=None)`<br><br>• `env`: energy envelope (Mean Square), same shape as `x` |
 | `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
 | `calculate_sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6) | `s = calculate_sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
 | `getansifrequencies` | `function` | **ANSI Frequency generator.**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)`<br><br>• `f_cen`: List of center frequencies [Hz]<br>• `f_low`: List of lower edges [Hz]<br>• `f_high`: List of upper edges [Hz]<br>• `labels`: IEC nominal frequency labels |
@@ -243,6 +243,24 @@ energy_envelope = time_weighting(signal, fs, mode='fast')
 # dB SPL relative to 20μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 ```
+
+By default, the exponential integrator starts from rest (`y[-1] = 0`). Passing `initial_state=None` leaves this default unspecified, while `initial_state='zero'` requests the same zero state explicitly. If the recorded segment begins after a steady signal is already present, you can start from the first sample energy instead:
+
+```python
+energy_envelope = time_weighting(signal, fs, mode='fast', initial_state='first')
+```
+
+For block processing, pass the last output value from the previous block as the next block's `initial_state` instead of resetting each block:
+
+```python
+state = None
+
+for block in audio_blocks:
+    energy_envelope = time_weighting(block, fs, mode='fast', initial_state=state)
+    state = energy_envelope[-1]
+```
+
+For multichannel blocks with time on the last axis, carry one state per channel: use `state = energy_envelope[..., -1]`. A scalar `initial_state` is applied to every channel, while an array must match or broadcast to the non-time shape, such as `(n_channels,)` for input shaped `(n_channels, n_samples)`.
 
 ---
 
@@ -563,6 +581,8 @@ $$
 $$
 
 Where `tau` is the time constant (e.g., 125ms for Fast).
+
+The default initial condition is `y[-1] = 0`. Use `initial_state='first'` to start from the first input energy, or pass a scalar/array with the previous mean-square output state.
 
 ---
 

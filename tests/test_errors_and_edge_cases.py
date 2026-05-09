@@ -14,6 +14,7 @@ from pyoctaveband import (
     time_weighting,
     weighting_filter,
 )
+from pyoctaveband.frequencies import getansifrequencies
 
 
 def test_octave_filter_bank_invalid_init() -> None:
@@ -217,3 +218,48 @@ def test_multichannel_consistency() -> None:
     
     assert np.allclose(spl_stereo[0], spl1)
     assert np.allclose(spl_stereo[1], spl2)
+
+
+def test_octave_filter_bank_repr() -> None:
+    """Verify OctaveFilterBank repr includes key configuration fields."""
+    bank = OctaveFilterBank(48000)
+    representation = repr(bank)
+
+    assert "OctaveFilterBank" in representation
+    assert "fs=48000" in representation
+
+
+def test_octavefilter_limits_none() -> None:
+    """Verify None limits use package defaults and return nominal labels."""
+    rng = np.random.default_rng(42)
+    spl, _ = octavefilter(rng.standard_normal(1000), 1000, limits=None)
+    assert len(spl) > 0
+
+    freq, freq_d, freq_u, labels = getansifrequencies(1, limits=None)
+    assert len(freq) > 0
+    assert len(freq) == len(freq_d) == len(freq_u) == len(labels)
+    assert all(isinstance(label, str) for label in labels)
+
+
+def test_calculate_level_invalid_mode() -> None:
+    """Verify invalid level calculation mode is rejected."""
+    bank = OctaveFilterBank(48000)
+
+    with pytest.raises(ValueError, match="Invalid mode\\. Use 'rms' or 'peak'\\."):
+        bank._calculate_level(np.array([1.0]), "invalid_mode")
+
+
+def test_process_bands_without_level_calculation() -> None:
+    """Verify internal band processing can skip level calculation."""
+    bank = OctaveFilterBank(48000)
+    x = np.zeros((bank.num_bands, 100))
+
+    spl, filtered = bank._process_bands(
+        x,
+        num_channels=bank.num_bands,
+        calculate_level=False,
+        sigbands=True,
+    )
+
+    assert spl is None
+    assert filtered is not None

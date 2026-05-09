@@ -55,6 +55,19 @@ def test_weighting_filter_steady_ic_initialization():
     assert wf.zi.shape == (n_sections, 2)
 
 
+def test_weighting_filter_steady_ic_initialization_multichannel():
+    from pyoctaveband import WeightingFilter
+
+    wf = WeightingFilter(fs=48000, stateful=True, steady_ic=True)
+    x = np.zeros((2, 100))
+
+    y = wf.filter(x)
+
+    n_sections = wf.sos.shape[0]
+    assert y.shape == x.shape
+    assert wf.zi.shape == (n_sections, 2, 2)
+
+
 def test_weighting_filter_multichannel_to_mono_transition():
     from pyoctaveband import WeightingFilter
     """zi must reinit when input switches from multichannel to 1D."""

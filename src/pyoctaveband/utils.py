@@ -62,4 +62,4 @@ def _downsamplingfactor(freq: List[float], fs: int) -> np.ndarray:
     """
     guard = 0.50
     factor = (np.floor((fs / (2 + guard)) / np.array(freq))).astype("int")
-    return np.clip(factor, 1, 500)
+    return cast(np.ndarray, np.clip(factor, 1, 500))

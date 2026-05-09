@@ -7,6 +7,11 @@ Basic test and usage example for pyoctaveband.
 import numpy as np
 
 import pyoctaveband as PyOctaveBand
+from pyoctaveband._version import __version__
+
+
+def test_package_version_is_public() -> None:
+    assert PyOctaveBand.__version__ == __version__
 
 
 def test_octave_filter_basic() -> None:

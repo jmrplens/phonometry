@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PyOctaveBand"
-version = "1.2.1"
+dynamic = ["version"]
 authors = [
   { name="Jose Manuel Requena Plens", email="jmrplens@gmail.com" },
 ]
@@ -17,10 +17,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "numpy",
-    "scipy",
-    "matplotlib",
-    "numba",
+    "numpy>=2.4.4",
+    "scipy>=1.17.1",
+    "matplotlib>=3.10.9",
+    "numba>=0.65.1",
 ]
 
 [project.urls]
@@ -29,6 +29,9 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pyoctaveband._version.__version__"}
 
 [tool.mypy]
 python_version = "3.11"

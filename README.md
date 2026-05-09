@@ -13,34 +13,43 @@ Now available on [PyPI](https://pypi.org/project/PyOctaveBand/).
 ---
 
 ## 📑 Table of Contents
-1. [🚀 Getting Started](#-getting-started)
+- [PyOctaveBand](#pyoctaveband)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [🚀 Getting Started](#-getting-started)
     - [Installation](#installation)
-    - [Basic Usage](#basic-usage-13-octave-analysis)
-2. [🛠️ Filter Architectures](#️-filter-architectures)
+  - [📖 Quick API Reference](#-quick-api-reference)
+    - [Basic Usage: 1/3 Octave Analysis](#basic-usage-13-octave-analysis)
+    - [Multichannel Support](#multichannel-support)
+    - [Block processing](#block-processing)
+  - [🛠️ Filter Architectures](#️-filter-architectures)
     - [Filter Comparison and Zoom](#filter-comparison-and-zoom)
-    - [Gallery of Responses](#gallery-of-filter-bank-responses)
-3. [🔊 Acoustic Weighting (A, C, Z)](#-acoustic-weighting-a-c-z)
-4. [⏱️ Time Weighting and Integration](#️-time-weighting-and-integration)
-5. [⚡ Performance: Multichannel & Vectorization](#-performance-multichannel--vectorization)
-6. [🔍 Filter Usage and Examples](#-filter-usage-and-examples)
-    - [1. Butterworth](#1-butterworth-butter)
-    - [2. Chebyshev I](#2-chebyshev-i-cheby1)
-    - [3. Chebyshev II](#3-chebyshev-ii-cheby2)
-    - [4. Elliptic](#4-elliptic-ellip)
-    - [5. Bessel](#5-bessel-bessel)
-    - [6. Linkwitz-Riley](#6-linkwitz-riley-lr)
-7. [📏 Calibration and dBFS](#-calibration-and-dbfs)
-    - [Physical Calibration](#physical-calibration-sound-level-meter)
+    - [Gallery of Filter Bank Responses](#gallery-of-filter-bank-responses)
+  - [🔊 Acoustic Weighting (A, C, Z)](#-acoustic-weighting-a-c-z)
+  - [⏱️ Time Weighting and Integration](#️-time-weighting-and-integration)
+  - [⚡ Performance: Multichannel \& Vectorization](#-performance-multichannel-vectorization)
+  - [🔍 Filter Usage and Examples](#-filter-usage-and-examples)
+    - [1. Butterworth (`butter`)](#1-butterworth-butter)
+    - [2. Chebyshev I (`cheby1`)](#2-chebyshev-i-cheby1)
+    - [3. Chebyshev II (`cheby2`)](#3-chebyshev-ii-cheby2)
+    - [4. Elliptic (`ellip`)](#4-elliptic-ellip)
+    - [5. Bessel (`bessel`)](#5-bessel-bessel)
+    - [6. Linkwitz-Riley (`lr`)](#6-linkwitz-riley-lr)
+  - [📏 Calibration and dBFS](#-calibration-and-dbfs)
+    - [Physical Calibration (Sound Level Meter)](#physical-calibration-sound-level-meter)
     - [Digital Analysis (dBFS)](#digital-analysis-dbfs)
-8. [📊 Signal Decomposition](#-signal-decomposition-and-stability)
-9. [📖 Theory and Equations](#-theoretical-background)
-    - [Octave Band Frequencies](#octave-band-frequencies-ansi-s111--iec-61260)
-    - [Magnitude Responses](#magnitude-responses-hjw)
-    - [Weighting Curves](#weighting-curves-iec-61672-1)
+    - [RMS vs Peak Levels](#rms-vs-peak-levels)
+  - [📊 Signal Decomposition and Stability](#-signal-decomposition-and-stability)
+  - [📖 Theoretical Background](#-theoretical-background)
+    - [Octave Band Frequencies (ANSI S1.11 / IEC 61260)](#octave-band-frequencies-ansi-s111-iec-61260)
+    - [Frequency Resolution vs FFT Bin Spacing](#frequency-resolution-vs-fft-bin-spacing)
+    - [Magnitude Responses |H(jw)|](#magnitude-responses-hjw)
+    - [Filter Bank Design \& Numerical Stability](#filter-bank-design-numerical-stability)
+    - [Weighting Curves (IEC 61672-1)](#weighting-curves-iec-61672-1)
     - [Time Integration](#time-integration)
-10. [🧪 Testing and Quality](#-development-and-verification)
+  - [🧪 Development and Verification](#-development-and-verification)
     - [Test Categories](#test-categories)
     - [Commands](#commands)
+- [Author](#author)
 
 ---
 
@@ -84,7 +93,7 @@ All core functionality can be imported directly from the `pyoctaveband` package.
 | `time_weighting` | `function` | **Energy capture.**<br>• `x`: Raw signal array (squared internally)<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', or 'impulse' | `env = time_weighting(x, fs, mode='fast')`<br><br>• `env`: 1D array of energy envelope (Mean Square) |
 | `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
 | `calculate_sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6) | `s = calculate_sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
-| `getansifrequencies` | `function` | **ANSI Frequency generator.**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `f_cen, f_low, f_high = getansifrequencies(fraction=3)`<br><br>• `f_cen`: List of center frequencies [Hz]<br>• `f_low`: List of lower edges [Hz]<br>• `f_high`: List of upper edges [Hz] |
+| `getansifrequencies` | `function` | **ANSI Frequency generator.**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)`<br><br>• `f_cen`: List of center frequencies [Hz]<br>• `f_low`: List of lower edges [Hz]<br>• `f_high`: List of upper edges [Hz]<br>• `labels`: IEC nominal frequency labels |
 | `normalizedfreq` | `function` | **Standard IEC Frequencies.**<br>• `fraction`: 1 or 3 | `freqs = normalizedfreq(fraction=3)`<br><br>• `freqs`: List of standard center frequencies [Hz] |
 
 ---
@@ -421,6 +430,74 @@ $$
 $$
 f_1 = f_m \cdot G^{-1/2b}, \quad f_2 = f_m \cdot G^{1/2b}
 $$
+
+### Frequency Resolution vs FFT Bin Spacing
+
+`octavefilter` is a **time-domain fractional-octave filter bank**, not an FFT or Welch spectrum estimator. Therefore, its result does not have a frequency resolution in the `fs / nfft` sense.
+
+For `fraction=3`, the output contains one scalar level per third-octave band. The relevant frequency granularity is the standardized band definition: center frequency, lower edge, and upper edge. Because fractional-octave bands are logarithmically spaced, their absolute bandwidth in Hz grows with frequency while their relative bandwidth remains approximately constant.
+
+For example, with `fraction=3` and `limits=[12, 20000]`, the exact third-octave band around 1 kHz is approximately:
+
+| Nominal band | Lower edge | Center | Upper edge | Bandwidth |
+| :--- | ---: | ---: | ---: | ---: |
+| 1 kHz | 891.25 Hz | 1000.00 Hz | 1122.02 Hz | 230.77 Hz |
+
+You can inspect the exact bands with:
+
+```python
+from pyoctaveband import getansifrequencies
+
+fc, fl, fu, labels = getansifrequencies(fraction=3, limits=[12, 20000])
+for label, center, lower, upper in zip(labels, fc, fl, fu):
+    print(label, center, lower, upper, upper - lower)
+```
+
+If you need narrowband FFT bins for tonal inspection, run Welch/FFT on the original signal and use the PyOctaveBand band edges as masks:
+
+```python
+import numpy as np
+from scipy import signal
+from pyoctaveband import octavefilter, getansifrequencies
+
+fs = 100_000
+x = pressure_signal_pa  # 1D pressure signal in Pa
+
+# Standardized third-octave levels from PyOctaveBand.
+levels, centers = octavefilter(
+    x,
+    fs=fs,
+    fraction=3,
+    limits=[12, 20_000],
+)
+
+# Same standardized band definitions, including lower/upper edges.
+fc, fl, fu, labels = getansifrequencies(fraction=3, limits=[12, 20_000])
+
+# Narrowband Welch estimate on the original signal.
+nperseg = min(2**15, len(x))
+freq_bins, psd = signal.welch(
+    x,
+    fs=fs,
+    window="hann",
+    nperseg=nperseg,
+    noverlap=nperseg // 2,
+    scaling="density",
+)
+
+# Example: list the Welch bins inside the third-octave band closest to 1 kHz.
+band_index = int(np.argmin(np.abs(np.asarray(fc) - 1000.0)))
+in_band = (freq_bins >= fl[band_index]) & (freq_bins <= fu[band_index])
+
+print("Selected third-octave band:", labels[band_index])
+print("Welch bin spacing:", freq_bins[1] - freq_bins[0], "Hz")
+for f, pxx in zip(freq_bins[in_band], psd[in_band]):
+    print(f, pxx)
+```
+
+This keeps the two concepts separate: PyOctaveBand gives standardized fractional-octave levels, while Welch gives narrowband FFT bins. With `fs=100000` and `nperseg=2**15`, the Welch bin spacing is about `3.05 Hz`. Window choice and overlap affect leakage and averaging variance, but they do not change the bin spacing of each FFT segment.
+
+When `sigbands=True`, `octavefilter` can also return the time-domain waveform filtered by each band. Applying Welch/FFT to one selected filtered waveform can be useful as a diagnostic view of the content inside that filtered band, but it does not recover FFT bins from the scalar band levels.
 
 ### Magnitude Responses |H(jw)|
 The library implements standard classical filter prototypes:

@@ -245,7 +245,7 @@ def test_calculate_level_invalid_mode() -> None:
     """Verify invalid level calculation mode is rejected."""
     bank = OctaveFilterBank(48000)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid mode\\. Use 'rms' or 'peak'\\."):
         bank._calculate_level(np.array([1.0]), "invalid_mode")
 
 

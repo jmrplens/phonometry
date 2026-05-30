@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import List, Tuple, overload, Literal
 
-import matplotlib
 import numpy as np
 
 from .calibration import calculate_sensitivity
@@ -16,9 +15,6 @@ from .core import OctaveFilterBank
 from .frequencies import getansifrequencies, normalizedfreq
 from .parametric_filters import WeightingFilter, linkwitz_riley, time_weighting, weighting_filter
 from ._version import __version__
-
-# Use non-interactive backend for plots
-matplotlib.use("Agg")
 
 # Public methods
 __all__ = [

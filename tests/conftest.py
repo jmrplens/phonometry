@@ -2,6 +2,13 @@
 import os
 import pytest
 
+# Select a non-interactive matplotlib backend for the headless test suite.
+# The library no longer forces a backend (see issue #52), so the test harness
+# must opt into Agg itself; otherwise matplotlib picks a GUI backend (e.g.
+# TkAgg on Windows runners) and figure creation fails without a display/Tcl.
+# Set at import time so it takes effect before any test module imports pyplot.
+os.environ.setdefault("MPLBACKEND", "Agg")
+
 def pytest_configure(config):
     """
     Configure environment variables for the test session.

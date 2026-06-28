@@ -49,7 +49,6 @@ Now available on [PyPI](https://pypi.org/project/PyOctaveBand/).
   - [🧪 Development and Verification](#-development-and-verification)
     - [Test Categories](#test-categories)
     - [Commands](#commands)
-- [Author](#author)
 
 ---
 
@@ -604,6 +603,3 @@ pytest tests/
 # Generate technical report
 python scripts/benchmark_filters.py
 ```
-
-# Author
-Jose M. Requena Plens, 2020 - 2026.

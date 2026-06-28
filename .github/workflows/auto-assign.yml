@@ -1,0 +1,22 @@
+name: Auto-assign
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Assign to jmrplens
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+        run: |
+          gh api             --method POST             -H "Accept: application/vnd.github+json"             /repos/$REPO/issues/$NUMBER/assignees             -f assignees[]=jmrplens

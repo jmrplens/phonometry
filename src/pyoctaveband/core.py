@@ -11,7 +11,7 @@ from typing import List, Tuple, cast, overload, Literal
 import numpy as np
 from scipy import signal
 
-from .filter_design import _design_sos_filter
+from .filter_design import _cheby2_headroom, _design_sos_filter
 from .frequencies import _genfreqs
 from .utils import _downsamplingfactor, _resample_to_length, _typesignal
 
@@ -98,7 +98,12 @@ class OctaveFilterBank:
 
         # Calculate factors and design SOS
         if resample:
-            self.factor = _downsamplingfactor(self.freq_u, fs)
+            headroom = 1.25
+            if filter_type == "cheby2":
+                # The cheby2 stopband extends above the band's upper edge;
+                # 5% safety margin so it clears the decimated Nyquist.
+                headroom = max(headroom, 1.05 * _cheby2_headroom(fraction, order, attenuation))
+            self.factor = _downsamplingfactor(self.freq_u, fs, headroom)
         else:
             self.factor = np.ones(self.num_bands, dtype=int)
 

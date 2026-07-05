@@ -54,14 +54,17 @@ def _resample_to_length(y: np.ndarray, factor: int, target_length: int) -> np.nd
     return y_resampled
 
 
-def _downsamplingfactor(freq: List[float], fs: int) -> np.ndarray:
+def _downsamplingfactor(freq: List[float], fs: int, headroom: float = 1.25) -> np.ndarray:
     """
     Compute optimal downsampling factors for filter stability.
 
-    :param freq: Frequencies.
+    :param freq: Band upper-edge frequencies.
     :param fs: Sample rate.
+    :param headroom: Required ratio between the decimated Nyquist and the
+        band's upper edge. 1.25 reproduces the classic ``fs / (2 + 0.5)``
+        guard; filter types whose design extends above the upper edge
+        (cheby2 stopband) need more.
     :return: Array of factors.
     """
-    guard = 0.50
-    factor = (np.floor((fs / (2 + guard)) / np.array(freq))).astype("int")
+    factor = (np.floor((fs / 2) / (headroom * np.array(freq)))).astype("int")
     return cast(np.ndarray, np.clip(factor, 1, 500))

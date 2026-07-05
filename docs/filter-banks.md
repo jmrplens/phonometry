@@ -164,3 +164,8 @@ option is incompatible with stateful (block) processing.
 ```python
 spl, freq, xb = octavefilterbank.filter(y, sigbands=True, zero_phase=True)
 ```
+
+<img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/zero_phase_comparison.png" width="80%">
+
+*Causal filtering delays the burst by the filter's group delay; zero-phase
+filtering keeps it aligned with the input.*

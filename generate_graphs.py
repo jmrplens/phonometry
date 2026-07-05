@@ -466,20 +466,181 @@ def generate_crossover_plot(output_dir: str) -> None:
     plt.close()
 
 
+def generate_spectrogram_example(output_dir: str) -> None:
+    """Visualize OctaveFilterBank.spectrogram on a time-varying signal."""
+    print("Generating spectrogram_example.png...")
+    fs = 48000
+    duration = 4.0
+    t = np.linspace(0, duration, int(fs * duration), endpoint=False)
+
+    # Log sweep + two tone bursts to show time-frequency localization
+    rng = np.random.default_rng(42)
+    x = 0.5 * scipy_signal.chirp(t, f0=80, t1=duration, f1=8000, method="logarithmic")
+    x[int(1.0 * fs):int(1.3 * fs)] += np.sin(2 * np.pi * 4000 * t[int(1.0 * fs):int(1.3 * fs)])
+    x[int(2.5 * fs):int(2.8 * fs)] += np.sin(2 * np.pi * 250 * t[int(2.5 * fs):int(2.8 * fs)])
+    x += 0.01 * rng.standard_normal(len(t))
+
+    bank = OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[50.0, 12000.0])
+    levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.5)
+
+    _, ax = plt.subplots()
+    mesh = ax.pcolormesh(times, freq, levels, shading="auto", cmap="magma")
+    ax.set_yscale("log")
+    ax.set_title("1/3 Octave Spectrogram (Fast windows, 50% overlap)", fontweight="bold", pad=12)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel(LABEL_FREQ_HZ)
+    yticks = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(["63", "125", "250", "500", "1k", "2k", "4k", "8k"])
+    plt.colorbar(mesh, ax=ax, label=LABEL_LEVEL_DB)
+    plt.savefig(os.path.join(output_dir, "spectrogram_example.png"))
+    plt.close()
+
+
+def generate_ln_levels_example(output_dir: str) -> None:
+    """Visualize statistical LN levels over the Fast envelope."""
+    print("Generating ln_levels_example.png...")
+    fs = 8000
+    duration = 30.0
+    t = np.linspace(0, duration, int(fs * duration), endpoint=False)
+
+    from pyoctaveband import ln_levels, time_weighting
+
+    # Fluctuating "traffic-like" noise: background + random events
+    rng = np.random.default_rng(42)
+    x = 0.05 * rng.standard_normal(len(t))
+    for _ in range(12):
+        start = rng.uniform(1, duration - 3)
+        length = rng.uniform(0.5, 2.0)
+        idx = (t >= start) & (t < start + length)
+        envelope = np.hanning(int(idx.sum()))
+        x[idx] += envelope * rng.uniform(0.3, 1.0) * rng.standard_normal(int(idx.sum()))
+
+    envelope_ms = time_weighting(x, fs, mode="fast")
+    level_t = 10 * np.log10(np.maximum(envelope_ms, 1e-12) / (2e-5) ** 2)
+    stats = ln_levels(x, fs, n=(10, 50, 90))
+
+    _, ax = plt.subplots()
+    ax.plot(t, level_t, color=COLOR_PRIMARY, linewidth=0.8, label="Fast level $L_p(t)$")
+    for n_value, color, style in [(10, COLOR_SECONDARY, "--"), (50, "black", "-"), (90, COLOR_TERTIARY, "-.")]:
+        ax.axhline(
+            float(stats[n_value]), color=color, linestyle=style, linewidth=1.5,
+            label=f"L{n_value} = {float(stats[n_value]):.1f} dB",
+        )
+    ax.set_title("Statistical Levels L10 / L50 / L90 (Fast envelope)", fontweight="bold", pad=12)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel(LABEL_LEVEL_DB)
+    ax.set_xlim(0, duration)
+    ax.legend(loc="lower right")
+    plt.savefig(os.path.join(output_dir, "ln_levels_example.png"))
+    plt.close()
+
+
+def generate_zero_phase_comparison(output_dir: str) -> None:
+    """Compare causal vs zero-phase band filtering of a tone burst."""
+    print("Generating zero_phase_comparison.png...")
+    fs = 48000
+    duration = 0.15
+    t = np.linspace(0, duration, int(fs * duration), endpoint=False)
+
+    # 250 Hz tone burst in the middle of the frame
+    x = np.zeros_like(t)
+    start, end = int(0.05 * fs), int(0.10 * fs)
+    x[start:end] = np.sin(2 * np.pi * 250 * t[start:end]) * np.hanning(end - start)
+
+    bank = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
+    _, _, bands_fwd = bank.filter(x, sigbands=True, calculate_level=False)
+    _, _, bands_zp = bank.filter(x, sigbands=True, calculate_level=False, zero_phase=True)
+
+    _, ax = plt.subplots()
+    ax.plot(t, x, color="gray", alpha=0.5, linewidth=1.0, label="Input burst (250 Hz)")
+    ax.plot(t, bands_fwd[0], color=COLOR_PRIMARY, linewidth=1.3, label="Causal filtering (group delay)")
+    ax.plot(t, bands_zp[0], color=COLOR_SECONDARY, linewidth=1.3, linestyle="--", label="zero_phase=True (aligned)")
+    ax.set_title("Zero-Phase Filtering: Group Delay Elimination (250 Hz Band)", fontweight="bold", pad=12)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Amplitude")
+    ax.legend(loc="upper right")
+    plt.savefig(os.path.join(output_dir, "zero_phase_comparison.png"))
+    plt.close()
+
+
+def generate_weighting_accuracy_hf(output_dir: str) -> None:
+    """Compare A-weighting HF accuracy: analytic vs bilinear vs high_accuracy."""
+    print("Generating weighting_accuracy_hf.png...")
+    fs = 48000
+
+    from pyoctaveband import WeightingFilter
+
+    freqs = np.logspace(np.log10(1000), np.log10(20000), 40)
+
+    def analytic_a(f: np.ndarray) -> np.ndarray:
+        ra = (12194**2 * f**4) / (
+            (f**2 + 20.6**2)
+            * np.sqrt((f**2 + 107.7**2) * (f**2 + 737.9**2))
+            * (f**2 + 12194**2)
+        )
+        return 20 * np.log10(ra) + 2.0
+
+    def measured_gains(wf: WeightingFilter) -> np.ndarray:
+        gains = []
+        for f0 in freqs:
+            tt = np.arange(int(fs * 0.2)) / fs
+            x = np.sin(2 * np.pi * f0 * tt)
+            y = wf.filter(x)
+            n0 = int(0.05 * fs)  # skip filter transient
+            gains.append(20 * np.log10(np.std(y[n0:]) / np.std(x[n0:])))
+        return np.array(gains)
+
+    legacy = measured_gains(WeightingFilter(fs, "A", high_accuracy=False))
+    accurate = measured_gains(WeightingFilter(fs, "A"))
+    reference = analytic_a(freqs)
+
+    _, (ax, ax_err) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    ax.semilogx(freqs, reference, color="black", linewidth=2, label="IEC 61672-1 analytic curve")
+    ax.semilogx(freqs, legacy, color=COLOR_SECONDARY, linestyle="--", label="Plain bilinear (high_accuracy=False)")
+    ax.semilogx(freqs, accurate, color=COLOR_PRIMARY, linestyle="-.", label="Oversampled (high_accuracy=True)")
+    ax.set_title(f"A-Weighting High-Frequency Accuracy @ fs={fs//1000} kHz", fontweight="bold", pad=12)
+    ax.set_ylabel(LABEL_LEVEL_DB)
+    ax.legend(loc="lower left")
+
+    ax_err.semilogx(freqs, legacy - reference, color=COLOR_SECONDARY, linestyle="--", label="Bilinear error")
+    ax_err.semilogx(freqs, accurate - reference, color=COLOR_PRIMARY, linestyle="-.", label="high_accuracy error")
+    ax_err.axhline(-2.5, color="gray", linestyle=":", label="Class 1 lower limit @ 12.5 kHz")
+    ax_err.set_ylabel("Error [dB]")
+    ax_err.set_xlabel(LABEL_FREQ_HZ)
+    ax_err.set_ylim(-8, 2)
+    ax_err.legend(loc="lower left")
+
+    for a in (ax, ax_err):
+        xticks = [1000, 2000, 4000, 8000, 12500, 16000, 20000]
+        a.set_xticks(xticks)
+        a.set_xticklabels(["1k", "2k", "4k", "8k", "12.5k", "16k", "20k"])
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, "weighting_accuracy_hf.png"))
+    plt.close()
+
+
 if __name__ == "__main__":
     img_dir = ".github/images"
     os.makedirs(img_dir, exist_ok=True)
-    
+
     # Generate all plots
     generate_filter_type_comparison(img_dir)
     generate_filter_responses(img_dir)
     generate_signal_responses(img_dir)
     generate_multichannel_response(img_dir)
     generate_decomposition_plot(img_dir)
-    
+
     # NEW PLOTS
     generate_weighting_responses(img_dir)
     generate_time_weighting_plot(img_dir)
     generate_crossover_plot(img_dir)
-    
+
+    # Feature documentation plots (levels, spectrogram, zero-phase, weighting accuracy)
+    generate_spectrogram_example(img_dir)
+    generate_ln_levels_example(img_dir)
+    generate_zero_phase_comparison(img_dir)
+    generate_weighting_accuracy_hf(img_dir)
+
     print("Graphics generated successfully.")

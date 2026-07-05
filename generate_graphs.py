@@ -401,12 +401,40 @@ def generate_decomposition_plot(output_dir: str) -> None:
 
 
 
+def measure_weighting_response(
+    fs: int, curve: str, freqs: "np.ndarray | None" = None
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Measure a weighting curve the way the docs figure plots it: impulse
+    response through the real filter path + FFT.
+
+    The impulse is placed at the CENTER of the buffer: the high-accuracy
+    weighting path resamples with polyphase FIRs, and an impulse at sample 0
+    loses the anti-causal half of the interpolation kernel (edge truncation),
+    which once shipped a figure with curves ~2.4 dB low. Centering only adds
+    linear phase, which does not affect the magnitude.
+
+    :param fs: Sample rate in Hz.
+    :param curve: 'A', 'C' or 'Z'.
+    :param freqs: Optional exact frequencies to evaluate; defaults to a
+        dense 8192-point grid for plotting.
+    :return: Tuple (frequencies, magnitude in dB).
+    """
+    from pyoctaveband import weighting_filter
+
+    impulse = np.zeros(fs)
+    impulse[fs // 2] = 1.0
+    weighted = weighting_filter(impulse, fs, curve=curve)
+
+    worn = 8192 if freqs is None else np.asarray(freqs, dtype=float)
+    w, h = scipy_signal.freqz(weighted, [1], worN=worn, fs=fs)
+    return w, 20 * np.log10(np.abs(h) + 1e-9)
+
+
 def generate_weighting_responses(output_dir: str) -> None:
     """Plot A, C and Z weighting frequency responses."""
     print("Generating weighting_responses.png...")
     fs = 48000
-
-    from pyoctaveband import weighting_filter
 
     _, ax = plt.subplots(figsize=(10, 7))
 
@@ -423,19 +451,8 @@ def generate_weighting_responses(output_dir: str) -> None:
     ]
 
     for code, label, color in curves:
-        # Measure the response via impulse response + FFT. The impulse is
-        # placed at the CENTER of the buffer: the high-accuracy weighting
-        # path resamples with polyphase FIRs, and an impulse at sample 0
-        # loses the anti-causal half of the interpolation kernel (edge
-        # truncation), distorting the measured spectrum. Centering only
-        # adds linear phase, which does not affect the magnitude.
-        impulse = np.zeros(fs)
-        impulse[fs // 2] = 1.0
-        weighted = weighting_filter(impulse, fs, curve=code)
-
-        # Frequency response
-        w, h = scipy_signal.freqz(weighted, [1], worN=8192, fs=fs)
-        mag_db = 20 * np.log10(np.abs(h) + 1e-9)
+        # measure_weighting_response is covered by tests/test_graph_measurements.py
+        w, mag_db = measure_weighting_response(fs, code)
         ax.semilogx(w, mag_db, label=label, color=color)
         axins.plot(w, mag_db, color=color)
 

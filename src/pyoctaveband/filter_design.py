@@ -62,7 +62,7 @@ def _cheby2_headroom(fraction: float, order: int, attenuation: float) -> float:
     edge = g ** (1 / (2 * fraction))
     fd, fu = 1.0 / edge, edge  # normalized band around fc=1
     _, f2 = _cheby2_stopband_edges(fd, fu, order, attenuation)
-    return f2 / fu
+    return float(f2 / fu)
 
 
 def _design_sos_filter(

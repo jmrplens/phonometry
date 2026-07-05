@@ -37,7 +37,7 @@ def _cached_filter_bank(
     fs: int,
     fraction: float,
     order: int,
-    limits: Tuple[float, ...],
+    limits: Tuple[float, ...] | None,
     filter_type: str,
     ripple: float,
     attenuation: float,
@@ -49,7 +49,7 @@ def _cached_filter_bank(
         fs=fs,
         fraction=fraction,
         order=order,
-        limits=list(limits),
+        limits=list(limits) if limits is not None else None,
         filter_type=filter_type,
         ripple=ripple,
         attenuation=attenuation,
@@ -219,8 +219,9 @@ def octavefilter(
     else:
         # The bank is immutable in non-stateful mode: reuse the design.
         # Pass limits through as-is (tuple for hashability); the bank
-        # constructor is the single place that validates them.
-        limits_key = tuple(map(float, limits)) if limits is not None else (12.0, 20000.0)
+        # constructor is the single place that validates them and owns
+        # the default when None.
+        limits_key = tuple(map(float, limits)) if limits is not None else None
         filter_bank = _cached_filter_bank(
             fs, fraction, order, limits_key, filter_type,
             ripple, attenuation, calibration_factor, dbfs,

@@ -46,13 +46,23 @@ def test_filter_design_has_no_toplevel_matplotlib_import() -> None:
     from pyoctaveband import filter_design
 
     tree = ast.parse(inspect.getsource(filter_design))
-    for node in tree.body:
+
+    # Only imports inside a function body are lazy; module-scope imports
+    # (even wrapped in try/if blocks) still run at import time.
+    inside_functions: set[ast.AST] = set()
+    for func in ast.walk(tree):
+        if isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            for sub in ast.walk(func):
+                inside_functions.add(sub)
+
+    for node in ast.walk(tree):
         if isinstance(node, (ast.Import, ast.ImportFrom)):
             module = getattr(node, "module", None) or ""
             aliases = [a.name for a in node.names]
-            assert not any("matplotlib" in n for n in [module, *aliases]), (
-                "matplotlib imported at module level in filter_design"
-            )
+            if any("matplotlib" in n for n in [module, *aliases]):
+                assert node in inside_functions, (
+                    "matplotlib imported at module scope in filter_design"
+                )
 
 
 def test_showfilter_raises_helpful_error_without_matplotlib(monkeypatch) -> None:

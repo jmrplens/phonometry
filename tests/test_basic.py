@@ -111,3 +111,14 @@ def test_octavefilter_cached_results_identical() -> None:
     spl2, f2 = PyOctaveBand.octavefilter(x, 48000, fraction=3)
     np.testing.assert_array_equal(spl1, spl2)
     assert f1 == f2
+
+
+def test_octavefilter_freq_list_is_mutation_safe() -> None:
+    """Mutating the returned freq list must not corrupt the cached bank."""
+    PyOctaveBand._cached_filter_bank.cache_clear()
+    x = np.random.default_rng(2).standard_normal(4800)
+    _, freq1 = PyOctaveBand.octavefilter(x, 48000, fraction=1)
+    freq1[0] = -999.0  # caller mutates the returned list
+    _, freq2 = PyOctaveBand.octavefilter(x, 48000, fraction=1)
+    assert freq2[0] != -999.0
+    PyOctaveBand._cached_filter_bank.cache_clear()

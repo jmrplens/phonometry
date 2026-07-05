@@ -278,7 +278,9 @@ class OctaveFilterBank:
             if sigbands and xb is not None:
                 xb = [band[0] for band in xb]
 
-        freq_out = self.nominal_freq if nominal else self.freq
+        # Return a copy: the bank (possibly shared via the octavefilter()
+        # design cache) must not be corrupted by callers mutating the list.
+        freq_out: List[float] | List[str] = list(self.nominal_freq) if nominal else list(self.freq)
 
         if sigbands and xb is not None:
             return spl, freq_out, xb

@@ -1,0 +1,75 @@
+← [Documentation index](README.md)
+
+# Time Weighting and Integration
+
+Accurate SPL measurement requires capturing energy over specific time windows.
+PyOctaveBand implements exact time constants per **IEC 61672-1:2013**.
+
+<img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis.png" width="80%">
+
+* **Fast (`fast`):** τ = 125 ms. Standard for noise fluctuations.
+* **Slow (`slow`):** τ = 1000 ms. Standard for steady noise.
+* **Impulse (`impulse`):** **Asymmetric** ballistics. 35 ms rise time for rapid
+  onset capture, 1500 ms decay for readability.
+
+```python
+from pyoctaveband import time_weighting
+
+# Calculate energy envelope (Mean Square)
+energy_envelope = time_weighting(signal, fs, mode='fast')
+# dB SPL relative to 20 μPa
+spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
+```
+
+## Initial state
+
+By default, the exponential integrator starts from rest (`y[-1] = 0`). Passing
+`initial_state=None` leaves this default unspecified, while `initial_state='zero'`
+requests the same zero state explicitly. If the recorded segment begins after a
+steady signal is already present, you can start from the first sample energy instead:
+
+```python
+energy_envelope = time_weighting(signal, fs, mode='fast', initial_state='first')
+```
+
+## Block processing
+
+For block processing, pass the last output value from the previous block as the
+next block's `initial_state` instead of resetting each block:
+
+```python
+state = None
+
+for block in audio_blocks:
+    energy_envelope = time_weighting(block, fs, mode='fast', initial_state=state)
+    state = energy_envelope[-1]
+```
+
+For multichannel blocks with time on the last axis, carry one state per channel:
+use `state = energy_envelope[..., -1]`. A scalar `initial_state` is applied to
+every channel, while an array must match or broadcast to the non-time shape,
+such as `(n_channels,)` for input shaped `(n_channels, n_samples)`.
+
+Or let the `TimeWeighting` class carry the state for you:
+
+```python
+from pyoctaveband import TimeWeighting
+
+tw = TimeWeighting(fs, mode='fast')
+for block in audio_blocks:
+    energy_envelope = tw.process(block)
+```
+
+Concatenated block outputs are exactly equal to a single continuous call
+(verified for all three modes, mono and multichannel). Call `tw.reset()` to
+start from rest again.
+
+## Performance note
+
+The `impulse` mode uses an asymmetric kernel that is JIT-compiled when
+[numba](https://numba.pydata.org/) is installed (`pip install PyOctaveBand[perf]`).
+Without numba a pure-Python fallback produces identical results, just slower.
+
+See [Integrated & Statistical Levels](levels.md) for Leq/LN metrics built on
+these envelopes, and [Why PyOctaveBand](why-pyoctaveband.md) for the IEC
+61672-1 tone-burst verification.

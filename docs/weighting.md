@@ -1,0 +1,63 @@
+← [Documentation index](README.md)
+
+# Frequency Weighting (A, C, Z)
+
+Frequency weighting curves simulate the human ear's sensitivity, as specified by
+**IEC 61672-1:2013**.
+
+<img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses.png" width="80%">
+
+* **A-Weighting (`A`):** Standard for environmental noise (IEC 61672-1).
+* **C-Weighting (`C`):** Used for peak sound pressure and high-level noise.
+* **Z-Weighting (`Z`):** Zero weighting, completely flat response.
+
+```python
+from pyoctaveband import weighting_filter
+
+# Apply A-weighting to the raw signal
+weighted_signal = weighting_filter(signal, fs, curve='A')
+
+# Apply C-weighting for peak analysis
+c_weighted_signal = weighting_filter(signal, fs, curve='C')
+```
+
+## Reusable filter object
+
+If you weight many signals with the same parameters, design the filter once:
+
+```python
+from pyoctaveband import WeightingFilter
+
+wf = WeightingFilter(fs, "A")
+for signal in signals:
+    weighted = wf.filter(signal)
+```
+
+## High-frequency accuracy (`high_accuracy`)
+
+A plain bilinear-transform design compresses the response near Nyquist: at
+fs = 48 kHz the A-curve error at 12.5 kHz reaches −2.7 dB, outside the IEC
+61672-1 **class 1** tolerance (+2.0/−2.5 dB).
+
+By default (`high_accuracy=True`), PyOctaveBand designs and runs the weighting
+filter at an internally oversampled rate (≥ 96 kHz) and decimates back, keeping
+the response within class 1 tolerances up to 16 kHz (error ≈ −0.5 dB at
+12.5 kHz for fs = 48 kHz).
+
+- `high_accuracy=False` restores the legacy plain-bilinear behavior.
+- **Stateful (block) processing** always uses the legacy design: the internal
+  FIR resampling is incompatible with block continuity. Passing
+  `high_accuracy=True` together with `stateful=True` raises a `ValueError`.
+
+```python
+# Explicit legacy behavior
+y = weighting_filter(signal, fs, curve="A", high_accuracy=False)
+
+# Stateful block processing (legacy design, state carried between blocks)
+wf = WeightingFilter(fs, "A", stateful=True)
+for block in blocks:
+    weighted = wf.filter(block)
+```
+
+See [Block Processing](block-processing.md) for the streaming workflow and
+[Theory](theory.md) for the analytic curve definitions.

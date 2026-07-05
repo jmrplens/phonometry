@@ -7,6 +7,8 @@ updates:
       day: "monday"
       time: "06:00"
       timezone: "Etc/UTC"
+    cooldown:
+      default-days: 0
     labels:
       - "dependencies"
       - "github-actions"
@@ -22,13 +24,32 @@ updates:
       day: "monday"
       time: "06:30"
       timezone: "Etc/UTC"
+    cooldown:
+      default-days: 0
     labels:
       - "dependencies"
       - "python"
     open-pull-requests-limit: 5
     versioning-strategy: "increase"
-    ignore:
-      - dependency-name: "*"
-        update-types:
-          - "version-update:semver-minor"
-          - "version-update:semver-patch"
+    groups:
+      python:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/site"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Etc/UTC"
+    cooldown:
+      default-days: 0
+    labels:
+      - "dependencies"
+      - "javascript"
+    open-pull-requests-limit: 5
+    groups:
+      site:
+        patterns:
+          - "*"

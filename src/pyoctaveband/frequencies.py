@@ -30,13 +30,12 @@ def getansifrequencies(
     fr = 1000
 
     x = _initindex(limits[0], fr, g, fraction)
-    freq = np.array([_ratio(g, x, fraction) * fr])
+    freq_list = [_ratio(g, x, fraction) * fr]
 
-    freq_x = freq[0]
-    while freq_x * _bandedge(g, fraction) < limits[1]:
+    while freq_list[-1] * _bandedge(g, fraction) < limits[1]:
         x += 1
-        freq_x = _ratio(g, x, fraction) * fr
-        freq = np.append(freq, freq_x)
+        freq_list.append(_ratio(g, x, fraction) * fr)
+    freq = np.array(freq_list)
 
     freq_d = freq / _bandedge(g, fraction)
     freq_u = freq * _bandedge(g, fraction)

@@ -77,3 +77,48 @@ def test_octave_filter_sigbands() -> None:
 
     assert len(xb) == len(freq)
     assert xb[0].shape == y.shape
+
+
+def test_octavefilter_reuses_cached_bank(monkeypatch) -> None:
+    """Repeated octavefilter calls with identical params must not redesign the bank."""
+    from pyoctaveband.core import OctaveFilterBank
+
+    PyOctaveBand._cached_filter_bank.cache_clear()
+    calls = {"n": 0}
+    original_init = OctaveFilterBank.__init__
+
+    def counting_init(self, *args, **kwargs):  # noqa: ANN001, ANN002, ANN003
+        calls["n"] += 1
+        original_init(self, *args, **kwargs)
+
+    monkeypatch.setattr(OctaveFilterBank, "__init__", counting_init)
+
+    x = np.random.default_rng(0).standard_normal(4800)
+    PyOctaveBand.octavefilter(x, 48000, fraction=3)
+    PyOctaveBand.octavefilter(x, 48000, fraction=3)
+    assert calls["n"] == 1
+
+    PyOctaveBand.octavefilter(x, 48000, fraction=1)  # different params -> new bank
+    assert calls["n"] == 2
+    PyOctaveBand._cached_filter_bank.cache_clear()
+
+
+def test_octavefilter_cached_results_identical() -> None:
+    """The cached bank must return bit-identical results across calls."""
+    PyOctaveBand._cached_filter_bank.cache_clear()
+    x = np.random.default_rng(1).standard_normal(4800)
+    spl1, f1 = PyOctaveBand.octavefilter(x, 48000, fraction=3)
+    spl2, f2 = PyOctaveBand.octavefilter(x, 48000, fraction=3)
+    np.testing.assert_array_equal(spl1, spl2)
+    assert f1 == f2
+
+
+def test_octavefilter_freq_list_is_mutation_safe() -> None:
+    """Mutating the returned freq list must not corrupt the cached bank."""
+    PyOctaveBand._cached_filter_bank.cache_clear()
+    x = np.random.default_rng(2).standard_normal(4800)
+    _, freq1 = PyOctaveBand.octavefilter(x, 48000, fraction=1)
+    freq1[0] = -999.0  # caller mutates the returned list
+    _, freq2 = PyOctaveBand.octavefilter(x, 48000, fraction=1)
+    assert freq2[0] != -999.0
+    PyOctaveBand._cached_filter_bank.cache_clear()

@@ -10,10 +10,14 @@ import math
 from typing import List, Tuple, cast
 
 import numpy as np
-from numba import jit
 from scipy import signal
 
 from .utils import _typesignal
+
+try:
+    from numba import jit as _numba_jit
+except ImportError:  # pragma: no cover - depends on install extras
+    _numba_jit = None
 
 
 class WeightingFilter:
@@ -207,27 +211,32 @@ def _prepare_time_weighting_initial_state(
         ) from exc
 
 
-@jit(nopython=True, cache=True)  # type: ignore
-def _apply_impulse_kernel(
+def _impulse_kernel_py(
     x_t: np.ndarray,
     alpha_rise: float,
     alpha_fall: float,
     initial_state: np.ndarray,
 ) -> np.ndarray:
-    """Numba-optimized kernel for asymmetric time weighting."""
+    """Asymmetric time-weighting kernel (pure Python; jitted when numba is present)."""
     y_t = np.zeros_like(x_t)
     curr_y = initial_state.copy()
-    
+
     for i in range(x_t.shape[0]):
         val = x_t[i]
         rising = val > curr_y
-        
+
         diff = val - curr_y
         factor = np.where(rising, alpha_rise, alpha_fall)
         curr_y += factor * diff
         y_t[i] = curr_y
-        
+
     return y_t
+
+
+if _numba_jit is not None:
+    _apply_impulse_kernel = _numba_jit(nopython=True, cache=True)(_impulse_kernel_py)
+else:  # pragma: no cover - exercised only without numba installed
+    _apply_impulse_kernel = _impulse_kernel_py
 
 def time_weighting(
     x: List[float] | np.ndarray,

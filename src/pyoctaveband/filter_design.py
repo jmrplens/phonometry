@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from typing import List, Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal
 
@@ -152,6 +151,13 @@ def _showfilter(
     :param show: If True, show the plot.
     :param plot_file: Path to save the plot.
     """
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError as exc:
+        raise ImportError(
+            "Plotting requires matplotlib. Install it with: pip install pyoctaveband[plot]"
+        ) from exc
+
     wn = 8192
     w = np.zeros([wn, len(freq)])
     h: np.ndarray = np.zeros([wn, len(freq)], dtype=np.complex128)

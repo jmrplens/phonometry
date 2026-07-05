@@ -36,3 +36,43 @@ def test_import_does_not_override_matplotlib_backend() -> None:
         timeout=30,
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_filter_design_has_no_toplevel_matplotlib_import() -> None:
+    """matplotlib must be imported lazily so the package works without it."""
+    import ast
+    import inspect
+
+    from pyoctaveband import filter_design
+
+    tree = ast.parse(inspect.getsource(filter_design))
+    for node in tree.body:
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            module = getattr(node, "module", None) or ""
+            aliases = [a.name for a in node.names]
+            assert not any("matplotlib" in n for n in [module, *aliases]), (
+                "matplotlib imported at module level in filter_design"
+            )
+
+
+def test_showfilter_raises_helpful_error_without_matplotlib(monkeypatch) -> None:
+    """Without matplotlib, plotting must fail with an actionable message."""
+    import builtins
+
+    import numpy as np
+    import pytest
+
+    from pyoctaveband import filter_design
+
+    real_import = builtins.__import__
+
+    def blocked_import(name, *args, **kwargs):  # noqa: ANN001, ANN002, ANN003
+        if name.startswith("matplotlib"):
+            raise ImportError("No module named 'matplotlib'")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", blocked_import)
+    with pytest.raises(ImportError, match=r"pip install pyoctaveband\[plot\]"):
+        filter_design._showfilter(
+            [], [1000.0], [1122.0], [891.0], 48000, np.array([1]), show=True, plot_file=None
+        )

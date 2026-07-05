@@ -319,7 +319,10 @@ class TimeWeighting:
 
     def process(self, x: List[float] | np.ndarray) -> np.ndarray:
         """Apply time weighting to a block, continuing from the previous block."""
-        env = time_weighting(x, self.fs, mode=self.mode, initial_state=self._state)
+        x_proc = _typesignal(x)
+        if x_proc.shape[-1] == 0:
+            return x_proc  # nothing to process; keep the carried state
+        env = time_weighting(x_proc, self.fs, mode=self.mode, initial_state=self._state)
         self._state = np.asarray(env[..., -1]).copy()
         return env
 

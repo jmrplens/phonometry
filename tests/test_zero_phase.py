@@ -56,3 +56,20 @@ def test_zero_phase_passband_level_matches() -> None:
     spl_fwd, _ = bank.filter(x)
     spl_zp, _ = bank.filter(x, zero_phase=True)
     assert spl_zp[0] == pytest.approx(spl_fwd[0], abs=0.1)
+
+
+def test_zero_phase_short_signal_does_not_crash() -> None:
+    """Heavily decimated bands can be shorter than sosfiltfilt's default padlen."""
+    bank = OctaveFilterBank(fs=FS, fraction=1, limits=[100, 200])
+    x = np.random.default_rng(3).standard_normal(4000)  # ~23 samples after decimation
+    spl, freq = bank.filter(x, zero_phase=True)
+    assert np.all(np.isfinite(spl))
+
+
+def test_spectrogram_supports_zero_phase() -> None:
+    bank = OctaveFilterBank(fs=FS, fraction=1, limits=[800, 1200])
+    x = np.random.default_rng(4).standard_normal(FS)
+    levels_zp, _, times = bank.spectrogram(x, window_time=0.125, zero_phase=True)
+    levels_fwd, _, _ = bank.spectrogram(x, window_time=0.125, zero_phase=False)
+    assert levels_zp.shape == levels_fwd.shape
+    assert np.all(np.isfinite(levels_zp))

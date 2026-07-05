@@ -282,3 +282,32 @@ def test_time_weighting_class_invalid_params() -> None:
         TimeWeighting(0)
     with pytest.raises(ValueError, match="Invalid time weighting mode"):
         TimeWeighting(48000, mode="banana")
+
+
+def test_time_weighting_class_impulse_blocks_match_continuous() -> None:
+    """Impulse mode uses a distinct asymmetric kernel: verify state carrying."""
+    from pyoctaveband import TimeWeighting, time_weighting
+
+    fs = 48000
+    rng = np.random.default_rng(7)
+    x = rng.standard_normal((2, fs))
+
+    continuous = time_weighting(x, fs, mode="impulse")
+    tw = TimeWeighting(fs, mode="impulse")
+    blocks = [tw.process(x[:, i * 12000:(i + 1) * 12000]) for i in range(4)]
+    np.testing.assert_allclose(np.concatenate(blocks, axis=-1), continuous, rtol=1e-10)
+
+
+def test_time_weighting_class_empty_block_keeps_state() -> None:
+    from pyoctaveband import TimeWeighting, time_weighting
+
+    fs = 48000
+    x = np.ones(1000)
+    tw = TimeWeighting(fs)
+    first = tw.process(x)
+    empty = tw.process(np.array([]))
+    assert empty.shape == (0,)
+    second = tw.process(x)
+    # State must have survived the empty block: continuous reference
+    reference = time_weighting(np.concatenate([x, x]), fs)
+    np.testing.assert_allclose(np.concatenate([first, second]), reference, rtol=1e-10)

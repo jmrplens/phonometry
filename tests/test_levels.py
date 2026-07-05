@@ -96,3 +96,28 @@ def test_ln_levels_multichannel() -> None:
     out = ln_levels(x, FS, n=(50,))
     assert out[50].shape == (2,)
     assert out[50][0] - out[50][1] == pytest.approx(6.02, abs=0.2)
+
+
+def test_leq_dbfs_ignores_calibration_factor() -> None:
+    """dBFS is relative to digital full scale (consistent with OctaveFilterBank)."""
+    x = _tone(1000)
+    assert leq(x, calibration_factor=10.0, dbfs=True) == pytest.approx(
+        leq(x, dbfs=True), abs=1e-12
+    )
+
+
+def test_leq_empty_signal_raises() -> None:
+    with pytest.raises(ValueError, match="empty"):
+        leq(np.array([]))
+
+
+def test_leq_nonpositive_calibration_raises() -> None:
+    with pytest.raises(ValueError, match="calibration_factor"):
+        leq(_tone(1000), calibration_factor=-1.0)
+
+
+def test_ln_levels_empty_signal_raises() -> None:
+    from pyoctaveband import ln_levels
+
+    with pytest.raises(ValueError, match="empty"):
+        ln_levels(np.array([]), FS)

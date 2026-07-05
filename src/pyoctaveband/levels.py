@@ -18,10 +18,21 @@ _REF_PRESSURE = 2e-5
 def _level_db(mean_square: np.ndarray, calibration_factor: float, dbfs: bool) -> np.ndarray:
     """Convert mean-square values to dB SPL (re 20 uPa) or dBFS."""
     eps = np.finfo(float).eps
-    rms = np.sqrt(np.maximum(mean_square, eps)) * calibration_factor
+    rms = np.sqrt(np.maximum(mean_square, eps))
     if dbfs:
+        # dBFS is relative to digital full scale: calibration does not apply
+        # (consistent with OctaveFilterBank's dbfs mode).
         return np.asarray(20 * np.log10(np.maximum(rms, eps)))
+    rms = rms * calibration_factor
     return np.asarray(20 * np.log10(np.maximum(rms, eps) / _REF_PRESSURE))
+
+
+def _validate_level_input(x_proc: np.ndarray, calibration_factor: float) -> None:
+    """Shared validation for the public level functions."""
+    if x_proc.shape[-1] == 0:
+        raise ValueError("Input signal 'x' cannot be empty.")
+    if calibration_factor <= 0:
+        raise ValueError("'calibration_factor' must be positive.")
 
 
 def leq(
@@ -38,6 +49,7 @@ def leq(
     :return: Scalar for 1D input, array of shape (channels,) for 2D input.
     """
     x_proc = _typesignal(x)
+    _validate_level_input(x_proc, calibration_factor)
     ms = np.mean(x_proc**2, axis=-1)
     out = _level_db(np.asarray(ms), calibration_factor, dbfs)
     return float(out) if out.ndim == 0 else out
@@ -87,6 +99,7 @@ def ln_levels(
         array (channels,) for 2D input).
     """
     x_proc = _typesignal(x)
+    _validate_level_input(x_proc, calibration_factor)
     for value in n:
         if not 0 < value < 100:
             raise ValueError("Percentile values in 'n' must be between 0 and 100.")

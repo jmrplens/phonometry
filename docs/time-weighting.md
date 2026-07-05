@@ -13,6 +13,7 @@ PyOctaveBand implements exact time constants per **IEC 61672-1:2013**.
   onset capture, 1500 ms decay for readability.
 
 ```python
+import numpy as np
 from pyoctaveband import time_weighting
 
 # Calculate energy envelope (Mean Square)

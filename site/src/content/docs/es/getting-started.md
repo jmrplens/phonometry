@@ -44,7 +44,7 @@ import numpy as np
 from pyoctaveband import octavefilter
 
 fs = 48000
-t = np.linspace(0, 1, fs)
+t = np.linspace(0, 1, fs, endpoint=False)
 # Señal compuesta: 100 Hz + 1000 Hz
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 

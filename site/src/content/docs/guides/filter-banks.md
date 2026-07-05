@@ -164,7 +164,10 @@ signals time-aligned with the input. The effective attenuation doubles, and the
 option is incompatible with stateful (block) processing.
 
 ```python
-spl, freq, xb = octavefilterbank.filter(y, sigbands=True, zero_phase=True)
+from pyoctaveband import OctaveFilterBank
+
+bank = OctaveFilterBank(fs=48000, fraction=3)
+spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/zero_phase_comparison.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/zero_phase_comparison_dark.png" width="80%">

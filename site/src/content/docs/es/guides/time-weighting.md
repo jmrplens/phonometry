@@ -15,6 +15,7 @@ específicas. PyOctaveBand implementa las constantes de tiempo exactas de la nor
   capturar ataques rápidos y 1500 ms de caída para facilitar la lectura.
 
 ```python
+import numpy as np
 from pyoctaveband import time_weighting
 
 # Calcular la envolvente de energía (valor cuadrático medio)

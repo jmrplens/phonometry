@@ -386,3 +386,47 @@ def test_weighting_z_bypass() -> None:
     x = rng.standard_normal(1000)
     y = weighting_filter(x, 48000, curve="Z")
     assert np.all(x == y)
+
+def test_time_weighting_int16_no_overflow() -> None:
+    """
+    Verify integer input does not overflow when squared internally.
+
+    **Purpose:**
+    int16 audio (e.g. from ``scipy.io.wavfile.read``) previously overflowed
+    silently in ``time_weighting`` (x**2 on int16), producing negative
+    mean-square energies.
+
+    **Verification:**
+    - Envelope of int16 input is non-negative everywhere.
+    - Final envelope value matches the float64 reference within 0.1%.
+    """
+    fs = 48000
+    t = np.arange(fs) / fs
+    x_float = 0.9 * 32767 * np.sin(2 * np.pi * 1000 * t)
+    x_int = x_float.astype(np.int16)
+
+    env_int = time_weighting(x_int, fs, mode="fast")
+    env_float = time_weighting(x_float, fs, mode="fast")
+
+    assert (env_int >= 0).all(), "mean-square envelope can never be negative"
+    np.testing.assert_allclose(env_int[-1], env_float[-1], rtol=1e-3)
+
+
+def test_calculate_sensitivity_int16_matches_float() -> None:
+    """
+    Verify calibration works with integer reference recordings.
+
+    **Purpose:**
+    ``calculate_sensitivity`` previously squared the raw integer array,
+    overflowing and returning a factor ~315x too large for int16 input.
+
+    **Verification:**
+    - Sensitivity from int16 input matches the float64 reference within 0.1%.
+    """
+    fs = 48000
+    t = np.arange(fs) / fs
+    x_float = 0.5 * 32767 * np.sin(2 * np.pi * 1000 * t)
+
+    s_int = calculate_sensitivity(x_float.astype(np.int16))
+    s_float = calculate_sensitivity(x_float)
+    np.testing.assert_allclose(s_int, s_float, rtol=1e-3)

@@ -13,14 +13,16 @@ from scipy import signal
 
 def _typesignal(x: List[float] | np.ndarray | Tuple[float, ...]) -> np.ndarray:
     """
-    Ensure signal is a numpy array.
+    Ensure signal is a float64 numpy array.
+
+    Integer inputs (e.g. int16 audio from ``scipy.io.wavfile.read``) are
+    converted to float64 to prevent silent overflow when the signal is
+    squared internally. Float64 arrays are passed through without copying.
 
     :param x: Input signal.
-    :return: Numpy array.
+    :return: Numpy float64 array.
     """
-    if isinstance(x, np.ndarray):
-        return x
-    return np.atleast_1d(np.array(x))
+    return np.atleast_1d(np.asarray(x, dtype=np.float64))
 
 
 def _resample_to_length(y: np.ndarray, factor: int, target_length: int) -> np.ndarray:

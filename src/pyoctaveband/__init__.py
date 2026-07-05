@@ -14,6 +14,7 @@ import numpy as np
 from .calibration import calculate_sensitivity
 from .core import OctaveFilterBank
 from .frequencies import getansifrequencies, normalizedfreq
+from .levels import laeq, leq
 from .parametric_filters import WeightingFilter, linkwitz_riley, time_weighting, weighting_filter
 from ._version import __version__
 
@@ -29,6 +30,8 @@ __all__ = [
     "time_weighting",
     "linkwitz_riley",
     "calculate_sensitivity",
+    "leq",
+    "laeq",
 ]
 
 

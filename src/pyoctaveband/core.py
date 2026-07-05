@@ -237,6 +237,9 @@ class OctaveFilterBank:
         :param x: Input signal (1D array or 2D array [channels, samples]).
         :param sigbands: If True, also return the signal in the time domain divided into bands.
         :param mode: 'rms' for energy-based level, 'peak' for peak-holding level.
+            Note: 'peak' includes the filter's onset transient; a tone that
+            starts abruptly can overshoot by ~1 dB. For steady signals,
+            discard the first ~5/f_low seconds or use longer signals.
         :param detrend: If True, remove DC offset from signal before filtering (Default: True).
         :param calculate_level: If True, calculate SPL.
         :param nominal: If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats.

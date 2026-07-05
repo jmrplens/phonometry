@@ -146,6 +146,8 @@ class WeightingFilter:
                 self._init_filter_state(x_proc)
             y, self.zi = signal.sosfilt(self.sos, x_proc, axis=-1, zi=self.zi)
         elif self._oversample > 1:
+            if x_proc.shape[-1] == 0:
+                return x_proc  # resample_poly rejects empty input
             up = signal.resample_poly(x_proc, self._oversample, 1, axis=-1)
             y_up = signal.sosfilt(self.sos, up, axis=-1)
             y = signal.resample_poly(y_up, 1, self._oversample, axis=-1)

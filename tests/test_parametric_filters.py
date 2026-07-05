@@ -492,3 +492,32 @@ def test_high_accuracy_preserves_length_and_shape() -> None:
     x = np.random.default_rng(0).standard_normal((2, 12345))
     y = WeightingFilter(48000, "A").filter(x)
     assert y.shape == x.shape
+
+
+def _analytic_c_weight_db(f: float) -> float:
+    """IEC 61672-1 analytic C-weighting curve."""
+    f2 = float(f) ** 2
+    rc = (12194**2 * f2) / ((f2 + 20.6**2) * (f2 + 12194**2))
+    return float(20 * np.log10(rc) + 0.06)
+
+
+@pytest.mark.parametrize("fs", [44100, 48000])
+def test_c_weighting_class1_high_frequencies(fs: int) -> None:
+    """
+    Verify C-weighting stays within IEC 61672-1 class 1 tolerances at HF.
+
+    **Purpose:**
+    Same oversampled design path as the A curve; dedicated regression so a
+    C-specific change cannot silently degrade HF accuracy.
+    """
+    wf = WeightingFilter(fs, "C")
+    for f0, tol_lo, tol_hi in [(8000, -1.5, 1.5), (12500, -2.5, 2.0), (16000, -3.0, 2.5)]:
+        err = _measured_gain_db(wf, fs, f0) - _analytic_c_weight_db(f0)
+        assert tol_lo < err < tol_hi, f"{f0} Hz: error {err:.2f} dB at fs={fs}"
+
+
+def test_weighting_filter_empty_signal_high_accuracy() -> None:
+    """Empty input must pass through (resample_poly rejects zero-length input)."""
+    wf = WeightingFilter(48000, "A")
+    y = wf.filter(np.array([]))
+    assert y.shape == (0,)

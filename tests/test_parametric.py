@@ -215,3 +215,22 @@ def test_filterbank_class_direct() -> None:
     # Test reuse
     spl2, _ = bank.filter(x * 0.5)
     assert np.all(spl2 < spl)
+
+
+def test_impulse_kernel_python_fallback_matches_numba() -> None:
+    """
+    Verify the pure-Python kernel matches the (possibly jitted) default.
+
+    **Purpose:**
+    numba is an optional dependency; without it, time_weighting 'impulse'
+    falls back to the undecorated kernel, which must be functionally
+    identical.
+    """
+    from pyoctaveband import parametric_filters as pf
+
+    rng = np.random.default_rng(3)
+    x_t = np.ascontiguousarray(rng.standard_normal((500, 2)) ** 2)
+    init = np.zeros(2)
+    y_default = pf._apply_impulse_kernel(x_t, 0.5, 0.01, init.copy())
+    y_python = pf._impulse_kernel_py(x_t, 0.5, 0.01, init.copy())
+    np.testing.assert_allclose(y_python, y_default, rtol=1e-12)

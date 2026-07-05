@@ -19,9 +19,12 @@ classifiers = [
 dependencies = [
     "numpy>=2.4.4",
     "scipy>=1.17.1",
-    "matplotlib>=3.10.9",
-    "numba>=0.65.1",
 ]
+
+[project.optional-dependencies]
+perf = ["numba>=0.65.1"]
+plot = ["matplotlib>=3.10.9"]
+full = ["numba>=0.65.1", "matplotlib>=3.10.9"]
 
 [project.urls]
 "Homepage" = "https://github.com/jmrplens/PyOctaveBand"

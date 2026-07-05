@@ -405,28 +405,58 @@ def generate_weighting_responses(output_dir: str) -> None:
     """Plot A, C and Z weighting frequency responses."""
     print("Generating weighting_responses.png...")
     fs = 48000
-    
+
     from pyoctaveband import weighting_filter
-    
-    _, ax = plt.subplots()
-    
+
+    _, ax = plt.subplots(figsize=(10, 7))
+
+    # Zoom inset: the A curve is POSITIVE (+1.27 dB max at ~2.5 kHz per
+    # IEC 61672-1 Table 2), invisible at the full -50..5 dB scale.
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+    axins = inset_axes(ax, width="42%", height="38%", loc="lower center", borderpad=2)
+    axins.set_xscale("log")
+
     curves = [
         ("A", "A-Weighting", COLOR_PRIMARY),
         ("C", "C-Weighting", COLOR_SECONDARY),
         ("Z", "Z-Weighting (Flat)", COLOR_FG)
     ]
-    
+
     for code, label, color in curves:
-        # We need to measure response. Simplest way: IR then FFT
+        # Measure the response via impulse response + FFT. The impulse is
+        # placed at the CENTER of the buffer: the high-accuracy weighting
+        # path resamples with polyphase FIRs, and an impulse at sample 0
+        # loses the anti-causal half of the interpolation kernel (edge
+        # truncation), distorting the measured spectrum. Centering only
+        # adds linear phase, which does not affect the magnitude.
         impulse = np.zeros(fs)
-        impulse[0] = 1.0
+        impulse[fs // 2] = 1.0
         weighted = weighting_filter(impulse, fs, curve=code)
-        
+
         # Frequency response
         w, h = scipy_signal.freqz(weighted, [1], worN=8192, fs=fs)
-        ax.semilogx(w, 20 * np.log10(np.abs(h) + 1e-9), label=label, color=color)
+        mag_db = 20 * np.log10(np.abs(h) + 1e-9)
+        ax.semilogx(w, mag_db, label=label, color=color)
+        axins.plot(w, mag_db, color=color)
 
+    ax.axhline(0, color=COLOR_FG, linestyle=":", alpha=0.3, linewidth=1)
     apply_axis_styling(ax, "Frequency Weighting Curves (IEC 61672-1)", xlim=(10, 22000), ylim=(-50, 5))
+
+    axins.axhline(0, color=COLOR_FG, linestyle=":", alpha=0.4, linewidth=1)
+    axins.set_xlim(500, 8000)
+    axins.set_ylim(-3, 2)
+    axins.grid(True, which="both", alpha=0.3)
+    axins.set_title("Zoom: A-weighting is positive (max +1.27 dB @ 2.5 kHz)", fontsize=9)
+    axins.annotate(
+        "+1.27 dB", xy=(2500, 1.27), xytext=(4200, 1.55), fontsize=8,
+        arrowprops={"arrowstyle": "->", "lw": 0.8},
+    )
+    from matplotlib.ticker import NullFormatter, ScalarFormatter
+    axins.xaxis.set_major_formatter(ScalarFormatter())
+    axins.xaxis.set_minor_formatter(NullFormatter())
+    axins.set_xticks([500, 1000, 2500, 5000, 8000])
+    axins.set_xticklabels(["500", "1k", "2.5k", "5k", "8k"], fontsize=8)
+
     ax.legend(loc="lower right")
     plt.savefig(themed_path(output_dir, "weighting_responses.png"))
     plt.close()

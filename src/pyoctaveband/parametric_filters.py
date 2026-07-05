@@ -296,6 +296,38 @@ def time_weighting(
         raise ValueError("Invalid time weighting mode. Use ['fast', 'slow', 'impulse']")
 
 
+class TimeWeighting:
+    """
+    Stateful time weighting for block processing.
+
+    Wraps :func:`time_weighting` carrying the exponential integrator state
+    across blocks, so concatenated block outputs equal a single continuous call.
+    """
+
+    def __init__(self, fs: int, mode: str = "fast") -> None:
+        """
+        :param fs: Sample rate in Hz.
+        :param mode: 'fast' (125 ms), 'slow' (1000 ms) or 'impulse' (35 ms / 1.5 s).
+        """
+        if fs <= 0:
+            raise ValueError("Sample rate 'fs' must be positive.")
+        if mode.lower() not in ("fast", "slow", "impulse"):
+            raise ValueError("Invalid time weighting mode. Use ['fast', 'slow', 'impulse']")
+        self.fs = fs
+        self.mode = mode.lower()
+        self._state: np.ndarray | None = None
+
+    def process(self, x: List[float] | np.ndarray) -> np.ndarray:
+        """Apply time weighting to a block, continuing from the previous block."""
+        env = time_weighting(x, self.fs, mode=self.mode, initial_state=self._state)
+        self._state = np.asarray(env[..., -1]).copy()
+        return env
+
+    def reset(self) -> None:
+        """Forget the carried state (the next block starts from rest)."""
+        self._state = None
+
+
 def linkwitz_riley(
     x: List[float] | np.ndarray, 
     fs: int, 

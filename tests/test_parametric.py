@@ -234,3 +234,51 @@ def test_impulse_kernel_python_fallback_matches_numba() -> None:
     y_default = pf._apply_impulse_kernel(x_t, 0.5, 0.01, init.copy())
     y_python = pf._impulse_kernel_py(x_t, 0.5, 0.01, init.copy())
     np.testing.assert_allclose(y_python, y_default, rtol=1e-12)
+
+
+def test_time_weighting_class_blocks_match_continuous() -> None:
+    """Block-wise TimeWeighting must equal one-shot time_weighting."""
+    from pyoctaveband import TimeWeighting, time_weighting
+
+    fs = 48000
+    rng = np.random.default_rng(5)
+    x = rng.standard_normal(fs)
+
+    continuous = time_weighting(x, fs, mode="fast")
+
+    tw = TimeWeighting(fs, mode="fast")
+    blocks = [tw.process(b) for b in np.split(x, 8)]
+    np.testing.assert_allclose(np.concatenate(blocks), continuous, rtol=1e-10)
+
+
+def test_time_weighting_class_reset() -> None:
+    from pyoctaveband import TimeWeighting
+
+    fs = 48000
+    x = np.ones(1000)
+    tw = TimeWeighting(fs, mode="fast")
+    first = tw.process(x)
+    tw.reset()
+    again = tw.process(x)
+    np.testing.assert_allclose(first, again)
+
+
+def test_time_weighting_class_multichannel_state() -> None:
+    from pyoctaveband import TimeWeighting, time_weighting
+
+    fs = 48000
+    rng = np.random.default_rng(6)
+    x = rng.standard_normal((2, fs))
+    continuous = time_weighting(x, fs, mode="slow")
+    tw = TimeWeighting(fs, mode="slow")
+    blocks = [tw.process(x[:, i * 12000:(i + 1) * 12000]) for i in range(4)]
+    np.testing.assert_allclose(np.concatenate(blocks, axis=-1), continuous, rtol=1e-10)
+
+
+def test_time_weighting_class_invalid_params() -> None:
+    from pyoctaveband import TimeWeighting
+
+    with pytest.raises(ValueError, match="must be positive"):
+        TimeWeighting(0)
+    with pytest.raises(ValueError, match="Invalid time weighting mode"):
+        TimeWeighting(48000, mode="banana")

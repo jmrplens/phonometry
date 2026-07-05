@@ -5,11 +5,67 @@ Filter design and visualization for pyoctaveband.
 
 from __future__ import annotations
 
-from typing import List
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal
+
+
+def _cheby2_transition_ratio(order: int, attenuation: float) -> float:
+    """Ratio between stopband-edge and -3 dB frequencies for a Chebyshev II prototype."""
+    # Below ~3.01 dB the -3 dB point does not exist (arccosh argument < 1).
+    if attenuation <= 10 * np.log10(2):
+        raise ValueError("cheby2 'attenuation' must be greater than 3.01 dB.")
+    eps_term = np.sqrt(10 ** (attenuation / 10) - 1)
+    return float(np.cosh(np.arccosh(eps_term) / order))
+
+
+def _cheby2_stopband_edges(
+    fd: float, fu: float, order: int, attenuation: float, fs: float | None = None
+) -> Tuple[float, float]:
+    """
+    Map desired -3 dB band edges (fd, fu) to the Chebyshev II stopband
+    edges that scipy expects as ``Wn``.
+
+    Uses the analog lowpass-to-bandpass transform: the stopband keeps the
+    geometric center (f1*f2 = fd*fu) and widens the bandwidth by the
+    prototype transition ratio.
+
+    When ``fs`` is given, the mapping is done in the pre-warped analog
+    domain of the bilinear transform. Decimated bands sit at a large
+    fraction of Nyquist, where the tan() frequency warping would otherwise
+    shift the -3 dB points well away from the band edges.
+    """
+    ratio = _cheby2_transition_ratio(order, attenuation)
+
+    if fs is not None:
+        ad = (fs / np.pi) * np.tan(np.pi * fd / fs)
+        au = (fs / np.pi) * np.tan(np.pi * fu / fs)
+    else:
+        ad, au = fd, fu
+
+    bw_stop = (au - ad) * ratio
+    a1 = (-bw_stop + np.sqrt(bw_stop**2 + 4 * ad * au)) / 2
+    a2 = a1 + bw_stop
+
+    if fs is not None:
+        f1 = (fs / np.pi) * np.arctan(np.pi * a1 / fs)
+        f2 = (fs / np.pi) * np.arctan(np.pi * a2 / fs)
+        return float(f1), float(f2)
+    return float(a1), float(a2)
+
+
+def _cheby2_headroom(fraction: float, order: int, attenuation: float) -> float:
+    """
+    Headroom factor ``f2_stop / f_upper_edge`` needed above the band's upper
+    edge. Constant across bands of the same fraction (bands are geometric).
+    """
+    g = 10 ** (3 / 10)
+    edge = g ** (1 / (2 * fraction))
+    fd, fu = 1.0 / edge, edge  # normalized band around fc=1
+    _, f2 = _cheby2_stopband_edges(fd, fu, order, attenuation)
+    return float(f2 / fu)
 
 
 def _design_sos_filter(
@@ -52,11 +108,22 @@ def _design_sos_filter(
         elif filter_type == "cheby1":
             sos[idx] = signal.cheby1(N=order, rp=ripple, Wn=wn, btype="bandpass", output="sos")
         elif filter_type == "cheby2":
-            sos[idx] = signal.cheby2(N=order, rs=attenuation, Wn=wn, btype="bandpass", output="sos")
+            # Wn in cheby2 is the STOPBAND edge; map the desired -3 dB band
+            # edges to stopband edges so the passband matches the ANSI band.
+            f1_stop, f2_stop = _cheby2_stopband_edges(lower, upper, order, attenuation, fsd)
+            nyq = fsd / 2
+            if f2_stop >= nyq:
+                # Top band without decimation margin: compress the upper
+                # transition to stay below Nyquist (edge gain degrades there).
+                f2_stop = 0.999 * nyq
+            wn_stop = np.array([f1_stop, f2_stop]) / nyq
+            sos[idx] = signal.cheby2(N=order, rs=attenuation, Wn=wn_stop, btype="bandpass", output="sos")
         elif filter_type == "ellip":
             sos[idx] = signal.ellip(N=order, rp=ripple, rs=attenuation, Wn=wn, btype="bandpass", output="sos")
         elif filter_type == "bessel":
-            sos[idx] = signal.bessel(N=order, Wn=wn, btype="bandpass", norm="phase", output="sos")
+            # norm="mag" places the -3 dB point at Wn (band edges);
+            # norm="phase" would shift it to ~-10 dB at the edges.
+            sos[idx] = signal.bessel(N=order, Wn=wn, btype="bandpass", norm="mag", output="sos")
 
     if show or plot_file:
         _showfilter(sos, freq, freq_u, freq_d, fs, factor, show, plot_file)

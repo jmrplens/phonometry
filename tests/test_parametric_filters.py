@@ -386,3 +386,138 @@ def test_weighting_z_bypass() -> None:
     x = rng.standard_normal(1000)
     y = weighting_filter(x, 48000, curve="Z")
     assert np.all(x == y)
+
+def test_time_weighting_int16_no_overflow() -> None:
+    """
+    Verify integer input does not overflow when squared internally.
+
+    **Purpose:**
+    int16 audio (e.g. from ``scipy.io.wavfile.read``) previously overflowed
+    silently in ``time_weighting`` (x**2 on int16), producing negative
+    mean-square energies.
+
+    **Verification:**
+    - Envelope of int16 input is non-negative everywhere.
+    - Final envelope value matches the float64 reference within 0.1%.
+    """
+    fs = 48000
+    t = np.arange(fs) / fs
+    x_float = 0.9 * 32767 * np.sin(2 * np.pi * 1000 * t)
+    x_int = x_float.astype(np.int16)
+
+    env_int = time_weighting(x_int, fs, mode="fast")
+    env_float = time_weighting(x_float, fs, mode="fast")
+
+    assert (env_int >= 0).all(), "mean-square envelope can never be negative"
+    np.testing.assert_allclose(env_int[-1], env_float[-1], rtol=1e-3)
+
+
+def test_calculate_sensitivity_int16_matches_float() -> None:
+    """
+    Verify calibration works with integer reference recordings.
+
+    **Purpose:**
+    ``calculate_sensitivity`` previously squared the raw integer array,
+    overflowing and returning a factor ~315x too large for int16 input.
+
+    **Verification:**
+    - Sensitivity from int16 input matches the float64 reference within 0.1%.
+    """
+    fs = 48000
+    t = np.arange(fs) / fs
+    x_float = 0.5 * 32767 * np.sin(2 * np.pi * 1000 * t)
+
+    s_int = calculate_sensitivity(x_float.astype(np.int16))
+    s_float = calculate_sensitivity(x_float)
+    np.testing.assert_allclose(s_int, s_float, rtol=1e-3)
+
+
+def _analytic_a_weight_db(f: float) -> float:
+    """IEC 61672-1 analytic A-weighting curve."""
+    f2 = float(f) ** 2
+    ra = (12194**2 * f2**2) / (
+        (f2 + 20.6**2)
+        * np.sqrt((f2 + 107.7**2) * (f2 + 737.9**2))
+        * (f2 + 12194**2)
+    )
+    return float(20 * np.log10(ra) + 2.0)
+
+
+def _measured_gain_db(wf: WeightingFilter, fs: int, f0: float) -> float:
+    """End-to-end RMS gain of the weighting filter at a single frequency."""
+    t = np.arange(int(fs * 0.5)) / fs
+    x = np.sin(2 * np.pi * f0 * t)
+    y = wf.filter(x)
+    n0 = int(0.1 * fs)  # skip the filter transient
+    rms_in = np.sqrt(np.mean(x[n0:] ** 2))
+    rms_out = np.sqrt(np.mean(y[n0:] ** 2))
+    return float(20 * np.log10(rms_out / rms_in))
+
+
+@pytest.mark.parametrize("fs", [44100, 48000])
+def test_a_weighting_class1_high_frequencies(fs: int) -> None:
+    """
+    Verify A-weighting stays within IEC 61672-1 class 1 tolerances at HF.
+
+    **Purpose:**
+    The plain bilinear design compresses the response near Nyquist: at
+    fs=48000 the error at 12.5 kHz was -2.67 dB (class 1 limit: -2.5 dB).
+    With high_accuracy (internal oversampling to >= 96 kHz) the error
+    drops below -0.6 dB.
+
+    **Verification:**
+    - Errors vs the analytic curve stay within class 1 tolerances
+      (12.5 kHz: +2.0/-2.5 dB; 16 kHz: +2.5/-16 dB, tightened here).
+    """
+    wf = WeightingFilter(fs, "A")  # high_accuracy defaults to True
+    for f0, tol_lo, tol_hi in [(8000, -1.5, 1.5), (12500, -2.5, 2.0), (16000, -3.0, 2.5)]:
+        err = _measured_gain_db(wf, fs, f0) - _analytic_a_weight_db(f0)
+        assert tol_lo < err < tol_hi, f"{f0} Hz: error {err:.2f} dB at fs={fs}"
+
+
+def test_high_accuracy_incompatible_with_stateful() -> None:
+    """high_accuracy resampling would break block continuity: must raise."""
+    with pytest.raises(ValueError, match="high_accuracy"):
+        WeightingFilter(48000, "A", stateful=True, high_accuracy=True)
+
+
+def test_stateful_defaults_to_legacy_mode() -> None:
+    """Stateful filters keep the plain bilinear design (no oversampling)."""
+    wf = WeightingFilter(48000, "A", stateful=True)
+    assert wf._oversample == 1
+
+
+def test_high_accuracy_preserves_length_and_shape() -> None:
+    """Oversample+decimate round trip must preserve the input shape."""
+    x = np.random.default_rng(0).standard_normal((2, 12345))
+    y = WeightingFilter(48000, "A").filter(x)
+    assert y.shape == x.shape
+
+
+def _analytic_c_weight_db(f: float) -> float:
+    """IEC 61672-1 analytic C-weighting curve."""
+    f2 = float(f) ** 2
+    rc = (12194**2 * f2) / ((f2 + 20.6**2) * (f2 + 12194**2))
+    return float(20 * np.log10(rc) + 0.06)
+
+
+@pytest.mark.parametrize("fs", [44100, 48000])
+def test_c_weighting_class1_high_frequencies(fs: int) -> None:
+    """
+    Verify C-weighting stays within IEC 61672-1 class 1 tolerances at HF.
+
+    **Purpose:**
+    Same oversampled design path as the A curve; dedicated regression so a
+    C-specific change cannot silently degrade HF accuracy.
+    """
+    wf = WeightingFilter(fs, "C")
+    for f0, tol_lo, tol_hi in [(8000, -1.5, 1.5), (12500, -2.5, 2.0), (16000, -3.0, 2.5)]:
+        err = _measured_gain_db(wf, fs, f0) - _analytic_c_weight_db(f0)
+        assert tol_lo < err < tol_hi, f"{f0} Hz: error {err:.2f} dB at fs={fs}"
+
+
+def test_weighting_filter_empty_signal_high_accuracy() -> None:
+    """Empty input must pass through (resample_poly rejects zero-length input)."""
+    wf = WeightingFilter(48000, "A")
+    y = wf.filter(np.array([]))
+    assert y.shape == (0,)

@@ -57,3 +57,6 @@ tests/*.png
 snyk.sarif
 issues_final*.json
 node_modules/
+
+# Local work plans
+plan/

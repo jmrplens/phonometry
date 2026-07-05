@@ -13,14 +13,16 @@ from scipy import signal
 
 def _typesignal(x: List[float] | np.ndarray | Tuple[float, ...]) -> np.ndarray:
     """
-    Ensure signal is a numpy array.
+    Ensure signal is a float64 numpy array.
+
+    Integer inputs (e.g. int16 audio from ``scipy.io.wavfile.read``) are
+    converted to float64 to prevent silent overflow when the signal is
+    squared internally. Float64 arrays are passed through without copying.
 
     :param x: Input signal.
-    :return: Numpy array.
+    :return: Numpy float64 array.
     """
-    if isinstance(x, np.ndarray):
-        return x
-    return np.atleast_1d(np.array(x))
+    return np.atleast_1d(np.asarray(x, dtype=np.float64))
 
 
 def _resample_to_length(y: np.ndarray, factor: int, target_length: int) -> np.ndarray:
@@ -52,14 +54,17 @@ def _resample_to_length(y: np.ndarray, factor: int, target_length: int) -> np.nd
     return y_resampled
 
 
-def _downsamplingfactor(freq: List[float], fs: int) -> np.ndarray:
+def _downsamplingfactor(freq: List[float], fs: int, headroom: float = 1.25) -> np.ndarray:
     """
     Compute optimal downsampling factors for filter stability.
 
-    :param freq: Frequencies.
+    :param freq: Band upper-edge frequencies.
     :param fs: Sample rate.
+    :param headroom: Required ratio between the decimated Nyquist and the
+        band's upper edge. 1.25 reproduces the classic ``fs / (2 + 0.5)``
+        guard; filter types whose design extends above the upper edge
+        (cheby2 stopband) need more.
     :return: Array of factors.
     """
-    guard = 0.50
-    factor = (np.floor((fs / (2 + guard)) / np.array(freq))).astype("int")
+    factor = (np.floor((fs / 2) / (headroom * np.array(freq)))).astype("int")
     return cast(np.ndarray, np.clip(factor, 1, 500))

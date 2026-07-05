@@ -42,6 +42,9 @@ sonar:
 	@echo "Running SonarQube Scanner..."
 	@if [ -f .env ]; then export $$(cat .env | xargs) && $(PNPM) exec sonar-scanner; else $(PNPM) exec sonar-scanner; fi
 
+graphs:
+	$(PYTHON) generate_graphs.py
+
 test:
 	$(PYTHON) -m pytest tests/
 

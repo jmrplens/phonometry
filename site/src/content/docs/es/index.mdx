@@ -1,0 +1,32 @@
+---
+title: PyOctaveBand
+description: Banco de filtros de banda de octava y octava fraccional para Python. Conforme con ANSI S1.11 e IEC 61672-1.
+template: splash
+hero:
+  tagline: Análisis acústico profesional en Python — bancos de octava fraccional, ponderación A/C/Z, balística temporal, Leq y niveles estadísticos.
+  actions:
+    - text: Empezar
+      link: /PyOctaveBand/es/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: Ver en GitHub
+      link: https://github.com/jmrplens/PyOctaveBand
+      icon: github
+---
+
+import { CardGrid, Card } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Conforme a las normas" icon="approve-check">
+    Bancos de filtros según ANSI S1.11-2004 y ponderación según IEC 61672-1:2013, verificados por más de 180 tests en CI.
+  </Card>
+  <Card title="Cinco arquitecturas" icon="setting">
+    Butterworth, Chebyshev I/II, Elíptico y Bessel — todas como cascadas SOS estables con los puntos de −3 dB en los bordes de banda.
+  </Card>
+  <Card title="Listo para tiempo real" icon="rocket">
+    Procesado por bloques con estado, multicanal vectorizado y diezmado multitasa.
+  </Card>
+  <Card title="Sonometría" icon="magnifier">
+    Ponderación A/C/Z, balística Fast/Slow/Impulse, Leq, LAeq, L10/L50/L90 y espectrogramas de octava.
+  </Card>
+</CardGrid>

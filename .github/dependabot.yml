@@ -27,8 +27,23 @@ updates:
       - "python"
     open-pull-requests-limit: 5
     versioning-strategy: "increase"
-    ignore:
-      - dependency-name: "*"
-        update-types:
-          - "version-update:semver-minor"
-          - "version-update:semver-patch"
+    groups:
+      python:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "npm"
+    directory: "/site"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Etc/UTC"
+    labels:
+      - "dependencies"
+      - "javascript"
+    open-pull-requests-limit: 5
+    groups:
+      site:
+        patterns:
+          - "*"

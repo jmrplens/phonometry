@@ -143,6 +143,7 @@ class OctaveFilterBank:
         detrend: bool = True,
         calculate_level: Literal[True] = True,
         nominal: Literal[False] = False,
+        zero_phase: bool = False,
     ) -> Tuple[np.ndarray, List[float]]: ...
 
     @overload
@@ -154,6 +155,7 @@ class OctaveFilterBank:
         detrend: bool = True,
         calculate_level: Literal[True] = True,
         nominal: Literal[False] = False,
+        zero_phase: bool = False,
     ) -> Tuple[np.ndarray, List[float], List[np.ndarray]]: ...
 
     @overload
@@ -165,6 +167,7 @@ class OctaveFilterBank:
         detrend: bool = True,
         calculate_level: Literal[False] = False,
         nominal: Literal[False] = False,
+        zero_phase: bool = False,
     ) -> Tuple[None, List[float]]: ...
 
     @overload
@@ -176,6 +179,7 @@ class OctaveFilterBank:
         detrend: bool = True,
         calculate_level: Literal[False] = False,
         nominal: Literal[False] = False,
+        zero_phase: bool = False,
     ) -> Tuple[None, List[float], List[np.ndarray]]: ...
 
     @overload
@@ -187,6 +191,7 @@ class OctaveFilterBank:
         detrend: bool = True,
         calculate_level: Literal[True] = True,
         nominal: Literal[True] = ...,
+        zero_phase: bool = False,
     ) -> Tuple[np.ndarray, List[str]]: ...
 
     @overload
@@ -198,6 +203,7 @@ class OctaveFilterBank:
         detrend: bool = True,
         calculate_level: Literal[True] = True,
         nominal: Literal[True] = ...,
+        zero_phase: bool = False,
     ) -> Tuple[np.ndarray, List[str], List[np.ndarray]]: ...
 
     @overload
@@ -209,6 +215,7 @@ class OctaveFilterBank:
         detrend: bool = True,
         calculate_level: Literal[False] = False,
         nominal: Literal[True] = ...,
+        zero_phase: bool = False,
     ) -> Tuple[None, List[str]]: ...
 
     @overload
@@ -220,6 +227,7 @@ class OctaveFilterBank:
         detrend: bool = True,
         calculate_level: Literal[False] = False,
         nominal: Literal[True] = ...,
+        zero_phase: bool = False,
     ) -> Tuple[None, List[str], List[np.ndarray]]: ...
 
     def filter(
@@ -230,6 +238,7 @@ class OctaveFilterBank:
         detrend: bool = True,
         calculate_level: bool = True,
         nominal: bool = False,
+        zero_phase: bool = False,
     ) -> Tuple[np.ndarray | None, List[float] | List[str]] | Tuple[np.ndarray | None, List[float] | List[str], List[np.ndarray]]:
         """
         Apply the pre-designed filter bank to a signal.
@@ -243,9 +252,14 @@ class OctaveFilterBank:
         :param detrend: If True, remove DC offset from signal before filtering (Default: True).
         :param calculate_level: If True, calculate SPL.
         :param nominal: If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats.
+        :param zero_phase: If True, filter with ``sosfiltfilt`` (forward-backward):
+            no group delay, but the effective stopband attenuation doubles.
+            Offline analysis only; incompatible with stateful mode.
         :return: A tuple containing (SPL_array, Frequencies_list) or (SPL_array, Frequencies_list, signals).
         """
-        
+        if zero_phase and self.stateful:
+            raise ValueError("zero_phase is not compatible with stateful processing.")
+
         # Convert input to numpy array
         x_proc = _typesignal(x)
 
@@ -269,7 +283,10 @@ class OctaveFilterBank:
         num_channels = x_proc.shape[0]
 
         # Process signal across all bands and channels
-        spl, xb = self._process_bands(x_proc, num_channels, sigbands, mode=mode, calculate_level=calculate_level)
+        spl, xb = self._process_bands(
+            x_proc, num_channels, sigbands, mode=mode,
+            calculate_level=calculate_level, zero_phase=zero_phase,
+        )
 
         # Format output based on input dimensionality
         if not is_multichannel:
@@ -350,7 +367,8 @@ class OctaveFilterBank:
         num_channels: int,
         sigbands: bool,
         mode: str = "rms",
-        calculate_level: bool = True
+        calculate_level: bool = True,
+        zero_phase: bool = False,
     ) -> Tuple[np.ndarray | None, List[np.ndarray] | None]:
         """
         Process signal through each frequency band.
@@ -360,6 +378,7 @@ class OctaveFilterBank:
         :param sigbands: If True, return filtered bands.
         :param mode: 'rms' or 'peak'.
         :param calculate_level: If True, calculate SPL
+        :param zero_phase: If True, use forward-backward filtering.
         :return: A tuple containing (SPL_array, Optional_List_of_filtered_signals).
         """
         if calculate_level:
@@ -370,7 +389,7 @@ class OctaveFilterBank:
 
         for idx in range(self.num_bands):
             # Vectorized processing for all channels
-            filtered_signal = self._filter_and_resample(x_proc, idx)
+            filtered_signal = self._filter_and_resample(x_proc, idx, zero_phase)
 
             if calculate_level and spl is not None:
                 # Sound Level Calculation (returns array of shape [num_channels])
@@ -385,7 +404,7 @@ class OctaveFilterBank:
         return spl, xb
 
 
-    def _filter_and_resample(self, x: np.ndarray, idx: int) -> np.ndarray:
+    def _filter_and_resample(self, x: np.ndarray, idx: int, zero_phase: bool = False) -> np.ndarray:
         """Resample and filter for a specific band (vectorized)."""
         if self.factor[idx] > 1:
             # axis=-1 is default for resample_poly, but being explicit is good
@@ -393,7 +412,9 @@ class OctaveFilterBank:
         else:
             sd = x
 
-        if self.stateful:
+        if zero_phase:
+            y = signal.sosfiltfilt(self.sos[idx], sd, axis=-1)
+        elif self.stateful:
             n_channels = sd.shape[0]
             # Lazy init: allocate zi with correct channel count on first use
             if self.zi[idx].ndim < 3 or self.zi[idx].shape[1] != n_channels:

@@ -521,3 +521,24 @@ def test_weighting_filter_empty_signal_high_accuracy() -> None:
     wf = WeightingFilter(48000, "A")
     y = wf.filter(np.array([]))
     assert y.shape == (0,)
+
+
+def test_a_weighting_positive_gain_region() -> None:
+    """
+    Verify the A-curve is POSITIVE between 1.25 and 5 kHz (IEC 61672-1 Table 2).
+
+    **Purpose:**
+    The A-weighting models equal-loudness sensitivity: the ear is MORE
+    sensitive than at 1 kHz around 2-4 kHz, so the curve must exceed 0 dB
+    there (max +1.27 dB at ~2.5 kHz). A curve that never crosses 0 dB
+    indicates a broken normalization or measurement.
+
+    **Verification (against IEC 61672-1 Table 2 values):**
+    - 1250 Hz: +0.6 | 2000 Hz: +1.2 | 2500 Hz: +1.3 | 4000 Hz: +1.0 | 5000 Hz: +0.5
+    """
+    fs = 48000
+    wf = WeightingFilter(fs, "A")
+    for f0, expected in [(1250, 0.6), (2000, 1.2), (2500, 1.3), (4000, 1.0), (5000, 0.5)]:
+        gain = _measured_gain_db(wf, fs, f0)
+        assert gain > 0, f"A-weighting must be positive at {f0} Hz, got {gain:.2f} dB"
+        assert gain == pytest.approx(expected, abs=0.15), f"{f0} Hz: {gain:.2f} dB vs Table 2 {expected}"

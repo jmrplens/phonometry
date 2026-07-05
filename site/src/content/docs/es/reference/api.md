@@ -1,0 +1,36 @@
+---
+title: "Referencia de la API"
+description: "Todas las funciones y clases públicas de PyOctaveBand."
+---
+
+Toda la funcionalidad principal puede importarse directamente del paquete
+`pyoctaveband`.
+
+| Nombre | Tipo | Descripción (entradas) | Uso (salidas) |
+| :--- | :--- | :--- | :--- |
+| `octavefilter` | `función` | **Análisis de alto nivel.**<br>• `x`: array de señal<br>• `fs`: frecuencia de muestreo [Hz]<br>• `fraction`: 1, 3, etc. (def.: 1)<br>• `order`: orden del filtro (def.: 6)<br>• `limits`: [f_min, f_max] (def.: [12, 20000])<br>• `filter_type`: 'butter', 'cheby1', 'cheby2', 'ellip', 'bessel' (def.: 'butter')<br>• `sigbands`: devolver señales por banda (def.: False)<br>• `detrend`: eliminar offset DC (def.: True)<br>• `calibration_factor`: multiplicador de sensibilidad (def.: 1.0)<br>• `dbfs`: salida en dBFS en lugar de dB SPL (def.: False)<br>• `mode`: 'rms' o 'peak' (def.: 'rms')<br>• `nominal`: etiquetas nominales IEC 61260-1 (def.: False)<br>• `show` / `plot_file`: gráfica de respuesta<br>• `ripple`: rizado de banda de paso [dB] (cheby1/ellip)<br>• `attenuation`: atenuación de banda atenuada [dB] (cheby2/ellip) | `spl, freq = octavefilter(x, fs, ...)`<br>• `spl`: niveles [dB]<br>• `freq`: frecuencias [Hz]<br><br>**Con `sigbands=True`:**<br>`spl, freq, xb = octavefilter(x, fs, sigbands=True)`<br>• `xb`: lista de señales filtradas (una por banda)<br><br>**Uso calibrado:**<br>`spl, f = octavefilter(x, fs, calibration_factor=0.05)` |
+| `OctaveFilterBank` | `clase` | **Banco eficiente reutilizable.**<br>• `fs`: frecuencia de muestreo [Hz]<br>• `fraction`: 1, 3, etc.<br>• `order`: orden del filtro<br>• `limits`: [f_min, f_max] (def.: [12, 20000])<br>• `filter_type`: arquitectura<br>• `show` / `plot_file`: gráfica de respuesta<br>• `calibration_factor`: multiplicador de sensibilidad<br>• `dbfs`: usar dBFS (def.: False)<br>• `stateful`: conservar estado entre llamadas (def.: False)<br>• `steady_ic`: condiciones iniciales de régimen permanente (def.: False)<br>• `resample`: diezmado multitasa (def.: True)<br>• `ripple` / `attenuation`: parámetros de diseño [dB] | `bank = OctaveFilterBank(fs=48000, fraction=3, order=6, filter_type='butter')`<br>`spl, f = bank.filter(x, sigbands=False, mode='rms', detrend=True, zero_phase=False)`<br><br>• `bank.freq` / `bank.freq_d` / `bank.freq_u` / `bank.sos`: propiedades calculadas |
+| `OctaveFilterBank.spectrogram` | `método` | **Niveles por banda vs tiempo.**<br>• `x`: array de señal (1D o 2D)<br>• `window_time`: longitud de ventana [s] (def.: 0.125)<br>• `overlap`: fracción en [0, 1) (def.: 0.5)<br>• `mode`: 'rms' o 'peak'<br>• `zero_phase`: ventanas sin retardo de grupo (def.: False) | `levels, freq, times = bank.spectrogram(x)`<br><br>• `levels`: (bandas, ventanas) o (canales, bandas, ventanas)<br>• `times`: centros de ventana [s] |
+| `weighting_filter` | `función` | **Ponderación acústica.**<br>• `x`: array de señal<br>• `fs`: frecuencia de muestreo [Hz]<br>• `curve`: 'A', 'C' o 'Z' (def.: 'A')<br>• `high_accuracy`: precisión clase 1 en HF por sobremuestreo interno (def.: True) | `y = weighting_filter(x, fs, curve='A')`<br><br>• `y`: señal ponderada |
+| `WeightingFilter` | `clase` | **Filtro de ponderación reutilizable.**<br>• `fs`: frecuencia de muestreo [Hz]<br>• `curve`: 'A', 'C' o 'Z'<br>• `stateful`: procesado por bloques (def.: False)<br>• `steady_ic`: condiciones iniciales de régimen permanente (def.: False)<br>• `high_accuracy`: True por defecto salvo en stateful | `wf = WeightingFilter(fs, 'A')`<br>`y = wf.filter(x)` |
+| `time_weighting` | `función` | **Captura de energía.**<br>• `x`: señal cruda (se eleva al cuadrado internamente; el tiempo es el último eje)<br>• `fs`: frecuencia de muestreo [Hz]<br>• `mode`: 'fast', 'slow' o 'impulse'<br>• `initial_state`: None, 'zero', 'first', escalar o array (def.: None) | `env = time_weighting(x, fs, mode='fast')`<br><br>• `env`: envolvente de energía (valor cuadrático medio), misma forma que `x` |
+| `TimeWeighting` | `clase` | **Ponderación temporal con estado.**<br>• `fs`: frecuencia de muestreo [Hz]<br>• `mode`: 'fast', 'slow', 'impulse' (def.: 'fast') | `tw = TimeWeighting(fs, mode='fast')`<br>`env = tw.process(block)` por bloque<br>`tw.reset()` para reiniciar |
+| `leq` | `función` | **Nivel equivalente (Leq).**<br>• `x`: array de señal (1D o 2D)<br>• `calibration_factor`: multiplicador de sensibilidad (def.: 1.0)<br>• `dbfs`: salida en dBFS (def.: False) | `level = leq(x, calibration_factor=s)`<br><br>• `level`: escalar (1D) o array por canal (2D) |
+| `laeq` | `función` | **Leq ponderado A (LAeq).**<br>• `x`: array de señal (1D o 2D)<br>• `fs`: frecuencia de muestreo [Hz]<br>• `calibration_factor` / `dbfs`: como `leq` | `level = laeq(x, fs, calibration_factor=s)`<br><br>• `level`: escalar (1D) o array por canal (2D) |
+| `ln_levels` | `función` | **Niveles estadísticos (LN).**<br>• `x`: array de señal (1D o 2D)<br>• `fs`: frecuencia de muestreo [Hz]<br>• `n`: percentiles de excedencia (def.: (10, 50, 90))<br>• `mode`: 'fast', 'slow', 'impulse' (def.: 'fast')<br>• `weighting`: 'A', 'C', 'Z' o None (def.: None)<br>• `calibration_factor` / `dbfs`: como `leq` | `stats = ln_levels(x, fs, n=(10, 50, 90), weighting='A')`<br><br>• `stats`: dict `{10: L10, 50: L50, 90: L90}` |
+| `linkwitz_riley` | `función` | **Crossover de audio.**<br>• `x`: array de señal<br>• `fs`: frecuencia de muestreo [Hz]<br>• `freq`: frecuencia de cruce [Hz]<br>• `order`: cualquier número par (def.: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: señal paso-bajo<br>• `hi`: señal paso-alto |
+| `calculate_sensitivity` | `función`| **Calibración SPL.**<br>• `ref_signal`: señal de calibración<br>• `target_spl`: nivel del calibrador (def.: 94.0)<br>• `ref_pressure`: presión de referencia (def.: 20e-6) | `s = calculate_sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: float (multiplicador a presión) |
+| `getansifrequencies` | `función` | **Generador de frecuencias ANSI.**<br>• `fraction`: 1, 3, etc. (obligatorio)<br>• `limits`: [f_min, f_max] (def.: [12, 20000]) | `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)`<br><br>• `f_cen` / `f_low` / `f_high`: centros y bordes [Hz]<br>• `labels`: etiquetas nominales IEC |
+| `normalizedfreq` | `función` | **Frecuencias IEC estándar.**<br>• `fraction`: 1 o 3 | `freqs = normalizedfreq(fraction=3)`<br><br>• `freqs`: lista de frecuencias centrales estándar [Hz] |
+
+## Notas
+
+- `zero_phase=True` (en `OctaveFilterBank.filter` y `spectrogram`) filtra hacia
+  delante y hacia atrás (`sosfiltfilt`): sin retardo de grupo, atenuación
+  efectiva doble, solo análisis offline. Incompatible con `stateful=True`.
+- `mode='peak'` incluye el transitorio de arranque del filtro; un tono que
+  empieza de forma abrupta puede sobrepasar ~1 dB. Consulta
+  [Calibración y dBFS](/PyOctaveBand/es/guides/calibration/).
+- `octavefilter()` cachea internamente los diseños del banco (32 entradas), así
+  que las llamadas repetidas con los mismos parámetros se saltan la fase de
+  diseño. Para control explícito usa `OctaveFilterBank`.

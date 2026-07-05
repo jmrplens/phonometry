@@ -19,6 +19,11 @@ COLOR_SECONDARY = "#d62728"
 COLOR_TERTIARY = "#2ca02c"
 COLOR_GRID = "#e0e0e0"
 
+# Theme state: every figure is generated twice (light + "_dark" suffix).
+# COLOR_FG replaces literal black so annotations stay visible on dark bg.
+COLOR_FG = "black"
+_FILENAME_SUFFIX = ""
+
 # Global matplotlib configuration
 plt.rcParams.update(
     {
@@ -31,6 +36,38 @@ plt.rcParams.update(
         "savefig.bbox": "tight",
     }
 )
+
+
+def set_theme(dark: bool) -> None:
+    """Switch between the light (default) and dark documentation themes."""
+    global COLOR_FG, COLOR_GRID, _FILENAME_SUFFIX
+    if dark:
+        plt.style.use("dark_background")
+        COLOR_FG = "white"
+        COLOR_GRID = "#555555"
+        _FILENAME_SUFFIX = "_dark"
+    else:
+        plt.style.use("default")
+        COLOR_FG = "black"
+        COLOR_GRID = "#e0e0e0"
+        _FILENAME_SUFFIX = ""
+    plt.rcParams.update(
+        {
+            "font.size": 10,
+            "axes.grid": True,
+            "grid.alpha": 0.5,
+            "grid.linestyle": "--",
+            "figure.figsize": (10, 6),
+            "figure.dpi": 150,
+            "savefig.bbox": "tight",
+        }
+    )
+
+
+def themed_path(output_dir: str, filename: str) -> str:
+    """Return the output path for *filename*, adding the theme suffix."""
+    stem, ext = os.path.splitext(filename)
+    return os.path.join(output_dir, f"{stem}{_FILENAME_SUFFIX}{ext}")
 
 
 
@@ -117,8 +154,8 @@ def generate_filter_type_comparison(output_dir: str) -> None:
         ax.semilogx(w, mag_db, label=label, color=color, linestyle=style)
         axins.plot(w, mag_db, color=color, linestyle=style)
 
-    ax.axhline(-3, color="black", linestyle=":", alpha=0.3, label="-3 dB")
-    axins.axhline(-3, color="black", linestyle=":", alpha=0.3)
+    ax.axhline(-3, color=COLOR_FG, linestyle=":", alpha=0.3, label="-3 dB")
+    axins.axhline(-3, color=COLOR_FG, linestyle=":", alpha=0.3)
     
     apply_axis_styling(ax, "Filter Architecture Comparison (Order 6, 1kHz Band)", xlim=(100, 8000), ylim=(-80, 5))
     
@@ -138,7 +175,7 @@ def generate_filter_type_comparison(output_dir: str) -> None:
     axins.set_xticklabels(["707", "1000", "1414"], fontsize=8)
 
     ax.legend(loc="lower right")
-    plt.savefig(os.path.join(output_dir, "filter_type_comparison.png"))
+    plt.savefig(themed_path(output_dir, "filter_type_comparison.png"))
     plt.close()
 
 
@@ -168,7 +205,7 @@ def generate_filter_responses(output_dir: str) -> None:
             
             from pyoctaveband.filter_design import _showfilter
             _showfilter(bank.sos, bank.freq, bank.freq_u, bank.freq_d, fs, bank.factor, 
-                       show=False, plot_file=os.path.join(output_dir, filename))
+                       show=False, plot_file=themed_path(output_dir, filename))
             plt.close("all")
 
 
@@ -214,7 +251,7 @@ def generate_signal_responses(output_dir: str) -> None:
         )
         apply_axis_styling(ax, title, xlim=(11, 25000))
         ax.legend(loc="lower right")
-        plt.savefig(os.path.join(output_dir, filename))
+        plt.savefig(themed_path(output_dir, filename))
         plt.close()
 
 
@@ -290,7 +327,7 @@ def generate_multichannel_response(output_dir: str) -> None:
     # Let Y-axis autoscale
 
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "signal_response_multichannel.png"))
+    plt.savefig(themed_path(output_dir, "signal_response_multichannel.png"))
     plt.close()
 
 
@@ -325,7 +362,7 @@ def generate_decomposition_plot(output_dir: str) -> None:
     y_lim = (-2.8, 2.8)
 
     # 1. Original Signal
-    axes[0].plot(t, y, color="black", linewidth=1.5)
+    axes[0].plot(t, y, color=COLOR_FG, linewidth=1.5)
     axes[0].set_title("Original Signal (250 Hz + 1000 Hz Sum) @ 48 kHz", fontweight="bold")
     axes[0].set_ylim(y_lim)
     axes[0].set_xlim(0, 0.04)
@@ -359,7 +396,7 @@ def generate_decomposition_plot(output_dir: str) -> None:
         ax.grid(True, which="both", alpha=0.4, linestyle=":")
 
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "signal_decomposition.png"))
+    plt.savefig(themed_path(output_dir, "signal_decomposition.png"))
     plt.close()
 
 
@@ -376,7 +413,7 @@ def generate_weighting_responses(output_dir: str) -> None:
     curves = [
         ("A", "A-Weighting", COLOR_PRIMARY),
         ("C", "C-Weighting", COLOR_SECONDARY),
-        ("Z", "Z-Weighting (Flat)", "black")
+        ("Z", "Z-Weighting (Flat)", COLOR_FG)
     ]
     
     for code, label, color in curves:
@@ -391,7 +428,7 @@ def generate_weighting_responses(output_dir: str) -> None:
 
     apply_axis_styling(ax, "Frequency Weighting Curves (IEC 61672-1)", xlim=(10, 22000), ylim=(-50, 5))
     ax.legend(loc="lower right")
-    plt.savefig(os.path.join(output_dir, "weighting_responses.png"))
+    plt.savefig(themed_path(output_dir, "weighting_responses.png"))
     plt.close()
 
 
@@ -435,7 +472,7 @@ def generate_time_weighting_plot(output_dir: str) -> None:
     ax.set_ylabel("Normalized Response")
     ax.legend(loc="upper right")
     ax.set_xlim(0.8, 3.5)
-    plt.savefig(os.path.join(output_dir, "time_weighting_analysis.png"))
+    plt.savefig(themed_path(output_dir, "time_weighting_analysis.png"))
     plt.close()
 
 
@@ -458,11 +495,11 @@ def generate_crossover_plot(output_dir: str) -> None:
     _, ax = plt.subplots()
     ax.semilogx(w, 20 * np.log10(np.abs(h_lp) + 1e-9), color=COLOR_PRIMARY, label="Low Pass (LR4)")
     ax.semilogx(w, 20 * np.log10(np.abs(h_hp) + 1e-9), color=COLOR_SECONDARY, label="High Pass (LR4)")
-    ax.semilogx(w, 20 * np.log10(np.abs(h_lp + h_hp) + 1e-9), color="black", linestyle="--", label="Sum (Flat)")
+    ax.semilogx(w, 20 * np.log10(np.abs(h_lp + h_hp) + 1e-9), color=COLOR_FG, linestyle="--", label="Sum (Flat)")
 
     apply_axis_styling(ax, "Linkwitz-Riley Crossover (4th Order @ 1kHz)", xlim=(20, 20000), ylim=(-60, 5))
     ax.legend(loc="lower right")
-    plt.savefig(os.path.join(output_dir, "crossover_lr4.png"))
+    plt.savefig(themed_path(output_dir, "crossover_lr4.png"))
     plt.close()
 
 
@@ -493,7 +530,7 @@ def generate_spectrogram_example(output_dir: str) -> None:
     ax.set_yticks(yticks)
     ax.set_yticklabels(["63", "125", "250", "500", "1k", "2k", "4k", "8k"])
     plt.colorbar(mesh, ax=ax, label=LABEL_LEVEL_DB)
-    plt.savefig(os.path.join(output_dir, "spectrogram_example.png"))
+    plt.savefig(themed_path(output_dir, "spectrogram_example.png"))
     plt.close()
 
 
@@ -522,7 +559,7 @@ def generate_ln_levels_example(output_dir: str) -> None:
 
     _, ax = plt.subplots()
     ax.plot(t, level_t, color=COLOR_PRIMARY, linewidth=0.8, label="Fast level $L_p(t)$")
-    for n_value, color, style in [(10, COLOR_SECONDARY, "--"), (50, "black", "-"), (90, COLOR_TERTIARY, "-.")]:
+    for n_value, color, style in [(10, COLOR_SECONDARY, "--"), (50, COLOR_FG, "-"), (90, COLOR_TERTIARY, "-.")]:
         ax.axhline(
             float(stats[n_value]), color=color, linestyle=style, linewidth=1.5,
             label=f"L{n_value} = {float(stats[n_value]):.1f} dB",
@@ -532,7 +569,7 @@ def generate_ln_levels_example(output_dir: str) -> None:
     ax.set_ylabel(LABEL_LEVEL_DB)
     ax.set_xlim(0, duration)
     ax.legend(loc="lower right")
-    plt.savefig(os.path.join(output_dir, "ln_levels_example.png"))
+    plt.savefig(themed_path(output_dir, "ln_levels_example.png"))
     plt.close()
 
 
@@ -560,7 +597,7 @@ def generate_zero_phase_comparison(output_dir: str) -> None:
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Amplitude")
     ax.legend(loc="upper right")
-    plt.savefig(os.path.join(output_dir, "zero_phase_comparison.png"))
+    plt.savefig(themed_path(output_dir, "zero_phase_comparison.png"))
     plt.close()
 
 
@@ -596,7 +633,7 @@ def generate_weighting_accuracy_hf(output_dir: str) -> None:
     reference = analytic_a(freqs)
 
     _, (ax, ax_err) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-    ax.semilogx(freqs, reference, color="black", linewidth=2, label="IEC 61672-1 analytic curve")
+    ax.semilogx(freqs, reference, color=COLOR_FG, linewidth=2, label="IEC 61672-1 analytic curve")
     ax.semilogx(freqs, legacy, color=COLOR_SECONDARY, linestyle="--", label="Plain bilinear (high_accuracy=False)")
     ax.semilogx(freqs, accurate, color=COLOR_PRIMARY, linestyle="-.", label="Oversampled (high_accuracy=True)")
     ax.set_title(f"A-Weighting High-Frequency Accuracy @ fs={fs//1000} kHz", fontweight="bold", pad=12)
@@ -617,22 +654,18 @@ def generate_weighting_accuracy_hf(output_dir: str) -> None:
         a.set_xticklabels(["1k", "2k", "4k", "8k", "12.5k", "16k", "20k"])
 
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "weighting_accuracy_hf.png"))
+    plt.savefig(themed_path(output_dir, "weighting_accuracy_hf.png"))
     plt.close()
 
 
-if __name__ == "__main__":
-    img_dir = ".github/images"
-    os.makedirs(img_dir, exist_ok=True)
-
-    # Generate all plots
+def generate_all(img_dir: str) -> None:
+    """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
     generate_filter_responses(img_dir)
     generate_signal_responses(img_dir)
     generate_multichannel_response(img_dir)
     generate_decomposition_plot(img_dir)
 
-    # NEW PLOTS
     generate_weighting_responses(img_dir)
     generate_time_weighting_plot(img_dir)
     generate_crossover_plot(img_dir)
@@ -642,5 +675,17 @@ if __name__ == "__main__":
     generate_ln_levels_example(img_dir)
     generate_zero_phase_comparison(img_dir)
     generate_weighting_accuracy_hf(img_dir)
+
+
+if __name__ == "__main__":
+    img_dir = ".github/images"
+    os.makedirs(img_dir, exist_ok=True)
+
+    # Every figure is produced twice: light theme (plain name) and dark
+    # theme ("_dark" suffix) so the docs site can follow the user's mode.
+    for dark in (False, True):
+        set_theme(dark)
+        print(f"--- Generating {'dark' if dark else 'light'} theme figures ---")
+        generate_all(img_dir)
 
     print("Graphics generated successfully.")

@@ -10,7 +10,7 @@ Microphone Arrays) using **fully vectorized operations**. Input arrays of shape
 `(N_channels, N_samples)` are processed in parallel, offering significant
 performance gains over iterative loops.
 
-<img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_multichannel.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_multichannel.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_multichannel_dark.png" width="80%">
 
 *Simultaneous analysis of a Stereo signal: Left Channel (Pink Noise) vs Right
 Channel (Log Sine Sweep).*

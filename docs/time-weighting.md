@@ -5,7 +5,7 @@
 Accurate SPL measurement requires capturing energy over specific time windows.
 PyOctaveBand implements exact time constants per **IEC 61672-1:2013**.
 
-<img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis.png" width="80%">
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis.png" width="80%"></picture>
 
 * **Fast (`fast`):** τ = 125 ms. Standard for noise fluctuations.
 * **Slow (`slow`):** τ = 1000 ms. Standard for steady noise.

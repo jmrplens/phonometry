@@ -1,0 +1,9 @@
+/* Show the figure variant that matches the active Starlight theme.
+   Figures are generated in both themes by generate_graphs.py (make graphs). */
+[data-theme='light'] img.dark-only {
+  display: none;
+}
+
+[data-theme='dark'] img.light-only {
+  display: none;
+}

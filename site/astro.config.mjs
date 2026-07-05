@@ -13,7 +13,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'PyOctaveBand',
-      customCss: ['./src/styles/katex.css'],
+      customCss: ['./src/styles/katex.css', './src/styles/theme-images.css'],
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/jmrplens/PyOctaveBand' },
       ],

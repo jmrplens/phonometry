@@ -1,0 +1,32 @@
+---
+title: PyOctaveBand
+description: Octave-band and fractional octave-band filter bank for Python. ANSI S1.11 and IEC 61672-1 compliant.
+template: splash
+hero:
+  tagline: Professional acoustic analysis in Python — fractional octave banks, A/C/Z weighting, time ballistics, Leq and statistical levels.
+  actions:
+    - text: Get started
+      link: /PyOctaveBand/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/jmrplens/PyOctaveBand
+      icon: github
+---
+
+import { CardGrid, Card } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Standards compliant" icon="approve-check">
+    ANSI S1.11-2004 filter banks and IEC 61672-1:2013 weighting, verified by 180+ tests in CI.
+  </Card>
+  <Card title="Five architectures" icon="setting">
+    Butterworth, Chebyshev I/II, Elliptic and Bessel — all as stable SOS cascades with −3 dB points on the band edges.
+  </Card>
+  <Card title="Real-time ready" icon="rocket">
+    Stateful block processing, vectorized multichannel, multirate decimation.
+  </Card>
+  <Card title="Sound level metering" icon="magnifier">
+    A/C/Z weighting, Fast/Slow/Impulse ballistics, Leq, LAeq, L10/L50/L90 and octave spectrograms.
+  </Card>
+</CardGrid>

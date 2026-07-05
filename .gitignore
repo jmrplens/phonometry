@@ -60,3 +60,8 @@ node_modules/
 
 # Local work plans
 plan/
+
+# Astro docs site
+site/node_modules/
+site/dist/
+site/.astro/

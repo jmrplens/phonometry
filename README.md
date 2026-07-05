@@ -92,6 +92,11 @@ All core functionality can be imported directly from the `pyoctaveband` package.
 | `time_weighting` | `function` | **Energy capture.**<br>• `x`: Raw signal array (squared internally; time is the last axis)<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', or 'impulse'<br>• `initial_state`: None, 'zero', 'first', scalar, or array (Default: None)<br>• `None`: use the default rest state (`y[-1] = 0`)<br>• `'zero'`: explicitly initialize `y[-1]` to zero<br>• scalar: broadcast to every channel<br>• array: must match/broadcast to `x.shape[:-1]`; for `x.shape == (n_channels, n_samples)`, use shape `(n_channels,)` | `env = time_weighting(x, fs, mode='fast', initial_state=None)`<br><br>• `env`: energy envelope (Mean Square), same shape as `x` |
 | `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
 | `calculate_sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6) | `s = calculate_sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
+| `leq` | `function` | **Equivalent level (Leq).**<br>• `x`: Signal array (1D or 2D)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS (Default: False) | `level = leq(x, calibration_factor=s)`<br><br>• `level`: Scalar (1D) or per-channel array (2D) |
+| `laeq` | `function` | **A-weighted Leq (LAeq).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `calibration_factor` / `dbfs`: as `leq` | `level = laeq(x, fs, calibration_factor=s)`<br><br>• `level`: Scalar (1D) or per-channel array (2D) |
+| `ln_levels` | `function` | **Statistical levels (LN).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `n`: Exceedance percentiles (Default: (10, 50, 90))<br>• `mode`: 'fast', 'slow', 'impulse' (Default: 'fast')<br>• `weighting`: 'A', 'C', 'Z' or None (Default: None)<br>• `calibration_factor` / `dbfs`: as `leq` | `stats = ln_levels(x, fs, n=(10, 50, 90), weighting='A')`<br><br>• `stats`: Dict `{10: L10, 50: L50, 90: L90}` |
+| `TimeWeighting` | `class` | **Stateful time weighting.**<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', 'impulse' (Default: 'fast') | `tw = TimeWeighting(fs, mode='fast')`<br>`env = tw.process(block)` per block<br>`tw.reset()` to start over |
+| `OctaveFilterBank.spectrogram` | `method` | **Band levels over time.**<br>• `x`: Signal array (1D or 2D)<br>• `window_time`: Window length [s] (Default: 0.125)<br>• `overlap`: Fraction in [0, 1) (Default: 0.5)<br>• `mode`: 'rms' or 'peak' | `levels, freq, times = bank.spectrogram(x)`<br><br>• `levels`: (bands, frames) or (channels, bands, frames) |
 | `getansifrequencies` | `function` | **ANSI Frequency generator.**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)`<br><br>• `f_cen`: List of center frequencies [Hz]<br>• `f_low`: List of lower edges [Hz]<br>• `f_high`: List of upper edges [Hz]<br>• `labels`: IEC nominal frequency labels |
 | `normalizedfreq` | `function` | **Standard IEC Frequencies.**<br>• `fraction`: 1 or 3 | `freqs = normalizedfreq(fraction=3)`<br><br>• `freqs`: List of standard center frequencies [Hz] |
 
@@ -260,6 +265,54 @@ for block in audio_blocks:
 ```
 
 For multichannel blocks with time on the last axis, carry one state per channel: use `state = energy_envelope[..., -1]`. A scalar `initial_state` is applied to every channel, while an array must match or broadcast to the non-time shape, such as `(n_channels,)` for input shaped `(n_channels, n_samples)`.
+
+Or let the `TimeWeighting` class carry the state for you:
+
+```python
+from pyoctaveband import TimeWeighting
+
+tw = TimeWeighting(fs, mode='fast')
+for block in audio_blocks:
+    energy_envelope = tw.process(block)
+```
+
+---
+
+## 📈 Integrated and Statistical Levels
+
+Environmental noise metrics computed directly from the raw (calibrated) signal:
+
+```python
+from pyoctaveband import leq, laeq, ln_levels
+
+# Equivalent continuous level of the whole recording
+level = leq(signal, calibration_factor=sensitivity)
+
+# A-weighted Leq (the standard environmental noise metric)
+la = laeq(signal, fs, calibration_factor=sensitivity)
+
+# Percentile levels: L10 (peaks), L50 (median), L90 (background)
+stats = ln_levels(signal, fs, n=(10, 50, 90), weighting="A")
+```
+
+---
+
+## 🗺️ Octave Spectrogram (levels over time)
+
+Short-time fractional-octave analysis: one level per band per window, time-aligned
+across bands.
+
+```python
+from pyoctaveband import OctaveFilterBank
+
+bank = OctaveFilterBank(fs=48000, fraction=3)
+levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
+# levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
+```
+
+For offline analysis without group delay (time-aligned band signals), use
+`zero_phase=True` in `bank.filter(...)` — the filter runs forward-backward
+(`sosfiltfilt`), doubling the effective attenuation. Not available in stateful mode.
 
 ---
 

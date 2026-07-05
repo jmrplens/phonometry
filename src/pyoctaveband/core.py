@@ -287,6 +287,63 @@ class OctaveFilterBank:
         else:
             return spl, freq_out
 
+    def spectrogram(
+        self,
+        x: List[float] | np.ndarray,
+        window_time: float = 0.125,
+        overlap: float = 0.5,
+        mode: str = "rms",
+        detrend: bool = True,
+    ) -> Tuple[np.ndarray, List[float], np.ndarray]:
+        """
+        Short-time fractional-octave analysis: level per band over time.
+
+        :param x: Input signal (1D array or 2D array [channels, samples]).
+        :param window_time: Analysis window length in seconds.
+        :param overlap: Window overlap fraction in [0, 1).
+        :param mode: 'rms' or 'peak' (per window).
+        :param detrend: If True, remove DC offset before filtering.
+        :return: Tuple (levels, freq, times). ``levels`` has shape
+            (num_bands, num_frames) for 1D input and
+            (channels, num_bands, num_frames) for 2D input; ``times`` holds
+            each window's center in seconds.
+        """
+        if self.stateful:
+            raise ValueError("spectrogram() is not supported on stateful banks.")
+        if not 0 <= overlap < 1:
+            raise ValueError("overlap must be in [0, 1).")
+
+        x_proc = _typesignal(x)
+        is_multichannel = x_proc.ndim > 1
+        n_samples = x_proc.shape[-1]
+        win = int(round(window_time * self.fs))
+        hop = max(1, int(round(win * (1 - overlap))))
+        if win <= 0 or win > n_samples:
+            raise ValueError("window_time must be positive and shorter than the signal.")
+
+        # Filter once per band at full rate so windows stay time-aligned
+        # across bands regardless of per-band decimation.
+        if detrend:
+            x_proc = signal.detrend(x_proc, axis=-1, type='constant')
+        x_2d = x_proc if is_multichannel else x_proc[np.newaxis, :]
+        _, bands_opt = self._process_bands(
+            x_2d, x_2d.shape[0], sigbands=True, mode=mode, calculate_level=False
+        )
+        # sigbands=True always fills the band list
+        bands = cast(List[np.ndarray], bands_opt)
+
+        starts = np.arange(0, n_samples - win + 1, hop)
+        times = (starts + win / 2) / self.fs
+
+        levels = np.zeros((x_2d.shape[0], self.num_bands, len(starts)))
+        for b, yb in enumerate(bands):
+            for j, s in enumerate(starts):
+                levels[:, b, j] = self._calculate_level(yb[:, s:s + win], mode)
+
+        if not is_multichannel:
+            return levels[0], list(self.freq), times
+        return levels, list(self.freq), times
+
     def _process_bands(
         self,
         x_proc: np.ndarray,

@@ -357,11 +357,15 @@ class OctaveFilterBank:
         times = (starts + win / 2) / self.fs
 
         levels = np.zeros((x_2d.shape[0], self.num_bands, len(starts)))
+        # Frames are processed in chunks: the strided view itself is free,
+        # but reducing it materializes temporaries of chunk*win samples, so
+        # chunking keeps memory bounded for long signals / high overlap.
+        frame_chunk = 256
         for b, yb in enumerate(bands):
-            # Strided view (channels, frames, win): one vectorized level
-            # call per band instead of a Python loop over frames.
             windows = np.lib.stride_tricks.sliding_window_view(yb, win, axis=-1)[:, ::hop, :]
-            levels[:, b, :] = self._calculate_level(windows, mode)
+            for j0 in range(0, windows.shape[1], frame_chunk):
+                seg = windows[:, j0:j0 + frame_chunk, :]
+                levels[:, b, j0:j0 + frame_chunk] = self._calculate_level(seg, mode)
 
         if not is_multichannel:
             return levels[0], list(self.freq), times

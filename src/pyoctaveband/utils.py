@@ -35,7 +35,11 @@ def _resample_to_length(y: np.ndarray, factor: int, target_length: int) -> np.nd
     :param target_length: Target length.
     :return: Resampled signal.
     """
-    y_resampled = cast(np.ndarray, signal.resample_poly(y, factor, 1, axis=-1))
+    if factor == 1:
+        # Nothing to resample: fall through to the slice/pad logic only.
+        y_resampled = y
+    else:
+        y_resampled = cast(np.ndarray, signal.resample_poly(y, factor, 1, axis=-1))
     current_length = y_resampled.shape[-1]
     
     if current_length > target_length:

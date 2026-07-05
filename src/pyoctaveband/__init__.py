@@ -6,6 +6,7 @@ Implementation according to ANSI s1.11-2004 and IEC 61260-1-2014.
 
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import List, Tuple, overload, Literal
 
 import numpy as np
@@ -29,6 +30,32 @@ __all__ = [
     "linkwitz_riley",
     "calculate_sensitivity",
 ]
+
+
+@lru_cache(maxsize=32)
+def _cached_filter_bank(
+    fs: int,
+    fraction: float,
+    order: int,
+    limits: Tuple[float, ...] | None,
+    filter_type: str,
+    ripple: float,
+    attenuation: float,
+    calibration_factor: float,
+    dbfs: bool,
+) -> OctaveFilterBank:
+    """Design (or reuse) a stateless filter bank for octavefilter()."""
+    return OctaveFilterBank(
+        fs=fs,
+        fraction=fraction,
+        order=order,
+        limits=list(limits) if limits is not None else None,
+        filter_type=filter_type,
+        ripple=ripple,
+        attenuation=attenuation,
+        calibration_factor=calibration_factor,
+        dbfs=dbfs,
+    )
 
 
 @overload
@@ -174,19 +201,30 @@ def octavefilter(
         Tuple[np.ndarray, List[str], List[np.ndarray]]]
     """
     
-    # Use the class-based implementation
-    filter_bank = OctaveFilterBank(
-        fs=fs,
-        fraction=fraction,
-        order=order,
-        limits=limits,
-        filter_type=filter_type,
-        ripple=ripple,
-        attenuation=attenuation,
-        show=show,
-        plot_file=plot_file,
-        calibration_factor=calibration_factor,
-        dbfs=dbfs
-    )
-    
+    if show or plot_file:
+        # Plotting has side effects: bypass the cache.
+        filter_bank = OctaveFilterBank(
+            fs=fs,
+            fraction=fraction,
+            order=order,
+            limits=limits,
+            filter_type=filter_type,
+            ripple=ripple,
+            attenuation=attenuation,
+            show=show,
+            plot_file=plot_file,
+            calibration_factor=calibration_factor,
+            dbfs=dbfs,
+        )
+    else:
+        # The bank is immutable in non-stateful mode: reuse the design.
+        # Pass limits through as-is (tuple for hashability); the bank
+        # constructor is the single place that validates them and owns
+        # the default when None.
+        limits_key = tuple(map(float, limits)) if limits is not None else None
+        filter_bank = _cached_filter_bank(
+            fs, fraction, order, limits_key, filter_type,
+            ripple, attenuation, calibration_factor, dbfs,
+        )
+
     return filter_bank.filter(x, sigbands=sigbands, mode=mode, detrend=detrend, nominal=nominal)  # type: ignore[call-overload,no-any-return]

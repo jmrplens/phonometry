@@ -7,6 +7,7 @@ import time
 
 import numpy as np
 
+import pyoctaveband
 from pyoctaveband import OctaveFilterBank, octavefilter
 
 
@@ -33,9 +34,12 @@ def test_filterbank_reuse_performance() -> None:
     x = rng.standard_normal(int(fs * duration))
     num_iterations = 10
     
-    # 1. Using functional API (re-designs every time)
+    # 1. Using functional API with a cold design cache on every call.
+    # octavefilter() now caches bank designs, so clear it each iteration to
+    # measure the redesign cost this test is about.
     start_func = time.time()
     for _ in range(num_iterations):
+        pyoctaveband._cached_filter_bank.cache_clear()
         octavefilter(x, fs)
     time_func = time.time() - start_func
     

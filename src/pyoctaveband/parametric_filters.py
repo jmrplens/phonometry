@@ -6,6 +6,7 @@ Implementation according to IEC 61672-1:2013.
 
 from __future__ import annotations
 
+import math
 from typing import List, Tuple, cast
 
 import numpy as np
@@ -22,7 +23,8 @@ class WeightingFilter:
     """
 
     def __init__(self, fs: int, curve: str = "A",
-                 stateful: bool = False, steady_ic: bool = False) -> None:
+                 stateful: bool = False, steady_ic: bool = False,
+                 high_accuracy: bool | None = None) -> None:
         """
         Initialize the weighting filter.
 
@@ -30,13 +32,25 @@ class WeightingFilter:
         :param curve: 'A', 'C' or 'Z'.
         :param stateful: If True, the weighting filter is stateful. Useful for block processing.
         :param steady_ic: If True, calculate steady state initial conditions for filter.
+        :param high_accuracy: If True, design and run the filter at an internal
+            oversampled rate (>= 96 kHz) so the response stays within
+            IEC 61672-1 class 1 tolerances up to 16 kHz. The plain bilinear
+            design exceeds class 1 limits at 12.5 kHz for fs <= 48 kHz.
+            Defaults to True except in stateful mode (the internal FIR
+            resampling is incompatible with block processing).
         """
         if fs <= 0:
             raise ValueError("Sample rate 'fs' must be positive.")
+        if high_accuracy is None:
+            high_accuracy = not stateful
+        if high_accuracy and stateful:
+            raise ValueError("high_accuracy is not compatible with stateful processing.")
 
         self.fs = fs
         self.curve = curve.upper()
         self.stateful = stateful
+        self.high_accuracy = high_accuracy
+        self._oversample = min(8, max(1, math.ceil(96000 / fs))) if high_accuracy else 1
 
         if self.curve == "Z":
             self.sos = np.array([])
@@ -81,7 +95,8 @@ class WeightingFilter:
         h = k * np.prod(1j * w - z) / np.prod(1j * w - p)
         k = k / np.abs(h)
 
-        zd, pd, kd = signal.bilinear_zpk(z, p, k, fs)
+        design_fs = self.fs * self._oversample
+        zd, pd, kd = signal.bilinear_zpk(z, p, k, design_fs)
         self.sos = signal.zpk2sos(zd, pd, kd)
 
         # Initialize filter state for stateful block-wise processing.
@@ -130,22 +145,32 @@ class WeightingFilter:
             if self._needs_zi_reinit(x_proc):
                 self._init_filter_state(x_proc)
             y, self.zi = signal.sosfilt(self.sos, x_proc, axis=-1, zi=self.zi)
+        elif self._oversample > 1:
+            if x_proc.shape[-1] == 0:
+                return x_proc  # resample_poly rejects empty input
+            up = signal.resample_poly(x_proc, self._oversample, 1, axis=-1)
+            y_up = signal.sosfilt(self.sos, up, axis=-1)
+            y = signal.resample_poly(y_up, 1, self._oversample, axis=-1)
         else:
             y = signal.sosfilt(self.sos, x_proc, axis=-1)
 
         return cast(np.ndarray, y)
 
 
-def weighting_filter(x: List[float] | np.ndarray, fs: int, curve: str = "A") -> np.ndarray:
+def weighting_filter(
+    x: List[float] | np.ndarray, fs: int, curve: str = "A", high_accuracy: bool = True
+) -> np.ndarray:
     """
     Apply frequency weighting (A or C) to a signal.
-    
+
     :param x: Input signal.
     :param fs: Sample rate.
     :param curve: 'A', 'C' or 'Z' (Z is zero weighting/bypass).
+    :param high_accuracy: Use internal oversampling for IEC 61672-1 class 1
+        accuracy at high frequencies (default True).
     :return: Weighted signal.
     """
-    wf = WeightingFilter(fs, curve)
+    wf = WeightingFilter(fs, curve, high_accuracy=high_accuracy)
     return wf.filter(x)
 
 

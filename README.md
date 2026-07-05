@@ -390,6 +390,12 @@ PyOctaveBand supports two measurement modes to align with professional software 
 spl_peak, freq = octavefilter(signal, fs, mode='peak')
 ```
 
+> [!NOTE]
+> `mode='peak'` measures the absolute maximum of the **filtered** band signal,
+> which includes the filter's onset transient (overshoot). Signals that start
+> abruptly may read up to ~1 dB high. This is inherent to IIR band filters
+> (an analog SLM behaves the same way), not a processing artifact.
+
 ---
 
 ## 📊 Signal Decomposition and Stability

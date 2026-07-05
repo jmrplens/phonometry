@@ -5,7 +5,21 @@ Tests for internal utility helpers.
 
 import numpy as np
 
-from pyoctaveband.utils import _resample_to_length
+from pyoctaveband.utils import _resample_to_length, _typesignal
+
+
+def test_typesignal_converts_int_arrays_to_float64() -> None:
+    """Integer inputs must be promoted to float64 to avoid overflow when squared."""
+    x = np.array([1, -2, 3], dtype=np.int16)
+    out = _typesignal(x)
+    assert out.dtype == np.float64
+    np.testing.assert_allclose(out, [1.0, -2.0, 3.0])
+
+
+def test_typesignal_preserves_float64_without_copy() -> None:
+    """float64 arrays pass through unchanged (no copy)."""
+    x = np.array([1.0, 2.0])
+    assert _typesignal(x) is x
 
 
 def test_resample_to_length_padding_and_trimming() -> None:

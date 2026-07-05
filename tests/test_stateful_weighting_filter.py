@@ -19,7 +19,10 @@ def test_weighting_filter_block_processing_matches_full_signal(block_size: int, 
     # Random signal (deterministic via seed)
     signal = rng.standard_normal(n_samples)
 
-    stateless_wf = WeightingFilter(fs, filter_type)
+    # high_accuracy=False: the reference must use the same plain bilinear
+    # design as the stateful filter (this test verifies state continuity,
+    # not absolute response accuracy).
+    stateless_wf = WeightingFilter(fs, filter_type, high_accuracy=False)
     stateless_output = stateless_wf.filter(signal)
 
     stateful_wf = WeightingFilter(fs, filter_type, stateful=True)
@@ -98,8 +101,8 @@ def test_weighting_filter_multichannel():
 
     x = rng.standard_normal((n_channels, n_samples))
 
-    # Full-signal reference (stateless)
-    ref_wf = WeightingFilter(fs, "A")
+    # Full-signal reference (stateless, same plain bilinear design as stateful)
+    ref_wf = WeightingFilter(fs, "A", high_accuracy=False)
     ref_out = ref_wf.filter(x)
 
     # Block-wise stateful

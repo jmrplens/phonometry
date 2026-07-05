@@ -406,7 +406,8 @@ def measure_weighting_response(
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Measure a weighting curve the way the docs figure plots it: impulse
-    response through the real filter path + FFT.
+    response through the real filter path, evaluated with ``freqz`` (DTFT
+    of the measured response).
 
     The impulse is placed at the CENTER of the buffer: the high-accuracy
     weighting path resamples with polyphase FIRs, and an impulse at sample 0
@@ -428,7 +429,11 @@ def measure_weighting_response(
 
     worn = 8192 if freqs is None else np.asarray(freqs, dtype=float)
     w, h = scipy_signal.freqz(weighted, [1], worN=worn, fs=fs)
-    return w, 20 * np.log10(np.abs(h) + 1e-9)
+    mag_db = 20 * np.log10(np.abs(h) + 1e-9)
+    if freqs is None:
+        # Drop the 0 Hz point: it cannot be drawn on a log frequency axis.
+        return w[1:], mag_db[1:]
+    return w, mag_db
 
 
 def generate_weighting_responses(output_dir: str) -> None:

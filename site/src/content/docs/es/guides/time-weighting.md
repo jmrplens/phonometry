@@ -24,6 +24,14 @@ energy_envelope = time_weighting(signal, fs, mode='fast')
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 ```
 
+## Balística verificada (IEC 61672-1, Tabla 4)
+
+La respuesta de la envolvente Fast a ráfagas de tono de 4 kHz cae exactamente
+sobre los valores de referencia de la norma — verificado en CI para duraciones
+de 1 s a 1 ms (ponderaciones F y S, límites de aceptación de clase 1):
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" width="80%">
+
 ## Estado inicial
 
 Por defecto, el integrador exponencial parte del reposo (`y[-1] = 0`). Pasar

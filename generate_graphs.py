@@ -710,6 +710,193 @@ def generate_weighting_accuracy_hf(output_dir: str) -> None:
     plt.close()
 
 
+def generate_group_delay_comparison(output_dir: str) -> None:
+    """Group delay of the 1 kHz band for every architecture (docs: filter-banks)."""
+    print("Generating group_delay_comparison.png...")
+    fs = 48000
+    limits = [800.0, 1200.0]
+
+    filters = [
+        ("butter", "Butterworth", COLOR_PRIMARY, "-"),
+        ("cheby1", "Chebyshev I", COLOR_SECONDARY, "--"),
+        ("cheby2", "Chebyshev II", COLOR_TERTIARY, ":"),
+        ("ellip", "Elliptic", "#9467bd", "-."),
+        ("bessel", "Bessel", "#8c564b", "-"),
+    ]
+
+    _, ax = plt.subplots()
+    for f_type, label, color, style in filters:
+        bank = OctaveFilterBank(fs, fraction=1, order=6, limits=limits, filter_type=f_type)
+        idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+        fsd = fs / bank.factor[idx]
+        # Group delay of an SOS cascade = sum of the sections' group delays.
+        w = np.logspace(np.log10(500), np.log10(2000), 1024)
+        gd = np.zeros_like(w)
+        for section in bank.sos[idx]:
+            w_s, gd_s = scipy_signal.group_delay((section[:3], section[3:]), w=w, fs=fsd)
+            gd += gd_s
+        ax.semilogx(w, gd / fsd * 1000, label=label, color=color, linestyle=style)
+
+    ax.set_title("Group Delay Comparison (1 kHz Octave Band, Order 6)", fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Group delay [ms]")
+    ax.set_xlim(500, 2000)
+    from matplotlib.ticker import NullFormatter
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xticks([500, 707, 1000, 1414, 2000])
+    ax.set_xticklabels(["500", "707", "1k", "1.41k", "2k"])
+    ax.legend(loc="upper right")
+    plt.savefig(themed_path(output_dir, "group_delay_comparison.png"))
+    plt.close()
+
+
+def generate_tone_burst_iec(output_dir: str) -> None:
+    """FAST envelope response to 4 kHz tonebursts vs IEC 61672-1 Table 4 targets."""
+    print("Generating tone_burst_iec.png...")
+    fs = 48000
+
+    from pyoctaveband import time_weighting
+
+    cases = [(0.2, -1.0), (0.05, -4.8), (0.01, -11.1)]  # Table 4, class 1 rows
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4.5), sharey=True)
+
+    t_all = np.arange(int(fs * 2.0)) / fs
+    steady = np.sin(2 * np.pi * 4000 * t_all)
+    ref = time_weighting(steady, fs, mode="fast")[int(1.5 * fs):].mean()
+
+    for ax, (duration, target) in zip(axes, cases):
+        burst = np.zeros_like(t_all)
+        start = int(0.5 * fs)
+        burst[start:start + round(duration * fs)] = steady[start:start + round(duration * fs)]
+        env_db = 10 * np.log10(np.maximum(time_weighting(burst, fs, mode="fast") / ref, 1e-6))
+
+        ax.plot(t_all, env_db, color=COLOR_PRIMARY, linewidth=1.3, label="FAST envelope")
+        ax.axhline(target, color=COLOR_SECONDARY, linestyle="--", linewidth=1.2,
+                   label=f"IEC target {target} dB")
+        ax.set_title(f"{duration * 1000:g} ms burst", fontsize=11, fontweight="bold")
+        ax.set_xlim(0.4, 1.4)
+        ax.set_ylim(-30, 3)
+        ax.set_xlabel("Time [s]")
+        ax.legend(loc="upper right", fontsize=8)
+    axes[0].set_ylabel("Level re steady state [dB]")
+
+    fig.suptitle("4 kHz Toneburst Response vs IEC 61672-1 Table 4 (FAST)", fontweight="bold")
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "tone_burst_iec.png"))
+    plt.close()
+
+
+def generate_block_processing_continuity(output_dir: str) -> None:
+    """Stateful vs stateless block processing (docs: block-processing)."""
+    print("Generating block_processing_continuity.png...")
+    fs = 8000
+    n_blocks, block = 4, 1000
+    rng = np.random.default_rng(42)
+    x = rng.standard_normal(n_blocks * block)
+    t = np.arange(len(x)) / fs
+
+    def band_output(stateful: bool) -> np.ndarray:
+        bank = OctaveFilterBank(fs, fraction=1, limits=[900, 1100],
+                                stateful=stateful, resample=False)
+        if stateful:
+            parts = [
+                bank.filter(x[i * block:(i + 1) * block], sigbands=True,
+                            detrend=False, calculate_level=False)[2][0]
+                for i in range(n_blocks)
+            ]
+        else:
+            parts = []
+            for i in range(n_blocks):
+                b2 = OctaveFilterBank(fs, fraction=1, limits=[900, 1100], resample=False)
+                parts.append(b2.filter(x[i * block:(i + 1) * block], sigbands=True,
+                                       detrend=False, calculate_level=False)[2][0])
+        return np.concatenate(parts)
+
+    continuous = OctaveFilterBank(fs, fraction=1, limits=[900, 1100], resample=False).filter(
+        x, sigbands=True, detrend=False, calculate_level=False)[2][0]
+    y_stateful = band_output(stateful=True)
+    y_stateless = band_output(stateful=False)
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6.5), sharex=True)
+    zoom = slice(int(0.9 * block), int(1.4 * block))  # around the first boundary
+
+    ax1.plot(t[zoom], continuous[zoom], color=COLOR_FG, linewidth=2.2, alpha=0.35,
+             label="Continuous (whole signal)")
+    ax1.plot(t[zoom], y_stateful[zoom], color=COLOR_PRIMARY, linewidth=1.1,
+             label="Stateful blocks (state carried)")
+    ax1.set_title("stateful=True: block outputs equal the continuous result",
+                  fontsize=11, fontweight="bold")
+    ax1.legend(loc="upper right", fontsize=9)
+
+    ax2.plot(t[zoom], continuous[zoom], color=COLOR_FG, linewidth=2.2, alpha=0.35,
+             label="Continuous (whole signal)")
+    ax2.plot(t[zoom], y_stateless[zoom], color=COLOR_SECONDARY, linewidth=1.1,
+             label="Independent blocks (state reset)")
+    ax2.axvline(block / fs, color=COLOR_FG, linestyle=":", alpha=0.6)
+    ax2.annotate("block boundary:\nfilter transient restarts", xy=(block / fs, 0),
+                 xytext=(block / fs + 0.02, ax2.get_ylim()[0] * 0.55 if ax2.get_ylim()[0] < 0 else -1),
+                 fontsize=8, arrowprops={"arrowstyle": "->", "lw": 0.8})
+    ax2.set_title("No state: each block restarts the filter transient",
+                  fontsize=11, fontweight="bold")
+    ax2.set_xlabel("Time [s]")
+    ax2.legend(loc="upper right", fontsize=9)
+    for a in (ax1, ax2):
+        a.set_ylabel("Amplitude")
+
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "block_processing_continuity.png"))
+    plt.close()
+
+
+def generate_class_mask_overlay(output_dir: str) -> None:
+    """Band response against the IEC 61260-1:2014 class limit mask."""
+    print("Generating class_mask_overlay.png...")
+    fs = 48000
+
+    from pyoctaveband.compliance import class_limits
+
+    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200], filter_type="butter")
+    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    fm = bank.freq[idx]
+    fsd = fs / bank.factor[idx]
+    w, h = scipy_signal.sosfreqz(bank.sos[idx], worN=2 ** 15, fs=fsd)
+    attenuation = -20 * np.log10(np.abs(h) + 1e-12)
+    a_ref = float(np.interp(fm, w, attenuation))
+    omega = w / fm
+    valid = (omega > 0.05) & (omega < 8)
+    omega, delta_a = omega[valid], (attenuation - a_ref)[valid]
+
+    grid = np.logspace(np.log10(0.05), np.log10(8), 2000)
+    lo1, hi1 = class_limits(1.0, 1, grid)
+    lo2, _ = class_limits(1.0, 2, grid)
+
+    _, ax = plt.subplots(figsize=(10, 6.5))
+    # Forbidden regions for class 1: below the minimum required attenuation
+    # (stop band) and above the maximum allowed attenuation (pass band).
+    ax.fill_between(grid, -10, lo1, color=COLOR_SECONDARY, alpha=0.15,
+                    label="Forbidden for class 1 (too little attenuation)")
+    finite = np.isfinite(hi1)
+    ax.fill_between(grid[finite], hi1[finite], 90, color="#9467bd", alpha=0.15,
+                    label="Forbidden for class 1 (too much attenuation)")
+    ax.plot(grid, lo2, color=COLOR_TERTIARY, linestyle=":", linewidth=1.2,
+            label="Class 2 minimum attenuation")
+
+    ax.plot(omega, delta_a, color=COLOR_PRIMARY, linewidth=1.6,
+            label="Butterworth order 6 (1 kHz octave band)")
+
+    ax.set_xscale("log")
+    ax.set_xlim(0.08, 8)
+    ax.set_ylim(-6, 90)
+    ax.set_title("Relative Attenuation vs IEC 61260-1:2014 Class Limits", fontweight="bold", pad=12)
+    ax.set_xlabel("Normalized frequency  f / fm")
+    ax.set_ylabel("Relative attenuation ΔA [dB]")
+    ax.set_xticks([0.125, 0.25, 0.5, 0.707, 1, 1.414, 2, 4, 8])
+    ax.set_xticklabels(["0.125", "0.25", "0.5", "0.707", "1", "1.41", "2", "4", "8"])
+    ax.legend(loc="upper left", fontsize=9)
+    plt.savefig(themed_path(output_dir, "class_mask_overlay.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -727,6 +914,12 @@ def generate_all(img_dir: str) -> None:
     generate_ln_levels_example(img_dir)
     generate_zero_phase_comparison(img_dir)
     generate_weighting_accuracy_hf(img_dir)
+
+    # Docs-enrichment plots (group delay, IEC toneburst, block continuity, class mask)
+    generate_group_delay_comparison(img_dir)
+    generate_tone_burst_iec(img_dir)
+    generate_block_processing_continuity(img_dir)
+    generate_class_mask_overlay(img_dir)
 
 
 if __name__ == "__main__":

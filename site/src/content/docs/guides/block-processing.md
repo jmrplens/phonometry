@@ -8,6 +8,12 @@ The `OctaveFilterBank`, `WeightingFilter` (for A, C, or Z-weighting) and
 filter state is carried between calls, so concatenated block outputs match a
 single full-signal pass.
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity_dark.png" width="80%">
+
+*With `stateful=True` the concatenated block outputs match the continuous
+result exactly; without state, every block boundary restarts the filter
+transient.*
+
 Create a stateful filter bank with `stateful=True`. The internal state is
 zero-initialized by default but may be initialized for step-response
 steady-state (like `scipy.signal.sosfilt_zi`) with `steady_ic=True`.

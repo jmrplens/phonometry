@@ -118,6 +118,34 @@ low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/crossover_lr4.png" width="60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/crossover_lr4_dark.png" width="60%">
 
+## Verifying the IEC 61260-1 class
+
+`verify_filter_class` checks every band of a bank against the acceptance
+limits of **IEC 61260-1:2014** (Table 1, with the fractional-octave breakpoint
+mapping and log-frequency interpolation from the standard) and reports the
+performance class per band with its margin in dB:
+
+```python
+from pyoctaveband import OctaveFilterBank, verify_filter_class
+
+bank = OctaveFilterBank(fs=48000, fraction=3, order=6)
+result = verify_filter_class(bank)
+print(result["overall_class"])          # 1, 2 or None
+print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_class1_db': ...}
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/class_mask_overlay.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/class_mask_overlay_dark.png" width="80%">
+
+*The order-6 Butterworth response (blue) threads between the forbidden
+regions: it must attenuate at least the red mask outside the band and no more
+than the purple mask inside it.*
+
+With default parameters (order 6), **Butterworth meets class 1**. Chebyshev II
+lands in class 2 — capped exactly by its `attenuation=60` versus the 70 dB
+far-stopband requirement (raise `attenuation` to reach class 1). Chebyshev I,
+Elliptic and Bessel do not meet class limits at order 6: passband ripple
+(cheby1/ellip) and slow roll-off (bessel) violate the mask.
+
 ## Signal Decomposition and Stability
 
 By setting `sigbands=True`, you can retrieve the time-domain components of each
@@ -155,6 +183,15 @@ compared to the Butterworth filter. This is a normal physical property of these
 architectures: more aggressive frequency roll-offs usually come at the cost of
 higher group delay and phase distortion.
 :::
+
+### Group delay, quantified
+
+The group delay $\tau_g(\omega) = -\frac{d\phi(\omega)}{d\omega}$ of the
+1 kHz octave band shows the trade-off directly: Bessel stays nearly flat across
+the passband (transient shapes survive), while Chebyshev I and Elliptic pay for
+their steep roll-off with strong delay peaks at the band edges.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/group_delay_comparison.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/group_delay_comparison_dark.png" width="80%">
 
 ## Zero-phase filtering
 

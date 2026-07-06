@@ -112,6 +112,35 @@ low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/crossover_lr4.png" width="60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/crossover_lr4_dark.png" width="60%">
 
+## Verificar la clase IEC 61260-1
+
+`verify_filter_class` comprueba cada banda de un banco contra los límites de
+aceptación de **IEC 61260-1:2014** (Tabla 1, con el mapeo de breakpoints a
+fraccionales y la interpolación logarítmica de la norma) e informa de la clase
+por banda con su margen en dB:
+
+```python
+from pyoctaveband import OctaveFilterBank, verify_filter_class
+
+bank = OctaveFilterBank(fs=48000, fraction=3, order=6)
+result = verify_filter_class(bank)
+print(result["overall_class"])          # 1, 2 o None
+print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_class1_db': ...}
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/class_mask_overlay.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/class_mask_overlay_dark.png" width="80%">
+
+*La respuesta del Butterworth de orden 6 (azul) serpentea entre las regiones
+prohibidas: debe atenuar al menos la máscara roja fuera de la banda y no más
+que la morada dentro de ella.*
+
+Con parámetros por defecto (orden 6), **Butterworth cumple clase 1**.
+Chebyshev II se queda en clase 2 — limitado exactamente por su `attenuation=60`
+frente a los 70 dB exigidos en el stopband lejano (sube `attenuation` para
+alcanzar clase 1). Chebyshev I, Elíptico y Bessel no cumplen los límites de
+clase con orden 6: el rizado de banda de paso (cheby1/ellip) y la caída lenta
+(bessel) violan la máscara.
+
 ## Descomposición de la señal y estabilidad
 
 Con `sigbands=True` puedes recuperar las componentes en el dominio del tiempo de
@@ -149,6 +178,16 @@ retardo de propagación distinto al de Butterworth. Es una propiedad física nor
 de estas arquitecturas: caídas más agresivas suelen implicar mayor retardo de
 grupo y distorsión de fase.
 :::
+
+### El retardo de grupo, cuantificado
+
+El retardo de grupo $\tau_g(\omega) = -\frac{d\phi(\omega)}{d\omega}$ de la
+banda de octava de 1 kHz muestra el compromiso directamente: Bessel se mantiene
+casi plano en la banda de paso (los transitorios sobreviven), mientras que
+Chebyshev I y el Elíptico pagan su caída abrupta con fuertes picos de retardo en
+los bordes de banda.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/group_delay_comparison.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/group_delay_comparison_dark.png" width="80%">
 
 ## Filtrado de fase cero
 

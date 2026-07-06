@@ -23,6 +23,14 @@ energy_envelope = time_weighting(signal, fs, mode='fast')
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 ```
 
+## Verified ballistics (IEC 61672-1 Table 4)
+
+The Fast envelope's response to 4 kHz tonebursts lands exactly on the
+standard's reference values — enforced in CI for burst durations from 1 s down
+to 1 ms (F and S weightings, class 1 acceptance limits):
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" width="80%">
+
 ## Initial state
 
 By default, the exponential integrator starts from rest (`y[-1] = 0`). Passing

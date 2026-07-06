@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-06
+
 ### ⚠️ Numerical behavior changes
 
 Results differ from 1.2.x for the following cases — all of them bring the
@@ -27,6 +29,18 @@ output in line with the governing standards:
 
 ### Added
 
+- `verify_filter_class()`: verify a bank against the IEC 61260-1:2014
+  class 1/2 acceptance limits (Table 1, transcribed from the official text)
+  with per-band margins; `class_limits()` exposes the limit curves. ([#64](https://github.com/jmrplens/PyOctaveBand/pull/64))
+- Standards-compliance test layer transcribed from the official texts:
+  IEC 61672-1:2013 Table 4 tone-burst suite (F/S, 1 s to 1 ms) and Table 3
+  full 34-frequency A/C weighting sweep within class 1 limits. ([#64](https://github.com/jmrplens/PyOctaveBand/pull/64))
+- `CITATION.cff` and `.zenodo.json` metadata; Codecov coverage upload and
+  quality badges. ([#64](https://github.com/jmrplens/PyOctaveBand/pull/64))
+- Documentation: four new auto-generated figures (group delay, IEC
+  toneburst, block continuity, IEC class mask), Mermaid diagrams, more
+  equations, and a full SEO/GEO layer for the docs site (JSON-LD,
+  llms.txt, AI-crawler opt-in, WCAG2AA gates). ([#66](https://github.com/jmrplens/PyOctaveBand/pull/66))
 - `leq()`, `laeq()` and `ln_levels()` (L10/L50/L90 statistical levels from the
   Fast/Slow/Impulse envelope, with optional A/C weighting). ([#60](https://github.com/jmrplens/PyOctaveBand/pull/60))
 - `OctaveFilterBank.spectrogram()`: short-time band levels (bands × frames),
@@ -113,7 +127,8 @@ Chebyshev I/II, Elliptic, Bessel), A/C/Z weighting, Fast/Slow/Impulse time
 weighting, Linkwitz-Riley crossover, calibration and dBFS modes,
 multichannel support.
 
-[Unreleased]: https://github.com/jmrplens/PyOctaveBand/compare/v1.2.3...HEAD
+[Unreleased]: https://github.com/jmrplens/PyOctaveBand/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/jmrplens/PyOctaveBand/compare/v1.2.3...v2.0.0
 [1.2.3]: https://github.com/jmrplens/PyOctaveBand/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/jmrplens/PyOctaveBand/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/jmrplens/PyOctaveBand/compare/v1.1.5...v1.2.1

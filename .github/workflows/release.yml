@@ -75,7 +75,8 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Release ${{ steps.version.outputs.tag }}
           body: |
-            Automated release for version ${{ steps.version.outputs.version }}
+            See the [changelog](https://github.com/jmrplens/PyOctaveBand/blob/main/CHANGELOG.md) for the full details of this release.
+          generate_release_notes: true
           draft: false
           prerelease: false
         env:

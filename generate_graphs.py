@@ -123,11 +123,31 @@ _ES_EXACT = {
     "Calibration Tone Stability Check (IEC 60942:2017, 5.3.3)":
         "Comprobaci\u00f3n de estabilidad del tono de calibraci\u00f3n (IEC 60942:2017, 5.3.3)",
     "F-weighted level re mean [dB]": "Nivel con ponderaci\u00f3n F re media [dB]",
+    "Fast level of the event": "Nivel Fast del evento",
+    "Leq over the whole event": "Leq de todo el evento",
+    "SEL: same energy in 1 s": "SEL: la misma energ\u00eda en 1 s",
+    "equal energy": "igual energ\u00eda",
+    "Sound Exposure Level: the event normalized to 1 s":
+        "Nivel de exposici\u00f3n sonora: el evento normalizado a 1 s",
+    "Level [dBFS]": "Nivel [dBFS]",
+    "Hourly LAeq": "LAeq horario",
+    "Lday (+0 dB)": "Ld\u00eda (+0 dB)",
+    "Levening + 5 dB": "Ltarde + 5 dB",
+    "Lnight + 10 dB": "Lnoche + 10 dB",
+    "Day-Evening-Night Level Lden (ISO 1996-1)":
+        "Nivel d\u00eda-tarde-noche Lden (ISO 1996-1)",
+    "Hour of day": "Hora del d\u00eda",
+    "Averaged FFT spectrum (Hann)": "Espectro FFT promediado (Hann)",
+    "Critical band around the tone": "Banda cr\u00edtica en torno al tono",
+    "Tone-to-Noise Ratio (ECMA-418-1, clause 11)":
+        "Relaci\u00f3n tono-ruido (ECMA-418-1, apartado 11)",
+    "Bin power [dB]": "Potencia por bin [dB]",
 }
 
 _ES_PATTERNS = [
     (r"^Octave Band: (.+) Hz$", r"Banda de octava: \1 Hz"),
     (r"^(\d+) phon$", r"\1 fonios"),
+    (r"^TNR = (.+) dB\n\(criterion (.+) dB\)$", "TNR = \\1 dB\\n(criterio \\2 dB)"),
     (r"^Measured 1/(\d+) Octave Bands$", r"Bandas de 1/\1 de octava medidas"),
     (r"^IEC target (.+) dB$", r"Objetivo IEC \1 dB"),
     (r"^([\d.]+) ms burst$", "R\u00e1faga de \\1 ms"),
@@ -1214,6 +1234,132 @@ def generate_calibration_stability(output_dir: str) -> None:
     plt.close()
 
 
+def generate_sel_concept(output_dir: str) -> None:
+    """SEL: the whole event compressed into one second of equal energy."""
+    print("Generating sel_concept.png...")
+    from phonometry import leq, sel, time_weighting
+
+    fs = 48000
+    seconds = 8.0
+    tt = np.arange(int(fs * seconds)) / fs
+    rng = np.random.default_rng(11)
+    # A vehicle pass-by: noise with a gaussian energy envelope
+    envelope = np.exp(-0.5 * ((tt - 4.0) / 1.1) ** 2)
+    x = envelope * rng.standard_normal(tt.size) * 0.3
+
+    env = time_weighting(x, fs, mode="fast")
+    level = 10 * np.log10(np.maximum(env, 1e-12))
+    l_sel = float(sel(x, fs, dbfs=True))
+    l_eq = float(leq(x, fs, dbfs=True))
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(tt, level, color=COLOR_PRIMARY, linewidth=1.2,
+            label="Fast level of the event")
+    ax.hlines(l_eq, 0, seconds, color=COLOR_TERTIARY, linestyle="--",
+              linewidth=1.6, label="Leq over the whole event")
+    # SEL: same energy squeezed into 1 s (drawn as a 1 s block)
+    ax.fill_between([3.5, 4.5], -55, l_sel, color=COLOR_SECONDARY, alpha=0.25)
+    ax.hlines(l_sel, 3.5, 4.5, color=COLOR_SECONDARY, linewidth=2.2,
+              label="SEL: same energy in 1 s")
+    ax.annotate("equal energy", xy=(4.5, l_sel - 3), xytext=(5.6, l_sel - 1),
+                fontsize=10, arrowprops={"arrowstyle": "->", "lw": 0.9})
+    ax.set_title("Sound Exposure Level: the event normalized to 1 s",
+                 fontweight="bold", pad=12)
+    ax.set_xlim(0, seconds)
+    ax.set_ylim(-55, l_sel + 6)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Level [dBFS]")
+    ax.legend(loc="lower left", fontsize=9)
+    plt.savefig(themed_path(output_dir, "sel_concept.png"))
+    plt.close()
+
+
+def generate_lden_profile(output_dir: str) -> None:
+    """A 24 h urban level profile with the Lden period weightings."""
+    print("Generating lden_profile.png...")
+    from phonometry import lden
+
+    hours = np.arange(24)
+    # Typical urban road profile (synthetic hourly LAeq, dB)
+    laeq_h = np.array([48, 46, 45, 45, 46, 50, 56, 64, 66, 65, 63, 63,
+                       64, 63, 63, 64, 65, 66, 65, 64, 63, 62, 61, 50],
+                      dtype=float)
+
+    def _period_leq(idx: "np.ndarray") -> float:
+        return float(10 * np.log10(np.mean(10 ** (0.1 * laeq_h[idx]))))
+
+    ld = _period_leq(np.arange(7, 19))    # day 07-19
+    le = _period_leq(np.arange(19, 23))   # evening 19-23
+    ln_ = _period_leq(np.r_[np.arange(23, 24), np.arange(0, 7)])  # night 23-07
+    l_den = lden(ld, le, ln_)
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    ax.axvspan(7, 19, color=COLOR_TERTIARY, alpha=0.10)
+    ax.axvspan(19, 23, color="#e8a838", alpha=0.15)
+    ax.axvspan(23, 24, color=COLOR_PRIMARY, alpha=0.12)
+    ax.axvspan(0, 7, color=COLOR_PRIMARY, alpha=0.12)
+    ax.step(np.r_[hours, 24], np.r_[laeq_h, laeq_h[-1]], where="post",
+            color=COLOR_FG, linewidth=1.6, label="Hourly LAeq")
+    ax.hlines(ld, 7, 19, color=COLOR_TERTIARY, linestyle="--", linewidth=2,
+              label="Lday (+0 dB)")
+    ax.hlines(le + 5, 19, 23, color="#e8a838", linestyle="--", linewidth=2,
+              label="Levening + 5 dB")
+    ax.hlines(ln_ + 10, 23, 24, color=COLOR_PRIMARY, linestyle="--", linewidth=2)
+    ax.hlines(ln_ + 10, 0, 7, color=COLOR_PRIMARY, linestyle="--", linewidth=2,
+              label="Lnight + 10 dB")
+    ax.hlines(l_den, 0, 24, color=COLOR_SECONDARY, linewidth=2.4,
+              label=f"Lden = {l_den:.1f} dB")
+    ax.set_title("Day-Evening-Night Level Lden (ISO 1996-1)",
+                 fontweight="bold", pad=12)
+    ax.set_xlim(0, 24)
+    ax.set_ylim(42, 80)
+    ax.set_xticks([0, 4, 7, 12, 16, 19, 23])
+    ax.set_xlabel("Hour of day")
+    ax.set_ylabel("Level [dB]")
+    ax.legend(loc="upper left", fontsize=9, ncol=2)
+    plt.savefig(themed_path(output_dir, "lden_profile.png"))
+    plt.close()
+
+
+def generate_tonality_spectrum(output_dir: str) -> None:
+    """Annotated spectrum for the tone-to-noise ratio method."""
+    print("Generating tonality_spectrum.png...")
+    from phonometry import tone_to_noise_ratio
+    from phonometry.tonality import _averaged_spectrum, _critical_band
+
+    fs = 48000
+    rng = np.random.default_rng(21)
+    tt = np.arange(fs * 30) / fs
+    x = (np.sqrt(2) * 0.1 * np.sin(2 * np.pi * 1000 * tt)
+         + 0.05 * rng.standard_normal(tt.size))
+    result = tone_to_noise_ratio(x, fs)
+    freqs, power, _ = _averaged_spectrum(x - np.mean(x), fs, 1.0)
+    f1, f2, _ = _critical_band(result.frequency)
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    sel_band = (freqs > 700) & (freqs < 1400)
+    db = 10 * np.log10(np.maximum(power, 1e-18))
+    ax.plot(freqs[sel_band], db[sel_band], color=COLOR_PRIMARY, linewidth=1.0,
+            label="Averaged FFT spectrum (Hann)")
+    ax.axvspan(f1, f2, color=COLOR_TERTIARY, alpha=0.15,
+               label="Critical band around the tone")
+    ax.axvline(result.frequency, color=COLOR_SECONDARY, linewidth=1.4,
+               linestyle="--")
+    ax.annotate(
+        f"TNR = {result.ratio_db:.1f} dB\n(criterion {result.criterion_db:.1f} dB)",
+        xy=(result.frequency, db.max() - 2), xytext=(1120, db.max() - 8),
+        fontsize=11, arrowprops={"arrowstyle": "->", "lw": 1.0},
+    )
+    ax.set_title("Tone-to-Noise Ratio (ECMA-418-1, clause 11)",
+                 fontweight="bold", pad=12)
+    ax.set_xlim(700, 1400)
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Bin power [dB]")
+    ax.legend(loc="upper right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "tonality_spectrum.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -1240,6 +1386,9 @@ def generate_all(img_dir: str) -> None:
     generate_block_processing_continuity(img_dir)
     generate_class_mask_overlay(img_dir)
     generate_calibration_stability(img_dir)
+    generate_sel_concept(img_dir)
+    generate_lden_profile(img_dir)
+    generate_tonality_spectrum(img_dir)
 
 
 if __name__ == "__main__":

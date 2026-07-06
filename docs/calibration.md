@@ -28,6 +28,21 @@ spl, freq = octavefilter(signal, fs, calibration_factor=sensitivity)
 The same `calibration_factor` works across the whole library: `octavefilter`,
 `OctaveFilterBank`, `leq`, `laeq` and `ln_levels`.
 
+## Calibrator assumptions (IEC 60942)
+
+`calculate_sensitivity` assumes the reference recording comes from an acoustic
+calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
+
+- The default `target_spl=94.0` matches the common 94 dB @ 1 kHz calibrator
+  output (the standard requires the principal level to be at least 90 dB re
+  20 µPa; 94 dB and 114 dB are the usual choices).
+- The resulting sensitivity inherits the calibrator's class tolerance — e.g.
+  ±0.4 dB for a class 1 calibrator between 160 Hz and 1.25 kHz (IEC 60942
+  Table 1) — plus the RMS estimation error of your recording.
+- IEC 60942 specifies the generated level as a 20 s average: record a few
+  seconds of *stable* tone (excluding handling noise at the start/end) for the
+  RMS estimate to converge.
+
 ## Digital Analysis (dBFS)
 
 If you are working with digital audio files (e.g., WAV, FLAC) and want to

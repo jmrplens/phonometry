@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "PyOctaveBand: Octave-Band and Fractional Octave-Band filter bank for Python"
+authors:
+  - family-names: "Requena Plens"
+    given-names: "Jose Manuel"
+    email: "jmrplens@gmail.com"
+    orcid: "https://orcid.org/0000-0003-1250-6212"
+repository-code: "https://github.com/jmrplens/PyOctaveBand"
+url: "https://jmrplens.github.io/PyOctaveBand/"
+license: MIT
+keywords:
+  - acoustics
+  - octave-band
+  - fractional-octave-band
+  - sound-level
+  - signal-processing
+  - ANSI-S1.11
+  - IEC-61260
+  - IEC-61672

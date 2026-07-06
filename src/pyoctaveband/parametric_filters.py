@@ -17,7 +17,9 @@ from .utils import _typesignal
 try:
     from numba import jit as _numba_jit
 except ImportError:  # pragma: no cover - depends on install extras
-    _numba_jit = None  # type: ignore[assignment]
+    # unused-ignore: with numba absent its import is Any and the ignore is
+    # unnecessary; with numba installed the assignment needs it.
+    _numba_jit = None  # type: ignore[assignment, unused-ignore]
 
 
 class WeightingFilter:

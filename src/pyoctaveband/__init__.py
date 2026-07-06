@@ -12,6 +12,7 @@ from typing import List, Tuple, overload, Literal
 import numpy as np
 
 from .calibration import calculate_sensitivity
+from .compliance import verify_filter_class
 from .core import OctaveFilterBank
 from .frequencies import getansifrequencies, normalizedfreq
 from .levels import laeq, leq, ln_levels
@@ -40,6 +41,7 @@ __all__ = [
     "leq",
     "laeq",
     "ln_levels",
+    "verify_filter_class",
 ]
 
 

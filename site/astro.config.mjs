@@ -136,6 +136,11 @@ const jsonLd = JSON.stringify({
       screenshot: socialImage,
       license: 'https://opensource.org/licenses/MIT',
       isAccessibleForFree: true,
+      identifier: {
+        '@type': 'PropertyValue',
+        propertyID: 'DOI',
+        value: '10.5281/zenodo.21215280',
+      },
       datePublished,
       dateModified,
       softwareRequirements,

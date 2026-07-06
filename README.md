@@ -1,6 +1,5 @@
 <!-- Package -->
 [![PyPI version](https://img.shields.io/pypi/v/PyOctaveBand?logo=pypi&logoColor=white)](https://pypi.org/project/PyOctaveBand/)
-[![PyPI downloads](https://img.shields.io/pypi/dm/PyOctaveBand?logo=pypi&logoColor=white)](https://pypi.org/project/PyOctaveBand/)
 [![Python versions](https://img.shields.io/pypi/pyversions/PyOctaveBand?logo=python&logoColor=white)](https://pypi.org/project/PyOctaveBand/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jmrplens/PyOctaveBand/blob/main/LICENSE)
 
@@ -11,7 +10,6 @@
 
 <!-- Citation & support -->
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21215280-blue?logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.21215280)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/jmrplens?logo=githubsponsors&label=Sponsor&color=ea4aaa)](https://github.com/sponsors/jmrplens)
 
 # PyOctaveBand
 

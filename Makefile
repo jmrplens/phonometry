@@ -45,6 +45,9 @@ sonar:
 graphs:
 	$(PYTHON) generate_graphs.py
 
+llms:
+	$(PYTHON) scripts/gen_llms.py
+
 test:
 	$(PYTHON) -m pytest tests/
 

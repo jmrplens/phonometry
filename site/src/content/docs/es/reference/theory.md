@@ -166,6 +166,17 @@ Para garantizar **estabilidad total** en todo el espectro audible (incluso a
 frecuencias bajas como 16 Hz con frecuencias de muestreo altas), PyOctaveBand
 emplea dos estrategias fundamentales:
 
+```mermaid
+flowchart LR
+    X["Señal de entrada\nfs"] --> D{"¿Banda grave?"}
+    D -- "sí" --> R["Diezmar\nresample_poly (1/M)"] --> S1["Filtro SOS de banda\na fs/M"]
+    D -- "no" --> S2["Filtro SOS de banda\na fs"]
+    S1 --> L["Nivel de banda (RMS/pico)"]
+    S2 --> L
+    S1 -- "sigbands=True" --> U["Interpolar de vuelta\nresample_poly (M/1)"] --> Y["Señal de banda\na fs"]
+    S2 -- "sigbands=True" --> Y
+```
+
 1. **Secciones de segundo orden (SOS):** todos los filtros se implementan como
    biquads en cascada, evitando la pérdida catastrófica de precisión de las
    funciones de transferencia de orden alto.

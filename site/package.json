@@ -4,16 +4,28 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "prebuild": "node scripts/copy-llms.mjs",
+    "postbuild": "node scripts/add-sitemap-lastmod.mjs",
+    "check:i18n": "node scripts/check-i18n-parity.mjs",
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "html-validate": "html-validate 'dist/**/*.html'",
+    "pa11y": "astro preview & PREVIEW_PID=$!; sleep 3 && pa11y-ci; EXIT=$?; kill $PREVIEW_PID 2>/dev/null; exit $EXIT"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.41.3",
     "astro": "^7.0.6",
+    "astro-mermaid": "^2.1.0",
     "katex": "^0.17.0",
+    "mermaid": "^11.16.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.3",
+    "starlight-links-validator": "^0.25.2"
+  },
+  "devDependencies": {
+    "html-validate": "^11.5.5",
+    "pa11y-ci": "^4.1.1"
   }
 }

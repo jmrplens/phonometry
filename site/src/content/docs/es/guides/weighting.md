@@ -6,7 +6,7 @@ description: "Curvas de ponderación IEC 61672-1 con precisión clase 1 en alta 
 Las curvas de ponderación frecuencial simulan la sensibilidad del oído humano,
 según especifica la norma **IEC 61672-1:2013**.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses.png" alt="Curvas de ponderación A, C y Z con zoom de la región positiva de la curva A (+1,27 dB en 2,5 kHz)" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses_dark.png" alt="Curvas de ponderación A, C y Z con zoom de la región positiva de la curva A (+1,27 dB en 2,5 kHz)" style="width:80%">
 
 * **Ponderación A (`A`):** estándar para ruido ambiental (IEC 61672-1).
 * **Ponderación C (`C`):** para presión sonora de pico y ruido de alto nivel.
@@ -45,7 +45,7 @@ ponderación a una frecuencia interna sobremuestreada (≥ 96 kHz) y diezma de
 vuelta, manteniendo la respuesta dentro de las tolerancias de clase 1 hasta
 16 kHz (error ≈ −0,5 dB a 12,5 kHz para fs = 48 kHz).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf.png" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño sobremuestreado, con error" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf_dark.png" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño sobremuestreado, con error" style="width:80%">
 
 *El diseño bilineal simple (rojo) cruza la tolerancia de clase 1 cerca de
 12,5 kHz; el diseño sobremuestreado (azul) se mantiene junto a la curva analítica.*

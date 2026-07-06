@@ -14,7 +14,7 @@ Usamos secciones de segundo orden (SOS) en todos los filtros para garantizar la
 estabilidad numérica. La siguiente gráfica compara las arquitecturas centrándose
 en el punto de cruce a −3 dB.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_type_comparison.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_type_comparison_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_type_comparison.png" alt="Comparación de la respuesta en magnitud de las cinco arquitecturas para la banda de octava de 1 kHz, con zoom en el cruce a -3 dB" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_type_comparison_dark.png" alt="Comparación de la respuesta en magnitud de las cinco arquitecturas para la banda de octava de 1 kHz, con zoom en el cruce a -3 dB" style="width:80%">
 
 | Tipo | Nombre | Ejemplo de uso | Ideal para |
 | :--- | :--- | :--- | :--- |
@@ -30,11 +30,11 @@ Vista espectral completa de los bancos para octava (1/1) y tercio de octava (1/3
 
 | Arquitectura | Octava 1/1 (fraction=1) | Octava 1/3 (fraction=3) |
 | :--- | :--- | :--- |
-| **Butterworth** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_1_order_6.png" width="100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_1_order_6_dark.png" width="100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_3_order_6.png" width="100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_3_order_6_dark.png" width="100%"> |
-| **Chebyshev I** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_1_order_6.png" width="100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_1_order_6_dark.png" width="100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_3_order_6.png" width="100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_3_order_6_dark.png" width="100%"> |
-| **Chebyshev II** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_1_order_6.png" width="100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_1_order_6_dark.png" width="100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_3_order_6.png" width="100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_3_order_6_dark.png" width="100%"> |
-| **Elíptico** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_1_order_6.png" width="100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_1_order_6_dark.png" width="100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_3_order_6.png" width="100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_3_order_6_dark.png" width="100%"> |
-| **Bessel** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_1_order_6.png" width="100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_1_order_6_dark.png" width="100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_3_order_6.png" width="100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_3_order_6_dark.png" width="100%"> |
+| **Butterworth** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_1_order_6.png" alt="Respuesta en frecuencia del banco de filtros Butterworth de banda de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_1_order_6_dark.png" alt="Respuesta en frecuencia del banco de filtros Butterworth de banda de octava" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_3_order_6.png" alt="Respuesta en frecuencia del banco Butterworth de tercio de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_3_order_6_dark.png" alt="Respuesta en frecuencia del banco Butterworth de tercio de octava" style="width:100%"> |
+| **Chebyshev I** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_1_order_6.png" alt="Respuesta en frecuencia del banco Chebyshev I de banda de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_1_order_6_dark.png" alt="Respuesta en frecuencia del banco Chebyshev I de banda de octava" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_3_order_6.png" alt="Respuesta en frecuencia del banco Chebyshev I de tercio de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_3_order_6_dark.png" alt="Respuesta en frecuencia del banco Chebyshev I de tercio de octava" style="width:100%"> |
+| **Chebyshev II** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_1_order_6.png" alt="Respuesta en frecuencia del banco Chebyshev II de banda de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_1_order_6_dark.png" alt="Respuesta en frecuencia del banco Chebyshev II de banda de octava" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_3_order_6.png" alt="Respuesta en frecuencia del banco Chebyshev II de tercio de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_3_order_6_dark.png" alt="Respuesta en frecuencia del banco Chebyshev II de tercio de octava" style="width:100%"> |
+| **Elíptico** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_1_order_6.png" alt="Respuesta en frecuencia del banco elíptico de banda de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_1_order_6_dark.png" alt="Respuesta en frecuencia del banco elíptico de banda de octava" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_3_order_6.png" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_3_order_6_dark.png" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:100%"> |
+| **Bessel** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_1_order_6.png" alt="Respuesta en frecuencia del banco Bessel de banda de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_1_order_6_dark.png" alt="Respuesta en frecuencia del banco Bessel de banda de octava" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_3_order_6.png" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_3_order_6_dark.png" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:100%"> |
 
 ## Uso y ejemplos por tipo de filtro
 
@@ -110,7 +110,36 @@ low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 # Reconstrucción: low + high == signal (respuesta plana)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/crossover_lr4.png" width="60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/crossover_lr4_dark.png" width="60%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/crossover_lr4.png" alt="Crossover Linkwitz-Riley de 4.º orden: paso-bajo, paso-alto y su suma plana" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/crossover_lr4_dark.png" alt="Crossover Linkwitz-Riley de 4.º orden: paso-bajo, paso-alto y su suma plana" style="width:60%">
+
+## Verificar la clase IEC 61260-1
+
+`verify_filter_class` comprueba cada banda de un banco contra los límites de
+aceptación de **IEC 61260-1:2014** (Tabla 1, con el mapeo de breakpoints a
+fraccionales y la interpolación logarítmica de la norma) e informa de la clase
+por banda con su margen en dB:
+
+```python
+from pyoctaveband import OctaveFilterBank, verify_filter_class
+
+bank = OctaveFilterBank(fs=48000, fraction=3, order=6)
+result = verify_filter_class(bank)
+print(result["overall_class"])          # 1, 2 o None
+print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_class1_db': ...}
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/class_mask_overlay.png" alt="Respuesta Butterworth serpenteando entre las regiones prohibidas de la máscara de clase 1 de IEC 61260-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/class_mask_overlay_dark.png" alt="Respuesta Butterworth serpenteando entre las regiones prohibidas de la máscara de clase 1 de IEC 61260-1" style="width:80%">
+
+*La respuesta del Butterworth de orden 6 (azul) serpentea entre las regiones
+prohibidas: debe atenuar al menos la máscara roja fuera de la banda y no más
+que la morada dentro de ella.*
+
+Con parámetros por defecto (orden 6), **Butterworth cumple clase 1**.
+Chebyshev II se queda en clase 2 — limitado exactamente por su `attenuation=60`
+frente a los 70 dB exigidos en el stopband lejano (sube `attenuation` para
+alcanzar clase 1). Chebyshev I, Elíptico y Bessel no cumplen los límites de
+clase con orden 6: el rizado de banda de paso (cheby1/ellip) y la caída lenta
+(bessel) violan la máscara.
 
 ## Descomposición de la señal y estabilidad
 
@@ -134,7 +163,7 @@ spl_c2, _, xb_cheby2 = octavefilter(y, fs=fs, fraction=1, sigbands=True, filter_
 # 'xb_butter' y 'xb_cheby2' contienen las señales por banda en el dominio del tiempo
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_decomposition.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_decomposition_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_decomposition.png" alt="Descomposición por bandas en el tiempo comparando Butterworth y Chebyshev II, incluida la respuesta al impulso" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_decomposition_dark.png" alt="Descomposición por bandas en el tiempo comparando Butterworth y Chebyshev II, incluida la respuesta al impulso" style="width:80%">
 
 *La gráfica compara las respuestas de **Butterworth** (azul, línea continua) y
 **Chebyshev II** (rojo, discontinua). El panel inferior muestra la **respuesta al
@@ -149,6 +178,16 @@ retardo de propagación distinto al de Butterworth. Es una propiedad física nor
 de estas arquitecturas: caídas más agresivas suelen implicar mayor retardo de
 grupo y distorsión de fase.
 :::
+
+### El retardo de grupo, cuantificado
+
+El retardo de grupo $\tau_g(\omega) = -\frac{d\phi(\omega)}{d\omega}$ de la
+banda de octava de 1 kHz muestra el compromiso directamente: Bessel se mantiene
+casi plano en la banda de paso (los transitorios sobreviven), mientras que
+Chebyshev I y el Elíptico pagan su caída abrupta con fuertes picos de retardo en
+los bordes de banda.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/group_delay_comparison.png" alt="Retardo de grupo de la banda de 1 kHz para las cinco arquitecturas: Bessel casi plano, Chebyshev y elíptico con picos en los bordes" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/group_delay_comparison_dark.png" alt="Retardo de grupo de la banda de 1 kHz para las cinco arquitecturas: Bessel casi plano, Chebyshev y elíptico con picos en los bordes" style="width:80%">
 
 ## Filtrado de fase cero
 
@@ -165,7 +204,7 @@ bank = OctaveFilterBank(fs=48000, fraction=3)
 spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/zero_phase_comparison.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/zero_phase_comparison_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/zero_phase_comparison.png" alt="Filtrado causal frente a fase cero de una ráfaga: la salida de fase cero queda alineada con la entrada" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/zero_phase_comparison_dark.png" alt="Filtrado causal frente a fase cero de una ráfaga: la salida de fase cero queda alineada con la entrada" style="width:80%">
 
 *El filtrado causal retrasa la ráfaga según el retardo de grupo del filtro; el
 filtrado de fase cero la mantiene alineada con la entrada.*

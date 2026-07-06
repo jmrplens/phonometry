@@ -5,7 +5,7 @@
 Frequency weighting curves simulate the human ear's sensitivity, as specified by
 **IEC 61672-1:2013**.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses.png" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses.png" alt="A, C and Z frequency weighting curves with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%"></picture>
 
 * **A-Weighting (`A`):** Standard for environmental noise (IEC 61672-1).
 * **C-Weighting (`C`):** Used for peak sound pressure and high-level noise.
@@ -44,7 +44,7 @@ filter at an internally oversampled rate (≥ 96 kHz) and decimates back, keepin
 the response within class 1 tolerances up to 16 kHz (error ≈ −0.5 dB at
 12.5 kHz for fs = 48 kHz).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf.png" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf.png" alt="A-weighting high-frequency accuracy at 48 kHz: analytic curve versus plain bilinear versus oversampled design, with error subplot" width="80%"></picture>
 
 *The plain bilinear design (red) crosses the class 1 tolerance near 12.5 kHz;
 the oversampled design (blue) stays close to the analytic curve.*

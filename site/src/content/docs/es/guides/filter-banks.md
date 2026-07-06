@@ -8,6 +8,55 @@ transferencia característica. Todos los bancos sitúan sus **puntos de −3 dB 
 los bordes de banda de ANSI S1.11**, de modo que los niveles por banda son
 comparables entre arquitecturas.
 
+## Bandas de octava fraccionaria: las matemáticas
+
+IEC 61260-1:2014 construye cada banda a partir de la razón de octava en base 10
+$G = 10^{3/10} \approx 1.99526$ (es decir, "una octava" *no* es exactamente 2).
+Para la fracción de banda $1/b$, las frecuencias centrales y los bordes de
+banda siguen (5.2-5.5):
+
+$$
+f_m = 1000 \cdot G^{x/b} \quad (b\ \text{impar}), \qquad
+f_1 = f_m G^{-1/2b}, \quad f_2 = f_m G^{+1/2b}
+$$
+
+de modo que cada banda de tercio de octava abarca
+$G^{1/3} \approx 1.2589 \approx 10^{1/10}$ — diez bandas por década, y por eso
+las frecuencias nominales (25, 31,5, 40 …) se repiten escaladas por 10.
+phonometry diseña cada banda como una cascada SOS cuyos puntos de −3 dB caen
+exactamente en $f_1$ y $f_2$ en todas las arquitecturas — para Chebyshev II,
+Elíptico y Bessel eso exige pre-deformar (pre-warping) el mapeo analítico de los
+bordes de banda en lugar de confiar en la parametrización por defecto de SciPy.
+
+### Decimación multitasa
+
+Una banda de tercio de octava de 25 Hz a 48 kHz tiene un ancho de banda
+relativo del 0,012 % de Nyquist — coeficientes tan rígidos que se vuelven
+numéricamente inestables. El banco lo evita filtrando las bandas bajas a una
+frecuencia diezmada:
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es.svg" alt="Decimación multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un filtro paso bajo antialias y decimación, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es_dark.svg" alt="Decimación multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un paso-bajo antialiasing y diezmado, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%">
+
+### Parámetros de `octavefilter()` / `OctaveFilterBank`
+
+| Parámetro | Tipo | Unidades | Rango / por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | array 1D o 2D | unidades digitales | no vacío | 2D es `[channels, samples]` |
+| `fs` | int | Hz | > 0 | |
+| `fraction` | int | — | por defecto `1`; habitual `3`; cualquier `b ≥ 1` | Bandas por octava = `b` |
+| `order` | int | — | por defecto `6` | Orden SOS por banda |
+| `limits` | lista `[lo, hi]` | Hz | por defecto `[12, 20000]` | Rango de análisis |
+| `filter_type` | str | — | `'butter'` (por defecto), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | Ver la comparación más abajo |
+| `ripple` / `attenuation` | float | dB | requerido por los tipos cheby/ellip | Rizado de banda de paso / atenuación de banda eliminada |
+| `show` | bool | — | por defecto `False` | Dibuja la respuesta del banco (requiere matplotlib) |
+| `sigbands` | bool | — | por defecto `False` | Devuelve también las señales temporales por banda |
+| `zero_phase` | bool | — | por defecto `False` | Filtrado adelante-atrás (offline) |
+| `stateful` / `steady_ic` (clase) | bool | — | por defecto `False` | Estado en streaming; consulta [Procesado por bloques](/phonometry/es/guides/block-processing/) |
+
+`verify_filter_class(bank)` comprueba el banco diseñado contra los límites de
+aceptación de la Tabla 1 de IEC 61260-1 e informa de la clase (0, 1, 2) con los
+márgenes por banda.
+
 ## Comparación de filtros y zoom
 
 Usamos secciones de segundo orden (SOS) en todos los filtros para garantizar la

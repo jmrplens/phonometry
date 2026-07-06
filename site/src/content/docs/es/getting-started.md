@@ -35,6 +35,19 @@ git submodule add https://github.com/jmrplens/phonometry.git
 pip install -e ./phonometry
 ```
 
+## La cadena de procesado de un vistazo
+
+Todo análisis con phonometry es un subconjunto de una misma cadena: tomar la
+señal cruda, convertirla a unidades físicas, ponderarla en frecuencia, dividirla
+en bandas normalizadas, suavizarla en el tiempo y reducirla a métricas:
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain_es.svg" alt="Cadena de procesado de phonometry: señal, calibración, ponderación frecuencial, banco de filtros de octava, ponderación temporal y métricas, con la norma verificada en cada etapa" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain_es_dark.svg" alt="Cadena de procesado de phonometry: señal, calibración, ponderación frecuencial, banco de filtros de octava, ponderación temporal y métricas, con la norma verificada en cada etapa" style="width:92%">
+
+Cada etapa es una función o clase independiente que puedes usar por separado;
+las guías las recorren de izquierda a derecha ([Calibración](/phonometry/es/guides/calibration/) →
+[Ponderación frecuencial](/phonometry/es/guides/weighting/) → [Bancos de filtros](/phonometry/es/guides/filter-banks/) →
+[Ponderación temporal](/phonometry/es/guides/time-weighting/) → [Niveles](/phonometry/es/guides/levels/)).
+
 ## Uso básico: análisis en tercios de octava
 
 Analiza una señal y obtén el nivel de presión sonora (SPL) por banda de frecuencia.

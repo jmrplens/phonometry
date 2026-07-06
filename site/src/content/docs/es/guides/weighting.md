@@ -47,6 +47,36 @@ se verifica en CI contra todos los valores nominales de respuesta de la Tabla 2
 multicanal y por bloques que A/C. Los niveles medidos con la curva G se
 expresan como L<sub>pG</sub> (o L<sub>Geq</sub> para el nivel equivalente).
 
+## De dónde vienen las curvas
+
+Las curvas A y C son líneas isofónicas invertidas, congeladas en filtros:
+**A** aproxima la inversa de la histórica línea isofónica de 40 fonios (niveles
+bajos, donde el oído descarta los graves con más agresividad) y **C** la más
+plana de ~100 fonios (niveles altos). IEC 61672-1:2013 (Anexo E) define ambas
+analíticamente a partir de cuatro frecuencias de esquina:
+
+$$
+f_1 = 20.599\ \text{Hz}, \quad f_2 = 107.653\ \text{Hz}, \quad
+f_3 = 737.862\ \text{Hz}, \quad f_4 = 12194.217\ \text{Hz}
+$$
+
+C es un paso-banda con polos dobles en $f_1$ y $f_4$ (2 ceros en el origen);
+A añade los polos $f_2$ y $f_3$ (4 ceros), y por eso sigue cayendo en los
+medios-graves. Ambas se normalizan a exactamente 0 dB en 1 kHz. Z es la
+ausencia de ponderación. La derivación completa de polos y ceros está en la
+página de [Teoría](/phonometry/es/reference/theory/).
+
+### Parámetros de `weighting_filter()` / `WeightingFilter`
+
+| Parámetro | Tipo | Unidades | Rango / por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | array 1D o 2D | cualquiera | no vacío | 2D es `[channels, samples]` |
+| `fs` | int | Hz | > 0 | |
+| `curve` | str | — | `'A'` (por defecto), `'C'`, `'G'`, `'Z'` | `'G'` según ISO 7196 (infrasonido); `'Z'` es un bypass |
+| `high_accuracy` | bool | — | por defecto `True` (función) / `not stateful` (clase) | El sobremuestreo interno ≥ 96 kHz mantiene A/C en clase 1 hasta 16 kHz; no aplicable a G |
+| `stateful` | bool (solo clase) | — | por defecto `False` | Conserva el estado del filtro entre bloques (streaming) |
+| `steady_ic` | bool (solo clase) | — | por defecto `False` | Condiciones iniciales estacionarias (sin transitorio de arranque) |
+
 ## Objeto de filtro reutilizable
 
 Si ponderas muchas señales con los mismos parámetros, diseña el filtro una sola vez:

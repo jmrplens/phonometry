@@ -88,6 +88,19 @@ git submodule add https://github.com/jmrplens/phonometry.git
 pip install -e ./phonometry
 ```
 
+## The processing chain at a glance
+
+Every phonometry analysis is some subset of one pipeline — take the raw
+signal, convert it to physical units, weight it in frequency, split it into
+standardized bands, smooth it in time and reduce it to metrics:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain.svg" alt="phonometry processing chain: signal, calibration, frequency weighting, octave filter bank, time weighting and metrics, with the standard verified at each stage" width="92%"></picture>
+
+Each stage is an independent function or class you can use on its own; the
+guides cover them left to right ([Calibration](https://jmrplens.github.io/phonometry/guides/calibration/) →
+[Frequency Weighting](https://jmrplens.github.io/phonometry/guides/weighting/) → [Filter Banks](https://jmrplens.github.io/phonometry/guides/filter-banks/) →
+[Time Weighting](https://jmrplens.github.io/phonometry/guides/time-weighting/) → [Levels](https://jmrplens.github.io/phonometry/guides/levels/)).
+
 ## Basic Usage: 1/3 Octave Analysis
 
 Analyze a signal and get the Sound Pressure Level (SPL) per frequency band.
@@ -146,6 +159,52 @@ safe to pass `wavfile.read` output directly.
 phonometry supports several filter types, each with its own transfer function
 characteristic. All banks place their **−3 dB points on the ANSI S1.11 band
 edges**, so band levels are comparable across architectures.
+
+## Fractional octave bands: the math
+
+IEC 61260-1:2014 builds every band from the base-10 octave ratio
+$G = 10^{3/10} \approx 1.99526$ (so "one octave" is *not* exactly 2). For
+band fraction $1/b$, the mid frequencies and band edges follow (5.2-5.5):
+
+$$
+f_m = 1000 \cdot G^{x/b} \quad (b\ \text{odd}), \qquad
+f_1 = f_m G^{-1/2b}, \quad f_2 = f_m G^{+1/2b}
+$$
+
+so every 1/3-octave band spans $G^{1/3} \approx 1.2589 \approx 10^{1/10}$ —
+ten bands per decade, which is why the nominal frequencies (25, 31.5, 40 …)
+repeat scaled by 10. phonometry designs each band as an SOS cascade whose
+−3 dB points land exactly on $f_1$ and $f_2$ for every architecture — for
+Chebyshev II, Elliptic and Bessel that requires pre-warping the analytic
+band-edge mapping rather than trusting SciPy's default parametrization.
+
+### Multirate decimation
+
+A 25 Hz one-third-octave band at 48 kHz has a relative bandwidth of 0.012 %
+of Nyquist — coefficients so stiff they go numerically unstable. The bank
+avoids that by filtering low bands at a decimated rate:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate.svg" alt="Multirate decimation: high bands filtered at the input rate, low bands after anti-alias low-pass and decimation so the SOS sections stay numerically healthy" width="92%"></picture>
+
+### `octavefilter()` / `OctaveFilterBank` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D or 2D array | digital units | non-empty | 2D is `[channels, samples]` |
+| `fs` | int | Hz | > 0 | |
+| `fraction` | int | — | default `1`; common `3`; any `b ≥ 1` | Bands per octave = `b` |
+| `order` | int | — | default `6` | SOS order per band |
+| `limits` | list `[lo, hi]` | Hz | default `[12, 20000]` | Analysis range |
+| `filter_type` | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See comparison above |
+| `ripple` / `attenuation` | float | dB | required by cheby/ellip types | Passband ripple / stopband attenuation |
+| `show` | bool | — | default `False` | Plot the bank response (needs matplotlib) |
+| `sigbands` | bool | — | default `False` | Also return the per-band time signals |
+| `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline) |
+| `stateful` / `steady_ic` (class) | bool | — | default `False` | Streaming state; see [Block Processing](https://jmrplens.github.io/phonometry/guides/block-processing/) |
+
+`verify_filter_class(bank)` checks the designed bank against the IEC 61260-1
+Table 1 acceptance limits and reports the class (0, 1, 2) with per-band
+margins.
 
 ## Filter Comparison and Zoom
 
@@ -401,6 +460,36 @@ verified in CI against every Table 2 nominal response value (0.25 Hz to 315 Hz).
 processing as A/C. Levels measured with the G curve are reported as
 L<sub>pG</sub> (or L<sub>Geq</sub> for the equivalent level over time).
 
+## Where the curves come from
+
+The A and C curves are inverted equal-loudness contours, frozen into filters:
+**A** approximates the inverse of the historic 40-phon contour (quiet levels,
+where the ear discards bass most aggressively) and **C** the flatter ~100-phon
+one (loud levels). IEC 61672-1:2013 (Annex E) defines both analytically from
+four corner frequencies:
+
+$$
+f_1 = 20.599\ \text{Hz}, \quad f_2 = 107.653\ \text{Hz}, \quad
+f_3 = 737.862\ \text{Hz}, \quad f_4 = 12194.217\ \text{Hz}
+$$
+
+C is a band-pass with double poles at $f_1$ and $f_4$ (2 zeros at the origin);
+A adds the $f_2$ and $f_3$ poles (4 zeros), which is why it keeps falling
+through the low-mids. Both are normalized to exactly 0 dB at 1 kHz. Z is the
+absence of weighting. The full pole/zero derivation is in the
+[Theory](https://jmrplens.github.io/phonometry/reference/theory/) page.
+
+### `weighting_filter()` / `WeightingFilter` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D or 2D array | any | non-empty | 2D is `[channels, samples]` |
+| `fs` | int | Hz | > 0 | |
+| `curve` | str | — | `'A'` (default), `'C'`, `'G'`, `'Z'` | `'G'` per ISO 7196 (infrasound); `'Z'` is a bypass |
+| `high_accuracy` | bool | — | default `True` (function) / `not stateful` (class) | Internal oversampling ≥ 96 kHz keeps A/C in class 1 up to 16 kHz; not applicable to G |
+| `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
+| `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
+
 ## Reusable filter object
 
 If you weight many signals with the same parameters, design the filter once:
@@ -481,6 +570,35 @@ $$
 y[n] = y[n-1] + \alpha \,(x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{otherwise}\end{cases}
 $$
+
+## The exponential detector
+
+A sound level meter's needle cannot follow the pressure waveform — it shows a
+running *mean square* with an exponential memory. Formally (IEC 61672-1, 3.8):
+
+$$
+\tau\,\frac{dy}{dt} + y = x^2(t)
+\quad\Longleftrightarrow\quad
+y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\, e^{-(t-\xi)/\tau}\, d\xi
+$$
+
+a first-order low-pass on the squared signal. The time constant τ sets the
+trade-off: **Fast** (125 ms) follows speech-like fluctuations, **Slow** (1 s)
+steadies the readout for quasi-stationary noise. After a step onset the
+envelope reaches 63 % of its final value in one τ and ~99.8 % after 8τ —
+that is why level analyses discard the first instants of a recording.
+
+### `time_weighting()` / `TimeWeighting` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D or 2D array | pressure (any scale) | non-empty | Squared internally; output is a mean-square envelope |
+| `fs` | int | Hz | > 0 | |
+| `mode` | str | — | `'fast'` (default), `'slow'`, `'impulse'` | τ = 125 ms / 1 s / 35 ms attack + 1.5 s decay |
+| `TimeWeighting(fs, mode)` (class) | — | — | — | Stateful variant for streaming: `process(x)` carries the integrator state between blocks |
+
+The output has the units of $x^2$: take `10*log10(y / p0**2)` for SPL or use
+the level functions, which do it for you.
 
 ## Verified ballistics (IEC 61672-1 Table 4)
 
@@ -663,7 +781,9 @@ A 4 s train pass-by and a 30 s one cannot be compared by their $L_{Aeq}$
 alone — the longer event delivers more energy at the same level. The **sound
 exposure level** compresses the *whole* event energy into exactly one second:
 
-$$L_E = L_{eq,T} + 10\log_{10}\frac{T}{T_0}, \qquad T_0 = 1\ \text{s}$$
+$$
+L_E = L_{eq,T} + 10\log_{10}\frac{T}{T_0}, \qquad T_0 = 1\ \text{s}
+$$
 
 so events of any duration become directly comparable, and $N$ identical
 events sum as $+10\log_{10}N$. This is the building block of airport and
@@ -678,8 +798,10 @@ expresses it as **sound exposure** $E$ in pascal-squared-hours — the time
 integral of the squared A-weighted pressure — and the equivalent
 **normalized 8 h level**:
 
-$$E = \int_0^T p_A^2(t)\,dt \quad [\text{Pa}^2\text{h}], \qquad
-L_{EX,8h} = 10\log_{10}\frac{E}{8\,\text{h} \cdot p_0^2}$$
+$$
+E = \int_0^T p_A^2(t)\,dt \quad [\text{Pa}^2\text{h}], \qquad
+L_{EX,8h} = 10\log_{10}\frac{E}{8\,\text{h} \cdot p_0^2}
+$$
 
 The anchor worth memorizing: **3.2 Pa²h ⇔ exactly 90 dB over 8 h** (the CI
 suite enforces it). Half the dose is −3 dB; double duration at the same level
@@ -827,7 +949,7 @@ levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D or 2D array | digital units | non-empty | 2D returns `(channels, bands, frames)` |
 | `window_time` | float | s | > 0; default `0.125` | Frame length (0.125 s mirrors Fast) |
-| `overlap` | float | — | 0–<1; default `0.5` | Fraction of window overlap |
+| `overlap` | float | — | 0 to 1 (exclusive); default `0.5` | Fraction of window overlap |
 | `mode` | str | — | `'rms'` (default) or `'peak'` | Per-window detector |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline only) |
 | `calibration_factor` / `dbfs` | | | as `leq` | |
@@ -864,8 +986,10 @@ sound pressure levels the chain microphone → preamplifier → ADC must be
 characterized by a single number, the **sensitivity factor** S, that converts
 digital units into pascals:
 
-$$p(t) = S \, x(t) \qquad
-S = \frac{p_\text{ref} \cdot 10^{L_\text{cal}/20}}{\tilde{x}_\text{ref}}$$
+$$
+p(t) = S \, x(t) \qquad
+S = \frac{p_\text{ref} \cdot 10^{L_\text{cal}/20}}{\tilde{x}_\text{ref}}
+$$
 
 where $L_\text{cal}$ is the calibrator's level (typically 94 dB, i.e. 1 Pa),
 $p_\text{ref} = 20\ \mu\text{Pa}$ and $\tilde{x}_\text{ref}$ is the RMS of
@@ -1081,6 +1205,35 @@ All stateful classes handle multichannel input `(channels, samples)`: the state
 is allocated lazily on the first call to match the channel count, and reallocated
 if the channel count changes (e.g. switching from stereo to mono resets the state).
 
+## Real-time level meter pattern
+
+The canonical streaming loop — weight, envelope and report block by block
+with all state carried across calls:
+
+```python
+import numpy as np
+from phonometry import TimeWeighting, WeightingFilter
+
+fs, block = 48000, 4800  # 100 ms blocks
+aw = WeightingFilter(fs, "A", stateful=True)
+env = TimeWeighting(fs, mode="fast")  # the class is inherently stateful
+
+for x in audio_stream(block):            # your capture callback
+    y = env.process(aw.filter(x))
+    spl = 10 * np.log10(y[-1] / (2e-5) ** 2)  # instantaneous LAF
+    display(spl)
+```
+
+### Stateful-mode constraints
+
+| Option | Stateful behavior | Why |
+| :--- | :--- | :--- |
+| `detrend` | must be `False` | Per-block detrending creates boundary discontinuities |
+| `resample` | must be `False` | The resampler is not stateful |
+| `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
+| `high_accuracy` (weighting) | forced off | The polyphase resampling inside is block-incompatible |
+| `steady_ic` | optional | Starts the filters in step-response steady state |
+
 ---
 
 
@@ -1113,6 +1266,20 @@ stereo = np.stack([left, right])          # (2, n_samples)
 spl, freq = octavefilter(stereo, fs, fraction=3)
 # spl has shape (2, n_bands): one row per channel
 ```
+
+## Accepted shapes, at a glance
+
+| Input | Interpreted as | Typical output |
+| :--- | :--- | :--- |
+| `(n,)` 1D array | one channel | scalar level / `(bands,)` |
+| `(ch, n)` 2D array | `ch` channels, `n` samples each | `(ch,)` levels / `(ch, bands)` |
+| list of floats | one channel (converted) | as 1D |
+| `(ch, n)` into `spectrogram` | multichannel STFT-style | `(ch, bands, frames)` |
+
+Everything vectorizes across the leading channel axis — one filter design is
+applied to all channels in a single SciPy call, so 8 channels cost far less
+than 8 separate runs. Convention: **channels first**, like most DSP code
+(`soundfile` returns `(n, ch)`: transpose with `x.T`).
 
 ## Performance: Vectorization and caching
 
@@ -1177,6 +1344,8 @@ All core functionality can be imported directly from the `phonometry` package.
 | `hearing_threshold` | `function` | **Threshold of hearing (ISO 226 Table 1).**<br>• (no parameters) | `freqs, tf = hearing_threshold()` |
 | `tone_to_noise_ratio` | `function` | **Tone-to-noise ratio (ECMA-418-1 §11).**<br>• `x`: Signal (1D)<br>• `fs`: Sample rate [Hz]<br>• `tone_freq`: Tone to assess [Hz] (Default: highest peak)<br>• `resolution_hz`: FFT bin spacing (Default: 1.0) | `r = tone_to_noise_ratio(x, fs)`<br><br>• `ToneAssessment(frequency, ratio_db, criterion_db, prominent)` |
 | `prominence_ratio` | `function` | **Prominence ratio (ECMA-418-1 §12).**<br>• Same params as `tone_to_noise_ratio` | `r = prominence_ratio(x, fs, tone_freq=1000)`<br><br>• `ToneAssessment(...)` |
+| `ToneAssessment` | `dataclass` | **Tone prominence verdict.**<br>• `frequency`: Assessed tone [Hz]<br>• `ratio_db`: TNR or PR [dB]<br>• `criterion_db`: Prominence limit at that frequency [dB]<br>• `prominent`: bool | `r = tone_to_noise_ratio(x, fs)`<br>`if r.prominent: ...` |
+| `CalibrationWarning` | `warning class` | **Unreliable calibration recording.**<br>Emitted by `calculate_sensitivity` when the tone is unstable (IEC 60942 limit) or too short | `warnings.simplefilter("error", CalibrationWarning)` |
 | `lden` | `function` | **Day-evening-night level (ISO 1996-1 §3.6.4).**<br>• `lday`/`levening`/`lnight`: LAeq per period [dB]<br>• `hours`: Period durations (Default: (12, 4, 8)) | `l = lden(63.2, 58.1, 51.4)` |
 | `ldn` | `function` | **Day-night level (ISO 1996-1 §3.6.5).**<br>• `lday`/`lnight`: LAeq per period [dB]<br>• `hours`: Default (15, 9) | `l = ldn(63.2, 51.4)` |
 | `composite_rating_level` | `function` | **Whole-day composite rating (ISO 1996-1 §6.5).**<br>• `periods`: list of (level_db, hours, adjustment_db) summing 24 h | `r = composite_rating_level([(63, 12, 0), (58, 4, 5), (51, 8, 10)])` |

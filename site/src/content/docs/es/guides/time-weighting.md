@@ -32,6 +32,37 @@ y[n] = y[n-1] + \alpha \,(x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{en otro caso}\end{cases}
 $$
 
+## El detector exponencial
+
+La aguja de un sonómetro no puede seguir la forma de onda de presión — muestra
+un *valor cuadrático medio* móvil con memoria exponencial. Formalmente
+(IEC 61672-1, 3.8):
+
+$$
+\tau\,\frac{dy}{dt} + y = x^2(t)
+\quad\Longleftrightarrow\quad
+y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\, e^{-(t-\xi)/\tau}\, d\xi
+$$
+
+un paso-bajo de primer orden sobre la señal al cuadrado. La constante de tiempo
+τ fija el compromiso: **Fast** (125 ms) sigue fluctuaciones del tipo del habla
+y **Slow** (1 s) estabiliza la lectura para ruido cuasi estacionario. Tras un
+escalón, la envolvente alcanza el 63 % de su valor final en un τ y ~99,8 %
+tras 8τ — por eso los análisis de nivel descartan los primeros instantes de una
+grabación.
+
+### Parámetros de `time_weighting()` / `TimeWeighting`
+
+| Parámetro | Tipo | Unidades | Rango / por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | array 1D o 2D | presión (cualquier escala) | no vacío | Se eleva al cuadrado internamente; la salida es una envolvente cuadrática media |
+| `fs` | int | Hz | > 0 | |
+| `mode` | str | — | `'fast'` (por defecto), `'slow'`, `'impulse'` | τ = 125 ms / 1 s / ataque de 35 ms + caída de 1,5 s |
+| `TimeWeighting(fs, mode)` (clase) | — | — | — | Variante con estado para streaming: `process(x)` conserva el estado del integrador entre bloques |
+
+La salida tiene las unidades de $x^2$: toma `10*log10(y / p0**2)` para SPL o
+usa las funciones de nivel, que lo hacen por ti.
+
 ## Balística verificada (IEC 61672-1, Tabla 4)
 
 La respuesta de la envolvente Fast a ráfagas de tono de 4 kHz cae exactamente

@@ -72,3 +72,32 @@ Todas las clases con estado gestionan entrada multicanal `(channels, samples)`:
 el estado se reserva de forma perezosa en la primera llamada para ajustarse al
 número de canales, y se realoja si este cambia (p. ej. pasar de estéreo a mono
 reinicia el estado).
+
+## Patrón de sonómetro en tiempo real
+
+El bucle de streaming canónico — ponderar, obtener la envolvente e informar
+bloque a bloque con todo el estado conservado entre llamadas:
+
+```python
+import numpy as np
+from phonometry import TimeWeighting, WeightingFilter
+
+fs, block = 48000, 4800  # bloques de 100 ms
+aw = WeightingFilter(fs, "A", stateful=True)
+env = TimeWeighting(fs, mode="fast")  # la clase es inherentemente stateful
+
+for x in audio_stream(block):            # tu callback de captura
+    y = env.process(aw.filter(x))
+    spl = 10 * np.log10(y[-1] / (2e-5) ** 2)  # LAF instantáneo
+    display(spl)
+```
+
+### Restricciones del modo con estado
+
+| Opción | Comportamiento con estado | Motivo |
+| :--- | :--- | :--- |
+| `detrend` | debe ser `False` | El detrending por bloque crea discontinuidades en las fronteras |
+| `resample` | debe ser `False` | El remuestreador no conserva estado |
+| `zero_phase` | no soportado | El filtrado bidireccional necesita la señal completa |
+| `high_accuracy` (ponderación) | desactivado forzosamente | El remuestreo polifásico interno es incompatible con bloques |
+| `steady_ic` | opcional | Arranca los filtros en el régimen permanente de la respuesta al escalón |

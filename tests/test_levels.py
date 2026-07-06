@@ -121,3 +121,177 @@ def test_ln_levels_empty_signal_raises() -> None:
 
     with pytest.raises(ValueError, match="empty"):
         ln_levels(np.array([]), FS)
+
+
+# ---------------------------------------------------------------------------
+# LCpeak — IEC 61672-1:2013 §5.13
+# ---------------------------------------------------------------------------
+
+
+def _faded(x: np.ndarray, ramp: float = 0.05) -> np.ndarray:
+    """Fade a tone in/out so the filter onset transient does not add overshoot."""
+    n = int(FS * ramp)
+    window = np.ones_like(x)
+    window[:n] = np.hanning(2 * n)[:n]
+    window[-n:] = np.hanning(2 * n)[n:]
+    return x * window
+
+
+def test_lc_peak_steady_1khz() -> None:
+    """C weighting is ~0 dB at 1 kHz: LCpeak of a steady sine = 20*log10(A/p0)."""
+    from pyoctaveband import lc_peak
+
+    x = _faded(_tone(1000, seconds=1.0, amp=1.0))
+    assert lc_peak(x, FS) == pytest.approx(20 * np.log10(1.0 / 2e-5), abs=0.15)
+
+
+def test_lc_peak_exceeds_lc_by_crest_factor() -> None:
+    """For a steady sine, LCpeak - LC = 20*log10(sqrt(2)) = 3.01 dB."""
+    from pyoctaveband import lc_peak, leq
+    from pyoctaveband.parametric_filters import weighting_filter
+
+    # 10 ms ramps: enough to avoid the onset click without biasing the RMS
+    x = _faded(_tone(1000, seconds=1.0), ramp=0.01)
+    lc = leq(weighting_filter(x, FS, "C"))
+    assert lc_peak(x, FS) - lc == pytest.approx(3.01, abs=0.2)
+
+
+def test_lc_peak_multichannel_and_dbfs() -> None:
+    from pyoctaveband import lc_peak
+
+    x = np.stack([_faded(_tone(1000)), 0.5 * _faded(_tone(1000))])
+    out = lc_peak(x, FS)
+    assert out.shape == (2,)
+    assert out[0] - out[1] == pytest.approx(6.02, abs=0.1)
+    # dBFS: peak 1.0 -> 0 dBFS, calibration must not apply
+    assert lc_peak(_faded(_tone(1000)), FS, calibration_factor=10.0, dbfs=True) == pytest.approx(0.0, abs=0.15)
+
+
+@pytest.mark.parametrize(
+    "cycles,freq,ref,tol",
+    [
+        # BS EN 61672-1:2013 Table 5 (standard page 27): reference differences
+        # LCpeak - LC and class 1 acceptance limits. Test frequencies are the
+        # EXACT one-third-octave frequencies (Annex D), not nominal.
+        (1.0, 10 ** 1.5, 2.5, 2.0),     # one cycle, 31.5 Hz nominal
+        (1.0, 10 ** 2.7, 3.5, 1.0),     # one cycle, 500 Hz nominal
+        (1.0, 10 ** 3.9, 3.4, 2.0),     # one cycle, 8 kHz nominal
+        (0.5, 10 ** 2.7, 2.4, 1.0),     # positive half cycle, 500 Hz
+        (-0.5, 10 ** 2.7, 2.4, 1.0),    # negative half cycle, 500 Hz
+    ],
+)
+def test_lc_peak_iec_table5(cycles: float, freq: float, ref: float, tol: float) -> None:
+    """One-cycle / half-cycle bursts must reproduce Table 5 within class 1."""
+    from pyoctaveband import lc_peak, leq
+    from pyoctaveband.parametric_filters import weighting_filter
+
+    fs = 96000
+    t = np.arange(int(fs * 1.0)) / fs
+    steady = np.sin(2 * np.pi * freq * t)
+    lc_steady = leq(weighting_filter(steady, fs, "C"))
+
+    n = round(abs(cycles) * fs / freq)  # starts and stops on zero crossings
+    sign = 1.0 if cycles > 0 else -1.0
+    burst = np.zeros(int(fs * 1.0))
+    start = len(burst) // 2
+    tt = np.arange(n) / fs
+    burst[start:start + n] = sign * np.sin(2 * np.pi * freq * tt)
+
+    diff = lc_peak(burst, fs) - lc_steady
+    assert diff == pytest.approx(ref, abs=tol), f"{cycles} cycles @ {freq:.0f} Hz: {diff:.2f} dB"
+
+
+# ---------------------------------------------------------------------------
+# SEL / LAE — sound exposure level
+# ---------------------------------------------------------------------------
+
+
+def test_sel_steady_signal_normalizes_to_one_second() -> None:
+    """SEL = Leq + 10*log10(T / 1 s) for a steady signal of duration T."""
+    from pyoctaveband import leq, sel
+
+    x = _tone(1000, seconds=4.0)
+    assert sel(x, FS) == pytest.approx(leq(x) + 10 * np.log10(4.0), abs=1e-6)
+
+
+def test_sel_one_second_equals_leq() -> None:
+    from pyoctaveband import leq, sel
+
+    x = _tone(1000, seconds=1.0)
+    assert sel(x, FS) == pytest.approx(leq(x), abs=1e-9)
+
+
+def test_sel_a_weighted() -> None:
+    from pyoctaveband import laeq, sel
+
+    x = _tone(1000, seconds=2.0)
+    assert sel(x, FS, weighting="A") == pytest.approx(laeq(x, FS) + 10 * np.log10(2.0), abs=0.05)
+
+
+# ---------------------------------------------------------------------------
+# Sound exposure / dose — IEC 61252 (BS EN 61252:1995 §3.1-3.3, Annex A)
+# ---------------------------------------------------------------------------
+
+
+def _tone_at_level(level_db: float, seconds: float = 2.0, f0: float = 1000.0) -> np.ndarray:
+    """1 kHz tone whose A-weighted level equals level_db (A(1 kHz) = 0 dB)."""
+    rms = 2e-5 * 10 ** (level_db / 20)
+    t = np.arange(int(FS * seconds)) / FS
+    return np.sqrt(2) * rms * np.sin(2 * np.pi * f0 * t)
+
+
+def test_sound_exposure_anchor_90db_8h_is_3p2_pa2h() -> None:
+    """BS EN 61252:1995 Annex A / §3.3 NOTE 4: 3.2 Pa²h <-> exactly 90 dB."""
+    from pyoctaveband import sound_exposure
+
+    x = _tone_at_level(90.0)
+    assert sound_exposure(x, FS, duration_hours=8.0) == pytest.approx(3.2, rel=0.01)
+
+
+def test_lex_8h_anchor_90db() -> None:
+    from pyoctaveband import lex_8h
+
+    x = _tone_at_level(90.0)
+    assert lex_8h(x, FS, duration_hours=8.0) == pytest.approx(90.0, abs=0.05)
+
+
+def test_lex_8h_half_workday_subtracts_3db() -> None:
+    """LEX,8h = LAeq,T + 10*log10(T/8h): a 4 h exposure at 90 dB -> 86.99 dB."""
+    from pyoctaveband import lex_8h
+
+    x = _tone_at_level(90.0)
+    assert lex_8h(x, FS, duration_hours=4.0) == pytest.approx(90.0 + 10 * np.log10(4 / 8), abs=0.05)
+
+
+def test_sound_exposure_1_pa2h_is_nearly_85db() -> None:
+    """§3.3 NOTE 4: 1 Pa²h corresponds to a LEX,8h of nearly 85 dB (84.95)."""
+    from pyoctaveband import lex_8h, sound_exposure
+
+    x = _tone_at_level(84.9485)
+    assert sound_exposure(x, FS, duration_hours=8.0) == pytest.approx(1.0, rel=0.01)
+    assert lex_8h(x, FS, duration_hours=8.0) == pytest.approx(84.95, abs=0.05)
+
+
+def test_sound_exposure_defaults_to_recording_duration() -> None:
+    """Without duration_hours, x IS the whole event: E = integral over len(x)."""
+    from pyoctaveband import sound_exposure
+
+    x = _tone_at_level(90.0, seconds=2.0)
+    expected = (2e-5 * 10 ** (90 / 20)) ** 2 * (2.0 / 3600.0)  # Pa² * hours
+    assert sound_exposure(x, FS) == pytest.approx(expected, rel=0.01)
+
+
+def test_sel_invalid_fs_raises() -> None:
+    from pyoctaveband import sel
+
+    with pytest.raises(ValueError, match="fs"):
+        sel(_tone(1000), 0)
+
+
+def test_sound_exposure_rejects_nonpositive_duration() -> None:
+    from pyoctaveband import lex_8h, sound_exposure
+
+    with pytest.raises(ValueError, match="duration_hours"):
+        sound_exposure(_tone_at_level(90.0), FS, duration_hours=0)
+    with pytest.raises(ValueError, match="duration_hours"):
+        lex_8h(_tone_at_level(90.0), FS, duration_hours=-1.0)

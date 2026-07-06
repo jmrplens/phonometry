@@ -98,3 +98,44 @@ def test_delta_ref_equation7_consistency() -> None:
             assert eq7 == pytest.approx(ref, abs=0.15), (
                 f"tau={tau}: Tb={duration}: table {ref} vs Eq.(7) {eq7:.2f}"
             )
+
+
+def _burst_sel_response_db(duration: float) -> float:
+    """LAE of a 4 kHz toneburst relative to the steady A-weighted level."""
+    from pyoctaveband import leq, sel
+    from pyoctaveband.parametric_filters import weighting_filter
+
+    total = 3.0
+    t = np.arange(int(FS * total)) / FS
+    x = np.sin(2 * np.pi * F0 * t)
+    la_steady = leq(weighting_filter(x, FS, "A")[int(0.5 * FS):])
+
+    burst = np.zeros_like(t)
+    start = int(1.0 * FS)
+    burst[start:start + round(duration * FS)] = x[start:start + round(duration * FS)]
+    return float(sel(burst, FS, weighting="A")) - float(la_steady)
+
+
+# BS EN 61672-1:2013 Table 4, column "LAE - LA" (Equation 8:
+# delta_ref = 10*lg(Tb/T0), T0 = 1 s) with the per-row class 1 limits.
+SEL_CASES = [
+    (1.000, 0.0, 0.5, -0.5),
+    (0.500, -3.0, 0.5, -0.5),
+    (0.200, -7.0, 0.5, -0.5),
+    (0.100, -10.0, 1.0, -1.0),
+    (0.050, -13.0, 1.0, -1.0),
+    (0.020, -17.0, 1.0, -1.0),
+    (0.010, -20.0, 1.0, -1.0),
+    (0.005, -23.0, 1.0, -1.0),
+    (0.002, -27.0, 1.0, -1.5),
+    (0.001, -30.0, 1.0, -2.0),
+]
+
+
+@pytest.mark.parametrize("duration,ref,upper,lower", SEL_CASES)
+def test_sel_tone_burst_iec_table4(duration: float, ref: float, upper: float, lower: float) -> None:
+    measured = _burst_sel_response_db(duration)
+    assert lower <= measured - ref <= upper, (
+        f"LAE {duration * 1000:g} ms burst: {measured:.2f} dB vs delta_ref {ref} dB "
+        f"(class 1 limits {upper:+}/{lower:+})"
+    )

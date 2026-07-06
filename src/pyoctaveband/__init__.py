@@ -11,11 +11,11 @@ from typing import List, Tuple, overload, Literal
 
 import numpy as np
 
-from .calibration import calculate_sensitivity
+from .calibration import CalibrationWarning, calculate_sensitivity
 from .compliance import verify_filter_class
 from .core import OctaveFilterBank
 from .frequencies import getansifrequencies, normalizedfreq
-from .levels import laeq, leq, ln_levels
+from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
 from .parametric_filters import (
     TimeWeighting,
     WeightingFilter,
@@ -41,6 +41,11 @@ __all__ = [
     "leq",
     "laeq",
     "ln_levels",
+    "lc_peak",
+    "sel",
+    "sound_exposure",
+    "lex_8h",
+    "CalibrationWarning",
     "verify_filter_class",
 ]
 

@@ -162,6 +162,17 @@ To ensure **100% stability** across the entire audible spectrum (even at low
 frequencies like 16 Hz with high sample rates), PyOctaveBand employs two
 critical strategies:
 
+```mermaid
+flowchart LR
+    X["Input signal\nfs"] --> D{"Low band?"}
+    D -- "yes" --> R["Decimate\nresample_poly (1/M)"] --> S1["SOS band filter\nat fs/M"]
+    D -- "no" --> S2["SOS band filter\nat fs"]
+    S1 --> L["Band level (RMS/peak)"]
+    S2 --> L
+    S1 -- "sigbands=True" --> U["Interpolate back\nresample_poly (M/1)"] --> Y["Band signal\nat fs"]
+    S2 -- "sigbands=True" --> Y
+```
+
 1. **Second-Order Sections (SOS):** All filters are implemented as a series of
    cascaded biquads. This avoids the catastrophic numerical precision loss
    associated with high-order transfer functions (coefficients a, b).

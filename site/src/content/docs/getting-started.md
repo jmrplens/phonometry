@@ -55,7 +55,7 @@ print(f"Bands: {freq}")
 print(f"SPL [dB]: {spl}")
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3.png" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3_dark.png" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" style="width:80%">
 
 *Example of a 1/3 Octave Band spectrum analysis of a complex signal.*
 

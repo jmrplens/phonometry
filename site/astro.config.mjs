@@ -1,3 +1,5 @@
+import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
@@ -5,9 +7,151 @@ import mermaid from 'astro-mermaid';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
+const siteUrl = 'https://jmrplens.github.io';
+const basePath = '/PyOctaveBand';
+const fullUrl = `${siteUrl}${basePath}`;
+const repositoryUrl = 'https://github.com/jmrplens/PyOctaveBand';
+const authorUrl = 'https://jmrp.io';
+const socialImageUrl = `${fullUrl}/og-image.png`;
+const authorId = `${authorUrl}/#person`;
+const websiteId = `${fullUrl}/#website`;
+const softwareId = `${repositoryUrl}#software`;
+const sourceCodeId = `${repositoryUrl}#source-code`;
+const siteDescription =
+  'Octave-band and fractional octave-band filter bank for Python. ANSI S1.11 / IEC 61260-1 compliant filters, IEC 61672-1 A/C/Z and Fast/Slow/Impulse weighting, Leq and statistical levels.';
+const socialImageAlt =
+  'PyOctaveBand: standards-compliant fractional octave analysis for Python';
+const socialImage = {
+  '@type': 'ImageObject',
+  url: socialImageUrl,
+  width: 1200,
+  height: 630,
+};
+
+// Single-sourced version: read from the package, never duplicated here.
+const version = readFileSync(
+  new URL('../src/pyoctaveband/_version.py', import.meta.url),
+  'utf8',
+).match(/__version__\s*=\s*"([^"]+)"/)[1];
+
+// Freshness signals for the SoftwareApplication node. `datePublished` is the
+// first public release (v1.0.0) and is intentionally fixed. To avoid stamping
+// a false "modified today" on every rebuild, `dateModified` tracks the last
+// repository change (HEAD commit date), falling back to build time only when
+// git history is unavailable.
+const datePublished = '2026-01-06';
+const dateModified = (() => {
+  try {
+    return execFileSync('git', ['log', '-1', '--format=%cI'], { encoding: 'utf8' })
+      .trim()
+      .slice(0, 10);
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+})();
+
+const featureList = [
+  '1/1, 1/3 and arbitrary fractional octave filter banks as stable SOS cascades with multirate decimation',
+  'Five architectures: Butterworth, Chebyshev I/II, Elliptic and Bessel, all with -3 dB points on the ANSI band edges',
+  'A/C/Z frequency weighting within IEC 61672-1 class 1 tolerances (verified against Table 3 in CI)',
+  'Fast/Slow/Impulse time ballistics verified against the IEC 61672-1 Table 4 toneburst responses',
+  'Leq, LAeq and L10/L50/L90 statistical levels, octave spectrograms and zero-phase offline filtering',
+  'IEC 61260-1:2014 filter class verifier with per-band margins',
+  'Physical SPL calibration (IEC 60942 calibrators) and dBFS mode',
+  'Vectorized multichannel processing and stateful block (streaming) workflows',
+];
+const softwareRequirements = 'Python >= 3.11 with NumPy and SciPy (matplotlib and numba optional).';
+
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': authorId,
+      name: 'José Manuel Requena Plens',
+      alternateName: 'jmrplens',
+      jobTitle: ['R&D Engineer', 'Firmware & Software Engineer'],
+      url: authorUrl,
+      image: 'https://github.com/jmrplens.png',
+      knowsAbout: [
+        'Acoustics',
+        'Signal processing',
+        'Octave-band filtering',
+        'Python',
+        'Embedded firmware',
+      ],
+      sameAs: [
+        'https://github.com/jmrplens',
+        'https://www.linkedin.com/in/jmrplens',
+        'https://mstdn.jmrp.io/@jmrplens',
+        'https://matrix.to/#/@jmrplens:matrix.jmrp.io',
+        'https://keyoxide.org/0A993B268654DBBA52B7E8D3FCF653391E2C91FC',
+        'https://scholar.google.com/citations?user=9b0kPaUAAAAJ',
+        'https://orcid.org/0000-0003-1250-6212',
+        'https://www.researchgate.net/profile/Jose-Requena-Plens-2',
+        'https://www.mathworks.com/matlabcentral/profile/authors/5890853',
+      ],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': websiteId,
+      name: 'PyOctaveBand',
+      url: `${fullUrl}/`,
+      description: siteDescription,
+      inLanguage: ['en', 'es'],
+      image: socialImage,
+      publisher: { '@id': authorId },
+      about: { '@id': softwareId },
+    },
+    {
+      '@type': 'SoftwareApplication',
+      '@id': softwareId,
+      name: 'PyOctaveBand',
+      softwareVersion: version,
+      applicationCategory: 'DeveloperApplication',
+      applicationSubCategory: 'Scientific/Engineering',
+      operatingSystem: 'Windows, Linux, macOS',
+      programmingLanguage: 'Python',
+      url: repositoryUrl,
+      downloadUrl: 'https://pypi.org/project/PyOctaveBand/',
+      codeRepository: repositoryUrl,
+      image: socialImage,
+      screenshot: socialImage,
+      license: 'https://opensource.org/licenses/MIT',
+      isAccessibleForFree: true,
+      datePublished,
+      dateModified,
+      softwareRequirements,
+      featureList,
+      keywords:
+        'acoustics, octave band, fractional octave, sound level, signal processing, ANSI S1.11, IEC 61260, IEC 61672, Python',
+      description:
+        'Fractional octave filter banks, IEC 61672-1 weighting, Leq/LN levels and octave spectrograms for Python signals in the time domain.',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+      author: { '@id': authorId },
+      sameAs: ['https://pypi.org/project/PyOctaveBand/', `${fullUrl}/`],
+    },
+    {
+      '@type': 'SoftwareSourceCode',
+      '@id': sourceCodeId,
+      name: 'PyOctaveBand source code',
+      codeRepository: repositoryUrl,
+      programmingLanguage: 'Python',
+      runtimePlatform: 'Windows, Linux, macOS',
+      license: 'https://opensource.org/licenses/MIT',
+      isPartOf: { '@id': softwareId },
+      author: { '@id': authorId },
+    },
+  ],
+});
+
 export default defineConfig({
-  site: 'https://jmrplens.github.io',
-  base: '/PyOctaveBand',
+  site: siteUrl,
+  base: basePath,
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex],
@@ -19,22 +163,78 @@ export default defineConfig({
     }),
     starlight({
       title: 'PyOctaveBand',
+      routeMiddleware: './src/routeData.ts',
       plugins: [
         starlightLinksValidator({
           errorOnRelativeLinks: false,
           errorOnFallbackPages: false,
         }),
       ],
+      description: siteDescription,
       lastUpdated: true,
-      customCss: ['./src/styles/katex.css', './src/styles/theme-images.css'],
+      components: {
+        // Per-page structured data (TechArticle / BreadcrumbList) and
+        // per-page Twitter card tags, layered on the default head.
+        Head: './src/components/Head.astro',
+        // Human-visible maintainer block corroborating the Person node.
+        Footer: './src/components/Footer.astro',
+      },
+      customCss: [
+        './src/styles/katex.css',
+        './src/styles/theme-images.css',
+        './src/styles/splash-menu.css',
+      ],
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/jmrplens/PyOctaveBand' },
+        { icon: 'mastodon', label: 'Mastodon', href: 'https://mstdn.jmrp.io/@jmrplens' },
+        { icon: 'linkedin', label: 'LinkedIn', href: 'https://linkedin.com/in/jmrplens' },
       ],
       defaultLocale: 'root',
       locales: {
         root: { label: 'English', lang: 'en' },
         es: { label: 'Español', lang: 'es' },
       },
+      head: [
+        // Open Graph image
+        { tag: 'meta', attrs: { property: 'og:image', content: socialImageUrl } },
+        { tag: 'meta', attrs: { property: 'og:image:alt', content: socialImageAlt } },
+        { tag: 'meta', attrs: { property: 'og:image:type', content: 'image/png' } },
+        { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+        { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+        // Twitter card
+        { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
+        { tag: 'meta', attrs: { name: 'twitter:image', content: socialImageUrl } },
+        { tag: 'meta', attrs: { name: 'twitter:image:alt', content: socialImageAlt } },
+        // Author
+        { tag: 'meta', attrs: { name: 'author', content: 'José Manuel Requena Plens' } },
+        // Theme color
+        { tag: 'meta', attrs: { name: 'theme-color', content: '#1f77b4' } },
+        // rel="me" identity links (canonical list from jmrp.io)
+        { tag: 'link', attrs: { rel: 'me', href: 'https://github.com/jmrplens' } },
+        { tag: 'link', attrs: { rel: 'me', href: 'https://www.linkedin.com/in/jmrplens' } },
+        { tag: 'link', attrs: { rel: 'me', href: 'https://mstdn.jmrp.io/@jmrplens' } },
+        { tag: 'link', attrs: { rel: 'me', href: 'https://scholar.google.com/citations?user=9b0kPaUAAAAJ' } },
+        { tag: 'link', attrs: { rel: 'me', href: 'https://orcid.org/0000-0003-1250-6212' } },
+        { tag: 'link', attrs: { rel: 'me', href: 'https://matrix.to/#/@jmrplens:matrix.jmrp.io' } },
+        { tag: 'link', attrs: { rel: 'me', href: 'https://keyoxide.org/0A993B268654DBBA52B7E8D3FCF653391E2C91FC' } },
+        { tag: 'link', attrs: { rel: 'me', href: 'https://jmrp.io' } },
+        // PGP public key
+        {
+          tag: 'link',
+          attrs: {
+            rel: 'pgpkey',
+            type: 'application/pgp-keys',
+            href: 'https://keys.openpgp.org/vks/v1/by-fingerprint/0A993B268654DBBA52B7E8D3FCF653391E2C91FC',
+          },
+        },
+        // Web app manifest
+        { tag: 'link', attrs: { rel: 'manifest', href: `${basePath}/manifest.json` } },
+        // Bing Webmaster Tools site verification (Google Search Console is
+        // already verified for this property; no meta needed).
+        { tag: 'meta', attrs: { name: 'msvalidate.01', content: '7574EB3B44624C239F14920DBC34EE25' } },
+        // JSON-LD structured data
+        { tag: 'script', attrs: { type: 'application/ld+json' }, content: jsonLd },
+      ],
       sidebar: [
         {
           label: 'Start',

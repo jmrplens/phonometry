@@ -1,0 +1,26 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "timeout": 15000,
+    "wait": 2000,
+    "chromeLaunchConfig": {
+      "args": [
+        "--no-sandbox",
+        "--disable-gpu",
+        "--disable-dev-shm-usage"
+      ]
+    }
+  },
+  "urls": [
+    "http://localhost:4321/PyOctaveBand/",
+    "http://localhost:4321/PyOctaveBand/getting-started/",
+    "http://localhost:4321/PyOctaveBand/guides/filter-banks/",
+    "http://localhost:4321/PyOctaveBand/guides/levels/",
+    "http://localhost:4321/PyOctaveBand/guides/calibration/",
+    "http://localhost:4321/PyOctaveBand/reference/api/",
+    "http://localhost:4321/PyOctaveBand/reference/theory/",
+    "http://localhost:4321/PyOctaveBand/es/",
+    "http://localhost:4321/PyOctaveBand/es/getting-started/",
+    "http://localhost:4321/PyOctaveBand/es/guides/filter-banks/"
+  ]
+}

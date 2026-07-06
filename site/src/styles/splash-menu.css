@@ -1,0 +1,12 @@
+/* The route middleware (src/routeData.ts) enables the sidebar on splash
+   pages so the mobile menu button exists. On desktop, hide the sidebar pane
+   to preserve the clean hero layout. */
+@media (min-width: 50rem) {
+  [data-has-hero] .sidebar-pane {
+    display: none;
+  }
+
+  [data-has-hero] .main-frame {
+    --sl-sidebar-width: 0rem;
+  }
+}

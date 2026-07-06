@@ -1,0 +1,98 @@
+---
+// Custom Starlight <Head> override.
+// Renders Starlight's default head, then layers per-page structured data
+// (TechArticle + BreadcrumbList) and per-page Twitter card tags on top.
+// The site-wide @graph (Person / WebSite / SoftwareApplication) lives in
+// astro.config.mjs; these IDs link the per-page nodes back into that graph.
+import Default from '@astrojs/starlight/components/Head.astro';
+
+const SITE = import.meta.env.SITE ?? 'https://jmrplens.github.io';
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+const PERSON_ID = 'https://jmrp.io/#person';
+const WEBSITE_ID = `${SITE}${BASE}/#website`;
+const SOFTWARE_ID = 'https://github.com/jmrplens/PyOctaveBand#software';
+
+interface RouteData {
+  entry?: { data?: { title?: string; description?: string } };
+  lastUpdated?: Date;
+}
+const route = (Astro.locals as { starlightRoute?: RouteData }).starlightRoute;
+const data = route?.entry?.data ?? {};
+const title = data.title ?? 'PyOctaveBand';
+const description = data.description ?? '';
+
+const pathname = Astro.url.pathname; // e.g. /PyOctaveBand/guides/levels/
+const canonical = new URL(pathname, SITE).href;
+const rel = pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname;
+const lang = rel.startsWith('/es/') || rel === '/es' ? 'es' : 'en';
+const isHome = rel === '/' || rel === '' || rel === '/es/' || rel === '/es';
+
+// Git-derived last-updated date (Starlight `lastUpdated: true`).
+const updated =
+  route?.lastUpdated instanceof Date ? route.lastUpdated.toISOString() : undefined;
+
+// TechArticle for every content page (not the splash home).
+const techArticle = isHome
+  ? null
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'TechArticle',
+      headline: title,
+      ...(description ? { description } : {}),
+      inLanguage: lang,
+      url: canonical,
+      mainEntityOfPage: canonical,
+      // Point voice/AI assistants at the page title and lead paragraph.
+      speakable: {
+        '@type': 'SpeakableSpecification',
+        cssSelector: ['h1', '.sl-markdown-content > p:first-of-type'],
+      },
+      ...(updated ? { datePublished: updated, dateModified: updated } : {}),
+      author: { '@id': PERSON_ID },
+      publisher: { '@id': PERSON_ID },
+      isPartOf: { '@id': WEBSITE_ID },
+      about: { '@id': SOFTWARE_ID },
+    };
+
+// BreadcrumbList for every non-home page, with locale-aware section labels.
+function titleCase(seg: string) {
+  return seg.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
+}
+const SECTION_LABELS: Record<string, { en: string; es: string }> = {
+  guides: { en: 'Guides', es: 'Guías' },
+  reference: { en: 'Reference', es: 'Referencia' },
+};
+const segments = rel.split('/').filter(Boolean).filter((s) => s !== 'es');
+const crumbs = [
+  { name: 'PyOctaveBand', item: `${SITE}${BASE}/${lang === 'es' ? 'es/' : ''}` },
+];
+let acc = `${SITE}${BASE}${lang === 'es' ? '/es' : ''}`;
+for (const seg of segments) {
+  acc += `/${seg}`;
+  const label = SECTION_LABELS[seg]?.[lang] ?? (seg === segments[segments.length - 1] ? title : titleCase(seg));
+  crumbs.push({ name: label, item: `${acc}/` });
+}
+const breadcrumbList = isHome
+  ? null
+  : {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: crumbs.map((c, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: c.name,
+        item: c.item,
+      })),
+    };
+---
+
+<Default><slot /></Default>
+{techArticle && (
+  <script type="application/ld+json" set:html={JSON.stringify(techArticle)} />
+)}
+{breadcrumbList && (
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbList)} />
+)}
+<meta name="twitter:title" content={title} />
+{description && <meta name="twitter:description" content={description} />}
+<link rel="canonical" href={canonical} />

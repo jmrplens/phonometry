@@ -20,6 +20,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+          # Full history: add-sitemap-lastmod.mjs stamps per-file git dates.
+          fetch-depth: 0
       - uses: pnpm/action-setup@v6
         with:
           version: 11
@@ -30,8 +32,17 @@ jobs:
           cache-dependency-path: site/pnpm-lock.yaml
       - name: Regenerate llms.txt from docs (freshness guarantee)
         run: python3 scripts/gen_llms.py
+      - name: Check EN/ES translation parity
+        run: node scripts/check-i18n-parity.mjs
+        working-directory: site
       - name: Build site
         run: pnpm install --frozen-lockfile && pnpm build
+        working-directory: site
+      - name: Validate HTML
+        run: pnpm run html-validate
+        working-directory: site
+      - name: Accessibility audit (pa11y, WCAG2AA)
+        run: pnpm run pa11y
         working-directory: site
       - uses: actions/upload-pages-artifact@v5
         with:

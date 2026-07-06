@@ -64,7 +64,7 @@ approach deviates significantly (> 0.8 dB) for the 50 ms burst because 125 ms
 blocks cannot resolve short transient events accurately — the result depends on
 how the burst aligns with the block boundaries.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%">
 
 *Measured Fast envelopes (blue) peaking exactly at the Table 4 reference
 values (dashed) for 200/50/10 ms bursts.*

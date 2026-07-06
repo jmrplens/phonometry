@@ -64,7 +64,7 @@ se desvía significativamente (> 0,8 dB) en la ráfaga de 50 ms porque los bloqu
 de 125 ms no pueden resolver con precisión eventos transitorios cortos — el
 resultado depende de cómo se alinee la ráfaga con los límites de los bloques.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
 
 *Envolventes Fast medidas (azul) alcanzando exactamente los valores de
 referencia de la Tabla 4 (discontinua) para ráfagas de 200/50/10 ms.*

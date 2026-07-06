@@ -8,7 +8,7 @@ Las clases `OctaveFilterBank`, `WeightingFilter` (para ponderación A, C o Z) y
 filtro se conserva entre llamadas, de modo que las salidas concatenadas por
 bloques coinciden con una única pasada sobre la señal completa.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity.png" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity_dark.png" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" style="width:80%">
 
 *Con `stateful=True` las salidas concatenadas por bloques coinciden exactamente
 con el resultado continuo; sin estado, cada frontera de bloque reinicia el

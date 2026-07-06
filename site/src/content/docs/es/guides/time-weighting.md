@@ -7,7 +7,7 @@ La medición precisa de SPL requiere capturar la energía en ventanas temporales
 específicas. PyOctaveBand implementa las constantes de tiempo exactas de la norma
 **IEC 61672-1:2013**.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis_dark.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%">
 
 * **Fast (`fast`):** τ = 125 ms. Estándar para fluctuaciones de ruido.
 * **Slow (`slow`):** τ = 1000 ms. Estándar para ruido estacionario.
@@ -24,13 +24,21 @@ energy_envelope = time_weighting(signal, fs, mode='fast')
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 ```
 
+La balística Impulse asimétrica usa dos constantes — ataque rápido y caída
+lenta — conmutando por muestra según el signo del cambio:
+
+$$
+y[n] = y[n-1] + \alpha \,(x^2[n] - y[n-1]), \qquad
+\alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{en otro caso}\end{cases}
+$$
+
 ## Balística verificada (IEC 61672-1, Tabla 4)
 
 La respuesta de la envolvente Fast a ráfagas de tono de 4 kHz cae exactamente
 sobre los valores de referencia de la norma — verificado en CI para duraciones
 de 1 s a 1 ms (ponderaciones F y S, límites de aceptación de clase 1):
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
 
 ## Estado inicial
 

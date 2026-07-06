@@ -11,7 +11,7 @@
 
 Advanced Octave-Band and Fractional Octave-Band filter bank for signals in the time domain. Fully compliant with **ANSI S1.11-2004** (Filters) and **IEC 61672-1:2013** (Weighting).
 
-<img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_type_comparison.png" width="80%">
+<img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_type_comparison.png" alt="Magnitude response comparison of the five filter architectures for the 1 kHz octave band, with a zoom at the -3 dB crossover" width="80%">
 
 ## ✨ Highlights
 
@@ -69,7 +69,7 @@ print(f"Bands: {freq}")
 print(f"SPL [dB]: {spl}")
 ```
 
-<img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3.png" width="80%">
+<img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3.png" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%">
 
 *1/3 Octave Band spectrum analysis of a complex signal. More examples in the
 [documentation](https://jmrplens.github.io/PyOctaveBand/).*

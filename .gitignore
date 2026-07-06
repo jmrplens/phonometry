@@ -66,3 +66,5 @@ site/node_modules/
 site/dist/
 site/.astro/
 
+site/public/llms.txt
+site/public/llms-full.txt

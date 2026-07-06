@@ -33,6 +33,9 @@ full = ["numba>=0.65.1", "matplotlib>=3.10.9"]
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+pyoctaveband = ["py.typed"]
+
 [tool.setuptools.dynamic]
 version = {attr = "pyoctaveband._version.__version__"}
 

@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     # Ref guard: workflow_dispatch could otherwise be run from any branch
     # and publish unreviewed code; only main may release.
-    if: github.repository == 'jmrplens/PyOctaveBand' && github.ref == 'refs/heads/main'
+    if: github.repository == 'jmrplens/phonometry' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v7
         with:
@@ -67,8 +67,8 @@ jobs:
       - name: Verify built version matches VERSION
         if: steps.version.outputs.skip != 'true'
         run: |
-          ls dist/pyoctaveband-${{ steps.version.outputs.version }}.tar.gz
-          ls dist/pyoctaveband-${{ steps.version.outputs.version }}-py3-none-any.whl
+          ls dist/phonometry-${{ steps.version.outputs.version }}.tar.gz
+          ls dist/phonometry-${{ steps.version.outputs.version }}-py3-none-any.whl
 
       - name: Publish to PyPI
         if: steps.version.outputs.skip != 'true'
@@ -84,7 +84,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Release ${{ steps.version.outputs.tag }}
           body: |
-            See the [changelog](https://github.com/jmrplens/PyOctaveBand/blob/main/CHANGELOG.md) for the full details of this release.
+            See the [changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md) for the full details of this release.
           generate_release_notes: true
           draft: false
           prerelease: false

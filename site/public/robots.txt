@@ -1,8 +1,8 @@
-# PyOctaveBand documentation — robots.txt
+# phonometry documentation — robots.txt
 # All crawlers are welcome, including AI / generative-engine crawlers.
 # Structured context for LLMs:
-#   https://jmrplens.github.io/PyOctaveBand/llms.txt
-#   https://jmrplens.github.io/PyOctaveBand/llms-full.txt
+#   https://jmrplens.github.io/phonometry/llms.txt
+#   https://jmrplens.github.io/phonometry/llms-full.txt
 
 User-agent: *
 Allow: /
@@ -52,4 +52,4 @@ Allow: /
 User-agent: Amazonbot
 Allow: /
 
-Sitemap: https://jmrplens.github.io/PyOctaveBand/sitemap-index.xml
+Sitemap: https://jmrplens.github.io/phonometry/sitemap-index.xml

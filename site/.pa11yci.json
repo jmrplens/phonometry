@@ -12,15 +12,15 @@
     }
   },
   "urls": [
-    "http://localhost:4321/PyOctaveBand/",
-    "http://localhost:4321/PyOctaveBand/getting-started/",
-    "http://localhost:4321/PyOctaveBand/guides/filter-banks/",
-    "http://localhost:4321/PyOctaveBand/guides/levels/",
-    "http://localhost:4321/PyOctaveBand/guides/calibration/",
-    "http://localhost:4321/PyOctaveBand/reference/api/",
-    "http://localhost:4321/PyOctaveBand/reference/theory/",
-    "http://localhost:4321/PyOctaveBand/es/",
-    "http://localhost:4321/PyOctaveBand/es/getting-started/",
-    "http://localhost:4321/PyOctaveBand/es/guides/filter-banks/"
+    "http://localhost:4321/phonometry/",
+    "http://localhost:4321/phonometry/getting-started/",
+    "http://localhost:4321/phonometry/guides/filter-banks/",
+    "http://localhost:4321/phonometry/guides/levels/",
+    "http://localhost:4321/phonometry/guides/calibration/",
+    "http://localhost:4321/phonometry/reference/api/",
+    "http://localhost:4321/phonometry/reference/theory/",
+    "http://localhost:4321/phonometry/es/",
+    "http://localhost:4321/phonometry/es/getting-started/",
+    "http://localhost:4321/phonometry/es/guides/filter-banks/"
   ]
 }

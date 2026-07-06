@@ -10,7 +10,7 @@ const SITE = import.meta.env.SITE ?? 'https://jmrplens.github.io';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const PERSON_ID = 'https://jmrp.io/#person';
 const WEBSITE_ID = `${SITE}${BASE}/#website`;
-const SOFTWARE_ID = 'https://github.com/jmrplens/PyOctaveBand#software';
+const SOFTWARE_ID = 'https://github.com/jmrplens/phonometry#software';
 
 interface RouteData {
   entry?: { data?: { title?: string; description?: string } };
@@ -18,10 +18,10 @@ interface RouteData {
 }
 const route = (Astro.locals as { starlightRoute?: RouteData }).starlightRoute;
 const data = route?.entry?.data ?? {};
-const title = data.title ?? 'PyOctaveBand';
+const title = data.title ?? 'phonometry';
 const description = data.description ?? '';
 
-const pathname = Astro.url.pathname; // e.g. /PyOctaveBand/guides/levels/
+const pathname = Astro.url.pathname; // e.g. /phonometry/guides/levels/
 const canonical = new URL(pathname, SITE).href;
 const rel = pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname;
 const lang = rel.startsWith('/es/') || rel === '/es' ? 'es' : 'en';
@@ -64,7 +64,7 @@ const SECTION_LABELS: Record<string, { en: string; es: string }> = {
 };
 const segments = rel.split('/').filter(Boolean).filter((s) => s !== 'es');
 const crumbs = [
-  { name: 'PyOctaveBand', item: `${SITE}${BASE}/${lang === 'es' ? 'es/' : ''}` },
+  { name: 'phonometry', item: `${SITE}${BASE}/${lang === 'es' ? 'es/' : ''}` },
 ];
 let acc = `${SITE}${BASE}${lang === 'es' ? '/es' : ''}`;
 for (const seg of segments) {

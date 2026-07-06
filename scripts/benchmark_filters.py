@@ -1,6 +1,6 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Professional technical benchmark for PyOctaveBand.
+Professional technical benchmark for phonometry.
 Validates numerical precision, stability, phase linearity, and performance 
 using High-Resolution Audio parameters (96kHz, 10s).
 """
@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal as scipy_signal
 
-from pyoctaveband import OctaveFilterBank, octavefilter
+from phonometry import OctaveFilterBank, octavefilter
 
 # Configure matplotlib for headless generation
 import matplotlib
@@ -130,7 +130,7 @@ def benchmark_stability_and_latency(filter_type: str, fs: int = FS_BENCH) -> Dic
 
 def benchmark_crossover(fs: int = FS_BENCH) -> Dict[str, float]:
     """Specialized benchmark for Linkwitz-Riley crossover."""
-    from pyoctaveband import linkwitz_riley
+    from phonometry import linkwitz_riley
     fc = 1000
     impulse = np.zeros(fs)
     impulse[0] = 1.0
@@ -230,7 +230,7 @@ def main() -> None:
     plt.close()
 
     markdown = [
-        "# PyOctaveBand: Technical Benchmark Report",
+        "# phonometry: Technical Benchmark Report",
         f"\nGenerated: {time.strftime('%Y-%m-%d %H:%M:%S')}",
         "\n## 1. Test Signal Parameters",
         f"- **Sample Rate:** {fs/1000} kHz",

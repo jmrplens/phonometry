@@ -10,7 +10,7 @@ back to reading the file directly.
 from importlib.metadata import PackageNotFoundError, version
 
 try:
-    __version__ = version("pyoctaveband")
+    __version__ = version("phonometry")
 except PackageNotFoundError:  # pragma: no cover - source tree without install
     from pathlib import Path
 

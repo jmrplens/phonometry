@@ -6,7 +6,7 @@ Tests for zero-phase (sosfiltfilt) filtering in OctaveFilterBank.
 import numpy as np
 import pytest
 
-from pyoctaveband import OctaveFilterBank
+from phonometry import OctaveFilterBank
 
 FS = 48000
 

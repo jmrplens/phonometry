@@ -1,6 +1,6 @@
-# Contributing to PyOctaveBand
+# Contributing to phonometry
 
-Thank you for your interest in contributing to PyOctaveBand! We welcome contributions from the community to help improve this project.
+Thank you for your interest in contributing to phonometry! We welcome contributions from the community to help improve this project.
 
 ## 🛠️ Development Setup
 
@@ -8,8 +8,8 @@ To set up your development environment:
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/jmrplens/PyOctaveBand.git
-   cd PyOctaveBand
+   git clone https://github.com/jmrplens/phonometry.git
+   cd phonometry
    ```
 
 2. **Create a virtual environment:**
@@ -48,7 +48,7 @@ pytest tests/
 ```
 To check coverage locally:
 ```bash
-pytest --cov=src/pyoctaveband --cov-report=term-missing tests/
+pytest --cov=src/phonometry --cov-report=term-missing tests/
 ```
 
 ### 4. Documentation Images (auto-generated)
@@ -79,7 +79,7 @@ skipped).
 ## 🚀 How to Contribute
 
 ### Reporting Bugs
-If you find a bug, check the [Issues](https://github.com/jmrplens/PyOctaveBand/issues). If not reported, open a new issue with:
+If you find a bug, check the [Issues](https://github.com/jmrplens/phonometry/issues). If not reported, open a new issue with:
 - Steps to reproduce
 - Expected vs Actual behavior
 - Environment details (OS, Python version)

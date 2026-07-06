@@ -8,7 +8,7 @@ from typing import cast
 import matplotlib.pyplot as plt
 import numpy as np
 
-from pyoctaveband import octavefilter
+from phonometry import octavefilter
 
 
 def generate_pink_noise(samples: int) -> np.ndarray:

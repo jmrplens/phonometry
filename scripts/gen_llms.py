@@ -109,7 +109,7 @@ def build_llms_txt(version: str) -> str:
         "## Source and metadata",
         "",
         f"- [Repository]({REPO_URL})",
-        f"- [PyPI](https://pypi.org/project/PyOctaveBand/)",
+        "- [PyPI](https://pypi.org/project/PyOctaveBand/)",
         f"- [Changelog]({REPO_URL}/blob/main/CHANGELOG.md)",
         f"- [Cite this software]({REPO_URL}/blob/main/CITATION.cff)",
         "",

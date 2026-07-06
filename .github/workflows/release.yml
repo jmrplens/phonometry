@@ -19,7 +19,9 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: github.repository == 'jmrplens/PyOctaveBand'
+    # Ref guard: workflow_dispatch could otherwise be run from any branch
+    # and publish unreviewed code; only main may release.
+    if: github.repository == 'jmrplens/PyOctaveBand' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v7
         with:

@@ -70,7 +70,7 @@ def test_weighting_filter_invalid() -> None:
     """
     rng = np.random.default_rng(42)
     x = rng.standard_normal(1000)
-    with pytest.raises(ValueError, match="must be 'A', 'C' or 'Z'"):
+    with pytest.raises(ValueError, match="must be 'A', 'C', 'G' or 'Z'"):
         weighting_filter(x, 48000, curve="B")
 
 

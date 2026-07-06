@@ -78,6 +78,76 @@ de la Tabla 4, y las funciones de dosis contra las anclas de IEC 61252
 muestra representativa de ese periodo de exposición; sin él, la entrada es el
 evento completo.
 
+## Nivel de sonoridad de tonos puros (ISO 226:2023)
+
+Las curvas isofónicas normales relacionan el SPL de un tono puro con su *nivel
+de sonoridad* percibido en fonos (el SPL de un tono de 1 kHz igual de fuerte).
+`equal_loudness_contour(phon)` evalúa la Fórmula (1) de ISO 226:2023 en las 29
+frecuencias preferentes de tercio de octava de la Tabla 1,
+`loudness_level(spl, frequency)` es la inversa exacta (Fórmula 2) y
+`hearing_threshold()` devuelve la columna del umbral de audición:
+
+```python
+from phonometry import equal_loudness_contour, loudness_level
+
+freqs, spl = equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonos
+phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonos
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonos con la curva del umbral de audición" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonos con la curva del umbral de audición" style="width:80%">
+
+Validez según el apartado 4.1: 20–90 fonos (80 fonos por encima de 4 kHz); la
+implementación se verifica en CI contra las tablas del Anexo B. Ojo: esto es la
+sonoridad de *tonos puros* — la sonoridad de señales arbitrarias (sonos,
+ISO 532) es una feature distinta, prevista más adelante.
+
+## Tonos discretos prominentes (ECMA-418-1)
+
+Los componentes tonales del ruido de maquinaria molestan mucho más de lo que
+sugiere su nivel. ECMA-418-1:2024 (referenciada por el Anexo D de ECMA-74)
+define dos métodos FFT para decidir si un tono discreto es *prominente*:
+`tone_to_noise_ratio()` compara el nivel del tono con el ruido enmascarante de
+su banda crítica (apartado 11) y `prominence_ratio()` compara la banda crítica
+centrada en el tono con las dos bandas contiguas (apartado 12). Ambos devuelven
+un veredicto estructurado frente a los criterios de prominencia dependientes de
+la frecuencia:
+
+```python
+from phonometry import tone_to_noise_ratio, prominence_ratio
+
+tnr = tone_to_noise_ratio(x, fs)            # pico más alto, o tone_freq=...
+pr = prominence_ratio(x, fs, tone_freq=1000.0)
+print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
+```
+
+Los tonos secundarios próximos en la misma banda crítica se combinan según el
+apartado 11.6; para complejos armónicos evalúa cada componente (`tone_freq=`).
+Ambos métodos trabajan sobre espectros promediados RMS con ventana Hann y no
+necesitan calibración absoluta (los ratios son diferencias de nivel).
+
+## Ruido ambiental: Lden, Ldn y niveles de evaluación (ISO 1996-1)
+
+La evaluación regulatoria del ruido pondera más las tardes y las noches.
+`lden()` implementa el nivel día-tarde-noche de ISO 1996-1:2016 (3.6.4:
++5 dB tarde, +10 dB noche, periodos 12/4/8 h por defecto — ajustables, porque
+cada país los define distinto), `ldn()` la variante día-noche (3.6.5) y
+`composite_rating_level()` el compuesto general de jornada completa del
+apartado 6.5 (Fórmulas 5-6) para periodos arbitrarios con ajustes por fuente o
+carácter (Tabla A.1: p. ej. +5 dB impulsivo regular, +12 dB altamente
+impulsivo, +3 a +6 dB tonos prominentes):
+
+```python
+from phonometry import lden, composite_rating_level
+
+l = lden(63.2, 58.1, 51.4)                      # desde LAeq por periodo
+r = composite_rating_level([(63.2, 12, 0.0),    # día
+                            (58.1, 4, 5.0),     # tarde (+5)
+                            (51.4, 8, 10.0)])   # noche (+10) == lden
+```
+
+Combínalo con `laeq()` por periodo para ir de grabaciones a Lden, y con
+`tone_to_noise_ratio()` / `prominence_ratio()` para justificar ajustes tonales.
+
 ## Espectrograma de octavas (niveles vs tiempo)
 
 Análisis de octava fraccional en tiempo corto: un nivel por banda y ventana,

@@ -12,10 +12,13 @@ from typing import List, Tuple, overload, Literal
 import numpy as np
 
 from .calibration import CalibrationWarning, calculate_sensitivity
+from .environmental import composite_rating_level, lden, ldn
 from .compliance import verify_filter_class
 from .core import OctaveFilterBank
 from .frequencies import getansifrequencies, normalizedfreq
 from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
+from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
+from .tonality import ToneAssessment, prominence_ratio, tone_to_noise_ratio
 from .parametric_filters import (
     TimeWeighting,
     WeightingFilter,
@@ -45,6 +48,15 @@ __all__ = [
     "sel",
     "sound_exposure",
     "lex_8h",
+    "equal_loudness_contour",
+    "loudness_level",
+    "hearing_threshold",
+    "tone_to_noise_ratio",
+    "prominence_ratio",
+    "ToneAssessment",
+    "lden",
+    "ldn",
+    "composite_rating_level",
     "CalibrationWarning",
     "verify_filter_class",
 ]

@@ -44,6 +44,7 @@ sonar:
 
 graphs:
 	$(PYTHON) generate_graphs.py
+	$(PYTHON) generate_diagrams.py
 
 llms:
 	$(PYTHON) scripts/gen_llms.py

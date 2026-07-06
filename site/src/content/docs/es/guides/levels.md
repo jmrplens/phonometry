@@ -55,6 +55,29 @@ Opciones: `mode` selecciona la balística de la envolvente (`'fast'`, `'slow'`,
 `calibration_factor`/`dbfs` se comportan como en `leq`. El transitorio de ataque
 del integrador (~2τ) se descarta antes de calcular los percentiles.
 
+## Métricas de pico, evento y ocupacionales
+
+```python
+from pyoctaveband import lc_peak, sel, sound_exposure, lex_8h
+
+# Pico ponderado C (IEC 61672-1 §5.13): los límites de acción laborales usan esto
+peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+
+# Nivel de exposición sonora: nivel del evento normalizado a 1 s (LAE)
+lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
+
+# Dosis diaria de ruido (IEC 61252): exposición en Pa²·h y LEX,8h / LEP,d
+E = sound_exposure(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+```
+
+`lc_peak` está verificado contra las respuestas de referencia de ciclo
+único/semiciclo de la Tabla 5 de IEC 61672-1:2013, `sel` contra la columna LAE
+de la Tabla 4, y las funciones de dosis contra las anclas de IEC 61252
+(3,2 Pa²h ↔ exactamente 90 dB). Con `duration_hours`, la entrada se trata como
+muestra representativa de ese periodo de exposición; sin él, la entrada es el
+evento completo.
+
 ## Espectrograma de octavas (niveles vs tiempo)
 
 Análisis de octava fraccional en tiempo corto: un nivel por banda y ventana,

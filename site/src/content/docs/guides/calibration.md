@@ -54,6 +54,15 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
   seconds of *stable* tone (excluding handling noise at the start/end) for the
   RMS estimate to converge.
 
+### Automatic stability validation
+
+When you pass the sample rate, `calculate_sensitivity(ref, fs=fs)` checks the
+recording the way IEC 60942 checks the calibrator itself: the short-term
+fluctuation of the F-weighted level (half of max−min) must stay below 0.10 dB
+(the class 1 limit of Table 1). A `CalibrationWarning` flags badly coupled
+microphones or handling noise before they silently corrupt every calibrated
+level. Tune with `max_fluctuation_db` or disable with `validate=False`.
+
 ## Digital Analysis (dBFS)
 
 If you are working with digital audio files (e.g., WAV, FLAC) and want to

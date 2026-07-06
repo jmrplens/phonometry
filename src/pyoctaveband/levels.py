@@ -117,3 +117,125 @@ def ln_levels(
         p = np.percentile(levels_db, 100 - value, axis=-1)
         result[value] = float(p) if np.ndim(p) == 0 else np.asarray(p)
     return result
+
+
+def lc_peak(
+    x: List[float] | np.ndarray,
+    fs: int,
+    calibration_factor: float = 1.0,
+    dbfs: bool = False,
+) -> float | np.ndarray:
+    """
+    C-weighted peak sound level, LCpeak (IEC 61672-1:2013, subclause 5.13).
+
+    The absolute maximum of the C-weighted signal, expressed in dB. This is
+    the quantity used by occupational-noise regulations (e.g. 135/137/140
+    dB(C) action limits). Verified against the reference one-cycle and
+    half-cycle responses of BS EN 61672-1:2013 Table 5 in the test suite.
+
+    :param x: Input signal (1D or 2D [channels, samples]), raw pressure units.
+    :param fs: Sample rate in Hz.
+    :param calibration_factor: Multiplier converting digital units to Pascals.
+    :param dbfs: If True, return dBFS (0 dB = peak 1.0) instead of dB SPL.
+    :return: Scalar for 1D input, array of shape (channels,) for 2D input.
+    """
+    x_proc = _typesignal(x)
+    _validate_level_input(x_proc, calibration_factor)
+    weighted = weighting_filter(x_proc, fs, "C")
+    peak = np.max(np.abs(weighted), axis=-1)
+    out = _level_db(np.asarray(peak) ** 2, calibration_factor, dbfs)
+    return float(out) if out.ndim == 0 else out
+
+
+def sel(
+    x: List[float] | np.ndarray,
+    fs: int,
+    weighting: str | None = None,
+    calibration_factor: float = 1.0,
+    dbfs: bool = False,
+) -> float | np.ndarray:
+    """
+    Sound exposure level (SEL / LAE): the event level normalized to 1 second.
+
+    ``SEL = Leq,T + 10*log10(T / 1 s)`` — the standard single-event metric
+    (aircraft flyovers, train passes). With ``weighting="A"`` this is LAE as
+    defined by IEC 61672-1:2013 (verified against the Table 4 toneburst
+    reference responses, Equation 8, in the test suite).
+
+    :param x: Input signal covering the whole event (1D or 2D).
+    :param fs: Sample rate in Hz.
+    :param weighting: Optional frequency weighting: 'A', 'C', 'Z' or None.
+    :param calibration_factor: Multiplier converting digital units to Pascals.
+    :param dbfs: If True, reference digital full scale instead of 20 uPa.
+    :return: Scalar for 1D input, array of shape (channels,) for 2D input.
+    """
+    x_proc = _typesignal(x)
+    _validate_level_input(x_proc, calibration_factor)
+    if weighting is not None and weighting.upper() != "Z":
+        x_proc = weighting_filter(x_proc, fs, weighting)
+    duration_s = x_proc.shape[-1] / fs
+    base = leq(x_proc, calibration_factor, dbfs)
+    out = np.asarray(base) + 10 * np.log10(duration_s)
+    return float(out) if out.ndim == 0 else out
+
+
+def sound_exposure(
+    x: List[float] | np.ndarray,
+    fs: int,
+    duration_hours: float | None = None,
+    calibration_factor: float = 1.0,
+) -> float | np.ndarray:
+    """
+    A-weighted sound exposure E in pascal-squared hours (IEC 61252, 3.1).
+
+    The time integral of the squared A-weighted sound pressure. By default
+    the input is the whole event (E integrates over ``len(x)/fs``); pass
+    ``duration_hours`` to treat the input as a representative sample of a
+    longer exposure period (E = mean-square * duration). Anchors from
+    BS EN 61252:1995 (3.3 NOTE 4): 3.2 Pa²h <-> LEX,8h of exactly 90 dB.
+
+    :param x: Input signal in raw pressure units (1D or 2D).
+    :param fs: Sample rate in Hz.
+    :param duration_hours: Exposure period the input represents, in hours.
+        Default: the recording duration itself.
+    :param calibration_factor: Multiplier converting digital units to Pascals.
+    :return: Exposure in Pa²·h (scalar or per-channel array).
+    """
+    x_proc = _typesignal(x)
+    _validate_level_input(x_proc, calibration_factor)
+    if duration_hours is not None and duration_hours <= 0:
+        raise ValueError("'duration_hours' must be positive.")
+    p_a = weighting_filter(x_proc, fs, "A") * calibration_factor
+    mean_square = np.mean(p_a ** 2, axis=-1)
+    hours = duration_hours if duration_hours is not None else x_proc.shape[-1] / fs / 3600.0
+    out = np.asarray(mean_square * hours)
+    return float(out) if out.ndim == 0 else out
+
+
+def lex_8h(
+    x: List[float] | np.ndarray,
+    fs: int,
+    duration_hours: float | None = None,
+    calibration_factor: float = 1.0,
+) -> float | np.ndarray:
+    """
+    Normalized 8-h average sound level, LEX,8h (IEC 61252, 3.3).
+
+    The daily personal noise exposure level: the steady level that, sustained
+    over a nominal 8 h working day, carries the same A-weighted sound
+    exposure as the measured event. Identical to LEP,d (Directive 86/188/EEC)
+    and LEX,8h of ISO 1999 (BS EN 61252:1995, 3.3 NOTES 5-6).
+
+    :param x: Input signal in raw pressure units (1D or 2D).
+    :param fs: Sample rate in Hz.
+    :param duration_hours: Exposure period the input represents, in hours.
+        Default: the recording duration itself.
+    :param calibration_factor: Multiplier converting digital units to Pascals.
+    :return: LEX,8h in dB (scalar or per-channel array).
+    """
+    exposure = np.asarray(
+        sound_exposure(x, fs, duration_hours=duration_hours, calibration_factor=calibration_factor)
+    )
+    eps = np.finfo(float).eps
+    out = 10 * np.log10(np.maximum(exposure, eps) / (8.0 * _REF_PRESSURE ** 2))
+    return float(out) if out.ndim == 0 else out

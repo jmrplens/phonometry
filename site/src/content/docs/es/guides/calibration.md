@@ -54,6 +54,16 @@ calibrador acústico según **IEC 60942** (clases LS, 1 y 2):
   segundos de tono *estable* (excluyendo el ruido de manipulación del
   principio y el final) para que la estimación RMS converja.
 
+### Validación automática de estabilidad
+
+Si pasas la frecuencia de muestreo, `calculate_sensitivity(ref, fs=fs)`
+comprueba la grabación igual que la IEC 60942 comprueba el calibrador: la
+fluctuación a corto plazo del nivel ponderado F (mitad de máx−mín) debe quedar
+por debajo de 0,10 dB (límite de clase 1 de la Tabla 1). Un
+`CalibrationWarning` delata micrófonos mal acoplados o ruido de manipulación
+antes de que corrompan silenciosamente todos los niveles calibrados. Ajusta con
+`max_fluctuation_db` o desactiva con `validate=False`.
+
 ## Análisis digital (dBFS)
 
 Si trabajas con archivos de audio digital (WAV, FLAC…) y quieres analizar

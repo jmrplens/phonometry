@@ -12,6 +12,7 @@ from typing import List, Tuple, overload, Literal
 import numpy as np
 
 from .calibration import CalibrationWarning, calculate_sensitivity
+from .environmental import composite_rating_level, lden, ldn
 from .compliance import verify_filter_class
 from .core import OctaveFilterBank
 from .frequencies import getansifrequencies, normalizedfreq
@@ -53,6 +54,9 @@ __all__ = [
     "tone_to_noise_ratio",
     "prominence_ratio",
     "ToneAssessment",
+    "lden",
+    "ldn",
+    "composite_rating_level",
     "CalibrationWarning",
     "verify_filter_class",
 ]

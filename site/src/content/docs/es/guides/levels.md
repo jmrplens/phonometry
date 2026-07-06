@@ -125,6 +125,29 @@ apartado 11.6; para complejos armónicos evalúa cada componente (`tone_freq=`).
 Ambos métodos trabajan sobre espectros promediados RMS con ventana Hann y no
 necesitan calibración absoluta (los ratios son diferencias de nivel).
 
+## Ruido ambiental: Lden, Ldn y niveles de evaluación (ISO 1996-1)
+
+La evaluación regulatoria del ruido pondera más las tardes y las noches.
+`lden()` implementa el nivel día-tarde-noche de ISO 1996-1:2016 (3.6.4:
++5 dB tarde, +10 dB noche, periodos 12/4/8 h por defecto — ajustables, porque
+cada país los define distinto), `ldn()` la variante día-noche (3.6.5) y
+`composite_rating_level()` el compuesto general de jornada completa del
+apartado 6.5 (Fórmulas 5-6) para periodos arbitrarios con ajustes por fuente o
+carácter (Tabla A.1: p. ej. +5 dB impulsivo regular, +12 dB altamente
+impulsivo, +3 a +6 dB tonos prominentes):
+
+```python
+from phonometry import lden, composite_rating_level
+
+l = lden(63.2, 58.1, 51.4)                      # desde LAeq por periodo
+r = composite_rating_level([(63.2, 12, 0.0),    # día
+                            (58.1, 4, 5.0),     # tarde (+5)
+                            (51.4, 8, 10.0)])   # noche (+10) == lden
+```
+
+Combínalo con `laeq()` por periodo para ir de grabaciones a Lden, y con
+`tone_to_noise_ratio()` / `prominence_ratio()` para justificar ajustes tonales.
+
 ## Espectrograma de octavas (niveles vs tiempo)
 
 Análisis de octava fraccional en tiempo corto: un nivel por banda y ventana,

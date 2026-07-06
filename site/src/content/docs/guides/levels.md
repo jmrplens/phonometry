@@ -122,6 +122,29 @@ clause 11.6; for harmonic complexes assess each component (`tone_freq=`).
 Both methods work on Hann-windowed, RMS-averaged spectra and need no absolute
 calibration (the ratios are level differences).
 
+## Environmental noise: Lden, Ldn and rating levels (ISO 1996-1)
+
+Regulatory noise assessment weights evenings and nights more heavily.
+`lden()` implements the day-evening-night level of ISO 1996-1:2016 (3.6.4:
++5 dB evening, +10 dB night, default 12/4/8 h periods — adjustable, since
+countries define them differently), `ldn()` the day-night variant (3.6.5),
+and `composite_rating_level()` the general whole-day composite of clause 6.5
+(Formulae 5-6) for arbitrary periods with source or character adjustments
+(Table A.1: e.g. +5 dB regular impulsive, +12 dB highly impulsive, +3 to
++6 dB prominent tones):
+
+```python
+from phonometry import lden, composite_rating_level
+
+l = lden(63.2, 58.1, 51.4)                      # from LAeq per period
+r = composite_rating_level([(63.2, 12, 0.0),    # day
+                            (58.1, 4, 5.0),     # evening (+5)
+                            (51.4, 8, 10.0)])   # night  (+10) == lden
+```
+
+Combine with `laeq()` per time period to go from recordings to Lden, and with
+`tone_to_noise_ratio()` / `prominence_ratio()` to justify tonal adjustments.
+
 ## Octave Spectrogram (levels over time)
 
 Short-time fractional-octave analysis: one level per band per window,

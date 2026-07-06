@@ -116,7 +116,9 @@ A 4 s train pass-by and a 30 s one cannot be compared by their $L_{Aeq}$
 alone — the longer event delivers more energy at the same level. The **sound
 exposure level** compresses the *whole* event energy into exactly one second:
 
-$$L_E = L_{eq,T} + 10\log_{10}\frac{T}{T_0}, \qquad T_0 = 1\ \text{s}$$
+$$
+L_E = L_{eq,T} + 10\log_{10}\frac{T}{T_0}, \qquad T_0 = 1\ \text{s}
+$$
 
 so events of any duration become directly comparable, and $N$ identical
 events sum as $+10\log_{10}N$. This is the building block of airport and
@@ -131,8 +133,10 @@ expresses it as **sound exposure** $E$ in pascal-squared-hours — the time
 integral of the squared A-weighted pressure — and the equivalent
 **normalized 8 h level**:
 
-$$E = \int_0^T p_A^2(t)\,dt \quad [\text{Pa}^2\text{h}], \qquad
-L_{EX,8h} = 10\log_{10}\frac{E}{8\,\text{h} \cdot p_0^2}$$
+$$
+E = \int_0^T p_A^2(t)\,dt \quad [\text{Pa}^2\text{h}], \qquad
+L_{EX,8h} = 10\log_{10}\frac{E}{8\,\text{h} \cdot p_0^2}
+$$
 
 The anchor worth memorizing: **3.2 Pa²h ⇔ exactly 90 dB over 8 h** (the CI
 suite enforces it). Half the dose is −3 dB; double duration at the same level
@@ -280,7 +284,7 @@ levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D or 2D array | digital units | non-empty | 2D returns `(channels, bands, frames)` |
 | `window_time` | float | s | > 0; default `0.125` | Frame length (0.125 s mirrors Fast) |
-| `overlap` | float | — | 0–<1; default `0.5` | Fraction of window overlap |
+| `overlap` | float | — | 0 to 1 (exclusive); default `0.5` | Fraction of window overlap |
 | `mode` | str | — | `'rms'` (default) or `'peak'` | Per-window detector |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline only) |
 | `calibration_factor` / `dbfs` | | | as `leq` | |

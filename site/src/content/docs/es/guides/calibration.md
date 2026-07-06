@@ -15,7 +15,9 @@ de presión sonora físicos, la cadena micrófono → preamplificador → ADC de
 caracterizarse con un único número, el **factor de sensibilidad** $S$, que
 convierte unidades digitales en pascales:
 
-$$p(t) = S\,x(t) \qquad S = \frac{p_\text{ref}\cdot 10^{L_\text{cal}/20}}{\tilde{x}_\text{ref}}$$
+$$
+p(t) = S\,x(t) \qquad S = \frac{p_\text{ref}\cdot 10^{L_\text{cal}/20}}{\tilde{x}_\text{ref}}
+$$
 
 donde $L_\text{cal}$ es el nivel del calibrador (típicamente 94 dB, es decir,
 1 Pa), $p_\text{ref} = 20\ \mu\text{Pa}$ y $\tilde{x}_\text{ref}$ es el RMS

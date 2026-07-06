@@ -46,6 +46,36 @@ verified in CI against every Table 2 nominal response value (0.25 Hz to 315 Hz).
 processing as A/C. Levels measured with the G curve are reported as
 L<sub>pG</sub> (or L<sub>Geq</sub> for the equivalent level over time).
 
+## Where the curves come from
+
+The A and C curves are inverted equal-loudness contours, frozen into filters:
+**A** approximates the inverse of the historic 40-phon contour (quiet levels,
+where the ear discards bass most aggressively) and **C** the flatter ~100-phon
+one (loud levels). IEC 61672-1:2013 (Annex E) defines both analytically from
+four corner frequencies:
+
+$$
+f_1 = 20.599\ \text{Hz}, \quad f_2 = 107.653\ \text{Hz}, \quad
+f_3 = 737.862\ \text{Hz}, \quad f_4 = 12194.217\ \text{Hz}
+$$
+
+C is a band-pass with double poles at $f_1$ and $f_4$ (2 zeros at the origin);
+A adds the $f_2$ and $f_3$ poles (4 zeros), which is why it keeps falling
+through the low-mids. Both are normalized to exactly 0 dB at 1 kHz. Z is the
+absence of weighting. The full pole/zero derivation is in the
+[Theory](/phonometry/reference/theory/) page.
+
+### `weighting_filter()` / `WeightingFilter` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D or 2D array | any | non-empty | 2D is `[channels, samples]` |
+| `fs` | int | Hz | > 0 | |
+| `curve` | str | — | `'A'` (default), `'C'`, `'G'`, `'Z'` | `'G'` per ISO 7196 (infrasound); `'Z'` is a bypass |
+| `high_accuracy` | bool | — | default `True` (function) / `not stateful` (class) | Internal oversampling ≥ 96 kHz keeps A/C in class 1 up to 16 kHz; not applicable to G |
+| `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
+| `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
+
 ## Reusable filter object
 
 If you weight many signals with the same parameters, design the filter once:

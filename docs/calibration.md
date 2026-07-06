@@ -13,8 +13,10 @@ sound pressure levels the chain microphone → preamplifier → ADC must be
 characterized by a single number, the **sensitivity factor** S, that converts
 digital units into pascals:
 
-$$p(t) = S \, x(t) \qquad
-S = \frac{p_\text{ref} \cdot 10^{L_\text{cal}/20}}{\tilde{x}_\text{ref}}$$
+$$
+p(t) = S \, x(t) \qquad
+S = \frac{p_\text{ref} \cdot 10^{L_\text{cal}/20}}{\tilde{x}_\text{ref}}
+$$
 
 where $L_\text{cal}$ is the calibrator's level (typically 94 dB, i.e. 1 Pa),
 $p_\text{ref} = 20\ \mu\text{Pa}$ and $\tilde{x}_\text{ref}$ is the RMS of

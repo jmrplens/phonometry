@@ -286,3 +286,12 @@ def test_sel_invalid_fs_raises() -> None:
 
     with pytest.raises(ValueError, match="fs"):
         sel(_tone(1000), 0)
+
+
+def test_sound_exposure_rejects_nonpositive_duration() -> None:
+    from pyoctaveband import lex_8h, sound_exposure
+
+    with pytest.raises(ValueError, match="duration_hours"):
+        sound_exposure(_tone_at_level(90.0), FS, duration_hours=0)
+    with pytest.raises(ValueError, match="duration_hours"):
+        lex_8h(_tone_at_level(90.0), FS, duration_hours=-1.0)

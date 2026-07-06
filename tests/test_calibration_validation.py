@@ -8,6 +8,10 @@ difference between the maximum and minimum levels; class 1 limit 0.10 dB
 (class LS 0.05 dB) for nominal frequencies 160 Hz to 1.25 kHz.
 """
 
+import warnings
+from contextlib import contextmanager
+from typing import Iterator
+
 import numpy as np
 import pytest
 
@@ -23,11 +27,15 @@ def _cal_tone(seconds: float = 5.0, am_depth: float = 0.0) -> np.ndarray:
     return 0.5 * am * np.sin(2 * np.pi * 1000 * t)
 
 
-def test_stable_tone_no_warning() -> None:
-    import warnings
-
+@contextmanager
+def _assert_no_calibration_warning() -> Iterator[None]:
     with warnings.catch_warnings():
         warnings.simplefilter("error", CalibrationWarning)
+        yield
+
+
+def test_stable_tone_no_warning() -> None:
+    with _assert_no_calibration_warning():
         factor = calculate_sensitivity(_cal_tone(), fs=FS)
     assert factor > 0
 
@@ -39,20 +47,14 @@ def test_unstable_tone_warns() -> None:
 
 
 def test_validation_can_be_disabled() -> None:
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.simplefilter("error", CalibrationWarning)
+    with _assert_no_calibration_warning():
         calculate_sensitivity(_cal_tone(am_depth=0.05), fs=FS, validate=False)
 
 
 def test_custom_fluctuation_limit() -> None:
     with pytest.warns(CalibrationWarning):
         calculate_sensitivity(_cal_tone(am_depth=0.05), fs=FS, max_fluctuation_db=0.1)
-    import warnings
-
-    with warnings.catch_warnings():
-        warnings.simplefilter("error", CalibrationWarning)
+    with _assert_no_calibration_warning():
         calculate_sensitivity(_cal_tone(am_depth=0.05), fs=FS, max_fluctuation_db=1.0)
 
 

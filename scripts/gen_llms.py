@@ -11,7 +11,6 @@ one fetch. Both are published to the docs site by site/scripts/copy-llms.mjs
 
 from __future__ import annotations
 
-import ast
 import re
 import pathlib
 
@@ -36,13 +35,7 @@ PAGES = [
 
 
 def _version() -> str:
-    source = (ROOT / "src/pyoctaveband/_version.py").read_text(encoding="utf-8")
-    for node in ast.parse(source).body:
-        if isinstance(node, ast.Assign):
-            for target in node.targets:
-                if isinstance(target, ast.Name) and target.id == "__version__":
-                    return str(ast.literal_eval(node.value))
-    raise SystemExit("Unable to find __version__")
+    return (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 
 
 def _page_title(path: pathlib.Path) -> str:

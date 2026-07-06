@@ -44,7 +44,7 @@ where = ["src"]
 pyoctaveband = ["py.typed"]
 
 [tool.setuptools.dynamic]
-version = {attr = "pyoctaveband._version.__version__"}
+version = {file = "VERSION"}
 
 [tool.mypy]
 # 3.12: numpy >= 2.5 ships PEP 695 `type` statements in its stubs, which mypy

@@ -116,6 +116,13 @@ _ES_EXACT = {
         "stateful=True: los bloques igualan el resultado continuo",
     "zero_phase=True (aligned)": "zero_phase=True (alineado)",
     "0 dB @ 10 Hz": "0 dB @ 10 Hz",
+    "Stable tone (good coupling)": "Tono estable (buen acoplamiento)",
+    "3% AM tone (loose coupling)": "Tono con AM del 3 % (acoplamiento flojo)",
+    "IEC 60942:2017 class 1 limit (deviation from mean)":
+        "L\u00edmite de clase 1 de IEC 60942:2017 (desviaci\u00f3n de la media)",
+    "Calibration Tone Stability Check (IEC 60942:2017, 5.3.3)":
+        "Comprobaci\u00f3n de estabilidad del tono de calibraci\u00f3n (IEC 60942:2017, 5.3.3)",
+    "F-weighted level re mean [dB]": "Nivel con ponderaci\u00f3n F re media [dB]",
 }
 
 _ES_PATTERNS = [
@@ -162,7 +169,8 @@ def _translate_figure(fig: Any) -> None:
         # (tick labels included) except code identifiers and mathtext.
         s = artist.get_text()
         if s and "$" not in s and "_" not in s and _re.search(r"\d\.\d", s):
-            artist.set_text(_re.sub(r"(\d)\.(\d)", r"\1,\2", s))
+            # Clause/version numbers like 5.3.3 keep their dots.
+            artist.set_text(_re.sub(r"(?<![\d.])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s))
 
 
 _plt_savefig = plt.savefig
@@ -1168,6 +1176,44 @@ def generate_og_image(output_path: str = "site/public/og-image.png") -> None:
     plt.close(fig)
 
 
+def generate_calibration_stability(output_dir: str) -> None:
+    """Stable vs unstable calibration tone against the IEC 60942 limit."""
+    print("Generating calibration_stability.png...")
+    from phonometry import time_weighting
+
+    fs = 48000
+    seconds = 6.0
+    tt = np.arange(int(fs * seconds)) / fs
+    stable = 0.5 * np.sin(2 * np.pi * 1000 * tt)
+    # 3 % amplitude modulation at 2 Hz: ~0.14 dB deviation, clearly over
+    unstable = 0.5 * (1 + 0.03 * np.sin(2 * np.pi * 2.0 * tt)) * np.sin(2 * np.pi * 1000 * tt)
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    skip = fs  # discard the F-integrator attack (~8*tau = 1 s)
+    for x, color, label in [
+        (stable, COLOR_PRIMARY, "Stable tone (good coupling)"),
+        (unstable, COLOR_SECONDARY, "3% AM tone (loose coupling)"),
+    ]:
+        env = time_weighting(x, fs, mode="fast")[skip:]
+        level = 10 * np.log10(np.maximum(env, np.finfo(float).eps))
+        rel = level - np.mean(level)
+        ax.plot(tt[skip:], rel, color=color, linewidth=1.4, label=label)
+
+    ax.axhline(0.07, color=COLOR_FG, linestyle="--", linewidth=1.2, alpha=0.7)
+    ax.axhline(-0.07, color=COLOR_FG, linestyle="--", linewidth=1.2, alpha=0.7,
+               label="IEC 60942:2017 class 1 limit (deviation from mean)")
+    ax.fill_between([1, seconds], -0.07, 0.07, color=COLOR_PRIMARY, alpha=0.06)
+    ax.set_title("Calibration Tone Stability Check (IEC 60942:2017, 5.3.3)",
+                 fontweight="bold", pad=12)
+    ax.set_xlim(1, seconds)
+    ax.set_ylim(-0.2, 0.2)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("F-weighted level re mean [dB]")
+    ax.legend(loc="upper right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "calibration_stability.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -1193,6 +1239,7 @@ def generate_all(img_dir: str) -> None:
     generate_tone_burst_iec(img_dir)
     generate_block_processing_continuity(img_dir)
     generate_class_mask_overlay(img_dir)
+    generate_calibration_stability(img_dir)
 
 
 if __name__ == "__main__":

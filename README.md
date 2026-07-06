@@ -6,6 +6,7 @@
 [![Python application](https://github.com/jmrplens/PyOctaveBand/actions/workflows/python-app.yml/badge.svg)](https://github.com/jmrplens/PyOctaveBand/actions/workflows/python-app.yml)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=jmrplens_PyOctaveBand&metric=alert_status)](https://sonarcloud.io/summary/overall?id=jmrplens_PyOctaveBand)
 [![codecov](https://codecov.io/gh/jmrplens/PyOctaveBand/branch/main/graph/badge.svg)](https://codecov.io/gh/jmrplens/PyOctaveBand)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21215280.svg)](https://doi.org/10.5281/zenodo.21215280)
 
 # PyOctaveBand
 

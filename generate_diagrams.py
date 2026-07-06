@@ -38,13 +38,58 @@ DARK = Theme(
 _FONT = "Segoe UI, Helvetica, Arial, sans-serif"
 _MONO = "Consolas, Menlo, monospace"
 
+# Spanish variants of every user-visible string. Strings not in the table
+# (numbers, unit-only labels, code identifiers) are shared between languages.
+_ES: dict[str, str] = {
+    "Calibration chain — from calibrator to physical units":
+        "Cadena de calibración — del calibrador a unidades físicas",
+    "Sound calibrator": "Calibrador acústico",
+    "Microphone +": "Micrófono +",
+    "preamplifier": "preamplificador",
+    "Audio interface": "Interfaz de audio",
+    "Pa per": "Pa por",
+    "digital unit": "unidad digital",
+    "Stability: |max − mean| and |min − mean| ≤ 0.07 dB":
+        "Estabilidad: |máx − media| y |mín − media| ≤ 0,07 dB",
+    "(IEC 60942:2017 Table 2, class 1) — else CalibrationWarning":
+        "(IEC 60942:2017 Tabla 2, clase 1) — si no, CalibrationWarning",
+    "Environmental noise measurement positions (ISO 1996-2)":
+        "Posiciones de medida de ruido ambiental (ISO 1996-2)",
+    "Building façade": "Fachada del edificio",
+    "A — free field": "A — campo libre",
+    "B — 2 m from façade": "B — a 2 m de la fachada",
+    "C — flush-mounted": "C — enrasado en fachada",
+    "4.0 ± 0.2 m": "4,0 ± 0,2 m",
+    "Emission measurement positions (ECMA-74)":
+        "Posiciones de medida de emisión (ECMA-74)",
+    "Operator — seated (P2)": "Operador — sentado (P2)",
+    "Bystanders — top view": "Observadores — vista en planta",
+    "height 1.50 m": "altura 1,50 m",
+    "0.25 m": "0,25 m",
+    "1.20 m": "1,20 m",
+    "1.00 m": "1,00 m",
+    "phonometry processing chain": "Cadena de procesado de phonometry",
+    "Signal": "Señal",
+    "Calibrate": "Calibrar",
+    "Weighting": "Ponderación",
+    "Octave": "Octavas",
+    "bands 1/b": "bandas 1/b",
+    "Ballistics": "Balística",
+    "Metrics": "Métricas",
+}
+
 
 class SVG:
     """Tiny element accumulator with technical-drawing helpers."""
 
-    def __init__(self, width: int, height: int, th: Theme) -> None:
+    def __init__(self, width: int, height: int, th: Theme, lang: str = "en") -> None:
         self.w, self.h, self.th = width, height, th
+        self.lang = lang
         self.parts: list[str] = []
+
+    def tr(self, s: str) -> str:
+        """Translate a user-visible string for the current language."""
+        return _ES.get(s, s) if self.lang == "es" else s
 
     # -- primitives -------------------------------------------------------
     def add(self, fragment: str) -> None:
@@ -71,6 +116,7 @@ class SVG:
     def text(self, x: float, y: float, s: str, size: int = 20,
              fill: str = "", anchor: str = "middle", bold: bool = False,
              mono: bool = False, italic: bool = False) -> None:
+        s = self.tr(s)
         fill = fill or self.th.fg
         w = ' font-weight="600"' if bold else ""
         i = ' font-style="italic"' if italic else ""
@@ -97,7 +143,7 @@ class SVG:
                   f"L {bx - W * px:.1f} {by - W * py:.1f} Z", fill=stroke)
 
     def dim(self, x1: float, y1: float, x2: float, y2: float, label: str,
-            offset: float = 0.0, size: int = 18) -> None:
+            offset: float = 0.0, size: int = 18, label_side: str = "left") -> None:
         """Dimension between two measured points, drafting style.
 
         The dimension line is placed ``offset`` px away (perpendicular);
@@ -123,9 +169,12 @@ class SVG:
             mid = (y1 + y2) / 2
             self.arrow(x, mid - 4, x, y1, th.muted, 1.2)
             self.arrow(x, mid + 4, x, y2, th.muted, 1.2)
-            # Label on the left of the line: keeps it clear of whatever is
-            # being measured (masts, people) on the right.
-            self.text(x - 9, mid + 6, label, size, th.fg, "end")
+            # Label beside the line, on whichever side is clear of the
+            # measured object (masts, people, furniture).
+            if label_side == "right":
+                self.text(x + 9, mid + 6, label, size, th.fg, "start")
+            else:
+                self.text(x - 9, mid + 6, label, size, th.fg, "end")
 
     def mic(self, x: float, capsule_top: float, ground: float,
             scale: float = 1.0) -> None:
@@ -173,19 +222,20 @@ class SVG:
                 f'<rect width="{self.w}" height="{self.h}" fill="{th.bg}"/>'
                 f'<text x="{self.w / 2}" y="30" font-family="{_FONT}" '
                 f'font-size="26" font-weight="600" fill="{th.fg}" '
-                f'text-anchor="middle">{title}</text>')
+                f'text-anchor="middle">{self.tr(title)}</text>')
         return head + "".join(self.parts) + "</svg>"
 
 
 def _write(output_dir: str, name: str, build: "callable", title: str,  # type: ignore[valid-type]
            height: int = 560) -> None:
-    for th in (LIGHT, DARK):
-        svg = SVG(900, height, th)
-        build(svg, th)
-        path = os.path.join(output_dir, f"{name}{th.suffix}.svg")
-        with open(path, "w", encoding="utf-8") as fh:
-            fh.write(svg.render(title))
-    print(f"Generated {name}.svg (+dark)")
+    for lang, lang_suffix in (("en", ""), ("es", "_es")):
+        for th in (LIGHT, DARK):
+            svg = SVG(900, height, th, lang)
+            build(svg, th)
+            path = os.path.join(output_dir, f"{name}{lang_suffix}{th.suffix}.svg")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(svg.render(title))
+    print(f"Generated {name}.svg (+dark, +es, +es_dark)")
 
 
 # ---------------------------------------------------------------------------
@@ -217,8 +267,8 @@ def _d1(s: SVG, th: Theme) -> None:
         s.arrow(prev_x, by + bh / 2, bx - bw / 2 - 6, by + bh / 2, th.fg, 2)
         prev_x = bx + bw / 2 + 6
     s.arrow(prev_x, by + bh / 2, 862, by + bh / 2, th.accent, 2.4)
-    s.text(818, by + bh / 2 + 34, "Pa per", 20, th.accent, mono=True)
-    s.text(818, by + bh / 2 + 58, "digital unit", 20, th.accent, mono=True)
+    s.text(796, by + bh / 2 + 34, "Pa per", 20, th.accent, mono=True)
+    s.text(796, by + bh / 2 + 58, "digital unit", 20, th.accent, mono=True)
 
     # Stability annotation, clearly separated below the chain
     s.rect(250, 340, 560, 96, "none", th.secondary, rx=12, dash="6,5")
@@ -258,16 +308,16 @@ def _d2(s: SVG, th: Theme) -> None:
     a_cap = gy - 230.0
     s.mic(ax, a_cap, gy, 1.15)
     s.dim(ax, gy, ax, a_cap, "4.0 ± 0.2 m", offset=-60, size=20)
-    s.text(ax + 10, a_cap - 58, "A — free field", 22, th.fg, bold=True)
-    s.text(ax + 10, a_cap - 30, "0 dB", 22, th.accent, bold=True, mono=True)
+    s.text(ax - 20, a_cap - 58, "A — free field", 22, th.fg, bold=True)
+    s.text(ax - 20, a_cap - 30, "0 dB", 22, th.accent, bold=True, mono=True)
 
     # Position B: 2 m in front of the facade, dimension at capsule height
     bx = fx - 108.0
     b_cap = gy - 230.0
     s.mic(bx, b_cap, gy, 1.15)
-    s.dim(bx, b_cap + 6, fx, b_cap + 6, "2 m", offset=-36, size=20)
-    s.text(bx - 42, b_cap - 58, "B — 2 m from façade", 22, th.fg, bold=True)
-    s.text(bx - 42, b_cap - 30, "−3 dB", 22, th.secondary, bold=True, mono=True)
+    s.dim(bx, b_cap + 6, fx, b_cap + 6, "2 m", offset=-14, size=20)
+    s.text(bx - 30, b_cap - 58, "B — 2 m from façade", 22, th.fg, bold=True)
+    s.text(bx - 30, b_cap - 30, "−3 dB", 22, th.secondary, bold=True, mono=True)
 
     # Position C: flush-mounted on the facade, below B's dimension zone
     cy = gy - 120.0
@@ -304,7 +354,7 @@ def _d3(s: SVG, th: Theme) -> None:
     s.mic(mx, cap, table_y, 1.1)
     s.line(mx - 18, table_y, mx + 18, table_y, th.fg, 2.2)
     s.dim(eut_front, table_y - 76, mx, cap, "0.25 m", offset=-36, size=20)
-    s.dim(mx + 210, gy, mx + 210, cap, "1.20 m", offset=0, size=20)
+    s.dim(mx + 210, gy, mx + 210, cap, "1.20 m", offset=0, size=20, label_side="right")
     s.line(mx + 10, cap, mx + 210, cap, th.muted, 0.9, dash="3,3")  # witness to capsule
 
     # seated operator on a chair, clear of both dimensions
@@ -347,7 +397,7 @@ def _d4(s: SVG, th: Theme) -> None:
         ("Ballistics", "F / S / I", th.primary),
         ("Metrics", "Leq, LN…", th.accent),
     ]
-    bw, bh, gap = 128.0, 92.0, 18.0
+    bw, bh, gap = 136.0, 92.0, 12.0
     total = len(stages) * bw + (len(stages) - 1) * gap
     x = (900 - total) / 2
     y = 170.0

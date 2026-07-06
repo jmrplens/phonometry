@@ -57,37 +57,70 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
 
   indexnow:
+    name: Submit URLs to IndexNow
     needs: deploy
     runs-on: ubuntu-latest
     permissions: {}
+    timeout-minutes: 10
     steps:
       - name: Submit sitemap URLs to IndexNow
         env:
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
         run: |
           set -euo pipefail
-          BASE="https://jmrplens.github.io/phonometry"
-          # The key file must be reachable before submitting.
-          curl -sf "${BASE}/${INDEXNOW_KEY}.txt" >/dev/null
-          urls=$(curl -sf "${BASE}/sitemap-0.xml" | grep -oP '(?<=<loc>)[^<]+')
-          payload=$(printf '%s\n' "$urls" | python3 -c '
-          import json, os, sys
-          urls = [u.strip() for u in sys.stdin if u.strip()]
-          print(json.dumps({
-              "host": "jmrplens.github.io",
-              "key": os.environ["INDEXNOW_KEY"],
-              "keyLocation": "https://jmrplens.github.io/phonometry/" + os.environ["INDEXNOW_KEY"] + ".txt",
-              "urlList": urls,
-          }))')
-          code=$(curl -s -o /tmp/indexnow-resp -w "%{http_code}" \
-            -X POST "https://api.indexnow.org/IndexNow" \
-            -H "Content-Type: application/json; charset=utf-8" \
-            --data "$payload")
-          echo "IndexNow HTTP $code ($(printf '%s\n' "$urls" | wc -l) URLs)"
-          cat /tmp/indexnow-resp || true
-          [ "$code" = "200" ] || [ "$code" = "202" ]
+          if [ -z "${INDEXNOW_KEY:-}" ]; then
+            echo "::error::INDEXNOW_KEY secret is not set"; exit 1
+          fi
+          python3 - <<'PY'
+          import json, os, sys, time, urllib.request, xml.etree.ElementTree as ET
+          from urllib.parse import urlparse
+
+          TIMEOUT = 30
+          key = os.environ["INDEXNOW_KEY"]
+          base = os.environ["PAGE_URL"].rstrip("/")
+          host = urlparse(base).netloc
+
+          def fetch(url):
+              with urllib.request.urlopen(url, timeout=TIMEOUT) as r:
+                  return r.read()
+
+          # Pages can take a moment to propagate after deploy: retry the key file.
+          key_url = f"{base}/{key}.txt"
+          for attempt in range(6):
+              try:
+                  assert fetch(key_url).decode().strip() == key
+                  break
+              except Exception:
+                  if attempt == 5:
+                      sys.exit(f"key file unreachable: {key_url}")
+                  time.sleep(2 ** attempt)
+
+          ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+          index = ET.fromstring(fetch(f"{base}/sitemap-index.xml"))
+          urls = []
+          for shard in index.findall("sm:sitemap/sm:loc", ns):
+              tree = ET.fromstring(fetch(shard.text.strip()))
+              urls += [loc.text.strip() for loc in tree.findall("sm:url/sm:loc", ns)]
+          if not urls:
+              sys.exit("sitemap produced no URLs")
+
+          payload = json.dumps({
+              "host": host, "key": key, "keyLocation": key_url, "urlList": urls,
+          }).encode()
+          req = urllib.request.Request(
+              "https://api.indexnow.org/IndexNow", data=payload,
+              headers={"Content-Type": "application/json; charset=utf-8"},
+          )
+          with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+              print(f"IndexNow HTTP {r.status} ({len(urls)} URLs submitted)")
+              if r.status not in (200, 202):
+                  sys.exit(f"unexpected status {r.status}: {r.read()[:300]}")
+          PY

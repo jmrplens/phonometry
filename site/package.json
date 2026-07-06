@@ -11,7 +11,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "html-validate": "html-validate 'dist/**/*.html'",
-    "pa11y": "astro preview & sleep 3 && pa11y-ci; EXIT=$?; kill %1 2>/dev/null; exit $EXIT"
+    "pa11y": "astro preview & PREVIEW_PID=$!; sleep 3 && pa11y-ci; EXIT=$?; kill $PREVIEW_PID 2>/dev/null; exit $EXIT"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.41.3",

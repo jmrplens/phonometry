@@ -132,9 +132,9 @@ safe to pass `wavfile.read` output directly.
 
 ## Where to go next
 
-- [Filter Banks](filter-banks.md) — choose an architecture and inspect responses
-- [Calibration and dBFS](calibration.md) — get real-world SPL values
-- [API Reference](api-reference.md) — every parameter of every function
+- [Filter Banks](https://jmrplens.github.io/PyOctaveBand/guides/filter-banks/) — choose an architecture and inspect responses
+- [Calibration and dBFS](https://jmrplens.github.io/PyOctaveBand/guides/calibration/) — get real-world SPL values
+- [API Reference](https://jmrplens.github.io/PyOctaveBand/reference/api/) — every parameter of every function
 
 ---
 
@@ -420,8 +420,8 @@ for block in blocks:
     weighted = wf.filter(block)
 ```
 
-See [Block Processing](block-processing.md) for the streaming workflow and
-[Theory](theory.md) for the analytic curve definitions.
+See [Block Processing](https://jmrplens.github.io/PyOctaveBand/guides/block-processing/) for the streaming workflow and
+[Theory](https://jmrplens.github.io/PyOctaveBand/reference/theory/) for the analytic curve definitions.
 
 ---
 
@@ -515,8 +515,8 @@ The `impulse` mode uses an asymmetric kernel that is JIT-compiled when
 [numba](https://numba.pydata.org/) is installed (`pip install PyOctaveBand[perf]`).
 Without numba a pure-Python fallback produces identical results, just slower.
 
-See [Integrated & Statistical Levels](levels.md) for Leq/LN metrics built on
-these envelopes, and [Why PyOctaveBand](why-pyoctaveband.md) for the IEC
+See [Integrated & Statistical Levels](https://jmrplens.github.io/PyOctaveBand/guides/levels/) for Leq/LN metrics built on
+these envelopes, and [Why PyOctaveBand](https://jmrplens.github.io/PyOctaveBand/reference/why-pyoctaveband/) for the IEC
 61672-1 tone-burst verification.
 
 ---
@@ -612,8 +612,8 @@ ax.set_ylabel("Frequency [Hz]")
 fig.colorbar(mesh, label="Level [dB]")
 ```
 
-See [Calibration and dBFS](calibration.md) to convert digital units to physical
-SPL, and [Time Weighting](time-weighting.md) for the envelope details.
+See [Calibration and dBFS](https://jmrplens.github.io/PyOctaveBand/guides/calibration/) to convert digital units to physical
+SPL, and [Time Weighting](https://jmrplens.github.io/PyOctaveBand/guides/time-weighting/) for the envelope details.
 
 ---
 
@@ -748,7 +748,7 @@ Notes when using a stateful `OctaveFilterBank`:
 - `zero_phase=True` is incompatible with stateful mode (forward-backward
   filtering needs the whole signal).
 - Stateful `WeightingFilter` uses the legacy bilinear design
-  (`high_accuracy=False`); see [Frequency Weighting](weighting.md).
+  (`high_accuracy=False`); see [Frequency Weighting](https://jmrplens.github.io/PyOctaveBand/guides/weighting/).
 
 ## Example
 
@@ -785,7 +785,7 @@ for block in audio_blocks:
 ```
 
 Or manage the state yourself with the functional API — see
-[Time Weighting](time-weighting.md#block-processing).
+[Time Weighting](https://jmrplens.github.io/PyOctaveBand/guides/time-weighting/#block-processing).
 
 ## Multichannel state
 
@@ -855,7 +855,7 @@ Additional performance notes:
   control over the design lifetime.
 - **Multirate decimation**: low-frequency bands are filtered at a decimated
   rate, which is both faster and numerically more stable (see
-  [Theory](theory.md)).
+  [Theory](https://jmrplens.github.io/PyOctaveBand/reference/theory/)).
 - **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
   numba is installed (`pip install PyOctaveBand[perf]`).
 
@@ -892,7 +892,7 @@ All core functionality can be imported directly from the `pyoctaveband` package.
   forward-backward (`sosfiltfilt`): no group delay, doubled effective
   attenuation, offline analysis only. Incompatible with `stateful=True`.
 - `mode='peak'` includes the filter's onset transient; a tone that starts
-  abruptly can overshoot by ~1 dB. See [Calibration and dBFS](calibration.md).
+  abruptly can overshoot by ~1 dB. See [Calibration and dBFS](https://jmrplens.github.io/PyOctaveBand/guides/calibration/).
 - `octavefilter()` caches filter bank designs internally (32 entries), so
   repeated calls with the same parameters skip the design phase. For explicit
   control use `OctaveFilterBank`.
@@ -1099,7 +1099,7 @@ $$
 The digital filter is obtained from the analog poles/zeros via the bilinear
 transform. Because the bilinear transform compresses frequencies near Nyquist,
 the default `high_accuracy` mode designs and runs the filter at an internally
-oversampled rate (≥ 96 kHz) — see [Frequency Weighting](weighting.md).
+oversampled rate (≥ 96 kHz) — see [Frequency Weighting](https://jmrplens.github.io/PyOctaveBand/guides/weighting/).
 
 ## Time Integration
 
@@ -1117,7 +1117,7 @@ Where `tau` is the time constant (e.g., 125 ms for Fast).
 
 The default initial condition is `y[-1] = 0`. Use `initial_state='first'` to
 start from the first input energy, or pass a scalar/array with the previous
-mean-square output state. See [Why PyOctaveBand](why-pyoctaveband.md) for the
+mean-square output state. See [Why PyOctaveBand](https://jmrplens.github.io/PyOctaveBand/reference/why-pyoctaveband/) for the
 IEC 61672-1 tone-burst verification of this implementation.
 
 ---
@@ -1161,7 +1161,7 @@ the measurement's nature.
 ## Verification against IEC 61672-1 (tone bursts)
 
 The rigorous test for time weighting is the **Tone Burst Response**
-(IEC 61672-1, Table 3), using a 4 kHz sine burst referenced to the steady-state
+(IEC 61672-1, Table 4), using a 4 kHz sine burst referenced to the steady-state
 level.
 
 **PyOctaveBand results (FAST):**
@@ -1190,16 +1190,16 @@ how the burst aligns with the block boundaries.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
 
-*Measured Fast envelopes (blue) peaking exactly at the Table 4 reference
-values (dashed) for 200/50/10 ms bursts.*
+*Measured Fast envelopes (blue) matching the Table 4 reference values
+(dashed) within 0.1 dB for 200/50/10 ms bursts.*
 
 ## What this means in practice
 
 - If you need **standard-compliant Fast/Slow/Impulse envelopes** (sound level
   meter behavior, one level per sample), use PyOctaveBand's
-  [`time_weighting`](time-weighting.md).
+  [`time_weighting`](https://jmrplens.github.io/PyOctaveBand/guides/time-weighting/).
 - If you need **block-averaged Leq per interval**, that is a different, equally
-  valid metric — you can compute it with [`leq`](levels.md) over consecutive
+  valid metric — you can compute it with [`leq`](https://jmrplens.github.io/PyOctaveBand/guides/levels/) over consecutive
   slices.
 - Both libraries are useful; they just answer different questions. The
   discrepancy reported in issue #38 comes from comparing a continuous envelope
@@ -1214,7 +1214,7 @@ The same standards-first approach applies across the library:
   parametrization would not).
 - A/C weighting stays within **IEC 61672-1 class 1** tolerances up to 16 kHz at
   common audio rates via internal oversampling (see
-  [Frequency Weighting](weighting.md)).
+  [Frequency Weighting](https://jmrplens.github.io/PyOctaveBand/guides/weighting/)).
 - The IEC tone-burst targets above are enforced in the test suite, so
   regressions are caught in CI.
 

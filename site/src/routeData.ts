@@ -6,7 +6,7 @@ import { defineRouteMiddleware } from '@astrojs/starlight/route-data';
 // (src/styles/splash-menu.css) to keep the splash layout clean.
 export const onRequest = defineRouteMiddleware(({ locals }) => {
   const { starlightRoute } = locals;
-  if (starlightRoute.entry.data.template === 'splash') {
+  if (starlightRoute?.entry?.data?.template === 'splash') {
     starlightRoute.hasSidebar = true;
   }
 });

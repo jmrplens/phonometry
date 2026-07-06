@@ -12,6 +12,7 @@ one fetch. Both are published to the docs site by site/scripts/copy-llms.mjs
 from __future__ import annotations
 
 import ast
+import re
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -117,6 +118,28 @@ def build_llms_txt(version: str) -> str:
     return "\n".join(lines)
 
 
+def _absolutize_links(content: str) -> str:
+    """Rewrite docs-relative markdown links to canonical absolute URLs.
+
+    llms-full.txt is served as a flat text artifact, so links relative to
+    docs/ (e.g. ``[x](filter-banks.md#anchor)``) would not resolve.
+    """
+    route_for = {md: route for md, route in PAGES}
+    route_for["README.md"] = ""
+
+    def repl(match: "re.Match[str]") -> str:
+        target, anchor = match.group(1), match.group(2) or ""
+        if target == "../CONTRIBUTING.md":
+            return f"]({REPO_URL}/blob/main/CONTRIBUTING.md{anchor})"
+        route = route_for.get(target)
+        if route is None:
+            return match.group(0)
+        suffix = f"{route}/" if route else ""
+        return f"]({SITE_URL}/{suffix}{anchor})"
+
+    return re.sub(r"\]\(((?:\.\./)?[\w.-]+\.md)(#[\w-]+)?\)", repl, content)
+
+
 def build_llms_full(llms_txt: str) -> str:
     parts = [llms_txt, "\n---\n"]
     for md_name, route in PAGES:
@@ -125,6 +148,7 @@ def build_llms_full(llms_txt: str) -> str:
         content = "\n".join(
             line for line in content.splitlines() if not line.startswith("← [Documentation index]")
         ).strip()
+        content = _absolutize_links(content)
         parts.append(f"\n<!-- source: docs/{md_name} | canonical: {SITE_URL}/{route}/ -->\n")
         parts.append(content)
         parts.append("\n---\n")

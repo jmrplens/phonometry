@@ -18,7 +18,8 @@ function rehypeTableAlign() {
         node.properties?.align
       ) {
         const val = node.properties.align;
-        node.properties.style = `text-align:${val}`;
+        const existing = node.properties.style ? `${node.properties.style};` : '';
+        node.properties.style = `${existing}text-align:${val}`;
         delete node.properties.align;
       }
       if (node.children) node.children.forEach(visit);
@@ -51,7 +52,7 @@ const socialImage = {
 const version = readFileSync(
   new URL('../src/pyoctaveband/_version.py', import.meta.url),
   'utf8',
-).match(/__version__\s*=\s*"([^"]+)"/)[1];
+).match(/__version__\s*=\s*['"]([^'"]+)['"]/)[1];
 
 // Freshness signals for the SoftwareApplication node. `datePublished` is the
 // first public release (v1.0.0) and is intentionally fixed. To avoid stamping

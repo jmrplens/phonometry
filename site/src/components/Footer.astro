@@ -4,7 +4,8 @@
 // site-wide JSON-LD @graph (GEO: entity corroboration).
 import Default from '@astrojs/starlight/components/Footer.astro';
 
-const lang = Astro.url.pathname.includes('/es/') ? 'es' : 'en';
+const path = Astro.url.pathname;
+const lang = path.includes('/es/') || path.endsWith('/es') ? 'es' : 'en';
 const text =
   lang === 'es'
     ? 'Creado y mantenido por'

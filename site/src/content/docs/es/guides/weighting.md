@@ -11,6 +11,7 @@ según especifica la norma **IEC 61672-1:2013**.
 * **Ponderación A (`A`):** estándar para ruido ambiental (IEC 61672-1).
 * **Ponderación C (`C`):** para presión sonora de pico y ruido de alto nivel.
 * **Ponderación Z (`Z`):** ponderación cero, respuesta completamente plana.
+* **Ponderación G (`G`):** ponderación de infrasonido según ISO 7196 (ver más abajo).
 
 ```python
 from phonometry import weighting_filter
@@ -21,6 +22,29 @@ weighted_signal = weighting_filter(signal, fs, curve='A')
 # Aplicar ponderación C para análisis de picos
 c_weighted_signal = weighting_filter(signal, fs, curve='C')
 ```
+
+## Infrasonido: ponderación G (ISO 7196)
+
+La **ponderación frecuencial G** (ISO 7196:1995) valora el infrasonido igual que
+la ponderación A valora el ruido audible. Se define por una configuración de
+polos y ceros con ganancia de 0 dB en 10 Hz, sube a 12 dB/octava entre 1 Hz y
+20 Hz (siguiendo el crecimiento abrupto de la percepción en esa banda) y cae a
+24 dB/octava fuera de ella. Úsala con fuentes con energía significativa por
+debajo de 20 Hz (aerogeneradores, climatización, voladuras):
+
+```python
+from phonometry import weighting_filter
+
+g_weighted = weighting_filter(signal, fs, curve='G')
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.png" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.png" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%">
+
+La implementación sigue exactamente los polos/ceros de la Tabla 1 de ISO 7196 y
+se verifica en CI contra todos los valores nominales de respuesta de la Tabla 2
+(0,25 Hz a 315 Hz). `WeightingFilter(fs, "G")` admite el mismo procesado
+multicanal y por bloques que A/C. Los niveles medidos con la curva G se
+expresan como L<sub>pG</sub> (o L<sub>Geq</sub> para el nivel equivalente).
 
 ## Objeto de filtro reutilizable
 

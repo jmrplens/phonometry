@@ -1,6 +1,6 @@
 ← [Documentation index](README.md)
 
-# Frequency Weighting (A, C, Z)
+# Frequency Weighting (A, C, G, Z)
 
 Frequency weighting curves simulate the human ear's sensitivity, as specified by
 **IEC 61672-1:2013**.
@@ -10,6 +10,7 @@ Frequency weighting curves simulate the human ear's sensitivity, as specified by
 * **A-Weighting (`A`):** Standard for environmental noise (IEC 61672-1).
 * **C-Weighting (`C`):** Used for peak sound pressure and high-level noise.
 * **Z-Weighting (`Z`):** Zero weighting, completely flat response.
+* **G-Weighting (`G`):** Infrasound weighting per ISO 7196 (see below).
 
 ```python
 from phonometry import weighting_filter
@@ -20,6 +21,28 @@ weighted_signal = weighting_filter(signal, fs, curve='A')
 # Apply C-weighting for peak analysis
 c_weighted_signal = weighting_filter(signal, fs, curve='C')
 ```
+
+## Infrasound: G-weighting (ISO 7196)
+
+The **G frequency weighting** (ISO 7196:1995) rates infrasound the way A-weighting
+rates audible noise. It is defined by a pole-zero configuration with 0 dB gain at
+10 Hz, rises at 12 dB/octave from 1 Hz to 20 Hz (matching the steep growth of
+perception in that band) and falls off at 24 dB/octave outside it. Use it for
+sources with significant energy below 20 Hz (wind turbines, HVAC, blasting):
+
+```python
+from phonometry import weighting_filter
+
+g_weighted = weighting_filter(signal, fs, curve='G')
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.png" alt="G-weighting frequency response from 0.1 Hz to 1 kHz with the ISO 7196 Table 2 nominal values overlaid" width="80%"></picture>
+
+The implementation follows the ISO 7196 Table 1 pole/zero values exactly and is
+verified in CI against every Table 2 nominal response value (0.25 Hz to 315 Hz).
+`WeightingFilter(fs, "G")` supports the same multichannel and stateful block
+processing as A/C. Levels measured with the G curve are reported as
+L<sub>pG</sub> (or L<sub>Geq</sub> for the equivalent level over time).
 
 ## Reusable filter object
 

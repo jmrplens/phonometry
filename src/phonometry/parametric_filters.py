@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Weighting filters (A, C, Z) and time weighting utilities for audio analysis.
-Implementation according to IEC 61672-1:2013.
+Weighting filters (A, C, G, Z) and time weighting utilities for audio analysis.
+A/C/Z per IEC 61672-1:2013; G (infrasound) per ISO 7196:1995.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ except ImportError:  # pragma: no cover - depends on install extras
 
 class WeightingFilter:
     """
-    Class-based frequency weighting filter (A, C, Z).
+    Class-based frequency weighting filter (A, C, G, Z).
     Allows pre-calculating and reusing filter coefficients.
     """
 
@@ -35,7 +35,7 @@ class WeightingFilter:
         Initialize the weighting filter.
 
         :param fs: Sample rate in Hz.
-        :param curve: 'A', 'C' or 'Z'.
+        :param curve: 'A', 'C', 'G' (ISO 7196 infrasound) or 'Z'.
         :param stateful: If True, the weighting filter is stateful. Useful for block processing.
         :param steady_ic: If True, calculate steady state initial conditions for filter.
         :param high_accuracy: If True, design and run the filter at an internal
@@ -64,15 +64,41 @@ class WeightingFilter:
                 self.zi = np.array([])
             return
 
-        if self.curve not in ["A", "C"]:
-            raise ValueError("Weighting curve must be 'A', 'C' or 'Z'")
+        if self.curve not in ["A", "C", "G"]:
+            raise ValueError("Weighting curve must be 'A', 'C', 'G' or 'Z'")
 
         # Analog ZPK for A and C weighting
         # f1, f2, f3, f4 constants as per IEC 61672-1
         f1 = 20.598997
         f4 = 12194.217
 
-        if self.curve == "A":
+        if self.curve == "G":
+            # ISO 7196:1995 Table 1 (p. 2): nominal pole/zero coordinates in
+            # the complex frequency plane, in Hz. Four zeros at the origin
+            # and four complex-conjugate pole pairs. The curve is defined
+            # with 0 dB gain at 10 Hz (clause 4).
+            z = np.zeros(4)
+            pole_coords_hz = np.array(
+                [
+                    -0.707 + 0.707j,
+                    -0.707 - 0.707j,
+                    -19.27 + 5.16j,
+                    -19.27 - 5.16j,
+                    -14.11 + 14.11j,
+                    -14.11 - 14.11j,
+                    -5.16 + 19.27j,
+                    -5.16 - 19.27j,
+                ]
+            )
+            p = 2 * np.pi * pole_coords_hz
+            # Normalize to 0 dB at 10 Hz.
+            w = 2 * np.pi * 10.0
+            k = 1.0 / np.abs(np.prod(1j * w - z) / np.prod(1j * w - p))
+            # G acts on 0.25 Hz - 315 Hz: the bilinear design is already
+            # exact there, so the high-accuracy oversampling used for A/C
+            # (whose action extends to 16 kHz) is unnecessary.
+            self._oversample = 1
+        elif self.curve == "A":
             f2 = 107.65265
             f3 = 737.86223
             # Zeros at 0 Hz
@@ -96,10 +122,11 @@ class WeightingFilter:
             p = np.array([-2 * np.pi * f1, -2 * np.pi * f1, -2 * np.pi * f4, -2 * np.pi * f4])
             k = 5.91797e8
 
-        # Recalculate k to ensure 0dB at 1kHz
-        w = 2 * np.pi * 1000
-        h = k * np.prod(1j * w - z) / np.prod(1j * w - p)
-        k = k / np.abs(h)
+        if self.curve != "G":
+            # Recalculate k to ensure 0dB at 1kHz (A/C reference frequency)
+            w = 2 * np.pi * 1000
+            h = k * np.prod(1j * w - z) / np.prod(1j * w - p)
+            k = k / np.abs(h)
 
         design_fs = self.fs * self._oversample
         zd, pd, kd = signal.bilinear_zpk(z, p, k, design_fs)
@@ -171,7 +198,7 @@ def weighting_filter(
 
     :param x: Input signal.
     :param fs: Sample rate.
-    :param curve: 'A', 'C' or 'Z' (Z is zero weighting/bypass).
+    :param curve: 'A', 'C', 'G' (ISO 7196 infrasound) or 'Z' (bypass).
     :param high_accuracy: Use internal oversampling for IEC 61672-1 class 1
         accuracy at high frequencies (default True).
     :return: Weighted signal.

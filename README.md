@@ -1,12 +1,17 @@
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?hosted_button_id=BLP3R6VGYJB4Q)
-[![Donate](https://img.shields.io/badge/Donate-Ko--fi-brightgreen?color=ff5f5f)](https://ko-fi.com/jmrplens) 
-[![PyPI version](https://img.shields.io/pypi/v/PyOctaveBand)](https://pypi.org/project/PyOctaveBand/)
-[![PyPI downloads](https://img.shields.io/pypi/dm/PyOctaveBand)](https://pypi.org/project/PyOctaveBand/)
-[![Python versions](https://img.shields.io/pypi/pyversions/PyOctaveBand)](https://pypi.org/project/PyOctaveBand/)
-[![Python application](https://github.com/jmrplens/PyOctaveBand/actions/workflows/python-app.yml/badge.svg)](https://github.com/jmrplens/PyOctaveBand/actions/workflows/python-app.yml)
+<!-- Package -->
+[![PyPI version](https://img.shields.io/pypi/v/PyOctaveBand?logo=pypi&logoColor=white)](https://pypi.org/project/PyOctaveBand/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/PyOctaveBand?logo=pypi&logoColor=white)](https://pypi.org/project/PyOctaveBand/)
+[![Python versions](https://img.shields.io/pypi/pyversions/PyOctaveBand?logo=python&logoColor=white)](https://pypi.org/project/PyOctaveBand/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/jmrplens/PyOctaveBand/blob/main/LICENSE)
+
+<!-- Quality -->
+[![CI](https://github.com/jmrplens/PyOctaveBand/actions/workflows/python-app.yml/badge.svg)](https://github.com/jmrplens/PyOctaveBand/actions/workflows/python-app.yml)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=jmrplens_PyOctaveBand&metric=alert_status)](https://sonarcloud.io/summary/overall?id=jmrplens_PyOctaveBand)
 [![codecov](https://codecov.io/gh/jmrplens/PyOctaveBand/branch/main/graph/badge.svg)](https://codecov.io/gh/jmrplens/PyOctaveBand)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21215280.svg)](https://doi.org/10.5281/zenodo.21215280)
+
+<!-- Citation & support -->
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21215280-blue?logo=doi&logoColor=white)](https://doi.org/10.5281/zenodo.21215280)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/jmrplens?logo=githubsponsors&label=Sponsor&color=ea4aaa)](https://github.com/sponsors/jmrplens)
 
 # PyOctaveBand
 

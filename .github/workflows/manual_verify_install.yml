@@ -26,13 +26,16 @@ jobs:
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
 
-      - name: Install latest PyOctaveBand
+      - name: Install latest phonometry
         if: ${{ inputs.version == '' }}
-        run: pip install pyoctaveband
+        run: pip install phonometry
 
-      - name: Install specific PyOctaveBand version
+      - name: Install specific phonometry version
         if: ${{ inputs.version != '' }}
-        run: pip install pyoctaveband==${{ inputs.version }}
+        env:
+          VERSION: ${{ inputs.version }}
+        shell: bash
+        run: pip install "phonometry==${VERSION}"
 
       - name: Verify Import
-        run: python -c "import pyoctaveband; print('Successfully imported pyoctaveband version:', pyoctaveband.__version__)"
+        run: python -c "import phonometry; print('Successfully imported phonometry version:', phonometry.__version__)"

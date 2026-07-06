@@ -8,7 +8,7 @@ Las clases `OctaveFilterBank`, `WeightingFilter` (para ponderación A, C o Z) y
 filtro se conserva entre llamadas, de modo que las salidas concatenadas por
 bloques coinciden con una única pasada sobre la señal completa.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity.png" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity_dark.png" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity.png" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_dark.png" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" style="width:80%">
 
 *Con `stateful=True` las salidas concatenadas por bloques coinciden exactamente
 con el resultado continuo; sin estado, cada frontera de bloque reinicia el
@@ -27,13 +27,13 @@ Notas al usar un `OctaveFilterBank` con estado:
   bidireccional necesita la señal completa).
 - Un `WeightingFilter` con estado usa el diseño bilineal clásico
   (`high_accuracy=False`); consulta
-  [Ponderación frecuencial](/PyOctaveBand/es/guides/weighting/).
+  [Ponderación frecuencial](/phonometry/es/guides/weighting/).
 
 ## Ejemplo
 
 ```python
 import soundfile as sf
-from pyoctaveband import OctaveFilterBank, WeightingFilter
+from phonometry import OctaveFilterBank, WeightingFilter
 
 fs = 48000
 octavefilter = OctaveFilterBank(fs, 1, stateful=True, resample=False)
@@ -56,7 +56,7 @@ for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
 Usa la clase `TimeWeighting` (el estado se lleva automáticamente):
 
 ```python
-from pyoctaveband import TimeWeighting
+from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode="fast")
 for block in audio_blocks:
@@ -64,7 +64,7 @@ for block in audio_blocks:
 ```
 
 O gestiona el estado tú mismo con la API funcional — consulta
-[Ponderación temporal](/PyOctaveBand/es/guides/time-weighting/#procesado-por-bloques).
+[Ponderación temporal](/phonometry/es/guides/time-weighting/#procesado-por-bloques).
 
 ## Estado multicanal
 

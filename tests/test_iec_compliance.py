@@ -12,13 +12,13 @@ does not specify toneburst responses for an impulse weighting.
 Tolerances below are the **class 1** acceptance limits from the same table
 (asymmetric where the standard specifies them). FAST values cross-checked
 against the maintainer's analysis in
-https://github.com/jmrplens/PyOctaveBand/issues/38.
+https://github.com/jmrplens/phonometry/issues/38.
 """
 
 import numpy as np
 import pytest
 
-from pyoctaveband import time_weighting
+from phonometry import time_weighting
 
 FS = 48000
 F0 = 4000
@@ -102,8 +102,8 @@ def test_delta_ref_equation7_consistency() -> None:
 
 def _burst_sel_response_db(duration: float) -> float:
     """LAE of a 4 kHz toneburst relative to the steady A-weighted level."""
-    from pyoctaveband import leq, sel
-    from pyoctaveband.parametric_filters import weighting_filter
+    from phonometry import leq, sel
+    from phonometry.parametric_filters import weighting_filter
 
     total = 3.0
     t = np.arange(int(FS * total)) / FS

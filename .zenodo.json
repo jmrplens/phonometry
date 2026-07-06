@@ -1,6 +1,6 @@
 {
-  "title": "PyOctaveBand: Octave-Band and Fractional Octave-Band filter bank for Python",
-  "description": "Fractional octave filter banks (ANSI S1.11 / IEC 61260-1), A/C/Z frequency weighting and Fast/Slow/Impulse time weighting (IEC 61672-1), Leq/LN levels and octave spectrograms for Python.",
+  "title": "phonometry: acoustic measurement toolkit for Python (formerly PyOctaveBand)",
+  "description": "Acoustic measurement toolkit (formerly PyOctaveBand): fractional octave filter banks (ANSI S1.11 / IEC 61260-1), A/C/Z frequency weighting, Fast/Slow/Impulse time weighting, Leq/LAeq/LN/SEL/LCpeak levels and noise dose (IEC 61672-1, IEC 61252), SPL calibration with IEC 60942 validation, and octave spectrograms for Python.",
   "license": "MIT",
   "upload_type": "software",
   "access_right": "open",
@@ -21,11 +21,11 @@
   "related_identifiers": [
     {
       "relation": "isSupplementTo",
-      "identifier": "https://github.com/jmrplens/PyOctaveBand"
+      "identifier": "https://github.com/jmrplens/phonometry"
     },
     {
       "relation": "isDocumentedBy",
-      "identifier": "https://jmrplens.github.io/PyOctaveBand/"
+      "identifier": "https://jmrplens.github.io/phonometry/"
     }
   ]
 }

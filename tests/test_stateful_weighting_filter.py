@@ -4,7 +4,7 @@ import pytest
 @pytest.mark.parametrize("block_size", [8, 256, 1024])
 @pytest.mark.parametrize("filter_type", ["A", "C", "Z"])
 def test_weighting_filter_block_processing_matches_full_signal(block_size: int, filter_type: str):
-    from pyoctaveband import WeightingFilter
+    from phonometry import WeightingFilter
     """
     Ensure that block-wise processing with preserved filter state
     produces the same result as filtering the full signal at once.
@@ -43,7 +43,7 @@ def test_weighting_filter_block_processing_matches_full_signal(block_size: int, 
     )
 
 def test_weighting_filter_steady_ic_initialization():
-    from pyoctaveband import WeightingFilter
+    from phonometry import WeightingFilter
     # Create a stateful weighting filter with steady_ic=True
     wf = WeightingFilter(fs=48000, stateful=True, steady_ic=True)
 
@@ -59,7 +59,7 @@ def test_weighting_filter_steady_ic_initialization():
 
 
 def test_weighting_filter_steady_ic_initialization_multichannel():
-    from pyoctaveband import WeightingFilter
+    from phonometry import WeightingFilter
 
     wf = WeightingFilter(fs=48000, stateful=True, steady_ic=True)
     x = np.zeros((2, 100))
@@ -72,7 +72,7 @@ def test_weighting_filter_steady_ic_initialization_multichannel():
 
 
 def test_weighting_filter_multichannel_to_mono_transition():
-    from pyoctaveband import WeightingFilter
+    from phonometry import WeightingFilter
     """zi must reinit when input switches from multichannel to 1D."""
     rng = np.random.default_rng(77)
     fs = 48000
@@ -91,7 +91,7 @@ def test_weighting_filter_multichannel_to_mono_transition():
 
 
 def test_weighting_filter_multichannel():
-    from pyoctaveband import WeightingFilter
+    from phonometry import WeightingFilter
     """Stateful block-wise multichannel weighting must match full-signal processing."""
     rng = np.random.default_rng(99)
     fs = 48000

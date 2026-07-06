@@ -3,7 +3,7 @@ import pytest
 
 @pytest.mark.parametrize("block_size", [8, 256, 1024])
 def test_block_processing_matches_full_signal(block_size: int):
-    from pyoctaveband import OctaveFilterBank
+    from phonometry import OctaveFilterBank
     """
     Ensure that block-wise processing with preserved filter state
     produces the same result as filtering the full signal at once.
@@ -45,13 +45,13 @@ def test_block_processing_matches_full_signal(block_size: int):
     )
 
 def test_resample_and_stateful():
-    from pyoctaveband.core import OctaveFilterBank
+    from phonometry.core import OctaveFilterBank
     with pytest.raises(ValueError):
         OctaveFilterBank(48000, resample=True, stateful=True)
 
 
 def test_stateful_steady_ic_initialization():
-    from pyoctaveband.core import OctaveFilterBank
+    from phonometry.core import OctaveFilterBank
     # Create a stateful filter bank with steady_ic=True
     bank = OctaveFilterBank(
         fs=48000,
@@ -80,7 +80,7 @@ def test_stateful_steady_ic_initialization():
 
 def test_stateful_multichannel():
     """Test that stateful processing works with multichannel (e.g. stereo) input."""
-    from pyoctaveband.core import OctaveFilterBank
+    from phonometry.core import OctaveFilterBank
     rng = np.random.default_rng(42)
     n_channels = 4
     fs = 48000
@@ -104,7 +104,7 @@ def test_stateful_multichannel():
     assert spl2.shape[0] == n_channels
 
 def test_detrend_stateful_warning():
-    from pyoctaveband.core import OctaveFilterBank
+    from phonometry.core import OctaveFilterBank
     rng = np.random.default_rng(42)
 
     fs = 48000

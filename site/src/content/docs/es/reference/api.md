@@ -1,10 +1,10 @@
 ---
 title: "Referencia de la API"
-description: "Todas las funciones y clases públicas de PyOctaveBand."
+description: "Todas las funciones y clases públicas de phonometry."
 ---
 
 Toda la funcionalidad principal puede importarse directamente del paquete
-`pyoctaveband`.
+`phonometry`.
 
 | Nombre | Tipo | Descripción (entradas) | Uso (salidas) |
 | :--- | :--- | :--- | :--- |
@@ -35,7 +35,7 @@ Toda la funcionalidad principal puede importarse directamente del paquete
   efectiva doble, solo análisis offline. Incompatible con `stateful=True`.
 - `mode='peak'` incluye el transitorio de arranque del filtro; un tono que
   empieza de forma abrupta puede sobrepasar ~1 dB. Consulta
-  [Calibración y dBFS](/PyOctaveBand/es/guides/calibration/).
+  [Calibración y dBFS](/phonometry/es/guides/calibration/).
 - `octavefilter()` cachea internamente los diseños del banco (32 entradas), así
   que las llamadas repetidas con los mismos parámetros se saltan la fase de
   diseño. Para control explícito usa `OctaveFilterBank`.

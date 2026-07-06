@@ -1,7 +1,7 @@
-# PyOctaveBand Documentation
+# phonometry Documentation
 
-Full documentation for PyOctaveBand. Also available as a website:
-**https://jmrplens.github.io/PyOctaveBand/**
+Full documentation for phonometry. Also available as a website:
+**https://jmrplens.github.io/phonometry/**
 
 ## Guides
 
@@ -18,7 +18,7 @@ Full documentation for PyOctaveBand. Also available as a website:
 
 - [API Reference](api-reference.md) — every public function and class
 - [Theory](theory.md) — standards, math and design decisions
-- [Why PyOctaveBand](why-pyoctaveband.md) — IEC compliance vs other libraries
+- [Why phonometry](why-phonometry.md) — IEC compliance vs other libraries
 
 ## Development
 

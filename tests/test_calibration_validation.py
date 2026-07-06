@@ -15,7 +15,7 @@ from typing import Iterator
 import numpy as np
 import pytest
 
-from pyoctaveband import CalibrationWarning, calculate_sensitivity
+from phonometry import CalibrationWarning, calculate_sensitivity
 
 FS = 48000
 

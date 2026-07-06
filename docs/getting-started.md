@@ -7,31 +7,31 @@
 **Option 1: From PyPI (Recommended)**
 
 ```bash
-pip install PyOctaveBand
+pip install phonometry
 ```
 
 Optional extras:
 
 ```bash
-pip install PyOctaveBand[plot]   # matplotlib, for filter response plots
-pip install PyOctaveBand[perf]  # numba, faster 'impulse' time weighting
-pip install PyOctaveBand[full]  # both
+pip install phonometry[plot]   # matplotlib, for filter response plots
+pip install phonometry[perf]  # numba, faster 'impulse' time weighting
+pip install phonometry[full]  # both
 ```
 
 **Option 2: Cloning and Installing**
 
 ```bash
-git clone https://github.com/jmrplens/PyOctaveBand.git
-cd PyOctaveBand
+git clone https://github.com/jmrplens/phonometry.git
+cd phonometry
 pip install .
 ```
 
 **Option 3: Git Submodule**
 
 ```bash
-git submodule add https://github.com/jmrplens/PyOctaveBand.git
+git submodule add https://github.com/jmrplens/phonometry.git
 # Then install in editable mode to use it from your project
-pip install -e ./PyOctaveBand
+pip install -e ./phonometry
 ```
 
 ## Basic Usage: 1/3 Octave Analysis
@@ -40,7 +40,7 @@ Analyze a signal and get the Sound Pressure Level (SPL) per frequency band.
 
 ```python
 import numpy as np
-from pyoctaveband import octavefilter
+from phonometry import octavefilter
 
 fs = 48000
 t = np.linspace(0, 1, fs, endpoint=False)
@@ -54,7 +54,7 @@ print(f"Bands: {freq}")
 print(f"SPL [dB]: {spl}")
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3.png" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.png" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>
 
 *Example of a 1/3 Octave Band spectrum analysis of a complex signal.*
 
@@ -62,7 +62,7 @@ print(f"SPL [dB]: {spl}")
 
 ```python
 from scipy.io import wavfile
-from pyoctaveband import octavefilter
+from phonometry import octavefilter
 
 # Load standard WAV file
 fs, signal = wavfile.read("measurement.wav")

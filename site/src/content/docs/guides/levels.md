@@ -19,7 +19,7 @@ level exceeded $N\,\%$ of the time — the $(100-N)$-th percentile of the
 time-weighted level distribution.
 
 ```python
-from pyoctaveband import leq, laeq
+from phonometry import leq, laeq
 
 # Equivalent continuous level of the whole recording
 level = leq(signal, calibration_factor=sensitivity)
@@ -39,13 +39,13 @@ full-scale analysis (calibration does not apply in dBFS mode).
 **L90** the background level.
 
 ```python
-from pyoctaveband import ln_levels
+from phonometry import ln_levels
 
 stats = ln_levels(signal, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/ln_levels_example.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/ln_levels_example_dark.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" style="width:80%">
 
 *L10 tracks the event peaks, L50 the median level and L90 the background.*
 
@@ -57,7 +57,7 @@ Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 ## Peak, event and occupational metrics
 
 ```python
-from pyoctaveband import lc_peak, sel, sound_exposure, lex_8h
+from phonometry import lc_peak, sel, sound_exposure, lex_8h
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
 peak = lc_peak(signal, fs, calibration_factor=sensitivity)
@@ -82,14 +82,14 @@ Short-time fractional-octave analysis: one level per band per window,
 time-aligned across bands.
 
 ```python
-from pyoctaveband import OctaveFilterBank
+from phonometry import OctaveFilterBank
 
 bank = OctaveFilterBank(fs=48000, fraction=3)
 levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
 # levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/spectrogram_example.png" alt="One-third-octave spectrogram of a logarithmic sweep with two tone bursts" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/spectrogram_example_dark.png" alt="One-third-octave spectrogram of a logarithmic sweep with two tone bursts" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example.png" alt="One-third-octave spectrogram of a logarithmic sweep with two tone bursts" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example_dark.png" alt="One-third-octave spectrogram of a logarithmic sweep with two tone bursts" style="width:80%">
 
 *A logarithmic sweep plus two tone bursts, resolved in time and in standardized
 1/3-octave bands.*
@@ -111,5 +111,5 @@ ax.set_ylabel("Frequency [Hz]")
 fig.colorbar(mesh, label="Level [dB]")
 ```
 
-See [Calibration and dBFS](/PyOctaveBand/guides/calibration/) to convert digital units to physical
-SPL, and [Time Weighting](/PyOctaveBand/guides/time-weighting/) for the envelope details.
+See [Calibration and dBFS](/phonometry/guides/calibration/) to convert digital units to physical
+SPL, and [Time Weighting](/phonometry/guides/time-weighting/) for the envelope details.

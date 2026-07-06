@@ -1,6 +1,6 @@
 ---
 title: "Teoría"
-description: "Normas, matemáticas y decisiones de diseño detrás de PyOctaveBand."
+description: "Normas, matemáticas y decisiones de diseño detrás de phonometry."
 ---
 
 ## Frecuencias de banda de octava (ANSI S1.11 / IEC 61260)
@@ -47,7 +47,7 @@ octava en torno a 1 kHz es aproximadamente:
 Puedes inspeccionar las bandas exactas con:
 
 ```python
-from pyoctaveband import getansifrequencies
+from phonometry import getansifrequencies
 
 fc, fl, fu, labels = getansifrequencies(fraction=3, limits=[12, 20000])
 for label, center, lower, upper in zip(labels, fc, fl, fu):
@@ -55,18 +55,18 @@ for label, center, lower, upper in zip(labels, fc, fl, fu):
 ```
 
 Si necesitas bins FFT de banda estrecha para inspección tonal, ejecuta
-Welch/FFT sobre la señal original y usa los bordes de banda de PyOctaveBand como
+Welch/FFT sobre la señal original y usa los bordes de banda de phonometry como
 máscaras:
 
 ```python
 import numpy as np
 from scipy import signal
-from pyoctaveband import octavefilter, getansifrequencies
+from phonometry import octavefilter, getansifrequencies
 
 fs = 100_000
 x = pressure_signal_pa  # señal de presión 1D en Pa
 
-# Niveles de tercio de octava normalizados de PyOctaveBand.
+# Niveles de tercio de octava normalizados de phonometry.
 levels, centers = octavefilter(
     x,
     fs=fs,
@@ -98,7 +98,7 @@ for f, pxx in zip(freq_bins[in_band], psd[in_band]):
     print(f, pxx)
 ```
 
-Esto mantiene separados los dos conceptos: PyOctaveBand da niveles de octava
+Esto mantiene separados los dos conceptos: phonometry da niveles de octava
 fraccional normalizados, mientras Welch da bins FFT de banda estrecha. Con
 `fs=100000` y `nperseg=2**15`, la separación de bins Welch es de unos `3.05 Hz`.
 La ventana y el solape afectan al leakage y a la varianza del promediado, pero
@@ -152,7 +152,7 @@ Para todas las arquitecturas, el banco sitúa los **puntos de −3 dB en los bor
 de banda**. Dos casos requieren tratamiento especial:
 
 - **Chebyshev II**: en scipy, `Wn` es el borde de la banda *atenuada*.
-  PyOctaveBand mapea analíticamente los bordes de −3 dB deseados a bordes de
+  phonometry mapea analíticamente los bordes de −3 dB deseados a bordes de
   banda atenuada — la razón de transición del prototipo es
   $\cosh(\operatorname{acosh}(\sqrt{10^{A/10}-1})/N)$ — aplicando la
   transformación paso-bajo→paso-banda en el dominio bilineal pre-warpeado, de
@@ -163,7 +163,7 @@ de banda**. Dos casos requieren tratamiento especial:
 ## Diseño del banco y estabilidad numérica
 
 Para garantizar **estabilidad total** en todo el espectro audible (incluso a
-frecuencias bajas como 16 Hz con frecuencias de muestreo altas), PyOctaveBand
+frecuencias bajas como 16 Hz con frecuencias de muestreo altas), phonometry
 emplea dos estrategias fundamentales:
 
 ```mermaid
@@ -202,7 +202,7 @@ El filtro digital se obtiene de los polos/ceros analógicos mediante la
 transformación bilineal. Como esta comprime las frecuencias cerca de Nyquist, el
 modo `high_accuracy` por defecto diseña y ejecuta el filtro a una frecuencia
 interna sobremuestreada (≥ 96 kHz) — consulta
-[Ponderación frecuencial](/PyOctaveBand/es/guides/weighting/).
+[Ponderación frecuencial](/phonometry/es/guides/weighting/).
 
 ## Integración temporal
 
@@ -221,5 +221,5 @@ donde `tau` es la constante de tiempo (p. ej. 125 ms para Fast).
 La condición inicial por defecto es `y[-1] = 0`. Usa `initial_state='first'`
 para partir de la energía de la primera muestra, o pasa un escalar/array con el
 estado cuadrático medio anterior. Consulta
-[Por qué PyOctaveBand](/PyOctaveBand/es/reference/why-pyoctaveband/) para la
+[Por qué phonometry](/phonometry/es/reference/why-phonometry/) para la
 verificación de esta implementación con ráfagas de tono de IEC 61672-1.

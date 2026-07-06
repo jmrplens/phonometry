@@ -28,9 +28,9 @@ function rehypeTableAlign() {
 }
 
 const siteUrl = 'https://jmrplens.github.io';
-const basePath = '/PyOctaveBand';
+const basePath = '/phonometry';
 const fullUrl = `${siteUrl}${basePath}`;
-const repositoryUrl = 'https://github.com/jmrplens/PyOctaveBand';
+const repositoryUrl = 'https://github.com/jmrplens/phonometry';
 const authorUrl = 'https://jmrp.io';
 const socialImageUrl = `${fullUrl}/og-image.png`;
 const authorId = `${authorUrl}/#person`;
@@ -40,7 +40,7 @@ const sourceCodeId = `${repositoryUrl}#source-code`;
 const siteDescription =
   'Octave-band and fractional octave-band filter bank for Python. ANSI S1.11 / IEC 61260-1 compliant filters, IEC 61672-1 A/C/Z and Fast/Slow/Impulse weighting, Leq and statistical levels.';
 const socialImageAlt =
-  'PyOctaveBand: standards-compliant fractional octave analysis for Python';
+  'phonometry: standards-compliant fractional octave analysis for Python';
 const socialImage = {
   '@type': 'ImageObject',
   url: socialImageUrl,
@@ -112,7 +112,7 @@ const jsonLd = JSON.stringify({
     {
       '@type': 'WebSite',
       '@id': websiteId,
-      name: 'PyOctaveBand',
+      name: 'phonometry',
       url: `${fullUrl}/`,
       description: siteDescription,
       inLanguage: ['en', 'es'],
@@ -123,14 +123,14 @@ const jsonLd = JSON.stringify({
     {
       '@type': 'SoftwareApplication',
       '@id': softwareId,
-      name: 'PyOctaveBand',
+      name: 'phonometry',
       softwareVersion: version,
       applicationCategory: 'DeveloperApplication',
       applicationSubCategory: 'Scientific/Engineering',
       operatingSystem: 'Windows, Linux, macOS',
       programmingLanguage: 'Python',
       url: repositoryUrl,
-      downloadUrl: 'https://pypi.org/project/PyOctaveBand/',
+      downloadUrl: 'https://pypi.org/project/phonometry/',
       codeRepository: repositoryUrl,
       image: socialImage,
       screenshot: socialImage,
@@ -156,7 +156,7 @@ const jsonLd = JSON.stringify({
       },
       author: { '@id': authorId },
       sameAs: [
-        'https://pypi.org/project/PyOctaveBand/',
+        'https://pypi.org/project/phonometry/',
         'https://doi.org/10.5281/zenodo.21215280',
         `${fullUrl}/`,
       ],
@@ -164,7 +164,7 @@ const jsonLd = JSON.stringify({
     {
       '@type': 'SoftwareSourceCode',
       '@id': sourceCodeId,
-      name: 'PyOctaveBand source code',
+      name: 'phonometry source code',
       codeRepository: repositoryUrl,
       programmingLanguage: 'Python',
       runtimePlatform: 'Windows, Linux, macOS',
@@ -188,7 +188,7 @@ export default defineConfig({
       autoTheme: true,
     }),
     starlight({
-      title: 'PyOctaveBand',
+      title: 'phonometry',
       routeMiddleware: './src/routeData.ts',
       plugins: [
         starlightLinksValidator({
@@ -211,7 +211,7 @@ export default defineConfig({
         './src/styles/splash-menu.css',
       ],
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/jmrplens/PyOctaveBand' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/jmrplens/phonometry' },
         { icon: 'mastodon', label: 'Mastodon', href: 'https://mstdn.jmrp.io/@jmrplens' },
         { icon: 'linkedin', label: 'LinkedIn', href: 'https://linkedin.com/in/jmrplens' },
       ],
@@ -283,7 +283,7 @@ export default defineConfig({
         {
           label: 'Reference',
           translations: { es: 'Referencia' },
-          items: ['reference/api', 'reference/theory', 'reference/why-pyoctaveband'],
+          items: ['reference/api', 'reference/theory', 'reference/why-phonometry'],
         },
       ],
     }),

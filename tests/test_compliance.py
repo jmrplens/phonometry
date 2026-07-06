@@ -6,8 +6,8 @@ Tests for the IEC 61260-1:2014 filter class verifier.
 import numpy as np
 import pytest
 
-from pyoctaveband import OctaveFilterBank, verify_filter_class
-from pyoctaveband.compliance import class_limits
+from phonometry import OctaveFilterBank, verify_filter_class
+from phonometry.compliance import class_limits
 
 
 def test_class_limits_table1_anchor_values() -> None:

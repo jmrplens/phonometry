@@ -6,7 +6,7 @@ Tests for integrated and statistical sound levels (Leq, LAeq, LN).
 import numpy as np
 import pytest
 
-from pyoctaveband import laeq, leq
+from phonometry import laeq, leq
 
 FS = 48000
 
@@ -54,7 +54,7 @@ def test_laeq_100hz_attenuated() -> None:
 
 def test_ln_levels_constant_signal_all_equal() -> None:
     """For a steady tone, L10 == L90 and L50 == Leq (within envelope ripple)."""
-    from pyoctaveband import ln_levels
+    from phonometry import ln_levels
 
     x = _tone(1000, seconds=3.0)
     out = ln_levels(x, FS, n=(10, 50, 90))
@@ -65,7 +65,7 @@ def test_ln_levels_constant_signal_all_equal() -> None:
 
 def test_ln_levels_ordering() -> None:
     """L10 (exceeded 10% of time) >= L50 >= L90 for a fluctuating signal."""
-    from pyoctaveband import ln_levels
+    from phonometry import ln_levels
 
     rng = np.random.default_rng(0)
     x = rng.standard_normal(FS * 3) * np.linspace(0.1, 1.0, FS * 3)
@@ -74,7 +74,7 @@ def test_ln_levels_ordering() -> None:
 
 
 def test_ln_levels_weighting_a() -> None:
-    from pyoctaveband import ln_levels
+    from phonometry import ln_levels
 
     x = _tone(100, seconds=3.0)
     unweighted = ln_levels(x, FS, n=(50,))[50]
@@ -83,14 +83,14 @@ def test_ln_levels_weighting_a() -> None:
 
 
 def test_ln_levels_invalid_percentile_raises() -> None:
-    from pyoctaveband import ln_levels
+    from phonometry import ln_levels
 
     with pytest.raises(ValueError, match="between 0 and 100"):
         ln_levels(_tone(1000), FS, n=(0,))
 
 
 def test_ln_levels_multichannel() -> None:
-    from pyoctaveband import ln_levels
+    from phonometry import ln_levels
 
     x = np.stack([_tone(1000, 2.0), 0.5 * _tone(1000, 2.0)])
     out = ln_levels(x, FS, n=(50,))
@@ -117,7 +117,7 @@ def test_leq_nonpositive_calibration_raises() -> None:
 
 
 def test_ln_levels_empty_signal_raises() -> None:
-    from pyoctaveband import ln_levels
+    from phonometry import ln_levels
 
     with pytest.raises(ValueError, match="empty"):
         ln_levels(np.array([]), FS)
@@ -139,7 +139,7 @@ def _faded(x: np.ndarray, ramp: float = 0.05) -> np.ndarray:
 
 def test_lc_peak_steady_1khz() -> None:
     """C weighting is ~0 dB at 1 kHz: LCpeak of a steady sine = 20*log10(A/p0)."""
-    from pyoctaveband import lc_peak
+    from phonometry import lc_peak
 
     x = _faded(_tone(1000, seconds=1.0, amp=1.0))
     assert lc_peak(x, FS) == pytest.approx(20 * np.log10(1.0 / 2e-5), abs=0.15)
@@ -147,8 +147,8 @@ def test_lc_peak_steady_1khz() -> None:
 
 def test_lc_peak_exceeds_lc_by_crest_factor() -> None:
     """For a steady sine, LCpeak - LC = 20*log10(sqrt(2)) = 3.01 dB."""
-    from pyoctaveband import lc_peak, leq
-    from pyoctaveband.parametric_filters import weighting_filter
+    from phonometry import lc_peak, leq
+    from phonometry.parametric_filters import weighting_filter
 
     # 10 ms ramps: enough to avoid the onset click without biasing the RMS
     x = _faded(_tone(1000, seconds=1.0), ramp=0.01)
@@ -157,7 +157,7 @@ def test_lc_peak_exceeds_lc_by_crest_factor() -> None:
 
 
 def test_lc_peak_multichannel_and_dbfs() -> None:
-    from pyoctaveband import lc_peak
+    from phonometry import lc_peak
 
     x = np.stack([_faded(_tone(1000)), 0.5 * _faded(_tone(1000))])
     out = lc_peak(x, FS)
@@ -182,8 +182,8 @@ def test_lc_peak_multichannel_and_dbfs() -> None:
 )
 def test_lc_peak_iec_table5(cycles: float, freq: float, ref: float, tol: float) -> None:
     """One-cycle / half-cycle bursts must reproduce Table 5 within class 1."""
-    from pyoctaveband import lc_peak, leq
-    from pyoctaveband.parametric_filters import weighting_filter
+    from phonometry import lc_peak, leq
+    from phonometry.parametric_filters import weighting_filter
 
     fs = 96000
     t = np.arange(int(fs * 1.0)) / fs
@@ -208,21 +208,21 @@ def test_lc_peak_iec_table5(cycles: float, freq: float, ref: float, tol: float) 
 
 def test_sel_steady_signal_normalizes_to_one_second() -> None:
     """SEL = Leq + 10*log10(T / 1 s) for a steady signal of duration T."""
-    from pyoctaveband import leq, sel
+    from phonometry import leq, sel
 
     x = _tone(1000, seconds=4.0)
     assert sel(x, FS) == pytest.approx(leq(x) + 10 * np.log10(4.0), abs=1e-6)
 
 
 def test_sel_one_second_equals_leq() -> None:
-    from pyoctaveband import leq, sel
+    from phonometry import leq, sel
 
     x = _tone(1000, seconds=1.0)
     assert sel(x, FS) == pytest.approx(leq(x), abs=1e-9)
 
 
 def test_sel_a_weighted() -> None:
-    from pyoctaveband import laeq, sel
+    from phonometry import laeq, sel
 
     x = _tone(1000, seconds=2.0)
     assert sel(x, FS, weighting="A") == pytest.approx(laeq(x, FS) + 10 * np.log10(2.0), abs=0.05)
@@ -242,14 +242,14 @@ def _tone_at_level(level_db: float, seconds: float = 2.0, f0: float = 1000.0) ->
 
 def test_sound_exposure_anchor_90db_8h_is_3p2_pa2h() -> None:
     """BS EN 61252:1995 Annex A / §3.3 NOTE 4: 3.2 Pa²h <-> exactly 90 dB."""
-    from pyoctaveband import sound_exposure
+    from phonometry import sound_exposure
 
     x = _tone_at_level(90.0)
     assert sound_exposure(x, FS, duration_hours=8.0) == pytest.approx(3.2, rel=0.01)
 
 
 def test_lex_8h_anchor_90db() -> None:
-    from pyoctaveband import lex_8h
+    from phonometry import lex_8h
 
     x = _tone_at_level(90.0)
     assert lex_8h(x, FS, duration_hours=8.0) == pytest.approx(90.0, abs=0.05)
@@ -257,7 +257,7 @@ def test_lex_8h_anchor_90db() -> None:
 
 def test_lex_8h_half_workday_subtracts_3db() -> None:
     """LEX,8h = LAeq,T + 10*log10(T/8h): a 4 h exposure at 90 dB -> 86.99 dB."""
-    from pyoctaveband import lex_8h
+    from phonometry import lex_8h
 
     x = _tone_at_level(90.0)
     assert lex_8h(x, FS, duration_hours=4.0) == pytest.approx(90.0 + 10 * np.log10(4 / 8), abs=0.05)
@@ -265,7 +265,7 @@ def test_lex_8h_half_workday_subtracts_3db() -> None:
 
 def test_sound_exposure_1_pa2h_is_nearly_85db() -> None:
     """§3.3 NOTE 4: 1 Pa²h corresponds to a LEX,8h of nearly 85 dB (84.95)."""
-    from pyoctaveband import lex_8h, sound_exposure
+    from phonometry import lex_8h, sound_exposure
 
     x = _tone_at_level(84.9485)
     assert sound_exposure(x, FS, duration_hours=8.0) == pytest.approx(1.0, rel=0.01)
@@ -274,7 +274,7 @@ def test_sound_exposure_1_pa2h_is_nearly_85db() -> None:
 
 def test_sound_exposure_defaults_to_recording_duration() -> None:
     """Without duration_hours, x IS the whole event: E = integral over len(x)."""
-    from pyoctaveband import sound_exposure
+    from phonometry import sound_exposure
 
     x = _tone_at_level(90.0, seconds=2.0)
     expected = (2e-5 * 10 ** (90 / 20)) ** 2 * (2.0 / 3600.0)  # Pa² * hours
@@ -282,14 +282,14 @@ def test_sound_exposure_defaults_to_recording_duration() -> None:
 
 
 def test_sel_invalid_fs_raises() -> None:
-    from pyoctaveband import sel
+    from phonometry import sel
 
     with pytest.raises(ValueError, match="fs"):
         sel(_tone(1000), 0)
 
 
 def test_sound_exposure_rejects_nonpositive_duration() -> None:
-    from pyoctaveband import lex_8h, sound_exposure
+    from phonometry import lex_8h, sound_exposure
 
     with pytest.raises(ValueError, match="duration_hours"):
         sound_exposure(_tone_at_level(90.0), FS, duration_hours=0)

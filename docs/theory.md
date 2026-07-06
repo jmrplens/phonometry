@@ -46,7 +46,7 @@ band around 1 kHz is approximately:
 You can inspect the exact bands with:
 
 ```python
-from pyoctaveband import getansifrequencies
+from phonometry import getansifrequencies
 
 fc, fl, fu, labels = getansifrequencies(fraction=3, limits=[12, 20000])
 for label, center, lower, upper in zip(labels, fc, fl, fu):
@@ -54,17 +54,17 @@ for label, center, lower, upper in zip(labels, fc, fl, fu):
 ```
 
 If you need narrowband FFT bins for tonal inspection, run Welch/FFT on the
-original signal and use the PyOctaveBand band edges as masks:
+original signal and use the phonometry band edges as masks:
 
 ```python
 import numpy as np
 from scipy import signal
-from pyoctaveband import octavefilter, getansifrequencies
+from phonometry import octavefilter, getansifrequencies
 
 fs = 100_000
 x = pressure_signal_pa  # 1D pressure signal in Pa
 
-# Standardized third-octave levels from PyOctaveBand.
+# Standardized third-octave levels from phonometry.
 levels, centers = octavefilter(
     x,
     fs=fs,
@@ -96,7 +96,7 @@ for f, pxx in zip(freq_bins[in_band], psd[in_band]):
     print(f, pxx)
 ```
 
-This keeps the two concepts separate: PyOctaveBand gives standardized
+This keeps the two concepts separate: phonometry gives standardized
 fractional-octave levels, while Welch gives narrowband FFT bins. With
 `fs=100000` and `nperseg=2**15`, the Welch bin spacing is about `3.05 Hz`.
 Window choice and overlap affect leakage and averaging variance, but they do not
@@ -148,7 +148,7 @@ $$
 For every architecture the bank places the **−3 dB points on the band edges**.
 Two cases need special handling:
 
-- **Chebyshev II**: scipy's `Wn` is the *stopband* edge. PyOctaveBand maps the
+- **Chebyshev II**: scipy's `Wn` is the *stopband* edge. phonometry maps the
   desired −3 dB edges to stopband edges analytically — the prototype transition
   ratio is $\cosh(\operatorname{acosh}(\sqrt{10^{A/10}-1})/N)$ — applying the
   lowpass→bandpass transform in the pre-warped bilinear domain so the mapping
@@ -159,7 +159,7 @@ Two cases need special handling:
 ## Filter Bank Design & Numerical Stability
 
 To ensure **100% stability** across the entire audible spectrum (even at low
-frequencies like 16 Hz with high sample rates), PyOctaveBand employs two
+frequencies like 16 Hz with high sample rates), phonometry employs two
 critical strategies:
 
 ```mermaid
@@ -215,5 +215,5 @@ Where `tau` is the time constant (e.g., 125 ms for Fast).
 
 The default initial condition is `y[-1] = 0`. Use `initial_state='first'` to
 start from the first input energy, or pass a scalar/array with the previous
-mean-square output state. See [Why PyOctaveBand](why-pyoctaveband.md) for the
+mean-square output state. See [Why phonometry](why-phonometry.md) for the
 IEC 61672-1 tone-burst verification of this implementation.

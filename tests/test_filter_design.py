@@ -10,8 +10,8 @@ import numpy as np
 import pytest
 from scipy import signal as sg
 
-from pyoctaveband import OctaveFilterBank, octavefilter
-from pyoctaveband.filter_design import _design_sos_filter, _showfilter
+from phonometry import OctaveFilterBank, octavefilter
+from phonometry.filter_design import _design_sos_filter, _showfilter
 
 
 def _edge_gains_db(bank: OctaveFilterBank, band_idx: int) -> tuple[float, float]:
@@ -151,7 +151,7 @@ def test_design_sos_with_internal_plot(tmp_path) -> None:
 
 def test_cheby2_low_attenuation_raises() -> None:
     """attenuation <= 3.01 dB has no -3 dB point: must raise, not produce NaN."""
-    from pyoctaveband.filter_design import _cheby2_transition_ratio
+    from phonometry.filter_design import _cheby2_transition_ratio
 
     with pytest.raises(ValueError, match="3.01"):
         _cheby2_transition_ratio(order=6, attenuation=3.0)
@@ -161,7 +161,7 @@ def test_cheby2_low_attenuation_raises() -> None:
 
 def test_cheby2_stopband_edges_near_nyquist_stay_valid() -> None:
     """Pre-warped mapping must keep f1 < f2 < Nyquist even for bands near fs/2."""
-    from pyoctaveband.filter_design import _cheby2_stopband_edges
+    from phonometry.filter_design import _cheby2_stopband_edges
 
     fs = 2400.0
     fu = 0.9999 * fs / 2

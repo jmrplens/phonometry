@@ -7,8 +7,8 @@ import time
 
 import numpy as np
 
-import pyoctaveband
-from pyoctaveband import OctaveFilterBank, octavefilter
+import phonometry
+from phonometry import OctaveFilterBank, octavefilter
 
 
 def test_filterbank_reuse_performance() -> None:
@@ -39,7 +39,7 @@ def test_filterbank_reuse_performance() -> None:
     # measure the redesign cost this test is about.
     start_func = time.time()
     for _ in range(num_iterations):
-        pyoctaveband._cached_filter_bank.cache_clear()
+        phonometry._cached_filter_bank.cache_clear()
         octavefilter(x, fs)
     time_func = time.time() - start_func
     

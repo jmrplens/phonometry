@@ -20,7 +20,7 @@ superado el $N\,\%$ del tiempo — el percentil $(100-N)$ de la distribución de
 nivel con ponderación temporal.
 
 ```python
-from pyoctaveband import leq, laeq
+from phonometry import leq, laeq
 
 # Nivel continuo equivalente de toda la grabación
 level = leq(signal, calibration_factor=sensitivity)
@@ -40,13 +40,13 @@ ponderación temporal: **L10** es el nivel superado el 10 % del tiempo (picos de
 eventos), **L50** la mediana y **L90** el nivel de fondo.
 
 ```python
-from pyoctaveband import ln_levels
+from phonometry import ln_levels
 
 stats = ln_levels(signal, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/ln_levels_example.png" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/ln_levels_example_dark.png" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.png" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.png" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%">
 
 *L10 sigue los picos de los eventos, L50 el nivel mediano y L90 el fondo.*
 
@@ -58,7 +58,7 @@ del integrador (~2τ) se descarta antes de calcular los percentiles.
 ## Métricas de pico, evento y ocupacionales
 
 ```python
-from pyoctaveband import lc_peak, sel, sound_exposure, lex_8h
+from phonometry import lc_peak, sel, sound_exposure, lex_8h
 
 # Pico ponderado C (IEC 61672-1 §5.13): los límites de acción laborales usan esto
 peak = lc_peak(signal, fs, calibration_factor=sensitivity)
@@ -84,14 +84,14 @@ Análisis de octava fraccional en tiempo corto: un nivel por banda y ventana,
 alineado en el tiempo entre bandas.
 
 ```python
-from pyoctaveband import OctaveFilterBank
+from phonometry import OctaveFilterBank
 
 bank = OctaveFilterBank(fs=48000, fraction=3)
 levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
 # levels: (bandas, ventanas) — listo para pcolormesh(times, freq, levels)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/spectrogram_example.png" alt="Espectrograma en tercios de octava de un barrido logarítmico con dos ráfagas de tono" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/spectrogram_example_dark.png" alt="Espectrograma en tercios de octava de un barrido logarítmico con dos ráfagas de tono" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example.png" alt="Espectrograma en tercios de octava de un barrido logarítmico con dos ráfagas de tono" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example_dark.png" alt="Espectrograma en tercios de octava de un barrido logarítmico con dos ráfagas de tono" style="width:80%">
 
 *Un barrido logarítmico y dos ráfagas de tono, resueltos en el tiempo y en
 bandas normalizadas de tercio de octava.*
@@ -113,7 +113,7 @@ ax.set_ylabel("Frecuencia [Hz]")
 fig.colorbar(mesh, label="Nivel [dB]")
 ```
 
-Consulta [Calibración y dBFS](/PyOctaveBand/es/guides/calibration/) para
+Consulta [Calibración y dBFS](/phonometry/es/guides/calibration/) para
 convertir unidades digitales a SPL físico, y
-[Ponderación temporal](/PyOctaveBand/es/guides/time-weighting/) para los
+[Ponderación temporal](/phonometry/es/guides/time-weighting/) para los
 detalles de la envolvente.

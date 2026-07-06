@@ -1,4 +1,4 @@
-# PyOctaveBand: Technical Benchmark Report
+# phonometry: Technical Benchmark Report
 
 Generated: 2026-01-07 09:42:54
 

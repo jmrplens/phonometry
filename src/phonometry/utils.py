@@ -1,6 +1,6 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Signal processing utilities for pyoctaveband.
+Signal processing utilities for phonometry.
 """
 
 from __future__ import annotations

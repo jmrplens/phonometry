@@ -6,7 +6,7 @@ Advanced tests for input validation, edge cases, and robustness.
 import numpy as np
 import pytest
 
-from pyoctaveband import normalizedfreq, octavefilter
+from phonometry import normalizedfreq, octavefilter
 
 
 def test_fraction_validation() -> None:

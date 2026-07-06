@@ -6,7 +6,7 @@ Tests for OctaveFilterBank.spectrogram() short-time band levels.
 import numpy as np
 import pytest
 
-from pyoctaveband import OctaveFilterBank
+from phonometry import OctaveFilterBank
 
 FS = 48000
 

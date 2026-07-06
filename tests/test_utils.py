@@ -5,7 +5,7 @@ Tests for internal utility helpers.
 
 import numpy as np
 
-from pyoctaveband.utils import _resample_to_length, _typesignal
+from phonometry.utils import _resample_to_length, _typesignal
 
 
 def test_typesignal_converts_int_arrays_to_float64() -> None:

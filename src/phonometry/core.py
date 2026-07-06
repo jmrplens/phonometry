@@ -1,6 +1,6 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Core processing logic and FilterBank class for pyoctaveband.
+Core processing logic and FilterBank class for phonometry.
 """
 
 from __future__ import annotations

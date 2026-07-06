@@ -9,7 +9,7 @@ from scipy import signal as scipy_signal
 # Add src to path to use the local package
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
 
-from pyoctaveband import OctaveFilterBank
+from phonometry import OctaveFilterBank
 
 # Constants for professional styling
 LABEL_FREQ_HZ = "Frequency [Hz]"
@@ -203,7 +203,7 @@ def generate_filter_responses(output_dir: str) -> None:
             print(f"Generating {filename}...")
             bank = OctaveFilterBank(fs=fs, fraction=fraction, order=order, limits=[12.0, 20000.0], filter_type=f_type)
             
-            from pyoctaveband.filter_design import _showfilter
+            from phonometry.filter_design import _showfilter
             _showfilter(bank.sos, bank.freq, bank.freq_u, bank.freq_d, fs, bank.factor, 
                        show=False, plot_file=themed_path(output_dir, filename))
             plt.close("all")
@@ -421,7 +421,7 @@ def measure_weighting_response(
         dense 8192-point grid for plotting.
     :return: Tuple (frequencies, magnitude in dB).
     """
-    from pyoctaveband import weighting_filter
+    from phonometry import weighting_filter
 
     impulse = np.zeros(fs)
     impulse[fs // 2] = 1.0
@@ -497,7 +497,7 @@ def generate_time_weighting_plot(output_dir: str) -> None:
     end_idx = int(fs * 1.5)
     x[start_idx:end_idx] = rng.standard_normal(end_idx - start_idx)
     
-    from pyoctaveband import time_weighting
+    from phonometry import time_weighting
     
     # Square for energy
     x_sq = x**2
@@ -533,7 +533,7 @@ def generate_crossover_plot(output_dir: str) -> None:
     print("Generating crossover_lr4.png...")
     fs = 48000
     
-    from pyoctaveband import linkwitz_riley
+    from phonometry import linkwitz_riley
     
     # Frequency analysis
     # Measure response using IR
@@ -593,7 +593,7 @@ def generate_ln_levels_example(output_dir: str) -> None:
     duration = 30.0
     t = np.linspace(0, duration, int(fs * duration), endpoint=False)
 
-    from pyoctaveband import ln_levels, time_weighting
+    from phonometry import ln_levels, time_weighting
 
     # Fluctuating "traffic-like" noise: background + random events
     rng = np.random.default_rng(42)
@@ -658,7 +658,7 @@ def generate_weighting_accuracy_hf(output_dir: str) -> None:
     print("Generating weighting_accuracy_hf.png...")
     fs = 48000
 
-    from pyoctaveband import WeightingFilter
+    from phonometry import WeightingFilter
 
     freqs = np.logspace(np.log10(1000), np.log10(20000), 40)
 
@@ -755,7 +755,7 @@ def generate_tone_burst_iec(output_dir: str) -> None:
     print("Generating tone_burst_iec.png...")
     fs = 48000
 
-    from pyoctaveband import time_weighting
+    from phonometry import time_weighting
 
     cases = [(0.2, -1.0), (0.05, -4.8), (0.01, -11.1)]  # Table 4, class 1 rows
     fig, axes = plt.subplots(1, 3, figsize=(12, 4.5), sharey=True)
@@ -853,7 +853,7 @@ def generate_class_mask_overlay(output_dir: str) -> None:
     print("Generating class_mask_overlay.png...")
     fs = 48000
 
-    from pyoctaveband.compliance import class_limits
+    from phonometry.compliance import class_limits
 
     bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200], filter_type="butter")
     idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
@@ -923,7 +923,7 @@ def generate_og_image(output_path: str = "site/public/og-image.png") -> None:
     ax_bg.set_ylim(-40, 2)
     ax_bg.axis("off")
 
-    fig.text(0.055, 0.82, "PyOctaveBand", color="white", fontsize=46, fontweight="bold")
+    fig.text(0.055, 0.82, "phonometry", color="white", fontsize=46, fontweight="bold")
     fig.text(0.057, 0.70, "Fractional octave analysis for Python", color="#a6d0ee", fontsize=22)
     fig.text(
         0.057, 0.60,

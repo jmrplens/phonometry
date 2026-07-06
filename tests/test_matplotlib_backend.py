@@ -3,7 +3,7 @@
 """
 Tests ensuring the package does not hijack the global matplotlib backend.
 
-Importing pyoctaveband must not force a specific (e.g. non-interactive)
+Importing phonometry must not force a specific (e.g. non-interactive)
 backend, so the package can be used during interactive exploration
 (IPython, Jupyter). See issue #52.
 """
@@ -14,13 +14,13 @@ import sys
 
 
 def test_import_does_not_override_matplotlib_backend() -> None:
-    """Importing pyoctaveband must preserve the user's chosen backend."""
+    """Importing phonometry must preserve the user's chosen backend."""
     code = (
         "import matplotlib\n"
         # Pick an explicit, always-available backend the user might have set.
         "matplotlib.use('svg')\n"
         "before = matplotlib.get_backend()\n"
-        "import pyoctaveband\n"
+        "import phonometry\n"
         "after = matplotlib.get_backend()\n"
         "assert before == after, f'backend changed: {before!r} -> {after!r}'\n"
     )
@@ -43,7 +43,7 @@ def test_filter_design_has_no_toplevel_matplotlib_import() -> None:
     import ast
     import inspect
 
-    from pyoctaveband import filter_design
+    from phonometry import filter_design
 
     tree = ast.parse(inspect.getsource(filter_design))
 
@@ -72,7 +72,7 @@ def test_showfilter_raises_helpful_error_without_matplotlib(monkeypatch) -> None
     import numpy as np
     import pytest
 
-    from pyoctaveband import filter_design
+    from phonometry import filter_design
 
     real_import = builtins.__import__
 
@@ -82,7 +82,7 @@ def test_showfilter_raises_helpful_error_without_matplotlib(monkeypatch) -> None
         return real_import(name, *args, **kwargs)
 
     monkeypatch.setattr(builtins, "__import__", blocked_import)
-    with pytest.raises(ImportError, match=r"pip install pyoctaveband\[plot\]"):
+    with pytest.raises(ImportError, match=r"pip install phonometry\[plot\]"):
         filter_design._showfilter(
             [], [1000.0], [1122.0], [891.0], 48000, np.array([1]), show=True, plot_file=None
         )

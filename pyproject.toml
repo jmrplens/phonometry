@@ -3,19 +3,18 @@ requires = ["setuptools>=82.0.1", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "PyOctaveBand"
+name = "phonometry"
 dynamic = ["version"]
 authors = [
   { name="Jose Manuel Requena Plens", email="jmrplens@gmail.com" },
 ]
-description = "Octave-Band and Fractional Octave-Band filter for signals in time domain."
+description = "Acoustic measurement toolkit: fractional octave-band filters, A/C/Z and time weighting, and sound level metrology per IEC 61260-1 and IEC 61672-1."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
@@ -34,23 +33,20 @@ plot = ["matplotlib>=3.10.9"]
 full = ["numba>=0.65.1", "matplotlib>=3.10.9"]
 
 [project.urls]
-"Homepage" = "https://github.com/jmrplens/PyOctaveBand"
-"Bug Tracker" = "https://github.com/jmrplens/PyOctaveBand/issues"
+"Homepage" = "https://github.com/jmrplens/phonometry"
+"Bug Tracker" = "https://github.com/jmrplens/phonometry/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-pyoctaveband = ["py.typed"]
+phonometry = ["py.typed"]
 
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}
 
 [tool.mypy]
-# 3.12: numpy >= 2.5 ships PEP 695 `type` statements in its stubs, which mypy
-# rejects under a 3.11 target. Runtime support stays at >= 3.11 (3.11 users
-# resolve numpy 2.4.x, which still supports it).
-python_version = "3.12"
+python_version = "3.13"
 strict = true
 ignore_missing_imports = true
 

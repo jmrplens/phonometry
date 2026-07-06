@@ -5,12 +5,12 @@ description: "Vectorized multichannel analysis and performance notes."
 
 ## Multichannel Support
 
-PyOctaveBand natively supports multichannel signals (e.g., Stereo, 5.1,
+phonometry natively supports multichannel signals (e.g., Stereo, 5.1,
 Microphone Arrays) using **fully vectorized operations**. Input arrays of shape
 `(N_channels, N_samples)` are processed in parallel, offering significant
 performance gains over iterative loops.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_multichannel.png" alt="Stereo analysis: pink noise and logarithmic sweep resolved per channel in one-third-octave bands" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_multichannel_dark.png" alt="Stereo analysis: pink noise and logarithmic sweep resolved per channel in one-third-octave bands" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel.png" alt="Stereo analysis: pink noise and logarithmic sweep resolved per channel in one-third-octave bands" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel_dark.png" alt="Stereo analysis: pink noise and logarithmic sweep resolved per channel in one-third-octave bands" style="width:80%">
 
 *Simultaneous analysis of a Stereo signal: Left Channel (Pink Noise) vs Right
 Channel (Log Sine Sweep).*
@@ -22,7 +22,7 @@ The convention is consistent across the whole library: time is always the
 
 ```python
 import numpy as np
-from pyoctaveband import octavefilter
+from phonometry import octavefilter
 
 stereo = np.stack([left, right])          # (2, n_samples)
 spl, freq = octavefilter(stereo, fs, fraction=3)
@@ -37,7 +37,7 @@ processing. It uses NumPy vectorization to handle multichannel audio arrays
 maximum throughput.
 
 ```python
-from pyoctaveband import OctaveFilterBank
+from phonometry import OctaveFilterBank
 
 bank = OctaveFilterBank(fs=48000, fraction=3, filter_type='butter')
 
@@ -58,6 +58,6 @@ Additional performance notes:
   control over the design lifetime.
 - **Multirate decimation**: low-frequency bands are filtered at a decimated
   rate, which is both faster and numerically more stable (see
-  [Theory](/PyOctaveBand/reference/theory/)).
+  [Theory](/phonometry/reference/theory/)).
 - **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
-  numba is installed (`pip install PyOctaveBand[perf]`).
+  numba is installed (`pip install phonometry[perf]`).

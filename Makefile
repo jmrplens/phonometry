@@ -52,6 +52,6 @@ test:
 	$(PYTHON) -m pytest tests/
 
 coverage:
-	$(PYTHON) -m pytest --cov=src/pyoctaveband --cov-report=term-missing tests/
+	$(PYTHON) -m pytest --cov=src/phonometry --cov-report=term-missing tests/
 
 check: lint security test

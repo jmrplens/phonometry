@@ -6,13 +6,13 @@ Tests for IEC 61260-1 nominal frequency helpers and opt-in nominal label support
 import numpy as np
 import pytest
 
-from pyoctaveband.frequencies import (
+from phonometry.frequencies import (
     _format_nominal_freq,
     _iec_e3_round,
     _nominal_freq_for_band,
     getansifrequencies,
 )
-from pyoctaveband import OctaveFilterBank, normalizedfreq, octavefilter
+from phonometry import OctaveFilterBank, normalizedfreq, octavefilter
 
 
 # --- _iec_e3_round ---

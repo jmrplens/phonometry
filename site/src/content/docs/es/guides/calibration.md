@@ -3,7 +3,7 @@ title: "Calibración y dBFS"
 description: "Calibración SPL física y análisis digital a fondo de escala."
 ---
 
-PyOctaveBand puede devolver resultados en **nivel de presión sonora físico
+phonometry puede devolver resultados en **nivel de presión sonora físico
 (dB SPL)** o en **decibelios relativos a fondo de escala digital (dBFS)**.
 
 ## Calibración física (sonómetro)
@@ -23,7 +23,7 @@ debes calcular la sensibilidad de tu cadena de medición usando un tono de
 referencia (p. ej. 94 dB @ 1 kHz).
 
 ```python
-from pyoctaveband import octavefilter, calculate_sensitivity
+from phonometry import octavefilter, calculate_sensitivity
 
 # 1. Graba la señal de tu calibrador de 94 dB
 # ref_signal = ... (tu grabación)
@@ -88,7 +88,7 @@ spl_dbfs, freq = octavefilter(signal, fs, dbfs=True)
 
 ## RMS vs niveles de pico
 
-PyOctaveBand admite dos modos de medición, alineados con software profesional
+phonometry admite dos modos de medición, alineados con software profesional
 como BK:
 
 - **RMS (`mode='rms'`)**: nivel energético (estándar).

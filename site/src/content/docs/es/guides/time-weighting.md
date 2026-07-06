@@ -4,10 +4,10 @@ description: "Balística Fast, Slow e Impulse según IEC 61672-1."
 ---
 
 La medición precisa de SPL requiere capturar la energía en ventanas temporales
-específicas. PyOctaveBand implementa las constantes de tiempo exactas de la norma
+específicas. phonometry implementa las constantes de tiempo exactas de la norma
 **IEC 61672-1:2013**.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis_dark.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%">
 
 * **Fast (`fast`):** τ = 125 ms. Estándar para fluctuaciones de ruido.
 * **Slow (`slow`):** τ = 1000 ms. Estándar para ruido estacionario.
@@ -16,7 +16,7 @@ específicas. PyOctaveBand implementa las constantes de tiempo exactas de la nor
 
 ```python
 import numpy as np
-from pyoctaveband import time_weighting
+from phonometry import time_weighting
 
 # Calcular la envolvente de energía (valor cuadrático medio)
 energy_envelope = time_weighting(signal, fs, mode='fast')
@@ -38,7 +38,7 @@ La respuesta de la envolvente Fast a ráfagas de tono de 4 kHz cae exactamente
 sobre los valores de referencia de la norma — verificado en CI para duraciones
 de 1 s a 1 ms (ponderaciones F y S, límites de aceptación de clase 1):
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
 
 ## Estado inicial
 
@@ -74,7 +74,7 @@ forma `(n_channels, n_samples)`.
 O deja que la clase `TimeWeighting` lleve el estado por ti:
 
 ```python
-from pyoctaveband import TimeWeighting
+from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode='fast')
 for block in audio_blocks:
@@ -88,11 +88,11 @@ continua (verificado para los tres modos, mono y multicanal). Llama a
 ## Nota de rendimiento
 
 El modo `impulse` usa un kernel asimétrico que se compila JIT cuando
-[numba](https://numba.pydata.org/) está instalado (`pip install PyOctaveBand[perf]`).
+[numba](https://numba.pydata.org/) está instalado (`pip install phonometry[perf]`).
 Sin numba, un fallback en Python puro produce resultados idénticos, solo que más
 lento.
 
-Consulta [Niveles integrados y estadísticos](/PyOctaveBand/es/guides/levels/)
+Consulta [Niveles integrados y estadísticos](/phonometry/es/guides/levels/)
 para las métricas Leq/LN construidas sobre estas envolventes, y
-[Por qué PyOctaveBand](/PyOctaveBand/es/reference/why-pyoctaveband/) para la
+[Por qué phonometry](/phonometry/es/reference/why-phonometry/) para la
 verificación con ráfagas de tono de IEC 61672-1.

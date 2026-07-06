@@ -1,15 +1,15 @@
 {
-  "name": "PyOctaveBand Documentation",
-  "short_name": "PyOctaveBand",
+  "name": "phonometry Documentation",
+  "short_name": "phonometry",
   "description": "Octave-band and fractional octave-band filter bank for Python. ANSI S1.11 and IEC 61672-1 compliant.",
-  "start_url": "/PyOctaveBand/",
-  "scope": "/PyOctaveBand/",
+  "start_url": "/phonometry/",
+  "scope": "/phonometry/",
   "display": "standalone",
   "background_color": "#0f1216",
   "theme_color": "#1f77b4",
   "icons": [
     {
-      "src": "/PyOctaveBand/favicon.svg",
+      "src": "/phonometry/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

@@ -1,9 +1,9 @@
 ---
 title: "API Reference"
-description: "Every public function and class in PyOctaveBand."
+description: "Every public function and class in phonometry."
 ---
 
-All core functionality can be imported directly from the `pyoctaveband` package.
+All core functionality can be imported directly from the `phonometry` package.
 
 | Name | Type | Description (Inputs) | Usage Snippet (Outputs) |
 | :--- | :--- | :--- | :--- |
@@ -33,7 +33,7 @@ All core functionality can be imported directly from the `pyoctaveband` package.
   forward-backward (`sosfiltfilt`): no group delay, doubled effective
   attenuation, offline analysis only. Incompatible with `stateful=True`.
 - `mode='peak'` includes the filter's onset transient; a tone that starts
-  abruptly can overshoot by ~1 dB. See [Calibration and dBFS](/PyOctaveBand/guides/calibration/).
+  abruptly can overshoot by ~1 dB. See [Calibration and dBFS](/phonometry/guides/calibration/).
 - `octavefilter()` caches filter bank designs internally (32 entries), so
   repeated calls with the same parameters skip the design phase. For explicit
   control use `OctaveFilterBank`.

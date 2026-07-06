@@ -5,14 +5,14 @@
 Frequency weighting curves simulate the human ear's sensitivity, as specified by
 **IEC 61672-1:2013**.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses.png" alt="A, C and Z frequency weighting curves with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.png" alt="A, C and Z frequency weighting curves with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%"></picture>
 
 * **A-Weighting (`A`):** Standard for environmental noise (IEC 61672-1).
 * **C-Weighting (`C`):** Used for peak sound pressure and high-level noise.
 * **Z-Weighting (`Z`):** Zero weighting, completely flat response.
 
 ```python
-from pyoctaveband import weighting_filter
+from phonometry import weighting_filter
 
 # Apply A-weighting to the raw signal
 weighted_signal = weighting_filter(signal, fs, curve='A')
@@ -26,7 +26,7 @@ c_weighted_signal = weighting_filter(signal, fs, curve='C')
 If you weight many signals with the same parameters, design the filter once:
 
 ```python
-from pyoctaveband import WeightingFilter
+from phonometry import WeightingFilter
 
 wf = WeightingFilter(fs, "A")
 for signal in signals:
@@ -39,12 +39,12 @@ A plain bilinear-transform design compresses the response near Nyquist: at
 fs = 48 kHz the A-curve error at 12.5 kHz reaches −2.7 dB, outside the IEC
 61672-1 **class 1** tolerance (+2.0/−2.5 dB).
 
-By default (`high_accuracy=True`), PyOctaveBand designs and runs the weighting
+By default (`high_accuracy=True`), phonometry designs and runs the weighting
 filter at an internally oversampled rate (≥ 96 kHz) and decimates back, keeping
 the response within class 1 tolerances up to 16 kHz (error ≈ −0.5 dB at
 12.5 kHz for fs = 48 kHz).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf.png" alt="A-weighting high-frequency accuracy at 48 kHz: analytic curve versus plain bilinear versus oversampled design, with error subplot" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf.png" alt="A-weighting high-frequency accuracy at 48 kHz: analytic curve versus plain bilinear versus oversampled design, with error subplot" width="80%"></picture>
 
 *The plain bilinear design (red) crosses the class 1 tolerance near 12.5 kHz;
 the oversampled design (blue) stays close to the analytic curve.*

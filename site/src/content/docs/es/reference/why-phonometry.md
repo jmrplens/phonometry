@@ -1,13 +1,13 @@
 ---
-title: "Por qué PyOctaveBand"
+title: "Por qué phonometry"
 description: "Verificación de conformidad con IEC 61672-1 y comparación con otras librerías."
 ---
 
-Cómo se relaciona la ponderación temporal de PyOctaveBand con la norma
+Cómo se relaciona la ponderación temporal de phonometry con la norma
 **IEC 61672-1:2013** (Electroacústica — Sonómetros), y en qué se diferencia de
 otras librerías de Python como `python-acoustics`. Esta página resume el
 análisis publicado originalmente en la
-[incidencia #38](https://github.com/jmrplens/PyOctaveBand/issues/38).
+[incidencia #38](https://github.com/jmrplens/phonometry/issues/38).
 
 ## Filosofía de diseño
 
@@ -21,7 +21,7 @@ $$
 que corresponde a un filtro paso-bajo de primer orden estable con un polo en el
 semiplano izquierdo ($s = -1/\tau$).
 
-| | PyOctaveBand | python-acoustics |
+| | phonometry | python-acoustics |
 | :--- | :--- | :--- |
 | Salida | Envolvente continua (un valor por muestra) | Salida escalonada (un valor cada τ segundos) |
 | Unidades de entrada | Presión sonora cruda (Pa); se eleva al cuadrado internamente | Se espera la magnitud energética (Pa²) como entrada |
@@ -40,9 +40,9 @@ La prueba rigurosa para la ponderación temporal es la **respuesta a ráfaga de
 tono** (IEC 61672-1, Tabla 4), usando una ráfaga senoidal de 4 kHz referida al
 nivel de régimen estacionario.
 
-**Resultados de PyOctaveBand (FAST):**
+**Resultados de phonometry (FAST):**
 
-| Duración de la ráfaga | Objetivo IEC (dB) | PyOctaveBand (dB) | Error (dB) | Estado |
+| Duración de la ráfaga | Objetivo IEC (dB) | phonometry (dB) | Error (dB) | Estado |
 | :--- | :--- | :--- | :--- | :--- |
 | 200 ms | −1.0 | −0.98 | +0.02 | ✅ PASA |
 | 50 ms | −4.8 | −4.82 | −0.02 | ✅ PASA |
@@ -59,12 +59,12 @@ requiere esa librería):**
 | 10 ms | −11.1 | −10.90 | +0.20 | ✅ PASA |
 | 1 ms | −20.9 | −20.90 | +0.00 | ✅ PASA |
 
-PyOctaveBand mantiene alta precisión en todos los casos. El enfoque por bloques
+phonometry mantiene alta precisión en todos los casos. El enfoque por bloques
 se desvía significativamente (> 0,8 dB) en la ráfaga de 50 ms porque los bloques
 de 125 ms no pueden resolver con precisión eventos transitorios cortos — el
 resultado depende de cómo se alinee la ráfaga con los límites de los bloques.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
 
 *Envolventes Fast medidas (azul) coincidiendo con los valores de referencia
 de la Tabla 4 (discontinua) dentro de 0,1 dB para ráfagas de 200/50/10 ms.*
@@ -73,10 +73,10 @@ de la Tabla 4 (discontinua) dentro de 0,1 dB para ráfagas de 200/50/10 ms.*
 
 - Si necesitas **envolventes Fast/Slow/Impulse conformes con la norma**
   (comportamiento de sonómetro, un nivel por muestra), usa
-  [`time_weighting`](/PyOctaveBand/es/guides/time-weighting/) de PyOctaveBand.
+  [`time_weighting`](/phonometry/es/guides/time-weighting/) de phonometry.
 - Si necesitas un **Leq promediado por intervalos**, esa es una métrica
   distinta e igualmente válida — puedes calcularla con
-  [`leq`](/PyOctaveBand/es/guides/levels/) sobre segmentos consecutivos.
+  [`leq`](/phonometry/es/guides/levels/) sobre segmentos consecutivos.
 - Ambas librerías son útiles; simplemente responden preguntas distintas. La
   discrepancia reportada en la incidencia #38 proviene de comparar una
   envolvente continua con un integrador por bloques, no de un error de
@@ -92,6 +92,6 @@ El mismo enfoque de "primero la norma" se aplica a toda la librería:
 - La ponderación A/C se mantiene dentro de las tolerancias de **clase 1 de
   IEC 61672-1** hasta 16 kHz a las frecuencias de muestreo habituales, gracias
   al sobremuestreo interno (consulta
-  [Ponderación frecuencial](/PyOctaveBand/es/guides/weighting/)).
+  [Ponderación frecuencial](/phonometry/es/guides/weighting/)).
 - Los objetivos de ráfaga de tono IEC de arriba están integrados en la batería
   de tests, de modo que las regresiones se detectan en CI.

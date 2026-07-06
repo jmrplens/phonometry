@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-07-06
+
+### ⚠️ Breaking changes
+
+- **The library is now `phonometry`** (formerly `PyOctaveBand`). Install with
+  `pip install phonometry` and `import phonometry`. The API is unchanged — a
+  plain rename of the import is a complete migration. The final
+  `PyOctaveBand 2.1.0` release on PyPI is a transition stub that depends on
+  `phonometry` and re-exports it under the old `pyoctaveband` module name with
+  a `DeprecationWarning`, so `pip install -U PyOctaveBand` keeps existing code
+  working. The last state under the old name is preserved in the locked
+  [`pyoctaveband-v2`](https://github.com/jmrplens/phonometry/tree/pyoctaveband-v2) branch.
+- **Python >= 3.13 required** (was >= 3.11). CI now tests 3.13, 3.14 and the
+  3.15 prerelease.
+
+### Added
+
+- `lc_peak()` — C-weighted peak level (IEC 61672-1 §5.13), verified against
+  the Table 5 one-cycle/half-cycle tone-burst responses.
+- `sel()` — sound exposure level (SEL/LAE), with class 1 conformance tests for
+  the Table 4 LAE tone-burst column.
+- `sound_exposure()` and `lex_8h()` — occupational noise dose (Pa²·h and
+  normalized 8 h exposure level, IEC 61252).
+- `calculate_sensitivity(..., validate=True)` — calibration-tone stability
+  validation per IEC 60942 (short-term level fluctuation, class 1 limit),
+  emitting `CalibrationWarning` on unstable or too-short recordings.
+
 ## [2.0.0] - 2026-07-06
 
 ### ⚠️ Numerical behavior changes
@@ -127,8 +154,9 @@ Chebyshev I/II, Elliptic, Bessel), A/C/Z weighting, Fast/Slow/Impulse time
 weighting, Linkwitz-Riley crossover, calibration and dBFS modes,
 multichannel support.
 
-[Unreleased]: https://github.com/jmrplens/PyOctaveBand/compare/v2.0.0...HEAD
-[2.0.0]: https://github.com/jmrplens/PyOctaveBand/compare/v1.2.3...v2.0.0
+[Unreleased]: https://github.com/jmrplens/phonometry/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/jmrplens/phonometry/compare/v2.0.0...v3.0.0
+[2.0.0]: https://github.com/jmrplens/phonometry/compare/v1.2.3...v2.0.0
 [1.2.3]: https://github.com/jmrplens/PyOctaveBand/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/jmrplens/PyOctaveBand/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/jmrplens/PyOctaveBand/compare/v1.1.5...v1.2.1

@@ -1,13 +1,12 @@
----
-title: "Why PyOctaveBand"
-description: "IEC 61672-1 compliance verification and comparison with other libraries."
----
+← [Documentation index](README.md)
 
-How PyOctaveBand's time weighting relates to the **IEC 61672-1:2013** standard
+# Why phonometry
+
+How phonometry's time weighting relates to the **IEC 61672-1:2013** standard
 (Electroacoustics — Sound level meters), and how it differs from other Python
 libraries such as `python-acoustics`. This page summarizes the analysis
 originally published in
-[issue #38](https://github.com/jmrplens/PyOctaveBand/issues/38).
+[issue #38](https://github.com/jmrplens/phonometry/issues/38).
 
 ## Design philosophy
 
@@ -21,7 +20,7 @@ $$
 which corresponds to a stable first-order low-pass filter with a pole in the
 left half-plane ($s = -1/\tau$).
 
-| | PyOctaveBand | python-acoustics |
+| | phonometry | python-acoustics |
 | :--- | :--- | :--- |
 | Output | Continuous time-weighted envelope (one value per sample) | Stepped output (one value every τ seconds) |
 | Input units | Raw sound pressure (Pa); squared internally | Energetic quantity (Pa²) expected as input |
@@ -40,9 +39,9 @@ The rigorous test for time weighting is the **Tone Burst Response**
 (IEC 61672-1, Table 4), using a 4 kHz sine burst referenced to the steady-state
 level.
 
-**PyOctaveBand results (FAST):**
+**phonometry results (FAST):**
 
-| Burst duration | IEC target (dB) | PyOctaveBand (dB) | Error (dB) | Status |
+| Burst duration | IEC target (dB) | phonometry (dB) | Error (dB) | Status |
 | :--- | :--- | :--- | :--- | :--- |
 | 200 ms | −1.0 | −0.98 | +0.02 | ✅ PASS |
 | 50 ms | −4.8 | −4.82 | −0.02 | ✅ PASS |
@@ -59,12 +58,12 @@ library):**
 | 10 ms | −11.1 | −10.90 | +0.20 | ✅ PASS |
 | 1 ms | −20.9 | −20.90 | +0.00 | ✅ PASS |
 
-PyOctaveBand maintains high precision across all test cases. The block-based
+phonometry maintains high precision across all test cases. The block-based
 approach deviates significantly (> 0.8 dB) for the 50 ms burst because 125 ms
 blocks cannot resolve short transient events accurately — the result depends on
 how the burst aligns with the block boundaries.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%">
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
 
 *Measured Fast envelopes (blue) matching the Table 4 reference values
 (dashed) within 0.1 dB for 200/50/10 ms bursts.*
@@ -72,10 +71,10 @@ how the burst aligns with the block boundaries.
 ## What this means in practice
 
 - If you need **standard-compliant Fast/Slow/Impulse envelopes** (sound level
-  meter behavior, one level per sample), use PyOctaveBand's
-  [`time_weighting`](/PyOctaveBand/guides/time-weighting/).
+  meter behavior, one level per sample), use phonometry's
+  [`time_weighting`](time-weighting.md).
 - If you need **block-averaged Leq per interval**, that is a different, equally
-  valid metric — you can compute it with [`leq`](/PyOctaveBand/guides/levels/) over consecutive
+  valid metric — you can compute it with [`leq`](levels.md) over consecutive
   slices.
 - Both libraries are useful; they just answer different questions. The
   discrepancy reported in issue #38 comes from comparing a continuous envelope
@@ -90,6 +89,6 @@ The same standards-first approach applies across the library:
   parametrization would not).
 - A/C weighting stays within **IEC 61672-1 class 1** tolerances up to 16 kHz at
   common audio rates via internal oversampling (see
-  [Frequency Weighting](/PyOctaveBand/guides/weighting/)).
+  [Frequency Weighting](weighting.md)).
 - The IEC tone-burst targets above are enforced in the test suite, so
   regressions are caught in CI.

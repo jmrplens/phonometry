@@ -6,7 +6,7 @@ Tests for error handling and edge cases across all modules.
 import numpy as np
 import pytest
 
-from pyoctaveband import (
+from phonometry import (
     OctaveFilterBank,
     calculate_sensitivity,
     linkwitz_riley,
@@ -14,7 +14,7 @@ from pyoctaveband import (
     time_weighting,
     weighting_filter,
 )
-from pyoctaveband.frequencies import getansifrequencies
+from phonometry.frequencies import getansifrequencies
 
 
 def test_octave_filter_bank_invalid_init() -> None:

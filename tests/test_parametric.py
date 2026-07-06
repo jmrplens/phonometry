@@ -6,7 +6,7 @@ Parametric tests using pytest best practices for signal processing verification.
 import numpy as np
 import pytest
 
-from pyoctaveband import OctaveFilterBank, octavefilter
+from phonometry import OctaveFilterBank, octavefilter
 
 
 @pytest.mark.parametrize("fraction, expected_bands", [
@@ -226,7 +226,7 @@ def test_impulse_kernel_python_fallback_matches_numba() -> None:
     falls back to the undecorated kernel, which must be functionally
     identical.
     """
-    from pyoctaveband import parametric_filters as pf
+    from phonometry import parametric_filters as pf
 
     rng = np.random.default_rng(3)
     x_t = np.ascontiguousarray(rng.standard_normal((500, 2)) ** 2)
@@ -238,7 +238,7 @@ def test_impulse_kernel_python_fallback_matches_numba() -> None:
 
 def test_time_weighting_class_blocks_match_continuous() -> None:
     """Block-wise TimeWeighting must equal one-shot time_weighting."""
-    from pyoctaveband import TimeWeighting, time_weighting
+    from phonometry import TimeWeighting, time_weighting
 
     fs = 48000
     rng = np.random.default_rng(5)
@@ -252,7 +252,7 @@ def test_time_weighting_class_blocks_match_continuous() -> None:
 
 
 def test_time_weighting_class_reset() -> None:
-    from pyoctaveband import TimeWeighting
+    from phonometry import TimeWeighting
 
     fs = 48000
     x = np.ones(1000)
@@ -264,7 +264,7 @@ def test_time_weighting_class_reset() -> None:
 
 
 def test_time_weighting_class_multichannel_state() -> None:
-    from pyoctaveband import TimeWeighting, time_weighting
+    from phonometry import TimeWeighting, time_weighting
 
     fs = 48000
     rng = np.random.default_rng(6)
@@ -276,7 +276,7 @@ def test_time_weighting_class_multichannel_state() -> None:
 
 
 def test_time_weighting_class_invalid_params() -> None:
-    from pyoctaveband import TimeWeighting
+    from phonometry import TimeWeighting
 
     with pytest.raises(ValueError, match="must be positive"):
         TimeWeighting(0)
@@ -286,7 +286,7 @@ def test_time_weighting_class_invalid_params() -> None:
 
 def test_time_weighting_class_impulse_blocks_match_continuous() -> None:
     """Impulse mode uses a distinct asymmetric kernel: verify state carrying."""
-    from pyoctaveband import TimeWeighting, time_weighting
+    from phonometry import TimeWeighting, time_weighting
 
     fs = 48000
     rng = np.random.default_rng(7)
@@ -299,7 +299,7 @@ def test_time_weighting_class_impulse_blocks_match_continuous() -> None:
 
 
 def test_time_weighting_class_empty_block_keeps_state() -> None:
-    from pyoctaveband import TimeWeighting, time_weighting
+    from phonometry import TimeWeighting, time_weighting
 
     fs = 48000
     x = np.ones(1000)

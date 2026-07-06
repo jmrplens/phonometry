@@ -2,7 +2,7 @@
 
 # API Reference
 
-All core functionality can be imported directly from the `pyoctaveband` package.
+All core functionality can be imported directly from the `phonometry` package.
 
 | Name | Type | Description (Inputs) | Usage Snippet (Outputs) |
 | :--- | :--- | :--- | :--- |

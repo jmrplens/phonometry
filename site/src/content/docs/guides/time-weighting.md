@@ -4,9 +4,9 @@ description: "Fast, Slow and Impulse ballistics per IEC 61672-1."
 ---
 
 Accurate SPL measurement requires capturing energy over specific time windows.
-PyOctaveBand implements exact time constants per **IEC 61672-1:2013**.
+phonometry implements exact time constants per **IEC 61672-1:2013**.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis_dark.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" style="width:80%">
 
 * **Fast (`fast`):** τ = 125 ms. Standard for noise fluctuations.
 * **Slow (`slow`):** τ = 1000 ms. Standard for steady noise.
@@ -15,7 +15,7 @@ PyOctaveBand implements exact time constants per **IEC 61672-1:2013**.
 
 ```python
 import numpy as np
-from pyoctaveband import time_weighting
+from phonometry import time_weighting
 
 # Calculate energy envelope (Mean Square)
 energy_envelope = time_weighting(signal, fs, mode='fast')
@@ -37,7 +37,7 @@ The Fast envelope's response to 4 kHz tonebursts lands exactly on the
 standard's reference values — enforced in CI for burst durations from 1 s down
 to 1 ms (F and S weightings, class 1 acceptance limits):
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%">
 
 ## Initial state
 
@@ -71,7 +71,7 @@ such as `(n_channels,)` for input shaped `(n_channels, n_samples)`.
 Or let the `TimeWeighting` class carry the state for you:
 
 ```python
-from pyoctaveband import TimeWeighting
+from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode='fast')
 for block in audio_blocks:
@@ -85,9 +85,9 @@ start from rest again.
 ## Performance note
 
 The `impulse` mode uses an asymmetric kernel that is JIT-compiled when
-[numba](https://numba.pydata.org/) is installed (`pip install PyOctaveBand[perf]`).
+[numba](https://numba.pydata.org/) is installed (`pip install phonometry[perf]`).
 Without numba a pure-Python fallback produces identical results, just slower.
 
-See [Integrated & Statistical Levels](/PyOctaveBand/guides/levels/) for Leq/LN metrics built on
-these envelopes, and [Why PyOctaveBand](/PyOctaveBand/reference/why-pyoctaveband/) for the IEC
+See [Integrated & Statistical Levels](/phonometry/guides/levels/) for Leq/LN metrics built on
+these envelopes, and [Why phonometry](/phonometry/reference/why-phonometry/) for the IEC
 61672-1 tone-burst verification.

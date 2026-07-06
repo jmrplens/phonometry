@@ -45,13 +45,20 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.13"]
+        python-version: ["3.13", "3.14"]
+        include:
+          # 3.15 is a prerelease until October 2026; numpy/scipy wheels may lag.
+          - os: ubuntu-latest
+            python-version: "3.15"
+            experimental: true
+    continue-on-error: ${{ matrix.experimental || false }}
     steps:
     - uses: actions/checkout@v7
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
+        allow-prereleases: true
         cache: 'pip'
     - name: Install dependencies
       run: |

@@ -15,8 +15,8 @@ import re
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-SITE_URL = "https://jmrplens.github.io/PyOctaveBand"
-REPO_URL = "https://github.com/jmrplens/PyOctaveBand"
+SITE_URL = "https://jmrplens.github.io/phonometry"
+REPO_URL = "https://github.com/jmrplens/phonometry"
 
 # docs page -> site route (order defines the llms-full concatenation)
 PAGES = [
@@ -30,7 +30,7 @@ PAGES = [
     ("multichannel.md", "guides/multichannel"),
     ("api-reference.md", "reference/api"),
     ("theory.md", "reference/theory"),
-    ("why-pyoctaveband.md", "reference/why-pyoctaveband"),
+    ("why-phonometry.md", "reference/why-phonometry"),
 ]
 
 
@@ -47,14 +47,14 @@ def _page_title(path: pathlib.Path) -> str:
 
 def build_llms_txt(version: str) -> str:
     lines = [
-        "# PyOctaveBand",
+        "# phonometry",
         "",
         "> Octave-band and fractional octave-band filter bank for Python signals in the "
         "time domain. Compliant with ANSI S1.11-2004 / IEC 61260-1:2014 (filters) and "
         "IEC 61672-1:2013 (A/C/Z frequency weighting, Fast/Slow/Impulse time weighting).",
         "",
-        f"PyOctaveBand v{version} is a pure-Python library built on NumPy/SciPy "
-        "(Python >= 3.11). It provides fractional octave filter banks (Butterworth, "
+        f"phonometry v{version} is a pure-Python library built on NumPy/SciPy "
+        "(Python >= 3.13). It provides fractional octave filter banks (Butterworth, "
         "Chebyshev I/II, Elliptic, Bessel as stable SOS cascades with multirate "
         "decimation), A/C/Z weighting within IEC class 1 tolerances, Fast/Slow/Impulse "
         "ballistics, Leq/LAeq/L10-L50-L90 statistical levels, octave spectrograms, "
@@ -66,9 +66,9 @@ def build_llms_txt(version: str) -> str:
         "Install:",
         "",
         "```bash",
-        "pip install PyOctaveBand            # core (NumPy + SciPy only)",
-        "pip install PyOctaveBand[plot]      # + matplotlib response plots",
-        "pip install PyOctaveBand[perf]      # + numba-jitted impulse kernel",
+        "pip install phonometry            # core (NumPy + SciPy only)",
+        "pip install phonometry[plot]      # + matplotlib response plots",
+        "pip install phonometry[perf]      # + numba-jitted impulse kernel",
         "```",
         "",
         "Minimal usage (all functions treat time as the LAST axis; 2D input is "
@@ -76,7 +76,7 @@ def build_llms_txt(version: str) -> str:
         "",
         "```python",
         "import numpy as np",
-        "from pyoctaveband import octavefilter, laeq, ln_levels",
+        "from phonometry import octavefilter, laeq, ln_levels",
         "",
         "fs = 48000",
         "x = np.random.randn(fs)              # 1 s of signal (pressure units)",
@@ -103,7 +103,7 @@ def build_llms_txt(version: str) -> str:
         "## Source and metadata",
         "",
         f"- [Repository]({REPO_URL})",
-        "- [PyPI](https://pypi.org/project/PyOctaveBand/)",
+        "- [PyPI](https://pypi.org/project/phonometry/)",
         f"- [Changelog]({REPO_URL}/blob/main/CHANGELOG.md)",
         f"- [Cite this software]({REPO_URL}/blob/main/CITATION.cff)",
         "",

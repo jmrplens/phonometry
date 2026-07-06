@@ -1,14 +1,14 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
-title: "PyOctaveBand: Octave-Band and Fractional Octave-Band filter bank for Python"
+title: "phonometry: acoustic measurement toolkit for Python (formerly PyOctaveBand)"
 authors:
   - family-names: "Requena Plens"
     given-names: "Jose Manuel"
     email: "jmrplens@gmail.com"
     orcid: "https://orcid.org/0000-0003-1250-6212"
-repository-code: "https://github.com/jmrplens/PyOctaveBand"
-url: "https://jmrplens.github.io/PyOctaveBand/"
+repository-code: "https://github.com/jmrplens/phonometry"
+url: "https://jmrplens.github.io/phonometry/"
 doi: "10.5281/zenodo.21215280"
 license: MIT
 keywords:

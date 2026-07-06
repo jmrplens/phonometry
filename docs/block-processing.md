@@ -7,7 +7,7 @@ The `OctaveFilterBank`, `WeightingFilter` (for A, C, or Z-weighting) and
 filter state is carried between calls, so concatenated block outputs match a
 single full-signal pass.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity.png" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity.png" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" width="80%"></picture>
 
 *With `stateful=True` the concatenated block outputs match the continuous
 result exactly; without state, every block boundary restarts the filter
@@ -32,7 +32,7 @@ Notes when using a stateful `OctaveFilterBank`:
 
 ```python
 import soundfile as sf
-from pyoctaveband import OctaveFilterBank, WeightingFilter
+from phonometry import OctaveFilterBank, WeightingFilter
 
 fs = 48000
 octavefilter = OctaveFilterBank(fs, 1, stateful=True, resample=False)
@@ -55,7 +55,7 @@ for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
 Use the `TimeWeighting` class (state carried automatically):
 
 ```python
-from pyoctaveband import TimeWeighting
+from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode="fast")
 for block in audio_blocks:

@@ -1,22 +1,22 @@
-# PyOctaveBand
+# phonometry
 
 > Octave-band and fractional octave-band filter bank for Python signals in the time domain. Compliant with ANSI S1.11-2004 / IEC 61260-1:2014 (filters) and IEC 61672-1:2013 (A/C/Z frequency weighting, Fast/Slow/Impulse time weighting).
 
-PyOctaveBand v2.0.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.11). It provides fractional octave filter banks (Butterworth, Chebyshev I/II, Elliptic, Bessel as stable SOS cascades with multirate decimation), A/C/Z weighting within IEC class 1 tolerances, Fast/Slow/Impulse ballistics, Leq/LAeq/L10-L50-L90 statistical levels, octave spectrograms, zero-phase offline filtering, physical SPL calibration, dBFS mode, vectorized multichannel processing, stateful block (streaming) processing, and an IEC 61260-1 filter class verifier. Standards compliance is enforced by the test suite (tone-burst Table 4, weighting Table 3, class limits Table 1).
+phonometry v3.0.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). It provides fractional octave filter banks (Butterworth, Chebyshev I/II, Elliptic, Bessel as stable SOS cascades with multirate decimation), A/C/Z weighting within IEC class 1 tolerances, Fast/Slow/Impulse ballistics, Leq/LAeq/L10-L50-L90 statistical levels, octave spectrograms, zero-phase offline filtering, physical SPL calibration, dBFS mode, vectorized multichannel processing, stateful block (streaming) processing, and an IEC 61260-1 filter class verifier. Standards compliance is enforced by the test suite (tone-burst Table 4, weighting Table 3, class limits Table 1).
 
 Install:
 
 ```bash
-pip install PyOctaveBand            # core (NumPy + SciPy only)
-pip install PyOctaveBand[plot]      # + matplotlib response plots
-pip install PyOctaveBand[perf]      # + numba-jitted impulse kernel
+pip install phonometry            # core (NumPy + SciPy only)
+pip install phonometry[plot]      # + matplotlib response plots
+pip install phonometry[perf]      # + numba-jitted impulse kernel
 ```
 
 Minimal usage (all functions treat time as the LAST axis; 2D input is (channels, samples)):
 
 ```python
 import numpy as np
-from pyoctaveband import octavefilter, laeq, ln_levels
+from phonometry import octavefilter, laeq, ln_levels
 
 fs = 48000
 x = np.random.randn(fs)              # 1 s of signal (pressure units)
@@ -29,21 +29,21 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 ## Documentation
 
-- [Getting Started](https://jmrplens.github.io/PyOctaveBand/getting-started/)
-- [Filter Banks](https://jmrplens.github.io/PyOctaveBand/guides/filter-banks/)
-- [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/PyOctaveBand/guides/weighting/)
-- [Time Weighting and Integration](https://jmrplens.github.io/PyOctaveBand/guides/time-weighting/)
-- [Integrated and Statistical Levels](https://jmrplens.github.io/PyOctaveBand/guides/levels/)
-- [Calibration and dBFS](https://jmrplens.github.io/PyOctaveBand/guides/calibration/)
-- [Block Processing](https://jmrplens.github.io/PyOctaveBand/guides/block-processing/)
-- [Multichannel and Performance](https://jmrplens.github.io/PyOctaveBand/guides/multichannel/)
-- [API Reference](https://jmrplens.github.io/PyOctaveBand/reference/api/)
-- [Theoretical Background](https://jmrplens.github.io/PyOctaveBand/reference/theory/)
-- [Why PyOctaveBand](https://jmrplens.github.io/PyOctaveBand/reference/why-pyoctaveband/)
+- [Getting Started](https://jmrplens.github.io/phonometry/getting-started/)
+- [Filter Banks](https://jmrplens.github.io/phonometry/guides/filter-banks/)
+- [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/phonometry/guides/weighting/)
+- [Time Weighting and Integration](https://jmrplens.github.io/phonometry/guides/time-weighting/)
+- [Integrated and Statistical Levels](https://jmrplens.github.io/phonometry/guides/levels/)
+- [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/)
+- [Block Processing](https://jmrplens.github.io/phonometry/guides/block-processing/)
+- [Multichannel and Performance](https://jmrplens.github.io/phonometry/guides/multichannel/)
+- [API Reference](https://jmrplens.github.io/phonometry/reference/api/)
+- [Theoretical Background](https://jmrplens.github.io/phonometry/reference/theory/)
+- [Why phonometry](https://jmrplens.github.io/phonometry/reference/why-phonometry/)
 
 ## Source and metadata
 
-- [Repository](https://github.com/jmrplens/PyOctaveBand)
-- [PyPI](https://pypi.org/project/PyOctaveBand/)
-- [Changelog](https://github.com/jmrplens/PyOctaveBand/blob/main/CHANGELOG.md)
-- [Cite this software](https://github.com/jmrplens/PyOctaveBand/blob/main/CITATION.cff)
+- [Repository](https://github.com/jmrplens/phonometry)
+- [PyPI](https://pypi.org/project/phonometry/)
+- [Changelog](https://github.com/jmrplens/phonometry/blob/main/CHANGELOG.md)
+- [Cite this software](https://github.com/jmrplens/phonometry/blob/main/CITATION.cff)

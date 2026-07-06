@@ -7,7 +7,7 @@ Focuses on edge cases that might be problematic in DSP.
 import numpy as np
 import pytest
 
-from pyoctaveband import octavefilter
+from phonometry import octavefilter
 
 
 def test_nyquist_frequency_content() -> None:

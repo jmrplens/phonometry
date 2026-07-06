@@ -16,7 +16,7 @@ import math
 import numpy as np
 import pytest
 
-from pyoctaveband import WeightingFilter
+from phonometry import WeightingFilter
 
 INF = math.inf
 

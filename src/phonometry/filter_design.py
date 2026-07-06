@@ -1,6 +1,6 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Filter design and visualization for pyoctaveband.
+Filter design and visualization for phonometry.
 """
 
 from __future__ import annotations
@@ -155,7 +155,7 @@ def _showfilter(
         import matplotlib.pyplot as plt
     except ImportError as exc:
         raise ImportError(
-            "Plotting requires matplotlib. Install it with: pip install pyoctaveband[plot]"
+            "Plotting requires matplotlib. Install it with: pip install phonometry[plot]"
         ) from exc
 
     wn = 8192

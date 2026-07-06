@@ -52,7 +52,12 @@ _FREQUENCIES = np.array(sorted(_TABLE1))
 
 
 def _params(frequency: float) -> tuple[float, float, float]:
-    """Table 1 parameters for a preferred third-octave frequency."""
+    """Table 1 parameters for a preferred third-octave frequency.
+
+    The 1e-6 relative tolerance only absorbs floating-point representation
+    error; adjacent table rows are >20 % apart, so a near-miss can never
+    resolve to the wrong row - anything else raises.
+    """
     for f, params in _TABLE1.items():
         if abs(frequency - f) <= 1e-6 * f:
             return params

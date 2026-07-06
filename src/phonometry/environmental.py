@@ -8,12 +8,12 @@ and composite whole-day rating levels (6.5, Formulae 5-6).
 
 from __future__ import annotations
 
-from typing import Sequence, Tuple
+from typing import Iterable, Tuple
 
 import numpy as np
 
 
-def composite_rating_level(periods: Sequence[Tuple[float, float, float]]) -> float:
+def composite_rating_level(periods: Iterable[Tuple[float, float, float]]) -> float:
     """
     Composite whole-day rating level (ISO 1996-1:2016, 6.5).
 
@@ -22,7 +22,7 @@ def composite_rating_level(periods: Sequence[Tuple[float, float, float]]) -> flo
 
     ``10*lg[ sum_i (h_i / 24) * 10^(0.1*(L_i + K_i)) ]``
 
-    :param periods: Sequence of ``(level_db, hours, adjustment_db)`` tuples.
+    :param periods: Iterable of ``(level_db, hours, adjustment_db)`` tuples.
         ``level_db`` is the period's (rating) equivalent continuous level,
         ``hours`` its duration and ``adjustment_db`` the time-of-day or
         source adjustment K (e.g. ISO 1996-1 Table A.1: evening 5 dB,

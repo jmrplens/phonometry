@@ -176,6 +176,10 @@ def tone_to_noise_ratio(
         raise ValueError("tone_to_noise_ratio expects a 1D signal.")
     if fs <= 0:
         raise ValueError("Sample rate 'fs' must be positive.")
+    if resolution_hz <= 0:
+        raise ValueError("'resolution_hz' must be positive.")
+    if tone_freq is not None and tone_freq <= 0:
+        raise ValueError("'tone_freq' must be positive.")
 
     freqs, power, df = _averaged_spectrum(x_proc, fs, resolution_hz)
     peak = _find_peak(freqs, power, tone_freq)
@@ -280,6 +284,10 @@ def prominence_ratio(
         raise ValueError("prominence_ratio expects a 1D signal.")
     if fs <= 0:
         raise ValueError("Sample rate 'fs' must be positive.")
+    if resolution_hz <= 0:
+        raise ValueError("'resolution_hz' must be positive.")
+    if tone_freq is not None and tone_freq <= 0:
+        raise ValueError("'tone_freq' must be positive.")
 
     freqs, power, df = _averaged_spectrum(x_proc, fs, resolution_hz)
     peak = _find_peak(freqs, power, tone_freq)

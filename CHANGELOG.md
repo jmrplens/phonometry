@@ -23,7 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - Calibrator stability validation updated from IEC 60942:2003 to
-  IEC 60942:2017 (Ed. 4): |max − mean| / |min − mean| criterion and the
+  IEC 60942:2017 (Ed. 4): the deviations |max − mean| and |min − mean| are
+  each compared against the limit, using the
   frequency-dependent Table 2 class 1 limits (0.07 dB in 160 Hz - 1.25 kHz);
   `calculate_sensitivity()` gains a `frequency` parameter.
 

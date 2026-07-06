@@ -139,3 +139,10 @@ def test_invalid_inputs() -> None:
         prominence_ratio(np.ones((2, FS)), FS)
     with pytest.raises(ValueError, match="too short"):
         tone_to_noise_ratio(np.ones(100), FS)
+
+
+def test_invalid_resolution_and_tone_freq() -> None:
+    with pytest.raises(ValueError, match="resolution_hz"):
+        tone_to_noise_ratio(np.ones(FS), FS, resolution_hz=0.0)
+    with pytest.raises(ValueError, match="tone_freq"):
+        prominence_ratio(np.ones(FS), FS, tone_freq=-100.0)

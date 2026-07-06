@@ -51,8 +51,8 @@ def calculate_sensitivity(
     itself (5.3.3): levels are measured with time-weighting F and the
     *short-term level fluctuation* — the absolute difference between each of
     the maximum and minimum levels and the mean level — must not exceed the
-    Table 2 acceptance limit for the calibrator class (class 1: 0.07 dB
-    between 160 Hz and 1.25 kHz, relaxed to 0.10/0.20 dB below 160/63 Hz
+    Table 2 acceptance limit for the calibrator class (class 1: 0.07 dB at
+    and above 160 Hz, relaxed to 0.10/0.20 dB below 160/63 Hz
     because the F time-weighting itself ripples at low frequencies). A larger
     fluctuation usually means a badly coupled microphone or handling noise in
     the recording, which would silently corrupt every calibrated level; a

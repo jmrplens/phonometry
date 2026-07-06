@@ -66,3 +66,10 @@ def test_empty_reference_raises() -> None:
 def test_too_short_recording_warns() -> None:
     with pytest.warns(CalibrationWarning, match="shorter than 2 s"):
         calculate_sensitivity(_cal_tone(seconds=1.0), fs=FS)
+
+
+def test_multichannel_stable_at_different_levels_no_warning() -> None:
+    """Per-channel stability: a level offset between channels is not fluctuation."""
+    x = np.stack([_cal_tone(), 0.5 * _cal_tone()])
+    with _assert_no_calibration_warning():
+        calculate_sensitivity(x, fs=FS)

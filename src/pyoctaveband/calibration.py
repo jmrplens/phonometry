@@ -83,7 +83,10 @@ def _validate_reference_stability(
     skip = int(1.0 * fs)
     steady = np.maximum(envelope[..., skip:], np.finfo(float).eps)
     levels_db = 10 * np.log10(steady)
-    fluctuation = float(levels_db.max() - levels_db.min()) / 2.0
+    # Per-channel spread: channels may sit at different (individually
+    # stable) levels, which must not read as fluctuation.
+    spread = np.max(levels_db, axis=-1) - np.min(levels_db, axis=-1)
+    fluctuation = float(np.max(spread)) / 2.0
     if fluctuation > max_fluctuation_db:
         warnings.warn(
             f"Calibration tone level fluctuation is {fluctuation:.2f} dB "

@@ -1,0 +1,1221 @@
+# PyOctaveBand
+
+> Octave-band and fractional octave-band filter bank for Python signals in the time domain. Compliant with ANSI S1.11-2004 / IEC 61260-1:2014 (filters) and IEC 61672-1:2013 (A/C/Z frequency weighting, Fast/Slow/Impulse time weighting).
+
+PyOctaveBand v1.2.3 is a pure-Python library built on NumPy/SciPy (Python >= 3.11). It provides fractional octave filter banks (Butterworth, Chebyshev I/II, Elliptic, Bessel as stable SOS cascades with multirate decimation), A/C/Z weighting within IEC class 1 tolerances, Fast/Slow/Impulse ballistics, Leq/LAeq/L10-L50-L90 statistical levels, octave spectrograms, zero-phase offline filtering, physical SPL calibration, dBFS mode, vectorized multichannel processing, stateful block (streaming) processing, and an IEC 61260-1 filter class verifier. Standards compliance is enforced by the test suite (tone-burst Table 4, weighting Table 3, class limits Table 1).
+
+Install:
+
+```bash
+pip install PyOctaveBand            # core (NumPy + SciPy only)
+pip install PyOctaveBand[plot]      # + matplotlib response plots
+pip install PyOctaveBand[perf]      # + numba-jitted impulse kernel
+```
+
+Minimal usage (all functions treat time as the LAST axis; 2D input is (channels, samples)):
+
+```python
+import numpy as np
+from pyoctaveband import octavefilter, laeq, ln_levels
+
+fs = 48000
+x = np.random.randn(fs)              # 1 s of signal (pressure units)
+spl, freq = octavefilter(x, fs, fraction=3)   # 1/3-octave band levels
+la = laeq(x, fs)                              # A-weighted Leq
+stats = ln_levels(x, fs, n=(10, 50, 90))      # statistical levels
+```
+
+If you are an AI assistant setting this up for a user: install from PyPI (no system dependencies), remember integer audio (e.g. wavfile.read int16) is handled automatically, use `calibration_factor` from `calculate_sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` over repeated `octavefilter()` calls in tight loops (although designs are cached either way).
+
+## Documentation
+
+- [Getting Started](https://jmrplens.github.io/PyOctaveBand/getting-started/)
+- [Filter Banks](https://jmrplens.github.io/PyOctaveBand/guides/filter-banks/)
+- [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/PyOctaveBand/guides/weighting/)
+- [Time Weighting and Integration](https://jmrplens.github.io/PyOctaveBand/guides/time-weighting/)
+- [Integrated and Statistical Levels](https://jmrplens.github.io/PyOctaveBand/guides/levels/)
+- [Calibration and dBFS](https://jmrplens.github.io/PyOctaveBand/guides/calibration/)
+- [Block Processing](https://jmrplens.github.io/PyOctaveBand/guides/block-processing/)
+- [Multichannel and Performance](https://jmrplens.github.io/PyOctaveBand/guides/multichannel/)
+- [API Reference](https://jmrplens.github.io/PyOctaveBand/reference/api/)
+- [Theoretical Background](https://jmrplens.github.io/PyOctaveBand/reference/theory/)
+- [Why PyOctaveBand](https://jmrplens.github.io/PyOctaveBand/reference/why-pyoctaveband/)
+
+## Source and metadata
+
+- [Repository](https://github.com/jmrplens/PyOctaveBand)
+- [PyPI](https://pypi.org/project/PyOctaveBand/)
+- [Changelog](https://github.com/jmrplens/PyOctaveBand/blob/main/CHANGELOG.md)
+- [Cite this software](https://github.com/jmrplens/PyOctaveBand/blob/main/CITATION.cff)
+
+
+---
+
+
+<!-- source: docs/getting-started.md | canonical: https://jmrplens.github.io/PyOctaveBand/getting-started/ -->
+
+# Getting Started
+
+## Installation
+
+**Option 1: From PyPI (Recommended)**
+
+```bash
+pip install PyOctaveBand
+```
+
+Optional extras:
+
+```bash
+pip install PyOctaveBand[plot]   # matplotlib, for filter response plots
+pip install PyOctaveBand[perf]  # numba, faster 'impulse' time weighting
+pip install PyOctaveBand[full]  # both
+```
+
+**Option 2: Cloning and Installing**
+
+```bash
+git clone https://github.com/jmrplens/PyOctaveBand.git
+cd PyOctaveBand
+pip install .
+```
+
+**Option 3: Git Submodule**
+
+```bash
+git submodule add https://github.com/jmrplens/PyOctaveBand.git
+# Then install in editable mode to use it from your project
+pip install -e ./PyOctaveBand
+```
+
+## Basic Usage: 1/3 Octave Analysis
+
+Analyze a signal and get the Sound Pressure Level (SPL) per frequency band.
+
+```python
+import numpy as np
+from pyoctaveband import octavefilter
+
+fs = 48000
+t = np.linspace(0, 1, fs, endpoint=False)
+# Composite signal: 100Hz + 1000Hz
+signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
+
+# Apply 1/3 octave filter bank
+spl, freq = octavefilter(signal, fs=fs, fraction=3)
+
+print(f"Bands: {freq}")
+print(f"SPL [dB]: {spl}")
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3.png" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>
+
+*Example of a 1/3 Octave Band spectrum analysis of a complex signal.*
+
+## Analyzing an audio file
+
+```python
+from scipy.io import wavfile
+from pyoctaveband import octavefilter
+
+# Load standard WAV file
+fs, signal = wavfile.read("measurement.wav")
+
+# Analyze
+# Note: To obtain real-world SPL values, you must calibrate the input.
+# See the Calibration guide.
+spl, freq = octavefilter(signal, fs=fs, fraction=3)
+```
+
+Integer audio (e.g. int16 WAV data) is converted to float64 internally, so it is
+safe to pass `wavfile.read` output directly.
+
+## Where to go next
+
+- [Filter Banks](https://jmrplens.github.io/PyOctaveBand/guides/filter-banks/) — choose an architecture and inspect responses
+- [Calibration and dBFS](https://jmrplens.github.io/PyOctaveBand/guides/calibration/) — get real-world SPL values
+- [API Reference](https://jmrplens.github.io/PyOctaveBand/reference/api/) — every parameter of every function
+
+---
+
+
+<!-- source: docs/filter-banks.md | canonical: https://jmrplens.github.io/PyOctaveBand/guides/filter-banks/ -->
+
+# Filter Banks
+
+PyOctaveBand supports several filter types, each with its own transfer function
+characteristic. All banks place their **−3 dB points on the ANSI S1.11 band
+edges**, so band levels are comparable across architectures.
+
+## Filter Comparison and Zoom
+
+We use Second-Order Sections (SOS) for all filters to ensure numerical stability.
+The following plot compares the architectures focusing on the -3 dB crossover point.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_type_comparison_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_type_comparison.png" alt="Magnitude response comparison of the five filter architectures for the 1 kHz octave band, with a zoom at the -3 dB crossover" width="80%"></picture>
+
+| Type | Name | Usage Example | Best For |
+| :--- | :--- | :--- | :--- |
+| `butter` | **Butterworth** | `octavefilter(x, fs, filter_type='butter')` | General acoustic measurement. |
+| `cheby1` | **Chebyshev I** | `octavefilter(x, fs, filter_type='cheby1', ripple=0.1)` | Sharper roll-off at the cost of ripple. |
+| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2', attenuation=60)` | Flat passband with stopband zeros. |
+| `ellip` | **Elliptic** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)` | Maximum selectivity. |
+| `bessel` | **Bessel** | `octavefilter(x, fs, filter_type='bessel')` | Preserving transient waveform shapes. |
+
+## Gallery of Filter Bank Responses
+
+Full spectral view of the filter banks for Octave (1/1) and 1/3-Octave fractions.
+
+| Architecture | 1/1 Octave (Fraction=1) | 1/3 Octave (Fraction=3) |
+| :--- | :--- | :--- |
+| **Butterworth** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_1_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_1_order_6.png" alt="Butterworth octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_3_order_6.png" alt="Butterworth one-third-octave filter bank frequency response" width="100%"></picture> |
+| **Chebyshev I** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_1_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_1_order_6.png" alt="Chebyshev I octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_3_order_6.png" alt="Chebyshev I one-third-octave filter bank frequency response" width="100%"></picture> |
+| **Chebyshev II** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_1_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_1_order_6.png" alt="Chebyshev II octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_3_order_6.png" alt="Chebyshev II one-third-octave filter bank frequency response" width="100%"></picture> |
+| **Elliptic** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_1_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_1_order_6.png" alt="Elliptic octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_3_order_6.png" alt="Elliptic one-third-octave filter bank frequency response" width="100%"></picture> |
+| **Bessel** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_1_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_1_order_6.png" alt="Bessel octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_3_order_6.png" alt="Bessel one-third-octave filter bank frequency response" width="100%"></picture> |
+
+## Filter Usage and Examples
+
+### 1. Butterworth (`butter`)
+
+The Butterworth filter is known for its **maximally flat passband**. It is the
+standard choice for acoustic measurements where no ripple is allowed within the
+frequency bands.
+
+```python
+from pyoctaveband import octavefilter
+# Default standard measurement
+spl, freq = octavefilter(x, fs, filter_type='butter')
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_butter_fraction_3_order_6.png" alt="Butterworth one-third-octave filter bank frequency response" width="60%"></picture>
+
+### 2. Chebyshev I (`cheby1`)
+
+Chebyshev Type I filters provide a **steeper roll-off** than Butterworth at the
+expense of ripples in the passband. Useful when high selectivity is needed near
+the cut-off frequencies.
+
+```python
+# Selectivity with 0.1 dB passband ripple
+spl, freq = octavefilter(x, fs, filter_type='cheby1', ripple=0.1)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby1_fraction_3_order_6.png" alt="Chebyshev I one-third-octave filter bank frequency response" width="60%"></picture>
+
+### 3. Chebyshev II (`cheby2`)
+
+Also known as Inverse Chebyshev, it has a **flat passband** and ripples in the
+stopband. It provides faster roll-off than Butterworth without affecting the
+signal in the passband. The stopband edges are placed automatically so that the
+−3 dB points land on the band edges (`attenuation` must be > 3.01 dB).
+
+```python
+# Flat passband with 60 dB stopband attenuation
+spl, freq = octavefilter(x, fs, filter_type='cheby2', attenuation=60)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_cheby2_fraction_3_order_6.png" alt="Chebyshev II one-third-octave filter bank frequency response" width="60%"></picture>
+
+### 4. Elliptic (`ellip`)
+
+Elliptic (Cauer) filters have the **shortest transition width** (steepest
+roll-off) for a given order. They feature ripples in both the passband and stopband.
+
+```python
+# Maximum selectivity for extreme band isolation
+spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_ellip_fraction_3_order_6.png" alt="Elliptic one-third-octave filter bank frequency response" width="60%"></picture>
+
+### 5. Bessel (`bessel`)
+
+Bessel filters are optimized for **linear phase response** and minimal group
+delay. They preserve the shape of filtered waveforms (transients) better than
+any other type, but have the slowest roll-off.
+
+```python
+# Best for pulse analysis and transient preservation
+spl, freq = octavefilter(x, fs, filter_type='bessel')
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/filter_bessel_fraction_3_order_6.png" alt="Bessel one-third-octave filter bank frequency response" width="60%"></picture>
+
+### 6. Linkwitz-Riley (`linkwitz_riley`)
+
+Specifically designed for **audio crossovers**. Linkwitz-Riley filters (typically
+4th order, but any even order is supported) allow splitting a signal into bands
+that, when summed, result in a perfectly flat magnitude response and zero phase
+difference between bands at the crossover.
+
+```python
+from pyoctaveband import linkwitz_riley
+# Split signal into Low and High bands at 1000 Hz
+low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
+# Reconstruction: low + high == signal (flat response)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/crossover_lr4_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/crossover_lr4.png" alt="Linkwitz-Riley 4th-order crossover: low-pass, high-pass and their flat sum" width="60%"></picture>
+
+## Verifying the IEC 61260-1 class
+
+`verify_filter_class` checks every band of a bank against the acceptance
+limits of **IEC 61260-1:2014** (Table 1, with the fractional-octave breakpoint
+mapping and log-frequency interpolation from the standard) and reports the
+performance class per band with its margin in dB:
+
+```python
+from pyoctaveband import OctaveFilterBank, verify_filter_class
+
+bank = OctaveFilterBank(fs=48000, fraction=3, order=6)
+result = verify_filter_class(bank)
+print(result["overall_class"])          # 1, 2 or None
+print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_class1_db': ...}
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/class_mask_overlay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/class_mask_overlay.png" alt="Butterworth band response threading between the forbidden regions of the IEC 61260-1 class 1 acceptance mask" width="80%"></picture>
+
+*The order-6 Butterworth response (blue) threads between the forbidden
+regions: it must attenuate at least the red mask outside the band and no more
+than the purple mask inside it.*
+
+With default parameters (order 6), **Butterworth meets class 1**. Chebyshev II
+lands in class 2 — capped exactly by its `attenuation=60` versus the 70 dB
+far-stopband requirement (raise `attenuation` to reach class 1). Chebyshev I,
+Elliptic and Bessel do not meet class limits at order 6: passband ripple
+(cheby1/ellip) and slow roll-off (bessel) violate the mask.
+
+## Signal Decomposition and Stability
+
+By setting `sigbands=True`, you can retrieve the time-domain components of each
+band. This allows for advanced analysis or comparing how different architectures
+(e.g., Butterworth vs Chebyshev) affect the signal phase and transient response.
+
+```python
+import numpy as np
+from pyoctaveband import octavefilter
+
+# 1. Generate a signal (Sum of 250Hz and 1000Hz)
+fs = 48000
+t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
+y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
+
+# 2. Compare architectures (Butterworth vs Chebyshev II)
+spl_b, freq, xb_butter = octavefilter(y, fs=fs, fraction=1, sigbands=True, filter_type='butter')
+spl_c2, _, xb_cheby2 = octavefilter(y, fs=fs, fraction=1, sigbands=True, filter_type='cheby2')
+
+# 'xb_butter' and 'xb_cheby2' contain the time-domain signals per band
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_decomposition_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_decomposition.png" alt="Time-domain band decomposition comparing Butterworth and Chebyshev II, including the impulse response" width="80%"></picture>
+
+*The plot compares the **Butterworth** (solid blue) and **Chebyshev II** (dashed
+red) responses. The bottom plot shows the **Impulse Response**, highlighting the
+differences in stability and transient decay.*
+
+> [!NOTE]
+> **Why do the signals look shifted in time?**
+> Digital IIR filters (like Butterworth or Chebyshev) have **non-linear phase
+> responses**, which results in frequency-dependent **Group Delay**. In the 250 Hz
+> band, you can see that the Chebyshev II filter has a different propagation delay
+> compared to the Butterworth filter. This is a normal physical property of these
+> architectures: more aggressive frequency roll-offs usually come at the cost of
+> higher group delay and phase distortion.
+
+### Group delay, quantified
+
+The group delay $\tau_g(\omega) = -\frac{d\phi(\omega)}{d\omega}$ of the
+1 kHz octave band shows the trade-off directly: Bessel stays nearly flat across
+the passband (transient shapes survive), while Chebyshev I and Elliptic pay for
+their steep roll-off with strong delay peaks at the band edges.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/group_delay_comparison_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/group_delay_comparison.png" alt="Group delay of the 1 kHz octave band for the five architectures: Bessel nearly flat, Chebyshev and Elliptic peaking at the band edges" width="80%"></picture>
+
+## Zero-phase filtering
+
+For offline analysis you can eliminate group delay entirely: `zero_phase=True`
+filters each band forward-backward (`scipy.signal.sosfiltfilt`), keeping band
+signals time-aligned with the input. The effective attenuation doubles, and the
+option is incompatible with stateful (block) processing.
+
+```python
+from pyoctaveband import OctaveFilterBank
+
+bank = OctaveFilterBank(fs=48000, fraction=3)
+spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/zero_phase_comparison_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/zero_phase_comparison.png" alt="Causal versus zero-phase filtering of a tone burst: the zero-phase output stays time-aligned with the input" width="80%"></picture>
+
+*Causal filtering delays the burst by the filter's group delay; zero-phase
+filtering keeps it aligned with the input.*
+
+---
+
+
+<!-- source: docs/weighting.md | canonical: https://jmrplens.github.io/PyOctaveBand/guides/weighting/ -->
+
+# Frequency Weighting (A, C, Z)
+
+Frequency weighting curves simulate the human ear's sensitivity, as specified by
+**IEC 61672-1:2013**.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_responses.png" alt="A, C and Z frequency weighting curves with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%"></picture>
+
+* **A-Weighting (`A`):** Standard for environmental noise (IEC 61672-1).
+* **C-Weighting (`C`):** Used for peak sound pressure and high-level noise.
+* **Z-Weighting (`Z`):** Zero weighting, completely flat response.
+
+```python
+from pyoctaveband import weighting_filter
+
+# Apply A-weighting to the raw signal
+weighted_signal = weighting_filter(signal, fs, curve='A')
+
+# Apply C-weighting for peak analysis
+c_weighted_signal = weighting_filter(signal, fs, curve='C')
+```
+
+## Reusable filter object
+
+If you weight many signals with the same parameters, design the filter once:
+
+```python
+from pyoctaveband import WeightingFilter
+
+wf = WeightingFilter(fs, "A")
+for signal in signals:
+    weighted = wf.filter(signal)
+```
+
+## High-frequency accuracy (`high_accuracy`)
+
+A plain bilinear-transform design compresses the response near Nyquist: at
+fs = 48 kHz the A-curve error at 12.5 kHz reaches −2.7 dB, outside the IEC
+61672-1 **class 1** tolerance (+2.0/−2.5 dB).
+
+By default (`high_accuracy=True`), PyOctaveBand designs and runs the weighting
+filter at an internally oversampled rate (≥ 96 kHz) and decimates back, keeping
+the response within class 1 tolerances up to 16 kHz (error ≈ −0.5 dB at
+12.5 kHz for fs = 48 kHz).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/weighting_accuracy_hf.png" alt="A-weighting high-frequency accuracy at 48 kHz: analytic curve versus plain bilinear versus oversampled design, with error subplot" width="80%"></picture>
+
+*The plain bilinear design (red) crosses the class 1 tolerance near 12.5 kHz;
+the oversampled design (blue) stays close to the analytic curve.*
+
+- `high_accuracy=False` restores the legacy plain-bilinear behavior.
+- **Stateful (block) processing** always uses the legacy design: the internal
+  FIR resampling is incompatible with block continuity. Passing
+  `high_accuracy=True` together with `stateful=True` raises a `ValueError`.
+
+```python
+# Explicit legacy behavior
+y = weighting_filter(signal, fs, curve="A", high_accuracy=False)
+
+# Stateful block processing (legacy design, state carried between blocks)
+wf = WeightingFilter(fs, "A", stateful=True)
+for block in blocks:
+    weighted = wf.filter(block)
+```
+
+See [Block Processing](https://jmrplens.github.io/PyOctaveBand/guides/block-processing/) for the streaming workflow and
+[Theory](https://jmrplens.github.io/PyOctaveBand/reference/theory/) for the analytic curve definitions.
+
+---
+
+
+<!-- source: docs/time-weighting.md | canonical: https://jmrplens.github.io/PyOctaveBand/guides/time-weighting/ -->
+
+# Time Weighting and Integration
+
+Accurate SPL measurement requires capturing energy over specific time windows.
+PyOctaveBand implements exact time constants per **IEC 61672-1:2013**.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>
+
+* **Fast (`fast`):** τ = 125 ms. Standard for noise fluctuations.
+* **Slow (`slow`):** τ = 1000 ms. Standard for steady noise.
+* **Impulse (`impulse`):** **Asymmetric** ballistics. 35 ms rise time for rapid
+  onset capture, 1500 ms decay for readability.
+
+```python
+import numpy as np
+from pyoctaveband import time_weighting
+
+# Calculate energy envelope (Mean Square)
+energy_envelope = time_weighting(signal, fs, mode='fast')
+# dB SPL relative to 20 μPa
+spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
+```
+
+The asymmetric Impulse ballistics use two constants — a fast attack and a slow
+decay — switching per sample on the sign of the change:
+
+$$
+y[n] = y[n-1] + \alpha \,(x^2[n] - y[n-1]), \qquad
+\alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{otherwise}\end{cases}
+$$
+
+## Verified ballistics (IEC 61672-1 Table 4)
+
+The Fast envelope's response to 4 kHz tonebursts lands exactly on the
+standard's reference values — enforced in CI for burst durations from 1 s down
+to 1 ms (F and S weightings, class 1 acceptance limits):
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
+
+## Initial state
+
+By default, the exponential integrator starts from rest (`y[-1] = 0`). Passing
+`initial_state=None` leaves this default unspecified, while `initial_state='zero'`
+requests the same zero state explicitly. If the recorded segment begins after a
+steady signal is already present, you can start from the first sample energy instead:
+
+```python
+energy_envelope = time_weighting(signal, fs, mode='fast', initial_state='first')
+```
+
+## Block processing
+
+For block processing, pass the last output value from the previous block as the
+next block's `initial_state` instead of resetting each block:
+
+```python
+state = None
+
+for block in audio_blocks:
+    energy_envelope = time_weighting(block, fs, mode='fast', initial_state=state)
+    state = energy_envelope[-1]
+```
+
+For multichannel blocks with time on the last axis, carry one state per channel:
+use `state = energy_envelope[..., -1]`. A scalar `initial_state` is applied to
+every channel, while an array must match or broadcast to the non-time shape,
+such as `(n_channels,)` for input shaped `(n_channels, n_samples)`.
+
+Or let the `TimeWeighting` class carry the state for you:
+
+```python
+from pyoctaveband import TimeWeighting
+
+tw = TimeWeighting(fs, mode='fast')
+for block in audio_blocks:
+    energy_envelope = tw.process(block)
+```
+
+Concatenated block outputs are exactly equal to a single continuous call
+(verified for all three modes, mono and multichannel). Call `tw.reset()` to
+start from rest again.
+
+## Performance note
+
+The `impulse` mode uses an asymmetric kernel that is JIT-compiled when
+[numba](https://numba.pydata.org/) is installed (`pip install PyOctaveBand[perf]`).
+Without numba a pure-Python fallback produces identical results, just slower.
+
+See [Integrated & Statistical Levels](https://jmrplens.github.io/PyOctaveBand/guides/levels/) for Leq/LN metrics built on
+these envelopes, and [Why PyOctaveBand](https://jmrplens.github.io/PyOctaveBand/reference/why-pyoctaveband/) for the IEC
+61672-1 tone-burst verification.
+
+---
+
+
+<!-- source: docs/levels.md | canonical: https://jmrplens.github.io/PyOctaveBand/guides/levels/ -->
+
+# Integrated and Statistical Levels
+
+Environmental noise metrics computed directly from the raw (calibrated) signal.
+
+## Leq and LAeq
+
+The equivalent continuous level integrates the squared pressure over the
+measurement time:
+
+$$
+L_{eq} = 10\log_{10}\!\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\,dt\right) \text{ dB}, \qquad p_0 = 20\ \mu\text{Pa}
+$$
+
+and $L_{Aeq}$ is the same integral after A-weighting the signal. $L_N$ is the
+level exceeded $N\,\%$ of the time — the $(100-N)$-th percentile of the
+time-weighted level distribution.
+
+```python
+from pyoctaveband import leq, laeq
+
+# Equivalent continuous level of the whole recording
+level = leq(signal, calibration_factor=sensitivity)
+
+# A-weighted Leq (the standard environmental noise metric)
+la = laeq(signal, fs, calibration_factor=sensitivity)
+```
+
+Both accept 1D signals (returning a scalar) or 2D `[channels, samples]` arrays
+(returning one level per channel), and support `dbfs=True` for digital
+full-scale analysis (calibration does not apply in dBFS mode).
+
+## Percentile levels (LN)
+
+`ln_levels` computes statistical levels from the time-weighted envelope:
+**L10** is the level exceeded 10 % of the time (event peaks), **L50** the median,
+**L90** the background level.
+
+```python
+from pyoctaveband import ln_levels
+
+stats = ln_levels(signal, fs, n=(10, 50, 90), weighting="A")
+print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/ln_levels_example_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/ln_levels_example.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%"></picture>
+
+*L10 tracks the event peaks, L50 the median level and L90 the background.*
+
+Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
+`'impulse'`), `weighting` applies A/C weighting first, and
+`calibration_factor`/`dbfs` behave as in `leq`. The integrator attack transient
+(~2τ) is discarded before taking percentiles.
+
+## Octave Spectrogram (levels over time)
+
+Short-time fractional-octave analysis: one level per band per window,
+time-aligned across bands.
+
+```python
+from pyoctaveband import OctaveFilterBank
+
+bank = OctaveFilterBank(fs=48000, fraction=3)
+levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
+# levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/spectrogram_example_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/spectrogram_example.png" alt="One-third-octave spectrogram of a logarithmic sweep with two tone bursts" width="80%"></picture>
+
+*A logarithmic sweep plus two tone bursts, resolved in time and in standardized
+1/3-octave bands.*
+
+- Multichannel input `(channels, samples)` returns `(channels, bands, frames)`.
+- `times` holds each window's center in seconds.
+- `mode='peak'` gives per-window peak-holding levels instead of RMS.
+- `zero_phase=True` filters bands forward-backward so per-band group delay does
+  not skew the frames (offline analysis only).
+
+```python
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+mesh = ax.pcolormesh(times, freq, levels, shading="auto")
+ax.set_yscale("log")
+ax.set_xlabel("Time [s]")
+ax.set_ylabel("Frequency [Hz]")
+fig.colorbar(mesh, label="Level [dB]")
+```
+
+See [Calibration and dBFS](https://jmrplens.github.io/PyOctaveBand/guides/calibration/) to convert digital units to physical
+SPL, and [Time Weighting](https://jmrplens.github.io/PyOctaveBand/guides/time-weighting/) for the envelope details.
+
+---
+
+
+<!-- source: docs/calibration.md | canonical: https://jmrplens.github.io/PyOctaveBand/guides/calibration/ -->
+
+# Calibration and dBFS
+
+PyOctaveBand can return results in physical **Sound Pressure Level (dB SPL)** or
+digital **decibels relative to Full Scale (dBFS)**.
+
+## Physical Calibration (Sound Level Meter)
+
+```mermaid
+flowchart LR
+    A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\nref_signal"]
+    B --> C["calculate_sensitivity()"]
+    C --> D["calibration_factor\n(digital units → Pa)"]
+    D --> E["octavefilter / leq / laeq / ln_levels"]
+    F["Measurement\nrecording"] --> E
+    E --> G["Levels in dB SPL\n(re 20 µPa)"]
+```
+
+To get accurate SPL measurements from a digital recording, you must first
+calculate the sensitivity of your measurement chain using a reference tone
+(e.g., 94 dB @ 1 kHz).
+
+```python
+from pyoctaveband import octavefilter, calculate_sensitivity
+
+# 1. Record your 94dB calibrator signal
+# ref_signal = ... (your recording)
+
+# 2. Calculate sensitivity factor
+sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0)
+
+# 3. Apply calibration to your measurements
+spl, freq = octavefilter(signal, fs, calibration_factor=sensitivity)
+# Now 'spl' values are in real-world dB SPL!
+```
+
+The same `calibration_factor` works across the whole library: `octavefilter`,
+`OctaveFilterBank`, `leq`, `laeq` and `ln_levels`.
+
+## Calibrator assumptions (IEC 60942)
+
+`calculate_sensitivity` assumes the reference recording comes from an acoustic
+calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
+
+- The default `target_spl=94.0` matches the common 94 dB @ 1 kHz calibrator
+  output (the standard requires the principal level to be at least 90 dB re
+  20 µPa; 94 dB and 114 dB are the usual choices).
+- The resulting sensitivity inherits the calibrator's class tolerance — e.g.
+  ±0.4 dB for a class 1 calibrator between 160 Hz and 1.25 kHz (IEC 60942
+  Table 1) — plus the RMS estimation error of your recording.
+- IEC 60942 specifies the generated level as a 20 s average: record a few
+  seconds of *stable* tone (excluding handling noise at the start/end) for the
+  RMS estimate to converge.
+
+## Digital Analysis (dBFS)
+
+If you are working with digital audio files (e.g., WAV, FLAC) and want to
+analyze levels relative to Full Scale rather than physical pressure, you can use
+the `dbfs=True` parameter.
+
+In this mode:
+
+* **0 dBFS** corresponds to a numeric signal level of 1.0 (RMS or Peak).
+* `calibration_factor` does not apply (dBFS is relative to digital full scale).
+* Useful for analyzing headroom, digital mastering, or normalized signals.
+
+```python
+# Assume 'signal' is normalized between -1.0 and 1.0
+spl_dbfs, freq = octavefilter(signal, fs, dbfs=True)
+# Results will be negative (e.g., -20 dBFS)
+```
+
+## RMS vs Peak Levels
+
+PyOctaveBand supports two measurement modes to align with professional software
+like BK:
+
+- **RMS (`mode='rms'`)**: Energy-based level (standard).
+- **Peak (`mode='peak'`)**: Absolute maximum value reached in the frame
+  (Peak-holding).
+
+```python
+# Measure peak-holding levels for impact analysis
+spl_peak, freq = octavefilter(signal, fs, mode='peak')
+```
+
+> [!NOTE]
+> `mode='peak'` measures the absolute maximum of the **filtered** band signal,
+> which includes the filter's onset transient (overshoot). Signals that start
+> abruptly may read up to ~1 dB high. This is inherent to IIR band filters
+> (an analog SLM behaves the same way), not a processing artifact.
+
+## Integer audio input
+
+Integer signals (e.g. int16 from `scipy.io.wavfile.read`) are converted to
+float64 internally before any squaring, so calibration and level results are
+identical whether you pass the raw integer array or a float conversion.
+
+---
+
+
+<!-- source: docs/block-processing.md | canonical: https://jmrplens.github.io/PyOctaveBand/guides/block-processing/ -->
+
+# Block Processing
+
+The `OctaveFilterBank`, `WeightingFilter` (for A, C, or Z-weighting) and
+`TimeWeighting` classes support block (streaming) processing: the internal
+filter state is carried between calls, so concatenated block outputs match a
+single full-signal pass.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/block_processing_continuity.png" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" width="80%"></picture>
+
+*With `stateful=True` the concatenated block outputs match the continuous
+result exactly; without state, every block boundary restarts the filter
+transient.*
+
+Create a stateful filter bank with `stateful=True`. The internal state is
+zero-initialized by default but may be initialized for step-response
+steady-state (like `scipy.signal.sosfilt_zi`) with `steady_ic=True`.
+
+Notes when using a stateful `OctaveFilterBank`:
+
+- Detrending should be disabled during block processing (`detrend=False`), as it
+  can introduce discontinuities between blocks.
+- Resampling is not supported for block processing, so you need to set
+  `resample=False`.
+- `zero_phase=True` is incompatible with stateful mode (forward-backward
+  filtering needs the whole signal).
+- Stateful `WeightingFilter` uses the legacy bilinear design
+  (`high_accuracy=False`); see [Frequency Weighting](https://jmrplens.github.io/PyOctaveBand/guides/weighting/).
+
+## Example
+
+```python
+import soundfile as sf
+from pyoctaveband import OctaveFilterBank, WeightingFilter
+
+fs = 48000
+octavefilter = OctaveFilterBank(fs, 1, stateful=True, resample=False)
+afilter = WeightingFilter(fs, "A", stateful=True)
+
+for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
+
+    # Apply A-filter
+    weighted = afilter.filter(block)
+
+    # Split into octave bands
+    block_spl, _, block_output = octavefilter.filter(weighted, sigbands=True, detrend=False)
+
+    # further signal processing
+    ...
+```
+
+## Time weighting across blocks
+
+Use the `TimeWeighting` class (state carried automatically):
+
+```python
+from pyoctaveband import TimeWeighting
+
+tw = TimeWeighting(fs, mode="fast")
+for block in audio_blocks:
+    envelope = tw.process(block)
+```
+
+Or manage the state yourself with the functional API — see
+[Time Weighting](https://jmrplens.github.io/PyOctaveBand/guides/time-weighting/#block-processing).
+
+## Multichannel state
+
+All stateful classes handle multichannel input `(channels, samples)`: the state
+is allocated lazily on the first call to match the channel count, and reallocated
+if the channel count changes (e.g. switching from stereo to mono resets the state).
+
+---
+
+
+<!-- source: docs/multichannel.md | canonical: https://jmrplens.github.io/PyOctaveBand/guides/multichannel/ -->
+
+# Multichannel and Performance
+
+## Multichannel Support
+
+PyOctaveBand natively supports multichannel signals (e.g., Stereo, 5.1,
+Microphone Arrays) using **fully vectorized operations**. Input arrays of shape
+`(N_channels, N_samples)` are processed in parallel, offering significant
+performance gains over iterative loops.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_multichannel_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_multichannel.png" alt="Stereo analysis: pink noise and logarithmic sweep resolved per channel in one-third-octave bands" width="80%"></picture>
+
+*Simultaneous analysis of a Stereo signal: Left Channel (Pink Noise) vs Right
+Channel (Log Sine Sweep).*
+
+The convention is consistent across the whole library: time is always the
+**last axis**. This applies to `octavefilter`, `OctaveFilterBank`,
+`weighting_filter`, `time_weighting`, `leq`, `laeq`, `ln_levels` and
+`spectrogram`.
+
+```python
+import numpy as np
+from pyoctaveband import octavefilter
+
+stereo = np.stack([left, right])          # (2, n_samples)
+spl, freq = octavefilter(stereo, fs, fraction=3)
+# spl has shape (2, n_bands): one row per channel
+```
+
+## Performance: Vectorization and caching
+
+The `OctaveFilterBank` class is highly optimized for real-time and batch
+processing. It uses NumPy vectorization to handle multichannel audio arrays
+(e.g., 64-channel microphone arrays) without explicit Python loops, ensuring
+maximum throughput.
+
+```python
+from pyoctaveband import OctaveFilterBank
+
+bank = OctaveFilterBank(fs=48000, fraction=3, filter_type='butter')
+
+# Access computed properties
+# bank.freq (center), bank.freq_d (lower), bank.freq_u (upper), bank.sos (coefficients)
+
+# Process multiple signals efficiently
+for frame in stream:
+    # detrend=True (default) removes DC offset to improve low-freq accuracy
+    spl, freq = bank.filter(frame, detrend=True)
+```
+
+Additional performance notes:
+
+- **Design cache**: `octavefilter()` reuses filter bank designs across calls
+  with identical parameters (LRU cache, 32 entries), so calling it in a loop
+  does not redesign the bank each time. `OctaveFilterBank` gives you explicit
+  control over the design lifetime.
+- **Multirate decimation**: low-frequency bands are filtered at a decimated
+  rate, which is both faster and numerically more stable (see
+  [Theory](https://jmrplens.github.io/PyOctaveBand/reference/theory/)).
+- **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
+  numba is installed (`pip install PyOctaveBand[perf]`).
+
+---
+
+
+<!-- source: docs/api-reference.md | canonical: https://jmrplens.github.io/PyOctaveBand/reference/api/ -->
+
+# API Reference
+
+All core functionality can be imported directly from the `pyoctaveband` package.
+
+| Name | Type | Description (Inputs) | Usage Snippet (Outputs) |
+| :--- | :--- | :--- | :--- |
+| `octavefilter` | `function` | **High-level analysis.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc. (Default: 1)<br>• `order`: Filter order (Default: 6)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: 'butter', 'cheby1', 'cheby2', 'ellip', 'bessel' (Default: 'butter')<br>• `sigbands`: Return time signals (Default: False)<br>• `detrend`: Remove DC offset (Default: True)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS instead of dB SPL (Default: False)<br>• `mode`: 'rms' or 'peak' (Default: 'rms')<br>• `nominal`: IEC 61260-1 nominal labels (Default: False)<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save plot (Default: None)<br>• `ripple`: Passband ripple [dB] (for cheby1/ellip)<br>• `attenuation`: Stopband atten. [dB] (for cheby2/ellip) | `spl, freq = octavefilter(x, fs, ...)`<br>• `spl`: levels [dB]<br>• `freq`: frequencies [Hz]<br><br>**With `sigbands=True`:**<br>`spl, freq, xb = octavefilter(x, fs, sigbands=True)`<br>• `xb`: List of filtered signals (one per band)<br><br>**Calibrated usage:**<br>`spl, f = octavefilter(x, fs, calibration_factor=0.05)` |
+| `OctaveFilterBank` | `class` | **Efficient bank implementation.**<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc.<br>• `order`: Filter order<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: Architecture name<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save the plot (Default: None)<br>• `calibration_factor`: Sensitivity multiplier<br>• `dbfs`: Use dBFS (Default: False)<br>• `stateful`: Carry filter state between calls (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `resample`: Multirate decimation (Default: True)<br>• `ripple`: Passband ripple [dB]<br>• `attenuation`: Stopband attenuation [dB] | `bank = OctaveFilterBank(fs=48000, fraction=3, order=6, filter_type='butter')`<br>`spl, f = bank.filter(x, sigbands=False, mode='rms', detrend=True, zero_phase=False)`<br><br>• `bank`: Instance of the filter bank<br>• `bank.freq` / `bank.freq_d` / `bank.freq_u` / `bank.sos`: computed properties |
+| `OctaveFilterBank.spectrogram` | `method` | **Band levels over time.**<br>• `x`: Signal array (1D or 2D)<br>• `window_time`: Window length [s] (Default: 0.125)<br>• `overlap`: Fraction in [0, 1) (Default: 0.5)<br>• `mode`: 'rms' or 'peak'<br>• `zero_phase`: Group-delay-free frames (Default: False) | `levels, freq, times = bank.spectrogram(x)`<br><br>• `levels`: (bands, frames) or (channels, bands, frames)<br>• `times`: window centers [s] |
+| `weighting_filter` | `function` | **Acoustic weighting.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `curve`: 'A', 'C', or 'Z' (Default: 'A')<br>• `high_accuracy`: IEC class 1 HF accuracy via internal oversampling (Default: True) | `y = weighting_filter(x, fs, curve='A')`<br><br>• `y`: weighted signal |
+| `WeightingFilter` | `class` | **Reusable weighting filter.**<br>• `fs`: Sample rate [Hz]<br>• `curve`: 'A', 'C' or 'Z'<br>• `stateful`: Block processing (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `high_accuracy`: Defaults to True except stateful | `wf = WeightingFilter(fs, 'A')`<br>`y = wf.filter(x)` |
+| `time_weighting` | `function` | **Energy capture.**<br>• `x`: Raw signal array (squared internally; time is the last axis)<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', or 'impulse'<br>• `initial_state`: None, 'zero', 'first', scalar, or array (Default: None) | `env = time_weighting(x, fs, mode='fast')`<br><br>• `env`: energy envelope (Mean Square), same shape as `x` |
+| `TimeWeighting` | `class` | **Stateful time weighting.**<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', 'impulse' (Default: 'fast') | `tw = TimeWeighting(fs, mode='fast')`<br>`env = tw.process(block)` per block<br>`tw.reset()` to start over |
+| `leq` | `function` | **Equivalent level (Leq).**<br>• `x`: Signal array (1D or 2D)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS (Default: False) | `level = leq(x, calibration_factor=s)`<br><br>• `level`: Scalar (1D) or per-channel array (2D) |
+| `laeq` | `function` | **A-weighted Leq (LAeq).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `calibration_factor` / `dbfs`: as `leq` | `level = laeq(x, fs, calibration_factor=s)`<br><br>• `level`: Scalar (1D) or per-channel array (2D) |
+| `ln_levels` | `function` | **Statistical levels (LN).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `n`: Exceedance percentiles (Default: (10, 50, 90))<br>• `mode`: 'fast', 'slow', 'impulse' (Default: 'fast')<br>• `weighting`: 'A', 'C', 'Z' or None (Default: None)<br>• `calibration_factor` / `dbfs`: as `leq` | `stats = ln_levels(x, fs, n=(10, 50, 90), weighting='A')`<br><br>• `stats`: Dict `{10: L10, 50: L50, 90: L90}` |
+| `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
+| `calculate_sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6) | `s = calculate_sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
+| `verify_filter_class` | `function` | **IEC 61260-1:2014 class check.**<br>• `bank`: an `OctaveFilterBank`<br>• `num_points`: frequency grid points per band (Default: 32768) | `result = verify_filter_class(bank)`<br><br>• `result["overall_class"]`: 1, 2 or None<br>• `result["bands"]`: per-band class and margins [dB] |
+| `getansifrequencies` | `function` | **ANSI Frequency generator.**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)`<br><br>• `f_cen`: List of center frequencies [Hz]<br>• `f_low`: List of lower edges [Hz]<br>• `f_high`: List of upper edges [Hz]<br>• `labels`: IEC nominal frequency labels |
+| `normalizedfreq` | `function` | **Standard IEC Frequencies.**<br>• `fraction`: 1 or 3 | `freqs = normalizedfreq(fraction=3)`<br><br>• `freqs`: List of standard center frequencies [Hz] |
+
+## Notes
+
+- `zero_phase=True` (in `OctaveFilterBank.filter` and `spectrogram`) filters
+  forward-backward (`sosfiltfilt`): no group delay, doubled effective
+  attenuation, offline analysis only. Incompatible with `stateful=True`.
+- `mode='peak'` includes the filter's onset transient; a tone that starts
+  abruptly can overshoot by ~1 dB. See [Calibration and dBFS](https://jmrplens.github.io/PyOctaveBand/guides/calibration/).
+- `octavefilter()` caches filter bank designs internally (32 entries), so
+  repeated calls with the same parameters skip the design phase. For explicit
+  control use `OctaveFilterBank`.
+
+---
+
+
+<!-- source: docs/theory.md | canonical: https://jmrplens.github.io/PyOctaveBand/reference/theory/ -->
+
+# Theoretical Background
+
+## Octave Band Frequencies (ANSI S1.11 / IEC 61260)
+
+The mid-band frequencies (fm) and edges (f1, f2) use a base-10 ratio:
+
+$$
+G = 10^{0.3}
+$$
+
+**Mid-band:**
+
+$$
+f_m = 1000 \cdot G^{x/b}
+$$
+
+(for odd b)
+
+**Band edges:**
+
+$$
+f_1 = f_m \cdot G^{-1/2b}, \quad f_2 = f_m \cdot G^{1/2b}
+$$
+
+## Frequency Resolution vs FFT Bin Spacing
+
+`octavefilter` is a **time-domain fractional-octave filter bank**, not an FFT or
+Welch spectrum estimator. Therefore, its result does not have a frequency
+resolution in the `fs / nfft` sense.
+
+For `fraction=3`, the output contains one scalar level per third-octave band.
+The relevant frequency granularity is the standardized band definition: center
+frequency, lower edge, and upper edge. Because fractional-octave bands are
+logarithmically spaced, their absolute bandwidth in Hz grows with frequency
+while their relative bandwidth remains approximately constant.
+
+For example, with `fraction=3` and `limits=[12, 20000]`, the exact third-octave
+band around 1 kHz is approximately:
+
+| Nominal band | Lower edge | Center | Upper edge | Bandwidth |
+| :--- | ---: | ---: | ---: | ---: |
+| 1 kHz | 891.25 Hz | 1000.00 Hz | 1122.02 Hz | 230.77 Hz |
+
+You can inspect the exact bands with:
+
+```python
+from pyoctaveband import getansifrequencies
+
+fc, fl, fu, labels = getansifrequencies(fraction=3, limits=[12, 20000])
+for label, center, lower, upper in zip(labels, fc, fl, fu):
+    print(label, center, lower, upper, upper - lower)
+```
+
+If you need narrowband FFT bins for tonal inspection, run Welch/FFT on the
+original signal and use the PyOctaveBand band edges as masks:
+
+```python
+import numpy as np
+from scipy import signal
+from pyoctaveband import octavefilter, getansifrequencies
+
+fs = 100_000
+x = pressure_signal_pa  # 1D pressure signal in Pa
+
+# Standardized third-octave levels from PyOctaveBand.
+levels, centers = octavefilter(
+    x,
+    fs=fs,
+    fraction=3,
+    limits=[12, 20_000],
+)
+
+# Same standardized band definitions, including lower/upper edges.
+fc, fl, fu, labels = getansifrequencies(fraction=3, limits=[12, 20_000])
+
+# Narrowband Welch estimate on the original signal.
+nperseg = min(2**15, len(x))
+freq_bins, psd = signal.welch(
+    x,
+    fs=fs,
+    window="hann",
+    nperseg=nperseg,
+    noverlap=nperseg // 2,
+    scaling="density",
+)
+
+# Example: list the Welch bins inside the third-octave band closest to 1 kHz.
+band_index = int(np.argmin(np.abs(np.asarray(fc) - 1000.0)))
+in_band = (freq_bins >= fl[band_index]) & (freq_bins <= fu[band_index])
+
+print("Selected third-octave band:", labels[band_index])
+print("Welch bin spacing:", freq_bins[1] - freq_bins[0], "Hz")
+for f, pxx in zip(freq_bins[in_band], psd[in_band]):
+    print(f, pxx)
+```
+
+This keeps the two concepts separate: PyOctaveBand gives standardized
+fractional-octave levels, while Welch gives narrowband FFT bins. With
+`fs=100000` and `nperseg=2**15`, the Welch bin spacing is about `3.05 Hz`.
+Window choice and overlap affect leakage and averaging variance, but they do not
+change the bin spacing of each FFT segment.
+
+When `sigbands=True`, `octavefilter` can also return the time-domain waveform
+filtered by each band. Applying Welch/FFT to one selected filtered waveform can
+be useful as a diagnostic view of the content inside that filtered band, but it
+does not recover FFT bins from the scalar band levels.
+
+## Magnitude Responses |H(jw)|
+
+The library implements standard classical filter prototypes:
+
+**1. Butterworth:** Maximally flat passband.
+
+$$
+|H(j\omega)| = \frac{1}{\sqrt{1 + (\omega/\omega_c)^{2n}}}
+$$
+
+**2. Chebyshev I:** Equiripple in passband, steeper roll-off.
+
+$$
+|H(j\omega)| = \frac{1}{\sqrt{1 + \epsilon^2 T_n^2(\omega/\omega_c)}}
+$$
+
+**3. Chebyshev II:** Inverse Chebyshev, equiripple in stopband, flat passband.
+
+$$
+|H(j\omega)| = \frac{1}{\sqrt{1 + \frac{1}{\epsilon^2 T_n^2(\omega_{stop}/\omega)}}}
+$$
+
+**4. Elliptic:** Equiripple in both, maximum selectivity.
+
+$$
+|H(j\omega)| = \frac{1}{\sqrt{1 + \epsilon^2 R_n^2(\omega/\omega_c, L)}}
+$$
+
+**5. Bessel:** Maximally flat group delay (linear phase).
+
+$$
+H(s) = \frac{\theta_n(0)}{\theta_n(s/\omega_0)}
+$$
+
+(Where $\theta_n$ is the reverse Bessel polynomial)
+
+### Band-edge placement
+
+For every architecture the bank places the **−3 dB points on the band edges**.
+Two cases need special handling:
+
+- **Chebyshev II**: scipy's `Wn` is the *stopband* edge. PyOctaveBand maps the
+  desired −3 dB edges to stopband edges analytically — the prototype transition
+  ratio is $\cosh(\operatorname{acosh}(\sqrt{10^{A/10}-1})/N)$ — applying the
+  lowpass→bandpass transform in the pre-warped bilinear domain so the mapping
+  stays exact for decimated bands close to Nyquist.
+- **Bessel**: designed with `norm="mag"`, which defines the −3 dB point exactly
+  at `Wn` (the `phase` norm would shift the edges to roughly −10 dB).
+
+## Filter Bank Design & Numerical Stability
+
+To ensure **100% stability** across the entire audible spectrum (even at low
+frequencies like 16 Hz with high sample rates), PyOctaveBand employs two
+critical strategies:
+
+```mermaid
+flowchart LR
+    X["Input signal\nfs"] --> D{"Low band?"}
+    D -- "yes" --> R["Decimate\nresample_poly (1/M)"] --> S1["SOS band filter\nat fs/M"]
+    D -- "no" --> S2["SOS band filter\nat fs"]
+    S1 --> L["Band level (RMS/peak)"]
+    S2 --> L
+    S1 -- "sigbands=True" --> U["Interpolate back\nresample_poly (M/1)"] --> Y["Band signal\nat fs"]
+    S2 -- "sigbands=True" --> Y
+```
+
+1. **Second-Order Sections (SOS):** All filters are implemented as a series of
+   cascaded biquads. This avoids the catastrophic numerical precision loss
+   associated with high-order transfer functions (coefficients a, b).
+2. **Multi-rate Decimation:** For low-frequency bands, the signal is
+   automatically downsampled (decimated) before filtering and upsampled
+   afterwards. This keeps the digital pole locations far from the unit circle
+   boundary, preventing oscillation and noise. Chebyshev II banks reserve extra
+   decimation headroom so their stopband edges stay below the decimated Nyquist.
+
+## Weighting Curves (IEC 61672-1)
+
+The A-weighting transfer function:
+
+$$
+R_A(f) = \frac{12194^2 \cdot f^4}{(f^2 + 20.6^2)\sqrt{(f^2 + 107.7^2)(f^2 + 737.9^2)}(f^2 + 12194^2)}
+$$
+
+$$
+A(f) = 20 \log_{10}(R_A(f)) + 2.00
+$$
+
+The digital filter is obtained from the analog poles/zeros via the bilinear
+transform. Because the bilinear transform compresses frequencies near Nyquist,
+the default `high_accuracy` mode designs and runs the filter at an internally
+oversampled rate (≥ 96 kHz) — see [Frequency Weighting](https://jmrplens.github.io/PyOctaveBand/guides/weighting/).
+
+## Time Integration
+
+Implemented as a first-order IIR exponential integrator:
+
+$$
+y[n] = \alpha \cdot x^2[n] + (1 - \alpha) \cdot y[n-1]
+$$
+
+$$
+\alpha = 1 - e^{-1 / (f_s \cdot \tau)}
+$$
+
+Where `tau` is the time constant (e.g., 125 ms for Fast).
+
+The default initial condition is `y[-1] = 0`. Use `initial_state='first'` to
+start from the first input energy, or pass a scalar/array with the previous
+mean-square output state. See [Why PyOctaveBand](https://jmrplens.github.io/PyOctaveBand/reference/why-pyoctaveband/) for the
+IEC 61672-1 tone-burst verification of this implementation.
+
+---
+
+
+<!-- source: docs/why-pyoctaveband.md | canonical: https://jmrplens.github.io/PyOctaveBand/reference/why-pyoctaveband/ -->
+
+# Why PyOctaveBand
+
+How PyOctaveBand's time weighting relates to the **IEC 61672-1:2013** standard
+(Electroacoustics — Sound level meters), and how it differs from other Python
+libraries such as `python-acoustics`. This page summarizes the analysis
+originally published in
+[issue #38](https://github.com/jmrplens/PyOctaveBand/issues/38).
+
+## Design philosophy
+
+Standard time weighting is defined as a **continuous function of time** via the
+differential equation
+
+$$
+\tau \frac{dy(t)}{dt} + y(t) = x^2(t)
+$$
+
+which corresponds to a stable first-order low-pass filter with a pole in the
+left half-plane ($s = -1/\tau$).
+
+| | PyOctaveBand | python-acoustics |
+| :--- | :--- | :--- |
+| Output | Continuous time-weighted envelope (one value per sample) | Stepped output (one value every τ seconds) |
+| Input units | Raw sound pressure (Pa); squared internally | Energetic quantity (Pa²) expected as input |
+| Filter | Stable exponential averaging (pole at $s=-1/\tau$) | Theoretically unstable design (pole in the right half-plane) stabilized by resetting the filter state every τ seconds |
+| Behavior | True IEC time weighting | Closer to a block integrator ($L_{eq,\tau}$) |
+
+A pole on the negative real axis corresponds to a decaying exponential impulse
+response ($h(t) \propto e^{-t/\tau}$) — exactly what "exponential time
+weighting" means: past events are forgotten exponentially. A pole on the
+positive real axis grows without bound; block-resetting hides this but changes
+the measurement's nature.
+
+## Verification against IEC 61672-1 (tone bursts)
+
+The rigorous test for time weighting is the **Tone Burst Response**
+(IEC 61672-1, Table 4), using a 4 kHz sine burst referenced to the steady-state
+level.
+
+**PyOctaveBand results (FAST):**
+
+| Burst duration | IEC target (dB) | PyOctaveBand (dB) | Error (dB) | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| 200 ms | −1.0 | −0.98 | +0.02 | ✅ PASS |
+| 50 ms | −4.8 | −4.82 | −0.02 | ✅ PASS |
+| 10 ms | −11.1 | −11.14 | −0.04 | ✅ PASS |
+| 1 ms | −20.9 | −20.99 | −0.09 | ✅ PASS |
+
+**python-acoustics results (FAST, squared signal passed as required by that
+library):**
+
+| Burst duration | IEC target (dB) | python-acoustics (dB) | Error (dB) | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| 200 ms | −1.0 | −0.97 | +0.03 | ✅ PASS |
+| 50 ms | −4.8 | −3.93 | **+0.87** | ⚠️ FAIL |
+| 10 ms | −11.1 | −10.90 | +0.20 | ✅ PASS |
+| 1 ms | −20.9 | −20.90 | +0.00 | ✅ PASS |
+
+PyOctaveBand maintains high precision across all test cases. The block-based
+approach deviates significantly (> 0.8 dB) for the 50 ms burst because 125 ms
+blocks cannot resolve short transient events accurately — the result depends on
+how the burst aligns with the block boundaries.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
+
+*Measured Fast envelopes (blue) matching the Table 4 reference values
+(dashed) within 0.1 dB for 200/50/10 ms bursts.*
+
+## What this means in practice
+
+- If you need **standard-compliant Fast/Slow/Impulse envelopes** (sound level
+  meter behavior, one level per sample), use PyOctaveBand's
+  [`time_weighting`](https://jmrplens.github.io/PyOctaveBand/guides/time-weighting/).
+- If you need **block-averaged Leq per interval**, that is a different, equally
+  valid metric — you can compute it with [`leq`](https://jmrplens.github.io/PyOctaveBand/guides/levels/) over consecutive
+  slices.
+- Both libraries are useful; they just answer different questions. The
+  discrepancy reported in issue #38 comes from comparing a continuous envelope
+  against a block integrator, not from an implementation error.
+
+## Beyond time weighting
+
+The same standards-first approach applies across the library:
+
+- Filter banks place their −3 dB points on the **ANSI S1.11** band edges for
+  every architecture (including Chebyshev II and Bessel, where scipy's raw
+  parametrization would not).
+- A/C weighting stays within **IEC 61672-1 class 1** tolerances up to 16 kHz at
+  common audio rates via internal oversampling (see
+  [Frequency Weighting](https://jmrplens.github.io/PyOctaveBand/guides/weighting/)).
+- The IEC tone-burst targets above are enforced in the test suite, so
+  regressions are caught in CI.
+
+---

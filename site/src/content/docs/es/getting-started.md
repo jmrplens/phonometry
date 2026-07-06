@@ -55,7 +55,7 @@ print(f"Bandas: {freq}")
 print(f"SPL [dB]: {spl}")
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3.png" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/signal_response_fraction_3_dark.png" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" style="width:80%">
 
 *Ejemplo de análisis espectral en tercios de octava de una señal compleja.*
 

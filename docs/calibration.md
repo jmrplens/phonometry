@@ -7,6 +7,16 @@ digital **decibels relative to Full Scale (dBFS)**.
 
 ## Physical Calibration (Sound Level Meter)
 
+```mermaid
+flowchart LR
+    A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\nref_signal"]
+    B --> C["calculate_sensitivity()"]
+    C --> D["calibration_factor\n(digital units → Pa)"]
+    D --> E["octavefilter / leq / laeq / ln_levels"]
+    F["Measurement\nrecording"] --> E
+    E --> G["Levels in dB SPL\n(re 20 µPa)"]
+```
+
 To get accurate SPL measurements from a digital recording, you must first
 calculate the sensitivity of your measurement chain using a reference tone
 (e.g., 94 dB @ 1 kHz).

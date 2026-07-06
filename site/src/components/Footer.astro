@@ -1,0 +1,32 @@
+---
+// Custom Starlight <Footer> override: renders the default footer, then a
+// human-visible maintainer block that corroborates the Person node in the
+// site-wide JSON-LD @graph (GEO: entity corroboration).
+import Default from '@astrojs/starlight/components/Footer.astro';
+
+const path = Astro.url.pathname;
+const lang = path.includes('/es/') || path.endsWith('/es') ? 'es' : 'en';
+const text =
+  lang === 'es'
+    ? 'Creado y mantenido por'
+    : 'Created and maintained by';
+---
+
+<Default><slot /></Default>
+<div class="maintainer">
+  {text}
+  <a href="https://jmrp.io" rel="author">José Manuel Requena Plens</a>
+  · <a href="https://github.com/jmrplens/PyOctaveBand">GitHub</a>
+  · <a href="https://pypi.org/project/PyOctaveBand/">PyPI</a>
+</div>
+
+<style>
+  .maintainer {
+    margin-top: 1rem;
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+  .maintainer a {
+    color: var(--sl-color-text-accent);
+  }
+</style>

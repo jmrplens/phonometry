@@ -8,6 +8,16 @@ PyOctaveBand puede devolver resultados en **nivel de presión sonora físico
 
 ## Calibración física (sonómetro)
 
+```mermaid
+flowchart LR
+    A["Tono del calibrador\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Grabación\nref_signal"]
+    B --> C["calculate_sensitivity()"]
+    C --> D["calibration_factor\n(unidades digitales → Pa)"]
+    D --> E["octavefilter / leq / laeq / ln_levels"]
+    F["Grabación de\nmedición"] --> E
+    E --> G["Niveles en dB SPL\n(re 20 µPa)"]
+```
+
 Para obtener mediciones SPL precisas a partir de una grabación digital, primero
 debes calcular la sensibilidad de tu cadena de medición usando un tono de
 referencia (p. ej. 94 dB @ 1 kHz).

@@ -37,7 +37,7 @@ por bloques lo oculta, pero cambia la naturaleza de la medición.
 ## Verificación frente a IEC 61672-1 (ráfagas de tono)
 
 La prueba rigurosa para la ponderación temporal es la **respuesta a ráfaga de
-tono** (IEC 61672-1, Tabla 3), usando una ráfaga senoidal de 4 kHz referida al
+tono** (IEC 61672-1, Tabla 4), usando una ráfaga senoidal de 4 kHz referida al
 nivel de régimen estacionario.
 
 **Resultados de PyOctaveBand (FAST):**
@@ -63,6 +63,11 @@ PyOctaveBand mantiene alta precisión en todos los casos. El enfoque por bloques
 se desvía significativamente (> 0,8 dB) en la ráfaga de 50 ms porque los bloques
 de 125 ms no pueden resolver con precisión eventos transitorios cortos — el
 resultado depende de cómo se alinee la ráfaga con los límites de los bloques.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
+
+*Envolventes Fast medidas (azul) coincidiendo con los valores de referencia
+de la Tabla 4 (discontinua) dentro de 0,1 dB para ráfagas de 200/50/10 ms.*
 
 ## Qué significa esto en la práctica
 

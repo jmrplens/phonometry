@@ -37,7 +37,7 @@ the measurement's nature.
 ## Verification against IEC 61672-1 (tone bursts)
 
 The rigorous test for time weighting is the **Tone Burst Response**
-(IEC 61672-1, Table 3), using a 4 kHz sine burst referenced to the steady-state
+(IEC 61672-1, Table 4), using a 4 kHz sine burst referenced to the steady-state
 level.
 
 **PyOctaveBand results (FAST):**
@@ -63,6 +63,11 @@ PyOctaveBand maintains high precision across all test cases. The block-based
 approach deviates significantly (> 0.8 dB) for the 50 ms burst because 125 ms
 blocks cannot resolve short transient events accurately — the result depends on
 how the burst aligns with the block boundaries.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%">
+
+*Measured Fast envelopes (blue) matching the Table 4 reference values
+(dashed) within 0.1 dB for 200/50/10 ms bursts.*
 
 ## What this means in practice
 

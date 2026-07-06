@@ -6,7 +6,7 @@ description: "Fast, Slow and Impulse ballistics per IEC 61672-1."
 Accurate SPL measurement requires capturing energy over specific time windows.
 PyOctaveBand implements exact time constants per **IEC 61672-1:2013**.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis.png" width="80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis_dark.png" width="80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/time_weighting_analysis_dark.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" style="width:80%">
 
 * **Fast (`fast`):** τ = 125 ms. Standard for noise fluctuations.
 * **Slow (`slow`):** τ = 1000 ms. Standard for steady noise.
@@ -22,6 +22,22 @@ energy_envelope = time_weighting(signal, fs, mode='fast')
 # dB SPL relative to 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 ```
+
+The asymmetric Impulse ballistics use two constants — a fast attack and a slow
+decay — switching per sample on the sign of the change:
+
+$$
+y[n] = y[n-1] + \alpha \,(x^2[n] - y[n-1]), \qquad
+\alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{otherwise}\end{cases}
+$$
+
+## Verified ballistics (IEC 61672-1 Table 4)
+
+The Fast envelope's response to 4 kHz tonebursts lands exactly on the
+standard's reference values — enforced in CI for burst durations from 1 s down
+to 1 ms (F and S weightings, class 1 acceptance limits):
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/PyOctaveBand/main/.github/images/tone_burst_iec_dark.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%">
 
 ## Initial state
 

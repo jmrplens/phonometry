@@ -39,6 +39,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
+      # Required for the OIDC-based Codecov upload (no token secret needed).
       id-token: write
     strategy:
       fail-fast: false
@@ -81,11 +82,14 @@ jobs:
   # impulse kernel; this job is the only one exercising the numba-jitted
   # path (numba pins numpy, so it lives in its own environment).
   tests-perf:
+    name: tests (numba-jitted kernel)
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
     - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
     - name: Set up Python 3.13
       uses: actions/setup-python@v6
       with:
@@ -97,6 +101,10 @@ jobs:
         pip install -r requirements-dev.txt
         pip install -e ".[perf,plot]"
     - name: Run tests (jitted kernel)
+      env:
+        # conftest.py disables JIT by default (coverage); override it here —
+        # this is the only job exercising the numba-compiled kernel.
+        NUMBA_DISABLE_JIT: "0"
       run: pytest -q
 
   sonar:

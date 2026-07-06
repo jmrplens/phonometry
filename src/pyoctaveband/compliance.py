@@ -81,6 +81,8 @@ def class_limits(
     """
     if filter_class not in (1, 2):
         raise ValueError("filter_class must be 1 or 2.")
+    if fraction <= 0:
+        raise ValueError("'fraction' must be positive.")
     col = 1 if filter_class == 1 else 2
 
     omega_arr = np.asarray(omega, dtype=np.float64)
@@ -112,39 +114,59 @@ def class_limits(
     return minimum, maximum
 
 
-def verify_filter_class(bank: OctaveFilterBank, worn: int = 2 ** 15) -> Dict[str, Any]:
+def verify_filter_class(bank: OctaveFilterBank, num_points: int = 2 ** 15) -> Dict[str, Any]:
     """
     Verify a filter bank against the IEC 61260-1:2014 class limits.
 
     Each band's relative attenuation (referenced to the attenuation at its
     exact mid-band frequency) is checked against the class 1 and class 2
     acceptance limits of Table 1, evaluated on a dense frequency grid up to
-    the band's processing Nyquist. Frequencies beyond that Nyquist cannot
-    carry signal energy at the band's decimated rate (the multirate
-    anti-aliasing filter removes them), so they are treated as compliant.
+    the band's processing Nyquist. The Table 1 breakpoint frequencies inside
+    that range are always included in the evaluation, so the pass-band
+    constraints are checked even if the grid were coarse. Frequencies beyond
+    the processing Nyquist cannot carry signal energy at the band's decimated
+    rate (the multirate anti-aliasing filter removes them), so they are
+    treated as compliant.
 
     :param bank: The filter bank to verify (its designed SOS are analyzed;
         works for stateful and stateless banks alike).
-    :param worn: Number of frequency points per band.
+    :param num_points: Number of frequency grid points per band (>= 16).
     :return: Dict with ``overall_class`` (1, 2 or None) and ``bands``: a list
         of ``{"freq", "class", "margin_class1_db", "margin_class2_db"}``
         where a positive margin means the limits are met with that much room.
     """
+    if num_points < 16:
+        raise ValueError("'num_points' must be at least 16.")
+
     bands: List[Dict[str, Any]] = []
+
+    # Table 1 breakpoints (both sides) that must always be evaluated.
+    breakpoint_omegas = np.array(
+        [_map_breakpoint(x, bank.fraction) for x, _, _ in _PASSBAND_MAX + _STOPBAND_MIN]
+    )
+    breakpoint_omegas = np.concatenate([1.0 / breakpoint_omegas, breakpoint_omegas])
 
     for idx in range(bank.num_bands):
         fm = float(bank.freq[idx])
         fsd = bank.fs / float(bank.factor[idx])
-        w, h = signal.sosfreqz(bank.sos[idx], worN=worn, fs=fsd)
+        w, h = signal.sosfreqz(bank.sos[idx], worN=num_points, fs=fsd)
 
         # Attenuation relative to the mid-band attenuation (Formulas 7-8).
         attenuation = -20.0 * np.log10(np.abs(h) + np.finfo(float).eps)
         a_ref = float(np.interp(fm, w, attenuation))
-        delta_a = attenuation - a_ref
+        delta_all = attenuation - a_ref
 
         omega = w / fm
         valid = omega > 0
-        omega, delta_a = omega[valid], delta_a[valid]
+        omega, delta_a = omega[valid], delta_all[valid]
+
+        # Guarantee the Table 1 breakpoints (pass-band included) are evaluated.
+        omega_max = float(omega.max())
+        extra = breakpoint_omegas[(breakpoint_omegas > 0) & (breakpoint_omegas <= omega_max)]
+        if extra.size:
+            delta_extra = np.interp(extra * fm, w, delta_all)
+            omega = np.concatenate([omega, extra])
+            delta_a = np.concatenate([delta_a, delta_extra])
 
         margins: Dict[int, float] = {}
         for cls in (1, 2):
@@ -165,6 +187,10 @@ def verify_filter_class(bank: OctaveFilterBank, worn: int = 2 ** 15) -> Dict[str
                 "margin_class2_db": margins[2],
             }
         )
+
+    if not bands:
+        # No bands to verify: never report compliance vacuously.
+        return {"overall_class": None, "bands": []}
 
     classes = [band["class"] for band in bands]
     if all(c == 1 for c in classes):

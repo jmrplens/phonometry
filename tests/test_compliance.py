@@ -73,8 +73,24 @@ def test_result_has_per_band_details() -> None:
     assert all(np.isfinite(b["margin_class1_db"]) for b in result["bands"])
 
 
-def test_stateful_bank_rejected() -> None:
-    bank = OctaveFilterBank(fs=48000, stateful=True, resample=False)
-    result = verify_filter_class(bank)
-    # stateful banks share the same SOS design: verification must still work
-    assert result["overall_class"] in (1, 2, None)
+def test_stateful_bank_matches_stateless_design() -> None:
+    """Stateful banks share the SOS design: verification must agree exactly."""
+    stateful = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000],
+                                stateful=True, resample=False)
+    stateless = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000],
+                                 resample=False)
+    r_stateful = verify_filter_class(stateful)
+    r_stateless = verify_filter_class(stateless)
+    assert r_stateful["overall_class"] == r_stateless["overall_class"]
+    for a, b in zip(r_stateful["bands"], r_stateless["bands"]):
+        assert a["margin_class1_db"] == pytest.approx(b["margin_class1_db"])
+
+
+def test_invalid_inputs_raise() -> None:
+    bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000])
+    with pytest.raises(ValueError, match="num_points"):
+        verify_filter_class(bank, num_points=4)
+    with pytest.raises(ValueError, match="filter_class"):
+        class_limits(1.0, 3, np.array([1.0]))
+    with pytest.raises(ValueError, match="fraction"):
+        class_limits(-1.0, 1, np.array([1.0]))

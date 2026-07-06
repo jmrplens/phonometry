@@ -34,7 +34,7 @@ def _burst_response_db(duration: float, mode: str, total: float) -> float:
 
     burst = np.zeros_like(t)
     start = int(1.0 * FS)
-    burst[start:start + int(duration * FS)] = x[start:start + int(duration * FS)]
+    burst[start:start + round(duration * FS)] = x[start:start + round(duration * FS)]
     env = time_weighting(burst, FS, mode=mode)
     return float(10 * np.log10(env.max() / ref))
 

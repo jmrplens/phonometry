@@ -451,7 +451,7 @@ def _d5(s: SVG, th: Theme) -> None:
         s.rect(bx, y, 190, 70, th.panel, color, rx=10, sw=2)
         s.text(bx + 95, y + 30, band, 20, th.fg, bold=True)
         s.text(bx + 95, y + 54, f"SOS @ {rate}", 18, color, mono=True)
-        s.text(720, y + 40, eff if "no" not in eff else "", 18, th.muted, mono=True)
+        s.text(660, y + 40, eff, 18, th.muted, "start", mono=True)
 
     s.text(450, 480, "Low bands are filtered at a decimated rate: the relative", 20, th.fg)
     s.text(450, 508, "bandwidth stays wide, so the SOS stays numerically healthy.", 20, th.fg)

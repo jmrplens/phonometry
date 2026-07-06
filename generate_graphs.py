@@ -173,6 +173,27 @@ def _translate_figure(fig: Any) -> None:
 
     if _LANG == "en":
         return
+    import re as _re2
+
+    from matplotlib.ticker import FixedFormatter as _FxF
+    from matplotlib.ticker import FuncFormatter as _FF
+    from matplotlib.ticker import ScalarFormatter as _SF
+
+    def _comma(s: str) -> str:
+        return _re2.sub(r"(?<![\d.])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s)
+
+    for ax in fig.get_axes():
+        for axis in (ax.xaxis, ax.yaxis):
+            fmt = axis.get_major_formatter()
+            if isinstance(fmt, _FxF):
+                fmt.seq = [_comma(s) for s in fmt.seq]
+            elif isinstance(fmt, _FF) and not getattr(fmt, "_phonometry_comma", False):
+                wrapped = _FF(lambda v, pos, _f=fmt: _comma(str(_f(v, pos))))
+                wrapped._phonometry_comma = True  # type: ignore[attr-defined]
+                axis.set_major_formatter(wrapped)
+            elif type(fmt) is _SF and axis.get_scale() == "linear":
+                wrapped = _FF(lambda v, pos: _comma(f"{v:g}"))
+                axis.set_major_formatter(wrapped)
     for artist in fig.findobj(_mtext.Text):
         s = artist.get_text()
         if not s:

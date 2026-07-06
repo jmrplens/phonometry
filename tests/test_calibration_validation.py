@@ -96,3 +96,14 @@ def test_asymmetric_fluctuation_uses_max_min_vs_mean() -> None:
     dip[i0:i1] = 10 ** (-0.2 / 20)
     with pytest.warns(CalibrationWarning, match="fluctuation"):
         calculate_sensitivity(x * dip, fs=FS)
+
+
+def test_table2_row_boundaries() -> None:
+    """IEC 60942:2017 Table 2: 160 Hz belongs to the 0.07 dB row and 63 Hz
+    to the 0.20 dB row; the open interval between them gets 0.10 dB."""
+    from phonometry.calibration import _class1_fluctuation_limit
+
+    assert _class1_fluctuation_limit(63.0) == pytest.approx(0.20)
+    assert _class1_fluctuation_limit(100.0) == pytest.approx(0.10)
+    assert _class1_fluctuation_limit(160.0) == pytest.approx(0.07)
+    assert _class1_fluctuation_limit(1000.0) == pytest.approx(0.07)

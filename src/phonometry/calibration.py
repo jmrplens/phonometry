@@ -19,27 +19,17 @@ class CalibrationWarning(UserWarning):
 # limits in dB by range of nominal frequencies, class 1 column. Classes LS
 # and 2 are only specified for 160 Hz to 1250 Hz (0,03 / 0,15 dB); the other
 # rows carry "-" for them, so this table exposes the class 1 limits only.
-# Rows: (lower bound exclusive*, upper bound inclusive, limit). *The first
-# row starts at the 31,5 Hz nominal band edge, treated as inclusive here.
-_FLUCTUATION_LIMITS_CLASS1_DB = (
-    (31.5, 63.0, 0.20),
-    (63.0, 160.0, 0.10),  # Table 2: "> 63 to < 160"; 160 belongs to next row
-    (160.0, 1250.0, 0.07),
-    (1250.0, 4000.0, 0.07),
-    (4000.0, 8000.0, 0.07),
-    (8000.0, 16000.0, 0.07),
-)
-
-
 def _class1_fluctuation_limit(frequency: float) -> float:
     """Class 1 short-term fluctuation limit for a nominal calibrator frequency.
 
-    IEC 60942:2017 Table 2. Frequencies outside the specified 31,5 Hz to
-    16 kHz span fall back to the strictest limit (0,07 dB).
+    IEC 60942:2017 Table 2 rows: 31,5-63 Hz -> 0,20 dB; > 63 to < 160 Hz ->
+    0,10 dB; 160 Hz and above -> 0,07 dB. Frequencies outside the specified
+    31,5 Hz to 16 kHz span fall back to the strictest limit (0,07 dB).
     """
-    for low, high, limit in _FLUCTUATION_LIMITS_CLASS1_DB:
-        if low <= frequency <= high:
-            return limit
+    if 31.5 <= frequency <= 63.0:
+        return 0.20
+    if 63.0 < frequency < 160.0:
+        return 0.10
     return 0.07
 
 

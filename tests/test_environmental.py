@@ -74,3 +74,11 @@ def test_composite_validation() -> None:
         composite_rating_level([(60.0, 10.0, 0.0)])
     with pytest.raises(ValueError, match="positive"):
         composite_rating_level([(60.0, -1.0, 0.0), (50.0, 25.0, 0.0)])
+
+
+def test_composite_accepts_generator_and_rejects_empty() -> None:
+    periods = [(60.0, 12, 0.0), (55.0, 4, 5.0), (50.0, 8, 10.0)]
+    from_gen = composite_rating_level(p for p in periods)
+    assert from_gen == pytest.approx(composite_rating_level(periods))
+    with pytest.raises(ValueError, match="one period"):
+        composite_rating_level([])

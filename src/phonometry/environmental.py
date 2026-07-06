@@ -29,6 +29,9 @@ def composite_rating_level(periods: Sequence[Tuple[float, float, float]]) -> flo
         night 10 dB). Hours must be positive and sum to 24.
     :return: Composite rating level in dB.
     """
+    periods = list(periods)
+    if not periods:
+        raise ValueError("At least one period is required.")
     hours = np.array([h for _, h, _ in periods], dtype=np.float64)
     if np.any(hours <= 0):
         raise ValueError("Every period duration must be positive.")

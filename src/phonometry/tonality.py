@@ -103,8 +103,8 @@ def _tone_band(power: np.ndarray, peak: int, half_width_bins: int) -> Tuple[int,
     window edge, the nearest local minimum beyond it is used."""
 
     def _edge(direction: int) -> int:
-        limit = peak + direction * half_width_bins
-        limit = max(1, min(limit, power.size - 2))
+        last = power.size - 1
+        limit = max(0, min(peak + direction * half_width_bins, last))
         idx = peak
         while idx != limit:
             nxt = idx + direction
@@ -113,7 +113,7 @@ def _tone_band(power: np.ndarray, peak: int, half_width_bins: int) -> Tuple[int,
             idx = nxt
         # Minimum sits on the window edge: continue to the nearest local
         # minimum beyond the 15 % window (clause 11.2).
-        while 0 < idx < power.size - 1 and power[idx + direction] < power[idx]:
+        while 0 < idx < last and power[idx + direction] < power[idx]:
             idx += direction
         return idx
 
@@ -122,7 +122,13 @@ def _tone_band(power: np.ndarray, peak: int, half_width_bins: int) -> Tuple[int,
 
 def _band_power(freqs: np.ndarray, power: np.ndarray, f1: float, f2: float) -> Tuple[float, int]:
     mask = (freqs > f1) & (freqs <= f2)
-    return float(np.sum(power[mask])), int(np.count_nonzero(mask))
+    n = int(np.count_nonzero(mask))
+    if n == 0:
+        raise ValueError(
+            f"No spectrum bins fall in the {f1:.1f}-{f2:.1f} Hz band; use a "
+            "finer resolution_hz."
+        )
+    return float(np.sum(power[mask])), n
 
 
 def _tnr_criterion(ft: float) -> float:
@@ -236,12 +242,13 @@ _UPPER_EDGE_COEFFS = (
 def _fitted_edge(
     ft: float, table: Tuple[Tuple[float, float, Tuple[float, float, float]], ...]
 ) -> float:
+    # Peaks marginally outside the range of interest (the verdict already
+    # reports them as non-prominent) are clipped to the table span.
+    ft = min(max(ft, _F_MIN), _F_MAX)
     for lo, hi, (c0, c1, c2) in table:
         if lo <= ft <= hi:
             return float(c0 + c1 * ft + c2 * ft**2)
-    raise ValueError(
-        f"Prominence ratio is specified for 89.1 Hz <= ft <= 11.2 kHz; got {ft!r} Hz."
-    )
+    raise AssertionError("unreachable: ft clipped to the table span")
 
 
 def prominence_ratio(

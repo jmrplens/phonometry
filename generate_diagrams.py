@@ -98,26 +98,34 @@ class SVG:
 
     def dim(self, x1: float, y1: float, x2: float, y2: float, label: str,
             offset: float = 0.0, size: int = 18) -> None:
-        """Dimension line with arrowheads on both ends and a centred label.
-        Works for horizontal or vertical dimensions (pick by coordinates)."""
+        """Dimension between two measured points, drafting style.
+
+        The dimension line is placed ``offset`` px away (perpendicular);
+        dashed witness lines connect it to the measured points. With
+        ``offset=0`` the caller is responsible for any witness lines.
+        """
         th = self.th
         horizontal = abs(y2 - y1) < abs(x2 - x1)
         if horizontal:
             y = y1 + offset
-            self.line(x1, y1, x1, y, th.muted, 0.9, dash="3,3")
-            self.line(x2, y2, x2, y, th.muted, 0.9, dash="3,3")
+            if offset:
+                self.line(x1, y1, x1, y, th.muted, 0.9, dash="3,3")
+                self.line(x2, y2, x2, y, th.muted, 0.9, dash="3,3")
             mid = (x1 + x2) / 2
             self.arrow(mid - 4, y, x1, y, th.muted, 1.2)
             self.arrow(mid + 4, y, x2, y, th.muted, 1.2)
-            self.text(mid, y - 5, label, size, th.fg, "middle")
+            self.text(mid, y - 7, label, size, th.fg, "middle")
         else:
             x = x1 + offset
-            self.line(x1, y1, x, y1, th.muted, 0.9, dash="3,3")
-            self.line(x2, y2, x, y2, th.muted, 0.9, dash="3,3")
+            if offset:
+                self.line(x1, y1, x, y1, th.muted, 0.9, dash="3,3")
+                self.line(x2, y2, x, y2, th.muted, 0.9, dash="3,3")
             mid = (y1 + y2) / 2
             self.arrow(x, mid - 4, x, y1, th.muted, 1.2)
             self.arrow(x, mid + 4, x, y2, th.muted, 1.2)
-            self.text(x + 7, mid + 4, label, size, th.fg, "start")
+            # Label on the left of the line: keeps it clear of whatever is
+            # being measured (masts, people) on the right.
+            self.text(x - 9, mid + 6, label, size, th.fg, "end")
 
     def mic(self, x: float, capsule_top: float, ground: float,
             scale: float = 1.0) -> None:
@@ -249,7 +257,7 @@ def _d2(s: SVG, th: Theme) -> None:
     ax = 330.0
     a_cap = gy - 230.0
     s.mic(ax, a_cap, gy, 1.15)
-    s.dim(ax - 60, gy, ax - 60, a_cap, "4.0 ± 0.2 m", offset=0, size=20)
+    s.dim(ax, gy, ax, a_cap, "4.0 ± 0.2 m", offset=-60, size=20)
     s.text(ax + 10, a_cap - 58, "A — free field", 22, th.fg, bold=True)
     s.text(ax + 10, a_cap - 30, "0 dB", 22, th.accent, bold=True, mono=True)
 
@@ -264,9 +272,11 @@ def _d2(s: SVG, th: Theme) -> None:
     # Position C: flush-mounted on the facade, below B's dimension zone
     cy = gy - 120.0
     s.circle(fx + 3, cy, 7, th.fg)
-    s.line(fx - 2, cy + 5, fx - 60, cy + 52, th.muted, 1.4)
-    s.text(fx - 64, cy + 74, "C — flush-mounted", 22, th.fg, "end", bold=True)
-    s.text(fx - 64, cy + 100, "−6 dB", 22, th.secondary, "end", bold=True, mono=True)
+    # The leader crosses mic B's mast (plain line crossing, standard
+    # drafting); the label itself sits in the clear zone between masts.
+    s.line(fx - 2, cy + 5, 470, cy + 60, th.muted, 1.4)
+    s.text(462, cy + 84, "C — flush-mounted", 22, th.fg, bold=True)
+    s.text(462, cy + 110, "−6 dB", 22, th.secondary, bold=True, mono=True)
 
 
 # ---------------------------------------------------------------------------
@@ -321,7 +331,7 @@ def _d3(s: SVG, th: Theme) -> None:
                      (cx - 52 - g, cyv), (cx + 52 + g, cyv)]:
         s.circle(pxx, pyy, 8, th.secondary)
         s.circle(pxx, pyy, 2.8, th.bg)
-    s.dim(cx + 52, cyv - 64, cx + 52 + g, cyv - 64, "1.00 m", offset=0, size=20)
+    s.dim(cx + 52, cyv - 20, cx + 52 + g, cyv, "1.00 m", offset=-44, size=20)
 
 
 # ---------------------------------------------------------------------------

@@ -150,7 +150,11 @@ const jsonLd = JSON.stringify({
         priceCurrency: 'USD',
       },
       author: { '@id': authorId },
-      sameAs: ['https://pypi.org/project/PyOctaveBand/', `${fullUrl}/`],
+      sameAs: [
+        'https://pypi.org/project/PyOctaveBand/',
+        'https://doi.org/10.5281/zenodo.21215280',
+        `${fullUrl}/`,
+      ],
     },
     {
       '@type': 'SoftwareSourceCode',

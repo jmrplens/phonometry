@@ -1,6 +1,6 @@
 ---
-title: "Frequency Weighting (A, C, Z)"
-description: "IEC 61672-1 frequency weighting curves with class 1 high-frequency accuracy."
+title: "Frequency Weighting (A, C, G, Z)"
+description: "IEC 61672-1 A/C/Z and ISO 7196 G frequency weighting curves with class 1 high-frequency accuracy."
 ---
 
 Frequency weighting curves simulate the human ear's sensitivity, as specified by

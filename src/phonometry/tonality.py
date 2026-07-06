@@ -71,6 +71,11 @@ def _averaged_spectrum(
     Returns (frequencies, bin powers in Pa^2-like units, bin spacing).
     """
     nperseg = int(round(fs / resolution_hz))
+    if nperseg < 16:
+        raise ValueError(
+            f"resolution_hz={resolution_hz!r} is too coarse for fs={fs}: it "
+            "leaves fewer than 16 samples per FFT segment."
+        )
     if x.shape[-1] < nperseg:
         raise ValueError(
             f"Signal too short for the requested {resolution_hz} Hz "

@@ -82,3 +82,8 @@ def test_composite_accepts_generator_and_rejects_empty() -> None:
     assert from_gen == pytest.approx(composite_rating_level(periods))
     with pytest.raises(ValueError, match="one period"):
         composite_rating_level([])
+
+
+def test_composite_rejects_non_finite_hours() -> None:
+    with pytest.raises(ValueError, match="finite"):
+        composite_rating_level([(60.0, float("nan"), 0.0), (50.0, 12.0, 0.0)])

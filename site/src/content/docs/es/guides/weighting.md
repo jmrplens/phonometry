@@ -1,6 +1,6 @@
 ---
-title: "Ponderación frecuencial (A, C, Z)"
-description: "Curvas de ponderación IEC 61672-1 con precisión clase 1 en alta frecuencia."
+title: "Ponderación frecuencial (A, C, G, Z)"
+description: "Curvas de ponderación frecuencial A/C/Z (IEC 61672-1) y G (ISO 7196) con precisión de clase 1 en alta frecuencia."
 ---
 
 Las curvas de ponderación frecuencial simulan la sensibilidad del oído humano,

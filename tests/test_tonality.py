@@ -146,3 +146,8 @@ def test_invalid_resolution_and_tone_freq() -> None:
         tone_to_noise_ratio(np.ones(FS), FS, resolution_hz=0.0)
     with pytest.raises(ValueError, match="tone_freq"):
         prominence_ratio(np.ones(FS), FS, tone_freq=-100.0)
+
+
+def test_too_coarse_resolution_raises() -> None:
+    with pytest.raises(ValueError, match="too coarse"):
+        tone_to_noise_ratio(np.ones(FS), FS, resolution_hz=FS / 4.0)

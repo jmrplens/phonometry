@@ -358,8 +358,9 @@ filtering keeps it aligned with the input.*
 
 # Frequency Weighting (A, C, G, Z)
 
-Frequency weighting curves simulate the human ear's sensitivity, as specified by
-**IEC 61672-1:2013**.
+Frequency weighting curves simulate the human ear's sensitivity. A, C and Z
+are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
+**ISO 7196:1995**.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.png" alt="A, C and Z frequency weighting curves with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%"></picture>
 
@@ -578,6 +579,22 @@ Both accept 1D signals (returning a scalar) or 2D `[channels, samples]` arrays
 (returning one level per channel), and support `dbfs=True` for digital
 full-scale analysis (calibration does not apply in dBFS mode).
 
+Why the *energy* mean and not the arithmetic mean of dB values? Because sound
+doses add as energy: two periods at 60 dB and 80 dB do not average to 70 dB —
+the 80 dB half dominates and $L_{eq}$ = 77 dB. Averaging decibels directly
+underestimates every fluctuating noise. $L_{eq}$ is the level of the *steady*
+sound carrying the same energy as the real, fluctuating one, which is why
+regulations are written in terms of it.
+
+### `leq()` / `laeq()` parameters
+
+| Parameter | Type / shape | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D or 2D array | digital units (or Pa if calibrated) | non-empty | 2D is `[channels, samples]`; returns one level per channel |
+| `fs` | int | Hz | > 0 (`laeq` only) | `leq` needs no sample rate (pure RMS integral) |
+| `calibration_factor` | float | Pa per digital unit | default `1.0` | From `calculate_sensitivity()` |
+| `dbfs` | bool | — | default `False` | `True`: 0 dBFS = full-scale RMS sine; ignores calibration |
+
 ## Percentile levels (LN)
 
 `ln_levels` computes statistical levels from the time-weighted envelope:
@@ -600,6 +617,24 @@ Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 `calibration_factor`/`dbfs` behave as in `leq`. The integrator attack transient
 (~2τ) is discarded before taking percentiles.
 
+Formally, $L_N$ is the $(100-N)$-th percentile of the distribution of the
+time-weighted level: the recording is first turned into a level-vs-time
+envelope (Fast by default), and $L_{10}$ is the envelope value exceeded 10 %
+of the time. That makes the *ballistics choice part of the metric*: an
+$L_{10}$ from a Slow envelope is systematically lower than from a Fast one on
+impulsive noise, so regulations always name the time weighting.
+
+### `ln_levels()` parameters
+
+| Parameter | Type / shape | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D or 2D array | digital units | non-empty | 2D returns per-channel dicts |
+| `fs` | int | Hz | > 0 | Needed by the envelope detector |
+| `n` | tuple of ints | % | default `(10, 50, 90)` | Any exceedance percentages, e.g. `(1, 5, 95)` |
+| `mode` | str | — | `'fast'` (default), `'slow'`, `'impulse'` | IEC 61672-1 ballistics of the envelope |
+| `weighting` | str or None | — | `'A'`, `'C'`, `'G'`, `'Z'`, `None` (default) | Frequency weighting before the envelope |
+| `calibration_factor` / `dbfs` | | | as `leq` | |
+
 ## Peak, event and occupational metrics
 
 ```python
@@ -621,6 +656,43 @@ IEC 61672-1:2013 Table 5, `sel` against the Table 4 LAE toneburst column, and
 the dose functions against the IEC 61252 anchors (3.2 Pa²h ↔ exactly 90 dB).
 With `duration_hours`, the input is treated as a representative sample of that
 exposure period; without it, the input is the whole event.
+
+### SEL: comparing events of different duration
+
+A 4 s train pass-by and a 30 s one cannot be compared by their $L_{Aeq}$
+alone — the longer event delivers more energy at the same level. The **sound
+exposure level** compresses the *whole* event energy into exactly one second:
+
+$$L_E = L_{eq,T} + 10\log_{10}\frac{T}{T_0}, \qquad T_0 = 1\ \text{s}$$
+
+so events of any duration become directly comparable, and $N$ identical
+events sum as $+10\log_{10}N$. This is the building block of airport and
+railway noise models.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept.png" alt="A vehicle pass-by level history with its Leq over the whole event and the equal-energy one-second SEL block" width="80%"></picture>
+
+### Noise dose: sound exposure and LEX,8h
+
+Occupational regulations limit the daily *dose*, not the level. IEC 61252
+expresses it as **sound exposure** $E$ in pascal-squared-hours — the time
+integral of the squared A-weighted pressure — and the equivalent
+**normalized 8 h level**:
+
+$$E = \int_0^T p_A^2(t)\,dt \quad [\text{Pa}^2\text{h}], \qquad
+L_{EX,8h} = 10\log_{10}\frac{E}{8\,\text{h} \cdot p_0^2}$$
+
+The anchor worth memorizing: **3.2 Pa²h ⇔ exactly 90 dB over 8 h** (the CI
+suite enforces it). Half the dose is −3 dB; double duration at the same level
+is +3 dB.
+
+### Peak / event / dose parameters
+
+| Function | Key parameters | Returns | Standard anchor |
+| :--- | :--- | :--- | :--- |
+| `lc_peak(x, fs, calibration_factor=1.0, dbfs=False)` | `dbfs=True` references full-scale *peak* (1.0), not RMS | LCpeak [dB] | IEC 61672-1 §5.13, Table 5 tone bursts |
+| `sel(x, fs, weighting=None, ...)` | `weighting='A'` gives LAE | SEL [dB] | IEC 61672-1 Table 4 (LAE column) |
+| `sound_exposure(x, fs, duration_hours=None, ...)` | `duration_hours` treats `x` as a sample of that period | E [Pa²h] | IEC 61252 |
+| `lex_8h(x, fs, duration_hours=None, ...)` | same sampling semantics | LEX,8h [dB] | IEC 61252 (≡ LEP,d) |
 
 ## Loudness level of pure tones (ISO 226:2023)
 
@@ -663,10 +735,33 @@ pr = prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 ```
 
+
+The methods hinge on the **critical band** — the ear's analysis bandwidth,
+$\Delta f_c = 25 + 75\,[1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz at 1 kHz): a
+tone is masked only by the noise *inside* its critical band, so both ratios
+compare the tone against exactly that noise, not the whole spectrum.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum.png" alt="Averaged spectrum of a tone in noise with the critical band shaded and the tone-to-noise ratio annotated against its prominence criterion" width="80%"></picture>
+
+A TNR above $8 + 8.33\log_{10}(1000/f_t)$ dB (8 dB from 1 kHz up) classifies
+the tone as *prominent*; the PR criterion is $9 + 10\log_{10}(1000/f_t)$ dB.
+Low frequencies get higher thresholds because wider relative bands mask more.
+
 Proximate secondary tones in the same critical band are combined per
 clause 11.6; for harmonic complexes assess each component (`tone_freq=`).
 Both methods work on Hann-windowed, RMS-averaged spectra and need no absolute
 calibration (the ratios are level differences).
+
+### `tone_to_noise_ratio()` / `prominence_ratio()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D array | any (uncalibrated OK) | ≥ `fs/resolution_hz` samples | Ratios are level differences: calibration cancels out |
+| `fs` | int | Hz | > 0 | |
+| `tone_freq` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
+| `resolution_hz` | float | Hz | > 0; default `1.0` | Tone band must stay within 15 % of the critical band (clause 11.2) |
+
+Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
 
 ## Environmental noise: Lden, Ldn and rating levels (ISO 1996-1)
 
@@ -687,6 +782,17 @@ r = composite_rating_level([(63.2, 12, 0.0),    # day
                             (58.1, 4, 5.0),     # evening (+5)
                             (51.4, 8, 10.0)])   # night  (+10) == lden
 ```
+
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.png" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" width="80%"></picture>
+
+### `lden()` / `ldn()` / `composite_rating_level()` parameters
+
+| Function | Key parameters | Notes |
+| :--- | :--- | :--- |
+| `lden(lday, levening, lnight, hours=(12, 4, 8))` | period LAeq values [dB]; `hours` must sum to 24 | +5 dB evening, +10 dB night (3.6.4) |
+| `ldn(lday, lnight, hours=(15, 9))` | | +10 dB night (3.6.5) |
+| `composite_rating_level(periods)` | iterable of `(level_db, hours, adjustment_db)` | General Formulae (5)-(6); adjustments per Table A.1 |
 
 Combine with `laeq()` per time period to go from recordings to Lden, and with
 `tone_to_noise_ratio()` / `prominence_ratio()` to justify tonal adjustments.
@@ -715,6 +821,17 @@ levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
 - `zero_phase=True` filters bands forward-backward so per-band group delay does
   not skew the frames (offline analysis only).
 
+### `OctaveFilterBank.spectrogram()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D or 2D array | digital units | non-empty | 2D returns `(channels, bands, frames)` |
+| `window_time` | float | s | > 0; default `0.125` | Frame length (0.125 s mirrors Fast) |
+| `overlap` | float | — | 0–<1; default `0.5` | Fraction of window overlap |
+| `mode` | str | — | `'rms'` (default) or `'peak'` | Per-window detector |
+| `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline only) |
+| `calibration_factor` / `dbfs` | | | as `leq` | |
+
 ```python
 import matplotlib.pyplot as plt
 
@@ -738,6 +855,25 @@ SPL, and [Time Weighting](https://jmrplens.github.io/phonometry/guides/time-weig
 
 phonometry can return results in physical **Sound Pressure Level (dB SPL)** or
 digital **decibels relative to Full Scale (dBFS)**.
+
+## Why calibrate? The theory
+
+A digital recording only knows *numbers*: a full-scale sine wave is ±1.0
+regardless of whether it was a whisper or a jet engine. To report physical
+sound pressure levels the chain microphone → preamplifier → ADC must be
+characterized by a single number, the **sensitivity factor** S, that converts
+digital units into pascals:
+
+$$p(t) = S \, x(t) \qquad
+S = \frac{p_\text{ref} \cdot 10^{L_\text{cal}/20}}{\tilde{x}_\text{ref}}$$
+
+where $L_\text{cal}$ is the calibrator's level (typically 94 dB, i.e. 1 Pa),
+$p_\text{ref} = 20\ \mu\text{Pa}$ and $\tilde{x}_\text{ref}$ is the RMS of
+the recorded calibration tone in digital units. `calculate_sensitivity()` is
+exactly that equation. The factor is valid as long as nothing in the chain
+changes — touch the gain knob and you must recalibrate.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup.svg" alt="Calibration chain: sound calibrator coupled on the microphone, preamplifier, ADC and calculate_sensitivity producing pascals per digital unit" width="92%"></picture>
 
 ## Physical Calibration (Sound Level Meter)
 
@@ -794,15 +930,36 @@ When you pass the sample rate (and `validate=True`, the default),
 IEC 60942:2017 checks the calibrator itself (5.3.3): the *short-term level
 fluctuation* — the absolute difference between each of the maximum and minimum
 F-time-weighted levels and the mean level — must not exceed the Table 2 class 1
-limit for the calibrator's nominal frequency (0.07 dB from 160 Hz up, relaxed
-to 0.10 dB below 160 Hz and 0.20 dB below 63 Hz, where the F time-weighting
-itself ripples). Pass `frequency=` to select the right row for non-1 kHz
+limit for the calibrator's nominal frequency (0.07 dB at and above 160 Hz, relaxed
+to 0.10 dB below 160 Hz and 0.20 dB at or below 63 Hz, where the F
+time-weighting itself ripples). Pass `frequency=` to select the right row for non-1 kHz
 calibrators. A `CalibrationWarning` flags badly coupled microphones or handling
 noise before they silently corrupt every calibrated level. The recording must
 be at least 2 s long (1 s for the F-integrator to settle plus 1 s of settled
 envelope); shorter recordings get a warning instead of an unreliable verdict.
 Without `fs` the check is skipped. Override the limit with
 `max_fluctuation_db` or disable with `validate=False`.
+
+The check catches exactly what ruins field calibrations — a loose coupler,
+wind, handling noise:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" width="80%"></picture>
+
+### `calculate_sensitivity()` parameters
+
+| Parameter | Type / shape | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `ref_signal` | 1D/2D array | digital units | non-empty, non-silent | Recording of the calibration tone only (trim handling noise) |
+| `target_spl` | float | dB re 20 µPa | default `94.0` | The calibrator's nominal level (114 dB calibrators: pass `114.0`) |
+| `ref_pressure` | float | Pa | default `2e-5` | Reference pressure p₀; rarely changed |
+| `fs` | int, optional | Hz | > 0; default `None` | Required for the stability validation; omit to skip it |
+| `validate` | bool | — | default `True` | Emit `CalibrationWarning` on unstable/short recordings |
+| `max_fluctuation_db` | float, optional | dB | default `None` → Table 2 class 1 | Explicit override of the stability limit |
+| `frequency` | float | Hz | default `1000.0` | Calibrator's nominal frequency; selects the IEC 60942 Table 2 row |
+
+Returns the sensitivity factor (float) to pass as `calibration_factor=` to
+`octavefilter`, `leq`, `laeq`, `ln_levels`, `lc_peak`, `sel` and the dose
+functions.
 
 ## Digital Analysis (dBFS)
 
@@ -1263,6 +1420,121 @@ start from the first input energy, or pass a scalar/array with the previous
 mean-square output state. See [Why phonometry](https://jmrplens.github.io/phonometry/reference/why-phonometry/) for the
 IEC 61672-1 tone-burst verification of this implementation.
 
+## G-weighting (ISO 7196)
+
+The G curve extends frequency weighting into the infrasound range. ISO 7196:1995 Table 1 (p. 2) defines it by four zeros at the origin and four complex-conjugate pole pairs, given as coordinates in Hz (multiplied by $2\pi$ to obtain rad/s):
+
+$$
+z_{1..4} = 0, \qquad
+p = 2\pi \left\{ -0.707 \pm j0.707,\; -19.27 \pm j5.16,\; -14.11 \pm j14.11,\; -5.16 \pm j19.27 \right\} \ \text{Hz}
+$$
+
+The gain $k$ is chosen so that the response is exactly **0 dB at 10 Hz** (clause 4):
+
+$$
+k = \left| \frac{\prod_i (j\omega_{10} - p_i)}{\prod_i (j\omega_{10} - z_i)} \right|, \qquad \omega_{10} = 2\pi \cdot 10 \ \text{rad/s}
+$$
+
+The four zeros against eight poles shape the characteristic response: a rise of approximately **+12 dB/octave between 1 Hz and 20 Hz**, with roll-offs of approximately **24 dB/octave** below 1 Hz and above 20 Hz. Infrasound needs its own curve because near the hearing threshold the perceived loudness of very-low-frequency tones grows much more steeply with sound pressure level than at mid frequencies — a small dB increase above threshold produces a large loudness jump — so the A curve (anchored at 1 kHz) grossly misrepresents infrasonic annoyance.
+
+Since G acts on 0.25 Hz – 315 Hz, the plain bilinear transform is already exact there and the internal oversampling used for the A/C designs (whose action extends to 16 kHz) is not applied.
+
+See the [Frequency Weighting guide](https://jmrplens.github.io/phonometry/guides/weighting/) for usage.
+
+## Equal-loudness contours (ISO 226:2023)
+
+A tone has a *loudness level* of $L_N$ phon when it is judged equally loud as a 1 kHz pure tone at $L_N$ dB SPL. ISO 226:2023 Formula (1) (clause 4.1, p. 2) gives the SPL of a pure tone at frequency $f$ that reaches loudness level $L_N$:
+
+$$
+L_f = \frac{10}{\alpha_f} \log_{10}\!\left[ \left(4 \cdot 10^{-10}\right)^{0.3 - \alpha_f} \left( 10^{\,0.03 L_N} - 10^{\,0.072} \right) + 10^{\,\alpha_f (T_f + L_U)/10} \right] - L_U
+$$
+
+Formula (2) (clause 4.2) inverts it, returning the loudness level of a tone at SPL $L_f$:
+
+$$
+L_N = \frac{100}{3} \log_{10}\!\left[ \frac{10^{\,\alpha_f (L_f + L_U)/10} - 10^{\,\alpha_f (T_f + L_U)/10}}{\left(4 \cdot 10^{-10}\right)^{0.3 - \alpha_f}} + 10^{\,0.072} \right]
+$$
+
+The three parameters come from Table 1 (p. 4), tabulated at the 29 preferred third-octave frequencies of ISO 266 from 20 Hz to 12.5 kHz:
+
+- $\alpha_f$ — exponent for loudness perception at frequency $f$,
+- $L_U$ — magnitude of the linear transfer function, normalized at 1 kHz ($L_U = 0$ at 1 kHz),
+- $T_f$ — threshold of hearing at $f$, in dB.
+
+The standard specifies **no interpolation** between the tabulated frequencies. Formula (1) is specified for **20 phon to 90 phon** between 20 Hz and 4 kHz, and only up to **80 phon between 5 kHz and 12.5 kHz** — above 80 phon the contour therefore stops at 4 kHz. Values outside these limits from Formula (2) are extrapolations the standard labels as informative only.
+
+See the [Levels guide](https://jmrplens.github.io/phonometry/guides/levels/) for usage.
+
+## Tone prominence: TNR and PR (ECMA-418-1)
+
+Both methods operate on a Hann-windowed, RMS-averaged power spectrum (clauses 11.1 / 12.1) and use the clause 10 critical-band model. The critical bandwidth centred on a tone at $f$ is (Formula 2):
+
+$$
+\Delta f_c = 25.0 + 75.0 \left(1.0 + 1.4 \left(\tfrac{f}{1000}\right)^2\right)^{0.69} \ \text{Hz}
+$$
+
+Band edges are placed **arithmetically** for $f \le 500$ Hz (Formulae 4–5): $f_{1,2} = f \mp \Delta f_c / 2$, and **geometrically** above (Formulae 7–8): $f_1 = -\Delta f_c/2 + \sqrt{\Delta f_c^2 + 4 f^2}/2$, $f_2 = f_1 + \Delta f_c$.
+
+**TNR** (clause 11). The tone band spans the spectral minima on both sides of the peak within 15 % of $\Delta f_c$ (clause 11.2). The tone power subtracts the straight line connecting the band-edge bins (Formula 9): over $N$ tone-band bins, $P_t = \sum_k P_k - (P_{\text{lo}} + P_{\text{hi}})\,N/2$. The masking-noise power is the remaining critical-band power rescaled to the full critical bandwidth (Formula 10): $P_n = (P_{\text{band}} - P_t) \cdot \Delta f_c / \Delta f_{\text{band}}$, and $\mathrm{TNR} = 10\log_{10}(P_t/P_n)$ (Formula 11). The prominence criterion (Formulae 12–13) is
+
+$$
+\mathrm{TNR}_{\text{crit}} = \begin{cases} 8.0 + 8.33 \log_{10}(1000/f_t) \ \text{dB} & f_t < 1\,\text{kHz} \\ 8.0 \ \text{dB} & f_t \ge 1\,\text{kHz} \end{cases}
+$$
+
+**PR** (clause 12) compares the level of the critical band centred on the tone, $L_M$, with the mean power of the two **contiguous** critical bands $L_L$, $L_U$ (edges from the fitted Formulae 21–22 with Tables 2–3): $\mathrm{PR} = 10\log_{10} P_M - 10\log_{10}\left[(P_L + P_U)/2\right]$ (Formula 23). For $f_t \le 171.4$ Hz the lower band is truncated at 20 Hz and its power rescaled to a **100 Hz bandwidth** (Formula 24). The criterion (Formulae 25–26) is 9.0 dB at $f_t \ge 1$ kHz, rising as $9.0 + 10.0\log_{10}(1000/f_t)$ below. Tones are assessed within the 89.1 Hz – 11.2 kHz range of interest (clauses 11.5 / 12.6).
+
+See the [Levels guide](https://jmrplens.github.io/phonometry/guides/levels/) for usage.
+
+## Event and dose metrics
+
+**Sound exposure level** (SEL; LAE with A-weighting, IEC 61672-1:2013) normalizes the energy of a discrete event (aircraft flyover, train pass) to a 1 s reference duration:
+
+$$
+\mathrm{SEL} = L_{eq,T} + 10 \log_{10}\!\left(\frac{T}{T_0}\right), \qquad T_0 = 1\ \text{s}
+$$
+
+**Sound exposure** $E$ (IEC 61252, 3.1) is the time integral of the squared A-weighted sound pressure, expressed in pascal-squared hours:
+
+$$
+E = \int_0^T p_A^2(t)\, dt = \overline{p_A^2} \cdot T \quad [\text{Pa}^2\text{h}]
+$$
+
+When the recording is a representative sample of a longer shift, $E$ scales the measured mean square by the actual exposure duration. The **normalized 8 h level** (IEC 61252, 3.3) converts exposure to the steady level that carries the same energy over a nominal working day:
+
+$$
+L_{EX,8h} = 10 \log_{10}\!\left(\frac{E}{8\ \text{h} \cdot p_0^2}\right), \qquad p_0 = 20\ \mu\text{Pa}
+$$
+
+It is identical to $L_{EP,d}$ of Directive 86/188/EEC and $L_{EX,8h}$ of ISO 1999 (BS EN 61252:1995, 3.3 NOTES 5–6). The anchor of BS EN 61252:1995 (3.3 NOTE 4): an exposure of **3.2 Pa²h corresponds to $L_{EX,8h}$ of exactly 90 dB**.
+
+**LCpeak** (IEC 61672-1:2013, subclause 5.13) is the absolute maximum of the C-weighted sound pressure expressed in dB, $L_{Cpeak} = 20\log_{10}(\max|p_C(t)|/p_0)$ — the quantity behind the 135/137/140 dB(C) occupational action limits. The implementation is verified against the one-cycle and half-cycle reference responses of Table 5.
+
+See the [Levels guide](https://jmrplens.github.io/phonometry/guides/levels/) for usage and the [Calibration guide](https://jmrplens.github.io/phonometry/guides/calibration/) for absolute-scale setup.
+
+## Environmental descriptors (ISO 1996-1)
+
+The **day-evening-night level** $L_{den}$ (ISO 1996-1:2016, 3.6.4) is an energy average over the 24 h day with penalty weightings of **+5 dB for the evening** and **+10 dB for the night**:
+
+$$
+L_{den} = 10 \log_{10}\!\left\{\frac{1}{24}\left[ t_d\, 10^{0.1 L_{day}} + t_e\, 10^{0.1 (L_{evening} + 5)} + t_n\, 10^{0.1 (L_{night} + 10)} \right]\right\}
+$$
+
+with default period durations $(t_d, t_e, t_n) = (12, 4, 8)$ h — countries may define the periods differently (3.6.4 Note 1). The **day-night level** $L_{dn}$ (3.6.5) drops the evening period:
+
+$$
+L_{dn} = 10 \log_{10}\!\left\{\frac{1}{24}\left[ t_d\, 10^{0.1 L_{day}} + t_n\, 10^{0.1 (L_{night} + 10)} \right]\right\}, \qquad (t_d, t_n) = (15, 9)\ \text{h}
+$$
+
+Both are special cases of the **composite whole-day rating level** (6.5, generalizing Formulae 5–6), where each period $i$ contributes its rating level $L_i$ plus an adjustment $K_i$, weighted by its share of the day:
+
+$$
+L_R = 10 \log_{10}\!\left[ \sum_i \frac{h_i}{24}\, 10^{0.1 (L_i + K_i)} \right], \qquad \sum_i h_i = 24\ \text{h}
+$$
+
+The adjustments $K_i$ cover time-of-day penalties (ISO 1996-1 Table A.1: evening 5 dB, night 10 dB) as well as source-character adjustments — e.g. tonal penalties, which the ECMA-418-1 TNR/PR assessments can justify objectively.
+
+See the [Levels guide](https://jmrplens.github.io/phonometry/guides/levels/) for usage.
+
 ---
 
 
@@ -1270,13 +1542,16 @@ IEC 61672-1 tone-burst verification of this implementation.
 
 # Why phonometry
 
-How phonometry's time weighting relates to the **IEC 61672-1:2013** standard
-(Electroacoustics — Sound level meters), and how it differs from other Python
-libraries such as `python-acoustics`. This page summarizes the analysis
-originally published in
-[issue #38](https://github.com/jmrplens/phonometry/issues/38).
+phonometry is a standards-based acoustic measurement toolkit. Its
+differentiator is not the list of features but how they are built: every
+metric is implemented from the governing standard's text, and the standard's
+own reference values and acceptance limits are transcribed into the test
+suite and enforced in CI. This page explains that approach with a concrete
+case study — time weighting under **IEC 61672-1:2013** — and summarizes what
+is conformance-tested today. The time-weighting analysis was originally
+published in [issue #38](https://github.com/jmrplens/phonometry/issues/38).
 
-## Design philosophy
+## Design philosophy: a case study in time weighting
 
 Standard time weighting is defined as a **continuous function of time** via the
 differential equation
@@ -1344,21 +1619,51 @@ how the burst aligns with the block boundaries.
 - If you need **block-averaged Leq per interval**, that is a different, equally
   valid metric — you can compute it with [`leq`](https://jmrplens.github.io/phonometry/guides/levels/) over consecutive
   slices.
-- Both libraries are useful; they just answer different questions. The
+- Both approaches are useful; they just answer different questions. The
   discrepancy reported in issue #38 comes from comparing a continuous envelope
   against a block integrator, not from an implementation error.
 
-## Beyond time weighting
+## Conformance testing across the library
 
-The same standards-first approach applies across the library:
+The tone-burst case above is not an isolated check. For each standard the
+library implements, the reference values and acceptance limits are transcribed
+from the official text into the test suite, so any regression fails CI:
 
-- Filter banks place their −3 dB points on the **ANSI S1.11** band edges for
-  every architecture (including Chebyshev II and Bessel, where scipy's raw
-  parametrization would not).
-- A/C weighting stays within **IEC 61672-1 class 1** tolerances up to 16 kHz at
-  common audio rates via internal oversampling (see
-  [Frequency Weighting](https://jmrplens.github.io/phonometry/guides/weighting/)).
-- The IEC tone-burst targets above are enforced in the test suite, so
-  regressions are caught in CI.
+| Standard | What is verified | Test file |
+| :--- | :--- | :--- |
+| IEC 61672-1:2013 Table 3 | A/C/Z weighting at all 34 nominal frequencies, class 1 limits, at 48 and 96 kHz | `tests/test_iec_weighting_table3.py` |
+| IEC 61672-1:2013 Table 4 | F/S tone-burst responses (1 s to 1 ms) and the LAE column for `sel()` | `tests/test_iec_compliance.py` |
+| IEC 61672-1:2013 Table 5 | `lc_peak()` one-cycle/half-cycle peak responses, class 1 limits | `tests/test_levels.py` |
+| IEC 61260-1:2014 Table 1 | Filter-bank class 1/2 acceptance limits via `verify_filter_class()` | `tests/test_compliance.py` |
+| ISO 7196:1995 Table 2 | G weighting (infrasound) at every nominal response value, 0.25–315 Hz | `tests/test_g_weighting.py` |
+| ISO 226:2023 Annex B | Equal-loudness contours, loudness levels and hearing threshold against the Annex B tables | `tests/test_equal_loudness.py` |
+| ECMA-418-1:2024 | TNR/PR tone prominence: critical bandwidths, proximity spacing and prominence criteria against the worked examples in clauses 10–12 | `tests/test_tonality.py` |
+| ISO 1996-1:2016 | `lden()`, `ldn()` and `composite_rating_level()` against hand-computed formula values | `tests/test_environmental.py` |
+| IEC 60942:2017 Table 2 | Calibrator short-term stability limits (frequency-dependent, class 1) in `calculate_sensitivity()` | `tests/test_calibration_validation.py` |
+
+Beyond IEC 61252-style noise dose (`sound_exposure()`, `lex_8h()`), the same
+standards-first mindset shows up in the numerics: filter banks place their
+−3 dB points on the **ANSI S1.11 / IEC 61260-1** band edges for every
+architecture (including Chebyshev II and Bessel, where scipy's raw
+parametrization would not), and A/C weighting stays within class 1 tolerances
+up to 16 kHz at common audio rates via internal oversampling (see
+[Frequency Weighting](https://jmrplens.github.io/phonometry/guides/weighting/)).
+
+## Where phonometry fits in the Python ecosystem
+
+- **python-acoustics** was archived in February 2024 and is no longer
+  maintained. Its comparison above reflects the last released code.
+- **acoustic-toolbox**, the community successor to python-acoustics, depends
+  on phonometry for its weighted level computations rather than reimplementing
+  them.
+- **MoSQITo** focuses on psychoacoustic sound-quality metrics (loudness,
+  sharpness, roughness). It complements rather than overlaps phonometry:
+  it does not cover sound level metrology (weighting filters, ballistics,
+  Leq/SEL/Lden, calibration) and does not claim conformance testing against
+  the standards' tolerance tables.
+
+If your work needs numbers you can defend against a standard's tolerance
+table — measurement reports, environmental assessments, instrument
+cross-checks — that verification layer is what phonometry is for.
 
 ---

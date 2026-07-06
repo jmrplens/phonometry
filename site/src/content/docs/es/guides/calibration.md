@@ -6,6 +6,26 @@ description: "Calibración SPL física y análisis digital a fondo de escala."
 phonometry puede devolver resultados en **nivel de presión sonora físico
 (dB SPL)** o en **decibelios relativos a fondo de escala digital (dBFS)**.
 
+
+## ¿Por qué calibrar? La teoría
+
+Una grabación digital solo conoce *números*: una senoide a fondo de escala es
+±1,0 tanto si era un susurro como un motor a reacción. Para expresar niveles
+de presión sonora físicos, la cadena micrófono → preamplificador → ADC debe
+caracterizarse con un único número, el **factor de sensibilidad** $S$, que
+convierte unidades digitales en pascales:
+
+$$
+p(t) = S\,x(t) \qquad S = \frac{p_\text{ref}\cdot 10^{L_\text{cal}/20}}{\tilde{x}_\text{ref}}
+$$
+
+donde $L_\text{cal}$ es el nivel del calibrador (típicamente 94 dB, es decir,
+1 Pa), $p_\text{ref} = 20\ \mu\text{Pa}$ y $\tilde{x}_\text{ref}$ es el RMS
+del tono de calibración grabado, en unidades digitales.
+`calculate_sensitivity()` es exactamente esa ecuación. El factor vale mientras
+nada cambie en la cadena — si tocas la ganancia, recalibra.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y calculate_sensitivity produciendo pascales por unidad digital" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es_dark.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y calculate_sensitivity produciendo pascales por unidad digital" style="width:92%">
 ## Calibración física (sonómetro)
 
 ```mermaid
@@ -71,6 +91,27 @@ grabación debe durar al menos 2 s (1 s para que el integrador F se asiente más
 1 s de envolvente estable); con grabaciones más cortas se avisa en lugar de dar
 un veredicto poco fiable. Sin `fs` la comprobación se omite. Sobrescribe el
 límite con `max_fluctuation_db` o desactiva con `validate=False`.
+
+La comprobación caza justo lo que arruina las calibraciones de campo — un acoplador flojo,
+viento, ruido de manipulación:
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_es.png" alt="Nivel con ponderación F de un tono de calibración estable frente a otro con AM del 3 % contra el límite de ±0,07 dB de clase 1 de IEC 60942" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_es_dark.png" alt="Nivel con ponderación F de un tono de calibración estable frente a otro con AM del 3 % contra el límite de ±0,07 dB de clase 1 de IEC 60942" style="width:80%">
+
+### Parámetros de `calculate_sensitivity()`
+
+| Parámetro | Tipo / forma | Unidades | Rango / defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `ref_signal` | array 1D/2D | unidades digitales | no vacío, no silencio | Grabación solo del tono de calibración (recorta el ruido de manipulación) |
+| `target_spl` | float | dB re 20 µPa | defecto `94.0` | Nivel nominal del calibrador (calibradores de 114 dB: pasa `114.0`) |
+| `ref_pressure` | float | Pa | defecto `2e-5` | Presión de referencia p₀; rara vez se cambia |
+| `fs` | int, opcional | Hz | > 0; defecto `None` | Necesario para la validación de estabilidad; omítelo para saltarla |
+| `validate` | bool | — | defecto `True` | Emite `CalibrationWarning` con grabaciones inestables/cortas |
+| `max_fluctuation_db` | float, opcional | dB | defecto `None` → Tabla 2 clase 1 | Sobrescritura explícita del límite de estabilidad |
+| `frequency` | float | Hz | defecto `1000.0` | Frecuencia nominal del calibrador; elige la fila de la Tabla 2 de IEC 60942 |
+
+Devuelve el factor de sensibilidad (float) para pasarlo como
+`calibration_factor=` a `octavefilter`, `leq`, `laeq`, `ln_levels`, `lc_peak`,
+`sel` y las funciones de dosis.
 
 ## Análisis digital (dBFS)
 

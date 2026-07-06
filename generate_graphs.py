@@ -12,6 +12,208 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src"
 from phonometry import OctaveFilterBank
 
 # Constants for professional styling
+# ---------------------------------------------------------------------------
+# Language support: every figure is also generated in Spanish ("_es" suffix).
+# Translation happens at savefig time by walking the figure's Text artists,
+# so the generator functions stay single-language (English) internally.
+_LANG = "en"
+_LANG_SUFFIX = ""
+
+_ES_EXACT = {
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Level [dB]": "Nivel [dB]",
+    "Time [s]": "Tiempo [s]",
+    "Amplitude": "Amplitud",
+    "Amplitude [dB]": "Amplitud [dB]",
+    "Error [dB]": "Error [dB]",
+    "Group delay [ms]": "Retardo de grupo [ms]",
+    "Level re steady state [dB]": "Nivel re estado estacionario [dB]",
+    "Normalized Response": "Respuesta normalizada",
+    "Normalized frequency  f / fm": "Frecuencia normalizada  f / fm",
+    "Relative attenuation \u0394A [dB]": "Atenuaci\u00f3n relativa \u0394A [dB]",
+    "Sound pressure level [dB re 20 \u00b5Pa]": "Nivel de presi\u00f3n sonora [dB re 20 \u00b5Pa]",
+    "1/1 Octave Band Analysis": "An\u00e1lisis en bandas de octava 1/1",
+    "1/3 Octave Band Analysis": "An\u00e1lisis en bandas de octava 1/3",
+    "1/3 Octave Spectrogram (Fast windows, 50% overlap)":
+        "Espectrograma 1/3 de octava (ventanas Fast, 50 % de solape)",
+    "4 kHz Toneburst Response vs IEC 61672-1 Table 4 (FAST)":
+        "Respuesta a r\u00e1fagas de 4 kHz vs Tabla 4 de IEC 61672-1 (FAST)",
+    "A-Weighting": "Ponderaci\u00f3n A",
+    "C-Weighting": "Ponderaci\u00f3n C",
+    "Z-Weighting (Flat)": "Ponderaci\u00f3n Z (plana)",
+    "G-weighting (ISO 7196)": "Ponderaci\u00f3n G (ISO 7196)",
+    "G Frequency Weighting for Infrasound (ISO 7196:1995)":
+        "Ponderaci\u00f3n frecuencial G para infrasonido (ISO 7196:1995)",
+    "Bessel": "Bessel",
+    "Bilinear error": "Error del dise\u00f1o bilineal",
+    "Butterworth": "Butterworth",
+    "Butterworth (Flat)": "Butterworth (plano)",
+    "Butterworth order 6 (1 kHz octave band)":
+        "Butterworth de orden 6 (banda de octava de 1 kHz)",
+    "Causal filtering (group delay)": "Filtrado causal (retardo de grupo)",
+    "Chebyshev I": "Chebyshev I",
+    "Chebyshev II": "Chebyshev II",
+    "Class 1 lower limit @ 12.5 kHz": "L\u00edmite inferior de clase 1 @ 12,5 kHz",
+    "Class 2 minimum attenuation": "Atenuaci\u00f3n m\u00ednima de clase 2",
+    "Continuous (whole signal)": "Continuo (se\u00f1al completa)",
+    "Elliptic": "El\u00edptico",
+    "FAST envelope": "Envolvente FAST",
+    "Fast (125ms)": "Fast (125 ms)",
+    "Fast level $L_p(t)$": "Nivel Fast $L_p(t)$",
+    "Filter Architecture Comparison (Order 6, 1kHz Band)":
+        "Comparativa de arquitecturas de filtro (orden 6, banda de 1 kHz)",
+    "Filter Bank Frequency Response": "Respuesta en frecuencia del banco de filtros",
+    "Forbidden for class 1 (too little attenuation)":
+        "Prohibido para clase 1 (atenuaci\u00f3n insuficiente)",
+    "Forbidden for class 1 (too much attenuation)":
+        "Prohibido para clase 1 (atenuaci\u00f3n excesiva)",
+    "Frequency Weighting Curves (IEC 61672-1)":
+        "Curvas de ponderaci\u00f3n frecuencial (IEC 61672-1)",
+    "Group Delay Comparison (1 kHz Octave Band, Order 6)":
+        "Comparativa de retardo de grupo (banda de 1 kHz, orden 6)",
+    "Hearing threshold $T_f$ (Table 1)": "Umbral de audici\u00f3n $T_f$ (Tabla 1)",
+    "High Pass (LR4)": "Paso alto (LR4)",
+    "IEC 61672-1 analytic curve": "Curva anal\u00edtica IEC 61672-1",
+    "ISO 7196 Table 2 nominals": "Nominales de la Tabla 2 de ISO 7196",
+    "Impulse (35ms/1.5s)": "Impulse (35 ms/1,5 s)",
+    "Independent blocks (state reset)": "Bloques independientes (estado reiniciado)",
+    "Input Burst (Normalized)": "R\u00e1faga de entrada (normalizada)",
+    "Input burst (250 Hz)": "R\u00e1faga de entrada (250 Hz)",
+    "Left Channel: Pink Noise": "Canal izquierdo: ruido rosa",
+    "Linkwitz-Riley Crossover (4th Order @ 1kHz)":
+        "Crossover Linkwitz-Riley (4\u00ba orden @ 1 kHz)",
+    "Low Pass (LR4)": "Paso bajo (LR4)",
+    "Multichannel Analysis (Stereo Input)": "An\u00e1lisis multicanal (entrada est\u00e9reo)",
+    "No state: each block restarts the filter transient":
+        "Sin estado: cada bloque reinicia el transitorio del filtro",
+    "Normal Equal-Loudness-Level Contours (ISO 226:2023)":
+        "L\u00edneas isof\u00f3nicas normales (ISO 226:2023)",
+    "Original Signal (250 Hz + 1000 Hz Sum) @ 48 kHz":
+        "Se\u00f1al original (suma de 250 Hz + 1000 Hz) @ 48 kHz",
+    "Oversampled (high_accuracy=True)": "Sobremuestreado (high_accuracy=True)",
+    "Plain bilinear (high_accuracy=False)": "Bilineal simple (high_accuracy=False)",
+    "Raw PSD": "PSD sin filtrar",
+    "Raw Signal Spectrum (PSD)": "Espectro de la se\u00f1al (PSD)",
+    "Relative Attenuation vs IEC 61260-1:2014 Class Limits":
+        "Atenuaci\u00f3n relativa vs l\u00edmites de clase de IEC 61260-1:2014",
+    "Right Channel: Log Sine Sweep": "Canal derecho: barrido senoidal logar\u00edtmico",
+    "Slow (1000ms)": "Slow (1000 ms)",
+    "Stateful blocks (state carried)": "Bloques con estado (estado conservado)",
+    "Statistical Levels L10 / L50 / L90 (Fast envelope)":
+        "Niveles estad\u00edsticos L10 / L50 / L90 (envolvente Fast)",
+    "Sum (Flat)": "Suma (plana)",
+    "Time Weighting Ballistics (IEC 61672-1)":
+        "Ponderaci\u00f3n temporal F/S/I (IEC 61672-1)",
+    "Zero-Phase Filtering: Group Delay Elimination (250 Hz Band)":
+        "Filtrado de fase cero: eliminaci\u00f3n del retardo de grupo (banda de 250 Hz)",
+    "Zoom at -3 dB (Log Scale)": "Zoom en -3 dB (escala log)",
+    "Zoom: A-weighting is positive (max +1.27 dB @ 2.5 kHz)":
+        "Zoom: la ponderaci\u00f3n A es positiva (m\u00e1x +1,27 dB @ 2,5 kHz)",
+    "block boundary:\nfilter transient restarts":
+        "frontera de bloque:\nse reinicia el transitorio del filtro",
+    "high_accuracy error": "Error con high_accuracy",
+    "stateful=True: block outputs equal the continuous result":
+        "stateful=True: los bloques igualan el resultado continuo",
+    "zero_phase=True (aligned)": "zero_phase=True (alineado)",
+    "0 dB @ 10 Hz": "0 dB @ 10 Hz",
+    "Stable tone (good coupling)": "Tono estable (buen acoplamiento)",
+    "3% AM tone (loose coupling)": "Tono con AM del 3 % (acoplamiento flojo)",
+    "IEC 60942:2017 class 1 limit (deviation from mean)":
+        "L\u00edmite de clase 1 de IEC 60942:2017 (desviaci\u00f3n de la media)",
+    "Calibration Tone Stability Check (IEC 60942:2017, 5.3.3)":
+        "Comprobaci\u00f3n de estabilidad del tono de calibraci\u00f3n (IEC 60942:2017, 5.3.3)",
+    "F-weighted level re mean [dB]": "Nivel con ponderaci\u00f3n F re media [dB]",
+    "Fast level of the event": "Nivel Fast del evento",
+    "Leq over the whole event": "Leq de todo el evento",
+    "SEL: same energy in 1 s": "SEL: la misma energ\u00eda en 1 s",
+    "equal energy": "igual energ\u00eda",
+    "Sound Exposure Level: the event normalized to 1 s":
+        "Nivel de exposici\u00f3n sonora: el evento normalizado a 1 s",
+    "Level [dBFS]": "Nivel [dBFS]",
+    "Hourly LAeq": "LAeq horario",
+    "Lday (+0 dB)": "Ld\u00eda (+0 dB)",
+    "Levening + 5 dB": "Ltarde + 5 dB",
+    "Lnight + 10 dB": "Lnoche + 10 dB",
+    "Day-Evening-Night Level Lden (ISO 1996-1)":
+        "Nivel d\u00eda-tarde-noche Lden (ISO 1996-1)",
+    "Hour of day": "Hora del d\u00eda",
+    "Averaged FFT spectrum (Hann)": "Espectro FFT promediado (Hann)",
+    "Critical band around the tone": "Banda cr\u00edtica en torno al tono",
+    "Tone-to-Noise Ratio (ECMA-418-1, clause 11)":
+        "Relaci\u00f3n tono-ruido (ECMA-418-1, apartado 11)",
+    "Bin power [dB]": "Potencia por bin [dB]",
+}
+
+_ES_PATTERNS = [
+    (r"^Octave Band: (.+) Hz$", r"Banda de octava: \1 Hz"),
+    (r"^(\d+) phon$", r"\1 fonios"),
+    (r"^TNR = (.+) dB\n\(criterion (.+) dB\)$", "TNR = \\1 dB\\n(criterio \\2 dB)"),
+    (r"^Measured 1/(\d+) Octave Bands$", r"Bandas de 1/\1 de octava medidas"),
+    (r"^IEC target (.+) dB$", r"Objetivo IEC \1 dB"),
+    (r"^([\d.]+) ms burst$", "R\u00e1faga de \\1 ms"),
+    (r"^A-Weighting High-Frequency Accuracy @ fs=(\d+) kHz$",
+     "Precisi\u00f3n en alta frecuencia de la ponderaci\u00f3n A @ fs=\\1 kHz"),
+    (r"^Impulse Response \((.+) Hz Band\) - Transient/Stability Comparison$",
+     "Respuesta al impulso (banda de \\1 Hz) \u2014 transitorio y estabilidad"),
+]
+
+
+def set_lang(lang: str) -> None:
+    """Switch the output language ('en' or 'es')."""
+    global _LANG, _LANG_SUFFIX
+    _LANG = lang
+    _LANG_SUFFIX = "" if lang == "en" else f"_{lang}"
+
+
+def _translate_figure(fig: Any) -> None:
+    """Rewrite every Text artist of *fig* into the active language."""
+    import re as _re
+
+    import matplotlib.text as _mtext
+
+    if _LANG == "en":
+        return
+    import re as _re2
+
+    from matplotlib.ticker import FixedFormatter as _FxF
+    from matplotlib.ticker import FuncFormatter as _FF
+    from matplotlib.ticker import ScalarFormatter as _SF
+
+    def _comma(s: str) -> str:
+        return _re2.sub(r"(?<![\d.])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s)
+
+    for ax in fig.get_axes():
+        for axis in (ax.xaxis, ax.yaxis):
+            fmt = axis.get_major_formatter()
+            if isinstance(fmt, _FxF):
+                fmt.seq = [_comma(s) for s in fmt.seq]
+            elif isinstance(fmt, _FF) and not getattr(fmt, "_phonometry_comma", False):
+                wrapped = _FF(lambda v, pos, _f=fmt: _comma(str(_f(v, pos))))
+                wrapped._phonometry_comma = True  # type: ignore[attr-defined]
+                axis.set_major_formatter(wrapped)
+            elif type(fmt) is _SF and axis.get_scale() == "linear":
+                wrapped = _FF(lambda v, pos: _comma(f"{v:g}"))
+                axis.set_major_formatter(wrapped)
+    for artist in fig.findobj(_mtext.Text):
+        s = artist.get_text()
+        if not s:
+            continue
+        if s in _ES_EXACT:
+            artist.set_text(_ES_EXACT[s])
+        else:
+            for pat, repl in _ES_PATTERNS:
+                new, n = _re.subn(pat, repl, s)
+                if n:
+                    artist.set_text(new)
+                    break
+        # Spanish decimal comma, applied uniformly to every text artist
+        # (tick labels included) except code identifiers and mathtext.
+        s = artist.get_text()
+        if s and "$" not in s and "_" not in s and _re.search(r"\d\.\d", s):
+            # Clause/version numbers like 5.3.3 keep their dots.
+            artist.set_text(_re.sub(r"(?<![\d.])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s))
+
+
 LABEL_FREQ_HZ = "Frequency [Hz]"
 LABEL_LEVEL_DB = "Level [dB]"
 COLOR_PRIMARY = "#1f77b4"
@@ -65,9 +267,15 @@ def set_theme(dark: bool) -> None:
 
 
 def themed_path(output_dir: str, filename: str) -> str:
-    """Return the output path for *filename*, adding the theme suffix."""
+    """Return the output path for *filename*, adding language + theme suffixes.
+
+    Also translates the current figure's text artists into the active
+    language: every generator calls ``plt.savefig(themed_path(...))``, so
+    this runs right before each save without patching matplotlib globally.
+    """
+    _translate_figure(plt.gcf())
     stem, ext = os.path.splitext(filename)
-    return os.path.join(output_dir, f"{stem}{_FILENAME_SUFFIX}{ext}")
+    return os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}{ext}")
 
 
 
@@ -247,7 +455,7 @@ def generate_signal_responses(output_dir: str) -> None:
             linewidth=1.5,
             markerfacecolor="white",
             markeredgewidth=1.5,
-            label=f"Measured {frac}/1 Octave Bands"
+            label=f"Measured 1/{frac} Octave Bands"
         )
         apply_axis_styling(ax, title, xlim=(11, 25000))
         ax.legend(loc="lower right")
@@ -1005,6 +1213,170 @@ def generate_og_image(output_path: str = "site/public/og-image.png") -> None:
     plt.close(fig)
 
 
+def generate_calibration_stability(output_dir: str) -> None:
+    """Stable vs unstable calibration tone against the IEC 60942 limit."""
+    print("Generating calibration_stability.png...")
+    from phonometry import time_weighting
+
+    fs = 48000
+    seconds = 6.0
+    tt = np.arange(int(fs * seconds)) / fs
+    stable = 0.5 * np.sin(2 * np.pi * 1000 * tt)
+    # 3 % amplitude modulation at 2 Hz: ~0.14 dB deviation, clearly over
+    unstable = 0.5 * (1 + 0.03 * np.sin(2 * np.pi * 2.0 * tt)) * np.sin(2 * np.pi * 1000 * tt)
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    skip = fs  # discard the F-integrator attack (~8*tau = 1 s)
+    for x, color, label in [
+        (stable, COLOR_PRIMARY, "Stable tone (good coupling)"),
+        (unstable, COLOR_SECONDARY, "3% AM tone (loose coupling)"),
+    ]:
+        env = time_weighting(x, fs, mode="fast")[skip:]
+        level = 10 * np.log10(np.maximum(env, np.finfo(float).eps))
+        rel = level - np.mean(level)
+        ax.plot(tt[skip:], rel, color=color, linewidth=1.4, label=label)
+
+    ax.axhline(0.07, color=COLOR_FG, linestyle="--", linewidth=1.2, alpha=0.7)
+    ax.axhline(-0.07, color=COLOR_FG, linestyle="--", linewidth=1.2, alpha=0.7,
+               label="IEC 60942:2017 class 1 limit (deviation from mean)")
+    ax.fill_between([1, seconds], -0.07, 0.07, color=COLOR_PRIMARY, alpha=0.06)
+    ax.set_title("Calibration Tone Stability Check (IEC 60942:2017, 5.3.3)",
+                 fontweight="bold", pad=12)
+    ax.set_xlim(1, seconds)
+    ax.set_ylim(-0.2, 0.2)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("F-weighted level re mean [dB]")
+    ax.legend(loc="upper right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "calibration_stability.png"))
+    plt.close()
+
+
+def generate_sel_concept(output_dir: str) -> None:
+    """SEL: the whole event compressed into one second of equal energy."""
+    print("Generating sel_concept.png...")
+    from phonometry import leq, sel, time_weighting
+
+    fs = 48000
+    seconds = 8.0
+    tt = np.arange(int(fs * seconds)) / fs
+    rng = np.random.default_rng(11)
+    # A vehicle pass-by: noise with a gaussian energy envelope
+    envelope = np.exp(-0.5 * ((tt - 4.0) / 1.1) ** 2)
+    x = envelope * rng.standard_normal(tt.size) * 0.3
+
+    env = time_weighting(x, fs, mode="fast")
+    level = 10 * np.log10(np.maximum(env, 1e-12))
+    l_sel = float(sel(x, fs, dbfs=True))
+    l_eq = float(leq(x, fs, dbfs=True))
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(tt, level, color=COLOR_PRIMARY, linewidth=1.2,
+            label="Fast level of the event")
+    ax.hlines(l_eq, 0, seconds, color=COLOR_TERTIARY, linestyle="--",
+              linewidth=1.6, label="Leq over the whole event")
+    # SEL: same energy squeezed into 1 s (drawn as a 1 s block)
+    ax.fill_between([3.5, 4.5], -55, l_sel, color=COLOR_SECONDARY, alpha=0.25)
+    ax.hlines(l_sel, 3.5, 4.5, color=COLOR_SECONDARY, linewidth=2.2,
+              label="SEL: same energy in 1 s")
+    ax.annotate("equal energy", xy=(4.5, l_sel - 3), xytext=(5.6, l_sel - 1),
+                fontsize=10, arrowprops={"arrowstyle": "->", "lw": 0.9})
+    ax.set_title("Sound Exposure Level: the event normalized to 1 s",
+                 fontweight="bold", pad=12)
+    ax.set_xlim(0, seconds)
+    ax.set_ylim(-55, l_sel + 6)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Level [dBFS]")
+    ax.legend(loc="lower left", fontsize=9)
+    plt.savefig(themed_path(output_dir, "sel_concept.png"))
+    plt.close()
+
+
+def generate_lden_profile(output_dir: str) -> None:
+    """A 24 h urban level profile with the Lden period weightings."""
+    print("Generating lden_profile.png...")
+    from phonometry import lden
+
+    hours = np.arange(24)
+    # Typical urban road profile (synthetic hourly LAeq, dB)
+    laeq_h = np.array([48, 46, 45, 45, 46, 50, 56, 64, 66, 65, 63, 63,
+                       64, 63, 63, 64, 65, 66, 65, 64, 63, 62, 61, 50],
+                      dtype=float)
+
+    def _period_leq(idx: "np.ndarray") -> float:
+        return float(10 * np.log10(np.mean(10 ** (0.1 * laeq_h[idx]))))
+
+    ld = _period_leq(np.arange(7, 19))    # day 07-19
+    le = _period_leq(np.arange(19, 23))   # evening 19-23
+    ln_ = _period_leq(np.r_[np.arange(23, 24), np.arange(0, 7)])  # night 23-07
+    l_den = lden(ld, le, ln_)
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    ax.axvspan(7, 19, color=COLOR_TERTIARY, alpha=0.10)
+    ax.axvspan(19, 23, color="#e8a838", alpha=0.15)
+    ax.axvspan(23, 24, color=COLOR_PRIMARY, alpha=0.12)
+    ax.axvspan(0, 7, color=COLOR_PRIMARY, alpha=0.12)
+    ax.step(np.r_[hours, 24], np.r_[laeq_h, laeq_h[-1]], where="post",
+            color=COLOR_FG, linewidth=1.6, label="Hourly LAeq")
+    ax.hlines(ld, 7, 19, color=COLOR_TERTIARY, linestyle="--", linewidth=2,
+              label="Lday (+0 dB)")
+    ax.hlines(le + 5, 19, 23, color="#e8a838", linestyle="--", linewidth=2,
+              label="Levening + 5 dB")
+    ax.hlines(ln_ + 10, 23, 24, color=COLOR_PRIMARY, linestyle="--", linewidth=2)
+    ax.hlines(ln_ + 10, 0, 7, color=COLOR_PRIMARY, linestyle="--", linewidth=2,
+              label="Lnight + 10 dB")
+    ax.hlines(l_den, 0, 24, color=COLOR_SECONDARY, linewidth=2.4,
+              label=f"Lden = {l_den:.1f} dB")
+    ax.set_title("Day-Evening-Night Level Lden (ISO 1996-1)",
+                 fontweight="bold", pad=12)
+    ax.set_xlim(0, 24)
+    ax.set_ylim(42, 80)
+    ax.set_xticks([0, 4, 7, 12, 16, 19, 23])
+    ax.set_xlabel("Hour of day")
+    ax.set_ylabel("Level [dB]")
+    ax.legend(loc="upper left", fontsize=9, ncol=2)
+    plt.savefig(themed_path(output_dir, "lden_profile.png"))
+    plt.close()
+
+
+def generate_tonality_spectrum(output_dir: str) -> None:
+    """Annotated spectrum for the tone-to-noise ratio method."""
+    print("Generating tonality_spectrum.png...")
+    from phonometry import tone_to_noise_ratio
+    from phonometry.tonality import _averaged_spectrum, _critical_band
+
+    fs = 48000
+    rng = np.random.default_rng(21)
+    tt = np.arange(fs * 30) / fs
+    x = (np.sqrt(2) * 0.1 * np.sin(2 * np.pi * 1000 * tt)
+         + 0.05 * rng.standard_normal(tt.size))
+    result = tone_to_noise_ratio(x, fs)
+    freqs, power, _ = _averaged_spectrum(x - np.mean(x), fs, 1.0)
+    f1, f2, _ = _critical_band(result.frequency)
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    sel_band = (freqs > 700) & (freqs < 1400)
+    db = 10 * np.log10(np.maximum(power, 1e-18))
+    ax.plot(freqs[sel_band], db[sel_band], color=COLOR_PRIMARY, linewidth=1.0,
+            label="Averaged FFT spectrum (Hann)")
+    ax.axvspan(f1, f2, color=COLOR_TERTIARY, alpha=0.15,
+               label="Critical band around the tone")
+    ax.axvline(result.frequency, color=COLOR_SECONDARY, linewidth=1.4,
+               linestyle="--")
+    ax.annotate(
+        f"TNR = {result.ratio_db:.1f} dB\n(criterion {result.criterion_db:.1f} dB)",
+        xy=(result.frequency, db.max() - 2), xytext=(1120, db.max() - 8),
+        fontsize=11, arrowprops={"arrowstyle": "->", "lw": 1.0},
+    )
+    ax.set_title("Tone-to-Noise Ratio (ECMA-418-1, clause 11)",
+                 fontweight="bold", pad=12)
+    ax.set_xlim(700, 1400)
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Bin power [dB]")
+    ax.legend(loc="upper right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "tonality_spectrum.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -1030,17 +1402,24 @@ def generate_all(img_dir: str) -> None:
     generate_tone_burst_iec(img_dir)
     generate_block_processing_continuity(img_dir)
     generate_class_mask_overlay(img_dir)
+    generate_calibration_stability(img_dir)
+    generate_sel_concept(img_dir)
+    generate_lden_profile(img_dir)
+    generate_tonality_spectrum(img_dir)
 
 
 if __name__ == "__main__":
     img_dir = ".github/images"
     os.makedirs(img_dir, exist_ok=True)
 
-    # Every figure is produced twice: light theme (plain name) and dark
-    # theme ("_dark" suffix) so the docs site can follow the user's mode.
-    for dark in (False, True):
-        set_theme(dark)
-        print(f"--- Generating {'dark' if dark else 'light'} theme figures ---")
-        generate_all(img_dir)
+    # Every figure is produced four times: light/dark theme x English/Spanish
+    # ("_dark" / "_es" / "_es_dark" suffixes) so both site languages can
+    # follow the user's mode.
+    for lang in ("en", "es"):
+        set_lang(lang)
+        for dark in (False, True):
+            set_theme(dark)
+            print(f"--- Generating {lang} {'dark' if dark else 'light'} theme figures ---")
+            generate_all(img_dir)
 
     print("Graphics generated successfully.")

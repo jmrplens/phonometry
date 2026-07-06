@@ -5,6 +5,27 @@
 phonometry can return results in physical **Sound Pressure Level (dB SPL)** or
 digital **decibels relative to Full Scale (dBFS)**.
 
+## Why calibrate? The theory
+
+A digital recording only knows *numbers*: a full-scale sine wave is ±1.0
+regardless of whether it was a whisper or a jet engine. To report physical
+sound pressure levels the chain microphone → preamplifier → ADC must be
+characterized by a single number, the **sensitivity factor** S, that converts
+digital units into pascals:
+
+$$
+p(t) = S \, x(t) \qquad
+S = \frac{p_\text{ref} \cdot 10^{L_\text{cal}/20}}{\tilde{x}_\text{ref}}
+$$
+
+where $L_\text{cal}$ is the calibrator's level (typically 94 dB, i.e. 1 Pa),
+$p_\text{ref} = 20\ \mu\text{Pa}$ and $\tilde{x}_\text{ref}$ is the RMS of
+the recorded calibration tone in digital units. `calculate_sensitivity()` is
+exactly that equation. The factor is valid as long as nothing in the chain
+changes — touch the gain knob and you must recalibrate.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup.svg" alt="Calibration chain: sound calibrator coupled on the microphone, preamplifier, ADC and calculate_sensitivity producing pascals per digital unit" width="92%"></picture>
+
 ## Physical Calibration (Sound Level Meter)
 
 ```mermaid
@@ -69,6 +90,27 @@ be at least 2 s long (1 s for the F-integrator to settle plus 1 s of settled
 envelope); shorter recordings get a warning instead of an unreliable verdict.
 Without `fs` the check is skipped. Override the limit with
 `max_fluctuation_db` or disable with `validate=False`.
+
+The check catches exactly what ruins field calibrations — a loose coupler,
+wind, handling noise:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" width="80%"></picture>
+
+### `calculate_sensitivity()` parameters
+
+| Parameter | Type / shape | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `ref_signal` | 1D/2D array | digital units | non-empty, non-silent | Recording of the calibration tone only (trim handling noise) |
+| `target_spl` | float | dB re 20 µPa | default `94.0` | The calibrator's nominal level (114 dB calibrators: pass `114.0`) |
+| `ref_pressure` | float | Pa | default `2e-5` | Reference pressure p₀; rarely changed |
+| `fs` | int, optional | Hz | > 0; default `None` | Required for the stability validation; omit to skip it |
+| `validate` | bool | — | default `True` | Emit `CalibrationWarning` on unstable/short recordings |
+| `max_fluctuation_db` | float, optional | dB | default `None` → Table 2 class 1 | Explicit override of the stability limit |
+| `frequency` | float | Hz | default `1000.0` | Calibrator's nominal frequency; selects the IEC 60942 Table 2 row |
+
+Returns the sensitivity factor (float) to pass as `calibration_factor=` to
+`octavefilter`, `leq`, `laeq`, `ln_levels`, `lc_peak`, `sel` and the dose
+functions.
 
 ## Digital Analysis (dBFS)
 

@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `weighting_filter(..., curve="G")` — G frequency weighting for infrasound
+  (ISO 7196:1995), verified against every Table 2 nominal response value.
+- `equal_loudness_contour()`, `loudness_level()`, `hearing_threshold()` —
+  ISO 226:2023 normal equal-loudness-level contours (Formulae 1-2, Table 1),
+  verified against the Annex B tables.
+- `tone_to_noise_ratio()` and `prominence_ratio()` — prominent discrete tone
+  assessment per ECMA-418-1:2024 (clauses 10-12), including proximate-tone
+  combination and the low-frequency truncated band.
+- `lden()`, `ldn()`, `composite_rating_level()` — environmental noise
+  descriptors per ISO 1996-1:2016 (3.6.4/3.6.5 and clause 6.5).
+
+### Changed
+
+- Calibrator stability validation updated from IEC 60942:2003 to
+  IEC 60942:2017 (Ed. 4): |max − mean| / |min − mean| criterion and the
+  frequency-dependent Table 2 class 1 limits (0.07 dB in 160 Hz - 1.25 kHz);
+  `calculate_sensitivity()` gains a `frequency` parameter.
+
 ## [3.0.0] - 2026-07-06
 
 ### ⚠️ Breaking changes

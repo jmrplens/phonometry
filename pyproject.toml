@@ -47,7 +47,10 @@ pyoctaveband = ["py.typed"]
 version = {attr = "pyoctaveband._version.__version__"}
 
 [tool.mypy]
-python_version = "3.11"
+# 3.12: numpy >= 2.5 ships PEP 695 `type` statements in its stubs, which mypy
+# rejects under a 3.11 target. Runtime support stays at >= 3.11 (3.11 users
+# resolve numpy 2.4.x, which still supports it).
+python_version = "3.12"
 strict = true
 ignore_missing_imports = true
 

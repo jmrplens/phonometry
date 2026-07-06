@@ -19,8 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a `DeprecationWarning`, so `pip install -U PyOctaveBand` keeps existing code
   working. The last state under the old name is preserved in the locked
   [`pyoctaveband-v2`](https://github.com/jmrplens/phonometry/tree/pyoctaveband-v2) branch.
-- **Python >= 3.13 required** (was >= 3.11). CI now tests 3.13, 3.14 and the
-  3.15 prerelease.
+- **Python >= 3.13 required** (was >= 3.11). CI now tests 3.13 and 3.14
+  (3.15 will be added once it reaches a stable release).
 
 ### Added
 

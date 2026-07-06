@@ -32,7 +32,10 @@ jobs:
 
       - name: Install specific phonometry version
         if: ${{ inputs.version != '' }}
-        run: pip install phonometry==${{ inputs.version }}
+        env:
+          VERSION: ${{ inputs.version }}
+        shell: bash
+        run: pip install "phonometry==${VERSION}"
 
       - name: Verify Import
         run: python -c "import phonometry; print('Successfully imported phonometry version:', phonometry.__version__)"

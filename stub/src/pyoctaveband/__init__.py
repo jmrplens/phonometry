@@ -10,10 +10,12 @@ import warnings
 from phonometry import *  # noqa: F403
 from phonometry import __all__, __version__  # noqa: F401
 
+# FutureWarning (not DeprecationWarning): visible by default, so users of
+# the old name actually see the migration notice.
 warnings.warn(
     "PyOctaveBand has been renamed to 'phonometry'. The API is identical: "
     "replace 'import pyoctaveband' with 'import phonometry'. "
     "See https://jmrplens.github.io/phonometry/",
-    DeprecationWarning,
+    FutureWarning,
     stacklevel=2,
 )

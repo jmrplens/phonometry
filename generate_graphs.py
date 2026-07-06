@@ -12,6 +12,169 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src"
 from phonometry import OctaveFilterBank
 
 # Constants for professional styling
+# ---------------------------------------------------------------------------
+# Language support: every figure is also generated in Spanish ("_es" suffix).
+# Translation happens at savefig time by walking the figure's Text artists,
+# so the generator functions stay single-language (English) internally.
+_LANG = "en"
+_LANG_SUFFIX = ""
+
+_ES_EXACT = {
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "Level [dB]": "Nivel [dB]",
+    "Time [s]": "Tiempo [s]",
+    "Amplitude": "Amplitud",
+    "Amplitude [dB]": "Amplitud [dB]",
+    "Error [dB]": "Error [dB]",
+    "Group delay [ms]": "Retardo de grupo [ms]",
+    "Level re steady state [dB]": "Nivel re estado estacionario [dB]",
+    "Normalized Response": "Respuesta normalizada",
+    "Normalized frequency  f / fm": "Frecuencia normalizada  f / fm",
+    "Relative attenuation \u0394A [dB]": "Atenuaci\u00f3n relativa \u0394A [dB]",
+    "Sound pressure level [dB re 20 \u00b5Pa]": "Nivel de presi\u00f3n sonora [dB re 20 \u00b5Pa]",
+    "1/1 Octave Band Analysis": "An\u00e1lisis en bandas de octava 1/1",
+    "1/3 Octave Band Analysis": "An\u00e1lisis en bandas de octava 1/3",
+    "1/3 Octave Spectrogram (Fast windows, 50% overlap)":
+        "Espectrograma 1/3 de octava (ventanas Fast, 50 % de solape)",
+    "4 kHz Toneburst Response vs IEC 61672-1 Table 4 (FAST)":
+        "Respuesta a r\u00e1fagas de 4 kHz vs Tabla 4 de IEC 61672-1 (FAST)",
+    "A-Weighting": "Ponderaci\u00f3n A",
+    "C-Weighting": "Ponderaci\u00f3n C",
+    "Z-Weighting (Flat)": "Ponderaci\u00f3n Z (plana)",
+    "G-weighting (ISO 7196)": "Ponderaci\u00f3n G (ISO 7196)",
+    "G Frequency Weighting for Infrasound (ISO 7196:1995)":
+        "Ponderaci\u00f3n frecuencial G para infrasonido (ISO 7196:1995)",
+    "Bessel": "Bessel",
+    "Bilinear error": "Error del dise\u00f1o bilineal",
+    "Butterworth": "Butterworth",
+    "Butterworth (Flat)": "Butterworth (plano)",
+    "Butterworth order 6 (1 kHz octave band)":
+        "Butterworth de orden 6 (banda de octava de 1 kHz)",
+    "Causal filtering (group delay)": "Filtrado causal (retardo de grupo)",
+    "Chebyshev I": "Chebyshev I",
+    "Chebyshev II": "Chebyshev II",
+    "Class 1 lower limit @ 12.5 kHz": "L\u00edmite inferior de clase 1 @ 12,5 kHz",
+    "Class 2 minimum attenuation": "Atenuaci\u00f3n m\u00ednima de clase 2",
+    "Continuous (whole signal)": "Continuo (se\u00f1al completa)",
+    "Elliptic": "El\u00edptico",
+    "FAST envelope": "Envolvente FAST",
+    "Fast (125ms)": "Fast (125 ms)",
+    "Fast level $L_p(t)$": "Nivel Fast $L_p(t)$",
+    "Filter Architecture Comparison (Order 6, 1kHz Band)":
+        "Comparativa de arquitecturas de filtro (orden 6, banda de 1 kHz)",
+    "Filter Bank Frequency Response": "Respuesta en frecuencia del banco de filtros",
+    "Forbidden for class 1 (too little attenuation)":
+        "Prohibido para clase 1 (atenuaci\u00f3n insuficiente)",
+    "Forbidden for class 1 (too much attenuation)":
+        "Prohibido para clase 1 (atenuaci\u00f3n excesiva)",
+    "Frequency Weighting Curves (IEC 61672-1)":
+        "Curvas de ponderaci\u00f3n frecuencial (IEC 61672-1)",
+    "Group Delay Comparison (1 kHz Octave Band, Order 6)":
+        "Comparativa de retardo de grupo (banda de 1 kHz, orden 6)",
+    "Hearing threshold $T_f$ (Table 1)": "Umbral de audici\u00f3n $T_f$ (Tabla 1)",
+    "High Pass (LR4)": "Paso alto (LR4)",
+    "IEC 61672-1 analytic curve": "Curva anal\u00edtica IEC 61672-1",
+    "ISO 7196 Table 2 nominals": "Nominales de la Tabla 2 de ISO 7196",
+    "Impulse (35ms/1.5s)": "Impulse (35 ms/1,5 s)",
+    "Independent blocks (state reset)": "Bloques independientes (estado reiniciado)",
+    "Input Burst (Normalized)": "R\u00e1faga de entrada (normalizada)",
+    "Input burst (250 Hz)": "R\u00e1faga de entrada (250 Hz)",
+    "Left Channel: Pink Noise": "Canal izquierdo: ruido rosa",
+    "Linkwitz-Riley Crossover (4th Order @ 1kHz)":
+        "Crossover Linkwitz-Riley (4\u00ba orden @ 1 kHz)",
+    "Low Pass (LR4)": "Paso bajo (LR4)",
+    "Multichannel Analysis (Stereo Input)": "An\u00e1lisis multicanal (entrada est\u00e9reo)",
+    "No state: each block restarts the filter transient":
+        "Sin estado: cada bloque reinicia el transitorio del filtro",
+    "Normal Equal-Loudness-Level Contours (ISO 226:2023)":
+        "L\u00edneas isof\u00f3nicas normales (ISO 226:2023)",
+    "Original Signal (250 Hz + 1000 Hz Sum) @ 48 kHz":
+        "Se\u00f1al original (suma de 250 Hz + 1000 Hz) @ 48 kHz",
+    "Oversampled (high_accuracy=True)": "Sobremuestreado (high_accuracy=True)",
+    "Plain bilinear (high_accuracy=False)": "Bilineal simple (high_accuracy=False)",
+    "Raw PSD": "PSD sin filtrar",
+    "Raw Signal Spectrum (PSD)": "Espectro de la se\u00f1al (PSD)",
+    "Relative Attenuation vs IEC 61260-1:2014 Class Limits":
+        "Atenuaci\u00f3n relativa vs l\u00edmites de clase de IEC 61260-1:2014",
+    "Right Channel: Log Sine Sweep": "Canal derecho: barrido senoidal logar\u00edtmico",
+    "Slow (1000ms)": "Slow (1000 ms)",
+    "Stateful blocks (state carried)": "Bloques con estado (estado conservado)",
+    "Statistical Levels L10 / L50 / L90 (Fast envelope)":
+        "Niveles estad\u00edsticos L10 / L50 / L90 (envolvente Fast)",
+    "Sum (Flat)": "Suma (plana)",
+    "Time Weighting Ballistics (IEC 61672-1)":
+        "Ponderaci\u00f3n temporal F/S/I (IEC 61672-1)",
+    "Zero-Phase Filtering: Group Delay Elimination (250 Hz Band)":
+        "Filtrado de fase cero: eliminaci\u00f3n del retardo de grupo (banda de 250 Hz)",
+    "Zoom at -3 dB (Log Scale)": "Zoom en -3 dB (escala log)",
+    "Zoom: A-weighting is positive (max +1.27 dB @ 2.5 kHz)":
+        "Zoom: la ponderaci\u00f3n A es positiva (m\u00e1x +1,27 dB @ 2,5 kHz)",
+    "block boundary:\nfilter transient restarts":
+        "frontera de bloque:\nse reinicia el transitorio del filtro",
+    "high_accuracy error": "Error con high_accuracy",
+    "stateful=True: block outputs equal the continuous result":
+        "stateful=True: los bloques igualan el resultado continuo",
+    "zero_phase=True (aligned)": "zero_phase=True (alineado)",
+    "0 dB @ 10 Hz": "0 dB @ 10 Hz",
+}
+
+_ES_PATTERNS = [
+    (r"^Octave Band: (.+) Hz$", r"Banda de octava: \1 Hz"),
+    (r"^(\d+) phon$", r"\1 fonios"),
+    (r"^Measured 1/(\d+) Octave Bands$", r"Bandas de 1/\1 de octava medidas"),
+    (r"^IEC target (.+) dB$", r"Objetivo IEC \1 dB"),
+    (r"^([\d.]+) ms burst$", "R\u00e1faga de \\1 ms"),
+    (r"^A-Weighting High-Frequency Accuracy @ fs=(\d+) kHz$",
+     "Precisi\u00f3n en alta frecuencia de la ponderaci\u00f3n A @ fs=\\1 kHz"),
+    (r"^Impulse Response \((.+) Hz Band\) - Transient/Stability Comparison$",
+     "Respuesta al impulso (banda de \\1 Hz) \u2014 transitorio y estabilidad"),
+]
+
+
+def set_lang(lang: str) -> None:
+    """Switch the output language ('en' or 'es')."""
+    global _LANG, _LANG_SUFFIX
+    _LANG = lang
+    _LANG_SUFFIX = "" if lang == "en" else f"_{lang}"
+
+
+def _translate_figure(fig: Any) -> None:
+    """Rewrite every Text artist of *fig* into the active language."""
+    import re as _re
+
+    import matplotlib.text as _mtext
+
+    if _LANG == "en":
+        return
+    for artist in fig.findobj(_mtext.Text):
+        s = artist.get_text()
+        if not s:
+            continue
+        if s in _ES_EXACT:
+            artist.set_text(_ES_EXACT[s])
+        else:
+            for pat, repl in _ES_PATTERNS:
+                new, n = _re.subn(pat, repl, s)
+                if n:
+                    artist.set_text(new)
+                    break
+        # Spanish decimal comma, applied uniformly to every text artist
+        # (tick labels included) except code identifiers and mathtext.
+        s = artist.get_text()
+        if s and "$" not in s and "_" not in s and _re.search(r"\d\.\d", s):
+            artist.set_text(_re.sub(r"(\d)\.(\d)", r"\1,\2", s))
+
+
+_plt_savefig = plt.savefig
+
+
+def _savefig_translated(*args: Any, **kwargs: Any) -> None:
+    _translate_figure(plt.gcf())
+    _plt_savefig(*args, **kwargs)
+
+
+plt.savefig = _savefig_translated  # type: ignore[assignment]
+
 LABEL_FREQ_HZ = "Frequency [Hz]"
 LABEL_LEVEL_DB = "Level [dB]"
 COLOR_PRIMARY = "#1f77b4"
@@ -65,9 +228,9 @@ def set_theme(dark: bool) -> None:
 
 
 def themed_path(output_dir: str, filename: str) -> str:
-    """Return the output path for *filename*, adding the theme suffix."""
+    """Return the output path for *filename*, adding language + theme suffixes."""
     stem, ext = os.path.splitext(filename)
-    return os.path.join(output_dir, f"{stem}{_FILENAME_SUFFIX}{ext}")
+    return os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}{ext}")
 
 
 
@@ -247,7 +410,7 @@ def generate_signal_responses(output_dir: str) -> None:
             linewidth=1.5,
             markerfacecolor="white",
             markeredgewidth=1.5,
-            label=f"Measured {frac}/1 Octave Bands"
+            label=f"Measured 1/{frac} Octave Bands"
         )
         apply_axis_styling(ax, title, xlim=(11, 25000))
         ax.legend(loc="lower right")
@@ -1036,11 +1199,14 @@ if __name__ == "__main__":
     img_dir = ".github/images"
     os.makedirs(img_dir, exist_ok=True)
 
-    # Every figure is produced twice: light theme (plain name) and dark
-    # theme ("_dark" suffix) so the docs site can follow the user's mode.
-    for dark in (False, True):
-        set_theme(dark)
-        print(f"--- Generating {'dark' if dark else 'light'} theme figures ---")
-        generate_all(img_dir)
+    # Every figure is produced four times: light/dark theme x English/Spanish
+    # ("_dark" / "_es" / "_es_dark" suffixes) so both site languages can
+    # follow the user's mode.
+    for lang in ("en", "es"):
+        set_lang(lang)
+        for dark in (False, True):
+            set_theme(dark)
+            print(f"--- Generating {lang} {'dark' if dark else 'light'} theme figures ---")
+            generate_all(img_dir)
 
     print("Graphics generated successfully.")

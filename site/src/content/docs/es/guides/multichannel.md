@@ -10,7 +10,7 @@ micrófonos…) mediante **operaciones totalmente vectorizadas**. Los arrays de
 entrada con forma `(N_channels, N_samples)` se procesan en paralelo, con
 ganancias de rendimiento significativas frente a bucles iterativos.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel.png" alt="Análisis estéreo: ruido rosa y barrido logarítmico resueltos por canal en tercios de octava" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel_dark.png" alt="Análisis estéreo: ruido rosa y barrido logarítmico resueltos por canal en tercios de octava" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel_es.png" alt="Análisis estéreo: ruido rosa y barrido logarítmico resueltos por canal en tercios de octava" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel_es_dark.png" alt="Análisis estéreo: ruido rosa y barrido logarítmico resueltos por canal en tercios de octava" style="width:80%">
 
 *Análisis simultáneo de una señal estéreo: canal izquierdo (ruido rosa) vs canal
 derecho (barrido senoidal logarítmico).*

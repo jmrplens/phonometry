@@ -74,7 +74,7 @@ _ES: dict[str, str] = {
     "Weighting": "Ponderación",
     "Octave": "Octavas",
     "bands 1/b": "bandas 1/b",
-    "Ballistics": "Balística",
+    "Ballistics": "Temporal",
     "Metrics": "Métricas",
 }
 

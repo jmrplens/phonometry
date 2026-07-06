@@ -73,7 +73,7 @@ página de [Teoría](/phonometry/es/reference/theory/).
 | `x` | array 1D o 2D | cualquiera | no vacío | 2D es `[channels, samples]` |
 | `fs` | int | Hz | > 0 | |
 | `curve` | str | — | `'A'` (por defecto), `'C'`, `'G'`, `'Z'` | `'G'` según ISO 7196 (infrasonido); `'Z'` es un bypass |
-| `high_accuracy` | bool | — | por defecto `True` (función) / `not stateful` (clase) | El sobremuestreo interno ≥ 96 kHz mantiene A/C en clase 1 hasta 16 kHz; no aplicable a G |
+| `high_accuracy` | bool | — | por defecto `True` (función); en la clase, `None` se resuelve a `not stateful` | Sobremuestreo interno (8×, ≥ 96 kHz a frecuencias de audio habituales) que mantiene A/C en clase 1 hasta 16 kHz; con G se ignora en silencio (su rango de 0,25–315 Hz ya es exacto con el diseño simple) |
 | `stateful` | bool (solo clase) | — | por defecto `False` | Conserva el estado del filtro entre bloques (streaming) |
 | `steady_ic` | bool (solo clase) | — | por defecto `False` | Condiciones iniciales estacionarias (sin transitorio de arranque) |
 

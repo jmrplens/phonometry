@@ -86,7 +86,7 @@ impulsive noise, so regulations always name the time weighting.
 | `n` | tuple of ints | % | default `(10, 50, 90)` | Any exceedance percentages, e.g. `(1, 5, 95)` |
 | `mode` | str | — | `'fast'` (default), `'slow'`, `'impulse'` | IEC 61672-1 ballistics of the envelope |
 | `weighting` | str or None | — | `'A'`, `'C'`, `'G'`, `'Z'`, `None` (default) | Frequency weighting before the envelope |
-| `calibration_factor` / `dbfs` | | | as `leq` | |
+| `calibration_factor` / `dbfs` | float / bool | — | as `leq` | Same semantics as in `leq()` |
 
 ## Peak, event and occupational metrics
 
@@ -249,7 +249,7 @@ r = composite_rating_level([(63.2, 12, 0.0),    # day
 | :--- | :--- | :--- |
 | `lden(lday, levening, lnight, hours=(12, 4, 8))` | period LAeq values [dB]; `hours` must sum to 24 | +5 dB evening, +10 dB night (3.6.4) |
 | `ldn(lday, lnight, hours=(15, 9))` | | +10 dB night (3.6.5) |
-| `composite_rating_level(periods)` | iterable of `(level_db, hours, adjustment_db)` | General Formulae (5)-(6); adjustments per Table A.1 |
+| `composite_rating_level(periods)` | iterable of `(level_db, hours, adjustment_db)`; hours positive, finite and summing to 24 | General Formulae (5)-(6); adjustments per Table A.1 |
 
 Combine with `laeq()` per time period to go from recordings to Lden, and with
 `tone_to_noise_ratio()` / `prominence_ratio()` to justify tonal adjustments.
@@ -284,10 +284,10 @@ levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D or 2D array | digital units | non-empty | 2D returns `(channels, bands, frames)` |
 | `window_time` | float | s | > 0; default `0.125` | Frame length (0.125 s mirrors Fast) |
-| `overlap` | float | — | 0 to 1 (exclusive); default `0.5` | Fraction of window overlap |
+| `overlap` | float | — | 0 ≤ overlap < 1; default `0.5` | Fraction of window overlap (0 = none) |
 | `mode` | str | — | `'rms'` (default) or `'peak'` | Per-window detector |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline only) |
-| `calibration_factor` / `dbfs` | | | as `leq` | |
+| `calibration_factor` / `dbfs` | — | — | constructor-only | Set on `OctaveFilterBank(...)`, not per call |
 
 ```python
 import matplotlib.pyplot as plt

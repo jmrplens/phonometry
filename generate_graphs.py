@@ -214,16 +214,6 @@ def _translate_figure(fig: Any) -> None:
             artist.set_text(_re.sub(r"(?<![\d.])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s))
 
 
-_plt_savefig = plt.savefig
-
-
-def _savefig_translated(*args: Any, **kwargs: Any) -> None:
-    _translate_figure(plt.gcf())
-    _plt_savefig(*args, **kwargs)
-
-
-plt.savefig = _savefig_translated  # type: ignore[assignment]
-
 LABEL_FREQ_HZ = "Frequency [Hz]"
 LABEL_LEVEL_DB = "Level [dB]"
 COLOR_PRIMARY = "#1f77b4"
@@ -277,7 +267,13 @@ def set_theme(dark: bool) -> None:
 
 
 def themed_path(output_dir: str, filename: str) -> str:
-    """Return the output path for *filename*, adding language + theme suffixes."""
+    """Return the output path for *filename*, adding language + theme suffixes.
+
+    Also translates the current figure's text artists into the active
+    language: every generator calls ``plt.savefig(themed_path(...))``, so
+    this runs right before each save without patching matplotlib globally.
+    """
+    _translate_figure(plt.gcf())
     stem, ext = os.path.splitext(filename)
     return os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}{ext}")
 

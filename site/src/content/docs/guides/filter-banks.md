@@ -27,7 +27,7 @@ band-edge mapping rather than trusting SciPy's default parametrization.
 
 ### Multirate decimation
 
-A 25 Hz one-third-octave band at 48 kHz has a relative bandwidth of 0.012 %
+A 25 Hz one-third-octave band at 48 kHz spans about 5.8 Hz — 0.024 %
 of Nyquist — coefficients so stiff they go numerically unstable. The bank
 avoids that by filtering low bands at a decimated rate:
 
@@ -50,7 +50,7 @@ avoids that by filtering low bands at a decimated rate:
 | `stateful` / `steady_ic` (class) | bool | — | default `False` | Streaming state; see [Block Processing](/phonometry/guides/block-processing/) |
 
 `verify_filter_class(bank)` checks the designed bank against the IEC 61260-1
-Table 1 acceptance limits and reports the class (0, 1, 2) with per-band
+Table 1 acceptance limits and reports the class (`1`, `2` or `None` if outside both) with per-band
 margins.
 
 ## Filter Comparison and Zoom

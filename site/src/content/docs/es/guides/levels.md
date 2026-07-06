@@ -88,7 +88,7 @@ que las normativas siempre indican la ponderación temporal.
 | `n` | tupla de ints | % | por defecto `(10, 50, 90)` | Cualquier porcentaje de excedencia, p. ej. `(1, 5, 95)` |
 | `mode` | str | — | `'fast'` (por defecto), `'slow'`, `'impulse'` | Ponderación temporal IEC 61672-1 de la envolvente |
 | `weighting` | str o None | — | `'A'`, `'C'`, `'G'`, `'Z'`, `None` (por defecto) | Ponderación frecuencial previa a la envolvente |
-| `calibration_factor` / `dbfs` | | | como `leq` | |
+| `calibration_factor` / `dbfs` | float / bool | — | como `leq` | Misma semántica que en `leq()` |
 
 ## Métricas de pico, evento y ocupacionales
 
@@ -289,10 +289,10 @@ bandas normalizadas de tercio de octava.*
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | array 1D o 2D | unidades digitales | no vacío | 2D devuelve `(channels, bands, frames)` |
 | `window_time` | float | s | > 0; por defecto `0.125` | Longitud de la ventana (0,125 s replica Fast) |
-| `overlap` | float | — | 0 a 1 (exclusivo); por defecto `0.5` | Fracción de solape entre ventanas |
+| `overlap` | float | — | 0 ≤ overlap < 1; por defecto `0.5` | Fracción de solape entre ventanas (0 = sin solape) |
 | `mode` | str | — | `'rms'` (por defecto) o `'peak'` | Detector por ventana |
 | `zero_phase` | bool | — | por defecto `False` | Filtrado hacia delante y atrás (solo offline) |
-| `calibration_factor` / `dbfs` | | | como `leq` | |
+| `calibration_factor` / `dbfs` | — | — | solo constructor | Se fijan en `OctaveFilterBank(...)`, no por llamada |
 
 ```python
 import matplotlib.pyplot as plt

@@ -86,7 +86,7 @@ env = TimeWeighting(fs, mode="fast")  # the class is inherently stateful
 
 for x in audio_stream(block):            # your capture callback
     y = env.process(aw.filter(x))
-    spl = 10 * np.log10(y[-1] / (2e-5) ** 2)  # instantaneous LAF
+    spl = 10 * np.log10(y[..., -1] / (2e-5) ** 2)  # instantaneous LAF
     display(spl)
 ```
 
@@ -97,5 +97,5 @@ for x in audio_stream(block):            # your capture callback
 | `detrend` | must be `False` | Per-block detrending creates boundary discontinuities |
 | `resample` | must be `False` | The resampler is not stateful |
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
-| `high_accuracy` (weighting) | forced off | The polyphase resampling inside is block-incompatible |
+| `high_accuracy` (weighting) | resolves to `False` by default; explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |

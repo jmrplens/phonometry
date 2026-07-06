@@ -88,7 +88,7 @@ env = TimeWeighting(fs, mode="fast")  # la clase es inherentemente stateful
 
 for x in audio_stream(block):            # tu callback de captura
     y = env.process(aw.filter(x))
-    spl = 10 * np.log10(y[-1] / (2e-5) ** 2)  # LAF instantáneo
+    spl = 10 * np.log10(y[..., -1] / (2e-5) ** 2)  # LAF instantáneo
     display(spl)
 ```
 
@@ -99,5 +99,5 @@ for x in audio_stream(block):            # tu callback de captura
 | `detrend` | debe ser `False` | El detrending por bloque crea discontinuidades en las fronteras |
 | `resample` | debe ser `False` | El remuestreador no conserva estado |
 | `zero_phase` | no soportado | El filtrado bidireccional necesita la señal completa |
-| `high_accuracy` (ponderación) | desactivado forzosamente | El remuestreo polifásico interno es incompatible con bloques |
+| `high_accuracy` (ponderación) | por defecto se resuelve a `False`; pasar `True` explícito lanza `ValueError` | El remuestreo polifásico interno es incompatible con bloques |
 | `steady_ic` | opcional | Arranca los filtros en el régimen permanente de la respuesta al escalón |

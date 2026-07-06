@@ -180,7 +180,7 @@ band-edge mapping rather than trusting SciPy's default parametrization.
 
 ### Multirate decimation
 
-A 25 Hz one-third-octave band at 48 kHz has a relative bandwidth of 0.012 %
+A 25 Hz one-third-octave band at 48 kHz spans about 5.8 Hz — 0.024 %
 of Nyquist — coefficients so stiff they go numerically unstable. The bank
 avoids that by filtering low bands at a decimated rate:
 
@@ -203,7 +203,7 @@ avoids that by filtering low bands at a decimated rate:
 | `stateful` / `steady_ic` (class) | bool | — | default `False` | Streaming state; see [Block Processing](https://jmrplens.github.io/phonometry/guides/block-processing/) |
 
 `verify_filter_class(bank)` checks the designed bank against the IEC 61260-1
-Table 1 acceptance limits and reports the class (0, 1, 2) with per-band
+Table 1 acceptance limits and reports the class (`1`, `2` or `None` if outside both) with per-band
 margins.
 
 ## Filter Comparison and Zoom
@@ -486,7 +486,7 @@ absence of weighting. The full pole/zero derivation is in the
 | `x` | 1D or 2D array | any | non-empty | 2D is `[channels, samples]` |
 | `fs` | int | Hz | > 0 | |
 | `curve` | str | — | `'A'` (default), `'C'`, `'G'`, `'Z'` | `'G'` per ISO 7196 (infrasound); `'Z'` is a bypass |
-| `high_accuracy` | bool | — | default `True` (function) / `not stateful` (class) | Internal oversampling ≥ 96 kHz keeps A/C in class 1 up to 16 kHz; not applicable to G |
+| `high_accuracy` | bool | — | default `True` (function); class default `None` resolves to `not stateful` | Internal oversampling (8× up to ≥ 96 kHz at common audio rates) keeps A/C in class 1 up to 16 kHz; silently ignored for G, whose 0.25–315 Hz range the plain design already renders exactly |
 | `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
 | `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
 
@@ -751,7 +751,7 @@ impulsive noise, so regulations always name the time weighting.
 | `n` | tuple of ints | % | default `(10, 50, 90)` | Any exceedance percentages, e.g. `(1, 5, 95)` |
 | `mode` | str | — | `'fast'` (default), `'slow'`, `'impulse'` | IEC 61672-1 ballistics of the envelope |
 | `weighting` | str or None | — | `'A'`, `'C'`, `'G'`, `'Z'`, `None` (default) | Frequency weighting before the envelope |
-| `calibration_factor` / `dbfs` | | | as `leq` | |
+| `calibration_factor` / `dbfs` | float / bool | — | as `leq` | Same semantics as in `leq()` |
 
 ## Peak, event and occupational metrics
 
@@ -914,7 +914,7 @@ r = composite_rating_level([(63.2, 12, 0.0),    # day
 | :--- | :--- | :--- |
 | `lden(lday, levening, lnight, hours=(12, 4, 8))` | period LAeq values [dB]; `hours` must sum to 24 | +5 dB evening, +10 dB night (3.6.4) |
 | `ldn(lday, lnight, hours=(15, 9))` | | +10 dB night (3.6.5) |
-| `composite_rating_level(periods)` | iterable of `(level_db, hours, adjustment_db)` | General Formulae (5)-(6); adjustments per Table A.1 |
+| `composite_rating_level(periods)` | iterable of `(level_db, hours, adjustment_db)`; hours positive, finite and summing to 24 | General Formulae (5)-(6); adjustments per Table A.1 |
 
 Combine with `laeq()` per time period to go from recordings to Lden, and with
 `tone_to_noise_ratio()` / `prominence_ratio()` to justify tonal adjustments.
@@ -949,10 +949,10 @@ levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D or 2D array | digital units | non-empty | 2D returns `(channels, bands, frames)` |
 | `window_time` | float | s | > 0; default `0.125` | Frame length (0.125 s mirrors Fast) |
-| `overlap` | float | — | 0 to 1 (exclusive); default `0.5` | Fraction of window overlap |
+| `overlap` | float | — | 0 ≤ overlap < 1; default `0.5` | Fraction of window overlap (0 = none) |
 | `mode` | str | — | `'rms'` (default) or `'peak'` | Per-window detector |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline only) |
-| `calibration_factor` / `dbfs` | | | as `leq` | |
+| `calibration_factor` / `dbfs` | — | — | constructor-only | Set on `OctaveFilterBank(...)`, not per call |
 
 ```python
 import matplotlib.pyplot as plt
@@ -1220,7 +1220,7 @@ env = TimeWeighting(fs, mode="fast")  # the class is inherently stateful
 
 for x in audio_stream(block):            # your capture callback
     y = env.process(aw.filter(x))
-    spl = 10 * np.log10(y[-1] / (2e-5) ** 2)  # instantaneous LAF
+    spl = 10 * np.log10(y[..., -1] / (2e-5) ** 2)  # instantaneous LAF
     display(spl)
 ```
 
@@ -1231,7 +1231,7 @@ for x in audio_stream(block):            # your capture callback
 | `detrend` | must be `False` | Per-block detrending creates boundary discontinuities |
 | `resample` | must be `False` | The resampler is not stateful |
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
-| `high_accuracy` (weighting) | forced off | The polyphase resampling inside is block-incompatible |
+| `high_accuracy` (weighting) | resolves to `False` by default; explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
 
 ---
@@ -1345,7 +1345,7 @@ All core functionality can be imported directly from the `phonometry` package.
 | `tone_to_noise_ratio` | `function` | **Tone-to-noise ratio (ECMA-418-1 §11).**<br>• `x`: Signal (1D)<br>• `fs`: Sample rate [Hz]<br>• `tone_freq`: Tone to assess [Hz] (Default: highest peak)<br>• `resolution_hz`: FFT bin spacing (Default: 1.0) | `r = tone_to_noise_ratio(x, fs)`<br><br>• `ToneAssessment(frequency, ratio_db, criterion_db, prominent)` |
 | `prominence_ratio` | `function` | **Prominence ratio (ECMA-418-1 §12).**<br>• Same params as `tone_to_noise_ratio` | `r = prominence_ratio(x, fs, tone_freq=1000)`<br><br>• `ToneAssessment(...)` |
 | `ToneAssessment` | `dataclass` | **Tone prominence verdict.**<br>• `frequency`: Assessed tone [Hz]<br>• `ratio_db`: TNR or PR [dB]<br>• `criterion_db`: Prominence limit at that frequency [dB]<br>• `prominent`: bool | `r = tone_to_noise_ratio(x, fs)`<br>`if r.prominent: ...` |
-| `CalibrationWarning` | `warning class` | **Unreliable calibration recording.**<br>Emitted by `calculate_sensitivity` when the tone is unstable (IEC 60942 limit) or too short | `warnings.simplefilter("error", CalibrationWarning)` |
+| `CalibrationWarning` | `warning class` | **Unreliable calibration recording.**<br>Emitted by `calculate_sensitivity` — with `fs` given and `validate=True` — when the tone is unstable (IEC 60942 limit) or too short | `warnings.simplefilter("error", CalibrationWarning)` |
 | `lden` | `function` | **Day-evening-night level (ISO 1996-1 §3.6.4).**<br>• `lday`/`levening`/`lnight`: LAeq per period [dB]<br>• `hours`: Period durations (Default: (12, 4, 8)) | `l = lden(63.2, 58.1, 51.4)` |
 | `ldn` | `function` | **Day-night level (ISO 1996-1 §3.6.5).**<br>• `lday`/`lnight`: LAeq per period [dB]<br>• `hours`: Default (15, 9) | `l = ldn(63.2, 51.4)` |
 | `composite_rating_level` | `function` | **Whole-day composite rating (ISO 1996-1 §6.5).**<br>• `periods`: list of (level_db, hours, adjustment_db) summing 24 h | `r = composite_rating_level([(63, 12, 0), (58, 4, 5), (51, 8, 10)])` |

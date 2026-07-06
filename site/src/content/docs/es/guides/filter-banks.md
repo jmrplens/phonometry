@@ -30,10 +30,10 @@ bordes de banda en lugar de confiar en la parametrización por defecto de SciPy.
 
 ### Decimación multitasa
 
-Una banda de tercio de octava de 25 Hz a 48 kHz tiene un ancho de banda
-relativo del 0,012 % de Nyquist — coeficientes tan rígidos que se vuelven
+Una banda de tercio de octava de 25 Hz a 48 kHz abarca unos 5,8 Hz — el
+0,024 % de Nyquist — con coeficientes tan rígidos que se vuelven
 numéricamente inestables. El banco lo evita filtrando las bandas bajas a una
-frecuencia diezmada:
+frecuencia decimada:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es.svg" alt="Decimación multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un filtro paso bajo antialias y decimación, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es_dark.svg" alt="Decimación multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un paso-bajo antialiasing y diezmado, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%">
 
@@ -54,7 +54,7 @@ frecuencia diezmada:
 | `stateful` / `steady_ic` (clase) | bool | — | por defecto `False` | Estado en streaming; consulta [Procesado por bloques](/phonometry/es/guides/block-processing/) |
 
 `verify_filter_class(bank)` comprueba el banco diseñado contra los límites de
-aceptación de la Tabla 1 de IEC 61260-1 e informa de la clase (0, 1, 2) con los
+aceptación de la Tabla 1 de IEC 61260-1 e informa de la clase (`1`, `2` o `None` si queda fuera de ambas) con los
 márgenes por banda.
 
 ## Comparación de filtros y zoom

@@ -7,6 +7,25 @@ import mermaid from 'astro-mermaid';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
+// Converts deprecated HTML align attributes (emitted by markdown table
+// alignment) to CSS text-align, for WCAG2AA compliance (pa11y).
+function rehypeTableAlign() {
+  return (tree) => {
+    (function visit(node) {
+      if (
+        node.type === 'element' &&
+        (node.tagName === 'td' || node.tagName === 'th') &&
+        node.properties?.align
+      ) {
+        const val = node.properties.align;
+        node.properties.style = `text-align:${val}`;
+        delete node.properties.align;
+      }
+      if (node.children) node.children.forEach(visit);
+    })(tree);
+  };
+}
+
 const siteUrl = 'https://jmrplens.github.io';
 const basePath = '/PyOctaveBand';
 const fullUrl = `${siteUrl}${basePath}`;
@@ -154,7 +173,7 @@ export default defineConfig({
   base: basePath,
   markdown: {
     remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatex],
+    rehypePlugins: [rehypeKatex, rehypeTableAlign],
   },
   integrations: [
     mermaid({

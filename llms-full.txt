@@ -577,6 +577,28 @@ Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 `calibration_factor`/`dbfs` behave as in `leq`. The integrator attack transient
 (~2τ) is discarded before taking percentiles.
 
+## Peak, event and occupational metrics
+
+```python
+from pyoctaveband import lc_peak, sel, sound_exposure, lex_8h
+
+# C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
+peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+
+# Sound exposure level: single-event level normalized to 1 s (LAE)
+lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
+
+# Daily noise dose (IEC 61252): exposure in Pa²·h and LEX,8h / LEP,d
+E = sound_exposure(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+```
+
+`lc_peak` is verified against the one-cycle/half-cycle reference responses of
+IEC 61672-1:2013 Table 5, `sel` against the Table 4 LAE toneburst column, and
+the dose functions against the IEC 61252 anchors (3.2 Pa²h ↔ exactly 90 dB).
+With `duration_hours`, the input is treated as a representative sample of that
+exposure period; without it, the input is the whole event.
+
 ## Octave Spectrogram (levels over time)
 
 Short-time fractional-octave analysis: one level per band per window,
@@ -672,6 +694,15 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
 - IEC 60942 specifies the generated level as a 20 s average: record a few
   seconds of *stable* tone (excluding handling noise at the start/end) for the
   RMS estimate to converge.
+
+### Automatic stability validation
+
+When you pass the sample rate, `calculate_sensitivity(ref, fs=fs)` checks the
+recording the way IEC 60942 checks the calibrator itself: the short-term
+fluctuation of the F-weighted level (half of max−min) must stay below 0.10 dB
+(the class 1 limit of Table 1). A `CalibrationWarning` flags badly coupled
+microphones or handling noise before they silently corrupt every calibrated
+level. Tune with `max_fluctuation_db` or disable with `validate=False`.
 
 ## Digital Analysis (dBFS)
 
@@ -880,6 +911,10 @@ All core functionality can be imported directly from the `pyoctaveband` package.
 | `leq` | `function` | **Equivalent level (Leq).**<br>• `x`: Signal array (1D or 2D)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS (Default: False) | `level = leq(x, calibration_factor=s)`<br><br>• `level`: Scalar (1D) or per-channel array (2D) |
 | `laeq` | `function` | **A-weighted Leq (LAeq).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `calibration_factor` / `dbfs`: as `leq` | `level = laeq(x, fs, calibration_factor=s)`<br><br>• `level`: Scalar (1D) or per-channel array (2D) |
 | `ln_levels` | `function` | **Statistical levels (LN).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `n`: Exceedance percentiles (Default: (10, 50, 90))<br>• `mode`: 'fast', 'slow', 'impulse' (Default: 'fast')<br>• `weighting`: 'A', 'C', 'Z' or None (Default: None)<br>• `calibration_factor` / `dbfs`: as `leq` | `stats = ln_levels(x, fs, n=(10, 50, 90), weighting='A')`<br><br>• `stats`: Dict `{10: L10, 50: L50, 90: L90}` |
+| `lc_peak` | `function` | **C-weighted peak (LCpeak).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `calibration_factor` / `dbfs`: as `leq` | `peak = lc_peak(x, fs)`<br><br>• IEC 61672-1 §5.13; verified against Table 5 |
+| `sel` | `function` | **Sound exposure level (SEL/LAE).**<br>• `x`: Whole-event signal (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'A', 'C', 'Z' or None<br>• `calibration_factor` / `dbfs`: as `leq` | `lae = sel(x, fs, weighting='A')`<br><br>• Event level normalized to 1 s |
+| `sound_exposure` | `function` | **A-weighted exposure E (IEC 61252).**<br>• `x`: Signal (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `duration_hours`: exposure period represented (Default: recording length)<br>• `calibration_factor` | `E = sound_exposure(x, fs, duration_hours=8)`<br><br>• `E`: Pa²·h |
+| `lex_8h` | `function` | **Daily exposure LEX,8h / LEP,d.**<br>• Same params as `sound_exposure` | `lex = lex_8h(x, fs, duration_hours=4)`<br><br>• Normalized 8 h level [dB] |
 | `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
 | `calculate_sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6) | `s = calculate_sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
 | `verify_filter_class` | `function` | **IEC 61260-1:2014 class check.**<br>• `bank`: an `OctaveFilterBank`<br>• `num_points`: frequency grid points per band (Default: 32768) | `result = verify_filter_class(bank)`<br><br>• `result["overall_class"]`: 1, 2 or None<br>• `result["bands"]`: per-band class and margins [dB] |

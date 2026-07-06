@@ -1,0 +1,10 @@
+# Codecov status checks are informational: coverage is tracked and shown on
+# the PR, but does not gate merges (SonarCloud already gates quality).
+coverage:
+  status:
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        informational: true

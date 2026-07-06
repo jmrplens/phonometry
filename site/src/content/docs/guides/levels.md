@@ -54,6 +54,28 @@ Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 `calibration_factor`/`dbfs` behave as in `leq`. The integrator attack transient
 (~2τ) is discarded before taking percentiles.
 
+## Peak, event and occupational metrics
+
+```python
+from pyoctaveband import lc_peak, sel, sound_exposure, lex_8h
+
+# C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
+peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+
+# Sound exposure level: single-event level normalized to 1 s (LAE)
+lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
+
+# Daily noise dose (IEC 61252): exposure in Pa²·h and LEX,8h / LEP,d
+E = sound_exposure(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+```
+
+`lc_peak` is verified against the one-cycle/half-cycle reference responses of
+IEC 61672-1:2013 Table 5, `sel` against the Table 4 LAE toneburst column, and
+the dose functions against the IEC 61252 anchors (3.2 Pa²h ↔ exactly 90 dB).
+With `duration_hours`, the input is treated as a representative sample of that
+exposure period; without it, the input is the whole event.
+
 ## Octave Spectrogram (levels over time)
 
 Short-time fractional-octave analysis: one level per band per window,

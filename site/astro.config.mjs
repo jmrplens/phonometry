@@ -49,10 +49,7 @@ const socialImage = {
 };
 
 // Single-sourced version: read from the package, never duplicated here.
-const version = readFileSync(
-  new URL('../src/pyoctaveband/_version.py', import.meta.url),
-  'utf8',
-).match(/__version__\s*=\s*['"]([^'"]+)['"]/)[1];
+const version = readFileSync(new URL('../VERSION', import.meta.url), 'utf8').trim();
 
 // Freshness signals for the SoftwareApplication node. `datePublished` is the
 // first public release (v1.0.0) and is intentionally fixed. To avoid stamping

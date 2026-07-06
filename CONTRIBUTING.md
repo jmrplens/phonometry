@@ -63,6 +63,19 @@ When adding a feature with visual output, add a `generate_*` function to
 `generate_graphs.py` and reference the resulting image from the docs — do not
 commit images produced any other way.
 
+## 📦 Releasing
+
+Releases are fully automated from the repository-root `VERSION` file:
+
+1. Open a PR that bumps `VERSION` (semver) and moves the `[Unreleased]`
+   CHANGELOG section to the new version.
+2. When the PR merges to `main`, the release workflow validates the version,
+   builds the package, publishes to PyPI and creates the GitHub Release
+   (tag included). Zenodo registers the DOI from the release webhook.
+
+Never push tags manually; the workflow is idempotent (an existing tag is
+skipped).
+
 ## 🚀 How to Contribute
 
 ### Reporting Bugs

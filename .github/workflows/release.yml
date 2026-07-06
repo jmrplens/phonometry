@@ -1,9 +1,17 @@
 name: Publish to PyPI and Release
 
+# Releases are driven by the repository-root VERSION file: merging a change
+# to it on main validates, builds, publishes to PyPI and creates the GitHub
+# Release (which creates the tag and fires the Zenodo webhook). Creating the
+# tag from a separate workflow with GITHUB_TOKEN would NOT trigger this one
+# (GitHub suppresses recursive workflow triggers), hence this single
+# self-contained workflow.
+
 on:
   push:
-    tags:
-      - "v*"
+    branches: ["main"]
+    paths: ["VERSION"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -11,71 +19,73 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    if: github.repository == 'jmrplens/PyOctaveBand'
+    # Ref guard: workflow_dispatch could otherwise be run from any branch
+    # and publish unreviewed code; only main may release.
+    if: github.repository == 'jmrplens/PyOctaveBand' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
+      - name: Read VERSION and guard existing tag
+        id: version
+        run: |
+          VERSION=$(tr -d ' \n' < VERSION)
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?$'; then
+            echo "::error::VERSION file does not contain a valid semver: '$VERSION'"
+            exit 1
+          fi
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "::notice::Tag v$VERSION already exists — nothing to release."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Set up Python
+        if: steps.version.outputs.skip != 'true'
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
-      - name: Install dependencies
+      - name: Install build tooling
+        if: steps.version.outputs.skip != 'true'
         run: |
           python -m pip install --upgrade pip
           pip install build twine
 
-      - name: Validate tag version
-        id: version
-        run: |
-          PACKAGE_VERSION=$(python - <<'PY'
-          import ast
-          from pathlib import Path
-
-          version_file = Path("src/pyoctaveband/_version.py")
-          module = ast.parse(version_file.read_text(encoding="utf-8"))
-
-          for node in module.body:
-              if isinstance(node, ast.Assign):
-                  for target in node.targets:
-                      if isinstance(target, ast.Name) and target.id == "__version__":
-                          print(ast.literal_eval(node.value))
-                          raise SystemExit(0)
-
-          raise SystemExit("Unable to find __version__ in src/pyoctaveband/_version.py")
-          PY
-          )
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
-
-          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
-            echo "::error::Tag ${GITHUB_REF_NAME} does not match package version ${PACKAGE_VERSION}"
-            exit 1
-          fi
-
-          echo "version=$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
-
       - name: Build package
+        if: steps.version.outputs.skip != 'true'
         run: python -m build
 
       - name: Check package
+        if: steps.version.outputs.skip != 'true'
         run: python -m twine check dist/*
 
+      - name: Verify built version matches VERSION
+        if: steps.version.outputs.skip != 'true'
+        run: |
+          ls dist/pyoctaveband-${{ steps.version.outputs.version }}.tar.gz
+          ls dist/pyoctaveband-${{ steps.version.outputs.version }}-py3-none-any.whl
+
       - name: Publish to PyPI
+        if: steps.version.outputs.skip != 'true'
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: python -m twine upload dist/*
 
-      - name: Create GitHub Release
+      - name: Create GitHub Release (creates the tag)
+        if: steps.version.outputs.skip != 'true'
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Release ${{ steps.version.outputs.tag }}
           body: |
-            Automated release for version ${{ steps.version.outputs.version }}
+            See the [changelog](https://github.com/jmrplens/PyOctaveBand/blob/main/CHANGELOG.md) for the full details of this release.
+          generate_release_notes: true
           draft: false
           prerelease: false
         env:

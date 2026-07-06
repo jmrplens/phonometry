@@ -60,3 +60,34 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+
+  indexnow:
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Submit sitemap URLs to IndexNow
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: |
+          set -euo pipefail
+          BASE="https://jmrplens.github.io/phonometry"
+          # The key file must be reachable before submitting.
+          curl -sf "${BASE}/${INDEXNOW_KEY}.txt" >/dev/null
+          urls=$(curl -sf "${BASE}/sitemap-0.xml" | grep -oP '(?<=<loc>)[^<]+')
+          payload=$(printf '%s\n' "$urls" | python3 -c '
+          import json, os, sys
+          urls = [u.strip() for u in sys.stdin if u.strip()]
+          print(json.dumps({
+              "host": "jmrplens.github.io",
+              "key": os.environ["INDEXNOW_KEY"],
+              "keyLocation": "https://jmrplens.github.io/phonometry/" + os.environ["INDEXNOW_KEY"] + ".txt",
+              "urlList": urls,
+          }))')
+          code=$(curl -s -o /tmp/indexnow-resp -w "%{http_code}" \
+            -X POST "https://api.indexnow.org/IndexNow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data "$payload")
+          echo "IndexNow HTTP $code ($(printf '%s\n' "$urls" | wc -l) URLs)"
+          cat /tmp/indexnow-resp || true
+          [ "$code" = "200" ] || [ "$code" = "202" ]

@@ -98,6 +98,29 @@ is verified against the Annex B tables in CI. Note this is the loudness of
 *pure tones* - loudness of arbitrary signals (ISO 532 sones) is a different,
 upcoming feature.
 
+## Prominent discrete tones (ECMA-418-1)
+
+Tonal components in machinery noise are far more annoying than their level
+suggests. ECMA-418-1:2024 (referenced by ECMA-74 Annex D) gives two FFT-based
+methods to decide whether a discrete tone is *prominent*:
+`tone_to_noise_ratio()` compares the tone level with the masking noise in its
+critical band (clause 11), and `prominence_ratio()` compares the critical band
+centred on the tone with the two contiguous bands (clause 12). Both return a
+structured verdict against the frequency-dependent prominence criteria:
+
+```python
+from phonometry import tone_to_noise_ratio, prominence_ratio
+
+tnr = tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
+pr = prominence_ratio(x, fs, tone_freq=1000.0)
+print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
+```
+
+Proximate secondary tones in the same critical band are combined per
+clause 11.6; for harmonic complexes assess each component (`tone_freq=`).
+Both methods work on Hann-windowed, RMS-averaged spectra and need no absolute
+calibration (the ratios are level differences).
+
 ## Octave Spectrogram (levels over time)
 
 Short-time fractional-octave analysis: one level per band per window,

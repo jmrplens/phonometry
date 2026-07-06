@@ -645,6 +645,29 @@ is verified against the Annex B tables in CI. Note this is the loudness of
 *pure tones* - loudness of arbitrary signals (ISO 532 sones) is a different,
 upcoming feature.
 
+## Prominent discrete tones (ECMA-418-1)
+
+Tonal components in machinery noise are far more annoying than their level
+suggests. ECMA-418-1:2024 (referenced by ECMA-74 Annex D) gives two FFT-based
+methods to decide whether a discrete tone is *prominent*:
+`tone_to_noise_ratio()` compares the tone level with the masking noise in its
+critical band (clause 11), and `prominence_ratio()` compares the critical band
+centred on the tone with the two contiguous bands (clause 12). Both return a
+structured verdict against the frequency-dependent prominence criteria:
+
+```python
+from phonometry import tone_to_noise_ratio, prominence_ratio
+
+tnr = tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
+pr = prominence_ratio(x, fs, tone_freq=1000.0)
+print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
+```
+
+Proximate secondary tones in the same critical band are combined per
+clause 11.6; for harmonic complexes assess each component (`tone_freq=`).
+Both methods work on Hann-windowed, RMS-averaged spectra and need no absolute
+calibration (the ratios are level differences).
+
 ## Octave Spectrogram (levels over time)
 
 Short-time fractional-octave analysis: one level per band per window,
@@ -972,6 +995,8 @@ All core functionality can be imported directly from the `phonometry` package.
 | `equal_loudness_contour` | `function` | **ISO 226:2023 equal-loudness contour.**<br>• `phon`: Loudness level, 20-90 phon | `freqs, spl = equal_loudness_contour(40.0)`<br><br>• SPL at the 29 preferred frequencies |
 | `loudness_level` | `function` | **Loudness level of a pure tone (phon).**<br>• `spl`: Tone SPL [dB]<br>• `frequency`: One of the 29 Table 1 frequencies [Hz] | `phon = loudness_level(73.0, 63.0)` |
 | `hearing_threshold` | `function` | **Threshold of hearing (ISO 226 Table 1).**<br>• (no parameters) | `freqs, tf = hearing_threshold()` |
+| `tone_to_noise_ratio` | `function` | **Tone-to-noise ratio (ECMA-418-1 §11).**<br>• `x`: Signal (1D)<br>• `fs`: Sample rate [Hz]<br>• `tone_freq`: Tone to assess [Hz] (Default: highest peak)<br>• `resolution_hz`: FFT bin spacing (Default: 1.0) | `r = tone_to_noise_ratio(x, fs)`<br><br>• `ToneAssessment(frequency, ratio_db, criterion_db, prominent)` |
+| `prominence_ratio` | `function` | **Prominence ratio (ECMA-418-1 §12).**<br>• Same params as `tone_to_noise_ratio` | `r = prominence_ratio(x, fs, tone_freq=1000)`<br><br>• `ToneAssessment(...)` |
 | `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
 | `calculate_sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6) | `s = calculate_sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
 | `verify_filter_class` | `function` | **IEC 61260-1:2014 class check.**<br>• `bank`: an `OctaveFilterBank`<br>• `num_points`: frequency grid points per band (Default: 32768) | `result = verify_filter_class(bank)`<br><br>• `result["overall_class"]`: 1, 2 or None<br>• `result["bands"]`: per-band class and margins [dB] |

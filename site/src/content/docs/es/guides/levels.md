@@ -101,6 +101,30 @@ implementación se verifica en CI contra las tablas del Anexo B. Ojo: esto es la
 sonoridad de *tonos puros* — la sonoridad de señales arbitrarias (sonos,
 ISO 532) es una feature distinta, prevista más adelante.
 
+## Tonos discretos prominentes (ECMA-418-1)
+
+Los componentes tonales del ruido de maquinaria molestan mucho más de lo que
+sugiere su nivel. ECMA-418-1:2024 (referenciada por el Anexo D de ECMA-74)
+define dos métodos FFT para decidir si un tono discreto es *prominente*:
+`tone_to_noise_ratio()` compara el nivel del tono con el ruido enmascarante de
+su banda crítica (apartado 11) y `prominence_ratio()` compara la banda crítica
+centrada en el tono con las dos bandas contiguas (apartado 12). Ambos devuelven
+un veredicto estructurado frente a los criterios de prominencia dependientes de
+la frecuencia:
+
+```python
+from phonometry import tone_to_noise_ratio, prominence_ratio
+
+tnr = tone_to_noise_ratio(x, fs)            # pico más alto, o tone_freq=...
+pr = prominence_ratio(x, fs, tone_freq=1000.0)
+print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
+```
+
+Los tonos secundarios próximos en la misma banda crítica se combinan según el
+apartado 11.6; para complejos armónicos evalúa cada componente (`tone_freq=`).
+Ambos métodos trabajan sobre espectros promediados RMS con ventana Hann y no
+necesitan calibración absoluta (los ratios son diferencias de nivel).
+
 ## Espectrograma de octavas (niveles vs tiempo)
 
 Análisis de octava fraccional en tiempo corto: un nivel por banda y ventana,

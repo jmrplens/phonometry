@@ -31,7 +31,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Getting Started](https://jmrplens.github.io/phonometry/getting-started/)
 - [Filter Banks](https://jmrplens.github.io/phonometry/guides/filter-banks/)
-- [Frequency Weighting (A, C, Z)](https://jmrplens.github.io/phonometry/guides/weighting/)
+- [Frequency Weighting (A, C, G, Z)](https://jmrplens.github.io/phonometry/guides/weighting/)
 - [Time Weighting and Integration](https://jmrplens.github.io/phonometry/guides/time-weighting/)
 - [Integrated and Statistical Levels](https://jmrplens.github.io/phonometry/guides/levels/)
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/)
@@ -356,7 +356,7 @@ filtering keeps it aligned with the input.*
 
 <!-- source: docs/weighting.md | canonical: https://jmrplens.github.io/phonometry/guides/weighting/ -->
 
-# Frequency Weighting (A, C, Z)
+# Frequency Weighting (A, C, G, Z)
 
 Frequency weighting curves simulate the human ear's sensitivity, as specified by
 **IEC 61672-1:2013**.
@@ -366,6 +366,7 @@ Frequency weighting curves simulate the human ear's sensitivity, as specified by
 * **A-Weighting (`A`):** Standard for environmental noise (IEC 61672-1).
 * **C-Weighting (`C`):** Used for peak sound pressure and high-level noise.
 * **Z-Weighting (`Z`):** Zero weighting, completely flat response.
+* **G-Weighting (`G`):** Infrasound weighting per ISO 7196 (see below).
 
 ```python
 from phonometry import weighting_filter
@@ -376,6 +377,28 @@ weighted_signal = weighting_filter(signal, fs, curve='A')
 # Apply C-weighting for peak analysis
 c_weighted_signal = weighting_filter(signal, fs, curve='C')
 ```
+
+## Infrasound: G-weighting (ISO 7196)
+
+The **G frequency weighting** (ISO 7196:1995) rates infrasound the way A-weighting
+rates audible noise. It is defined by a pole-zero configuration with 0 dB gain at
+10 Hz, rises at 12 dB/octave from 1 Hz to 20 Hz (matching the steep growth of
+perception in that band) and falls off at 24 dB/octave outside it. Use it for
+sources with significant energy below 20 Hz (wind turbines, HVAC, blasting):
+
+```python
+from phonometry import weighting_filter
+
+g_weighted = weighting_filter(signal, fs, curve='G')
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.png" alt="G-weighting frequency response from 0.1 Hz to 1 kHz with the ISO 7196 Table 2 nominal values overlaid" width="80%"></picture>
+
+The implementation follows the ISO 7196 Table 1 pole/zero values exactly and is
+verified in CI against every Table 2 nominal response value (0.25 Hz to 315 Hz).
+`WeightingFilter(fs, "G")` supports the same multichannel and stateful block
+processing as A/C. Levels measured with the G curve are reported as
+L<sub>pG</sub> (or L<sub>Geq</sub> for the equivalent level over time).
 
 ## Reusable filter object
 
@@ -599,6 +622,75 @@ the dose functions against the IEC 61252 anchors (3.2 Pa²h ↔ exactly 90 dB).
 With `duration_hours`, the input is treated as a representative sample of that
 exposure period; without it, the input is the whole event.
 
+## Loudness level of pure tones (ISO 226:2023)
+
+The normal equal-loudness-level contours relate the SPL of a pure tone to its
+perceived *loudness level* in phons (the SPL of an equally loud 1 kHz tone).
+`equal_loudness_contour(phon)` evaluates ISO 226:2023 Formula (1) at the 29
+preferred third-octave frequencies of Table 1, `loudness_level(spl, frequency)`
+is the exact inverse (Formula 2), and `hearing_threshold()` returns the
+threshold-of-hearing column:
+
+```python
+from phonometry import equal_loudness_contour, loudness_level
+
+freqs, spl = equal_loudness_contour(40.0)   # the classic 40-phon contour
+phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.png" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" width="80%"></picture>
+
+Validity per clause 4.1: 20-90 phon (80 phon above 4 kHz); the implementation
+is verified against the Annex B tables in CI. Note this is the loudness of
+*pure tones* - loudness of arbitrary signals (ISO 532 sones) is a different,
+upcoming feature.
+
+## Prominent discrete tones (ECMA-418-1)
+
+Tonal components in machinery noise are far more annoying than their level
+suggests. ECMA-418-1:2024 (referenced by ECMA-74 Annex D) gives two FFT-based
+methods to decide whether a discrete tone is *prominent*:
+`tone_to_noise_ratio()` compares the tone level with the masking noise in its
+critical band (clause 11), and `prominence_ratio()` compares the critical band
+centred on the tone with the two contiguous bands (clause 12). Both return a
+structured verdict against the frequency-dependent prominence criteria:
+
+```python
+from phonometry import tone_to_noise_ratio, prominence_ratio
+
+tnr = tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
+pr = prominence_ratio(x, fs, tone_freq=1000.0)
+print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
+```
+
+Proximate secondary tones in the same critical band are combined per
+clause 11.6; for harmonic complexes assess each component (`tone_freq=`).
+Both methods work on Hann-windowed, RMS-averaged spectra and need no absolute
+calibration (the ratios are level differences).
+
+## Environmental noise: Lden, Ldn and rating levels (ISO 1996-1)
+
+Regulatory noise assessment weights evenings and nights more heavily.
+`lden()` implements the day-evening-night level of ISO 1996-1:2016 (3.6.4:
++5 dB evening, +10 dB night, default 12/4/8 h periods — adjustable, since
+countries define them differently), `ldn()` the day-night variant (3.6.5),
+and `composite_rating_level()` the general whole-day composite of clause 6.5
+(Formulae 5-6) for arbitrary periods with source or character adjustments
+(Table A.1: e.g. +5 dB regular impulsive, +12 dB highly impulsive, +3 to
++6 dB prominent tones):
+
+```python
+from phonometry import lden, composite_rating_level
+
+l = lden(63.2, 58.1, 51.4)                      # from LAeq per period
+r = composite_rating_level([(63.2, 12, 0.0),    # day
+                            (58.1, 4, 5.0),     # evening (+5)
+                            (51.4, 8, 10.0)])   # night  (+10) == lden
+```
+
+Combine with `laeq()` per time period to go from recordings to Lden, and with
+`tone_to_noise_ratio()` / `prominence_ratio()` to justify tonal adjustments.
+
 ## Octave Spectrogram (levels over time)
 
 Short-time fractional-octave analysis: one level per band per window,
@@ -698,15 +790,19 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
 ### Automatic stability validation
 
 When you pass the sample rate (and `validate=True`, the default),
-`calculate_sensitivity(ref, fs=fs)` checks the recording the way IEC 60942
-checks the calibrator itself: the *short-term level fluctuation* — one-half of
-the difference between the maximum and minimum F-time-weighted levels — must
-not exceed 0.10 dB (the class 1 limit of Table 1). A `CalibrationWarning`
-flags badly coupled microphones or handling noise before they silently corrupt
-every calibrated level. The recording must be at least 2 s long (1 s for the
-F-integrator to settle plus 1 s of settled envelope); shorter recordings get a
-warning instead of an unreliable verdict. Without `fs` the check is skipped.
-Tune with `max_fluctuation_db` or disable with `validate=False`.
+`calculate_sensitivity(ref, fs=fs)` checks the recording the way
+IEC 60942:2017 checks the calibrator itself (5.3.3): the *short-term level
+fluctuation* — the absolute difference between each of the maximum and minimum
+F-time-weighted levels and the mean level — must not exceed the Table 2 class 1
+limit for the calibrator's nominal frequency (0.07 dB from 160 Hz up, relaxed
+to 0.10 dB below 160 Hz and 0.20 dB below 63 Hz, where the F time-weighting
+itself ripples). Pass `frequency=` to select the right row for non-1 kHz
+calibrators. A `CalibrationWarning` flags badly coupled microphones or handling
+noise before they silently corrupt every calibrated level. The recording must
+be at least 2 s long (1 s for the F-integrator to settle plus 1 s of settled
+envelope); shorter recordings get a warning instead of an unreliable verdict.
+Without `fs` the check is skipped. Override the limit with
+`max_fluctuation_db` or disable with `validate=False`.
 
 ## Digital Analysis (dBFS)
 
@@ -908,17 +1004,25 @@ All core functionality can be imported directly from the `phonometry` package.
 | `octavefilter` | `function` | **High-level analysis.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc. (Default: 1)<br>• `order`: Filter order (Default: 6)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: 'butter', 'cheby1', 'cheby2', 'ellip', 'bessel' (Default: 'butter')<br>• `sigbands`: Return time signals (Default: False)<br>• `detrend`: Remove DC offset (Default: True)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS instead of dB SPL (Default: False)<br>• `mode`: 'rms' or 'peak' (Default: 'rms')<br>• `nominal`: IEC 61260-1 nominal labels (Default: False)<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save plot (Default: None)<br>• `ripple`: Passband ripple [dB] (for cheby1/ellip)<br>• `attenuation`: Stopband atten. [dB] (for cheby2/ellip) | `spl, freq = octavefilter(x, fs, ...)`<br>• `spl`: levels [dB]<br>• `freq`: frequencies [Hz]<br><br>**With `sigbands=True`:**<br>`spl, freq, xb = octavefilter(x, fs, sigbands=True)`<br>• `xb`: List of filtered signals (one per band)<br><br>**Calibrated usage:**<br>`spl, f = octavefilter(x, fs, calibration_factor=0.05)` |
 | `OctaveFilterBank` | `class` | **Efficient bank implementation.**<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc.<br>• `order`: Filter order<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: Architecture name<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save the plot (Default: None)<br>• `calibration_factor`: Sensitivity multiplier<br>• `dbfs`: Use dBFS (Default: False)<br>• `stateful`: Carry filter state between calls (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `resample`: Multirate decimation (Default: True)<br>• `ripple`: Passband ripple [dB]<br>• `attenuation`: Stopband attenuation [dB] | `bank = OctaveFilterBank(fs=48000, fraction=3, order=6, filter_type='butter')`<br>`spl, f = bank.filter(x, sigbands=False, mode='rms', detrend=True, zero_phase=False)`<br><br>• `bank`: Instance of the filter bank<br>• `bank.freq` / `bank.freq_d` / `bank.freq_u` / `bank.sos`: computed properties |
 | `OctaveFilterBank.spectrogram` | `method` | **Band levels over time.**<br>• `x`: Signal array (1D or 2D)<br>• `window_time`: Window length [s] (Default: 0.125)<br>• `overlap`: Fraction in [0, 1) (Default: 0.5)<br>• `mode`: 'rms' or 'peak'<br>• `zero_phase`: Group-delay-free frames (Default: False) | `levels, freq, times = bank.spectrogram(x)`<br><br>• `levels`: (bands, frames) or (channels, bands, frames)<br>• `times`: window centers [s] |
-| `weighting_filter` | `function` | **Acoustic weighting.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `curve`: 'A', 'C', or 'Z' (Default: 'A')<br>• `high_accuracy`: IEC class 1 HF accuracy via internal oversampling (Default: True) | `y = weighting_filter(x, fs, curve='A')`<br><br>• `y`: weighted signal |
-| `WeightingFilter` | `class` | **Reusable weighting filter.**<br>• `fs`: Sample rate [Hz]<br>• `curve`: 'A', 'C' or 'Z'<br>• `stateful`: Block processing (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `high_accuracy`: Defaults to True except stateful | `wf = WeightingFilter(fs, 'A')`<br>`y = wf.filter(x)` |
+| `weighting_filter` | `function` | **Acoustic weighting.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `curve`: 'A', 'C', 'G' (ISO 7196 infrasound) or 'Z' (Default: 'A')<br>• `high_accuracy`: IEC class 1 HF accuracy via internal oversampling (Default: True) | `y = weighting_filter(x, fs, curve='A')`<br><br>• `y`: weighted signal |
+| `WeightingFilter` | `class` | **Reusable weighting filter.**<br>• `fs`: Sample rate [Hz]<br>• `curve`: 'A', 'C', 'G' or 'Z'<br>• `stateful`: Block processing (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `high_accuracy`: Defaults to True except stateful | `wf = WeightingFilter(fs, 'A')`<br>`y = wf.filter(x)` |
 | `time_weighting` | `function` | **Energy capture.**<br>• `x`: Raw signal array (squared internally; time is the last axis)<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', or 'impulse'<br>• `initial_state`: None, 'zero', 'first', scalar, or array (Default: None) | `env = time_weighting(x, fs, mode='fast')`<br><br>• `env`: energy envelope (Mean Square), same shape as `x` |
 | `TimeWeighting` | `class` | **Stateful time weighting.**<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', 'impulse' (Default: 'fast') | `tw = TimeWeighting(fs, mode='fast')`<br>`env = tw.process(block)` per block<br>`tw.reset()` to start over |
 | `leq` | `function` | **Equivalent level (Leq).**<br>• `x`: Signal array (1D or 2D)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS (Default: False) | `level = leq(x, calibration_factor=s)`<br><br>• `level`: Scalar (1D) or per-channel array (2D) |
 | `laeq` | `function` | **A-weighted Leq (LAeq).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `calibration_factor` / `dbfs`: as `leq` | `level = laeq(x, fs, calibration_factor=s)`<br><br>• `level`: Scalar (1D) or per-channel array (2D) |
-| `ln_levels` | `function` | **Statistical levels (LN).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `n`: Exceedance percentiles (Default: (10, 50, 90))<br>• `mode`: 'fast', 'slow', 'impulse' (Default: 'fast')<br>• `weighting`: 'A', 'C', 'Z' or None (Default: None)<br>• `calibration_factor` / `dbfs`: as `leq` | `stats = ln_levels(x, fs, n=(10, 50, 90), weighting='A')`<br><br>• `stats`: Dict `{10: L10, 50: L50, 90: L90}` |
+| `ln_levels` | `function` | **Statistical levels (LN).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `n`: Exceedance percentiles (Default: (10, 50, 90))<br>• `mode`: 'fast', 'slow', 'impulse' (Default: 'fast')<br>• `weighting`: 'A', 'C', 'G', 'Z' or None (Default: None)<br>• `calibration_factor` / `dbfs`: as `leq` | `stats = ln_levels(x, fs, n=(10, 50, 90), weighting='A')`<br><br>• `stats`: Dict `{10: L10, 50: L50, 90: L90}` |
 | `lc_peak` | `function` | **C-weighted peak (LCpeak).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `calibration_factor`: as `leq`<br>• `dbfs`: 0 dBFS = full-scale *peak* (amplitude 1.0), unlike the RMS reference of `leq` | `peak = lc_peak(x, fs)`<br><br>• IEC 61672-1 §5.13; verified against Table 5 |
-| `sel` | `function` | **Sound exposure level (SEL/LAE).**<br>• `x`: Whole-event signal (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'A', 'C', 'Z' or None (Default: None)<br>• `calibration_factor` / `dbfs`: as `leq` | `lae = sel(x, fs, weighting='A')`<br><br>• Event level normalized to 1 s |
+| `sel` | `function` | **Sound exposure level (SEL/LAE).**<br>• `x`: Whole-event signal (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'A', 'C', 'G', 'Z' or None (Default: None)<br>• `calibration_factor` / `dbfs`: as `leq` | `lae = sel(x, fs, weighting='A')`<br><br>• Event level normalized to 1 s |
 | `sound_exposure` | `function` | **A-weighted exposure E (IEC 61252).**<br>• `x`: Signal (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `duration_hours`: exposure period represented (Default: recording length)<br>• `calibration_factor` | `E = sound_exposure(x, fs, duration_hours=8)`<br><br>• `E`: Pa²·h |
 | `lex_8h` | `function` | **Daily exposure LEX,8h / LEP,d.**<br>• Same params as `sound_exposure` | `lex = lex_8h(x, fs, duration_hours=4)`<br><br>• Normalized 8 h level [dB] |
+| `equal_loudness_contour` | `function` | **ISO 226:2023 equal-loudness contour.**<br>• `phon`: Loudness level, 20-90 phon | `freqs, spl = equal_loudness_contour(40.0)`<br><br>• SPL at the 29 preferred frequencies |
+| `loudness_level` | `function` | **Loudness level of a pure tone (phon).**<br>• `spl`: Tone SPL [dB]<br>• `frequency`: One of the 29 Table 1 frequencies [Hz] | `phon = loudness_level(73.0, 63.0)` |
+| `hearing_threshold` | `function` | **Threshold of hearing (ISO 226 Table 1).**<br>• (no parameters) | `freqs, tf = hearing_threshold()` |
+| `tone_to_noise_ratio` | `function` | **Tone-to-noise ratio (ECMA-418-1 §11).**<br>• `x`: Signal (1D)<br>• `fs`: Sample rate [Hz]<br>• `tone_freq`: Tone to assess [Hz] (Default: highest peak)<br>• `resolution_hz`: FFT bin spacing (Default: 1.0) | `r = tone_to_noise_ratio(x, fs)`<br><br>• `ToneAssessment(frequency, ratio_db, criterion_db, prominent)` |
+| `prominence_ratio` | `function` | **Prominence ratio (ECMA-418-1 §12).**<br>• Same params as `tone_to_noise_ratio` | `r = prominence_ratio(x, fs, tone_freq=1000)`<br><br>• `ToneAssessment(...)` |
+| `lden` | `function` | **Day-evening-night level (ISO 1996-1 §3.6.4).**<br>• `lday`/`levening`/`lnight`: LAeq per period [dB]<br>• `hours`: Period durations (Default: (12, 4, 8)) | `l = lden(63.2, 58.1, 51.4)` |
+| `ldn` | `function` | **Day-night level (ISO 1996-1 §3.6.5).**<br>• `lday`/`lnight`: LAeq per period [dB]<br>• `hours`: Default (15, 9) | `l = ldn(63.2, 51.4)` |
+| `composite_rating_level` | `function` | **Whole-day composite rating (ISO 1996-1 §6.5).**<br>• `periods`: list of (level_db, hours, adjustment_db) summing 24 h | `r = composite_rating_level([(63, 12, 0), (58, 4, 5), (51, 8, 10)])` |
 | `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
 | `calculate_sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6) | `s = calculate_sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
 | `verify_filter_class` | `function` | **IEC 61260-1:2014 class check.**<br>• `bank`: an `OctaveFilterBank`<br>• `num_points`: frequency grid points per band (Default: 32768) | `result = verify_filter_class(bank)`<br><br>• `result["overall_class"]`: 1, 2 or None<br>• `result["bands"]`: per-band class and margins [dB] |

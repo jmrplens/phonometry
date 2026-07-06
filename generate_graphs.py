@@ -484,6 +484,75 @@ def generate_weighting_responses(output_dir: str) -> None:
     plt.close()
 
 
+def generate_g_weighting_response(output_dir: str) -> None:
+    """Plot the ISO 7196 G-weighting curve against the Table 2 nominals."""
+    print("Generating g_weighting_response.png...")
+    from scipy import signal as sp_signal
+
+    from phonometry import WeightingFilter
+
+    fs = 48000
+    # ISO 7196:1995 Table 2 - nominal one-third-octave frequency, response dB
+    table2 = [
+        (0.25, -88.0), (0.5, -64.3), (1.0, -43.0), (2.0, -28.3),
+        (4.0, -16.0), (8.0, -4.0), (10.0, 0.0), (16.0, 7.7), (20.0, 9.0),
+        (31.5, -4.0), (63.0, -28.0), (125.0, -52.0), (250.0, -76.0),
+    ]
+    freqs = np.logspace(np.log10(0.1), np.log10(1000), 800)
+    sos = WeightingFilter(fs, "G").sos
+    _, h = sp_signal.sosfreqz(sos, worN=freqs, fs=fs)
+    mag_db = 20 * np.log10(np.abs(h))
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    ax.semilogx(freqs, mag_db, color=COLOR_PRIMARY, label="G-weighting (ISO 7196)")
+    tf = [f for f, _ in table2]
+    tv = [v for _, v in table2]
+    ax.plot(tf, tv, "o", color=COLOR_SECONDARY, markersize=5,
+            label="ISO 7196 Table 2 nominals", zorder=5)
+    ax.axhline(0, color=COLOR_FG, linestyle=":", alpha=0.3, linewidth=1)
+    ax.axvline(10, color=COLOR_FG, linestyle=":", alpha=0.3, linewidth=1)
+    ax.annotate("0 dB @ 10 Hz", xy=(10, 0), xytext=(20, -18), fontsize=9,
+                arrowprops={"arrowstyle": "->", "lw": 0.8})
+    apply_axis_styling(
+        ax, "G Frequency Weighting for Infrasound (ISO 7196:1995)",
+        xlim=(0.1, 1000), ylim=(-95, 15),
+    )
+    from matplotlib.ticker import NullFormatter, ScalarFormatter
+    ticks = [0.1, 0.25, 0.5, 1, 2, 5, 10, 20, 50, 125, 315, 1000]
+    ax.set_xticks(ticks)
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xticklabels(["0.1", "0.25", "0.5", "1", "2", "5", "10", "20", "50", "125", "315", "1k"])
+    ax.legend(loc="upper right")
+    plt.savefig(themed_path(output_dir, "g_weighting_response.png"))
+    plt.close()
+
+
+def generate_equal_loudness_contours(output_dir: str) -> None:
+    """Plot the ISO 226:2023 normal equal-loudness-level contours."""
+    print("Generating equal_loudness_contours.png...")
+    from phonometry import equal_loudness_contour, hearing_threshold
+
+    _, ax = plt.subplots(figsize=(10, 7))
+    for phon in [20, 40, 60, 80, 90]:
+        freqs, spl = equal_loudness_contour(float(phon))
+        ax.semilogx(freqs, spl, color=COLOR_PRIMARY, linewidth=1.5)
+        ax.annotate(f"{phon} phon", xy=(1000, phon), xytext=(1150, phon + 1),
+                    fontsize=9, color=COLOR_PRIMARY)
+    ft, tf = hearing_threshold()
+    ax.semilogx(ft, tf, color=COLOR_SECONDARY, linestyle="--",
+                label="Hearing threshold $T_f$ (Table 1)")
+    ax.plot(1000, 0, alpha=0)  # keep 0 dB in view
+    apply_axis_styling(
+        ax, "Normal Equal-Loudness-Level Contours (ISO 226:2023)",
+        xlim=(20, 12500), ylim=(-10, 130),
+    )
+    ax.set_ylabel("Sound pressure level [dB re 20 \u00b5Pa]")
+    ax.legend(loc="upper right")
+    plt.savefig(themed_path(output_dir, "equal_loudness_contours.png"))
+    plt.close()
+
+
 def generate_time_weighting_plot(output_dir: str) -> None:
     """Visualize Fast, Slow and Impulse time weighting response to a burst."""
     print("Generating time_weighting_analysis.png...")
@@ -945,6 +1014,8 @@ def generate_all(img_dir: str) -> None:
     generate_decomposition_plot(img_dir)
 
     generate_weighting_responses(img_dir)
+    generate_g_weighting_response(img_dir)
+    generate_equal_loudness_contours(img_dir)
     generate_time_weighting_plot(img_dir)
     generate_crossover_plot(img_dir)
 

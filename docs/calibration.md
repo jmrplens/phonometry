@@ -56,15 +56,19 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
 ### Automatic stability validation
 
 When you pass the sample rate (and `validate=True`, the default),
-`calculate_sensitivity(ref, fs=fs)` checks the recording the way IEC 60942
-checks the calibrator itself: the *short-term level fluctuation* — one-half of
-the difference between the maximum and minimum F-time-weighted levels — must
-not exceed 0.10 dB (the class 1 limit of Table 1). A `CalibrationWarning`
-flags badly coupled microphones or handling noise before they silently corrupt
-every calibrated level. The recording must be at least 2 s long (1 s for the
-F-integrator to settle plus 1 s of settled envelope); shorter recordings get a
-warning instead of an unreliable verdict. Without `fs` the check is skipped.
-Tune with `max_fluctuation_db` or disable with `validate=False`.
+`calculate_sensitivity(ref, fs=fs)` checks the recording the way
+IEC 60942:2017 checks the calibrator itself (5.3.3): the *short-term level
+fluctuation* — the absolute difference between each of the maximum and minimum
+F-time-weighted levels and the mean level — must not exceed the Table 2 class 1
+limit for the calibrator's nominal frequency (0.07 dB at and above 160 Hz, relaxed
+to 0.10 dB below 160 Hz and 0.20 dB at or below 63 Hz, where the F
+time-weighting itself ripples). Pass `frequency=` to select the right row for non-1 kHz
+calibrators. A `CalibrationWarning` flags badly coupled microphones or handling
+noise before they silently corrupt every calibrated level. The recording must
+be at least 2 s long (1 s for the F-integrator to settle plus 1 s of settled
+envelope); shorter recordings get a warning instead of an unreliable verdict.
+Without `fs` the check is skipped. Override the limit with
+`max_fluctuation_db` or disable with `validate=False`.
 
 ## Digital Analysis (dBFS)
 

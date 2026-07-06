@@ -1,10 +1,11 @@
 ---
 title: "Frequency Weighting (A, C, G, Z)"
-description: "IEC 61672-1 A/C/Z and ISO 7196 G frequency weighting curves with class 1 high-frequency accuracy."
+description: "A/C/Z frequency weighting per IEC 61672-1 (class 1, with a high-frequency accuracy mode) and G-weighting for infrasound per ISO 7196."
 ---
 
-Frequency weighting curves simulate the human ear's sensitivity, as specified by
-**IEC 61672-1:2013**.
+Frequency weighting curves simulate the human ear's sensitivity. A, C and Z
+are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
+**ISO 7196:1995**.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.png" alt="A, C and Z frequency weighting curves with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_dark.png" alt="A, C and Z frequency weighting curves with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" style="width:80%">
 

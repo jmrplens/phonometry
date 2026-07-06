@@ -2,8 +2,9 @@
 
 # Frequency Weighting (A, C, G, Z)
 
-Frequency weighting curves simulate the human ear's sensitivity, as specified by
-**IEC 61672-1:2013**.
+Frequency weighting curves simulate the human ear's sensitivity. A, C and Z
+are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
+**ISO 7196:1995**.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.png" alt="A, C and Z frequency weighting curves with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%"></picture>
 

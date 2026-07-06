@@ -119,16 +119,18 @@ class SVG:
             self.arrow(x, mid + 4, x, y2, th.muted, 1.2)
             self.text(x + 7, mid + 4, label, size, th.fg, "start")
 
-    def mic(self, x: float, y: float, scale: float = 1.0,
-            label: str = "") -> None:
-        """Measurement microphone glyph pointing up: capsule + body + stand."""
+    def mic(self, x: float, capsule_top: float, ground: float,
+            scale: float = 1.0) -> None:
+        """Measurement microphone on a stand that reaches the ground.
+
+        ``capsule_top`` is the y of the capsule tip (the measurement point).
+        """
         th, s = self.th, scale
-        self.line(x, y, x, y + 46 * s, th.fg, 2.0)                    # stand
-        self.line(x - 12 * s, y + 46 * s, x + 12 * s, y + 46 * s, th.fg, 2.0)
-        self.rect(x - 4 * s, y - 26 * s, 8 * s, 26 * s, th.primary, rx=3 * s)  # body
-        self.rect(x - 3 * s, y - 34 * s, 6 * s, 8 * s, th.fg, rx=2 * s)        # capsule
-        if label:
-            self.text(x, y + 66 * s, label, 18, self.th.muted)
+        cap_h, body_h = 12 * s, 34 * s
+        self.rect(x - 4 * s, capsule_top, 8 * s, cap_h, th.fg, rx=2.5 * s)
+        self.rect(x - 6 * s, capsule_top + cap_h, 12 * s, body_h, th.primary, rx=4 * s)
+        self.line(x, capsule_top + cap_h + body_h, x, ground, th.fg, 2.2)
+        self.line(x - 16 * s, ground, x + 16 * s, ground, th.fg, 2.2)
 
     def person(self, x: float, y: float, h: float = 90.0, seated: bool = False) -> None:
         """Simple engineering-style human silhouette; (x, y) = feet."""
@@ -167,9 +169,10 @@ class SVG:
         return head + "".join(self.parts) + "</svg>"
 
 
-def _write(output_dir: str, name: str, build: "callable", title: str) -> None:  # type: ignore[valid-type]
+def _write(output_dir: str, name: str, build: "callable", title: str,  # type: ignore[valid-type]
+           height: int = 560) -> None:
     for th in (LIGHT, DARK):
-        svg = SVG(980, 520, th)
+        svg = SVG(900, height, th)
         build(svg, th)
         path = os.path.join(output_dir, f"{name}{th.suffix}.svg")
         with open(path, "w", encoding="utf-8") as fh:
@@ -182,53 +185,37 @@ def _write(output_dir: str, name: str, build: "callable", title: str) -> None:  
 # ---------------------------------------------------------------------------
 
 def _d1(s: SVG, th: Theme) -> None:
-    gy = 440.0
-    s.ground(gy, 40, 940)
+    gy = 470.0
+    s.ground(gy, 40, 860)
 
     # Calibrator on top of the microphone (left column)
-    mx = 170.0
-    cal_y = 120.0
-    s.rect(mx - 52, cal_y, 104, 74, th.panel, th.fg, rx=8, sw=2)      # calibrator body
-    s.text(mx, cal_y + 30, "94.0 dB", 22, th.secondary, bold=True, mono=True)
-    s.text(mx, cal_y + 50, "1 kHz", 18, th.muted, mono=True)
-    s.rect(mx - 14, cal_y + 74, 28, 10, th.fg, rx=2)                 # coupler cavity
-    s.text(mx, cal_y - 14, "Sound calibrator", 20, th.fg, bold=True)
-    # microphone below, capsule inserted in the coupler
-    cap_y = cal_y + 84
-    s.rect(mx - 4, cap_y, 8, 10, th.fg, rx=2)                        # capsule
-    s.rect(mx - 6, cap_y + 10, 12, 66, th.primary, rx=4)             # body
-    s.line(mx, cap_y + 76, mx, gy, th.fg, 2.0)                       # stand
-    s.line(mx - 16, gy, mx + 16, gy, th.fg, 2.0)
-    s.text(mx, gy + 26, "Class 1 calibrator (IEC 60942)", 18, th.muted)
-    s.text(mx, gy + 42, "coupled to the microphone", 18, th.muted)
+    mx = 150.0
+    cal_y = 110.0
+    s.text(mx, cal_y - 22, "Sound calibrator", 22, th.fg, bold=True)
+    s.rect(mx - 62, cal_y, 124, 86, th.panel, th.fg, rx=10, sw=2)
+    s.text(mx, cal_y + 38, "94.0 dB", 26, th.secondary, bold=True, mono=True)
+    s.text(mx, cal_y + 66, "1 kHz", 20, th.muted, mono=True)
+    s.rect(mx - 15, cal_y + 86, 30, 12, th.fg, rx=3)   # coupler cavity
+    s.mic(mx, cal_y + 98, gy, 1.3)
 
-    # Signal chain boxes to the right, aligned with the mic body
-    boxes = [
-        (380, "Microphone +", "preamplifier"),
-        (585, "Audio interface", "(ADC)"),
-        (790, "sensitivity", "factor"),
-    ]
-    by, bw, bh = 180.0, 170.0, 64.0
-    prev_x = mx + 40
-    s.line(mx + 6, by + bh / 2, mx + 40, by + bh / 2, th.fg, 1.6)
+    # Signal chain
+    boxes = [(400, "Microphone +", "preamplifier"), (650, "Audio interface", "(ADC)")]
+    by, bw, bh = 176.0, 210.0, 78.0
+    prev_x = mx + 62
     for bx, l1, l2 in boxes:
-        mono = l1.startswith("sensitivity")
-        s.rect(bx - bw / 2, by, bw, bh, th.panel, th.primary, rx=10, sw=2)
-        s.text(bx, by + 27, l1, 20, th.fg, bold=not mono, mono=mono)
-        s.text(bx, by + 46, l2, 20, th.fg, bold=not mono, mono=mono)
-        s.arrow(prev_x, by + bh / 2, bx - bw / 2 - 6, by + bh / 2, th.fg)
+        s.rect(bx - bw / 2, by, bw, bh, th.panel, th.primary, rx=12, sw=2)
+        s.text(bx, by + 33, l1, 22, th.fg, bold=True)
+        s.text(bx, by + 60, l2, 22, th.fg, bold=True)
+        s.arrow(prev_x, by + bh / 2, bx - bw / 2 - 6, by + bh / 2, th.fg, 2)
         prev_x = bx + bw / 2 + 6
-    s.arrow(890, by + bh, 890, by + bh + 34, th.accent, 2)
-    s.text(892, by + bh + 60, "Pa / digital unit", 18, th.accent, "end", mono=True)
-    s.text(872, by + bh / 2 + 12, "digital", 18, th.accent, "start", mono=True)
-    s.text(872, by + bh / 2 + 28, "unit", 18, th.accent, "start", mono=True)
+    s.arrow(prev_x, by + bh / 2, 862, by + bh / 2, th.accent, 2.4)
+    s.text(818, by + bh / 2 + 34, "Pa per", 20, th.accent, mono=True)
+    s.text(818, by + bh / 2 + 58, "digital unit", 20, th.accent, mono=True)
 
-    # Stability annotation box
-    s.rect(270, 296, 600, 104, "none", th.secondary, rx=10, dash="5,4")
-    s.text(560, 326, "Stability check (IEC 60942:2017, 5.3.3)", 20, th.secondary, bold=True)
-    s.text(560, 348, "|max − mean| and |min − mean| of the F-weighted level", 18, th.fg)
-    s.text(560, 366, "must stay ≤ 0.07 dB (class 1, 160 Hz – 1.25 kHz),", 18, th.fg)
-    s.text(560, 384, "otherwise a CalibrationWarning is raised", 18, th.fg)
+    # Stability annotation, clearly separated below the chain
+    s.rect(250, 340, 560, 96, "none", th.secondary, rx=12, dash="6,5")
+    s.text(530, 376, "Stability: |max − mean| and |min − mean| ≤ 0.07 dB", 22, th.secondary, bold=True)
+    s.text(530, 408, "(IEC 60942:2017 Table 2, class 1) — else CalibrationWarning", 20, th.fg)
 
 
 # ---------------------------------------------------------------------------
@@ -236,54 +223,50 @@ def _d1(s: SVG, th: Theme) -> None:
 # ---------------------------------------------------------------------------
 
 def _d2(s: SVG, th: Theme) -> None:
-    gy = 430.0
-    s.ground(gy, 40, 940)
+    gy = 470.0
+    s.ground(gy, 40, 860)
 
     # Building facade (right)
-    fx = 760.0
-    s.rect(fx, 120, 150, gy - 120, th.panel, th.fg, sw=2)
-    for wy in range(160, int(gy) - 40, 70):
-        s.rect(fx + 22, wy, 34, 40, th.bg, th.muted, rx=2, sw=1)
-        s.rect(fx + 86, wy, 34, 40, th.bg, th.muted, rx=2, sw=1)
-    s.text(fx + 75, 108, "Building façade", 20, th.fg, bold=True)
+    fx = 700.0
+    s.rect(fx, 120, 160, gy - 120, th.panel, th.fg, sw=2)
+    for wy in range(158, int(gy) - 50, 78):
+        s.rect(fx + 24, wy, 38, 46, th.bg, th.muted, rx=3, sw=1.2)
+        s.rect(fx + 96, wy, 38, 46, th.bg, th.muted, rx=3, sw=1.2)
+    s.text(fx + 80, 104, "Building façade", 22, th.fg, bold=True)
 
-    # Source (left): road with car glyph
-    s.rect(60, gy - 8, 150, 8, th.muted)
-    s.path(f"M 90 {gy - 26} L 110 {gy - 44} L 150 {gy - 44} L 170 {gy - 26} Z",
-           fill=th.secondary)
-    s.rect(84, gy - 28, 96, 18, th.secondary, rx=4)
-    s.circle(104, gy - 12, 8, th.fg)
-    s.circle(160, gy - 12, 8, th.fg)
-    s.text(132, gy + 26, "Noise source (road traffic)", 18, th.muted)
-    # Sound propagation arcs
-    for r in (40, 70, 100):
-        s.path(f"M {170 + r * 0.5} {gy - 30 - r * 0.55} "
-               f"A {r} {r} 0 0 1 {170 + r * 0.87} {gy - 30 + r * 0.1}",
-               stroke=th.accent, sw=1.4)
+    # Source (left): car on a road
+    s.rect(60, gy - 9, 140, 9, th.muted)
+    s.path(f"M 88 {gy - 30} L 106 {gy - 48} L 146 {gy - 48} L 164 {gy - 30} Z", fill=th.secondary)
+    s.rect(80, gy - 32, 96, 14, th.secondary, rx=5)
+    s.circle(102, gy - 13, 9, th.fg)
+    s.circle(156, gy - 13, 9, th.fg)
+    for r in (44, 76, 108):
+        s.path(f"M {168 + r * 0.5} {gy - 34 - r * 0.55} "
+               f"A {r} {r} 0 0 1 {168 + r * 0.87} {gy - 34 + r * 0.1}",
+               stroke=th.accent, sw=1.6)
 
-    # Position A: free field mic, 4.0 m height (general mapping)
-    ax = 420.0
-    amy = gy - 190
-    s.mic(ax, amy, 1.1)
-    s.dim(ax - 46, gy, ax - 46, amy - 30, "4.0 ± 0.2 m", offset=0)
-    s.text(ax, amy - 64, "A — free field (mapping)", 20, th.fg, bold=True)
-    s.text(ax, amy - 44, "correction: 0 dB", 18, th.accent, mono=True)
+    # Position A: free field, capsule 4 m above ground
+    ax = 330.0
+    a_cap = gy - 230.0
+    s.mic(ax, a_cap, gy, 1.15)
+    s.dim(ax - 60, gy, ax - 60, a_cap, "4.0 ± 0.2 m", offset=0, size=20)
+    s.text(ax + 10, a_cap - 58, "A — free field", 22, th.fg, bold=True)
+    s.text(ax + 10, a_cap - 30, "0 dB", 22, th.accent, bold=True, mono=True)
 
-    # Position B: 2 m in front of facade
-    bx = fx - 90.0
-    bmy = gy - 190
-    s.mic(bx, bmy, 1.1)
-    s.dim(bx, bmy + 30, fx, bmy + 30, "2 m", offset=0)
-    s.text(bx - 60, bmy - 100, "B — 2 m in front of façade", 20, th.fg, bold=True)
-    s.text(bx - 60, bmy - 78, "correction: −3 dB", 18, th.secondary, mono=True)
+    # Position B: 2 m in front of the facade, dimension at capsule height
+    bx = fx - 108.0
+    b_cap = gy - 230.0
+    s.mic(bx, b_cap, gy, 1.15)
+    s.dim(bx, b_cap + 6, fx, b_cap + 6, "2 m", offset=-36, size=20)
+    s.text(bx - 42, b_cap - 58, "B — 2 m from façade", 22, th.fg, bold=True)
+    s.text(bx - 42, b_cap - 30, "−3 dB", 22, th.secondary, bold=True, mono=True)
 
-    # Position C: flush-mounted on the facade
-    cy = gy - 160
-    s.circle(fx + 3, cy, 6, th.fg)
-    s.line(fx + 3, cy, fx - 30, cy + 60, th.muted, 1.2)
-    s.text(fx - 24, cy + 84, "C — flush-mounted", 20, th.fg, "end", bold=True)
-    s.text(fx - 24, cy + 104, "correction: −6 dB", 18, th.secondary, "end", mono=True)
-
+    # Position C: flush-mounted on the facade, below B's dimension zone
+    cy = gy - 120.0
+    s.circle(fx + 3, cy, 7, th.fg)
+    s.line(fx - 2, cy + 5, fx - 60, cy + 52, th.muted, 1.4)
+    s.text(fx - 64, cy + 74, "C — flush-mounted", 22, th.fg, "end", bold=True)
+    s.text(fx - 64, cy + 100, "−6 dB", 22, th.secondary, "end", bold=True, mono=True)
 
 
 # ---------------------------------------------------------------------------
@@ -291,62 +274,54 @@ def _d2(s: SVG, th: Theme) -> None:
 # ---------------------------------------------------------------------------
 
 def _d3(s: SVG, th: Theme) -> None:
-    gy = 420.0
-    s.ground(gy, 40, 940)
+    gy = 470.0
+    s.ground(gy, 40, 860)
 
-    # --- Left scene: seated operator with table-top equipment -------------
-    tx = 110.0
-    table_y = gy - 140.0
-    # table
-    s.line(tx + 16, gy, tx + 16, table_y, th.fg, 3)
-    s.line(tx + 244, gy, tx + 244, table_y, th.fg, 3)
-    s.line(tx, table_y, tx + 260, table_y, th.fg, 4)
-    # equipment (reference box) on the table
-    s.rect(tx + 20, table_y - 70, 110, 70, th.panel, th.primary, rx=6, sw=2)
-    s.text(tx + 75, table_y - 30, "EUT", 20, th.primary, bold=True)
-    s.text(tx + 75, table_y - 80, "reference box", 16, th.muted)
-    eut_front = tx + 130.0
+    # --- Left: seated operator at table-top equipment (side view) ---------
+    s.text(240, 72, "Operator — seated (P2)", 24, th.fg, bold=True)
+    tx = 80.0
+    table_y = gy - 150.0
+    s.line(tx + 18, gy, tx + 18, table_y, th.fg, 3)
+    s.line(tx + 232, gy, tx + 232, table_y, th.fg, 3)
+    s.line(tx, table_y, tx + 250, table_y, th.fg, 4)
+    s.rect(tx + 16, table_y - 76, 118, 76, th.panel, th.primary, rx=8, sw=2)
+    s.text(tx + 75, table_y - 32, "EUT", 22, th.primary, bold=True)
+    eut_front = tx + 134.0
 
-    # microphone: capsule at 1.20 m above the floor, 0.25 m from the box
-    mx = eut_front + 62.0
-    cap = gy - 235.0  # capsule height (1.20 m)
-    s.rect(mx - 5, cap, 10, 13, th.fg, rx=3)
-    s.rect(mx - 7, cap + 13, 14, 38, th.primary, rx=4)
-    s.line(mx, cap + 51, mx, table_y, th.fg, 2.2)
-    s.line(mx - 14, table_y, mx + 14, table_y, th.fg, 2.2)
-    s.dim(eut_front, cap - 22, mx, cap - 22, "0.25 ± 0.03 m", offset=0)
-    s.dim(mx + 74, gy, mx + 74, cap, "1.20 ± 0.03 m", offset=0)
+    # microphone: capsule tip at 1.20 m, 0.25 m from the EUT front face
+    mx = eut_front + 76.0
+    cap = gy - 268.0
+    s.mic(mx, cap, table_y, 1.1)
+    s.line(mx - 18, table_y, mx + 18, table_y, th.fg, 2.2)
+    s.dim(eut_front, table_y - 76, mx, cap, "0.25 m", offset=-36, size=20)
+    s.dim(mx + 210, gy, mx + 210, cap, "1.20 m", offset=0, size=20)
+    s.line(mx + 10, cap, mx + 210, cap, th.muted, 0.9, dash="3,3")  # witness to capsule
 
-    # seated operator on a chair, head near the microphone height
-    px = mx + 168.0
-    seat_y = gy - 105.0
-    s.line(px - 26, seat_y, px + 30, seat_y, th.muted, 3)        # seat
-    s.line(px - 22, seat_y, px - 22, gy, th.muted, 2.4)          # chair legs
-    s.line(px + 26, seat_y, px + 26, gy, th.muted, 2.4)
-    s.line(px + 30, seat_y, px + 30, seat_y - 78, th.muted, 2.4) # backrest
-    s.circle(px, gy - 218, 20, th.muted)                          # head
-    s.line(px, gy - 205, px + 6, seat_y, th.muted, 3.2)           # torso
-    s.line(px + 6, seat_y, px - 34, seat_y - 2, th.muted, 2.6)    # thigh
-    s.line(px - 34, seat_y - 2, px - 34, gy, th.muted, 2.6)       # shin
-    s.line(px - 2, gy - 185, px - 40, gy - 160, th.muted, 2.4)    # arm
-    s.text(px + 4, gy - 244, "operator", 16, th.muted)
+    # seated operator on a chair, clear of both dimensions
+    px = mx + 120.0
+    seat_y = gy - 115.0
+    s.line(px - 28, seat_y, px + 32, seat_y, th.muted, 3)
+    s.line(px - 24, seat_y, px - 24, gy, th.muted, 2.6)
+    s.line(px + 28, seat_y, px + 28, gy, th.muted, 2.6)
+    s.line(px + 32, seat_y, px + 32, seat_y - 86, th.muted, 2.6)
+    s.circle(px, gy - 240, 15, th.muted)
+    s.line(px, gy - 225, px + 6, seat_y, th.muted, 3.4)
+    s.line(px + 6, seat_y, px - 34, seat_y - 2, th.muted, 2.8)
+    s.line(px - 34, seat_y - 2, px - 34, gy, th.muted, 2.8)
+    s.line(px - 1, gy - 205, px - 38, gy - 178, th.muted, 2.6)
 
-    s.text(tx + 190, 70, "Operator's position — seated (P2)", 22, th.fg, bold=True)
-    s.text(tx + 190, 90, "standing: height 1.50 ± 0.03 m (P1)", 18, th.muted)
-
-    # --- Right scene: bystander positions, top view -----------------------
-    cx, cyv = 760.0, 250.0
-    s.text(cx, 70, "Bystander positions — top view", 22, th.fg, bold=True)
-    s.text(cx, 90, "height 1.50 ± 0.03 m, ≥ 4 positions", 18, th.muted)
-    s.rect(cx - 55, cyv - 40, 110, 80, th.panel, th.primary, rx=6, sw=2)
-    s.text(cx, cyv + 5, "EUT", 20, th.primary, bold=True)
-    for pxx, pyy, lab in [(cx, cyv - 110, "front"), (cx, cyv + 110, "rear"),
-                          (cx - 160, cyv, "left"), (cx + 160, cyv, "right")]:
-        s.circle(pxx, pyy, 7, th.secondary)
-        s.circle(pxx, pyy, 2.4, th.bg)
-        s.text(pxx, pyy + 24 if pyy >= cyv else pyy - 16, lab, 16, th.muted)
-    s.dim(cx + 55, cyv + 80, cx + 160, cyv + 80, "1.00 ± 0.03 m", offset=0)
-
+    # --- Right: bystander positions (top view), equal face distances ------
+    cx, cyv = 700.0, 270.0
+    s.text(cx, 72, "Bystanders — top view", 24, th.fg, bold=True)
+    s.text(cx, 100, "height 1.50 m", 20, th.muted)
+    s.rect(cx - 52, cyv - 40, 104, 80, th.panel, th.primary, rx=8, sw=2)
+    s.text(cx, cyv + 8, "EUT", 22, th.primary, bold=True)
+    g = 92.0  # face-to-microphone distance, equal on all four sides
+    for pxx, pyy in [(cx, cyv - 40 - g), (cx, cyv + 40 + g),
+                     (cx - 52 - g, cyv), (cx + 52 + g, cyv)]:
+        s.circle(pxx, pyy, 8, th.secondary)
+        s.circle(pxx, pyy, 2.8, th.bg)
+    s.dim(cx + 52, cyv - 64, cx + 52 + g, cyv - 64, "1.00 m", offset=0, size=20)
 
 
 # ---------------------------------------------------------------------------
@@ -356,53 +331,37 @@ def _d3(s: SVG, th: Theme) -> None:
 def _d4(s: SVG, th: Theme) -> None:
     stages = [
         ("Signal", "x, fs", th.fg),
-        ("Calibration", "sensitivity", th.primary),
-        ("Freq. weighting", "A / C / G / Z", th.primary),
-        ("Filter bank", "1/1, 1/3, 1/b", th.primary),
-        ("Time weighting", "F / S / I", th.primary),
-        ("Metrics", "Leq, LN, SEL…", th.accent),
+        ("Calibrate", "→ Pa", th.primary),
+        ("Weighting", "A/C/G/Z", th.primary),
+        ("Octave", "bands 1/b", th.primary),
+        ("Ballistics", "F / S / I", th.primary),
+        ("Metrics", "Leq, LN…", th.accent),
     ]
-    bw, bh, gap = 138.0, 78.0, 18.0
+    bw, bh, gap = 128.0, 92.0, 18.0
     total = len(stages) * bw + (len(stages) - 1) * gap
-    x = (980 - total) / 2
-    y = 160.0
+    x = (900 - total) / 2
+    y = 170.0
     for i, (title, sub, color) in enumerate(stages):
-        s.rect(x, y, bw, bh, th.panel, color, rx=10, sw=2)
-        s.text(x + bw / 2, y + 32, title, 20, th.fg, bold=True)
-        s.text(x + bw / 2, y + 54, sub, 16, color, mono=True)
+        s.rect(x, y, bw, bh, th.panel, color, rx=12, sw=2)
+        s.text(x + bw / 2, y + 40, title, 22, th.fg, bold=True)
+        s.text(x + bw / 2, y + 68, sub, 19, color, mono=True)
         if i < len(stages) - 1:
-            s.arrow(x + bw, y + bh / 2, x + bw + gap - 2, y + bh / 2, th.fg)
+            s.arrow(x + bw + 1, y + bh / 2, x + bw + gap - 2, y + bh / 2, th.fg, 2)
         x += bw + gap
-
-    notes = [
-        (170, "WAV / stream /", "NumPy array"),
-        (330, "digital units → Pa", "(IEC 60942 check)"),
-        (487, "IEC 61672-1", "class 1 verified"),
-        (644, "IEC 61260-1", "class 1 verified"),
-        (800, "IEC 61672-1", "ballistics"),
-    ]
-    for nx, l1, l2 in notes:
-        s.text(nx, 278, l1, 16, th.muted)
-        s.text(nx, 293, l2, 16, th.muted)
-
-    s.text(490, 360, "Every stage is available standalone; conformance is enforced by the test "
-                     "suite against the tolerance tables of each standard.", 18, th.muted)
-    s.text(490, 382, "Block/streaming variants keep filter state across calls "
-                     "(OctaveFilterBank, WeightingFilter(stateful=True)).", 18, th.muted)
 
 
 DIAGRAMS = {
-    "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units"),
-    "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)"),
-    "diagram_tonality_positions": (_d3, "Emission measurement positions (ECMA-74)"),
-    "diagram_signal_chain": (_d4, "phonometry processing chain"),
+    "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
+    "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
+    "diagram_tonality_positions": (_d3, "Emission measurement positions (ECMA-74)", 560),
+    "diagram_signal_chain": (_d4, "phonometry processing chain", 400),
 }
 
 
 def generate_all(output_dir: str = ".github/images") -> None:
     os.makedirs(output_dir, exist_ok=True)
-    for name, (builder, title) in DIAGRAMS.items():
-        _write(output_dir, name, builder, title)
+    for name, (builder, title, height) in DIAGRAMS.items():
+        _write(output_dir, name, builder, title, height)
 
 
 if __name__ == "__main__":

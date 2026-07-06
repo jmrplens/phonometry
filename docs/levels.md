@@ -75,6 +75,29 @@ the dose functions against the IEC 61252 anchors (3.2 Pa²h ↔ exactly 90 dB).
 With `duration_hours`, the input is treated as a representative sample of that
 exposure period; without it, the input is the whole event.
 
+## Loudness level of pure tones (ISO 226:2023)
+
+The normal equal-loudness-level contours relate the SPL of a pure tone to its
+perceived *loudness level* in phons (the SPL of an equally loud 1 kHz tone).
+`equal_loudness_contour(phon)` evaluates ISO 226:2023 Formula (1) at the 29
+preferred third-octave frequencies of Table 1, `loudness_level(spl, frequency)`
+is the exact inverse (Formula 2), and `hearing_threshold()` returns the
+threshold-of-hearing column:
+
+```python
+from phonometry import equal_loudness_contour, loudness_level
+
+freqs, spl = equal_loudness_contour(40.0)   # the classic 40-phon contour
+phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.png" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" width="80%"></picture>
+
+Validity per clause 4.1: 20-90 phon (80 phon above 4 kHz); the implementation
+is verified against the Annex B tables in CI. Note this is the loudness of
+*pure tones* - loudness of arbitrary signals (ISO 532 sones) is a different,
+upcoming feature.
+
 ## Octave Spectrogram (levels over time)
 
 Short-time fractional-octave analysis: one level per band per window,

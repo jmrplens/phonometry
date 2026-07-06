@@ -528,6 +528,31 @@ def generate_g_weighting_response(output_dir: str) -> None:
     plt.close()
 
 
+def generate_equal_loudness_contours(output_dir: str) -> None:
+    """Plot the ISO 226:2023 normal equal-loudness-level contours."""
+    print("Generating equal_loudness_contours.png...")
+    from phonometry import equal_loudness_contour, hearing_threshold
+
+    _, ax = plt.subplots(figsize=(10, 7))
+    for phon in [20, 40, 60, 80, 90]:
+        freqs, spl = equal_loudness_contour(float(phon))
+        ax.semilogx(freqs, spl, color=COLOR_PRIMARY, linewidth=1.5)
+        ax.annotate(f"{phon} phon", xy=(1000, phon), xytext=(1150, phon + 1),
+                    fontsize=9, color=COLOR_PRIMARY)
+    ft, tf = hearing_threshold()
+    ax.semilogx(ft, tf, color=COLOR_SECONDARY, linestyle="--",
+                label="Hearing threshold $T_f$ (Table 1)")
+    ax.plot(1000, 0, alpha=0)  # keep 0 dB in view
+    apply_axis_styling(
+        ax, "Normal Equal-Loudness-Level Contours (ISO 226:2023)",
+        xlim=(20, 12500), ylim=(-10, 130),
+    )
+    ax.set_ylabel("Sound pressure level [dB re 20 \u00b5Pa]")
+    ax.legend(loc="upper right")
+    plt.savefig(themed_path(output_dir, "equal_loudness_contours.png"))
+    plt.close()
+
+
 def generate_time_weighting_plot(output_dir: str) -> None:
     """Visualize Fast, Slow and Impulse time weighting response to a burst."""
     print("Generating time_weighting_analysis.png...")
@@ -990,6 +1015,7 @@ def generate_all(img_dir: str) -> None:
 
     generate_weighting_responses(img_dir)
     generate_g_weighting_response(img_dir)
+    generate_equal_loudness_contours(img_dir)
     generate_time_weighting_plot(img_dir)
     generate_crossover_plot(img_dir)
 

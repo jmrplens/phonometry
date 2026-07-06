@@ -16,6 +16,7 @@ from .compliance import verify_filter_class
 from .core import OctaveFilterBank
 from .frequencies import getansifrequencies, normalizedfreq
 from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
+from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
 from .parametric_filters import (
     TimeWeighting,
     WeightingFilter,
@@ -45,6 +46,9 @@ __all__ = [
     "sel",
     "sound_exposure",
     "lex_8h",
+    "equal_loudness_contour",
+    "loudness_level",
+    "hearing_threshold",
     "CalibrationWarning",
     "verify_filter_class",
 ]

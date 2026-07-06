@@ -78,6 +78,29 @@ de la Tabla 4, y las funciones de dosis contra las anclas de IEC 61252
 muestra representativa de ese periodo de exposición; sin él, la entrada es el
 evento completo.
 
+## Nivel de sonoridad de tonos puros (ISO 226:2023)
+
+Las curvas isofónicas normales relacionan el SPL de un tono puro con su *nivel
+de sonoridad* percibido en fonos (el SPL de un tono de 1 kHz igual de fuerte).
+`equal_loudness_contour(phon)` evalúa la Fórmula (1) de ISO 226:2023 en las 29
+frecuencias preferentes de tercio de octava de la Tabla 1,
+`loudness_level(spl, frequency)` es la inversa exacta (Fórmula 2) y
+`hearing_threshold()` devuelve la columna del umbral de audición:
+
+```python
+from phonometry import equal_loudness_contour, loudness_level
+
+freqs, spl = equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonos
+phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonos
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonos con la curva del umbral de audición" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonos con la curva del umbral de audición" style="width:80%">
+
+Validez según el apartado 4.1: 20–90 fonos (80 fonos por encima de 4 kHz); la
+implementación se verifica en CI contra las tablas del Anexo B. Ojo: esto es la
+sonoridad de *tonos puros* — la sonoridad de señales arbitrarias (sonos,
+ISO 532) es una feature distinta, prevista más adelante.
+
 ## Espectrograma de octavas (niveles vs tiempo)
 
 Análisis de octava fraccional en tiempo corto: un nivel por banda y ventana,

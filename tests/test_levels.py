@@ -279,3 +279,10 @@ def test_sound_exposure_defaults_to_recording_duration() -> None:
     x = _tone_at_level(90.0, seconds=2.0)
     expected = (2e-5 * 10 ** (90 / 20)) ** 2 * (2.0 / 3600.0)  # Pa² * hours
     assert sound_exposure(x, FS) == pytest.approx(expected, rel=0.01)
+
+
+def test_sel_invalid_fs_raises() -> None:
+    from pyoctaveband import sel
+
+    with pytest.raises(ValueError, match="fs"):
+        sel(_tone(1000), 0)

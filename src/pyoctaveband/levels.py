@@ -171,6 +171,8 @@ def sel(
     """
     x_proc = _typesignal(x)
     _validate_level_input(x_proc, calibration_factor)
+    if fs <= 0:
+        raise ValueError("Sample rate 'fs' must be positive.")
     if weighting is not None and weighting.upper() != "Z":
         x_proc = weighting_filter(x_proc, fs, weighting)
     duration_s = x_proc.shape[-1] / fs

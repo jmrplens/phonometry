@@ -49,6 +49,8 @@ def calculate_sensitivity(
     :return: Calibration factor (sensitivity multiplier).
     """
     signal_arr = np.asarray(ref_signal, dtype=np.float64)
+    if signal_arr.size == 0:
+        raise ValueError("Reference signal is empty, cannot calibrate.")
     rms_ref = np.sqrt(np.mean(signal_arr ** 2))
     if rms_ref == 0:
         raise ValueError("Reference signal is silent, cannot calibrate.")
@@ -66,10 +68,19 @@ def _validate_reference_stability(
     """Warn if the F-weighted level of the recording fluctuates too much."""
     from .parametric_filters import time_weighting
 
+    # The integrator attack lasts ~8*tau (1 s for F); we need at least
+    # another second of settled envelope to assess the fluctuation.
+    if signal_arr.shape[-1] < 2 * fs:
+        warnings.warn(
+            "Calibration tone is shorter than 2 s: too short to validate its "
+            "stability (IEC 60942 measures the generated level over 20 s). "
+            "Record a longer, steady tone.",
+            CalibrationWarning,
+            stacklevel=3,
+        )
+        return
     envelope = time_weighting(signal_arr, fs, mode="fast")
-    # Skip the integrator attack: after 8*tau (1 s for F) the envelope is
-    # within 0.002 dB of its final value, well below the 0.10 dB limit.
-    skip = min(int(1.0 * fs), envelope.shape[-1] // 2)
+    skip = int(1.0 * fs)
     steady = np.maximum(envelope[..., skip:], np.finfo(float).eps)
     levels_db = 10 * np.log10(steady)
     fluctuation = float(levels_db.max() - levels_db.min()) / 2.0

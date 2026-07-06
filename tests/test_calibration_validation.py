@@ -54,3 +54,13 @@ def test_custom_fluctuation_limit() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", CalibrationWarning)
         calculate_sensitivity(_cal_tone(am_depth=0.05), fs=FS, max_fluctuation_db=1.0)
+
+
+def test_empty_reference_raises() -> None:
+    with pytest.raises(ValueError, match="empty"):
+        calculate_sensitivity(np.array([]), fs=FS)
+
+
+def test_too_short_recording_warns() -> None:
+    with pytest.warns(CalibrationWarning, match="shorter than 2 s"):
+        calculate_sensitivity(_cal_tone(seconds=1.0), fs=FS)

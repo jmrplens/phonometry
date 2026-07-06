@@ -78,7 +78,8 @@ make check     # ruff + mypy + bandit + tests
 make graphs    # regenerate documentation images
 ```
 
-See https://github.com/jmrplens/PyOctaveBand/blob/main/CONTRIBUTING.md
+See https://github.com/jmrplens/PyOctaveBand/blob/main/CONTRIBUTING.md and the
+https://github.com/jmrplens/PyOctaveBand/blob/main/CHANGELOG.md
 
 ## 📄 License
 

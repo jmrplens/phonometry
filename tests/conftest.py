@@ -14,8 +14,10 @@ def pytest_configure(config):
     Configure environment variables for the test session.
     We disable Numba JIT to allow coverage tools to trace inside the kernels.
     """
-    # Disable JIT by default for tests to ensure 100% coverage reporting
-    os.environ["NUMBA_DISABLE_JIT"] = "1"
+    # Disable JIT by default for tests to ensure 100% coverage reporting.
+    # setdefault: the CI tests-perf job sets NUMBA_DISABLE_JIT=0 explicitly
+    # to exercise the jitted kernel; an externally-set value must win.
+    os.environ.setdefault("NUMBA_DISABLE_JIT", "1")
 
 @pytest.fixture(autouse=True)
 def handle_performance_tests(request):

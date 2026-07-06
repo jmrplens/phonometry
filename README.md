@@ -1,7 +1,11 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate?hosted_button_id=BLP3R6VGYJB4Q)
 [![Donate](https://img.shields.io/badge/Donate-Ko--fi-brightgreen?color=ff5f5f)](https://ko-fi.com/jmrplens) 
 [![PyPI version](https://img.shields.io/pypi/v/PyOctaveBand)](https://pypi.org/project/PyOctaveBand/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/PyOctaveBand)](https://pypi.org/project/PyOctaveBand/)
+[![Python versions](https://img.shields.io/pypi/pyversions/PyOctaveBand)](https://pypi.org/project/PyOctaveBand/)
 [![Python application](https://github.com/jmrplens/PyOctaveBand/actions/workflows/python-app.yml/badge.svg)](https://github.com/jmrplens/PyOctaveBand/actions/workflows/python-app.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=jmrplens_PyOctaveBand&metric=alert_status)](https://sonarcloud.io/summary/overall?id=jmrplens_PyOctaveBand)
+[![codecov](https://codecov.io/gh/jmrplens/PyOctaveBand/branch/main/graph/badge.svg)](https://codecov.io/gh/jmrplens/PyOctaveBand)
 
 # PyOctaveBand
 
@@ -78,7 +82,8 @@ make check     # ruff + mypy + bandit + tests
 make graphs    # regenerate documentation images
 ```
 
-See https://github.com/jmrplens/PyOctaveBand/blob/main/CONTRIBUTING.md
+See https://github.com/jmrplens/PyOctaveBand/blob/main/CONTRIBUTING.md and the
+https://github.com/jmrplens/PyOctaveBand/blob/main/CHANGELOG.md
 
 ## 📄 License
 

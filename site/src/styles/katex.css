@@ -1,1 +1,9 @@
 @import 'katex/dist/katex.min.css';
+
+/* Display math must scroll inside its own box on narrow viewports instead
+   of overflowing the page (mobile-legibility requirement). */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.25rem;
+}

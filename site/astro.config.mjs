@@ -205,6 +205,8 @@ export default defineConfig({
         Head: './src/components/Head.astro',
         // Human-visible maintainer block corroborating the Person node.
         Footer: './src/components/Footer.astro',
+        // Default header plus a mobile-visible language selector.
+        Header: './src/components/Header.astro',
       },
       customCss: [
         './src/styles/katex.css',

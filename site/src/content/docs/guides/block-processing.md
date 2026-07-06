@@ -71,3 +71,32 @@ Or manage the state yourself with the functional API — see
 All stateful classes handle multichannel input `(channels, samples)`: the state
 is allocated lazily on the first call to match the channel count, and reallocated
 if the channel count changes (e.g. switching from stereo to mono resets the state).
+
+## Real-time level meter pattern
+
+The canonical streaming loop — weight, envelope and report block by block
+with all state carried across calls:
+
+```python
+import numpy as np
+from phonometry import TimeWeighting, WeightingFilter
+
+fs, block = 48000, 4800  # 100 ms blocks
+aw = WeightingFilter(fs, "A", stateful=True)
+env = TimeWeighting(fs, mode="fast")  # the class is inherently stateful
+
+for x in audio_stream(block):            # your capture callback
+    y = env.process(aw.filter(x))
+    spl = 10 * np.log10(y[..., -1] / (2e-5) ** 2)  # instantaneous LAF
+    display(spl)
+```
+
+### Stateful-mode constraints
+
+| Option | Stateful behavior | Why |
+| :--- | :--- | :--- |
+| `detrend` | must be `False` | Per-block detrending creates boundary discontinuities |
+| `resample` | must be `False` | The resampler is not stateful |
+| `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
+| `high_accuracy` (weighting) | resolves to `False` by default; explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
+| `steady_ic` | optional | Starts the filters in step-response steady state |

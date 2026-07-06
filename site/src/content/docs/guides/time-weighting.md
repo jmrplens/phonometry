@@ -31,6 +31,35 @@ y[n] = y[n-1] + \alpha \,(x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{otherwise}\end{cases}
 $$
 
+## The exponential detector
+
+A sound level meter's needle cannot follow the pressure waveform — it shows a
+running *mean square* with an exponential memory. Formally (IEC 61672-1, 3.8):
+
+$$
+\tau\,\frac{dy}{dt} + y = x^2(t)
+\quad\Longleftrightarrow\quad
+y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\, e^{-(t-\xi)/\tau}\, d\xi
+$$
+
+a first-order low-pass on the squared signal. The time constant τ sets the
+trade-off: **Fast** (125 ms) follows speech-like fluctuations, **Slow** (1 s)
+steadies the readout for quasi-stationary noise. After a step onset the
+envelope reaches 63 % of its final value in one τ and ~99.8 % after 8τ —
+that is why level analyses discard the first instants of a recording.
+
+### `time_weighting()` / `TimeWeighting` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D or 2D array | pressure (any scale) | non-empty | Squared internally; output is a mean-square envelope |
+| `fs` | int | Hz | > 0 | |
+| `mode` | str | — | `'fast'` (default), `'slow'`, `'impulse'` | τ = 125 ms / 1 s / 35 ms attack + 1.5 s decay |
+| `TimeWeighting(fs, mode)` (class) | — | — | — | Stateful variant for streaming: `process(x)` carries the integrator state between blocks |
+
+The output has the units of $x^2$: take `10*log10(y / p0**2)` for SPL or use
+the level functions, which do it for you.
+
 ## Verified ballistics (IEC 61672-1 Table 4)
 
 The Fast envelope's response to 4 kHz tonebursts lands exactly on the

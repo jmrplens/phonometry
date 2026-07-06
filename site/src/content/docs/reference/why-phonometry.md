@@ -3,13 +3,16 @@ title: "Why phonometry"
 description: "IEC 61672-1 compliance verification and comparison with other libraries."
 ---
 
-How phonometry's time weighting relates to the **IEC 61672-1:2013** standard
-(Electroacoustics — Sound level meters), and how it differs from other Python
-libraries such as `python-acoustics`. This page summarizes the analysis
-originally published in
-[issue #38](https://github.com/jmrplens/phonometry/issues/38).
+phonometry is a standards-based acoustic measurement toolkit. Its
+differentiator is not the list of features but how they are built: every
+metric is implemented from the governing standard's text, and the standard's
+own reference values and acceptance limits are transcribed into the test
+suite and enforced in CI. This page explains that approach with a concrete
+case study — time weighting under **IEC 61672-1:2013** — and summarizes what
+is conformance-tested today. The time-weighting analysis was originally
+published in [issue #38](https://github.com/jmrplens/phonometry/issues/38).
 
-## Design philosophy
+## Design philosophy: a case study in time weighting
 
 Standard time weighting is defined as a **continuous function of time** via the
 differential equation
@@ -77,19 +80,49 @@ how the burst aligns with the block boundaries.
 - If you need **block-averaged Leq per interval**, that is a different, equally
   valid metric — you can compute it with [`leq`](/phonometry/guides/levels/) over consecutive
   slices.
-- Both libraries are useful; they just answer different questions. The
+- Both approaches are useful; they just answer different questions. The
   discrepancy reported in issue #38 comes from comparing a continuous envelope
   against a block integrator, not from an implementation error.
 
-## Beyond time weighting
+## Conformance testing across the library
 
-The same standards-first approach applies across the library:
+The tone-burst case above is not an isolated check. For each standard the
+library implements, the reference values and acceptance limits are transcribed
+from the official text into the test suite, so any regression fails CI:
 
-- Filter banks place their −3 dB points on the **ANSI S1.11** band edges for
-  every architecture (including Chebyshev II and Bessel, where scipy's raw
-  parametrization would not).
-- A/C weighting stays within **IEC 61672-1 class 1** tolerances up to 16 kHz at
-  common audio rates via internal oversampling (see
-  [Frequency Weighting](/phonometry/guides/weighting/)).
-- The IEC tone-burst targets above are enforced in the test suite, so
-  regressions are caught in CI.
+| Standard | What is verified | Test file |
+| :--- | :--- | :--- |
+| IEC 61672-1:2013 Table 3 | A/C/Z weighting at all 34 nominal frequencies, class 1 limits, at 48 and 96 kHz | `tests/test_iec_weighting_table3.py` |
+| IEC 61672-1:2013 Table 4 | F/S tone-burst responses (1 s to 1 ms) and the LAE column for `sel()` | `tests/test_iec_compliance.py` |
+| IEC 61672-1:2013 Table 5 | `lc_peak()` one-cycle/half-cycle peak responses, class 1 limits | `tests/test_levels.py` |
+| IEC 61260-1:2014 Table 1 | Filter-bank class 1/2 acceptance limits via `verify_filter_class()` | `tests/test_compliance.py` |
+| ISO 7196:1995 Table 2 | G weighting (infrasound) at every nominal response value, 0.25–315 Hz | `tests/test_g_weighting.py` |
+| ISO 226:2023 Annex B | Equal-loudness contours, loudness levels and hearing threshold against the Annex B tables | `tests/test_equal_loudness.py` |
+| ECMA-418-1:2024 | TNR/PR tone prominence: critical bandwidths, proximity spacing and prominence criteria against the worked examples in clauses 10–12 | `tests/test_tonality.py` |
+| ISO 1996-1:2016 | `lden()`, `ldn()` and `composite_rating_level()` against hand-computed formula values | `tests/test_environmental.py` |
+| IEC 60942:2017 Table 2 | Calibrator short-term stability limits (frequency-dependent, class 1) in `calculate_sensitivity()` | `tests/test_calibration_validation.py` |
+
+Beyond IEC 61252-style noise dose (`sound_exposure()`, `lex_8h()`), the same
+standards-first mindset shows up in the numerics: filter banks place their
+−3 dB points on the **ANSI S1.11 / IEC 61260-1** band edges for every
+architecture (including Chebyshev II and Bessel, where scipy's raw
+parametrization would not), and A/C weighting stays within class 1 tolerances
+up to 16 kHz at common audio rates via internal oversampling (see
+[Frequency Weighting](/phonometry/guides/weighting/)).
+
+## Where phonometry fits in the Python ecosystem
+
+- **python-acoustics** was archived in February 2024 and is no longer
+  maintained. Its comparison above reflects the last released code.
+- **acoustic-toolbox**, the community successor to python-acoustics, depends
+  on phonometry for its weighted level computations rather than reimplementing
+  them.
+- **MoSQITo** focuses on psychoacoustic sound-quality metrics (loudness,
+  sharpness, roughness). It complements rather than overlaps phonometry:
+  it does not cover sound level metrology (weighting filters, ballistics,
+  Leq/SEL/Lden, calibration) and does not claim conformance testing against
+  the standards' tolerance tables.
+
+If your work needs numbers you can defend against a standard's tolerance
+table — measurement reports, environmental assessments, instrument
+cross-checks — that verification layer is what phonometry is for.

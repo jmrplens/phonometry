@@ -7,7 +7,7 @@ Las curvas de ponderación frecuencial simulan la sensibilidad del oído humano.
 A, C y Z están especificadas en **IEC 61672-1:2013**; la curva G de
 infrasonido, en **ISO 7196:1995**.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.png" alt="Curvas de ponderación A, C y Z con zoom de la región positiva de la curva A (+1,27 dB en 2,5 kHz)" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_dark.png" alt="Curvas de ponderación A, C y Z con zoom de la región positiva de la curva A (+1,27 dB en 2,5 kHz)" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_es.png" alt="Curvas de ponderación A, C y Z con zoom de la región positiva de la curva A (+1,27 dB en 2,5 kHz)" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_es_dark.png" alt="Curvas de ponderación A, C y Z con zoom de la región positiva de la curva A (+1,27 dB en 2,5 kHz)" style="width:80%">
 
 * **Ponderación A (`A`):** estándar para ruido ambiental (IEC 61672-1).
 * **Ponderación C (`C`):** para presión sonora de pico y ruido de alto nivel.
@@ -39,13 +39,43 @@ from phonometry import weighting_filter
 g_weighted = weighting_filter(signal, fs, curve='G')
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.png" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.png" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_es.png" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_es_dark.png" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%">
 
 La implementación sigue exactamente los polos/ceros de la Tabla 1 de ISO 7196 y
 se verifica en CI contra todos los valores nominales de respuesta de la Tabla 2
 (0,25 Hz a 315 Hz). `WeightingFilter(fs, "G")` admite el mismo procesado
 multicanal y por bloques que A/C. Los niveles medidos con la curva G se
 expresan como L<sub>pG</sub> (o L<sub>Geq</sub> para el nivel equivalente).
+
+## De dónde vienen las curvas
+
+Las curvas A y C son líneas isofónicas invertidas, congeladas en filtros:
+**A** aproxima la inversa de la histórica línea isofónica de 40 fonios (niveles
+bajos, donde el oído descarta los graves con más agresividad) y **C** la más
+plana de ~100 fonios (niveles altos). IEC 61672-1:2013 (Anexo E) define ambas
+analíticamente a partir de cuatro frecuencias de esquina:
+
+$$
+f_1 = 20.599\ \text{Hz}, \quad f_2 = 107.653\ \text{Hz}, \quad
+f_3 = 737.862\ \text{Hz}, \quad f_4 = 12194.217\ \text{Hz}
+$$
+
+C es un paso-banda con polos dobles en $f_1$ y $f_4$ (2 ceros en el origen);
+A añade los polos $f_2$ y $f_3$ (4 ceros), y por eso sigue cayendo en los
+medios-graves. Ambas se normalizan a exactamente 0 dB en 1 kHz. Z es la
+ausencia de ponderación. La derivación completa de polos y ceros está en la
+página de [Teoría](/phonometry/es/reference/theory/).
+
+### Parámetros de `weighting_filter()` / `WeightingFilter`
+
+| Parámetro | Tipo | Unidades | Rango / por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | array 1D o 2D | cualquiera | no vacío | 2D es `[channels, samples]` |
+| `fs` | int | Hz | > 0 | |
+| `curve` | str | — | `'A'` (por defecto), `'C'`, `'G'`, `'Z'` | `'G'` según ISO 7196 (infrasonido); `'Z'` es un bypass |
+| `high_accuracy` | bool | — | por defecto `True` (función); en la clase, `None` se resuelve a `not stateful` | Sobremuestreo interno (8×, ≥ 96 kHz a frecuencias de audio habituales) que mantiene A/C en clase 1 hasta 16 kHz; con G se ignora en silencio (su rango de 0,25–315 Hz ya es exacto con el diseño simple) |
+| `stateful` | bool (solo clase) | — | por defecto `False` | Conserva el estado del filtro entre bloques (streaming) |
+| `steady_ic` | bool (solo clase) | — | por defecto `False` | Condiciones iniciales estacionarias (sin transitorio de arranque) |
 
 ## Objeto de filtro reutilizable
 
@@ -70,7 +100,7 @@ ponderación a una frecuencia interna sobremuestreada (≥ 96 kHz) y diezma de
 vuelta, manteniendo la respuesta dentro de las tolerancias de clase 1 hasta
 16 kHz (error ≈ −0,5 dB a 12,5 kHz para fs = 48 kHz).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf.png" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño sobremuestreado, con error" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_dark.png" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño sobremuestreado, con error" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_es.png" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño sobremuestreado, con error" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_es_dark.png" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño sobremuestreado, con error" style="width:80%">
 
 *El diseño bilineal simple (rojo) cruza la tolerancia de clase 1 cerca de
 12,5 kHz; el diseño sobremuestreado (azul) se mantiene junto a la curva analítica.*

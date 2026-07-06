@@ -55,7 +55,7 @@ that is why level analyses discard the first instants of a recording.
 | `x` | 1D or 2D array | pressure (any scale) | non-empty | Squared internally; output is a mean-square envelope |
 | `fs` | int | Hz | > 0 | |
 | `mode` | str | — | `'fast'` (default), `'slow'`, `'impulse'` | τ = 125 ms / 1 s / 35 ms attack + 1.5 s decay |
-| `stateful` (class) | bool | — | default `False` | Streaming: keeps the integrator state between blocks |
+| `TimeWeighting(fs, mode)` (class) | — | — | — | Stateful variant for streaming: `process(x)` carries the integrator state between blocks |
 
 The output has the units of $x^2$: take `10*log10(y / p0**2)` for SPL or use
 the level functions, which do it for you.

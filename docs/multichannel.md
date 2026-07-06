@@ -28,6 +28,20 @@ spl, freq = octavefilter(stereo, fs, fraction=3)
 # spl has shape (2, n_bands): one row per channel
 ```
 
+## Accepted shapes, at a glance
+
+| Input | Interpreted as | Typical output |
+| :--- | :--- | :--- |
+| `(n,)` 1D array | one channel | scalar level / `(bands,)` |
+| `(ch, n)` 2D array | `ch` channels, `n` samples each | `(ch,)` levels / `(ch, bands)` |
+| list of floats | one channel (converted) | as 1D |
+| `(ch, n)` into `spectrogram` | multichannel STFT-style | `(ch, bands, frames)` |
+
+Everything vectorizes across the leading channel axis — one filter design is
+applied to all channels in a single SciPy call, so 8 channels cost far less
+than 8 separate runs. Convention: **channels first**, like most DSP code
+(`soundfile` returns `(n, ch)`: transpose with `x.T`).
+
 ## Performance: Vectorization and caching
 
 The `OctaveFilterBank` class is highly optimized for real-time and batch

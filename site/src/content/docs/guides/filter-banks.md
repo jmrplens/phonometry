@@ -7,6 +7,52 @@ phonometry supports several filter types, each with its own transfer function
 characteristic. All banks place their **−3 dB points on the ANSI S1.11 band
 edges**, so band levels are comparable across architectures.
 
+## Fractional octave bands: the math
+
+IEC 61260-1:2014 builds every band from the base-10 octave ratio
+$G = 10^{3/10} \approx 1.99526$ (so "one octave" is *not* exactly 2). For
+band fraction $1/b$, the mid frequencies and band edges follow (5.2-5.5):
+
+$$
+f_m = 1000 \cdot G^{x/b} \quad (b\ \text{odd}), \qquad
+f_1 = f_m G^{-1/2b}, \quad f_2 = f_m G^{+1/2b}
+$$
+
+so every 1/3-octave band spans $G^{1/3} \approx 1.2589 \approx 10^{1/10}$ —
+ten bands per decade, which is why the nominal frequencies (25, 31.5, 40 …)
+repeat scaled by 10. phonometry designs each band as an SOS cascade whose
+−3 dB points land exactly on $f_1$ and $f_2$ for every architecture — for
+Chebyshev II, Elliptic and Bessel that requires pre-warping the analytic
+band-edge mapping rather than trusting SciPy's default parametrization.
+
+### Multirate decimation
+
+A 25 Hz one-third-octave band at 48 kHz has a relative bandwidth of 0.012 %
+of Nyquist — coefficients so stiff they go numerically unstable. The bank
+avoids that by filtering low bands at a decimated rate:
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate.svg" alt="Multirate decimation: high bands filtered at the input rate, low bands after anti-alias low-pass and decimation so the SOS sections stay numerically healthy" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_dark.svg" alt="Multirate decimation: high bands filtered at the input rate, low bands after anti-alias low-pass and decimation so the SOS sections stay numerically healthy" style="width:92%">
+
+### `octavefilter()` / `OctaveFilterBank` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D or 2D array | digital units | non-empty | 2D is `[channels, samples]` |
+| `fs` | int | Hz | > 0 | |
+| `fraction` | int | — | default `1`; common `3`; any `b ≥ 1` | Bands per octave = `b` |
+| `order` | int | — | default `6` | SOS order per band |
+| `limits` | list `[lo, hi]` | Hz | default `[12, 20000]` | Analysis range |
+| `filter_type` | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See comparison above |
+| `ripple` / `attenuation` | float | dB | required by cheby/ellip types | Passband ripple / stopband attenuation |
+| `show` | bool | — | default `False` | Plot the bank response (needs matplotlib) |
+| `sigbands` | bool | — | default `False` | Also return the per-band time signals |
+| `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline) |
+| `stateful` / `steady_ic` (class) | bool | — | default `False` | Streaming state; see [Block Processing](/phonometry/guides/block-processing/) |
+
+`verify_filter_class(bank)` checks the designed bank against the IEC 61260-1
+Table 1 acceptance limits and reports the class (0, 1, 2) with per-band
+margins.
+
 ## Filter Comparison and Zoom
 
 We use Second-Order Sections (SOS) for all filters to ensure numerical stability.

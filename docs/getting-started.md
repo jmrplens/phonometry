@@ -34,6 +34,19 @@ git submodule add https://github.com/jmrplens/phonometry.git
 pip install -e ./phonometry
 ```
 
+## The processing chain at a glance
+
+Every phonometry analysis is some subset of one pipeline — take the raw
+signal, convert it to physical units, weight it in frequency, split it into
+standardized bands, smooth it in time and reduce it to metrics:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_signal_chain.svg" alt="phonometry processing chain: signal, calibration, frequency weighting, octave filter bank, time weighting and metrics, with the standard verified at each stage" width="92%"></picture>
+
+Each stage is an independent function or class you can use on its own; the
+guides cover them left to right ([Calibration](calibration.md) →
+[Frequency Weighting](weighting.md) → [Filter Banks](filter-banks.md) →
+[Time Weighting](time-weighting.md) → [Levels](levels.md)).
+
 ## Basic Usage: 1/3 Octave Analysis
 
 Analyze a signal and get the Sound Pressure Level (SPL) per frequency band.

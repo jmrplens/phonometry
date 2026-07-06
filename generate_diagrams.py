@@ -76,6 +76,17 @@ _ES: dict[str, str] = {
     "bands 1/b": "bandas 1/b",
     "Ballistics": "Temporal",
     "Metrics": "Métricas",
+    "Multirate decimation in the octave filter bank":
+        "Decimación multitasa en el banco de filtros de octava",
+    "16 kHz band": "Banda de 16 kHz",
+    "1 kHz band": "Banda de 1 kHz",
+    "63 Hz band": "Banda de 63 Hz",
+    "no decimation": "sin decimación",
+    "Anti-alias": "Antialias",
+    "Low bands are filtered at a decimated rate: the relative":
+        "Las bandas graves se filtran a frecuencia decimada: el ancho",
+    "bandwidth stays wide, so the SOS stays numerically healthy.":
+        "relativo se mantiene amplio y las SOS siguen bien condicionadas.",
 }
 
 
@@ -410,11 +421,48 @@ def _d4(s: SVG, th: Theme) -> None:
         x += bw + gap
 
 
+
+
+# ---------------------------------------------------------------------------
+# d5 - Multirate decimation inside the filter bank
+# ---------------------------------------------------------------------------
+
+def _d5(s: SVG, th: Theme) -> None:
+    # Input on the left
+    s.rect(36, 150, 136, 70, th.panel, th.fg, rx=10, sw=2)
+    s.text(104, 180, "Signal", 22, th.fg, bold=True)
+    s.text(104, 205, "fs = 48 kHz", 18, th.muted, mono=True)
+
+    rows = [
+        (120.0, "16 kHz band", "fs", "no decimation", th.secondary),
+        (230.0, "1 kHz band", "fs / 8", "6 kHz", th.primary),
+        (340.0, "63 Hz band", "fs / 64", "750 Hz", th.accent),
+    ]
+    for y, band, rate, eff, color in rows:
+        bx = 455.0
+        if "no" not in eff:
+            s.arrow(172, 185, 240, y + 35, th.fg, 1.6)
+            s.rect(250, y, 150, 70, th.panel, th.muted, rx=10, sw=1.6)
+            s.text(325, y + 30, "Anti-alias", 20, th.fg)
+            s.text(325, y + 54, "LPF + \u2193M", 18, th.muted, mono=True)
+            s.arrow(400, y + 35, 448, y + 35, th.fg, 1.6)
+        else:
+            s.arrow(172, 185, 448, y + 35, th.fg, 1.6)
+        s.rect(bx, y, 190, 70, th.panel, color, rx=10, sw=2)
+        s.text(bx + 95, y + 30, band, 20, th.fg, bold=True)
+        s.text(bx + 95, y + 54, f"SOS @ {rate}", 18, color, mono=True)
+        s.text(720, y + 40, eff if "no" not in eff else "", 18, th.muted, mono=True)
+
+    s.text(450, 480, "Low bands are filtered at a decimated rate: the relative", 20, th.fg)
+    s.text(450, 508, "bandwidth stays wide, so the SOS stays numerically healthy.", 20, th.fg)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
     "diagram_tonality_positions": (_d3, "Emission measurement positions (ECMA-74)", 560),
     "diagram_signal_chain": (_d4, "phonometry processing chain", 400),
+    "diagram_multirate": (_d5, "Multirate decimation in the octave filter bank", 560),
 }
 
 

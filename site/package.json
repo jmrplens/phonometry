@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "prebuild": "node scripts/copy-llms.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview"
@@ -11,9 +12,12 @@
   "dependencies": {
     "@astrojs/starlight": "^0.41.3",
     "astro": "^7.0.6",
+    "astro-mermaid": "^2.1.0",
     "katex": "^0.17.0",
+    "mermaid": "^11.16.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.3",
+    "starlight-links-validator": "^0.25.2"
   }
 }

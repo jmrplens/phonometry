@@ -28,6 +28,8 @@ jobs:
           node-version: 22
           cache: pnpm
           cache-dependency-path: site/pnpm-lock.yaml
+      - name: Regenerate llms.txt from docs (freshness guarantee)
+        run: python3 scripts/gen_llms.py
       - name: Build site
         run: pnpm install --frozen-lockfile && pnpm build
         working-directory: site

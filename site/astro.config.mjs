@@ -1,5 +1,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightLinksValidator from 'starlight-links-validator';
+import mermaid from 'astro-mermaid';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
@@ -11,8 +13,19 @@ export default defineConfig({
     rehypePlugins: [rehypeKatex],
   },
   integrations: [
+    mermaid({
+      theme: 'default',
+      autoTheme: true,
+    }),
     starlight({
       title: 'PyOctaveBand',
+      plugins: [
+        starlightLinksValidator({
+          errorOnRelativeLinks: false,
+          errorOnFallbackPages: false,
+        }),
+      ],
+      lastUpdated: true,
       customCss: ['./src/styles/katex.css', './src/styles/theme-images.css'],
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/jmrplens/PyOctaveBand' },

@@ -77,7 +77,7 @@ const featureList = [
   'Physical SPL calibration (IEC 60942 calibrators) and dBFS mode',
   'Vectorized multichannel processing and stateful block (streaming) workflows',
 ];
-const softwareRequirements = 'Python >= 3.11 with NumPy and SciPy (matplotlib and numba optional).';
+const softwareRequirements = 'Python >= 3.13 with NumPy and SciPy (matplotlib and numba optional).';
 
 const jsonLd = JSON.stringify({
   '@context': 'https://schema.org',
@@ -158,6 +158,7 @@ const jsonLd = JSON.stringify({
       sameAs: [
         'https://pypi.org/project/phonometry/',
         'https://doi.org/10.5281/zenodo.21215280',
+        'https://www.wikidata.org/wiki/Q140451720',
         `${fullUrl}/`,
       ],
     },

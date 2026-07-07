@@ -162,6 +162,30 @@ def _validate_area_inputs(
         raise ValueError("Reverberation times must be positive.")
     if np.any(m < 0.0):
         raise ValueError("Air attenuation coefficient 'm' must be non-negative.")
+    if m.ndim != 0 and m.shape != t.shape:
+        raise ValueError(
+            "'m' must be a scalar or an array matching the shape of 't60'."
+        )
+
+
+def _absorption_area(
+    t60: ArrayLike,
+    volume: float,
+    *,
+    temperature: float,
+    speed_of_sound: float | None,
+    m: ArrayLike,
+) -> NDArray[np.float64]:
+    """Core Eq. (5)/(7) evaluation without the advisory volume warning.
+
+    Shared by :func:`absorption_area` (which adds the ISO 354 clause 6.1.1
+    volume advisory) and :func:`absorption_coefficient` (which advises the
+    volume once for the pair of measurements)."""
+    t = np.asarray(t60, dtype=np.float64)
+    m_arr = np.asarray(m, dtype=np.float64)
+    _validate_area_inputs(t, volume, m_arr)
+    c = _resolve_speed(temperature, speed_of_sound)
+    return _SABINE * volume / (c * t) - 4.0 * volume * m_arr
 
 
 def absorption_area(
@@ -171,7 +195,6 @@ def absorption_area(
     temperature: float = 20.0,
     speed_of_sound: float | None = None,
     m: ArrayLike = 0.0,
-    _advise_volume: bool = True,
 ) -> NDArray[np.float64]:
     """Equivalent sound absorption area of a room (ISO 354:2003, Eq. (5)/(7)).
 
@@ -188,19 +211,19 @@ def absorption_area(
         minimum of clause 6.1.1 likewise emits an advisory :class:`AbsorptionWarning`.
     :param speed_of_sound: Explicit speed of sound ``c``, in m/s; overrides
         ``temperature`` and Eq. (6) when supplied.
-    :param m: Power attenuation coefficient of air ``m``, in 1/m (scalar or per
-        band; default 0, i.e. no air correction). Obtain it from an ISO 9613-1
-        attenuation coefficient with :func:`attenuation_from_alpha`.
+    :param m: Power attenuation coefficient of air ``m``, in 1/m (a scalar or an
+        array matching the shape of ``t60``; default 0, i.e. no air correction).
+        A per-band ``m`` whose shape differs from ``t60`` raises ``ValueError``.
+        Obtain it from an ISO 9613-1 attenuation coefficient with
+        :func:`attenuation_from_alpha`.
     :return: Equivalent sound absorption area ``A``, in square metres, with the
         shape of ``t60``.
     """
-    t = np.asarray(t60, dtype=np.float64)
-    m_arr = np.asarray(m, dtype=np.float64)
-    _validate_area_inputs(t, volume, m_arr)
-    if _advise_volume:
-        _warn_small_room(volume, stacklevel=3)
-    c = _resolve_speed(temperature, speed_of_sound)
-    return _SABINE * volume / (c * t) - 4.0 * volume * m_arr
+    area = _absorption_area(
+        t60, volume, temperature=temperature, speed_of_sound=speed_of_sound, m=m
+    )
+    _warn_small_room(volume, stacklevel=3)
+    return area
 
 
 def absorption_coefficient(
@@ -246,6 +269,8 @@ def absorption_coefficient(
         is given.
     :param speed_of_sound1: Explicit ``c1`` in m/s; overrides ``temperature1``.
     :param speed_of_sound2: Explicit ``c2`` in m/s; overrides ``temperature2``.
+        Defaults to ``speed_of_sound1`` when that is given but ``c2`` is not, so
+        overriding only ``c1`` applies the same speed to both measurements.
     :param m1: Empty-room air attenuation coefficient ``m1``, in 1/m (default 0).
     :param m2: With-specimen air attenuation coefficient ``m2``, in 1/m
         (default 0).
@@ -258,17 +283,18 @@ def absorption_coefficient(
         raise ValueError("'volume' must be positive.")
     if temperature2 is None:
         temperature2 = temperature1
+    if speed_of_sound2 is None:
+        speed_of_sound2 = speed_of_sound1
     # Advisory setup checks (result still returned). Volume is advised here once
-    # and suppressed in the internal absorption_area calls to avoid duplicates.
+    # via the module-private core helper (which does not warn) to avoid
+    # duplicate volume advisories from the two area evaluations.
     _warn_small_room(volume, stacklevel=2)
     _warn_sample_area(sample_area, volume, stacklevel=2)
-    a1 = absorption_area(
-        t1, volume, temperature=temperature1, speed_of_sound=speed_of_sound1,
-        m=m1, _advise_volume=False,
+    a1 = _absorption_area(
+        t1, volume, temperature=temperature1, speed_of_sound=speed_of_sound1, m=m1,
     )
-    a2 = absorption_area(
-        t2, volume, temperature=temperature2, speed_of_sound=speed_of_sound2,
-        m=m2, _advise_volume=False,
+    a2 = _absorption_area(
+        t2, volume, temperature=temperature2, speed_of_sound=speed_of_sound2, m=m2,
     )
     area_specimen = a2 - a1
     alpha_s = area_specimen / sample_area

@@ -117,18 +117,19 @@ flags that the levels are upper bounds — the determination still returns.
 | `dimensions` | (float, float, float) | m | > 0 (box) | Reference-box `(l1, l2, l3)` |
 | `distance` | float | m | > 0 (box) | Measurement distance `d` |
 | `reflecting_planes` | int | — | `1` / `2` / `3`, default `1` | Halves/quarters the hemisphere area |
-| `background_levels` | 2D array | dB | same shape as `levels` | Enables `K1` |
+| `background_levels` | 2D array or spectrum | dB | `(NM, NB)`, or `(NB,)` / `(1, NB)` | Enables `K1`; a single spectrum broadcasts to every position |
 | `frequencies` | 1D array | Hz | nominal band centres | Enables `LWA` (Annex E) |
-| `absorption_area` | float | m² | > 0 | `A` for `K2` (direct) |
-| `reverberation_time`, `room_volume` | float | s, m³ | > 0 | `A = 0.16 V/T` for `K2` |
-| `mean_absorption_coefficient`, `room_surface` | float | —, m² | `(0,1]`, > 0 | `A = α·Sv` for `K2` |
+| `absorption_area` | float or 1D array | m² | > 0 | `A` for `K2` (direct); per-band array → per-band `K2` |
+| `reverberation_time`, `room_volume` | float/array, float | s, m³ | > 0 | `A = 0.16 V/T` for `K2`; per-band `T` → per-band `K2` |
+| `mean_absorption_coefficient`, `room_surface` | float/array, float | —, m² | `(0,1]`, > 0 | `A = α·Sv` (Eq. A.7); per-band `α` → per-band `K2` |
 | `grade` | str | — | `'engineering'` (default) / `'survey'` | ISO 3744 vs ISO 3746 |
 | `omc_uncertainty` | float | dB | default `0.0` | `σomc`, operating/mounting instability, folded into `U` |
 
 Returns a `SoundPowerResult`: `sound_power_level` (per-band `LW`),
 `surface_pressure_level` (`Lp` after K1/K2), `mean_pressure_level`,
 `background_correction`/`environmental_correction` (`K1`/`K2`),
-`directivity_index` (apparent `DIi*` per microphone position), `surface_area`,
+`directivity_index` (apparent `DIi*` per microphone position **and** frequency
+band, shape `(NM, NB)`; ISO 3744 clause 8.6), `surface_area`,
 `sound_power_level_a` (`LWA`), `uncertainty` (expanded, 95 %) and `grade`.
 `measurement_positions('hemisphere', radius=…, reflecting_planes=…, tones=…,
 grade=…)` returns the normative `(N, 3)` microphone coordinates (Table B.1 for
@@ -215,7 +216,19 @@ result still returns.
 `sound_power_comparison(levels, levels_ref, lw_ref, *, frequencies=None,
 background_levels=…, background_levels_ref=…, temperature=23.0,
 static_pressure=101.325)` takes the same room levels plus the reference
-source's levels and known power. Both return a `ReverberationSoundPowerResult`
+source's levels and known power.
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels_ref` | 1D or 2D array | dB | matches `levels` | Mean room SPL with the reference source (RSS) running |
+| `lw_ref` | 1D array | dB | per band | Known sound power `LW(RSS)` of the reference source |
+| `background_levels` | 1D or 2D array | dB | matches `levels` | Background for the test source; per-band `K1` on `Lp(ST)` |
+| `background_levels_ref` | 1D or 2D array | dB | matches `levels_ref` | Background for the **reference** source; per-band `K1` on `Lp(RSS)` |
+
+`background_levels_ref` background-corrects the reference-source room level
+`Lp(RSS)` exactly as `background_levels` does for the test source; both need
+`frequencies` (the ISO 3741 criterion is frequency-dependent). Both return a
+`ReverberationSoundPowerResult`
 (`sound_power_level`, `mean_pressure_level`, `absorption_area`,
 `waterhouse_correction`, `background_correction`, `c1`, `c2`,
 `speed_of_sound`, `sound_power_level_a`, `method`; the absorption/Waterhouse/`c1`

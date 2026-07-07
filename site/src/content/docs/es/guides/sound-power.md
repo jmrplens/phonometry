@@ -122,11 +122,11 @@ determinación se devuelve igualmente.
 | `dimensions` | (float, float, float) | m | > 0 (caja) | `(l1, l2, l3)` del paralelepípedo de referencia |
 | `distance` | float | m | > 0 (caja) | Distancia de medición `d` |
 | `reflecting_planes` | int | — | `1` / `2` / `3`, por defecto `1` | Divide entre dos/cuatro el área de la semiesfera |
-| `background_levels` | array 2D | dB | misma forma que `levels` | Habilita `K1` |
+| `background_levels` | array 2D o espectro | dB | `(NM, NB)`, o `(NB,)` / `(1, NB)` | Habilita `K1`; un espectro único se difunde a todas las posiciones |
 | `frequencies` | array 1D | Hz | centros de banda nominales | Habilita `LWA` (Anexo E) |
-| `absorption_area` | float | m² | > 0 | `A` para `K2` (directo) |
-| `reverberation_time`, `room_volume` | float | s, m³ | > 0 | `A = 0.16 V/T` para `K2` |
-| `mean_absorption_coefficient`, `room_surface` | float | —, m² | `(0,1]`, > 0 | `A = α·Sv` para `K2` |
+| `absorption_area` | float o array 1D | m² | > 0 | `A` para `K2` (directo); un array por banda → `K2` por banda |
+| `reverberation_time`, `room_volume` | float/array, float | s, m³ | > 0 | `A = 0.16 V/T` para `K2`; `T` por banda → `K2` por banda |
+| `mean_absorption_coefficient`, `room_surface` | float/array, float | —, m² | `(0,1]`, > 0 | `A = α·Sv` (Ec. A.7); `α` por banda → `K2` por banda |
 | `grade` | str | — | `'engineering'` (por defecto) / `'survey'` | ISO 3744 vs ISO 3746 |
 | `omc_uncertainty` | float | dB | por defecto `0.0` | `σomc`, inestabilidad de operación/montaje, incorporada a `U` |
 
@@ -134,7 +134,8 @@ Devuelve un `SoundPowerResult`: `sound_power_level` (`LW` por banda),
 `surface_pressure_level` (`Lp` tras K1/K2), `mean_pressure_level`,
 `background_correction`/`environmental_correction` (`K1`/`K2`),
 `directivity_index` (índice de directividad aparente `DIi*` por posición de
-micrófono), `surface_area`, `sound_power_level_a` (`LWA`), `uncertainty`
+micrófono **y** banda de frecuencia, forma `(NM, NB)`; ISO 3744 cláusula 8.6),
+`surface_area`, `sound_power_level_a` (`LWA`), `uncertainty`
 (expandida, 95 %) y `grade`. `measurement_positions('hemisphere', radius=…,
 reflecting_planes=…, tones=…, grade=…)` devuelve las coordenadas normativas
 `(N, 3)` de micrófono (Tabla B.1 para fuentes tonales, B.2 para banda ancha).
@@ -221,7 +222,19 @@ posiciones, o una dispersión entre posiciones superior a 1,5 dB), se emite un
 `sound_power_comparison(levels, levels_ref, lw_ref, *, frequencies=None,
 background_levels=…, background_levels_ref=…, temperature=23.0,
 static_pressure=101.325)` toma los mismos niveles de sala más los niveles de la
-fuente de referencia y su potencia conocida. Ambas devuelven un
+fuente de referencia y su potencia conocida.
+
+| Parámetro | Tipo | Unidades | Rango / defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `levels_ref` | array 1D o 2D | dB | coincide con `levels` | SPL medio de sala con la fuente de referencia (RSS) en marcha |
+| `lw_ref` | array 1D | dB | por banda | Potencia sonora conocida `LW(RSS)` de la fuente de referencia |
+| `background_levels` | array 1D o 2D | dB | coincide con `levels` | Ruido de fondo de la fuente de ensayo; `K1` por banda sobre `Lp(ST)` |
+| `background_levels_ref` | array 1D o 2D | dB | coincide con `levels_ref` | Ruido de fondo de la fuente de **referencia**; `K1` por banda sobre `Lp(RSS)` |
+
+`background_levels_ref` corrige por ruido de fondo el nivel de sala de la fuente
+de referencia `Lp(RSS)` igual que `background_levels` lo hace para la fuente de
+ensayo; ambos requieren `frequencies` (el criterio ISO 3741 depende de la
+frecuencia). Ambas devuelven un
 `ReverberationSoundPowerResult` (`sound_power_level`, `mean_pressure_level`,
 `absorption_area`, `waterhouse_correction`, `background_correction`, `c1`, `c2`,
 `speed_of_sound`, `sound_power_level_a`, `method`; los campos de

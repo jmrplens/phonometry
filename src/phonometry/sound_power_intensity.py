@@ -110,7 +110,10 @@ class SoundPowerIntensityResult:
     (FpI, Eq. A.1) and ``negative_partial_power_index`` (F+/-, Eq. A.2) are
     per band, ``None`` when the inputs they need are absent. ``repeatability``
     is ``|LWi(1)-LWi(2)|`` per segment and band (criterion 3), ``None`` without
-    a second scan. ``dynamic_capability_index`` is ``Ld`` for the requested
+    a second scan; it is ``+inf`` where the two sweeps reverse the flow
+    direction on a segment (opposite-sign partial powers), a gross
+    non-repeatability that criterion 3 must reject even when the magnitudes
+    happen to match. ``dynamic_capability_index`` is ``Ld`` for the requested
     grade. ``achieved_grade`` is the per-band class ``'engineering'``/
     ``'survey'``/``'none'`` (clause 8.4), ``None`` when the qualifying inputs
     (``delta_pI0`` and a second scan) are absent. ``sound_power_level_a`` is the
@@ -223,6 +226,10 @@ def sound_power_intensity(
             f"the number of segment 'areas' ({n_seg})."
         )
     n_bands = intensity.shape[1]
+    if frequencies is not None and np.asarray(frequencies).shape != (n_bands,):
+        # Validate up front so a mismatched length raises the public ValueError
+        # rather than an IndexError from the Table 2 lookup during classification.
+        raise ValueError("'frequencies' length must match the number of bands.")
     if np.any(seg <= 0.0):
         raise ValueError("All segment 'areas' must be positive.")
     if n_seg < 4:
@@ -240,6 +247,14 @@ def sound_power_intensity(
         pi1 = intensity * seg[:, None]
         pi2 = scan2 * seg[:, None]
         repeatability = np.abs(_level_magnitude(pi1) - _level_magnitude(pi2))
+        # Criterion 3 (B.1.3) tests whether the partial power of a segment
+        # repeats between the two sweeps. A complete flow reversal (pi1 and
+        # pi2 of opposite sign) is grossly non-repeatable, yet |ΔL| of the
+        # magnitudes alone can be ~0 when |pi1| ~ |pi2|. Force the criterion to
+        # fail (repeatability = +inf) wherever the signs differ; exact zeros
+        # carry no direction and are treated as matching either sign.
+        reversed_flow = (np.sign(pi1) * np.sign(pi2)) < 0.0
+        repeatability = np.where(reversed_flow, np.inf, repeatability)
         mean_intensity = 0.5 * (intensity + scan2)
     else:
         mean_intensity = intensity

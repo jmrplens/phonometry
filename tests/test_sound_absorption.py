@@ -162,6 +162,26 @@ def test_temperature2_defaults_to_temperature1() -> None:
     assert float(np.asarray(a)) == pytest.approx(float(np.asarray(b)))
 
 
+def test_speed_of_sound2_defaults_to_speed_of_sound1() -> None:
+    """Overriding only c1 must apply the same speed to the second measurement
+    (c2 defaults to c1), mirroring the temperature2 -> temperature1 default."""
+    v, s = 200.0, 10.0
+    c = 340.0
+    only_c1 = absorption_coefficient(5.0, 3.0, v, s, speed_of_sound1=c)
+    both = absorption_coefficient(
+        5.0, 3.0, v, s, speed_of_sound1=c, speed_of_sound2=c
+    )
+    assert float(np.asarray(only_c1)) == pytest.approx(float(np.asarray(both)))
+    # And it must differ from letting c2 fall back to the 20 degC default.
+    default_c2 = absorption_coefficient(5.0, 3.0, v, s, speed_of_sound1=c)
+    explicit_343 = absorption_coefficient(
+        5.0, 3.0, v, s, speed_of_sound1=c, speed_of_sound2=_speed_of_sound(20.0)
+    )
+    assert float(np.asarray(default_c2)) != pytest.approx(
+        float(np.asarray(explicit_343))
+    )
+
+
 # --- Non-physical result warning (A2 <= A1, i.e. T2 >= T1) ------------------
 
 def test_warns_when_alpha_non_positive() -> None:
@@ -262,6 +282,22 @@ def test_zero_reverberation_time_raises() -> None:
 def test_negative_m_raises() -> None:
     with pytest.raises(ValueError):
         absorption_area(3.0, 200.0, m=-0.001)
+
+
+def test_m_shape_mismatch_raises() -> None:
+    """A per-band 'm' whose shape differs from 't60' is a contract violation."""
+    t60 = np.array([3.0, 2.5, 2.0])  # 3 bands
+    with pytest.raises(ValueError, match="'m' must be a scalar"):
+        absorption_area(t60, 200.0, m=np.array([0.001, 0.002]))  # 2 values
+
+
+def test_m_matching_shape_and_scalar_allowed() -> None:
+    """A scalar 'm' or one matching 't60' is accepted."""
+    t60 = np.array([3.0, 2.5, 2.0])
+    a_scalar = absorption_area(t60, 200.0, m=0.001)
+    a_perband = absorption_area(t60, 200.0, m=np.array([0.001, 0.001, 0.001]))
+    assert a_scalar.shape == (3,)
+    assert np.allclose(a_scalar, a_perband)
 
 
 def test_negative_sample_area_raises() -> None:

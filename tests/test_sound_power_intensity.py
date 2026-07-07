@@ -249,6 +249,79 @@ def test_class_downgrade_by_repeatability() -> None:
     assert res.achieved_grade[0] == "survey"
 
 
+def test_sweep_reversal_fails_criterion_3() -> None:
+    """An equal-magnitude opposite-sign segment between the two sweeps has
+    |ΔL| ~ 0 from the magnitudes alone, yet is grossly non-repeatable. With the
+    band still determinable (positive total power) and criteria 1/2 satisfied,
+    the reversed segment must force criterion 3 (and thus the grade) to fail."""
+    areas = np.array([0.5, 0.5, 0.5, 0.5])
+    scan1 = np.full((4, 1), 5.0e-4)
+    scan2 = scan1.copy()
+    scan2[0, 0] = -5.0e-4  # equal magnitude, opposite sign on segment 0
+    lp = np.full((4, 1), 90.0)
+    res = sound_power_intensity(
+        scan1,
+        areas,
+        normal_intensity_2=scan2,
+        pressure_levels=lp,
+        pressure_residual_index=40.0,  # Ld high -> criterion 1 passes
+        frequencies=np.array([1000.0]),
+        band_type="octave",
+    )
+    assert not res.negative_band[0]  # band remains determinable
+    assert np.isinf(res.repeatability[0, 0])
+    # criterion 3 fails on segment 0 -> neither engineering nor survey qualifies.
+    assert res.achieved_grade[0] == "none"
+    # Without the sign guard, the magnitude-only |ΔL| would have been 0 and the
+    # band would have qualified; confirm an all-aligned pair does qualify.
+    ok = sound_power_intensity(
+        scan1, areas, normal_intensity_2=scan1, pressure_levels=lp,
+        pressure_residual_index=40.0, frequencies=np.array([1000.0]),
+        band_type="octave",
+    )
+    assert ok.achieved_grade[0] == "engineering"
+
+
+def test_partial_sweep_reversal_only_affects_flipped_segment() -> None:
+    """Only the segment whose flow reverses gets +inf repeatability; the aligned
+    segments keep their finite |ΔL|."""
+    areas = np.array([0.5, 0.5, 0.5, 0.5])
+    scan1 = np.full((4, 1), 5.0e-4)
+    scan2 = scan1.copy()
+    scan2[2, 0] = -5.0e-4  # reverse only segment 2
+    res = sound_power_intensity(scan1, areas, normal_intensity_2=scan2)
+    rep = res.repeatability[:, 0]
+    assert np.isinf(rep[2])
+    assert np.allclose(rep[[0, 1, 3]], 0.0, atol=1e-9)
+
+
+def test_exact_zero_partial_power_does_not_trigger_reversal() -> None:
+    """An exact-zero partial power carries no direction and must not be treated
+    as a reversal (no spurious +inf repeatability)."""
+    areas = np.array([0.5, 0.5, 0.5, 0.5])
+    scan1 = np.full((4, 1), 5.0e-4)
+    scan2 = scan1.copy()
+    scan2[1, 0] = 0.0  # zero, not a sign flip
+    res = sound_power_intensity(scan1, areas, normal_intensity_2=scan2)
+    assert np.all(np.isfinite(res.repeatability[:, 0]))
+
+
+def test_short_frequencies_raises_value_error_not_index_error() -> None:
+    """A 'frequencies' array shorter than the band count raises the public
+    ValueError up front, not an IndexError during classification."""
+    areas = np.array([0.5, 0.5, 0.5, 0.5])
+    intensity = np.column_stack([np.full(4, 5.0e-4), np.full(4, 5.0e-4)])
+    with pytest.raises(ValueError, match="frequencies"):
+        sound_power_intensity(
+            intensity,
+            areas,
+            normal_intensity_2=intensity,
+            pressure_levels=np.full((4, 2), 90.0),
+            pressure_residual_index=40.0,
+            frequencies=np.array([1000.0]),  # one freq, two bands
+        )
+
+
 def test_repeatability_uses_mean_of_two_scans_for_power() -> None:
     """Partial power uses the mean of the two scan intensities (Eq. 12)."""
     areas = np.array([0.5, 0.5, 0.5, 0.5])

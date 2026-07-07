@@ -232,12 +232,123 @@ def test_directivity_index_background_corrects_each_position() -> None:
     bg = np.full((10, 1), 72.0)  # dL ~ 8.4 dB -> above the 6 dB criterion
     res = sound_power_pressure(src, "hemisphere", radius=5.0, background_levels=bg)
     mean_level = 10.0 * np.log10(np.mean(10.0 ** (0.1 * src[:, 0])))
-    expected = src[:, 0] - mean_level
+    expected = (src[:, 0] - mean_level)[:, np.newaxis]  # DI is (NM, NB)
+    assert res.directivity_index.shape == (10, 1)
     assert np.allclose(res.directivity_index, expected, atol=1e-9)
     # And the DI differences are invariant to the background correction: the
     # same source with negligible background gives an identical DI.
     res_nobg = sound_power_pressure(src, "hemisphere", radius=5.0)
     assert np.allclose(res.directivity_index, res_nobg.directivity_index, atol=1e-9)
+
+
+def test_directivity_index_per_band_localises_a_hot_band() -> None:
+    """ISO 3744 clause 8.6: DI is per band, shape (NM, NB). A position that is
+    hotter only in one band must show a positive DI in that band and ~0 in the
+    others; the other positions stay ~0 outside that band."""
+    n_pos, n_bands = 10, 4
+    levels = np.full((n_pos, n_bands), 70.0)
+    levels[3, 2] += 12.0  # position 3 hot only in band 2
+    res = sound_power_pressure(levels, "hemisphere", radius=2.0)
+    di = res.directivity_index
+    assert di.shape == (n_pos, n_bands)
+    # Band 2: the hot position stands out, others dip slightly below the mean.
+    assert di[3, 2] > 5.0
+    assert np.all(di[np.arange(n_pos) != 3, 2] < 0.0)
+    # Every other band is perfectly uniform -> DI == 0 everywhere.
+    for b in (0, 1, 3):
+        assert np.allclose(di[:, b], 0.0, atol=1e-9)
+
+
+def test_directivity_index_per_band_equals_level_minus_energy_mean() -> None:
+    """DIi*(k) reduces to the raw per-band level minus the per-band energy mean
+    (the uniform per-band K1 cancels; ISO 3744 Eq. 7)."""
+    rng = np.random.default_rng(0)
+    levels = 70.0 + rng.uniform(-3.0, 3.0, size=(10, 3))
+    res = sound_power_pressure(levels, "hemisphere", radius=2.0)
+    mean = 10.0 * np.log10(np.mean(10.0 ** (0.1 * levels), axis=0))
+    assert np.allclose(res.directivity_index, levels - mean[np.newaxis, :], atol=1e-9)
+
+
+def test_background_levels_single_spectrum_broadcasts() -> None:
+    """A single background spectrum (NB,) or (1, NB) is broadcast to every
+    position and gives the same K1 as the equivalent full (NM, NB) array."""
+    levels = np.tile(np.array([90.0, 92.0, 95.0]), (10, 1))
+    bg_spectrum = np.array([70.0, 71.0, 72.0])
+    res_1d = sound_power_pressure(
+        levels, "hemisphere", radius=2.0, background_levels=bg_spectrum
+    )
+    res_row = sound_power_pressure(
+        levels, "hemisphere", radius=2.0, background_levels=bg_spectrum[np.newaxis, :]
+    )
+    res_full = sound_power_pressure(
+        levels, "hemisphere", radius=2.0, background_levels=np.tile(bg_spectrum, (10, 1))
+    )
+    assert np.allclose(res_1d.background_correction, res_full.background_correction)
+    assert np.allclose(res_row.background_correction, res_full.background_correction)
+    assert np.allclose(res_1d.sound_power_level, res_full.sound_power_level)
+
+
+def test_background_levels_wrong_length_raises() -> None:
+    levels = np.tile(np.array([90.0, 92.0, 95.0]), (10, 1))
+    with pytest.raises(ValueError, match="background_levels"):
+        sound_power_pressure(
+            levels, "hemisphere", radius=2.0, background_levels=np.array([70.0, 71.0])
+        )
+
+
+def test_k2_per_band_from_absorption_area() -> None:
+    """A per-band absorption area yields a per-band K2 (ISO 3744 Eq. A.2)."""
+    a = np.array([100.0, 200.0, 400.0])
+    k2 = environmental_correction(50.0, absorption_area=a)
+    expected = 10.0 * np.log10(1.0 + 4.0 * 50.0 / a)
+    assert isinstance(k2, np.ndarray)
+    assert np.allclose(k2, expected)
+
+
+def test_k2_per_band_eq_a7_from_mean_absorption() -> None:
+    """Eq. A.7: A = alpha*Sv per band -> K2 per band, and matches the scalar
+    branch band by band."""
+    alpha = np.array([0.1, 0.2, 0.4])
+    sv = 500.0
+    k2 = environmental_correction(
+        50.0, mean_absorption_coefficient=alpha, room_surface=sv
+    )
+    expected = np.array(
+        [environmental_correction(50.0, absorption_area=float(al) * sv) for al in alpha]
+    )
+    assert isinstance(k2, np.ndarray)
+    assert np.allclose(k2, expected)
+
+
+def test_k2_per_band_from_reverberation_time() -> None:
+    """Eq. A.3: A = 0,16*V/T per band gives a per-band K2."""
+    t = np.array([1.0, 2.0, 4.0])
+    v = 300.0
+    k2 = environmental_correction(40.0, reverberation_time=t, room_volume=v)
+    expected = 10.0 * np.log10(1.0 + 4.0 * 40.0 / (0.16 * v / t))
+    assert np.allclose(k2, expected)
+
+
+def test_k2_scalar_still_returns_float() -> None:
+    """Scalar inputs keep the original scalar (float) return type."""
+    k2 = environmental_correction(50.0, absorption_area=200.0)
+    assert isinstance(k2, float)
+
+
+def test_per_band_k2_flows_into_sound_power() -> None:
+    """A per-band K2 (from per-band reverberation time) is applied band by band
+    in the full determination."""
+    levels = np.tile(np.array([90.0, 92.0, 95.0]), (10, 1))
+    t = np.array([1.0, 2.0, 4.0])
+    volume = 2000.0  # large enough that per-band K2 stays under the 4 dB limit
+    res = sound_power_pressure(
+        levels, "hemisphere", radius=2.0, reverberation_time=t, room_volume=volume
+    )
+    a = 0.16 * volume / t
+    expected_k2 = 10.0 * np.log10(1.0 + 4.0 * res.surface_area / a)
+    assert np.allclose(res.environmental_correction, expected_k2)
+    # The three K2 values differ band to band (per-band absorption).
+    assert res.environmental_correction[0] != res.environmental_correction[2]
 
 
 def test_sound_power_level_a_multiband_without_frequencies_is_nan() -> None:

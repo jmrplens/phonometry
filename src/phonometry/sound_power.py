@@ -144,7 +144,9 @@ class SoundPowerResult:
     are supplied; for a single band it equals ``LW``, and for several bands
     without ``frequencies`` it is ``NaN`` (A-weighting needs the band centres).
     ``directivity_index`` is the apparent directivity index ``DIi*`` per
-    microphone position (Eq. 7). ``uncertainty`` is the expanded uncertainty
+    microphone position and frequency band, shape ``(NM, NB)`` (Eq. 7,
+    evaluated per band per clause 8.6). ``uncertainty`` is the expanded
+    uncertainty
     ``U = 2*sqrt(sigma_R0^2 + sigma_omc^2)`` (95 %, ISO 3744 clause 9.5)."""
 
     frequencies: np.ndarray | None
@@ -209,12 +211,12 @@ def background_noise_correction(
 def environmental_correction(
     surface_area: float,
     *,
-    absorption_area: float | None = None,
-    reverberation_time: float | None = None,
+    absorption_area: float | np.ndarray | None = None,
+    reverberation_time: float | np.ndarray | None = None,
     room_volume: float | None = None,
-    mean_absorption_coefficient: float | None = None,
+    mean_absorption_coefficient: float | np.ndarray | None = None,
     room_surface: float | None = None,
-) -> float:
+) -> float | np.ndarray:
     """Environmental correction ``K2`` (ISO 3744:2010 Eq. A.2).
 
     ``K2 = 10*lg(1 + 4*S/A)`` where ``A`` is the equivalent sound absorption
@@ -224,26 +226,44 @@ def environmental_correction(
     ``A = alpha*Sv`` (Eq. A.7, ``mean_absorption_coefficient`` + ``room_
     surface``). With no room data the field is treated as free and ``K2 = 0``.
 
+    The room absorption is frequency dependent (``T``, ``alpha`` and hence ``A``
+    vary with the band). Passing ``absorption_area``, ``reverberation_time`` or
+    ``mean_absorption_coefficient`` as a per-band array returns ``K2`` per band
+    with that shape; scalar inputs return a scalar, unchanged.
+
     :param surface_area: Measurement surface area ``S``, in square metres.
-    :return: ``K2``, in decibels.
+    :param absorption_area: Equivalent absorption area ``A`` (m^2), scalar or
+        per band.
+    :param reverberation_time: Sabine ``T`` (s), scalar or per band, with
+        ``room_volume`` (Eq. A.3).
+    :param room_volume: Room volume ``V`` (m^3), with ``reverberation_time``.
+    :param mean_absorption_coefficient: ``alpha`` in (0, 1], scalar or per band,
+        with ``room_surface`` (Eq. A.7).
+    :param room_surface: Room boundary area ``Sv`` (m^2), with ``alpha``.
+    :return: ``K2`` in decibels; a scalar for scalar inputs, otherwise an array
+        per band.
     """
     if absorption_area is None:
         if reverberation_time is not None and room_volume is not None:
-            if reverberation_time <= 0 or room_volume <= 0:
+            t = np.asarray(reverberation_time, dtype=np.float64)
+            if room_volume <= 0 or np.any(t <= 0.0):
                 raise ValueError("reverberation_time and room_volume must be > 0.")
-            absorption_area = 0.16 * room_volume / reverberation_time
+            absorption_area = 0.16 * room_volume / t
         elif mean_absorption_coefficient is not None and room_surface is not None:
-            if not 0.0 < mean_absorption_coefficient <= 1.0 or room_surface <= 0:
+            alpha = np.asarray(mean_absorption_coefficient, dtype=np.float64)
+            if room_surface <= 0 or np.any(alpha <= 0.0) or np.any(alpha > 1.0):
                 raise ValueError(
                     "mean_absorption_coefficient must be in (0, 1] and "
                     "room_surface > 0."
                 )
-            absorption_area = mean_absorption_coefficient * room_surface
+            absorption_area = alpha * room_surface
         else:
             return 0.0
-    if absorption_area <= 0:
+    a = np.asarray(absorption_area, dtype=np.float64)
+    if np.any(a <= 0.0):
         raise ValueError("absorption_area must be positive.")
-    return float(10.0 * np.log10(1.0 + 4.0 * surface_area / absorption_area))
+    k2 = 10.0 * np.log10(1.0 + 4.0 * surface_area / a)
+    return float(k2) if k2.ndim == 0 else np.asarray(k2, dtype=np.float64)
 
 
 def measurement_positions(
@@ -394,7 +414,8 @@ def sound_power_pressure(
     :param dimensions: Reference box ``(l1, l2, l3)`` (metres), for ``'box'``.
     :param distance: Measurement distance ``d`` (metres), for ``'box'``.
     :param reflecting_planes: Number of reflecting planes (1, 2 or 3).
-    :param background_levels: ``(NM, NB)`` background levels for ``K1``.
+    :param background_levels: ``(NM, NB)`` background levels for ``K1``, or a
+        single spectrum ``(NB,)`` / ``(1, NB)`` broadcast to every position.
     :param frequencies: Band mid-band frequencies (Hz) for the A-weighted total.
     :param absorption_area: Equivalent absorption area ``A`` (m^2) for ``K2``.
     :param reverberation_time: Sabine ``T`` (s), with ``room_volume``, for ``K2``.
@@ -441,14 +462,22 @@ def sound_power_pressure(
     n_bands = mean_level.shape[0]
     if background_levels is not None:
         bg = np.atleast_2d(np.asarray(background_levels, dtype=np.float64))
+        # A single background spectrum (shape (NB,) or (1, NB)) is broadcast to
+        # every microphone position; a full (NM, NB) array is used as given.
+        if bg.shape == (1, n_bands) and n_positions != 1:
+            bg = np.broadcast_to(bg, (n_positions, n_bands))
         if bg.shape != levels.shape:
-            raise ValueError("'background_levels' must match 'levels_positions' shape.")
+            raise ValueError(
+                "'background_levels' must match 'levels_positions' shape, or be "
+                "a single spectrum of shape (NB,) or (1, NB) broadcast to all "
+                "positions."
+            )
         k1 = background_noise_correction(mean_level, _energy_average(bg), grade)
     else:
         k1 = np.zeros(n_bands, dtype=np.float64)
 
-    # --- environmental correction K2 --------------------------------------
-    k2_scalar = environmental_correction(
+    # --- environmental correction K2 (scalar or per band) -----------------
+    k2_value = environmental_correction(
         area,
         absorption_area=absorption_area,
         reverberation_time=reverberation_time,
@@ -456,15 +485,22 @@ def sound_power_pressure(
         mean_absorption_coefficient=mean_absorption_coefficient,
         room_surface=room_surface,
     )
-    if k2_scalar > _K2_LIMIT[grade]:
+    k2_arr = np.atleast_1d(np.asarray(k2_value, dtype=np.float64))
+    if k2_arr.shape not in ((1,), (n_bands,)):
+        raise ValueError(
+            "per-band environmental inputs (absorption_area / reverberation_time"
+            " / mean_absorption_coefficient) must match the number of bands."
+        )
+    if np.any(k2_arr > _K2_LIMIT[grade]):
         warnings.warn(
-            f"K2 = {k2_scalar:.1f} dB exceeds the {grade} validity limit of "
-            f"{_K2_LIMIT[grade]:g} dB; the acoustic environment does not "
-            "qualify for this method (ISO 3744:2010 clause 4.3.2).",
+            f"K2 up to {float(np.max(k2_arr)):.1f} dB exceeds the {grade} "
+            f"validity limit of {_K2_LIMIT[grade]:g} dB; the acoustic "
+            "environment does not qualify for this method (ISO 3744:2010 "
+            "clause 4.3.2).",
             SoundPowerWarning,
             stacklevel=2,
         )
-    k2 = np.full(n_bands, k2_scalar, dtype=np.float64)
+    k2 = np.broadcast_to(k2_arr, (n_bands,)).astype(np.float64)
 
     # --- surface SPL, sound power level and A-weighted total ---------------
     surface_spl = mean_level - k1 - k2
@@ -483,19 +519,15 @@ def sound_power_pressure(
         # carries no weighting, so LWA = LW.
         lwa = float(lw[0]) if n_bands == 1 else float("nan")
 
-    # --- apparent directivity index per position (Eq. 7) ------------------
-    # DIi* = Lpi(ST) - (Lp'(ST) - K1): per Eq. 7 semantics BOTH the per-position
-    # level Lpi(ST) and the surface mean Lp'(ST) are background-corrected by the
-    # same broadband K1 (ISO 3744:2010, 3.24 DI definition / Eq. 7 context).
-    # Applying the identical uniform K1 to every position and to the mean
-    # leaves the DI differences
-    # unchanged and cancels the offset, so the raw energy-summed broadband
-    # levels give the directivity index directly (no residual +K1 bias).
-    position_levels = 10.0 * np.log10(np.sum(10.0 ** (0.1 * levels), axis=1))
-    mean_position = 10.0 * np.log10(
-        np.sum(10.0 ** (0.1 * position_levels)) / n_positions
-    )
-    directivity = np.asarray(position_levels - mean_position, dtype=np.float64)
+    # --- apparent directivity index per position AND band (Eq. 7) ---------
+    # ISO 3744:2010 clause 8.6 requires the directivity index to be evaluated
+    # per frequency band, so DIi* is a (NM, NB) array. Per Eq. 7
+    # DIi*(k) = Lpi(k) - (Lp'(k) - K1(k)): BOTH the per-position level Lpi(k)
+    # and the surface energy mean Lp'(k) carry the same per-band background
+    # correction K1(k), which cancels in the difference (3.24 DI definition).
+    # The uniform per-band K1 therefore drops out and DIi*(k) reduces to the raw
+    # per-band level minus the raw per-band surface mean (no residual +K1 bias).
+    directivity = np.asarray(levels - mean_level[np.newaxis, :], dtype=np.float64)
 
     uncertainty = 2.0 * float(np.hypot(_SIGMA_R0[grade], omc_uncertainty))
 

@@ -87,6 +87,20 @@ class ReverberationSoundPowerResult:
     method: str
 
 
+def _validate_meteorology(temperature: float, static_pressure: float) -> None:
+    """Guard the meteorological inputs before the log10/sqrt of C1/C2 and c.
+
+    A non-finite or ``<= -273 degC`` temperature makes ``sqrt(273 + theta)``
+    complex/zero, and a non-finite or non-positive static pressure makes
+    ``lg(ps/ps0)`` undefined; both are rejected with a clean ``ValueError``."""
+    if not np.isfinite(temperature) or temperature <= -273.0:
+        raise ValueError(
+            "'temperature' must be finite and greater than -273 degC."
+        )
+    if not np.isfinite(static_pressure) or static_pressure <= 0.0:
+        raise ValueError("'static_pressure' must be finite and positive.")
+
+
 def _speed_of_sound(temperature: float) -> float:
     """Speed of sound ``c = 20,05*sqrt(273 + theta)`` (ISO 3741 clause 9.1.4)."""
     return float(20.05 * np.sqrt(273.0 + temperature))
@@ -299,6 +313,7 @@ def sound_power_reverberation(
     """
     if volume <= 0 or surface_area <= 0:
         raise ValueError("'volume' and 'surface_area' must be positive.")
+    _validate_meteorology(temperature, static_pressure)
     mean_level = _mean_level(levels)
     n_bands = mean_level.shape[0]
     freqs = np.asarray(frequencies, dtype=np.float64)
@@ -385,6 +400,7 @@ def sound_power_comparison(
     :param static_pressure: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundPowerResult` (``method='comparison'``).
     """
+    _validate_meteorology(temperature, static_pressure)
     lp_st = _mean_level(levels)
     lp_rss = _mean_level(levels_ref)
     lw_rss = np.asarray(lw_ref, dtype=np.float64)

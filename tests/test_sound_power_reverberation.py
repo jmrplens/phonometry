@@ -236,6 +236,43 @@ def test_mismatched_shapes_raise() -> None:
 
 
 # --------------------------------------------------------------------------
+# Meteorological input validation (clean ValueError before log10/sqrt)
+# --------------------------------------------------------------------------
+@pytest.mark.parametrize("theta", [-273.0, -300.0, np.inf, np.nan])
+def test_direct_method_invalid_temperature_raises(theta: float) -> None:
+    with pytest.raises(ValueError, match="temperature"):
+        sound_power_reverberation(
+            np.array([80.0]), np.array([1.5]), 200.0, 210.0, np.array([1000.0]),
+            temperature=theta,
+        )
+
+
+@pytest.mark.parametrize("ps", [0.0, -1.0, np.inf, np.nan])
+def test_direct_method_invalid_pressure_raises(ps: float) -> None:
+    with pytest.raises(ValueError, match="static_pressure"):
+        sound_power_reverberation(
+            np.array([80.0]), np.array([1.5]), 200.0, 210.0, np.array([1000.0]),
+            static_pressure=ps,
+        )
+
+
+def test_comparison_method_invalid_temperature_raises() -> None:
+    with pytest.raises(ValueError, match="temperature"):
+        sound_power_comparison(
+            np.array([80.0]), np.array([70.0]), np.array([90.0]),
+            temperature=-300.0,
+        )
+
+
+def test_comparison_method_invalid_pressure_raises() -> None:
+    with pytest.raises(ValueError, match="static_pressure"):
+        sound_power_comparison(
+            np.array([80.0]), np.array([70.0]), np.array([90.0]),
+            static_pressure=0.0,
+        )
+
+
+# --------------------------------------------------------------------------
 # Room-qualification advisories (ISO 3741:2010, 5.2/5.3/8.3/8.4.2.2)
 # --------------------------------------------------------------------------
 def test_volume_below_table1_minimum_warns() -> None:

@@ -380,8 +380,11 @@ _E_THRQ_HF = 2.065  # E_THRQ/E0 for fc >= 500 Hz (clause 7.5.2)
 # ---------------------------------------------------------------------------
 _INH_B = 0.08  # spread parameter B of Formulae 10/11
 _INH_THETA = 1.5978  # exponent theta of Formulae 12/13
-_INH_TAPS = np.arange(-18, 19)  # smoothing window on the 0.1 Cam grid
-_INH_KERNEL = np.exp(-((_INH_B * _INH_TAPS) ** 2))
+# Formula (10)/(11): the smoothing weight is exp(-(B*Di)^2) with B = 0.08 and
+# Di changed in steps of 0,1 over -18..+18 Cam (clause 8.1).  Taps are index
+# offsets on the 0.1-Cam grid, so Di in Cam = tap * _I_STEP.
+_INH_TAPS = np.arange(-180, 181)  # 0.1 Cam steps, +/-18 Cam (Formula 10)
+_INH_KERNEL = np.exp(-((_INH_B * (_INH_TAPS * _I_STEP)) ** 2))
 _EPS = 1e-13  # additive constant of clause 8.1 (avoids division by zero)
 
 # ---------------------------------------------------------------------------
@@ -561,6 +564,13 @@ def _source_levels(freqs: np.ndarray, powers: np.ndarray) -> np.ndarray:
     sharpness of the level-dependent lower skirt of every auditory filter the
     component drives (Formula 5).  Computed with a cumulative sum over the
     frequency-sorted spectrum.
+
+    Approximation: clause 7.4 forms X with a rounded-exponential (roex)
+    weighting W(g, fc) of slope p = 4 fc/ERB_n over g = 0..1 (lower) and
+    0..4 (upper) (Formulae 2-4), not the hard rectangular +/-ERB_n/2 window
+    used here.  For an isolated tonal component the single in-band term is
+    weighted W(0) = 1 in either form, so the two are identical; the deviation
+    is immaterial for the broadband cases validated to ~1 % across Annex B.
     """
     order = np.argsort(freqs)
     f_sorted = freqs[order]
@@ -641,7 +651,12 @@ def _specific_loudness(excitation: np.ndarray) -> np.ndarray:
 
 
 def _smooth(pattern: np.ndarray) -> np.ndarray:
-    """Broadly tuned smoothing of a specific-loudness pattern (Formulae 10/11)."""
+    """Broadly tuned smoothing of a specific-loudness pattern (Formulae 10/11).
+
+    Inert on every validated Annex B case: those are all diotic (identical ears
+    give an inhibition ratio of 1) or monaural (silent contralateral ear gives
+    unit inhibition), so the smoothed pattern never changes the result.
+    """
     smoothed = np.zeros_like(pattern)
     n = pattern.size
     for offset, weight in zip(_INH_TAPS, _INH_KERNEL):

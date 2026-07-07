@@ -104,6 +104,28 @@ def test_user_band_excluding_tone_lowers_tonality() -> None:
     assert restricted.tonality < 0.2
 
 
+def test_band_range_uses_edge_midpoints() -> None:
+    # Formulae 56-57 select bands by the edge midpoints to the neighbours, not
+    # by the centre frequency.  For an f_low that lies between band z's centre
+    # F(z) and its upper boundary (F(z)+F(z+0.5))/2, band z must still be the
+    # lower edge z_L (a centre-frequency threshold would wrongly exclude it).
+    from phonometry.loudness_ecma import _F_CENTRE
+    from phonometry.tonality_ecma import _band_range
+
+    z = 20
+    upper_mid = 0.5 * (_F_CENTRE[z] + _F_CENTRE[z + 1])
+    f_low = 0.5 * (_F_CENTRE[z] + upper_mid)  # inside band z, above its centre
+    assert f_low > _F_CENTRE[z]
+    z_lo, _ = _band_range(f_low, None)
+    assert z_lo == z
+    # Symmetric check for the upper edge via Formula 57.
+    lower_mid = 0.5 * (_F_CENTRE[z] + _F_CENTRE[z - 1])
+    f_high = 0.5 * (_F_CENTRE[z] + lower_mid)  # inside band z, below its centre
+    assert f_high < _F_CENTRE[z]
+    _, z_hi = _band_range(None, f_high)
+    assert z_hi == z
+
+
 # --------------------------------------------------------------------------
 # Field handling
 # --------------------------------------------------------------------------

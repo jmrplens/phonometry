@@ -184,6 +184,10 @@ def _average_bands_full(
             other = _scaled_acf_at(p_bands, 1, block_size, n_new, cache)
             out.append(0.5 * (native + other))
             continue
+        # The ``_CBF-1-band`` upper-edge term is a defensive guard that cannot
+        # fire: bands with N_B > 0 all sit at low index (0..24, block size
+        # >= 2048), so their distance to the top band (>= 28) never limits the
+        # symmetric reach (n_b <= 2).  Only the ``band`` lower-edge term bites.
         reach = min(n_b, band, _CBF - 1 - band)
         if reach == 0:
             out.append(native)
@@ -246,16 +250,24 @@ def _tonal_noise_tonality(
 def _band_range(f_low: float | None, f_high: float | None) -> Tuple[int, int]:
     """Critical-band index range [z_L, z_H] for a user band (Formulae 56-60).
 
-    ``None`` limits default to the full 0..52 band range.
+    ``None`` limits default to the full 0..52 band range.  A band z is included
+    when its edge midpoints to the neighbouring bands straddle the user edge:
+    ``f_low < (F(z) + F(z+0.5))/2`` selects z_L (Formula 56) and
+    ``f_high > (F(z) + F(z-0.5))/2`` selects z_H (Formula 57).  ``mid[i]`` is
+    the boundary between bands ``i`` and ``i+1`` on the 0.5-Bark_HMS grid.
     """
     z_lo = 0
     z_hi = _CBF - 1
+    mid = (_F_CENTRE[:-1] + _F_CENTRE[1:]) / 2.0  # inter-band boundaries
     if f_low is not None:
-        candidates = np.where(_F_CENTRE >= f_low)[0]
+        # z_L: lowest band whose upper boundary exceeds f_low (Formula 56).
+        candidates = np.where(f_low < mid)[0]
         z_lo = int(candidates[0]) if candidates.size else _CBF - 1
     if f_high is not None:
-        candidates = np.where(_F_CENTRE <= f_high)[0]
-        z_hi = int(candidates[-1]) if candidates.size else 0
+        # z_H: highest band whose lower boundary is below f_high (Formula 57);
+        # f_high > mid[j] admits band j+1, so shift the index up by one.
+        candidates = np.where(f_high > mid)[0]
+        z_hi = int(candidates[-1]) + 1 if candidates.size else 0
     if z_hi < z_lo:
         z_lo, z_hi = z_hi, z_lo
     return z_lo, z_hi

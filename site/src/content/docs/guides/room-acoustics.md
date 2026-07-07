@@ -64,10 +64,12 @@ from phonometry import sweep_signal, impulse_response, mls_signal, mls_impulse_r
 
 fs = 48000
 # A 3 s, 20 Hz - 20 kHz sweep is a good broadband room excitation
+# sweep: excitation you play through the loudspeaker
 sweep = sweep_signal(fs, 20.0, 20000.0, 3.0)
 
 # Deconvolve the recorded response back to the impulse response
 system = np.zeros(fs); system[100] = 1.0; system[2000] = 0.4   # direct + reflection
+# recorded: mic capture of the played sweep (here simulated by convolution with a synthetic room)
 recorded = fftconvolve(sweep, system)
 ir = impulse_response(recorded, sweep, fs, method="spectral")
 print(int(np.argmax(np.abs(ir))))                    # 100: direct sound recovered
@@ -156,6 +158,7 @@ from phonometry import decay_curve, room_parameters
 fs = 48000
 # Single-slope decay with T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
 t = np.arange(fs) / fs
+# ir: measured room impulse response; a synthetic single-slope decay stands in here.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
 time, level = decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
@@ -170,7 +173,35 @@ print(round(float(res.ts[0]) * 1000, 0))             # 72 ms
 octaves = room_parameters(ir, fs)
 print(octaves.frequency)                             # ~[126, 251, 501, 1000, 1995, 3981]
 print(octaves.t30_valid)                             # per-band dynamic-range flags
+
+octaves.plot()               # per-band EDT/T20/T30 + C50/C80 bars (needs matplotlib)
+decay_curve(ir, fs).plot()   # Schroeder decay with EDT/T20/T30 fit overlays
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — Schroeder decay with the EDT/T20/T30 straight-line fits:
+decay = decay_curve(ir, fs)          # a DecayCurve (still unpacks as time, level)
+decay.plot()
+plt.show()
+
+# By hand, the decay is just the Schroeder curve; mark the evaluation levels:
+fig, ax = plt.subplots()
+ax.plot(time, level, color="#1f77b4", label="Schroeder decay")
+for db in (-5.0, -25.0, -35.0):      # T20 / T30 evaluation-window edges
+    ax.axhline(db, ls=":", alpha=0.4)
+ax.set_xlabel("Time [s]")
+ax.set_ylabel("Level re steady state [dB]")
+ax.set_ylim(top=3.0)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 For this single-slope decay EDT, T20 and T30 all return ≈ 1.0 s, and the
 energy parameters match their closed forms (C80 = 3.05 dB, D50 = 0.499,
@@ -229,6 +260,44 @@ m = open_plan_metrics(r, lp, sti)
 print(round(m.d2s, 1), round(m.lp_as_4m, 1))         # 7.0 dB, 51.0 dB
 print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Spatial decay: measured Lp,A,S vs distance on a log axis, the D2,S
+# regression rebuilt from the result fields, and STI with the rD / rP
+# crossings on a twin axis:
+b = -m.d2s / np.log10(2.0)                 # regression slope vs lg(r)
+a = m.lp_as_4m - b * np.log10(4.0)         # intercept from the 4 m level
+rr = np.logspace(np.log10(2.0), np.log10(16.0), 100)
+
+fig, ax = plt.subplots()
+ax.semilogx(r, lp, "o", label="Measured Lp,A,S")
+ax.semilogx(rr, a + b * np.log10(rr), "--", label=f"D2,S = {m.d2s:.1f} dB")
+ax.plot(4.0, m.lp_as_4m, "D", label=f"Lp,A,S,4m = {m.lp_as_4m:.0f} dB")
+ax.set_xlabel("Distance from the talker r [m]")
+ax.set_ylabel("A-weighted speech level [dB]")
+ax.set_xlim(1.8, 20.0)
+
+twin = ax.twinx()
+twin.semilogx(r, sti, "s-", color="#2ca02c", label="STI")
+twin.axvline(m.rd, ls=":", color="#2ca02c")
+twin.axvline(m.rp, ls=":", color="#9467bd")
+twin.annotate(f"rD = {m.rd:.1f} m", (m.rd, 0.52))
+twin.annotate(f"rP = {m.rp:.1f} m", (m.rp, 0.22))
+twin.set_ylabel("STI")
+twin.set_ylim(0.0, 1.0)
+
+lines, labels = ax.get_legend_handles_labels()
+tl, tlab = twin.get_legend_handles_labels()
+ax.legend(lines + tl, labels + tlab, loc="best")
+plt.show()
+```
+
+</details>
 
 ### `open_plan_metrics()` parameters
 
@@ -296,7 +365,35 @@ R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
      28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
 w = weighted_rating(R)
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
+
+w.plot()   # measured R' vs shifted ISO 717-1 reference, deviations shaded (needs matplotlib)
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — measured curve vs the shifted ISO 717-1 reference, deviations shaded:
+w.plot()
+plt.show()
+
+# By hand, from the band curve the result now carries:
+fig, ax = plt.subplots()
+ax.semilogx(w.band_centers, w.measured, "o-", label="Measured R'")
+ax.semilogx(w.band_centers, w.shifted_reference, "s--", label="Shifted reference")
+ax.fill_between(w.band_centers, w.measured, w.shifted_reference,
+                where=w.measured < w.shifted_reference, interpolate=True,
+                alpha=0.3, label="Unfavourable deviations")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound reduction index [dB]")
+ax.set_title(f"Rw = {w.rating} dB  (C={w.c:+d}; Ctr={w.ctr:+d})")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Compute `l1`, `l2` and `t2` on the same 16 one-third-octave bands from
 100 Hz to 3150 Hz — obtain `t2` from
@@ -375,13 +472,43 @@ print(round(float(imp.l_n_t[0]), 1))          # 62.1  (= Li since T = T0)
 print(round(float(imp.l_n[0]), 1))            # 64.1  normalized to A0 = 10 m^2
 
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
-r = weighted_impact_rating(imp.l_n_t)
-print(r.rating, r.ci, r.unfavourable_sum)     # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
+res_imp = weighted_impact_rating(imp.l_n_t)
+print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
 
 # Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(weighted_impact_rating(octave).rating)  # 54
+
+res_imp.plot()   # measured L'nT vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — measured L'nT vs the shifted ISO 717-2 reference (measured-above shaded):
+res_imp.plot()
+plt.show()
+
+# By hand, from the band curve the result now carries (note the opposite sign:
+# an unfavourable deviation is where the MEASURED level exceeds the reference).
+# Here the input was l_n_t, so the rated quantity is the field level L'nT,w:
+fig, ax = plt.subplots()
+ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured L'nT")
+ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Shifted reference")
+ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
+                where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
+                alpha=0.3, label="Unfavourable deviations")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Impact sound pressure level [dB]")
+ax.set_title(f"L'nT,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Feed `impact_insulation`'s `l_n_t` (or `l_n`) straight into
 `weighted_impact_rating`; the rating and `CI` reproduce the ISO 717-2 Annex C

@@ -46,9 +46,12 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import Dict, Literal, cast
+from typing import TYPE_CHECKING, Any, Dict, Literal, cast
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 from .intensity import dynamic_capability_index
 from .sound_power import SoundPowerWarning, _a_weighting_corrections
@@ -135,6 +138,16 @@ class SoundPowerIntensityResult:
     surface_area: float
     sound_power_level_a: float
     grade: str
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the LW spectrum; non-positive bands are hatched as unusable.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_sound_power
+
+        return plot_sound_power(self, ax=ax, **kwargs)
 
 
 def _check_grade(grade: str) -> Grade:

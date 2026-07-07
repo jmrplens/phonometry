@@ -30,7 +30,7 @@ nada cambie en la cadena — si tocas la ganancia, recalibra.
 
 ```mermaid
 flowchart LR
-    A["Tono del calibrador\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Grabación\nref_signal"]
+    A["Tono del calibrador\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Grabación\ncalibrator_recording"]
     B --> C["calculate_sensitivity()"]
     C --> D["calibration_factor\n(unidades digitales → Pa)"]
     D --> E["octavefilter / leq / laeq / ln_levels"]
@@ -48,14 +48,18 @@ from phonometry import octavefilter, calculate_sensitivity
 
 # 1. Graba la señal de tu calibrador de 94 dB (1 kHz, 1 Pa RMS = 94 dB SPL)
 fs = 48000
-ref_signal = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # tu medición
+# calibrator_recording: tu tono de calibrador de 1 kHz grabado (1 Pa RMS = 94 dB SPL).
+#   Sintetizado aquí para que la guía funcione; en una medición real graba tu calibrador.
+calibrator_recording = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+# recording: la captura de micrófono que quieres calibrar, misma cadena de entrada (Pa tras calibrar).
+#   Sintetizada aquí; en una medición real es tu señal grabada.
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # 2. Calcula el factor de sensibilidad
-sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0, fs=fs)
+sensitivity = calculate_sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
 
 # 3. Aplica la calibración a tus mediciones
-spl, freq = octavefilter(signal, fs, calibration_factor=sensitivity)
+spl, freq = octavefilter(recording, fs, calibration_factor=sensitivity)
 # ¡Ahora los valores de 'spl' son dB SPL reales!
 ```
 
@@ -130,8 +134,8 @@ En este modo:
 * Útil para analizar headroom, mastering digital o señales normalizadas.
 
 ```python
-# Suponiendo que 'signal' está normalizada entre -1.0 y 1.0
-spl_dbfs, freq = octavefilter(signal, fs, dbfs=True)
+# Suponiendo que 'recording' está normalizada entre -1.0 y 1.0
+spl_dbfs, freq = octavefilter(recording, fs, dbfs=True)
 # Los resultados serán negativos (p. ej. -20 dBFS)
 ```
 
@@ -145,7 +149,7 @@ como BK:
 
 ```python
 # Medir niveles de pico para análisis de impactos
-spl_peak, freq = octavefilter(signal, fs, mode='peak')
+spl_peak, freq = octavefilter(recording, fs, mode='peak')
 ```
 
 :::note

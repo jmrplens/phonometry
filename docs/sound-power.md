@@ -97,6 +97,8 @@ print(round(float(res.environmental_correction[0]), 2)) # K2 = 2.32 dB
 print(round(res.sound_power_level_a, 1))                # LWA = 92.4 dB
 print(round(res.uncertainty, 1))                        # U = 3.0 dB (2*sigma_R0)
 print(np.round(res.sound_power_level, 1))               # per-band LW
+
+res.plot()   # sound power level bars per band, LWA in the title (needs matplotlib)
 ```
 
 The A-weighted total `LWA` is combined from the band powers with the ISO 3744
@@ -191,6 +193,8 @@ lw_rss = np.full(freqs.size, 85.0)
 lp_rss = np.linspace(78.0, 69.0, freqs.size)
 cmp = sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature=20.0)
 print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
+
+rev.plot()   # reverberation-room LW spectrum, LWA in the title (needs matplotlib)
 ```
 
 `levels` may be a 1D mean spectrum or a 2D `(NM, NB)` array averaged over
@@ -292,6 +296,8 @@ print(round(res.sound_power_level_a, 1))                # LWA over determinable 
 print(round(float(res.dynamic_capability_index[0]), 1)) # Ld = 12 - 10 = 2.0 dB
 print(round(float(res.surface_pressure_intensity_index[0]), 2))   # FpI
 print(list(res.achieved_grade))                         # per-band grade
+
+res.plot()   # LW spectrum; non-positive (undeterminable) bands hatched (needs matplotlib)
 ```
 
 Supplying `normal_intensity_2` (the second sweep) averages the two for the

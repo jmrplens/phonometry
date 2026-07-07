@@ -18,15 +18,15 @@ infrasonido, en **ISO 7196:1995**.
 import numpy as np
 from phonometry import weighting_filter
 
-# Una señal calibrada en Pa para que la guía funcione por sí sola
+# recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Aplicar ponderación A a la señal cruda
-weighted_signal = weighting_filter(signal, fs, curve='A')
+weighted_signal = weighting_filter(recording, fs, curve='A')
 
 # Aplicar ponderación C para análisis de picos
-c_weighted_signal = weighting_filter(signal, fs, curve='C')
+c_weighted_signal = weighting_filter(recording, fs, curve='C')
 ```
 
 ## Infrasonido: ponderación G (ISO 7196)
@@ -41,7 +41,7 @@ debajo de 20 Hz (aerogeneradores, climatización, voladuras):
 ```python
 from phonometry import weighting_filter
 
-g_weighted = weighting_filter(signal, fs, curve='G')
+g_weighted = weighting_filter(recording, fs, curve='G')
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_es.png" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_es_dark.png" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%">
@@ -90,9 +90,9 @@ Si ponderas muchas señales con los mismos parámetros, diseña el filtro una so
 from phonometry import WeightingFilter
 
 wf = WeightingFilter(fs, "A")
-signals = [signal]                # tu lote de grabaciones
-for signal in signals:
-    weighted = wf.filter(signal)
+signals = [recording]                # tu lote de grabaciones
+for recording in signals:
+    weighted = wf.filter(recording)
 ```
 
 ## Precisión en alta frecuencia (`high_accuracy`)
@@ -118,11 +118,11 @@ vuelta, manteniendo la respuesta dentro de las tolerancias de clase 1 hasta
 
 ```python
 # Comportamiento clásico explícito
-y = weighting_filter(signal, fs, curve="A", high_accuracy=False)
+y = weighting_filter(recording, fs, curve="A", high_accuracy=False)
 
 # Procesado por bloques con estado (diseño clásico, estado entre bloques)
 wf = WeightingFilter(fs, "A", stateful=True)
-blocks = [signal]                 # tu secuencia de bloques de señal
+blocks = [recording]                 # tu secuencia de bloques de señal
 for block in blocks:
     weighted = wf.filter(block)
 ```

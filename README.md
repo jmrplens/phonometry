@@ -41,7 +41,7 @@ Acoustic measurement toolkit for Python: fractional octave-band filter banks, fr
 pip install phonometry
 ```
 
-Optional extras: `phonometry[plot]` (matplotlib for response plots), `phonometry[perf]` (numba for faster impulse ballistics), `phonometry[full]` (both).
+Optional extras: `phonometry[plot]` (matplotlib for response plots and result `.plot()` methods), `phonometry[perf]` (numba for faster impulse ballistics), `phonometry[full]` (both).
 
 ## 📚 Documentation
 

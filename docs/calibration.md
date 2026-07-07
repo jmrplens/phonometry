@@ -29,7 +29,7 @@ changes — touch the gain knob and you must recalibrate.
 
 ```mermaid
 flowchart LR
-    A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\nref_signal"]
+    A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\ncalibrator_recording"]
     B --> C["calculate_sensitivity()"]
     C --> D["calibration_factor\n(digital units → Pa)"]
     D --> E["octavefilter / leq / laeq / ln_levels"]
@@ -47,14 +47,18 @@ from phonometry import octavefilter, calculate_sensitivity
 
 # 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
 fs = 48000
-ref_signal = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # your measurement
+# calibrator_recording: your recorded 1 kHz calibrator tone (1 Pa RMS = 94 dB SPL).
+#   Synthesized here so the guide runs; in a real measurement, record your calibrator.
+calibrator_recording = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+# recording: the mic capture you want to calibrate, same input chain (Pa after calibration).
+#   Synthesized here; in a real measurement this is your recorded signal.
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # 2. Calculate sensitivity factor
-sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0, fs=fs)
+sensitivity = calculate_sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
 
 # 3. Apply calibration to your measurements
-spl, freq = octavefilter(signal, fs, calibration_factor=sensitivity)
+spl, freq = octavefilter(recording, fs, calibration_factor=sensitivity)
 # Now 'spl' values are in real-world dB SPL!
 ```
 
@@ -128,8 +132,8 @@ In this mode:
 * Useful for analyzing headroom, digital mastering, or normalized signals.
 
 ```python
-# Assume 'signal' is normalized between -1.0 and 1.0
-spl_dbfs, freq = octavefilter(signal, fs, dbfs=True)
+# Assume 'recording' is normalized between -1.0 and 1.0
+spl_dbfs, freq = octavefilter(recording, fs, dbfs=True)
 # Results will be negative (e.g., -20 dBFS)
 ```
 
@@ -144,7 +148,7 @@ like BK:
 
 ```python
 # Measure peak-holding levels for impact analysis
-spl_peak, freq = octavefilter(signal, fs, mode='peak')
+spl_peak, freq = octavefilter(recording, fs, mode='peak')
 ```
 
 > [!NOTE]

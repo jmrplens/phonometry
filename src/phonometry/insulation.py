@@ -65,7 +65,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Sequence, Tuple
+from typing import Any, Sequence, Tuple
 
 import numpy as np
 
@@ -77,6 +77,14 @@ _REF_THIRD_OCTAVE: Tuple[int, ...] = (
 )
 #: Octave reference values, 125 Hz to 2000 Hz (Table 3).
 _REF_OCTAVE: Tuple[int, ...] = (36, 45, 52, 55, 56)
+
+#: One-third-octave band centre frequencies, 100 Hz to 3150 Hz (16 bands).
+_FREQ_THIRD_OCTAVE: Tuple[float, ...] = (
+    100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0,
+    630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0,
+)
+#: Octave band centre frequencies, 125 Hz to 2000 Hz (5 bands).
+_FREQ_OCTAVE: Tuple[float, ...] = (125.0, 250.0, 500.0, 1000.0, 2000.0)
 
 #: Index of the 500 Hz band in each band set (the rating is read there).
 _INDEX_500_THIRD = 7
@@ -159,12 +167,34 @@ class WeightedRatingResult:
     :ivar unfavourable_sum: Sum of unfavourable deviations at the final
         shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5
         bands).
+    :ivar band_centers: Band centre frequencies of the measured curve, in
+        Hz. Defaults to ``None`` for backward-compatible construction.
+    :ivar measured: The measured band quantities used for the rating (after
+        the one-decimal reduction of Clause 4.4), in dB. Defaults to
+        ``None``.
+    :ivar shifted_reference: Table 3 reference curve after the final shift,
+        in dB. Defaults to ``None``.
     """
 
     rating: int
     c: int
     ctr: int
     unfavourable_sum: float
+    band_centers: np.ndarray | None = None
+    measured: np.ndarray | None = None
+    shifted_reference: np.ndarray | None = None
+
+    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+        """Plot the measured curve vs the shifted reference (ISO 717-1).
+
+        Unfavourable deviations (reference above measurement) are shaded and
+        ``Rw (C; Ctr)`` annotated. Requires matplotlib
+        (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_weighted_rating
+
+        return plot_weighted_rating(self, ax=ax, **kwargs)
 
 
 @dataclass(frozen=True)
@@ -197,11 +227,33 @@ class ImpactRatingResult:
     :ivar unfavourable_sum: Sum of unfavourable deviations at the final
         shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5
         bands).
+    :ivar band_centers: Band centre frequencies of the measured curve, in
+        Hz. Defaults to ``None`` for backward-compatible construction.
+    :ivar measured: The measured impact levels used for the rating (after
+        the one-decimal reduction of Clause 4.3.1), in dB. Defaults to
+        ``None``.
+    :ivar shifted_reference: Table 3 impact reference curve after the final
+        shift, in dB. Defaults to ``None``.
     """
 
     rating: int
     ci: int
     unfavourable_sum: float
+    band_centers: np.ndarray | None = None
+    measured: np.ndarray | None = None
+    shifted_reference: np.ndarray | None = None
+
+    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+        """Plot the measured curve vs the shifted reference (ISO 717-2).
+
+        Unfavourable deviations (measurement above the reference, the sign
+        opposite to airborne) are shaded and ``Ln,w (CI)`` annotated.
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_impact_rating
+
+        return plot_impact_rating(self, ax=ax, **kwargs)
 
 
 def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
@@ -457,8 +509,15 @@ def weighted_rating(
     rating = int(reference[index_500]) + shift
     c = _adaptation_term(measured, spectrum1, rating)
     ctr = _adaptation_term(measured, spectrum2, rating)
+    centers = _FREQ_THIRD_OCTAVE if data.size == 16 else _FREQ_OCTAVE
     return WeightedRatingResult(
-        rating=rating, c=c, ctr=ctr, unfavourable_sum=unfavourable
+        rating=rating,
+        c=c,
+        ctr=ctr,
+        unfavourable_sum=unfavourable,
+        band_centers=np.asarray(centers, dtype=np.float64),
+        measured=measured,
+        shifted_reference=ref + shift,
     )
 
 
@@ -630,6 +689,12 @@ def weighted_impact_rating(
     shift, unfavourable = _best_shift(-measured, -ref, limit)
     rating = int(reference[index_500]) - shift + octave_offset
     ci = _impact_ci(measured, rating, ci_bands)
+    centers = _FREQ_THIRD_OCTAVE if data.size == 16 else _FREQ_OCTAVE
     return ImpactRatingResult(
-        rating=rating, ci=ci, unfavourable_sum=unfavourable
+        rating=rating,
+        ci=ci,
+        unfavourable_sum=unfavourable,
+        band_centers=np.asarray(centers, dtype=np.float64),
+        measured=measured,
+        shifted_reference=ref - shift,
     )

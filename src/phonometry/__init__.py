@@ -65,7 +65,12 @@ from .sound_power_intensity import (
     SoundPowerIntensityResult,
     sound_power_intensity,
 )
-from .room_acoustics import RoomAcousticsResult, decay_curve, room_parameters
+from .room_acoustics import (
+    DecayCurve,
+    RoomAcousticsResult,
+    decay_curve,
+    room_parameters,
+)
 from .sound_absorption import (
     AbsorptionWarning,
     absorption_area,
@@ -128,6 +133,7 @@ __all__ = [
     "mls_impulse_response",
     "room_parameters",
     "decay_curve",
+    "DecayCurve",
     "RoomAcousticsResult",
     "absorption_area",
     "absorption_coefficient",

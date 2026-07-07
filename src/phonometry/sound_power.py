@@ -37,7 +37,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import Dict, Literal, Tuple, cast
+from typing import Any, Dict, Literal, Tuple, cast
 
 import numpy as np
 
@@ -160,6 +160,16 @@ class SoundPowerResult:
     sound_power_level_a: float
     uncertainty: float
     grade: str
+
+    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+        """Plot the LW spectrum with the A-weighted total annotated.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_sound_power
+
+        return plot_sound_power(self, ax=ax, **kwargs)
 
 
 def _energy_average(levels: np.ndarray) -> np.ndarray:

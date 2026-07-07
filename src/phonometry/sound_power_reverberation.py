@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -85,6 +86,16 @@ class ReverberationSoundPowerResult:
     speed_of_sound: float
     sound_power_level_a: float
     method: str
+
+    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+        """Plot the LW spectrum with the A-weighted total annotated.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_sound_power
+
+        return plot_sound_power(self, ax=ax, **kwargs)
 
 
 def _validate_meteorology(temperature: float, static_pressure: float) -> None:

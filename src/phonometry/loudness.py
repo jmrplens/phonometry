@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 import numpy as np
 from scipy import signal
@@ -105,6 +105,17 @@ class ZwickerLoudness:
     n10: float | None = None
     time: np.ndarray | None = None
     loudness_vs_time: np.ndarray | None = None
+
+    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+        """Plot the specific loudness N'(z) over Bark (see :mod:`._plotting`).
+
+        Adds a loudness-vs-time panel when the time-varying trace is
+        present.  Requires matplotlib (``pip install phonometry[plot]``);
+        returns the :class:`~matplotlib.axes.Axes` (or array thereof).
+        """
+        from ._plotting import plot_zwicker_loudness
+
+        return plot_zwicker_loudness(self, ax=ax, **kwargs)
 
 
 # ---------------------------------------------------------------------------

@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import List, Sequence
+from typing import Any, List, Sequence
 
 import numpy as np
 from scipy import signal
@@ -97,6 +97,16 @@ class STIResult:
     mtf: np.ndarray
     band_levels: np.ndarray | None
     rating: str
+
+    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+        """Plot the per-band MTI bars with the STI and rating letter.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_sti
+
+        return plot_sti(self, ax=ax, **kwargs)
 
 
 def _rating(sti: float) -> str:

@@ -203,6 +203,46 @@ def test_directivity_index_uniform_field_is_zero() -> None:
     assert np.allclose(res.directivity_index, 0.0, atol=1e-9)
 
 
+def test_directivity_index_uniform_field_with_background_is_zero() -> None:
+    """With background correction and a uniform field (large dL so K1 ~ 0),
+    the apparent DI stays ~0 at every position; it must NOT be inflated by the
+    surface-area term 10*lg(S/S0) (~22 dB at r = 5 m). ISO 3744 Eq. 7 / Eq. 16."""
+    src = np.full((10, 1), 80.0)
+    bg = np.full((10, 1), 40.0)  # dL = 40 dB -> K1 ~ 4e-4 dB
+    res = sound_power_pressure(src, "hemisphere", radius=5.0, background_levels=bg)
+    assert np.allclose(res.directivity_index, 0.0, atol=1e-3)
+
+
+def test_directivity_index_uses_broadband_k1_not_area() -> None:
+    """With a modest background margin the DI reference is the background-
+    corrected surface level: DI_i = Lp_i - (mean - K1), with K1 the broadband
+    background correction (ISO 3744 Eq. 7, Eq. 16). Verified analytically."""
+    src = np.array(
+        [[82.0], [78.0], [80.0], [79.0], [81.0],
+         [80.0], [83.0], [77.0], [80.0], [80.0]]
+    )
+    bg = np.full((10, 1), 72.0)  # dL ~ 8.4 dB -> above the 6 dB criterion
+    res = sound_power_pressure(src, "hemisphere", radius=5.0, background_levels=bg)
+    mean_level = 10.0 * np.log10(np.mean(10.0 ** (0.1 * src[:, 0])))
+    k1 = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * (mean_level - 72.0)))
+    expected = src[:, 0] - (mean_level - k1)
+    assert np.allclose(res.directivity_index, expected, atol=1e-9)
+
+
+def test_sound_power_level_a_multiband_without_frequencies_is_nan() -> None:
+    """Multi-band input without 'frequencies' cannot be A-weighted, so the
+    A-weighted field is NaN (A-weighting needs the band centre frequencies)."""
+    levels = np.tile(np.array([90.0, 92.0, 95.0]), (10, 1))
+    res = sound_power_pressure(levels, "hemisphere", radius=2.0)
+    assert np.isnan(res.sound_power_level_a)
+
+
+def test_sound_power_level_a_single_band_equals_level() -> None:
+    """A single band without 'frequencies' keeps LWA = LW (no weighting)."""
+    res = sound_power_pressure(np.full((10, 1), 60.0), "hemisphere", radius=2.0)
+    assert res.sound_power_level_a == pytest.approx(float(res.sound_power_level[0]))
+
+
 # --------------------------------------------------------------------------
 # validations
 # --------------------------------------------------------------------------

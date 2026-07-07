@@ -55,7 +55,7 @@ class SoundPowerWarning(UserWarning):
 
 
 # --- ISO 3744:2010 Annex B, normative microphone coordinates (x/r,y/r,z/r) ---
-#: Table B.1 - preferred positions for all sources (including tones), p. 37.
+#: Table B.1 - preferred positions for all sources (including tones).
 _TABLE_B1: np.ndarray = np.array(
     [
         [0.16, -0.96, 0.22], [0.78, -0.60, 0.20], [0.78, 0.55, 0.31],
@@ -67,7 +67,7 @@ _TABLE_B1: np.ndarray = np.array(
         [-0.56, 0.02, 0.83], [0.14, 0.04, 0.99],
     ]
 )
-#: Table B.2 - positions for a broadband (tone-free) source, p. 38.
+#: Table B.2 - positions for a broadband (tone-free) source.
 _TABLE_B2: np.ndarray = np.array(
     [
         [-0.99, 0.0, 0.15], [0.50, -0.86, 0.15], [0.50, 0.86, 0.15],
@@ -79,7 +79,7 @@ _TABLE_B2: np.ndarray = np.array(
         [-0.33, 0.57, 0.75], [0.0, 0.0, 1.00],
     ]
 )
-#: Table B.3 - source adjacent to three reflecting planes, p. 38.
+#: Table B.3 - source adjacent to three reflecting planes.
 _TABLE_B3: np.ndarray = np.array(
     [
         [0.86, -0.50, 0.15], [0.45, -0.77, 0.45], [0.47, -0.47, 0.75],
@@ -88,14 +88,14 @@ _TABLE_B3: np.ndarray = np.array(
 )
 
 # --- ISO 3744:2010 Annex E, A-weighting band corrections Ck (dB) ------------
-#: Table E.1 - one-third-octave mid-band frequencies, p. 59.
+#: Table E.1 - one-third-octave mid-band frequencies.
 _CK_THIRD: Dict[int, float] = {
     50: -30.2, 63: -26.2, 80: -22.5, 100: -19.1, 125: -16.1, 160: -13.4,
     200: -10.9, 250: -8.6, 315: -6.6, 400: -4.8, 500: -3.2, 630: -1.9,
     800: -0.8, 1000: 0.0, 1250: 0.6, 1600: 1.0, 2000: 1.2, 2500: 1.3,
     3150: 1.2, 4000: 1.0, 5000: 0.5, 6300: -0.1, 8000: -1.1, 10000: -2.5,
 }
-#: Table E.2 - octave mid-band frequencies, p. 60 (subset of E.1 values).
+#: Table E.2 - octave mid-band frequencies (subset of E.1 values).
 _CK_OCTAVE: Dict[int, float] = {
     63: -26.2, 125: -16.1, 250: -8.6, 500: -3.2,
     1000: 0.0, 2000: 1.2, 4000: 1.0, 8000: -1.1,
@@ -117,8 +117,9 @@ _MIN_HEMI_POSITIONS: Dict[str, Dict[int, int]] = {
     "engineering": {1: 10, 2: 5, 3: 3},
     "survey": {1: 4, 2: 3, 3: 3},
 }
-#: Minimum microphone positions on a parallelepiped (ISO 3744 clause C.1: 9
-#: rectangular key positions; ISO 3746 clause C: 4).
+#: Minimum microphone positions on a parallelepiped: ISO 3744 clause C.1 (9 key
+#: positions for rectangular partial areas); ISO 3746 clause C.1, Figure C.7 (4
+#: positions for a floor-standing source on one reflecting plane).
 _MIN_BOX_POSITIONS: Dict[str, int] = {"engineering": 9, "survey": 4}
 #: Typical A-weighted reproducibility standard deviation sigma_R0, in dB.
 #: ISO 3744 Table 2 (1,5); ISO 3746 Table 1 (3,0, tone-free).
@@ -135,7 +136,8 @@ class SoundPowerResult:
     level ``Lp'(ST)`` (Eq. 12). ``background_correction`` (K1) and
     ``environmental_correction`` (K2) are per band. ``sound_power_level_a`` is
     the A-weighted total ``LWA`` (Eq. E.1), computed only when ``frequencies``
-    are supplied (otherwise it equals the single-band level).
+    are supplied; for a single band it equals ``LW``, and for several bands
+    without ``frequencies`` it is ``NaN`` (A-weighting needs the band centres).
     ``directivity_index`` is the apparent directivity index ``DIi*`` per
     microphone position (Eq. 7). ``uncertainty`` is the expanded uncertainty
     ``U = 2*sqrt(sigma_R0^2 + sigma_omc^2)`` (95 %, ISO 3744 clause 9.5)."""
@@ -471,21 +473,26 @@ def sound_power_pressure(
         lwa = float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (lw + ck)))))
     else:
         freqs = None
-        lwa = float(lw[0]) if n_bands == 1 else float(
-            10.0 * np.log10(np.sum(10.0 ** (0.1 * lw)))
-        )
+        # A-weighting needs the band centre frequencies; with several bands and
+        # none supplied the A-weighted total is undefined (NaN). A single band
+        # carries no weighting, so LWA = LW.
+        lwa = float(lw[0]) if n_bands == 1 else float("nan")
 
     # --- apparent directivity index per position (Eq. 7) ------------------
     position_levels = 10.0 * np.log10(np.sum(10.0 ** (0.1 * levels), axis=1))
     mean_position = 10.0 * np.log10(
         np.sum(10.0 ** (0.1 * position_levels)) / n_positions
     )
-    k1_overall = (
-        10.0 * np.log10(np.sum(10.0 ** (0.1 * lw)))
-        - 10.0 * np.log10(np.sum(10.0 ** (0.1 * surface_spl)))
-        if background_levels is not None
-        else 0.0
-    )
+    # Broadband background correction K1: the energy sum over bands of the raw
+    # surface mean minus that of the background-corrected mean. This is the true
+    # K1 (per-band K1 aggregated over bands, Eq. 16), not the surface-area term
+    # 10*lg(S/S0) that lw - surface_spl would yield.
+    if background_levels is not None:
+        total_raw = 10.0 * np.log10(np.sum(10.0 ** (0.1 * mean_level)))
+        total_corrected = 10.0 * np.log10(np.sum(10.0 ** (0.1 * (mean_level - k1))))
+        k1_overall = total_raw - total_corrected
+    else:
+        k1_overall = 0.0
     directivity = np.asarray(
         position_levels - (mean_position - k1_overall), dtype=np.float64
     )

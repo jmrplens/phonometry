@@ -12,7 +12,7 @@ El nivel continuo equivalente integra la presión al cuadrado durante el tiempo
 de medición:
 
 $$
-L_{eq} = 10\log_{10}\!\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\,dt\right) \text{ dB}, \qquad p_0 = 20\ \mu\text{Pa}
+L_{eq} = 10\log_{10}\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\,dt\right) \text{ dB}, \qquad p_0 = 20\ \mu\text{Pa}
 $$
 
 y $L_{Aeq}$ es la misma integral tras ponderar A la señal. $L_N$ es el nivel

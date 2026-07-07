@@ -36,6 +36,13 @@ from .parametric_filters import (
     time_weighting,
     weighting_filter,
 )
+from .room_ir import (
+    impulse_response,
+    inverse_filter,
+    mls_impulse_response,
+    mls_signal,
+    sweep_signal,
+)
 from ._version import __version__
 
 # Public methods
@@ -78,6 +85,11 @@ __all__ = [
     "stipa",
     "stipa_signal",
     "STIResult",
+    "sweep_signal",
+    "inverse_filter",
+    "impulse_response",
+    "mls_signal",
+    "mls_impulse_response",
     "lden",
     "ldn",
     "composite_rating_level",

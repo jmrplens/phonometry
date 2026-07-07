@@ -47,7 +47,7 @@ frecuencia decimada:
 | `order` | int | — | por defecto `6` | Orden SOS por banda |
 | `limits` | lista `[lo, hi]` | Hz | por defecto `[12, 20000]` | Rango de análisis |
 | `filter_type` | str | — | `'butter'` (por defecto), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | Ver la comparación más abajo |
-| `ripple` / `attenuation` | float | dB | requerido por los tipos cheby/ellip | Rizado de banda de paso / atenuación de banda eliminada |
+| `ripple` / `attenuation` | float | dB | `ripple` defecto `0.1`; `attenuation` defecto `72.0` | Rizado de banda de paso / atenuación de banda eliminada (cheby/ellip); `cheby2` necesita `attenuation ≥ 70` para clase 1, ya que scipy fija su suelo equirizado en exactamente este valor |
 | `show` | bool | — | por defecto `False` | Dibuja la respuesta del banco (requiere matplotlib) |
 | `sigbands` | bool | — | por defecto `False` | Devuelve también las señales temporales por banda |
 | `mode` | str | — | `'rms'` (por defecto), `'peak'`, `'sum'` | Estadístico por banda devuelto |
@@ -197,12 +197,14 @@ print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_clas
 prohibidas: debe atenuar al menos la máscara roja fuera de la banda y no más
 que la morada dentro de ella.*
 
-Con parámetros por defecto (orden 6), **Butterworth cumple clase 1**.
-Chebyshev II se queda en clase 2 — limitado exactamente por su `attenuation=60`
-frente a los 70 dB exigidos en el stopband lejano (sube `attenuation` para
-alcanzar clase 1). Chebyshev I, Elíptico y Bessel no cumplen los límites de
-clase con orden 6: el rizado de banda de paso (cheby1/ellip) y la caída lenta
-(bessel) violan la máscara.
+Con parámetros por defecto (orden 6), **Butterworth cumple clase 1**, y también
+lo hace **Chebyshev II**: su valor por defecto de `attenuation` es ahora `72` dB,
+superando el límite de clase 1 de 70 dB en el stopband lejano (scipy fija el
+suelo equirizado de cheby2 en exactamente `attenuation`, así que cualquier valor
+≥ 70 dB cumple; el valor por defecto de 72 dB mantiene el mismo margen de banda
+de paso de +0,400 dB que Butterworth). Chebyshev I, Elíptico y Bessel no cumplen
+los límites de clase con orden 6: el rizado de banda de paso (cheby1/ellip) y la
+caída lenta (bessel) violan la máscara.
 
 ## Descomposición de la señal y estabilidad
 
@@ -257,7 +259,12 @@ los bordes de banda.
 Para análisis offline puedes eliminar por completo el retardo de grupo:
 `zero_phase=True` filtra cada banda hacia delante y hacia atrás
 (`scipy.signal.sosfiltfilt`), manteniendo las señales por banda alineadas con la
-entrada. La atenuación efectiva se duplica y la opción es incompatible con el
+entrada. La atenuación efectiva se duplica y la banda de paso efectiva se
+estrecha, reduciendo el nivel de banda ancha medido en ~0,2 a 0,3 dB por banda
+(un tono puro dentro de banda no se ve afectado); prefiere el filtrado hacia
+delante cuando el SPL absoluto de banda debe coincidir con el convenio de un
+solo paso, y reserva la fase cero para cuando importa la envolvente temporal
+(p. ej. decaimiento de reverberación). La opción es incompatible con el
 procesado por bloques (stateful).
 
 ```python

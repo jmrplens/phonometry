@@ -137,6 +137,12 @@ recording = test                       # en la práctica, la señal del micrófo
 res = stipa(recording, fs)
 ```
 
+`stipa` emite un `UserWarning` cuando la grabación es más corta que los 15 s
+recomendados (práctica STIPA de IEC 60268-16, de 15 s a 25 s): por debajo de eso
+las componentes de modulación lentas se promedian sobre muy pocos periodos y el
+STI queda sesgado a la baja (un lazo ideal da STI ≈ 0,944 a 5 s frente a
+≈ 0,998 a 18 s).
+
 La implementación sigue la **Edición 5 (2020)**: el PDF normativo de la
 Edición 4 es la base y cada cambio de la Ed. 5 está atribuido a su fuente en el
 código — el único delta numérico es el espectro de habla masculina revisado del

@@ -92,6 +92,7 @@ ok = ld > fi.f2                                            # criterion 1
 | `c` | float | m/s | default `343.0` | Speed of sound (bias/validity estimates) |
 | `fraction` | int, optional | — | `1`, `3` or `None` (default) | Octave/third-octave band integration |
 | `limits` | list, optional | Hz | default library band range | Band analysis limits |
+| `bias_correct` | bool | — | default `False` | Apply the per-bin $(k\Delta r)/\sin(k\Delta r)$ correction (IEC 61043 §7.3) before summing, so band/broadband totals stop under-reading as $f \to$ `max_valid_frequency`; bins past the first null are left uncorrected. The per-band `bias_correction` factor is reported either way |
 
 See [Theory](theory.md) for the derivations and [Calibration](calibration.md)
 for absolute scaling of the two channels.

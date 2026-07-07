@@ -199,7 +199,7 @@ avoids that by filtering low bands at a decimated rate:
 | `order` | int | — | default `6` | SOS order per band |
 | `limits` | list `[lo, hi]` | Hz | default `[12, 20000]` | Analysis range |
 | `filter_type` | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See comparison above |
-| `ripple` / `attenuation` | float | dB | required by cheby/ellip types | Passband ripple / stopband attenuation |
+| `ripple` / `attenuation` | float | dB | `ripple` default `0.1`; `attenuation` default `72.0` | Passband ripple / stopband attenuation (cheby/ellip); `cheby2` needs `attenuation ≥ 70` for class 1, since scipy pins its equiripple floor at exactly this value |
 | `show` | bool | — | default `False` | Plot the bank response (needs matplotlib) |
 | `sigbands` | bool | — | default `False` | Also return the per-band time signals |
 | `mode` | str | — | `'rms'` (default), `'peak'`, `'sum'` | Per-band statistic returned |
@@ -356,11 +356,13 @@ print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_clas
 regions: it must attenuate at least the red mask outside the band and no more
 than the purple mask inside it.*
 
-With default parameters (order 6), **Butterworth meets class 1**. Chebyshev II
-lands in class 2 — capped exactly by its `attenuation=60` versus the 70 dB
-far-stopband requirement (raise `attenuation` to reach class 1). Chebyshev I,
-Elliptic and Bessel do not meet class limits at order 6: passband ripple
-(cheby1/ellip) and slow roll-off (bessel) violate the mask.
+With default parameters (order 6), **Butterworth meets class 1**, and so does
+**Chebyshev II**: its `attenuation` default is now `72` dB, clearing the 70 dB
+far-stopband class 1 limit (scipy pins the cheby2 equiripple floor at exactly
+`attenuation`, so any value ≥ 70 dB qualifies; the 72 dB default keeps the same
++0.400 dB passband margin as Butterworth). Chebyshev I, Elliptic and Bessel do
+not meet class limits at order 6: passband ripple (cheby1/ellip) and slow
+roll-off (bessel) violate the mask.
 
 ## Signal Decomposition and Stability
 
@@ -412,8 +414,12 @@ their steep roll-off with strong delay peaks at the band edges.
 
 For offline analysis you can eliminate group delay entirely: `zero_phase=True`
 filters each band forward-backward (`scipy.signal.sosfiltfilt`), keeping band
-signals time-aligned with the input. The effective attenuation doubles, and the
-option is incompatible with stateful (block) processing.
+signals time-aligned with the input. The effective attenuation doubles and the
+effective passband narrows, lowering the measured broadband band level by
+~0.2 to 0.3 dB per band (a pure in-band tone is unaffected); prefer forward
+filtering when the absolute band SPL must match single-pass conventions, and
+reserve zero-phase for when the temporal envelope matters (e.g. reverberation
+decay). The option is incompatible with stateful (block) processing.
 
 ```python
 from phonometry import OctaveFilterBank
@@ -767,7 +773,8 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` applies A/C weighting first, and
 `calibration_factor`/`dbfs` behave as in `leq`. The integrator attack transient
-(~2τ) is discarded before taking percentiles.
+(~5τ) is discarded before taking percentiles, so the leading settling ramp is
+not counted in the low percentiles.
 
 Formally, $L_N$ is the $(100-N)$-th percentile of the distribution of the
 time-weighted level: the recording is first turned into a level-vs-time
@@ -810,8 +817,13 @@ lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
 `lc_peak` is verified against the one-cycle/half-cycle reference responses of
 IEC 61672-1:2013 Table 5, `sel` against the Table 4 LAE toneburst column, and
 the dose functions against the IEC 61252 anchors (3.2 Pa²h ↔ exactly 90 dB).
-With `duration_hours`, the input is treated as a representative sample of that
-exposure period; without it, the input is the whole event.
+`lc_peak` polyphase-oversamples the C-weighted signal by `oversample` (default
+`8`) before taking the maximum, recovering the true inter-sample peak: a raw
+on-grid maximum under-reads sustained HF tones by up to ~1.15 dB (an 8 kHz tone
+at 48 kHz is only 6 samples/cycle). Set `oversample=1` to detect the peak on the
+original sample grid. With `duration_hours`, the input is treated as a
+representative sample of that exposure period; without it, the input is the
+whole event.
 
 ### SEL: comparing events of different duration
 
@@ -1149,6 +1161,11 @@ recording = test                       # in practice, the microphone signal afte
 res = stipa(recording, fs)
 ```
 
+`stipa` emits a `UserWarning` when the recording is shorter than the
+recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s): below that the
+slow modulation components are averaged over too few periods and the STI is
+biased low (an ideal loopback gives STI ≈ 0.944 at 5 s vs ≈ 0.998 at 18 s).
+
 The implementation follows **Edition 5 (2020)**: Edition 4's normative PDF
 is the base and every Ed. 5 change is source-attributed in the code — the
 only numeric delta is the revised male speech spectrum of clause A.6.1.
@@ -1270,6 +1287,7 @@ ok = ld > fi.f2                                            # criterion 1
 | `c` | float | m/s | default `343.0` | Speed of sound (bias/validity estimates) |
 | `fraction` | int, optional | — | `1`, `3` or `None` (default) | Octave/third-octave band integration |
 | `limits` | list, optional | Hz | default library band range | Band analysis limits |
+| `bias_correct` | bool | — | default `False` | Apply the per-bin $(k\Delta r)/\sin(k\Delta r)$ correction (IEC 61043 §7.3) before summing, so band/broadband totals stop under-reading as $f \to$ `max_valid_frequency`; bins past the first null are left uncorrected. The per-band `bias_correction` factor is reported either way |
 
 See [Theory](https://jmrplens.github.io/phonometry/reference/theory/) for the derivations and [Calibration](https://jmrplens.github.io/phonometry/guides/calibration/)
 for absolute scaling of the two channels.
@@ -1461,14 +1479,17 @@ Ts = 72 ms). A real room has a steeper early slope, so EDT < T30.
 | `fs` | int | Hz | > 0 | Sample rate |
 | `limits` | (float, float) or `None` | Hz | default `(125.0, 4000.0)` | Band-centre limits; `None` = broadband single band |
 | `fraction` | int | — | `1` (octave, default) / `3` (third) | Bandwidth fraction |
+| `zero_phase` | bool | — | default `False` | Forward-backward octave filtering (ISO 3382-2 §7.3 NOTE, which relaxes $BT > 16$ to $BT > 4$); removes the filter group delay before the backward integration and roughly halves the 125 Hz short-decay T30 bias (~+4.9 % → +2.4 % at $T$ = 0.2 s). `decay_curve` accepts it too |
 
 Returns a `RoomAcousticsResult`: `frequency` (band centres, or `None`
 broadband), `edt`/`t20`/`t30` (s), `c50`/`c80` (dB), `d50`, `ts` (s),
 `dynamic_range` (dB), the `edt_valid`/`t20_valid`/`t30_valid` flags (ISO
-3382-1 §5.3.3: noise ≥ 25/35/45 dB below the peak) and `curvature`
+3382-1 §5.3.3: noise ≥ 25 dB below the peak for EDT, tightened to 46 dB for
+T20 and 54 dB for T30 so the tail-compensation bias of a flagged-valid value
+stays within the 5 % JND) and `curvature`
 $C = 100\ (T_{30}/T_{20} - 1)$ % (values above 10 % flag a non-straight
-decay). `decay_curve(ir, fs, band=None, fraction=1)` returns just the
-`(time, level)` curve for one band or the broadband response.
+decay). `decay_curve(ir, fs, band=None, fraction=1, zero_phase=False)` returns
+just the `(time, level)` curve for one band or the broadband response.
 
 ## 3. Open-plan offices (ISO 3382-3)
 
@@ -1726,6 +1747,7 @@ wind, handling noise:
 | `validate` | bool | — | default `True` | Emit `CalibrationWarning` on unstable/short recordings |
 | `max_fluctuation_db` | float, optional | dB | default `None` → Table 2 class 1 | Explicit override of the stability limit |
 | `frequency` | float | Hz | default `1000.0` | Calibrator's nominal frequency; selects the IEC 60942 Table 2 row |
+| `narrowband` | bool | — | default `False` | Estimate the tone with a coherent Goertzel detector near `frequency` (needs `fs`) instead of full-band RMS; rejects broadband hum/noise that otherwise inflates the RMS and shrinks every later level (~−0.44 dB at 20 dB SNR). Enable for noisy coupler recordings |
 
 Returns the sensitivity factor (float) to pass as `calibration_factor=` to
 `octavefilter`, `leq`, `laeq`, `ln_levels`, `lc_peak`, `sel` and the dose
@@ -1982,8 +2004,8 @@ All core functionality can be imported directly from the `phonometry` package.
 
 | Name | Type | Description (Inputs) | Usage Snippet (Outputs) |
 | :--- | :--- | :--- | :--- |
-| `octavefilter` | `function` | **High-level analysis.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc. (Default: 1)<br>• `order`: Filter order (Default: 6)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: 'butter', 'cheby1', 'cheby2', 'ellip', 'bessel' (Default: 'butter')<br>• `sigbands`: Return time signals (Default: False)<br>• `detrend`: Remove DC offset (Default: True)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS instead of dB SPL (Default: False)<br>• `mode`: 'rms' or 'peak' (Default: 'rms')<br>• `nominal`: IEC 61260-1 nominal labels (Default: False)<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save plot (Default: None)<br>• `ripple`: Passband ripple [dB] (for cheby1/ellip)<br>• `attenuation`: Stopband atten. [dB] (for cheby2/ellip) | `spl, freq = octavefilter(x, fs, ...)`<br>• `spl`: levels [dB]<br>• `freq`: frequencies [Hz]<br><br>**With `sigbands=True`:**<br>`spl, freq, xb = octavefilter(x, fs, sigbands=True)`<br>• `xb`: List of filtered signals (one per band)<br><br>**Calibrated usage:**<br>`spl, f = octavefilter(x, fs, calibration_factor=0.05)` |
-| `OctaveFilterBank` | `class` | **Efficient bank implementation.**<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc.<br>• `order`: Filter order<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: Architecture name<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save the plot (Default: None)<br>• `calibration_factor`: Sensitivity multiplier<br>• `dbfs`: Use dBFS (Default: False)<br>• `stateful`: Carry filter state between calls (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `resample`: Multirate decimation (Default: True)<br>• `ripple`: Passband ripple [dB]<br>• `attenuation`: Stopband attenuation [dB] | `bank = OctaveFilterBank(fs=48000, fraction=3, order=6, filter_type='butter')`<br>`spl, f = bank.filter(x, sigbands=False, mode='rms', detrend=True, zero_phase=False)`<br><br>• `bank`: Instance of the filter bank<br>• `bank.freq` / `bank.freq_d` / `bank.freq_u` / `bank.sos`: computed properties |
+| `octavefilter` | `function` | **High-level analysis.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc. (Default: 1)<br>• `order`: Filter order (Default: 6)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: 'butter', 'cheby1', 'cheby2', 'ellip', 'bessel' (Default: 'butter')<br>• `sigbands`: Return time signals (Default: False)<br>• `detrend`: Remove DC offset (Default: True)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS instead of dB SPL (Default: False)<br>• `mode`: 'rms' or 'peak' (Default: 'rms')<br>• `nominal`: IEC 61260-1 nominal labels (Default: False)<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save plot (Default: None)<br>• `ripple`: Passband ripple [dB] (for cheby1/ellip)<br>• `attenuation`: Stopband atten. [dB] (Default: 72; for cheby2/ellip — cheby2 needs >= 70 dB for class 1) | `spl, freq = octavefilter(x, fs, ...)`<br>• `spl`: levels [dB]<br>• `freq`: frequencies [Hz]<br><br>**With `sigbands=True`:**<br>`spl, freq, xb = octavefilter(x, fs, sigbands=True)`<br>• `xb`: List of filtered signals (one per band)<br><br>**Calibrated usage:**<br>`spl, f = octavefilter(x, fs, calibration_factor=0.05)` |
+| `OctaveFilterBank` | `class` | **Efficient bank implementation.**<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc.<br>• `order`: Filter order<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: Architecture name<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save the plot (Default: None)<br>• `calibration_factor`: Sensitivity multiplier<br>• `dbfs`: Use dBFS (Default: False)<br>• `stateful`: Carry filter state between calls (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `resample`: Multirate decimation (Default: True)<br>• `ripple`: Passband ripple [dB]<br>• `attenuation`: Stopband attenuation [dB] (Default: 72; cheby2 needs >= 70 dB for class 1) | `bank = OctaveFilterBank(fs=48000, fraction=3, order=6, filter_type='butter')`<br>`spl, f = bank.filter(x, sigbands=False, mode='rms', detrend=True, zero_phase=False)`<br><br>• `bank`: Instance of the filter bank<br>• `bank.freq` / `bank.freq_d` / `bank.freq_u` / `bank.sos`: computed properties |
 | `OctaveFilterBank.spectrogram` | `method` | **Band levels over time.**<br>• `x`: Signal array (1D or 2D)<br>• `window_time`: Window length [s] (Default: 0.125)<br>• `overlap`: Fraction in [0, 1) (Default: 0.5)<br>• `mode`: 'rms' or 'peak'<br>• `zero_phase`: Group-delay-free frames (Default: False) | `levels, freq, times = bank.spectrogram(x)`<br><br>• `levels`: (bands, frames) or (channels, bands, frames)<br>• `times`: window centers [s] |
 | `weighting_filter` | `function` | **Acoustic weighting.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `curve`: 'A', 'C', 'G' (ISO 7196 infrasound) or 'Z' (Default: 'A')<br>• `high_accuracy`: IEC class 1 HF accuracy via internal oversampling (Default: True) | `y = weighting_filter(x, fs, curve='A')`<br><br>• `y`: weighted signal |
 | `WeightingFilter` | `class` | **Reusable weighting filter.**<br>• `fs`: Sample rate [Hz]<br>• `curve`: 'A', 'C', 'G' or 'Z'<br>• `stateful`: Block processing (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `high_accuracy`: Defaults to True except stateful | `wf = WeightingFilter(fs, 'A')`<br>`y = wf.filter(x)` |
@@ -1992,7 +2014,7 @@ All core functionality can be imported directly from the `phonometry` package.
 | `leq` | `function` | **Equivalent level (Leq).**<br>• `x`: Signal array (1D or 2D)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS (Default: False) | `level = leq(x, calibration_factor=s)`<br><br>• `level`: Scalar (1D) or per-channel array (2D) |
 | `laeq` | `function` | **A-weighted Leq (LAeq).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `calibration_factor` / `dbfs`: as `leq` | `level = laeq(x, fs, calibration_factor=s)`<br><br>• `level`: Scalar (1D) or per-channel array (2D) |
 | `ln_levels` | `function` | **Statistical levels (LN).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `n`: Exceedance percentiles (Default: (10, 50, 90))<br>• `mode`: 'fast', 'slow', 'impulse' (Default: 'fast')<br>• `weighting`: 'A', 'C', 'G', 'Z' or None (Default: None)<br>• `calibration_factor` / `dbfs`: as `leq` | `stats = ln_levels(x, fs, n=(10, 50, 90), weighting='A')`<br><br>• `stats`: Dict `{10: L10, 50: L50, 90: L90}` |
-| `lc_peak` | `function` | **C-weighted peak (LCpeak).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `calibration_factor`: as `leq`<br>• `dbfs`: 0 dBFS = full-scale *peak* (amplitude 1.0), unlike the RMS reference of `leq` | `peak = lc_peak(x, fs)`<br><br>• IEC 61672-1 §5.13; verified against Table 5 |
+| `lc_peak` | `function` | **C-weighted peak (LCpeak).**<br>• `x`: Signal array (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `calibration_factor`: as `leq`<br>• `dbfs`: 0 dBFS = full-scale *peak* (amplitude 1.0), unlike the RMS reference of `leq`<br>• `oversample`: HF inter-sample peak recovery (Default: 8; 1 = on-grid, under-reads up to ~1.15 dB at 48 kHz) | `peak = lc_peak(x, fs)`<br><br>• IEC 61672-1 §5.13; verified against Table 5 |
 | `sel` | `function` | **Sound exposure level (SEL/LAE).**<br>• `x`: Whole-event signal (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'A', 'C', 'G', 'Z' or None (Default: None)<br>• `calibration_factor` / `dbfs`: as `leq` | `lae = sel(x, fs, weighting='A')`<br><br>• Event level normalized to 1 s |
 | `sound_exposure` | `function` | **A-weighted exposure E (IEC 61252).**<br>• `x`: Signal (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `duration_hours`: exposure period represented (Default: recording length)<br>• `calibration_factor` | `E = sound_exposure(x, fs, duration_hours=8)`<br><br>• `E`: Pa²·h |
 | `lex_8h` | `function` | **Daily exposure LEX,8h / LEP,d.**<br>• Same params as `sound_exposure` | `lex = lex_8h(x, fs, duration_hours=4)`<br><br>• Normalized 8 h level [dB] |
@@ -2008,10 +2030,10 @@ All core functionality can be imported directly from the `phonometry` package.
 | `prominence_ratio` | `function` | **Prominence ratio (ECMA-418-1 §12).**<br>• Same params as `tone_to_noise_ratio` | `r = prominence_ratio(x, fs, tone_freq=1000)`<br><br>• `ToneAssessment(...)` |
 | `ToneAssessment` | `dataclass` | **Tone prominence verdict.**<br>• `frequency`: Assessed tone [Hz]<br>• `ratio_db`: TNR or PR [dB]<br>• `criterion_db`: Prominence limit at that frequency [dB]<br>• `prominent`: bool | `r = tone_to_noise_ratio(x, fs)`<br>`if r.prominent: ...` |
 | `sti_from_impulse_response` | `function` | **Full STI, indirect method (IEC 60268-16 Ed. 5).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `snr`: SNR [dB], scalar or 7 bands (Default: None)<br>• `level`: 7 speech band levels [dB SPL]; enables masking + reception threshold (Default: None)<br>• `ambient`: 7 noise band levels [dB SPL]; requires `level` | `res = sti_from_impulse_response(ir, fs, snr=25.0)`<br><br>• `STIResult` with `mtf` (7×14) |
-| `stipa` | `function` | **STIPA direct method (Annex B).**<br>• `x`: Recorded STIPA signal (1D), 15-25 s<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `reference`: Measured source signal instead of the nominal m = 0.55 (Default: None)<br>• `level` / `ambient`: as `sti_from_impulse_response` | `res = stipa(recording, fs)`<br><br>• `STIResult` with `mtf` (7×2) |
+| `stipa` | `function` | **STIPA direct method (Annex B).**<br>• `x`: Recorded STIPA signal (1D), 15-25 s<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `reference`: Measured source signal instead of the nominal m = 0.55 (Default: None)<br>• `level` / `ambient`: as `sti_from_impulse_response`<br>• warns (`UserWarning`) if the recording is < 15 s (STI biased low) | `res = stipa(recording, fs)`<br><br>• `STIResult` with `mtf` (7×2) |
 | `stipa_signal` | `function` | **STIPA test-signal generator (A.4/A.6.1).**<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `seconds`: Duration [s] (Default: 18.0)<br>• `level_db`: RMS level [dB SPL] (Default: None → RMS 0.1)<br>• `seed`: Pink-noise seed (Default: None) | `sig = stipa_signal(48000, seconds=18.0)`<br><br>• 1D test signal, Ed. 5 male spectrum |
 | `STIResult` | `dataclass` | **STI result.**<br>• `sti`: 0 to 1<br>• `mti`: band indices (7,)<br>• `mtf`: corrected m values (7×14 or 7×2)<br>• `band_levels`: levels used or None<br>• `rating`: Annex F letter 'A+'…'U' | `res = stipa(x, fs)`<br>`print(res.sti, res.rating)` |
-| `sound_intensity` | `function` | **p-p sound intensity (IEC 61043).**<br>• `p1`, `p2`: Microphone signals [Pa], equal length<br>• `fs`: Sample rate [Hz]<br>• `spacing`: Microphone separation Δr [m]<br>• `rho`: Air density (Default: 1.204)<br>• `c`: Speed of sound (Default: 343.0)<br>• `fraction`: None, 1 or 3 (Default: None)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3)`<br><br>• `IntensityResult` |
+| `sound_intensity` | `function` | **p-p sound intensity (IEC 61043).**<br>• `p1`, `p2`: Microphone signals [Pa], equal length<br>• `fs`: Sample rate [Hz]<br>• `spacing`: Microphone separation Δr [m]<br>• `rho`: Air density (Default: 1.204)<br>• `c`: Speed of sound (Default: 343.0)<br>• `fraction`: None, 1 or 3 (Default: None)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `bias_correct`: undo finite-difference under-read of band/broadband totals near `max_valid_frequency` (Default: False) | `res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3)`<br><br>• `IntensityResult` |
 | `IntensityResult` | `dataclass` | **Intensity result.**<br>• Per band (with `fraction`): `frequency`, `intensity` [W/m²], `intensity_level`, `pressure_level`, `pressure_intensity_index`, `direction` (±1), `bias_correction`<br>• Broadband: `total_*` counterparts<br>• `max_valid_frequency`: 0.1·c/Δr | `res.total_intensity_level`<br>`res.total_direction` |
 | `field_indicators` | `function` | **ISO 9614-1 Annex A field indicators.**<br>• `pressure_levels`: Lpi per position [dB]<br>• `normal_intensity`: Signed Ini per position [W/m²] | `fi = field_indicators(lp, i_n)`<br><br>• `FieldIndicators(f2, f3, f4)` |
 | `dynamic_capability_index` | `function` | **Dynamic capability Ld (ISO 9614-1 §3.12).**<br>• `pressure_residual_intensity_index`: δpI0 [dB]<br>• `bias_error_factor`: K [dB] (Default: 10.0) | `ld = dynamic_capability_index(18.0)`<br><br>• Adequate when `Ld > F2` (criterion 1) |
@@ -2020,7 +2042,7 @@ All core functionality can be imported directly from the `phonometry` package.
 | `ldn` | `function` | **Day-night level (ISO 1996-1 §3.6.5).**<br>• `lday`/`lnight`: LAeq per period [dB]<br>• `hours`: Default (15, 9) | `l = ldn(63.2, 51.4)` |
 | `composite_rating_level` | `function` | **Whole-day composite rating (ISO 1996-1 §6.5).**<br>• `periods`: list of (level_db, hours, adjustment_db) summing 24 h | `r = composite_rating_level([(63, 12, 0), (58, 4, 5), (51, 8, 10)])` |
 | `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
-| `calculate_sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6) | `s = calculate_sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
+| `calculate_sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6)<br>• `narrowband`: coherent Goertzel tone estimate that rejects broadband hum/noise (needs `fs`; Default: False) | `s = calculate_sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
 | `verify_filter_class` | `function` | **IEC 61260-1:2014 class check.**<br>• `bank`: an `OctaveFilterBank`<br>• `num_points`: frequency grid points per band (Default: 32768) | `result = verify_filter_class(bank)`<br><br>• `result["overall_class"]`: 1, 2 or None<br>• `result["bands"]`: per-band class and margins [dB] |
 | `getansifrequencies` | `function` | **ANSI Frequency generator.**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `f_cen, f_low, f_high, labels = getansifrequencies(fraction=3)`<br><br>• `f_cen`: List of center frequencies [Hz]<br>• `f_low`: List of lower edges [Hz]<br>• `f_high`: List of upper edges [Hz]<br>• `labels`: IEC nominal frequency labels |
 | `normalizedfreq` | `function` | **Standard IEC Frequencies.**<br>• `fraction`: 1 or 3 | `freqs = normalizedfreq(fraction=3)`<br><br>• `freqs`: List of standard center frequencies [Hz] |
@@ -2029,8 +2051,8 @@ All core functionality can be imported directly from the `phonometry` package.
 | `impulse_response` | `function` | **Sweep deconvolution (ISO 18233 B.5).**<br>• `recorded`: Recorded response (1D)<br>• `reference`: Emitted sweep (1D)<br>• `fs`: Sample rate [Hz]<br>• `method`: 'spectral' (Default) or 'farina'<br>• `f_range`: (f1, f2) for 'farina'<br>• `regularization`: Tikhonov term (Default: 1e-6)<br>• `length`: causal samples (Default: len(recorded))<br>• `return_full`: keep distortion tail (Default: False) | `ir = impulse_response(rec, sweep, fs)`<br><br>• 1D impulse response |
 | `mls_signal` | `function` | **Maximum-length sequence (ISO 18233 Annex A).**<br>• `order`: Register length N, 2-20 | `mls = mls_signal(16)`<br><br>• Bipolar sequence, length 2**N − 1 |
 | `mls_impulse_response` | `function` | **IR from a periodic MLS.**<br>• `recorded`: Response spanning whole MLS periods (1D)<br>• `mls`: Excitation sequence<br>• `length`: IR samples (Default: 2**N − 1) | `ir = mls_impulse_response(rec, mls)`<br><br>• Circular cross-correlation / averaging |
-| `decay_curve` | `function` | **Schroeder decay curve (ISO 3382-1 5.3.3).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `band`: Band centre [Hz] (Default: None → broadband)<br>• `fraction`: 1 or 3 (Default: 1) | `time, level = decay_curve(ir, fs)`<br><br>• `time` [s], `level` [dB] (0 dB at t=0) |
-| `room_parameters` | `function` | **Room acoustics (ISO 3382-1/2).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `limits`: (f_min, f_max) or None (Default: (125, 4000))<br>• `fraction`: 1 or 3 (Default: 1) | `res = room_parameters(ir, fs)`<br><br>• `RoomAcousticsResult` per band |
+| `decay_curve` | `function` | **Schroeder decay curve (ISO 3382-1 5.3.3).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `band`: Band centre [Hz] (Default: None → broadband)<br>• `fraction`: 1 or 3 (Default: 1)<br>• `zero_phase`: forward-backward band filtering, halves the 125 Hz short-T bias (Default: False) | `time, level = decay_curve(ir, fs)`<br><br>• `time` [s], `level` [dB] (0 dB at t=0) |
+| `room_parameters` | `function` | **Room acoustics (ISO 3382-1/2).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `limits`: (f_min, f_max) or None (Default: (125, 4000))<br>• `fraction`: 1 or 3 (Default: 1)<br>• `zero_phase`: forward-backward octave filtering, halves the 125 Hz short-T T30 bias (Default: False) | `res = room_parameters(ir, fs)`<br><br>• `RoomAcousticsResult` per band |
 | `RoomAcousticsResult` | `dataclass` | **Per-band room parameters.**<br>• `frequency` [Hz]<br>• `edt`, `t20`, `t30` [s]<br>• `c50`, `c80` [dB], `d50`, `ts` [s]<br>• `dynamic_range` [dB]<br>• `edt_valid`/`t20_valid`/`t30_valid`<br>• `curvature` [%] | `res.t30, res.c80, res.t30_valid`<br><br>• Arrays with one entry per band |
 | `open_plan_metrics` | `function` | **Open-plan office metrics (ISO 3382-3).**<br>• `positions_m`: Source distances [m] (≥ 4)<br>• `spl_a_speech`: A-weighted speech level per position [dB]<br>• `sti_values`: STI per position | `m = open_plan_metrics(r, lp, sti)`<br><br>• `OpenPlanResult` |
 | `OpenPlanResult` | `dataclass` | **Open-plan single numbers.**<br>• `d2s`: Spatial decay rate [dB/doubling]<br>• `lp_as_4m`: Speech level at 4 m [dB]<br>• `rd`: Distraction distance [m]<br>• `rp`: Privacy distance [m] | `m.d2s, m.rd, m.rp`<br><br>• `nan` when undefined |
@@ -2044,7 +2066,11 @@ All core functionality can be imported directly from the `phonometry` package.
 
 - `zero_phase=True` (in `OctaveFilterBank.filter` and `spectrogram`) filters
   forward-backward (`sosfiltfilt`): no group delay, doubled effective
-  attenuation, offline analysis only. Incompatible with `stateful=True`.
+  attenuation, offline analysis only. Incompatible with `stateful=True`. The
+  passband also narrows, lowering the measured broadband band level by ~0.2 to
+  0.3 dB per band (a pure in-band tone is unaffected); prefer forward filtering
+  when the absolute band SPL must match single-pass conventions, and reserve
+  zero-phase for when the temporal envelope matters (e.g. reverberation decay).
 - `mode='peak'` includes the filter's onset transient; a tone that starts
   abruptly can overshoot by ~1 dB. See [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/).
 - `octavefilter()` caches filter bank designs internally (32 entries), so

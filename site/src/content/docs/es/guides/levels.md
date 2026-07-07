@@ -75,7 +75,8 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 Opciones: `mode` selecciona la ponderación temporal de la envolvente (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` aplica antes la ponderación A/C, y
 `calibration_factor`/`dbfs` se comportan como en `leq`. El transitorio de ataque
-del integrador (~2τ) se descarta antes de calcular los percentiles.
+del integrador (~5τ) se descarta antes de calcular los percentiles, de modo que
+la rampa inicial de asentamiento no cuenta en los percentiles bajos.
 
 Formalmente, $L_N$ es el percentil $(100-N)$ de la distribución del nivel con
 ponderación temporal: la grabación se convierte primero en una envolvente de
@@ -119,9 +120,13 @@ lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
 `lc_peak` está verificado contra las respuestas de referencia de ciclo
 único/semiciclo de la Tabla 5 de IEC 61672-1:2013, `sel` contra la columna LAE
 de la Tabla 4, y las funciones de dosis contra las anclas de IEC 61252
-(3,2 Pa²h ↔ exactamente 90 dB). Con `duration_hours`, la entrada se trata como
-muestra representativa de ese periodo de exposición; sin él, la entrada es el
-evento completo.
+(3,2 Pa²h ↔ exactamente 90 dB). `lc_peak` sobremuestrea (polifásico) la señal
+ponderada C por `oversample` (por defecto `8`) antes de tomar el máximo,
+recuperando el verdadero pico inter-muestra: un máximo en rejilla subestima los
+tonos de HF sostenidos hasta ~1,15 dB (un tono de 8 kHz a 48 kHz tiene solo
+6 muestras/ciclo). Usa `oversample=1` para detectar el pico en la rejilla
+original. Con `duration_hours`, la entrada se trata como muestra representativa
+de ese periodo de exposición; sin él, la entrada es el evento completo.
 
 ### SEL: comparar eventos de distinta duración
 

@@ -43,7 +43,7 @@ avoids that by filtering low bands at a decimated rate:
 | `order` | int | — | default `6` | SOS order per band |
 | `limits` | list `[lo, hi]` | Hz | default `[12, 20000]` | Analysis range |
 | `filter_type` | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See comparison above |
-| `ripple` / `attenuation` | float | dB | required by cheby/ellip types | Passband ripple / stopband attenuation |
+| `ripple` / `attenuation` | float | dB | `ripple` default `0.1`; `attenuation` default `72.0` | Passband ripple / stopband attenuation (cheby/ellip); `cheby2` needs `attenuation ≥ 70` for class 1, since scipy pins its equiripple floor at exactly this value |
 | `show` | bool | — | default `False` | Plot the bank response (needs matplotlib) |
 | `sigbands` | bool | — | default `False` | Also return the per-band time signals |
 | `mode` | str | — | `'rms'` (default), `'peak'`, `'sum'` | Per-band statistic returned |
@@ -200,11 +200,13 @@ print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_clas
 regions: it must attenuate at least the red mask outside the band and no more
 than the purple mask inside it.*
 
-With default parameters (order 6), **Butterworth meets class 1**. Chebyshev II
-lands in class 2 — capped exactly by its `attenuation=60` versus the 70 dB
-far-stopband requirement (raise `attenuation` to reach class 1). Chebyshev I,
-Elliptic and Bessel do not meet class limits at order 6: passband ripple
-(cheby1/ellip) and slow roll-off (bessel) violate the mask.
+With default parameters (order 6), **Butterworth meets class 1**, and so does
+**Chebyshev II**: its `attenuation` default is now `72` dB, clearing the 70 dB
+far-stopband class 1 limit (scipy pins the cheby2 equiripple floor at exactly
+`attenuation`, so any value ≥ 70 dB qualifies; the 72 dB default keeps the same
++0.400 dB passband margin as Butterworth). Chebyshev I, Elliptic and Bessel do
+not meet class limits at order 6: passband ripple (cheby1/ellip) and slow
+roll-off (bessel) violate the mask.
 
 ## Signal Decomposition and Stability
 
@@ -257,8 +259,12 @@ their steep roll-off with strong delay peaks at the band edges.
 
 For offline analysis you can eliminate group delay entirely: `zero_phase=True`
 filters each band forward-backward (`scipy.signal.sosfiltfilt`), keeping band
-signals time-aligned with the input. The effective attenuation doubles, and the
-option is incompatible with stateful (block) processing.
+signals time-aligned with the input. The effective attenuation doubles and the
+effective passband narrows, lowering the measured broadband band level by
+~0.2 to 0.3 dB per band (a pure in-band tone is unaffected); prefer forward
+filtering when the absolute band SPL must match single-pass conventions, and
+reserve zero-phase for when the temporal envelope matters (e.g. reverberation
+decay). The option is incompatible with stateful (block) processing.
 
 ```python
 from phonometry import OctaveFilterBank

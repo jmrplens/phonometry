@@ -129,6 +129,11 @@ recording = test                       # in practice, the microphone signal afte
 res = stipa(recording, fs)
 ```
 
+`stipa` emits a `UserWarning` when the recording is shorter than the
+recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s): below that the
+slow modulation components are averaged over too few periods and the STI is
+biased low (an ideal loopback gives STI ≈ 0.944 at 5 s vs ≈ 0.998 at 18 s).
+
 The implementation follows **Edition 5 (2020)**: Edition 4's normative PDF
 is the base and every Ed. 5 change is source-attributed in the code — the
 only numeric delta is the revised male speech spectrum of clause A.6.1.

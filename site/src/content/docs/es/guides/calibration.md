@@ -111,6 +111,7 @@ viento, ruido de manipulación:
 | `validate` | bool | — | defecto `True` | Emite `CalibrationWarning` con grabaciones inestables/cortas |
 | `max_fluctuation_db` | float, opcional | dB | defecto `None` → Tabla 2 clase 1 | Sobrescritura explícita del límite de estabilidad |
 | `frequency` | float | Hz | defecto `1000.0` | Frecuencia nominal del calibrador; elige la fila de la Tabla 2 de IEC 60942 |
+| `narrowband` | bool | — | defecto `False` | Estima el tono con un detector coherente (Goertzel) cerca de `frequency` (requiere `fs`) en lugar del RMS de banda completa; rechaza el zumbido/ruido de banda ancha que si no infla el RMS y reduce todos los niveles posteriores (~−0,44 dB a 20 dB de SNR). Actívalo para grabaciones de acoplador ruidosas |
 
 Devuelve el factor de sensibilidad (float) para pasarlo como
 `calibration_factor=` a `octavefilter`, `leq`, `laeq`, `ln_levels`, `lc_peak`,

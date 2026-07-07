@@ -109,6 +109,7 @@ wind, handling noise:
 | `validate` | bool | — | default `True` | Emit `CalibrationWarning` on unstable/short recordings |
 | `max_fluctuation_db` | float, optional | dB | default `None` → Table 2 class 1 | Explicit override of the stability limit |
 | `frequency` | float | Hz | default `1000.0` | Calibrator's nominal frequency; selects the IEC 60942 Table 2 row |
+| `narrowband` | bool | — | default `False` | Estimate the tone with a coherent Goertzel detector near `frequency` (needs `fs`) instead of full-band RMS; rejects broadband hum/noise that otherwise inflates the RMS and shrinks every later level (~−0.44 dB at 20 dB SNR). Enable for noisy coupler recordings |
 
 Returns the sensitivity factor (float) to pass as `calibration_factor=` to
 `octavefilter`, `leq`, `laeq`, `ln_levels`, `lc_peak`, `sel` and the dose

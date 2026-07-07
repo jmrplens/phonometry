@@ -74,7 +74,8 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` applies A/C weighting first, and
 `calibration_factor`/`dbfs` behave as in `leq`. The integrator attack transient
-(~2τ) is discarded before taking percentiles.
+(~5τ) is discarded before taking percentiles, so the leading settling ramp is
+not counted in the low percentiles.
 
 Formally, $L_N$ is the $(100-N)$-th percentile of the distribution of the
 time-weighted level: the recording is first turned into a level-vs-time
@@ -117,8 +118,13 @@ lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
 `lc_peak` is verified against the one-cycle/half-cycle reference responses of
 IEC 61672-1:2013 Table 5, `sel` against the Table 4 LAE toneburst column, and
 the dose functions against the IEC 61252 anchors (3.2 Pa²h ↔ exactly 90 dB).
-With `duration_hours`, the input is treated as a representative sample of that
-exposure period; without it, the input is the whole event.
+`lc_peak` polyphase-oversamples the C-weighted signal by `oversample` (default
+`8`) before taking the maximum, recovering the true inter-sample peak: a raw
+on-grid maximum under-reads sustained HF tones by up to ~1.15 dB (an 8 kHz tone
+at 48 kHz is only 6 samples/cycle). Set `oversample=1` to detect the peak on the
+original sample grid. With `duration_hours`, the input is treated as a
+representative sample of that exposure period; without it, the input is the
+whole event.
 
 ### SEL: comparing events of different duration
 

@@ -94,6 +94,7 @@ ok = ld > fi.f2                                            # criterio 1
 | `c` | float | m/s | por defecto `343.0` | Velocidad del sonido (estimaciones de sesgo/validez) |
 | `fraction` | int, opcional | — | `1`, `3` o `None` (por defecto) | Integración en bandas de octava/tercio de octava |
 | `limits` | lista, opcional | Hz | por defecto el rango de bandas de la librería | Límites del análisis por bandas |
+| `bias_correct` | bool | — | defecto `False` | Aplica la corrección por bin $(k\Delta r)/\sin(k\Delta r)$ (IEC 61043 §7.3) antes de sumar, para que los totales de banda/banda ancha dejen de subestimar cuando $f \to$ `max_valid_frequency`; los bins pasado el primer nulo se dejan sin corregir. El factor `bias_correction` por banda se reporta en ambos casos |
 
 Consulta [Teoría](/phonometry/es/reference/theory/) para las derivaciones y
 [Calibración](/phonometry/es/guides/calibration/) para el escalado absoluto de

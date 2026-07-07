@@ -158,7 +158,6 @@ const jsonLd = JSON.stringify({
       sameAs: [
         'https://pypi.org/project/phonometry/',
         'https://doi.org/10.5281/zenodo.21215280',
-        'https://www.wikidata.org/wiki/Q140451720',
         `${fullUrl}/`,
       ],
     },

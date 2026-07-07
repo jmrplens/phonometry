@@ -36,6 +36,13 @@ from .parametric_filters import (
     time_weighting,
     weighting_filter,
 )
+from .insulation import (
+    AirborneInsulationResult,
+    WeightedRatingResult,
+    airborne_insulation,
+    energy_average_level,
+    weighted_rating,
+)
 from .open_plan import OpenPlanResult, open_plan_metrics
 from .room_acoustics import RoomAcousticsResult, decay_curve, room_parameters
 from .room_ir import (
@@ -97,6 +104,11 @@ __all__ = [
     "RoomAcousticsResult",
     "open_plan_metrics",
     "OpenPlanResult",
+    "airborne_insulation",
+    "AirborneInsulationResult",
+    "weighted_rating",
+    "WeightedRatingResult",
+    "energy_average_level",
     "lden",
     "ldn",
     "composite_rating_level",

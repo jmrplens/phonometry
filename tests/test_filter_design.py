@@ -169,3 +169,21 @@ def test_cheby2_stopband_edges_near_nyquist_stay_valid() -> None:
     f1, f2 = _cheby2_stopband_edges(fd, fu, order=6, attenuation=60.0, fs=fs)
     assert 0 < f1 < fd
     assert fu < f2 < fs / 2
+
+
+@pytest.mark.parametrize("fraction", [1, 3])
+def test_cheby2_default_bank_meets_class1(fraction: float) -> None:
+    """The default cheby2 bank must pass IEC 61260-1:2014 class 1 (audit N1 A5).
+
+    scipy's cheby2 pins the deep-stopband floor at exactly ``attenuation`` dB.
+    The former default of 60 dB sat 10 dB inside the class-1 requirement
+    (>= 70 dB for Omega >= G^4). The default was raised to 72 dB, which the
+    audit demonstrated passes class 1 with the same +0.400 dB passband margin.
+    """
+    from phonometry import verify_filter_class
+
+    bank = OctaveFilterBank(
+        fs=48000, fraction=fraction, order=6, limits=[100, 5000], filter_type="cheby2"
+    )
+    result = verify_filter_class(bank)
+    assert result["overall_class"] == 1, result

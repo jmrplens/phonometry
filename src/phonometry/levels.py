@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import Dict, List, Sequence
 
 import numpy as np
+from scipy import signal
 
 from .parametric_filters import time_weighting, weighting_filter
 from .utils import _typesignal
@@ -124,6 +125,7 @@ def lc_peak(
     fs: int,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
+    oversample: int = 8,
 ) -> float | np.ndarray:
     """
     C-weighted peak sound level, LCpeak (IEC 61672-1:2013, subclause 5.13).
@@ -133,15 +135,32 @@ def lc_peak(
     dB(C) action limits). Verified against the reference one-cycle and
     half-cycle responses of BS EN 61672-1:2013 Table 5 in the test suite.
 
+    The true peak of a continuous waveform generally falls *between* samples.
+    A raw on-grid maximum therefore under-reads sustained high-frequency
+    tones (worst near integer samples-per-cycle rates, e.g. an 8 kHz tone at
+    fs = 48 kHz is 6.0 samples/cycle and under-reads by up to ~1.15 dB). The
+    C-weighted signal is polyphase-oversampled by ``oversample`` before the
+    maximum is taken, recovering the inter-sample peak to within about
+    +/-0.5 dB of the analytic value.
+
     :param x: Input signal (1D or 2D [channels, samples]), raw pressure units.
     :param fs: Sample rate in Hz.
     :param calibration_factor: Multiplier converting digital units to Pascals.
     :param dbfs: If True, return dBFS (0 dB = peak 1.0) instead of dB SPL.
+    :param oversample: Integer oversampling factor applied before peak
+        detection (default 8, the audit-validated value). Use 1 to disable
+        oversampling and detect the peak on the original sample grid.
     :return: Scalar for 1D input, array of shape (channels,) for 2D input.
     """
+    if not isinstance(oversample, (int, np.integer)) or oversample < 1:
+        raise ValueError("oversample must be an integer >= 1.")
     x_proc = _typesignal(x)
     _validate_level_input(x_proc, calibration_factor)
     weighted = weighting_filter(x_proc, fs, "C")
+    if oversample > 1 and weighted.shape[-1] > 0:
+        # Recover inter-sample peaks: the on-grid maximum misses the true
+        # continuous peak between samples for sustained HF tones.
+        weighted = signal.resample_poly(weighted, oversample, 1, axis=-1)
     peak = np.max(np.abs(weighted), axis=-1)
     out = _level_db(np.asarray(peak) ** 2, calibration_factor, dbfs)
     return float(out) if out.ndim == 0 else out

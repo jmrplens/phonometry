@@ -30,7 +30,7 @@ class OctaveFilterBank:
         limits: List[float] | None = None,
         filter_type: str = "butter",
         ripple: float = 0.1,
-        attenuation: float = 60.0,
+        attenuation: float = 72.0,
         show: bool = False,
         plot_file: str | None = None,
         calibration_factor: float = 1.0,
@@ -48,7 +48,12 @@ class OctaveFilterBank:
         :param limits: Frequency limits [f_min, f_max].
         :param filter_type: Type of filter ('butter', 'cheby1', 'cheby2', 'ellip', 'bessel').
         :param ripple: Passband ripple in dB.
-        :param attenuation: Stopband attenuation in dB.
+        :param attenuation: Stopband attenuation in dB. Default 72.0. For the
+            ``cheby2`` filter scipy pins the equiripple deep-stopband floor at
+            exactly this value, so it must be >= 70 dB for the bank to meet the
+            IEC 61260-1:2014 class 1 deep-stopband limit (Omega >= G^4). The
+            72 dB default clears class 1 with the same +0.400 dB passband
+            margin as ``butter``.
         :param show: If True, show the filter response plot.
         :param plot_file: Path to save the filter response plot.
         :param calibration_factor: Calibration factor for SPL calculation.

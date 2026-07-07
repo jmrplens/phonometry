@@ -91,7 +91,9 @@ def _design_sos_filter(
     :param factor: Downsampling factors per band.
     :param filter_type: Type of filter.
     :param ripple: Passband ripple (dB).
-    :param attenuation: Stopband attenuation (dB).
+    :param attenuation: Stopband attenuation (dB). For ``cheby2`` this is also
+        the equiripple deep-stopband floor, so it must be >= 70 dB to meet the
+        IEC 61260-1:2014 class 1 deep-stopband limit (the bank default is 72).
     :param show: If True, plot response.
     :param plot_file: Path to save plot.
     :return: List of SOS coefficient arrays.

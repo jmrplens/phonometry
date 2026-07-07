@@ -39,11 +39,13 @@ class WeightingFilter:
         :param stateful: If True, the weighting filter is stateful. Useful for block processing.
         :param steady_ic: If True, calculate steady state initial conditions for filter.
         :param high_accuracy: If True, design and run the filter at an internal
-            oversampled rate (>= 96 kHz) so the response stays within
-            IEC 61672-1 class 1 tolerances up to 16 kHz. The plain bilinear
-            design exceeds class 1 limits at 12.5 kHz for fs <= 48 kHz.
-            Defaults to True except in stateful mode (the internal FIR
-            resampling is incompatible with block processing).
+            oversampled rate (target >= 144 kHz) so the response stays within
+            IEC 61672-1 class 1 tolerances up to 16 kHz. At 48 kHz this
+            oversamples x3, keeping the deviation from the analytic curve to
+            about -0.44 dB @16k / -0.85 dB @20k; the plain bilinear design
+            exceeds class 1 limits at 12.5 kHz for fs <= 48 kHz. Defaults to
+            True except in stateful mode (the internal FIR resampling is
+            incompatible with block processing).
         """
         if fs <= 0:
             raise ValueError("Sample rate 'fs' must be positive.")
@@ -56,7 +58,10 @@ class WeightingFilter:
         self.curve = curve.upper()
         self.stateful = stateful
         self.high_accuracy = high_accuracy
-        self._oversample = min(8, max(1, math.ceil(96000 / fs))) if high_accuracy else 1
+        # Oversample target 144 kHz: fs=48k -> x3, fs=44.1k -> x4, fs>=96k -> x1.
+        # A 96 kHz target left the common 48 kHz rate at only x2 (-1.1 dB @16k /
+        # -2.1 dB @20k vs analytic); 144 kHz halves that residual (audit N1 A6).
+        self._oversample = min(8, max(1, math.ceil(144000 / fs))) if high_accuracy else 1
 
         if self.curve == "Z":
             self.sos = np.array([])

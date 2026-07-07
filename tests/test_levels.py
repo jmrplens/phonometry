@@ -201,6 +201,83 @@ def test_lc_peak_iec_table5(cycles: float, freq: float, ref: float, tol: float) 
     assert diff == pytest.approx(ref, abs=tol), f"{cycles} cycles @ {freq:.0f} Hz: {diff:.2f} dB"
 
 
+@pytest.mark.parametrize(
+    "cycles,freq,ref,tol",
+    [
+        # Same BS EN 61672-1:2013 Table 5 cases as above, at a field-typical
+        # 48 kHz (audit N2 I-1: the standard test ran only at 96 kHz, masking
+        # the inter-sample peak loss). Must still reproduce Table 5 within
+        # class 1 with the oversampled peak detection.
+        (1.0, 10 ** 1.5, 2.5, 2.0),     # one cycle, 31.5 Hz nominal
+        (1.0, 10 ** 2.7, 3.5, 1.0),     # one cycle, 500 Hz nominal
+        (1.0, 10 ** 3.9, 3.4, 2.0),     # one cycle, 8 kHz nominal
+        (0.5, 10 ** 2.7, 2.4, 1.0),     # positive half cycle, 500 Hz
+        (-0.5, 10 ** 2.7, 2.4, 1.0),    # negative half cycle, 500 Hz
+    ],
+)
+def test_lc_peak_iec_table5_48k(cycles: float, freq: float, ref: float, tol: float) -> None:
+    """Table 5 reference differences must also hold at fs = 48 kHz."""
+    from phonometry import lc_peak, leq
+    from phonometry.parametric_filters import weighting_filter
+
+    fs = 48000
+    t = np.arange(int(fs * 1.0)) / fs
+    steady = np.sin(2 * np.pi * freq * t)
+    lc_steady = leq(weighting_filter(steady, fs, "C"))
+
+    n = round(abs(cycles) * fs / freq)  # starts and stops on zero crossings
+    sign = 1.0 if cycles > 0 else -1.0
+    burst = np.zeros(int(fs * 1.0))
+    start = len(burst) // 2
+    tt = np.arange(n) / fs
+    burst[start:start + n] = sign * np.sin(2 * np.pi * freq * tt)
+
+    diff = lc_peak(burst, fs) - lc_steady
+    assert diff == pytest.approx(ref, abs=tol), f"{cycles} cycles @ {freq:.0f} Hz: {diff:.2f} dB"
+
+
+def _lcpeak_analytic_steady(x: np.ndarray, fs: int) -> float:
+    """Analytic LCpeak of a steady tone: C-weighted steady RMS + 3.01 dB crest.
+
+    The crest factor of a pure sinusoid is exactly 20*log10(sqrt(2)) = 3.01 dB,
+    verified independent of the C-weighting gain. Measured from a transient-free
+    middle window so it isolates the peak-detection accuracy.
+    """
+    from phonometry.parametric_filters import weighting_filter
+
+    w = weighting_filter(x, fs, "C")
+    mid = w[int(0.4 * w.shape[-1]):int(0.6 * w.shape[-1])]
+    rms = np.sqrt(np.mean(mid ** 2))
+    return float(20 * np.log10(rms / 2e-5) + 3.01)
+
+
+def test_lc_peak_recovers_inter_sample_peak_8k_48k() -> None:
+    """LCpeak must catch the inter-sample peak of a sustained 8 kHz tone at 48 kHz.
+
+    8 kHz at 48 kHz is exactly 6.0 samples/cycle, so the sampling phase is
+    locked and the on-grid maximum consistently under-reads the true peak
+    (audit N2 I-1: up to -1.15 dB worst-case over phase, -0.69 dB at phase 0).
+    Oversampled peak detection recovers the analytic sinusoid crest.
+    """
+    from phonometry import lc_peak
+
+    x = _faded(_tone(8000, seconds=1.0))
+    err = lc_peak(x, FS) - _lcpeak_analytic_steady(x, FS)
+    assert abs(err) < 0.5, f"LCpeak under-reads by {err:+.3f} dB (inter-sample loss)"
+
+
+def test_lc_peak_oversample_keyword_controls_recovery() -> None:
+    """oversample=1 reproduces the legacy on-grid under-read; the default fixes it."""
+    from phonometry import lc_peak
+
+    x = _faded(_tone(8000, seconds=1.0))
+    ref = _lcpeak_analytic_steady(x, FS)
+    legacy_err = lc_peak(x, FS, oversample=1) - ref
+    fixed_err = lc_peak(x, FS) - ref
+    assert legacy_err < -0.5          # legacy on-grid detection under-reads
+    assert abs(fixed_err) < abs(legacy_err)   # default oversampling recovers it
+
+
 # ---------------------------------------------------------------------------
 # SEL / LAE — sound exposure level
 # ---------------------------------------------------------------------------

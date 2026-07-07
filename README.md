@@ -26,7 +26,11 @@ Acoustic measurement toolkit for Python: fractional octave-band filter banks, fr
 - 🔊 A/C/Z frequency weighting within IEC 61672-1 class 1 tolerances
 - ⏱️ Fast/Slow/Impulse time ballistics, `Leq`, `LAeq` and `L10/L50/L90` statistical levels
 - 🗺️ Octave spectrogram (band levels over time) and zero-phase offline filtering
-- 📏 Physical SPL calibration and dBFS modes
+- 🧠 Zwicker loudness in sones (full ISO 532-1 Annex B validation), DIN 45692 sharpness, ISO 226:2023 contours
+- 🗣️ Speech Transmission Index: STI and STIPA per IEC 60268-16 Ed. 5, with signal generator
+- 🎯 Tone prominence (TNR/PR, ECMA-418-1), environmental Lden/Ldn (ISO 1996-1), IEC 61252 noise dose
+- ↗️ Two-microphone sound intensity (IEC 61043) with ISO 9614-1 field indicators
+- 📏 Physical SPL calibration with IEC 60942:2017 stability validation, and dBFS modes
 - ⚡ Vectorized multichannel processing and stateful block (real-time) workflows
 
 ## 🚀 Installation
@@ -49,7 +53,9 @@ Or browse the Markdown docs on GitHub:
 | [Filter Banks](https://github.com/jmrplens/phonometry/blob/main/docs/filter-banks.md) | Architectures, response gallery, band decomposition, zero-phase |
 | [Frequency Weighting](https://github.com/jmrplens/phonometry/blob/main/docs/weighting.md) | A/C/Z curves, class 1 high-accuracy mode |
 | [Time Weighting](https://github.com/jmrplens/phonometry/blob/main/docs/time-weighting.md) | Fast/Slow/Impulse ballistics, initial state |
-| [Levels](https://github.com/jmrplens/phonometry/blob/main/docs/levels.md) | Leq, LAeq, L10/L50/L90, octave spectrogram |
+| [Levels](https://github.com/jmrplens/phonometry/blob/main/docs/levels.md) | Leq, LAeq, percentiles, LCpeak, SEL, noise dose, Lden, tonality, octave spectrogram |
+| [Psychoacoustics](https://github.com/jmrplens/phonometry/blob/main/docs/psychoacoustics.md) | Zwicker loudness (ISO 532-1), sharpness (DIN 45692), STI/STIPA (IEC 60268-16) |
+| [Sound Intensity](https://github.com/jmrplens/phonometry/blob/main/docs/intensity.md) | Two-microphone p-p intensity (IEC 61043), ISO 9614-1 field indicators |
 | [Calibration and dBFS](https://github.com/jmrplens/phonometry/blob/main/docs/calibration.md) | Physical SPL, digital full-scale, RMS vs peak |
 | [Block Processing](https://github.com/jmrplens/phonometry/blob/main/docs/block-processing.md) | Stateful streaming workflows |
 | [Multichannel](https://github.com/jmrplens/phonometry/blob/main/docs/multichannel.md) | Vectorized multichannel analysis, performance |

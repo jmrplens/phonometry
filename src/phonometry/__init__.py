@@ -16,8 +16,18 @@ from .environmental import composite_rating_level, lden, ldn
 from .compliance import verify_filter_class
 from .core import OctaveFilterBank
 from .frequencies import getansifrequencies, normalizedfreq
+from .intensity import (
+    FieldIndicators,
+    IntensityResult,
+    dynamic_capability_index,
+    field_indicators,
+    sound_intensity,
+)
 from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
+from .loudness import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
 from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
+from .sharpness import sharpness_din, sharpness_din_from_specific
+from .sti import STIResult, sti_from_impulse_response, stipa, stipa_signal
 from .tonality import ToneAssessment, prominence_ratio, tone_to_noise_ratio
 from .parametric_filters import (
     TimeWeighting,
@@ -48,12 +58,26 @@ __all__ = [
     "sel",
     "sound_exposure",
     "lex_8h",
+    "loudness_zwicker",
+    "loudness_zwicker_from_spectrum",
+    "ZwickerLoudness",
+    "sharpness_din",
+    "sharpness_din_from_specific",
     "equal_loudness_contour",
     "loudness_level",
     "hearing_threshold",
     "tone_to_noise_ratio",
     "prominence_ratio",
     "ToneAssessment",
+    "sound_intensity",
+    "IntensityResult",
+    "field_indicators",
+    "FieldIndicators",
+    "dynamic_capability_index",
+    "sti_from_impulse_response",
+    "stipa",
+    "stipa_signal",
+    "STIResult",
     "lden",
     "ldn",
     "composite_rating_level",

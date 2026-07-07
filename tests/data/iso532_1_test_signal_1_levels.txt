@@ -1,0 +1,34 @@
+# 28 third octave levels from 25 Hz to 12500 Hz for a test case
+#
+# Only the numbers to the right of the colon are interpreted. 
+# The given center frequencies are only informative.
+# Lines starting with # are ignored.
+#
+   25   :-60
+   31.5 :-60
+   40   : 78
+   50   : 79
+   63   : 89
+   80   : 72
+  100   : 80
+  125   : 89
+  160   : 75
+  200   : 87
+  250   : 85
+  315   : 79
+  400   : 86
+  500   : 80
+  630   : 71
+  800   : 70
+ 1000   : 72
+ 1250   : 71
+ 1600   : 72
+ 2000   : 74
+ 2500   : 69
+ 3150   : 65
+ 4000   : 67
+ 5000   : 77
+ 6300   : 68
+ 8000   : 58
+10000   : 45
+12500   : 30

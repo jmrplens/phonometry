@@ -53,6 +53,8 @@ coverage.xml
 
 # Project specific generated files
 *.wav
+# ISO 532-1 normative validation pulses are tracked explicitly
+!tests/data/iso532_1_test_signal_*.wav
 tests/*.png
 snyk.sarif
 issues_final*.json

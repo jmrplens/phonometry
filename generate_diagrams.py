@@ -87,6 +87,20 @@ _ES: dict[str, str] = {
         "Las bandas graves se filtran a frecuencia decimada: el ancho",
     "bandwidth stays wide, so the SOS stays numerically healthy.":
         "relativo se mantiene amplio y las SOS siguen bien condicionadas.",
+    "Two-microphone (p-p) intensity probe":
+        "Sonda de intensidad p-p (dos micrófonos)",
+    "measurement axis / intensity direction":
+        "eje de medida / dirección de la intensidad",
+    "u from the p2−p1 gradient": "u a partir del gradiente p2−p1",
+    "STI measurement chain (IEC 60268-16)":
+        "Cadena de medida STI (IEC 60268-16)",
+    "Source": "Fuente",
+    "STIPA signal": "Señal STIPA",
+    "Room": "Sala",
+    "reverberation + noise": "reverberación + ruido",
+    "Microphone": "Micrófono",
+    "Analysis": "Análisis",
+    "m(F) drops": "m(F) cae",
 }
 
 
@@ -457,12 +471,83 @@ def _d5(s: SVG, th: Theme) -> None:
     s.text(450, 508, "bandwidth stays wide, so the SOS stays numerically healthy.", 20, th.fg)
 
 
+# ---------------------------------------------------------------------------
+# d6 - Two-microphone (p-p) intensity probe (IEC 61043)
+# ---------------------------------------------------------------------------
+
+def _d6(s: SVG, th: Theme) -> None:
+    ay = 232.0  # probe axis height
+
+    # Measurement axis / intensity direction (drawn first, under the probe)
+    s.line(70, ay, 820, ay, th.accent, 1.4, dash="10,4,2,4")
+    s.arrow(820, ay, 852, ay, th.accent, 1.8)
+    s.text(450, 305, "measurement axis / intensity direction", 18, th.accent)
+
+    # Two opposed capsules facing each other with a spacer between the tips
+    for side in (-1, 1):
+        # bodies: 180..320 and 580..720; capsules: 320..400 / 500..580;
+        # tips (grilles): 400..414 / 486..500; gap 414..486 = Δr
+        bx = 180.0 if side < 0 else 580.0
+        cx = 320.0 if side < 0 else 500.0
+        tx = 400.0 if side < 0 else 486.0
+        s.rect(bx, ay - 28, 140, 56, th.panel, th.primary, rx=10, sw=2)
+        s.rect(cx, ay - 20, 80, 40, th.fg, rx=4)
+        s.rect(tx, ay - 16, 14, 32, th.muted, rx=2)
+    s.rect(414, ay - 6, 72, 12, th.panel, th.muted, rx=4, sw=1.2)  # spacer
+
+    s.text(360, ay - 38, "p1", 20, th.fg, mono=True, bold=True)
+    s.text(540, ay - 38, "p2", 20, th.fg, mono=True, bold=True)
+
+    # Δr dimension between the capsule tips, drafting style
+    s.dim(414, ay - 16, 486, ay - 16, "Δr = 12 mm", offset=-66, size=18)
+
+    # p-p estimator notes near the capsules
+    s.text(280, 365, "u from the p2−p1 gradient", 19, th.muted, mono=True)
+    s.text(620, 365, "p = (p1+p2)/2", 19, th.muted, mono=True)
+
+
+# ---------------------------------------------------------------------------
+# d7 - STI measurement chain (IEC 60268-16)
+# ---------------------------------------------------------------------------
+
+def _d7(s: SVG, th: Theme) -> None:
+    stages = [
+        ("Source", "STIPA signal", th.fg),
+        ("Room", "reverberation + noise", th.secondary),
+        ("Microphone", "", th.primary),
+        ("Analysis", "MTF → TI → STI", th.accent),
+    ]
+    bw, bh, gap = 192.0, 96.0, 20.0
+    total = len(stages) * bw + (len(stages) - 1) * gap
+    x = (900 - total) / 2
+    y = 150.0
+    for i, (title, sub, color) in enumerate(stages):
+        s.rect(x, y, bw, bh, th.panel, color, rx=12, sw=2)
+        if sub:
+            s.text(x + bw / 2, y + 42, title, 22, th.fg, bold=True)
+            if "→" in sub:
+                s.text(x + bw / 2, y + 70, sub, 18, color, mono=True)
+            else:
+                s.text(x + bw / 2, y + 70, sub, 18, color)
+        else:
+            s.text(x + bw / 2, y + bh / 2 + 7, title, 22, th.fg, bold=True)
+        if i == 1:  # the room degrades the modulation transfer function
+            cx = x + bw / 2
+            s.line(cx, y + bh, cx, y + bh + 18, th.muted, 1.2, dash="3,3")
+            s.text(cx, y + bh + 40, "m(F) drops", 18, th.muted, italic=True)
+        if i < len(stages) - 1:
+            s.arrow(x + bw + 1, y + bh / 2, x + bw + gap - 2, y + bh / 2, th.fg, 2)
+        x += bw + gap
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
     "diagram_tonality_positions": (_d3, "Emission measurement positions (ECMA-74)", 560),
     "diagram_signal_chain": (_d4, "phonometry processing chain", 400),
     "diagram_multirate": (_d5, "Multirate decimation in the octave filter bank", 560),
+    "diagram_pp_probe": (_d6, "Two-microphone (p-p) intensity probe", 460),
+    "diagram_sti_chain": (_d7, "STI measurement chain (IEC 60268-16)", 400),
 }
 
 

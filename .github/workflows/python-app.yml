@@ -147,9 +147,11 @@ jobs:
         pip install -r requirements.txt
         pip install -e .
         
-    - name: Run technical benchmark
-      run: python scripts/benchmark_filters.py
-      
+    - name: Generate numerical conformance report
+      # Never block the comment: if a check regresses the harness exits
+      # non-zero, but we still want the report (with the failing rows) posted.
+      run: python scripts/conformance_report.py || true
+
     - name: Download Test Results
       uses: actions/download-artifact@v8
       with:

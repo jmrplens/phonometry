@@ -261,6 +261,44 @@ print(round(m.d2s, 1), round(m.lp_as_4m, 1))         # 7.0 dB, 51.0 dB
 print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 ```
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Spatial decay: measured Lp,A,S vs distance on a log axis, the D2,S
+# regression rebuilt from the result fields, and STI with the rD / rP
+# crossings on a twin axis:
+b = -m.d2s / np.log10(2.0)                 # regression slope vs lg(r)
+a = m.lp_as_4m - b * np.log10(4.0)         # intercept from the 4 m level
+rr = np.logspace(np.log10(2.0), np.log10(16.0), 100)
+
+fig, ax = plt.subplots()
+ax.semilogx(r, lp, "o", label="Measured Lp,A,S")
+ax.semilogx(rr, a + b * np.log10(rr), "--", label=f"D2,S = {m.d2s:.1f} dB")
+ax.plot(4.0, m.lp_as_4m, "D", label=f"Lp,A,S,4m = {m.lp_as_4m:.0f} dB")
+ax.set_xlabel("Distance from the talker r [m]")
+ax.set_ylabel("A-weighted speech level [dB]")
+ax.set_xlim(1.8, 20.0)
+
+twin = ax.twinx()
+twin.semilogx(r, sti, "s-", color="#2ca02c", label="STI")
+twin.axvline(m.rd, ls=":", color="#2ca02c")
+twin.axvline(m.rp, ls=":", color="#9467bd")
+twin.annotate(f"rD = {m.rd:.1f} m", (m.rd, 0.52))
+twin.annotate(f"rP = {m.rp:.1f} m", (m.rp, 0.22))
+twin.set_ylabel("STI")
+twin.set_ylim(0.0, 1.0)
+
+lines, labels = ax.get_legend_handles_labels()
+tl, tlab = twin.get_legend_handles_labels()
+ax.legend(lines + tl, labels + tlab, loc="best")
+plt.show()
+```
+
+</details>
+
 ### `open_plan_metrics()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |

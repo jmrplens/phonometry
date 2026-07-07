@@ -163,6 +163,34 @@ res = stipa(recording, fs)
 res.plot()   # per-band modulation transfer index (MTI) bars, STI + rating in the title
 ```
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# STI vs reverberation time: sweep sti_from_impulse_response over synthetic
+# exponential decays (white noise x exp(-6.9077 t / T60)) at a T60 grid —
+# exactly the physics behind the curve above:
+rng = np.random.default_rng(0)
+t60_grid = np.array([0.3, 0.5, 0.8, 1.2, 1.6, 2.0, 2.5, 3.0, 4.0, 5.0])
+sti_values = []
+for t60 in t60_grid:
+    t = np.arange(int(2 * t60 * fs)) / fs
+    ir = rng.standard_normal(t.size) * np.exp(-6.9077 * t / t60)
+    sti_values.append(sti_from_impulse_response(ir, fs).sti)
+
+fig, ax = plt.subplots()
+ax.semilogx(t60_grid, sti_values, "o-")
+ax.set_xlabel("Reverberation time T60 [s]")
+ax.set_ylabel("STI")
+ax.set_ylim(0.0, 1.0)
+ax.grid(True, which="both", alpha=0.3)
+plt.show()
+```
+
+</details>
+
 `stipa` emits a `UserWarning` when the recording is shorter than the
 recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s): below that the
 slow modulation components are averaged over too few periods and the STI is

@@ -270,6 +270,44 @@ print(round(m.d2s, 1), round(m.lp_as_4m, 1))         # 7.0 dB, 51.0 dB
 print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 ```
 
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Decaimiento espacial: Lp,A,S medido frente a la distancia en eje logarítmico,
+# la regresión D2,S reconstruida con los campos del resultado, y el STI con los
+# cruces rD / rP en un eje gemelo:
+b = -m.d2s / np.log10(2.0)                 # pendiente de la regresión frente a lg(r)
+a = m.lp_as_4m - b * np.log10(4.0)         # ordenada desde el nivel a 4 m
+rr = np.logspace(np.log10(2.0), np.log10(16.0), 100)
+
+fig, ax = plt.subplots()
+ax.semilogx(r, lp, "o", label="Lp,A,S medido")
+ax.semilogx(rr, a + b * np.log10(rr), "--", label=f"D2,S = {m.d2s:.1f} dB")
+ax.plot(4.0, m.lp_as_4m, "D", label=f"Lp,A,S,4m = {m.lp_as_4m:.0f} dB")
+ax.set_xlabel("Distancia al hablante r [m]")
+ax.set_ylabel("Nivel de habla ponderado A [dB]")
+ax.set_xlim(1.8, 20.0)
+
+twin = ax.twinx()
+twin.semilogx(r, sti, "s-", color="#2ca02c", label="STI")
+twin.axvline(m.rd, ls=":", color="#2ca02c")
+twin.axvline(m.rp, ls=":", color="#9467bd")
+twin.annotate(f"rD = {m.rd:.1f} m", (m.rd, 0.52))
+twin.annotate(f"rP = {m.rp:.1f} m", (m.rp, 0.22))
+twin.set_ylabel("STI")
+twin.set_ylim(0.0, 1.0)
+
+lines, labels = ax.get_legend_handles_labels()
+tl, tlab = twin.get_legend_handles_labels()
+ax.legend(lines + tl, labels + tlab, loc="best")
+plt.show()
+```
+
+</details>
+
 ### Parámetros de `open_plan_metrics()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |

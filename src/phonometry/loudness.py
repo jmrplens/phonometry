@@ -612,7 +612,7 @@ def loudness_zwicker(
     sounds (clause 6) is used: core loudness every 0.5 ms, nonlinear
     temporal decay, specific-loudness slopes, temporal weighting of the
     total loudness and the percentile values N5/N10 from the full-rate
-    (2 ms) weighted loudness series, while the public 500 Hz
+    (2000 Hz) weighted loudness series, while the public 500 Hz
     loudness-vs-time trace is left unchanged.
 
     Input scaling follows the reference implementation's WAV convention:

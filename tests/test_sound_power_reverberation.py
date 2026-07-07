@@ -10,6 +10,8 @@ Physics / normative anchors (ISO 3741:2010):
 - Comparison method, Eq. (21): LW = LW(RSS) + (Lp(ST) - Lp(RSS) + C2).
 """
 
+import warnings
+
 import numpy as np
 import pytest
 
@@ -79,7 +81,9 @@ def test_direct_method_multi_position_energy_average() -> None:
     t60 = np.array([1.5])
     # Two positions differing by 6 dB -> energy mean is between them.
     levels = np.array([[80.0], [86.0]])
-    res = sound_power_reverberation(levels, t60, volume, surface, freqs)
+    with warnings.catch_warnings():  # 2 positions trip the qualification advisories
+        warnings.simplefilter("ignore", SoundPowerWarning)
+        res = sound_power_reverberation(levels, t60, volume, surface, freqs)
     mean = 10.0 * np.log10((10 ** 8.0 + 10 ** 8.6) / 2.0)
     assert np.isclose(res.mean_pressure_level[0], mean)
 
@@ -199,4 +203,76 @@ def test_mismatched_shapes_raise() -> None:
         sound_power_reverberation(
             np.array([80.0, 81.0]), np.array([1.5]), 200.0, 210.0,
             np.array([1000.0]),
+        )
+
+
+# --------------------------------------------------------------------------
+# Room-qualification advisories (ISO 3741:2010, 5.2/5.3/8.3/8.4.2.2)
+# --------------------------------------------------------------------------
+def test_volume_below_table1_minimum_warns() -> None:
+    """Lowest band 100 Hz needs >= 200 m^3 (Table 1); 150 m^3 is advisory."""
+    freqs = np.array([100.0, 500.0])
+    t60 = np.array([1.5, 1.5])
+    lp = np.array([80.0, 80.0])
+    with pytest.warns(SoundPowerWarning, match="Table 1"):
+        sound_power_reverberation(lp, t60, 150.0, 210.0, freqs)
+
+
+def test_t60_below_v_over_s_floor_warns() -> None:
+    """T60 <= V/S in a band below 6,3 kHz violates the Eq. (7) floor."""
+    freqs = np.array([1000.0])
+    # floor = V/S = 200/210 ~ 0,95 s; T60 = 0,5 s is below it.
+    t60 = np.array([0.5])
+    lp = np.array([80.0])
+    with pytest.warns(SoundPowerWarning, match="V/S floor"):
+        sound_power_reverberation(lp, t60, 200.0, 210.0, freqs)
+
+
+def test_fewer_than_six_positions_warns() -> None:
+    """Only 3 microphone rows -> below the 6-position minimum (8.3/8.4.1)."""
+    freqs = np.array([1000.0])
+    t60 = np.array([1.5])
+    levels = np.array([[80.0], [80.1], [79.9]])  # 3 positions, tight spread
+    with pytest.warns(SoundPowerWarning, match="microphone position"):
+        sound_power_reverberation(levels, t60, 200.0, 210.0, freqs)
+
+
+def test_interposition_std_above_criterion_warns() -> None:
+    """sM > 1,5 dB across the 6 positions flags discrete tones (Eq. 10)."""
+    freqs = np.array([1000.0])
+    t60 = np.array([1.5])
+    # Six positions with a large spread -> sM > 1,5 dB.
+    levels = np.array([[70.0], [80.0], [72.0], [78.0], [71.0], [79.0]])
+    with pytest.warns(SoundPowerWarning, match="standard deviation"):
+        sound_power_reverberation(levels, t60, 200.0, 210.0, freqs)
+
+
+def test_qualified_room_emits_no_warning() -> None:
+    """Adequate volume, T60 above the floor, 6 tight positions -> silent."""
+    freqs = np.array([500.0, 1000.0])
+    t60 = np.array([1.5, 1.5])
+    base = np.array([80.0, 80.0])
+    levels = np.tile(base, (6, 1)) + np.array(
+        [[0.0, 0.1], [-0.1, 0.0], [0.1, -0.1], [0.0, 0.1], [-0.1, 0.0], [0.05, -0.05]]
+    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", SoundPowerWarning)
+        sound_power_reverberation(levels, t60, 200.0, 210.0, freqs)
+
+
+# --------------------------------------------------------------------------
+# Validation ordering (comparison method): shape check before background block
+# --------------------------------------------------------------------------
+def test_comparison_wrong_frequency_length_raises_clean_error() -> None:
+    """Wrong-length 'frequencies' with 'background_levels' must raise a clean
+    ValueError (shape check ahead of the background broadcasting)."""
+    levels = np.array([80.0, 81.0, 82.0])
+    levels_ref = np.array([70.0, 71.0, 72.0])
+    lw_ref = np.array([90.0, 91.0, 92.0])
+    background = np.array([50.0, 51.0, 52.0])
+    with pytest.raises(ValueError, match="length must match"):
+        sound_power_comparison(
+            levels, levels_ref, lw_ref,
+            frequencies=np.array([1000.0, 2000.0]),  # wrong length (2 != 3)
+            background_levels=background,
         )

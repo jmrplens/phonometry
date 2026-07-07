@@ -151,6 +151,85 @@ def _background_correction(
     return np.asarray(k1, dtype=np.float64)
 
 
+#: Minimum room volume vs lowest 1/3-oct band of interest (ISO 3741 Table 1).
+_TABLE1_MIN_VOLUME: tuple[tuple[float, float], ...] = (
+    (100.0, 200.0),
+    (125.0, 150.0),
+    (160.0, 100.0),
+)
+
+
+def _min_room_volume(lowest_band: float) -> float:
+    """Minimum room volume for the lowest band of interest (ISO 3741 Table 1).
+
+    Bands at or below 160 Hz demand a progressively larger room; from 200 Hz
+    upward the floor is 70 m^3."""
+    for band, vmin in _TABLE1_MIN_VOLUME:
+        if lowest_band <= band:
+            return vmin
+    return 70.0
+
+
+def _room_qualification_warnings(
+    levels: np.ndarray,
+    t60: np.ndarray,
+    volume: float,
+    surface_area: float,
+    frequencies: np.ndarray,
+) -> None:
+    """Emit advisory :class:`SoundPowerWarning`\\ s when the room or the
+    microphone sampling fails an ISO 3741 qualification criterion.
+
+    The determination still proceeds and returns a result; the warnings flag
+    that the room must be qualified per Annex C/D or that more microphone
+    positions are needed (ISO 3741:2010, clauses 5.2, 5.3, 8.3, 8.4.2.2)."""
+    lowest = float(np.min(frequencies))
+    vmin = _min_room_volume(lowest)
+    if volume < vmin:
+        warnings.warn(
+            f"Room volume {volume:g} m^3 is below the ISO 3741 Table 1 minimum "
+            f"({vmin:g} m^3) for the lowest band of interest ({lowest:g} Hz); "
+            "the room must be qualified per Annex C/D (ISO 3741:2010, 5.2, "
+            "Table 1).",
+            SoundPowerWarning,
+            stacklevel=3,
+        )
+    floor = volume / surface_area
+    below_6k3 = frequencies < 6300.0
+    if np.any(below_6k3 & (t60 <= floor)):
+        warnings.warn(
+            f"Reverberation time falls to or below the V/S floor ({floor:g} s) "
+            "in one or more bands below 6,3 kHz; the room is too absorptive and "
+            "must be qualified per Annex C (ISO 3741:2010, 5.3, Eq. 7).",
+            SoundPowerWarning,
+            stacklevel=3,
+        )
+    arr = np.asarray(levels, dtype=np.float64)
+    if arr.ndim != 2:
+        return
+    n_positions = arr.shape[0]
+    if n_positions < 6:
+        warnings.warn(
+            f"Only {n_positions} microphone position(s) were supplied; an "
+            "unqualified reverberation room requires at least 6 "
+            "(ISO 3741:2010, 8.3, 8.4.1).",
+            SoundPowerWarning,
+            stacklevel=3,
+        )
+    if n_positions >= 2:
+        s_m = np.std(arr, axis=0, ddof=1)
+        if np.any(s_m > 1.5):
+            warnings.warn(
+                "Inter-position standard deviation exceeds the ISO 3741 sM "
+                "criterion (1,5 dB) in one or more bands; the source may radiate "
+                "significant discrete tones, requiring more microphone/source "
+                "positions or room qualification per Annex D (ISO 3741:2010, "
+                "8.4.2.2, Eq. 10).",
+                SoundPowerWarning,
+                stacklevel=3,
+            )
+
+
 def _a_weighted_total(
     sound_power_level: np.ndarray, frequencies: np.ndarray | None
 ) -> float:
@@ -219,6 +298,8 @@ def sound_power_reverberation(
         raise ValueError("'t60' values must be positive.")
     if np.any(freqs <= 0.0):
         raise ValueError("'frequencies' must be positive.")
+
+    _room_qualification_warnings(levels, t60_arr, volume, surface_area, freqs)
 
     if background_levels is not None:
         k1 = _background_correction(levels, background_levels, freqs)
@@ -302,27 +383,24 @@ def sound_power_comparison(
             "'levels', 'levels_ref' and 'lw_ref' must span the same bands."
         )
 
+    freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
+    if freqs is not None and freqs.shape != (n_bands,):
+        raise ValueError("'frequencies' length must match the number of bands.")
+
     if background_levels is not None:
-        if frequencies is None:
+        if freqs is None:
             raise ValueError("'frequencies' are required to apply 'background_levels'.")
-        lp_st = lp_st - _background_correction(
-            levels, background_levels, np.asarray(frequencies, dtype=np.float64)
-        )
+        lp_st = lp_st - _background_correction(levels, background_levels, freqs)
     if background_levels_ref is not None:
-        if frequencies is None:
+        if freqs is None:
             raise ValueError(
                 "'frequencies' are required to apply 'background_levels_ref'."
             )
-        lp_rss = lp_rss - _background_correction(
-            levels_ref, background_levels_ref, np.asarray(frequencies, dtype=np.float64)
-        )
+        lp_rss = lp_rss - _background_correction(levels_ref, background_levels_ref, freqs)
 
     c2 = _c2_correction(temperature, static_pressure)
     lw = np.asarray(lw_rss + (lp_st - lp_rss + c2), dtype=np.float64)
 
-    freqs = None if frequencies is None else np.asarray(frequencies, dtype=np.float64)
-    if freqs is not None and freqs.shape != (n_bands,):
-        raise ValueError("'frequencies' length must match the number of bands.")
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
     return ReverberationSoundPowerResult(
         frequencies=freqs,

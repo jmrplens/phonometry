@@ -222,8 +222,10 @@ _ALPHA_RL = 0.00133  # long-term release constant (Formula 20/21), T_rl ~ 751 ms
 # ---------------------------------------------------------------------------
 _INH_B = 0.08
 _INH_THETA = 1.5978
-_INH_TAPS = np.arange(-7, 8)  # 0.25 Cam steps, ~+/-1.75 Cam like ISO 532-2
-_INH_KERNEL = np.exp(-((_INH_B * (_INH_TAPS * _I_STEP / 0.1)) ** 2))
+# Formula (14)/(15): Di runs in 0.25 Cam steps over +/-18 Cam; the Gaussian
+# weight is exp(-(B*Di)^2) with Di the ERB-number offset in Cam and B = 0.08.
+_INH_TAPS = np.arange(-72, 73)  # 0.25 Cam steps, +/-18 Cam (Formula 14)
+_INH_KERNEL = np.exp(-((_INH_B * (_INH_TAPS * _I_STEP)) ** 2))
 _EPS = 1e-13  # additive constant of clause 7.7 (avoids division by zero)
 
 # ---------------------------------------------------------------------------
@@ -664,16 +666,26 @@ def loudness_moore_glasberg_time(
     n_frames = stsl_l.shape[0]
     stl = np.zeros(n_frames, dtype=np.float64)
     ltl = np.zeros(n_frames, dtype=np.float64)
-    ltl_state = 0.0
+    # Clause 7.9: the long-term loudness is computed per ear by the attack/
+    # release averager (Formulae 18-21) and the two ears are then summed.  The
+    # averager is nonlinear (attack vs release branch), so summing the two
+    # short-term loudnesses before smoothing would not equal the per-ear result
+    # for dichotic input.  For diotic/monaural the branches coincide and this is
+    # identical to smoothing the binaural sum.
+    ltl_left = 0.0
+    ltl_right = 0.0
     for k in range(n_frames):
         s_left, s_right = _short_term_loudness(stsl_l[k], stsl_r[k])
-        s_bin = s_left + s_right
-        stl[k] = s_bin
-        if s_bin > ltl_state:
-            ltl_state = _ALPHA_AL * s_bin + (1.0 - _ALPHA_AL) * ltl_state
+        stl[k] = s_left + s_right
+        if s_left > ltl_left:
+            ltl_left = _ALPHA_AL * s_left + (1.0 - _ALPHA_AL) * ltl_left
         else:
-            ltl_state = _ALPHA_RL * s_bin + (1.0 - _ALPHA_RL) * ltl_state
-        ltl[k] = ltl_state
+            ltl_left = _ALPHA_RL * s_left + (1.0 - _ALPHA_RL) * ltl_left
+        if s_right > ltl_right:
+            ltl_right = _ALPHA_AL * s_right + (1.0 - _ALPHA_AL) * ltl_right
+        else:
+            ltl_right = _ALPHA_RL * s_right + (1.0 - _ALPHA_RL) * ltl_right
+        ltl[k] = ltl_left + ltl_right
 
     time = np.arange(n_frames, dtype=np.float64) * (_FRAME_MS * 1e-3)
     n_max = float(ltl.max()) if n_frames else 0.0

@@ -31,6 +31,7 @@ from phonometry import (
     MooreGlasbergTimeVaryingLoudness,
     loudness_moore_glasberg_time,
 )
+from phonometry.loudness_moore_glasberg_time import _ALPHA_AL, _ALPHA_RL
 
 FS = 32000.0  # the Annex B/C sampling rate; keeps reference tones on FFT bins
 
@@ -235,6 +236,60 @@ def test_stereo_input_accepted() -> None:
     mono = loudness_moore_glasberg_time(tone, FS)
     # Identical channels == diotic presentation.
     assert res.n_max == pytest.approx(mono.n_max, rel=1e-6)
+
+
+def _sum_then_agc(stl: np.ndarray) -> np.ndarray:
+    """The old (non-conformant) sum-then-AGC long-term loudness of a trace.
+
+    Runs the clause-7.9 attack/release averager on the *binaural sum* of the
+    short-term loudness.  For dichotic input this differs from the standard's
+    per-ear-then-sum result because the averager is nonlinear.
+    """
+    ltl = np.zeros_like(stl)
+    state = 0.0
+    for k, s in enumerate(stl):
+        if s > state:
+            state = _ALPHA_AL * s + (1.0 - _ALPHA_AL) * state
+        else:
+            state = _ALPHA_RL * s + (1.0 - _ALPHA_RL) * state
+        ltl[k] = state
+    return ltl
+
+
+def test_dichotic_ltl_is_per_ear_then_summed() -> None:
+    """Clause 7.9: long-term loudness is smoothed per ear, then summed.
+
+    For a dichotic transient (a different envelope at each ear) the conformant
+    per-ear-then-sum long-term loudness must differ from smoothing the binaural
+    sum (the old behaviour); for a diotic input the two are provably identical.
+    """
+    left = np.concatenate([_tone(1000.0, 75.0, 0.3), np.zeros(int(0.7 * FS))])
+    right = np.concatenate(
+        [np.zeros(int(0.3 * FS)), _tone(1000.0, 55.0, 0.4), np.zeros(int(0.3 * FS))]
+    )
+    n = min(left.size, right.size)
+    res = loudness_moore_glasberg_time(np.column_stack([left[:n], right[:n]]), FS)
+    old = _sum_then_agc(res.short_term_loudness)
+    # (a) The fix changes the dichotic result substantially.
+    assert np.max(np.abs(res.long_term_loudness - old)) > 0.1
+
+    # (b) A diotic input is byte-identical to the old sum-then-AGC (regression).
+    tone = _tone(1000.0, 60.0)
+    diotic = loudness_moore_glasberg_time(np.column_stack([tone, tone]), FS)
+    assert np.array_equal(
+        diotic.long_term_loudness, _sum_then_agc(diotic.short_term_loudness)
+    )
+
+
+def test_anchor_oracle_is_byte_identical() -> None:
+    """Regression pin: the diotic 1 kHz / 40 dB anchor is unchanged by the fix.
+
+    The dichotic-path fix must leave every diotic/monaural oracle bit-for-bit
+    identical; this pins the definitional anchor to full float precision.
+    """
+    res = loudness_moore_glasberg_time(_tone(1000.0, 40.0), FS)
+    assert res.n_max == pytest.approx(1.0000044713237626, abs=1e-12)
+    assert res.loudness_level_max == pytest.approx(40.00005907615314, abs=1e-9)
 
 
 def test_invalid_inputs_raise() -> None:

@@ -1,0 +1,157 @@
+{
+ "Test signal 1.txt": {
+  "N": 83.2957,
+  "Nmax": 87.46049,
+  "Nmin": 79.13091,
+  "annex": "B.2",
+  "kind": "stationary"
+ },
+ "Test signal 10": {
+  "N5": 0.74487,
+  "Nmax": 4.2998,
+  "annex": "B.4",
+  "kind": "time_varying"
+ },
+ "Test signal 11": {
+  "N5": 4.16026,
+  "Nmax": 5.9746,
+  "annex": "B.4",
+  "kind": "time_varying"
+ },
+ "Test signal 12": {
+  "N5": 7.67002,
+  "Nmax": 8.0772,
+  "annex": "B.4",
+  "kind": "time_varying"
+ },
+ "Test signal 13": {
+  "N5": 3.23937,
+  "Nmax": 9.9756,
+  "annex": "B.4",
+  "kind": "time_varying"
+ },
+ "Test signal 14": {
+  "N5": 18.08146,
+  "Nmax": 22.6399,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 15": {
+  "N5": 8.75501,
+  "Nmax": 9.6059,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 16": {
+  "N5": 36.88757,
+  "Nmax": 38.5363,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 17": {
+  "N5": 9.72202,
+  "Nmax": 11.2105,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 18": {
+  "N5": 10.3915,
+  "Nmax": 12.6468,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 19": {
+  "N5": 10.00934,
+  "Nmax": 10.8817,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 2": {
+  "N": 14.6545,
+  "Nmax": 15.38723,
+  "Nmin": 13.92178,
+  "annex": "B.3",
+  "kind": "stationary"
+ },
+ "Test signal 20": {
+  "N5": 13.09259,
+  "Nmax": 14.8802,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 21": {
+  "N5": 8.9998,
+  "Nmax": 9.7188,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 22": {
+  "N5": 8.15808,
+  "Nmax": 8.9063,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 23": {
+  "N5": 10.42144,
+  "Nmax": 11.1858,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 24": {
+  "N5": 8.51889,
+  "Nmax": 9.2751,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 25": {
+  "N5": 5.76142,
+  "Nmax": 7.2593,
+  "annex": "B.5",
+  "kind": "time_varying"
+ },
+ "Test signal 3": {
+  "N": 4.0192,
+  "Nmax": 4.22016,
+  "Nmin": 3.81824,
+  "annex": "B.3",
+  "kind": "stationary"
+ },
+ "Test signal 4": {
+  "N": 1.5494,
+  "Nmax": 1.6494,
+  "Nmin": 1.4494,
+  "annex": "B.3",
+  "kind": "stationary"
+ },
+ "Test signal 5": {
+  "N": 10.4978,
+  "Nmax": 11.02269,
+  "Nmin": 9.97291,
+  "annex": "B.3",
+  "kind": "stationary"
+ },
+ "Test signal 6": {
+  "N5": 11.85756,
+  "Nmax": 14.3592,
+  "annex": "B.4",
+  "kind": "time_varying"
+ },
+ "Test signal 7": {
+  "N5": 13.37887,
+  "Nmax": 15.9534,
+  "annex": "B.4",
+  "kind": "time_varying"
+ },
+ "Test signal 8": {
+  "N5": 20.26187,
+  "Nmax": 23.9501,
+  "annex": "B.4",
+  "kind": "time_varying"
+ },
+ "Test signal 9": {
+  "N5": 24.22158,
+  "Nmax": 29.3141,
+  "annex": "B.4",
+  "kind": "time_varying"
+ }
+}

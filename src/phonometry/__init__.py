@@ -44,6 +44,14 @@ from .insulation import (
     weighted_rating,
 )
 from .open_plan import OpenPlanResult, open_plan_metrics
+from .sound_power import (
+    SoundPowerResult,
+    SoundPowerWarning,
+    background_noise_correction,
+    environmental_correction,
+    measurement_positions,
+    sound_power_pressure,
+)
 from .room_acoustics import RoomAcousticsResult, decay_curve, room_parameters
 from .room_ir import (
     impulse_response,
@@ -104,6 +112,12 @@ __all__ = [
     "RoomAcousticsResult",
     "open_plan_metrics",
     "OpenPlanResult",
+    "sound_power_pressure",
+    "measurement_positions",
+    "background_noise_correction",
+    "environmental_correction",
+    "SoundPowerResult",
+    "SoundPowerWarning",
     "airborne_insulation",
     "AirborneInsulationResult",
     "weighted_rating",

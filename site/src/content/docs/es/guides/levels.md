@@ -66,7 +66,7 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 
 *L10 sigue los picos de los eventos, L50 el nivel mediano y L90 el fondo.*
 
-Opciones: `mode` selecciona la balística de la envolvente (`'fast'`, `'slow'`,
+Opciones: `mode` selecciona la ponderación temporal de la envolvente (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` aplica antes la ponderación A/C, y
 `calibration_factor`/`dbfs` se comportan como en `leq`. El transitorio de ataque
 del integrador (~2τ) se descarta antes de calcular los percentiles.

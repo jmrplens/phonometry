@@ -11,7 +11,7 @@ específicas. phonometry implementa las constantes de tiempo exactas de la norma
 
 * **Fast (`fast`):** τ = 125 ms. Estándar para fluctuaciones de ruido.
 * **Slow (`slow`):** τ = 1000 ms. Estándar para ruido estacionario.
-* **Impulse (`impulse`):** balística **asimétrica**. 35 ms de subida para
+* **Impulse (`impulse`):** ponderación temporal **asimétrica**. 35 ms de subida para
   capturar ataques rápidos y 1500 ms de caída para facilitar la lectura.
 
 ```python
@@ -24,7 +24,7 @@ energy_envelope = time_weighting(signal, fs, mode='fast')
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 ```
 
-La balística Impulse asimétrica usa dos constantes — ataque rápido y caída
+La ponderación temporal Impulse asimétrica usa dos constantes — ataque rápido y caída
 lenta — conmutando por muestra según el signo del cambio:
 
 $$

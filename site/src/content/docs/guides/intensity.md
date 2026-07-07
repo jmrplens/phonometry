@@ -36,7 +36,7 @@ from phonometry import sound_intensity
 
 fs = 48000
 rng = np.random.default_rng(0)
-# the two probe-microphone pressures in Pa, p1 closest to the source.
+# The two probe-microphone pressures in Pa, p1 closest to the source.
 #   In a real measurement these are your two calibrated probe recordings;
 #   synthesized here (p2 = p1 delayed one sample) so the guide runs.
 p1 = 0.02 * rng.standard_normal(fs)

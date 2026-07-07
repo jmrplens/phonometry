@@ -94,9 +94,10 @@ def plot_zwicker_loudness(
     """Specific loudness N'(z) over the Bark scale (ISO 532-1).
 
     When the result carries the time-varying loudness trace
-    (``time`` / ``loudness_vs_time``) a second panel with loudness vs time
-    is added and an array of two axes is returned; otherwise a single axes
-    is returned.
+    (``time`` / ``loudness_vs_time``) *and* ``ax`` is ``None``, a second
+    panel with loudness vs time is added and an array of two axes is
+    returned; otherwise (a stationary result, or an ``ax`` was supplied) a
+    single axes is returned.
 
     :param result: A :class:`~phonometry.loudness.ZwickerLoudness`.
     :param ax: Existing axes to draw on, or ``None`` to create a figure.

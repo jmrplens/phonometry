@@ -71,7 +71,7 @@ pip install phonometry
 Optional extras:
 
 ```bash
-pip install phonometry[plot]   # matplotlib, for filter response plots
+pip install phonometry[plot]   # matplotlib, for filter response plots and result .plot() methods
 pip install phonometry[perf]  # numba, faster 'impulse' time weighting
 pip install phonometry[full]  # both
 ```
@@ -1301,7 +1301,7 @@ from phonometry import sound_intensity
 
 fs = 48000
 rng = np.random.default_rng(0)
-# the two probe-microphone pressures in Pa, p1 closest to the source.
+# The two probe-microphone pressures in Pa, p1 closest to the source.
 #   In a real measurement these are your two calibrated probe recordings;
 #   synthesized here (p2 = p1 delayed one sample) so the guide runs.
 p1 = 0.02 * rng.standard_normal(fs)
@@ -1868,14 +1868,14 @@ print(round(float(imp.l_n_t[0]), 1))          # 62.1  (= Li since T = T0)
 print(round(float(imp.l_n[0]), 1))            # 64.1  normalized to A0 = 10 m^2
 
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
-r = weighted_impact_rating(imp.l_n_t)
-print(r.rating, r.ci, r.unfavourable_sum)     # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
+res_imp = weighted_impact_rating(imp.l_n_t)
+print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
 
 # Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(weighted_impact_rating(octave).rating)  # 54
 
-r.plot()   # measured Ln vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
+res_imp.plot()   # measured Ln vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
 ```
 
 <details>
@@ -1885,20 +1885,20 @@ r.plot()   # measured Ln vs shifted ISO 717-2 reference, measured-above shaded (
 import matplotlib.pyplot as plt
 
 # One line — measured Ln vs the shifted ISO 717-2 reference (measured-above shaded):
-r.plot()
+res_imp.plot()
 plt.show()
 
 # By hand, from the band curve the result now carries (note the opposite sign:
 # an unfavourable deviation is where the MEASURED level exceeds the reference):
 fig, ax = plt.subplots()
-ax.semilogx(r.band_centers, r.measured, "o-", label="Measured Ln")
-ax.semilogx(r.band_centers, r.shifted_reference, "s--", label="Shifted reference")
-ax.fill_between(r.band_centers, r.shifted_reference, r.measured,
-                where=r.measured > r.shifted_reference, interpolate=True,
+ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured Ln")
+ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Shifted reference")
+ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
+                where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
                 alpha=0.3, label="Unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Impact sound pressure level [dB]")
-ax.set_title(f"Ln,w = {r.rating} dB  (CI={r.ci:+d})")
+ax.set_title(f"Ln,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
 ax.legend()
 plt.show()
 ```
@@ -2778,11 +2778,11 @@ All core functionality can be imported directly from the `phonometry` package.
 | `weighted_rating` | `function` | **Single-number rating + C/Ctr (ISO 717-1).**<br>• `values_by_band`: 16 thirds or 5 octaves [dB]<br>• `bands`: 'third-octave', 'octave' or None | `w = weighted_rating(R)`<br><br>• `WeightedRatingResult` (Rw, C, Ctr) |
 | `energy_average_level` | `function` | **Energy-average level (ISO 16283-1 (9)).**<br>• `levels`: Levels [dB] to average<br>• `axis`: Averaging axis (Default: -1) | `L = energy_average_level([60, 66])`<br><br>• `10 lg( mean(10^(Li/10)) )` |
 | `AirborneInsulationResult` | `dataclass` | **Field insulation per band.**<br>• `d`: Level difference D [dB]<br>• `dnt`: Standardized DnT [dB]<br>• `r_prime`: Apparent R' [dB] or None | `res.d, res.dnt, res.r_prime` |
-| `WeightedRatingResult` | `dataclass` | **Weighted rating result.**<br>• `rating`: Rw/DnT,w … [dB], int<br>• `c`: Spectrum term C, int<br>• `ctr`: Spectrum term Ctr, int<br>• `unfavourable_sum`: [dB] | `w.rating, w.c, w.ctr` |
+| `WeightedRatingResult` | `dataclass` | **Weighted rating result.**<br>• `rating`: Rw/DnT,w … [dB], int<br>• `c`: Spectrum term C, int<br>• `ctr`: Spectrum term Ctr, int<br>• `unfavourable_sum`: [dB]<br>• `band_centers`: Measured-curve centres [Hz] or None<br>• `measured`: Measured band values [dB] or None<br>• `shifted_reference`: Shifted Table 3 reference [dB] or None | `w.rating, w.c, w.ctr` |
 | `impact_insulation` | `function` | **Field impact insulation (ISO 16283-2).**<br>• `li`: Impact SPL [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `volume`: Receiving V [m³] (for L'n)<br>• `t0`: Reference T0 [s] (Default: 0.5) | `imp = impact_insulation(li, t2, volume=50)`<br><br>• `ImpactInsulationResult` (`l_n_t`, `l_n`) |
 | `weighted_impact_rating` | `function` | **Single-number impact rating + CI (ISO 717-2).**<br>• `values_by_band`: 16 thirds (100-3150 Hz) or 5 octaves (125-2000 Hz) [dB]<br>• `bands`: 'third-octave', 'octave' or None | `r = weighted_impact_rating(imp.l_n_t)`<br><br>• `ImpactRatingResult` (Ln,w, CI); octave rating carries the -5 dB rule |
 | `ImpactInsulationResult` | `dataclass` | **Impact insulation per band.**<br>• `l_n_t`: Standardized L'nT [dB]<br>• `l_n`: Normalized L'n [dB] or None | `imp.l_n_t, imp.l_n` |
-| `ImpactRatingResult` | `dataclass` | **Weighted impact rating.**<br>• `rating`: Ln,w/L'n,w/L'nT,w [dB], int<br>• `ci`: Spectrum term CI, int<br>• `unfavourable_sum`: [dB] | `r.rating, r.ci` |
+| `ImpactRatingResult` | `dataclass` | **Weighted impact rating.**<br>• `rating`: Ln,w/L'n,w/L'nT,w [dB], int<br>• `ci`: Spectrum term CI, int<br>• `unfavourable_sum`: [dB]<br>• `band_centers`: Measured-curve centres [Hz] or None<br>• `measured`: Measured impact levels [dB] or None<br>• `shifted_reference`: Shifted impact reference [dB] or None | `r.rating, r.ci` |
 | `sound_power_pressure` | `function` | **Sound power from surface pressure (ISO 3744/3746).**<br>• `levels_positions`: (NM, NB) SPL [dB]<br>• `surface`: 'hemisphere' / 'box'<br>• `radius` [m] or `dimensions`+`distance` [m]<br>• `reflecting_planes`: 1/2/3 (Default: 1)<br>• `background_levels`: for K1<br>• `frequencies` [Hz]: for LWA<br>• `reverberation_time`+`room_volume` / `absorption_area` / `mean_absorption_coefficient`+`room_surface`: for K2<br>• `grade`: 'engineering' (Default) / 'survey'<br>• `omc_uncertainty` [dB] (Default: 0) | `res = sound_power_pressure(levels, 'hemisphere', radius=1.5, frequencies=f)`<br><br>• `SoundPowerResult` |
 | `measurement_positions` | `function` | **Hemisphere mic coordinates (ISO 3744 Annex B).**<br>• `surface`: 'hemisphere'<br>• `radius` [m]<br>• `reflecting_planes`: 1/2/3<br>• `tones`: Table B.1 vs B.2 (Default: True)<br>• `grade`: 'engineering'/'survey' | `xyz = measurement_positions('hemisphere', radius=1.5)`<br><br>• (N, 3) coordinates [m] |
 | `background_noise_correction` | `function` | **Background correction K1 (ISO 3744 Eq. 16).**<br>• `source_levels` [dB]<br>• `background_levels` [dB]<br>• `grade`: 'engineering'/'survey' | `k1 = background_noise_correction(src, bg)`<br><br>• K1 per band [dB] |

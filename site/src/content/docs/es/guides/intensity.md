@@ -37,7 +37,7 @@ from phonometry import sound_intensity
 
 fs = 48000
 rng = np.random.default_rng(0)
-# las presiones de los dos micrófonos de la sonda en Pa, p1 el más cercano a la fuente.
+# Las presiones de los dos micrófonos de la sonda en Pa, p1 el más cercano a la fuente.
 #   En una medición real son tus dos grabaciones de sonda calibradas;
 #   sintetizadas aquí (p2 = p1 retardada una muestra) para que la guía funcione.
 p1 = 0.02 * rng.standard_normal(fs)

@@ -19,7 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   with `pip install phonometry[plot]` guidance when it is missing. The
   renderers create their own figure when `ax` is `None`, always return the
   Matplotlib `Axes` (an array for multi-panel figures) and never call
-  `plt.show()`, so they compose into larger layouts.
+  `plt.show()`, so they compose into larger layouts. To feed those
+  figures, `WeightedRatingResult` and `ImpactRatingResult` now also carry
+  `band_centers`, `measured` and `shifted_reference`, exposing the ISO 717
+  measured curve and shifted reference behind each single-number rating.
 - `sweep_signal()`, `inverse_filter()`, `impulse_response()`, `mls_signal()`
   and `mls_impulse_response()` — deterministic-excitation impulse-response
   acquisition per ISO 18233:2006 (exponential sine sweep with spectral and

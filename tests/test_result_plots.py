@@ -1,6 +1,6 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 
-"""One-line ``.plot()`` methods on result objects (plan 16 T2).
+"""Tests for the one-line ``.plot()`` methods on result objects.
 
 The library exposes matplotlib as a *soft* dependency: importing
 phonometry and computing must work without it, and only ``.plot()``

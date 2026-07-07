@@ -128,6 +128,40 @@ def test_k2_from_reverberation_time_sabine() -> None:
     assert k2 == pytest.approx(6.9897, abs=1e-4)
 
 
+def test_k2_no_room_data_is_free_field_zero() -> None:
+    """All room inputs omitted is the legitimate free-field path: K2 = 0."""
+    k2 = environmental_correction(100.0)
+    assert k2 == pytest.approx(0.0, abs=1e-12)
+
+
+def test_k2_reverberation_time_without_volume_raises() -> None:
+    """Half-specified room (T without V) must not silently give K2 = 0."""
+    with pytest.raises(ValueError, match="room_volume"):
+        environmental_correction(40.0, reverberation_time=1.2)
+
+
+def test_k2_room_volume_without_reverberation_time_raises() -> None:
+    with pytest.raises(ValueError, match="reverberation_time"):
+        environmental_correction(40.0, room_volume=300.0)
+
+
+def test_k2_mean_absorption_without_room_surface_raises() -> None:
+    with pytest.raises(ValueError, match="room_surface"):
+        environmental_correction(50.0, mean_absorption_coefficient=0.2)
+
+
+def test_k2_room_surface_without_mean_absorption_raises() -> None:
+    with pytest.raises(ValueError, match="mean_absorption_coefficient"):
+        environmental_correction(50.0, room_surface=500.0)
+
+
+def test_partial_room_data_raises_via_sound_power_pressure() -> None:
+    """The partial-pair guard is enforced through sound_power_pressure too."""
+    levels = np.full((10, 1), 90.0)
+    with pytest.raises(ValueError, match="room_volume"):
+        sound_power_pressure(levels, "hemisphere", radius=2.0, reverberation_time=1.2)
+
+
 # --------------------------------------------------------------------------
 # sound_power_pressure — monopole recovery (ISO 3744 Eq. 18)
 # --------------------------------------------------------------------------

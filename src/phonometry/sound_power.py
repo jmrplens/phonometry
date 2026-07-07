@@ -224,7 +224,9 @@ def environmental_correction(
     the Sabine reverberation time ``A = 0,16*V/T`` (Eq. A.3, ``reverberation_
     time`` + ``room_volume``), or from the mean absorption coefficient
     ``A = alpha*Sv`` (Eq. A.7, ``mean_absorption_coefficient`` + ``room_
-    surface``). With no room data the field is treated as free and ``K2 = 0``.
+    surface``). With no room data the field is treated as free and ``K2 = 0``;
+    supplying only one member of a pair raises :class:`ValueError` rather than
+    silently falling back to the free-field result.
 
     The room absorption is frequency dependent (``T``, ``alpha`` and hence ``A``
     vary with the band). Passing ``absorption_area``, ``reverberation_time`` or
@@ -244,6 +246,24 @@ def environmental_correction(
         per band.
     """
     if absorption_area is None:
+        # A half-specified room pair must never be read as free field: naming
+        # only one member of a pair is a mistake, not a K2 = 0 request.
+        if (reverberation_time is None) != (room_volume is None):
+            missing = "room_volume" if room_volume is None else "reverberation_time"
+            raise ValueError(
+                "reverberation_time and room_volume must be given together "
+                f"(Eq. A.3); '{missing}' is missing."
+            )
+        if (mean_absorption_coefficient is None) != (room_surface is None):
+            missing = (
+                "room_surface"
+                if room_surface is None
+                else "mean_absorption_coefficient"
+            )
+            raise ValueError(
+                "mean_absorption_coefficient and room_surface must be given "
+                f"together (Eq. A.7); '{missing}' is missing."
+            )
         if reverberation_time is not None and room_volume is not None:
             t = np.asarray(reverberation_time, dtype=np.float64)
             if room_volume <= 0 or np.any(t <= 0.0):

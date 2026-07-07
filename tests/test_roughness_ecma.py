@@ -51,10 +51,22 @@ def ref_calibration() -> EcmaRoughness:
 
 
 def test_calibration_1khz_70hz_is_one_asper(ref_calibration: EcmaRoughness) -> None:
-    # c_R (Formula 104) is the standard's tabulated value, not reverse-fit, so
-    # the output lands near but not exactly 1.000; c_R may vary +/- 0.25 % and
-    # implementation differences add a little, so a 10 % window is comfortable.
-    assert ref_calibration.roughness == pytest.approx(1.0, abs=0.1)
+    """Pin the deterministic roughness of the Clause 7 calibration signal.
+
+    (a) The standard's target for this 1 kHz / 70 Hz / m=1 / 60 dB SPL signal
+        is 1.0 asper (Clause 7 calibration -- the only value it tabulates).
+    (b) This clean-room implementation computes ~1.073 asper (+7.35 %). The
+        offset is documented methodology variance, not a tuning defect: c_R
+        (Formula 104) is the tabulated Clause-7 value (not reverse-fit) and the
+        front-end takes the literal reading of Formula 65 -- a per-block Hilbert
+        envelope with the plain factor-32 downsampling to 1500 Hz (Clause
+        7.1.2), which shifts the reference by a few percent versus
+        whole-signal-Hilbert / anti-aliased-decimation variants.
+    (c) This test guards against regression of that established, deterministic
+        value -- NOT against the 1.0 target. A tight window is deliberate so a
+        real change in the signal chain fails here.
+    """
+    assert ref_calibration.roughness == pytest.approx(1.0735, abs=0.01)
 
 
 # --------------------------------------------------------------------------

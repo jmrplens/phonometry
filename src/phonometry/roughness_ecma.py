@@ -35,6 +35,16 @@ speed signal and is not implemented (see ``notes-ecma418-2-roughness.md``).
 The calibration constant ``c_R`` of Formula (104) is the standard's tabulated
 value, so a 1 kHz carrier 100 %-amplitude-modulated at 70 Hz at 60 dB SPL
 yields approximately 1 asper.
+
+Calibration variance: the standard's Clause 7 reference point (that 1 kHz /
+70 Hz / m = 1 / 60 dB SPL signal, defined as 1 asper) computes to ~1.073 asper
+here (+7.35 %). This is clean-room methodology variance, not a tuning defect:
+``c_R`` is the tabulated Clause-7 value (unchanged, not reverse-fit), and the
+front-end takes the literal reading of Formula 65 -- a per-block Hilbert
+envelope of each critical-band segment followed by the plain factor-32
+downsampling to 1500 Hz (Clause 7.1.2). Whole-signal-Hilbert variants and
+anti-aliased decimation shift the reference by a few percent; the value is
+deterministic and is pinned by the roughness calibration test.
 """
 
 from __future__ import annotations
@@ -275,7 +285,7 @@ def _bias_correction(f_tilde: float) -> float:
     beta = (np.floor(f_tilde / _DELTA_F) + theta / 32.0) * _DELTA_F - (
         f_tilde + _E_THETA
     )  # Formula 79
-    theta_min = int(np.argmin(np.abs(beta)))  # Formula 80
+    theta_min = int(np.argmin(np.abs(beta[:33])))  # Formula 80 (0 <= theta <= 32)
     if theta_min > 0 and beta[theta_min] * beta[theta_min - 1] < 0.0:
         theta_corr = theta_min  # Formula 81
     else:

@@ -17,12 +17,12 @@ phonometry implements exact time constants per **IEC 61672-1:2013**.
 import numpy as np
 from phonometry import time_weighting
 
-# A calibrated signal in Pa so the guide runs standalone
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Calculate energy envelope (Mean Square)
-energy_envelope = time_weighting(signal, fs, mode='fast')
+energy_envelope = time_weighting(recording, fs, mode='fast')
 # dB SPL relative to 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 ```
@@ -80,7 +80,7 @@ requests the same zero state explicitly. If the recorded segment begins after a
 steady signal is already present, you can start from the first sample energy instead:
 
 ```python
-energy_envelope = time_weighting(signal, fs, mode='fast', initial_state='first')
+energy_envelope = time_weighting(recording, fs, mode='fast', initial_state='first')
 ```
 
 ## Block processing
@@ -91,6 +91,8 @@ next block's `initial_state` instead of resetting each block:
 ```python
 state = None
 
+# audio_blocks: consecutive frames of your calibrated recording (Pa),
+#   streamed from your sound card or read from a WAV in blocks.
 for block in audio_blocks:
     energy_envelope = time_weighting(block, fs, mode='fast', initial_state=state)
     state = energy_envelope[-1]
@@ -107,6 +109,8 @@ Or let the `TimeWeighting` class carry the state for you:
 from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode='fast')
+# audio_blocks: consecutive frames of your calibrated recording (Pa),
+#   streamed from your sound card or read from a WAV in blocks.
 for block in audio_blocks:
     energy_envelope = tw.process(block)
 ```

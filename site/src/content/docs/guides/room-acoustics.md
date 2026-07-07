@@ -64,10 +64,12 @@ from phonometry import sweep_signal, impulse_response, mls_signal, mls_impulse_r
 
 fs = 48000
 # A 3 s, 20 Hz - 20 kHz sweep is a good broadband room excitation
+# sweep: excitation you play through the loudspeaker
 sweep = sweep_signal(fs, 20.0, 20000.0, 3.0)
 
 # Deconvolve the recorded response back to the impulse response
 system = np.zeros(fs); system[100] = 1.0; system[2000] = 0.4   # direct + reflection
+# recorded: mic capture of the played sweep (here simulated by convolution with a synthetic room)
 recorded = fftconvolve(sweep, system)
 ir = impulse_response(recorded, sweep, fs, method="spectral")
 print(int(np.argmax(np.abs(ir))))                    # 100: direct sound recovered
@@ -156,6 +158,7 @@ from phonometry import decay_curve, room_parameters
 fs = 48000
 # Single-slope decay with T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
 t = np.arange(fs) / fs
+# ir: measured room impulse response; a synthetic single-slope decay stands in here.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
 time, level = decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)

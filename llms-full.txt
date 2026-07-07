@@ -456,15 +456,15 @@ are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
 import numpy as np
 from phonometry import weighting_filter
 
-# A calibrated signal in Pa so the guide runs standalone
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
-# Apply A-weighting to the raw signal
-weighted_signal = weighting_filter(signal, fs, curve='A')
+# Apply A-weighting to the raw recording
+weighted_signal = weighting_filter(recording, fs, curve='A')
 
 # Apply C-weighting for peak analysis
-c_weighted_signal = weighting_filter(signal, fs, curve='C')
+c_weighted_signal = weighting_filter(recording, fs, curve='C')
 ```
 
 ## Infrasound: G-weighting (ISO 7196)
@@ -478,7 +478,7 @@ sources with significant energy below 20 Hz (wind turbines, HVAC, blasting):
 ```python
 from phonometry import weighting_filter
 
-g_weighted = weighting_filter(signal, fs, curve='G')
+g_weighted = weighting_filter(recording, fs, curve='G')
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.png" alt="G-weighting frequency response from 0.1 Hz to 1 kHz with the ISO 7196 Table 2 nominal values overlaid" width="80%"></picture>
@@ -527,9 +527,9 @@ If you weight many signals with the same parameters, design the filter once:
 from phonometry import WeightingFilter
 
 wf = WeightingFilter(fs, "A")
-signals = [signal]                # your batch of recordings
-for signal in signals:
-    weighted = wf.filter(signal)
+signals = [recording]                # your batch of recordings
+for recording in signals:
+    weighted = wf.filter(recording)
 ```
 
 ## High-frequency accuracy (`high_accuracy`)
@@ -555,11 +555,11 @@ the oversampled design (blue) stays close to the analytic curve.*
 
 ```python
 # Explicit legacy behavior
-y = weighting_filter(signal, fs, curve="A", high_accuracy=False)
+y = weighting_filter(recording, fs, curve="A", high_accuracy=False)
 
 # Stateful block processing (legacy design, state carried between blocks)
 wf = WeightingFilter(fs, "A", stateful=True)
-blocks = [signal]                 # your sequence of signal blocks
+blocks = [recording]                 # your sequence of recording blocks
 for block in blocks:
     weighted = wf.filter(block)
 ```
@@ -588,12 +588,12 @@ phonometry implements exact time constants per **IEC 61672-1:2013**.
 import numpy as np
 from phonometry import time_weighting
 
-# A calibrated signal in Pa so the guide runs standalone
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Calculate energy envelope (Mean Square)
-energy_envelope = time_weighting(signal, fs, mode='fast')
+energy_envelope = time_weighting(recording, fs, mode='fast')
 # dB SPL relative to 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 ```
@@ -651,7 +651,7 @@ requests the same zero state explicitly. If the recorded segment begins after a
 steady signal is already present, you can start from the first sample energy instead:
 
 ```python
-energy_envelope = time_weighting(signal, fs, mode='fast', initial_state='first')
+energy_envelope = time_weighting(recording, fs, mode='fast', initial_state='first')
 ```
 
 ## Block processing
@@ -662,6 +662,8 @@ next block's `initial_state` instead of resetting each block:
 ```python
 state = None
 
+# audio_blocks: consecutive frames of your calibrated recording (Pa),
+#   streamed from your sound card or read from a WAV in blocks.
 for block in audio_blocks:
     energy_envelope = time_weighting(block, fs, mode='fast', initial_state=state)
     state = energy_envelope[-1]
@@ -678,6 +680,8 @@ Or let the `TimeWeighting` class carry the state for you:
 from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode='fast')
+# audio_blocks: consecutive frames of your calibrated recording (Pa),
+#   streamed from your sound card or read from a WAV in blocks.
 for block in audio_blocks:
     energy_envelope = tw.process(block)
 ```
@@ -722,16 +726,16 @@ time-weighted level distribution.
 import numpy as np
 from phonometry import leq, laeq
 
-# A calibrated recording in pascals so the guide runs standalone
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # Equivalent continuous level of the whole recording
-level = leq(signal, calibration_factor=sensitivity)
+level = leq(recording, calibration_factor=sensitivity)
 
 # A-weighted Leq (the standard environmental noise metric)
-la = laeq(signal, fs, calibration_factor=sensitivity)
+la = laeq(recording, fs, calibration_factor=sensitivity)
 ```
 
 Both accept 1D signals (returning a scalar) or 2D `[channels, samples]` arrays
@@ -763,7 +767,7 @@ regulations are written in terms of it.
 ```python
 from phonometry import ln_levels
 
-stats = ln_levels(signal, fs, n=(10, 50, 90), weighting="A")
+stats = ln_levels(recording, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 ```
 
@@ -801,11 +805,11 @@ impulsive noise, so regulations always name the time weighting.
 from phonometry import lc_peak, sel, sound_exposure, lex_8h
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
-peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+peak = lc_peak(recording, fs, calibration_factor=sensitivity)
 
 # A single noise event and a work-shift sample (slices of a real recording)
-event = signal
-shift_sample = signal
+event = recording
+shift_sample = recording
 
 # Sound exposure level: single-event level normalized to 1 s (LAE)
 lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
@@ -992,7 +996,7 @@ time-aligned across bands.
 from phonometry import OctaveFilterBank
 
 bank = OctaveFilterBank(fs=48000, fraction=3)
-levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
+levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
 ```
 
@@ -1234,11 +1238,13 @@ $$
 import numpy as np
 from phonometry import sound_intensity
 
-# Two microphone pressure signals in Pa (p1 closer to the source)
 fs = 48000
 rng = np.random.default_rng(0)
+# the two probe-microphone pressures in Pa, p1 closest to the source.
+#   In a real measurement these are your two calibrated probe recordings;
+#   synthesized here (p2 = p1 delayed one sample) so the guide runs.
 p1 = 0.02 * rng.standard_normal(fs)
-p2 = np.roll(p1, 1)                        # ~one-sample propagation delay across the probe
+p2 = np.roll(p1, 1)
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
@@ -1366,10 +1372,12 @@ from phonometry import sweep_signal, impulse_response, mls_signal, mls_impulse_r
 
 fs = 48000
 # A 3 s, 20 Hz - 20 kHz sweep is a good broadband room excitation
+# sweep: excitation you play through the loudspeaker
 sweep = sweep_signal(fs, 20.0, 20000.0, 3.0)
 
 # Deconvolve the recorded response back to the impulse response
 system = np.zeros(fs); system[100] = 1.0; system[2000] = 0.4   # direct + reflection
+# recorded: mic capture of the played sweep (here simulated by convolution with a synthetic room)
 recorded = fftconvolve(sweep, system)
 ir = impulse_response(recorded, sweep, fs, method="spectral")
 print(int(np.argmax(np.abs(ir))))                    # 100: direct sound recovered
@@ -1458,6 +1466,7 @@ from phonometry import decay_curve, room_parameters
 fs = 48000
 # Single-slope decay with T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
 t = np.arange(fs) / fs
+# ir: measured room impulse response; a synthetic single-slope decay stands in here.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
 time, level = decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
@@ -2153,7 +2162,7 @@ changes — touch the gain knob and you must recalibrate.
 
 ```mermaid
 flowchart LR
-    A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\nref_signal"]
+    A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\ncalibrator_recording"]
     B --> C["calculate_sensitivity()"]
     C --> D["calibration_factor\n(digital units → Pa)"]
     D --> E["octavefilter / leq / laeq / ln_levels"]
@@ -2171,14 +2180,18 @@ from phonometry import octavefilter, calculate_sensitivity
 
 # 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
 fs = 48000
-ref_signal = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # your measurement
+# calibrator_recording: your recorded 1 kHz calibrator tone (1 Pa RMS = 94 dB SPL).
+#   Synthesized here so the guide runs; in a real measurement, record your calibrator.
+calibrator_recording = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+# recording: the mic capture you want to calibrate, same input chain (Pa after calibration).
+#   Synthesized here; in a real measurement this is your recorded signal.
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # 2. Calculate sensitivity factor
-sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0, fs=fs)
+sensitivity = calculate_sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
 
 # 3. Apply calibration to your measurements
-spl, freq = octavefilter(signal, fs, calibration_factor=sensitivity)
+spl, freq = octavefilter(recording, fs, calibration_factor=sensitivity)
 # Now 'spl' values are in real-world dB SPL!
 ```
 
@@ -2252,8 +2265,8 @@ In this mode:
 * Useful for analyzing headroom, digital mastering, or normalized signals.
 
 ```python
-# Assume 'signal' is normalized between -1.0 and 1.0
-spl_dbfs, freq = octavefilter(signal, fs, dbfs=True)
+# Assume 'recording' is normalized between -1.0 and 1.0
+spl_dbfs, freq = octavefilter(recording, fs, dbfs=True)
 # Results will be negative (e.g., -20 dBFS)
 ```
 
@@ -2268,7 +2281,7 @@ like BK:
 
 ```python
 # Measure peak-holding levels for impact analysis
-spl_peak, freq = octavefilter(signal, fs, mode='peak')
+spl_peak, freq = octavefilter(recording, fs, mode='peak')
 ```
 
 > [!NOTE]
@@ -2350,6 +2363,8 @@ Use the `TimeWeighting` class (state carried automatically):
 from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode="fast")
+# audio_blocks: successive frames of your microphone recording (Pa),
+#   e.g. from sf.blocks("measurement.wav", ...) as in the block above.
 for block in audio_blocks:
     envelope = tw.process(block)
 ```

@@ -34,11 +34,13 @@ $$
 import numpy as np
 from phonometry import sound_intensity
 
-# Two microphone pressure signals in Pa (p1 closer to the source)
 fs = 48000
 rng = np.random.default_rng(0)
+# the two probe-microphone pressures in Pa, p1 closest to the source.
+#   In a real measurement these are your two calibrated probe recordings;
+#   synthesized here (p2 = p1 delayed one sample) so the guide runs.
 p1 = 0.02 * rng.standard_normal(fs)
-p2 = np.roll(p1, 1)                        # ~one-sample propagation delay across the probe
+p2 = np.roll(p1, 1)
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])

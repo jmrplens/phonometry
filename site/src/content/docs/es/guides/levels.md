@@ -23,16 +23,16 @@ nivel con ponderación temporal.
 import numpy as np
 from phonometry import leq, laeq
 
-# Una grabación calibrada en pascales para que la guía funcione por sí sola
+# recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 sensitivity = 1.0                                    # calibration_factor (ver Calibración)
 
 # Nivel continuo equivalente de toda la grabación
-level = leq(signal, calibration_factor=sensitivity)
+level = leq(recording, calibration_factor=sensitivity)
 
 # Leq ponderado A (la métrica estándar de ruido ambiental)
-la = laeq(signal, fs, calibration_factor=sensitivity)
+la = laeq(recording, fs, calibration_factor=sensitivity)
 ```
 
 Ambas aceptan señales 1D (devuelven un escalar) o arrays 2D
@@ -64,7 +64,7 @@ eventos), **L50** la mediana y **L90** el nivel de fondo.
 ```python
 from phonometry import ln_levels
 
-stats = ln_levels(signal, fs, n=(10, 50, 90), weighting="A")
+stats = ln_levels(recording, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 ```
 
@@ -103,11 +103,11 @@ que las normativas siempre indican la ponderación temporal.
 from phonometry import lc_peak, sel, sound_exposure, lex_8h
 
 # Pico ponderado C (IEC 61672-1 §5.13): los límites de acción laborales usan esto
-peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+peak = lc_peak(recording, fs, calibration_factor=sensitivity)
 
 # Un único evento de ruido y una muestra de jornada (fragmentos de una grabación real)
-event = signal
-shift_sample = signal
+event = recording
+shift_sample = recording
 
 # Nivel de exposición sonora: nivel del evento normalizado a 1 s (LAE)
 lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
@@ -296,7 +296,7 @@ alineado en el tiempo entre bandas.
 from phonometry import OctaveFilterBank
 
 bank = OctaveFilterBank(fs=48000, fraction=3)
-levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
+levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bandas, ventanas) — listo para pcolormesh(times, freq, levels)
 ```
 

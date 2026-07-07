@@ -68,10 +68,12 @@ from phonometry import sweep_signal, impulse_response, mls_signal, mls_impulse_r
 
 fs = 48000
 # Un barrido de 3 s, 20 Hz - 20 kHz es una buena excitación de sala de banda ancha
+# sweep: excitación que reproduces por el altavoz
 sweep = sweep_signal(fs, 20.0, 20000.0, 3.0)
 
 # Deconvoluciona la respuesta grabada para recuperar la respuesta al impulso
 system = np.zeros(fs); system[100] = 1.0; system[2000] = 0.4   # directo + reflexión
+# recorded: captura de micrófono del barrido reproducido (aquí simulada por convolución con una sala sintética)
 recorded = fftconvolve(sweep, system)
 ir = impulse_response(recorded, sweep, fs, method="spectral")
 print(int(np.argmax(np.abs(ir))))                    # 100: sonido directo recuperado
@@ -162,6 +164,7 @@ from phonometry import decay_curve, room_parameters
 fs = 48000
 # Decaimiento de pendiente única con T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
 t = np.arange(fs) / fs
+# ir: respuesta al impulso de sala medida; aquí la sustituye un decaimiento sintético de pendiente única.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
 time, level = decay_curve(ir, fs)                    # curva de Schroeder (0 dB en t = 0)

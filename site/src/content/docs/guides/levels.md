@@ -22,16 +22,16 @@ time-weighted level distribution.
 import numpy as np
 from phonometry import leq, laeq
 
-# A calibrated recording in pascals so the guide runs standalone
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # Equivalent continuous level of the whole recording
-level = leq(signal, calibration_factor=sensitivity)
+level = leq(recording, calibration_factor=sensitivity)
 
 # A-weighted Leq (the standard environmental noise metric)
-la = laeq(signal, fs, calibration_factor=sensitivity)
+la = laeq(recording, fs, calibration_factor=sensitivity)
 ```
 
 Both accept 1D signals (returning a scalar) or 2D `[channels, samples]` arrays
@@ -63,7 +63,7 @@ regulations are written in terms of it.
 ```python
 from phonometry import ln_levels
 
-stats = ln_levels(signal, fs, n=(10, 50, 90), weighting="A")
+stats = ln_levels(recording, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 ```
 
@@ -101,11 +101,11 @@ impulsive noise, so regulations always name the time weighting.
 from phonometry import lc_peak, sel, sound_exposure, lex_8h
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
-peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+peak = lc_peak(recording, fs, calibration_factor=sensitivity)
 
 # A single noise event and a work-shift sample (slices of a real recording)
-event = signal
-shift_sample = signal
+event = recording
+shift_sample = recording
 
 # Sound exposure level: single-event level normalized to 1 s (LAE)
 lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
@@ -292,7 +292,7 @@ time-aligned across bands.
 from phonometry import OctaveFilterBank
 
 bank = OctaveFilterBank(fs=48000, fraction=3)
-levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
+levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
 ```
 

@@ -35,11 +35,13 @@ $$
 import numpy as np
 from phonometry import sound_intensity
 
-# Dos señales de presión de micrófono en Pa (p1 más cerca de la fuente)
 fs = 48000
 rng = np.random.default_rng(0)
+# las presiones de los dos micrófonos de la sonda en Pa, p1 el más cercano a la fuente.
+#   En una medición real son tus dos grabaciones de sonda calibradas;
+#   sintetizadas aquí (p2 = p1 retardada una muestra) para que la guía funcione.
 p1 = 0.02 * rng.standard_normal(fs)
-p2 = np.roll(p1, 1)                        # retardo de propagación de ~1 muestra en la sonda
+p2 = np.roll(p1, 1)
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])

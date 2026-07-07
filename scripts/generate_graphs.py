@@ -1811,8 +1811,12 @@ def generate_impact_rating(output_dir: str) -> None:
     # Ln,w is the shifted reference read at 500 Hz.
     ax.axvline(500, color=COLOR_FG, linestyle=":", alpha=0.4)
     ax.plot(500, result.rating, "D", color=COLOR_SECONDARY, markersize=9, zorder=6)
+    # The annotation sits in the clear gap between the rising measured curve
+    # and the flat low-frequency reference plateau; the string is identical
+    # in both languages, so the placement holds for every variant.
     ax.annotate(f"Ln,w = {result.rating} dB", xy=(500, result.rating),
-                xytext=(585, result.rating - 3.5), fontsize=12, fontweight="bold",
+                xytext=(135, result.rating - 4.2), fontsize=12,
+                fontweight="bold",
                 arrowprops={"arrowstyle": "->", "lw": 1.0})
 
     for dy, text in (

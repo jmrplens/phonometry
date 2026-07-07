@@ -57,6 +57,10 @@ from .sound_power_reverberation import (
     sound_power_comparison,
     sound_power_reverberation,
 )
+from .sound_power_intensity import (
+    SoundPowerIntensityResult,
+    sound_power_intensity,
+)
 from .room_acoustics import RoomAcousticsResult, decay_curve, room_parameters
 from .room_ir import (
     impulse_response,
@@ -126,6 +130,8 @@ __all__ = [
     "sound_power_reverberation",
     "sound_power_comparison",
     "ReverberationSoundPowerResult",
+    "sound_power_intensity",
+    "SoundPowerIntensityResult",
     "airborne_insulation",
     "AirborneInsulationResult",
     "weighted_rating",

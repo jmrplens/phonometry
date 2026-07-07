@@ -14,7 +14,7 @@ pip install phonometry
 Optional extras:
 
 ```bash
-pip install phonometry[plot]   # matplotlib, for filter response plots
+pip install phonometry[plot]   # matplotlib, for filter response plots and result .plot() methods
 pip install phonometry[perf]  # numba, faster 'impulse' time weighting
 pip install phonometry[full]  # both
 ```

@@ -101,6 +101,8 @@ print(round(float(res.environmental_correction[0]), 2)) # K2 = 2.32 dB
 print(round(res.sound_power_level_a, 1))                # LWA = 92.4 dB
 print(round(res.uncertainty, 1))                        # U = 3.0 dB (2*sigma_R0)
 print(np.round(res.sound_power_level, 1))               # LW por banda
+
+res.plot()   # barras de nivel de potencia sonora por banda; LWA en el título (requiere matplotlib)
 ```
 
 El total ponderado A `LWA` se combina a partir de las potencias por banda con
@@ -197,6 +199,8 @@ lw_rss = np.full(freqs.size, 85.0)
 lp_rss = np.linspace(78.0, 69.0, freqs.size)
 cmp = sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature=20.0)
 print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
+
+rev.plot()   # espectro LW de la sala reverberante; LWA en el título (requiere matplotlib)
 ```
 
 `levels` puede ser un espectro medio 1D o un array 2D `(NM, NB)` promediado
@@ -301,6 +305,8 @@ print(round(res.sound_power_level_a, 1))                # LWA sobre las bandas d
 print(round(float(res.dynamic_capability_index[0]), 1)) # Ld = 12 - 10 = 2.0 dB
 print(round(float(res.surface_pressure_intensity_index[0]), 2))   # FpI
 print(list(res.achieved_grade))                         # grado por banda
+
+res.plot()   # espectro LW; bandas no positivas (indeterminables) con trama (requiere matplotlib)
 ```
 
 Suministrar `normal_intensity_2` (el segundo barrido) promedia ambos para las

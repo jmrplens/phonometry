@@ -21,16 +21,16 @@ time-weighted level distribution.
 import numpy as np
 from phonometry import leq, laeq
 
-# A calibrated recording in pascals so the guide runs standalone
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # Equivalent continuous level of the whole recording
-level = leq(signal, calibration_factor=sensitivity)
+level = leq(recording, calibration_factor=sensitivity)
 
 # A-weighted Leq (the standard environmental noise metric)
-la = laeq(signal, fs, calibration_factor=sensitivity)
+la = laeq(recording, fs, calibration_factor=sensitivity)
 ```
 
 Both accept 1D signals (returning a scalar) or 2D `[channels, samples]` arrays
@@ -62,8 +62,18 @@ regulations are written in terms of it.
 ```python
 from phonometry import ln_levels
 
-stats = ln_levels(signal, fs, n=(10, 50, 90), weighting="A")
+# A steady tone gives L10 = L50 = L90; percentiles only tell a story for a
+# *fluctuating* level. Synthesize 3 s alternating between a quiet and a
+# ~10 dB louder half-second so the statistics separate.
+rng = np.random.default_rng(0)
+segment = fs // 2                                  # 0.5 s per level
+quiet = 0.02 * rng.standard_normal(segment)        # background
+loud = 0.06 * rng.standard_normal(segment)         # ~10 dB louder events
+varying = np.tile(np.concatenate([quiet, loud]), 3)
+
+stats = ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
+# LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%"></picture>
@@ -100,11 +110,11 @@ impulsive noise, so regulations always name the time weighting.
 from phonometry import lc_peak, sel, sound_exposure, lex_8h
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
-peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+peak = lc_peak(recording, fs, calibration_factor=sensitivity)
 
 # A single noise event and a work-shift sample (slices of a real recording)
-event = signal
-shift_sample = signal
+event = recording
+shift_sample = recording
 
 # Sound exposure level: single-event level normalized to 1 s (LAE)
 lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
@@ -291,7 +301,7 @@ time-aligned across bands.
 from phonometry import OctaveFilterBank
 
 bank = OctaveFilterBank(fs=48000, fraction=3)
-levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
+levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
 ```
 

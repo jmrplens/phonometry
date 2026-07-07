@@ -39,13 +39,17 @@ from a straight line.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
 
 from .core import OctaveFilterBank
 from .utils import _typesignal
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 #: Default octave-band analysis range (ISO 3382-1:2009, 5.1: engineering
 #: and precision methods cover at least 125 Hz to 4 kHz in octave bands).
@@ -131,6 +135,18 @@ class RoomAcousticsResult:
     t20_valid: np.ndarray
     t30_valid: np.ndarray
     curvature: np.ndarray
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes | np.ndarray:
+        """Plot per-band decay times (EDT/T20/T30) and clarity (C50/C80).
+
+        Invalid bands are hatched and greyed. With ``ax`` given, only the
+        decay-times panel is drawn on it. Requires matplotlib
+        (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes` (or array thereof).
+        """
+        from ._plotting import plot_room_acoustics
+
+        return plot_room_acoustics(self, ax=ax, **kwargs)
 
 
 def _onset_index(p2: np.ndarray) -> int:
@@ -313,13 +329,48 @@ def _validate_ir(ir: List[float] | np.ndarray, fs: int) -> np.ndarray:
     return x
 
 
+@dataclass(frozen=True)
+class DecayCurve:
+    """Schroeder backward-integrated decay curve of an impulse response.
+
+    ``time`` holds the sample times in seconds from the direct sound and
+    ``level`` the decay levels in dB (0 dB at time zero), up to the noise
+    truncation point (ISO 3382-1:2009, 5.3.3). ``band`` is the octave/third-
+    octave band centre in Hz, or ``None`` for a broadband decay.
+
+    For backward compatibility with the previous ``(time, level)`` tuple
+    return of :func:`decay_curve`, the dataclass is iterable and unpacks as
+    ``time, level = decay_curve(...)``.
+    """
+
+    time: np.ndarray
+    level: np.ndarray
+    band: float | None = None
+
+    def __iter__(self) -> "Iterator[np.ndarray]":
+        """Yield ``time`` then ``level`` so the result unpacks like a tuple."""
+        yield self.time
+        yield self.level
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the decay curve with optional straight T-fit overlays.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`. Pass ``fits=False`` to omit the
+        EDT/T20/T30 fit lines.
+        """
+        from ._plotting import plot_decay_curve
+
+        return plot_decay_curve(self, ax=ax, **kwargs)
+
+
 def decay_curve(
     ir: List[float] | np.ndarray,
     fs: int,
     band: float | None = None,
     fraction: int = 1,
     zero_phase: bool = False,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> DecayCurve:
     """
     Schroeder decay curve of an impulse response.
 
@@ -346,9 +397,10 @@ def decay_curve(
         permits time-reversed filtering (it relaxes the B*T > 16 rule to
         B*T > 4); it roughly halves the low-frequency short-decay bias at
         125 Hz. Only used when ``band`` is not None. Default False (causal).
-    :return: ``(time, level)``: times in seconds from the direct sound
-        and decay levels in dB (0 dB at time zero), up to the noise
-        truncation point.
+    :return: A :class:`DecayCurve` with ``time`` in seconds from the direct
+        sound and ``level`` in dB (0 dB at time zero), up to the noise
+        truncation point. It unpacks as ``time, level = decay_curve(...)``
+        for backward compatibility and exposes :meth:`DecayCurve.plot`.
     """
     x = _validate_ir(ir, fs)
     if band is not None:
@@ -372,7 +424,7 @@ def decay_curve(
         raise ValueError("The selected band has no energy.")
     p2 = p2[_onset_index(p2) :]
     time, level, _, _, _, _ = _schroeder(p2, fs)
-    return time, level
+    return DecayCurve(time=time, level=level, band=band)
 
 
 def room_parameters(

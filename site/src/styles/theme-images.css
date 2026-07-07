@@ -7,3 +7,39 @@
 [data-theme='dark'] img.light-only {
   display: none;
 }
+
+/* ------------------------------------------------------------------ *
+ * Responsive figure sizing — full width on narrow screens, 92% plots on desktop.
+ * Figures are authored as <img style="width:NN%"> (inline). NN encodes
+ * intent: 60/70 = small schematic diagrams, 80 = detailed plots,
+ * 88/92 = wide diagrams, 100 = full-bleed. The width lives in an inline
+ * style attribute (the markdown pipeline emits the literal, unspaced
+ * string `width:80%`), so it can only be overridden with `!important`
+ * and is targeted per-tier via `img[style*="width:NN%"]`. Natural sizes
+ * (plots ~1200-1310px, diagrams 900px) exceed the 720px reading-column
+ * cap (Starlight --sl-content-width: 45rem), so 100% never upscales.
+ *
+ * Two tiers (both maintainer-approved):
+ *   - Mobile (<=50rem, column tracks the viewport): reclaim wasted side
+ *     margins — 80/88/92% -> 100%, 70% -> 90%, 60% -> 80%.
+ *   - Desktop (>50rem, column capped at 720px so never full-screen):
+ *     gentle boost of detailed plots 80% -> 92% (matches wide diagrams).
+ * ------------------------------------------------------------------ */
+
+/* Phones & small tablets (column tracks the viewport): reclaim the
+   wasted side margins so detailed figures fill the reading column. */
+@media (max-width: 50rem) {
+  .sl-markdown-content img[style*="width:80%"],
+  .sl-markdown-content img[style*="width:88%"],
+  .sl-markdown-content img[style*="width:92%"] { width: 100% !important; }
+  /* keep the small schematics subordinate, but larger than on desktop */
+  .sl-markdown-content img[style*="width:70%"] { width: 90% !important; }
+  .sl-markdown-content img[style*="width:60%"] { width: 80% !important; }
+}
+
+/* Desktop / wide reading column (capped at 720px, so never full-screen):
+   give the detailed plots a gentle boost, aligning them with the wide
+   diagrams. Everything else keeps its authored width. */
+@media (min-width: 50.0625rem) {
+  .sl-markdown-content img[style*="width:80%"] { width: 92% !important; }
+}

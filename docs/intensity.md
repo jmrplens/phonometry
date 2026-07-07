@@ -33,16 +33,19 @@ $$
 import numpy as np
 from phonometry import sound_intensity
 
-# Two microphone pressure signals in Pa (p1 closer to the source)
 fs = 48000
 rng = np.random.default_rng(0)
+# The two probe-microphone pressures in Pa, p1 closest to the source.
+#   In a real measurement these are your two calibrated probe recordings;
+#   synthesized here (p2 = p1 delayed one sample) so the guide runs.
 p1 = 0.02 * rng.standard_normal(fs)
-p2 = np.roll(p1, 1)                        # ~one-sample propagation delay across the probe
+p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 delayed one sample
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
 print(res.total_intensity_level, res.total_direction)      # LI [dB], ±1
 print(res.frequency, res.intensity_level)                  # per band
+res.plot()   # Lp vs LI per band + the pressure-intensity index (needs matplotlib)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.png" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%"></picture>
@@ -52,6 +55,39 @@ L_I ≈ L_p. Right: a standing wave carries (almost) no net energy — the
 pressure is high but the intensity collapses. The gap L_p − L_I is the
 **pressure-intensity index**, the fundamental quality indicator of every
 intensity measurement.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# res is the IntensityResult computed in the example above.
+# One line — Lp vs LI per band with the pressure-intensity index on a twin axis:
+res.plot()
+plt.show()
+
+# By hand, from the per-band fields the result carries — mirroring what
+# IntensityResult.plot() draws (bar label, merged twin-axis legend, δpI title):
+fig, ax = plt.subplots()
+ax.semilogx(res.frequency, res.pressure_level, "o-", label="Pressure level Lp")
+ax.semilogx(res.frequency, res.intensity_level, "s--", label="Intensity level LI")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Level [dB]")
+twin = ax.twinx()
+twin.bar(res.frequency, res.pressure_intensity_index,
+         width=res.frequency * 0.2, color="#2ca02c", alpha=0.25,
+         label="δpI = Lp − LI")
+twin.set_ylabel("Pressure-intensity index δpI [dB]")
+# Merge both axes' handles into a single legend, exactly as .plot() does:
+lines, labels = ax.get_legend_handles_labels()
+tlines, tlabels = twin.get_legend_handles_labels()
+ax.legend(lines + tlines, labels + tlabels)
+ax.set_title(f"Lp vs LI  (total δpI = {res.total_pressure_intensity_index:.1f} dB)")
+plt.show()
+```
+
+</details>
 
 ## Knowing when to trust the number
 

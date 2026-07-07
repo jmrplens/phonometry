@@ -17,15 +17,15 @@ are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
 import numpy as np
 from phonometry import weighting_filter
 
-# A calibrated signal in Pa so the guide runs standalone
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
-# Apply A-weighting to the raw signal
-weighted_signal = weighting_filter(signal, fs, curve='A')
+# Apply A-weighting to the raw recording
+weighted_signal = weighting_filter(recording, fs, curve='A')
 
 # Apply C-weighting for peak analysis
-c_weighted_signal = weighting_filter(signal, fs, curve='C')
+c_weighted_signal = weighting_filter(recording, fs, curve='C')
 ```
 
 ## Infrasound: G-weighting (ISO 7196)
@@ -39,7 +39,7 @@ sources with significant energy below 20 Hz (wind turbines, HVAC, blasting):
 ```python
 from phonometry import weighting_filter
 
-g_weighted = weighting_filter(signal, fs, curve='G')
+g_weighted = weighting_filter(recording, fs, curve='G')
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.png" alt="G-weighting frequency response from 0.1 Hz to 1 kHz with the ISO 7196 Table 2 nominal values overlaid" width="80%"></picture>
@@ -88,9 +88,9 @@ If you weight many signals with the same parameters, design the filter once:
 from phonometry import WeightingFilter
 
 wf = WeightingFilter(fs, "A")
-signals = [signal]                # your batch of recordings
-for signal in signals:
-    weighted = wf.filter(signal)
+signals = [recording]                # your batch of recordings
+for recording in signals:
+    weighted = wf.filter(recording)
 ```
 
 ## High-frequency accuracy (`high_accuracy`)
@@ -116,11 +116,11 @@ the oversampled design (blue) stays close to the analytic curve.*
 
 ```python
 # Explicit legacy behavior
-y = weighting_filter(signal, fs, curve="A", high_accuracy=False)
+y = weighting_filter(recording, fs, curve="A", high_accuracy=False)
 
 # Stateful block processing (legacy design, state carried between blocks)
 wf = WeightingFilter(fs, "A", stateful=True)
-blocks = [signal]                 # your sequence of signal blocks
+blocks = [recording]                 # your sequence of recording blocks
 for block in blocks:
     weighted = wf.filter(block)
 ```

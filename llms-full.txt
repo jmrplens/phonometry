@@ -71,7 +71,7 @@ pip install phonometry
 Optional extras:
 
 ```bash
-pip install phonometry[plot]   # matplotlib, for filter response plots
+pip install phonometry[plot]   # matplotlib, for filter response plots and result .plot() methods
 pip install phonometry[perf]  # numba, faster 'impulse' time weighting
 pip install phonometry[full]  # both
 ```
@@ -456,15 +456,15 @@ are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
 import numpy as np
 from phonometry import weighting_filter
 
-# A calibrated signal in Pa so the guide runs standalone
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
-# Apply A-weighting to the raw signal
-weighted_signal = weighting_filter(signal, fs, curve='A')
+# Apply A-weighting to the raw recording
+weighted_signal = weighting_filter(recording, fs, curve='A')
 
 # Apply C-weighting for peak analysis
-c_weighted_signal = weighting_filter(signal, fs, curve='C')
+c_weighted_signal = weighting_filter(recording, fs, curve='C')
 ```
 
 ## Infrasound: G-weighting (ISO 7196)
@@ -478,7 +478,7 @@ sources with significant energy below 20 Hz (wind turbines, HVAC, blasting):
 ```python
 from phonometry import weighting_filter
 
-g_weighted = weighting_filter(signal, fs, curve='G')
+g_weighted = weighting_filter(recording, fs, curve='G')
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.png" alt="G-weighting frequency response from 0.1 Hz to 1 kHz with the ISO 7196 Table 2 nominal values overlaid" width="80%"></picture>
@@ -527,9 +527,9 @@ If you weight many signals with the same parameters, design the filter once:
 from phonometry import WeightingFilter
 
 wf = WeightingFilter(fs, "A")
-signals = [signal]                # your batch of recordings
-for signal in signals:
-    weighted = wf.filter(signal)
+signals = [recording]                # your batch of recordings
+for recording in signals:
+    weighted = wf.filter(recording)
 ```
 
 ## High-frequency accuracy (`high_accuracy`)
@@ -555,11 +555,11 @@ the oversampled design (blue) stays close to the analytic curve.*
 
 ```python
 # Explicit legacy behavior
-y = weighting_filter(signal, fs, curve="A", high_accuracy=False)
+y = weighting_filter(recording, fs, curve="A", high_accuracy=False)
 
 # Stateful block processing (legacy design, state carried between blocks)
 wf = WeightingFilter(fs, "A", stateful=True)
-blocks = [signal]                 # your sequence of signal blocks
+blocks = [recording]                 # your sequence of recording blocks
 for block in blocks:
     weighted = wf.filter(block)
 ```
@@ -588,12 +588,12 @@ phonometry implements exact time constants per **IEC 61672-1:2013**.
 import numpy as np
 from phonometry import time_weighting
 
-# A calibrated signal in Pa so the guide runs standalone
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Calculate energy envelope (Mean Square)
-energy_envelope = time_weighting(signal, fs, mode='fast')
+energy_envelope = time_weighting(recording, fs, mode='fast')
 # dB SPL relative to 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 ```
@@ -651,7 +651,7 @@ requests the same zero state explicitly. If the recorded segment begins after a
 steady signal is already present, you can start from the first sample energy instead:
 
 ```python
-energy_envelope = time_weighting(signal, fs, mode='fast', initial_state='first')
+energy_envelope = time_weighting(recording, fs, mode='fast', initial_state='first')
 ```
 
 ## Block processing
@@ -662,6 +662,8 @@ next block's `initial_state` instead of resetting each block:
 ```python
 state = None
 
+# audio_blocks: consecutive frames of your calibrated recording (Pa),
+#   streamed from your sound card or read from a WAV in blocks.
 for block in audio_blocks:
     energy_envelope = time_weighting(block, fs, mode='fast', initial_state=state)
     state = energy_envelope[-1]
@@ -678,6 +680,8 @@ Or let the `TimeWeighting` class carry the state for you:
 from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode='fast')
+# audio_blocks: consecutive frames of your calibrated recording (Pa),
+#   streamed from your sound card or read from a WAV in blocks.
 for block in audio_blocks:
     energy_envelope = tw.process(block)
 ```
@@ -722,16 +726,16 @@ time-weighted level distribution.
 import numpy as np
 from phonometry import leq, laeq
 
-# A calibrated recording in pascals so the guide runs standalone
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # Equivalent continuous level of the whole recording
-level = leq(signal, calibration_factor=sensitivity)
+level = leq(recording, calibration_factor=sensitivity)
 
 # A-weighted Leq (the standard environmental noise metric)
-la = laeq(signal, fs, calibration_factor=sensitivity)
+la = laeq(recording, fs, calibration_factor=sensitivity)
 ```
 
 Both accept 1D signals (returning a scalar) or 2D `[channels, samples]` arrays
@@ -763,8 +767,18 @@ regulations are written in terms of it.
 ```python
 from phonometry import ln_levels
 
-stats = ln_levels(signal, fs, n=(10, 50, 90), weighting="A")
+# A steady tone gives L10 = L50 = L90; percentiles only tell a story for a
+# *fluctuating* level. Synthesize 3 s alternating between a quiet and a
+# ~10 dB louder half-second so the statistics separate.
+rng = np.random.default_rng(0)
+segment = fs // 2                                  # 0.5 s per level
+quiet = 0.02 * rng.standard_normal(segment)        # background
+loud = 0.06 * rng.standard_normal(segment)         # ~10 dB louder events
+varying = np.tile(np.concatenate([quiet, loud]), 3)
+
+stats = ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
+# LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%"></picture>
@@ -801,11 +815,11 @@ impulsive noise, so regulations always name the time weighting.
 from phonometry import lc_peak, sel, sound_exposure, lex_8h
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
-peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+peak = lc_peak(recording, fs, calibration_factor=sensitivity)
 
 # A single noise event and a work-shift sample (slices of a real recording)
-event = signal
-shift_sample = signal
+event = recording
+shift_sample = recording
 
 # Sound exposure level: single-event level normalized to 1 s (LAE)
 lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
@@ -992,7 +1006,7 @@ time-aligned across bands.
 from phonometry import OctaveFilterBank
 
 bank = OctaveFilterBank(fs=48000, fraction=3)
-levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
+levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
 ```
 
@@ -1082,7 +1096,39 @@ print(res.n5, res.n10, res.loudness)   # N5, N10, Nmax
 
 # From 28 one-third-octave band levels (25 Hz .. 12.5 kHz)
 res = loudness_zwicker_from_spectrum(levels_28, field="diffuse")
+
+res.plot()   # N'(z) over the Bark scale — the specific-loudness pattern (needs matplotlib)
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — the specific-loudness pattern N'(z) straight from the result:
+res.plot()
+plt.show()
+
+# Or reproduce the figure by hand — two patterns of equal band level (60 dB),
+# energy spread over many critical bands vs concentrated in the 1 kHz band:
+narrow = loudness_zwicker_from_spectrum(np.r_[np.full(16, -60.0), 60.0, np.full(11, -60.0)])
+broad = loudness_zwicker_from_spectrum(np.full(28, 60.0))
+z = np.arange(1, narrow.specific.size + 1) * 0.1          # Bark axis
+fig, ax = plt.subplots()
+for r, color, label in [
+    (broad, "#ff7f0e", f"Broadband  N = {broad.loudness:.1f} sone"),
+    (narrow, "#1f77b4", f"1 kHz narrowband  N = {narrow.loudness:.1f} sone"),
+]:
+    ax.fill_between(z, r.specific, color=color, alpha=0.3)
+    ax.plot(z, r.specific, color=color, label=label)
+ax.set_xlabel("Critical-band rate z [Bark]")
+ax.set_ylabel("Specific loudness N' [sone/Bark]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 The implementation is a clean-room port of the standard's **normative
 reference program** (Annex A.4): all twelve data tables are digit-exact and
@@ -1165,7 +1211,36 @@ print(f"STI = {res.sti:.2f}  ({res.rating})")   # e.g. 0.62 (D)
 test = stipa_signal(fs, seconds=18.0, level_db=80.0)
 recording = test                       # in practice, the microphone signal after playback
 res = stipa(recording, fs)
+res.plot()   # per-band modulation transfer index (MTI) bars, STI + rating in the title
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# STI vs reverberation time: sweep sti_from_impulse_response over synthetic
+# exponential decays (white noise x exp(-6.9077 t / T60)) at a T60 grid —
+# exactly the physics behind the curve above:
+rng = np.random.default_rng(0)
+t60_grid = np.array([0.3, 0.5, 0.8, 1.2, 1.6, 2.0, 2.5, 3.0, 4.0, 5.0])
+sti_values = []
+for t60 in t60_grid:
+    t = np.arange(int(2 * t60 * fs)) / fs
+    ir = rng.standard_normal(t.size) * np.exp(-6.9077 * t / t60)
+    sti_values.append(sti_from_impulse_response(ir, fs).sti)
+
+fig, ax = plt.subplots()
+ax.semilogx(t60_grid, sti_values, "o-")
+ax.set_xlabel("Reverberation time T60 [s]")
+ax.set_ylabel("STI")
+ax.set_ylim(0.0, 1.0)
+ax.grid(True, which="both", alpha=0.3)
+plt.show()
+```
+
+</details>
 
 `stipa` emits a `UserWarning` when the recording is shorter than the
 recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s): below that the
@@ -1234,16 +1309,19 @@ $$
 import numpy as np
 from phonometry import sound_intensity
 
-# Two microphone pressure signals in Pa (p1 closer to the source)
 fs = 48000
 rng = np.random.default_rng(0)
+# The two probe-microphone pressures in Pa, p1 closest to the source.
+#   In a real measurement these are your two calibrated probe recordings;
+#   synthesized here (p2 = p1 delayed one sample) so the guide runs.
 p1 = 0.02 * rng.standard_normal(fs)
-p2 = np.roll(p1, 1)                        # ~one-sample propagation delay across the probe
+p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 delayed one sample
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
 print(res.total_intensity_level, res.total_direction)      # LI [dB], ±1
 print(res.frequency, res.intensity_level)                  # per band
+res.plot()   # Lp vs LI per band + the pressure-intensity index (needs matplotlib)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.png" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%"></picture>
@@ -1253,6 +1331,39 @@ L_I ≈ L_p. Right: a standing wave carries (almost) no net energy — the
 pressure is high but the intensity collapses. The gap L_p − L_I is the
 **pressure-intensity index**, the fundamental quality indicator of every
 intensity measurement.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# res is the IntensityResult computed in the example above.
+# One line — Lp vs LI per band with the pressure-intensity index on a twin axis:
+res.plot()
+plt.show()
+
+# By hand, from the per-band fields the result carries — mirroring what
+# IntensityResult.plot() draws (bar label, merged twin-axis legend, δpI title):
+fig, ax = plt.subplots()
+ax.semilogx(res.frequency, res.pressure_level, "o-", label="Pressure level Lp")
+ax.semilogx(res.frequency, res.intensity_level, "s--", label="Intensity level LI")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Level [dB]")
+twin = ax.twinx()
+twin.bar(res.frequency, res.pressure_intensity_index,
+         width=res.frequency * 0.2, color="#2ca02c", alpha=0.25,
+         label="δpI = Lp − LI")
+twin.set_ylabel("Pressure-intensity index δpI [dB]")
+# Merge both axes' handles into a single legend, exactly as .plot() does:
+lines, labels = ax.get_legend_handles_labels()
+tlines, tlabels = twin.get_legend_handles_labels()
+ax.legend(lines + tlines, labels + tlabels)
+ax.set_title(f"Lp vs LI  (total δpI = {res.total_pressure_intensity_index:.1f} dB)")
+plt.show()
+```
+
+</details>
 
 ## Knowing when to trust the number
 
@@ -1366,10 +1477,12 @@ from phonometry import sweep_signal, impulse_response, mls_signal, mls_impulse_r
 
 fs = 48000
 # A 3 s, 20 Hz - 20 kHz sweep is a good broadband room excitation
+# sweep: excitation you play through the loudspeaker
 sweep = sweep_signal(fs, 20.0, 20000.0, 3.0)
 
 # Deconvolve the recorded response back to the impulse response
 system = np.zeros(fs); system[100] = 1.0; system[2000] = 0.4   # direct + reflection
+# recorded: mic capture of the played sweep (here simulated by convolution with a synthetic room)
 recorded = fftconvolve(sweep, system)
 ir = impulse_response(recorded, sweep, fs, method="spectral")
 print(int(np.argmax(np.abs(ir))))                    # 100: direct sound recovered
@@ -1458,6 +1571,7 @@ from phonometry import decay_curve, room_parameters
 fs = 48000
 # Single-slope decay with T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
 t = np.arange(fs) / fs
+# ir: measured room impulse response; a synthetic single-slope decay stands in here.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
 time, level = decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
@@ -1472,7 +1586,35 @@ print(round(float(res.ts[0]) * 1000, 0))             # 72 ms
 octaves = room_parameters(ir, fs)
 print(octaves.frequency)                             # ~[126, 251, 501, 1000, 1995, 3981]
 print(octaves.t30_valid)                             # per-band dynamic-range flags
+
+octaves.plot()               # per-band EDT/T20/T30 + C50/C80 bars (needs matplotlib)
+decay_curve(ir, fs).plot()   # Schroeder decay with EDT/T20/T30 fit overlays
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — Schroeder decay with the EDT/T20/T30 straight-line fits:
+decay = decay_curve(ir, fs)          # a DecayCurve (still unpacks as time, level)
+decay.plot()
+plt.show()
+
+# By hand, the decay is just the Schroeder curve; mark the evaluation levels:
+fig, ax = plt.subplots()
+ax.plot(time, level, color="#1f77b4", label="Schroeder decay")
+for db in (-5.0, -25.0, -35.0):      # T20 / T30 evaluation-window edges
+    ax.axhline(db, ls=":", alpha=0.4)
+ax.set_xlabel("Time [s]")
+ax.set_ylabel("Level re steady state [dB]")
+ax.set_ylim(top=3.0)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 For this single-slope decay EDT, T20 and T30 all return ≈ 1.0 s, and the
 energy parameters match their closed forms (C80 = 3.05 dB, D50 = 0.499,
@@ -1531,6 +1673,44 @@ m = open_plan_metrics(r, lp, sti)
 print(round(m.d2s, 1), round(m.lp_as_4m, 1))         # 7.0 dB, 51.0 dB
 print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Spatial decay: measured Lp,A,S vs distance on a log axis, the D2,S
+# regression rebuilt from the result fields, and STI with the rD / rP
+# crossings on a twin axis:
+b = -m.d2s / np.log10(2.0)                 # regression slope vs lg(r)
+a = m.lp_as_4m - b * np.log10(4.0)         # intercept from the 4 m level
+rr = np.logspace(np.log10(2.0), np.log10(16.0), 100)
+
+fig, ax = plt.subplots()
+ax.semilogx(r, lp, "o", label="Measured Lp,A,S")
+ax.semilogx(rr, a + b * np.log10(rr), "--", label=f"D2,S = {m.d2s:.1f} dB")
+ax.plot(4.0, m.lp_as_4m, "D", label=f"Lp,A,S,4m = {m.lp_as_4m:.0f} dB")
+ax.set_xlabel("Distance from the talker r [m]")
+ax.set_ylabel("A-weighted speech level [dB]")
+ax.set_xlim(1.8, 20.0)
+
+twin = ax.twinx()
+twin.semilogx(r, sti, "s-", color="#2ca02c", label="STI")
+twin.axvline(m.rd, ls=":", color="#2ca02c")
+twin.axvline(m.rp, ls=":", color="#9467bd")
+twin.annotate(f"rD = {m.rd:.1f} m", (m.rd, 0.52))
+twin.annotate(f"rP = {m.rp:.1f} m", (m.rp, 0.22))
+twin.set_ylabel("STI")
+twin.set_ylim(0.0, 1.0)
+
+lines, labels = ax.get_legend_handles_labels()
+tl, tlab = twin.get_legend_handles_labels()
+ax.legend(lines + tl, labels + tlab, loc="best")
+plt.show()
+```
+
+</details>
 
 ### `open_plan_metrics()` parameters
 
@@ -1598,7 +1778,35 @@ R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
      28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
 w = weighted_rating(R)
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
+
+w.plot()   # measured R' vs shifted ISO 717-1 reference, deviations shaded (needs matplotlib)
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — measured curve vs the shifted ISO 717-1 reference, deviations shaded:
+w.plot()
+plt.show()
+
+# By hand, from the band curve the result now carries:
+fig, ax = plt.subplots()
+ax.semilogx(w.band_centers, w.measured, "o-", label="Measured R'")
+ax.semilogx(w.band_centers, w.shifted_reference, "s--", label="Shifted reference")
+ax.fill_between(w.band_centers, w.measured, w.shifted_reference,
+                where=w.measured < w.shifted_reference, interpolate=True,
+                alpha=0.3, label="Unfavourable deviations")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound reduction index [dB]")
+ax.set_title(f"Rw = {w.rating} dB  (C={w.c:+d}; Ctr={w.ctr:+d})")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Compute `l1`, `l2` and `t2` on the same 16 one-third-octave bands from
 100 Hz to 3150 Hz — obtain `t2` from
@@ -1677,13 +1885,43 @@ print(round(float(imp.l_n_t[0]), 1))          # 62.1  (= Li since T = T0)
 print(round(float(imp.l_n[0]), 1))            # 64.1  normalized to A0 = 10 m^2
 
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
-r = weighted_impact_rating(imp.l_n_t)
-print(r.rating, r.ci, r.unfavourable_sum)     # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
+res_imp = weighted_impact_rating(imp.l_n_t)
+print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
 
 # Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(weighted_impact_rating(octave).rating)  # 54
+
+res_imp.plot()   # measured L'nT vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — measured L'nT vs the shifted ISO 717-2 reference (measured-above shaded):
+res_imp.plot()
+plt.show()
+
+# By hand, from the band curve the result now carries (note the opposite sign:
+# an unfavourable deviation is where the MEASURED level exceeds the reference).
+# Here the input was l_n_t, so the rated quantity is the field level L'nT,w:
+fig, ax = plt.subplots()
+ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured L'nT")
+ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Shifted reference")
+ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
+                where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
+                alpha=0.3, label="Unfavourable deviations")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Impact sound pressure level [dB]")
+ax.set_title(f"L'nT,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Feed `impact_insulation`'s `l_n_t` (or `l_n`) straight into
 `weighted_impact_rating`; the rating and `CI` reproduce the ISO 717-2 Annex C
@@ -1884,6 +2122,8 @@ print(round(float(res.environmental_correction[0]), 2)) # K2 = 2.32 dB
 print(round(res.sound_power_level_a, 1))                # LWA = 92.4 dB
 print(round(res.uncertainty, 1))                        # U = 3.0 dB (2*sigma_R0)
 print(np.round(res.sound_power_level, 1))               # per-band LW
+
+res.plot()   # sound power level bars per band, LWA in the title (needs matplotlib)
 ```
 
 The A-weighted total `LWA` is combined from the band powers with the ISO 3744
@@ -1978,6 +2218,8 @@ lw_rss = np.full(freqs.size, 85.0)
 lp_rss = np.linspace(78.0, 69.0, freqs.size)
 cmp = sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature=20.0)
 print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
+
+rev.plot()   # reverberation-room LW spectrum, LWA in the title (needs matplotlib)
 ```
 
 `levels` may be a 1D mean spectrum or a 2D `(NM, NB)` array averaged over
@@ -2079,6 +2321,8 @@ print(round(res.sound_power_level_a, 1))                # LWA over determinable 
 print(round(float(res.dynamic_capability_index[0]), 1)) # Ld = 12 - 10 = 2.0 dB
 print(round(float(res.surface_pressure_intensity_index[0]), 2))   # FpI
 print(list(res.achieved_grade))                         # per-band grade
+
+res.plot()   # LW spectrum; non-positive (undeterminable) bands hatched (needs matplotlib)
 ```
 
 Supplying `normal_intensity_2` (the second sweep) averages the two for the
@@ -2153,7 +2397,7 @@ changes — touch the gain knob and you must recalibrate.
 
 ```mermaid
 flowchart LR
-    A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\nref_signal"]
+    A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\ncalibrator_recording"]
     B --> C["calculate_sensitivity()"]
     C --> D["calibration_factor\n(digital units → Pa)"]
     D --> E["octavefilter / leq / laeq / ln_levels"]
@@ -2171,14 +2415,18 @@ from phonometry import octavefilter, calculate_sensitivity
 
 # 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
 fs = 48000
-ref_signal = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # your measurement
+# calibrator_recording: your recorded 1 kHz calibrator tone (1 Pa RMS = 94 dB SPL).
+#   Synthesized here so the guide runs; in a real measurement, record your calibrator.
+calibrator_recording = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+# recording: the mic capture you want to calibrate, same input chain (Pa after calibration).
+#   Synthesized here; in a real measurement this is your recorded signal.
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # 2. Calculate sensitivity factor
-sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0, fs=fs)
+sensitivity = calculate_sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
 
 # 3. Apply calibration to your measurements
-spl, freq = octavefilter(signal, fs, calibration_factor=sensitivity)
+spl, freq = octavefilter(recording, fs, calibration_factor=sensitivity)
 # Now 'spl' values are in real-world dB SPL!
 ```
 
@@ -2252,8 +2500,8 @@ In this mode:
 * Useful for analyzing headroom, digital mastering, or normalized signals.
 
 ```python
-# Assume 'signal' is normalized between -1.0 and 1.0
-spl_dbfs, freq = octavefilter(signal, fs, dbfs=True)
+# Assume 'recording' is normalized between -1.0 and 1.0
+spl_dbfs, freq = octavefilter(recording, fs, dbfs=True)
 # Results will be negative (e.g., -20 dBFS)
 ```
 
@@ -2268,7 +2516,7 @@ like BK:
 
 ```python
 # Measure peak-holding levels for impact analysis
-spl_peak, freq = octavefilter(signal, fs, mode='peak')
+spl_peak, freq = octavefilter(recording, fs, mode='peak')
 ```
 
 > [!NOTE]
@@ -2350,6 +2598,8 @@ Use the `TimeWeighting` class (state carried automatically):
 from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode="fast")
+# audio_blocks: successive frames of your microphone recording (Pa),
+#   e.g. from sf.blocks("measurement.wav", ...) as in the block above.
 for block in audio_blocks:
     envelope = tw.process(block)
 ```
@@ -2537,7 +2787,7 @@ All core functionality can be imported directly from the `phonometry` package.
 | `impulse_response` | `function` | **Sweep deconvolution (ISO 18233 B.5).**<br>• `recorded`: Recorded response (1D)<br>• `reference`: Emitted sweep (1D)<br>• `fs`: Sample rate [Hz]<br>• `method`: 'spectral' (Default) or 'farina'<br>• `f_range`: (f1, f2) for 'farina'<br>• `regularization`: Tikhonov term (Default: 1e-6)<br>• `length`: causal samples (Default: len(recorded))<br>• `return_full`: keep distortion tail (Default: False) | `ir = impulse_response(rec, sweep, fs)`<br><br>• 1D impulse response |
 | `mls_signal` | `function` | **Maximum-length sequence (ISO 18233 Annex A).**<br>• `order`: Register length N, 2-20 | `mls = mls_signal(16)`<br><br>• Bipolar sequence, length 2**N − 1 |
 | `mls_impulse_response` | `function` | **IR from a periodic MLS.**<br>• `recorded`: Response spanning whole MLS periods (1D)<br>• `mls`: Excitation sequence<br>• `length`: IR samples (Default: 2**N − 1) | `ir = mls_impulse_response(rec, mls)`<br><br>• Circular cross-correlation / averaging |
-| `decay_curve` | `function` | **Schroeder decay curve (ISO 3382-1 5.3.3).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `band`: Band centre [Hz] (Default: None → broadband)<br>• `fraction`: 1 or 3 (Default: 1)<br>• `zero_phase`: forward-backward band filtering, halves the 125 Hz short-T bias (Default: False) | `time, level = decay_curve(ir, fs)`<br><br>• `time` [s], `level` [dB] (0 dB at t=0) |
+| `decay_curve` | `function` | **Schroeder decay curve (ISO 3382-1 5.3.3).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `band`: Band centre [Hz] (Default: None → broadband)<br>• `fraction`: 1 or 3 (Default: 1)<br>• `zero_phase`: forward-backward band filtering, halves the 125 Hz short-T bias (Default: False) | `dc = decay_curve(ir, fs)` → `DecayCurve`<br>`time, level = dc` still unpacks (`time` [s], `level` [dB], 0 dB at t=0)<br>`dc.plot()` draws the decay + EDT/T20/T30 fits |
 | `room_parameters` | `function` | **Room acoustics (ISO 3382-1/2).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz]<br>• `limits`: (f_min, f_max) or None (Default: (125, 4000))<br>• `fraction`: 1 or 3 (Default: 1)<br>• `zero_phase`: forward-backward octave filtering, halves the 125 Hz short-T T30 bias (Default: False) | `res = room_parameters(ir, fs)`<br><br>• `RoomAcousticsResult` per band |
 | `RoomAcousticsResult` | `dataclass` | **Per-band room parameters.**<br>• `frequency` [Hz]<br>• `edt`, `t20`, `t30` [s]<br>• `c50`, `c80` [dB], `d50`, `ts` [s]<br>• `dynamic_range` [dB]<br>• `edt_valid`/`t20_valid`/`t30_valid`<br>• `curvature` [%] | `res.t30, res.c80, res.t30_valid`<br><br>• Arrays with one entry per band |
 | `open_plan_metrics` | `function` | **Open-plan office metrics (ISO 3382-3).**<br>• `positions_m`: Source distances [m] (≥ 4)<br>• `spl_a_speech`: A-weighted speech level per position [dB]<br>• `sti_values`: STI per position | `m = open_plan_metrics(r, lp, sti)`<br><br>• `OpenPlanResult` |
@@ -2546,11 +2796,11 @@ All core functionality can be imported directly from the `phonometry` package.
 | `weighted_rating` | `function` | **Single-number rating + C/Ctr (ISO 717-1).**<br>• `values_by_band`: 16 thirds or 5 octaves [dB]<br>• `bands`: 'third-octave', 'octave' or None | `w = weighted_rating(R)`<br><br>• `WeightedRatingResult` (Rw, C, Ctr) |
 | `energy_average_level` | `function` | **Energy-average level (ISO 16283-1 (9)).**<br>• `levels`: Levels [dB] to average<br>• `axis`: Averaging axis (Default: -1) | `L = energy_average_level([60, 66])`<br><br>• `10 lg( mean(10^(Li/10)) )` |
 | `AirborneInsulationResult` | `dataclass` | **Field insulation per band.**<br>• `d`: Level difference D [dB]<br>• `dnt`: Standardized DnT [dB]<br>• `r_prime`: Apparent R' [dB] or None | `res.d, res.dnt, res.r_prime` |
-| `WeightedRatingResult` | `dataclass` | **Weighted rating result.**<br>• `rating`: Rw/DnT,w … [dB], int<br>• `c`: Spectrum term C, int<br>• `ctr`: Spectrum term Ctr, int<br>• `unfavourable_sum`: [dB] | `w.rating, w.c, w.ctr` |
+| `WeightedRatingResult` | `dataclass` | **Weighted rating result.**<br>• `rating`: Rw/DnT,w … [dB], int<br>• `c`: Spectrum term C, int<br>• `ctr`: Spectrum term Ctr, int<br>• `unfavourable_sum`: [dB]<br>• `band_centers`: Measured-curve centres [Hz] or None<br>• `measured`: Measured band values [dB] or None<br>• `shifted_reference`: Shifted Table 3 reference [dB] or None | `w.rating, w.c, w.ctr` |
 | `impact_insulation` | `function` | **Field impact insulation (ISO 16283-2).**<br>• `li`: Impact SPL [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `volume`: Receiving V [m³] (for L'n)<br>• `t0`: Reference T0 [s] (Default: 0.5) | `imp = impact_insulation(li, t2, volume=50)`<br><br>• `ImpactInsulationResult` (`l_n_t`, `l_n`) |
 | `weighted_impact_rating` | `function` | **Single-number impact rating + CI (ISO 717-2).**<br>• `values_by_band`: 16 thirds (100-3150 Hz) or 5 octaves (125-2000 Hz) [dB]<br>• `bands`: 'third-octave', 'octave' or None | `r = weighted_impact_rating(imp.l_n_t)`<br><br>• `ImpactRatingResult` (Ln,w, CI); octave rating carries the -5 dB rule |
 | `ImpactInsulationResult` | `dataclass` | **Impact insulation per band.**<br>• `l_n_t`: Standardized L'nT [dB]<br>• `l_n`: Normalized L'n [dB] or None | `imp.l_n_t, imp.l_n` |
-| `ImpactRatingResult` | `dataclass` | **Weighted impact rating.**<br>• `rating`: Ln,w/L'n,w/L'nT,w [dB], int<br>• `ci`: Spectrum term CI, int<br>• `unfavourable_sum`: [dB] | `r.rating, r.ci` |
+| `ImpactRatingResult` | `dataclass` | **Weighted impact rating.**<br>• `rating`: Ln,w/L'n,w/L'nT,w [dB], int<br>• `ci`: Spectrum term CI, int<br>• `unfavourable_sum`: [dB]<br>• `band_centers`: Measured-curve centres [Hz] or None<br>• `measured`: Measured impact levels [dB] or None<br>• `shifted_reference`: Shifted impact reference [dB] or None | `r.rating, r.ci` |
 | `sound_power_pressure` | `function` | **Sound power from surface pressure (ISO 3744/3746).**<br>• `levels_positions`: (NM, NB) SPL [dB]<br>• `surface`: 'hemisphere' / 'box'<br>• `radius` [m] or `dimensions`+`distance` [m]<br>• `reflecting_planes`: 1/2/3 (Default: 1)<br>• `background_levels`: for K1<br>• `frequencies` [Hz]: for LWA<br>• `reverberation_time`+`room_volume` / `absorption_area` / `mean_absorption_coefficient`+`room_surface`: for K2<br>• `grade`: 'engineering' (Default) / 'survey'<br>• `omc_uncertainty` [dB] (Default: 0) | `res = sound_power_pressure(levels, 'hemisphere', radius=1.5, frequencies=f)`<br><br>• `SoundPowerResult` |
 | `measurement_positions` | `function` | **Hemisphere mic coordinates (ISO 3744 Annex B).**<br>• `surface`: 'hemisphere'<br>• `radius` [m]<br>• `reflecting_planes`: 1/2/3<br>• `tones`: Table B.1 vs B.2 (Default: True)<br>• `grade`: 'engineering'/'survey' | `xyz = measurement_positions('hemisphere', radius=1.5)`<br><br>• (N, 3) coordinates [m] |
 | `background_noise_correction` | `function` | **Background correction K1 (ISO 3744 Eq. 16).**<br>• `source_levels` [dB]<br>• `background_levels` [dB]<br>• `grade`: 'engineering'/'survey' | `k1 = background_noise_correction(src, bg)`<br><br>• K1 per band [dB] |
@@ -2566,6 +2816,7 @@ All core functionality can be imported directly from the `phonometry` package.
 | `attenuation_from_alpha` | `function` | **ISO 9613-1 α → m (ISO 354 8.1.2.1).**<br>• `alpha`: attenuation [dB/m] | `m = attenuation_from_alpha(0.01)`<br><br>• m = α/(10 lg e) [1/m] |
 | `SoundPowerWarning` | `warning class` | **ISO 3744/3746/3741/9614-2 qualification issue.**<br>Emitted when the background margin is below the criterion, K2 exceeds the validity limit, a band's power is negative, or the room fails qualification; levels are then upper bounds | `warnings.simplefilter('error', SoundPowerWarning)` |
 | `AbsorptionWarning` | `warning class` | **ISO 354 advisory.**<br>Emitted for a room below 150 m³, a sample area outside 10-12 m², an out-of-range temperature, or a non-physical α_s ≤ 0; the result still returns | `warnings.simplefilter('error', AbsorptionWarning)` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `STIResult`, `RoomAcousticsResult`, `DecayCurve`, `WeightedRatingResult`, `ImpactRatingResult`, `SoundPowerResult`, `ReverberationSoundPowerResult`, `SoundPowerIntensityResult` and `IntensityResult`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 

@@ -18,12 +18,12 @@ específicas. phonometry implementa las constantes de tiempo exactas de la norma
 import numpy as np
 from phonometry import time_weighting
 
-# Una señal calibrada en Pa para que la guía funcione por sí sola
+# recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
 fs = 48000
-signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Calcular la envolvente de energía (valor cuadrático medio)
-energy_envelope = time_weighting(signal, fs, mode='fast')
+energy_envelope = time_weighting(recording, fs, mode='fast')
 # dB SPL respecto a 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 ```
@@ -84,7 +84,7 @@ comienza con una señal estacionaria ya presente, puedes partir de la energía d
 la primera muestra:
 
 ```python
-energy_envelope = time_weighting(signal, fs, mode='fast', initial_state='first')
+energy_envelope = time_weighting(recording, fs, mode='fast', initial_state='first')
 ```
 
 ## Procesado por bloques
@@ -95,6 +95,8 @@ como `initial_state` del siguiente en lugar de reiniciar en cada bloque:
 ```python
 state = None
 
+# audio_blocks: fotogramas consecutivos de tu grabación calibrada (Pa),
+#   transmitidos desde tu tarjeta de sonido o leídos de un WAV por bloques.
 for block in audio_blocks:
     energy_envelope = time_weighting(block, fs, mode='fast', initial_state=state)
     state = energy_envelope[-1]
@@ -112,6 +114,8 @@ O deja que la clase `TimeWeighting` lleve el estado por ti:
 from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode='fast')
+# audio_blocks: fotogramas consecutivos de tu grabación calibrada (Pa),
+#   transmitidos desde tu tarjeta de sonido o leídos de un WAV por bloques.
 for block in audio_blocks:
     energy_envelope = tw.process(block)
 ```

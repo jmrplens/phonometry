@@ -19,9 +19,12 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import List, Sequence
+from typing import TYPE_CHECKING, Any, List, Sequence
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 from scipy import signal
 
 from .core import OctaveFilterBank
@@ -97,6 +100,16 @@ class STIResult:
     mtf: np.ndarray
     band_levels: np.ndarray | None
     rating: str
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the per-band MTI bars with the STI and rating letter.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_sti
+
+        return plot_sti(self, ax=ax, **kwargs)
 
 
 def _rating(sti: float) -> str:

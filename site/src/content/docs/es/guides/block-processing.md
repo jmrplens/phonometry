@@ -63,6 +63,8 @@ Usa la clase `TimeWeighting` (el estado se lleva automáticamente):
 from phonometry import TimeWeighting
 
 tw = TimeWeighting(fs, mode="fast")
+# audio_blocks: fotogramas sucesivos de tu grabación de micrófono (Pa),
+#   p. ej. de sf.blocks("measurement.wav", ...) como en el bloque anterior.
 for block in audio_blocks:
     envelope = tw.process(block)
 ```

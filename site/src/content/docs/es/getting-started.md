@@ -14,7 +14,7 @@ pip install phonometry
 Extras opcionales:
 
 ```bash
-pip install phonometry[plot]   # matplotlib, para las gráficas de respuesta
+pip install phonometry[plot]   # matplotlib, para gráficas de respuesta y métodos .plot() de resultados
 pip install phonometry[perf]  # numba, ponderación temporal 'impulse' más rápida
 pip install phonometry[full]  # ambos
 ```

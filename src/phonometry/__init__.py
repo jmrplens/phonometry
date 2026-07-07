@@ -36,6 +36,7 @@ from .parametric_filters import (
     time_weighting,
     weighting_filter,
 )
+from .open_plan import OpenPlanResult, open_plan_metrics
 from .room_acoustics import RoomAcousticsResult, decay_curve, room_parameters
 from .room_ir import (
     impulse_response,
@@ -94,6 +95,8 @@ __all__ = [
     "room_parameters",
     "decay_curve",
     "RoomAcousticsResult",
+    "open_plan_metrics",
+    "OpenPlanResult",
     "lden",
     "ldn",
     "composite_rating_level",

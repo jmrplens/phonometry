@@ -19,7 +19,13 @@ level exceeded $N\ \%$ of the time — the $(100-N)$-th percentile of the
 time-weighted level distribution.
 
 ```python
+import numpy as np
 from phonometry import leq, laeq
+
+# A calibrated recording in pascals so the guide runs standalone
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # Equivalent continuous level of the whole recording
 level = leq(signal, calibration_factor=sensitivity)
@@ -68,7 +74,8 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` applies A/C weighting first, and
 `calibration_factor`/`dbfs` behave as in `leq`. The integrator attack transient
-(~2τ) is discarded before taking percentiles.
+(~5τ) is discarded before taking percentiles, so the leading settling ramp is
+not counted in the low percentiles.
 
 Formally, $L_N$ is the $(100-N)$-th percentile of the distribution of the
 time-weighted level: the recording is first turned into a level-vs-time
@@ -96,6 +103,10 @@ from phonometry import lc_peak, sel, sound_exposure, lex_8h
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
 peak = lc_peak(signal, fs, calibration_factor=sensitivity)
 
+# A single noise event and a work-shift sample (slices of a real recording)
+event = signal
+shift_sample = signal
+
 # Sound exposure level: single-event level normalized to 1 s (LAE)
 lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
 
@@ -107,8 +118,13 @@ lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
 `lc_peak` is verified against the one-cycle/half-cycle reference responses of
 IEC 61672-1:2013 Table 5, `sel` against the Table 4 LAE toneburst column, and
 the dose functions against the IEC 61252 anchors (3.2 Pa²h ↔ exactly 90 dB).
-With `duration_hours`, the input is treated as a representative sample of that
-exposure period; without it, the input is the whole event.
+`lc_peak` polyphase-oversamples the C-weighted signal by `oversample` (default
+`8`) before taking the maximum, recovering the true inter-sample peak: a raw
+on-grid maximum under-reads sustained HF tones by up to ~1.15 dB (an 8 kHz tone
+at 48 kHz is only 6 samples/cycle). Set `oversample=1` to detect the peak on the
+original sample grid. With `duration_hours`, the input is treated as a
+representative sample of that exposure period; without it, the input is the
+whole event.
 
 ### SEL: comparing events of different duration
 
@@ -185,8 +201,13 @@ centred on the tone with the two contiguous bands (clause 12). Both return a
 structured verdict against the frequency-dependent prominence criteria:
 
 ```python
+import numpy as np
 from phonometry import tone_to_noise_ratio, prominence_ratio
 
+fs = 48000
+rng = np.random.default_rng(0)
+t = np.arange(fs) / fs
+x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # 1 kHz tone in noise
 tnr = tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
 pr = prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
@@ -294,6 +315,7 @@ levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
 | `window_time` | float | s | > 0; default `0.125` | Frame length (0.125 s mirrors Fast) |
 | `overlap` | float | — | 0 ≤ overlap < 1; default `0.5` | Fraction of window overlap (0 = none) |
 | `mode` | str | — | `'rms'` (default) or `'peak'` | Per-window detector |
+| `detrend` | bool | — | default `True` | Remove each band's DC offset before the level (improves low-frequency accuracy) |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline only) |
 | `calibration_factor` / `dbfs` | — | — | constructor-only | Set on `OctaveFilterBank(...)`, not per call |
 

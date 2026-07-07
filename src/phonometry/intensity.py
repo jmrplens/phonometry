@@ -51,6 +51,29 @@ from .utils import _typesignal
 _I0 = 1.0e-12
 #: Reference sound pressure, in pascals.
 _P0 = 2.0e-5
+#: Upper ``k*dr`` bound (rad) for the finite-difference bias correction. The
+#: exact reciprocal ``(k*dr)/sin(k*dr)`` diverges as ``k*dr -> pi`` (the first
+#: spatial-aliasing null, ``f = c/(2*dr)``), so a handful of near-null bins
+#: would otherwise dominate the summed totals. IEC 61043:1994 (7.3) only
+#: characterises the probe over its usable range, well short of the null;
+#: applying the correction up to ``pi/2`` and holding it constant beyond keeps
+#: the totals bounded while leaving the low-frequency region (where the bias
+#: matters and is trustworthy) exact.
+_BIAS_CORRECTION_MAX_KDR = np.pi / 2.0
+
+
+def _finite_difference_correction(k_dr: np.ndarray) -> np.ndarray:
+    """Reciprocal ``(k*dr)/sin(k*dr)`` of the finite-difference response.
+
+    IEC 61043:1994 (7.3). The correction is clamped at ``k*dr = pi/2``: below
+    the cutoff the exact reciprocal is returned (so the trustworthy
+    low-frequency region is left unchanged), and at or above it the factor is
+    held constant at its ``pi/2`` value (``pi/2``). This avoids the divergence
+    as ``k*dr -> pi`` that would let near-null bins blow up the totals.
+    """
+    kd = np.clip(np.asarray(k_dr, dtype=np.float64), 0.0, _BIAS_CORRECTION_MAX_KDR)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.where(kd > 0.0, kd / np.sin(kd), 1.0)
 
 
 @dataclass(frozen=True)
@@ -123,6 +146,7 @@ def sound_intensity(
     c: float = 343.0,
     fraction: int | None = None,
     limits: List[float] | None = None,
+    bias_correct: bool = False,
 ) -> IntensityResult:
     """
     Sound intensity from a two-microphone (p-p) probe (IEC 61043:1994).
@@ -166,6 +190,18 @@ def sound_intensity(
         3 (one-third octave bands).
     :param limits: [f_min, f_max] band limits in Hz (default
         [12, 20000], as in :func:`phonometry.getansifrequencies`).
+    :param bias_correct: If True, apply the per-bin finite-difference
+        correction ``(k*spacing)/sin(k*spacing)`` (IEC 61043:1994, 7.3) to the
+        intensity spectral density before summing the band and broadband
+        totals, so the totals no longer under-read as the frequency approaches
+        ``max_valid_frequency``. The reciprocal diverges as ``k*spacing -> pi``
+        (the first spatial-aliasing null at ``c/(2*spacing)``, inside the
+        default band range for close spacings), so it is applied only over the
+        probe's usable range — up to ``k*spacing = pi/2`` — and held constant
+        beyond, keeping the totals bounded instead of letting a few near-null
+        bins dominate them. Default False keeps the exact legacy totals; the
+        per-band ``bias_correction`` factor (same clamped definition) is
+        reported either way.
     :return: :class:`IntensityResult`.
     """
     x1 = _typesignal(p1)
@@ -207,6 +243,14 @@ def sound_intensity(
     i_density = -np.imag(g12[pos]) / (2.0 * np.pi * fpos * rho * spacing)
     p_density = spp[pos]
 
+    if bias_correct:
+        # IEC 61043:1994, 7.3: undo the finite-difference response
+        # sin(k*dr)/(k*dr) per bin. The reciprocal is clamped at k*dr = pi/2
+        # (see _finite_difference_correction) so bins near the first null do
+        # not diverge and dominate the totals.
+        k_dr_full = 2.0 * np.pi * fpos * spacing / c
+        i_density = i_density * _finite_difference_correction(k_dr_full)
+
     if limits is not None:
         broad = (fpos >= limits[0]) & (fpos <= limits[1])
     else:
@@ -244,10 +288,11 @@ def sound_intensity(
         pressure_intensity_index = pressure_level - intensity_level
         direction = np.where(intensity >= 0.0, 1, -1)
         # IEC 61043:1994, 7.3: finite-difference response sin(k*dr)/(k*dr)
-        # with k*dr = 2*pi*f*dr/c; the correction is its reciprocal.
+        # with k*dr = 2*pi*f*dr/c; the reported correction is its reciprocal,
+        # clamped at k*dr = pi/2 to match the applied bias_correct path and to
+        # avoid diverging near the first null (_finite_difference_correction).
         k_dr = 2.0 * np.pi * frequency * spacing / c
-        with np.errstate(divide="ignore", invalid="ignore"):
-            bias_correction = np.where(k_dr < np.pi, k_dr / np.sin(k_dr), np.nan)
+        bias_correction = _finite_difference_correction(k_dr)
 
     return IntensityResult(
         frequency=frequency,

@@ -46,6 +46,12 @@ graphs:
 	$(PYTHON) scripts/generate_graphs.py
 	$(PYTHON) scripts/generate_diagrams.py
 
+# Regenerate the fallback social-preview card (site/public/og-image.png).
+# Kept out of `graphs`/CI so the committed designed asset is not clobbered on
+# every build; run manually to refresh it deterministically when needed.
+og:
+	$(PYTHON) -c "import sys; sys.path.insert(0, 'scripts'); import generate_graphs as g; g.generate_og_image()"
+
 llms:
 	$(PYTHON) scripts/gen_llms.py
 

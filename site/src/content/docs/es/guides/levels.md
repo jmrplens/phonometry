@@ -20,7 +20,13 @@ superado el $N\ \%$ del tiempo — el percentil $(100-N)$ de la distribución de
 nivel con ponderación temporal.
 
 ```python
+import numpy as np
 from phonometry import leq, laeq
+
+# Una grabación calibrada en pascales para que la guía funcione por sí sola
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+sensitivity = 1.0                                    # calibration_factor (ver Calibración)
 
 # Nivel continuo equivalente de toda la grabación
 level = leq(signal, calibration_factor=sensitivity)
@@ -69,7 +75,8 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 Opciones: `mode` selecciona la ponderación temporal de la envolvente (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` aplica antes la ponderación A/C, y
 `calibration_factor`/`dbfs` se comportan como en `leq`. El transitorio de ataque
-del integrador (~2τ) se descarta antes de calcular los percentiles.
+del integrador (~5τ) se descarta antes de calcular los percentiles, de modo que
+la rampa inicial de asentamiento no cuenta en los percentiles bajos.
 
 Formalmente, $L_N$ es el percentil $(100-N)$ de la distribución del nivel con
 ponderación temporal: la grabación se convierte primero en una envolvente de
@@ -98,6 +105,10 @@ from phonometry import lc_peak, sel, sound_exposure, lex_8h
 # Pico ponderado C (IEC 61672-1 §5.13): los límites de acción laborales usan esto
 peak = lc_peak(signal, fs, calibration_factor=sensitivity)
 
+# Un único evento de ruido y una muestra de jornada (fragmentos de una grabación real)
+event = signal
+shift_sample = signal
+
 # Nivel de exposición sonora: nivel del evento normalizado a 1 s (LAE)
 lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
 
@@ -109,9 +120,13 @@ lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
 `lc_peak` está verificado contra las respuestas de referencia de ciclo
 único/semiciclo de la Tabla 5 de IEC 61672-1:2013, `sel` contra la columna LAE
 de la Tabla 4, y las funciones de dosis contra las anclas de IEC 61252
-(3,2 Pa²h ↔ exactamente 90 dB). Con `duration_hours`, la entrada se trata como
-muestra representativa de ese periodo de exposición; sin él, la entrada es el
-evento completo.
+(3,2 Pa²h ↔ exactamente 90 dB). `lc_peak` sobremuestrea (polifásico) la señal
+ponderada C por `oversample` (por defecto `8`) antes de tomar el máximo,
+recuperando el verdadero pico inter-muestra: un máximo en rejilla subestima los
+tonos de HF sostenidos hasta ~1,15 dB (un tono de 8 kHz a 48 kHz tiene solo
+6 muestras/ciclo). Usa `oversample=1` para detectar el pico en la rejilla
+original. Con `duration_hours`, la entrada se trata como muestra representativa
+de ese periodo de exposición; sin él, la entrada es el evento completo.
 
 ### SEL: comparar eventos de distinta duración
 
@@ -190,8 +205,13 @@ un veredicto estructurado frente a los criterios de prominencia dependientes de
 la frecuencia:
 
 ```python
+import numpy as np
 from phonometry import tone_to_noise_ratio, prominence_ratio
 
+fs = 48000
+rng = np.random.default_rng(0)
+t = np.arange(fs) / fs
+x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # tono de 1 kHz en ruido
 tnr = tone_to_noise_ratio(x, fs)            # pico más alto, o tone_freq=...
 pr = prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
@@ -299,6 +319,7 @@ bandas normalizadas de tercio de octava.*
 | `window_time` | float | s | > 0; por defecto `0.125` | Longitud de la ventana (0,125 s replica Fast) |
 | `overlap` | float | — | 0 ≤ overlap < 1; por defecto `0.5` | Fracción de solape entre ventanas (0 = sin solape) |
 | `mode` | str | — | `'rms'` (por defecto) o `'peak'` | Detector por ventana |
+| `detrend` | bool | — | por defecto `True` | Elimina el offset DC de cada banda antes del nivel (mejora la precisión en graves) |
 | `zero_phase` | bool | — | por defecto `False` | Filtrado hacia delante y atrás (solo offline) |
 | `calibration_factor` / `dbfs` | — | — | solo constructor | Se fijan en `OctaveFilterBank(...)`, no por llamada |
 

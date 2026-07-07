@@ -98,6 +98,41 @@ def test_asymmetric_fluctuation_uses_max_min_vs_mean() -> None:
         calculate_sensitivity(x * dip, fs=FS)
 
 
+def test_narrowband_rejects_broadband_noise() -> None:
+    """A noisy calibrator take biases the broadband-RMS factor low by
+    ``-10*lg(1 + 1/SNR)``; the narrowband tone estimator recovers it."""
+    tone = _cal_tone(seconds=3.0)
+    tone_power = float(np.mean(tone ** 2))
+    rng = np.random.default_rng(0)
+    noise = rng.standard_normal(tone.size)
+    # 10 dB SNR broadband noise: broadband RMS inflates ~0.42 dB.
+    noise *= np.sqrt(tone_power / 10 ** (10 / 10)) / np.sqrt(np.mean(noise ** 2))
+    noisy = tone + noise
+
+    clean = calculate_sensitivity(tone, fs=FS, validate=False)
+    broadband = calculate_sensitivity(noisy, fs=FS, validate=False)
+    narrow = calculate_sensitivity(noisy, fs=FS, validate=False, narrowband=True)
+
+    broadband_bias_db = 20 * np.log10(broadband / clean)
+    narrow_bias_db = 20 * np.log10(narrow / clean)
+    assert broadband_bias_db < -0.3  # broadband under-reads the sensitivity
+    assert abs(narrow_bias_db) < 0.05  # narrowband stays within 0.05 dB
+
+
+def test_narrowband_locks_to_off_nominal_tone() -> None:
+    """A calibrator a few Hz off 1 kHz is still estimated exactly."""
+    t = np.arange(int(FS * 3.0)) / FS
+    tone = 0.5 * np.sin(2 * np.pi * 1003.0 * t)
+    clean = calculate_sensitivity(tone, fs=FS, validate=False)
+    narrow = calculate_sensitivity(tone, fs=FS, validate=False, narrowband=True)
+    assert 20 * np.log10(narrow / clean) == pytest.approx(0.0, abs=0.01)
+
+
+def test_narrowband_requires_fs() -> None:
+    with pytest.raises(ValueError, match="requires 'fs'"):
+        calculate_sensitivity(_cal_tone(), narrowband=True)
+
+
 def test_table2_row_boundaries() -> None:
     """IEC 60942:2017 Table 2: 160 Hz belongs to the 0.07 dB row and 63 Hz
     to the 0.20 dB row; the open interval between them gets 0.10 dB."""

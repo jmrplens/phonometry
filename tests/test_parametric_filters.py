@@ -470,9 +470,26 @@ def test_a_weighting_class1_high_frequencies(fs: int) -> None:
       (12.5 kHz: +2.0/-2.5 dB; 16 kHz: +2.5/-16 dB, tightened here).
     """
     wf = WeightingFilter(fs, "A")  # high_accuracy defaults to True
-    for f0, tol_lo, tol_hi in [(8000, -1.5, 1.5), (12500, -2.5, 2.0), (16000, -3.0, 2.5)]:
+    # Tightened to lock the 144 kHz oversample-target fit (audit N1 A6): with
+    # the target raised from 96 to 144 kHz both 44.1k and 48k oversample enough
+    # to keep the HF error within +/-0.7 dB of the analytic curve up to 16 kHz.
+    for f0, tol_lo, tol_hi in [(8000, -0.7, 0.7), (12500, -0.7, 0.7), (16000, -0.7, 0.7)]:
         err = _measured_gain_db(wf, fs, f0) - _analytic_a_weight_db(f0)
         assert tol_lo < err < tol_hi, f"{f0} Hz: error {err:.2f} dB at fs={fs}"
+
+
+def test_a_weighting_48k_hf_accuracy_locked() -> None:
+    """Lock the 144 kHz oversample-target HF fit at 48 kHz (audit N1 A6).
+
+    The former 96 kHz target oversampled 48 kHz only x2, leaving -1.11 dB @16k
+    and -2.10 dB @20k vs the analytic A curve. Raising the internal target to
+    144 kHz oversamples x3, halving those residuals to about -0.44 / -0.85 dB.
+    """
+    fs = 48000
+    wf = WeightingFilter(fs, "A")
+    for f0, bound in [(16000, 0.6), (20000, 1.0)]:
+        err = _measured_gain_db(wf, fs, f0) - _analytic_a_weight_db(f0)
+        assert abs(err) < bound, f"{f0} Hz: error {err:+.2f} dB at fs={fs}"
 
 
 def test_high_accuracy_incompatible_with_stateful() -> None:
@@ -511,7 +528,8 @@ def test_c_weighting_class1_high_frequencies(fs: int) -> None:
     C-specific change cannot silently degrade HF accuracy.
     """
     wf = WeightingFilter(fs, "C")
-    for f0, tol_lo, tol_hi in [(8000, -1.5, 1.5), (12500, -2.5, 2.0), (16000, -3.0, 2.5)]:
+    # Tightened alongside the A curve for the 144 kHz oversample target (A6).
+    for f0, tol_lo, tol_hi in [(8000, -0.7, 0.7), (12500, -0.7, 0.7), (16000, -0.7, 0.7)]:
         err = _measured_gain_db(wf, fs, f0) - _analytic_c_weight_db(f0)
         assert tol_lo < err < tol_hi, f"{f0} Hz: error {err:.2f} dB at fs={fs}"
 

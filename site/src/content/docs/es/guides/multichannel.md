@@ -23,6 +23,12 @@ La convención es consistente en toda la librería: el tiempo siempre es el
 import numpy as np
 from phonometry import octavefilter
 
+# Dos canales calibrados en Pa para que la guía funcione por sí sola
+fs = 48000
+t = np.arange(fs) / fs
+left = 0.2 * np.sin(2 * np.pi * 1000 * t)
+right = 0.1 * np.sin(2 * np.pi * 500 * t)
+
 stereo = np.stack([left, right])          # (2, n_samples)
 spl, freq = octavefilter(stereo, fs, fraction=3)
 # spl tiene forma (2, n_bands): una fila por canal
@@ -58,6 +64,7 @@ bank = OctaveFilterBank(fs=48000, fraction=3, filter_type='butter')
 # bank.freq (centros), bank.freq_d (bordes inferiores), bank.freq_u (superiores), bank.sos
 
 # Procesar múltiples señales de forma eficiente
+stream = [stereo]                 # tu secuencia de tramas multicanal
 for frame in stream:
     # detrend=True (por defecto) elimina el offset DC y mejora la precisión en graves
     spl, freq = bank.filter(frame, detrend=True)

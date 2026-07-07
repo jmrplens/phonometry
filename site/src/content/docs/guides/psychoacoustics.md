@@ -26,7 +26,14 @@ bands (red) sums to far more sones than the same level concentrated in one
 band (blue). The area under N'(z) is the total loudness.*
 
 ```python
+import numpy as np
 from phonometry import loudness_zwicker, loudness_zwicker_from_spectrum
+
+# A raw recording plus its calibration so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # any recording (digital units)
+sens = 1.0                                                # calibration_factor to pascals
+levels_28 = np.full(28, 60.0)                             # 28 one-third-octave band levels (dB)
 
 # From a raw recording: calibration_factor scales digital units to Pa
 res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
@@ -75,6 +82,8 @@ normalized so the reference sound — critical-band-wide noise at 1 kHz,
 60 dB — is exactly **1.00 acum** (DIN 45692 clause 6; the derived
 $k = 0.108$ sits inside the normative window 0.105–0.115).
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.png" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.png" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" style="width:80%">
+
 ```python
 from phonometry import sharpness_din
 
@@ -104,7 +113,12 @@ $$
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_dark.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" style="width:92%">
 
 ```python
+import numpy as np
 from phonometry import sti_from_impulse_response, stipa, stipa_signal
+
+fs = 48000
+# A measured room impulse response (synthesized decay so the example runs)
+ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
 
 # Indirect method: from a measured room impulse response
 res = sti_from_impulse_response(ir, fs, snr=25.0)
@@ -112,8 +126,14 @@ print(f"STI = {res.sti:.2f}  ({res.rating})")   # e.g. 0.62 (D)
 
 # Direct STIPA measurement: play stipa_signal() in the room, record it
 test = stipa_signal(fs, seconds=18.0, level_db=80.0)
+recording = test                       # in practice, the microphone signal after playback
 res = stipa(recording, fs)
 ```
+
+`stipa` emits a `UserWarning` when the recording is shorter than the
+recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s): below that the
+slow modulation components are averaged over too few periods and the STI is
+biased low (an ideal loopback gives STI ≈ 0.944 at 5 s vs ≈ 0.998 at 18 s).
 
 The implementation follows **Edition 5 (2020)**: Edition 4's normative PDF
 is the base and every Ed. 5 change is source-attributed in the code — the

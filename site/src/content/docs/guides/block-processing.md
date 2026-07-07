@@ -31,6 +31,10 @@ Notes when using a stateful `OctaveFilterBank`:
 
 ## Example
 
+This example streams a WAV file with [`soundfile`](https://pysoundfile.readthedocs.io/),
+an optional dependency (`pip install soundfile`). Any block source works just as
+well — `scipy.io.wavfile` plus manual slicing, or a live capture callback.
+
 ```python
 import soundfile as sf
 from phonometry import OctaveFilterBank, WeightingFilter

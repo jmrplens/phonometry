@@ -35,12 +35,23 @@ decay curves -- that step belongs to downstream room-acoustics modules.
 
 from __future__ import annotations
 
+import warnings
 from typing import Dict, List, Tuple
 
 import numpy as np
 from scipy import signal
 
 from .utils import _typesignal
+
+#: Warn from mls_impulse_response when the recovered IR still carries more than
+#: this level (dB re its peak) in the last 10 % of the MLS period: an IR longer
+#: than one period aliases circularly and this residual tail is the symptom.
+_MLS_ALIAS_TAIL_DB = -35.0
+
+#: A genuine (optionally faded) exponential sweep never ends in a run of
+#: exact zeros; more trailing zeros than this small tolerance indicate the
+#: reference was zero-padded (see the Farina guard in ``impulse_response``).
+_FARINA_MAX_TRAILING_ZEROS = 8
 
 # Primitive-polynomial feedback taps (1-indexed register positions, highest
 # tap == order) yielding maximum-length sequences. Values from the standard
@@ -100,7 +111,13 @@ def sweep_signal(
     :param amplitude: Peak amplitude of the sweep. Default 1.0.
     :param fade: Half-Hann fade-in/out length as a fraction of the sweep
         duration, applied to suppress start/stop transients (B.3.3). Default
-        0.01. Set to 0.0 to disable.
+        0.01. Set to 0.0 to disable. Because the sweep frequency is
+        logarithmic in time, the fades consume roughly ``fade*log2(f2/f1)``
+        octaves at each band edge (the fade-out lands on the highest
+        frequencies): with the default 0.01 the top ~29 dB of the highest
+        band is unusable, so choose ``f1``/``f2`` with margin beyond the
+        analysis range (ISO 18233 B.3.1) rather than relying on a smaller
+        fade.
     :return: The sweep samples, length ``round(seconds*fs)``.
     """
     if f1 <= 0.0:
@@ -204,6 +221,47 @@ def inverse_filter(
     return inv
 
 
+def _farina_deconvolve(
+    rec: np.ndarray,
+    ref: np.ndarray,
+    fs: int,
+    f_range: Tuple[float, float] | None,
+) -> np.ndarray:
+    """Farina inverse-filter deconvolution (ISO 18233:2006, Figure B.2).
+
+    Rebuilds the analytic inverse filter from ``ref`` and convolves it with the
+    recording, returning the full sequence with the causal IR rolled to index
+    0 (matching the spectral-method layout). Raises ``ValueError`` if
+    ``f_range`` is missing or if ``ref`` is zero-padded (the correct input for
+    the spectral method, which would silently produce a wrong inverse filter).
+    """
+    if f_range is None:
+        raise ValueError("method='farina' requires f_range=(f1, f2)")
+    # A reference that was zero-padded to the recording length - the correct
+    # input for method="spectral" - makes the rebuilt sweep longer than the
+    # real excitation, silently producing a wrong inverse filter (the IR peak
+    # is mislocated and orders of magnitude too small). Detect trailing
+    # zero-padding and reject it: a genuine (optionally faded) sweep has no
+    # trailing run of exact zeros.
+    nonzero = np.flatnonzero(ref)
+    last_nonzero = int(nonzero[-1]) if nonzero.size else -1
+    n_trailing = ref.size - 1 - last_nonzero
+    if n_trailing > _FARINA_MAX_TRAILING_ZEROS:
+        raise ValueError(
+            f"method='farina' requires the unpadded excitation sweep as "
+            f"'reference', but it ends in {n_trailing} zero samples "
+            "(zero-padding to the recording length is only correct for "
+            "method='spectral'). Pass the exact-length sweep from "
+            "sweep_signal(), or use method='spectral'."
+        )
+    inv = inverse_filter(fs, f_range[0], f_range[1], ref.size / fs)
+    conv = signal.fftconvolve(rec, inv)
+    # The linear IR peaks where the inverse aligns with the sweep, at index
+    # len(reference)-1. Roll it to index 0 so the layout matches the spectral
+    # method (causal at 0, negative times in the tail).
+    return np.roll(conv, -(ref.size - 1))
+
+
 def impulse_response(
     recorded: List[float] | np.ndarray,
     reference: List[float] | np.ndarray,
@@ -232,11 +290,15 @@ def impulse_response(
     :param method: ``"spectral"`` for spectral division
         ``H = Y*conj(X)/(|X|^2+reg)`` (Figure B.3, default) or ``"farina"``
         for convolution with the analytic inverse filter (Figure B.2). The
-        Farina method requires ``f_range`` and assumes the reference sweep was
-        generated with the default ``amplitude``/``fade`` of :func:`sweep_signal`
-        (it rebuilds the inverse filter with those defaults); a non-unit
-        amplitude or custom fade yields a scaled IR, so use the spectral
-        method in that case.
+        Farina method requires ``f_range`` and the **exact-length, unpadded**
+        excitation sweep as ``reference`` (it rebuilds the inverse filter from
+        ``reference.size/fs`` as the sweep duration); a reference zero-padded
+        to the recording length - the correct input for the spectral method -
+        is rejected with a ``ValueError`` because it would silently produce a
+        wrong inverse filter. It also assumes the reference sweep was
+        generated with the default ``amplitude``/``fade`` of
+        :func:`sweep_signal`; a non-unit amplitude or custom fade yields a
+        scaled IR, so use the spectral method in that case.
     :param f_range: ``(f1, f2)`` of the sweep, required for ``method="farina"``
         to rebuild the inverse filter; ignored for the spectral method.
     :param regularization: Tikhonov term added to the denominator, expressed
@@ -267,14 +329,7 @@ def impulse_response(
         h_spec = spec_y * np.conj(spec_x) / (power + reg)
         full = np.fft.irfft(h_spec, n=n)
     elif method == "farina":
-        if f_range is None:
-            raise ValueError("method='farina' requires f_range=(f1, f2)")
-        inv = inverse_filter(fs, f_range[0], f_range[1], ref.size / fs)
-        conv = signal.fftconvolve(rec, inv)
-        # The linear IR peaks where the inverse aligns with the sweep, at
-        # index len(reference)-1. Roll it to index 0 so the layout matches
-        # the spectral method (causal at 0, negative times in the tail).
-        full = np.roll(conv, -(ref.size - 1))
+        full = _farina_deconvolve(rec, ref, fs, f_range)
     else:
         raise ValueError(f"unknown method {method!r}")
 
@@ -340,6 +395,15 @@ def mls_impulse_response(
     :param length: Number of IR samples to return. Defaults to the sequence
         length ``2**N - 1``.
     :return: The recovered impulse response.
+
+    .. note::
+        A ``UserWarning`` is emitted when the recovered IR retains significant
+        energy at the end of the period (a circular-aliasing symptom). The
+        tail-RMS heuristic is advisory: a high ambient noise floor in the
+        recording raises the tail RMS on its own and can trigger a
+        false positive even when the IR fits within one period, so treat the
+        warning as a prompt to check the noise floor and MLS order rather than
+        a definitive aliasing diagnosis.
     """
     rec = _typesignal(recorded)
     seq = _typesignal(mls)
@@ -358,6 +422,26 @@ def mls_impulse_response(
     spec = np.conj(np.fft.rfft(seq)) * np.fft.rfft(averaged)
     corr = np.fft.irfft(spec, n=period)
     ir = corr / (period + 1.0)  # normalise by 2**N so the delta peaks at 1
+
+    # Circular-aliasing guard: if the system IR is longer than one MLS period
+    # it folds back into the record (A.1). The symptom is undecayed energy in
+    # the last part of the period; warn (do not raise) so short-order misuse is
+    # visible instead of silently biasing the result.
+    peak = float(np.max(np.abs(ir)))
+    if peak > 0.0:
+        tail = ir[int(0.9 * period):]
+        tail_rms = float(np.sqrt(np.mean(tail ** 2)))
+        if tail_rms > peak * 10.0 ** (_MLS_ALIAS_TAIL_DB / 20.0):
+            warnings.warn(
+                "Recovered MLS impulse response still has energy near the end "
+                f"of the {period}-sample period ({20 * np.log10(tail_rms / peak):.0f} "
+                f"dB re peak, above {_MLS_ALIAS_TAIL_DB:.0f} dB): the impulse "
+                "response is likely longer than one period and aliases "
+                "circularly. Use a higher MLS order.",
+                UserWarning,
+                stacklevel=2,
+            )
+
     out_len = length if length is not None else period
     if out_len <= period:
         return ir[:out_len]

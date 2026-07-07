@@ -15,6 +15,8 @@ Validation strategy (closed-form, not self-consistency):
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 import pytest
 from scipy import signal
@@ -114,6 +116,24 @@ def test_farina_method_recovers_iir_response_in_band() -> None:
     est_db, true_db = _band_response_db(b, a, ir, FS, 300.0, 1500.0)
     # Farina inverse-filter whitening is approximate; use a looser band bound.
     assert np.max(np.abs(est_db - true_db)) < 0.5
+
+
+def test_farina_rejects_zero_padded_reference() -> None:
+    """A reference zero-padded to the recording length (the correct input
+    for method='spectral') silently rebuilds a wrong inverse filter for
+    Farina; it must raise instead. The unpadded sweep is unaffected."""
+    b, a = signal.butter(4, [200.0, 2000.0], btype="band", fs=FS)
+    f1, f2, secs = 20.0, 20000.0, 2.0
+    x = sweep_signal(FS, f1, f2, secs)
+    y = signal.lfilter(b, a, x)
+    # Pad the reference to the recording length, as one would for spectral.
+    n = y.size + x.size - 1
+    x_padded = np.concatenate([x, np.zeros(n - x.size)])
+    with pytest.raises(ValueError, match="zero-pad|unpadded|spectral"):
+        impulse_response(y, x_padded, FS, method="farina", f_range=(f1, f2))
+    # The unpadded sweep still works unchanged.
+    ir = impulse_response(y, x, FS, method="farina", f_range=(f1, f2), length=16384)
+    assert np.isfinite(ir).all()
 
 
 # --------------------------------------------------------------------------
@@ -237,6 +257,35 @@ def test_mls_recovers_iir_response_in_band() -> None:
     est_db = 20.0 * np.log10(np.abs(h_est[mask]))
     true_db = 20.0 * np.log10(np.abs(h_true[mask]))
     assert np.max(np.abs(est_db - true_db)) < 0.1
+
+
+def test_mls_short_period_aliasing_warns() -> None:
+    """An IR longer than one MLS period folds back circularly (A.1); the
+    recovered IR keeps undecayed energy at the period end, which is warned."""
+    order = 12  # L = 4095 samples (~85 ms at 48 kHz)
+    a = mls_signal(order)
+    length = a.size
+    t = np.arange(int(0.3 * FS)) / FS  # 0.3 s IR >> one period
+    h = np.exp(-6.9078 * t / 0.3) * np.random.default_rng(0).standard_normal(t.size)
+    h[0] += 2.0
+    hh = np.zeros(length)
+    for i in range(h.size):
+        hh[i % length] += h[i]  # circular wrap into one period
+    y = np.real(np.fft.ifft(np.fft.fft(a) * np.fft.fft(hh)))
+    with pytest.warns(UserWarning, match="aliases"):
+        mls_impulse_response(y, a)
+
+
+def test_mls_well_fitting_ir_does_not_warn() -> None:
+    """A system IR that decays within one period must not warn."""
+    order = 14  # L = 16383 samples (~340 ms)
+    a = mls_signal(order)
+    length = a.size
+    b, coef_a = signal.butter(4, [200.0, 2000.0], btype="band", fs=FS)
+    y = signal.lfilter(b, coef_a, np.tile(a, 3))[-length:]
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        mls_impulse_response(y, a)
 
 
 def test_mls_snr_improves_with_averaging() -> None:

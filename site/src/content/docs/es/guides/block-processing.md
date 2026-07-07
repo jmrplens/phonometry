@@ -31,6 +31,10 @@ Notas al usar un `OctaveFilterBank` con estado:
 
 ## Ejemplo
 
+Este ejemplo procesa un WAV por bloques con [`soundfile`](https://pysoundfile.readthedocs.io/),
+una dependencia opcional (`pip install soundfile`). Sirve cualquier fuente de bloques
+— `scipy.io.wavfile` con troceado manual, o una función de captura en vivo.
+
 ```python
 import soundfile as sf
 from phonometry import OctaveFilterBank, WeightingFilter

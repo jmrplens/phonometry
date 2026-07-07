@@ -9,6 +9,7 @@ Implements the tone-to-noise ratio (TNR, clause 11) and prominence ratio
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import List, Tuple
 
@@ -16,6 +17,24 @@ import numpy as np
 from scipy import signal
 
 from .utils import _typesignal
+
+
+def _warn_coarse_resolution(dfc: float, df: float, ft: float) -> None:
+    """Warn when the FFT resolution is too coarse to resolve the tone band.
+
+    The tone band is 15 % of the critical bandwidth ``dfc`` (half-width
+    ``0.075*dfc``). Below ~3 bins across the half-width the tone/noise split
+    is biased (ECMA-418-1 keeps the tone band within 15 % of the critical
+    bandwidth). At 250 Hz a 4 Hz bin already costs ~0.3 dB of TNR."""
+    bins = 0.075 * dfc / df
+    if bins < 3.0:
+        warnings.warn(
+            f"Frequency resolution {df:.3g} Hz is coarse for the tone at "
+            f"{ft:.0f} Hz: the tone band spans only {bins:.1f} bins (< 3), "
+            "which biases TNR/PR. Use a finer resolution_hz.",
+            UserWarning,
+            stacklevel=3,
+        )
 
 # Frequency range of interest for discrete tones (clauses 11.5 / 12.6).
 _F_MIN = 89.1
@@ -190,6 +209,7 @@ def tone_to_noise_ratio(
     peak = _find_peak(freqs, power, tone_freq)
     ft = float(freqs[peak])
     f1, f2, dfc = _critical_band(ft)
+    _warn_coarse_resolution(dfc, df, ft)
 
     half_width_bins = max(1, int(round(0.075 * dfc / df)))
     lo, hi = _tone_band(power, peak, half_width_bins)
@@ -299,7 +319,8 @@ def prominence_ratio(
     ft = float(freqs[peak])
 
     # Middle critical band (12.2).
-    f1_m, f2_m, _ = _critical_band(ft)
+    f1_m, f2_m, dfc_m = _critical_band(ft)
+    _warn_coarse_resolution(dfc_m, df, ft)
     # Lower band (12.3): truncated at 20 Hz below 171.4 Hz.
     f1_l = max(_fitted_edge(ft, _LOWER_EDGE_COEFFS), 20.0) if ft <= 171.4 else _fitted_edge(ft, _LOWER_EDGE_COEFFS)
     # Upper band (12.4).

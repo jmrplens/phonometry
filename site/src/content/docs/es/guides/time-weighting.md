@@ -1,6 +1,6 @@
 ---
 title: "Ponderación temporal"
-description: "Balística Fast, Slow e Impulse según IEC 61672-1."
+description: "Ponderación temporal Fast, Slow e Impulse según IEC 61672-1."
 ---
 
 La medición precisa de SPL requiere capturar la energía en ventanas temporales
@@ -17,6 +17,10 @@ específicas. phonometry implementa las constantes de tiempo exactas de la norma
 ```python
 import numpy as np
 from phonometry import time_weighting
+
+# Una señal calibrada en Pa para que la guía funcione por sí sola
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Calcular la envolvente de energía (valor cuadrático medio)
 energy_envelope = time_weighting(signal, fs, mode='fast')
@@ -63,7 +67,7 @@ grabación.
 La salida tiene las unidades de $x^2$: toma `10*log10(y / p0**2)` para SPL o
 usa las funciones de nivel, que lo hacen por ti.
 
-## Balística verificada (IEC 61672-1, Tabla 4)
+## Respuesta temporal verificada (IEC 61672-1, Tabla 4)
 
 La respuesta de la envolvente Fast a ráfagas de tono de 4 kHz cae exactamente
 sobre los valores de referencia de la norma — verificado en CI para duraciones

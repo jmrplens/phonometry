@@ -47,9 +47,15 @@ frecuencia decimada:
 | `order` | int | — | por defecto `6` | Orden SOS por banda |
 | `limits` | lista `[lo, hi]` | Hz | por defecto `[12, 20000]` | Rango de análisis |
 | `filter_type` | str | — | `'butter'` (por defecto), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | Ver la comparación más abajo |
-| `ripple` / `attenuation` | float | dB | requerido por los tipos cheby/ellip | Rizado de banda de paso / atenuación de banda eliminada |
+| `ripple` / `attenuation` | float | dB | `ripple` defecto `0.1`; `attenuation` defecto `72.0` | Rizado de banda de paso / atenuación de banda eliminada (cheby/ellip); `cheby2` necesita `attenuation ≥ 70` para clase 1, ya que scipy fija su suelo equirizado en exactamente este valor |
 | `show` | bool | — | por defecto `False` | Dibuja la respuesta del banco (requiere matplotlib) |
 | `sigbands` | bool | — | por defecto `False` | Devuelve también las señales temporales por banda |
+| `mode` | str | — | `'rms'` (por defecto), `'peak'`, `'sum'` | Estadístico por banda devuelto |
+| `nominal` | bool | — | por defecto `False` | Devuelve etiquetas nominales (p. ej. `1000`) en vez de las frecuencias centrales exactas |
+| `detrend` | bool | — | por defecto `True` | Elimina el offset DC de cada banda antes del nivel (mejora la precisión en graves) |
+| `calibration_factor` | float | — | por defecto `1.0` | Escala la entrada a pascales (consulta la guía de Calibración) |
+| `dbfs` | bool | — | por defecto `False` | Referencia los niveles a fondo de escala digital en vez de 20 µPa |
+| `plot_file` | str o `None` | — | por defecto `None` | Guarda la gráfica de respuesta del banco en esta ruta |
 | `zero_phase` | bool | — | por defecto `False` | Filtrado adelante-atrás (offline) |
 | `stateful` / `steady_ic` (clase) | bool | — | por defecto `False` | Estado en streaming; consulta [Procesado por bloques](/phonometry/es/guides/block-processing/) |
 
@@ -69,8 +75,8 @@ en el punto de cruce a −3 dB.
 | :--- | :--- | :--- | :--- |
 | `butter` | **Butterworth** | `octavefilter(x, fs, filter_type='butter')` | Medición acústica general. |
 | `cheby1` | **Chebyshev I** | `octavefilter(x, fs, filter_type='cheby1', ripple=0.1)` | Caída más abrupta a costa de rizado. |
-| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2', attenuation=60)` | Banda de paso plana con ceros en la banda atenuada. |
-| `ellip` | **Elíptico** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)` | Máxima selectividad. |
+| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2')` | Banda de paso plana con ceros en la banda atenuada. |
+| `ellip` | **Elíptico** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1)` | Máxima selectividad. |
 | `bessel` | **Bessel** | `octavefilter(x, fs, filter_type='bessel')` | Preservar la forma de los transitorios. |
 
 ## Galería de respuestas del banco
@@ -94,7 +100,13 @@ la elección estándar para mediciones acústicas donde no se admite rizado dent
 de las bandas de frecuencia.
 
 ```python
+import numpy as np
 from phonometry import octavefilter
+
+# Una señal calibrada en Pa para que la guía funcione por sí sola
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Medición estándar por defecto
 spl, freq = octavefilter(x, fs, filter_type='butter')
 ```
@@ -119,8 +131,8 @@ automáticamente para que los puntos de −3 dB caigan en los bordes de banda
 (`attenuation` debe ser > 3.01 dB).
 
 ```python
-# Banda de paso plana con 60 dB de atenuación
-spl, freq = octavefilter(x, fs, filter_type='cheby2', attenuation=60)
+# Banda de paso plana, 72 dB de atenuación por defecto (clase 1)
+spl, freq = octavefilter(x, fs, filter_type='cheby2')
 ```
 
 ### 4. Elíptico (`ellip`)
@@ -131,7 +143,7 @@ la atenuada.
 
 ```python
 # Máxima selectividad para aislamiento extremo entre bandas
-spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)
+spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
 ### 5. Bessel (`bessel`)
@@ -154,6 +166,8 @@ perfectamente plana y sin diferencia de fase entre bandas en el cruce.
 
 ```python
 from phonometry import linkwitz_riley
+
+signal = x                            # reutiliza la señal calibrada del inicio de la página
 # Dividir la señal en bandas grave y aguda a 1000 Hz
 low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 # Reconstrucción: low + high == signal (respuesta plana)
@@ -183,12 +197,14 @@ print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_clas
 prohibidas: debe atenuar al menos la máscara roja fuera de la banda y no más
 que la morada dentro de ella.*
 
-Con parámetros por defecto (orden 6), **Butterworth cumple clase 1**.
-Chebyshev II se queda en clase 2 — limitado exactamente por su `attenuation=60`
-frente a los 70 dB exigidos en el stopband lejano (sube `attenuation` para
-alcanzar clase 1). Chebyshev I, Elíptico y Bessel no cumplen los límites de
-clase con orden 6: el rizado de banda de paso (cheby1/ellip) y la caída lenta
-(bessel) violan la máscara.
+Con parámetros por defecto (orden 6), **Butterworth cumple clase 1**, y también
+lo hace **Chebyshev II**: su valor por defecto de `attenuation` es ahora `72` dB,
+superando el límite de clase 1 de 70 dB en el stopband lejano (scipy fija el
+suelo equirizado de cheby2 en exactamente `attenuation`, así que cualquier valor
+≥ 70 dB cumple; el valor por defecto de 72 dB mantiene el mismo margen de banda
+de paso de +0,400 dB que Butterworth). Chebyshev I, Elíptico y Bessel no cumplen
+los límites de clase con orden 6: el rizado de banda de paso (cheby1/ellip) y la
+caída lenta (bessel) violan la máscara.
 
 ## Descomposición de la señal y estabilidad
 
@@ -243,7 +259,12 @@ los bordes de banda.
 Para análisis offline puedes eliminar por completo el retardo de grupo:
 `zero_phase=True` filtra cada banda hacia delante y hacia atrás
 (`scipy.signal.sosfiltfilt`), manteniendo las señales por banda alineadas con la
-entrada. La atenuación efectiva se duplica y la opción es incompatible con el
+entrada. La atenuación efectiva se duplica y la banda de paso efectiva se
+estrecha, reduciendo el nivel de banda ancha medido en ~0,2 a 0,3 dB por banda
+(un tono puro dentro de banda no se ve afectado); prefiere el filtrado hacia
+delante cuando el SPL absoluto de banda debe coincidir con el convenio de un
+solo paso, y reserva la fase cero para cuando importa la envolvente temporal
+(p. ej. decaimiento de reverberación). La opción es incompatible con el
 procesado por bloques (stateful).
 
 ```python

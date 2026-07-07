@@ -52,7 +52,9 @@ def test_g_matches_iso7196_table2(freq: float, expected_db: float) -> None:
     octave frequencies; evaluated at the exact base-10 frequencies
     10^(n/10), the same convention as IEC 61672-1 Annex D)."""
     exact = 10 ** (round(10 * np.log10(freq)) / 10)
-    assert _response_db([exact])[0] == pytest.approx(expected_db, abs=0.3)
+    # Worst measured deviation vs Table 2 is 0.047 dB; 0.1 keeps ~2x headroom
+    # (was 0.3, ~6x looser) while staying well inside the +/-1 dB tolerance.
+    assert _response_db([exact])[0] == pytest.approx(expected_db, abs=0.1)
 
 
 def test_g_cutoff_slopes() -> None:

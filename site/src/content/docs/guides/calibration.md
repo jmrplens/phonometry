@@ -43,13 +43,16 @@ calculate the sensitivity of your measurement chain using a reference tone
 (e.g., 94 dB @ 1 kHz).
 
 ```python
+import numpy as np
 from phonometry import octavefilter, calculate_sensitivity
 
-# 1. Record your 94dB calibrator signal
-# ref_signal = ... (your recording)
+# 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
+fs = 48000
+ref_signal = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # your measurement
 
 # 2. Calculate sensitivity factor
-sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0)
+sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0, fs=fs)
 
 # 3. Apply calibration to your measurements
 spl, freq = octavefilter(signal, fs, calibration_factor=sensitivity)
@@ -107,6 +110,7 @@ wind, handling noise:
 | `validate` | bool | — | default `True` | Emit `CalibrationWarning` on unstable/short recordings |
 | `max_fluctuation_db` | float, optional | dB | default `None` → Table 2 class 1 | Explicit override of the stability limit |
 | `frequency` | float | Hz | default `1000.0` | Calibrator's nominal frequency; selects the IEC 60942 Table 2 row |
+| `narrowband` | bool | — | default `False` | Estimate the tone with a coherent Goertzel detector near `frequency` (needs `fs`) instead of full-band RMS; rejects broadband hum/noise that otherwise inflates the RMS and shrinks every later level (~−0.44 dB at 20 dB SNR). Enable for noisy coupler recordings |
 
 Returns the sensitivity factor (float) to pass as `calibration_factor=` to
 `octavefilter`, `leq`, `laeq`, `ln_levels`, `lc_peak`, `sel` and the dose

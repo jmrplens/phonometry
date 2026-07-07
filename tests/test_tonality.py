@@ -56,7 +56,9 @@ def test_tnr_of_synthetic_tone_matches_analytic() -> None:
     expected = 10 * np.log10(tone_rms**2 / (n0 * dfc))
     result = tone_to_noise_ratio(x, FS)
     assert result.frequency == pytest.approx(1000.0, abs=1.0)
-    assert result.ratio_db == pytest.approx(expected, abs=0.7)
+    # Demonstrated error on this signal is ~0.18 dB; 0.4 keeps ~2x headroom
+    # (was 0.7, ~4x looser than the achieved accuracy).
+    assert result.ratio_db == pytest.approx(expected, abs=0.4)
 
 
 def test_tnr_prominence_criteria() -> None:
@@ -89,7 +91,8 @@ def test_pr_of_synthetic_tone_matches_analytic() -> None:
     )
     result = prominence_ratio(x, FS)
     assert result.frequency == pytest.approx(1000.0, abs=1.0)
-    assert result.ratio_db == pytest.approx(expected, abs=0.7)
+    # Demonstrated error ~0.03 dB; 0.1 keeps ample headroom (was 0.7).
+    assert result.ratio_db == pytest.approx(expected, abs=0.1)
 
 
 def test_pr_criteria_and_noise_only() -> None:
@@ -129,7 +132,8 @@ def test_tnr_proximate_tones_combine() -> None:
     _, _, dfc = _critical_band(1000.0)
     expected = 10 * np.log10((0.1**2 + 0.1**2) / (n0 * dfc))
     result = tone_to_noise_ratio(x, FS, tone_freq=1000.0)
-    assert result.ratio_db == pytest.approx(expected, abs=0.8)
+    # Demonstrated error ~0.01 dB; 0.1 keeps ample headroom (was 0.8).
+    assert result.ratio_db == pytest.approx(expected, abs=0.1)
 
 
 def test_invalid_inputs() -> None:
@@ -151,3 +155,13 @@ def test_invalid_resolution_and_tone_freq() -> None:
 def test_too_coarse_resolution_raises() -> None:
     with pytest.raises(ValueError, match="too coarse"):
         tone_to_noise_ratio(np.ones(FS), FS, resolution_hz=FS / 4.0)
+
+
+def test_coarse_resolution_warns_at_low_frequency() -> None:
+    """At 250 Hz (dfc ~ 115 Hz) a 4 Hz bin gives < 3 bins across the tone
+    half-width, biasing the ratio; the function warns (it does not raise)."""
+    x = _tone_in_noise(250.0, 0.2, 0.02)
+    with pytest.warns(UserWarning, match="bins"):
+        tone_to_noise_ratio(x, FS, tone_freq=250.0, resolution_hz=4.0)
+    with pytest.warns(UserWarning, match="bins"):
+        prominence_ratio(x, FS, tone_freq=250.0, resolution_hz=4.0)

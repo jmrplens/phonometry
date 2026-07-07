@@ -169,3 +169,43 @@ def test_cheby2_stopband_edges_near_nyquist_stay_valid() -> None:
     f1, f2 = _cheby2_stopband_edges(fd, fu, order=6, attenuation=60.0, fs=fs)
     assert 0 < f1 < fd
     assert fu < f2 < fs / 2
+
+
+@pytest.mark.parametrize("fraction", [1, 3])
+def test_cheby2_default_bank_meets_class1(fraction: float) -> None:
+    """The default cheby2 bank must pass IEC 61260-1:2014 class 1 (audit N1 A5).
+
+    scipy's cheby2 pins the deep-stopband floor at exactly ``attenuation`` dB.
+    The former default of 60 dB sat 10 dB inside the class-1 requirement
+    (>= 70 dB for Omega >= G^4). The default was raised to 72 dB, which the
+    audit demonstrated passes class 1 with the same +0.400 dB passband margin.
+    """
+    from phonometry import verify_filter_class
+
+    bank = OctaveFilterBank(
+        fs=48000, fraction=fraction, order=6, limits=[100, 5000], filter_type="cheby2"
+    )
+    result = verify_filter_class(bank)
+    assert result["overall_class"] == 1, result
+
+
+def test_functional_octavefilter_cheby2_default_meets_class1() -> None:
+    """The functional octavefilter() wrapper defaults attenuation to 72 dB so a
+    cheby2 call meets IEC 61260-1 class 1, matching OctaveFilterBank (F1 follow-up:
+    the wrapper previously still defaulted to 60 dB)."""
+    import inspect
+
+    from phonometry import verify_filter_class
+
+    default_att = inspect.signature(octavefilter).parameters["attenuation"].default
+    assert default_att == 72.0
+    # A bank built with the wrapper's own default passes class 1; and the
+    # functional call itself runs without raising.
+    bank = OctaveFilterBank(
+        fs=48000, fraction=1, order=6, limits=[100, 5000],
+        filter_type="cheby2", attenuation=default_att,
+    )
+    assert verify_filter_class(bank)["overall_class"] == 1
+    x = np.random.default_rng(0).standard_normal(48000)
+    spl, _ = octavefilter(x, 48000, fraction=1, filter_type="cheby2", limits=[100, 5000])
+    assert np.all(np.isfinite(spl))

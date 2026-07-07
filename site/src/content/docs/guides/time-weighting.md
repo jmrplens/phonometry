@@ -17,6 +17,10 @@ phonometry implements exact time constants per **IEC 61672-1:2013**.
 import numpy as np
 from phonometry import time_weighting
 
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Calculate energy envelope (Mean Square)
 energy_envelope = time_weighting(signal, fs, mode='fast')
 # dB SPL relative to 20 μPa

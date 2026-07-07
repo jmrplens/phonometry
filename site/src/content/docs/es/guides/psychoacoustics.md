@@ -28,7 +28,14 @@ concentrado en una sola banda (azul). El área bajo N'(z) es la sonoridad
 total.*
 
 ```python
+import numpy as np
 from phonometry import loudness_zwicker, loudness_zwicker_from_spectrum
+
+# Una grabación cruda y su calibración para que la guía funcione por sí sola
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # cualquier grabación (unidades digitales)
+sens = 1.0                                                # calibration_factor a pascales
+levels_28 = np.full(28, 60.0)                             # 28 niveles de tercio de octava (dB)
 
 # Desde una grabación sin calibrar: calibration_factor convierte unidades digitales en Pa
 res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
@@ -81,6 +88,8 @@ $k$ normalizada para que el sonido de referencia — ruido de ancho de banda
 crítico a 1 kHz, 60 dB — sea exactamente **1,00 acum** (DIN 45692 apartado 6;
 la $k = 0.108$ derivada queda dentro de la ventana normativa 0,105–0,115).
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es.png" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es_dark.png" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%">
+
 ```python
 from phonometry import sharpness_din
 
@@ -112,7 +121,12 @@ $$
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_es.svg" alt="Cadena de medición del STI: señal de la fuente STIPA a través de la sala hasta el micrófono y el análisis de la MTF" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_es_dark.svg" alt="Cadena de medición del STI: señal de la fuente STIPA a través de la sala hasta el micrófono y el análisis de la MTF" style="width:92%">
 
 ```python
+import numpy as np
 from phonometry import sti_from_impulse_response, stipa, stipa_signal
+
+fs = 48000
+# Una respuesta al impulso medida en la sala (decaimiento sintetizado para que el ejemplo funcione)
+ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
 
 # Método indirecto: desde una respuesta al impulso medida en la sala
 res = sti_from_impulse_response(ir, fs, snr=25.0)
@@ -120,8 +134,15 @@ print(f"STI = {res.sti:.2f}  ({res.rating})")   # p. ej. 0.62 (D)
 
 # Medición STIPA directa: reproduce stipa_signal() en la sala y grábala
 test = stipa_signal(fs, seconds=18.0, level_db=80.0)
+recording = test                       # en la práctica, la señal del micrófono tras la reproducción
 res = stipa(recording, fs)
 ```
+
+`stipa` emite un `UserWarning` cuando la grabación es más corta que los 15 s
+recomendados (práctica STIPA de IEC 60268-16, de 15 s a 25 s): por debajo de eso
+las componentes de modulación lentas se promedian sobre muy pocos periodos y el
+STI queda sesgado a la baja (un lazo ideal da STI ≈ 0,944 a 5 s frente a
+≈ 0,998 a 18 s).
 
 La implementación sigue la **Edición 5 (2020)**: el PDF normativo de la
 Edición 4 es la base y cada cambio de la Ed. 5 está atribuido a su fuente en el

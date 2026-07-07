@@ -130,6 +130,52 @@ _ES: dict[str, str] = {
     "The room response h(t) is recovered by deconvolving the microphone signal.":
         "La respuesta de la sala h(t) se recupera deconvolucionando "
         "la señal del micrófono.",
+    # d10 - ISO 3744/3746 sound power measurement surfaces
+    "ISO 3744 / 3746 sound power measurement surfaces":
+        "Superficies de medición de potencia sonora (ISO 3744 / 3746)",
+    "Hemispherical surface": "Superficie hemisférica",
+    "Reflecting plane": "Plano reflectante",
+    "Measurement surface": "Superficie de medición",
+    "Parallelepiped surface": "Superficie de paralelepípedo",
+    "radius r ≥ 2 d₀": "radio r ≥ 2 d₀",
+    "measurement distance d": "distancia de medición d",
+    "10 key positions (Table B.1)": "10 posiciones clave (Tabla B.1)",
+    "one plane · S = 2πr²": "un plano · S = 2πr²",
+    "one plane · S = 4(ab+bc+ca)": "un plano · S = 4(ab+bc+ca)",
+    # d11 - ISO 16283-2 impact sound insulation setup
+    "ISO 16283-2 impact sound insulation setup":
+        "Montaje de aislamiento de ruido de impactos (ISO 16283-2)",
+    "Source room (upper)": "Recinto emisor (superior)",
+    "Receiving room (lower)": "Recinto receptor (inferior)",
+    "Separating floor": "Forjado separador",
+    "Tapping machine": "Máquina de impactos",
+    "Microphone positions": "Posiciones de micrófono",
+    "structure-borne impact": "impacto estructural",
+    "radiated impact sound": "ruido de impactos radiado",
+    "Impact sound insulation": "Aislamiento de impactos",
+    "Li = energy-averaged": "Li = promedio en energía",
+    "band level (Formula 10)": "del nivel de banda (Fórmula 10)",
+    "T₀ = 0.5 s , A₀ = 10 m²": "T₀ = 0,5 s , A₀ = 10 m²",
+    # d12 - sound power methods comparison
+    "Sound power methods compared": "Métodos de potencia sonora comparados",
+    "Free field over a reflecting plane":
+        "Campo libre sobre plano reflectante",
+    "Reverberation test room": "Sala reverberante de ensayo",
+    "In situ — any environment": "In situ — cualquier entorno",
+    "Grade 2 / 3 (engineering / survey)":
+        "Grado 2 / 3 (ingeniería / control)",
+    "Grade 1 (precision)": "Grado 1 (precisión)",
+    "Sound pressure · enveloping surface":
+        "Presión sonora · superficie envolvente",
+    "Sound pressure · diffuse field": "Presión sonora · campo difuso",
+    "Sound intensity · scanning": "Intensidad sonora · barrido de intensidad",
+    "K2A ≤ 4 dB (3744) / ≤ 7 dB (3746)":
+        "K2A ≤ 4 dB (3744) / ≤ 7 dB (3746)",
+    "V ≥ 200 m³ , qualified room": "V ≥ 200 m³ , sala cualificada",
+    "no negative-power bands": "sin bandas de potencia negativa",
+    "Method": "Método",
+    "Environment": "Entorno",
+    "Accuracy": "Exactitud",
 }
 
 
@@ -166,6 +212,13 @@ class SVG:
                stroke: str = "none", sw: float = 1.5) -> None:
         self.add(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{fill}" '
                  f'stroke="{stroke}" stroke-width="{sw}"/>')
+
+    def ellipse(self, cx: float, cy: float, rx: float, ry: float,
+                fill: str = "none", stroke: str = "none", sw: float = 1.5,
+                dash: str = "") -> None:
+        d = f' stroke-dasharray="{dash}"' if dash else ""
+        self.add(f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" '
+                 f'fill="{fill}" stroke="{stroke}" stroke-width="{sw}"{d}/>')
 
     def text(self, x: float, y: float, s: str, size: int = 20,
              fill: str = "", anchor: str = "middle", bold: bool = False,
@@ -675,6 +728,256 @@ def _d9(s: SVG, th: Theme) -> None:
            "microphone signal.", 18, th.fg)
 
 
+def _box_solid(s: SVG, th: Theme, bx: float, gy: float, hw: float, dp: float,
+               ht: float, stroke: str = "", fill: str = "") -> None:
+    """Small oblique-projected box standing on the plane at ``(bx, gy)``.
+
+    ``hw`` is the front half-width, ``ht`` the height, ``dp`` the depth
+    (oblique offset). Draws the top, front and right visible faces.
+    """
+    stroke = stroke or th.primary
+    fill = fill or th.panel
+    dxo, dyo = dp * 0.72, dp * 0.55
+    ftl, ftr = (bx - hw, gy - ht), (bx + hw, gy - ht)
+    fbr = (bx + hw, gy)
+    btl = (bx - hw + dxo, gy - ht - dyo)
+    btr = (bx + hw + dxo, gy - ht - dyo)
+    bbr = (bx + hw + dxo, gy - dyo)
+    # top face (lighter) then right face (shaded) then front face
+    s.path(f"M {ftl[0]} {ftl[1]} L {ftr[0]} {ftr[1]} L {btr[0]} {btr[1]} "
+           f"L {btl[0]} {btl[1]} Z", fill=fill, stroke=stroke, sw=1.8)
+    s.path(f"M {ftr[0]} {ftr[1]} L {fbr[0]} {fbr[1]} L {bbr[0]} {bbr[1]} "
+           f"L {btr[0]} {btr[1]} Z", fill=th.panel, stroke=stroke, sw=1.8)
+    s.rect(bx - hw, gy - ht, 2 * hw, ht, fill, stroke, sw=1.8)
+
+
+def _box_wire(s: SVG, th: Theme, bx: float, gy: float, hw: float, dp: float,
+              ht: float, color: str, dash: str = "7,5") -> None:
+    """Dashed oblique wireframe box (measurement surface) on the plane."""
+    dxo, dyo = dp * 0.72, dp * 0.55
+    fbl, fbr = (bx - hw, gy), (bx + hw, gy)
+    ftl, ftr = (bx - hw, gy - ht), (bx + hw, gy - ht)
+    bbl = (bx - hw + dxo, gy - dyo)
+    bbr = (bx + hw + dxo, gy - dyo)
+    btl = (bx - hw + dxo, gy - ht - dyo)
+    btr = (bx + hw + dxo, gy - ht - dyo)
+    for a, b in ((fbl, fbr), (fbr, ftr), (ftr, ftl), (ftl, fbl),
+                 (bbl, bbr), (bbr, btr), (btr, btl), (btl, bbl),
+                 (fbl, bbl), (fbr, bbr), (ftl, btl), (ftr, btr)):
+        s.line(a[0], a[1], b[0], b[1], color, 1.5, dash=dash)
+
+
+# ---------------------------------------------------------------------------
+# d10 - ISO 3744/3746 sound power measurement surfaces
+# ---------------------------------------------------------------------------
+
+def _d_surfaces(s: SVG, th: Theme) -> None:
+    # ===== Left panel: hemispherical surface over a reflecting plane =====
+    cx, gy, R = 235.0, 420.0, 150.0
+    s.text(cx, 74, "Hemispherical surface", 22, th.fg, bold=True)
+
+    # Reflecting plane (hatched line through the equator / footprint centre).
+    s.ground(gy, 55, 430)
+    s.text(70, gy + 34, "Reflecting plane", 17, th.muted, anchor="start")
+
+    # Hemisphere: dashed footprint ellipse + solid dome silhouette.
+    ky = 0.30
+    s.ellipse(cx, gy, R, R * ky, "none", th.muted, 1.3, dash="5,4")
+    s.path(f"M {cx - R} {gy} A {R} {R} 0 0 1 {cx + R} {gy}",
+           stroke=th.primary, sw=2.4)
+
+    # Source box at the centre O.
+    _box_solid(s, th, cx, gy, 30, 24, 34)
+    s.circle(cx, gy, 3.4, th.fg)
+
+    # Ten key microphone positions (ISO 3744 Table B.1), oblique-projected.
+    b1 = [(0.16, -0.96, 0.22), (0.78, -0.60, 0.20), (0.78, 0.55, 0.31),
+          (0.16, 0.90, 0.41), (-0.83, 0.32, 0.45), (-0.83, -0.40, 0.38),
+          (-0.26, -0.65, 0.71), (0.74, -0.07, 0.67), (-0.26, 0.50, 0.83),
+          (0.10, -0.10, 0.99)]
+    labelled = {1, 8, 10}
+    pts = []
+    for x, y, z in b1:
+        px = cx + R * x + 42 * y
+        py = gy - 34 * y - R * z
+        pts.append((px, py))
+    # radius r drawn to position 8 (a mid-height point on the surface).
+    r8 = pts[7]
+    s.line(cx, gy, r8[0], r8[1], th.accent, 1.6, dash="6,4")
+    s.text((cx + r8[0]) / 2 + 10, (gy + r8[1]) / 2 + 4, "radius r ≥ 2 d₀",
+           17, th.accent, anchor="start")
+    for i, (px, py) in enumerate(pts, start=1):
+        s.circle(px, py, 6.5, th.secondary)
+        s.circle(px, py, 2.2, th.bg)
+        if i in labelled:
+            s.text(px, py - 12, str(i), 16, th.fg, bold=True)
+    s.text(cx, gy + 62, "10 key positions (Table B.1)", 17, th.muted)
+    s.text(cx, gy + 86, "one plane · S = 2πr²", 18, th.primary, bold=True, mono=True)
+
+    # ===== Right panel: parallelepiped measurement surface =====
+    bx2, gy2 = 675.0, 420.0
+    s.text(bx2, 74, "Parallelepiped surface", 22, th.fg, bold=True)
+    s.ground(gy2, 500, 872)
+
+    # Source box (solid) enclosed by the measurement box (dashed wireframe).
+    _box_solid(s, th, bx2, gy2, 46, 40, 58)
+    _box_wire(s, th, bx2, gy2, 96, 90, 108, th.accent)
+    s.text(bx2, gy2 + 40, "Measurement surface", 17, th.muted)
+    s.text(bx2, gy2 + 64, "one plane · S = 4(ab+bc+ca)", 18, th.accent,
+           bold=True, mono=True)
+
+    # Measurement distance d: vertical clearance between the source top face
+    # and the enveloping measurement surface (labelled arrow + caption above).
+    s.text(bx2, 208, "measurement distance d", 18, th.secondary, bold=True)
+    s.dim(bx2, gy2 - 108, bx2, gy2 - 58, "d", offset=0, size=20,
+          label_side="right")
+
+
+# ---------------------------------------------------------------------------
+# d11 - ISO 16283-2 impact sound insulation setup
+# ---------------------------------------------------------------------------
+
+def _d_impact(s: SVG, th: Theme) -> None:
+    bx0, bx1 = 90.0, 620.0          # building left / right walls
+    top = 82.0
+    floor_top, floor_bot = 292.0, 316.0  # separating floor slab
+    bot = 512.0                     # receiving-room floor
+
+    # Building shell and the two stacked rooms.
+    s.rect(bx0, top, bx1 - bx0, floor_top - top, th.panel, th.fg, sw=2.5)
+    s.rect(bx0, floor_bot, bx1 - bx0, bot - floor_bot, th.panel, th.fg, sw=2.5)
+    s.rect(bx0, floor_top, bx1 - bx0, floor_bot - floor_top, th.secondary,
+           th.fg, sw=2)  # separating floor / ceiling
+    s.text(bx0 + 16, top + 30, "Source room (upper)", 21, th.fg, bold=True,
+           anchor="start")
+    s.text(bx0 + 16, bot - 16, "Receiving room (lower)", 21, th.fg, bold=True,
+           anchor="start")
+    s.text(bx1 - 12, floor_top - 8, "Separating floor", 17, th.secondary,
+           bold=True, anchor="end")
+
+    # Tapping machine standing on the separating floor (five hammers).
+    mx = bx0 + 165.0
+    body_y = floor_top - 40.0
+    s.rect(mx - 60, body_y, 120, 28, th.primary, th.fg, rx=5, sw=2)
+    for hx in range(-40, 41, 20):
+        s.line(mx + hx, body_y + 28, mx + hx, floor_top - 2, th.fg, 2.4)
+        s.circle(mx + hx, floor_top - 2, 4.2, th.fg)
+    s.line(mx - 54, body_y + 28, mx - 54, floor_top, th.fg, 2)   # legs
+    s.line(mx + 54, body_y + 28, mx + 54, floor_top, th.fg, 2)
+    s.text(mx, body_y - 12, "Tapping machine", 19, th.fg, bold=True)
+
+    # Structure-borne path through the slab, radiated into the room below.
+    s.arrow(mx, floor_bot + 2, mx, floor_bot + 42, th.secondary, 2.2)
+    s.text(mx - 12, floor_bot + 30, "structure-borne impact", 15, th.secondary,
+           anchor="end", italic=True)
+    for r in (46, 74, 102):
+        s.path(f"M {mx - r * 0.72:.1f} {floor_bot + 44 + r * 0.5:.1f} "
+               f"A {r} {r} 0 0 0 {mx + r * 0.72:.1f} {floor_bot + 44 + r * 0.5:.1f}",
+               stroke=th.accent, sw=1.6)
+    s.text(mx, bot - 44, "radiated impact sound", 15, th.accent, italic=True)
+
+    # Microphone positions on the receiving-room floor.
+    for off in (300, 400, 500):
+        s.mic(bx0 + off, bot - 120, bot, 0.95)
+    s.text(bx0 + 400, floor_bot + 42, "Microphone positions", 16, th.muted)
+
+    # Normative relations (right column) — no invented spacing dimensions.
+    lx = 648.0
+    s.text(lx, 118, "Impact sound insulation", 18, th.fg, bold=True,
+           anchor="start")
+    box_items = [
+        (160, "L′nT = Li − 10 lg(T/T₀)", th.primary),
+        (192, "L′n = Li + 10 lg(A/A₀)", th.primary),
+        (224, "A = 0,16 V/T  (Sabine)", th.muted),
+        (256, "T₀ = 0.5 s , A₀ = 10 m²", th.accent),
+    ]
+    for y, txt, col in box_items:
+        s.text(lx, y, txt, 15, col, anchor="start", mono=True,
+               bold=(col != th.muted))
+    s.rect(lx - 10, 292, 236, 100, "none", th.muted, rx=10, dash="6,5")
+    s.text(lx, 320, "Li = energy-averaged", 15, th.fg, anchor="start")
+    s.text(lx, 342, "band level (Formula 10)", 15, th.fg, anchor="start")
+    s.text(lx, 374, "ISO 717-2 → Ln,w , CI", 16, th.secondary, anchor="start",
+           bold=True)
+
+
+# ---------------------------------------------------------------------------
+# d12 - Sound power methods comparison infographic
+# ---------------------------------------------------------------------------
+
+def _d_methods(s: SVG, th: Theme) -> None:
+    cols = [
+        ("ISO 3744 / 3746", "Free field over a reflecting plane",
+         "Grade 2 / 3 (engineering / survey)",
+         "Sound pressure · enveloping surface",
+         "LW = L̄p + 10lg(S/S₀) − K1 − K2",
+         "K2A ≤ 4 dB (3744) / ≤ 7 dB (3746)", th.primary, "hemi"),
+        ("ISO 3741", "Reverberation test room",
+         "Grade 1 (precision)",
+         "Sound pressure · diffuse field",
+         "LW ← L̄p , T , V",
+         "V ≥ 200 m³ , qualified room", th.accent, "reverb"),
+        ("ISO 9614-2", "In situ — any environment",
+         "Grade 2 / 3 (engineering / survey)",
+         "Sound intensity · scanning",
+         "LW = 10lg |Σ IᵢSᵢ| / W₀",
+         "no negative-power bands", th.secondary, "probe"),
+    ]
+    cw, gap = 270.0, 15.0
+    x0 = (900 - (3 * cw + 2 * gap)) / 2
+    ctop, cbot = 66.0, 540.0
+    for i, (name, env, grade, method, formula, note, col, pic) in enumerate(cols):
+        x = x0 + i * (cw + gap)
+        cxc = x + cw / 2
+        s.rect(x, ctop, cw, cbot - ctop, th.panel, col, rx=14, sw=2.4)
+        s.rect(x, ctop, cw, 44, col, col, rx=14, sw=0)
+        s.rect(x, ctop + 22, cw, 22, col, "none")  # square off header bottom
+        s.text(cxc, ctop + 30, name, 22, th.bg, bold=True)
+
+        # Mini-pictogram band.
+        py = ctop + 120.0
+        if pic == "hemi":
+            R = 58.0
+            s.ellipse(cxc, py + 30, R, R * 0.3, "none", th.muted, 1.2, dash="4,3")
+            s.path(f"M {cxc - R} {py + 30} A {R} {R} 0 0 1 {cxc + R} {py + 30}",
+                   stroke=col, sw=2.2)
+            s.line(cxc - R, py + 30, cxc + R, py + 30, th.muted, 1.4)
+            _box_solid(s, th, cxc, py + 30, 12, 10, 16, stroke=col)
+            for ang in (35, 90, 145):
+                import math
+                a = math.radians(ang)
+                s.circle(cxc + R * math.cos(a), py + 30 - R * math.sin(a), 4.5,
+                         th.secondary)
+        elif pic == "reverb":
+            s.rect(cxc - 58, py - 26, 116, 84, "none", col, rx=6, sw=2.2)
+            for k in range(3):
+                yy = py - 12 + k * 22
+                s.path(f"M {cxc - 44} {yy} q 12 -12 24 0 q 12 12 24 0 q 12 -12 24 0",
+                       stroke=th.muted, sw=1.6)
+            s.circle(cxc - 40, py + 44, 6, th.secondary)   # RSS / source
+        else:  # probe scanning a surface
+            s.rect(cxc - 56, py - 30, 112, 92, "none", col, rx=6, sw=2.0, )
+            # serpentine scan path
+            s.path(f"M {cxc - 44} {py - 16} L {cxc + 40} {py - 16} "
+                   f"L {cxc + 40} {py + 4} L {cxc - 44} {py + 4} "
+                   f"L {cxc - 44} {py + 24} L {cxc + 40} {py + 24}",
+                   stroke=th.accent, sw=1.7)
+            s.circle(cxc + 40, py + 24, 5, th.secondary)
+            s.text(cxc, py + 54, "I⊥", 17, col, bold=True, mono=True)
+
+        # Attribute rows.
+        rows = [(py + 96, env, th.fg, False),
+                (py + 128, grade, col, True),
+                (py + 160, method, th.muted, False)]
+        for yy, txt, cc, bold in rows:
+            s.text(cxc, yy, txt, 14, cc, bold=bold)
+
+        # Headline formula in a boxed footer.
+        s.rect(x + 10, cbot - 96, cw - 20, 46, "none", col, rx=8, dash="5,4")
+        s.text(cxc, cbot - 67, formula, 14, th.fg, bold=True, mono=True)
+        s.text(cxc, cbot - 26, note, 14, th.muted)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -687,6 +990,12 @@ DIAGRAMS = {
         _d8, "Airborne sound insulation setup (ISO 16283-1)", 600),
     "diagram_ir_measurement": (
         _d9, "Impulse-response measurement chain (ISO 18233)", 440),
+    "diagram_sound_power_surfaces": (
+        _d_surfaces, "ISO 3744 / 3746 sound power measurement surfaces", 640),
+    "diagram_impact_setup": (
+        _d_impact, "ISO 16283-2 impact sound insulation setup", 600),
+    "sound_power_methods": (
+        _d_methods, "Sound power methods compared", 620),
 }
 
 

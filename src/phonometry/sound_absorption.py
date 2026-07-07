@@ -54,10 +54,54 @@ _SABINE = 55.3
 _TEN_LG_E = 10.0 * math.log10(math.e)
 #: Validity range of the speed-of-sound Eq. (6), in degrees Celsius.
 _EQ6_TEMPERATURE_RANGE = (15.0, 30.0)
+#: Minimum reverberation-room volume, ISO 354:2003 clause 6.1.1 (m3).
+_MIN_ROOM_VOLUME = 150.0
+#: Plane-absorber sample-area limits, ISO 354:2003 clause 6.2.1.1 (m2).
+_SAMPLE_AREA_MIN = 10.0
+_SAMPLE_AREA_MAX = 12.0
+#: Reference volume for scaling the upper sample-area limit, clause 6.2.1.1 (m3).
+_SAMPLE_AREA_REF_VOLUME = 200.0
 
 
 class AbsorptionWarning(UserWarning):
     """Advisory for out-of-range or non-physical ISO 354 absorption inputs."""
+
+
+def _warn_small_room(volume: float, *, stacklevel: int) -> None:
+    """Advise when the room is below the ISO 354 clause 6.1.1 minimum volume.
+
+    Clause 6.1.1 requires ``V >= 150 m3`` (new rooms are recommended to be at
+    least 200 m3). Below that the modal density is too low for a reliable diffuse
+    field; the result is still returned.
+    """
+    if volume < _MIN_ROOM_VOLUME:
+        warnings.warn(
+            f"Room volume {volume:g} m3 is below the {_MIN_ROOM_VOLUME:g} m3 "
+            "minimum of ISO 354:2003 clause 6.1.1 (new rooms recommended "
+            ">= 200 m3); the result is advisory.",
+            AbsorptionWarning,
+            stacklevel=stacklevel,
+        )
+
+
+def _warn_sample_area(sample_area: float, volume: float, *, stacklevel: int) -> None:
+    """Advise when ``S`` is outside the ISO 354 clause 6.2.1.1 range.
+
+    Clause 6.2.1.1 requires a plane-absorber area ``10 m2 <= S <= 12 m2``; for
+    ``V > 200 m3`` the upper limit is multiplied by ``(V/200)^(2/3)``. The result
+    is still returned.
+    """
+    upper = _SAMPLE_AREA_MAX
+    if volume > _SAMPLE_AREA_REF_VOLUME:
+        upper *= (volume / _SAMPLE_AREA_REF_VOLUME) ** (2.0 / 3.0)
+    if not _SAMPLE_AREA_MIN <= sample_area <= upper:
+        warnings.warn(
+            f"Sample area {sample_area:g} m2 is outside the ISO 354:2003 clause "
+            f"6.2.1.1 range [{_SAMPLE_AREA_MIN:g}, {upper:g}] m2; the result is "
+            "advisory.",
+            AbsorptionWarning,
+            stacklevel=stacklevel,
+        )
 
 
 def _speed_of_sound(temperature: float) -> float:
@@ -127,6 +171,7 @@ def absorption_area(
     temperature: float = 20.0,
     speed_of_sound: float | None = None,
     m: ArrayLike = 0.0,
+    _advise_volume: bool = True,
 ) -> NDArray[np.float64]:
     """Equivalent sound absorption area of a room (ISO 354:2003, Eq. (5)/(7)).
 
@@ -139,7 +184,8 @@ def absorption_area(
     :param temperature: Air temperature, in degrees Celsius, used to compute the
         speed of sound via Eq. (6) when ``speed_of_sound`` is not given
         (default 20 degC, i.e. c = 343 m/s). A temperature outside 15..30 degC
-        raises an :class:`AbsorptionWarning`.
+        raises an :class:`AbsorptionWarning`. A room volume below the 150 m3
+        minimum of clause 6.1.1 likewise raises an advisory :class:`AbsorptionWarning`.
     :param speed_of_sound: Explicit speed of sound ``c``, in m/s; overrides
         ``temperature`` and Eq. (6) when supplied.
     :param m: Power attenuation coefficient of air ``m``, in 1/m (scalar or per
@@ -151,6 +197,8 @@ def absorption_area(
     t = np.asarray(t60, dtype=np.float64)
     m_arr = np.asarray(m, dtype=np.float64)
     _validate_area_inputs(t, volume, m_arr)
+    if _advise_volume:
+        _warn_small_room(volume, stacklevel=3)
     c = _resolve_speed(temperature, speed_of_sound)
     return _SABINE * volume / (c * t) - 4.0 * volume * m_arr
 
@@ -179,7 +227,10 @@ def absorption_coefficient(
     resolved independently. ``alpha_s`` is returned unclamped and may exceed 1,0
     (Clause 3.7 NOTE 2). Because adding an absorber must reduce the reverberation
     time, ``T2 >= T1`` (``alpha_s <= 0``) is non-physical and raises an
-    :class:`AbsorptionWarning`.
+    :class:`AbsorptionWarning`. A room volume below the 150 m3 minimum of
+    clause 6.1.1, or a sample area outside the clause 6.2.1.1 range
+    (``10 m2 <= S <= 12 m2``, upper limit scaled by ``(V/200)^(2/3)`` when
+    ``V > 200 m3``), each raise an advisory :class:`AbsorptionWarning`.
 
     :param t1: Empty-room reverberation time(s) ``T1``, in seconds.
     :param t2: With-specimen reverberation time(s) ``T2``, in seconds.
@@ -203,13 +254,21 @@ def absorption_coefficient(
     """
     if sample_area <= 0.0:
         raise ValueError("'sample_area' must be positive.")
+    if volume <= 0.0:
+        raise ValueError("'volume' must be positive.")
     if temperature2 is None:
         temperature2 = temperature1
+    # Advisory setup checks (result still returned). Volume is advised here once
+    # and suppressed in the internal absorption_area calls to avoid duplicates.
+    _warn_small_room(volume, stacklevel=2)
+    _warn_sample_area(sample_area, volume, stacklevel=2)
     a1 = absorption_area(
-        t1, volume, temperature=temperature1, speed_of_sound=speed_of_sound1, m=m1
+        t1, volume, temperature=temperature1, speed_of_sound=speed_of_sound1,
+        m=m1, _advise_volume=False,
     )
     a2 = absorption_area(
-        t2, volume, temperature=temperature2, speed_of_sound=speed_of_sound2, m=m2
+        t2, volume, temperature=temperature2, speed_of_sound=speed_of_sound2,
+        m=m2, _advise_volume=False,
     )
     area_specimen = a2 - a1
     alpha_s = area_specimen / sample_area

@@ -176,6 +176,77 @@ def test_no_warning_for_positive_alpha() -> None:
         absorption_coefficient(5.0, 3.0, 200.0, 10.0)
 
 
+# --- Setup advisories: room volume (6.1.1) & sample area (6.2.1.1) ----------
+
+def test_warns_small_room_absorption_area() -> None:
+    # Clause 6.1.1: V < 150 m3 is advisory (result still returned).
+    with pytest.warns(AbsorptionWarning):
+        a = absorption_area(3.0, 120.0)
+    assert np.isfinite(np.asarray(a)).all()
+
+
+def test_warns_small_room_absorption_coefficient() -> None:
+    with pytest.warns(AbsorptionWarning):
+        absorption_coefficient(5.0, 3.0, 120.0, 10.0)
+
+
+def test_small_room_warning_not_duplicated_in_coefficient(
+    recwarn: pytest.WarningsRecorder,
+) -> None:
+    # The internal absorption_area calls must not re-emit the volume advisory.
+    absorption_coefficient(5.0, 3.0, 120.0, 10.0)
+    volume_warnings = [
+        w for w in recwarn.list
+        if issubclass(w.category, AbsorptionWarning) and "Room volume" in str(w.message)
+    ]
+    assert len(volume_warnings) == 1
+
+
+def test_no_room_warning_at_minimum_volume() -> None:
+    # V = 150 m3 is exactly at the clause 6.1.1 minimum (>= 150): no warning.
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        absorption_area(3.0, 150.0)
+
+
+def test_warns_sample_area_below_range() -> None:
+    # Clause 6.2.1.1: S < 10 m2 is advisory.
+    with pytest.warns(AbsorptionWarning):
+        absorption_coefficient(5.0, 3.0, 200.0, 8.0)
+
+
+def test_warns_sample_area_above_range_no_scaling() -> None:
+    # V <= 200 m3: upper limit is 12 m2; S = 13 m2 is out of range.
+    with pytest.warns(AbsorptionWarning):
+        absorption_coefficient(5.0, 3.0, 200.0, 13.0)
+
+
+def test_warns_sample_area_above_scaled_range() -> None:
+    # V > 200 m3: upper limit is 12*(V/200)^(2/3). For V = 400, ~19,05 m2;
+    # S = 20 m2 exceeds it and must warn.
+    v = 400.0
+    upper = 12.0 * (v / 200.0) ** (2.0 / 3.0)
+    assert 19.0 < upper < 19.1
+    with pytest.warns(AbsorptionWarning):
+        absorption_coefficient(5.0, 3.0, v, 20.0)
+
+
+def test_no_sample_area_warning_within_scaled_range() -> None:
+    # V = 400 m3 lifts the upper limit to ~19,05 m2; S = 15 m2 is now in range.
+    v = 400.0
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        absorption_coefficient(5.0, 3.0, v, 15.0)
+
+
+def test_no_sample_area_warning_at_limits() -> None:
+    # S = 10 and S = 12 m2 are the inclusive clause 6.2.1.1 bounds (V <= 200).
+    for s in (10.0, 12.0):
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            absorption_coefficient(5.0, 3.0, 200.0, s)
+
+
 # --- Range / input validation ----------------------------------------------
 
 def test_negative_volume_raises() -> None:

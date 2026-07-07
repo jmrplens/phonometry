@@ -11,11 +11,11 @@ The equivalent continuous level integrates the squared pressure over the
 measurement time:
 
 $$
-L_{eq} = 10\log_{10}\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\,dt\right) \text{ dB}, \qquad p_0 = 20\ \mu\text{Pa}
+L_{eq} = 10\log_{10}\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\ dt\right) \text{ dB}, \qquad p_0 = 20\ \mu\text{Pa}
 $$
 
 and $L_{Aeq}$ is the same integral after A-weighting the signal. $L_N$ is the
-level exceeded $N\,\%$ of the time — the $(100-N)$-th percentile of the
+level exceeded $N\ \%$ of the time — the $(100-N)$-th percentile of the
 time-weighted level distribution.
 
 ```python
@@ -134,8 +134,8 @@ integral of the squared A-weighted pressure — and the equivalent
 **normalized 8 h level**:
 
 $$
-E = \int_0^T p_A^2(t)\,dt \quad [\text{Pa}^2\text{h}], \qquad
-L_{EX,8h} = 10\log_{10}\frac{E}{8\,\text{h} \cdot p_0^2}
+E = \int_0^T p_A^2(t)\ dt \quad [\text{Pa}^2\text{h}], \qquad
+L_{EX,8h} = 10\log_{10}\frac{E}{8\ \text{h} \cdot p_0^2}
 $$
 
 The anchor worth memorizing: **3.2 Pa²h ⇔ exactly 90 dB over 8 h** (the CI
@@ -194,7 +194,7 @@ print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 
 
 The methods hinge on the **critical band** — the ear's analysis bandwidth,
-$\Delta f_c = 25 + 75\,[1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz at 1 kHz): a
+$\Delta f_c = 25 + 75\ [1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz at 1 kHz): a
 tone is masked only by the noise *inside* its critical band, so both ratios
 compare the tone against exactly that noise, not the whole spectrum.
 

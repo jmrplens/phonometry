@@ -14,7 +14,7 @@ characterized by a single number, the **sensitivity factor** S, that converts
 digital units into pascals:
 
 $$
-p(t) = S \, x(t) \qquad
+p(t) = S \ x(t) \qquad
 S = \frac{p_\text{ref} \cdot 10^{L_\text{cal}/20}}{\tilde{x}_\text{ref}}
 $$
 

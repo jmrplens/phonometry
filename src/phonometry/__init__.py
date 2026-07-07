@@ -19,6 +19,7 @@ from .frequencies import getansifrequencies, normalizedfreq
 from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
 from .loudness import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
 from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
+from .sharpness import sharpness_din, sharpness_din_from_specific
 from .tonality import ToneAssessment, prominence_ratio, tone_to_noise_ratio
 from .parametric_filters import (
     TimeWeighting,
@@ -52,6 +53,8 @@ __all__ = [
     "loudness_zwicker",
     "loudness_zwicker_from_spectrum",
     "ZwickerLoudness",
+    "sharpness_din",
+    "sharpness_din_from_specific",
     "equal_loudness_contour",
     "loudness_level",
     "hearing_threshold",

@@ -1,0 +1,142 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Sharpness per DIN 45692:2009-08.
+
+Sharpness rates the high-frequency emphasis of a sound in acum, computed
+as the g(z)-weighted first moment of the specific loudness pattern
+(DIN 45692 Equation 1) over the 24 Bark critical-band scale, normalized so
+the reference sound - critical-band-wide narrowband noise at 1 kHz
+(920 Hz to 1080 Hz) at 60 dB overall level - yields exactly 1.00 acum
+(clause 6). The informative Annex B variants of Aures and von Bismarck are
+provided as alternative methods.
+"""
+
+from __future__ import annotations
+
+from typing import List
+
+import numpy as np
+
+from .loudness import ZwickerLoudness, loudness_zwicker
+
+_DZ = 0.1  # Bark step of the ISO 532-1 specific-loudness pattern
+_Z = np.arange(1, 241) * _DZ  # Bark bin centers (0.1 .. 24.0), reference convention
+
+
+def _g_din(z: np.ndarray) -> np.ndarray:
+    """DIN 45692 Eq. (1) weighting: 1 up to 15.8 Bark, rising beyond."""
+    g = np.ones_like(z)
+    high = z > 15.8
+    g[high] = 0.15 * np.exp(0.42 * (z[high] - 15.8)) + 0.85
+    return g
+
+
+def _g_bismarck(z: np.ndarray) -> np.ndarray:
+    """DIN 45692 Annex B (informative), von Bismarck weighting."""
+    g = np.ones_like(z)
+    high = z > 15.0
+    g[high] = 0.2 * np.exp(0.308 * (z[high] - 15.0)) + 0.8
+    return g
+
+
+def _g_aures(z: np.ndarray, total_n: float) -> np.ndarray:
+    """DIN 45692 Annex B (informative), Aures loudness-dependent weighting."""
+    return 0.078 * np.exp(0.171 * z) / z * (total_n / np.log(total_n * 0.05 + 1.0))
+
+
+def _moment(specific: np.ndarray, method: str) -> float:
+    n_total = float(np.sum(specific) * _DZ)
+    if n_total <= 0:
+        return 0.0
+    if method == "din":
+        num = float(np.sum(specific * _g_din(_Z) * _Z) * _DZ)
+        return num / n_total
+    if method == "bismarck":
+        num = float(np.sum(specific * _g_bismarck(_Z) * _Z) * _DZ)
+        return 0.11 * num / n_total
+    if method == "aures":
+        num = float(np.sum(specific * _g_aures(_Z, n_total) * _Z) * _DZ)
+        return 0.11 * num / n_total
+    raise ValueError("method must be 'din', 'aures' or 'bismarck'")
+
+
+def reference_sound(fs: int = 48000, seconds: float = 2.0, seed: int = 45692) -> np.ndarray:
+    """The DIN 45692 clause 6 standard test signal.
+
+    Critical-band-wide narrowband noise: 920 Hz to 1080 Hz, 60 dB overall
+    level (deterministic realization; the clause fixes only the band and
+    the level).
+    """
+    from scipy import signal as sp_signal
+
+    rng = np.random.default_rng(seed)
+    white = rng.standard_normal(int(fs * seconds))
+    sos = sp_signal.butter(8, [920.0, 1080.0], btype="band", fs=fs, output="sos")
+    nb = sp_signal.sosfilt(sos, white)
+    return np.asarray(nb / np.sqrt(np.mean(nb**2)) * 2e-5 * 10 ** (60.0 / 20))
+
+
+def _reference_specific() -> np.ndarray:
+    """Specific loudness of the clause 6 reference sound (signal path)."""
+    return loudness_zwicker(reference_sound(), 48000, stationary=True).specific
+
+
+_K_DIN: float | None = None
+
+
+def _k_din() -> float:
+    """DIN 45692 normalization constant (0.105 <= k < 0.115, clause 5.2)."""
+    global _K_DIN
+    if _K_DIN is None:
+        _K_DIN = 1.0 / _moment(_reference_specific(), "din")
+        if not 0.105 <= _K_DIN < 0.115:  # pragma: no cover - sanity guard
+            raise AssertionError(f"k={_K_DIN} outside the DIN 45692 range")
+    return _K_DIN
+
+
+def sharpness_din_from_specific(specific: np.ndarray, method: str = "din") -> float:
+    """
+    Sharpness in acum from a specific-loudness pattern (DIN 45692 Eq. 1).
+
+    :param specific: Specific loudness N'(z) at 0.1 Bark steps (240 values),
+        e.g. ``ZwickerLoudness.specific``.
+    :param method: ``'din'`` (default, Eq. 1), or the informative Annex B
+        variants ``'aures'`` / ``'bismarck'``.
+    :return: Sharpness in acum (0.0 for silence).
+    """
+    specific = np.asarray(specific, dtype=np.float64)
+    if specific.shape != (240,):
+        raise ValueError("specific must be the 240-bin ISO 532-1 pattern.")
+    if method == "din":
+        return _k_din() * _moment(specific, "din")
+    return _moment(specific, method)
+
+
+def sharpness_din(
+    x: List[float] | np.ndarray,
+    fs: int,
+    field: str = "free",
+    method: str = "din",
+    calibration_factor: float = 1.0,
+) -> float:
+    """
+    Sharpness of a signal per DIN 45692:2009 (stationary analysis).
+
+    The specific loudness comes from the ISO 532-1 Zwicker stationary
+    method (the DIN 45631 basis named by DIN 45692); the sharpness is its
+    g(z)-weighted first moment, normalized so the reference sound of
+    clause 6 (critical-band-wide noise, 1 kHz, 60 dB) gives 1.00 acum.
+    Verification tolerance per clause 6: 5 % or 0.05 acum against the
+    Table A.2/A.3 target values.
+
+    :param x: Input signal (1D), in Pa after ``calibration_factor``.
+    :param fs: Sample rate in Hz.
+    :param field: ``'free'`` (default) or ``'diffuse'``.
+    :param method: ``'din'`` (default), ``'aures'`` or ``'bismarck'``.
+    :param calibration_factor: Digital-units-to-Pa factor.
+    :return: Sharpness in acum.
+    """
+    zw: ZwickerLoudness = loudness_zwicker(
+        x, fs, field=field, stationary=True, calibration_factor=calibration_factor
+    )
+    return sharpness_din_from_specific(zw.specific, method=method)

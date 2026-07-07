@@ -28,6 +28,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   field airborne sound insulation per ISO 16283-1:2014 (D, DnT, R') and
   single-number weighted ratings with C/Ctr per ISO 717-1 (reference-curve
   method), verified against the ISO 717-1 Annex C worked example.
+- `impact_insulation()`, `weighted_impact_rating()` and the
+  `ImpactInsulationResult` / `ImpactRatingResult` dataclasses — field impact
+  sound insulation per ISO 16283-2 (standardized L'nT and normalized L'n from
+  the tapping-machine impact level) and single-number weighted impact ratings
+  with the CI adaptation term per ISO 717-2 (reference-curve method, octave
+  −5 dB rule), verified against the ISO 717-2 Annex C examples (L'nT,w = 79,
+  CI = −11; octave 54, CI = 0).
+- `absorption_area()`, `absorption_coefficient()`, `attenuation_from_alpha()`
+  and `AbsorptionWarning` — sound absorption in a reverberation room per
+  ISO 354:2003 (equivalent absorption area from the empty and with-specimen
+  reverberation times via Sabine's equation with the air-attenuation term, and
+  the plane-absorber coefficient αs, left unclamped per Clause 3.7), with
+  room-volume and sample-area qualification advisories.
+- `sound_power_pressure()`, `measurement_positions()`,
+  `background_noise_correction()`, `environmental_correction()` and
+  `SoundPowerResult` / `SoundPowerWarning` — sound power level from surface
+  sound pressure per ISO 3744:2010 (engineering) and ISO 3746:2010 (survey):
+  hemisphere and box measurement surfaces, background (K1) and environmental
+  (K2) corrections, A-weighted total, directivity index and expanded
+  uncertainty.
+- `sound_power_reverberation()`, `sound_power_comparison()` and
+  `ReverberationSoundPowerResult` — precision-grade sound power in a
+  reverberation room per ISO 3741:2010 (direct method with Sabine absorption
+  area, Waterhouse boundary correction and C1/C2 meteorological corrections;
+  comparison method against a reference sound source), with room-qualification
+  advisories.
+- `sound_power_intensity()` and `SoundPowerIntensityResult` — sound power by
+  sound-intensity scanning per ISO 9614-2:1996 (partial powers over the
+  measurement surface, FpI and F+/− field indicators, per-segment
+  repeatability and the per-band achieved engineering/survey grade).
 - `loudness_zwicker()` / `loudness_zwicker_from_spectrum()` — Zwicker
   loudness per ISO 532-1:2017 (stationary and time-varying), a clean-room
   port of the normative reference program with the full Annex B validation

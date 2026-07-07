@@ -12,7 +12,8 @@ Full documentation for phonometry. Also available as a website:
 - [Integrated & Statistical Levels](levels.md) — Leq, LAeq, L10/L50/L90, octave spectrogram
 - [Psychoacoustics and Speech Intelligibility](psychoacoustics.md) — Zwicker loudness, sharpness, STI/STIPA
 - [Sound Intensity (p-p)](intensity.md) — two-microphone intensity and field indicators
-- [Room and Building Acoustics](room-acoustics.md) — impulse-response acquisition, reverberation and room parameters, open-plan speech metrics, field sound insulation
+- [Room and Building Acoustics](room-acoustics.md) — impulse-response acquisition, reverberation and room parameters, open-plan speech metrics, airborne and impact sound insulation, sound absorption (ISO 354)
+- [Sound Power](sound-power.md) — sound power level by enveloping surface (ISO 3744/3746), reverberation room (ISO 3741) and intensity scanning (ISO 9614-2)
 - [Calibration and dBFS](calibration.md) — physical SPL and digital analysis
 - [Block Processing](block-processing.md) — stateful real-time workflows
 - [Multichannel](multichannel.md) — vectorized multichannel analysis

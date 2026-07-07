@@ -65,7 +65,8 @@ _K: Dict[str, float] = {"engineering": 10.0, "survey": 7.0}
 _F_PLUS_MINUS_LIMIT = 3.0
 #: Grade-3 (control) per-band repeatability limit s, in dB. Table 2 tabulates
 #: per-band s only for grade 2; grade 3 carries only the A-weighted value
-#: (4 dB), used here as the per-band survey limit.
+#: (4 dB), reused here as a per-band survey limit (extrapolated -- the
+#: per-band grade-3 use of the A-weighted 4 dB is non-normative).
 _S_SURVEY = 4.0
 
 
@@ -199,7 +200,9 @@ def sound_power_intensity(
     :param grade: ``'engineering'`` (grade 2) or ``'survey'`` (grade 3);
         selects ``K`` for the reported ``Ld`` and the criterion-2 warning.
     :param repeatability_limit: Override for the criterion-3 limit ``s`` (dB),
-        scalar or per band; defaults to ISO 9614-2 Table 2 by ``frequencies``.
+        scalar or per band; defaults to ISO 9614-2 Table 2 by ``frequencies``
+        for ``'engineering'``. For ``'survey'`` the default is the A-weighted
+        4 dB reused per band (extrapolated -- non-normative).
     :return: :class:`SoundPowerIntensityResult`.
     """
     grade = _check_grade(grade)
@@ -297,7 +300,13 @@ def sound_power_intensity(
             SoundPowerWarning,
             stacklevel=2,
         )
-    if np.any(f_plus_minus[~negative_band] > _F_PLUS_MINUS_LIMIT):
+    # Criterion 2 (F+/- <= 3 dB) is mandatory only for the engineering grade;
+    # for a survey run it is optional (ISO 9614-2:1996, B.1.2), so exceeding
+    # the limit does not by itself disqualify the survey grade and the warning
+    # is suppressed there.
+    if grade == "engineering" and np.any(
+        f_plus_minus[~negative_band] > _F_PLUS_MINUS_LIMIT
+    ):
         warnings.warn(
             f"Negative-partial-power indicator F+/- exceeds {_F_PLUS_MINUS_LIMIT:g} "
             "dB in one or more bands; criterion 2 is not satisfied and the "

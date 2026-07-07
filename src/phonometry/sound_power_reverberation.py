@@ -204,6 +204,17 @@ def _room_qualification_warnings(
             SoundPowerWarning,
             stacklevel=3,
         )
+    _position_sampling_warnings(levels, stacklevel=4)
+
+
+def _position_sampling_warnings(levels: np.ndarray, stacklevel: int) -> None:
+    """Emit the microphone-sampling advisories for a per-position level array.
+
+    Flags fewer than 6 positions (ISO 3741:2010, 8.3, 8.4.1) and an
+    inter-position standard deviation above the sM criterion (1,5 dB;
+    8.4.2.2, Eq. 10). These sampling criteria need no room geometry, so they
+    apply to both the direct and the comparison methods. A 1D (already-averaged)
+    spectrum carries no per-position information and is skipped."""
     arr = np.asarray(levels, dtype=np.float64)
     if arr.ndim != 2:
         return
@@ -214,7 +225,7 @@ def _room_qualification_warnings(
             "unqualified reverberation room requires at least 6 "
             "(ISO 3741:2010, 8.3, 8.4.1).",
             SoundPowerWarning,
-            stacklevel=3,
+            stacklevel=stacklevel,
         )
     if n_positions >= 2:
         s_m = np.std(arr, axis=0, ddof=1)
@@ -226,7 +237,7 @@ def _room_qualification_warnings(
                 "positions or room qualification per Annex D (ISO 3741:2010, "
                 "8.4.2.2, Eq. 10).",
                 SoundPowerWarning,
-                stacklevel=3,
+                stacklevel=stacklevel,
             )
 
 
@@ -374,6 +385,11 @@ def sound_power_comparison(
     :param static_pressure: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundPowerResult` (``method='comparison'``).
     """
+    # Microphone-sampling advisories (<6 positions, sM > 1,5 dB) apply to the
+    # per-position measurement of the source under test, exactly as in the
+    # direct method; there is no room geometry here, so no V/S check.
+    _position_sampling_warnings(levels, stacklevel=2)
+
     lp_st = _mean_level(levels)
     lp_rss = _mean_level(levels_ref)
     lw_rss = np.asarray(lw_ref, dtype=np.float64)

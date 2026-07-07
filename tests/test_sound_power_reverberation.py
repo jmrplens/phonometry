@@ -135,6 +135,35 @@ def test_comparison_reference_conditions_c2_near_zero() -> None:
     assert np.isclose(res.sound_power_level[0], 100.0, atol=0.01)
 
 
+def test_comparison_fewer_than_six_positions_warns() -> None:
+    """2D per-position test-source levels below the 6-position minimum warn
+    in the comparison method too (no V/S check -- no room geometry)."""
+    levels = np.array([[80.0], [80.1], [79.9]])  # 3 positions, tight spread
+    lp_rss = np.array([70.0])
+    lw_ref = np.array([90.0])
+    with pytest.warns(SoundPowerWarning, match="microphone position"):
+        sound_power_comparison(levels, lp_rss, lw_ref)
+
+
+def test_comparison_interposition_std_above_criterion_warns() -> None:
+    """sM > 1,5 dB across the comparison test-source positions warns (Eq. 10)."""
+    levels = np.array([[70.0], [80.0], [72.0], [78.0], [71.0], [79.0]])
+    lp_rss = np.array([70.0])
+    lw_ref = np.array([90.0])
+    with pytest.warns(SoundPowerWarning, match="standard deviation"):
+        sound_power_comparison(levels, lp_rss, lw_ref)
+
+
+def test_comparison_1d_spectra_emit_no_sampling_warning() -> None:
+    """Already-averaged 1D spectra carry no per-position info -> no advisory."""
+    lp_st = np.array([80.0, 80.0])
+    lp_rss = np.array([70.0, 70.0])
+    lw_ref = np.array([90.0, 90.0])
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", SoundPowerWarning)
+        sound_power_comparison(lp_st, lp_rss, lw_ref)
+
+
 # --------------------------------------------------------------------------
 # Synergy — room_parameters T30 feeds the direct method
 # --------------------------------------------------------------------------

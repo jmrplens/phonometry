@@ -184,8 +184,8 @@ def absorption_area(
     :param temperature: Air temperature, in degrees Celsius, used to compute the
         speed of sound via Eq. (6) when ``speed_of_sound`` is not given
         (default 20 degC, i.e. c = 343 m/s). A temperature outside 15..30 degC
-        raises an :class:`AbsorptionWarning`. A room volume below the 150 m3
-        minimum of clause 6.1.1 likewise raises an advisory :class:`AbsorptionWarning`.
+        emits an :class:`AbsorptionWarning`. A room volume below the 150 m3
+        minimum of clause 6.1.1 likewise emits an advisory :class:`AbsorptionWarning`.
     :param speed_of_sound: Explicit speed of sound ``c``, in m/s; overrides
         ``temperature`` and Eq. (6) when supplied.
     :param m: Power attenuation coefficient of air ``m``, in 1/m (scalar or per
@@ -226,11 +226,11 @@ def absorption_coefficient(
     The two measurements may be at different temperatures; ``c1`` and ``c2`` are
     resolved independently. ``alpha_s`` is returned unclamped and may exceed 1,0
     (Clause 3.7 NOTE 2). Because adding an absorber must reduce the reverberation
-    time, ``T2 >= T1`` (``alpha_s <= 0``) is non-physical and raises an
+    time, ``T2 >= T1`` (``alpha_s <= 0``) is non-physical and emits an
     :class:`AbsorptionWarning`. A room volume below the 150 m3 minimum of
     clause 6.1.1, or a sample area outside the clause 6.2.1.1 range
     (``10 m2 <= S <= 12 m2``, upper limit scaled by ``(V/200)^(2/3)`` when
-    ``V > 200 m3``), each raise an advisory :class:`AbsorptionWarning`.
+    ``V > 200 m3``), each emit an advisory :class:`AbsorptionWarning`.
 
     :param t1: Empty-room reverberation time(s) ``T1``, in seconds.
     :param t2: With-specimen reverberation time(s) ``T2``, in seconds.

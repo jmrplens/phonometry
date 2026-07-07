@@ -479,23 +479,17 @@ def sound_power_pressure(
         lwa = float(lw[0]) if n_bands == 1 else float("nan")
 
     # --- apparent directivity index per position (Eq. 7) ------------------
+    # DIi* = Lpi(ST) - (Lp'(ST) - K1): per Eq. 7 semantics BOTH the per-position
+    # level Lpi(ST) and the surface mean Lp'(ST) are background-corrected by the
+    # same broadband K1 (notes-iso3744-3746.md sec. 9). Applying the identical
+    # uniform K1 to every position and to the mean leaves the DI differences
+    # unchanged and cancels the offset, so the raw energy-summed broadband
+    # levels give the directivity index directly (no residual +K1 bias).
     position_levels = 10.0 * np.log10(np.sum(10.0 ** (0.1 * levels), axis=1))
     mean_position = 10.0 * np.log10(
         np.sum(10.0 ** (0.1 * position_levels)) / n_positions
     )
-    # Broadband background correction K1: the energy sum over bands of the raw
-    # surface mean minus that of the background-corrected mean. This is the true
-    # K1 (per-band K1 aggregated over bands, Eq. 16), not the surface-area term
-    # 10*lg(S/S0) that lw - surface_spl would yield.
-    if background_levels is not None:
-        total_raw = 10.0 * np.log10(np.sum(10.0 ** (0.1 * mean_level)))
-        total_corrected = 10.0 * np.log10(np.sum(10.0 ** (0.1 * (mean_level - k1))))
-        k1_overall = total_raw - total_corrected
-    else:
-        k1_overall = 0.0
-    directivity = np.asarray(
-        position_levels - (mean_position - k1_overall), dtype=np.float64
-    )
+    directivity = np.asarray(position_levels - mean_position, dtype=np.float64)
 
     uncertainty = 2.0 * float(np.hypot(_SIGMA_R0[grade], omc_uncertainty))
 

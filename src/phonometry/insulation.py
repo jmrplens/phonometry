@@ -82,7 +82,10 @@ _REF_OCTAVE: Tuple[int, ...] = (36, 45, 52, 55, 56)
 _INDEX_500_THIRD = 7
 _INDEX_500_OCTAVE = 2
 
-#: Maximum sum of unfavourable deviations (Clause 4.4).
+#: Maximum sum of unfavourable deviations. These bounds are shared by both
+#: rating paths: ISO 717-1 Clause 4.4 (airborne) and ISO 717-2 Clause 4.3
+#: (impact) specify the identical 32,0 dB (16 one-third-octave bands) and
+#: 10,0 dB (5 octave bands) limits.
 _MAX_UNFAVOURABLE_THIRD = 32.0
 _MAX_UNFAVOURABLE_OCTAVE = 10.0
 

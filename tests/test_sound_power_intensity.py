@@ -97,6 +97,25 @@ def test_small_negative_partial_power_no_warning() -> None:
     assert res.negative_partial_power_index[0] <= 3.0
 
 
+def test_f_plus_minus_warning_suppressed_under_survey_grade() -> None:
+    """Criterion 2 is optional for the survey grade (B.1.2): F+/- > 3 dB must
+    not emit the 'engineering grade not achieved' warning when grade='survey',
+    while the engineering grade still warns for the same data."""
+    import warnings
+
+    areas = np.array([0.5, 0.5, 0.5, 0.5])
+    intensity = (np.array([1.0, 1.0, 1.0, -2.0]) * 5.0e-4).reshape(4, 1)
+    # Survey grade: no F+/- warning (total power still positive -> no other
+    # warning source either).
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        res = sound_power_intensity(intensity, areas, grade="survey")
+    assert res.negative_partial_power_index[0] > 3.0
+    # Engineering grade: the same data still warns.
+    with pytest.warns(SoundPowerWarning):
+        sound_power_intensity(intensity, areas, grade="engineering")
+
+
 def test_negative_total_power_band_not_determinable() -> None:
     """Sum Pi < 0: method not applicable to the band (clause 9.2), warn, NaN."""
     areas = np.array([0.5, 0.5, 0.5, 0.5])

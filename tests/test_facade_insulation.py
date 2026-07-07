@@ -179,6 +179,25 @@ def test_nonpositive_area_volume_raises() -> None:
         )
 
 
+def test_surface_and_area_without_volume_raises() -> None:
+    # surface_level + area but no volume: R' would silently be None, so raise
+    # a clear error naming 'volume' as the missing input.
+    with pytest.raises(ValueError, match="volume"):
+        facade_insulation(
+            _flat(3, 70.0), _flat(3, 30.0), _flat(3, 0.5),
+            area=10.0, surface_level=_flat(3, 72.0),
+        )
+
+
+def test_surface_area_and_volume_returns_r_prime() -> None:
+    # The complete set of R' inputs still yields a value.
+    res = facade_insulation(
+        _flat(3, 70.0), _flat(3, 30.0), _flat(3, 0.5),
+        area=10.0, volume=62.5, surface_level=_flat(3, 72.0),
+    )
+    assert res.r_prime is not None
+
+
 def test_invalid_method_raises() -> None:
     with pytest.raises(ValueError):
         facade_insulation(

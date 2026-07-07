@@ -63,7 +63,11 @@ energy-averaged (Clause 9.5.1, Formula (20)). Quantities are evaluated over
 the core one-third-octave range 100 Hz to 3150 Hz (Clause 5), optionally
 extended to 50-5000 Hz. The façade quantity is airborne, so its
 single-number rating uses the **ISO 717-1 airborne** reference curve and
-method (Clause 2, Annex F) via :func:`weighted_rating` unchanged.
+method (Clause 2, Annex F) via :func:`weighted_rating` unchanged. The
+ISO 16283-3 clause and formula numbers cited here follow the 2014 DIS
+draft and should be reconciled against the published 2016 edition, which
+may renumber them; the computed quantities and the -1,5 dB / -3 dB
+element-method corrections are edition-stable.
 
 **Weighted impact rating (ISO 717-2).** The reference-curve method of
 Clause 4.3 shifts the Table 3 impact reference curve towards the measured
@@ -750,6 +754,11 @@ def facade_insulation(
         raise ValueError(
             "'area' requires 'surface_level' to compute the apparent sound "
             "reduction index R'."
+        )
+    if surface_level is not None and area is not None and volume is None:
+        raise ValueError(
+            "'volume' is required with 'surface_level' and 'area' to compute "
+            "the apparent sound reduction index R'."
         )
 
     # Sabine equivalent absorption area A = 0,16 V / T (Formula (7)).

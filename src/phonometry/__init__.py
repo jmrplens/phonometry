@@ -52,6 +52,11 @@ from .sound_power import (
     measurement_positions,
     sound_power_pressure,
 )
+from .sound_power_reverberation import (
+    ReverberationSoundPowerResult,
+    sound_power_comparison,
+    sound_power_reverberation,
+)
 from .room_acoustics import RoomAcousticsResult, decay_curve, room_parameters
 from .room_ir import (
     impulse_response,
@@ -118,6 +123,9 @@ __all__ = [
     "environmental_correction",
     "SoundPowerResult",
     "SoundPowerWarning",
+    "sound_power_reverberation",
+    "sound_power_comparison",
+    "ReverberationSoundPowerResult",
     "airborne_insulation",
     "AirborneInsulationResult",
     "weighted_rating",

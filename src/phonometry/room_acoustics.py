@@ -41,12 +41,15 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Any, List, Tuple
+from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
 
 from .core import OctaveFilterBank
 from .utils import _typesignal
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 #: Default octave-band analysis range (ISO 3382-1:2009, 5.1: engineering
 #: and precision methods cover at least 125 Hz to 4 kHz in octave bands).
@@ -133,7 +136,7 @@ class RoomAcousticsResult:
     t30_valid: np.ndarray
     curvature: np.ndarray
 
-    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes | np.ndarray:
         """Plot per-band decay times (EDT/T20/T30) and clarity (C50/C80).
 
         Invalid bands are hatched and greyed. With ``ax`` given, only the
@@ -349,7 +352,7 @@ class DecayCurve:
         yield self.time
         yield self.level
 
-    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
         """Plot the decay curve with optional straight T-fit overlays.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the

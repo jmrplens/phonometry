@@ -491,7 +491,7 @@ print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  -> 
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(weighted_impact_rating(octave).rating)  # 54
 
-res_imp.plot()   # Ln medido frente a la referencia ISO 717-2 desplazada, exceso sombreado (requiere matplotlib)
+res_imp.plot()   # L'nT medido frente a la referencia ISO 717-2 desplazada, exceso sombreado (requiere matplotlib)
 ```
 
 <details>
@@ -500,21 +500,22 @@ res_imp.plot()   # Ln medido frente a la referencia ISO 717-2 desplazada, exceso
 ```python
 import matplotlib.pyplot as plt
 
-# En una línea — Ln medido frente a la referencia ISO 717-2 desplazada (exceso sombreado):
+# En una línea — L'nT medido frente a la referencia ISO 717-2 desplazada (exceso sombreado):
 res_imp.plot()
 plt.show()
 
 # A mano, con la curva por banda que ahora lleva el resultado (signo opuesto: la
-# desviación desfavorable está donde el nivel MEDIDO supera la referencia):
+# desviación desfavorable está donde el nivel MEDIDO supera la referencia).
+# Aquí la entrada fue l_n_t, así que la magnitud valorada es el nivel de campo L'nT,w:
 fig, ax = plt.subplots()
-ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Ln medido")
+ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="L'nT medido")
 ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Referencia desplazada")
 ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
                 where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
                 alpha=0.3, label="Desviaciones desfavorables")
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Nivel de presión sonora de impacto [dB]")
-ax.set_title(f"Ln,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.set_title(f"L'nT,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
 ax.legend()
 plt.show()
 ```

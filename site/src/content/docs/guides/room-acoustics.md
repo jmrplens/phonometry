@@ -479,7 +479,7 @@ print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  -> 
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(weighted_impact_rating(octave).rating)  # 54
 
-res_imp.plot()   # measured Ln vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
+res_imp.plot()   # measured L'nT vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
 ```
 
 <details>
@@ -488,21 +488,22 @@ res_imp.plot()   # measured Ln vs shifted ISO 717-2 reference, measured-above sh
 ```python
 import matplotlib.pyplot as plt
 
-# One line — measured Ln vs the shifted ISO 717-2 reference (measured-above shaded):
+# One line — measured L'nT vs the shifted ISO 717-2 reference (measured-above shaded):
 res_imp.plot()
 plt.show()
 
 # By hand, from the band curve the result now carries (note the opposite sign:
-# an unfavourable deviation is where the MEASURED level exceeds the reference):
+# an unfavourable deviation is where the MEASURED level exceeds the reference).
+# Here the input was l_n_t, so the rated quantity is the field level L'nT,w:
 fig, ax = plt.subplots()
-ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured Ln")
+ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured L'nT")
 ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Shifted reference")
 ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
                 where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
                 alpha=0.3, label="Unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Impact sound pressure level [dB]")
-ax.set_title(f"Ln,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.set_title(f"L'nT,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
 ax.legend()
 plt.show()
 ```

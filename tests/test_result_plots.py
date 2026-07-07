@@ -101,6 +101,28 @@ def _intensity() -> ph.IntensityResult:
     return ph.sound_intensity(p1, p2, FS, spacing=0.012, fraction=3, limits=[125, 4000])
 
 
+def _intensity_wide() -> ph.IntensityResult:
+    """IntensityResult with band centres spanning two decades (100 Hz-10 kHz)
+    so the log-axis bar-width scaling can be checked at the extremes."""
+    freqs = np.array([100.0, 1000.0, 10000.0])
+    n = freqs.size
+    return ph.IntensityResult(
+        frequency=freqs,
+        intensity=np.zeros(n),
+        intensity_level=np.full(n, 60.0),
+        pressure_level=np.full(n, 62.0),
+        pressure_intensity_index=np.full(n, 2.0),
+        direction=np.ones(n),
+        bias_correction=np.ones(n),
+        total_intensity=0.0,
+        total_intensity_level=60.0,
+        total_pressure_level=62.0,
+        total_pressure_intensity_index=2.0,
+        total_direction=1,
+        max_valid_frequency=5000.0,
+    )
+
+
 # --------------------------------------------------------------------------
 # Soft-dependency contract: lazy import + ImportError guidance
 # --------------------------------------------------------------------------
@@ -317,6 +339,23 @@ def test_every_plot_forwards_kwargs_to_primary_artist(name, factory, kind) -> No
     )
     plt.close("all")
 
+    # A user-supplied color must win over the renderer's fixed default rather
+    # than raising ``TypeError: got multiple values for keyword 'color'``.
+    out = res.plot(color="red")
+    ax = out[0] if isinstance(out, np.ndarray) else out
+    artists = ax.lines if kind == "line" else ax.patches
+    red = plt.matplotlib.colors.to_rgba("red")
+
+    def _is_red(artist) -> bool:  # noqa: ANN001
+        if kind == "line":
+            return plt.matplotlib.colors.to_rgba(artist.get_color()) == red
+        return tuple(artist.get_facecolor()) == red
+
+    assert any(_is_red(a) for a in artists), (
+        f"{name}: color kwarg did not override the fixed default artist color"
+    )
+    plt.close("all")
+
 
 # --------------------------------------------------------------------------
 # Room acoustics
@@ -424,6 +463,23 @@ def test_intensity_plots_lp_and_li_with_index_twin() -> None:
     # twin axis carries the pressure-intensity index bars.
     twins = [a for a in ax.figure.axes if a is not ax]
     assert twins, "expected a twin axis for the pressure-intensity index"
+    plt.close("all")
+
+
+def test_intensity_bar_width_scales_with_frequency_on_log_axis() -> None:
+    # On a log frequency axis a constant linear bar width vanishes at high
+    # frequency; the index bars must instead scale their width with each
+    # centre frequency so the drawn width/f ratio is one constant.
+    res = _intensity_wide()
+    ax = res.plot()
+    twin = next(a for a in ax.figure.axes if a is not ax)
+    assert len(twin.patches) == 3
+    centers = [p.get_x() + p.get_width() / 2.0 for p in twin.patches]
+    ratios = [p.get_width() / c for p, c in zip(twin.patches, centers, strict=True)]
+    # width/f is the same constant at 100 Hz and at 10 kHz (and in between).
+    assert min(centers) == pytest.approx(100.0)
+    assert max(centers) == pytest.approx(10000.0)
+    np.testing.assert_allclose(ratios, ratios[0], rtol=1e-9)
     plt.close("all")
 
 

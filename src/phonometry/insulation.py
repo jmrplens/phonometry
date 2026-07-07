@@ -65,9 +65,12 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Any, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Sequence, Tuple
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 # --- ISO 717-1 Table 3 reference values ----------------------------------
 
@@ -184,7 +187,7 @@ class WeightedRatingResult:
     measured: np.ndarray | None = None
     shifted_reference: np.ndarray | None = None
 
-    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
         """Plot the measured curve vs the shifted reference (ISO 717-1).
 
         Unfavourable deviations (reference above measurement) are shaded and
@@ -243,7 +246,7 @@ class ImpactRatingResult:
     measured: np.ndarray | None = None
     shifted_reference: np.ndarray | None = None
 
-    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
         """Plot the measured curve vs the shifted reference (ISO 717-2).
 
         Unfavourable deviations (measurement above the reference, the sign

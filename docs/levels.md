@@ -62,8 +62,18 @@ regulations are written in terms of it.
 ```python
 from phonometry import ln_levels
 
-stats = ln_levels(recording, fs, n=(10, 50, 90), weighting="A")
+# A steady tone gives L10 = L50 = L90; percentiles only tell a story for a
+# *fluctuating* level. Synthesize 3 s alternating between a quiet and a
+# ~10 dB louder half-second so the statistics separate.
+rng = np.random.default_rng(0)
+segment = fs // 2                                  # 0.5 s per level
+quiet = 0.02 * rng.standard_normal(segment)        # background
+loud = 0.06 * rng.standard_normal(segment)         # ~10 dB louder events
+varying = np.tile(np.concatenate([quiet, loud]), 3)
+
+stats = ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
+# LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%"></picture>

@@ -41,7 +41,7 @@ rng = np.random.default_rng(0)
 #   En una medición real son tus dos grabaciones de sonda calibradas;
 #   sintetizadas aquí (p2 = p1 retardada una muestra) para que la guía funcione.
 p1 = 0.02 * rng.standard_normal(fs)
-p2 = np.roll(p1, 1)
+p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 retardada una muestra
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
@@ -64,11 +64,13 @@ medición de intensidad.*
 ```python
 import matplotlib.pyplot as plt
 
+# res es el IntensityResult calculado en el ejemplo anterior.
 # En una línea — Lp frente a LI por banda, con el índice presión-intensidad en un eje gemelo:
 res.plot()
 plt.show()
 
-# A mano, con los campos por banda que lleva el resultado:
+# A mano, con los campos por banda que lleva el resultado — reproduciendo lo que
+# dibuja IntensityResult.plot() (etiqueta de barra, leyenda combinada de ambos ejes, título δpI):
 fig, ax = plt.subplots()
 ax.semilogx(res.frequency, res.pressure_level, "o-", label="Nivel de presión Lp")
 ax.semilogx(res.frequency, res.intensity_level, "s--", label="Nivel de intensidad LI")
@@ -76,9 +78,14 @@ ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Nivel [dB]")
 twin = ax.twinx()
 twin.bar(res.frequency, res.pressure_intensity_index,
-         width=res.frequency * 0.2, color="#2ca02c", alpha=0.25)
-twin.set_ylabel("δpI = Lp − LI [dB]")
-ax.legend()
+         width=res.frequency * 0.2, color="#2ca02c", alpha=0.25,
+         label="δpI = Lp − LI")
+twin.set_ylabel("Índice presión-intensidad δpI [dB]")
+# Combina los manejadores de ambos ejes en una sola leyenda, igual que .plot():
+lines, labels = ax.get_legend_handles_labels()
+tlines, tlabels = twin.get_legend_handles_labels()
+ax.legend(lines + tlines, labels + tlabels)
+ax.set_title(f"Lp frente a LI  (δpI total = {res.total_pressure_intensity_index:.1f} dB)")
 plt.show()
 ```
 

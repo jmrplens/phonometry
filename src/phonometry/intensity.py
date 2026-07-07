@@ -39,9 +39,12 @@ Annex B equation (B.1)).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, List
+from typing import TYPE_CHECKING, Any, List
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 from scipy import signal
 
 from .frequencies import _genfreqs
@@ -107,7 +110,7 @@ class IntensityResult:
     total_direction: int
     max_valid_frequency: float
 
-    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
         """Plot Lp vs LI per band with the pressure-intensity index.
 
         Requires per-band data (call ``sound_intensity(..., fraction=...)``)

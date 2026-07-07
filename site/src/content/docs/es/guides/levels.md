@@ -64,8 +64,18 @@ eventos), **L50** la mediana y **L90** el nivel de fondo.
 ```python
 from phonometry import ln_levels
 
-stats = ln_levels(recording, fs, n=(10, 50, 90), weighting="A")
+# Un tono constante da L10 = L50 = L90; los percentiles solo cuentan algo con un
+# nivel *fluctuante*. Sintetizamos 3 s alternando entre medio segundo tranquilo
+# y otro ~10 dB más fuerte para que los estadísticos se separen.
+rng = np.random.default_rng(0)
+segment = fs // 2                                  # 0.5 s por nivel
+quiet = 0.02 * rng.standard_normal(segment)        # fondo
+loud = 0.06 * rng.standard_normal(segment)         # eventos ~10 dB más fuertes
+varying = np.tile(np.concatenate([quiet, loud]), 3)
+
+stats = ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
+# LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (eventos) > L50 (mediana) > L90 (fondo)
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_es.png" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_es_dark.png" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%">

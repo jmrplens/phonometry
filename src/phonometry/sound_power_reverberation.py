@@ -40,9 +40,12 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 from .sound_power import (
     SoundPowerWarning,
@@ -87,7 +90,7 @@ class ReverberationSoundPowerResult:
     sound_power_level_a: float
     method: str
 
-    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
         """Plot the LW spectrum with the A-weighted total annotated.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the

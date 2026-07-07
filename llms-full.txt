@@ -767,8 +767,18 @@ regulations are written in terms of it.
 ```python
 from phonometry import ln_levels
 
-stats = ln_levels(recording, fs, n=(10, 50, 90), weighting="A")
+# A steady tone gives L10 = L50 = L90; percentiles only tell a story for a
+# *fluctuating* level. Synthesize 3 s alternating between a quiet and a
+# ~10 dB louder half-second so the statistics separate.
+rng = np.random.default_rng(0)
+segment = fs // 2                                  # 0.5 s per level
+quiet = 0.02 * rng.standard_normal(segment)        # background
+loud = 0.06 * rng.standard_normal(segment)         # ~10 dB louder events
+varying = np.tile(np.concatenate([quiet, loud]), 3)
+
+stats = ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
+# LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%"></picture>
@@ -1305,7 +1315,7 @@ rng = np.random.default_rng(0)
 #   In a real measurement these are your two calibrated probe recordings;
 #   synthesized here (p2 = p1 delayed one sample) so the guide runs.
 p1 = 0.02 * rng.standard_normal(fs)
-p2 = np.roll(p1, 1)
+p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 delayed one sample
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
@@ -1328,11 +1338,13 @@ intensity measurement.*
 ```python
 import matplotlib.pyplot as plt
 
+# res is the IntensityResult computed in the example above.
 # One line — Lp vs LI per band with the pressure-intensity index on a twin axis:
 res.plot()
 plt.show()
 
-# By hand, from the per-band fields the result carries:
+# By hand, from the per-band fields the result carries — mirroring what
+# IntensityResult.plot() draws (bar label, merged twin-axis legend, δpI title):
 fig, ax = plt.subplots()
 ax.semilogx(res.frequency, res.pressure_level, "o-", label="Pressure level Lp")
 ax.semilogx(res.frequency, res.intensity_level, "s--", label="Intensity level LI")
@@ -1340,9 +1352,14 @@ ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Level [dB]")
 twin = ax.twinx()
 twin.bar(res.frequency, res.pressure_intensity_index,
-         width=res.frequency * 0.2, color="#2ca02c", alpha=0.25)
-twin.set_ylabel("δpI = Lp − LI [dB]")
-ax.legend()
+         width=res.frequency * 0.2, color="#2ca02c", alpha=0.25,
+         label="δpI = Lp − LI")
+twin.set_ylabel("Pressure-intensity index δpI [dB]")
+# Merge both axes' handles into a single legend, exactly as .plot() does:
+lines, labels = ax.get_legend_handles_labels()
+tlines, tlabels = twin.get_legend_handles_labels()
+ax.legend(lines + tlines, labels + tlabels)
+ax.set_title(f"Lp vs LI  (total δpI = {res.total_pressure_intensity_index:.1f} dB)")
 plt.show()
 ```
 
@@ -1875,7 +1892,7 @@ print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  -> 
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(weighted_impact_rating(octave).rating)  # 54
 
-res_imp.plot()   # measured Ln vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
+res_imp.plot()   # measured L'nT vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
 ```
 
 <details>
@@ -1884,21 +1901,22 @@ res_imp.plot()   # measured Ln vs shifted ISO 717-2 reference, measured-above sh
 ```python
 import matplotlib.pyplot as plt
 
-# One line — measured Ln vs the shifted ISO 717-2 reference (measured-above shaded):
+# One line — measured L'nT vs the shifted ISO 717-2 reference (measured-above shaded):
 res_imp.plot()
 plt.show()
 
 # By hand, from the band curve the result now carries (note the opposite sign:
-# an unfavourable deviation is where the MEASURED level exceeds the reference):
+# an unfavourable deviation is where the MEASURED level exceeds the reference).
+# Here the input was l_n_t, so the rated quantity is the field level L'nT,w:
 fig, ax = plt.subplots()
-ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured Ln")
+ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured L'nT")
 ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Shifted reference")
 ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
                 where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
                 alpha=0.3, label="Unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Impact sound pressure level [dB]")
-ax.set_title(f"Ln,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.set_title(f"L'nT,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
 ax.legend()
 plt.show()
 ```

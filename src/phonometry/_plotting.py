@@ -116,7 +116,8 @@ def plot_zwicker_loudness(
     else:
         ax_specific = ax if ax is not None else _new_axes()
 
-    ax_specific.plot(bark, specific, color="#1f77b4", **kwargs)
+    kwargs.setdefault("color", "#1f77b4")
+    ax_specific.plot(bark, specific, **kwargs)
     ax_specific.fill_between(bark, specific, color="#1f77b4", alpha=0.25)
     ax_specific.set_xlabel("Critical-band rate z [Bark]")
     ax_specific.set_ylabel("Specific loudness N' [sone/Bark]")
@@ -163,7 +164,8 @@ def plot_sti(result: STIResult, ax: Axes | None = None, **kwargs: Any) -> Axes:
     ax = ax if ax is not None else _new_axes()
     mti = np.asarray(result.mti, dtype=np.float64)
     positions = np.arange(mti.size)
-    ax.bar(positions, mti, color="#1f77b4", **kwargs)
+    kwargs.setdefault("color", "#1f77b4")
+    ax.bar(positions, mti, **kwargs)
     ax.set_xticks(positions)
     if mti.size == len(_STI_BAND_CENTERS):
         ax.set_xticklabels([_format_freq(f) for f in _STI_BAND_CENTERS])
@@ -204,7 +206,9 @@ def _plot_rating(
     keyword arguments style the measured curve (its primary artist).
     """
     ax = ax if ax is not None else _new_axes()
-    ax.plot(band_centers, measured, "o-", color="#1f77b4", label="Measured", **kwargs)
+    kwargs.setdefault("color", "#1f77b4")
+    kwargs.setdefault("label", "Measured")
+    ax.plot(band_centers, measured, "o-", **kwargs)
     ax.plot(
         band_centers, reference, "s--", color="#d62728", label="Shifted reference"
     )
@@ -281,7 +285,10 @@ def plot_impact_rating(result: Any, ax: Axes | None = None, **kwargs: Any) -> Ax
         impact=True,
         rating=result.rating,
         unfavourable_sum=result.unfavourable_sum,
-        title=f"Ln,w (CI={result.ci:+d})",
+        # The rated quantity depends on the input (Ln,w, L'n,w or L'nT,w);
+        # the dataclass does not carry which, so the figure uses the neutral
+        # "Impact rating" label rather than hard-coding one specific symbol.
+        title=f"Impact rating (CI={result.ci:+d})",
         ylabel="Impact sound pressure level [dB]",
         ax=ax,
         **kwargs,
@@ -316,7 +323,7 @@ def _annotate_impact_500(
     offset = rating - read_value
     if abs(offset) >= 0.5:  # octave-band -5 dB rule (Clause 4.3.2)
         ax.annotate(
-            f"Ln,w = {rating} dB = {read_value:.0f} - 5 dB (octave rule)",
+            f"rating = {rating} dB = {read_value:.0f} - 5 dB (octave rule)",
             xy=(band_centers[idx], read_value),
             xytext=(0.0, -32.0),
             textcoords="offset points",
@@ -421,9 +428,12 @@ def _draw_decay_times(
         valid_arr = np.asarray(valid, dtype=bool)
         colors = [color if v else "#bbbbbb" for v in valid_arr]
         hatches = np.where(valid_arr, "", "//")
+        # Merge per-series defaults with the user kwargs (user wins) freshly
+        # each iteration so an overriding label/color is not frozen by the
+        # first band group.
+        bar_kwargs = {"color": colors, "label": label, **kwargs}
         bars = ax.bar(
-            positions + offset, np.nan_to_num(vals), width=width,
-            color=colors, label=label, **kwargs,
+            positions + offset, np.nan_to_num(vals), width=width, **bar_kwargs,
         )
         for bar, hatch in zip(bars, hatches, strict=True):
             if hatch:
@@ -473,7 +483,8 @@ def plot_sound_power(result: Any, ax: Axes | None = None, **kwargs: Any) -> Axes
         else np.zeros(n, dtype=bool)
     )
     colors = ["#bbbbbb" if b else "#1f77b4" for b in neg]
-    bars = ax.bar(positions, np.nan_to_num(lw), color=colors, **kwargs)
+    kwargs.setdefault("color", colors)
+    bars = ax.bar(positions, np.nan_to_num(lw), **kwargs)
     for bar, is_neg in zip(bars, neg, strict=True):
         if is_neg:
             bar.set_hatch("//")
@@ -501,10 +512,17 @@ def plot_sound_power(result: Any, ax: Axes | None = None, **kwargs: Any) -> Axes
 # ---------------------------------------------------------------------------
 
 
-def _bar_width(positions: np.ndarray) -> float:
-    if positions.size > 1:
-        return 0.8 * float(np.min(np.diff(np.sort(positions))))
-    return 0.8
+def _bar_width(positions: np.ndarray, k: float = 0.2) -> np.ndarray:
+    """Per-bar widths for a *logarithmic* frequency axis.
+
+    A constant linear width makes high-frequency bars almost invisible on
+    a log axis (a 25 Hz-wide bar spans a third of an octave at 100 Hz but
+    a thousandth of one at 10 kHz).  Scaling each width with its own centre
+    frequency (``width_i = k * f_i``, the fractional-band style) keeps the
+    *drawn* (log-space) width visually constant across the whole spectrum,
+    so ``get_width() / f`` is the same constant ``k`` for every band.
+    """
+    return k * np.asarray(positions, dtype=np.float64)
 
 
 def plot_intensity(
@@ -533,7 +551,9 @@ def plot_intensity(
     li = np.asarray(result.intensity_level, dtype=np.float64)
     index = np.asarray(result.pressure_intensity_index, dtype=np.float64)
 
-    ax.plot(freqs, lp, "o-", color="#1f77b4", label="Pressure level Lp", **kwargs)
+    kwargs.setdefault("color", "#1f77b4")
+    kwargs.setdefault("label", "Pressure level Lp")
+    ax.plot(freqs, lp, "o-", **kwargs)
     ax.plot(freqs, li, "s--", color="#d62728", label="Intensity level LI")
     _freq_axis(ax, freqs)
     ax.set_ylabel("Level [dB]")
@@ -573,7 +593,9 @@ def plot_decay_curve(
     ax = ax if ax is not None else _new_axes()
     time = np.asarray(result.time, dtype=np.float64)
     level = np.asarray(result.level, dtype=np.float64)
-    ax.plot(time, level, color="#1f77b4", label="Schroeder decay", **kwargs)
+    kwargs.setdefault("color", "#1f77b4")
+    kwargs.setdefault("label", "Schroeder decay")
+    ax.plot(time, level, **kwargs)
 
     if fits:
         for label, lo, hi, style in (

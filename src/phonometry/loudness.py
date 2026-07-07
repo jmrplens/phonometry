@@ -22,9 +22,12 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Any, List, Tuple
+from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 from scipy import signal
 
 from ._zwicker_data import (
@@ -106,7 +109,7 @@ class ZwickerLoudness:
     time: np.ndarray | None = None
     loudness_vs_time: np.ndarray | None = None
 
-    def plot(self, ax: Any = None, **kwargs: Any) -> Any:
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes | np.ndarray:
         """Plot the specific loudness N'(z) over Bark (see :mod:`._plotting`).
 
         Adds a loudness-vs-time panel when the time-varying trace is

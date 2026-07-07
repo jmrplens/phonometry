@@ -11,53 +11,15 @@ The measured gain is the steady-state RMS ratio of a pure tone through the
 real filter path (default ``high_accuracy``), at 48 kHz and 96 kHz.
 """
 
-import math
-
 import numpy as np
 import pytest
 
 from phonometry import WeightingFilter
-
-INF = math.inf
+from reference_data import IEC61672_TABLE3 as TABLE3
 
 # (nominal_freq_Hz, A_dB, C_dB, class1_upper_dB, class1_lower_dB)
-# BS EN 61672-1:2013 Table 3 (Z weighting is 0.0 dB at every frequency).
-TABLE3 = [
-    (10, -70.4, -14.3, 3.0, -INF),
-    (12.5, -63.4, -11.2, 2.5, -INF),
-    (16, -56.7, -8.5, 2.0, -4.0),
-    (20, -50.5, -6.2, 2.0, -2.0),
-    (25, -44.7, -4.4, 2.0, -1.5),
-    (31.5, -39.4, -3.0, 1.5, -1.5),
-    (40, -34.6, -2.0, 1.0, -1.0),
-    (50, -30.2, -1.3, 1.0, -1.0),
-    (63, -26.2, -0.8, 1.0, -1.0),
-    (80, -22.5, -0.5, 1.0, -1.0),
-    (100, -19.1, -0.3, 1.0, -1.0),
-    (125, -16.1, -0.2, 1.0, -1.0),
-    (160, -13.4, -0.1, 1.0, -1.0),
-    (200, -10.9, 0.0, 1.0, -1.0),
-    (250, -8.6, 0.0, 1.0, -1.0),
-    (315, -6.6, 0.0, 1.0, -1.0),
-    (400, -4.8, 0.0, 1.0, -1.0),
-    (500, -3.2, 0.0, 1.0, -1.0),
-    (630, -1.9, 0.0, 1.0, -1.0),
-    (800, -0.8, 0.0, 1.0, -1.0),
-    (1000, 0.0, 0.0, 0.7, -0.7),
-    (1250, 0.6, 0.0, 1.0, -1.0),
-    (1600, 1.0, -0.1, 1.0, -1.0),
-    (2000, 1.2, -0.2, 1.0, -1.0),
-    (2500, 1.3, -0.3, 1.0, -1.0),
-    (3150, 1.2, -0.5, 1.0, -1.0),
-    (4000, 1.0, -0.8, 1.0, -1.0),
-    (5000, 0.5, -1.3, 1.5, -1.5),
-    (6300, -0.1, -2.0, 1.5, -2.0),
-    (8000, -1.1, -3.0, 1.5, -2.5),
-    (10000, -2.5, -4.4, 2.0, -3.0),
-    (12500, -4.3, -6.2, 2.0, -5.0),
-    (16000, -6.6, -8.5, 2.5, -16.0),
-    (20000, -9.3, -11.2, 3.0, -INF),
-]
+# BS EN 61672-1:2013 Table 3 is imported from reference_data (shared with the
+# CI conformance report). Z weighting is 0.0 dB at every frequency.
 
 
 def _measured_gain_db(wf: WeightingFilter, fs: int, f0: float) -> float:

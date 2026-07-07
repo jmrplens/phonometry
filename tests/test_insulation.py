@@ -34,6 +34,7 @@ from phonometry import (
     energy_average_level,
     weighted_rating,
 )
+from reference_data import ISO717_1_ANNEX_C_R as _ANNEX_C_R
 
 # One-third-octave reference values, ISO 717-1 Table 3 (100 Hz to 3150 Hz).
 _REF_THIRD = [33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56]
@@ -92,11 +93,8 @@ def _brute_force_adaptation(
     x_aj = -10.0 * np.log10(np.sum(10.0 ** ((spec - meas) / 10.0)))
     return int(math.floor(x_aj + 0.5)) - rating
 
-# ISO 717-1 Annex C, Table C.1 measured sound reduction index R (100-3150).
-_ANNEX_C_R = [
-    20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
-    28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5,
-]
+# ISO 717-1 Annex C, Table C.1 measured sound reduction index R (100-3150)
+# is imported from reference_data (shared with the CI conformance report).
 
 
 # --------------------------------------------------------------------------

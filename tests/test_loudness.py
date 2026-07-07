@@ -188,3 +188,21 @@ def test_diffuse_field_differs() -> None:
     diffuse = loudness_zwicker_from_spectrum(levels, field="diffuse")
     assert isinstance(free, ZwickerLoudness)
     assert free.loudness != diffuse.loudness
+
+
+def test_minimal_length_validation() -> None:
+    """Signals shorter than one 500 Hz output sample raise cleanly instead
+    of crashing on an empty percentile buffer."""
+    with pytest.raises(ValueError, match="too short"):
+        loudness_zwicker(np.ones(48), FS)
+    res = loudness_zwicker(np.ones(96 * 4), FS)  # exactly a few output samples
+    assert res.loudness >= 0.0
+
+
+def test_specific_pattern_matches_reported_max() -> None:
+    """The returned pattern is taken at the same decimated instant as the
+    reported Nmax. For a steady tone the temporal weighting converges, so
+    the pattern integral must match Nmax there (for transients the
+    instantaneous pattern legitimately exceeds the weighted maximum)."""
+    res = loudness_zwicker(_tone(1000.0, 70.0, seconds=2.0, pad_ms=0.0), FS)
+    assert float(np.sum(res.specific) * 0.1) == pytest.approx(res.loudness, rel=0.03)

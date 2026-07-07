@@ -153,10 +153,12 @@ def _third_octave_levels(x: np.ndarray, stationary: bool) -> np.ndarray:
     else:
         dec_factor = _FS_REF // _SR_LEVEL
         num_dec = num_samples // dec_factor
-        if num_dec == 0:
+        # One 500 Hz output sample needs _SR_LEVEL/_SR_LOUDNESS level steps.
+        min_steps = _SR_LEVEL // _SR_LOUDNESS
+        if num_dec < min_steps:
             raise ValueError(
                 "Input signal is too short for the time-varying method: at "
-                f"least {dec_factor} samples at 48 kHz are required."
+                f"least {dec_factor * min_steps} samples at 48 kHz are required."
             )
 
     levels = np.empty((_N_BANDS, num_dec))
@@ -681,7 +683,10 @@ def loudness_zwicker(
     n_max = float(np.max(loudness_out, initial=0.0))
     n5 = _percentile(loudness_out, 5)
     n10 = _percentile(loudness_out, 10)
-    specific_at_max = specific[:, int(np.argmax(loudness))].copy()
+    # The reported pattern must correspond to the reported maximum: pick the
+    # same decimated instant that produced n_max, mapped back to the 2 ms axis.
+    idx_max = int(np.argmax(loudness_out)) * dec_factor
+    specific_at_max = specific[:, idx_max].copy()
     time = np.arange(num_out) / _SR_LOUDNESS
     return ZwickerLoudness(
         loudness=n_max,

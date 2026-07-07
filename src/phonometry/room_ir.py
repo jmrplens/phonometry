@@ -48,6 +48,11 @@ from .utils import _typesignal
 # and Long Pseudo-Random Sequence Generators", P. Alfke, 1996; equivalent to
 # the primitive-polynomial tables used by Rife & Vanderkooy, JAES 37 (1989),
 # ISO 18233 Bibliography [16]).
+#: A genuine (optionally faded) exponential sweep never ends in a run of
+#: exact zeros; more trailing zeros than this small tolerance indicate the
+#: reference was zero-padded (see the Farina guard in ``impulse_response``).
+_FARINA_MAX_TRAILING_ZEROS = 8
+
 _MLS_TAPS: Dict[int, Tuple[int, ...]] = {
     2: (2, 1),
     3: (3, 2),
@@ -232,11 +237,15 @@ def impulse_response(
     :param method: ``"spectral"`` for spectral division
         ``H = Y*conj(X)/(|X|^2+reg)`` (Figure B.3, default) or ``"farina"``
         for convolution with the analytic inverse filter (Figure B.2). The
-        Farina method requires ``f_range`` and assumes the reference sweep was
-        generated with the default ``amplitude``/``fade`` of :func:`sweep_signal`
-        (it rebuilds the inverse filter with those defaults); a non-unit
-        amplitude or custom fade yields a scaled IR, so use the spectral
-        method in that case.
+        Farina method requires ``f_range`` and the **exact-length, unpadded**
+        excitation sweep as ``reference`` (it rebuilds the inverse filter from
+        ``reference.size/fs`` as the sweep duration); a reference zero-padded
+        to the recording length - the correct input for the spectral method -
+        is rejected with a ``ValueError`` because it would silently produce a
+        wrong inverse filter. It also assumes the reference sweep was
+        generated with the default ``amplitude``/``fade`` of
+        :func:`sweep_signal`; a non-unit amplitude or custom fade yields a
+        scaled IR, so use the spectral method in that case.
     :param f_range: ``(f1, f2)`` of the sweep, required for ``method="farina"``
         to rebuild the inverse filter; ignored for the spectral method.
     :param regularization: Tikhonov term added to the denominator, expressed
@@ -269,6 +278,25 @@ def impulse_response(
     elif method == "farina":
         if f_range is None:
             raise ValueError("method='farina' requires f_range=(f1, f2)")
+        # The Farina inverse filter is rebuilt from the reference length
+        # (ref.size/fs is taken as the sweep duration). A reference that was
+        # zero-padded to the recording length - the correct input for
+        # method="spectral" - makes the rebuilt sweep longer than the real
+        # excitation, silently producing a wrong inverse filter (the IR peak
+        # is mislocated and orders of magnitude too small). Detect trailing
+        # zero-padding and reject it: a genuine (optionally faded) sweep has
+        # no trailing run of exact zeros.
+        nonzero = np.flatnonzero(ref)
+        last_nonzero = int(nonzero[-1]) if nonzero.size else -1
+        n_trailing = ref.size - 1 - last_nonzero
+        if n_trailing > _FARINA_MAX_TRAILING_ZEROS:
+            raise ValueError(
+                f"method='farina' requires the unpadded excitation sweep as "
+                f"'reference', but it ends in {n_trailing} zero samples "
+                "(zero-padding to the recording length is only correct for "
+                "method='spectral'). Pass the exact-length sweep from "
+                "sweep_signal(), or use method='spectral'."
+            )
         inv = inverse_filter(fs, f_range[0], f_range[1], ref.size / fs)
         conv = signal.fftconvolve(rec, inv)
         # The linear IR peaks where the inverse aligns with the sweep, at

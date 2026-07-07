@@ -684,14 +684,21 @@ def loudness_zwicker(
     loudness = _temporal_weighting(loudness, _SR_LEVEL)
 
     # Loudness-vs-time output at 500 Hz (clause 6.5): plain decimation of
-    # the 2 ms series, as in the reference main program.
+    # the 2 ms series, as in the reference main program. This decimated
+    # trace remains the public ``time``/``loudness_vs_time`` contract.
     dec_factor = _SR_LEVEL // _SR_LOUDNESS
     num_out = loudness.size // dec_factor
     loudness_out = loudness[: num_out * dec_factor : dec_factor].copy()
 
+    # N5/N10 percentiles are taken on the FULL-rate 2000 Hz weighted series
+    # rather than the 4x-decimated 500 Hz trace: decimation keeps only one
+    # of four phases and discards 75 % of the samples, giving up to ~3 %
+    # phase-dependent spread in N5 (Annex B TS 10). The full-rate percentile
+    # is phase-unambiguous and lies inside that spread. Nmax stays tied to
+    # the reported 500 Hz trace (so it matches the reported pattern).
     n_max = float(np.max(loudness_out, initial=0.0))
-    n5 = _percentile(loudness_out, 5)
-    n10 = _percentile(loudness_out, 10)
+    n5 = _percentile(loudness, 5)
+    n10 = _percentile(loudness, 10)
     # The reported pattern must correspond to the reported maximum: pick the
     # same decimated instant that produced n_max, mapped back to the 2 ms axis.
     idx_max = int(np.argmax(loudness_out)) * dec_factor

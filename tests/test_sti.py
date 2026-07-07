@@ -15,6 +15,8 @@ Validation vectors:
 - Annex F qualification bands: edges 0,36-0,76 in 0,04 steps, U..A+.
 """
 
+import warnings
+
 import numpy as np
 import pytest
 
@@ -224,6 +226,20 @@ def test_stipa_loopback_ideal_channel():
     assert result.rating == "A+"
     assert result.mtf.shape == (7, 2)
     assert np.all(result.mtf > 0.9)
+
+
+def test_stipa_short_recording_warns():
+    """A recording shorter than the recommended 15 s biases the recovered
+    modulation depths (and STI) low; stipa should warn (IEC 60268-16 STIPA
+    practice recommends 15 s to 25 s)."""
+    short = stipa_signal(FS, seconds=5.0, seed=1234)
+    with pytest.warns(UserWarning, match="15"):
+        stipa(short, FS)
+    # No warning at the recommended length.
+    long = stipa_signal(FS, seconds=18.0, seed=1234)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        stipa(long, FS)
 
 
 def test_stipa_with_noise_is_monotonic():

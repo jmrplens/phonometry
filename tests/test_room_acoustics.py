@@ -202,6 +202,44 @@ def test_noise_flips_validity_flags() -> None:
     assert res.dynamic_range[0] == pytest.approx(30.0, abs=3.0)
 
 
+def test_decay_validity_thresholds_account_for_tail_compensation() -> None:
+    """The T20/T30 validity flags must require more dynamic range than the
+    bare ISO 3382-1 +15 dB rule (old thresholds 35/45 dB peak-to-noise).
+    That rule is derived for finite forward integration with no tail
+    compensation (C = 0, which under-estimates T); this module compensates
+    the truncated tail (Schroeder Eq. (3), C != 0), whose residual bias is
+    positive, so a flagged-valid T20 at dyn=35 / T30 at dyn=45 exceeds the
+    5 % JND (ISO 3382-2 Table A.1). Flags must tighten to ~46 dB (T20) and
+    ~54 dB (T30), where the bias falls below the JND."""
+
+    def noisy_exp(sigma: float, seed: int) -> np.ndarray:
+        rng = np.random.default_rng(seed)
+        ir = exponential_ir(1.0, 3.0)
+        return ir + sigma * rng.standard_normal(ir.size)
+
+    # dyn ~ 40 dB: above the OLD T20 threshold (35 dB, would flag valid),
+    # below the NEW one (46 dB) -> must now be flagged INVALID.
+    res = room_parameters(noisy_exp(0.010, 0), FS, limits=None)
+    assert res.dynamic_range[0] == pytest.approx(40.0, abs=2.0)
+    assert np.isfinite(res.t20[0])
+    assert not bool(res.t20_valid[0])
+
+    # dyn ~ 52 dB: T20 now valid (>= 46) with bias < JND; T30 still below its
+    # NEW threshold (54 dB) though above the OLD one (45 dB) -> T30 invalid.
+    res = room_parameters(noisy_exp(0.0025, 0), FS, limits=None)
+    assert res.dynamic_range[0] == pytest.approx(52.0, abs=2.0)
+    assert bool(res.t20_valid[0])
+    assert abs(res.t20[0] - 1.0) < 0.05
+    assert np.isfinite(res.t30[0])
+    assert not bool(res.t30_valid[0])
+
+    # dyn ~ 56 dB: T30 now valid (>= 54) with bias < JND.
+    res = room_parameters(noisy_exp(0.0016, 0), FS, limits=None)
+    assert res.dynamic_range[0] == pytest.approx(56.0, abs=2.0)
+    assert bool(res.t30_valid[0])
+    assert abs(res.t30[0] - 1.0) < 0.05
+
+
 def test_clean_ir_flags_all_valid() -> None:
     ir = exponential_ir(1.0, 3.0)
     res = room_parameters(ir, FS, limits=None)

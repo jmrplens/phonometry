@@ -46,6 +46,13 @@ def _g_aures(z: np.ndarray, total_n: float) -> np.ndarray:
 
 
 def _moment(specific: np.ndarray, method: str) -> float:
+    """Raw g(z)-weighted first moment of the specific-loudness pattern.
+
+    Returns the un-normalized moment ``sum(N' g(z) z) dz / sum(N') dz`` for
+    the requested weighting; the per-variant normalization constant that
+    anchors the DIN 45692 reference sound to 1.00 acum is applied by the
+    caller (``_k_din`` / ``_k_bismarck`` / ``_k_aures``).
+    """
     n_total = float(np.sum(specific) * _DZ)
     if n_total <= 0:
         return 0.0
@@ -54,10 +61,10 @@ def _moment(specific: np.ndarray, method: str) -> float:
         return num / n_total
     if method == "bismarck":
         num = float(np.sum(specific * _g_bismarck(_Z) * _Z) * _DZ)
-        return 0.11 * num / n_total
+        return num / n_total
     if method == "aures":
         num = float(np.sum(specific * _g_aures(_Z, n_total) * _Z) * _DZ)
-        return 0.11 * num / n_total
+        return num / n_total
     raise ValueError("method must be 'din', 'aures' or 'bismarck'")
 
 
@@ -83,6 +90,8 @@ def _reference_specific() -> np.ndarray:
 
 
 _K_DIN: float | None = None
+_K_BISMARCK: float | None = None
+_K_AURES: float | None = None
 
 
 def _k_din() -> float:
@@ -93,6 +102,32 @@ def _k_din() -> float:
         if not 0.105 <= _K_DIN < 0.115:  # pragma: no cover - sanity guard
             raise AssertionError(f"k={_K_DIN} outside the DIN 45692 range")
     return _K_DIN
+
+
+def _k_bismarck() -> float:
+    """von Bismarck (Annex B) normalization constant, derived like ``_k_din``
+    so the clause 6 reference sound yields exactly 1.00 acum (replacing the
+    hard-coded 0.11 literal)."""
+    global _K_BISMARCK
+    if _K_BISMARCK is None:
+        _K_BISMARCK = 1.0 / _moment(_reference_specific(), "bismarck")
+        if not 0.08 <= _K_BISMARCK < 0.15:  # pragma: no cover - sanity guard
+            raise AssertionError(f"k_bismarck={_K_BISMARCK} out of range")
+    return _K_BISMARCK
+
+
+def _k_aures() -> float:
+    """Aures (Annex B) normalization constant, derived like ``_k_din`` so the
+    clause 6 reference sound yields exactly 1.00 acum (replacing the
+    hard-coded 0.11 literal). Because the Aures weighting depends on the
+    total loudness N, this anchor holds at the reference sound's loudness
+    specifically."""
+    global _K_AURES
+    if _K_AURES is None:
+        _K_AURES = 1.0 / _moment(_reference_specific(), "aures")
+        if not 0.08 <= _K_AURES < 0.15:  # pragma: no cover - sanity guard
+            raise AssertionError(f"k_aures={_K_AURES} out of range")
+    return _K_AURES
 
 
 def sharpness_din_from_specific(specific: np.ndarray, method: str = "din") -> float:
@@ -110,7 +145,11 @@ def sharpness_din_from_specific(specific: np.ndarray, method: str = "din") -> fl
         raise ValueError("specific must be the 240-bin ISO 532-1 pattern.")
     if method == "din":
         return _k_din() * _moment(specific, "din")
-    return _moment(specific, method)
+    if method == "bismarck":
+        return _k_bismarck() * _moment(specific, "bismarck")
+    if method == "aures":
+        return _k_aures() * _moment(specific, "aures")
+    raise ValueError("method must be 'din', 'aures' or 'bismarck'")
 
 
 def sharpness_din(

@@ -57,6 +57,13 @@ _STIPA_F1 = np.array([1.60, 1.00, 0.63, 2.00, 1.25, 0.80, 2.50])
 _STIPA_F2 = np.array([8.00, 5.00, 3.15, 10.00, 6.25, 4.00, 12.50])
 _STIPA_MOD_INDEX = 0.55  # Annex B: m = 0.55 per component, unchanged in Ed.5
 
+#: Recommended minimum STIPA recording length (IEC 60268-16 STIPA practice
+#: recommends 15 s to 25 s). Below this the recovered modulation depths are
+#: biased low - and hence the STI too - because the slow modulation
+#: components are averaged over too few periods: on an ideal loopback the
+#: recovered STI is ~0.944 at 5 s, ~0.991 at 15 s and ~0.998 at 18 s.
+_STIPA_MIN_SECONDS = 15.0
+
 # Ed.5 male speech test-signal spectrum, clause A.6.1, in dB relative to
 # the 500 Hz band (125 Hz and 250 Hz reduced by 6.2 dB and 3.2 dB vs Ed.4
 # Table A.4 - the only numeric change of Edition 5).
@@ -378,6 +385,12 @@ def stipa(
     ``level`` (and optionally ``ambient``) only to enable the absolute
     level-dependent corrections, which are otherwise skipped.
 
+    A :class:`UserWarning` is emitted when the recording is shorter than
+    the recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s),
+    because the slow modulation components are then averaged over too few
+    periods and the recovered modulation depths - and hence the STI - are
+    biased low (an ideal loopback gives STI ~0.944 at 5 s vs ~0.998 at 18 s).
+
     :param x: Recorded STIPA signal (1D), 15 s to 25 s recommended.
     :param fs: Sample rate in Hz (>= 22,5 kHz).
     :param reference: Optional reference recording of the undistorted
@@ -398,6 +411,16 @@ def stipa(
         raise ValueError(
             f"Sample rate 'fs' must be >= {_MIN_FS} Hz: the 8 kHz octave band "
             "extends to 11,2 kHz (IEC 61260-1)."
+        )
+
+    if x_proc.size / fs < _STIPA_MIN_SECONDS:
+        warnings.warn(
+            f"STIPA recording is {x_proc.size / fs:.1f} s, shorter than the "
+            f"recommended {_STIPA_MIN_SECONDS:.0f} s (IEC 60268-16 STIPA "
+            "practice, 15 s to 25 s): the recovered modulation depths, and "
+            "hence the STI, are biased low.",
+            UserWarning,
+            stacklevel=2,
         )
 
     mdr = _stipa_modulation_depths(_intensity_envelopes(x_proc, fs), fs)

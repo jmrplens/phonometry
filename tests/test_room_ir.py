@@ -116,6 +116,24 @@ def test_farina_method_recovers_iir_response_in_band() -> None:
     assert np.max(np.abs(est_db - true_db)) < 0.5
 
 
+def test_farina_rejects_zero_padded_reference() -> None:
+    """A reference zero-padded to the recording length (the correct input
+    for method='spectral') silently rebuilds a wrong inverse filter for
+    Farina; it must raise instead. The unpadded sweep is unaffected."""
+    b, a = signal.butter(4, [200.0, 2000.0], btype="band", fs=FS)
+    f1, f2, secs = 20.0, 20000.0, 2.0
+    x = sweep_signal(FS, f1, f2, secs)
+    y = signal.lfilter(b, a, x)
+    # Pad the reference to the recording length, as one would for spectral.
+    n = y.size + x.size - 1
+    x_padded = np.concatenate([x, np.zeros(n - x.size)])
+    with pytest.raises(ValueError, match="zero-pad|unpadded|spectral"):
+        impulse_response(y, x_padded, FS, method="farina", f_range=(f1, f2))
+    # The unpadded sweep still works unchanged.
+    ir = impulse_response(y, x, FS, method="farina", f_range=(f1, f2), length=16384)
+    assert np.isfinite(ir).all()
+
+
 # --------------------------------------------------------------------------
 # Harmonic separation (Farina): distortion products at negative times
 # --------------------------------------------------------------------------

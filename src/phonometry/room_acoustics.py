@@ -24,11 +24,17 @@ sound (A.2.1).
 
 Validity flags implement the dynamic-range criterion of ISO 3382-1:2009,
 5.3.3: the background noise must lie at least the evaluation range plus
-15 dB below the maximum of the (squared) impulse response - 25 dB for
-EDT, 35 dB for T20 and 45 dB for T30 (equivalently, the noise floor sits
-at least 10 dB below the lowest evaluation point). The curvature
-indicator C = 100*(T30/T20 - 1) follows ISO 3382-2:2008, B.3; values
-above 10 % flag a decay curve that is far from a straight line.
+15 dB below the maximum of the (squared) impulse response - 25 dB for EDT
+(equivalently, the noise floor sits at least 10 dB below the lowest
+evaluation point). The +15 dB rule is derived for finite forward
+integration without tail compensation (C = 0), which under-estimates T;
+because this module compensates the truncated tail (5.3.3, Equation (3),
+C != 0) with a residual positive bias, the T20 and T30 flags add extra
+headroom (46 dB for T20, 54 dB for T30) so that a flagged-valid decay
+time stays within the 5 % just-noticeable difference of ISO 3382-2:2008,
+Table A.1. The curvature indicator C = 100*(T30/T20 - 1) follows
+ISO 3382-2:2008, B.3; values above 10 % flag a decay curve that is far
+from a straight line.
 """
 
 from __future__ import annotations
@@ -57,6 +63,20 @@ _NOISE_TAIL_FRACTION = 0.1
 #: the maximum of the impulse response (i.e. 10 dB below the lowest
 #: evaluation point).
 _NOISE_MARGIN_DB = 15.0
+
+#: Extra dynamic-range headroom (dB) beyond the ISO 3382-1 +15 dB rule for
+#: the T20/T30 validity flags. ISO 3382-1:2009, 5.3.3 requires the noise to
+#: lie at least the evaluation range + 15 dB below the IR maximum, but that
+#: rule is derived for finite forward integration WITHOUT tail compensation
+#: (C = 0), which UNDER-estimates T. This module compensates the truncated
+#: tail (Schroeder Eq. (3), C != 0), whose residual bias is POSITIVE and
+#: larger than the +15 dB budget: at the bare thresholds (35 dB T20, 45 dB
+#: T30) a flagged-valid decay time still carries a bias above the 5 % JND
+#: (ISO 3382-2:2008 Table A.1). The flagged-valid bias only falls below the
+#: JND at dyn >= 46 dB (T20) and dyn >= 54 dB (T30), i.e. +11 dB / +9 dB of
+#: extra headroom, at the cost of flagging borderline measurements invalid.
+_T20_TAIL_HEADROOM_DB = 11.0
+_T30_TAIL_HEADROOM_DB = 9.0
 
 #: The decay curve is only trusted down to noise floor + 10 dB.
 _TRUST_MARGIN_DB = 10.0
@@ -89,8 +109,11 @@ class RoomAcousticsResult:
     ``dynamic_range`` is the peak-to-noise-floor distance of the squared
     band impulse response in dB. ``edt_valid``, ``t20_valid`` and
     ``t30_valid`` apply the ISO 3382-1:2009, 5.3.3 criterion (noise at
-    least evaluation range + 15 dB below the maximum: 25/35/45 dB) and
-    are False when the value could not be evaluated. ``curvature`` is
+    least evaluation range + 15 dB below the maximum: 25 dB for EDT), with
+    T20 and T30 tightened to 46 dB and 54 dB to absorb the positive bias of
+    the tail compensation (5.3.3, Eq. (3)) and keep a flagged-valid value
+    within the 5 % JND (ISO 3382-2:2008, Table A.1); they are False when the
+    value could not be evaluated. ``curvature`` is
     C = 100*(T30/T20 - 1) in percent (ISO 3382-2:2008, B.3); values
     above 10 % indicate an unreliable, non-straight decay.
     """
@@ -358,7 +381,10 @@ def room_parameters(
     reaching below the noise floor + 10 dB) are NaN. The validity flags
     apply the dynamic-range criterion of ISO 3382-1:2009, 5.3.3 (noise
     at least evaluation range + 15 dB below the maximum of the impulse
-    response: 25 dB for EDT, 35 dB for T20, 45 dB for T30).
+    response: 25 dB for EDT), with T20 and T30 raised to 46 dB and 54 dB
+    to absorb the positive bias of the tail compensation and keep a
+    flagged-valid decay time within the 5 % JND (ISO 3382-2:2008,
+    Table A.1).
 
     :param ir: Measured impulse response (1D).
     :param fs: Sample rate in Hz.
@@ -403,8 +429,14 @@ def room_parameters(
         dynamic_range=dyn,
         edt_valid=np.isfinite(edt) & (dyn >= _EDT_RANGE[1] + _NOISE_MARGIN_DB),
         t20_valid=np.isfinite(t20)
-        & (dyn >= _T20_RANGE[1] - _T20_RANGE[0] + _NOISE_MARGIN_DB),
+        & (
+            dyn
+            >= _T20_RANGE[1] - _T20_RANGE[0] + _NOISE_MARGIN_DB + _T20_TAIL_HEADROOM_DB
+        ),
         t30_valid=np.isfinite(t30)
-        & (dyn >= _T30_RANGE[1] - _T30_RANGE[0] + _NOISE_MARGIN_DB),
+        & (
+            dyn
+            >= _T30_RANGE[1] - _T30_RANGE[0] + _NOISE_MARGIN_DB + _T30_TAIL_HEADROOM_DB
+        ),
         curvature=curvature,
     )

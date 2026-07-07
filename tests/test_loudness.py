@@ -137,6 +137,39 @@ def test_annex_b4_tone_pulses(case: str, num: int, level: float) -> None:
     assert inside >= 0.99, f"{case}: only {inside:.1%} of N(t) inside the tolerance band"
 
 
+def test_n5_n10_use_full_rate_series(monkeypatch) -> None:
+    """N5/N10 must come from the full-rate 2000 Hz weighted-loudness series,
+    not the 4x-decimated 500 Hz output trace. Decimation keeps only one of
+    four phases, spreading N5 by up to ~3 % across the phases (Annex B
+    TS 10, 0.7513..0.7752); the full-rate percentile (0.7628) is
+    phase-unambiguous and sits inside that envelope. The 500 Hz
+    ``loudness_vs_time`` output is unchanged (public contract)."""
+    import phonometry.loudness as L
+    from phonometry.loudness import _SR_LEVEL, _SR_LOUDNESS
+
+    seen: dict[int, np.ndarray] = {}
+    orig = L._percentile
+
+    def spy(values: np.ndarray, pct: int) -> float:
+        seen[pct] = np.asarray(values, dtype=float).copy()
+        return orig(values, pct)
+
+    monkeypatch.setattr(L, "_percentile", spy)
+    x, fs = _read_wav_pa(DATA / "iso532_1_test_signal_10.wav", 70.0)
+    res = loudness_zwicker(x, fs, stationary=False)
+    assert res.n5 is not None and res.loudness_vs_time is not None
+
+    full = seen[5]
+    dec = _SR_LEVEL // _SR_LOUDNESS
+    # (a) computed on the un-decimated series (~dec x longer than the trace).
+    assert full.size >= (dec - 0.5) * res.loudness_vs_time.size
+    # (b) the reported N5 is the phase-unambiguous full-rate percentile, and
+    #     lies strictly inside the envelope of the four decimation phases.
+    phase_n5 = [orig(full[p::dec], 5) for p in range(dec)]
+    assert min(phase_n5) < res.n5 < max(phase_n5)
+    assert res.n5 == pytest.approx(orig(full, 5))
+
+
 def test_time_varying_outputs() -> None:
     x = _tone(1000.0, 70.0, seconds=0.5)
     res = loudness_zwicker(x, FS)

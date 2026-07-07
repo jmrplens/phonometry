@@ -41,7 +41,8 @@ def _g_bismarck(z: np.ndarray) -> np.ndarray:
 
 def _g_aures(z: np.ndarray, total_n: float) -> np.ndarray:
     """DIN 45692 Annex B (informative), Aures loudness-dependent weighting."""
-    return 0.078 * np.exp(0.171 * z) / z * (total_n / np.log(total_n * 0.05 + 1.0))
+    g: np.ndarray = 0.078 * np.exp(0.171 * z) / z * (total_n / np.log(total_n * 0.05 + 1.0))
+    return g
 
 
 def _moment(specific: np.ndarray, method: str) -> float:

@@ -28,7 +28,7 @@ La balística Impulse asimétrica usa dos constantes — ataque rápido y caída
 lenta — conmutando por muestra según el signo del cambio:
 
 $$
-y[n] = y[n-1] + \alpha \,(x^2[n] - y[n-1]), \qquad
+y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{en otro caso}\end{cases}
 $$
 
@@ -39,9 +39,9 @@ un *valor cuadrático medio* móvil con memoria exponencial. Formalmente
 (IEC 61672-1, 3.8):
 
 $$
-\tau\,\frac{dy}{dt} + y = x^2(t)
+\tau\ \frac{dy}{dt} + y = x^2(t)
 \quad\Longleftrightarrow\quad
-y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\, e^{-(t-\xi)/\tau}\, d\xi
+y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\ e^{-(t-\xi)/\tau}\ d\xi
 $$
 
 un paso-bajo de primer orden sobre la señal al cuadrado. La constante de tiempo

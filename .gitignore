@@ -70,3 +70,4 @@ site/public/llms.txt
 site/public/llms-full.txt
 stub/dist/
 stub/src/*.egg-info/
+.playwright-mcp/

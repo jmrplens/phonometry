@@ -7,7 +7,7 @@ import numpy as np
 from scipy import signal as scipy_signal
 
 # Add src to path to use the local package
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from phonometry import OctaveFilterBank
 

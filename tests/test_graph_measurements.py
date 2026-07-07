@@ -15,7 +15,7 @@ import sys
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
 import generate_graphs  # noqa: E402
 
 FS = 48000

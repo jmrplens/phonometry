@@ -119,6 +119,17 @@ _ES: dict[str, str] = {
         "7.6 c) ≥ 1,0 m al altavoz",
     "7.2.2 ≥ 1.0 m loudspeaker to separating partition":
         "7.2.2 ≥ 1,0 m del altavoz a la partición separadora",
+    "Impulse-response measurement chain (ISO 18233)":
+        "Cadena de medición de la respuesta al impulso (ISO 18233)",
+    "Excitation": "Excitación",
+    "ESS sweep / MLS": "Barrido ESS / MLS",
+    "Deconvolution": "Deconvolución",
+    "correlation /": "correlación /",
+    "inverse filter": "filtro inverso",
+    "acoustic path": "trayecto acústico",
+    "The room response h(t) is recovered by deconvolving the microphone signal.":
+        "La respuesta de la sala h(t) se recupera deconvolucionando "
+        "la señal del micrófono.",
 }
 
 
@@ -614,6 +625,56 @@ def _d8(s: SVG, th: Theme) -> None:
         s.text(80, y, txt, 18, th.fg, anchor="start")
 
 
+# ---------------------------------------------------------------------------
+# d9 - ISO 18233 indirect impulse-response measurement chain
+# ---------------------------------------------------------------------------
+
+def _d9(s: SVG, th: Theme) -> None:
+    bw, bh = 200.0, 96.0
+    xs = (120.0, 350.0, 580.0)
+    y1, y2 = 110.0, 300.0
+
+    def box(x: float, y: float, title: str, subs: list[str], color: str,
+            mono: bool) -> None:
+        s.rect(x, y, bw, bh, th.panel, color, rx=12, sw=2)
+        t_size = 20 if len(title) > 11 else 22
+        if subs:
+            s.text(x + bw / 2, y + 38, title, t_size, th.fg, bold=True)
+            if len(subs) == 1:
+                s.text(x + bw / 2, y + 66, subs[0], 18, color,
+                       mono=mono, italic=mono)
+            else:
+                s.text(x + bw / 2, y + 62, subs[0], 18, color)
+                s.text(x + bw / 2, y + 82, subs[1], 18, color)
+        else:
+            s.text(x + bw / 2, y + bh / 2 + 7, title, t_size, th.fg, bold=True)
+
+    # Row 1 (left to right): the physical excitation path.
+    box(xs[0], y1, "Excitation", ["ESS sweep / MLS"], th.primary, False)
+    box(xs[1], y1, "Loudspeaker", [], th.fg, False)
+    box(xs[2], y1, "Room", ["h(t)"], th.secondary, True)
+    s.arrow(xs[0] + bw, y1 + bh / 2, xs[1] - 2, y1 + bh / 2, th.fg, 2)
+    s.arrow(xs[1] + bw, y1 + bh / 2, xs[2] - 2, y1 + bh / 2, th.fg, 2)
+
+    # Serpentine connector: the acoustic field couples Room -> Microphone.
+    cx = xs[2] + bw / 2
+    s.arrow(cx, y1 + bh, cx, y2 - 2, th.muted, 2)
+    s.text(cx - 12, (y1 + bh + y2) / 2 + 5, "acoustic path", 18, th.muted,
+           anchor="end", italic=True)
+
+    # Row 2 (right to left): recover the impulse response by deconvolution.
+    box(xs[2], y2, "Microphone", [], th.primary, False)
+    box(xs[1], y2, "Deconvolution", ["correlation /", "inverse filter"],
+        th.accent, False)
+    box(xs[0], y2, "IR", ["ĥ(t)"], th.accent, True)
+    s.arrow(xs[2], y2 + bh / 2, xs[1] + bw + 2, y2 + bh / 2, th.fg, 2)
+    s.arrow(xs[1], y2 + bh / 2, xs[0] + bw + 2, y2 + bh / 2, th.fg, 2)
+
+    s.text(450, 425,
+           "The room response h(t) is recovered by deconvolving the "
+           "microphone signal.", 18, th.fg)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -624,6 +685,8 @@ DIAGRAMS = {
     "diagram_sti_chain": (_d7, "STI measurement chain (IEC 60268-16)", 400),
     "diagram_insulation_setup": (
         _d8, "Airborne sound insulation setup (ISO 16283-1)", 600),
+    "diagram_ir_measurement": (
+        _d9, "Impulse-response measurement chain (ISO 18233)", 440),
 }
 
 

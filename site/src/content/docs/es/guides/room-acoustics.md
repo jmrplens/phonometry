@@ -43,7 +43,10 @@ banda donde el barrido tiene poca energía. Como un barrido de grave a agudo
 sitúa la distorsión armónica en tiempos de llegada *negativos*, la distorsión
 se separa limpiamente de la RI lineal y se descarta conservando solo la parte
 causal. El método `"farina"` llega al mismo resultado convolucionando la
-grabación con el filtro inverso analítico.
+grabación con el filtro inverso analítico; supone que el barrido de
+referencia se generó con la amplitud y el desvanecimiento por defecto, así
+que usa el método espectral con un barrido de amplitud distinta de la unidad
+o con desvanecimiento personalizado.
 
 **Secuencia de longitud máxima (MLS, Anexo A).** Una secuencia binaria de
 orden `N` y longitud $2^N-1$ cuya autocorrelación circular es una delta casi
@@ -55,7 +58,7 @@ deriva de temperatura) y no admite tanta potencia como un barrido.
 excitación deba ser periódica o el hardware favorezca una señal de dos
 niveles.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_es.svg" alt="Cadena de medición: una señal de excitación se reproduce a través de la sala hacia un micrófono, y la deconvolución recupera la respuesta al impulso" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_es_dark.svg" alt="Cadena de medición: una señal de excitación se reproduce a través de la sala hacia un micrófono, y la deconvolución recupera la respuesta al impulso" style="width:92%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ir_measurement_es.svg" alt="Cadena de medición indirecta ISO 18233: una excitación (barrido ESS o MLS) alimenta un altavoz en la sala, un micrófono capta la respuesta y la deconvolución (correlación o filtro inverso) recupera la respuesta al impulso" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ir_measurement_es_dark.svg" alt="Cadena de medición indirecta ISO 18233: una excitación (barrido ESS o MLS) alimenta un altavoz en la sala, un micrófono capta la respuesta y la deconvolución (correlación o filtro inverso) recupera la respuesta al impulso" style="width:92%">
 
 ```python
 import numpy as np
@@ -162,7 +165,7 @@ ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
 time, level = decay_curve(ir, fs)                    # curva de Schroeder (0 dB en t = 0)
 
-res = room_parameters(ir, fs, bands=None)            # banda única de banda ancha
+res = room_parameters(ir, fs, limits=None)           # banda única de banda ancha
 print(round(float(res.t30[0]), 2))                   # 1.0  s
 print(round(float(res.c80[0]), 2))                   # 3.05 dB
 print(round(float(res.d50[0]), 3))                   # 0.499
@@ -185,7 +188,7 @@ inicial más pronunciada, así que EDT < T30.
 | :--- | :--- | :--- | :--- | :--- |
 | `ir` | array 1D | cualquiera | no silencioso | Respuesta al impulso medida |
 | `fs` | int | Hz | > 0 | Frecuencia de muestreo |
-| `bands` | (float, float) o `None` | Hz | por defecto `(125.0, 4000.0)` | Límites de centros de banda; `None` = banda única de banda ancha |
+| `limits` | (float, float) o `None` | Hz | por defecto `(125.0, 4000.0)` | Límites de centros de banda; `None` = banda única de banda ancha |
 | `fraction` | int | — | `1` (octava, por defecto) / `3` (tercio) | Fracción de ancho de banda |
 
 Devuelve un `RoomAcousticsResult`: `frequency` (centros de banda, o `None` en
@@ -298,6 +301,11 @@ R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
 w = weighted_rating(R)
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
 ```
+
+Para alimentar `weighted_rating`, los espectros `t2` y de nivel deben ser
+las 16 bandas de tercio de octava de 100 Hz a 3150 Hz — por ejemplo
+`room_parameters(ir, fs, limits=(100, 3150), fraction=3)` — de modo que cada
+banda quede alineada índice a índice con la curva de referencia ISO 717-1.
 
 ### Parámetros de `airborne_insulation()`
 

@@ -40,7 +40,9 @@ sweep has little energy. Because a low-to-high sweep places harmonic
 distortion at *negative* arrival times, distortion separates cleanly from
 the linear IR and is discarded by keeping only the causal part. The
 `"farina"` method reaches the same result by convolving the recording with
-the analytic inverse filter.
+the analytic inverse filter; it assumes the reference sweep was generated
+with the default amplitude and fade, so use the spectral method for a
+non-unit-amplitude or custom-fade sweep.
 
 **Maximum-length sequence (MLS, Annex A).** An order-`N` binary sequence of
 length $2^N-1$ whose circular autocorrelation is a near-perfect delta; the
@@ -51,7 +53,7 @@ be fed as much power as a sweep. **Prefer the sweep** for rooms and
 partitions; reach for MLS when the excitation must be periodic or the
 hardware favours a two-level signal.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain.svg" alt="Measurement chain: an excitation signal plays through the room to a microphone, and deconvolution recovers the impulse response" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ir_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ir_measurement.svg" alt="ISO 18233 indirect measurement chain: an ESS sweep or MLS excitation drives a loudspeaker into the room, a microphone captures the response, and deconvolution (correlation or inverse filter) recovers the impulse response" width="92%"></picture>
 
 ```python
 import numpy as np
@@ -156,7 +158,7 @@ ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
 time, level = decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
 
-res = room_parameters(ir, fs, bands=None)            # broadband single band
+res = room_parameters(ir, fs, limits=None)           # broadband single band
 print(round(float(res.t30[0]), 2))                   # 1.0  s
 print(round(float(res.c80[0]), 2))                   # 3.05 dB
 print(round(float(res.d50[0]), 3))                   # 0.499
@@ -178,7 +180,7 @@ Ts = 72 ms). A real room has a steeper early slope, so EDT < T30.
 | :--- | :--- | :--- | :--- | :--- |
 | `ir` | 1D array | any | non-silent | Measured impulse response |
 | `fs` | int | Hz | > 0 | Sample rate |
-| `bands` | (float, float) or `None` | Hz | default `(125.0, 4000.0)` | Band-centre limits; `None` = broadband single band |
+| `limits` | (float, float) or `None` | Hz | default `(125.0, 4000.0)` | Band-centre limits; `None` = broadband single band |
 | `fraction` | int | — | `1` (octave, default) / `3` (third) | Bandwidth fraction |
 
 Returns a `RoomAcousticsResult`: `frequency` (band centres, or `None`
@@ -288,6 +290,11 @@ R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
 w = weighted_rating(R)
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
 ```
+
+To feed `weighted_rating`, the `t2` and level spectra must be the 16
+one-third-octave bands from 100 Hz to 3150 Hz — for example
+`room_parameters(ir, fs, limits=(100, 3150), fraction=3)` — so that every
+band aligns index-by-index with the ISO 717-1 reference curve.
 
 ### `airborne_insulation()` parameters
 

@@ -32,6 +32,10 @@ from .loudness_moore_glasberg import (
     loudness_moore_glasberg_from_spectrum,
     loudness_moore_glasberg_from_third_octave,
 )
+from .loudness_moore_glasberg_time import (
+    MooreGlasbergTimeVaryingLoudness,
+    loudness_moore_glasberg_time,
+)
 from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
 from .sharpness import sharpness_din, sharpness_din_from_specific
 from .sti import STIResult, sti_from_impulse_response, stipa, stipa_signal
@@ -124,6 +128,8 @@ __all__ = [
     "loudness_moore_glasberg_from_spectrum",
     "loudness_moore_glasberg_from_third_octave",
     "MooreGlasbergLoudness",
+    "loudness_moore_glasberg_time",
+    "MooreGlasbergTimeVaryingLoudness",
     "tonality_ecma",
     "EcmaTonality",
     "roughness_ecma",

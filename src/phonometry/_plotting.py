@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from .loudness import ZwickerLoudness
     from .loudness_ecma import EcmaLoudness
     from .loudness_moore_glasberg import MooreGlasbergLoudness
+    from .loudness_moore_glasberg_time import MooreGlasbergTimeVaryingLoudness
     from .room_acoustics import DecayCurve, RoomAcousticsResult
     from .tonality_ecma import EcmaTonality
     from .roughness_ecma import EcmaRoughness
@@ -128,8 +129,7 @@ def plot_zwicker_loudness(
     ax_specific.set_xlim(0.0, bark[-1])
     ax_specific.set_ylim(bottom=0.0)
     ax_specific.set_title(
-        f"Loudness N = {result.loudness:.2f} sone "
-        f"({result.loudness_level:.1f} phon)"
+        f"Loudness N = {result.loudness:.2f} sone ({result.loudness_level:.1f} phon)"
     )
     ax_specific.grid(True, alpha=0.3)
 
@@ -141,9 +141,13 @@ def plot_zwicker_loudness(
     lvt = np.asarray(result.loudness_vs_time, dtype=np.float64)
     ax_time.plot(time, lvt, color="#2ca02c", label="N(t)")
     if result.n5 is not None:
-        ax_time.axhline(result.n5, color="#d62728", ls="--", lw=1, label=f"N5={result.n5:.2f}")
+        ax_time.axhline(
+            result.n5, color="#d62728", ls="--", lw=1, label=f"N5={result.n5:.2f}"
+        )
     if result.n10 is not None:
-        ax_time.axhline(result.n10, color="#ff7f0e", ls=":", lw=1, label=f"N10={result.n10:.2f}")
+        ax_time.axhline(
+            result.n10, color="#ff7f0e", ls=":", lw=1, label=f"N10={result.n10:.2f}"
+        )
     ax_time.set_xlabel("Time [s]")
     ax_time.set_ylabel("Loudness N [sone]")
     ax_time.set_ylim(bottom=0.0)
@@ -235,9 +239,43 @@ def plot_moore_glasberg_loudness(
     ax.set_xlim(erb_number[0], erb_number[-1])
     ax.set_ylim(bottom=0.0)
     ax.set_title(
-        f"Loudness N = {result.loudness:.2f} sone "
-        f"({result.loudness_level:.1f} phon)"
+        f"Loudness N = {result.loudness:.2f} sone ({result.loudness_level:.1f} phon)"
     )
+    ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_moore_glasberg_time_loudness(
+    result: MooreGlasbergTimeVaryingLoudness, ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Short-term and long-term loudness against time (ISO 532-3).
+
+    :param result: A
+        :class:`~phonometry.loudness_moore_glasberg_time.MooreGlasbergTimeVaryingLoudness`.
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the long-term-loudness line ``plot`` call.
+    :return: The axes.
+    """
+    time = np.asarray(result.time, dtype=np.float64)
+    stl = np.asarray(result.short_term_loudness, dtype=np.float64)
+    ltl = np.asarray(result.long_term_loudness, dtype=np.float64)
+    ax = ax if ax is not None else _new_axes()
+
+    ax.plot(time, stl, color="#aec7e8", lw=1.0, label="Short-term loudness")
+    kwargs.setdefault("color", "#1f77b4")
+    kwargs.setdefault("lw", 1.8)
+    ax.plot(time, ltl, label="Long-term loudness", **kwargs)
+    ax.axhline(result.n_max, color="#d62728", ls="--", lw=1.0, alpha=0.7)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Loudness [sone]")
+    if time.size:
+        ax.set_xlim(time[0], time[-1])
+    ax.set_ylim(bottom=0.0)
+    ax.set_title(
+        f"Peak long-term loudness N = {result.n_max:.2f} sone "
+        f"({result.loudness_level_max:.1f} phon)"
+    )
+    ax.legend(loc="best")
     ax.grid(True, alpha=0.3)
     return ax
 
@@ -333,12 +371,8 @@ def plot_ecma_roughness(
     bark = np.asarray(result.bark, dtype=np.float64)
     spec = np.asarray(result.specific_roughness_vs_time, dtype=np.float64)
     if time.size >= 2 and spec.size:
-        mesh = ax_heat.pcolormesh(
-            time, bark, spec.T, cmap="magma", shading="auto"
-        )
-        ax_heat.figure.colorbar(
-            mesh, ax=ax_heat, label="R' [asper/Bark_HMS]"
-        )
+        mesh = ax_heat.pcolormesh(time, bark, spec.T, cmap="magma", shading="auto")
+        ax_heat.figure.colorbar(mesh, ax=ax_heat, label="R' [asper/Bark_HMS]")
     ax_heat.set_xlabel("Time [s]")
     ax_heat.set_ylabel("Critical-band rate z [Bark_HMS]")
     return axes
@@ -405,9 +439,7 @@ def _plot_rating(
     kwargs.setdefault("color", "#1f77b4")
     kwargs.setdefault("label", "Measured")
     ax.plot(band_centers, measured, "o-", **kwargs)
-    ax.plot(
-        band_centers, reference, "s--", color="#d62728", label="Shifted reference"
-    )
+    ax.plot(band_centers, reference, "s--", color="#d62728", label="Shifted reference")
     unfavourable = _unfavourable_mask(measured, reference, impact)
     ax.fill_between(
         band_centers,
@@ -421,9 +453,7 @@ def _plot_rating(
     )
     _freq_axis(ax, band_centers)
     ax.set_ylabel(ylabel)
-    ax.set_title(
-        f"{title} = {rating} dB  (Sigma unfav. = {unfavourable_sum:.1f} dB)"
-    )
+    ax.set_title(f"{title} = {rating} dB  (Sigma unfav. = {unfavourable_sum:.1f} dB)")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     return ax
@@ -443,9 +473,7 @@ def _unfavourable_mask(
     return np.asarray(measured < reference)
 
 
-def plot_weighted_rating(
-    result: Any, ax: Axes | None = None, **kwargs: Any
-) -> Axes:
+def plot_weighted_rating(result: Any, ax: Axes | None = None, **kwargs: Any) -> Axes:
     """Airborne rating curve vs shifted reference (ISO 717-1)."""
     _require_rating_curve(result)
     return _plot_rating(
@@ -596,10 +624,20 @@ def plot_room_acoustics(
         return ax_times
 
     ax_clarity = cast("Axes", axes[1])
-    ax_clarity.plot(positions, np.asarray(result.c50, dtype=np.float64), "o-",
-                    color="#2ca02c", label="C50")
-    ax_clarity.plot(positions, np.asarray(result.c80, dtype=np.float64), "s--",
-                    color="#9467bd", label="C80")
+    ax_clarity.plot(
+        positions,
+        np.asarray(result.c50, dtype=np.float64),
+        "o-",
+        color="#2ca02c",
+        label="C50",
+    )
+    ax_clarity.plot(
+        positions,
+        np.asarray(result.c80, dtype=np.float64),
+        "s--",
+        color="#9467bd",
+        label="C80",
+    )
     ax_clarity.set_ylabel("Clarity [dB]")
     ax_clarity.set_xticks(positions)
     ax_clarity.set_xticklabels(labels, rotation=45, ha="right")
@@ -629,7 +667,10 @@ def _draw_decay_times(
         # first band group.
         bar_kwargs = {"color": colors, "label": label, **kwargs}
         bars = ax.bar(
-            positions + offset, np.nan_to_num(vals), width=width, **bar_kwargs,
+            positions + offset,
+            np.nan_to_num(vals),
+            width=width,
+            **bar_kwargs,
         )
         for bar, hatch in zip(bars, hatches, strict=True):
             if hatch:
@@ -696,8 +737,7 @@ def plot_sound_power(result: Any, ax: Axes | None = None, **kwargs: Any) -> Axes
     else:
         ax.set_title("Sound power spectrum")
     if np.any(neg):
-        ax.plot([], [], color="#bbbbbb", marker="s", ls="",
-                label="Non-positive band")
+        ax.plot([], [], color="#bbbbbb", marker="s", ls="", label="Non-positive band")
         ax.legend(loc="best", fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
     return ax
@@ -756,8 +796,14 @@ def plot_intensity(
     ax.grid(True, which="both", alpha=0.3)
 
     twin = ax.twinx()
-    twin.bar(freqs, index, width=_bar_width(freqs), color="#2ca02c", alpha=0.25,
-             label="δpI = Lp - LI")
+    twin.bar(
+        freqs,
+        index,
+        width=_bar_width(freqs),
+        color="#2ca02c",
+        alpha=0.25,
+        label="δpI = Lp - LI",
+    )
     twin.set_ylabel("Pressure-intensity index δpI [dB]")
 
     lines, labels = ax.get_legend_handles_labels()

@@ -11,7 +11,7 @@ The equivalent continuous level integrates the squared pressure over the
 measurement time:
 
 $$
-L_{eq} = 10\log_{10}\!\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\,dt\right) \text{ dB}, \qquad p_0 = 20\ \mu\text{Pa}
+L_{eq} = 10\log_{10}\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\,dt\right) \text{ dB}, \qquad p_0 = 20\ \mu\text{Pa}
 $$
 
 and $L_{Aeq}$ is the same integral after A-weighting the signal. $L_N$ is the

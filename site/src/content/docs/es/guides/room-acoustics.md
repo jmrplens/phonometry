@@ -421,8 +421,9 @@ ISO 717-2 (tercios `L'nT,w = 79`, `CI = −11`; octava `54`, `CI = 0`).
 
 ## 5. Absorción sonora (ISO 354)
 
-El área de absorción sonora equivalente `A` que gobierna `R'`, `L'n` y la
-corrección ambiental de ISO 3741 se mide a su vez en una sala reverberante
+El área de absorción sonora equivalente `A` que gobierna `R'`, `L'n`, la
+corrección ambiental `K2` de ISO 3744 y el término de absorción de ISO 3741 se
+mide a su vez en una sala reverberante
 (ISO 354). Mide el tiempo de reverberación de la sala **vacía** ($T_1$) y de
 nuevo **con la muestra de ensayo instalada** ($T_2$); la absorción de la muestra
 es la diferencia de las dos áreas de Sabine, y dividiendo por el área cubierta
@@ -481,7 +482,8 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
 ## Véase también
 
 - [Potencia sonora](/phonometry/es/guides/sound-power/) — los métodos de `LW` que
-  consumen el área de absorción de ISO 354 (corrección ambiental de ISO 3741).
+  consumen el área de absorción de ISO 354 (el `K2` de ISO 3744 y el término de
+  absorción de ISO 3741).
 - [Psicoacústica e inteligibilidad del habla](/phonometry/es/guides/psychoacoustics/) — el
   STI/STIPA alimenta los `sti_values` de oficinas diáfanas; sonoridad y sharpness.
 - [Bancos de filtros](/phonometry/es/guides/filter-banks/) — los filtros de octava

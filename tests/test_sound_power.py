@@ -84,6 +84,13 @@ def test_k1_zero_above_15db() -> None:
     assert k1[0] == 0.0
 
 
+def test_k1_zero_at_exactly_15db() -> None:
+    """dL == 15 dB (upper criterion) -> K1 = 0 (>= knee, matches the ISO 3744
+    'dLp >= 15 -> no correction' clause and the ISO 3741 reverberation form)."""
+    k1 = background_noise_correction(np.array([75.0]), np.array([60.0]))
+    assert k1[0] == 0.0
+
+
 def test_k1_below_criterion_clamps_and_warns() -> None:
     """dL < 6 dB (engineering) -> clamp to the 6 dB value, warn."""
     with pytest.warns(SoundPowerWarning):

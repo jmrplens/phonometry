@@ -155,6 +155,7 @@ _ES: dict[str, str] = {
     "Impact sound insulation": "Aislamiento de impactos",
     "Li = energy-averaged": "Li = promedio en energía",
     "band level (Formula 10)": "del nivel de banda (Fórmula 10)",
+    "A = 0.16 V/T  (Sabine)": "A = 0,16 V/T  (Sabine)",
     "T₀ = 0.5 s , A₀ = 10 m²": "T₀ = 0,5 s , A₀ = 10 m²",
     # d12 - sound power methods comparison
     "Sound power methods compared": "Métodos de potencia sonora comparados",
@@ -888,7 +889,7 @@ def _d_impact(s: SVG, th: Theme) -> None:
     box_items = [
         (160, "L′nT = Li − 10 lg(T/T₀)", th.primary),
         (192, "L′n = Li + 10 lg(A/A₀)", th.primary),
-        (224, "A = 0,16 V/T  (Sabine)", th.muted),
+        (224, "A = 0.16 V/T  (Sabine)", th.muted),
         (256, "T₀ = 0.5 s , A₀ = 10 m²", th.accent),
     ]
     for y, txt, col in box_items:

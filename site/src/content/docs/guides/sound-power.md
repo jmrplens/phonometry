@@ -197,7 +197,7 @@ print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 positions. When the room volume, its reverberation time or the microphone
 count fail an ISO 3741 qualification criterion (Table 1 minimum volume, the
 `V/S` reverberation floor, fewer than 6 positions, or an inter-position
-spread above 1.5 dB), an advisory `SoundPowerWarning` is raised and the
+spread above 1.5 dB), an advisory `SoundPowerWarning` is emitted and the
 result still returns.
 
 ### `sound_power_reverberation()` parameters

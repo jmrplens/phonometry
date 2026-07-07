@@ -409,8 +409,9 @@ values (thirds `L'nT,w = 79`, `CI = −11`; octave `54`, `CI = 0`).
 
 ## 5. Sound absorption (ISO 354)
 
-The equivalent absorption area `A` that drives `R'`, `L'n` and the ISO 3741
-environmental correction is itself measured in a reverberation room (ISO 354).
+The equivalent absorption area `A` that drives `R'`, `L'n`, the ISO 3744 `K2`
+environmental correction and the ISO 3741 absorption term is itself measured in
+a reverberation room (ISO 354).
 Measure the room's reverberation time **empty** ($T_1$) and again **with the
 test specimen installed** ($T_2$); the specimen's absorption is the difference
 of the two Sabine areas, and dividing by the covered area gives the absorption
@@ -468,7 +469,7 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
 ## See also
 
 - [Sound Power](/phonometry/guides/sound-power/) — the `LW` methods that consume the
-  ISO 354 absorption area (ISO 3741 environmental correction).
+  ISO 354 absorption area (the ISO 3744 `K2` and the ISO 3741 absorption term).
 - [Psychoacoustics and Speech Intelligibility](/phonometry/guides/psychoacoustics/) — STI/STIPA
   feeds the open-plan `sti_values`; loudness and sharpness.
 - [Filter Banks](/phonometry/guides/filter-banks/) — the IEC 61260 fractional-octave filters

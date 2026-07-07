@@ -385,11 +385,6 @@ def sound_power_comparison(
     :param static_pressure: Static pressure ``ps`` in the room, in kilopascals.
     :return: :class:`ReverberationSoundPowerResult` (``method='comparison'``).
     """
-    # Microphone-sampling advisories (<6 positions, sM > 1,5 dB) apply to the
-    # per-position measurement of the source under test, exactly as in the
-    # direct method; there is no room geometry here, so no V/S check.
-    _position_sampling_warnings(levels, stacklevel=2)
-
     lp_st = _mean_level(levels)
     lp_rss = _mean_level(levels_ref)
     lw_rss = np.asarray(lw_ref, dtype=np.float64)
@@ -403,10 +398,18 @@ def sound_power_comparison(
     if freqs is not None and freqs.shape != (n_bands,):
         raise ValueError("'frequencies' length must match the number of bands.")
 
+    # Microphone-sampling advisories (<6 positions, sM > 1,5 dB) apply to the
+    # per-position measurement of the source under test, exactly as in the
+    # direct method; there is no room geometry here, so no V/S check. Emitted
+    # only after the shape validations so malformed input raises cleanly first.
+    _position_sampling_warnings(levels, stacklevel=2)
+
+    k1_st = np.zeros(n_bands, dtype=np.float64)
     if background_levels is not None:
         if freqs is None:
             raise ValueError("'frequencies' are required to apply 'background_levels'.")
-        lp_st = lp_st - _background_correction(levels, background_levels, freqs)
+        k1_st = _background_correction(levels, background_levels, freqs)
+        lp_st = lp_st - k1_st
     if background_levels_ref is not None:
         if freqs is None:
             raise ValueError(
@@ -424,7 +427,7 @@ def sound_power_comparison(
         mean_pressure_level=lp_st,
         absorption_area=nan_band,
         waterhouse_correction=nan_band,
-        background_correction=np.zeros(n_bands, dtype=np.float64),
+        background_correction=k1_st,
         c1=float("nan"),
         c2=c2,
         speed_of_sound=_speed_of_sound(temperature),

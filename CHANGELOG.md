@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   sound insulation per ISO 16283-2 (standardized L'nT and normalized L'n from
   the tapping-machine impact level) and single-number weighted impact ratings
   with the CI adaptation term per ISO 717-2 (reference-curve method, octave
-  −5 dB rule), verified against the ISO 717-2 Annex C examples (L'nT,w = 79,
+  −5 dB rule), verified against the ISO 717-2 Annex C examples (Ln,w = 79,
   CI = −11; octave 54, CI = 0).
 - `absorption_area()`, `absorption_coefficient()`, `attenuation_from_alpha()`
   and `AbsorptionWarning` — sound absorption in a reverberation room per

@@ -48,10 +48,15 @@ Surface = Literal["hemisphere", "box"]
 
 
 class SoundPowerWarning(UserWarning):
-    """Non-fatal ISO 3744/3746 qualification issue (background margin below the
-    criterion, or environmental correction beyond the method's validity limit).
-    The returned levels then represent upper bounds and must be reported as
-    such (ISO 3744:2010, 8.2.3 and 4.3.2)."""
+    """Non-fatal qualification issue in any of the sound-power methods.
+
+    Emitted for ISO 3744/3746 background margin below the criterion and for
+    ``K2`` beyond the method's validity limit (8.2.3, 4.3.2); for ISO 3741
+    reverberation-room qualification (room volume vs Table 1, mean absorption)
+    and microphone/source-position sampling; and for ISO 9614-2 negative total
+    partial power and unmet field-indicator criteria. Where a lower criterion
+    is only just met the returned levels represent upper bounds and must be
+    reported as such."""
 
 
 # --- ISO 3744:2010 Annex B, normative microphone coordinates (x/r,y/r,z/r) ---
@@ -176,7 +181,7 @@ def background_noise_correction(
     background is negligible and ``K1 = 0``. For ``dLp`` below the lower
     criterion (6 dB engineering, 3 dB survey) the accuracy is reduced: ``K1``
     is clamped to its value at that criterion and a :class:`SoundPowerWarning`
-    is raised, the result then being an upper bound (clause 8.2.3).
+    is emitted, the result then being an upper bound (clause 8.2.3).
 
     :param source_levels: Levels with the source operating, in decibels.
     :param background_levels: Background-noise levels, in decibels.
@@ -189,7 +194,7 @@ def background_noise_correction(
     delta = src - bg
     clamped = np.maximum(delta, low)
     k1 = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * clamped))
-    k1 = np.where(delta > high, 0.0, k1)
+    k1 = np.where(delta >= high, 0.0, k1)
     if np.any(delta < low):
         warnings.warn(
             f"Background margin below {low:g} dB in one or more bands; K1 "
@@ -481,8 +486,9 @@ def sound_power_pressure(
     # --- apparent directivity index per position (Eq. 7) ------------------
     # DIi* = Lpi(ST) - (Lp'(ST) - K1): per Eq. 7 semantics BOTH the per-position
     # level Lpi(ST) and the surface mean Lp'(ST) are background-corrected by the
-    # same broadband K1 (notes-iso3744-3746.md sec. 9). Applying the identical
-    # uniform K1 to every position and to the mean leaves the DI differences
+    # same broadband K1 (ISO 3744:2010, 3.24 DI definition / Eq. 7 context).
+    # Applying the identical uniform K1 to every position and to the mean
+    # leaves the DI differences
     # unchanged and cancels the offset, so the raw energy-summed broadband
     # levels give the directivity index directly (no residual +K1 bias).
     position_levels = 10.0 * np.log10(np.sum(10.0 ** (0.1 * levels), axis=1))

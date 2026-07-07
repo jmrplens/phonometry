@@ -305,3 +305,48 @@ def test_comparison_wrong_frequency_length_raises_clean_error() -> None:
             frequencies=np.array([1000.0, 2000.0]),  # wrong length (2 != 3)
             background_levels=background,
         )
+
+
+def test_comparison_wrong_shape_raises_without_sampling_warning() -> None:
+    """Malformed shapes raise ValueError before any position-sampling advisory
+    (warn-after-validate: a fewer-than-6-positions input must not warn first)."""
+    # 3 positions (< 6) x 2 bands, but levels_ref spans 3 bands -> mismatch.
+    levels = np.array([[80.0, 81.0], [80.1, 81.1], [79.9, 80.9]])
+    levels_ref = np.array([70.0, 71.0, 72.0])
+    lw_ref = np.array([90.0, 91.0])
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", SoundPowerWarning)
+        with pytest.raises(ValueError, match="span the same bands"):
+            sound_power_comparison(levels, levels_ref, lw_ref)
+
+
+# --------------------------------------------------------------------------
+# Comparison method reports the effective per-band background correction K1
+# --------------------------------------------------------------------------
+def test_comparison_reports_applied_background_correction() -> None:
+    """The comparison method reports the ST K1 actually applied per band (Eq.
+    14), and reporting the field does not alter the computed LW."""
+    freqs = np.array([1000.0])
+    lw_ref = np.array([90.0])
+    lp_rss = np.array([70.0])
+    lp_st = np.array([80.0])
+    background = np.array([70.0])  # dLp = 10 dB at 1 kHz (>= lower criterion)
+    # Analytic K1 with a 10 dB margin (no clamp, no zeroing).
+    k1 = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * 10.0))
+
+    res = sound_power_comparison(
+        lp_st, lp_rss, lw_ref, frequencies=freqs, background_levels=background,
+    )
+    assert res.background_correction[0] == pytest.approx(k1, abs=1e-9)
+    # LW keeps the K1-corrected level: LW(RSS) + (Lp(ST) - K1 - Lp(RSS) + C2).
+    c2 = _c2(23.0, _PS0)
+    expected_lw = 90.0 + ((80.0 - k1) - 70.0 + c2)
+    assert res.sound_power_level[0] == pytest.approx(expected_lw, abs=1e-9)
+
+
+def test_comparison_background_correction_zero_without_background() -> None:
+    """No background supplied -> the reported per-band K1 is zero."""
+    res = sound_power_comparison(
+        np.array([80.0, 80.0]), np.array([70.0, 70.0]), np.array([90.0, 90.0]),
+    )
+    assert np.all(res.background_correction == 0.0)

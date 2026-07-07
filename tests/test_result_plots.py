@@ -229,6 +229,95 @@ def test_rating_without_curve_data_raises() -> None:
         bare.plot()
 
 
+def test_rating_plot_forwards_kwargs_without_typeerror() -> None:
+    # Regression: _plot_rating used to lack **kwargs, so any styling kwarg
+    # forwarded by plot_weighted_rating/plot_impact_rating raised TypeError.
+    res = _airborne_rating()
+    ax = res.plot(linewidth=2)
+    assert ax.lines[0].get_linewidth() == 2.0
+    ax2 = _impact_rating().plot(linewidth=2)
+    assert ax2.lines[0].get_linewidth() == 2.0
+    plt.close("all")
+
+
+# --------------------------------------------------------------------------
+# ISO 717-2 octave-band -5 dB rule: the curve is honest, the rating annotated
+# --------------------------------------------------------------------------
+_ANNEX_C3_LN_OCTAVE = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
+
+
+def test_octave_impact_plot_keeps_curve_honest_and_annotates_offset() -> None:
+    # ISO 717-2 Annex C, Table C.3 (octave): Ln,w = 54, applying the -5 dB
+    # rule of Clause 4.3.2. The drawn shifted-reference curve is genuinely
+    # ref - shift (so it reads 59 at 500 Hz); the rating (54) is annotated
+    # with the -5 dB note rather than the curve being distorted down.
+    res = ph.weighted_impact_rating(_ANNEX_C3_LN_OCTAVE)
+    assert res.rating == 54
+    idx500 = int(np.argmin(np.abs(res.band_centers - 500.0)))
+    read_value = float(res.shifted_reference[idx500])
+    assert read_value == pytest.approx(res.rating + 5)  # honest curve
+    ax = res.plot()
+    # reference line (index 1) is undistorted: reads read_value at 500 Hz.
+    assert ax.lines[1].get_ydata()[idx500] == pytest.approx(read_value)
+    # a marker records the 500 Hz read value.
+    marked = [
+        ln for ln in ax.lines
+        if ln.get_ydata().size == 1
+        and ln.get_ydata()[0] == pytest.approx(read_value)
+    ]
+    assert marked, "expected a 500 Hz read-value marker"
+    # annotation carries both the rating and the -5 dB octave note.
+    texts = " ".join(t.get_text() for t in ax.texts).replace("−", "-")
+    assert str(res.rating) in texts and "-5" in texts.replace(" ", "")
+    plt.close("all")
+
+
+def test_third_octave_impact_plot_reads_rating_at_500() -> None:
+    # For one-third-octave impact there is no -5 dB offset: the curve read
+    # value at 500 Hz equals the rating, so no offset note is drawn.
+    res = _impact_rating()
+    idx500 = int(np.argmin(np.abs(res.band_centers - 500.0)))
+    assert int(round(float(res.shifted_reference[idx500]))) == res.rating
+    ax = res.plot()
+    texts = " ".join(t.get_text() for t in ax.texts).replace("−", "-")
+    assert "-5" not in texts.replace(" ", "")
+    plt.close("all")
+
+
+# --------------------------------------------------------------------------
+# Every public .plot() must accept and forward a benign styling kwarg
+# --------------------------------------------------------------------------
+_KWARG_PLOT_CASES = [
+    ("zwicker", _zwicker_stationary, "line"),
+    ("sti", _sti, "bar"),
+    ("airborne", _airborne_rating, "line"),
+    ("impact", _impact_rating, "line"),
+    ("room", lambda: _room([250, 2000]), "bar"),
+    ("sound_power", _sound_power, "bar"),
+    ("reverb_power", _reverb_power, "bar"),
+    ("intensity_power", _intensity_power_negative, "bar"),
+    ("intensity", _intensity, "line"),
+    ("decay_curve", lambda: ph.decay_curve(_exp_ir(seconds=1.0, t60=0.6), FS), "line"),
+]
+
+
+@pytest.mark.parametrize(
+    ("name", "factory", "kind"),
+    _KWARG_PLOT_CASES,
+    ids=[c[0] for c in _KWARG_PLOT_CASES],
+)
+def test_every_plot_forwards_kwargs_to_primary_artist(name, factory, kind) -> None:
+    res = factory()
+    out = res.plot(linewidth=2)
+    ax = out[0] if isinstance(out, np.ndarray) else out
+    artists = ax.lines if kind == "line" else ax.patches
+    assert artists, f"{name}: no primary {kind} artist drawn"
+    assert any(a.get_linewidth() == 2.0 for a in artists), (
+        f"{name}: linewidth kwarg not forwarded to the primary artist"
+    )
+    plt.close("all")
+
+
 # --------------------------------------------------------------------------
 # Room acoustics
 # --------------------------------------------------------------------------
@@ -244,16 +333,46 @@ def test_room_acoustics_two_panels_and_bar_heights() -> None:
     plt.close("all")
 
 
+def _room_with_one_invalid_band() -> ph.RoomAcousticsResult:
+    """A RoomAcousticsResult whose middle band is flagged invalid on every
+    decay-time series (built directly so the test is deterministic)."""
+    freq = np.array([250.0, 500.0, 1000.0])
+    ones = np.ones(3)
+    valid = np.array([True, False, True])  # 500 Hz band invalid
+    return ph.RoomAcousticsResult(
+        frequency=freq,
+        edt=ones.copy(),
+        t20=ones.copy(),
+        t30=ones.copy(),
+        c50=np.zeros(3),
+        c80=np.zeros(3),
+        d50=np.zeros(3),
+        ts=np.zeros(3),
+        dynamic_range=np.array([60.0, 5.0, 60.0]),
+        edt_valid=valid.copy(),
+        t20_valid=valid.copy(),
+        t30_valid=valid.copy(),
+        curvature=np.zeros(3),
+    )
+
+
 def test_room_acoustics_invalid_bands_are_hatched() -> None:
-    # A near-silent IR yields invalid decay-time bands (fails ISO criterion).
-    ir = RNG.standard_normal(int(0.3 * FS)) * 1e-6
-    ir[0] = 1.0
-    res = ph.room_parameters(ir, FS, limits=[250, 2000])
-    if bool(np.all(res.t30_valid)):
-        pytest.skip("all bands happened to be valid")
+    # Deterministic: only the 500 Hz band is flagged invalid on all three
+    # decay-time series, so exactly those three bars must be hatched/greyed.
+    res = _room_with_one_invalid_band()
+    invalid_idx = 1
+    n = res.t30.size
     axes = res.plot()
-    hatched = [p for p in axes[0].patches if p.get_hatch()]
-    assert hatched, "expected at least one hatched (invalid) bar"
+    patches = axes[0].patches
+    assert len(patches) == 3 * n  # EDT/T20/T30 grouped bars
+    hatched = [p for p in patches if p.get_hatch()]
+    greyed = [p for p in patches if p.get_facecolor()[:3] == plt.matplotlib.colors.to_rgb("#bbbbbb")]
+    # Exactly one bar per series (EDT/T20/T30) is invalid -> 3 hatched/greyed.
+    assert len(hatched) == 3
+    assert len(greyed) == 3
+    # And they are the bars sitting over the invalid (500 Hz) band position.
+    for p in hatched:
+        assert round(p.get_x() + p.get_width() / 2.0) == invalid_idx
     plt.close("all")
 
 

@@ -192,16 +192,18 @@ def _plot_rating(
     title: str,
     ylabel: str,
     ax: Axes | None,
+    **kwargs: Any,
 ) -> Axes:
     """Shared renderer for airborne and impact rating figures.
 
     Draws the measured curve against the shifted reference and shades the
     unfavourable deviations: where the reference exceeds the measurement
     for airborne insulation (higher is better) and where the measurement
-    exceeds the reference for impact sound (lower is better).
+    exceeds the reference for impact sound (lower is better).  Extra
+    keyword arguments style the measured curve (its primary artist).
     """
     ax = ax if ax is not None else _new_axes()
-    ax.plot(band_centers, measured, "o-", color="#1f77b4", label="Measured")
+    ax.plot(band_centers, measured, "o-", color="#1f77b4", label="Measured", **kwargs)
     ax.plot(
         band_centers, reference, "s--", color="#d62728", label="Shifted reference"
     )
@@ -260,12 +262,21 @@ def plot_weighted_rating(
 
 
 def plot_impact_rating(result: Any, ax: Axes | None = None, **kwargs: Any) -> Axes:
-    """Impact rating curve vs shifted reference (ISO 717-2)."""
+    """Impact rating curve vs shifted reference (ISO 717-2).
+
+    The drawn shifted-reference curve is the normatively honest ``ref -
+    shift``; for octave-band data the rating is that curve read at 500 Hz
+    *minus 5 dB* (Clause 4.3.2), so the plot marks the 500 Hz read value on
+    the (undistorted) curve and annotates the -5 dB reduction rather than
+    pulling the curve down to the rating.
+    """
     _require_rating_curve(result)
-    return _plot_rating(
-        np.asarray(result.band_centers, dtype=np.float64),
+    band_centers = np.asarray(result.band_centers, dtype=np.float64)
+    reference = np.asarray(result.shifted_reference, dtype=np.float64)
+    ax = _plot_rating(
+        band_centers,
         np.asarray(result.measured, dtype=np.float64),
-        np.asarray(result.shifted_reference, dtype=np.float64),
+        reference,
         impact=True,
         rating=result.rating,
         unfavourable_sum=result.unfavourable_sum,
@@ -274,6 +285,45 @@ def plot_impact_rating(result: Any, ax: Axes | None = None, **kwargs: Any) -> Ax
         ax=ax,
         **kwargs,
     )
+    _annotate_impact_500(ax, band_centers, reference, int(result.rating))
+    return ax
+
+
+def _annotate_impact_500(
+    ax: Axes, band_centers: np.ndarray, reference: np.ndarray, rating: int
+) -> None:
+    """Mark the 500 Hz read value on the reference curve and, when the
+    octave-band -5 dB reduction applies (ISO 717-2 Clause 4.3.2), annotate
+    the rating as ``read - 5 dB`` so the figure stays normatively truthful.
+    """
+    if band_centers.size == 0:
+        return
+    idx = int(np.argmin(np.abs(band_centers - 500.0)))
+    read_value = float(reference[idx])
+    ax.plot(
+        [band_centers[idx]],
+        [read_value],
+        marker="D",
+        ls="",
+        color="#d62728",
+        ms=9,
+        mfc="none",
+        mew=1.6,
+        zorder=5,
+        label=f"500 Hz read = {read_value:.0f} dB",
+    )
+    offset = rating - read_value
+    if abs(offset) >= 0.5:  # octave-band -5 dB rule (Clause 4.3.2)
+        ax.annotate(
+            f"Ln,w = {rating} dB = {read_value:.0f} - 5 dB (octave rule)",
+            xy=(band_centers[idx], read_value),
+            xytext=(0.0, -32.0),
+            textcoords="offset points",
+            ha="center",
+            fontsize="small",
+            arrowprops={"arrowstyle": "->", "color": "#555555"},
+        )
+    ax.legend(loc="best", fontsize="small")
 
 
 def _require_rating_curve(result: Any) -> None:
@@ -445,15 +495,15 @@ def plot_sound_power(result: Any, ax: Axes | None = None, **kwargs: Any) -> Axes
     return ax
 
 
+# ---------------------------------------------------------------------------
+# Sound intensity (ISO 9614 / IEC 61043)
+# ---------------------------------------------------------------------------
+
+
 def _bar_width(positions: np.ndarray) -> float:
     if positions.size > 1:
         return 0.8 * float(np.min(np.diff(np.sort(positions))))
     return 0.8
-
-
-# ---------------------------------------------------------------------------
-# Sound intensity (ISO 9614 / IEC 61043)
-# ---------------------------------------------------------------------------
 
 
 def plot_intensity(

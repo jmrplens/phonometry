@@ -1,0 +1,252 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Tests for ISO 3382-1:2009 / ISO 3382-2:2008 room acoustic parameters.
+
+Validation strategy (closed forms, not self-consistency). For a purely
+exponential energy decay p^2(t) = exp(-a*t) with a = 6*ln(10)/T:
+
+- The Schroeder curve is an exact straight line L(t) = -60*t/T dB, so
+  EDT = T20 = T30 = T for any evaluation range (ISO 3382-1, 5.3.3 / A.2.2).
+- C_te = 10*lg(exp(a*te) - 1) dB (from ISO 3382-1 Eq. A.10),
+  e.g. C80 = 10*lg(exp(13.8155*0.08/T) - 1).
+- D50 = 1 - exp(-a*0.05)  (Eq. A.11), with C50 = 10*lg(D50/(1-D50))
+  (Eq. A.12).
+- Ts = 1/a = T/13.8155  (centre of gravity of exp(-a*t), Eq. A.13).
+
+Tolerances are chosen far below the ISO 3382-1 Table A.1 JNDs
+(EDT: rel. 5 %; C80: 1 dB; D50: 0.05; Ts: 10 ms).
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+
+from phonometry import RoomAcousticsResult, decay_curve, room_parameters
+
+FS = 48000
+#: 6*ln(10): decay-rate constant so that exp(-A*t/T) falls 60 dB in T seconds.
+A60 = 6.0 * np.log(10.0)
+
+
+def exponential_ir(t60: float, seconds: float, fs: int = FS) -> np.ndarray:
+    """Pressure IR whose energy envelope is exactly exp(-A60*t/t60)."""
+    t = np.arange(int(round(seconds * fs))) / fs
+    return np.asarray(np.exp(-0.5 * A60 * t / t60))
+
+
+def multitone_ir(t60: float, seconds: float, freqs: list[float],
+                 fs: int = FS) -> np.ndarray:
+    """One sine carrier per octave band, all sharing the same exponential
+    energy envelope, so every band-filtered envelope is exp(-A60*t/t60)."""
+    t = np.arange(int(round(seconds * fs))) / fs
+    env = np.exp(-0.5 * A60 * t / t60)
+    out = np.zeros_like(t)
+    for f in freqs:
+        out += np.sin(2.0 * np.pi * f * t)
+    return out * env
+
+
+def c_te_closed_form(t60: float, te: float) -> float:
+    """C_te for a pure exponential decay: 10*lg(exp(A60*te/T) - 1) dB."""
+    return float(10.0 * np.log10(np.exp(A60 * te / t60) - 1.0))
+
+
+# --------------------------------------------------------------------------
+# decay_curve (Schroeder backward integration, ISO 3382-1 5.3.3)
+# --------------------------------------------------------------------------
+def test_decay_curve_is_linear_for_exponential() -> None:
+    # L(t) = -60*t/T exactly for an exponential decay (5.3.3, Eq. 1).
+    t60 = 1.0
+    ir = exponential_ir(t60, 3.0)
+    t, level = decay_curve(ir, FS)
+    assert level[0] == pytest.approx(0.0, abs=1e-9)
+    # Compare over the first 40 dB of decay.
+    mask = level >= -40.0
+    np.testing.assert_allclose(level[mask], -60.0 * t[mask] / t60, atol=0.1)
+
+
+def test_decay_curve_monotone_nonincreasing() -> None:
+    rng = np.random.default_rng(7)
+    ir = exponential_ir(0.7, 2.0) * rng.standard_normal(int(2.0 * FS))
+    _, level = decay_curve(ir, FS)
+    assert np.all(np.diff(level) <= 1e-12)
+
+
+def test_decay_curve_single_band() -> None:
+    ir = multitone_ir(0.8, 2.5, [500.0])
+    t, level = decay_curve(ir, FS, band=500.0)
+    assert t.shape == level.shape
+    assert level[0] == pytest.approx(0.0, abs=1e-9)
+    assert np.all(np.isfinite(level))
+
+
+# --------------------------------------------------------------------------
+# Reverberation times: closed form for pure exponential decay
+# --------------------------------------------------------------------------
+@pytest.mark.parametrize("t60", [0.5, 1.0, 2.0])
+def test_rt_exponential_broadband(t60: float) -> None:
+    # T20 = T30 = EDT = T within +/-1 % (far below the Table A.1 JND of
+    # rel. 5 % for EDT / reverberation).
+    ir = exponential_ir(t60, 3.0 * t60)
+    res = room_parameters(ir, FS, bands=None)
+    assert res.frequency is None
+    assert res.edt[0] == pytest.approx(t60, rel=0.01)
+    assert res.t20[0] == pytest.approx(t60, rel=0.01)
+    assert res.t30[0] == pytest.approx(t60, rel=0.01)
+    assert bool(res.edt_valid[0]) and bool(res.t20_valid[0])
+    assert bool(res.t30_valid[0])
+    # Perfectly straight decay: curvature ~ 0 % (ISO 3382-2, B.3).
+    assert abs(res.curvature[0]) < 2.0
+
+
+def test_rt_exponential_per_octave_band() -> None:
+    # Each octave band sees the same exponential envelope: T within +/-1 %.
+    t60 = 1.0
+    centers = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+    ir = multitone_ir(t60, 3.0, centers)
+    res = room_parameters(ir, FS)
+    assert res.frequency is not None
+    assert len(res.frequency) == 6
+    np.testing.assert_allclose(res.t20, t60, rtol=0.01)
+    np.testing.assert_allclose(res.t30, t60, rtol=0.01)
+    np.testing.assert_allclose(res.edt, t60, rtol=0.01)
+    assert bool(np.all(res.t30_valid))
+    # Band-filter group delay smears some early energy past 80 ms, so the
+    # per-band C80 sits slightly below the closed form; it must stay well
+    # within the 1 dB JND of Table A.1.
+    np.testing.assert_allclose(res.c80, c_te_closed_form(t60, 0.080), atol=1.0)
+
+
+# --------------------------------------------------------------------------
+# Energy parameters: closed forms (ISO 3382-1, A.2.3)
+# --------------------------------------------------------------------------
+@pytest.mark.parametrize("t60", [0.5, 1.0, 2.0])
+def test_clarity_closed_form(t60: float) -> None:
+    # C80 = 10*lg(exp(13.8155*0.08/T) - 1) dB; tolerance << 1 dB JND.
+    ir = exponential_ir(t60, 3.0 * t60)
+    res = room_parameters(ir, FS, bands=None)
+    assert res.c80[0] == pytest.approx(c_te_closed_form(t60, 0.080), abs=0.05)
+    assert res.c50[0] == pytest.approx(c_te_closed_form(t60, 0.050), abs=0.05)
+
+
+@pytest.mark.parametrize("t60", [0.5, 1.0, 2.0])
+def test_definition_and_centre_time_closed_form(t60: float) -> None:
+    ir = exponential_ir(t60, 3.0 * t60)
+    res = room_parameters(ir, FS, bands=None)
+    # D50 = 1 - exp(-13.8155*0.05/T); tolerance << 0.05 JND.
+    d50_expected = 1.0 - np.exp(-A60 * 0.05 / t60)
+    assert res.d50[0] == pytest.approx(d50_expected, abs=0.005)
+    # Ts = T/13.8155 seconds; tolerance 0.5 ms << 10 ms JND.
+    assert res.ts[0] == pytest.approx(t60 / A60, abs=5e-4)
+
+
+def test_c50_d50_exact_relation() -> None:
+    # C50 = 10*lg(D50/(1 - D50)) must hold exactly (Eq. A.12).
+    ir = exponential_ir(1.2, 3.5)
+    res = room_parameters(ir, FS, bands=None)
+    d50 = float(res.d50[0])
+    assert res.c50[0] == pytest.approx(10.0 * np.log10(d50 / (1.0 - d50)),
+                                       abs=1e-9)
+
+
+def test_energy_parameters_shift_invariant() -> None:
+    # t = 0 is the start of the direct sound (A.2.1): prepending silence
+    # must not change the energy parameters.
+    t60 = 1.0
+    ir = exponential_ir(t60, 3.0)
+    shifted = np.concatenate([np.zeros(int(0.05 * FS)), ir])
+    res_a = room_parameters(ir, FS, bands=None)
+    res_b = room_parameters(shifted, FS, bands=None)
+    assert res_b.c80[0] == pytest.approx(float(res_a.c80[0]), abs=0.05)
+    assert res_b.ts[0] == pytest.approx(float(res_a.ts[0]), abs=5e-4)
+    assert res_b.t30[0] == pytest.approx(float(res_a.t30[0]), rel=0.01)
+
+
+# --------------------------------------------------------------------------
+# Double-slope decay: EDT != T30 with the correct direction
+# --------------------------------------------------------------------------
+def test_double_slope_edt_below_t30() -> None:
+    # Fast early decay (T = 0.4 s) with a weak slow tail (T = 2.0 s,
+    # -20 dB): the initial 0/-10 dB slope is steep (EDT ~ fast decay)
+    # while -5/-35 dB includes the shallow tail, so EDT < T20 < T30.
+    fs = FS
+    t = np.arange(int(4.0 * fs)) / fs
+    p2 = np.exp(-A60 * t / 0.4) + 1e-2 * np.exp(-A60 * t / 2.0)
+    ir = np.sqrt(p2)
+    res = room_parameters(ir, fs, bands=None)
+    assert np.isfinite(res.edt[0]) and np.isfinite(res.t30[0])
+    assert res.edt[0] < res.t20[0] < res.t30[0]
+    # Strong curvature indicator (ISO 3382-2, B.3: C > 10 % is suspicious).
+    assert res.curvature[0] > 10.0
+
+
+# --------------------------------------------------------------------------
+# Background noise: validity flags (ISO 3382-1, 5.3.3 / 5.2.1)
+# --------------------------------------------------------------------------
+def test_noise_flips_validity_flags() -> None:
+    # Noise floor ~30 dB below the IR maximum: EDT needs 25 dB (10+15),
+    # T20 needs 35 dB (20+15) and T30 needs 45 dB (30+15), so only EDT
+    # stays valid (5.3.3: noise at least evaluation range + 15 dB below
+    # the maximum of the impulse response).
+    rng = np.random.default_rng(11)
+    ir = exponential_ir(1.0, 3.0)
+    noisy = ir + 10.0 ** (-30.0 / 20.0) * rng.standard_normal(ir.size)
+    res = room_parameters(noisy, FS, bands=None)
+    assert bool(res.edt_valid[0])
+    assert not bool(res.t20_valid[0])
+    assert not bool(res.t30_valid[0])
+    # Reported dynamic range should sit near the constructed 30 dB.
+    assert res.dynamic_range[0] == pytest.approx(30.0, abs=3.0)
+
+
+def test_clean_ir_flags_all_valid() -> None:
+    ir = exponential_ir(1.0, 3.0)
+    res = room_parameters(ir, FS, bands=None)
+    assert bool(res.edt_valid[0] and res.t20_valid[0] and res.t30_valid[0])
+    assert res.dynamic_range[0] > 45.0
+
+
+def test_short_ir_yields_nan_and_invalid() -> None:
+    # 0.3 s of a T = 2 s decay only covers ~9 dB: T30 (needs -35 dB) is
+    # not evaluable.
+    ir = exponential_ir(2.0, 0.3)
+    res = room_parameters(ir, FS, bands=None)
+    assert np.isnan(res.t30[0])
+    assert not bool(res.t30_valid[0])
+
+
+# --------------------------------------------------------------------------
+# Band handling and input validation
+# --------------------------------------------------------------------------
+def test_third_octave_bands_option() -> None:
+    rng = np.random.default_rng(3)
+    ir = exponential_ir(0.8, 2.0) * rng.standard_normal(int(2.0 * FS))
+    res = room_parameters(ir, FS, bands=(100.0, 5000.0), fraction=3)
+    assert res.frequency is not None
+    assert len(res.frequency) == 18  # 100 Hz..5 kHz one-third octaves
+    assert res.t20.shape == (18,)
+    assert isinstance(res, RoomAcousticsResult)
+
+
+def test_default_bands_are_octaves_125_to_4k() -> None:
+    rng = np.random.default_rng(5)
+    ir = exponential_ir(0.8, 2.0) * rng.standard_normal(int(2.0 * FS))
+    res = room_parameters(ir, FS)
+    assert res.frequency is not None
+    np.testing.assert_allclose(
+        res.frequency,
+        [125.89254117941672, 251.188643150958, 501.18723362727235,
+         1000.0, 1995.2623149688795, 3981.0717055349724],
+    )
+
+
+def test_rejects_bad_input() -> None:
+    with pytest.raises(ValueError):
+        room_parameters(np.zeros((2, 100)), FS)  # 2D
+    with pytest.raises(ValueError):
+        room_parameters(np.zeros(100), FS)  # silent
+    with pytest.raises(ValueError):
+        room_parameters(exponential_ir(1.0, 1.0), 0)  # bad fs
+    with pytest.raises(ValueError):
+        decay_curve(np.zeros(100), FS)  # silent

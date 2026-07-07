@@ -36,6 +36,7 @@ from .parametric_filters import (
     time_weighting,
     weighting_filter,
 )
+from .room_acoustics import RoomAcousticsResult, decay_curve, room_parameters
 from .room_ir import (
     impulse_response,
     inverse_filter,
@@ -90,6 +91,9 @@ __all__ = [
     "impulse_response",
     "mls_signal",
     "mls_impulse_response",
+    "room_parameters",
+    "decay_curve",
+    "RoomAcousticsResult",
     "lden",
     "ldn",
     "composite_rating_level",

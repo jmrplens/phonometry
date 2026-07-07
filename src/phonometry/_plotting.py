@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from .loudness import ZwickerLoudness
     from .loudness_ecma import EcmaLoudness
     from .room_acoustics import DecayCurve, RoomAcousticsResult
+    from .tonality_ecma import EcmaTonality
     from .sti import STIResult
 
 _INSTALL_HINT = (
@@ -198,6 +199,56 @@ def plot_ecma_loudness(
     ax_time.plot(time, lvt, color="#2ca02c", label="N(l)")
     ax_time.set_xlabel("Time [s]")
     ax_time.set_ylabel("Loudness N [sone_HMS]")
+    ax_time.set_ylim(bottom=0.0)
+    ax_time.grid(True, alpha=0.3)
+    ax_time.legend(loc="best", fontsize="small")
+    return axes
+
+
+def plot_ecma_tonality(
+    result: EcmaTonality, ax: Axes | None = None, **kwargs: Any
+) -> Axes | np.ndarray:
+    """Average specific tonality T'(z) and time-dependent tonality T(l).
+
+    When ``ax`` is ``None`` a two-panel figure is drawn (specific tonality over
+    the critical-band-rate scale and tonality vs time) and an array of two axes
+    is returned; when ``ax`` is supplied only the specific-tonality panel is
+    drawn on it and that single axes is returned.
+
+    :param result: An :class:`~phonometry.tonality_ecma.EcmaTonality`.
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the specific-tonality line ``plot`` call.
+    :return: The axes, or an array of two axes.
+    """
+    specific = np.asarray(result.specific_tonality, dtype=np.float64)
+    bark = np.asarray(result.bark, dtype=np.float64)
+    two_panel = ax is None
+
+    if two_panel:
+        axes = _new_axes_column(2, figsize=(7.0, 6.0))
+        ax_specific = cast("Axes", axes[0])
+    else:
+        ax_specific = cast("Axes", ax)
+
+    kwargs.setdefault("color", "#d62728")
+    ax_specific.plot(bark, specific, **kwargs)
+    ax_specific.fill_between(bark, specific, color="#d62728", alpha=0.25)
+    ax_specific.set_xlabel("Critical-band rate z [Bark_HMS]")
+    ax_specific.set_ylabel("Specific tonality T' [tu_HMS]")
+    ax_specific.set_xlim(0.0, bark[-1])
+    ax_specific.set_ylim(bottom=0.0)
+    ax_specific.set_title(f"Tonality T = {result.tonality:.2f} tu_HMS")
+    ax_specific.grid(True, alpha=0.3)
+
+    if not two_panel:
+        return ax_specific
+
+    ax_time = cast("Axes", axes[1])
+    time = np.asarray(result.time, dtype=np.float64)
+    tvt = np.asarray(result.tonality_vs_time, dtype=np.float64)
+    ax_time.plot(time, tvt, color="#9467bd", label="T(l)")
+    ax_time.set_xlabel("Time [s]")
+    ax_time.set_ylabel("Tonality T [tu_HMS]")
     ax_time.set_ylim(bottom=0.0)
     ax_time.grid(True, alpha=0.3)
     ax_time.legend(loc="best", fontsize="small")

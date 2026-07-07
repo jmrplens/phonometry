@@ -358,7 +358,15 @@ def _average_bands(scaled: List[np.ndarray]) -> List[np.ndarray]:
     Implements the band averaging of Clause 6.2.3 (Table 5) restricted to
     bands sharing the same block size; N_B is reduced symmetrically at group
     edges and the lowest band is averaged only with the second-lowest.
-    Cross-group neighbour recomputation is not performed (see module notes).
+
+    ============================ BOUNDARY MARKER ============================
+    SIMPLIFICATION (valid for LOUDNESS ONLY): the cross-block-size-group
+    neighbour ACF recomputation that Clause 6.2.3 mandates for bands adjacent
+    to a block-size change is NOT performed here. This is second-order for the
+    loudness metric (the calibrated 0.996 sone / 1 kHz-40 dB guard depends on
+    it staying byte-identical) but WRONG for tonality. The tonality metric uses
+    the full 6.2.3 in ``tonality_ecma._average_bands_full`` instead.
+    ========================================================================
     """
     groups: dict[int, List[int]] = {}
     for band in range(_CBF):
@@ -398,10 +406,14 @@ def _average_blocks(averaged: List[np.ndarray]) -> List[np.ndarray]:
     return out
 
 
-def _tonal_estimate(acf: np.ndarray, band: int) -> Tuple[np.ndarray, np.ndarray]:
+def _tonal_estimate(
+    acf: np.ndarray, band: int
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Windowed-ACF tonal loudness estimate (Clause 6.2.4-6.2.5).
 
-    Returns (Nhat'_tonal(l, z), N'_signal(l, z)) at the band's own block rate.
+    Returns ``(Nhat'_tonal(l, z), N'_signal(l, z), f_ton(l, z))`` at the band's
+    own block rate. ``f_ton`` (Formulae 38-39) is the DFT-peak frequency of the
+    windowed ACF; loudness ignores it, the tonality metric consumes it.
     """
     df = _DF[band]
     tau_start = max(0.5 / df, 0.002)  # Formula 31, tau_min = 2 ms
@@ -413,12 +425,18 @@ def _tonal_estimate(acf: np.ndarray, band: int) -> Tuple[np.ndarray, np.ndarray]
     n_signal = acf[:, 0].copy()  # Formula 41: phi_bar'(0)
     window = acf[:, m_start : m_end + 1].copy()  # Formula 35
     window -= window.mean(axis=1, keepdims=True)
-    spec = np.fft.fft(window, n=16384, axis=1)  # Formula 36
+    spec = np.abs(np.fft.fft(window, n=16384, axis=1))  # Formula 36
     # Formula 37: 2 * max|Phi'| / (M/2); the 2 compensates the half-wave
     # rectification and M/2 is the DFT energy normalization (footnote 19).
-    peak = (4.0 / m_count) * np.max(np.abs(spec), axis=1)
+    peak = (4.0 / m_count) * np.max(spec, axis=1)
     n_tonal = np.minimum(peak, n_signal)
-    return n_tonal, n_signal
+    # Formula 38/39: DFT peak bin -> physical frequency. The magnitude spectrum
+    # of the real windowed ACF is conjugate-symmetric, so the argmax is
+    # restricted to the lower half [0, r_s/2] to return the physical bin (the
+    # mirror bin above Nyquist would otherwise alias to > 24 kHz).
+    k_max = np.argmax(spec[:, : 16384 // 2 + 1], axis=1)
+    f_ton = k_max.astype(np.float64) * _FS / 16384.0
+    return n_tonal, n_signal, f_ton
 
 
 def _resample_common(values: np.ndarray, band: int, n_common: int) -> np.ndarray:
@@ -463,7 +481,7 @@ def _tonal_noise_loudness(fe: _FrontEnd) -> Tuple[np.ndarray, np.ndarray, np.nda
     n_tonal = np.zeros((n_common, _CBF))
     n_signal = np.zeros((n_common, _CBF))
     for band in range(_CBF):
-        tonal_b, signal_b = _tonal_estimate(averaged[band], band)
+        tonal_b, signal_b, _ = _tonal_estimate(averaged[band], band)
         n_tonal[:, band] = _resample_common(tonal_b, band, n_common)
         n_signal[:, band] = _resample_common(signal_b, band, n_common)
 

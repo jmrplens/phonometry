@@ -53,7 +53,8 @@ _TINY_VALUE = 1e-12
 # Internal sampling rate of the reference algorithm (clause A.2).
 _FS_REF = 48000
 # Sampling rate of the one-third-octave level time series: one value
-# every 2 ms (clause 6.2, constant SR_LEVEL).
+# every 0.5 ms (SR_LEVEL = 2000 Hz; clause 6.2). The 2 ms / 500 Hz spacing
+# applies only to the final loudness-vs-time output (_SR_LOUDNESS).
 _SR_LEVEL = 2000
 # Output sampling rate of the total loudness vs. time (clause 6.5).
 _SR_LOUDNESS = 500
@@ -140,11 +141,12 @@ def _third_octave_levels(x: np.ndarray, stationary: bool) -> np.ndarray:
     clause A.2.  For the stationary method one level per band is returned
     (mean square over the whole signal); for the time-varying method the
     squared output is smoothed by three cascaded first-order low-passes
-    with tau = 2/(3*fc) (fc capped at 1 kHz) and sampled every 2 ms.
+    with tau = 2/(3*fc) (fc capped at 1 kHz) and sampled every 0.5 ms
+    (SR_LEVEL = 2000 Hz).
 
     :param x: Sound pressure signal in Pa at 48 kHz.
     :param stationary: Select the stationary or the time-varying method.
-    :return: Levels in dB, shape (28, 1) or (28, num_2ms_steps).
+    :return: Levels in dB, shape (28, 1) or (28, num_level_steps) at 2000 Hz.
     """
     num_samples = x.size
     if stationary:
@@ -336,8 +338,8 @@ def _nl_lp_step(
 def _nonlinear_decay(core: np.ndarray, sample_rate: float) -> None:
     """Nonlinear temporal decay of the core loudness (clause 6.3).
 
-    Processes each critical band independently.  Between consecutive 2 ms
-    samples the input is linearly interpolated and the state machine is
+    Processes each critical band independently.  Between consecutive 0.5 ms
+    core-loudness samples the input is linearly interpolated and the state machine is
     advanced ``_NL_ITER`` times (virtual upsampling) for precision, as in
     the reference implementation.  Modifies ``core`` in place.
     """
@@ -607,7 +609,7 @@ def loudness_zwicker(
     A.1/A.2), squared and smoothed.  With ``stationary=True`` the method
     for stationary sounds (clause 5) is applied to the per-band mean
     square of the whole signal.  Otherwise the method for time-varying
-    sounds (clause 6) is used: core loudness every 2 ms, nonlinear
+    sounds (clause 6) is used: core loudness every 0.5 ms, nonlinear
     temporal decay, specific-loudness slopes, temporal weighting of the
     total loudness and the percentile values N5/N10 from the 500 Hz
     loudness-vs-time trace.

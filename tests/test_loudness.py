@@ -84,7 +84,9 @@ def test_1khz_60db_anchor() -> None:
     """Definitional anchor: a 1 kHz tone at 40 phon is 1 sone; 60 dB -> 4 sone
     (each 10 phon doubles loudness)."""
     res = loudness_zwicker(_tone(1000.0, 60.0, seconds=2.0, pad_ms=0.0), FS, stationary=True)
-    assert res.loudness == pytest.approx(4.0, rel=0.05)
+    # Measured +0.97 % vs the 4.0 sone definitional value (the +0.5-0.8 %
+    # Zwicker stationary bias); 0.02 keeps ~2x headroom (was 0.05).
+    assert res.loudness == pytest.approx(4.0, rel=0.02)
     assert res.loudness_level == pytest.approx(60.0, abs=0.5)
 
 
@@ -127,7 +129,9 @@ def test_annex_b4_tone_pulses(case: str, num: int, level: float) -> None:
     x, fs = _read_wav_pa(DATA / f"iso532_1_test_signal_{num}.wav", level)
     res = loudness_zwicker(x, fs, stationary=False)
     assert res.n5 is not None and res.loudness_vs_time is not None
-    assert res.loudness == pytest.approx(exp["Nmax"], rel=0.05), (
+    # Nmax reproduces the workbook header to < 0.01 %; 1e-3 locks that in
+    # (was 0.05, ~700x looser than the achieved accuracy).
+    assert res.loudness == pytest.approx(exp["Nmax"], rel=1e-3), (
         f"{case}: Nmax={res.loudness:.4f} vs expected {exp['Nmax']}"
     )
     ref = np.load(DATA / "iso532_1_annexB4_traces.npz")[f"signal_{num}"]

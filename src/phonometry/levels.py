@@ -108,9 +108,14 @@ def ln_levels(
         x_proc = weighting_filter(x_proc, fs, weighting)
 
     envelope = time_weighting(x_proc, fs, mode=mode)
-    # Discard the attack transient of the exponential integrator (~2*tau)
+    # Discard the attack transient of the exponential integrator. At 2*tau the
+    # F integrator is only 1-e^-2 = 86% settled (-0.6 dB), so the leading ramp
+    # is counted in the distribution and drags the low percentiles down (a
+    # 0.15 dB L10-L90 spread on a 2 s steady tone). 5*tau leaves it 99.3%
+    # settled, cutting that residual ~12x, and matches the ~8*tau skip that
+    # _validate_reference_stability already uses in calibration.py.
     tau = {"fast": 0.125, "slow": 1.0, "impulse": 0.035}[mode.lower()]
-    skip = min(int(2 * tau * fs), envelope.shape[-1] // 2)
+    skip = min(int(5 * tau * fs), envelope.shape[-1] // 2)
     levels_db = _level_db(envelope[..., skip:], calibration_factor, dbfs)
 
     result: Dict[int, float | np.ndarray] = {}

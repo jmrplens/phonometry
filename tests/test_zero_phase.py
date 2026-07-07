@@ -58,6 +58,21 @@ def test_zero_phase_passband_level_matches() -> None:
     assert spl_zp[0] == pytest.approx(spl_fwd[0], abs=0.1)
 
 
+def test_zero_phase_broadband_band_narrowing() -> None:
+    """Forward-backward filtering narrows the effective passband, lowering the
+    measured broadband band level ~0.2-0.3 dB per band (a pure center tone,
+    tested above, does not exercise this). Characterizes the documented bias."""
+    bank = OctaveFilterBank(fs=FS, fraction=1, limits=[100, 8000])
+    x = np.random.default_rng(7).standard_normal(FS * 4)
+    spl_fwd, _ = bank.filter(x)
+    spl_zp, _ = bank.filter(x, zero_phase=True)
+    delta = spl_zp - spl_fwd
+    # Every band shifts down by a small, bounded amount (never up).
+    assert np.all(delta < 0.0)
+    assert np.all(delta > -0.5)
+    assert -0.35 < float(np.mean(delta)) < -0.15
+
+
 def test_zero_phase_short_signal_does_not_crash() -> None:
     """Heavily decimated bands can be shorter than sosfiltfilt's default padlen."""
     bank = OctaveFilterBank(fs=FS, fraction=1, limits=[100, 200])

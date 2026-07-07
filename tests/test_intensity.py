@@ -54,7 +54,9 @@ def test_plane_progressive_wave_broadband() -> None:
     res = sound_intensity(p1, p2, FS, SPACING, rho=RHO, c=C)
     p_center = (p1 + p2) / 2.0
     expected = float(np.mean(p_center**2)) / (RHO * C)
-    assert res.total_intensity == pytest.approx(expected, rel=0.03)
+    # Measured residual is ~0.5 % (second-order finite-difference/Welch term);
+    # 0.015 keeps ~3x headroom (was 0.03).
+    assert res.total_intensity == pytest.approx(expected, rel=0.015)
     assert res.total_direction == 1
     # IEC 61043:1994 clause 5: Lp - LI = 10*lg(rho*c/400) = 0,14 dB.
     assert res.total_pressure_intensity_index == pytest.approx(
@@ -64,6 +66,30 @@ def test_plane_progressive_wave_broadband() -> None:
     # The whole excitation band lies below the usable-bandwidth bound.
     assert res.max_valid_frequency == pytest.approx(0.1 * C / SPACING)
     assert res.max_valid_frequency > 2000.0
+
+
+def test_bias_correct_undoes_finite_difference_underread() -> None:
+    """bias_correct=True lifts each in-band bin by (k*dr)/sin(k*dr)
+    (IEC 61043:1994, 7.3). For a single tone the corrected total therefore
+    equals the raw total times that factor; at low frequency it is ~1."""
+    spacing, f0 = 0.05, 500.0
+    t = np.arange(int(FS * 2)) / FS
+    delay = spacing / C
+    p1 = np.sin(2 * np.pi * f0 * t)
+    p2 = np.sin(2 * np.pi * f0 * (t - delay))
+    raw = sound_intensity(p1, p2, FS, spacing, rho=RHO, c=C)
+    corr = sound_intensity(p1, p2, FS, spacing, rho=RHO, c=C, bias_correct=True)
+    k_dr = 2.0 * np.pi * f0 * spacing / C
+    expected_ratio = k_dr / np.sin(k_dr)
+    assert corr.total_intensity / raw.total_intensity == pytest.approx(
+        expected_ratio, rel=1e-3
+    )
+    # At 50 Hz the correction is negligible (< 0.1 %).
+    lo1 = np.sin(2 * np.pi * 50.0 * t)
+    lo2 = np.sin(2 * np.pi * 50.0 * (t - delay))
+    r = sound_intensity(lo1, lo2, FS, spacing, rho=RHO, c=C)
+    cc = sound_intensity(lo1, lo2, FS, spacing, rho=RHO, c=C, bias_correct=True)
+    assert cc.total_intensity == pytest.approx(r.total_intensity, rel=2e-3)
 
 
 def test_reversing_microphones_flips_the_sign() -> None:

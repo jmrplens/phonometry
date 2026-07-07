@@ -115,9 +115,31 @@ def test_rt_exponential_per_octave_band() -> None:
     np.testing.assert_allclose(res.edt, t60, rtol=0.01)
     assert bool(np.all(res.t30_valid))
     # Band-filter group delay smears some early energy past 80 ms, so the
-    # per-band C80 sits slightly below the closed form; it must stay well
-    # within the 1 dB JND of Table A.1.
-    np.testing.assert_allclose(res.c80, c_te_closed_form(t60, 0.080), atol=1.0)
+    # per-band C80 sits below the closed form; the smearing is worst in the
+    # 125 Hz band (~0.58 dB) and smaller above. 0.7 dB (below the 1 dB
+    # Table A.1 JND, was a full 1.0) locks the current accuracy in.
+    np.testing.assert_allclose(res.c80, c_te_closed_form(t60, 0.080), atol=0.7)
+
+
+def test_zero_phase_reduces_short_decay_group_delay_bias() -> None:
+    """ISO 3382-2:2008 Clause 7.3 NOTE: time-reversed (zero-phase) octave
+    filtering removes the filter group delay, which otherwise inflates the
+    apparent decay time of a short low-frequency decay. On a deterministic
+    125 Hz damped sinusoid (T = 0.2 s) the zero-phase T20/T30 sit closer to
+    the true value than the causal fit."""
+    t60, fc = 0.2, 125.89254118
+    n = int(1.2 * FS)
+    t = np.arange(n) / FS
+    # Amplitude decays A60/2 (energy decays A60, i.e. 60 dB) over t60.
+    ir = np.exp(-0.5 * A60 * t / t60) * np.sin(2 * np.pi * fc * t)
+    causal = room_parameters(ir, FS, limits=(112.0, 140.0), fraction=1)
+    zp = room_parameters(ir, FS, limits=(112.0, 140.0), fraction=1, zero_phase=True)
+    for arr in (causal.t20, causal.t30, zp.t20, zp.t30):
+        assert np.isfinite(arr[0])
+    # Both over-estimate the short decay (positive group-delay bias); the
+    # zero-phase estimate is strictly closer to the true T.
+    assert t60 <= zp.t20[0] < causal.t20[0]
+    assert t60 <= zp.t30[0] < causal.t30[0]
 
 
 # --------------------------------------------------------------------------

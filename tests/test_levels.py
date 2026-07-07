@@ -59,7 +59,9 @@ def test_ln_levels_constant_signal_all_equal() -> None:
     x = _tone(1000, seconds=3.0)
     out = ln_levels(x, FS, n=(10, 50, 90))
     assert set(out.keys()) == {10, 50, 90}
-    assert out[10] == pytest.approx(out[90], abs=0.2)
+    # 5*tau attack skip settles the F integrator to 99.3%, so a steady tone's
+    # L10-L90 spread collapses to ~0.01 dB (was ~0.15 dB at the old 2*tau).
+    assert out[10] == pytest.approx(out[90], abs=0.05)
     assert out[50] == pytest.approx(90.97, abs=0.3)
 
 

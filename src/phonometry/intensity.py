@@ -123,6 +123,7 @@ def sound_intensity(
     c: float = 343.0,
     fraction: int | None = None,
     limits: List[float] | None = None,
+    bias_correct: bool = False,
 ) -> IntensityResult:
     """
     Sound intensity from a two-microphone (p-p) probe (IEC 61043:1994).
@@ -166,6 +167,14 @@ def sound_intensity(
         3 (one-third octave bands).
     :param limits: [f_min, f_max] band limits in Hz (default
         [12, 20000], as in :func:`phonometry.getansifrequencies`).
+    :param bias_correct: If True, apply the per-bin finite-difference
+        correction ``(k*spacing)/sin(k*spacing)`` (IEC 61043:1994, 7.3) to the
+        intensity spectral density before summing the band and broadband
+        totals, so the totals no longer under-read as the frequency approaches
+        ``max_valid_frequency``. Bins at or beyond the first null
+        (``k*spacing >= pi``, where the correction diverges) are left
+        uncorrected. Default False keeps the exact legacy totals; the per-band
+        ``bias_correction`` factor is reported either way.
     :return: :class:`IntensityResult`.
     """
     x1 = _typesignal(p1)
@@ -206,6 +215,19 @@ def sound_intensity(
     # I(f) = -Im{G12(f)} / (2*pi*f*rho*dr) per frequency bin (W/m^2/Hz).
     i_density = -np.imag(g12[pos]) / (2.0 * np.pi * fpos * rho * spacing)
     p_density = spp[pos]
+
+    if bias_correct:
+        # IEC 61043:1994, 7.3: undo the finite-difference response
+        # sin(k*dr)/(k*dr) per bin, leaving bins at/after the first null
+        # (k*dr >= pi, where the reciprocal diverges) untouched.
+        k_dr_full = 2.0 * np.pi * fpos * spacing / c
+        with np.errstate(divide="ignore", invalid="ignore"):
+            correction = np.where(
+                (k_dr_full > 0.0) & (k_dr_full < np.pi),
+                k_dr_full / np.sin(k_dr_full),
+                1.0,
+            )
+        i_density = i_density * correction
 
     if limits is not None:
         broad = (fpos >= limits[0]) & (fpos <= limits[1])

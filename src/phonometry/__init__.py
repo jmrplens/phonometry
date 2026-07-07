@@ -156,7 +156,7 @@ def octavefilter(
     detrend: bool = True,
     filter_type: str = "butter",
     ripple: float = 0.1,
-    attenuation: float = 60.0,
+    attenuation: float = 72.0,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
     mode: str = "rms",
@@ -177,7 +177,7 @@ def octavefilter(
     detrend: bool = True,
     filter_type: str = "butter",
     ripple: float = 0.1,
-    attenuation: float = 60.0,
+    attenuation: float = 72.0,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
     mode: str = "rms",
@@ -198,7 +198,7 @@ def octavefilter(
     detrend: bool = True,
     filter_type: str = "butter",
     ripple: float = 0.1,
-    attenuation: float = 60.0,
+    attenuation: float = 72.0,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
     mode: str = "rms",
@@ -219,7 +219,7 @@ def octavefilter(
     detrend: bool = True,
     filter_type: str = "butter",
     ripple: float = 0.1,
-    attenuation: float = 60.0,
+    attenuation: float = 72.0,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
     mode: str = "rms",
@@ -239,7 +239,7 @@ def octavefilter(
     detrend: bool = True,
     filter_type: str = "butter",
     ripple: float = 0.1,
-    attenuation: float = 60.0,
+    attenuation: float = 72.0,
     calibration_factor: float = 1.0,
     dbfs: bool = False,
     mode: str = "rms",
@@ -272,9 +272,14 @@ def octavefilter(
     :type plot_file: Optional[str]
     :param detrend: If True, remove DC offset before filtering. Default: True.
     :type detrend: bool
-    :param filter_type: Type of filter ('butter', 'cheby1', 'cheby2', 'ellip', 'bessel'). Default: 'butter'.
+    :param filter_type: Type of filter ('butter', 'cheby1', 'cheby2', 'ellip', 'bessel').
+        Default: 'butter' (the only type that meets IEC 61260-1 class 1 with the
+        default parameters).
     :param ripple: Passband ripple in dB (for cheby1, ellip). Default: 0.1.
-    :param attenuation: Stopband attenuation in dB (for cheby2, ellip). Default: 60.0.
+    :param attenuation: Stopband attenuation in dB (for cheby2, ellip). Default: 72.0.
+        For ``cheby2`` scipy pins the deep-stopband floor at exactly this value,
+        so it must be >= 70 dB to clear the IEC 61260-1 class 1 limit (matches
+        :class:`OctaveFilterBank`).
     :param calibration_factor: Calibration factor for SPL calculation. Default: 1.0.
     :param dbfs: If True, return results in dBFS. Default: False.
     :param mode: 'rms' or 'peak'. Default: 'rms'.

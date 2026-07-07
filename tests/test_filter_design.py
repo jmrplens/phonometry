@@ -187,3 +187,25 @@ def test_cheby2_default_bank_meets_class1(fraction: float) -> None:
     )
     result = verify_filter_class(bank)
     assert result["overall_class"] == 1, result
+
+
+def test_functional_octavefilter_cheby2_default_meets_class1() -> None:
+    """The functional octavefilter() wrapper defaults attenuation to 72 dB so a
+    cheby2 call meets IEC 61260-1 class 1, matching OctaveFilterBank (F1 follow-up:
+    the wrapper previously still defaulted to 60 dB)."""
+    import inspect
+
+    from phonometry import verify_filter_class
+
+    default_att = inspect.signature(octavefilter).parameters["attenuation"].default
+    assert default_att == 72.0
+    # A bank built with the wrapper's own default passes class 1; and the
+    # functional call itself runs without raising.
+    bank = OctaveFilterBank(
+        fs=48000, fraction=1, order=6, limits=[100, 5000],
+        filter_type="cheby2", attenuation=default_att,
+    )
+    assert verify_filter_class(bank)["overall_class"] == 1
+    x = np.random.default_rng(0).standard_normal(48000)
+    spl, _ = octavefilter(x, 48000, fraction=1, filter_type="cheby2", limits=[100, 5000])
+    assert np.all(np.isfinite(spl))

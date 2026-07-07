@@ -7,6 +7,7 @@ A/C/Z per IEC 61672-1:2013; G (infrasound) per ISO 7196:1995.
 from __future__ import annotations
 
 import math
+from functools import lru_cache
 from typing import List, Tuple, cast
 
 import numpy as np
@@ -195,6 +196,21 @@ class WeightingFilter:
         return cast(np.ndarray, y)
 
 
+@lru_cache(maxsize=32)
+def _cached_weighting_filter(
+    fs: int, curve: str, high_accuracy: bool
+) -> WeightingFilter:
+    """Reuse the (immutable, non-stateful) weighting-filter design.
+
+    A non-stateful ``WeightingFilter`` never mutates its SOS in ``filter()``,
+    so the design (bilinear + zpk2sos, ~0.9 ms) can be cached and shared across
+    repeated ``weighting_filter()`` calls at the same rate/curve. The
+    high-accuracy filtering cost itself (oversample -> sosfilt -> decimate) is
+    inherent to IEC 61672-1 class 1 accuracy and is not cached.
+    """
+    return WeightingFilter(fs, curve, high_accuracy=high_accuracy)
+
+
 def weighting_filter(
     x: List[float] | np.ndarray, fs: int, curve: str = "A", high_accuracy: bool = True
 ) -> np.ndarray:
@@ -208,7 +224,7 @@ def weighting_filter(
         accuracy at high frequencies (default True).
     :return: Weighted signal.
     """
-    wf = WeightingFilter(fs, curve, high_accuracy=high_accuracy)
+    wf = _cached_weighting_filter(fs, curve, high_accuracy)
     return wf.filter(x)
 
 

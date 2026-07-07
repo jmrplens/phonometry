@@ -167,7 +167,11 @@ def sharpness_din(
     g(z)-weighted first moment, normalized so the reference sound of
     clause 6 (critical-band-wide noise, 1 kHz, 60 dB) gives 1.00 acum.
     Verification tolerance per clause 6: 5 % or 0.05 acum against the
-    Table A.2/A.3 target values.
+    Table A.2/A.3 target values. A small, systematic negative bias grows
+    with centre frequency for narrowband stimuli (about -0.03 acum at
+    2.5 kHz to -0.15 acum at 8.5 kHz, from the specific-loudness upper-slope
+    handling near the 24 Bark edge); it stays within the 5 % / 0.05 acum
+    tolerance and is a known DIN 45692 implementation property.
 
     :param x: Input signal (1D), in Pa after ``calibration_factor``.
     :param fs: Sample rate in Hz.

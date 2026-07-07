@@ -100,7 +100,14 @@ class STIResult:
 
 
 def _rating(sti: float) -> str:
-    """Annex F qualification letter for an STI value (band edges 0.36-0.76)."""
+    """Annex F qualification letter for an STI value (band edges 0.36-0.76).
+
+    Note: the qualification bands are 0.04 STI wide, so every band edge flips a
+    letter under +/-0.005 of STI jitter. Because typical STIPA measurement
+    uncertainty (+/-0.02 to 0.03) exceeds the 0.02 half-width, a value near an
+    edge can legitimately be graded one letter either way; treat the letter as
+    indicative near a boundary and report the numeric STI alongside it.
+    """
     idx = int(np.searchsorted(np.asarray(_RATING_EDGES), sti, side="right"))
     return _RATING_LETTERS[idx]
 
@@ -273,6 +280,13 @@ def sti_from_impulse_response(
     auditory masking and the absolute reception threshold corrections are
     skipped (they require absolute band levels), matching the common
     "noise-free indirect measurement" use of the standard.
+
+    .. note:: The indirect method has a small positive MTF bias that grows
+       with reverberation time for a finite noise-carrier IR. It stays within
+       the IEC 60268-16 A.5.1.2 systematic-error allowance (<= 0.01 STI) up to
+       about T60 = 4 s, reaching ~+0.012 STI only in very reverberant rooms
+       (T60 ~ 8 s, STI ~ 0.19). It is a property of the finite IR, not of the
+       (exact) Schroeder integration, and does not depend on IR truncation.
 
     :param ir: Impulse response (1D).
     :param fs: Sample rate in Hz (>= 22,5 kHz so the 8 kHz band fits).

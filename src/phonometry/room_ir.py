@@ -35,12 +35,18 @@ decay curves -- that step belongs to downstream room-acoustics modules.
 
 from __future__ import annotations
 
+import warnings
 from typing import Dict, List, Tuple
 
 import numpy as np
 from scipy import signal
 
 from .utils import _typesignal
+
+#: Warn from mls_impulse_response when the recovered IR still carries more than
+#: this level (dB re its peak) in the last 10 % of the MLS period: an IR longer
+#: than one period aliases circularly and this residual tail is the symptom.
+_MLS_ALIAS_TAIL_DB = -35.0
 
 # Primitive-polynomial feedback taps (1-indexed register positions, highest
 # tap == order) yielding maximum-length sequences. Values from the standard
@@ -105,7 +111,13 @@ def sweep_signal(
     :param amplitude: Peak amplitude of the sweep. Default 1.0.
     :param fade: Half-Hann fade-in/out length as a fraction of the sweep
         duration, applied to suppress start/stop transients (B.3.3). Default
-        0.01. Set to 0.0 to disable.
+        0.01. Set to 0.0 to disable. Because the sweep frequency is
+        logarithmic in time, the fades consume roughly ``fade*log2(f2/f1)``
+        octaves at each band edge (the fade-out lands on the highest
+        frequencies): with the default 0.01 the top ~29 dB of the highest
+        band is unusable, so choose ``f1``/``f2`` with margin beyond the
+        analysis range (ISO 18233 B.3.1) rather than relying on a smaller
+        fade.
     :return: The sweep samples, length ``round(seconds*fs)``.
     """
     if f1 <= 0.0:
@@ -386,6 +398,26 @@ def mls_impulse_response(
     spec = np.conj(np.fft.rfft(seq)) * np.fft.rfft(averaged)
     corr = np.fft.irfft(spec, n=period)
     ir = corr / (period + 1.0)  # normalise by 2**N so the delta peaks at 1
+
+    # Circular-aliasing guard: if the system IR is longer than one MLS period
+    # it folds back into the record (A.1). The symptom is undecayed energy in
+    # the last part of the period; warn (do not raise) so short-order misuse is
+    # visible instead of silently biasing the result.
+    peak = float(np.max(np.abs(ir)))
+    if peak > 0.0:
+        tail = ir[int(0.9 * period):]
+        tail_rms = float(np.sqrt(np.mean(tail ** 2)))
+        if tail_rms > peak * 10.0 ** (_MLS_ALIAS_TAIL_DB / 20.0):
+            warnings.warn(
+                "Recovered MLS impulse response still has energy near the end "
+                f"of the {period}-sample period ({20 * np.log10(tail_rms / peak):.0f} "
+                f"dB re peak, above {_MLS_ALIAS_TAIL_DB:.0f} dB): the impulse "
+                "response is likely longer than one period and aliases "
+                "circularly. Use a higher MLS order.",
+                UserWarning,
+                stacklevel=2,
+            )
+
     out_len = length if length is not None else period
     if out_len <= period:
         return ir[:out_len]

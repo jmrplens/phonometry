@@ -38,13 +38,40 @@ from .parametric_filters import (
 )
 from .insulation import (
     AirborneInsulationResult,
+    ImpactInsulationResult,
+    ImpactRatingResult,
     WeightedRatingResult,
     airborne_insulation,
     energy_average_level,
+    impact_insulation,
+    weighted_impact_rating,
     weighted_rating,
 )
 from .open_plan import OpenPlanResult, open_plan_metrics
+from .sound_power import (
+    SoundPowerResult,
+    SoundPowerWarning,
+    background_noise_correction,
+    environmental_correction,
+    measurement_positions,
+    sound_power_pressure,
+)
+from .sound_power_reverberation import (
+    ReverberationSoundPowerResult,
+    sound_power_comparison,
+    sound_power_reverberation,
+)
+from .sound_power_intensity import (
+    SoundPowerIntensityResult,
+    sound_power_intensity,
+)
 from .room_acoustics import RoomAcousticsResult, decay_curve, room_parameters
+from .sound_absorption import (
+    AbsorptionWarning,
+    absorption_area,
+    absorption_coefficient,
+    attenuation_from_alpha,
+)
 from .room_ir import (
     impulse_response,
     inverse_filter,
@@ -102,12 +129,31 @@ __all__ = [
     "room_parameters",
     "decay_curve",
     "RoomAcousticsResult",
+    "absorption_area",
+    "absorption_coefficient",
+    "attenuation_from_alpha",
+    "AbsorptionWarning",
     "open_plan_metrics",
     "OpenPlanResult",
+    "sound_power_pressure",
+    "measurement_positions",
+    "background_noise_correction",
+    "environmental_correction",
+    "SoundPowerResult",
+    "SoundPowerWarning",
+    "sound_power_reverberation",
+    "sound_power_comparison",
+    "ReverberationSoundPowerResult",
+    "sound_power_intensity",
+    "SoundPowerIntensityResult",
     "airborne_insulation",
     "AirborneInsulationResult",
+    "impact_insulation",
+    "ImpactInsulationResult",
     "weighted_rating",
     "WeightedRatingResult",
+    "weighted_impact_rating",
+    "ImpactRatingResult",
     "energy_average_level",
     "lden",
     "ldn",

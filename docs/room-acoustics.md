@@ -9,8 +9,9 @@ intelligibility; measure it either side of a wall and it yields the sound
 insulation of the partition. This page follows that chain in measurement
 order — acquiring the IR (ISO 18233), turning it into room parameters
 (ISO 3382-1/2), spatial speech metrics for open-plan offices
-(ISO 3382-3), and finally field insulation and single-number ratings
-(ISO 16283-1, ISO 717-1).
+(ISO 3382-3), field airborne and impact insulation with single-number
+ratings (ISO 16283-1/2, ISO 717-1/2) and, closing the loop, the sound
+absorption of a material in a reverberation room (ISO 354).
 
 ## 1. Impulse-response acquisition (ISO 18233)
 
@@ -325,7 +326,149 @@ ISO 717-1 reference curve.
 `r_prime` or `None`); `weighted_rating()` returns a `WeightedRatingResult`
 (`rating`, `c`, `ctr`, `unfavourable_sum`, all integers except the sum).
 
+### Impact sound (ISO 16283-2, ISO 717-2)
+
+Footstep noise is rated the other way round. Instead of how much a floor
+*blocks*, impact insulation measures how much a standardized **tapping
+machine** on the floor above puts into the room below — so a *higher* number
+is *worse*. The energy-average impact sound pressure level $L_i$ in the
+receiving room is normalised like the airborne case, but with a sign flip on
+the reverberation term:
+
+$$
+L'_{nT} = L_i - 10 \log_{10} \frac{T}{T_0}, \qquad
+L'_n = L_i + 10 \log_{10} \frac{A}{A_0}, \quad
+A_0 = 10\ \text{m}^2,\ A = \frac{0.16\ V}{T}.
+$$
+
+The **standardized** impact level $L'_{nT}$ ($T_0 = 0.5$ s for dwellings)
+needs only the receiving-room $T$, so with $T = 0.5$ s it equals $L_i$; the
+**normalized** level $L'_n$ (referenced to a 10 m² absorption area) also needs
+the receiving-room volume. Note the **minus** sign — more reverberation
+*lowers* $L'_{nT}$, opposite to the airborne $D_{nT}$.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup.svg" alt="Field impact insulation setup: a standardized tapping machine on the floor of the source room above, microphones energy-averaged in the receiving room below, and the receiving-room reverberation time" width="92%"></picture>
+
+The single-number rating (ISO 717-2) shifts the same style of reference curve,
+but an **unfavourable deviation now occurs where the measurement *exceeds* the
+reference** (impact noise is worse when higher) — the sign opposite to
+ISO 717-1. The rating (`Ln,w`, `L'n,w`, `L'nT,w`) is the shifted reference read
+at 500 Hz; for octave bands it is then reduced by 5 dB. The spectrum
+adaptation term $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$ uses the energetic sum
+over 100–2500 Hz (16-band thirds excluding 3150 Hz) or 125–2000 Hz (octaves).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating.png" alt="Measured one-third-octave normalized impact sound pressure level with the shifted ISO 717-2 reference curve and the resulting weighted rating read at 500 Hz" width="80%"></picture>
+
+```python
+import numpy as np
+from phonometry import impact_insulation, weighted_impact_rating
+
+# 16 one-third-octave impact levels Li (100 Hz - 3150 Hz), dB, from the
+# ISO 717-2 Annex C worked example, and the receiving-room T per band.
+li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+t2 = np.full(16, 0.5)
+
+imp = impact_insulation(li, t2, volume=50.0)
+print(round(float(imp.l_n_t[0]), 1))          # 62.1  (= Li since T = T0)
+print(round(float(imp.l_n[0]), 1))            # 64.1  normalized to A0 = 10 m^2
+
+# Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
+r = weighted_impact_rating(imp.l_n_t)
+print(r.rating, r.ci, r.unfavourable_sum)     # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
+
+# Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
+octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
+print(weighted_impact_rating(octave).rating)  # 54
+```
+
+Feed `impact_insulation`'s `l_n_t` (or `l_n`) straight into
+`weighted_impact_rating`; the rating and `CI` reproduce the ISO 717-2 Annex C
+values (thirds `L'nT,w = 79`, `CI = −11`; octave `54`, `CI = 0`).
+
+#### `impact_insulation()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `li` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Energy-average impact SPL (2D is averaged over positions) |
+| `t2` | 1D array | s | > 0, one per band | Receiving-room reverberation time |
+| `volume` | float, optional | m³ | > 0 | Receiving-room `V` (enables `L'n`) |
+| `t0` | float | s | default `0.5` | Reference reverberation time `T0` |
+
+#### `weighted_impact_rating()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `values_by_band` | 1D array | dB | 16 (thirds) or 5 (octaves) | Measured `Ln`, `L'n` or `L'nT` per band |
+| `bands` | str or `None` | — | `'third-octave'` / `'octave'` / `None` | `None` infers from the count |
+
+`impact_insulation()` returns an `ImpactInsulationResult` (`l_n_t`, `l_n` or
+`None`); `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
+`ci` integers, `unfavourable_sum` in dB).
+
+## 5. Sound absorption (ISO 354)
+
+The equivalent absorption area `A` that drives `R'`, `L'n`, the ISO 3744 `K2`
+environmental correction and the ISO 3741 absorption term is itself measured in
+a reverberation room (ISO 354).
+Measure the room's reverberation time **empty** ($T_1$) and again **with the
+test specimen installed** ($T_2$); the specimen's absorption is the difference
+of the two Sabine areas, and dividing by the covered area gives the absorption
+coefficient:
+
+$$
+A = \frac{55.3\ V}{c\ T} - 4 V m, \qquad
+\alpha_s = \frac{A_2 - A_1}{S}, \qquad c = 331 + 0.6\ t ,
+$$
+
+with $c$ from the room air temperature $t$ in °C (valid 15–30 °C) and $m$ the
+power attenuation coefficient of air (default 0; convert an ISO 9613-1
+$\alpha$ in dB/m with `attenuation_from_alpha`). Because edge and diffraction
+effects can scatter more energy than the sample's flat area intercepts,
+$\alpha_s$ may exceed 1.0 and is never clamped (ISO 354 Clause 3.7).
+
+```python
+import numpy as np
+from phonometry import absorption_area, absorption_coefficient
+
+# Third-octave reverberation times of a 200 m^3 room, empty (T1) and with a
+# 10.8 m^2 absorber sample installed (T2).
+t1 = np.array([5.0, 4.0, 3.0])
+t2 = np.array([3.0, 2.5, 2.0])
+
+a_empty = absorption_area(t1, volume=200.0, temperature=20.0)
+print(np.round(a_empty, 2))                    # [ 6.45  8.06 10.75] m^2
+
+alpha = absorption_coefficient(t1, t2, volume=200.0, sample_area=10.8,
+                               temperature1=20.0)
+print(np.round(alpha, 3))                      # [0.398 0.448 0.498]
+```
+
+`T1` and `T2` are exactly the reverberation times `room_parameters` returns, so
+an ISO 3382-2 decay measurement of the empty and treated room flows straight
+into `absorption_coefficient`. A room volume below the 150 m³ minimum or a
+sample area outside 10–12 m² raises an advisory `AbsorptionWarning`; the result
+still returns.
+
+### `absorption_area()` / `absorption_coefficient()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `t60` / `t1`, `t2` | 1D array | s | > 0 | Reverberation time(s); `t1` empty, `t2` with specimen |
+| `volume` | float | m³ | > 0 | Room volume `V` (advisory below 150 m³) |
+| `sample_area` | float | m² | > 0 | Area `S` the specimen covers (coefficient only) |
+| `temperature` / `temperature1`, `temperature2` | float | °C | default `20.0`, 15–30 | Sets `c` via Eq. (6); `temperature2` defaults to `temperature1` |
+| `speed_of_sound` (`…1`, `…2`) | float, optional | m/s | > 0 | Overrides the temperature-derived `c` |
+| `m` (`m1`, `m2`) | float or 1D array | 1/m | ≥ 0, default `0` | Air power attenuation coefficient |
+
+`absorption_area()` returns the equivalent absorption area `A` (m²) with the
+shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
+`attenuation_from_alpha(alpha)` converts an ISO 9613-1 `alpha` (dB/m) to `m`.
+
 ## See also
+
+- [Sound Power](sound-power.md) — the `LW` methods that consume the ISO 354
+  absorption area (the ISO 3744 `K2` and the ISO 3741 absorption term).
 
 - [Psychoacoustics and Speech Intelligibility](psychoacoustics.md) — STI/STIPA
   feeds the open-plan `sti_values`; loudness and sharpness.

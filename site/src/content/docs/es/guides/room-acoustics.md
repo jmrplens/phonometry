@@ -1,6 +1,6 @@
 ---
 title: "Acústica de salas y edificación"
-description: "Adquisición de la respuesta al impulso (ISO 18233), parámetros de sala EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), métricas de habla en oficinas diáfanas (ISO 3382-3) y aislamiento acústico en campo con índices ponderados (ISO 16283-1, ISO 717-1)."
+description: "Adquisición de la respuesta al impulso (ISO 18233), parámetros de sala EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), métricas de habla en oficinas diáfanas (ISO 3382-3), aislamiento acústico en campo a ruido aéreo y a impactos con índices ponderados (ISO 16283-1/2, ISO 717-1/2) y absorción sonora en sala reverberante (ISO 354)."
 ---
 
 La acústica de salas y de la edificación parte de una única medición: la
@@ -10,8 +10,9 @@ inteligibilidad del habla; mídela a ambos lados de una pared, y da el
 aislamiento acústico del cerramiento. Esta página sigue esa cadena en orden
 de medición: adquirir la RI (ISO 18233), convertirla en parámetros de sala
 (ISO 3382-1/2), métricas espaciales del habla para oficinas diáfanas
-(ISO 3382-3) y, por último, aislamiento en campo e índices de un solo número
-(ISO 16283-1, ISO 717-1).
+(ISO 3382-3), aislamiento en campo a ruido aéreo y a impactos con índices de
+un solo número (ISO 16283-1/2, ISO 717-1/2) y, cerrando el ciclo, la absorción
+sonora de un material en una sala reverberante (ISO 354).
 
 ## 1. Adquisición de la respuesta al impulso (ISO 18233)
 
@@ -336,8 +337,153 @@ función a `weighted_rating`, de modo que cada banda quede alineada índice a
 `r_prime` o `None`); `weighted_rating()` devuelve un `WeightedRatingResult`
 (`rating`, `c`, `ctr`, `unfavourable_sum`, todos enteros salvo la suma).
 
+### Ruido de impactos (ISO 16283-2, ISO 717-2)
+
+El ruido de pisadas se califica al revés. En lugar de cuánto *bloquea* un
+forjado, el aislamiento a impactos mide cuánto introduce en la sala inferior
+una **máquina de impactos normalizada** situada en el forjado superior —así que
+un número *mayor* es *peor*. El nivel de presión de ruido de impactos $L_i$
+promediado en energía en la sala receptora se normaliza igual que el caso
+aéreo, pero con un cambio de signo en el término de reverberación:
+
+$$
+L'_{nT} = L_i - 10 \log_{10} \frac{T}{T_0}, \qquad
+L'_n = L_i + 10 \log_{10} \frac{A}{A_0}, \quad
+A_0 = 10\ \text{m}^2,\ A = \frac{0.16\ V}{T}.
+$$
+
+El nivel de impactos **estandarizado** $L'_{nT}$ ($T_0 = 0.5$ s para viviendas)
+solo necesita el $T$ de la sala receptora, así que con $T = 0.5$ s es igual a
+$L_i$; el nivel **normalizado** $L'_n$ (referido a un área de absorción de
+10 m²) necesita además el volumen de la sala receptora. Fíjate en el signo
+**menos** —más reverberación *reduce* $L'_{nT}$, al contrario que el $D_{nT}$
+aéreo.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup_es.svg" alt="Montaje de aislamiento a impactos en campo: una máquina de impactos normalizada sobre el suelo de la sala emisora superior, micrófonos promediados en energía en la sala receptora inferior, y el tiempo de reverberación de la sala receptora" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup_es_dark.svg" alt="Montaje de aislamiento a impactos en campo: una máquina de impactos normalizada sobre el suelo de la sala emisora superior, micrófonos promediados en energía en la sala receptora inferior, y el tiempo de reverberación de la sala receptora" style="width:92%">
+
+El índice de un solo número (ISO 717-2) desplaza el mismo estilo de curva de
+referencia, pero una **desviación desfavorable se produce ahora donde la
+medición *supera* la referencia** (el ruido de impactos es peor cuanto más
+alto) —el signo opuesto a ISO 717-1. El índice (`Ln,w`, `L'n,w`, `L'nT,w`) es
+la referencia desplazada leída a 500 Hz; para bandas de octava se reduce además
+en 5 dB. El término de adaptación espectral $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$
+usa la suma energética sobre 100–2500 Hz (16 tercios excluyendo 3150 Hz) o
+125–2000 Hz (octavas).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_es.png" alt="Nivel de presión de ruido de impactos normalizado medido en tercios de octava con la curva de referencia de ISO 717-2 desplazada y el índice ponderado resultante leído a 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_es_dark.png" alt="Nivel de presión de ruido de impactos normalizado medido en tercios de octava con la curva de referencia de ISO 717-2 desplazada y el índice ponderado resultante leído a 500 Hz" style="width:80%">
+
+```python
+import numpy as np
+from phonometry import impact_insulation, weighted_impact_rating
+
+# 16 niveles de impactos Li en tercios de octava (100 Hz - 3150 Hz), dB, del
+# ejemplo resuelto del Anexo C de ISO 717-2, y el T de la sala receptora por banda.
+li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+t2 = np.full(16, 0.5)
+
+imp = impact_insulation(li, t2, volume=50.0)
+print(round(float(imp.l_n_t[0]), 1))          # 62.1  (= Li ya que T = T0)
+print(round(float(imp.l_n[0]), 1))            # 64.1  normalizado a A0 = 10 m^2
+
+# Índice de impactos ponderado + término de adaptación espectral CI (ISO 717-2)
+r = weighted_impact_rating(imp.l_n_t)
+print(r.rating, r.ci, r.unfavourable_sum)     # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
+
+# Los datos en banda de octava llevan la reducción extra de -5 dB (Cláusula 4.3.2)
+octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
+print(weighted_impact_rating(octave).rating)  # 54
+```
+
+Pasa el `l_n_t` (o `l_n`) de `impact_insulation` directamente a
+`weighted_impact_rating`; el índice y `CI` reproducen los valores del Anexo C de
+ISO 717-2 (tercios `L'nT,w = 79`, `CI = −11`; octava `54`, `CI = 0`).
+
+#### Parámetros de `impact_insulation()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `li` | array 1D o 2D | dB | uno/banda, o `(posiciones, bandas)` | SPL de impactos promediado en energía (2D se promedia sobre las posiciones) |
+| `t2` | array 1D | s | > 0, uno por banda | Tiempo de reverberación de la sala receptora |
+| `volume` | float, opcional | m³ | > 0 | `V` de la sala receptora (habilita `L'n`) |
+| `t0` | float | s | por defecto `0.5` | Tiempo de reverberación de referencia `T0` |
+
+#### Parámetros de `weighted_impact_rating()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `values_by_band` | array 1D | dB | 16 (tercios) o 5 (octavas) | `Ln`, `L'n` o `L'nT` medidos por banda |
+| `bands` | str o `None` | — | `'third-octave'` / `'octave'` / `None` | `None` lo infiere del número de bandas |
+
+`impact_insulation()` devuelve un `ImpactInsulationResult` (`l_n_t`, `l_n` o
+`None`); `weighted_impact_rating()` devuelve un `ImpactRatingResult` (`rating`,
+`ci` enteros, `unfavourable_sum` en dB).
+
+## 5. Absorción sonora (ISO 354)
+
+El área de absorción sonora equivalente `A` que gobierna `R'`, `L'n`, la
+corrección ambiental `K2` de ISO 3744 y el término de absorción de ISO 3741 se
+mide a su vez en una sala reverberante
+(ISO 354). Mide el tiempo de reverberación de la sala **vacía** ($T_1$) y de
+nuevo **con la muestra de ensayo instalada** ($T_2$); la absorción de la muestra
+es la diferencia de las dos áreas de Sabine, y dividiendo por el área cubierta
+se obtiene el coeficiente de absorción:
+
+$$
+A = \frac{55.3\ V}{c\ T} - 4 V m, \qquad
+\alpha_s = \frac{A_2 - A_1}{S}, \qquad c = 331 + 0.6\ t ,
+$$
+
+con $c$ a partir de la temperatura del aire de la sala $t$ en °C (válida
+15–30 °C) y $m$ el coeficiente de atenuación en potencia del aire (por defecto
+0; convierte un $\alpha$ de ISO 9613-1 en dB/m con `attenuation_from_alpha`).
+Como los efectos de borde y difracción pueden dispersar más energía de la que
+intercepta el área plana de la muestra, $\alpha_s$ puede superar 1,0 y nunca se
+satura (ISO 354 Cláusula 3.7).
+
+```python
+import numpy as np
+from phonometry import absorption_area, absorption_coefficient
+
+# Tiempos de reverberación en tercios de octava de una sala de 200 m^3, vacía (T1)
+# y con una muestra absorbente de 10.8 m^2 instalada (T2).
+t1 = np.array([5.0, 4.0, 3.0])
+t2 = np.array([3.0, 2.5, 2.0])
+
+a_empty = absorption_area(t1, volume=200.0, temperature=20.0)
+print(np.round(a_empty, 2))                    # [ 6.45  8.06 10.75] m^2
+
+alpha = absorption_coefficient(t1, t2, volume=200.0, sample_area=10.8,
+                               temperature1=20.0)
+print(np.round(alpha, 3))                      # [0.398 0.448 0.498]
+```
+
+`T1` y `T2` son exactamente los tiempos de reverberación que devuelve
+`room_parameters`, así que una medición de decaimiento ISO 3382-2 de la sala
+vacía y tratada fluye directamente a `absorption_coefficient`. Un volumen de
+sala por debajo del mínimo de 150 m³ o un área de muestra fuera de 10–12 m²
+genera un `AbsorptionWarning` de aviso; el resultado se devuelve igualmente.
+
+### Parámetros de `absorption_area()` / `absorption_coefficient()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `t60` / `t1`, `t2` | array 1D | s | > 0 | Tiempo(s) de reverberación; `t1` vacía, `t2` con la muestra |
+| `volume` | float | m³ | > 0 | Volumen de la sala `V` (aviso por debajo de 150 m³) |
+| `sample_area` | float | m² | > 0 | Área `S` que cubre la muestra (solo coeficiente) |
+| `temperature` / `temperature1`, `temperature2` | float | °C | por defecto `20.0`, 15–30 | Fija `c` vía Ec. (6); `temperature2` por defecto es `temperature1` |
+| `speed_of_sound` (`…1`, `…2`) | float, opcional | m/s | > 0 | Sobrescribe la `c` derivada de la temperatura |
+| `m` (`m1`, `m2`) | float o array 1D | 1/m | ≥ 0, por defecto `0` | Coeficiente de atenuación en potencia del aire |
+
+`absorption_area()` devuelve el área de absorción sonora equivalente `A` (m²)
+con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
+`attenuation_from_alpha(alpha)` convierte un `alpha` de ISO 9613-1 (dB/m) a `m`.
+
 ## Véase también
 
+- [Potencia sonora](/phonometry/es/guides/sound-power/) — los métodos de `LW` que
+  consumen el área de absorción de ISO 354 (el `K2` de ISO 3744 y el término de
+  absorción de ISO 3741).
 - [Psicoacústica e inteligibilidad del habla](/phonometry/es/guides/psychoacoustics/) — el
   STI/STIPA alimenta los `sti_values` de oficinas diáfanas; sonoridad y sharpness.
 - [Bancos de filtros](/phonometry/es/guides/filter-banks/) — los filtros de octava

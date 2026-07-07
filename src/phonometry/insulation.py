@@ -1,7 +1,8 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Field airborne sound insulation (ISO 16283-1:2014) and single-number
-weighted ratings with spectrum adaptation terms (ISO 717-1).
+Field airborne sound insulation (ISO 16283-1:2014) and impact sound
+insulation (ISO 16283-2), with single-number weighted ratings and
+spectrum adaptation terms (ISO 717-1 airborne, ISO 717-2 impact).
 
 **Field quantities (ISO 16283-1:2014).** From the energy-average sound
 pressure levels in the source and receiving rooms this module forms the
@@ -32,6 +33,32 @@ the A-weighted spectra No. 1 (pink noise, ``C``) and No. 2 (urban traffic,
 reduced to one decimal place before use (Clause 4.4, footnote 1). The
 reference values, spectra and shifting rule are identical in the 2013 and
 2020 editions of ISO 717-1.
+
+**Field impact quantities (ISO 16283-2).** With the tapping machine as the
+impact source this module forms, from the energy-average impact sound
+pressure level ``Li`` in the receiving room, the standardized impact sound
+pressure level ``L'nT = Li - 10 lg(T/T0)`` with ``T0 = 0,5 s`` (Clause
+3.13, Formula (1)) and the normalized impact sound pressure level
+``L'n = Li + 10 lg(A/A0)`` with the Sabine absorption area ``A = 0,16 V/T``
+and the reference area ``A0 = 10 m²`` (Clause 3.14, Formula (2)). Levels
+may be supplied already averaged or as several microphone positions, then
+energy-averaged (Clause 7.8, Formula (10)), over the core one-third-octave
+range 100 Hz to 3150 Hz (Clause 5.1).
+
+**Weighted impact rating (ISO 717-2).** The reference-curve method of
+Clause 4.3 shifts the Table 3 impact reference curve towards the measured
+curve until the sum of unfavourable deviations (here where the
+**measurement exceeds** the reference, the sign opposite to airborne) is
+as large as possible but not more than 32,0 dB (16 one-third-octave bands)
+or 10,0 dB (5 octave bands). The rating (``Ln,w``, ``L'n,w``, ``L'nT,w``)
+is the shifted reference read at 500 Hz, reduced by a further 5 dB for
+octave bands (Clause 4.3.2). The spectrum adaptation term
+``CI = Ln,sum - 15 - Ln,w`` uses the energetic sum ``Ln,sum`` over
+100 Hz to 2500 Hz (one-third octave) or 125 Hz to 2000 Hz (octave),
+rounded to an integer (Clause A.2.1, Formulae (A.1) to (A.3)). The Table 3
+reference values, the shifting rule and CI are identical in the 2013 and
+2020 editions of ISO 717-2 (the 2020 edition only adds Annex D for the
+rubber-ball heavy/soft impactor, out of scope here).
 """
 
 from __future__ import annotations
@@ -55,9 +82,35 @@ _REF_OCTAVE: Tuple[int, ...] = (36, 45, 52, 55, 56)
 _INDEX_500_THIRD = 7
 _INDEX_500_OCTAVE = 2
 
-#: Maximum sum of unfavourable deviations (Clause 4.4).
+#: Maximum sum of unfavourable deviations. These bounds are shared by both
+#: rating paths: ISO 717-1 Clause 4.4 (airborne) and ISO 717-2 Clause 4.3
+#: (impact) specify the identical 32,0 dB (16 one-third-octave bands) and
+#: 10,0 dB (5 octave bands) limits.
 _MAX_UNFAVOURABLE_THIRD = 32.0
 _MAX_UNFAVOURABLE_OCTAVE = 10.0
+
+#: Tolerance absorbing floating-point noise when comparing the
+#: unfavourable-deviation sum (a true multiple of 0,1 dB) to the bound.
+_SHIFT_TOLERANCE = 1e-6
+
+# --- ISO 717-2 Table 3 impact reference values ---------------------------
+
+#: One-third-octave impact reference values, 100 Hz to 3150 Hz (Table 3).
+_REF_IMPACT_THIRD_OCTAVE: Tuple[int, ...] = (
+    62, 62, 62, 62, 62, 62, 61, 60, 59, 58, 57, 54, 51, 48, 45, 42,
+)
+#: Octave impact reference values, 125 Hz to 2000 Hz (Table 3).
+_REF_IMPACT_OCTAVE: Tuple[int, ...] = (67, 67, 65, 62, 49)
+
+#: Octave-band single-number reduction applied to L'n,w / L'nT,w
+#: (ISO 717-2 Clause 4.3.2): the shifted reference at 500 Hz minus 5 dB.
+_IMPACT_OCTAVE_OFFSET = -5
+
+#: One-third-octave band count for CI (100 Hz to 2500 Hz, excludes 3150 Hz).
+_CI_THIRD_OCTAVE_BANDS = 15
+
+#: Reference absorption area A0 for the normalized level (Clause 3.14).
+_A0_IMPACT = 10.0
 
 # --- ISO 717-1 Table 4 spectra (A-weighted, normalized to 0 dB) ----------
 
@@ -111,6 +164,43 @@ class WeightedRatingResult:
     rating: int
     c: int
     ctr: int
+    unfavourable_sum: float
+
+
+@dataclass(frozen=True)
+class ImpactInsulationResult:
+    """Per-band field impact sound insulation (ISO 16283-2).
+
+    :ivar l_n_t: Standardized impact sound pressure level
+        ``L'nT = Li - 10 lg(T/T0)`` per band, in dB (Clause 3.13,
+        Formula (1)).
+    :ivar l_n: Normalized impact sound pressure level
+        ``L'n = Li + 10 lg(A/A0)`` per band, in dB (Clause 3.14,
+        Formula (2)), or ``None`` when the receiving-room volume was not
+        supplied.
+    """
+
+    l_n_t: np.ndarray
+    l_n: np.ndarray | None
+
+
+@dataclass(frozen=True)
+class ImpactRatingResult:
+    """Single-number weighted impact rating and CI (ISO 717-2).
+
+    :ivar rating: Weighted impact rating (``Ln,w``, ``L'n,w``,
+        ``L'nT,w``), the shifted reference read at 500 Hz, in dB
+        (Clause 4.3; octave-band ratings include the -5 dB reduction of
+        Clause 4.3.2). Integer.
+    :ivar ci: Spectrum adaptation term ``CI`` (Clause A.2.1), in dB.
+        Integer.
+    :ivar unfavourable_sum: Sum of unfavourable deviations at the final
+        shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5
+        bands).
+    """
+
+    rating: int
+    ci: int
     unfavourable_sum: float
 
 
@@ -297,12 +387,17 @@ def _best_shift(
     Shifts the reference by integer ``k`` and returns the largest ``k``
     for which ``sum max(0, reference + k - measured) <= limit`` (the sum
     is monotone non-decreasing in ``k``), together with that sum.
+
+    Measured levels are multiples of 0,1 dB (Clause 4.4 footnote 1) and the
+    reference and shift are integers, so every deviation sum is a true
+    multiple of 0,1 dB; a small tolerance absorbs floating-point noise so
+    that a sum of exactly 32,0 (or 10,0) dB is not spuriously rejected.
     """
     # Start below any feasible shift, then climb while the bound holds.
     k = int(np.floor(np.min(measured - reference))) - 1
     while True:
         next_sum = float(np.sum(np.maximum(0.0, reference + (k + 1) - measured)))
-        if next_sum > limit:
+        if next_sum > limit + _SHIFT_TOLERANCE:
             break
         k += 1
     unfavourable = float(np.sum(np.maximum(0.0, reference + k - measured)))
@@ -364,4 +459,177 @@ def weighted_rating(
     ctr = _adaptation_term(measured, spectrum2, rating)
     return WeightedRatingResult(
         rating=rating, c=c, ctr=ctr, unfavourable_sum=unfavourable
+    )
+
+
+# --- ISO 16283-2 field impact sound insulation ---------------------------
+
+
+def impact_insulation(
+    li: Sequence[float] | np.ndarray,
+    t2: Sequence[float] | np.ndarray,
+    *,
+    volume: float | None = None,
+    t0: float = 0.5,
+) -> ImpactInsulationResult:
+    """
+    Field impact sound insulation per ISO 16283-2 (tapping machine).
+
+    Computes, per frequency band, the standardized impact sound pressure
+    level ``L'nT = Li - 10 lg(T/T0)`` (Formula (1)) and, when the
+    receiving-room volume is given, the normalized impact sound pressure
+    level ``L'n = Li + 10 lg(A/A0)`` with the Sabine equivalent absorption
+    area ``A = 0,16 V / T`` (Formula (6)) and the reference absorption area
+    ``A0 = 10 m²`` (Formula (2)).
+
+    ``li`` may be one value per band (already energy-averaged) or a
+    two-dimensional ``(positions, bands)`` array, in which case the
+    positions are energy-averaged with Formula (10). The band levels are
+    assumed already corrected for background noise (Clause 9).
+
+    :param li: Energy-average impact sound pressure levels, in dB.
+    :param t2: Receiving-room reverberation time per band, in seconds.
+    :param volume: Receiving-room volume ``V``, in m³ (optional; required
+        for ``L'n``).
+    :param t0: Reference reverberation time ``T0``, in seconds (default
+        0,5 s for dwellings, Clause 3.13).
+    :return: :class:`ImpactInsulationResult` with ``l_n_t`` and ``l_n``
+        (the latter ``None`` unless ``volume`` is given).
+    :raises ValueError: If the band counts of ``li`` and ``t2`` differ, if
+        ``t2``/``t0``/``volume`` are not positive, or if inputs are
+        non-finite.
+    """
+    li_bands = _as_band_levels(li, "li")
+    t = np.asarray(t2, dtype=np.float64)
+
+    if li_bands.shape != t.shape:
+        raise ValueError("'li' and 't2' must share the same band count.")
+    if t.ndim != 1:
+        raise ValueError("'t2' must be one-dimensional (one value per band).")
+    if not np.all(np.isfinite(t)) or np.any(t <= 0.0):
+        raise ValueError("'t2' must contain positive, finite values.")
+    if t0 <= 0.0:
+        raise ValueError("'t0' must be positive.")
+
+    l_n_t = li_bands - 10.0 * np.log10(t / t0)
+
+    l_n: np.ndarray | None = None
+    if volume is not None:
+        if volume <= 0.0:
+            raise ValueError("'volume' must be positive.")
+        absorption = 0.16 * volume / t
+        l_n = li_bands + 10.0 * np.log10(absorption / _A0_IMPACT)
+
+    return ImpactInsulationResult(l_n_t=l_n_t, l_n=l_n)
+
+
+def _resolve_impact_band_set(
+    n: int, bands: str | None
+) -> Tuple[Tuple[int, ...], float, int, int, int]:
+    """Select the impact reference curve, bound, indices for the band set.
+
+    :return: ``(reference, max_unfavourable, index_500, octave_offset,
+        ci_band_count)``.
+    """
+    if bands == "third-octave" or (bands is None and n == 16):
+        if n != 16:
+            raise ValueError(
+                "One-third-octave impact rating needs 16 bands "
+                f"(100-3150 Hz), got {n}."
+            )
+        return (
+            _REF_IMPACT_THIRD_OCTAVE,
+            _MAX_UNFAVOURABLE_THIRD,
+            _INDEX_500_THIRD,
+            0,
+            _CI_THIRD_OCTAVE_BANDS,
+        )
+    if bands == "octave" or (bands is None and n == 5):
+        if n != 5:
+            raise ValueError(
+                "Octave impact rating needs 5 bands (125-2000 Hz), "
+                f"got {n}."
+            )
+        return (
+            _REF_IMPACT_OCTAVE,
+            _MAX_UNFAVOURABLE_OCTAVE,
+            _INDEX_500_OCTAVE,
+            _IMPACT_OCTAVE_OFFSET,
+            5,
+        )
+    if bands is not None:
+        raise ValueError("'bands' must be 'third-octave', 'octave' or None.")
+    raise ValueError(
+        "Expected 16 one-third-octave (100-3150 Hz) or 5 octave "
+        f"(125-2000 Hz) values, got {n}."
+    )
+
+
+def _impact_ci(measured: np.ndarray, rating: int, n_bands: int) -> int:
+    """Spectrum adaptation term ``CI`` (ISO 717-2 Clause A.2.1).
+
+    ``CI = Ln,sum - 15 - Ln,w`` with the energetic sum ``Ln,sum = 10 lg
+    Σ 10^(Li/10)`` over the CI range (one-third octave 100-2500 Hz, i.e.
+    the first 15 bands; octave 125-2000 Hz), rounded to an integer
+    (round half up), Formulae (A.1) to (A.3).
+    """
+    l_sum = 10.0 * np.log10(np.sum(10.0 ** (measured[:n_bands] / 10.0)))
+    return int(math.floor(l_sum + 0.5)) - 15 - rating
+
+
+def weighted_impact_rating(
+    values_by_band: Sequence[float] | np.ndarray,
+    bands: str | None = None,
+) -> ImpactRatingResult:
+    """
+    Single-number weighted impact rating and CI per ISO 717-2.
+
+    Applies the reference-curve method of Clause 4.3: the Table 3 impact
+    reference curve is shifted in 1 dB steps towards the measured curve
+    until the sum of unfavourable deviations is as large as possible but
+    not more than 32,0 dB (16 one-third-octave bands, 100 Hz to 3150 Hz)
+    or 10,0 dB (5 octave bands, 125 Hz to 2000 Hz). For impact sound an
+    unfavourable deviation occurs where the **measurement exceeds** the
+    reference (the sign opposite to ISO 717-1 airborne). The rating is the
+    shifted reference read at 500 Hz; for octave bands it is then reduced
+    by 5 dB (Clause 4.3.2). The spectrum adaptation term ``CI`` follows
+    Clause A.2.1. Input values are first reduced to one decimal place
+    (Clause 4.3.1, footnote 1).
+
+    The shift search reuses the verified engine of :func:`weighted_rating`
+    on the negated curves: minimising ``Σ max(0, measured - (ref + k))``
+    over ``k`` equals maximising ``Σ max(0, (-ref) + (-k) - (-measured))``,
+    the airborne problem, so no separate search is duplicated.
+
+    :param values_by_band: Measured impact levels (``Ln``, ``L'n``,
+        ``L'nT``) in dB. 16 values are read as one-third-octave bands, 5
+        values as octave bands.
+    :param bands: ``"third-octave"``, ``"octave"`` or ``None`` to infer
+        the band set from the number of values.
+    :return: :class:`ImpactRatingResult` with ``rating``, ``ci`` and
+        ``unfavourable_sum``.
+    :raises ValueError: If the number of values does not match the band
+        set, or if any value is non-finite.
+    """
+    data = np.asarray(values_by_band, dtype=np.float64)
+    if data.ndim != 1:
+        raise ValueError("'values_by_band' must be one-dimensional.")
+    if not np.all(np.isfinite(data)):
+        raise ValueError("'values_by_band' must contain only finite values.")
+
+    reference, limit, index_500, octave_offset, ci_bands = (
+        _resolve_impact_band_set(int(data.size), bands)
+    )
+    measured = _round_half_up_tenths(data)
+    ref = np.asarray(reference, dtype=np.float64)
+
+    # Impact shift is the airborne search on the negated curves: the
+    # returned shift m maximises Σ max(0, (-ref)+m-(-meas)); the impact
+    # shift is k = -m, so the rating is ref_500 - m. The unfavourable sum
+    # is identical under negation.
+    shift, unfavourable = _best_shift(-measured, -ref, limit)
+    rating = int(reference[index_500]) - shift + octave_offset
+    ci = _impact_ci(measured, rating, ci_bands)
+    return ImpactRatingResult(
+        rating=rating, ci=ci, unfavourable_sum=unfavourable
     )

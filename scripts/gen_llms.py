@@ -28,6 +28,7 @@ PAGES = [
     ("psychoacoustics.md", "guides/psychoacoustics"),
     ("intensity.md", "guides/intensity"),
     ("room-acoustics.md", "guides/room-acoustics"),
+    ("sound-power.md", "guides/sound-power"),
     ("calibration.md", "guides/calibration"),
     ("block-processing.md", "guides/block-processing"),
     ("multichannel.md", "guides/multichannel"),

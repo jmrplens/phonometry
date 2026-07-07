@@ -15,9 +15,14 @@ Validation strategy: the standards' own numbers, not self-consistency.
 - DnT (Formula (2)) reduces to D when T = T0 = 0,5 s; R' (Formula (4)
   with A = 0,16 V / T, Formula (5)) reduces to D for S T = 0,16 V.
 - The energy-average level (Formula (9)) is checked against hand values.
+- The shared shift engine is re-verified against an independent brute-force
+  airborne-shift search on 10 000 random curves for both band sets, pinning
+  the shared-engine float-tolerance behaviour on the airborne path too.
 """
 
 from __future__ import annotations
+
+import math
 
 import numpy as np
 import pytest
@@ -34,6 +39,58 @@ from phonometry import (
 _REF_THIRD = [33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56]
 # Octave reference values, ISO 717-1 Table 3 (125 Hz to 2000 Hz).
 _REF_OCTAVE = [36, 45, 52, 55, 56]
+_INDEX_500_THIRD = 7
+_INDEX_500_OCTAVE = 2
+
+# ISO 717-1 Table 4 spectra (A-weighted, normalized to 0 dB).
+_SPECTRUM1_THIRD = [
+    -29, -26, -23, -21, -19, -17, -15, -13, -12, -11, -10, -9, -9, -9, -9, -9,
+]
+_SPECTRUM2_THIRD = [
+    -20, -20, -18, -16, -15, -14, -13, -12, -11, -9, -8, -9, -10, -11, -13, -15,
+]
+_SPECTRUM1_OCTAVE = [-21, -14, -8, -5, -4]
+_SPECTRUM2_OCTAVE = [-14, -10, -7, -4, -6]
+
+
+def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
+    return np.sign(values) * np.floor(np.abs(values) * 10.0 + 0.5) / 10.0
+
+
+def _brute_force_airborne_rating(
+    measured: list[float],
+    reference: list[float],
+    limit: float,
+    index_500: int,
+) -> tuple[int, float]:
+    """Independent brute-force airborne shift search (ISO 717-1 Clause 4.4).
+
+    Unfavourable deviation = measured below reference. Find the largest
+    integer shift k with the deviation sum <= limit (the sum grows with k);
+    the rating is the shifted reference read at 500 Hz.
+    """
+    meas = _round_half_up_tenths(np.asarray(measured, dtype=np.float64))
+    ref = np.asarray(reference, dtype=np.float64)
+    best_k = None
+    for k in range(200, -201, -1):
+        dev = float(np.sum(np.maximum(0.0, ref + k - meas)))
+        if dev <= limit + 1e-6:
+            best_k = k
+            break
+    assert best_k is not None
+    dev = float(np.sum(np.maximum(0.0, ref + best_k - meas)))
+    rating = int(reference[index_500]) + best_k
+    return rating, dev
+
+
+def _brute_force_adaptation(
+    measured: list[float], spectrum: list[int], rating: int
+) -> int:
+    """Independent adaptation term Xaj - rating (ISO 717-1 Clause 4.5)."""
+    meas = _round_half_up_tenths(np.asarray(measured, dtype=np.float64))
+    spec = np.asarray(spectrum, dtype=np.float64)
+    x_aj = -10.0 * np.log10(np.sum(10.0 ** ((spec - meas) / 10.0)))
+    return int(math.floor(x_aj + 0.5)) - rating
 
 # ISO 717-1 Annex C, Table C.1 measured sound reduction index R (100-3150).
 _ANNEX_C_R = [
@@ -122,6 +179,40 @@ def test_weighted_rating_rejects_nan() -> None:
     bad[0] = float("nan")
     with pytest.raises(ValueError):
         weighted_rating(bad)
+
+
+def test_engine_matches_brute_force_third_octave() -> None:
+    """10 000 random third-octave curves: shared engine == brute force."""
+    rng = np.random.default_rng(20264)
+    for _ in range(10_000):
+        curve = rng.uniform(10.0, 80.0, size=16)
+        res = weighted_rating(curve)
+        rating, dev = _brute_force_airborne_rating(
+            list(curve), _REF_THIRD, 32.0, _INDEX_500_THIRD
+        )
+        c = _brute_force_adaptation(list(curve), _SPECTRUM1_THIRD, rating)
+        ctr = _brute_force_adaptation(list(curve), _SPECTRUM2_THIRD, rating)
+        assert res.rating == rating
+        assert res.c == c
+        assert res.ctr == ctr
+        assert res.unfavourable_sum == pytest.approx(dev, abs=1e-9)
+
+
+def test_engine_matches_brute_force_octave() -> None:
+    """10 000 random octave curves: shared engine == brute force."""
+    rng = np.random.default_rng(20265)
+    for _ in range(10_000):
+        curve = rng.uniform(10.0, 80.0, size=5)
+        res = weighted_rating(curve)
+        rating, dev = _brute_force_airborne_rating(
+            list(curve), _REF_OCTAVE, 10.0, _INDEX_500_OCTAVE
+        )
+        c = _brute_force_adaptation(list(curve), _SPECTRUM1_OCTAVE, rating)
+        ctr = _brute_force_adaptation(list(curve), _SPECTRUM2_OCTAVE, rating)
+        assert res.rating == rating
+        assert res.c == c
+        assert res.ctr == ctr
+        assert res.unfavourable_sum == pytest.approx(dev, abs=1e-9)
 
 
 # --------------------------------------------------------------------------

@@ -441,7 +441,7 @@ El **índice presión-intensidad** $\delta_{pI} = L_p - L_I$ mide cuán reactivo
 Consulta la [guía de intensidad sonora](/phonometry/es/guides/intensity/) para su uso.
 
 
-## Acústica de salas y edificación (ISO 18233, ISO 3382, ISO 16283-1, ISO 717-1)
+## Acústica de salas y edificación (ISO 18233, ISO 3382, ISO 16283, ISO 717, ISO 354)
 
 ### Respuesta al impulso por excitación determinista (ISO 18233)
 
@@ -493,4 +493,97 @@ Por banda de tercio de octava, la diferencia de niveles $D = L_1 - L_2$ (promedi
 
 El índice de un solo número (ISO 717-1, Cláusula 4.4) desplaza la **curva de referencia** de la Tabla 3 en pasos de 1 dB hacia la curva medida hasta que la suma de desviaciones *desfavorables* $\sum_i \max(0, \text{ref}_i + k - \text{meas}_i)$ es máxima pero $\le$ 32,0 dB (16 tercios) o 10,0 dB (5 octavas); el índice $R_w$ es la referencia desplazada a 500 Hz. Los **términos de adaptación espectral** son $C = X_{A1} - X_w$ y $C_{tr} = X_{A2} - X_w$ con $X_{Aj} = -10 \log_{10} \sum_i 10^{(L_{ij} - X_i)/10}$ (espectros de la Tabla 4: n.º 1 ruido rosa, n.º 2 tráfico urbano), cada uno redondeado a un entero. El ejemplo resuelto del Anexo C de ISO 717-1 ($R_w = 30$, $C = -2$, $C_{tr} = -3$, suma desfavorable 31,8 dB) se reproduce exactamente.
 
+### Aislamiento a impactos y absorción (ISO 16283-2, ISO 717-2, ISO 354)
+
+El aislamiento a impactos cambia la fuente aérea por una **máquina de impactos
+normalizada** y califica el nivel de la sala receptora, así que las convenciones
+de signo se invierten. Los niveles de impactos estandarizado y normalizado son $L'_{nT} = L_i - 10 \log_{10}(T/T_0)$
+(el término de reverberación se *resta*, al contrario que $D_{nT}$) y
+$L'_n = L_i + 10 \log_{10}(A/A_0)$ con $A_0 = 10$ m² y $A = 0.16\ V/T$. El índice
+de ISO 717-2 desplaza la curva de referencia de la Tabla 3 hasta que $\sum_i \max(0, \text{meas}_i - (\text{ref}_i + k))$
+es máxima pero $\le$ 32,0 dB (16 tercios) o 10,0 dB (5 octavas) —la desviación
+*desfavorable* cuenta ahora donde la **medición supera** la referencia (el ruido
+de impactos es peor cuanto más alto), la imagen especular de ISO 717-1. El
+índice es la referencia desplazada a 500 Hz, reducida en otros 5 dB para bandas
+de octava, y el término de adaptación es $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$
+con la suma energética $L_{n,\text{sum}} = 10 \log_{10} \sum_i 10^{L_i/10}$ sobre
+100–2500 Hz (tercios) o 125–2000 Hz (octavas). Los ejemplos del Anexo C de
+ISO 717-2 se reproducen exactamente (tercios $L_{n,w} = 79$, $C_I = -11$;
+octavas $54$, $0$), mediante la misma búsqueda de desplazamiento monótono que
+ISO 717-1 ejecutada sobre las curvas negadas.
+
+La absorción sonora (ISO 354) mide el área de absorción equivalente a partir de
+la relación de Sabine aplicada a una sala reverberante vacía y con la muestra:
+$A = 55.3\ V/(c\ T) - 4 V m$ (el término $4 V m$ es la absorción del aire, $m$ el
+coeficiente de atenuación en potencia en 1/m), de modo que el área de la muestra
+es $A_T = A_2 - A_1$ y su coeficiente $\alpha_s = A_T/S$. Con la velocidad del
+sonido de la Ec. (6), $c = 331 + 0.6\ t$ (°C), y $m$ convertido de un
+coeficiente de atenuación de ISO 9613-1 mediante $m = \alpha / (10 \lg e)$. Como
+la difracción y la dispersión de borde interceptan más que el área plana de la
+muestra, $\alpha_s$ se deja sin saturar y puede superar 1,0 (Cláusula 3.7
+NOTA 2).
+
 Consulta la [guía de acústica de salas y edificación](/phonometry/es/guides/room-acoustics/) para su uso.
+
+## Determinación de la potencia sonora (ISO 3744/3746, ISO 3741, ISO 9614-2)
+
+El nivel de potencia sonora $L_W = 10 \log_{10}(P/P_0)$ ($P_0 = 1$ pW) es una
+magnitud de *emisión*: a diferencia de un nivel de presión, no depende de la
+distancia al receptor ni de la sala. Tres familias de métodos lo recuperan.
+
+### Presión sobre superficie envolvente (ISO 3744/3746)
+
+Sobre un plano reflectante la relación de campo libre es simplemente
+$L_W = \bar{L}_p + 10 \log_{10}(S/S_0)$: la presión cuadrática media promediada
+sobre una superficie envolvente de área $S$, multiplicada por $S$, es la
+potencia radiada. Dos correcciones restablecen esa idealización. El **ruido de
+fondo** no correlacionado suma su valor cuadrático medio al de la fuente, así
+que con el margen $\Delta L_p = L_{ST} - L_{bg}$ el nivel solo de la fuente se
+recupera restando $K_1 = -10 \log_{10}(1 - 10^{-\Delta L_p/10})$ (de
+$p_{src}^2 = p_{ST}^2 (1 - 10^{-\Delta L_p/10})$). El **campo reverberante** de
+una sala no anecoica añade una densidad de energía casi uniforme $4P/(A c)$ al
+directo $P/(S c)$, de modo que el nivel superficial supera el valor de campo
+libre en su cociente, $K_2 = 10 \log_{10}(1 + 4 S/A)$, con $A$ el área de
+absorción equivalente de la sala. El área de la superficie es la forma cerrada
+de la geometría: una semiesfera $S = 2 \pi r^2$ sobre un plano reflectante
+(dividida entre dos y entre cuatro para dos y tres planos), una caja de un plano
+$S = 4(ab + bc + ca)$ con $a = 0.5\ l_1 + d$, $b = 0.5\ l_2 + d$,
+$c = l_3 + d$. ISO 3746 (control) comparte las matemáticas con criterios más
+laxos. La incertidumbre expandida es $U = 2 \sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}$.
+
+### Sala reverberante (ISO 3741)
+
+En un campo difuso cualificado la densidad de energía estacionaria
+$w = 4P/(A c)$ liga la potencia a la absorción de la sala, dando
+$L_W = \bar{L}_p + 10 \log_{10}(A/A_0) - 6$ más correcciones de orden superior,
+con $A = (55.26/c)(V/T_{60})$ y $c = 20.05 \sqrt{273 + \theta}$. La **corrección
+de Waterhouse** $10 \log_{10}(1 + S c/(8 V f))$ compensa la energía extra
+almacenada en la capa límite que los micrófonos del interior no captan
+($S c/(8 V f) = S \lambda/(8 V)$, así que se desvanece al subir la frecuencia);
+el término $4.34\ A/S$ es la corrección del aire por recorrido libre medio, y
+$C_1$, $C_2$ llevan el resultado a las condiciones meteorológicas de referencia
+(23 °C, 101,325 kPa). El **método de comparación** resta una fuente de
+referencia de potencia conocida medida en la misma sala,
+$L_W = L_{W(\text{RSS})} + (\bar{L}_p - \bar{L}_{p,\text{RSS}} + C_2)$, de modo
+que los términos de área de absorción, Waterhouse y $C_1$ se cancelan y la sala
+no necesita caracterizarse.
+
+### Barrido de intensidad (ISO 9614-2)
+
+La intensidad sonora es el flujo neto de energía $\vec{I} = \overline{p\ \vec{u}}$,
+así que por el teorema de la divergencia la potencia que atraviesa una
+superficie cerrada es $P = \sum_i \langle I_{n,i} \rangle\ S_i$. Una fuente
+estacionaria *fuera* de la superficie aporta flujo neto nulo (su energía entra y
+sale), y por eso la intensidad rechaza el ruido de fondo estacionario —pero aún
+puede llevar el $P$ de una banda a negativo, en cuyo caso esa banda es no
+determinable. Dos indicadores de campo normativos controlan la validez: el
+indicador superficial presión-intensidad $F_{pI} = [L_p] - L_W + 10 \log_{10}(S/S_0)$
+(reactividad) y el indicador de potencia parcial negativa
+$F_{+/-} = 10 \log_{10}(\sum_i \lvert P_i \rvert / \lvert \sum_i P_i \rvert)$
+(recirculación), junto con la capacidad dinámica de la sonda
+$L_d = \delta_{pI0} - K$ ($K = 10$ dB grado 2, 7 dB grado 3), que debe superar
+$F_{pI}$. Una banda obtiene el grado de ingeniería cuando $L_d > F_{pI}$,
+$F_{+/-} \le 3$ dB y los dos barridos repetidos coinciden dentro del límite de
+la Tabla 2.
+
+Consulta la [guía de potencia sonora](/phonometry/es/guides/sound-power/) para su uso.

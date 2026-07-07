@@ -37,6 +37,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Psychoacoustics and Speech Intelligibility](https://jmrplens.github.io/phonometry/guides/psychoacoustics/)
 - [Sound Intensity (p-p method)](https://jmrplens.github.io/phonometry/guides/intensity/)
 - [Room and Building Acoustics](https://jmrplens.github.io/phonometry/guides/room-acoustics/)
+- [Sound Power](https://jmrplens.github.io/phonometry/guides/sound-power/)
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/)
 - [Block Processing](https://jmrplens.github.io/phonometry/guides/block-processing/)
 - [Multichannel and Performance](https://jmrplens.github.io/phonometry/guides/multichannel/)

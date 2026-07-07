@@ -435,7 +435,7 @@ The **pressure-intensity index** $\delta_{pI} = L_p - L_I$ measures how reactive
 See the [Sound Intensity guide](intensity.md) for usage.
 
 
-## Room and building acoustics (ISO 18233, ISO 3382, ISO 16283-1, ISO 717-1)
+## Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 717, ISO 354)
 
 ### Deterministic-excitation impulse response (ISO 18233)
 
@@ -487,4 +487,92 @@ Per one-third-octave band the level difference $D = L_1 - L_2$ (energy-averaged 
 
 The single-number rating (ISO 717-1, Clause 4.4) shifts the Table 3 **reference curve** in 1 dB steps toward the measured curve until the sum of *unfavourable* deviations $\sum_i \max(0, \text{ref}_i + k - \text{meas}_i)$ is maximal but $\le$ 32.0 dB (16 thirds) or 10.0 dB (5 octaves); the rating $R_w$ is the shifted reference at 500 Hz. The **spectrum adaptation terms** are $C = X_{A1} - X_w$ and $C_{tr} = X_{A2} - X_w$ with $X_{Aj} = -10 \log_{10} \sum_i 10^{(L_{ij} - X_i)/10}$ (Table 4 spectra No. 1 pink noise, No. 2 urban traffic), each rounded to an integer. The ISO 717-1 Annex C worked example ($R_w = 30$, $C = -2$, $C_{tr} = -3$, unfavourable sum 31.8 dB) is reproduced exactly.
 
+### Impact insulation and absorption (ISO 16283-2, ISO 717-2, ISO 354)
+
+Impact insulation swaps the airborne source for a standardized **tapping
+machine** and rates the receiving-room level, so the sign conventions flip. The
+standardized and normalized impact levels are $L'_{nT} = L_i - 10 \log_{10}(T/T_0)$
+(the reverberation term is *subtracted*, opposite to $D_{nT}$) and
+$L'_n = L_i + 10 \log_{10}(A/A_0)$ with $A_0 = 10$ m² and $A = 0.16\ V/T$. The
+ISO 717-2 rating shifts the Table 3 reference curve until $\sum_i \max(0, \text{meas}_i - (\text{ref}_i + k))$
+is maximal but $\le$ 32.0 dB (16 thirds) or 10.0 dB (5 octaves) — the
+*unfavourable* deviation now counts where the **measurement exceeds** the
+reference (impact noise is worse when louder), the mirror image of ISO 717-1.
+The rating is the shifted reference at 500 Hz, reduced by a further 5 dB for
+octave bands, and the adaptation term is $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$
+with the energetic sum $L_{n,\text{sum}} = 10 \log_{10} \sum_i 10^{L_i/10}$ over
+100–2500 Hz (thirds) or 125–2000 Hz (octaves). The ISO 717-2 Annex C examples
+are reproduced exactly (thirds $L_{n,w} = 79$, $C_I = -11$; octaves $54$, $0$),
+via the same monotone shift search as ISO 717-1 run on the negated curves.
+
+Sound absorption (ISO 354) measures the equivalent absorption area from
+Sabine's relation applied to a reverberation room empty and with the specimen:
+$A = 55.3\ V/(c\ T) - 4 V m$ (the $4 V m$ term is the air absorption, $m$ the
+power attenuation coefficient in 1/m), so the specimen area is
+$A_T = A_2 - A_1$ and its coefficient $\alpha_s = A_T/S$. With the speed of
+sound from Eq. (6), $c = 331 + 0.6\ t$ (°C), and $m$ converted from an
+ISO 9613-1 attenuation coefficient by $m = \alpha / (10 \lg e)$. Because
+diffraction and edge scattering intercept more than the flat sample area,
+$\alpha_s$ is left unclamped and may exceed 1.0 (Clause 3.7 NOTE 2).
+
 See the [Room and Building Acoustics guide](room-acoustics.md) for usage.
+
+## Sound power determination (ISO 3744/3746, ISO 3741, ISO 9614-2)
+
+The sound power level $L_W = 10 \log_{10}(P/P_0)$ ($P_0 = 1$ pW) is an
+*emission* quantity: unlike a pressure level it does not depend on the receiver
+distance or the room. Three families of methods recover it.
+
+### Enveloping-surface pressure (ISO 3744/3746)
+
+Over a reflecting plane the free-field relation is simply
+$L_W = \bar{L}_p + 10 \log_{10}(S/S_0)$: the mean-square pressure averaged over
+an enveloping surface of area $S$, multiplied by $S$, is the radiated power.
+Two corrections restore that idealisation. Uncorrelated **background noise**
+adds its mean square to the source's, so with the margin
+$\Delta L_p = L_{ST} - L_{bg}$ the source-only level is recovered by subtracting
+$K_1 = -10 \log_{10}(1 - 10^{-\Delta L_p/10})$ (from $p_{src}^2 = p_{ST}^2 (1 - 10^{-\Delta L_p/10})$).
+The **reverberant field** of a non-anechoic room adds a near-uniform energy
+density $4P/(A c)$ to the direct $P/(S c)$, so the surface level exceeds the
+free-field value by their ratio, $K_2 = 10 \log_{10}(1 + 4 S/A)$, with $A$ the
+room's equivalent absorption area. The surface area is the closed form of the
+geometry: a hemisphere $S = 2 \pi r^2$ over one reflecting plane (halved and
+quartered for two and three planes), a one-plane box $S = 4(ab + bc + ca)$ with
+$a = 0.5\ l_1 + d$, $b = 0.5\ l_2 + d$, $c = l_3 + d$. ISO 3746 (survey) shares
+the maths with looser criteria. The expanded uncertainty is
+$U = 2 \sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}$.
+
+### Reverberation room (ISO 3741)
+
+In a qualified diffuse field the steady energy density $w = 4P/(A c)$ ties the
+power to the room absorption, giving $L_W = \bar{L}_p + 10 \log_{10}(A/A_0) - 6$
+plus higher-order corrections, with $A = (55.26/c)(V/T_{60})$ and
+$c = 20.05 \sqrt{273 + \theta}$. The **Waterhouse correction**
+$10 \log_{10}(1 + S c/(8 V f))$ compensates the extra energy stored in the
+boundary layer that interior microphones miss ($S c/(8 V f) = S \lambda/(8 V)$,
+so it fades as frequency rises); the $4.34\ A/S$ term is the mean-free-path air
+correction, and $C_1$, $C_2$ carry the result to the reference meteorological
+conditions (23 °C, 101.325 kPa). The **comparison method** subtracts a
+reference source of known power measured in the same room,
+$L_W = L_{W(\text{RSS})} + (\bar{L}_p - \bar{L}_{p,\text{RSS}} + C_2)$, so the
+absorption-area, Waterhouse and $C_1$ terms cancel and the room need not be
+characterised.
+
+### Intensity scanning (ISO 9614-2)
+
+Sound intensity is the net energy flux $\vec{I} = \overline{p\ \vec{u}}$, so by
+the divergence theorem the power through a closed surface is
+$P = \sum_i \langle I_{n,i} \rangle\ S_i$. A steady source *outside* the surface
+contributes zero net flux (its energy enters and leaves), which is why
+intensity rejects stationary background noise — but it can still drive a band's
+$P$ negative, in which case that band is not determinable. Two normative field
+indicators gate validity: the surface pressure-intensity indicator
+$F_{pI} = [L_p] - L_W + 10 \log_{10}(S/S_0)$ (reactivity) and the
+negative-partial-power indicator
+$F_{+/-} = 10 \log_{10}(\sum_i \lvert P_i \rvert / \lvert \sum_i P_i \rvert)$
+(recirculation), together with the probe's dynamic capability
+$L_d = \delta_{pI0} - K$ ($K = 10$ dB grade 2, 7 dB grade 3), which must exceed
+$F_{pI}$. A band earns the engineering grade when $L_d > F_{pI}$, $F_{+/-} \le 3$ dB
+and the two repeated sweeps agree within the Table 2 limit.
+
+See the [Sound Power guide](sound-power.md) for usage.

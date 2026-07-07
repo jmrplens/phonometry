@@ -281,6 +281,7 @@ export default defineConfig({
             'guides/psychoacoustics',
             'guides/intensity',
             'guides/room-acoustics',
+            'guides/sound-power',
             'guides/calibration',
             'guides/block-processing',
             'guides/multichannel',

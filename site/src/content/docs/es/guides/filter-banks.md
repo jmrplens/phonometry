@@ -75,8 +75,8 @@ en el punto de cruce a −3 dB.
 | :--- | :--- | :--- | :--- |
 | `butter` | **Butterworth** | `octavefilter(x, fs, filter_type='butter')` | Medición acústica general. |
 | `cheby1` | **Chebyshev I** | `octavefilter(x, fs, filter_type='cheby1', ripple=0.1)` | Caída más abrupta a costa de rizado. |
-| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2', attenuation=60)` | Banda de paso plana con ceros en la banda atenuada. |
-| `ellip` | **Elíptico** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)` | Máxima selectividad. |
+| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2')` | Banda de paso plana con ceros en la banda atenuada. |
+| `ellip` | **Elíptico** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1)` | Máxima selectividad. |
 | `bessel` | **Bessel** | `octavefilter(x, fs, filter_type='bessel')` | Preservar la forma de los transitorios. |
 
 ## Galería de respuestas del banco
@@ -131,8 +131,8 @@ automáticamente para que los puntos de −3 dB caigan en los bordes de banda
 (`attenuation` debe ser > 3.01 dB).
 
 ```python
-# Banda de paso plana con 60 dB de atenuación
-spl, freq = octavefilter(x, fs, filter_type='cheby2', attenuation=60)
+# Banda de paso plana, 72 dB de atenuación por defecto (clase 1)
+spl, freq = octavefilter(x, fs, filter_type='cheby2')
 ```
 
 ### 4. Elíptico (`ellip`)
@@ -143,7 +143,7 @@ la atenuada.
 
 ```python
 # Máxima selectividad para aislamiento extremo entre bandas
-spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)
+spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
 ### 5. Bessel (`bessel`)

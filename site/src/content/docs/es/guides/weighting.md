@@ -78,7 +78,7 @@ página de [Teoría](/phonometry/es/reference/theory/).
 | `x` | array 1D o 2D | cualquiera | no vacío | 2D es `[channels, samples]` |
 | `fs` | int | Hz | > 0 | |
 | `curve` | str | — | `'A'` (por defecto), `'C'`, `'G'`, `'Z'` | `'G'` según ISO 7196 (infrasonido); `'Z'` es un bypass |
-| `high_accuracy` | bool | — | por defecto `True` (función); en la clase, `None` se resuelve a `not stateful` | Sobremuestreo interno (8×, ≥ 96 kHz a frecuencias de audio habituales) que mantiene A/C en clase 1 hasta 16 kHz; con G se ignora en silencio (su rango de 0,25–315 Hz ya es exacto con el diseño simple) |
+| `high_accuracy` | bool | — | por defecto `True` (función); en la clase, `None` se resuelve a `not stateful` | Sobremuestreo interno (hasta 8×, ≥ 144 kHz a frecuencias de audio habituales, p. ej. entrada de 96 kHz ×2) que mantiene A/C en clase 1 hasta 16 kHz; con G se ignora en silencio (su rango de 0,25–315 Hz ya es exacto con el diseño simple) |
 | `stateful` | bool (solo clase) | — | por defecto `False` | Conserva el estado del filtro entre bloques (streaming) |
 | `steady_ic` | bool (solo clase) | — | por defecto `False` | Condiciones iniciales estacionarias (sin transitorio de arranque) |
 
@@ -102,7 +102,7 @@ Nyquist: a fs = 48 kHz el error de la curva A a 12,5 kHz alcanza −2,7 dB, fuer
 de la tolerancia **clase 1** de IEC 61672-1 (+2,0/−2,5 dB).
 
 Por defecto (`high_accuracy=True`), phonometry diseña y ejecuta el filtro de
-ponderación a una frecuencia interna sobremuestreada (≥ 96 kHz) y diezma de
+ponderación a una frecuencia interna sobremuestreada (≥ 144 kHz) y diezma de
 vuelta, manteniendo la respuesta dentro de las tolerancias de clase 1 hasta
 16 kHz (error ≈ −0,5 dB a 12,5 kHz para fs = 48 kHz).
 

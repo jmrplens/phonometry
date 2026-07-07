@@ -226,8 +226,8 @@ The following plot compares the architectures focusing on the -3 dB crossover po
 | :--- | :--- | :--- | :--- |
 | `butter` | **Butterworth** | `octavefilter(x, fs, filter_type='butter')` | General acoustic measurement. |
 | `cheby1` | **Chebyshev I** | `octavefilter(x, fs, filter_type='cheby1', ripple=0.1)` | Sharper roll-off at the cost of ripple. |
-| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2', attenuation=60)` | Flat passband with stopband zeros. |
-| `ellip` | **Elliptic** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)` | Maximum selectivity. |
+| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2')` | Flat passband with stopband zeros. |
+| `ellip` | **Elliptic** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1)` | Maximum selectivity. |
 | `bessel` | **Bessel** | `octavefilter(x, fs, filter_type='bessel')` | Preserving transient waveform shapes. |
 
 ## Gallery of Filter Bank Responses
@@ -285,8 +285,8 @@ signal in the passband. The stopband edges are placed automatically so that the
 −3 dB points land on the band edges (`attenuation` must be > 3.01 dB).
 
 ```python
-# Flat passband with 60 dB stopband attenuation
-spl, freq = octavefilter(x, fs, filter_type='cheby2', attenuation=60)
+# Flat passband, class-1 default 72 dB stopband attenuation
+spl, freq = octavefilter(x, fs, filter_type='cheby2')
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6.png" alt="Chebyshev II one-third-octave filter bank frequency response" width="60%"></picture>
@@ -298,7 +298,7 @@ roll-off) for a given order. They feature ripples in both the passband and stopb
 
 ```python
 # Maximum selectivity for extreme band isolation
-spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)
+spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.png" alt="Elliptic one-third-octave filter bank frequency response" width="60%"></picture>
@@ -514,7 +514,7 @@ absence of weighting. The full pole/zero derivation is in the
 | `x` | 1D or 2D array | any | non-empty | 2D is `[channels, samples]` |
 | `fs` | int | Hz | > 0 | |
 | `curve` | str | — | `'A'` (default), `'C'`, `'G'`, `'Z'` | `'G'` per ISO 7196 (infrasound); `'Z'` is a bypass |
-| `high_accuracy` | bool | — | default `True` (function); class default `None` resolves to `not stateful` | Internal oversampling (8× up to ≥ 96 kHz at common audio rates) keeps A/C in class 1 up to 16 kHz; silently ignored for G, whose 0.25–315 Hz range the plain design already renders exactly |
+| `high_accuracy` | bool | — | default `True` (function); class default `None` resolves to `not stateful` | Internal oversampling (up to 8×, reaching ≥ 144 kHz at common audio rates, e.g. 96 kHz input ×2) keeps A/C in class 1 up to 16 kHz; silently ignored for G, whose 0.25–315 Hz range the plain design already renders exactly |
 | `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
 | `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
 
@@ -538,7 +538,7 @@ fs = 48 kHz the A-curve error at 12.5 kHz reaches −2.7 dB, outside the IEC
 61672-1 **class 1** tolerance (+2.0/−2.5 dB).
 
 By default (`high_accuracy=True`), phonometry designs and runs the weighting
-filter at an internally oversampled rate (≥ 96 kHz) and decimates back, keeping
+filter at an internally oversampled rate (≥ 144 kHz) and decimates back, keeping
 the response within class 1 tolerances up to 16 kHz (error ≈ −0.5 dB at
 12.5 kHz for fs = 48 kHz).
 
@@ -2281,7 +2281,7 @@ $$
 The digital filter is obtained from the analog poles/zeros via the bilinear
 transform. Because the bilinear transform compresses frequencies near Nyquist,
 the default `high_accuracy` mode designs and runs the filter at an internally
-oversampled rate (≥ 96 kHz) — see [Frequency Weighting](https://jmrplens.github.io/phonometry/guides/weighting/).
+oversampled rate (≥ 144 kHz) — see [Frequency Weighting](https://jmrplens.github.io/phonometry/guides/weighting/).
 
 ## Time Integration
 
@@ -2541,7 +2541,7 @@ i.e. a reversed cumulative sum in discrete time. Backward integration cancels th
 
 ### Regression windows and validity (ISO 3382-2, Clause 6, Annex B/C)
 
-Reverberation time is a least-squares fit $L = a + b t$ over a window, extrapolated to 60 dB via $T = -60/b$ (Annex C): **EDT** on 0 to −10 dB, **T20** on −5 to −25 dB, **T30** on −5 to −35 dB. A single-slope decay gives EDT = T20 = T30; a fast early / slow late double slope gives EDT < T30. Validity uses the dynamic-range rule of 5.3.3 — the noise must sit at least (evaluation span + 15) dB below the IR peak, i.e. 25/35/45 dB for EDT/T20/T30 — and the **curvature** $C = 100\ (T_{30}/T_{20} - 1)$ % (Annex B) flags a non-straight decay above 10 %.
+Reverberation time is a least-squares fit $L = a + b t$ over a window, extrapolated to 60 dB via $T = -60/b$ (Annex C): **EDT** on 0 to −10 dB, **T20** on −5 to −25 dB, **T30** on −5 to −35 dB. A single-slope decay gives EDT = T20 = T30; a fast early / slow late double slope gives EDT < T30. Validity uses the dynamic-range rule of 5.3.3 — the noise must sit at least 25 dB below the IR peak for EDT (evaluation span + 15 dB), tightened to 46 dB for T20 and 54 dB for T30 so the tail-compensation bias of a flagged-valid value stays within the 5 % JND — and the **curvature** $C = 100\ (T_{30}/T_{20} - 1)$ % (Annex B) flags a non-straight decay above 10 %.
 
 ### Clarity, definition and centre time (ISO 3382-1, Annex A)
 

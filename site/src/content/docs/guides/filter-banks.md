@@ -70,8 +70,8 @@ The following plot compares the architectures focusing on the -3 dB crossover po
 | :--- | :--- | :--- | :--- |
 | `butter` | **Butterworth** | `octavefilter(x, fs, filter_type='butter')` | General acoustic measurement. |
 | `cheby1` | **Chebyshev I** | `octavefilter(x, fs, filter_type='cheby1', ripple=0.1)` | Sharper roll-off at the cost of ripple. |
-| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2', attenuation=60)` | Flat passband with stopband zeros. |
-| `ellip` | **Elliptic** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)` | Maximum selectivity. |
+| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2')` | Flat passband with stopband zeros. |
+| `ellip` | **Elliptic** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1)` | Maximum selectivity. |
 | `bessel` | **Bessel** | `octavefilter(x, fs, filter_type='bessel')` | Preserving transient waveform shapes. |
 
 ## Gallery of Filter Bank Responses
@@ -129,8 +129,8 @@ signal in the passband. The stopband edges are placed automatically so that the
 −3 dB points land on the band edges (`attenuation` must be > 3.01 dB).
 
 ```python
-# Flat passband with 60 dB stopband attenuation
-spl, freq = octavefilter(x, fs, filter_type='cheby2', attenuation=60)
+# Flat passband, class-1 default 72 dB stopband attenuation
+spl, freq = octavefilter(x, fs, filter_type='cheby2')
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6.png" alt="Chebyshev II one-third-octave filter bank frequency response" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_dark.png" alt="Chebyshev II one-third-octave filter bank frequency response" style="width:60%">
@@ -142,7 +142,7 @@ roll-off) for a given order. They feature ripples in both the passband and stopb
 
 ```python
 # Maximum selectivity for extreme band isolation
-spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)
+spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.png" alt="Elliptic one-third-octave filter bank frequency response" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.png" alt="Elliptic one-third-octave filter bank frequency response" style="width:60%">

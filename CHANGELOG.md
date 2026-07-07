@@ -94,13 +94,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `attenuation`, so the former 60 dB default sat 10 dB inside the IEC
   61260-1:2014 class 1 deep-stopband limit; 72 dB makes the default cheby2
   bank class 1 (same +0.400 dB passband margin as `butter`). Numerical
-  outputs change for cheby2 users who relied on the previous default.
+  outputs change for cheby2 users — and for elliptic (`ellip`) banks, which
+  consume `attenuation` as their stopband attenuation `rs` — who relied on
+  the previous default.
 - Weighting-filter `high_accuracy` internal oversample target raised from
   96 to 144 kHz, so fs = 48 kHz now oversamples x3 (was x2). This halves the
   high-frequency residual vs the analytic A/C curves (48 kHz: -1.11 -> -0.44
   dB @16k, -2.10 -> -0.85 dB @20k) and removes the 48k-worse-than-44.1k
-  asymmetry. High-accuracy weighting outputs shift slightly at 48 kHz.
-
+  asymmetry. High-accuracy weighting outputs shift for all rates below
+  144 kHz (48/96/128 kHz included) — e.g. 96 kHz by +0.86 dB @16k / +1.63 dB
+  @20k — always toward the analytic curve.
 - Calibrator stability validation updated from IEC 60942:2003 to
   IEC 60942:2017 (Ed. 4): the deviations |max − mean| and |min − mean| are
   each compared against the limit, using the

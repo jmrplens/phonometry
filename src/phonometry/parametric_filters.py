@@ -59,7 +59,8 @@ class WeightingFilter:
         self.curve = curve.upper()
         self.stateful = stateful
         self.high_accuracy = high_accuracy
-        # Oversample target 144 kHz: fs=48k -> x3, fs=44.1k -> x4, fs>=96k -> x1.
+        # Oversample target 144 kHz: fs=48k -> x3, fs=44.1k -> x4, fs=96k -> x2,
+        # fs=128k -> x2, fs>=144k -> x1.
         # A 96 kHz target left the common 48 kHz rate at only x2 (-1.1 dB @16k /
         # -2.1 dB @20k vs analytic); 144 kHz halves that residual (audit N1 A6).
         self._oversample = min(8, max(1, math.ceil(144000 / fs))) if high_accuracy else 1

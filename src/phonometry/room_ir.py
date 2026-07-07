@@ -48,17 +48,17 @@ from .utils import _typesignal
 #: than one period aliases circularly and this residual tail is the symptom.
 _MLS_ALIAS_TAIL_DB = -35.0
 
+#: A genuine (optionally faded) exponential sweep never ends in a run of
+#: exact zeros; more trailing zeros than this small tolerance indicate the
+#: reference was zero-padded (see the Farina guard in ``impulse_response``).
+_FARINA_MAX_TRAILING_ZEROS = 8
+
 # Primitive-polynomial feedback taps (1-indexed register positions, highest
 # tap == order) yielding maximum-length sequences. Values from the standard
 # LFSR tables (Xilinx XAPP052, "Efficient Shift Registers, LFSR Counters,
 # and Long Pseudo-Random Sequence Generators", P. Alfke, 1996; equivalent to
 # the primitive-polynomial tables used by Rife & Vanderkooy, JAES 37 (1989),
 # ISO 18233 Bibliography [16]).
-#: A genuine (optionally faded) exponential sweep never ends in a run of
-#: exact zeros; more trailing zeros than this small tolerance indicate the
-#: reference was zero-padded (see the Farina guard in ``impulse_response``).
-_FARINA_MAX_TRAILING_ZEROS = 8
-
 _MLS_TAPS: Dict[int, Tuple[int, ...]] = {
     2: (2, 1),
     3: (3, 2),

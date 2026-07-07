@@ -203,7 +203,7 @@ $$
 El filtro digital se obtiene de los polos/ceros analógicos mediante la
 transformación bilineal. Como esta comprime las frecuencias cerca de Nyquist, el
 modo `high_accuracy` por defecto diseña y ejecuta el filtro a una frecuencia
-interna sobremuestreada (≥ 96 kHz) — consulta
+interna sobremuestreada (≥ 144 kHz) — consulta
 [Ponderación frecuencial](/phonometry/es/guides/weighting/).
 
 ## Integración temporal
@@ -465,7 +465,7 @@ es decir, una suma acumulada invertida en tiempo discreto. La integración hacia
 
 ### Ventanas de regresión y validez (ISO 3382-2, Cláusula 6, Anexo B/C)
 
-El tiempo de reverberación es un ajuste por mínimos cuadrados $L = a + b t$ sobre una ventana, extrapolado a 60 dB mediante $T = -60/b$ (Anexo C): **EDT** de 0 a −10 dB, **T20** de −5 a −25 dB, **T30** de −5 a −35 dB. Un decaimiento de una sola pendiente da EDT = T20 = T30; una doble pendiente rápida al principio y lenta al final da EDT < T30. La validez se basa en la regla de rango dinámico de 5.3.3 — el ruido debe situarse al menos (rango de evaluación + 15) dB por debajo del pico de la respuesta al impulso, es decir 25/35/45 dB para EDT/T20/T30 — y la **curvatura** $C = 100\ (T_{30}/T_{20} - 1)$ % (Anexo B) señala un decaimiento no recto por encima del 10 %.
+El tiempo de reverberación es un ajuste por mínimos cuadrados $L = a + b t$ sobre una ventana, extrapolado a 60 dB mediante $T = -60/b$ (Anexo C): **EDT** de 0 a −10 dB, **T20** de −5 a −25 dB, **T30** de −5 a −35 dB. Un decaimiento de una sola pendiente da EDT = T20 = T30; una doble pendiente rápida al principio y lenta al final da EDT < T30. La validez se basa en la regla de rango dinámico de 5.3.3 — el ruido debe situarse al menos 25 dB por debajo del pico de la respuesta al impulso para EDT (rango de evaluación + 15 dB), aumentado a 46 dB para T20 y 54 dB para T30 de modo que el sesgo de compensación de cola de un valor marcado como válido se mantenga dentro del 5 % del JND — y la **curvatura** $C = 100\ (T_{30}/T_{20} - 1)$ % (Anexo B) señala un decaimiento no recto por encima del 10 %.
 
 ### Claridad, definición y tiempo central (ISO 3382-1, Anexo A)
 

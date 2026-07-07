@@ -199,7 +199,7 @@ $$
 The digital filter is obtained from the analog poles/zeros via the bilinear
 transform. Because the bilinear transform compresses frequencies near Nyquist,
 the default `high_accuracy` mode designs and runs the filter at an internally
-oversampled rate (≥ 96 kHz) — see [Frequency Weighting](weighting.md).
+oversampled rate (≥ 144 kHz) — see [Frequency Weighting](weighting.md).
 
 ## Time Integration
 
@@ -459,7 +459,7 @@ i.e. a reversed cumulative sum in discrete time. Backward integration cancels th
 
 ### Regression windows and validity (ISO 3382-2, Clause 6, Annex B/C)
 
-Reverberation time is a least-squares fit $L = a + b t$ over a window, extrapolated to 60 dB via $T = -60/b$ (Annex C): **EDT** on 0 to −10 dB, **T20** on −5 to −25 dB, **T30** on −5 to −35 dB. A single-slope decay gives EDT = T20 = T30; a fast early / slow late double slope gives EDT < T30. Validity uses the dynamic-range rule of 5.3.3 — the noise must sit at least (evaluation span + 15) dB below the IR peak, i.e. 25/35/45 dB for EDT/T20/T30 — and the **curvature** $C = 100\ (T_{30}/T_{20} - 1)$ % (Annex B) flags a non-straight decay above 10 %.
+Reverberation time is a least-squares fit $L = a + b t$ over a window, extrapolated to 60 dB via $T = -60/b$ (Annex C): **EDT** on 0 to −10 dB, **T20** on −5 to −25 dB, **T30** on −5 to −35 dB. A single-slope decay gives EDT = T20 = T30; a fast early / slow late double slope gives EDT < T30. Validity uses the dynamic-range rule of 5.3.3 — the noise must sit at least 25 dB below the IR peak for EDT (evaluation span + 15 dB), tightened to 46 dB for T20 and 54 dB for T30 so the tail-compensation bias of a flagged-valid value stays within the 5 % JND — and the **curvature** $C = 100\ (T_{30}/T_{20} - 1)$ % (Annex B) flags a non-straight decay above 10 %.
 
 ### Clarity, definition and centre time (ISO 3382-1, Annex A)
 

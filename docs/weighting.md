@@ -76,7 +76,7 @@ absence of weighting. The full pole/zero derivation is in the
 | `x` | 1D or 2D array | any | non-empty | 2D is `[channels, samples]` |
 | `fs` | int | Hz | > 0 | |
 | `curve` | str | — | `'A'` (default), `'C'`, `'G'`, `'Z'` | `'G'` per ISO 7196 (infrasound); `'Z'` is a bypass |
-| `high_accuracy` | bool | — | default `True` (function); class default `None` resolves to `not stateful` | Internal oversampling (8× up to ≥ 96 kHz at common audio rates) keeps A/C in class 1 up to 16 kHz; silently ignored for G, whose 0.25–315 Hz range the plain design already renders exactly |
+| `high_accuracy` | bool | — | default `True` (function); class default `None` resolves to `not stateful` | Internal oversampling (up to 8×, reaching ≥ 144 kHz at common audio rates, e.g. 96 kHz input ×2) keeps A/C in class 1 up to 16 kHz; silently ignored for G, whose 0.25–315 Hz range the plain design already renders exactly |
 | `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
 | `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
 
@@ -100,7 +100,7 @@ fs = 48 kHz the A-curve error at 12.5 kHz reaches −2.7 dB, outside the IEC
 61672-1 **class 1** tolerance (+2.0/−2.5 dB).
 
 By default (`high_accuracy=True`), phonometry designs and runs the weighting
-filter at an internally oversampled rate (≥ 96 kHz) and decimates back, keeping
+filter at an internally oversampled rate (≥ 144 kHz) and decimates back, keeping
 the response within class 1 tolerances up to 16 kHz (error ≈ −0.5 dB at
 12.5 kHz for fs = 48 kHz).
 

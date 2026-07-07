@@ -53,15 +53,18 @@ pytest --cov=src/phonometry --cov-report=term-missing tests/
 
 ### 4. Documentation Images (auto-generated)
 Every image under `.github/images/` is generated with the library itself by
-`generate_graphs.py` — never hand-made. If your change alters filter responses,
+`scripts/generate_graphs.py` (plots) and `scripts/generate_diagrams.py` (setup /
+signal-flow diagrams) — never hand-made. If your change alters filter responses,
 weighting curves or any other plotted behavior, regenerate the graphs and commit
 the affected images together with the code change:
+
 ```bash
-make graphs   # or: python generate_graphs.py
+make graphs   # runs both: python scripts/generate_graphs.py && python scripts/generate_diagrams.py
 ```
+
 When adding a feature with visual output, add a `generate_*` function to
-`generate_graphs.py` and reference the resulting image from the docs — do not
-commit images produced any other way.
+`scripts/generate_graphs.py` (or `scripts/generate_diagrams.py` for a diagram) and
+reference the resulting image from the docs — do not commit images produced any other way.
 
 ## 📦 Releasing
 

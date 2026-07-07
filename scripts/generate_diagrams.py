@@ -101,6 +101,35 @@ _ES: dict[str, str] = {
     "Microphone": "Micrófono",
     "Analysis": "Análisis",
     "m(F) drops": "m(F) cae",
+    "Airborne sound insulation setup (ISO 16283-1)":
+        "Montaje de aislamiento acústico aéreo (ISO 16283-1)",
+    "Source room": "Recinto emisor",
+    "Receiving room": "Recinto receptor",
+    "Test partition": "Partición de ensayo",
+    "Loudspeaker": "Altavoz",
+    "microphone positions": "posiciones de micrófono",
+    "≥ 1.0 m": "≥ 1,0 m",
+    "≥ 0.7 m": "≥ 0,7 m",
+    "≥ 0.5 m": "≥ 0,5 m",
+    "7.6 a) ≥ 0.7 m between microphone positions":
+        "7.6 a) ≥ 0,7 m entre posiciones de micrófono",
+    "7.6 b) ≥ 0.5 m to room boundaries":
+        "7.6 b) ≥ 0,5 m a los límites del recinto",
+    "7.6 c) ≥ 1.0 m to the loudspeaker":
+        "7.6 c) ≥ 1,0 m al altavoz",
+    "7.2.2 ≥ 1.0 m loudspeaker to separating partition":
+        "7.2.2 ≥ 1,0 m del altavoz a la partición separadora",
+    "Impulse-response measurement chain (ISO 18233)":
+        "Cadena de medición de la respuesta al impulso (ISO 18233)",
+    "Excitation": "Excitación",
+    "ESS sweep / MLS": "Barrido ESS / MLS",
+    "Deconvolution": "Deconvolución",
+    "correlation /": "correlación /",
+    "inverse filter": "filtro inverso",
+    "acoustic path": "trayecto acústico",
+    "The room response h(t) is recovered by deconvolving the microphone signal.":
+        "La respuesta de la sala h(t) se recupera deconvolucionando "
+        "la señal del micrófono.",
 }
 
 
@@ -540,6 +569,112 @@ def _d7(s: SVG, th: Theme) -> None:
         x += bw + gap
 
 
+# ---------------------------------------------------------------------------
+# d8 - Airborne sound insulation setup (ISO 16283-1)
+# ---------------------------------------------------------------------------
+
+def _d8(s: SVG, th: Theme) -> None:
+    top, bot = 90.0, 470.0
+
+    # Two rooms in plan view separated by the test partition.
+    s.rect(70, top, 375, bot - top, th.panel, th.fg, rx=6, sw=3)
+    s.rect(465, top, 365, bot - top, th.panel, th.fg, rx=6, sw=3)
+    s.rect(445, top, 20, bot - top, th.secondary, th.fg, sw=2)  # partition (S)
+    s.text(455, 80, "Test partition", 20, th.secondary, bold=True)
+
+    s.text(90, top + 32, "Source room", 22, th.fg, bold=True, anchor="start")
+    s.text(90, top + 58, "L₁", 20, th.muted, anchor="start")
+    s.text(486, top + 32, "Receiving room", 22, th.fg, bold=True, anchor="start")
+    s.text(486, top + 58, "L₂ , T", 20, th.muted, anchor="start")
+
+    # Loudspeaker in a corner of the source room (bottom-left).
+    lsx, lsy = 150.0, 405.0
+    for r in (40, 66, 92):
+        s.path(f"M {lsx + r * 0.22:.1f} {lsy - r:.1f} "
+               f"A {r} {r} 0 0 1 {lsx + r:.1f} {lsy - r * 0.22:.1f}",
+               stroke=th.accent, sw=1.6)
+    s.rect(lsx - 26, lsy - 30, 52, 60, th.panel, th.primary, rx=6, sw=2)
+    s.circle(lsx, lsy - 10, 12, th.primary)
+    s.circle(lsx, lsy - 10, 5, th.bg)
+    s.circle(lsx, lsy + 16, 7, th.primary)
+    s.text(lsx, lsy + 52, "Loudspeaker", 20, th.fg, bold=True)
+
+    # Microphone positions (five per room, in the central zone).
+    src_mics = [(150, 315), (255, 250), (360, 300), (300, 360), (390, 205)]
+    rec_mics = [(590, 160), (653, 160), (560, 290), (690, 380), (785, 300)]
+    for mics in (src_mics, rec_mics):
+        for mx, my in mics:
+            s.circle(mx, my, 8, th.fg)
+            s.circle(mx, my, 3, th.bg)
+    s.text(268, 172, "microphone positions", 18, th.muted)
+    s.text(636, 430, "microphone positions", 18, th.muted)
+
+    # Normative minimum separations (ISO 16283-1, 7.6 and 7.2.2).
+    s.dim(150, 395, 150, 317, "≥ 1.0 m", offset=-42, size=20)          # 7.6c
+    s.dim(178, 405, 443, 405, "≥ 1.0 m", offset=0, size=20)            # 7.2.2
+    s.dim(590, 160, 653, 160, "≥ 0.7 m", offset=42, size=20)           # 7.6a
+    s.dim(785, 300, 830, 300, "≥ 0.5 m", offset=-46, size=20)          # 7.6b
+
+    # Clause legend.
+    for y, txt in (
+        (505, "7.6 a) ≥ 0.7 m between microphone positions"),
+        (531, "7.6 b) ≥ 0.5 m to room boundaries"),
+        (557, "7.6 c) ≥ 1.0 m to the loudspeaker"),
+        (583, "7.2.2 ≥ 1.0 m loudspeaker to separating partition"),
+    ):
+        s.text(80, y, txt, 18, th.fg, anchor="start")
+
+
+# ---------------------------------------------------------------------------
+# d9 - ISO 18233 indirect impulse-response measurement chain
+# ---------------------------------------------------------------------------
+
+def _d9(s: SVG, th: Theme) -> None:
+    bw, bh = 200.0, 96.0
+    xs = (120.0, 350.0, 580.0)
+    y1, y2 = 110.0, 300.0
+
+    def box(x: float, y: float, title: str, subs: list[str], color: str,
+            mono: bool) -> None:
+        s.rect(x, y, bw, bh, th.panel, color, rx=12, sw=2)
+        t_size = 20 if len(title) > 11 else 22
+        if subs:
+            s.text(x + bw / 2, y + 38, title, t_size, th.fg, bold=True)
+            if len(subs) == 1:
+                s.text(x + bw / 2, y + 66, subs[0], 18, color,
+                       mono=mono, italic=mono)
+            else:
+                s.text(x + bw / 2, y + 62, subs[0], 18, color)
+                s.text(x + bw / 2, y + 82, subs[1], 18, color)
+        else:
+            s.text(x + bw / 2, y + bh / 2 + 7, title, t_size, th.fg, bold=True)
+
+    # Row 1 (left to right): the physical excitation path.
+    box(xs[0], y1, "Excitation", ["ESS sweep / MLS"], th.primary, False)
+    box(xs[1], y1, "Loudspeaker", [], th.fg, False)
+    box(xs[2], y1, "Room", ["h(t)"], th.secondary, True)
+    s.arrow(xs[0] + bw, y1 + bh / 2, xs[1] - 2, y1 + bh / 2, th.fg, 2)
+    s.arrow(xs[1] + bw, y1 + bh / 2, xs[2] - 2, y1 + bh / 2, th.fg, 2)
+
+    # Serpentine connector: the acoustic field couples Room -> Microphone.
+    cx = xs[2] + bw / 2
+    s.arrow(cx, y1 + bh, cx, y2 - 2, th.muted, 2)
+    s.text(cx - 12, (y1 + bh + y2) / 2 + 5, "acoustic path", 18, th.muted,
+           anchor="end", italic=True)
+
+    # Row 2 (right to left): recover the impulse response by deconvolution.
+    box(xs[2], y2, "Microphone", [], th.primary, False)
+    box(xs[1], y2, "Deconvolution", ["correlation /", "inverse filter"],
+        th.accent, False)
+    box(xs[0], y2, "IR", ["ĥ(t)"], th.accent, True)
+    s.arrow(xs[2], y2 + bh / 2, xs[1] + bw + 2, y2 + bh / 2, th.fg, 2)
+    s.arrow(xs[1], y2 + bh / 2, xs[0] + bw + 2, y2 + bh / 2, th.fg, 2)
+
+    s.text(450, 425,
+           "The room response h(t) is recovered by deconvolving the "
+           "microphone signal.", 18, th.fg)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -548,6 +683,10 @@ DIAGRAMS = {
     "diagram_multirate": (_d5, "Multirate decimation in the octave filter bank", 560),
     "diagram_pp_probe": (_d6, "Two-microphone (p-p) intensity probe", 460),
     "diagram_sti_chain": (_d7, "STI measurement chain (IEC 60268-16)", 400),
+    "diagram_insulation_setup": (
+        _d8, "Airborne sound insulation setup (ISO 16283-1)", 600),
+    "diagram_ir_measurement": (
+        _d9, "Impulse-response measurement chain (ISO 18233)", 440),
 }
 
 

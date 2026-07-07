@@ -7,7 +7,7 @@ import numpy as np
 from scipy import signal as scipy_signal
 
 # Add src to path to use the local package
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from phonometry import OctaveFilterBank
 
@@ -162,6 +162,22 @@ _ES_EXACT = {
     "Standing wave: reactive field": "Onda estacionaria: campo reactivo",
     "Pressure level Lp": "Nivel de presi\u00f3n Lp",
     "Intensity level LI": "Nivel de intensidad LI",
+    "Schroeder Integration and Reverberation Time (ISO 3382)":
+        "Integraci\u00f3n de Schroeder y tiempo de reverberaci\u00f3n (ISO 3382)",
+    "Raw squared IR level": "Nivel de la RI al cuadrado",
+    "Schroeder decay curve": "Curva de ca\u00edda de Schroeder",
+    "T20 fit (\u22125 to \u221225 dB)": "Ajuste T20 (\u22125 a \u221225 dB)",
+    "T30 fit (\u22125 to \u221235 dB)": "Ajuste T30 (\u22125 a \u221235 dB)",
+    "EDT fit (0 to \u221210 dB)": "Ajuste EDT (0 a \u221210 dB)",
+    "EDT slope": "Pendiente EDT",
+    "ISO 717-1 Weighted Sound Reduction Index (Annex C example)":
+        "\u00cdndice ponderado de reducci\u00f3n sonora (ISO 717-1, ejemplo del Anexo C)",
+    "Apparent sound reduction index R' [dB]":
+        "\u00cdndice de reducci\u00f3n sonora aparente R' [dB]",
+    "Measured R' (third octave)": "R' medido (tercios de octava)",
+    "Shifted reference curve (ISO 717-1)":
+        "Curva de referencia desplazada (ISO 717-1)",
+    "Unfavourable deviations": "Desviaciones desfavorables",
 }
 
 _ES_PATTERNS = [
@@ -181,6 +197,10 @@ _ES_PATTERNS = [
      "Banda ancha plana a 60 dB - N = \\1 sonios"),
     (r"^Pressure-intensity index\n\u03b4pI = (.+) dB$",
      "\u00cdndice presi\u00f3n-intensidad\\n\u03b4pI = \\1 dB"),
+    (r"^Reference curve shifted by (.+) dB$",
+     r"Curva de referencia desplazada \1 dB"),
+    (r"^Sum of unfavourable deviations = (.+) dB  \(limit 32\.0 dB\)$",
+     "Suma de desviaciones desfavorables = \\1 dB  (l\u00edmite 32,0 dB)"),
 ]
 
 
@@ -1577,6 +1597,160 @@ def generate_intensity_demo(output_dir: str) -> None:
     plt.close()
 
 
+def generate_schroeder_decay(output_dir: str) -> None:
+    """Schroeder backward integration with T20/T30/EDT regressions (ISO 3382)."""
+    print("Generating schroeder_decay.png...")
+    from phonometry import decay_curve, room_parameters
+    from phonometry.room_acoustics import (
+        _EDT_RANGE,
+        _T20_RANGE,
+        _T30_RANGE,
+        _onset_index,
+    )
+
+    fs = 48000
+    reverb_t = 1.2  # target reverberation time (s)
+    duration = 2.5
+    rng = np.random.default_rng(2026)
+    t = np.arange(int(duration * fs)) / fs
+    # Exponential decay (T = 1.2 s) excited by white noise + a realistic
+    # background-noise floor (~-45 dB re the peak envelope).
+    ir = rng.standard_normal(t.size) * np.exp(-6.9077 * t / reverb_t)
+    ir = ir + rng.standard_normal(t.size) * 10.0 ** (-45.0 / 20.0)
+
+    # Library outputs: the annotated numbers are exactly these.
+    time, level = decay_curve(ir, fs)
+    res = room_parameters(ir, fs, limits=None)
+    edt, t20, t30 = float(res.edt[0]), float(res.t20[0]), float(res.t30[0])
+
+    # Raw squared-IR level trace (onset-trimmed, normalized to its peak):
+    # the noisy line the backward integration smooths into the decay curve.
+    p2 = ir.astype(np.float64) ** 2
+    p2 = p2[_onset_index(p2):]
+    t_raw = np.arange(p2.size) / fs
+    raw_db = 10.0 * np.log10(np.maximum(p2, p2.max() * 1e-12) / p2.max())
+
+    def fit_line(decay_range: tuple[float, float]) -> tuple[float, float]:
+        """Least-squares (slope, intercept) over an evaluation range,
+        replicating room_acoustics._fit_decay_time so the drawn line has
+        slope -60/T with the annotated T."""
+        mask = (level <= -decay_range[0]) & (level >= -decay_range[1])
+        slope, intercept = np.polyfit(time[mask], level[mask], 1)
+        return float(slope), float(intercept)
+
+    _, ax = plt.subplots(figsize=(10, 6.5))
+    ax.plot(t_raw, raw_db, color="gray", alpha=0.28, linewidth=0.6, zorder=0,
+            label="Raw squared IR level")
+    ax.plot(time, level, color=COLOR_PRIMARY, linewidth=2.4, zorder=5,
+            label="Schroeder decay curve")
+
+    lines = [
+        (_EDT_RANGE, "#9467bd", "-", "EDT fit (0 to −10 dB)", (0.0, -13.0)),
+        (_T20_RANGE, COLOR_SECONDARY, "--", "T20 fit (−5 to −25 dB)", (0.0, -60.0)),
+        (_T30_RANGE, COLOR_TERTIARY, "-.", "T30 fit (−5 to −35 dB)", (0.0, -60.0)),
+    ]
+    for decay_range, color, style, label, (lo, hi) in lines:
+        slope, intercept = fit_line(decay_range)
+        t_lo, t_hi = (lo - intercept) / slope, (hi - intercept) / slope
+        ax.plot([t_lo, t_hi], [lo, hi], color=color, linestyle=style,
+                linewidth=1.7, zorder=4, label=label)
+
+    # Evaluation levels -5 / -25 / -35 dB and the decay-curve crossings.
+    for target in (-5.0, -25.0, -35.0):
+        ax.axhline(target, color=COLOR_FG, linestyle=":", alpha=0.35, linewidth=1)
+        t_cross = float(np.interp(target, level[::-1], time[::-1]))
+        ax.plot(t_cross, target, "o", color=COLOR_FG, markersize=5, zorder=6)
+        # Place level labels clear of the upper-right legend.
+        ax.text(1.40, target + 0.8, f"{target:.0f} dB", ha="left",
+                va="bottom", fontsize=8, color=COLOR_FG, alpha=0.85)
+
+    ax.text(0.12, -7.0, "EDT slope", fontsize=8, color="#9467bd", rotation=0)
+    facecolor = plt.rcParams["axes.facecolor"]
+    ax.text(0.04, 0.06,
+            f"EDT = {edt:.2f} s\nT20 = {t20:.2f} s\nT30 = {t30:.2f} s",
+            transform=ax.transAxes, va="bottom", ha="left", fontsize=11,
+            bbox={"boxstyle": "round", "facecolor": facecolor,
+                  "edgecolor": COLOR_FG, "alpha": 0.85})
+
+    ax.set_title("Schroeder Integration and Reverberation Time (ISO 3382)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Level re steady state [dB]")
+    ax.set_xlim(0, duration)
+    ax.set_ylim(-65, 3)
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.legend(loc="upper right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "schroeder_decay.png"))
+    plt.close()
+
+
+def generate_insulation_rating(output_dir: str) -> None:
+    """ISO 717-1 weighted rating: measured R', shifted reference, deviations."""
+    print("Generating insulation_rating.png...")
+    from phonometry.insulation import (
+        _INDEX_500_THIRD,
+        _REF_THIRD_OCTAVE,
+        weighted_rating,
+    )
+
+    # ISO 717-1 Annex C worked example (Table C.1), 100 Hz .. 3150 Hz.
+    freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                      1000, 1250, 1600, 2000, 2500, 3150], dtype=float)
+    measured = np.array([20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+                         28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5])
+
+    result = weighted_rating(measured)
+    reference = np.asarray(_REF_THIRD_OCTAVE, dtype=float)
+    shift = result.rating - _REF_THIRD_OCTAVE[_INDEX_500_THIRD]
+    shifted = reference + shift  # shifted reference read at 500 Hz == Rw
+
+    _, ax = plt.subplots(figsize=(10, 6.5))
+    ax.fill_between(freqs, measured, shifted, where=measured < shifted,
+                    interpolate=True, color=COLOR_SECONDARY, alpha=0.25,
+                    zorder=1, label="Unfavourable deviations")
+    ax.semilogx(freqs, shifted, marker="s", color=COLOR_FG, linewidth=1.6,
+                linestyle="--", markersize=4, zorder=3,
+                label="Shifted reference curve (ISO 717-1)")
+    ax.semilogx(freqs, measured, marker="o", color=COLOR_PRIMARY, linewidth=1.8,
+                markersize=5, markerfacecolor="white", markeredgewidth=1.4,
+                zorder=4, label="Measured R' (third octave)")
+
+    # Rw is the shifted reference read at 500 Hz.
+    ax.axvline(500, color=COLOR_FG, linestyle=":", alpha=0.4)
+    ax.plot(500, result.rating, "D", color=COLOR_SECONDARY, markersize=9, zorder=6)
+    ax.annotate(f"Rw = {result.rating} dB", xy=(500, result.rating),
+                xytext=(560, result.rating - 9), fontsize=12, fontweight="bold",
+                arrowprops={"arrowstyle": "->", "lw": 1.0})
+
+    for dy, text in (
+        (0.97, f"Reference curve shifted by {shift} dB"),
+        (0.90, f"Sum of unfavourable deviations = {result.unfavourable_sum:.1f}"
+               f" dB  (limit 32.0 dB)"),
+        (0.83, f"Rw (C ; Ctr) = {result.rating} "
+               f"({result.c:+d} ; {result.ctr:+d}) dB"),
+    ):
+        ax.text(0.03, dy, text, transform=ax.transAxes, va="top", ha="left",
+                fontsize=9.5, color=COLOR_FG)
+
+    ax.set_title("ISO 717-1 Weighted Sound Reduction Index (Annex C example)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Apparent sound reduction index R' [dB]")
+    ax.set_xscale("log")
+    ax.set_xlim(90, 3600)
+    ax.set_ylim(8, 44)
+    from matplotlib.ticker import NullFormatter
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xticks(freqs)
+    ax.set_xticklabels(
+        ["100", "125", "160", "200", "250", "315", "400", "500", "630", "800",
+         "1k", "1.25k", "1.6k", "2k", "2.5k", "3.15k"], fontsize=8)
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.legend(loc="lower right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "insulation_rating.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -1611,6 +1785,10 @@ def generate_all(img_dir: str) -> None:
     generate_loudness_pattern(img_dir)
     generate_sti_curve(img_dir)
     generate_intensity_demo(img_dir)
+
+    # Room / building acoustics plots (Schroeder decay, ISO 717-1 rating)
+    generate_schroeder_decay(img_dir)
+    generate_insulation_rating(img_dir)
 
 
 if __name__ == "__main__":

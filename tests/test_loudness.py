@@ -182,6 +182,24 @@ def test_invalid_inputs() -> None:
         loudness_zwicker(np.ones(1000), 0)
 
 
+def test_non_finite_inputs_rejected() -> None:
+    levels = np.full(28, 60.0)
+    levels[5] = np.nan
+    with pytest.raises(ValueError, match="finite"):
+        loudness_zwicker_from_spectrum(levels)
+    x = np.ones(1000)
+    x[3] = np.inf
+    with pytest.raises(ValueError, match="finite"):
+        loudness_zwicker(x, FS)
+
+
+def test_pathological_resampling_ratio_rejected() -> None:
+    """gcd(48000, 44101) = 1 would demand a 48000/44101 polyphase filter;
+    reject instead of hanging."""
+    with pytest.raises(ValueError, match="resampl"):
+        loudness_zwicker(np.ones(1000), 44101)
+
+
 def test_diffuse_field_differs() -> None:
     levels = np.full(28, 70.0)
     free = loudness_zwicker_from_spectrum(levels, field="free")

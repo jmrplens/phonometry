@@ -30,7 +30,7 @@ total.*
 ```python
 from phonometry import loudness_zwicker, loudness_zwicker_from_spectrum
 
-# Desde una señal calibrada (Pa): estacionaria o variable en el tiempo
+# Desde una grabación sin calibrar: calibration_factor convierte unidades digitales en Pa
 res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
 print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")
 

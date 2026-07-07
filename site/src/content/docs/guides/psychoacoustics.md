@@ -28,7 +28,7 @@ band (blue). The area under N'(z) is the total loudness.*
 ```python
 from phonometry import loudness_zwicker, loudness_zwicker_from_spectrum
 
-# From a calibrated signal (Pa): stationary or time-varying
+# From a raw recording: calibration_factor scales digital units to Pa
 res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
 print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")
 

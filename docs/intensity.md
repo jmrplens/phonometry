@@ -33,7 +33,7 @@ $$
 from phonometry import sound_intensity
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
-                      limits=[100, 5000])
+                      limits=[100, 2500])
 print(res.total_intensity_level, res.total_direction)      # LI [dB], ±1
 print(res.frequency, res.intensity_level)                  # per band
 ```
@@ -66,7 +66,7 @@ carries both:
 from phonometry import field_indicators, dynamic_capability_index
 
 fi = field_indicators(pressure_levels, normal_intensity)   # F2, F3, F4
-ld = dynamic_capability_index(delta_pi0=18.0)              # Ld = δpI0 − K
+ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
 ok = ld > fi.f2                                            # criterion 1
 ```
 

@@ -580,6 +580,8 @@ def loudness_zwicker_from_spectrum(
             f"'levels' must contain exactly {_N_BANDS} one-third-octave band "
             f"levels (25 Hz to 12.5 kHz), got shape {band_levels.shape}."
         )
+    if not np.all(np.isfinite(band_levels)):
+        raise ValueError("'levels' must contain only finite values.")
     core = _core_loudness_from_levels(band_levels[:, np.newaxis], diffuse)
     loudness, specific = _slopes_over_time(core)
     total = float(loudness[0])
@@ -647,6 +649,8 @@ def loudness_zwicker(
         )
     if pressure.size == 0:
         raise ValueError("Input signal 'x' cannot be empty.")
+    if not np.all(np.isfinite(pressure)):
+        raise ValueError("Input signal 'x' must contain only finite values.")
     pressure = pressure * calibration_factor
 
     if int(fs) != fs:
@@ -654,9 +658,14 @@ def loudness_zwicker(
     fs_int = int(fs)
     if fs_int != _FS_REF:
         gcd = math.gcd(_FS_REF, fs_int)
-        pressure = np.asarray(
-            signal.resample_poly(pressure, _FS_REF // gcd, fs_int // gcd)
-        )
+        up, down = _FS_REF // gcd, fs_int // gcd
+        if max(up, down) > 1000:
+            raise ValueError(
+                f"Sampling rate {fs_int} Hz needs an impractical resampling "
+                f"ratio ({up}/{down}) to reach 48000 Hz; resample the signal "
+                "to a standard rate first."
+            )
+        pressure = np.asarray(signal.resample_poly(pressure, up, down))
 
     levels = _third_octave_levels(pressure, stationary)
     core = _core_loudness_from_levels(levels, diffuse)

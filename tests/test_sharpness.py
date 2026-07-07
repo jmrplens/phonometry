@@ -78,10 +78,13 @@ def test_higher_frequency_is_sharper() -> None:
 
 
 def test_annex_b_variants() -> None:
+    """The Aures and von Bismarck scales anchor the same 1 kHz
+    critical-band reference at 1 acum (DIN 45692 Annex B); hold them to
+    the clause 6 tolerance (0.05 acum) on the clause 6 reference sound."""
     spec = loudness_zwicker(reference_sound(), FS, stationary=True).specific
     for method in ("aures", "bismarck"):
         s = sharpness_din_from_specific(spec, method=method)
-        assert 0.3 < s < 3.0
+        assert abs(s - 1.0) < 0.05
     with pytest.raises(ValueError, match="method"):
         sharpness_din_from_specific(spec, method="zwicker")
 

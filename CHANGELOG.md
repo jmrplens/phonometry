@@ -24,9 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   two-microphone p-p sound intensity per IEC 61043 (cross-spectral
   estimator, finite-difference bias correction validated against Table 3)
   with the ISO 9614-1 Annex A field indicators.
-
-### Added
-
 - `weighting_filter(..., curve="G")` — G frequency weighting for infrasound
   (ISO 7196:1995), verified against every Table 2 nominal response value.
 - `equal_loudness_contour()`, `loudness_level()`, `hearing_threshold()` —

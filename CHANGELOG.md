@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `loudness_zwicker()` / `loudness_zwicker_from_spectrum()` — Zwicker
+  loudness per ISO 532-1:2017 (stationary and time-varying), a clean-room
+  port of the normative reference program with the full Annex B validation
+  set in CI (25 test cases, per-sample tolerance bands).
+- `sharpness_din()` — sharpness in acum per DIN 45692:2009 with the Aures
+  and von Bismarck variants, verified against the Table A.2 targets.
+- `sti_from_impulse_response()`, `stipa()` and `stipa_signal()` — Speech
+  Transmission Index per IEC 60268-16 Ed. 5 (indirect and direct STIPA
+  methods, Ed. 5 male spectrum, Annex F ratings), verified against the
+  standard's weighting-pair and m-mapping vectors and the Schroeder
+  closed form.
+- `sound_intensity()`, `field_indicators()`, `dynamic_capability_index()` —
+  two-microphone p-p sound intensity per IEC 61043 (cross-spectral
+  estimator, finite-difference bias correction validated against Table 3)
+  with the ISO 9614-1 Annex A field indicators.
+
+### Added
+
 - `weighting_filter(..., curve="G")` — G frequency weighting for infrasound
   (ISO 7196:1995), verified against every Table 2 nominal response value.
 - `equal_loudness_contour()`, `loudness_level()`, `hearing_threshold()` —

@@ -203,6 +203,10 @@ A TNR above $8 + 8.33\log_{10}(1000/f_t)$ dB (8 dB from 1 kHz up) classifies
 the tone as *prominent*; the PR criterion is $9 + 10\log_{10}(1000/f_t)$ dB.
 Low frequencies get higher thresholds because wider relative bands mask more.
 
+ECMA-74 (which delegates its tone assessments to ECMA-418-1) also fixes where to measure around a device:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions.svg" alt="ECMA-74 emission measurement positions: seated operator microphone at 0.25 m and 1.20 m, and the four bystander positions at 1 m" width="92%"></picture>
+
 Proximate secondary tones in the same critical band are combined per
 clause 11.6; for harmonic complexes assess each component (`tone_freq=`).
 Both methods work on Hann-windowed, RMS-averaged spectra and need no absolute
@@ -249,6 +253,10 @@ r = composite_rating_level([(63.2, 12, 0.0),    # day
 | `lden(lday, levening, lnight, hours=(12, 4, 8))` | period LAeq values [dB]; `hours` must sum to 24 | +5 dB evening, +10 dB night (3.6.4) |
 | `ldn(lday, lnight, hours=(15, 9))` | | +10 dB night (3.6.5) |
 | `composite_rating_level(periods)` | iterable of `(level_db, hours, adjustment_db)`; hours positive, finite and summing to 24 | General Formulae (5)-(6); adjustments per Table A.1 |
+
+Where you put the microphone changes the number: ISO 1996-2 fixes the receiver positions and their façade corrections:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement.svg" alt="Environmental noise measurement positions per ISO 1996-2: free field, 2 m from the facade and flush-mounted, with their corrections" width="92%"></picture>
 
 Combine with `laeq()` per time period to go from recordings to Lden, and with
 `tone_to_noise_ratio()` / `prominence_ratio()` to justify tonal adjustments.

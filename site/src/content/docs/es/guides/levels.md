@@ -12,11 +12,11 @@ El nivel continuo equivalente integra la presión al cuadrado durante el tiempo
 de medición:
 
 $$
-L_{eq} = 10\log_{10}\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\,dt\right) \text{ dB}, \qquad p_0 = 20\ \mu\text{Pa}
+L_{eq} = 10\log_{10}\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\ dt\right) \text{ dB}, \qquad p_0 = 20\ \mu\text{Pa}
 $$
 
 y $L_{Aeq}$ es la misma integral tras ponderar A la señal. $L_N$ es el nivel
-superado el $N\,\%$ del tiempo — el percentil $(100-N)$ de la distribución del
+superado el $N\ \%$ del tiempo — el percentil $(100-N)$ de la distribución del
 nivel con ponderación temporal.
 
 ```python
@@ -138,8 +138,8 @@ integral temporal de la presión ponderada A al cuadrado — y el **nivel
 normalizado a 8 h** equivalente:
 
 $$
-E = \int_0^T p_A^2(t)\,dt \quad [\text{Pa}^2\text{h}], \qquad
-L_{EX,8h} = 10\log_{10}\frac{E}{8\,\text{h} \cdot p_0^2}
+E = \int_0^T p_A^2(t)\ dt \quad [\text{Pa}^2\text{h}], \qquad
+L_{EX,8h} = 10\log_{10}\frac{E}{8\ \text{h} \cdot p_0^2}
 $$
 
 El ancla que conviene memorizar: **3,2 Pa²h ⇔ exactamente 90 dB durante 8 h**
@@ -198,7 +198,7 @@ print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 ```
 
 Los métodos se apoyan en la **banda crítica** — el ancho de banda de análisis
-del oído, $\Delta f_c = 25 + 75\,[1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz a
+del oído, $\Delta f_c = 25 + 75\ [1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz a
 1 kHz): a un tono solo lo enmascara el ruido que hay *dentro* de su banda
 crítica, así que ambos ratios comparan el tono exactamente con ese ruido, no
 con todo el espectro.

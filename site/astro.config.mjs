@@ -278,6 +278,8 @@ export default defineConfig({
             'guides/weighting',
             'guides/time-weighting',
             'guides/levels',
+            'guides/psychoacoustics',
+            'guides/intensity',
             'guides/calibration',
             'guides/block-processing',
             'guides/multichannel',

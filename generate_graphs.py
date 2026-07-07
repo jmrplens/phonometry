@@ -142,6 +142,26 @@ _ES_EXACT = {
     "Tone-to-Noise Ratio (ECMA-418-1, clause 11)":
         "Relaci\u00f3n tono-ruido (ECMA-418-1, apartado 11)",
     "Bin power [dB]": "Potencia por bin [dB]",
+    "Specific Loudness Pattern (ISO 532-1 Zwicker)":
+        "Patr\u00f3n de sonoridad espec\u00edfica (Zwicker, ISO 532-1)",
+    "Critical-band rate z [Bark]": "Raz\u00f3n de banda cr\u00edtica z [Bark]",
+    "Specific loudness N' [sone/Bark]":
+        "Sonoridad espec\u00edfica N' [sonios/Bark]",
+    "Shaded area = total loudness N": "\u00c1rea sombreada = sonoridad total N",
+    "STI vs Reverberation Time (IEC 60268-16)":
+        "STI frente al tiempo de reverberaci\u00f3n (IEC 60268-16)",
+    "Reverberation time T60 [s]": "Tiempo de reverberaci\u00f3n T60 [s]",
+    "Analytic Schroeder MTF (closed form)":
+        "MTF de Schroeder anal\u00edtica (forma cerrada)",
+    "Measured (sti_from_impulse_response)":
+        "Medido (sti_from_impulse_response)",
+    "Annex F rating": "Calificaci\u00f3n del Anexo F",
+    "Sound Intensity with a p-p Probe (IEC 61043)":
+        "Intensidad sonora con sonda p-p (IEC 61043)",
+    "Plane wave: Lp \u2248 LI": "Onda plana: Lp \u2248 LI",
+    "Standing wave: reactive field": "Onda estacionaria: campo reactivo",
+    "Pressure level Lp": "Nivel de presi\u00f3n Lp",
+    "Intensity level LI": "Nivel de intensidad LI",
 }
 
 _ES_PATTERNS = [
@@ -155,6 +175,12 @@ _ES_PATTERNS = [
      "Precisi\u00f3n en alta frecuencia de la ponderaci\u00f3n A @ fs=\\1 kHz"),
     (r"^Impulse Response \((.+) Hz Band\) - Transient/Stability Comparison$",
      "Respuesta al impulso (banda de \\1 Hz) \u2014 transitorio y estabilidad"),
+    (r"^1 kHz narrowband - N = (.+) sone$",
+     "Banda estrecha de 1 kHz - N = \\1 sonios"),
+    (r"^Flat broadband 60 dB - N = (.+) sone$",
+     "Banda ancha plana a 60 dB - N = \\1 sonios"),
+    (r"^Pressure-intensity index\n\u03b4pI = (.+) dB$",
+     "\u00cdndice presi\u00f3n-intensidad\\n\u03b4pI = \\1 dB"),
 ]
 
 
@@ -1377,6 +1403,180 @@ def generate_tonality_spectrum(output_dir: str) -> None:
     plt.close()
 
 
+def generate_loudness_pattern(output_dir: str) -> None:
+    """Specific loudness N'(z) of a narrowband vs a broadband sound."""
+    print("Generating loudness_pattern.png...")
+    from phonometry import loudness_zwicker_from_spectrum
+
+    # 28 one-third-octave band levels, 25 Hz .. 12.5 kHz (ISO 532-1
+    # clause 5.3). Index 16 is the 1 kHz band.
+    narrow_levels = np.full(28, -60.0)
+    narrow_levels[16] = 60.0
+    narrow = loudness_zwicker_from_spectrum(narrow_levels)
+    flat = loudness_zwicker_from_spectrum(np.full(28, 60.0))
+
+    z = np.arange(1, 241) * 0.1  # 0.1-Bark steps up to 24 Bark
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    ax.fill_between(z, flat.specific, color=COLOR_SECONDARY, alpha=0.25)
+    ax.plot(z, flat.specific, color=COLOR_SECONDARY, linewidth=1.6,
+            label=f"Flat broadband 60 dB - N = {flat.loudness:.1f} sone")
+    ax.fill_between(z, narrow.specific, color=COLOR_PRIMARY, alpha=0.35)
+    ax.plot(z, narrow.specific, color=COLOR_PRIMARY, linewidth=1.6,
+            label=f"1 kHz narrowband - N = {narrow.loudness:.1f} sone")
+
+    peak_z = float(z[np.argmax(narrow.specific)])
+    ax.annotate(
+        "Shaded area = total loudness N",
+        xy=(peak_z + 0.6, float(narrow.specific.max()) * 0.45),
+        xytext=(12.5, float(narrow.specific.max()) * 0.75),
+        fontsize=10, arrowprops={"arrowstyle": "->", "lw": 0.9},
+    )
+    ax.set_title("Specific Loudness Pattern (ISO 532-1 Zwicker)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Critical-band rate z [Bark]")
+    ax.set_ylabel("Specific loudness N' [sone/Bark]")
+    ax.set_xlim(0, 24)
+    # Headroom above the tallest pattern so the legend stays clear of it.
+    ax.set_ylim(0, float(flat.specific.max()) * 1.28)
+    ax.set_xticks([0, 4, 8, 12, 16, 20, 24])
+    ax.legend(loc="upper right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "loudness_pattern.png"))
+    plt.close()
+
+
+def generate_sti_curve(output_dir: str) -> None:
+    """STI vs reverberation time: pipeline points vs the analytic MTF."""
+    print("Generating sti_vs_t60.png...")
+    from phonometry import sti_from_impulse_response
+
+    fs = 48000
+    t60_points = [0.3, 0.5, 0.8, 1.2, 2.0, 3.0, 5.0]
+
+    # The 14 full-STI modulation frequencies and the male alpha/beta
+    # factors of IEC 60268-16 Ed.5 Table A.1 (phonometry.sti keeps them
+    # private, so they are restated here for the analytic reference).
+    mod_freqs = np.array([0.63, 0.80, 1.00, 1.25, 1.60, 2.00, 2.50,
+                          3.15, 4.00, 5.00, 6.30, 8.00, 10.0, 12.5])
+    alpha = np.array([0.085, 0.127, 0.230, 0.233, 0.309, 0.224, 0.173])
+    beta = np.array([0.085, 0.078, 0.065, 0.011, 0.047, 0.095])
+
+    def analytic_sti(t60: float) -> float:
+        # Schroeder MTF of an exponential decay: m(F) = 1/sqrt(1+(2*pi*F*T/13.8)^2)
+        m = 1.0 / np.sqrt(1.0 + (2 * np.pi * mod_freqs * t60 / 13.8) ** 2)
+        snr_eff = np.clip(10 * np.log10(m / (1 - m)), -15.0, 15.0)
+        mti = np.full(7, ((snr_eff + 15.0) / 30.0).mean())
+        return float(np.dot(alpha, mti) - np.dot(beta, np.sqrt(mti[:-1] * mti[1:])))
+
+    rng = np.random.default_rng(2026)
+    measured = []
+    for t60 in t60_points:
+        t = np.arange(int(2 * t60 * fs)) / fs
+        ir = rng.standard_normal(t.size) * np.exp(-6.9077 * t / t60)
+        measured.append(sti_from_impulse_response(ir, fs).sti)
+
+    t_dense = np.logspace(np.log10(0.25), np.log10(6.0), 200)
+    sti_dense = [analytic_sti(float(t)) for t in t_dense]
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    # Annex F qualification bands (informative): edges 0.36 .. 0.76.
+    edges = [0.36, 0.40, 0.44, 0.48, 0.52, 0.56, 0.60, 0.64, 0.68, 0.72, 0.76]
+    letters = ["U", "J", "I", "H", "G", "F", "E", "D", "C", "B", "A", "A+"]
+    y_min, y_max = 0.15, 0.95
+    bounds = [y_min] + edges + [y_max]
+    cmap = plt.get_cmap("RdYlGn")
+    for i, letter in enumerate(letters):
+        lo, hi = bounds[i], bounds[i + 1]
+        ax.axhspan(lo, hi, color=cmap(i / (len(letters) - 1)), alpha=0.13, lw=0)
+        ax.text(0.985, (lo + hi) / 2, letter, transform=ax.get_yaxis_transform(),
+                ha="right", va="center", fontsize=8, color=COLOR_FG, alpha=0.7)
+    ax.text(0.92, 0.985, "Annex F rating", transform=ax.transAxes,
+            ha="right", va="top", fontsize=8, color=COLOR_FG, alpha=0.7)
+
+    ax.plot(t_dense, sti_dense, color=COLOR_PRIMARY, linestyle="--",
+            linewidth=1.5, label="Analytic Schroeder MTF (closed form)")
+    ax.plot(t60_points, measured, "o", color=COLOR_SECONDARY, markersize=7,
+            markerfacecolor="white", markeredgewidth=1.6,
+            label="Measured (sti_from_impulse_response)")
+
+    ax.set_xscale("log")
+    ax.set_title("STI vs Reverberation Time (IEC 60268-16)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Reverberation time T60 [s]")
+    ax.set_ylabel("STI")
+    ax.set_xlim(0.25, 6.0)
+    ax.set_ylim(y_min, y_max)
+    from matplotlib.ticker import NullFormatter
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xticks(t60_points)
+    ax.set_xticklabels(["0.3", "0.5", "0.8", "1.2", "2", "3", "5"])
+    ax.legend(loc="lower left", fontsize=9)
+    plt.savefig(themed_path(output_dir, "sti_vs_t60.png"))
+    plt.close()
+
+
+def generate_intensity_demo(output_dir: str) -> None:
+    """p-p intensity: plane progressive wave vs reactive standing wave."""
+    print("Generating intensity_demo.png...")
+    from phonometry import sound_intensity
+
+    fs = 48000
+    dr, c = 0.012, 343.0
+    duration = 4.0
+    n = int(fs * duration)
+
+    # Broadband noise, band-limited and scaled to ~70 dB SPL, in pascals.
+    rng = np.random.default_rng(2026)
+    noise = rng.standard_normal(n)
+    sos = scipy_signal.butter(4, [80.0, 6000.0], btype="bandpass", fs=fs, output="sos")
+    noise = scipy_signal.sosfilt(sos, noise)
+    noise *= 0.063 / np.std(noise)
+
+    spectrum = np.fft.rfft(noise)
+    freqs = np.fft.rfftfreq(n, 1 / fs)
+    k = 2 * np.pi * freqs / c
+
+    # Plane progressive wave: microphone 2 sees the wave dr/c later.
+    p1_plane = noise
+    p2_plane = np.fft.irfft(spectrum * np.exp(-2j * np.pi * freqs * dr / c), n)
+    plane = sound_intensity(p1_plane, p2_plane, fs, dr, fraction=3, limits=[100.0, 5000.0])
+
+    # Standing wave: equal counter-propagating waves, probe centred at x0.
+    x0 = 0.30
+    def standing_pressure(pos: float) -> np.ndarray:
+        return np.fft.irfft(spectrum * 2.0 * np.cos(k * pos), n)
+    standing = sound_intensity(
+        standing_pressure(x0 - dr / 2), standing_pressure(x0 + dr / 2),
+        fs, dr, fraction=3, limits=[100.0, 5000.0],
+    )
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
+    for ax, res, title in [
+        (ax1, plane, "Plane wave: Lp ≈ LI"),
+        (ax2, standing, "Standing wave: reactive field"),
+    ]:
+        ax.semilogx(res.frequency, res.pressure_level, marker="o", markersize=5,
+                    color=COLOR_PRIMARY, linewidth=1.5, markerfacecolor="white",
+                    markeredgewidth=1.3, label="Pressure level Lp")
+        ax.semilogx(res.frequency, res.intensity_level, marker="s", markersize=5,
+                    color=COLOR_SECONDARY, linewidth=1.5, linestyle="--",
+                    markerfacecolor="white", markeredgewidth=1.3,
+                    label="Intensity level LI")
+        apply_axis_styling(ax, title, xlim=(90, 5600), ylim=(0, 85))
+        # The standard octave ticks extend past the band range: re-clamp.
+        ax.set_xlim(90, 5600)
+        dpi_db = round(float(res.total_pressure_intensity_index), 1) + 0.0
+        ax.text(0.05, 0.33, f"Pressure-intensity index\nδpI = {dpi_db:.1f} dB",
+                transform=ax.transAxes, fontsize=10, va="bottom", color=COLOR_FG)
+        ax.legend(loc="upper right", fontsize=9)
+    ax2.set_ylabel("")
+
+    fig.suptitle("Sound Intensity with a p-p Probe (IEC 61043)", fontweight="bold")
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "intensity_demo.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -1406,6 +1606,11 @@ def generate_all(img_dir: str) -> None:
     generate_sel_concept(img_dir)
     generate_lden_profile(img_dir)
     generate_tonality_spectrum(img_dir)
+
+    # Psychoacoustics / intensity plots (loudness, STI, p-p intensity)
+    generate_loudness_pattern(img_dir)
+    generate_sti_curve(img_dir)
+    generate_intensity_demo(img_dir)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=82.0.1", "wheel"]
+requires = ["setuptools>=83.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -23,14 +23,14 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "numpy>=2.4.4",
+    "numpy>=2.5.1",
     "scipy>=1.17.1",
 ]
 
 [project.optional-dependencies]
-perf = ["numba>=0.65.1"]
+perf = ["numba>=0.66.0"]
 plot = ["matplotlib>=3.10.9"]
-full = ["numba>=0.65.1", "matplotlib>=3.10.9"]
+full = ["numba>=0.66.0", "matplotlib>=3.10.9"]
 
 [project.urls]
 "Homepage" = "https://github.com/jmrplens/phonometry"

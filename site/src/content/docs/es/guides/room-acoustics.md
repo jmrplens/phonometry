@@ -302,10 +302,12 @@ w = weighted_rating(R)
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
 ```
 
-Para alimentar `weighted_rating`, los espectros `t2` y de nivel deben ser
-las 16 bandas de tercio de octava de 100 Hz a 3150 Hz — por ejemplo
-`room_parameters(ir, fs, limits=(100, 3150), fraction=3)` — de modo que cada
-banda quede alineada índice a índice con la curva de referencia ISO 717-1.
+Calcula `l1`, `l2` y `t2` en las mismas 16 bandas de tercio de octava de
+100 Hz a 3150 Hz — obtén `t2` de
+`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t30`, por ejemplo — y
+pásalos a `airborne_insulation`. Alimenta el espectro `dnt` (o `r_prime`) de esa
+función a `weighted_rating`, de modo que cada banda quede alineada índice a
+índice con la curva de referencia ISO 717-1.
 
 ### Parámetros de `airborne_insulation()`
 

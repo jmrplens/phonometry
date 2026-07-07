@@ -121,6 +121,22 @@ def test_too_few_in_range_gives_nan_decay() -> None:
     assert res.rd == pytest.approx(5.0, abs=1e-9)
 
 
+def test_exactly_one_in_range_gives_nan_decay() -> None:
+    """Exactly one 2-16 m position -> D2,S / Lp,A,S,4m NaN (need >=2 to fit).
+
+    A single in-range point cannot define a decay slope, so the module
+    degrades gracefully to NaN (as documented) rather than crashing, while
+    the distance-based STI regression still resolves rD."""
+    r = np.array([0.5, 1.0, 4.0, 18.0])  # only 4 m lies in [2, 16] m
+    lp = np.array([60.0, 58.0, 50.0, 40.0])
+    sti = 0.6 - 0.02 * r
+    res = open_plan_metrics(r, lp, sti)
+    assert math.isnan(res.d2s)
+    assert math.isnan(res.lp_as_4m)
+    # STI regression uses all positions: 0.5 = 0.6 - 0.02 r -> r = 5 m.
+    assert res.rd == pytest.approx(5.0, abs=1e-9)
+
+
 def test_nan_in_positions_raises() -> None:
     """A NaN position must raise ValueError, not a raw LinAlgError."""
     r = np.array([2.0, 4.0, np.nan, 16.0])

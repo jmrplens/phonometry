@@ -159,7 +159,10 @@ def inverse_filter(
     frequency``), which whitens the ESS's pink (-3 dB/octave) spectrum so
     that convolving the sweep with its inverse yields an impulse
     (ISO 18233:2006, B.5, Figure B.2; Farina 2000, Bibliography [14]). The
-    filter is scaled so that ``sweep * inverse`` has unit peak.
+    filter is scaled to unit in-band magnitude: it is normalised by the
+    median in-band magnitude of the compressed pulse ``sweep * inverse`` so
+    that the deconvolution reproduces a system's true in-band level, matching
+    the spectral-division convention (rather than a unit pulse peak).
 
     :param fs: Sampling frequency in Hz.
     :param f1: Sweep start frequency in Hz (same value used for the sweep).
@@ -189,8 +192,14 @@ def inverse_filter(
     comp = signal.fftconvolve(sweep, inv)
     freqs = np.fft.rfftfreq(comp.size, d=1.0 / fs)
     band = (freqs >= f1) & (freqs <= f2)
+    if not np.any(band):
+        raise ValueError(
+            "no frequency bin falls within the sweep band [f1, f2]; the "
+            "sweep is too short for this frequency resolution — increase "
+            "'seconds' or widen the (f1, f2) range."
+        )
     gain = float(np.median(np.abs(np.fft.rfft(comp)[band])))
-    if gain != 0.0:
+    if gain > 0.0:
         inv = inv / gain
     return inv
 
@@ -243,6 +252,10 @@ def impulse_response(
     """
     rec = _typesignal(recorded)
     ref = _typesignal(reference)
+    if rec.ndim != 1 or ref.ndim != 1:
+        raise ValueError("'recorded' and 'reference' must be one-dimensional.")
+    if rec.size == 0 or ref.size == 0:
+        raise ValueError("'recorded' and 'reference' must be non-empty.")
     out_len = length if length is not None else rec.size
     n = rec.size + ref.size - 1
 
@@ -330,6 +343,10 @@ def mls_impulse_response(
     """
     rec = _typesignal(recorded)
     seq = _typesignal(mls)
+    if rec.ndim != 1 or seq.ndim != 1:
+        raise ValueError("'recorded' and 'mls' must be one-dimensional.")
+    if rec.size == 0 or seq.size == 0:
+        raise ValueError("'recorded' and 'mls' must be non-empty.")
     period = seq.size
     if rec.size == 0 or rec.size % period != 0:
         raise ValueError(

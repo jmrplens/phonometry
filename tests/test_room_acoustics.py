@@ -19,6 +19,8 @@ Tolerances are chosen far below the ISO 3382-1 Table A.1 JNDs
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 import pytest
 
@@ -250,3 +252,24 @@ def test_rejects_bad_input() -> None:
         room_parameters(exponential_ir(1.0, 1.0), 0)  # bad fs
     with pytest.raises(ValueError):
         decay_curve(np.zeros(100), FS)  # silent
+
+
+def test_constant_noise_no_decay_is_finite_and_invalid() -> None:
+    """A near-constant-noise 'IR' with no decay must not overflow.
+
+    A barely-negative fitted slope (e.g. -1e-16 dB/s) would otherwise make
+    the tail-compensation terms overflow to inf; the -1e-7 dB/s cutoff in
+    _truncation forces a graceful no-truncation return with invalid decays.
+    """
+    rng = np.random.default_rng(0)
+    ir = rng.standard_normal(FS)  # stationary noise, no decay envelope
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        res = room_parameters(ir, FS, limits=None)
+    # No decay is measurable -> the T-parameters are NaN and flagged invalid.
+    assert not bool(res.edt_valid[0])
+    assert not bool(res.t20_valid[0])
+    assert not bool(res.t30_valid[0])
+    # Nothing overflowed to +/-inf (energy metrics stay finite).
+    for arr in (res.edt, res.t20, res.t30, res.c50, res.c80, res.d50, res.ts):
+        assert not np.any(np.isinf(arr))

@@ -160,7 +160,13 @@ def _truncation(
     if int(mask.sum()) < 2:
         return no_truncation
     slope, intercept = np.polyfit(t_smooth[mask], level[mask], 1)
-    if slope >= 0.0:
+    # A non-negative slope means no decay; a barely-negative slope (e.g.
+    # -1e-16 dB/s from fitting near-constant noise) would make the decay
+    # constant alpha underflow toward 0 and the tail terms p2_t1/alpha and
+    # 1/alpha**2 overflow to inf. A slope of -1e-7 dB/s implies a T60 of
+    # ~6e8 s, which is physically meaningless, so treat anything shallower
+    # as no decay.
+    if slope >= -1e-7:
         return no_truncation
     t1 = (noise_db - intercept) / slope
     i1 = min(max(int(round(t1 * fs)), 2), n)

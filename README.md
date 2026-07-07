@@ -30,7 +30,7 @@ Acoustic measurement toolkit for Python: fractional octave-band filter banks, fr
 - 🗣️ Speech Transmission Index: STI and STIPA per IEC 60268-16 Ed. 5, with signal generator
 - 🎯 Tone prominence (TNR/PR, ECMA-418-1), environmental Lden/Ldn (ISO 1996-1), IEC 61252 noise dose
 - ↗️ Two-microphone sound intensity (IEC 61043) with ISO 9614-1 field indicators
-- 🏛️ Room & building acoustics: swept-sine/MLS impulse responses (ISO 18233), EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), open-plan speech metrics (ISO 3382-3), field insulation and Rw/DnT,w with C/Ctr (ISO 16283-1, ISO 717-1)
+- 🏛️ Room & building acoustics: swept-sine/MLS impulse responses (ISO 18233), EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), open-plan speech metrics (ISO 3382-3), field insulation and R′w/DnT,w with C/Ctr (ISO 16283-1, ISO 717-1)
 - 📏 Physical SPL calibration with IEC 60942:2017 stability validation, and dBFS modes
 - ⚡ Vectorized multichannel processing and stateful block (real-time) workflows
 

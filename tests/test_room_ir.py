@@ -305,3 +305,41 @@ def test_invalid_arguments() -> None:
         impulse_response(np.zeros(10), np.zeros(10), FS, method="farina")  # no f_range
     with pytest.raises(ValueError):
         mls_impulse_response(np.zeros(10), mls_signal(4))  # not a multiple of L
+
+
+def test_inverse_filter_empty_band_raises() -> None:
+    # A very short sweep over a razor-thin band yields no in-band FFT bin:
+    # the median of an empty slice would be NaN, so this must raise instead.
+    with pytest.raises(ValueError):
+        inverse_filter(FS, 1000.0, 1000.5, 0.001)
+    # The error must propagate through the Farina deconvolution path too.
+    with pytest.raises(ValueError):
+        impulse_response(
+            np.zeros(48), np.zeros(48), FS,
+            method="farina", f_range=(1000.0, 1000.5),
+        )
+
+
+def test_impulse_response_rejects_bad_shapes() -> None:
+    good = np.zeros(10)
+    with pytest.raises(ValueError):
+        impulse_response(np.zeros((2, 5)), good, FS)  # 2-D recorded
+    with pytest.raises(ValueError):
+        impulse_response(good, np.zeros((2, 5)), FS)  # 2-D reference
+    with pytest.raises(ValueError):
+        impulse_response(np.zeros(0), good, FS)  # empty recorded
+    with pytest.raises(ValueError):
+        impulse_response(good, np.zeros(0), FS)  # empty reference
+
+
+def test_mls_impulse_response_rejects_bad_shapes() -> None:
+    seq = mls_signal(4)
+    good = np.tile(seq, 2)
+    with pytest.raises(ValueError):
+        mls_impulse_response(np.zeros((2, seq.size)), seq)  # 2-D recorded
+    with pytest.raises(ValueError):
+        mls_impulse_response(good, np.zeros((2, seq.size)))  # 2-D mls
+    with pytest.raises(ValueError):
+        mls_impulse_response(np.zeros(0), seq)  # empty recorded
+    with pytest.raises(ValueError):
+        mls_impulse_response(good, np.zeros(0))  # empty mls

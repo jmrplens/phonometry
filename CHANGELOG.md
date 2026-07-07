@@ -53,14 +53,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   combination and the low-frequency truncated band.
 - `lden()`, `ldn()`, `composite_rating_level()` — environmental noise
   descriptors per ISO 1996-1:2016 (3.6.4/3.6.5 and clause 6.5).
+- `calculate_sensitivity(..., narrowband=True)` — opt-in coherent
+  single-frequency (Goertzel) tone estimator that locks to the calibrator
+  tone near `frequency` and rejects broadband hum/noise in the reference
+  take, which otherwise inflates the RMS and biases the sensitivity by
+  `-10*lg(1 + 1/SNR)` (about -0.42 dB at 10 dB SNR). The default keeps the
+  legacy broadband-RMS behaviour.
+- `decay_curve(..., zero_phase=...)` and `room_parameters(..., zero_phase=...)`
+  — optional forward-backward (time-reversed) octave filtering permitted by
+  ISO 3382-2:2008 Clause 7.3 NOTE (relaxing B*T > 16 to B*T > 4). It removes
+  the octave filter's group delay before the backward integration, roughly
+  halving the 125 Hz short-decay T30 bias. Default off (causal).
+- `sound_intensity(..., bias_correct=True)` — optional per-bin
+  finite-difference correction `(k*dr)/sin(k*dr)` (IEC 61043:1994, 7.3)
+  applied to the band and broadband intensity totals so they no longer
+  under-read toward `max_valid_frequency`. Default off (legacy totals).
+- **STIPA (IEC 60268-16):** `stipa()` now emits a `UserWarning` for
+  recordings shorter than the recommended 15 s, where the recovered
+  modulation depths (and STI) are biased low.
+- `tone_to_noise_ratio()` / `prominence_ratio()` (ECMA-418-1) now warn when
+  the FFT resolution is too coarse to resolve the tone band (fewer than
+  ~3 bins across the 15 % tone half-width), which biases TNR/PR at low
+  frequencies.
+- `mls_impulse_response()` (ISO 18233) now warns when the recovered impulse
+  response still carries energy at the end of the MLS period, the symptom of
+  an impulse response longer than one period aliasing circularly (choose a
+  higher MLS order).
 
 ### Changed
 
+- `lc_peak()` now polyphase-oversamples the C-weighted signal (new
+  `oversample` parameter, default 8) before peak detection, recovering the
+  true inter-sample peak. Sustained high-frequency tones previously
+  under-read by up to ~1.15 dB at fs = 48 kHz (e.g. an 8 kHz tone, 6.0
+  samples/cycle); LCpeak now tracks the analytic peak within about +/-0.5 dB.
+  Reported LCpeak values shift upward for HF-rich signals; pass
+  `oversample=1` for the legacy on-grid behaviour.
+- `OctaveFilterBank` / `octavefilter` default `attenuation` raised from 60 to
+  72 dB. scipy's `cheby2` pins the equiripple deep-stopband floor at exactly
+  `attenuation`, so the former 60 dB default sat 10 dB inside the IEC
+  61260-1:2014 class 1 deep-stopband limit; 72 dB makes the default cheby2
+  bank class 1 (same +0.400 dB passband margin as `butter`). Numerical
+  outputs change for cheby2 users — and for elliptic (`ellip`) banks, which
+  consume `attenuation` as their stopband attenuation `rs` — who relied on
+  the previous default.
+- Weighting-filter `high_accuracy` internal oversample target raised from
+  96 to 144 kHz, so fs = 48 kHz now oversamples x3 (was x2). This halves the
+  high-frequency residual vs the analytic A/C curves (48 kHz: -1.11 -> -0.44
+  dB @16k, -2.10 -> -0.85 dB @20k) and removes the 48k-worse-than-44.1k
+  asymmetry. High-accuracy weighting outputs shift for all rates below
+  144 kHz (48/96/128 kHz included) — e.g. 96 kHz by +0.86 dB @16k / +1.63 dB
+  @20k — always toward the analytic curve.
 - Calibrator stability validation updated from IEC 60942:2003 to
   IEC 60942:2017 (Ed. 4): the deviations |max − mean| and |min − mean| are
   each compared against the limit, using the
   frequency-dependent Table 2 class 1 limits (0.07 dB in 160 Hz - 1.25 kHz);
   `calculate_sensitivity()` gains a `frequency` parameter.
+- `ln_levels()` now discards 5*tau (was 2*tau) of the time-weighting
+  integrator attack before computing the percentiles. At 2*tau the F
+  integrator is only 86 % settled, so the leading ramp dragged the low
+  percentiles down (~0.15 dB L10-L90 spread on a steady 2 s tone); 5*tau
+  cuts that ~12x and matches the skip already used by the calibration
+  stability check. Percentile values on short records shift slightly.
+
+### Fixed
+
+- **Sharpness (DIN 45692):** the informative Aures and von Bismarck variants
+  are now anchored to exactly 1.00 acum on the clause 6 reference sound via
+  per-variant normalization constants (previously 0.959 / 1.019 from a
+  shared hard-coded factor).
+- **Loudness (ISO 532-1):** N5/N10 percentiles are now computed on the
+  full-rate 2000 Hz weighted-loudness series instead of the 4x-decimated
+  500 Hz trace, removing an up-to-3% decimation-phase ambiguity. The
+  500 Hz `time`/`loudness_vs_time` output and Nmax are unchanged.
+- **Room acoustics (ISO 3382):** T20/T30 reverberation-time validity flags
+  now require 46 dB / 54 dB of dynamic range (was 35 dB / 45 dB) to
+  absorb the positive bias of the tail compensation and keep a flagged-valid
+  decay time within the 5% JND (ISO 3382-2 Table A.1).
+- **Impulse-response (ISO 18233):** `impulse_response(method="farina")` now
+  raises `ValueError` when handed a zero-padded reference sweep (which
+  silently produced a wrong inverse filter) instead of returning garbage;
+  pass the unpadded sweep or use `method="spectral"`.
 
 ## [3.0.0] - 2026-07-06
 

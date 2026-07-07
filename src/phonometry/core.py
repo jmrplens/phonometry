@@ -30,7 +30,7 @@ class OctaveFilterBank:
         limits: List[float] | None = None,
         filter_type: str = "butter",
         ripple: float = 0.1,
-        attenuation: float = 60.0,
+        attenuation: float = 72.0,
         show: bool = False,
         plot_file: str | None = None,
         calibration_factor: float = 1.0,
@@ -46,9 +46,18 @@ class OctaveFilterBank:
         :param fraction: Bandwidth fraction (e.g., 1 for octave, 3 for 1/3 octave).
         :param order: Filter order.
         :param limits: Frequency limits [f_min, f_max].
-        :param filter_type: Type of filter ('butter', 'cheby1', 'cheby2', 'ellip', 'bessel').
+        :param filter_type: Type of filter ('butter', 'cheby1', 'cheby2', 'ellip',
+            'bessel'). Only ``butter`` meets IEC 61260-1:2014 class 1 with the
+            default parameters (``cheby2`` also does once ``attenuation`` >= 70 dB,
+            see below); ``cheby1``/``ellip``/``bessel`` fail on passband ripple or
+            roll-off regardless of parameters.
         :param ripple: Passband ripple in dB.
-        :param attenuation: Stopband attenuation in dB.
+        :param attenuation: Stopband attenuation in dB. Default 72.0. For the
+            ``cheby2`` filter scipy pins the equiripple deep-stopband floor at
+            exactly this value, so it must be >= 70 dB for the bank to meet the
+            IEC 61260-1:2014 class 1 deep-stopband limit (Omega >= G^4). The
+            72 dB default clears class 1 with the same +0.400 dB passband
+            margin as ``butter``.
         :param show: If True, show the filter response plot.
         :param plot_file: Path to save the filter response plot.
         :param calibration_factor: Calibration factor for SPL calculation.
@@ -253,8 +262,15 @@ class OctaveFilterBank:
         :param calculate_level: If True, calculate SPL.
         :param nominal: If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats.
         :param zero_phase: If True, filter with ``sosfiltfilt`` (forward-backward):
-            no group delay, but the effective stopband attenuation doubles.
-            Offline analysis only; incompatible with stateful mode.
+            no group delay, but the effective stopband attenuation doubles and
+            the effective passband narrows. The narrowing lowers the measured
+            broadband band level by about 0.2 to 0.3 dB per band relative to
+            forward filtering (a pure in-band tone is unaffected, since it sits
+            where both passes are ~0 dB). Prefer forward filtering when the
+            absolute band SPL must match single-pass conventions; use zero-phase
+            when preserving the temporal envelope matters (e.g. reverberation
+            decay, ISO 3382-2 Clause 7.3). Offline analysis only; incompatible
+            with stateful mode.
         :return: A tuple containing (SPL_array, Frequencies_list) or (SPL_array, Frequencies_list, signals).
         """
         if zero_phase and self.stateful:

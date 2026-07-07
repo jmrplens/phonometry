@@ -53,7 +53,8 @@ _TINY_VALUE = 1e-12
 # Internal sampling rate of the reference algorithm (clause A.2).
 _FS_REF = 48000
 # Sampling rate of the one-third-octave level time series: one value
-# every 2 ms (clause 6.2, constant SR_LEVEL).
+# every 0.5 ms (SR_LEVEL = 2000 Hz; clause 6.2). The 2 ms / 500 Hz spacing
+# applies only to the final loudness-vs-time output (_SR_LOUDNESS).
 _SR_LEVEL = 2000
 # Output sampling rate of the total loudness vs. time (clause 6.5).
 _SR_LOUDNESS = 500
@@ -140,11 +141,12 @@ def _third_octave_levels(x: np.ndarray, stationary: bool) -> np.ndarray:
     clause A.2.  For the stationary method one level per band is returned
     (mean square over the whole signal); for the time-varying method the
     squared output is smoothed by three cascaded first-order low-passes
-    with tau = 2/(3*fc) (fc capped at 1 kHz) and sampled every 2 ms.
+    with tau = 2/(3*fc) (fc capped at 1 kHz) and sampled every 0.5 ms
+    (SR_LEVEL = 2000 Hz).
 
     :param x: Sound pressure signal in Pa at 48 kHz.
     :param stationary: Select the stationary or the time-varying method.
-    :return: Levels in dB, shape (28, 1) or (28, num_2ms_steps).
+    :return: Levels in dB, shape (28, 1) or (28, num_level_steps) at 2000 Hz.
     """
     num_samples = x.size
     if stationary:
@@ -336,8 +338,8 @@ def _nl_lp_step(
 def _nonlinear_decay(core: np.ndarray, sample_rate: float) -> None:
     """Nonlinear temporal decay of the core loudness (clause 6.3).
 
-    Processes each critical band independently.  Between consecutive 2 ms
-    samples the input is linearly interpolated and the state machine is
+    Processes each critical band independently.  Between consecutive 0.5 ms
+    core-loudness samples the input is linearly interpolated and the state machine is
     advanced ``_NL_ITER`` times (virtual upsampling) for precision, as in
     the reference implementation.  Modifies ``core`` in place.
     """
@@ -607,10 +609,11 @@ def loudness_zwicker(
     A.1/A.2), squared and smoothed.  With ``stationary=True`` the method
     for stationary sounds (clause 5) is applied to the per-band mean
     square of the whole signal.  Otherwise the method for time-varying
-    sounds (clause 6) is used: core loudness every 2 ms, nonlinear
+    sounds (clause 6) is used: core loudness every 0.5 ms, nonlinear
     temporal decay, specific-loudness slopes, temporal weighting of the
-    total loudness and the percentile values N5/N10 from the 500 Hz
-    loudness-vs-time trace.
+    total loudness and the percentile values N5/N10 from the full-rate
+    (2000 Hz) weighted loudness series, while the public 500 Hz
+    loudness-vs-time trace is left unchanged.
 
     Input scaling follows the reference implementation's WAV convention:
     ``x * calibration_factor`` must be the instantaneous sound pressure in
@@ -684,16 +687,23 @@ def loudness_zwicker(
     loudness = _temporal_weighting(loudness, _SR_LEVEL)
 
     # Loudness-vs-time output at 500 Hz (clause 6.5): plain decimation of
-    # the 2 ms series, as in the reference main program.
+    # the 0.5 ms (2000 Hz) series, as in the reference main program. This decimated
+    # trace remains the public ``time``/``loudness_vs_time`` contract.
     dec_factor = _SR_LEVEL // _SR_LOUDNESS
     num_out = loudness.size // dec_factor
     loudness_out = loudness[: num_out * dec_factor : dec_factor].copy()
 
+    # N5/N10 percentiles are taken on the FULL-rate 2000 Hz weighted series
+    # rather than the 4x-decimated 500 Hz trace: decimation keeps only one
+    # of four phases and discards 75 % of the samples, giving up to ~3 %
+    # phase-dependent spread in N5 (Annex B TS 10). The full-rate percentile
+    # is phase-unambiguous and lies inside that spread. Nmax stays tied to
+    # the reported 500 Hz trace (so it matches the reported pattern).
     n_max = float(np.max(loudness_out, initial=0.0))
-    n5 = _percentile(loudness_out, 5)
-    n10 = _percentile(loudness_out, 10)
+    n5 = _percentile(loudness, 5)
+    n10 = _percentile(loudness, 10)
     # The reported pattern must correspond to the reported maximum: pick the
-    # same decimated instant that produced n_max, mapped back to the 2 ms axis.
+    # same decimated instant that produced n_max, mapped back to the 0.5 ms axis.
     idx_max = int(np.argmax(loudness_out)) * dec_factor
     specific_at_max = specific[:, idx_max].copy()
     time = np.arange(num_out) / _SR_LOUDNESS

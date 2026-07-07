@@ -24,7 +24,6 @@ _ES_EXACT = {
     "Level [dB]": "Nivel [dB]",
     "Time [s]": "Tiempo [s]",
     "Amplitude": "Amplitud",
-    "Amplitude [dB]": "Amplitud [dB]",
     "Error [dB]": "Error [dB]",
     "Group delay [ms]": "Retardo de grupo [ms]",
     "Level re steady state [dB]": "Nivel re estado estacionario [dB]",
@@ -32,7 +31,6 @@ _ES_EXACT = {
     "Normalized frequency  f / fm": "Frecuencia normalizada  f / fm",
     "Relative attenuation \u0394A [dB]": "Atenuaci\u00f3n relativa \u0394A [dB]",
     "Sound pressure level [dB re 20 \u00b5Pa]": "Nivel de presi\u00f3n sonora [dB re 20 \u00b5Pa]",
-    "1/1 Octave Band Analysis": "An\u00e1lisis en bandas de octava 1/1",
     "1/3 Octave Band Analysis": "An\u00e1lisis en bandas de octava 1/3",
     "1/3 Octave Spectrogram (Fast windows, 50% overlap)":
         "Espectrograma 1/3 de octava (ventanas Fast, 50 % de solape)",
@@ -62,7 +60,6 @@ _ES_EXACT = {
     "Fast level $L_p(t)$": "Nivel Fast $L_p(t)$",
     "Filter Architecture Comparison (Order 6, 1kHz Band)":
         "Comparativa de arquitecturas de filtro (orden 6, banda de 1 kHz)",
-    "Filter Bank Frequency Response": "Respuesta en frecuencia del banco de filtros",
     "Forbidden for class 1 (too little attenuation)":
         "Prohibido para clase 1 (atenuaci\u00f3n insuficiente)",
     "Forbidden for class 1 (too much attenuation)":
@@ -178,6 +175,19 @@ _ES_EXACT = {
     "Shifted reference curve (ISO 717-1)":
         "Curva de referencia desplazada (ISO 717-1)",
     "Unfavourable deviations": "Desviaciones desfavorables",
+    "Sharpness Weighting g(z) (DIN 45692)":
+        "Ponderación de nitidez g(z) (DIN 45692)",
+    "Weighting g(z)": "Ponderación g(z)",
+    "DIN 45692 g(z)": "g(z) DIN 45692",
+    "von Bismarck (Annex B)": "von Bismarck (Anexo B)",
+    "DIN knee\n15.8 Bark": "Codo DIN\n15,8 Bark",
+    "Bismarck knee\n15 Bark": "Codo Bismarck\n15 Bark",
+    "Open-Plan Spatial Decay of Speech (ISO 3382-3)":
+        "Decaimiento espacial del habla en oficina abierta (ISO 3382-3)",
+    "Distance from the talker r [m]": "Distancia al hablante r [m]",
+    "A-weighted SPL [dB]": "SPL ponderado A [dB]",
+    "Measured Lp,A,S": "Lp,A,S medido",
+    "STI vs distance": "STI vs distancia",
 }
 
 _ES_PATTERNS = [
@@ -201,6 +211,10 @@ _ES_PATTERNS = [
      r"Curva de referencia desplazada \1 dB"),
     (r"^Sum of unfavourable deviations = (.+) dB  \(limit 32\.0 dB\)$",
      "Suma de desviaciones desfavorables = \\1 dB  (l\u00edmite 32,0 dB)"),
+    (r"^Aures \(Annex B, N = (.+) sone\)$",
+     r"Aures (Anexo B, N = \1 sonios)"),
+    (r"^Spatial decay D2,S = (.+) dB$",
+     r"Decaimiento espacial D2,S = \1 dB"),
 ]
 
 
@@ -472,7 +486,6 @@ def generate_signal_responses(output_dir: str) -> None:
     y = 100 * np.sum([np.sin(2 * np.pi * f * t) for f in freqs], axis=0)
 
     for frac, filename, title in [
-        (1, "signal_response_fraction_1.png", "1/1 Octave Band Analysis"),
         (3, "signal_response_fraction_3.png", "1/3 Octave Band Analysis"),
     ]:
         print(f"Generating {filename}...")
@@ -1751,6 +1764,119 @@ def generate_insulation_rating(output_dir: str) -> None:
     plt.close()
 
 
+def generate_sharpness_weighting(output_dir: str) -> None:
+    """DIN 45692 sharpness weighting g(z): DIN vs Aures vs von Bismarck."""
+    print("Generating sharpness_weighting.png...")
+    from phonometry.sharpness import _Z, _g_aures, _g_bismarck, _g_din
+
+    z = _Z                       # 0.1 .. 24 Bark, 0.1-Bark steps
+    total_n = 4.0                # reference loudness for the Aures variant (sone)
+    g_din = _g_din(z)
+    g_bismarck = _g_bismarck(z)
+    g_aures = _g_aures(z, total_n)
+
+    _, ax = plt.subplots(figsize=(10, 6.5))
+    ax.semilogy(z, g_din, color=COLOR_PRIMARY, linewidth=2.2,
+                label="DIN 45692 g(z)")
+    ax.semilogy(z, g_bismarck, color=COLOR_TERTIARY, linewidth=1.7,
+                linestyle="--", label="von Bismarck (Annex B)")
+    ax.semilogy(z, g_aures, color=COLOR_SECONDARY, linewidth=1.7,
+                linestyle="-.", label=f"Aures (Annex B, N = {total_n:.0f} sone)")
+
+    # DIN weighting is flat (g = 1) up to 15.8 Bark, von Bismarck up to 15.
+    ax.axhline(1.0, color=COLOR_FG, linestyle="-", alpha=0.15, linewidth=1)
+    ax.axvline(15.8, color=COLOR_PRIMARY, linestyle=":", alpha=0.5, linewidth=1)
+    ax.axvline(15.0, color=COLOR_TERTIARY, linestyle=":", alpha=0.5, linewidth=1)
+    ax.annotate("DIN knee\n15.8 Bark", xy=(15.8, 1.0), xytext=(10.2, 2.3),
+                fontsize=9, color=COLOR_PRIMARY, ha="center",
+                arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_PRIMARY})
+    ax.annotate("Bismarck knee\n15 Bark", xy=(15.0, 1.0), xytext=(7.0, 0.5),
+                fontsize=9, color=COLOR_TERTIARY, ha="center",
+                arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_TERTIARY})
+
+    ax.set_title("Sharpness Weighting g(z) (DIN 45692)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Critical-band rate z [Bark]")
+    ax.set_ylabel("Weighting g(z)")
+    ax.set_xlim(0, 24)
+    ax.set_ylim(0.4, 30)
+    ax.set_xticks([0, 4, 8, 12, 16, 20, 24])
+    ax.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax.legend(loc="upper right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "sharpness_weighting.png"))
+    plt.close()
+
+
+def generate_open_plan_decay(output_dir: str) -> None:
+    """ISO 3382-3 spatial decay: speech SPL and STI vs source distance."""
+    print("Generating open_plan_decay.png...")
+    from phonometry import open_plan_metrics
+
+    # The worked example from the room-acoustics guide (matches its numbers).
+    r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])   # distances (m)
+    lp = 65.0 - 7.0 * np.log2(r)                      # A-weighted speech level (dB)
+    sti = 0.70 - 0.03 * r                             # STI per position
+    m = open_plan_metrics(r, lp, sti)
+
+    # Reconstruct the two regressions the metrics come from (2-16 m window).
+    b_log = -m.d2s / np.log10(2.0)                    # slope vs lg(r/r0)
+    a_lp = m.lp_as_4m - b_log * np.log10(4.0)
+    d_sti, c_sti = np.polyfit(r, sti, 1)              # STI vs distance
+
+    fig, ax = plt.subplots(figsize=(10, 6.5))
+    ax.set_xscale("log")
+    rr = np.logspace(np.log10(2.0), np.log10(16.0), 100)
+    line_spl, = ax.plot(rr, a_lp + b_log * np.log10(rr), color=COLOR_PRIMARY,
+                        linestyle="--", linewidth=1.8,
+                        label=f"Spatial decay D2,S = {m.d2s:.1f} dB")
+    pts_spl, = ax.plot(r, lp, "o", color=COLOR_PRIMARY, markersize=7,
+                       markerfacecolor="white", markeredgewidth=1.6,
+                       label="Measured Lp,A,S")
+    ax.axvline(4.0, color=COLOR_FG, linestyle=":", alpha=0.35, linewidth=1)
+    mark_4m, = ax.plot(4.0, m.lp_as_4m, "D", color=COLOR_SECONDARY, markersize=9,
+                       zorder=6, label=f"Lp,A,S,4m = {m.lp_as_4m:.0f} dB")
+    ax.annotate(f"Lp,A,S,4m = {m.lp_as_4m:.0f} dB", xy=(4.0, m.lp_as_4m),
+                xytext=(4.7, m.lp_as_4m + 4.5), fontsize=10,
+                arrowprops={"arrowstyle": "->", "lw": 1.0})
+
+    ax.set_title("Open-Plan Spatial Decay of Speech (ISO 3382-3)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Distance from the talker r [m]")
+    ax.set_ylabel("A-weighted SPL [dB]", color=COLOR_PRIMARY)
+    ax.set_xlim(1.7, 18.0)
+    ax.set_ylim(30, 62)
+    from matplotlib.ticker import NullFormatter, ScalarFormatter
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xticks([2, 3, 4, 6, 8, 12, 16])
+    ax.set_xticklabels(["2", "3", "4", "6", "8", "12", "16"])
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.4)
+
+    # Right axis: STI vs distance with the distraction / privacy crossings.
+    ax2 = ax.twinx()
+    rr2 = np.linspace(1.7, 18.0, 100)
+    line_sti, = ax2.plot(rr2, c_sti + d_sti * rr2, color=COLOR_TERTIARY,
+                         linewidth=1.7, label="STI vs distance")
+    ax2.plot(r, sti, "s", color=COLOR_TERTIARY, markersize=5,
+             markerfacecolor="white", markeredgewidth=1.3)
+    for dist, level, name in [(m.rd, 0.50, "rD"), (m.rp, 0.20, "rP")]:
+        ax2.axhline(level, color=COLOR_FG, linestyle=":", alpha=0.25, linewidth=1)
+        ax2.plot(dist, level, "v", color=COLOR_SECONDARY, markersize=9, zorder=6)
+        ax2.annotate(f"{name} = {dist:.1f} m", xy=(dist, level),
+                     xytext=(dist * 0.62, level + 0.03), fontsize=9,
+                     color=COLOR_SECONDARY,
+                     arrowprops={"arrowstyle": "->", "lw": 0.9,
+                                 "color": COLOR_SECONDARY})
+    ax2.set_ylabel("STI", color=COLOR_TERTIARY)
+    ax2.set_ylim(0.1, 0.75)
+
+    handles = [pts_spl, line_spl, mark_4m, line_sti]
+    ax.legend(handles, [h.get_label() for h in handles],
+              loc="upper right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "open_plan_decay.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -1789,6 +1915,10 @@ def generate_all(img_dir: str) -> None:
     # Room / building acoustics plots (Schroeder decay, ISO 717-1 rating)
     generate_schroeder_decay(img_dir)
     generate_insulation_rating(img_dir)
+
+    # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
+    generate_sharpness_weighting(img_dir)
+    generate_open_plan_decay(img_dir)
 
 
 if __name__ == "__main__":

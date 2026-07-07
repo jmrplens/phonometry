@@ -43,9 +43,15 @@ avoids that by filtering low bands at a decimated rate:
 | `order` | int | — | default `6` | SOS order per band |
 | `limits` | list `[lo, hi]` | Hz | default `[12, 20000]` | Analysis range |
 | `filter_type` | str | — | `'butter'` (default), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | See comparison above |
-| `ripple` / `attenuation` | float | dB | required by cheby/ellip types | Passband ripple / stopband attenuation |
+| `ripple` / `attenuation` | float | dB | `ripple` default `0.1`; `attenuation` default `72.0` | Passband ripple / stopband attenuation (cheby/ellip); `cheby2` needs `attenuation ≥ 70` for class 1, since scipy pins its equiripple floor at exactly this value |
 | `show` | bool | — | default `False` | Plot the bank response (needs matplotlib) |
 | `sigbands` | bool | — | default `False` | Also return the per-band time signals |
+| `mode` | str | — | `'rms'` (default), `'peak'`, `'sum'` | Per-band statistic returned |
+| `nominal` | bool | — | default `False` | Return nominal band labels (e.g. `1000`) instead of exact centre frequencies |
+| `detrend` | bool | — | default `True` | Remove each band's DC offset before the level (improves low-frequency accuracy) |
+| `calibration_factor` | float | — | default `1.0` | Scales the input to pascals (see the Calibration guide) |
+| `dbfs` | bool | — | default `False` | Reference levels to digital full scale instead of 20 µPa |
+| `plot_file` | str or `None` | — | default `None` | Save the bank-response plot to this path |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline) |
 | `stateful` / `steady_ic` (class) | bool | — | default `False` | Streaming state; see [Block Processing](/phonometry/guides/block-processing/) |
 
@@ -64,8 +70,8 @@ The following plot compares the architectures focusing on the -3 dB crossover po
 | :--- | :--- | :--- | :--- |
 | `butter` | **Butterworth** | `octavefilter(x, fs, filter_type='butter')` | General acoustic measurement. |
 | `cheby1` | **Chebyshev I** | `octavefilter(x, fs, filter_type='cheby1', ripple=0.1)` | Sharper roll-off at the cost of ripple. |
-| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2', attenuation=60)` | Flat passband with stopband zeros. |
-| `ellip` | **Elliptic** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)` | Maximum selectivity. |
+| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2')` | Flat passband with stopband zeros. |
+| `ellip` | **Elliptic** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1)` | Maximum selectivity. |
 | `bessel` | **Bessel** | `octavefilter(x, fs, filter_type='bessel')` | Preserving transient waveform shapes. |
 
 ## Gallery of Filter Bank Responses
@@ -89,7 +95,13 @@ standard choice for acoustic measurements where no ripple is allowed within the
 frequency bands.
 
 ```python
+import numpy as np
 from phonometry import octavefilter
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Default standard measurement
 spl, freq = octavefilter(x, fs, filter_type='butter')
 ```
@@ -117,8 +129,8 @@ signal in the passband. The stopband edges are placed automatically so that the
 −3 dB points land on the band edges (`attenuation` must be > 3.01 dB).
 
 ```python
-# Flat passband with 60 dB stopband attenuation
-spl, freq = octavefilter(x, fs, filter_type='cheby2', attenuation=60)
+# Flat passband, class-1 default 72 dB stopband attenuation
+spl, freq = octavefilter(x, fs, filter_type='cheby2')
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6.png" alt="Chebyshev II one-third-octave filter bank frequency response" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_dark.png" alt="Chebyshev II one-third-octave filter bank frequency response" style="width:60%">
@@ -130,7 +142,7 @@ roll-off) for a given order. They feature ripples in both the passband and stopb
 
 ```python
 # Maximum selectivity for extreme band isolation
-spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1, attenuation=60)
+spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.png" alt="Elliptic one-third-octave filter bank frequency response" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.png" alt="Elliptic one-third-octave filter bank frequency response" style="width:60%">
@@ -157,6 +169,8 @@ difference between bands at the crossover.
 
 ```python
 from phonometry import linkwitz_riley
+
+signal = x                            # reuse the calibrated signal from the top of the page
 # Split signal into Low and High bands at 1000 Hz
 low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 # Reconstruction: low + high == signal (flat response)
@@ -186,11 +200,13 @@ print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_clas
 regions: it must attenuate at least the red mask outside the band and no more
 than the purple mask inside it.*
 
-With default parameters (order 6), **Butterworth meets class 1**. Chebyshev II
-lands in class 2 — capped exactly by its `attenuation=60` versus the 70 dB
-far-stopband requirement (raise `attenuation` to reach class 1). Chebyshev I,
-Elliptic and Bessel do not meet class limits at order 6: passband ripple
-(cheby1/ellip) and slow roll-off (bessel) violate the mask.
+With default parameters (order 6), **Butterworth meets class 1**, and so does
+**Chebyshev II**: its `attenuation` default is now `72` dB, clearing the 70 dB
+far-stopband class 1 limit (scipy pins the cheby2 equiripple floor at exactly
+`attenuation`, so any value ≥ 70 dB qualifies; the 72 dB default keeps the same
++0.400 dB passband margin as Butterworth). Chebyshev I, Elliptic and Bessel do
+not meet class limits at order 6: passband ripple (cheby1/ellip) and slow
+roll-off (bessel) violate the mask.
 
 ## Signal Decomposition and Stability
 
@@ -243,8 +259,12 @@ their steep roll-off with strong delay peaks at the band edges.
 
 For offline analysis you can eliminate group delay entirely: `zero_phase=True`
 filters each band forward-backward (`scipy.signal.sosfiltfilt`), keeping band
-signals time-aligned with the input. The effective attenuation doubles, and the
-option is incompatible with stateful (block) processing.
+signals time-aligned with the input. The effective attenuation doubles and the
+effective passband narrows, lowering the measured broadband band level by
+~0.2 to 0.3 dB per band (a pure in-band tone is unaffected); prefer forward
+filtering when the absolute band SPL must match single-pass conventions, and
+reserve zero-phase for when the temporal envelope matters (e.g. reverberation
+decay). The option is incompatible with stateful (block) processing.
 
 ```python
 from phonometry import OctaveFilterBank

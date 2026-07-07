@@ -182,14 +182,17 @@ Ts = 72 ms). A real room has a steeper early slope, so EDT < T30.
 | `fs` | int | Hz | > 0 | Sample rate |
 | `limits` | (float, float) or `None` | Hz | default `(125.0, 4000.0)` | Band-centre limits; `None` = broadband single band |
 | `fraction` | int | — | `1` (octave, default) / `3` (third) | Bandwidth fraction |
+| `zero_phase` | bool | — | default `False` | Forward-backward octave filtering (ISO 3382-2 §7.3 NOTE, which relaxes $BT > 16$ to $BT > 4$); removes the filter group delay before the backward integration and roughly halves the 125 Hz short-decay T30 bias (~+4.9 % → +2.4 % at $T$ = 0.2 s). `decay_curve` accepts it too |
 
 Returns a `RoomAcousticsResult`: `frequency` (band centres, or `None`
 broadband), `edt`/`t20`/`t30` (s), `c50`/`c80` (dB), `d50`, `ts` (s),
 `dynamic_range` (dB), the `edt_valid`/`t20_valid`/`t30_valid` flags (ISO
-3382-1 §5.3.3: noise ≥ 25/35/45 dB below the peak) and `curvature`
+3382-1 §5.3.3: noise ≥ 25 dB below the peak for EDT, tightened to 46 dB for
+T20 and 54 dB for T30 so the tail-compensation bias of a flagged-valid value
+stays within the 5 % JND) and `curvature`
 $C = 100\ (T_{30}/T_{20} - 1)$ % (values above 10 % flag a non-straight
-decay). `decay_curve(ir, fs, band=None, fraction=1)` returns just the
-`(time, level)` curve for one band or the broadband response.
+decay). `decay_curve(ir, fs, band=None, fraction=1, zero_phase=False)` returns
+just the `(time, level)` curve for one band or the broadband response.
 
 ## 3. Open-plan offices (ISO 3382-3)
 
@@ -209,6 +212,8 @@ with **Lp,A,S,4m** read off the same line at 4 m. The **distraction
 distance** rD (STI = 0.50) and **privacy distance** rP (STI = 0.20) come
 from a linear regression of STI against distance. Good offices push rD
 below ~5 m; poor ones leave speech distracting past 10 m.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay.png" alt="Open-plan spatial decay: A-weighted speech level and STI against source distance on a log axis, with the D2,S regression, the Lp,A,S,4m marker at 4 m and the rD and rP distance crossings" width="80%"></picture>
 
 ```python
 import numpy as np

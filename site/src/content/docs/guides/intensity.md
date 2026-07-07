@@ -31,7 +31,14 @@ $$
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Two-microphone p-p intensity probe with the spacer distance and the measurement axis" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_dark.svg" alt="Two-microphone p-p intensity probe with the spacer distance and the measurement axis" style="width:92%">
 
 ```python
+import numpy as np
 from phonometry import sound_intensity
+
+# Two microphone pressure signals in Pa (p1 closer to the source)
+fs = 48000
+rng = np.random.default_rng(0)
+p1 = 0.02 * rng.standard_normal(fs)
+p2 = np.roll(p1, 1)                        # ~one-sample propagation delay across the probe
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
@@ -66,6 +73,10 @@ carries both:
 ```python
 from phonometry import field_indicators, dynamic_capability_index
 
+# Per-position measurements over the ISO 9614-1 measurement surface
+pressure_levels = np.array([74.1, 73.8, 74.5, 73.2])       # Lp per position (dB)
+normal_intensity = np.array([1.2e-5, 1.0e-5, 1.4e-5, 0.9e-5])  # signed In per position (W/m²)
+
 fi = field_indicators(pressure_levels, normal_intensity)   # F2, F3, F4
 ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
 ok = ld > fi.f2                                            # criterion 1
@@ -82,6 +93,7 @@ ok = ld > fi.f2                                            # criterion 1
 | `c` | float | m/s | default `343.0` | Speed of sound (bias/validity estimates) |
 | `fraction` | int, optional | — | `1`, `3` or `None` (default) | Octave/third-octave band integration |
 | `limits` | list, optional | Hz | default library band range | Band analysis limits |
+| `bias_correct` | bool | — | default `False` | Apply the per-bin $(k\Delta r)/\sin(k\Delta r)$ correction (IEC 61043 §7.3) before summing, so band/broadband totals stop under-reading as $f \to$ `max_valid_frequency`; bins past the first null are left uncorrected. The per-band `bias_correction` factor is reported either way |
 
 See [Theory](/phonometry/reference/theory/) for the derivations and [Calibration](/phonometry/guides/calibration/)
 for absolute scaling of the two channels.

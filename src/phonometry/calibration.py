@@ -41,6 +41,7 @@ def calculate_sensitivity(
     validate: bool = True,
     max_fluctuation_db: float | None = None,
     frequency: float = 1000.0,
+    narrowband: bool = False,
 ) -> float:
     """
     Calculate the calibration factor (multiplier) to convert digital units
@@ -75,12 +76,25 @@ def calculate_sensitivity(
         ``frequency``.
     :param frequency: Nominal frequency of the calibration tone in Hz
         (default 1000.0), used to select the Table 2 row.
+    :param narrowband: If True (requires ``fs``), estimate the tone level with
+        a coherent single-frequency (Goertzel) detector locked to the tone
+        near ``frequency`` instead of the full-band RMS. This rejects
+        broadband hum/noise in the reference take, which otherwise inflates
+        the RMS and shrinks the factor by ``-10*lg(1 + 1/SNR)`` (about
+        -0.44 dB at 20 dB SNR), silently biasing every subsequent level.
+        The default (False) keeps the exact legacy broadband-RMS behaviour;
+        enable it for noisy coupler recordings.
     :return: Calibration factor (sensitivity multiplier).
     """
     signal_arr = np.asarray(ref_signal, dtype=np.float64)
     if signal_arr.size == 0:
         raise ValueError("Reference signal is empty, cannot calibrate.")
-    rms_ref = np.sqrt(np.mean(signal_arr ** 2))
+    if narrowband:
+        if fs is None:
+            raise ValueError("narrowband tone estimation requires 'fs'.")
+        rms_ref = _narrowband_tone_rms(signal_arr, fs, frequency)
+    else:
+        rms_ref = float(np.sqrt(np.mean(signal_arr ** 2)))
     if rms_ref == 0:
         raise ValueError("Reference signal is silent, cannot calibrate.")
 
@@ -132,3 +146,54 @@ def _validate_reference_stability(
             CalibrationWarning,
             stacklevel=3,
         )
+
+
+def _narrowband_tone_rms(
+    signal_arr: np.ndarray, fs: int, frequency: float
+) -> float:
+    """RMS amplitude of the calibration tone via coherent detection.
+
+    A Hann-windowed single-frequency (Goertzel) detector locked to the tone
+    near ``frequency`` recovers the tone RMS while rejecting broadband noise,
+    which averages toward zero as ``1/sqrt(N)`` because it is incoherent with
+    the detector. Multichannel input is reduced to the same flattened power
+    the broadband path uses. The nominal frequency is refined to the local
+    spectral peak (parabolic interpolation) so calibrator frequency tolerance
+    does not bias the estimate.
+    """
+    x = np.asarray(signal_arr, dtype=np.float64)
+    if x.ndim > 1:
+        per_channel = [_narrowband_tone_rms(row, fs, frequency) for row in x]
+        return float(np.sqrt(np.mean(np.square(per_channel))))
+    n = x.size
+    if n < 4:
+        # Too short for a coherent estimate; fall back to broadband RMS.
+        return float(np.sqrt(np.mean(x ** 2)))
+    window = np.hanning(n)
+    freqs = np.fft.rfftfreq(n, 1.0 / fs)
+    df = float(fs) / n
+    magnitude = np.abs(np.fft.rfft(x * window))
+    # Search a +/-10 % window around the nominal calibrator frequency so a
+    # strong low-frequency hum cannot capture the peak estimate.
+    in_range = (freqs >= 0.9 * frequency) & (freqs <= 1.1 * frequency)
+    candidates = np.flatnonzero(in_range)
+    if candidates.size:
+        peak = int(candidates[int(np.argmax(magnitude[candidates]))])
+    else:
+        peak = int(np.argmax(magnitude[1:]) + 1) if magnitude.size > 1 else 0
+    f0 = freqs[peak]
+    if 1 <= peak < magnitude.size - 1:
+        a, b, c = magnitude[peak - 1], magnitude[peak], magnitude[peak + 1]
+        denom = a - 2.0 * b + c
+        # Skip parabolic refinement on a degenerate flat-top peak. Guard the
+        # denominator against being negligible relative to the bin magnitudes
+        # involved rather than testing exact float equality (which the
+        # SonarCloud quality gate flags): a genuine tone gives denom of order
+        # the peak magnitude, so normal-tone behaviour is unchanged.
+        if abs(denom) > 1e-12 * max(a, b, c, np.finfo(np.float64).tiny):
+            delta = float(np.clip(0.5 * (a - c) / denom, -0.5, 0.5))
+            f0 = (peak + delta) * df
+    idx = np.arange(n)
+    demod = np.exp(-2j * np.pi * f0 * idx / fs)
+    amplitude = np.sum(x * window * demod) / np.sum(window)
+    return float(np.sqrt(2.0) * np.abs(amplitude))

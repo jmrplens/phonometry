@@ -14,7 +14,12 @@ are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
 * **G-Weighting (`G`):** Infrasound weighting per ISO 7196 (see below).
 
 ```python
+import numpy as np
 from phonometry import weighting_filter
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Apply A-weighting to the raw signal
 weighted_signal = weighting_filter(signal, fs, curve='A')
@@ -71,7 +76,7 @@ absence of weighting. The full pole/zero derivation is in the
 | `x` | 1D or 2D array | any | non-empty | 2D is `[channels, samples]` |
 | `fs` | int | Hz | > 0 | |
 | `curve` | str | — | `'A'` (default), `'C'`, `'G'`, `'Z'` | `'G'` per ISO 7196 (infrasound); `'Z'` is a bypass |
-| `high_accuracy` | bool | — | default `True` (function); class default `None` resolves to `not stateful` | Internal oversampling (8× up to ≥ 96 kHz at common audio rates) keeps A/C in class 1 up to 16 kHz; silently ignored for G, whose 0.25–315 Hz range the plain design already renders exactly |
+| `high_accuracy` | bool | — | default `True` (function); class default `None` resolves to `not stateful` | Internal oversampling (up to 8×, reaching ≥ 144 kHz at common audio rates, e.g. 96 kHz input ×2) keeps A/C in class 1 up to 16 kHz; silently ignored for G, whose 0.25–315 Hz range the plain design already renders exactly |
 | `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
 | `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
 
@@ -83,6 +88,7 @@ If you weight many signals with the same parameters, design the filter once:
 from phonometry import WeightingFilter
 
 wf = WeightingFilter(fs, "A")
+signals = [signal]                # your batch of recordings
 for signal in signals:
     weighted = wf.filter(signal)
 ```
@@ -94,7 +100,7 @@ fs = 48 kHz the A-curve error at 12.5 kHz reaches −2.7 dB, outside the IEC
 61672-1 **class 1** tolerance (+2.0/−2.5 dB).
 
 By default (`high_accuracy=True`), phonometry designs and runs the weighting
-filter at an internally oversampled rate (≥ 96 kHz) and decimates back, keeping
+filter at an internally oversampled rate (≥ 144 kHz) and decimates back, keeping
 the response within class 1 tolerances up to 16 kHz (error ≈ −0.5 dB at
 12.5 kHz for fs = 48 kHz).
 
@@ -114,6 +120,7 @@ y = weighting_filter(signal, fs, curve="A", high_accuracy=False)
 
 # Stateful block processing (legacy design, state carried between blocks)
 wf = WeightingFilter(fs, "A", stateful=True)
+blocks = [signal]                 # your sequence of signal blocks
 for block in blocks:
     weighted = wf.filter(block)
 ```

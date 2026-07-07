@@ -190,14 +190,17 @@ inicial más pronunciada, así que EDT < T30.
 | `fs` | int | Hz | > 0 | Frecuencia de muestreo |
 | `limits` | (float, float) o `None` | Hz | por defecto `(125.0, 4000.0)` | Límites de centros de banda; `None` = banda única de banda ancha |
 | `fraction` | int | — | `1` (octava, por defecto) / `3` (tercio) | Fracción de ancho de banda |
+| `zero_phase` | bool | — | defecto `False` | Filtrado de octava hacia delante y atrás (NOTA de ISO 3382-2, 7.3, que relaja $BT > 16$ a $BT > 4$); elimina el retardo de grupo del filtro antes de la integración inversa y reduce aproximadamente a la mitad el sesgo de T30 corto a 125 Hz (~+4,9 % → +2,4 % con $T$ = 0,2 s). `decay_curve` también lo acepta |
 
 Devuelve un `RoomAcousticsResult`: `frequency` (centros de banda, o `None` en
 banda ancha), `edt`/`t20`/`t30` (s), `c50`/`c80` (dB), `d50`, `ts` (s),
 `dynamic_range` (dB), los indicadores `edt_valid`/`t20_valid`/`t30_valid`
-(ISO 3382-1, 5.3.3: ruido ≥ 25/35/45 dB por debajo del pico) y `curvature`
+(ISO 3382-1, 5.3.3: ruido ≥ 25 dB por debajo del pico para EDT, endurecido a
+46 dB para T20 y 54 dB para T30 para que el sesgo de compensación de cola de un
+valor marcado como válido quede dentro de la DAP del 5 %) y `curvature`
 $C = 100\ (T_{30}/T_{20} - 1)$ % (valores por encima del 10 % señalan un
-decaimiento no recto). `decay_curve(ir, fs, band=None, fraction=1)` devuelve
-solo la curva `(time, level)` para una banda o la respuesta de banda ancha.
+decaimiento no recto). `decay_curve(ir, fs, band=None, fraction=1, zero_phase=False)`
+devuelve solo la curva `(time, level)` para una banda o la respuesta de banda ancha.
 
 ## 3. Oficinas diáfanas (ISO 3382-3)
 
@@ -219,6 +222,8 @@ distracción** rD (STI = 0,50) y la **distancia de privacidad** rP
 (STI = 0,20) provienen de una regresión lineal del STI frente a la distancia.
 Las buenas oficinas empujan rD por debajo de ~5 m; las malas dejan el habla
 molesta más allá de 10 m.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_es.png" alt="Decaimiento espacial en oficina abierta: nivel de habla ponderado A y STI frente a la distancia a la fuente en eje logarítmico, con la regresión D2,S, el marcador Lp,A,S,4m a 4 m y los cruces de distancia rD y rP" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_es_dark.png" alt="Decaimiento espacial en oficina abierta: nivel de habla ponderado A y STI frente a la distancia a la fuente en eje logarítmico, con la regresión D2,S, el marcador Lp,A,S,4m a 4 m y los cruces de distancia rD y rP" style="width:80%">
 
 ```python
 import numpy as np

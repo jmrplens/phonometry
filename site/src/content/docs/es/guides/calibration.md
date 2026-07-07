@@ -43,13 +43,16 @@ debes calcular la sensibilidad de tu cadena de medición usando un tono de
 referencia (p. ej. 94 dB @ 1 kHz).
 
 ```python
+import numpy as np
 from phonometry import octavefilter, calculate_sensitivity
 
-# 1. Graba la señal de tu calibrador de 94 dB
-# ref_signal = ... (tu grabación)
+# 1. Graba la señal de tu calibrador de 94 dB (1 kHz, 1 Pa RMS = 94 dB SPL)
+fs = 48000
+ref_signal = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # tu medición
 
 # 2. Calcula el factor de sensibilidad
-sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0)
+sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0, fs=fs)
 
 # 3. Aplica la calibración a tus mediciones
 spl, freq = octavefilter(signal, fs, calibration_factor=sensitivity)
@@ -108,6 +111,7 @@ viento, ruido de manipulación:
 | `validate` | bool | — | defecto `True` | Emite `CalibrationWarning` con grabaciones inestables/cortas |
 | `max_fluctuation_db` | float, opcional | dB | defecto `None` → Tabla 2 clase 1 | Sobrescritura explícita del límite de estabilidad |
 | `frequency` | float | Hz | defecto `1000.0` | Frecuencia nominal del calibrador; elige la fila de la Tabla 2 de IEC 60942 |
+| `narrowband` | bool | — | defecto `False` | Estima el tono con un detector coherente (Goertzel) cerca de `frequency` (requiere `fs`) en lugar del RMS de banda completa; rechaza el zumbido/ruido de banda ancha que si no infla el RMS y reduce todos los niveles posteriores (~−0,44 dB a 20 dB de SNR). Actívalo para grabaciones de acoplador ruidosas |
 
 Devuelve el factor de sensibilidad (float) para pasarlo como
 `calibration_factor=` a `octavefilter`, `leq`, `laeq`, `ln_levels`, `lc_peak`,

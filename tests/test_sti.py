@@ -15,6 +15,8 @@ Validation vectors:
 - Annex F qualification bands: edges 0,36-0,76 in 0,04 steps, U..A+.
 """
 
+import warnings
+
 import numpy as np
 import pytest
 
@@ -220,10 +222,26 @@ def test_masking_amdb_is_vectorized_and_continuous():
 def test_stipa_loopback_ideal_channel():
     x = stipa_signal(FS, seconds=18.0, seed=1234)
     result = stipa(x, FS)
-    assert result.sti >= 0.95
+    # Ideal loopback recovers STI 0.998 and min MTF 0.943 at 18 s; lock those
+    # in (was >= 0.95 / > 0.9, several x looser than the achieved accuracy).
+    assert result.sti >= 0.99
     assert result.rating == "A+"
     assert result.mtf.shape == (7, 2)
-    assert np.all(result.mtf > 0.9)
+    assert np.all(result.mtf > 0.93)
+
+
+def test_stipa_short_recording_warns():
+    """A recording shorter than the recommended 15 s biases the recovered
+    modulation depths (and STI) low; stipa should warn (IEC 60268-16 STIPA
+    practice recommends 15 s to 25 s)."""
+    short = stipa_signal(FS, seconds=5.0, seed=1234)
+    with pytest.warns(UserWarning, match="15"):
+        stipa(short, FS)
+    # No warning at the recommended length.
+    long = stipa_signal(FS, seconds=18.0, seed=1234)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        stipa(long, FS)
 
 
 def test_stipa_with_noise_is_monotonic():
@@ -313,11 +331,19 @@ def test_invalid_inputs_raise():
     with pytest.raises(ValueError, match="1D"):
         stipa(np.zeros((2, FS)), FS)
     with pytest.raises(ValueError, match="too short"):
-        stipa(stipa_signal(FS, seconds=18.0, seed=3)[: FS // 2], FS)
+        # The 0.5 s clip also triggers the (correct) sub-15 s STIPA warning;
+        # silence it so the test output stays clean while asserting the error.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            stipa(stipa_signal(FS, seconds=18.0, seed=3)[: FS // 2], FS)
     with pytest.raises(ValueError, match="no energy"):
-        # A pure tone leaves other octave bands empty.
+        # A pure tone leaves other octave bands empty. The 4 s clip also
+        # triggers the (correct) sub-15 s STIPA warning; silence it so the
+        # test output stays clean while we assert on the ValueError.
         t = np.arange(4 * FS) / FS
-        stipa(np.sin(2 * np.pi * 1000.0 * t), FS)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            stipa(np.sin(2 * np.pi * 1000.0 * t), FS)
 
     with pytest.raises(ValueError, match="positive"):
         stipa_signal(FS, seconds=0.0)

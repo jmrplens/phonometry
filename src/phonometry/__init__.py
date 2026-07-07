@@ -38,9 +38,13 @@ from .parametric_filters import (
 )
 from .insulation import (
     AirborneInsulationResult,
+    ImpactInsulationResult,
+    ImpactRatingResult,
     WeightedRatingResult,
     airborne_insulation,
     energy_average_level,
+    impact_insulation,
+    weighted_impact_rating,
     weighted_rating,
 )
 from .open_plan import OpenPlanResult, open_plan_metrics
@@ -134,8 +138,12 @@ __all__ = [
     "SoundPowerIntensityResult",
     "airborne_insulation",
     "AirborneInsulationResult",
+    "impact_insulation",
+    "ImpactInsulationResult",
     "weighted_rating",
     "WeightedRatingResult",
+    "weighted_impact_rating",
+    "ImpactRatingResult",
     "energy_average_level",
     "lden",
     "ldn",

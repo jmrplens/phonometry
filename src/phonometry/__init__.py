@@ -66,6 +66,12 @@ from .sound_power_intensity import (
     sound_power_intensity,
 )
 from .room_acoustics import RoomAcousticsResult, decay_curve, room_parameters
+from .sound_absorption import (
+    AbsorptionWarning,
+    absorption_area,
+    absorption_coefficient,
+    attenuation_from_alpha,
+)
 from .room_ir import (
     impulse_response,
     inverse_filter,
@@ -123,6 +129,10 @@ __all__ = [
     "room_parameters",
     "decay_curve",
     "RoomAcousticsResult",
+    "absorption_area",
+    "absorption_coefficient",
+    "attenuation_from_alpha",
+    "AbsorptionWarning",
     "open_plan_metrics",
     "OpenPlanResult",
     "sound_power_pressure",

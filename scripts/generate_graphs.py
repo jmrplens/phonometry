@@ -182,6 +182,16 @@ _ES_EXACT = {
     "von Bismarck (Annex B)": "von Bismarck (Anexo B)",
     "DIN knee\n15.8 Bark": "Codo DIN\n15,8 Bark",
     "Bismarck knee\n15 Bark": "Codo Bismarck\n15 Bark",
+    "ISO 717-2 Weighted Normalized Impact Sound Level (Annex C example)":
+        "Nivel de ruido de impactos normalizado y ponderado "
+        "(ISO 717-2, ejemplo del Anexo C)",
+    "Normalized impact sound pressure level Ln [dB]":
+        "Nivel de presión de ruido de impactos normalizado Ln [dB]",
+    "Measured Ln (third octave)": "Ln medido (tercios de octava)",
+    "Shifted reference curve (ISO 717-2)":
+        "Curva de referencia desplazada (ISO 717-2)",
+    "Unfavourable deviations (measured above reference)":
+        "Desviaciones desfavorables (medido por encima de la referencia)",
     "Open-Plan Spatial Decay of Speech (ISO 3382-3)":
         "Decaimiento espacial del habla en oficina abierta (ISO 3382-3)",
     "Distance from the talker r [m]": "Distancia al hablante r [m]",
@@ -1764,6 +1774,79 @@ def generate_insulation_rating(output_dir: str) -> None:
     plt.close()
 
 
+def generate_impact_rating(output_dir: str) -> None:
+    """ISO 717-2 weighted impact rating: measured Ln, shifted reference, CI."""
+    print("Generating impact_rating.png...")
+    from phonometry.insulation import (
+        _INDEX_500_THIRD,
+        _REF_IMPACT_THIRD_OCTAVE,
+        weighted_impact_rating,
+    )
+
+    # ISO 717-2 Annex C worked example (Table C.1): laboratory bare massive
+    # floor, one-third octave 100 Hz .. 3150 Hz.
+    freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                      1000, 1250, 1600, 2000, 2500, 3150], dtype=float)
+    measured = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+                         73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+
+    result = weighted_impact_rating(measured)
+    reference = np.asarray(_REF_IMPACT_THIRD_OCTAVE, dtype=float)
+    shift = result.rating - _REF_IMPACT_THIRD_OCTAVE[_INDEX_500_THIRD]
+    shifted = reference + shift  # shifted reference read at 500 Hz == Ln,w
+
+    _, ax = plt.subplots(figsize=(10, 6.5))
+    # For impact sound an unfavourable deviation occurs where the MEASURED
+    # curve lies ABOVE the reference (opposite sign to ISO 717-1 airborne).
+    ax.fill_between(freqs, shifted, measured, where=measured > shifted,
+                    interpolate=True, color=COLOR_SECONDARY, alpha=0.25,
+                    zorder=1, label="Unfavourable deviations (measured above reference)")
+    ax.semilogx(freqs, shifted, marker="s", color=COLOR_FG, linewidth=1.6,
+                linestyle="--", markersize=4, zorder=3,
+                label="Shifted reference curve (ISO 717-2)")
+    ax.semilogx(freqs, measured, marker="o", color=COLOR_PRIMARY, linewidth=1.8,
+                markersize=5, markerfacecolor="white", markeredgewidth=1.4,
+                zorder=4, label="Measured Ln (third octave)")
+
+    # Ln,w is the shifted reference read at 500 Hz.
+    ax.axvline(500, color=COLOR_FG, linestyle=":", alpha=0.4)
+    ax.plot(500, result.rating, "D", color=COLOR_SECONDARY, markersize=9, zorder=6)
+    # The annotation sits in the clear gap between the rising measured curve
+    # and the flat low-frequency reference plateau; the string is identical
+    # in both languages, so the placement holds for every variant.
+    ax.annotate(f"Ln,w = {result.rating} dB", xy=(500, result.rating),
+                xytext=(135, result.rating - 4.2), fontsize=12,
+                fontweight="bold",
+                arrowprops={"arrowstyle": "->", "lw": 1.0})
+
+    for dy, text in (
+        (0.97, f"Reference curve shifted by {shift} dB"),
+        (0.90, f"Sum of unfavourable deviations = {result.unfavourable_sum:.1f}"
+               f" dB  (limit 32.0 dB)"),
+        (0.83, f"Ln,w = {result.rating} dB ; CI = {result.ci:+d} dB"),
+    ):
+        ax.text(0.03, dy, text, transform=ax.transAxes, va="top", ha="left",
+                fontsize=9.5, color=COLOR_FG)
+
+    ax.set_title("ISO 717-2 Weighted Normalized Impact Sound Level "
+                 "(Annex C example)", fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Normalized impact sound pressure level Ln [dB]")
+    ax.set_xscale("log")
+    ax.set_xlim(90, 3600)
+    ax.set_ylim(55, 86)
+    from matplotlib.ticker import NullFormatter
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xticks(freqs)
+    ax.set_xticklabels(
+        ["100", "125", "160", "200", "250", "315", "400", "500", "630", "800",
+         "1k", "1.25k", "1.6k", "2k", "2.5k", "3.15k"], fontsize=8)
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.legend(loc="lower left", fontsize=9)
+    plt.savefig(themed_path(output_dir, "impact_rating.png"))
+    plt.close()
+
+
 def generate_sharpness_weighting(output_dir: str) -> None:
     """DIN 45692 sharpness weighting g(z): DIN vs Aures vs von Bismarck."""
     print("Generating sharpness_weighting.png...")
@@ -1912,9 +1995,10 @@ def generate_all(img_dir: str) -> None:
     generate_sti_curve(img_dir)
     generate_intensity_demo(img_dir)
 
-    # Room / building acoustics plots (Schroeder decay, ISO 717-1 rating)
+    # Room / building acoustics plots (Schroeder decay, ISO 717-1/-2 ratings)
     generate_schroeder_decay(img_dir)
     generate_insulation_rating(img_dir)
+    generate_impact_rating(img_dir)
 
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)

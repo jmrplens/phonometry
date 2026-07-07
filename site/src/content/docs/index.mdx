@@ -18,7 +18,7 @@ import { CardGrid, Card } from '@astrojs/starlight/components';
 
 <CardGrid>
   <Card title="Conformance-tested" icon="approve-check">
-    Every metric is verified in CI against its standard's own tolerance tables and test vectors: IEC 61260-1, IEC 61672-1, IEC 61252, IEC 60942, IEC 60268-16, IEC 61043, ISO 532-1, ISO 226, ISO 1996, ISO 7196, ISO 9614, ISO 18233, ISO 3382-1/2/3, ISO 16283-1, ISO 717-1, ECMA-418-1 and DIN 45692 — 19 standards.
+    Every metric is verified in CI against its standard's own tolerance tables and test vectors: IEC 61260-1, IEC 61672-1, IEC 61252, IEC 60942, IEC 60268-16, IEC 61043, ISO 532-1, ISO 226, ISO 1996, ISO 7196, ISO 9614-1/2, ISO 18233, ISO 3382-1/2/3, ISO 3741, ISO 3744, ISO 3746, ISO 354, ISO 16283-1/2, ISO 717-1/2, ECMA-418-1 and DIN 45692 — 26 standards.
   </Card>
   <Card title="Sound level metering" icon="magnifier">
     Fractional octave banks (five SOS architectures), A/C/G/Z weighting, Fast/Slow/Impulse ballistics, Leq/LAeq, percentiles, LCpeak, SEL, noise dose, Lden and octave spectrograms.
@@ -30,6 +30,9 @@ import { CardGrid, Card } from '@astrojs/starlight/components';
     p-p sound intensity with ISO 9614-1 field indicators, calibrated SPL with IEC 60942 stability checks, stateful real-time block processing and vectorized multichannel.
   </Card>
   <Card title="Room & building acoustics" icon="open-book">
-    Swept-sine and MLS impulse responses (ISO 18233), reverberation and room parameters EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), open-plan speech metrics (ISO 3382-3) and field sound insulation with R′w/DnT,w and C/Ctr (ISO 16283-1, ISO 717-1).
+    Swept-sine and MLS impulse responses (ISO 18233), reverberation and room parameters EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), open-plan speech metrics (ISO 3382-3), field airborne and impact insulation with R′w/DnT,w/L′nT,w and C/Ctr/CI (ISO 16283-1/2, ISO 717-1/2) and sound absorption in a reverberation room (ISO 354).
+  </Card>
+  <Card title="Sound power" icon="rocket">
+    Device-independent emission level LW by three routes: enveloping-surface sound pressure (ISO 3744/3746), the reverberation-room precision method with Waterhouse and C1/C2 corrections (ISO 3741), and intensity scanning with field indicators and achieved grade (ISO 9614-2).
   </Card>
 </CardGrid>

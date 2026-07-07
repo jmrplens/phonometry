@@ -20,7 +20,13 @@ superado el $N\ \%$ del tiempo — el percentil $(100-N)$ de la distribución de
 nivel con ponderación temporal.
 
 ```python
+import numpy as np
 from phonometry import leq, laeq
+
+# Una grabación calibrada en pascales para que la guía funcione por sí sola
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+sensitivity = 1.0                                    # calibration_factor (ver Calibración)
 
 # Nivel continuo equivalente de toda la grabación
 level = leq(signal, calibration_factor=sensitivity)
@@ -97,6 +103,10 @@ from phonometry import lc_peak, sel, sound_exposure, lex_8h
 
 # Pico ponderado C (IEC 61672-1 §5.13): los límites de acción laborales usan esto
 peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+
+# Un único evento de ruido y una muestra de jornada (fragmentos de una grabación real)
+event = signal
+shift_sample = signal
 
 # Nivel de exposición sonora: nivel del evento normalizado a 1 s (LAE)
 lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
@@ -192,6 +202,7 @@ la frecuencia:
 ```python
 from phonometry import tone_to_noise_ratio, prominence_ratio
 
+x = signal                                  # la grabación calibrada del inicio de la página
 tnr = tone_to_noise_ratio(x, fs)            # pico más alto, o tone_freq=...
 pr = prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
@@ -299,6 +310,7 @@ bandas normalizadas de tercio de octava.*
 | `window_time` | float | s | > 0; por defecto `0.125` | Longitud de la ventana (0,125 s replica Fast) |
 | `overlap` | float | — | 0 ≤ overlap < 1; por defecto `0.5` | Fracción de solape entre ventanas (0 = sin solape) |
 | `mode` | str | — | `'rms'` (por defecto) o `'peak'` | Detector por ventana |
+| `detrend` | bool | — | por defecto `True` | Elimina el offset DC de cada banda antes del nivel (mejora la precisión en graves) |
 | `zero_phase` | bool | — | por defecto `False` | Filtrado hacia delante y atrás (solo offline) |
 | `calibration_factor` / `dbfs` | — | — | solo constructor | Se fijan en `OctaveFilterBank(...)`, no por llamada |
 

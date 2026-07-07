@@ -15,7 +15,12 @@ infrasonido, en **ISO 7196:1995**.
 * **Ponderación G (`G`):** ponderación de infrasonido según ISO 7196 (ver más abajo).
 
 ```python
+import numpy as np
 from phonometry import weighting_filter
+
+# Una señal calibrada en Pa para que la guía funcione por sí sola
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Aplicar ponderación A a la señal cruda
 weighted_signal = weighting_filter(signal, fs, curve='A')
@@ -85,6 +90,7 @@ Si ponderas muchas señales con los mismos parámetros, diseña el filtro una so
 from phonometry import WeightingFilter
 
 wf = WeightingFilter(fs, "A")
+signals = [signal]                # tu lote de grabaciones
 for signal in signals:
     weighted = wf.filter(signal)
 ```
@@ -116,6 +122,7 @@ y = weighting_filter(signal, fs, curve="A", high_accuracy=False)
 
 # Procesado por bloques con estado (diseño clásico, estado entre bloques)
 wf = WeightingFilter(fs, "A", stateful=True)
+blocks = [signal]                 # tu secuencia de bloques de señal
 for block in blocks:
     weighted = wf.filter(block)
 ```

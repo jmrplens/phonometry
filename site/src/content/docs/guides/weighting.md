@@ -15,7 +15,12 @@ are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
 * **G-Weighting (`G`):** Infrasound weighting per ISO 7196 (see below).
 
 ```python
+import numpy as np
 from phonometry import weighting_filter
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Apply A-weighting to the raw signal
 weighted_signal = weighting_filter(signal, fs, curve='A')
@@ -84,6 +89,7 @@ If you weight many signals with the same parameters, design the filter once:
 from phonometry import WeightingFilter
 
 wf = WeightingFilter(fs, "A")
+signals = [signal]                # your batch of recordings
 for signal in signals:
     weighted = wf.filter(signal)
 ```
@@ -115,6 +121,7 @@ y = weighting_filter(signal, fs, curve="A", high_accuracy=False)
 
 # Stateful block processing (legacy design, state carried between blocks)
 wf = WeightingFilter(fs, "A", stateful=True)
+blocks = [signal]                 # your sequence of signal blocks
 for block in blocks:
     weighted = wf.filter(block)
 ```

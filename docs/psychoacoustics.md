@@ -25,7 +25,14 @@ bands (red) sums to far more sones than the same level concentrated in one
 band (blue). The area under N'(z) is the total loudness.*
 
 ```python
+import numpy as np
 from phonometry import loudness_zwicker, loudness_zwicker_from_spectrum
+
+# A raw recording plus its calibration so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # any recording (digital units)
+sens = 1.0                                                # calibration_factor to pascals
+levels_28 = np.full(28, 60.0)                             # 28 one-third-octave band levels (dB)
 
 # From a raw recording: calibration_factor scales digital units to Pa
 res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
@@ -74,6 +81,8 @@ normalized so the reference sound — critical-band-wide noise at 1 kHz,
 60 dB — is exactly **1.00 acum** (DIN 45692 clause 6; the derived
 $k = 0.108$ sits inside the normative window 0.105–0.115).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.png" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" width="80%"></picture>
+
 ```python
 from phonometry import sharpness_din
 
@@ -103,7 +112,11 @@ $$
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" width="92%"></picture>
 
 ```python
+import numpy as np
 from phonometry import sti_from_impulse_response, stipa, stipa_signal
+
+# A measured room impulse response (synthesized decay so the example runs)
+ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
 
 # Indirect method: from a measured room impulse response
 res = sti_from_impulse_response(ir, fs, snr=25.0)
@@ -111,6 +124,7 @@ print(f"STI = {res.sti:.2f}  ({res.rating})")   # e.g. 0.62 (D)
 
 # Direct STIPA measurement: play stipa_signal() in the room, record it
 test = stipa_signal(fs, seconds=18.0, level_db=80.0)
+recording = test                       # in practice, the microphone signal after playback
 res = stipa(recording, fs)
 ```
 

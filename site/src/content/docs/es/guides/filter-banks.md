@@ -50,6 +50,12 @@ frecuencia decimada:
 | `ripple` / `attenuation` | float | dB | requerido por los tipos cheby/ellip | Rizado de banda de paso / atenuación de banda eliminada |
 | `show` | bool | — | por defecto `False` | Dibuja la respuesta del banco (requiere matplotlib) |
 | `sigbands` | bool | — | por defecto `False` | Devuelve también las señales temporales por banda |
+| `mode` | str | — | `'rms'` (por defecto), `'peak'`, `'sum'` | Estadístico por banda devuelto |
+| `nominal` | bool | — | por defecto `False` | Devuelve etiquetas nominales (p. ej. `1000`) en vez de las frecuencias centrales exactas |
+| `detrend` | bool | — | por defecto `True` | Elimina el offset DC de cada banda antes del nivel (mejora la precisión en graves) |
+| `calibration_factor` | float | — | por defecto `1.0` | Escala la entrada a pascales (consulta la guía de Calibración) |
+| `dbfs` | bool | — | por defecto `False` | Referencia los niveles a fondo de escala digital en vez de 20 µPa |
+| `plot_file` | str o `None` | — | por defecto `None` | Guarda la gráfica de respuesta del banco en esta ruta |
 | `zero_phase` | bool | — | por defecto `False` | Filtrado adelante-atrás (offline) |
 | `stateful` / `steady_ic` (clase) | bool | — | por defecto `False` | Estado en streaming; consulta [Procesado por bloques](/phonometry/es/guides/block-processing/) |
 
@@ -94,7 +100,13 @@ la elección estándar para mediciones acústicas donde no se admite rizado dent
 de las bandas de frecuencia.
 
 ```python
+import numpy as np
 from phonometry import octavefilter
+
+# Una señal calibrada en Pa para que la guía funcione por sí sola
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Medición estándar por defecto
 spl, freq = octavefilter(x, fs, filter_type='butter')
 ```
@@ -154,6 +166,8 @@ perfectamente plana y sin diferencia de fase entre bandas en el cruce.
 
 ```python
 from phonometry import linkwitz_riley
+
+signal = x                            # reutiliza la señal calibrada del inicio de la página
 # Dividir la señal en bandas grave y aguda a 1000 Hz
 low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 # Reconstrucción: low + high == signal (respuesta plana)

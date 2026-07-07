@@ -202,6 +202,12 @@ avoids that by filtering low bands at a decimated rate:
 | `ripple` / `attenuation` | float | dB | required by cheby/ellip types | Passband ripple / stopband attenuation |
 | `show` | bool | — | default `False` | Plot the bank response (needs matplotlib) |
 | `sigbands` | bool | — | default `False` | Also return the per-band time signals |
+| `mode` | str | — | `'rms'` (default), `'peak'`, `'sum'` | Per-band statistic returned |
+| `nominal` | bool | — | default `False` | Return nominal band labels (e.g. `1000`) instead of exact centre frequencies |
+| `detrend` | bool | — | default `True` | Remove each band's DC offset before the level (improves low-frequency accuracy) |
+| `calibration_factor` | float | — | default `1.0` | Scales the input to pascals (see the Calibration guide) |
+| `dbfs` | bool | — | default `False` | Reference levels to digital full scale instead of 20 µPa |
+| `plot_file` | str or `None` | — | default `None` | Save the bank-response plot to this path |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline) |
 | `stateful` / `steady_ic` (class) | bool | — | default `False` | Streaming state; see [Block Processing](https://jmrplens.github.io/phonometry/guides/block-processing/) |
 
@@ -245,7 +251,13 @@ standard choice for acoustic measurements where no ripple is allowed within the
 frequency bands.
 
 ```python
+import numpy as np
 from phonometry import octavefilter
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Default standard measurement
 spl, freq = octavefilter(x, fs, filter_type='butter')
 ```
@@ -313,6 +325,8 @@ difference between bands at the crossover.
 
 ```python
 from phonometry import linkwitz_riley
+
+signal = x                            # reuse the calibrated signal from the top of the page
 # Split signal into Low and High bands at 1000 Hz
 low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 # Reconstruction: low + high == signal (flat response)
@@ -432,7 +446,12 @@ are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
 * **G-Weighting (`G`):** Infrasound weighting per ISO 7196 (see below).
 
 ```python
+import numpy as np
 from phonometry import weighting_filter
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Apply A-weighting to the raw signal
 weighted_signal = weighting_filter(signal, fs, curve='A')
@@ -501,6 +520,7 @@ If you weight many signals with the same parameters, design the filter once:
 from phonometry import WeightingFilter
 
 wf = WeightingFilter(fs, "A")
+signals = [signal]                # your batch of recordings
 for signal in signals:
     weighted = wf.filter(signal)
 ```
@@ -532,6 +552,7 @@ y = weighting_filter(signal, fs, curve="A", high_accuracy=False)
 
 # Stateful block processing (legacy design, state carried between blocks)
 wf = WeightingFilter(fs, "A", stateful=True)
+blocks = [signal]                 # your sequence of signal blocks
 for block in blocks:
     weighted = wf.filter(block)
 ```
@@ -559,6 +580,10 @@ phonometry implements exact time constants per **IEC 61672-1:2013**.
 ```python
 import numpy as np
 from phonometry import time_weighting
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Calculate energy envelope (Mean Square)
 energy_envelope = time_weighting(signal, fs, mode='fast')
@@ -687,7 +712,13 @@ level exceeded $N\ \%$ of the time — the $(100-N)$-th percentile of the
 time-weighted level distribution.
 
 ```python
+import numpy as np
 from phonometry import leq, laeq
+
+# A calibrated recording in pascals so the guide runs standalone
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # Equivalent continuous level of the whole recording
 level = leq(signal, calibration_factor=sensitivity)
@@ -763,6 +794,10 @@ from phonometry import lc_peak, sel, sound_exposure, lex_8h
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
 peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+
+# A single noise event and a work-shift sample (slices of a real recording)
+event = signal
+shift_sample = signal
 
 # Sound exposure level: single-event level normalized to 1 s (LAE)
 lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
@@ -855,6 +890,7 @@ structured verdict against the frequency-dependent prominence criteria:
 ```python
 from phonometry import tone_to_noise_ratio, prominence_ratio
 
+x = signal                                  # the calibrated recording from the top of the page
 tnr = tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
 pr = prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
@@ -962,6 +998,7 @@ levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
 | `window_time` | float | s | > 0; default `0.125` | Frame length (0.125 s mirrors Fast) |
 | `overlap` | float | — | 0 ≤ overlap < 1; default `0.5` | Fraction of window overlap (0 = none) |
 | `mode` | str | — | `'rms'` (default) or `'peak'` | Per-window detector |
+| `detrend` | bool | — | default `True` | Remove each band's DC offset before the level (improves low-frequency accuracy) |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline only) |
 | `calibration_factor` / `dbfs` | — | — | constructor-only | Set on `OctaveFilterBank(...)`, not per call |
 
@@ -1009,7 +1046,14 @@ bands (red) sums to far more sones than the same level concentrated in one
 band (blue). The area under N'(z) is the total loudness.*
 
 ```python
+import numpy as np
 from phonometry import loudness_zwicker, loudness_zwicker_from_spectrum
+
+# A raw recording plus its calibration so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # any recording (digital units)
+sens = 1.0                                                # calibration_factor to pascals
+levels_28 = np.full(28, 60.0)                             # 28 one-third-octave band levels (dB)
 
 # From a raw recording: calibration_factor scales digital units to Pa
 res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
@@ -1058,6 +1102,8 @@ normalized so the reference sound — critical-band-wide noise at 1 kHz,
 60 dB — is exactly **1.00 acum** (DIN 45692 clause 6; the derived
 $k = 0.108$ sits inside the normative window 0.105–0.115).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.png" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" width="80%"></picture>
+
 ```python
 from phonometry import sharpness_din
 
@@ -1087,7 +1133,11 @@ $$
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" width="92%"></picture>
 
 ```python
+import numpy as np
 from phonometry import sti_from_impulse_response, stipa, stipa_signal
+
+# A measured room impulse response (synthesized decay so the example runs)
+ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
 
 # Indirect method: from a measured room impulse response
 res = sti_from_impulse_response(ir, fs, snr=25.0)
@@ -1095,6 +1145,7 @@ print(f"STI = {res.sti:.2f}  ({res.rating})")   # e.g. 0.62 (D)
 
 # Direct STIPA measurement: play stipa_signal() in the room, record it
 test = stipa_signal(fs, seconds=18.0, level_db=80.0)
+recording = test                       # in practice, the microphone signal after playback
 res = stipa(recording, fs)
 ```
 
@@ -1157,7 +1208,14 @@ $$
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Two-microphone p-p intensity probe with the spacer distance and the measurement axis" width="92%"></picture>
 
 ```python
+import numpy as np
 from phonometry import sound_intensity
+
+# Two microphone pressure signals in Pa (p1 closer to the source)
+fs = 48000
+rng = np.random.default_rng(0)
+p1 = 0.02 * rng.standard_normal(fs)
+p2 = np.roll(p1, 1)                        # ~one-sample propagation delay across the probe
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
@@ -1191,6 +1249,10 @@ carries both:
 
 ```python
 from phonometry import field_indicators, dynamic_capability_index
+
+# Per-position measurements over the ISO 9614-1 measurement surface
+pressure_levels = np.array([74.1, 73.8, 74.5, 73.2])       # Lp per position (dB)
+normal_intensity = np.array([1.2e-5, 1.0e-5, 1.4e-5, 0.9e-5])  # signed In per position (W/m²)
 
 fi = field_indicators(pressure_levels, normal_intensity)   # F2, F3, F4
 ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
@@ -1427,6 +1489,8 @@ distance** rD (STI = 0.50) and **privacy distance** rP (STI = 0.20) come
 from a linear regression of STI against distance. Good offices push rD
 below ~5 m; poor ones leave speech distracting past 10 m.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay.png" alt="Open-plan spatial decay: A-weighted speech level and STI against source distance on a log axis, with the D2,S regression, the Lp,A,S,4m marker at 4 m and the rD and rP distance crossings" width="80%"></picture>
+
 ```python
 import numpy as np
 from phonometry import open_plan_metrics
@@ -1595,10 +1659,13 @@ calculate the sensitivity of your measurement chain using a reference tone
 (e.g., 94 dB @ 1 kHz).
 
 ```python
+import numpy as np
 from phonometry import octavefilter, calculate_sensitivity
 
-# 1. Record your 94dB calibrator signal
-# ref_signal = ... (your recording)
+# 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
+fs = 48000
+ref_signal = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # your measurement
 
 # 2. Calculate sensitivity factor
 sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0)
@@ -1743,6 +1810,10 @@ Notes when using a stateful `OctaveFilterBank`:
 
 ## Example
 
+This example streams a WAV file with [`soundfile`](https://pysoundfile.readthedocs.io/),
+an optional dependency (`pip install soundfile`). Any block source works just as
+well — `scipy.io.wavfile` plus manual slicing, or a live capture callback.
+
 ```python
 import soundfile as sf
 from phonometry import OctaveFilterBank, WeightingFilter
@@ -1841,6 +1912,12 @@ The convention is consistent across the whole library: time is always the
 import numpy as np
 from phonometry import octavefilter
 
+# Two calibrated channels in Pa so the guide runs standalone
+fs = 48000
+t = np.arange(fs) / fs
+left = 0.2 * np.sin(2 * np.pi * 1000 * t)
+right = 0.1 * np.sin(2 * np.pi * 500 * t)
+
 stereo = np.stack([left, right])          # (2, n_samples)
 spl, freq = octavefilter(stereo, fs, fraction=3)
 # spl has shape (2, n_bands): one row per channel
@@ -1876,6 +1953,7 @@ bank = OctaveFilterBank(fs=48000, fraction=3, filter_type='butter')
 # bank.freq (center), bank.freq_d (lower), bank.freq_u (upper), bank.sos (coefficients)
 
 # Process multiple signals efficiently
+stream = [stereo]                 # your sequence of multichannel frames
 for frame in stream:
     # detrend=True (default) removes DC offset to improve low-freq accuracy
     spl, freq = bank.filter(frame, detrend=True)
@@ -2040,7 +2118,9 @@ from scipy import signal
 from phonometry import octavefilter, getansifrequencies
 
 fs = 100_000
-x = pressure_signal_pa  # 1D pressure signal in Pa
+# any 1D pressure signal in Pa (synthesized here so the example runs)
+pressure_signal_pa = 0.02 * np.random.default_rng(0).standard_normal(fs)
+x = pressure_signal_pa
 
 # Standardized third-octave levels from phonometry.
 levels, centers = octavefilter(

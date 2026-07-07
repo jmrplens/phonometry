@@ -30,7 +30,14 @@ $$
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Two-microphone p-p intensity probe with the spacer distance and the measurement axis" width="92%"></picture>
 
 ```python
+import numpy as np
 from phonometry import sound_intensity
+
+# Two microphone pressure signals in Pa (p1 closer to the source)
+fs = 48000
+rng = np.random.default_rng(0)
+p1 = 0.02 * rng.standard_normal(fs)
+p2 = np.roll(p1, 1)                        # ~one-sample propagation delay across the probe
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
@@ -64,6 +71,10 @@ carries both:
 
 ```python
 from phonometry import field_indicators, dynamic_capability_index
+
+# Per-position measurements over the ISO 9614-1 measurement surface
+pressure_levels = np.array([74.1, 73.8, 74.5, 73.2])       # Lp per position (dB)
+normal_intensity = np.array([1.2e-5, 1.0e-5, 1.4e-5, 0.9e-5])  # signed In per position (W/m²)
 
 fi = field_indicators(pressure_levels, normal_intensity)   # F2, F3, F4
 ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K

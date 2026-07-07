@@ -63,7 +63,9 @@ from scipy import signal
 from phonometry import octavefilter, getansifrequencies
 
 fs = 100_000
-x = pressure_signal_pa  # 1D pressure signal in Pa
+# any 1D pressure signal in Pa (synthesized here so the example runs)
+pressure_signal_pa = 0.02 * np.random.default_rng(0).standard_normal(fs)
+x = pressure_signal_pa
 
 # Standardized third-octave levels from phonometry.
 levels, centers = octavefilter(

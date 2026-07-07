@@ -64,7 +64,9 @@ from scipy import signal
 from phonometry import octavefilter, getansifrequencies
 
 fs = 100_000
-x = pressure_signal_pa  # señal de presión 1D en Pa
+# cualquier señal de presión 1D en Pa (se sintetiza para que el ejemplo funcione)
+pressure_signal_pa = 0.02 * np.random.default_rng(0).standard_normal(fs)
+x = pressure_signal_pa
 
 # Niveles de tercio de octava normalizados de phonometry.
 levels, centers = octavefilter(

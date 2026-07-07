@@ -210,6 +210,8 @@ distance** rD (STI = 0.50) and **privacy distance** rP (STI = 0.20) come
 from a linear regression of STI against distance. Good offices push rD
 below ~5 m; poor ones leave speech distracting past 10 m.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay.png" alt="Open-plan spatial decay: A-weighted speech level and STI against source distance on a log axis, with the D2,S regression, the Lp,A,S,4m marker at 4 m and the rD and rP distance crossings" width="80%"></picture>
+
 ```python
 import numpy as np
 from phonometry import open_plan_metrics

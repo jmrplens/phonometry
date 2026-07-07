@@ -43,10 +43,13 @@ debes calcular la sensibilidad de tu cadena de medición usando un tono de
 referencia (p. ej. 94 dB @ 1 kHz).
 
 ```python
+import numpy as np
 from phonometry import octavefilter, calculate_sensitivity
 
-# 1. Graba la señal de tu calibrador de 94 dB
-# ref_signal = ... (tu grabación)
+# 1. Graba la señal de tu calibrador de 94 dB (1 kHz, 1 Pa RMS = 94 dB SPL)
+fs = 48000
+ref_signal = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # tu medición
 
 # 2. Calcula el factor de sensibilidad
 sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0)

@@ -18,7 +18,13 @@ level exceeded $N\ \%$ of the time — the $(100-N)$-th percentile of the
 time-weighted level distribution.
 
 ```python
+import numpy as np
 from phonometry import leq, laeq
+
+# A calibrated recording in pascals so the guide runs standalone
+fs = 48000
+signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # Equivalent continuous level of the whole recording
 level = leq(signal, calibration_factor=sensitivity)
@@ -94,6 +100,10 @@ from phonometry import lc_peak, sel, sound_exposure, lex_8h
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
 peak = lc_peak(signal, fs, calibration_factor=sensitivity)
+
+# A single noise event and a work-shift sample (slices of a real recording)
+event = signal
+shift_sample = signal
 
 # Sound exposure level: single-event level normalized to 1 s (LAE)
 lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
@@ -186,6 +196,7 @@ structured verdict against the frequency-dependent prominence criteria:
 ```python
 from phonometry import tone_to_noise_ratio, prominence_ratio
 
+x = signal                                  # the calibrated recording from the top of the page
 tnr = tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
 pr = prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
@@ -293,6 +304,7 @@ levels, freq, times = bank.spectrogram(signal, window_time=0.125, overlap=0.5)
 | `window_time` | float | s | > 0; default `0.125` | Frame length (0.125 s mirrors Fast) |
 | `overlap` | float | — | 0 ≤ overlap < 1; default `0.5` | Fraction of window overlap (0 = none) |
 | `mode` | str | — | `'rms'` (default) or `'peak'` | Per-window detector |
+| `detrend` | bool | — | default `True` | Remove each band's DC offset before the level (improves low-frequency accuracy) |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline only) |
 | `calibration_factor` / `dbfs` | — | — | constructor-only | Set on `OctaveFilterBank(...)`, not per call |
 

@@ -45,6 +45,12 @@ avoids that by filtering low bands at a decimated rate:
 | `ripple` / `attenuation` | float | dB | required by cheby/ellip types | Passband ripple / stopband attenuation |
 | `show` | bool | — | default `False` | Plot the bank response (needs matplotlib) |
 | `sigbands` | bool | — | default `False` | Also return the per-band time signals |
+| `mode` | str | — | `'rms'` (default), `'peak'`, `'sum'` | Per-band statistic returned |
+| `nominal` | bool | — | default `False` | Return nominal band labels (e.g. `1000`) instead of exact centre frequencies |
+| `detrend` | bool | — | default `True` | Remove each band's DC offset before the level (improves low-frequency accuracy) |
+| `calibration_factor` | float | — | default `1.0` | Scales the input to pascals (see the Calibration guide) |
+| `dbfs` | bool | — | default `False` | Reference levels to digital full scale instead of 20 µPa |
+| `plot_file` | str or `None` | — | default `None` | Save the bank-response plot to this path |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline) |
 | `stateful` / `steady_ic` (class) | bool | — | default `False` | Streaming state; see [Block Processing](block-processing.md) |
 
@@ -88,7 +94,13 @@ standard choice for acoustic measurements where no ripple is allowed within the
 frequency bands.
 
 ```python
+import numpy as np
 from phonometry import octavefilter
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Default standard measurement
 spl, freq = octavefilter(x, fs, filter_type='butter')
 ```
@@ -156,6 +168,8 @@ difference between bands at the crossover.
 
 ```python
 from phonometry import linkwitz_riley
+
+signal = x                            # reuse the calibrated signal from the top of the page
 # Split signal into Low and High bands at 1000 Hz
 low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 # Reconstruction: low + high == signal (flat response)

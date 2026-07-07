@@ -32,7 +32,14 @@ $$
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_es.svg" alt="Sonda de intensidad p-p de dos micrófonos con la distancia del separador y el eje de medición" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_es_dark.svg" alt="Sonda de intensidad p-p de dos micrófonos con la distancia del separador y el eje de medición" style="width:92%">
 
 ```python
+import numpy as np
 from phonometry import sound_intensity
+
+# Dos señales de presión de micrófono en Pa (p1 más cerca de la fuente)
+fs = 48000
+rng = np.random.default_rng(0)
+p1 = 0.02 * rng.standard_normal(fs)
+p2 = np.roll(p1, 1)                        # retardo de propagación de ~1 muestra en la sonda
 
 res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
@@ -66,6 +73,10 @@ ambos:
 
 ```python
 from phonometry import field_indicators, dynamic_capability_index
+
+# Mediciones por posición sobre la superficie de medición de ISO 9614-1
+pressure_levels = np.array([74.1, 73.8, 74.5, 73.2])       # Lp por posición (dB)
+normal_intensity = np.array([1.2e-5, 1.0e-5, 1.4e-5, 0.9e-5])  # In con signo por posición (W/m²)
 
 fi = field_indicators(pressure_levels, normal_intensity)   # F2, F3, F4
 ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K

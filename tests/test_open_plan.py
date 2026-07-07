@@ -111,7 +111,7 @@ def test_mismatched_lengths_raise() -> None:
 
 def test_too_few_in_range_gives_nan_decay() -> None:
     """<2 positions in 2-16 m -> D2,S / Lp,A,S,4m NaN, rD/rP still work."""
-    r = np.array([0.5, 1.0, 1.5, 18.0])  # only r = 18 is... none in range
+    r = np.array([0.5, 1.0, 1.5, 18.0])  # all below 2 m or above 16 m: none in range
     lp = np.array([60.0, 58.0, 56.0, 40.0])
     sti = 0.6 - 0.02 * r
     res = open_plan_metrics(r, lp, sti)
@@ -119,3 +119,30 @@ def test_too_few_in_range_gives_nan_decay() -> None:
     assert math.isnan(res.lp_as_4m)
     # STI regression uses all positions: 0.5 = 0.6 - 0.02 r -> r = 5
     assert res.rd == pytest.approx(5.0, abs=1e-9)
+
+
+def test_nan_in_positions_raises() -> None:
+    """A NaN position must raise ValueError, not a raw LinAlgError."""
+    r = np.array([2.0, 4.0, np.nan, 16.0])
+    lp = np.array([70.0, 64.0, 58.0, 46.0])
+    sti = np.array([0.6, 0.5, 0.4, 0.3])
+    with pytest.raises(ValueError, match="finite"):
+        open_plan_metrics(r, lp, sti)
+
+
+def test_nan_in_spl_raises() -> None:
+    """A NaN speech level must raise ValueError."""
+    r = np.array([2.0, 4.0, 8.0, 16.0])
+    lp = np.array([70.0, np.nan, 58.0, 46.0])
+    sti = np.array([0.6, 0.5, 0.4, 0.3])
+    with pytest.raises(ValueError, match="finite"):
+        open_plan_metrics(r, lp, sti)
+
+
+def test_inf_in_sti_raises() -> None:
+    """An Inf STI value must raise ValueError."""
+    r = np.array([2.0, 4.0, 8.0, 16.0])
+    lp = np.array([70.0, 64.0, 58.0, 46.0])
+    sti = np.array([0.6, np.inf, 0.4, 0.3])
+    with pytest.raises(ValueError, match="finite"):
+        open_plan_metrics(r, lp, sti)

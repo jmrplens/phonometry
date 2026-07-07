@@ -263,6 +263,31 @@ def test_mls_snr_improves_with_averaging() -> None:
     assert snr_4 - snr_1 == pytest.approx(6.0, abs=1.5)
 
 
+def test_mls_multi_period_recording_averages_internally() -> None:
+    """A >1-period recording exercises the internal reshape/mean averaging
+    branch and recovers a known filter, beating a single noisy period."""
+    order = 14
+    a = mls_signal(order)
+    length = a.size
+    b = np.array([0.6, 0.25, 0.1, 0.05])  # known short FIR filter
+    reps = 4
+    rng = np.random.default_rng(2026)
+    # Steady-state periodic response: filter reps+1 tiles and drop the first
+    # (transient) period so every remaining period is the circular response.
+    x = np.tile(a, reps + 1)
+    y = signal.lfilter(b, 1.0, x)[length:]
+    noisy = y + rng.standard_normal(y.size) * 0.3
+    assert noisy.size == reps * length  # multi-period recording
+
+    ir_multi = mls_impulse_response(noisy, a)  # internal averaging over reps
+    ir_single = mls_impulse_response(noisy[:length], a)  # one noisy period
+
+    err_multi = float(np.max(np.abs(ir_multi[: b.size] - b)))
+    err_single = float(np.max(np.abs(ir_single[: b.size] - b)))
+    assert err_multi < err_single  # averaging lowers the error
+    assert err_multi < 0.02  # recovers the filter within a tight tolerance
+
+
 def test_invalid_arguments() -> None:
     with pytest.raises(ValueError):
         sweep_signal(FS, 100.0, 100.0, 1.0)  # f1 == f2

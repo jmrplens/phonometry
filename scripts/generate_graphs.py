@@ -1620,7 +1620,7 @@ def generate_schroeder_decay(output_dir: str) -> None:
 
     # Library outputs: the annotated numbers are exactly these.
     time, level = decay_curve(ir, fs)
-    res = room_parameters(ir, fs, bands=None)
+    res = room_parameters(ir, fs, limits=None)
     edt, t20, t30 = float(res.edt[0]), float(res.t20[0]), float(res.t30[0])
 
     # Raw squared-IR level trace (onset-trimmed, normalized to its peak):

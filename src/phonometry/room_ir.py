@@ -223,7 +223,11 @@ def impulse_response(
     :param method: ``"spectral"`` for spectral division
         ``H = Y*conj(X)/(|X|^2+reg)`` (Figure B.3, default) or ``"farina"``
         for convolution with the analytic inverse filter (Figure B.2). The
-        Farina method requires ``f_range``.
+        Farina method requires ``f_range`` and assumes the reference sweep was
+        generated with the default ``amplitude``/``fade`` of :func:`sweep`
+        (it rebuilds the inverse filter with those defaults); a non-unit
+        amplitude or custom fade yields a scaled IR, so use the spectral
+        method in that case.
     :param f_range: ``(f1, f2)`` of the sweep, required for ``method="farina"``
         to rebuild the inverse filter; ignored for the spectral method.
     :param regularization: Tikhonov term added to the denominator, expressed

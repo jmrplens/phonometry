@@ -89,7 +89,7 @@ def test_rt_exponential_broadband(t60: float) -> None:
     # T20 = T30 = EDT = T within +/-1 % (far below the Table A.1 JND of
     # rel. 5 % for EDT / reverberation).
     ir = exponential_ir(t60, 3.0 * t60)
-    res = room_parameters(ir, FS, bands=None)
+    res = room_parameters(ir, FS, limits=None)
     assert res.frequency is None
     assert res.edt[0] == pytest.approx(t60, rel=0.01)
     assert res.t20[0] == pytest.approx(t60, rel=0.01)
@@ -125,7 +125,7 @@ def test_rt_exponential_per_octave_band() -> None:
 def test_clarity_closed_form(t60: float) -> None:
     # C80 = 10*lg(exp(13.8155*0.08/T) - 1) dB; tolerance << 1 dB JND.
     ir = exponential_ir(t60, 3.0 * t60)
-    res = room_parameters(ir, FS, bands=None)
+    res = room_parameters(ir, FS, limits=None)
     assert res.c80[0] == pytest.approx(c_te_closed_form(t60, 0.080), abs=0.05)
     assert res.c50[0] == pytest.approx(c_te_closed_form(t60, 0.050), abs=0.05)
 
@@ -133,7 +133,7 @@ def test_clarity_closed_form(t60: float) -> None:
 @pytest.mark.parametrize("t60", [0.5, 1.0, 2.0])
 def test_definition_and_centre_time_closed_form(t60: float) -> None:
     ir = exponential_ir(t60, 3.0 * t60)
-    res = room_parameters(ir, FS, bands=None)
+    res = room_parameters(ir, FS, limits=None)
     # D50 = 1 - exp(-13.8155*0.05/T); tolerance << 0.05 JND.
     d50_expected = 1.0 - np.exp(-A60 * 0.05 / t60)
     assert res.d50[0] == pytest.approx(d50_expected, abs=0.005)
@@ -144,7 +144,7 @@ def test_definition_and_centre_time_closed_form(t60: float) -> None:
 def test_c50_d50_exact_relation() -> None:
     # C50 = 10*lg(D50/(1 - D50)) must hold exactly (Eq. A.12).
     ir = exponential_ir(1.2, 3.5)
-    res = room_parameters(ir, FS, bands=None)
+    res = room_parameters(ir, FS, limits=None)
     d50 = float(res.d50[0])
     assert res.c50[0] == pytest.approx(10.0 * np.log10(d50 / (1.0 - d50)),
                                        abs=1e-9)
@@ -156,8 +156,8 @@ def test_energy_parameters_shift_invariant() -> None:
     t60 = 1.0
     ir = exponential_ir(t60, 3.0)
     shifted = np.concatenate([np.zeros(int(0.05 * FS)), ir])
-    res_a = room_parameters(ir, FS, bands=None)
-    res_b = room_parameters(shifted, FS, bands=None)
+    res_a = room_parameters(ir, FS, limits=None)
+    res_b = room_parameters(shifted, FS, limits=None)
     assert res_b.c80[0] == pytest.approx(float(res_a.c80[0]), abs=0.05)
     assert res_b.ts[0] == pytest.approx(float(res_a.ts[0]), abs=5e-4)
     assert res_b.t30[0] == pytest.approx(float(res_a.t30[0]), rel=0.01)
@@ -174,7 +174,7 @@ def test_double_slope_edt_below_t30() -> None:
     t = np.arange(int(4.0 * fs)) / fs
     p2 = np.exp(-A60 * t / 0.4) + 1e-2 * np.exp(-A60 * t / 2.0)
     ir = np.sqrt(p2)
-    res = room_parameters(ir, fs, bands=None)
+    res = room_parameters(ir, fs, limits=None)
     assert np.isfinite(res.edt[0]) and np.isfinite(res.t30[0])
     assert res.edt[0] < res.t20[0] < res.t30[0]
     # Strong curvature indicator (ISO 3382-2, B.3: C > 10 % is suspicious).
@@ -192,7 +192,7 @@ def test_noise_flips_validity_flags() -> None:
     rng = np.random.default_rng(11)
     ir = exponential_ir(1.0, 3.0)
     noisy = ir + 10.0 ** (-30.0 / 20.0) * rng.standard_normal(ir.size)
-    res = room_parameters(noisy, FS, bands=None)
+    res = room_parameters(noisy, FS, limits=None)
     assert bool(res.edt_valid[0])
     assert not bool(res.t20_valid[0])
     assert not bool(res.t30_valid[0])
@@ -202,7 +202,7 @@ def test_noise_flips_validity_flags() -> None:
 
 def test_clean_ir_flags_all_valid() -> None:
     ir = exponential_ir(1.0, 3.0)
-    res = room_parameters(ir, FS, bands=None)
+    res = room_parameters(ir, FS, limits=None)
     assert bool(res.edt_valid[0] and res.t20_valid[0] and res.t30_valid[0])
     assert res.dynamic_range[0] > 45.0
 
@@ -211,7 +211,7 @@ def test_short_ir_yields_nan_and_invalid() -> None:
     # 0.3 s of a T = 2 s decay only covers ~9 dB: T30 (needs -35 dB) is
     # not evaluable.
     ir = exponential_ir(2.0, 0.3)
-    res = room_parameters(ir, FS, bands=None)
+    res = room_parameters(ir, FS, limits=None)
     assert np.isnan(res.t30[0])
     assert not bool(res.t30_valid[0])
 
@@ -222,7 +222,7 @@ def test_short_ir_yields_nan_and_invalid() -> None:
 def test_third_octave_bands_option() -> None:
     rng = np.random.default_rng(3)
     ir = exponential_ir(0.8, 2.0) * rng.standard_normal(int(2.0 * FS))
-    res = room_parameters(ir, FS, bands=(100.0, 5000.0), fraction=3)
+    res = room_parameters(ir, FS, limits=(100.0, 5000.0), fraction=3)
     assert res.frequency is not None
     assert len(res.frequency) == 18  # 100 Hz..5 kHz one-third octaves
     assert res.t20.shape == (18,)

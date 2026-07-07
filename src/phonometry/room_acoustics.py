@@ -331,7 +331,7 @@ def decay_curve(
 def room_parameters(
     ir: List[float] | np.ndarray,
     fs: int,
-    bands: Tuple[float, float] | None = _DEFAULT_BANDS,
+    limits: Tuple[float, float] | None = _DEFAULT_BANDS,
     fraction: int = 1,
 ) -> RoomAcousticsResult:
     """
@@ -356,7 +356,7 @@ def room_parameters(
 
     :param ir: Measured impulse response (1D).
     :param fs: Sample rate in Hz.
-    :param bands: ``(f_min, f_max)`` band-centre limits in Hz; default
+    :param limits: ``(f_min, f_max)`` band-centre limits in Hz; default
         octave bands 125 Hz to 4 kHz (ISO 3382-1:2009, 5.1). Use
         ``(100.0, 5000.0)`` with ``fraction=3`` for the one-third-octave
         engineering/precision range. ``None`` analyses the broadband
@@ -367,14 +367,14 @@ def room_parameters(
     """
     x = _validate_ir(ir, fs)
     frequency: np.ndarray | None
-    if bands is None:
+    if limits is None:
         frequency = None
         band_signals: List[np.ndarray] = [x]
     else:
-        if len(bands) != 2:
-            raise ValueError("'bands' must be a (f_min, f_max) pair or None.")
+        if len(limits) != 2:
+            raise ValueError("'limits' must be a (f_min, f_max) pair or None.")
         bank = OctaveFilterBank(
-            fs=fs, fraction=fraction, order=6, limits=[bands[0], bands[1]]
+            fs=fs, fraction=fraction, order=6, limits=[limits[0], limits[1]]
         )
         _, freqs, band_signals = bank.filter(
             x, sigbands=True, detrend=False, calculate_level=False

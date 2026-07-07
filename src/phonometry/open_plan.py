@@ -155,6 +155,15 @@ def open_plan_metrics(
             "ISO 3382-3 requires at least 4 measurement positions "
             f"(got {r.size})."
         )
+    if not (
+        np.all(np.isfinite(r))
+        and np.all(np.isfinite(lp))
+        and np.all(np.isfinite(sti))
+    ):
+        raise ValueError(
+            "positions_m, spl_a_speech and sti_values must be finite "
+            "(no NaN or Inf)."
+        )
     if np.any(r <= 0.0):
         raise ValueError("Distances 'positions_m' must be positive.")
 

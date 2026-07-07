@@ -201,9 +201,13 @@ centred on the tone with the two contiguous bands (clause 12). Both return a
 structured verdict against the frequency-dependent prominence criteria:
 
 ```python
+import numpy as np
 from phonometry import tone_to_noise_ratio, prominence_ratio
 
-x = signal                                  # the calibrated recording from the top of the page
+fs = 48000
+rng = np.random.default_rng(0)
+t = np.arange(fs) / fs
+x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # 1 kHz tone in noise
 tnr = tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
 pr = prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)

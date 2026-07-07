@@ -124,6 +124,7 @@ $$
 import numpy as np
 from phonometry import sti_from_impulse_response, stipa, stipa_signal
 
+fs = 48000
 # Una respuesta al impulso medida en la sala (decaimiento sintetizado para que el ejemplo funcione)
 ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
 

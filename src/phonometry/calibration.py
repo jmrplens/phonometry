@@ -185,7 +185,12 @@ def _narrowband_tone_rms(
     if 1 <= peak < magnitude.size - 1:
         a, b, c = magnitude[peak - 1], magnitude[peak], magnitude[peak + 1]
         denom = a - 2.0 * b + c
-        if denom != 0.0:
+        # Skip parabolic refinement on a degenerate flat-top peak. Guard the
+        # denominator against being negligible relative to the bin magnitudes
+        # involved rather than testing exact float equality (which the
+        # SonarCloud quality gate flags): a genuine tone gives denom of order
+        # the peak magnitude, so normal-tone behaviour is unchanged.
+        if abs(denom) > 1e-12 * max(a, b, c, np.finfo(np.float64).tiny):
             delta = float(np.clip(0.5 * (a - c) / denom, -0.5, 0.5))
             f0 = (peak + delta) * df
     idx = np.arange(n)

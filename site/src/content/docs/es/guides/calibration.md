@@ -52,7 +52,7 @@ ref_signal = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 signal = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # tu medición
 
 # 2. Calcula el factor de sensibilidad
-sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0)
+sensitivity = calculate_sensitivity(ref_signal, target_spl=94.0, fs=fs)
 
 # 3. Aplica la calibración a tus mediciones
 spl, freq = octavefilter(signal, fs, calibration_factor=sensitivity)

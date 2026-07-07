@@ -205,9 +205,13 @@ un veredicto estructurado frente a los criterios de prominencia dependientes de
 la frecuencia:
 
 ```python
+import numpy as np
 from phonometry import tone_to_noise_ratio, prominence_ratio
 
-x = signal                                  # la grabación calibrada del inicio de la página
+fs = 48000
+rng = np.random.default_rng(0)
+t = np.arange(fs) / fs
+x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # tono de 1 kHz en ruido
 tnr = tone_to_noise_ratio(x, fs)            # pico más alto, o tone_freq=...
 pr = prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)

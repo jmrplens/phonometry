@@ -92,6 +92,48 @@ def test_bias_correct_undoes_finite_difference_underread() -> None:
     assert cc.total_intensity == pytest.approx(r.total_intensity, rel=2e-3)
 
 
+def test_bias_correct_near_null_does_not_explode() -> None:
+    """A tone close to the first finite-difference null (c/(2*dr)) has a raw
+    intensity that is almost nulled; the un-clamped reciprocal
+    (k*dr)/sin(k*dr) would blow up by ~30x there and let a few near-null bins
+    dominate the total. Clamping the correction at k*dr = pi/2 keeps the
+    corrected total finite and bounded by the constant pi/2 factor."""
+    spacing = SPACING  # 12 mm -> first null at 343/0.024 = 14.3 kHz
+    f0 = 14000.0  # k*dr ~ 0.98*pi, deep in the near-null region
+    t = np.arange(int(FS * 2)) / FS
+    delay = spacing / C
+    p1 = np.sin(2 * np.pi * f0 * t)
+    p2 = np.sin(2 * np.pi * f0 * (t - delay))
+    raw = sound_intensity(p1, p2, FS, spacing, rho=RHO, c=C)
+    corr = sound_intensity(p1, p2, FS, spacing, rho=RHO, c=C, bias_correct=True)
+    k_dr = 2.0 * np.pi * f0 * spacing / C
+    assert k_dr > np.pi / 2.0  # the tone is past the cutoff
+    # The un-clamped correction factor at this bin is huge (documented blow-up).
+    assert k_dr / np.sin(k_dr) > 30.0
+    assert np.isfinite(corr.total_intensity)
+    # Every contributing bin sits above the cutoff, so all are held at the
+    # constant pi/2 factor: the corrected total is bounded, not amplified ~30x.
+    ratio = corr.total_intensity / raw.total_intensity
+    assert ratio == pytest.approx(np.pi / 2.0, rel=0.02)
+    assert abs(ratio) <= np.pi / 2.0 * 1.001
+
+
+def test_bias_correct_below_cutoff_matches_analytic() -> None:
+    """Below the pi/2 cutoff the clamped correction equals the exact
+    reciprocal, so bias_correct recovers the unbiased plane-wave intensity
+    A^2/(2*rho*c) (behaviour unchanged from the un-clamped correction)."""
+    spacing, f0 = SPACING, 4000.0  # k*dr = 0.88 rad < pi/2
+    t = np.arange(int(FS * 5.0)) / FS
+    amp = np.sqrt(2.0)  # 1 Pa rms
+    phi = 2.0 * np.pi * f0 * spacing / C
+    assert phi < np.pi / 2.0
+    p1 = amp * np.cos(2.0 * np.pi * f0 * t)
+    p2 = amp * np.cos(2.0 * np.pi * f0 * t - phi)
+    corr = sound_intensity(p1, p2, FS, spacing, rho=RHO, c=C, bias_correct=True)
+    true_plane = amp**2 / (2.0 * RHO * C)
+    assert corr.total_intensity == pytest.approx(true_plane, rel=0.02)
+
+
 def test_reversing_microphones_flips_the_sign() -> None:
     p1, p2 = _plane_wave_pair(delay_s=SPACING / C)
     fwd = sound_intensity(p1, p2, FS, SPACING, rho=RHO, c=C)

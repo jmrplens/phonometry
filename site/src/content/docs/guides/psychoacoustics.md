@@ -116,6 +116,7 @@ $$
 import numpy as np
 from phonometry import sti_from_impulse_response, stipa, stipa_signal
 
+fs = 48000
 # A measured room impulse response (synthesized decay so the example runs)
 ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
 

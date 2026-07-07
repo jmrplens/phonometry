@@ -221,6 +221,47 @@ def inverse_filter(
     return inv
 
 
+def _farina_deconvolve(
+    rec: np.ndarray,
+    ref: np.ndarray,
+    fs: int,
+    f_range: Tuple[float, float] | None,
+) -> np.ndarray:
+    """Farina inverse-filter deconvolution (ISO 18233:2006, Figure B.2).
+
+    Rebuilds the analytic inverse filter from ``ref`` and convolves it with the
+    recording, returning the full sequence with the causal IR rolled to index
+    0 (matching the spectral-method layout). Raises ``ValueError`` if
+    ``f_range`` is missing or if ``ref`` is zero-padded (the correct input for
+    the spectral method, which would silently produce a wrong inverse filter).
+    """
+    if f_range is None:
+        raise ValueError("method='farina' requires f_range=(f1, f2)")
+    # A reference that was zero-padded to the recording length - the correct
+    # input for method="spectral" - makes the rebuilt sweep longer than the
+    # real excitation, silently producing a wrong inverse filter (the IR peak
+    # is mislocated and orders of magnitude too small). Detect trailing
+    # zero-padding and reject it: a genuine (optionally faded) sweep has no
+    # trailing run of exact zeros.
+    nonzero = np.flatnonzero(ref)
+    last_nonzero = int(nonzero[-1]) if nonzero.size else -1
+    n_trailing = ref.size - 1 - last_nonzero
+    if n_trailing > _FARINA_MAX_TRAILING_ZEROS:
+        raise ValueError(
+            f"method='farina' requires the unpadded excitation sweep as "
+            f"'reference', but it ends in {n_trailing} zero samples "
+            "(zero-padding to the recording length is only correct for "
+            "method='spectral'). Pass the exact-length sweep from "
+            "sweep_signal(), or use method='spectral'."
+        )
+    inv = inverse_filter(fs, f_range[0], f_range[1], ref.size / fs)
+    conv = signal.fftconvolve(rec, inv)
+    # The linear IR peaks where the inverse aligns with the sweep, at index
+    # len(reference)-1. Roll it to index 0 so the layout matches the spectral
+    # method (causal at 0, negative times in the tail).
+    return np.roll(conv, -(ref.size - 1))
+
+
 def impulse_response(
     recorded: List[float] | np.ndarray,
     reference: List[float] | np.ndarray,
@@ -288,33 +329,7 @@ def impulse_response(
         h_spec = spec_y * np.conj(spec_x) / (power + reg)
         full = np.fft.irfft(h_spec, n=n)
     elif method == "farina":
-        if f_range is None:
-            raise ValueError("method='farina' requires f_range=(f1, f2)")
-        # The Farina inverse filter is rebuilt from the reference length
-        # (ref.size/fs is taken as the sweep duration). A reference that was
-        # zero-padded to the recording length - the correct input for
-        # method="spectral" - makes the rebuilt sweep longer than the real
-        # excitation, silently producing a wrong inverse filter (the IR peak
-        # is mislocated and orders of magnitude too small). Detect trailing
-        # zero-padding and reject it: a genuine (optionally faded) sweep has
-        # no trailing run of exact zeros.
-        nonzero = np.flatnonzero(ref)
-        last_nonzero = int(nonzero[-1]) if nonzero.size else -1
-        n_trailing = ref.size - 1 - last_nonzero
-        if n_trailing > _FARINA_MAX_TRAILING_ZEROS:
-            raise ValueError(
-                f"method='farina' requires the unpadded excitation sweep as "
-                f"'reference', but it ends in {n_trailing} zero samples "
-                "(zero-padding to the recording length is only correct for "
-                "method='spectral'). Pass the exact-length sweep from "
-                "sweep_signal(), or use method='spectral'."
-            )
-        inv = inverse_filter(fs, f_range[0], f_range[1], ref.size / fs)
-        conv = signal.fftconvolve(rec, inv)
-        # The linear IR peaks where the inverse aligns with the sweep, at
-        # index len(reference)-1. Roll it to index 0 so the layout matches
-        # the spectral method (causal at 0, negative times in the tail).
-        full = np.roll(conv, -(ref.size - 1))
+        full = _farina_deconvolve(rec, ref, fs, f_range)
     else:
         raise ValueError(f"unknown method {method!r}")
 
@@ -380,6 +395,15 @@ def mls_impulse_response(
     :param length: Number of IR samples to return. Defaults to the sequence
         length ``2**N - 1``.
     :return: The recovered impulse response.
+
+    .. note::
+        A ``UserWarning`` is emitted when the recovered IR retains significant
+        energy at the end of the period (a circular-aliasing symptom). The
+        tail-RMS heuristic is advisory: a high ambient noise floor in the
+        recording raises the tail RMS on its own and can trigger a
+        false positive even when the IR fits within one period, so treat the
+        warning as a prompt to check the noise floor and MLS order rather than
+        a definitive aliasing diagnosis.
     """
     rec = _typesignal(recorded)
     seq = _typesignal(mls)

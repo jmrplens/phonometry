@@ -43,8 +43,8 @@ sonar:
 	@if [ -f .env ]; then export $$(cat .env | xargs) && $(PNPM) exec sonar-scanner; else $(PNPM) exec sonar-scanner; fi
 
 graphs:
-	$(PYTHON) generate_graphs.py
-	$(PYTHON) generate_diagrams.py
+	$(PYTHON) scripts/generate_graphs.py
+	$(PYTHON) scripts/generate_diagrams.py
 
 llms:
 	$(PYTHON) scripts/gen_llms.py

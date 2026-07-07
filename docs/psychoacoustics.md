@@ -66,7 +66,7 @@ because its loudness sits higher on the Bark scale. Sharpness is the
 g(z)-weighted first moment of the specific loudness pattern:
 
 $$
-S = k\,\frac{\int_0^{24} N'(z)\, g(z)\, z\ dz}{\int_0^{24} N'(z)\ dz}\ \text{acum}
+S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz}\ \text{acum}
 $$
 
 with $g(z) = 1$ up to 15.8 Bark and rising exponentially beyond, and $k$
@@ -94,7 +94,7 @@ delta-like channel keeps m = 1 (STI = 1); reverberation low-passes the
 envelope following Schroeder's closed form, and steady noise scales it:
 
 $$
-m(F) = \frac{1}{\sqrt{1 + \left(2\pi F\,\frac{T_{60}}{13.8}\right)^2}}
+m(F) = \frac{1}{\sqrt{1 + \left(2\pi F\ \frac{T_{60}}{13.8}\right)^2}}
 \cdot \frac{1}{1 + 10^{-\mathrm{SNR}/10}}
 $$
 

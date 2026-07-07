@@ -16,15 +16,15 @@ from the pressure *gradient* (Euler's equation, finite-difference form):
 
 $$
 p = \frac{p_1 + p_2}{2}, \qquad
-u = -\frac{1}{\rho_0\,\Delta r}\int (p_2 - p_1)\ dt, \qquad
-I = \overline{p\,u}
+u = -\frac{1}{\rho_0\ \Delta r}\int (p_2 - p_1)\ dt, \qquad
+I = \overline{p\ u}
 $$
 
 In practice the estimator works in the frequency domain through the
 cross-spectrum of the two channels (the standard's equivalent form):
 
 $$
-I(f) = -\,\frac{\mathrm{Im}\{G_{12}(f)\}}{2\pi f\,\rho_0\,\Delta r}
+I(f) = -\ \frac{\mathrm{Im}\lbrace G_{12}(f)\rbrace}{2\pi f\ \rho_0\ \Delta r}
 $$
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Two-microphone p-p intensity probe with the spacer distance and the measurement axis" width="92%"></picture>

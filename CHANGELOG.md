@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `sweep_signal()`, `inverse_filter()`, `impulse_response()`, `mls_signal()`
+  and `mls_impulse_response()` — deterministic-excitation impulse-response
+  acquisition per ISO 18233:2006 (exponential sine sweep with spectral and
+  Farina deconvolution, maximum-length sequences), verified by recovering
+  known impulse responses at the correct sample lags.
+- `decay_curve()`, `room_parameters()` and `RoomAcousticsResult` — room
+  acoustic parameters per ISO 3382-1:2009 / 3382-2:2008 (Schroeder backward
+  integration with noise truncation and tail compensation; EDT/T20/T30,
+  C50/C80, D50, Ts with dynamic-range validity flags and curvature),
+  verified against the exponential-decay closed forms within their JNDs.
+- `open_plan_metrics()` and `OpenPlanResult` — open-plan-office spatial
+  speech metrics per ISO 3382-3:2012 (spatial decay rate D2,S and Lp,A,S,4m
+  from the log-distance regression, distraction distance rD and privacy
+  distance rP from the STI-vs-distance line).
+- `airborne_insulation()`, `weighted_rating()`, `energy_average_level()`
+  and the `AirborneInsulationResult` / `WeightedRatingResult` dataclasses —
+  field airborne sound insulation per ISO 16283-1:2014 (D, DnT, R') and
+  single-number weighted ratings with C/Ctr per ISO 717-1 (reference-curve
+  method), verified against the ISO 717-1 Annex C worked example.
 - `loudness_zwicker()` / `loudness_zwicker_from_spectrum()` — Zwicker
   loudness per ISO 532-1:2017 (stationary and time-varying), a clean-room
   port of the normative reference program with the full Annex B validation

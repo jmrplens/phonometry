@@ -36,6 +36,22 @@ from .parametric_filters import (
     time_weighting,
     weighting_filter,
 )
+from .insulation import (
+    AirborneInsulationResult,
+    WeightedRatingResult,
+    airborne_insulation,
+    energy_average_level,
+    weighted_rating,
+)
+from .open_plan import OpenPlanResult, open_plan_metrics
+from .room_acoustics import RoomAcousticsResult, decay_curve, room_parameters
+from .room_ir import (
+    impulse_response,
+    inverse_filter,
+    mls_impulse_response,
+    mls_signal,
+    sweep_signal,
+)
 from ._version import __version__
 
 # Public methods
@@ -78,6 +94,21 @@ __all__ = [
     "stipa",
     "stipa_signal",
     "STIResult",
+    "sweep_signal",
+    "inverse_filter",
+    "impulse_response",
+    "mls_signal",
+    "mls_impulse_response",
+    "room_parameters",
+    "decay_curve",
+    "RoomAcousticsResult",
+    "open_plan_metrics",
+    "OpenPlanResult",
+    "airborne_insulation",
+    "AirborneInsulationResult",
+    "weighted_rating",
+    "WeightedRatingResult",
+    "energy_average_level",
     "lden",
     "ldn",
     "composite_rating_level",

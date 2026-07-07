@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from .loudness_ecma import EcmaLoudness
     from .room_acoustics import DecayCurve, RoomAcousticsResult
     from .tonality_ecma import EcmaTonality
+    from .roughness_ecma import EcmaRoughness
     from .sti import STIResult
 
 _INSTALL_HINT = (
@@ -252,6 +253,58 @@ def plot_ecma_tonality(
     ax_time.set_ylim(bottom=0.0)
     ax_time.grid(True, alpha=0.3)
     ax_time.legend(loc="best", fontsize="small")
+    return axes
+
+
+def plot_ecma_roughness(
+    result: EcmaRoughness, ax: Axes | None = None, **kwargs: Any
+) -> Axes | np.ndarray:
+    """Time-dependent roughness R(l50) and a specific-roughness heatmap.
+
+    When ``ax`` is ``None`` a two-panel figure is drawn (roughness vs time and
+    a specific-roughness R'(l50, z) heatmap over the critical-band-rate scale)
+    and an array of two axes is returned; when ``ax`` is supplied only the
+    time-dependent roughness is drawn on it and that single axes is returned.
+
+    :param result: An :class:`~phonometry.roughness_ecma.EcmaRoughness`.
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the roughness-vs-time line ``plot`` call.
+    :return: The axes, or an array of two axes.
+    """
+    time = np.asarray(result.time, dtype=np.float64)
+    rvt = np.asarray(result.roughness_vs_time, dtype=np.float64)
+    two_panel = ax is None
+
+    if two_panel:
+        axes = _new_axes_column(2, figsize=(7.0, 6.0))
+        ax_time = cast("Axes", axes[0])
+    else:
+        ax_time = cast("Axes", ax)
+
+    kwargs.setdefault("color", "#8c564b")
+    ax_time.plot(time, rvt, **kwargs)
+    ax_time.fill_between(time, rvt, color="#8c564b", alpha=0.25)
+    ax_time.set_xlabel("Time [s]")
+    ax_time.set_ylabel("Roughness R [asper]")
+    ax_time.set_ylim(bottom=0.0)
+    ax_time.set_title(f"Roughness R = {result.roughness:.2f} asper")
+    ax_time.grid(True, alpha=0.3)
+
+    if not two_panel:
+        return ax_time
+
+    ax_heat = cast("Axes", axes[1])
+    bark = np.asarray(result.bark, dtype=np.float64)
+    spec = np.asarray(result.specific_roughness_vs_time, dtype=np.float64)
+    if time.size >= 2 and spec.size:
+        mesh = ax_heat.pcolormesh(
+            time, bark, spec.T, cmap="magma", shading="auto"
+        )
+        ax_heat.figure.colorbar(
+            mesh, ax=ax_heat, label="R' [asper/Bark_HMS]"
+        )
+    ax_heat.set_xlabel("Time [s]")
+    ax_heat.set_ylabel("Critical-band rate z [Bark_HMS]")
     return axes
 
 

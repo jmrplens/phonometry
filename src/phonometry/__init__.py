@@ -30,6 +30,7 @@ from .loudness_contours import equal_loudness_contour, hearing_threshold, loudne
 from .sharpness import sharpness_din, sharpness_din_from_specific
 from .sti import STIResult, sti_from_impulse_response, stipa, stipa_signal
 from .tonality_ecma import EcmaTonality, tonality_ecma
+from .roughness_ecma import EcmaRoughness, roughness_ecma
 from .tonality import ToneAssessment, prominence_ratio, tone_to_noise_ratio
 from .parametric_filters import (
     TimeWeighting,
@@ -115,6 +116,8 @@ __all__ = [
     "EcmaLoudness",
     "tonality_ecma",
     "EcmaTonality",
+    "roughness_ecma",
+    "EcmaRoughness",
     "sharpness_din",
     "sharpness_din_from_specific",
     "equal_loudness_contour",

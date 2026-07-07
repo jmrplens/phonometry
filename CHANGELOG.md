@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- One-line canonical `.plot()` method on every public result object —
+  `ZwickerLoudness`, `STIResult`, `RoomAcousticsResult`, `DecayCurve`,
+  `WeightedRatingResult`, `ImpactRatingResult`, `SoundPowerResult`,
+  `ReverberationSoundPowerResult`, `SoundPowerIntensityResult` and
+  `IntensityResult` — reproducing each result's documentation figure in a
+  single call (`res.plot()`). matplotlib stays a soft dependency: importing
+  and computing work without it, and `.plot()` raises a clear `ImportError`
+  with `pip install phonometry[plot]` guidance when it is missing. The
+  renderers create their own figure when `ax` is `None`, always return the
+  Matplotlib `Axes` (an array for multi-panel figures) and never call
+  `plt.show()`, so they compose into larger layouts.
 - `sweep_signal()`, `inverse_filter()`, `impulse_response()`, `mls_signal()`
   and `mls_impulse_response()` — deterministic-excitation impulse-response
   acquisition per ISO 18233:2006 (exponential sine sweep with spectral and
@@ -112,6 +123,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- `decay_curve()` now returns a `DecayCurve` dataclass (`time`, `level`,
+  `band`) with a `.plot()` method instead of a bare `(time, level)` tuple.
+  Backward compatible: `time, level = decay_curve(ir, fs)` still unpacks
+  because `DecayCurve` iterates as `(time, level)`.
 - `lc_peak()` now polyphase-oversamples the C-weighted signal (new
   `oversample` parameter, default 8) before peak detection, recovering the
   true inter-sample peak. Sustained high-frequency tones previously

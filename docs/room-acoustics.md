@@ -172,7 +172,35 @@ print(round(float(res.ts[0]) * 1000, 0))             # 72 ms
 octaves = room_parameters(ir, fs)
 print(octaves.frequency)                             # ~[126, 251, 501, 1000, 1995, 3981]
 print(octaves.t30_valid)                             # per-band dynamic-range flags
+
+octaves.plot()               # per-band EDT/T20/T30 + C50/C80 bars (needs matplotlib)
+decay_curve(ir, fs).plot()   # Schroeder decay with EDT/T20/T30 fit overlays
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — Schroeder decay with the EDT/T20/T30 straight-line fits:
+decay = decay_curve(ir, fs)          # a DecayCurve (still unpacks as time, level)
+decay.plot()
+plt.show()
+
+# By hand, the decay is just the Schroeder curve; mark the evaluation levels:
+fig, ax = plt.subplots()
+ax.plot(time, level, color="#1f77b4", label="Schroeder decay")
+for db in (-5.0, -25.0, -35.0):      # T20 / T30 evaluation-window edges
+    ax.axhline(db, ls=":", alpha=0.4)
+ax.set_xlabel("Time [s]")
+ax.set_ylabel("Level re steady state [dB]")
+ax.set_ylim(top=3.0)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 For this single-slope decay EDT, T20 and T30 all return ≈ 1.0 s, and the
 energy parameters match their closed forms (C80 = 3.05 dB, D50 = 0.499,
@@ -298,7 +326,35 @@ R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
      28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
 w = weighted_rating(R)
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
+
+w.plot()   # measured R' vs shifted ISO 717-1 reference, deviations shaded (needs matplotlib)
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — measured curve vs the shifted ISO 717-1 reference, deviations shaded:
+w.plot()
+plt.show()
+
+# By hand, from the band curve the result now carries:
+fig, ax = plt.subplots()
+ax.semilogx(w.band_centers, w.measured, "o-", label="Measured R'")
+ax.semilogx(w.band_centers, w.shifted_reference, "s--", label="Shifted reference")
+ax.fill_between(w.band_centers, w.measured, w.shifted_reference,
+                where=w.measured < w.shifted_reference, interpolate=True,
+                alpha=0.3, label="Unfavourable deviations")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound reduction index [dB]")
+ax.set_title(f"Rw = {w.rating} dB  (C={w.c:+d}; Ctr={w.ctr:+d})")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Compute `l1`, `l2` and `t2` on the same 16 one-third-octave bands from
 100 Hz to 3150 Hz — obtain `t2` from
@@ -383,7 +439,36 @@ print(r.rating, r.ci, r.unfavourable_sum)     # 79 -11 28.0  ->  L'nT,w(CI)=79(-
 # Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(weighted_impact_rating(octave).rating)  # 54
+
+r.plot()   # measured Ln vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — measured Ln vs the shifted ISO 717-2 reference (measured-above shaded):
+r.plot()
+plt.show()
+
+# By hand, from the band curve the result now carries (note the opposite sign:
+# an unfavourable deviation is where the MEASURED level exceeds the reference):
+fig, ax = plt.subplots()
+ax.semilogx(r.band_centers, r.measured, "o-", label="Measured Ln")
+ax.semilogx(r.band_centers, r.shifted_reference, "s--", label="Shifted reference")
+ax.fill_between(r.band_centers, r.shifted_reference, r.measured,
+                where=r.measured > r.shifted_reference, interpolate=True,
+                alpha=0.3, label="Unfavourable deviations")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Impact sound pressure level [dB]")
+ax.set_title(f"Ln,w = {r.rating} dB  (CI={r.ci:+d})")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Feed `impact_insulation`'s `l_n_t` (or `l_n`) straight into
 `weighted_impact_rating`; the rating and `CI` reproduce the ISO 717-2 Annex C

@@ -48,7 +48,39 @@ print(res.n5, res.n10, res.loudness)   # N5, N10, Nmax
 
 # Desde 28 niveles de tercio de octava (25 Hz .. 12.5 kHz)
 res = loudness_zwicker_from_spectrum(levels_28, field="diffuse")
+
+res.plot()   # N'(z) sobre la escala Bark — el patrón de sonoridad específica (requiere matplotlib)
 ```
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# En una línea — el patrón de sonoridad específica N'(z) desde el resultado:
+res.plot()
+plt.show()
+
+# O reproduce la figura a mano — dos patrones con el mismo nivel de banda (60 dB),
+# la energía repartida entre muchas bandas críticas frente a la banda de 1 kHz:
+narrow = loudness_zwicker_from_spectrum(np.r_[np.full(16, -60.0), 60.0, np.full(11, -60.0)])
+broad = loudness_zwicker_from_spectrum(np.full(28, 60.0))
+z = np.arange(1, narrow.specific.size + 1) * 0.1          # eje Bark
+fig, ax = plt.subplots()
+for r, color, label in [
+    (broad, "#ff7f0e", f"Banda ancha  N = {broad.loudness:.1f} sone"),
+    (narrow, "#1f77b4", f"Banda estrecha 1 kHz  N = {narrow.loudness:.1f} sone"),
+]:
+    ax.fill_between(z, r.specific, color=color, alpha=0.3)
+    ax.plot(z, r.specific, color=color, label=label)
+ax.set_xlabel("Tasa de banda crítica z [Bark]")
+ax.set_ylabel("Sonoridad específica N' [sone/Bark]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 La implementación es un port de sala limpia del **programa de referencia
 normativo** de la norma (Anexo A.4): las doce tablas de datos son exactas
@@ -136,6 +168,7 @@ print(f"STI = {res.sti:.2f}  ({res.rating})")   # p. ej. 0.62 (D)
 test = stipa_signal(fs, seconds=18.0, level_db=80.0)
 recording = test                       # en la práctica, la señal del micrófono tras la reproducción
 res = stipa(recording, fs)
+res.plot()   # barras del índice de transferencia de modulación (MTI) por banda; STI y valoración en el título
 ```
 
 `stipa` emite un `UserWarning` cuando la grabación es más corta que los 15 s

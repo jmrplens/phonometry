@@ -45,6 +45,7 @@ res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
 print(res.total_intensity_level, res.total_direction)      # LI [dB], ±1
 print(res.frequency, res.intensity_level)                  # per band
+res.plot()   # Lp vs LI per band + the pressure-intensity index (needs matplotlib)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.png" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%"></picture>
@@ -54,6 +55,32 @@ L_I ≈ L_p. Right: a standing wave carries (almost) no net energy — the
 pressure is high but the intensity collapses. The gap L_p − L_I is the
 **pressure-intensity index**, the fundamental quality indicator of every
 intensity measurement.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — Lp vs LI per band with the pressure-intensity index on a twin axis:
+res.plot()
+plt.show()
+
+# By hand, from the per-band fields the result carries:
+fig, ax = plt.subplots()
+ax.semilogx(res.frequency, res.pressure_level, "o-", label="Pressure level Lp")
+ax.semilogx(res.frequency, res.intensity_level, "s--", label="Intensity level LI")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Level [dB]")
+twin = ax.twinx()
+twin.bar(res.frequency, res.pressure_intensity_index,
+         width=res.frequency * 0.2, color="#2ca02c", alpha=0.25)
+twin.set_ylabel("δpI = Lp − LI [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ## Knowing when to trust the number
 

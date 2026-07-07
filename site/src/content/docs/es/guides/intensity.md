@@ -47,6 +47,7 @@ res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
 print(res.total_intensity_level, res.total_direction)      # LI [dB], ±1
 print(res.frequency, res.intensity_level)                  # por banda
+res.plot()   # Lp frente a LI por banda + el índice presión-intensidad (requiere matplotlib)
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_es.png" alt="Niveles de presión e intensidad en tercios de octava para una onda plana progresiva frente a una onda estacionaria" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_es_dark.png" alt="Niveles de presión e intensidad en tercios de octava para una onda plana progresiva frente a una onda estacionaria" style="width:92%">
@@ -56,6 +57,32 @@ L_I ≈ L_p. Derecha: una onda estacionaria no transporta (casi) energía neta �
 la presión es alta pero la intensidad se desploma. La diferencia L_p − L_I es
 el **índice presión-intensidad**, el indicador de calidad fundamental de toda
 medición de intensidad.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# En una línea — Lp frente a LI por banda, con el índice presión-intensidad en un eje gemelo:
+res.plot()
+plt.show()
+
+# A mano, con los campos por banda que lleva el resultado:
+fig, ax = plt.subplots()
+ax.semilogx(res.frequency, res.pressure_level, "o-", label="Nivel de presión Lp")
+ax.semilogx(res.frequency, res.intensity_level, "s--", label="Nivel de intensidad LI")
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Nivel [dB]")
+twin = ax.twinx()
+twin.bar(res.frequency, res.pressure_intensity_index,
+         width=res.frequency * 0.2, color="#2ca02c", alpha=0.25)
+twin.set_ylabel("δpI = Lp − LI [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ## Saber cuándo fiarse del número
 

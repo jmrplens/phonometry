@@ -44,7 +44,39 @@ print(res.n5, res.n10, res.loudness)   # N5, N10, Nmax
 
 # From 28 one-third-octave band levels (25 Hz .. 12.5 kHz)
 res = loudness_zwicker_from_spectrum(levels_28, field="diffuse")
+
+res.plot()   # N'(z) over the Bark scale — the specific-loudness pattern (needs matplotlib)
 ```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — the specific-loudness pattern N'(z) straight from the result:
+res.plot()
+plt.show()
+
+# Or reproduce the figure by hand — two patterns of equal band level (60 dB),
+# energy spread over many critical bands vs concentrated in the 1 kHz band:
+narrow = loudness_zwicker_from_spectrum(np.r_[np.full(16, -60.0), 60.0, np.full(11, -60.0)])
+broad = loudness_zwicker_from_spectrum(np.full(28, 60.0))
+z = np.arange(1, narrow.specific.size + 1) * 0.1          # Bark axis
+fig, ax = plt.subplots()
+for r, color, label in [
+    (broad, "#ff7f0e", f"Broadband  N = {broad.loudness:.1f} sone"),
+    (narrow, "#1f77b4", f"1 kHz narrowband  N = {narrow.loudness:.1f} sone"),
+]:
+    ax.fill_between(z, r.specific, color=color, alpha=0.3)
+    ax.plot(z, r.specific, color=color, label=label)
+ax.set_xlabel("Critical-band rate z [Bark]")
+ax.set_ylabel("Specific loudness N' [sone/Bark]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 The implementation is a clean-room port of the standard's **normative
 reference program** (Annex A.4): all twelve data tables are digit-exact and
@@ -127,6 +159,7 @@ print(f"STI = {res.sti:.2f}  ({res.rating})")   # e.g. 0.62 (D)
 test = stipa_signal(fs, seconds=18.0, level_db=80.0)
 recording = test                       # in practice, the microphone signal after playback
 res = stipa(recording, fs)
+res.plot()   # per-band modulation transfer index (MTI) bars, STI + rating in the title
 ```
 
 `stipa` emits a `UserWarning` when the recording is shorter than the

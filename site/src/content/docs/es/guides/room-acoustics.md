@@ -179,7 +179,35 @@ print(round(float(res.ts[0]) * 1000, 0))             # 72 ms
 octaves = room_parameters(ir, fs)
 print(octaves.frequency)                             # ~[126, 251, 501, 1000, 1995, 3981]
 print(octaves.t30_valid)                             # indicadores de rango dinámico por banda
+
+octaves.plot()               # barras EDT/T20/T30 + C50/C80 por banda (requiere matplotlib)
+decay_curve(ir, fs).plot()   # curva de Schroeder con los ajustes EDT/T20/T30
 ```
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# En una línea — la curva de Schroeder con los ajustes rectos EDT/T20/T30:
+decay = decay_curve(ir, fs)          # un DecayCurve (se sigue desempaquetando como time, level)
+decay.plot()
+plt.show()
+
+# A mano, el decaimiento es solo la curva de Schroeder; marca los niveles de evaluación:
+fig, ax = plt.subplots()
+ax.plot(time, level, color="#1f77b4", label="Curva de Schroeder")
+for db in (-5.0, -25.0, -35.0):      # bordes de la ventana de evaluación T20 / T30
+    ax.axhline(db, ls=":", alpha=0.4)
+ax.set_xlabel("Tiempo [s]")
+ax.set_ylabel("Nivel re régimen permanente [dB]")
+ax.set_ylim(top=3.0)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Para este decaimiento de pendiente única, EDT, T20 y T30 devuelven todos
 ≈ 1,0 s, y los parámetros de energía coinciden con sus formas cerradas
@@ -309,7 +337,35 @@ R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
      28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
 w = weighted_rating(R)
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
+
+w.plot()   # R' medido frente a la referencia ISO 717-1 desplazada, desviaciones sombreadas (requiere matplotlib)
 ```
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# En una línea — la curva medida frente a la referencia ISO 717-1 desplazada:
+w.plot()
+plt.show()
+
+# A mano, con los campos de la curva por banda que ahora lleva el resultado:
+fig, ax = plt.subplots()
+ax.semilogx(w.band_centers, w.measured, "o-", label="R' medido")
+ax.semilogx(w.band_centers, w.shifted_reference, "s--", label="Referencia desplazada")
+ax.fill_between(w.band_centers, w.measured, w.shifted_reference,
+                where=w.measured < w.shifted_reference, interpolate=True,
+                alpha=0.3, label="Desviaciones desfavorables")
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Índice de reducción sonora [dB]")
+ax.set_title(f"Rw = {w.rating} dB  (C={w.c:+d}; Ctr={w.ctr:+d})")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Calcula `l1`, `l2` y `t2` en las mismas 16 bandas de tercio de octava de
 100 Hz a 3150 Hz — obtén `t2` de
@@ -396,7 +452,36 @@ print(r.rating, r.ci, r.unfavourable_sum)     # 79 -11 28.0  ->  L'nT,w(CI)=79(-
 # Los datos en banda de octava llevan la reducción extra de -5 dB (Cláusula 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(weighted_impact_rating(octave).rating)  # 54
+
+r.plot()   # Ln medido frente a la referencia ISO 717-2 desplazada, exceso sombreado (requiere matplotlib)
 ```
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# En una línea — Ln medido frente a la referencia ISO 717-2 desplazada (exceso sombreado):
+r.plot()
+plt.show()
+
+# A mano, con la curva por banda que ahora lleva el resultado (signo opuesto: la
+# desviación desfavorable está donde el nivel MEDIDO supera la referencia):
+fig, ax = plt.subplots()
+ax.semilogx(r.band_centers, r.measured, "o-", label="Ln medido")
+ax.semilogx(r.band_centers, r.shifted_reference, "s--", label="Referencia desplazada")
+ax.fill_between(r.band_centers, r.shifted_reference, r.measured,
+                where=r.measured > r.shifted_reference, interpolate=True,
+                alpha=0.3, label="Desviaciones desfavorables")
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Nivel de presión sonora de impacto [dB]")
+ax.set_title(f"Ln,w = {r.rating} dB  (CI={r.ci:+d})")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Pasa el `l_n_t` (o `l_n`) de `impact_insulation` directamente a
 `weighted_impact_rating`; el índice y `CI` reproducen los valores del Anexo C de

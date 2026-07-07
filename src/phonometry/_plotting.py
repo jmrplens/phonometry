@@ -570,6 +570,52 @@ def _require_rating_curve(result: Any) -> None:
         )
 
 
+def plot_facade_insulation(
+    result: Any, ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Per-band façade sound-insulation profile (ISO 16283-3).
+
+    Draws the standardized level difference ``D2m,nT`` first, then the
+    other available quantities (``D2m``, ``D2m,n``, ``R'``) against
+    frequency. Works for
+    :class:`~phonometry.insulation.FacadeInsulationResult`.
+
+    :param result: A façade result exposing ``d_2m``, ``d_2m_nt``,
+        ``d_2m_n``, ``r_prime`` and (optionally) ``frequencies``.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    dnt = np.asarray(result.d_2m_nt, dtype=np.float64)
+    n = dnt.size
+    freqs = getattr(result, "frequencies", None)
+    if freqs is None:
+        x = np.arange(n, dtype=np.float64)
+        ax.set_xticks(x)
+        ax.set_xticklabels([f"Band {i + 1}" for i in range(n)],
+                           rotation=45, ha="right")
+        ax.set_xlabel("Band")
+    else:
+        x = np.asarray(freqs, dtype=np.float64)
+        _freq_axis(ax, x)
+
+    # D2m,nT first so it is lines[0]; other quantities follow when present.
+    curves = [("$D_{2m,nT}$", dnt)]
+    curves.append(("$D_{2m}$", np.asarray(result.d_2m, dtype=np.float64)))
+    if result.d_2m_n is not None:
+        curves.append(("$D_{2m,n}$", np.asarray(result.d_2m_n, dtype=np.float64)))
+    if result.r_prime is not None:
+        curves.append(("$R'$", np.asarray(result.r_prime, dtype=np.float64)))
+    for label, y in curves:
+        ax.plot(x, y, "o-", label=label, **kwargs)
+
+    ax.set_ylabel("Level difference / reduction index [dB]")
+    ax.set_title("Façade sound insulation (ISO 16283-3)")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, alpha=0.3)
+    return ax
+
+
 # ---------------------------------------------------------------------------
 # Room acoustics (ISO 3382)
 # ---------------------------------------------------------------------------

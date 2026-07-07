@@ -51,11 +51,13 @@ from .parametric_filters import (
 )
 from .insulation import (
     AirborneInsulationResult,
+    FacadeInsulationResult,
     ImpactInsulationResult,
     ImpactRatingResult,
     WeightedRatingResult,
     airborne_insulation,
     energy_average_level,
+    facade_insulation,
     impact_insulation,
     weighted_impact_rating,
     weighted_rating,
@@ -185,6 +187,8 @@ __all__ = [
     "WeightedRatingResult",
     "weighted_impact_rating",
     "ImpactRatingResult",
+    "facade_insulation",
+    "FacadeInsulationResult",
     "energy_average_level",
     "lden",
     "ldn",

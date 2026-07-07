@@ -26,6 +26,12 @@ from .intensity import (
 from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
 from .loudness import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
 from .loudness_ecma import EcmaLoudness, loudness_ecma
+from .loudness_moore_glasberg import (
+    MooreGlasbergLoudness,
+    loudness_moore_glasberg,
+    loudness_moore_glasberg_from_spectrum,
+    loudness_moore_glasberg_from_third_octave,
+)
 from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
 from .sharpness import sharpness_din, sharpness_din_from_specific
 from .sti import STIResult, sti_from_impulse_response, stipa, stipa_signal
@@ -114,6 +120,10 @@ __all__ = [
     "ZwickerLoudness",
     "loudness_ecma",
     "EcmaLoudness",
+    "loudness_moore_glasberg",
+    "loudness_moore_glasberg_from_spectrum",
+    "loudness_moore_glasberg_from_third_octave",
+    "MooreGlasbergLoudness",
     "tonality_ecma",
     "EcmaTonality",
     "roughness_ecma",

@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from .intensity import IntensityResult
     from .loudness import ZwickerLoudness
     from .loudness_ecma import EcmaLoudness
+    from .loudness_moore_glasberg import MooreGlasbergLoudness
     from .room_acoustics import DecayCurve, RoomAcousticsResult
     from .tonality_ecma import EcmaTonality
     from .roughness_ecma import EcmaRoughness
@@ -204,6 +205,41 @@ def plot_ecma_loudness(
     ax_time.grid(True, alpha=0.3)
     ax_time.legend(loc="best", fontsize="small")
     return axes
+
+
+# ---------------------------------------------------------------------------
+# ISO 532-2 Moore-Glasberg loudness
+# ---------------------------------------------------------------------------
+
+
+def plot_moore_glasberg_loudness(
+    result: MooreGlasbergLoudness, ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Specific loudness N'(i) over the ERB-number (Cam) scale (ISO 532-2).
+
+    :param result: A
+        :class:`~phonometry.loudness_moore_glasberg.MooreGlasbergLoudness`.
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the specific-loudness line ``plot`` call.
+    :return: The axes.
+    """
+    specific = np.asarray(result.specific, dtype=np.float64)
+    erb_number = np.asarray(result.erb_number, dtype=np.float64)
+    ax = ax if ax is not None else _new_axes()
+
+    kwargs.setdefault("color", "#1f77b4")
+    ax.plot(erb_number, specific, **kwargs)
+    ax.fill_between(erb_number, specific, color="#1f77b4", alpha=0.25)
+    ax.set_xlabel("ERB number [Cam]")
+    ax.set_ylabel("Specific loudness N' [sone/Cam]")
+    ax.set_xlim(erb_number[0], erb_number[-1])
+    ax.set_ylim(bottom=0.0)
+    ax.set_title(
+        f"Loudness N = {result.loudness:.2f} sone "
+        f"({result.loudness_level:.1f} phon)"
+    )
+    ax.grid(True, alpha=0.3)
+    return ax
 
 
 def plot_ecma_tonality(

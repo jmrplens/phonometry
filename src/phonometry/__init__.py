@@ -107,6 +107,22 @@ from .room_ir import (
     mls_signal,
     sweep_signal,
 )
+from .building_prediction import (
+    AirbornePredictionResult,
+    FlankingPath,
+    ImpactPredictionResult,
+    PathContribution,
+    combine_linings,
+    equivalent_impact_level,
+    flanking_element,
+    flanking_path,
+    impact_flanking_correction,
+    junction_min_vibration_reduction,
+    junction_vibration_reduction,
+    predicted_airborne_insulation,
+    predicted_impact_insulation,
+    standardized_impact_level,
+)
 from ._version import __version__
 
 # Public methods
@@ -209,6 +225,20 @@ __all__ = [
     "composite_rating_level",
     "CalibrationWarning",
     "verify_filter_class",
+    "predicted_airborne_insulation",
+    "AirbornePredictionResult",
+    "predicted_impact_insulation",
+    "ImpactPredictionResult",
+    "junction_vibration_reduction",
+    "junction_min_vibration_reduction",
+    "flanking_path",
+    "flanking_element",
+    "FlankingPath",
+    "PathContribution",
+    "combine_linings",
+    "equivalent_impact_level",
+    "impact_flanking_correction",
+    "standardized_impact_level",
 ]
 
 

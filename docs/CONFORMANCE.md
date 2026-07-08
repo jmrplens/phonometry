@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **26/26 conformance checks pass** across 6 domains and 20 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **32/32 conformance checks pass** across 7 domains and 25 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -95,4 +95,15 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 717-1 Annex C, Table C.1 | Weighted sound reduction index Rw (C;Ctr) | Rw 30 (C -2; Ctr -3) | Rw 30 (C -2; Ctr -3) | sum 31.8 dB | &#9989; |
 | ISO 354:2003 Eq. 5/8 | Sabine inversion recovers absorption area | 9.212828 m^2 (+/-0 m^2) | 9.212828 m^2 | 0 m^2 | &#9989; |
 | ISO 3382-3:2012 Clause 6.2 | Open-plan spatial decay rate D2,S (-6 dB/doubling) | 6 dB (+/-0 dB) | 6 dB | 0 dB | &#9989; |
+| ISO 16283-3:2016 Clause 3.12 | Facade R'45 isolates the -1.5 dB incidence correction (S=A) | 38.5 dB (+/-0 dB) | 38.5 dB | 0 dB | &#9989; |
+| ISO 10140-2:2010 Formula (2) | Lab airborne R on the ISO 717-1 reference shape -> Rw = 54 | Rw 54 dB | Rw 54 dB | +0 dB | &#9989; |
+
+### Building prediction & uncertainty
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| EN 12354-1:2000 Annex H.3 | Airborne prediction R'w (direct + 12 flanking paths) | R'w 52 dB (13 paths) | R'w 52 dB (13 paths, 52.17) | +0.17 dB | &#9989; |
+| EN 12354-2:2000 Annex E.3 | Impact prediction L'n,w = Ln,w,eq - dLw + K | 45 dB (+/-0 dB) | 45 dB | 0 dB | &#9989; |
+| ISO 12999-1:2020 Table 2 | Airborne band uncertainty, situation A @ 1 kHz | 1.8 dB (+/-0 dB) | 1.8 dB | 0 dB | &#9989; |
+| ISO 12999-1:2020 Clause 8 / Table 8 | Expanded uncertainty U = 1.96 u (95 % two-sided, Rw sit. A) | 2.352 dB (+/-0 dB) | 2.352 dB | 0 dB | &#9989; |
 

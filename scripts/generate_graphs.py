@@ -230,6 +230,22 @@ _ES_EXACT = {
     "1 kHz burst, 200 ms": "Ráfaga de 1 kHz, 200 ms",
     "Fast attack / release": "Ataque / relajación rápidos",
     "Slow integration": "Integración lenta",
+    # Building acoustics (EN 12354-1 flanking prediction, ISO 12999-1 uncertainty)
+    "EN 12354-1 Flanking Transmission (Annex H.3 example)":
+        "Transmisión por flancos EN 12354-1 (ejemplo del Anexo H.3)",
+    "Share of transmitted energy [%]": "Cuota de energía transmitida [%]",
+    "Transmission path": "Camino de transmisión",
+    "Dd — direct": "Dd — directo",
+    "Ff — flanking–flanking": "Ff — flanco–flanco",
+    "Fd — flanking–separating": "Fd — flanco–separador",
+    "Df — separating–flanking": "Df — separador–flanco",
+    "dominant path": "camino dominante",
+    "ISO 12999-1 Measurement Uncertainty (situation B, airborne)":
+        "Incertidumbre de medición ISO 12999-1 (situación B, aéreo)",
+    "Measured R'": "R' medido",
+    "Standard uncertainty ±u": "Incertidumbre típica ±u",
+    "Expanded uncertainty ±U (95 %)": "Incertidumbre expandida ±U (95 %)",
+    "R'w ± U (single number)": "R'w ± U (valor único)",
 }
 
 _ES_PATTERNS = [
@@ -275,6 +291,10 @@ _ES_PATTERNS = [
      r"Sonoridad a corto plazo STL (STL máx = \1 sonios)"),
     (r"^Long-term loudness LTL \(LTL peak = (.+) sone\)$",
      r"Sonoridad a largo plazo LTL (LTL máx = \1 sonios)"),
+    (r"^floor-(.+)$", r"suelo-\1"),
+    (r"^ceiling-(.+)$", r"techo-\1"),
+    (r"^facade-(.+)$", r"fachada-\1"),
+    (r"^wall-(.+)$", r"tabique-\1"),
 ]
 
 
@@ -302,13 +322,29 @@ def _translate_figure(fig: Any) -> None:
     def _comma(s: str) -> str:
         return _re2.sub(r"(?<![\d.])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s)
 
+    def _tr_words(s: str) -> str:
+        """Apply the exact / pattern lookups (no decimal comma) to *s*."""
+        if s in _ES_EXACT:
+            return _ES_EXACT[s]
+        for pat, repl in _ES_PATTERNS:
+            new, n = _re.subn(pat, repl, s)
+            if n:
+                return new
+        return s
+
     for ax in fig.get_axes():
         for axis in (ax.xaxis, ax.yaxis):
             fmt = axis.get_major_formatter()
             if isinstance(fmt, _FxF):
-                fmt.seq = [_comma(s) for s in fmt.seq]
+                # Translate categorical tick labels (e.g. path names) too;
+                # numeric labels match nothing and only get the decimal comma.
+                fmt.seq = [_comma(_tr_words(s)) for s in fmt.seq]
             elif isinstance(fmt, _FF) and not getattr(fmt, "_phonometry_comma", False):
-                wrapped = _FF(lambda v, pos, _f=fmt: _comma(str(_f(v, pos))))
+                # Categorical labels (set_xticklabels installs a FuncFormatter)
+                # need the word lookups too; numeric labels are untouched.
+                wrapped = _FF(
+                    lambda v, pos, _f=fmt: _comma(_tr_words(str(_f(v, pos))))
+                )
                 wrapped._phonometry_comma = True  # type: ignore[attr-defined]
                 axis.set_major_formatter(wrapped)
             elif type(fmt) is _SF and axis.get_scale() == "linear":
@@ -2266,6 +2302,175 @@ def generate_moore_glasberg_time_loudness(output_dir: str) -> None:
     plt.close()
 
 
+def generate_prediction_flanking_demo(output_dir: str) -> None:
+    """EN 12354-1 simplified flanking prediction (Annex H.3 worked example)."""
+    print("Generating prediction_flanking_demo.png...")
+    from phonometry.building_prediction import (
+        flanking_element,
+        predicted_airborne_insulation,
+    )
+
+    # Annex H.3 inputs: separating wall Rs,w = 57 dB, Ss = 11.5 m², four
+    # flanking elements. Columns: (label, Rw, KFf, KFd=KDf, coupling length lf).
+    elements = [
+        ("floor", 49, 12.4, 8.9, 4.50),
+        ("ceiling", 46, 14.4, 9.2, 4.50),
+        ("facade", 42, 12.6, 6.7, 2.55),
+        ("wall", 33, 33.5, 15.7, 2.55),
+    ]
+    paths = []
+    for name, rw, k_ff, k_side, lf in elements:
+        ff, df, fd = flanking_element(
+            label=name, r_flanking=float(rw), r_separating=57.0,
+            k_ff=k_ff, k_fd=k_side, k_df=k_side,
+            separating_area=11.5, coupling_length=lf,
+        )
+        paths.extend((ff, df, fd))
+    result = predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
+
+    # Sort every path (direct + 12 flanking) by its share of the transmitted
+    # energy, largest first.
+    contribs = sorted(result.paths, key=lambda c: c.fraction, reverse=True)
+    labels = [c.label for c in contribs]
+    fracs = [c.fraction * 100.0 for c in contribs]
+    df_orange = "#ff7f0e"
+    kind_color = {
+        "Dd": COLOR_TERTIARY, "Ff": COLOR_PRIMARY,
+        "Fd": COLOR_SECONDARY, "Df": df_orange,
+    }
+    colors = [kind_color[c.kind] for c in contribs]
+
+    direct_share = next(c.fraction for c in result.paths if c.kind == "Dd") * 100.0
+    flank_share = 100.0 - direct_share
+
+    fig, ax = plt.subplots(figsize=(11, 6.4))
+    bars = ax.bar(range(len(fracs)), fracs, color=colors, edgecolor=COLOR_FG,
+                  linewidth=0.7, zorder=3)
+    bars[0].set_linewidth(2.2)  # highlight the dominant path
+    ax.annotate("dominant path", xy=(0, fracs[0]), xytext=(1.5, fracs[0] + 3.5),
+                fontsize=10, fontweight="bold", color=COLOR_FG,
+                arrowprops={"arrowstyle": "->", "lw": 1.1})
+
+    ax.set_xticks(range(len(labels)))
+    ax.set_xticklabels(labels, rotation=40, ha="right", fontsize=9)
+    ax.set_ylabel("Share of transmitted energy [%]")
+    ax.set_xlabel("Transmission path")
+    ax.set_ylim(0, max(fracs) + 9.0)
+    ax.set_title("EN 12354-1 Flanking Transmission (Annex H.3 example)",
+                 fontweight="bold", pad=12)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+
+    from matplotlib.patches import Patch
+    handles = [
+        Patch(facecolor=COLOR_TERTIARY, edgecolor=COLOR_FG, label="Dd — direct"),
+        Patch(facecolor=COLOR_PRIMARY, edgecolor=COLOR_FG,
+              label="Ff — flanking–flanking"),
+        Patch(facecolor=COLOR_SECONDARY, edgecolor=COLOR_FG,
+              label="Fd — flanking–separating"),
+        Patch(facecolor=df_orange, edgecolor=COLOR_FG,
+              label="Df — separating–flanking"),
+    ]
+    ax.legend(handles=handles, loc="upper right", fontsize=9)
+
+    rw_dd = result.r_direct_w
+    rpw = result.r_prime_w
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    lines = [
+        f"Rw (Dd) = {rw_dd:.1f} dB",
+        f"R'w = {rpw:.1f} dB",
+        f"R'w − Rw = {rpw - rw_dd:.1f} dB",
+        f"Dd {direct_share:.1f} %   ΣFf,Fd,Df {flank_share:.1f} %",
+    ]
+    ax.text(0.985, 0.62, "\n".join(lines), transform=ax.transAxes,
+            va="top", ha="right", fontsize=11, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "prediction_flanking_demo.png"))
+    plt.close()
+
+
+def generate_insulation_uncertainty_demo(output_dir: str) -> None:
+    """ISO 12999-1 per-band + single-number measurement uncertainty (situation B)."""
+    print("Generating insulation_uncertainty_demo.png...")
+    from phonometry.building_uncertainty import (
+        band_uncertainty,
+        coverage_factor,
+        expanded_uncertainty,
+        single_number_uncertainty,
+    )
+    from phonometry.insulation import weighted_rating
+
+    # Reuse the ISO 717-1 Annex C measured R' curve (100 Hz .. 3150 Hz); its
+    # weighted rating is R'w = 30 dB.
+    freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                      1000, 1250, 1600, 2000, 2500, 3150], dtype=float)
+    measured = np.array([20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+                         28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5])
+    rating = weighted_rating(measured).rating
+
+    # Per-band standard uncertainty u (ISO 12999-1 Table 2, situation B); match
+    # each measured band to its tabulated value, then expand at k = 1.96 (95 %).
+    band = band_uncertainty("airborne", "B")
+    band_f, band_u = band.to_arrays()
+    idx = [int(np.argmin(np.abs(band_f - f))) for f in freqs]
+    u_band = band_u[idx]
+    k = coverage_factor(0.95)
+    exp_band = np.array([expanded_uncertainty(float(v), 0.95) for v in u_band])
+
+    # Single-number expanded uncertainty for the rating.
+    u_single = single_number_uncertainty("r_w", "B")
+    exp_single = expanded_uncertainty(u_single, 0.95)
+
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    ax.fill_between(freqs, measured - exp_band, measured + exp_band,
+                    color=COLOR_PRIMARY, alpha=0.14, zorder=1,
+                    label="Expanded uncertainty ±U (95 %)")
+    ax.fill_between(freqs, measured - u_band, measured + u_band,
+                    color=COLOR_PRIMARY, alpha=0.30, zorder=2,
+                    label="Standard uncertainty ±u")
+    ax.semilogx(freqs, measured, marker="o", color=COLOR_PRIMARY, linewidth=1.9,
+                markersize=5, markerfacecolor="white", markeredgewidth=1.4,
+                zorder=4, label="Measured R'")
+
+    # Single-number R'w with its expanded uncertainty, read at 500 Hz.
+    ax.errorbar(500, rating, yerr=exp_single, fmt="D", color=COLOR_SECONDARY,
+                markersize=9, capsize=6, elinewidth=1.8, zorder=6,
+                label="R'w ± U (single number)")
+    ax.axvline(500, color=COLOR_FG, linestyle=":", alpha=0.35, zorder=0)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    # Word-free box (the situation and band meanings are in the title/legend, so
+    # translation reduces to the automatic decimal-comma substitution).
+    box = [
+        f"R'w = {rating} ± {exp_single:.1f} dB",
+        f"U = k·u ,  k = {k:g} (95 %)",
+    ]
+    ax.text(0.03, 0.97, "\n".join(box), transform=ax.transAxes, va="top",
+            ha="left", fontsize=10, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+
+    ax.set_title("ISO 12999-1 Measurement Uncertainty (situation B, airborne)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Apparent sound reduction index R' [dB]")
+    ax.set_xscale("log")
+    ax.set_xlim(90, 3600)
+    ax.set_ylim(8, 42)
+    from matplotlib.ticker import NullFormatter
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xticks(freqs)
+    ax.set_xticklabels(
+        ["100", "125", "160", "200", "250", "315", "400", "500", "630", "800",
+         "1k", "1.25k", "1.6k", "2k", "2.5k", "3.15k"], fontsize=8)
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.legend(loc="lower right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "insulation_uncertainty_demo.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -2305,6 +2510,10 @@ def generate_all(img_dir: str) -> None:
     generate_schroeder_decay(img_dir)
     generate_insulation_rating(img_dir)
     generate_impact_rating(img_dir)
+
+    # Building-acoustics prediction / uncertainty (EN 12354-1, ISO 12999-1)
+    generate_prediction_flanking_demo(img_dir)
+    generate_insulation_uncertainty_demo(img_dir)
 
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)

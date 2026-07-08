@@ -755,6 +755,134 @@ def _chk_open_plan_d2s() -> Outcome:
     return numeric(6.0, float(res.d2s), 1e-9, unit="dB", places=6)
 
 
+@register(
+    "Room & building acoustics",
+    "ISO 16283-3:2016 Clause 3.12",
+    "Facade R'45 isolates the -1.5 dB incidence correction (S=A)",
+)
+def _chk_facade_r45() -> Outcome:
+    # With S = A the 10 lg(S/A) coupling term vanishes, so R' = L1,s - L2 - 1,5.
+    n = 3
+    res = ph.facade_insulation(
+        np.full(n, 55.0),
+        np.full(n, ref.ISO16283_3_R45_RECEIVE_LEVEL_DB),
+        np.full(n, ref.ISO16283_3_R45_REVERB_TIME_S),
+        area=ref.ISO16283_3_R45_AREA_M2,
+        volume=ref.ISO16283_3_R45_VOLUME_M3,
+        surface_level=np.full(n, ref.ISO16283_3_R45_SURFACE_LEVEL_DB),
+    )
+    assert res.r_prime is not None
+    computed = float(np.asarray(res.r_prime)[0])
+    return numeric(ref.ISO16283_3_R45_EXPECTED_DB, computed, 1e-9, unit="dB", places=6)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-2:2010 Formula (2)",
+    "Lab airborne R on the ISO 717-1 reference shape -> Rw = 54",
+)
+def _chk_lab_airborne_rw() -> Outcome:
+    # S = A (A = 0,16*50/0,8 = 10 = area) => R = L1 - L2 = the reference curve.
+    ref_r = np.asarray(ref.ISO10140_2_REF_AIRBORNE_R, dtype=float)
+    res = ph.lab_airborne_insulation(
+        np.full(16, 90.0), 90.0 - ref_r, np.full(16, 0.8), area=10.0, volume=50.0
+    )
+    assert res.rating is not None
+    # R lands exactly on the reference; guard that before reading the rating.
+    on_curve = bool(np.allclose(np.asarray(res.r), ref_r))
+    expected = ref.ISO10140_2_REF_AIRBORNE_RW
+    return Outcome(
+        expected=f"Rw {expected} dB",
+        computed=f"Rw {res.rating.rating} dB",
+        delta=f"{res.rating.rating - expected:+d} dB",
+        passed=on_curve and res.rating.rating == expected,
+    )
+
+
+# ===========================================================================
+# Domain 7 - Building prediction & uncertainty
+# ===========================================================================
+def _annex_h3_paths() -> list:
+    """The EN 12354-1 Annex H.3 flanking paths from the shared input table."""
+    ss = ref.EN12354_1_ANNEX_H3_SEPARATING_AREA
+    paths: list = []
+    for label, rw, kff, kfd, lf in ref.EN12354_1_ANNEX_H3_ELEMENTS:
+        ff, df, fd = ph.flanking_element(
+            label=label, r_flanking=rw, r_separating=ref.EN12354_1_ANNEX_H3_R_DIRECT,
+            k_ff=kff, k_fd=kfd, k_df=kfd, separating_area=ss, coupling_length=lf,
+        )
+        paths += [ff, df, fd]
+    return paths
+
+
+@register(
+    "Building prediction & uncertainty",
+    "EN 12354-1:2000 Annex H.3",
+    "Airborne prediction R'w (direct + 12 flanking paths)",
+)
+def _chk_en12354_1_airborne() -> Outcome:
+    res = ph.predicted_airborne_insulation(
+        r_direct=ref.EN12354_1_ANNEX_H3_R_DIRECT, flanking_paths=_annex_h3_paths()
+    )
+    expected = ref.EN12354_1_ANNEX_H3_RPRIME_W
+    computed = float(res.r_prime_w)
+    paths_ok = len(res.paths) == ref.EN12354_1_ANNEX_H3_NUM_PATHS
+    return Outcome(
+        expected=f"R'w {expected} dB ({ref.EN12354_1_ANNEX_H3_NUM_PATHS} paths)",
+        computed=f"R'w {round(computed)} dB ({len(res.paths)} paths, {computed:.2f})",
+        delta=f"{computed - expected:+.2f} dB",
+        passed=paths_ok and round(computed) == expected,
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "EN 12354-2:2000 Annex E.3",
+    "Impact prediction L'n,w = Ln,w,eq - dLw + K",
+)
+def _chk_en12354_2_impact() -> Outcome:
+    ln_eq = ph.equivalent_impact_level(ref.EN12354_2_ANNEX_E3_MASS)
+    k = ph.impact_flanking_correction(
+        ref.EN12354_2_ANNEX_E3_MASS, ref.EN12354_2_ANNEX_E3_FLANKING_MEAN_MASS
+    )
+    res = ph.predicted_impact_insulation(
+        ln_w_eq=round(ln_eq), delta_l_w=ref.EN12354_2_ANNEX_E3_DELTA_LW,
+        k_correction=k,
+    )
+    k_ok = int(k) == ref.EN12354_2_ANNEX_E3_K
+    computed = float(res.l_prime_n_w)
+    out = numeric(
+        ref.EN12354_2_ANNEX_E3_LPRIME_N_W, computed, 1e-9, unit="dB", places=6
+    )
+    return Outcome(out.expected, out.computed, out.delta, out.passed and k_ok)
+
+
+@register(
+    "Building prediction & uncertainty",
+    "ISO 12999-1:2020 Table 2",
+    "Airborne band uncertainty, situation A @ 1 kHz",
+)
+def _chk_iso12999_table2_band() -> Outcome:
+    res = ph.band_uncertainty("airborne", "A")
+    idx = list(res.frequencies).index(1000)
+    computed = float(res.uncertainties[idx])
+    return numeric(
+        ref.ISO12999_1_TABLE2_AIRBORNE_A_1000HZ, computed, 1e-9, unit="dB", places=3
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "ISO 12999-1:2020 Clause 8 / Table 8",
+    "Expanded uncertainty U = 1.96 u (95 % two-sided, Rw sit. A)",
+)
+def _chk_iso12999_expanded() -> Outcome:
+    u = ref.ISO12999_1_RW_A_STANDARD_UNCERTAINTY
+    expected = ref.ISO12999_1_COVERAGE_K_95 * u
+    computed = float(ph.expanded_uncertainty(u, coverage=0.95))
+    return numeric(expected, computed, 1e-9, unit="dB", places=6)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

@@ -327,9 +327,13 @@ def _translate_figure(fig: Any) -> None:
                     artist.set_text(new)
                     break
         # Spanish decimal comma, applied uniformly to every text artist
-        # (tick labels included) except code identifiers and mathtext.
+        # (tick labels included) except mathtext. The substitution itself is
+        # conservative -- it only rewrites a bare ``digit.digit`` not adjacent
+        # to further digits/dots -- so underscore-bearing unit tokens such as
+        # ``sone_HMS`` / ``tu_HMS`` keep their identifier intact while genuine
+        # decimals in the same label (e.g. ``8.0 sone_HMS``) still get commas.
         s = artist.get_text()
-        if s and "$" not in s and "_" not in s and _re.search(r"\d\.\d", s):
+        if s and "$" not in s and _re.search(r"\d\.\d", s):
             # Clause/version numbers like 5.3.3 keep their dots.
             artist.set_text(_re.sub(r"(?<![\d.])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s))
 

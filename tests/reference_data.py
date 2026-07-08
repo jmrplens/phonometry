@@ -221,9 +221,12 @@ ISO12999_1_RW_A_STANDARD_UNCERTAINTY = 1.2
 # ISO 266 preferred one-third-octave frequencies but the values are computed at
 # the EXACT midband frequencies fm = 1000*10^(k/10) (Note 5). Each entry is
 # (temperature_degC, relative_humidity_percent, preferred_freq_Hz, alpha_dB_km).
-# Digit-exact transcription; the Eq. (3)-(5) implementation reproduces them to
-# < 0,4 % (limited only by the 3-significant-figure printed values), well inside
-# the standard's own +/- 10 % claimed accuracy (clause 7.1).
+# Digit-exact transcription against the FULL standard text (37 pp): sub-tables
+# 1(a)-1(p) span -20 degC to +50 degC in 5 degC steps. The Eq. (3)-(5)
+# implementation reproduces every point to < 0,4 % (limited only by the
+# 3-significant-figure printed values), well inside the standard's own +/- 10 %
+# claimed accuracy (clause 7.1). The second block (20-50 degC) was added once
+# the full Table 1 became available, extending the earlier -20..+15 degC oracle.
 # ---------------------------------------------------------------------------
 ISO9613_1_TABLE1: list[tuple[float, float, float, float]] = [
     (-20.0, 10.0, 50.0, 0.589),
@@ -239,6 +242,17 @@ ISO9613_1_TABLE1: list[tuple[float, float, float, float]] = [
     (10.0, 50.0, 4000.0, 46.7),
     (15.0, 50.0, 1000.0, 4.16),
     (15.0, 100.0, 10000.0, 105.0),
+    # Extension from the full-text sub-tables 1(i)-1(p) (20 degC .. 50 degC).
+    (20.0, 50.0, 1000.0, 4.66),
+    (20.0, 50.0, 2000.0, 9.86),
+    (25.0, 50.0, 1000.0, 5.68),
+    (25.0, 100.0, 2000.0, 11.4),
+    (30.0, 50.0, 1000.0, 7.03),
+    (30.0, 50.0, 4000.0, 24.5),
+    (35.0, 50.0, 1000.0, 8.43),
+    (40.0, 50.0, 1000.0, 9.52),
+    (45.0, 50.0, 800.0, 7.16),
+    (50.0, 50.0, 2000.0, 24.8),
 ]
 # Two representative grid points for the conformance registry (middle + corner).
 ISO9613_1_TABLE1_MID = (10.0, 70.0, 1000.0, 3.66)  # dB/km

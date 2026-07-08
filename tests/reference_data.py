@@ -302,3 +302,41 @@ ISO9612_ANNEX_F_SAMPLES: tuple[float, ...] = (88.0, 91.9, 87.6, 90.4, 89.0, 88.4
 ISO9612_ANNEX_F_TE_HOURS = 9.25
 ISO9612_ANNEX_F_LEX_8H = 90.1
 ISO9612_ANNEX_F_U = 3.4
+
+# ---------------------------------------------------------------------------
+# ISO 11654:1997 rating of sound absorption — the two normative worked examples
+# of Annex A. Both use the same practical-coefficient spectrum except at 500 Hz;
+# A.1 gives alpha_w = 0,60 with no shape indicator, A.2 (500 Hz raised to 1,00)
+# gives alpha_w = 0,60(M). Bands are 250/500/1000/2000/4000 Hz. Mirrors
+# tests/test_absorption_rating.py.
+# ---------------------------------------------------------------------------
+ISO11654_ANNEX_A1_ALPHA_P: tuple[float, ...] = (0.35, 0.70, 0.65, 0.60, 0.55)
+ISO11654_ANNEX_A1_ALPHA_W = 0.60
+ISO11654_ANNEX_A1_CLASS = "C"
+ISO11654_ANNEX_A1_INDICATOR = ""
+ISO11654_ANNEX_A2_ALPHA_P: tuple[float, ...] = (0.35, 1.00, 0.65, 0.60, 0.55)
+ISO11654_ANNEX_A2_ALPHA_W = 0.60
+ISO11654_ANNEX_A2_INDICATOR = "M"
+
+# ---------------------------------------------------------------------------
+# ISO 9053-2:2020 alternating-method airflow resistance — the Annex A.3 worked
+# example of the effective ratio of specific heats. A closed cylinder 100 mm x
+# 100 mm gives V = 7,854e-4 m3 and S = 0,0471 m2; with the IEC 61094-2:2009 air
+# properties at 23 C and f = 2 Hz the standard prints b = 1,83e-3 m and the
+# heat-conduction-corrected kappa' = kappa*0,978 = 1,370. Mirrors
+# tests/test_airflow_resistance.py.
+# ---------------------------------------------------------------------------
+ISO9053_2_ANNEX_A_SURFACE = 0.0471  # S (m2)
+ISO9053_2_ANNEX_A_VOLUME = 7.854e-4  # V (m3)
+ISO9053_2_ANNEX_A_FREQUENCY = 2.0  # f (Hz)
+ISO9053_2_ANNEX_A_BOUNDARY_LAYER = 1.83e-3  # b (m)
+ISO9053_2_ANNEX_A_KAPPA_PRIME = 1.370  # kappa' = kappa*0,978
+
+# ---------------------------------------------------------------------------
+# ISO 10534-1:1996 standing-wave-ratio method — closed-form physics oracle from
+# Eqs (13)/(14)/(9): a standing-wave ratio s = 3 gives |r| = (s-1)/(s+1) = 0,5
+# and absorption alpha = 1 - |r|^2 = 0,75.
+# ---------------------------------------------------------------------------
+ISO10534_1_SWR = 3.0
+ISO10534_1_REFLECTION_MAGNITUDE = 0.5
+ISO10534_1_ABSORPTION = 0.75

@@ -522,6 +522,45 @@ def plot_impact_rating(result: Any, ax: Axes | None = None, **kwargs: Any) -> Ax
     return ax
 
 
+def plot_weighted_absorption(result: Any, ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """Practical absorption curve vs the shifted reference (ISO 11654:1997).
+
+    Draws the practical coefficients ``alpha_p`` against the shifted reference
+    curve and shades the unfavourable deviations (measured below the shifted
+    reference, Clause 4.2), reusing :func:`_unfavourable_mask` and the shared
+    frequency axis. Extra keyword arguments style the measured curve.
+    """
+    ax = ax if ax is not None else _new_axes()
+    band_centers = np.asarray(result.band_centers, dtype=np.float64)
+    measured = np.asarray(result.measured, dtype=np.float64)
+    reference = np.asarray(result.shifted_reference, dtype=np.float64)
+    kwargs.setdefault("color", "#1f77b4")
+    kwargs.setdefault("label", "Practical alpha_p")
+    ax.plot(band_centers, measured, "o-", **kwargs)
+    ax.plot(band_centers, reference, "s--", color="#d62728", label="Shifted reference")
+    unfavourable = _unfavourable_mask(measured, reference, impact=False)
+    ax.fill_between(
+        band_centers,
+        measured,
+        reference,
+        where=unfavourable.tolist(),
+        color="#ff7f0e",
+        alpha=0.4,
+        label="Unfavourable deviations",
+        interpolate=True,
+    )
+    _freq_axis(ax, band_centers)
+    ax.set_ylabel("Sound absorption coefficient")
+    ax.set_ylim(0.0, 1.05)
+    ax.set_title(
+        f"alpha_w = {result.rating_label}  (class {result.absorption_class}, "
+        f"Sigma unfav. = {result.unfavourable_sum:.2f})"
+    )
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    return ax
+
+
 def _annotate_impact_500(
     ax: Axes, band_centers: np.ndarray, reference: np.ndarray, rating: int
 ) -> None:

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **43/43 conformance checks pass** across 8 domains and 28 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **48/48 conformance checks pass** across 9 domains and 31 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -122,4 +122,14 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 9612:2009 Annex D | Task-based LEX,8h + U (welder day, case a) | LEX,8h 84.3; U 2.7 dB | LEX,8h 84.3; U 2.7 dB | -0.01; +0.02 dB | &#9989; |
 | ISO 9612:2009 Annex E | Job-based LEX,8h + U (production line, 18 workers) | LEX,8h 88.1; U 3.8 dB | LEX,8h 88.2; U 3.8 dB | +0.06; -0.03 dB | &#9989; |
 | ISO 9612:2009 Annex F | Full-day LEX,8h + U (forklift drivers) | LEX,8h 90.1; U 3.4 dB | LEX,8h 90.1; U 3.4 dB | +0.02; +0.03 dB | &#9989; |
+
+### Materials: absorption, airflow & impedance
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ISO 11654:1997 Annex A.1 | Weighted absorption alpha_w (no indicator) | 0.60 (class C, no indic.) | 0.60 (class C, '') | 0 | &#9989; |
+| ISO 11654:1997 Annex A.2 | Weighted absorption alpha_w with M indicator | 0.60(M) | 0.60(M) | 0 | &#9989; |
+| ISO 9053-2:2020 Annex A.3 | Thermal boundary-layer thickness b | 0.00183 m (+/-0.00001 m) | 0.00183 m | 0 m | &#9989; |
+| ISO 9053-2:2020 Annex A.3 | Effective ratio of specific heats kappa' | 1.37 (+/-0.001) | 1.37 | 0 | &#9989; |
+| ISO 10534-1:1996 Eqs (9)/(13)/(14) | Absorption from standing-wave ratio s=3 | 0.75 (+/-0) | 0.75 | 0 | &#9989; |
 

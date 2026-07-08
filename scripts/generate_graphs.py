@@ -270,6 +270,29 @@ _ES_EXACT = {
     "cutting/grinding": "corte/amolado",
     "Daily LEX,8h": "LEX,8h diario",
     "LEX,8h + U (one-sided 95 %)": "LEX,8h + U (unilateral 95 %)",
+    # Materials: absorption rating, airflow resistance, impedance tube
+    "Shifted reference curve (ISO 11654)":
+        "Curva de referencia desplazada (ISO 11654)",
+    "Practical absorption alpha_p": "Absorción práctica alpha_p",
+    "ISO 11654 Weighted Sound Absorption Coefficient (Annex A.2 example)":
+        "Coeficiente de absorción sonora ponderado ISO 11654 (ejemplo del Anexo A.2)",
+    "Sound absorption coefficient": "Coeficiente de absorción sonora",
+    "Through-origin quadratic fit  dp = a u + b u^2":
+        "Ajuste cuadrático por el origen  dp = a u + b u^2",
+    "Measured pressure drop": "Caída de presión medida",
+    "evaluation at 0.5 mm/s": "evaluación a 0,5 mm/s",
+    "ISO 9053-1 Static-Method Airflow Resistance":
+        "Resistencia al flujo de aire por el método estático (ISO 9053-1)",
+    "Linear airflow velocity u [mm/s]": "Velocidad lineal del aire u [mm/s]",
+    "Pressure drop dp [Pa]": "Caída de presión dp [Pa]",
+    "Absorption coefficient alpha = 1 - |r|^2":
+        "Coeficiente de absorción alpha = 1 - |r|^2",
+    "Standing-wave level difference L_max - L_min [dB]":
+        "Diferencia de nivel de onda estacionaria L_max - L_min [dB]",
+    "Sound absorption coefficient alpha": "Coeficiente de absorción sonora alpha",
+    "Reflection factor magnitude |r|": "Módulo del factor de reflexión |r|",
+    "ISO 10534-1 Standing-Wave-Ratio Method":
+        "Método de la razón de onda estacionaria (ISO 10534-1)",
 }
 
 _ES_PATTERNS = [
@@ -320,6 +343,19 @@ _ES_PATTERNS = [
     (r"^facade-(.+)$", r"fachada-\1"),
     (r"^wall-(.+)$", r"tabique-\1"),
     (r"^(.+) °C, (.+) % RH$", r"\1 °C, \2 % HR"),
+    # Materials: absorption rating & airflow resistance annotations
+    (r"^Reference curve shifted by ([\d.]+)$",
+     r"Curva de referencia desplazada \1"),
+    (r"^Sum of unfavourable deviations = (.+)  \(limit 0\.10\)$",
+     "Suma de desviaciones desfavorables = \\1  (límite 0,10)"),
+    (r"^Absorption class (.+)  \(shape indicator: (.+)\)$",
+     r"Clase de absorción \1  (indicador de forma: \2)"),
+    (r"^Specific airflow resistance R_s = (.+) Pa s/m$",
+     r"Resistencia específica al flujo R_s = \1 Pa s/m"),
+    (r"^Airflow resistivity sigma = (.+) Pa s/m\^2$",
+     r"Resistividad al flujo sigma = \1 Pa s/m^2"),
+    (r"^Linear term a = (.+) Pa s/m  \(= R_s at u -> 0\)$",
+     r"Término lineal a = \1 Pa s/m  (= R_s en u -> 0)"),
 ]
 
 
@@ -2636,6 +2672,165 @@ def generate_exposure_uncertainty(output_dir: str) -> None:
     plt.close()
 
 
+def generate_absorption_rating(output_dir: str) -> None:
+    """ISO 11654 alpha_w: practical curve, shifted reference, deviations (Annex A.2)."""
+    print("Generating absorption_rating.png...")
+    from phonometry import weighted_absorption
+
+    # ISO 11654:1997 Annex A.2 worked example -> alpha_w = 0.60(M).
+    alpha_p = [0.35, 1.00, 0.65, 0.60, 0.55]
+    result = weighted_absorption(alpha_p)
+    freqs = np.asarray(result.band_centers, dtype=float)
+    measured = np.asarray(result.measured, dtype=float)
+    shifted = np.asarray(result.shifted_reference, dtype=float)
+
+    _, ax = plt.subplots(figsize=(10, 6.5))
+    ax.fill_between(freqs, measured, shifted, where=(measured < shifted).tolist(),
+                    interpolate=True, color=COLOR_SECONDARY, alpha=0.25,
+                    zorder=1, label="Unfavourable deviations")
+    ax.semilogx(freqs, shifted, marker="s", color=COLOR_FG, linewidth=1.6,
+                linestyle="--", markersize=5, zorder=3,
+                label="Shifted reference curve (ISO 11654)")
+    ax.semilogx(freqs, measured, marker="o", color=COLOR_PRIMARY, linewidth=1.8,
+                markersize=6, markerfacecolor="white", markeredgewidth=1.4,
+                zorder=4, label="Practical absorption alpha_p")
+
+    # alpha_w is the shifted reference read at 500 Hz.
+    ax.axvline(500, color=COLOR_FG, linestyle=":", alpha=0.4)
+    ax.plot(500, result.alpha_w, "D", color=COLOR_SECONDARY, markersize=9, zorder=6)
+    ax.annotate(f"alpha_w = {result.rating_label}", xy=(500, result.alpha_w),
+                xytext=(600, result.alpha_w - 0.16), fontsize=12, fontweight="bold",
+                arrowprops={"arrowstyle": "->", "lw": 1.0})
+
+    # Placed low-left, clear of the practical curve that peaks top-centre.
+    for dy, text in (
+        (0.30, f"Reference curve shifted by {result.shift:.2f}"),
+        (0.23, f"Sum of unfavourable deviations = {result.unfavourable_sum:.2f}"
+               f"  (limit 0.10)"),
+        (0.16, f"Absorption class {result.absorption_class}  "
+               f"(shape indicator: {result.shape_indicator or 'none'})"),
+    ):
+        ax.text(0.03, dy, text, transform=ax.transAxes, va="top", ha="left",
+                fontsize=9.5, color=COLOR_FG)
+
+    ax.set_title("ISO 11654 Weighted Sound Absorption Coefficient (Annex A.2 example)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Sound absorption coefficient")
+    ax.set_xscale("log")
+    ax.set_xlim(220, 4600)
+    ax.set_ylim(0.0, 1.08)
+    from matplotlib.ticker import NullFormatter
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xticks(freqs)
+    ax.set_xticklabels(["250", "500", "1k", "2k", "4k"], fontsize=9)
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.legend(loc="lower right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "absorption_rating.png"))
+    plt.close()
+
+
+def generate_airflow_resistance(output_dir: str) -> None:
+    """ISO 9053-1 static method: dp vs u, through-origin quadratic fit, R_s at 0.5 mm/s."""
+    print("Generating airflow_resistance.png...")
+    from phonometry import static_airflow_resistance
+
+    # A porous specimen (area 100 mm dia, 50 mm thick) measured stepwise. The
+    # pressure drop is slightly super-linear in velocity; the through-origin
+    # quadratic fit dp = a*u + b*u**2 recovers R_s = a at the reference 0.5 mm/s.
+    area = float(np.pi) * (0.05 ** 2)  # 100 mm diameter cell
+    r_s_true, curvature = 1.6e4, 4.0e5  # Pa*s/m, Pa*s2/m2
+    u = np.array([0.5, 1.0, 2.0, 4.0, 8.0, 12.0]) * 1e-3  # m/s
+    dp = r_s_true * u + curvature * u**2
+    result = static_airflow_resistance(u, dp, area=area, thickness=0.05)
+
+    u_fit = np.linspace(0.0, 13e-3, 200)
+    dp_fit = result.linear_coefficient * u_fit + result.quadratic_coefficient * u_fit**2
+
+    _, ax = plt.subplots(figsize=(10, 6.5))
+    ax.plot(u_fit * 1e3, dp_fit, color=COLOR_PRIMARY, linewidth=1.8, zorder=2,
+            label="Through-origin quadratic fit  dp = a u + b u^2")
+    ax.plot(u * 1e3, dp, "o", color=COLOR_SECONDARY, markersize=7,
+            markerfacecolor="white", markeredgewidth=1.6, zorder=4,
+            label="Measured pressure drop")
+
+    u_ref = result.evaluation_velocity
+    ax.axvline(u_ref * 1e3, color=COLOR_FG, linestyle=":", alpha=0.4)
+    ax.plot(u_ref * 1e3, result.pressure_drop, "D", color=COLOR_TERTIARY,
+            markersize=9, zorder=6)
+    ax.annotate("evaluation at 0.5 mm/s", xy=(u_ref * 1e3, result.pressure_drop),
+                xytext=(2.0, result.pressure_drop + 40), fontsize=10,
+                arrowprops={"arrowstyle": "->", "lw": 1.0})
+
+    for dy, text in (
+        (0.97, f"Specific airflow resistance R_s = {result.specific_resistance:.0f}"
+               f" Pa s/m"),
+        (0.90, f"Airflow resistivity sigma = {result.resistivity:.0f} Pa s/m^2"),
+        (0.83, f"Linear term a = {result.linear_coefficient:.0f} Pa s/m"
+               f"  (= R_s at u -> 0)"),
+    ):
+        ax.text(0.03, dy, text, transform=ax.transAxes, va="top", ha="left",
+                fontsize=9.5, color=COLOR_FG)
+
+    ax.set_title("ISO 9053-1 Static-Method Airflow Resistance", fontweight="bold",
+                 pad=12)
+    ax.set_xlabel("Linear airflow velocity u [mm/s]")
+    ax.set_ylabel("Pressure drop dp [Pa]")
+    ax.set_xlim(0.0, 13.0)
+    ax.set_ylim(bottom=0.0)
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.legend(loc="lower right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "airflow_resistance.png"))
+    plt.close()
+
+
+def generate_impedance_tube(output_dir: str) -> None:
+    """ISO 10534-1 standing-wave-ratio method: alpha and |r| vs level difference."""
+    print("Generating impedance_tube.png...")
+    from phonometry import (
+        standing_wave_absorption,
+        standing_wave_reflection_magnitude,
+        standing_wave_ratio_from_level,
+    )
+
+    # Level difference between pressure maximum and minimum (Eq. 15): a large dL
+    # means a strong reflection (little absorption); dL -> 0 is a perfect absorber.
+    level_diff = np.linspace(0.5, 40.0, 300)
+    swr = np.array([standing_wave_ratio_from_level(dl) for dl in level_diff])
+    alpha = np.array([standing_wave_absorption(s) for s in swr])
+    r_mag = np.array([standing_wave_reflection_magnitude(s) for s in swr])
+
+    _, ax = plt.subplots(figsize=(10, 6.5))
+    ax.plot(level_diff, alpha, color=COLOR_PRIMARY, linewidth=2.0, zorder=3,
+            label="Absorption coefficient alpha = 1 - |r|^2")
+    ax.set_xlabel("Standing-wave level difference L_max - L_min [dB]")
+    ax.set_ylabel("Sound absorption coefficient alpha")
+    ax.set_ylim(0.0, 1.02)
+    ax.set_xlim(0.0, 40.0)
+
+    ax_r = ax.twinx()
+    ax_r.plot(level_diff, r_mag, color=COLOR_SECONDARY, linewidth=1.8,
+              linestyle="--", zorder=2, label="Reflection factor magnitude |r|")
+    ax_r.set_ylabel("Reflection factor magnitude |r|")
+    ax_r.set_ylim(0.0, 1.02)
+
+    # Mark the didactic anchor: dL = 9.54 dB -> s = 3 -> |r| = 0.5 -> alpha = 0.75.
+    dl_anchor = 20.0 * float(np.log10(3.0))
+    ax.plot(dl_anchor, 0.75, "D", color=COLOR_TERTIARY, markersize=9, zorder=6)
+    # Text sits in the lens that opens between the diverging alpha and |r| curves.
+    ax.annotate("s = 3 -> |r| = 0.5 -> alpha = 0.75",
+                xy=(dl_anchor, 0.75), xytext=(15.0, 0.44),
+                fontsize=10, arrowprops={"arrowstyle": "->", "lw": 1.0})
+
+    ax.set_title("ISO 10534-1 Standing-Wave-Ratio Method", fontweight="bold", pad=12)
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    lines1, labels1 = ax.get_legend_handles_labels()
+    lines2, labels2 = ax_r.get_legend_handles_labels()
+    ax.legend(lines1 + lines2, labels1 + labels2, loc="center right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "impedance_tube.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -2684,6 +2879,12 @@ def generate_all(img_dir: str) -> None:
     generate_air_absorption_alpha(img_dir)
     generate_outdoor_attenuation_breakdown(img_dir)
     generate_exposure_uncertainty(img_dir)
+
+    # Materials: absorption rating, airflow resistance, impedance tube
+    # (ISO 11654, ISO 9053-1/-2, ISO 10534-1/-2, ASTM E2611)
+    generate_absorption_rating(img_dir)
+    generate_airflow_resistance(img_dir)
+    generate_impedance_tube(img_dir)
 
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)

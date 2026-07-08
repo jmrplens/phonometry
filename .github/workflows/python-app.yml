@@ -35,6 +35,34 @@ jobs:
     - name: Security check with Bandit
       run: bandit -r src
 
+  # Fast gate (~12 s harness, runtime deps only, no pytest): the committed
+  # docs/CONFORMANCE.md must equal a fresh `make conformance` run.
+  conformance:
+    name: Conformance report up to date
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install runtime dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+    - name: Regenerate docs/CONFORMANCE.md
+      run: make conformance
+    - name: Fail if the committed report is stale
+      run: |
+        if ! git diff --exit-code docs/CONFORMANCE.md; then
+          echo "::error file=docs/CONFORMANCE.md::docs/CONFORMANCE.md is out of date - run 'make conformance' and commit the result."
+          exit 1
+        fi
+
   tests:
     runs-on: ${{ matrix.os }}
     permissions:

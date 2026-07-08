@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# Optional convenience pre-commit hook for phonometry.
+#
+# Regenerates the committed numerical conformance report
+# (docs/CONFORMANCE.md) and stages it, but ONLY when the library source, the
+# report generator, or the shared reference tables are part of the commit -
+# so unrelated commits pay nothing (a full run is ~12 s).
+#
+# This is a convenience only. The real enforcement is the CI staleness check
+# (the `conformance` job in .github/workflows/python-app.yml). Install with:
+#
+#     make install-hooks
+#
+set -e
+
+if git diff --cached --name-only \
+	| grep -Eq '^(src/phonometry/|scripts/conformance_report\.py|tests/reference_data\.py)'; then
+	echo "[pre-commit] source changed - regenerating docs/CONFORMANCE.md ..."
+	make conformance
+	git add docs/CONFORMANCE.md
+fi

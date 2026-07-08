@@ -90,6 +90,12 @@ def register(domain: str, standard: str, quantity: str) -> Callable[
     return deco
 
 
+# Decimal places for the informational delta column. Coarse on purpose so the
+# committed docs/CONFORMANCE.md stays byte-stable across numpy/scipy/BLAS
+# builds (see the note in ``numeric``).
+_DELTA_PLACES = 3
+
+
 def _fmt(value: float, unit: str = "", places: int = 4) -> str:
     """Compact fixed/again-significant formatting with an optional unit."""
     if not math.isfinite(value):
@@ -119,7 +125,13 @@ def numeric(
     return Outcome(
         expected=f"{exp_txt} (+/-{tol_txt})" if not expected_label else exp_txt,
         computed=_fmt(computed, unit, places),
-        delta=_fmt(delta, unit, max(places, 5)),
+        # The delta column is informational (pass/fail comes from ``passed``),
+        # so it is coarsened to 3 decimals. This collapses sub-milli residuals
+        # of the heavy DSP chains (ECMA/Moore-Glasberg/Zwicker, FFT intensity),
+        # whose 4th-5th digit is BLAS/FFT-build dependent, to a stable value -
+        # keeping the committed report diff-stable without hiding a regression
+        # (that still shows in the Computed column and flips the status).
+        delta=_fmt(delta, unit, _DELTA_PLACES),
         passed=passed,
     )
 
@@ -877,10 +889,34 @@ def render_markdown() -> tuple[str, int, int]:
     return "\n".join(out), passed, total
 
 
-def main() -> int:
+# Header prepended to the committed docs/CONFORMANCE.md (via `--file-header`,
+# used by `make conformance`). Emitted only for the committed file, not for the
+# CI PR-comment body, so the PR comment stays header-free.
+_DOC_HEADER = """<!--
+  AUTO-GENERATED FILE - DO NOT EDIT BY HAND.
+  Regenerate with `make conformance` (runs scripts/conformance_report.py).
+  CI regenerates it on every pull request and fails the build if it drifts.
+-->
+
+> **Auto-generated conformance report - do not hand-edit.** Produced by
+> `make conformance` from the library's own computations checked against the
+> referenced standards. CI regenerates it on every pull request and fails if it
+> is out of date, so edit the checks in `scripts/conformance_report.py`, not this
+> file. Each row pins a standard and clause to its expected normative value and
+> the value the library computes. Full standards list and methodology:
+> [Theory](https://github.com/jmrplens/phonometry/blob/main/docs/theory.md) -
+> [Why phonometry](https://github.com/jmrplens/phonometry/blob/main/docs/why-phonometry.md).
+
+"""
+
+
+def main(argv: Optional[list[str]] = None) -> int:
+    args = sys.argv[1:] if argv is None else argv
     markdown, passed, total = render_markdown()
+    # The root artifact feeds the CI PR comment; keep it header-free.
     (_ROOT / "conformance_report.md").write_text(markdown + "\n")
-    print(markdown)
+    output = _DOC_HEADER + markdown if "--file-header" in args else markdown
+    print(output)
     print(f"\n[conformance] {passed}/{total} checks passed", file=sys.stderr)
     return 0 if passed == total else 1
 

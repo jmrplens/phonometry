@@ -55,6 +55,22 @@ og:
 llms:
 	$(PYTHON) scripts/gen_llms.py
 
+# Regenerate the committed, versioned numerical conformance report. The
+# --file-header flag prepends the "do not hand-edit" note; the body is exactly
+# what the CI PR-comment harness computes. CI fails if this drifts (see the
+# `conformance` job in python-app.yml).
+conformance:
+	$(PYTHON) scripts/conformance_report.py --file-header > docs/CONFORMANCE.md
+
+# Optional convenience: install a git pre-commit hook that regenerates
+# docs/CONFORMANCE.md when the library source or the report generator changes.
+# The CI staleness check is the enforcement; this only saves a round-trip.
+install-hooks:
+	@mkdir -p .git/hooks
+	@cp hooks/pre-commit .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit
+	@echo "Installed .git/hooks/pre-commit (regenerates docs/CONFORMANCE.md when src/scripts change)."
+
 test:
 	$(PYTHON) -m pytest tests/
 
@@ -62,3 +78,5 @@ coverage:
 	$(PYTHON) -m pytest --cov=src/phonometry --cov-report=term-missing tests/
 
 check: lint security test
+
+.PHONY: conformance install-hooks

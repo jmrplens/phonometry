@@ -288,19 +288,44 @@ def test_result_structure() -> None:
     assert 14.0 < peak_cam < 17.0
 
 
-def test_signal_path_monotonic_and_calibrated() -> None:
-    def tone(level_db: float) -> np.ndarray:
-        t = np.arange(int(FS * 0.5)) / FS
-        amp = np.sqrt(2.0) * 2e-5 * 10 ** (level_db / 20.0)
-        return amp * np.sin(2.0 * np.pi * 1000.0 * t)
+def _tone_signal(level_db: float, freq: float = 1000.0, seconds: float = 1.0) -> np.ndarray:
+    t = np.arange(int(FS * seconds)) / FS
+    amp = np.sqrt(2.0) * 2e-5 * 10 ** (level_db / 20.0)
+    return amp * np.sin(2.0 * np.pi * freq * t)
 
-    low = loudness_moore_glasberg(tone(40.0), FS)
-    high = loudness_moore_glasberg(tone(60.0), FS)
+
+def test_signal_path_monotonic_and_calibrated() -> None:
+    low = loudness_moore_glasberg(_tone_signal(40.0), FS)
+    high = loudness_moore_glasberg(_tone_signal(60.0), FS)
     assert isinstance(low, MooreGlasbergLoudness)
     assert high.loudness > low.loudness
-    # Practical band method treats the tone as a narrow band; loudness is a
-    # few sone at 40 dB and clearly higher at 60 dB.
+    # The signal path builds a narrowband spectrum, so a pure tone reduces to a
+    # single component and reproduces the definitional anchor.
     assert 0.5 < low.loudness < 8.0
+
+
+def test_signal_path_anchor_is_one_sone() -> None:
+    # A calibrated 1 kHz tone at 40 dB SPL is the definitional anchor of the
+    # sone (clause 3.17): the signal path must reproduce 1.000 sone / 40 phon,
+    # the same value as the exact spectrum path for a single 1 kHz line.
+    result = loudness_moore_glasberg(_tone_signal(40.0), FS)
+    assert result.loudness == pytest.approx(1.0, abs=0.02)
+    assert result.loudness_level == pytest.approx(40.0, abs=0.5)
+
+
+def test_signal_path_matches_spectrum_for_multitone() -> None:
+    # The narrowband signal path must agree with the exact sinusoidal-component
+    # (clause 5.2/5.4) spectrum path for a multi-tone signal.
+    signal = (
+        _tone_signal(50.0, freq=400.0)
+        + _tone_signal(50.0, freq=1000.0)
+        + _tone_signal(50.0, freq=2500.0)
+    )
+    from_signal = loudness_moore_glasberg(signal, FS).loudness
+    from_spectrum = loudness_moore_glasberg_from_spectrum(
+        [(400.0, 50.0), (1000.0, 50.0), (2500.0, 50.0)]
+    ).loudness
+    assert from_signal == pytest.approx(from_spectrum, rel=0.02)
 
 
 def test_diotic_alias_matches_binaural() -> None:

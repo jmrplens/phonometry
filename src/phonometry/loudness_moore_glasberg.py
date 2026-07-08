@@ -30,8 +30,9 @@ sone (clause 3.17), which this implementation reproduces without tuning.
 The stationary method is spectrum based.  :func:`loudness_moore_glasberg_from_spectrum`
 takes the exact sinusoidal-component representation of clauses 5.2/5.4,
 :func:`loudness_moore_glasberg_from_third_octave` takes the 29 one-third-octave
-band levels of clause 5.5, and :func:`loudness_moore_glasberg` derives the band
-levels from a calibrated pressure signal.
+band levels of clause 5.5, and :func:`loudness_moore_glasberg` forms the
+narrowband (FFT) line spectrum of a calibrated pressure signal and feeds it to
+the exact sinusoidal-component method.
 """
 
 from __future__ import annotations
@@ -850,30 +851,43 @@ def loudness_moore_glasberg_from_third_octave(
     return _result_from_components(freqs, comp_levels, field, presentation)
 
 
-def _signal_third_octave_levels(pressure: np.ndarray, fs: float) -> np.ndarray:
-    """One-third-octave band levels of a pressure signal from its spectrum.
+_SIGNAL_FLOOR_DB = 100.0  # discard bins > 100 dB below the spectral peak
+_AUDIBLE_LO, _AUDIBLE_HI = 20.0, 20000.0  # component band retained (clause 7.2)
 
-    The single-sided power spectrum is integrated over each IEC 61260-1 band
-    (25 Hz..16 kHz) and converted to a sound pressure level re 20 uPa.
+
+def _signal_components(pressure: np.ndarray, fs: float) -> np.ndarray:
+    """Narrowband sinusoidal-component spectrum of a pressure signal.
+
+    ISO 532-2:2017 is a spectrum-based method whose exact input (clauses
+    5.2/5.4) is a set of discrete sinusoidal components ``(frequency, level)``.
+    The natural representation of a recorded signal is therefore its narrowband
+    (FFT) line spectrum: every FFT bin becomes one component at its own
+    frequency with its calibrated sound pressure level re 20 uPa.  A pure tone
+    then enters the excitation model (Formula 5, evaluated per component) as a
+    single line at its frequency and level - as the standard's convention
+    requires - rather than being smeared over a one-third-octave band.
+
+    The single-sided power spectrum uses the power-preserving (Parseval)
+    window normalisation ``|X|^2 / (N * sum(w^2))`` so that the summed bin
+    powers equal the signal's mean square regardless of the window: a 1 kHz
+    tone at 40 dB SPL yields 1.000 sone, the definitional anchor of the sone.
+    Bins outside the audible range or more than ``_SIGNAL_FLOOR_DB`` below the
+    spectral peak are dropped as inaudible.
     """
     n = pressure.size
     window = np.hanning(n)
-    coherent_gain = float(np.mean(window))
+    window_power = float(np.sum(window**2))
+    if window_power <= 0.0:
+        return np.empty((0, 2), dtype=np.float64)
     spectrum = np.fft.rfft(pressure * window)
     freqs = np.fft.rfftfreq(n, d=1.0 / fs)
-    # Single-sided mean-square contribution of each FFT bin.
-    power = (np.abs(spectrum) / (n * coherent_gain)) ** 2
+    # Single-sided mean-square contribution of each FFT bin (Parseval).
+    power = np.abs(spectrum) ** 2 / (n * window_power)
     power[1:] *= 2.0
-    levels = np.full(_N_THIRD_OCTAVE, -np.inf)
-    for band in range(_N_THIRD_OCTAVE):
-        centre = _THIRD_OCTAVE_FREQ[band]
-        f_lo = centre / _THIRD_OCTAVE_RATIO
-        f_hi = centre * _THIRD_OCTAVE_RATIO
-        mask = (freqs >= f_lo) & (freqs < f_hi)
-        band_power = float(np.sum(power[mask]))
-        if band_power > 0.0:
-            levels[band] = 10.0 * math.log10(band_power / (2e-5) ** 2)
-    return levels
+    levels = 10.0 * np.log10(np.maximum(power, 1e-300) / (2e-5) ** 2)
+    audible = (freqs >= _AUDIBLE_LO) & (freqs <= _AUDIBLE_HI)
+    keep = audible & (levels > levels.max() - _SIGNAL_FLOOR_DB)
+    return np.column_stack((freqs[keep], levels[keep])).astype(np.float64)
 
 
 def loudness_moore_glasberg(
@@ -886,10 +900,14 @@ def loudness_moore_glasberg(
     """Moore-Glasberg loudness of a calibrated stationary pressure signal.
 
     Convenience wrapper around
-    :func:`loudness_moore_glasberg_from_third_octave`: the one-third-octave
-    band levels (25 Hz..16 kHz) are derived from the signal spectrum and the
-    practical method of ISO 532-2:2017 clause 5.5 is applied.  The signal must
-    be calibrated so that ``x`` is the instantaneous sound pressure in pascals.
+    :func:`loudness_moore_glasberg_from_spectrum`: the signal's narrowband
+    (FFT) line spectrum is formed and each bin is passed to the exact
+    sinusoidal-component method of ISO 532-2:2017 (clauses 5.2/5.4).  Because
+    the model computes the excitation pattern per spectral component
+    (Formula 5), a pure tone enters as a single line - so a calibrated 1 kHz
+    tone at 40 dB SPL yields 1.000 sone / 40 phon (the definitional anchor),
+    matching :func:`loudness_moore_glasberg_from_spectrum`.  The signal must be
+    calibrated so that ``x`` is the instantaneous sound pressure in pascals.
 
     :param x: Single-channel calibrated pressure signal in pascals.
     :param fs: Sampling rate in Hz (positive).
@@ -905,9 +923,7 @@ def loudness_moore_glasberg(
         raise ValueError("Input signal 'x' must contain only finite values.")
     if fs <= 0.0:
         raise ValueError(f"'fs' must be a positive sampling rate, got {fs!r}.")
-    levels = _signal_third_octave_levels(pressure, float(fs))
-    finite = levels.copy()
-    finite[~np.isfinite(finite)] = -300.0  # inaudible bands
-    return loudness_moore_glasberg_from_third_octave(
-        finite, field=field, presentation=presentation
+    components = _signal_components(pressure, float(fs))
+    return loudness_moore_glasberg_from_spectrum(
+        components, field=field, presentation=presentation
     )

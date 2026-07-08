@@ -913,6 +913,133 @@ def _chk_iso9613_table1_corner() -> Outcome:
 
 
 # ===========================================================================
+# Domain 8 - Outdoor propagation & occupational exposure
+# ===========================================================================
+@register(
+    "Outdoor propagation & occupational exposure",
+    "ISO 9613-2:1996 Eq. (7)",
+    "Geometrical divergence Adiv = 20 lg(d/d0) + 11 at 100 m",
+)
+def _chk_iso9613_2_adiv() -> Outcome:
+    computed = ph.geometric_divergence(100.0)
+    return numeric(ref.ISO9613_2_ADIV_100M, computed, 1e-9, unit="dB", places=6)
+
+
+@register(
+    "Outdoor propagation & occupational exposure",
+    "ISO 9613-2:1996 Table 3",
+    "Ground b'(0) porous limit -> Agr(250 Hz) = 2(-1.5 + 10.1)",
+)
+def _chk_iso9613_2_ground_limit() -> Outcome:
+    # Porous ground both sides (Gs = Gr = 1), source and receiver on the ground
+    # (hs = hr = 0), fully-developed path (dp -> inf): the 250 Hz band isolates
+    # the Table 3 limit b'(0) = 1,5 + 8,6 = 10,1, so Agr = 2(-1,5 + 10,1) = 17,2.
+    big = 1.0e7
+    agr = ph.ground_attenuation(big, 0.0, 0.0, [250.0], 1.0, 1.0, 1.0,
+                                projected_distance=big)
+    return numeric(
+        ref.ISO9613_2_GROUND_AGR_250_POROUS, float(agr[0]), 1e-6, unit="dB",
+        places=4,
+    )
+
+
+@register(
+    "Outdoor propagation & occupational exposure",
+    "ISO 9613-2:1996 clause 7.4",
+    "Single-edge diffraction saturates at the 20 dB cap",
+)
+def _chk_iso9613_2_barrier_single_cap() -> Outcome:
+    b = ph.Barrier(source_to_edge=50.0, edge_to_receiver=50.0)
+    dz = ph.barrier_attenuation(b, 60.0, ph.DEFAULT_FREQUENCIES)
+    return numeric(
+        ref.ISO9613_2_BARRIER_CAP_SINGLE, float(np.max(dz)), 1e-9, unit="dB",
+        places=6,
+    )
+
+
+@register(
+    "Outdoor propagation & occupational exposure",
+    "ISO 9613-2:1996 clause 7.4",
+    "Double-edge diffraction saturates at the 25 dB cap",
+)
+def _chk_iso9613_2_barrier_double_cap() -> Outcome:
+    b = ph.Barrier(source_to_edge=50.0, edge_to_receiver=50.0, edge_separation=5.0)
+    dz = ph.barrier_attenuation(b, 60.0, ph.DEFAULT_FREQUENCIES)
+    return numeric(
+        ref.ISO9613_2_BARRIER_CAP_DOUBLE, float(np.max(dz)), 1e-9, unit="dB",
+        places=6,
+    )
+
+
+def _iso9612_annex_d_tasks() -> list:
+    """Rebuild the ISO 9612 Annex D Task objects from the shared input table."""
+    from phonometry.occupational_exposure import Task
+
+    tasks = []
+    for samples, duration, drange in ref.ISO9612_ANNEX_D_TASKS:
+        tasks.append(Task(samples=samples, duration_hours=duration,
+                          duration_range=drange))
+    return tasks
+
+
+def _lex_and_u(lex: float, u: float, exp_lex: float, exp_u: float,
+               tol_lex: float, tol_u: float) -> Outcome:
+    """Combined LEX,8h + expanded-uncertainty outcome for one ISO 9612 example."""
+    ok = abs(lex - exp_lex) <= tol_lex and abs(u - exp_u) <= tol_u
+    return Outcome(
+        expected=f"LEX,8h {exp_lex:.1f}; U {exp_u:.1f} dB",
+        computed=f"LEX,8h {lex:.1f}; U {u:.1f} dB",
+        delta=f"{lex - exp_lex:+.2f}; {u - exp_u:+.2f} dB",
+        passed=ok,
+    )
+
+
+@register(
+    "Outdoor propagation & occupational exposure",
+    "ISO 9612:2009 Annex D",
+    "Task-based LEX,8h + U (welder day, case a)",
+)
+def _chk_iso9612_annex_d() -> Outcome:
+    res = ph.task_based_exposure(
+        _iso9612_annex_d_tasks(), include_duration_uncertainty=False, warn=False
+    )
+    return _lex_and_u(
+        res.lex_8h, res.expanded_uncertainty,
+        ref.ISO9612_ANNEX_D_LEX_8H, ref.ISO9612_ANNEX_D_U, 0.05, 0.1,
+    )
+
+
+@register(
+    "Outdoor propagation & occupational exposure",
+    "ISO 9612:2009 Annex E",
+    "Job-based LEX,8h + U (production line, 18 workers)",
+)
+def _chk_iso9612_annex_e() -> Outcome:
+    res = ph.job_based_exposure(
+        list(ref.ISO9612_ANNEX_E_SAMPLES), ref.ISO9612_ANNEX_E_TE_HOURS
+    )
+    return _lex_and_u(
+        res.lex_8h, res.expanded_uncertainty,
+        ref.ISO9612_ANNEX_E_LEX_8H, ref.ISO9612_ANNEX_E_U, 0.1, 0.05,
+    )
+
+
+@register(
+    "Outdoor propagation & occupational exposure",
+    "ISO 9612:2009 Annex F",
+    "Full-day LEX,8h + U (forklift drivers)",
+)
+def _chk_iso9612_annex_f() -> Outcome:
+    res = ph.full_day_exposure(
+        list(ref.ISO9612_ANNEX_F_SAMPLES), ref.ISO9612_ANNEX_F_TE_HOURS
+    )
+    return _lex_and_u(
+        res.lex_8h, res.expanded_uncertainty,
+        ref.ISO9612_ANNEX_F_LEX_8H, ref.ISO9612_ANNEX_F_U, 0.05, 0.05,
+    )
+
+
+# ===========================================================================
 # Markdown rendering
 # ===========================================================================
 def _snap(value: float, eps: float = 5e-4) -> float:

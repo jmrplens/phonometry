@@ -257,3 +257,48 @@ ISO9613_1_TABLE1: list[tuple[float, float, float, float]] = [
 # Two representative grid points for the conformance registry (middle + corner).
 ISO9613_1_TABLE1_MID = (10.0, 70.0, 1000.0, 3.66)  # dB/km
 ISO9613_1_TABLE1_CORNER = (0.0, 20.0, 2000.0, 34.6)  # dB/km
+
+# ---------------------------------------------------------------------------
+# ISO 9613-2:1996 outdoor sound propagation — closed-form oracles. The general
+# method (clause 7) sums independent physical terms, each with an exact limit:
+#   * Eq. (7) geometrical divergence Adiv = 20 lg(d/d0) + 11 = 51,0 dB at 100 m.
+#   * Table 3 ground functions have exact on-ground (h = 0), fully-developed
+#     (dp -> inf) limits: b'(0) = 1,5 + 8,6 = 10,1 (250 Hz). With porous ground
+#     both sides (Gs = Gr = 1) and hs = hr = 0 the source and receiver regions
+#     each add (-1,5 + b'(0)), so Agr(250 Hz) = 2*(-1,5 + 10,1) = 17,2 dB.
+#   * Clause 7.4 caps the diffraction term Dz at 20 dB (single edge) and 25 dB
+#     (double edge); a deep-shadow geometry saturates to those caps exactly.
+# ---------------------------------------------------------------------------
+ISO9613_2_ADIV_100M = 51.0  # Eq. (7): 20 lg(100/1) + 11
+ISO9613_2_GROUND_BPRIME_ZERO = 10.1  # Table 3 b'(h=0, dp->inf) = 1,5 + 8,6
+ISO9613_2_GROUND_AGR_250_POROUS = 17.2  # 2*(-1,5 + 10,1), hs=hr=0, Gs=Gr=1
+ISO9613_2_BARRIER_CAP_SINGLE = 20.0  # clause 7.4 single-diffraction limit, dB
+ISO9613_2_BARRIER_CAP_DOUBLE = 25.0  # clause 7.4 double-diffraction limit, dB
+
+# ---------------------------------------------------------------------------
+# ISO 9612:2009 occupational noise exposure — the three normative worked
+# examples (Annexes D/E/F), reproduced digit-for-digit by the test suite. Each
+# stores the raw measured levels/durations and the standard's reported LEX,8h
+# and expanded uncertainty U (k = 1,65, one-sided 95 %). Annex D is the
+# task-based welder day; its case (a) omits the task-duration uncertainty
+# (U = 2,7 dB), case (b) includes it (U = 3,2 dB). Annexes E (job-based, 18
+# workers) and F (full-day forklift drivers) use the Table C.4 sampling budget.
+# Task tuples are (samples, duration_hours, duration_range) so the conformance
+# report can rebuild the Task objects (Task is not importable here — this module
+# is stdlib-only). Mirrors tests/test_occupational_exposure.py.
+# ---------------------------------------------------------------------------
+ISO9612_ANNEX_D_TASKS: tuple[tuple, ...] = (
+    ((70.0,), 1.5, None),
+    ((80.1, 82.2, 79.6), 5.0, (4.0, 6.0)),
+    ((86.5, 92.4, 89.3, 93.2, 87.8, 86.2), 1.5, (1.0, 2.0)),
+)
+ISO9612_ANNEX_D_LEX_8H = 84.3
+ISO9612_ANNEX_D_U = 2.7  # case (a): task-duration uncertainty omitted
+ISO9612_ANNEX_E_SAMPLES: tuple[float, ...] = (88.1, 86.1, 89.7, 86.5, 91.1, 86.7)
+ISO9612_ANNEX_E_TE_HOURS = 7.5
+ISO9612_ANNEX_E_LEX_8H = 88.1
+ISO9612_ANNEX_E_U = 3.8
+ISO9612_ANNEX_F_SAMPLES: tuple[float, ...] = (88.0, 91.9, 87.6, 90.4, 89.0, 88.4)
+ISO9612_ANNEX_F_TE_HOURS = 9.25
+ISO9612_ANNEX_F_LEX_8H = 90.1
+ISO9612_ANNEX_F_U = 3.4

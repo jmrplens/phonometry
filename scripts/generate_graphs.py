@@ -114,6 +114,17 @@ _ES_EXACT = {
         "stateful=True: los bloques igualan el resultado continuo",
     "zero_phase=True (aligned)": "zero_phase=True (alineado)",
     "0 dB @ 10 Hz": "0 dB @ 10 Hz",
+    # Scattering coefficient spectrum (ISO 17497-1)
+    "Random-incidence scattering coefficient (ISO 17497-1)":
+        "Coeficiente de dispersión de incidencia aleatoria (ISO 17497-1)",
+    "Scattering coefficient s": "Coeficiente de dispersión s",
+    # In-situ road-surface absorption (ISO 13472-1)
+    "In-situ road-surface absorption (ISO 13472-1)":
+        "Absorción in situ de pavimentos (ISO 13472-1)",
+    "Absorption coefficient alpha": "Coeficiente de absorción alpha",
+    # Precision sound power (ISO 3745 / ISO 9614-3)
+    "Sound power level LW [dB]": "Nivel de potencia sonora LW [dB]",
+    "Non-applicable band": "Banda no aplicable",
     "Stable tone (good coupling)": "Tono estable (buen acoplamiento)",
     "3% AM tone (loose coupling)": "Tono con AM del 3 % (acoplamiento flojo)",
     "IEC 60942:2017 class 1 limit (deviation from mean)":
@@ -356,6 +367,13 @@ _ES_PATTERNS = [
      r"Resistividad al flujo sigma = \1 Pa s/m^2"),
     (r"^Linear term a = (.+) Pa s/m  \(= R_s at u -> 0\)$",
      r"Término lineal a = \1 Pa s/m  (= R_s en u -> 0)"),
+    # Scattering / diffusion / precision power dynamic titles (numeric d / LWA)
+    (r"^Directional diffusion  d = (.+)  \(ISO 17497-2\)$",
+     r"Difusión direccional  d = \1  (ISO 17497-2)"),
+    (r"^Precision sound power \(ISO 3745\)  LWA = (.+) dB\(A\)$",
+     r"Potencia sonora de precisión (ISO 3745)  LWA = \1 dB(A)"),
+    (r"^Precision intensity scanning \(ISO 9614-3\)  LWA = (.+) dB\(A\)$",
+     r"Barrido de intensidad de precisión (ISO 9614-3)  LWA = \1 dB(A)"),
 ]
 
 
@@ -2831,6 +2849,226 @@ def generate_impedance_tube(output_dir: str) -> None:
     plt.close()
 
 
+def generate_scattering_coefficient(output_dir: str) -> None:
+    """ISO 17497-1: scattering coefficient s(f) from a per-band measurement."""
+    print("Generating scattering_coefficient.png...")
+    from phonometry import scattering_coefficient_spectrum
+
+    # A realistic reverberation-room measurement reduced to two absorption
+    # spectra over the 13 one-third-octave bands 250-4000 Hz: the random-
+    # incidence absorption alpha_s (stationary sample) and the specular
+    # absorption alpha_spec (rotating turntable). A diffuser scatters more with
+    # frequency, so alpha_spec climbs above alpha_s and s(f) = (alpha_spec -
+    # alpha_s)/(1 - alpha_s) rises smoothly from near 0 towards 0.8.
+    freqs = np.array(
+        [250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000],
+        dtype=float,
+    )
+    alpha_s = np.full_like(freqs, 0.10)
+    alpha_spec = 0.11 + 0.75 * (np.log10(freqs / 250.0) / np.log10(4000.0 / 250.0))
+    result = scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
+
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    ax.semilogx(result.frequencies, result.scattering, color=COLOR_PRIMARY,
+                linewidth=1.9, marker="o", markersize=6, markerfacecolor="white",
+                markeredgewidth=1.4, zorder=3)
+    ax.set_title("Random-incidence scattering coefficient (ISO 17497-1)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Scattering coefficient s")
+    ax.set_xlim(freqs.min() * 0.9, freqs.max() * 1.1)
+    ax.set_ylim(0.0, 1.0)
+    from matplotlib.ticker import NullFormatter, ScalarFormatter
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.set_xticks([250, 500, 1000, 2000, 4000])
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "scattering_coefficient.png"))
+    plt.close()
+
+
+def generate_diffusion_polar(output_dir: str) -> None:
+    """ISO 17497-2: polar reflected response and its diffusion coefficient d."""
+    print("Generating diffusion_polar.png...")
+    from phonometry import directional_diffusion
+
+    # Reflected sound-pressure levels L_i(theta) on a 37-point semicircle
+    # (-90 to 90 deg, 5 deg spacing) of a diffusing surface: the energy is
+    # spread almost uniformly over angle, so the ISO 17497-2 Formula (5)
+    # autocorrelation coefficient d is high.
+    angles = np.arange(-90.0, 90.5, 5.0)
+    rng = np.random.default_rng(3)
+    levels = 70.0 + 2.0 * np.sin(np.radians(angles) * 3.0) + rng.normal(
+        0.0, 1.0, angles.size
+    )
+    result = directional_diffusion(angles, levels)
+
+    fig, ax = plt.subplots(figsize=(8.0, 7.5),
+                           subplot_kw={"projection": "polar"})
+    # The theta-* setters live on PolarAxes, not the base Axes type.
+    polar: Any = ax
+    theta = np.radians(result.angles)
+    polar.plot(theta, result.levels, color=COLOR_PRIMARY, linewidth=1.9,
+               marker="o", markersize=4, zorder=3)
+    polar.fill(theta, result.levels, color=COLOR_PRIMARY, alpha=0.15, zorder=1)
+    polar.set_theta_zero_location("N")
+    polar.set_theta_direction(-1)
+    polar.set_thetamin(-90)
+    polar.set_thetamax(90)
+    polar.set_title(
+        f"Directional diffusion  d = {result.coefficient:.2f}  (ISO 17497-2)",
+        fontweight="bold", pad=20,
+    )
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "diffusion_polar.png"))
+    plt.close()
+
+
+def generate_insitu_absorption(output_dir: str) -> None:
+    """ISO 13472-1: in-situ one-third-octave absorption spectrum alpha(f)."""
+    print("Generating insitu_absorption.png...")
+    from phonometry import geometric_spreading_factor, insitu_absorption_spectrum
+
+    # A synthetic-but-realistic in-situ measurement. The incident impulse hi is
+    # a unit spike; the road reflection is hr = Kr * r0 * roll(hi, shift) with
+    # Kr the geometrical-spreading factor (2/3 for ds=1.25 m, dm=0.25 m), a
+    # mildly frequency-dependent r0 realised by a gentle low-pass (a porous
+    # surface reflects less as frequency rises), and the reflected-path delay
+    # shift = round(2 dm / c * fs). The library forms the narrow-band
+    # alpha = 1 - (1/Kr^2)|Hr/Hi|^2 and reduces it to one-third-octave bands.
+    fs, n = 48000.0, 8192
+    kr = geometric_spreading_factor()  # (ds - dm)/(ds + dm) = 2/3
+    hi = np.zeros(n)
+    hi[0] = 1.0
+    r0 = 0.85
+    taps = scipy_signal.firwin(41, 1200.0, fs=fs)
+    taps = taps / taps.sum()
+    shift = int(round(2.0 * 0.25 / 340.0 * fs))  # reflected-path delay 2 dm / c
+    hr = kr * r0 * np.roll(scipy_signal.lfilter(taps, 1.0, hi), shift)
+    result = insitu_absorption_spectrum(hi, hr, fs)
+
+    freqs = result.frequencies
+    positions = np.arange(freqs.size, dtype=float)
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    ax.bar(positions, np.nan_to_num(result.absorption), width=0.7,
+           color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.7, zorder=3)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax.set_title("In-situ road-surface absorption (ISO 13472-1)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Absorption coefficient alpha")
+    ax.set_ylim(0.0, 1.0)
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    ax.text(0.04, 0.94, "Kr = 2/3\nalpha = 1 - (1/Kr^2)|Hr/Hi|^2",
+            transform=ax.transAxes, va="top", ha="left", fontsize=10,
+            color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "insitu_absorption.png"))
+    plt.close()
+
+
+def generate_precision_anechoic_power(output_dir: str) -> None:
+    """ISO 3745: precision LW spectrum from a hemisphere pressure measurement."""
+    print("Generating precision_anechoic_power.png...")
+    from phonometry import sound_power_anechoic
+
+    # A mid-frequency-peaked machine measured over the 40-position hemisphere
+    # array (ISO 3745 Annex E) in a hemi-anechoic room. levels_positions is the
+    # (40, NB) surface pressure spectrum: a base machine spectrum peaked near
+    # 1 kHz plus a small per-position spatial variation. The library forms the
+    # surface-averaged LW = Lp_bar + 10 lg(S/S0) + C1+C2+C3 and the A-weighted
+    # total LWA.
+    freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+    base = 70.0 + 8.0 * np.exp(-(np.log2(freqs / 1000.0) ** 2) / 2.0)
+    rng = np.random.default_rng(7)
+    levels = base[None, :] + rng.normal(0.0, 1.0, (40, freqs.size))
+    result = sound_power_anechoic(levels, "hemisphere", radius=1.0,
+                                  frequencies=freqs)
+
+    lw = result.sound_power_level
+    lwa = result.sound_power_level_a
+    positions = np.arange(freqs.size, dtype=float)
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    ax.bar(positions, lw, width=0.7, color=COLOR_PRIMARY, edgecolor=COLOR_FG,
+           linewidth=0.7, zorder=3)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax.set_title(f"Precision sound power (ISO 3745)  LWA = {lwa:.1f} dB(A)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Sound power level LW [dB]")
+    ax.set_ylim(0.0, float(np.nanmax(lw)) + 8.0)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "precision_anechoic_power.png"))
+    plt.close()
+
+
+def generate_intensity_scan_power(output_dir: str) -> None:
+    """ISO 9614-3: precision LW spectrum by intensity scanning (with a NaN band)."""
+    print("Generating intensity_scan_power.png...")
+    import warnings
+
+    from phonometry import sound_power_intensity_precision
+
+    # Four partial surfaces scanned over five one-third-octave bands. Each cell
+    # of partial_intensity is the signed normal intensity In_i (W/m^2) already
+    # reduced to the two-scan result; areas are the partial-surface areas Si.
+    # The 250 Hz band has net-negative power (more energy flowing in than out),
+    # so ISO 9614-3 flags it not-applicable (clause 9.2) and it is hatched.
+    freqs = np.array([250, 500, 1000, 2000, 4000], dtype=float)
+    areas = np.array([0.5, 1.0, 0.75, 0.5])
+    base_intensity = np.array([2.0e-6, 8.0e-6, 2.0e-5, 1.0e-5, 3.0e-6])
+    per_segment = np.array([1.0, 1.1, 0.9, 1.05])
+    partial_intensity = base_intensity[None, :] * per_segment[:, None]
+    # A locally reactive 250 Hz band: the segment intensities cancel to a
+    # net-negative total.
+    partial_intensity[:, 0] = np.array([2.0e-6, -3.0e-6, -4.0e-6, -1.0e-6])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        result = sound_power_intensity_precision(partial_intensity, areas,
+                                                 frequencies=freqs)
+
+    lw = result.sound_power_level
+    neg = result.not_applicable_band
+    lwa = result.sound_power_level_a
+    positions = np.arange(freqs.size, dtype=float)
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    # Determinate bands: a solid LW bar. Non-applicable bands carry no LW (NaN),
+    # so instead of a zero-height bar they are flagged by a full-height greyed,
+    # hatched span - clearly a marker, not a plotted value (ISO 9614-3, 9.2).
+    ax.bar(positions[~neg], np.nan_to_num(lw)[~neg], width=0.7, color=COLOR_PRIMARY,
+           edgecolor=COLOR_FG, linewidth=0.7, zorder=3)
+    for pos, is_neg in zip(positions, neg):
+        if is_neg:
+            ax.axvspan(pos - 0.35, pos + 0.35, facecolor="#888888", alpha=0.28,
+                       hatch="//", edgecolor="#888888", linewidth=0.8, zorder=2)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax.set_title(f"Precision intensity scanning (ISO 9614-3)  LWA = {lwa:.1f} dB(A)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Sound power level LW [dB]")
+    ax.set_ylim(0.0, float(np.nanmax(lw)) + 8.0)
+    from matplotlib.patches import Patch
+    handle = Patch(facecolor="#888888", alpha=0.28, hatch="//",
+                   edgecolor="#888888", label="Non-applicable band")
+    ax.legend(handles=[handle], loc="upper right", fontsize=9)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "intensity_scan_power.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -2885,6 +3123,14 @@ def generate_all(img_dir: str) -> None:
     generate_absorption_rating(img_dir)
     generate_airflow_resistance(img_dir)
     generate_impedance_tube(img_dir)
+
+    # Scattering/diffusion, in-situ road absorption, precision sound power
+    # (ISO 17497-1/-2, ISO 13472-1, ISO 3745 / ISO 9614-3)
+    generate_scattering_coefficient(img_dir)
+    generate_diffusion_polar(img_dir)
+    generate_insitu_absorption(img_dir)
+    generate_precision_anechoic_power(img_dir)
+    generate_intensity_scan_power(img_dir)
 
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)

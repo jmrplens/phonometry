@@ -98,7 +98,10 @@ def main():
     test_table, tests, failures = parse_test_results(test_dir)
     status = "✅ all green" if failures == 0 else f"❌ {failures} failing"
 
-    body = f"""{conformance}
+    # Hidden marker so the CI updates one sticky comment instead of posting a
+    # new one every run (see the "Post PR Comment" step in python-app.yml).
+    body = f"""<!-- phonometry-ci-conformance -->
+{conformance}
 
 ---
 

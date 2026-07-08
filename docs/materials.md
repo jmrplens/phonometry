@@ -93,6 +93,8 @@ flow, $A$ the cross-section and $d$ the thickness. Note the specific airflow
 resistance $R_s$ is in **Pa·s/m** (not Pa·s/m²); the airflow resistivity $\sigma$
 is $R_s$ per metre of thickness.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_airflow_resistance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_airflow_resistance.svg" alt="Airflow resistance measurement rigs: the ISO 9053-1 static method with a specimen in a holder, a steady laminar flow q_v and a differential manometer reading the pressure drop; and the ISO 9053-2 alternating method with an oscillating piston driving a cavity terminated by the specimen or an airtight plug, and a microphone reading the cavity level" width="92%"></picture>
+
 **Static method (ISO 9053-1:2018).** A steady laminar flow is stepped up and the
 pressure difference plotted against the linear velocity $u = q_v/A$. A regression
 of at least second order **constrained through the origin**, $\Delta p = a\,u +
@@ -171,6 +173,8 @@ The impedance tube measures a small sample at **normal incidence**. Two standard
 share the geometry but differ in method and sign convention, so the library keeps
 their helpers separate and never mixes them.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube.svg" alt="ISO 10534-2 two-microphone impedance tube: a loudspeaker radiating a plane wave down the tube, two microphones flush in the wall at spacing s and distance x1 from the specimen face, the test specimen against a rigid backing, and the incident and reflected waves" width="92%"></picture>
+
 **Standing-wave-ratio method (ISO 10534-1).** A probe traverses the standing wave
 and reads the level difference $\Delta L = L_\text{max} - L_\text{min}$ between a
 pressure maximum and the adjacent minimum. The standing-wave ratio, reflection
@@ -238,6 +242,8 @@ tube attenuation; correct any microphone mismatch beforehand with
 downstream of the sample — a two-load (or one-load) measurement recovers the
 sample's transfer matrix, whose entries give the normal-incidence transmission
 loss, reflection and wavenumber:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_astm_tube_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_astm_tube.svg" alt="ASTM E2611 four-microphone transmission-loss tube: a sound source, two microphones upstream and two downstream of the test specimen at spacings s1 and s2 and offsets l1 and l2, an adjustable termination for the two-load method, the upstream A and B and downstream C and D travelling waves, and the transfer matrix and transmission-loss relations" width="92%"></picture>
 
 $$
 \mathrm{TL} = 20\log_{10}\left|\frac{T_{11} + T_{12}/\rho c

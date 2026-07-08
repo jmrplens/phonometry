@@ -68,6 +68,20 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "AirflowResistanceWarning",
+    "StaticAirflowResult",
+    "airflow_resistance",
+    "specific_airflow_resistance",
+    "airflow_resistivity",
+    "linear_airflow_velocity",
+    "static_airflow_resistance",
+    "piston_volume_flow_rate",
+    "thermal_boundary_layer_thickness",
+    "effective_kappa",
+    "alternating_airflow_resistance",
+]
+
 #: Standard atmospheric (static) pressure ``P_S`` (Pa), ISO 9053-2:2020 Formula (2).
 _STANDARD_STATIC_PRESSURE = 101325.0
 #: Uncorrected adiabatic ratio of specific heats for air; the fallback used for

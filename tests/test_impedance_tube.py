@@ -33,6 +33,7 @@ from phonometry.impedance_tube import (
     air_layer_transfer_matrix,
     apply_mic_calibration,
     characteristic_impedance,
+    face_quantities,
     mic_calibration_factor,
     normalized_surface_admittance,
     normalized_surface_impedance,
@@ -418,6 +419,32 @@ def test_wave_decomposition_recovers_amplitudes_up_to_sign() -> None:
     assert np.allclose(b, -b_true, atol=1e-9)
     assert np.allclose(c, -down_c, atol=1e-9)
     assert np.allclose(d, -down_d, atol=1e-9)
+
+
+def test_face_quantities_progressive_wave_impedance() -> None:
+    # ASTM E2611 Eq. (21): a single forward-travelling wave has the specific
+    # acoustic impedance p/u = +rho*c at every plane, on both faces, whatever
+    # the frequency or thickness (the propagation phase cancels in the ratio).
+    f = np.array([500.0, 1500.0])
+    k = np.asarray(tube_wavenumber(f, C0)).real.astype(np.complex128)
+    p0, pd, u0, ud = face_quantities(
+        1.0, 0.0, 1.0, 0.0, wavenumber=k, thickness=THICKNESS,
+        characteristic_impedance=RC,
+    )
+    assert np.allclose(p0 / u0, RC, atol=1e-9)
+    assert np.allclose(pd / ud, RC, atol=1e-9)
+
+
+def test_face_quantities_backward_wave_impedance() -> None:
+    # A single backward-travelling wave reverses the sign: p/u = -rho*c.
+    f = np.array([500.0, 1500.0])
+    k = np.asarray(tube_wavenumber(f, C0)).real.astype(np.complex128)
+    p0, pd, u0, ud = face_quantities(
+        0.0, 1.0, 0.0, 1.0, wavenumber=k, thickness=THICKNESS,
+        characteristic_impedance=RC,
+    )
+    assert np.allclose(p0 / u0, -RC, atol=1e-9)
+    assert np.allclose(pd / ud, -RC, atol=1e-9)
 
 
 def test_two_load_recovers_air_layer_matrix() -> None:

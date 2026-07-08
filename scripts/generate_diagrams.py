@@ -206,6 +206,54 @@ _ES: dict[str, str] = {
         "z = dss + dsr − d   (diferencia de camino)",
     "Dz = 10 lg[ 3 + (C₂/λ) C₃ z Kmet ]   (Eq. 14)":
         "Dz = 10 lg[ 3 + (C₂/λ) C₃ z Kmet ]   (Ec. 14)",
+    # Impedance tube (ISO 10534) setup
+    "Impedance tube: two-microphone method (ISO 10534-2)":
+        "Tubo de impedancia: método de dos micrófonos (ISO 10534-2)",
+    "Test specimen": "Probeta de ensayo",
+    "Rigid backing": "Terminación rígida",
+    "incident": "incidente",
+    "reflected": "reflejada",
+    "H₁₂ → reflection factor r (Eq. 17), absorption α = 1 − |r|² (Eq. 18), "
+    "Z/ρc₀ = (1+r)/(1−r) (Eq. 19)":
+        "H₁₂ → factor de reflexión r (Ec. 17), absorción α = 1 − |r|² (Ec. 18), "
+        "Z/ρc₀ = (1+r)/(1−r) (Ec. 19)",
+    "Working range f_l < f < f_u set by the microphone spacing s "
+    "and the tube diameter (Clause 6.1)":
+        "Rango útil f_l < f < f_u fijado por la separación s de micrófonos "
+        "y el diámetro del tubo (Cláusula 6.1)",
+    "ASTM E2611: two further microphones behind the specimen also "
+    "give the transmission loss":
+        "ASTM E2611: dos micrófonos más tras la probeta dan también "
+        "la pérdida por transmisión",
+    # Four-microphone tube (ASTM E2611) setup
+    "Four-microphone transmission-loss tube (ASTM E2611)":
+        "Tubo de pérdida por transmisión de cuatro micrófonos (ASTM E2611)",
+    "Termination": "Terminación",
+    "(2 loads)": "(2 cargas)",
+    "Decompose A, B (upstream) and C, D (downstream) → transfer matrix T (Eq. 22)":
+        "Descomponer A, B (aguas arriba) y C, D (aguas abajo) → "
+        "matriz de transferencia T (Ec. 22)",
+    "TL = 20 log₁₀ |(T₁₁ + T₁₂/ρc + ρc·T₂₁ + T₂₂) / 2|   (Eq. 26)":
+        "TL = 20 log₁₀ |(T₁₁ + T₁₂/ρc + ρc·T₂₁ + T₂₂) / 2|   (Ec. 26)",
+    "Two-load method: repeat with two terminations; the one-load "
+    "variant uses a single anechoic end":
+        "Método de dos cargas: repetir con dos terminaciones; la variante "
+        "de una carga usa un único extremo anecoico",
+    # Airflow resistance (ISO 9053) setup
+    "Airflow resistance: static and alternating methods (ISO 9053-1/-2)":
+        "Resistencia al flujo: métodos estático y alternante (ISO 9053-1/-2)",
+    "Static method (ISO 9053-1)": "Método estático (ISO 9053-1)",
+    "specimen (A, d)": "probeta (A, d)",
+    "laminar flow  q_v": "flujo laminar  q_v",
+    "manom.": "manóm.",
+    "R = Δp / q_v   (through-origin fit at 0.5 mm/s)":
+        "R = Δp / q_v   (ajuste por el origen a 0,5 mm/s)",
+    "Alternating method (ISO 9053-2)": "Método alternante (ISO 9053-2)",
+    "cavity": "cavidad",
+    "specimen / airtight": "probeta / cierre estanco",
+    "piston  f = 1–4 Hz": "pistón  f = 1–4 Hz",
+    "R from L_p,s − L_p,t   (κ′ per Annex A)":
+        "R por L_p,s − L_p,t   (κ′ según Anexo A)",
 }
 
 
@@ -254,6 +302,8 @@ class SVG:
              fill: str = "", anchor: str = "middle", bold: bool = False,
              mono: bool = False, italic: bool = False) -> None:
         s = self.tr(s)
+        # Escape XML metacharacters so labels may contain <, > and & literally.
+        s = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         fill = fill or self.th.fg
         w = ' font-weight="600"' if bold else ""
         i = ' font-style="italic"' if italic else ""
@@ -1169,6 +1219,197 @@ def _d_outdoor(s: SVG, th: Theme) -> None:
            "Dz = 10 lg[ 3 + (C₂/λ) C₃ z Kmet ]   (Eq. 14)", 18, th.muted)
 
 
+def _d_impedance_tube(s: SVG, th: Theme) -> None:
+    """ISO 10534-2 two-microphone impedance tube (side view)."""
+    tube_top, tube_bot, mid = 215.0, 335.0, 275.0
+    tube_l, tube_r = 165.0, 778.0
+    back_w, spec_w = 20.0, 48.0
+    spec_l = tube_r - back_w - spec_w
+
+    # Tube body.
+    s.rect(tube_l, tube_top, tube_r - tube_l, tube_bot - tube_top, th.bg, th.fg, sw=3)
+
+    # Loudspeaker sealed to the left end, cone opening into the tube.
+    s.rect(72, mid - 46, 70, 92, th.panel, th.primary, rx=6, sw=2)
+    s.path(f"M 142 {mid - 18} L 142 {mid + 18} L {tube_l} {tube_bot} "
+           f"L {tube_l} {tube_top} Z", fill=th.panel, stroke=th.primary, sw=2)
+    s.circle(120, mid, 11, th.primary)
+    s.text(118, tube_bot + 42, "Loudspeaker", 20, th.fg, bold=True)
+
+    # Test specimen and rigid backing at the right end.
+    s.rect(tube_r - back_w, tube_top, back_w, tube_bot - tube_top, th.fg)
+    s.rect(spec_l, tube_top, spec_w, tube_bot - tube_top, th.panel, th.secondary, sw=2)
+    for hx in range(int(spec_l) + 8, int(spec_l + spec_w), 11):
+        s.line(hx, tube_bot - 4, hx - 16, tube_top + 4, th.secondary, 1.0)
+    s.text(spec_l + spec_w / 2, tube_top - 14, "Test specimen", 19, th.secondary, bold=True)
+    s.text(tube_r - back_w / 2, tube_bot + 42, "Rigid backing", 18, th.muted)
+
+    # Two microphones flush in the top wall (mic 1 = farther from specimen).
+    m1x, m2x = 460.0, 555.0
+    for mx, lab in ((m1x, "Mic 1"), (m2x, "Mic 2")):
+        s.rect(mx - 7, tube_top - 20, 14, 20, th.fg, rx=3)
+        s.circle(mx, tube_top, 5, th.primary)
+        s.text(mx, tube_top - 28, lab, 18, th.fg, bold=True)
+
+    # Plane-wave arrows inside the tube.
+    s.arrow(tube_l + 30, mid - 18, spec_l - 16, mid - 18, th.accent, 2.2)
+    s.text((tube_l + spec_l) / 2 - 40, mid - 26, "incident", 17, th.accent)
+    s.arrow(spec_l - 16, mid + 20, tube_l + 30, mid + 20, th.secondary, 2.2)
+    s.text((tube_l + spec_l) / 2 - 40, mid + 38, "reflected", 17, th.secondary)
+
+    # Dimensions: x1 (specimen face -> far mic) above, spacing s below.
+    s.dim(spec_l, tube_top, m1x, tube_top, "x₁", offset=-58, size=19)
+    s.dim(m1x, tube_bot, m2x, tube_bot, "s", offset=70, size=19)
+
+    # Governing relations and range.
+    for y, txt, col in (
+        (438, "H₁₂ → reflection factor r (Eq. 17), "
+              "absorption α = 1 − |r|² (Eq. 18), "
+              "Z/ρc₀ = (1+r)/(1−r) (Eq. 19)", th.fg),
+        (466, "Working range f_l < f < f_u set by the microphone spacing s "
+              "and the tube diameter (Clause 6.1)", th.muted),
+        (492, "ASTM E2611: two further microphones behind the specimen also "
+              "give the transmission loss", th.muted),
+    ):
+        s.text(450, y, txt, 18, col)
+
+
+def _d_astm_tube(s: SVG, th: Theme) -> None:
+    """ASTM E2611 four-microphone transmission-loss tube (side view)."""
+    tube_top, tube_bot, mid = 225.0, 345.0, 285.0
+    tube_l, tube_r = 140.0, 825.0
+    spec_l, spec_r = 453.0, 497.0
+    m1x, m2x, m3x, m4x = 250.0, 360.0, 590.0, 700.0
+
+    # Tube body.
+    s.rect(tube_l, tube_top, tube_r - tube_l, tube_bot - tube_top, th.bg, th.fg, sw=3)
+
+    # Loudspeaker sealed to the left end.
+    s.rect(56, mid - 42, 62, 84, th.panel, th.primary, rx=6, sw=2)
+    s.path(f"M 118 {mid - 16} L 118 {mid + 16} L {tube_l} {tube_bot} "
+           f"L {tube_l} {tube_top} Z", fill=th.panel, stroke=th.primary, sw=2)
+    s.circle(96, mid, 10, th.primary)
+    s.text(96, tube_bot + 40, "Source", 19, th.fg, bold=True)
+
+    # Adjustable termination (two loads) at the right end.
+    s.rect(tube_r - 20, tube_top, 20, tube_bot - tube_top, th.fg)
+    s.text(tube_r - 10, tube_bot + 40, "Termination", 17, th.muted)
+    s.text(tube_r - 10, tube_bot + 60, "(2 loads)", 17, th.muted)
+
+    # Test specimen at the centre.
+    s.rect(spec_l, tube_top, spec_r - spec_l, tube_bot - tube_top, th.panel,
+           th.secondary, sw=2)
+    for hx in range(int(spec_l) + 7, int(spec_r), 10):
+        s.line(hx, tube_bot - 4, hx - 14, tube_top + 4, th.secondary, 1.0)
+    s.text((spec_l + spec_r) / 2, tube_bot + 40, "Test specimen", 18,
+           th.secondary, bold=True)
+
+    # Four microphones flush in the top wall (1,2 upstream; 3,4 downstream).
+    for mx, lab in ((m1x, "Mic 1"), (m2x, "Mic 2"), (m3x, "Mic 3"), (m4x, "Mic 4")):
+        s.rect(mx - 6, tube_top - 18, 12, 18, th.fg, rx=3)
+        s.circle(mx, tube_top, 5, th.primary)
+        s.text(mx, tube_top - 26, lab, 16, th.fg, bold=True)
+
+    # Up- and downstream travelling waves.
+    s.arrow(tube_l + 26, mid - 16, spec_l - 8, mid - 16, th.accent, 2.0)
+    s.arrow(spec_l - 8, mid + 18, tube_l + 26, mid + 18, th.secondary, 2.0)
+    s.arrow(spec_r + 8, mid - 16, tube_r - 26, mid - 16, th.accent, 2.0)
+    s.arrow(tube_r - 26, mid + 18, spec_r + 8, mid + 18, th.secondary, 2.0)
+    s.text(tube_l + 40, mid - 22, "A", 17, th.accent, bold=True)
+    s.text(tube_l + 40, mid + 34, "B", 17, th.secondary, bold=True)
+    s.text(tube_r - 40, mid - 22, "C", 17, th.accent, bold=True)
+    s.text(tube_r - 40, mid + 34, "D", 17, th.secondary, bold=True)
+
+    # Dimensions: spacings s1/s2 below; specimen offsets l1/l2 and thickness d above.
+    s.dim(m1x, tube_bot, m2x, tube_bot, "s₁", offset=62, size=18)
+    s.dim(m3x, tube_bot, m4x, tube_bot, "s₂", offset=62, size=18)
+    # l1, l2 are both measured from the specimen FRONT face (x = 0), matching
+    # wave_decomposition/transfer_matrix_two_load; l2 therefore spans the specimen.
+    s.dim(m2x, tube_top, spec_l, tube_top, "l₁", offset=-42, size=18)
+    s.dim(spec_l, tube_top, m3x, tube_top, "l₂", offset=-58, size=18)
+    s.dim(spec_l, tube_top - 78, spec_r, tube_top - 78, "d", offset=0, size=17)
+    s.line(spec_l, tube_top, spec_l, tube_top - 78, th.muted, 0.9, dash="3,3")
+    s.line(spec_r, tube_top, spec_r, tube_top - 78, th.muted, 0.9, dash="3,3")
+
+    # Governing relations.
+    for y, txt, col in (
+        (452, "Decompose A, B (upstream) and C, D (downstream) → "
+              "transfer matrix T (Eq. 22)", th.fg),
+        (480, "TL = 20 log₁₀ |(T₁₁ + T₁₂/ρc + ρc·T₂₁ + T₂₂) / 2|   (Eq. 26)",
+         th.muted),
+        (506, "Two-load method: repeat with two terminations; the one-load "
+              "variant uses a single anechoic end", th.muted),
+    ):
+        s.text(450, y, txt, 17, col)
+
+
+def _d_airflow(s: SVG, th: Theme) -> None:
+    """ISO 9053-1 static and ISO 9053-2 alternating airflow-resistance rigs."""
+    # --- Left panel: static (DC) method -----------------------------------
+    s.rect(55, 70, 385, 430, th.panel, th.fg, rx=8, sw=2)
+    s.text(247, 100, "Static method (ISO 9053-1)", 21, th.fg, bold=True)
+
+    cx = 200.0
+    holder_l, holder_r = cx - 45, cx + 45
+    top_y, bot_y = 170.0, 430.0
+    # Vertical specimen holder (tube).
+    s.line(holder_l, top_y, holder_l, bot_y, th.fg, 2.5)
+    s.line(holder_r, top_y, holder_r, bot_y, th.fg, 2.5)
+    # Specimen (hatched disc) in the middle.
+    spec_y, spec_h = 285.0, 46.0
+    s.rect(holder_l, spec_y, 90, spec_h, th.bg, th.secondary, sw=2)
+    for hy in range(int(spec_y) + 8, int(spec_y + spec_h), 10):
+        s.line(holder_l + 4, hy, holder_r - 4, hy - 8, th.secondary, 1.0)
+    s.text(cx, spec_y + spec_h + 22, "specimen (A, d)", 17, th.secondary, bold=True)
+    # Steady laminar flow up through the holder.
+    s.arrow(cx, bot_y - 6, cx, spec_y + spec_h + 34, th.accent, 2.4)
+    s.arrow(cx, spec_y - 12, cx, top_y + 8, th.accent, 2.4)
+    s.text(cx, bot_y + 22, "laminar flow  q_v", 18, th.accent, bold=True)
+    # Differential manometer across the specimen (pressure taps).
+    tap_x = holder_r + 8
+    s.line(holder_r, spec_y - 4, tap_x + 40, spec_y - 4, th.primary, 1.6)
+    s.line(holder_r, spec_y + spec_h + 4, tap_x + 40, spec_y + spec_h + 4, th.primary, 1.6)
+    s.rect(tap_x + 40, spec_y - 26, 74, spec_h + 44, th.bg, th.primary, rx=8, sw=2)
+    s.text(tap_x + 77, spec_y + 8, "Δp", 22, th.primary, bold=True, mono=True)
+    s.text(tap_x + 77, spec_y + 34, "manom.", 15, th.muted)
+    s.text(247, 478, "R = Δp / q_v   (through-origin fit at 0.5 mm/s)",
+           16, th.fg, bold=True)
+
+    # --- Right panel: alternating (AC) method -----------------------------
+    s.rect(460, 70, 385, 430, th.panel, th.fg, rx=8, sw=2)
+    s.text(652, 100, "Alternating method (ISO 9053-2)", 21, th.fg, bold=True)
+
+    cav_l, cav_r = 590.0, 715.0
+    cav_top, cav_bot = 160.0, 360.0
+    # Cavity walls.
+    s.rect(cav_l, cav_top, cav_r - cav_l, cav_bot - cav_top, th.bg, th.fg, sw=2.5)
+    s.text((cav_l + cav_r) / 2, (cav_top + cav_bot) / 2 - 6, "cavity", 18, th.fg)
+    s.text((cav_l + cav_r) / 2, (cav_top + cav_bot) / 2 + 18, "V", 20, th.fg,
+           bold=True, italic=True)
+    # Specimen / airtight termination on top.
+    s.rect(cav_l, cav_top - 26, cav_r - cav_l, 26, th.bg, th.secondary, sw=2)
+    for hx in range(int(cav_l) + 8, int(cav_r), 11):
+        s.line(hx, cav_top - 4, hx - 14, cav_top - 22, th.secondary, 1.0)
+    s.text((cav_l + cav_r) / 2, cav_top - 36, "specimen / airtight", 16,
+           th.secondary, bold=True)
+    # Piston at the bottom, oscillating.
+    s.rect(cav_l, cav_bot, cav_r - cav_l, 26, th.panel, th.primary, sw=2)
+    s.arrow((cav_l + cav_r) / 2, cav_bot + 58, (cav_l + cav_r) / 2, cav_bot + 30,
+            th.primary, 2.2)
+    s.arrow((cav_l + cav_r) / 2, cav_bot + 30, (cav_l + cav_r) / 2, cav_bot + 58,
+            th.primary, 2.2)
+    s.text((cav_l + cav_r) / 2, cav_bot + 80, "piston  f = 1–4 Hz", 18,
+           th.primary, bold=True)
+    # Microphone in the cavity wall.
+    s.circle(cav_r + 2, (cav_top + cav_bot) / 2, 6, th.fg)
+    s.line(cav_r + 2, (cav_top + cav_bot) / 2, cav_r + 60,
+           (cav_top + cav_bot) / 2, th.muted, 1.4)
+    s.text(cav_r + 66, (cav_top + cav_bot) / 2 + 6, "L_p", 20, th.fg,
+           bold=True, mono=True, anchor="start")
+    s.text(652, 478, "R from L_p,s − L_p,t   (κ′ per Annex A)",
+           16, th.fg, bold=True)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -1191,6 +1432,12 @@ DIAGRAMS = {
         _d_flanking, "Direct and flanking transmission paths (EN 12354)", 640),
     "diagram_outdoor_geometry": (
         _d_outdoor, "ISO 9613-2 source–barrier–receiver geometry", 560),
+    "diagram_impedance_tube": (
+        _d_impedance_tube, "Impedance tube: two-microphone method (ISO 10534-2)", 520),
+    "diagram_astm_tube": (
+        _d_astm_tube, "Four-microphone transmission-loss tube (ASTM E2611)", 560),
+    "diagram_airflow_resistance": (
+        _d_airflow, "Airflow resistance: static and alternating methods (ISO 9053-1/-2)", 540),
 }
 
 

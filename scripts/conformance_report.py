@@ -883,6 +883,35 @@ def _chk_iso12999_expanded() -> Outcome:
     return numeric(expected, computed, 1e-9, unit="dB", places=6)
 
 
+def _iso9613_table1(point: tuple[float, float, float, float]) -> Outcome:
+    """Compare air_attenuation against an ISO 9613-1 Table 1 grid point (dB/km)."""
+    temp, rh, freq, alpha_km = point
+    computed = float(
+        ph.air_attenuation(freq, temp, rh, exact_midband=True)[()]
+    ) * 1000.0  # dB/m -> dB/km
+    # Tolerance = 1 in the last printed (3-significant-figure) digit.
+    tol = 10.0 ** (math.floor(math.log10(alpha_km)) - 2)
+    return numeric(alpha_km, computed, tol, unit="dB/km", places=3)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 9613-1:1993 Table 1",
+    "Air attenuation @ 10 degC, 70 %, 1 kHz",
+)
+def _chk_iso9613_table1_mid() -> Outcome:
+    return _iso9613_table1(ref.ISO9613_1_TABLE1_MID)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 9613-1:1993 Table 1",
+    "Air attenuation @ 0 degC, 20 %, 2 kHz",
+)
+def _chk_iso9613_table1_corner() -> Outcome:
+    return _iso9613_table1(ref.ISO9613_1_TABLE1_CORNER)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

@@ -100,6 +100,11 @@ from .sound_absorption import (
     absorption_coefficient,
     attenuation_from_alpha,
 )
+from .air_absorption import (
+    AtmosphericAbsorptionWarning,
+    air_attenuation,
+    air_attenuation_m,
+)
 from .room_ir import (
     impulse_response,
     inverse_filter,
@@ -207,6 +212,9 @@ __all__ = [
     "absorption_coefficient",
     "attenuation_from_alpha",
     "AbsorptionWarning",
+    "air_attenuation",
+    "air_attenuation_m",
+    "AtmosphericAbsorptionWarning",
     "open_plan_metrics",
     "OpenPlanResult",
     "sound_power_pressure",

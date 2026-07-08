@@ -214,3 +214,32 @@ EN12354_2_ANNEX_E3_LPRIME_N_W = 45
 ISO12999_1_TABLE2_AIRBORNE_A_1000HZ = 1.8
 ISO12999_1_COVERAGE_K_95 = 1.96
 ISO12999_1_RW_A_STANDARD_UNCERTAINTY = 1.2
+
+# ---------------------------------------------------------------------------
+# ISO 9613-1:1993 Table 1 - pure-tone atmospheric-absorption attenuation
+# coefficient (dB/km) at one standard atmosphere (101,325 kPa). Rows are the
+# ISO 266 preferred one-third-octave frequencies but the values are computed at
+# the EXACT midband frequencies fm = 1000*10^(k/10) (Note 5). Each entry is
+# (temperature_degC, relative_humidity_percent, preferred_freq_Hz, alpha_dB_km).
+# Digit-exact transcription; the Eq. (3)-(5) implementation reproduces them to
+# < 0,4 % (limited only by the 3-significant-figure printed values), well inside
+# the standard's own +/- 10 % claimed accuracy (clause 7.1).
+# ---------------------------------------------------------------------------
+ISO9613_1_TABLE1: list[tuple[float, float, float, float]] = [
+    (-20.0, 10.0, 50.0, 0.589),
+    (-20.0, 50.0, 1000.0, 9.14),
+    (-20.0, 70.0, 8000.0, 27.8),
+    (-20.0, 100.0, 10000.0, 47.0),
+    (0.0, 10.0, 50.0, 0.302),
+    (0.0, 50.0, 1000.0, 6.83),
+    (0.0, 20.0, 2000.0, 34.6),
+    (0.0, 100.0, 6300.0, 88.0),
+    (5.0, 50.0, 1000.0, 5.08),
+    (10.0, 70.0, 1000.0, 3.66),
+    (10.0, 50.0, 4000.0, 46.7),
+    (15.0, 50.0, 1000.0, 4.16),
+    (15.0, 100.0, 10000.0, 105.0),
+]
+# Two representative grid points for the conformance registry (middle + corner).
+ISO9613_1_TABLE1_MID = (10.0, 70.0, 1000.0, 3.66)  # dB/km
+ISO9613_1_TABLE1_CORNER = (0.0, 20.0, 2000.0, 34.6)  # dB/km

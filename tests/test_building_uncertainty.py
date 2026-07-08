@@ -257,6 +257,16 @@ def test_coverage_factor_unknown_confidence():
         coverage_factor(0.925)
 
 
+def test_coverage_factors_table_is_public():
+    import phonometry
+    from phonometry.building_uncertainty import COVERAGE_FACTORS
+
+    assert phonometry.COVERAGE_FACTORS is COVERAGE_FACTORS
+    # Keyed by (confidence, one_sided); matches the functional lookup.
+    assert COVERAGE_FACTORS[(0.95, False)] == pytest.approx(1.96)
+    assert COVERAGE_FACTORS[(0.95, True)] == pytest.approx(1.65)
+
+
 # --------------------------------------------------------------------------- #
 # Expansion U = k·u (Formula 2) and the k >= 1 minimum.
 # --------------------------------------------------------------------------- #

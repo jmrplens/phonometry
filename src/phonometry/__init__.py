@@ -124,6 +124,7 @@ from .building_prediction import (
     standardized_impact_level,
 )
 from .building_uncertainty import (
+    COVERAGE_FACTORS,
     BandUncertainty,
     UncertainValue,
     band_uncertainty,
@@ -269,6 +270,7 @@ __all__ = [
     "satisfies_upper_requirement",
     "BandUncertainty",
     "UncertainValue",
+    "COVERAGE_FACTORS",
 ]
 
 

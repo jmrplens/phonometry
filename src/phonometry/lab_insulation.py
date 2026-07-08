@@ -190,7 +190,17 @@ def background_correction(
       ``L = 10 lg(10^(Lsb/10) - 10^(Lb/10))``.
     - ``margin <= 6 dB``: the fixed 1,3 dB correction is applied
       (``L = Lsb - 1,3``); such bands are the *limit of measurement* and a
-      :class:`LabInsulationWarning` is emitted (Clause 4.3).
+      :class:`LabInsulationWarning` is emitted (Clause 4.3). A *negative*
+      margin (``Lb > Lsb``, i.e. background above the measured signal) falls
+      in this branch and is likewise capped at ``Lsb - 1,3``: the band is
+      simply flagged as the limit of measurement rather than yielding a
+      nonsensical (or ``NaN``) corrected level.
+
+    This is the sound-insulation counterpart of
+    :func:`phonometry.background_noise_correction` (ISO 3744:2010): both apply
+    the same energy subtraction ``10 lg(10^(Lsb/10) - 10^(Lb/10))``, but that
+    routine returns the correction *offset* ``K1`` (to subtract from ``Lsb``),
+    whereas this one returns the already-corrected levels ``L`` directly.
 
     :param signal_and_background: Combined signal-plus-background levels
         ``Lsb`` per band, in dB.

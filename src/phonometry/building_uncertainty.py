@@ -144,6 +144,10 @@ _SINGLE: Dict[str, Tuple[Tuple[float | None, float | None, float | None], float 
     "r_w+ctr_100_3150": ((1.5, 1.1, 0.7), 2.4),
     "r_w+ctr_100_5000": ((1.5, 1.1, 0.7), 2.4),
     "r_w+ctr_50_3150": ((1.5, 1.3, 1.0), 2.4),
+    # NOTE: σsitu(B)=1.0 here is anomalous — it is *lower* than the 50-3150 row
+    # above (B=1.3) and equal to its own σr(C)=1.0, breaking the otherwise
+    # monotonic pattern. Verified digit-by-digit against the ISO 12999-1:2020(E)
+    # Table 3 page image (std p.8): the standard normatively prints 1,5 / 1,0 / 1,0.
     "r_w+ctr_50_5000": ((1.5, 1.0, 1.0), 2.4),
     # Impact — Table 5 (situation A values are estimates, footnote a).
     "ln_w": ((1.5, 1.0, 0.5), None),
@@ -304,6 +308,11 @@ def single_number_uncertainty(
     variants ``"r_w+c_50_5000"`` etc. (Table 3); ``"ln_w"``/``"ln_w+ci"`` (Table 5);
     ``"delta_lw"`` (Table 7). ``upper_limit=True`` selects the situation-A ``σR95``
     (Annex D Table D.2), defined for airborne descriptors only.
+
+    .. note::
+        For the impact descriptors (``"ln_w"``/``"ln_w+ci"``, Table 5) the
+        situation-A value is an *estimate*: no reproducibility results are
+        available for impact sound insulation (Table 5, footnote a).
 
     :param quantity: Rating descriptor (see above).
     :param situation: Measurement situation ``"A"``, ``"B"`` or ``"C"`` (Clause 5.2).

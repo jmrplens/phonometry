@@ -91,6 +91,11 @@ def test_airborne_rating_matches_direct_engine() -> None:
     t2 = np.full(16, 0.8)
     res = lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
     assert res.rating is not None
+    # R exactly equal to the ISO 717-1 reference curve shape => Rw = 54 dB: the
+    # 32 dB unfavourable-deviation allowance permits a 2 dB upward shift of the
+    # reference (32 dB / 16 bands), i.e. curve@500 Hz (52) + 2. Independent
+    # anchor of the engine-consistency check below.
+    assert res.rating.rating == 54
     direct = weighted_rating(res.r)
     assert res.rating.rating == direct.rating
     assert res.rating.c == direct.c
@@ -142,6 +147,11 @@ def test_impact_rating_matches_direct_engine() -> None:
     t2 = np.full(16, 0.8)
     res = lab_impact_insulation(li, t2, volume=50.0)
     assert res.rating is not None
+    # Ln exactly equal to the ISO 717-2 reference curve shape => Ln,w = 58 dB:
+    # the 32 dB unfavourable-deviation allowance permits a 2 dB downward shift of
+    # the reference (32 dB / 16 bands), i.e. curve@500 Hz (60) − 2. Independent
+    # anchor of the engine-consistency check below.
+    assert res.rating.rating == 58
     direct = weighted_impact_rating(res.l_n)
     assert res.rating.rating == direct.rating
     assert res.rating.ci == direct.ci

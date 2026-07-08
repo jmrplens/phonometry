@@ -306,6 +306,7 @@ def flanking_path(
     separating_area: float,
     coupling_length: float,
     delta_r: float = 0.0,
+    kij_min: float | None = None,
 ) -> FlankingPath:
     """Build one flanking path ``Rij,w`` (EN 12354-1 Formula 28a).
 
@@ -315,6 +316,12 @@ def flanking_path(
     separating (receive) elements; for ``Df`` the separating (source) and
     flanking (receive) elements.
 
+    When ``kij_min`` is given, ``k_ij`` is clamped up to it
+    (``max(k_ij, kij_min)``) before the path is formed, enforcing the floor
+    ``Kij ≥ Kij,min`` of Clause 4.4.2 (compute ``kij_min`` with
+    :func:`junction_min_vibration_reduction`). Left as ``None`` the raw ``k_ij``
+    is used unchanged.
+
     :param label: Human-readable path name.
     :param kind: ``"Ff"``, ``"Df"`` or ``"Fd"``.
     :param r_source: Weighted sound reduction index of the source-side element.
@@ -323,6 +330,8 @@ def flanking_path(
     :param separating_area: Area ``Ss`` of the separating element, in m².
     :param coupling_length: Junction coupling length ``lf``, in m.
     :param delta_r: Combined lining improvement ``ΔRij,w`` for this path, in dB.
+    :param kij_min: Optional ``Kij,min`` floor (Clause 4.4.2); ``k_ij`` is
+        raised to it when it lies below. ``None`` disables the clamp.
     :return: The :class:`FlankingPath`.
     :raises ValueError: If ``kind`` is unknown, areas/lengths are not positive,
         or any value is non-finite.
@@ -332,6 +341,8 @@ def flanking_path(
     rs = _check_finite(r_source, "r_source")
     rr = _check_finite(r_receive, "r_receive")
     kij = _check_finite(k_ij, "k_ij")
+    if kij_min is not None:
+        kij = max(kij, _check_finite(kij_min, "kij_min"))
     dr = _check_finite(delta_r, "delta_r")
     r_ij = (rs + rr) / 2.0 + dr + kij + _coupling_term(
         separating_area, coupling_length
@@ -359,6 +370,14 @@ def flanking_element(
     flanking element is essentially the same on the source and receiving side
     (Clause 4.4.1). Returns the ``Ff``, ``Df`` and ``Fd`` paths that this element
     contributes across its junction with the separating element.
+
+    .. note::
+        Clause 4.4.2 requires ``Kij ≥ Kij,min``. This wrapper does not clamp
+        (each of ``KFf``/``KFd``/``KDf`` has its own ``Kij,min`` from the two
+        element areas of that junction). Compute the floor per path with
+        :func:`junction_min_vibration_reduction` and pass already-clamped
+        ``k_ff``/``k_fd``/``k_df`` here, or call :func:`flanking_path` directly
+        with its ``kij_min`` argument, to avoid silent non-compliance.
 
     :param label: Base name; paths are labelled ``"<label>-Ff"`` etc.
     :param r_flanking: Weighted sound reduction index of the flanking element.
@@ -483,6 +502,10 @@ def impact_flanking_correction(
     fm = _check_finite(flanking_mass, "flanking_mass")
     if sm <= 0.0 or fm <= 0.0:
         raise ValueError("'separating_mass' and 'flanking_mass' must be positive.")
+    # Nearest-neighbour selection on the discrete Table 1 grid. Both mass axes
+    # are ascending, and ``min`` returns the first index reaching the smallest
+    # distance, so a mass exactly halfway between two tabulated values (e.g.
+    # 125 kg/m² between 100 and 150) ties to the *lower* tabulated mass.
     row = min(range(len(_TABLE1_SEP)), key=lambda i: abs(_TABLE1_SEP[i] - sm))
     col = min(range(len(_TABLE1_FLK)), key=lambda j: abs(_TABLE1_FLK[j] - fm))
     return _TABLE1_K[row][col]

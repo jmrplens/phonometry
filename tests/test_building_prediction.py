@@ -174,6 +174,21 @@ def test_flanking_path_invalid() -> None:
         )
 
 
+def test_flanking_path_kij_min_clamps() -> None:
+    # Clause 4.4.2 floor: k_ij below kij_min is raised, so Rij,w rises with it;
+    # a k_ij already above the floor (and kij_min=None) is left untouched.
+    kwargs = dict(
+        label="floor-Ff", kind="Ff", r_source=49.0, r_receive=49.0,
+        separating_area=11.5, coupling_length=4.5,
+    )
+    unclamped = flanking_path(k_ij=2.0, **kwargs)  # type: ignore[arg-type]
+    clamped = flanking_path(k_ij=2.0, kij_min=12.4, **kwargs)  # type: ignore[arg-type]
+    assert clamped.r_ij_w == pytest.approx(unclamped.r_ij_w + 10.4, abs=0.05)
+    # Floor at or below k_ij is a no-op (matches the raw Annex-H Ff path).
+    above = flanking_path(k_ij=12.4, kij_min=8.0, **kwargs)  # type: ignore[arg-type]
+    assert above.r_ij_w == pytest.approx(65.5, abs=0.05)
+
+
 # --------------------------------------------------------------------------
 # Airborne prediction — Formula (26), Annex H oracle
 # --------------------------------------------------------------------------

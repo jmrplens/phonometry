@@ -4,7 +4,11 @@
 Tables transcribed verbatim from the published standards. Both the test
 suite (``tests/test_*.py``) and the CI conformance report
 (``scripts/conformance_report.py``) import these constants, so the report's
-expected values can never drift from what the tests assert.
+expected values can never drift from what the tests assert. The six PR-B
+building-acoustics oracles are the exception: their test modules re-hardcode
+the values inline rather than import them, and a dedicated consistency test
+(``test_building_reference_data_matches_published_oracles``) pins this shared
+table to those same published results so neither copy can drift.
 
 This module is deliberately dependency-free (stdlib only) so it can be
 imported in the ``pr-comment`` CI job, which installs the runtime
@@ -154,7 +158,7 @@ ISO16283_3_R45_REVERB_TIME_S = 1.0
 ISO16283_3_R45_EXPECTED_DB = 38.5
 
 # ---------------------------------------------------------------------------
-# ISO 10140-2:2021 laboratory airborne sound reduction index R (Formula (2)):
+# ISO 10140-2:2010 laboratory airborne sound reduction index R (Formula (2)):
 # R = L1 - L2 + 10 lg(S/A), A = 0,16 V/T. The reference-curve construction lays
 # R exactly on the ISO 717-1 Table 3 shape (100-3150 Hz) by choosing S = A
 # (S = 10 m2, A = 0,16 * 50 / 0,8 = 10 m2), so R = L1 - L2 = the reference. The

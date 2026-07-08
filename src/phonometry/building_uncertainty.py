@@ -45,6 +45,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import sqrt
+from types import MappingProxyType
 from typing import Dict, Literal, Mapping, Sequence, Tuple
 
 import numpy as np
@@ -147,7 +148,7 @@ _SINGLE: Dict[str, Tuple[Tuple[float | None, float | None, float | None], float 
     # NOTE: σsitu(B)=1.0 here is anomalous — it is *lower* than the 50-3150 row
     # above (B=1.3) and equal to its own σr(C)=1.0, breaking the otherwise
     # monotonic pattern. Verified digit-by-digit against the ISO 12999-1:2020(E)
-    # Table 3 page image (std p.8): the standard normatively prints 1,5 / 1,0 / 1,0.
+    # Table 3 (standard page 8): the standard normatively prints 1,5 / 1,0 / 1,0.
     "r_w+ctr_50_5000": ((1.5, 1.0, 1.0), 2.4),
     # Impact — Table 5 (situation A values are estimates, footnote a).
     "ln_w": ((1.5, 1.0, 0.5), None),
@@ -556,7 +557,9 @@ def satisfies_upper_requirement(
 
 
 #: Coverage factors of Table 8 keyed by ``(confidence, one_sided)`` (read-only view).
-COVERAGE_FACTORS: Mapping[Tuple[float, bool], float] = {
-    **{(level, False): k for level, k in _COVERAGE_TWO_SIDED.items()},
-    **{(level, True): k for level, k in _COVERAGE_ONE_SIDED.items()},
-}
+COVERAGE_FACTORS: Mapping[Tuple[float, bool], float] = MappingProxyType(
+    {
+        **{(level, False): k for level, k in _COVERAGE_TWO_SIDED.items()},
+        **{(level, True): k for level, k in _COVERAGE_ONE_SIDED.items()},
+    }
+)

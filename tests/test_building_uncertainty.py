@@ -267,6 +267,13 @@ def test_coverage_factors_table_is_public():
     assert COVERAGE_FACTORS[(0.95, True)] == pytest.approx(1.65)
 
 
+def test_coverage_factors_table_is_read_only():
+    from phonometry.building_uncertainty import COVERAGE_FACTORS
+
+    with pytest.raises(TypeError):
+        COVERAGE_FACTORS[(0.95, False)] = 9.9  # type: ignore[index]
+
+
 # --------------------------------------------------------------------------- #
 # Expansion U = k·u (Formula 2) and the k >= 1 minimum.
 # --------------------------------------------------------------------------- #

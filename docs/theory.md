@@ -624,7 +624,7 @@ path (Formula 28a) is
 
 $$
 R_{ij,w} = \frac{R_{i,w} + R_{j,w}}{2} + \Delta R_{ij,w} + K_{ij}
-         + 10 \log_{10}\frac{S_s}{l_0\, l_f},
+         + 10 \log_{10}\frac{S_s}{l_0\ l_f},
 $$
 
 with $R_{i,w}$, $R_{j,w}$ the laboratory indices of the two elements meeting at
@@ -634,7 +634,7 @@ junction coupling length and $l_0 = 1$ m the reference coupling length. $K_{ij}$
 is the junction **vibration reduction index** (Annex E), an empirical function of
 the mass ratio $M = \log_{10}(m'_{\perp,i}/m'_i)$ — for a rigid cross-junction
 $K_{13} = 8.7 + 17.1 M + 5.7 M^2$ (through) and $K_{12} = 8.7 + 5.7 M^2$
-(corner), read at 500 Hz — floored at $K_{ij,\min} = 10 \log_{10}[l_f\, l_0
+(corner), read at 500 Hz — floored at $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
 (1/S_i + 1/S_j)]$ (Formula 29). Two linings combine as $\max(a,b) + \min(a,b)/2$
 (Formulas 30/31). The impact counterpart (EN 12354-2, Formula 21) is the direct
 subtraction $L'_{n,w} = L_{n,w,eq} - \Delta L_w + K$, with the bare-floor
@@ -654,9 +654,10 @@ reproducibility standard deviation $\sigma_R$; situation **B** (same location,
 different teams) the in-situ $\sigma_{situ}$; situation **C** (same location,
 operator and equipment, repeated) the repeatability $\sigma_r$. The per-band and
 single-number values are tabulated for airborne $R$/$R'$/$D_n$/$D_{nT}$
-(Tables 2/3), impact $L_n$/$L'_n$ (Tables 4/5, situations B/C only) and the
+(Tables 2/3), impact $L_n$/$L'_n$ (Table 4 bands, situations B/C only; Table 5
+ratings adding a situation-A estimate) and the
 covering reduction $\Delta L$ (Tables 6/7, situation A only). The expanded
-uncertainty is $U = k\,u$ (Formula 2) with the coverage factor $k$ of Table 8
+uncertainty is $U = k\ u$ (Formula 2) with the coverage factor $k$ of Table 8
 (at 95 %, $k = 1.96$ two-sided, $k = 1.65$ one-sided; a minimum $k = 1$ is
 enforced). A two-sided interval $Y = y \pm U$ reports a value (Formula 3); a
 one-sided factor declares conformity, $y - U > $ requirement for a lower limit

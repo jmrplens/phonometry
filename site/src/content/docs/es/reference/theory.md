@@ -632,7 +632,7 @@ Cada camino de flanco (Fórmula 28a) es
 
 $$
 R_{ij,w} = \frac{R_{i,w} + R_{j,w}}{2} + \Delta R_{ij,w} + K_{ij}
-         + 10 \log_{10}\frac{S_s}{l_0\, l_f},
+         + 10 \log_{10}\frac{S_s}{l_0\ l_f},
 $$
 
 con $R_{i,w}$, $R_{j,w}$ los índices de laboratorio de los dos elementos que se
@@ -643,7 +643,7 @@ acoplamiento de referencia. $K_{ij}$ es el **índice de reducción vibracional**
 la unión (Anexo E), una función empírica de la relación de masas
 $M = \log_{10}(m'_{\perp,i}/m'_i)$ — para una unión rígida en cruz
 $K_{13} = 8.7 + 17.1 M + 5.7 M^2$ (a través) y $K_{12} = 8.7 + 5.7 M^2$
-(en esquina), leídos a 500 Hz — acotada en su mínimo $K_{ij,\min} = 10 \log_{10}[l_f\, l_0
+(en esquina), leídos a 500 Hz — acotada en su mínimo $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
 (1/S_i + 1/S_j)]$ (Fórmula 29). Dos trasdosados se combinan como
 $\max(a,b) + \min(a,b)/2$ (Fórmulas 30/31). La contrapartida a impactos
 (EN 12354-2, Fórmula 21) es la resta directa
@@ -665,9 +665,10 @@ típica de reproducibilidad $\sigma_R$; la situación **B** (misma ubicación,
 equipos distintos) la $\sigma_{situ}$ in situ; la situación **C** (misma
 ubicación, operador y equipo, repetida) la repetibilidad $\sigma_r$. Los valores
 por banda y de un solo número están tabulados para $R$/$R'$/$D_n$/$D_{nT}$ a
-ruido aéreo (Tablas 2/3), $L_n$/$L'_n$ a impactos (Tablas 4/5, solo situaciones
-B/C) y la reducción del revestimiento $\Delta L$ (Tablas 6/7, solo situación A).
-La incertidumbre expandida es $U = k\,u$ (Fórmula 2) con el factor de cobertura
+ruido aéreo (Tablas 2/3), $L_n$/$L'_n$ a impactos (Tabla 4 por banda, solo
+situaciones B/C; la Tabla 5 de un solo número añade una estimación en situación
+A) y la reducción del revestimiento $\Delta L$ (Tablas 6/7, solo situación A).
+La incertidumbre expandida es $U = k\ u$ (Fórmula 2) con el factor de cobertura
 $k$ de la Tabla 8 (al 95 %, $k = 1.96$ bilateral, $k = 1.65$ unilateral; se impone
 un mínimo $k = 1$). Un intervalo bilateral $Y = y \pm U$ informa un valor
 (Fórmula 3); un factor unilateral declara conformidad, $y - U > $ requisito para

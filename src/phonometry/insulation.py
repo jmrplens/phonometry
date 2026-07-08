@@ -717,8 +717,11 @@ def facade_insulation(
         (``None`` unless ``surface_level``, ``area`` and ``volume`` are all
         given).
     :raises ValueError: If band counts differ, if ``method`` is unknown, if
-        ``t2``/``t0``/``area``/``volume`` are not positive, if only some of
-        the ``R'`` inputs are supplied, or if inputs are non-finite.
+        ``t2``/``t0``/``area``/``volume`` are not positive, if ``area`` is
+        given without ``surface_level``, if ``surface_level`` and ``area`` are
+        given without ``volume``, or if inputs are non-finite. Supplying
+        ``surface_level`` alone is not an error: ``r_prime`` simply stays
+        ``None``.
     """
     if method not in _FACADE_CORRECTION:
         raise ValueError(

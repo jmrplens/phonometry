@@ -778,7 +778,7 @@ def _chk_facade_r45() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "ISO 10140-2:2021 Formula (2)",
+    "ISO 10140-2:2010 Formula (2)",
     "Lab airborne R on the ISO 717-1 reference shape -> Rw = 54",
 )
 def _chk_lab_airborne_rw() -> Outcome:

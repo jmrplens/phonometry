@@ -1,6 +1,6 @@
 ---
 title: "Acústica de salas y edificación"
-description: "Adquisición de la respuesta al impulso (ISO 18233), parámetros de sala EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), métricas de habla en oficinas diáfanas (ISO 3382-3), aislamiento acústico en campo a ruido aéreo y a impactos con índices ponderados (ISO 16283-1/2, ISO 717-1/2) y absorción sonora en sala reverberante (ISO 354)."
+description: "Adquisición de la respuesta al impulso (ISO 18233), parámetros de sala EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), métricas de habla en oficinas diáfanas (ISO 3382-3), aislamiento acústico en laboratorio (ISO 10140) y en campo (ISO 16283-1/2/3) a ruido aéreo y a impactos con índices ponderados (ISO 717-1/2), predicción de la transmisión (EN 12354) e incertidumbre de medición (ISO 12999-1), y absorción sonora en sala reverberante (ISO 354)."
 ---
 
 La acústica de salas y de la edificación parte de una única medición: la
@@ -732,7 +732,7 @@ junto al único camino directo $Dd$. El **modelo simplificado de un solo número
 los combina energéticamente (Fórmula 26):
 
 $$
-R'_w = -10 \log_{10}\!\Big[ 10^{-R_{Dd,w}/10}
+R'_w = -10 \log_{10}\Big[ 10^{-R_{Dd,w}/10}
       + \sum 10^{-R_{Ff,w}/10} + \sum 10^{-R_{Df,w}/10}
       + \sum 10^{-R_{Fd,w}/10} \Big],
 $$
@@ -742,7 +742,7 @@ camino de flanco (Fórmula 28a)
 
 $$
 R_{ij,w} = \tfrac{R_{i,w} + R_{j,w}}{2} + \Delta R_{ij,w} + K_{ij}
-         + 10 \log_{10}\frac{S_s}{l_0\, l_f},
+         + 10 \log_{10}\frac{S_s}{l_0\ l_f},
 $$
 
 donde $l_0 = 1$ m es la longitud de acoplamiento de referencia, $l_f$ la longitud
@@ -879,7 +879,7 @@ de medición** (Cláusula 5.2):
 | **B** | misma ubicación, equipos distintos | in situ $\sigma_{situ}$ |
 | **C** | misma ubicación, mismo operador repetido | repetibilidad $\sigma_r$ |
 
-La incertidumbre expandida es $U = k\,u$ (Fórmula 2) con el factor de cobertura
+La incertidumbre expandida es $U = k\ u$ (Fórmula 2) con el factor de cobertura
 $k$ de la Tabla 8. Un intervalo bilateral $Y = y \pm U$ (Fórmula 3, $k = 1.96$ al
 95 %) *informa* un valor; el factor **unilateral** ($k = 1.65$ al 95 %) *declara
 conformidad* con un requisito (Fórmulas 4/5).

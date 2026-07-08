@@ -1,6 +1,6 @@
 ---
 title: "Room & Building Acoustics"
-description: "Impulse-response acquisition (ISO 18233), room parameters EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), open-plan speech metrics (ISO 3382-3), field airborne and impact sound insulation with weighted ratings (ISO 16283-1/2, ISO 717-1/2) and sound absorption in a reverberation room (ISO 354)."
+description: "Impulse-response acquisition (ISO 18233), room parameters EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), open-plan speech metrics (ISO 3382-3), laboratory (ISO 10140) and field (ISO 16283-1/2/3) airborne and impact sound insulation with weighted ratings (ISO 717-1/2), transmission prediction (EN 12354) and measurement uncertainty (ISO 12999-1), and sound absorption in a reverberation room (ISO 354)."
 ---
 
 Room and building acoustics start from one measurement: the **impulse
@@ -717,7 +717,7 @@ three paths — $Ff$ (flanking→flanking), $Df$ (direct→flanking) and $Fd$
 single-number model** combines them energetically (Formula 26):
 
 $$
-R'_w = -10 \log_{10}\!\Big[ 10^{-R_{Dd,w}/10}
+R'_w = -10 \log_{10}\Big[ 10^{-R_{Dd,w}/10}
       + \sum 10^{-R_{Ff,w}/10} + \sum 10^{-R_{Df,w}/10}
       + \sum 10^{-R_{Fd,w}/10} \Big],
 $$
@@ -727,7 +727,7 @@ flanking path (Formula 28a)
 
 $$
 R_{ij,w} = \tfrac{R_{i,w} + R_{j,w}}{2} + \Delta R_{ij,w} + K_{ij}
-         + 10 \log_{10}\frac{S_s}{l_0\, l_f},
+         + 10 \log_{10}\frac{S_s}{l_0\ l_f},
 $$
 
 where $l_0 = 1$ m is the reference coupling length, $l_f$ the junction coupling
@@ -861,7 +861,7 @@ how to expand and combine it. Which standard deviation is $u$ depends on the
 | **B** | same location, different teams | in-situ $\sigma_{situ}$ |
 | **C** | same location, same operator repeated | repeatability $\sigma_r$ |
 
-The expanded uncertainty is $U = k\,u$ (Formula 2) with the coverage factor $k$
+The expanded uncertainty is $U = k\ u$ (Formula 2) with the coverage factor $k$
 of Table 8. A two-sided interval $Y = y \pm U$ (Formula 3, $k = 1.96$ at 95 %)
 *reports* a value; the **one-sided** factor ($k = 1.65$ at 95 %) *declares
 conformity* with a requirement (Formulae 4/5).

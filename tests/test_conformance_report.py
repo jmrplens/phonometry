@@ -40,7 +40,7 @@ def test_building_acoustics_checks_registered() -> None:
     """The PR-B facade / lab / prediction / uncertainty checks are wired."""
     standards = {c.standard for c in cr.CHECKS}
     assert "ISO 16283-3:2016 Clause 3.12" in standards  # facade R'45
-    assert "ISO 10140-2:2021 Formula (2)" in standards  # lab airborne Rw=54
+    assert "ISO 10140-2:2010 Formula (2)" in standards  # lab airborne Rw=54
     assert "EN 12354-1:2000 Annex H.3" in standards  # R'w=52 prediction
     assert "EN 12354-2:2000 Annex E.3" in standards  # L'n,w=45 impact
     assert "ISO 12999-1:2020 Table 2" in standards  # band uncertainty

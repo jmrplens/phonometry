@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **32/32 conformance checks pass** across 7 domains and 25 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **41/41 conformance checks pass** across 8 domains and 28 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -97,6 +97,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 3382-3:2012 Clause 6.2 | Open-plan spatial decay rate D2,S (-6 dB/doubling) | 6 dB (+/-0 dB) | 6 dB | 0 dB | &#9989; |
 | ISO 16283-3:2016 Clause 3.12 | Facade R'45 isolates the -1.5 dB incidence correction (S=A) | 38.5 dB (+/-0 dB) | 38.5 dB | 0 dB | &#9989; |
 | ISO 10140-2:2010 Formula (2) | Lab airborne R on the ISO 717-1 reference shape -> Rw = 54 | Rw 54 dB | Rw 54 dB | +0 dB | &#9989; |
+| ISO 9613-1:1993 Table 1 | Air attenuation @ 10 degC, 70 %, 1 kHz | 3.66 dB/km (+/-0.01 dB/km) | 3.658 dB/km | -0.002 dB/km | &#9989; |
+| ISO 9613-1:1993 Table 1 | Air attenuation @ 0 degC, 20 %, 2 kHz | 34.6 dB/km (+/-0.1 dB/km) | 34.64 dB/km | 0.04 dB/km | &#9989; |
 
 ### Building prediction & uncertainty
 
@@ -106,4 +108,16 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | EN 12354-2:2000 Annex E.3 | Impact prediction L'n,w = Ln,w,eq - dLw + K | 45 dB (+/-0 dB) | 45 dB | 0 dB | &#9989; |
 | ISO 12999-1:2020 Table 2 | Airborne band uncertainty, situation A @ 1 kHz | 1.8 dB (+/-0 dB) | 1.8 dB | 0 dB | &#9989; |
 | ISO 12999-1:2020 Clause 8 / Table 8 | Expanded uncertainty U = 1.96 u (95 % two-sided, Rw sit. A) | 2.352 dB (+/-0 dB) | 2.352 dB | 0 dB | &#9989; |
+
+### Outdoor propagation & occupational exposure
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ISO 9613-2:1996 Eq. (7) | Geometrical divergence Adiv = 20 lg(d/d0) + 11 at 100 m | 51 dB (+/-0 dB) | 51 dB | 0 dB | &#9989; |
+| ISO 9613-2:1996 Table 3 | Ground b'(0) porous limit -> Agr(250 Hz) = 2(-1.5 + 10.1) | 17.2 dB (+/-0 dB) | 17.2 dB | 0 dB | &#9989; |
+| ISO 9613-2:1996 clause 7.4 | Single-edge diffraction saturates at the 20 dB cap | 20 dB (+/-0 dB) | 20 dB | 0 dB | &#9989; |
+| ISO 9613-2:1996 clause 7.4 | Double-edge diffraction saturates at the 25 dB cap | 25 dB (+/-0 dB) | 25 dB | 0 dB | &#9989; |
+| ISO 9612:2009 Annex D | Task-based LEX,8h + U (welder day, case a) | LEX,8h 84.3; U 2.7 dB | LEX,8h 84.3; U 2.7 dB | -0.01; +0.02 dB | &#9989; |
+| ISO 9612:2009 Annex E | Job-based LEX,8h + U (production line, 18 workers) | LEX,8h 88.1; U 3.8 dB | LEX,8h 88.2; U 3.8 dB | +0.06; -0.03 dB | &#9989; |
+| ISO 9612:2009 Annex F | Full-day LEX,8h + U (forklift drivers) | LEX,8h 90.1; U 3.4 dB | LEX,8h 90.1; U 3.4 dB | +0.02; +0.03 dB | &#9989; |
 

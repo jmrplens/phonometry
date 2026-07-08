@@ -10,19 +10,23 @@ feeds a room prediction (ISO 12354) or is checked against a noise-emission
 limit. This page covers the three routes phonometry implements to obtain it
 and when to reach for each: an enveloping *pressure* surface in the field
 (ISO 3744/3746), the diffuse field of a *reverberation room* (ISO 3741),
-and *intensity* scanning over a surface (ISO 9614-2).
+*intensity* scanning over a surface (ISO 9614-2), and — for the highest
+accuracy — the precision grades in an *anechoic room* (ISO 3745) and by
+precision *intensity* scanning (ISO 9614-3).
 
 ## Choosing a method
 
-All three deliver the same quantity — a per-band `LW` and an A-weighted
-total `LWA` — but under different environments, accuracy grades and
-practical constraints.
+All deliver the same quantity — a per-band `LW` and an A-weighted total
+`LWA` — but under different environments, accuracy grades and practical
+constraints.
 
 | Method | Standard | Measured quantity | Environment | Accuracy grade | Use when |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Enveloping surface | **ISO 3744** (engineering) / **ISO 3746** (survey) | Sound pressure on a hemisphere or box | Essentially free field over one or more reflecting planes | Grade 2 (`σR0 ≈ 1.5 dB`) / grade 3 (`≈ 3.0 dB`) | In situ or a large room; no special test facility available |
 | Reverberation room | **ISO 3741** | Sound pressure in the diffuse field | Qualified hard-walled reverberation room | Grade 1 (precision) | Highest accuracy for steady, broadband sources in a lab |
 | Intensity scanning | **ISO 9614-2** | Normal sound intensity scanned over a surface | Almost any, tolerant of steady extraneous noise | Grade 2 / 3 (from per-band field indicators) | On-site with background noise, or one machine among many |
+| Anechoic room | **ISO 3745** | Sound pressure on a fixed microphone array | Qualified anechoic or hemi-anechoic room | Grade 1 (precision) | Reference-grade emission in a free-field laboratory |
+| Precision intensity scanning | **ISO 9614-3** | Scanned normal intensity, tighter criteria | Almost any, tolerant of steady extraneous noise | Grade 1 (precision) | Precision on-site, with the ISO 9614-3 field-indicator checks |
 
 The pressure methods correct the surface level for the room (`K2`) and for
 background noise (`K1`); the reverberation method needs a *qualified* room
@@ -326,6 +330,103 @@ where `negative_band`), `surface_pressure_intensity_index` (`FpI`),
 `negative_partial_power_index` (`F+/-`), `repeatability`,
 `dynamic_capability_index` (`Ld`), `achieved_grade`, `surface_area`,
 `sound_power_level_a` and `grade`.
+
+## 4. Precision grade, anechoic room (ISO 3745)
+
+When the highest accuracy is required, ISO 3745 measures sound power in a
+qualified **anechoic** or **hemi-anechoic** room, where the free field lets a
+fixed array of microphones sample the radiated sound pressure directly. It is the
+grade-1 counterpart to the enveloping-surface method of Section 1, with
+standardized microphone coordinates, a per-position background correction and an
+explicit meteorological correction.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic.svg" alt="ISO 3745 precision sound power in an anechoic room: wedge-lined walls, the device under test at the centre and a hemispherical array of microphones at a fixed radius, with the sound power level formed from the surface-averaged pressure plus the area, background and meteorological corrections" width="92%"></picture>
+
+**Sound power level (Clause 8).** The band sound power level is the
+surface-averaged pressure level plus the surface term and the corrections:
+
+$$
+L_W = \overline{L_p} + 10\lg\frac{S}{S_0} + C_1 + C_2 + C_3,
+$$
+
+with $S = 4\pi r^2$ over the sphere or $S = 2\pi r^2$ over the hemisphere,
+$S_0 = 1\ \text{m}^2$. $C_1$ and $C_2$ are the meteorological corrections
+(reference and radiation-impedance terms); $C_3$ accounts for air absorption over
+the measurement radius. The microphone positions are the standardized
+unit-vector arrays of Tables D.1 (sphere), E.1 (hemisphere) and E.2 (hemisphere,
+broadband).
+
+```python
+import numpy as np
+import phonometry as ph
+
+# The 40 standardized hemisphere positions (unit vectors scaled by the radius).
+pos = ph.precision_positions("hemisphere", radius=1.0, count=40)
+print(pos.shape)                      # (40, 3)
+
+# Octave/third-octave band SPL (dB) at each of the 40 positions; here a uniform
+# 74 dB in one band. The result carries S = 2*pi*r^2 and LW with C1+C2+C3.
+levels = np.full((40, 1), 74.0)
+res = ph.sound_power_anechoic(levels, "hemisphere", radius=1.0)
+print(round(res.surface_area, 3))                 # 6.283  (2*pi*1^2)
+print(np.round(res.sound_power_level, 2))         # [81.85]
+```
+
+**Background and meteorological corrections.** The $K_1$ background correction is
+applied **per position** and floored where the signal-to-background difference is
+small (Eq. 11); the meteorological correction is evaluated from the measured
+temperature and static pressure.
+
+```python
+import numpy as np
+import phonometry as ph
+
+# K1 for a 6 dB signal-to-background difference in a <=200 Hz edge band: the
+# floor is 1.26 dB (Eq. 11). Source and background levels are [positions, bands].
+k1 = ph.precision_background_correction(
+    np.array([[56.0]]), np.array([[50.0]]), np.array([200.0]))
+print(round(float(k1[0, 0]), 4))      # 1.2563
+
+# Meteorological corrections at the 23 C, 101.325 kPa reference (Eq. 16):
+mc = ph.meteorological_corrections(23.0, 101.325)
+print(round(mc.c1, 4), round(mc.c2, 4))   # -0.1282 0.0
+
+# Expanded uncertainty (Clause 10.5 EXAMPLE): sigma_R0 = 0.5, sigma_omc = 2.0,
+# k = 2 -> U = 4.1 dB.
+print(round(ph.precision_uncertainty(0.5, 2.0, 2.0), 3))   # 4.123
+```
+
+## 5. Precision intensity scanning (ISO 9614-3)
+
+ISO 9614-3 is the grade-1 scanning method: like ISO 9614-2 it integrates the
+normal intensity over a surface enclosing the source, but with a continuous
+scan, tighter field-indicator criteria and an explicit uncertainty budget.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan.svg" alt="ISO 9614-3 precision sound intensity scanning: a source enclosed by a measurement surface divided into segments, a two-microphone intensity probe scanned along a serpentine path over each segment, and the sound power formed by summing the normal intensity times segment area, subject to the field-indicator acceptance criteria" width="92%"></picture>
+
+**Power and level (Clause 7).** The partial power of each segment is
+$P_i = I_{n,i}\,S_i$; the total $P = \sum_i P_i$ gives
+$L_W = 10\lg(P/P_0)$, $P_0 = 1\ \text{pW}$. A band whose net intensity is
+negative (more power flowing in than out) is flagged not-applicable rather than
+logged. The field indicators (temporal variability $F_T$, the signed and
+unsigned pressure–intensity indicators, and the non-uniformity $F_S$) drive the
+five acceptance criteria.
+
+```python
+import numpy as np
+import phonometry as ph
+
+# A fully enclosing surface with a uniform normal intensity In = W/S recovers
+# the source power exactly: LW = 10*lg(W/P0). Here W = 100 uW -> 80 dB.
+areas = np.array([0.5, 1.0, 0.25, 2.0])
+w = 1.0e-4
+i_n = np.full(areas.shape, w / float(areas.sum()))
+res = ph.sound_power_intensity_precision(i_n, areas)
+print(round(float(res.sound_power[0]), 6))          # 0.0001
+print(round(float(res.sound_power_level[0]), 2))    # 80.0
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_sound_power_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_sound_power.png" alt="Left: the 40 standardized ISO 3745 hemisphere microphone positions, projected and coloured by height. Right: the ISO 3745 K1 background-noise correction as a function of the signal-to-background level difference, showing the 1.26 dB edge-band and 0.46 dB mid-band floors and the cut-off above a 15 dB difference" width="88%"></picture>
 
 ## See also
 

@@ -292,6 +292,34 @@ def test_anchor_oracle_is_byte_identical() -> None:
     assert res.loudness_level_max == pytest.approx(40.00005907615314, abs=1e-9)
 
 
+def test_low_freq_band_not_truncated_across_sample_rates() -> None:
+    """The 64 ms (20-80 Hz) window must not be truncated at 44.1/48 kHz.
+
+    At 44.1/48 kHz the 64 ms segment is 2822/3072 samples, longer than the
+    nominal 2048-point FFT.  A fixed 2048-point transform truncates the Hann
+    window tail while its ``sum_w2`` still normalises the full window, so the
+    20-80 Hz band under-reads by ~0.75 dB.  With a per-window FFT length >= the
+    segment length the recovered low-frequency band level is consistent with
+    the 32 kHz case (where the 64 ms window is exactly 2048 samples).
+    """
+    import importlib
+
+    _mgt_mod = importlib.import_module("phonometry.loudness_moore_glasberg_time")
+
+    def _band_level(fs: float) -> float:
+        p_rms = 2e-5 * 10.0 ** (60.0 / 20.0)
+        t = np.arange(int(round(1.0 * fs))) / fs
+        sig = np.sqrt(2.0) * p_rms * np.sin(2.0 * np.pi * 50.0 * t)
+        comp_f, plans, perm = _mgt_mod._spectral_plan(fs)
+        levels = _mgt_mod._frame_levels(sig, sig.size // 2, plans, comp_f.size)[perm]
+        band = (comp_f >= 20.0) & (comp_f < 80.0)
+        return float(10.0 * np.log10(np.sum(10.0 ** (levels[band] / 10.0))))
+
+    ref = _band_level(32000.0)  # exact 2048-sample window, no zero-pad/truncate
+    for fs in (44100.0, 48000.0):
+        assert _band_level(fs) == pytest.approx(ref, abs=0.05)
+
+
 def test_invalid_inputs_raise() -> None:
     """Invalid field, presentation, sampling rate and signal raise ValueError."""
     tone = _tone(1000.0, 40.0, duration=0.1)

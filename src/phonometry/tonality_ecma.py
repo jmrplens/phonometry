@@ -293,8 +293,9 @@ def _assemble_tonality(
 
     # Averaging window: discard transient, bound by l_end (Formulae 40, 54).
     l_end = min(math.ceil(n_samples / _FS * _R_SD), n_blocks - 1)
-    lo = min(_TRANSIENT_BLOCKS + 1, max(n_blocks - 1, 0))
-    keep = slice(lo, l_end + 1)
+    keep = slice(_TRANSIENT_BLOCKS + 1, l_end + 1)
+    if t_spec_lz[keep].shape[0] == 0:  # very short signals: fall back to all
+        keep = slice(0, n_blocks)  # (matches loudness_ecma's fallback)
     t_win = t_spec_lz[keep]  # (n_kept, z)
     f_win = f_ton[keep]
 

@@ -86,6 +86,22 @@ def test_tonal_frequency_tracks_a_second_tone() -> None:
     assert result.tonal_frequencies[peak_band] == pytest.approx(2000.0, rel=0.05)
 
 
+def test_short_signal_averages_over_all_blocks() -> None:
+    """A signal too short for the normal transient discard (< ~0.3 s) averages
+    over all available blocks, matching ``loudness_ecma``'s fall-back.
+
+    Previously such signals collapsed onto the final block alone; the fall-back
+    keeps a short tonal signal clearly tonal and well above short broadband
+    noise (the normal-length calibration anchor is unaffected: those signals
+    have far more blocks than the 56-block transient window).
+    """
+    short_tone = tonality_ecma(_tone(1000.0, 40.0, seconds=0.2), FS)
+    assert np.isfinite(short_tone.tonality)
+    assert short_tone.tonality > 0.3
+    short_noise = tonality_ecma(_noise(60.0, seconds=0.2), FS)
+    assert short_tone.tonality > short_noise.tonality
+
+
 def test_silence_is_zero() -> None:
     result = tonality_ecma(np.zeros(int(FS * 1.2)), FS)
     assert result.tonality == 0.0

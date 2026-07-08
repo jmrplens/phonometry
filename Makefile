@@ -79,4 +79,5 @@ coverage:
 
 check: lint security test
 
-.PHONY: conformance install-hooks
+.PHONY: install lint format security snyk sonar graphs og llms conformance \
+	install-hooks test coverage check

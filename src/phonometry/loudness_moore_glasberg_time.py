@@ -63,8 +63,10 @@ from .loudness_moore_glasberg import (
 )
 
 # One entry per FFT window: (segment length, Hann window, sum of window^2,
-# in-band bin indices, output slice into the concatenation-order level array).
-_Plan = Tuple[int, np.ndarray, float, np.ndarray, slice]
+# in-band bin indices, output slice into the concatenation-order level array,
+# FFT length).  The FFT length is >= the segment length so the Hann window is
+# never truncated (at 44.1/48 kHz the 64 ms segment exceeds the nominal 2048).
+_Plan = Tuple[int, np.ndarray, float, np.ndarray, slice, int]
 
 # ---------------------------------------------------------------------------
 # ERB-number grid (clause 7.4): i from 1.75 to 39 Cam in 0.25 Cam steps
@@ -477,12 +479,18 @@ def _spectral_plan(fs: float) -> Tuple[np.ndarray, List[_Plan], np.ndarray]:
     """Precompute the six-window analysis for a sampling rate.
 
     Returns the ascending component frequencies, a list of
-    ``(length, window, sum_w2, bin_indices, out_slice)`` per FFT window (the
-    slices index a per-frame level array in concatenation order), and the
+    ``(length, window, sum_w2, bin_indices, out_slice, n_fft)`` per FFT window
+    (the slices index a per-frame level array in concatenation order), and the
     permutation ``perm`` that sorts that concatenation-order array into
     ascending frequency order.
+
+    The FFT length is per window: the nominal ``_N_FFT`` (2048) when the
+    segment fits, otherwise the next power of two that is >= the segment length.
+    This keeps the Hann window intact - at 44.1/48 kHz the 64 ms segment is
+    2822/3072 samples, longer than 2048, and a fixed 2048-point FFT would
+    truncate the window tail while ``sum_w2`` still normalises the full window,
+    skewing the 20-80 Hz band levels.
     """
-    bin_freqs = np.fft.rfftfreq(_N_FFT, d=1.0 / fs)
     plans = []
     freqs_parts = []
     cursor = 0
@@ -490,10 +498,12 @@ def _spectral_plan(fs: float) -> Tuple[np.ndarray, List[_Plan], np.ndarray]:
         length = max(2, int(round(duration * fs)))
         window = np.hanning(length)
         sum_w2 = float(np.sum(window**2))
+        n_fft = max(_N_FFT, 1 << (length - 1).bit_length())
+        bin_freqs = np.fft.rfftfreq(n_fft, d=1.0 / fs)
         idx = np.nonzero((bin_freqs >= f_lo) & (bin_freqs < f_hi))[0]
         out_slice = slice(cursor, cursor + idx.size)
         cursor += idx.size
-        plans.append((length, window, sum_w2, idx, out_slice))
+        plans.append((length, window, sum_w2, idx, out_slice, n_fft))
         freqs_parts.append(bin_freqs[idx])
     comp_f = np.concatenate(freqs_parts) if freqs_parts else np.empty(0)
     perm = np.argsort(comp_f, kind="stable")
@@ -506,22 +516,23 @@ def _frame_levels(
     """Component sound pressure levels (dB SPL) for one 1-ms frame (clause 7.3).
 
     Each window's Hann-windowed segment is centred on ``centre`` (zero padded
-    outside the signal), transformed to a 2048-point FFT and the in-band bins
-    kept.  The per-bin power uses an energy-preserving (Parseval) normalisation
-    so a sinusoid recovers its true mean-square regardless of spectral leakage;
-    the fixed calibration of clause 7.3 is added afterwards.
+    outside the signal), transformed to a per-window FFT (>= the segment length
+    so the window is never truncated) and the in-band bins kept.  The per-bin
+    power uses an energy-preserving (Parseval) normalisation so a sinusoid
+    recovers its true mean-square regardless of spectral leakage; the fixed
+    calibration of clause 7.3 is added afterwards.
     """
     levels = np.empty(n_components, dtype=np.float64)
     n = signal.size
-    for length, window, sum_w2, idx, out_slice in plans:
+    for length, window, sum_w2, idx, out_slice, n_fft in plans:
         start = centre - length // 2
         lo = max(0, start)
         hi = min(n, start + length)
         segment = np.zeros(length, dtype=np.float64)
         if hi > lo:
             segment[lo - start : hi - start] = signal[lo:hi]
-        spectrum = np.fft.rfft(segment * window, n=_N_FFT)
-        power = 2.0 * np.abs(spectrum[idx]) ** 2 / (_N_FFT * sum_w2)
+        spectrum = np.fft.rfft(segment * window, n=n_fft)
+        power = 2.0 * np.abs(spectrum[idx]) ** 2 / (n_fft * sum_w2)
         levels[out_slice] = 10.0 * np.log10(np.maximum(power, 1e-300) / _P0**2)
     return levels + _SPECTRAL_CAL_DB
 

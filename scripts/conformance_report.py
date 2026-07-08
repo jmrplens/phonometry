@@ -159,7 +159,8 @@ class FilterClass:
     bind_freq: float
     bind_measured_db: float
     bind_limit_db: float
-    bind_side: str  # "floor" (pass-band min) or "stop" (stop-band min)
+    bind_side: str  # "ceil" (upper limit), "floor" (pass-band min) or
+    # "stop" (stop-band min) - the side of the acceptance band that binds
 
 
 @dataclass(frozen=True)
@@ -651,11 +652,21 @@ def _reverb_bracket(
     t60: np.ndarray, volume: float, surface: float, freq: np.ndarray,
     theta: float, ps: float,
 ) -> np.ndarray:
-    """Independent re-implementation of the ISO 3741 Eq. (20) bracket."""
+    """Independent re-implementation of the ISO 3741 Eq. (20) bracket.
+
+    The two constants below are deliberately different and mirror the library
+    (:func:`phonometry.sound_power_reverberation._speed_of_sound` and its C1/C2
+    terms): the speed of sound uses the rounded 273 of ISO 3741 clause 9.1.4
+    (``c = 20,05*sqrt(273 + theta)``), while the C1/C2 barometric corrections
+    use the exact absolute-zero offset 273.15 in their temperature ratios.
+    Matching the library keeps the "expected" bracket and the computed value on
+    the same convention.
+    """
     ps0, theta0, theta1 = 101.325, 314.0, 296.0
-    c = 20.05 * math.sqrt(273.0 + theta)
+    c = 20.05 * math.sqrt(273.0 + theta)  # ISO 3741 clause 9.1.4 (rounded 273)
     a = (55.26 / c) * (volume / t60)
     waterhouse = 10.0 * np.log10(1.0 + surface * c / (8.0 * volume * freq))
+    # C1/C2 use 273.15 (absolute temperature ratios), as in the library.
     c1 = -10.0 * math.log10(ps / ps0) + 5.0 * math.log10((273.15 + theta) / theta0)
     c2 = -10.0 * math.log10(ps / ps0) + 15.0 * math.log10((273.15 + theta) / theta1)
     return 10.0 * np.log10(a) + 4.34 * (a / surface) + waterhouse + c1 + c2 - 6.0

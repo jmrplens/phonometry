@@ -215,7 +215,7 @@ _ES_EXACT = {
         "Sonoridad específica N' [sonios_HMS/Bark]",
     "Peak specific loudness": "Sonoridad específica máxima",
     "ECMA-418-2 Tonality T(t)": "Tonalidad T(t) (ECMA-418-2)",
-    "Tonality T [tu]": "Tonalidad T [tu]",
+    "Tonality T [tu_HMS]": "Tonalidad T [tu_HMS]",
     "ECMA-418-2 Roughness vs Modulation Frequency":
         "Aspereza vs frecuencia de modulación (ECMA-418-2)",
     "Modulation frequency f_mod [Hz]":
@@ -263,14 +263,14 @@ _ES_PATTERNS = [
      r"Moore-Glasberg (ISO 532-2), N = \1 sonios"),
     (r"^Sottek \(ECMA-418-2\), N = (.+) sone$",
      r"Sottek (ECMA-418-2), N = \1 sonios"),
-    (r"^1 kHz tone, 60 dB \(N = (.+) sone\)$",
-     r"Tono de 1 kHz, 60 dB (N = \1 sonios)"),
-    (r"^Tone in noise \(T = (.+) tu\)$",
-     r"Tono en ruido (T = \1 tu)"),
-    (r"^Pure noise \(T = (.+) tu\)$",
-     r"Ruido puro (T = \1 tu)"),
-    (r"^Peak R = (.+) asper @ 70 Hz$",
-     r"Máximo R = \1 asper @ 70 Hz"),
+    (r"^1 kHz tone, 60 dB \(N = (.+) sone_HMS\)$",
+     r"Tono de 1 kHz, 60 dB (N = \1 sonios_HMS)"),
+    (r"^Tone in noise \(T = (.+) tu_HMS\)$",
+     r"Tono en ruido (T = \1 tu_HMS)"),
+    (r"^Pure noise \(T = (.+) tu_HMS\)$",
+     r"Ruido puro (T = \1 tu_HMS)"),
+    (r"^Peak R = (.+) asper @ (.+) Hz$",
+     r"Máximo R = \1 asper @ \2 Hz"),
     (r"^Short-term loudness STL \(STL peak = (.+) sone\)$",
      r"Sonoridad a corto plazo STL (STL máx = \1 sonios)"),
     (r"^Long-term loudness LTL \(LTL peak = (.+) sone\)$",
@@ -2105,7 +2105,7 @@ def generate_sottek_specific_loudness(output_dir: str) -> None:
     _, ax = plt.subplots(figsize=(10, 6))
     ax.fill_between(bark, spec, color=COLOR_PRIMARY, alpha=0.30)
     ax.plot(bark, spec, color=COLOR_PRIMARY, linewidth=1.8,
-            label=f"1 kHz tone, 60 dB (N = {total:.1f} sone)")
+            label=f"1 kHz tone, 60 dB (N = {total:.1f} sone_HMS)")
 
     peak_i = int(np.argmax(spec))
     ax.annotate("Peak specific loudness",
@@ -2171,12 +2171,12 @@ def generate_tonality_roughness_demo(output_dir: str) -> None:
 
     # -- Top: time-dependent tonality, tone-in-noise vs pure noise -----------
     ax0.plot(t_tin, tv_tin, color=COLOR_PRIMARY, linewidth=1.8,
-             label=f"Tone in noise (T = {t_single:.2f} tu)")
+             label=f"Tone in noise (T = {t_single:.2f} tu_HMS)")
     ax0.plot(_t_pn, tv_pn, color=COLOR_SECONDARY, linewidth=1.8,
-             label=f"Pure noise (T = {pn_single:.2f} tu)")
+             label=f"Pure noise (T = {pn_single:.2f} tu_HMS)")
     ax0.set_title("ECMA-418-2 Tonality T(t)", fontweight="bold", pad=10)
     ax0.set_xlabel("Time [s]")
-    ax0.set_ylabel("Tonality T [tu]")
+    ax0.set_ylabel("Tonality T [tu_HMS]")
     ax0.set_xlim(0, float(t_tin[-1]))
     ax0.set_ylim(0, max(1.0, float(tv_tin.max()) * 1.30))
     ax0.legend(loc="upper right", fontsize=9)
@@ -2187,7 +2187,7 @@ def generate_tonality_roughness_demo(output_dir: str) -> None:
     peak_i = int(np.argmax(r))
     ax1.plot(fmods[peak_i], r[peak_i], "o", color=COLOR_SECONDARY, markersize=9,
              markerfacecolor="none", markeredgewidth=1.6, zorder=5)
-    ax1.annotate(f"Peak R = {r[peak_i]:.1f} asper @ 70 Hz",
+    ax1.annotate(f"Peak R = {r[peak_i]:.1f} asper @ {fmods[peak_i]:.0f} Hz",
                  xy=(float(fmods[peak_i]), float(r[peak_i])),
                  xytext=(105.0, float(r[peak_i]) * 0.95), fontsize=10,
                  color=COLOR_FG,

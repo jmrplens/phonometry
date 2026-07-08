@@ -11,11 +11,17 @@
 #
 #     make install-hooks
 #
-set -e
+# NOTE: deliberately no `set -e`. A benign non-zero from the regeneration
+# (e.g. a transient tooling hiccup) must NOT hard-abort the commit - the CI
+# staleness check is the real gate. The hook warns and lets the commit proceed.
 
 if git diff --cached --name-only \
 	| grep -Eq '^(src/phonometry/|scripts/conformance_report\.py|tests/reference_data\.py)'; then
 	echo "[pre-commit] source changed - regenerating docs/CONFORMANCE.md ..."
-	make conformance
-	git add docs/CONFORMANCE.md
+	if make conformance && git add docs/CONFORMANCE.md; then
+		echo "[pre-commit] docs/CONFORMANCE.md regenerated and staged."
+	else
+		echo "[pre-commit] WARNING: conformance regen failed; committing anyway" \
+			"(CI staleness check remains the gate)." >&2
+	fi
 fi

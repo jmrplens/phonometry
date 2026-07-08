@@ -296,7 +296,7 @@ def _bias_correction(f_tilde: float) -> float:
         _E_THETA[theta_corr - 1]
         - (_E_THETA[theta_corr] - _E_THETA[theta_corr - 1])
         * beta[theta_corr - 1]
-        / (d_beta if d_beta != 0.0 else _EPS)
+        / (d_beta if abs(d_beta) > _EPS else _EPS)
     )  # Formula 78
 
 
@@ -336,7 +336,9 @@ def _pick_peaks(spec: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
             c = np.linalg.solve(mat, y)  # Formula 73
         except np.linalg.LinAlgError:  # pragma: no cover - defensive
             c = np.array([0.0, 0.0, 0.0])
-        f_tilde = -(c[1] / (2.0 * c[0])) * _DELTA_F if c[0] != 0.0 else k * _DELTA_F
+        f_tilde = (
+            -(c[1] / (2.0 * c[0])) * _DELTA_F if abs(c[0]) > _EPS else k * _DELTA_F
+        )
         f_p[j] = f_tilde + _bias_correction(f_tilde)  # Formulae 76-77
         a_i[j] = float(np.sum(y))  # Formula 82
     return f_p, a_i
@@ -445,7 +447,7 @@ def _time_dependent(
     r_rms = np.sqrt(np.sum(r_est**2, axis=1) / _CBF)  # Formula 107
     r_bar = np.sum(r_est, axis=1) / _CBF  # Formula 108
     b_l = np.zeros(n50)
-    nz = r_bar != 0.0
+    nz = np.abs(r_bar) > _EPS
     b_l[nz] = r_rms[nz] / r_bar[nz]  # Formula 106
     e_l = 0.37106 * (np.tanh(1.6407 * (b_l - 2.5804)) + 1.0) * 0.5 + 0.58449  # F.105
     r_hat = _C_R * (r_est ** e_l[:, None])  # Formula 104

@@ -5,7 +5,7 @@ IEC 61672-1:2013 frequency weighting compliance (Table 3).
 Nominal A/C/Z weightings and class 1 acceptance limits transcribed from the
 official text: BS EN 61672-1:2013, **Table 3** ("Frequency weightings and
 acceptance limits", standard page 22). Lower limits of ``-inf`` in the
-standard are represented as ``-math.inf`` (only the upper limit applies).
+standard are represented as negative infinity (only the upper limit applies).
 
 The measured gain is the steady-state RMS ratio of a pure tone through the
 real filter path (default ``high_accuracy``), at 48 kHz and 96 kHz.

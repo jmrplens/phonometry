@@ -22,7 +22,12 @@ import pytest
 from phonometry import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
 
 FS = 48000
-DATA = pathlib.Path(__file__).parent / "data" / "iso532_1"
+# Single ISO 532-1 data root, honouring the ISO532_1_TESTDATA override so the
+# presence gate, the expected-values JSON and the Annex B.5 recordings all
+# resolve from the same directory. Defaults to the in-repo fixtures.
+DATA = pathlib.Path(os.environ.get(
+    "ISO532_1_TESTDATA", str(pathlib.Path(__file__).parent / "data" / "iso532_1")
+))
 # The ISO 532-1 Annex B validation data may be absent (its README documents a
 # removal policy); the tests that need it then skip rather than crash on import.
 _ISO_DATA_PRESENT = (DATA / "iso532_1_annexB_expected.json").is_file()
@@ -212,12 +217,9 @@ def test_time_varying_outputs() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Optional full validation against the recorded ISO signals
+# Full validation against the recorded ISO signals (Annex B.5), shipped in
+# tests/data/iso532_1 (see its README) or the ISO532_1_TESTDATA override.
 # ---------------------------------------------------------------------------
-
-# The Annex B.5 recordings ship in tests/data/iso532_1 (see its README);
-# ISO532_1_TESTDATA points at a full local copy of the attachment instead.
-ISO_DIR = os.environ.get("ISO532_1_TESTDATA", str(DATA))
 
 
 @requires_iso_data
@@ -225,7 +227,7 @@ ISO_DIR = os.environ.get("ISO532_1_TESTDATA", str(DATA))
 def test_annex_b5_technical_signals(num: int) -> None:
     import glob
 
-    matches = glob.glob(os.path.join(ISO_DIR, "Annex B.5", f"Test signal {num} *.wav"))
+    matches = glob.glob(str(DATA / "Annex B.5" / f"Test signal {num} *.wav"))
     if not matches:
         pytest.skip(f"signal {num} not found")
     # Annex B.1: "0 dB (relative to full scale) shall correspond to a sound

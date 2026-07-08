@@ -799,7 +799,11 @@ def plot_sound_power(result: Any, ax: Axes | None = None, **kwargs: Any) -> Axes
         labels = [_format_freq(f) for f in np.asarray(freqs, dtype=np.float64)]
         xlabel = "Frequency [Hz]"
 
+    # ``negative_band`` (ISO 9614-2) and ``not_applicable_band`` (ISO 9614-3)
+    # both flag bands whose net power is non-positive and therefore unusable.
     negative = getattr(result, "negative_band", None)
+    if negative is None:
+        negative = getattr(result, "not_applicable_band", None)
     neg = (
         np.asarray(negative, dtype=bool)
         if negative is not None
@@ -958,3 +962,85 @@ def _fit_segment(
         return None
     slope, intercept = np.polyfit(time[mask], level[mask], 1)
     return np.asarray(slope * time + intercept, dtype=np.float64)
+
+
+# ---------------------------------------------------------------------------
+# Surface scattering & diffusion (ISO 17497)
+# ---------------------------------------------------------------------------
+
+
+def plot_scattering_coefficient(
+    result: Any, ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Random-incidence scattering coefficient ``s`` versus frequency.
+
+    :param result: A :class:`~phonometry.scattering_diffusion.ScatteringResult`
+        exposing ``frequencies`` and ``scattering``.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    s = np.asarray(result.scattering, dtype=np.float64)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("color", "#1f77b4")
+    ax.plot(freqs, s, **kwargs)
+    _freq_axis(ax, freqs)
+    ax.set_ylabel("Scattering coefficient s")
+    ax.set_ylim(0.0, 1.05)
+    ax.set_title("Random-incidence scattering coefficient (ISO 17497-1)")
+    ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_diffusion_polar(
+    result: Any, ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Polar reflected-level response with the diffusion coefficient annotated.
+
+    :param result: A :class:`~phonometry.scattering_diffusion.DiffusionResult`
+        exposing ``angles`` (degrees), ``levels`` (dB) and ``coefficient``.
+    :param ax: Existing (ideally polar) axes, or ``None`` to create a polar one.
+    :return: The polar axes.
+    """
+    if ax is None:
+        plt = _import_pyplot()
+        _fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+    angles = np.radians(np.asarray(result.angles, dtype=np.float64))
+    levels = np.asarray(result.levels, dtype=np.float64)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("color", "#1f77b4")
+    ax.plot(angles, levels, **kwargs)
+    ax.fill(angles, levels, alpha=0.15, color=kwargs["color"])
+    ax.set_title(
+        f"Diffusion coefficient d = {float(result.coefficient):.2f} "
+        "(ISO 17497-2)"
+    )
+    return cast("Axes", ax)
+
+
+def plot_insitu_absorption(
+    result: Any, ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """In-situ one-third-octave absorption spectrum ``alpha(f)``.
+
+    :param result: An
+        :class:`~phonometry.road_absorption.InsituAbsorptionResult` exposing
+        ``frequencies`` and ``absorption``.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    alpha = np.asarray(result.absorption, dtype=np.float64)
+    positions = np.arange(freqs.size, dtype=np.float64)
+    kwargs.setdefault("color", "#1f77b4")
+    ax.bar(positions, np.nan_to_num(alpha), **kwargs)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([_format_freq(f) for f in freqs], rotation=45, ha="right")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Absorption coefficient")
+    ax.set_ylim(0.0, 1.0)
+    ax.set_title("In-situ road-surface absorption (ISO 13472-1)")
+    ax.grid(True, axis="y", alpha=0.3)
+    return ax

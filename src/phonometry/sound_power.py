@@ -730,6 +730,16 @@ class PrecisionSoundPowerResult:
     uncertainty_bands: np.ndarray
     coverage_factor: float
 
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the precision ``LW`` spectrum with the A-weighted total.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_sound_power
+
+        return plot_sound_power(self, ax=ax, **kwargs)
+
 
 def _precision_table(surface: PrecisionSurface, array: PrecisionArray) -> np.ndarray:
     """Select the normative coordinate table (Annex D/E) and self-check it."""
@@ -1181,6 +1191,16 @@ class PrecisionIntensityResult:
     not_applicable_band: np.ndarray
     surface_area: float
     sound_power_level_a: float
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the ``LW`` spectrum; non-applicable bands are hatched/greyed.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_sound_power
+
+        return plot_sound_power(self, ax=ax, **kwargs)
 
 
 def precision_field_indicators(

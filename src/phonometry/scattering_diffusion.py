@@ -39,10 +39,13 @@ import math
 import warnings
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from matplotlib.axes import Axes
 
 Real = NDArray[np.float64]
 
@@ -50,19 +53,23 @@ __all__ = [
     "BASE_PLATE_BANDS_HZ",
     "BASE_PLATE_MAX_SCATTERING",
     "TWO_DIMENSIONAL_SOURCE_WEIGHTS",
+    "DiffusionResult",
     "ScatteringDiffusionWarning",
+    "ScatteringResult",
     "ScatteringUncertainty",
     "absorption_coefficient_uncertainty",
     "air_attenuation_coefficient",
     "area_factors",
     "base_plate_scattering",
     "check_base_plate_scattering",
+    "directional_diffusion",
     "directional_diffusion_coefficient",
     "normalized_diffusion_coefficient",
     "random_incidence_absorption",
     "random_incidence_diffusion",
     "reverberation_time_uncertainty",
     "scattering_coefficient",
+    "scattering_coefficient_spectrum",
     "scattering_coefficient_uncertainty",
     "specular_absorption_coefficient",
     "speed_of_sound",
@@ -325,6 +332,123 @@ def scattering_coefficient(
     if truncate_negative:
         s = np.maximum(s, 0.0)
     return np.asarray(s, dtype=np.float64)
+
+
+@dataclass(frozen=True)
+class ScatteringResult:
+    """A random-incidence scattering-coefficient spectrum (ISO 17497-1).
+
+    :ivar frequencies: One-third-octave band centre frequencies, in hertz.
+    :ivar scattering: Scattering coefficient ``s`` per band (Eq. (5)).
+    :ivar random_incidence: Random-incidence absorption ``alpha_s`` (Eq. (1)).
+    :ivar specular: Specular absorption ``alpha_spec`` (Eq. (4)).
+    """
+
+    frequencies: Real
+    scattering: Real
+    random_incidence: Real
+    specular: Real
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the scattering coefficient ``s`` versus frequency.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+        """
+        from ._plotting import plot_scattering_coefficient
+
+        return plot_scattering_coefficient(self, ax=ax, **kwargs)
+
+
+def scattering_coefficient_spectrum(
+    frequencies: ArrayLike,
+    specular_absorption: ArrayLike,
+    random_absorption: ArrayLike,
+    *,
+    truncate_negative: bool = True,
+) -> ScatteringResult:
+    """Scattering-coefficient spectrum ``s(f)`` (ISO 17497-1, Eq. (5)).
+
+    Convenience wrapper over :func:`scattering_coefficient` that pairs the
+    per-band specular ``alpha_spec`` (Eq. (4)) and random-incidence ``alpha_s``
+    (Eq. (1)) absorptions with their band centres and returns a plottable
+    :class:`ScatteringResult`.
+
+    :param frequencies: One-third-octave band centres, in hertz (1-D).
+    :param specular_absorption: Specular absorption ``alpha_spec`` per band.
+    :param random_absorption: Random-incidence absorption ``alpha_s`` per band.
+    :param truncate_negative: Clip negative ``s`` to 0 (Clause 8.3 default).
+    :return: A :class:`ScatteringResult` with ``.plot()``.
+    :raises ValueError: if the three inputs differ in length, are empty, or any
+        ``alpha_s`` equals 1.
+    """
+    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    spec = np.atleast_1d(np.asarray(specular_absorption, dtype=np.float64))
+    rand = np.atleast_1d(np.asarray(random_absorption, dtype=np.float64))
+    if freq.size == 0 or freq.shape != spec.shape or freq.shape != rand.shape:
+        raise ValueError(
+            "'frequencies', 'specular_absorption' and 'random_absorption' must "
+            "be non-empty and equal-length."
+        )
+    s = scattering_coefficient(spec, rand, truncate_negative=truncate_negative)
+    return ScatteringResult(
+        frequencies=freq,
+        scattering=np.asarray(s, dtype=np.float64),
+        random_incidence=rand,
+        specular=spec,
+    )
+
+
+@dataclass(frozen=True)
+class DiffusionResult:
+    """A measured polar response and its diffusion coefficient (ISO 17497-2).
+
+    :ivar angles: Receiver angles of the polar response, in degrees.
+    :ivar levels: Reflected sound-pressure level at each angle, in decibels.
+    :ivar coefficient: Autocorrelation diffusion coefficient ``d`` (Formula (5)).
+    """
+
+    angles: Real
+    levels: Real
+    coefficient: float
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the polar response with the diffusion coefficient annotated.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        polar :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+        """
+        from ._plotting import plot_diffusion_polar
+
+        return plot_diffusion_polar(self, ax=ax, **kwargs)
+
+
+def directional_diffusion(
+    angles: ArrayLike,
+    levels: ArrayLike,
+    *,
+    weights: ArrayLike | None = None,
+) -> DiffusionResult:
+    """Diffusion coefficient of a polar response (ISO 17497-2, Formula (5)/(6)).
+
+    Convenience wrapper over :func:`directional_diffusion_coefficient` that
+    keeps the receiver angles alongside the levels and returns a plottable
+    :class:`DiffusionResult`.
+
+    :param angles: Receiver angles of the polar response, in degrees (1-D).
+    :param levels: Reflected sound-pressure level at each angle, in decibels.
+    :param weights: Optional area weights ``N_i`` (Formula (8)); ``None`` uses
+        the equal-area Formula (5).
+    :return: A :class:`DiffusionResult` with ``.plot()``.
+    :raises ValueError: if ``angles`` and ``levels`` differ in length or are
+        shorter than two receivers.
+    """
+    ang = np.atleast_1d(np.asarray(angles, dtype=np.float64))
+    lev = np.atleast_1d(np.asarray(levels, dtype=np.float64))
+    if ang.shape != lev.shape:
+        raise ValueError("'angles' and 'levels' must have the same length.")
+    d = float(directional_diffusion_coefficient(lev, area_weights=weights))
+    return DiffusionResult(angles=ang, levels=lev, coefficient=d)
 
 
 def base_plate_scattering(

@@ -55,9 +55,14 @@ hard-coded as if normative.
 from __future__ import annotations
 
 import warnings
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from matplotlib.axes import Axes
 
 Real = NDArray[np.float64]
 Complex = NDArray[np.complex128]
@@ -106,9 +111,11 @@ __all__ = [
     "PART1_FREQUENCY_RANGE",
     "SPOT_FREQUENCY_RANGE",
     "SPOT_NARROW_BAND_RANGE",
+    "InsituAbsorptionResult",
     "RoadAbsorptionWarning",
     "insitu_absorption_coefficient",
     "insitu_absorption_from_reflection",
+    "insitu_absorption_spectrum",
     "absorption_reference_corrected",
     "adrienne_window",
     "check_spot_frequency_range",
@@ -539,6 +546,86 @@ def one_third_octave_absorption(
     if clip_negative:
         out = np.where(np.isnan(out), out, np.maximum(out, 0.0))
     return centres, np.asarray(out, dtype=np.float64)
+
+
+@dataclass(frozen=True)
+class InsituAbsorptionResult:
+    """An in-situ one-third-octave absorption spectrum (ISO 13472-1).
+
+    :ivar frequencies: One-third-octave band centre frequencies, in hertz.
+    :ivar absorption: Sound-absorption coefficient ``alpha`` per band (a band
+        with no contributing narrow-band samples is ``nan``).
+    """
+
+    frequencies: Real
+    absorption: Real
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the in-situ absorption spectrum ``alpha(f)``.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
+        """
+        from ._plotting import plot_insitu_absorption
+
+        return plot_insitu_absorption(self, ax=ax, **kwargs)
+
+
+def insitu_absorption_spectrum(
+    incident_ir: ArrayLike,
+    reflected_ir: ArrayLike,
+    sample_rate: float,
+    *,
+    source_height: float = DEFAULT_SOURCE_HEIGHT,
+    mic_height: float = DEFAULT_MIC_HEIGHT,
+    incidence_angle: float = 0.0,
+    n: int | None = None,
+    f_min: float = PART1_FREQUENCY_RANGE[0],
+    f_max: float = PART1_FREQUENCY_RANGE[1],
+    clip_negative: bool = True,
+) -> InsituAbsorptionResult:
+    """In-situ one-third-octave absorption spectrum (ISO 13472-1, Clause 4.1).
+
+    End-to-end convenience: the windowed incident and reflected impulse
+    responses give the narrow-band absorption via
+    :func:`insitu_absorption_coefficient`, which is then reduced to
+    one-third-octave bands with :func:`one_third_octave_absorption` and wrapped
+    in a plottable :class:`InsituAbsorptionResult`.
+
+    :param incident_ir: Windowed incident (direct-path) impulse response ``hi``.
+    :param reflected_ir: Windowed reflected-path impulse response ``hr``.
+    :param sample_rate: Sampling frequency ``fs``, in hertz.
+    :param source_height: Source-to-plane distance ``ds``, in metres.
+    :param mic_height: Microphone-to-plane distance ``dm``, in metres.
+    :param incidence_angle: Incidence angle ``theta``, in radians (0 = normal).
+    :param n: FFT length; defaults to the longer of the two impulse responses.
+    :param f_min: Lowest band centre to report, in hertz (default 250 Hz).
+    :param f_max: Highest band centre to report, in hertz (default 4000 Hz).
+    :param clip_negative: Clip negative band results to zero (default ``True``).
+    :return: An :class:`InsituAbsorptionResult` with ``.plot()``.
+    :raises ValueError: On empty inputs, invalid geometry, or non-positive
+        ``sample_rate``.
+    """
+    if sample_rate <= 0.0:
+        raise ValueError("'sample_rate' must be positive.")
+    hi_t = np.atleast_1d(np.asarray(incident_ir, dtype=np.float64))
+    hr_t = np.atleast_1d(np.asarray(reflected_ir, dtype=np.float64))
+    # Fix the FFT length explicitly so ``rfftfreq`` matches the transform used
+    # inside ``insitu_absorption_coefficient`` for both even and odd inputs.
+    length = n if n is not None else max(hi_t.size, hr_t.size)
+    alpha = insitu_absorption_coefficient(
+        hi_t,
+        hr_t,
+        source_height=source_height,
+        mic_height=mic_height,
+        incidence_angle=incidence_angle,
+        n=length,
+    )
+    freq = np.fft.rfftfreq(length, d=1.0 / sample_rate)
+    centres, band = one_third_octave_absorption(
+        freq, alpha, f_min=f_min, f_max=f_max, clip_negative=clip_negative
+    )
+    return InsituAbsorptionResult(frequencies=centres, absorption=band)
 
 
 # --------------------------------------------------------------------------- #

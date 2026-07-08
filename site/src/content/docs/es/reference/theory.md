@@ -507,7 +507,7 @@ El **índice presión-intensidad** $\delta_{pI} = L_p - L_I$ mide cuán reactivo
 Consulta la [guía de intensidad sonora](/phonometry/es/guides/intensity/) para su uso.
 
 
-## Acústica de salas y edificación (ISO 18233, ISO 3382, ISO 16283, ISO 717, ISO 354)
+## Acústica de salas y edificación (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)
 
 ### Respuesta al impulso por excitación determinista (ISO 18233)
 
@@ -588,6 +588,95 @@ coeficiente de atenuación de ISO 9613-1 mediante $m = \alpha / (10 \lg e)$. Com
 la difracción y la dispersión de borde interceptan más que el área plana de la
 muestra, $\alpha_s$ se deja sin saturar y puede superar 1,0 (Cláusula 3.7
 NOTA 2).
+
+### Normalización en laboratorio frente a campo (ISO 10140, ISO 16283)
+
+Los índices de campo llevan una prima porque incluyen la transmisión por flancos
+alrededor del cerramiento; los índices de laboratorio no, porque una instalación
+cualificada la suprime. El álgebra es por lo demás idéntica, y difiere solo en
+qué magnitud se normaliza. El par a ruido aéreo es el índice de reducción sonora
+directo de laboratorio $R = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 10140-2) frente
+al índice aparente de campo $R' = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 16283-1),
+la misma forma cerrada evaluada con el $A$ conocido de la instalación o el
+$A = 0.16\ V/T$ medido de la sala. El par a impactos es el nivel normalizado de
+laboratorio $L_n = L_i + 10 \log_{10}(A/A_0)$ (ISO 10140-3) frente al $L'_n$ de
+campo (ISO 16283-2), ambos referidos a $A_0 = 10$ m². Antes de formar cualquiera
+de ellos, el nivel de la sala receptora se corrige por ruido de fondo mediante la
+resta energética $L = 10 \log_{10}(10^{L_{sb}/10} - 10^{L_b/10})$ para un margen
+señal-fondo de 6–15 dB, saturada en un valor fijo de $1.3$ dB (el límite de
+medición) en 6 dB o por debajo y omitida en 15 dB o por encima (ISO 10140-4,
+Cláusula 4.3), el análogo de laboratorio de la regla 6/10 dB de ISO 16283-1. La
+extensión a fachadas (ISO 16283-3) sustituye el nivel de la sala emisora por el
+nivel 2 m frente a la fachada, $D_{2m} = L_{1,2m} - L_2$, y añade una corrección
+fija por ángulo de incidencia al índice de reducción sonora del elemento, $-1.5$
+dB para el método del altavoz a 45° ($R'_{45°}$) y $-3$ dB para el método de
+tráfico rodado con todos los ángulos ($R'_{tr,s}$); los tres llevan el número
+único a ruido aéreo de ISO 717-1.
+
+### Predicción de la transmisión por flancos (EN 12354-1/2)
+
+El índice aparente de campo es la suma energética del camino directo $Dd$ y, para
+cada elemento de flanco $F=f$ a través de su unión con el elemento separador, los
+tres caminos $Ff$, $Df$ y $Fd$ (EN 12354-1, modelo simplificado de un solo
+número, Fórmula 26):
+
+$$
+R'_w = -10 \log_{10}\Big[ 10^{-R_{Dd,w}/10}
+       + \sum 10^{-R_{Ff,w}/10} + \sum 10^{-R_{Df,w}/10}
+       + \sum 10^{-R_{Fd,w}/10} \Big].
+$$
+
+El camino directo es $R_{Dd,w} = R_{s,w} + \Delta R_{Dd,w}$ (Fórmula 27), el
+índice de laboratorio del elemento separador más cualquier mejora del trasdosado.
+Cada camino de flanco (Fórmula 28a) es
+
+$$
+R_{ij,w} = \frac{R_{i,w} + R_{j,w}}{2} + \Delta R_{ij,w} + K_{ij}
+         + 10 \log_{10}\frac{S_s}{l_0\, l_f},
+$$
+
+con $R_{i,w}$, $R_{j,w}$ los índices de laboratorio de los dos elementos que se
+encuentran en la unión ($i$ lado emisor, $j$ lado receptor), $\Delta R_{ij,w}$ la
+mejora combinada del trasdosado, $S_s$ la superficie del elemento separador,
+$l_f$ la longitud de acoplamiento de la unión y $l_0 = 1$ m la longitud de
+acoplamiento de referencia. $K_{ij}$ es el **índice de reducción vibracional** de
+la unión (Anexo E), una función empírica de la relación de masas
+$M = \log_{10}(m'_{\perp,i}/m'_i)$ — para una unión rígida en cruz
+$K_{13} = 8.7 + 17.1 M + 5.7 M^2$ (a través) y $K_{12} = 8.7 + 5.7 M^2$
+(en esquina), leídos a 500 Hz — acotada en su mínimo $K_{ij,\min} = 10 \log_{10}[l_f\, l_0
+(1/S_i + 1/S_j)]$ (Fórmula 29). Dos trasdosados se combinan como
+$\max(a,b) + \min(a,b)/2$ (Fórmulas 30/31). La contrapartida a impactos
+(EN 12354-2, Fórmula 21) es la resta directa
+$L'_{n,w} = L_{n,w,eq} - \Delta L_w + K$, con el nivel equivalente del suelo
+desnudo $L_{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Anexo B), la mejora del
+revestimiento $\Delta L_w$ (ISO 717-2) y la corrección por flancos $K$ de la
+Tabla 1. Los ejemplos resueltos del Anexo H.3 de EN 12354-1 ($R'_w = 52$ dB) y del
+Anexo E.3 de EN 12354-2 ($L'_{n,w} = 45$ dB) se reproducen exactamente; se
+declara que el modelo simplificado tiene una desviación típica de unos 2 dB
+(Cláusula 5).
+
+### Incertidumbre de medición (ISO 12999-1)
+
+ISO 12999-1 proporciona la incertidumbre de las magnitudes anteriores a partir de
+la reproducibilidad y la repetibilidad interlaboratorio (ISO 5725) en lugar de un
+modelo funcional GUM. Tres **situaciones de medición** fijan la incertidumbre
+típica $u$: la situación **A** (caracterización en laboratorio) usa la desviación
+típica de reproducibilidad $\sigma_R$; la situación **B** (misma ubicación,
+equipos distintos) la $\sigma_{situ}$ in situ; la situación **C** (misma
+ubicación, operador y equipo, repetida) la repetibilidad $\sigma_r$. Los valores
+por banda y de un solo número están tabulados para $R$/$R'$/$D_n$/$D_{nT}$ a
+ruido aéreo (Tablas 2/3), $L_n$/$L'_n$ a impactos (Tablas 4/5, solo situaciones
+B/C) y la reducción del revestimiento $\Delta L$ (Tablas 6/7, solo situación A).
+La incertidumbre expandida es $U = k\,u$ (Fórmula 2) con el factor de cobertura
+$k$ de la Tabla 8 (al 95 %, $k = 1.96$ bilateral, $k = 1.65$ unilateral; se impone
+un mínimo $k = 1$). Un intervalo bilateral $Y = y \pm U$ informa un valor
+(Fórmula 3); un factor unilateral declara conformidad, $y - U > $ requisito para
+un límite inferior (Fórmula 5) o $y + U <$ requisito para un límite superior
+(Fórmula 4). Los componentes no correlacionados se combinan en cuadratura
+$u_c = \sqrt{\sum u_i^2}$ (Fórmula C.2), $m$ mediciones independientes reducen $u$
+a $u/\sqrt{m}$ (Fórmula A.7), y la incertidumbre de un solo número no
+correlacionada es la suma en cuadratura ponderada en energía de las
+incertidumbres por banda (Fórmula B.2).
 
 Consulta la [guía de acústica de salas y edificación](/phonometry/es/guides/room-acoustics/) para su uso.
 

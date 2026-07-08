@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `loudness_moore_glasberg()`, `loudness_moore_glasberg_from_spectrum()` and
+  `loudness_moore_glasberg_from_third_octave()` with the `MooreGlasbergLoudness`
+  result and its `.plot()` — stationary Moore-Glasberg loudness per
+  ISO 532-2:2017 (level-dependent roex excitation pattern on the ERB-number/Cam
+  scale, compressive specific loudness and binaural inhibition), anchored so a
+  1 kHz / 40 dB SPL tone is 1.000 sone.
+- `loudness_moore_glasberg_time()` and `MooreGlasbergTimeVaryingLoudness` (with
+  `.plot()`) — time-varying Moore-Glasberg-Schlittenlacher loudness per
+  ISO 532-3:2023: the short-term S′(t) and long-term S″(t) loudness traces, the
+  peak long-term loudness N_max and percentile long-term loudness.
+- `loudness_ecma()` and `EcmaLoudness` (with `.plot()`) — Sottek Hearing Model
+  loudness per ECMA-418-2:2025 (sone_HMS) on the 53-band Bark_HMS auditory
+  front-end; a 1 kHz / 40 dB SPL tone calibrates to ≈ 1 sone_HMS.
+- `tonality_ecma()` and `EcmaTonality` (with `.plot()`) — ECMA-418-2:2025
+  tonality (tu_HMS) from the autocorrelation of the band signal, with the
+  time-dependent tonality T(l), the average specific tonality T′(z) and the
+  per-band tonal frequency; a 1 kHz / 40 dB tone calibrates to ≈ 1 tu_HMS.
+- `roughness_ecma()` and `EcmaRoughness` (with `.plot()`) — ECMA-418-2:2025
+  roughness (asper), a new capability, from the band-envelope modulation
+  analysis; the reference 1 kHz carrier 100 %-AM at 70 Hz, 60 dB SPL calibrates
+  to ≈ 1 asper.
+
 - One-line canonical `.plot()` method on every public result object —
   `ZwickerLoudness`, `STIResult`, `RoomAcousticsResult`, `DecayCurve`,
   `WeightedRatingResult`, `ImpactRatingResult`, `SoundPowerResult`,

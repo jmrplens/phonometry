@@ -4,11 +4,12 @@ Zwicker loudness (ISO 532-1:2017) conformance tests.
 
 Expected values and tolerances come from the results workbooks of the
 freely downloadable ISO 532-1:2017 electronic attachment (Annex B),
-extracted to ``tests/data/iso532_1_annexB_expected.json``. Synthetic test
-signals are regenerated per their normative Annex B descriptions (pure
-tones at stated levels; 100 ms of silence before and after, as noted in
-the workbooks). The recorded technical signals (B.5) are only exercised
-when the ISO package is available locally (``ISO532_1_TESTDATA``).
+extracted to ``tests/data/iso532_1/iso532_1_annexB_expected.json``.
+Synthetic test signals are regenerated per their normative Annex B
+descriptions (pure tones at stated levels; 100 ms of silence before and
+after, as noted in the workbooks). The recorded technical signals (B.5)
+ship in ``tests/data/iso532_1/`` (see its README for provenance and ISO
+attribution); ``ISO532_1_TESTDATA`` overrides the location.
 """
 
 import json
@@ -21,7 +22,7 @@ import pytest
 from phonometry import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
 
 FS = 48000
-DATA = pathlib.Path(__file__).parent / "data"
+DATA = pathlib.Path(__file__).parent / "data" / "iso532_1"
 EXPECTED = json.loads((DATA / "iso532_1_annexB_expected.json").read_text())
 
 
@@ -186,23 +187,35 @@ def test_time_varying_outputs() -> None:
 # Optional full validation against the recorded ISO signals
 # ---------------------------------------------------------------------------
 
-ISO_DIR = os.environ.get("ISO532_1_TESTDATA", "")
+# The Annex B.5 recordings ship in tests/data/iso532_1 (see its README);
+# ISO532_1_TESTDATA points at a full local copy of the attachment instead.
+ISO_DIR = os.environ.get("ISO532_1_TESTDATA", str(DATA))
 
 
-@pytest.mark.skipif(not ISO_DIR, reason="set ISO532_1_TESTDATA to the ISO 532-1 attachment dir")
 @pytest.mark.parametrize("num", list(range(14, 26)))
 def test_annex_b5_technical_signals(num: int) -> None:
     import glob
-
-    import soundfile as sf
+    import wave
 
     matches = glob.glob(os.path.join(ISO_DIR, "Annex B.5", f"Test signal {num} *.wav"))
     if not matches:
         pytest.skip(f"signal {num} not found")
-    x, fs = sf.read(matches[0])
+    with wave.open(matches[0]) as w:
+        fs = w.getframerate()
+        raw = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16)
+    # Annex B.1: "0 dB (relative to full scale) shall correspond to a sound
+    # pressure level of 100 dB" — a full-scale sine is 100 dB SPL (2 Pa RMS),
+    # so one full-scale unit is 2*sqrt(2) Pa peak.
+    x = raw.astype(np.float64) / 32768.0 * (2.0 * np.sqrt(2.0))
     exp = EXPECTED[f"Test signal {num}"]
-    res = loudness_zwicker(np.asarray(x, dtype=np.float64), int(fs))
-    assert res.loudness == pytest.approx(exp["Nmax"], rel=0.05)
+    # Each B.5 signal is validated in the sound field its ISO results
+    # workbook was computed in; signal 15 (vehicle interior) is diffuse.
+    res = loudness_zwicker(np.asarray(x, dtype=np.float64), int(fs), field=exp["field"])
+    # Nmax reproduces the ISO results workbook to < 0.01 % for all twelve
+    # signals; 1e-3 locks that in. N5 is a percentile of the loudness-vs-time
+    # trace, phase-sensitive on impulsive signals (e.g. the machine gun),
+    # so it is held to the clause 6.1 +-5 % tolerance with a small margin.
+    assert res.loudness == pytest.approx(exp["Nmax"], rel=1e-3)
     assert res.n5 == pytest.approx(exp["N5"], rel=0.06)
 
 

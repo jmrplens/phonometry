@@ -25,7 +25,7 @@ install:
 
 lint:
 	$(RUFF) check .
-	$(MYPY) src
+	$(MYPY) src scripts
 
 format:
 	$(RUFF) check --fix .

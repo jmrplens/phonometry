@@ -403,14 +403,14 @@ def _chk_lden() -> Outcome:
 # Domain 3 - Psychoacoustics
 # ===========================================================================
 def _iso532_stationary_expected() -> tuple[float, float, float]:
-    data = json.loads((_DATA / "iso532_1_annexB_expected.json").read_text())
+    data = json.loads((_DATA / "iso532_1" / "iso532_1_annexB_expected.json").read_text())
     entry = data["Test signal 1.txt"]
     return entry["N"], entry["Nmin"], entry["Nmax"]
 
 
 def _iso532_levels() -> np.ndarray:
     levels = []
-    for line in (_DATA / "iso532_1_test_signal_1_levels.txt").read_text().splitlines():
+    for line in (_DATA / "iso532_1" / "iso532_1_test_signal_1_levels.txt").read_text().splitlines():
         if ":" in line and not line.strip().startswith("#"):
             levels.append(float(line.split(":")[1]))
     return np.array(levels)
@@ -428,6 +428,49 @@ def _chk_iso532_stationary() -> Outcome:
     out = numeric(expected_n, computed, 0.001, unit="sone", rel=True, places=4)
     within_band = nmin <= computed <= nmax
     return Outcome(out.expected, out.computed, out.delta, out.passed and within_band)
+
+
+def _iso532_b5_signal(num: int) -> tuple[np.ndarray, int, float, str]:
+    """Load a recorded ISO 532-1 Annex B.5 technical signal and its expected values.
+
+    Returns the pressure signal, its sample rate, the expected maximum loudness
+    Nmax (sone) and the sound field the ISO results workbook was computed in.
+    The 16-bit WAV is scaled per Annex B.1 (full scale = 100 dB SPL, so one
+    full-scale unit is 2*sqrt(2) Pa peak).
+    """
+    import glob
+    import wave
+
+    data = json.loads((_DATA / "iso532_1" / "iso532_1_annexB_expected.json").read_text())
+    entry = data[f"Test signal {num}"]
+    match = glob.glob(str(_DATA / "iso532_1" / "Annex B.5" / f"Test signal {num} *.wav"))[0]
+    with wave.open(match) as handle:
+        fs = handle.getframerate()
+        raw = np.frombuffer(handle.readframes(handle.getnframes()), dtype=np.int16)
+    signal = raw.astype(np.float64) / 32768.0 * (2.0 * math.sqrt(2.0))
+    return signal, int(fs), float(entry["Nmax"]), str(entry["field"])
+
+
+@register(
+    "Psychoacoustics",
+    "ISO 532-1:2017 Annex B.5",
+    "Time-varying loudness Nmax, technical signal 14 (aircraft, free field)",
+)
+def _chk_iso532_b5_free() -> Outcome:
+    signal, fs, nmax, field = _iso532_b5_signal(14)
+    res = ph.loudness_zwicker(signal, fs, field=field)
+    return numeric(nmax, float(res.loudness), 0.001, unit="sone", rel=True, places=4)
+
+
+@register(
+    "Psychoacoustics",
+    "ISO 532-1:2017 Annex B.5",
+    "Time-varying loudness Nmax, technical signal 15 (vehicle interior, diffuse field)",
+)
+def _chk_iso532_b5_diffuse() -> Outcome:
+    signal, fs, nmax, field = _iso532_b5_signal(15)
+    res = ph.loudness_zwicker(signal, fs, field=field)
+    return numeric(nmax, float(res.loudness), 0.001, unit="sone", rel=True, places=4)
 
 
 @register(
@@ -802,10 +845,10 @@ def _chk_lab_airborne_rw() -> Outcome:
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================
-def _annex_h3_paths() -> list:
+def _annex_h3_paths() -> list[ph.FlankingPath]:
     """The EN 12354-1 Annex H.3 flanking paths from the shared input table."""
     ss = ref.EN12354_1_ANNEX_H3_SEPARATING_AREA
-    paths: list = []
+    paths: list[ph.FlankingPath] = []
     for label, rw, kff, kfd, lf in ref.EN12354_1_ANNEX_H3_ELEMENTS:
         ff, df, fd = ph.flanking_element(
             label=label, r_flanking=rw, r_separating=ref.EN12354_1_ANNEX_H3_R_DIRECT,

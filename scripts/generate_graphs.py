@@ -2599,7 +2599,7 @@ def generate_exposure_uncertainty(output_dir: str) -> None:
     ax.bar(x, contribs, color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.7,
            width=0.6, zorder=3, label="Measurement task")
     for xi, c in zip(x, contribs):
-        ax.text(xi, c - 2.5, f"{c:.1f}", ha="center", va="top",
+        ax.text(float(xi), c - 2.5, f"{c:.1f}", ha="center", va="top",
                 fontsize=9, color="white", fontweight="bold")
 
     # Daily energy-summed level and its one-sided 95 % upper limit LEX,8h + U.

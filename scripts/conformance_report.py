@@ -1024,7 +1024,7 @@ def _chk_iso9613_2_barrier_double_cap() -> Outcome:
     )
 
 
-def _iso9612_annex_d_tasks() -> list:
+def _iso9612_annex_d_tasks() -> list[ph.Task]:
     """Rebuild the ISO 9612 Annex D Task objects from the shared input table."""
     from phonometry.occupational_exposure import Task
 

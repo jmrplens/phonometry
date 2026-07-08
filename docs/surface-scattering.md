@@ -69,6 +69,56 @@ print(round(float(alpha_spec), 4))  # 0.2148
 print(round(float(s), 4))           # 0.0931
 ```
 
+Over a full one-third-octave measurement, `scattering_coefficient_spectrum`
+pairs the per-band $\alpha_{spec}$ and $\alpha_s$ with their band centres and
+returns a plottable `ScatteringResult`:
+
+```python
+import numpy as np
+import phonometry as ph
+
+# A 13-band measurement (250-4000 Hz): the random-incidence absorption alpha_s
+# (stationary sample) and the specular absorption alpha_spec (rotating
+# turntable). A diffuser scatters more with frequency, so s(f) rises.
+freqs = np.array([250, 315, 400, 500, 630, 800, 1000,
+                  1250, 1600, 2000, 2500, 3150, 4000], float)
+alpha_s = np.full_like(freqs, 0.10)
+alpha_spec = 0.11 + 0.75 * (np.log10(freqs / 250) / np.log10(4000 / 250))
+
+result = ph.scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
+print(np.round(result.scattering[[0, 6, 12]], 3))   # [0.011 0.428 0.844]
+result.plot()   # s(f) on a log-frequency axis, 0 to 1 (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient.png" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" width="88%"></picture>
+
+*The scattering coefficient climbs with frequency: at low frequency the surface
+relief is small compared with the wavelength and the reflection stays specular
+($s \to 0$); as the wavelength shrinks the relief scatters more energy out of
+the specular direction ($s \to 1$).*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# result is the ScatteringResult computed above. One line:
+result.plot()
+plt.show()
+
+# By hand, from the result's fields, mirroring what ScatteringResult.plot() draws:
+fig, ax = plt.subplots()
+ax.semilogx(result.frequencies, result.scattering, "o-", color="#1f77b4")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Scattering coefficient s")
+ax.set_ylim(0.0, 1.0)
+ax.set_title("Random-incidence scattering coefficient (ISO 17497-1)")
+plt.show()
+```
+
+</details>
+
 **Base-plate check (Clause 6.4, Table 1).** The empty base plate must itself
 scatter only negligibly, or it would bias the result. ISO 17497-1 caps the
 base-plate scattering coefficient per one-third-octave band; the library exposes
@@ -132,7 +182,57 @@ d_random = ph.random_incidence_diffusion(
 print(round(float(d_random), 4))     # 0.2231
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_diffusion_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_diffusion.png" alt="Left: two polar responses and their autocorrelation diffusion coefficients, a diffusing surface with a high coefficient against a flat specular surface with a near-zero coefficient. Right: the ISO 17497-1 base-plate maximum-scattering limit as a step curve over one-third-octave bands with a compliant sample scattering curve below it" width="88%"></picture>
+`directional_diffusion` keeps the receiver angles beside the levels of a full
+goniometer sweep and returns a plottable `DiffusionResult`:
+
+```python
+import numpy as np
+import phonometry as ph
+
+# A goniometer sweep of a diffusing surface: reflected levels L_i at 37
+# receivers from -90 to 90 deg (5 deg spacing). The energy is spread almost
+# uniformly over angle, so the Formula (5) coefficient d is high.
+angles = np.arange(-90.0, 90.5, 5.0)
+rng = np.random.default_rng(3)
+levels = 70.0 + 2.0 * np.sin(np.radians(angles) * 3.0) + rng.normal(0.0, 1.0, angles.size)
+
+result = ph.directional_diffusion(angles, levels)
+print(round(result.coefficient, 2))   # 0.82
+result.plot()   # polar reflected response, d in the title (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar.png" alt="A polar plot of the reflected sound-pressure level of a diffusing surface over 37 receivers from -90 to 90 degrees, the response spread almost uniformly over angle, giving an autocorrelation diffusion coefficient d of about 0.82" width="72%"></picture>
+
+*The reflected energy fills the whole semicircle rather than concentrating in a
+specular lobe, so the autocorrelation diffusion coefficient is high
+($d \approx 0.82$). A flat surface would collapse the response into a narrow
+spike and drive $d$ towards zero.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# result is the DiffusionResult computed above. One line:
+result.plot()
+plt.show()
+
+# By hand: a polar plot of the levels, with d annotated in the title.
+fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+theta = np.radians(result.angles)
+ax.plot(theta, result.levels, "o-", color="#1f77b4")
+ax.fill(theta, result.levels, color="#1f77b4", alpha=0.15)
+ax.set_theta_zero_location("N")
+ax.set_theta_direction(-1)
+ax.set_thetamin(-90)
+ax.set_thetamax(90)
+ax.set_title(f"Directional diffusion  d = {result.coefficient:.2f}  (ISO 17497-2)")
+plt.show()
+```
+
+</details>
 
 ## 3. In-situ road absorption — subtraction technique (ISO 13472-1)
 
@@ -197,7 +297,68 @@ print(w.shape[0])          # 504 samples at 48 kHz
 print(round(float(w.max()), 3))   # 1.0  (flat top and edges meet at unity)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_absorption_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/road_absorption.png" alt="Left: the Adrienne temporal window returned by the library, showing the sharp leading edge, the 5 ms flat portion and the Blackman-Harris trailing edge. Right: an in-situ one-third-octave absorption spectrum computed from a synthetic road reflection via the reflection-factor route" width="88%"></picture>
+**End-to-end spectrum.** `insitu_absorption_spectrum` runs the whole chain — the
+windowed incident and reflected impulse responses to the narrow-band absorption
+and on to one-third-octave bands — and returns a plottable
+`InsituAbsorptionResult`:
+
+```python
+import numpy as np
+import phonometry as ph
+from scipy.signal import firwin, lfilter
+
+# A synthetic-but-realistic measurement. hi is a unit incident impulse; the road
+# reflection hr = Kr * r0 * roll(hi, shift) uses the geometrical-spreading
+# factor Kr, a mildly frequency-dependent r0 (a gentle low-pass, so a porous
+# surface reflects less as frequency rises) and the reflected-path delay
+# shift = round(2 dm / c * fs).
+fs, n = 48000.0, 8192
+kr = ph.geometric_spreading_factor()           # (ds - dm)/(ds + dm) = 2/3
+hi = np.zeros(n)
+hi[0] = 1.0
+taps = firwin(41, 1200.0, fs=fs)
+taps = taps / taps.sum()
+shift = int(round(2.0 * 0.25 / 340.0 * fs))     # reflected-path delay 2 dm / c
+hr = kr * 0.85 * np.roll(lfilter(taps, 1.0, hi), shift)
+
+result = ph.insitu_absorption_spectrum(hi, hr, fs)
+print(result.frequencies[[0, -1]].astype(int))     # [ 250 4000]
+print(np.round(result.absorption[[0, 6, 12]], 2))  # [0.31 0.65 1.  ]
+result.plot()   # alpha(f) bar chart over 250-4000 Hz (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption.png" alt="An in-situ one-third-octave road-surface absorption spectrum computed by the reflection-factor route from a synthetic road reflection, rising from about 0.3 at 250 Hz to near 1.0 above 2 kHz" width="88%"></picture>
+
+*The absorption rises with frequency because the surface reflects less of the
+high-frequency energy, exactly as the low-pass reflection factor $r_0(f)$
+dictates through $\alpha = 1 - (1/K_r^2)\,|H_r/H_i|^2$.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# result is the InsituAbsorptionResult computed above. One line:
+result.plot()
+plt.show()
+
+# By hand: a bar chart of alpha over the one-third-octave bands.
+freqs = result.frequencies
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, np.nan_to_num(result.absorption), width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Absorption coefficient alpha")
+ax.set_ylim(0.0, 1.0)
+ax.set_title("In-situ road-surface absorption (ISO 13472-1)")
+plt.show()
+```
+
+</details>
 
 **Maximum sampled area (Annex A).** The finite time window limits how much of the
 surface contributes to the reflection. The maximum sampled area is a circle whose

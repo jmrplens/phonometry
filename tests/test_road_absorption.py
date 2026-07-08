@@ -32,9 +32,11 @@ from phonometry.road_absorption import (
     PART1_FREQUENCY_RANGE,
     SPOT_FREQUENCY_RANGE,
     SPOT_NARROW_BAND_RANGE,
+    InsituAbsorptionResult,
     RoadAbsorptionWarning,
     insitu_absorption_coefficient,
     insitu_absorption_from_reflection,
+    insitu_absorption_spectrum,
     absorption_reference_corrected,
     adrienne_window,
     check_spot_frequency_range,
@@ -337,6 +339,46 @@ def test_one_third_octave_guards() -> None:
         one_third_octave_absorption([250.0, 500.0], [0.1])
     with pytest.raises(ValueError):
         one_third_octave_absorption([], [])
+
+
+# --------------------------------------------------------------------------- #
+# Plottable end-to-end spectrum (insitu_absorption_spectrum)
+# --------------------------------------------------------------------------- #
+def test_insitu_absorption_spectrum_mid_bands_are_one_minus_r0_sq() -> None:
+    hi = _incident_ir()
+    kr = geometric_spreading_factor()
+    r0 = 0.5
+    # hr = Kr * r0 * delayed(hi): a flat reflection of magnitude r0, so
+    # |Hr/Hi| = Kr*r0 and alpha = 1 - (1/Kr^2)(Kr*r0)^2 = 1 - r0^2 in every band.
+    hr = kr * r0 * np.roll(hi, 96)
+    result = insitu_absorption_spectrum(hi, hr, FS)
+
+    assert isinstance(result, InsituAbsorptionResult)
+    assert result.frequencies.shape == (13,)  # 250..4000 Hz
+    np.testing.assert_allclose(result.absorption, 1.0 - r0**2, atol=1e-6)
+
+
+def test_insitu_absorption_spectrum_rejects_nonpositive_sample_rate() -> None:
+    hi = _incident_ir()
+    hr = 0.4 * np.roll(hi, 96)
+    with pytest.raises(ValueError):
+        insitu_absorption_spectrum(hi, hr, 0.0)
+    with pytest.raises(ValueError):
+        insitu_absorption_spectrum(hi, hr, -48000.0)
+
+
+def test_insitu_absorption_spectrum_plot_returns_axes() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    hi = _incident_ir()
+    hr = geometric_spreading_factor() * 0.5 * np.roll(hi, 96)
+    result = insitu_absorption_spectrum(hi, hr, FS)
+    ax = result.plot()
+    assert isinstance(ax, plt.Axes)
+    plt.close("all")
 
 
 # --------------------------------------------------------------------------- #

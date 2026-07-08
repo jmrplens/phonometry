@@ -396,6 +396,59 @@ print(round(mc.c1, 4), round(mc.c2, 4))   # -0.1282 0.0
 print(round(ph.precision_uncertainty(0.5, 2.0, 2.0), 3))   # 4.123
 ```
 
+Over several bands `sound_power_anechoic` returns a plottable
+`PrecisionSoundPowerResult` carrying the per-band `LW` and the A-weighted total:
+
+```python
+import numpy as np
+import phonometry as ph
+
+# A mid-frequency-peaked machine measured over the 40-position hemisphere array
+# (Annex E). levels_positions is the (40, NB) surface pressure spectrum: a base
+# spectrum peaked near 1 kHz plus a small per-position spatial spread.
+freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], float)
+base = 70.0 + 8.0 * np.exp(-(np.log2(freqs / 1000.0) ** 2) / 2.0)
+rng = np.random.default_rng(7)
+levels = base[None, :] + rng.normal(0.0, 1.0, (40, freqs.size))
+
+result = ph.sound_power_anechoic(levels, "hemisphere", radius=1.0, frequencies=freqs)
+print(round(result.sound_power_level_a, 1))   # 89.3
+result.plot()   # LW spectrum, LWA in the title (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power.png" alt="The precision sound power level spectrum of a mid-frequency-peaked machine measured over the ISO 3745 hemisphere array, one bar per band peaking near 1 kHz, with the A-weighted total of 89.3 dB(A) in the title" width="88%"></picture>
+
+*One bar per band: the surface-averaged pressure plus the area, background and
+meteorological corrections give `LW(f)`, and the A-weighted energy sum across
+bands gives the single-number `LWA` in the title.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# result is the PrecisionSoundPowerResult computed above. One line:
+result.plot()
+plt.show()
+
+# By hand: a bar spectrum of LW with the A-weighted total in the title.
+freqs = result.frequencies
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, result.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound power level LW [dB]")
+ax.set_title(
+    f"Precision sound power (ISO 3745)  LWA = {result.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
+
 ## 5. Precision intensity scanning (ISO 9614-3)
 
 ISO 9614-3 is the grade-1 scanning method: like ISO 9614-2 it integrates the
@@ -426,7 +479,68 @@ print(round(float(res.sound_power[0]), 6))          # 0.0001
 print(round(float(res.sound_power_level[0]), 2))    # 80.0
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_sound_power_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_sound_power.png" alt="Left: the 40 standardized ISO 3745 hemisphere microphone positions, projected and coloured by height. Right: the ISO 3745 K1 background-noise correction as a function of the signal-to-background level difference, showing the 1.26 dB edge-band and 0.46 dB mid-band floors and the cut-off above a 15 dB difference" width="88%"></picture>
+Across several bands the result carries the per-band `LW` (`NaN` where the net
+power is non-positive) and flags those bands `not_applicable`:
+
+```python
+import numpy as np
+import phonometry as ph
+
+# Four partial surfaces scanned over five one-third-octave bands. Each cell of
+# partial_intensity is the signed normal intensity In_i (W/m^2); areas are the
+# partial-surface areas Si. The 250 Hz band has net-negative power (a locally
+# reactive field), so ISO 9614-3 flags it not-applicable (clause 9.2) -> NaN.
+freqs = np.array([250, 500, 1000, 2000, 4000], float)
+areas = np.array([0.5, 1.0, 0.75, 0.5])
+base_intensity = np.array([2.0e-6, 8.0e-6, 2.0e-5, 1.0e-5, 3.0e-6])
+partial_intensity = base_intensity[None, :] * np.array([1.0, 1.1, 0.9, 1.05])[:, None]
+partial_intensity[:, 0] = [2.0e-6, -3.0e-6, -4.0e-6, -1.0e-6]   # net-negative band
+
+result = ph.sound_power_intensity_precision(partial_intensity, areas, frequencies=freqs)
+print(result.not_applicable_band.tolist())   # [True, False, False, False, False]
+print(round(result.sound_power_level_a, 1))   # 80.6
+result.plot()   # LW spectrum; the not-applicable band is hatched (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power.png" alt="The precision intensity-scanning sound power level spectrum over five one-third-octave bands, four determinate bars and a hatched, greyed 250 Hz band flagged not-applicable because its net intensity is negative, with the A-weighted total of 80.6 dB(A) in the title" width="88%"></picture>
+
+*The 250 Hz band nets negative (more energy flowing in than out), so ISO 9614-3
+declares it not-applicable — the figure hatches and greys it while the four
+determinate bands and the A-weighted total stand.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# result is the PrecisionIntensityResult computed above. One line:
+result.plot()
+plt.show()
+
+# By hand: determinate bands as LW bars; a not-applicable band (its LW is NaN)
+# is flagged by a full-height greyed, hatched span rather than a zero-height bar.
+freqs = result.frequencies
+positions = np.arange(freqs.size)
+neg = result.not_applicable_band
+lw = np.nan_to_num(result.sound_power_level)
+fig, ax = plt.subplots()
+ax.bar(positions[~neg], lw[~neg], width=0.7, color="#1f77b4")
+for pos in positions[neg]:
+    ax.axvspan(pos - 0.35, pos + 0.35, facecolor="#888888", alpha=0.28,
+               hatch="//", edgecolor="#888888")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound power level LW [dB]")
+ax.set_title(
+    f"Precision intensity scanning (ISO 9614-3)  "
+    f"LWA = {result.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
 
 ## See also
 

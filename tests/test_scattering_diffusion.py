@@ -29,19 +29,23 @@ from phonometry.scattering_diffusion import (
     BASE_PLATE_BANDS_HZ,
     BASE_PLATE_MAX_SCATTERING,
     TWO_DIMENSIONAL_SOURCE_WEIGHTS,
+    DiffusionResult,
     ScatteringDiffusionWarning,
+    ScatteringResult,
     ScatteringUncertainty,
     absorption_coefficient_uncertainty,
     air_attenuation_coefficient,
     area_factors,
     base_plate_scattering,
     check_base_plate_scattering,
+    directional_diffusion,
     directional_diffusion_coefficient,
     normalized_diffusion_coefficient,
     random_incidence_absorption,
     random_incidence_diffusion,
     reverberation_time_uncertainty,
     scattering_coefficient,
+    scattering_coefficient_spectrum,
     scattering_coefficient_uncertainty,
     specular_absorption_coefficient,
     speed_of_sound,
@@ -409,6 +413,81 @@ def test_base_plate_checker_rejects_missing_band() -> None:
 # ---------------------------------------------------------------------------
 # Module surface (package __init__ wiring is done separately).
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Plottable result objects: scattering_coefficient_spectrum / directional_diffusion.
+# ---------------------------------------------------------------------------
+def test_scattering_spectrum_recomputes_s_per_band() -> None:
+    freqs = np.array([250.0, 500.0, 1000.0, 2000.0, 4000.0])
+    alpha_spec = np.array([0.12, 0.25, 0.40, 0.60, 0.80])
+    alpha_s = np.array([0.10, 0.11, 0.12, 0.13, 0.14])
+    result = scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
+
+    # Independent re-derivation of Eq. (5) per band.
+    expected = (alpha_spec - alpha_s) / (1.0 - alpha_s)
+    assert isinstance(result, ScatteringResult)
+    np.testing.assert_allclose(result.scattering, expected)
+    np.testing.assert_allclose(result.frequencies, freqs)
+    np.testing.assert_allclose(result.specular, alpha_spec)
+    np.testing.assert_allclose(result.random_incidence, alpha_s)
+
+
+def test_scattering_spectrum_length_mismatch_raises() -> None:
+    with pytest.raises(ValueError):
+        scattering_coefficient_spectrum([250.0, 500.0], [0.2], [0.1])
+
+
+def test_scattering_spectrum_empty_raises() -> None:
+    with pytest.raises(ValueError):
+        scattering_coefficient_spectrum([], [], [])
+
+
+def test_scattering_spectrum_plot_returns_axes() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    result = scattering_coefficient_spectrum(
+        [250.0, 500.0, 1000.0], [0.2, 0.3, 0.5], [0.1, 0.1, 0.1]
+    )
+    ax = result.plot()
+    assert isinstance(ax, plt.Axes)
+    plt.close("all")
+
+
+def test_directional_diffusion_coefficient_matches_scalar() -> None:
+    angles = np.arange(-90.0, 90.5, 5.0)
+    rng = np.random.default_rng(3)
+    levels = 70.0 + 2.0 * np.sin(np.radians(angles) * 3.0) + rng.normal(
+        0.0, 1.0, angles.size
+    )
+    result = directional_diffusion(angles, levels)
+
+    assert isinstance(result, DiffusionResult)
+    assert result.coefficient == pytest.approx(
+        directional_diffusion_coefficient(levels)
+    )
+    np.testing.assert_allclose(result.angles, angles)
+    np.testing.assert_allclose(result.levels, levels)
+
+
+def test_directional_diffusion_length_mismatch_raises() -> None:
+    with pytest.raises(ValueError):
+        directional_diffusion([-30.0, 0.0, 30.0], [70.0, 72.0])
+
+
+def test_directional_diffusion_plot_returns_axes() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    result = directional_diffusion([-30.0, 0.0, 30.0], [70.0, 72.0, 69.0])
+    ax = result.plot()
+    assert ax.name == "polar"
+    plt.close("all")
+
+
 def test_public_names_in_module_all() -> None:
     import phonometry.scattering_diffusion as mod
 

@@ -576,6 +576,38 @@ def test_field_indicators_shape_mismatch_raises() -> None:
         precision_field_indicators(np.full((4, 1), 1e-6), np.full((3, 1), 60.0))
 
 
+def test_anechoic_result_plot_returns_axes() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    freqs = np.array([250.0, 500.0, 1000.0, 2000.0])
+    levels = np.full((40, freqs.size), 74.0)
+    result = sound_power_anechoic(levels, "hemisphere", radius=1.0,
+                                  frequencies=freqs)
+    assert isinstance(result, PrecisionSoundPowerResult)
+    ax = result.plot()
+    assert isinstance(ax, plt.Axes)
+    plt.close("all")
+
+
+def test_intensity_result_plot_returns_axes() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    freqs = np.array([250.0, 500.0, 1000.0])
+    areas = np.array([0.5, 1.0, 0.75])
+    intensity = np.full((3, freqs.size), 1.0e-5)
+    result = sound_power_intensity_precision(intensity, areas, frequencies=freqs)
+    assert isinstance(result, PrecisionIntensityResult)
+    ax = result.plot()
+    assert isinstance(ax, plt.Axes)
+    plt.close("all")
+
+
 def test_public_exports() -> None:
     import phonometry
 

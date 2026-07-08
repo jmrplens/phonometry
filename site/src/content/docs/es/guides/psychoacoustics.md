@@ -282,8 +282,9 @@ from phonometry import (
 res = loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="free")
 print(f"N = {res.loudness:.3f} sone  ({res.loudness_level:.1f} phon)")   # 1.000 sono (40.0 fonios)
 
-# Desde una grabación calibrada: los niveles de tercio de octava se derivan
-# del espectro de la señal y se aplica el método exacto del apartado 5.5.
+# Desde una grabación calibrada: se forma el espectro de líneas de banda
+# estrecha (FFT, normalización que preserva la potencia) y se alimenta al
+# método exacto de componentes sinusoidales (ISO 532-2 apartados 5.2/5.4).
 fs = 48000
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 res = loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
@@ -321,7 +322,7 @@ plt.show()
 | `band_levels` | vector de 29 | dB SPL | 25 Hz .. 16 kHz | Entrada de `_from_third_octave` (bandas IEC 61260-1) |
 | `fs` | int | Hz | > 0 | Solo en el envoltorio de señal |
 | `field` | str | — | `'free'` (por defecto) / `'diffuse'` / `'eardrum'` | Transferencia del oído externo |
-| `presentation` | str | — | `'binaural'`/`'diotic'` (por defecto) / `'monaural'` | Suma binaural |
+| `presentation` | str | — | `'binaural'` (por defecto) / `'diotic'` / `'monaural'` | Suma binaural |
 
 Devuelve un `MooreGlasbergLoudness`: `loudness` (N, sonos), `loudness_level`
 (fonios), `specific` (N′(i), 372 bins de 0,1 Cam), `erb_number`,
@@ -382,7 +383,7 @@ plt.show()
 | `signal` | array 1D o `(n, 2)` | Pa | no vacío | Mono = diótico; dos columnas = oídos izquierdo/derecho |
 | `fs` | int | Hz | > 0 | |
 | `field` | str | — | `'free'` (por defecto) / `'diffuse'` / `'eardrum'` | Transferencia del oído externo |
-| `presentation` | str | — | `'binaural'`/`'diotic'` (por defecto) / `'monaural'` | Suma binaural |
+| `presentation` | str | — | `'binaural'` (por defecto) / `'diotic'` / `'monaural'` | Suma binaural |
 | `percentiles` | secuencia | porcentaje | por defecto `(1, 5, 10, 50, 90, 95)` | Niveles de sonoridad de largo plazo excedidos |
 
 Devuelve un `MooreGlasbergTimeVaryingLoudness`: `time` (rejilla de 1 ms),

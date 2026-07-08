@@ -268,8 +268,9 @@ from phonometry import (
 res = loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="free")
 print(f"N = {res.loudness:.3f} sone  ({res.loudness_level:.1f} phon)")   # 1.000 sone (40.0 phon)
 
-# From a calibrated recording: the one-third-octave levels are derived from
-# the signal spectrum and the exact Clause 5.5 method is applied.
+# From a calibrated recording: the narrowband (FFT) line spectrum is formed
+# (power-preserving normalization) and fed to the exact sinusoidal-component
+# method (ISO 532-2 clauses 5.2/5.4).
 fs = 48000
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 res = loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
@@ -307,7 +308,7 @@ plt.show()
 | `band_levels` | 29-vector | dB SPL | 25 Hz .. 16 kHz | `_from_third_octave` input (IEC 61260-1 bands) |
 | `fs` | int | Hz | > 0 | Signal wrapper only |
 | `field` | str | — | `'free'` (default) / `'diffuse'` / `'eardrum'` | Outer-ear transfer |
-| `presentation` | str | — | `'binaural'`/`'diotic'` (default) / `'monaural'` | Binaural summation |
+| `presentation` | str | — | `'binaural'` (default) / `'diotic'` / `'monaural'` | Binaural summation |
 
 Returns a `MooreGlasbergLoudness`: `loudness` (N, sone), `loudness_level`
 (phon), `specific` (N′(i), 372 bins of 0.1 Cam), `erb_number`,
@@ -367,7 +368,7 @@ plt.show()
 | `signal` | 1D or `(n, 2)` array | Pa | non-empty | Mono = diotic; two columns = left/right ears |
 | `fs` | int | Hz | > 0 | |
 | `field` | str | — | `'free'` (default) / `'diffuse'` / `'eardrum'` | Outer-ear transfer |
-| `presentation` | str | — | `'binaural'`/`'diotic'` (default) / `'monaural'` | Binaural summation |
+| `presentation` | str | — | `'binaural'` (default) / `'diotic'` / `'monaural'` | Binaural summation |
 | `percentiles` | sequence | percent | default `(1, 5, 10, 50, 90, 95)` | Exceeded long-term loudness levels |
 
 Returns a `MooreGlasbergTimeVaryingLoudness`: `time` (1 ms grid),

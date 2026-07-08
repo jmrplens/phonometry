@@ -1236,9 +1236,9 @@ _PRECISION_POWER = "Precision sound power (ISO 3745 / 9614-3)"
 
 @register(_PRECISION_POWER, "ISO 3745:2012 Clause 10.5 EXAMPLE", "Expanded uncertainty U (k=2)")
 def _chk_iso3745_uncertainty() -> Outcome:
-    u = ph.precision_uncertainty(
+    u = float(ph.precision_uncertainty(
         ref.ISO3745_U_SIGMA_R0, ref.ISO3745_U_SIGMA_OMC, ref.ISO3745_U_COVERAGE
-    )
+    ))
     return numeric(ref.ISO3745_U_EXPANDED, u, 1e-3, unit="dB", places=3)
 
 

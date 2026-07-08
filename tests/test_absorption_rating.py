@@ -251,6 +251,21 @@ def test_end_to_end_from_third_octaves() -> None:
     assert res.shape_indicator == ""
 
 
+def test_weighted_absorption_rejects_multidimensional_input() -> None:
+    # A wrongly-shaped (3, 5) array must not be silently flattened (CodeRabbit).
+    with pytest.raises(ValueError, match="1-D"):
+        weighted_absorption(np.zeros((3, 5)))
+
+
+def test_weighted_absorption_rejects_non_finite() -> None:
+    # NaN/inf must fail fast with a clear message, not a cryptic downstream error.
+    with pytest.raises(ValueError, match="finite"):
+        weighted_absorption([0.35, float("nan"), 0.65, 0.60, 0.55])
+    with pytest.raises(ValueError, match="finite"):
+        weighted_absorption({250: 0.35, 500: float("inf"), 1000: 0.65,
+                             2000: 0.60, 4000: 0.55})
+
+
 def test_plot_smoke() -> None:
     pytest.importorskip("matplotlib")
     import matplotlib

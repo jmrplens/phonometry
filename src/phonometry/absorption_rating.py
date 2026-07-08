@@ -159,14 +159,19 @@ def _coerce(
                     f"{name} mapping is missing band {c} Hz; "
                     f"expected keys {centers}"
                 )
-        return out
-    seq: list[float] = np.asarray(values, dtype=np.float64).ravel().tolist()
-    if len(seq) != len(centers):
-        raise ValueError(
-            f"{name} must have {len(centers)} values for bands {centers}, "
-            f"got {len(seq)}"
-        )
-    return seq
+    else:
+        arr = np.asarray(values, dtype=np.float64)
+        if arr.ndim != 1:
+            raise ValueError(f"{name} must be 1-D, got shape {arr.shape}.")
+        out = arr.tolist()
+        if len(out) != len(centers):
+            raise ValueError(
+                f"{name} must have {len(centers)} values for bands {centers}, "
+                f"got {len(out)}"
+            )
+    if not all(math.isfinite(v) for v in out):
+        raise ValueError(f"{name} values must all be finite (no NaN or inf).")
+    return out
 
 
 # --- result --------------------------------------------------------------

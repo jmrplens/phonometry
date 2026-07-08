@@ -670,6 +670,116 @@ energy-weighted quadrature sum of the band uncertainties (Formula B.2).
 
 See the [Room and Building Acoustics guide](/phonometry/guides/room-acoustics/) for usage.
 
+## Outdoor propagation and occupational exposure (ISO 9613-1/2, ISO 9612)
+
+### Atmospheric absorption (ISO 9613-1)
+
+Air is a lossy medium: a propagating tone loses energy to shear viscosity and
+heat conduction (classical and rotational losses, growing as $f^2$) and to the
+**vibrational relaxation** of the oxygen and nitrogen molecules, each an energy
+reservoir that resonates near a humidity- and temperature-dependent relaxation
+frequency. ISO 9613-1:1993, Eq. (5) gives the pure-tone attenuation coefficient
+$\alpha$ in decibels per metre:
+
+$$
+\alpha = 8.686\ f^2 \Big[ 1.84\times10^{-11} \big(p_a/p_r\big)^{-1} \big(T/T_0\big)^{1/2}
+       + \big(T/T_0\big)^{-5/2} \big( 0.01275\ \tfrac{e^{-2239.1/T}}{f_{rO} + f^2/f_{rO}}
+       + 0.1068\ \tfrac{e^{-3352.0/T}}{f_{rN} + f^2/f_{rN}} \big) \Big],
+$$
+
+with the oxygen and nitrogen relaxation frequencies $f_{rO}$, $f_{rN}$ of
+Eq. (3)/(4), the reference conditions $T_0 = 293.15$ K, $p_r = 101.325$ kPa
+(Clause 4.2) and the molar water-vapour concentration $h$ from the relative
+humidity (Annex B). At low frequency $\alpha \propto f^2$; near each relaxation
+frequency the corresponding term peaks and rolls off, which is why $\alpha$ rises
+by two decades from 50 Hz to 10 kHz and why raising the humidity sweeps a peak
+across the band. The library reproduces Table 1 to under 0.4 % (the standard's
+own printed precision), well inside its stated $\pm 10$ %; passing
+`exact_midband=True` snaps each frequency onto the exact midbands
+$f_m = 1000 \cdot 10^{k/10}$ (Note 5) used to compute that table. The same
+$\alpha$ is the only route to the ISO 354 power attenuation coefficient
+$m = \alpha/(10 \lg e)$, exposed as `air_attenuation_m`.
+
+### Outdoor propagation, general method (ISO 9613-2)
+
+ISO 9613-2:1996 predicts the octave-band level at a receiver **downwind** of a
+point source (or the equivalent moderate temperature inversion) as
+$L_{fT}(DW) = L_W + D_c - A$ (Eq. (3)), where $D_c$ is the directivity correction
+and $A$ is the octave-band attenuation, a sum of independent physical mechanisms
+(Eq. (4)):
+
+$$
+A = A_{div} + A_{atm} + A_{gr} + A_{bar} + A_{misc}.
+$$
+
+The library implements the four general terms of Clause 7; the informative
+$A_{misc}$ (foliage, industrial sites, housing) and reflections are left to the
+caller. **Geometrical divergence** is spherical spreading from a point source,
+$A_{div} = 20 \log_{10}(d/d_0) + 11$ dB with $d_0 = 1$ m (Eq. (7)) — exactly
+51 dB at 100 m, +6 dB per distance doubling. **Atmospheric absorption** is
+$A_{atm} = \alpha\ d$ (Eq. (8)) with $\alpha$ the ISO 9613-1 coefficient above.
+**Ground effect** $A_{gr} = A_s + A_r + A_m$ (Eq. (9)) sums a source, receiver and
+middle region, each evaluated from the Table 3 functions $a'/b'/c'/d'$ and its
+ground factor $G$ (0 hard, 1 porous); a negative $A_{gr}$ denotes a net gain from
+the ground reflection. An alternative A-weighted-only form
+$A_{gr} = 4.8 - (2 h_m/d)[17 + 300/d] \ge 0$ (Eq. (10)) is offered for porous
+ground when only the A-weighted level matters, paired with the solid-angle index
+$D_\Omega$ (Eq. (11)). **Screening** by a barrier is the diffraction insertion
+loss
+
+$$
+D_z = 10 \log_{10}\big[ 3 + (C_2/\lambda)\ C_3\ z\ K_{met} \big] \quad\text{dB},
+$$
+
+(Eq. (14)) with $C_2 = 20$ (or 40 when ground reflections are handled by image
+sources), $C_3 = 1$ for a single edge or Eq. (15) for a double edge, the
+path-length difference $z = d_{ss} + d_{sr} - d$ (Eq. (16)/(17)), wavelength
+$\lambda = 340/f$ and the meteorological factor $K_{met}$ (Eq. (18)); $D_z$ is
+capped at 20 dB (single) or 25 dB (double). For a top-edge barrier the ground
+effect of the screened path is folded into the screening term,
+$A_{bar} = D_z - A_{gr} \ge 0$ (Eq. (12), Note 13); for a lateral (vertical-edge)
+barrier $A_{bar} = D_z$ and the ground term is kept (Eq. (13)). The long-term
+average level subtracts the meteorological correction $C_{met}$ (Eq. (6),
+(21)/(22)). The method's stated accuracy is $\pm 1$ to $\pm 3$ dB for broadband
+noise up to 1000 m (Table 5).
+
+### Occupational noise exposure and uncertainty (ISO 9612)
+
+ISO 9612:2009 is the engineering method (accuracy grade 2) for a worker's daily
+noise exposure level $L_{EX,8h}$, normalised to a nominal 8 h day. Three
+**measurement strategies** trade effort for representativeness. The *task-based*
+method (Clause 9) splits the day into tasks, energy-averages $I \ge 3$ samples
+per task (Eq. 7) and sums the task contributions
+$L_{EX,8h,m} = L_{p,A,eqT,m} + 10 \log_{10}(T_m/T_0)$ energetically (Eq. 9/10).
+The *job-based* method (Clause 10) energy-averages $N \ge 5$ random samples over a
+homogeneous exposure group (Eq. 11) and normalises the effective-day duration
+(Eq. 12); the *full-day* method (Clause 11) does the same arithmetic on whole-day
+measurements (Eq. 13).
+
+The **Annex C** uncertainty budget is normative. The combined standard
+uncertainty is $u^2 = \sum c_i^2 u_i^2$ (C.1) and the expanded uncertainty is
+$U = k\ u$ with $k = 1.65$ for a **one-sided** 95 % interval (Clause 14), so the
+reported upper limit is $L_{EX,8h} + U$. The task and job methods differ in an
+instructive way: the task noise-sampling uncertainty $u_{1a}$ divides the summed
+squared deviations by $I(I-1)$ — the standard error of the mean (Eq. C.6) —
+whereas the job/full-day sampling uncertainty $u_1$ is the plain sample standard
+deviation with denominator $N-1$ (Eq. C.12), so the same spread contributes more
+in the job method (fewer, coarser samples). The task budget (Eq. C.3) adds the
+sensitivity coefficients $c_{1a}$ (Eq. C.4) and $c_{1b}$ (Eq. C.5) and an optional
+task-duration uncertainty $u_{1b}$ (Eq. C.7); the job/full-day budget (Eq. C.9)
+reads $c_1 u_1$ from Table C.4 as a function of $(N, u_1)$ and adds the instrument
+uncertainty $u_2$ (Table C.5) and microphone-position uncertainty $u_3 = 1.0$ dB
+in quadrature. Peak levels $L_{p,Cpeak}$ are reported without an uncertainty:
+Annex C provides no method for them (Table C.5, Note 1). The three worked
+examples of Annexes D (task, $L_{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (job,
+$88.1$ dB, $3.8$ dB) and F (full-day, $90.1$ dB, $3.4$ dB) are reproduced to
+the standard's printed precision — every intermediate of Annex E is digit-exact,
+and its final level differs only by the standard's own pre-rounding of the
+effective-day level (see the [Levels guide](/phonometry/guides/levels/)).
+
+See the [Outdoor Propagation guide](/phonometry/guides/outdoor-propagation/) and the
+[Levels guide](/phonometry/guides/levels/) for usage.
+
 ## Sound power determination (ISO 3744/3746, ISO 3741, ISO 9614-2)
 
 The sound power level $L_W = 10 \log_{10}(P/P_0)$ ($P_0 = 1$ pW) is an

@@ -9,6 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `air_attenuation()` and `air_attenuation_m()` (with the
+  `AtmosphericAbsorptionWarning`) — pure-tone atmospheric absorption coefficient
+  α per ISO 9613-1:1993 (Eq. 3–5) from frequency, temperature, humidity and
+  pressure; reproduces Table 1 to under 0,4 % and exposes the ISO 354 power
+  attenuation coefficient m = α/(10 lg e). `exact_midband=True` snaps onto the
+  Table 1 midbands.
+- ISO 9613-2:1996 outdoor sound propagation: `outdoor_propagation_attenuation()`
+  and `predicted_receiver_level()` with the `OutdoorAttenuation` per-term
+  breakdown, plus the individual terms `geometric_divergence()`,
+  `atmospheric_absorption()`, `ground_attenuation()` (general 7.3.1),
+  `ground_attenuation_alternative()` / `directivity_omega()` (alternative 7.3.2),
+  `barrier_attenuation()` with the `Barrier` geometry dataclass, and
+  `meteorological_correction()`. `DEFAULT_FREQUENCIES` gives the nominal octave
+  bands.
+- `task_based_exposure()`, `job_based_exposure()` and `full_day_exposure()`
+  (with `Task`, `ExposureResult` and `ExposureWarning`) — ISO 9612:2009 daily
+  noise exposure LEX,8h by the three measurement strategies and the normative
+  Annex C uncertainty budget (k = 1,65 one-sided 95 %, the C.6 I(I−1) vs
+  C.12 N−1 sampling asymmetry, Table C.4 and the LEX,8h + U upper limit); the
+  Annex D/E/F worked examples reproduce to the standard's printed precision.
+- Documentation: new **Outdoor Sound Propagation** guide (ISO 9613-1/2, EN + ES),
+  an **ISO 9612 occupational exposure** section in the Levels guide, theory and
+  API-reference sections, four new figures each (air absorption α(f), the
+  per-term attenuation breakdown and the exposure-uncertainty example) and the
+  source–barrier–receiver geometry diagram. Conformance report adds seven
+  ISO 9613-2 / ISO 9612 checks (41 total).
+
 - `loudness_moore_glasberg()`, `loudness_moore_glasberg_from_spectrum()` and
   `loudness_moore_glasberg_from_third_octave()` with the `MooreGlasbergLoudness`
   result and its `.plot()` — stationary Moore-Glasberg loudness per

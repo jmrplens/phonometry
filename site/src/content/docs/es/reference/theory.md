@@ -681,6 +681,125 @@ incertidumbres por banda (Fórmula B.2).
 
 Consulta la [guía de acústica de salas y edificación](/phonometry/es/guides/room-acoustics/) para su uso.
 
+## Propagación en exteriores y exposición al ruido en el trabajo (ISO 9613-1/2, ISO 9612)
+
+### Absorción atmosférica (ISO 9613-1)
+
+El aire es un medio con pérdidas: un tono en propagación cede energía a la
+viscosidad de cizalla y a la conducción de calor (pérdidas clásicas y
+rotacionales, que crecen como $f^2$) y a la **relajación vibracional** de las
+moléculas de oxígeno y nitrógeno, cada una un depósito de energía que resuena
+cerca de una frecuencia de relajación dependiente de la humedad y la
+temperatura. La ISO 9613-1:1993, Ec. (5) da el coeficiente de atenuación de tono
+puro $\alpha$ en decibelios por metro:
+
+$$
+\alpha = 8.686\ f^2 \Big[ 1.84\times10^{-11} \big(p_a/p_r\big)^{-1} \big(T/T_0\big)^{1/2}
+       + \big(T/T_0\big)^{-5/2} \big( 0.01275\ \tfrac{e^{-2239.1/T}}{f_{rO} + f^2/f_{rO}}
+       + 0.1068\ \tfrac{e^{-3352.0/T}}{f_{rN} + f^2/f_{rN}} \big) \Big],
+$$
+
+con las frecuencias de relajación del oxígeno y el nitrógeno $f_{rO}$, $f_{rN}$
+de la Ec. (3)/(4), las condiciones de referencia $T_0 = 293.15$ K,
+$p_r = 101.325$ kPa (apartado 4.2) y la concentración molar de vapor de agua $h$
+a partir de la humedad relativa (anexo B). A baja frecuencia
+$\alpha \propto f^2$; cerca de cada frecuencia de relajación el término
+correspondiente alcanza un máximo y decae, razón por la que $\alpha$ sube dos
+décadas de 50 Hz a 10 kHz y por la que subir la humedad barre un pico por la
+banda. La biblioteca reproduce la Tabla 1 con menos del 0,4 % (la propia
+precisión impresa del estándar), muy dentro de su $\pm 10$ % declarado; pasar
+`exact_midband=True` ajusta cada frecuencia a los centros exactos
+$f_m = 1000 \cdot 10^{k/10}$ (Nota 5) empleados para calcular esa tabla. El mismo
+$\alpha$ es la única vía hacia el coeficiente de atenuación de potencia de la
+ISO 354 $m = \alpha/(10 \lg e)$, expuesto como `air_attenuation_m`.
+
+### Método general de cálculo en exteriores (ISO 9613-2)
+
+La ISO 9613-2:1996 predice el nivel en un receptor situado **a favor del viento**
+respecto de una fuente puntual (o bajo la inversión térmica moderada
+equivalente) como $L_{fT}(DW) = L_W + D_c - A$ (Ec. (3)), donde $D_c$ es la
+corrección de directividad y $A$ la atenuación por bandas de octava, suma de
+mecanismos físicos independientes (Ec. (4)):
+
+$$
+A = A_{div} + A_{atm} + A_{gr} + A_{bar} + A_{misc}.
+$$
+
+La biblioteca implementa los cuatro términos generales del apartado 7; el
+$A_{misc}$ informativo (vegetación, zonas industriales, edificación) y las
+reflexiones se dejan a criterio del usuario. La **divergencia geométrica** es la
+expansión esférica desde una fuente puntual,
+$A_{div} = 20 \log_{10}(d/d_0) + 11$ dB con $d_0 = 1$ m (Ec. (7)) —exactamente
+51 dB a 100 m, +6 dB por cada duplicación de la distancia—. La **absorción
+atmosférica** es $A_{atm} = \alpha\ d$ (Ec. (8)) con $\alpha$ el coeficiente de
+la ISO 9613-1 anterior. El **efecto del suelo** $A_{gr} = A_s + A_r + A_m$
+(Ec. (9)) suma una región fuente, receptor y media, cada una a partir de las
+funciones $a'/b'/c'/d'$ de la Tabla 3 y su factor de suelo $G$ (0 duro,
+1 poroso); un $A_{gr}$ negativo es una ganancia neta por la reflexión en el
+suelo. Una forma alternativa, solo ponderada A,
+$A_{gr} = 4.8 - (2 h_m/d)[17 + 300/d] \ge 0$ (Ec. (10)) se ofrece para suelo
+poroso cuando solo importa el nivel ponderado A, acompañada del índice de ángulo
+sólido $D_\Omega$ (Ec. (11)). El **apantallamiento** por una barrera es la
+pérdida por inserción por difracción
+
+$$
+D_z = 10 \log_{10}\big[ 3 + (C_2/\lambda)\ C_3\ z\ K_{met} \big] \quad\text{dB},
+$$
+
+(Ec. (14)) con $C_2 = 20$ (o 40 cuando las reflexiones en el suelo se tratan por
+fuentes imagen), $C_3 = 1$ para un borde o la Ec. (15) para un borde doble, la
+diferencia de recorrido $z = d_{ss} + d_{sr} - d$ (Ec. (16)/(17)), longitud de
+onda $\lambda = 340/f$ y el factor meteorológico $K_{met}$ (Ec. (18)); $D_z$ se
+limita a 20 dB (un borde) o 25 dB (doble). Para una barrera de borde superior, el
+efecto del suelo del recorrido apantallado se integra en el término de
+apantallamiento, $A_{bar} = D_z - A_{gr} \ge 0$ (Ec. (12), Nota 13); para una
+barrera lateral $A_{bar} = D_z$ y se conserva el término del suelo (Ec. (13)). El
+nivel medio a largo plazo resta la corrección meteorológica $C_{met}$ (Ec. (6),
+(21)/(22)). La exactitud declarada del método es de $\pm 1$ a $\pm 3$ dB para
+ruido de banda ancha hasta 1000 m (Tabla 5).
+
+### Exposición al ruido en el trabajo e incertidumbre (ISO 9612)
+
+La ISO 9612:2009 es el método de ingeniería (clase de exactitud 2) para el nivel
+diario de exposición al ruido de un trabajador $L_{EX,8h}$, normalizado a una
+jornada nominal de 8 h. Tres **estrategias de medición** cambian esfuerzo por
+representatividad. El método *basado en tareas* (apartado 9) divide la jornada en
+tareas, promedia en energía $I \ge 3$ muestras por tarea (Ec. 7) y suma en
+energía las contribuciones de cada tarea
+$L_{EX,8h,m} = L_{p,A,eqT,m} + 10 \log_{10}(T_m/T_0)$ (Ec. 9/10). El método
+*basado en la función* (apartado 10) promedia en energía $N \ge 5$ muestras
+aleatorias sobre un grupo de exposición homogéneo (Ec. 11) y normaliza la
+duración efectiva de la jornada (Ec. 12); el método *de jornada completa*
+(apartado 11) hace la misma aritmética sobre mediciones de jornada completa
+(Ec. 13).
+
+El presupuesto de incertidumbre del **anexo C** es normativo. La incertidumbre
+típica combinada es $u^2 = \sum c_i^2 u_i^2$ (C.1) y la incertidumbre expandida es
+$U = k\ u$ con $k = 1.65$ para un intervalo **unilateral** al 95 %
+(apartado 14), de modo que el límite superior declarado es $L_{EX,8h} + U$. Los
+métodos por tareas y por función difieren de forma instructiva: la incertidumbre
+de muestreo del ruido de la tarea $u_{1a}$ divide la suma de desviaciones al
+cuadrado entre $I(I-1)$ —el error típico de la media (Ec. C.6)—, mientras que la
+incertidumbre de muestreo por función/jornada completa $u_1$ es la desviación
+típica muestral simple con denominador $N-1$ (Ec. C.12), así que la misma
+dispersión contribuye más en el método por función (menos muestras, más gruesas).
+El presupuesto de la tarea (Ec. C.3) añade los coeficientes de sensibilidad
+$c_{1a}$ (Ec. C.4) y $c_{1b}$ (Ec. C.5) y una incertidumbre opcional de la
+duración de la tarea $u_{1b}$ (Ec. C.7); el presupuesto por función/jornada
+completa (Ec. C.9) lee $c_1 u_1$ de la Tabla C.4 en función de $(N, u_1)$ y suma
+en cuadratura la incertidumbre del instrumento $u_2$ (Tabla C.5) y la
+incertidumbre de posición del micrófono $u_3 = 1.0$ dB. Los niveles de pico
+$L_{p,Cpeak}$ se declaran sin incertidumbre: el anexo C no da método para ellos
+(Tabla C.5, Nota 1). Los tres ejemplos resueltos de los anexos D (tarea,
+$L_{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (función, $88.1$ dB, $3.8$ dB) y F
+(jornada completa, $90.1$ dB, $3.4$ dB) se reproducen con la precisión impresa
+de la norma: todos los intermedios del anexo E son exactos dígito a dígito, y su
+nivel final difiere solo por el redondeo previo que la propia norma aplica al
+nivel efectivo de la jornada (véase la [guía de Niveles](/phonometry/es/guides/levels/)).
+
+Consulta la [guía de Propagación en exteriores](/phonometry/es/guides/outdoor-propagation/)
+y la [guía de Niveles](/phonometry/es/guides/levels/) para su uso.
+
 ## Determinación de la potencia sonora (ISO 3744/3746, ISO 3741, ISO 9614-2)
 
 El nivel de potencia sonora $L_W = 10 \log_{10}(P/P_0)$ ($P_0 = 1$ pW) es una

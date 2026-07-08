@@ -69,6 +69,37 @@ def test_building_reference_data_matches_published_oracles() -> None:
     assert ref.ISO12999_1_COVERAGE_K_95 == 1.96  # Table 8 (95 %, two-sided)
 
 
+def test_outdoor_and_exposure_checks_registered() -> None:
+    """PR-C outdoor-propagation and occupational-exposure checks are present."""
+    standards = {c.standard for c in cr.CHECKS}
+    assert "ISO 9613-2:1996 Eq. (7)" in standards  # Adiv = 51 dB at 100 m
+    assert "ISO 9613-2:1996 Table 3" in standards  # b'(0) ground limit
+    assert "ISO 9613-2:1996 clause 7.4" in standards  # 20/25 dB barrier caps
+    assert "ISO 9612:2009 Annex D" in standards  # task-based LEX,8h + U
+    assert "ISO 9612:2009 Annex E" in standards  # job-based LEX,8h + U
+    assert "ISO 9612:2009 Annex F" in standards  # full-day LEX,8h + U
+
+    assert "Outdoor propagation & occupational exposure" in cr._domains()
+
+
+def test_outdoor_exposure_reference_data_matches_published_oracles() -> None:
+    """Pin the shared ISO 9613-2 / ISO 9612 constants to their published values."""
+    import reference_data as ref
+
+    assert ref.ISO9613_2_ADIV_100M == 51.0  # 20 lg(100) + 11
+    assert ref.ISO9613_2_GROUND_BPRIME_ZERO == 10.1  # Table 3 b'(0)
+    assert ref.ISO9613_2_GROUND_AGR_250_POROUS == 17.2  # 2*(-1,5 + 10,1)
+    assert ref.ISO9613_2_BARRIER_CAP_SINGLE == 20.0  # clause 7.4
+    assert ref.ISO9613_2_BARRIER_CAP_DOUBLE == 25.0  # clause 7.4
+    assert ref.ISO9612_ANNEX_D_LEX_8H == 84.3  # welder day
+    assert ref.ISO9612_ANNEX_D_U == 2.7  # case (a), duration uncertainty omitted
+    assert ref.ISO9612_ANNEX_E_LEX_8H == 88.1  # production line
+    assert ref.ISO9612_ANNEX_E_U == 3.8
+    assert ref.ISO9612_ANNEX_F_LEX_8H == 90.1  # forklift drivers
+    assert ref.ISO9612_ANNEX_F_U == 3.4
+    assert len(ref.ISO9612_ANNEX_D_TASKS) == 3
+
+
 def test_filter_binding_detail_matches_library_margin() -> None:
     """The report re-derives the binding measured value and limit with the
     public ``class_limits``; guard that its class-1 margin never diverges from

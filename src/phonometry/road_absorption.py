@@ -758,6 +758,14 @@ def spot_microphone_spacing_bounds(
         raise ValueError("'f_min' must be less than 'f_max'.")
     s_max = _SPOT_SMAX_FACTOR * speed_of_sound / f_max
     s_min = _SPOT_SMIN_FACTOR * speed_of_sound / f_min
+    if s_min >= s_max:
+        warnings.warn(
+            f"No valid microphone spacing exists for {f_min:g}-{f_max:g} Hz: "
+            f"s_min ({s_min:.4f} m) >= s_max ({s_max:.4f} m). Narrow the "
+            "frequency range (the spot method's narrow band is 220-1800 Hz).",
+            RoadAbsorptionWarning,
+            stacklevel=2,
+        )
     return s_min, s_max
 
 

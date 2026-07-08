@@ -426,6 +426,15 @@ def test_spot_spacing_bounds() -> None:
     assert s_min < 0.081 < s_max  # brackets nominal 81 mm spacing
 
 
+def test_spot_spacing_bounds_warns_when_interval_empty() -> None:
+    # A range far wider than the narrow band leaves no valid spacing (s_min>=s_max).
+    with pytest.warns(RoadAbsorptionWarning):
+        s_min, s_max = spot_microphone_spacing_bounds(
+            340.0, f_min=220.0, f_max=4000.0
+        )
+    assert s_min >= s_max
+
+
 def test_spot_frequency_range_guard_warns() -> None:
     with pytest.warns(RoadAbsorptionWarning):
         check_spot_frequency_range([200.0, 500.0, 2000.0])

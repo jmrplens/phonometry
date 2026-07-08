@@ -385,10 +385,15 @@ def scattering_coefficient_spectrum(
     freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     spec = np.atleast_1d(np.asarray(specular_absorption, dtype=np.float64))
     rand = np.atleast_1d(np.asarray(random_absorption, dtype=np.float64))
-    if freq.size == 0 or freq.shape != spec.shape or freq.shape != rand.shape:
+    if (
+        freq.ndim != 1
+        or freq.size == 0
+        or freq.shape != spec.shape
+        or freq.shape != rand.shape
+    ):
         raise ValueError(
             "'frequencies', 'specular_absorption' and 'random_absorption' must "
-            "be non-empty and equal-length."
+            "be non-empty, 1-D and equal-length."
         )
     s = scattering_coefficient(spec, rand, truncate_negative=truncate_negative)
     return ScatteringResult(
@@ -717,6 +722,11 @@ def directional_diffusion_coefficient(
         raise ValueError("The total area weight must exceed 1.")
     weighted_energy = np.sum(p * weights)
     weighted_energy_sq = np.sum(weights * p**2)
+    if weighted_energy_sq <= 0.0:
+        raise ValueError(
+            "The polar response carries no energy (all levels -inf); the "
+            "diffusion coefficient is undefined."
+        )
     numerator = weighted_energy**2 - weighted_energy_sq
     denominator = (weight_sum - 1.0) * weighted_energy_sq
     return float(numerator / denominator)
@@ -784,8 +794,10 @@ def area_factors(
     :raises ValueError: for a non-1-D input or non-positive spacings.
     """
     theta_deg = np.asarray(elevations, dtype=np.float64)
-    if theta_deg.ndim != 1:
-        raise ValueError("'elevations' must be a 1-D sequence of angles.")
+    if theta_deg.ndim != 1 or theta_deg.size == 0:
+        raise ValueError(
+            "'elevations' must be a non-empty 1-D sequence of angles."
+        )
     d_theta = _positive_scalar(delta_theta, "delta_theta")
     d_phi = d_theta if delta_phi is None else _positive_scalar(
         delta_phi, "delta_phi"

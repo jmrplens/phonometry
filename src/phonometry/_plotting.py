@@ -987,7 +987,10 @@ def plot_scattering_coefficient(
     ax.plot(freqs, s, **kwargs)
     _freq_axis(ax, freqs)
     ax.set_ylabel("Scattering coefficient s")
-    ax.set_ylim(0.0, 1.05)
+    # s is normally in [0, 1], but edge effects (Clause 6.3.2) can push it above
+    # 1 and those values are kept, not clipped; grow the top so they stay visible.
+    top = max(1.05, float(np.nanmax(s)) * 1.05) if s.size else 1.05
+    ax.set_ylim(0.0, top)
     ax.set_title("Random-incidence scattering coefficient (ISO 17497-1)")
     ax.grid(True, alpha=0.3)
     return ax

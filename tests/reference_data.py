@@ -346,7 +346,7 @@ ISO10534_1_ABSORPTION = 0.75
 # ---------------------------------------------------------------------------
 # ISO 17497-1:2004 random-incidence scattering coefficient. Eq (2) fixes the
 # reference speed of sound c = 343,2 m/s at 20 C. The synthetic worked chain
-# (T1..T4 = 8,0/6,0/7,5/5,0 s, V/S from V = 200 m3, S = 12 m2) exercises the
+# (T1..T4 = 8,0/6,0/7,5/5,0 s, V/S from V = 200 m3, S = 10 m2) exercises the
 # Sabine absorptions Eq (1)/(4) and the scattering Eq (5). Mirrors
 # tests/test_scattering_diffusion.py.
 # ---------------------------------------------------------------------------

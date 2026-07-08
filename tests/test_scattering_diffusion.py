@@ -399,6 +399,17 @@ def test_area_factors_rejects_nonpositive_spacing() -> None:
         area_factors([0.0, 30.0], delta_theta=0.0)
 
 
+def test_area_factors_rejects_empty_elevations() -> None:
+    with pytest.raises(ValueError):
+        area_factors([], delta_theta=5.0)
+
+
+def test_diffusion_coefficient_rejects_zero_energy() -> None:
+    # All -inf levels means zero energy everywhere; the coefficient is undefined.
+    with pytest.raises(ValueError):
+        directional_diffusion_coefficient([float("-inf"), float("-inf")])
+
+
 def test_base_plate_checker_rejects_wrong_length() -> None:
     with pytest.raises(ValueError):
         check_base_plate_scattering([0.1, 0.2, 0.3])
@@ -439,6 +450,13 @@ def test_scattering_spectrum_length_mismatch_raises() -> None:
 def test_scattering_spectrum_empty_raises() -> None:
     with pytest.raises(ValueError):
         scattering_coefficient_spectrum([], [], [])
+
+
+def test_scattering_spectrum_rejects_2d_input() -> None:
+    # frequencies is documented 1-D; equal-shaped 2-D arrays must be rejected.
+    two_d = [[250.0, 500.0], [1000.0, 2000.0]]
+    with pytest.raises(ValueError):
+        scattering_coefficient_spectrum(two_d, two_d, two_d)
 
 
 def test_scattering_spectrum_plot_returns_axes() -> None:

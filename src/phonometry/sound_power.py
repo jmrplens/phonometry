@@ -1411,13 +1411,19 @@ def sound_power_intensity_precision(
     :param barometric_pressure: Barometric pressure ``B`` (Pa), for LW0.
     :return: :class:`PrecisionIntensityResult`.
     """
-    intensity = np.atleast_2d(np.asarray(partial_intensity, dtype=np.float64))
+    raw_intensity = np.asarray(partial_intensity, dtype=np.float64)
     seg = np.asarray(areas, dtype=np.float64)
     if seg.ndim != 1:
         raise ValueError("'areas' must be a 1D array of partial surface areas.")
     n_seg = seg.shape[0]
-    if intensity.shape == (1, n_seg) and n_seg != 1:
-        intensity = intensity.T  # a 1D (N,) input arrives as (1, N)
+    # A 1-D input is unambiguously ``(N,)`` segments with one band -> ``(N, 1)``;
+    # a 2-D input is taken as ``(segments, bands)`` as given. Keying off the
+    # original ndim avoids misreading a genuine ``(1, N)`` single-segment,
+    # N-band array as N segments when ``n_seg == N``.
+    if raw_intensity.ndim == 1:
+        intensity = raw_intensity.reshape(-1, 1)
+    else:
+        intensity = np.atleast_2d(raw_intensity)
     if intensity.shape[0] != n_seg:
         raise ValueError(
             f"'partial_intensity' first axis ({intensity.shape[0]}) must match "

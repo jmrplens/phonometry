@@ -416,6 +416,18 @@ def test_intensity_nonpositive_area_raises() -> None:
         sound_power_intensity_precision(np.full((2,), 1e-5), np.array([1.0, 0.0]))
 
 
+def test_intensity_single_segment_2d_input_not_transposed() -> None:
+    # A genuine (1, N) single-segment, N-band array must NOT be read as N
+    # segments, even when N equals a plausible segment count. One area -> one
+    # segment; the N bands are preserved.
+    i_n = np.array([[1e-5, 2e-5, 3e-5]])  # 1 segment, 3 bands
+    res = sound_power_intensity_precision(i_n, np.array([2.0]))
+    assert res.sound_power.shape == (3,)  # 3 bands, not 3 segments
+    np.testing.assert_allclose(
+        res.partial_power[0], np.array([2e-5, 4e-5, 6e-5])
+    )
+
+
 # ==========================================================================
 # ISO 9614-3 - field indicators (Annex B) and criteria (Annex C)
 # ==========================================================================

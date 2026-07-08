@@ -123,6 +123,22 @@ from .building_prediction import (
     predicted_impact_insulation,
     standardized_impact_level,
 )
+from .building_uncertainty import (
+    BandUncertainty,
+    UncertainValue,
+    band_uncertainty,
+    combine_uncertainties,
+    coverage_factor,
+    expanded_uncertainty,
+    maximum_repeatability_standard_deviation,
+    prediction_input_uncertainty,
+    reduce_by_independent_measurements,
+    satisfies_lower_requirement,
+    satisfies_upper_requirement,
+    single_number_uncertainty,
+    single_number_uncertainty_uncorrelated,
+    uncertain_value,
+)
 from ._version import __version__
 
 # Public methods
@@ -239,6 +255,20 @@ __all__ = [
     "equivalent_impact_level",
     "impact_flanking_correction",
     "standardized_impact_level",
+    "band_uncertainty",
+    "single_number_uncertainty",
+    "single_number_uncertainty_uncorrelated",
+    "maximum_repeatability_standard_deviation",
+    "coverage_factor",
+    "expanded_uncertainty",
+    "uncertain_value",
+    "combine_uncertainties",
+    "prediction_input_uncertainty",
+    "reduce_by_independent_measurements",
+    "satisfies_lower_requirement",
+    "satisfies_upper_requirement",
+    "BandUncertainty",
+    "UncertainValue",
 ]
 
 

@@ -29,7 +29,8 @@ expanded ``U = k*u`` with ``k = 1.65`` for a one-sided 95 % confidence interval
 (C.7) and sensitivity coefficients ``c1a`` (C.4)/``c1b`` (C.5). Job-based and
 full-day use Eq C.9 with ``c1*u1`` read from Table C.4 and ``c2 = c3 = 1``. The
 instrument standard uncertainty ``u2`` is from Table C.5 and the microphone
-position ``u3 = 1.0 dB`` (C.6).
+position ``u3 = 1.0 dB`` (C.6). Peak levels ``Lp,Cpeak`` are reported without an
+uncertainty: Annex C gives no method for them (Table C.5, NOTE 1).
 
 The three worked examples of Annexes D (task), E (job) and F (full-day) are
 reproduced digit-for-digit in the test suite. Clause/equation/table numbers refer
@@ -81,7 +82,7 @@ _C4_TABLE: Tuple[Tuple[float, ...], ...] = (
     (0.6, 1.6, 3.1, 5.2, 8.0, 11.5, 15.7, 20.6, 26.1, 32.2, 39.0, 46.5),  # N=3
     (0.4, 0.9, 1.6, 2.5, 3.6, 5.0, 6.7, 8.6, 10.9, 13.4, 16.1, 19.2),  # N=4
     (0.3, 0.7, 1.2, 1.7, 2.4, 3.3, 4.4, 5.6, 6.9, 8.5, 10.2, 12.1),  # N=5
-    (0.3, 0.6, 0.9, 1.4, 1.9, 2.6, 3.4, 4.2, 5.2, 6.3, 7.6, 8.9),  # N=6
+    (0.3, 0.6, 0.9, 1.4, 1.9, 2.6, 3.3, 4.2, 5.2, 6.3, 7.6, 8.9),  # N=6
     (0.2, 0.5, 0.8, 1.2, 1.6, 2.2, 2.8, 3.5, 4.3, 5.1, 6.1, 7.2),  # N=7
     (0.2, 0.5, 0.7, 1.1, 1.4, 1.9, 2.4, 3.0, 3.6, 4.4, 5.2, 6.1),  # N=8
     (0.2, 0.4, 0.7, 1.0, 1.3, 1.7, 2.1, 2.6, 3.2, 3.9, 4.6, 5.4),  # N=9
@@ -90,7 +91,7 @@ _C4_TABLE: Tuple[Tuple[float, ...], ...] = (
     (0.1, 0.3, 0.5, 0.7, 0.9, 1.2, 1.5, 1.8, 2.2, 2.6, 3.0, 3.5),  # N=14
     (0.1, 0.3, 0.5, 0.6, 0.8, 1.1, 1.3, 1.6, 2.0, 2.3, 2.7, 3.2),  # N=16
     (0.1, 0.3, 0.4, 0.6, 0.8, 1.0, 1.2, 1.5, 1.8, 2.1, 2.5, 2.9),  # N=18
-    (0.1, 0.3, 0.4, 0.6, 0.7, 0.9, 1.1, 1.4, 1.7, 2.0, 2.3, 2.6),  # N=20
+    (0.1, 0.3, 0.4, 0.5, 0.7, 0.9, 1.1, 1.4, 1.7, 2.0, 2.3, 2.6),  # N=20
     (0.1, 0.2, 0.3, 0.5, 0.6, 0.8, 1.0, 1.2, 1.4, 1.7, 2.0, 2.3),  # N=25
     (0.1, 0.2, 0.3, 0.4, 0.6, 0.7, 0.9, 1.1, 1.3, 1.5, 1.7, 2.0),  # N=30
 )
@@ -340,7 +341,8 @@ def task_based_exposure(
             if task.duration_samples is not None:
                 j = np.asarray(task.duration_samples, dtype=float)
                 if j.size >= 2:
-                    u1b = float(np.std(j, ddof=1))
+                    # Eq C.7 divides by J(J-1), like Eq C.6: standard error of the mean.
+                    u1b = float(np.std(j, ddof=1) / sqrt(j.size))
             elif task.duration_range is not None:
                 t_min, t_max = task.duration_range
                 if t_max < t_min:

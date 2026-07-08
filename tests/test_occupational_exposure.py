@@ -84,7 +84,8 @@ def test_table_c4_exact_cells():
     assert table_c4_contribution(6, 2.0) == pytest.approx(1.4, abs=1e-9)
     assert table_c4_contribution(3, 0.5) == pytest.approx(0.6, abs=1e-9)
     assert table_c4_contribution(30, 6.0) == pytest.approx(2.0, abs=1e-9)
-    assert table_c4_contribution(6, 3.5) == pytest.approx(3.4, abs=1e-9)
+    assert table_c4_contribution(6, 3.5) == pytest.approx(3.3, abs=1e-9)
+    assert table_c4_contribution(20, 2.0) == pytest.approx(0.5, abs=1e-9)
 
 
 def test_table_c4_interpolates_annex_f_cell():
@@ -176,6 +177,15 @@ def test_annex_d_duration_sensitivities():
     assert by_label["cutting/grinding"].u1b == pytest.approx(0.5, abs=1e-9)
     assert by_label["welding"].c1b == pytest.approx(0.24, abs=0.02)
     assert by_label["cutting/grinding"].c1b == pytest.approx(2.1, abs=0.05)
+
+
+def test_duration_samples_u1b_is_standard_error_of_mean():
+    """Eq C.7 divides by J(J-1): samples (4, 6) h give u1b = 1.0 h, not sqrt(2)."""
+    result = task_based_exposure(
+        [Task(samples=(85.0, 85.0), duration_hours=5.0, duration_samples=(4.0, 6.0))],
+        warn=False,
+    )
+    assert result.tasks[0].u1b == pytest.approx(1.0, abs=1e-9)
 
 
 def test_annex_d_expanded_uncertainty_without_duration():

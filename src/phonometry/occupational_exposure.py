@@ -216,6 +216,12 @@ class Task:
     label: str | None = None
     instrument: InstrumentClass | None = None
 
+    def __post_init__(self) -> None:
+        if len(self.samples) == 0:
+            raise ValueError("A Task needs at least one Lp,A,eqT sample.")
+        if self.duration_hours <= 0.0:
+            raise ValueError("'duration_hours' must be positive.")
+
 
 @dataclass(frozen=True)
 class TaskContribution:
@@ -479,6 +485,8 @@ def job_based_exposure(
     :param warn: Emit :class:`ExposureWarning` for the Table C.4 / Table 1 advisories.
     :return: An :class:`ExposureResult`.
     """
+    if sample_duration_hours is not None and sample_duration_hours <= 0.0:
+        raise ValueError("'sample_duration_hours' must be positive.")
     result = _sampled_exposure(
         samples, effective_duration_hours, instrument, u3, "job", warn, spread_advisory=False
     )

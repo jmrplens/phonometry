@@ -189,7 +189,7 @@ per-band form here is a **convenience**, not a literal reading of Clause 8.
 
 When only the A-weighted receiver level matters and the sound travels over
 porous or mostly-porous ground (and is not a pure tone), 7.3.2 offers a simpler
-closed form $A_{gr} = 4.8 - (2 h_m/d)[17 + 300/d] \ge 0$ (Eq. (10), negative
+closed form $A_{gr} = 4.8 - \frac{2 h_m}{d}\left(17 + \frac{300}{d}\right) \ge 0$ (Eq. (10), negative
 results clamped to zero), paired with the solid-angle index $D_\Omega$
 (Eq. (11)) that must then be added to $D_c$. These are exposed as
 `ground_attenuation_alternative` and `directivity_omega`, but they are **not

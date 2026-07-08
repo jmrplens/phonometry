@@ -312,6 +312,16 @@ def test_task_rejects_nonpositive_duration():
         task_based_exposure([Task(samples=(85.0,), duration_hours=0.0)])
 
 
+def test_task_rejects_empty_samples():
+    with pytest.raises(ValueError, match="sample"):
+        Task(samples=(), duration_hours=8.0)
+
+
+def test_job_based_rejects_nonpositive_sample_duration():
+    with pytest.raises(ValueError, match="sample_duration_hours"):
+        job_based_exposure([80.0, 82.0, 81.0], 8.0, n_workers=6, sample_duration_hours=0.0)
+
+
 def test_job_based_requires_two_samples():
     with pytest.raises(ValueError):
         job_based_exposure([85.0], 8.0)

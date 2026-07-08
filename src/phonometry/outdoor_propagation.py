@@ -94,6 +94,16 @@ class Barrier:
     ground_reflections_by_image: bool = False
     lateral: bool = False
 
+    def __post_init__(self) -> None:
+        if self.source_to_edge < 0.0 or self.edge_to_receiver < 0.0:
+            raise ValueError("Barrier edge distances must be non-negative.")
+        if self.parallel_distance < 0.0:
+            raise ValueError("'parallel_distance' must be non-negative.")
+        if self.edge_separation is not None and self.edge_separation <= 0.0:
+            raise ValueError(
+                "'edge_separation' must be positive; use None for single diffraction."
+            )
+
     @property
     def is_double(self) -> bool:
         """Whether double diffraction (Eq. (17)/(15)) applies (``e`` given)."""
@@ -258,14 +268,21 @@ def ground_attenuation(
     :param projected_distance: Ground-plane projected distance ``dp``, in metres;
         defaults to ``sqrt(d^2 - (hs - hr)^2)``.
     :return: ``Agr`` per band, in decibels (negative denotes a net gain).
-    :raises ValueError: If a ground factor is outside ``[0, 1]``.
+    :raises ValueError: If a ground factor is outside ``[0, 1]``, ``distance``
+        is not positive, a height is negative, or a frequency is not positive.
     """
     for name, g in (("ground_source", ground_source),
                     ("ground_middle", ground_middle),
                     ("ground_receiver", ground_receiver)):
         if not 0.0 <= g <= 1.0:
             raise ValueError(f"'{name}' must be within [0, 1].")
+    if distance <= 0.0:
+        raise ValueError("'distance' must be positive.")
+    if source_height < 0.0 or receiver_height < 0.0:
+        raise ValueError("Source and receiver heights must be non-negative.")
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    if np.any(freqs <= 0.0):
+        raise ValueError("'frequencies' must be positive.")
     dp = _projected_distance(distance, source_height, receiver_height,
                              projected_distance)
 
@@ -362,11 +379,13 @@ def barrier_attenuation(
     :param distance: Straight-line source-to-receiver distance ``d``, in metres.
     :param frequencies: Octave-band midband frequencies, in hertz.
     :return: ``Dz`` per band, in decibels (>= 0).
-    :raises ValueError: If ``distance`` is not positive.
+    :raises ValueError: If ``distance`` or any frequency is not positive.
     """
     if distance <= 0.0:
         raise ValueError("'distance' must be positive.")
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    if np.any(freqs <= 0.0):
+        raise ValueError("'frequencies' must be positive.")
     dss = barrier.source_to_edge
     dsr = barrier.edge_to_receiver
     a = barrier.parallel_distance

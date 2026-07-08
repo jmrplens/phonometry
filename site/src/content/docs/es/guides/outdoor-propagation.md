@@ -199,7 +199,7 @@ apartado 8—.
 
 Cuando solo importa el nivel ponderado A en el receptor y el sonido viaja sobre
 suelo poroso o mayoritariamente poroso (y no es un tono puro), el 7.3.2 ofrece
-una forma cerrada más simple $A_{gr} = 4.8 - (2 h_m/d)[17 + 300/d] \ge 0$
+una forma cerrada más simple $A_{gr} = 4.8 - \frac{2 h_m}{d}\left(17 + \frac{300}{d}\right) \ge 0$
 (Ec. (10), los resultados negativos se recortan a cero), acompañada del índice de
 ángulo sólido $D_\Omega$ (Ec. (11)) que debe entonces sumarse a $D_c$. Se exponen
 como `ground_attenuation_alternative` y `directivity_omega`, pero **no se conectan

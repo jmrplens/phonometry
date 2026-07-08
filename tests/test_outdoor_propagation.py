@@ -352,6 +352,29 @@ class TestPredictedReceiverLevel:
         assert np.all(far < near)
 
 
+class TestInputValidation:
+    def test_barrier_rejects_zero_edge_separation(self) -> None:
+        with pytest.raises(ValueError, match="edge_separation"):
+            Barrier(source_to_edge=50.0, edge_to_receiver=50.0, edge_separation=0.0)
+
+    def test_barrier_rejects_negative_edge_distance(self) -> None:
+        with pytest.raises(ValueError, match="non-negative"):
+            Barrier(source_to_edge=-1.0, edge_to_receiver=50.0)
+
+    def test_ground_attenuation_rejects_nonpositive_frequency(self) -> None:
+        with pytest.raises(ValueError, match="frequencies"):
+            ground_attenuation(200.0, 2.0, 2.0, np.array([0.0, 500.0]), 1.0, 1.0, 1.0)
+
+    def test_ground_attenuation_rejects_nonpositive_distance(self) -> None:
+        with pytest.raises(ValueError, match="distance"):
+            ground_attenuation(0.0, 2.0, 2.0, BANDS, 1.0, 1.0, 1.0)
+
+    def test_barrier_attenuation_rejects_nonpositive_frequency(self) -> None:
+        barrier = Barrier(source_to_edge=50.0, edge_to_receiver=50.0)
+        with pytest.raises(ValueError, match="frequencies"):
+            barrier_attenuation(barrier, 90.0, np.array([-1.0, 500.0]))
+
+
 def test_public_exports() -> None:
     import phonometry
 

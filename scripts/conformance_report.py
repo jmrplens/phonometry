@@ -1395,17 +1395,31 @@ def render_markdown() -> tuple[str, int, int]:
     out.append("")
 
     for domain in _domains():
-        out.append(f"### {domain}")
+        rows = [(chk, o) for chk, o in results if chk.domain == domain]
+        passed_d = sum(1 for _, o in rows if o.passed)
+        total_d = len(rows)
+        pct = 100.0 * passed_d / total_d if total_d else 100.0
+        emoji = "&#9989;" if passed_d == total_d else "&#10060;"
+        # Each domain is a collapsible group labelled with its compliance
+        # percentage (100 % = every row passes). Groups with any failing row are
+        # opened by default so regressions stay visible.
+        opened = " open" if passed_d != total_d else ""
+        domain_html = domain.replace("&", "&amp;")
+        out.append(f"<details{opened}>")
+        out.append(
+            f"<summary>{emoji} <b>{domain_html}</b> — {pct:.0f}% "
+            f"({passed_d}/{total_d})</summary>"
+        )
         out.append("")
         out.append("| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |")
         out.append("|:---|:---|:---|:---|:---|:---:|")
-        for chk, outcome in results:
-            if chk.domain != domain:
-                continue
+        for chk, outcome in rows:
             out.append(
                 f"| {chk.standard} | {chk.quantity} | {outcome.expected} "
                 f"| {outcome.computed} | {outcome.delta} | {_status(outcome.passed)} |"
             )
+        out.append("")
+        out.append("</details>")
         out.append("")
 
     return "\n".join(out), passed, total

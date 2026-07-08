@@ -40,7 +40,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | C | 48 kHz | -0.935 dB @ 20000 Hz | 1000 Hz | +0.000 dB | [-0.70, +0.70] dB | +0.700 dB |
 | G | 48 kHz | +0.047 dB @ 1 Hz | 1 Hz | +0.047 dB | [-1.00, +1.00] dB | +0.953 dB |
 
-### Filters & weightings
+<details>
+<summary>&#9989; <b>Filters &amp; weightings</b> — 100% (5/5)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -50,7 +51,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61672-1:2013 Table 3 | C-weighting deviation vs class-1 limits (fs=48 kHz) | deviation within limits @ 1000 Hz | +0.000 dB in [-0.70, +0.70] dB | headroom +0.700 dB | &#9989; |
 | ISO 7196:1995 Table 2 / A.3 | G-weighting deviation vs +/-1 dB tolerance (fs=48 kHz) | deviation within limits @ 1 Hz | +0.047 dB in [-1.00, +1.00] dB | headroom +0.953 dB | &#9989; |
 
-### Levels & dosimetry
+</details>
+
+<details>
+<summary>&#9989; <b>Levels &amp; dosimetry</b> — 100% (3/3)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -58,7 +62,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61252:1995 (LEX,8h) | 8 h exposure to 90 dB(A) noise | 90 dB (+/-0.05 dB) | 90.008 dB | 0.008 dB | &#9989; |
 | ISO 1996-1:2016 3.6.4 | Lden, constant 60 dB in day/evening/night | 66.3952 dB (+/-0 dB) | 66.3952 dB | 0 dB | &#9989; |
 
-### Psychoacoustics
+</details>
+
+<details>
+<summary>&#9989; <b>Psychoacoustics</b> — 100% (10/10)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -73,14 +80,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 532-2:2017 Clause 3.17 / Annex B.1 | Moore-Glasberg loudness of a 1 kHz / 40 dB tone (C=0.0617) | 1 sone (+/-0.01 sone) | 1.0001 sone | 0 sone | &#9989; |
 | ISO 532-3:2023 Annex C.1 | Moore-Glasberg-Schlittenlacher peak LTL, steady 1 kHz / 40 dB | 1 sone (+/-0.02 sone) | 0.9996 sone | 0 sone | &#9989; |
 
-### Speech intelligibility
+</details>
+
+<details>
+<summary>&#9989; <b>Speech intelligibility</b> — 100% (2/2)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | IEC 60268-16:2020 A.2.2 | STI weighting-factor pair (500 Hz + 1 kHz bands) | 0.398 (+/-0.001) | 0.398 | 0 | &#9989; |
 | IEC 60268-16:2020 A.3.1.2 | Uniform MTF m=0.5 maps to STI=0.5 | 0.5 (+/-0.01) | 0.5 | 0 | &#9989; |
 
-### Intensity & sound power
+</details>
+
+<details>
+<summary>&#9989; <b>Intensity &amp; sound power</b> — 100% (4/4)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -89,7 +102,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 9614-2:1996 Eq. 12 | Intensity scan recovers LW of an enclosed source | 90 dB (+/-0.000001 dB) | 90 dB | 0 dB | &#9989; |
 | ISO 3741:2010 Eq. 20 | Reverberation-room method inverts to a known LW | 0 dB error | 0 dB | 0 dB | &#9989; |
 
-### Room & building acoustics
+</details>
+
+<details>
+<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (8/8)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -102,7 +118,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 9613-1:1993 Table 1 | Air attenuation @ 10 degC, 70 %, 1 kHz | 3.66 dB/km (+/-0.01 dB/km) | 3.658 dB/km | -0.002 dB/km | &#9989; |
 | ISO 9613-1:1993 Table 1 | Air attenuation @ 0 degC, 20 %, 2 kHz | 34.6 dB/km (+/-0.1 dB/km) | 34.64 dB/km | 0.04 dB/km | &#9989; |
 
-### Building prediction & uncertainty
+</details>
+
+<details>
+<summary>&#9989; <b>Building prediction &amp; uncertainty</b> — 100% (4/4)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -111,7 +130,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 12999-1:2020 Table 2 | Airborne band uncertainty, situation A @ 1 kHz | 1.8 dB (+/-0 dB) | 1.8 dB | 0 dB | &#9989; |
 | ISO 12999-1:2020 Clause 8 / Table 8 | Expanded uncertainty U = 1.96 u (95 % two-sided, Rw sit. A) | 2.352 dB (+/-0 dB) | 2.352 dB | 0 dB | &#9989; |
 
-### Outdoor propagation & occupational exposure
+</details>
+
+<details>
+<summary>&#9989; <b>Outdoor propagation &amp; occupational exposure</b> — 100% (7/7)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -123,7 +145,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 9612:2009 Annex E | Job-based LEX,8h + U (production line, 18 workers) | LEX,8h 88.1; U 3.8 dB | LEX,8h 88.2; U 3.8 dB | +0.06; -0.03 dB | &#9989; |
 | ISO 9612:2009 Annex F | Full-day LEX,8h + U (forklift drivers) | LEX,8h 90.1; U 3.4 dB | LEX,8h 90.1; U 3.4 dB | +0.02; +0.03 dB | &#9989; |
 
-### Materials: absorption, airflow & impedance
+</details>
+
+<details>
+<summary>&#9989; <b>Materials: absorption, airflow &amp; impedance</b> — 100% (5/5)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -133,7 +158,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 9053-2:2020 Annex A.3 | Effective ratio of specific heats kappa' | 1.37 (+/-0.001) | 1.37 | 0 | &#9989; |
 | ISO 10534-1:1996 Eqs (9)/(13)/(14) | Absorption from standing-wave ratio s=3 | 0.75 (+/-0) | 0.75 | 0 | &#9989; |
 
-### Scattering & diffusion (ISO 17497)
+</details>
+
+<details>
+<summary>&#9989; <b>Scattering &amp; diffusion (ISO 17497)</b> — 100% (5/5)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -143,7 +171,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 17497-2:2012 Formula (5) | Diffusion coefficient (autocorrelation) | 0.7367 (+/-0) | 0.7367 | 0 | &#9989; |
 | ISO 17497-2:2012 Formula (8) | Zenith area factor (radians convention) | 1.57105 (+/-0) | 1.57105 | 0 | &#9989; |
 
-### In-situ road absorption (ISO 13472)
+</details>
+
+<details>
+<summary>&#9989; <b>In-situ road absorption (ISO 13472)</b> — 100% (3/3)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -151,7 +182,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 13472-1:2002 Annex A | Maximum-sampled-area radius | 1.3425 m (+/-0 m) | 1.3425 m | 0 m | &#9989; |
 | ISO 13472-2:2010 Clause 5.4.1 | Spot-tube upper usable frequency f_u | 1989.4 Hz (+/-0.1 Hz) | 1989.4 Hz | 0 Hz | &#9989; |
 
-### Precision sound power (ISO 3745 / 9614-3)
+</details>
+
+<details>
+<summary>&#9989; <b>Precision sound power (ISO 3745 / 9614-3)</b> — 100% (4/4)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -159,4 +193,6 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 3745:2012 Eq (11) | K1 background floor (6 dB edge band) | 1.2563 dB (+/-0.0001 dB) | 1.2563 dB | 0 dB | &#9989; |
 | ISO 3745:2012 Eq (16) | Meteorological C1 at 23 C reference | -0.1282 dB (+/-0.0001 dB) | -0.1282 dB | 0 dB | &#9989; |
 | ISO 9614-3:2002 Eqs (5)/(8)/(9) | Uniform-intensity LW recovery | 80 dB (+/-0 dB) | 80 dB | 0 dB | &#9989; |
+
+</details>
 

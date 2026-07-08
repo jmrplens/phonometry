@@ -336,7 +336,8 @@ def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
     zero (``floor(x*10 + 0,5)/10`` for non-negative values, mirrored for
     negative ones).
     """
-    return np.sign(values) * np.floor(np.abs(values) * 10.0 + 0.5) / 10.0
+    rounded: np.ndarray = np.sign(values) * np.floor(np.abs(values) * 10.0 + 0.5) / 10.0
+    return rounded
 
 
 def energy_average_level(

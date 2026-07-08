@@ -68,7 +68,8 @@ def _new_axes_column(n: int, **kwargs: Any) -> np.ndarray:
     """Create a stacked column of ``n`` axes and return them as an array."""
     plt = _import_pyplot()
     _fig, axes = plt.subplots(n, 1, **kwargs)
-    return cast("np.ndarray", np.atleast_1d(axes))
+    result: np.ndarray = np.atleast_1d(axes)
+    return result
 
 
 def _freq_axis(ax: Axes, freqs: np.ndarray) -> None:

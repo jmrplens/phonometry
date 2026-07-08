@@ -5,12 +5,13 @@ Tables transcribed verbatim from the published standards. Both the test
 suite (``tests/test_*.py``) and the CI conformance report
 (``scripts/conformance_report.py``) import these constants, so the report's
 expected values can never drift from what the tests assert. The PR-B
-building-acoustics and PR-E scattering/in-situ/precision-power oracles are the
-exception: their test modules re-hardcode the values inline rather than import
-them, and dedicated consistency tests
-(``test_building_reference_data_matches_published_oracles`` and
-``test_scattering_insitu_precision_reference_data_matches_oracles``) pin this
-shared table to those same published results so neither copy can drift.
+building-acoustics, PR-E scattering/in-situ/precision-power and PR-F
+human-vibration oracles are the exception: their test modules re-hardcode the
+values inline rather than import them, and dedicated consistency tests
+(``test_building_reference_data_matches_published_oracles``,
+``test_scattering_insitu_precision_reference_data_matches_oracles`` and
+``test_human_vibration_reference_data_matches_oracles``) pin this shared table
+to those same published results so neither copy can drift.
 
 This module is deliberately dependency-free (stdlib only) so it can be
 imported in the ``pr-comment`` CI job, which installs the runtime
@@ -423,3 +424,27 @@ ISO3745_C1_REFERENCE = -0.12819  # C1 at 23 C, ps = ps0 (dB)
 ISO9614_3_UNIFORM_POWER = 1.0e-4  # radiated power W (W)
 ISO9614_3_UNIFORM_AREAS: tuple[float, ...] = (0.5, 1.0, 0.25, 2.0)
 ISO9614_3_UNIFORM_LW = 80.0  # 10*lg(W/1e-12) (dB)
+
+# ---------------------------------------------------------------------------
+# PR-F human vibration (ISO 8041-1 / ISO 2631 / ISO 5349 / Directive 2002/44/EC).
+# The true IEC 61260 one-third-octave centre is 10^(n/10) Hz; the reference
+# frequencies of ISO 8041-1 Table 1 are exact (rad/s -> Hz). Design-goal
+# factors are from ISO 8041-1:2017 Annex B (Tables B.1-B.9, 4 sig. figs).
+# ---------------------------------------------------------------------------
+# ISO 8041-1 Annex B design-goal weighting factors at the true band centre.
+ISO8041_1_WK_FACTOR_6P31HZ = 1.054  # Table B.8, n = 8 (6,31 Hz) - Wk peak
+ISO8041_1_WM_FACTOR_1P585HZ = 0.9342  # Table B.9, n = 2 (1,585 Hz) - Wm
+# ISO 8041-1 Table 1 weighting factor at the reference frequency.
+ISO8041_1_WH_REF_FREQ_HZ = 500.0 / (2.0 * math.pi)  # 79,577 Hz (500 rad/s)
+ISO8041_1_WH_REF_FACTOR = 0.2020  # Table 1, Wh @ 500 rad/s
+# ISO 5349-2:2001 Annex E worked-example daily exposures A(8), m/s^2.
+ISO5349_2_E21_A8 = 4.1  # E.2.1 single tool: 7,4*sqrt(2,5/8)
+ISO5349_2_E3_A8 = 3.6  # E.3 forestry three-task combination
+# ISO 5349-1:2001 Annex C: Dy = 31,8*A(8)^-1,06; Table C.1 A(8)=7 -> Dy=4 yr.
+ISO5349_1_VWF_A8 = 7.0
+ISO5349_1_VWF_DY_YEARS = 4.0
+# Directive 2002/44/EC Article 3 daily exposure action/limit values.
+DIRECTIVE_2002_44_HAV_EAV = 2.5  # A(8) m/s^2, Art. 3(1)(a)
+DIRECTIVE_2002_44_HAV_ELV = 5.0  # A(8) m/s^2, Art. 3(1)(b)
+DIRECTIVE_2002_44_WBV_EAV = 0.5  # A(8) m/s^2, Art. 3(2)(a)
+DIRECTIVE_2002_44_WBV_ELV = 1.15  # A(8) m/s^2, Art. 3(2)(b)

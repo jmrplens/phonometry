@@ -647,7 +647,10 @@ def area_factors(
     with the ``4 pi`` factor.
 
     :param elevations: Receiver elevation angles ``theta`` from the reference
-        normal, in **degrees** (1-D).
+        normal, in **degrees** (1-D), over the measurement domain
+        ``0 <= theta <= 90`` (Figure 7). Formula (8) assumes a single receiver
+        at ``theta = 0`` (the zenith); duplicate zenith entries would each take
+        the full zenith area.
     :param delta_theta: Elevation spacing between adjacent receivers, in degrees
         (typically 5).
     :param delta_phi: Azimuth spacing between adjacent receivers, in degrees;

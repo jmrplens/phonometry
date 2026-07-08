@@ -171,6 +171,20 @@ def test_phase_restoration_recovers_real_reflection() -> None:
     np.testing.assert_allclose(r.imag[1:], 0.0, atol=1e-6)
 
 
+def test_phase_restoration_recovers_real_reflection_odd_length() -> None:
+    # Odd-length inputs: rfftfreq must use the true time-domain length, not the
+    # even length reconstructed from the bin count, or the restored phase drifts.
+    hi = _incident_ir(4097)
+    kr = geometric_spreading_factor()
+    shift = 96
+    delay = shift / FS
+    r0 = 0.6
+    hr = kr * r0 * np.roll(hi, shift)
+    r = insitu_reflection_factor(hi, hr, sample_rate=FS, delay=delay)
+    np.testing.assert_allclose(r.real[1:], r0, atol=1e-6)
+    np.testing.assert_allclose(r.imag[1:], 0.0, atol=1e-6)
+
+
 def test_oblique_incidence_uses_kr_theta() -> None:
     hi = _incident_ir()
     theta = np.pi / 4.0
@@ -254,6 +268,27 @@ def test_adrienne_window_cosine_squared_shape() -> None:
     # cos^2 trailing edge reaches exactly zero at the final sample.
     assert w[-1] == pytest.approx(0.0, abs=1e-12)
     assert w.shape[0] == n_flat + round(2e-3 * FS)
+
+
+def test_adrienne_blackman_harris_edges_meet_flat_at_unity() -> None:
+    # The Blackman-Harris half-tapers must reach exactly 1 where they join the
+    # flat top, so the flat-to-edge transition is continuous (no ~0.26 % step).
+    w = adrienne_window(
+        FS,
+        leading_duration=1e-3,
+        flat_duration=5e-3,
+        trailing_duration=3e-3,
+        leading_edge="blackman-harris",
+        trailing_edge="blackman-harris",
+    )
+    n_lead = round(1e-3 * FS)
+    n_trail = round(3e-3 * FS)
+    assert w[n_lead - 1] == pytest.approx(1.0, abs=1e-12)  # end of rising edge
+    assert w[-n_trail] == pytest.approx(1.0, abs=1e-12)  # start of falling edge
+    # Edges still start/end near zero and stay within [0, 1].
+    assert w[0] < 1e-3
+    assert w[-1] < 1e-3
+    assert np.all(w <= 1.0 + 1e-12)
 
 
 def test_adrienne_window_guards() -> None:

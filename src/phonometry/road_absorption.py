@@ -48,7 +48,7 @@ Clause 6.4 mandates only a sharp leading edge, a 5 ms flat portion and a
 cosine-squared or Blackman-Harris trailing edge, with the shape and lengths
 **reported per measurement**. They are therefore configurable here and default
 to a short leading edge, a 5 ms flat top and a Blackman-Harris trailing edge
-(the Annex E example report); the EU-Adrienne-project timings are **not**
+(the Annex E example report); the historical fixed edge timings are **not**
 hard-coded as if normative.
 """
 
@@ -216,8 +216,15 @@ def _edge(n_samples: int, shape: str, *, rising: bool) -> NDArray[np.float64]:
         return np.empty(0, dtype=np.float64)
     if shape == "blackman-harris":
         full = _blackman_harris_full(2 * n_samples)
-        half = full[:n_samples] if rising else full[n_samples:]
-        return np.asarray(half, dtype=np.float64)
+        half = np.asarray(
+            full[:n_samples] if rising else full[n_samples:], dtype=np.float64
+        )
+        # The symmetric window peaks (== 1) between samples ``n_samples-1`` and
+        # ``n_samples``, so the half taper stops just short of 1 at its inner
+        # end. Rescale so the junction with the flat top is exactly 1, keeping
+        # the taper length unchanged and the flat-to-edge transition continuous.
+        inner = half[-1] if rising else half[0]
+        return np.asarray(half / inner, dtype=np.float64)
     # Cosine-squared (Hann) half-taper: sin^2 rising, cos^2 falling.
     k = np.arange(1, n_samples + 1, dtype=np.float64)
     arg = 0.5 * np.pi * k / n_samples
@@ -247,8 +254,8 @@ def adrienne_window(
         w = [ rising_edge (0 -> 1) | flat (== 1) | trailing_edge (1 -> 0) ]
 
     The defaults (short 0.5 ms leading edge, 5 ms flat top, 5 ms Blackman-Harris
-    trailing edge) follow the Annex E example report; they are **not** the
-    normative EU-Adrienne-project timings. The lower usable frequency scales as
+    trailing edge) follow the Annex E example report; they are **not** a
+    normative fixed set of timings. The lower usable frequency scales as
     ``~ 1 / T_window`` (Clause 6.4), so report the durations used.
 
     :param sample_rate: Sampling frequency ``fs``, in hertz (ISO 13472-1
@@ -292,8 +299,13 @@ def _transfer_functions(
     incident_ir: ArrayLike,
     reflected_ir: ArrayLike,
     n: int | None,
-) -> tuple[Complex, Complex]:
-    """Real FFTs of the (windowed) incident and reflected impulse responses."""
+) -> tuple[Complex, Complex, int]:
+    """Real FFTs of the (windowed) incident and reflected impulse responses.
+
+    Returns the two spectra together with the time-domain FFT length actually
+    used, so callers needing ``rfftfreq`` do not have to reconstruct it from the
+    bin count (which is ambiguous for odd lengths).
+    """
     hi_t = np.atleast_1d(np.asarray(incident_ir, dtype=np.float64))
     hr_t = np.atleast_1d(np.asarray(reflected_ir, dtype=np.float64))
     if hi_t.size == 0 or hr_t.size == 0:
@@ -306,6 +318,7 @@ def _transfer_functions(
     return (
         np.asarray(hi, dtype=np.complex128),
         np.asarray(hr, dtype=np.complex128),
+        length,
     )
 
 
@@ -349,23 +362,18 @@ def insitu_reflection_factor(
     kr = geometric_spreading_factor_angle(
         incidence_angle, source_height, mic_height
     )
-    hi, hr = _transfer_functions(incident_ir, reflected_ir, n)
+    hi, hr, length = _transfer_functions(incident_ir, reflected_ir, n)
     r = (hr / hi) / kr
     if delay is not None:
         if sample_rate is None:
             raise ValueError("'sample_rate' is required to apply 'delay'.")
         if sample_rate <= 0.0:
             raise ValueError("'sample_rate' must be positive.")
-        # rfftfreq needs the time-domain length; reconstruct it from the bins.
-        length = n if n is not None else _rfft_time_length(hi.size)
+        # ``length`` is the exact time-domain length used for the FFTs, so
+        # ``rfftfreq`` is correct for both even and odd inputs.
         freqs = np.fft.rfftfreq(length, d=1.0 / sample_rate)
         r = r * np.exp(2j * np.pi * freqs * delay)
     return np.asarray(r, dtype=np.complex128)
-
-
-def _rfft_time_length(n_bins: int) -> int:
-    """Even time-domain length whose ``rfft`` has ``n_bins`` bins."""
-    return 2 * (n_bins - 1)
 
 
 def insitu_absorption_from_reflection(reflection: ArrayLike) -> Real:
@@ -410,7 +418,7 @@ def power_reflection_coefficient(
     kr = geometric_spreading_factor_angle(
         incidence_angle, source_height, mic_height
     )
-    hi, hr = _transfer_functions(incident_ir, reflected_ir, n)
+    hi, hr, _length = _transfer_functions(incident_ir, reflected_ir, n)
     ratio = np.abs(hr) / np.abs(hi)
     return np.asarray((ratio / kr) ** 2, dtype=np.float64)
 
@@ -615,13 +623,13 @@ def msa_major_axis(
 # phonometry.impedance_tube.two_microphone_impedance (ISO 10534-2, Clause 7).
 # --------------------------------------------------------------------------- #
 def spot_tube_upper_frequency(
-    diameter: float, speed_of_sound: float = 343.2
+    diameter: float, speed_of_sound: float = DEFAULT_SPEED_OF_SOUND
 ) -> float:
     """Upper usable frequency of the spot tube (ISO 13472-2:2010, Clause 5.4.1).
 
     ``f_u = 0.58 c0 / d`` (circular tube), the highest frequency at which only
-    plane waves propagate. A 100 mm tube at ``c0 = 343 m/s`` gives
-    ``f_u ~ 1989 Hz``, consistent with the 1800 Hz narrow-band top.
+    plane waves propagate. A 100 mm tube at ``c0 = 340 m/s`` gives
+    ``f_u ~ 1972 Hz``, comfortably above the 1800 Hz narrow-band top.
 
     :param diameter: Tube diameter ``d``, in metres.
     :param speed_of_sound: Speed of sound ``c0``, in metres per second.
@@ -636,7 +644,7 @@ def spot_tube_upper_frequency(
 
 
 def spot_microphone_spacing_bounds(
-    speed_of_sound: float = 343.2,
+    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
     *,
     f_min: float = SPOT_NARROW_BAND_RANGE[0],
     f_max: float = SPOT_NARROW_BAND_RANGE[1],

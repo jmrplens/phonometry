@@ -100,6 +100,39 @@ def test_outdoor_exposure_reference_data_matches_published_oracles() -> None:
     assert len(ref.ISO9612_ANNEX_D_TASKS) == 3
 
 
+def test_scattering_insitu_precision_checks_registered() -> None:
+    """The PR-E scattering / in-situ / precision-power checks are wired."""
+    standards = {c.standard for c in cr.CHECKS}
+    assert "ISO 17497-1:2004 Eqs (1)/(4)/(5)" in standards  # scattering chain
+    assert "ISO 17497-2:2012 Formula (8)" in standards  # radians area factor
+    assert "ISO 13472-1:2002 Annex A" in standards  # MSA radius ~1.34 m
+    assert "ISO 13472-2:2010 Clause 5.4.1" in standards  # spot f_u
+    assert "ISO 3745:2012 Clause 10.5 EXAMPLE" in standards  # U = 4.1 dB
+    assert "ISO 9614-3:2002 Eqs (5)/(8)/(9)" in standards  # uniform-In LW
+    # The three domains form their own readable report sections.
+    for domain in (
+        "Scattering & diffusion (ISO 17497)",
+        "In-situ road absorption (ISO 13472)",
+        "Precision sound power (ISO 3745 / 9614-3)",
+    ):
+        assert domain in cr._domains()
+
+
+def test_scattering_insitu_precision_reference_data_matches_oracles() -> None:
+    """Pin the shared PR-E constants to their standard worked-example values."""
+    import reference_data as ref
+
+    assert ref.ISO17497_1_SPEED_OF_SOUND_20C == 343.2  # Eq. (2) at 20 C
+    assert ref.ISO17497_1_CHAIN_SCATTERING == pytest.approx(0.09306, abs=1e-5)
+    assert ref.ISO17497_2_AREA_FACTOR_ZENITH == pytest.approx(1.5710, abs=1e-4)
+    assert ref.ISO13472_1_KR == pytest.approx(2.0 / 3.0)  # Clause 4.2
+    assert ref.ISO13472_1_MSA_RADIUS == pytest.approx(1.34, abs=5e-3)  # Annex A
+    assert ref.ISO13472_2_SPOT_FU == pytest.approx(1989.4, abs=0.1)  # 0.58c/d
+    assert ref.ISO3745_U_EXPANDED == pytest.approx(4.123, abs=1e-3)  # Cl. 10.5
+    assert ref.ISO3745_C1_REFERENCE == pytest.approx(-0.1282, abs=1e-4)  # Eq. 16
+    assert ref.ISO9614_3_UNIFORM_LW == 80.0  # 10 lg(1e-4/1e-12)
+
+
 def test_filter_binding_detail_matches_library_margin() -> None:
     """The report re-derives the binding measured value and limit with the
     public ``class_limits``; guard that its class-1 margin never diverges from

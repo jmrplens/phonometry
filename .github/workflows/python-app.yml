@@ -199,10 +199,31 @@ jobs:
         script: |
           const fs = require('fs');
           const body = fs.readFileSync('pr_comment_body.md', 'utf8');
-          
-          github.rest.issues.createComment({
+          const marker = '<!-- phonometry-ci-conformance -->';
+
+          // Update the single sticky conformance comment instead of posting a
+          // new one every run: find the existing marked comment and edit it.
+          const { data: comments } = await github.rest.issues.listComments({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: body
-          })
+            per_page: 100,
+          });
+          const existing = comments.find(
+            (c) => c.body && c.body.includes(marker)
+          );
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existing.id,
+              body: body,
+            });
+          } else {
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body,
+            });
+          }

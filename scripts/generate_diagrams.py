@@ -254,6 +254,98 @@ _ES: dict[str, str] = {
     "piston  f = 1–4 Hz": "pistón  f = 1–4 Hz",
     "R from L_p,s − L_p,t   (κ′ per Annex A)":
         "R por L_p,s − L_p,t   (κ′ según Anexo A)",
+    # d15 - ISO 17497-1 random-incidence scattering (reverberation room)
+    "Random-incidence scattering in a reverberation room (ISO 17497-1)":
+        "Dispersión a incidencia aleatoria en sala reverberante (ISO 17497-1)",
+    "Reverberation room": "Sala reverberante",
+    "Turntable (test sample)": "Plataforma giratoria (probeta)",
+    "Rotating boom source": "Fuente en brazo giratorio",
+    "stationary → α_s": "estática → α_s",
+    "rotating → α_spec": "girando → α_spec",
+    "Stationary sample → α_s (Eq. 1)   ·   rotating / averaged → α_spec (Eq. 4)":
+        "Probeta estática → α_s (Ec. 1)   ·   girando / promediada → α_spec (Ec. 4)",
+    "s = (α_spec − α_s) / (1 − α_s)   (Eq. 5)":
+        "s = (α_spec − α_s) / (1 − α_s)   (Ec. 5)",
+    "α from 55.3·(V/S)·(1/cT) − 4(V/S)m   (Sabine, Table 2 rows T1–T4)":
+        "α con 55,3·(V/S)·(1/cT) − 4(V/S)m   (Sabine, filas T1–T4 de la Tabla 2)",
+    "Base-plate check: s_base ≤ Table 1 limit (Clause 6.2)":
+        "Placa base: s_base ≤ límite de la Tabla 1 (Cláusula 6.2)",
+    # d16 - ISO 17497-2 free-field diffusion goniometer
+    "Free-field diffusion goniometer (ISO 17497-2)":
+        "Goniómetro de difusión en campo libre (ISO 17497-2)",
+    "Test sample": "Probeta de ensayo",
+    "Turntable": "Plataforma giratoria",
+    "Fixed source": "Fuente fija",
+    "polar response L_i": "respuesta polar L_i",
+    "receiver arc (5° steps)": "arco de receptores (pasos de 5°)",
+    "d = [(Σ10^(L_i/10))² − Σ(10^(L_i/10))²] / [(n−1)·Σ(10^(L_i/10))²]   (Formula 5)":
+        "d = [(Σ10^(L_i/10))² − Σ(10^(L_i/10))²] / [(n−1)·Σ(10^(L_i/10))²]   (Fórmula 5)",
+    "d_n = (d − d_ref) / (1 − d_ref)   (Formula 7)":
+        "d_n = (d − d_ref) / (1 − d_ref)   (Fórmula 7)",
+    "5° receiver steps · turntable rotates the sample · source fixed":
+        "pasos de 5° entre receptores · la plataforma gira la probeta · fuente fija",
+    # d17 - ISO 13472-1 in-situ road absorption, subtraction technique
+    "In-situ road absorption — subtraction technique (ISO 13472-1)":
+        "Absorción in situ de carreteras — técnica de sustracción (ISO 13472-1)",
+    "Road surface": "Superficie de la carretera",
+    "direct  ds−dm": "directo  ds−dm",
+    "reflected  ds+dm": "reflejado  ds+dm",
+    "to image source (ds below)": "hacia fuente imagen (ds por debajo)",
+    "ds = 1.25 m": "ds = 1,25 m",
+    "dm = 0.25 m": "dm = 0,25 m",
+    "Free-field reference": "Referencia en campo libre",
+    "Hi: no ground reflection in the window":
+        "Hi: sin reflexión del suelo en la ventana",
+    "Kr = (ds − dm)/(ds + dm) = 2/3   (Clause 4.1)":
+        "Kr = (ds − dm)/(ds + dm) = 2/3   (Cláusula 4.1)",
+    "α(f) = 1 − (1/Kr²)·|Hr/Hi|²   ·   Δτ = 2 dm / c":
+        "α(f) = 1 − (1/Kr²)·|Hr/Hi|²   ·   Δτ = 2 dm / c",
+    "Adrienne time window isolates the reflected response Hr":
+        "La ventana temporal Adrienne aísla la respuesta reflejada Hr",
+    # d18 - ISO 13472-2 in-situ road absorption, spot method
+    "In-situ road absorption — spot method (ISO 13472-2)":
+        "Absorción in situ de carreteras — método puntual (ISO 13472-2)",
+    "Road surface (test sample)": "Superficie de carretera (probeta)",
+    "Spot method (ISO 13472-2)": "Método puntual (ISO 13472-2)",
+    "f_u = 0.58 c₀ / d   (Clause 5.4.1)":
+        "f_u = 0,58 c₀ / d   (Cláusula 5.4.1)",
+    "0.05 c₀/f_min < s < 0.45 c₀/f_max   (Clause 5.4.2)":
+        "0,05 c₀/f_min < s < 0,45 c₀/f_max   (Cláusula 5.4.2)",
+    "Working range: 250–1600 Hz (1/3-octave)":
+        "Rango útil: 250–1600 Hz (1/3 de octava)",
+    "Two-microphone transfer function H₁₂":
+        "Función de transferencia de dos micrófonos H₁₂",
+    "→ ISO 10534-2 decomposition → α(f)":
+        "→ descomposición ISO 10534-2 → α(f)",
+    "Tube sealed onto the road; plane waves only below f_u":
+        "Tubo sellado sobre la carretera; solo ondas planas por debajo de f_u",
+    # d19 - ISO 3745 precision sound power (anechoic / hemi-anechoic room)
+    "Precision sound power in an anechoic room (ISO 3745)":
+        "Potencia sonora de precisión en sala anecoica (ISO 3745)",
+    "Reflecting plane (hemi-anechoic)": "Plano reflectante (semianecoica)",
+    "Anechoic wedges": "Cuñas anecoicas",
+    "Source (DUT)": "Fuente (DUT)",
+    "20 / 40 mic positions": "20 / 40 posiciones de micrófono",
+    "radius r": "radio r",
+    "S = 2πr² (hemi-anechoic) · 4πr² (anechoic)":
+        "S = 2πr² (semianecoica) · 4πr² (anecoica)",
+    "K1: per-position background correction":
+        "K1: corrección de ruido de fondo por posición",
+    "C1, C2, C3: meteorological corrections (ps, θ, a(f))":
+        "C1, C2, C3: correcciones meteorológicas (ps, θ, a(f))",
+    # d20 - ISO 9614-3 precision sound intensity scanning
+    "Precision sound intensity scanning (ISO 9614-3)":
+        "Barrido de intensidad sonora de precisión (ISO 9614-3)",
+    "Measurement surface (segments S_i)": "Superficie de medición (segmentos S_i)",
+    "p-p probe": "sonda p-p",
+    "serpentine scan": "barrido en serpentina",
+    "I_n (normal intensity)": "I_n (intensidad normal)",
+    "P = Σ I_n,i · S_i   (partial powers per segment)":
+        "P = Σ I_n,i · S_i   (potencias parciales por segmento)",
+    "Field indicators: F_pIn , FT , FS":
+        "Indicadores de campo: F_pIn , FT , FS",
+    "Five acceptance criteria (Annex C); band invalid if P < 0":
+        "Cinco criterios de aceptación (Anexo C); banda no válida si P < 0",
 }
 
 
@@ -1410,6 +1502,395 @@ def _d_airflow(s: SVG, th: Theme) -> None:
            16, th.fg, bold=True)
 
 
+def _rot_arrow(s: SVG, cx: float, cy: float, r: float, a0_deg: float,
+               a1_deg: float, color: str, sw: float = 2.0,
+               ry: float | None = None) -> None:
+    """Curved rotation indicator: an elliptical arc with a head at ``a1``."""
+    import math
+    ryy = r if ry is None else ry
+    a0, a1 = math.radians(a0_deg), math.radians(a1_deg)
+    x0, y0 = cx + r * math.cos(a0), cy + ryy * math.sin(a0)
+    x1, y1 = cx + r * math.cos(a1), cy + ryy * math.sin(a1)
+    large = 1 if abs(a1_deg - a0_deg) > 180 else 0
+    sweep = 1 if a1_deg > a0_deg else 0
+    s.path(f"M {x0:.1f} {y0:.1f} A {r:.1f} {ryy:.1f} 0 {large} {sweep} "
+           f"{x1:.1f} {y1:.1f}", stroke=color, sw=sw)
+    tang = a1 + (math.pi / 2 if sweep else -math.pi / 2)
+    L, W = 10.0, 4.4
+    bx, by = x1 - L * math.cos(tang), y1 - L * math.sin(tang)
+    px, py = -math.sin(tang), math.cos(tang)
+    s.path(f"M {x1:.1f} {y1:.1f} L {bx + W * px:.1f} {by + W * py:.1f} "
+           f"L {bx - W * px:.1f} {by - W * py:.1f} Z", fill=color)
+
+
+# ---------------------------------------------------------------------------
+# d15 - ISO 17497-1 random-incidence scattering (reverberation room)
+# ---------------------------------------------------------------------------
+
+def _d_scattering_reverb(s: SVG, th: Theme) -> None:
+    """ISO 17497-1 scattering coefficient in a reverberation room."""
+    gy = 400.0
+    # Reverberation room with non-parallel walls (skew quadrilateral).
+    s.path("M 60 80 L 782 66 L 796 400 L 72 400 Z", fill=th.panel,
+           stroke=th.fg, sw=3)
+    s.text(80, 106, "Reverberation room", 20, th.fg, bold=True, anchor="start")
+
+    # --- Turntable carrying the test sample (left, in perspective) --------
+    tx, tyc = 285.0, 366.0
+    s.ellipse(tx, tyc, 150, 26, th.panel, th.primary, 2.2)      # turntable
+    s.ellipse(tx, tyc - 12, 82, 15, th.bg, th.secondary, 2.2)   # test sample
+    for hx in range(int(tx) - 60, int(tx) + 60, 12):            # sample hatch
+        s.line(hx, tyc - 10, hx + 10, tyc - 18, th.secondary, 1.0)
+    s.text(tx, gy + 22, "Turntable (test sample)", 17, th.fg, bold=True)
+    _rot_arrow(s, tx, tyc, 150, 205, 340, th.accent, 2.2, ry=26)
+    s.text(445, tyc + 6, "rotating → α_spec", 15, th.accent, anchor="start")
+    s.text(tx, tyc - 42, "stationary → α_s", 15, th.muted)
+
+    # --- Rotating boom loudspeaker source (upper right) -------------------
+    pvx, pvy = 560.0, 100.0
+    spx, spy = 668.0, 202.0
+    s.circle(pvx, pvy, 5, th.fg)
+    s.line(pvx, pvy, spx, spy, th.fg, 3)
+    s.rect(spx - 26, spy - 26, 40, 52, th.panel, th.primary, rx=6, sw=2)
+    s.circle(spx - 6, spy, 11, th.primary)
+    s.circle(spx - 6, spy, 4, th.bg)
+    _rot_arrow(s, pvx, pvy, 118, -18, 46, th.accent, 2.0)
+    s.text(spx + 8, spy + 46, "Rotating boom source", 18, th.fg, bold=True)
+
+    # --- Microphone on a stand in the room --------------------------------
+    s.mic(468.0, 246.0, gy, 1.0)
+    s.text(468.0, 234.0, "Microphone", 18, th.fg, bold=True)
+
+    # --- Governing relations ----------------------------------------------
+    for y, txt, col, bold in (
+        (448, "Stationary sample → α_s (Eq. 1)   ·   "
+              "rotating / averaged → α_spec (Eq. 4)", th.fg, True),
+        (478, "s = (α_spec − α_s) / (1 − α_s)   (Eq. 5)", th.accent, True),
+        (508, "α from 55.3·(V/S)·(1/cT) − 4(V/S)m   "
+              "(Sabine, Table 2 rows T1–T4)", th.muted, False),
+        (534, "Base-plate check: s_base ≤ Table 1 limit (Clause 6.2)",
+         th.muted, False),
+    ):
+        s.text(450, y, txt, 19 if bold else 18, col, bold=bold)
+
+
+# ---------------------------------------------------------------------------
+# d16 - ISO 17497-2 free-field diffusion goniometer
+# ---------------------------------------------------------------------------
+
+def _d_diffusion_goniometer(s: SVG, th: Theme) -> None:
+    """ISO 17497-2 directional diffusion coefficient (goniometer)."""
+    import math
+    gy, cx, R = 430.0, 450.0, 300.0
+    s.ground(gy, 90, 810)
+
+    # Semicircular receiver arc (0 deg right .. 180 deg left, zenith at top).
+    s.path(f"M {cx - R} {gy} A {R} {R} 0 0 1 {cx + R} {gy}",
+           stroke=th.muted, sw=1.8)
+    ends = {0, 90, 180}
+    for ang in range(0, 181, 15):
+        a = math.radians(ang)
+        px, py = cx + R * math.cos(a), gy - R * math.sin(a)
+        s.circle(px, py, 6.5, th.primary)
+        s.circle(px, py, 2.2, th.bg)
+    # Label the two horizon receivers and the zenith one.
+    s.text(cx + R + 4, gy - 4, "L_n", 17, th.fg, anchor="start")
+    s.text(cx - R - 4, gy - 4, "L_1", 17, th.fg, anchor="end")
+    s.text(cx, gy - R - 14, "L_i", 17, th.fg)
+    s.text(cx + 150, gy - 250, "receiver arc (5° steps)", 16, th.muted)
+    _ = ends
+
+    # Polar (scattered) response lobe about the sample centre.
+    pts = []
+    for ang in range(0, 181, 6):
+        a = math.radians(ang)
+        rr = 92.0 + 42.0 * abs(math.sin(3.0 * a))
+        pts.append((cx + rr * math.cos(a), gy - rr * math.sin(a)))
+    d = "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in pts)
+    s.path(d, stroke=th.accent, sw=2.0)
+    s.text(cx + 96, gy - 150, "polar response L_i", 16, th.accent)
+
+    # Fixed source, off to the upper left, illuminating the sample.
+    sa = math.radians(155.0)
+    sxx, syy = cx + (R + 44) * math.cos(sa), gy - (R + 44) * math.sin(sa)
+    s.rect(sxx - 26, syy - 22, 52, 44, th.panel, th.primary, rx=6, sw=2)
+    s.circle(sxx + 20, syy, 10, th.primary)
+    s.circle(sxx + 20, syy, 4, th.bg)
+    s.text(sxx, syy - 32, "Fixed source", 17, th.fg, bold=True)
+    s.arrow(sxx + 26, syy + 6, cx - 74, gy - 12, th.accent, 2.0)
+
+    # Test sample on the turntable at the arc centre.
+    s.rect(cx - 72, gy - 13, 144, 13, th.bg, th.secondary, sw=2)
+    for hx in range(int(cx) - 64, int(cx) + 64, 12):
+        s.line(hx, gy - 3, hx + 9, gy - 11, th.secondary, 1.0)
+    s.text(cx, gy - 20, "Test sample", 16, th.secondary, bold=True)
+    s.ellipse(cx, gy + 8, 88, 12, "none", th.primary, 1.8)
+    _rot_arrow(s, cx, gy + 8, 88, 200, 340, th.primary, 1.8, ry=12)
+    s.text(cx + 150, gy + 12, "Turntable", 16, th.fg, bold=True, anchor="start")
+
+    # Governing relations.
+    s.text(450, 476,
+           "d = [(Σ10^(L_i/10))² − Σ(10^(L_i/10))²] / "
+           "[(n−1)·Σ(10^(L_i/10))²]   (Formula 5)", 17, th.fg, bold=True)
+    s.text(450, 506, "d_n = (d − d_ref) / (1 − d_ref)   (Formula 7)", 18,
+           th.accent, bold=True)
+    s.text(450, 534,
+           "5° receiver steps · turntable rotates the sample · source fixed",
+           17, th.muted)
+
+
+# ---------------------------------------------------------------------------
+# d17 - ISO 13472-1 in-situ road absorption, subtraction technique
+# ---------------------------------------------------------------------------
+
+def _d_insitu_subtraction(s: SVG, th: Theme) -> None:
+    """ISO 13472-1 extended-surface (subtraction) in-situ absorption."""
+    gy = 415.0
+    # Road surface (the reference plane) under the main measurement.
+    s.ground(gy, 55, 590)
+    s.text(66, gy + 30, "Road surface", 16, th.muted, anchor="start")
+
+    sx = 250.0
+    src_y, mic_y = gy - 235.0, gy - 47.0        # ds : dm = 1.25 : 0.25 m
+    s.line(sx, src_y, sx, gy, th.muted, 1.0, dash="4,4")   # normal axis
+
+    # Loudspeaker (source) at ds above the surface.
+    s.rect(sx - 30, src_y - 30, 60, 60, th.panel, th.primary, rx=6, sw=2)
+    s.circle(sx, src_y, 12, th.primary)
+    s.circle(sx, src_y, 5, th.bg)
+    s.text(sx, src_y - 42, "Loudspeaker", 18, th.fg, bold=True)
+
+    # Microphone at dm above the surface.
+    s.rect(sx - 6, mic_y - 9, 12, 18, th.fg, rx=3)
+    s.circle(sx, mic_y - 9, 5, th.primary)
+    s.text(sx + 16, mic_y + 5, "Microphone", 15, th.fg, anchor="start")
+
+    # Direct ray (source -> mic), drawn offset to the left of the axis.
+    s.arrow(sx - 7, src_y + 22, sx - 7, mic_y - 12, th.accent, 2.0)
+    s.text(sx - 60, (src_y + mic_y) / 2, "direct  ds−dm", 15, th.accent,
+           anchor="end")
+    # Road-reflected ray: source -> surface point -> mic (shallow V, offset).
+    gpx = sx + 74.0
+    s.line(sx + 8, src_y + 24, gpx, gy, th.secondary, 2.0)
+    s.arrow(gpx, gy, sx + 8, mic_y + 6, th.secondary, 2.0)
+    s.text(gpx + 8, gy - 96, "reflected  ds+dm", 15, th.secondary,
+           anchor="start")
+    # Dashed continuation toward the image source below the plane.
+    s.line(gpx, gy, sx + 34, gy + 66, th.muted, 1.2, dash="5,4")
+    s.text(sx + 40, gy + 60, "to image source (ds below)", 14, th.muted,
+           anchor="start")
+
+    # Height dimensions ds and dm.
+    s.dim(sx - 72, gy, sx - 72, src_y, "ds = 1.25 m", offset=0,
+          label_side="left", size=17)
+    s.line(sx - 72, gy, sx, gy, th.muted, 0.9, dash="3,3")
+    s.line(sx - 72, src_y, sx - 30, src_y, th.muted, 0.9, dash="3,3")
+    s.dim(sx + 122, gy, sx + 122, mic_y, "dm = 0.25 m", offset=0,
+          label_side="right", size=17)
+    s.line(sx, mic_y, sx + 122, mic_y, th.muted, 0.9, dash="3,3")
+
+    # --- Free-field reference (right): source + mic high, no ground -------
+    s.line(615, 90, 615, gy + 40, th.muted, 1.2, dash="6,5")
+    fx = 730.0
+    fs_y, fm_y = 150.0, 292.0
+    s.rect(fx - 28, fs_y - 26, 56, 52, th.panel, th.primary, rx=6, sw=2)
+    s.circle(fx, fs_y, 11, th.primary)
+    s.circle(fx, fs_y, 4, th.bg)
+    s.rect(fx - 6, fm_y - 9, 12, 18, th.fg, rx=3)
+    s.circle(fx, fm_y - 9, 5, th.primary)
+    s.arrow(fx, fs_y + 28, fx, fm_y - 14, th.accent, 2.0)
+    s.text(fx, fs_y - 40, "Free-field reference", 17, th.fg, bold=True)
+    s.text(fx, fm_y + 34, "Hi: no ground reflection in the window", 14,
+           th.muted)
+
+    # Governing relations.
+    s.text(450, 502, "Kr = (ds − dm)/(ds + dm) = 2/3   (Clause 4.1)", 18,
+           th.fg, bold=True)
+    s.text(450, 528, "α(f) = 1 − (1/Kr²)·|Hr/Hi|²   ·   Δτ = 2 dm / c", 18,
+           th.accent, bold=True)
+    s.text(450, 552, "Adrienne time window isolates the reflected response Hr",
+           16, th.muted)
+
+
+# ---------------------------------------------------------------------------
+# d18 - ISO 13472-2 in-situ road absorption, spot method
+# ---------------------------------------------------------------------------
+
+def _d_spot_tube(s: SVG, th: Theme) -> None:
+    """ISO 13472-2 spot method: short tube sealed onto the road surface."""
+    gy = 430.0
+    cx, hw, y_top = 235.0, 72.0, 120.0
+
+    # Road surface (the test sample) with the tube sealed onto it.
+    s.ground(gy, 60, 430)
+    s.text(72, gy + 30, "Road surface (test sample)", 15, th.muted,
+           anchor="start")
+
+    # Tube walls.
+    s.line(cx - hw, y_top, cx - hw, gy, th.fg, 3)
+    s.line(cx + hw, y_top, cx + hw, gy, th.fg, 3)
+    # Sealing rings where the tube meets the road.
+    s.rect(cx - hw - 7, gy - 9, 14, 18, th.muted, rx=2)
+    s.rect(cx + hw - 7, gy - 9, 14, 18, th.muted, rx=2)
+
+    # Loudspeaker cap at the top.
+    s.rect(cx - hw, y_top - 40, 2 * hw, 40, th.panel, th.primary, sw=2)
+    s.circle(cx, y_top - 20, 12, th.primary)
+    s.circle(cx, y_top - 20, 5, th.bg)
+    s.text(cx, y_top - 52, "Loudspeaker", 18, th.fg, bold=True)
+
+    # Two microphones flush in the right wall, spacing s.
+    m1y, m2y = gy - 158.0, gy - 82.0
+    for my, lab in ((m1y, "Mic 1"), (m2y, "Mic 2")):
+        s.rect(cx + hw - 4, my - 7, 12, 14, th.fg, rx=3)
+        s.circle(cx + hw, my, 4, th.primary)
+        s.text(cx + hw + 16, my + 5, lab, 15, th.fg, anchor="start")
+
+    # Plane-wave travel down and reflection back up.
+    s.arrow(cx - 34, y_top + 16, cx - 34, gy - 26, th.accent, 2.0)
+    s.arrow(cx - 8, gy - 26, cx - 8, y_top + 16, th.secondary, 2.0)
+
+    # Dimensions: tube diameter d (across) and mic spacing s (down).
+    s.dim(cx - hw, y_top + 18, cx + hw, y_top + 18, "d", offset=0, size=18)
+    s.dim(cx + hw + 62, m1y, cx + hw + 62, m2y, "s", offset=0,
+          label_side="right", size=18)
+    s.line(cx + hw + 10, m1y, cx + hw + 62, m1y, th.muted, 0.9, dash="3,3")
+    s.line(cx + hw + 10, m2y, cx + hw + 62, m2y, th.muted, 0.9, dash="3,3")
+
+    # Right panel: usable frequency range and DSP method.
+    s.rect(430, 118, 430, 300, "none", th.muted, rx=12, dash="6,5")
+    s.text(645, 152, "Spot method (ISO 13472-2)", 20, th.fg, bold=True)
+    for y, txt, col in (
+        (196, "f_u = 0.58 c₀ / d   (Clause 5.4.1)", th.accent),
+        (232, "0.05 c₀/f_min < s < 0.45 c₀/f_max   (Clause 5.4.2)", th.accent),
+        (268, "Working range: 250–1600 Hz (1/3-octave)", th.fg),
+        (312, "Two-microphone transfer function H₁₂", th.fg),
+        (344, "→ ISO 10534-2 decomposition → α(f)", th.primary),
+    ):
+        s.text(645, y, txt, 18, col, bold=(col is th.primary))
+    s.text(645, 396, "Tube sealed onto the road; plane waves only below f_u",
+           15, th.muted)
+
+
+# ---------------------------------------------------------------------------
+# d19 - ISO 3745 precision sound power (anechoic / hemi-anechoic room)
+# ---------------------------------------------------------------------------
+
+def _d_precision_anechoic(s: SVG, th: Theme) -> None:
+    """ISO 3745 precision sound power on a (hemi-)spherical array."""
+    x0, y0, x1, gy = 60.0, 70.0, 840.0, 470.0
+    s.rect(x0, y0, x1 - x0, gy - y0, th.bg, th.fg, sw=3)
+
+    # Anechoic wedges lining the ceiling and the two side walls.
+    for wx in range(int(x0) + 4, int(x1) - 36, 40):
+        s.path(f"M {wx} {y0} L {wx + 40} {y0} L {wx + 20} {y0 + 28} Z",
+               fill=th.panel, stroke=th.muted, sw=1.0)
+    for wy in range(int(y0) + 30, int(gy) - 36, 40):
+        s.path(f"M {x0} {wy} L {x0} {wy + 40} L {x0 + 28} {wy + 20} Z",
+               fill=th.panel, stroke=th.muted, sw=1.0)
+        s.path(f"M {x1} {wy} L {x1} {wy + 40} L {x1 - 28} {wy + 20} Z",
+               fill=th.panel, stroke=th.muted, sw=1.0)
+    s.text(200, 120, "Anechoic wedges", 15, th.muted, anchor="start")
+
+    # Reflecting floor (hemi-anechoic room).
+    s.ground(gy, x0, x1)
+    s.text(70, gy - 8, "Reflecting plane (hemi-anechoic)", 15, th.muted,
+           anchor="start")
+
+    # Source (DUT) at the centre of the reflecting plane.
+    cx, R = 450.0, 200.0
+    _box_solid(s, th, cx, gy, 34, 26, 40)
+    s.circle(cx, gy, 3.4, th.fg)
+    s.text(cx + 52, gy - 14, "Source (DUT)", 17, th.fg, bold=True,
+           anchor="start")
+
+    # Hemispherical measurement surface of radius r.
+    s.ellipse(cx, gy, R, R * 0.16, "none", th.muted, 1.3, dash="5,4")
+    s.path(f"M {cx - R} {gy} A {R} {R} 0 0 1 {cx + R} {gy}",
+           stroke=th.primary, sw=2.4)
+
+    # Ten normative microphone positions (ISO 3744/3745 Annex B), projected.
+    b1 = [(0.16, -0.96, 0.22), (0.78, -0.60, 0.20), (0.78, 0.55, 0.31),
+          (0.16, 0.90, 0.41), (-0.83, 0.32, 0.45), (-0.83, -0.40, 0.38),
+          (-0.26, -0.65, 0.71), (0.74, -0.07, 0.67), (-0.26, 0.50, 0.83),
+          (0.10, -0.10, 0.99)]
+    pts = [(cx + R * x + 46 * y, gy - 30 * y - R * z) for x, y, z in b1]
+    r8 = pts[7]
+    s.line(cx, gy, r8[0], r8[1], th.accent, 1.6, dash="6,4")
+    s.text((cx + r8[0]) / 2 + 8, (gy + r8[1]) / 2 + 2, "radius r", 16,
+           th.accent, anchor="start")
+    for px, py in pts:
+        s.circle(px, py, 6.5, th.secondary)
+        s.circle(px, py, 2.2, th.bg)
+    s.text(688, 300, "20 / 40 mic positions", 16, th.muted, anchor="start")
+
+    # Governing relations.
+    for y, txt, col, bold in (
+        (514, "LW = ⟨Lp⟩ + 10 lg(S/S0) + C1 + C2 + C3", th.fg, True),
+        (540, "S = 2πr² (hemi-anechoic) · 4πr² (anechoic)", th.primary, True),
+        (564, "K1: per-position background correction", th.muted, False),
+        (587, "C1, C2, C3: meteorological corrections (ps, θ, a(f))",
+         th.muted, False),
+    ):
+        s.text(450, y, txt, 19 if bold else 18, col, bold=bold)
+
+
+# ---------------------------------------------------------------------------
+# d20 - ISO 9614-3 precision sound intensity scanning
+# ---------------------------------------------------------------------------
+
+def _d_intensity_scan(s: SVG, th: Theme) -> None:
+    """ISO 9614-3 precision sound power by intensity scanning."""
+    gy, bx = 470.0, 360.0
+
+    # Measurement surface (dashed wireframe) enclosing the source.
+    _box_wire(s, th, bx, gy, 150, 120, 240, th.primary)
+    _box_solid(s, th, bx, gy, 45, 34, 70)
+    s.text(bx, gy - 82, "Source", 18, th.fg, bold=True)
+    s.text(bx, 214, "Measurement surface (segments S_i)", 17, th.primary,
+           bold=True)
+
+    # Segment grid on the front face (3 x 3 segments Sᵢ).
+    fl, fr, ft, fb = bx - 150, bx + 150, gy - 240, gy
+    for gx in (fl + 100, fl + 200):
+        s.line(gx, ft, gx, fb, th.muted, 1.2, dash="4,4")
+    for gyy in (ft + 80, ft + 160):
+        s.line(fl, gyy, fr, gyy, th.muted, 1.2, dash="4,4")
+    s.text(fl + 50, ft + 46, "S_i", 18, th.fg, bold=True)
+
+    # Serpentine scan path across the segment-row centres.
+    ys = (ft + 40, ft + 120, ft + 200)
+    px = [(fl + 30, ys[0]), (fr - 30, ys[0]), (fr - 30, ys[1]),
+          (fl + 30, ys[1]), (fl + 30, ys[2]), (fr - 30, ys[2])]
+    for (ax, ay), (bxx, byy) in zip(px[:-1], px[1:]):
+        s.line(ax, ay, bxx, byy, th.accent, 2.0, dash="2,3")
+    s.arrow(px[-2][0] + 60, px[-1][1], px[-1][0], px[-1][1], th.accent, 2.0)
+    s.text(fr + 8, ys[2] + 6, "serpentine scan", 15, th.accent, anchor="start")
+
+    # A p-p intensity probe on the scan path.
+    ppx, ppy = bx, ys[1]
+    s.line(ppx, ppy, ppx + 46, ppy - 26, th.fg, 2.2)
+    s.circle(ppx, ppy - 6, 5, th.fg)
+    s.circle(ppx, ppy + 6, 5, th.fg)
+    s.text(ppx + 52, ppy - 30, "p-p probe", 15, th.fg, anchor="start")
+
+    # Normal-intensity arrows exiting the left column of segments.
+    for yy in ys:
+        s.arrow(fl, yy, fl - 34, yy + 8, th.secondary, 2.0)
+    s.text(fl - 40, ys[1] + 30, "I_n (normal intensity)", 15, th.secondary,
+           anchor="end")
+
+    # Governing relations.
+    for y, txt, col, bold in (
+        (505, "P = Σ I_n,i · S_i   (partial powers per segment)", th.fg, True),
+        (533, "LW = 10 lg(P/P0),  P0 = 1 pW", th.accent, True),
+        (559, "Field indicators: F_pIn , FT , FS", th.primary, True),
+        (583, "Five acceptance criteria (Annex C); band invalid if P < 0",
+         th.muted, False),
+    ):
+        s.text(450, y, txt, 19 if bold else 18, col, bold=bold)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -1438,6 +1919,24 @@ DIAGRAMS = {
         _d_astm_tube, "Four-microphone transmission-loss tube (ASTM E2611)", 560),
     "diagram_airflow_resistance": (
         _d_airflow, "Airflow resistance: static and alternating methods (ISO 9053-1/-2)", 540),
+    "diagram_scattering_reverb": (
+        _d_scattering_reverb,
+        "Random-incidence scattering in a reverberation room (ISO 17497-1)", 560),
+    "diagram_diffusion_goniometer": (
+        _d_diffusion_goniometer,
+        "Free-field diffusion goniometer (ISO 17497-2)", 580),
+    "diagram_insitu_subtraction": (
+        _d_insitu_subtraction,
+        "In-situ road absorption — subtraction technique (ISO 13472-1)", 560),
+    "diagram_spot_tube": (
+        _d_spot_tube,
+        "In-situ road absorption — spot method (ISO 13472-2)", 540),
+    "diagram_precision_anechoic": (
+        _d_precision_anechoic,
+        "Precision sound power in an anechoic room (ISO 3745)", 600),
+    "diagram_intensity_scan": (
+        _d_intensity_scan,
+        "Precision sound intensity scanning (ISO 9614-3)", 600),
 }
 
 

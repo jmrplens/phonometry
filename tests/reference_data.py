@@ -4,11 +4,13 @@
 Tables transcribed verbatim from the published standards. Both the test
 suite (``tests/test_*.py``) and the CI conformance report
 (``scripts/conformance_report.py``) import these constants, so the report's
-expected values can never drift from what the tests assert. The six PR-B
-building-acoustics oracles are the exception: their test modules re-hardcode
-the values inline rather than import them, and a dedicated consistency test
-(``test_building_reference_data_matches_published_oracles``) pins this shared
-table to those same published results so neither copy can drift.
+expected values can never drift from what the tests assert. The PR-B
+building-acoustics and PR-E scattering/in-situ/precision-power oracles are the
+exception: their test modules re-hardcode the values inline rather than import
+them, and dedicated consistency tests
+(``test_building_reference_data_matches_published_oracles`` and
+``test_scattering_insitu_precision_reference_data_matches_oracles``) pin this
+shared table to those same published results so neither copy can drift.
 
 This module is deliberately dependency-free (stdlib only) so it can be
 imported in the ``pr-comment`` CI job, which installs the runtime

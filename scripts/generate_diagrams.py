@@ -11,6 +11,7 @@ Run directly or via ``make graphs``.
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 
 
@@ -362,7 +363,7 @@ class SVG:
         return head + "".join(self.parts) + "</svg>"
 
 
-def _write(output_dir: str, name: str, build: "callable", title: str,  # type: ignore[valid-type]
+def _write(output_dir: str, name: str, build: Callable[["SVG", "Theme"], None], title: str,
            height: int = 560) -> None:
     for lang, lang_suffix in (("en", ""), ("es", "_es")):
         for th in (LIGHT, DARK):

@@ -56,8 +56,10 @@ coverage.xml
 conformance_report.md
 pr_comment_body.md
 *.wav
-# ISO 532-1 normative validation pulses are tracked explicitly
-!tests/data/iso532_1_test_signal_*.wav
+# ISO 532-1 normative validation signals are tracked explicitly
+# (see tests/data/iso532_1/README.md for provenance and ISO attribution)
+!tests/data/iso532_1/**/*.wav
+!tests/data/iso532_1/*.wav
 tests/*.png
 snyk.sarif
 issues_final*.json

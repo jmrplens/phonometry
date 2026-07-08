@@ -31,7 +31,7 @@ jobs:
     - name: Lint with Ruff
       run: ruff check .
     - name: Type check with Mypy
-      run: mypy src
+      run: mypy src scripts
     - name: Security check with Bandit
       run: bandit -r src
 

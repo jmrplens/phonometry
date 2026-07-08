@@ -1,12 +1,14 @@
 ---
 title: "Psicoacústica e inteligibilidad del habla"
-description: "Sonoridad de Zwicker (ISO 532-1), sharpness (DIN 45692) y el índice de transmisión del habla STI/STIPA (IEC 60268-16)."
+description: "Sonoridad de Zwicker (ISO 532-1), Moore-Glasberg (ISO 532-2/3) y Sottek (ECMA-418-2), sharpness (DIN 45692), tonalidad y aspereza, además del índice de transmisión del habla STI/STIPA (IEC 60268-16)."
 ---
 
 Las métricas de nivel dicen cuánta *presión sonora* hay; las métricas
 psicoacústicas dicen qué *percibe* realmente quien escucha. Esta página cubre
 la sonoridad (ISO 532-1), el sharpness (DIN 45692) y el índice de transmisión
-del habla (IEC 60268-16).
+del habla (IEC 60268-16), y luego los modelos avanzados de sonoridad, tonalidad
+y aspereza de Moore-Glasberg (ISO 532-2/3) y del modelo de Sottek
+(ECMA-418-2).
 
 ## Sonoridad en sonos (ISO 532-1, Zwicker)
 
@@ -227,6 +229,347 @@ de T₆₀.
 
 Ambas devuelven `STIResult`: `sti`, `mti` (7 bandas), `mtf` (7×14 o 7×2),
 `band_levels`, `rating` (letra del Anexo F, `A+`…`U`).
+
+## Modelos avanzados de sonoridad y calidad sonora
+
+La ISO 532-1 de arriba es uno de los **tres** modelos de sonoridad que incluye
+phonometry, y la sonoridad es solo la mitad de la historia de la calidad
+sonora: dos sonidos igual de sonoros pueden diferir aún en cuán *tonales* o cuán
+*ásperos* son. Esta sección añade la sonoridad de **Moore-Glasberg** de
+ISO 532-2/532-3 y la sonoridad, la tonalidad y la aspereza del **modelo de
+Sottek** de ECMA-418-2:2025.
+
+### Elegir un modelo de sonoridad
+
+| Modelo | Norma | Estacionario / variable en el tiempo | Salida | Cuándo usarlo |
+| :--- | :--- | :--- | :--- | :--- |
+| Zwicker | ISO 532-1:2017 | ambos | sonos | Método de referencia; entrada en tercios de octava; rápido y muy citado |
+| Moore-Glasberg | ISO 532-2:2017 | estacionario | sonos | Patrón de excitación roex; mejor para tonos y con suma binaural explícita |
+| Moore-Glasberg-Schlittenlacher | ISO 532-3:2023 | variable en el tiempo | sonos (STL/LTL) | Sonoridad variable en el tiempo con trazas de corto/largo plazo y el pico N_max |
+| Sottek (modelo auditivo) | ECMA-418-2:2025 | variable en el tiempo | sone_HMS | Comparte un único front-end auditivo con las métricas de tonalidad y aspereza de ECMA |
+
+Los tres están anclados de modo que un **tono de 1 kHz a 40 dB SPL es ≈ 1 sono**;
+los valores no son intercambiables dígito a dígito porque los modelos difieren
+en sus filtros auditivos y en su suma de sonoridad.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es.png" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es_dark.png" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" style="width:80%">
+
+*Los tres modelos coinciden en el ancla de 1 sono / 40 dB y divergen con el
+nivel: Zwicker duplica el valor en sonos cada +10 fonios, mientras que el modelo
+de Sottek crece más lentamente (alrededor de 1,65× por cada 10 dB), una
+diferencia intrínseca entre las sumas auditivas, no un error de calibración.*
+
+### Sonoridad de Moore-Glasberg (ISO 532-2)
+
+Donde Zwicker usa bandas críticas fijas sobre la escala Bark, Moore-Glasberg
+construye un **patrón de excitación** con filtros auditivos exponenciales
+redondeados (roex) dependientes del nivel sobre la escala del número ERB
+("Cam"), y luego aplica una transformación compresiva de excitación →
+sonoridad específica con C = 0,0617 sonos/Cam (ISO 532-2:2017, Fórmula 7) y una
+etapa de inhibición binaural. Reproduce los casos de tono y de banda ancha del
+Anexo B con un uno o dos por ciento de error y, a diferencia de ISO 532-1,
+modela la suma binaural explícitamente.
+
+```python
+import numpy as np
+from phonometry import (
+    loudness_moore_glasberg,
+    loudness_moore_glasberg_from_spectrum,
+)
+
+# El ancla definitoria: una componente sinusoidal de 1 kHz a 40 dB SPL,
+# campo libre, binaural -> 1 sono / 40 fonios por construcción del sono.
+res = loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="free")
+print(f"N = {res.loudness:.3f} sone  ({res.loudness_level:.1f} phon)")   # 1.000 sono (40.0 fonios)
+
+# Desde una grabación calibrada: se forma el espectro de líneas de banda
+# estrecha (FFT, normalización que preserva la potencia) y se alimenta al
+# método exacto de componentes sinusoidales (ISO 532-2 apartados 5.2/5.4).
+fs = 48000
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+res = loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
+
+res.plot()   # sonoridad específica N'(i) sobre la escala del número ERB (Cam)
+```
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# En una línea — el patrón de sonoridad específica N'(i) directo del resultado:
+res.plot()
+plt.show()
+
+# O dibújalo a mano desde la rejilla del número ERB que ya lleva el resultado:
+fig, ax = plt.subplots()
+ax.fill_between(res.erb_number, res.specific, alpha=0.3)
+ax.plot(res.erb_number, res.specific)
+ax.set_xlabel("Número ERB [Cam]")
+ax.set_ylabel("Sonoridad específica N' [sone/Cam]")
+plt.show()
+```
+
+</details>
+
+#### Parámetros de `loudness_moore_glasberg()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | array 1D | Pa | no vacío | Señal de presión calibrada (envoltorio de señal) |
+| `components` | lista de `(f, L)` | Hz, dB SPL | — | `_from_spectrum`: componentes sinusoidales discretas |
+| `band_levels` | vector de 29 | dB SPL | 25 Hz .. 16 kHz | Entrada de `_from_third_octave` (bandas IEC 61260-1) |
+| `fs` | int | Hz | > 0 | Solo en el envoltorio de señal |
+| `field` | str | — | `'free'` (por defecto) / `'diffuse'` / `'eardrum'` | Transferencia del oído externo |
+| `presentation` | str | — | `'binaural'` (por defecto) / `'diotic'` / `'monaural'` | Suma binaural |
+
+Devuelve un `MooreGlasbergLoudness`: `loudness` (N, sonos), `loudness_level`
+(fonios), `specific` (N′(i), 372 bins de 0,1 Cam), `erb_number`,
+`centre_frequencies`, `field`, `presentation`.
+
+### Sonoridad variable en el tiempo (ISO 532-3)
+
+ISO 532-3 envuelve el mismo modelo de excitación / sonoridad específica en un
+análisis espectral multirresolución deslizante (seis FFT paralelas, actualizadas
+cada 1 ms) y dos integradores temporales en cascada: la **sonoridad de corto
+plazo** S′(t), rápida, y la **sonoridad de largo plazo** S″(t), más lenta. La
+sonoridad de largo plazo de pico N_max predice la sonoridad de sonidos de hasta
+unos 5 s.
+
+```python
+import numpy as np
+from phonometry import loudness_moore_glasberg_time
+
+fs = 32000
+t = np.arange(int(1.3 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+
+res = loudness_moore_glasberg_time(x, fs, field="free")
+print(f"N_max = {res.n_max:.3f} sone  ({res.loudness_level_max:.0f} phon)")   # 1.000 sono (40 fonios)
+print(f"sonoridad de largo plazo superada el 5% del tiempo: {res.percentiles[5.0]:.3f} sone")
+
+res.plot()   # sonoridad de corto plazo S'(t) y de largo plazo S''(t) frente al tiempo
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es.png" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es_dark.png" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" style="width:80%">
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# El resultado lleva ambas trazas sobre un eje temporal de 1 ms:
+res.plot()
+plt.show()
+
+# O dibújalas directamente para ver la STL rápida frente a la LTL lenta:
+fig, ax = plt.subplots()
+ax.plot(res.time, res.short_term_loudness, label="Corto plazo S'(t)")
+ax.plot(res.time, res.long_term_loudness, label="Largo plazo S''(t)")
+ax.set_xlabel("Tiempo [s]")
+ax.set_ylabel("Sonoridad [sone]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+#### Parámetros de `loudness_moore_glasberg_time()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `signal` | array 1D o `(n, 2)` | Pa | no vacío | Mono = diótico; dos columnas = oídos izquierdo/derecho |
+| `fs` | int | Hz | > 0 | |
+| `field` | str | — | `'free'` (por defecto) / `'diffuse'` / `'eardrum'` | Transferencia del oído externo |
+| `presentation` | str | — | `'binaural'` (por defecto) / `'diotic'` / `'monaural'` | Suma binaural |
+| `percentiles` | secuencia | porcentaje | por defecto `(1, 5, 10, 50, 90, 95)` | Niveles de sonoridad de largo plazo excedidos |
+
+Devuelve un `MooreGlasbergTimeVaryingLoudness`: `time` (rejilla de 1 ms),
+`short_term_loudness` / `long_term_loudness` (sonos), sus `_level` en fonios,
+`n_max`, `loudness_level_max`, un dict `percentiles`, `field`, `presentation`.
+
+### Sonoridad del modelo de Sottek (ECMA-418-2)
+
+ECMA-418-2:2025 especifica un único front-end auditivo — filtrado del oído
+externo/medio, un banco de 53 filtros de tipo gammatone sobre la escala Bark_HMS
+(z = 0,5 .. 26,5), rectificación de media onda, RMS de bloque y una no
+linealidad compresiva (Fórmula 23) — que **comparten** sus métricas de
+sonoridad, tonalidad y aspereza. La sonoridad N se expresa en **sone_HMS**, y el
+mismo ancla de 1 kHz/40 dB calibra el front-end (nuestro valor de sala limpia
+0,996).
+
+```python
+import numpy as np
+from phonometry import loudness_ecma
+
+fs = 48000
+t = np.arange(int(1.2 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+
+res = loudness_ecma(x, fs, field="free")
+print(f"N = {res.loudness:.3f} sone_HMS")   # 0.996 sone_HMS
+print(res.specific_loudness.shape)          # (53,) sonoridad específica media N'(z)
+
+res.plot()   # sonoridad específica media N'(z) + N(l) dependiente del tiempo a 187,5 Hz
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es.png" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es_dark.png" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%">
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# El resultado lleva la sonoridad específica media sobre las 53 bandas Bark_HMS:
+res.plot()
+plt.show()
+
+# O dibuja N'(z) a mano frente a la escala de tasa de banda crítica:
+fig, ax = plt.subplots()
+ax.fill_between(res.bark, res.specific_loudness, alpha=0.3)
+ax.plot(res.bark, res.specific_loudness)
+ax.set_xlabel("Tasa de banda crítica z [Bark_HMS]")
+ax.set_ylabel("Sonoridad específica N' [sone_HMS/Bark_HMS]")
+plt.show()
+```
+
+</details>
+
+#### Parámetros de `loudness_ecma()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `signal_in` | array 1D | Pa | no vacío | Señal de presión calibrada |
+| `fs` | float | Hz | > 0 | Se remuestrea a 48 kHz internamente si es necesario (apartado 5.1.1) |
+| `field` | str | — | `'free'` (por defecto) / `'diffuse'` | Filtro del oído externo/medio (apartado 5.1.3) |
+
+Devuelve un `EcmaLoudness`: `loudness` (N, sone_HMS), `specific_loudness`
+(N′(z), 53 bandas), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
+(N(l) a 187,5 Hz), `field`.
+
+### Tonalidad (ECMA-418-2)
+
+Una componente tonal — un silbido, el tono de paso de pala de un ventilador —
+destaca incluso a bajo nivel. ECMA-418-2 la cuantifica a partir de la **función
+de autocorrelación** (ACF) de la señal rectificada de cada banda: una componente
+periódica (tonal) mantiene una ACF alta a retardo no nulo, y la relación entre
+sonoridad tonal y de ruido impulsa la tonalidad específica T′(z). El valor único
+T se da en **tu_HMS**, calibrado de modo que un tono de 1 kHz/40 dB sea
+≈ 1 tu_HMS; el resultado también sigue la frecuencia tonal f_ton por banda.
+
+```python
+import numpy as np
+from phonometry import tonality_ecma
+
+fs = 48000
+t = np.arange(int(1.2 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+
+res = tonality_ecma(x, fs, field="free")
+peak = int(np.argmax(res.specific_tonality))
+print(f"T = {res.tonality:.3f} tu_HMS")                    # 1.000 tu_HMS
+print(f"f_ton = {res.tonal_frequencies[peak]:.0f} Hz")     # 999 Hz
+
+res.plot()   # tonalidad específica media T'(z) + T(l) dependiente del tiempo
+```
+
+#### Parámetros de `tonality_ecma()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `signal_in` | array 1D | Pa | no vacío | Señal de presión calibrada |
+| `fs` | float | Hz | > 0 | Se remuestrea a 48 kHz internamente si es necesario |
+| `field` | str | — | `'free'` (por defecto) / `'diffuse'` | Filtro del oído externo/medio |
+| `f_low` | float, opcional | Hz | por defecto `None` | Borde inferior de una banda de usuario para la búsqueda de T(l) |
+| `f_high` | float, opcional | Hz | por defecto `None` | Borde superior de la banda de usuario |
+
+Devuelve un `EcmaTonality`: `tonality` (T, tu_HMS), `specific_tonality`
+(T′(z), 53 bandas), `bark`, `centre_frequencies`, `tonal_frequencies`
+(f_ton,z), `time`, `tonality_vs_time` (T(l)), `tonal_frequency_vs_time`,
+`field`.
+
+### Aspereza (ECMA-418-2) — capacidad nueva
+
+La aspereza es la sensación áspera y zumbante de una modulación de amplitud
+rápida (aproximadamente 20–300 Hz, con máximo cerca de 70 Hz) — la cualidad de
+un ralentí diésel o de un altavoz distorsionado. Es una **métrica nueva** en
+phonometry. ECMA-418-2 extrae la envolvente de cada banda, pondera su espectro
+de modulación por la tasa y la profundidad de modulación, y correlaciona la
+modulación entre bandas; el resultado R se da en **asper**. El sonido de
+referencia (portador de 1 kHz, modulado en amplitud al 100 % a 70 Hz, 60 dB SPL)
+se define como 1 asper — esta implementación de sala limpia devuelve
+1,0735 asper (alrededor de +7 %), una varianza honesta: la constante de
+calibración tabulada c_R (Fórmula 104) se usa **sin** reajustarla hacia atrás al
+objetivo.
+
+```python
+import numpy as np
+from phonometry import roughness_ecma
+
+fs = 48000
+t = np.arange(int(2.0 * fs)) / fs
+carrier = np.sin(2 * np.pi * 1000 * t)
+amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)                  # portador a 60 dB SPL
+x = amp * (1.0 + np.cos(2 * np.pi * 70 * t)) * carrier      # AM al 100 % a 70 Hz
+
+res = roughness_ecma(x, fs, field="free")
+print(f"R = {res.roughness:.4f} asper")   # 1.0735 asper (objetivo de referencia 1.0)
+
+res.plot()   # aspereza R(l50) dependiente del tiempo + mapa de calor de aspereza específica
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es.png" alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es_dark.png" alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad" style="width:80%">
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import tonality_ecma, roughness_ecma
+
+fs = 48000
+t = np.arange(int(2.0 * fs)) / fs
+amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)
+
+# Un tono puro (tonal, suave) frente a un tono modulado en amplitud a 70 Hz (áspero):
+tone = amp * np.sin(2 * np.pi * 1000 * t)
+rough = amp * (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
+
+scores = {
+    "Tono puro": (tonality_ecma(tone, fs).tonality, roughness_ecma(tone, fs).roughness),
+    "Tono AM 70 Hz": (tonality_ecma(rough, fs).tonality, roughness_ecma(rough, fs).roughness),
+}
+labels = list(scores)
+tonal = [scores[k][0] for k in labels]
+rough_v = [scores[k][1] for k in labels]
+xpos = np.arange(len(labels))
+fig, ax = plt.subplots()
+ax.bar(xpos - 0.2, tonal, 0.4, label="Tonalidad [tu_HMS]")
+ax.bar(xpos + 0.2, rough_v, 0.4, label="Aspereza [asper]")
+ax.set_xticks(xpos)
+ax.set_xticklabels(labels)
+ax.legend()
+plt.show()
+```
+
+</details>
+
+#### Parámetros de `roughness_ecma()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `signal_in` | array 1D | Pa | no vacío | Señal de presión calibrada |
+| `fs` | float | Hz | > 0 | Se remuestrea a 48 kHz internamente si es necesario |
+| `field` | str | — | `'free'` (por defecto) / `'diffuse'` | Filtro del oído externo/medio |
+
+Devuelve un `EcmaRoughness`: `roughness` (R, asper, el percentil 90 de
+R(l50)), `specific_roughness` (R′(z), 53 bandas), `bark`, `centre_frequencies`,
+`time`, `roughness_vs_time` (R(l50)), `specific_roughness_vs_time`
+(array de (n_times, 53)), `field`.
 
 Consulta [Niveles](/phonometry/es/guides/levels/) para las métricas de
 tonalidad y [Teoría](/phonometry/es/reference/theory/) para la matemática

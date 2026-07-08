@@ -1153,6 +1153,119 @@ def _chk_iso10534_1_swr() -> Outcome:
     return numeric(ref.ISO10534_1_ABSORPTION, alpha, 1e-9, places=4)
 
 
+# ---------------------------------------------------------------------------
+# Scattering & diffusion (ISO 17497-1/-2)
+# ---------------------------------------------------------------------------
+_SCATTERING = "Scattering & diffusion (ISO 17497)"
+
+
+@register(_SCATTERING, "ISO 17497-1:2004 Eq (2)", "Reference speed of sound at 20 C")
+def _chk_iso17497_1_speed() -> Outcome:
+    c = float(ph.speed_of_sound(20.0))
+    return numeric(ref.ISO17497_1_SPEED_OF_SOUND_20C, c, 1e-6, unit="m/s", places=4)
+
+
+@register(_SCATTERING, "ISO 17497-1:2004 Eqs (1)/(4)/(5)", "Scattering coefficient (synthetic chain)")
+def _chk_iso17497_1_scattering() -> Outcome:
+    t1, t2, t3, t4 = ref.ISO17497_1_CHAIN_T
+    c = ref.ISO17497_1_CHAIN_C
+    alpha_s = ph.random_incidence_absorption(
+        ref.ISO17497_1_CHAIN_V, ref.ISO17497_1_CHAIN_S, c1=c, T1=t1, c2=c, T2=t2
+    )
+    alpha_spec = ph.specular_absorption_coefficient(
+        ref.ISO17497_1_CHAIN_V, ref.ISO17497_1_CHAIN_S, c3=c, T3=t3, c4=c, T4=t4
+    )
+    s = float(ph.scattering_coefficient(alpha_spec, alpha_s))
+    return numeric(ref.ISO17497_1_CHAIN_SCATTERING, s, 1e-9, places=4)
+
+
+@register(_SCATTERING, "ISO 17497-1:2004 Annex A.5", "Expanded uncertainty of scattering coefficient")
+def _chk_iso17497_1_uncertainty() -> Outcome:
+    u = float(ph.scattering_coefficient_uncertainty(
+        ref.ISO17497_1_A5_ALPHA_SPEC,
+        ref.ISO17497_1_A5_ALPHA_S,
+        ref.ISO17497_1_A5_U_ALPHA_SPEC,
+        ref.ISO17497_1_A5_U_ALPHA_S,
+    ).u_scattering)
+    return numeric(ref.ISO17497_1_A5_U_SCATTERING, u, 1e-6, places=5)
+
+
+@register(_SCATTERING, "ISO 17497-2:2012 Formula (5)", "Diffusion coefficient (autocorrelation)")
+def _chk_iso17497_2_diffusion() -> Outcome:
+    d = float(ph.directional_diffusion_coefficient(list(ref.ISO17497_2_DIFFUSION_LEVELS)))
+    return numeric(ref.ISO17497_2_DIFFUSION_COEFF, d, 1e-9, places=4)
+
+
+@register(_SCATTERING, "ISO 17497-2:2012 Formula (8)", "Zenith area factor (radians convention)")
+def _chk_iso17497_2_area_factor() -> Outcome:
+    n = ph.area_factors([0.0, 30.0, 60.0, 90.0], delta_theta=5.0)
+    return numeric(ref.ISO17497_2_AREA_FACTOR_ZENITH, float(n[0]), 1e-6, places=5)
+
+
+# ---------------------------------------------------------------------------
+# In-situ road-surface absorption (ISO 13472-1/-2)
+# ---------------------------------------------------------------------------
+_ROAD = "In-situ road absorption (ISO 13472)"
+
+
+@register(_ROAD, "ISO 13472-1:2002 Clause 4.2", "Geometrical-spreading factor Kr")
+def _chk_iso13472_1_kr() -> Outcome:
+    kr = ph.geometric_spreading_factor()
+    return numeric(ref.ISO13472_1_KR, kr, 1e-12, places=4)
+
+
+@register(_ROAD, "ISO 13472-1:2002 Annex A", "Maximum-sampled-area radius")
+def _chk_iso13472_1_msa() -> Outcome:
+    r = ph.max_sampled_area_radius(ref.ISO13472_1_MSA_WINDOW)
+    return numeric(ref.ISO13472_1_MSA_RADIUS, r, 1e-6, unit="m", places=4)
+
+
+@register(_ROAD, "ISO 13472-2:2010 Clause 5.4.1", "Spot-tube upper usable frequency f_u")
+def _chk_iso13472_2_fu() -> Outcome:
+    fu = ph.spot_tube_upper_frequency(
+        ref.ISO13472_2_SPOT_DIAMETER, ref.ISO13472_2_SPOT_SPEED
+    )
+    return numeric(ref.ISO13472_2_SPOT_FU, fu, 0.1, unit="Hz", places=1)
+
+
+# ---------------------------------------------------------------------------
+# Precision sound power (ISO 3745 / ISO 9614-3)
+# ---------------------------------------------------------------------------
+_PRECISION_POWER = "Precision sound power (ISO 3745 / 9614-3)"
+
+
+@register(_PRECISION_POWER, "ISO 3745:2012 Clause 10.5 EXAMPLE", "Expanded uncertainty U (k=2)")
+def _chk_iso3745_uncertainty() -> Outcome:
+    u = ph.precision_uncertainty(
+        ref.ISO3745_U_SIGMA_R0, ref.ISO3745_U_SIGMA_OMC, ref.ISO3745_U_COVERAGE
+    )
+    return numeric(ref.ISO3745_U_EXPANDED, u, 1e-3, unit="dB", places=3)
+
+
+@register(_PRECISION_POWER, "ISO 3745:2012 Eq (11)", "K1 background floor (6 dB edge band)")
+def _chk_iso3745_k1_floor() -> Outcome:
+    k1 = ph.precision_background_correction(
+        np.array([[ref.ISO3745_K1_EDGE_LEVEL]]),
+        np.array([[ref.ISO3745_K1_EDGE_BACKGROUND]]),
+        np.array([ref.ISO3745_K1_EDGE_FREQUENCY]),
+    )
+    return numeric(ref.ISO3745_K1_EDGE_FLOOR, float(k1[0, 0]), 1e-4, unit="dB", places=4)
+
+
+@register(_PRECISION_POWER, "ISO 3745:2012 Eq (16)", "Meteorological C1 at 23 C reference")
+def _chk_iso3745_c1() -> Outcome:
+    c1 = ph.meteorological_corrections(23.0, 101.325).c1
+    return numeric(ref.ISO3745_C1_REFERENCE, c1, 1e-4, unit="dB", places=4)
+
+
+@register(_PRECISION_POWER, "ISO 9614-3:2002 Eqs (5)/(8)/(9)", "Uniform-intensity LW recovery")
+def _chk_iso9614_3_uniform() -> Outcome:
+    areas = np.array(ref.ISO9614_3_UNIFORM_AREAS, dtype=float)
+    i_n = np.full(areas.shape, ref.ISO9614_3_UNIFORM_POWER / float(areas.sum()))
+    res = ph.sound_power_intensity_precision(i_n, areas)
+    return numeric(ref.ISO9614_3_UNIFORM_LW, float(res.sound_power_level[0]), 1e-9, unit="dB", places=4)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

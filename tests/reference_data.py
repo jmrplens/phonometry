@@ -340,3 +340,84 @@ ISO9053_2_ANNEX_A_KAPPA_PRIME = 1.370  # kappa' = kappa*0,978
 ISO10534_1_SWR = 3.0
 ISO10534_1_REFLECTION_MAGNITUDE = 0.5
 ISO10534_1_ABSORPTION = 0.75
+
+# ---------------------------------------------------------------------------
+# ISO 17497-1:2004 random-incidence scattering coefficient. Eq (2) fixes the
+# reference speed of sound c = 343,2 m/s at 20 C. The synthetic worked chain
+# (T1..T4 = 8,0/6,0/7,5/5,0 s, V/S from V = 200 m3, S = 12 m2) exercises the
+# Sabine absorptions Eq (1)/(4) and the scattering Eq (5). Mirrors
+# tests/test_scattering_diffusion.py.
+# ---------------------------------------------------------------------------
+ISO17497_1_SPEED_OF_SOUND_20C = 343.2  # Eq (2) reference condition (m/s)
+ISO17497_1_CHAIN_V = 200.0  # chamber volume V (m3)
+ISO17497_1_CHAIN_S = 10.0  # sample area S (m2)
+ISO17497_1_CHAIN_C = 343.2  # speed of sound used throughout (m/s)
+ISO17497_1_CHAIN_T: tuple[float, float, float, float] = (8.0, 6.0, 7.5, 5.0)
+ISO17497_1_CHAIN_ALPHA_S = 0.1342754467754468  # random-incidence absorption
+ISO17497_1_CHAIN_ALPHA_SPEC = 0.21484071484071485  # specular absorption
+ISO17497_1_CHAIN_SCATTERING = 0.09306108711505018  # s = (a_spec-a_s)/(1-a_s)
+# Annex A.5 combined uncertainty of the scattering coefficient. For
+# a_spec = 0,6, a_s = 0,3 with u(a_spec) = 0,02 and u(a_s) = 0,01 the
+# error-propagation form gives u(s) = 0,0297.
+ISO17497_1_A5_ALPHA_SPEC = 0.6
+ISO17497_1_A5_ALPHA_S = 0.3
+ISO17497_1_A5_U_ALPHA_SPEC = 0.02
+ISO17497_1_A5_U_ALPHA_S = 0.01
+ISO17497_1_A5_U_SCATTERING = 0.0297147342419613  # combined u(s)
+
+# ---------------------------------------------------------------------------
+# ISO 17497-2:2012 diffusion coefficient. Formula (5)/(6) autocorrelation of a
+# polar response; the four-level pattern below is re-derived by hand. Formula
+# (8) area factors use RADIANS internally, so the zenith weight is
+# N0 = (4*pi/dphi)*sin^2(dtheta/4) / A_min with dtheta = dphi = 5 deg.
+# ---------------------------------------------------------------------------
+ISO17497_2_DIFFUSION_LEVELS: tuple[float, ...] = (70.0, 74.0, 68.0, 72.0)
+ISO17497_2_DIFFUSION_COEFF = 0.7367371379926486  # d from Formula (5)
+ISO17497_2_AREA_FACTOR_ZENITH = 1.571045588794762  # N0, radians convention
+
+# ---------------------------------------------------------------------------
+# ISO 13472-1:2002 in-situ road-surface absorption. The mandatory geometry
+# ds = 1,25 m, dm = 0,25 m gives the geometrical-spreading factor Kr = 2/3
+# (Clause 4.2). The Annex A worked example (c = 340 m/s, 5 ms flat window)
+# gives a maximum-sampled-area radius r ~ 1,34 m. Mirrors
+# tests/test_road_absorption.py.
+# ---------------------------------------------------------------------------
+ISO13472_1_KR = 2.0 / 3.0  # geometrical-spreading factor
+ISO13472_1_MSA_WINDOW = 5.0e-3  # reflected-wave window width Tw (s)
+ISO13472_1_MSA_RADIUS = 1.3425466996067585  # Annex A worked example (m)
+
+# ---------------------------------------------------------------------------
+# ISO 13472-2:2010 spot method. The upper usable (plane-wave) frequency of a
+# circular tube is f_u = 0,58 c0/d (Clause 5.4.1); a 100 mm tube at
+# c0 = 343 m/s gives f_u = 1989,4 Hz.
+# ---------------------------------------------------------------------------
+ISO13472_2_SPOT_DIAMETER = 0.100  # tube diameter d (m)
+ISO13472_2_SPOT_SPEED = 343.0  # speed of sound c0 (m/s)
+ISO13472_2_SPOT_FU = 1989.4  # upper usable frequency (Hz)
+
+# ---------------------------------------------------------------------------
+# ISO 3745:2012 precision sound power (anechoic/hemi-anechoic). The Clause 10.5
+# EXAMPLE combines sigma_omc = 2,0 dB and sigma_R0 = 0,5 dB at k = 2 to the
+# expanded uncertainty U = 4,1 dB. The K1 background correction floors at
+# 1,26 dB (>= 6 dB signal-to-noise edge bands). The meteorological correction
+# C1 at the 23 C, ps0 reference is 5*lg(296/314) = -0,128 dB. Mirrors
+# tests/test_sound_power_precision.py.
+# ---------------------------------------------------------------------------
+ISO3745_U_SIGMA_R0 = 0.5  # reproducibility standard deviation (dB)
+ISO3745_U_SIGMA_OMC = 2.0  # operating/mounting/... std. deviation (dB)
+ISO3745_U_COVERAGE = 2.0  # coverage factor k
+ISO3745_U_EXPANDED = 4.123105625617661  # U = k*sqrt(sR0^2+somc^2) (dB)
+ISO3745_K1_EDGE_LEVEL = 56.0  # measured Lp in the edge band (dB)
+ISO3745_K1_EDGE_BACKGROUND = 50.0  # background Lp -> dLp = 6 dB (dB)
+ISO3745_K1_EDGE_FREQUENCY = 200.0  # <= 200 Hz band uses the 6 dB floor (Hz)
+ISO3745_K1_EDGE_FLOOR = 1.25628  # K1 floor, 6 dB S/N edge band (dB)
+ISO3745_C1_REFERENCE = -0.12819  # C1 at 23 C, ps = ps0 (dB)
+
+# ---------------------------------------------------------------------------
+# ISO 9614-3:2002 precision intensity scanning. A fully enclosing surface with
+# a uniform normal intensity In = W/S recovers the source power exactly, so
+# LW = 10*lg(W/P0). For W = 100 uW this is LW = 80 dB (P0 = 1 pW).
+# ---------------------------------------------------------------------------
+ISO9614_3_UNIFORM_POWER = 1.0e-4  # radiated power W (W)
+ISO9614_3_UNIFORM_AREAS: tuple[float, ...] = (0.5, 1.0, 0.25, 2.0)
+ISO9614_3_UNIFORM_LW = 80.0  # 10*lg(W/1e-12) (dB)

@@ -100,6 +100,25 @@ from .sound_absorption import (
     absorption_coefficient,
     attenuation_from_alpha,
 )
+from .air_absorption import (
+    AtmosphericAbsorptionWarning,
+    air_attenuation,
+    air_attenuation_m,
+)
+from .outdoor_propagation import (
+    DEFAULT_FREQUENCIES,
+    Barrier,
+    OutdoorAttenuation,
+    atmospheric_absorption,
+    barrier_attenuation,
+    directivity_omega,
+    geometric_divergence,
+    ground_attenuation,
+    ground_attenuation_alternative,
+    meteorological_correction,
+    outdoor_propagation_attenuation,
+    predicted_receiver_level,
+)
 from .room_ir import (
     impulse_response,
     inverse_filter,
@@ -139,6 +158,19 @@ from .building_uncertainty import (
     single_number_uncertainty,
     single_number_uncertainty_uncorrelated,
     uncertain_value,
+)
+from .occupational_exposure import (
+    COVERAGE_FACTOR,
+    INSTRUMENT_U2,
+    ExposureResult,
+    ExposureWarning,
+    Task,
+    TaskContribution,
+    full_day_exposure,
+    job_based_exposure,
+    minimum_cumulative_duration_hours,
+    table_c4_contribution,
+    task_based_exposure,
 )
 from ._version import __version__
 
@@ -207,6 +239,21 @@ __all__ = [
     "absorption_coefficient",
     "attenuation_from_alpha",
     "AbsorptionWarning",
+    "air_attenuation",
+    "air_attenuation_m",
+    "AtmosphericAbsorptionWarning",
+    "DEFAULT_FREQUENCIES",
+    "Barrier",
+    "OutdoorAttenuation",
+    "atmospheric_absorption",
+    "barrier_attenuation",
+    "directivity_omega",
+    "geometric_divergence",
+    "ground_attenuation",
+    "ground_attenuation_alternative",
+    "meteorological_correction",
+    "outdoor_propagation_attenuation",
+    "predicted_receiver_level",
     "open_plan_metrics",
     "OpenPlanResult",
     "sound_power_pressure",
@@ -271,6 +318,17 @@ __all__ = [
     "BandUncertainty",
     "UncertainValue",
     "COVERAGE_FACTORS",
+    "task_based_exposure",
+    "job_based_exposure",
+    "full_day_exposure",
+    "minimum_cumulative_duration_hours",
+    "table_c4_contribution",
+    "Task",
+    "TaskContribution",
+    "ExposureResult",
+    "ExposureWarning",
+    "COVERAGE_FACTOR",
+    "INSTRUMENT_U2",
 ]
 
 

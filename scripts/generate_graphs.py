@@ -246,6 +246,30 @@ _ES_EXACT = {
     "Standard uncertainty ±u": "Incertidumbre típica ±u",
     "Expanded uncertainty ±U (95 %)": "Incertidumbre expandida ±U (95 %)",
     "R'w ± U (single number)": "R'w ± U (valor único)",
+    # Outdoor propagation & occupational exposure (PR-C).
+    "ISO 9613-1 Atmospheric Absorption α(f)":
+        "Absorción atmosférica α(f) (ISO 9613-1)",
+    "Attenuation coefficient α [dB/km]":
+        "Coeficiente de atenuación α [dB/km]",
+    "ISO 9613-2 Attenuation Breakdown (with a 4 m barrier)":
+        "Desglose de la atenuación (ISO 9613-2, con barrera de 4 m)",
+    "Octave-band centre frequency [Hz]":
+        "Frecuencia central de banda de octava [Hz]",
+    "Attenuation A [dB]": "Atenuación A [dB]",
+    "Adiv — divergence": "Adiv — divergencia",
+    "Aatm — atmospheric": "Aatm — atmosférica",
+    "Agr — ground": "Agr — suelo",
+    "Abar — barrier": "Abar — barrera",
+    "A — total": "A — total",
+    "ISO 9612 Task-Based Exposure (Annex D)":
+        "Exposición por tareas (ISO 9612, Anexo D)",
+    "LEX,8h contribution [dB]": "Contribución a LEX,8h [dB]",
+    "Measurement task": "Tarea de medición",
+    "planning/breaks": "planificación/pausas",
+    "welding": "soldadura",
+    "cutting/grinding": "corte/amolado",
+    "Daily LEX,8h": "LEX,8h diario",
+    "LEX,8h + U (one-sided 95 %)": "LEX,8h + U (unilateral 95 %)",
 }
 
 _ES_PATTERNS = [
@@ -295,6 +319,7 @@ _ES_PATTERNS = [
     (r"^ceiling-(.+)$", r"techo-\1"),
     (r"^facade-(.+)$", r"fachada-\1"),
     (r"^wall-(.+)$", r"tabique-\1"),
+    (r"^(.+) °C, (.+) % RH$", r"\1 °C, \2 % HR"),
 ]
 
 
@@ -2472,6 +2497,145 @@ def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     plt.close()
 
 
+def generate_air_absorption_alpha(output_dir: str) -> None:
+    """ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha(f)."""
+    print("Generating air_absorption_alpha.png...")
+    from phonometry import air_attenuation
+
+    freqs = np.logspace(np.log10(50.0), np.log10(10000.0), 400)
+    # Four representative (temperature, relative humidity) conditions spanning
+    # the relaxation behaviour: the reference, a dry warm day, a cold humid day
+    # and a hot humid day. alpha is returned in dB/m; plot in dB/km (Table 1).
+    conditions = [
+        (20.0, 50.0, COLOR_PRIMARY),
+        (20.0, 10.0, COLOR_SECONDARY),
+        (0.0, 70.0, COLOR_TERTIARY),
+        (30.0, 80.0, "#ff7f0e"),
+    ]
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    for temp, rh, color in conditions:
+        alpha_km = air_attenuation(freqs, temp, rh) * 1000.0
+        ax.loglog(freqs, alpha_km, color=color, linewidth=2.0,
+                  label=f"{temp:g} °C, {rh:g} % RH")
+    ax.set_title("ISO 9613-1 Atmospheric Absorption α(f)", fontweight="bold",
+                 pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Attenuation coefficient α [dB/km]")
+    ax.set_xlim(50.0, 10000.0)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.legend(loc="upper left", fontsize=10)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "air_absorption_alpha.png"))
+    plt.close()
+
+
+def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
+    """ISO 9613-2 per-term octave-band attenuation breakdown, with a barrier."""
+    print("Generating outdoor_attenuation_breakdown.png...")
+    from phonometry import Barrier, outdoor_propagation_attenuation
+
+    bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+    # A point source 200 m away over porous ground (G = 1), screened by a 4 m
+    # barrier midway (source and receiver 1,5 m high; the diffraction geometry
+    # gives dss = dsr ~ 100 m over the raised edge).
+    barrier = Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
+    att = outdoor_propagation_attenuation(
+        200.0, 1.5, 1.5, bands, ground_source=1.0, ground_middle=1.0,
+        ground_receiver=1.0, barrier=barrier, temperature=15.0, humidity=70.0,
+    )
+    x = np.arange(len(bands))
+    fig, ax = plt.subplots(figsize=(11, 6.4))
+    ax.bar(x, att.a_div, color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.6,
+           label="Adiv — divergence", zorder=3)
+    ax.bar(x, att.a_atm, bottom=att.a_div, color=COLOR_TERTIARY,
+           edgecolor=COLOR_FG, linewidth=0.6, label="Aatm — atmospheric",
+           zorder=3)
+    base = att.a_div + att.a_atm
+    ax.bar(x, att.a_gr, bottom=base, color="#9467bd", edgecolor=COLOR_FG,
+           linewidth=0.6, label="Agr — ground", zorder=3)
+    base = base + att.a_gr
+    ax.bar(x, att.a_bar, bottom=base, color="#ff7f0e", edgecolor=COLOR_FG,
+           linewidth=0.6, label="Abar — barrier", zorder=3)
+    ax.plot(x, att.a_total, marker="D", color=COLOR_SECONDARY, linewidth=2.0,
+            markersize=6, markerfacecolor="white", markeredgewidth=1.4,
+            zorder=5, label="A — total")
+
+    ax.set_title("ISO 9613-2 Attenuation Breakdown (with a 4 m barrier)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Octave-band centre frequency [Hz]")
+    ax.set_ylabel("Attenuation A [dB]")
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{b:g}" for b in bands])
+    ax.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.6)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9, ncol=2)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "outdoor_attenuation_breakdown.png"))
+    plt.close()
+
+
+def generate_exposure_uncertainty(output_dir: str) -> None:
+    """ISO 9612 Annex D task-based exposure with its expanded uncertainty."""
+    print("Generating exposure_uncertainty.png...")
+    from phonometry.occupational_exposure import Task, task_based_exposure
+
+    tasks = [
+        Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
+        Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
+             duration_range=(4.0, 6.0), label="welding"),
+        Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
+             duration_range=(1.0, 2.0), label="cutting/grinding"),
+    ]
+    result = task_based_exposure(tasks, include_duration_uncertainty=False,
+                                 warn=False)
+    labels = [t.label for t in result.tasks]
+    contribs = [t.lex_8h_contribution for t in result.tasks]
+    lex = result.lex_8h
+    upper = result.upper_limit  # LEX,8h + U
+
+    x = np.arange(len(labels))
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    ax.bar(x, contribs, color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.7,
+           width=0.6, zorder=3, label="Measurement task")
+    for xi, c in zip(x, contribs):
+        ax.text(xi, c - 2.5, f"{c:.1f}", ha="center", va="top",
+                fontsize=9, color="white", fontweight="bold")
+
+    # Daily energy-summed level and its one-sided 95 % upper limit LEX,8h + U.
+    ax.axhspan(lex, upper, color=COLOR_SECONDARY, alpha=0.14, zorder=0,
+               label="LEX,8h + U (one-sided 95 %)")
+    ax.axhline(lex, color=COLOR_SECONDARY, linewidth=2.0, zorder=4,
+               label="Daily LEX,8h")
+    ax.axhline(upper, color=COLOR_SECONDARY, linewidth=1.2, linestyle="--",
+               zorder=4)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    box = [
+        f"LEX,8h = {lex:.1f} dB",
+        f"U = {result.expanded_uncertainty:.1f} dB (k = 1.65)",
+        f"LEX,8h + U = {upper:.1f} dB",
+    ]
+    ax.text(0.03, 0.78, "\n".join(box), transform=ax.transAxes, va="top",
+            ha="left", fontsize=10, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+
+    ax.set_title("ISO 9612 Task-Based Exposure (Annex D)", fontweight="bold",
+                 pad=12)
+    ax.set_xlabel("Measurement task")
+    ax.set_ylabel("LEX,8h contribution [dB]")
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, rotation=15, ha="right")
+    ax.set_ylim(0.0, upper + 10.0)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "exposure_uncertainty.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -2515,6 +2679,11 @@ def generate_all(img_dir: str) -> None:
     # Building-acoustics prediction / uncertainty (EN 12354-1, ISO 12999-1)
     generate_prediction_flanking_demo(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
+
+    # Outdoor propagation & occupational exposure (ISO 9613-1/2, ISO 9612)
+    generate_air_absorption_alpha(img_dir)
+    generate_outdoor_attenuation_breakdown(img_dir)
+    generate_exposure_uncertainty(img_dir)
 
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)

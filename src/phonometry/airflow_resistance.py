@@ -46,8 +46,17 @@ device needs no absolute calibration (clause 8.7). The RMS piston volume flow is
 ``q_v = 2*pi*f*h*A_P`` (ISO 9053-2:2020, 6.2), with ``h`` the stroke amplitude
 and ``A_P`` the piston cross-sectional area.
 
-Neither part defines a temperature/atmospheric normalisation of the result; the
-adiabatic value ``kappa = 1.4`` is used as the default for ``kappa'``.
+The **effective** ratio of specific heats ``kappa'`` accounts for heat conduction
+between the oscillating air and the cavity walls, which makes the compression not
+fully adiabatic. ISO 9053-2:2020 Annex A (normative) gives its evaluation from the
+cavity geometry and air properties (:func:`effective_kappa`, Formula (A.7)); the
+Annex A.3 worked example yields ``kappa' = 1.370`` (about 2 % below the adiabatic
+``kappa = 1.4008``). When no cavity/air data are supplied,
+:func:`alternating_airflow_resistance` falls back to the **uncorrected adiabatic**
+value ``kappa = 1.4`` (Formula (A.1)); for a conforming result compute ``kappa'``
+per Annex A and pass it explicitly.
+
+Neither part defines a temperature/atmospheric normalisation of the result.
 """
 
 from __future__ import annotations
@@ -61,8 +70,17 @@ from numpy.typing import ArrayLike, NDArray
 
 #: Standard atmospheric (static) pressure ``P_S`` (Pa), ISO 9053-2:2020 Formula (2).
 _STANDARD_STATIC_PRESSURE = 101325.0
-#: Adiabatic ratio of specific heats for air; default for ``kappa'`` (ISO 9053-2 Annex A).
+#: Uncorrected adiabatic ratio of specific heats for air; the fallback used for
+#: ``kappa'`` when no cavity/air data are supplied. NOT the Annex A output: Annex A
+#: applies a heat-conduction correction that lowers it (worked example ``kappa' = 1.370``).
 _ADIABATIC_KAPPA = 1.4
+#: Reference air properties from IEC 61094-2:2009 (23 C, 101.325 kPa, 50 % RH) as used
+#: in the ISO 9053-2:2020 Annex A.3 worked example; defaults of :func:`effective_kappa`.
+_ANNEX_A_SPEED_OF_SOUND = 345.9  # c0 (m/s)
+_ANNEX_A_AIR_DENSITY = 1.186  # rho0 (kg/m3)
+_ANNEX_A_HEAT_RATIO = 1.4008  # kappa, adiabatic (ISO 9053-2:2020 Annex A.3)
+_ANNEX_A_THERMAL_CONDUCTIVITY = 0.02355  # k_a (J/(s*m*K))
+_ANNEX_A_SPECIFIC_HEAT_CP = 938.7  # C_P (J/(kg*K))
 #: Reference linear airflow velocity, ISO 9053-1:2018 clause 7.5 (m/s).
 _STATIC_REFERENCE_VELOCITY = 0.5e-3
 #: Upper linear-velocity limit of the static method, ISO 9053-1:2018 clause 7.5 (m/s).
@@ -284,6 +302,89 @@ def piston_volume_flow_rate(
     return 2.0 * math.pi * frequency * stroke_amplitude * piston_area
 
 
+def thermal_boundary_layer_thickness(
+    frequency: float,
+    *,
+    speed_of_sound: float = _ANNEX_A_SPEED_OF_SOUND,
+    air_density: float = _ANNEX_A_AIR_DENSITY,
+    specific_heat_cp: float = _ANNEX_A_SPECIFIC_HEAT_CP,
+    thermal_conductivity: float = _ANNEX_A_THERMAL_CONDUCTIVITY,
+) -> float:
+    """Thermal boundary-layer thickness ``b`` (ISO 9053-2:2020, Formulae (A.4)/(A.5)).
+
+    ::
+
+        l_h = k_a / (rho0 * c0 * C_P)              (A.5)
+        b   = sqrt(2 * c0 * l_h / omega)           (A.4),  omega = 2*pi*f
+
+    ``frequency`` is the piston frequency ``f`` (Hz); ``speed_of_sound`` ``c0`` (m/s),
+    ``air_density`` ``rho0`` (kg/m3), ``specific_heat_cp`` ``C_P`` (J/(kg*K)) and
+    ``thermal_conductivity`` ``k_a`` (J/(s*m*K)) are air properties, defaulting to the
+    IEC 61094-2:2009 values used in ISO 9053-2:2020 Annex A.3. Returns ``b`` in metres;
+    with the Annex A.3 example (``f = 2 Hz``) this is ``1.83e-3 m``.
+    """
+    if frequency <= 0.0:
+        raise ValueError("'frequency' must be positive.")
+    if speed_of_sound <= 0.0:
+        raise ValueError("'speed_of_sound' must be positive.")
+    if air_density <= 0.0:
+        raise ValueError("'air_density' must be positive.")
+    if specific_heat_cp <= 0.0:
+        raise ValueError("'specific_heat_cp' must be positive.")
+    if thermal_conductivity <= 0.0:
+        raise ValueError("'thermal_conductivity' must be positive.")
+    omega = 2.0 * math.pi * frequency
+    diffusion_length = thermal_conductivity / (air_density * speed_of_sound * specific_heat_cp)
+    return math.sqrt(2.0 * speed_of_sound * diffusion_length / omega)
+
+
+def effective_kappa(
+    cavity_surface: float,
+    cavity_volume: float,
+    frequency: float,
+    *,
+    speed_of_sound: float = _ANNEX_A_SPEED_OF_SOUND,
+    air_density: float = _ANNEX_A_AIR_DENSITY,
+    specific_heat_ratio: float = _ANNEX_A_HEAT_RATIO,
+    specific_heat_cp: float = _ANNEX_A_SPECIFIC_HEAT_CP,
+    thermal_conductivity: float = _ANNEX_A_THERMAL_CONDUCTIVITY,
+) -> float:
+    """Effective ratio of specific heats ``kappa'`` (ISO 9053-2:2020, Annex A, Formula (A.7)).
+
+    Heat conduction between the oscillating air and the cavity walls makes the
+    compression not fully adiabatic, lowering ``kappa`` to::
+
+        kappa' = kappa / sqrt(1 + (kappa-1)*(S/V)*b + 0.5*((kappa-1)*(S/V)*b)**2)   (A.7)
+
+    with ``b`` the thermal boundary-layer thickness (Formulae (A.4)/(A.5),
+    :func:`thermal_boundary_layer_thickness`), ``S`` the total internal surface area
+    of the air cavity (m2) and ``V`` its volume (m3).
+
+    ``cavity_surface`` is ``S`` (m2), ``cavity_volume`` ``V`` (m3) and ``frequency``
+    the piston frequency ``f`` (Hz); ``specific_heat_ratio`` ``kappa`` (adiabatic) and
+    the remaining air properties default to the ISO 9053-2:2020 Annex A.3 values.
+    Returns the dimensionless ``kappa'`` for use in
+    :func:`alternating_airflow_resistance`; the Annex A.3 worked example
+    (``S = 0.0471 m2``, ``V = 7.854e-4 m3``, ``f = 2 Hz``) yields ``kappa' = 1.370``.
+    """
+    if cavity_surface <= 0.0:
+        raise ValueError("'cavity_surface' must be positive.")
+    if cavity_volume <= 0.0:
+        raise ValueError("'cavity_volume' must be positive.")
+    if specific_heat_ratio <= 0.0:
+        raise ValueError("'specific_heat_ratio' must be positive.")
+    boundary_thickness = thermal_boundary_layer_thickness(
+        frequency,
+        speed_of_sound=speed_of_sound,
+        air_density=air_density,
+        specific_heat_cp=specific_heat_cp,
+        thermal_conductivity=thermal_conductivity,
+    )
+    surface_to_volume = cavity_surface / cavity_volume
+    term = (specific_heat_ratio - 1.0) * surface_to_volume * boundary_thickness
+    return specific_heat_ratio / math.sqrt(1.0 + term + 0.5 * term**2)
+
+
 def _warn_alternating_validity(
     ratio_term: float,
     level_specimen: float,
@@ -336,9 +437,14 @@ def alternating_airflow_resistance(
     (m); ``frequency`` the piston frequency ``f`` (Hz, 1-4 Hz); ``cavity_volume``
     the airtight-termination cavity volume ``V`` (m3); ``static_pressure`` the
     atmospheric pressure ``P_S`` (Pa, default 101325); ``kappa_prime`` the
-    effective ratio of specific heats ``kappa'`` (Annex A, default 1.4);
-    ``background_level`` the optional cavity background level ``L_pb`` (dB) for the
-    Formula (4) check. Returns ``R`` in Pa*s/m3.
+    effective ratio of specific heats ``kappa'``; ``background_level`` the optional
+    cavity background level ``L_pb`` (dB) for the Formula (4) check. Returns ``R`` in
+    Pa*s/m3.
+
+    ``kappa_prime`` defaults to the **uncorrected adiabatic** ``kappa = 1.4``
+    (Formula (A.1)). For a result conforming to the normative Annex A, compute the
+    heat-conduction-corrected ``kappa'`` with :func:`effective_kappa` from the cavity
+    geometry and pass it here (the Annex A.3 example gives ``kappa' = 1.370``).
 
     Emits :class:`AirflowResistanceWarning` when the piston frequency is outside
     1-4 Hz or when the Formula (3)/(4) validity criteria are not met.

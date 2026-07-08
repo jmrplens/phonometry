@@ -32,10 +32,12 @@ from phonometry.airflow_resistance import (
     airflow_resistance,
     airflow_resistivity,
     alternating_airflow_resistance,
+    effective_kappa,
     linear_airflow_velocity,
     piston_volume_flow_rate,
     specific_airflow_resistance,
     static_airflow_resistance,
+    thermal_boundary_layer_thickness,
 )
 
 
@@ -242,6 +244,49 @@ def test_alternating_invalid_inputs_raise(kwargs: dict[str, float]) -> None:
         alternating_airflow_resistance(60.0, 80.0, **base)
 
 
+# --- Annex A (normative): effective ratio of specific heats kappa' -----------
+# Worked example, ISO 9053-2:2020 Annex A.3 (page-verified oracle): closed cylinder
+# 100 mm x 100 mm -> V = 7.854e-4 m3, S = 0.0471 m2; IEC 61094-2:2009 air properties
+# at 23 C; f = 2 Hz give b = 1.83e-3 m and kappa' = kappa*0.978 = 1.370.
+
+def test_thermal_boundary_layer_thickness_annex_a_example() -> None:
+    b = thermal_boundary_layer_thickness(frequency=2.0)
+    assert b == pytest.approx(1.83e-3, abs=5e-6)
+
+
+def test_effective_kappa_annex_a_example() -> None:
+    kappa_prime = effective_kappa(
+        cavity_surface=0.0471, cavity_volume=7.854e-4, frequency=2.0
+    )
+    # Standard prints kappa' = kappa*0.978 = 1.370 (kappa = 1.4008).
+    assert kappa_prime == pytest.approx(1.370, abs=5e-4)
+    assert kappa_prime == pytest.approx(1.4008 * 0.978, abs=1e-3)
+
+
+def test_effective_kappa_below_adiabatic() -> None:
+    # Heat conduction always lowers kappa below the adiabatic value.
+    kappa_prime = effective_kappa(
+        cavity_surface=0.0471, cavity_volume=7.854e-4, frequency=2.0
+    )
+    assert kappa_prime < 1.4008
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"cavity_surface": 0.0},
+        {"cavity_volume": 0.0},
+        {"frequency": 0.0},
+        {"specific_heat_ratio": 0.0},
+    ],
+)
+def test_effective_kappa_invalid_inputs_raise(kwargs: dict[str, float]) -> None:
+    base = {"cavity_surface": 0.0471, "cavity_volume": 7.854e-4, "frequency": 2.0}
+    base.update(kwargs)
+    with pytest.raises(ValueError):
+        effective_kappa(**base)
+
+
 def test_public_exports() -> None:
     import phonometry
 
@@ -249,6 +294,7 @@ def test_public_exports() -> None:
         "AirflowResistanceWarning", "StaticAirflowResult", "airflow_resistance",
         "specific_airflow_resistance", "airflow_resistivity", "linear_airflow_velocity",
         "static_airflow_resistance", "piston_volume_flow_rate",
-        "alternating_airflow_resistance",
+        "alternating_airflow_resistance", "effective_kappa",
+        "thermal_boundary_layer_thickness",
     ):
         assert hasattr(phonometry, name), name

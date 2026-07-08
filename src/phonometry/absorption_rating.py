@@ -220,48 +220,9 @@ class AbsorptionRatingResult:
         (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
-        try:
-            import matplotlib.pyplot as plt
-        except ImportError as exc:  # pragma: no cover - exercised via monkeypatch
-            raise ImportError(
-                "Plotting requires matplotlib. Install it with: "
-                "pip install phonometry[plot]"
-            ) from exc
+        from ._plotting import plot_weighted_absorption
 
-        if ax is None:
-            _, ax = plt.subplots()
-        centers = np.asarray(self.band_centers, dtype=np.float64)
-        measured = np.asarray(self.measured, dtype=np.float64)
-        reference = np.asarray(self.shifted_reference, dtype=np.float64)
-        kwargs.setdefault("color", "#1f77b4")
-        kwargs.setdefault("label", "Practical alpha_p")
-        ax.plot(centers, measured, "o-", **kwargs)
-        ax.plot(
-            centers, reference, "s--", color="#d62728", label="Shifted reference"
-        )
-        ax.fill_between(
-            centers,
-            measured,
-            reference,
-            where=(measured < reference).tolist(),
-            color="#ff7f0e",
-            alpha=0.4,
-            label="Unfavourable deviations",
-            interpolate=True,
-        )
-        ax.set_xscale("log")
-        ax.set_xticks(centers)
-        ax.set_xticklabels([f"{int(c)}" for c in centers])
-        ax.set_xlabel("Frequency [Hz]")
-        ax.set_ylabel("Sound absorption coefficient")
-        ax.set_ylim(0.0, 1.05)
-        ax.set_title(
-            f"alpha_w = {self.rating_label}  (class {self.absorption_class}, "
-            f"Sigma unfav. = {self.unfavourable_sum:.2f})"
-        )
-        ax.grid(True, which="both", alpha=0.3)
-        ax.legend(loc="best", fontsize="small")
-        return ax
+        return plot_weighted_absorption(self, ax=ax, **kwargs)
 
 
 # --- public functions ----------------------------------------------------

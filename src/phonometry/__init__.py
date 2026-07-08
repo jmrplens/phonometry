@@ -142,10 +142,12 @@ from .airflow_resistance import (
     airflow_resistance,
     airflow_resistivity,
     alternating_airflow_resistance,
+    effective_kappa,
     linear_airflow_velocity,
     piston_volume_flow_rate,
     specific_airflow_resistance,
     static_airflow_resistance,
+    thermal_boundary_layer_thickness,
 )
 from .absorption_rating import (
     AbsorptionRatingResult,
@@ -329,10 +331,12 @@ __all__ = [
     "airflow_resistance",
     "airflow_resistivity",
     "alternating_airflow_resistance",
+    "effective_kappa",
     "linear_airflow_velocity",
     "piston_volume_flow_rate",
     "specific_airflow_resistance",
     "static_airflow_resistance",
+    "thermal_boundary_layer_thickness",
     # Absorption rating (ISO 11654)
     "AbsorptionRatingResult",
     "OCTAVE_BANDS_HZ",

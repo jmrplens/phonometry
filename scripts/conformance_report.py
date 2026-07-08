@@ -1092,6 +1092,67 @@ def _chk_iso9612_annex_f() -> Outcome:
     )
 
 
+# ---------------------------------------------------------------------------
+# Materials: absorption rating, airflow resistance & impedance tube
+# ---------------------------------------------------------------------------
+_MATERIALS = "Materials: absorption, airflow & impedance"
+
+
+@register(_MATERIALS, "ISO 11654:1997 Annex A.1", "Weighted absorption alpha_w (no indicator)")
+def _chk_iso11654_a1() -> Outcome:
+    res = ph.weighted_absorption(list(ref.ISO11654_ANNEX_A1_ALPHA_P))
+    out = numeric(ref.ISO11654_ANNEX_A1_ALPHA_W, res.alpha_w, 5e-4, places=2)
+    # alpha_w matches AND no shape indicator applies AND class is C.
+    ok = (
+        out.passed
+        and res.shape_indicator == ref.ISO11654_ANNEX_A1_INDICATOR
+        and res.absorption_class == ref.ISO11654_ANNEX_A1_CLASS
+    )
+    return Outcome(
+        expected=f"{ref.ISO11654_ANNEX_A1_ALPHA_W:.2f} (class C, no indic.)",
+        computed=f"{res.alpha_w:.2f} (class {res.absorption_class}, '{res.shape_indicator}')",
+        delta=out.delta,
+        passed=ok,
+    )
+
+
+@register(_MATERIALS, "ISO 11654:1997 Annex A.2", "Weighted absorption alpha_w with M indicator")
+def _chk_iso11654_a2() -> Outcome:
+    res = ph.weighted_absorption(list(ref.ISO11654_ANNEX_A2_ALPHA_P))
+    out = numeric(ref.ISO11654_ANNEX_A2_ALPHA_W, res.alpha_w, 5e-4, places=2)
+    ok = out.passed and res.shape_indicator == ref.ISO11654_ANNEX_A2_INDICATOR
+    return Outcome(
+        expected=f"{ref.ISO11654_ANNEX_A2_ALPHA_W:.2f}(M)",
+        computed=res.rating_label,
+        delta=out.delta,
+        passed=ok,
+    )
+
+
+@register(_MATERIALS, "ISO 9053-2:2020 Annex A.3", "Thermal boundary-layer thickness b")
+def _chk_iso9053_2_boundary() -> Outcome:
+    b = ph.thermal_boundary_layer_thickness(frequency=ref.ISO9053_2_ANNEX_A_FREQUENCY)
+    return numeric(
+        ref.ISO9053_2_ANNEX_A_BOUNDARY_LAYER, b, 5e-6, unit="m", places=5,
+    )
+
+
+@register(_MATERIALS, "ISO 9053-2:2020 Annex A.3", "Effective ratio of specific heats kappa'")
+def _chk_iso9053_2_kappa() -> Outcome:
+    kp = ph.effective_kappa(
+        cavity_surface=ref.ISO9053_2_ANNEX_A_SURFACE,
+        cavity_volume=ref.ISO9053_2_ANNEX_A_VOLUME,
+        frequency=ref.ISO9053_2_ANNEX_A_FREQUENCY,
+    )
+    return numeric(ref.ISO9053_2_ANNEX_A_KAPPA_PRIME, kp, 5e-4, places=3)
+
+
+@register(_MATERIALS, "ISO 10534-1:1996 Eqs (9)/(13)/(14)", "Absorption from standing-wave ratio s=3")
+def _chk_iso10534_1_swr() -> Outcome:
+    alpha = float(ph.standing_wave_absorption(ref.ISO10534_1_SWR))
+    return numeric(ref.ISO10534_1_ABSORPTION, alpha, 1e-9, places=4)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

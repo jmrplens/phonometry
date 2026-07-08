@@ -374,6 +374,72 @@ por debajo de 1 sono el programa de referencia usa $L_N = 40 (N + 0.0005)^{0.35}
 
 Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) para su uso.
 
+## Modelos avanzados de sonoridad y calidad sonora
+
+ISO 532-1 es uno de tres modelos de sonoridad; dos familias más recientes refinan el front-end auditivo y añaden las métricas de calidad sonora tonalidad y aspereza.
+
+### Sonoridad de Moore-Glasberg (ISO 532-2:2017, ISO 532-3:2023)
+
+En lugar de las bandas críticas fijas de Zwicker, el modelo de Moore-Glasberg forma un **patrón de excitación** continuo sobre la escala del número ERB ("Cam") usando filtros auditivos **exponenciales redondeados (roex)** dependientes del nivel. En función de la desviación de frecuencia normalizada $g = |f - f_c| / f_c$ respecto a un filtro centrado en $f_c$, la ponderación del filtro es
+
+$$
+W(g) = (1 + p\ g)\ e^{-p\ g}
+$$
+
+donde la pendiente $p$ crece con el nivel de la fuente, ensanchando el flanco inferior a medida que sube el nivel (ISO 532-2, Fórmulas 2–5); esto reproduce la propagación ascendente del enmascaramiento. Al pasar la intensidad del estímulo por cada filtro se obtiene la excitación $E(i)$, y una ley compresiva la transforma en la **sonoridad específica** $N'(i)$ en sonos/Cam (Fórmulas 7–9), de la forma de nivel medio
+
+$$
+N'(i) = C \left[ \left( G\ \frac{E(i)}{E_0} + A \right)^{\alpha} - A^{\alpha} \right]
+$$
+
+con la constante de calibración $C = 0.0617$ sonos/Cam (ISO 532-2; $0.063$ en ISO 532-3). La sonoridad total es el área bajo el patrón,
+
+$$
+N = \int N'(i)\ di \ \ \text{sonos}
+$$
+
+y una etapa de inhibición binaural (Fórmulas 10–13) combina los oídos de modo que un sonido diótico es más sonoro que el mismo sonido en un solo oído. El ancla de 1 kHz / 40 dB SPL da exactamente 1 sono.
+
+**ISO 532-3** lo hace variable en el tiempo. Un espectro deslizante de seis FFT paralelas con ventana de Hann (longitudes de segmento de 2 a 64 ms, cada una aportando su propio rango de frecuencias, actualizado cada $T_0 = 1$ ms) alimenta la misma cadena de excitación y sonoridad específica, integrada por dos suavizadores de primer orden en cascada con $\alpha = 1 - e^{-T_0 / \tau}$,
+
+$$
+S(t) = \alpha\ x(t) + (1 - \alpha)\ S(t - 1)
+$$
+
+usando una constante de tiempo rápida en el ataque y una más lenta en la relajación. Esto produce la **sonoridad de corto plazo** $S'(t)$ (ataque/relajación en torno a 20–30 ms) y la **sonoridad de largo plazo** $S''(t)$ (en torno a 0,1–0,75 s); la sonoridad de largo plazo de pico $N_{\max} = \max_t S''(t)$ predice la sonoridad de sonidos de hasta unos 5 s.
+
+### Modelo de Sottek (ECMA-418-2:2025)
+
+ECMA-418-2 construye sus tres métricas sobre un único front-end auditivo (Cláusula 5): un filtro de oído externo/medio, un banco de 53 filtros paso-banda solapados de tipo gammatone espaciados en la escala Bark_HMS ($z = 0.5$ a $26.5$), rectificación de media onda y un RMS de bloque corto $\tilde{p}(l, z)$ por banda $z$ y bloque temporal $l$. Una no linealidad compresiva (Fórmula 23) convierte el RMS de banda en la **sonoridad de base específica** $N'_{\mathrm{basis}}(l, z)$, cuya constante de calibración $c_N$ fija un tono de 1 kHz / 40 dB SPL en 1 sone_HMS. La sonoridad ensambla las sonoridades tonal y de ruido (abajo) sobre bandas y tiempo (Fórmulas 113–117); crece unas $1.65\times$ por cada 10 dB, más lentamente que el factor de 2 de Zwicker — una propiedad intrínseca de la suma de Sottek.
+
+### Tonalidad — autocorrelación de la señal de banda (ECMA-418-2)
+
+Una componente tonal es periódica, así que sobrevive en la **función de autocorrelación** (ACF) de la señal rectificada de una banda mientras que el ruido de banda ancha se descorrelaciona. Para cada banda, la ACF no sesgada del bloque es
+
+$$
+\phi_z(m) = \frac{1}{M - m} \sum_{n=0}^{M - 1 - m} p_z(n)\ p_z(n + m)
+$$
+
+Una estimación espectral con ventana de $\phi_z$ separa una **sonoridad tonal** $N'_{\mathrm{tonal}}(l, z)$ de la **sonoridad de ruido** $N'_{\mathrm{noise}}(l, z)$ (Fórmulas 36–48). La tonalidad específica es la sonoridad tonal escalada por una compuerta suave de relación señal-ruido $q(l)$ (Fórmulas 49–51),
+
+$$
+T'(l, z) = c_T\ q(l)\ N'_{\mathrm{tonal}}(l, z)
+$$
+
+y el valor único $T$ (tu_HMS) es el promedio temporal con compuerta del máximo por bloque sobre las bandas (Fórmulas 61–64). La constante $c_T$ fija el tono de 1 kHz / 40 dB en 1 tu_HMS, y la banda del pico de la ACF da la frecuencia tonal $f_{\mathrm{ton}}$.
+
+### Aspereza — modulación de la envolvente (ECMA-418-2)
+
+La aspereza es la sensación de modulación de amplitud rápida (aproximadamente 20–300 Hz), máxima cerca de 70 Hz. A partir de la envolvente de cada banda $p_E(n)$ (magnitud de Hilbert) se forma un espectro de modulación ponderado por una función de tasa de modulación con pico cerca de 70 Hz y por la profundidad de modulación; correlacionando la modulación entre bandas vecinas y aplicando el filtrado temporal especificado se obtiene la **aspereza específica** $R'(l_{50}, z)$ y la aspereza dependiente del tiempo
+
+$$
+R(l_{50}) = \sum_z R'(l_{50}, z) \ \ \text{asper}
+$$
+
+(Fórmulas 65–111). El valor único $R$ es el percentil 90 de $R(l_{50})$ en el tiempo (Cláusula 7.1.10); la constante $c_R$ (Fórmula 104) calibra el sonido de referencia — un portador de 1 kHz modulado en amplitud al 100 % a 70 Hz y 60 dB SPL — a 1 asper.
+
+Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) para su uso.
+
 ## Transferencia de modulación y STI (IEC 60268-16)
 
 La inteligibilidad del habla viaja en las modulaciones lentas de intensidad de la envolvente del habla. La **función de transferencia de modulación (MTF)** $m(F)$ de un canal de transmisión es la razón entre la profundidad de modulación recibida y la emitida de la envolvente de intensidad por banda de octava a la frecuencia de modulación $F$; el STI completo la evalúa en las 14 frecuencias de modulación en tercios de octava de 0,63 a 12,5 Hz en las siete bandas de octava de 125 Hz a 8 kHz (A.2.2). Desde una respuesta al impulso medida, la **forma cerrada de Schroeder** la da directamente (método indirecto):

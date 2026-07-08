@@ -159,6 +159,19 @@ from .building_uncertainty import (
     single_number_uncertainty_uncorrelated,
     uncertain_value,
 )
+from .occupational_exposure import (
+    COVERAGE_FACTOR,
+    INSTRUMENT_U2,
+    ExposureResult,
+    ExposureWarning,
+    Task,
+    TaskContribution,
+    full_day_exposure,
+    job_based_exposure,
+    minimum_cumulative_duration_hours,
+    table_c4_contribution,
+    task_based_exposure,
+)
 from ._version import __version__
 
 # Public methods
@@ -305,6 +318,17 @@ __all__ = [
     "BandUncertainty",
     "UncertainValue",
     "COVERAGE_FACTORS",
+    "task_based_exposure",
+    "job_based_exposure",
+    "full_day_exposure",
+    "minimum_cumulative_duration_hours",
+    "table_c4_contribution",
+    "Task",
+    "TaskContribution",
+    "ExposureResult",
+    "ExposureWarning",
+    "COVERAGE_FACTOR",
+    "INSTRUMENT_U2",
 ]
 
 

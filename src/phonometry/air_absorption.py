@@ -67,7 +67,7 @@ _PR = 101.325
 _T01 = 273.16
 #: 0 degC in kelvins, for the Celsius -> kelvin conversion.
 _KELVIN = 273.15
-#: dB/m -> Np/m factor ``20 lg e`` printed as 8,686 in Eq. (5).
+#: Np -> dB factor (20*lg e) ``20 lg e`` printed as 8,686 in Eq. (5).
 _EIGHT_686 = 8.686
 
 #: Tabulated ranges of ISO 9613-1:1993 (Scope / clause 1), used for advisories.

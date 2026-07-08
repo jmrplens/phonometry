@@ -77,7 +77,7 @@ def test_reference_condition_constants() -> None:
     assert _T01 == 273.16  # triple point of water, K
 
 
-def test_dry_reference_matches_table_20c_reference_point() -> None:
+def test_reference_condition_finite_positive() -> None:
     # At the reference T0 = 20 degC the model must stay finite and positive.
     alpha = air_attenuation([1000.0], temperature=20.0, relative_humidity=50.0)
     assert np.all(np.isfinite(alpha)) and np.all(alpha > 0.0)

@@ -1,5 +1,6 @@
 import os
 import sys
+from functools import lru_cache
 from typing import Any
 
 import matplotlib.pyplot as plt
@@ -198,6 +199,37 @@ _ES_EXACT = {
     "A-weighted SPL [dB]": "SPL ponderado A [dB]",
     "Measured Lp,A,S": "Lp,A,S medido",
     "STI vs distance": "STI vs distancia",
+    # --- Advanced psychoacoustics figures (plan-17 block A) ---
+    "Loudness Models Compared (1 kHz tone)":
+        "Modelos de sonoridad comparados (tono de 1 kHz)",
+    "Sound pressure level [dB SPL]": "Nivel de presión sonora [dB SPL]",
+    "Total loudness N [sone]": "Sonoridad total N [sonios]",
+    "Sottek ECMA-418-2": "Sottek ECMA-418-2",
+    "Anchor: 1 kHz / 40 dB = 1 sone":
+        "Anclaje: 1 kHz / 40 dB = 1 sonio",
+    "Models diverge at high levels":
+        "Los modelos divergen a niveles altos",
+    "Sottek Specific Loudness (ECMA-418-2)":
+        "Sonoridad específica de Sottek (ECMA-418-2)",
+    "Specific loudness N' [sone_HMS/Bark]":
+        "Sonoridad específica N' [sonios_HMS/Bark]",
+    "Peak specific loudness": "Sonoridad específica máxima",
+    "ECMA-418-2 Tonality T(t)": "Tonalidad T(t) (ECMA-418-2)",
+    "Tonality T [tu]": "Tonalidad T [tu]",
+    "ECMA-418-2 Roughness vs Modulation Frequency":
+        "Aspereza vs frecuencia de modulación (ECMA-418-2)",
+    "Modulation frequency f_mod [Hz]":
+        "Frecuencia de modulación f_mod [Hz]",
+    "Roughness R [asper]": "Aspereza R [asper]",
+    "1 kHz carrier, 100 % AM": "Portadora de 1 kHz, AM del 100 %",
+    "Sound Quality Metrics (ECMA-418-2 Sottek Hearing Model)":
+        "Métricas de calidad sonora (modelo auditivo de Sottek, ECMA-418-2)",
+    "Time-Varying Loudness (ISO 532-3)":
+        "Sonoridad variable en el tiempo (ISO 532-3)",
+    "Loudness [sone]": "Sonoridad [sonios]",
+    "1 kHz burst, 200 ms": "Ráfaga de 1 kHz, 200 ms",
+    "Fast attack / release": "Ataque / relajación rápidos",
+    "Slow integration": "Integración lenta",
 }
 
 _ES_PATTERNS = [
@@ -225,6 +257,24 @@ _ES_PATTERNS = [
      r"Aures (Anexo B, N = \1 sonios)"),
     (r"^Spatial decay D2,S = (.+) dB$",
      r"Decaimiento espacial D2,S = \1 dB"),
+    (r"^Zwicker \(ISO 532-1\), N = (.+) sone$",
+     r"Zwicker (ISO 532-1), N = \1 sonios"),
+    (r"^Moore-Glasberg \(ISO 532-2\), N = (.+) sone$",
+     r"Moore-Glasberg (ISO 532-2), N = \1 sonios"),
+    (r"^Sottek \(ECMA-418-2\), N = (.+) sone$",
+     r"Sottek (ECMA-418-2), N = \1 sonios"),
+    (r"^1 kHz tone, 60 dB \(N = (.+) sone\)$",
+     r"Tono de 1 kHz, 60 dB (N = \1 sonios)"),
+    (r"^Tone in noise \(T = (.+) tu\)$",
+     r"Tono en ruido (T = \1 tu)"),
+    (r"^Pure noise \(T = (.+) tu\)$",
+     r"Ruido puro (T = \1 tu)"),
+    (r"^Peak R = (.+) asper @ 70 Hz$",
+     r"Máximo R = \1 asper @ 70 Hz"),
+    (r"^Short-term loudness STL \(STL peak = (.+) sone\)$",
+     r"Sonoridad a corto plazo STL (STL máx = \1 sonios)"),
+    (r"^Long-term loudness LTL \(LTL peak = (.+) sone\)$",
+     r"Sonoridad a largo plazo LTL (LTL máx = \1 sonios)"),
 ]
 
 
@@ -1960,6 +2010,258 @@ def generate_open_plan_decay(output_dir: str) -> None:
     plt.close()
 
 
+# ---------------------------------------------------------------------------
+# Advanced psychoacoustics (plan-17 block A): the ECMA-418-2 Sottek model
+# (loudness, tonality, roughness) and the Moore-Glasberg ISO 532-2/-3 models.
+# The heavy computations (ECMA loudness ~5 s/call, tonality ~8 s/call) are
+# cached so they run once and are reused across the four themed/language
+# passes rather than four times over.
+# ---------------------------------------------------------------------------
+_P_REF = 2e-5  # reference sound pressure [Pa]
+_FS_PSY = 48000  # ECMA-418-2 / ISO 532 operate at 48 kHz
+
+
+def _pure_tone(freq: float, spl_db: float, dur: float,
+               fs: int = _FS_PSY) -> np.ndarray:
+    """Calibrated sinusoid: sound pressure in pascals at *spl_db* dB SPL."""
+    t = np.arange(int(round(dur * fs))) / fs
+    amp = _P_REF * 10.0 ** (spl_db / 20.0) * np.sqrt(2.0)
+    return amp * np.sin(2.0 * np.pi * freq * t)
+
+
+@lru_cache(maxsize=None)
+def _loudness_models_data() -> tuple:
+    """Total loudness (sone) vs level for the three loudness models."""
+    from phonometry import (
+        loudness_ecma,
+        loudness_moore_glasberg_from_spectrum,
+        loudness_zwicker,
+    )
+
+    levels = np.arange(20.0, 81.0, 10.0)  # 20..80 dB SPL
+    zw, mg, ec = [], [], []
+    for spl in levels:
+        x = _pure_tone(1000.0, float(spl), 1.0)
+        zw.append(loudness_zwicker(x, _FS_PSY, stationary=True).loudness)
+        mg.append(
+            loudness_moore_glasberg_from_spectrum([(1000.0, float(spl))]).loudness
+        )
+        ec.append(loudness_ecma(x, _FS_PSY).loudness)
+    return levels, np.array(zw), np.array(mg), np.array(ec)
+
+
+def generate_loudness_models_comparison(output_dir: str) -> None:
+    """Zwicker vs Moore-Glasberg vs Sottek loudness for a 1 kHz tone."""
+    print("Generating loudness_models_comparison.png...")
+    levels, zw, mg, ec = _loudness_models_data()
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(levels, zw, "o-", color=COLOR_PRIMARY, linewidth=2.0, markersize=6,
+            label=f"Zwicker (ISO 532-1), N = {zw[2]:.1f} sone")
+    ax.plot(levels, mg, "s--", color=COLOR_TERTIARY, linewidth=1.8, markersize=6,
+            label=f"Moore-Glasberg (ISO 532-2), N = {mg[2]:.1f} sone")
+    ax.plot(levels, ec, "^-.", color=COLOR_SECONDARY, linewidth=1.8, markersize=6,
+            label=f"Sottek (ECMA-418-2), N = {ec[2]:.1f} sone")
+
+    # The three models are anchored to 1 sone at 1 kHz / 40 dB SPL.
+    ax.axhline(1.0, color=COLOR_FG, linestyle=":", alpha=0.35, linewidth=1)
+    ax.plot(40.0, 1.0, "o", color=COLOR_FG, markersize=9,
+            markerfacecolor="none", markeredgewidth=1.6, zorder=5)
+    ax.annotate("Anchor: 1 kHz / 40 dB = 1 sone",
+                xy=(40.0, 1.0), xytext=(21.5, 6.5), fontsize=10,
+                color=COLOR_FG,
+                arrowprops={"arrowstyle": "->", "lw": 1.0, "color": COLOR_FG})
+    ax.annotate("Models diverge at high levels",
+                xy=(80.0, float(zw[-1])), xytext=(52.0, 13.5), fontsize=9,
+                color=COLOR_FG, ha="center",
+                arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_FG})
+
+    ax.set_title("Loudness Models Compared (1 kHz tone)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Sound pressure level [dB SPL]")
+    ax.set_ylabel("Total loudness N [sone]")
+    ax.set_xlim(18, 82)
+    ax.set_ylim(0, float(zw[-1]) * 1.08)
+    ax.set_xticks([20, 30, 40, 50, 60, 70, 80])
+    ax.legend(loc="upper left", fontsize=9)
+    plt.savefig(themed_path(output_dir, "loudness_models_comparison.png"))
+    plt.close()
+
+
+@lru_cache(maxsize=None)
+def _sottek_specific_data() -> tuple:
+    """ECMA-418-2 specific loudness N'(z) of a 1 kHz / 60 dB tone."""
+    from phonometry import loudness_ecma
+
+    el = loudness_ecma(_pure_tone(1000.0, 60.0, 1.0), _FS_PSY)
+    return el.bark.copy(), el.specific_loudness.copy(), float(el.loudness)
+
+
+def generate_sottek_specific_loudness(output_dir: str) -> None:
+    """ECMA-418-2 (Sottek) specific loudness N'(z) over the Bark-rate scale."""
+    print("Generating sottek_specific_loudness.png...")
+    bark, spec, total = _sottek_specific_data()
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    ax.fill_between(bark, spec, color=COLOR_PRIMARY, alpha=0.30)
+    ax.plot(bark, spec, color=COLOR_PRIMARY, linewidth=1.8,
+            label=f"1 kHz tone, 60 dB (N = {total:.1f} sone)")
+
+    peak_i = int(np.argmax(spec))
+    ax.annotate("Peak specific loudness",
+                xy=(float(bark[peak_i]), float(spec[peak_i])),
+                xytext=(float(bark[peak_i]) + 4.5, float(spec[peak_i]) * 0.92),
+                fontsize=10, color=COLOR_FG,
+                arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_FG})
+
+    ax.set_title("Sottek Specific Loudness (ECMA-418-2)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Critical-band rate z [Bark]")
+    ax.set_ylabel("Specific loudness N' [sone_HMS/Bark]")
+    ax.set_xlim(0, float(bark[-1]))
+    ax.set_ylim(0, float(spec.max()) * 1.25)
+    ax.set_xticks([0, 4, 8, 12, 16, 20, 24])
+    ax.legend(loc="upper right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "sottek_specific_loudness.png"))
+    plt.close()
+
+
+@lru_cache(maxsize=None)
+def _tonality_data() -> tuple:
+    """ECMA-418-2 tonality T(t) for a 1 kHz tone-in-noise vs pure noise."""
+    from phonometry import tonality_ecma
+
+    rng = np.random.default_rng(2026)
+    dur = 2.0
+    t = np.arange(int(dur * _FS_PSY)) / _FS_PSY
+    noise = rng.standard_normal(t.size)
+    noise = noise / np.sqrt(np.mean(noise ** 2)) * _P_REF * 10.0 ** (50.0 / 20.0)
+    tone = _P_REF * 10.0 ** (50.0 / 20.0) * np.sqrt(2.0) * np.sin(2.0 * np.pi * 1000.0 * t)
+
+    tin = tonality_ecma(tone + noise, _FS_PSY)
+    pn = tonality_ecma(noise, _FS_PSY)
+    return (tin.time.copy(), tin.tonality_vs_time.copy(), float(tin.tonality),
+            pn.time.copy(), pn.tonality_vs_time.copy(), float(pn.tonality))
+
+
+@lru_cache(maxsize=None)
+def _roughness_sweep_data() -> tuple:
+    """ECMA-418-2 roughness R vs AM frequency, 1 kHz carrier, 100 % AM, 60 dB."""
+    from phonometry import roughness_ecma
+
+    dur = 1.0
+    t = np.arange(int(dur * _FS_PSY)) / _FS_PSY
+    fmods = np.array([20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0,
+                      100.0, 120.0, 150.0, 180.0, 200.0])
+    r = []
+    for fm in fmods:
+        am = (1.0 + 1.0 * np.sin(2.0 * np.pi * fm * t)) * np.sin(2.0 * np.pi * 1000.0 * t)
+        am = am / np.sqrt(np.mean(am ** 2)) * _P_REF * 10.0 ** (60.0 / 20.0)
+        r.append(roughness_ecma(am, _FS_PSY).roughness)
+    return fmods, np.array(r)
+
+
+def generate_tonality_roughness_demo(output_dir: str) -> None:
+    """Two-panel ECMA-418-2 sound-quality demo: tonality T(t) and roughness."""
+    print("Generating tonality_roughness_demo.png...")
+    (t_tin, tv_tin, t_single, _t_pn, tv_pn, pn_single) = _tonality_data()
+    fmods, r = _roughness_sweep_data()
+
+    fig, (ax0, ax1) = plt.subplots(2, 1, figsize=(10, 8.5))
+
+    # -- Top: time-dependent tonality, tone-in-noise vs pure noise -----------
+    ax0.plot(t_tin, tv_tin, color=COLOR_PRIMARY, linewidth=1.8,
+             label=f"Tone in noise (T = {t_single:.2f} tu)")
+    ax0.plot(_t_pn, tv_pn, color=COLOR_SECONDARY, linewidth=1.8,
+             label=f"Pure noise (T = {pn_single:.2f} tu)")
+    ax0.set_title("ECMA-418-2 Tonality T(t)", fontweight="bold", pad=10)
+    ax0.set_xlabel("Time [s]")
+    ax0.set_ylabel("Tonality T [tu]")
+    ax0.set_xlim(0, float(t_tin[-1]))
+    ax0.set_ylim(0, max(1.0, float(tv_tin.max()) * 1.30))
+    ax0.legend(loc="upper right", fontsize=9)
+
+    # -- Bottom: roughness vs modulation frequency (peak near 70 Hz) ---------
+    ax1.plot(fmods, r, "o-", color=COLOR_TERTIARY, linewidth=2.0, markersize=6,
+             label="1 kHz carrier, 100 % AM")
+    peak_i = int(np.argmax(r))
+    ax1.plot(fmods[peak_i], r[peak_i], "o", color=COLOR_SECONDARY, markersize=9,
+             markerfacecolor="none", markeredgewidth=1.6, zorder=5)
+    ax1.annotate(f"Peak R = {r[peak_i]:.1f} asper @ 70 Hz",
+                 xy=(float(fmods[peak_i]), float(r[peak_i])),
+                 xytext=(105.0, float(r[peak_i]) * 0.95), fontsize=10,
+                 color=COLOR_FG,
+                 arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_FG})
+    ax1.set_title("ECMA-418-2 Roughness vs Modulation Frequency",
+                  fontweight="bold", pad=10)
+    ax1.set_xlabel("Modulation frequency f_mod [Hz]")
+    ax1.set_ylabel("Roughness R [asper]")
+    ax1.set_xlim(10, 210)
+    ax1.set_ylim(0, float(r.max()) * 1.25)
+    ax1.legend(loc="upper right", fontsize=9)
+
+    fig.suptitle("Sound Quality Metrics (ECMA-418-2 Sottek Hearing Model)",
+                 fontweight="bold", fontsize=13)
+    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    plt.savefig(themed_path(output_dir, "tonality_roughness_demo.png"))
+    plt.close()
+
+
+@lru_cache(maxsize=None)
+def _time_loudness_data() -> tuple:
+    """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
+    from phonometry import loudness_moore_glasberg_time
+
+    dur = 0.8
+    t = np.arange(int(dur * _FS_PSY)) / _FS_PSY
+    sig = np.zeros_like(t)
+    on = (t >= 0.2) & (t < 0.4)
+    sig[on] = _P_REF * 10.0 ** (60.0 / 20.0) * np.sqrt(2.0) * np.sin(
+        2.0 * np.pi * 1000.0 * t[on]
+    )
+    tv = loudness_moore_glasberg_time(sig, _FS_PSY)
+    return (tv.time.copy(), tv.short_term_loudness.copy(),
+            tv.long_term_loudness.copy())
+
+
+def generate_moore_glasberg_time_loudness(output_dir: str) -> None:
+    """ISO 532-3 short-term vs long-term loudness for a 1 kHz tone burst."""
+    print("Generating moore_glasberg_time_loudness.png...")
+    time, stl, ltl = _time_loudness_data()
+
+    _, ax = plt.subplots(figsize=(10, 6))
+    # Shade the burst window (200-400 ms).
+    ax.axvspan(0.2, 0.4, color=COLOR_FG, alpha=0.07, linewidth=0)
+    ax.plot(time, stl, color=COLOR_PRIMARY, linewidth=1.8,
+            label=f"Short-term loudness STL (STL peak = {stl.max():.1f} sone)")
+    ax.plot(time, ltl, color=COLOR_SECONDARY, linewidth=2.0,
+            label=f"Long-term loudness LTL (LTL peak = {ltl.max():.1f} sone)")
+
+    ax.annotate("1 kHz burst, 200 ms", xy=(0.3, 0.0),
+                xytext=(0.3, float(stl.max()) * 1.02), fontsize=10,
+                color=COLOR_FG, ha="center")
+    ax.annotate("Fast attack / release",
+                xy=(float(time[int(np.argmax(stl))]), float(stl.max())),
+                xytext=(0.45, float(stl.max()) * 0.82), fontsize=9,
+                color=COLOR_PRIMARY,
+                arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_PRIMARY})
+    ax.annotate("Slow integration",
+                xy=(0.55, float(np.interp(0.55, time, ltl))),
+                xytext=(0.58, float(ltl.max()) * 0.55), fontsize=9,
+                color=COLOR_SECONDARY,
+                arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_SECONDARY})
+
+    ax.set_title("Time-Varying Loudness (ISO 532-3)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Loudness [sone]")
+    ax.set_xlim(0, float(time[-1]))
+    ax.set_ylim(0, float(stl.max()) * 1.18)
+    ax.legend(loc="upper right", fontsize=9)
+    plt.savefig(themed_path(output_dir, "moore_glasberg_time_loudness.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -2003,6 +2305,14 @@ def generate_all(img_dir: str) -> None:
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)
     generate_open_plan_decay(img_dir)
+
+    # Advanced psychoacoustics (plan-17 block A): ECMA-418-2 Sottek model and
+    # Moore-Glasberg ISO 532-2/-3 loudness (models, specific loudness, sound
+    # quality metrics, time-varying loudness).
+    generate_loudness_models_comparison(img_dir)
+    generate_sottek_specific_loudness(img_dir)
+    generate_tonality_roughness_demo(img_dir)
+    generate_moore_glasberg_time_loudness(img_dir)
 
 
 if __name__ == "__main__":

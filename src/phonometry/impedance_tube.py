@@ -873,6 +873,32 @@ def _face_from_loads(
     )
 
 
+#: Relative floor below which a two-/one-load solve denominator is treated as
+#: near-singular (catastrophic cancellation) and flagged (ASTM E2611-19).
+_MATRIX_COND_EPS = 1e-9
+
+
+def _warn_ill_conditioned(
+    den: NDArray[np.complex128],
+    scale: NDArray[np.float64],
+    context: str,
+    *,
+    stacklevel: int,
+) -> None:
+    """Flag a near-singular transfer-matrix solve (poor conditioning)."""
+    den_mag = np.abs(np.asarray(den, dtype=np.complex128))
+    bad = den_mag < _MATRIX_COND_EPS * np.asarray(scale, dtype=np.float64)
+    n = int(np.count_nonzero(bad))
+    if n:
+        warnings.warn(
+            f"{context}: the solve denominator is near-singular at {n} "
+            "frequency point(s) (the loads are insufficiently different or the "
+            "geometry is near a resonance); results there are unreliable.",
+            ImpedanceTubeWarning,
+            stacklevel=stacklevel,
+        )
+
+
 def transfer_matrix_two_load(
     load_a: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike],
     load_b: tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike],
@@ -917,6 +943,11 @@ def transfer_matrix_two_load(
         wavenumber=wavenumber, characteristic_impedance=characteristic_impedance,
     )
     den = pda * udb - pdb * uda
+    _warn_ill_conditioned(
+        np.asarray(den, dtype=np.complex128),
+        np.abs(pda * udb) + np.abs(pdb * uda),
+        "transfer_matrix_two_load", stacklevel=2,
+    )
     return TransferMatrix(
         t11=np.asarray((p0a * udb - p0b * uda) / den, dtype=np.complex128),
         t12=np.asarray((p0b * pda - p0a * pdb) / den, dtype=np.complex128),
@@ -961,6 +992,11 @@ def transfer_matrix_one_load(
         wavenumber=wavenumber, characteristic_impedance=characteristic_impedance,
     )
     den = p0 * ud + pd * u0
+    _warn_ill_conditioned(
+        np.asarray(den, dtype=np.complex128),
+        np.abs(p0 * ud) + np.abs(pd * u0),
+        "transfer_matrix_one_load", stacklevel=2,
+    )
     t_diag = np.asarray((pd * ud + p0 * u0) / den, dtype=np.complex128)
     return TransferMatrix(
         t11=t_diag,

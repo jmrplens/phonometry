@@ -447,6 +447,36 @@ def test_face_quantities_backward_wave_impedance() -> None:
     assert np.allclose(pd / ud, -RC, atol=1e-9)
 
 
+def test_two_load_warns_on_singular_load_pair() -> None:
+    # Two identical loads make DEN = 0 (ASTM E2611); flag it rather than
+    # silently returning inf/nan (CodeRabbit).
+    f = np.array([500.0, 1000.0])
+    k = np.asarray(tube_wavenumber(f, C0)).real.astype(np.complex128)
+    load = (1.0 + 0j, 0.9 + 0j, 0.8 + 0j, 0.7 + 0j)
+    with pytest.warns(ImpedanceTubeWarning, match="near-singular"):
+        transfer_matrix_two_load(
+            load, load, thickness=THICKNESS, wavenumber=k,
+            characteristic_impedance=RC, **GEOM,
+        )
+
+
+def test_two_load_no_warning_when_well_conditioned() -> None:
+    # A genuine two-load measurement (distinct terminations) must not warn.
+    import warnings as _w
+
+    f = np.array([500.0, 1000.0, 1800.0])
+    k = np.asarray(tube_wavenumber(f, C0)).real.astype(np.complex128)
+    tm = air_layer_transfer_matrix(k, THICKNESS, RC)
+    h_a = _synth_four_mics(tm, np.asarray(k), 1.0 + 0j, 0.2 - 0.3j)
+    h_b = _synth_four_mics(tm, np.asarray(k), 0.4 + 0.5j, -0.6 + 0.1j)
+    with _w.catch_warnings():
+        _w.simplefilter("error", ImpedanceTubeWarning)
+        transfer_matrix_two_load(
+            h_a, h_b, thickness=THICKNESS, wavenumber=k,
+            characteristic_impedance=RC, **GEOM,
+        )
+
+
 def test_two_load_recovers_air_layer_matrix() -> None:
     # End-to-end validation of Eqs. (17)-(22) AND the geometry convention.
     f = np.array([500.0, 1000.0, 1800.0])

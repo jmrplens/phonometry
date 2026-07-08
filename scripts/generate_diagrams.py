@@ -193,6 +193,18 @@ _ES: dict[str, str] = {
         "Df — separador (emisor) → flanco (receptor)",
     "R'w = −10 lg Σ 10^(−Rij,w /10) dB   (EN 12354-1, Formula 26)":
         "R'w = −10 lg Σ 10^(−Rij,w /10) dB   (EN 12354-1, Fórmula 26)",
+    # d14 - ISO 9613-2 outdoor propagation geometry
+    "ISO 9613-2 source–barrier–receiver geometry":
+        "Geometría fuente–barrera–receptor (ISO 9613-2)",
+    "Receiver": "Receptor",
+    "Barrier": "Barrera",
+    "Ground (Gs, Gm, Gr)": "Suelo (Gs, Gm, Gr)",
+    "diffracted path": "trayecto difractado",
+    "direct path (blocked)": "trayecto directo (bloqueado)",
+    "z = dss + dsr − d   (path difference)":
+        "z = dss + dsr − d   (diferencia de camino)",
+    "Dz = 10 lg[ 3 + (C₂/λ) C₃ z Kmet ]   (Eq. 14)":
+        "Dz = 10 lg[ 3 + (C₂/λ) C₃ z Kmet ]   (Ec. 14)",
 }
 
 
@@ -1096,6 +1108,66 @@ def _d_flanking(s: SVG, th: Theme) -> None:
            19, th.muted, bold=True)
 
 
+def _d_outdoor(s: SVG, th: Theme) -> None:
+    c_diff = th.accent          # diffracted (over-the-top) ray
+    c_direct = th.muted         # blocked direct ray
+    gy = 430.0                  # ground line
+    s.ground(gy, 60.0, 840.0)
+    s.text(66.0, gy + 26.0, "Ground (Gs, Gm, Gr)", 18, th.muted, anchor="start")
+
+    # --- source (loudspeaker) on the left, acoustic centre at (sx, sy) -------
+    sx, sy = 150.0, 300.0
+    for r in (26, 44, 62):
+        s.path(f"M {sx + r * 0.22:.1f} {sy - r:.1f} "
+               f"A {r} {r} 0 0 1 {sx + r:.1f} {sy - r * 0.22:.1f}",
+               stroke=th.muted, sw=1.3)
+    s.rect(sx - 20, sy - 24, 40, 48, th.panel, th.fg, rx=5, sw=2)
+    s.circle(sx, sy - 6, 9, th.fg)
+    s.circle(sx, sy - 6, 3.5, th.bg)
+    s.circle(sx, sy + 14, 6, th.fg)
+    s.line(sx, sy + 24, sx, gy, th.fg, 2.0)          # mast to the ground
+    s.text(sx, sy - 74, "Source", 20, th.fg, bold=True)
+
+    # --- barrier in the middle, top edge at (ex, ey) -------------------------
+    ex, ey = 450.0, 150.0
+    bw = 16.0
+    s.rect(ex - bw / 2, ey, bw, gy - ey, th.secondary, th.fg, sw=2)
+    s.text(ex + 16.0, (ey + gy) / 2 + 6.0, "Barrier", 20, th.secondary,
+           bold=True, anchor="start")
+    s.circle(ex, ey, 5.5, th.bg, th.fg, 2.0)          # diffraction edge node
+
+    # --- receiver (microphone) on the right, capsule at (rx, ry) -------------
+    rx, ry = 770.0, 288.0
+    s.mic(rx, ry, gy, 1.0)
+    s.text(rx, ry - 18.0, "Receiver", 20, th.fg, bold=True)
+
+    # --- rays ---------------------------------------------------------------
+    # Direct (blocked) ray straight through the barrier.
+    s.line(sx + 14, sy - 6, rx, ry + 6, c_direct, 1.8, dash="7,6")
+    s.text(285.0, sy + 40.0, "direct path (blocked)", 16, c_direct,
+           anchor="middle", italic=True)
+    # Diffracted ray up to the top edge, then down to the receiver.
+    s.line(sx + 12, sy - 12, ex, ey, c_diff, 3.0)
+    s.arrow(ex, ey, rx, ry + 2, c_diff, 3.0)
+    s.text(300.0, 208.0, "dss", 18, c_diff, anchor="middle")
+    s.text(610.0, 200.0, "dsr", 18, c_diff, anchor="middle")
+    s.text(ex, ey - 22.0, "diffracted path", 17, c_diff, bold=True)
+
+    # --- heights (witness dimensions) ---------------------------------------
+    s.dim(sx - 44, gy, sx - 44, sy - 6, "hs", offset=0, label_side="left")
+    s.line(sx - 44, gy, sx, gy, th.muted, 0.9, dash="3,3")
+    s.line(sx - 44, sy - 6, sx, sy - 6, th.muted, 0.9, dash="3,3")
+    s.dim(rx + 40, gy, rx + 40, ry + 6, "hr", offset=0, label_side="right")
+    s.line(rx, gy, rx + 40, gy, th.muted, 0.9, dash="3,3")
+    s.line(rx, ry + 6, rx + 40, ry + 6, th.muted, 0.9, dash="3,3")
+
+    # --- master relations ---------------------------------------------------
+    s.text(450.0, gy + 58.0, "z = dss + dsr − d   (path difference)", 19,
+           th.fg, bold=True)
+    s.text(450.0, gy + 84.0,
+           "Dz = 10 lg[ 3 + (C₂/λ) C₃ z Kmet ]   (Eq. 14)", 18, th.muted)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -1116,6 +1188,8 @@ DIAGRAMS = {
         _d_methods, "Sound power methods compared", 620),
     "diagram_flanking_paths": (
         _d_flanking, "Direct and flanking transmission paths (EN 12354)", 640),
+    "diagram_outdoor_geometry": (
+        _d_outdoor, "ISO 9613-2 source–barrier–receiver geometry", 560),
 }
 
 

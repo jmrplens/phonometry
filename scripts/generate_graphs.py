@@ -1129,7 +1129,7 @@ def generate_weighting_accuracy_hf(output_dir: str) -> None:
             * np.sqrt((f**2 + 107.7**2) * (f**2 + 737.9**2))
             * (f**2 + 12194**2)
         )
-        return 20 * np.log10(ra) + 2.0
+        return np.asarray(20 * np.log10(ra) + 2.0)
 
     def measured_gains(wf: WeightingFilter) -> np.ndarray:
         gains = []
@@ -1372,7 +1372,7 @@ def generate_og_image(output_path: str = "site/public/og-image.png") -> None:
     fig.patch.set_facecolor("#0f1216")
 
     # Background: 1/3-octave bank response, dimmed.
-    ax_bg = fig.add_axes([0.0, 0.0, 1.0, 0.52])
+    ax_bg = fig.add_axes((0.0, 0.0, 1.0, 0.52))
     ax_bg.set_facecolor("none")
     bank = OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[20.0, 20000.0])
     for idx in range(bank.num_bands):
@@ -1843,7 +1843,7 @@ def generate_insulation_rating(output_dir: str) -> None:
     shifted = reference + shift  # shifted reference read at 500 Hz == Rw
 
     _, ax = plt.subplots(figsize=(10, 6.5))
-    ax.fill_between(freqs, measured, shifted, where=measured < shifted,
+    ax.fill_between(freqs, measured, shifted, where=(measured < shifted).tolist(),
                     interpolate=True, color=COLOR_SECONDARY, alpha=0.25,
                     zorder=1, label="Unfavourable deviations")
     ax.semilogx(freqs, shifted, marker="s", color=COLOR_FG, linewidth=1.6,
@@ -1913,7 +1913,7 @@ def generate_impact_rating(output_dir: str) -> None:
     _, ax = plt.subplots(figsize=(10, 6.5))
     # For impact sound an unfavourable deviation occurs where the MEASURED
     # curve lies ABOVE the reference (opposite sign to ISO 717-1 airborne).
-    ax.fill_between(freqs, shifted, measured, where=measured > shifted,
+    ax.fill_between(freqs, shifted, measured, where=(measured > shifted).tolist(),
                     interpolate=True, color=COLOR_SECONDARY, alpha=0.25,
                     zorder=1, label="Unfavourable deviations (measured above reference)")
     ax.semilogx(freqs, shifted, marker="s", color=COLOR_FG, linewidth=1.6,
@@ -2069,7 +2069,7 @@ def generate_open_plan_decay(output_dir: str) -> None:
     ax2.set_ylim(0.1, 0.75)
 
     handles = [pts_spl, line_spl, mark_4m, line_sti]
-    ax.legend(handles, [h.get_label() for h in handles],
+    ax.legend(handles, [str(h.get_label()) for h in handles],
               loc="upper right", fontsize=9)
     plt.savefig(themed_path(output_dir, "open_plan_decay.png"))
     plt.close()
@@ -2091,11 +2091,11 @@ def _pure_tone(freq: float, spl_db: float, dur: float,
     """Calibrated sinusoid: sound pressure in pascals at *spl_db* dB SPL."""
     t = np.arange(int(round(dur * fs))) / fs
     amp = _P_REF * 10.0 ** (spl_db / 20.0) * np.sqrt(2.0)
-    return amp * np.sin(2.0 * np.pi * freq * t)
+    return np.asarray(amp * np.sin(2.0 * np.pi * freq * t))
 
 
 @lru_cache(maxsize=None)
-def _loudness_models_data() -> tuple:
+def _loudness_models_data() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Total loudness (sone) vs level for the three loudness models."""
     from phonometry import (
         loudness_ecma,
@@ -2154,7 +2154,7 @@ def generate_loudness_models_comparison(output_dir: str) -> None:
 
 
 @lru_cache(maxsize=None)
-def _sottek_specific_data() -> tuple:
+def _sottek_specific_data() -> tuple[np.ndarray, np.ndarray, float]:
     """ECMA-418-2 specific loudness N'(z) of a 1 kHz / 60 dB tone."""
     from phonometry import loudness_ecma
 
@@ -2192,7 +2192,7 @@ def generate_sottek_specific_loudness(output_dir: str) -> None:
 
 
 @lru_cache(maxsize=None)
-def _tonality_data() -> tuple:
+def _tonality_data() -> tuple[np.ndarray, np.ndarray, float, np.ndarray, np.ndarray, float]:
     """ECMA-418-2 tonality T(t) for a 1 kHz tone-in-noise vs pure noise."""
     from phonometry import tonality_ecma
 
@@ -2210,7 +2210,7 @@ def _tonality_data() -> tuple:
 
 
 @lru_cache(maxsize=None)
-def _roughness_sweep_data() -> tuple:
+def _roughness_sweep_data() -> tuple[np.ndarray, np.ndarray]:
     """ECMA-418-2 roughness R vs AM frequency, 1 kHz carrier, 100 % AM, 60 dB."""
     from phonometry import roughness_ecma
 
@@ -2273,7 +2273,7 @@ def generate_tonality_roughness_demo(output_dir: str) -> None:
 
 
 @lru_cache(maxsize=None)
-def _time_loudness_data() -> tuple:
+def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
     from phonometry import loudness_moore_glasberg_time
 
@@ -2331,6 +2331,7 @@ def generate_prediction_flanking_demo(output_dir: str) -> None:
     """EN 12354-1 simplified flanking prediction (Annex H.3 worked example)."""
     print("Generating prediction_flanking_demo.png...")
     from phonometry.building_prediction import (
+        FlankingPath,
         flanking_element,
         predicted_airborne_insulation,
     )
@@ -2343,7 +2344,7 @@ def generate_prediction_flanking_demo(output_dir: str) -> None:
         ("facade", 42, 12.6, 6.7, 2.55),
         ("wall", 33, 33.5, 15.7, 2.55),
     ]
-    paths = []
+    paths: list[FlankingPath] = []
     for name, rw, k_ff, k_side, lf in elements:
         ff, df, fd = flanking_element(
             label=name, r_flanking=float(rw), r_separating=57.0,
@@ -2598,7 +2599,7 @@ def generate_exposure_uncertainty(output_dir: str) -> None:
     ax.bar(x, contribs, color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.7,
            width=0.6, zorder=3, label="Measurement task")
     for xi, c in zip(x, contribs):
-        ax.text(xi, c - 2.5, f"{c:.1f}", ha="center", va="top",
+        ax.text(float(xi), c - 2.5, f"{c:.1f}", ha="center", va="top",
                 fontsize=9, color="white", fontweight="bold")
 
     # Daily energy-summed level and its one-sided 95 % upper limit LEX,8h + U.

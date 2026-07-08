@@ -34,36 +34,42 @@
   "N5": 18.08146,
   "Nmax": 22.6399,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 15": {
   "N5": 8.75501,
   "Nmax": 9.6059,
   "annex": "B.5",
+  "field": "diffuse",
   "kind": "time_varying"
  },
  "Test signal 16": {
   "N5": 36.88757,
   "Nmax": 38.5363,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 17": {
   "N5": 9.72202,
   "Nmax": 11.2105,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 18": {
   "N5": 10.3915,
   "Nmax": 12.6468,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 19": {
   "N5": 10.00934,
   "Nmax": 10.8817,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 2": {
@@ -77,36 +83,42 @@
   "N5": 13.09259,
   "Nmax": 14.8802,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 21": {
   "N5": 8.9998,
   "Nmax": 9.7188,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 22": {
   "N5": 8.15808,
   "Nmax": 8.9063,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 23": {
   "N5": 10.42144,
   "Nmax": 11.1858,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 24": {
   "N5": 8.51889,
   "Nmax": 9.2751,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 25": {
   "N5": 5.76142,
   "Nmax": 7.2593,
   "annex": "B.5",
+  "field": "free",
   "kind": "time_varying"
  },
  "Test signal 3": {

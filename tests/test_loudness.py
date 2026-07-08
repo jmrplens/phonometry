@@ -23,7 +23,18 @@ from phonometry import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_
 
 FS = 48000
 DATA = pathlib.Path(__file__).parent / "data" / "iso532_1"
-EXPECTED = json.loads((DATA / "iso532_1_annexB_expected.json").read_text())
+# The ISO 532-1 Annex B validation data may be absent (its README documents a
+# removal policy); the tests that need it then skip rather than crash on import.
+_ISO_DATA_PRESENT = (DATA / "iso532_1_annexB_expected.json").is_file()
+EXPECTED = (
+    json.loads((DATA / "iso532_1_annexB_expected.json").read_text())
+    if _ISO_DATA_PRESENT
+    else {}
+)
+requires_iso_data = pytest.mark.skipif(
+    not _ISO_DATA_PRESENT,
+    reason="ISO 532-1 Annex B data absent (see tests/data/iso532_1/README.md)",
+)
 
 
 def _tone(freq: float, level_db: float, seconds: float = 1.0, pad_ms: float = 100.0) -> np.ndarray:
@@ -47,6 +58,7 @@ def _levels_from_file() -> np.ndarray:
 # Annex B.2 - stationary loudness from one-third-octave levels
 # ---------------------------------------------------------------------------
 
+@requires_iso_data
 def test_annex_b2_stationary_from_levels() -> None:
     exp = EXPECTED["Test signal 1.txt"]
     res = loudness_zwicker_from_spectrum(_levels_from_file(), field="free")
@@ -54,6 +66,7 @@ def test_annex_b2_stationary_from_levels() -> None:
     assert res.loudness == pytest.approx(exp["N"], rel=0.001)
 
 
+@requires_iso_data
 def test_specific_loudness_shape_and_integral() -> None:
     res = loudness_zwicker_from_spectrum(_levels_from_file())
     assert res.specific.shape == (240,)
@@ -72,6 +85,7 @@ def test_specific_loudness_shape_and_integral() -> None:
     [("Test signal 2", 250.0, 80.0), ("Test signal 3", 1000.0, 60.0),
      ("Test signal 4", 4000.0, 40.0)],
 )
+@requires_iso_data
 def test_annex_b3_stationary_tones(case: str, freq: float, level: float) -> None:
     exp = EXPECTED[case]
     x = _tone(freq, level, seconds=2.0, pad_ms=0.0)
@@ -95,15 +109,27 @@ def test_1khz_60db_anchor() -> None:
 # Annex B.4 - time-varying loudness (synthetic, regenerated)
 # ---------------------------------------------------------------------------
 
+def _read_wav_fullscale(path: str) -> tuple[np.ndarray, int]:
+    """Read a 16-bit WAV as first-channel samples in [-1, 1) with its rate.
+
+    WAV/RIFF is little-endian, so the sample dtype is fixed to ``<i2`` rather
+    than the host-native ``int16``; a multi-channel file keeps only channel 0.
+    """
+    import wave
+
+    with wave.open(path) as w:
+        fs = w.getframerate()
+        n_channels = w.getnchannels()
+        raw = np.frombuffer(w.readframes(w.getnframes()), dtype="<i2")
+    if n_channels > 1:
+        raw = raw.reshape(-1, n_channels)[:, 0]
+    return raw.astype(np.float64) / 32768.0, int(fs)
+
+
 def _read_wav_pa(path: pathlib.Path, peak_rms_db: float) -> tuple[np.ndarray, int]:
     """Read a 16-bit ISO test WAV and calibrate its peak short-time RMS to
     the level stated in Annex B (the WAVs carry no absolute scale)."""
-    import wave
-
-    with wave.open(str(path)) as w:
-        fs = w.getframerate()
-        raw = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16)
-    x = raw.astype(np.float64) / 32768.0
+    x, fs = _read_wav_fullscale(str(path))
     win = max(1, int(fs * 0.002))
     sq = np.convolve(x**2, np.ones(win) / win, mode="same")
     peak_rms = float(np.sqrt(sq.max()))
@@ -116,6 +142,7 @@ def _read_wav_pa(path: pathlib.Path, peak_rms_db: float) -> tuple[np.ndarray, in
     [("Test signal 10", 10, 70.0), ("Test signal 11", 11, 70.0),
      ("Test signal 12", 12, 70.0)],
 )
+@requires_iso_data
 def test_annex_b4_tone_pulses(case: str, num: int, level: float) -> None:
     """The normative 1 kHz tone-pulse WAVs (Annex B.4): the prose only
     states duration and peak rms level; the ramp shapes exist only in the
@@ -142,6 +169,7 @@ def test_annex_b4_tone_pulses(case: str, num: int, level: float) -> None:
     assert inside >= 0.99, f"{case}: only {inside:.1%} of N(t) inside the tolerance band"
 
 
+@requires_iso_data
 def test_n5_n10_use_full_rate_series(monkeypatch) -> None:
     """N5/N10 must come from the full-rate 2000 Hz weighted-loudness series,
     not the 4x-decimated 500 Hz output trace. Decimation keeps only one of
@@ -192,21 +220,19 @@ def test_time_varying_outputs() -> None:
 ISO_DIR = os.environ.get("ISO532_1_TESTDATA", str(DATA))
 
 
+@requires_iso_data
 @pytest.mark.parametrize("num", list(range(14, 26)))
 def test_annex_b5_technical_signals(num: int) -> None:
     import glob
-    import wave
 
     matches = glob.glob(os.path.join(ISO_DIR, "Annex B.5", f"Test signal {num} *.wav"))
     if not matches:
         pytest.skip(f"signal {num} not found")
-    with wave.open(matches[0]) as w:
-        fs = w.getframerate()
-        raw = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16)
     # Annex B.1: "0 dB (relative to full scale) shall correspond to a sound
     # pressure level of 100 dB" — a full-scale sine is 100 dB SPL (2 Pa RMS),
     # so one full-scale unit is 2*sqrt(2) Pa peak.
-    x = raw.astype(np.float64) / 32768.0 * (2.0 * np.sqrt(2.0))
+    fullscale, fs = _read_wav_fullscale(matches[0])
+    x = fullscale * (2.0 * np.sqrt(2.0))
     exp = EXPECTED[f"Test signal {num}"]
     # Each B.5 signal is validated in the sound field its ISO results
     # workbook was computed in; signal 15 (vehicle interior) is diffuse.

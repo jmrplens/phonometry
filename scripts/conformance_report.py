@@ -443,10 +443,20 @@ def _iso532_b5_signal(num: int) -> tuple[np.ndarray, int, float, str]:
 
     data = json.loads((_DATA / "iso532_1" / "iso532_1_annexB_expected.json").read_text())
     entry = data[f"Test signal {num}"]
-    match = glob.glob(str(_DATA / "iso532_1" / "Annex B.5" / f"Test signal {num} *.wav"))[0]
-    with wave.open(match) as handle:
+    matches = glob.glob(str(_DATA / "iso532_1" / "Annex B.5" / f"Test signal {num} *.wav"))
+    if not matches:
+        raise FileNotFoundError(
+            f"No ISO 532-1 Annex B.5 WAV found for Test signal {num} "
+            "(see tests/data/iso532_1/README.md)."
+        )
+    # WAV/RIFF is little-endian, so the dtype is fixed to '<i2'; a multi-channel
+    # file keeps only channel 0.
+    with wave.open(matches[0]) as handle:
         fs = handle.getframerate()
-        raw = np.frombuffer(handle.readframes(handle.getnframes()), dtype=np.int16)
+        n_channels = handle.getnchannels()
+        raw = np.frombuffer(handle.readframes(handle.getnframes()), dtype="<i2")
+    if n_channels > 1:
+        raw = raw.reshape(-1, n_channels)[:, 0]
     signal = raw.astype(np.float64) / 32768.0 * (2.0 * math.sqrt(2.0))
     return signal, int(fs), float(entry["Nmax"]), str(entry["field"])
 

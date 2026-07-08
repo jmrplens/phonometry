@@ -21,9 +21,9 @@ import conformance_report as cr  # noqa: E402
 
 
 def test_registry_is_populated() -> None:
-    assert len(cr.CHECKS) >= 26
+    assert len(cr.CHECKS) >= 32
     # Every domain has at least one check.
-    assert len(cr._domains()) >= 6
+    assert len(cr._domains()) >= 7
 
 
 def test_block_a_psychoacoustics_checks_registered() -> None:
@@ -34,6 +34,39 @@ def test_block_a_psychoacoustics_checks_registered() -> None:
     assert "ECMA-418-2:2025 Clause 7" in standards  # HMS roughness
     assert "ISO 532-2:2017 Clause 3.17 / Annex B.1" in standards
     assert "ISO 532-3:2023 Annex C.1" in standards
+
+
+def test_building_acoustics_checks_registered() -> None:
+    """The PR-B facade / lab / prediction / uncertainty checks are wired."""
+    standards = {c.standard for c in cr.CHECKS}
+    assert "ISO 16283-3:2016 Clause 3.12" in standards  # facade R'45
+    assert "ISO 10140-2:2021 Formula (2)" in standards  # lab airborne Rw=54
+    assert "EN 12354-1:2000 Annex H.3" in standards  # R'w=52 prediction
+    assert "EN 12354-2:2000 Annex E.3" in standards  # L'n,w=45 impact
+    assert "ISO 12999-1:2020 Table 2" in standards  # band uncertainty
+    assert "ISO 12999-1:2020 Clause 8 / Table 8" in standards  # U = k u
+    # Prediction + uncertainty form their own readable domain.
+    assert "Building prediction & uncertainty" in cr._domains()
+
+
+def test_building_reference_data_matches_published_oracles() -> None:
+    """Guard the shared reference_data oracles against their standard values.
+
+    The report reuses these constants (single source of truth), while the
+    building-standard test modules keep independent inline copies; this pins the
+    shared table to the published worked-example results so neither can drift.
+    """
+    import reference_data as ref
+
+    assert ref.ISO16283_3_R45_EXPECTED_DB == 38.5  # 60 - 20 - 1,5
+    assert ref.ISO10140_2_REF_AIRBORNE_RW == 54  # +2-shift anchor
+    assert len(ref.ISO10140_2_REF_AIRBORNE_R) == 16
+    assert ref.EN12354_1_ANNEX_H3_RPRIME_W == 52  # Annex H.3
+    assert ref.EN12354_1_ANNEX_H3_NUM_PATHS == 13  # 1 direct + 12 flanking
+    assert ref.EN12354_2_ANNEX_E3_LPRIME_N_W == 45  # 76 - 33 + 2
+    assert ref.EN12354_2_ANNEX_E3_K == 2  # Table 1
+    assert ref.ISO12999_1_TABLE2_AIRBORNE_A_1000HZ == 1.8  # Table 2
+    assert ref.ISO12999_1_COVERAGE_K_95 == 1.96  # Table 8 (95 %, two-sided)
 
 
 def test_filter_binding_detail_matches_library_margin() -> None:

@@ -135,3 +135,78 @@ ISO532_2_C = 0.0617
 # a steady 1 kHz / 40 dB SPL tone reaches a peak long-term loudness of
 # 1.0 sone / 40 phon (the spectral calibration is fixed to this anchor).
 ISO532_3_ANCHOR_1KHZ_40DB_SONE = 1.0
+
+# ---------------------------------------------------------------------------
+# ISO 16283-3:2016 field facade sound insulation. Clause 3.12 defines the
+# apparent sound reduction index of the element (loudspeaker) method as
+# R'45deg = L1,s - L2 + 10 lg(S/A) - 1,5. Choosing the specimen area S equal to
+# the equivalent absorption area A (A = 0,16 V/T = 0,16 * 62,5 / 1,0 = 10 m2)
+# collapses the 10 lg(S/A) coupling term, isolating the -1,5 dB oblique-
+# incidence correction exactly: R' = 60 - 20 - 1,5 = 38,5 dB. (Road-traffic
+# method R'tr,s uses -3 dB instead; Clause 3.13.)
+# ---------------------------------------------------------------------------
+ISO16283_3_R45_LOUDSPEAKER_CORRECTION_DB = 1.5
+ISO16283_3_R45_SURFACE_LEVEL_DB = 60.0
+ISO16283_3_R45_RECEIVE_LEVEL_DB = 20.0
+ISO16283_3_R45_AREA_M2 = 10.0
+ISO16283_3_R45_VOLUME_M3 = 62.5
+ISO16283_3_R45_REVERB_TIME_S = 1.0
+ISO16283_3_R45_EXPECTED_DB = 38.5
+
+# ---------------------------------------------------------------------------
+# ISO 10140-2:2021 laboratory airborne sound reduction index R (Formula (2)):
+# R = L1 - L2 + 10 lg(S/A), A = 0,16 V/T. The reference-curve construction lays
+# R exactly on the ISO 717-1 Table 3 shape (100-3150 Hz) by choosing S = A
+# (S = 10 m2, A = 0,16 * 50 / 0,8 = 10 m2), so R = L1 - L2 = the reference. The
+# 32 dB unfavourable-deviation allowance then permits a 2 dB upward shift of the
+# reference (32 dB / 16 bands), giving Rw = curve@500 Hz (52) + 2 = 54 dB - the
+# analytic +2-shift anchor (mirrors tests/test_lab_insulation.py).
+# ---------------------------------------------------------------------------
+ISO10140_2_REF_AIRBORNE_R: list[float] = [
+    33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56,
+]
+ISO10140_2_REF_AIRBORNE_RW = 54
+
+# ---------------------------------------------------------------------------
+# EN 12354-1:2000 Annex H.3 airborne prediction worked example. A separating
+# element of Rw = 57 dB and area S = 11,5 m2 is flanked by four elements; each
+# contributes an Ff/Fd/Df triplet (12 flanking paths), which with the direct
+# Dd path make 13 transmission paths. Energy summation (Formula (26)) gives
+# R'w = 52,2 dB -> 52 dB. Row = (label, Rw_flanking, KFf, KFd=KDf, coupling
+# length lf). Mirrors tests/test_building_prediction.py (_annex_h_paths).
+# ---------------------------------------------------------------------------
+EN12354_1_ANNEX_H3_R_DIRECT = 57.0
+EN12354_1_ANNEX_H3_SEPARATING_AREA = 11.5
+EN12354_1_ANNEX_H3_ELEMENTS: list[tuple[str, float, float, float, float]] = [
+    ("floor", 49.0, 12.4, 8.9, 4.5),
+    ("ceiling", 46.0, 14.4, 9.2, 4.5),
+    ("facade", 42.0, 12.6, 6.7, 2.55),
+    ("intwall", 33.0, 33.5, 15.7, 2.55),
+]
+EN12354_1_ANNEX_H3_NUM_PATHS = 13
+EN12354_1_ANNEX_H3_RPRIME_W = 52  # 52,2 dB rounds to 52
+
+# ---------------------------------------------------------------------------
+# EN 12354-2:2000 Annex E.3 impact prediction worked example. A concrete floor
+# of mass per area m' = 322 kg/m2 has an equivalent normalized impact level
+# Ln,w,eq = 164 - 35 lg(m') ~ 76 dB (Formula for heavy floors). With a floating-
+# floor improvement ΔLw = 33 dB and a flanking correction K = 2 dB (Table 1;
+# separating 322 -> row 300, flanking mean 145 -> col 150), the predicted
+# apparent normalized impact level is L'n,w = 76 - 33 + 2 = 45 dB (Formula 21).
+# ---------------------------------------------------------------------------
+EN12354_2_ANNEX_E3_MASS = 322.0
+EN12354_2_ANNEX_E3_FLANKING_MEAN_MASS = 145.0
+EN12354_2_ANNEX_E3_DELTA_LW = 33.0
+EN12354_2_ANNEX_E3_K = 2
+EN12354_2_ANNEX_E3_LPRIME_N_W = 45
+
+# ---------------------------------------------------------------------------
+# ISO 12999-1:2020 measurement uncertainty. Table 2 (Clause 7.2) tabulates the
+# airborne one-third-octave standard uncertainty; situation A at 1000 Hz is
+# 1,8 dB (digit-exact oracle). Table 8 (Clause 8) gives the two-sided 95 %
+# coverage factor k = 1,96, so the expanded uncertainty is U = k u = 1,96 u
+# exactly; for Rw in situation A (u = 1,2 dB, Table 3) this is U = 2,352 dB.
+# ---------------------------------------------------------------------------
+ISO12999_1_TABLE2_AIRBORNE_A_1000HZ = 1.8
+ISO12999_1_COVERAGE_K_95 = 1.96
+ISO12999_1_RW_A_STANDARD_UNCERTAINTY = 1.2

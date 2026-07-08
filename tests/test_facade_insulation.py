@@ -1,19 +1,21 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Tests for ISO 16283-3 field façade sound insulation and its ISO 717-1
+Tests for ISO 16283-3:2016 field façade sound insulation and its ISO 717-1
 weighted rating.
 
 Validation strategy: the standard's own formulas and closed-form
-identities, plus reuse of the already-verified ISO 717-1 engine.
+identities, plus reuse of the already-verified ISO 717-1 engine. The field
+quantities are defined by unnumbered formulas inline in the Clause 3 terms.
 
-- ``D2m = L1,2m - L2`` (Formula 4); ``Dls,2m,nT = D2m + 10 lg(T/T0)``
-  reduces to ``D2m`` at ``T = T0 = 0,5 s`` (Formula 5); ``Dls,2m,n =
+- ``D2m = L1,2m - L2`` (Clause 3.14); ``Dls,2m,nT = D2m + 10 lg(T/T0)``
+  reduces to ``D2m`` at ``T = T0 = 0,5 s`` (Clause 3.15); ``Dls,2m,n =
   D2m - 10 lg(A/A0)`` with ``A = 0,16 V/T``, ``A0 = 10 m²`` reduces to
-  ``D2m`` when ``A = A0`` (Formula 6, 7).
-- ``R'45° = L1,s - L2 + 10 lg(S/A) - 1,5`` (Formula 2, loudspeaker) and
-  ``R'tr,s = ... - 3`` (Formula 3, road traffic); with ``S = A`` the
+  ``D2m`` when ``A = A0`` (Clause 3.16, 3.17).
+- ``R'45° = L1,s - L2 + 10 lg(S/A) - 1,5`` (Clause 3.12, loudspeaker) and
+  ``R'tr,s = ... - 3`` (Clause 3.13, road traffic); with ``S = A`` the
   ``10 lg`` term vanishes so only the incidence correction remains.
-- Positions are energy-averaged (Formula 20), reusing the 16283-1 helper.
+- Positions are energy-averaged (Clause 9.5.1, Formula 7), reusing the
+  16283-1 helper.
 - The single-number rating goes through the ISO 717-1 airborne
   ``weighted_rating`` unchanged (Annex F), reproducing a known ``Rw``.
 """
@@ -45,10 +47,10 @@ def _flat(n: int, value: float) -> np.ndarray:
 
 
 # --------------------------------------------------------------------------
-# Global loudspeaker method: D2m family (Formulae 4-7)
+# Global loudspeaker method: D2m family (Clauses 3.14-3.17)
 # --------------------------------------------------------------------------
 def test_d2m_is_level_difference() -> None:
-    """D2m = L1,2m - L2 per band (Formula 4)."""
+    """D2m = L1,2m - L2 per band (Clause 3.14)."""
     l1 = np.array([80.0, 78.0, 76.0])
     l2 = np.array([40.0, 41.0, 39.0])
     res = facade_insulation(l1, l2, _flat(3, 0.5))
@@ -57,7 +59,7 @@ def test_d2m_is_level_difference() -> None:
 
 
 def test_dnt_reduces_to_d_at_reference_time() -> None:
-    """Dls,2m,nT = D2m when T = T0 = 0,5 s (Formula 5)."""
+    """Dls,2m,nT = D2m when T = T0 = 0,5 s (Clause 3.15)."""
     l1 = _flat(3, 75.0)
     l2 = _flat(3, 35.0)
     res = facade_insulation(l1, l2, _flat(3, 0.5))
@@ -75,7 +77,7 @@ def test_dnt_standardization_term() -> None:
 
 
 def test_d2m_n_reduces_to_d_when_absorption_equals_reference() -> None:
-    """Dls,2m,n = D2m when A = 0,16 V/T = A0 = 10 m² (Formula 6, 7)."""
+    """Dls,2m,n = D2m when A = 0,16 V/T = A0 = 10 m² (Clause 3.16, 3.17)."""
     # 0,16 * 62,5 / 1,0 = 10,0 = A0.
     res = facade_insulation(
         _flat(3, 72.0), _flat(3, 32.0), _flat(3, 1.0), volume=62.5
@@ -91,7 +93,7 @@ def test_d2m_n_none_without_volume() -> None:
 
 
 # --------------------------------------------------------------------------
-# Element method: apparent sound reduction index (Formulae 2, 3)
+# Element method: apparent sound reduction index (Clauses 3.12, 3.13)
 # --------------------------------------------------------------------------
 def test_r45_loudspeaker_correction() -> None:
     """R'45° = L1,s - L2 + 10 lg(S/A) - 1,5; with S = A only -1,5 remains."""
@@ -108,7 +110,7 @@ def test_r45_loudspeaker_correction() -> None:
 
 
 def test_rtrs_road_traffic_correction() -> None:
-    """R'tr,s uses a -3 dB correction (Formula 3)."""
+    """R'tr,s uses a -3 dB correction (Clause 3.13)."""
     n = 3
     surf = _flat(n, 60.0)
     l2 = _flat(n, 20.0)
@@ -122,7 +124,7 @@ def test_rtrs_road_traffic_correction() -> None:
 
 
 def test_r45_full_formula_with_absorption() -> None:
-    """R'45° with a non-trivial 10 lg(S/A) term (Formula 2, 7)."""
+    """R'45° with a non-trivial 10 lg(S/A) term (Clause 3.12, 3.17)."""
     surf = np.array([65.0, 63.0])
     l2 = np.array([25.0, 24.0])
     t = np.array([0.8, 0.8])
@@ -147,10 +149,10 @@ def test_r_prime_needs_surface_area_and_volume() -> None:
 
 
 # --------------------------------------------------------------------------
-# Energy averaging of microphone positions (Formula 20)
+# Energy averaging of microphone positions (Clause 9.5.1, Formula 7)
 # --------------------------------------------------------------------------
 def test_positions_are_energy_averaged() -> None:
-    """2-D (positions x bands) inputs are energy-averaged (Formula 20)."""
+    """2-D (positions x bands) inputs are energy-averaged (Clause 9.5.1, Formula 7)."""
     l1 = np.array([[80.0, 70.0], [86.0, 70.0]])  # two positions, two bands
     l2 = np.array([[40.0, 30.0], [40.0, 30.0]])
     res = facade_insulation(l1, l2, np.array([0.5, 0.5]))

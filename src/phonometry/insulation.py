@@ -45,29 +45,27 @@ may be supplied already averaged or as several microphone positions, then
 energy-averaged (Clause 7.8, Formula (10)), over the core one-third-octave
 range 100 Hz to 3150 Hz (Clause 5.1).
 
-**Field façade quantities (ISO 16283-3).** With an outdoor sound source
-this module forms, from the level 2 m in front of the façade ``L1,2m`` and
-the receiving-room level ``L2``, the level difference ``D2m = L1,2m - L2``
-(Clause 3.14, Formula (4)), its standardized form
-``D2m,nT = D2m + 10 lg(T/T0)`` with ``T0 = 0,5 s`` (Clause 3.15, Formula
-(5)) and normalized form ``D2m,n = D2m - 10 lg(A/A0)`` with the Sabine
-absorption area ``A = 0,16 V/T`` (Clause 3.17, Formula (7)) and reference
-``A0 = 10 m²`` (Clause 3.16, Formula (6)) — the global loudspeaker /
-traffic quantities ``Dls,2m,*`` / ``Dtr,2m,*``. When a surface level
-``L1,s`` (microphone on the test element) with the element area ``S`` and
-volume are given it forms the apparent sound reduction index
+**Field façade quantities (ISO 16283-3:2016).** With an outdoor sound
+source this module forms, from the level 2 m in front of the façade
+``L1,2m`` and the receiving-room level ``L2``, the level difference
+``D2m = L1,2m - L2`` (Clause 3.14), its standardized form
+``D2m,nT = D2m + 10 lg(T/T0)`` with ``T0 = 0,5 s`` (Clause 3.15) and
+normalized form ``D2m,n = D2m - 10 lg(A/A0)`` with the Sabine absorption
+area ``A = 0,16 V/T`` (Clause 3.17) and reference ``A0 = 10 m²``
+(Clause 3.16) — the global loudspeaker / traffic quantities
+``Dls,2m,*`` / ``Dtr,2m,*``. When a surface level ``L1,s`` (microphone on
+the test element) with the element area ``S`` and volume are given it
+forms the apparent sound reduction index
 ``R'45° = L1,s - L2 + 10 lg(S/A) - 1,5`` for the loudspeaker element method
-(Clause 3.12, Formula (2)) or ``R'tr,s = L1,s - L2 + 10 lg(S/A) - 3`` for
-the road-traffic element method (Clause 3.13, Formula (3)). Positions are
-energy-averaged (Clause 9.5.1, Formula (20)). Quantities are evaluated over
-the core one-third-octave range 100 Hz to 3150 Hz (Clause 5), optionally
-extended to 50-5000 Hz. The façade quantity is airborne, so its
-single-number rating uses the **ISO 717-1 airborne** reference curve and
-method (Clause 2, Annex F) via :func:`weighted_rating` unchanged. The
-ISO 16283-3 clause and formula numbers cited here follow the 2014 DIS
-draft and should be reconciled against the published 2016 edition, which
-may renumber them; the computed quantities and the -1,5 dB / -3 dB
-element-method corrections are edition-stable.
+(Clause 3.12) or ``R'tr,s = L1,s - L2 + 10 lg(S/A) - 3`` for the
+road-traffic element method (Clause 3.13). These quantities are defined by
+unnumbered formulas inline in the Clause 3 terms; positions are
+energy-averaged with the surface-level formula (Clause 9.5.1, Formula (7)).
+Quantities are evaluated over the core one-third-octave range 100 Hz to
+3150 Hz (Clause 5), optionally extended to 50-5000 Hz. The façade quantity
+is airborne, so its single-number rating uses the **ISO 717-1 airborne**
+reference curve and method (Clause 2, Annex F) via :func:`weighted_rating`
+unchanged.
 
 **Weighted impact rating (ISO 717-2).** The reference-curve method of
 Clause 4.3 shifts the Table 3 impact reference curve towards the measured
@@ -153,8 +151,8 @@ _A0_IMPACT = 10.0
 _A0_FACADE = 10.0
 
 #: Angle-of-incidence corrections in the apparent sound reduction index:
-#: -1,5 dB for the loudspeaker method at 45° (Formula (2)) and -3 dB for
-#: the road-traffic method with all-angle incidence (Formula (3)).
+#: -1,5 dB for the loudspeaker method at 45° (Clause 3.12) and -3 dB for
+#: the road-traffic method with all-angle incidence (Clause 3.13).
 _FACADE_CORRECTION = {"loudspeaker": 1.5, "road_traffic": 3.0}
 
 # --- ISO 717-1 Table 4 spectra (A-weighted, normalized to 0 dB) ----------
@@ -298,18 +296,15 @@ class FacadeInsulationResult:
     """Per-band field façade sound insulation (ISO 16283-3).
 
     :ivar d_2m: Level difference ``D2m = L1,2m - L2`` per band, in dB
-        (Clause 3.14, Formula (4); ``Dls,2m`` loudspeaker, ``Dtr,2m``
-        traffic).
+        (Clause 3.14; ``Dls,2m`` loudspeaker, ``Dtr,2m`` traffic).
     :ivar d_2m_nt: Standardized level difference
-        ``D2m,nT = D2m + 10 lg(T/T0)`` per band, in dB (Clause 3.15,
-        Formula (5)).
+        ``D2m,nT = D2m + 10 lg(T/T0)`` per band, in dB (Clause 3.15).
     :ivar d_2m_n: Normalized level difference
-        ``D2m,n = D2m - 10 lg(A/A0)`` per band, in dB (Clause 3.16,
-        Formula (6)), or ``None`` when the receiving-room volume was not
-        supplied.
+        ``D2m,n = D2m - 10 lg(A/A0)`` per band, in dB (Clause 3.16), or
+        ``None`` when the receiving-room volume was not supplied.
     :ivar r_prime: Apparent sound reduction index ``R'45°`` (loudspeaker,
-        Clause 3.12, Formula (2)) or ``R'tr,s`` (road traffic, Clause 3.13,
-        Formula (3)) per band, in dB, or ``None`` unless a surface level
+        Clause 3.12) or ``R'tr,s`` (road traffic, Clause 3.13) per band, in
+        dB, or ``None`` unless a surface level
         together with the element area and receiving-room volume were
         supplied.
     :ivar frequencies: Band centre frequencies, in Hz, or ``None``.
@@ -673,25 +668,27 @@ def facade_insulation(
     frequencies: Sequence[float] | np.ndarray | None = None,
 ) -> FacadeInsulationResult:
     """
-    Field façade sound insulation per ISO 16283-3.
+    Field façade sound insulation per ISO 16283-3:2016.
 
     Computes, per frequency band, the global-method level difference
-    ``D2m = L1,2m - L2`` (Formula (4)), its standardized form
-    ``D2m,nT = D2m + 10 lg(T/T0)`` (Formula (5)) and, when the
+    ``D2m = L1,2m - L2`` (Clause 3.14), its standardized form
+    ``D2m,nT = D2m + 10 lg(T/T0)`` (Clause 3.15) and, when the
     receiving-room volume is given, its normalized form
     ``D2m,n = D2m - 10 lg(A/A0)`` with the Sabine equivalent absorption
-    area ``A = 0,16 V/T`` (Formula (7)) and ``A0 = 10 m²`` (Formula (6)).
+    area ``A = 0,16 V/T`` (Clause 3.17) and ``A0 = 10 m²`` (Clause 3.16).
     When a surface level ``L1,s`` (microphone on the test element),
     together with the element area ``S`` and the volume, is supplied it
     also computes the apparent sound reduction index of the element
     method: ``R'45° = L1,s - L2 + 10 lg(S/A) - 1,5`` for a loudspeaker
-    source (Formula (2)) or ``R'tr,s = L1,s - L2 + 10 lg(S/A) - 3`` for a
-    road-traffic source (Formula (3)).
+    source (Clause 3.12) or ``R'tr,s = L1,s - L2 + 10 lg(S/A) - 3`` for a
+    road-traffic source (Clause 3.13). The defining formulas are unnumbered
+    inline in the Clause 3 terms.
 
     ``l1_2m``, ``l2`` and ``surface_level`` may be one value per band
     (already energy-averaged) or a two-dimensional ``(positions, bands)``
-    array, in which case the positions are energy-averaged with
-    Formula (20). Band levels are assumed already corrected for background
+    array, in which case the positions are energy-averaged with the
+    surface-level formula (Clause 9.5.1, Formula (7)). Band levels are
+    assumed already corrected for background
     noise. The single-number rating uses the ISO 717-1 airborne reference
     curve (Annex F); pass the desired 16-band quantity to
     :func:`weighted_rating`.
@@ -709,7 +706,7 @@ def facade_insulation(
         ``R'``).
     :param method: ``"loudspeaker"`` (45° incidence, -1,5 dB) or
         ``"road_traffic"`` (all-angle incidence, -3 dB); selects the ``R'``
-        correction (Formula (2) / (3)).
+        correction (Clause 3.12 / 3.13).
     :param t0: Reference reverberation time ``T0``, in seconds (default
         0,5 s for dwellings, Clause 3.15).
     :param frequencies: Optional band centre frequencies, in Hz, carried
@@ -761,7 +758,7 @@ def facade_insulation(
             "the apparent sound reduction index R'."
         )
 
-    # Sabine equivalent absorption area A = 0,16 V / T (Formula (7)).
+    # Sabine equivalent absorption area A = 0,16 V / T (Clause 3.17).
     absorption = 0.16 * volume / t if volume is not None else None
 
     d_2m_n: np.ndarray | None = None

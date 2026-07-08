@@ -71,6 +71,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   with the CI adaptation term per ISO 717-2 (reference-curve method, octave
   −5 dB rule), verified against the ISO 717-2 Annex C examples (Ln,w = 79,
   CI = −11; octave 54, CI = 0).
+- `facade_insulation()` and `FacadeInsulationResult` (with `.plot()`) — field
+  façade sound insulation per ISO 16283-3:2016: the level difference D2m from
+  the level 2 m in front of the façade, its standardized D2m,nT and normalized
+  D2m,n forms, and the apparent element-method sound reduction index R′45°
+  (loudspeaker, −1.5 dB) / R′tr,s (road traffic, −3 dB), rated to a single
+  number with the ISO 717-1 airborne engine.
+- `lab_airborne_insulation()`, `lab_impact_insulation()`,
+  `background_correction()` and the `LabAirborneInsulationResult` /
+  `LabImpactInsulationResult` dataclasses (with `.plot()`) plus the
+  `LabInsulationWarning` — laboratory sound insulation per ISO 10140: the direct
+  sound reduction index R (Part 2) and normalized impact level Ln (Part 3) with
+  the Sabine absorption area A = 0,16 V/T (Part 4), background-noise correction
+  with the 6/15 dB limit-of-measurement rule, and single-number ratings via the
+  reused ISO 717-1/2 engines.
+- `predicted_airborne_insulation()`, `predicted_impact_insulation()`,
+  `junction_vibration_reduction()`, `junction_min_vibration_reduction()`,
+  `flanking_path()`, `flanking_element()`, `combine_linings()`,
+  `equivalent_impact_level()`, `impact_flanking_correction()`,
+  `standardized_impact_level()` and the `AirbornePredictionResult` /
+  `ImpactPredictionResult` / `FlankingPath` / `PathContribution` dataclasses —
+  building acoustic performance prediction per EN 12354-1/-2:2000 (simplified
+  single-number model): the apparent R′w from the direct path and the twelve
+  flanking paths of four elements (Ff/Df/Fd each) with the Annex E junction
+  vibration reduction index Kij and the Kij,min
+  floor, and the apparent L′n,w from the bare-floor equivalent level, covering
+  improvement and Table 1 flanking correction. Verified against the EN 12354-1
+  Annex H.3 (R′w = 52 dB) and EN 12354-2 Annex E.3 (L′n,w = 45 dB) worked
+  examples.
+- `band_uncertainty()`, `single_number_uncertainty()`,
+  `single_number_uncertainty_uncorrelated()`,
+  `maximum_repeatability_standard_deviation()`, `coverage_factor()`,
+  `expanded_uncertainty()`, `uncertain_value()`, `combine_uncertainties()`,
+  `prediction_input_uncertainty()`, `reduce_by_independent_measurements()`,
+  `satisfies_lower_requirement()`, `satisfies_upper_requirement()`, the
+  `BandUncertainty` / `UncertainValue` dataclasses and the `COVERAGE_FACTORS`
+  mapping — measurement uncertainty in building acoustics per ISO 12999-1:2020:
+  the tabulated standard uncertainties for the three measurement situations
+  (A/B/C, Tables 1–7 and Annex D), the expanded uncertainty U = k·u with the
+  Table 8 coverage factors, and the combination, reduction and conformity rules
+  (Annexes A/B/C, one-sided and two-sided).
 - `absorption_area()`, `absorption_coefficient()`, `attenuation_from_alpha()`
   and `AbsorptionWarning` — sound absorption in a reverberation room per
   ISO 354:2003 (equivalent absorption area from the empty and with-specimen

@@ -1759,9 +1759,13 @@ intelligibility; measure it either side of a wall and it yields the sound
 insulation of the partition. This page follows that chain in measurement
 order — acquiring the IR (ISO 18233), turning it into room parameters
 (ISO 3382-1/2), spatial speech metrics for open-plan offices
-(ISO 3382-3), field airborne and impact insulation with single-number
-ratings (ISO 16283-1/2, ISO 717-1/2) and, closing the loop, the sound
-absorption of a material in a reverberation room (ISO 354).
+(ISO 3382-3), field airborne, impact and façade insulation with
+single-number ratings (ISO 16283-1/2/3, ISO 717-1/2), the laboratory
+characterisation of a building element (ISO 10140), the prediction of
+in-situ performance from flanking transmission (EN 12354-1/2), the
+measurement uncertainty that qualifies every rating (ISO 12999-1) and,
+closing the loop, the sound absorption of a material in a reverberation
+room (ISO 354).
 
 ## 1. Impulse-response acquisition (ISO 18233)
 
@@ -2283,7 +2287,407 @@ values (thirds `L'nT,w = 79`, `CI = −11`; octave `54`, `CI = 0`).
 `None`); `weighted_impact_rating()` returns an `ImpactRatingResult` (`rating`,
 `ci` integers, `unfavourable_sum` in dB).
 
-## 5. Sound absorption (ISO 354)
+### Field façade insulation (ISO 16283-3)
+
+The same source/receiver logic reaches the building **façade**, but now the
+source is *outdoors* — a loudspeaker at 45° or the road traffic itself. Rather
+than a level difference across an internal partition, ISO 16283-3 references the
+receiving-room level $L_2$ to the level **2 m in front of the façade**
+$L_{1,2m}$, giving the level difference $D_{2m}$ and, exactly as in the airborne
+case, its standardized and normalized forms:
+
+$$
+D_{2m} = L_{1,2m} - L_2, \quad
+D_{2m,nT} = D_{2m} + 10 \log_{10}\frac{T}{T_0}, \quad
+D_{2m,n} = D_{2m} - 10 \log_{10}\frac{A}{A_0},
+$$
+
+with $T_0 = 0.5$ s, $A_0 = 10$ m² and $A = 0.16\ V/T$ (dwellings). When the
+microphone sits **on the test element** (surface level $L_{1,s}$) the *element*
+method also yields an apparent sound reduction index, carrying a fixed
+angle-of-incidence correction — $-1.5$ dB for the 45° loudspeaker method,
+$-3$ dB for the all-angle road-traffic method:
+
+$$
+R'_{45°} = L_{1,s} - L_2 + 10 \log_{10}\frac{S}{A} - 1.5, \qquad
+R'_{tr,s} = L_{1,s} - L_2 + 10 \log_{10}\frac{S}{A} - 3.
+$$
+
+The façade quantity is airborne, so its single-number rating uses the
+**ISO 717-1** reference curve through `weighted_rating` unchanged (Annex F).
+
+```python
+import numpy as np
+from phonometry import facade_insulation, weighted_rating
+
+# Outdoor level 2 m in front of the façade, receiving-room level and T per
+# one-third-octave band; surface_level is the microphone on the test element.
+l1_2m = np.full(16, 75.0)                              # L1,2m outdoors
+l2 = np.full(16, 33.0)                                 # receiving-room L2
+t2 = np.full(16, 0.5)                                  # receiving-room T (s)
+
+fac = facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
+                        surface_level=np.full(16, 78.0), method="loudspeaker")
+print(round(float(fac.d_2m[0]), 1))                    # 42.0  D2m = L1,2m - L2
+print(round(float(fac.d_2m_nt[0]), 1))                 # 42.0  (= D2m since T = T0)
+print(round(float(fac.d_2m_n[0]), 1))                  # 40.0  normalized to A0 = 10 m^2
+print(round(float(fac.r_prime[0]), 1))                 # 42.1  R'45deg (loudspeaker, -1.5 dB)
+
+# The road-traffic element method carries the -3 dB all-angle correction instead
+tr = facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
+                       surface_level=np.full(16, 78.0), method="road_traffic")
+print(round(float(tr.r_prime[0]), 1))                  # 40.6  R'tr,s (traffic, -3 dB)
+
+# The façade quantity is airborne: rate D2m,nT with the ISO 717-1 engine
+print(weighted_rating(fac.d_2m_nt).rating)             # 42  Dls,2m,nT,w
+
+fac.plot()   # per-band D2m,nT with D2m, D2m,n and R' overlaid (needs matplotlib)
+```
+
+`surface_level`, `area` and `volume` are all optional: with only `l1_2m`, `l2`
+and `t2` the function returns `d_2m` and `d_2m_nt`; add `volume` for `d_2m_n`;
+add `surface_level` **and** `area` **and** `volume` for `r_prime`. Positions are
+energy-averaged with the surface-level formula (Clause 9.5.1); band levels are
+assumed already corrected for background noise.
+
+#### `facade_insulation()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `l1_2m` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Level 2 m in front of the façade `L1,2m` |
+| `l2` | 1D or 2D array | dB | same band count | Receiving-room levels |
+| `t2` | 1D array | s | > 0, one per band | Receiving-room reverberation time |
+| `area` | float, optional | m² | > 0, with `surface_level`, `volume` | Test-element area `S` (enables `R'`) |
+| `volume` | float, optional | m³ | > 0 | Receiving-room `V` (enables `D2m,n`; required for `R'`) |
+| `surface_level` | 1D/2D array, optional | dB | same band count | Surface level `L1,s` on the element (enables `R'`) |
+| `method` | str | — | `'loudspeaker'` (−1.5 dB) / `'road_traffic'` (−3 dB) | Angle-of-incidence correction of `R'` |
+| `t0` | float | s | default `0.5` | Reference reverberation time `T0` |
+| `frequencies` | 1D array, optional | Hz | — | Band centres carried on the result for plotting |
+
+`facade_insulation()` returns a `FacadeInsulationResult` (`d_2m`, `d_2m_nt`,
+`d_2m_n` or `None`, `r_prime` or `None`, `frequencies`); feed any 16-band façade
+quantity to `weighted_rating` for its ISO 717-1 single number.
+
+## 5. Laboratory measurement (ISO 10140)
+
+Everything above is a **field** measurement (the primed quantities $R'$, $L'_n$):
+the number a real building achieves, flanking transmission and all. To rate an
+element on its own — a wall type, a floating floor, a window — you take it to a
+qualified **laboratory** (ISO 10140), where suppressed flanking makes the
+*direct* transmission the whole story. The formulas lose their primes: the
+**sound reduction index** $R$ (not $R'$) and the **normalized impact level**
+$L_n$ (not $L'_n$), with the receiving room's absorption area $A = 0.16\ V/T$
+now a known property of the facility:
+
+$$
+R = L_1 - L_2 + 10 \log_{10}\frac{S}{A}, \qquad
+L_n = L_i + 10 \log_{10}\frac{A}{A_0}, \quad A_0 = 10\ \text{m}^2.
+$$
+
+| | Field (ISO 16283) | Laboratory (ISO 10140) |
+| :--- | :--- | :--- |
+| Airborne | $R'$ apparent (with flanking) | $R$ direct (flanking suppressed) |
+| Impact | $L'_n$ apparent | $L_n$ direct |
+| Absorption area | measured in the room | property of the facility |
+
+The single-number ratings reuse the very same ISO 717-1/2 engines
+(`weighted_rating`, `weighted_impact_rating`) — an $R$ spectrum rates to $R_w$
+exactly as an $R'$ spectrum rated to $R'_w$. Before forming the index the
+receiving-room levels must be **corrected for background noise** (Clause 4.3):
+the energy subtraction $10 \log_{10}(10^{L_{sb}/10} - 10^{L_b/10})$ applies for a
+6–15 dB signal-to-background margin, a fixed 1.3 dB correction (the *limit of
+measurement*) at or below 6 dB, and no correction at or above 15 dB.
+
+```python
+import numpy as np
+from phonometry import (lab_airborne_insulation, lab_impact_insulation,
+                        background_correction)
+
+# Source/receiving levels and receiving-room T over the 16 one-third-octave
+# bands; S is the free test-opening area, V the receiving-room volume.
+l1 = np.full(16, 80.0)
+l2 = np.full(16, 40.0)
+t2 = np.full(16, 0.5)
+lab = lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+print(round(float(lab.r[0]), 1))              # 38.0  R = L1 - L2 + 10 lg(S/A)
+print(round(float(lab.absorption[0]), 1))     # 16.0  A = 0.16 V / T (m^2)
+print(lab.rating.rating, lab.rating.c, lab.rating.ctr)   # 38 0 0  ->  Rw(C;Ctr)
+
+# Impact: the tapping-machine level Li normalized to A0 = 10 m^2 gives Ln
+li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+imp = lab_impact_insulation(li, t2, volume=50.0)
+print(round(float(imp.l_n[0]), 1))            # 64.1  Ln = Li + 10 lg(A/A0)
+print(imp.rating.rating, imp.rating.ci)       # 81 -11  ->  Ln,w(CI)
+
+# Background correction: margins 6 / 1 / 20 dB -> capped / capped / unchanged
+corrected = background_correction([30.0, 33.0, 50.0], [24.0, 32.0, 30.0])
+print(np.round(corrected, 1))                 # [28.7 31.7 50.0]  (1.3 dB cap twice)
+
+lab.rating.plot()   # measured R vs shifted ISO 717-1 reference (needs matplotlib)
+```
+
+A margin at or below 6 dB emits a `LabInsulationWarning` and flags the band as
+the limit of measurement; catch it with `warnings.simplefilter("error",
+LabInsulationWarning)`. The automatic rating is formed only when exactly 16
+one-third-octave or 5 octave values are supplied (`rating` is `None` otherwise).
+
+### `lab_airborne_insulation()` / `lab_impact_insulation()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `l1` / `l2` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Source / receiving levels (airborne) |
+| `li` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Impact SPL from the tapping machine (impact) |
+| `t2` | 1D array | s | > 0, one per band | Receiving-room reverberation time |
+| `area` | float | m² | > 0 | Free test-opening area `S` (airborne only) |
+| `volume` | float | m³ | > 0 | Receiving-room volume `V` |
+
+`lab_airborne_insulation()` returns a `LabAirborneInsulationResult` (`r`,
+`absorption`, `rating`); `lab_impact_insulation()` a
+`LabImpactInsulationResult` (`l_n`, `absorption`, `rating`);
+`background_correction(signal_and_background, background)` returns the corrected
+levels directly.
+
+## 6. Predicting performance (EN 12354)
+
+A laboratory rating describes an element in isolation, yet the sound a building
+actually transmits also travels *around* the partition — along the floor, up the
+façade, through the flanking walls — re-radiating into the receiving room. This
+**flanking transmission** is the whole difference between the laboratory $R$ and
+the field $R'$. EN 12354 predicts the in-situ apparent rating from the
+laboratory ratings of the elements plus the vibration transmission of their
+junctions.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths.svg" alt="The direct path Dd through the separating element and the three flanking paths Ff, Df and Fd across each junction between a flanking element and the separating element" width="92%"></picture>
+
+Each junction between a flanking element and the separating element carries
+three paths — $Ff$ (flanking→flanking), $Df$ (direct→flanking) and $Fd$
+(flanking→direct) — alongside the single direct path $Dd$. The **simplified
+single-number model** combines them energetically (Formula 26):
+
+$$
+R'_w = -10 \log_{10}\Big[ 10^{-R_{Dd,w}/10}
+      + \sum 10^{-R_{Ff,w}/10} + \sum 10^{-R_{Df,w}/10}
+      + \sum 10^{-R_{Fd,w}/10} \Big],
+$$
+
+with the direct path $R_{Dd,w} = R_{s,w} + \Delta R_{Dd,w}$ (Formula 27) and each
+flanking path (Formula 28a)
+
+$$
+R_{ij,w} = \tfrac{R_{i,w} + R_{j,w}}{2} + \Delta R_{ij,w} + K_{ij}
+         + 10 \log_{10}\frac{S_s}{l_0\ l_f},
+$$
+
+where $l_0 = 1$ m is the reference coupling length, $l_f$ the junction coupling
+length and $K_{ij}$ the junction's **vibration reduction index** (Annex E,
+empirical in the mass ratio $M = \log_{10}(m'_{\perp,i}/m'_i)$).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo.png" alt="Per-path sound reduction indices for the EN 12354-1 Annex H.3 example and each path's share of the transmitted energy, showing the direct path dominating at R'w = 52 dB" width="80%"></picture>
+
+```python
+import numpy as np
+from phonometry import (junction_vibration_reduction, flanking_element,
+                        predicted_airborne_insulation)
+
+# EN 12354-1 Annex H.3: a separating wall Rs,w = 57 dB, area Ss = 11.5 m², with
+# four flanking elements. The simplified model reads each junction's Kij at
+# 500 Hz from the mass ratio m'perp / m' (Annex E) — here the floor's rigid
+# cross-junction (the mass ratio is itself rounded, hence 12.5 vs Annex 12.4):
+print(round(junction_vibration_reduction("rigid_cross", "through", 1.61), 1))  # 12.5  KFf
+print(round(junction_vibration_reduction("rigid_cross", "corner",  1.61), 1))  #  8.9  KFd = KDf
+
+# Build each element's three flanking paths (Ff, Df, Fd) from the Annex H
+# tabulated Kij, then combine the direct path Dd energetically (Formula 26).
+elements = [   # (name, Rw, KFf, KFd = KDf, coupling length lf)
+    ("floor",    49, 12.4,  8.9, 4.50),
+    ("ceiling",  46, 14.4,  9.2, 4.50),
+    ("facade",   42, 12.6,  6.7, 2.55),
+    ("int-wall", 33, 33.5, 15.7, 2.55),
+]
+paths = []
+for name, rw, k_ff, k_fd, lf in elements:
+    paths += flanking_element(label=name, r_flanking=rw, r_separating=57,
+                              k_ff=k_ff, k_fd=k_fd, k_df=k_fd,
+                              separating_area=11.5, coupling_length=lf)
+
+res = predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
+print(round(res.r_prime_w, 1))                          # 52.2  ->  R'w = 52 dB
+print(res.dominant.label, round(res.dominant.fraction, 2))   # Dd 0.33 (direct dominates)
+```
+
+Every added flanking path strictly lowers $R'_w$ below the direct $R_{Dd,w} = 57$;
+`res.paths` exposes each path's share of the transmitted energy so the dominant
+path is visible. Clause 4.4.2 also enforces a floor $K_{ij} \ge K_{ij,\min}$ from
+the junction geometry — compute it with `junction_min_vibration_reduction` and
+pass it to `flanking_path(..., kij_min=...)`, which raises a below-floor $K_{ij}$
+to the minimum:
+
+```python
+from phonometry import junction_min_vibration_reduction
+# Kij,min = 10 lg[lf·l0·(1/Si + 1/Sj)]; large elements give a low (here negative)
+# floor, so a realistic tabulated Kij is rarely clamped.
+print(round(junction_min_vibration_reduction(coupling_length=4.5,
+                                             s_i=11.5, s_j=11.5), 1))     # -1.1
+```
+
+The impact counterpart (EN 12354-2, Formula 21) is a direct subtraction:
+$L'_{n,w} = L_{n,w,eq} - \Delta L_w + K$, with the bare-floor equivalent level
+$L_{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Annex B), the covering improvement
+$\Delta L_w$ (ISO 717-2) and the flanking correction $K$ from Table 1.
+
+```python
+from phonometry import (equivalent_impact_level, impact_flanking_correction,
+                        predicted_impact_insulation, standardized_impact_level)
+
+# EN 12354-2 Annex E.3: a 0.14 m concrete floor (m' = 322 kg/m²) with a floating
+# floor (ΔLw = 33 dB), rooms one above the other, mean flanking mass 145 kg/m².
+ln_eq = equivalent_impact_level(322.0)                   # 164 - 35 lg(m')
+k = impact_flanking_correction(322.0, 145.0)             # Table 1 (sep 322, flk 145)
+imp = predicted_impact_insulation(ln_w_eq=ln_eq, delta_l_w=33.0, k_correction=k)
+print(round(ln_eq, 1), k, round(imp.l_prime_n_w, 1))     # 76.2 2 45.2  ->  L'n,w = 45 dB
+print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT,w
+```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Per-path sound reduction index and each path's share of the transmitted
+# energy for the Annex H.3 result computed above.
+labels = [p.label for p in res.paths]
+r_w = [p.r_w for p in res.paths]
+frac = [100.0 * p.fraction for p in res.paths]
+
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9, 6), sharex=True)
+ax1.bar(labels, r_w, color="tab:blue")
+ax1.axhline(res.r_prime_w, ls="--", color="k", label=f"R'w = {res.r_prime_w:.1f} dB")
+ax1.set_ylabel("Path Rij,w [dB]"); ax1.legend()
+ax2.bar(labels, frac, color="tab:orange")
+ax2.set_ylabel("Energy share [%]"); ax2.set_xlabel("Transmission path")
+for ax in (ax1, ax2):
+    ax.tick_params(axis="x", rotation=45)
+fig.suptitle("EN 12354-1 Annex H.3 — flanking transmission")
+fig.tight_layout()
+plt.show()
+```
+
+</details>
+
+### `junction_vibration_reduction()` / `flanking_element()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `junction_type` | str | — | `'rigid_cross'` / `'rigid_t'` / `'flexible_t'` / `'lightweight_facade'` | Junction geometry (Annex E) |
+| `path` | str | — | `'through'` (K13) / `'corner'` (K12 = K23) | Path branch |
+| `mass_ratio` | float | — | > 0 | `m'⊥,i / m'i` (Formula E.2) |
+| `frequency` | float | Hz | default `500` | Only `flexible_t` is frequency-dependent |
+| `r_flanking` / `r_separating` | float | dB | — | Weighted indices of the flanking / separating element |
+| `k_ff` / `k_fd` / `k_df` | float | dB | — | Junction `Kij` for the three paths |
+| `separating_area` | float | m² | > 0 | Separating-element area `Ss` |
+| `coupling_length` | float | m | > 0 | Junction coupling length `lf` |
+| `delta_r_ff` / `delta_r_fd` / `delta_r_df` | float | dB | default `0` | Lining improvements per path |
+
+`predicted_airborne_insulation()` returns an `AirbornePredictionResult`
+(`r_prime_w`, `r_direct_w`, `paths` of `PathContribution`, `dominant`);
+`predicted_impact_insulation()` an `ImpactPredictionResult` (`l_prime_n_w`,
+`ln_w_eq`, `delta_l_w`, `k_correction`). The simplified model carries a reported
+standard deviation of about 2 dB (Clause 5).
+
+## 7. Measurement uncertainty (ISO 12999-1)
+
+A rating without an uncertainty is only half a result. ISO 12999-1 does not
+re-measure anything; it tabulates the **standard uncertainty** $u$ of every
+sound-insulation quantity — derived from inter-laboratory tests — and prescribes
+how to expand and combine it. Which standard deviation is $u$ depends on the
+**measurement situation** (Clause 5.2):
+
+| Situation | Meaning | Standard uncertainty $u$ |
+| :--- | :--- | :--- |
+| **A** | laboratory characterisation (ISO 10140) | reproducibility $\sigma_R$ |
+| **B** | same location, different teams | in-situ $\sigma_{situ}$ |
+| **C** | same location, same operator repeated | repeatability $\sigma_r$ |
+
+The expanded uncertainty is $U = k\ u$ (Formula 2) with the coverage factor $k$
+of Table 8. A two-sided interval $Y = y \pm U$ (Formula 3, $k = 1.96$ at 95 %)
+*reports* a value; the **one-sided** factor ($k = 1.65$ at 95 %) *declares
+conformity* with a requirement (Formulae 4/5).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo.png" alt="A weighted rating reported with its two-sided 95 % expanded uncertainty in situations A, B and C, the reproducibility uncertainty widest and the repeatability uncertainty narrowest" width="80%"></picture>
+
+```python
+from phonometry import (band_uncertainty, single_number_uncertainty,
+                        uncertain_value, satisfies_lower_requirement)
+
+# Situation B (same building, different teams) -> the in-situ standard deviation.
+print(single_number_uncertainty("r_w", "B"))       # 0.9  dB  (Table 3)
+u = band_uncertainty("airborne", "B")              # per-band u (Table 2)
+print(len(u.frequencies), u.uncertainties[10])     # 21 1.1  (the 500 Hz band)
+
+# Report R'w = 52 dB with a two-sided 95 % interval (k = 1.96, Table 8):
+uv = uncertain_value(52.0, "rprime_w", "B")        # aliases resolve to r_w
+print(uv.coverage_factor, round(uv.expanded_uncertainty, 1))    # 1.96 1.8
+print(round(uv.lower, 1), round(uv.upper, 1))      # 50.2 53.8  ->  52 ± 1.8 dB
+
+# Declaring conformity uses the ONE-sided factor (k = 1.65): does R'w provably
+# clear a 50 dB requirement?
+uc = uncertain_value(52.0, "rprime_w", "B", one_sided=True)
+print(satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
+```
+
+Impact quantities offer situations B/C only (Table 4, no 500 Hz band in the 2020
+edition), and $\Delta L$ only situation A. Descriptors are case-insensitive with
+aliases (`rprime_w`/`dnt_w`→`r_w`, `lprime_n_w`→`ln_w`); combine independent
+components in quadrature with `combine_uncertainties`, and reduce by $m$
+independent measurements with `reduce_by_independent_measurements` ($u/\sqrt{m}$).
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import uncertain_value
+
+# The same R'w = 52 dB reported in each situation with its two-sided 95 % U.
+situations = ["A", "B", "C"]
+vals = [uncertain_value(52.0, "r_w", s) for s in situations]
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.errorbar(situations, [v.value for v in vals],
+            yerr=[v.expanded_uncertainty for v in vals],
+            fmt="o", capsize=8, color="tab:blue")
+for s, v in zip(situations, vals):
+    ax.annotate(f"±{v.expanded_uncertainty:.1f}", (s, v.upper),
+                textcoords="offset points", xytext=(8, 4))
+ax.set_ylabel("R'w [dB]"); ax.set_xlabel("Measurement situation")
+ax.set_title("R'w = 52 dB with 95 % expanded uncertainty (ISO 12999-1)")
+fig.tight_layout()
+plt.show()
+```
+
+</details>
+
+### `band_uncertainty()` / `single_number_uncertainty()` / `uncertain_value()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `measurand` | str | — | `'airborne'` / `'impact'` / `'impact_reduction'` | Selects Table 2 / 4 / 6 |
+| `quantity` | str | — | `'r_w'`, `'ln_w'`, `'delta_lw'` (+ aliases, `+c`/`+ctr` variants) | Single-number descriptor |
+| `situation` | str | — | `'A'` / `'B'` / `'C'` | Measurement situation (Clause 5.2) |
+| `value` | float | dB | — | Best estimate `y` to attach `U` to |
+| `coverage` | float | — | default `0.95` | Confidence level (Table 8) |
+| `one_sided` | bool | — | default `False` | One-sided factor for conformity checks |
+| `upper_limit` | bool | — | default `False` | Select the σR95 upper limit (airborne, situation A) |
+
+`band_uncertainty()` returns a `BandUncertainty` (`frequencies`,
+`uncertainties`, `.to_arrays()`); `single_number_uncertainty()` a float;
+`uncertain_value()` an `UncertainValue` (`value`, `standard_uncertainty`,
+`coverage_factor`, `expanded_uncertainty`, `.lower`, `.upper`). The read-only
+`COVERAGE_FACTORS` mapping exposes Table 8 keyed by `(confidence, one_sided)`.
+
+## 8. Sound absorption (ISO 354)
 
 The equivalent absorption area `A` that drives `R'`, `L'n`, the ISO 3744 `K2`
 environmental correction and the ISO 3741 absorption term is itself measured in
@@ -3149,6 +3553,43 @@ All core functionality can be imported directly from the `phonometry` package.
 | `weighted_impact_rating` | `function` | **Single-number impact rating + CI (ISO 717-2).**<br>• `values_by_band`: 16 thirds (100-3150 Hz) or 5 octaves (125-2000 Hz) [dB]<br>• `bands`: 'third-octave', 'octave' or None | `r = weighted_impact_rating(imp.l_n_t)`<br><br>• `ImpactRatingResult` (Ln,w, CI); octave rating carries the -5 dB rule |
 | `ImpactInsulationResult` | `dataclass` | **Impact insulation per band.**<br>• `l_n_t`: Standardized L'nT [dB]<br>• `l_n`: Normalized L'n [dB] or None | `imp.l_n_t, imp.l_n` |
 | `ImpactRatingResult` | `dataclass` | **Weighted impact rating.**<br>• `rating`: Ln,w/L'n,w/L'nT,w [dB], int<br>• `ci`: Spectrum term CI, int<br>• `unfavourable_sum`: [dB]<br>• `band_centers`: Measured-curve centres [Hz] or None<br>• `measured`: Measured impact levels [dB] or None<br>• `shifted_reference`: Shifted impact reference [dB] or None | `r.rating, r.ci` |
+| `facade_insulation` | `function` | **Field façade insulation (ISO 16283-3).**<br>• `l1_2m`/`l2`: Level 2 m in front / receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Element S [m²], `volume`: Receiving V [m³], `surface_level`: L1,s [dB] (all three for R')<br>• `method`: 'loudspeaker' (−1.5 dB) / 'road_traffic' (−3 dB)<br>• `t0`: Reference T0 [s] (Default: 0.5)<br>• `frequencies` [Hz] | `fac = facade_insulation(l1_2m, l2, t2, volume=50, area=11.5, surface_level=ls)`<br><br>• `FacadeInsulationResult` |
+| `FacadeInsulationResult` | `dataclass` | **Façade insulation per band.**<br>• `d_2m`: Level difference D2m [dB]<br>• `d_2m_nt`: Standardized D2m,nT [dB]<br>• `d_2m_n`: Normalized D2m,n [dB] or None<br>• `r_prime`: Apparent R'45°/R'tr,s [dB] or None<br>• `frequencies` [Hz] or None<br>• `.plot()` | `fac.d_2m_nt, fac.r_prime` |
+| `lab_airborne_insulation` | `function` | **Laboratory airborne insulation (ISO 10140-2).**<br>• `l1`/`l2`: Source/receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Free test-opening S [m²]<br>• `volume`: Receiving V [m³] | `lab = lab_airborne_insulation(l1, l2, t2, area=10, volume=50)`<br><br>• `LabAirborneInsulationResult` |
+| `lab_impact_insulation` | `function` | **Laboratory impact insulation (ISO 10140-3).**<br>• `li`: Tapping-machine impact SPL [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `volume`: Receiving V [m³] | `imp = lab_impact_insulation(li, t2, volume=50)`<br><br>• `LabImpactInsulationResult` |
+| `background_correction` | `function` | **Background-noise correction (ISO 10140-4 §4.3).**<br>• `signal_and_background`: Combined Lsb per band [dB]<br>• `background`: Lb per band [dB]<br>• 6–15 dB margin corrected, ≤6 dB capped at 1.3 dB, ≥15 dB unchanged | `L = background_correction(lsb, lb)`<br><br>• Corrected levels [dB] (`LabInsulationWarning` at the limit of measurement) |
+| `LabAirborneInsulationResult` | `dataclass` | **Laboratory airborne result.**<br>• `r`: Sound reduction index R [dB]<br>• `absorption`: A = 0.16 V/T [m²]<br>• `rating`: `WeightedRatingResult` or None<br>• `.plot()` (needs the rating) | `lab.r, lab.rating.rating` |
+| `LabImpactInsulationResult` | `dataclass` | **Laboratory impact result.**<br>• `l_n`: Normalized impact level Ln [dB]<br>• `absorption`: A [m²]<br>• `rating`: `ImpactRatingResult` or None<br>• `.plot()` (needs the rating) | `imp.l_n, imp.rating.rating` |
+| `LabInsulationWarning` | `warning class` | **Limit-of-measurement condition (ISO 10140-4).**<br>Emitted by `background_correction` when a band's signal-to-background margin is ≤ 6 dB (fixed 1.3 dB cap applied) | `warnings.simplefilter('error', LabInsulationWarning)` |
+| `predicted_airborne_insulation` | `function` | **Predicted apparent airborne R'w (EN 12354-1 Formula 26).**<br>• `r_direct`: Separating-element Rs,w [dB]<br>• `flanking_paths`: sequence of `FlankingPath` (Default: ())<br>• `delta_r_direct`: Lining ΔRDd,w [dB] (Default: 0) | `res = predicted_airborne_insulation(r_direct=57, flanking_paths=paths)`<br><br>• `AirbornePredictionResult` |
+| `predicted_impact_insulation` | `function` | **Predicted apparent impact L'n,w (EN 12354-2 Formula 21).**<br>• `ln_w_eq`: Bare-floor equivalent Ln,w,eq [dB]<br>• `delta_l_w`: Covering improvement ΔLw [dB] (Default: 0)<br>• `k_correction`: Flanking K [dB] (Default: 0) | `imp = predicted_impact_insulation(ln_w_eq=76.2, delta_l_w=33, k_correction=2)`<br><br>• `ImpactPredictionResult` |
+| `junction_vibration_reduction` | `function` | **Vibration reduction index Kij (EN 12354-1 Annex E).**<br>• `junction_type`: 'rigid_cross'/'rigid_t'/'flexible_t'/'lightweight_facade'<br>• `path`: 'through' (K13) / 'corner' (K12=K23)<br>• `mass_ratio`: m'⊥,i/m'i<br>• `frequency` [Hz] (Default: 500), `f1` [Hz] (Default: 125) | `k = junction_vibration_reduction('rigid_cross', 'through', 1.61)`<br><br>• Kij [dB] |
+| `junction_min_vibration_reduction` | `function` | **Minimum Kij,min (EN 12354-1 Formula 29).**<br>• `coupling_length`: lf [m]<br>• `s_i`, `s_j`: Element areas [m²] | `kmin = junction_min_vibration_reduction(4.5, 11.5, 11.5)`<br><br>• Kij,min [dB] |
+| `flanking_path` | `function` | **One flanking path Rij,w (EN 12354-1 Formula 28a).**<br>• `label`, `kind`: 'Ff'/'Df'/'Fd'<br>• `r_source`/`r_receive`: element indices [dB]<br>• `k_ij` [dB], `separating_area` Ss [m²], `coupling_length` lf [m]<br>• `delta_r` [dB] (Default: 0), `kij_min` [dB] clamp (Default: None) | `p = flanking_path(label='f', kind='Ff', r_source=49, r_receive=49, k_ij=12.4, separating_area=11.5, coupling_length=4.5)`<br><br>• `FlankingPath` |
+| `flanking_element` | `function` | **The three paths (Ff, Df, Fd) of one flanking element.**<br>• `label`, `r_flanking`, `r_separating` [dB]<br>• `k_ff`/`k_fd`/`k_df` [dB]<br>• `separating_area` Ss [m²], `coupling_length` lf [m]<br>• `delta_r_ff`/`delta_r_fd`/`delta_r_df` [dB] (Default: 0) | `ff, df, fd = flanking_element(label='floor', r_flanking=49, r_separating=57, k_ff=12.4, k_fd=8.9, k_df=8.9, separating_area=11.5, coupling_length=4.5)` |
+| `combine_linings` | `function` | **Combine two lining improvements (EN 12354-1 Formulas 30/31).**<br>• `delta_a`, `delta_b` [dB] (pass 0 for a single lining) | `dr = combine_linings(14.0, 14.0)`<br><br>• max(a,b) + min(a,b)/2 = 21.0 [dB] |
+| `equivalent_impact_level` | `function` | **Bare-floor equivalent Ln,w,eq (EN 12354-2 Annex B).**<br>• `mass_per_area`: m' [kg/m²] | `lneq = equivalent_impact_level(322.0)`<br><br>• 164 − 35 lg(m') = 76.2 [dB] |
+| `impact_flanking_correction` | `function` | **Flanking correction K (EN 12354-2 Table 1).**<br>• `separating_mass`, `flanking_mass` [kg/m²] (nearest tabulated) | `k = impact_flanking_correction(322.0, 145.0)`<br><br>• K = 2 [dB], int |
+| `standardized_impact_level` | `function` | **Standardized L'nT,w (EN 12354-2 Formula 3).**<br>• `l_prime_n_w`: L'n,w [dB]<br>• `volume`: Receiving V [m³], V0 = 30 m³ | `lnt = standardized_impact_level(45.2, 50.0)`<br><br>• L'nT,w = 43.0 [dB] |
+| `AirbornePredictionResult` | `dataclass` | **Predicted airborne insulation.**<br>• `r_prime_w`: Apparent R'w [dB]<br>• `r_direct_w`: Direct RDd,w [dB]<br>• `paths`: tuple of `PathContribution`<br>• `dominant`: highest-energy path | `res.r_prime_w, res.dominant.label` |
+| `ImpactPredictionResult` | `dataclass` | **Predicted impact insulation.**<br>• `l_prime_n_w`: Apparent L'n,w [dB]<br>• `ln_w_eq`, `delta_l_w`, `k_correction` [dB] | `imp.l_prime_n_w` |
+| `FlankingPath` | `dataclass` | **One flanking transmission path.**<br>• `label`, `kind`: 'Ff'/'Df'/'Fd'<br>• `r_ij_w`: Flanking index Rij,w [dB] | `p.r_ij_w` |
+| `PathContribution` | `dataclass` | **A path with its energy share.**<br>• `label`, `kind`: 'Dd'/'Ff'/'Df'/'Fd'<br>• `r_w`: Path index [dB]<br>• `fraction`: share of transmitted energy (0–1) | `c.r_w, c.fraction` |
+| `band_uncertainty` | `function` | **One-third-octave standard uncertainty u (ISO 12999-1 Tables 2/4/6).**<br>• `measurand`: 'airborne'/'impact'/'impact_reduction'<br>• `situation`: 'A'/'B'/'C'<br>• `upper_limit`: σR95 (airborne A, Annex D) (Default: False) | `u = band_uncertainty('airborne', 'B')`<br><br>• `BandUncertainty` |
+| `single_number_uncertainty` | `function` | **Single-number standard uncertainty u (ISO 12999-1 Tables 3/5/7).**<br>• `quantity`: 'r_w'/'ln_w'/'delta_lw' (+ aliases, +c/+ctr variants)<br>• `situation`: 'A'/'B'/'C'<br>• `upper_limit` (Default: False) | `u = single_number_uncertainty('r_w', 'B')`<br><br>• u [dB] (0.9) |
+| `single_number_uncertainty_uncorrelated` | `function` | **Uncorrelated single-number u from bands (ISO 12999-1 Formula B.2).**<br>• `band_uncertainties`: per-band u_i [dB]<br>• `reference_differences`: L_i − R_i [dB] | `u = single_number_uncertainty_uncorrelated(u_i, d_i)`<br><br>• Energy-weighted quadrature u [dB] |
+| `maximum_repeatability_standard_deviation` | `function` | **Max repeatability σx per band (ISO 12999-1 Table 1).**<br>• (no parameters) | `b = maximum_repeatability_standard_deviation()`<br><br>• `BandUncertainty` (lab self-verification) |
+| `coverage_factor` | `function` | **Coverage factor k (ISO 12999-1 Table 8).**<br>• `confidence`: fraction (Default: 0.95)<br>• `one_sided` (Default: False) | `k = coverage_factor(0.95)`<br><br>• 1.96 (two-sided) / 1.65 (one-sided) |
+| `expanded_uncertainty` | `function` | **Expanded uncertainty U = k·u (ISO 12999-1 Formula 2).**<br>• `u` [dB]<br>• `coverage`: fraction (Default: 0.95)<br>• `one_sided` (Default: False); enforces k ≥ 1 | `U = expanded_uncertainty(0.9)`<br><br>• 1.764 [dB] |
+| `uncertain_value` | `function` | **Attach U to a rating (ISO 12999-1 Clause 8).**<br>• `value` [dB], `quantity`, `situation`<br>• `coverage` (Default: 0.95), `one_sided` (Default: False), `upper_limit` (Default: False) | `uv = uncertain_value(52.0, 'rprime_w', 'B')`<br><br>• `UncertainValue` (value ± U) |
+| `combine_uncertainties` | `function` | **Quadrature combination (ISO 12999-1 Formula C.2).**<br>• `*components`: non-negative u_i [dB] | `uc = combine_uncertainties(1.0, 0.6)`<br><br>• sqrt(Σ u_i²) = 1.166 [dB] |
+| `prediction_input_uncertainty` | `function` | **Prediction input uncertainty (ISO 12999-1 Formula A.1).**<br>• `sigma_reproducibility`, `sigma_product` [dB]<br>• `n`: measurements (≥ 1) | `u = prediction_input_uncertainty(1.8, 1.0, 3)`<br><br>• sqrt((σR²+σp²)/n + σp²) [dB] |
+| `reduce_by_independent_measurements` | `function` | **Reduce u by m measurements (ISO 12999-1 Formula A.7).**<br>• `u` [dB]<br>• `m`: independent measurements (≥ 1) | `ur = reduce_by_independent_measurements(1.0, 4)`<br><br>• u/√m = 0.5 [dB] |
+| `satisfies_lower_requirement` | `function` | **Conformity to a minimum (ISO 12999-1 Formula 5).**<br>• `value`, `expanded_uncertainty_value`, `requirement` [dB] | `ok = satisfies_lower_requirement(52.0, 1.485, 50.0)`<br><br>• True when value − U > requirement |
+| `satisfies_upper_requirement` | `function` | **Conformity to a maximum (ISO 12999-1 Formula 4).**<br>• `value`, `expanded_uncertainty_value`, `requirement` [dB] | `ok = satisfies_upper_requirement(45.0, 1.5, 50.0)`<br><br>• True when value + U < requirement |
+| `BandUncertainty` | `dataclass` | **Per-band standard uncertainty (ISO 12999-1).**<br>• `measurand`, `situation`<br>• `frequencies` [Hz], `uncertainties` [dB]<br>• `upper_limit`: σR95 flag<br>• `.to_arrays()` | `b.frequencies, b.uncertainties` |
+| `UncertainValue` | `dataclass` | **A value with its expanded uncertainty.**<br>• `value`, `standard_uncertainty`, `expanded_uncertainty` [dB]<br>• `coverage_factor`, `confidence`, `one_sided`<br>• `.lower` = y − U, `.upper` = y + U | `uv.lower, uv.upper` |
+| `COVERAGE_FACTORS` | `mapping` | **Table 8 coverage factors (read-only).**<br>Keyed by `(confidence, one_sided)` → k | `COVERAGE_FACTORS[(0.95, False)]  # 1.96` |
 | `sound_power_pressure` | `function` | **Sound power from surface pressure (ISO 3744/3746).**<br>• `levels_positions`: (NM, NB) SPL [dB]<br>• `surface`: 'hemisphere' / 'box'<br>• `radius` [m] or `dimensions`+`distance` [m]<br>• `reflecting_planes`: 1/2/3 (Default: 1)<br>• `background_levels`: for K1<br>• `frequencies` [Hz]: for LWA<br>• `reverberation_time`+`room_volume` / `absorption_area` / `mean_absorption_coefficient`+`room_surface`: for K2<br>• `grade`: 'engineering' (Default) / 'survey'<br>• `omc_uncertainty` [dB] (Default: 0) | `res = sound_power_pressure(levels, 'hemisphere', radius=1.5, frequencies=f)`<br><br>• `SoundPowerResult` |
 | `measurement_positions` | `function` | **Hemisphere mic coordinates (ISO 3744 Annex B).**<br>• `surface`: 'hemisphere'<br>• `radius` [m]<br>• `reflecting_planes`: 1/2/3<br>• `tones`: Table B.1 vs B.2 (Default: True)<br>• `grade`: 'engineering'/'survey' | `xyz = measurement_positions('hemisphere', radius=1.5)`<br><br>• (N, 3) coordinates [m] |
 | `background_noise_correction` | `function` | **Background correction K1 (ISO 3744 Eq. 16).**<br>• `source_levels` [dB]<br>• `background_levels` [dB]<br>• `grade`: 'engineering'/'survey' | `k1 = background_noise_correction(src, bg)`<br><br>• K1 per band [dB] |
@@ -3164,7 +3605,7 @@ All core functionality can be imported directly from the `phonometry` package.
 | `attenuation_from_alpha` | `function` | **ISO 9613-1 α → m (ISO 354 8.1.2.1).**<br>• `alpha`: attenuation [dB/m] | `m = attenuation_from_alpha(0.01)`<br><br>• m = α/(10 lg e) [1/m] |
 | `SoundPowerWarning` | `warning class` | **ISO 3744/3746/3741/9614-2 qualification issue.**<br>Emitted when the background margin is below the criterion, K2 exceeds the validity limit, a band's power is negative, or the room fails qualification; levels are then upper bounds | `warnings.simplefilter('error', SoundPowerWarning)` |
 | `AbsorptionWarning` | `warning class` | **ISO 354 advisory.**<br>Emitted for a room below 150 m³, a sample area outside 10-12 m², an out-of-range temperature, or a non-physical α_s ≤ 0; the result still returns | `warnings.simplefilter('error', AbsorptionWarning)` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `STIResult`, `RoomAcousticsResult`, `DecayCurve`, `WeightedRatingResult`, `ImpactRatingResult`, `SoundPowerResult`, `ReverberationSoundPowerResult`, `SoundPowerIntensityResult` and `IntensityResult`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `STIResult`, `RoomAcousticsResult`, `DecayCurve`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `ReverberationSoundPowerResult`, `SoundPowerIntensityResult` and `IntensityResult`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 
@@ -3687,7 +4128,7 @@ The **pressure-intensity index** $\delta_{pI} = L_p - L_I$ measures how reactive
 See the [Sound Intensity guide](https://jmrplens.github.io/phonometry/guides/intensity/) for usage.
 
 
-## Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 717, ISO 354)
+## Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)
 
 ### Deterministic-excitation impulse response (ISO 18233)
 
@@ -3766,6 +4207,92 @@ sound from Eq. (6), $c = 331 + 0.6\ t$ (°C), and $m$ converted from an
 ISO 9613-1 attenuation coefficient by $m = \alpha / (10 \lg e)$. Because
 diffraction and edge scattering intercept more than the flat sample area,
 $\alpha_s$ is left unclamped and may exceed 1.0 (Clause 3.7 NOTE 2).
+
+### Laboratory vs field normalization (ISO 10140, ISO 16283)
+
+The field indices carry a prime because they include flanking transmission
+around the partition; the laboratory indices do not, because a qualified
+facility suppresses it. The algebra is otherwise identical, differing only in
+which quantity is normalised. The airborne pair is the direct laboratory sound
+reduction index $R = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 10140-2) versus the
+apparent field index $R' = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 16283-1), the
+same closed form evaluated with the facility's known $A$ or the room's measured
+$A = 0.16\ V/T$. The impact pair is the normalized laboratory level
+$L_n = L_i + 10 \log_{10}(A/A_0)$ (ISO 10140-3) versus the field $L'_n$
+(ISO 16283-2), both referenced to $A_0 = 10$ m². Before either is formed the
+receiving-room level is corrected for background noise by the energy
+subtraction $L = 10 \log_{10}(10^{L_{sb}/10} - 10^{L_b/10})$ for a 6–15 dB
+signal-to-background margin, capped at a fixed $1.3$ dB (the limit of
+measurement) at or below 6 dB and omitted at or above 15 dB (ISO 10140-4,
+Clause 4.3) — the laboratory analogue of the 6/10 dB rule of ISO 16283-1. The
+façade extension (ISO 16283-3) replaces the source-room level by the level 2 m
+in front of the façade, $D_{2m} = L_{1,2m} - L_2$, and adds a fixed
+angle-of-incidence correction to the element sound reduction index, $-1.5$ dB
+for the 45° loudspeaker method ($R'_{45°}$) and $-3$ dB for the all-angle
+road-traffic method ($R'_{tr,s}$); all three carry the ISO 717-1 airborne
+single number.
+
+### Flanking transmission prediction (EN 12354-1/2)
+
+The apparent field index is the energetic sum of the direct path $Dd$ and, for
+each flanking element $F=f$ across its junction with the separating element, the
+three paths $Ff$, $Df$ and $Fd$ (EN 12354-1, simplified single-number model,
+Formula 26):
+
+$$
+R'_w = -10 \log_{10}\Big[ 10^{-R_{Dd,w}/10}
+       + \sum 10^{-R_{Ff,w}/10} + \sum 10^{-R_{Df,w}/10}
+       + \sum 10^{-R_{Fd,w}/10} \Big].
+$$
+
+The direct path is $R_{Dd,w} = R_{s,w} + \Delta R_{Dd,w}$ (Formula 27), the
+separating-element laboratory index plus any lining improvement. Each flanking
+path (Formula 28a) is
+
+$$
+R_{ij,w} = \frac{R_{i,w} + R_{j,w}}{2} + \Delta R_{ij,w} + K_{ij}
+         + 10 \log_{10}\frac{S_s}{l_0\ l_f},
+$$
+
+with $R_{i,w}$, $R_{j,w}$ the laboratory indices of the two elements meeting at
+the junction ($i$ source side, $j$ receiving side), $\Delta R_{ij,w}$ the
+combined lining improvement, $S_s$ the separating-element area, $l_f$ the
+junction coupling length and $l_0 = 1$ m the reference coupling length. $K_{ij}$
+is the junction **vibration reduction index** (Annex E), an empirical function of
+the mass ratio $M = \log_{10}(m'_{\perp,i}/m'_i)$ — for a rigid cross-junction
+$K_{13} = 8.7 + 17.1 M + 5.7 M^2$ (through) and $K_{12} = 8.7 + 5.7 M^2$
+(corner), read at 500 Hz — floored at $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
+(1/S_i + 1/S_j)]$ (Formula 29). Two linings combine as $\max(a,b) + \min(a,b)/2$
+(Formulas 30/31). The impact counterpart (EN 12354-2, Formula 21) is the direct
+subtraction $L'_{n,w} = L_{n,w,eq} - \Delta L_w + K$, with the bare-floor
+equivalent level $L_{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Annex B), the
+covering improvement $\Delta L_w$ (ISO 717-2) and the flanking correction $K$
+from Table 1. The EN 12354-1 Annex H.3 ($R'_w = 52$ dB) and EN 12354-2 Annex E.3
+($L'_{n,w} = 45$ dB) worked examples are reproduced exactly; the simplified
+model is stated to have about a 2 dB standard deviation (Clause 5).
+
+### Measurement uncertainty (ISO 12999-1)
+
+ISO 12999-1 supplies the uncertainty of the quantities above from
+inter-laboratory (ISO 5725) reproducibility and repeatability rather than a
+GUM functional model. Three **measurement situations** fix the standard
+uncertainty $u$: situation **A** (laboratory characterisation) uses the
+reproducibility standard deviation $\sigma_R$; situation **B** (same location,
+different teams) the in-situ $\sigma_{situ}$; situation **C** (same location,
+operator and equipment, repeated) the repeatability $\sigma_r$. The per-band and
+single-number values are tabulated for airborne $R$/$R'$/$D_n$/$D_{nT}$
+(Tables 2/3), impact $L_n$/$L'_n$ (Table 4 bands, situations B/C only; Table 5
+ratings adding a situation-A estimate) and the
+covering reduction $\Delta L$ (Tables 6/7, situation A only). The expanded
+uncertainty is $U = k\ u$ (Formula 2) with the coverage factor $k$ of Table 8
+(at 95 %, $k = 1.96$ two-sided, $k = 1.65$ one-sided; a minimum $k = 1$ is
+enforced). A two-sided interval $Y = y \pm U$ reports a value (Formula 3); a
+one-sided factor declares conformity, $y - U > $ requirement for a lower limit
+(Formula 5) or $y + U <$ requirement for an upper limit (Formula 4).
+Uncorrelated components combine in quadrature $u_c = \sqrt{\sum u_i^2}$
+(Formula C.2), $m$ independent measurements reduce $u$ to $u/\sqrt{m}$
+(Formula A.7), and the uncorrelated single-number uncertainty is the
+energy-weighted quadrature sum of the band uncertainties (Formula B.2).
 
 See the [Room and Building Acoustics guide](https://jmrplens.github.io/phonometry/guides/room-acoustics/) for usage.
 

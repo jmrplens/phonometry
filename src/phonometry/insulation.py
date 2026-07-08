@@ -45,6 +45,28 @@ may be supplied already averaged or as several microphone positions, then
 energy-averaged (Clause 7.8, Formula (10)), over the core one-third-octave
 range 100 Hz to 3150 Hz (Clause 5.1).
 
+**Field façade quantities (ISO 16283-3:2016).** With an outdoor sound
+source this module forms, from the level 2 m in front of the façade
+``L1,2m`` and the receiving-room level ``L2``, the level difference
+``D2m = L1,2m - L2`` (Clause 3.14), its standardized form
+``D2m,nT = D2m + 10 lg(T/T0)`` with ``T0 = 0,5 s`` (Clause 3.15) and
+normalized form ``D2m,n = D2m - 10 lg(A/A0)`` with the Sabine absorption
+area ``A = 0,16 V/T`` (Clause 3.17) and reference ``A0 = 10 m²``
+(Clause 3.16) — the global loudspeaker / traffic quantities
+``Dls,2m,*`` / ``Dtr,2m,*``. When a surface level ``L1,s`` (microphone on
+the test element) with the element area ``S`` and volume are given it
+forms the apparent sound reduction index
+``R'45° = L1,s - L2 + 10 lg(S/A) - 1,5`` for the loudspeaker element method
+(Clause 3.12) or ``R'tr,s = L1,s - L2 + 10 lg(S/A) - 3`` for the
+road-traffic element method (Clause 3.13). These quantities are defined by
+unnumbered formulas inline in the Clause 3 terms; positions are
+energy-averaged with the surface-level formula (Clause 9.5.1, Formula (7)).
+Quantities are evaluated over the core one-third-octave range 100 Hz to
+3150 Hz (Clause 5), optionally extended to 50-5000 Hz. The façade quantity
+is airborne, so its single-number rating uses the **ISO 717-1 airborne**
+reference curve and method (Clause 2, Annex F) via :func:`weighted_rating`
+unchanged.
+
 **Weighted impact rating (ISO 717-2).** The reference-curve method of
 Clause 4.3 shifts the Table 3 impact reference curve towards the measured
 curve until the sum of unfavourable deviations (here where the
@@ -122,6 +144,16 @@ _CI_THIRD_OCTAVE_BANDS = 15
 
 #: Reference absorption area A0 for the normalized level (Clause 3.14).
 _A0_IMPACT = 10.0
+
+# --- ISO 16283-3 façade sound insulation ---------------------------------
+
+#: Reference absorption area A0 for D2m,n (Clause 3.16, dwellings).
+_A0_FACADE = 10.0
+
+#: Angle-of-incidence corrections in the apparent sound reduction index:
+#: -1,5 dB for the loudspeaker method at 45° (Clause 3.12) and -3 dB for
+#: the road-traffic method with all-angle incidence (Clause 3.13).
+_FACADE_CORRECTION = {"loudspeaker": 1.5, "road_traffic": 3.0}
 
 # --- ISO 717-1 Table 4 spectra (A-weighted, normalized to 0 dB) ----------
 
@@ -259,6 +291,44 @@ class ImpactRatingResult:
         return plot_impact_rating(self, ax=ax, **kwargs)
 
 
+@dataclass(frozen=True)
+class FacadeInsulationResult:
+    """Per-band field façade sound insulation (ISO 16283-3).
+
+    :ivar d_2m: Level difference ``D2m = L1,2m - L2`` per band, in dB
+        (Clause 3.14; ``Dls,2m`` loudspeaker, ``Dtr,2m`` traffic).
+    :ivar d_2m_nt: Standardized level difference
+        ``D2m,nT = D2m + 10 lg(T/T0)`` per band, in dB (Clause 3.15).
+    :ivar d_2m_n: Normalized level difference
+        ``D2m,n = D2m - 10 lg(A/A0)`` per band, in dB (Clause 3.16), or
+        ``None`` when the receiving-room volume was not supplied.
+    :ivar r_prime: Apparent sound reduction index ``R'45°`` (loudspeaker,
+        Clause 3.12) or ``R'tr,s`` (road traffic, Clause 3.13) per band, in
+        dB, or ``None`` unless a surface level
+        together with the element area and receiving-room volume were
+        supplied.
+    :ivar frequencies: Band centre frequencies, in Hz, or ``None``.
+    """
+
+    d_2m: np.ndarray
+    d_2m_nt: np.ndarray
+    d_2m_n: np.ndarray | None
+    r_prime: np.ndarray | None
+    frequencies: np.ndarray | None = None
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the per-band façade insulation profile (ISO 16283-3).
+
+        Draws the standardized level difference and any other available
+        quantities (``D2m``, ``D2m,n``, ``R'``) against frequency. Requires
+        matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_facade_insulation
+
+        return plot_facade_insulation(self, ax=ax, **kwargs)
+
+
 def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
     """Reduce levels to one decimal place (ISO 717-1 Clause 4.4, note 1).
 
@@ -266,7 +336,8 @@ def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
     zero (``floor(x*10 + 0,5)/10`` for non-negative values, mirrored for
     negative ones).
     """
-    return np.sign(values) * np.floor(np.abs(values) * 10.0 + 0.5) / 10.0
+    rounded: np.ndarray = np.sign(values) * np.floor(np.abs(values) * 10.0 + 0.5) / 10.0
+    return rounded
 
 
 def energy_average_level(
@@ -583,6 +654,153 @@ def impact_insulation(
         l_n = li_bands + 10.0 * np.log10(absorption / _A0_IMPACT)
 
     return ImpactInsulationResult(l_n_t=l_n_t, l_n=l_n)
+
+
+def facade_insulation(
+    l1_2m: Sequence[float] | np.ndarray,
+    l2: Sequence[float] | np.ndarray,
+    t2: Sequence[float] | np.ndarray,
+    *,
+    area: float | None = None,
+    volume: float | None = None,
+    surface_level: Sequence[float] | np.ndarray | None = None,
+    method: str = "loudspeaker",
+    t0: float = 0.5,
+    frequencies: Sequence[float] | np.ndarray | None = None,
+) -> FacadeInsulationResult:
+    """
+    Field façade sound insulation per ISO 16283-3:2016.
+
+    Computes, per frequency band, the global-method level difference
+    ``D2m = L1,2m - L2`` (Clause 3.14), its standardized form
+    ``D2m,nT = D2m + 10 lg(T/T0)`` (Clause 3.15) and, when the
+    receiving-room volume is given, its normalized form
+    ``D2m,n = D2m - 10 lg(A/A0)`` with the Sabine equivalent absorption
+    area ``A = 0,16 V/T`` (Clause 3.17) and ``A0 = 10 m²`` (Clause 3.16).
+    When a surface level ``L1,s`` (microphone on the test element),
+    together with the element area ``S`` and the volume, is supplied it
+    also computes the apparent sound reduction index of the element
+    method: ``R'45° = L1,s - L2 + 10 lg(S/A) - 1,5`` for a loudspeaker
+    source (Clause 3.12) or ``R'tr,s = L1,s - L2 + 10 lg(S/A) - 3`` for a
+    road-traffic source (Clause 3.13). The defining formulas are unnumbered
+    inline in the Clause 3 terms.
+
+    ``l1_2m``, ``l2`` and ``surface_level`` may be one value per band
+    (already energy-averaged) or a two-dimensional ``(positions, bands)``
+    array, in which case the positions are energy-averaged with the
+    surface-level formula (Clause 9.5.1, Formula (7)). Band levels are
+    assumed already corrected for background
+    noise. The single-number rating uses the ISO 717-1 airborne reference
+    curve (Annex F); pass the desired 16-band quantity to
+    :func:`weighted_rating`.
+
+    :param l1_2m: Outdoor sound pressure levels 2 m in front of the façade,
+        in dB.
+    :param l2: Receiving-room sound pressure levels, in dB.
+    :param t2: Receiving-room reverberation time per band, in seconds.
+    :param area: Area ``S`` of the test element, in m² (optional; required
+        with ``volume`` and ``surface_level`` for ``R'``).
+    :param volume: Receiving-room volume ``V``, in m³ (optional; required
+        for ``D2m,n`` and for ``R'``).
+    :param surface_level: Outdoor surface level ``L1,s`` on the test
+        element, in dB (optional; required with ``area`` and ``volume`` for
+        ``R'``).
+    :param method: ``"loudspeaker"`` (45° incidence, -1,5 dB) or
+        ``"road_traffic"`` (all-angle incidence, -3 dB); selects the ``R'``
+        correction (Clause 3.12 / 3.13).
+    :param t0: Reference reverberation time ``T0``, in seconds (default
+        0,5 s for dwellings, Clause 3.15).
+    :param frequencies: Optional band centre frequencies, in Hz, carried
+        on the result for plotting.
+    :return: :class:`FacadeInsulationResult` with ``d_2m``, ``d_2m_nt``,
+        ``d_2m_n`` (``None`` unless ``volume`` is given) and ``r_prime``
+        (``None`` unless ``surface_level``, ``area`` and ``volume`` are all
+        given).
+    :raises ValueError: If band counts differ, if ``method`` is unknown, if
+        ``t2``/``t0``/``area``/``volume`` are not positive, if ``area`` is
+        given without ``surface_level``, if ``surface_level`` and ``area`` are
+        given without ``volume``, if ``frequencies`` is given with a length
+        that differs from the band count, or if inputs are non-finite.
+        Supplying ``surface_level`` alone is not an error: ``r_prime`` simply
+        stays ``None``.
+    """
+    if method not in _FACADE_CORRECTION:
+        raise ValueError(
+            "'method' must be 'loudspeaker' or 'road_traffic', got "
+            f"{method!r}."
+        )
+
+    l1_bands = _as_band_levels(l1_2m, "l1_2m")
+    l2_bands = _as_band_levels(l2, "l2")
+    t = np.asarray(t2, dtype=np.float64)
+
+    if not (l1_bands.shape == l2_bands.shape == t.shape):
+        raise ValueError(
+            "'l1_2m', 'l2' and 't2' must share the same band count."
+        )
+    if t.ndim != 1:
+        raise ValueError("'t2' must be one-dimensional (one value per band).")
+    if not np.all(np.isfinite(t)) or np.any(t <= 0.0):
+        raise ValueError("'t2' must contain positive, finite values.")
+    if t0 <= 0.0:
+        raise ValueError("'t0' must be positive.")
+
+    d_2m = l1_bands - l2_bands
+    d_2m_nt = d_2m + 10.0 * np.log10(t / t0)
+
+    if volume is not None and volume <= 0.0:
+        raise ValueError("'volume' must be positive.")
+    if area is not None and area <= 0.0:
+        raise ValueError("'area' must be positive.")
+    if area is not None and surface_level is None:
+        raise ValueError(
+            "'area' requires 'surface_level' to compute the apparent sound "
+            "reduction index R'."
+        )
+    if surface_level is not None and area is not None and volume is None:
+        raise ValueError(
+            "'volume' is required with 'surface_level' and 'area' to compute "
+            "the apparent sound reduction index R'."
+        )
+
+    # Sabine equivalent absorption area A = 0,16 V / T (Clause 3.17).
+    absorption = 0.16 * volume / t if volume is not None else None
+
+    d_2m_n: np.ndarray | None = None
+    if absorption is not None:
+        d_2m_n = d_2m - 10.0 * np.log10(absorption / _A0_FACADE)
+
+    r_prime: np.ndarray | None = None
+    if surface_level is not None and area is not None and absorption is not None:
+        surf_bands = _as_band_levels(surface_level, "surface_level")
+        if surf_bands.shape != l2_bands.shape:
+            raise ValueError(
+                "'surface_level' must share the band count of 'l2'."
+            )
+        r_prime = (
+            surf_bands
+            - l2_bands
+            + 10.0 * np.log10(area / absorption)
+            - _FACADE_CORRECTION[method]
+        )
+
+    freqs = (
+        np.asarray(frequencies, dtype=np.float64)
+        if frequencies is not None
+        else None
+    )
+    if freqs is not None and freqs.shape != d_2m.shape:
+        raise ValueError(
+            "'frequencies' must have one value per band; got "
+            f"{freqs.size} for {d_2m.size} bands."
+        )
+    return FacadeInsulationResult(
+        d_2m=d_2m,
+        d_2m_nt=d_2m_nt,
+        d_2m_n=d_2m_n,
+        r_prime=r_prime,
+        frequencies=freqs,
+    )
 
 
 def _resolve_impact_band_set(

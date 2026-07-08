@@ -31,7 +31,7 @@ Acoustic measurement toolkit for Python: fractional octave-band filter banks, fr
 - 🗣️ Speech Transmission Index: STI and STIPA per IEC 60268-16 Ed. 5, with signal generator
 - 🎯 Tone prominence (TNR/PR, ECMA-418-1), environmental Lden/Ldn (ISO 1996-1), IEC 61252 noise dose
 - ↗️ Two-microphone sound intensity (IEC 61043) with ISO 9614-1 field indicators
-- 🏛️ Room & building acoustics: swept-sine/MLS impulse responses (ISO 18233), EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), open-plan speech metrics (ISO 3382-3), field airborne + impact insulation with R′w/DnT,w/L′nT,w and C/Ctr/CI (ISO 16283-1/2, ISO 717-1/2), sound absorption (ISO 354)
+- 🏛️ Room & building acoustics: swept-sine/MLS impulse responses (ISO 18233), EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), open-plan speech metrics (ISO 3382-3), field airborne + impact + façade insulation with R′w/DnT,w/L′nT,w/D2m,nT,w and C/Ctr/CI (ISO 16283-1/2/3, ISO 717-1/2), laboratory R/Ln (ISO 10140), flanking-transmission prediction of R′w/L′n,w (EN 12354-1/2), measurement uncertainty (ISO 12999-1), sound absorption (ISO 354)
 - 🔊 Sound power LW three ways: enveloping-surface pressure (ISO 3744/3746), reverberation-room precision with Waterhouse/C1/C2 (ISO 3741), intensity scanning with field indicators and grade (ISO 9614-2)
 - 📏 Physical SPL calibration with IEC 60942:2017 stability validation, and dBFS modes
 - ⚡ Vectorized multichannel processing and stateful block (real-time) workflows
@@ -59,7 +59,7 @@ Or browse the Markdown docs on GitHub:
 | [Levels](https://github.com/jmrplens/phonometry/blob/main/docs/levels.md) | Leq, LAeq, percentiles, LCpeak, SEL, noise dose, Lden, tonality, octave spectrogram |
 | [Psychoacoustics](https://github.com/jmrplens/phonometry/blob/main/docs/psychoacoustics.md) | Zwicker (ISO 532-1), Moore-Glasberg (ISO 532-2/3) and Sottek (ECMA-418-2) loudness, sharpness (DIN 45692), tonality & roughness (ECMA-418-2), STI/STIPA (IEC 60268-16) |
 | [Sound Intensity](https://github.com/jmrplens/phonometry/blob/main/docs/intensity.md) | Two-microphone p-p intensity (IEC 61043), ISO 9614-1 field indicators |
-| [Room & Building Acoustics](https://github.com/jmrplens/phonometry/blob/main/docs/room-acoustics.md) | Impulse responses (ISO 18233), room parameters (ISO 3382-1/2), open-plan metrics (ISO 3382-3), airborne + impact insulation and weighted ratings (ISO 16283-1/2, ISO 717-1/2), sound absorption (ISO 354) |
+| [Room & Building Acoustics](https://github.com/jmrplens/phonometry/blob/main/docs/room-acoustics.md) | Impulse responses (ISO 18233), room parameters (ISO 3382-1/2), open-plan metrics (ISO 3382-3), field airborne + impact + façade insulation and weighted ratings (ISO 16283-1/2/3, ISO 717-1/2), laboratory characterisation (ISO 10140), flanking-transmission prediction (EN 12354-1/2), measurement uncertainty (ISO 12999-1), sound absorption (ISO 354) |
 | [Sound Power](https://github.com/jmrplens/phonometry/blob/main/docs/sound-power.md) | Sound power level LW by enveloping surface (ISO 3744/3746), reverberation room (ISO 3741) and intensity scanning (ISO 9614-2) |
 | [Calibration and dBFS](https://github.com/jmrplens/phonometry/blob/main/docs/calibration.md) | Physical SPL, digital full-scale, RMS vs peak |
 | [Block Processing](https://github.com/jmrplens/phonometry/blob/main/docs/block-processing.md) | Stateful streaming workflows |

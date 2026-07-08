@@ -502,7 +502,7 @@ The **pressure-intensity index** $\delta_{pI} = L_p - L_I$ measures how reactive
 See the [Sound Intensity guide](/phonometry/guides/intensity/) for usage.
 
 
-## Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 717, ISO 354)
+## Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)
 
 ### Deterministic-excitation impulse response (ISO 18233)
 
@@ -581,6 +581,92 @@ sound from Eq. (6), $c = 331 + 0.6\ t$ (°C), and $m$ converted from an
 ISO 9613-1 attenuation coefficient by $m = \alpha / (10 \lg e)$. Because
 diffraction and edge scattering intercept more than the flat sample area,
 $\alpha_s$ is left unclamped and may exceed 1.0 (Clause 3.7 NOTE 2).
+
+### Laboratory vs field normalization (ISO 10140, ISO 16283)
+
+The field indices carry a prime because they include flanking transmission
+around the partition; the laboratory indices do not, because a qualified
+facility suppresses it. The algebra is otherwise identical, differing only in
+which quantity is normalised. The airborne pair is the direct laboratory sound
+reduction index $R = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 10140-2) versus the
+apparent field index $R' = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 16283-1), the
+same closed form evaluated with the facility's known $A$ or the room's measured
+$A = 0.16\ V/T$. The impact pair is the normalized laboratory level
+$L_n = L_i + 10 \log_{10}(A/A_0)$ (ISO 10140-3) versus the field $L'_n$
+(ISO 16283-2), both referenced to $A_0 = 10$ m². Before either is formed the
+receiving-room level is corrected for background noise by the energy
+subtraction $L = 10 \log_{10}(10^{L_{sb}/10} - 10^{L_b/10})$ for a 6–15 dB
+signal-to-background margin, capped at a fixed $1.3$ dB (the limit of
+measurement) at or below 6 dB and omitted at or above 15 dB (ISO 10140-4,
+Clause 4.3) — the laboratory analogue of the 6/10 dB rule of ISO 16283-1. The
+façade extension (ISO 16283-3) replaces the source-room level by the level 2 m
+in front of the façade, $D_{2m} = L_{1,2m} - L_2$, and adds a fixed
+angle-of-incidence correction to the element sound reduction index, $-1.5$ dB
+for the 45° loudspeaker method ($R'_{45°}$) and $-3$ dB for the all-angle
+road-traffic method ($R'_{tr,s}$); all three carry the ISO 717-1 airborne
+single number.
+
+### Flanking transmission prediction (EN 12354-1/2)
+
+The apparent field index is the energetic sum of the direct path $Dd$ and, for
+each flanking element $F=f$ across its junction with the separating element, the
+three paths $Ff$, $Df$ and $Fd$ (EN 12354-1, simplified single-number model,
+Formula 26):
+
+$$
+R'_w = -10 \log_{10}\Big[ 10^{-R_{Dd,w}/10}
+       + \sum 10^{-R_{Ff,w}/10} + \sum 10^{-R_{Df,w}/10}
+       + \sum 10^{-R_{Fd,w}/10} \Big].
+$$
+
+The direct path is $R_{Dd,w} = R_{s,w} + \Delta R_{Dd,w}$ (Formula 27), the
+separating-element laboratory index plus any lining improvement. Each flanking
+path (Formula 28a) is
+
+$$
+R_{ij,w} = \frac{R_{i,w} + R_{j,w}}{2} + \Delta R_{ij,w} + K_{ij}
+         + 10 \log_{10}\frac{S_s}{l_0\ l_f},
+$$
+
+with $R_{i,w}$, $R_{j,w}$ the laboratory indices of the two elements meeting at
+the junction ($i$ source side, $j$ receiving side), $\Delta R_{ij,w}$ the
+combined lining improvement, $S_s$ the separating-element area, $l_f$ the
+junction coupling length and $l_0 = 1$ m the reference coupling length. $K_{ij}$
+is the junction **vibration reduction index** (Annex E), an empirical function of
+the mass ratio $M = \log_{10}(m'_{\perp,i}/m'_i)$ — for a rigid cross-junction
+$K_{13} = 8.7 + 17.1 M + 5.7 M^2$ (through) and $K_{12} = 8.7 + 5.7 M^2$
+(corner), read at 500 Hz — floored at $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
+(1/S_i + 1/S_j)]$ (Formula 29). Two linings combine as $\max(a,b) + \min(a,b)/2$
+(Formulas 30/31). The impact counterpart (EN 12354-2, Formula 21) is the direct
+subtraction $L'_{n,w} = L_{n,w,eq} - \Delta L_w + K$, with the bare-floor
+equivalent level $L_{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Annex B), the
+covering improvement $\Delta L_w$ (ISO 717-2) and the flanking correction $K$
+from Table 1. The EN 12354-1 Annex H.3 ($R'_w = 52$ dB) and EN 12354-2 Annex E.3
+($L'_{n,w} = 45$ dB) worked examples are reproduced exactly; the simplified
+model is stated to have about a 2 dB standard deviation (Clause 5).
+
+### Measurement uncertainty (ISO 12999-1)
+
+ISO 12999-1 supplies the uncertainty of the quantities above from
+inter-laboratory (ISO 5725) reproducibility and repeatability rather than a
+GUM functional model. Three **measurement situations** fix the standard
+uncertainty $u$: situation **A** (laboratory characterisation) uses the
+reproducibility standard deviation $\sigma_R$; situation **B** (same location,
+different teams) the in-situ $\sigma_{situ}$; situation **C** (same location,
+operator and equipment, repeated) the repeatability $\sigma_r$. The per-band and
+single-number values are tabulated for airborne $R$/$R'$/$D_n$/$D_{nT}$
+(Tables 2/3), impact $L_n$/$L'_n$ (Table 4 bands, situations B/C only; Table 5
+ratings adding a situation-A estimate) and the
+covering reduction $\Delta L$ (Tables 6/7, situation A only). The expanded
+uncertainty is $U = k\ u$ (Formula 2) with the coverage factor $k$ of Table 8
+(at 95 %, $k = 1.96$ two-sided, $k = 1.65$ one-sided; a minimum $k = 1$ is
+enforced). A two-sided interval $Y = y \pm U$ reports a value (Formula 3); a
+one-sided factor declares conformity, $y - U > $ requirement for a lower limit
+(Formula 5) or $y + U <$ requirement for an upper limit (Formula 4).
+Uncorrelated components combine in quadrature $u_c = \sqrt{\sum u_i^2}$
+(Formula C.2), $m$ independent measurements reduce $u$ to $u/\sqrt{m}$
+(Formula A.7), and the uncorrelated single-number uncertainty is the
+energy-weighted quadrature sum of the band uncertainties (Formula B.2).
 
 See the [Room and Building Acoustics guide](/phonometry/guides/room-acoustics/) for usage.
 

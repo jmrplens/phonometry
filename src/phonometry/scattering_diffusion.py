@@ -326,7 +326,7 @@ def scattering_coefficient(
     spec = np.asarray(alpha_spec, dtype=np.float64)
     diff = np.asarray(alpha_s, dtype=np.float64)
     denom = 1.0 - diff
-    if np.any(denom == 0.0):
+    if np.any(np.isclose(denom, 0.0)):
         raise ValueError("'alpha_s' must not equal 1 (division by zero).")
     s = (spec - diff) / denom
     if truncate_negative:
@@ -645,9 +645,9 @@ def scattering_coefficient_uncertainty(
     u_diff = _nonneg_array(u_alpha_s, "u_alpha_s")
     spec_term = spec - 1.0
     diff_term = 1.0 - diff
-    if np.any(diff_term == 0.0):
+    if np.any(np.isclose(diff_term, 0.0)):
         raise ValueError("'alpha_s' must not equal 1 (division by zero).")
-    if np.any(spec_term == 0.0):
+    if np.any(np.isclose(spec_term, 0.0)):
         raise ValueError("'alpha_spec' must not equal 1 (division by zero).")
     u_s = np.abs(spec_term / diff_term) * np.sqrt(
         (u_spec / spec_term) ** 2 + (u_diff / diff_term) ** 2
@@ -742,7 +742,7 @@ def normalized_diffusion_coefficient(
     d = np.asarray(d_theta, dtype=np.float64)
     d_ref = np.asarray(d_theta_reference, dtype=np.float64)
     denom = 1.0 - d_ref
-    if np.any(denom == 0.0):
+    if np.any(np.isclose(denom, 0.0)):
         raise ValueError(
             "'d_theta_reference' must not equal 1 (division by zero)."
         )

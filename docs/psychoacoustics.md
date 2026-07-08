@@ -5,7 +5,8 @@
 Level metrics tell you how much *sound pressure* there is; psychoacoustic
 metrics tell you what a listener actually *perceives*. This page covers
 loudness (ISO 532-1), sharpness (DIN 45692) and the speech transmission
-index (IEC 60268-16).
+index (IEC 60268-16), then the advanced Moore-Glasberg (ISO 532-2/3) and
+Sottek Hearing Model (ECMA-418-2) loudness, tonality and roughness models.
 
 ## Loudness in sones (ISO 532-1, Zwicker)
 
@@ -215,6 +216,341 @@ masking control points, and Schroeder-form decays at four T₆₀ values.
 
 Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
 `band_levels`, `rating` (Annex F letter `A+`…`U`).
+
+## Advanced loudness & sound-quality models
+
+ISO 532-1 above is one of **three** loudness models phonometry ships, and
+loudness is only half of the sound-quality story: two sounds of equal loudness
+can still differ in how *tonal* or how *rough* they are. This section adds the
+**Moore-Glasberg** loudness of ISO 532-2/532-3 and the **Sottek Hearing Model**
+loudness, tonality and roughness of ECMA-418-2:2025.
+
+### Choosing a loudness model
+
+| Model | Standard | Stationary / time-varying | Output | When to use |
+| :--- | :--- | :--- | :--- | :--- |
+| Zwicker | ISO 532-1:2017 | both | sone | Reference method; one-third-octave input; fast and widely cited |
+| Moore-Glasberg | ISO 532-2:2017 | stationary | sone | roex excitation pattern; better for tones and explicit binaural summation |
+| Moore-Glasberg-Schlittenlacher | ISO 532-3:2023 | time-varying | sone (STL/LTL) | Time-varying loudness with short-/long-term traces and the peak N_max |
+| Sottek (Hearing Model) | ECMA-418-2:2025 | time-varying | sone_HMS | Shares one auditory front-end with the ECMA tonality and roughness metrics |
+
+All three are anchored so a **1 kHz tone at 40 dB SPL is ≈ 1 sone**; the values
+are not interchangeable digit-for-digit because the models differ in their
+auditory filters and their loudness summation.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison.png" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" width="80%"></picture>
+
+*The three models agree at the 1 sone / 40 dB anchor and diverge with level:
+Zwicker doubles the sone value every +10 phon, while the Sottek model grows
+more slowly (about 1.65× per 10 dB), an intrinsic difference between the
+auditory summations, not a calibration error.*
+
+### Moore-Glasberg loudness (ISO 532-2)
+
+Where Zwicker uses fixed critical bands on the Bark scale, Moore-Glasberg builds
+an **excitation pattern** with level-dependent rounded-exponential (roex)
+auditory filters on the ERB-number ("Cam") scale, then applies a compressive
+excitation → specific-loudness transform with C = 0.0617 sone/Cam
+(ISO 532-2:2017, Formula 7) and a binaural-inhibition stage. It reproduces the
+tone and broadband cases of Annex B to a percent or two and, unlike ISO 532-1,
+models binaural summation explicitly.
+
+```python
+import numpy as np
+from phonometry import (
+    loudness_moore_glasberg,
+    loudness_moore_glasberg_from_spectrum,
+)
+
+# The definitional anchor: one 1 kHz sinusoidal component at 40 dB SPL,
+# free field, binaural -> 1 sone / 40 phon by construction of the sone.
+res = loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="free")
+print(f"N = {res.loudness:.3f} sone  ({res.loudness_level:.1f} phon)")   # 1.000 sone (40.0 phon)
+
+# From a calibrated recording: the narrowband (FFT) line spectrum is formed
+# (power-preserving normalization) and fed to the exact sinusoidal-component
+# method (ISO 532-2 clauses 5.2/5.4).
+fs = 48000
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+res = loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
+
+res.plot()   # specific loudness N'(i) over the ERB-number (Cam) scale
+```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line — the specific-loudness pattern N'(i) straight from the result:
+res.plot()
+plt.show()
+
+# Or draw it by hand from the ERB-number grid the result already carries:
+fig, ax = plt.subplots()
+ax.fill_between(res.erb_number, res.specific, alpha=0.3)
+ax.plot(res.erb_number, res.specific)
+ax.set_xlabel("ERB number [Cam]")
+ax.set_ylabel("Specific loudness N' [sone/Cam]")
+plt.show()
+```
+
+</details>
+
+#### `loudness_moore_glasberg()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `x` | 1D array | Pa | non-empty | Calibrated pressure signal (signal wrapper) |
+| `components` | list of `(f, L)` | Hz, dB SPL | — | `_from_spectrum`: discrete sinusoidal components |
+| `band_levels` | 29-vector | dB SPL | 25 Hz .. 16 kHz | `_from_third_octave` input (IEC 61260-1 bands) |
+| `fs` | int | Hz | > 0 | Signal wrapper only |
+| `field` | str | — | `'free'` (default) / `'diffuse'` / `'eardrum'` | Outer-ear transfer |
+| `presentation` | str | — | `'binaural'` (default) / `'diotic'` / `'monaural'` | Binaural summation |
+
+Returns a `MooreGlasbergLoudness`: `loudness` (N, sone), `loudness_level`
+(phon), `specific` (N′(i), 372 bins of 0.1 Cam), `erb_number`,
+`centre_frequencies`, `field`, `presentation`.
+
+### Time-varying loudness (ISO 532-3)
+
+ISO 532-3 wraps the same excitation / specific-loudness model in a running
+multi-resolution spectral analysis (six parallel FFTs, updated every 1 ms) and
+two cascaded temporal integrators: the fast **short-term loudness** S′(t) and
+the slower **long-term loudness** S″(t). The peak long-term loudness N_max
+predicts the loudness of sounds up to about 5 s.
+
+```python
+import numpy as np
+from phonometry import loudness_moore_glasberg_time
+
+fs = 32000
+t = np.arange(int(1.3 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+
+res = loudness_moore_glasberg_time(x, fs, field="free")
+print(f"N_max = {res.n_max:.3f} sone  ({res.loudness_level_max:.0f} phon)")   # 1.000 sone (40 phon)
+print(f"long-term loudness exceeded 5% of the time: {res.percentiles[5.0]:.3f} sone")
+
+res.plot()   # short-term S'(t) and long-term S''(t) loudness vs time
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness.png" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# The result carries both traces on a 1 ms time axis:
+res.plot()
+plt.show()
+
+# Or plot them directly to see the fast STL vs the slow LTL:
+fig, ax = plt.subplots()
+ax.plot(res.time, res.short_term_loudness, label="Short-term S'(t)")
+ax.plot(res.time, res.long_term_loudness, label="Long-term S''(t)")
+ax.set_xlabel("Time [s]")
+ax.set_ylabel("Loudness [sone]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+#### `loudness_moore_glasberg_time()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `signal` | 1D or `(n, 2)` array | Pa | non-empty | Mono = diotic; two columns = left/right ears |
+| `fs` | int | Hz | > 0 | |
+| `field` | str | — | `'free'` (default) / `'diffuse'` / `'eardrum'` | Outer-ear transfer |
+| `presentation` | str | — | `'binaural'` (default) / `'diotic'` / `'monaural'` | Binaural summation |
+| `percentiles` | sequence | percent | default `(1, 5, 10, 50, 90, 95)` | Exceeded long-term loudness levels |
+
+Returns a `MooreGlasbergTimeVaryingLoudness`: `time` (1 ms grid),
+`short_term_loudness` / `long_term_loudness` (sone), their `_level` in phon,
+`n_max`, `loudness_level_max`, a `percentiles` dict, `field`, `presentation`.
+
+### Sottek Hearing Model loudness (ECMA-418-2)
+
+ECMA-418-2:2025 specifies a single auditory front-end — outer/middle-ear
+filtering, a 53-band gammatone-like filter bank on the Bark_HMS scale
+(z = 0.5 .. 26.5), half-wave rectification, block RMS and a compressive
+nonlinearity (Formula 23) — that is **shared** by its loudness, tonality and
+roughness metrics. The loudness N is reported in **sone_HMS**, and the same
+1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.996).
+
+```python
+import numpy as np
+from phonometry import loudness_ecma
+
+fs = 48000
+t = np.arange(int(1.2 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+
+res = loudness_ecma(x, fs, field="free")
+print(f"N = {res.loudness:.3f} sone_HMS")   # 0.996 sone_HMS
+print(res.specific_loudness.shape)          # (53,) average specific loudness N'(z)
+
+res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness.png" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# The result carries the average specific loudness over the 53 Bark_HMS bands:
+res.plot()
+plt.show()
+
+# Or draw N'(z) by hand against the critical-band-rate scale:
+fig, ax = plt.subplots()
+ax.fill_between(res.bark, res.specific_loudness, alpha=0.3)
+ax.plot(res.bark, res.specific_loudness)
+ax.set_xlabel("Critical-band rate z [Bark_HMS]")
+ax.set_ylabel("Specific loudness N' [sone_HMS/Bark_HMS]")
+plt.show()
+```
+
+</details>
+
+#### `loudness_ecma()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `signal_in` | 1D array | Pa | non-empty | Calibrated pressure signal |
+| `fs` | float | Hz | > 0 | Resampled to 48 kHz internally if needed (Clause 5.1.1) |
+| `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter (Clause 5.1.3) |
+
+Returns an `EcmaLoudness`: `loudness` (N, sone_HMS), `specific_loudness`
+(N′(z), 53 bands), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
+(N(l) at 187.5 Hz), `field`.
+
+### Tonality (ECMA-418-2)
+
+A tonal component — a whistle, a fan's blade-passing tone — stands out even at
+low level. ECMA-418-2 quantifies it from the **autocorrelation function** (ACF)
+of each band's rectified signal: a periodic (tonal) component keeps a high ACF
+at nonzero lag, and the tonal-to-noise loudness ratio drives the specific
+tonality T′(z). The single value T is in **tu_HMS**, calibrated so a 1 kHz/40 dB
+tone is ≈ 1 tu_HMS; the result also tracks the tonal frequency f_ton per band.
+
+```python
+import numpy as np
+from phonometry import tonality_ecma
+
+fs = 48000
+t = np.arange(int(1.2 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+
+res = tonality_ecma(x, fs, field="free")
+peak = int(np.argmax(res.specific_tonality))
+print(f"T = {res.tonality:.3f} tu_HMS")                    # 1.000 tu_HMS
+print(f"f_ton = {res.tonal_frequencies[peak]:.0f} Hz")     # 999 Hz
+
+res.plot()   # average specific tonality T'(z) + time-dependent T(l)
+```
+
+#### `tonality_ecma()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `signal_in` | 1D array | Pa | non-empty | Calibrated pressure signal |
+| `fs` | float | Hz | > 0 | Resampled to 48 kHz internally if needed |
+| `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter |
+| `f_low` | float, optional | Hz | default `None` | Lower edge of a user band for the T(l) search |
+| `f_high` | float, optional | Hz | default `None` | Upper edge of the user band |
+
+Returns an `EcmaTonality`: `tonality` (T, tu_HMS), `specific_tonality`
+(T′(z), 53 bands), `bark`, `centre_frequencies`, `tonal_frequencies`
+(f_ton,z), `time`, `tonality_vs_time` (T(l)), `tonal_frequency_vs_time`,
+`field`.
+
+### Roughness (ECMA-418-2) — new capability
+
+Roughness is the harsh, buzzing sensation of fast amplitude modulation
+(roughly 20–300 Hz, peaking near 70 Hz) — the quality of a diesel idle or a
+distorted loudspeaker. It is a **new metric** for phonometry. ECMA-418-2
+extracts each band's envelope, weights its modulation spectrum by modulation
+rate and depth, and correlates the modulation across bands; the result R is in
+**asper**. The reference sound (1 kHz carrier, 100 % amplitude-modulated at
+70 Hz, 60 dB SPL) is defined as 1 asper — this clean-room implementation
+returns 1.0735 asper (about +7 %), an honest variance: the tabulated
+calibration constant c_R (Formula 104) is used **without** reverse-fitting to
+the target.
+
+```python
+import numpy as np
+from phonometry import roughness_ecma
+
+fs = 48000
+t = np.arange(int(2.0 * fs)) / fs
+carrier = np.sin(2 * np.pi * 1000 * t)
+amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)                  # 60 dB SPL carrier
+x = amp * (1.0 + np.cos(2 * np.pi * 70 * t)) * carrier      # 100 % AM at 70 Hz
+
+res = roughness_ecma(x, fs, field="free")
+print(f"R = {res.roughness:.4f} asper")   # 1.0735 asper (reference target 1.0)
+
+res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.png" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import tonality_ecma, roughness_ecma
+
+fs = 48000
+t = np.arange(int(2.0 * fs)) / fs
+amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)
+
+# A pure tone (tonal, smooth) vs a 70 Hz amplitude-modulated tone (rough):
+tone = amp * np.sin(2 * np.pi * 1000 * t)
+rough = amp * (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
+
+scores = {
+    "Pure tone": (tonality_ecma(tone, fs).tonality, roughness_ecma(tone, fs).roughness),
+    "70 Hz AM tone": (tonality_ecma(rough, fs).tonality, roughness_ecma(rough, fs).roughness),
+}
+labels = list(scores)
+tonal = [scores[k][0] for k in labels]
+rough_v = [scores[k][1] for k in labels]
+xpos = np.arange(len(labels))
+fig, ax = plt.subplots()
+ax.bar(xpos - 0.2, tonal, 0.4, label="Tonality [tu_HMS]")
+ax.bar(xpos + 0.2, rough_v, 0.4, label="Roughness [asper]")
+ax.set_xticks(xpos)
+ax.set_xticklabels(labels)
+ax.legend()
+plt.show()
+```
+
+</details>
+
+#### `roughness_ecma()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `signal_in` | 1D array | Pa | non-empty | Calibrated pressure signal |
+| `fs` | float | Hz | > 0 | Resampled to 48 kHz internally if needed |
+| `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter |
+
+Returns an `EcmaRoughness`: `roughness` (R, asper, the 90th percentile of
+R(l50)), `specific_roughness` (R′(z), 53 bands), `bark`, `centre_frequencies`,
+`time`, `roughness_vs_time` (R(l50)), `specific_roughness_vs_time`
+((n_times, 53) array), `field`.
 
 See [Levels](levels.md) for tonality metrics and [Theory](theory.md) for the
 underlying math.

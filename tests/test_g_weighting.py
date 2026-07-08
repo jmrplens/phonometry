@@ -16,23 +16,12 @@ import pytest
 from scipy import signal as sp_signal
 
 from phonometry import WeightingFilter, weighting_filter
+from reference_data import ISO7196_TABLE2 as TABLE2
 
 FS = 48000
 
-# ISO 7196:1995 Table 2 - Nominal frequency response (Hz, dB).
-TABLE2 = [
-    (0.25, -88.0), (0.315, -80.0), (0.4, -72.1),
-    (0.5, -64.3), (0.63, -56.6), (0.8, -49.5),
-    (1.00, -43.0), (1.25, -37.5), (1.6, -32.6),
-    (2.0, -28.3), (2.5, -24.1), (3.15, -20.0),
-    (4.0, -16.0), (5.0, -12.0), (6.3, -8.0),
-    (8.0, -4.0), (10.0, 0.0), (12.5, 4.0),
-    (16.0, 7.7), (20.0, 9.0), (25.0, 3.7),
-    (31.5, -4.0), (40.0, -12.0), (50.0, -20.0),
-    (63.0, -28.0), (80.0, -36.0), (100.0, -44.0),
-    (125.0, -52.0), (160.0, -60.0), (200.0, -68.0),
-    (250.0, -76.0), (315.0, -84.0),
-]
+# ISO 7196:1995 Table 2 - Nominal frequency response (Hz, dB) is imported
+# from reference_data (shared with the CI conformance report).
 
 
 def _response_db(freqs: list[float], fs: int = FS) -> np.ndarray:

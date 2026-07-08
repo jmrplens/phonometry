@@ -25,9 +25,22 @@ from .intensity import (
 )
 from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
 from .loudness import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
+from .loudness_ecma import EcmaLoudness, loudness_ecma
+from .loudness_moore_glasberg import (
+    MooreGlasbergLoudness,
+    loudness_moore_glasberg,
+    loudness_moore_glasberg_from_spectrum,
+    loudness_moore_glasberg_from_third_octave,
+)
+from .loudness_moore_glasberg_time import (
+    MooreGlasbergTimeVaryingLoudness,
+    loudness_moore_glasberg_time,
+)
 from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
 from .sharpness import sharpness_din, sharpness_din_from_specific
 from .sti import STIResult, sti_from_impulse_response, stipa, stipa_signal
+from .tonality_ecma import EcmaTonality, tonality_ecma
+from .roughness_ecma import EcmaRoughness, roughness_ecma
 from .tonality import ToneAssessment, prominence_ratio, tone_to_noise_ratio
 from .parametric_filters import (
     TimeWeighting,
@@ -109,6 +122,18 @@ __all__ = [
     "loudness_zwicker",
     "loudness_zwicker_from_spectrum",
     "ZwickerLoudness",
+    "loudness_ecma",
+    "EcmaLoudness",
+    "loudness_moore_glasberg",
+    "loudness_moore_glasberg_from_spectrum",
+    "loudness_moore_glasberg_from_third_octave",
+    "MooreGlasbergLoudness",
+    "loudness_moore_glasberg_time",
+    "MooreGlasbergTimeVaryingLoudness",
+    "tonality_ecma",
+    "EcmaTonality",
+    "roughness_ecma",
+    "EcmaRoughness",
     "sharpness_din",
     "sharpness_din_from_specific",
     "equal_loudness_contour",

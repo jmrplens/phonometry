@@ -194,6 +194,21 @@ def test_zwicker_time_varying_returns_two_panels() -> None:
 
 
 # --------------------------------------------------------------------------
+# Moore-Glasberg loudness (ISO 532-2)
+# --------------------------------------------------------------------------
+def test_moore_glasberg_returns_single_axes_with_specific_curve() -> None:
+    res = ph.loudness_moore_glasberg_from_spectrum([(1000.0, 60.0)])
+    ax = res.plot()
+    assert not isinstance(ax, np.ndarray)
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), res.specific)
+    xdata = ax.lines[0].get_xdata()
+    assert xdata[0] == pytest.approx(1.8) and xdata[-1] == pytest.approx(38.9)
+    assert "Cam" in ax.get_xlabel()
+    assert "sone/Cam" in ax.get_ylabel()
+    plt.close("all")
+
+
+# --------------------------------------------------------------------------
 # STI
 # --------------------------------------------------------------------------
 def test_sti_bars_match_mti_and_annotate_rating() -> None:

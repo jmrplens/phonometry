@@ -52,6 +52,9 @@ coverage.xml
 .ruff_cache/
 
 # Project specific generated files
+# CI-generated PR-comment artifacts (conformance report + comment body)
+conformance_report.md
+pr_comment_body.md
 *.wav
 # ISO 532-1 normative validation pulses are tracked explicitly
 !tests/data/iso532_1_test_signal_*.wav

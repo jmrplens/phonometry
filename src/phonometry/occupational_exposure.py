@@ -33,14 +33,16 @@ position ``u3 = 1.0 dB`` (C.6). Peak levels ``Lp,Cpeak`` are reported without an
 uncertainty: Annex C gives no method for them (Table C.5, NOTE 1).
 
 The three worked examples of Annexes D (task), E (job) and F (full-day) are
-reproduced digit-for-digit in the test suite. Clause/equation/table numbers refer
-to ISO 9612:2009(E).
+reproduced to the standard's printed precision in the test suite (Annex E rounds
+its effective-day level to 88.4 dB before Eq 12 and prints 88.1; the library
+keeps intermediates unrounded and yields 88.2). Clause/equation/table numbers
+refer to ISO 9612:2009(E).
 """
 
 from __future__ import annotations
 
 import warnings
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from math import log10, sqrt
 from typing import Dict, Literal, Sequence, Tuple
 
@@ -535,19 +537,4 @@ def full_day_exposure(
 
 def _with_advisory(result: ExposureResult) -> ExposureResult:
     """Return a copy of ``result`` with the sampling advisory flag set."""
-    return ExposureResult(
-        lex_8h=result.lex_8h,
-        combined_standard_uncertainty=result.combined_standard_uncertainty,
-        expanded_uncertainty=result.expanded_uncertainty,
-        strategy=result.strategy,
-        coverage_factor=result.coverage_factor,
-        lp_aeqte=result.lp_aeqte,
-        effective_duration_hours=result.effective_duration_hours,
-        u1=result.u1,
-        c1u1=result.c1u1,
-        u2=result.u2,
-        u3=result.u3,
-        n_samples=result.n_samples,
-        sampling_advisory=True,
-        tasks=result.tasks,
-    )
+    return replace(result, sampling_advisory=True)

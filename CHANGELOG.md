@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   noise exposure LEX,8h by the three measurement strategies and the normative
   Annex C uncertainty budget (k = 1,65 one-sided 95 %, the C.6 I(I−1) vs
   C.12 N−1 sampling asymmetry, Table C.4 and the LEX,8h + U upper limit); the
-  Annex D/E/F worked examples reproduce digit-for-digit.
+  Annex D/E/F worked examples reproduce to the standard's printed precision.
 - Documentation: new **Outdoor Sound Propagation** guide (ISO 9613-1/2, EN + ES),
   an **ISO 9612 occupational exposure** section in the Levels guide, theory and
   API-reference sections, four new figures each (air absorption α(f), the

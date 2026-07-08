@@ -130,7 +130,10 @@ exceso de recorrido sobre el borde es $z = d_{ss} + d_{sr} - d$:
   fija el nivel a la distancia de referencia de 1 m.
 * **Absorción atmosférica** $A_{atm} = \alpha\ d$ (Ec. (8)) con $\alpha$ el
   coeficiente de la ISO 9613-1 —despreciable a baja frecuencia, dominante a 8 kHz
-  en recorridos largos—.
+  en recorridos largos—. Las funciones de la ISO 9613-2 usan por defecto 20 °C y
+  una humedad relativa del 70 % —una de las atmósferas de referencia que la norma
+  tabula en su Tabla 2—, mientras que `air_attenuation` usa por defecto el 50 %
+  habitual de la ISO 9613-1.
 * **Efecto del suelo** $A_{gr} = A_s + A_r + A_m$ (Ec. (9)) suma una región
   fuente, receptor y media, cada una a partir de las funciones $a'/b'/c'/d'$ de
   la Tabla 3 y su factor de suelo $G$ (0 = duro/reflectante, 1 =
@@ -255,8 +258,8 @@ Devuelve un `OutdoorAttenuation` con `a_div`, `a_atm`, `a_gr`, `a_bar`,
 | `lateral` | bool | — | `False` | `True` ⇒ difracción por borde vertical (Ec. (13)) |
 
 La exactitud declarada del método es de $\pm 1$ a $\pm 3$ dB para ruido de banda
-ancha hasta 1000 m (Tabla 5). Consulta la página de [Teoría](/phonometry/reference/theory/)
-para la derivación completa, la [guía de Acústica de salas y edificación](/phonometry/guides/room-acoustics/)
-para cómo $\alpha$ alimenta la ISO 354, y la [guía de Niveles](/phonometry/guides/levels/)
+ancha hasta 1000 m (Tabla 5). Consulta la página de [Teoría](/phonometry/es/reference/theory/)
+para la derivación completa, la [guía de Acústica de salas y edificación](/phonometry/es/guides/room-acoustics/)
+para cómo $\alpha$ alimenta la ISO 354, y la [guía de Niveles](/phonometry/es/guides/levels/)
 para la exposición al ruido en el trabajo (ISO 9612) que consume niveles
 ponderados A.

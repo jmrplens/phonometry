@@ -772,8 +772,10 @@ uncertainty $u_2$ (Table C.5) and microphone-position uncertainty $u_3 = 1.0$ dB
 in quadrature. Peak levels $L_{p,Cpeak}$ are reported without an uncertainty:
 Annex C provides no method for them (Table C.5, Note 1). The three worked
 examples of Annexes D (task, $L_{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (job,
-$88.1$ dB, $3.8$ dB) and F (full-day, $90.1$ dB, $3.4$ dB) are reproduced
-digit-for-digit.
+$88.1$ dB, $3.8$ dB) and F (full-day, $90.1$ dB, $3.4$ dB) are reproduced to
+the standard's printed precision — every intermediate of Annex E is digit-exact,
+and its final level differs only by the standard's own pre-rounding of the
+effective-day level (see the [Levels guide](/phonometry/guides/levels/)).
 
 See the [Outdoor Propagation guide](/phonometry/guides/outdoor-propagation/) and the
 [Levels guide](/phonometry/guides/levels/) for usage.

@@ -267,8 +267,9 @@ demasiado pocos trabajadores (duración acumulada de la Tabla 1), el resultado f
 recomienda más mediciones. Los niveles de pico $L_{p,Cpeak}$ se declaran **sin**
 incertidumbre —el anexo C no da método para ellos (Tabla C.5, Nota 1)—, así que
 la incertidumbre de pico queda fuera del alcance. Los tres ejemplos resueltos de
-los anexos D/E/F anteriores se reproducen dígito a dígito, y la teoría se deriva
-en la página de [Teoría](/phonometry/reference/theory/).
+los anexos D/E/F anteriores se reproducen con la precisión impresa de la norma
+(el redondeo final del anexo E se explica más arriba), y la teoría se deriva
+en la página de [Teoría](/phonometry/es/reference/theory/).
 
 ### Parámetros de `task_based_exposure()` / `job_based_exposure()` / `full_day_exposure()`
 

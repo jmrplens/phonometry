@@ -204,6 +204,8 @@ def _d_prime(h: float, dp: float) -> float:
     return float(1.5 + 5.0 * np.exp(-0.9 * h**2) * (1.0 - np.exp(-dp / 50.0)))
 
 
+# Float keys are safe: lookups always come from _nearest_nominal, which returns
+# these exact literals.
 _PRIME_BY_BAND = {125.0: _a_prime, 250.0: _b_prime, 500.0: _c_prime,
                   1000.0: _d_prime}
 
@@ -391,9 +393,10 @@ def barrier_attenuation(
             continue
         lam = _C_SOUND / float(f)
         c3 = _c3_double(lam, e) if e is not None else 1.0
+        # z > 0 here, so arg >= 3 and Dz = 10 lg(arg) is always positive.
         arg = 3.0 + (c2 / lam) * c3 * z * kmet
-        dz = 10.0 * np.log10(arg) if arg > 1.0 else 0.0
-        out[i] = min(max(dz, 0.0), limit)
+        dz = 10.0 * np.log10(arg)
+        out[i] = min(dz, limit)
     return out
 
 

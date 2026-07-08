@@ -962,8 +962,9 @@ $c_1 u_1$ exceeds 3.5 dB (Clause 10.4), or too few workers are covered
 `warn=True`, emits an `ExposureWarning` recommending more measurements. Peak
 levels $L_{p,Cpeak}$ are reported **without** an uncertainty — Annex C gives no
 method for them (Table C.5, Note 1), so peak-uncertainty is out of scope. The
-three Annex D/E/F worked examples above are reproduced digit-for-digit, and the
-theory is derived on the [Theory](https://jmrplens.github.io/phonometry/reference/theory/) page.
+three Annex D/E/F worked examples above are reproduced to the standard's printed
+precision (Annex E's final rounding is disclosed above), and the theory is
+derived on the [Theory](https://jmrplens.github.io/phonometry/reference/theory/) page.
 
 ### `task_based_exposure()` / `job_based_exposure()` / `full_day_exposure()` parameters
 
@@ -2989,7 +2990,9 @@ path length over the edge is $z = d_{ss} + d_{sr} - d$:
   1 m reference distance.
 * **Atmospheric absorption** $A_{atm} = \alpha\ d$ (Eq. (8)) with $\alpha$ the
   ISO 9613-1 coefficient — negligible at low frequency, dominant at 8 kHz over
-  long paths.
+  long paths. The ISO 9613-2 functions default to 20 °C and 70 % relative
+  humidity — one of the Table 2 reference atmospheres the standard tabulates —
+  while `air_attenuation` itself defaults to the ISO 9613-1 usual 50 %.
 * **Ground effect** $A_{gr} = A_s + A_r + A_m$ (Eq. (9)) sums a source, receiver
   and middle region, each from the Table 3 functions $a'/b'/c'/d'$ and its
   ground factor $G$ (0 = hard/reflective, 1 = porous/absorbing). A **negative**
@@ -3969,7 +3972,7 @@ All core functionality can be imported directly from the `phonometry` package.
 | `Barrier` | `dataclass` | **Barrier diffraction geometry (ISO 9613-2 7.4).**<br>• `source_to_edge` dss, `edge_to_receiver` dsr [m]<br>• `parallel_distance` a [m] (Default: 0)<br>• `edge_separation` e [m] (Default: None → single diffraction)<br>• `ground_reflections_by_image` (Default: False → C₂=20)<br>• `lateral` (Default: False → top-edge) | `b = Barrier(source_to_edge=101, edge_to_receiver=101)`<br><br>• `.is_double` when e is given |
 | `barrier_attenuation` | `function` | **Barrier diffraction Dz (ISO 9613-2 Eq. 14).**<br>• `barrier`: `Barrier`<br>• `distance` d [m]<br>• `frequencies` [Hz] | `dz = barrier_attenuation(b, 200, bands)`<br><br>• 10 lg[3+(C₂/λ)C₃ z Kmet], capped 20/25 dB |
 | `meteorological_correction` | `function` | **Meteorological correction Cmet (ISO 9613-2 Eq. 21/22).**<br>• `projected_distance` dp, `source_height` hs, `receiver_height` hr [m]<br>• `c0`: factor C₀ [dB] | `c = meteorological_correction(200, 1.5, 1.5, 2.0)`<br><br>• C₀[1 − 10(hs+hr)/dp] ≥ 0 [dB] |
-| `outdoor_propagation_attenuation` | `function` | **Total octave-band attenuation A (ISO 9613-2 Eq. 4).**<br>• `distance` d, `source_height` hs, `receiver_height` hr [m]<br>• `frequencies` [Hz]<br>• `ground_source`/`ground_middle`/`ground_receiver` G<br>• `barrier`: `Barrier` or None<br>• `temperature`/`humidity`/`pressure`<br>• `projected_distance` dp [m] | `att = outdoor_propagation_attenuation(200, 2, 2, bands, 1, 1, 1)`<br><br>• `OutdoorAttenuation` term breakdown |
+| `outdoor_propagation_attenuation` | `function` | **Total octave-band attenuation A (ISO 9613-2 Eq. 4).**<br>• `distance` d, `source_height` hs, `receiver_height` hr [m]<br>• `frequencies` [Hz]<br>• `ground_source`/`ground_middle`/`ground_receiver` G<br>• `barrier`: `Barrier` or None<br>• `temperature`/`humidity`/`pressure` (Default: 20 °C/70 %/101.325 kPa, a Table 2 reference atmosphere)<br>• `projected_distance` dp [m] | `att = outdoor_propagation_attenuation(200, 2, 2, bands, 1, 1, 1)`<br><br>• `OutdoorAttenuation` term breakdown |
 | `predicted_receiver_level` | `function` | **Predicted octave-band receiver level (ISO 9613-2 Eq. 3/6).**<br>• `sound_power_level` Lw [dB]<br>• same geometry/ground/barrier/atmosphere params as `outdoor_propagation_attenuation`<br>• `directivity_index` Di, `d_omega` DΩ [dB]<br>• `c0`: subtract Cmet (Default: None) | `lp = predicted_receiver_level(lw, 200, 2, 2, bands)`<br><br>• LfT(DW) = Lw + Dc − A per band [dB] |
 | `OutdoorAttenuation` | `dataclass` | **Per-band ISO 9613-2 attenuation breakdown.**<br>• `frequencies` [Hz]<br>• `a_div`, `a_atm`, `a_gr`, `a_bar` [dB]<br>• `a_total` = Adiv+Aatm+Agr+Abar [dB]<br>• `d_omega` [dB] | `att.a_div, att.a_bar, att.a_total` |
 | `DEFAULT_FREQUENCIES` | `tuple` | **ISO 9613-2 nominal octave bands.**<br>(no parameters) | `DEFAULT_FREQUENCIES  # (63, …, 8000)` |
@@ -3978,6 +3981,11 @@ All core functionality can be imported directly from the `phonometry` package.
 | `full_day_exposure` | `function` | **Full-day daily exposure LEX,8h + U (ISO 9612 Clause 11).**<br>• `samples` whole-day Lp,A,eqT [dB]<br>• `effective_duration_hours` Te [h]<br>• `instrument`, `u3`, `warn` | `res = full_day_exposure(samples, 9.25)`<br><br>• `ExposureResult`; 3 samples spanning ≥3 dB advise |
 | `Task` | `dataclass` | **One task of a task-based measurement (ISO 9612 Clause 9).**<br>• `samples` [dB], `duration_hours` [h]<br>• `duration_samples`/`duration_range` (for u1b)<br>• `label`, `instrument` | `Task(samples=(80.1, 82.2), duration_hours=5.0)` |
 | `ExposureResult` | `dataclass` | **Daily exposure and uncertainty (ISO 9612).**<br>• `lex_8h` [dB]<br>• `combined_standard_uncertainty` u [dB]<br>• `expanded_uncertainty` U = 1.65 u [dB]<br>• `upper_limit` = LEX,8h + U [dB]<br>• `strategy`, `sampling_advisory`, `tasks` | `res.lex_8h, res.upper_limit` |
+| `TaskContribution` | `dataclass` | **Per-task breakdown inside `ExposureResult.tasks` (ISO 9612 Clause 9).**<br>• `label`, `lp_aeqt` (Eq. 7), `duration_hours`<br>• `lex_8h_contribution` (Eq. 8) [dB]<br>• uncertainty terms `u1a`, `u1b`, `c1a`, `c1b`, `u2`, `u3` | `res.tasks[0].lex_8h_contribution` |
+| `table_c4_contribution` | `function` | **Sampling contribution c₁u₁ [dB] from Table C.4 (ISO 9612 job/full-day).**<br>• `n_samples`: N (clamped to [3, 30])<br>• `u1`: sampling standard uncertainty [dB]<br>• bilinear interpolation, anchored at u₁ = 0 | `table_c4_contribution(6, 2.0)  # 1.4` |
+| `minimum_cumulative_duration_hours` | `function` | **Minimum cumulative measurement duration [h] (ISO 9612 Table 1).**<br>• `n_workers`: group size n_G (> 40 → 17 h; the standard advises splitting the group) | `minimum_cumulative_duration_hours(18)  # 10.75` |
+| `COVERAGE_FACTOR` | `float` | **ISO 9612 coverage factor k = 1.65 (Clause 14).**<br>One-sided 95 % confidence: U = 1.65 u, upper limit LEX,8h + U | `COVERAGE_FACTOR  # 1.65` |
+| `INSTRUMENT_U2` | `mapping` | **Instrument standard uncertainty u2 [dB] (ISO 9612 Table C.5).**<br>Keyed by `'class1'` (0.7), `'class2'` (1.5), `'personal_exposimeter'` (1.5) | `INSTRUMENT_U2['class1']  # 0.7` |
 | `ExposureWarning` | `warning class` | **ISO 9612 sampling advisory.**<br>Emitted for the 3 dB task spread (Clause 9.3), c₁u₁ > 3.5 dB (Clause 10.4) or a short Table 1 cumulative duration | `warnings.simplefilter('error', ExposureWarning)` |
 | `SoundPowerWarning` | `warning class` | **ISO 3744/3746/3741/9614-2 qualification issue.**<br>Emitted when the background margin is below the criterion, K2 exceeds the validity limit, a band's power is negative, or the room fails qualification; levels are then upper bounds | `warnings.simplefilter('error', SoundPowerWarning)` |
 | `AbsorptionWarning` | `warning class` | **ISO 354 advisory.**<br>Emitted for a room below 150 m³, a sample area outside 10-12 m², an out-of-range temperature, or a non-physical α_s ≤ 0; the result still returns | `warnings.simplefilter('error', AbsorptionWarning)` |
@@ -4774,8 +4782,10 @@ uncertainty $u_2$ (Table C.5) and microphone-position uncertainty $u_3 = 1.0$ dB
 in quadrature. Peak levels $L_{p,Cpeak}$ are reported without an uncertainty:
 Annex C provides no method for them (Table C.5, Note 1). The three worked
 examples of Annexes D (task, $L_{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (job,
-$88.1$ dB, $3.8$ dB) and F (full-day, $90.1$ dB, $3.4$ dB) are reproduced
-digit-for-digit.
+$88.1$ dB, $3.8$ dB) and F (full-day, $90.1$ dB, $3.4$ dB) are reproduced to
+the standard's printed precision — every intermediate of Annex E is digit-exact,
+and its final level differs only by the standard's own pre-rounding of the
+effective-day level (see the [Levels guide](https://jmrplens.github.io/phonometry/guides/levels/)).
 
 See the [Outdoor Propagation guide](https://jmrplens.github.io/phonometry/guides/outdoor-propagation/) and the
 [Levels guide](https://jmrplens.github.io/phonometry/guides/levels/) for usage.

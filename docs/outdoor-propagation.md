@@ -123,7 +123,9 @@ path length over the edge is $z = d_{ss} + d_{sr} - d$:
   1 m reference distance.
 * **Atmospheric absorption** $A_{atm} = \alpha\ d$ (Eq. (8)) with $\alpha$ the
   ISO 9613-1 coefficient — negligible at low frequency, dominant at 8 kHz over
-  long paths.
+  long paths. The ISO 9613-2 functions default to 20 °C and 70 % relative
+  humidity — one of the Table 2 reference atmospheres the standard tabulates —
+  while `air_attenuation` itself defaults to the ISO 9613-1 usual 50 %.
 * **Ground effect** $A_{gr} = A_s + A_r + A_m$ (Eq. (9)) sums a source, receiver
   and middle region, each from the Table 3 functions $a'/b'/c'/d'$ and its
   ground factor $G$ (0 = hard/reflective, 1 = porous/absorbing). A **negative**

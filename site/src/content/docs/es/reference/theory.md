@@ -792,10 +792,13 @@ incertidumbre de posición del micrófono $u_3 = 1.0$ dB. Los niveles de pico
 $L_{p,Cpeak}$ se declaran sin incertidumbre: el anexo C no da método para ellos
 (Tabla C.5, Nota 1). Los tres ejemplos resueltos de los anexos D (tarea,
 $L_{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (función, $88.1$ dB, $3.8$ dB) y F
-(jornada completa, $90.1$ dB, $3.4$ dB) se reproducen dígito a dígito.
+(jornada completa, $90.1$ dB, $3.4$ dB) se reproducen con la precisión impresa
+de la norma: todos los intermedios del anexo E son exactos dígito a dígito, y su
+nivel final difiere solo por el redondeo previo que la propia norma aplica al
+nivel efectivo de la jornada (véase la [guía de Niveles](/phonometry/es/guides/levels/)).
 
-Consulta la [guía de Propagación en exteriores](/phonometry/guides/outdoor-propagation/)
-y la [guía de Niveles](/phonometry/guides/levels/) para su uso.
+Consulta la [guía de Propagación en exteriores](/phonometry/es/guides/outdoor-propagation/)
+y la [guía de Niveles](/phonometry/es/guides/levels/) para su uso.
 
 ## Determinación de la potencia sonora (ISO 3744/3746, ISO 3741, ISO 9614-2)
 

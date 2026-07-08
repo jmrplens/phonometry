@@ -62,6 +62,14 @@ from .insulation import (
     weighted_impact_rating,
     weighted_rating,
 )
+from .lab_insulation import (
+    LabAirborneInsulationResult,
+    LabImpactInsulationResult,
+    LabInsulationWarning,
+    background_correction,
+    lab_airborne_insulation,
+    lab_impact_insulation,
+)
 from .open_plan import OpenPlanResult, open_plan_metrics
 from .sound_power import (
     SoundPowerResult,
@@ -190,6 +198,12 @@ __all__ = [
     "facade_insulation",
     "FacadeInsulationResult",
     "energy_average_level",
+    "lab_airborne_insulation",
+    "LabAirborneInsulationResult",
+    "lab_impact_insulation",
+    "LabImpactInsulationResult",
+    "background_correction",
+    "LabInsulationWarning",
     "lden",
     "ldn",
     "composite_rating_level",

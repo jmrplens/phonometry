@@ -44,7 +44,7 @@ Clause citations refer to EN 12354-1:2000 (airborne) or EN 12354-2:2000 (impact)
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import log10
+from math import isfinite, log10
 from typing import Literal, Sequence
 
 #: Reference coupling length ``l0`` in Formula (28a), in metres (Clause 4.4.1).
@@ -166,7 +166,7 @@ class ImpactPredictionResult:
 def _check_finite(value: float, name: str) -> float:
     """Return ``value`` as a float, raising if it is not finite."""
     v = float(value)
-    if v != v or v in (float("inf"), float("-inf")):
+    if not isfinite(v):
         raise ValueError(f"'{name}' must be a finite number.")
     return v
 

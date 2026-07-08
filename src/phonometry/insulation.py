@@ -719,9 +719,10 @@ def facade_insulation(
     :raises ValueError: If band counts differ, if ``method`` is unknown, if
         ``t2``/``t0``/``area``/``volume`` are not positive, if ``area`` is
         given without ``surface_level``, if ``surface_level`` and ``area`` are
-        given without ``volume``, or if inputs are non-finite. Supplying
-        ``surface_level`` alone is not an error: ``r_prime`` simply stays
-        ``None``.
+        given without ``volume``, if ``frequencies`` is given with a length
+        that differs from the band count, or if inputs are non-finite.
+        Supplying ``surface_level`` alone is not an error: ``r_prime`` simply
+        stays ``None``.
     """
     if method not in _FACADE_CORRECTION:
         raise ValueError(
@@ -788,6 +789,11 @@ def facade_insulation(
         if frequencies is not None
         else None
     )
+    if freqs is not None and freqs.shape != d_2m.shape:
+        raise ValueError(
+            "'frequencies' must have one value per band; got "
+            f"{freqs.size} for {d_2m.size} bands."
+        )
     return FacadeInsulationResult(
         d_2m=d_2m,
         d_2m_nt=d_2m_nt,

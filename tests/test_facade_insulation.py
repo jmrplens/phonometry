@@ -214,6 +214,16 @@ def test_nonfinite_raises() -> None:
         )
 
 
+def test_frequencies_length_mismatch_raises() -> None:
+    # 'frequencies' shorter than the band count must fail clearly here rather
+    # than deferring a confusing matplotlib shape error to plot().
+    with pytest.raises(ValueError, match="frequencies"):
+        facade_insulation(
+            _flat(3, 70.0), _flat(3, 30.0), _flat(3, 0.5),
+            frequencies=[125.0, 250.0],
+        )
+
+
 # --------------------------------------------------------------------------
 # Extended frequency range (Clause 5) still computes per band
 # --------------------------------------------------------------------------

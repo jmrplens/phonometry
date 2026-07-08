@@ -698,7 +698,7 @@ LabInsulationWarning)`. El índice automático se forma solo cuando se suministr
 exactamente 16 valores en tercio de octava o 5 en octava (`rating` es `None` en
 caso contrario).
 
-#### Parámetros de `lab_airborne_insulation()` / `lab_impact_insulation()`
+### Parámetros de `lab_airborne_insulation()` / `lab_impact_insulation()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
@@ -845,7 +845,7 @@ plt.show()
 
 </details>
 
-#### Parámetros de `junction_vibration_reduction()` / `flanking_element()`
+### Parámetros de `junction_vibration_reduction()` / `flanking_element()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
@@ -939,7 +939,7 @@ plt.show()
 
 </details>
 
-#### Parámetros de `band_uncertainty()` / `single_number_uncertainty()` / `uncertain_value()`
+### Parámetros de `band_uncertainty()` / `single_number_uncertainty()` / `uncertain_value()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |

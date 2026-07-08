@@ -682,7 +682,7 @@ the limit of measurement; catch it with `warnings.simplefilter("error",
 LabInsulationWarning)`. The automatic rating is formed only when exactly 16
 one-third-octave or 5 octave values are supplied (`rating` is `None` otherwise).
 
-#### `lab_airborne_insulation()` / `lab_impact_insulation()` parameters
+### `lab_airborne_insulation()` / `lab_impact_insulation()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -826,7 +826,7 @@ plt.show()
 
 </details>
 
-#### `junction_vibration_reduction()` / `flanking_element()` parameters
+### `junction_vibration_reduction()` / `flanking_element()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -919,7 +919,7 @@ plt.show()
 
 </details>
 
-#### `band_uncertainty()` / `single_number_uncertainty()` / `uncertain_value()` parameters
+### `band_uncertainty()` / `single_number_uncertainty()` / `uncertain_value()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |

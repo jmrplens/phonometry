@@ -1379,6 +1379,27 @@ def _chk_rn_rc_lmf() -> Outcome:
     return numeric(ref.RN_RC35_LMF, ph.room_criterion(ph.rc_curve(35.0)).lmf, 1e-9, places=3)
 
 
+_HEAR = "Hearing threshold (ISO 7029 / ISO 389-7)"
+
+
+@register(_HEAR, "ISO 7029:2017 Table 1", "Median threshold, male age 60 at 4 kHz")
+def _chk_hearing_median() -> Outcome:
+    value = float(ph.age_threshold(60, "male", 0.5).median[8])
+    return numeric(ref.HEARING_MEDIAN_MALE_60_4KHZ, value, 1e-3, unit="dB", places=3)
+
+
+@register(_HEAR, "ISO 7029:2017 Table 2", "Upper spread su, male age 60 at 1 kHz")
+def _chk_hearing_spread() -> Outcome:
+    value = float(ph.age_threshold(60, "male", 0.5).spread_upper[4])
+    return numeric(ref.HEARING_SU_MALE_60_1KHZ, value, 1e-3, unit="dB", places=3)
+
+
+@register(_HEAR, "ISO 389-7:2006 Table 1", "Free-field reference threshold at 1 kHz")
+def _chk_hearing_reference() -> Outcome:
+    value = float(ph.reference_threshold("free-field")[4])
+    return numeric(ref.HEARING_REF_FREE_1KHZ, value, 1e-9, unit="dB", places=3)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

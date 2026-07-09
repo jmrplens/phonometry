@@ -10,8 +10,10 @@ from typing import List
 
 import numpy as np
 
+from ._warnings import PhonometryWarning
 
-class CalibrationWarning(UserWarning):
+
+class CalibrationWarning(PhonometryWarning):
     """The calibration reference recording looks unreliable."""
 
 

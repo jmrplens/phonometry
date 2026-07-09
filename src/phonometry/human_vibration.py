@@ -54,12 +54,14 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+
+from ._types import Real
+from ._warnings import PhonometryWarning
 from scipy import signal as sig
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
-Real = NDArray[np.float64]
 Complex = NDArray[np.complex128]
 
 __all__ = [
@@ -130,7 +132,7 @@ WBV_ELV_VDV = 21.0
 _Q_BUTTERWORTH = 1.0 / math.sqrt(2.0)
 
 
-class HumanVibrationWarning(UserWarning):
+class HumanVibrationWarning(PhonometryWarning):
     """Advisory for out-of-range human-vibration measurement conditions."""
 
 

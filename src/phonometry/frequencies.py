@@ -11,6 +11,8 @@ from typing import List, Tuple
 
 import numpy as np
 
+from ._warnings import PhonometryWarning
+
 
 def getansifrequencies(
     fraction: float,
@@ -102,7 +104,11 @@ def _deleteouters(
 
     idx = np.nonzero(freq_u_arr > fs / 2)[0]
     if len(idx) > 0:
-        warnings.warn("Low sampling rate: frequencies above fs/2 removed", stacklevel=3)
+        warnings.warn(
+            "Low sampling rate: frequencies above fs/2 removed",
+            PhonometryWarning,
+            stacklevel=3,
+        )
         freq_arr = np.delete(freq_arr, idx)
         freq_d_arr = np.delete(freq_d_arr, idx)
         freq_u_arr = np.delete(freq_u_arr, idx)

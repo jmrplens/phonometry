@@ -48,6 +48,9 @@ from typing import Dict, Literal, Sequence, Tuple
 
 import numpy as np
 
+from ._levels_math import energy_mean
+from ._warnings import PhonometryWarning
+
 #: Reference duration T0 = 8 h (Clause 4).
 _T0: float = 8.0
 
@@ -70,7 +73,7 @@ INSTRUMENT_U2: Dict[str, float] = {
 }
 
 
-class ExposureWarning(UserWarning):
+class ExposureWarning(PhonometryWarning):
     """Advisory raised when an ISO 9612 sampling rule recommends more measurements."""
 
 
@@ -157,12 +160,6 @@ def minimum_cumulative_duration_hours(n_workers: int) -> float:
 # --------------------------------------------------------------------------- #
 # Energy helpers.
 # --------------------------------------------------------------------------- #
-def _energy_average(levels: Sequence[float]) -> float:
-    """Energy (logarithmic) average of A-weighted levels, dB (Eq 7 / Eq 11)."""
-    arr = np.asarray(levels, dtype=float)
-    return float(10.0 * log10(float(np.mean(10.0 ** (0.1 * arr)))))
-
-
 def _sampling_std(levels: Sequence[float]) -> float:
     """Sample standard deviation about the arithmetic mean (Eq C.12), dB.
 
@@ -323,7 +320,7 @@ def task_based_exposure(
             raise ValueError("Each task needs at least one sample.")
         if task.duration_hours <= 0:
             raise ValueError("Task 'duration_hours' must be positive.")
-        levels.append(_energy_average(task.samples))
+        levels.append(energy_mean(task.samples))  # Eq 7
         durations.append(task.duration_hours)
 
     # Daily level: energy sum of contributions (Eq 9 == Eq 10).
@@ -421,7 +418,7 @@ def _sampled_exposure(
     if u3 < 0:
         raise ValueError("'u3' must be non-negative.")
 
-    lp_aeqte = _energy_average(samples)  # Eq 11
+    lp_aeqte = energy_mean(samples)  # Eq 11
     lex_8h = lp_aeqte + 10.0 * log10(effective_duration_hours / _T0)  # Eq 12/13
 
     u1 = _sampling_std(samples)  # Eq C.12

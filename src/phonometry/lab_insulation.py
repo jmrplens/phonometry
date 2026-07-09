@@ -52,6 +52,8 @@ import warnings
 
 import numpy as np
 
+from ._warnings import PhonometryWarning
+
 from .insulation import (
     ImpactRatingResult,
     WeightedRatingResult,
@@ -82,7 +84,7 @@ _BACKGROUND_LOW = 6.0
 _BACKGROUND_HIGH = 15.0
 
 
-class LabInsulationWarning(UserWarning):
+class LabInsulationWarning(PhonometryWarning):
     """Warning for laboratory-insulation limit-of-measurement conditions."""
 
 

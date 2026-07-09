@@ -61,10 +61,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from ._types import Real
+from ._warnings import PhonometryWarning
+
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
-Real = NDArray[np.float64]
 Complex = NDArray[np.complex128]
 
 #: Mandatory source-to-reference-plane distance ``ds`` (ISO 13472-1, 4.2), m.
@@ -133,7 +135,7 @@ __all__ = [
 ]
 
 
-class RoadAbsorptionWarning(UserWarning):
+class RoadAbsorptionWarning(PhonometryWarning):
     """Advisory for out-of-range in-situ road-absorption frequencies."""
 
 

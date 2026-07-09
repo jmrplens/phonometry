@@ -221,6 +221,12 @@ _ES_EXACT = {
     "Speech spectrum level [dB SPL]": "Nivel del espectro de voz [dB SPL]",
     "SII vs vocal effort in a fixed noise":
         "SII frente al esfuerzo vocal en un ruido fijo",
+    "Onset rate [dB/s]": "Tasa de crecimiento [dB/s]",
+    "Predicted prominence $P$": "Prominencia prevista $P$",
+    "Adjustment $K_I$ [dB]": "Ajuste $K_I$ [dB]",
+    "Adjustment to $L_{Aeq}$": "Ajuste a $L_{Aeq}$",
+    "Impulses": "Impulsos",
+    "threshold $P = 5$": "umbral $P = 5$",
     "Speech Intelligibility Index": "Índice de inteligibilidad del habla",
     "Normal": "Normal",
     "Raised": "Elevada",
@@ -391,6 +397,7 @@ _ES_EXACT = {
 
 _ES_PATTERNS = [
     (r"^(\d+) yr$", r"\1 años"),
+    (r"^Governing  (\$K_I\$ = .+ dB)$", r"Determinante  \1"),
     (r"^Octave Band: (.+) Hz$", r"Banda de octava: \1 Hz"),
     (r"^(\d+) phon$", r"\1 fonios"),
     (r"^TNR = (.+) dB\n\(criterion (.+) dB\)$", "TNR = \\1 dB\\n(criterio \\2 dB)"),
@@ -3508,6 +3515,59 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     plt.close()
 
 
+def generate_ntacou112(output_dir: str) -> None:
+    """NT ACOU 112: predicted prominence and the LAeq adjustment."""
+    print("Generating impulse_prominence.png...")
+    from phonometry import (
+        impulse_adjustment,
+        impulse_prominence,
+        predicted_prominence,
+    )
+    from phonometry.ntacou112 import ADJUSTMENT_THRESHOLD
+
+    fig, (ax_p, ax_k) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+
+    # --- Left: P vs onset rate for three level differences (Formula 1). ---
+    orate = np.logspace(1, 4, 200)  # 10 to 10000 dB/s
+    # Distinct hues (not COLOR_GRID, which is near-invisible on a light ground).
+    for ld, colour in ((5.0, COLOR_TERTIARY), (15.0, COLOR_PRIMARY),
+                       (30.0, COLOR_SECONDARY)):
+        ax_p.plot(orate, predicted_prominence(orate, np.full_like(orate, ld)),
+                  color=colour, label=f"LD = {ld:g} dB")
+    ax_p.set_xscale("log")
+    ax_p.set_xlabel("Onset rate [dB/s]")
+    ax_p.set_ylabel("Predicted prominence $P$")
+    ax_p.set_title(r"$P = 3\,\lg(\mathrm{OR}) + 2\,\lg(\mathrm{LD})$",
+                   fontweight="bold", pad=10)
+    ax_p.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_p.set_axisbelow(True)
+    ax_p.legend(loc="upper left")
+
+    # --- Right: the adjustment KI(P) with example impulses. ---
+    result = impulse_prominence([1200.0, 300.0, 60.0], [32.0, 18.0, 11.0])
+    grid = np.linspace(0.0, 16.0, 200)
+    ax_k.plot(grid, impulse_adjustment(grid), color=COLOR_PRIMARY,
+              label=r"$K_I = 1.8\,(P-5)$")
+    ax_k.axvline(ADJUSTMENT_THRESHOLD, color="#7f7f7f", linestyle=":",
+                 label=f"threshold $P = {ADJUSTMENT_THRESHOLD:g}$")
+    ax_k.scatter(result.per_impulse, impulse_adjustment(result.per_impulse),
+                 color="#aec7e8", zorder=3, label="Impulses")
+    ax_k.scatter([result.prominence], [result.adjustment], color=COLOR_SECONDARY,
+                 marker="*", s=140, zorder=4,
+                 label=f"Governing  $K_I$ = {result.adjustment:.1f} dB")
+    ax_k.set_xlabel("Predicted prominence $P$")
+    ax_k.set_ylabel("Adjustment $K_I$ [dB]")
+    ax_k.set_title("Adjustment to $L_{Aeq}$", fontweight="bold", pad=10)
+    ax_k.set_ylim(bottom=0.0)
+    ax_k.grid(color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_k.set_axisbelow(True)
+    ax_k.legend(loc="upper left")
+
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "impulse_prominence.png"))
+    plt.close()
+
+
 def generate_room_noise_criteria(output_dir: str) -> None:
     """ANSI S12.2-2019: NC tangency rating and RC Mark II classification."""
     print("Generating room_noise_criteria.png...")
@@ -3825,6 +3885,7 @@ def generate_all(img_dir: str) -> None:
     # Speech intelligibility (ANSI S3.5-1997): band audibility and the SII.
     generate_speech_intelligibility(img_dir)
     generate_sii_vocal_efforts(img_dir)
+    generate_ntacou112(img_dir)
 
     # Room-noise criteria (ANSI S12.2-2019): NC tangency and RC Mark II.
     generate_room_noise_criteria(img_dir)

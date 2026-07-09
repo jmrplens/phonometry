@@ -462,6 +462,14 @@ SII_STANDARD_QUIET = 0.9958  # SII, standard normal speech, quiet, normal hearin
 SII_LOUD_1KHZ = 42.16  # Table 3, loud-effort standard speech spectrum at 1 kHz
 
 # ---------------------------------------------------------------------------
+# Prominence of impulsive sounds - NT ACOU 112:2002.
+# P = 3*lg(1000) + 2*lg(30) = 11.9542 (Formula 1); the adjustment at P = 10 is
+# KI = 1.8*(10 - 5) = 9.0 dB (Formula 2).
+# ---------------------------------------------------------------------------
+NTACOU_PROMINENCE = 11.9542  # P for onset rate 1000 dB/s, level difference 30 dB
+NTACOU_ADJUSTMENT_P10 = 9.0  # KI at P = 10
+
+# ---------------------------------------------------------------------------
 # Room-noise criteria - ANSI/ASA S12.2-2019.
 # Feeding an NC curve of Table 1 back through the tangency method returns its
 # NC value; the RC Mark II curves reproduce Table D.1 (the 63 Hz level of the

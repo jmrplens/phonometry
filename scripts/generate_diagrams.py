@@ -138,6 +138,29 @@ _ES: dict[str, str] = {
     "HTLAN   H' = H + N − H·N / 120": "HTLAN   H' = H + N − H·N / 120",
     "threshold from age and noise  (Formula 1, 6.1)":
         "umbral por edad y ruido  (Fórmula 1, 6.1)",
+    # Impulsive-sound prominence (NT ACOU 112)
+    "Impulsive-sound prominence and LAeq adjustment (NT ACOU 112)":
+        "Prominencia de sonidos impulsivos y ajuste de LAeq (NT ACOU 112)",
+    "A-weighted level history  L_pAF  (time weighting F)":
+        "Historia del nivel ponderado A  L_pAF  (ponderación F)",
+    "an onset = a stretch where the gradient exceeds 10 dB/s (clauses 4.5-4.7)":
+        "un arranque = tramo donde el gradiente supera 10 dB/s (cláusulas 4.5-4.7)",
+    "Per impulse: onset rate OR and level difference LD":
+        "Por impulso: tasa de crecimiento OR y diferencia de nivel LD",
+    "OR = onset slope [dB/s],   LD = Le − Ls [dB]":
+        "OR = pendiente de crecimiento [dB/s],   LD = Le − Ls [dB]",
+    "Predicted prominence  P   (clause 7, Formula 1)":
+        "Prominencia prevista  P   (cláusula 7, Fórmula 1)",
+    "P = 3·lg(OR) + 2·lg(LD);   highest P over 30 min governs":
+        "P = 3·lg(OR) + 2·lg(LD);   la P más alta en 30 min gobierna",
+    "Adjustment  KI   (clause 8, Formula 2)":
+        "Ajuste  KI   (cláusula 8, Fórmula 2)",
+    "KI = 1.8·(P − 5) dB for P > 5, else 0":
+        "KI = 1.8·(P − 5) dB si P > 5, si no 0",
+    "Rating level  LAr,T = 10·lg( (1/T) Σ Δt·10^((LAeq+KI)/10) )":
+        "Nivel de valoración  LAr,T = 10·lg( (1/T) Σ Δt·10^((LAeq+KI)/10) )",
+    "impulse-adjusted level over the reference time  (Note 1)":
+        "nivel ajustado por impulsos sobre el tiempo de referencia  (Nota 1)",
     "Speech  Ei'": "Habla  Ei'",
     "Noise  Ni'": "Ruido  Ni'",
     "Threshold  Ti'": "Umbral  Ti'",
@@ -2416,6 +2439,43 @@ def _d_nihl(s: SVG, th: Theme) -> None:
            13, th.muted, "middle")
 
 
+def _d_ntacou112(s: SVG, th: Theme) -> None:
+    """Impulsive-sound prominence and the LAeq adjustment (NT ACOU 112:2002)."""
+    cx = 450.0
+    bw, bh = 640.0, 60.0
+    x0 = cx - bw / 2
+
+    # --- Input --------------------------------------------------------------
+    s.rect(x0, 56, bw, bh, th.panel, th.fg, rx=10, sw=2)
+    s.text(cx, 82, "A-weighted level history  L_pAF  (time weighting F)", 19,
+           th.fg, "middle", bold=True)
+    s.text(cx, 103, "an onset = a stretch where the gradient exceeds 10 dB/s "
+           "(clauses 4.5-4.7)", 13, th.muted, "middle")
+    s.arrow(cx, 116, cx, 150, th.fg, 1.8)
+
+    def _step(y: float, l1: str, l2: str, color: str) -> None:
+        s.rect(x0, y, bw, bh, th.panel, color, rx=10, sw=2)
+        s.text(cx, y + 26, l1, 18, th.fg, "middle", bold=True)
+        s.text(cx, y + 47, l2, 13, th.muted, "middle")
+
+    _step(150, "Per impulse: onset rate OR and level difference LD",
+          "OR = onset slope [dB/s],   LD = Le − Ls [dB]", th.primary)
+    _step(242, "Predicted prominence  P   (clause 7, Formula 1)",
+          "P = 3·lg(OR) + 2·lg(LD);   highest P over 30 min governs", th.fg)
+    _step(334, "Adjustment  KI   (clause 8, Formula 2)",
+          "KI = 1.8·(P − 5) dB for P > 5, else 0", th.secondary)
+    s.arrow(cx, 210, cx, 242, th.fg, 1.8)
+    s.arrow(cx, 302, cx, 334, th.fg, 1.8)
+    s.arrow(cx, 394, cx, 426, th.fg, 1.8)
+
+    # --- Output -------------------------------------------------------------
+    s.rect(x0, 426, bw, 60, "none", th.primary, rx=10, sw=2.4)
+    s.text(cx, 452, "Rating level  LAr,T = 10·lg( (1/T) Σ Δt·10^((LAeq+KI)/10) )",
+           18, th.fg, "middle", bold=True)
+    s.text(cx, 473, "impulse-adjusted level over the reference time  (Note 1)",
+           13, th.muted, "middle")
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -2483,6 +2543,9 @@ DIAGRAMS = {
     "diagram_nihl": (
         _d_nihl,
         "Noise-induced hearing loss (ISO 1999): NIPTS and HTLAN", 470),
+    "diagram_ntacou112": (
+        _d_ntacou112,
+        "Impulsive-sound prominence and LAeq adjustment (NT ACOU 112)", 520),
 }
 
 

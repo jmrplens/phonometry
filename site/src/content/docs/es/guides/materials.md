@@ -273,8 +273,9 @@ print(np.round(tm.transmission_loss(rho_c), 6))   # [0. 0. 0.]
 ```
 
 `transfer_matrix_two_load` / `transfer_matrix_one_load` construyen la
-`TransferMatrix` a partir de las amplitudes de onda medidas con cuatro
-micrófonos; sus métodos (`transmission_loss`, `reflection_hard_backed`,
+`TransferMatrix` a partir de las funciones de transferencia de los cuatro
+micrófonos `(H1, H2, H3, H4)` medidas en cada carga; sus métodos
+(`transmission_loss`, `reflection_hard_backed`,
 `absorption_hard_backed`, `characteristic_impedance_material`,
 `material_wavenumber`) leen entonces las magnitudes de ASTM E2611.
 

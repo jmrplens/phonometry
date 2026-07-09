@@ -1,6 +1,6 @@
 ---
 title: "Vibración en humanos"
-description: "Exposición a vibración de cuerpo completo y mano-brazo: las ponderaciones frecuenciales de ISO 8041-1, el valor eficaz ponderado y las medidas de dosis de ISO 2631-1 (VDV, MTVV, MSDV, factor de cresta), el valor total de vibración y la exposición diaria de 8 horas A(8), evaluada frente a los valores de acción y límite de ISO 5349 y la Directiva 2002/44/CE."
+description: "Exposición a vibración de cuerpo completo y mano-brazo: las ponderaciones frecuenciales de ISO 8041-1, el valor eficaz ponderado y las medidas de dosis de ISO 2631-1 (VDV, MTVV, MSDV, factor de cresta), el valor total de vibración y la exposición diaria de 8 horas A(8), con la orientación de exposición de ISO 5349 y los valores de acción y límite de la Directiva 2002/44/CE."
 ---
 
 La vibración transmitida a una persona se evalúa con la misma cadena de medida

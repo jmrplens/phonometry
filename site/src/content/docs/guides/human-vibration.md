@@ -1,6 +1,6 @@
 ---
 title: "Human Vibration"
-description: "Whole-body and hand-arm vibration exposure: the ISO 8041-1 frequency weightings, the ISO 2631-1 weighted r.m.s. and dose measures (VDV, MTVV, MSDV, crest factor), the vibration total value and the 8-hour daily exposure A(8), assessed against the ISO 5349 and Directive 2002/44/EC action and limit values."
+description: "Whole-body and hand-arm vibration exposure: the ISO 8041-1 frequency weightings, the ISO 2631-1 weighted r.m.s. and dose measures (VDV, MTVV, MSDV, crest factor), the vibration total value and the 8-hour daily exposure A(8), with the ISO 5349 exposure guidance and the action and limit values of Directive 2002/44/EC."
 ---
 
 Vibration transmitted to a person is evaluated with the same measurement chain

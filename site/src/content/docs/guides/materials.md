@@ -265,7 +265,8 @@ print(np.round(tm.transmission_loss(rho_c), 6))   # [0. 0. 0.]
 ```
 
 `transfer_matrix_two_load` / `transfer_matrix_one_load` build the
-`TransferMatrix` from measured four-microphone wave amplitudes; its methods
+`TransferMatrix` from the four measured microphone transfer functions
+`(H1, H2, H3, H4)` of each load; its methods
 (`transmission_loss`, `reflection_hard_backed`, `absorption_hard_backed`,
 `characteristic_impedance_material`, `material_wavenumber`) then read off the
 ASTM E2611 quantities.

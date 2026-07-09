@@ -308,6 +308,7 @@ export default defineConfig({
             'guides/room-acoustics',
             'guides/materials',
             'guides/surface-scattering',
+            'guides/room-noise',
           ],
         },
         {

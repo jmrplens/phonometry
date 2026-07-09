@@ -12,6 +12,7 @@ Full documentation for phonometry. Also available as a website:
 - [Integrated & Statistical Levels](levels.md) — Leq, LAeq, L10/L50/L90, noise dose and occupational exposure (ISO 9612), octave spectrogram
 - [Psychoacoustics and Speech Intelligibility](psychoacoustics.md) — Zwicker loudness, sharpness, STI/STIPA
 - [Speech Intelligibility Index](speech-intelligibility.md) — the ANSI S3.5-1997 one-third-octave-band SII: band-importance weighting (Table 3), self-speech and upward spread of masking, band audibility, and the index in noise and hearing loss
+- [Room-noise criteria](room-noise.md) — the ANSI/ASA S12.2-2019 room-noise ratings: the NC tangency method (Table 1) and the RC Mark II rating with its rumble/hiss/neutral spectral tag (Annex D)
 - [Sound Intensity (p-p)](intensity.md) — two-microphone intensity and field indicators
 - [Room and Building Acoustics](room-acoustics.md) — impulse-response acquisition, reverberation and room parameters, open-plan speech metrics, field airborne/impact/façade sound insulation (ISO 16283-1/2/3), laboratory characterisation (ISO 10140), flanking-transmission prediction (EN 12354-1/2), measurement uncertainty (ISO 12999-1), sound absorption (ISO 354)
 - [Outdoor Sound Propagation](outdoor-propagation.md) — atmospheric absorption α(f) (ISO 9613-1) and the ISO 9613-2 general method: divergence, atmospheric absorption, ground effect and barrier screening (occupational exposure ISO 9612 lives in [Levels](levels.md))

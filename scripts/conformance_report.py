@@ -1360,6 +1360,25 @@ def _chk_sii_standard_quiet() -> Outcome:
     return numeric(ref.SII_STANDARD_QUIET, result.sii, 5e-4, places=4)
 
 
+_RN = "Room noise (ANSI S12.2-2019)"
+
+
+@register(_RN, "ANSI S12.2-2019 Table 1", "NC-40 curve, tangency self-consistency")
+def _chk_rn_nc_self() -> Outcome:
+    rating = ph.noise_criterion(ph.nc_curve(40.0)).rating
+    return numeric(ref.RN_NC40_SELF, rating, 1e-9, places=3)
+
+
+@register(_RN, "ANSI S12.2-2019 Table D.1", "RC-31 Mark II curve, 63 Hz level")
+def _chk_rn_rc_curve() -> Outcome:
+    return numeric(ref.RN_RC31_63HZ, float(ph.rc_curve(31.0)[2]), 1e-9, places=3)
+
+
+@register(_RN, "ANSI S12.2-2019 clause D.4", "RC-35 curve, mid-frequency average LMF")
+def _chk_rn_rc_lmf() -> Outcome:
+    return numeric(ref.RN_RC35_LMF, ph.room_criterion(ph.rc_curve(35.0)).lmf, 1e-9, places=3)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

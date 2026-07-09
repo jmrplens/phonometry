@@ -126,6 +126,11 @@ _ES_EXACT = {
     "Whole-body vertical weighting Wk (ISO 8041-1)":
         "Ponderación vertical de cuerpo entero Wk (ISO 8041-1)",
     "Weighting factor [dB]": "Factor de ponderación [dB]",
+    "One-third-octave band [Hz]": "Banda de tercio de octava [Hz]",
+    "Band audibility": "Audibilidad de banda",
+    r"Band audibility $A_i$": r"Audibilidad de banda $A_i$",
+    r"Importance-weighted $I_i\,A_i$ (scaled)":
+        r"Ponderada por importancia $I_i\,A_i$ (escalada)",
     "r.m.s. acceleration [m/s$^2$]": "Aceleración eficaz [m/s$^2$]",
     "Unweighted $a_i$": "Sin ponderar $a_i$",
     "Weighted $W_i\\,a_i$ (Wk)": "Ponderada $W_i\\,a_i$ (Wk)",
@@ -390,6 +395,9 @@ _ES_PATTERNS = [
      r"Aceleración ponderada del asiento (ISO 2631-1)  \1"),
     (r"^Hand-arm daily exposure \(ISO 5349 / 2002-44-EC\)  (.+)$",
      r"Exposición diaria mano-brazo (ISO 5349 / 2002-44-EC)  \1"),
+    # Speech intelligibility dynamic title (numeric SII)
+    (r"^Speech Intelligibility Index \(ANSI S3\.5-1997\)   SII = (.+)$",
+     r"Índice de inteligibilidad del habla (ANSI S3.5-1997)   SII = \1"),
 ]
 
 
@@ -415,7 +423,9 @@ def _translate_figure(fig: Any) -> None:
     from matplotlib.ticker import ScalarFormatter as _SF
 
     def _comma(s: str) -> str:
-        return _re2.sub(r"(?<![\d.])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s)
+        # A letter immediately before the number marks a standard designation
+        # (e.g. "S3.5"), not a decimal - leave those untouched.
+        return _re2.sub(r"(?<![\d.A-Za-z])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s)
 
     def _tr_words(s: str) -> str:
         """Apply the exact / pattern lookups (no decimal comma) to *s*."""
@@ -465,8 +475,11 @@ def _translate_figure(fig: Any) -> None:
         # decimals in the same label (e.g. ``8.0 sone_HMS``) still get commas.
         s = artist.get_text()
         if s and "$" not in s and _re.search(r"\d\.\d", s):
-            # Clause/version numbers like 5.3.3 keep their dots.
-            artist.set_text(_re.sub(r"(?<![\d.])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s))
+            # Clause/version numbers like 5.3.3 and standard designations like
+            # "S3.5" (a letter immediately before the number) keep their dots.
+            artist.set_text(
+                _re.sub(r"(?<![\d.A-Za-z])(\d+)\.(\d+)(?![.\d])", r"\1,\2", s)
+            )
 
 
 LABEL_FREQ_HZ = "Frequency [Hz]"
@@ -3203,6 +3216,45 @@ def generate_daily_vibration_exposure(output_dir: str) -> None:
     plt.close()
 
 
+def generate_speech_intelligibility(output_dir: str) -> None:
+    """ANSI S3.5-1997: band audibility and the SII in broadband noise."""
+    print("Generating speech_intelligibility.png...")
+    from phonometry import speech_intelligibility_index, standard_speech_spectrum
+
+    # Standard normal-effort speech in a descending broadband masking noise
+    # (an office/ventilation-like spectrum): the band-audibility function A_i
+    # is partial across the band, and the importance-weighted contribution
+    # I_i*A_i (ANSI S3.5-1997 clause 6) sums to the index SII.
+    speech = standard_speech_spectrum("normal")
+    noise = np.array([38.0, 37.0, 36.0, 34.0, 32.0, 30.0, 28.0, 26.0, 24.0,
+                      22.0, 20.0, 18.0, 16.0, 14.0, 12.0, 10.0, 8.0, 6.0])
+    result = speech_intelligibility_index(speech, noise)
+
+    freqs = result.frequencies
+    positions = np.arange(freqs.size)
+    weighted = result.band_audibility * result.band_importance
+
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    ax.bar(positions, result.band_audibility, width=0.8, color=COLOR_PRIMARY,
+           alpha=0.35, zorder=2, label=r"Band audibility $A_i$")
+    ax.bar(positions, weighted / weighted.max(), width=0.45, color=COLOR_PRIMARY,
+           zorder=3, label=r"Importance-weighted $I_i\,A_i$ (scaled)")
+    ax.set_title(
+        f"Speech Intelligibility Index (ANSI S3.5-1997)   SII = {result.sii:.2f}",
+        fontweight="bold", pad=12)
+    ax.set_xlabel("One-third-octave band [Hz]")
+    ax.set_ylabel("Band audibility")
+    ax.set_ylim(0.0, 1.0)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax.grid(which="major", axis="y", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right")
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "speech_intelligibility.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -3271,6 +3323,9 @@ def generate_all(img_dir: str) -> None:
     generate_vibration_weighting(img_dir)
     generate_weighted_acceleration(img_dir)
     generate_daily_vibration_exposure(img_dir)
+
+    # Speech intelligibility (ANSI S3.5-1997): band audibility and the SII.
+    generate_speech_intelligibility(img_dir)
 
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)

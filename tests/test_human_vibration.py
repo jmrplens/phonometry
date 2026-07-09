@@ -244,7 +244,9 @@ def test_iso5349_2_example_e2_1_single_tool() -> None:
 
 
 def test_iso5349_2_example_e2_4_burst() -> None:
-    """ISO 5349-2 E.2.4: a_hv=14,6, T=1,1 h -> A(8)=5,4 m/s2."""
+    """ISO 5349-2 E.2.4: a_hv=14,6 m/s2, T=4000 s (= 1,1 h) -> A(8)=5,4 m/s2."""
+    # T = (1000 nuts/day / 5 nuts measured) * 20 s = 4000 s per Eq. (E.4); the
+    # standard rounds 4000 s to "1,1 h". A(8) = 14,6*sqrt(4000/28800) = 5,4.
     a8 = hv.daily_exposure(14.6, 4000.0)
     assert a8 == pytest.approx(5.4, abs=0.05)
 

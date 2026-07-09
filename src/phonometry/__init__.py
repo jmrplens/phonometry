@@ -14,7 +14,7 @@ import numpy as np
 from .calibration import CalibrationWarning, calculate_sensitivity
 from .environmental import composite_rating_level, lden, ldn
 from .compliance import verify_filter_class
-from .core import OctaveFilterBank
+from .core import FilterBankWarning, OctaveFilterBank
 from .frequencies import getansifrequencies, normalizedfreq
 from .intensity import (
     FieldIndicators,
@@ -104,10 +104,21 @@ from .sii import (
     speech_intelligibility_index,
     standard_speech_spectrum,
 )
-from .sti import STIResult, sti_from_impulse_response, stipa, stipa_signal
+from .sti import (
+    STIResult,
+    STIWarning,
+    sti_from_impulse_response,
+    stipa,
+    stipa_signal,
+)
 from .tonality_ecma import EcmaTonality, tonality_ecma
 from .roughness_ecma import EcmaRoughness, roughness_ecma
-from .tonality import ToneAssessment, prominence_ratio, tone_to_noise_ratio
+from .tonality import (
+    TonalityWarning,
+    ToneAssessment,
+    prominence_ratio,
+    tone_to_noise_ratio,
+)
 from .parametric_filters import (
     TimeWeighting,
     WeightingFilter,
@@ -339,6 +350,7 @@ from .outdoor_propagation import (
 )
 from .room_ir import (
     ImpulseResponseResult,
+    ImpulseResponseWarning,
     impulse_response,
     inverse_filter,
     mls_impulse_response,
@@ -346,6 +358,7 @@ from .room_ir import (
     sweep_signal,
 )
 from ._plotting import plot_excitation
+from ._warnings import PhonometryWarning
 from .building_prediction import (
     AirbornePredictionResult,
     FlankingPath,
@@ -398,11 +411,13 @@ from ._version import __version__
 
 # Public methods
 __all__ = [
+    "PhonometryWarning",
     "__version__",
     "octavefilter",
     "getansifrequencies",
     "normalizedfreq",
     "OctaveFilterBank",
+    "FilterBankWarning",
     "WeightingFilter",
     "weighting_filter",
     "time_weighting",
@@ -439,6 +454,7 @@ __all__ = [
     "tone_to_noise_ratio",
     "prominence_ratio",
     "ToneAssessment",
+    "TonalityWarning",
     "sound_intensity",
     "IntensityResult",
     "field_indicators",
@@ -448,6 +464,7 @@ __all__ = [
     "stipa",
     "stipa_signal",
     "STIResult",
+    "STIWarning",
     "speech_intelligibility_index",
     "standard_speech_spectrum",
     "SIIResult",
@@ -504,6 +521,7 @@ __all__ = [
     "mls_signal",
     "mls_impulse_response",
     "ImpulseResponseResult",
+    "ImpulseResponseWarning",
     "plot_excitation",
     "room_parameters",
     "decay_curve",

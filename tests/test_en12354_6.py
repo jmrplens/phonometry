@@ -139,17 +139,17 @@ def test_air_condition_none_neglects_air() -> None:
 
 
 def test_invalid_inputs_raise() -> None:
-    with pytest.raises(ValueError, match="volume must be positive"):
+    with pytest.raises(ValueError, match="'volume' must be positive"):
         m.object_fraction([1.0], 0.0)
     with pytest.raises(ValueError, match="non-negative"):
         m.hard_object_absorption([-1.0])
     with pytest.raises(ValueError, match="absorption_area must be positive"):
         m.reverberation_time(0.0, 30.0)
-    with pytest.raises(ValueError, match="volume must be positive"):
+    with pytest.raises(ValueError, match="'volume' must be positive"):
         m.reverberation_time(2.0, 0.0)
-    with pytest.raises(ValueError, match="speed_of_sound must be positive"):
+    with pytest.raises(ValueError, match="'speed_of_sound' must be positive"):
         m.reverberation_time(2.0, 30.0, speed_of_sound=0.0)
-    with pytest.raises(ValueError, match="volume must be positive"):
+    with pytest.raises(ValueError, match="'volume' must be positive"):
         m.reverberation_time(2.0, float("nan"))
     with pytest.raises(ValueError, match="air_condition must be"):
         m.enclosed_space_reverberation([(20.0, 0.5)], 50.0, air_condition="hot")

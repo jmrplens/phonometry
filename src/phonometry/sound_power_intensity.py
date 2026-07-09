@@ -46,15 +46,16 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, Literal, cast
+from typing import TYPE_CHECKING, Any, Dict, Literal
 
 import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+from ._levels_math import weighted_energy_mean
 from .intensity import dynamic_capability_index
-from .sound_power import SoundPowerWarning, _a_weighting_corrections
+from .sound_power import SoundPowerWarning, _a_weighting_corrections, _check_grade
 
 _P0 = 1.0e-12  #: Reference sound power, in watts (ISO 9614-2, 3.6.3).
 _S0 = 1.0  #: Reference surface area, in square metres (ISO 9614-2, A.2.1).
@@ -148,12 +149,6 @@ class SoundPowerIntensityResult:
         from ._plotting import plot_sound_power
 
         return plot_sound_power(self, ax=ax, **kwargs)
-
-
-def _check_grade(grade: str) -> Grade:
-    if grade not in ("engineering", "survey"):
-        raise ValueError("'grade' must be 'engineering' or 'survey'.")
-    return cast(Grade, grade)
 
 
 def _level_magnitude(values: np.ndarray) -> np.ndarray:
@@ -293,9 +288,7 @@ def sound_power_intensity(
     if pressure_levels is not None:
         lp = _as_2d("pressure_levels", np.asarray(pressure_levels), n_seg, n_bands)
         # Eq. A.1: area-weighted surface pressure level [Lp].
-        lp_surface = 10.0 * np.log10(
-            np.sum(seg[:, None] * 10.0 ** (0.1 * lp), axis=0) / s_total
-        )
+        lp_surface = weighted_energy_mean(lp, seg[:, None], axis=0)
         fpi = np.asarray(
             lp_surface - lw_magnitude + 10.0 * np.log10(s_total / _S0),
             dtype=np.float64,

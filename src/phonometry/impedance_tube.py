@@ -44,8 +44,10 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from ._types import Real
+from ._warnings import PhonometryWarning
+
 Complex = NDArray[np.complex128]
-Real = NDArray[np.float64]
 
 #: Reference speed of sound of ISO 10534-2 Eq. (5), in m/s (343,2 exactly).
 _ISO_C_REF = 343.2
@@ -110,7 +112,7 @@ __all__ = [
 ]
 
 
-class ImpedanceTubeWarning(UserWarning):
+class ImpedanceTubeWarning(PhonometryWarning):
     """Advisory for out-of-plane-wave-range impedance-tube frequencies."""
 
 

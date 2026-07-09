@@ -66,7 +66,10 @@ import warnings
 from dataclasses import dataclass
 
 import numpy as np
+
 from numpy.typing import ArrayLike, NDArray
+
+from ._warnings import PhonometryWarning
 
 __all__ = [
     "AirflowResistanceWarning",
@@ -109,7 +112,7 @@ _ALT_VALIDITY_LIMIT = 0.3
 _ALT_BACKGROUND_MARGIN = 10.0
 
 
-class AirflowResistanceWarning(UserWarning):
+class AirflowResistanceWarning(PhonometryWarning):
     """Advisory for out-of-range or non-conforming ISO 9053 airflow inputs."""
 
 

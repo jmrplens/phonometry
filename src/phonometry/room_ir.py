@@ -42,7 +42,13 @@ from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 import numpy as np
 from scipy import signal
 
+from ._warnings import PhonometryWarning
 from .utils import _typesignal
+
+
+class ImpulseResponseWarning(PhonometryWarning):
+    """Warns about suspect recovered impulse responses (e.g. MLS aliasing)."""
+
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -472,7 +478,7 @@ def mls_impulse_response(
         consumer and adds :meth:`ImpulseResponseResult.plot`.
 
     .. note::
-        A ``UserWarning`` is emitted when the recovered IR retains significant
+        An :class:`ImpulseResponseWarning` is emitted when the recovered IR retains significant
         energy at the end of the period (a circular-aliasing symptom). The
         tail-RMS heuristic is advisory: a high ambient noise floor in the
         recording raises the tail RMS on its own and can trigger a
@@ -513,7 +519,7 @@ def mls_impulse_response(
                 f"dB re peak, above {_MLS_ALIAS_TAIL_DB:.0f} dB): the impulse "
                 "response is likely longer than one period and aliases "
                 "circularly. Use a higher MLS order.",
-                UserWarning,
+                ImpulseResponseWarning,
                 stacklevel=2,
             )
 

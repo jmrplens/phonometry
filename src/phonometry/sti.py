@@ -27,9 +27,15 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 from scipy import signal
 
+from ._warnings import PhonometryWarning
 from .core import OctaveFilterBank
 from .frequencies import getansifrequencies
 from .utils import _typesignal
+
+
+class STIWarning(PhonometryWarning):
+    """Warns about suspect STI/STIPA measurements or inputs."""
+
 
 # Octave-band analysis range: 125 Hz - 8 kHz (Ed.4 A.5.1 = Ed.5), 7 bands.
 _BAND_LIMITS = (125.0, 8000.0)
@@ -198,7 +204,7 @@ def _sti_from_mtf(
         warnings.warn(
             "Modulation transfer values above 1.3 detected: the measurement "
             "is likely invalid (IEC 60268-16 A.5.3). Values truncated to 1.0.",
-            UserWarning,
+            STIWarning,
             stacklevel=3,
         )
     m = np.minimum(m, 1.0)
@@ -412,7 +418,7 @@ def stipa(
     ``level`` (and optionally ``ambient``) only to enable the absolute
     level-dependent corrections, which are otherwise skipped.
 
-    A :class:`UserWarning` is emitted when the recording is shorter than
+    An :class:`STIWarning` is emitted when the recording is shorter than
     the recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s),
     because the slow modulation components are then averaged over too few
     periods and the recovered modulation depths - and hence the STI - are
@@ -446,7 +452,7 @@ def stipa(
             f"recommended {_STIPA_MIN_SECONDS:.0f} s (IEC 60268-16 STIPA "
             "practice, 15 s to 25 s): the recovered modulation depths, and "
             "hence the STI, are biased low.",
-            UserWarning,
+            STIWarning,
             stacklevel=2,
         )
 

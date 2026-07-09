@@ -202,7 +202,7 @@ def test_multiple_shock_assessment_end_to_end() -> None:
 
 
 def test_invalid_inputs_raise() -> None:
-    with pytest.raises(ValueError, match="fs must be positive"):
+    with pytest.raises(ValueError, match="'fs' must be positive"):
         v.spinal_response([1.0, 2.0], 0.0)
     with pytest.raises(ValueError, match="empty"):
         v.spinal_response([], 256.0)
@@ -212,7 +212,7 @@ def test_invalid_inputs_raise() -> None:
         v.daily_dose_multi([1.0, 2.0], [1.0], [1.0, 2.0])
     with pytest.raises(ValueError, match="years must be"):
         v.injury_risk(1.0, start_age=20, years=0, days_per_year=120)
-    with pytest.raises(ValueError, match="sex must be"):
+    with pytest.raises(ValueError, match="'sex' must be"):
         v.injury_probability(1.0, sex="other")
     with pytest.raises(ValueError, match="both exposure_time and measurement_time"):
         v.multiple_shock_assessment(

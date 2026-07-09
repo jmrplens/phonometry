@@ -55,7 +55,10 @@ from __future__ import annotations
 import warnings
 
 import numpy as np
+
 from numpy.typing import ArrayLike, NDArray
+
+from ._warnings import PhonometryWarning
 
 from .sound_absorption import attenuation_from_alpha
 
@@ -78,7 +81,7 @@ _HUMIDITY_RANGE = (10.0, 100.0)
 _PRESSURE_MAX = 200.0
 
 
-class AtmosphericAbsorptionWarning(UserWarning):
+class AtmosphericAbsorptionWarning(PhonometryWarning):
     """Advisory for ISO 9613-1 inputs outside the tabulated/validity ranges."""
 
 

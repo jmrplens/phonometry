@@ -493,3 +493,21 @@ def test_plot_excitation_returns_axes() -> None:
     assert isinstance(axes_m, np.ndarray) and axes_m.size == 2
     assert all(isinstance(a, Axes) for a in axes_m)
     matplotlib.pyplot.close("all")
+
+
+def test_plot_excitation_short_and_empty_guards() -> None:
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    # A short sweep must not crash the spectrogram (nperseg capped by length).
+    short = sweep_signal(FS, 100.0, 4000.0, 0.02)
+    axes = plot_excitation(short, FS, kind="sweep")
+    assert axes.size == 2
+    plt.close("all")
+
+    # Empty inputs raise a clear error rather than a cryptic reduction failure.
+    with pytest.raises(ValueError, match="empty"):
+        plot_excitation(np.array([]), FS, kind="mls")
+    with pytest.raises(ValueError, match="empty"):
+        ImpulseResponseResult(ir=np.array([]), fs=FS, method="spectral").plot()

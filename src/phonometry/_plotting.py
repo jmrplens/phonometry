@@ -1024,6 +1024,8 @@ def plot_impulse_response(
     """
     h = np.asarray(result.ir, dtype=np.float64)
     n = h.shape[-1]
+    if n == 0:
+        raise ValueError("impulse response is empty; nothing to plot.")
     time, xlabel = _time_axis(n, result.fs)
     peak = float(np.max(np.abs(h)))
     tiny = np.finfo(np.float64).tiny
@@ -1087,6 +1089,8 @@ def plot_excitation(
     """
     x = np.asarray(signal, dtype=np.float64)
     n = x.shape[-1]
+    if n == 0:
+        raise ValueError("excitation signal is empty; nothing to plot.")
     t = np.arange(n) / float(fs)
     color = kwargs.pop("color", "#1f77b4")
 
@@ -1110,7 +1114,10 @@ def plot_excitation(
         spec = np.abs(np.fft.rfft(x))
         freqs = np.fft.rfftfreq(n, d=1.0 / fs)
         ax_f = axes[1]
-        ax_f.semilogx(freqs[1:], 20.0 * np.log10(spec[1:] / np.median(spec[1:])),
+        ac = spec[1:]
+        denom = float(np.median(ac)) if ac.size else 1.0
+        ax_f.semilogx(freqs[1:], 20.0 * np.log10(
+                      np.maximum(ac, 1e-10) / (denom if denom > 0.0 else 1.0)),
                       color="#d62728", lw=0.8)
         ax_f.set_xlabel("Frequency [Hz]")
         ax_f.set_ylabel("Magnitude [dB]")
@@ -1127,7 +1134,7 @@ def plot_excitation(
     if not two_panel:
         return ax_time
     ax_s = axes[1]
-    nperseg = max(256, min(2048, n // 16))
+    nperseg = min(n, max(256, min(2048, n // 16)))
     ax_s.specgram(x, NFFT=nperseg, Fs=fs, noverlap=nperseg // 2, cmap="magma")
     ax_s.set_xlabel("Time [s]")
     ax_s.set_ylabel("Frequency [Hz]")

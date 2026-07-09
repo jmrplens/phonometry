@@ -56,6 +56,10 @@ $$
 A_i = \operatorname{clip}\!\left(\frac{E_i' - D_i + 15}{30},\; 0,\; 1\right).
 $$
 
+At speech levels well above normal effort a **level-distortion factor** of
+clause 5.7 — unity for the standard spectra used on this page — reduces $A_i$
+further; phonometry applies it automatically.
+
 ## 3. The index in noise
 
 The Speech Intelligibility Index is the band-importance-weighted sum of the band

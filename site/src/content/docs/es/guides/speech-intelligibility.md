@@ -59,6 +59,10 @@ $$
 A_i = \operatorname{clip}\!\left(\frac{E_i' - D_i + 15}{30},\; 0,\; 1\right).
 $$
 
+A niveles de habla muy por encima del esfuerzo normal, un **factor de distorsión
+de nivel** de la cláusula 5.7 —la unidad para los espectros estándar usados en
+esta página— reduce aún más $A_i$; phonometry lo aplica automáticamente.
+
 ## 3. El índice en ruido
 
 El índice de inteligibilidad del habla es la suma de las audibilidades de banda

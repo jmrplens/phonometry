@@ -54,8 +54,8 @@ _ES: dict[str, str] = {
     "Self-masking + spread of masking": "Automáscara + propagación de la máscara",
     "Zi   (clause 5.4)": "Zi   (cláusula 5.4)",
     "Equivalent disturbance Di": "Perturbación equivalente Di",
-    "max of masking / internal noise (5.6)":
-        "máx. de máscara / ruido interno (5.6)",
+    "masking + internal noise, energetic (5.6)":
+        "máscara + ruido interno, energético (5.6)",
     "Band audibility Ai = (Ei' − Di + 15)/30":
         "Audibilidad de banda Ai = (Ei' − Di + 15)/30",
     "clipped to [0, 1]   (clause 5.8)": "acotada a [0, 1]   (cláusula 5.8)",
@@ -1990,7 +1990,7 @@ def _d_speech_intelligibility(s: SVG, th: Theme) -> None:
     x0 = cx - bw / 2
     chain = [
         (150.0, "Self-masking + spread of masking", "Zi   (clause 5.4)"),
-        (264.0, "Equivalent disturbance Di", "max of masking / internal noise (5.6)"),
+        (264.0, "Equivalent disturbance Di", "masking + internal noise, energetic (5.6)"),
         (378.0, "Band audibility Ai = (Ei' − Di + 15)/30", "clipped to [0, 1]   (clause 5.8)"),
     ]
     for by, l1, l2 in chain:

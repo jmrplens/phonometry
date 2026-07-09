@@ -355,3 +355,104 @@ def test_weighting_names_complete() -> None:
     assert set(hv.WEIGHTING_NAMES) == {
         "Wb", "Wc", "Wd", "We", "Wf", "Wh", "Wj", "Wk", "Wm"
     }
+
+
+# ---------------------------------------------------------------------------
+# Remaining validation branches and the .plot() renderers.
+# ---------------------------------------------------------------------------
+def test_all_nonpositive_frequencies_return_zero_response() -> None:
+    resp = hv.frequency_weighting("Wk", [0.0, -1.0])
+    assert np.all(resp.magnitude == 0.0)
+
+
+def test_apply_weighting_rejects_empty_signal() -> None:
+    with pytest.raises(ValueError, match="non-empty"):
+        hv.apply_weighting([], 1000.0, "Wk")
+
+
+def test_running_rms_rejects_empty_signal() -> None:
+    with pytest.raises(ValueError, match="non-empty"):
+        hv.running_rms([], 1000.0)
+
+
+def test_vibration_total_value_validates() -> None:
+    with pytest.raises(ValueError, match="non-empty"):
+        hv.vibration_total_value([])
+    with pytest.raises(ValueError, match="same length"):
+        hv.vibration_total_value([1.0, 2.0], k=[1.4])
+
+
+def test_daily_exposure_rejects_negative() -> None:
+    with pytest.raises(ValueError, match="non-negative"):
+        hv.daily_exposure(-1.0, 3600.0)
+
+
+def test_combine_partial_exposures_rejects_empty() -> None:
+    with pytest.raises(ValueError, match="non-empty"):
+        hv.combine_partial_exposures([])
+
+
+def test_hav_daily_exposure_validates() -> None:
+    with pytest.raises(ValueError, match="equal-length"):
+        hv.hav_daily_exposure([2.0, 3.0], [3600.0])
+    with pytest.raises(ValueError, match="non-negative"):
+        hv.hav_daily_exposure([2.0, -3.0], [3600.0, 3600.0])
+
+
+def test_energy_equivalent_rejects_length_mismatch() -> None:
+    with pytest.raises(ValueError, match="equal-length"):
+        hv.energy_equivalent_acceleration([1.0, 2.0], [3600.0])
+
+
+def test_energy_equivalent_rejects_zero_total_duration() -> None:
+    with pytest.raises(ValueError, match="total duration"):
+        hv.energy_equivalent_acceleration([1.0, 2.0], [0.0, 0.0])
+
+
+def test_hav_vwf_lifetime_rejects_nonpositive() -> None:
+    with pytest.raises(ValueError, match="positive"):
+        hv.hav_vwf_lifetime_years(0.0)
+
+
+def test_daily_vibration_exposure_rejects_length_mismatch() -> None:
+    with pytest.raises(ValueError, match="equal-length"):
+        hv.daily_vibration_exposure([2.0, 3.0], [3600.0], kind="hav")
+
+
+def test_weighting_response_plot_returns_axes() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    ax = hv.frequency_weighting("Wk", [1.0, 10.0, 100.0]).plot()
+    assert isinstance(ax, plt.Axes)
+    plt.close("all")
+
+
+def test_weighted_spectrum_plot_returns_axes() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    result = hv.weighted_acceleration(
+        [0.5, 0.8, 0.3], [16.0, 31.5, 63.0], "Wk"
+    )
+    ax = result.plot()
+    assert isinstance(ax, plt.Axes)
+    plt.close("all")
+
+
+def test_daily_vibration_exposure_plot_returns_axes() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    result = hv.daily_vibration_exposure(
+        [2.5, 3.0], [3600.0, 1800.0], kind="hav"
+    )
+    ax = result.plot()
+    assert isinstance(ax, plt.Axes)
+    plt.close("all")

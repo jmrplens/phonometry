@@ -126,6 +126,33 @@ and lowers the index, exactly as added masking noise does. The `SIIResult` also
 carries the per-band masking $Z_i$, disturbance $D_i$, audibility $A_i$ and
 importance $I_i$, and its `.plot()` renders the figure above.
 
+## 4. Vocal effort
+
+Talkers raise their voice in noise, and the standard gives four **standard
+speech spectra** for the vocal efforts *normal*, *raised*, *loud* and *shout*
+(ANSI S3.5-1997 Table 3). Passing the effort name selects the corresponding
+spectrum; speaking louder lifts the whole spectrum and, in a fixed noise, raises
+the index.
+
+```python
+import numpy as np
+import phonometry as ph
+
+# The same broadband noise, four vocal efforts.
+noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
+                  32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
+for effort in ph.sii.VOCAL_EFFORTS:
+    print(effort, round(ph.speech_intelligibility_index(effort, noise).sii, 2))
+# normal 0.12 | raised 0.36 | loud 0.59 | shout 0.79
+
+print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.png" alt="Left: the four ANSI S3.5-1997 standard speech spectra (normal, raised, loud, shout) over 160 Hz to 8000 Hz, each higher effort lifting the whole spectrum. Right: the resulting SII in a fixed broadband noise, rising from 0.12 (normal) to 0.79 (shout)" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.png" alt="Left: the four ANSI S3.5-1997 standard speech spectra (normal, raised, loud, shout) over 160 Hz to 8000 Hz, each higher effort lifting the whole spectrum. Right: the resulting SII in a fixed broadband noise, rising from 0.12 (normal) to 0.79 (shout)" style="width:96%">
+
+The vocal-effort names work anywhere a speech spectrum is expected, including as
+the first argument to `speech_intelligibility_index`.
+
 ## See also
 
 - [Psychoacoustics and Speech Intelligibility](/phonometry/guides/psychoacoustics/) — loudness,

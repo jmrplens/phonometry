@@ -155,6 +155,35 @@ def test_filter_binding_detail_matches_library_margin() -> None:
             )
 
 
+def test_human_vibration_checks_registered() -> None:
+    """The PR-F human-vibration checks are wired into their own domain."""
+    standards = {c.standard for c in cr.CHECKS}
+    assert "ISO 8041-1:2017 Table B.8" in standards  # Wk design-goal factor
+    assert "ISO 8041-1:2017 Table 1" in standards  # Wh reference-freq factor
+    assert "ISO 5349-2:2001 Example E.2.1" in standards  # A(8) single tool
+    assert "ISO 5349-2:2001 Example E.3" in standards  # A(8) forestry
+    assert "ISO 5349-1:2001 Eq. (C.1)" in standards  # VWF lifetime
+    assert "Directive 2002/44/EC Art. 3" in standards  # EAV/ELV
+    assert "Human vibration (ISO 8041 / 2631 / 5349)" in cr._domains()
+
+
+def test_human_vibration_reference_data_matches_oracles() -> None:
+    """Pin the shared PR-F constants to their published values."""
+    import reference_data as ref
+
+    assert ref.ISO8041_1_WK_FACTOR_6P31HZ == 1.054  # Table B.8, n=8
+    assert ref.ISO8041_1_WM_FACTOR_1P585HZ == 0.9342  # Table B.9, n=2
+    assert ref.ISO8041_1_WH_REF_FACTOR == 0.2020  # Table 1, Wh @ 500 rad/s
+    assert ref.ISO5349_2_E21_A8 == 4.1  # 7,4*sqrt(2,5/8)
+    assert ref.ISO5349_2_E3_A8 == 3.6  # forestry three-task
+    assert ref.ISO5349_1_VWF_A8 == 7.0
+    assert ref.ISO5349_1_VWF_DY_YEARS == 4.0  # Table C.1
+    assert ref.DIRECTIVE_2002_44_HAV_EAV == 2.5
+    assert ref.DIRECTIVE_2002_44_HAV_ELV == 5.0
+    assert ref.DIRECTIVE_2002_44_WBV_EAV == 0.5
+    assert ref.DIRECTIVE_2002_44_WBV_ELV == 1.15
+
+
 @pytest.mark.parametrize("check", cr.CHECKS, ids=lambda c: f"{c.standard} :: {c.quantity}")
 def test_every_check_passes(check: "cr.Check") -> None:
     outcome = check.run()

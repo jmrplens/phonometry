@@ -44,6 +44,18 @@ _MONO = "Consolas, Menlo, monospace"
 _ES: dict[str, str] = {
     "Calibration chain — from calibrator to physical units":
         "Cadena de calibración — del calibrador a unidades físicas",
+    # Human vibration (ISO 2631-1 / ISO 8041-1 / 2002-44-EC)
+    "Whole-body vibration measurement chain (ISO 2631-1 / ISO 8041-1)":
+        "Cadena de medición de vibración de cuerpo entero (ISO 2631-1 / ISO 8041-1)",
+    "vibration input": "entrada de vibración",
+    "Seat/body interface": "Interfaz asiento/cuerpo",
+    "Triaxial accelerometer": "Acelerómetro triaxial",
+    "Band limiting + Wk / Wd": "Limitación de banda + Wk / Wd",
+    "weighting (ISO 8041-1)": "ponderación (ISO 8041-1)",
+    "Weighted r.m.s. a_w  &  VDV": "a_w eficaz ponderada  y  VDV",
+    "(ISO 2631-1)": "(ISO 2631-1)",
+    "assessed vs EAV / ELV (Directive 2002/44/EC)":
+        "evaluada frente a EAV / ELV (Directiva 2002/44/CE)",
     "Sound calibrator": "Calibrador acústico",
     "Microphone +": "Micrófono +",
     "preamplifier": "preamplificador",
@@ -1891,6 +1903,56 @@ def _d_intensity_scan(s: SVG, th: Theme) -> None:
         s.text(450, y, txt, 19 if bold else 18, col, bold=bold)
 
 
+def _d_human_vibration(s: SVG, th: Theme) -> None:
+    """Whole-body vibration measurement chain (ISO 2631-1 / ISO 8041-1)."""
+    gy = 510.0
+    # --- Left: a seated person on a vibrating seat, triaxial accelerometer ---
+    s.ground(gy, 40, 350)
+    # Seat: cushion, backrest and support leg.
+    s.rect(118, 424, 132, 18, th.panel, th.fg, rx=4, sw=2)      # cushion
+    s.rect(118, 336, 16, 90, th.panel, th.fg, rx=3, sw=2)       # backrest
+    s.line(184, 442, 184, gy, th.fg, 2.4)                       # pedestal
+    # A wavy "vibration" arrow rising into the seat base.
+    s.arrow(184, gy - 4, 184, 452, th.secondary, 2.4)
+    s.text(184, gy - 12, "vibration input", 17, th.secondary, "middle", italic=True)
+    s.person(178, gy, 176, seated=True)
+    # Triaxial accelerometer at the seat/body interface with its x, y, z axes.
+    ox, oy = 176.0, 420.0
+    s.rect(ox - 9, oy - 8, 18, 16, th.secondary, th.fg, rx=2, sw=1.5)
+    s.arrow(ox, oy - 8, ox, oy - 58, th.accent, 2.0)            # z (vertical)
+    s.text(ox + 8, oy - 54, "z", 18, th.accent, "start", bold=True)
+    s.arrow(ox + 9, oy, ox + 62, oy, th.accent, 2.0)            # x (fore-aft)
+    s.text(ox + 66, oy + 5, "x", 18, th.accent, "start", bold=True)
+    s.arrow(ox - 7, oy + 6, ox - 44, oy + 34, th.accent, 2.0)   # y (lateral)
+    s.text(ox - 52, oy + 44, "y", 18, th.accent, "end", bold=True)
+    s.text(150, gy + 34, "Seat/body interface", 18, th.fg, "middle")
+
+    # --- Right: the vertical signal-processing chain ---
+    cx, bw, bh = 650.0, 320.0, 72.0
+    x0 = cx - bw / 2
+    chain = [
+        (96.0, "Triaxial accelerometer", "a_x , a_y , a_z  (m/s²)"),
+        (206.0, "Band limiting + Wk / Wd", "weighting (ISO 8041-1)"),
+        (316.0, "Weighted r.m.s. a_w  &  VDV", "(ISO 2631-1)"),
+    ]
+    for by, l1, l2 in chain:
+        s.rect(x0, by, bw, bh, th.panel, th.primary, rx=12, sw=2)
+        s.text(cx, by + 31, l1, 21, th.fg, "middle", bold=True)
+        s.text(cx, by + 56, l2, 18, th.muted, "middle")
+    s.arrow(cx, 168, cx, 206, th.fg, 2.0)
+    s.arrow(cx, 278, cx, 316, th.fg, 2.0)
+    # Feed the setup into the chain.
+    s.arrow(252, oy, x0 - 6, 132, th.fg, 2.0)
+
+    # --- Bottom: vector sum, daily exposure and the Directive assessment ---
+    s.arrow(cx, 388, cx, 424, th.fg, 2.0)
+    s.rect(400, 424, 470, 78, "none", th.secondary, rx=12, sw=2, dash="6,5")
+    s.text(635, 452, "a_v = √(Σ k_j² a_wj²)   →   A(8) = a_v·√(T/T₀)",
+           20, th.fg, "middle", bold=True)
+    s.text(635, 480, "assessed vs EAV / ELV (Directive 2002/44/EC)",
+           18, th.secondary, "middle")
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -1937,6 +1999,9 @@ DIAGRAMS = {
     "diagram_intensity_scan": (
         _d_intensity_scan,
         "Precision sound intensity scanning (ISO 9614-3)", 600),
+    "diagram_human_vibration": (
+        _d_human_vibration,
+        "Whole-body vibration measurement chain (ISO 2631-1 / ISO 8041-1)", 580),
 }
 
 

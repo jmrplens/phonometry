@@ -1267,6 +1267,76 @@ def _chk_iso9614_3_uniform() -> Outcome:
 
 
 # ===========================================================================
+# Human vibration (ISO 8041-1 / ISO 2631 / ISO 5349 / Directive 2002/44/EC)
+# ===========================================================================
+_HUMAN_VIB = "Human vibration (ISO 8041 / 2631 / 5349)"
+
+
+def _true_centre(n: int) -> float:
+    """True IEC 61260 one-third-octave centre ``10^(n/10)`` Hz."""
+    return float(10.0 ** (n / 10.0))
+
+
+@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.8", "Wk design-goal factor at 6,31 Hz")
+def _chk_iso8041_wk_annex_b() -> Outcome:
+    factor = float(ph.weighting_factors("Wk", _true_centre(8))[0])
+    return numeric(ref.ISO8041_1_WK_FACTOR_6P31HZ, factor, 1e-3, rel=True, places=4)
+
+
+@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.9", "Wm design-goal factor at 1,585 Hz")
+def _chk_iso8041_wm_annex_b() -> Outcome:
+    factor = float(ph.weighting_factors("Wm", _true_centre(2))[0])
+    return numeric(ref.ISO8041_1_WM_FACTOR_1P585HZ, factor, 1e-3, rel=True, places=4)
+
+
+@register(_HUMAN_VIB, "ISO 8041-1:2017 Table 1", "Wh factor at the 500 rad/s reference")
+def _chk_iso8041_wh_reference() -> Outcome:
+    factor = float(ph.weighting_factors("Wh", ref.ISO8041_1_WH_REF_FREQ_HZ)[0])
+    return numeric(ref.ISO8041_1_WH_REF_FACTOR, factor, 1.5e-3, rel=True, places=4)
+
+
+@register(_HUMAN_VIB, "ISO 5349-2:2001 Example E.2.1", "Single-tool daily exposure A(8)")
+def _chk_iso5349_e21() -> Outcome:
+    a8 = ph.daily_exposure(7.4, 2.5 * 3600.0)
+    return numeric(ref.ISO5349_2_E21_A8, a8, 0.05, unit="m/s^2", places=2)
+
+
+@register(_HUMAN_VIB, "ISO 5349-2:2001 Example E.3", "Forestry three-task A(8)")
+def _chk_iso5349_e3() -> Outcome:
+    a8 = ph.hav_daily_exposure(
+        [4.6, 6.0, 3.6], [2 * 3600.0, 1 * 3600.0, 2 * 3600.0]
+    )
+    return numeric(ref.ISO5349_2_E3_A8, a8, 0.05, unit="m/s^2", places=2)
+
+
+@register(_HUMAN_VIB, "ISO 5349-1:2001 Eq. (C.1)", "VWF 10 % lifetime Dy at A(8)=7")
+def _chk_iso5349_vwf() -> Outcome:
+    dy = ph.hav_vwf_lifetime_years(ref.ISO5349_1_VWF_A8)
+    return numeric(ref.ISO5349_1_VWF_DY_YEARS, dy, 0.1, unit="yr", places=2)
+
+
+@register(_HUMAN_VIB, "Directive 2002/44/EC Art. 3", "HAV/WBV action & limit values")
+def _chk_directive_2002_44() -> Outcome:
+    hav = ph.exposure_assessment(1.0, kind="hav")
+    wbv = ph.exposure_assessment(0.1, kind="wbv")
+    ok = (
+        hav.action_value == ref.DIRECTIVE_2002_44_HAV_EAV
+        and hav.limit_value == ref.DIRECTIVE_2002_44_HAV_ELV
+        and wbv.action_value == ref.DIRECTIVE_2002_44_WBV_EAV
+        and wbv.limit_value == ref.DIRECTIVE_2002_44_WBV_ELV
+    )
+    exp = (
+        f"HAV {ref.DIRECTIVE_2002_44_HAV_EAV}/{ref.DIRECTIVE_2002_44_HAV_ELV}, "
+        f"WBV {ref.DIRECTIVE_2002_44_WBV_EAV}/{ref.DIRECTIVE_2002_44_WBV_ELV} m/s^2"
+    )
+    got = (
+        f"HAV {hav.action_value}/{hav.limit_value}, "
+        f"WBV {wbv.action_value}/{wbv.limit_value} m/s^2"
+    )
+    return Outcome(expected=exp, computed=got, delta="0", passed=ok)
+
+
+# ===========================================================================
 # Markdown rendering
 # ===========================================================================
 def _snap(value: float, eps: float = 5e-4) -> float:

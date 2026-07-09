@@ -1047,3 +1047,120 @@ def plot_insitu_absorption(
     ax.set_title("In-situ road-surface absorption (ISO 13472-1)")
     ax.grid(True, axis="y", alpha=0.3)
     return ax
+
+
+# ---------------------------------------------------------------------------
+# Human vibration (ISO 8041-1 / ISO 2631 / ISO 5349 / Directive 2002/44/EC)
+# ---------------------------------------------------------------------------
+
+
+def plot_vibration_weighting(
+    result: Any, ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Frequency-weighting factor (dB) versus frequency (ISO 8041-1).
+
+    :param result: A
+        :class:`~phonometry.human_vibration.WeightingResponse` exposing
+        ``name``, ``frequencies`` and ``magnitude_db``.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    mag_db = np.asarray(result.magnitude_db, dtype=np.float64)
+    kwargs.setdefault("color", "#1f77b4")
+    ax.semilogx(freqs, mag_db, **kwargs)
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Weighting factor [dB]")
+    ax.set_title(f"Frequency weighting {result.name} (ISO 8041-1)")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_weighted_spectrum(
+    result: Any, ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Unweighted vs weighted one-third-octave acceleration spectrum.
+
+    Draws the measured band accelerations and, overlaid, the weighted band
+    contributions ``W_i*a_i``; the overall ``a_w`` is annotated in the title.
+
+    :param result: A
+        :class:`~phonometry.human_vibration.WeightedSpectrum` exposing
+        ``frequencies``, ``band_accelerations``, ``weighted``, ``overall`` and
+        ``weighting_name``.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    raw = np.asarray(result.band_accelerations, dtype=np.float64)
+    weighted = np.asarray(result.weighted, dtype=np.float64)
+    positions = np.arange(freqs.size, dtype=np.float64)
+    width = 0.4
+    # The weighted bars are the primary artist; forward user kwargs there.
+    kwargs.setdefault("color", "#1f77b4")
+    ax.bar(
+        positions - width / 2, raw, width, color="#bbbbbb", label="Unweighted $a_i$"
+    )
+    ax.bar(
+        positions + width / 2,
+        weighted,
+        width,
+        label=f"Weighted $W_i a_i$ ({result.weighting_name})",
+        **kwargs,
+    )
+    ax.set_xticks(positions)
+    ax.set_xticklabels([_format_freq(f) for f in freqs], rotation=45, ha="right")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel(r"r.m.s. acceleration [m/s$^2$]")
+    ax.set_title(
+        f"Weighted acceleration spectrum  ($a_w$ = {float(result.overall):.3f} "
+        r"m/s$^2$)"
+    )
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, axis="y", alpha=0.3)
+    return ax
+
+
+def plot_daily_exposure(
+    result: Any, ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Partial daily exposures against the EAV / ELV (Directive 2002/44/EC).
+
+    Draws one bar per operation (its partial exposure ``A_i(8)``), a combined
+    ``A(8)`` bar, and the exposure action and limit value as horizontal lines.
+
+    :param result: A
+        :class:`~phonometry.human_vibration.DailyVibrationExposure` exposing
+        ``labels``, ``partials``, ``a8`` and ``assessment``.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    partials = np.asarray(result.partials, dtype=np.float64)
+    labels = [*result.labels, "A(8)"]
+    values = [*partials.tolist(), float(result.a8)]
+    positions = np.arange(len(values), dtype=np.float64)
+    colors = ["#bbbbbb"] * partials.size + ["#1f77b4"]
+    kwargs.setdefault("color", colors)
+    ax.bar(positions, values, **kwargs)
+    ax.set_xticks(positions)
+    ax.set_xticklabels(labels, rotation=45, ha="right")
+    ax.set_ylabel(r"Vibration exposure A(8) [m/s$^2$]")
+
+    assessment = result.assessment
+    eav = float(assessment.action_value)
+    elv = float(assessment.limit_value)
+    ax.axhline(eav, color="#ff7f0e", ls="--", label=f"EAV = {eav:g}")
+    ax.axhline(elv, color="#d62728", ls="--", label=f"ELV = {elv:g}")
+    top = max(elv, float(np.max(values))) * 1.15
+    ax.set_ylim(0.0, top)
+    kind = str(assessment.kind).upper()
+    ax.set_title(
+        f"Daily {kind} exposure  (A(8) = {float(result.a8):.2f} "
+        rf"m/s$^2$, {assessment.zone})"
+    )
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, axis="y", alpha=0.3)
+    return ax

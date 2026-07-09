@@ -3462,7 +3462,9 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     from phonometry.sii import BAND_CENTRES, VOCAL_EFFORTS
 
     freqs = BAND_CENTRES
-    colours = {"normal": COLOR_GRID, "raised": "#7f7f7f",
+    # Distinct hues (not COLOR_GRID, which blends into the gridlines and is
+    # near-invisible on a light background) for the four ordered efforts.
+    colours = {"normal": COLOR_TERTIARY, "raised": "#7f7f7f",
                "loud": COLOR_PRIMARY, "shout": COLOR_SECONDARY}
     fig, (ax_s, ax_i) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 

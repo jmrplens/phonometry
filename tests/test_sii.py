@@ -96,7 +96,9 @@ def test_vocal_effort_overall_level_increases() -> None:
     assert overall == sorted(overall)  # normal < raised < loud < shout
     # Matches the known ANSI vocal-effort overall levels (dB SPL).
     assert overall[0] == pytest.approx(62.35, abs=0.1)
-    assert overall[3] == pytest.approx(82.3, abs=0.2)
+    assert overall[1] == pytest.approx(68.3, abs=0.1)
+    assert overall[2] == pytest.approx(74.86, abs=0.1)
+    assert overall[3] == pytest.approx(82.36, abs=0.1)
 
 
 def test_higher_effort_raises_index_in_noise() -> None:

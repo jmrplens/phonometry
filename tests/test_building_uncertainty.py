@@ -17,8 +17,8 @@ from phonometry.building_uncertainty import (
     UncertainValue,
     band_uncertainty,
     combine_uncertainties,
-    coverage_factor,
-    expanded_uncertainty,
+    insulation_coverage_factor,
+    insulation_expanded_uncertainty,
     maximum_repeatability_standard_deviation,
     prediction_input_uncertainty,
     reduce_by_independent_measurements,
@@ -241,7 +241,7 @@ def test_sigma_r95_single_number_impact_absent():
     [(0.68, 1.00), (0.80, 1.28), (0.90, 1.65), (0.95, 1.96), (0.99, 2.58), (0.999, 3.29)],
 )
 def test_table8_two_sided(confidence, k):
-    assert coverage_factor(confidence, one_sided=False) == pytest.approx(k)
+    assert insulation_coverage_factor(confidence, one_sided=False) == pytest.approx(k)
 
 
 @pytest.mark.parametrize(
@@ -249,12 +249,12 @@ def test_table8_two_sided(confidence, k):
     [(0.84, 1.00), (0.90, 1.28), (0.95, 1.65), (0.975, 1.96), (0.995, 2.58), (0.9995, 3.29)],
 )
 def test_table8_one_sided(confidence, k):
-    assert coverage_factor(confidence, one_sided=True) == pytest.approx(k)
+    assert insulation_coverage_factor(confidence, one_sided=True) == pytest.approx(k)
 
 
 def test_coverage_factor_unknown_confidence():
     with pytest.raises(ValueError, match="not tabulated"):
-        coverage_factor(0.925)
+        insulation_coverage_factor(0.925)
 
 
 def test_coverage_factors_table_is_public():
@@ -279,24 +279,24 @@ def test_coverage_factors_table_is_read_only():
 # --------------------------------------------------------------------------- #
 def test_expanded_uncertainty_two_sided():
     # Rw situation A, u = 1.2 dB, 95 % two-sided -> k = 1.96.
-    assert expanded_uncertainty(1.2, coverage=0.95) == pytest.approx(1.96 * 1.2)
+    assert insulation_expanded_uncertainty(1.2, coverage=0.95) == pytest.approx(1.96 * 1.2)
 
 
 def test_expanded_uncertainty_one_sided():
     # Conformity check at 95 % one-sided -> k = 1.65.
-    assert expanded_uncertainty(1.2, coverage=0.95, one_sided=True) == pytest.approx(
+    assert insulation_expanded_uncertainty(1.2, coverage=0.95, one_sided=True) == pytest.approx(
         1.65 * 1.2
     )
 
 
 def test_coverage_minimum_k_is_one():
     # 68 % two-sided is exactly k = 1; U == u.
-    assert expanded_uncertainty(0.9, coverage=0.68) == pytest.approx(0.9)
+    assert insulation_expanded_uncertainty(0.9, coverage=0.68) == pytest.approx(0.9)
 
 
 def test_expanded_uncertainty_rejects_negative():
     with pytest.raises(ValueError):
-        expanded_uncertainty(-0.1)
+        insulation_expanded_uncertainty(-0.1)
 
 
 # --------------------------------------------------------------------------- #
@@ -413,3 +413,14 @@ def test_band_uncertainty_to_arrays_roundtrip():
 def test_prediction_input_rejects_bad_n():
     with pytest.raises(ValueError):
         prediction_input_uncertainty(1.2, 1.0, 0)
+
+
+def test_deprecated_bare_names_warn_and_delegate():
+    # The bare names shadowed the GUM pair at the package root; they now warn
+    # and delegate to the insulation_* canonical functions.
+    import phonometry.building_uncertainty as bu
+
+    with pytest.warns(DeprecationWarning, match="insulation_coverage_factor"):
+        assert bu.coverage_factor(0.95) == insulation_coverage_factor(0.95)
+    with pytest.warns(DeprecationWarning, match="insulation_expanded_uncertainty"):
+        assert bu.expanded_uncertainty(1.2) == insulation_expanded_uncertainty(1.2)

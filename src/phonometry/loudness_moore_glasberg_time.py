@@ -606,9 +606,13 @@ def _as_two_channels(
             raise ValueError(
                 f"signal must be mono (1-D) or two-channel; got shape {array.shape}."
             )
-    else:
-        left = array.ravel()
+    elif array.ndim == 1:
+        left = array
         right = None  # mono: diotic (both ears) or single ear (monaural)
+    else:
+        raise ValueError(
+            f"signal must be mono (1-D) or two-channel; got shape {array.shape}."
+        )
     if left.size == 0:
         raise ValueError("Input signal cannot be empty.")
     if not np.all(np.isfinite(left)) or (

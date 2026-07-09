@@ -349,3 +349,14 @@ def test_invalid_inputs() -> None:
         loudness_moore_glasberg(np.array([]), FS)
     with pytest.raises(ValueError):
         loudness_moore_glasberg(np.ones(100), -1.0)
+
+
+def test_stereo_input_is_rejected() -> None:
+    # A 2-D signal used to be silently flattened; it must be rejected.
+    import numpy as np
+    import pytest
+    from phonometry import loudness_moore_glasberg
+
+    stereo = np.zeros((2, 4800))
+    with pytest.raises(ValueError, match="1-D time series"):
+        loudness_moore_glasberg(stereo, 48000.0)

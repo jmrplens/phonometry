@@ -157,7 +157,12 @@ def response_peaks(response: ArrayLike) -> np.ndarray:
     :param response: The spinal response acceleration ``Az(t)``.
     :return: The positive peak values, in the order they occur.
     """
-    sig = np.asarray(response, dtype=np.float64).ravel()
+    sig = np.asarray(response, dtype=np.float64)
+    if sig.ndim != 1:
+        raise ValueError(
+            f"response must be a 1-D time series; got shape {sig.shape}. "
+            "Process multichannel signals one channel at a time."
+        )
     if sig.size == 0:
         return np.array([], dtype=np.float64)
     # Bracket the positive samples with False sentinels so the first and last

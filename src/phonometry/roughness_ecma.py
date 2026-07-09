@@ -499,7 +499,12 @@ def roughness_ecma(
     if field not in ("free", "diffuse"):
         raise ValueError("field must be 'free' or 'diffuse'")
     x = _typesignal(signal_in)
-    x = np.asarray(x, dtype=np.float64).ravel()
+    x = np.asarray(x, dtype=np.float64)
+    if x.ndim != 1:
+        raise ValueError(
+            f"signal must be a 1-D time series; got shape {x.shape}. "
+            "Process multichannel signals one channel at a time."
+        )
     if x.size == 0:
         raise ValueError("signal must not be empty")
     fs = float(fs)

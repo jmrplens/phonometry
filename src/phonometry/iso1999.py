@@ -176,8 +176,11 @@ def _nipts_components(l_ex: float, years: float) -> tuple[np.ndarray, np.ndarray
     n50 = np.maximum(n50, 0.0)
 
     xu, yu, xl, yl = _XY[:, 0], _XY[:, 1], _XY[:, 2], _XY[:, 3]
-    du = (xu + yu * lg_t) * excess2
-    dl = (xl + yl * lg_t) * excess2
+    # The spreads are half-Gaussian standard deviations and must stay >= 0; the
+    # linear term can only turn negative for a sub-1-year extrapolation, outside
+    # the standard's range, where it would otherwise invert the percentiles.
+    du = np.maximum((xu + yu * lg_t) * excess2, 0.0)
+    dl = np.maximum((xl + yl * lg_t) * excess2, 0.0)
     return n50, du, dl
 
 

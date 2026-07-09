@@ -79,6 +79,16 @@ def test_short_duration_extrapolation() -> None:
     np.testing.assert_allclose(n50_5, factor * n50_10, rtol=1e-9)
 
 
+def test_spreads_non_negative_subyear() -> None:
+    # Below 1 year the linear spread term can go negative; du/dl are clamped so
+    # the fractile ordering never inverts (spreads are standard deviations).
+    r_low = m.nipts(100.0, 0.02, 0.1)
+    r_high = m.nipts(100.0, 0.02, 0.9)
+    assert np.all(r_high.value >= r_low.value)
+    assert np.all(r_low.spread_upper >= 0.0)
+    assert np.all(r_low.spread_lower >= 0.0)
+
+
 def test_htlan_formula_1() -> None:
     # H' = H + N - H*N/120 at each frequency (clause 6.1).
     r = m.htlan(60, "male", 90.0, 30.0, 0.5)

@@ -284,6 +284,11 @@ def test_energy_equivalent_acceleration() -> None:
     assert got == pytest.approx(math.sqrt((1 + 4 * 3) / 4))
 
 
+def test_energy_equivalent_rejects_negative_duration() -> None:
+    with pytest.raises(ValueError, match="non-negative"):
+        hv.energy_equivalent_acceleration([1.0, 2.0], [1.0, -1.0])
+
+
 def test_hav_vwf_lifetime_matches_table_c1() -> None:
     """ISO 5349-1 Table C.1 / Eq. (C.1): A(8)=7 -> ~4 years; 3,7 -> ~8."""
     assert hv.hav_vwf_lifetime_years(7.0) == pytest.approx(4.0, abs=0.3)

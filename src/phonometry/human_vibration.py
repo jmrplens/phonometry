@@ -326,6 +326,9 @@ def apply_weighting(signal: ArrayLike, fs: float, name: str) -> Real:
     The exact analog response :func:`frequency_weighting` is applied in the
     frequency domain (real FFT), so the weighted signal reproduces both the
     magnitude and phase of the standard's cascade without bilinear warping.
+    The multiplication is circular, so the record wraps at its ends; apply it
+    to a record long enough (or pre-tapered) that the boundary transient is
+    negligible, as for any block frequency-domain filtering.
 
     :param signal: Unweighted acceleration time history (1-D), in m/s2.
     :param fs: Sampling frequency, in hertz (> 0).
@@ -337,9 +340,7 @@ def apply_weighting(signal: ArrayLike, fs: float, name: str) -> Real:
     x = np.asarray(signal, dtype=np.float64)
     if x.ndim != 1 or x.size == 0:
         raise ValueError("'signal' must be a non-empty 1-D array.")
-    fs = float(fs)
-    if not math.isfinite(fs) or fs <= 0.0:
-        raise ValueError("'fs' must be a positive, finite sampling frequency.")
+    fs = _positive_fs(fs)
     n = x.size
     freqs = np.fft.rfftfreq(n, d=1.0 / fs).astype(np.float64)
     resp = _weighting_response(name, freqs)
@@ -427,6 +428,14 @@ def _weighted_signal(signal: ArrayLike) -> Real:
     return x
 
 
+def _positive_fs(fs: float) -> float:
+    """Return ``fs`` as a positive, finite float or raise ``ValueError``."""
+    fs = float(fs)
+    if not math.isfinite(fs) or fs <= 0.0:
+        raise ValueError("'fs' must be a positive, finite sampling frequency.")
+    return fs
+
+
 def running_rms(
     signal: ArrayLike,
     fs: float,
@@ -447,19 +456,19 @@ def running_rms(
         unknown ``method``.
     """
     x = _weighted_signal(signal)
-    fs = float(fs)
+    fs = _positive_fs(fs)
     tau = float(integration_time)
-    if not math.isfinite(fs) or fs <= 0.0:
-        raise ValueError("'fs' must be a positive, finite sampling frequency.")
     if not math.isfinite(tau) or tau <= 0.0:
         raise ValueError("'integration_time' must be positive and finite.")
     power = x**2
     if method == "linear":
         window = max(1, int(round(tau * fs)))
-        kernel = np.ones(window, dtype=np.float64) / window
-        # Causal sliding mean over the trailing ``tau`` seconds.
-        padded = np.concatenate((np.zeros(window - 1, dtype=np.float64), power))
-        mean_power = np.convolve(padded, kernel, mode="valid")
+        # Causal sliding mean over the trailing ``tau`` seconds, O(n) via a
+        # prefix sum (early samples average over the samples available, i.e.
+        # zero-padded at the front, matching the "slow" running r.m.s.).
+        csum = np.concatenate(([0.0], np.cumsum(power)))
+        lo = np.maximum(0, np.arange(power.size) + 1 - window)
+        mean_power = (csum[1:] - csum[lo]) / window
     elif method == "exponential":
         # Single-pole IIR average: y[i] = (1-alpha) y[i-1] + alpha x[i].
         alpha = 1.0 - math.exp(-1.0 / (tau * fs))
@@ -496,9 +505,7 @@ def vibration_dose_value(signal: ArrayLike, fs: float) -> float:
     :raises ValueError: for a bad signal or non-positive ``fs``.
     """
     x = _weighted_signal(signal)
-    fs = float(fs)
-    if not math.isfinite(fs) or fs <= 0.0:
-        raise ValueError("'fs' must be a positive, finite sampling frequency.")
+    fs = _positive_fs(fs)
     return float(np.sum(x**4 / fs) ** 0.25)
 
 
@@ -514,9 +521,7 @@ def motion_sickness_dose_value(signal: ArrayLike, fs: float) -> float:
     :raises ValueError: for a bad signal or non-positive ``fs``.
     """
     x = _weighted_signal(signal)
-    fs = float(fs)
-    if not math.isfinite(fs) or fs <= 0.0:
-        raise ValueError("'fs' must be a positive, finite sampling frequency.")
+    fs = _positive_fs(fs)
     return float(np.sum(x**2 / fs) ** 0.5)
 
 
@@ -536,7 +541,8 @@ def crest_factor(signal: ArrayLike) -> float:
     """
     x = _weighted_signal(signal)
     rms = float(np.sqrt(np.mean(x**2)))
-    if rms == 0.0:
+    # rms is a root-mean-square, so it is >= 0; <= 0 means an all-zero signal.
+    if rms <= 0.0:
         return 0.0
     cf = float(np.max(np.abs(x)) / rms)
     if cf > 9.0:
@@ -665,6 +671,8 @@ def energy_equivalent_acceleration(
             "'magnitudes' and 'durations_s' must be non-empty, 1-D and "
             "equal-length."
         )
+    if np.any(t < 0.0):
+        raise ValueError("'durations_s' must be non-negative.")
     total = float(np.sum(t))
     if total <= 0.0:
         raise ValueError("The total duration must be positive.")
@@ -747,7 +755,12 @@ def exposure_assessment(
         )
     exceeds_action = v >= eav
     exceeds_limit = v >= elv
-    zone = "limit" if exceeds_limit else "action" if exceeds_action else "below action"
+    if exceeds_limit:
+        zone = "limit"
+    elif exceeds_action:
+        zone = "action"
+    else:
+        zone = "below action"
     return ExposureAssessment(
         value=v,
         kind=kind,

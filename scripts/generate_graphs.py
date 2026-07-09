@@ -28,6 +28,23 @@ _ES_EXACT = {
     "Error [dB]": "Error [dB]",
     "Group delay [ms]": "Retardo de grupo [ms]",
     "Level re steady state [dB]": "Nivel re estado estacionario [dB]",
+    # ISO 18233 excitation signals + recovered impulse response
+    "ISO 18233 excitation signals": "Señales de excitación ISO 18233",
+    "Exponential sine sweep — waveform":
+        "Barrido sinusoidal exponencial — forma de onda",
+    "Sweep spectrogram (exponential rise)":
+        "Espectrograma del barrido (ascenso exponencial)",
+    "MLS magnitude spectrum (flat)": "Espectro de magnitud de la MLS (plano)",
+    "Recovered room impulse response (ISO 18233)":
+        "Respuesta al impulso de la sala recuperada (ISO 18233)",
+    "Amplitude (norm.)": "Amplitud (norm.)",
+    "Level re peak [dB]": "Nivel re pico [dB]",
+    "Magnitude [dB]": "Magnitud [dB]",
+    "Sample": "Muestra",
+    "direct sound": "sonido directo",
+    "reflections": "reflexiones",
+    "Log-magnitude envelope": "Envolvente log-magnitud",
+    "Schroeder decay (EDC)": "Decaimiento de Schroeder (EDC)",
     "Normalized Response": "Respuesta normalizada",
     "Normalized frequency  f / fm": "Frecuencia normalizada  f / fm",
     "Relative attenuation \u0394A [dB]": "Atenuaci\u00f3n relativa \u0394A [dB]",
@@ -326,6 +343,8 @@ _ES_PATTERNS = [
     (r"^Octave Band: (.+) Hz$", r"Banda de octava: \1 Hz"),
     (r"^(\d+) phon$", r"\1 fonios"),
     (r"^TNR = (.+) dB\n\(criterion (.+) dB\)$", "TNR = \\1 dB\\n(criterio \\2 dB)"),
+    (r"^MLS — first (\d+) of (\d+) samples$",
+     r"MLS — primeras \1 de \2 muestras"),
     (r"^Measured 1/(\d+) Octave Bands$", r"Bandas de 1/\1 de octava medidas"),
     (r"^IEC target (.+) dB$", r"Objetivo IEC \1 dB"),
     (r"^([\d.]+) ms burst$", "R\u00e1faga de \\1 ms"),
@@ -1905,6 +1924,127 @@ def generate_schroeder_decay(output_dir: str) -> None:
     plt.close()
 
 
+def generate_excitation_signals(output_dir: str) -> None:
+    """ISO 18233 excitations: ESS waveform + spectrogram and MLS + spectrum."""
+    print("Generating excitation_signals.png...")
+    from phonometry import mls_signal, sweep_signal
+
+    fs = 48000
+    f1, f2, secs = 50.0, 20000.0, 1.0
+    sweep = sweep_signal(fs, f1, f2, secs)
+    t = np.arange(sweep.size) / fs
+    mls = mls_signal(12)  # length 2**12 - 1 = 4095
+
+    fig, axes = plt.subplots(2, 2, figsize=(12, 7.2))
+    (ax_sw, ax_sp), (ax_ml, ax_ms) = axes
+
+    # Exponential sine sweep: time-domain waveform.
+    ax_sw.plot(t, sweep, color=COLOR_PRIMARY, linewidth=0.5)
+    ax_sw.set_title("Exponential sine sweep — waveform", fontweight="bold")
+    ax_sw.set_xlabel("Time [s]")
+    ax_sw.set_ylabel("Amplitude")
+    ax_sw.set_xlim(0.0, secs)
+    ax_sw.set_ylim(-1.2, 1.2)
+    ax_sw.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+
+    # Sweep spectrogram: the exponential frequency rise.
+    ax_sp.specgram(sweep, NFFT=1024, Fs=fs, noverlap=512, cmap="magma")
+    ax_sp.set_title("Sweep spectrogram (exponential rise)", fontweight="bold")
+    ax_sp.set_xlabel("Time [s]")
+    ax_sp.set_ylabel("Frequency [Hz]")
+    ax_sp.set_ylim(0.0, fs / 2)
+
+    # MLS: first samples of the bipolar sequence.
+    show = 100
+    ax_ml.step(np.arange(show), mls[:show], where="mid", color=COLOR_PRIMARY,
+               linewidth=1.2)
+    ax_ml.set_title(f"MLS — first {show} of {mls.size} samples", fontweight="bold")
+    ax_ml.set_xlabel("Sample")
+    ax_ml.set_ylabel("Amplitude")
+    ax_ml.set_ylim(-1.4, 1.4)
+    ax_ml.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+
+    # MLS magnitude spectrum: essentially flat (white excitation).
+    spec = np.abs(np.fft.rfft(mls))
+    freqs = np.fft.rfftfreq(mls.size, d=1.0 / fs)
+    ax_ms.semilogx(freqs[1:], 20.0 * np.log10(spec[1:] / np.median(spec[1:])),
+                   color=COLOR_SECONDARY, linewidth=0.7)
+    ax_ms.set_title("MLS magnitude spectrum (flat)", fontweight="bold")
+    ax_ms.set_xlabel("Frequency [Hz]")
+    ax_ms.set_ylabel("Magnitude [dB]")
+    ax_ms.set_xlim(20.0, fs / 2)
+    ax_ms.set_ylim(-12.0, 12.0)
+    ax_ms.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+
+    fig.suptitle("ISO 18233 excitation signals", fontweight="bold")
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "excitation_signals.png"))
+    plt.close()
+
+
+def generate_impulse_response(output_dir: str) -> None:
+    """ISO 18233 recovered IR: waveform + log-magnitude / Schroeder decay."""
+    print("Generating impulse_response.png...")
+    from scipy.signal import fftconvolve
+
+    from phonometry import impulse_response, sweep_signal
+
+    fs = 48000
+    sweep = sweep_signal(fs, 20.0, 20000.0, 1.5)
+
+    # A synthetic room: direct sound, two early reflections and an
+    # exponentially decaying diffuse tail (T ~ 0.6 s) plus a low noise floor.
+    rng = np.random.default_rng(2026)
+    n = int(0.7 * fs)
+    system = np.zeros(n)
+    system[80] = 1.0                       # direct sound
+    system[1400] = 0.5                     # early reflection
+    system[3100] = 0.32                    # second reflection
+    tail_t = np.arange(n) / fs
+    system += rng.standard_normal(n) * np.exp(-6.9077 * tail_t / 0.6) * 0.08
+    system += rng.standard_normal(n) * 10.0 ** (-60.0 / 20.0)
+
+    recorded = fftconvolve(sweep, system)
+    ir = impulse_response(recorded, sweep, fs, length=n)
+
+    h = np.asarray(ir, dtype=np.float64)
+    time = np.arange(h.size) / fs
+    peak = float(np.max(np.abs(h)))
+    tiny = np.finfo(np.float64).tiny
+    env_db = 20.0 * np.log10(np.maximum(np.abs(h), tiny) / peak)
+    energy = np.cumsum(h[::-1] ** 2)[::-1]
+    edc_db = 10.0 * np.log10(np.maximum(energy, tiny) / energy[0])
+
+    fig, (ax_w, ax_d) = plt.subplots(2, 1, figsize=(10, 7), sharex=True)
+    ax_w.plot(time, h / peak, color=COLOR_PRIMARY, linewidth=0.7)
+    ax_w.set_title("Recovered room impulse response (ISO 18233)",
+                   fontweight="bold", pad=10)
+    ax_w.set_ylabel("Amplitude (norm.)")
+    ax_w.set_ylim(-1.1, 1.1)
+    ax_w.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_w.annotate("direct sound", xy=(80 / fs, 1.0), xytext=(0.06, 0.86),
+                  textcoords="axes fraction", fontsize=9, color=COLOR_FG,
+                  arrowprops={"arrowstyle": "->", "color": COLOR_FG, "alpha": 0.7})
+    ax_w.annotate("reflections", xy=(1400 / fs, 0.5), xytext=(0.20, 0.62),
+                  textcoords="axes fraction", fontsize=9, color=COLOR_FG,
+                  arrowprops={"arrowstyle": "->", "color": COLOR_FG, "alpha": 0.7})
+
+    ax_d.plot(time, env_db, color="#9ecae1", linewidth=0.7,
+              label="Log-magnitude envelope")
+    ax_d.plot(time, edc_db, color=COLOR_SECONDARY, linewidth=1.9,
+              label="Schroeder decay (EDC)")
+    ax_d.set_xlabel("Time [s]")
+    ax_d.set_ylabel("Level re peak [dB]")
+    ax_d.set_xlim(0.0, n / fs)
+    ax_d.set_ylim(-80.0, 5.0)
+    ax_d.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_d.legend(loc="upper right", fontsize=9)
+
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "impulse_response.png"))
+    plt.close()
+
+
 def generate_insulation_rating(output_dir: str) -> None:
     """ISO 717-1 weighted rating: measured R', shifted reference, deviations."""
     print("Generating insulation_rating.png...")
@@ -3290,7 +3430,10 @@ def generate_all(img_dir: str) -> None:
     generate_sti_curve(img_dir)
     generate_intensity_demo(img_dir)
 
-    # Room / building acoustics plots (Schroeder decay, ISO 717-1/-2 ratings)
+    # Room / building acoustics plots (ISO 18233 excitations + IR, Schroeder
+    # decay, ISO 717-1/-2 ratings)
+    generate_excitation_signals(img_dir)
+    generate_impulse_response(img_dir)
     generate_schroeder_decay(img_dir)
     generate_insulation_rating(img_dir)
     generate_impact_rating(img_dir)

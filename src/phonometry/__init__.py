@@ -277,12 +277,14 @@ from .outdoor_propagation import (
     predicted_receiver_level,
 )
 from .room_ir import (
+    ImpulseResponseResult,
     impulse_response,
     inverse_filter,
     mls_impulse_response,
     mls_signal,
     sweep_signal,
 )
+from ._plotting import plot_excitation
 from .building_prediction import (
     AirbornePredictionResult,
     FlankingPath,
@@ -391,6 +393,8 @@ __all__ = [
     "impulse_response",
     "mls_signal",
     "mls_impulse_response",
+    "ImpulseResponseResult",
+    "plot_excitation",
     "room_parameters",
     "decay_curve",
     "DecayCurve",

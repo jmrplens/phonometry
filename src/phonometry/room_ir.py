@@ -36,12 +36,16 @@ decay curves -- that step belongs to downstream room-acoustics modules.
 from __future__ import annotations
 
 import warnings
-from typing import Dict, List, Tuple
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 import numpy as np
 from scipy import signal
 
 from .utils import _typesignal
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 #: Warn from mls_impulse_response when the recovered IR still carries more than
 #: this level (dB re its peak) in the last 10 % of the MLS period: an IR longer
@@ -80,6 +84,69 @@ _MLS_TAPS: Dict[int, Tuple[int, ...]] = {
     19: (19, 6, 2, 1),
     20: (20, 17),
 }
+
+
+@dataclass(frozen=True)
+class ImpulseResponseResult:
+    """Recovered broadband impulse response with its acquisition metadata.
+
+    Returned by :func:`impulse_response` and :func:`mls_impulse_response`.
+    The impulse response samples live in ``ir``; ``fs`` is the sample rate in
+    Hz (or ``None`` when unknown, e.g. an MLS recovery called without one) and
+    ``method`` records how the IR was obtained (``"spectral"``, ``"farina"``
+    or ``"mls"``).
+
+    The object is a drop-in replacement for the raw array it used to be: it
+    implements :meth:`__array__`, so ``np.asarray(result)`` yields the IR and
+    the result can be passed straight to array consumers such as
+    :func:`phonometry.room_parameters`, :func:`phonometry.decay_curve` and
+    :func:`phonometry.sti_from_impulse_response`. Indexing, ``len(result)``
+    and the ``size``/``ndim``/``shape``/``dtype`` attributes forward to ``ir``.
+    """
+
+    ir: np.ndarray
+    fs: int | None
+    method: str
+
+    def __array__(self, dtype: Any = None) -> np.ndarray:
+        """Return the impulse response as an array (optionally recast)."""
+        return np.asarray(self.ir, dtype=dtype)
+
+    def __len__(self) -> int:
+        return int(self.ir.shape[-1])
+
+    def __getitem__(self, key: Any) -> Any:
+        return self.ir[key]
+
+    @property
+    def size(self) -> int:
+        """Number of samples in the impulse response."""
+        return int(self.ir.size)
+
+    @property
+    def ndim(self) -> int:
+        return int(self.ir.ndim)
+
+    @property
+    def shape(self) -> Tuple[int, ...]:
+        return tuple(self.ir.shape)
+
+    @property
+    def dtype(self) -> np.dtype[Any]:
+        return self.ir.dtype
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> "Axes | np.ndarray":
+        """Plot the impulse response: waveform and log-magnitude decay.
+
+        Draws the (normalised) time-domain waveform and, below it, the
+        log-magnitude envelope in dB with a Schroeder energy-decay overlay.
+        With ``ax`` given, only the decay panel is drawn on it. Requires
+        matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes` (or an array of two axes).
+        """
+        from ._plotting import plot_impulse_response
+
+        return plot_impulse_response(self, ax=ax, **kwargs)
 
 
 def sweep_signal(
@@ -272,7 +339,7 @@ def impulse_response(
     regularization: float = 1e-6,
     length: int | None = None,
     return_full: bool = False,
-) -> np.ndarray:
+) -> ImpulseResponseResult:
     """
     Recover the broadband impulse response by sweep deconvolution.
 
@@ -310,7 +377,10 @@ def impulse_response(
     :param return_full: If True, return the full deconvolution sequence
         (causal IR at index 0, negative-time distortion products in the
         tail) instead of the trimmed causal IR. Default False.
-    :return: The recovered impulse response.
+    :return: An :class:`ImpulseResponseResult` wrapping the recovered impulse
+        response. It behaves like the raw IR array (``np.asarray(result)``,
+        indexing, ``.size``) for every downstream consumer and adds
+        :meth:`ImpulseResponseResult.plot`.
     """
     rec = _typesignal(recorded)
     ref = _typesignal(reference)
@@ -333,9 +403,8 @@ def impulse_response(
     else:
         raise ValueError(f"unknown method {method!r}")
 
-    if return_full:
-        return full
-    return full[:out_len]
+    ir = full if return_full else full[:out_len]
+    return ImpulseResponseResult(ir=np.asarray(ir), fs=fs, method=method)
 
 
 def mls_signal(order: int) -> np.ndarray:
@@ -378,7 +447,8 @@ def mls_impulse_response(
     mls: List[float] | np.ndarray,
     *,
     length: int | None = None,
-) -> np.ndarray:
+    fs: int | None = None,
+) -> ImpulseResponseResult:
     """
     Recover an impulse response from a periodic MLS excitation.
 
@@ -394,7 +464,12 @@ def mls_impulse_response(
     :param mls: The excitation sequence returned by :func:`mls_signal`.
     :param length: Number of IR samples to return. Defaults to the sequence
         length ``2**N - 1``.
-    :return: The recovered impulse response.
+    :param fs: Optional sample rate in Hz, stored on the result so that
+        :meth:`ImpulseResponseResult.plot` can label a time axis in seconds
+        (the recovery itself is sample-rate agnostic). Default ``None``.
+    :return: An :class:`ImpulseResponseResult` wrapping the recovered impulse
+        response. It behaves like the raw IR array for every downstream
+        consumer and adds :meth:`ImpulseResponseResult.plot`.
 
     .. note::
         A ``UserWarning`` is emitted when the recovered IR retains significant
@@ -444,7 +519,9 @@ def mls_impulse_response(
 
     out_len = length if length is not None else period
     if out_len <= period:
-        return ir[:out_len]
-    # Periodic extension for requests longer than one period.
-    reps = (out_len + period - 1) // period
-    return np.tile(ir, reps)[:out_len]
+        out = ir[:out_len]
+    else:
+        # Periodic extension for requests longer than one period.
+        reps = (out_len + period - 1) // period
+        out = np.tile(ir, reps)[:out_len]
+    return ImpulseResponseResult(ir=np.asarray(out), fs=fs, method="mls")

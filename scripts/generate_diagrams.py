@@ -375,6 +375,26 @@ _ES: dict[str, str] = {
         "Indicadores de campo: F_pIn , FT , FS",
     "Five acceptance criteria (Annex C); band invalid if P < 0":
         "Cinco criterios de aceptación (Anexo C); banda no válida si P < 0",
+    # d_room - ISO 3382-1/-2 room-acoustics measurement setup
+    "Room-acoustics measurement setup (ISO 3382-1 / ISO 3382-2)":
+        "Configuración de medición de acústica de salas (ISO 3382-1 / ISO 3382-2)",
+    "Room plan (top view)": "Planta de la sala (vista superior)",
+    "Microphone position": "Posición de micrófono",
+    "Loudspeaker source": "Fuente (altavoz)",
+    "ISO 3382-1 (positions):": "ISO 3382-1 (posiciones):",
+    "• ≥ 2 source positions": "• ≥ 2 posiciones de fuente",
+    "• mics ≥ 2 m apart": "• micrófonos ≥ 2 m entre sí",
+    "• ≥ 1 m from surfaces": "• ≥ 1 m de las superficies",
+    "• mic height 1.2 m": "• altura del micrófono 1,2 m",
+    "ISO 3382-2 — reverberation-time measurement grades":
+        "ISO 3382-2 — grados de medición del tiempo de reverberación",
+    "Source pos.": "Pos. fuente",
+    "Mic pos.": "Pos. micróf.",
+    "Source–mic comb.": "Comb. fuente–micróf.",
+    "Decays / comb.": "Decaim. / comb.",
+    "Survey": "Control",
+    "Engineering": "Ingeniería",
+    "Precision": "Precisión",
 }
 
 
@@ -2008,6 +2028,100 @@ def _d_speech_intelligibility(s: SVG, th: Theme) -> None:
            16, th.primary, "middle")
 
 
+def _d_room_measurement(s: SVG, th: Theme) -> None:
+    """Room-acoustics measurement layout (ISO 3382-1 positions, ISO 3382-2 grades).
+
+    A top-view room plan with two source positions and six microphone
+    positions plus the ISO 3382-1 spacing rules, and a table of the
+    ISO 3382-2:2008 Table 1 minimum position counts for the three grades.
+    """
+    # --- Room plan (top view) ------------------------------------------------
+    rx, ry, rw, rh = 60.0, 96.0, 500.0, 300.0
+    s.rect(rx, ry, rw, rh, th.panel, th.fg, rx=6, sw=2.4)
+    s.text(rx + 10, ry - 12, "Room plan (top view)", 20, th.fg, "start", bold=True)
+
+    # Two loudspeaker source positions (ISO 3382-1: at least two).
+    def _speaker(x: float, y: float, label: str) -> None:
+        s.rect(x - 13, y - 11, 26, 22, th.primary, th.fg, rx=3, sw=1.6)
+        s.circle(x, y, 5, th.bg, th.fg, 1.2)
+        s.text(x, y - 18, label, 18, th.primary, "middle", bold=True)
+
+    _speaker(rx + 70, ry + 70, "S1")
+    _speaker(rx + rw - 80, ry + rh - 70, "S2")
+
+    # Six microphone positions, asymmetric (ISO 3382-1: >= 2 m apart,
+    # >= 1 m from surfaces; >= 3 receivers per source in ISO 3382-2 precision).
+    mics = [
+        (rx + 180, ry + 90, "M1"),
+        (rx + 300, ry + 55, "M2"),
+        (rx + 420, ry + 130, "M3"),
+        (rx + 250, ry + 220, "M4"),
+        (rx + 380, ry + 250, "M5"),
+        (rx + 130, ry + 210, "M6"),
+    ]
+    for mx, my, label in mics:
+        s.circle(mx, my, 7, th.secondary, th.fg, 1.4)
+        s.text(mx + 12, my + 6, label, 17, th.fg, "start", bold=True)
+
+    # Spacing annotations.
+    m1 = (rx + 180, ry + 90)
+    m2 = (rx + 300, ry + 55)
+    s.line(m1[0], m1[1], m2[0], m2[1], th.accent, 1.6, dash="5,4")
+    s.text((m1[0] + m2[0]) / 2, (m1[1] + m2[1]) / 2 - 8,
+           "≥ 2 m", 17, th.accent, "middle", bold=True)
+    m6 = (rx + 130, ry + 210)
+    s.arrow(m6[0], m6[1] + 9, m6[0], ry + rh, th.muted, 1.4)
+    s.text(m6[0] - 8, (m6[1] + ry + rh) / 2 + 6, "≥ 1 m", 16, th.fg, "end")
+    # Minimum source-receiver distance guideline.
+    s.line(rx + 70, ry + 70, m1[0], m1[1], th.primary, 1.3, dash="4,4")
+
+    # Legend + ISO 3382-1 rules, to the right of the plan.
+    lx = rx + rw + 24
+    s.circle(lx + 8, ry + 16, 7, th.secondary, th.fg, 1.4)
+    s.text(lx + 24, ry + 22, "Microphone position", 17, th.fg, "start")
+    s.rect(lx, ry + 40, 16, 14, th.primary, th.fg, rx=2, sw=1.4)
+    s.text(lx + 24, ry + 52, "Loudspeaker source", 17, th.fg, "start")
+    for i, line in enumerate((
+        "ISO 3382-1 (positions):",
+        "• ≥ 2 source positions",
+        "• mics ≥ 2 m apart",
+        "• ≥ 1 m from surfaces",
+        "• mic height 1.2 m",
+        "d_min = 2√(V/cT)",
+    )):
+        bold = i == 0 or line.startswith("d_min")
+        s.text(lx, ry + 88 + i * 30, line, 17, th.fg, "start", bold=bold)
+
+    # --- ISO 3382-2 Table 1: minimum measurement positions per grade ---------
+    ty = ry + rh + 46.0
+    s.text(60, ty - 14, "ISO 3382-2 — reverberation-time measurement grades",
+           20, th.fg, "start", bold=True)
+    cols = [
+        (70.0, "Method", "start"),
+        (330.0, "Source pos.", "middle"),
+        (470.0, "Mic pos.", "middle"),
+        (630.0, "Source–mic comb.", "middle"),
+        (820.0, "Decays / comb.", "middle"),
+    ]
+    rows = [
+        ("Survey", "≥ 1", "≥ 2", "2", "1"),
+        ("Engineering", "≥ 2", "≥ 2", "6", "2"),
+        ("Precision", "≥ 2", "≥ 3", "12", "3"),
+    ]
+    tw, th_row = 840.0, 40.0
+    s.rect(60, ty, tw, th_row * (len(rows) + 1), "none", th.fg, rx=6, sw=1.8)
+    s.rect(60, ty, tw, th_row, th.panel, th.fg, rx=6, sw=1.8)
+    for cx, label, anchor in cols:
+        s.text(cx, ty + 26, label, 17, th.fg, anchor, bold=True)
+    for r, row in enumerate(rows):
+        yy = ty + th_row * (r + 1)
+        if r < len(rows) - 1:
+            s.line(60, yy + th_row, 60 + tw, yy + th_row, th.muted, 1.0)
+        for (cx, _, anchor), value in zip(cols, row):
+            col = th.primary if cx == 70.0 else th.fg
+            s.text(cx, yy + 26, value, 17, col, anchor, bold=(cx == 70.0))
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -2060,6 +2174,9 @@ DIAGRAMS = {
     "diagram_speech_intelligibility": (
         _d_speech_intelligibility,
         "Speech Intelligibility Index computation flow (ANSI S3.5-1997)", 600),
+    "diagram_room_measurement": (
+        _d_room_measurement,
+        "Room-acoustics measurement setup (ISO 3382-1 / ISO 3382-2)", 620),
 }
 
 

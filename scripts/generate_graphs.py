@@ -122,6 +122,17 @@ _ES_EXACT = {
     "In-situ road-surface absorption (ISO 13472-1)":
         "Absorción in situ de pavimentos (ISO 13472-1)",
     "Absorption coefficient alpha": "Coeficiente de absorción alpha",
+    # Human vibration (ISO 8041-1 / ISO 2631 / ISO 5349 / 2002/44/EC)
+    "Whole-body vertical weighting Wk (ISO 8041-1)":
+        "Ponderación vertical de cuerpo entero Wk (ISO 8041-1)",
+    "Weighting factor [dB]": "Factor de ponderación [dB]",
+    "r.m.s. acceleration [m/s$^2$]": "Aceleración eficaz [m/s$^2$]",
+    "Unweighted $a_i$": "Sin ponderar $a_i$",
+    "Weighted $W_i\\,a_i$ (Wk)": "Ponderada $W_i\\,a_i$ (Wk)",
+    "Daily exposure A(8) [m/s$^2$]": "Exposición diaria A(8) [m/s$^2$]",
+    "brush-saw": "desbrozadora",
+    "felling": "tala",
+    "stripping": "descortezado",
     # Precision sound power (ISO 3745 / ISO 9614-3)
     "Sound power level LW [dB]": "Nivel de potencia sonora LW [dB]",
     "Non-applicable band": "Banda no aplicable",
@@ -374,6 +385,11 @@ _ES_PATTERNS = [
      r"Potencia sonora de precisión (ISO 3745)  LWA = \1 dB(A)"),
     (r"^Precision intensity scanning \(ISO 9614-3\)  LWA = (.+) dB\(A\)$",
      r"Barrido de intensidad de precisión (ISO 9614-3)  LWA = \1 dB(A)"),
+    # Human-vibration dynamic titles (numeric a_w / A(8))
+    (r"^Weighted seat acceleration \(ISO 2631-1\)  (.+)$",
+     r"Aceleración ponderada del asiento (ISO 2631-1)  \1"),
+    (r"^Hand-arm daily exposure \(ISO 5349 / 2002-44-EC\)  (.+)$",
+     r"Exposición diaria mano-brazo (ISO 5349 / 2002-44-EC)  \1"),
 ]
 
 
@@ -3069,6 +3085,124 @@ def generate_intensity_scan_power(output_dir: str) -> None:
     plt.close()
 
 
+def generate_vibration_weighting(output_dir: str) -> None:
+    """ISO 8041-1: the whole-body vertical weighting Wk over its band."""
+    print("Generating vibration_weighting.png...")
+    from phonometry import frequency_weighting
+
+    # A user evaluates the principal ISO 2631-1 weighting Wk on a fine
+    # frequency grid across the whole-body band (0,4-100 Hz). The result is the
+    # ISO 8041-1 cascade H(f): a gentle +0,5 dB peak near 6 Hz, a band-limiting
+    # roll-off below 0,4 Hz and above ~16 Hz.
+    freqs = np.geomspace(0.4, 100.0, 240)
+    result = frequency_weighting("Wk", freqs)
+
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    ax.semilogx(result.frequencies, result.magnitude_db, color=COLOR_PRIMARY,
+                linewidth=1.9, zorder=3)
+    ax.axhline(0.0, color=COLOR_FG, linewidth=0.8, alpha=0.4, zorder=1)
+    ax.set_title("Whole-body vertical weighting Wk (ISO 8041-1)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Weighting factor [dB]")
+    ax.set_xlim(0.4, 100.0)
+    ax.set_ylim(-40.0, 5.0)
+    from matplotlib.ticker import NullFormatter
+    ax.set_xticks([0.5, 1, 2, 5, 10, 20, 50, 100])
+    # Explicit string labels install a FixedFormatter so the Spanish pass can
+    # apply the decimal comma (a log-axis ScalarFormatter would not be caught).
+    ax.set_xticklabels(["0.5", "1", "2", "5", "10", "20", "50", "100"])
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "vibration_weighting.png"))
+    plt.close()
+
+
+def generate_weighted_acceleration(output_dir: str) -> None:
+    """ISO 2631-1: measured seat spectrum weighted to a_w (Eq. (9))."""
+    print("Generating weighted_acceleration.png...")
+    from phonometry import weighted_acceleration
+
+    # A measured vertical seat-pan acceleration spectrum (r.m.s. per one-third
+    # octave, m/s^2) from a vehicle seat: energy concentrated in the 2-8 Hz
+    # whole-body range. Weighting it with Wk gives the health-relevant a_w.
+    freqs = np.array([1.0, 1.25, 1.6, 2.0, 2.5, 3.15, 4.0, 5.0, 6.3, 8.0,
+                      10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 63.0, 80.0])
+    accel = np.array([0.18, 0.24, 0.33, 0.46, 0.52, 0.55, 0.48, 0.39, 0.31,
+                      0.26, 0.21, 0.17, 0.13, 0.10, 0.078, 0.060, 0.045,
+                      0.028, 0.020])
+    result = weighted_acceleration(accel, freqs, "Wk")
+
+    positions = np.arange(freqs.size, dtype=float)
+    width = 0.4
+    fig, ax = plt.subplots(figsize=(10.5, 6.3))
+    ax.bar(positions - width / 2, result.band_accelerations, width,
+           color=COLOR_GRID, edgecolor=COLOR_FG, linewidth=0.5,
+           label="Unweighted $a_i$", zorder=2)
+    ax.bar(positions + width / 2, result.weighted, width, color=COLOR_PRIMARY,
+           edgecolor=COLOR_FG, linewidth=0.5, label="Weighted $W_i\\,a_i$ (Wk)",
+           zorder=3)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax.set_title(
+        f"Weighted seat acceleration (ISO 2631-1)  $a_w$ = {result.overall:.3f} "
+        "m/s$^2$", fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("r.m.s. acceleration [m/s$^2$]")
+    ax.legend(loc="upper right", fontsize=9)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "weighted_acceleration.png"))
+    plt.close()
+
+
+def generate_daily_vibration_exposure(output_dir: str) -> None:
+    """ISO 5349 + Directive 2002/44/EC: A(8) vs the EAV/ELV thresholds."""
+    print("Generating daily_vibration_exposure.png...")
+    from phonometry import daily_vibration_exposure
+
+    # A forestry worker's day across three chain-saw tasks (the ISO 5349-2
+    # Annex E.3 worked example): each task's a_hv and duration give a partial
+    # exposure A_i(8); they combine to A(8) = 3,6 m/s^2, assessed against the
+    # hand-arm action (2,5) and limit (5,0) values of Directive 2002/44/EC.
+    result = daily_vibration_exposure(
+        [4.6, 6.0, 3.6],
+        [2 * 3600.0, 1 * 3600.0, 2 * 3600.0],
+        kind="hav",
+        labels=["brush-saw", "felling", "stripping"],
+    )
+
+    labels = [*result.labels, "A(8)"]
+    values = [*result.partials.tolist(), result.a8]
+    positions = np.arange(len(values), dtype=float)
+    colors = [COLOR_GRID] * result.partials.size + [COLOR_PRIMARY]
+    fig, ax = plt.subplots(figsize=(9.5, 6.3))
+    ax.bar(positions, values, width=0.62, color=colors, edgecolor=COLOR_FG,
+           linewidth=0.6, zorder=3)
+    eav = result.assessment.action_value
+    elv = result.assessment.limit_value
+    ax.axhline(eav, color=COLOR_TERTIARY, linestyle="--", linewidth=1.6,
+               label=f"EAV = {eav:g} m/s$^2$", zorder=2)
+    ax.axhline(elv, color=COLOR_SECONDARY, linestyle="--", linewidth=1.6,
+               label=f"ELV = {elv:g} m/s$^2$", zorder=2)
+    ax.set_xticks(positions)
+    ax.set_xticklabels(labels, rotation=30, ha="right")
+    ax.set_ylabel("Daily exposure A(8) [m/s$^2$]")
+    ax.set_ylim(0.0, elv * 1.2)
+    ax.set_title(
+        f"Hand-arm daily exposure (ISO 5349 / 2002-44-EC)  A(8) = "
+        f"{result.a8:.2f} m/s$^2$", fontweight="bold", pad=12)
+    ax.legend(loc="upper left", fontsize=9)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "daily_vibration_exposure.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -3131,6 +3265,12 @@ def generate_all(img_dir: str) -> None:
     generate_insitu_absorption(img_dir)
     generate_precision_anechoic_power(img_dir)
     generate_intensity_scan_power(img_dir)
+
+    # Human vibration (ISO 8041-1, ISO 2631-1/-2/-4, ISO 5349-1/-2,
+    # Directive 2002/44/EC): frequency weighting, weighted a_w, daily A(8)
+    generate_vibration_weighting(img_dir)
+    generate_weighted_acceleration(img_dir)
+    generate_daily_vibration_exposure(img_dir)
 
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)

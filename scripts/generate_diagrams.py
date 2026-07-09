@@ -187,6 +187,24 @@ _ES: dict[str, str] = {
         "riesgo de lesión lumbar de Weibull, por sexo (Tabla C.1/C.2)",
     "Multiple-shock spinal-response dose and injury risk (ISO 2631-5)":
         "Dosis espinal por choques múltiples y riesgo de lesión (ISO 2631-5)",
+    "Surfaces  (Si, αs,i)": "Superficies  (Si, αs,i)",
+    "area and absorption per band": "área y absorción por banda",
+    "Objects  (Vobj)": "Objetos  (Vobj)",
+    "Aobj = Vobj^(2/3)  (Formula 4)": "Aobj = Vobj^(2/3)  (Fórmula 4)",
+    "Equivalent absorption area  A  (clause 4.3, Formula 1)":
+        "Área de absorción equivalente  A  (cláusula 4.3, Fórmula 1)",
+    "A = Σ αs,i·Si + Σ Aobj + Aair;   Aair = 4·m·V·(1 − ψ)  (Formula 2)":
+        "A = Σ αs,i·Si + Σ Aobj + Aair;   Aair = 4·m·V·(1 − ψ)  (Fórmula 2)",
+    "Object fraction  ψ = Σ Vobj / V   (Formula 3)":
+        "Fracción de objetos  ψ = Σ Vobj / V   (Fórmula 3)",
+    "air absorption negligible below 1 kHz for V < 200 m³":
+        "absorción del aire despreciable bajo 1 kHz si V < 200 m³",
+    "Reverberation time  T = 55.3/co · V·(1 − ψ) / A  (Formula 5)":
+        "Tiempo de reverberación  T = 55.3/co · V·(1 − ψ) / A  (Fórmula 5)",
+    "co = 345.6 m/s so 55.3/co = 0.16  (clause 4.4)":
+        "co = 345.6 m/s, así 55.3/co = 0.16  (cláusula 4.4)",
+    "Absorption area and reverberation time of a room (EN 12354-6)":
+        "Área de absorción y tiempo de reverberación de una sala (EN 12354-6)",
     "Speech  Ei'": "Habla  Ei'",
     "Noise  Ni'": "Ruido  Ni'",
     "Threshold  Ti'": "Umbral  Ti'",
@@ -2541,6 +2559,48 @@ def _d_iso2631_5(s: SVG, th: Theme) -> None:
            th.muted, "middle")
 
 
+def _d_en12354_6(s: SVG, th: Theme) -> None:
+    """Absorption area and reverberation time of a room (EN 12354-6:2003)."""
+    cx = 450.0
+    bw, bh = 660.0, 58.0
+    x0 = cx - bw / 2
+
+    # --- Inputs (two feeder boxes) -----------------------------------------
+    iw = 320.0
+    s.rect(cx - bw / 2, 48, iw, bh, th.panel, th.fg, rx=10, sw=2)
+    s.text(cx - bw / 2 + iw / 2, 72, "Surfaces  (Si, αs,i)", 17, th.fg, "middle",
+           bold=True)
+    s.text(cx - bw / 2 + iw / 2, 92, "area and absorption per band", 13, th.muted,
+           "middle")
+    s.rect(cx + bw / 2 - iw, 48, iw, bh, th.panel, th.fg, rx=10, sw=2)
+    s.text(cx + bw / 2 - iw / 2, 72, "Objects  (Vobj)", 17, th.fg, "middle",
+           bold=True)
+    s.text(cx + bw / 2 - iw / 2, 92, "Aobj = Vobj^(2/3)  (Formula 4)", 13,
+           th.muted, "middle")
+    s.arrow(cx - bw / 2 + iw / 2, 106, cx - 60, 150, th.fg, 1.8)
+    s.arrow(cx + bw / 2 - iw / 2, 106, cx + 60, 150, th.fg, 1.8)
+
+    def _step(y: float, l1: str, l2: str, color: str) -> None:
+        s.rect(x0, y, bw, bh, th.panel, color, rx=10, sw=2)
+        s.text(cx, y + 25, l1, 17, th.fg, "middle", bold=True)
+        s.text(cx, y + 45, l2, 13, th.muted, "middle")
+
+    _step(150, "Equivalent absorption area  A  (clause 4.3, Formula 1)",
+          "A = Σ αs,i·Si + Σ Aobj + Aair;   Aair = 4·m·V·(1 − ψ)  (Formula 2)",
+          th.primary)
+    _step(238, "Object fraction  ψ = Σ Vobj / V   (Formula 3)",
+          "air absorption negligible below 1 kHz for V < 200 m³", th.fg)
+    s.arrow(cx, 210, cx, 238, th.fg, 1.8)
+    s.arrow(cx, 296, cx, 324, th.fg, 1.8)
+
+    # --- Output -------------------------------------------------------------
+    s.rect(x0, 324, bw, 58, "none", th.primary, rx=10, sw=2.4)
+    s.text(cx, 349, "Reverberation time  T = 55.3/co · V·(1 − ψ) / A  (Formula 5)",
+           17, th.fg, "middle", bold=True)
+    s.text(cx, 369, "co = 345.6 m/s so 55.3/co = 0.16  (clause 4.4)", 13,
+           th.muted, "middle")
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -2614,6 +2674,9 @@ DIAGRAMS = {
     "diagram_iso2631_5": (
         _d_iso2631_5,
         "Multiple-shock spinal-response dose and injury risk (ISO 2631-5)", 580),
+    "diagram_en12354_6": (
+        _d_en12354_6,
+        "Absorption area and reverberation time of a room (EN 12354-6)", 410),
 }
 
 

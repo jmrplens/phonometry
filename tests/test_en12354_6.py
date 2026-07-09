@@ -1,0 +1,151 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""Tests for EN 12354-6:2003 sound absorption in enclosed spaces.
+
+Validated against the three worked cases of the standard's Annex E (a
+4,54 x 2,73 x 2,40 = 29,75 m3 room, 1000 Hz octave band).
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+from reference_data import (
+    EN12354_6_A_BARE,
+    EN12354_6_A_OBJECTS,
+    EN12354_6_T_BARE,
+)
+
+from phonometry import en12354_6 as m
+
+_VOLUME = 29.75
+# The six surfaces of the bare room (area, absorption coefficient at 1000 Hz).
+_BARE_SURFACES = [
+    (12.39, 0.05),  # floor
+    (12.39, 0.02),  # ceiling
+    (10.90, 0.04),  # long wall
+    (10.90, 0.04),  # side wall
+    (6.55, 0.04),   # side wall
+    (6.55, 0.04),   # glass facade
+]
+
+
+# ---------------------------------------------------------------------------
+# Annex E worked cases.
+# ---------------------------------------------------------------------------
+
+
+def test_annex_e_case1_bare_room() -> None:
+    a = m.equivalent_absorption_area(_BARE_SURFACES)
+    assert a == pytest.approx(EN12354_6_A_BARE, abs=0.01)
+    t = m.reverberation_time(a, _VOLUME)
+    assert t == pytest.approx(EN12354_6_T_BARE, abs=0.05)
+
+
+def test_annex_e_case1_air_note() -> None:
+    # With air absorption Aair = 0.12 m2 the reverberation time becomes 2.0 s.
+    a = m.equivalent_absorption_area(_BARE_SURFACES)
+    aair = m.air_absorption_area(m.AIR_ATTENUATION["20C_50-70"][3], _VOLUME)
+    assert aair == pytest.approx(0.12, abs=0.005)
+    assert m.reverberation_time(a + aair, _VOLUME) == pytest.approx(2.0, abs=0.05)
+
+
+def test_annex_e_case2_with_objects() -> None:
+    volumes = [0.15, 0.60, 0.05, 0.05, 0.65, 0.65]
+    aobj = m.hard_object_absorption(volumes)
+    assert float(np.sum(aobj)) == pytest.approx(2.77, abs=0.01)
+    psi = m.object_fraction(volumes, _VOLUME)
+    assert psi == pytest.approx(0.072, abs=0.001)
+    a = m.equivalent_absorption_area(_BARE_SURFACES, objects=aobj)
+    assert a == pytest.approx(EN12354_6_A_OBJECTS, abs=0.01)
+    t = m.reverberation_time(a, _VOLUME, object_fraction=psi)
+    assert t == pytest.approx(0.9, abs=0.05)
+
+
+def test_annex_e_case3_absorbing_wall() -> None:
+    # One long wall lined for 90 % of its area with alpha_s = 0.85.
+    surfaces = [
+        (12.39, 0.05), (12.39, 0.02),
+        (1.09, 0.04), (9.81, 0.85),
+        (10.90, 0.04), (6.55, 0.04), (6.55, 0.04),
+    ]
+    a = m.equivalent_absorption_area(surfaces)
+    assert a == pytest.approx(10.21, abs=0.01)
+    assert m.reverberation_time(a, _VOLUME) == pytest.approx(0.5, abs=0.05)
+
+
+# ---------------------------------------------------------------------------
+# Formula checks.
+# ---------------------------------------------------------------------------
+
+
+def test_hard_object_absorption_formula_4() -> None:
+    assert float(m.hard_object_absorption(0.65)) == pytest.approx(0.65 ** (2.0 / 3.0))
+    assert float(m.hard_object_absorption(1.0)) == pytest.approx(1.0)
+
+
+def test_air_absorption_area_formula_2() -> None:
+    # Aair = 4*m*V*(1 - psi).
+    assert m.air_absorption_area(1e-3, 100.0, 0.1) == pytest.approx(
+        4.0 * 1e-3 * 100.0 * 0.9
+    )
+
+
+def test_reverberation_factor_is_016() -> None:
+    # 55.3 / c0 = 0.16 for the standard's c0 = 345.6 m/s.
+    assert m._RT_CONSTANT / m.SPEED_OF_SOUND == pytest.approx(0.16, abs=1e-4)
+
+
+def test_object_fraction_formula_3() -> None:
+    assert m.object_fraction([1.0, 2.0], 30.0) == pytest.approx(0.1)
+
+
+# ---------------------------------------------------------------------------
+# Per-band spectrum and validation.
+# ---------------------------------------------------------------------------
+
+
+def test_enclosed_space_reverberation_spectrum() -> None:
+    alpha = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70]
+    result = m.enclosed_space_reverberation(
+        [(20.0, alpha)], 50.0, air_condition="20C_50-70"
+    )
+    assert result.frequencies.shape == (7,)
+    assert result.reverberation_time.shape == (7,)
+    # More absorption at high frequency shortens the reverberation time.
+    assert result.reverberation_time[0] > result.reverberation_time[-1]
+    # Cross-check the 1000 Hz band against the primitives.
+    aair = m.air_absorption_area(m.AIR_ATTENUATION["20C_50-70"][3], 50.0)
+    a_1k = m.equivalent_absorption_area([(20.0, 0.40)], air_area=aair)
+    assert result.absorption_area[3] == pytest.approx(a_1k)
+
+
+def test_equivalent_area_accepts_single_object() -> None:
+    # A room with a single hard object (a 0-d array from hard_object_absorption).
+    aobj = m.hard_object_absorption(0.65)
+    a = m.equivalent_absorption_area([(12.39, 0.05)], objects=aobj)
+    assert a == pytest.approx(12.39 * 0.05 + 0.65 ** (2.0 / 3.0))
+
+
+def test_equivalent_area_per_band_objects() -> None:
+    # Objects with per-band areas come as a (n_objects, n_bands) array.
+    objects = np.array([[1.0, 2.0, 3.0], [0.5, 0.5, 0.5]])
+    a = m.equivalent_absorption_area([(10.0, [0.1, 0.2, 0.3])], objects=objects)
+    np.testing.assert_allclose(a, [2.5, 4.5, 6.5])
+
+
+def test_air_condition_none_neglects_air() -> None:
+    result = m.enclosed_space_reverberation([(20.0, 0.5)], 50.0, air_condition=None)
+    assert result.absorption_area[0] == pytest.approx(10.0)
+
+
+def test_invalid_inputs_raise() -> None:
+    with pytest.raises(ValueError, match="volume must be positive"):
+        m.object_fraction([1.0], 0.0)
+    with pytest.raises(ValueError, match="non-negative"):
+        m.hard_object_absorption([-1.0])
+    with pytest.raises(ValueError, match="absorption_area must be positive"):
+        m.reverberation_time(0.0, 30.0)
+    with pytest.raises(ValueError, match="volume must be positive"):
+        m.reverberation_time(2.0, 0.0)
+    with pytest.raises(ValueError, match="air_condition must be"):
+        m.enclosed_space_reverberation([(20.0, 0.5)], 50.0, air_condition="hot")

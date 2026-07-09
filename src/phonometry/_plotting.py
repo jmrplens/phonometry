@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from .room_acoustics import DecayCurve, RoomAcousticsResult
     from .room_ir import ImpulseResponseResult
     from .hearing import AgeThresholdResult
+    from .en12354_6 import ReverberationResult
     from .iso1999 import HtlanResult, NiptsResult
     from .iso2631_5 import MultipleShockResult
     from .ntacou112 import ImpulseProminence
@@ -1592,6 +1593,32 @@ def plot_impulse_prominence(
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="upper left", fontsize="small")
     ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_en12354_6(
+    result: "ReverberationResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Reverberation time over the octave bands (EN 12354-6).
+
+    :param result: A :class:`~phonometry.en12354_6.ReverberationResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the reverberation-time ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    rt = np.asarray(result.reverberation_time, dtype=np.float64)
+    kwargs.setdefault("color", "#1f77b4")
+    kwargs.setdefault("marker", "o")
+    ax.semilogx(freq, rt, **kwargs)
+    ax.set_xticks(freq)
+    ax.set_xticklabels([f"{f:g}" if f < 1000 else f"{f / 1000:g}k" for f in freq])
+    ax.set_xlabel("Octave-band centre frequency [Hz]")
+    ax.set_ylabel("Reverberation time $T$ [s]")
+    ax.set_title("EN 12354-6 reverberation time")
+    ax.set_ylim(bottom=0.0)
+    ax.grid(True, which="both", alpha=0.3)
     return ax
 
 

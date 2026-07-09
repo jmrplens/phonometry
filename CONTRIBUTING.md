@@ -102,9 +102,11 @@ against numpy/scipy, pandas, matplotlib, scikit-learn, statsmodels and librosa).
 
 Renames of **published** API keep the old name working for one cycle:
 
-- Warn with `warnings.warn(msg, DeprecationWarning, stacklevel=2)` using the
-  NEP 23 message format (deprecated-since version, removal version, and the
-  replacement to use).
+- Warn with `warnings.warn(msg, DeprecationWarning, stacklevel=...)` using
+  the NEP 23 message format (deprecated-since version, removal version, and
+  the replacement to use). Pick the `stacklevel` so the warning points at the
+  *caller's* line: `2` when warning directly from the deprecated function,
+  `3` when the warning is emitted through a shared helper.
 - Renamed **modules**: keep a shim using a PEP 562 module `__getattr__`
   (scipy pattern).
 - Renamed **keyword arguments**: accept the old keyword with a `"deprecated"`

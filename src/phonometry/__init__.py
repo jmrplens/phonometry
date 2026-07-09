@@ -38,6 +38,11 @@ from .loudness_moore_glasberg_time import (
 )
 from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
 from .sharpness import sharpness_din, sharpness_din_from_specific
+from .sii import (
+    SIIResult,
+    speech_intelligibility_index,
+    standard_speech_spectrum,
+)
 from .sti import STIResult, sti_from_impulse_response, stipa, stipa_signal
 from .tonality_ecma import EcmaTonality, tonality_ecma
 from .roughness_ecma import EcmaRoughness, roughness_ecma
@@ -378,6 +383,9 @@ __all__ = [
     "stipa",
     "stipa_signal",
     "STIResult",
+    "speech_intelligibility_index",
+    "standard_speech_spectrum",
+    "SIIResult",
     "sweep_signal",
     "inverse_filter",
     "impulse_response",

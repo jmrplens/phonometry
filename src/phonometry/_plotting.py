@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from .room_acoustics import DecayCurve, RoomAcousticsResult
     from .tonality_ecma import EcmaTonality
     from .roughness_ecma import EcmaRoughness
+    from .sii import SIIResult
     from .sti import STIResult
 
 _INSTALL_HINT = (
@@ -406,6 +407,34 @@ def plot_sti(result: STIResult, ax: Axes | None = None, **kwargs: Any) -> Axes:
     ax.set_ylabel("Modulation transfer index MTI")
     ax.set_ylim(0.0, 1.0)
     ax.set_title(f"STI = {result.sti:.2f}  (rating {result.rating})")
+    ax.grid(True, axis="y", alpha=0.3)
+    return ax
+
+
+def plot_sii(result: "SIIResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """Per-band audibility and its importance-weighted contribution to the SII.
+
+    :param result: A :class:`~phonometry.sii.SIIResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the weighted-contribution :meth:`bar`.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    audibility = np.asarray(result.band_audibility, dtype=np.float64)
+    contribution = audibility * np.asarray(result.band_importance, dtype=np.float64)
+    positions = np.arange(freqs.size)
+    ax.bar(positions, audibility, color="#c6dbef", label="Band audibility $A_i$")
+    kwargs.setdefault("color", "#1f77b4")
+    ax.bar(positions, contribution / contribution.max(), width=0.5,
+           label=r"Importance-weighted $I_i A_i$ (scaled)", **kwargs)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([_format_freq(f) for f in freqs], rotation=45, ha="right")
+    ax.set_xlabel("One-third-octave band [Hz]")
+    ax.set_ylabel("Band audibility")
+    ax.set_ylim(0.0, 1.0)
+    ax.set_title(f"SII = {result.sii:.3f}")
+    ax.legend(loc="upper right", fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
     return ax
 

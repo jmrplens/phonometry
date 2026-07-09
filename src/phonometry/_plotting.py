@@ -1399,14 +1399,21 @@ def plot_noise_criterion(
     kwargs.setdefault("color", "#1f77b4")
     kwargs.setdefault("label", "Measured")
     ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
-    # Nearest-band lookup rather than float equality against the stored value.
-    governing = int(np.argmin(np.abs(freqs - result.governing_frequency)))
-    ax.plot(
-        [result.governing_frequency],
-        [levels[governing]],
-        "D", color="#d62728", zorder=4,
-        label=f"Governing band ({_format_freq(result.governing_frequency)})",
-    )
+    # Nearest *valid* band rather than float equality against the stored
+    # value; the marker sits on that band so its x and y stay paired.
+    candidates = np.flatnonzero(valid)
+    if candidates.size:
+        governing = int(
+            candidates[
+                np.argmin(np.abs(freqs[candidates] - result.governing_frequency))
+            ]
+        )
+        ax.plot(
+            [freqs[governing]],
+            [levels[governing]],
+            "D", color="#d62728", zorder=4,
+            label=f"Governing band ({_format_freq(result.governing_frequency)})",
+        )
     _freq_axis(ax, OCTAVE_BANDS)
     ax.set_ylabel("Octave-band SPL [dB]")
     ax.set_title(

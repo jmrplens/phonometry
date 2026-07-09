@@ -12,7 +12,7 @@ EN 12354 (los miembros de aislamiento aéreo y de impacto están en
 phonometry implementa el modelo normativo de la cláusula 4. (El método
 informativo del Anexo D para recintos irregulares queda fuera de alcance.)
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6_es.svg" alt="Flujo desde las superficies y objetos de la sala hasta el área de absorción equivalente total A, la fracción de objetos psi, y el tiempo de reverberación T = 55.3/co por V por (1 menos psi) entre A" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6_es_dark.svg" alt="Flujo desde las superficies y objetos de la sala hasta el área de absorción equivalente total A, la fracción de objetos psi, y el tiempo de reverberación T = 55.3/co por V por (1 menos psi) entre A" style="width:82%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6_es.svg" alt="Flujo desde las superficies y objetos de la sala hasta el área de absorción equivalente total A, la fracción de objetos psi, y el tiempo de reverberación T = 55.3/c0 por V por (1 menos psi) entre A" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6_es_dark.svg" alt="Flujo desde las superficies y objetos de la sala hasta el área de absorción equivalente total A, la fracción de objetos psi, y el tiempo de reverberación T = 55.3/c0 por V por (1 menos psi) entre A" style="width:82%">
 
 ## 1. Área de absorción equivalente (cláusula 4.3)
 

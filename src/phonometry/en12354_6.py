@@ -24,6 +24,7 @@ distribution is out of scope.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
@@ -69,6 +70,20 @@ AIR_ATTENUATION: dict[str, np.ndarray] = {
 DEFAULT_AIR_CONDITION = "20C_50-70"
 
 
+def _require_positive(value: float, name: str) -> float:
+    """Validate that *value* is a positive finite number (rejects NaN)."""
+    if math.isnan(value) or value <= 0.0:
+        raise ValueError(f"{name} must be positive.")
+    return float(value)
+
+
+def _require_fraction(value: float, name: str) -> float:
+    """Validate that *value* is a fraction in ``[0, 1)`` (rejects NaN)."""
+    if math.isnan(value) or value < 0.0 or value >= 1.0:
+        raise ValueError(f"{name} must be in the range [0, 1).")
+    return float(value)
+
+
 # ---------------------------------------------------------------------------
 # Clause 4.3 - total equivalent absorption area.
 # ---------------------------------------------------------------------------
@@ -81,10 +96,14 @@ def object_fraction(object_volumes: ArrayLike, volume: float) -> float:
     :param volume: Volume of the empty enclosed space ``V``, m3.
     :return: The object fraction ``psi = sum(Vobj) / V``.
     """
-    if not volume > 0.0:
-        raise ValueError("volume must be positive.")
-    total = float(np.sum(np.asarray(object_volumes, dtype=np.float64)))
-    return total / volume
+    volume = _require_positive(volume, "volume")
+    vols = np.asarray(object_volumes, dtype=np.float64)
+    if np.any(vols < 0.0):
+        raise ValueError("object volumes must be non-negative.")
+    psi = float(np.sum(vols)) / volume
+    if psi >= 1.0:
+        raise ValueError("the object volumes cannot exceed the room volume.")
+    return psi
 
 
 def hard_object_absorption(object_volume: ArrayLike) -> np.ndarray:
@@ -113,9 +132,12 @@ def air_absorption_area(
     :param object_fraction: Object fraction ``psi`` (0-1).
     :return: The air absorption area ``Aair = 4*m*V*(1 - psi)``, m2.
     """
-    if not volume > 0.0:
-        raise ValueError("volume must be positive.")
-    area = 4.0 * np.asarray(m, dtype=np.float64) * volume * (1.0 - object_fraction)
+    volume = _require_positive(volume, "volume")
+    object_fraction = _require_fraction(object_fraction, "object_fraction")
+    m_arr = np.asarray(m, dtype=np.float64)
+    if np.any(m_arr < 0.0):
+        raise ValueError("the attenuation coefficient m must be non-negative.")
+    area = 4.0 * m_arr * volume * (1.0 - object_fraction)
     return float(area) if area.ndim == 0 else area
 
 
@@ -140,12 +162,19 @@ def equivalent_absorption_area(
         all-scalar inputs, otherwise a per-band array.
     """
     total = np.asarray(air_area, dtype=np.float64)
+    if np.any(total < 0.0):
+        raise ValueError("air_area must be non-negative.")
     for area, alpha in surfaces:
         if area < 0.0:
             raise ValueError("surface areas must be non-negative.")
-        total = total + area * np.asarray(alpha, dtype=np.float64)
+        alpha_arr = np.asarray(alpha, dtype=np.float64)
+        if np.any(alpha_arr < 0.0):
+            raise ValueError("absorption coefficients must be non-negative.")
+        total = total + area * alpha_arr
     obj = np.atleast_1d(np.asarray(objects, dtype=np.float64))
     if obj.size:
+        if np.any(obj < 0.0):
+            raise ValueError("object absorption areas must be non-negative.")
         total = total + obj.sum(axis=0)
     return float(total) if total.ndim == 0 else total
 
@@ -171,10 +200,9 @@ def reverberation_time(
         :data:`SPEED_OF_SOUND`, giving the factor ``0.16``).
     :return: The reverberation time ``T = 55.3/c0 * V*(1 - psi) / A``, s.
     """
-    if not volume > 0.0:
-        raise ValueError("volume must be positive.")
-    if not speed_of_sound > 0.0:
-        raise ValueError("speed_of_sound must be positive.")
+    volume = _require_positive(volume, "volume")
+    speed_of_sound = _require_positive(speed_of_sound, "speed_of_sound")
+    object_fraction = _require_fraction(object_fraction, "object_fraction")
     area = np.asarray(absorption_area, dtype=np.float64)
     if np.any(area <= 0.0):
         raise ValueError("absorption_area must be positive.")
@@ -233,11 +261,18 @@ def enclosed_space_reverberation(
     :param object_fraction: Object fraction ``psi`` (0-1).
     :param air_condition: A key of :data:`AIR_ATTENUATION` (e.g.
         ``"20C_50-70"``) to include air absorption, or ``None`` to neglect it.
-    :param frequencies: Octave-band centre frequencies, in hertz.
+    :param frequencies: Octave-band centre frequencies, in hertz. The built-in
+        ``air_condition`` profiles require the standard :data:`OCTAVE_BANDS`.
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The :class:`ReverberationResult`.
     """
     freq = np.asarray(frequencies, dtype=np.float64)
+    if air_condition is not None and not np.array_equal(freq, OCTAVE_BANDS):
+        raise ValueError(
+            "the built-in air_condition profiles cover the standard "
+            "OCTAVE_BANDS only; for custom frequencies compute the air term "
+            "with air_absorption_area and pass it to equivalent_absorption_area."
+        )
     if air_condition is None:
         air_area: np.ndarray | float = 0.0
     elif air_condition in AIR_ATTENUATION:

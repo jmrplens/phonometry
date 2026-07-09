@@ -10,7 +10,7 @@ impact insulation members live in [Building Acoustics](building-acoustics.md)).
 phonometry implements the normative Clause 4 model. (The informative Annex D
 method for irregular spaces is out of scope.)
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6.svg" alt="Flow from the room surfaces (area and absorption per band) and objects (volume, giving an equivalent area Vobj to the two-thirds power) into the total equivalent absorption area A = sum of alpha times S plus the object areas plus air absorption, then the object fraction psi, and finally the reverberation time T = 55.3/co times V times (1 minus psi) over A" width="82%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6.svg" alt="Flow from the room surfaces (area and absorption per band) and objects (volume, giving an equivalent area Vobj to the two-thirds power) into the total equivalent absorption area A = sum of alpha times S plus the object areas plus air absorption, then the object fraction psi, and finally the reverberation time T = 55.3/c0 times V times (1 minus psi) over A" width="82%"></picture>
 
 ## 1. Equivalent absorption area (clause 4.3)
 

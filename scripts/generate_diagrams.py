@@ -199,10 +199,10 @@ _ES: dict[str, str] = {
         "Fracción de objetos  ψ = Σ Vobj / V   (Fórmula 3)",
     "air absorption negligible below 1 kHz for V < 200 m³":
         "absorción del aire despreciable bajo 1 kHz si V < 200 m³",
-    "Reverberation time  T = 55.3/co · V·(1 − ψ) / A  (Formula 5)":
-        "Tiempo de reverberación  T = 55.3/co · V·(1 − ψ) / A  (Fórmula 5)",
-    "co = 345.6 m/s so 55.3/co = 0.16  (clause 4.4)":
-        "co = 345.6 m/s, así 55.3/co = 0.16  (cláusula 4.4)",
+    "Reverberation time  T = 55.3/c₀ · V·(1 − ψ) / A  (Formula 5)":
+        "Tiempo de reverberación  T = 55.3/c₀ · V·(1 − ψ) / A  (Fórmula 5)",
+    "c₀ = 345.6 m/s so 55.3/c₀ = 0.16  (clause 4.4)":
+        "c₀ = 345.6 m/s, así 55.3/c₀ = 0.16  (cláusula 4.4)",
     "Absorption area and reverberation time of a room (EN 12354-6)":
         "Área de absorción y tiempo de reverberación de una sala (EN 12354-6)",
     "Speech  Ei'": "Habla  Ei'",
@@ -2595,9 +2595,9 @@ def _d_en12354_6(s: SVG, th: Theme) -> None:
 
     # --- Output -------------------------------------------------------------
     s.rect(x0, 324, bw, 58, "none", th.primary, rx=10, sw=2.4)
-    s.text(cx, 349, "Reverberation time  T = 55.3/co · V·(1 − ψ) / A  (Formula 5)",
+    s.text(cx, 349, "Reverberation time  T = 55.3/c₀ · V·(1 − ψ) / A  (Formula 5)",
            17, th.fg, "middle", bold=True)
-    s.text(cx, 369, "co = 345.6 m/s so 55.3/co = 0.16  (clause 4.4)", 13,
+    s.text(cx, 369, "c₀ = 345.6 m/s so 55.3/c₀ = 0.16  (clause 4.4)", 13,
            th.muted, "middle")
 
 

@@ -12,7 +12,7 @@ impact insulation members live in
 implements the normative Clause 4 model. (The informative Annex D method for
 irregular spaces is out of scope.)
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6.svg" alt="Flow from the room surfaces and objects into the total equivalent absorption area A, the object fraction psi, and the reverberation time T = 55.3/co times V times (1 minus psi) over A" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6_dark.svg" alt="Flow from the room surfaces and objects into the total equivalent absorption area A, the object fraction psi, and the reverberation time T = 55.3/co times V times (1 minus psi) over A" style="width:82%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6.svg" alt="Flow from the room surfaces and objects into the total equivalent absorption area A, the object fraction psi, and the reverberation time T = 55.3/c0 times V times (1 minus psi) over A" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_en12354_6_dark.svg" alt="Flow from the room surfaces and objects into the total equivalent absorption area A, the object fraction psi, and the reverberation time T = 55.3/c0 times V times (1 minus psi) over A" style="width:82%">
 
 ## 1. Equivalent absorption area (clause 4.3)
 

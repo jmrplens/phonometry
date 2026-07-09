@@ -342,3 +342,15 @@ def test_plot_smoke() -> None:
     res = loudness_moore_glasberg_time(_tone(1000.0, 60.0, duration=0.4), FS)
     ax = res.plot()
     assert ax.get_ylabel() == "Loudness [sone]"
+
+
+def test_three_channel_input_is_rejected() -> None:
+    # Mono and two-channel are supported; anything higher-dimensional used to
+    # be silently flattened and must be rejected.
+    import numpy as np
+    import pytest
+    from phonometry import loudness_moore_glasberg_time
+
+    cube = np.zeros((2, 2, 2400))
+    with pytest.raises(ValueError, match="mono .1-D. or two-channel"):
+        loudness_moore_glasberg_time(cube, 32000.0)

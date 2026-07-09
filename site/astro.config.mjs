@@ -306,6 +306,7 @@ export default defineConfig({
           translations: { es: 'Acústica de salas' },
           items: [
             'guides/room-acoustics',
+            'guides/enclosed-space-absorption',
             'guides/materials',
             'guides/surface-scattering',
             'guides/room-noise',

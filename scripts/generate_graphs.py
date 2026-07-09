@@ -236,6 +236,13 @@ _ES_EXACT = {
     "Injury probability (Annex C)": "Probabilidad de lesión (Anexo C)",
     "male": "hombre",
     "female": "mujer",
+    "Equivalent absorption area $A$ [m$^2$]":
+        "Área de absorción equivalente $A$ [m$^2$]",
+    "Absorption area (Formula 1)": "Área de absorción (Fórmula 1)",
+    "Reverberation time $T$ [s]": "Tiempo de reverberación $T$ [s]",
+    "Reverberation time (Formula 5)": "Tiempo de reverberación (Fórmula 5)",
+    "bare ceiling": "techo desnudo",
+    "acoustic ceiling": "techo acústico",
     "Speech Intelligibility Index": "Índice de inteligibilidad del habla",
     "Normal": "Normal",
     "Raised": "Elevada",
@@ -3638,6 +3645,51 @@ def generate_iso2631_5(output_dir: str) -> None:
     plt.close()
 
 
+def generate_en12354_6(output_dir: str) -> None:
+    """EN 12354-6: absorption area and reverberation time of a room."""
+    print("Generating enclosed_space_absorption.png...")
+    from phonometry import enclosed_space_reverberation
+    from phonometry.en12354_6 import OCTAVE_BANDS
+
+    # A 5 x 4 x 3 m office (60 m3): hard plaster walls and floor; the ceiling is
+    # either bare plaster or lined with an absorbing acoustic tile.
+    volume = 60.0
+    plaster = [0.02, 0.03, 0.03, 0.04, 0.05, 0.05, 0.05]
+    tile = [0.15, 0.35, 0.65, 0.85, 0.90, 0.90, 0.85]
+    walls_floor = [(54.0, plaster), (20.0, plaster)]  # walls + floor
+    bare = enclosed_space_reverberation(
+        [*walls_floor, (20.0, plaster)], volume, air_condition="20C_50-70")
+    treated = enclosed_space_reverberation(
+        [*walls_floor, (20.0, tile)], volume, air_condition="20C_50-70")
+
+    fig, (ax_a, ax_t) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+    freq = OCTAVE_BANDS
+    labels = [f"{f:g}" if f < 1000 else f"{f / 1000:g}k" for f in freq]
+
+    for res, colour, name in ((bare, COLOR_SECONDARY, "bare ceiling"),
+                              (treated, COLOR_PRIMARY, "acoustic ceiling")):
+        ax_a.semilogx(freq, res.absorption_area, color=colour, marker="o", label=name)
+        ax_t.semilogx(freq, res.reverberation_time, color=colour, marker="o",
+                      label=name)
+    for ax, ylab, title in (
+        (ax_a, "Equivalent absorption area $A$ [m$^2$]", "Absorption area (Formula 1)"),
+        (ax_t, "Reverberation time $T$ [s]", "Reverberation time (Formula 5)"),
+    ):
+        ax.set_xticks(freq)
+        ax.set_xticklabels(labels)
+        ax.set_xlabel("Octave-band centre frequency [Hz]")
+        ax.set_ylabel(ylab)
+        ax.set_title(title, fontweight="bold", pad=10)
+        ax.set_ylim(bottom=0.0)
+        ax.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+        ax.set_axisbelow(True)
+        ax.legend(loc="upper right")
+
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "enclosed_space_absorption.png"))
+    plt.close()
+
+
 def generate_room_noise_criteria(output_dir: str) -> None:
     """ANSI S12.2-2019: NC tangency rating and RC Mark II classification."""
     print("Generating room_noise_criteria.png...")
@@ -3968,6 +4020,9 @@ def generate_all(img_dir: str) -> None:
 
     # Multiple-shock whole-body vibration (ISO 2631-5 Clause 5 + Annex C).
     generate_iso2631_5(img_dir)
+
+    # Sound absorption in enclosed spaces (EN 12354-6 Clause 4).
+    generate_en12354_6(img_dir)
 
     # Measurement uncertainty (GUM Guide 98-3 + Supplement 1 Monte Carlo).
     generate_uncertainty(img_dir)

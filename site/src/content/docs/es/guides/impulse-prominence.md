@@ -103,7 +103,7 @@ plt.xscale("log"); plt.legend(); plt.show()
 
 </details>
 
-El `ImpulseProminence` lleva las prominencias `per_impulse`, la `prominence`
+El `ImpulseProminenceResult` lleva las prominencias `per_impulse`, la `prominence`
 determinante y su `adjustment`, y su `.plot()` dibuja la curva `KI(P)` con los
 impulsos marcados. El método es un complemento a la medida de ruido ambiental de
 [ISO 1996-2](/phonometry/es/guides/levels/).

@@ -1451,19 +1451,19 @@ _NIHL = "Noise-induced hearing loss (ISO 1999)"
 
 
 @register(_NIHL, "ISO 1999:2013 Table D.2", "Median NIPTS, 4 kHz, 90 dB, 20 yr")
-def _chk_iso1999_median() -> Outcome:
+def _chk_nihl_median() -> Outcome:
     value = float(ph.nipts(90.0, 20.0, 0.5).value[4])
     return numeric(ref.ISO1999_N50_4K_90_20, value, 0.5, unit="dB", places=1)
 
 
 @register(_NIHL, "ISO 1999:2013 Table D.2", "Worst-10 % NIPTS, 4 kHz, 90 dB, 20 yr")
-def _chk_iso1999_fractile() -> Outcome:
+def _chk_nihl_fractile() -> Outcome:
     value = float(ph.nipts(90.0, 20.0, 0.9).value[4])
     return numeric(ref.ISO1999_N10_4K_90_20, value, 0.5, unit="dB", places=1)
 
 
 @register(_NIHL, "ISO 1999:2013 Table D.4", "Worst-10 % NIPTS, 3 kHz, 100 dB, 40 yr")
-def _chk_iso1999_high() -> Outcome:
+def _chk_nihl_high() -> Outcome:
     value = float(ph.nipts(100.0, 40.0, 0.9).value[3])
     return numeric(ref.ISO1999_N10_3K_100_40, value, 0.5, unit="dB", places=1)
 
@@ -1472,20 +1472,20 @@ _MSV = "Multiple-shock whole-body vibration (ISO 2631-5)"
 
 
 @register(_MSV, "ISO 2631-5:2018 Formula 3", "Daily acceleration dose, 5 x 40 m/s2 peaks")
-def _chk_iso2631_5_dose() -> Outcome:
+def _chk_multiple_shock_dose() -> Outcome:
     value = ph.dose_from_peaks([40.0] * 5)
     return numeric(ref.ISO2631_5_DZD_MALE, value, 0.01, unit="m/s2", places=2)
 
 
 @register(_MSV, "ISO 2631-5:2018 Formula C.3", "Stress variable R, Annex C male example")
-def _chk_iso2631_5_risk() -> Outcome:
+def _chk_multiple_shock_risk() -> Outcome:
     sd = ph.compression_dose(ph.dose_from_peaks([40.0] * 5))
     value = ph.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
     return numeric(ref.ISO2631_5_R_MALE, value, 0.01, places=2)
 
 
 @register(_MSV, "ISO 2631-5:2018 Formula C.5", "Injury probability, Annex C male example")
-def _chk_iso2631_5_probability() -> Outcome:
+def _chk_multiple_shock_probability() -> Outcome:
     sd = ph.compression_dose(ph.dose_from_peaks([40.0] * 5))
     r = ph.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
     return numeric(ref.ISO2631_5_PI_MALE, float(ph.injury_probability(r)), 0.01, places=2)
@@ -1493,21 +1493,21 @@ def _chk_iso2631_5_probability() -> Outcome:
 
 _ABS = "Sound absorption in enclosed spaces (EN 12354-6)"
 
-_EN12354_6_SURFACES = [
+_ENCLOSED_SPACE_SURFACES = [
     (12.39, 0.05), (12.39, 0.02), (10.90, 0.04),
     (10.90, 0.04), (6.55, 0.04), (6.55, 0.04),
 ]
 
 
 @register(_ABS, "EN 12354-6:2003 Formula 1", "Equivalent absorption area, Annex E bare room")
-def _chk_en12354_6_area() -> Outcome:
-    value = float(ph.equivalent_absorption_area(_EN12354_6_SURFACES))
+def _chk_enclosed_space_area() -> Outcome:
+    value = float(ph.equivalent_absorption_area(_ENCLOSED_SPACE_SURFACES))
     return numeric(ref.EN12354_6_A_BARE, value, 0.01, unit="m2", places=2)
 
 
 @register(_ABS, "EN 12354-6:2003 Formula 5", "Reverberation time, Annex E bare room")
-def _chk_en12354_6_rt() -> Outcome:
-    area = ph.equivalent_absorption_area(_EN12354_6_SURFACES)
+def _chk_enclosed_space_rt() -> Outcome:
+    area = ph.equivalent_absorption_area(_ENCLOSED_SPACE_SURFACES)
     value = float(ph.reverberation_time(area, 29.75))
     return numeric(ref.EN12354_6_T_BARE, value, 0.05, unit="s", places=1)
 

@@ -85,7 +85,7 @@ A 4 kHz la componente de edad (20,2 dB) y la de ruido (24,8 dB) se combinan en
 ```python
 import matplotlib.pyplot as plt
 import phonometry as ph
-from phonometry.iso1999 import NIPTS_FREQUENCIES as f
+from phonometry.noise_induced_hearing_loss import NIPTS_FREQUENCIES as f
 
 # One line for the NIPTS spectrum with its fractile band:
 ph.nipts(95.0, 40.0, 0.9).plot()

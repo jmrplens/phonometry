@@ -50,7 +50,7 @@ ONSET_RATE_LIMIT: float = 10.0
 
 
 @dataclass(frozen=True)
-class ImpulseProminence:
+class ImpulseProminenceResult:
     """Prominence of a set of candidate impulses (NT ACOU 112:2002).
 
     :ivar onset_rates: Onset rate of each impulse, in dB/s.
@@ -118,7 +118,7 @@ def impulse_adjustment(prominence: ArrayLike) -> np.ndarray:
 
 def impulse_prominence(
     onset_rates: ArrayLike, level_differences: ArrayLike
-) -> ImpulseProminence:
+) -> ImpulseProminenceResult:
     """Governing prominence and adjustment of a set of impulses (clauses 7-8).
 
     Evaluates the predicted prominence of each candidate impulse (Formula 1),
@@ -127,7 +127,7 @@ def impulse_prominence(
 
     :param onset_rates: Onset rate of each impulse, in dB/s (> 0).
     :param level_differences: Level difference of each impulse, in dB (> 0).
-    :return: An :class:`ImpulseProminence` with the per-impulse and governing
+    :return: An :class:`ImpulseProminenceResult` with the per-impulse and governing
         values and ``.plot()``.
     :raises ValueError: for empty input, mismatched lengths, or a non-positive
         onset rate or level difference.
@@ -143,7 +143,7 @@ def impulse_prominence(
         )
     per_impulse = predicted_prominence(orate, ld)
     governing = float(np.max(per_impulse))
-    return ImpulseProminence(
+    return ImpulseProminenceResult(
         onset_rates=orate,
         level_differences=ld,
         per_impulse=per_impulse,

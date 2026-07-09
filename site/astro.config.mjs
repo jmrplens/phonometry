@@ -270,22 +270,60 @@ export default defineConfig({
           items: ['getting-started'],
         },
         {
-          label: 'Guides',
-          translations: { es: 'Guías' },
+          label: 'Signal processing & instrumentation',
+          translations: { es: 'Procesado e instrumentación' },
           items: [
             'guides/filter-banks',
-            'guides/weighting',
-            'guides/time-weighting',
-            'guides/levels',
-            'guides/psychoacoustics',
-            'guides/intensity',
-            'guides/room-acoustics',
-            'guides/outdoor-propagation',
-            'guides/sound-power',
-            'guides/calibration',
             'guides/block-processing',
             'guides/multichannel',
+            'guides/calibration',
           ],
+        },
+        {
+          label: 'Levels & weighting',
+          translations: { es: 'Niveles y ponderación' },
+          items: [
+            'guides/levels',
+            'guides/weighting',
+            'guides/time-weighting',
+          ],
+        },
+        {
+          label: 'Perception & speech',
+          translations: { es: 'Percepción e inteligibilidad' },
+          items: ['guides/psychoacoustics'],
+        },
+        {
+          label: 'Sound power & intensity',
+          translations: { es: 'Potencia e intensidad' },
+          items: [
+            'guides/intensity',
+            'guides/sound-power',
+          ],
+        },
+        {
+          label: 'Room acoustics',
+          translations: { es: 'Acústica de salas' },
+          items: [
+            'guides/room-acoustics',
+            'guides/materials',
+            'guides/surface-scattering',
+          ],
+        },
+        {
+          label: 'Building acoustics & insulation',
+          translations: { es: 'Acústica de la edificación y aislamiento' },
+          items: ['guides/building-acoustics'],
+        },
+        {
+          label: 'Environmental acoustics',
+          translations: { es: 'Acústica ambiental' },
+          items: ['guides/outdoor-propagation'],
+        },
+        {
+          label: 'Human vibration',
+          translations: { es: 'Vibración en humanos' },
+          items: ['guides/human-vibration'],
         },
         {
           label: 'Reference',

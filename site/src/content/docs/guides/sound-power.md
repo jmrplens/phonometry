@@ -1,6 +1,6 @@
 ---
 title: "Sound Power"
-description: "Sound power level LW by three routes: enveloping-surface sound pressure (ISO 3744/3746), the reverberation-room precision method with Waterhouse and C1/C2 corrections (ISO 3741), and intensity scanning with field indicators and achieved grade (ISO 9614-2)."
+description: "Sound power level LW by five routes: enveloping-surface sound pressure (ISO 3744/3746), the reverberation-room precision method with Waterhouse and C1/C2 corrections (ISO 3741), intensity scanning with field indicators and achieved grade (ISO 9614-2), the precision anechoic-room method (ISO 3745) and precision intensity scanning (ISO 9614-3)."
 ---
 
 Sound *pressure* depends on where you stand and on the room you stand in;
@@ -8,22 +8,26 @@ sound **power** does not. The sound power level `LW` is the total acoustic
 energy per second a source radiates, referenced to `P0 = 1 pW`, and it is
 the device-independent **emission** descriptor that goes on a datasheet,
 feeds a room prediction (ISO 12354) or is checked against a noise-emission
-limit. This page covers the three routes phonometry implements to obtain it
+limit. This page covers the routes phonometry implements to obtain it
 and when to reach for each: an enveloping *pressure* surface in the field
 (ISO 3744/3746), the diffuse field of a *reverberation room* (ISO 3741),
-and *intensity* scanning over a surface (ISO 9614-2).
+*intensity* scanning over a surface (ISO 9614-2), and — for the highest
+accuracy — the precision grades in an *anechoic room* (ISO 3745) and by
+precision *intensity* scanning (ISO 9614-3).
 
 ## Choosing a method
 
-All three deliver the same quantity — a per-band `LW` and an A-weighted
-total `LWA` — but under different environments, accuracy grades and
-practical constraints.
+All deliver the same quantity — a per-band `LW` and an A-weighted total
+`LWA` — but under different environments, accuracy grades and practical
+constraints.
 
 | Method | Standard | Measured quantity | Environment | Accuracy grade | Use when |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Enveloping surface | **ISO 3744** (engineering) / **ISO 3746** (survey) | Sound pressure on a hemisphere or box | Essentially free field over one or more reflecting planes | Grade 2 (`σR0 ≈ 1.5 dB`) / grade 3 (`≈ 3.0 dB`) | In situ or a large room; no special test facility available |
 | Reverberation room | **ISO 3741** | Sound pressure in the diffuse field | Qualified hard-walled reverberation room | Grade 1 (precision) | Highest accuracy for steady, broadband sources in a lab |
 | Intensity scanning | **ISO 9614-2** | Normal sound intensity scanned over a surface | Almost any, tolerant of steady extraneous noise | Grade 2 / 3 (from per-band field indicators) | On-site with background noise, or one machine among many |
+| Anechoic room | **ISO 3745** | Sound pressure on a fixed microphone array | Qualified anechoic or hemi-anechoic room | Grade 1 (precision) | Reference-grade emission in a free-field laboratory |
+| Precision intensity scanning | **ISO 9614-3** | Scanned normal intensity, tighter criteria | Almost any, tolerant of steady extraneous noise | Grade 1 (precision) | Precision on-site, with the ISO 9614-3 field-indicator checks |
 
 The pressure methods correct the surface level for the room (`K2`) and for
 background noise (`K1`); the reverberation method needs a *qualified* room
@@ -328,13 +332,227 @@ where `negative_band`), `surface_pressure_intensity_index` (`FpI`),
 `dynamic_capability_index` (`Ld`), `achieved_grade`, `surface_area`,
 `sound_power_level_a` and `grade`.
 
+## 4. Precision grade, anechoic room (ISO 3745)
+
+When the highest accuracy is required, ISO 3745 measures sound power in a
+qualified **anechoic** or **hemi-anechoic** room, where the free field lets a
+fixed array of microphones sample the radiated sound pressure directly. It is the
+grade-1 counterpart to the enveloping-surface method of Section 1, with
+standardized microphone coordinates, a per-position background correction and an
+explicit meteorological correction.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic.svg" alt="ISO 3745 precision sound power in an anechoic room: wedge-lined walls, the device under test at the centre and a hemispherical array of microphones at a fixed radius, with the sound power level formed from the surface-averaged pressure plus the area, background and meteorological corrections" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_precision_anechoic_dark.svg" alt="ISO 3745 precision sound power in an anechoic room: wedge-lined walls, the device under test at the centre and a hemispherical array of microphones at a fixed radius, with the sound power level formed from the surface-averaged pressure plus the area, background and meteorological corrections" style="width:92%">
+
+**Sound power level (Clause 8).** The band sound power level is the
+surface-averaged pressure level plus the surface term and the corrections:
+
+$$
+L_W = \overline{L_p} + 10\lg\frac{S}{S_0} + C_1 + C_2 + C_3,
+$$
+
+with $S = 4\pi r^2$ over the sphere or $S = 2\pi r^2$ over the hemisphere,
+$S_0 = 1\ \text{m}^2$. $C_1$ and $C_2$ are the meteorological corrections
+(reference and radiation-impedance terms); $C_3$ accounts for air absorption over
+the measurement radius. The microphone positions are the standardized
+unit-vector arrays of Tables D.1 (sphere), E.1 (hemisphere) and E.2 (hemisphere,
+broadband).
+
+```python
+import numpy as np
+import phonometry as ph
+
+# The 40 standardized hemisphere positions (unit vectors scaled by the radius).
+pos = ph.precision_positions("hemisphere", radius=1.0, count=40)
+print(pos.shape)                      # (40, 3)
+
+# Octave/third-octave band SPL (dB) at each of the 40 positions; here a uniform
+# 74 dB in one band. The result carries S = 2*pi*r^2 and LW with C1+C2+C3.
+levels = np.full((40, 1), 74.0)
+res = ph.sound_power_anechoic(levels, "hemisphere", radius=1.0)
+print(round(res.surface_area, 3))                 # 6.283  (2*pi*1^2)
+print(np.round(res.sound_power_level, 2))         # [81.85]
+```
+
+**Background and meteorological corrections.** The $K_1$ background correction is
+applied **per position** and floored where the signal-to-background difference is
+small (Eq. 11); the meteorological correction is evaluated from the measured
+temperature and static pressure.
+
+```python
+import numpy as np
+import phonometry as ph
+
+# K1 for a 6 dB signal-to-background difference in a <=200 Hz edge band: the
+# floor is 1.26 dB (Eq. 11). Source and background levels are [positions, bands].
+k1 = ph.precision_background_correction(
+    np.array([[56.0]]), np.array([[50.0]]), np.array([200.0]))
+print(round(float(k1[0, 0]), 4))      # 1.2563
+
+# Meteorological corrections at the 23 C, 101.325 kPa reference (Eq. 16):
+mc = ph.meteorological_corrections(23.0, 101.325)
+print(round(mc.c1, 4), round(mc.c2, 4))   # -0.1282 0.0
+
+# Expanded uncertainty (Clause 10.5 EXAMPLE): sigma_R0 = 0.5, sigma_omc = 2.0,
+# k = 2 -> U = 4.1 dB.
+print(round(ph.precision_uncertainty(0.5, 2.0, 2.0), 3))   # 4.123
+```
+
+Over several bands `sound_power_anechoic` returns a plottable
+`PrecisionSoundPowerResult` carrying the per-band `LW` and the A-weighted total:
+
+```python
+import numpy as np
+import phonometry as ph
+
+# A mid-frequency-peaked machine measured over the 40-position hemisphere array
+# (Annex E). levels_positions is the (40, NB) surface pressure spectrum: a base
+# spectrum peaked near 1 kHz plus a small per-position spatial spread.
+freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], float)
+base = 70.0 + 8.0 * np.exp(-(np.log2(freqs / 1000.0) ** 2) / 2.0)
+rng = np.random.default_rng(7)
+levels = base[None, :] + rng.normal(0.0, 1.0, (40, freqs.size))
+
+result = ph.sound_power_anechoic(levels, "hemisphere", radius=1.0, frequencies=freqs)
+print(round(result.sound_power_level_a, 1))   # 89.3
+result.plot()   # LW spectrum, LWA in the title (needs matplotlib)
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power.png" alt="The precision sound power level spectrum of a mid-frequency-peaked machine measured over the ISO 3745 hemisphere array, one bar per band peaking near 1 kHz, with the A-weighted total of 89.3 dB(A) in the title" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_dark.png" alt="The precision sound power level spectrum of a mid-frequency-peaked machine measured over the ISO 3745 hemisphere array, one bar per band peaking near 1 kHz, with the A-weighted total of 89.3 dB(A) in the title" style="width:88%">
+
+*One bar per band: the surface-averaged pressure plus the area, background and
+meteorological corrections give `LW(f)`, and the A-weighted energy sum across
+bands gives the single-number `LWA` in the title.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# result is the PrecisionSoundPowerResult computed above. One line:
+result.plot()
+plt.show()
+
+# By hand: a bar spectrum of LW with the A-weighted total in the title.
+freqs = result.frequencies
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, result.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound power level LW [dB]")
+ax.set_title(
+    f"Precision sound power (ISO 3745)  LWA = {result.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
+
+## 5. Precision intensity scanning (ISO 9614-3)
+
+ISO 9614-3 is the grade-1 scanning method: like ISO 9614-2 it integrates the
+normal intensity over a surface enclosing the source, but with a continuous
+scan, tighter field-indicator criteria and an explicit uncertainty budget.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan.svg" alt="ISO 9614-3 precision sound intensity scanning: a source enclosed by a measurement surface divided into segments, a two-microphone intensity probe scanned along a serpentine path over each segment, and the sound power formed by summing the normal intensity times segment area, subject to the field-indicator acceptance criteria" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_scan_dark.svg" alt="ISO 9614-3 precision sound intensity scanning: a source enclosed by a measurement surface divided into segments, a two-microphone intensity probe scanned along a serpentine path over each segment, and the sound power formed by summing the normal intensity times segment area, subject to the field-indicator acceptance criteria" style="width:92%">
+
+**Power and level (Clause 7).** The partial power of each segment is
+$P_i = I_{n,i}\,S_i$; the total $P = \sum_i P_i$ gives
+$L_W = 10\lg(P/P_0)$, $P_0 = 1\ \text{pW}$. A band whose net intensity is
+negative (more power flowing in than out) is flagged not-applicable rather than
+logged. The field indicators (temporal variability $F_T$, the signed and
+unsigned pressure–intensity indicators, and the non-uniformity $F_S$) drive the
+five acceptance criteria.
+
+```python
+import numpy as np
+import phonometry as ph
+
+# A fully enclosing surface with a uniform normal intensity In = W/S recovers
+# the source power exactly: LW = 10*lg(W/P0). Here W = 100 uW -> 80 dB.
+areas = np.array([0.5, 1.0, 0.25, 2.0])
+w = 1.0e-4
+i_n = np.full(areas.shape, w / float(areas.sum()))
+res = ph.sound_power_intensity_precision(i_n, areas)
+print(round(float(res.sound_power[0]), 6))          # 0.0001
+print(round(float(res.sound_power_level[0]), 2))    # 80.0
+```
+
+Across several bands the result carries the per-band `LW` (`NaN` where the net
+power is non-positive) and flags those bands `not_applicable`:
+
+```python
+import numpy as np
+import phonometry as ph
+
+# Four partial surfaces scanned over five one-third-octave bands. Each cell of
+# partial_intensity is the signed normal intensity In_i (W/m^2); areas are the
+# partial-surface areas Si. The 250 Hz band has net-negative power (a locally
+# reactive field), so ISO 9614-3 flags it not-applicable (clause 9.2) -> NaN.
+freqs = np.array([250, 500, 1000, 2000, 4000], float)
+areas = np.array([0.5, 1.0, 0.75, 0.5])
+base_intensity = np.array([2.0e-6, 8.0e-6, 2.0e-5, 1.0e-5, 3.0e-6])
+partial_intensity = base_intensity[None, :] * np.array([1.0, 1.1, 0.9, 1.05])[:, None]
+partial_intensity[:, 0] = [2.0e-6, -3.0e-6, -4.0e-6, -1.0e-6]   # net-negative band
+
+result = ph.sound_power_intensity_precision(partial_intensity, areas, frequencies=freqs)
+print(result.not_applicable_band.tolist())   # [True, False, False, False, False]
+print(round(result.sound_power_level_a, 1))   # 80.6
+result.plot()   # LW spectrum; the not-applicable band is hatched (needs matplotlib)
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power.png" alt="The precision intensity-scanning sound power level spectrum over five one-third-octave bands, four determinate bars and a hatched, greyed 250 Hz band flagged not-applicable because its net intensity is negative, with the A-weighted total of 80.6 dB(A) in the title" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_dark.png" alt="The precision intensity-scanning sound power level spectrum over five one-third-octave bands, four determinate bars and a hatched, greyed 250 Hz band flagged not-applicable because its net intensity is negative, with the A-weighted total of 80.6 dB(A) in the title" style="width:88%">
+
+*The 250 Hz band nets negative (more energy flowing in than out), so ISO 9614-3
+declares it not-applicable — the figure hatches and greys it while the four
+determinate bands and the A-weighted total stand.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# result is the PrecisionIntensityResult computed above. One line:
+result.plot()
+plt.show()
+
+# By hand: determinate bands as LW bars; a not-applicable band (its LW is NaN)
+# is flagged by a full-height greyed, hatched span rather than a zero-height bar.
+freqs = result.frequencies
+positions = np.arange(freqs.size)
+neg = result.not_applicable_band
+lw = np.nan_to_num(result.sound_power_level)
+fig, ax = plt.subplots()
+ax.bar(positions[~neg], lw[~neg], width=0.7, color="#1f77b4")
+for pos in positions[neg]:
+    ax.axvspan(pos - 0.35, pos + 0.35, facecolor="#888888", alpha=0.28,
+               hatch="//", edgecolor="#888888")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound power level LW [dB]")
+ax.set_title(
+    f"Precision intensity scanning (ISO 9614-3)  "
+    f"LWA = {result.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
+
 ## See also
 
 - [Sound Intensity (p-p)](/phonometry/guides/intensity/) — the two-microphone probe, its
   finite-difference bias and the ISO 9614-1 field indicators behind the
   scanning method.
-- [Room and Building Acoustics](/phonometry/guides/room-acoustics/) — the reverberation time
+- [Room Acoustics](/phonometry/guides/room-acoustics/) — the reverberation time
   and equivalent absorption area (ISO 354) that feed `K2` and the ISO 3741
-  absorption area; impact and airborne insulation.
+  absorption area.
+- [Building Acoustics & Sound Insulation](/phonometry/guides/building-acoustics/) — the
+  airborne and impact insulation ratings and the EN 12354 emission predictions
+  that consume a source `LW`.
 - [Levels](/phonometry/guides/levels/) — energy averaging and the A-weighting behind `LWA`.
 - [Theory](/phonometry/reference/theory/) — the Waterhouse, K1/K2 and C1/C2 derivations.

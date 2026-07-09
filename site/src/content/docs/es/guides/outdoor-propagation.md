@@ -259,7 +259,7 @@ Devuelve un `OutdoorAttenuation` con `a_div`, `a_atm`, `a_gr`, `a_bar`,
 
 La exactitud declarada del método es de $\pm 1$ a $\pm 3$ dB para ruido de banda
 ancha hasta 1000 m (Tabla 5). Consulta la página de [Teoría](/phonometry/es/reference/theory/)
-para la derivación completa, la [guía de Acústica de salas y edificación](/phonometry/es/guides/room-acoustics/)
+para la derivación completa, la [guía de Acústica de salas](/phonometry/es/guides/room-acoustics/)
 para cómo $\alpha$ alimenta la ISO 354, y la [guía de Niveles](/phonometry/es/guides/levels/)
 para la exposición al ruido en el trabajo (ISO 9612) que consume niveles
 ponderados A.

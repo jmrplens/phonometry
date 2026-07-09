@@ -43,6 +43,12 @@ from .hearing import (
     age_threshold,
     reference_threshold,
 )
+from .iso1999 import (
+    HtlanResult,
+    NiptsResult,
+    htlan,
+    nipts,
+)
 from .uncertainty import (
     MonteCarloResult,
     Quantity,
@@ -420,6 +426,10 @@ __all__ = [
     "age_threshold",
     "reference_threshold",
     "AgeThresholdResult",
+    "nipts",
+    "htlan",
+    "NiptsResult",
+    "HtlanResult",
     "combine_uncertainty",
     "monte_carlo",
     "rectangular",

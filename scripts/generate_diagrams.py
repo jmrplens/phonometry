@@ -120,6 +120,24 @@ _ES: dict[str, str] = {
     "prob.-symmetric 95 % interval": "intervalo simétrico en prob. al 95 %",
     "coverage interval": "intervalo de cobertura",
     "[y_low, y_high]   (clause 7.7)": "[y_low, y_high]   (cláusula 7.7)",
+    # Noise-induced hearing loss (ISO 1999)
+    "Noise-induced hearing loss (ISO 1999): NIPTS and HTLAN":
+        "Pérdida auditiva inducida por ruido (ISO 1999): NIPTS y HTLAN",
+    "Age Y,  sex,  fractile Q": "Edad Y,  sexo,  fractil Q",
+    "database A = ISO 7029": "base de datos A = ISO 7029",
+    "Exposure L_EX,8h,  t years": "Exposición L_EX,8h,  t años",
+    "normalized to 8 h / 5 days": "normalizada a 8 h / 5 días",
+    "Age threshold  H  (HTLA)": "Umbral por edad  H  (HTLA)",
+    "ISO 7029 fractile, dB": "fractil ISO 7029, dB",
+    "Median NIPTS  N50  (6.3.1)": "NIPTS mediana  N50  (6.3.1)",
+    "N50 = [u + v·lg(t/t0)]·(L − L0)²":
+        "N50 = [u + v·lg(t/t0)]·(L − L0)²",
+    "Fractile NIPTS  N  (6.3.2)": "NIPTS del fractil  N  (6.3.2)",
+    "N = N50 + z·(du if z ≥ 0 else dl)":
+        "N = N50 + z·(du si z ≥ 0, si no dl)",
+    "HTLAN   H' = H + N − H·N / 120": "HTLAN   H' = H + N − H·N / 120",
+    "threshold from age and noise  (Formula 1, 6.1)":
+        "umbral por edad y ruido  (Fórmula 1, 6.1)",
     "Speech  Ei'": "Habla  Ei'",
     "Noise  Ni'": "Ruido  Ni'",
     "Threshold  Ti'": "Umbral  Ti'",
@@ -2352,6 +2370,52 @@ def _d_uncertainty(s: SVG, th: Theme) -> None:
     s.text(rxc, 482, "[y_low, y_high]   (clause 7.7)", 14, th.muted, "middle")
 
 
+def _d_nihl(s: SVG, th: Theme) -> None:
+    """Noise-induced hearing loss (ISO 1999:2013): NIPTS and HTLAN.
+
+    Two converging lanes — the age component H (HTLA, database A = ISO 7029)
+    and the noise component N (NIPTS, Formulae 2-7) — combine into the hearing
+    threshold associated with age and noise (HTLAN, Formula 1).
+    """
+    cx = 450.0
+    lxc, rxc = 232.0, 668.0
+    bw, bh = 372.0, 62.0
+
+    def _step(cxx: float, y: float, l1: str, l2: str, color: str) -> None:
+        s.rect(cxx - bw / 2, y, bw, bh, th.panel, color, rx=10, sw=2)
+        s.text(cxx, y + 27, l1, 18, th.fg, "middle", bold=True)
+        if l2:
+            s.text(cxx, y + 48, l2, 13, th.muted, "middle")
+
+    # --- Inputs -------------------------------------------------------------
+    _step(lxc, 56, "Age Y,  sex,  fractile Q", "database A = ISO 7029", th.fg)
+    _step(rxc, 56, "Exposure L_EX,8h,  t years",
+          "normalized to 8 h / 5 days", th.fg)
+
+    # --- Left lane: age component H (HTLA) ----------------------------------
+    s.arrow(lxc, 118, lxc, 150, th.fg, 1.8)
+    _step(lxc, 150, "Age threshold  H  (HTLA)",
+          "ISO 7029 fractile, dB", th.primary)
+
+    # --- Right lane: noise component N (NIPTS) ------------------------------
+    s.arrow(rxc, 118, rxc, 150, th.fg, 1.8)
+    _step(rxc, 150, "Median NIPTS  N50  (6.3.1)",
+          "N50 = [u + v·lg(t/t0)]·(L − L0)²", th.secondary)
+    s.arrow(rxc, 212, rxc, 244, th.fg, 1.8)
+    _step(rxc, 244, "Fractile NIPTS  N  (6.3.2)",
+          "N = N50 + z·(du if z ≥ 0 else dl)", th.fg)
+
+    # --- Converge into HTLAN ------------------------------------------------
+    box_y = 372.0
+    s.arrow(lxc, 212, cx - 118.0, box_y, th.fg, 1.8)
+    s.arrow(rxc, 306, cx + 118.0, box_y, th.fg, 1.8)
+    s.rect(cx - bw / 2, box_y, bw, 66, "none", th.primary, rx=10, sw=2.4)
+    s.text(cx, box_y + 29, "HTLAN   H' = H + N − H·N / 120", 20, th.fg,
+           "middle", bold=True)
+    s.text(cx, box_y + 51, "threshold from age and noise  (Formula 1, 6.1)",
+           13, th.muted, "middle")
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -2416,6 +2480,9 @@ DIAGRAMS = {
     "diagram_uncertainty": (
         _d_uncertainty,
         "Uncertainty: GUM propagation vs Monte Carlo (Guide 98-3)", 540),
+    "diagram_nihl": (
+        _d_nihl,
+        "Noise-induced hearing loss (ISO 1999): NIPTS and HTLAN", 470),
 }
 
 

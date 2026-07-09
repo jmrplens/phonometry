@@ -16,7 +16,12 @@ from typing import List, Tuple
 import numpy as np
 from scipy import signal
 
+from ._warnings import PhonometryWarning
 from .utils import _typesignal
+
+
+class TonalityWarning(PhonometryWarning):
+    """Warns about biased tonality estimates (e.g. coarse FFT resolution)."""
 
 
 def _warn_coarse_resolution(dfc: float, df: float, ft: float) -> None:
@@ -32,7 +37,7 @@ def _warn_coarse_resolution(dfc: float, df: float, ft: float) -> None:
             f"Frequency resolution {df:.3g} Hz is coarse for the tone at "
             f"{ft:.0f} Hz: the tone band spans only {bins:.1f} bins (< 3), "
             "which biases TNR/PR. Use a finer resolution_hz.",
-            UserWarning,
+            TonalityWarning,
             stacklevel=3,
         )
 

@@ -91,6 +91,9 @@ from typing import TYPE_CHECKING, Any, Sequence, Tuple
 
 import numpy as np
 
+from ._levels_math import energy_mean, energy_sum
+from ._types import as_float_or_array
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
@@ -362,13 +365,7 @@ def energy_average_level(
         raise ValueError("'levels' must not be empty.")
     if not np.all(np.isfinite(data)):
         raise ValueError("'levels' must contain only finite values.")
-    n = data.shape[axis]
-    result: np.ndarray = 10.0 * np.log10(
-        np.sum(10.0 ** (data / 10.0), axis=axis) / n
-    )
-    if result.ndim == 0:
-        return float(result)
-    return result
+    return as_float_or_array(energy_mean(data, axis=axis))
 
 
 def _as_band_levels(
@@ -534,9 +531,7 @@ def _adaptation_term(
     measured: np.ndarray, spectrum: Tuple[int, ...], rating: int
 ) -> int:
     """Spectrum adaptation term ``Xaj - rating`` (Clause 4.5, Formula (2))."""
-    x_aj = -10.0 * np.log10(
-        np.sum(10.0 ** ((np.asarray(spectrum, dtype=np.float64) - measured) / 10.0))
-    )
+    x_aj = -energy_sum(np.asarray(spectrum, dtype=np.float64) - measured)
     return int(math.floor(x_aj + 0.5)) - rating
 
 
@@ -853,7 +848,7 @@ def _impact_ci(measured: np.ndarray, rating: int, n_bands: int) -> int:
     the first 15 bands; octave 125-2000 Hz), rounded to an integer
     (round half up), Formulae (A.1) to (A.3).
     """
-    l_sum = 10.0 * np.log10(np.sum(10.0 ** (measured[:n_bands] / 10.0)))
+    l_sum = energy_sum(measured[:n_bands])
     return int(math.floor(l_sum + 0.5)) - 15 - rating
 
 

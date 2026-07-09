@@ -10,6 +10,7 @@ from typing import Dict, List, Sequence
 import numpy as np
 from scipy import signal
 
+from ._types import as_float_or_array
 from .parametric_filters import time_weighting, weighting_filter
 from .utils import _typesignal
 
@@ -53,7 +54,7 @@ def leq(
     _validate_level_input(x_proc, calibration_factor)
     ms = np.mean(x_proc**2, axis=-1)
     out = _level_db(np.asarray(ms), calibration_factor, dbfs)
-    return float(out) if out.ndim == 0 else out
+    return as_float_or_array(out)
 
 
 def laeq(
@@ -168,7 +169,7 @@ def lc_peak(
         weighted = signal.resample_poly(weighted, oversample, 1, axis=-1)
     peak = np.max(np.abs(weighted), axis=-1)
     out = _level_db(np.asarray(peak) ** 2, calibration_factor, dbfs)
-    return float(out) if out.ndim == 0 else out
+    return as_float_or_array(out)
 
 
 def sel(
@@ -202,7 +203,7 @@ def sel(
     duration_s = x_proc.shape[-1] / fs
     base = leq(x_proc, calibration_factor, dbfs)
     out = np.asarray(base) + 10 * np.log10(duration_s)
-    return float(out) if out.ndim == 0 else out
+    return as_float_or_array(out)
 
 
 def sound_exposure(
@@ -235,7 +236,7 @@ def sound_exposure(
     mean_square = np.mean(p_a ** 2, axis=-1)
     hours = duration_hours if duration_hours is not None else x_proc.shape[-1] / fs / 3600.0
     out = np.asarray(mean_square * hours)
-    return float(out) if out.ndim == 0 else out
+    return as_float_or_array(out)
 
 
 def lex_8h(
@@ -264,4 +265,4 @@ def lex_8h(
     )
     eps = np.finfo(float).eps
     out = 10 * np.log10(np.maximum(exposure, eps) / (8.0 * _REF_PRESSURE ** 2))
-    return float(out) if out.ndim == 0 else out
+    return as_float_or_array(out)

@@ -29,7 +29,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ._validation import require_1d_signal
+from ._types import as_float_or_array
+from ._validation import require_1d_signal, require_choice, require_positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -88,11 +89,6 @@ RISK_THRESHOLDS_FEMALE: tuple[float, float, float] = (0.52, 0.87, 1.20)
 _SEXES = ("male", "female")
 
 
-def _check_sex(sex: str) -> None:
-    if sex not in _SEXES:
-        raise ValueError(f"sex must be one of {_SEXES}; got {sex!r}.")
-
-
 def _mz_for_sex(sex: str) -> float:
     return MZ_MALE if sex == "male" else MZ_FEMALE
 
@@ -121,12 +117,6 @@ def seat_to_spine_transfer(frequencies: ArrayLike) -> np.ndarray:
     return np.asarray(response, dtype=np.complex128)
 
 
-def _positive_fs(fs: float) -> float:
-    if not fs > 0.0:
-        raise ValueError("fs must be positive.")
-    return float(fs)
-
-
 def spinal_response(acceleration: ArrayLike, fs: float) -> np.ndarray:
     """Vertical spinal response ``Az(t)`` (clause 5.2, Formula 2).
 
@@ -138,7 +128,7 @@ def spinal_response(acceleration: ArrayLike, fs: float) -> np.ndarray:
     :param fs: Sampling frequency, in hertz.
     :return: The spinal response acceleration ``Az(t)``, m/s2, same length.
     """
-    fs = _positive_fs(fs)
+    fs = require_positive(fs, "fs")
     az = np.asarray(acceleration, dtype=np.float64)
     if az.ndim != 1:
         raise ValueError("acceleration must be a 1-D time series.")
@@ -266,7 +256,7 @@ def ultimate_strength(age: ArrayLike, *, sex: str = "male") -> np.ndarray:
     :param sex: ``"male"`` or ``"female"`` (sets the age slope ``Sage``).
     :return: The ultimate strength ``Su = 6.75 - Sage*(b+i)``, MPa.
     """
-    _check_sex(sex)
+    require_choice(sex, "sex", _SEXES)
     slope = STRENGTH_AGE_SLOPE_MALE if sex == "male" else STRENGTH_AGE_SLOPE_FEMALE
     years = np.asarray(age, dtype=np.float64)
     return ULTIMATE_STRENGTH_INTERCEPT - slope * years
@@ -297,7 +287,7 @@ def injury_risk(
     :raises ValueError: if ``years`` is not positive or the spine strength is
         exhausted (``Su - Sstat <= 0``) within the exposure period.
     """
-    _check_sex(sex)
+    require_choice(sex, "sex", _SEXES)
     if years <= 0:
         raise ValueError("years must be a positive integer.")
     if not days_per_year > 0.0:
@@ -325,11 +315,11 @@ def injury_probability(risk: ArrayLike, *, sex: str = "male") -> np.ndarray | fl
     :return: The injury probability ``P = 1 - exp(-(R/alpha)**beta)`` in 0-1;
         a float for a scalar input, otherwise an array. Negative ``R`` gives 0.
     """
-    _check_sex(sex)
+    require_choice(sex, "sex", _SEXES)
     alpha, beta = WEIBULL_MALE if sex == "male" else WEIBULL_FEMALE
     r = np.asarray(risk, dtype=np.float64)
     prob = 1.0 - np.exp(-((np.maximum(r, 0.0) / alpha) ** beta))
-    return float(prob) if prob.ndim == 0 else prob
+    return as_float_or_array(prob)
 
 
 def _risk_thresholds(sex: str) -> tuple[float, float, float]:
@@ -409,7 +399,7 @@ def multiple_shock_assessment(
         sex-specific value.
     :return: The :class:`MultipleShockResult`.
     """
-    _check_sex(sex)
+    require_choice(sex, "sex", _SEXES)
     if (exposure_time is None) != (measurement_time is None):
         raise ValueError(
             "provide both exposure_time and measurement_time to scale to a "

@@ -47,10 +47,10 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+from ._levels_math import energy_mean, energy_sum
 from .sound_power import (
     SoundPowerWarning,
     _a_weighting_corrections,
-    _energy_average,
 )
 
 _A0 = 1.0  #: Reference absorption area, in square metres (ISO 3741, Eq. 20).
@@ -144,7 +144,7 @@ def _mean_level(levels: np.ndarray) -> np.ndarray:
     if arr.ndim == 1:
         return arr
     if arr.ndim == 2:
-        return _energy_average(arr)
+        return energy_mean(arr, axis=0)
     raise ValueError("'levels' must be a 1D spectrum or a 2D (positions, bands) array.")
 
 
@@ -282,7 +282,7 @@ def _a_weighted_total(
             # Frequencies are not nominal band centres (e.g. exact filter
             # centres from room_parameters); the A-weighted total is undefined.
             return float("nan")
-        return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (sound_power_level + ck)))))
+        return energy_sum(sound_power_level + ck)
     return float(sound_power_level[0]) if n_bands == 1 else float("nan")
 
 

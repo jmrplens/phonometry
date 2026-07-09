@@ -42,12 +42,14 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
+from numpy.typing import ArrayLike
+
+from ._types import Real
+from ._warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
-Real = NDArray[np.float64]
 
 __all__ = [
     "BASE_PLATE_BANDS_HZ",
@@ -117,7 +119,7 @@ BASE_PLATE_MAX_SCATTERING: dict[int, float] = {
 TWO_DIMENSIONAL_SOURCE_WEIGHTS: tuple[int, ...] = (1, 3, 3, 3, 3)
 
 
-class ScatteringDiffusionWarning(UserWarning):
+class ScatteringDiffusionWarning(PhonometryWarning):
     """Advisory for out-of-range scattering/diffusion measurement conditions."""
 
 

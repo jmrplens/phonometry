@@ -46,7 +46,10 @@ import math
 import warnings
 
 import numpy as np
+
 from numpy.typing import ArrayLike, NDArray
+
+from ._warnings import PhonometryWarning
 
 #: Sabine constant of ISO 354:2003, Eq. (5)/(7) (55,3 exactly as printed).
 _SABINE = 55.3
@@ -63,7 +66,7 @@ _SAMPLE_AREA_MAX = 12.0
 _SAMPLE_AREA_REF_VOLUME = 200.0
 
 
-class AbsorptionWarning(UserWarning):
+class AbsorptionWarning(PhonometryWarning):
     """Advisory for out-of-range or non-physical ISO 354 absorption inputs."""
 
 

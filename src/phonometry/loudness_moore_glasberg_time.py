@@ -60,6 +60,7 @@ from .loudness_moore_glasberg import (
     _cochlea_levels,
     _erb_bandwidth,
     _fc_from_cam,
+    _validate_conditions,
 )
 
 # One entry per FFT window: (segment length, Hann window, sum of window^2,
@@ -323,9 +324,6 @@ _T5_SONE = np.array(
 )
 _LOG_T5_SONE = np.log10(_T5_SONE)
 
-_FIELDS = ("free", "diffuse", "eardrum")
-_PRESENTATIONS = ("binaural", "diotic", "monaural")
-
 
 @dataclass(frozen=True)
 class MooreGlasbergTimeVaryingLoudness:
@@ -581,15 +579,6 @@ def _run_ear(
 # ---------------------------------------------------------------------------
 # Input handling and public API
 # ---------------------------------------------------------------------------
-
-
-def _validate_conditions(field: str, presentation: str) -> None:
-    if field not in _FIELDS:
-        raise ValueError(f"field must be one of {_FIELDS}, got {field!r}.")
-    if presentation not in _PRESENTATIONS:
-        raise ValueError(
-            f"presentation must be one of {_PRESENTATIONS}, got {presentation!r}."
-        )
 
 
 def _as_two_channels(

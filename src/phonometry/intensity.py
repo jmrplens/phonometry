@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 from scipy import signal
 
+from ._levels_math import energy_mean
 from .frequencies import _genfreqs
 from .utils import _typesignal
 
@@ -366,7 +367,7 @@ def field_indicators(
         raise ValueError("At least two measurement positions are required.")
 
     # Equation (A.4): surface pressure level.
-    lp_surface = float(10.0 * np.log10(np.mean(10.0 ** (0.1 * lp))))
+    lp_surface = energy_mean(lp)
     # Equation (A.5): level of the mean magnitude of the normal intensity.
     li_abs = _level(float(np.mean(np.abs(i_n))), _I0)
     mean_i = float(np.mean(i_n))

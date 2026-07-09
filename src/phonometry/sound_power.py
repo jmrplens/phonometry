@@ -41,6 +41,10 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Tuple, cast
 
 import numpy as np
 
+from ._levels_math import energy_mean, energy_sum, weighted_energy_mean
+from ._types import as_float_or_array
+from ._warnings import PhonometryWarning
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
@@ -50,7 +54,7 @@ Grade = Literal["engineering", "survey"]
 Surface = Literal["hemisphere", "box"]
 
 
-class SoundPowerWarning(UserWarning):
+class SoundPowerWarning(PhonometryWarning):
     """Non-fatal qualification issue in any of the sound-power methods.
 
     Emitted for ISO 3744/3746 background margin below the criterion and for
@@ -175,15 +179,6 @@ class SoundPowerResult:
         return plot_sound_power(self, ax=ax, **kwargs)
 
 
-def _energy_average(levels: np.ndarray) -> np.ndarray:
-    """Energy (mean-square) average of levels over axis 0 (ISO 3744 Eq. 12)."""
-    n = levels.shape[0]
-    return np.asarray(
-        10.0 * np.log10(np.sum(10.0 ** (0.1 * levels), axis=0) / n),
-        dtype=np.float64,
-    )
-
-
 def background_noise_correction(
     source_levels: np.ndarray,
     background_levels: np.ndarray,
@@ -296,7 +291,7 @@ def environmental_correction(
     if np.any(a <= 0.0):
         raise ValueError("absorption_area must be positive.")
     k2 = 10.0 * np.log10(1.0 + 4.0 * surface_area / a)
-    return float(k2) if k2.ndim == 0 else np.asarray(k2, dtype=np.float64)
+    return as_float_or_array(k2)
 
 
 def measurement_positions(
@@ -491,7 +486,7 @@ def sound_power_pressure(
         )
 
     # --- energy average and background correction K1 ----------------------
-    mean_level = _energy_average(levels)
+    mean_level = energy_mean(levels, axis=0)
     n_bands = mean_level.shape[0]
     if background_levels is not None:
         bg = np.atleast_2d(np.asarray(background_levels, dtype=np.float64))
@@ -505,7 +500,7 @@ def sound_power_pressure(
                 "a single spectrum of shape (NB,) or (1, NB) broadcast to all "
                 "positions."
             )
-        k1 = background_noise_correction(mean_level, _energy_average(bg), grade)
+        k1 = background_noise_correction(mean_level, energy_mean(bg, axis=0), grade)
     else:
         k1 = np.zeros(n_bands, dtype=np.float64)
 
@@ -544,7 +539,7 @@ def sound_power_pressure(
         if freqs.shape[0] != n_bands:
             raise ValueError("'frequencies' length must match the number of bands.")
         ck = _a_weighting_corrections(freqs)
-        lwa = float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (lw + ck)))))
+        lwa = energy_sum(lw + ck)
     else:
         freqs = None
         # A-weighting needs the band centre frequencies; with several bands and
@@ -899,7 +894,7 @@ def meteorological_corrections(
         if np.any(a0 < 0.0):
             raise ValueError("'air_absorption_coefficient' must be non-negative.")
         c3_arr = a0 * (1.0053 - 0.0012 * a0) ** 1.6
-        c3 = float(c3_arr) if c3_arr.ndim == 0 else np.asarray(c3_arr, dtype=np.float64)
+        c3 = as_float_or_array(c3_arr)
     return MeteorologicalCorrection(c1=c1, c2=c2, c3=c3)
 
 
@@ -943,7 +938,7 @@ def precision_uncertainty(
         raise ValueError("'sigma_omc' must be non-negative.")
     sigma_tot = np.hypot(np.asarray(sigma_r0, dtype=np.float64), sigma_omc)
     u = coverage_factor * sigma_tot
-    return float(u) if u.ndim == 0 else np.asarray(u, dtype=np.float64)
+    return as_float_or_array(u)
 
 
 def sound_power_anechoic(
@@ -1032,23 +1027,16 @@ def sound_power_anechoic(
     corrected = levels - k1  # Lpi = L'pi(ST) - K1i
 
     # --- surface time-averaged level Lp_bar (Eq. 12 equal / Eq. 13 area) --
-    mean_level = _energy_average(levels)
+    mean_level = energy_mean(levels, axis=0)
     if areas is None:
-        lp_bar = _energy_average(corrected)
+        lp_bar = energy_mean(corrected, axis=0)
     else:
         seg = np.asarray(areas, dtype=np.float64)
         if seg.shape != (n_positions,):
             raise ValueError("'areas' must have one value per microphone position.")
         if np.any(seg <= 0.0):
             raise ValueError("All 'areas' must be positive.")
-        s_total = float(np.sum(seg))
-        lp_bar = np.asarray(
-            10.0
-            * np.log10(
-                np.sum(seg[:, None] * 10.0 ** (0.1 * corrected), axis=0) / s_total
-            ),
-            dtype=np.float64,
-        )
+        lp_bar = weighted_energy_mean(corrected, seg[:, None], axis=0)
 
     # --- meteorological corrections C1, C2, C3 (Eq. 14) -------------------
     mc = meteorological_corrections(
@@ -1066,7 +1054,7 @@ def sound_power_anechoic(
     # --- A-weighted total LWA (Eq. C.1) -----------------------------------
     if freqs is not None:
         ck = _a_weighting_corrections(freqs)
-        lwa = float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (lw + ck)))))
+        lwa = energy_sum(lw + ck)
     else:
         lwa = float(lw[0]) if n_bands == 1 else float("nan")
 
@@ -1240,7 +1228,7 @@ def precision_field_indicators(
     if n_seg < 2:
         raise ValueError("At least two segments are required for the indicators.")
 
-    lp_bar = _energy_average(lp)  # Eq. B.4
+    lp_bar = energy_mean(lp, axis=0)  # Eq. B.4
     li_unsigned = 10.0 * np.log10(np.mean(np.abs(i_n), axis=0) / _I0)  # Eq. B.5
     mean_signed = np.mean(i_n, axis=0)
     li_signed = 10.0 * np.log10(

@@ -1,0 +1,321 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Measurement uncertainty by the GUM and its Monte Carlo supplement.
+
+Implements the two propagation methods of the *Guide to the Expression of
+Uncertainty in Measurement*:
+
+* the **law of propagation of uncertainty** (ISO/IEC Guide 98-3:2008, clause 5)
+  - the combined standard uncertainty of a measurement model ``y = f(x1..xN)``
+  from the input standard uncertainties and sensitivity coefficients, with
+  optional input correlations, the effective degrees of freedom
+  (Welch-Satterthwaite, Annex G.4) and the expanded uncertainty
+  ``U = k * uc`` with a coverage factor from the t-distribution (clause 6);
+* the **Monte Carlo method** (ISO/IEC Guide 98-3-1:2008, Supplement 1) - the
+  numerical propagation of the input probability density functions, giving the
+  estimate, its standard uncertainty and a probabilistically symmetric coverage
+  interval (clause 7.7).
+
+Input quantities are described by :class:`Quantity`; :func:`rectangular`,
+:func:`triangular` and :func:`u_shaped` build Type B quantities from a
+half-width (clause 4.3).
+"""
+
+from __future__ import annotations
+
+import math
+from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
+from numpy.typing import ArrayLike
+
+Model = Callable[..., float]
+
+#: Recognised probability density functions for the Monte Carlo method.
+DISTRIBUTIONS: tuple[str, ...] = ("gaussian", "rectangular", "triangular", "u-shaped")
+
+
+@dataclass(frozen=True)
+class Quantity:
+    """An input quantity of a measurement model (GUM clause 4).
+
+    :ivar value: Best estimate ``xi`` of the input quantity.
+    :ivar uncertainty: Standard uncertainty ``u(xi)`` (>= 0).
+    :ivar distribution: PDF used by the Monte Carlo method: ``"gaussian"``,
+        ``"rectangular"``, ``"triangular"`` or ``"u-shaped"``.
+    :ivar dof: Degrees of freedom of ``uncertainty`` (``inf`` for Type B).
+    :ivar name: Optional label used in the uncertainty budget and its plot.
+    """
+
+    value: float
+    uncertainty: float
+    distribution: str = "gaussian"
+    dof: float = math.inf
+    name: str = ""
+
+    def __post_init__(self) -> None:
+        if self.uncertainty < 0.0:
+            raise ValueError("uncertainty must be non-negative.")
+        if self.distribution not in DISTRIBUTIONS:
+            raise ValueError(
+                f"distribution must be one of {DISTRIBUTIONS}; "
+                f"got {self.distribution!r}."
+            )
+        if self.dof <= 0.0:
+            raise ValueError("dof must be positive.")
+
+
+def rectangular(value: float, half_width: float, name: str = "") -> Quantity:
+    """Type B quantity with a rectangular PDF of half-width ``a`` (GUM 4.3.7).
+
+    The standard uncertainty is ``a / sqrt(3)``.
+    """
+    return Quantity(value, half_width / math.sqrt(3.0), "rectangular", name=name)
+
+
+def triangular(value: float, half_width: float, name: str = "") -> Quantity:
+    """Type B quantity with a triangular PDF of half-width ``a`` (GUM 4.3.9).
+
+    The standard uncertainty is ``a / sqrt(6)``.
+    """
+    return Quantity(value, half_width / math.sqrt(6.0), "triangular", name=name)
+
+
+def u_shaped(value: float, half_width: float, name: str = "") -> Quantity:
+    """Type B quantity with a U-shaped (arcsine) PDF of half-width ``a``.
+
+    The standard uncertainty is ``a / sqrt(2)``.
+    """
+    return Quantity(value, half_width / math.sqrt(2.0), "u-shaped", name=name)
+
+
+@dataclass(frozen=True)
+class UncertaintyResult:
+    """Result of the GUM law of propagation of uncertainty (Guide 98-3).
+
+    :ivar value: The output estimate ``y = f(x1..xN)``.
+    :ivar combined_uncertainty: Combined standard uncertainty ``uc(y)``.
+    :ivar sensitivities: Sensitivity coefficients ``ci = df/dxi``.
+    :ivar contributions: Per-input contributions ``|ci| u(xi)`` to ``uc(y)``.
+    :ivar effective_dof: Welch-Satterthwaite effective degrees of freedom.
+    :ivar names: Input labels aligned with the arrays above.
+    """
+
+    value: float
+    combined_uncertainty: float
+    sensitivities: np.ndarray
+    contributions: np.ndarray
+    effective_dof: float
+    names: tuple[str, ...] = field(default=())
+
+    def expanded(self, coverage: float = 0.95) -> tuple[float, float]:
+        """Coverage factor ``k`` and expanded uncertainty ``U = k*uc``.
+
+        :param coverage: Coverage probability in (0, 1); ``0.95`` by default.
+        :return: The pair ``(k, U)`` (GUM clause 6, Annex G).
+        """
+        k = coverage_factor(coverage, self.effective_dof)
+        return k, k * self.combined_uncertainty
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the uncertainty budget (per-input contributions).
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_uncertainty_budget
+
+        return plot_uncertainty_budget(self, ax=ax, **kwargs)
+
+
+@dataclass(frozen=True)
+class MonteCarloResult:
+    """Result of the Monte Carlo method (Guide 98-3-1, Supplement 1).
+
+    :ivar value: Estimate ``y`` (the sample mean of the output).
+    :ivar standard_uncertainty: ``u(y)`` (the sample standard deviation).
+    :ivar interval: Probabilistically symmetric coverage interval
+        ``(low, high)`` (clause 7.7).
+    :ivar coverage: The coverage probability of ``interval``.
+    :ivar trials: Number of Monte Carlo trials.
+    """
+
+    value: float
+    standard_uncertainty: float
+    interval: tuple[float, float]
+    coverage: float
+    trials: int
+
+
+def _sensitivity(model: Model, values: np.ndarray, uncertainties: np.ndarray) -> np.ndarray:
+    """Central-difference sensitivity coefficients ``df/dxi`` (GUM 5.1.3)."""
+    n = values.size
+    coeffs = np.empty(n)
+    for i in range(n):
+        # Step scaled to the input uncertainty, with a floor for zero-u inputs.
+        step = (uncertainties[i] if uncertainties[i] > 0.0 else 1.0) * 1e-3
+        up = values.copy()
+        down = values.copy()
+        up[i] += step
+        down[i] -= step
+        coeffs[i] = (model(*up) - model(*down)) / (2.0 * step)
+    return coeffs
+
+
+def combine_uncertainty(
+    model: Model,
+    quantities: Sequence[Quantity],
+    correlation: ArrayLike | None = None,
+) -> UncertaintyResult:
+    """Combined standard uncertainty by the GUM law of propagation (clause 5).
+
+    :param model: The measurement function ``f(x1, ..., xN)`` returning ``y``.
+    :param quantities: The input :class:`Quantity` objects, in the order the
+        model takes its arguments.
+    :param correlation: Optional ``N x N`` correlation matrix ``r_ij`` between
+        the inputs; ``None`` treats them as uncorrelated.
+    :return: An :class:`UncertaintyResult` with ``uc(y)``, the sensitivity
+        coefficients, the contributions and the effective degrees of freedom.
+    :raises ValueError: for no inputs or a malformed correlation matrix.
+    """
+    if len(quantities) == 0:
+        raise ValueError("at least one input quantity is required.")
+    values = np.array([q.value for q in quantities], dtype=np.float64)
+    uncert = np.array([q.uncertainty for q in quantities], dtype=np.float64)
+    n = values.size
+
+    r = None
+    if correlation is not None:
+        r = np.asarray(correlation, dtype=np.float64)
+        if r.shape != (n, n):
+            raise ValueError(f"correlation must have shape ({n}, {n}); got {r.shape}.")
+
+    coeffs = _sensitivity(model, values, uncert)
+    contributions = np.abs(coeffs) * uncert  # ui(y) = |ci| u(xi)
+
+    if r is None:
+        variance = float(np.sum(contributions**2))
+    else:
+        signed = coeffs * uncert
+        variance = float(signed @ r @ signed)
+    combined = math.sqrt(max(variance, 0.0))
+
+    # Welch-Satterthwaite effective degrees of freedom (Annex G.4).
+    dofs = np.array([q.dof for q in quantities], dtype=np.float64)
+    finite = np.isfinite(dofs)
+    if combined > 0.0 and np.any(finite & (contributions > 0.0)):
+        terms = np.where(finite, contributions**4 / np.where(finite, dofs, 1.0), 0.0)
+        denom = float(np.sum(terms))
+        effective_dof = combined**4 / denom if denom > 0.0 else math.inf
+    else:
+        effective_dof = math.inf
+
+    return UncertaintyResult(
+        value=float(model(*values)),
+        combined_uncertainty=combined,
+        sensitivities=coeffs,
+        contributions=contributions,
+        effective_dof=effective_dof,
+        names=tuple(q.name or f"x{i + 1}" for i, q in enumerate(quantities)),
+    )
+
+
+def coverage_factor(coverage: float = 0.95, dof: float = math.inf) -> float:
+    """Coverage factor ``k`` from the t-distribution (GUM clause 6, Annex G).
+
+    :param coverage: Coverage probability in (0, 1).
+    :param dof: Effective degrees of freedom; ``inf`` gives the normal quantile.
+    :return: The two-sided coverage factor ``k = t_p(dof)``.
+    :raises ValueError: for a coverage outside (0, 1).
+    """
+    if not 0.0 < coverage < 1.0:
+        raise ValueError(f"coverage must be in (0, 1); got {coverage}.")
+    p = 0.5 * (1.0 + coverage)
+    if math.isinf(dof):
+        from scipy.special import ndtri
+
+        return float(ndtri(p))
+    from scipy.stats import t
+
+    return float(t.ppf(p, dof))
+
+
+def expanded_uncertainty(
+    result: UncertaintyResult, coverage: float = 0.95
+) -> tuple[float, float]:
+    """Coverage factor and expanded uncertainty of a GUM result (clause 6).
+
+    Convenience wrapper for :meth:`UncertaintyResult.expanded`.
+    """
+    return result.expanded(coverage)
+
+
+def _sample(q: Quantity, size: int, rng: np.random.Generator) -> np.ndarray:
+    """Draw ``size`` samples of a quantity from its PDF (Supplement 1, 6.4)."""
+    mu, u = q.value, q.uncertainty
+    if u == 0.0:
+        # A constant (zero-uncertainty) input: its PDF is a spike at ``mu``.
+        # Guarded here because ``rng.triangular`` rejects a zero-width support.
+        return np.full(size, mu)
+    if q.distribution == "gaussian":
+        return rng.normal(mu, u, size)
+    if q.distribution == "rectangular":
+        a = u * math.sqrt(3.0)
+        return rng.uniform(mu - a, mu + a, size)
+    if q.distribution == "triangular":
+        a = u * math.sqrt(6.0)
+        return rng.triangular(mu - a, mu, mu + a, size)
+    # U-shaped (arcsine): a * cos(theta), theta uniform on [0, pi).
+    a = u * math.sqrt(2.0)
+    return mu + a * np.cos(rng.uniform(0.0, math.pi, size))
+
+
+def monte_carlo(
+    model: Model,
+    quantities: Sequence[Quantity],
+    trials: int = 1_000_000,
+    coverage: float = 0.95,
+    seed: int | None = None,
+) -> MonteCarloResult:
+    """Propagate uncertainty by the Monte Carlo method (Supplement 1).
+
+    Draws ``trials`` samples of each input from its PDF, evaluates the model and
+    reports the sample mean, the sample standard deviation and the
+    probabilistically symmetric coverage interval (clause 7.7).
+
+    :param model: The measurement function ``f(x1, ..., xN)`` returning ``y``;
+        it must accept array arguments (vectorised over the trials).
+    :param quantities: The input :class:`Quantity` objects, in argument order.
+    :param trials: Number of Monte Carlo trials ``M``.
+    :param coverage: Coverage probability of the reported interval.
+    :param seed: Optional seed for the random generator (reproducibility).
+    :return: A :class:`MonteCarloResult`.
+    :raises ValueError: for no inputs, non-positive trials or bad coverage.
+    """
+    if len(quantities) == 0:
+        raise ValueError("at least one input quantity is required.")
+    if trials <= 0:
+        raise ValueError("trials must be positive.")
+    if not 0.0 < coverage < 1.0:
+        raise ValueError(f"coverage must be in (0, 1); got {coverage}.")
+
+    rng = np.random.default_rng(seed)
+    samples = [_sample(q, trials, rng) for q in quantities]
+    output = np.asarray(model(*samples), dtype=np.float64)
+
+    low_q = 0.5 * (1.0 - coverage)
+    high_q = 0.5 * (1.0 + coverage)
+    low, high = np.quantile(output, [low_q, high_q])
+    return MonteCarloResult(
+        value=float(np.mean(output)),
+        standard_uncertainty=float(np.std(output, ddof=1)),
+        interval=(float(low), float(high)),
+        coverage=coverage,
+        trials=trials,
+    )

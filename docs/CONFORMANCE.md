@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **76/76 conformance checks pass** across 16 domains and 49 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **79/79 conformance checks pass** across 17 domains and 52 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -241,6 +241,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 7029:2017 Table 1 | Median threshold, male age 60 at 4 kHz | 20.209 dB (+/-0.001 dB) | 20.208 dB | 0 dB | &#9989; |
 | ISO 7029:2017 Table 2 | Upper spread su, male age 60 at 1 kHz | 10.153 dB (+/-0.001 dB) | 10.153 dB | 0 dB | &#9989; |
 | ISO 389-7:2006 Table 1 | Free-field reference threshold at 1 kHz | 2.4 dB (+/-0 dB) | 2.4 dB | 0 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Measurement uncertainty (GUM / Supplement 1)</b> — 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ISO/IEC Guide 98-3-1 clause 9.2 | Combined uncertainty, additive model | 2 (+/-0) | 2 | 0 | &#9989; |
+| ISO/IEC Guide 98-3 Table G.2 | Coverage factor, p=0.99, v=16 | 2.92 (+/-0.005) | 2.921 | 0.001 | &#9989; |
+| ISO/IEC Guide 98-3 Annex G.4 | Welch-Satterthwaite effective dof | 40 (+/-0) | 40 | 0 | &#9989; |
 
 </details>
 

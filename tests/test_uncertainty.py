@@ -155,6 +155,14 @@ def test_invalid_inputs_raise() -> None:
         u.coverage_factor(1.5)
     with pytest.raises(ValueError, match="shape"):
         u.combine_uncertainty(_add4, [u.Quantity(0, 1)] * 2, correlation=np.eye(3))
+    with pytest.raises(ValueError, match="symmetric"):
+        u.combine_uncertainty(
+            lambda a, b: a + b, [u.Quantity(0, 1)] * 2,
+            correlation=np.array([[1.0, 0.5], [0.2, 1.0]]))
+    with pytest.raises(ValueError, match="diagonal"):
+        u.combine_uncertainty(
+            lambda a, b: a + b, [u.Quantity(0, 1)] * 2,
+            correlation=np.array([[1.0, 0.0], [0.0, 0.9]]))
     with pytest.raises(ValueError, match="trials"):
         u.monte_carlo(_add4, [u.Quantity(0, 1)], trials=0)
     with pytest.raises(ValueError, match="coverage"):

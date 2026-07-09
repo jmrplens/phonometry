@@ -195,6 +195,10 @@ def combine_uncertainty(
         r = np.asarray(correlation, dtype=np.float64)
         if r.shape != (n, n):
             raise ValueError(f"correlation must have shape ({n}, {n}); got {r.shape}.")
+        if not np.allclose(r, r.T):
+            raise ValueError("correlation matrix must be symmetric.")
+        if not np.allclose(np.diag(r), 1.0):
+            raise ValueError("correlation matrix diagonal must be 1.0.")
 
     coeffs = _sensitivity(model, values, uncert)
     contributions = np.abs(coeffs) * uncert  # ui(y) = |ci| u(xi)

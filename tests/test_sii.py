@@ -73,6 +73,44 @@ def test_standard_speech_spectrum_values() -> None:
     assert sii.standard_speech_spectrum("normal")[0] == pytest.approx(32.41)
 
 
+def test_vocal_effort_spectra_spot_values() -> None:
+    # ANSI S3.5-1997 Table 3, cross-verified against reference implementations
+    # (Google speech_intelligibility_index, R CRAN SII) at 1 kHz (band 8).
+    assert sii.standard_speech_spectrum("raised")[8] == pytest.approx(33.86)
+    assert sii.standard_speech_spectrum("loud")[8] == pytest.approx(42.16)
+    assert sii.standard_speech_spectrum("shout")[8] == pytest.approx(51.31)
+    assert sii.VOCAL_EFFORTS == ("normal", "raised", "loud", "shout")
+
+
+def test_vocal_effort_overall_level_increases() -> None:
+    # The overall speech level grows with vocal effort (Table 3): reconstruct
+    # each spectrum's overall free-field SPL and check it is monotone.
+    f = sii.BAND_CENTRES
+    bw = (2.0 ** (1 / 6) - 2.0 ** (-1 / 6)) * f
+    overall = [
+        10.0 * np.log10(
+            np.sum(10.0 ** ((sii.standard_speech_spectrum(e) + 10 * np.log10(bw)) / 10))
+        )
+        for e in sii.VOCAL_EFFORTS
+    ]
+    assert overall == sorted(overall)  # normal < raised < loud < shout
+    # Matches the known ANSI vocal-effort overall levels (dB SPL).
+    assert overall[0] == pytest.approx(62.35, abs=0.1)
+    assert overall[1] == pytest.approx(68.3, abs=0.1)
+    assert overall[2] == pytest.approx(74.86, abs=0.1)
+    assert overall[3] == pytest.approx(82.36, abs=0.1)
+
+
+def test_higher_effort_raises_index_in_noise() -> None:
+    # In a fixed noise, speaking louder improves intelligibility.
+    noise = np.full(18, 40.0)
+    indices = [
+        sii.speech_intelligibility_index(e, noise).sii for e in sii.VOCAL_EFFORTS
+    ]
+    assert indices == sorted(indices)
+    assert indices[3] > indices[0]
+
+
 def test_custom_speech_spectrum_accepted() -> None:
     result = sii.speech_intelligibility_index(np.full(18, 40.0))
     assert 0.0 <= result.sii <= 1.0
@@ -87,7 +125,7 @@ def test_invalid_inputs_raise() -> None:
     with pytest.raises(ValueError, match="18"):
         sii.speech_intelligibility_index("normal", threshold=np.zeros(5))
     with pytest.raises(ValueError, match="vocal_effort"):
-        sii.standard_speech_spectrum("loud")
+        sii.standard_speech_spectrum("whisper")
 
 
 def test_result_fields_present() -> None:

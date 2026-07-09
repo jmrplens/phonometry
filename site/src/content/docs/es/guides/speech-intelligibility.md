@@ -129,6 +129,34 @@ reduce el índice, igual que lo hace añadir ruido de enmascaramiento. El
 $D_i$, la audibilidad $A_i$ y la importancia $I_i$, y su `.plot()` dibuja la
 figura de arriba.
 
+## 4. Esfuerzo vocal
+
+Los hablantes elevan la voz en ruido, y la norma da cuatro **espectros de voz
+estándar** para los esfuerzos vocales *normal*, *elevada*, *fuerte* y *grito*
+(ANSI S3.5-1997, Tabla 3). Al pasar el nombre del esfuerzo se selecciona el
+espectro correspondiente; hablar más fuerte sube todo el espectro y, en un ruido
+fijo, aumenta el índice.
+
+```python
+import numpy as np
+import phonometry as ph
+
+# El mismo ruido de banda ancha, cuatro esfuerzos vocales.
+noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
+                  32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
+for effort in ph.sii.VOCAL_EFFORTS:
+    print(effort, round(ph.speech_intelligibility_index(effort, noise).sii, 2))
+# normal 0.12 | raised 0.36 | loud 0.59 | shout 0.79
+
+print(ph.standard_speech_spectrum("loud")[8])  # 42,16 dB SPL a 1 kHz
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_es.png" alt="Izquierda: los cuatro espectros de voz estándar de ANSI S3.5-1997 (normal, elevada, fuerte, grito) de 160 Hz a 8000 Hz, cada esfuerzo mayor sube todo el espectro. Derecha: el SII resultante en un ruido de banda ancha fijo, subiendo de 0,12 (normal) a 0,79 (grito)" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_es_dark.png" alt="Izquierda: los cuatro espectros de voz estándar de ANSI S3.5-1997 (normal, elevada, fuerte, grito) de 160 Hz a 8000 Hz, cada esfuerzo mayor sube todo el espectro. Derecha: el SII resultante en un ruido de banda ancha fijo, subiendo de 0,12 (normal) a 0,79 (grito)" style="width:96%">
+
+Los nombres de esfuerzo vocal funcionan en cualquier sitio donde se espere un
+espectro de voz, incluido como primer argumento de
+`speech_intelligibility_index`.
+
 ## Véase también
 
 - [Psicoacústica e inteligibilidad del habla](/phonometry/es/guides/psychoacoustics/) — la

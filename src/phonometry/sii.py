@@ -47,18 +47,35 @@ BAND_IMPORTANCE: np.ndarray = np.array(
     dtype=np.float64,
 )
 
-#: Standard speech spectrum level ``Ui``, normal vocal effort (Table 3), dB SPL.
+#: Standard speech spectrum level ``Ui`` by vocal effort (Table 3), dB SPL.
 _SPEECH_NORMAL: np.ndarray = np.array(
     [32.41, 34.48, 34.75, 33.98, 34.59, 34.27, 32.06, 28.30, 25.01, 23.00,
      20.15, 17.32, 13.18, 11.55, 9.33, 5.31, 2.59, 1.13],
     dtype=np.float64,
 )
+_SPEECH_RAISED: np.ndarray = np.array(
+    [33.81, 33.92, 38.98, 38.57, 39.11, 40.15, 38.78, 36.37, 33.86, 31.89,
+     28.58, 25.32, 22.35, 20.15, 16.78, 11.47, 7.67, 5.07],
+    dtype=np.float64,
+)
+_SPEECH_LOUD: np.ndarray = np.array(
+    [35.29, 37.76, 41.55, 43.78, 43.30, 44.85, 45.55, 44.05, 42.16, 40.53,
+     37.70, 34.39, 30.98, 28.21, 25.41, 18.35, 13.87, 11.39],
+    dtype=np.float64,
+)
+_SPEECH_SHOUT: np.ndarray = np.array(
+    [30.77, 36.65, 42.50, 46.51, 47.40, 49.24, 51.21, 51.44, 51.31, 49.63,
+     47.65, 44.32, 40.80, 38.13, 34.41, 28.24, 23.45, 20.72],
+    dtype=np.float64,
+)
 
-#: Standard speech spectra by vocal effort (Table 3). Only the normal-effort
-#: spectrum is currently included; the raised/loud/shout spectra are pending
-#: transcription against a verified copy of Table 3.
+#: Standard speech spectra by vocal effort (Table 3): normal, raised, loud and
+#: shout.
 _SPEECH_SPECTRA: dict[str, np.ndarray] = {
     "normal": _SPEECH_NORMAL,
+    "raised": _SPEECH_RAISED,
+    "loud": _SPEECH_LOUD,
+    "shout": _SPEECH_SHOUT,
 }
 
 #: Reference internal noise spectrum level ``Xi`` (Table 3), dB SPL.
@@ -69,7 +86,7 @@ REFERENCE_INTERNAL_NOISE: np.ndarray = np.array(
 )
 
 _N_BANDS = BAND_CENTRES.size
-VOCAL_EFFORTS: tuple[str, ...] = ("normal",)
+VOCAL_EFFORTS: tuple[str, ...] = ("normal", "raised", "loud", "shout")
 
 
 @dataclass(frozen=True)
@@ -144,8 +161,9 @@ def speech_intelligibility_index(
     the 18 one-third-octave band centres from 160 Hz to 8000 Hz.
 
     :param speech_spectrum: Equivalent speech spectrum level ``Ei'``, in dB SPL.
-        The vocal-effort name ``"normal"`` selects the standard normal-effort
-        spectrum (Table 3).
+        A vocal-effort name (``"normal"``, ``"raised"``, ``"loud"`` or
+        ``"shout"``) selects the corresponding standard speech spectrum
+        (Table 3).
     :param noise_spectrum: Equivalent noise spectrum level ``Ni'``, in dB SPL;
         ``None`` uses a quiet field (``-80`` dB in every band).
     :param threshold: Equivalent hearing threshold ``Ti'``, in dB HL; ``None``

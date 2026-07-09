@@ -469,3 +469,14 @@ SII_STANDARD_QUIET = 0.9958  # SII, standard normal speech, quiet, normal hearin
 RN_NC40_SELF = 40.0  # NC-40 curve -> tangency rating (Table 1)
 RN_RC31_63HZ = 51.0  # RC-31 curve, 63 Hz octave-band level (Table D.1)
 RN_RC35_LMF = 35.0  # RC-35 curve, mid-frequency average LMF (clause D.4)
+
+# ---------------------------------------------------------------------------
+# Hearing thresholds - ISO 7029:2017 (age) and ISO 389-7:2006 (reference).
+# The median deviation follows a*(age-18)**b (Table 1); at 4 kHz for a 60-year
+# male it is 20.21 dB. The upper spread su is a degree-5 polynomial (Table 2);
+# at 1 kHz age 60 male it is 10.15 dB. The free-field reference threshold at
+# 1 kHz is 2.4 dB (ISO 389-7 Table 1).
+# ---------------------------------------------------------------------------
+HEARING_MEDIAN_MALE_60_4KHZ = 20.2085  # dB, ISO 7029 Table 1 median formula
+HEARING_SU_MALE_60_1KHZ = 10.1533  # dB, ISO 7029 Table 2 upper spread
+HEARING_REF_FREE_1KHZ = 2.4  # dB, ISO 389-7 Table 1 free-field

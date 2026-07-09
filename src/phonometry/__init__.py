@@ -38,6 +38,11 @@ from .loudness_moore_glasberg_time import (
 )
 from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
 from .sharpness import sharpness_din, sharpness_din_from_specific
+from .hearing import (
+    AgeThresholdResult,
+    age_threshold,
+    reference_threshold,
+)
 from .room_noise import (
     NCResult,
     RCResult,
@@ -402,6 +407,9 @@ __all__ = [
     "rc_curve",
     "NCResult",
     "RCResult",
+    "age_threshold",
+    "reference_threshold",
+    "AgeThresholdResult",
     "sweep_signal",
     "inverse_filter",
     "impulse_response",

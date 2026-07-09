@@ -16,9 +16,11 @@ irregular spaces is out of scope.)
 
 ## 1. Equivalent absorption area (clause 4.3)
 
-The total equivalent absorption area sums each surface's area times its
-absorption coefficient, the equivalent absorption areas of objects, and the air
-absorption (Formula 1):
+The total equivalent absorption area sums, over the surfaces $i$, the objects
+$j$ and the object arrays $k$, each surface's area times its absorption
+coefficient, the equivalent absorption areas of the objects, the object arrays
+(groups of identical objects treated as an absorbing surface of area $S_k$),
+and the air absorption (Formula 1):
 
 $$
 A = \sum_i \alpha_{s,i}\,S_i + \sum_j A_{\mathrm{obj},j}

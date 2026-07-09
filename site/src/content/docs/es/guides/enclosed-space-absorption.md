@@ -16,9 +16,11 @@ informativo del Anexo D para recintos irregulares queda fuera de alcance.)
 
 ## 1. Área de absorción equivalente (cláusula 4.3)
 
-El área de absorción equivalente total suma el área de cada superficie por su
-coeficiente de absorción, las áreas de absorción equivalentes de los objetos y
-la absorción del aire (Fórmula 1):
+El área de absorción equivalente total suma, sobre las superficies $i$, los
+objetos $j$ y las matrices de objetos $k$, el área de cada superficie por su
+coeficiente de absorción, las áreas de absorción equivalentes de los objetos,
+las matrices de objetos (grupos de objetos idénticos tratados como una
+superficie absorbente de área $S_k$) y la absorción del aire (Fórmula 1):
 
 $$
 A = \sum_i \alpha_{s,i}\,S_i + \sum_j A_{\mathrm{obj},j}

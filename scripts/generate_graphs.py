@@ -3551,7 +3551,7 @@ def generate_ntacou112(output_dir: str) -> None:
     ax_k.axvline(ADJUSTMENT_THRESHOLD, color="#7f7f7f", linestyle=":",
                  label=f"threshold $P = {ADJUSTMENT_THRESHOLD:g}$")
     ax_k.scatter(result.per_impulse, impulse_adjustment(result.per_impulse),
-                 color="#7f7f7f", zorder=3, label="Impulses")
+                 color="#aec7e8", zorder=3, label="Impulses")
     ax_k.scatter([result.prominence], [result.adjustment], color=COLOR_SECONDARY,
                  marker="*", s=140, zorder=4,
                  label=f"Governing  $K_I$ = {result.adjustment:.1f} dB")

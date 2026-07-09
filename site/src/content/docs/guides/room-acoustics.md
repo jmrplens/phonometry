@@ -84,6 +84,94 @@ ir_m = mls_impulse_response(rec, mls)
 print(int(np.argmax(np.abs(ir_m))))                  # 100
 ```
 
+`sweep_signal`/`mls_signal` return plain arrays, ready to write to a WAV file
+and play. `impulse_response`/`mls_impulse_response` return an
+`ImpulseResponseResult` — a drop-in for the raw IR array (`np.asarray(ir)`,
+indexing and `ir.size` all keep working, so `room_parameters(ir, fs)` is
+unchanged) that also carries the sample rate and method and adds an `.plot()`.
+
+**The two excitations.** The exponential sweep sweeps its energy up the
+spectrum over the whole signal, while the MLS is a flat-spectrum two-level
+sequence — visible as the near-constant magnitude on the right.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals.png" alt="ISO 18233 excitation signals: the exponential sine sweep waveform and its spectrogram showing the exponential frequency rise, and a maximum-length sequence with its flat magnitude spectrum" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals_dark.png" alt="ISO 18233 excitation signals: the exponential sine sweep waveform and its spectrogram showing the exponential frequency rise, and a maximum-length sequence with its flat magnitude spectrum" style="width:96%">
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import sweep_signal, mls_signal, plot_excitation
+
+fs = 48000
+sweep = sweep_signal(fs, 50.0, 20000.0, 1.0)   # ESS excitation
+mls = mls_signal(12).astype(float)             # length 2**12 - 1
+
+# One-liner: waveform + spectrogram (sweep), sequence + flat spectrum (MLS)
+plot_excitation(sweep, fs, kind="sweep")
+plot_excitation(mls, fs, kind="mls")
+
+# By hand: the sweep spectrogram and the MLS magnitude spectrum
+import numpy as np
+import matplotlib.pyplot as plt
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+ax1.specgram(sweep, NFFT=1024, Fs=fs, noverlap=512)
+ax1.set(xlabel="Time [s]", ylabel="Frequency [Hz]", title="Sweep spectrogram")
+spec = np.abs(np.fft.rfft(mls))
+freqs = np.fft.rfftfreq(mls.size, d=1.0 / fs)
+ax2.semilogx(freqs[1:], 20 * np.log10(spec[1:] / np.median(spec[1:])))
+ax2.set(xlabel="Frequency [Hz]", ylabel="Magnitude [dB]", title="MLS spectrum (flat)")
+```
+
+</details>
+
+**The recovered impulse response.** Deconvolving the recording gives the
+broadband IR: the direct sound, discrete early reflections and the decaying
+diffuse tail. Its `.plot()` shows the waveform above and the log-magnitude
+envelope with the Schroeder energy-decay curve below — the straight decay
+whose slope becomes the reverberation time in §2.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response.png" alt="Recovered room impulse response: the normalized waveform with the direct sound and reflections labelled, and below it the log-magnitude envelope in dB with the Schroeder energy-decay curve" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_dark.png" alt="Recovered room impulse response: the normalized waveform with the direct sound and reflections labelled, and below it the log-magnitude envelope in dB with the Schroeder energy-decay curve" style="width:88%">
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+from scipy.signal import fftconvolve
+from phonometry import sweep_signal, impulse_response
+
+fs = 48000
+sweep = sweep_signal(fs, 20.0, 20000.0, 1.5)
+# A synthetic room: direct sound + two reflections + a decaying diffuse tail
+system = np.zeros(int(0.7 * fs))
+system[80], system[1400], system[3100] = 1.0, 0.5, 0.32
+ir = impulse_response(fftconvolve(sweep, system), sweep, fs, length=system.size)
+
+# One-liner: waveform + log-magnitude / Schroeder decay
+ir.plot()
+
+# By hand: the normalized log-magnitude envelope in dB
+import matplotlib.pyplot as plt
+h = np.asarray(ir)
+t = np.arange(h.size) / fs
+plt.plot(t, 20 * np.log10(np.abs(h) / np.max(np.abs(h))))
+plt.ylim(-80, 5)
+plt.xlabel("Time [s]"); plt.ylabel("Level re peak [dB]")
+```
+
+</details>
+
+**Where to measure.** One IR characterises a single source–receiver pair; a
+reported room parameter is the spatial average over several. ISO 3382-1
+(performance spaces) asks for at least two source positions and microphones
+spaced $\geq 2$ m apart, $\geq 1$ m from any surface, at $1.2$ m
+(seated-ear) height, avoiding symmetric placements; ISO 3382-2 fixes the
+minimum number of source, microphone and source–microphone combinations per
+accuracy grade (survey / engineering / precision).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement.svg" alt="Room-acoustics measurement setup: a top-view room plan with two loudspeaker source positions and six microphone positions with the ISO 3382-1 spacing rules, and the ISO 3382-2 table of minimum positions for the survey, engineering and precision grades" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_dark.svg" alt="Room-acoustics measurement setup: a top-view room plan with two loudspeaker source positions and six microphone positions with the ISO 3382-1 spacing rules, and the ISO 3382-2 table of minimum positions for the survey, engineering and precision grades" style="width:94%">
+
 ### `sweep_signal()` / `inverse_filter()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |

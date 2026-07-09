@@ -22,10 +22,13 @@ import pytest
 from scipy import signal
 
 from phonometry import (
+    ImpulseResponseResult,
     impulse_response,
     inverse_filter,
     mls_impulse_response,
     mls_signal,
+    plot_excitation,
+    room_parameters,
     sweep_signal,
 )
 from phonometry.room_ir import _MLS_TAPS
@@ -392,3 +395,101 @@ def test_mls_impulse_response_rejects_bad_shapes() -> None:
         mls_impulse_response(np.zeros(0), seq)  # empty recorded
     with pytest.raises(ValueError):
         mls_impulse_response(good, np.zeros(0))  # empty mls
+
+
+# --------------------------------------------------------------------------
+# Result object: backward compatibility (drop-in for the raw IR array)
+# --------------------------------------------------------------------------
+def _synthetic_recording() -> tuple[np.ndarray, np.ndarray]:
+    sweep = sweep_signal(FS, 20.0, 20000.0, 1.0)
+    system = np.zeros(FS)
+    system[100] = 1.0
+    system[2000] = 0.4
+    return signal.fftconvolve(sweep, system), sweep
+
+
+def test_impulse_response_returns_result_object() -> None:
+    rec, sweep = _synthetic_recording()
+    ir = impulse_response(rec, sweep, FS)
+    assert isinstance(ir, ImpulseResponseResult)
+    assert ir.fs == FS
+    assert ir.method == "spectral"
+    # Array protocol: np.asarray yields the raw IR and equals the .ir field.
+    arr = np.asarray(ir)
+    assert isinstance(arr, np.ndarray)
+    assert np.array_equal(arr, ir.ir)
+    # Drop-in array surface used across the codebase.
+    assert ir.size == ir.ir.size == len(ir)
+    assert ir.shape == ir.ir.shape
+    assert ir.ndim == 1
+    assert np.array_equal(ir[100:110], ir.ir[100:110])
+    assert int(np.argmax(np.abs(ir))) == 100
+
+
+def test_impulse_response_asarray_matches_untrimmed_math() -> None:
+    """np.asarray(result) must equal the array the old API returned."""
+    rec, sweep = _synthetic_recording()
+    ir = impulse_response(rec, sweep, FS, length=4096)
+    n = rec.size + sweep.size - 1
+    spec_x = np.fft.rfft(sweep, n=n)
+    spec_y = np.fft.rfft(rec, n=n)
+    power = np.abs(spec_x) ** 2
+    reg = 1e-6 * float(power.max())
+    full = np.fft.irfft(spec_x.conj() * spec_y / (power + reg), n=n)
+    assert np.allclose(np.asarray(ir), full[:4096])
+
+
+def test_room_parameters_accepts_result_object() -> None:
+    """room_parameters(result, fs) must work exactly like room_parameters(arr, fs)."""
+    rec, sweep = _synthetic_recording()
+    ir = impulse_response(rec, sweep, FS)
+    from_result = room_parameters(ir, FS, limits=None)
+    from_array = room_parameters(np.asarray(ir), FS, limits=None)
+    assert np.allclose(from_result.edt, from_array.edt, equal_nan=True)
+    assert np.allclose(from_result.t30, from_array.t30, equal_nan=True)
+
+
+def test_mls_result_metadata() -> None:
+    a = mls_signal(14)
+    ir = mls_impulse_response(np.tile(a, 2)[: a.size], a, fs=FS)
+    assert isinstance(ir, ImpulseResponseResult)
+    assert ir.method == "mls"
+    assert ir.fs == FS
+    # fs is optional; omitting it leaves the axis unitful-agnostic (None).
+    assert mls_impulse_response(a, a).fs is None
+
+
+# --------------------------------------------------------------------------
+# Plotting (Agg backend): impulse response and excitation signals
+# --------------------------------------------------------------------------
+def test_impulse_response_plot_returns_axes() -> None:
+    import matplotlib
+    matplotlib.use("Agg")
+    from matplotlib.axes import Axes
+
+    rec, sweep = _synthetic_recording()
+    ir = impulse_response(rec, sweep, FS)
+    axes = ir.plot()
+    assert isinstance(axes, np.ndarray) and axes.size == 2
+    assert all(isinstance(a, Axes) for a in axes)
+
+    _, single = matplotlib.pyplot.subplots()
+    returned = ir.plot(ax=single)
+    assert returned is single
+    matplotlib.pyplot.close("all")
+
+
+def test_plot_excitation_returns_axes() -> None:
+    import matplotlib
+    matplotlib.use("Agg")
+    from matplotlib.axes import Axes
+
+    sweep = sweep_signal(FS, 20.0, 20000.0, 0.5)
+    axes = plot_excitation(sweep, FS, kind="sweep")
+    assert isinstance(axes, np.ndarray) and axes.size == 2
+
+    mls = mls_signal(12).astype(float)
+    axes_m = plot_excitation(mls, FS, kind="mls")
+    assert isinstance(axes_m, np.ndarray) and axes_m.size == 2
+    assert all(isinstance(a, Axes) for a in axes_m)
+    matplotlib.pyplot.close("all")

@@ -1336,6 +1336,30 @@ def _chk_directive_2002_44() -> Outcome:
     return Outcome(expected=exp, computed=got, delta="0", passed=ok)
 
 
+# ---------------------------------------------------------------------------
+# Speech Intelligibility Index (ANSI S3.5-1997)
+# ---------------------------------------------------------------------------
+_SII = "Speech intelligibility (ANSI S3.5-1997)"
+
+
+@register(_SII, "ANSI S3.5-1997 Table 3", "Band-importance function normalisation")
+def _chk_sii_band_importance_sum() -> Outcome:
+    total = float(ph.sii.BAND_IMPORTANCE.sum())
+    return numeric(ref.SII_BAND_IMPORTANCE_SUM, total, 1e-9, places=6)
+
+
+@register(_SII, "ANSI S3.5-1997 clause 5.4", "Equivalent masking spectrum level at 200 Hz")
+def _chk_sii_masking() -> Outcome:
+    result = ph.speech_intelligibility_index("normal")
+    return numeric(ref.SII_MASKING_Z_200HZ, float(result.masking[1]), 1e-3, places=3)
+
+
+@register(_SII, "ANSI S3.5-1997 clause 6", "SII, standard speech in quiet, normal hearing")
+def _chk_sii_standard_quiet() -> Outcome:
+    result = ph.speech_intelligibility_index("normal")
+    return numeric(ref.SII_STANDARD_QUIET, result.sii, 5e-4, places=4)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

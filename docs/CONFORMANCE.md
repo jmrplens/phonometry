@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **67/67 conformance checks pass** across 13 domains and 41 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **70/70 conformance checks pass** across 14 domains and 44 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -208,6 +208,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 5349-2:2001 Example E.3 | Forestry three-task A(8) | 3.6 m/s^2 (+/-0.05 m/s^2) | 3.61 m/s^2 | 0.01 m/s^2 | &#9989; |
 | ISO 5349-1:2001 Eq. (C.1) | VWF 10 % lifetime Dy at A(8)=7 | 4 yr (+/-0.1 yr) | 4.04 yr | 0.042 yr | &#9989; |
 | Directive 2002/44/EC Art. 3 | HAV/WBV action & limit values | HAV 2.5/5.0, WBV 0.5/1.15 m/s^2 | HAV 2.5/5.0, WBV 0.5/1.15 m/s^2 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Speech intelligibility (ANSI S3.5-1997)</b> — 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ANSI S3.5-1997 Table 3 | Band-importance function normalisation | 1 (+/-0) | 1 | 0 | &#9989; |
+| ANSI S3.5-1997 clause 5.4 | Equivalent masking spectrum level at 200 Hz | -1.665 (+/-0.001) | -1.665 | 0 | &#9989; |
+| ANSI S3.5-1997 clause 6 | SII, standard speech in quiet, normal hearing | 0.9958 (+/-0.0005) | 0.9958 | 0 | &#9989; |
 
 </details>
 

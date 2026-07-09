@@ -442,7 +442,11 @@ def plot_sii(result: "SIIResult", ax: Axes | None = None, **kwargs: Any) -> Axes
     positions = np.arange(freqs.size)
     ax.bar(positions, audibility, color="#c6dbef", label="Band audibility $A_i$")
     kwargs.setdefault("color", "#1f77b4")
-    ax.bar(positions, contribution / contribution.max(), width=0.5,
+    # A fully masked speech signal (SII = 0) has an all-zero contribution;
+    # keep the zero bars rather than dividing 0/0 into NaN.
+    peak = float(contribution.max()) if contribution.size else 0.0
+    scaled = contribution / peak if peak > 0.0 else contribution
+    ax.bar(positions, scaled, width=0.5,
            label=r"Importance-weighted $I_i A_i$ (scaled)", **kwargs)
     ax.set_xticks(positions)
     ax.set_xticklabels([_format_freq(f) for f in freqs], rotation=45, ha="right")
@@ -691,8 +695,14 @@ def plot_facade_insulation(
         curves.append(("$D_{2m,n}$", np.asarray(result.d_2m_n, dtype=np.float64)))
     if result.r_prime is not None:
         curves.append(("$R'$", np.asarray(result.r_prime, dtype=np.float64)))
-    for label, y in curves:
-        ax.plot(x, y, "o-", label=label, **kwargs)
+    # Forward user kwargs to the primary D2m,nT curve only, so styling kwargs
+    # (label=, color=) neither collide with the per-curve labels nor make the
+    # companion curves indistinguishable.
+    for index, (label, y) in enumerate(curves):
+        opts: dict[str, Any] = {"label": label}
+        if index == 0:
+            opts.update(kwargs)
+        ax.plot(x, y, "o-", **opts)
 
     ax.set_ylabel("Level difference / reduction index [dB]")
     ax.set_title("Façade sound insulation (ISO 16283-3)")
@@ -1389,9 +1399,11 @@ def plot_noise_criterion(
     kwargs.setdefault("color", "#1f77b4")
     kwargs.setdefault("label", "Measured")
     ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
+    # Nearest-band lookup rather than float equality against the stored value.
+    governing = int(np.argmin(np.abs(freqs - result.governing_frequency)))
     ax.plot(
         [result.governing_frequency],
-        [levels[freqs == result.governing_frequency][0]],
+        [levels[governing]],
         "D", color="#d62728", zorder=4,
         label=f"Governing band ({_format_freq(result.governing_frequency)})",
     )
@@ -1573,7 +1585,8 @@ def plot_impulse_prominence(
 
     ax = ax if ax is not None else _new_axes()
     per = np.asarray(result.per_impulse, dtype=np.float64)
-    p_max = max(float(per.max()), result.prominence, 15.0) + 1.0
+    per_max = float(per.max()) if per.size else 0.0
+    p_max = max(per_max, result.prominence, 15.0) + 1.0
     grid = np.linspace(0.0, p_max, 200)
     ax.plot(grid, impulse_adjustment(grid), color="#1f77b4",
             label=r"$K_I = 1.8\,(P-5)$")

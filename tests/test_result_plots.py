@@ -335,6 +335,8 @@ _KWARG_PLOT_CASES = [
     ("intensity_power", _intensity_power_negative, "bar"),
     ("intensity", _intensity, "line"),
     ("decay_curve", lambda: ph.decay_curve(_exp_ir(seconds=1.0, t60=0.6), FS), "line"),
+    ("facade", lambda: ph.facade_insulation(
+        [70.0, 72.0, 74.0], [40.0, 41.0, 42.0], [0.5, 0.5, 0.5]), "line"),
 ]
 
 

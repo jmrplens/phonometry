@@ -100,7 +100,7 @@ def _k_din() -> float:
     if _K_DIN is None:
         _K_DIN = 1.0 / _moment(_reference_specific(), "din")
         if not 0.105 <= _K_DIN < 0.115:  # pragma: no cover - sanity guard
-            raise AssertionError(f"k={_K_DIN} outside the DIN 45692 range")
+            raise RuntimeError(f"k={_K_DIN} outside the DIN 45692 range")
     return _K_DIN
 
 
@@ -112,7 +112,7 @@ def _k_bismarck() -> float:
     if _K_BISMARCK is None:
         _K_BISMARCK = 1.0 / _moment(_reference_specific(), "bismarck")
         if not 0.08 <= _K_BISMARCK < 0.15:  # pragma: no cover - sanity guard
-            raise AssertionError(f"k_bismarck={_K_BISMARCK} out of range")
+            raise RuntimeError(f"k_bismarck={_K_BISMARCK} out of range")
     return _K_BISMARCK
 
 
@@ -126,7 +126,7 @@ def _k_aures() -> float:
     if _K_AURES is None:
         _K_AURES = 1.0 / _moment(_reference_specific(), "aures")
         if not 0.08 <= _K_AURES < 0.15:  # pragma: no cover - sanity guard
-            raise AssertionError(f"k_aures={_K_AURES} out of range")
+            raise RuntimeError(f"k_aures={_K_AURES} out of range")
     return _K_AURES
 
 

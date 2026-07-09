@@ -88,6 +88,98 @@ ir_m = mls_impulse_response(rec, mls)
 print(int(np.argmax(np.abs(ir_m))))                  # 100
 ```
 
+`sweep_signal`/`mls_signal` devuelven arrays simples, listos para escribir en
+un WAV y reproducir. `impulse_response`/`mls_impulse_response` devuelven ahora
+un `ImpulseResponseResult` — un sustituto directo del array de la RI
+(`np.asarray(ir)`, la indexación y `ir.size` siguen funcionando, de modo que
+`room_parameters(ir, fs)` no cambia) que además guarda la frecuencia de
+muestreo y el método y añade un `.plot()`.
+
+**Las dos excitaciones.** El barrido exponencial desplaza su energía hacia
+frecuencias altas a lo largo de toda la señal, mientras que la MLS es una
+secuencia de dos niveles con espectro plano — visible como la magnitud
+casi constante de la derecha.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals_es.png" alt="Señales de excitación ISO 18233: la forma de onda del barrido sinusoidal exponencial y su espectrograma con el ascenso exponencial de frecuencia, y una secuencia de longitud máxima con su espectro de magnitud plano" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals_es_dark.png" alt="Señales de excitación ISO 18233: la forma de onda del barrido sinusoidal exponencial y su espectrograma con el ascenso exponencial de frecuencia, y una secuencia de longitud máxima con su espectro de magnitud plano" style="width:96%">
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+from phonometry import sweep_signal, mls_signal, plot_excitation
+
+fs = 48000
+sweep = sweep_signal(fs, 50.0, 20000.0, 1.0)   # excitación ESS
+mls = mls_signal(12).astype(float)             # longitud 2**12 - 1
+
+# Una línea: forma de onda + espectrograma (barrido), secuencia + espectro (MLS)
+plot_excitation(sweep, fs, kind="sweep")
+plot_excitation(mls, fs, kind="mls")
+
+# A mano: el espectrograma del barrido y el espectro de magnitud de la MLS
+import numpy as np
+import matplotlib.pyplot as plt
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+ax1.specgram(sweep, NFFT=1024, Fs=fs, noverlap=512)
+ax1.set(xlabel="Tiempo [s]", ylabel="Frecuencia [Hz]", title="Espectrograma del barrido")
+spec = np.abs(np.fft.rfft(mls))
+freqs = np.fft.rfftfreq(mls.size, d=1.0 / fs)
+ax2.semilogx(freqs[1:], 20 * np.log10(spec[1:] / np.median(spec[1:])))
+ax2.set(xlabel="Frecuencia [Hz]", ylabel="Magnitud [dB]", title="Espectro de la MLS (plano)")
+```
+
+</details>
+
+**La respuesta al impulso recuperada.** Deconvolucionar la grabación da la RI
+de banda ancha: el sonido directo, las reflexiones tempranas discretas y la
+cola difusa que decae. Su `.plot()` muestra la forma de onda arriba y la
+envolvente log-magnitud con la curva de decaimiento de energía de Schroeder
+abajo — el decaimiento recto cuya pendiente se convierte en el tiempo de
+reverberación del §2.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_es.png" alt="Respuesta al impulso de la sala recuperada: la forma de onda normalizada con el sonido directo y las reflexiones etiquetadas, y debajo la envolvente log-magnitud en dB con la curva de decaimiento de energía de Schroeder" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_es_dark.png" alt="Respuesta al impulso de la sala recuperada: la forma de onda normalizada con el sonido directo y las reflexiones etiquetadas, y debajo la envolvente log-magnitud en dB con la curva de decaimiento de energía de Schroeder" style="width:88%">
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import numpy as np
+from scipy.signal import fftconvolve
+from phonometry import sweep_signal, impulse_response
+
+fs = 48000
+sweep = sweep_signal(fs, 20.0, 20000.0, 1.5)
+# Una sala sintética: sonido directo + dos reflexiones + cola difusa que decae
+system = np.zeros(int(0.7 * fs))
+system[80], system[1400], system[3100] = 1.0, 0.5, 0.32
+ir = impulse_response(fftconvolve(sweep, system), sweep, fs, length=system.size)
+
+# Una línea: forma de onda + log-magnitud / decaimiento de Schroeder
+ir.plot()
+
+# A mano: la envolvente log-magnitud normalizada en dB
+import matplotlib.pyplot as plt
+h = np.asarray(ir)
+t = np.arange(h.size) / fs
+plt.plot(t, 20 * np.log10(np.abs(h) / np.max(np.abs(h))))
+plt.ylim(-80, 5)
+plt.xlabel("Tiempo [s]"); plt.ylabel("Nivel re pico [dB]")
+```
+
+</details>
+
+**Dónde medir.** Una RI caracteriza un único par fuente–receptor; un parámetro
+de sala se obtiene promediando sobre varios. ISO 3382-1 (espacios para
+interpretación) pide al menos dos posiciones de fuente y micrófonos separados
+$\geq 2$ m entre sí, $\geq 1$ m de cualquier superficie, a $1{,}2$ m
+(altura de oído sentado), evitando colocaciones simétricas; ISO 3382-2 fija el
+número mínimo de posiciones de fuente, de micrófono y de combinaciones
+fuente–micrófono según el grado de exactitud (control / ingeniería /
+precisión).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_es.svg" alt="Configuración de medición de acústica de salas: una planta de la sala en vista superior con dos posiciones de fuente (altavoz) y seis posiciones de micrófono con las reglas de separación de ISO 3382-1, y la tabla de ISO 3382-2 con el número mínimo de posiciones para los grados de control, ingeniería y precisión" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_es_dark.svg" alt="Configuración de medición de acústica de salas: una planta de la sala en vista superior con dos posiciones de fuente (altavoz) y seis posiciones de micrófono con las reglas de separación de ISO 3382-1, y la tabla de ISO 3382-2 con el número mínimo de posiciones para los grados de control, ingeniería y precisión" style="width:94%">
+
 ### Parámetros de `sweep_signal()` / `inverse_filter()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |

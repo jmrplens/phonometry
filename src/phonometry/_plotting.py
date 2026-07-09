@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     from .loudness_moore_glasberg import MooreGlasbergLoudness
     from .loudness_moore_glasberg_time import MooreGlasbergTimeVaryingLoudness
     from .room_acoustics import DecayCurve, RoomAcousticsResult
+    from .room_ir import ImpulseResponseResult
     from .tonality_ecma import EcmaTonality
     from .roughness_ecma import EcmaRoughness
     from .sii import SIIResult
@@ -991,6 +992,154 @@ def _fit_segment(
         return None
     slope, intercept = np.polyfit(time[mask], level[mask], 1)
     return np.asarray(slope * time + intercept, dtype=np.float64)
+
+
+# ---------------------------------------------------------------------------
+# Impulse-response acquisition (ISO 18233)
+# ---------------------------------------------------------------------------
+
+
+def _time_axis(n: int, fs: int | None) -> tuple[np.ndarray, str]:
+    """Sample times in seconds when ``fs`` is known, else sample index."""
+    if fs:
+        return np.arange(n) / float(fs), "Time [s]"
+    return np.arange(n, dtype=np.float64), "Sample"
+
+
+def plot_impulse_response(
+    result: "ImpulseResponseResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes | np.ndarray:
+    """Impulse-response waveform and its log-magnitude / Schroeder decay.
+
+    Two stacked panels: the (peak-normalised) time-domain waveform on top and,
+    below it, the log-magnitude envelope in dB with the Schroeder
+    backward-integrated energy-decay curve overlaid. With ``ax`` given, only
+    the decay panel is drawn on it.
+
+    :param result: An :class:`~phonometry.room_ir.ImpulseResponseResult`.
+    :param ax: Existing axes for the decay panel, or ``None`` for a fresh
+        two-panel figure.
+    :param kwargs: Forwarded to the waveform / envelope ``plot`` calls.
+    :return: The decay-panel axes (``ax`` given) or the array of two axes.
+    """
+    h = np.asarray(result.ir, dtype=np.float64)
+    n = h.shape[-1]
+    if n == 0:
+        raise ValueError("impulse response is empty; nothing to plot.")
+    time, xlabel = _time_axis(n, result.fs)
+    peak = float(np.max(np.abs(h)))
+    tiny = np.finfo(np.float64).tiny
+    norm = peak if peak > 0.0 else 1.0
+    env_db = 20.0 * np.log10(np.maximum(np.abs(h), tiny) / norm)
+    # Schroeder backward integration of the squared IR (broadband).
+    energy = np.cumsum(h[::-1] ** 2)[::-1]
+    total = float(energy[0]) if energy.size else 0.0
+    edc_db = 10.0 * np.log10(np.maximum(energy, tiny) / (total if total > 0.0 else 1.0))
+
+    color = kwargs.pop("color", "#1f77b4")
+
+    def _decay(axd: Axes) -> None:
+        axd.plot(time, env_db, color="#9ecae1", lw=0.8, label="Log-magnitude envelope")
+        axd.plot(time, edc_db, color="#d62728", lw=1.8, label="Schroeder decay")
+        axd.set_xlabel(xlabel)
+        axd.set_ylabel("Level re peak [dB]")
+        axd.set_ylim(bottom=-80.0, top=5.0)
+        axd.set_xlim(left=float(time[0]) if n else 0.0,
+                     right=float(time[-1]) if n else None)
+        axd.grid(True, alpha=0.3)
+        axd.legend(loc="upper right", fontsize="small")
+
+    if ax is not None:
+        _decay(ax)
+        ax.set_title(f"Impulse response ({result.method})")
+        return ax
+
+    axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.0))
+    axes[0].plot(time, h / norm, color=color, lw=0.8, **kwargs)
+    axes[0].set_ylabel("Amplitude (norm.)")
+    axes[0].set_title(f"Impulse response ({result.method})")
+    axes[0].grid(True, alpha=0.3)
+    _decay(axes[1])
+    return axes
+
+
+def plot_excitation(
+    signal: "np.ndarray | Any",
+    fs: int,
+    *,
+    kind: str = "sweep",
+    ax: Axes | None = None,
+    **kwargs: Any,
+) -> Axes | np.ndarray:
+    """Plot an ISO 18233 excitation signal (sweep or MLS).
+
+    A documented helper for the raw arrays returned by
+    :func:`~phonometry.sweep_signal` and :func:`~phonometry.mls_signal`, which
+    stay plain :class:`numpy.ndarray` (they are meant for playback). For a
+    swept sine the waveform and its spectrogram are drawn; for an MLS the first
+    samples of the bipolar sequence and its (flat) magnitude spectrum.
+
+    :param signal: The excitation samples (1D array-like).
+    :param fs: Sample rate in Hz (for the time and frequency axes).
+    :param kind: ``"sweep"`` (default) or ``"mls"``.
+    :param ax: Existing axes for the top (time-domain) panel, or ``None`` for a
+        fresh two-panel figure.
+    :param kwargs: Forwarded to the time-domain ``plot`` call.
+    :return: The time-domain axes (``ax`` given) or the array of two axes.
+    """
+    x = np.asarray(signal, dtype=np.float64)
+    n = x.shape[-1]
+    if n == 0:
+        raise ValueError("excitation signal is empty; nothing to plot.")
+    t = np.arange(n) / float(fs)
+    color = kwargs.pop("color", "#1f77b4")
+
+    two_panel = ax is None
+    if two_panel:
+        axes = _new_axes_column(2, figsize=(8.0, 6.0))
+        ax_time = cast("Axes", axes[0])
+    else:
+        ax_time = cast("Axes", ax)
+
+    if kind == "mls":
+        show = min(n, 120)
+        ax_time.step(np.arange(show), x[:show], where="mid", color=color, **kwargs)
+        ax_time.set_xlabel("Sample")
+        ax_time.set_ylabel("Amplitude")
+        ax_time.set_ylim(-1.4, 1.4)
+        ax_time.set_title(f"MLS excitation (first {show} of {n} samples)")
+        ax_time.grid(True, alpha=0.3)
+        if not two_panel:
+            return ax_time
+        spec = np.abs(np.fft.rfft(x))
+        freqs = np.fft.rfftfreq(n, d=1.0 / fs)
+        ax_f = axes[1]
+        ac = spec[1:]
+        denom = float(np.median(ac)) if ac.size else 1.0
+        ax_f.semilogx(freqs[1:], 20.0 * np.log10(
+                      np.maximum(ac, 1e-10) / (denom if denom > 0.0 else 1.0)),
+                      color="#d62728", lw=0.8)
+        ax_f.set_xlabel("Frequency [Hz]")
+        ax_f.set_ylabel("Magnitude [dB]")
+        ax_f.set_title("Magnitude spectrum (flat)")
+        ax_f.grid(True, which="both", alpha=0.3)
+        return axes
+
+    # Swept sine.
+    ax_time.plot(t, x, color=color, lw=0.6, **kwargs)
+    ax_time.set_xlabel("Time [s]")
+    ax_time.set_ylabel("Amplitude")
+    ax_time.set_title("Exponential sine sweep")
+    ax_time.grid(True, alpha=0.3)
+    if not two_panel:
+        return ax_time
+    ax_s = axes[1]
+    nperseg = min(n, max(256, min(2048, n // 16)))
+    ax_s.specgram(x, NFFT=nperseg, Fs=fs, noverlap=nperseg // 2, cmap="magma")
+    ax_s.set_xlabel("Time [s]")
+    ax_s.set_ylabel("Frequency [Hz]")
+    ax_s.set_title("Spectrogram (exponential frequency rise)")
+    return axes
 
 
 # ---------------------------------------------------------------------------

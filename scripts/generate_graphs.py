@@ -406,8 +406,10 @@ _ES_EXACT = {
 
 _ES_PATTERNS = [
     (r"^(\d+) yr$", r"\1 años"),
-    (r"^Governing  (\$K_I\$ = .+ dB)$", r"Determinante  \1"),
-    (r"^Example  (\$R\$ = .+)$", r"Ejemplo  \1"),
+    (r"^Governing  \$K_I\$ = (\d+)\.(\d+) dB$", r"Determinante  $K_I$ = \1,\2 dB"),
+    # The mathtext ($R$) makes the later decimal-comma pass skip this label, so
+    # convert the decimal here as part of the translation.
+    (r"^Example  \$R\$ = (\d+)\.(\d+)$", r"Ejemplo  $R$ = \1,\2"),
     (r"^Octave Band: (.+) Hz$", r"Banda de octava: \1 Hz"),
     (r"^(\d+) phon$", r"\1 fonios"),
     (r"^TNR = (.+) dB\n\(criterion (.+) dB\)$", "TNR = \\1 dB\\n(criterio \\2 dB)"),

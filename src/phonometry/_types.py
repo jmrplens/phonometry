@@ -17,10 +17,10 @@ from numpy.typing import NDArray
 Real = NDArray[np.float64]
 
 
-def as_float_or_array(x: np.ndarray) -> np.ndarray | float:
-    """Return a Python ``float`` for a 0-d array, the array otherwise.
+def as_float_or_array(x: np.ndarray | float) -> np.ndarray | float:
+    """Return a Python ``float`` for a 0-d array or scalar, the array otherwise.
 
-    :param x: The array produced by a vectorised computation.
+    :param x: The array (or scalar) produced by a vectorised computation.
     :return: ``float(x)`` when *x* is zero-dimensional, else *x* unchanged.
     """
-    return float(x) if x.ndim == 0 else x
+    return float(x) if np.ndim(x) == 0 else x

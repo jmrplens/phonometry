@@ -34,8 +34,7 @@ def energy_mean(levels: ArrayLike, axis: int | None = None) -> np.ndarray | floa
     :return: A ``float`` when *axis* is ``None``, otherwise an array.
     """
     arr = np.asarray(levels, dtype=np.float64)
-    n = arr.size if axis is None else arr.shape[axis]
-    out = 10.0 * np.log10(np.sum(10.0 ** (arr / 10.0), axis=axis) / n)
+    out = 10.0 * np.log10(np.mean(10.0 ** (arr / 10.0), axis=axis))
     if axis is None:
         return float(out)
     return np.asarray(out, dtype=np.float64)

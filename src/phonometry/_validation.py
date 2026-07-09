@@ -16,40 +16,40 @@ from numpy.typing import ArrayLike
 
 
 def require_positive(value: float, name: str) -> float:
-    """Require a positive finite number (rejects NaN).
+    """Require a positive finite number (rejects NaN and infinities).
 
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for NaN or a non-positive value.
+    :raises ValueError: for a non-finite or non-positive value.
     """
-    if math.isnan(value) or value <= 0.0:
+    if not math.isfinite(value) or value <= 0.0:
         raise ValueError(f"'{name}' must be positive.")
     return float(value)
 
 
 def require_non_negative(value: float, name: str) -> float:
-    """Require a non-negative finite number (rejects NaN).
+    """Require a non-negative finite number (rejects NaN and infinities).
 
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for NaN or a negative value.
+    :raises ValueError: for a non-finite or negative value.
     """
-    if math.isnan(value) or value < 0.0:
+    if not math.isfinite(value) or value < 0.0:
         raise ValueError(f"'{name}' must be non-negative.")
     return float(value)
 
 
 def require_fraction(value: float, name: str) -> float:
-    """Require a fraction in ``[0, 1)`` (rejects NaN).
+    """Require a finite fraction in ``[0, 1)``.
 
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
     :return: The validated value as a ``float``.
-    :raises ValueError: for NaN or a value outside ``[0, 1)``.
+    :raises ValueError: for a non-finite value or one outside ``[0, 1)``.
     """
-    if math.isnan(value) or value < 0.0 or value >= 1.0:
+    if not math.isfinite(value) or value < 0.0 or value >= 1.0:
         raise ValueError(f"'{name}' must be in the range [0, 1).")
     return float(value)
 

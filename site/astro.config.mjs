@@ -327,6 +327,11 @@ export default defineConfig({
           items: ['guides/human-vibration'],
         },
         {
+          label: 'Metrology & uncertainty',
+          translations: { es: 'Metrología e incertidumbre' },
+          items: ['guides/gum-uncertainty'],
+        },
+        {
           label: 'Reference',
           translations: { es: 'Referencia' },
           items: ['reference/api', 'reference/theory', 'reference/why-phonometry'],

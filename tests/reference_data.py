@@ -480,3 +480,14 @@ RN_RC35_LMF = 35.0  # RC-35 curve, mid-frequency average LMF (clause D.4)
 HEARING_MEDIAN_MALE_60_4KHZ = 20.2085  # dB, ISO 7029 Table 1 median formula
 HEARING_SU_MALE_60_1KHZ = 10.1533  # dB, ISO 7029 Table 2 upper spread
 HEARING_REF_FREE_1KHZ = 2.4  # dB, ISO 389-7 Table 1 free-field
+
+# ---------------------------------------------------------------------------
+# Measurement uncertainty - ISO/IEC Guide 98-3 (GUM) and Supplement 1.
+# The additive model y = x1+x2+x3+x4 with u(xi)=1 has uc = 2.0 (Suppl 1, 9.2);
+# the coverage factor at p=0.99 with 16 degrees of freedom is 2.92 (GUM Annex
+# H.1 / Table G.2); equal contributions each with 10 degrees of freedom give a
+# Welch-Satterthwaite effective dof of 40 (Annex G.4).
+# ---------------------------------------------------------------------------
+GUM_ADDITIVE_UC = 2.0  # combined standard uncertainty, additive model
+GUM_COVERAGE_K99_16 = 2.92  # coverage factor t at p=0.99, v=16
+GUM_WELCH_VEFF = 40.0  # Welch-Satterthwaite effective degrees of freedom

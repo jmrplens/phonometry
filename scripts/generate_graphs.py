@@ -216,6 +216,18 @@ _ES_EXACT = {
     "Reference threshold [dB]": "Umbral de referencia [dB]",
     "Free-field (frontal)": "Campo libre (frontal)",
     "Diffuse-field": "Campo difuso",
+    "GUM uncertainty budget": "Presupuesto de incertidumbre (GUM)",
+    "Contribution to combined uncertainty [dB]":
+        "Contribución a la incertidumbre combinada [dB]",
+    "Monte Carlo (Suppl 1)": "Monte Carlo (Supl. 1)",
+    "GUM Gaussian": "Gaussiana GUM",
+    "95 % coverage interval": "Intervalo de cobertura 95 %",
+    "A-weighted level [dB]": "Nivel ponderado A [dB]",
+    "Probability density": "Densidad de probabilidad",
+    "Reading": "Lectura",
+    "Calibration": "Calibración",
+    "Instrument": "Instrumento",
+    "Position (Type A)": "Posición (Tipo A)",
     "Sound Intensity with a p-p Probe (IEC 61043)":
         "Intensidad sonora con sonda p-p (IEC 61043)",
     "Plane wave: Lp \u2248 LI": "Onda plana: Lp \u2248 LI",
@@ -3542,6 +3554,69 @@ def generate_hearing_threshold(output_dir: str) -> None:
     plt.close()
 
 
+def generate_uncertainty(output_dir: str) -> None:
+    """GUM uncertainty budget and Monte Carlo distribution (Guide 98-3 + S1)."""
+    print("Generating uncertainty_budget.png...")
+    import phonometry as ph
+
+    # A-weighted level: reading plus calibration, instrument and positional
+    # corrections (all zero-mean); the model is their sum.
+    quantities = [
+        ph.Quantity(74.0, 0.0, name="Reading"),
+        ph.rectangular(0.0, 0.20, name="Calibration"),
+        ph.rectangular(0.0, 0.30, name="Instrument"),
+        ph.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    ]
+    model = lambda a, b, c, d: a + b + c + d  # noqa: E731
+
+    result = ph.combine_uncertainty(model, quantities)
+    mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1)
+    k, big = result.expanded(0.95)
+
+    fig, (ax_b, ax_m) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+
+    # --- Left: uncertainty budget (contributions). ---
+    contrib = result.contributions
+    names = list(result.names)
+    pos = np.arange(len(names))
+    ax_b.barh(pos, contrib, color=COLOR_PRIMARY, zorder=2)
+    ax_b.axvline(result.combined_uncertainty, color=COLOR_SECONDARY, ls="--",
+                 label=f"$u_c$ = {result.combined_uncertainty:.3f} dB")
+    ax_b.set_yticks(pos)
+    ax_b.set_yticklabels(names)
+    ax_b.invert_yaxis()
+    ax_b.set_xlabel("Contribution to combined uncertainty [dB]")
+    ax_b.set_title("GUM uncertainty budget", fontweight="bold", pad=10)
+    ax_b.grid(which="major", axis="x", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax_b.set_axisbelow(True)
+    ax_b.legend(loc="lower right")
+
+    # --- Right: Monte Carlo output vs the GUM Gaussian. ---
+    rng = np.random.default_rng(1)
+    samples = (74.0 + rng.uniform(-0.20, 0.20, 200000)
+               + rng.uniform(-0.30, 0.30, 200000)
+               + rng.normal(0.0, 0.35, 200000))
+    ax_m.hist(samples, bins=120, density=True, color=COLOR_PRIMARY, alpha=0.35,
+              label="Monte Carlo (Suppl 1)")
+    grid = np.linspace(samples.min(), samples.max(), 400)
+    gauss = (np.exp(-0.5 * ((grid - result.value) / result.combined_uncertainty) ** 2)
+             / (result.combined_uncertainty * np.sqrt(2 * np.pi)))
+    ax_m.plot(grid, gauss, color=COLOR_SECONDARY, lw=2, label="GUM Gaussian")
+    ax_m.axvspan(mc.interval[0], mc.interval[1], color=COLOR_PRIMARY, alpha=0.12,
+                 label="95 % coverage interval")
+    ax_m.set_xlabel("A-weighted level [dB]")
+    ax_m.set_ylabel("Probability density")
+    ax_m.set_title(f"Y = {result.value:.2f} dB,  U = {big:.2f} dB (k = {k:.2f})",
+                   fontweight="bold", pad=10)
+    ax_m.grid(color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_m.set_axisbelow(True)
+    ax_m.legend(loc="upper right")
+
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "uncertainty_budget.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -3622,6 +3697,9 @@ def generate_all(img_dir: str) -> None:
 
     # Hearing threshold (ISO 7029 age-related, ISO 389-7 reference).
     generate_hearing_threshold(img_dir)
+
+    # Measurement uncertainty (GUM Guide 98-3 + Supplement 1 Monte Carlo).
+    generate_uncertainty(img_dir)
 
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)

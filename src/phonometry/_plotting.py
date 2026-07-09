@@ -43,6 +43,7 @@ if TYPE_CHECKING:
     from .roughness_ecma import EcmaRoughness
     from .sii import SIIResult
     from .sti import STIResult
+    from .uncertainty import UncertaintyResult
 
 _INSTALL_HINT = (
     "Plotting requires matplotlib. Install it with: pip install phonometry[plot]"
@@ -1474,4 +1475,37 @@ def plot_age_threshold(
     ax.set_title(f"ISO 7029 hearing threshold — {result.sex}, age {result.age:g}")
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# Measurement uncertainty budget (GUM)
+# ---------------------------------------------------------------------------
+
+
+def plot_uncertainty_budget(
+    result: "UncertaintyResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Bar chart of each input's contribution to the combined uncertainty.
+
+    :param result: An :class:`~phonometry.uncertainty.UncertaintyResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to :meth:`barh`.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    contributions = np.asarray(result.contributions, dtype=np.float64)
+    names = list(result.names) or [f"x{i + 1}" for i in range(contributions.size)]
+    positions = np.arange(contributions.size)
+    kwargs.setdefault("color", "#1f77b4")
+    ax.barh(positions, contributions, **kwargs)
+    ax.axvline(result.combined_uncertainty, color="#d62728", ls="--",
+               label=f"$u_c$ = {result.combined_uncertainty:.3g}")
+    ax.set_yticks(positions)
+    ax.set_yticklabels(names)
+    ax.invert_yaxis()
+    ax.set_xlabel("Contribution to combined uncertainty $|c_i|\\,u(x_i)$")
+    ax.set_title(f"Uncertainty budget — y = {result.value:.4g}")
+    ax.legend(loc="lower right", fontsize="small")
+    ax.grid(True, axis="x", alpha=0.3)
     return ax

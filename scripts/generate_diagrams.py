@@ -96,6 +96,30 @@ _ES: dict[str, str] = {
         "Cero audiométrico = umbral de referencia ISO 389-7",
     "free-field / diffuse-field (Table 1) — the dB HL / dB SPL zero":
         "campo libre / campo difuso (Tabla 1) — el cero dB HL / dB SPL",
+    # Measurement uncertainty (ISO/IEC Guide 98-3 / Supplement 1)
+    "Uncertainty: GUM propagation vs Monte Carlo (Guide 98-3)":
+        "Incertidumbre: propagación GUM frente a Monte Carlo (Guía 98-3)",
+    "Measurement model  y = f(x_1, …, x_N)":
+        "Modelo de medida  y = f(x_1, …, x_N)",
+    "input estimates x_i with standard uncertainties u(x_i)":
+        "estimaciones de entrada x_i con incertidumbres típicas u(x_i)",
+    "Law of propagation  (GUM 5)": "Ley de propagación  (GUM 5)",
+    "sensitivity c_i = ∂f / ∂x_i": "sensibilidad c_i = ∂f / ∂x_i",
+    "Combine in quadrature": "Combinación en cuadratura",
+    "uc² = Σ c_i² u²(x_i) + correlation":
+        "uc² = Σ c_i² u²(x_i) + correlación",
+    "Effective dof  (Annex G.4)": "Grados de libertad efectivos  (Anexo G.4)",
+    "v_eff — Welch–Satterthwaite": "v_eff — Welch–Satterthwaite",
+    "U = k · uc": "U = k · uc",
+    "k = t_p(v_eff)   (clause 6)": "k = t_p(v_eff)   (cláusula 6)",
+    "Monte Carlo  (Suppl. 1, 7)": "Monte Carlo  (Supl. 1, 7)",
+    "draw x_i from its PDF g(x_i)": "muestrear x_i de su PDF g(x_i)",
+    "Propagate M trials": "Propagar M ensayos",
+    "y_r = f(x_1r, …, x_Nr)": "y_r = f(x_1r, …, x_Nr)",
+    "Sort {y_r}, take fractiles": "Ordenar {y_r}, tomar fractiles",
+    "prob.-symmetric 95 % interval": "intervalo simétrico en prob. al 95 %",
+    "coverage interval": "intervalo de cobertura",
+    "[y_low, y_high]   (clause 7.7)": "[y_low, y_high]   (cláusula 7.7)",
     "Speech  Ei'": "Habla  Ei'",
     "Noise  Ni'": "Ruido  Ni'",
     "Threshold  Ti'": "Umbral  Ti'",
@@ -2271,6 +2295,63 @@ def _d_hearing_threshold(s: SVG, th: Theme) -> None:
            14, th.muted, "middle")
 
 
+def _d_uncertainty(s: SVG, th: Theme) -> None:
+    """Two routes to measurement uncertainty (ISO/IEC Guide 98-3 and Suppl. 1).
+
+    From a shared measurement model and its input estimates, two parallel
+    lanes: the GUM law of propagation of uncertainty (clause 5) and the
+    Monte Carlo propagation of distributions (Supplement 1, clause 7).
+    """
+    # --- Shared measurement model + inputs ----------------------------------
+    cx = 450.0
+    iw, ih = 560.0, 62.0
+    s.rect(cx - iw / 2, 56, iw, ih, th.panel, th.fg, rx=10, sw=2)
+    s.text(cx, 84, "Measurement model  y = f(x_1, …, x_N)", 20, th.fg,
+           "middle", bold=True)
+    s.text(cx, 106, "input estimates x_i with standard uncertainties u(x_i)",
+           15, th.muted, "middle")
+
+    lxc, rxc = 232.0, 668.0
+    s.arrow(cx, 118, lxc, 158, th.fg, 1.8)
+    s.arrow(cx, 118, rxc, 158, th.fg, 1.8)
+
+    bw, bh = 372.0, 62.0
+
+    def _step(cxx: float, y: float, l1: str, l2: str, color: str) -> None:
+        s.rect(cxx - bw / 2, y, bw, bh, th.panel, color, rx=10, sw=2)
+        s.text(cxx, y + 27, l1, 18, th.fg, "middle", bold=True)
+        if l2:
+            s.text(cxx, y + 48, l2, 14, th.muted, "middle")
+
+    # --- Left lane: GUM law of propagation (clause 5) -----------------------
+    _step(lxc, 158, "Law of propagation  (GUM 5)",
+          "sensitivity c_i = ∂f / ∂x_i", th.primary)
+    _step(lxc, 250, "Combine in quadrature",
+          "uc² = Σ c_i² u²(x_i) + correlation", th.fg)
+    _step(lxc, 342, "Effective dof  (Annex G.4)",
+          "v_eff — Welch–Satterthwaite", th.fg)
+    s.arrow(lxc, 220, lxc, 250, th.fg, 1.8)
+    s.arrow(lxc, 312, lxc, 342, th.fg, 1.8)
+    s.arrow(lxc, 404, lxc, 434, th.fg, 1.8)
+    s.rect(lxc - bw / 2, 434, bw, 58, "none", th.primary, rx=10, sw=2.4)
+    s.text(lxc, 462, "U = k · uc", 22, th.fg, "middle", bold=True)
+    s.text(lxc, 482, "k = t_p(v_eff)   (clause 6)", 14, th.muted, "middle")
+
+    # --- Right lane: Monte Carlo (Supplement 1, clause 7) -------------------
+    _step(rxc, 158, "Monte Carlo  (Suppl. 1, 7)",
+          "draw x_i from its PDF g(x_i)", th.secondary)
+    _step(rxc, 250, "Propagate M trials",
+          "y_r = f(x_1r, …, x_Nr)", th.fg)
+    _step(rxc, 342, "Sort {y_r}, take fractiles",
+          "prob.-symmetric 95 % interval", th.fg)
+    s.arrow(rxc, 220, rxc, 250, th.fg, 1.8)
+    s.arrow(rxc, 312, rxc, 342, th.fg, 1.8)
+    s.arrow(rxc, 404, rxc, 434, th.fg, 1.8)
+    s.rect(rxc - bw / 2, 434, bw, 58, "none", th.secondary, rx=10, sw=2.4)
+    s.text(rxc, 462, "coverage interval", 22, th.fg, "middle", bold=True)
+    s.text(rxc, 482, "[y_low, y_high]   (clause 7.7)", 14, th.muted, "middle")
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -2332,6 +2413,9 @@ DIAGRAMS = {
     "diagram_hearing_threshold": (
         _d_hearing_threshold,
         "Hearing-threshold model (ISO 7029 age distribution, ISO 389-7 zero)", 600),
+    "diagram_uncertainty": (
+        _d_uncertainty,
+        "Uncertainty: GUM propagation vs Monte Carlo (Guide 98-3)", 540),
 }
 
 

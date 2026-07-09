@@ -1400,6 +1400,30 @@ def _chk_hearing_reference() -> Outcome:
     return numeric(ref.HEARING_REF_FREE_1KHZ, value, 1e-9, unit="dB", places=3)
 
 
+_GUM = "Measurement uncertainty (GUM / Supplement 1)"
+
+
+@register(_GUM, "ISO/IEC Guide 98-3-1 clause 9.2", "Combined uncertainty, additive model")
+def _chk_gum_additive() -> Outcome:
+    quantities = [ph.Quantity(0.0, 1.0) for _ in range(4)]
+    result = ph.combine_uncertainty(lambda a, b, c, d: a + b + c + d, quantities)
+    return numeric(ref.GUM_ADDITIVE_UC, result.combined_uncertainty, 1e-9, places=4)
+
+
+@register(_GUM, "ISO/IEC Guide 98-3 Table G.2", "Coverage factor, p=0.99, v=16")
+def _chk_gum_coverage() -> Outcome:
+    from phonometry.uncertainty import coverage_factor
+
+    return numeric(ref.GUM_COVERAGE_K99_16, coverage_factor(0.99, 16), 5e-3, places=3)
+
+
+@register(_GUM, "ISO/IEC Guide 98-3 Annex G.4", "Welch-Satterthwaite effective dof")
+def _chk_gum_welch() -> Outcome:
+    quantities = [ph.Quantity(0.0, 1.0, dof=10) for _ in range(4)]
+    result = ph.combine_uncertainty(lambda a, b, c, d: a + b + c + d, quantities)
+    return numeric(ref.GUM_WELCH_VEFF, result.effective_dof, 1e-6, places=3)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

@@ -43,6 +43,16 @@ from .hearing import (
     age_threshold,
     reference_threshold,
 )
+from .uncertainty import (
+    MonteCarloResult,
+    Quantity,
+    UncertaintyResult,
+    combine_uncertainty,
+    monte_carlo,
+    rectangular,
+    triangular,
+    u_shaped,
+)
 from .room_noise import (
     NCResult,
     RCResult,
@@ -410,6 +420,14 @@ __all__ = [
     "age_threshold",
     "reference_threshold",
     "AgeThresholdResult",
+    "combine_uncertainty",
+    "monte_carlo",
+    "rectangular",
+    "triangular",
+    "u_shaped",
+    "Quantity",
+    "UncertaintyResult",
+    "MonteCarloResult",
     "sweep_signal",
     "inverse_filter",
     "impulse_response",

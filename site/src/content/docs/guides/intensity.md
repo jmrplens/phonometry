@@ -107,15 +107,17 @@ carries both:
   are available directly:
 
 ```python
+import numpy as np
 from phonometry import field_indicators, dynamic_capability_index
 
 # Per-position measurements over the ISO 9614-1 measurement surface
 pressure_levels = np.array([74.1, 73.8, 74.5, 73.2])       # Lp per position (dB)
 normal_intensity = np.array([1.2e-5, 1.0e-5, 1.4e-5, 0.9e-5])  # signed In per position (W/m²)
 
-fi = field_indicators(pressure_levels, normal_intensity)   # F2, F3, F4
+fi = field_indicators(pressure_levels, normal_intensity)
+print(round(fi.f2, 2), round(fi.f3, 2), round(fi.f4, 3))   # 3.41 3.41 0.197
 ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
-ok = ld > fi.f2                                            # criterion 1
+print(ld, ld > fi.f2)                                      # 8.0 True (criterion 1)
 ```
 
 ### `sound_intensity()` parameters

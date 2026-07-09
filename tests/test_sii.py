@@ -1,0 +1,102 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""Tests for :mod:`phonometry.sii` (Speech Intelligibility Index, ANSI S3.5-1997).
+
+The one-third-octave-band procedure is validated against the standard's own
+tabulated constants (the Table 3 band-importance function sums to one) and its
+masking intermediates (the equivalent masking spectrum level ``Zi`` of the
+standard normal-effort spectrum in quiet, used here as reference values), and
+against the known index for speech in quiet with normal hearing.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+
+from phonometry import sii
+
+
+def test_band_importance_sums_to_one() -> None:
+    # ANSI S3.5-1997 Table 3: the band-importance function is normalised.
+    assert sii.BAND_IMPORTANCE.sum() == pytest.approx(1.0, abs=1e-12)
+    assert sii.BAND_IMPORTANCE.size == 18
+    assert sii.BAND_CENTRES.size == 18
+
+
+def test_sii_standard_speech_in_quiet() -> None:
+    # Standard normal-effort spectrum, quiet field, normal hearing.
+    result = sii.speech_intelligibility_index("normal")
+    assert result.sii == pytest.approx(0.9958, abs=5e-4)
+    assert 0.0 <= result.sii <= 1.0
+
+
+def test_masking_spectrum_matches_reference() -> None:
+    # Equivalent masking spectrum level Zi for the standard spectrum in quiet
+    # (reference values for the first four one-third-octave bands).
+    result = sii.speech_intelligibility_index("normal")
+    reference_zi = np.array([8.41, -1.6647, 0.7052, 0.3817])
+    np.testing.assert_allclose(result.masking[:4], reference_zi, atol=1e-4)
+
+
+def test_noise_reduces_index_monotonically() -> None:
+    # More masking noise can only lower the index.
+    quiet = sii.speech_intelligibility_index("normal").sii
+    mild = sii.speech_intelligibility_index("normal", np.full(18, 20.0)).sii
+    loud = sii.speech_intelligibility_index("normal", np.full(18, 40.0)).sii
+    assert quiet > mild > loud >= 0.0
+
+
+def test_hearing_loss_reduces_index() -> None:
+    # A raised hearing threshold lifts the internal noise and lowers the index.
+    normal = sii.speech_intelligibility_index("normal").sii
+    impaired = sii.speech_intelligibility_index(
+        "normal", threshold=np.full(18, 40.0)
+    ).sii
+    assert impaired < normal
+
+
+def test_standard_speech_spectrum_values() -> None:
+    spectrum = sii.standard_speech_spectrum("normal")
+    assert spectrum[0] == pytest.approx(32.41)
+    assert spectrum[8] == pytest.approx(25.01)
+    assert spectrum[17] == pytest.approx(1.13)
+    # A returned copy must not alias the module constant.
+    spectrum[0] = 0.0
+    assert sii.standard_speech_spectrum("normal")[0] == pytest.approx(32.41)
+
+
+def test_custom_speech_spectrum_accepted() -> None:
+    result = sii.speech_intelligibility_index(np.full(18, 40.0))
+    assert 0.0 <= result.sii <= 1.0
+    assert result.speech_spectrum.shape == (18,)
+
+
+def test_invalid_inputs_raise() -> None:
+    with pytest.raises(ValueError, match="18"):
+        sii.speech_intelligibility_index([1.0, 2.0, 3.0])
+    with pytest.raises(ValueError, match="18"):
+        sii.speech_intelligibility_index("normal", noise_spectrum=[1.0, 2.0])
+    with pytest.raises(ValueError, match="18"):
+        sii.speech_intelligibility_index("normal", threshold=np.zeros(5))
+    with pytest.raises(ValueError, match="vocal_effort"):
+        sii.standard_speech_spectrum("loud")
+
+
+def test_result_fields_present() -> None:
+    result = sii.speech_intelligibility_index("normal")
+    assert result.band_audibility.shape == (18,)
+    assert result.band_importance.shape == (18,)
+    assert result.disturbance.shape == (18,)
+    assert result.masking.shape == (18,)
+    np.testing.assert_allclose(result.frequencies, sii.BAND_CENTRES)
+
+
+def test_plot_returns_axes() -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    ax = sii.speech_intelligibility_index("normal").plot()
+    assert isinstance(ax, plt.Axes)
+    plt.close("all")

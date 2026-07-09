@@ -50,7 +50,7 @@ The reverberation time follows from the absorption area, the volume and the
 object fraction `psi = sum(Vobj)/V` (Formula 5):
 
 $$
-T = \frac{55{,}3}{c_0}\,\frac{V\,(1 - \psi)}{A},
+T = \frac{55.3}{c_0}\,\frac{V\,(1 - \psi)}{A},
 $$
 
 where the speed of sound `c0 = 345.6 m/s` makes the factor `55.3/c0` the

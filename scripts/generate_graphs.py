@@ -23,6 +23,10 @@ _LANG_SUFFIX = ""
 
 _ES_EXACT = {
     "Frequency [Hz]": "Frecuencia [Hz]",
+    # Emitted by phonometry.filter_design._showfilter (not by this script);
+    # do not remove as "orphans".
+    "Filter Bank Frequency Response": "Respuesta en frecuencia del banco de filtros",
+    "Amplitude [dB]": "Amplitud [dB]",
     "Level [dB]": "Nivel [dB]",
     "Time [s]": "Tiempo [s]",
     "Amplitude": "Amplitud",
@@ -785,8 +789,13 @@ def generate_filter_responses(output_dir: str) -> None:
             bank = OctaveFilterBank(fs=fs, fraction=fraction, order=order, limits=[12.0, 20000.0], filter_type=f_type)
             
             from phonometry.filter_design import _showfilter
-            _showfilter(bank.sos, bank.freq, bank.freq_u, bank.freq_d, fs, bank.factor, 
-                       show=False, plot_file=themed_path(output_dir, filename))
+            # Draw first, then save through themed_path so the Spanish
+            # translation pass runs on the finished figure (it rewrites the
+            # live figure's text artists right before the save).
+            _showfilter(bank.sos, bank.freq, bank.freq_u, bank.freq_d, fs,
+                        bank.factor, show=False, plot_file=None, close=False)
+            plt.savefig(themed_path(output_dir, filename), dpi=150,
+                        bbox_inches="tight")
             plt.close("all")
 
 
@@ -1163,7 +1172,7 @@ def generate_time_weighting_plot(output_dir: str) -> None:
     slow /= peak
     impulse /= peak
     
-    ax.plot(t, x_sq, color=COLOR_GRID, alpha=0.5, label="Input Burst (Normalized)")
+    ax.plot(t, x_sq, color="#9e9e9e", alpha=0.6, label="Input Burst (Normalized)")
     ax.plot(t, fast, color=COLOR_PRIMARY, label="Fast (125ms)")
     ax.plot(t, slow, color=COLOR_SECONDARY, label="Slow (1000ms)")
     ax.plot(t, impulse, color="purple", linestyle="-.", linewidth=1.5, label="Impulse (35ms/1.5s)")
@@ -3378,7 +3387,7 @@ def generate_weighted_acceleration(output_dir: str) -> None:
     width = 0.4
     fig, ax = plt.subplots(figsize=(10.5, 6.3))
     ax.bar(positions - width / 2, result.band_accelerations, width,
-           color=COLOR_GRID, edgecolor=COLOR_FG, linewidth=0.5,
+           color="#9e9e9e", edgecolor=COLOR_FG, linewidth=0.5,
            label="Unweighted $a_i$", zorder=2)
     ax.bar(positions + width / 2, result.weighted, width, color=COLOR_PRIMARY,
            edgecolor=COLOR_FG, linewidth=0.5, label="Weighted $W_i\\,a_i$ (Wk)",
@@ -3417,7 +3426,7 @@ def generate_daily_vibration_exposure(output_dir: str) -> None:
     labels = [*result.labels, "A(8)"]
     values = [*result.partials.tolist(), result.a8]
     positions = np.arange(len(values), dtype=float)
-    colors = [COLOR_GRID] * result.partials.size + [COLOR_PRIMARY]
+    colors = ["#9e9e9e"] * result.partials.size + [COLOR_PRIMARY]
     fig, ax = plt.subplots(figsize=(9.5, 6.3))
     ax.bar(positions, values, width=0.62, color=colors, edgecolor=COLOR_FG,
            linewidth=0.6, zorder=3)
@@ -3764,7 +3773,7 @@ def generate_hearing_threshold(output_dir: str) -> None:
     fig, (ax_age, ax_ref) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: ISO 7029 median threshold by age (male) + 10-90 % band @70. ---
-    ages = [(20, COLOR_GRID), (40, "#7f7f7f"), (60, COLOR_PRIMARY),
+    ages = [(20, "#9e9e9e"), (40, "#7f7f7f"), (60, COLOR_PRIMARY),
             (80, COLOR_SECONDARY)]
     for age, color in ages:
         r = age_threshold(age, "male", 0.5)
@@ -3820,7 +3829,7 @@ def generate_nihl(output_dir: str) -> None:
     fig, (ax_n, ax_h) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: median NIPTS growth with exposure duration at 95 dB. ---
-    durations = [(10, COLOR_GRID), (20, "#7f7f7f"), (30, COLOR_PRIMARY),
+    durations = [(10, "#9e9e9e"), (20, "#7f7f7f"), (30, COLOR_PRIMARY),
                  (40, COLOR_SECONDARY)]
     for years, color in durations:
         r = nipts(95.0, years, 0.5)

@@ -335,6 +335,8 @@ _KWARG_PLOT_CASES = [
     ("intensity_power", _intensity_power_negative, "bar"),
     ("intensity", _intensity, "line"),
     ("decay_curve", lambda: ph.decay_curve(_exp_ir(seconds=1.0, t60=0.6), FS), "line"),
+    ("facade", lambda: ph.facade_insulation(
+        [70.0, 72.0, 74.0], [40.0, 41.0, 42.0], [0.5, 0.5, 0.5]), "line"),
 ]
 
 
@@ -369,6 +371,20 @@ def test_every_plot_forwards_kwargs_to_primary_artist(name, factory, kind) -> No
     assert any(_is_red(a) for a in artists), (
         f"{name}: color kwarg did not override the fixed default artist color"
     )
+    plt.close("all")
+
+
+def test_facade_plot_accepts_label_kwarg() -> None:
+    # Regression: kwargs used to be forwarded to all four curves, so a user
+    # label= collided with the per-curve labels and raised TypeError.
+    res = ph.facade_insulation(
+        [70.0, 72.0, 74.0], [40.0, 41.0, 42.0], [0.5, 0.5, 0.5]
+    )
+    ax = res.plot(label="my measurement")
+    labels = [ln.get_label() for ln in ax.lines]
+    assert "my measurement" in labels
+    # The companion curves keep their own labels.
+    assert any(label.startswith("$D_{2m}$") for label in labels)
     plt.close("all")
 
 

@@ -89,12 +89,20 @@ print(round(100 * ph.injury_probability(r)))     # 37  % de riesgo de lesión
 Desde un registro temporal medido, toda la cadena es una sola llamada:
 
 ```python
+import numpy as np
 import phonometry as ph
 
+# Un registro sintético de asiento de 10 s a 256 Hz con cinco choques de
+# 60 m/s2 (sustituto de un az(t) medido).
+fs = 256.0
+az = np.zeros(2560)
+az[256::512] = 60.0
 result = ph.multiple_shock_assessment(
     az, fs, start_age=20, years=20, days_per_year=120, sex="male",
 )
-print(result.acceleration_dose, result.risk, result.probability)
+print(round(result.acceleration_dose, 2))  # 20.94  m/s2
+print(round(result.risk, 2))               # 0.46
+print(round(result.probability, 2))        # 0.03
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock_es.png" alt="Izquierda: la transmisibilidad asiento-columna sube hasta cerca de 1,6 en una resonancia de 5 Hz y luego cae casi a cero en 80 Hz. Derecha: la probabilidad de lesión lumbar de Weibull frente a la variable de tensión R para hombre y mujer, con los niveles de riesgo del 10, 50 y 90 por ciento y el ejemplo masculino del Anexo C en R = 1,22, en torno al 37 por ciento" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock_es_dark.png" alt="Izquierda: la transmisibilidad asiento-columna sube hasta cerca de 1,6 en una resonancia de 5 Hz y luego cae casi a cero en 80 Hz. Derecha: la probabilidad de lesión lumbar de Weibull frente a la variable de tensión R para hombre y mujer, con los niveles de riesgo del 10, 50 y 90 por ciento y el ejemplo masculino del Anexo C en R = 1,22, en torno al 37 por ciento" style="width:96%">
@@ -112,7 +120,11 @@ f = np.logspace(np.log10(0.5), np.log10(80.0), 400)
 plt.plot(f, np.abs(ph.seat_to_spine_transfer(f)))
 plt.xscale("log"); plt.show()
 
-# Derecha: la curva de probabilidad de lesión con la R de esta evaluación.
+# Derecha: la curva de probabilidad de lesión con la R de esta evaluación
+# (az/fs como en el snippet anterior).
+fs = 256.0
+az = np.zeros(2560)
+az[256::512] = 60.0
 ph.multiple_shock_assessment(
     az, fs, start_age=20, years=20, days_per_year=120,
 ).plot()

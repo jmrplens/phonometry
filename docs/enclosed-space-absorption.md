@@ -6,7 +6,8 @@
 room and its **reverberation time** from the absorption of its surfaces and
 objects — the design counterpart of the measured reverberation time. It is the
 absorption member of the EN 12354 building-acoustics family (the airborne and
-impact insulation members live in [Building Acoustics](building-acoustics.md)).
+impact insulation members live in
+[Room and Building Acoustics](room-acoustics.md)).
 phonometry implements the normative Clause 4 model. (The informative Annex D
 method for irregular spaces is out of scope.)
 
@@ -48,7 +49,7 @@ The reverberation time follows from the absorption area, the volume and the
 object fraction `psi = sum(Vobj)/V` (Formula 5):
 
 $$
-T = \frac{55{,}3}{c_0}\,\frac{V\,(1 - \psi)}{A},
+T = \frac{55.3}{c_0}\,\frac{V\,(1 - \psi)}{A},
 $$
 
 where the speed of sound `c0 = 345.6 m/s` makes the factor `55.3/c0` the

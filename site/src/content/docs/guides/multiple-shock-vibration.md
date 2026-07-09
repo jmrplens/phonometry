@@ -40,7 +40,7 @@ maximum between two consecutive zero crossings) with a sixth-power law, so the
 largest shocks dominate (Formula 3):
 
 $$
-D_z = 1{,}07\left(\sum_i A_{z,i}^{\,6}\right)^{1/6}.
+D_z = 1.07\left(\sum_i A_{z,i}^{\,6}\right)^{1/6}.
 $$
 
 A daily dose scales the measured dose to the daily exposure time `td` over the
@@ -87,12 +87,20 @@ print(round(100 * ph.injury_probability(r)))     # 37  % risk of injury
 From a measured time history the whole chain is one call:
 
 ```python
+import numpy as np
 import phonometry as ph
 
+# A synthetic 10 s seat record at 256 Hz with five 60 m/s2 shocks (stand-in
+# for a measured az(t)).
+fs = 256.0
+az = np.zeros(2560)
+az[256::512] = 60.0
 result = ph.multiple_shock_assessment(
     az, fs, start_age=20, years=20, days_per_year=120, sex="male",
 )
-print(result.acceleration_dose, result.risk, result.probability)
+print(round(result.acceleration_dose, 2))  # 20.94  m/s2
+print(round(result.risk, 2))               # 0.46
+print(round(result.probability, 2))        # 0.03
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock.png" alt="Left: the seat-to-spine transmissibility rising to about 1.6 near a 5 Hz resonance then rolling off to near zero by 80 Hz. Right: the Weibull probability of lumbar injury versus the stress variable R for male and female, with the 10, 50 and 90 percent risk levels and the Annex C male example at R = 1.22, about 37 percent" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock_dark.png" alt="Left: the seat-to-spine transmissibility rising to about 1.6 near a 5 Hz resonance then rolling off to near zero by 80 Hz. Right: the Weibull probability of lumbar injury versus the stress variable R for male and female, with the 10, 50 and 90 percent risk levels and the Annex C male example at R = 1.22, about 37 percent" style="width:96%">
@@ -110,7 +118,11 @@ f = np.logspace(np.log10(0.5), np.log10(80.0), 400)
 plt.plot(f, np.abs(ph.seat_to_spine_transfer(f)))
 plt.xscale("log"); plt.show()
 
-# Right: the injury-probability curve with this assessment's R marked.
+# Right: the injury-probability curve with this assessment's R marked
+# (az/fs as in the snippet above).
+fs = 256.0
+az = np.zeros(2560)
+az[256::512] = 60.0
 ph.multiple_shock_assessment(
     az, fs, start_age=20, years=20, days_per_year=120,
 ).plot()

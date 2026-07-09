@@ -140,6 +140,7 @@ def _showfilter(
     factor: np.ndarray,
     show: bool = False,
     plot_file: str | None = None,
+    close: bool = True,
 ) -> None:
     """
     Visualize filter bank frequency response.
@@ -152,6 +153,8 @@ def _showfilter(
     :param factor: Downsampling factors.
     :param show: If True, show the plot.
     :param plot_file: Path to save the plot.
+    :param close: Close the figure before returning; pass ``False`` when the
+        caller post-processes and saves the live figure itself.
     """
     try:
         import matplotlib.pyplot as plt
@@ -213,4 +216,5 @@ def _showfilter(
         plt.savefig(plot_file, dpi=150, bbox_inches="tight")
     if show:
         plt.show()
-    plt.close(fig)
+    if close:
+        plt.close(fig)

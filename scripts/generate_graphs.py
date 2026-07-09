@@ -216,6 +216,16 @@ _ES_EXACT = {
     "Reference threshold [dB]": "Umbral de referencia [dB]",
     "Free-field (frontal)": "Campo libre (frontal)",
     "Diffuse-field": "Campo difuso",
+    r"ISO 1999 — NIPTS at $L_{EX,8h}$ = 95 dB":
+        r"ISO 1999 — NIPTS a $L_{EX,8h}$ = 95 dB",
+    "ISO 1999 — HTLAN (male, age 60, 95 dB / 30 yr)":
+        "ISO 1999 — HTLAN (hombres, 60 años, 95 dB / 30 años)",
+    "Median NIPTS [dB]": "NIPTS mediana [dB]",
+    "Hearing threshold level [dB]": "Nivel del umbral de audición [dB]",
+    "10-90 % band (40 yr)": "Banda 10-90 % (40 años)",
+    "Age (HTLA, ISO 7029)": "Edad (HTLA, ISO 7029)",
+    "Noise (NIPTS)": "Ruido (NIPTS)",
+    "Age + noise (HTLAN)": "Edad + ruido (HTLAN)",
     "GUM uncertainty budget": "Presupuesto de incertidumbre (GUM)",
     "Contribution to combined uncertainty [dB]":
         "Contribución a la incertidumbre combinada [dB]",
@@ -370,6 +380,7 @@ _ES_EXACT = {
 }
 
 _ES_PATTERNS = [
+    (r"^(\d+) yr$", r"\1 años"),
     (r"^Octave Band: (.+) Hz$", r"Banda de octava: \1 Hz"),
     (r"^(\d+) phon$", r"\1 fonios"),
     (r"^TNR = (.+) dB\n\(criterion (.+) dB\)$", "TNR = \\1 dB\\n(criterio \\2 dB)"),
@@ -3554,6 +3565,65 @@ def generate_hearing_threshold(output_dir: str) -> None:
     plt.close()
 
 
+def generate_nihl(output_dir: str) -> None:
+    """ISO 1999 noise-induced permanent threshold shift and HTLAN combination."""
+    print("Generating noise_induced_hearing_loss.png...")
+    from phonometry import htlan, nipts
+    from phonometry.iso1999 import NIPTS_FREQUENCIES
+
+    freqs = NIPTS_FREQUENCIES
+    fig, (ax_n, ax_h) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+
+    # --- Left: median NIPTS growth with exposure duration at 95 dB. ---
+    durations = [(10, COLOR_GRID), (20, "#7f7f7f"), (30, COLOR_PRIMARY),
+                 (40, COLOR_SECONDARY)]
+    for years, color in durations:
+        r = nipts(95.0, years, 0.5)
+        ax_n.plot(freqs, r.median, "o-", color=color, label=f"{years} yr")
+    r40 = nipts(95.0, 40.0, 0.5)
+    z90 = 1.2816
+    ax_n.fill_between(freqs, np.maximum(r40.median - z90 * r40.spread_lower, 0.0),
+                      r40.median + z90 * r40.spread_upper,
+                      color=COLOR_SECONDARY, alpha=0.12,
+                      label="10-90 % band (40 yr)")
+    ax_n.set_xscale("log")
+    ax_n.set_xticks(list(freqs))
+    ax_n.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax_n.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax_n.invert_yaxis()
+    ax_n.set_xlabel("Audiometric frequency [Hz]")
+    ax_n.set_ylabel("Median NIPTS [dB]")
+    ax_n.set_title(r"ISO 1999 — NIPTS at $L_{EX,8h}$ = 95 dB",
+                   fontweight="bold", pad=10)
+    ax_n.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_n.set_axisbelow(True)
+    ax_n.legend(loc="lower left")
+
+    # --- Right: HTLAN = age + noise for a 60-year-old worker, 95 dB / 30 yr. ---
+    h = htlan(60, "male", 95.0, 30.0, 0.5)
+    ax_h.plot(freqs, h.htla, "o-", color=COLOR_PRIMARY,
+              label="Age (HTLA, ISO 7029)")
+    ax_h.plot(freqs, h.nipts, "^-", color="#ff7f0e", label="Noise (NIPTS)")
+    ax_h.plot(freqs, h.threshold, "s--", color=COLOR_SECONDARY,
+              label="Age + noise (HTLAN)")
+    ax_h.set_xscale("log")
+    ax_h.set_xticks(list(freqs))
+    ax_h.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax_h.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax_h.invert_yaxis()
+    ax_h.set_xlabel("Audiometric frequency [Hz]")
+    ax_h.set_ylabel("Hearing threshold level [dB]")
+    ax_h.set_title("ISO 1999 — HTLAN (male, age 60, 95 dB / 30 yr)",
+                   fontweight="bold", pad=10)
+    ax_h.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_h.set_axisbelow(True)
+    ax_h.legend(loc="lower left")
+
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "noise_induced_hearing_loss.png"))
+    plt.close()
+
+
 def generate_uncertainty(output_dir: str) -> None:
     """GUM uncertainty budget and Monte Carlo distribution (Guide 98-3 + S1)."""
     print("Generating uncertainty_budget.png...")
@@ -3697,6 +3767,9 @@ def generate_all(img_dir: str) -> None:
 
     # Hearing threshold (ISO 7029 age-related, ISO 389-7 reference).
     generate_hearing_threshold(img_dir)
+
+    # Noise-induced hearing loss (ISO 1999 NIPTS and HTLAN).
+    generate_nihl(img_dir)
 
     # Measurement uncertainty (GUM Guide 98-3 + Supplement 1 Monte Carlo).
     generate_uncertainty(img_dir)

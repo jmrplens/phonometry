@@ -491,3 +491,13 @@ HEARING_REF_FREE_1KHZ = 2.4  # dB, ISO 389-7 Table 1 free-field
 GUM_ADDITIVE_UC = 2.0  # combined standard uncertainty, additive model
 GUM_COVERAGE_K99_16 = 2.92  # coverage factor t at p=0.99, v=16
 GUM_WELCH_VEFF = 40.0  # Welch-Satterthwaite effective degrees of freedom
+
+# ---------------------------------------------------------------------------
+# Noise-induced hearing loss - ISO 1999:2013, Annex D worked examples (dB).
+# Table D.2 (L_EX,8h = 90 dB, 20 years) at 4 kHz: median NIPTS = 13 dB and the
+# most-susceptible tenth (fractile 0.9) = 18 dB. Table D.4 (100 dB, 40 years)
+# at 3 kHz, fractile 0.9 = 60 dB.
+# ---------------------------------------------------------------------------
+ISO1999_N50_4K_90_20 = 13.0  # median NIPTS, 4 kHz, 90 dB, 20 yr
+ISO1999_N10_4K_90_20 = 18.0  # worst-10 % NIPTS, 4 kHz, 90 dB, 20 yr
+ISO1999_N10_3K_100_40 = 60.0  # worst-10 % NIPTS, 3 kHz, 100 dB, 40 yr

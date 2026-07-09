@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **79/79 conformance checks pass** across 17 domains and 52 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **82/82 conformance checks pass** across 18 domains and 53 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -252,6 +252,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO/IEC Guide 98-3-1 clause 9.2 | Combined uncertainty, additive model | 2 (+/-0) | 2 | 0 | &#9989; |
 | ISO/IEC Guide 98-3 Table G.2 | Coverage factor, p=0.99, v=16 | 2.92 (+/-0.005) | 2.921 | 0.001 | &#9989; |
 | ISO/IEC Guide 98-3 Annex G.4 | Welch-Satterthwaite effective dof | 40 (+/-0) | 40 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Noise-induced hearing loss (ISO 1999)</b> — 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ISO 1999:2013 Table D.2 | Median NIPTS, 4 kHz, 90 dB, 20 yr | 13 dB (+/-0.5 dB) | 12.9 dB | -0.057 dB | &#9989; |
+| ISO 1999:2013 Table D.2 | Worst-10 % NIPTS, 4 kHz, 90 dB, 20 yr | 18 dB (+/-0.5 dB) | 17.8 dB | -0.239 dB | &#9989; |
+| ISO 1999:2013 Table D.4 | Worst-10 % NIPTS, 3 kHz, 100 dB, 40 yr | 60 dB (+/-0.5 dB) | 59.8 dB | -0.172 dB | &#9989; |
 
 </details>
 

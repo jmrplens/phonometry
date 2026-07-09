@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from .room_acoustics import DecayCurve, RoomAcousticsResult
     from .room_ir import ImpulseResponseResult
     from .hearing import AgeThresholdResult
+    from .iso1999 import HtlanResult, NiptsResult
     from .room_noise import NCResult, RCResult
     from .tonality_ecma import EcmaTonality
     from .roughness_ecma import EcmaRoughness
@@ -1474,6 +1475,78 @@ def plot_age_threshold(
     ax.invert_yaxis()  # audiogram convention: worse hearing downward
     ax.set_title(f"ISO 7029 hearing threshold — {result.sex}, age {result.age:g}")
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# Noise-induced hearing loss (ISO 1999)
+# ---------------------------------------------------------------------------
+
+
+def plot_nipts(
+    result: "NiptsResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Median NIPTS spectrum with the 10-90 % fractile band (ISO 1999).
+
+    :param result: A :class:`~phonometry.iso1999.NiptsResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the median line ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    median = np.asarray(result.median, dtype=np.float64)
+    du = np.asarray(result.spread_upper, dtype=np.float64)
+    dl = np.asarray(result.spread_lower, dtype=np.float64)
+    z90 = 1.2816  # standard-normal quantile of 0.9
+
+    ax.fill_between(freqs, np.maximum(median - z90 * dl, 0.0), median + z90 * du,
+                    color="#ffbb78", alpha=0.5, label="10-90 % fractile band")
+    kwargs.setdefault("color", "#ff7f0e")
+    ax.plot(freqs, median, "o-", label="Median $N_{50}$", **kwargs)
+    if abs(result.fractile - 0.5) > 1e-9:
+        ax.plot(freqs, np.asarray(result.value, dtype=np.float64), "s--",
+                color="#d62728", label=f"Fractile {result.fractile:g}")
+    _freq_axis(ax, freqs)
+    ax.set_ylabel("NIPTS [dB]")
+    ax.invert_yaxis()  # audiogram convention: worse hearing downward
+    ax.set_title(
+        f"ISO 1999 NIPTS — $L_{{EX,8h}}$ = {result.l_ex:g} dB, "
+        f"{result.years:g} yr"
+    )
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_htlan(
+    result: "HtlanResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Age, noise and combined hearing threshold components (ISO 1999, 6.1).
+
+    :param result: A :class:`~phonometry.iso1999.HtlanResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the combined-threshold line ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    ax.plot(freqs, np.asarray(result.htla, dtype=np.float64), "o-",
+            color="#1f77b4", label="Age (HTLA, ISO 7029)")
+    ax.plot(freqs, np.asarray(result.nipts, dtype=np.float64), "^-",
+            color="#ff7f0e", label="Noise (NIPTS)")
+    kwargs.setdefault("color", "#d62728")
+    ax.plot(freqs, np.asarray(result.threshold, dtype=np.float64), "s--",
+            label="Age + noise (HTLAN)", **kwargs)
+    _freq_axis(ax, freqs)
+    ax.set_ylabel("Hearing threshold level [dB]")
+    ax.invert_yaxis()  # audiogram convention: worse hearing downward
+    ax.set_title(
+        f"ISO 1999 HTLAN — {result.sex}, age {result.age:g}, "
+        f"{result.l_ex:g} dB / {result.years:g} yr"
+    )
+    ax.legend(loc="lower left", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     return ax
 

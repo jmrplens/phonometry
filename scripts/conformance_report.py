@@ -1424,6 +1424,27 @@ def _chk_gum_welch() -> Outcome:
     return numeric(ref.GUM_WELCH_VEFF, result.effective_dof, 1e-6, places=3)
 
 
+_NIHL = "Noise-induced hearing loss (ISO 1999)"
+
+
+@register(_NIHL, "ISO 1999:2013 Table D.2", "Median NIPTS, 4 kHz, 90 dB, 20 yr")
+def _chk_iso1999_median() -> Outcome:
+    value = float(ph.nipts(90.0, 20.0, 0.5).value[4])
+    return numeric(ref.ISO1999_N50_4K_90_20, value, 0.5, unit="dB", places=1)
+
+
+@register(_NIHL, "ISO 1999:2013 Table D.2", "Worst-10 % NIPTS, 4 kHz, 90 dB, 20 yr")
+def _chk_iso1999_fractile() -> Outcome:
+    value = float(ph.nipts(90.0, 20.0, 0.9).value[4])
+    return numeric(ref.ISO1999_N10_4K_90_20, value, 0.5, unit="dB", places=1)
+
+
+@register(_NIHL, "ISO 1999:2013 Table D.4", "Worst-10 % NIPTS, 3 kHz, 100 dB, 40 yr")
+def _chk_iso1999_high() -> Outcome:
+    value = float(ph.nipts(100.0, 40.0, 0.9).value[3])
+    return numeric(ref.ISO1999_N10_3K_100_40, value, 0.5, unit="dB", places=1)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

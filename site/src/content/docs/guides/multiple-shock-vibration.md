@@ -1,0 +1,136 @@
+---
+title: "Multiple-shock whole-body vibration (ISO 2631-5)"
+description: "The ISO 2631-5:2018 spinal-response model for whole-body vibration containing multiple shocks: the seat-to-spine transfer function and acceleration dose of Clause 5, and the compressive stress, cumulative stress variable R and Weibull probability of lumbar injury of Annex C."
+---
+
+Vibration that contains repeated **mechanical shocks** — off-road vehicles,
+high-speed marine craft, earth-moving machinery — loads the lumbar spine far
+more than its equivalent r.m.s. level suggests. **ISO 2631-5:2018** predicts the
+resulting spinal response and the risk of lumbar injury from the measured
+vertical seat acceleration. phonometry implements the normative **Clause 5**
+spinal-response model and the **Annex C** health-effect assessment. (The
+Annex A / Annex E finite-element model is distributed by ISO as separate
+software and is out of scope here.)
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t) through the spinal response, the acceleration dose Dz and daily dose Dzd, the compressive stress Sd, the age-cumulated stress variable R, and the Weibull probability of lumbar injury" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_dark.svg" alt="Flow from the vertical seat acceleration az(t) through the spinal response, the acceleration dose Dz and daily dose Dzd, the compressive stress Sd, the age-cumulated stress variable R, and the Weibull probability of lumbar injury" style="width:86%">
+
+## 1. Spinal response (clause 5.2)
+
+A seat-to-spine transfer function `H(f)` — one complex zero and six complex
+poles, unity transmissibility at 0 Hz and a resonance near 5 Hz — maps the
+measured seat acceleration to the vertical spinal response `Az(t)`
+(Formula 1/2):
+
+$$
+A_z(t) = \mathcal{F}^{-1}\!\left[H(f)\,\mathcal{F}[a_z(t)]\right].
+$$
+
+```python
+import phonometry as ph
+
+# The transmissibility peaks near the ~5 Hz spinal resonance.
+print(round(abs(ph.seat_to_spine_transfer([2.0])[0]), 2))  # 1.06
+print(round(abs(ph.seat_to_spine_transfer([5.0])[0]), 2))  # 1.54
+```
+
+## 2. Acceleration dose (clause 5.3)
+
+The **acceleration dose** combines the positive response peaks `Az,i` (each the
+maximum between two consecutive zero crossings) with a sixth-power law, so the
+largest shocks dominate (Formula 3):
+
+$$
+D_z = 1{,}07\left(\sum_i A_{z,i}^{\,6}\right)^{1/6}.
+$$
+
+A daily dose scales the measured dose to the daily exposure time `td` over the
+measurement time `tm` (Formula 4): `Dzd = Dz * (td/tm)**(1/6)`.
+
+```python
+import phonometry as ph
+
+# Five 40 m/s2 response peaks in a day (the Annex C worked example).
+print(round(ph.dose_from_peaks([40.0] * 5), 2))  # 55.97  m/s2
+```
+
+## 3. Injury risk (Annex C)
+
+The daily dose becomes a daily **compressive stress** `Sd = mz * Dzd`
+(Formula C.1), where `mz` (0.029 MPa per m/s² for an 82 kg male, 0.025 for a
+64 kg female) converts acceleration to vertebral stress. The stress accumulates
+over the exposure years against the ageing spine's reducing ultimate strength
+`Su = 6.75 - Sage*(b+i)` (Formulae C.3/C.4):
+
+$$
+R = \left[\sum_{i=0}^{n-1}
+\left(\frac{S_d\,N^{1/6}}{S_{u,i} - S_{\mathrm{stat}}}\right)^{6}\right]^{1/6},
+$$
+
+and a Weibull model gives the probability of lumbar injury (Formula C.5):
+
+$$
+\Pi(R) = 1 - \exp\!\left[-\left(\frac{R}{\alpha}\right)^{\beta}\right].
+$$
+
+```python
+import phonometry as ph
+
+# Annex C worked example: 5 x 40 m/s2/day, 82 kg male, age 20 for 20 years,
+# 120 days/year.
+dz = ph.dose_from_peaks([40.0] * 5)
+sd = ph.compression_dose(dz)                     # 1.62 MPa
+r = ph.injury_risk(sd, start_age=20, years=20, days_per_year=120)
+print(round(r, 2))                               # 1.22
+print(round(100 * ph.injury_probability(r)))     # 37  % risk of injury
+```
+
+From a measured time history the whole chain is one call:
+
+```python
+import phonometry as ph
+
+result = ph.multiple_shock_assessment(
+    az, fs, start_age=20, years=20, days_per_year=120, sex="male",
+)
+print(result.acceleration_dose, result.risk, result.probability)
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock.png" alt="Left: the seat-to-spine transmissibility rising to about 1.6 near a 5 Hz resonance then rolling off to near zero by 80 Hz. Right: the Weibull probability of lumbar injury versus the stress variable R for male and female, with the 10, 50 and 90 percent risk levels and the Annex C male example at R = 1.22, about 37 percent" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock_dark.png" alt="Left: the seat-to-spine transmissibility rising to about 1.6 near a 5 Hz resonance then rolling off to near zero by 80 Hz. Right: the Weibull probability of lumbar injury versus the stress variable R for male and female, with the 10, 50 and 90 percent risk levels and the Annex C male example at R = 1.22, about 37 percent" style="width:96%">
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+import phonometry as ph
+
+# Left: the seat-to-spine transfer function magnitude.
+f = np.logspace(np.log10(0.5), np.log10(80.0), 400)
+plt.plot(f, np.abs(ph.seat_to_spine_transfer(f)))
+plt.xscale("log"); plt.show()
+
+# Right: the injury-probability curve with this assessment's R marked.
+ph.multiple_shock_assessment(
+    az, fs, start_age=20, years=20, days_per_year=120,
+).plot()
+plt.show()
+```
+
+</details>
+
+The `MultipleShockResult` carries the dose `Dz`, the daily dose `Dzd`, the
+compressive stress `Sd`, the stress variable `R`, the injury probability and the
+response peaks, and its `.plot()` draws the injury-probability curve with the
+10/50/90 % risk thresholds of Table C.2. This complements the r.m.s.,
+running-r.m.s./MTVV and VDV metrics of
+[Human Vibration](/phonometry/guides/human-vibration/) (ISO 2631-1).
+
+---
+
+**Standards.** ISO 2631-5:2018, *Mechanical vibration and shock — Evaluation of
+human exposure to whole-body vibration — Part 5: Method for evaluation of
+vibration containing multiple shocks* — the seat-to-spine transfer function
+(clause 5.2, Formula 1), the acceleration and daily dose (clause 5.3,
+Formulae 3-5) and the Annex C assessment of adverse health effects (Formulae
+C.1, C.3-C.5, Tables C.1/C.2).

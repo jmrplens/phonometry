@@ -510,3 +510,13 @@ GUM_WELCH_VEFF = 40.0  # Welch-Satterthwaite effective degrees of freedom
 ISO1999_N50_4K_90_20 = 13.0  # median NIPTS, 4 kHz, 90 dB, 20 yr
 ISO1999_N10_4K_90_20 = 18.0  # worst-10 % NIPTS, 4 kHz, 90 dB, 20 yr
 ISO1999_N10_3K_100_40 = 60.0  # worst-10 % NIPTS, 3 kHz, 100 dB, 40 yr
+
+# ---------------------------------------------------------------------------
+# Multiple-shock whole-body vibration - ISO 2631-5:2018, Annex C worked
+# example: five 40 m/s2 response peaks per day, 82 kg male, exposure from age
+# b = 20 for n = 20 years at N = 120 days/year. Daily acceleration dose
+# Dzd = 55.97 m/s2, stress variable R = 1.22 and injury probability Pi = 0.37.
+# ---------------------------------------------------------------------------
+ISO2631_5_DZD_MALE = 55.97  # daily acceleration dose, m/s2 (Formula 3)
+ISO2631_5_R_MALE = 1.22  # cumulative stress variable R (Formula C.3)
+ISO2631_5_PI_MALE = 0.37  # probability of lumbar injury (Formula C.5)

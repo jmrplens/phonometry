@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     from .room_ir import ImpulseResponseResult
     from .hearing import AgeThresholdResult
     from .iso1999 import HtlanResult, NiptsResult
+    from .iso2631_5 import MultipleShockResult
     from .ntacou112 import ImpulseProminence
     from .room_noise import NCResult, RCResult
     from .tonality_ecma import EcmaTonality
@@ -1590,6 +1591,45 @@ def plot_impulse_prominence(
     ax.set_title("NT ACOU 112 — impulse adjustment to $L_{Aeq}$")
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="upper left", fontsize="small")
+    ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_multiple_shock(
+    result: "MultipleShockResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Injury-probability curve ``P(R)`` with this assessment's ``R`` marked.
+
+    :param result: A :class:`~phonometry.iso2631_5.MultipleShockResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``R`` marker ``scatter``.
+    :return: The axes.
+    """
+    from .iso2631_5 import injury_probability
+
+    ax = ax if ax is not None else _new_axes()
+    r10, r50, r90 = result.risk_thresholds
+    r_max = max(result.risk, r90) * 1.3
+    grid = np.linspace(0.0, r_max, 240)
+    prob = np.asarray(injury_probability(grid, sex=result.sex), dtype=np.float64)
+    ax.plot(grid, 100.0 * prob, color="#1f77b4",
+            label=r"$\Pi(R) = 1 - e^{-(R/\alpha)^{\beta}}$")
+    for level, r_val in zip((10, 50, 90), (r10, r50, r90)):
+        ax.axhline(level, color="#7f7f7f", ls=":", lw=0.8)
+        ax.plot([r_val, r_val], [0.0, level], color="#7f7f7f", ls=":", lw=0.8)
+
+    kwargs.setdefault("color", "#d62728")
+    kwargs.setdefault("zorder", 4)
+    kwargs.setdefault("s", 90)
+    ax.scatter([result.risk], [100.0 * result.probability],
+               label=f"$R$ = {result.risk:.2f},  $\\Pi$ = "
+                     f"{100.0 * result.probability:.0f} %", **kwargs)
+    ax.set_xlabel("Stress variable $R$")
+    ax.set_ylabel("Probability of lumbar injury [%]")
+    ax.set_title(f"ISO 2631-5 injury probability — {result.sex}")
+    ax.set_xlim(left=0.0)
+    ax.set_ylim(0.0, 100.0)
+    ax.legend(loc="lower right", fontsize="small")
     ax.grid(True, alpha=0.3)
     return ax
 

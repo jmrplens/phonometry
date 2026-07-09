@@ -227,6 +227,15 @@ _ES_EXACT = {
     "Adjustment to $L_{Aeq}$": "Ajuste a $L_{Aeq}$",
     "Impulses": "Impulsos",
     "threshold $P = 5$": "umbral $P = 5$",
+    "Transmissibility  seat $\\rightarrow$ spine":
+        "Transmisibilidad  asiento $\\rightarrow$ columna",
+    "Seat-to-spine transfer function":
+        "Función de transferencia asiento-columna",
+    "Stress variable $R$": "Variable de tensión $R$",
+    "Probability of lumbar injury [%]": "Probabilidad de lesión lumbar [%]",
+    "Injury probability (Annex C)": "Probabilidad de lesión (Anexo C)",
+    "male": "hombre",
+    "female": "mujer",
     "Speech Intelligibility Index": "Índice de inteligibilidad del habla",
     "Normal": "Normal",
     "Raised": "Elevada",
@@ -397,7 +406,10 @@ _ES_EXACT = {
 
 _ES_PATTERNS = [
     (r"^(\d+) yr$", r"\1 años"),
-    (r"^Governing  (\$K_I\$ = .+ dB)$", r"Determinante  \1"),
+    (r"^Governing  \$K_I\$ = (\d+)\.(\d+) dB$", r"Determinante  $K_I$ = \1,\2 dB"),
+    # The mathtext ($R$) makes the later decimal-comma pass skip this label, so
+    # convert the decimal here as part of the translation.
+    (r"^Example  \$R\$ = (\d+)\.(\d+)$", r"Ejemplo  $R$ = \1,\2"),
     (r"^Octave Band: (.+) Hz$", r"Banda de octava: \1 Hz"),
     (r"^(\d+) phon$", r"\1 fonios"),
     (r"^TNR = (.+) dB\n\(criterion (.+) dB\)$", "TNR = \\1 dB\\n(criterio \\2 dB)"),
@@ -3568,6 +3580,64 @@ def generate_ntacou112(output_dir: str) -> None:
     plt.close()
 
 
+def generate_iso2631_5(output_dir: str) -> None:
+    """ISO 2631-5: seat-to-spine transmissibility and the injury probability."""
+    print("Generating multiple_shock.png...")
+    from phonometry import (
+        compression_dose,
+        dose_from_peaks,
+        injury_probability,
+        injury_risk,
+        seat_to_spine_transfer,
+    )
+    from phonometry.iso2631_5 import (
+        MZ_MALE,
+        RISK_THRESHOLDS_MALE,
+    )
+
+    fig, (ax_h, ax_r) = plt.subplots(1, 2, figsize=(12.5, 5.4))
+
+    # --- Left: seat-to-spine transmissibility |H(f)| (Formula 1). ---
+    freq = np.logspace(np.log10(0.5), np.log10(80.0), 400)
+    ax_h.plot(freq, np.abs(seat_to_spine_transfer(freq)), color=COLOR_PRIMARY,
+              label=r"$|H(f)|$")
+    ax_h.axhline(1.0, color=COLOR_GRID, linestyle="--", alpha=0.7)
+    ax_h.set_xscale("log")
+    ax_h.set_xlabel("Frequency [Hz]")
+    ax_h.set_ylabel("Transmissibility  seat $\\rightarrow$ spine")
+    ax_h.set_title("Seat-to-spine transfer function", fontweight="bold", pad=10)
+    ax_h.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_h.set_axisbelow(True)
+    ax_h.legend(loc="upper right")
+
+    # --- Right: injury probability Pi(R) with the Annex C male example. ---
+    grid = np.linspace(0.0, 3.0, 300)
+    for sex, colour in (("male", COLOR_PRIMARY), ("female", COLOR_SECONDARY)):
+        prob = 100.0 * injury_probability(grid, sex=sex)
+        ax_r.plot(grid, prob, color=colour, label=f"{sex}")
+    # The worked example: five 40 m/s2 peaks, 82 kg male -> R = 1.22.
+    sd = compression_dose(dose_from_peaks([40.0] * 5), mz=MZ_MALE)
+    r_male = injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
+    for level, r_val in zip((10, 50, 90), RISK_THRESHOLDS_MALE):
+        ax_r.axhline(level, color="#7f7f7f", linestyle=":", lw=0.8)
+        ax_r.plot([r_val, r_val], [0.0, level], color="#7f7f7f", linestyle=":", lw=0.8)
+    ax_r.scatter([r_male], [100.0 * injury_probability(r_male, sex="male")],
+                 color=COLOR_TERTIARY, marker="*", s=160, zorder=4,
+                 label=f"Example  $R$ = {r_male:.2f}")
+    ax_r.set_xlabel("Stress variable $R$")
+    ax_r.set_ylabel("Probability of lumbar injury [%]")
+    ax_r.set_title("Injury probability (Annex C)", fontweight="bold", pad=10)
+    ax_r.set_xlim(left=0.0)
+    ax_r.set_ylim(0.0, 100.0)
+    ax_r.grid(color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_r.set_axisbelow(True)
+    ax_r.legend(loc="lower right")
+
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "multiple_shock.png"))
+    plt.close()
+
+
 def generate_room_noise_criteria(output_dir: str) -> None:
     """ANSI S12.2-2019: NC tangency rating and RC Mark II classification."""
     print("Generating room_noise_criteria.png...")
@@ -3895,6 +3965,9 @@ def generate_all(img_dir: str) -> None:
 
     # Noise-induced hearing loss (ISO 1999 NIPTS and HTLAN).
     generate_nihl(img_dir)
+
+    # Multiple-shock whole-body vibration (ISO 2631-5 Clause 5 + Annex C).
+    generate_iso2631_5(img_dir)
 
     # Measurement uncertainty (GUM Guide 98-3 + Supplement 1 Monte Carlo).
     generate_uncertainty(img_dir)

@@ -1468,6 +1468,29 @@ def _chk_iso1999_high() -> Outcome:
     return numeric(ref.ISO1999_N10_3K_100_40, value, 0.5, unit="dB", places=1)
 
 
+_MSV = "Multiple-shock whole-body vibration (ISO 2631-5)"
+
+
+@register(_MSV, "ISO 2631-5:2018 Formula 3", "Daily acceleration dose, 5 x 40 m/s2 peaks")
+def _chk_iso2631_5_dose() -> Outcome:
+    value = ph.dose_from_peaks([40.0] * 5)
+    return numeric(ref.ISO2631_5_DZD_MALE, value, 0.01, unit="m/s2", places=2)
+
+
+@register(_MSV, "ISO 2631-5:2018 Formula C.3", "Stress variable R, Annex C male example")
+def _chk_iso2631_5_risk() -> Outcome:
+    sd = ph.compression_dose(ph.dose_from_peaks([40.0] * 5))
+    value = ph.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
+    return numeric(ref.ISO2631_5_R_MALE, value, 0.01, places=2)
+
+
+@register(_MSV, "ISO 2631-5:2018 Formula C.5", "Injury probability, Annex C male example")
+def _chk_iso2631_5_probability() -> Outcome:
+    sd = ph.compression_dose(ph.dose_from_peaks([40.0] * 5))
+    r = ph.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
+    return numeric(ref.ISO2631_5_PI_MALE, float(ph.injury_probability(r)), 0.01, places=2)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

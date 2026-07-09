@@ -49,6 +49,15 @@ from .iso1999 import (
     htlan,
     nipts,
 )
+from .en12354_6 import (
+    ReverberationResult,
+    air_absorption_area,
+    enclosed_space_reverberation,
+    equivalent_absorption_area,
+    hard_object_absorption,
+    object_fraction,
+    reverberation_time,
+)
 from .iso2631_5 import (
     MultipleShockResult,
     acceleration_dose,
@@ -472,6 +481,13 @@ __all__ = [
     "injury_probability",
     "multiple_shock_assessment",
     "MultipleShockResult",
+    "object_fraction",
+    "hard_object_absorption",
+    "air_absorption_area",
+    "equivalent_absorption_area",
+    "reverberation_time",
+    "enclosed_space_reverberation",
+    "ReverberationResult",
     "combine_uncertainty",
     "monte_carlo",
     "rectangular",

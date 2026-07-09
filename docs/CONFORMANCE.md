@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **88/88 conformance checks pass** across 20 domains and 55 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **90/90 conformance checks pass** across 21 domains and 56 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -285,6 +285,16 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 2631-5:2018 Formula 3 | Daily acceleration dose, 5 x 40 m/s2 peaks | 55.97 m/s2 (+/-0.01 m/s2) | 55.97 m/s2 | -0.002 m/s2 | &#9989; |
 | ISO 2631-5:2018 Formula C.3 | Stress variable R, Annex C male example | 1.22 (+/-0.01) | 1.22 | 0 | &#9989; |
 | ISO 2631-5:2018 Formula C.5 | Injury probability, Annex C male example | 0.37 (+/-0.01) | 0.37 | -0.003 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Sound absorption in enclosed spaces (EN 12354-6)</b> — 100% (2/2)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| EN 12354-6:2003 Formula 1 | Equivalent absorption area, Annex E bare room | 2.26 m2 (+/-0.01 m2) | 2.26 m2 | 0.003 m2 | &#9989; |
+| EN 12354-6:2003 Formula 5 | Reverberation time, Annex E bare room | 2.1 s (+/-0.1 s) | 2.1 s | 0.003 s | &#9989; |
 
 </details>
 

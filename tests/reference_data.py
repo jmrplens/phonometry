@@ -520,3 +520,12 @@ ISO1999_N10_3K_100_40 = 60.0  # worst-10 % NIPTS, 3 kHz, 100 dB, 40 yr
 ISO2631_5_DZD_MALE = 55.97  # daily acceleration dose, m/s2 (Formula 3)
 ISO2631_5_R_MALE = 1.22  # cumulative stress variable R (Formula C.3)
 ISO2631_5_PI_MALE = 0.37  # probability of lumbar injury (Formula C.5)
+
+# ---------------------------------------------------------------------------
+# Sound absorption in enclosed spaces - EN 12354-6:2003, Annex E worked
+# example (29,75 m3 room, 1000 Hz octave band). Case 1 (bare) A = 2,26 m2,
+# T = 2,1 s; Case 2 (with hard objects) A = 5,03 m2.
+# ---------------------------------------------------------------------------
+EN12354_6_A_BARE = 2.26  # equivalent absorption area, bare room (m2)
+EN12354_6_T_BARE = 2.1  # reverberation time, bare room (s)
+EN12354_6_A_OBJECTS = 5.03  # equivalent absorption area, with objects (m2)

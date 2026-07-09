@@ -1491,6 +1491,27 @@ def _chk_iso2631_5_probability() -> Outcome:
     return numeric(ref.ISO2631_5_PI_MALE, float(ph.injury_probability(r)), 0.01, places=2)
 
 
+_ABS = "Sound absorption in enclosed spaces (EN 12354-6)"
+
+_EN12354_6_SURFACES = [
+    (12.39, 0.05), (12.39, 0.02), (10.90, 0.04),
+    (10.90, 0.04), (6.55, 0.04), (6.55, 0.04),
+]
+
+
+@register(_ABS, "EN 12354-6:2003 Formula 1", "Equivalent absorption area, Annex E bare room")
+def _chk_en12354_6_area() -> Outcome:
+    value = float(ph.equivalent_absorption_area(_EN12354_6_SURFACES))
+    return numeric(ref.EN12354_6_A_BARE, value, 0.01, unit="m2", places=2)
+
+
+@register(_ABS, "EN 12354-6:2003 Formula 5", "Reverberation time, Annex E bare room")
+def _chk_en12354_6_rt() -> Outcome:
+    area = ph.equivalent_absorption_area(_EN12354_6_SURFACES)
+    value = float(ph.reverberation_time(area, 29.75))
+    return numeric(ref.EN12354_6_T_BARE, value, 0.05, unit="s", places=1)
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

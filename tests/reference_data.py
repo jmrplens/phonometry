@@ -459,6 +459,7 @@ DIRECTIVE_2002_44_WBV_ELV = 1.15  # A(8) m/s^2, Art. 3(2)(b)
 SII_BAND_IMPORTANCE_SUM = 1.0  # ANSI S3.5-1997 Table 3, sum of Ii
 SII_MASKING_Z_200HZ = -1.665  # Zi at 200 Hz, standard spectrum in quiet
 SII_STANDARD_QUIET = 0.9958  # SII, standard normal speech, quiet, normal hearing
+SII_LOUD_1KHZ = 42.16  # Table 3, loud-effort standard speech spectrum at 1 kHz
 
 # ---------------------------------------------------------------------------
 # Room-noise criteria - ANSI/ASA S12.2-2019.

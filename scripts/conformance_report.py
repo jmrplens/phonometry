@@ -1360,6 +1360,14 @@ def _chk_sii_standard_quiet() -> Outcome:
     return numeric(ref.SII_STANDARD_QUIET, result.sii, 5e-4, places=4)
 
 
+@register(_SII, "ANSI S3.5-1997 Table 3", "Loud-effort speech spectrum level at 1 kHz")
+def _chk_sii_loud_spectrum() -> Outcome:
+    from phonometry.sii import standard_speech_spectrum
+
+    value = float(standard_speech_spectrum("loud")[8])
+    return numeric(ref.SII_LOUD_1KHZ, value, 1e-9, unit="dB", places=2)
+
+
 _RN = "Room noise (ANSI S12.2-2019)"
 
 

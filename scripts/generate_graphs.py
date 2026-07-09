@@ -216,6 +216,16 @@ _ES_EXACT = {
     "Reference threshold [dB]": "Umbral de referencia [dB]",
     "Free-field (frontal)": "Campo libre (frontal)",
     "Diffuse-field": "Campo difuso",
+    "ANSI S3.5-1997 — speech spectra by vocal effort":
+        "ANSI S3.5-1997 — espectros de voz por esfuerzo vocal",
+    "Speech spectrum level [dB SPL]": "Nivel del espectro de voz [dB SPL]",
+    "SII vs vocal effort in a fixed noise":
+        "SII frente al esfuerzo vocal en un ruido fijo",
+    "Speech Intelligibility Index": "Índice de inteligibilidad del habla",
+    "Normal": "Normal",
+    "Raised": "Elevada",
+    "Loud": "Fuerte",
+    "Shout": "Grito",
     r"ISO 1999 — NIPTS at $L_{EX,8h}$ = 95 dB":
         r"ISO 1999 — NIPTS a $L_{EX,8h}$ = 95 dB",
     "ISO 1999 — HTLAN (male, age 60, 95 dB / 30 yr)":
@@ -3445,6 +3455,57 @@ def generate_speech_intelligibility(output_dir: str) -> None:
     plt.close()
 
 
+def generate_sii_vocal_efforts(output_dir: str) -> None:
+    """ANSI S3.5-1997 Table 3 standard speech spectra by vocal effort."""
+    print("Generating sii_vocal_efforts.png...")
+    from phonometry import speech_intelligibility_index, standard_speech_spectrum
+    from phonometry.sii import BAND_CENTRES, VOCAL_EFFORTS
+
+    freqs = BAND_CENTRES
+    colours = {"normal": COLOR_GRID, "raised": "#7f7f7f",
+               "loud": COLOR_PRIMARY, "shout": COLOR_SECONDARY}
+    fig, (ax_s, ax_i) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+
+    # --- Left: the four standard speech spectra. ---
+    for effort in VOCAL_EFFORTS:
+        ax_s.plot(freqs, standard_speech_spectrum(effort), "o-",
+                  color=colours[effort], label=effort.capitalize())
+    ax_s.set_xscale("log")
+    ax_s.set_xticks(list(freqs))
+    ax_s.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax_s.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax_s.set_xlabel("One-third-octave band [Hz]")
+    ax_s.set_ylabel("Speech spectrum level [dB SPL]")
+    ax_s.set_title("ANSI S3.5-1997 — speech spectra by vocal effort",
+                   fontweight="bold", pad=10)
+    ax_s.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_s.set_axisbelow(True)
+    ax_s.legend(loc="upper right")
+
+    # --- Right: SII in a fixed broadband noise rises with vocal effort. ---
+    noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
+                      32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
+    indices = [speech_intelligibility_index(e, noise).sii for e in VOCAL_EFFORTS]
+    positions = np.arange(len(VOCAL_EFFORTS))
+    bar_colours = [colours[e] for e in VOCAL_EFFORTS]
+    ax_i.bar(positions, indices, width=0.6, color=bar_colours, zorder=2)
+    for x, v in zip(positions, indices):
+        ax_i.text(x, v + 0.01, f"{v:.2f}", ha="center", va="bottom",
+                  fontweight="bold")
+    ax_i.set_xticks(positions)
+    ax_i.set_xticklabels([e.capitalize() for e in VOCAL_EFFORTS])
+    ax_i.set_ylim(0.0, 1.0)
+    ax_i.set_ylabel("Speech Intelligibility Index")
+    ax_i.set_title("SII vs vocal effort in a fixed noise",
+                   fontweight="bold", pad=10)
+    ax_i.grid(which="major", axis="y", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax_i.set_axisbelow(True)
+
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "sii_vocal_efforts.png"))
+    plt.close()
+
+
 def generate_room_noise_criteria(output_dir: str) -> None:
     """ANSI S12.2-2019: NC tangency rating and RC Mark II classification."""
     print("Generating room_noise_criteria.png...")
@@ -3761,6 +3822,7 @@ def generate_all(img_dir: str) -> None:
 
     # Speech intelligibility (ANSI S3.5-1997): band audibility and the SII.
     generate_speech_intelligibility(img_dir)
+    generate_sii_vocal_efforts(img_dir)
 
     # Room-noise criteria (ANSI S12.2-2019): NC tangency and RC Mark II.
     generate_room_noise_criteria(img_dir)

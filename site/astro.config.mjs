@@ -324,7 +324,7 @@ export default defineConfig({
         {
           label: 'Human vibration',
           translations: { es: 'Vibración en humanos' },
-          items: ['guides/human-vibration'],
+          items: ['guides/human-vibration', 'guides/multiple-shock-vibration'],
         },
         {
           label: 'Metrology & uncertainty',

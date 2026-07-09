@@ -24,6 +24,7 @@ Full documentation for phonometry. Also available as a website:
 - [Acoustic Materials](materials.md) — sound-absorption rating α_w and classes (ISO 11654), airflow resistance static and alternating methods (ISO 9053-1/-2), and impedance-tube measurement of absorption, surface impedance and transmission loss (ISO 10534-1/-2, ASTM E2611)
 - [Surface Scattering, Diffusion and In-situ Absorption](surface-scattering.md) — random-incidence scattering (ISO 17497-1), free-field diffusion coefficient (ISO 17497-2), and in-situ road-surface absorption by the extended-surface subtraction technique (ISO 13472-1) and the spot method (ISO 13472-2)
 - [Human Vibration](human-vibration.md) — whole-body and hand-arm frequency weightings (ISO 8041-1), weighted r.m.s. acceleration, running r.m.s./MTVV/VDV and crest factor (ISO 2631-1), vibration in buildings (ISO 2631-2), vibration total value and daily exposure A(8) (ISO 5349-1/-2), and the exposure action/limit values of Directive 2002/44/EC
+- [Multiple-shock whole-body vibration](multiple-shock-vibration.md) — the ISO 2631-5:2018 spinal-response model: the seat-to-spine transfer function, the acceleration and daily dose from the response peaks (Clause 5), and the compressive stress, stress variable R and Weibull probability of lumbar injury (Annex C)
 - [Calibration and dBFS](calibration.md) — physical SPL and digital analysis
 - [Block Processing](block-processing.md) — stateful real-time workflows
 - [Multichannel](multichannel.md) — vectorized multichannel analysis

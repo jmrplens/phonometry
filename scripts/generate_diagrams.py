@@ -161,6 +161,32 @@ _ES: dict[str, str] = {
         "Nivel de valoración  LAr,T = 10·lg( (1/T) Σ Δt·10^((LAeq+KI)/10) )",
     "impulse-adjusted level over the reference time  (Note 1)":
         "nivel ajustado por impulsos sobre el tiempo de referencia  (Nota 1)",
+    "Vertical seat acceleration  az(t)":
+        "Aceleración vertical del asiento  az(t)",
+    "band-limited per ISO 2631-1  (0.4 Hz to 100 Hz)":
+        "limitada en banda según ISO 2631-1  (0,4 Hz a 100 Hz)",
+    "Spinal response  Az(t)  (clause 5.2, Formula 1/2)":
+        "Respuesta de la columna  Az(t)  (cláusula 5.2, Fórmula 1/2)",
+    "seat-to-spine transfer function H(f): 1 zero, 6 poles":
+        "función de transferencia asiento-columna H(f): 1 cero, 6 polos",
+    "Acceleration dose  Dz = 1.07·(Σ Az,i^6)^(1/6)  (Formula 3)":
+        "Dosis de aceleración  Dz = 1.07·(Σ Az,i^6)^(1/6)  (Fórmula 3)",
+    "Az,i = positive peaks;   daily dose Dzd = Dz·(td/tm)^(1/6)":
+        "Az,i = picos positivos;   dosis diaria Dzd = Dz·(td/tm)^(1/6)",
+    "Compressive stress  Sd = mz·Dzd  (Annex C, Formula C.1)":
+        "Tensión compresiva  Sd = mz·Dzd  (Anexo C, Fórmula C.1)",
+    "mz = 0.029 (male) / 0.025 (female) MPa per m/s²":
+        "mz = 0.029 (hombre) / 0.025 (mujer) MPa por m/s²",
+    "Stress variable  R = [Σ (Sd·N^(1/6) / (Su − Sstat))^6]^(1/6)":
+        "Variable de tensión  R = [Σ (Sd·N^(1/6) / (Su − Sstat))^6]^(1/6)",
+    "Su = 6.75 − Sage·(b+i) MPa, cumulated over exposure years (C.3/C.4)":
+        "Su = 6.75 − Sage·(b+i) MPa, acumulada sobre los años de exposición (C.3/C.4)",
+    "Injury probability  P(R) = 1 − exp(−(R/α)^β)  (Formula C.5)":
+        "Probabilidad de lesión  P(R) = 1 − exp(−(R/α)^β)  (Fórmula C.5)",
+    "Weibull risk of lumbar injury, by sex (Table C.1/C.2)":
+        "riesgo de lesión lumbar de Weibull, por sexo (Tabla C.1/C.2)",
+    "Multiple-shock spinal-response dose and injury risk (ISO 2631-5)":
+        "Dosis espinal por choques múltiples y riesgo de lesión (ISO 2631-5)",
     "Speech  Ei'": "Habla  Ei'",
     "Noise  Ni'": "Ruido  Ni'",
     "Threshold  Ti'": "Umbral  Ti'",
@@ -2476,6 +2502,45 @@ def _d_ntacou112(s: SVG, th: Theme) -> None:
            13, th.muted, "middle")
 
 
+def _d_iso2631_5(s: SVG, th: Theme) -> None:
+    """Multiple-shock spinal-response dose and injury risk (ISO 2631-5:2018)."""
+    cx = 450.0
+    bw, bh = 660.0, 58.0
+    x0 = cx - bw / 2
+
+    # --- Input --------------------------------------------------------------
+    s.rect(x0, 48, bw, bh, th.panel, th.fg, rx=10, sw=2)
+    s.text(cx, 72, "Vertical seat acceleration  az(t)", 19, th.fg, "middle",
+           bold=True)
+    s.text(cx, 92, "band-limited per ISO 2631-1  (0.4 Hz to 100 Hz)", 13,
+           th.muted, "middle")
+    s.arrow(cx, 106, cx, 136, th.fg, 1.8)
+
+    def _step(y: float, l1: str, l2: str, color: str) -> None:
+        s.rect(x0, y, bw, bh, th.panel, color, rx=10, sw=2)
+        s.text(cx, y + 25, l1, 17, th.fg, "middle", bold=True)
+        s.text(cx, y + 45, l2, 13, th.muted, "middle")
+
+    _step(136, "Spinal response  Az(t)  (clause 5.2, Formula 1/2)",
+          "seat-to-spine transfer function H(f): 1 zero, 6 poles", th.primary)
+    _step(224, "Acceleration dose  Dz = 1.07·(Σ Az,i^6)^(1/6)  (Formula 3)",
+          "Az,i = positive peaks;   daily dose Dzd = Dz·(td/tm)^(1/6)", th.fg)
+    _step(312, "Compressive stress  Sd = mz·Dzd  (Annex C, Formula C.1)",
+          "mz = 0.029 (male) / 0.025 (female) MPa per m/s²", th.fg)
+    _step(400, "Stress variable  R = [Σ (Sd·N^(1/6) / (Su − Sstat))^6]^(1/6)",
+          "Su = 6.75 − Sage·(b+i) MPa, cumulated over exposure years (C.3/C.4)",
+          th.secondary)
+    for y0, y1 in ((196, 224), (284, 312), (372, 400), (460, 488)):
+        s.arrow(cx, y0, cx, y1, th.fg, 1.8)
+
+    # --- Output -------------------------------------------------------------
+    s.rect(x0, 488, bw, 58, "none", th.primary, rx=10, sw=2.4)
+    s.text(cx, 513, "Injury probability  P(R) = 1 − exp(−(R/α)^β)  (Formula C.5)",
+           17, th.fg, "middle", bold=True)
+    s.text(cx, 533, "Weibull risk of lumbar injury, by sex (Table C.1/C.2)", 13,
+           th.muted, "middle")
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -2546,6 +2611,9 @@ DIAGRAMS = {
     "diagram_ntacou112": (
         _d_ntacou112,
         "Impulsive-sound prominence and LAeq adjustment (NT ACOU 112)", 520),
+    "diagram_iso2631_5": (
+        _d_iso2631_5,
+        "Multiple-shock spinal-response dose and injury risk (ISO 2631-5)", 580),
 }
 
 

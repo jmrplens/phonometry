@@ -47,7 +47,7 @@ def test_transfer_matches_annex_d_filter() -> None:
     freqs = np.array([0.5, 2.0, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0])
     formula = np.abs(v.seat_to_spine_transfer(freqs))
     _, h = freqz(_ANNEX_D_B, _ANNEX_D_A, worN=2.0 * np.pi * freqs / 256.0)
-    assert np.max(np.abs(formula - np.abs(h))) < 0.04
+    np.testing.assert_allclose(formula, np.abs(h), atol=0.04)
 
 
 # ---------------------------------------------------------------------------
@@ -137,7 +137,7 @@ def test_annex_c_male_worked_example() -> None:
     # 5 x 40 m/s2, 82 kg male, b = 20, n = 20, N = 120: R = 1.22, Pi = 0.37.
     dz = v.dose_from_peaks([40.0] * 5)
     sd = v.compression_dose(dz, mz=v.MZ_MALE)
-    assert sd == pytest.approx(0.029 * ISO2631_5_DZD_MALE, abs=1e-3)
+    assert sd == pytest.approx(v.MZ_MALE * ISO2631_5_DZD_MALE, abs=1e-3)
     r = v.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
     assert r == pytest.approx(ISO2631_5_R_MALE, abs=0.01)
     pi = v.injury_probability(r, sex="male")
@@ -168,9 +168,18 @@ def test_injury_probability_bounds_and_monotonic() -> None:
     assert probs == sorted(probs)
 
 
+def test_injury_probability_accepts_arrays() -> None:
+    # Array input returns an array element-wise equal to the scalar calls.
+    grid = [0.5, 1.0, 2.0]
+    arr = v.injury_probability(grid, sex="male")
+    assert isinstance(arr, np.ndarray)
+    scalars = [v.injury_probability(r, sex="male") for r in grid]
+    np.testing.assert_allclose(arr, scalars)
+
+
 def test_injury_probability_at_thresholds() -> None:
     # Table C.2: the R for 10 / 50 / 90 % risk should map back to those risks.
-    for r_val, expected in zip(v.RISK_THRESHOLDS_MALE, (0.10, 0.50, 0.90)):
+    for r_val, expected in zip(v.RISK_THRESHOLDS_MALE, (0.10, 0.50, 0.90), strict=True):
         assert v.injury_probability(r_val, sex="male") == pytest.approx(expected, abs=0.02)
 
 
@@ -205,6 +214,11 @@ def test_invalid_inputs_raise() -> None:
         v.injury_risk(1.0, start_age=20, years=0, days_per_year=120)
     with pytest.raises(ValueError, match="sex must be"):
         v.injury_probability(1.0, sex="other")
+    with pytest.raises(ValueError, match="both exposure_time and measurement_time"):
+        v.multiple_shock_assessment(
+            [1.0, 2.0], 256.0, start_age=20, years=20, days_per_year=120,
+            exposure_time=8.0,
+        )
 
 
 def test_injury_risk_rejects_exhausted_strength() -> None:

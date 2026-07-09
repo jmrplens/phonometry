@@ -137,7 +137,9 @@ def spinal_response(acceleration: ArrayLike, fs: float) -> np.ndarray:
     :return: The spinal response acceleration ``Az(t)``, m/s2, same length.
     """
     fs = _positive_fs(fs)
-    az = np.asarray(acceleration, dtype=np.float64).ravel()
+    az = np.asarray(acceleration, dtype=np.float64)
+    if az.ndim != 1:
+        raise ValueError("acceleration must be a 1-D time series.")
     if az.size == 0:
         raise ValueError("acceleration must not be empty.")
     spectrum = np.fft.rfft(az)
@@ -156,21 +158,17 @@ def response_peaks(response: ArrayLike) -> np.ndarray:
     :return: The positive peak values, in the order they occur.
     """
     sig = np.asarray(response, dtype=np.float64).ravel()
-    peaks: list[float] = []
-    current = -np.inf
-    active = False
-    for value in sig:
-        if value > 0.0:
-            active = True
-            if value > current:
-                current = value
-        elif active:
-            peaks.append(current)
-            current = -np.inf
-            active = False
-    if active:
-        peaks.append(current)
-    return np.asarray(peaks, dtype=np.float64)
+    if sig.size == 0:
+        return np.array([], dtype=np.float64)
+    # Bracket the positive samples with False sentinels so the first and last
+    # runs are closed, then take the maximum of each positive run.
+    positive = np.empty(sig.size + 2, dtype=bool)
+    positive[0] = positive[-1] = False
+    positive[1:-1] = sig > 0.0
+    starts = np.where(~positive[:-1] & positive[1:])[0]
+    if starts.size == 0:
+        return np.array([], dtype=np.float64)
+    return np.maximum.reduceat(sig, starts)
 
 
 def dose_from_peaks(peaks: ArrayLike) -> float:
@@ -316,18 +314,20 @@ def injury_risk(
     return float(total ** (1.0 / DOSE_EXPONENT))
 
 
-def injury_probability(risk: float, *, sex: str = "male") -> float:
+def injury_probability(risk: ArrayLike, *, sex: str = "male") -> np.ndarray | float:
     """Probability of lumbar injury ``P(R)`` (Annex C, Formula C.5).
 
-    :param risk: The stress variable ``R`` (see :func:`injury_risk`).
+    :param risk: The stress variable ``R`` (see :func:`injury_risk`); scalar or
+        array-like.
     :param sex: ``"male"`` or ``"female"`` (sets the Weibull coefficients).
-    :return: The injury probability ``P = 1 - exp(-(R/alpha)**beta)`` in 0-1.
+    :return: The injury probability ``P = 1 - exp(-(R/alpha)**beta)`` in 0-1;
+        a float for a scalar input, otherwise an array. Negative ``R`` gives 0.
     """
     _check_sex(sex)
     alpha, beta = WEIBULL_MALE if sex == "male" else WEIBULL_FEMALE
-    if risk <= 0.0:
-        return 0.0
-    return float(1.0 - np.exp(-((risk / alpha) ** beta)))
+    r = np.asarray(risk, dtype=np.float64)
+    prob = 1.0 - np.exp(-((np.maximum(r, 0.0) / alpha) ** beta))
+    return float(prob) if prob.ndim == 0 else prob
 
 
 def _risk_thresholds(sex: str) -> tuple[float, float, float]:
@@ -408,6 +408,11 @@ def multiple_shock_assessment(
     :return: The :class:`MultipleShockResult`.
     """
     _check_sex(sex)
+    if (exposure_time is None) != (measurement_time is None):
+        raise ValueError(
+            "provide both exposure_time and measurement_time to scale to a "
+            "daily dose, or neither."
+        )
     mz = _mz_for_sex(sex) if mz is None else mz
     peaks = response_peaks(spinal_response(acceleration, fs))
     dz = dose_from_peaks(peaks)
@@ -424,7 +429,7 @@ def multiple_shock_assessment(
         sex=sex,
         mz=mz,
     )
-    prob = injury_probability(r, sex=sex)
+    prob = float(injury_probability(r, sex=sex))
     return MultipleShockResult(
         sex=sex,
         acceleration_dose=dz,

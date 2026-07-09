@@ -1488,7 +1488,7 @@ def _chk_iso2631_5_risk() -> Outcome:
 def _chk_iso2631_5_probability() -> Outcome:
     sd = ph.compression_dose(ph.dose_from_peaks([40.0] * 5))
     r = ph.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
-    return numeric(ref.ISO2631_5_PI_MALE, ph.injury_probability(r), 0.01, places=2)
+    return numeric(ref.ISO2631_5_PI_MALE, float(ph.injury_probability(r)), 0.01, places=2)
 
 
 # ===========================================================================

@@ -80,7 +80,7 @@ import phonometry as ph
 # Ejemplo del Anexo C: 5 x 40 m/s2/día, hombre de 82 kg, edad 20 durante 20
 # años, 120 días/año.
 dz = ph.dose_from_peaks([40.0] * 5)
-sd = ph.compression_dose(dz)                     # 1,62 MPa
+sd = ph.compression_dose(dz)                     # 1.62 MPa
 r = ph.injury_risk(sd, start_age=20, years=20, days_per_year=120)
 print(round(r, 2))                               # 1.22
 print(round(100 * ph.injury_probability(r)))     # 37  % de riesgo de lesión

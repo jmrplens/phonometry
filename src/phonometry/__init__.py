@@ -62,6 +62,7 @@ from .iso2631_5 import (
     response_peaks,
     seat_to_spine_transfer,
     spinal_response,
+    static_stress,
     ultimate_strength,
 )
 from .ntacou112 import (
@@ -465,6 +466,7 @@ __all__ = [
     "daily_dose",
     "daily_dose_multi",
     "compression_dose",
+    "static_stress",
     "ultimate_strength",
     "injury_risk",
     "injury_probability",

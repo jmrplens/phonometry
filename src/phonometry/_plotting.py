@@ -1611,10 +1611,7 @@ def plot_multiple_shock(
     r10, r50, r90 = result.risk_thresholds
     r_max = max(result.risk, r90) * 1.3
     grid = np.linspace(0.0, r_max, 240)
-    prob = np.array(
-        [injury_probability(float(r), sex=result.sex) for r in grid],
-        dtype=np.float64,
-    )
+    prob = np.asarray(injury_probability(grid, sex=result.sex), dtype=np.float64)
     ax.plot(grid, 100.0 * prob, color="#1f77b4",
             label=r"$\Pi(R) = 1 - e^{-(R/\alpha)^{\beta}}$")
     for level, r_val in zip((10, 50, 90), (r10, r50, r90)):

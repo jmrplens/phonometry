@@ -3611,7 +3611,7 @@ def generate_iso2631_5(output_dir: str) -> None:
     # --- Right: injury probability Pi(R) with the Annex C male example. ---
     grid = np.linspace(0.0, 3.0, 300)
     for sex, colour in (("male", COLOR_PRIMARY), ("female", COLOR_SECONDARY)):
-        prob = [100.0 * injury_probability(float(r), sex=sex) for r in grid]
+        prob = 100.0 * injury_probability(grid, sex=sex)
         ax_r.plot(grid, prob, color=colour, label=f"{sex}")
     # The worked example: five 40 m/s2 peaks, 82 kg male -> R = 1.22.
     sd = compression_dose(dose_from_peaks([40.0] * 5), mz=MZ_MALE)

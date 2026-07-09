@@ -2740,8 +2740,8 @@ def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     print("Generating insulation_uncertainty_demo.png...")
     from phonometry.building_uncertainty import (
         band_uncertainty,
-        coverage_factor,
-        expanded_uncertainty,
+        insulation_coverage_factor,
+        insulation_expanded_uncertainty,
         single_number_uncertainty,
     )
     from phonometry.insulation import weighted_rating
@@ -2760,12 +2760,14 @@ def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     band_f, band_u = band.to_arrays()
     idx = [int(np.argmin(np.abs(band_f - f))) for f in freqs]
     u_band = band_u[idx]
-    k = coverage_factor(0.95)
-    exp_band = np.array([expanded_uncertainty(float(v), 0.95) for v in u_band])
+    k = insulation_coverage_factor(0.95)
+    exp_band = np.array(
+        [insulation_expanded_uncertainty(float(v), 0.95) for v in u_band]
+    )
 
     # Single-number expanded uncertainty for the rating.
     u_single = single_number_uncertainty("r_w", "B")
-    exp_single = expanded_uncertainty(u_single, 0.95)
+    exp_single = insulation_expanded_uncertainty(u_single, 0.95)
 
     fig, ax = plt.subplots(figsize=(10, 6.3))
     ax.fill_between(freqs, measured - exp_band, measured + exp_band,

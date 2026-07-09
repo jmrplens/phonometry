@@ -356,7 +356,9 @@ def maximum_repeatability_standard_deviation() -> BandUncertainty:
 # --------------------------------------------------------------------------- #
 # Coverage factors and expansion (Clause 8, Table 8).
 # --------------------------------------------------------------------------- #
-def coverage_factor(confidence: float = 0.95, one_sided: bool = False) -> float:
+def insulation_coverage_factor(
+    confidence: float = 0.95, one_sided: bool = False
+) -> float:
     """Return the coverage factor ``k`` for a confidence level (Table 8).
 
     :param confidence: Confidence level as a fraction. Two-sided values are
@@ -377,7 +379,7 @@ def coverage_factor(confidence: float = 0.95, one_sided: bool = False) -> float:
     )
 
 
-def expanded_uncertainty(
+def insulation_expanded_uncertainty(
     u: float,
     coverage: float = 0.95,
     one_sided: bool = False,
@@ -388,13 +390,13 @@ def expanded_uncertainty(
     level; a minimum of ``k = 1`` is enforced (Clause 8).
 
     :param u: Standard uncertainty ``u``, in dB (must be non-negative).
-    :param coverage: Confidence level as a fraction (see :func:`coverage_factor`).
+    :param coverage: Confidence level as a fraction (see :func:`insulation_coverage_factor`).
     :param one_sided: Use the one-sided coverage factor (conformity checks).
     :raises ValueError: Negative ``u`` or an untabulated confidence level.
     """
     if u < 0:
         raise ValueError("Standard uncertainty u must be non-negative.")
-    k = max(coverage_factor(coverage, one_sided), 1.0)
+    k = max(insulation_coverage_factor(coverage, one_sided), 1.0)
     return k * u
 
 
@@ -410,7 +412,7 @@ def uncertain_value(
     """Attach the ISO 12999-1 expanded uncertainty to a single-number rating.
 
     Convenience wrapper combining :func:`single_number_uncertainty`,
-    :func:`coverage_factor` and :func:`expanded_uncertainty` into an
+    :func:`insulation_coverage_factor` and :func:`insulation_expanded_uncertainty` into an
     :class:`UncertainValue` (``value ± U``) without modifying the rating
     dataclasses. For conformity checks pass ``one_sided=True`` and read
     :attr:`UncertainValue.lower` / :attr:`UncertainValue.upper` (Formulae 4/5).
@@ -423,7 +425,7 @@ def uncertain_value(
     :param upper_limit: Use the ``σR95`` upper limit (airborne, situation A).
     """
     u = single_number_uncertainty(quantity, situation, upper_limit=upper_limit)
-    k = max(coverage_factor(coverage, one_sided), 1.0)
+    k = max(insulation_coverage_factor(coverage, one_sided), 1.0)
     return UncertainValue(
         value=value,
         standard_uncertainty=u,
@@ -563,3 +565,34 @@ COVERAGE_FACTORS: Mapping[Tuple[float, bool], float] = MappingProxyType(
         **{(level, True): k for level, k in _COVERAGE_ONE_SIDED.items()},
     }
 )
+
+
+# --------------------------------------------------------------------------- #
+# Deprecated aliases (the bare names shadowed the GUM functions of
+# :mod:`phonometry.uncertainty` at the package root; remove in the next major).
+# --------------------------------------------------------------------------- #
+def _warn_renamed(old: str, new: str) -> None:
+    import warnings
+
+    warnings.warn(
+        f"phonometry {old} (ISO 12999-1) is deprecated; use {new}. For the "
+        f"GUM function use phonometry.uncertainty.{old}.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
+
+
+def coverage_factor(confidence: float = 0.95, one_sided: bool = False) -> float:
+    """Deprecated alias of :func:`insulation_coverage_factor`."""
+    _warn_renamed("coverage_factor", "insulation_coverage_factor")
+    return insulation_coverage_factor(confidence, one_sided)
+
+
+def expanded_uncertainty(
+    u: float,
+    coverage: float = 0.95,
+    one_sided: bool = False,
+) -> float:
+    """Deprecated alias of :func:`insulation_expanded_uncertainty`."""
+    _warn_renamed("expanded_uncertainty", "insulation_expanded_uncertainty")
+    return insulation_expanded_uncertainty(u, coverage, one_sided)

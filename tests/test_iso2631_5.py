@@ -225,3 +225,9 @@ def test_injury_risk_rejects_exhausted_strength() -> None:
     # By ~age 125 the male ultimate strength minus static stress goes negative.
     with pytest.raises(ValueError, match="non-positive"):
         v.injury_risk(1.0, start_age=20, years=120, days_per_year=120, sex="male")
+
+
+def test_response_peaks_rejects_2d() -> None:
+    # A 2-D response would create a false crossing at the channel seam.
+    with pytest.raises(ValueError, match="1-D time series"):
+        v.response_peaks(np.zeros((2, 100)))

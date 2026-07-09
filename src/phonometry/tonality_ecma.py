@@ -58,6 +58,7 @@ from .loudness_ecma import (
     _specific_basis_loudness,
     _tonal_estimate,
 )
+from ._validation import require_1d_signal
 from .utils import _typesignal
 
 # Noise reduction sigmoid parameters (Table 7), reused on the tonality path.
@@ -349,8 +350,7 @@ def tonality_ecma(
     """
     if field not in ("free", "diffuse"):
         raise ValueError("field must be 'free' or 'diffuse'")
-    x = _typesignal(signal_in)
-    x = np.asarray(x, dtype=np.float64).ravel()
+    x = require_1d_signal(_typesignal(signal_in))
     if x.size == 0:
         raise ValueError("signal must not be empty")
     fs = float(fs)

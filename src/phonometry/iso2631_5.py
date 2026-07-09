@@ -29,6 +29,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ._validation import require_1d_signal
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
@@ -157,7 +159,7 @@ def response_peaks(response: ArrayLike) -> np.ndarray:
     :param response: The spinal response acceleration ``Az(t)``.
     :return: The positive peak values, in the order they occur.
     """
-    sig = np.asarray(response, dtype=np.float64).ravel()
+    sig = require_1d_signal(response, name="response")
     if sig.size == 0:
         return np.array([], dtype=np.float64)
     # Bracket the positive samples with False sentinels so the first and last

@@ -448,3 +448,14 @@ DIRECTIVE_2002_44_HAV_EAV = 2.5  # A(8) m/s^2, Art. 3(1)(a)
 DIRECTIVE_2002_44_HAV_ELV = 5.0  # A(8) m/s^2, Art. 3(1)(b)
 DIRECTIVE_2002_44_WBV_EAV = 0.5  # A(8) m/s^2, Art. 3(2)(a)
 DIRECTIVE_2002_44_WBV_ELV = 1.15  # A(8) m/s^2, Art. 3(2)(b)
+
+# ---------------------------------------------------------------------------
+# ANSI S3.5-1997 Speech Intelligibility Index (one-third-octave method).
+# The band-importance function (Table 3) sums to one; the equivalent masking
+# spectrum level Zi is a tabulated intermediate of the standard procedure for
+# the standard normal-effort spectrum in quiet; the index for that condition
+# with normal hearing is the standard-procedure result.
+# ---------------------------------------------------------------------------
+SII_BAND_IMPORTANCE_SUM = 1.0  # ANSI S3.5-1997 Table 3, sum of Ii
+SII_MASKING_Z_200HZ = -1.665  # Zi at 200 Hz, standard spectrum in quiet
+SII_STANDARD_QUIET = 0.9958  # SII, standard normal speech, quiet, normal hearing

@@ -44,6 +44,23 @@ _MONO = "Consolas, Menlo, monospace"
 _ES: dict[str, str] = {
     "Calibration chain — from calibrator to physical units":
         "Cadena de calibración — del calibrador a unidades físicas",
+    # Speech Intelligibility Index (ANSI S3.5-1997)
+    "Speech Intelligibility Index computation flow (ANSI S3.5-1997)":
+        "Flujo de cálculo del índice de inteligibilidad del habla (ANSI S3.5-1997)",
+    "Speech  Ei'": "Habla  Ei'",
+    "Noise  Ni'": "Ruido  Ni'",
+    "Threshold  Ti'": "Umbral  Ti'",
+    "spectrum level (dB)": "nivel espectral (dB)",
+    "Self-masking + spread of masking": "Automáscara + propagación de la máscara",
+    "Zi   (clause 5.4)": "Zi   (cláusula 5.4)",
+    "Equivalent disturbance Di": "Perturbación equivalente Di",
+    "masking + internal noise, energetic (5.6)":
+        "máscara + ruido interno, energético (5.6)",
+    "Band audibility Ai = (Ei' − Di + 15)/30":
+        "Audibilidad de banda Ai = (Ei' − Di + 15)/30",
+    "clipped to [0, 1]   (clause 5.8)": "acotada a [0, 1]   (cláusula 5.8)",
+    "band importance I_i (Table 3)  ·  index in [0, 1]  (clause 6)":
+        "importancia de banda I_i (Tabla 3)  ·  índice en [0, 1]  (cláusula 6)",
     # Human vibration (ISO 2631-1 / ISO 8041-1 / 2002-44-EC)
     "Whole-body vibration measurement chain (ISO 2631-1 / ISO 8041-1)":
         "Cadena de medición de vibración de cuerpo entero (ISO 2631-1 / ISO 8041-1)",
@@ -1953,6 +1970,44 @@ def _d_human_vibration(s: SVG, th: Theme) -> None:
            18, th.secondary, "middle")
 
 
+def _d_speech_intelligibility(s: SVG, th: Theme) -> None:
+    """SII computation flow (ANSI S3.5-1997, one-third-octave method)."""
+    # --- Top: three equivalent-spectrum-level inputs (per 1/3-octave band) ---
+    inputs = [
+        (150.0, "Speech  Ei'", th.primary),
+        (450.0, "Noise  Ni'", th.secondary),
+        (750.0, "Threshold  Ti'", th.accent),
+    ]
+    iw, ih, iy = 220.0, 66.0, 40.0
+    for cx, label, col in inputs:
+        s.rect(cx - iw / 2, iy, iw, ih, th.panel, col, rx=10, sw=2)
+        s.text(cx, iy + 28, label, 21, th.fg, "middle", bold=True)
+        s.text(cx, iy + 51, "spectrum level (dB)", 16, th.muted, "middle")
+        s.arrow(cx, iy + ih, cx, 150, th.fg, 1.8)
+
+    # --- Vertical processing chain (ANSI S3.5-1997 clause 5) ---
+    cx, bw, bh = 450.0, 470.0, 70.0
+    x0 = cx - bw / 2
+    chain = [
+        (150.0, "Self-masking + spread of masking", "Zi   (clause 5.4)"),
+        (264.0, "Equivalent disturbance Di", "masking + internal noise, energetic (5.6)"),
+        (378.0, "Band audibility Ai = (Ei' − Di + 15)/30", "clipped to [0, 1]   (clause 5.8)"),
+    ]
+    for by, l1, l2 in chain:
+        s.rect(x0, by, bw, bh, th.panel, th.fg, rx=12, sw=2)
+        s.text(cx, by + 30, l1, 20, th.fg, "middle", bold=True)
+        s.text(cx, by + 54, l2, 17, th.muted, "middle")
+    s.arrow(cx, 220, cx, 264, th.fg, 2.0)
+    s.arrow(cx, 334, cx, 378, th.fg, 2.0)
+
+    # --- Band-importance weighting and the final index ---
+    s.arrow(cx, 448, cx, 486, th.fg, 2.0)
+    s.rect(x0, 486, bw, 74, "none", th.primary, rx=12, sw=2.4)
+    s.text(cx, 516, "SII = Σ I_i A_i", 26, th.fg, "middle", bold=True)
+    s.text(cx, 542, "band importance I_i (Table 3)  ·  index in [0, 1]  (clause 6)",
+           16, th.primary, "middle")
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -2002,6 +2057,9 @@ DIAGRAMS = {
     "diagram_human_vibration": (
         _d_human_vibration,
         "Whole-body vibration measurement chain (ISO 2631-1 / ISO 8041-1)", 580),
+    "diagram_speech_intelligibility": (
+        _d_speech_intelligibility,
+        "Speech Intelligibility Index computation flow (ANSI S3.5-1997)", 600),
 }
 
 

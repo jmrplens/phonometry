@@ -142,6 +142,15 @@ def test_monte_carlo_zero_uncertainty_input(dist: str) -> None:
     assert mc.standard_uncertainty == pytest.approx(1.0, rel=0.05)
 
 
+def test_monte_carlo_triangular_tiny_uncertainty() -> None:
+    # A tiny but non-zero triangular u whose support underflows against mu must
+    # not crash rng.triangular (bounds mu +/- a round to the same float).
+    qs = [u.Quantity(1.0, 1e-17, "triangular"), u.Quantity(0.0, 1.0)]
+    mc = u.monte_carlo(lambda a, b: a + b, qs, trials=5_000, seed=5)
+    assert mc.value == pytest.approx(1.0, abs=0.05)
+    assert mc.standard_uncertainty == pytest.approx(1.0, rel=0.05)
+
+
 def test_invalid_inputs_raise() -> None:
     with pytest.raises(ValueError, match="non-negative"):
         u.Quantity(0.0, -1.0)
@@ -163,6 +172,11 @@ def test_invalid_inputs_raise() -> None:
         u.combine_uncertainty(
             lambda a, b: a + b, [u.Quantity(0, 1)] * 2,
             correlation=np.array([[1.0, 0.0], [0.0, 0.9]]))
+    with pytest.raises(ValueError, match="positive semi-definite"):
+        # Symmetric, unit diagonal, but indefinite (|r| > 1).
+        u.combine_uncertainty(
+            lambda a, b: a + b, [u.Quantity(0, 1)] * 2,
+            correlation=np.array([[1.0, 1.5], [1.5, 1.0]]))
     with pytest.raises(ValueError, match="trials"):
         u.monte_carlo(_add4, [u.Quantity(0, 1)], trials=0)
     with pytest.raises(ValueError, match="coverage"):

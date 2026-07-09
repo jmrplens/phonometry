@@ -199,6 +199,10 @@ def combine_uncertainty(
             raise ValueError("correlation matrix must be symmetric.")
         if not np.allclose(np.diag(r), 1.0):
             raise ValueError("correlation matrix diagonal must be 1.0.")
+        # A symmetric, unit-diagonal matrix can still be indefinite, which would
+        # make the variance negative and be silently masked below; reject it.
+        if float(np.min(np.linalg.eigvalsh(r))) < -1e-8:
+            raise ValueError("correlation matrix must be positive semi-definite.")
 
     coeffs = _sensitivity(model, values, uncert)
     contributions = np.abs(coeffs) * uncert  # ui(y) = |ci| u(xi)
@@ -261,12 +265,15 @@ def expanded_uncertainty(
 
 
 def _sample(q: Quantity, size: int, rng: np.random.Generator) -> np.ndarray:
-    """Draw ``size`` samples of a quantity from its PDF (Supplement 1, 6.4)."""
+    """Draw ``size`` samples of a quantity from its PDF (Supplement 1, 6.4).
+
+    A constant (or numerically negligible) uncertainty collapses every PDF to a
+    spike at ``mu``; ``rng.uniform`` and ``rng.normal`` already return ``mu`` in
+    that case, but ``rng.triangular`` rejects a zero-width support, so it is
+    guarded explicitly (including the case where ``mu - a`` and ``mu + a`` round
+    to the same float for a tiny but non-zero ``u``).
+    """
     mu, u = q.value, q.uncertainty
-    if u == 0.0:
-        # A constant (zero-uncertainty) input: its PDF is a spike at ``mu``.
-        # Guarded here because ``rng.triangular`` rejects a zero-width support.
-        return np.full(size, mu)
     if q.distribution == "gaussian":
         return rng.normal(mu, u, size)
     if q.distribution == "rectangular":
@@ -274,7 +281,10 @@ def _sample(q: Quantity, size: int, rng: np.random.Generator) -> np.ndarray:
         return rng.uniform(mu - a, mu + a, size)
     if q.distribution == "triangular":
         a = u * math.sqrt(6.0)
-        return rng.triangular(mu - a, mu, mu + a, size)
+        left, right = mu - a, mu + a
+        if not left < right:  # zero-width support (u == 0 or underflow)
+            return np.full(size, mu)
+        return rng.triangular(left, mu, right, size)
     # U-shaped (arcsine): a * cos(theta), theta uniform on [0, pi).
     a = u * math.sqrt(2.0)
     return mu + a * np.cos(rng.uniform(0.0, math.pi, size))

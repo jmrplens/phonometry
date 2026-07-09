@@ -38,6 +38,14 @@ from .loudness_moore_glasberg_time import (
 )
 from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
 from .sharpness import sharpness_din, sharpness_din_from_specific
+from .room_noise import (
+    NCResult,
+    RCResult,
+    nc_curve,
+    noise_criterion,
+    rc_curve,
+    room_criterion,
+)
 from .sii import (
     SIIResult,
     speech_intelligibility_index,
@@ -388,6 +396,12 @@ __all__ = [
     "speech_intelligibility_index",
     "standard_speech_spectrum",
     "SIIResult",
+    "noise_criterion",
+    "room_criterion",
+    "nc_curve",
+    "rc_curve",
+    "NCResult",
+    "RCResult",
     "sweep_signal",
     "inverse_filter",
     "impulse_response",

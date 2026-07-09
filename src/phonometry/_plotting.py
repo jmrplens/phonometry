@@ -23,7 +23,7 @@ figures) so the plot can be composed into a larger layout.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Final, cast
 
 import numpy as np
 
@@ -49,6 +49,9 @@ _INSTALL_HINT = (
 
 #: Nominal octave-band centres used by the STI computation (125 Hz - 8 kHz).
 _STI_BAND_CENTERS = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
+
+#: Default legend placement shared by the band-spectrum figures.
+_LEGEND_UPPER_RIGHT: Final = "upper right"
 
 
 def _import_pyplot() -> Any:
@@ -436,7 +439,7 @@ def plot_sii(result: "SIIResult", ax: Axes | None = None, **kwargs: Any) -> Axes
     ax.set_ylabel("Band audibility")
     ax.set_ylim(0.0, 1.0)
     ax.set_title(f"SII = {result.sii:.3f}")
-    ax.legend(loc="upper right", fontsize="small")
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
     return ax
 
@@ -1048,7 +1051,7 @@ def plot_impulse_response(
         axd.set_xlim(left=float(time[0]) if n else 0.0,
                      right=float(time[-1]) if n else None)
         axd.grid(True, alpha=0.3)
-        axd.legend(loc="upper right", fontsize="small")
+        axd.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     if ax is not None:
         _decay(ax)
@@ -1384,10 +1387,10 @@ def plot_noise_criterion(
     _freq_axis(ax, OCTAVE_BANDS)
     ax.set_ylabel("Octave-band SPL [dB]")
     ax.set_title(
-        f"NC-{result.rating:.0f} "
+        f"NC-{result.rating:g} "
         f"({_format_freq(result.governing_frequency)})"
     )
-    ax.legend(loc="upper right", fontsize="small")
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     return ax
 
@@ -1425,6 +1428,6 @@ def plot_room_criterion(
     _freq_axis(ax, freqs)
     ax.set_ylabel("Octave-band SPL [dB]")
     ax.set_title(result.label)
-    ax.legend(loc="upper right", fontsize="small")
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     return ax

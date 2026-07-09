@@ -75,7 +75,7 @@ The strong low-frequency content of this spectrum lifts the 63–250 Hz bands
 well above the reference curve, so the noise is tagged `R` (rumble) — the
 subjective "throb" of an oversized air handler.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria.png" alt="Two panels for the same ventilation-dominated room spectrum. Left: the measured octave-band levels over the NC curve family, with a red diamond marking the tangent point at 250 Hz that sets the NC-42 rating. Right: the same spectrum over the reference RC-35 curve, with the low-frequency bands rising through the shaded rumble tolerance (+5 dB below 500 Hz) so the noise is classified RC-35(R), and the hiss tolerance (+3 dB at and above 1000 Hz) shaded for comparison" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria.png" alt="Two panels for the same ventilation-dominated room spectrum. Left: the measured octave-band levels over the NC curve family, with a red diamond marking the tangent point at 250 Hz that sets the NC-42.5 rating. Right: the same spectrum over the reference RC-35 curve, with the low-frequency bands rising through the shaded rumble tolerance (+5 dB below 500 Hz) so the noise is classified RC-35(R), and the hiss tolerance (+3 dB at and above 1000 Hz) shaded for comparison" width="96%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -102,7 +102,7 @@ for row, idx in zip(NC_CURVES, NC_INDICES):
 ax1.plot(OCTAVE_BANDS, spl, "o-", label="Measured")
 gov = spl[OCTAVE_BANDS == nc.governing_frequency][0]
 ax1.plot([nc.governing_frequency], [gov], "D", color="#d62728")
-ax1.set_xscale("log"); ax1.set_title(f"NC-{nc.rating:.0f}")
+ax1.set_xscale("log"); ax1.set_title(f"NC-{nc.rating:g}")
 
 ref = rc.reference_curve
 low, high = OCTAVE_BANDS <= 500, OCTAVE_BANDS >= 1000

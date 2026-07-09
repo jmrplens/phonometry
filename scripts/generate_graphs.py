@@ -3439,7 +3439,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     ax_nc.set_xticklabels([f"{f:g}" for f in OCTAVE_BANDS], rotation=45, ha="right")
     ax_nc.set_xlabel("Octave-band center frequency [Hz]")
     ax_nc.set_ylabel("Octave-band sound pressure level [dB]")
-    ax_nc.set_title(f"Noise Criteria — tangency method   NC-{nc.rating:.0f}",
+    ax_nc.set_title(f"Noise Criteria — tangency method   NC-{nc.rating:g}",
                     fontweight="bold", pad=10)
     ax_nc.grid(which="both", axis="y", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_nc.set_axisbelow(True)

@@ -281,7 +281,8 @@ def room_criterion(
     high_dev = deviation[high][~np.isnan(deviation[high])]
     rumble = low_dev.size > 0 and np.max(low_dev) > 5.0
     hiss = high_dev.size > 0 and np.max(high_dev) > 3.0
-    classification = f"{'R' if rumble else ''}{'H' if hiss else ''}" or "N"
+    tag = ("R" if rumble else "") + ("H" if hiss else "")
+    classification = tag if tag else "N"
 
     return RCResult(
         rating=rating,

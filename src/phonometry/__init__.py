@@ -49,6 +49,13 @@ from .iso1999 import (
     htlan,
     nipts,
 )
+from .ntacou112 import (
+    ImpulseProminence,
+    impulse_adjustment,
+    impulse_prominence,
+    predicted_prominence,
+    rating_level,
+)
 from .uncertainty import (
     MonteCarloResult,
     Quantity,
@@ -430,6 +437,11 @@ __all__ = [
     "htlan",
     "NiptsResult",
     "HtlanResult",
+    "predicted_prominence",
+    "impulse_adjustment",
+    "impulse_prominence",
+    "rating_level",
+    "ImpulseProminence",
     "combine_uncertainty",
     "monte_carlo",
     "rectangular",

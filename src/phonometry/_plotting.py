@@ -37,6 +37,7 @@ if TYPE_CHECKING:
     from .loudness_moore_glasberg_time import MooreGlasbergTimeVaryingLoudness
     from .room_acoustics import DecayCurve, RoomAcousticsResult
     from .room_ir import ImpulseResponseResult
+    from .hearing import AgeThresholdResult
     from .room_noise import NCResult, RCResult
     from .tonality_ecma import EcmaTonality
     from .roughness_ecma import EcmaRoughness
@@ -80,9 +81,14 @@ def _new_axes_column(n: int, **kwargs: Any) -> np.ndarray:
 
 def _freq_axis(ax: Axes, freqs: np.ndarray) -> None:
     """Configure a logarithmic frequency x-axis labelled with band centres."""
+    import matplotlib.ticker as mticker
+
     ax.set_xscale("log")
     ax.set_xticks(list(freqs))
     ax.set_xticklabels([_format_freq(f) for f in freqs], rotation=45, ha="right")
+    # Suppress the log-scale minor-tick labels (2x10^2, 3x10^2, ...) that would
+    # otherwise collide with off-decade band centres such as 750 or 1500 Hz.
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
     ax.set_xlabel("Frequency [Hz]")
 
 
@@ -1428,6 +1434,44 @@ def plot_room_criterion(
     _freq_axis(ax, freqs)
     ax.set_ylabel("Octave-band SPL [dB]")
     ax.set_title(result.label)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# Age-related hearing threshold (ISO 7029)
+# ---------------------------------------------------------------------------
+
+
+def plot_age_threshold(
+    result: "AgeThresholdResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Median age-related hearing threshold with the 10-90 % fractile band.
+
+    :param result: An :class:`~phonometry.hearing.AgeThresholdResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the median line ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    median = np.asarray(result.median, dtype=np.float64)
+    su = np.asarray(result.spread_upper, dtype=np.float64)
+    sl = np.asarray(result.spread_lower, dtype=np.float64)
+    z90 = 1.2816  # standard-normal quantile of 0.9
+
+    ax.fill_between(freqs, median - z90 * sl, median + z90 * su,
+                    color="#aec7e8", alpha=0.5, label="10-90 % fractile band")
+    kwargs.setdefault("color", "#1f77b4")
+    ax.plot(freqs, median, "o-", label="Median", **kwargs)
+    if abs(result.fractile - 0.5) > 1e-9:
+        ax.plot(freqs, np.asarray(result.threshold, dtype=np.float64), "s--",
+                color="#d62728", label=f"Fractile {result.fractile:g}")
+    _freq_axis(ax, freqs)
+    ax.set_ylabel("Threshold deviation from age 18 [dB]")
+    ax.invert_yaxis()  # audiogram convention: worse hearing downward
+    ax.set_title(f"ISO 7029 hearing threshold — {result.sex}, age {result.age:g}")
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     return ax

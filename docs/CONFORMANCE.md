@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **73/73 conformance checks pass** across 15 domains and 47 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **76/76 conformance checks pass** across 16 domains and 49 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -230,6 +230,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ANSI S12.2-2019 Table 1 | NC-40 curve, tangency self-consistency | 40 (+/-0) | 40 | 0 | &#9989; |
 | ANSI S12.2-2019 Table D.1 | RC-31 Mark II curve, 63 Hz level | 51 (+/-0) | 51 | 0 | &#9989; |
 | ANSI S12.2-2019 clause D.4 | RC-35 curve, mid-frequency average LMF | 35 (+/-0) | 35 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Hearing threshold (ISO 7029 / ISO 389-7)</b> — 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ISO 7029:2017 Table 1 | Median threshold, male age 60 at 4 kHz | 20.209 dB (+/-0.001 dB) | 20.208 dB | 0 dB | &#9989; |
+| ISO 7029:2017 Table 2 | Upper spread su, male age 60 at 1 kHz | 10.153 dB (+/-0.001 dB) | 10.153 dB | 0 dB | &#9989; |
+| ISO 389-7:2006 Table 1 | Free-field reference threshold at 1 kHz | 2.4 dB (+/-0 dB) | 2.4 dB | 0 dB | &#9989; |
 
 </details>
 

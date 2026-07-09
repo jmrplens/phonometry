@@ -291,7 +291,7 @@ export default defineConfig({
         {
           label: 'Perception & speech',
           translations: { es: 'Percepción e inteligibilidad' },
-          items: ['guides/psychoacoustics', 'guides/speech-intelligibility'],
+          items: ['guides/psychoacoustics', 'guides/speech-intelligibility', 'guides/hearing-threshold'],
         },
         {
           label: 'Sound power & intensity',

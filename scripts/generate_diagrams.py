@@ -69,6 +69,33 @@ _ES: dict[str, str] = {
         "H  siseo: una banda ≥ 1000 Hz supera RC en > 3 dB",
     "N  neutral: within both tolerances":
         "N  neutro: dentro de ambas tolerancias",
+    # Hearing threshold (ISO 7029 / ISO 389-7)
+    "Hearing-threshold model (ISO 7029 age distribution, ISO 389-7 zero)":
+        "Modelo del umbral de audición (ISO 7029 por edad, cero ISO 389-7)",
+    "Age Y,  sex,  population fractile Q":
+        "Edad Y,  sexo,  fractil poblacional Q",
+    "audiometric frequencies 125 Hz – 8000 Hz":
+        "frecuencias audiométricas 125 Hz – 8000 Hz",
+    "Median deviation from age 18   (ISO 7029, 4.2)":
+        "Desviación mediana respecto a los 18 años   (ISO 7029, 4.2)",
+    "dHmd = a · (Y − 18) ^ b   (Table 1, by sex)":
+        "dHmd = a · (Y − 18) ^ b   (Tabla 1, por sexo)",
+    "Spread su / sl   (ISO 7029, 4.3)":
+        "Dispersión su / sl   (ISO 7029, 4.3)",
+    "degree-5 polynomials in (Y − 18)   (Tables 2–5)":
+        "polinomios de grado 5 en (Y − 18)   (Tablas 2–5)",
+    "Fractile threshold   (ISO 7029, 4.4)":
+        "Umbral del fractil   (ISO 7029, 4.4)",
+    "dHQ = dHmd + z(Q) * s   (su if Q >= 0.5, else sl)":
+        "dHQ = dHmd + z(Q) * s   (su si Q >= 0.5, si no sl)",
+    "Expected hearing threshold level (dB HL)":
+        "Nivel del umbral de audición esperado (dB HL)",
+    "referenced to the audiometric zero":
+        "referido al cero audiométrico",
+    "Audiometric zero = ISO 389-7 reference threshold":
+        "Cero audiométrico = umbral de referencia ISO 389-7",
+    "free-field / diffuse-field (Table 1) — the dB HL / dB SPL zero":
+        "campo libre / campo difuso (Tabla 1) — el cero dB HL / dB SPL",
     "Speech  Ei'": "Habla  Ei'",
     "Noise  Ni'": "Ruido  Ni'",
     "Threshold  Ti'": "Umbral  Ti'",
@@ -2200,6 +2227,50 @@ def _d_room_noise(s: SVG, th: Theme) -> None:
     s.text(rxc, 525, "RC-NN(A)", 23, th.fg, "middle", bold=True)
 
 
+def _d_hearing_threshold(s: SVG, th: Theme) -> None:
+    """Hearing-threshold model: ISO 7029 age distribution + ISO 389-7 zero."""
+    cx = 450.0
+    # --- Inputs --------------------------------------------------------------
+    iw, ih = 540.0, 62.0
+    s.rect(cx - iw / 2, 56, iw, ih, th.panel, th.fg, rx=10, sw=2)
+    s.text(cx, 84, "Age Y,  sex,  population fractile Q", 20, th.fg,
+           "middle", bold=True)
+    s.text(cx, 106, "audiometric frequencies 125 Hz – 8000 Hz", 15, th.muted,
+           "middle")
+    s.arrow(cx, 118, cx, 152, th.fg, 1.8)
+
+    bw, bh = 620.0, 60.0
+    x0 = cx - bw / 2
+
+    def _step(y: float, l1: str, l2: str, color: str) -> None:
+        s.rect(x0, y, bw, bh, th.panel, color, rx=10, sw=2)
+        s.text(cx, y + 26, l1, 18, th.fg, "middle", bold=True)
+        s.text(cx, y + 47, l2, 14, th.muted, "middle")
+
+    # --- ISO 7029 chain ------------------------------------------------------
+    _step(152, "Median deviation from age 18   (ISO 7029, 4.2)",
+          "dHmd = a · (Y − 18) ^ b   (Table 1, by sex)", th.primary)
+    _step(244, "Spread su / sl   (ISO 7029, 4.3)",
+          "degree-5 polynomials in (Y − 18)   (Tables 2–5)", th.fg)
+    _step(336, "Fractile threshold   (ISO 7029, 4.4)",
+          "dHQ = dHmd + z(Q) * s   (su if Q >= 0.5, else sl)", th.fg)
+    s.arrow(cx, 212, cx, 244, th.fg, 1.8)
+    s.arrow(cx, 304, cx, 336, th.fg, 1.8)
+    s.arrow(cx, 396, cx, 430, th.fg, 1.8)
+
+    # --- Output + ISO 389-7 reference ---------------------------------------
+    s.rect(x0, 430, bw, 58, "none", th.primary, rx=10, sw=2.4)
+    s.text(cx, 456, "Expected hearing threshold level (dB HL)", 19, th.fg,
+           "middle", bold=True)
+    s.text(cx, 476, "referenced to the audiometric zero", 14, th.primary,
+           "middle")
+    s.rect(x0, 506, bw, 52, th.panel, th.secondary, rx=10, sw=2)
+    s.text(cx, 530, "Audiometric zero = ISO 389-7 reference threshold",
+           17, th.fg, "middle", bold=True)
+    s.text(cx, 549, "free-field / diffuse-field (Table 1) — the dB HL / dB SPL zero",
+           14, th.muted, "middle")
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -2258,6 +2329,9 @@ DIAGRAMS = {
     "diagram_room_noise": (
         _d_room_noise,
         "Room-noise rating methods (ANSI/ASA S12.2-2019): NC and RC Mark II", 580),
+    "diagram_hearing_threshold": (
+        _d_hearing_threshold,
+        "Hearing-threshold model (ISO 7029 age distribution, ISO 389-7 zero)", 600),
 }
 
 

@@ -4,6 +4,7 @@ from functools import lru_cache
 from typing import Any
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import numpy as np
 from scipy import signal as scipy_signal
 
@@ -205,6 +206,16 @@ _ES_EXACT = {
         "Nivel de presi\u00f3n sonora por banda de octava [dB]",
     "Rumble tol. (+5 dB)": "Tol. retumbo (+5 dB)",
     "Hiss tol. (+3 dB)": "Tol. siseo (+3 dB)",
+    "ISO 7029 — age-related threshold (male)":
+        "ISO 7029 — umbral por edad (hombres)",
+    "ISO 389-7 — reference threshold of hearing":
+        "ISO 389-7 — umbral de referencia de la audición",
+    "Audiometric frequency [Hz]": "Frecuencia audiométrica [Hz]",
+    "Median threshold deviation from age 18 [dB]":
+        "Desviación mediana del umbral respecto a los 18 años [dB]",
+    "Reference threshold [dB]": "Umbral de referencia [dB]",
+    "Free-field (frontal)": "Campo libre (frontal)",
+    "Diffuse-field": "Campo difuso",
     "Sound Intensity with a p-p Probe (IEC 61043)":
         "Intensidad sonora con sonda p-p (IEC 61043)",
     "Plane wave: Lp \u2248 LI": "Onda plana: Lp \u2248 LI",
@@ -431,6 +442,8 @@ _ES_PATTERNS = [
      r"Criterios de sala Mark II   RC-\1"),
     (r"^Tangent @ (.+) Hz$", r"Tangente @ \1 Hz"),
     (r"^Reference RC-(.+)$", r"Referencia RC-\1"),
+    (r"^(\d+) yr$", r"\1 años"),
+    (r"^10-90 % band \((\d+) yr\)$", r"banda 10-90 % (\1 años)"),
 ]
 
 
@@ -3473,6 +3486,62 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     plt.close()
 
 
+def generate_hearing_threshold(output_dir: str) -> None:
+    """ISO 7029 age-related threshold and ISO 389-7 reference threshold."""
+    print("Generating hearing_threshold.png...")
+    from phonometry import age_threshold, reference_threshold
+    from phonometry.hearing import AUDIOMETRIC_FREQUENCIES
+
+    freqs = AUDIOMETRIC_FREQUENCIES
+    fig, (ax_age, ax_ref) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+
+    # --- Left: ISO 7029 median threshold by age (male) + 10-90 % band @70. ---
+    ages = [(20, COLOR_GRID), (40, "#7f7f7f"), (60, COLOR_PRIMARY),
+            (80, COLOR_SECONDARY)]
+    for age, color in ages:
+        r = age_threshold(age, "male", 0.5)
+        ax_age.plot(freqs, r.median, "o-", color=color, label=f"{age} yr")
+    r70 = age_threshold(70, "male", 0.5)
+    z90 = 1.2816
+    ax_age.fill_between(freqs, r70.median - z90 * r70.spread_lower,
+                        r70.median + z90 * r70.spread_upper,
+                        color=COLOR_PRIMARY, alpha=0.12,
+                        label="10-90 % band (70 yr)")
+    ax_age.set_xscale("log")
+    ax_age.set_xticks(list(freqs))
+    ax_age.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax_age.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax_age.invert_yaxis()
+    ax_age.set_xlabel("Audiometric frequency [Hz]")
+    ax_age.set_ylabel("Median threshold deviation from age 18 [dB]")
+    ax_age.set_title("ISO 7029 — age-related threshold (male)",
+                     fontweight="bold", pad=10)
+    ax_age.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_age.set_axisbelow(True)
+    ax_age.legend(loc="lower left")
+
+    # --- Right: ISO 389-7 reference threshold, free vs diffuse field. ---
+    ax_ref.plot(freqs, reference_threshold("free-field"), "o-",
+                color=COLOR_PRIMARY, label="Free-field (frontal)")
+    ax_ref.plot(freqs, reference_threshold("diffuse-field"), "s--",
+                color=COLOR_SECONDARY, label="Diffuse-field")
+    ax_ref.set_xscale("log")
+    ax_ref.set_xticks(list(freqs))
+    ax_ref.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax_ref.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax_ref.set_xlabel("Audiometric frequency [Hz]")
+    ax_ref.set_ylabel("Reference threshold [dB]")
+    ax_ref.set_title("ISO 389-7 — reference threshold of hearing",
+                     fontweight="bold", pad=10)
+    ax_ref.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_ref.set_axisbelow(True)
+    ax_ref.legend(loc="upper left")
+
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "hearing_threshold.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -3550,6 +3619,9 @@ def generate_all(img_dir: str) -> None:
 
     # Room-noise criteria (ANSI S12.2-2019): NC tangency and RC Mark II.
     generate_room_noise_criteria(img_dir)
+
+    # Hearing threshold (ISO 7029 age-related, ISO 389-7 reference).
+    generate_hearing_threshold(img_dir)
 
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)

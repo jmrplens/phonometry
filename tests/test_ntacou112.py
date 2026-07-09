@@ -14,6 +14,8 @@ import math
 import numpy as np
 import pytest
 
+from reference_data import NTACOU_ADJUSTMENT_P10, NTACOU_PROMINENCE
+
 from phonometry import ntacou112 as nt
 
 
@@ -21,7 +23,7 @@ def test_predicted_prominence_formula_1() -> None:
     # P = 3*lg(1000) + 2*lg(30) = 9 + 2*1.477121 = 11.9542.
     p = float(nt.predicted_prominence(1000.0, 30.0))
     assert p == pytest.approx(9.0 + 2.0 * math.log10(30.0), abs=1e-9)
-    assert p == pytest.approx(11.9542, abs=1e-4)
+    assert p == pytest.approx(NTACOU_PROMINENCE, abs=1e-4)
 
 
 def test_predicted_prominence_vectorised() -> None:
@@ -31,7 +33,8 @@ def test_predicted_prominence_vectorised() -> None:
 
 
 def test_adjustment_formula_2_and_threshold() -> None:
-    assert float(nt.impulse_adjustment(10.0)) == pytest.approx(9.0)   # 1.8*5
+    # KI at P = 10 is 1.8*(10-5) = 9.0.
+    assert float(nt.impulse_adjustment(10.0)) == pytest.approx(NTACOU_ADJUSTMENT_P10)
     assert float(nt.impulse_adjustment(5.0)) == 0.0                   # threshold
     assert float(nt.impulse_adjustment(3.0)) == 0.0                   # below
     # Just above the threshold the adjustment is small and positive.
@@ -43,7 +46,7 @@ def test_governing_impulse_is_the_highest_p() -> None:
     result = nt.impulse_prominence([50.0, 1000.0, 200.0], [12.0, 30.0, 20.0])
     assert result.per_impulse.shape == (3,)
     assert result.prominence == pytest.approx(float(result.per_impulse.max()))
-    assert result.prominence == pytest.approx(11.9542, abs=1e-4)
+    assert result.prominence == pytest.approx(NTACOU_PROMINENCE, abs=1e-4)
     assert result.adjustment == pytest.approx(1.8 * (result.prominence - 5.0))
 
 

@@ -3548,7 +3548,7 @@ def generate_ntacou112(output_dir: str) -> None:
     grid = np.linspace(0.0, 16.0, 200)
     ax_k.plot(grid, impulse_adjustment(grid), color=COLOR_PRIMARY,
               label=r"$K_I = 1.8\,(P-5)$")
-    ax_k.axvline(ADJUSTMENT_THRESHOLD, color=COLOR_GRID, linestyle=":",
+    ax_k.axvline(ADJUSTMENT_THRESHOLD, color="#7f7f7f", linestyle=":",
                  label=f"threshold $P = {ADJUSTMENT_THRESHOLD:g}$")
     ax_k.scatter(result.per_impulse, impulse_adjustment(result.per_impulse),
                  color="#7f7f7f", zorder=3, label="Impulses")

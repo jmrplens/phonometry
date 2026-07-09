@@ -132,8 +132,8 @@ def impulse_prominence(
     :raises ValueError: for empty input, mismatched lengths, or a non-positive
         onset rate or level difference.
     """
-    orate = np.atleast_1d(np.asarray(onset_rates, dtype=np.float64))
-    ld = np.atleast_1d(np.asarray(level_differences, dtype=np.float64))
+    orate = np.asarray(onset_rates, dtype=np.float64).ravel()
+    ld = np.asarray(level_differences, dtype=np.float64).ravel()
     if orate.size == 0:
         raise ValueError("at least one impulse is required.")
     if orate.shape != ld.shape:

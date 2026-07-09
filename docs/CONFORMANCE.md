@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **83/83 conformance checks pass** across 18 domains and 53 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **85/85 conformance checks pass** across 19 domains and 54 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -220,6 +220,16 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ANSI S3.5-1997 clause 5.4 | Equivalent masking spectrum level at 200 Hz | -1.665 (+/-0.001) | -1.665 | 0 | &#9989; |
 | ANSI S3.5-1997 clause 6 | SII, standard speech in quiet, normal hearing | 0.9958 (+/-0.0005) | 0.9958 | 0 | &#9989; |
 | ANSI S3.5-1997 Table 3 | Loud-effort speech spectrum level at 1 kHz | 42.16 dB (+/-0 dB) | 42.16 dB | 0 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Impulsive-sound prominence (NT ACOU 112)</b> — 100% (2/2)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| NT ACOU 112:2002 Formula 1 | Predicted prominence, OR=1000 dB/s, LD=30 dB | 11.9542 (+/-0.0001) | 11.9542 | 0 | &#9989; |
+| NT ACOU 112:2002 Formula 2 | Adjustment KI to LAeq at prominence P=10 | 9 dB (+/-0 dB) | 9 dB | 0 dB | &#9989; |
 
 </details>
 

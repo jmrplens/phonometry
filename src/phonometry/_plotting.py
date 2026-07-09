@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     from .room_ir import ImpulseResponseResult
     from .hearing import AgeThresholdResult
     from .iso1999 import HtlanResult, NiptsResult
+    from .ntacou112 import ImpulseProminence
     from .room_noise import NCResult, RCResult
     from .tonality_ecma import EcmaTonality
     from .roughness_ecma import EcmaRoughness
@@ -1548,6 +1549,48 @@ def plot_htlan(
     )
     ax.legend(loc="lower left", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# Impulsive-sound prominence (NT ACOU 112)
+# ---------------------------------------------------------------------------
+
+
+def plot_impulse_prominence(
+    result: "ImpulseProminence", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Adjustment curve ``KI(P)`` with the candidate impulses marked.
+
+    :param result: An :class:`~phonometry.ntacou112.ImpulseProminence`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the impulses ``scatter``.
+    :return: The axes.
+    """
+    from .ntacou112 import ADJUSTMENT_THRESHOLD, impulse_adjustment
+
+    ax = ax if ax is not None else _new_axes()
+    per = np.asarray(result.per_impulse, dtype=np.float64)
+    p_max = max(float(per.max()), result.prominence, 15.0) + 1.0
+    grid = np.linspace(0.0, p_max, 200)
+    ax.plot(grid, impulse_adjustment(grid), color="#1f77b4",
+            label=r"$K_I = 1.8\,(P-5)$")
+    ax.axvline(ADJUSTMENT_THRESHOLD, color="#7f7f7f", ls=":",
+               label=f"threshold $P = {ADJUSTMENT_THRESHOLD:g}$")
+
+    kwargs.setdefault("color", "#aec7e8")
+    kwargs.setdefault("zorder", 3)
+    ax.scatter(per, impulse_adjustment(per), label="Impulses", **kwargs)
+    ax.scatter([result.prominence], [result.adjustment], color="#d62728",
+               zorder=4, s=90, marker="*",
+               label=f"Governing  P = {result.prominence:.2f},  "
+                     f"$K_I$ = {result.adjustment:.1f} dB")
+    ax.set_xlabel("Predicted prominence $P$")
+    ax.set_ylabel("Adjustment $K_I$ [dB]")
+    ax.set_title("NT ACOU 112 — impulse adjustment to $L_{Aeq}$")
+    ax.set_ylim(bottom=0.0)
+    ax.legend(loc="upper left", fontsize="small")
+    ax.grid(True, alpha=0.3)
     return ax
 
 

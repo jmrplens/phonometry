@@ -1368,6 +1368,21 @@ def _chk_sii_loud_spectrum() -> Outcome:
     return numeric(ref.SII_LOUD_1KHZ, value, 1e-9, unit="dB", places=2)
 
 
+_NTA = "Impulsive-sound prominence (NT ACOU 112)"
+
+
+@register(_NTA, "NT ACOU 112:2002 Formula 1", "Predicted prominence, OR=1000 dB/s, LD=30 dB")
+def _chk_ntacou_prominence() -> Outcome:
+    value = float(ph.predicted_prominence(1000.0, 30.0))
+    return numeric(ref.NTACOU_PROMINENCE, value, 1e-4, places=4)
+
+
+@register(_NTA, "NT ACOU 112:2002 Formula 2", "Adjustment KI to LAeq at prominence P=10")
+def _chk_ntacou_adjustment() -> Outcome:
+    value = float(ph.impulse_adjustment(10.0))
+    return numeric(ref.NTACOU_ADJUSTMENT_P10, value, 1e-9, unit="dB", places=3)
+
+
 _RN = "Room noise (ANSI S12.2-2019)"
 
 

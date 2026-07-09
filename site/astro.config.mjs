@@ -319,7 +319,7 @@ export default defineConfig({
         {
           label: 'Environmental acoustics',
           translations: { es: 'Acústica ambiental' },
-          items: ['guides/outdoor-propagation'],
+          items: ['guides/outdoor-propagation', 'guides/impulse-prominence'],
         },
         {
           label: 'Human vibration',

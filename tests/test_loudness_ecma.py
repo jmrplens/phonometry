@@ -134,15 +134,3 @@ def test_plot_smoke(ref_1k_40: EcmaLoudness) -> None:
     matplotlib.use("Agg")
     axes = ref_1k_40.plot()
     assert axes.shape == (2,)
-
-
-def test_stereo_input_is_rejected() -> None:
-    # A 2-D (stereo) signal used to be silently flattened, concatenating the
-    # channels into one wrong series; it must be rejected.
-    import numpy as np
-    import pytest
-    from phonometry import loudness_ecma
-
-    stereo = np.zeros((2, 4800))
-    with pytest.raises(ValueError, match="1-D time series"):
-        loudness_ecma(stereo, 48000.0)

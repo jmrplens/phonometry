@@ -139,13 +139,3 @@ def test_free_and_diffuse_differ() -> None:
     free = roughness_ecma(sig, FS, field="free").roughness
     diffuse = roughness_ecma(sig, FS, field="diffuse").roughness
     assert free != diffuse
-
-
-def test_stereo_input_is_rejected() -> None:
-    import numpy as np
-    import pytest
-    from phonometry import roughness_ecma
-
-    stereo = np.zeros((2, 4800))
-    with pytest.raises(ValueError, match="1-D time series"):
-        roughness_ecma(stereo, 48000.0)

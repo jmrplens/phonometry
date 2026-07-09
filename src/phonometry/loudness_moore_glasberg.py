@@ -46,6 +46,7 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+from ._validation import require_1d_signal
 from .utils import _typesignal
 
 # ---------------------------------------------------------------------------
@@ -916,13 +917,7 @@ def loudness_moore_glasberg(
     :return: A :class:`MooreGlasbergLoudness`.
     """
     _validate_conditions(field, presentation)
-    pressure = np.asarray(_typesignal(x), dtype=np.float64)
-    if pressure.ndim != 1:
-        raise ValueError(
-            f"Input signal 'x' must be a 1-D time series; got shape "
-            f"{pressure.shape}. Process multichannel signals one channel at "
-            "a time."
-        )
+    pressure = require_1d_signal(_typesignal(x), name="'x'")
     if pressure.size == 0:
         raise ValueError("Input signal 'x' cannot be empty.")
     if not np.all(np.isfinite(pressure)):

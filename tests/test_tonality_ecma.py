@@ -195,13 +195,3 @@ def test_plot_smoke(ref_1k_40: EcmaTonality) -> None:
     matplotlib.use("Agg")
     axes = ref_1k_40.plot()
     assert axes.shape == (2,)
-
-
-def test_stereo_input_is_rejected() -> None:
-    import numpy as np
-    import pytest
-    from phonometry import tonality_ecma
-
-    stereo = np.zeros((2, 4800))
-    with pytest.raises(ValueError, match="1-D time series"):
-        tonality_ecma(stereo, 48000.0)

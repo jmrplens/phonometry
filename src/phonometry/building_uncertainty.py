@@ -571,17 +571,20 @@ COVERAGE_FACTORS: Mapping[Tuple[float, bool], float] = MappingProxyType(
 # Deprecated aliases (the bare names shadowed the GUM functions of
 # :mod:`phonometry.uncertainty` at the package root; remove in the next major).
 # --------------------------------------------------------------------------- #
-def coverage_factor(confidence: float = 0.95, one_sided: bool = False) -> float:
-    """Deprecated alias of :func:`insulation_coverage_factor`."""
+def _warn_renamed(old: str, new: str) -> None:
     import warnings
 
     warnings.warn(
-        "phonometry coverage_factor (ISO 12999-1 Table 8) is deprecated; use "
-        "insulation_coverage_factor. For the GUM coverage factor use "
-        "phonometry.uncertainty.coverage_factor.",
+        f"phonometry {old} (ISO 12999-1) is deprecated; use {new}. For the "
+        f"GUM function use phonometry.uncertainty.{old}.",
         DeprecationWarning,
-        stacklevel=2,
+        stacklevel=3,
     )
+
+
+def coverage_factor(confidence: float = 0.95, one_sided: bool = False) -> float:
+    """Deprecated alias of :func:`insulation_coverage_factor`."""
+    _warn_renamed("coverage_factor", "insulation_coverage_factor")
     return insulation_coverage_factor(confidence, one_sided)
 
 
@@ -591,13 +594,5 @@ def expanded_uncertainty(
     one_sided: bool = False,
 ) -> float:
     """Deprecated alias of :func:`insulation_expanded_uncertainty`."""
-    import warnings
-
-    warnings.warn(
-        "phonometry expanded_uncertainty (ISO 12999-1) is deprecated; use "
-        "insulation_expanded_uncertainty. For the GUM expanded uncertainty "
-        "use phonometry.uncertainty.expanded_uncertainty.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
+    _warn_renamed("expanded_uncertainty", "insulation_expanded_uncertainty")
     return insulation_expanded_uncertainty(u, coverage, one_sided)

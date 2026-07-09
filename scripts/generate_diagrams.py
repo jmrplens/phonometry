@@ -47,6 +47,28 @@ _ES: dict[str, str] = {
     # Speech Intelligibility Index (ANSI S3.5-1997)
     "Speech Intelligibility Index computation flow (ANSI S3.5-1997)":
         "Flujo de cálculo del índice de inteligibilidad del habla (ANSI S3.5-1997)",
+    # Room-noise rating methods (ANSI/ASA S12.2-2019)
+    "Room-noise rating methods (ANSI/ASA S12.2-2019): NC and RC Mark II":
+        "Calificación del ruido de salas (S12.2-2019): NC y RC Mark II",
+    "Octave-band sound pressure levels  L(f)":
+        "Niveles de presión sonora por banda de octava  L(f)",
+    "NC — tangency method": "NC — método de tangencia",
+    "Table 1 curves": "curvas de la Tabla 1",
+    "NC value in each band": "Valor NC en cada banda",
+    "curve level = L(f) at that f": "nivel de la curva = L(f) en esa f",
+    "NC = highest curve touched": "NC = curva más alta tocada",
+    "note the governing band": "anotar la banda determinante",
+    "NC-NN (band)": "NC-NN (banda)",
+    "RC Mark II  (Annex D)": "RC Mark II  (Anexo D)",
+    "−5 dB/octave curves": "curvas de −5 dB/octava",
+    "RC = round(LMF)   (clause D.4)": "RC = redondeo(LMF)   (cláusula D.4)",
+    "Spectral tag  (clause D.3)": "Etiqueta espectral  (cláusula D.3)",
+    "R  rumble: a band ≤ 500 Hz exceeds RC by > 5 dB":
+        "R  retumbo: una banda ≤ 500 Hz supera RC en > 5 dB",
+    "H  hiss: a band ≥ 1000 Hz exceeds RC by > 3 dB":
+        "H  siseo: una banda ≥ 1000 Hz supera RC en > 3 dB",
+    "N  neutral: within both tolerances":
+        "N  neutro: dentro de ambas tolerancias",
     "Speech  Ei'": "Habla  Ei'",
     "Noise  Ni'": "Ruido  Ni'",
     "Threshold  Ti'": "Umbral  Ti'",
@@ -2122,6 +2144,62 @@ def _d_room_measurement(s: SVG, th: Theme) -> None:
             s.text(cx, yy + 26, value, 17, col, anchor, bold=(cx == 70.0))
 
 
+def _d_room_noise(s: SVG, th: Theme) -> None:
+    """Room-noise rating methods (ANSI/ASA S12.2-2019): NC and RC Mark II.
+
+    From a single octave-band spectrum, two parallel lanes: the NC tangency
+    method (Table 1) and the RC Mark II rating and spectral tag (Annex D).
+    """
+    # --- Shared input spectrum ----------------------------------------------
+    cx = 450.0
+    iw, ih = 540.0, 62.0
+    s.rect(cx - iw / 2, 56, iw, ih, th.panel, th.fg, rx=10, sw=2)
+    s.text(cx, 84, "Octave-band sound pressure levels  L(f)", 20, th.fg,
+           "middle", bold=True)
+    s.text(cx, 106, "16 Hz – 8000 Hz", 15, th.muted, "middle")
+
+    lxc, rxc = 232.0, 668.0
+    s.arrow(cx, 118, lxc, 158, th.fg, 1.8)
+    s.arrow(cx, 118, rxc, 158, th.fg, 1.8)
+
+    bw, bh = 372.0, 62.0
+
+    def _step(cxx: float, y: float, l1: str, l2: str, color: str) -> None:
+        s.rect(cxx - bw / 2, y, bw, bh, th.panel, color, rx=10, sw=2)
+        s.text(cxx, y + 27, l1, 18, th.fg, "middle", bold=True)
+        if l2:
+            s.text(cxx, y + 48, l2, 14, th.muted, "middle")
+
+    # --- Left lane: NC tangency method (Table 1) ----------------------------
+    _step(lxc, 158, "NC — tangency method", "Table 1 curves", th.primary)
+    _step(lxc, 256, "NC value in each band", "curve level = L(f) at that f", th.fg)
+    _step(lxc, 354, "NC = highest curve touched", "note the governing band", th.fg)
+    s.arrow(lxc, 220, lxc, 256, th.fg, 1.8)
+    s.arrow(lxc, 318, lxc, 354, th.fg, 1.8)
+    s.arrow(lxc, 416, lxc, 470, th.fg, 1.8)
+    s.rect(lxc - bw / 2, 470, bw, 58, "none", th.primary, rx=10, sw=2.4)
+    s.text(lxc, 505, "NC-NN (band)", 23, th.fg, "middle", bold=True)
+
+    # --- Right lane: RC Mark II rating and tag (Annex D) ---------------------
+    _step(rxc, 158, "RC Mark II  (Annex D)", "−5 dB/octave curves", th.secondary)
+    _step(rxc, 256, "LMF = (L500 + L1000 + L2000) / 3", "RC = round(LMF)   (clause D.4)",
+          th.fg)
+    s.arrow(rxc, 220, rxc, 256, th.fg, 1.8)
+    s.arrow(rxc, 318, rxc, 354, th.fg, 1.8)
+    # Spectral-tag rule box (clause D.3).
+    s.rect(rxc - bw / 2, 354, bw, 116, th.panel, th.fg, rx=10, sw=2)
+    s.text(rxc, 379, "Spectral tag  (clause D.3)", 18, th.fg, "middle", bold=True)
+    for i, line in enumerate((
+        "R  rumble: a band ≤ 500 Hz exceeds RC by > 5 dB",
+        "H  hiss: a band ≥ 1000 Hz exceeds RC by > 3 dB",
+        "N  neutral: within both tolerances",
+    )):
+        s.text(rxc - bw / 2 + 18, 403 + i * 22, line, 14, th.fg, "start")
+    s.arrow(rxc, 470, rxc, 490, th.fg, 1.8)
+    s.rect(rxc - bw / 2, 490, bw, 58, "none", th.secondary, rx=10, sw=2.4)
+    s.text(rxc, 525, "RC-NN(A)", 23, th.fg, "middle", bold=True)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -2177,6 +2255,9 @@ DIAGRAMS = {
     "diagram_room_measurement": (
         _d_room_measurement,
         "Room-acoustics measurement setup (ISO 3382-1 / ISO 3382-2)", 620),
+    "diagram_room_noise": (
+        _d_room_noise,
+        "Room-noise rating methods (ANSI/ASA S12.2-2019): NC and RC Mark II", 580),
 }
 
 

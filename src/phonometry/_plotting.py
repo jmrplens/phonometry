@@ -37,6 +37,7 @@ if TYPE_CHECKING:
     from .loudness_moore_glasberg_time import MooreGlasbergTimeVaryingLoudness
     from .room_acoustics import DecayCurve, RoomAcousticsResult
     from .room_ir import ImpulseResponseResult
+    from .room_noise import NCResult, RCResult
     from .tonality_ecma import EcmaTonality
     from .roughness_ecma import EcmaRoughness
     from .sii import SIIResult
@@ -1341,4 +1342,89 @@ def plot_daily_exposure(
     )
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
+    return ax
+
+
+# ---------------------------------------------------------------------------
+# Room-noise criteria (ANSI/ASA S12.2-2019)
+# ---------------------------------------------------------------------------
+
+
+def plot_noise_criterion(
+    result: "NCResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Measured spectrum against the NC curve family (ANSI/ASA S12.2-2019).
+
+    :param result: A :class:`~phonometry.room_noise.NCResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the measured-spectrum :meth:`plot`.
+    :return: The axes.
+    """
+    from .room_noise import NC_CURVES, NC_INDICES, OCTAVE_BANDS
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    for row, idx in zip(NC_CURVES, NC_INDICES):
+        ax.plot(OCTAVE_BANDS, row, color="#bbbbbb", lw=0.8, zorder=1)
+        ax.annotate(
+            f"{idx:.0f}", (OCTAVE_BANDS[-1], row[-1]),
+            fontsize="x-small", color="#888888", va="center",
+        )
+    valid = ~np.isnan(levels)
+    kwargs.setdefault("color", "#1f77b4")
+    kwargs.setdefault("label", "Measured")
+    ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
+    ax.plot(
+        [result.governing_frequency],
+        [levels[freqs == result.governing_frequency][0]],
+        "D", color="#d62728", zorder=4,
+        label=f"Governing band ({_format_freq(result.governing_frequency)})",
+    )
+    _freq_axis(ax, OCTAVE_BANDS)
+    ax.set_ylabel("Octave-band SPL [dB]")
+    ax.set_title(
+        f"NC-{result.rating:.0f} "
+        f"({_format_freq(result.governing_frequency)})"
+    )
+    ax.legend(loc="upper right", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_room_criterion(
+    result: "RCResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Measured spectrum against the reference RC Mark II curve (Annex D).
+
+    Shades the rumble tolerance (reference + 5 dB below 500 Hz) and the hiss
+    tolerance (reference + 3 dB at and above 1000 Hz).
+
+    :param result: A :class:`~phonometry.room_noise.RCResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the measured-spectrum :meth:`plot`.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    reference = np.asarray(result.reference_curve, dtype=np.float64)
+    valid = ~np.isnan(levels)
+
+    ax.plot(freqs, reference, "s--", color="#7f7f7f",
+            label=f"Reference RC-{result.rating}")
+    low = freqs <= 500.0
+    high = freqs >= 1000.0
+    ax.fill_between(freqs[low], reference[low], reference[low] + 5.0,
+                    color="#ffbb78", alpha=0.35, label="Rumble tolerance (+5 dB)")
+    ax.fill_between(freqs[high], reference[high], reference[high] + 3.0,
+                    color="#aec7e8", alpha=0.45, label="Hiss tolerance (+3 dB)")
+    kwargs.setdefault("color", "#1f77b4")
+    kwargs.setdefault("label", "Measured")
+    ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
+    _freq_axis(ax, freqs)
+    ax.set_ylabel("Octave-band SPL [dB]")
+    ax.set_title(result.label)
+    ax.legend(loc="upper right", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
     return ax

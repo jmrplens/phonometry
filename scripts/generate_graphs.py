@@ -198,6 +198,13 @@ _ES_EXACT = {
     "Measured (sti_from_impulse_response)":
         "Medido (sti_from_impulse_response)",
     "Annex F rating": "Calificaci\u00f3n del Anexo F",
+    "Measured": "Medido",
+    "Octave-band center frequency [Hz]":
+        "Frecuencia central de banda de octava [Hz]",
+    "Octave-band sound pressure level [dB]":
+        "Nivel de presi\u00f3n sonora por banda de octava [dB]",
+    "Rumble tol. (+5 dB)": "Tol. retumbo (+5 dB)",
+    "Hiss tol. (+3 dB)": "Tol. siseo (+3 dB)",
     "Sound Intensity with a p-p Probe (IEC 61043)":
         "Intensidad sonora con sonda p-p (IEC 61043)",
     "Plane wave: Lp \u2248 LI": "Onda plana: Lp \u2248 LI",
@@ -417,6 +424,13 @@ _ES_PATTERNS = [
     # Speech intelligibility dynamic title (numeric SII)
     (r"^Speech Intelligibility Index \(ANSI S3\.5-1997\)   SII = (.+)$",
      r"Índice de inteligibilidad del habla (ANSI S3.5-1997)   SII = \1"),
+    # Room-noise criteria (ANSI S12.2-2019) dynamic titles/legends
+    (r"^Noise Criteria — tangency method   NC-(.+)$",
+     r"Criterios de ruido — método de tangencia   NC-\1"),
+    (r"^Room Criteria Mark II   RC-(.+)$",
+     r"Criterios de sala Mark II   RC-\1"),
+    (r"^Tangent @ (.+) Hz$", r"Tangente @ \1 Hz"),
+    (r"^Reference RC-(.+)$", r"Referencia RC-\1"),
 ]
 
 
@@ -3395,6 +3409,70 @@ def generate_speech_intelligibility(output_dir: str) -> None:
     plt.close()
 
 
+def generate_room_noise_criteria(output_dir: str) -> None:
+    """ANSI S12.2-2019: NC tangency rating and RC Mark II classification."""
+    print("Generating room_noise_criteria.png...")
+    from phonometry import noise_criterion, room_criterion
+    from phonometry.room_noise import NC_CURVES, NC_INDICES, OCTAVE_BANDS
+
+    # A ventilation-dominated room spectrum: the low-frequency bands rise well
+    # above the sloped RC reference (a rumble tag under RC Mark II) while the
+    # mid bands set the NC tangency.
+    spectrum = np.array([62.0, 62.0, 59.0, 57.0, 52.0, 42.0, 35.0, 29.0, 24.0, 19.0])
+    nc = noise_criterion(spectrum)
+    rc = room_criterion(spectrum)
+
+    fig, (ax_nc, ax_rc) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+
+    # --- Left: NC curves + tangency rating. ---
+    for row, idx in zip(NC_CURVES, NC_INDICES):
+        ax_nc.plot(OCTAVE_BANDS, row, color=COLOR_GRID, lw=0.8, zorder=1)
+        ax_nc.annotate(f"{idx:.0f}", (OCTAVE_BANDS[-1], row[-1]),
+                       fontsize=7, color="#999999", va="center")
+    ax_nc.plot(OCTAVE_BANDS, spectrum, "o-", color=COLOR_PRIMARY, zorder=3,
+               label="Measured")
+    gov = spectrum[OCTAVE_BANDS == nc.governing_frequency][0]
+    ax_nc.plot([nc.governing_frequency], [gov], "D", color=COLOR_SECONDARY,
+               ms=9, zorder=4, label=f"Tangent @ {nc.governing_frequency:g} Hz")
+    ax_nc.set_xscale("log")
+    ax_nc.set_xticks(list(OCTAVE_BANDS))
+    ax_nc.set_xticklabels([f"{f:g}" for f in OCTAVE_BANDS], rotation=45, ha="right")
+    ax_nc.set_xlabel("Octave-band center frequency [Hz]")
+    ax_nc.set_ylabel("Octave-band sound pressure level [dB]")
+    ax_nc.set_title(f"Noise Criteria — tangency method   NC-{nc.rating:.0f}",
+                    fontweight="bold", pad=10)
+    ax_nc.grid(which="both", axis="y", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_nc.set_axisbelow(True)
+    ax_nc.legend(loc="upper right")
+
+    # --- Right: RC Mark II reference + rumble/hiss tolerances. ---
+    ref = rc.reference_curve
+    low = OCTAVE_BANDS <= 500.0
+    high = OCTAVE_BANDS >= 1000.0
+    ax_rc.plot(OCTAVE_BANDS, ref, "s--", color="#7f7f7f",
+               label=f"Reference RC-{rc.rating}")
+    ax_rc.fill_between(OCTAVE_BANDS[low], ref[low], ref[low] + 5.0,
+                       color="#ff7f0e", alpha=0.25, label="Rumble tol. (+5 dB)")
+    ax_rc.fill_between(OCTAVE_BANDS[high], ref[high], ref[high] + 3.0,
+                       color=COLOR_PRIMARY, alpha=0.20, label="Hiss tol. (+3 dB)")
+    ax_rc.plot(OCTAVE_BANDS, spectrum, "o-", color=COLOR_PRIMARY, zorder=3,
+               label="Measured")
+    ax_rc.set_xscale("log")
+    ax_rc.set_xticks(list(OCTAVE_BANDS))
+    ax_rc.set_xticklabels([f"{f:g}" for f in OCTAVE_BANDS], rotation=45, ha="right")
+    ax_rc.set_xlabel("Octave-band center frequency [Hz]")
+    ax_rc.set_ylabel("Octave-band sound pressure level [dB]")
+    ax_rc.set_title(f"Room Criteria Mark II   {rc.label}",
+                    fontweight="bold", pad=10)
+    ax_rc.grid(which="both", axis="y", color=COLOR_GRID, linestyle="-", alpha=0.4)
+    ax_rc.set_axisbelow(True)
+    ax_rc.legend(loc="upper right")
+
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "room_noise_criteria.png"))
+    plt.close()
+
+
 def generate_all(img_dir: str) -> None:
     """Generate every documentation figure for the currently active theme."""
     generate_filter_type_comparison(img_dir)
@@ -3469,6 +3547,9 @@ def generate_all(img_dir: str) -> None:
 
     # Speech intelligibility (ANSI S3.5-1997): band audibility and the SII.
     generate_speech_intelligibility(img_dir)
+
+    # Room-noise criteria (ANSI S12.2-2019): NC tangency and RC Mark II.
+    generate_room_noise_criteria(img_dir)
 
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
     generate_sharpness_weighting(img_dir)

@@ -55,6 +55,14 @@ def test_hearing_loss_reduces_index() -> None:
     assert impaired < normal
 
 
+def test_extreme_speech_level_stays_bounded() -> None:
+    # The level-distortion factor is clipped to [0, 1], so even an absurdly loud
+    # speech level cannot drive the audibility (or the index) negative.
+    result = sii.speech_intelligibility_index(np.full(18, 200.0))
+    assert np.all(result.band_audibility >= 0.0)
+    assert 0.0 <= result.sii <= 1.0
+
+
 def test_standard_speech_spectrum_values() -> None:
     spectrum = sii.standard_speech_spectrum("normal")
     assert spectrum[0] == pytest.approx(32.41)

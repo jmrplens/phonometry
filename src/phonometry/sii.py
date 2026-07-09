@@ -184,7 +184,7 @@ def speech_intelligibility_index(
     d = 10.0 * np.log10(10.0 ** (0.1 * z) + 10.0 ** (0.1 * xp))
 
     # Clause 5.7/5.8 - level distortion, band audibility and the index.
-    level_factor = np.minimum(1.0, 1.0 - (e - _SPEECH_NORMAL - 10.0) / 160.0)
+    level_factor = np.clip(1.0 - (e - _SPEECH_NORMAL - 10.0) / 160.0, 0.0, 1.0)
     audibility = np.clip((e - d + 15.0) / 30.0, 0.0, 1.0)
     a = level_factor * audibility
     sii = float(np.sum(BAND_IMPORTANCE * a))

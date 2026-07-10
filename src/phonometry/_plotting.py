@@ -1007,6 +1007,7 @@ def plot_sound_power(
         ax.set_title(f"{designation} sound power spectrum")
     if np.any(neg):
         ax.plot([], [], color=_C_MUTED, marker="s", ls="", label="Non-positive band")
+    if np.any(neg) or "label" in kwargs:
         ax.legend(loc="best", fontsize="small")
     ax.grid(True, axis="y", alpha=0.3)
     return ax
@@ -1882,7 +1883,8 @@ def plot_monte_carlo(
     samples = np.asarray(result.samples, dtype=np.float64)
     kwargs.setdefault("color", _C_PRIMARY_LIGHT)
     kwargs.setdefault("bins", 120)
-    ax.hist(samples, density=True, **kwargs)
+    kwargs.setdefault("density", True)
+    ax.hist(samples, **kwargs)
     low, high = result.interval
     ax.axvspan(low, high, color=_C_PRIMARY, alpha=0.12,
                label=f"{100.0 * result.coverage:g} % coverage interval")
@@ -1921,8 +1923,6 @@ def plot_open_plan(
     :raises ValueError: If the spatial-decay regression is undefined
         (``d2s`` / ``lp_as_4m`` are NaN).
     """
-    import matplotlib.ticker as mticker
-
     if not (np.isfinite(result.d2s) and np.isfinite(result.lp_as_4m)):
         raise ValueError(
             "plot() needs the spatial-decay regression; this result's d2s / "
@@ -1930,6 +1930,8 @@ def plot_open_plan(
             "range)."
         )
     ax = ax if ax is not None else _new_axes()
+    import matplotlib.ticker as mticker
+
     r_max = 16.0
     for marker in (result.rd, result.rp):
         if np.isfinite(marker):
@@ -2097,7 +2099,9 @@ def plot_occupational_exposure(
                label=f"$L_{{EX,8h}}$ = {result.lex_8h:.1f} dB")
     ax.axhline(result.upper_limit, color=_C_MUTED, ls=":",
                label=f"$L_{{EX,8h}} + U$ = {result.upper_limit:.1f} dB")
-    ax.set_ylim(0.0, max(result.upper_limit, max(contributions)) * 1.12)
+    top = max(result.upper_limit, max(contributions))
+    bottom = min(0.0, min(contributions))
+    ax.set_ylim(bottom * 1.12 if bottom < 0.0 else 0.0, top * 1.12)
     ax.set_ylabel("A-weighted level [dB]")
     ax.set_title(
         f"ISO 9612 daily noise exposure — $L_{{EX,8h}}$ = "

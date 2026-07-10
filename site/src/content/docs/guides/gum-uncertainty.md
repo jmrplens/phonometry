@@ -118,7 +118,8 @@ mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
 k, U = result.expanded(0.95)
 
-# One line per panel — the budget and the Monte Carlo output distribution:
+# One line per panel — the budget bars, and the Monte Carlo histogram with
+# its coverage interval (the committed figure also overlays the GUM Gaussian):
 result.plot()
 mc.plot()
 plt.show()

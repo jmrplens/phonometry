@@ -120,7 +120,9 @@ mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
 k, U = result.expanded(0.95)
 
-# En una línea por panel — el balance y la distribución de salida de Monte Carlo:
+# En una línea por panel — las barras del balance, y el histograma de Monte
+# Carlo con su intervalo (la figura del repositorio superpone además la
+# gaussiana del GUM):
 result.plot()
 mc.plot()
 plt.show()

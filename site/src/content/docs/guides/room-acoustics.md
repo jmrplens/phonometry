@@ -353,10 +353,13 @@ print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 <summary>Show the code for this figure</summary>
 
 ```python
+import matplotlib.pyplot as plt
+
 # One line: the D2,S regression rebuilt from the result fields, with the
 # rD / rP crossings marked (the figure above adds the measured points and
 # the STI axis on top of it):
 m.plot()
+plt.show()
 ```
 
 ```python

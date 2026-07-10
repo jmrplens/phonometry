@@ -366,10 +366,13 @@ print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 <summary>Ver el código de esta figura</summary>
 
 ```python
+import matplotlib.pyplot as plt
+
 # En una línea: la regresión D2,S reconstruida con los campos del resultado,
 # con los cruces rD / rP marcados (la figura superior añade además los puntos
 # medidos y el eje de STI):
 m.plot()
+plt.show()
 ```
 
 ```python

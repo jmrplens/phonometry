@@ -344,12 +344,78 @@ print(np.round(tm.transmission_loss(rho_c), 6))   # [0. 0. 0.]
 `characteristic_impedance_material`, `material_wavenumber`) then read off the
 ASTM E2611 quantities.
 
+## 4. Sound-absorption measurement uncertainty (ISO 12999-2)
+
+A rated absorption coefficient means little without its uncertainty. ISO
+12999-2:2020 gives the standard uncertainty `u` of the quantities produced by a
+reverberation-room measurement (ISO 354) and its ratings (ISO 11654, EN 1793-1),
+estimated from inter-laboratory tests to ISO 5725. It is the sound-absorption
+companion of the sound-insulation uncertainty of ISO 12999-1
+([Building acoustics](building-acoustics.md)).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty.svg" alt="ISO 12999-2 sound absorption coefficient uncertainty: the measured alpha_s spectrum over one-third-octave bands from 63 Hz to 5000 Hz with a shaded plus-or-minus U band at coverage factor k = 2, reproducing the standard's worked Table 4 example" width="80%"></picture>
+
+**One-third-octave bands (Clause 5).** For the sound-absorption coefficient the
+reproducibility standard deviation is `σR = m·αs + n` (Formula (1)), and for the
+equivalent absorption area `σR = m·AT + n·S` with `S = 10 m²` (Formula (2)), where
+`m` and `n` are the frequency-dependent constants of Table 1 (63–5000 Hz). The
+repeatability value is `σr = 0.6·σR` (Formula (3)).
+
+**Practical coefficient (Clause 6).** For the ISO 11654 practical coefficient
+`σR = m·αp + n` in octave bands with the constants of Table 2 (250–4000 Hz);
+again `σr = 0.6·σR`.
+
+**Single numbers (Clause 7).** The weighted coefficient `αw` has a constant
+standard uncertainty (`σR = 0.035`, `σr = 0.020`); the EN 1793-1 single-number
+rating `DLα,NRD` scales with the value (`σR = 0.10·DLα`, `σr = 0.02·DLα`).
+
+**Reporting (Clause 8).** The expanded uncertainty is `U = k·u` (Formula (10))
+with the Table 3 coverage factor `k` (`k = 2.0` at 95 %, Gaussian). The reported
+`U` is rounded to two decimals for absorption coefficients and one decimal for
+the equivalent area and `DLα,NRD`.
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import sound_absorption_coefficient_uncertainty
+
+# ISO 12999-2 Table 4 worked example: alpha_s per one-third-octave band.
+freqs = [63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+         630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+alpha_s = [0.33, 0.35, 0.39, 0.38, 0.37, 0.36, 0.36, 0.36, 0.43, 0.49,
+           0.58, 0.63, 0.68, 0.71, 0.73, 0.75, 0.77, 0.79, 0.81, 0.81]
+result = sound_absorption_coefficient_uncertainty(alpha_s, freqs, confidence=0.95)
+result.plot()   # alpha_s with the +/-U (k = 2) reproducibility ribbon
+plt.show()
+```
+</details>
+
+```python
+from phonometry import (
+    sound_absorption_coefficient_uncertainty,
+    weighted_coefficient_uncertainty,
+    single_number_rating_uncertainty,
+)
+
+# Reproducibility uncertainty of alpha_s at 1000 Hz (Table 1: m=0.040, n=0.015).
+r = sound_absorption_coefficient_uncertainty([0.68], [1000], confidence=0.95)
+print(round(float(r.standard_uncertainty[0]), 4))            # 0.0422 (sigma_R)
+print(float(r.reported_expanded_uncertainty[0]))             # 0.08  (U, k=2)
+
+# Single-number ratings (Clause 7 worked examples).
+print(float(weighted_coefficient_uncertainty(0.70).reported_expanded_uncertainty[0]))  # 0.07
+print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[0]))   # 1.6
+```
+
 ---
 
 **Standards.** ISO 11654:1997 (weighted sound-absorption rating); ISO 9053-1:2018
 (static airflow resistance); ISO 9053-2:2020 (alternating airflow resistance);
 BS EN ISO 10534-1:2001 and BS EN ISO 10534-2:2001 (impedance tube); ASTM E2611-19
-(four-microphone transmission loss). Every equation is derived from the standard
+(four-microphone transmission loss); ISO 12999-2:2020 (sound-absorption
+measurement uncertainty). Every equation is derived from the standard
 text; the [conformance report](CONFORMANCE.md) validates the library against the
-standards' own worked examples (ISO 11654 Annex A, ISO 9053-2 Annex A.3) and
-closed-form identities.
+standards' own worked examples (ISO 11654 Annex A, ISO 9053-2 Annex A.3,
+ISO 12999-2 Tables 4/5) and closed-form identities.

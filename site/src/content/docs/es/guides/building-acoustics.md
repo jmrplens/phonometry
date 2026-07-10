@@ -502,7 +502,7 @@ plt.show()
 Cada camino de flanco añadido rebaja estrictamente $R'_w$ por debajo del directo
 $R_{Dd,w} = 57$; `res.paths` expone la fracción de energía transmitida de cada
 camino, de modo que el camino dominante queda visible. `flanking_element` es una
-comodidad que construye de una vez los tres caminos de una unión; el constructor
+función de conveniencia que construye de una vez los tres caminos de una unión; el constructor
 de camino único que hay detrás, `flanking_path`, construye un camino `Ff`, `Df`
 o `Fd` cada vez (Fórmula 28a). La Cláusula 4.4.2 también
 impone un límite inferior $K_{ij} \ge K_{ij,\min}$ a partir de la geometría de la

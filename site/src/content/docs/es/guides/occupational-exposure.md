@@ -27,7 +27,7 @@ L_{EX,8h,m} = L_{p,A,eqT,m} + 10 \log_{10}(T_m/T_0), \qquad T_0 = 8\ \text{h},
 $$
 
 de modo que una tarea ruidosa pero corta contribuye poco. Las estrategias
-*basada en la función* (apartado 10) y *de jornada completa* (apartado 11) toman
+*basadas en la función* (apartado 10) y *de jornada completa* (apartado 11) toman
 en cambio $N \ge 5$ (o tres jornadas completas) muestras aleatorias sobre un grupo
 de exposición homogéneo y normalizan la duración efectiva de la jornada. El nivel
 diario es el mismo en ambos casos; las estrategias difieren en cómo se construye
@@ -131,8 +131,8 @@ $u$, `expanded_uncertainty` $U = 1.65\ u$, `upper_limit` = $L_{EX,8h} + U$,
 ---
 
 **Normas.** ISO 9612:2009, *Acoustics — Determination of occupational noise
-exposure — Engineering method* — las estrategias basada en tareas (apartado 9),
-basada en la función (apartado 10) y de jornada completa (apartado 11), el
+exposure — Engineering method* — las estrategias basadas en tareas (apartado 9),
+basadas en la función (apartado 10) y de jornada completa (apartado 11), el
 presupuesto de incertidumbre del anexo C (Ecuaciones C.6, C.9 y C.12, Tablas
 C.4/C.5) y el factor de cobertura unilateral k = 1,65 (apartado 14), validado
 frente a los ejemplos resueltos de los anexos D, E y F.

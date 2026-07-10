@@ -209,6 +209,70 @@ EN12354_2_ANNEX_E3_K = 2
 EN12354_2_ANNEX_E3_LPRIME_N_W = 45
 
 # ---------------------------------------------------------------------------
+# EN 12354-3:2000 Annex F worked example - facade airborne insulation. A 11,3 m2
+# facade (V = 50 m3, flat reflecting so ΔLfs = 0) of four elements, octave bands
+# 125-2000 Hz. Rows: (name, area_m2, R_or_Dne_dB[5]); the air inlet is a small
+# element entered as Dn,e (already length-corrected to the installed 3 m). The
+# apparent R' = -10 lg Σ τe (Formula 10) and D2m,nT = R' + 10 lg(V/(6 T0 S))
+# (Formula 13, T0 = 0,5 s) give the single numbers R'tr,s,w = 31 (Ctr = -3) and
+# D2m,nT,w = 33 dB (Table F.1.3). NOTE: the standard's own printed per-element
+# partial indices sum to R' = 35,8 / 38,0 dB at 1 k / 2 k, whereas its R' row
+# prints 35,4 / 37,5 - an internal rounding inconsistency in the 2000 example;
+# the low bands (125-500 Hz) and every single-number rating are exact.
+# ---------------------------------------------------------------------------
+EN12354_3_ANNEX_F_BANDS = (125.0, 250.0, 500.0, 1000.0, 2000.0)
+EN12354_3_ANNEX_F_AREA = 11.3
+EN12354_3_ANNEX_F_VOLUME = 50.0
+EN12354_3_ANNEX_F_ELEMENTS: list[tuple[str, float, list[float]]] = [
+    ("wall", 6.0, [41.0, 46.0, 52.0, 58.0, 64.0]),
+    ("window2", 4.5, [23.0, 22.0, 30.0, 36.0, 37.0]),
+    ("window3", 0.5, [24.0, 27.0, 30.0, 33.0, 30.0]),
+]
+EN12354_3_ANNEX_F_INLET_DNE = [28.0, 23.0, 25.0, 38.0, 44.0]  # small element, Dn,e
+EN12354_3_ANNEX_F_RPRIME_LOW = [24.4, 21.5, 24.9]  # 125/250/500 Hz, digit-exact
+EN12354_3_ANNEX_F_RTRS_W = 31
+EN12354_3_ANNEX_F_CTR = -3
+EN12354_3_ANNEX_F_D2MNT_W = 33
+
+# ---------------------------------------------------------------------------
+# EN 12354-4:2000 Annex G worked example - sound radiated to the outside. An
+# industrial building (Lp,in in Table G.1, octave 63-8000 Hz, Cd = -5 dB from
+# Annex B, apparent R' limited to 40 dB per the Table G.3 footnote). Side 1 is a
+# 10x60 m wall (100 mm light concrete, R in Table G.2) with a 6x4 m industrial
+# door, segmented into 10x20 = 200 m2 panels; LW = Lp,in + Cd - R' + 10 lg(S/S0)
+# (Formula 2). The exterior level uses the simplified Annex E attenuation of a
+# finite radiating side: Table G.9 gives A'tot and Lp at reception points in
+# front of side 1 (60x10 m) and side 4 (100x10 m). NOTE: the standard's own R'
+# rows above 500 Hz are internally inconsistent with its Table G.2 inputs (e.g.
+# the wall-only R' prints 36 dB at 1 k while the concrete input is 39 dB, which
+# no 40 dB cap can produce); the low bands, the LW relation and the whole Annex E
+# propagation reproduce exactly.
+# ---------------------------------------------------------------------------
+EN12354_4_ANNEX_G_BANDS = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
+EN12354_4_ANNEX_G_LP_IN = [70.0, 74.0, 76.0, 72.0, 70.0, 67.0, 62.0, 57.0]
+EN12354_4_ANNEX_G_CD = -5.0
+EN12354_4_ANNEX_G_RPRIME_CAP = 40.0
+EN12354_4_ANNEX_G_CONCRETE_R = [32.0, 36.0, 36.0, 33.0, 39.0, 49.0, 57.0, 63.0]
+EN12354_4_ANNEX_G_DOOR_R = [21.0, 23.0, 28.0, 30.0, 30.0, 30.0, 30.0, 30.0]
+EN12354_4_ANNEX_G_SEGMENT_AREA = 200.0
+EN12354_4_ANNEX_G_DOOR_AREA = 24.0  # 6 x 4 m
+EN12354_4_ANNEX_G_SIDE1_RPRIME_LOW = [28.2, 30.8, 33.9]  # 63/125/250 Hz
+EN12354_4_ANNEX_G_SIDE1_LW_LOW = [59.8, 61.2]  # 63/125 Hz, digit-exact
+# Table G.9 attenuation and exterior level (side W x H, distance d) -> A'tot, Lp.
+# Lp uses the side's A-weighted power level (Table G.8): side1 62,9 / side4 72,9.
+EN12354_4_ANNEX_G_SIDE1_LWA = 62.9
+EN12354_4_ANNEX_G_SIDE4_LWA = 72.9
+EN12354_4_ANNEX_G_ATTENUATION: list[tuple[float, float, float, float]] = [
+    # (width, height, distance, A'tot_dB)
+    (60.0, 10.0, 5.0, 26.3),
+    (60.0, 10.0, 25.0, 34.4),
+    (100.0, 10.0, 5.0, 28.3),
+    (100.0, 10.0, 25.0, 35.6),
+]
+EN12354_4_ANNEX_G_LP_SIDE1_D5 = 36.6
+EN12354_4_ANNEX_G_LP_SIDE4_D25 = 37.3
+
+# ---------------------------------------------------------------------------
 # ISO 12999-1:2020 measurement uncertainty. Table 2 (Clause 7.2) tabulates the
 # airborne one-third-octave standard uncertainty; situation A at 1000 Hz is
 # 1,8 dB (digit-exact oracle). Table 8 (Clause 8) gives the two-sided 95 %

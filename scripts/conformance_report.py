@@ -970,6 +970,105 @@ def _chk_en12354_2_impact() -> Outcome:
     return Outcome(out.expected, out.computed, out.delta, out.passed and k_ok)
 
 
+def _en12354_3_annex_f() -> "ph.FacadePredictionResult":
+    """The EN 12354-3 Annex F facade prediction from the shared input table."""
+    elements = [
+        ph.FacadeElement(name=name, area=area, r=r)
+        for name, area, r in ref.EN12354_3_ANNEX_F_ELEMENTS
+    ]
+    elements.append(ph.FacadeElement(name="inlet", dn_e=ref.EN12354_3_ANNEX_F_INLET_DNE))
+    return ph.facade_sound_reduction(
+        elements,
+        area=ref.EN12354_3_ANNEX_F_AREA,
+        volume=ref.EN12354_3_ANNEX_F_VOLUME,
+        frequencies=ref.EN12354_3_ANNEX_F_BANDS,
+        bands="octave",
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "EN 12354-3:2000 Annex F",
+    "Facade airborne prediction (R'tr,s,w / D2m,nT,w single numbers)",
+)
+def _chk_en12354_3_facade() -> Outcome:
+    res = _en12354_3_annex_f()
+    # Anchor on the digit-exact low bands and the single-number ratings.
+    low_ok = np.allclose(
+        np.asarray(res.r_prime)[:3], ref.EN12354_3_ANNEX_F_RPRIME_LOW, atol=0.05
+    )
+    nums_ok = (
+        res.r_tr_s_w == ref.EN12354_3_ANNEX_F_RTRS_W
+        and res.c_tr == ref.EN12354_3_ANNEX_F_CTR
+        and res.d_2m_nt_w == ref.EN12354_3_ANNEX_F_D2MNT_W
+    )
+    return Outcome(
+        expected=(
+            f"R'tr,s,w {ref.EN12354_3_ANNEX_F_RTRS_W} "
+            f"(Ctr {ref.EN12354_3_ANNEX_F_CTR}); D2m,nT,w {ref.EN12354_3_ANNEX_F_D2MNT_W} dB"
+        ),
+        computed=f"R'tr,s,w {res.r_tr_s_w} (Ctr {res.c_tr}); D2m,nT,w {res.d_2m_nt_w} dB",
+        delta="0",
+        passed=bool(low_ok and nums_ok),
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "EN 12354-4:2000 Annex G / Formula (2)",
+    "Radiated LW of a wall+door segment (side 1, low bands)",
+)
+def _chk_en12354_4_radiated() -> Outcome:
+    res = ph.radiated_sound_power(
+        [
+            ph.FacadeElement(
+                name="wall",
+                area=ref.EN12354_4_ANNEX_G_SEGMENT_AREA - ref.EN12354_4_ANNEX_G_DOOR_AREA,
+                r=ref.EN12354_4_ANNEX_G_CONCRETE_R,
+            ),
+            ph.FacadeElement(
+                name="door", area=ref.EN12354_4_ANNEX_G_DOOR_AREA,
+                r=ref.EN12354_4_ANNEX_G_DOOR_R,
+            ),
+        ],
+        lp_in=ref.EN12354_4_ANNEX_G_LP_IN,
+        area=ref.EN12354_4_ANNEX_G_SEGMENT_AREA,
+        c_d=ref.EN12354_4_ANNEX_G_CD,
+        r_prime_cap=ref.EN12354_4_ANNEX_G_RPRIME_CAP,
+        octave_bands=[int(f) for f in ref.EN12354_4_ANNEX_G_BANDS],
+    )
+    rp_ok = np.allclose(
+        np.asarray(res.r_prime)[:3], ref.EN12354_4_ANNEX_G_SIDE1_RPRIME_LOW, atol=0.05
+    )
+    lw = np.asarray(res.l_w)[:2]
+    exp = np.asarray(ref.EN12354_4_ANNEX_G_SIDE1_LW_LOW)
+    out = numeric(0.0, float(np.max(np.abs(lw - exp))), 0.1, unit="dB", places=3)
+    return Outcome(
+        expected=f"LW 63/125 Hz {ref.EN12354_4_ANNEX_G_SIDE1_LW_LOW} dB (+/-0.1)",
+        computed=f"LW {np.round(lw, 1).tolist()} dB",
+        delta=out.delta,
+        passed=bool(rp_ok and out.passed),
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "EN 12354-4:2000 Annex E / Table G.9",
+    "Exterior level from a finite radiating side (side 1, d = 5 m)",
+)
+def _chk_en12354_4_propagation() -> Outcome:
+    w, h, d, a_tot = ref.EN12354_4_ANNEX_G_ATTENUATION[0]
+    att = ph.outdoor_attenuation(w, h, d)
+    lp = ph.outdoor_level(ref.EN12354_4_ANNEX_G_SIDE1_LWA, att)
+    att_ok = abs(att - a_tot) <= 0.05
+    return numeric(
+        ref.EN12354_4_ANNEX_G_LP_SIDE1_D5, lp, 0.05, unit="dB", places=3
+    ) if att_ok else Outcome(
+        expected=f"A'tot {a_tot} dB", computed=f"A'tot {att:.2f} dB",
+        delta=f"{att - a_tot:+.2f} dB", passed=False,
+    )
+
+
 @register(
     "Building prediction & uncertainty",
     "ISO 12999-1:2020 Table 2",

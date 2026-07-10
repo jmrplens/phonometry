@@ -385,6 +385,15 @@ from .building_prediction import (
     predicted_impact_insulation,
     standardized_impact_level,
 )
+from .facade_prediction import (
+    FacadeElement,
+    FacadePredictionResult,
+    RadiatedPowerResult,
+    facade_sound_reduction,
+    outdoor_attenuation,
+    outdoor_level,
+    radiated_sound_power,
+)
 from .building_uncertainty import (
     COVERAGE_FACTORS,
     BandUncertainty,
@@ -760,6 +769,13 @@ __all__ = [
     "equivalent_impact_level",
     "impact_flanking_correction",
     "standardized_impact_level",
+    "facade_sound_reduction",
+    "radiated_sound_power",
+    "outdoor_attenuation",
+    "outdoor_level",
+    "FacadeElement",
+    "FacadePredictionResult",
+    "RadiatedPowerResult",
     "band_uncertainty",
     "single_number_uncertainty",
     "single_number_uncertainty_uncorrelated",

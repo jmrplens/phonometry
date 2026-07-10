@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from .airflow_resistance import StaticAirflowResult
     from .building_prediction import AirbornePredictionResult, ImpactPredictionResult
     from .building_uncertainty import BandUncertainty
+    from .facade_prediction import FacadePredictionResult, RadiatedPowerResult
     from .impedance_tube import ImpedanceTubeResult
     from .insulation import (
         AirborneInsulationResult,
@@ -807,16 +808,7 @@ def plot_facade_insulation(
     ax = ax if ax is not None else _new_axes()
     dnt = np.asarray(result.d_2m_nt, dtype=np.float64)
     n = dnt.size
-    freqs = getattr(result, "frequencies", None)
-    if freqs is None:
-        x = np.arange(n, dtype=np.float64)
-        ax.set_xticks(x)
-        ax.set_xticklabels([f"Band {i + 1}" for i in range(n)],
-                           rotation=45, ha="right")
-        ax.set_xlabel("Band")
-    else:
-        x = np.asarray(freqs, dtype=np.float64)
-        _freq_axis(ax, x)
+    x = _facade_x_axis(ax, getattr(result, "frequencies", None), n)
 
     # D2m,nT first so it is lines[0]; other quantities follow when present.
     curves = [("$D_{2m,nT}$", dnt)]
@@ -838,6 +830,105 @@ def plot_facade_insulation(
     ax.set_title("Façade sound insulation (ISO 16283-3)")
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, alpha=0.3)
+    return ax
+
+
+def _facade_x_axis(ax: Axes, freqs: "np.ndarray | None", n: int) -> np.ndarray:
+    """Frequency x-axis when centres are known, else a labelled band index."""
+    if freqs is None:
+        x = np.arange(n, dtype=np.float64)
+        ax.set_xticks(x)
+        ax.set_xticklabels([f"Band {i + 1}" for i in range(n)], rotation=45, ha="right")
+        ax.set_xlabel("Band")
+        return x
+    x = np.asarray(freqs, dtype=np.float64)
+    _freq_axis(ax, x)
+    return x
+
+
+def plot_facade_prediction(
+    result: "FacadePredictionResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Predicted façade insulation profile (EN 12354-3:2000).
+
+    Draws the per-element partial indices ``Rp = -10 lg τ`` as thin dashed
+    lines, then the façade apparent reduction ``R'`` and the standardized
+    level difference ``D2m,nT`` as bold curves, against frequency. Works for
+    :class:`~phonometry.facade_prediction.FacadePredictionResult`.
+
+    :param result: A façade prediction result exposing ``r_prime``,
+        ``d_2m_nt``, ``element_r`` and (optionally) ``frequencies``.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the primary ``R'`` curve ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    r_prime = np.asarray(result.r_prime, dtype=np.float64)
+    n = r_prime.size
+    x = _facade_x_axis(ax, result.frequencies, n)
+
+    for name, rp in result.element_r.items():
+        ax.plot(x, np.asarray(rp, dtype=np.float64), "--", lw=0.9, alpha=0.6, label=name)
+
+    opts: dict[str, Any] = {"label": "$R'$", "color": "black", "lw": 2.0}
+    opts.update(kwargs)
+    ax.plot(x, r_prime, "o-", **opts)
+    ax.plot(
+        x,
+        np.asarray(result.d_2m_nt, dtype=np.float64),
+        "s-",
+        color="tab:blue",
+        lw=2.0,
+        label="$D_{2m,nT}$",
+    )
+
+    ax.set_ylabel("Reduction index / level difference [dB]")
+    ax.set_title("Façade insulation prediction (EN 12354-3)")
+    ax.legend(loc="best", fontsize="small", ncol=2)
+    ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_radiated_power(
+    result: "RadiatedPowerResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Radiated sound power level ``LW`` per band (EN 12354-4:2000).
+
+    Draws the segment radiated power level as bars, annotating the A-weighted
+    single number when available. Works for
+    :class:`~phonometry.facade_prediction.RadiatedPowerResult`.
+
+    :param result: A :class:`~phonometry.facade_prediction.RadiatedPowerResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``bar`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    l_w = np.asarray(result.l_w, dtype=np.float64)
+    n = l_w.size
+    positions = np.arange(n, dtype=np.float64)
+    if result.frequencies is None:
+        labels = [f"Band {i + 1}" for i in range(n)]
+    else:
+        labels = [_format_freq(f) for f in np.asarray(result.frequencies, dtype=np.float64)]
+
+    opts: dict[str, Any] = {"color": "tab:red", "alpha": 0.8, "label": "$L_W$"}
+    opts.update(kwargs)
+    ax.bar(positions, l_w, **opts)
+    _band_axis(ax, labels, xlabel="Frequency [Hz]")
+
+    if result.l_w_dba is not None:
+        ax.axhline(
+            result.l_w_dba,
+            color="black",
+            ls="--",
+            lw=1.2,
+            label=f"$L_{{WA}}$ = {result.l_w_dba:.1f} dB(A)",
+        )
+    ax.set_ylabel("Radiated sound power level [dB]")
+    ax.set_title("Radiated sound power (EN 12354-4)")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, axis="y", alpha=0.3)
     return ax
 
 

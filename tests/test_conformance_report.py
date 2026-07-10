@@ -21,9 +21,12 @@ import conformance_report as cr  # noqa: E402
 
 
 def test_registry_is_populated() -> None:
-    assert len(cr.CHECKS) >= 32
+    # Realistic floors for the current registry size (95 checks / 22 domains
+    # as of the tests-audit batch): loose enough to allow pruning a couple of
+    # checks, tight enough that losing a whole domain fails.
+    assert len(cr.CHECKS) >= 90
     # Every domain has at least one check.
-    assert len(cr._domains()) >= 7
+    assert len(cr._domains()) >= 20
 
 
 def test_block_a_psychoacoustics_checks_registered() -> None:

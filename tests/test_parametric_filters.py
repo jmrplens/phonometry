@@ -116,7 +116,7 @@ def test_a_weighting_response() -> None:
     test_freqs = [100, 1000, 8000]
     expected_gain = [-19.1, 0.0, -1.1]
     
-    for f, expected in zip(test_freqs, expected_gain):
+    for f, expected in zip(test_freqs, expected_gain, strict=True):
         # Generate tone
         x = np.sin(2 * np.pi * f * t)
         y = weighting_filter(x, fs, curve="A")
@@ -148,7 +148,7 @@ def test_c_weighting_response() -> None:
     test_freqs = [31.5, 1000, 8000]
     expected_gain = [-3.0, 0.0, -3.0]
     
-    for f, expected in zip(test_freqs, expected_gain):
+    for f, expected in zip(test_freqs, expected_gain, strict=True):
         x = np.sin(2 * np.pi * f * t)
         y = weighting_filter(x, fs, curve="C")
         

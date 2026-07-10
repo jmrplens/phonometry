@@ -24,6 +24,11 @@ import warnings
 
 import numpy as np
 import pytest
+from reference_data import (
+    ISO17497_1_CHAIN_ALPHA_S,
+    ISO17497_1_CHAIN_ALPHA_SPEC,
+    ISO17497_1_CHAIN_SCATTERING,
+)
 
 from phonometry.scattering_diffusion import (
     BASE_PLATE_BANDS,
@@ -122,9 +127,10 @@ def test_scattering_end_to_end_synthetic() -> None:
     alpha_spec = specular_absorption_coefficient(V, S, c3=C, T3=T3, c4=C, T4=T4)
     s = scattering_coefficient(alpha_spec, alpha_s)
 
-    assert float(alpha_s) == pytest.approx(0.1342754467754468)
-    assert float(alpha_spec) == pytest.approx(0.21484071484071485)
-    assert float(s) == pytest.approx(0.09306108711505018)
+    # Shared oracles from tests/reference_data.py (used by the CI report too).
+    assert float(alpha_s) == pytest.approx(ISO17497_1_CHAIN_ALPHA_S)
+    assert float(alpha_spec) == pytest.approx(ISO17497_1_CHAIN_ALPHA_SPEC)
+    assert float(s) == pytest.approx(ISO17497_1_CHAIN_SCATTERING)
     # And it matches the independent re-derivation.
     assert float(alpha_s) == pytest.approx(expected_alpha_s)
     assert float(alpha_spec) == pytest.approx(expected_alpha_spec)
@@ -359,68 +365,86 @@ def test_random_incidence_two_dimensional_weighting() -> None:
 # Input-validation guards.
 # ---------------------------------------------------------------------------
 def test_diffusion_requires_two_receivers() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'levels' needs at least two receivers"
+    ):
         directional_diffusion_coefficient([80.0])
 
 
 def test_diffusion_weight_length_mismatch() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'area_weights' must match the number of receivers"
+    ):
         directional_diffusion_coefficient([70.0, 72.0], area_weights=[1.0])
 
 
 def test_reverberation_uncertainty_requires_two() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'times' needs at least two measurements"
+    ):
         reverberation_time_uncertainty([6.0])
 
 
 def test_absorption_rejects_nonpositive_geometry() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'volume' must be a positive, finite number"
+    ):
         random_incidence_absorption(0.0, S, c1=C, T1=8.0, c2=C, T2=6.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'area' must be a positive, finite number"
+    ):
         random_incidence_absorption(V, -1.0, c1=C, T1=8.0, c2=C, T2=6.0)
 
 
 def test_absorption_rejects_nonpositive_time_and_speed() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'T' values must be positive"):
         random_incidence_absorption(V, S, c1=C, T1=0.0, c2=C, T2=6.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'c' values must be positive"):
         random_incidence_absorption(V, S, c1=-1.0, T1=8.0, c2=C, T2=6.0)
 
 
 def test_scattering_rejects_alpha_s_equal_one() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'alpha_s' must not equal 1"):
         scattering_coefficient(0.5, 1.0)
 
 
 def test_normalization_rejects_reference_one() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'d_theta_reference' must not equal 1"
+    ):
         normalized_diffusion_coefficient(0.5, 1.0)
 
 
 def test_area_factors_rejects_nonpositive_spacing() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'delta_theta' must be a positive, finite number"
+    ):
         area_factors([0.0, 30.0], delta_theta=0.0)
 
 
 def test_area_factors_rejects_empty_elevations() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'elevations' must be a non-empty 1-D sequence"
+    ):
         area_factors([], delta_theta=5.0)
 
 
 def test_diffusion_coefficient_rejects_zero_energy() -> None:
     # All -inf levels means zero energy everywhere; the coefficient is undefined.
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="The polar response carries no energy"
+    ):
         directional_diffusion_coefficient([float("-inf"), float("-inf")])
 
 
 def test_base_plate_checker_rejects_wrong_length() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="values for bands"):
         check_base_plate_scattering([0.1, 0.2, 0.3])
 
 
 def test_base_plate_checker_rejects_missing_band() -> None:
     incomplete = {b: 0.0 for b in BASE_PLATE_BANDS if b != 500}
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="missing band 500 Hz"):
         check_base_plate_scattering(incomplete)
 
 
@@ -446,19 +470,25 @@ def test_scattering_spectrum_recomputes_s_per_band() -> None:
 
 
 def test_scattering_spectrum_length_mismatch_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="non-empty, 1-D and equal-length"
+    ):
         scattering_coefficient_spectrum([250.0, 500.0], [0.2], [0.1])
 
 
 def test_scattering_spectrum_empty_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="non-empty, 1-D and equal-length"
+    ):
         scattering_coefficient_spectrum([], [], [])
 
 
 def test_scattering_spectrum_rejects_2d_input() -> None:
     # frequencies is documented 1-D; equal-shaped 2-D arrays must be rejected.
     two_d = [[250.0, 500.0], [1000.0, 2000.0]]
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="non-empty, 1-D and equal-length"
+    ):
         scattering_coefficient_spectrum(two_d, two_d, two_d)
 
 
@@ -493,7 +523,9 @@ def test_directional_diffusion_coefficient_matches_scalar() -> None:
 
 
 def test_directional_diffusion_length_mismatch_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'angles' and 'levels' must have the same length"
+    ):
         directional_diffusion([-30.0, 0.0, 30.0], [70.0, 72.0])
 
 

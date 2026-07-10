@@ -341,59 +341,85 @@ def test_mls_multi_period_recording_averages_internally() -> None:
 
 
 def test_invalid_arguments() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="f2 must be greater than f1"):
         sweep_signal(FS, 100.0, 100.0, 1.0)  # f1 == f2
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="f2 must be greater than f1"):
         sweep_signal(FS, 100.0, 50.0, 1.0)  # f1 > f2
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="must not exceed the Nyquist frequency"
+    ):
         sweep_signal(FS, 20.0, 30000.0, 1.0)  # f2 > Nyquist
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="order must be one of"):
         mls_signal(1)  # order too small
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="order must be one of"):
         mls_signal(99)  # unsupported order
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="unknown method"):
         impulse_response(np.zeros(10), np.zeros(10), FS, method="bogus")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="requires f_range"):
         impulse_response(np.zeros(10), np.zeros(10), FS, method="farina")  # no f_range
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="recorded length must be a positive multiple of the MLS length",
+    ):
         mls_impulse_response(np.zeros(10), mls_signal(4))  # not a multiple of L
 
 
 def test_inverse_filter_empty_band_raises() -> None:
     # A very short sweep over a razor-thin band yields no in-band FFT bin:
     # the median of an empty slice would be NaN, so this must raise instead.
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="no frequency bin falls within the sweep band"
+    ):
         inverse_filter(FS, 1000.0, 1000.5, 0.001)
     # The error must propagate through the Farina deconvolution path too.
-    with pytest.raises(ValueError):
+    # The reference must be non-zero, or the zero-padding guard fires first.
+    with pytest.raises(
+        ValueError, match="no frequency bin falls within the sweep band"
+    ):
         impulse_response(
-            np.zeros(48), np.zeros(48), FS,
+            np.zeros(48), np.ones(48), FS,
             method="farina", f_range=(1000.0, 1000.5),
         )
 
 
 def test_impulse_response_rejects_bad_shapes() -> None:
     good = np.zeros(10)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'recorded' and 'reference' must be one-dimensional"
+    ):
         impulse_response(np.zeros((2, 5)), good, FS)  # 2-D recorded
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'recorded' and 'reference' must be one-dimensional"
+    ):
         impulse_response(good, np.zeros((2, 5)), FS)  # 2-D reference
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'recorded' and 'reference' must be non-empty"
+    ):
         impulse_response(np.zeros(0), good, FS)  # empty recorded
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'recorded' and 'reference' must be non-empty"
+    ):
         impulse_response(good, np.zeros(0), FS)  # empty reference
 
 
 def test_mls_impulse_response_rejects_bad_shapes() -> None:
     seq = mls_signal(4)
     good = np.tile(seq, 2)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'recorded' and 'mls' must be one-dimensional"
+    ):
         mls_impulse_response(np.zeros((2, seq.size)), seq)  # 2-D recorded
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'recorded' and 'mls' must be one-dimensional"
+    ):
         mls_impulse_response(good, np.zeros((2, seq.size)))  # 2-D mls
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'recorded' and 'mls' must be non-empty"
+    ):
         mls_impulse_response(np.zeros(0), seq)  # empty recorded
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'recorded' and 'mls' must be non-empty"
+    ):
         mls_impulse_response(good, np.zeros(0))  # empty mls
 
 

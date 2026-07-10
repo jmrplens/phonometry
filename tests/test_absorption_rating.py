@@ -23,6 +23,15 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from reference_data import (
+    ISO11654_ANNEX_A1_ALPHA_P,
+    ISO11654_ANNEX_A1_ALPHA_W,
+    ISO11654_ANNEX_A1_CLASS,
+    ISO11654_ANNEX_A1_INDICATOR,
+    ISO11654_ANNEX_A2_ALPHA_P,
+    ISO11654_ANNEX_A2_ALPHA_W,
+    ISO11654_ANNEX_A2_INDICATOR,
+)
 
 from phonometry.absorption_rating import (
     OCTAVE_BANDS,
@@ -36,8 +45,9 @@ from phonometry.absorption_rating import (
 
 # ISO 11654:1997 Annex A worked examples (the "Absorber" alpha_p columns).
 # Bands 250, 500, 1000, 2000, 4000 Hz (the 125 Hz row is not rated).
-_ANNEX_A1_ALPHA_P = [0.35, 0.70, 0.65, 0.60, 0.55]
-_ANNEX_A2_ALPHA_P = [0.35, 1.00, 0.65, 0.60, 0.55]
+# Imported from tests/reference_data.py (shared with the conformance report).
+_ANNEX_A1_ALPHA_P = list(ISO11654_ANNEX_A1_ALPHA_P)
+_ANNEX_A2_ALPHA_P = list(ISO11654_ANNEX_A2_ALPHA_P)
 # The tabulated shifted reference curve (shift s = 0.40) shared by both.
 _ANNEX_A_SHIFTED_REF = [0.40, 0.60, 0.60, 0.60, 0.50]
 
@@ -70,19 +80,19 @@ def test_band_layout() -> None:
 
 def test_annex_a1_no_indicator() -> None:
     res = weighted_absorption(_ANNEX_A1_ALPHA_P)
-    assert _almost(res.alpha_w, 0.60)
-    assert res.shape_indicator == ""
+    assert _almost(res.alpha_w, ISO11654_ANNEX_A1_ALPHA_W)
+    assert res.shape_indicator == ISO11654_ANNEX_A1_INDICATOR
     assert _almost(res.shift, 0.40)
     assert _almost(res.unfavourable_sum, 0.05)
-    assert res.absorption_class == "C"
+    assert res.absorption_class == ISO11654_ANNEX_A1_CLASS
     assert res.rating_label == "0.60"
     np.testing.assert_allclose(res.shifted_reference, _ANNEX_A_SHIFTED_REF)
 
 
 def test_annex_a2_shape_indicator_m() -> None:
     res = weighted_absorption(_ANNEX_A2_ALPHA_P)
-    assert _almost(res.alpha_w, 0.60)
-    assert res.shape_indicator == "M"
+    assert _almost(res.alpha_w, ISO11654_ANNEX_A2_ALPHA_W)
+    assert res.shape_indicator == ISO11654_ANNEX_A2_INDICATOR
     assert _almost(res.shift, 0.40)
     assert _almost(res.unfavourable_sum, 0.05)
     assert res.absorption_class == "C"
@@ -102,7 +112,7 @@ def test_shift_is_the_smallest_qualifying_one() -> None:
     res = weighted_absorption(_ANNEX_A1_ALPHA_P)
     ref_units = [16, 20, 20, 20, 18]
     meas_units = [7, 14, 13, 12, 11]
-    smaller = sum(max(0, (r - 7) - m) for r, m in zip(ref_units, meas_units))
+    smaller = sum(max(0, (r - 7) - m) for r, m in zip(ref_units, meas_units, strict=True))
     assert smaller / 20.0 > 0.10
     assert _almost(res.shift, 0.40)
 
@@ -157,7 +167,7 @@ def test_practical_wrong_length() -> None:
 
 def test_practical_mapping_matches_sequence() -> None:
     seq = [0.10 + 0.05 * i for i in range(15)]
-    mapping = dict(zip(THIRD_OCTAVE_BANDS, seq))
+    mapping = dict(zip(THIRD_OCTAVE_BANDS, seq, strict=True))
     np.testing.assert_allclose(
         practical_absorption_coefficient(mapping),
         practical_absorption_coefficient(seq),
@@ -235,7 +245,7 @@ def test_result_exposes_curves_for_plotting() -> None:
 
 
 def test_weighted_mapping_matches_sequence() -> None:
-    mapping = dict(zip(OCTAVE_BANDS, _ANNEX_A2_ALPHA_P))
+    mapping = dict(zip(OCTAVE_BANDS, _ANNEX_A2_ALPHA_P, strict=True))
     res_map = weighted_absorption(mapping)
     res_seq = weighted_absorption(_ANNEX_A2_ALPHA_P)
     assert _almost(res_map.alpha_w, res_seq.alpha_w)

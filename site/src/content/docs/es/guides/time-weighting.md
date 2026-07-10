@@ -7,7 +7,55 @@ La medición precisa de SPL requiere capturar la energía en ventanas temporales
 específicas. phonometry implementa las constantes de tiempo exactas de la norma
 **IEC 61672-1:2013**.
 
+## 1. El detector exponencial
+
+La aguja de un sonómetro no puede seguir la forma de onda de presión — muestra
+un *valor cuadrático medio* móvil con memoria exponencial. Formalmente
+(IEC 61672-1, 3.8):
+
+$$
+\tau\ \frac{dy}{dt} + y = x^2(t)
+\quad\Longleftrightarrow\quad
+y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\ e^{-(t-\xi)/\tau}\ d\xi
+$$
+
+un paso-bajo de primer orden sobre la señal al cuadrado. La constante de tiempo
+τ fija el compromiso: **Fast** (125 ms) sigue fluctuaciones del tipo del habla
+y **Slow** (1 s) estabiliza la lectura para ruido cuasi estacionario. Tras un
+escalón, la envolvente alcanza el 63 % de su valor final en un τ y ~99,97 %
+tras 8τ — por eso los análisis de nivel descartan los primeros instantes de una
+grabación.
+
+## 2. Las tres ponderaciones temporales
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es_dark.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import time_weighting
+
+fs = 48000
+t = np.arange(int(fs * 4)) / fs
+burst = np.zeros_like(t)  # ráfaga de ruido de 0.5 s (Pa) que empieza en t = 1 s
+rng = np.random.default_rng(42)
+burst[fs:int(1.5 * fs)] = 0.2 * rng.standard_normal(int(0.5 * fs))
+
+p0 = 2e-5
+plt.figure()
+for mode in ('fast', 'slow', 'impulse'):
+    envelope = time_weighting(burst, fs, mode=mode)
+    plt.plot(t, 10 * np.log10(np.maximum(envelope, 1e-12) / p0**2), label=mode)
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Nivel [dB SPL]')
+plt.legend()
+plt.show()
+```
+
+</details>
 
 * **Fast (`fast`):** τ = 125 ms. Estándar para fluctuaciones de ruido.
 * **Slow (`slow`):** τ = 1000 ms. Estándar para ruido estacionario.
@@ -26,6 +74,9 @@ recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 energy_envelope = time_weighting(recording, fs, mode='fast')
 # dB SPL respecto a 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
+
+print(f"Nivel Fast en régimen permanente: {spl_t[-1]:.1f} dB SPL")
+# Nivel Fast en régimen permanente: 77.0 dB SPL
 ```
 
 La ponderación temporal Impulse asimétrica usa dos constantes — ataque rápido y caída
@@ -36,26 +87,7 @@ y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0{,}035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1{,}5)} & \text{en otro caso}\end{cases}
 $$
 
-## El detector exponencial
-
-La aguja de un sonómetro no puede seguir la forma de onda de presión — muestra
-un *valor cuadrático medio* móvil con memoria exponencial. Formalmente
-(IEC 61672-1, 3.8):
-
-$$
-\tau\ \frac{dy}{dt} + y = x^2(t)
-\quad\Longleftrightarrow\quad
-y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\ e^{-(t-\xi)/\tau}\ d\xi
-$$
-
-un paso-bajo de primer orden sobre la señal al cuadrado. La constante de tiempo
-τ fija el compromiso: **Fast** (125 ms) sigue fluctuaciones del tipo del habla
-y **Slow** (1 s) estabiliza la lectura para ruido cuasi estacionario. Tras un
-escalón, la envolvente alcanza el 63 % de su valor final en un τ y ~99,8 %
-tras 8τ — por eso los análisis de nivel descartan los primeros instantes de una
-grabación.
-
-### Parámetros de `time_weighting()` / `TimeWeighting`
+## 3. Parámetros de `time_weighting()` / `TimeWeighting`
 
 | Parámetro | Tipo | Unidades | Rango / por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
@@ -67,15 +99,48 @@ grabación.
 La salida tiene las unidades de $x^2$: toma `10*log10(y / p0**2)` para SPL o
 usa las funciones de nivel, que lo hacen por ti.
 
-## Respuesta temporal verificada (IEC 61672-1, Tabla 4)
+## 4. Respuesta temporal verificada (IEC 61672-1, Tabla 4)
 
 La respuesta de la envolvente Fast a ráfagas de tono de 4 kHz cae exactamente
-sobre los valores de referencia de la norma — verificado en CI para duraciones
-de 1 s a 1 ms (ponderaciones F y S, límites de aceptación de clase 1):
+sobre los valores de referencia de la norma — el ejemplo de abajo verifica la
+fila de la ráfaga Fast de 200 ms; la batería de CI cubre la Tabla 4 completa,
+de 1 s a 1 ms en F y de 1 s a 2 ms en S, con límites de aceptación de clase 1:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
 
-## Estado inicial
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import time_weighting
+
+fs = 48000
+t = np.arange(int(fs * 2)) / fs
+tone = np.sin(2 * np.pi * 4000 * t)
+
+# Referencia Fast en régimen permanente del tono continuo
+reference = time_weighting(tone, fs, mode='fast')[int(1.5 * fs):].mean()
+
+# Ráfaga de 200 ms del mismo tono (objetivo de la Tabla 4 de IEC 61672-1: -1.0 dB)
+burst = np.zeros_like(t)
+burst[int(0.5 * fs):int(0.7 * fs)] = tone[int(0.5 * fs):int(0.7 * fs)]
+envelope = time_weighting(burst, fs, mode='fast')
+env_db = 10 * np.log10(np.maximum(envelope / reference, 1e-6))
+
+plt.figure()
+plt.plot(t, env_db, label='Envolvente Fast')
+plt.axhline(-1.0, linestyle='--', label='Objetivo IEC −1.0 dB')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Nivel respecto al régimen permanente [dB]')
+plt.legend()
+plt.show()
+```
+
+</details>
+
+## 5. Estado inicial
 
 Por defecto, el integrador exponencial parte del reposo (`y[-1] = 0`). Pasar
 `initial_state=None` deja ese comportamiento por defecto, mientras que
@@ -84,10 +149,11 @@ comienza con una señal estacionaria ya presente, puedes partir de la energía d
 la primera muestra:
 
 ```python
+# Usa `recording` y `fs` del snippet anterior.
 energy_envelope = time_weighting(recording, fs, mode='fast', initial_state='first')
 ```
 
-## Procesado por bloques
+## 6. Procesado por bloques
 
 Para procesar por bloques, pasa el último valor de salida del bloque anterior
 como `initial_state` del siguiente en lugar de reiniciar en cada bloque:
@@ -124,7 +190,7 @@ Las salidas concatenadas por bloques son exactamente iguales a una única llamad
 continua (verificado para los tres modos, mono y multicanal). Llama a
 `tw.reset()` para volver al reposo.
 
-## Nota de rendimiento
+## 7. Nota de rendimiento
 
 El modo `impulse` usa un kernel asimétrico que se compila JIT cuando
 [numba](https://numba.pydata.org/) está instalado (`pip install phonometry[perf]`).
@@ -135,3 +201,11 @@ Consulta [Niveles integrados y estadísticos](/phonometry/es/guides/levels/)
 para las métricas Leq/LN construidas sobre estas envolventes, y
 [Por qué phonometry](/phonometry/es/reference/why-phonometry/) para la
 verificación con ráfagas de tono de IEC 61672-1.
+
+---
+
+**Normas.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+Part 1: Specifications* — el detector exponencial de ponderación temporal
+(cláusula 3.8) con las constantes de tiempo F y S (cláusula 5.7), y las
+respuestas de referencia a ráfagas de tono de 4 kHz de la Tabla 4 (límites de
+aceptación de clase 1) usadas para verificar la respuesta temporal en CI.

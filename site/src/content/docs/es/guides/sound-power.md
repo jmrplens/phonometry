@@ -109,6 +109,41 @@ print(np.round(res.sound_power_level, 1))               # LW por banda
 res.plot()   # barras de nivel de potencia sonora por banda; LWA en el título (requiere matplotlib)
 ```
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_es.png" alt="El espectro de nivel de potencia sonora por superficie envolvente del ejemplo de semiesfera de ISO 3744, una barra por banda de octava de 63 Hz a 8 kHz con pico cerca de 500 Hz, con el total ponderado A de 92,4 dB(A) en el título" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_es_dark.png" alt="El espectro de nivel de potencia sonora por superficie envolvente del ejemplo de semiesfera de ISO 3744, una barra por banda de octava de 63 Hz a 8 kHz con pico cerca de 500 Hz, con el total ponderado A de 92,4 dB(A) en el título" style="width:88%">
+
+*Una barra por banda: la presión superficial promediada en energía menos las
+correcciones de fondo (`K1`) y ambiental (`K2`) más el término de superficie
+`10 lg(S/S0)` dan `LW(f)`, y la suma energética ponderada A entre bandas da el
+número único `LWA` del título.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# res es el SoundPowerResult calculado arriba. Una línea:
+res.plot()
+plt.show()
+
+# A mano: un espectro de barras de LW con el total ponderado A en el título.
+freqs = res.frequencies
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, res.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Nivel de potencia sonora LW [dB]")
+ax.set_title(
+    f"Potencia sonora por superficie envolvente (ISO 3744)  "
+    f"LWA = {res.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
+
 El total ponderado A `LWA` se combina a partir de las potencias por banda con
 las correcciones de ponderación A del Anexo E de ISO 3744, así que necesita
 `frequencies`. Pasar los datos de sala (`reverberation_time` + `volume`,
@@ -206,6 +241,41 @@ print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 
 rev.plot()   # espectro LW de la sala reverberante; LWA en el título (requiere matplotlib)
 ```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_es.png" alt="El espectro de nivel de potencia sonora en cámara reverberante del ejemplo de ISO 3741, una barra por banda de tercio de octava de 100 Hz a 10 kHz descendiendo suavemente con la frecuencia, con el total ponderado A de 92,1 dB(A) en el título" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_es_dark.png" alt="El espectro de nivel de potencia sonora en cámara reverberante del ejemplo de ISO 3741, una barra por banda de tercio de octava de 100 Hz a 10 kHz descendiendo suavemente con la frecuencia, con el total ponderado A de 92,1 dB(A) en el título" style="width:88%">
+
+*El nivel medio de la sala llevado a través de los términos de área de
+absorción, de Waterhouse y meteorológicos de la Ec. 20 da el `LW(f)` por tercio
+de octava, y la suma energética ponderada A entre las 21 bandas da el `LWA` del
+título.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# rev es el ReverberationSoundPowerResult calculado arriba. Una línea:
+rev.plot()
+plt.show()
+
+# A mano: un espectro de barras de LW con el total ponderado A en el título.
+freqs = rev.frequencies
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, rev.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Nivel de potencia sonora LW [dB]")
+ax.set_title(
+    f"Potencia sonora en cámara reverberante (ISO 3741)  "
+    f"LWA = {rev.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
 
 `levels` puede ser un espectro medio 1D o un array 2D `(NM, NB)` promediado
 sobre las posiciones. Cuando el volumen de la sala, su tiempo de reverberación
@@ -312,6 +382,41 @@ print(list(res.achieved_grade))                         # grado por banda
 
 res.plot()   # espectro LW; bandas no positivas (indeterminables) con trama (requiere matplotlib)
 ```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_es.png" alt="El espectro de nivel de potencia sonora por barrido de intensidad del ejemplo de ISO 9614-2, una barra por banda de octava de 125 Hz a 4 kHz todas cerca de 85 dB, con el total ponderado A de 90,9 dB(A) en el título" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_es_dark.png" alt="El espectro de nivel de potencia sonora por barrido de intensidad del ejemplo de ISO 9614-2, una barra por banda de octava de 125 Hz a 4 kHz todas cerca de 85 dB, con el total ponderado A de 90,9 dB(A) en el título" style="width:88%">
+
+*Las potencias parciales `<In,i>·Si` de los seis segmentos suman el `LW` de
+cada banda; aquí todas las bandas tienen potencia neta positiva y superan los
+criterios de indicadores de campo en grado de ingeniería, así que las seis
+barras se sostienen, y el total ponderado A de 90,9 dB(A) encabeza el título.*
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# res es el SoundPowerIntensityResult calculado arriba. Una línea:
+res.plot()
+plt.show()
+
+# A mano: un espectro de barras de LW con el total ponderado A en el título.
+freqs = res.frequencies
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, res.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Nivel de potencia sonora LW [dB]")
+ax.set_title(
+    f"Potencia sonora por barrido de intensidad (ISO 9614-2)  "
+    f"LWA = {res.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
 
 Suministrar `normal_intensity_2` (el segundo barrido) promedia ambos para las
 potencias parciales y evalúa el criterio 3; `pressure_levels` habilita `FpI`;
@@ -569,3 +674,26 @@ plt.show()
   tras `LWA`.
 - [Teoría](/phonometry/es/reference/theory/) — las derivaciones de Waterhouse, K1/K2 y
   C1/C2.
+
+---
+
+**Normas.** ISO 3744:2010, *Acoustics — Determination of sound power levels
+and sound energy levels of noise sources using sound pressure — Engineering
+methods for an essentially free field over a reflecting plane* — el método de
+superficie envolvente: las áreas de la semiesfera y la caja, las correcciones
+`K1`/`K2`, las posiciones de micrófono del Anexo B y la ponderación A del
+Anexo E. ISO 3746:2010, *… Survey method using an enveloping measurement
+surface over a reflecting plane* — el grado de inspección que comparte las
+mismas fórmulas con criterios más laxos. ISO 3741:2010, *… Precision methods
+for reverberation test rooms* — los métodos directo (Ec. 20) y de comparación
+con las correcciones de Waterhouse y meteorológicas y los criterios de
+cualificación de la Tabla 1. ISO 3745:2012, *… Precision methods for anechoic
+rooms and hemi-anechoic rooms* — el nivel de potencia de la cláusula 8, la
+corrección de fondo por posición (Ec. 11), las correcciones meteorológicas y
+los conjuntos de micrófonos normalizados. ISO 9614-2:1996, *Acoustics —
+Determination of sound power levels of noise sources using sound intensity —
+Part 2: Measurement by scanning* — las potencias parciales, los indicadores de
+campo `FpI` y `F+/-` y los criterios de grado. ISO 9614-3:2002, *… Part 3:
+Precision method for measurement by scanning* — el método de barrido de
+grado 1, sus indicadores de campo y el marcado de no aplicable de la
+cláusula 9.2.

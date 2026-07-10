@@ -21,19 +21,19 @@ chain.
 ## 1. Frequency weightings (ISO 8041-1)
 
 Every human-vibration weighting is the product of four analog stages evaluated
-at `s = j·2πf` (ISO 8041-1 Formulae (1)–(5)): a second-order Butterworth
+at $s = j\,2\pi f$ (ISO 8041-1 Formulae (1)–(5)): a second-order Butterworth
 **high-pass** and **low-pass** band limiting, an **acceleration–velocity
-transition** carrying the overall gain `K`, and an **upward step**:
+transition** carrying the overall gain $K$, and an **upward step**:
 
 $$
 H(s) = H_h(s)\,H_l(s)\,H_t(s)\,H_s(s).
 $$
 
-A single Table 3 parameter set `(f_1,\,Q_1,\,f_2,\,Q_2,\,f_3,\,f_4,\,Q_4,\,
-f_5,\,Q_5,\,f_6,\,Q_6,\,K)` realises all nine weightings — `Wb, Wc, Wd, We, Wf,
-Wh, Wj, Wk, Wm` — a corner set to infinity collapsing its stage to unity. The
-principal whole-body weighting is `Wk` (vertical, seat surface); `Wd` is the
-horizontal weighting, and `Wh` the hand-arm weighting.
+A single Table 3 parameter set $(f_1, Q_1, f_2, Q_2, f_3, f_4, Q_4, f_5, Q_5,
+f_6, Q_6, K)$ realises all nine weightings — `Wb, Wc, Wd, We, Wf, Wh, Wj, Wk,
+Wm` — a corner set to infinity collapsing its stage to unity. The principal
+whole-body weighting is `Wk` (vertical, seat surface); `Wd` is the horizontal
+weighting, and `Wh` the hand-arm weighting.
 
 ```python
 import phonometry as ph
@@ -83,13 +83,13 @@ time-domain dose metrics below then consume.
 
 The basic evaluation is the **weighted r.m.s. acceleration**. From a
 one-third-octave spectrum it is (ISO 2631-1 Eq. (9); the identical construction
-gives the hand-arm `a_hw` of ISO 5349-1 Eq. (A.1)):
+gives the hand-arm $a_{hw}$ of ISO 5349-1 Eq. (A.1)):
 
 $$
 a_w = \sqrt{\sum_i \left(W_i\,a_i\right)^2},
 $$
 
-with `W_i` the weighting factor at band centre `i` and `a_i` the measured band
+with $W_i$ the weighting factor at band centre $i$ and $a_i$ the measured band
 acceleration.
 
 ```python
@@ -147,9 +147,10 @@ When the r.m.s. value understates an intermittent or shock-laden exposure,
 ISO 2631-1 adds dose measures computed on the weighted time signal: the
 **running r.m.s.** and its maximum, the **maximum transient vibration value**
 `MTVV` (Eq. (4), a 1 s running r.m.s.); the fourth-power **vibration dose
-value** `VDV = (∫ a_w^4\,dt)^{1/4}` (Eq. (5)); the **motion sickness dose value**
-`MSDV = (∫ a_w^2\,dt)^{1/2}`; and the **crest factor** (peak / r.m.s.), whose
-value above 9 signals that the basic method is inadequate.
+value** $\text{VDV} = \left(\int a_w^4\,dt\right)^{1/4}$ (Eq. (5)); the **motion
+sickness dose value** $\text{MSDV} = \left(\int a_w^2\,dt\right)^{1/2}$; and the
+**crest factor** (peak / r.m.s.), whose value above 9 signals that the basic
+method is inadequate.
 
 ```python
 import numpy as np
@@ -159,16 +160,16 @@ fs = 1000.0
 raw = np.random.default_rng(0).standard_normal(int(60 * fs))   # 60 s record
 a_w = ph.apply_weighting(raw, fs, "Wk")                        # weighted signal
 
-print(round(ph.vibration_dose_value(a_w, fs), 3))   # VDV  [m/s^1.75]
-print(round(ph.mtvv(a_w, fs), 3))                   # MTVV [m/s^2]
-print(round(ph.crest_factor(a_w), 2))               # crest factor
+print(round(ph.vibration_dose_value(a_w, fs), 3))   # 0.744  VDV [m/s^1.75]
+print(round(ph.mtvv(a_w, fs), 3))                   # 0.265  MTVV [m/s^2]
+print(round(ph.crest_factor(a_w), 2))               # 3.74   crest factor
 ```
 
 ## 3. Vibration total value and daily exposure `A(8)`
 
 Across the three axes the **vibration total value** combines the axis-weighted
-r.m.s. accelerations with the posture multiplying factors `k_j` (ISO 2631-1
-Eq. (10); for hand-arm, ISO 5349-1 Eq. (1) with every `k = 1`):
+r.m.s. accelerations with the posture multiplying factors $k_j$ (ISO 2631-1
+Eq. (10); for hand-arm, ISO 5349-1 Eq. (1) with every $k = 1$):
 
 $$
 a_v = \sqrt{\sum_j k_j^2\,a_{wj}^2}.
@@ -183,9 +184,9 @@ print(round(a_v, 3))     # 0.882  m/s^2
 ```
 
 The **daily exposure** normalises the total value to a reference 8-hour day
-(`T_0 = 28 800 s`). For a single operation `A(8) = a_v·\sqrt{T/T_0}`; several
-operations combine through their partial exposures `A_i(8) = a_{vi}·\sqrt{T_i/T_0}`
-as `A(8) = \sqrt{\sum_i A_i(8)^2}` (ISO 5349-1 Eqs. (2)/(3); ISO 5349-2
+($T_0 = 28\,800$ s). For a single operation $A(8) = a_v\,\sqrt{T/T_0}$; several
+operations combine through their partial exposures $A_i(8) = a_{vi}\,\sqrt{T_i/T_0}$
+as $A(8) = \sqrt{\sum_i A_i(8)^2}$ (ISO 5349-1 Eqs. (2)/(3); ISO 5349-2
 Eqs. (1)–(3)).
 
 `daily_vibration_exposure` builds the partial exposures, combines them and
@@ -248,8 +249,8 @@ plt.show()
 ## 4. Exposure–response guidance
 
 For hand-transmitted vibration, ISO 5349-1 Annex C relates the daily exposure to
-the group-mean lifetime `D_y` (in years) that produces vibration-white-finger in
-10 % of an exposed group, `D_y = 31.8\,A(8)^{-1.06}` (Eq. (C.1)):
+the group-mean lifetime $D_y$ (in years) that produces vibration-white-finger in
+10 % of an exposed group, $D_y = 31.8\,A(8)^{-1.06}$ (Eq. (C.1)):
 
 ```python
 import phonometry as ph

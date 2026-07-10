@@ -8,7 +8,7 @@ transferencia característica. Todos los bancos sitúan sus **puntos de −3 dB 
 los bordes de banda de ANSI S1.11**, de modo que los niveles por banda son
 comparables entre arquitecturas.
 
-## Bandas de octava fraccionaria: las matemáticas
+## 1. Bandas de octava fraccionaria: las matemáticas
 
 IEC 61260-1:2014 construye cada banda a partir de la razón de octava en base 10
 $G = 10^{3/10} \approx 1{,}99526$ (es decir, "una octava" *no* es exactamente 2).
@@ -37,7 +37,23 @@ frecuencia diezmada:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es.svg" alt="Diezmado multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un paso-bajo antialiasing y diezmado, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es_dark.svg" alt="Diezmado multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un paso-bajo antialiasing y diezmado, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%">
 
-### Parámetros de `octave_filter()` / `OctaveFilterBank`
+## 2. Comparación de filtros y zoom
+
+Usamos secciones de segundo orden (SOS) en todos los filtros para garantizar la
+estabilidad numérica. La siguiente gráfica compara las arquitecturas centrándose
+en el punto de cruce a −3 dB.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_es.png" alt="Comparación de la respuesta en magnitud de las cinco arquitecturas para la banda de octava de 1 kHz, con zoom en el cruce a -3 dB" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_es_dark.png" alt="Comparación de la respuesta en magnitud de las cinco arquitecturas para la banda de octava de 1 kHz, con zoom en el cruce a -3 dB" style="width:80%">
+
+| Tipo | Nombre | Ejemplo de uso | Ideal para |
+| :--- | :--- | :--- | :--- |
+| `butter` | **Butterworth** | `octave_filter(x, fs, filter_type='butter')` | Medición acústica general. |
+| `cheby1` | **Chebyshev I** | `octave_filter(x, fs, filter_type='cheby1', ripple=0.1)` | Caída más abrupta a costa de rizado. |
+| `cheby2` | **Chebyshev II** | `octave_filter(x, fs, filter_type='cheby2')` | Banda de paso plana con ceros en la banda atenuada. |
+| `ellip` | **Elíptico** | `octave_filter(x, fs, filter_type='ellip', ripple=0.1)` | Máxima selectividad. |
+| `bessel` | **Bessel** | `octave_filter(x, fs, filter_type='bessel')` | Preservar la forma de los transitorios. |
+
+## 3. Parámetros de `octave_filter()` / `OctaveFilterBank`
 
 | Parámetro | Tipo | Unidades | Rango / por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
@@ -46,7 +62,7 @@ frecuencia diezmada:
 | `fraction` | int | — | por defecto `1`; habitual `3`; cualquier `b ≥ 1` | Bandas por octava = `b` |
 | `order` | int | — | por defecto `6` | Orden SOS por banda |
 | `limits` | lista `[lo, hi]` | Hz | por defecto `[12, 20000]` | Rango de análisis |
-| `filter_type` | str | — | `'butter'` (por defecto), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | Ver la comparación más abajo |
+| `filter_type` | str | — | `'butter'` (por defecto), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | Ver la comparación más arriba |
 | `ripple` / `attenuation` | float | dB | `ripple` defecto `0.1`; `attenuation` defecto `72.0` | Rizado de banda de paso / atenuación en banda atenuada (cheby/ellip); `cheby2` necesita `attenuation ≥ 70` para clase 1, ya que scipy fija su suelo equirizado en exactamente este valor |
 | `show` | bool | — | por defecto `False` | Dibuja la respuesta del banco (requiere matplotlib) |
 | `sigbands` | bool | — | por defecto `False` | Devuelve también las señales temporales por banda |
@@ -63,23 +79,7 @@ frecuencia diezmada:
 aceptación de la Tabla 1 de IEC 61260-1 e informa de la clase (`1`, `2` o `None` si queda fuera de ambas) con los
 márgenes por banda.
 
-## Comparación de filtros y zoom
-
-Usamos secciones de segundo orden (SOS) en todos los filtros para garantizar la
-estabilidad numérica. La siguiente gráfica compara las arquitecturas centrándose
-en el punto de cruce a −3 dB.
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_es.png" alt="Comparación de la respuesta en magnitud de las cinco arquitecturas para la banda de octava de 1 kHz, con zoom en el cruce a -3 dB" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_es_dark.png" alt="Comparación de la respuesta en magnitud de las cinco arquitecturas para la banda de octava de 1 kHz, con zoom en el cruce a -3 dB" style="width:80%">
-
-| Tipo | Nombre | Ejemplo de uso | Ideal para |
-| :--- | :--- | :--- | :--- |
-| `butter` | **Butterworth** | `octave_filter(x, fs, filter_type='butter')` | Medición acústica general. |
-| `cheby1` | **Chebyshev I** | `octave_filter(x, fs, filter_type='cheby1', ripple=0.1)` | Caída más abrupta a costa de rizado. |
-| `cheby2` | **Chebyshev II** | `octave_filter(x, fs, filter_type='cheby2')` | Banda de paso plana con ceros en la banda atenuada. |
-| `ellip` | **Elíptico** | `octave_filter(x, fs, filter_type='ellip', ripple=0.1)` | Máxima selectividad. |
-| `bessel` | **Bessel** | `octave_filter(x, fs, filter_type='bessel')` | Preservar la forma de los transitorios. |
-
-## Galería de respuestas del banco
+## 4. Galería de respuestas del banco
 
 Vista espectral completa de los bancos para octava (1/1) y tercio de octava (1/3).
 
@@ -91,7 +91,7 @@ Vista espectral completa de los bancos para octava (1/1) y tercio de octava (1/3
 | **Elíptico** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6_es.png" alt="Respuesta en frecuencia del banco elíptico de banda de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6_es_dark.png" alt="Respuesta en frecuencia del banco elíptico de banda de octava" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_es.png" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_es_dark.png" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:100%"> |
 | **Bessel** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6_es.png" alt="Respuesta en frecuencia del banco Bessel de banda de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6_es_dark.png" alt="Respuesta en frecuencia del banco Bessel de banda de octava" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_es.png" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_es_dark.png" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:100%"> |
 
-## Uso y ejemplos por tipo de filtro
+## 5. Uso y ejemplos por tipo de filtro
 
 ### 1. Butterworth (`butter`)
 
@@ -120,6 +120,7 @@ cambio de rizado en la banda de paso. Útiles cuando se necesita alta selectivid
 cerca de las frecuencias de corte.
 
 ```python
+# Usa `x` y `fs` del snippet anterior.
 # Selectividad con 0.1 dB de rizado en la banda de paso
 spl, freq = octave_filter(x, fs, filter_type='cheby1', ripple=0.1)
 ```
@@ -135,6 +136,7 @@ automáticamente para que los puntos de −3 dB caigan en los bordes de banda
 (`attenuation` debe ser > 3,01 dB).
 
 ```python
+# Usa `x` y `fs` del snippet anterior.
 # Banda de paso plana, 72 dB de atenuación por defecto (clase 1)
 spl, freq = octave_filter(x, fs, filter_type='cheby2')
 ```
@@ -148,6 +150,7 @@ abrupta) para un orden dado. Presentan rizado tanto en la banda de paso como en
 la atenuada.
 
 ```python
+# Usa `x` y `fs` del snippet anterior.
 # Máxima selectividad para aislamiento extremo entre bandas
 spl, freq = octave_filter(x, fs, filter_type='ellip', ripple=0.1)
 ```
@@ -161,6 +164,7 @@ retardo de grupo mínimo. Preservan la forma de las ondas filtradas (transitorio
 mejor que ningún otro tipo, pero tienen la caída más lenta.
 
 ```python
+# Usa `x` y `fs` del snippet anterior.
 # Ideal para análisis de pulsos y preservación de transitorios
 spl, freq = octave_filter(x, fs, filter_type='bessel')
 ```
@@ -177,7 +181,8 @@ perfectamente plana y sin diferencia de fase entre bandas en el cruce.
 ```python
 from phonometry import linkwitz_riley
 
-signal = x                            # reutiliza la señal calibrada del inicio de la página
+# Usa `x` y `fs` del snippet anterior.
+signal = x
 # Dividir la señal en bandas grave y aguda a 1000 Hz
 low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 # Reconstrucción: low + high == signal (respuesta plana)
@@ -185,7 +190,7 @@ low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4_es.png" alt="Crossover Linkwitz-Riley de 4.º orden: paso-bajo, paso-alto y su suma plana" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4_es_dark.png" alt="Crossover Linkwitz-Riley de 4.º orden: paso-bajo, paso-alto y su suma plana" style="width:60%">
 
-## Verificar la clase IEC 61260-1
+## 6. Verificar la clase IEC 61260-1
 
 `verify_filter_class` comprueba cada banda de un banco contra los límites de
 aceptación de **IEC 61260-1:2014** (Tabla 1, con el mapeo de breakpoints a
@@ -197,8 +202,9 @@ from phonometry import OctaveFilterBank, verify_filter_class
 
 bank = OctaveFilterBank(fs=48000, fraction=3, order=6)
 result = verify_filter_class(bank)
-print(result["overall_class"])          # 1, 2 o None
-print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_class1_db': ...}
+print(result["overall_class"])          # 1
+print(result["bands"][0])
+# {'freq': 12.589254117941678, 'class': 1, 'margin_class1_db': 0.39999999999997266, 'margin_class2_db': 0.5999999999999727}
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay_es.png" alt="Respuesta Butterworth serpenteando entre las regiones prohibidas de la máscara de clase 1 de IEC 61260-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay_es_dark.png" alt="Respuesta Butterworth serpenteando entre las regiones prohibidas de la máscara de clase 1 de IEC 61260-1" style="width:80%">
@@ -216,7 +222,7 @@ de paso de +0,400 dB que Butterworth). Chebyshev I, Elíptico y Bessel no cumple
 los límites de clase con orden 6: el rizado de banda de paso (cheby1/ellip) y la
 caída lenta (bessel) violan la máscara.
 
-## Descomposición de la señal y estabilidad
+## 7. Descomposición de la señal y estabilidad
 
 Con `sigbands=True` puedes recuperar las componentes en el dominio del tiempo de
 cada banda. Esto permite análisis avanzados o comparar cómo afectan distintas
@@ -264,7 +270,7 @@ los bordes de banda.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison_es.png" alt="Retardo de grupo de la banda de 1 kHz para las cinco arquitecturas: Bessel casi plano, Chebyshev y elíptico con picos en los bordes" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison_es_dark.png" alt="Retardo de grupo de la banda de 1 kHz para las cinco arquitecturas: Bessel casi plano, Chebyshev y elíptico con picos en los bordes" style="width:80%">
 
-## Filtrado de fase cero
+## 8. Filtrado de fase cero
 
 Para análisis offline puedes eliminar por completo el retardo de grupo:
 `zero_phase=True` filtra cada banda hacia delante y hacia atrás
@@ -280,6 +286,7 @@ procesado por bloques (stateful).
 ```python
 from phonometry import OctaveFilterBank
 
+# Usa `y` del snippet anterior.
 bank = OctaveFilterBank(fs=48000, fraction=3)
 spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
 ```
@@ -288,3 +295,14 @@ spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
 
 *El filtrado causal retrasa la ráfaga según el retardo de grupo del filtro; el
 filtrado de fase cero la mantiene alineada con la entrada.*
+
+---
+
+**Normas.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+fractional-octave-band filters — Part 1: Specifications* — las frecuencias
+centrales y los bordes de banda en base 10 del §1 (5.2-5.5), las etiquetas
+nominales de banda y los límites de aceptación de clase 1 / clase 2 de la
+Tabla 1 (con el mapeo de breakpoints a fraccionales y la interpolación en
+frecuencia logarítmica) verificados en el §6. ANSI S1.11-2004, *Octave-Band
+and Fractional-Octave-Band Analog and Digital Filters* — el convenio de
+bordes de banda sobre el que cada banco sitúa sus puntos de −3 dB.

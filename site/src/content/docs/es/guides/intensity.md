@@ -104,8 +104,18 @@ ambos:
   menores, más altas.
 - **Campos reactivos**: cuando `pressure_intensity_index` (F2 en ISO 9614-1)
   se acerca al índice residual δ_pI0 de la sonda, dominan los errores de fase.
-  Los indicadores de campo del Anexo A de ISO 9614-1 y el criterio de
-  capacidad dinámica están disponibles directamente:
+
+Sobre una superficie de medición, los indicadores de campo del Anexo A de
+ISO 9614-1 califican el propio barrido. **F2**, el indicador
+presión-intensidad de superficie, es el nivel de presión de superficie menos
+el nivel de la *magnitud* media de la intensidad normal — cuanto mayor es,
+más cerca está la medición del suelo de error de fase de la sonda. **F3**, el
+indicador de potencia parcial negativa, es la misma diferencia tomada con la
+intensidad media *con signo* — F3 − F2 > 0 revela potencia que entra por
+partes de la superficie. **F4**, el indicador de no uniformidad del campo, es
+la dispersión normalizada de las intensidades por posición — cuanto mayor es,
+más posiciones de medición necesita la superficie. Junto con el criterio de
+capacidad dinámica están disponibles directamente:
 
 ```python
 import numpy as np
@@ -137,3 +147,15 @@ print(ld, ld > fi.f2)                                      # 8.0 True (criterio 
 Consulta [Teoría](/phonometry/es/reference/theory/) para las derivaciones y
 [Calibración](/phonometry/es/guides/calibration/) para el escalado absoluto de
 los dos canales.
+
+---
+
+**Normas.** IEC 61043:1994, *Electroacoustics — Instruments for the
+measurement of sound intensity — Measurements with pairs of pressure sensing
+microphones* — el estimador de intensidad por espectro cruzado con dos
+micrófonos, la corrección del sesgo por diferencias finitas y el límite de
+ancho de banda utilizable (cláusula 7.3, Tabla 3). ISO 9614-1:1993,
+*Acoustics — Determination of sound power levels of noise sources using sound
+intensity — Part 1: Measurement at discrete points* — el índice
+presión-intensidad, los indicadores de campo F2, F3 y F4 del Anexo A y el
+criterio de capacidad dinámica (Anexo B).

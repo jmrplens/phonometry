@@ -161,9 +161,9 @@ fs = 1000.0
 raw = np.random.default_rng(0).standard_normal(int(60 * fs))   # 60 s record
 a_w = ph.apply_weighting(raw, fs, "Wk")                        # weighted signal
 
-print(round(ph.vibration_dose_value(a_w, fs), 3))   # VDV  [m/s^1.75]
-print(round(ph.mtvv(a_w, fs), 3))                   # MTVV [m/s^2]
-print(round(ph.crest_factor(a_w), 2))               # crest factor
+print(round(ph.vibration_dose_value(a_w, fs), 3))   # 0.744  VDV [m/s^1.75]
+print(round(ph.mtvv(a_w, fs), 3))                   # 0.265  MTVV [m/s^2]
+print(round(ph.crest_factor(a_w), 2))               # 3.74   crest factor
 ```
 
 ## 3. Vibration total value and daily exposure `A(8)`

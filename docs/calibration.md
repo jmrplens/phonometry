@@ -162,3 +162,11 @@ spl_peak, freq = octave_filter(recording, fs, mode='peak')
 Integer signals (e.g. int16 from `scipy.io.wavfile.read`) are converted to
 float64 internally before any squaring, so calibration and level results are
 identical whether you pass the raw integer array or a float conversion.
+
+---
+
+**Standards.** IEC 60942:2017, *Electroacoustics — Sound calibrators* — the
+calibrator level and class assumptions behind `sensitivity()` (the 94 dB
+principal level and the Table 1 class tolerances) and the short-term
+level-fluctuation stability check of the reference recording (5.3.3, Table 2
+class 1 limits per nominal frequency).

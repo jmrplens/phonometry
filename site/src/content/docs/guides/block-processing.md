@@ -3,6 +3,12 @@ title: "Block Processing"
 description: "Stateful streaming workflows with carried filter state."
 ---
 
+Some measurements never fit in memory: an hour-long environmental recording,
+a live monitor that must report levels while the microphone is still
+capturing, or an embedded logger that only ever sees one buffer at a time. In
+all of these the signal has to be processed block by block — and the filters
+must behave exactly as if they had seen the whole signal at once.
+
 The `OctaveFilterBank`, `WeightingFilter` (for A, C, or Z-weighting) and
 `TimeWeighting` classes support block (streaming) processing: the internal
 filter state is carried between calls, so concatenated block outputs match a
@@ -16,18 +22,9 @@ transient.*
 
 Create a stateful filter bank with `stateful=True`. The internal state is
 zero-initialized by default but may be initialized for step-response
-steady-state (like `scipy.signal.sosfilt_zi`) with `steady_ic=True`.
-
-Notes when using a stateful `OctaveFilterBank`:
-
-- Detrending should be disabled during block processing (`detrend=False`), as it
-  can introduce discontinuities between blocks.
-- Resampling is not supported for block processing, so you need to set
-  `resample=False`.
-- `zero_phase=True` is incompatible with stateful mode (forward-backward
-  filtering needs the whole signal).
-- Stateful `WeightingFilter` uses the legacy bilinear design
-  (`high_accuracy=False`); see [Frequency Weighting](/phonometry/guides/weighting/).
+steady-state (like `scipy.signal.sosfilt_zi`) with `steady_ic=True`. The
+options that must be disabled in stateful mode are summarized in the
+[constraints table](#stateful-mode-constraints) at the end of this guide.
 
 ## Example
 
@@ -70,7 +67,7 @@ for block in audio_blocks:
 ```
 
 Or manage the state yourself with the functional API — see
-[Time Weighting](/phonometry/guides/time-weighting/#block-processing).
+[Time Weighting](/phonometry/guides/time-weighting/#6-block-processing).
 
 ## Multichannel state
 
@@ -104,5 +101,5 @@ for x in audio_stream(block):            # your capture callback
 | `detrend` | must be `False` | Per-block detrending creates boundary discontinuities |
 | `resample` | must be `False` | The resampler is not stateful |
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
-| `high_accuracy` (weighting) | resolves to `False` by default; explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
+| `high_accuracy` (weighting) | resolves to `False` by default — the legacy bilinear design, see [Frequency Weighting](/phonometry/guides/weighting/); explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |

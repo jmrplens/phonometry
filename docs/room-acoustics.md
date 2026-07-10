@@ -475,3 +475,13 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
   source/receiving-room levels.
 - [Theory](theory.md) — Schroeder integration, regression windows and the
   reference-curve derivation.
+
+---
+
+**Standards.** ISO 18233:2006 (application of new measurement methods — the
+swept-sine and MLS acquisition of impulse responses); ISO 3382-1:2009 and
+ISO 3382-2:2008 (reverberation time and room parameters from the Schroeder
+decay); ISO 3382-3:2022 (open-plan office speech metrics); ISO 354:2003
+(sound absorption in a reverberation room). Validated against closed-form
+decays and the standards' own parameter definitions in the
+[conformance report](CONFORMANCE.md).

@@ -490,6 +490,12 @@ _ES_PATTERNS = [
      r"Potencia sonora de precisión (ISO 3745)  LWA = \1 dB(A)"),
     (r"^Precision intensity scanning \(ISO 9614-3\)  LWA = (.+) dB\(A\)$",
      r"Barrido de intensidad de precisión (ISO 9614-3)  LWA = \1 dB(A)"),
+    (r"^Enveloping-surface sound power \(ISO 3744\)  LWA = (.+) dB\(A\)$",
+     r"Potencia sonora por superficie envolvente (ISO 3744)  LWA = \1 dB(A)"),
+    (r"^Reverberation-room sound power \(ISO 3741\)  LWA = (.+) dB\(A\)$",
+     r"Potencia sonora en cámara reverberante (ISO 3741)  LWA = \1 dB(A)"),
+    (r"^Intensity-scanning sound power \(ISO 9614-2\)  LWA = (.+) dB\(A\)$",
+     r"Potencia sonora por barrido de intensidad (ISO 9614-2)  LWA = \1 dB(A)"),
     # Human-vibration dynamic titles (numeric a_w / A(8))
     (r"^Weighted seat acceleration \(ISO 2631-1\)  (.+)$",
      r"Aceleración ponderada del asiento (ISO 2631-1)  \1"),
@@ -2865,17 +2871,22 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
     )
     x = np.arange(len(bands))
     fig, ax = plt.subplots(figsize=(11, 6.4))
-    ax.bar(x, att.a_div, color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.6,
-           label="Adiv — divergence", zorder=3)
-    ax.bar(x, att.a_atm, bottom=att.a_div, color=COLOR_TERTIARY,
-           edgecolor=COLOR_FG, linewidth=0.6, label="Aatm — atmospheric",
-           zorder=3)
-    base = att.a_div + att.a_atm
-    ax.bar(x, att.a_gr, bottom=base, color="#9467bd", edgecolor=COLOR_FG,
-           linewidth=0.6, label="Agr — ground", zorder=3)
-    base = base + att.a_gr
-    ax.bar(x, att.a_bar, bottom=base, color="#ff7f0e", edgecolor=COLOR_FG,
-           linewidth=0.6, label="Abar — barrier", zorder=3)
+    # Separate positive and negative cumulative baselines so a negative term
+    # (Agr is a net gain at 63 Hz here) stacks below zero instead of being
+    # drawn on top of the previous bars; the signed heights sum to a_total.
+    pos_bottom = np.zeros(len(bands))
+    neg_bottom = np.zeros(len(bands))
+    for term, color, label in [
+        (att.a_div, COLOR_PRIMARY, "Adiv — divergence"),
+        (att.a_atm, COLOR_TERTIARY, "Aatm — atmospheric"),
+        (att.a_gr, "#9467bd", "Agr — ground"),
+        (att.a_bar, "#ff7f0e", "Abar — barrier"),
+    ]:
+        bottom = np.where(term >= 0.0, pos_bottom, neg_bottom)
+        ax.bar(x, term, bottom=bottom, color=color, edgecolor=COLOR_FG,
+               linewidth=0.6, label=label, zorder=3)
+        pos_bottom += np.maximum(term, 0.0)
+        neg_bottom += np.minimum(term, 0.0)
     ax.plot(x, att.a_total, marker="D", color=COLOR_SECONDARY, linewidth=2.0,
             markersize=6, markerfacecolor="white", markeredgewidth=1.4,
             zorder=5, label="A — total")
@@ -3237,6 +3248,136 @@ def generate_insitu_absorption(output_dir: str) -> None:
     ax.set_axisbelow(True)
     plt.tight_layout()
     plt.savefig(themed_path(output_dir, "insitu_absorption.png"))
+    plt.close()
+
+
+def generate_sound_power_pressure_result(output_dir: str) -> None:
+    """ISO 3744: enveloping-surface LW spectrum from hemisphere pressure levels."""
+    print("Generating sound_power_pressure_result.png...")
+    from phonometry import sound_power_pressure
+
+    # The sound-power guide's section-1 example: octave-band SPL at the 10
+    # hemisphere positions of ISO 3744 (Annex B) around a machine on one
+    # reflecting plane, with a flat 55 dB background, corrected for background
+    # (K1) and for the test room (K2 from T = 0.6 s, V = 300 m^3). The library
+    # forms LW = Lp_bar - K1 - K2 + 10 lg(S/S0) per band and the A-weighted
+    # total LWA.
+    freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000], dtype=float)
+    base = np.array([70.0, 74.0, 78.0, 80.0, 79.0, 76.0, 72.0, 66.0])
+    rng = np.random.default_rng(0)
+    levels = base + rng.normal(0.0, 0.5, size=(10, 8))
+    background = np.full((10, 8), 55.0)
+    result = sound_power_pressure(
+        levels, "hemisphere", radius=1.5, reflecting_planes=1,
+        background_levels=background, frequencies=freqs,
+        reverberation_time=0.6, volume=300.0,
+    )
+
+    lw = result.sound_power_level
+    lwa = result.sound_power_level_a
+    positions = np.arange(freqs.size, dtype=float)
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    ax.bar(positions, lw, width=0.7, color=COLOR_PRIMARY, edgecolor=COLOR_FG,
+           linewidth=0.7, zorder=3)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax.set_title(f"Enveloping-surface sound power (ISO 3744)  LWA = {lwa:.1f} dB(A)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Sound power level LW [dB]")
+    ax.set_ylim(0.0, float(np.nanmax(lw)) + 8.0)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "sound_power_pressure_result.png"))
+    plt.close()
+
+
+def generate_sound_power_reverberation_result(output_dir: str) -> None:
+    """ISO 3741: reverberation-room LW spectrum (direct method)."""
+    print("Generating sound_power_reverberation_result.png...")
+    from phonometry import sound_power_reverberation
+
+    # The sound-power guide's section-2 example: one-third-octave mean room
+    # SPL from 100 Hz to 10 kHz in a qualified 200 m^3 reverberation room with
+    # T60 = 2 s, carried to LW through the Sabine absorption area, the
+    # Waterhouse correction and the meteorological corrections C1/C2
+    # (ISO 3741 Eq. 20).
+    freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
+                      1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000,
+                      10000], dtype=float)
+    lp = np.linspace(80.0, 70.0, freqs.size)
+    t60 = np.full(freqs.size, 2.0)
+    result = sound_power_reverberation(
+        lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
+        temperature=20.0, static_pressure=101.0,
+    )
+
+    lw = result.sound_power_level
+    lwa = result.sound_power_level_a
+    positions = np.arange(freqs.size, dtype=float)
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    ax.bar(positions, lw, width=0.7, color=COLOR_PRIMARY, edgecolor=COLOR_FG,
+           linewidth=0.7, zorder=3)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax.set_title(
+        f"Reverberation-room sound power (ISO 3741)  LWA = {lwa:.1f} dB(A)",
+        fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Sound power level LW [dB]")
+    ax.set_ylim(0.0, float(np.nanmax(lw)) + 8.0)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "sound_power_reverberation_result.png"))
+    plt.close()
+
+
+def generate_sound_power_intensity_result(output_dir: str) -> None:
+    """ISO 9614-2: intensity-scanning LW spectrum from segment sweeps."""
+    print("Generating sound_power_intensity_result.png...")
+    from phonometry import sound_power_intensity
+
+    # The sound-power guide's section-3 example: two repeated intensity sweeps
+    # over 6 surface segments and 6 octave bands, with the segment surface SPL
+    # and the probe's pressure-residual intensity index. The partial powers
+    # In_i * Si sum to the band LW; every band passes the field-indicator
+    # criteria at engineering grade here (no SoundPowerWarning fires).
+    freqs = np.array([125, 250, 500, 1000, 2000, 4000], dtype=float)
+    areas = np.full(6, 0.5)
+    rng = np.random.default_rng(0)
+    scan1 = np.abs(rng.normal(1e-4, 2e-5, size=(6, 6)))
+    scan2 = scan1 * (1.0 + rng.normal(0.0, 0.02, size=(6, 6)))
+    pressure = np.full((6, 6), 80.0)
+    result = sound_power_intensity(
+        scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
+        pressure_residual_index=12.0, frequencies=freqs,
+        band_type="octave", grade="engineering",
+    )
+
+    lw = result.sound_power_level
+    lwa = result.sound_power_level_a
+    positions = np.arange(freqs.size, dtype=float)
+    fig, ax = plt.subplots(figsize=(10, 6.3))
+    # Plot only the determinable (finite-LW) bands; an undeterminable band
+    # (net inflow -> NaN) is left as a gap rather than faked to 0 dB. All six
+    # bands are finite with this synthetic data, so this is future-proofing.
+    finite = np.isfinite(lw)
+    ax.bar(positions[finite], lw[finite], width=0.7, color=COLOR_PRIMARY,
+           edgecolor=COLOR_FG, linewidth=0.7, zorder=3)
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax.set_title(
+        f"Intensity-scanning sound power (ISO 9614-2)  LWA = {lwa:.1f} dB(A)",
+        fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Sound power level LW [dB]")
+    ax.set_ylim(0.0, float(np.nanmax(lw)) + 8.0)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    plt.tight_layout()
+    plt.savefig(themed_path(output_dir, "sound_power_intensity_result.png"))
     plt.close()
 
 
@@ -4012,6 +4153,13 @@ def generate_all(img_dir: str) -> None:
     generate_insitu_absorption(img_dir)
     generate_precision_anechoic_power(img_dir)
     generate_intensity_scan_power(img_dir)
+
+    # Sound power result spectra for the three most-used routes
+    # (ISO 3744 enveloping surface, ISO 3741 reverberation room,
+    # ISO 9614-2 intensity scanning)
+    generate_sound_power_pressure_result(img_dir)
+    generate_sound_power_reverberation_result(img_dir)
+    generate_sound_power_intensity_result(img_dir)
 
     # Human vibration (ISO 8041-1, ISO 2631-1/-2/-4, ISO 5349-1/-2,
     # Directive 2002/44/EC): frequency weighting, weighted a_w, daily A(8)

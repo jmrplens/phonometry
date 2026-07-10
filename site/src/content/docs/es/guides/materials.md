@@ -58,6 +58,21 @@ $\alpha_w = 0{,}60$; el pico de 500 Hz sobrepasa la curva desplazada en ≥ 0,25
 añadiendo el indicador `M`, de modo que la valoración es $0{,}60(\text{M})$, clase
 C.*
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import weighted_absorption
+
+# Coeficientes prácticos del Anexo A.2 de ISO 11654 a 250/500/1000/2000/4000 Hz
+result = weighted_absorption([0.35, 1.00, 0.65, 0.60, 0.55])
+result.plot()   # curva práctica frente a la referencia desplazada
+plt.show()
+```
+
+</details>
+
 ```python
 from phonometry import weighted_absorption, absorption_class
 
@@ -113,6 +128,35 @@ lineal $a$ es la resistencia específica al flujo de aire a velocidad nula.
 *La caída de presión, ligeramente superlineal, se ajusta pasando por el origen;
 la resistencia específica al flujo de aire es el ajuste leído a 0,5 mm/s.*
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import static_airflow_resistance
+
+area = np.pi * 0.05**2                      # celda de 100 mm de diámetro [m^2]
+u = np.array([0.5, 1, 2, 4, 8, 12]) * 1e-3  # velocidad lineal [m/s]
+dp = 1.6e4 * u + 4.0e5 * u**2               # caída de presión medida [Pa]
+r = static_airflow_resistance(u, dp, area=area, thickness=0.05)
+
+u_fit = np.linspace(0.0, 13e-3, 200)
+dp_fit = r.linear_coefficient * u_fit + r.quadratic_coefficient * u_fit**2
+fig, ax = plt.subplots()
+ax.plot(u_fit * 1e3, dp_fit, label="Ajuste por el origen  dp = a u + b u^2")
+ax.plot(u * 1e3, dp, "o", label="Caída de presión medida")
+ax.plot(r.evaluation_velocity * 1e3, r.pressure_drop, "D",
+        label="Evaluación a 0.5 mm/s")
+ax.set_xlabel("Velocidad lineal del flujo u [mm/s]")
+ax.set_ylabel("Caída de presión dp [Pa]")
+ax.set_title(f"R_s = {r.specific_resistance:.0f} Pa·s/m")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
 from phonometry import static_airflow_resistance
@@ -165,7 +209,7 @@ R = alternating_airflow_resistance(
     piston_stroke_specimen=14e-3, piston_stroke_termination=1.4e-3,
     frequency=2.0, cavity_volume=7.854e-4, kappa_prime=kp,
 )
-print(round(R))                   # resistencia al flujo de aire R [Pa*s/m^3]
+print(round(R))                   # 222956  resistencia al flujo de aire R [Pa*s/m^3]
 ```
 
 Pasa el resultado de `effective_kappa` a `alternating_airflow_resistance` para
@@ -197,6 +241,32 @@ $$
 
 *Una diferencia de nivel pequeña significa un absorbente casi perfecto; una
 diferencia de nivel de 9,54 dB da $s = 3$, $|r| = 0{,}5$ y $\alpha = 0{,}75$.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import (
+    standing_wave_absorption, standing_wave_ratio_from_level,
+    standing_wave_reflection_magnitude,
+)
+
+level_diff = np.linspace(0.5, 40.0, 300)    # L_max - L_min [dB]
+swr = standing_wave_ratio_from_level(level_diff)
+fig, ax = plt.subplots()
+ax.plot(level_diff, standing_wave_absorption(swr),
+        label="Coeficiente de absorción alpha")
+ax.plot(level_diff, standing_wave_reflection_magnitude(swr), "--",
+        label="Magnitud del factor de reflexión |r|")
+ax.set_xlabel("Diferencia de nivel de onda estacionaria L_max - L_min [dB]")
+ax.set_ylabel("alpha, |r|")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ```python
 from phonometry import standing_wave_absorption, standing_wave_ratio_from_level
@@ -239,6 +309,7 @@ h12 = (np.exp(1j*k0*x2) + target*np.exp(-1j*k0*x2)) / \
 r = reflection_factor(h12, spacing=spacing, x1=x1, wavenumber=k0)
 print(np.round(absorption_from_reflection(r), 3))     # [0.75 0.75 0.75]
 print(np.round(normalized_surface_impedance(r), 2))   # Z / rho c0
+# [1.15-1.23j 1.15-1.23j 1.15-1.23j]
 ```
 
 El `two_microphone_impedance` de alto nivel envuelve esta cadena y devuelve un

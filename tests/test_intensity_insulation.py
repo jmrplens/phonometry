@@ -72,7 +72,8 @@ def test_ri_modified_adds_kc() -> None:
     lin = _levels_for_target_ri(
         ref.ISO15186_1_REF_RI, 85.0, 12.0, 10.0
     )
-    freq = np.geomspace(100.0, 3150.0, 16)
+    freq = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                     1000, 1250, 1600, 2000, 2500, 3150], dtype=float)
     kc = adaptation_term_kc(freq)
     result = intensity_sound_reduction(
         [85.0] * 16, lin, measurement_area=12.0, area=10.0, kc=kc

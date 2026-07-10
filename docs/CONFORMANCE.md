@@ -119,7 +119,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 16283-3:2016 Clause 3.12 | Facade R'45 isolates the -1.5 dB incidence correction (S=A) | 38.5 dB (+/-0 dB) | 38.5 dB | 0 dB | &#9989; |
 | ISO 10140-2:2010 Formula (2) | Lab airborne R on the ISO 717-1 reference shape -> Rw = 54 | Rw 54 dB | Rw 54 dB | +0 dB | &#9989; |
 | ISO 15186-1:2000 Formula (7) | Intensity RI on the ISO 717-1 reference shape -> RI,w = 30 | RI,w 30 dB | RI,w 30 dB | +0 dB | &#9989; |
-| ISO 15186-1:2000 Annex B | Adaptation term Kc: reference-room (B.1) reduces to (B.2) | max |B.1 - B.2| <= 0,001 dB | 2.59e-04 dB (Kc@1k = 0.259 dB) | 2.59e-04 dB | &#9989; |
+| ISO 15186-1:2000 Annex B | Adaptation term Kc: reference-room (B.1) reduces to (B.2) | max abs(B.1 - B.2) <= 0,001 dB | 2.59e-04 dB (Kc@1k = 0.259 dB) | 2.59e-04 dB | &#9989; |
 
 </details>
 

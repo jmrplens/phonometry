@@ -198,18 +198,18 @@ def adaptation_term_kc(
     if not np.all(np.isfinite(f)) or np.any(f <= 0.0):
         raise ValueError("'freq' must contain positive, finite values.")
 
-    if (boundary_area is None) != (volume is None):
+    if boundary_area is None and volume is None:
+        ratio = _KC_APPROX_COEFF / f
+    elif boundary_area is not None and volume is not None:
+        sb2 = _positive_area(boundary_area, "boundary_area")
+        v2 = _positive_area(volume, "volume")
+        wavelength = _SPEED_OF_SOUND / f
+        ratio = sb2 * wavelength / (8.0 * v2)
+    else:
         raise ValueError(
             "Supply both 'boundary_area' and 'volume' for Formula (B.1), or "
             "neither for the Formula (B.2) approximation."
         )
-    if boundary_area is None:
-        ratio = _KC_APPROX_COEFF / f
-    else:
-        sb2 = _positive_area(boundary_area, "boundary_area")
-        v2 = _positive_area(volume, "volume")  # type: ignore[arg-type]
-        wavelength = _SPEED_OF_SOUND / f
-        ratio = sb2 * wavelength / (8.0 * v2)
     return 10.0 * np.log10(1.0 + ratio)
 
 

@@ -972,7 +972,7 @@ def _chk_intensity_kc_annexb() -> Outcome:
     delta = float(np.max(np.abs(b1 - b2)))
     passed = bool(np.allclose(b2, tab, atol=5e-4)) and delta <= 1e-3
     return Outcome(
-        expected="max |B.1 - B.2| <= 0,001 dB",
+        expected="max abs(B.1 - B.2) <= 0,001 dB",
         computed=f"{delta:.2e} dB (Kc@1k = {b2[3]:.3f} dB)",
         delta=f"{delta:.2e} dB",
         passed=passed,

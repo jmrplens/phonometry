@@ -809,7 +809,9 @@ from phonometry import (intensity_sound_reduction, adaptation_term_kc,
 # measurement surface (Sm), for a specimen of area S; 16 one-third-octave bands.
 lp1 = np.full(16, 85.0)
 l_in = np.full(16, 40.0)
-kc = adaptation_term_kc(np.geomspace(100.0, 3150.0, 16))   # Annex B (B.2)
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150]   # nominal 1/3-octave centres
+kc = adaptation_term_kc(freqs)                  # Annex B (B.2)
 res = intensity_sound_reduction(lp1, l_in, measurement_area=12.0, area=10.0, kc=kc)
 print(round(float(res.r_i[0]), 2))          # 38.21  RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)]
 print(round(float(res.r_i_modified[0]), 2)) # 40.29  RI,M = RI + Kc

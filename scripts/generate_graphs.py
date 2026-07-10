@@ -156,8 +156,7 @@ _ES_EXACT = {
         "Índice de reducción sonora por intensidad ISO 15186-1 (RI y RI,M)",
     "Sound reduction index [dB]": "Índice de reducción sonora [dB]",
     "Kc adaptation": "Adaptación Kc",
-    "Kc lifts the low bands (Annex B)":
-        "Kc eleva las bandas bajas (Anexo B)",
+    "RI (intensity)": "RI (intensidad)",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3032,10 +3031,11 @@ def generate_intensity_insulation(output_dir: str) -> None:
     ax.legend(loc="upper left", fontsize=9)
 
     panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    # Data-only info box (language-neutral); the Kc lift is explained by the
+    # shaded "Kc adaptation" legend entry, which the ES translator handles.
     info = [
         f"RI,w = {result.rating.rating} dB",
         f"RI,M,w = {result.rating_modified.rating} dB",
-        "Kc lifts the low bands (Annex B)",
     ]
     ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
             va="bottom", ha="right", fontsize=11, color=COLOR_FG,

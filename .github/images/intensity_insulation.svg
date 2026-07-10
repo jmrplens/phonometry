@@ -466,21 +466,20 @@ L 705.704063 28.318125
    </g>
    <g id="text_26">
     <g id="patch_7">
-     <path d="M 520.87581 384.964631 
+     <path d="M 611.275185 384.964631 
 L 695.875498 384.964631 
 Q 701.375498 384.964631 701.375498 379.464631 
-L 701.375498 339.855607 
-Q 701.375498 334.355607 695.875498 334.355607 
-L 520.87581 334.355607 
-Q 515.37581 334.355607 515.37581 339.855607 
-L 515.37581 379.464631 
-Q 515.37581 384.964631 520.87581 384.964631 
+L 701.375498 353.058615 
+Q 701.375498 347.558615 695.875498 347.558615 
+L 611.275185 347.558615 
+Q 605.775185 347.558615 605.775185 353.058615 
+L 605.775185 379.464631 
+Q 605.775185 384.964631 611.275185 384.964631 
 z
 " style="fill: #f0f2f5; stroke: #e0e0e0; stroke-linejoin: miter"/>
     </g>
-    <text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(624.26206 349.314963)">RI,w = 30 dB</text>
-    <text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(611.275185 362.51797)">RI,M,w = 30 dB</text>
-    <text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(520.87581 375.720978)">Kc lifts the low bands (Annex B)</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(624.26206 362.51797)">RI,w = 30 dB</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(611.275185 375.720978)">RI,M,w = 30 dB</text>
    </g>
    <g id="text_27">
     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="378.085234" y="16.318125" transform="rotate(-0 378.085234 16.318125)">ISO 15186-1 Intensity Sound Reduction Index (RI and RI,M)</text>

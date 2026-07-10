@@ -663,3 +663,22 @@ ISO717_2_ANNEX_C1_EXPECTED = {
     "ci": -11,
     "unfavourable_sum": 28.0,
 }
+
+# ---------------------------------------------------------------------------
+# ISO 15186-1:2000 - sound insulation measured with sound intensity.
+# The standard gives no fully worked numeric example, so the intensity sound
+# reduction index RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)] (Formula (7)) is anchored
+# on the identity that, when the receiving-side intensity levels are chosen so
+# that RI reproduces the ISO 717-1 Annex C airborne curve above, the ISO 717-1
+# engine returns the same Rw = 30 dB through the intensity path. The
+# adaptation term Kc (Annex B) values below are from Formula (B.2)
+# Kc = 10 lg(1 + 61,4/f); Formula (B.1) with the reference room
+# (Sb2 = 117 m², V2 = 81 m³, c = 340 m/s) reduces to (B.2) within 0,001 dB.
+# ---------------------------------------------------------------------------
+ISO15186_1_REF_LP1 = 85.0  # flat source-room level (dB)
+ISO15186_1_REF_SM = 12.0  # measurement-surface area (m²)
+ISO15186_1_REF_S = 10.0  # specimen area (m²)
+ISO15186_1_REF_RI = ISO717_1_ANNEX_C_R  # target intensity SRI (16 bands)
+ISO15186_1_REF_RIW = 30  # RI,w through the ISO 717-1 engine
+ISO15186_1_KC_BANDS = (125.0, 250.0, 500.0, 1000.0, 2000.0)
+ISO15186_1_KC_B2 = [1.735, 0.954, 0.503, 0.259, 0.131]  # 10 lg(1+61,4/f), 3 dp

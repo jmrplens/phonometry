@@ -157,6 +157,15 @@ from .lab_insulation import (
     lab_airborne_insulation,
     lab_impact_insulation,
 )
+from .intensity_insulation import (
+    IntensityElementNormalizedResult,
+    IntensityReductionResult,
+    adaptation_term_kc,
+    combine_subareas,
+    intensity_element_normalized_difference,
+    intensity_sound_reduction,
+    surface_pressure_intensity_indicator,
+)
 from .open_plan import OpenPlanResult, open_plan_metrics
 from .sound_power import (
     MeteorologicalCorrection,
@@ -747,6 +756,13 @@ __all__ = [
     "LabImpactInsulationResult",
     "background_correction",
     "LabInsulationWarning",
+    "intensity_sound_reduction",
+    "IntensityReductionResult",
+    "intensity_element_normalized_difference",
+    "IntensityElementNormalizedResult",
+    "adaptation_term_kc",
+    "surface_pressure_intensity_indicator",
+    "combine_subareas",
     "lden",
     "ldn",
     "composite_rating_level",

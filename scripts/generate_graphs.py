@@ -151,6 +151,12 @@ _ES_EXACT = {
     "Class 0 corridor": "Corredor de clase 0",
     "Class 1 corridor": "Corredor de clase 1",
     "Class 2 corridor": "Corredor de clase 2",
+    # intensity_insulation figure (ISO 15186-1)
+    "ISO 15186-1 Intensity Sound Reduction Index (RI and RI,M)":
+        "Índice de reducción sonora por intensidad ISO 15186-1 (RI y RI,M)",
+    "Sound reduction index [dB]": "Índice de reducción sonora [dB]",
+    "Kc adaptation": "Adaptación Kc",
+    "RI (intensity)": "RI (intensidad)",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -2982,6 +2988,64 @@ def generate_facade_prediction(output_dir: str) -> None:
     plt.close()
 
 
+def generate_intensity_insulation(output_dir: str) -> None:
+    """ISO 15186-1 intensity SRI and the Kc-modified index RI,M = RI + Kc."""
+    print("Generating intensity_insulation...")
+    from phonometry import adaptation_term_kc, intensity_sound_reduction
+
+    # 16 one-third-octave bands (100-3150 Hz); reuse the ISO 717-1 Annex C
+    # airborne shape as the intensity SRI target (RI,w = 30 dB, a light wall).
+    freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+                      1000, 1250, 1600, 2000, 2500, 3150], dtype=float)
+    ri = np.array([20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+                   28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5])
+    lp1, sm, s = 85.0, 12.0, 10.0
+    # Levels that make Formula (7) land on RI, then modify with Kc (Annex B).
+    l_in = lp1 - 6.0 - 10.0 * np.log10(sm / s) - ri
+    kc = adaptation_term_kc(freqs)
+    result = intensity_sound_reduction(
+        np.full(16, lp1), l_in, measurement_area=sm, area=s, kc=kc
+    )
+    assert result.r_i_modified is not None
+    assert result.rating is not None and result.rating_modified is not None
+
+    x = np.arange(len(freqs))
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    # Shade the Kc adaptation lift between RI and RI,M (largest at low bands).
+    ax.fill_between(x, result.r_i, result.r_i_modified, color=COLOR_TERTIARY,
+                    alpha=0.18, zorder=0, label="Kc adaptation")
+    ax.plot(x, result.r_i, "-", color=COLOR_PRIMARY, linewidth=2.6, marker="o",
+            markersize=6, zorder=5, label="RI (intensity)")
+    ax.plot(x, result.r_i_modified, "--", color=COLOR_TERTIARY, linewidth=2.2,
+            marker="s", markersize=6, zorder=5, label="RI,M = RI + Kc")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{int(f)}" for f in freqs], rotation=45, ha="right",
+                       fontsize=8)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Sound reduction index [dB]")
+    ax.set_title("ISO 15186-1 Intensity Sound Reduction Index (RI and RI,M)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    # Data-only info box (language-neutral); the Kc lift is explained by the
+    # shaded "Kc adaptation" legend entry, which the ES translator handles.
+    info = [
+        f"RI,w = {result.rating.rating} dB",
+        f"RI,M,w = {result.rating_modified.rating} dB",
+    ]
+    ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=11, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "intensity_insulation.png")
+    plt.close()
+
+
 def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     """ISO 12999-1 per-band + single-number measurement uncertainty (situation B)."""
     print("Generating insulation_uncertainty_demo.png...")
@@ -4377,6 +4441,7 @@ def generate_all(img_dir: str) -> None:
     # Building-acoustics prediction / uncertainty (EN 12354-1, ISO 12999-1)
     generate_prediction_flanking_demo(img_dir)
     generate_facade_prediction(img_dir)
+    generate_intensity_insulation(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 
     # Outdoor propagation & occupational exposure (ISO 9613-1/2, ISO 9612)

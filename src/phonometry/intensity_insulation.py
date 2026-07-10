@@ -1,0 +1,407 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Sound insulation measured with sound intensity (ISO 15186).
+
+This is the sound-**intensity** counterpart of the sound-pressure methods in
+:mod:`phonometry.lab_insulation` (ISO 10140) and :mod:`phonometry.insulation`
+(ISO 16283). Instead of an equivalent absorption area in the receiving room,
+the transmitted sound power is measured directly by scanning an intensity
+probe over a measurement surface enclosing the specimen. The main use is when
+the traditional pressure method fails because of high flanking transmission
+(ISO 15186-1:2000, Clause 1): the intensity method only captures the power
+radiated by the element itself.
+
+**Intensity sound reduction index (ISO 15186-1:2000, Clause 3.8, Formula
+(7)).** From the average source-room sound pressure level ``Lp1`` and the
+average normal sound intensity level ``LIn`` over the measurement surface,
+
+``RI = Lp1 - 6 - [LIn + 10 lg(Sm / S)]`` dB
+
+with the measurement-surface area ``Sm`` and the specimen area ``S``. The
+constant ``6`` dB is the diffuse-field relationship between the sound pressure
+level and the sound intensity level incident on the specimen. The same formula
+yields the *apparent* index ``R'I`` in the field (ISO 15186-2), the only
+difference being the measurement condition (flanking is not suppressed), not
+the arithmetic.
+
+**Modified intensity sound reduction index (Clause 3.10, Formula (9)).**
+``RI,M = RI + Kc`` corrects ``RI`` so that it reproduces the ISO 140-3 (now
+ISO 10140-2) pressure result, which slightly overestimates ``R`` because the
+power radiated into the receiving room is underestimated. The adaptation term
+``Kc`` (Annex B) is ``10 lg(1 + Sb2 lambda / (8 V2))`` (Formula (B.1)) for a
+well-defined receiving room of boundary area ``Sb2`` and volume ``V2``, or the
+room-independent approximation ``10 lg(1 + 61,4 / f)`` (Formula (B.2)); both
+use the speed of sound ``c = 340 m/s`` so that (B.1) with the reference room
+``Sb2 = 117 m²``, ``V2 = 81 m³`` reduces to (B.2).
+
+**Intensity element normalized level difference (Clause 3.9, Formula (8)).**
+For small building elements, ``DI,n,e = Lp1 - 6 - (LIn + 10 lg(Sm / A0) +
+10 lg N)`` dB with the reference absorption area ``A0 = 10 m²`` and the number
+``N`` of element units in the measurement surface.
+
+**Surface pressure-intensity indicator (Clause 3.6 / 6.4.2, Formula (10)).**
+``FpI = Lp - LIn`` qualifies the measurement surface: it must stay below
+10 dB for a sound-reflecting specimen (below 6 dB when the receiving side is
+sound absorbing), and the probe's pressure-residual intensity index must
+exceed ``FpI + 10`` dB (Clause 4.1) for the dynamic capability to be adequate.
+
+**Frequency range (Clause 6.6).** Quantities are measured over the mandatory
+one-third-octave range 100 Hz to 5000 Hz (18 bands), optionally extended down
+to 50 Hz. The single-number weighted rating uses the ISO 717-1 core range, so
+the automatic rating (``RI,w``, ``RI,M,w``, ``DI,n,e,w``) is formed via the
+verified :func:`phonometry.weighted_rating` engine only when exactly 16
+one-third-octave (100-3150 Hz) or 5 octave (125-2000 Hz) values are supplied.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Sequence
+
+import numpy as np
+
+from .insulation import (
+    WeightedRatingResult,
+    _as_band_levels,
+    weighted_rating,
+)
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
+#: Reference equivalent absorption area for the element-normalized level
+#: difference (ISO 15186-1:2000, Clause 3.9): 10 m².
+_A0 = 10.0
+
+#: Diffuse-field level difference between the sound pressure level and the
+#: incident sound intensity level (ISO 15186-1:2000, Formulas (7)-(8)): 6 dB.
+_DIFFUSE_FIELD = 6.0
+
+#: Speed of sound used in the adaptation term ``Kc`` (Annex B): 340 m/s, the
+#: value for which Formula (B.1) with the reference room reduces to (B.2).
+_SPEED_OF_SOUND = 340.0
+
+#: Numerator of the room-independent adaptation term ``Kc`` (Formula (B.2)).
+_KC_APPROX_COEFF = 61.4
+
+
+@dataclass(frozen=True)
+class IntensityReductionResult:
+    """Per-band intensity sound reduction index (ISO 15186-1:2000).
+
+    :ivar r_i: Intensity sound reduction index ``RI = Lp1 - 6 -
+        [LIn + 10 lg(Sm/S)]`` per band, in dB (Clause 3.8, Formula (7)). In
+        the field (ISO 15186-2) this is the apparent index ``R'I``.
+    :ivar r_i_modified: Modified index ``RI,M = RI + Kc`` per band, in dB
+        (Clause 3.10, Formula (9)), or ``None`` when no adaptation term was
+        supplied.
+    :ivar rating: Single-number weighted rating ``RI,w`` with ``C`` / ``Ctr``
+        (ISO 717-1), or ``None`` when the band count is neither 16
+        (one-third octave) nor 5 (octave).
+    :ivar rating_modified: Weighted rating ``RI,M,w`` of the modified index,
+        or ``None`` when unavailable.
+    """
+
+    r_i: np.ndarray
+    r_i_modified: np.ndarray | None
+    rating: WeightedRatingResult | None
+    rating_modified: WeightedRatingResult | None
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot ``RI`` against the shifted ISO 717-1 reference curve.
+
+        Delegates to the weighted-rating plot (measured ``RI`` versus the
+        shifted reference, unfavourable deviations shaded). Requires the
+        automatic rating to be available (16 or 5 bands) and matplotlib
+        (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        if self.rating is None:
+            raise ValueError(
+                "No single-number rating is available to plot (need 16 "
+                "one-third-octave or 5 octave bands)."
+            )
+        return self.rating.plot(ax=ax, **kwargs)
+
+
+@dataclass(frozen=True)
+class IntensityElementNormalizedResult:
+    """Per-band intensity element normalized level difference (ISO 15186-1).
+
+    :ivar d_i_n_e: Intensity element normalized level difference
+        ``DI,n,e = Lp1 - 6 - (LIn + 10 lg(Sm/A0) + 10 lg N)`` per band, in dB
+        (Clause 3.9, Formula (8)).
+    :ivar rating: Single-number weighted rating ``DI,n,e,w`` with ``C`` /
+        ``Ctr`` (ISO 717-1), or ``None`` when the band count is neither 16
+        (one-third octave) nor 5 (octave).
+    """
+
+    d_i_n_e: np.ndarray
+    rating: WeightedRatingResult | None
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot ``DI,n,e`` against the shifted ISO 717-1 reference curve.
+
+        Delegates to the weighted-rating plot. Requires the automatic rating
+        to be available (16 or 5 bands) and matplotlib
+        (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        if self.rating is None:
+            raise ValueError(
+                "No single-number rating is available to plot (need 16 "
+                "one-third-octave or 5 octave bands)."
+            )
+        return self.rating.plot(ax=ax, **kwargs)
+
+
+def _positive_area(value: float, name: str) -> float:
+    """Return ``value`` as a positive, finite area, or raise."""
+    v = float(value)
+    if not np.isfinite(v) or v <= 0.0:
+        raise ValueError(f"'{name}' must be positive.")
+    return v
+
+
+def adaptation_term_kc(
+    freq: Sequence[float] | np.ndarray,
+    *,
+    boundary_area: float | None = None,
+    volume: float | None = None,
+) -> np.ndarray:
+    """Adaptation term ``Kc`` per ISO 15186-1:2000, Annex B.
+
+    Returns, per one-third-octave midband frequency, the term ``Kc`` that
+    turns the intensity sound reduction index ``RI`` into the modified index
+    ``RI,M = RI + Kc`` (Clause 3.10). Two forms are available:
+
+    - **Well-defined receiving room (Formula (B.1)):** when both
+      ``boundary_area`` (``Sb2``) and ``volume`` (``V2``) are supplied,
+      ``Kc = 10 lg(1 + Sb2 lambda / (8 V2))`` with the midband wavelength
+      ``lambda = c / f`` and ``c = 340 m/s``.
+    - **Room-independent approximation (Formula (B.2)):** when neither is
+      supplied, ``Kc = 10 lg(1 + 61,4 / f)`` — the exact reduction of (B.1)
+      for the reference room ``Sb2 = 117 m²``, ``V2 = 81 m³``.
+
+    :param freq: One-third-octave midband frequencies, in Hz.
+    :param boundary_area: Total boundary-surface area ``Sb2`` of the
+        receiving room, in m². Supply together with ``volume`` for (B.1).
+    :param volume: Receiving-room volume ``V2``, in m³.
+    :return: The adaptation term ``Kc`` per band, in dB.
+    :raises ValueError: If ``freq`` is not positive/finite, if only one of
+        ``boundary_area`` / ``volume`` is supplied, or if either is not
+        positive.
+    """
+    f = np.asarray(freq, dtype=np.float64)
+    if f.ndim != 1:
+        raise ValueError("'freq' must be one-dimensional.")
+    if not np.all(np.isfinite(f)) or np.any(f <= 0.0):
+        raise ValueError("'freq' must contain positive, finite values.")
+
+    if (boundary_area is None) != (volume is None):
+        raise ValueError(
+            "Supply both 'boundary_area' and 'volume' for Formula (B.1), or "
+            "neither for the Formula (B.2) approximation."
+        )
+    if boundary_area is None:
+        ratio = _KC_APPROX_COEFF / f
+    else:
+        sb2 = _positive_area(boundary_area, "boundary_area")
+        v2 = _positive_area(volume, "volume")  # type: ignore[arg-type]
+        wavelength = _SPEED_OF_SOUND / f
+        ratio = sb2 * wavelength / (8.0 * v2)
+    return 10.0 * np.log10(1.0 + ratio)
+
+
+def surface_pressure_intensity_indicator(
+    lp: Sequence[float] | np.ndarray,
+    l_in: Sequence[float] | np.ndarray,
+) -> np.ndarray:
+    """Surface pressure-intensity indicator ``FpI`` (ISO 15186-1, Formula (10)).
+
+    Returns ``FpI = Lp - LIn`` per band from the surface- and time-averaged
+    sound pressure level ``Lp`` and normal sound intensity level ``LIn`` on
+    the measurement surface (Clause 3.6 / 6.4.2). The measurement surface is
+    adequately qualified when ``FpI`` stays below 10 dB for a sound-reflecting
+    specimen, or below 6 dB when the receiving side is sound absorbing; in
+    addition the probe's pressure-residual intensity index must exceed
+    ``FpI + 10`` dB (Clause 4.1).
+
+    :param lp: Surface-averaged sound pressure levels, in dB.
+    :param l_in: Normal sound intensity levels on the surface, in dB.
+    :return: The indicator ``FpI`` per band, in dB.
+    :raises ValueError: If the shapes differ or contain non-finite values.
+    """
+    p = np.asarray(lp, dtype=np.float64)
+    i = np.asarray(l_in, dtype=np.float64)
+    if p.shape != i.shape:
+        raise ValueError("'lp' and 'l_in' must share their shape.")
+    if not (np.all(np.isfinite(p)) and np.all(np.isfinite(i))):
+        raise ValueError("Levels must contain only finite values.")
+    return p - i
+
+
+def combine_subareas(
+    l_in: Sequence[Sequence[float]] | np.ndarray,
+    measurement_area: Sequence[float] | np.ndarray,
+) -> tuple[np.ndarray, float]:
+    """Combine per-subarea intensity levels (ISO 15186-1, Formulas (11)-(12)).
+
+    When the measurement surface is divided into subareas ``Smi`` each scanned
+    individually, the normal sound intensity level over the whole surface is
+    the area-weighted energy average
+
+    ``LIn = 10 lg[ (1/Sm) sum_i Smi 10^(0,1 LIni) ]`` dB
+
+    with the total measured area ``Sm = sum_i Smi`` (Formula (12)).
+
+    :param l_in: Per-subarea intensity levels as a ``(subareas, bands)``
+        array (one row per subarea), in dB.
+    :param measurement_area: Subarea areas ``Smi``, in m² (one per row).
+    :return: A tuple ``(LIn, Sm)`` with the combined level per band, in dB,
+        and the total measured area, in m².
+    :raises ValueError: If the shapes are inconsistent or values non-finite,
+        or if any subarea area is not positive.
+    """
+    levels = np.asarray(l_in, dtype=np.float64)
+    if levels.ndim != 2:
+        raise ValueError(
+            "'l_in' must be a two-dimensional (subareas, bands) array."
+        )
+    areas = np.asarray(measurement_area, dtype=np.float64)
+    if areas.ndim != 1 or areas.size != levels.shape[0]:
+        raise ValueError(
+            "'measurement_area' must give one area per subarea (row of "
+            "'l_in')."
+        )
+    if not np.all(np.isfinite(levels)):
+        raise ValueError("'l_in' must contain only finite values.")
+    if not np.all(np.isfinite(areas)) or np.any(areas <= 0.0):
+        raise ValueError("'measurement_area' must contain positive values.")
+
+    sm = float(np.sum(areas))
+    energy = np.sum(areas[:, None] * 10.0 ** (0.1 * levels), axis=0)
+    l_in_total = 10.0 * np.log10(energy / sm)
+    return l_in_total, sm
+
+
+def intensity_sound_reduction(
+    lp1: Sequence[float] | np.ndarray,
+    l_in: Sequence[float] | np.ndarray,
+    *,
+    measurement_area: float,
+    area: float,
+    kc: Sequence[float] | np.ndarray | None = None,
+) -> IntensityReductionResult:
+    """
+    Intensity sound reduction index per ISO 15186-1:2000 (Formula (7)).
+
+    Computes, per frequency band, the intensity sound reduction index
+
+    ``RI = Lp1 - 6 - [LIn + 10 lg(Sm / S)]`` dB
+
+    from the average source-room sound pressure level ``Lp1`` and the average
+    normal sound intensity level ``LIn`` over the measurement surface of area
+    ``Sm`` (``measurement_area``), for a specimen of area ``S`` (``area``).
+    The same formula gives the apparent index ``R'I`` in the field
+    (ISO 15186-2). When an adaptation term ``kc`` is supplied (see
+    :func:`adaptation_term_kc`), the modified index ``RI,M = RI + Kc``
+    (Formula (9)) is also formed. Weighted ratings ``RI,w`` (and ``RI,M,w``)
+    are computed via :func:`phonometry.weighted_rating` (ISO 717-1) when
+    exactly 16 one-third-octave (100-3150 Hz) or 5 octave (125-2000 Hz)
+    values are supplied.
+
+    ``lp1`` and ``l_in`` may be one value per band (already averaged) or a
+    two-dimensional ``(positions, bands)`` array, in which case the positions
+    are energy-averaged. Subareas scanned separately should first be combined
+    with :func:`combine_subareas`.
+
+    :param lp1: Source-room sound pressure levels, in dB.
+    :param l_in: Normal sound intensity levels over the measurement surface,
+        in dB.
+    :param measurement_area: Measurement-surface area ``Sm``, in m².
+    :param area: Specimen area ``S``, in m².
+    :param kc: Adaptation term ``Kc`` per band (dB) for the modified index,
+        or ``None`` to skip it.
+    :return: :class:`IntensityReductionResult`.
+    :raises ValueError: If the band counts differ, if ``measurement_area`` /
+        ``area`` are not positive, or if inputs are non-finite.
+    """
+    lp1_bands = _as_band_levels(lp1, "lp1")
+    l_in_bands = _as_band_levels(l_in, "l_in")
+    if lp1_bands.shape != l_in_bands.shape:
+        raise ValueError("'lp1' and 'l_in' must share the same band count.")
+    sm = _positive_area(measurement_area, "measurement_area")
+    s = _positive_area(area, "area")
+
+    r_i = lp1_bands - _DIFFUSE_FIELD - (l_in_bands + 10.0 * np.log10(sm / s))
+
+    r_i_modified: np.ndarray | None = None
+    if kc is not None:
+        kc_bands = np.asarray(kc, dtype=np.float64)
+        if kc_bands.shape != r_i.shape:
+            raise ValueError("'kc' must share the band count of the levels.")
+        if not np.all(np.isfinite(kc_bands)):
+            raise ValueError("'kc' must contain only finite values.")
+        r_i_modified = r_i + kc_bands
+
+    rating = weighted_rating(r_i) if r_i.size in (16, 5) else None
+    rating_modified = (
+        weighted_rating(r_i_modified)
+        if r_i_modified is not None and r_i_modified.size in (16, 5)
+        else None
+    )
+    return IntensityReductionResult(
+        r_i=r_i,
+        r_i_modified=r_i_modified,
+        rating=rating,
+        rating_modified=rating_modified,
+    )
+
+
+def intensity_element_normalized_difference(
+    lp1: Sequence[float] | np.ndarray,
+    l_in: Sequence[float] | np.ndarray,
+    *,
+    measurement_area: float,
+    n: int = 1,
+) -> IntensityElementNormalizedResult:
+    """
+    Intensity element normalized level difference per ISO 15186-1 (Formula (8)).
+
+    Computes, per frequency band, the intensity element normalized level
+    difference for small building elements
+
+    ``DI,n,e = Lp1 - 6 - (LIn + 10 lg(Sm / A0) + 10 lg N)`` dB
+
+    from the average source-room sound pressure level ``Lp1``, the average
+    normal sound intensity level ``LIn`` over the measurement surface of area
+    ``Sm`` (``measurement_area``), the reference absorption area ``A0 = 10
+    m²`` and the number ``N`` of element units installed within the surface.
+    The weighted rating ``DI,n,e,w`` is computed via
+    :func:`phonometry.weighted_rating` (ISO 717-1) when exactly 16 or 5 values
+    are supplied.
+
+    :param lp1: Source-room sound pressure levels, in dB.
+    :param l_in: Normal sound intensity levels over the measurement surface,
+        in dB.
+    :param measurement_area: Measurement-surface area ``Sm``, in m².
+    :param n: Number ``N`` of small element units in the surface (Default: 1).
+    :return: :class:`IntensityElementNormalizedResult`.
+    :raises ValueError: If the band counts differ, if ``measurement_area`` is
+        not positive, if ``n`` is not a positive integer, or if inputs are
+        non-finite.
+    """
+    lp1_bands = _as_band_levels(lp1, "lp1")
+    l_in_bands = _as_band_levels(l_in, "l_in")
+    if lp1_bands.shape != l_in_bands.shape:
+        raise ValueError("'lp1' and 'l_in' must share the same band count.")
+    sm = _positive_area(measurement_area, "measurement_area")
+    if int(n) != n or n < 1:
+        raise ValueError("'n' must be a positive integer.")
+
+    d_i_n_e = lp1_bands - _DIFFUSE_FIELD - (
+        l_in_bands + 10.0 * np.log10(sm / _A0) + 10.0 * np.log10(float(n))
+    )
+    rating = weighted_rating(d_i_n_e) if d_i_n_e.size in (16, 5) else None
+    return IntensityElementNormalizedResult(d_i_n_e=d_i_n_e, rating=rating)

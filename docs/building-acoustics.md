@@ -773,6 +773,82 @@ plt.show()
 `coverage_factor`, `expanded_uncertainty`, `.lower`, `.upper`). The read-only
 `COVERAGE_FACTORS` mapping exposes Table 8 keyed by `(confidence, one_sided)`.
 
+## 5. Sound insulation by intensity (ISO 15186)
+
+The laboratory method of §2 reads the transmitted power *indirectly*, from the
+receiving-room level and its absorption area — which breaks down when flanking
+paths leak power the room integrates in anyway. The **sound-intensity** method
+(ISO 15186) sidesteps that: an intensity probe scans a measurement surface that
+encloses the specimen and measures the radiated power *directly*, so only the
+element under test contributes. It is the tool of choice when flanking is high
+(ISO 15186-1:2000, Clause 1). From the source-room level $L_{p1}$ and the
+average normal intensity level $L_{In}$ over the surface (area $S_m$), for a
+specimen of area $S$,
+
+$$
+R_I = L_{p1} - 6 - \left[ L_{In} + 10 \log_{10}\frac{S_m}{S} \right],
+$$
+
+where the $6$ dB is the diffuse-field offset between the sound pressure level
+and the incident intensity level. The same formula gives the apparent index
+$R'_I$ in the field (ISO 15186-2). Because the intensity method slightly
+*underestimates* the power radiated into a real receiving room, a **modified
+index** $R_{I,M} = R_I + K_c$ reproduces the ISO 10140-2 pressure result; the
+adaptation term $K_c$ (Annex B) is $10 \log_{10}(1 + S_{b2}\lambda/8V_2)$ for a
+well-defined room, or the room-independent $10 \log_{10}(1 + 61.4/f)$. For small
+elements the **element normalized level difference** replaces $10\lg(S_m/S)$
+with $10\lg(S_m/A_0) + 10\lg N$ ($A_0 = 10\ \text{m}^2$, $N$ element units).
+
+```python
+import numpy as np
+from phonometry import (intensity_sound_reduction, adaptation_term_kc,
+                        surface_pressure_intensity_indicator)
+
+# Source-room level Lp1 and the average normal intensity level LIn over the
+# measurement surface (Sm), for a specimen of area S; 16 one-third-octave bands.
+lp1 = np.full(16, 85.0)
+l_in = np.full(16, 40.0)
+kc = adaptation_term_kc(np.geomspace(100.0, 3150.0, 16))   # Annex B (B.2)
+res = intensity_sound_reduction(lp1, l_in, measurement_area=12.0, area=10.0, kc=kc)
+print(round(float(res.r_i[0]), 2))          # 38.21  RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)]
+print(round(float(res.r_i_modified[0]), 2)) # 40.29  RI,M = RI + Kc
+print(res.rating.rating)                     # 38  ->  RI,w (ISO 717-1 engine)
+
+# Qualify the measurement surface: FpI = Lp - LIn must stay < 10 dB (< 6 dB when
+# the receiving side is absorbing); the probe's residual index must exceed FpI+10.
+fpi = surface_pressure_intensity_indicator(np.full(16, 46.0), l_in)
+print(round(float(fpi[0]), 1))               # 6.0
+
+res.plot()   # measured RI vs shifted ISO 717-1 reference (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation.svg" alt="Intensity sound reduction index RI and the Kc-modified index RI,M across the one-third-octave bands, with the Annex B adaptation lift shaded between the two curves" width="80%"></picture>
+
+*The modified index $R_{I,M} = R_I + K_c$ lifts $R_I$ — most at the low bands,
+where $K_c$ is largest — so an intensity measurement reproduces the ISO 10140-2
+pressure result. The automatic rating is formed only for exactly 16
+one-third-octave or 5 octave values (`rating`/`rating_modified` are `None`
+otherwise). Subareas scanned separately are combined first with
+`combine_subareas` (Formulas (11)-(12)).*
+
+### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `lp1` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Source-room sound pressure level |
+| `l_in` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Normal intensity level over the surface |
+| `measurement_area` | float | m² | > 0 | Measurement-surface area `Sm` |
+| `area` | float | m² | > 0 | Specimen area `S` |
+| `kc` | 1D array | dB | one per band / `None` | Adaptation term for the modified index |
+| `freq` | 1D array | Hz | > 0 | Midband frequencies (`adaptation_term_kc`) |
+| `boundary_area` / `volume` | float | m² / m³ | > 0, both or neither | Room `Sb2` / `V2` for Formula (B.1) |
+
+`intensity_sound_reduction()` returns an `IntensityReductionResult` (`r_i`,
+`r_i_modified`, `rating`, `rating_modified`);
+`intensity_element_normalized_difference()` an
+`IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
+`surface_pressure_intensity_indicator()` and `combine_subareas()` return arrays.
+
 ---
 
 **Standards.** ISO 16283-1:2014, ISO 16283-2 and ISO 16283-3:2016, *Acoustics —
@@ -787,7 +863,9 @@ EN 12354-4:2000 — the façade sound insulation and outdoor-radiation predictio
 of §3 (Annex F and Annex G worked examples); ISO 12999-1:2020 — the
 standard uncertainties per measurement situation and the coverage factors
 of §4; its precision framework builds on ISO 5725 (context, not
-implemented directly).
+implemented directly); ISO 15186-1:2000 and ISO 15186-2:2003 — the
+sound-intensity sound reduction index $R_I$, its $K_c$-modified form and the
+element normalized level difference of §5 (laboratory and field).
 
 ## See also
 

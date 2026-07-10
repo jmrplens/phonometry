@@ -553,6 +553,149 @@ _ES: dict[str, str] = {
     "Survey": "Control",
     "Engineering": "Ingeniería",
     "Precision": "Precisión",
+    # --- Tanda 11: new diagrams -------------------------------------------
+    "Exponential-detector chain of the time weightings (IEC 61672-1)":
+        "Cadena del detector exponencial de las ponderaciones temporales "
+        "(IEC 61672-1)",
+    "Block processing: carrying the filter state versus resetting it":
+        "Procesado por bloques: conservar el estado del filtro frente a "
+        "reiniciarlo",
+    "Array-shape flow through a per-channel operation":
+        "Flujo de formas de array en una operación por canal",
+    "Open-plan office spatial decay of speech (ISO 3382-3)":
+        "Caída espacial del habla en oficina diáfana (ISO 3382-3)",
+    "Measurement uncertainty from tables to expanded U (ISO 12999-1)":
+        "Incertidumbre de medición: de las tablas a la U expandida (ISO 12999-1)",
+    "Single-number sound-absorption rating (ISO 11654)":
+        "Valoración de la absorción sonora en índice único (ISO 11654)",
+    "Zwicker loudness model chain (ISO 532-1)":
+        "Cadena del modelo de sonoridad de Zwicker (ISO 532-1)",
+    # time-weighting
+    "a first-order low-pass on the squared signal → the mean-square envelope":
+        "un paso bajo de primer orden sobre la señal al cuadrado → la "
+        "envolvente cuadrática media",
+    "band signal": "señal de banda",
+    "square": "cuadrado",
+    "one-pole RC": "RC de un polo",
+    "time constant τ": "constante de tiempo τ",
+    "to decibels": "a decibelios",
+    "time-weighted level": "nivel con ponderación temporal",
+    "Fast (F)": "Rápida (F)",
+    "Slow (S)": "Lenta (S)",
+    "Impulse (I)": "Impulso (I)",
+    "35 ms rise · 1500 ms fall": "35 ms subida · 1500 ms bajada",
+    # block-processing
+    "State carried across blocks — TimeWeighting.process()":
+        "Estado conservado entre bloques — TimeWeighting.process()",
+    "y[-1] (or the sosfilt zi vector) seeds the next block → identical to "
+    "one continuous call":
+        "y[-1] (o el vector zi de sosfilt) inicializa el bloque siguiente → "
+        "idéntico a una llamada continua",
+    "State reset each block — reset() or a fresh call":
+        "Estado reiniciado en cada bloque — reset() o una llamada nueva",
+    "every block restarts from rest → spurious discontinuities at the seams":
+        "cada bloque arranca desde reposo → discontinuidades espurias en las "
+        "uniones",
+    "block 1": "bloque 1",
+    "block 2": "bloque 2",
+    "block 3": "bloque 3",
+    # multichannel
+    "1-D:  (samples,)": "1-D:  (muestras,)",
+    "scalar": "escalar",
+    "2-D:  (channels, samples)": "2-D:  (canales, muestras)",
+    "(channels,)": "(canales,)",
+    "reduce along": "reducir sobre",
+    "axis = −1  (time)": "eje = −1  (tiempo)",
+    "the channel axis 0": "el eje de canal 0",
+    "rides through untouched": "pasa intacto",
+    "A mono call returns a scalar; a C-channel call returns C results.":
+        "Una llamada mono devuelve un escalar; una de C canales devuelve C "
+        "resultados.",
+    "Band metrics widen the reduced axis instead: (…, bands).":
+        "Las métricas por banda ensanchan el eje reducido: (…, bandas).",
+    # open-plan
+    "source": "fuente",
+    "spatial-decay fit range (2 m to 16 m)":
+        "rango de ajuste de caída espacial (2 m a 16 m)",
+    "spatial decay rate": "tasa de caída espacial",
+    "dB per doubling · Cl. 6.2": "dB por duplicación · Cl. 6.2",
+    "speech level at 4 m": "nivel de habla a 4 m",
+    "A-weighted · Cl. 3.3": "ponderado A · Cl. 3.3",
+    "distraction distance": "distancia de distracción",
+    "fitted STI = 0.50 · Cl. 3.6": "STI ajustado = 0,50 · Cl. 3.6",
+    "privacy distance": "distancia de privacidad",
+    "fitted STI = 0.20 · Cl. 3.7": "STI ajustado = 0,20 · Cl. 3.7",
+    # ISO 12999-1
+    "Standard uncertainty  u  — reproducibility read from the tables":
+        "Incertidumbre típica  u  — reproducibilidad leída de las tablas",
+    "bands: Tables 2/4 · ratings: Tables 3/5 · situation A (σR) / B (σsitu) / "
+    "C (σr)":
+        "bandas: Tablas 2/4 · índices: Tablas 3/5 · situación A (σR) / "
+        "B (σsitu) / C (σr)",
+    "Reduce by  m  independent measurements   u/√m   (Formula A.7)":
+        "Reducir con  m  mediciones independientes   u/√m   (Fórmula A.7)",
+    "and combine model with reality per Annex A when predicting":
+        "y combinar modelo con realidad según el Anexo A al predecir",
+    "Combine uncorrelated contributions   uc = √(Σ u_i²)   (Formula C.2)":
+        "Combinar contribuciones no correlacionadas   uc = √(Σ u_i²)   "
+        "(Fórmula C.2)",
+    "single-number combination of Annex B uses Formula B.2":
+        "la combinación de índice único del Anexo B usa la Fórmula B.2",
+    "Expand   U = k·u   (Formula 2),   k from Table 8   (k ≥ 1)":
+        "Expandir   U = k·u   (Fórmula 2),   k de la Tabla 8   (k ≥ 1)",
+    "the coverage factor depends on the reported quantity and situation":
+        "el factor de cobertura depende de la magnitud reportada y la situación",
+    "Report   Y = y ± U   (Formula 3)": "Reportar   Y = y ± U   (Fórmula 3)",
+    "two-sided coverage factor": "factor de cobertura bilateral",
+    "Declare conformity   (Formulae 4/5)": "Declarar conformidad   (Fórmulas 4/5)",
+    "one-sided coverage factor": "factor de cobertura unilateral",
+    # ISO 11654
+    "Measured  αs  at one-third octaves, 200 Hz to 5000 Hz":
+        "αs medido en tercios de octava, 200 Hz a 5000 Hz",
+    "from a reverberation room (ISO 354)": "en sala reverberante (ISO 354)",
+    "Practical  αp  per octave band, 250 Hz to 4000 Hz  (Clause 4.1)":
+        "αp práctico por banda de octava, 250 Hz a 4000 Hz  (Cláusula 4.1)",
+    "mean of the three one-third octaves, rounded to 0.05":
+        "media de los tres tercios de octava, redondeado a 0,05",
+    "Shift the reference curve in 0.05 steps to best fit  (Clause 4.2)":
+        "Desplazar la curva de referencia en pasos de 0,05 hasta el mejor "
+        "ajuste  (Cláusula 4.2)",
+    "sum of unfavourable deviations kept ≤ 0.10":
+        "suma de desviaciones desfavorables ≤ 0,10",
+    "Weighted coefficient  αw = shifted reference at 500 Hz":
+        "Coeficiente ponderado  αw = referencia desplazada a 500 Hz",
+    "Shape indicators (L, M, H) where  αp − reference ≥ 0.25":
+        "Indicadores de forma (L, M, H) donde  αp − referencia ≥ 0,25",
+    "Sound absorption class  A to E   (Table B.1, Annex B)":
+        "Clase de absorción sonora  A a E   (Tabla B.1, Anexo B)",
+    "or “Not classified” when αw falls below the class-E band":
+        "o «No clasificado» cuando αw cae por debajo de la banda de clase E",
+    # Zwicker
+    "28 one-third-octave band levels, 25 Hz to 12.5 kHz":
+        "28 niveles de banda de tercio de octava, 25 Hz a 12,5 kHz",
+    "from a spectrum, or from a calibrated signal via the Annex A filterbank":
+        "de un espectro, o de una señal calibrada mediante el banco de filtros "
+        "del Anexo A",
+    "Equal-loudness correction and lower critical bands  "
+    "(Clause 5.4, Table A.3)":
+        "Corrección de igual sonoridad y bandas críticas inferiores  "
+        "(Cláusula 5.4, Tabla A.3)",
+    "the 11 lowest bands grouped into 3 critical bands, 25-250 Hz":
+        "las 11 bandas más bajas agrupadas en 3 bandas críticas, 25-250 Hz",
+    "Core loudness of the 20 critical bands  (Tables A.4-A.7)":
+        "Sonoridad de núcleo de las 20 bandas críticas  (Tablas A.4-A.7)",
+    "a₀ transmission (A.4), diffuse-field DDF (A.5), threshold in quiet "
+    "LTQ (A.6)":
+        "transmisión a₀ (A.4), DDF de campo difuso (A.5), umbral en silencio "
+        "LTQ (A.6)",
+    "Specific loudness  N′(z)  over 0.1-Bark steps to 24 Bark":
+        "Sonoridad específica  N′(z)  en pasos de 0,1 Bark hasta 24 Bark",
+    "upper masking slopes added band to band (Table A.9)":
+        "pendientes de enmascaramiento superior sumadas banda a banda (Tabla A.9)",
+    "Total loudness  N = ∫ N′(z) dz  [sone]":
+        "Sonoridad total  N = ∫ N′(z) dz  [sone]",
+    "loudness level  LN = 40 + 10·log₂ N  [phon]":
+        "nivel de sonoridad  LN = 40 + 10·log₂ N  [phon]",
 }
 
 
@@ -2601,6 +2744,294 @@ def _d_enclosed_space_absorption(s: SVG, th: Theme) -> None:
            th.muted, "middle")
 
 
+def _d_time_weighting(s: SVG, th: Theme) -> None:
+    """Exponential-detector chain of the sound-level time weightings (IEC 61672-1)."""
+    stages = [
+        ("p(t)", "band signal", th.fg),
+        ("( · )²", "square", th.primary),
+        ("one-pole RC", "time constant τ", th.primary),
+        ("10·lg(·/p₀²)", "to decibels", th.accent),
+        ("L_τ(t)", "time-weighted level", th.secondary),
+    ]
+    bw, bh, gap = 150.0, 90.0, 12.0
+    total = len(stages) * bw + (len(stages) - 1) * gap
+    x = (900 - total) / 2
+    y = 108.0
+    last = len(stages) - 1
+    for i, (title, sub, color) in enumerate(stages):
+        fill = "none" if i in (0, last) else th.panel
+        s.rect(x, y, bw, bh, fill, color, rx=12, sw=2.2)
+        s.text(x + bw / 2, y + 38, title, 21, th.fg, "middle", bold=True)
+        s.text(x + bw / 2, y + 64, sub, 14, color, "middle")
+        if i < last:
+            s.arrow(x + bw + 1, y + bh / 2, x + bw + gap - 2, y + bh / 2, th.fg, 2)
+        x += bw + gap
+
+    # Discrete realization of the detector.
+    s.rect(130, 246, 640, 70, th.panel, th.muted, rx=10, sw=1.6)
+    s.text(450, 275, "y[n] = α·x²[n] + (1 − α)·y[n−1],   α = 1 − e^(−1/(fs·τ))",
+           18, th.fg, "middle", bold=True, mono=True)
+    s.text(450, 299, "a first-order low-pass on the squared signal → the mean-square "
+           "envelope", 14, th.muted, "middle")
+
+    # The three standardized time constants.
+    chips = [
+        ("Fast (F)", "τ = 125 ms", th.primary),
+        ("Slow (S)", "τ = 1000 ms", th.accent),
+        ("Impulse (I)", "35 ms rise · 1500 ms fall", th.secondary),
+    ]
+    cw, cgap = 210.0, 15.0
+    cx = (900 - (len(chips) * cw + (len(chips) - 1) * cgap)) / 2
+    for title, sub, color in chips:
+        s.rect(cx, 350, cw, 74, "none", color, rx=10, sw=2.2)
+        s.text(cx + cw / 2, 380, title, 18, th.fg, "middle", bold=True)
+        s.text(cx + cw / 2, 404, sub, 14, th.muted, "middle")
+        cx += cw + cgap
+
+
+def _d_block_processing(s: SVG, th: Theme) -> None:
+    """Streaming block processing: carrying the filter state versus resetting it."""
+    import math
+
+    x0, blk_w, nblk, amp = 150.0, 190.0, 3, 66.0
+
+    def _lane(gy: float, reset: bool, color: str) -> None:
+        s.line(x0, gy, x0 + nblk * blk_w, gy, th.muted, 1.4)
+        for k in range(nblk + 1):
+            bx = x0 + k * blk_w
+            s.line(bx, gy - amp - 16, bx, gy + 12, th.muted, 1.0, dash="3,4")
+        for k in range(nblk):
+            pts = []
+            for j in range(31):
+                frac = j / 30.0
+                t = frac if reset else (k + frac)
+                v = 1.0 - math.exp(-t / 0.9)
+                pts.append((x0 + (k + frac) * blk_w, gy - amp * v))
+            d = "M " + " L ".join(f"{px:.1f} {py:.1f}" for px, py in pts)
+            s.path(d, stroke=color, sw=2.6)
+            s.text(x0 + (k + 0.5) * blk_w, gy + 30, f"block {k + 1}", 13,
+                   th.muted, "middle")
+        if reset:
+            # Mark the discontinuity where each block restarts from rest.
+            v_end = 1.0 - math.exp(-1.0 / 0.9)
+            for k in range(1, nblk):
+                bx = x0 + k * blk_w
+                s.line(bx, gy - amp * v_end, bx, gy, th.secondary, 1.6, dash="2,3")
+        else:
+            # A small tag shows the carried state seeding the next block.
+            for k in range(1, nblk):
+                bx = x0 + k * blk_w
+                s.rect(bx - 27, gy - amp - 40, 54, 22, th.bg, color, rx=6, sw=1.4)
+                s.text(bx, gy - amp - 25, "y[-1]", 12, th.fg, "middle", mono=True)
+
+    s.text(450, 62, "State carried across blocks — TimeWeighting.process()", 19,
+           th.fg, "middle", bold=True)
+    s.text(450, 84, "y[-1] (or the sosfilt zi vector) seeds the next block → identical "
+           "to one continuous call", 13, th.muted, "middle")
+    _lane(200.0, reset=False, color=th.primary)
+
+    s.text(450, 300, "State reset each block — reset() or a fresh call", 19,
+           th.fg, "middle", bold=True)
+    s.text(450, 322, "every block restarts from rest → spurious discontinuities at "
+           "the seams", 13, th.muted, "middle")
+    _lane(430.0, reset=True, color=th.secondary)
+
+
+def _d_multichannel(s: SVG, th: Theme) -> None:
+    """How array shapes flow through a per-channel operation (time axis last)."""
+    cell = 22.0
+
+    def _grid(gx: float, gy: float, rows: int, cols: int, color: str) -> None:
+        for r in range(rows):
+            for c in range(cols):
+                s.rect(gx + c * cell, gy + r * cell, cell, cell, th.panel, color, sw=1.3)
+
+    # 1-D lane.
+    _grid(64, 120, 1, 8, th.primary)
+    s.text(64 + 4 * cell, 108, "1-D:  (samples,)", 15, th.fg, "middle", bold=True)
+    s.rect(610, 120, cell, cell, "none", th.accent, sw=2)
+    s.text(610 + cell / 2, 108, "scalar", 15, th.fg, "middle", bold=True)
+
+    # 2-D lane.
+    _grid(64, 250, 3, 8, th.primary)
+    s.text(64 + 4 * cell, 238, "2-D:  (channels, samples)", 15, th.fg, "middle",
+           bold=True)
+    for r in range(3):
+        s.rect(610, 250 + r * cell, cell, cell, "none", th.accent, sw=2)
+    s.text(610 + cell / 2, 238, "(channels,)", 15, th.fg, "middle", bold=True)
+
+    # Shared processing box.
+    s.rect(360, 96, 190, 200, th.panel, th.fg, rx=12, sw=2)
+    s.text(455, 178, "reduce along", 17, th.fg, "middle", bold=True)
+    s.text(455, 202, "axis = −1  (time)", 17, th.primary, "middle", bold=True, mono=True)
+    s.text(455, 236, "the channel axis 0", 14, th.muted, "middle")
+    s.text(455, 256, "rides through untouched", 14, th.muted, "middle")
+
+    s.arrow(64 + 8 * cell + 4, 131, 358, 150, th.fg, 1.6)
+    s.arrow(64 + 8 * cell + 4, 283, 358, 244, th.fg, 1.6)
+    s.arrow(552, 150, 606, 131, th.fg, 1.6)
+    s.arrow(552, 244, 606, 283, th.fg, 1.6)
+
+    s.text(450, 350, "A mono call returns a scalar; a C-channel call returns C results.",
+           15, th.fg, "middle")
+    s.text(450, 374, "Band metrics widen the reduced axis instead: (…, bands).",
+           14, th.muted, "middle")
+
+
+def _d_open_plan(s: SVG, th: Theme) -> None:
+    """ISO 3382-3 open-plan measurement line and its single-number quantities."""
+    ly = 150.0
+    lx0, lx1 = 120.0, 812.0
+    # Talker/source near the origin.
+    s.person(lx0, ly, h=70)
+    s.text(lx0, ly + 22, "source", 13, th.muted, "middle")
+    s.text(lx0, ly + 40, "(r₀ = 1 m)", 13, th.muted, "middle")
+    # Measurement line with workstations and positions.
+    s.line(lx0 + 26, ly - 30, lx1, ly - 30, th.fg, 1.8, dash="6,5")
+    dists = [(0.18, "2 m"), (0.36, "4 m"), (0.56, "8 m"), (0.78, "12 m"), (0.98, "16 m")]
+    for frac, lab in dists:
+        px = lx0 + 26 + frac * (lx1 - lx0 - 26)
+        s.rect(px - 22, ly + 4, 44, 26, th.panel, th.muted, rx=4, sw=1.3)  # desk
+        s.circle(px, ly - 30, 5, th.primary)  # measurement position
+        s.text(px, ly - 42, lab, 13, th.fg, "middle")
+    # Evaluation-range bracket (2 m to 16 m).
+    bx0 = lx0 + 26 + 0.18 * (lx1 - lx0 - 26)
+    bx1 = lx0 + 26 + 0.98 * (lx1 - lx0 - 26)
+    s.line(bx0, ly + 52, bx1, ly + 52, th.accent, 1.6)
+    s.line(bx0, ly + 46, bx0, ly + 58, th.accent, 1.6)
+    s.line(bx1, ly + 46, bx1, ly + 58, th.accent, 1.6)
+    s.text((bx0 + bx1) / 2, ly + 74, "spatial-decay fit range (2 m to 16 m)", 14,
+           th.accent, "middle")
+
+    chips = [
+        ("D₂,S", "spatial decay rate", "dB per doubling · Cl. 6.2", th.primary),
+        ("Lp,A,S,4m", "speech level at 4 m", "A-weighted · Cl. 3.3", th.primary),
+        ("rD", "distraction distance", "fitted STI = 0.50 · Cl. 3.6", th.secondary),
+        ("rP", "privacy distance", "fitted STI = 0.20 · Cl. 3.7", th.secondary),
+    ]
+    cw, cgap = 190.0, 14.0
+    cx = (900 - (len(chips) * cw + (len(chips) - 1) * cgap)) / 2
+    for sym, name, note, color in chips:
+        s.rect(cx, 320, cw, 118, th.panel, color, rx=10, sw=2)
+        s.text(cx + cw / 2, 356, sym, 22, th.fg, "middle", bold=True)
+        s.text(cx + cw / 2, 384, name, 15, color, "middle", bold=True)
+        s.text(cx + cw / 2, 412, note, 12, th.muted, "middle")
+        cx += cw + cgap
+
+
+def _d_iso12999(s: SVG, th: Theme) -> None:
+    """ISO 12999-1 uncertainty: from tabulated reproducibility to the expanded U."""
+    cx = 450.0
+    bw, bh = 664.0, 60.0
+    x0 = cx - bw / 2
+
+    s.rect(x0, 48, bw, bh, th.panel, th.fg, rx=10, sw=2)
+    s.text(cx, 72, "Standard uncertainty  u  — reproducibility read from the tables",
+           18, th.fg, "middle", bold=True)
+    s.text(cx, 92, "bands: Tables 2/4 · ratings: Tables 3/5 · situation A (σR) / "
+           "B (σsitu) / C (σr)", 13, th.muted, "middle")
+    s.arrow(cx, 108, cx, 138, th.fg, 1.8)
+
+    def _step(y: float, l1: str, l2: str, color: str) -> None:
+        s.rect(x0, y, bw, bh, th.panel, color, rx=10, sw=2)
+        s.text(cx, y + 25, l1, 17, th.fg, "middle", bold=True)
+        s.text(cx, y + 45, l2, 13, th.muted, "middle")
+
+    _step(138, "Reduce by  m  independent measurements   u/√m   (Formula A.7)",
+          "and combine model with reality per Annex A when predicting", th.fg)
+    _step(226, "Combine uncorrelated contributions   uc = √(Σ u_i²)   (Formula C.2)",
+          "single-number combination of Annex B uses Formula B.2", th.primary)
+    _step(314, "Expand   U = k·u   (Formula 2),   k from Table 8   (k ≥ 1)",
+          "the coverage factor depends on the reported quantity and situation",
+          th.secondary)
+    for y0, y1 in ((198, 226), (286, 314)):
+        s.arrow(cx, y0, cx, y1, th.fg, 1.8)
+    s.arrow(cx, 374, cx, 404, th.fg, 1.8)
+
+    # Two-sided reporting vs one-sided conformity.
+    hw = 320.0
+    s.rect(x0, 404, hw, 66, "none", th.primary, rx=10, sw=2.2)
+    s.text(x0 + hw / 2, 430, "Report   Y = y ± U   (Formula 3)", 16, th.fg,
+           "middle", bold=True)
+    s.text(x0 + hw / 2, 452, "two-sided coverage factor", 13, th.muted, "middle")
+    s.rect(cx + bw / 2 - hw, 404, hw, 66, "none", th.secondary, rx=10, sw=2.2)
+    s.text(cx + bw / 2 - hw / 2, 430, "Declare conformity   (Formulae 4/5)", 16,
+           th.fg, "middle", bold=True)
+    s.text(cx + bw / 2 - hw / 2, 452, "one-sided coverage factor", 13, th.muted, "middle")
+
+
+def _d_iso11654(s: SVG, th: Theme) -> None:
+    """ISO 11654 single-number absorption rating: from αs to the absorption class."""
+    cx = 450.0
+    bw, bh = 664.0, 54.0
+    x0 = cx - bw / 2
+
+    s.rect(x0, 46, bw, bh, th.panel, th.fg, rx=10, sw=2)
+    s.text(cx, 68, "Measured  αs  at one-third octaves, 200 Hz to 5000 Hz", 18,
+           th.fg, "middle", bold=True)
+    s.text(cx, 88, "from a reverberation room (ISO 354)", 13, th.muted, "middle")
+    s.arrow(cx, 100, cx, 128, th.fg, 1.8)
+
+    def _step(y: float, l1: str, l2: str, color: str) -> None:
+        s.rect(x0, y, bw, bh, th.panel, color, rx=10, sw=2)
+        s.text(cx, y + 23, l1, 17, th.fg, "middle", bold=True)
+        s.text(cx, y + 42, l2, 13, th.muted, "middle")
+
+    _step(128, "Practical  αp  per octave band, 250 Hz to 4000 Hz  (Clause 4.1)",
+          "mean of the three one-third octaves, rounded to 0.05", th.primary)
+    _step(206, "Shift the reference curve in 0.05 steps to best fit  (Clause 4.2)",
+          "sum of unfavourable deviations kept ≤ 0.10", th.fg)
+    _step(284, "Weighted coefficient  αw = shifted reference at 500 Hz", "", th.fg)
+    _step(362, "Shape indicators (L, M, H) where  αp − reference ≥ 0.25", "", th.secondary)
+    for y0, y1 in ((100, 128), (182, 206), (260, 284), (338, 362)):
+        s.arrow(cx, y0, cx, y1, th.fg, 1.8)
+    s.arrow(cx, 416, cx, 444, th.fg, 1.8)
+
+    s.rect(x0, 444, bw, 58, "none", th.primary, rx=10, sw=2.4)
+    s.text(cx, 469, "Sound absorption class  A to E   (Table B.1, Annex B)", 17,
+           th.fg, "middle", bold=True)
+    s.text(cx, 489, "or “Not classified” when αw falls below the class-E band",
+           13, th.muted, "middle")
+
+
+def _d_zwicker(s: SVG, th: Theme) -> None:
+    """ISO 532-1 Zwicker loudness: from band levels to N (sone) and LN (phon)."""
+    cx = 450.0
+    bw, bh = 668.0, 58.0
+    x0 = cx - bw / 2
+
+    s.rect(x0, 46, bw, bh, th.panel, th.fg, rx=10, sw=2)
+    s.text(cx, 70, "28 one-third-octave band levels, 25 Hz to 12.5 kHz", 18,
+           th.fg, "middle", bold=True)
+    s.text(cx, 90, "from a spectrum, or from a calibrated signal via the Annex A "
+           "filterbank", 13, th.muted, "middle")
+    s.arrow(cx, 104, cx, 132, th.fg, 1.8)
+
+    def _step(y: float, l1: str, l2: str, color: str) -> None:
+        s.rect(x0, y, bw, bh, th.panel, color, rx=10, sw=2)
+        s.text(cx, y + 25, l1, 17, th.fg, "middle", bold=True)
+        s.text(cx, y + 45, l2, 13, th.muted, "middle")
+
+    _step(132, "Equal-loudness correction and lower critical bands  "
+          "(Clause 5.4, Table A.3)",
+          "the 11 lowest bands grouped into 3 critical bands, 25-250 Hz",
+          th.primary)
+    _step(218, "Core loudness of the 20 critical bands  (Tables A.4-A.7)",
+          "a₀ transmission (A.4), diffuse-field DDF (A.5), threshold in quiet "
+          "LTQ (A.6)", th.fg)
+    _step(304, "Specific loudness  N′(z)  over 0.1-Bark steps to 24 Bark",
+          "upper masking slopes added band to band (Table A.9)", th.secondary)
+    for y0, y1 in ((190, 218), (276, 304)):
+        s.arrow(cx, y0, cx, y1, th.fg, 1.8)
+    s.arrow(cx, 362, cx, 392, th.fg, 1.8)
+
+    s.rect(x0, 392, bw, 60, "none", th.primary, rx=10, sw=2.4)
+    s.text(cx, 417, "Total loudness  N = ∫ N′(z) dz  [sone]", 17, th.fg, "middle",
+           bold=True)
+    s.text(cx, 438, "loudness level  LN = 40 + 10·log₂ N  [phon]", 14, th.muted,
+           "middle")
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -2677,6 +3108,27 @@ DIAGRAMS = {
     "diagram_en12354_6": (
         _d_enclosed_space_absorption,
         "Absorption area and reverberation time of a room (EN 12354-6)", 410),
+    "diagram_time_weighting": (
+        _d_time_weighting,
+        "Exponential-detector chain of the time weightings (IEC 61672-1)", 460),
+    "diagram_block_processing": (
+        _d_block_processing,
+        "Block processing: carrying the filter state versus resetting it", 510),
+    "diagram_multichannel": (
+        _d_multichannel,
+        "Array-shape flow through a per-channel operation", 410),
+    "diagram_open_plan": (
+        _d_open_plan,
+        "Open-plan office spatial decay of speech (ISO 3382-3)", 500),
+    "diagram_iso12999": (
+        _d_iso12999,
+        "Measurement uncertainty from tables to expanded U (ISO 12999-1)", 500),
+    "diagram_iso11654": (
+        _d_iso11654,
+        "Single-number sound-absorption rating (ISO 11654)", 520),
+    "diagram_zwicker": (
+        _d_zwicker,
+        "Zwicker loudness model chain (ISO 532-1)", 490),
 }
 
 

@@ -113,11 +113,14 @@ quantities = [
 ]
 model = lambda a, b, c, d: a + b + c + d
 result = ph.combine_uncertainty(model, quantities)
-mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1)
+mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
+                    keep_samples=True)
 k, U = result.expanded(0.95)
 
-# One line for the budget:
+# One line per panel — the budget bars, and the Monte Carlo histogram with
+# its coverage interval (the committed figure also overlays the GUM Gaussian):
 result.plot()
+mc.plot()
 plt.show()
 
 # By hand, both panels — budget bars and the Monte Carlo output distribution:
@@ -145,7 +148,9 @@ The `UncertaintyResult` carries the `value`, `combined_uncertainty`, the
 `sensitivities`, the per-input `contributions` and the `effective_dof`; its
 `.plot()` draws the budget and `.expanded(coverage)` returns the pair
 $(k, U)$. The `MonteCarloResult` carries the `value`, `standard_uncertainty`,
-the coverage `interval` and its `coverage`. The building-acoustics uncertainty
+the coverage `interval` and its `coverage`; with `keep_samples=True` it also
+retains the output `samples`, and its `.plot()` draws the output histogram
+with the coverage interval marked (the right panel above). The building-acoustics uncertainty
 of ISO 12999-1 — which combines reproducibility terms for a single-number
 rating — is a separate, domain-specific budget.
 

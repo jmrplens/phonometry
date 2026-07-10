@@ -64,12 +64,16 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from numpy.typing import ArrayLike, NDArray
 
 from ._warnings import PhonometryWarning
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 __all__ = [
     "AirflowResistanceWarning",
@@ -137,6 +141,16 @@ class StaticAirflowResult:
     pressure_drop: float
     linear_coefficient: float
     quadratic_coefficient: float
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the fitted ``dp(u)`` curve with the evaluation point.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_static_airflow
+
+        return plot_static_airflow(self, ax=ax, **kwargs)
 
 
 def linear_airflow_velocity(volume_flow_rate: float, area: float) -> float:

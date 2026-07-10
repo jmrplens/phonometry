@@ -144,6 +144,9 @@ class MonteCarloResult:
         ``(low, high)`` (clause 7.7).
     :ivar coverage: The coverage probability of ``interval``.
     :ivar trials: Number of Monte Carlo trials.
+    :ivar samples: The raw model-output sample (one value per trial), kept
+        only when :func:`monte_carlo` is called with ``keep_samples=True``
+        (it feeds the output-distribution histogram of :meth:`plot`).
     """
 
     value: float
@@ -151,6 +154,18 @@ class MonteCarloResult:
     interval: tuple[float, float]
     coverage: float
     trials: int
+    samples: np.ndarray | None = field(default=None, repr=False)
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the output histogram with the coverage interval marked.
+
+        Needs the raw output sample, so call ``monte_carlo(...,
+        keep_samples=True)``. Requires matplotlib (``pip install
+        phonometry[plot]``); returns the :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_monte_carlo
+
+        return plot_monte_carlo(self, ax=ax, **kwargs)
 
 
 def _sensitivity(model: Model, values: np.ndarray, uncertainties: np.ndarray) -> np.ndarray:
@@ -296,6 +311,7 @@ def monte_carlo(
     trials: int = 1_000_000,
     coverage: float = 0.95,
     seed: int | None = None,
+    keep_samples: bool = False,
 ) -> MonteCarloResult:
     """Propagate uncertainty by the Monte Carlo method (Supplement 1).
 
@@ -309,6 +325,9 @@ def monte_carlo(
     :param trials: Number of Monte Carlo trials ``M``.
     :param coverage: Coverage probability of the reported interval.
     :param seed: Optional seed for the random generator (reproducibility).
+    :param keep_samples: Retain the raw output sample on the result (one
+        float per trial) so :meth:`MonteCarloResult.plot` can draw the
+        output-distribution histogram.
     :return: A :class:`MonteCarloResult`.
     :raises ValueError: for no inputs, non-positive trials or bad coverage.
     """
@@ -332,4 +351,5 @@ def monte_carlo(
         interval=(float(low), float(high)),
         coverage=coverage,
         trials=trials,
+        samples=output if keep_samples else None,
     )

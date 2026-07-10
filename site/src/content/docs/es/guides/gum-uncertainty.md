@@ -116,11 +116,15 @@ quantities = [
 ]
 model = lambda a, b, c, d: a + b + c + d
 result = ph.combine_uncertainty(model, quantities)
-mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1)
+mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
+                    keep_samples=True)
 k, U = result.expanded(0.95)
 
-# En una línea, el balance:
+# En una línea por panel — las barras del balance, y el histograma de Monte
+# Carlo con su intervalo (la figura del repositorio superpone además la
+# gaussiana del GUM):
 result.plot()
+mc.plot()
 plt.show()
 
 # A mano, ambos paneles — las barras del balance y la distribución de salida de Monte Carlo:
@@ -148,7 +152,9 @@ El `UncertaintyResult` lleva el `value`, la `combined_uncertainty`, las
 `sensitivities`, las `contributions` por entrada y los `effective_dof`; su
 `.plot()` dibuja el balance y `.expanded(coverage)` devuelve el par $(k, U)$. El
 `MonteCarloResult` lleva el `value`, la `standard_uncertainty`, el `interval` de
-cobertura y su `coverage`. La incertidumbre de acústica de la edificación de
+cobertura y su `coverage`; con `keep_samples=True` conserva además las
+muestras de salida (`samples`), y su `.plot()` dibuja el histograma de salida
+con el intervalo de cobertura marcado (el panel derecho de arriba). La incertidumbre de acústica de la edificación de
 ISO 12999-1 — que combina términos de reproducibilidad para una magnitud de
 número único — es un balance aparte, específico de ese dominio.
 

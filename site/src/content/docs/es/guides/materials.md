@@ -316,7 +316,9 @@ El `two_microphone_impedance` de alto nivel envuelve esta cadena y devuelve un
 `ImpedanceTubeResult` con la absorción, el factor de reflexión, la impedancia
 superficial y la impedancia normalizada, aplicando la comprobación del rango de
 frecuencias de onda plana y la atenuación opcional del tubo; corrige antes
-cualquier desajuste de micrófonos con `apply_mic_calibration`.
+cualquier desajuste de micrófonos con `apply_mic_calibration`. Su `.plot()`
+dibuja el espectro de absorción $\alpha(f)$ con el módulo del factor de
+reflexión $|r|$ superpuesto.
 
 **Pérdida por transmisión (ASTM E2611).** Con cuatro micrófonos —dos aguas
 arriba, dos aguas abajo de la muestra— una medición de dos cargas (o de una

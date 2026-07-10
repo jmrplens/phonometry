@@ -368,6 +368,16 @@ print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 ```python
 import matplotlib.pyplot as plt
 
+# En una línea: la regresión D2,S reconstruida con los campos del resultado,
+# con los cruces rD / rP marcados (la figura superior añade además los puntos
+# medidos y el eje de STI):
+m.plot()
+plt.show()
+```
+
+```python
+import matplotlib.pyplot as plt
+
 # Decaimiento espacial: Lp,A,S medido frente a la distancia en eje logarítmico,
 # la regresión D2,S reconstruida con los campos del resultado, y el STI con los
 # cruces rD / rP en un eje gemelo:
@@ -408,7 +418,9 @@ plt.show()
 | `spl_a_speech` | array 1D | dB | misma longitud | Nivel de habla ponderado A `Lp,A,S,n` por posición |
 | `sti_values` | array 1D | — | misma longitud | STI por posición (método completo de IEC 60268-16) |
 
-Devuelve un `OpenPlanResult` con `d2s`, `lp_as_4m`, `rd` y `rp`.
+Devuelve un `OpenPlanResult` con `d2s`, `lp_as_4m`, `rd` y `rp`; su
+`.plot()` redibuja la regresión de decaimiento espacial del apartado 6.2 a
+partir de esos cuatro campos y marca `rd` / `rp`.
 `d2s`/`lp_as_4m` son `nan` si menos de dos posiciones caen en 2–16 m;
 `rd`/`rp` son `nan` cuando el STI no decrece con la distancia. El STI por
 posición puede medirse a su vez con las herramientas STIPA de la

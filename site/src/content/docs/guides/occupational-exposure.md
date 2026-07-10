@@ -30,6 +30,21 @@ the **uncertainty** is built.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.png" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_dark.png" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" style="width:80%">
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line, with the Annex D `res` computed below: task contribution bars
+# plus the LEX,8h and LEX,8h + U lines.
+res.plot()
+plt.show()
+```
+
+</details>
+
+
 ```python
 from phonometry.occupational_exposure import (
     Task, task_based_exposure, job_based_exposure, full_day_exposure,
@@ -107,7 +122,10 @@ derived on the [Theory](/phonometry/reference/theory/) page.
 
 All three return an `ExposureResult` with `lex_8h`, `combined_standard_uncertainty`
 $u$, `expanded_uncertainty` $U = 1.65\ u$, `upper_limit` = $L_{EX,8h} + U$,
-`sampling_advisory`, and (task-based) the per-task `tasks` breakdown.
+`sampling_advisory`, and (task-based) the per-task `tasks` breakdown; the
+result's `.plot()` draws the per-task contribution bars with the $L_{EX,8h}$
+and upper-limit lines (task-based results only, since the other strategies
+carry no per-task breakdown).
 
 ## See also
 

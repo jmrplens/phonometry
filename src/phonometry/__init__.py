@@ -434,6 +434,15 @@ from .building_uncertainty import (
     single_number_uncertainty_uncorrelated,
     uncertain_value,
 )
+from .absorption_uncertainty import (
+    AbsorptionUncertaintyResult,
+    sound_absorption_coefficient_uncertainty,
+    absorption_coverage_factor,
+    equivalent_area_uncertainty,
+    practical_coefficient_uncertainty,
+    single_number_rating_uncertainty,
+    weighted_coefficient_uncertainty,
+)
 from .occupational_exposure import (
     COVERAGE_FACTOR,
     INSTRUMENT_U2,
@@ -831,6 +840,14 @@ __all__ = [
     "BandUncertainty",
     "UncertainValue",
     "COVERAGE_FACTORS",
+    # ISO 12999-2 absorption uncertainty
+    "AbsorptionUncertaintyResult",
+    "absorption_coverage_factor",
+    "sound_absorption_coefficient_uncertainty",
+    "equivalent_area_uncertainty",
+    "practical_coefficient_uncertainty",
+    "weighted_coefficient_uncertainty",
+    "single_number_rating_uncertainty",
     "task_based_exposure",
     "job_based_exposure",
     "full_day_exposure",

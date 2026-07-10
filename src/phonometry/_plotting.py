@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from matplotlib.container import BarContainer
 
     from .absorption_rating import AbsorptionRatingResult
+    from .absorption_uncertainty import AbsorptionUncertaintyResult
     from .airflow_resistance import StaticAirflowResult
     from .building_prediction import AirbornePredictionResult, ImpactPredictionResult
     from .building_uncertainty import BandUncertainty
@@ -2442,4 +2443,61 @@ def plot_band_uncertainty(
         f"{result.measurand}, situation {result.situation}"
     )
     ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+_ABSORPTION_QUANTITY_LABELS: Final = {
+    "absorption_coefficient": "Sound absorption coefficient alpha_s",
+    "equivalent_area": "Equivalent absorption area A_T [m2]",
+    "practical_coefficient": "Practical absorption coefficient alpha_p",
+}
+
+
+def plot_absorption_uncertainty(
+    result: "AbsorptionUncertaintyResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Absorption quantity with its expanded-uncertainty ribbon (ISO 12999-2).
+
+    Draws the per-band quantity (``alpha_s``, ``A_T`` or ``alpha_p``) as a curve
+    with a shaded ``±U`` band using the exact expanded uncertainty ``U = k·u``.
+
+    :param result: An
+        :class:`~phonometry.absorption_uncertainty.AbsorptionUncertaintyResult`
+        for a band quantity (single-number results have no spectrum to plot).
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the value-curve ``plot`` call.
+    :return: The axes.
+    :raises ValueError: The result is a single-number quantity (no bands).
+    """
+    if result.frequencies.size == 0:
+        raise ValueError(
+            "plot() needs a per-band result; single-number quantities "
+            "(alpha_w, DLalpha) have no spectrum to plot."
+        )
+    ax = ax if ax is not None else _new_axes()
+    freqs = result.frequencies
+    value = result.values
+    u_expanded = result.expanded_uncertainty
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    ax.fill_between(
+        freqs,
+        value - u_expanded,
+        value + u_expanded,
+        color=_C_PRIMARY_LIGHT,
+        alpha=0.5,
+        label=f"+/-U (k = {result.coverage_factor:g})",
+    )
+    ax.plot(freqs, value, **kwargs)
+    _freq_axis(ax, freqs)
+    ylabel = _ABSORPTION_QUANTITY_LABELS.get(result.quantity, "Value")
+    ax.set_ylabel(ylabel)
+    if result.quantity != "equivalent_area":
+        ax.set_ylim(0.0, 1.05)
+    sigma = "sigma_R" if result.condition == "reproducibility" else "sigma_r"
+    ax.set_title(
+        f"ISO 12999-2 absorption uncertainty ({sigma}) — {result.condition}"
+    )
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend()
     return ax

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **104/104 conformance checks pass** across 22 domains and 65 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **107/107 conformance checks pass** across 22 domains and 66 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -127,7 +127,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Building prediction &amp; uncertainty</b> — 100% (7/7)</summary>
+<summary>&#9989; <b>Building prediction &amp; uncertainty</b> — 100% (10/10)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -138,6 +138,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | EN 12354-4:2000 Annex E / Table G.9 | Exterior level from a finite radiating side (side 1, d = 5 m) | 36.6 dB (+/-0.05 dB) | 36.597 dB | -0.003 dB | &#9989; |
 | ISO 12999-1:2020 Table 2 | Airborne band uncertainty, situation A @ 1 kHz | 1.8 dB (+/-0 dB) | 1.8 dB | 0 dB | &#9989; |
 | ISO 12999-1:2020 Clause 8 / Table 8 | Expanded uncertainty U = 1.96 u (95 % two-sided, Rw sit. A) | 2.352 dB (+/-0 dB) | 2.352 dB | 0 dB | &#9989; |
+| ISO 12999-2:2020 Table 4 / Formula (1) | Absorption coefficient +/-U (k=2), reproducibility, 20 x 1/3-oct bands | U(k=2) = [0.33, 0.26, 0.22, 0.17, 0.13, 0.11, 0.09, 0.08, 0.08, 0.08, 0.08, 0.08, 0.08, 0.09, 0.09, 0.09, 0.1, 0.11, 0.13, 0.16] | U(k=2) = [0.33, 0.26, 0.22, 0.17, 0.13, 0.11, 0.09, 0.08, 0.08, 0.08, 0.08, 0.08, 0.08, 0.09, 0.09, 0.09, 0.1, 0.11, 0.13, 0.16] | exact | &#9989; |
+| ISO 12999-2:2020 Table 5 / Formula (4) | Practical coefficient +/-U (k=2), reproducibility, 5 octave bands | U(k=2) = [0.09, 0.08, 0.08, 0.08, 0.1] | U(k=2) = [0.09, 0.08, 0.08, 0.08, 0.1] | exact | &#9989; |
+| ISO 12999-2:2020 Clause 7, Examples 1/2 | Single-number U (k=2): alpha_w and DLalpha,NRD | alpha_w +/-0.07, DLalpha +/-1.6 dB | alpha_w +/-0.07, DLalpha +/-1.6 dB | exact | &#9989; |
 
 </details>
 

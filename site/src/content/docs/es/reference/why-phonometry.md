@@ -106,6 +106,10 @@ que cualquier regresión hace fallar la CI:
 | ISO 1996-1:2016 | `lden()`, `ldn()` y `composite_rating_level()` frente a valores de las fórmulas calculados a mano | `tests/test_environmental.py` |
 | IEC 60942:2017 Tabla 2 | Límites de estabilidad a corto plazo del calibrador (dependientes de la frecuencia, clase 1) en `sensitivity()` | `tests/test_calibration_validation.py` |
 
+El informe numérico completo — el valor esperado y el valor que calcula la
+librería para cada comprobación, regenerado en cada pull request — está
+publicado como [informe de conformidad](/phonometry/es/reference/conformance/).
+
 Más allá de la dosis de ruido al estilo IEC 61252 (`sound_exposure()`,
 `lex_8h()`), la misma mentalidad de "primero la norma" se refleja en la parte
 numérica: los bancos de filtros sitúan sus puntos de −3 dB en los bordes de

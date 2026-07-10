@@ -7,7 +7,7 @@ La presión *sonora* depende de dónde te sitúes y de la sala en la que estés;
 la **potencia** sonora no. El nivel de potencia sonora `LW` es la energía
 acústica total por segundo que radia una fuente, referida a `P0 = 1 pW`, y es
 el descriptor de **emisión** independiente del dispositivo que figura en una
-ficha técnica, alimenta una predicción de sala (ISO 12354) o se contrasta con
+ficha técnica, alimenta una predicción de sala (EN 12354) o se contrasta con
 un límite de emisión de ruido. Esta página cubre las vías que phonometry
 implementa para obtenerlo y cuándo recurrir a cada una: una superficie
 envolvente de *presión* en campo (ISO 3744/3746), el campo difuso de una

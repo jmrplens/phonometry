@@ -662,7 +662,8 @@ laboratory R and Ln with the background-noise correction of §2; EN 12354-1:2000
 and EN 12354-2:2000 — the simplified flanking-transmission predictions of §3
 (Annex E junctions, worked examples H.3 and E.3); ISO 12999-1:2020 — the
 standard uncertainties per measurement situation and the coverage factors
-of §4.
+of §4; its precision framework builds on ISO 5725 (context, not
+implemented directly).
 
 ## See also
 

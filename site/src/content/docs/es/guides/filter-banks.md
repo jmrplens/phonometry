@@ -207,6 +207,11 @@ print(result["bands"][0])
 # {'freq': 12.589254117941678, 'class': 1, 'margin_class1_db': 0.39999999999997266, 'margin_class2_db': 0.5999999999999727}
 ```
 
+La propia máscara de aceptación de la Tabla 1 también es pública:
+`class_limits(fraction, filter_class, omega)` devuelve los límites
+mínimo/máximo de atenuación relativa en frecuencias normalizadas Ω = f/fm —
+los mismos límites que usan el verificador y la figura de abajo.
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay_es.png" alt="Respuesta Butterworth serpenteando entre las regiones prohibidas de la máscara de clase 1 de IEC 61260-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay_es_dark.png" alt="Respuesta Butterworth serpenteando entre las regiones prohibidas de la máscara de clase 1 de IEC 61260-1" style="width:80%">
 
 *La respuesta del Butterworth de orden 6 (azul) serpentea entre las regiones
@@ -305,4 +310,6 @@ nominales de banda y los límites de aceptación de clase 1 / clase 2 de la
 Tabla 1 (con el mapeo de breakpoints a fraccionales y la interpolación en
 frecuencia logarítmica) verificados en el §6. ANSI S1.11-2004, *Octave-Band
 and Fractional-Octave-Band Analog and Digital Filters* — el convenio de
-bordes de banda sobre el que cada banco sitúa sus puntos de −3 dB.
+bordes de banda sobre el que cada banco sitúa sus puntos de −3 dB. ISO 266
+— la serie de frecuencias preferentes en la que se basan las etiquetas nominales de banda
+que devuelve `nominal_frequencies`.

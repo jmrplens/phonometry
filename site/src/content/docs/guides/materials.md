@@ -346,7 +346,7 @@ ASTM E2611 quantities.
 
 **Standards.** ISO 11654:1997 (weighted sound-absorption rating); ISO 9053-1:2018
 (static airflow resistance); ISO 9053-2:2020 (alternating airflow resistance);
-ISO 10534-1:1996 and ISO 10534-2:1998 (impedance tube); ASTM E2611-19
+BS EN ISO 10534-1:2001 and BS EN ISO 10534-2:2001 (impedance tube); ASTM E2611-19
 (four-microphone transmission loss). Every equation is derived from the standard
 text and validated against the standards' own worked examples (ISO 11654 Annex A,
 ISO 9053-2 Annex A.3) and closed-form identities.

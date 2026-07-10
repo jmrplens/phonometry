@@ -674,7 +674,8 @@ ISO 10140-4:2010 — los R y Ln de laboratorio con la corrección de ruido de
 fondo del §2; EN 12354-1:2000 y EN 12354-2:2000 — las predicciones
 simplificadas de transmisión por flancos del §3 (uniones del Anexo E, ejemplos
 resueltos H.3 y E.3); ISO 12999-1:2020 — las incertidumbres típicas por
-situación de medición y los factores de cobertura del §4.
+situación de medición y los factores de cobertura del §4; su marco de
+precisión se apoya en ISO 5725 (contexto, no implementada directamente).
 
 ## Véase también
 

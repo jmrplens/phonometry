@@ -26,6 +26,8 @@ that is why level analyses discard the first instants of a recording.
 
 ## 2. The three time weightings
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting.gif" alt="Animation: the Fast, Slow and Impulse detectors chasing a tone burst — Fast rises and falls quickly, Slow lags, and Impulse rises fast but decays the slowest" width="88%"></picture>
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>
 
 <details>

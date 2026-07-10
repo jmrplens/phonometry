@@ -1,7 +1,10 @@
 {
-  "extends": ["html-validate:recommended"],
+  "extends": [
+    "html-validate:recommended"
+  ],
   "rules": {
     "element-permitted-content": "off",
+    "no-autoplay": "off",
     "no-deprecated-attr": "off",
     "no-implicit-button-type": "off",
     "no-inline-style": "off",

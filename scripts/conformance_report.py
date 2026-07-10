@@ -1219,8 +1219,10 @@ def _chk_iso10534_1_swr() -> Outcome:
     out = numeric(ref.ISO10534_1_ABSORPTION, alpha, 1e-9, places=4)
     r_ok = abs(r_mag - ref.ISO10534_1_REFLECTION_MAGNITUDE) <= 1e-9
     # Show both chained values so a |r| failure is visible in the report.
-    expected = f"alpha {out.expected}, |r| {ref.ISO10534_1_REFLECTION_MAGNITUDE:g}"
-    computed = f"alpha {out.computed}, |r| {r_mag:.4f}"
+    expected = (
+        f"alpha {out.expected}, \\|r\\| {ref.ISO10534_1_REFLECTION_MAGNITUDE:g}"
+    )
+    computed = f"alpha {out.computed}, \\|r\\| {r_mag:.4f}"
     return Outcome(expected, computed, out.delta, out.passed and r_ok)
 
 

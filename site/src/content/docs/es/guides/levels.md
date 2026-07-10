@@ -263,7 +263,7 @@ de la normalización de la duración; la biblioteca lo mantiene sin redondear.)
 Cuando las muestras de una tarea abarcan **3 dB o más** (apartado 9.3), o la
 contribución por función $c_1 u_1$ supera 3,5 dB (apartado 10.4), o se cubren
 demasiado pocos trabajadores (duración acumulada de la Tabla 1), el resultado fija
-`sampling_advisory=True` y, con `warn=True`, emite una `ExposureWarning` que
+`sampling_advisory=True` y, con `warn=True`, emite una `OccupationalExposureWarning` que
 recomienda más mediciones. Los niveles de pico $L_{p,Cpeak}$ se declaran **sin**
 incertidumbre —el anexo C no da método para ellos (Tabla C.5, Nota 1)—, así que
 la incertidumbre de pico queda fuera del alcance. Los tres ejemplos resueltos de
@@ -282,7 +282,7 @@ en la página de [Teoría](/phonometry/es/reference/theory/).
 | `u3` | todas | float | dB | def. `1.0` | Incertidumbre de posición del micrófono (apartado C.6) |
 | `include_duration_uncertainty` | tarea | bool | — | def. `True` | `False` omite el término $(c_{1b}u_{1b})^2$ (anexo D caso a) |
 | `n_workers` / `sample_duration_hours` | función | int / float | — / h | def. `None` | Comprobación de duración acumulada de la Tabla 1 |
-| `warn` | todas | bool | — | def. `True` | Emitir `ExposureWarning` para los avisos de muestreo |
+| `warn` | todas | bool | — | def. `True` | Emitir `OccupationalExposureWarning` para los avisos de muestreo |
 
 Las tres devuelven un `ExposureResult` con `lex_8h`, `combined_standard_uncertainty`
 $u$, `expanded_uncertainty` $U = 1.65\ u$, `upper_limit` = $L_{EX,8h} + U$,

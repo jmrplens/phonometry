@@ -253,7 +253,7 @@ unrounded.)
 When a task's samples span **3 dB or more** (Clause 9.3), or the job contribution
 $c_1 u_1$ exceeds 3.5 dB (Clause 10.4), or too few workers are covered
 (Table 1 cumulative-duration), the result sets `sampling_advisory=True` and, with
-`warn=True`, emits an `ExposureWarning` recommending more measurements. Peak
+`warn=True`, emits an `OccupationalExposureWarning` recommending more measurements. Peak
 levels $L_{p,Cpeak}$ are reported **without** an uncertainty — Annex C gives no
 method for them (Table C.5, Note 1), so peak-uncertainty is out of scope. The
 three Annex D/E/F worked examples above are reproduced to the standard's printed
@@ -271,7 +271,7 @@ derived on the [Theory](theory.md) page.
 | `u3` | all | float | dB | default `1.0` | Microphone-position uncertainty (Clause C.6) |
 | `include_duration_uncertainty` | task | bool | — | default `True` | `False` omits the $(c_{1b}u_{1b})^2$ term (Annex D case a) |
 | `n_workers` / `sample_duration_hours` | job | int / float | — / h | default `None` | Table 1 cumulative-duration check |
-| `warn` | all | bool | — | default `True` | Emit `ExposureWarning` for the sampling advisories |
+| `warn` | all | bool | — | default `True` | Emit `OccupationalExposureWarning` for the sampling advisories |
 
 All three return an `ExposureResult` with `lex_8h`, `combined_standard_uncertainty`
 $u$, `expanded_uncertainty` $U = 1.65\ u$, `upper_limit` = $L_{EX,8h} + U$,

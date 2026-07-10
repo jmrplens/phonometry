@@ -25,9 +25,9 @@ import numpy as np
 import pytest
 
 from phonometry.absorption_rating import (
-    OCTAVE_BANDS_HZ,
+    OCTAVE_BANDS,
     REFERENCE_CURVE,
-    THIRD_OCTAVE_BANDS_HZ,
+    THIRD_OCTAVE_BANDS,
     AbsorptionRatingResult,
     absorption_class,
     practical_absorption_coefficient,
@@ -55,11 +55,14 @@ def test_reference_curve_verbatim() -> None:
 
 
 def test_band_layout() -> None:
-    assert OCTAVE_BANDS_HZ == (250, 500, 1000, 2000, 4000)
-    assert len(THIRD_OCTAVE_BANDS_HZ) == 15
+    assert OCTAVE_BANDS == (250, 500, 1000, 2000, 4000)
+    assert THIRD_OCTAVE_BANDS == (
+        200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500,
+        3150, 4000, 5000,
+    )
     # Each octave centre is the middle of its one-third-octave triple.
-    for i, octave in enumerate(OCTAVE_BANDS_HZ):
-        assert THIRD_OCTAVE_BANDS_HZ[3 * i + 1] == octave
+    for i, octave in enumerate(OCTAVE_BANDS):
+        assert THIRD_OCTAVE_BANDS[3 * i + 1] == octave
 
 
 # --- Annex A oracles ------------------------------------------------------
@@ -154,7 +157,7 @@ def test_practical_wrong_length() -> None:
 
 def test_practical_mapping_matches_sequence() -> None:
     seq = [0.10 + 0.05 * i for i in range(15)]
-    mapping = dict(zip(THIRD_OCTAVE_BANDS_HZ, seq))
+    mapping = dict(zip(THIRD_OCTAVE_BANDS, seq))
     np.testing.assert_allclose(
         practical_absorption_coefficient(mapping),
         practical_absorption_coefficient(seq),
@@ -226,13 +229,13 @@ def test_result_is_frozen() -> None:
 
 def test_result_exposes_curves_for_plotting() -> None:
     res = weighted_absorption(_ANNEX_A1_ALPHA_P)
-    np.testing.assert_allclose(res.band_centers, OCTAVE_BANDS_HZ)
+    np.testing.assert_allclose(res.band_centers, OCTAVE_BANDS)
     np.testing.assert_allclose(res.measured, _ANNEX_A1_ALPHA_P)
     assert res.measured.shape == res.shifted_reference.shape == res.band_centers.shape
 
 
 def test_weighted_mapping_matches_sequence() -> None:
-    mapping = dict(zip(OCTAVE_BANDS_HZ, _ANNEX_A2_ALPHA_P))
+    mapping = dict(zip(OCTAVE_BANDS, _ANNEX_A2_ALPHA_P))
     res_map = weighted_absorption(mapping)
     res_seq = weighted_absorption(_ANNEX_A2_ALPHA_P)
     assert _almost(res_map.alpha_w, res_seq.alpha_w)
@@ -280,8 +283,8 @@ def test_public_exports() -> None:
     import phonometry
 
     for name in (
-        "AbsorptionRatingResult", "OCTAVE_BANDS_HZ", "REFERENCE_CURVE",
-        "THIRD_OCTAVE_BANDS_HZ", "absorption_class",
+        "AbsorptionRatingResult", "OCTAVE_BANDS", "REFERENCE_CURVE",
+        "THIRD_OCTAVE_BANDS", "absorption_class",
         "practical_absorption_coefficient", "weighted_absorption",
     ):
         assert hasattr(phonometry, name), name

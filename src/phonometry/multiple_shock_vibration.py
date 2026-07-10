@@ -31,6 +31,7 @@ import numpy as np
 
 from ._types import as_float_or_array
 from ._validation import require_1d_signal, require_choice, require_positive
+from .hearing import SEXES as _SEXES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -85,8 +86,6 @@ WEIBULL_FEMALE: tuple[float, float] = (0.959, 3.709)
 #: R values for 10 %, 50 % and 90 % risk of injury by sex (Table C.2).
 RISK_THRESHOLDS_MALE: tuple[float, float, float] = (0.72, 1.42, 2.17)
 RISK_THRESHOLDS_FEMALE: tuple[float, float, float] = (0.52, 0.87, 1.20)
-
-_SEXES = ("male", "female")
 
 
 def _mz_for_sex(sex: str) -> float:

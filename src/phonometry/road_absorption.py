@@ -94,7 +94,7 @@ SPOT_FREQUENCY_RANGE = (250.0, 1600.0)
 SPOT_NARROW_BAND_RANGE = (220.0, 1800.0)
 
 #: Nominal one-third-octave midband frequencies spanning both methods, in hertz.
-_ONE_THIRD_OCTAVE_CENTRES = (
+_ONE_THIRD_OCTAVE_CENTERS = (
     250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0,
     2000.0, 2500.0, 3150.0, 4000.0,
 )
@@ -560,7 +560,7 @@ def one_third_octave_absorption(
             "'frequency' and 'absorption' must be non-empty and equal-length."
         )
     centres = np.array(
-        [c for c in _ONE_THIRD_OCTAVE_CENTRES if f_min <= c <= f_max],
+        [c for c in _ONE_THIRD_OCTAVE_CENTERS if f_min <= c <= f_max],
         dtype=np.float64,
     )
     lower = centres * 2.0 ** (-1.0 / 6.0)

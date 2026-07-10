@@ -184,7 +184,7 @@ from .sound_power_intensity import (
     sound_power_intensity,
 )
 from .scattering_diffusion import (
-    BASE_PLATE_BANDS_HZ,
+    BASE_PLATE_BANDS,
     BASE_PLATE_MAX_SCATTERING,
     TWO_DIMENSIONAL_SOURCE_WEIGHTS,
     DiffusionResult,
@@ -331,10 +331,10 @@ from .airflow_resistance import (
     thermal_boundary_layer_thickness,
 )
 from .absorption_rating import (
-    AbsorptionRatingResult,
-    OCTAVE_BANDS_HZ,
+    OCTAVE_BANDS,
     REFERENCE_CURVE,
-    THIRD_OCTAVE_BANDS_HZ,
+    THIRD_OCTAVE_BANDS,
+    AbsorptionRatingResult,
     absorption_class,
     practical_absorption_coefficient,
     weighted_absorption,
@@ -403,7 +403,7 @@ from .occupational_exposure import (
     COVERAGE_FACTOR,
     INSTRUMENT_U2,
     ExposureResult,
-    ExposureWarning,
+    OccupationalExposureWarning,
     Task,
     TaskContribution,
     full_day_exposure,
@@ -588,9 +588,9 @@ __all__ = [
     "thermal_boundary_layer_thickness",
     # Absorption rating (ISO 11654)
     "AbsorptionRatingResult",
-    "OCTAVE_BANDS_HZ",
+    "OCTAVE_BANDS",
     "REFERENCE_CURVE",
-    "THIRD_OCTAVE_BANDS_HZ",
+    "THIRD_OCTAVE_BANDS",
     "absorption_class",
     "practical_absorption_coefficient",
     "weighted_absorption",
@@ -642,7 +642,7 @@ __all__ = [
     "scattering_coefficient_spectrum",
     "ScatteringResult",
     "base_plate_scattering",
-    "BASE_PLATE_BANDS_HZ",
+    "BASE_PLATE_BANDS",
     "BASE_PLATE_MAX_SCATTERING",
     "check_base_plate_scattering",
     "reverberation_time_uncertainty",
@@ -777,7 +777,7 @@ __all__ = [
     "Task",
     "TaskContribution",
     "ExposureResult",
-    "ExposureWarning",
+    "OccupationalExposureWarning",
     "COVERAGE_FACTOR",
     "INSTRUMENT_U2",
 ]
@@ -990,3 +990,29 @@ def octavefilter(*args: Any, **kwargs: Any) -> Any:
     """Deprecated alias of :func:`octave_filter`."""
     _warn_renamed("octavefilter()", "octave_filter()")
     return octave_filter(*args, **kwargs)
+
+
+#: Deprecated root-level name -> canonical name (phonometry 3.1 renames).
+_RENAMED_ATTRIBUTES: dict[str, str] = {
+    "OCTAVE_BANDS_HZ": "OCTAVE_BANDS",
+    "THIRD_OCTAVE_BANDS_HZ": "THIRD_OCTAVE_BANDS",
+    "BASE_PLATE_BANDS_HZ": "BASE_PLATE_BANDS",
+    "ExposureWarning": "OccupationalExposureWarning",
+}
+
+
+def __getattr__(name: str) -> Any:
+    """PEP 562 shim warning for names renamed in phonometry 3.1.
+
+    Constants cannot warn through a wrapper, so the deprecated names live
+    here (and in their home modules) as module ``__getattr__`` aliases.
+    Remove in 4.0.
+    """
+    try:
+        canonical = _RENAMED_ATTRIBUTES[name]
+    except KeyError:
+        raise AttributeError(
+            f"module 'phonometry' has no attribute {name!r}"
+        ) from None
+    _warn_renamed(name, canonical)
+    return globals()[canonical]

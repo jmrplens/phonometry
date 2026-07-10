@@ -54,12 +54,14 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from ._warnings import _warn_renamed
+
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
 __all__ = [
-    "OCTAVE_BANDS_HZ",
-    "THIRD_OCTAVE_BANDS_HZ",
+    "OCTAVE_BANDS",
+    "THIRD_OCTAVE_BANDS",
     "REFERENCE_CURVE",
     "AbsorptionRatingResult",
     "absorption_class",
@@ -70,11 +72,11 @@ __all__ = [
 # --- ISO 11654:1997 fixed data ------------------------------------------
 
 #: Octave rating bands, in Hz (Clause 4.1); the reference-curve bands.
-OCTAVE_BANDS_HZ: tuple[int, ...] = (250, 500, 1000, 2000, 4000)
+OCTAVE_BANDS: tuple[int, ...] = (250, 500, 1000, 2000, 4000)
 
 #: One-third-octave bands feeding the five octaves, in Hz (200 Hz to
 #: 5000 Hz); each consecutive triple averages into one octave (Clause 4.1).
-THIRD_OCTAVE_BANDS_HZ: tuple[int, ...] = (
+THIRD_OCTAVE_BANDS: tuple[int, ...] = (
     200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150,
     4000, 5000,
 )
@@ -249,12 +251,12 @@ def practical_absorption_coefficient(
     :raises ValueError: if any coefficient is negative or the wrong number
         of values is supplied.
     """
-    values = _coerce(third_octave_alpha_s, THIRD_OCTAVE_BANDS_HZ, "third_octave_alpha_s")
+    values = _coerce(third_octave_alpha_s, THIRD_OCTAVE_BANDS, "third_octave_alpha_s")
     if any(v < 0.0 for v in values):
         raise ValueError("alpha_s values must be non-negative")
     alpha_p = [
         _practical_round((values[3 * i] + values[3 * i + 1] + values[3 * i + 2]) / 3.0)
-        for i in range(len(OCTAVE_BANDS_HZ))
+        for i in range(len(OCTAVE_BANDS))
     ]
     return np.asarray(alpha_p, dtype=np.float64)
 
@@ -296,7 +298,7 @@ def weighted_absorption(
         shape indicators, the applied shift, the fitted reference curve and
         the absorption class.
     """
-    measured = _coerce(alpha_p, OCTAVE_BANDS_HZ, "alpha_p")
+    measured = _coerce(alpha_p, OCTAVE_BANDS, "alpha_p")
     measured_units = [_to_units(v) for v in measured]
 
     # Shift the reference down in 0,05 steps until Clause 4.2 is satisfied.
@@ -322,7 +324,7 @@ def weighted_absorption(
         absorption_class=absorption_class(alpha_w_units / 20.0),
         shift=shift_units / 20.0,
         unfavourable_sum=unfav_units / 20.0,
-        band_centers=np.asarray(OCTAVE_BANDS_HZ, dtype=np.float64),
+        band_centers=np.asarray(OCTAVE_BANDS, dtype=np.float64),
         measured=np.asarray([u / 20.0 for u in measured_units], dtype=np.float64),
         shifted_reference=np.asarray(
             [u / 20.0 for u in shifted_units], dtype=np.float64
@@ -343,3 +345,24 @@ def absorption_class(alpha_w: float) -> str:
         if units >= lowest:
             return letter
     return _NOT_CLASSIFIED
+
+
+# --- Deprecated aliases (phonometry 3.1 renames; remove in 4.0) ----------
+
+#: Old constant name -> canonical name (units moved to the docstring).
+_RENAMED_CONSTANTS: dict[str, str] = {
+    "OCTAVE_BANDS_HZ": "OCTAVE_BANDS",
+    "THIRD_OCTAVE_BANDS_HZ": "THIRD_OCTAVE_BANDS",
+}
+
+
+def __getattr__(name: str) -> Any:
+    """PEP 562 shim warning for the renamed band constants."""
+    try:
+        canonical = _RENAMED_CONSTANTS[name]
+    except KeyError:
+        raise AttributeError(
+            f"module 'phonometry.absorption_rating' has no attribute {name!r}"
+        ) from None
+    _warn_renamed(name, canonical)
+    return globals()[canonical]

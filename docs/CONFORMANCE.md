@@ -158,7 +158,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 11654:1997 Annex A.2 | Weighted absorption alpha_w with M indicator | 0.60(M) | 0.60(M) | 0 | &#9989; |
 | ISO 9053-2:2020 Annex A.3 | Thermal boundary-layer thickness b | 0.00183 m (+/-0.00001 m) | 0.00183 m | 0 m | &#9989; |
 | ISO 9053-2:2020 Annex A.3 | Effective ratio of specific heats kappa' | 1.37 (+/-0.001) | 1.37 | 0 | &#9989; |
-| ISO 10534-1:1996 Eqs (9)/(13)/(14) | Absorption from standing-wave ratio s=3 | 0.75 (+/-0) | 0.75 | 0 | &#9989; |
+| ISO 10534-1:1996 Eqs (9)/(13)/(14) | Absorption from standing-wave ratio s=3 | alpha 0.75 (+/-0), |r| 0.5 | alpha 0.75, |r| 0.5000 | 0 | &#9989; |
 | ISO 10534-2 Eq. (17) / Annex D | Two-microphone round trip recovers a known reflection factor | abs(r - (0.3-0.4j)) = 0 (identity, +/-1e-9) | 0 | 0 | &#9989; |
 
 </details>

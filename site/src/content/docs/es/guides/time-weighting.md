@@ -32,7 +32,7 @@ grabación.
 
 <video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting_es.webm" autoplay loop muted controls playsinline title="Animación: los detectores Rápida, Lenta e Impulso persiguiendo una ráfaga de tono — Rápida sube y baja rápido, Lenta va con retraso, e Impulso sube rápido pero decae más lento" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting_es_dark.webm" autoplay loop muted controls playsinline title="Animación: los detectores Rápida, Lenta e Impulso persiguiendo una ráfaga de tono — Rápida sube y baja rápido, Lenta va con retraso, e Impulso sube rápido pero decae más lento" style="width:88%"></video>
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es_dark.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es.svg" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es_dark.svg" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%">
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -110,7 +110,7 @@ sobre los valores de referencia de la norma — el ejemplo de abajo verifica la
 fila de la ráfaga Fast de 200 ms; la batería de CI cubre la Tabla 4 completa,
 de 1 s a 1 ms en F y de 1 s a 2 ms en S, con límites de aceptación de clase 1:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es.svg" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es_dark.svg" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
 
 <details>
 <summary>Mostrar el código de esta figura</summary>

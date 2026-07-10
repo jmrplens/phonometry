@@ -105,7 +105,7 @@ print(np.round(res.sound_power_level, 1))               # per-band LW
 res.plot()   # sound power level bars per band, LWA in the title (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result.png" alt="The enveloping-surface sound power level spectrum of the ISO 3744 hemisphere example, one bar per octave band from 63 Hz to 8 kHz peaking near 500 Hz, with the A-weighted total of 92.4 dB(A) in the title" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result.svg" alt="The enveloping-surface sound power level spectrum of the ISO 3744 hemisphere example, one bar per octave band from 63 Hz to 8 kHz peaking near 500 Hz, with the A-weighted total of 92.4 dB(A) in the title" width="88%"></picture>
 
 *One bar per band: the energy-averaged surface pressure minus the background
 (`K1`) and environmental (`K2`) corrections plus the surface term
@@ -236,7 +236,7 @@ print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 rev.plot()   # reverberation-room LW spectrum, LWA in the title (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result.png" alt="The reverberation-room sound power level spectrum of the ISO 3741 example, one bar per one-third-octave band from 100 Hz to 10 kHz falling gently with frequency, with the A-weighted total of 92.1 dB(A) in the title" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result.svg" alt="The reverberation-room sound power level spectrum of the ISO 3741 example, one bar per one-third-octave band from 100 Hz to 10 kHz falling gently with frequency, with the A-weighted total of 92.1 dB(A) in the title" width="88%"></picture>
 
 *The mean room level carried through the absorption-area, Waterhouse and
 meteorological terms of Eq. 20 gives the one-third-octave `LW(f)`, and the
@@ -373,7 +373,7 @@ print(list(res.achieved_grade))                         # per-band grade
 res.plot()   # LW spectrum; non-positive (undeterminable) bands hatched (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result.png" alt="The intensity-scanning sound power level spectrum of the ISO 9614-2 example, one bar per octave band from 125 Hz to 4 kHz all near 85 dB, with the A-weighted total of 90.9 dB(A) in the title" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result.svg" alt="The intensity-scanning sound power level spectrum of the ISO 9614-2 example, one bar per octave band from 125 Hz to 4 kHz all near 85 dB, with the A-weighted total of 90.9 dB(A) in the title" width="88%"></picture>
 
 *The partial powers `<In,i>·Si` of the six segments sum to each band's `LW`;
 every band here nets positive power and passes the field-indicator criteria at
@@ -520,7 +520,7 @@ print(round(result.sound_power_level_a, 1))   # 89.3
 result.plot()   # LW spectrum, LWA in the title (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power.png" alt="The precision sound power level spectrum of a mid-frequency-peaked machine measured over the ISO 3745 hemisphere array, one bar per band peaking near 1 kHz, with the A-weighted total of 89.3 dB(A) in the title" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power.svg" alt="The precision sound power level spectrum of a mid-frequency-peaked machine measured over the ISO 3745 hemisphere array, one bar per band peaking near 1 kHz, with the A-weighted total of 89.3 dB(A) in the title" width="88%"></picture>
 
 *One bar per band: the surface-averaged pressure plus the area, background and
 meteorological corrections give `LW(f)`, and the A-weighted energy sum across
@@ -606,7 +606,7 @@ print(round(result.sound_power_level_a, 1))   # 80.6
 result.plot()   # LW spectrum; the not-applicable band is hatched (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power.png" alt="The precision intensity-scanning sound power level spectrum over five one-third-octave bands, four determinate bars and a hatched, greyed 250 Hz band flagged not-applicable because its net intensity is negative, with the A-weighted total of 80.6 dB(A) in the title" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power.svg" alt="The precision intensity-scanning sound power level spectrum over five one-third-octave bands, four determinate bars and a hatched, greyed 250 Hz band flagged not-applicable because its net intensity is negative, with the A-weighted total of 80.6 dB(A) in the title" width="88%"></picture>
 
 *The 250 Hz band nets negative (more energy flowing in than out), so ISO 9614-3
 declares it not-applicable — the figure hatches and greys it while the four

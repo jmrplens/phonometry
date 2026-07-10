@@ -63,6 +63,43 @@ jobs:
           exit 1
         fi
 
+  # The committed documentation figures (.github/images) must equal a fresh
+  # `make graphs` run. The vector SVGs are byte-reproducible (fixed svg.hashsalt,
+  # svg.fonttype=none, no date metadata) and the raster/dense PNGs strip the
+  # version-stamped Software chunk -- but text layout still uses matplotlib's
+  # bundled DejaVu metrics, so the check pins the exact matplotlib the committed
+  # files were generated with. Bump this pin (and rerun `make graphs`) together
+  # whenever the figures are regenerated against a newer matplotlib.
+  figures:
+    name: Documentation figures up to date
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install runtime dependencies (matplotlib pinned for byte stability)
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install 'matplotlib==3.11.0'
+        pip install -e .
+    - name: Regenerate figures and diagrams
+      run: make graphs
+    - name: Fail if any committed figure is stale
+      run: |
+        # Stage first so the diff also catches added/removed files, not just
+        # in-place edits (plain `git diff` ignores untracked output).
+        git add -A -- .github/images
+        if ! git diff --cached --exit-code -- .github/images; then
+          echo "::error::.github/images is out of date - run 'make graphs' and commit the result."
+          exit 1
+        fi
+
   tests:
     runs-on: ${{ matrix.os }}
     permissions:

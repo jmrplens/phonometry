@@ -70,7 +70,7 @@ print(f"SPL [dB]: {spl}")
 # SPL [dB]: [46.88395351 47.96774897 49.04991279 ...]  — ~90.7 dB en 100 Hz y ~90.9 dB en 1 kHz
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_es.png" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_es_dark.png" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_es.svg" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_es_dark.svg" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" style="width:80%">
 
 *Ejemplo de análisis espectral en tercios de octava de una señal compleja.*
 

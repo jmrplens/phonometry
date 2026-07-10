@@ -28,7 +28,7 @@ que 2 sonos. Por definición, un tono de 1 kHz a 40 dB SPL es 1 sono, y cada
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_es.svg" alt="Cadena de sonoridad de Zwicker ISO 532-1: 28 niveles de banda de tercio de octava, transmisión y agrupación de bandas críticas inferiores, sonoridad de núcleo de las 20 bandas críticas, sonoridad específica sobre Bark, integrada en la sonoridad total N en sonos y el nivel de sonoridad en fonios" style="width:78%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_es_dark.svg" alt="Cadena de sonoridad de Zwicker ISO 532-1: 28 niveles de banda de tercio de octava, transmisión y agrupación de bandas críticas inferiores, sonoridad de núcleo de las 20 bandas críticas, sonoridad específica sobre Bark, integrada en la sonoridad total N en sonos y el nivel de sonoridad en fonios" style="width:78%">
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_es.png" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_es_dark.png" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_es.svg" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_es_dark.svg" alt="Patrones de sonoridad específica sobre la escala Bark para un sonido de banda estrecha de 1 kHz y un sonido de banda ancha con el mismo nivel de banda" style="width:80%">
 
 *Mismo nivel de banda, sonoridad muy distinta: la energía repartida entre
 muchas bandas críticas (rojo) suma muchos más sonos que el mismo nivel
@@ -128,7 +128,7 @@ $k$ normalizada para que el sonido de referencia — ruido de ancho de banda
 crítico a 1 kHz, 60 dB — sea exactamente **1,00 acum** (DIN 45692 apartado 6;
 la $k = 0{,}108$ derivada queda dentro de la ventana normativa 0,105–0,115).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es.png" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es_dark.png" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es.svg" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es_dark.svg" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%">
 
 ```python
 from phonometry import sharpness_din
@@ -158,7 +158,7 @@ freqs, spl = equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonio
 phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonios
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es_dark.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.svg" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es_dark.svg" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%">
 
 Validez según el apartado 4.1: 20–90 fonios (80 fonios por encima de 4 kHz); la
 implementación se verifica en CI contra las tablas del Anexo B. Ojo: esto es la
@@ -187,7 +187,7 @@ Los tres están anclados de modo que un **tono de 1 kHz a 40 dB SPL es ≈ 1 son
 los valores no son intercambiables dígito a dígito porque los modelos difieren
 en sus filtros auditivos y en su suma de sonoridad.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es.png" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es_dark.png" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es.svg" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es_dark.svg" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" style="width:80%">
 
 *Los tres modelos coinciden en el ancla de 1 sono / 40 dB y divergen con el
 nivel: Zwicker duplica el valor en sonos cada +10 fonios, mientras que el modelo
@@ -287,7 +287,7 @@ print(f"sonoridad de largo plazo superada el 5% del tiempo: {res.percentiles[5.0
 res.plot()   # sonoridad de corto plazo S'(t) y de largo plazo S''(t) frente al tiempo
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es.png" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es_dark.png" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es.svg" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es_dark.svg" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" style="width:80%">
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -350,7 +350,7 @@ print(res.specific_loudness.shape)          # (53,) sonoridad específica media 
 res.plot()   # sonoridad específica media N'(z) + N(l) dependiente del tiempo a 187.5 Hz
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es.png" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es_dark.png" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es.svg" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es_dark.svg" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%">
 
 <details>
 <summary>Ver el código de esta figura</summary>
@@ -456,7 +456,7 @@ print(f"R = {res.roughness:.4f} asper")   # 1.0735 asper (objetivo de referencia
 res.plot()   # aspereza R(l50) dependiente del tiempo + mapa de calor de aspereza específica
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es.png" alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es_dark.png" alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es.svg" alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es_dark.svg" alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad" style="width:80%">
 
 <details>
 <summary>Ver el código de esta figura</summary>

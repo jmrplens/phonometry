@@ -49,7 +49,7 @@ shifted curve by $0.25$ or more, a shape indicator is appended: `L` at 250 Hz,
 classified" (0.00–0.10). Because $\alpha_w$ is always a multiple of $0.05$ these
 ranges partition the grid exactly.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_rating_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_rating.png" alt="ISO 11654 weighted sound absorption rating: the practical absorption spectrum plotted against the shifted reference curve over 250 Hz to 4000 Hz, with the unfavourable deviation at 250 Hz shaded and the weighted coefficient alpha_w read at 500 Hz" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_rating.svg" alt="ISO 11654 weighted sound absorption rating: the practical absorption spectrum plotted against the shifted reference curve over 250 Hz to 4000 Hz, with the unfavourable deviation at 250 Hz shaded and the weighted coefficient alpha_w read at 500 Hz" width="80%"></picture>
 
 *The Annex A.2 worked example: the reference curve is shifted down by 0.40 until
 the unfavourable deviations sum to 0.05 (≤ 0.10), giving $\alpha_w = 0.60$; the
@@ -120,7 +120,7 @@ $u = 0.5\ \text{mm/s}$ (Clause 7.5); the highest velocity must not exceed
 15 mm/s. Because $R_s = \Delta p/u = a + b\,u$, the linear term $a$ is the
 zero-velocity specific airflow resistance.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airflow_resistance_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airflow_resistance.png" alt="ISO 9053-1 static-method airflow resistance: the measured pressure drop against linear airflow velocity, fitted with a through-origin quadratic, with the specific airflow resistance evaluated at the 0.5 mm/s reference velocity" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airflow_resistance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airflow_resistance.svg" alt="ISO 9053-1 static-method airflow resistance: the measured pressure drop against linear airflow velocity, fitted with a through-origin quadratic, with the specific airflow resistance evaluated at the 0.5 mm/s reference velocity" width="80%"></picture>
 
 *The slightly super-linear pressure drop is fitted through the origin; the
 specific airflow resistance is the fit read at 0.5 mm/s.*
@@ -231,7 +231,7 @@ s = 10^{\Delta L/20}, \qquad |r| = \frac{s-1}{s+1}, \qquad
 \alpha = 1 - |r|^2.
 $$
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube.png" alt="ISO 10534-1 standing-wave-ratio method: the absorption coefficient and the reflection factor magnitude as functions of the standing-wave level difference, showing that a 9.54 dB difference corresponds to a standing-wave ratio of 3, a reflection magnitude of 0.5 and an absorption of 0.75" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube.svg" alt="ISO 10534-1 standing-wave-ratio method: the absorption coefficient and the reflection factor magnitude as functions of the standing-wave level difference, showing that a 9.54 dB difference corresponds to a standing-wave ratio of 3, a reflection magnitude of 0.5 and an absorption of 0.75" width="80%"></picture>
 
 *A small level difference means a near-perfect absorber; a level difference of
 9.54 dB gives $s = 3$, $|r| = 0.5$ and $\alpha = 0.75$.*

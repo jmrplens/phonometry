@@ -69,7 +69,7 @@ bloques de 125 ms no pueden resolver con precisión eventos transitorios cortos
 — el resultado depende de cómo se alinee la ráfaga con los límites de los
 bloques.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de referencia de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de referencia de la Tabla 4 de IEC 61672-1" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es.svg" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de referencia de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es_dark.svg" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de referencia de la Tabla 4 de IEC 61672-1" style="width:80%">
 
 *Envolventes Fast medidas (azul) coincidiendo con los valores de referencia
 de la Tabla 4 (discontinua) dentro de 0,1 dB para ráfagas de 200/50/10 ms.*

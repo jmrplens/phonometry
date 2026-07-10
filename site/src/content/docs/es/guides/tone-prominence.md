@@ -33,7 +33,7 @@ del oído, $\Delta f_c = 25 + 75\ [1 + 1{,}4(f/1000)^2]^{0{,}69}$ Hz (162 Hz a
 crítica, así que ambos ratios comparan el tono exactamente con ese ruido, no
 con todo el espectro.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es.png" alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es_dark.png" alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es.svg" alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es_dark.svg" alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia" style="width:80%">
 
 Un TNR por encima de $8 + 8{,}33\log_{10}(1000/f_t)$ dB (8 dB de 1 kHz hacia
 arriba) clasifica el tono como *prominente*; el criterio del PR es

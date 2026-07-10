@@ -108,15 +108,18 @@ class FacadeElement:
 
     def tau(self, total_area: float, n_bands: int) -> np.ndarray:
         """Transmission factor ``τ`` of this element for the whole façade area."""
+        if total_area <= 0:
+            raise ValueError("'total_area' (façade area S) must be positive.")
         kind = self._kind()
         raw = getattr(self, kind)  # the one non-None quantity, per _kind()
+        label = f"{self.name} ({kind})"
         if kind == "dn_e":
-            level = _as_array(raw, "dn_e")
+            level = _as_array(raw, label)
             weight = _A0 / total_area
         else:
             if self.area is None or self.area <= 0:
                 raise ValueError(f"Element '{self.name}': 'area' must be positive.")
-            level = _as_array(raw, kind)
+            level = _as_array(raw, label)
             weight = self.area / total_area
         if level.size == 1:
             level = np.full(n_bands, float(level[0]))
@@ -129,8 +132,8 @@ def _band_count(elements: Sequence[FacadeElement]) -> int:
     """Number of frequency bands implied by the elements (1 if all scalar)."""
     sizes = set()
     for el in elements:
-        val = getattr(el, el._kind())  # exactly one of r / dn_e / insertion_loss
-        sizes.add(_as_array(val, el.name).size)
+        kind = el._kind()  # exactly one of r / dn_e / insertion_loss
+        sizes.add(_as_array(getattr(el, kind), f"{el.name} ({kind})").size)
     sizes.discard(1)
     if len(sizes) > 1:
         raise ValueError("Elements have inconsistent band counts.")
@@ -215,11 +218,18 @@ def _apparent_reduction(elements: Sequence[FacadeElement], total_area: float) ->
         raise ValueError("At least one façade element is required.")
     if total_area <= 0:
         raise ValueError("'area' (total façade area S) must be positive.")
+    names = [el.name for el in elements]
+    if len(set(names)) != len(names):
+        raise ValueError(
+            "Façade element names must be unique (they key the per-element results)."
+        )
     n = _band_count(elements)
-    taus = {el.name: el.tau(total_area, n) for el in elements}
-    tau_total = np.sum(list(taus.values()), axis=0)
+    # Sum over the element list (not a name-keyed dict), so no element is ever
+    # silently dropped, then key the per-element index by the unique names.
+    taus = [el.tau(total_area, n) for el in elements]
+    tau_total = np.sum(taus, axis=0)
     r_prime = -10.0 * np.log10(tau_total)
-    element_r = {name: -10.0 * np.log10(t) for name, t in taus.items()}
+    element_r = {name: -10.0 * np.log10(t) for name, t in zip(names, taus)}
     return r_prime, element_r
 
 
@@ -255,10 +265,10 @@ def facade_sound_reduction(
     :param volume: Receiving-room volume ``V``, in m³ (Formula 13).
     :param delta_l_fs: Façade-shape term ``ΔLfs`` in dB (Annex C; 0 for a flat
         reflecting façade).
-    :param bands: ``"octave"``, ``"third"`` or ``None`` (auto) for the single
-        number ratings, passed to :func:`weighted_rating`.
+    :param bands: ``"octave"``, ``"third-octave"`` or ``None`` (auto) for the
+        single number ratings, passed to :func:`weighted_rating`.
     :param frequencies: Optional band centre frequencies (Hz), stored on the
-        result for plotting.
+        result for plotting; must match the element band count.
     :return: A :class:`FacadePredictionResult`.
     """
     delta = float(delta_l_fs)
@@ -266,6 +276,11 @@ def facade_sound_reduction(
     if v <= 0:
         raise ValueError("'volume' must be positive.")
     r_prime, element_r = _apparent_reduction(elements, float(area))
+    if frequencies is not None and len(frequencies) != r_prime.size:
+        raise ValueError(
+            f"'frequencies' has {len(frequencies)} entries but the elements imply "
+            f"{r_prime.size} bands."
+        )
     r_45 = r_prime + 1.0
     r_tr_s = r_prime.copy()
     d_2m_nt = r_prime + delta + 10.0 * log10(v / (6.0 * _T0 * float(area)))
@@ -321,10 +336,15 @@ def radiated_sound_power(
         lp = np.full(r_prime.size, float(lp[0]))
     if lp.size != r_prime.size:
         raise ValueError("'lp_in' must match the element band count.")
+    if octave_bands is not None and len(octave_bands) != r_prime.size:
+        raise ValueError(
+            f"'octave_bands' has {len(octave_bands)} entries but the elements imply "
+            f"{r_prime.size} bands."
+        )
     l_w = lp + float(c_d) - r_prime + 10.0 * log10(float(area) / _S0)
 
     l_w_dba: float | None = None
-    if octave_bands is not None and len(octave_bands) == l_w.size:
+    if octave_bands is not None:
         try:
             a_weights = np.array([_A_WEIGHT_OCTAVE[int(f)] for f in octave_bands])
         except KeyError:
@@ -367,7 +387,8 @@ def outdoor_level(
 
     ``Lp = 10 lg( Σ 10^(LW,k/10) ) - Atot`` for sides sharing a reception point,
     or the per-side ``LW - Atot`` energetically summed. Pass matching sequences
-    of side power levels and their attenuations, or scalars for a single side.
+    of side power levels and their attenuations, or scalars for a single side; a
+    scalar broadcasts against an array (e.g. several sides, one common ``Atot``).
 
     :param l_w: Radiated power level(s) ``LW`` (dB) — scalar or per side.
     :param attenuation: Attenuation(s) ``Atot`` (dB) — scalar or per side.
@@ -375,6 +396,10 @@ def outdoor_level(
     """
     lw = np.atleast_1d(np.asarray(l_w, dtype=np.float64))
     at = np.atleast_1d(np.asarray(attenuation, dtype=np.float64))
-    if lw.shape != at.shape:
-        raise ValueError("'l_w' and 'attenuation' must have the same shape.")
-    return float(10.0 * np.log10(np.sum(10.0 ** ((lw - at) / 10.0))))
+    try:
+        diff = lw - at  # NumPy broadcasting (scalar vs array is allowed)
+    except ValueError as exc:
+        raise ValueError(
+            "'l_w' and 'attenuation' must have broadcast-compatible shapes."
+        ) from exc
+    return float(10.0 * np.log10(np.sum(10.0 ** (diff / 10.0))))

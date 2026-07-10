@@ -258,6 +258,18 @@ def test_outdoor_level_energy_sum() -> None:
     assert pair == pytest.approx(single + 3.0103, abs=1e-3)
 
 
+def test_outdoor_level_scalar_broadcast() -> None:
+    """A scalar attenuation broadcasts against an array of side powers."""
+    broadcast = outdoor_level([60.0, 60.0], 3.0)
+    explicit = outdoor_level([60.0, 60.0], [3.0, 3.0])
+    assert broadcast == pytest.approx(explicit)
+
+
+def test_outdoor_level_incompatible_shapes_raise() -> None:
+    with pytest.raises(ValueError, match="broadcast-compatible"):
+        outdoor_level([60.0, 60.0, 60.0], [0.0, 0.0])
+
+
 def test_far_field_point_source() -> None:
     """Beyond the largest side dimension the point-source form (E.2b) applies."""
     # d=200 > max(10,10): A'tot = -10 lg(S0/(π d²)) = 10 lg(π d²).
@@ -308,6 +320,56 @@ def test_scalar_broadcasts_to_band_count() -> None:
 def test_non_finite_input_rejected() -> None:
     with pytest.raises(ValueError, match="finite"):
         FacadeElement(name="x", area=1.0, r=[np.nan]).tau(10.0, 1)
+
+
+def test_duplicate_element_names_raise() -> None:
+    """Elements are keyed by name in the result, so names must be unique."""
+    with pytest.raises(ValueError, match="unique"):
+        facade_sound_reduction(
+            [
+                FacadeElement(name="glass", area=5.0, r=[40.0]),
+                FacadeElement(name="glass", area=5.0, r=[30.0]),
+            ],
+            area=10.0, volume=50.0,
+        )
+
+
+def test_no_element_silently_dropped_when_names_unique() -> None:
+    """Every element contributes to R' even if two share the same R values."""
+    two = facade_sound_reduction(
+        [
+            FacadeElement(name="a", area=5.0, r=[30.0]),
+            FacadeElement(name="b", area=5.0, r=[30.0]),
+        ],
+        area=10.0, volume=50.0,
+    )
+    one = facade_sound_reduction(
+        [FacadeElement(name="a", area=5.0, r=[30.0])], area=10.0, volume=50.0
+    )
+    # Two 5 m² halves at R=30 over S=10 => R'=30; one 5 m² over S=10 => R'=33.
+    assert two.r_prime[0] == pytest.approx(30.0, abs=1e-9)
+    assert one.r_prime[0] == pytest.approx(33.0103, abs=1e-3)
+
+
+def test_frequencies_length_must_match_bands() -> None:
+    with pytest.raises(ValueError, match="frequencies"):
+        facade_sound_reduction(
+            [FacadeElement(name="a", area=5.0, r=[40.0, 41.0, 42.0])],
+            area=10.0, volume=50.0, frequencies=[125.0, 250.0],
+        )
+
+
+def test_octave_bands_length_must_match() -> None:
+    with pytest.raises(ValueError, match="octave_bands"):
+        radiated_sound_power(
+            [FacadeElement(name="w", area=10.0, r=[40.0, 41.0])],
+            lp_in=[70.0, 71.0], area=10.0, octave_bands=[125],
+        )
+
+
+def test_tau_rejects_non_positive_total_area() -> None:
+    with pytest.raises(ValueError, match="total_area"):
+        FacadeElement(name="x", area=1.0, r=[40.0]).tau(0.0, 1)
 
 
 def test_positive_area_and_volume_required() -> None:

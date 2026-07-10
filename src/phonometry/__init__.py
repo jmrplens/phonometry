@@ -13,7 +13,12 @@ import numpy as np
 
 from .calibration import CalibrationWarning, calculate_sensitivity, sensitivity
 from .environmental import composite_rating_level, lden, ldn
-from .compliance import class_limits, verify_filter_class
+from .compliance import (
+    class_limits,
+    verify_filter_class,
+    verify_weighting_class,
+    weighting_class_limits,
+)
 from .core import FilterBankWarning, OctaveFilterBank
 from .frequencies import (
     getansifrequencies,
@@ -739,6 +744,8 @@ __all__ = [
     "CalibrationWarning",
     "verify_filter_class",
     "class_limits",
+    "verify_weighting_class",
+    "weighting_class_limits",
     "predicted_airborne_insulation",
     "AirbornePredictionResult",
     "predicted_impact_insulation",

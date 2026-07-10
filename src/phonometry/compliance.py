@@ -1,17 +1,25 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-IEC 61260-1:2014 filter class verification.
+IEC 61260-1:2014 filter and IEC 61672-1:2013 weighting class verification.
 
-Acceptance limits on relative attenuation transcribed from the official text
-(BS EN 61260-1:2014, **Table 1**, standard pages 15-16): octave-band
-breakpoint frequencies with class 1 and class 2 minimum/maximum limits.
-Fractional-octave-band breakpoints are derived with Formulas (9) and (10)
-(subclauses 5.10.3-5.10.4) and limits between breakpoints are interpolated
-linearly in lg(Omega) per Formula (11) (subclause 5.10.6).
+**Filters.** Acceptance limits on relative attenuation transcribed from the
+official text (BS EN 61260-1:2014, **Table 1**, standard pages 15-16):
+octave-band breakpoint frequencies with class 1 and class 2 minimum/maximum
+limits. Fractional-octave-band breakpoints are derived with Formulas (9) and
+(10) (subclauses 5.10.3-5.10.4) and limits between breakpoints are interpolated
+linearly in lg(Omega) per Formula (11) (subclause 5.10.6). Relative attenuation
+is ``deltaA(Omega) = A(Omega) - Aref`` (Formula 8) with ``A = Lin - Lout``
+(Formula 7); here ``Aref`` is the attenuation at the exact mid-band frequency
+(subclause 5.9: the pass-band reference attenuation). IEC 61260-1:2014 defines
+only classes 1 and 2 (the withdrawn IEC 61260:1995 / ANSI S1.11-2004 class 0 is
+not covered here: its class 1/2 masks differ numerically from the 2014 edition,
+so mixing a 1995 class-0 column into the 2014 mask would be inconsistent).
 
-Relative attenuation is ``deltaA(Omega) = A(Omega) - Aref`` (Formula 8) with
-``A = Lin - Lout`` (Formula 7); here ``Aref`` is the attenuation at the exact
-mid-band frequency (subclause 5.9: the pass-band reference attenuation).
+**Weightings.** A/C/Z frequency-weighting acceptance limits transcribed from
+BS EN 61672-1:2013, **Table 3** (standard page 22): the design-goal responses
+and the class 1 and class 2 upper/lower limits at the 34 nominal frequencies
+from 10 Hz to 20 kHz. A lower limit of ``-inf`` means only the upper limit
+applies (subclause 5.5.6 checks measured deviations at the nominal frequencies).
 """
 
 from __future__ import annotations
@@ -22,6 +30,9 @@ import numpy as np
 from scipy import signal
 
 from .core import OctaveFilterBank
+from .parametric_filters import WeightingFilter
+
+_INF = float("inf")
 
 _G = 10 ** (3 / 10)
 
@@ -190,6 +201,161 @@ def verify_filter_class(bank: OctaveFilterBank, num_points: int = 2 ** 15) -> Di
 
     if not bands:
         # No bands to verify: never report compliance vacuously.
+        return {"overall_class": None, "bands": []}
+
+    classes = [band["class"] for band in bands]
+    if all(c == 1 for c in classes):
+        overall: int | None = 1
+    elif all(c in (1, 2) for c in classes):
+        overall = 2
+    else:
+        overall = None
+
+    return {"overall_class": overall, "bands": bands}
+
+
+# BS EN 61672-1:2013 Table 3 (standard page 22): design-goal frequency
+# weightings and class 1 / class 2 acceptance limits at the 34 nominal
+# frequencies. Columns: (nominal Hz, A dB, C dB, class1 upper, class1 lower,
+# class2 upper, class2 lower); Z is 0.0 dB at every frequency. A lower limit
+# of -inf means only the upper limit applies.
+_WEIGHTING_TABLE3: List[Tuple[float, float, float, float, float, float, float]] = [
+    (10.0, -70.4, -14.3, 3.0, -_INF, 5.0, -_INF),
+    (12.5, -63.4, -11.2, 2.5, -_INF, 5.0, -_INF),
+    (16.0, -56.7, -8.5, 2.0, -4.0, 5.0, -_INF),
+    (20.0, -50.5, -6.2, 2.0, -2.0, 3.0, -3.0),
+    (25.0, -44.7, -4.4, 2.0, -1.5, 3.0, -3.0),
+    (31.5, -39.4, -3.0, 1.5, -1.5, 3.0, -3.0),
+    (40.0, -34.6, -2.0, 1.0, -1.0, 2.0, -2.0),
+    (50.0, -30.2, -1.3, 1.0, -1.0, 2.0, -2.0),
+    (63.0, -26.2, -0.8, 1.0, -1.0, 2.0, -2.0),
+    (80.0, -22.5, -0.5, 1.0, -1.0, 2.0, -2.0),
+    (100.0, -19.1, -0.3, 1.0, -1.0, 1.5, -1.5),
+    (125.0, -16.1, -0.2, 1.0, -1.0, 1.5, -1.5),
+    (160.0, -13.4, -0.1, 1.0, -1.0, 1.5, -1.5),
+    (200.0, -10.9, 0.0, 1.0, -1.0, 1.5, -1.5),
+    (250.0, -8.6, 0.0, 1.0, -1.0, 1.5, -1.5),
+    (315.0, -6.6, 0.0, 1.0, -1.0, 1.5, -1.5),
+    (400.0, -4.8, 0.0, 1.0, -1.0, 1.5, -1.5),
+    (500.0, -3.2, 0.0, 1.0, -1.0, 1.5, -1.5),
+    (630.0, -1.9, 0.0, 1.0, -1.0, 1.5, -1.5),
+    (800.0, -0.8, 0.0, 1.0, -1.0, 1.5, -1.5),
+    (1000.0, 0.0, 0.0, 0.7, -0.7, 1.0, -1.0),
+    (1250.0, 0.6, 0.0, 1.0, -1.0, 1.5, -1.5),
+    (1600.0, 1.0, -0.1, 1.0, -1.0, 2.0, -2.0),
+    (2000.0, 1.2, -0.2, 1.0, -1.0, 2.0, -2.0),
+    (2500.0, 1.3, -0.3, 1.0, -1.0, 2.5, -2.5),
+    (3150.0, 1.2, -0.5, 1.0, -1.0, 2.5, -2.5),
+    (4000.0, 1.0, -0.8, 1.0, -1.0, 3.0, -3.0),
+    (5000.0, 0.5, -1.3, 1.5, -1.5, 3.5, -3.5),
+    (6300.0, -0.1, -2.0, 1.5, -2.0, 4.5, -4.5),
+    (8000.0, -1.1, -3.0, 1.5, -2.5, 5.0, -5.0),
+    (10000.0, -2.5, -4.4, 2.0, -3.0, 5.0, -_INF),
+    (12500.0, -4.3, -6.2, 2.0, -5.0, 5.0, -_INF),
+    (16000.0, -6.6, -8.5, 2.5, -16.0, 5.0, -_INF),
+    (20000.0, -9.3, -11.2, 3.0, -_INF, 5.0, -_INF),
+]
+
+_WEIGHTING_COL = {"A": 1, "C": 2, "Z": None}
+
+
+def weighting_class_limits(
+    weighting_class: int,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    IEC 61672-1:2013 Table 3 acceptance limits for a performance class.
+
+    The limits apply to every weighting (A, C, Z); they qualify the deviation
+    of the measured relative response from the design goal at each nominal
+    frequency, not the response itself.
+
+    :param weighting_class: 1 or 2 (IEC 61672-1:2013 performance class).
+    :return: Tuple ``(frequencies, lower, upper)`` of the 34 nominal
+        frequencies (Hz) and the lower/upper deviation limits in dB. A lower
+        limit of ``-inf`` means only the upper limit applies.
+    """
+    if weighting_class not in (1, 2):
+        raise ValueError("weighting_class must be 1 or 2.")
+    up_col, lo_col = (3, 4) if weighting_class == 1 else (5, 6)
+    freqs = np.array([row[0] for row in _WEIGHTING_TABLE3], dtype=np.float64)
+    upper = np.array([row[up_col] for row in _WEIGHTING_TABLE3], dtype=np.float64)
+    lower = np.array([row[lo_col] for row in _WEIGHTING_TABLE3], dtype=np.float64)
+    return freqs, lower, upper
+
+
+def _weighting_response_db(wf: WeightingFilter, frequencies: np.ndarray) -> np.ndarray:
+    """Relative steady-state response of *wf* in dB, normalized to 1 kHz."""
+    if wf.curve == "Z" or wf.sos.size == 0:
+        return np.zeros_like(frequencies)
+    # The SOS are designed at the (possibly oversampled) processing rate.
+    fs_proc = wf.fs * wf._oversample
+    worn = np.concatenate([frequencies, [1000.0]])
+    _, h = signal.sosfreqz(wf.sos, worN=worn, fs=fs_proc)
+    gain_db = 20.0 * np.log10(np.abs(h) + np.finfo(float).eps)
+    return np.asarray(gain_db[:-1] - gain_db[-1], dtype=np.float64)  # relative to 1 kHz
+
+
+def verify_weighting_class(wf: WeightingFilter) -> Dict[str, Any]:
+    """
+    Verify a frequency-weighting filter against IEC 61672-1:2013 Table 3.
+
+    The filter's relative response (normalized to its 1 kHz gain) is evaluated
+    at each Table 3 nominal frequency below the Nyquist frequency, and the
+    deviation from the design-goal weighting is checked against the class 1 and
+    class 2 acceptance limits (subclause 5.5.6, "measured deviations ... at the
+    nominal frequencies"). The response is taken from the designed second-order
+    sections (evaluated with ``sosfreqz`` at their design rate), so it is exact
+    and deterministic; it does not model the runtime resampling stages that
+    ``high_accuracy`` adds around them, whose anti-alias response is flat across
+    the audio band checked here. The ``Z`` weighting is a flat bypass and always
+    complies.
+
+    :param wf: The weighting filter to verify (``A``, ``C`` or ``Z``).
+    :return: Dict with ``overall_class`` (1, 2 or None) and ``bands``: a list of
+        ``{"freq", "class", "deviation_db", "margin_class1_db",
+        "margin_class2_db"}`` where a positive margin means the limits are met
+        with that much room.
+    """
+    if wf.curve not in _WEIGHTING_COL:
+        raise ValueError("Weighting curve must be 'A', 'C' or 'Z'.")
+    col = _WEIGHTING_COL[wf.curve]
+
+    nyquist = wf.fs / 2.0
+    freqs = np.array([row[0] for row in _WEIGHTING_TABLE3], dtype=np.float64)
+    in_range = freqs < nyquist
+    freqs = freqs[in_range]
+
+    design = (
+        np.zeros_like(freqs)
+        if col is None
+        else np.array([row[col] for row in _WEIGHTING_TABLE3], dtype=np.float64)[in_range]
+    )
+    response = _weighting_response_db(wf, freqs)
+    deviation = response - design
+
+    _, lower1, upper1 = weighting_class_limits(1)
+    _, lower2, upper2 = weighting_class_limits(2)
+    lower1, upper1 = lower1[in_range], upper1[in_range]
+    lower2, upper2 = lower2[in_range], upper2[in_range]
+
+    bands: List[Dict[str, Any]] = []
+    for i, fm in enumerate(freqs):
+        # Margin = distance to the nearer limit; a -inf lower limit makes that
+        # side non-binding (its term is +inf), i.e. an upper-only limit.
+        m1 = min(upper1[i] - deviation[i], deviation[i] - lower1[i])
+        m2 = min(upper2[i] - deviation[i], deviation[i] - lower2[i])
+        band_class = 1 if m1 >= 0 else (2 if m2 >= 0 else None)
+        bands.append(
+            {
+                "freq": float(fm),
+                "class": band_class,
+                "deviation_db": float(deviation[i]),
+                "margin_class1_db": float(m1),
+                "margin_class2_db": float(m2),
+            }
+        )
+
+    if not bands:
         return {"overall_class": None, "bands": []}
 
     classes = [band["class"] for band in bands]

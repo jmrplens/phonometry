@@ -238,13 +238,44 @@ Consulta [Procesado por bloques](/phonometry/es/guides/block-processing/) para
 el flujo en streaming y [Teoría](/phonometry/es/reference/theory/) para las
 definiciones analíticas de las curvas.
 
+## 7. Verificación de la clase IEC 61672-1
+
+`verify_weighting_class` comprueba un filtro de ponderación frente a los
+límites de aceptación de **IEC 61672-1:2013** (Tabla 3). Evalúa la respuesta
+relativa del filtro en cada frecuencia nominal por debajo de Nyquist, resta la
+ponderación objetivo de diseño e informa de la clase de prestaciones por
+frecuencia con su margen en dB:
+
+```python
+from phonometry import WeightingFilter, verify_weighting_class
+
+result = verify_weighting_class(WeightingFilter(48000, "A"))
+print(result["overall_class"])          # 1
+print(result["bands"][20])
+# {'freq': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
+```
+
+La máscara de aceptación de la Tabla 3 también es pública:
+`weighting_class_limits(1)` devuelve las 34 frecuencias nominales con los
+límites de desviación inferior/superior (un límite inferior de `-inf` significa
+que solo se aplica el superior). Los límites cualifican la *desviación* respecto
+al objetivo de diseño, por lo que son idénticos para A, C y Z.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask_es.svg" alt="Desviaciones de las ponderaciones A y C a 48 kHz dentro del corredor de aceptación de clase 1 de la Tabla 3 de IEC 61672-1, con los límites más amplios de clase 2 punteados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask_es_dark.svg" alt="Desviaciones de las ponderaciones A y C a 48 kHz dentro del corredor de aceptación de clase 1 de la Tabla 3 de IEC 61672-1, con los límites más amplios de clase 2 punteados" style="width:80%">
+
+*Los diseños sobremuestreados A y C (azul, morado) se mantienen cerca de
+desviación cero, holgadamente dentro del corredor de clase 1 (sombreado); los
+límites más amplios de clase 2 se muestran punteados. El corredor se ensancha
+en los extremos de banda donde solo se aplica un límite unilateral.*
+
 ---
 
 **Normas.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — las curvas de ponderación frecuencial A, C y Z (la
 definición analítica del Anexo E a partir de cuatro frecuencias de esquina,
-normalizadas a 0 dB en 1 kHz) y las tolerancias de clase 1 que el diseño
-`high_accuracy` mantiene hasta 16 kHz. ISO 7196:1995, *Acoustics —
-Frequency-weighting characteristic for infrasound measurements* — la
+normalizadas a 0 dB en 1 kHz), las tolerancias de clase 1 que el diseño
+`high_accuracy` mantiene hasta 16 kHz y los límites de aceptación de clase 1 y
+clase 2 de la Tabla 3 que comprueba `verify_weighting_class`. ISO 7196:1995,
+*Acoustics — Frequency-weighting characteristic for infrasound measurements* — la
 definición de polos y ceros de la ponderación G (Tabla 1), verificada frente a
 todos los valores nominales de respuesta de la Tabla 2 (0,25 Hz a 315 Hz).

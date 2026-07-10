@@ -589,7 +589,8 @@ façade). Single-number ratings reuse EN ISO 717-1 (`weighted_rating`).
 from phonometry import FacadeElement, facade_sound_reduction
 
 # EN 12354-3 Annex F: an 11.3 m² façade (V = 50 m³, flat so ΔLfs = 0) of a double
-# wall, two windows and a small acoustically-treated air inlet (a Dn,e element).
+# wall, a window, a small skylight and an acoustically-treated air inlet (a Dn,e
+# element).
 elements = [
     FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
     FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
@@ -669,7 +670,10 @@ fig.tight_layout(); plt.show()
 | `radiated_sound_power(lp_in)` | float or seq | dB | — | Inside level $L_{p,in}$ per band |
 | `radiated_sound_power(c_d)` | float | dB | default `-6` | Diffusivity term $C_d$ (Annex B) |
 | `radiated_sound_power(r_prime_cap)` | float | dB | default `40` (`None` off) | Field cap on $R'$ (Annex G) |
+| `radiated_sound_power(octave_bands)` | seq of int | Hz | default `None` | Octave centres matching the bands; enables the A-weighted $L_{WA}$ |
+| `facade_sound_reduction(frequencies)` | seq | Hz | default `None`; length = band count | Band centres carried on the result for plotting |
 | `outdoor_attenuation(width, height, distance)` | float | m | > 0 | Finite radiating side and reception distance (Annex E) |
+| `outdoor_level(l_w, attenuation)` | float or seq | dB | broadcast-compatible | Exterior $L_p$ from one or more sides (Formula E.1) |
 
 `facade_sound_reduction()` returns a `FacadePredictionResult` (`r_prime`, `r_45`,
 `r_tr_s`, `d_2m_nt`, `element_r`, and the `r_tr_s_w` / `d_2m_nt_w` / `c_tr` single

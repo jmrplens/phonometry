@@ -315,6 +315,25 @@ def _chk_butter_third() -> Outcome:
     return _filter_class_check("butter", 3, "third")
 
 
+@register(
+    "Filters & weightings",
+    "IEC 61260:1995 / ANSI S1.11-2004 Table 1",
+    "Class 0 (strictest) octave-band filter (butterworth, fs=48 kHz)",
+)
+def _chk_butter_class0_1995() -> Outcome:
+    bank = OctaveFilterBank(48000, fraction=1, order=6, limits=[100, 10000], filter_type="butter")
+    result = ph.verify_filter_class(bank, edition="1995")
+    margin = min(b["margin_class0_db"] for b in result["bands"])
+    ok = result["overall_class"] == 0
+    return Outcome(
+        expected="class 0",
+        computed=(f"class {result['overall_class']}" if result["overall_class"] is not None
+                  else "none") + f" (margin {margin:+.3f} dB)",
+        delta=f"{margin:+.3f} dB",
+        passed=ok,
+    )
+
+
 def _weighting_check(curve: str, fs: int) -> Outcome:
     res = _weighting_deviation(curve, fs)
     headroom = res.min_headroom

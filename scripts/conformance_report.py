@@ -931,6 +931,54 @@ def _chk_lab_airborne_rw() -> Outcome:
     )
 
 
+@register(
+    "Room & building acoustics",
+    "ISO 15186-1:2000 Formula (7)",
+    "Intensity RI on the ISO 717-1 reference shape -> RI,w = 30",
+)
+def _chk_intensity_ri_rw() -> Outcome:
+    # Choose LIn so that RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)] lands exactly on
+    # the ISO 717-1 Annex C curve; the rating engine must then return Rw = 30.
+    ref_ri = np.asarray(ref.ISO15186_1_REF_RI, dtype=float)
+    lp1, sm, s = ref.ISO15186_1_REF_LP1, ref.ISO15186_1_REF_SM, ref.ISO15186_1_REF_S
+    lin = lp1 - 6.0 - 10.0 * np.log10(sm / s) - ref_ri
+    res = ph.intensity_sound_reduction(
+        np.full(16, lp1), lin, measurement_area=sm, area=s
+    )
+    assert res.rating is not None
+    on_curve = bool(np.allclose(np.asarray(res.r_i), ref_ri))
+    expected = ref.ISO15186_1_REF_RIW
+    return Outcome(
+        expected=f"RI,w {expected} dB",
+        computed=f"RI,w {res.rating.rating} dB",
+        delta=f"{res.rating.rating - expected:+d} dB",
+        passed=on_curve and res.rating.rating == expected,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 15186-1:2000 Annex B",
+    "Adaptation term Kc: reference-room (B.1) reduces to (B.2)",
+)
+def _chk_intensity_kc_annexb() -> Outcome:
+    # Formula (B.1) with Sb2 = 117 m², V2 = 81 m³, c = 340 m/s must reproduce
+    # the room-independent approximation Kc = 10 lg(1 + 61,4/f) of (B.2).
+    b2 = ph.adaptation_term_kc(ref.ISO15186_1_KC_BANDS)
+    b1 = ph.adaptation_term_kc(
+        ref.ISO15186_1_KC_BANDS, boundary_area=117.0, volume=81.0
+    )
+    tab = np.asarray(ref.ISO15186_1_KC_B2, dtype=float)
+    delta = float(np.max(np.abs(b1 - b2)))
+    passed = bool(np.allclose(b2, tab, atol=5e-4)) and delta <= 1e-3
+    return Outcome(
+        expected="max abs(B.1 - B.2) <= 0,001 dB",
+        computed=f"{delta:.2e} dB (Kc@1k = {b2[3]:.3f} dB)",
+        delta=f"{delta:.2e} dB",
+        passed=passed,
+    )
+
+
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================

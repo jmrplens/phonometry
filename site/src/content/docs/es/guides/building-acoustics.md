@@ -789,6 +789,86 @@ plt.show()
 `coverage_factor`, `expanded_uncertainty`, `.lower`, `.upper`). El mapa de solo
 lectura `COVERAGE_FACTORS` expone la Tabla 8 indexada por `(confidence, one_sided)`.
 
+## 5. Aislamiento acústico por intensidad (ISO 15186)
+
+El método de laboratorio del §2 lee la potencia transmitida de forma
+*indirecta*, a partir del nivel de la sala receptora y de su área de absorción —
+lo que falla cuando los flancos filtran una potencia que la sala integra
+igualmente. El método por **intensidad sonora** (ISO 15186) lo evita: una sonda
+de intensidad barre una superficie de medición que envuelve el espécimen y mide
+la potencia radiada de forma *directa*, así que solo contribuye el elemento
+ensayado. Es la herramienta preferida cuando la transmisión por flancos es alta
+(ISO 15186-1:2000, cláusula 1). A partir del nivel de la sala emisora $L_{p1}$ y
+del nivel medio de intensidad normal $L_{In}$ sobre la superficie (área $S_m$),
+para un espécimen de área $S$,
+
+$$
+R_I = L_{p1} - 6 - \left[ L_{In} + 10 \log_{10}\frac{S_m}{S} \right],
+$$
+
+donde los $6$ dB son el desfase de campo difuso entre el nivel de presión sonora
+y el nivel de intensidad incidente. La misma fórmula da el índice aparente
+$R'_I$ en campo (ISO 15186-2). Como el método por intensidad *subestima*
+ligeramente la potencia radiada a una sala receptora real, un **índice
+modificado** $R_{I,M} = R_I + K_c$ reproduce el resultado por presión de la
+ISO 10140-2; el término de adaptación $K_c$ (Anexo B) es
+$10 \log_{10}(1 + S_{b2}\lambda/8V_2)$ para una sala bien definida, o el
+independiente de la sala $10 \log_{10}(1 + 61,4/f)$. Para elementos pequeños, la
+**diferencia de niveles normalizada por elemento** sustituye $10\lg(S_m/S)$ por
+$10\lg(S_m/A_0) + 10\lg N$ ($A_0 = 10\ \text{m}^2$, $N$ unidades de elemento).
+
+```python
+import numpy as np
+from phonometry import (intensity_sound_reduction, adaptation_term_kc,
+                        surface_pressure_intensity_indicator)
+
+# Nivel de sala emisora Lp1 y nivel medio de intensidad normal LIn sobre la
+# superficie de medición (Sm), para un espécimen de área S; 16 bandas 1/3 octava.
+lp1 = np.full(16, 85.0)
+l_in = np.full(16, 40.0)
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150]   # centros nominales 1/3 octava
+kc = adaptation_term_kc(freqs)                  # Anexo B (B.2)
+res = intensity_sound_reduction(lp1, l_in, measurement_area=12.0, area=10.0, kc=kc)
+print(round(float(res.r_i[0]), 2))          # 38.21  RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)]
+print(round(float(res.r_i_modified[0]), 2)) # 40.29  RI,M = RI + Kc
+print(res.rating.rating)                     # 38  ->  RI,w (motor ISO 717-1)
+
+# Cualifica la superficie de medición: FpI = Lp - LIn debe quedar < 10 dB (< 6 dB
+# si el lado receptor es absorbente); el índice residual de la sonda > FpI+10.
+fpi = surface_pressure_intensity_indicator(np.full(16, 46.0), l_in)
+print(round(float(fpi[0]), 1))               # 6.0
+
+res.plot()   # RI medido vs curva de referencia ISO 717-1 desplazada (necesita matplotlib)
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_es.svg" alt="Índice de reducción sonora por intensidad RI y el índice modificado RI,M a lo largo de las bandas de tercio de octava, con el aumento de adaptación del Anexo B sombreado entre las dos curvas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_es_dark.svg" alt="Índice de reducción sonora por intensidad RI y el índice modificado RI,M a lo largo de las bandas de tercio de octava, con el aumento de adaptación del Anexo B sombreado entre las dos curvas" style="width:80%">
+
+*El índice modificado $R_{I,M} = R_I + K_c$ eleva $R_I$ — más en las bandas
+bajas, donde $K_c$ es mayor — de modo que una medición por intensidad reproduce
+el resultado por presión de la ISO 10140-2. El índice automático solo se forma
+con exactamente 16 valores de tercio de octava o 5 de octava
+(`rating`/`rating_modified` son `None` en otro caso). Las subáreas barridas por
+separado se combinan primero con `combine_subareas` (Fórmulas (11)-(12)).*
+
+### Parámetros de `intensity_sound_reduction()` / `adaptation_term_kc()`
+
+| Parámetro | Tipo | Unidades | Rango / def. | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `lp1` | array 1D o 2D | dB | uno/banda, o `(posiciones, bandas)` | Nivel de presión de la sala emisora |
+| `l_in` | array 1D o 2D | dB | uno/banda, o `(posiciones, bandas)` | Nivel de intensidad normal sobre la superficie |
+| `measurement_area` | float | m² | > 0 | Área de la superficie de medición `Sm` |
+| `area` | float | m² | > 0 | Área del espécimen `S` |
+| `kc` | array 1D | dB | uno por banda / `None` | Término de adaptación para el índice modificado |
+| `freq` | array 1D | Hz | > 0 | Frecuencias centrales (`adaptation_term_kc`) |
+| `boundary_area` / `volume` | float | m² / m³ | > 0, ambos o ninguno | Sala `Sb2` / `V2` para la Fórmula (B.1) |
+
+`intensity_sound_reduction()` devuelve un `IntensityReductionResult` (`r_i`,
+`r_i_modified`, `rating`, `rating_modified`);
+`intensity_element_normalized_difference()` un
+`IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
+`surface_pressure_intensity_indicator()` y `combine_subareas()` devuelven arrays.
+
 ---
 
 **Normas.** ISO 16283-1:2014, ISO 16283-2 e ISO 16283-3:2016, *Acoustics —
@@ -803,7 +883,10 @@ resueltos H.3 y E.3); EN 12354-3:2000 y EN 12354-4:2000 — las predicciones de
 aislamiento de fachada y de radiación al exterior del §3 (ejemplos resueltos del
 Anexo F y del Anexo G); ISO 12999-1:2020 — las incertidumbres típicas por
 situación de medición y los factores de cobertura del §4; su marco de
-precisión se apoya en ISO 5725 (contexto, no implementada directamente).
+precisión se apoya en ISO 5725 (contexto, no implementada directamente);
+ISO 15186-1:2000 e ISO 15186-2:2003 — el índice de reducción sonora por
+intensidad $R_I$, su forma modificada por $K_c$ y la diferencia de niveles
+normalizada por elemento del §5 (laboratorio y campo).
 
 ## Véase también
 

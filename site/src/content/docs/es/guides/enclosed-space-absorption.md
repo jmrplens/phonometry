@@ -114,7 +114,7 @@ El `ReverberationResult` lleva el área de absorción y el tiempo de reverberaci
 por banda, el volumen y la fracción de objetos, y su `.plot()` dibuja el espectro
 del tiempo de reverberación. Es la contraparte de predicción del tiempo de
 reverberación medido en
-[Acústica de salas y edificación](/phonometry/es/guides/room-acoustics/)
+[Acústica de salas](/phonometry/es/guides/room-acoustics/)
 (ISO 3382) y de la absorción en cámara reverberante de
 [Materiales acústicos](/phonometry/es/guides/materials/) (ISO 354).
 

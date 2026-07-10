@@ -269,7 +269,7 @@ Los tres parámetros provienen de la Tabla 1 (p. 4), tabulados en las 29 frecuen
 
 La norma **no especifica interpolación** entre las frecuencias tabuladas. La Fórmula (1) está especificada para **20 fonios a 90 fonios** entre 20 Hz y 4 kHz, y solo hasta **80 fonios entre 5 kHz y 12,5 kHz** — por encima de 80 fonios la línea isofónica se detiene, por tanto, en 4 kHz. Los valores fuera de estos límites obtenidos con la Fórmula (2) son extrapolaciones que la norma califica de meramente informativas.
 
-Consulta la [guía de niveles](/phonometry/es/guides/levels/) para su uso.
+Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) para su uso.
 
 ## Prominencia tonal: TNR y PR (ECMA-418-1)
 
@@ -289,7 +289,7 @@ $$
 
 **PR** (apartado 12) compara el nivel de la banda crítica centrada en el tono, $L_M$, con la potencia media de las dos bandas críticas **contiguas** $L_L$, $L_U$ (bordes según las Fórmulas ajustadas 21–22 con las Tablas 2–3): $\mathrm{PR} = 10\log_{10} P_M - 10\log_{10}\left[(P_L + P_U)/2\right]$ (Fórmula 23). Para $f_t \le 171.4$ Hz la banda inferior se trunca en 20 Hz y su potencia se reescala a un **ancho de banda de 100 Hz** (Fórmula 24). El criterio (Fórmulas 25–26) es 9,0 dB para $f_t \ge 1$ kHz, y crece como $9.0 + 10.0\log_{10}(1000/f_t)$ por debajo. Los tonos se evalúan dentro del rango de interés de 89,1 Hz – 11,2 kHz (apartados 11.5 / 12.6).
 
-Consulta la [guía de niveles](/phonometry/es/guides/levels/) para su uso.
+Consulta la [guía de tonos discretos prominentes](/phonometry/es/guides/tone-prominence/) para su uso.
 
 ## Métricas de evento y de dosis
 
@@ -507,7 +507,7 @@ $$
 m_{dr} = \frac{2 \sqrt{\left( \sum_t I_k(t) \sin 2 \pi f_m t \right)^2 + \left( \sum_t I_k(t) \cos 2 \pi f_m t \right)^2}}{\sum_t I_k(t)}, \qquad m = \frac{m_{dr}}{0.55}
 $$
 
-Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) para su uso.
+Consulta la [guía del índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) para su uso.
 
 ## Índice de inteligibilidad del habla (ANSI S3.5)
 
@@ -794,7 +794,8 @@ a $u/\sqrt{m}$ (Fórmula A.7), y la incertidumbre de un solo número no
 correlacionada es la suma en cuadratura ponderada en energía de las
 incertidumbres por banda (Fórmula B.2).
 
-Consulta la [guía de acústica de salas y edificación](/phonometry/es/guides/room-acoustics/) para su uso.
+Consulta las guías de [acústica de salas](/phonometry/es/guides/room-acoustics/) y de
+[acústica de la edificación](/phonometry/es/guides/building-acoustics/) para su uso.
 
 ## Propagación en exteriores y exposición al ruido en el trabajo (ISO 9613-1/2, ISO 9612)
 
@@ -910,10 +911,10 @@ $L_{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (función, $88.1$ dB, $3.8$ dB) y F
 (jornada completa, $90.1$ dB, $3.4$ dB) se reproducen con la precisión impresa
 de la norma: todos los intermedios del anexo E son exactos dígito a dígito, y su
 nivel final difiere solo por el redondeo previo que la propia norma aplica al
-nivel efectivo de la jornada (véase la [guía de Niveles](/phonometry/es/guides/levels/)).
+nivel efectivo de la jornada (véase la [guía de exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/)).
 
 Consulta la [guía de Propagación en exteriores](/phonometry/es/guides/outdoor-propagation/)
-y la [guía de Niveles](/phonometry/es/guides/levels/) para su uso.
+y la [guía de exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/) para su uso.
 
 ## Determinación de la potencia sonora (ISO 3744/3745/3746, ISO 3741, ISO 9614-2/3)
 

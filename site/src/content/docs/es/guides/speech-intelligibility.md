@@ -11,6 +11,15 @@ auditivo a un único número en `[0, 1]`: `0` cuando nada útil alcanza al oyent
 **método por bandas de tercio de octava** de **ANSI S3.5-1997 (R2017)** — 18
 bandas de 160 Hz a 8000 Hz.
 
+:::note
+**SII frente a STI.** El SII predice la inteligibilidad desde la
+*audibilidad* — cuánto del espectro del habla supera el ruido y el umbral de
+audición en el oído de quien escucha —, mientras que el STI caracteriza un
+*canal de transmisión*: cuánta de la modulación del habla conserva una sala o
+un sistema de sonido. Para esto último, consulta la
+[guía del índice de transmisión del habla](/phonometry/es/guides/speech-transmission/).
+:::
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_speech_intelligibility_es.svg" alt="El flujo de cálculo del SII: tres entradas de nivel espectral equivalente (habla Ei', ruido Ni', umbral auditivo Ti') alimentan la etapa de automáscara del habla y propagación de la máscara (nivel espectral de enmascaramiento equivalente Zi), después la perturbación equivalente Di, después la función de audibilidad de banda Ai acotada a [0, 1], y por último la suma ponderada por importancia de banda SII sobre las 18 bandas de tercio de octava" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_speech_intelligibility_es_dark.svg" alt="El flujo de cálculo del SII: tres entradas de nivel espectral equivalente (habla Ei', ruido Ni', umbral auditivo Ti') alimentan la etapa de automáscara del habla y propagación de la máscara (nivel espectral de enmascaramiento equivalente Zi), después la perturbación equivalente Di, después la función de audibilidad de banda Ai acotada a [0, 1], y por último la suma ponderada por importancia de banda SII sobre las 18 bandas de tercio de octava" style="width:94%">
 
 ## 1. Entradas y la función de importancia de banda
@@ -159,8 +168,10 @@ espectro de voz, incluido como primer argumento de
 
 ## Véase también
 
-- [Psicoacústica e inteligibilidad del habla](/phonometry/es/guides/psychoacoustics/) — la
-  sonoridad, la nitidez y el índice de transmisión STI/STIPA que el SII complementa.
+- [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) — el
+  índice de transmisión STI/STIPA que el SII complementa.
+- [Psicoacústica](/phonometry/es/guides/psychoacoustics/) — la sonoridad, el
+  sharpness y las métricas de percepción de lo que oye quien escucha.
 - [Bancos de filtros](/phonometry/es/guides/filter-banks/) — las bandas de tercio de octava
   sobre las que se evalúa el SII.
 - [Niveles](/phonometry/es/guides/levels/) — los niveles espectrales y de banda tras las

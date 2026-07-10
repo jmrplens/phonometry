@@ -249,5 +249,5 @@ Returns an `OutdoorAttenuation` with `a_div`, `a_atm`, `a_gr`, `a_bar`,
 The method's stated accuracy is $\pm 1$ to $\pm 3$ dB for broadband noise up to
 1000 m (Table 5). See the [Theory](/phonometry/reference/theory/) page for the full derivation, the
 [Room Acoustics guide](/phonometry/guides/room-acoustics/) for how $\alpha$ feeds
-ISO 354, and the [Levels guide](/phonometry/guides/levels/) for the ISO 9612 occupational
+ISO 354, and the [Occupational Noise Exposure guide](/phonometry/guides/occupational-exposure/) for the ISO 9612 occupational
 exposure that consumes A-weighted levels.

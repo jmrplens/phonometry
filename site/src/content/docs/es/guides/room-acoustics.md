@@ -412,7 +412,7 @@ Devuelve un `OpenPlanResult` con `d2s`, `lp_as_4m`, `rd` y `rp`.
 `d2s`/`lp_as_4m` son `nan` si menos de dos posiciones caen en 2–16 m;
 `rd`/`rp` son `nan` cuando el STI no decrece con la distancia. El STI por
 posición puede medirse a su vez con las herramientas STIPA de la
-[guía de Psicoacústica](/phonometry/es/guides/psychoacoustics/).
+[guía del índice de transmisión del habla](/phonometry/es/guides/speech-transmission/).
 
 ## 4. Absorción sonora (ISO 354)
 
@@ -481,8 +481,10 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
 - [Potencia sonora](/phonometry/es/guides/sound-power/) — los métodos de `LW` que
   consumen el área de absorción de ISO 354 (el `K2` de ISO 3744 y el término de
   absorción de ISO 3741).
-- [Psicoacústica e inteligibilidad del habla](/phonometry/es/guides/psychoacoustics/) — el
-  STI/STIPA alimenta los `sti_values` de oficinas diáfanas; sonoridad y sharpness.
+- [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) — la
+  medición STI/STIPA que alimenta los `sti_values` de oficinas diáfanas.
+- [Psicoacústica](/phonometry/es/guides/psychoacoustics/) — la sonoridad, el
+  sharpness y las demás métricas de percepción de lo que entrega la sala.
 - [Bancos de filtros](/phonometry/es/guides/filter-banks/) — los filtros de octava
   fraccionaria IEC 61260 usados para las curvas de decaimiento por banda y los espectros de
   aislamiento.

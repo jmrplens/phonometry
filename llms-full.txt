@@ -128,12 +128,40 @@ signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 spl, freq = octave_filter(signal, fs=fs, fraction=3)
 
 print(f"Bands: {freq}")
+# Bands: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bands)
 print(f"SPL [dB]: {spl}")
+# SPL [dB]: [46.88395351 47.96774897 49.04991279 ...]  — ~90.7 dB at 100 Hz and ~90.9 dB at 1 kHz
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.png" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>
 
 *Example of a 1/3 Octave Band spectrum analysis of a complex signal.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import scipy.signal
+
+# Uses `signal`, `fs`, `spl` and `freq` from the snippet above.
+# Gray background: the raw-signal PSD (Welch), shifted to sit just below the
+# band SPLs so both spectral shapes share one axis.
+f_psd, psd = scipy.signal.welch(signal, fs, nperseg=8192)
+psd_db = 10 * np.log10(psd + 1e-12)
+psd_db += np.max(spl) - np.max(psd_db) - 5
+
+fig, ax = plt.subplots()
+ax.semilogx(f_psd, psd_db, color="gray", alpha=0.6, label="Raw signal PSD")
+ax.semilogx(freq, spl, marker="o", markerfacecolor="white",
+            label="1/3 octave bands")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("SPL [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ## Analyzing an audio file
 
@@ -170,7 +198,7 @@ phonometry supports several filter types, each with its own transfer function
 characteristic. All banks place their **−3 dB points on the ANSI S1.11 band
 edges**, so band levels are comparable across architectures.
 
-## Fractional octave bands: the math
+## 1. Fractional octave bands: the math
 
 IEC 61260-1:2014 builds every band from the base-10 octave ratio
 $G = 10^{3/10} \approx 1.99526$ (so "one octave" is *not* exactly 2). For
@@ -196,7 +224,22 @@ avoids that by filtering low bands at a decimated rate:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate.svg" alt="Multirate decimation: high bands filtered at the input rate, low bands after anti-alias low-pass and decimation so the SOS sections stay numerically healthy" width="92%"></picture>
 
-### `octave_filter()` / `OctaveFilterBank` parameters
+## 2. Filter Comparison and Zoom
+
+We use Second-Order Sections (SOS) for all filters to ensure numerical stability.
+The following plot compares the architectures focusing on the -3 dB crossover point.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison.svg" alt="Magnitude response comparison of the five filter architectures for the 1 kHz octave band, with a zoom at the -3 dB crossover" width="80%"></picture>
+
+| Type | Name | Usage Example | Best For |
+| :--- | :--- | :--- | :--- |
+| `butter` | **Butterworth** | `octave_filter(x, fs, filter_type='butter')` | General acoustic measurement. |
+| `cheby1` | **Chebyshev I** | `octave_filter(x, fs, filter_type='cheby1', ripple=0.1)` | Sharper roll-off at the cost of ripple. |
+| `cheby2` | **Chebyshev II** | `octave_filter(x, fs, filter_type='cheby2')` | Flat passband with stopband zeros. |
+| `ellip` | **Elliptic** | `octave_filter(x, fs, filter_type='ellip', ripple=0.1)` | Maximum selectivity. |
+| `bessel` | **Bessel** | `octave_filter(x, fs, filter_type='bessel')` | Preserving transient waveform shapes. |
+
+## 3. `octave_filter()` / `OctaveFilterBank` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -222,34 +265,19 @@ avoids that by filtering low bands at a decimated rate:
 Table 1 acceptance limits and reports the class (`1`, `2` or `None` if outside both) with per-band
 margins.
 
-## Filter Comparison and Zoom
-
-We use Second-Order Sections (SOS) for all filters to ensure numerical stability.
-The following plot compares the architectures focusing on the -3 dB crossover point.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison.png" alt="Magnitude response comparison of the five filter architectures for the 1 kHz octave band, with a zoom at the -3 dB crossover" width="80%"></picture>
-
-| Type | Name | Usage Example | Best For |
-| :--- | :--- | :--- | :--- |
-| `butter` | **Butterworth** | `octave_filter(x, fs, filter_type='butter')` | General acoustic measurement. |
-| `cheby1` | **Chebyshev I** | `octave_filter(x, fs, filter_type='cheby1', ripple=0.1)` | Sharper roll-off at the cost of ripple. |
-| `cheby2` | **Chebyshev II** | `octave_filter(x, fs, filter_type='cheby2')` | Flat passband with stopband zeros. |
-| `ellip` | **Elliptic** | `octave_filter(x, fs, filter_type='ellip', ripple=0.1)` | Maximum selectivity. |
-| `bessel` | **Bessel** | `octave_filter(x, fs, filter_type='bessel')` | Preserving transient waveform shapes. |
-
-## Gallery of Filter Bank Responses
+## 4. Gallery of Filter Bank Responses
 
 Full spectral view of the filter banks for Octave (1/1) and 1/3-Octave fractions.
 
 | Architecture | 1/1 Octave (Fraction=1) | 1/3 Octave (Fraction=3) |
 | :--- | :--- | :--- |
-| **Butterworth** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_1_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_1_order_6.png" alt="Butterworth octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6.png" alt="Butterworth one-third-octave filter bank frequency response" width="100%"></picture> |
-| **Chebyshev I** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_1_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_1_order_6.png" alt="Chebyshev I octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6.png" alt="Chebyshev I one-third-octave filter bank frequency response" width="100%"></picture> |
-| **Chebyshev II** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_1_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_1_order_6.png" alt="Chebyshev II octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6.png" alt="Chebyshev II one-third-octave filter bank frequency response" width="100%"></picture> |
-| **Elliptic** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6.png" alt="Elliptic octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.png" alt="Elliptic one-third-octave filter bank frequency response" width="100%"></picture> |
-| **Bessel** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6.png" alt="Bessel octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6.png" alt="Bessel one-third-octave filter bank frequency response" width="100%"></picture> |
+| **Butterworth** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_1_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_1_order_6.svg" alt="Butterworth octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6.svg" alt="Butterworth one-third-octave filter bank frequency response" width="100%"></picture> |
+| **Chebyshev I** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_1_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_1_order_6.svg" alt="Chebyshev I octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6.svg" alt="Chebyshev I one-third-octave filter bank frequency response" width="100%"></picture> |
+| **Chebyshev II** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_1_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_1_order_6.svg" alt="Chebyshev II octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6.svg" alt="Chebyshev II one-third-octave filter bank frequency response" width="100%"></picture> |
+| **Elliptic** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6.svg" alt="Elliptic octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.svg" alt="Elliptic one-third-octave filter bank frequency response" width="100%"></picture> |
+| **Bessel** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6.svg" alt="Bessel octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6.svg" alt="Bessel one-third-octave filter bank frequency response" width="100%"></picture> |
 
-## Filter Usage and Examples
+## 5. Filter Usage and Examples
 
 ### 1. Butterworth (`butter`)
 
@@ -269,7 +297,7 @@ x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 spl, freq = octave_filter(x, fs, filter_type='butter')
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6.png" alt="Butterworth one-third-octave filter bank frequency response" width="60%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6.svg" alt="Butterworth one-third-octave filter bank frequency response" width="60%"></picture>
 
 ### 2. Chebyshev I (`cheby1`)
 
@@ -278,11 +306,12 @@ expense of ripples in the passband. Useful when high selectivity is needed near
 the cut-off frequencies.
 
 ```python
+# Uses `x` and `fs` from the snippet above.
 # Selectivity with 0.1 dB passband ripple
 spl, freq = octave_filter(x, fs, filter_type='cheby1', ripple=0.1)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6.png" alt="Chebyshev I one-third-octave filter bank frequency response" width="60%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6.svg" alt="Chebyshev I one-third-octave filter bank frequency response" width="60%"></picture>
 
 ### 3. Chebyshev II (`cheby2`)
 
@@ -292,11 +321,12 @@ signal in the passband. The stopband edges are placed automatically so that the
 −3 dB points land on the band edges (`attenuation` must be > 3.01 dB).
 
 ```python
+# Uses `x` and `fs` from the snippet above.
 # Flat passband, class-1 default 72 dB stopband attenuation
 spl, freq = octave_filter(x, fs, filter_type='cheby2')
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6.png" alt="Chebyshev II one-third-octave filter bank frequency response" width="60%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6.svg" alt="Chebyshev II one-third-octave filter bank frequency response" width="60%"></picture>
 
 ### 4. Elliptic (`ellip`)
 
@@ -304,11 +334,12 @@ Elliptic (Cauer) filters have the **shortest transition width** (steepest
 roll-off) for a given order. They feature ripples in both the passband and stopband.
 
 ```python
+# Uses `x` and `fs` from the snippet above.
 # Maximum selectivity for extreme band isolation
 spl, freq = octave_filter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.png" alt="Elliptic one-third-octave filter bank frequency response" width="60%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.svg" alt="Elliptic one-third-octave filter bank frequency response" width="60%"></picture>
 
 ### 5. Bessel (`bessel`)
 
@@ -317,11 +348,12 @@ delay. They preserve the shape of filtered waveforms (transients) better than
 any other type, but have the slowest roll-off.
 
 ```python
+# Uses `x` and `fs` from the snippet above.
 # Best for pulse analysis and transient preservation
 spl, freq = octave_filter(x, fs, filter_type='bessel')
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6.png" alt="Bessel one-third-octave filter bank frequency response" width="60%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6.svg" alt="Bessel one-third-octave filter bank frequency response" width="60%"></picture>
 
 ### 6. Linkwitz-Riley (`linkwitz_riley`)
 
@@ -333,15 +365,16 @@ difference between bands at the crossover.
 ```python
 from phonometry import linkwitz_riley
 
-signal = x                            # reuse the calibrated signal from the top of the page
+# Uses `x` and `fs` from the snippet above.
+signal = x
 # Split signal into Low and High bands at 1000 Hz
 low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 # Reconstruction: low + high == signal (flat response)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4.png" alt="Linkwitz-Riley 4th-order crossover: low-pass, high-pass and their flat sum" width="60%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4.svg" alt="Linkwitz-Riley 4th-order crossover: low-pass, high-pass and their flat sum" width="60%"></picture>
 
-## Verifying the IEC 61260-1 class
+## 6. Verifying the IEC 61260-1 class
 
 `verify_filter_class` checks every band of a bank against the acceptance
 limits of **IEC 61260-1:2014** (Table 1, with the fractional-octave breakpoint
@@ -353,11 +386,17 @@ from phonometry import OctaveFilterBank, verify_filter_class
 
 bank = OctaveFilterBank(fs=48000, fraction=3, order=6)
 result = verify_filter_class(bank)
-print(result["overall_class"])          # 1, 2 or None
-print(result["bands"][0])               # {'freq': ..., 'class': 1, 'margin_class1_db': ...}
+print(result["overall_class"])          # 1
+print(result["bands"][0])
+# {'freq': 12.589254117941678, 'class': 1, 'margin_class1_db': 0.39999999999997266, 'margin_class2_db': 0.5999999999999727}
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay.png" alt="Butterworth band response threading between the forbidden regions of the IEC 61260-1 class 1 acceptance mask" width="80%"></picture>
+The Table 1 acceptance mask itself is public too: `class_limits(fraction,
+filter_class, omega)` returns the minimum/maximum relative-attenuation
+limits at normalized frequencies Ω = f/fm — the same limits the verifier
+and the figure below use.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay.svg" alt="Butterworth band response threading between the forbidden regions of the IEC 61260-1 class 1 acceptance mask" width="80%"></picture>
 
 *The order-6 Butterworth response (blue) threads between the forbidden
 regions: it must attenuate at least the red mask outside the band and no more
@@ -371,7 +410,7 @@ far-stopband class 1 limit (scipy pins the cheby2 equiripple floor at exactly
 not meet class limits at order 6: passband ripple (cheby1/ellip) and slow
 roll-off (bessel) violate the mask.
 
-## Signal Decomposition and Stability
+## 7. Signal Decomposition and Stability
 
 By setting `sigbands=True`, you can retrieve the time-domain components of each
 band. This allows for advanced analysis or comparing how different architectures
@@ -393,7 +432,7 @@ spl_c2, _, xb_cheby2 = octave_filter(y, fs=fs, fraction=1, sigbands=True, filter
 # 'xb_butter' and 'xb_cheby2' contain the time-domain signals per band
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_decomposition_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_decomposition.png" alt="Time-domain band decomposition comparing Butterworth and Chebyshev II, including the impulse response" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_decomposition_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_decomposition.svg" alt="Time-domain band decomposition comparing Butterworth and Chebyshev II, including the impulse response" width="80%"></picture>
 
 *The plot compares the **Butterworth** (solid blue) and **Chebyshev II** (dashed
 red) responses. The bottom plot shows the **Impulse Response**, highlighting the
@@ -415,9 +454,9 @@ The group delay $\tau_g(\omega) = -\frac{d\phi(\omega)}{d\omega}$ of the
 the passband (transient shapes survive), while Chebyshev I and Elliptic pay for
 their steep roll-off with strong delay peaks at the band edges.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison.png" alt="Group delay of the 1 kHz octave band for the five architectures: Bessel nearly flat, Chebyshev and Elliptic peaking at the band edges" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison.svg" alt="Group delay of the 1 kHz octave band for the five architectures: Bessel nearly flat, Chebyshev and Elliptic peaking at the band edges" width="80%"></picture>
 
-## Zero-phase filtering
+## 8. Zero-phase filtering
 
 For offline analysis you can eliminate group delay entirely: `zero_phase=True`
 filters each band forward-backward (`scipy.signal.sosfiltfilt`), keeping band
@@ -431,14 +470,27 @@ decay). The option is incompatible with stateful (block) processing.
 ```python
 from phonometry import OctaveFilterBank
 
+# Uses `y` from the snippet above.
 bank = OctaveFilterBank(fs=48000, fraction=3)
 spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zero_phase_comparison_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zero_phase_comparison.png" alt="Causal versus zero-phase filtering of a tone burst: the zero-phase output stays time-aligned with the input" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zero_phase_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zero_phase_comparison.svg" alt="Causal versus zero-phase filtering of a tone burst: the zero-phase output stays time-aligned with the input" width="80%"></picture>
 
 *Causal filtering delays the burst by the filter's group delay; zero-phase
 filtering keeps it aligned with the input.*
+
+---
+
+**Standards.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+fractional-octave-band filters — Part 1: Specifications* — the base-10 mid
+frequencies and band edges of §1 (5.2-5.5), the nominal band labels, and the
+Table 1 class 1 / class 2 acceptance limits (with the fractional-octave
+breakpoint mapping and log-frequency interpolation) verified in §6.
+ANSI S1.11-2004, *Octave-Band and Fractional-Octave-Band Analog and Digital
+Filters* — the band-edge convention on which every bank places its −3 dB
+points. ISO 266 — the preferred-frequency series behind the nominal band
+labels reported by `nominal_frequencies`.
 
 ---
 
@@ -451,51 +503,43 @@ Frequency weighting curves simulate the human ear's sensitivity. A, C and Z
 are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
 **ISO 7196:1995**.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.png" alt="A, C and Z frequency weighting curves with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_responses.svg" alt="A, C and Z frequency weighting curves with a zoom showing the positive region of the A curve (+1.27 dB at 2.5 kHz)" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import weighting_filter
+
+# Measure each curve's response: weight a centered unit impulse and take
+# its spectrum (1 s buffer -> 1 Hz frequency resolution).
+fs = 48000
+impulse = np.zeros(fs)
+impulse[fs // 2] = 1.0
+freqs = np.fft.rfftfreq(fs, 1 / fs)
+
+fig, ax = plt.subplots(figsize=(9, 5))
+for curve in ("A", "C", "Z"):
+    spectrum = np.fft.rfft(weighting_filter(impulse, fs, curve=curve))
+    ax.semilogx(freqs[1:], 20 * np.log10(np.abs(spectrum[1:]) + np.finfo(float).eps),
+                label=curve)
+ax.set(xlim=(10, 20000), ylim=(-80, 10),
+       xlabel="Frequency [Hz]", ylabel="Response [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 * **A-Weighting (`A`):** Standard for environmental noise (IEC 61672-1).
 * **C-Weighting (`C`):** Used for peak sound pressure and high-level noise.
 * **Z-Weighting (`Z`):** Zero weighting, completely flat response.
 * **G-Weighting (`G`):** Infrasound weighting per ISO 7196 (see below).
 
-```python
-import numpy as np
-from phonometry import weighting_filter
-
-# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
-fs = 48000
-recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
-
-# Apply A-weighting to the raw recording
-weighted_signal = weighting_filter(recording, fs, curve='A')
-
-# Apply C-weighting for peak analysis
-c_weighted_signal = weighting_filter(recording, fs, curve='C')
-```
-
-## Infrasound: G-weighting (ISO 7196)
-
-The **G frequency weighting** (ISO 7196:1995) rates infrasound the way A-weighting
-rates audible noise. It is defined by a pole-zero configuration with 0 dB gain at
-10 Hz, rises at 12 dB/octave from 1 Hz to 20 Hz (matching the steep growth of
-perception in that band) and falls off at 24 dB/octave outside it. Use it for
-sources with significant energy below 20 Hz (wind turbines, HVAC, blasting):
-
-```python
-from phonometry import weighting_filter
-
-g_weighted = weighting_filter(recording, fs, curve='G')
-```
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.png" alt="G-weighting frequency response from 0.1 Hz to 1 kHz with the ISO 7196 Table 2 nominal values overlaid" width="80%"></picture>
-
-The implementation follows the ISO 7196 Table 1 pole/zero values exactly and is
-verified in CI against every Table 2 nominal response value (0.25 Hz to 315 Hz).
-`WeightingFilter(fs, "G")` supports the same multichannel and stateful block
-processing as A/C. Levels measured with the G curve are reported as
-L<sub>pG</sub> (or L<sub>Geq</sub> for the equivalent level over time).
-
-## Where the curves come from
+## 1. Where the curves come from
 
 The A and C curves are inverted equal-loudness contours, frozen into filters:
 **A** approximates the inverse of the historic 40-phon contour (quiet levels,
@@ -514,7 +558,77 @@ through the low-mids. Both are normalized to exactly 0 dB at 1 kHz. Z is the
 absence of weighting. The full pole/zero derivation is in the
 [Theory](https://jmrplens.github.io/phonometry/reference/theory/) page.
 
-### `weighting_filter()` / `WeightingFilter` parameters
+## 2. Basic usage
+
+```python
+import numpy as np
+from phonometry import weighting_filter
+
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+# Apply A-weighting to the raw recording
+weighted_signal = weighting_filter(recording, fs, curve='A')
+
+# Apply C-weighting for peak analysis
+c_weighted_signal = weighting_filter(recording, fs, curve='C')
+```
+
+## 3. Infrasound: G-weighting (ISO 7196)
+
+The **G frequency weighting** (ISO 7196:1995) rates infrasound the way A-weighting
+rates audible noise. It is defined by a pole-zero configuration with 0 dB gain at
+10 Hz, rises at 12 dB/octave from 1 Hz to 20 Hz (matching the steep growth of
+perception in that band) and falls off at 24 dB/octave outside it. Use it for
+sources with significant energy below 20 Hz (wind turbines, HVAC, blasting):
+
+```python
+from phonometry import weighting_filter
+
+# Uses `recording` and `fs` from the snippet above.
+g_weighted = weighting_filter(recording, fs, curve='G')
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.svg" alt="G-weighting frequency response from 0.1 Hz to 1 kHz with the ISO 7196 Table 2 nominal values overlaid" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import weighting_filter
+
+# Measure the G response: weight a centered unit impulse and take its
+# spectrum. A long buffer gives the resolution the infrasound range
+# needs (20 s -> 0.05 Hz).
+fs = 4000
+impulse = np.zeros(20 * fs)
+impulse[impulse.size // 2] = 1.0
+freqs = np.fft.rfftfreq(impulse.size, 1 / fs)
+spectrum = np.fft.rfft(weighting_filter(impulse, fs, curve="G"))
+
+fig, ax = plt.subplots(figsize=(9, 5))
+ax.semilogx(freqs[1:],
+            20 * np.log10(np.abs(spectrum[1:]) + np.finfo(float).eps))
+ax.plot(10, 0, "o", color="tab:red", label="0 dB at 10 Hz")
+ax.set(xlim=(0.1, 1000), ylim=(-90, 15),
+       xlabel="Frequency [Hz]", ylabel="G-weighting response [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
+The implementation follows the ISO 7196 Table 1 pole/zero values exactly and is
+verified in CI against every Table 2 nominal response value (0.25 Hz to 315 Hz).
+`WeightingFilter(fs, "G")` supports the same multichannel and stateful block
+processing as A/C. Levels measured with the G curve are reported as
+L<sub>pG</sub> (or L<sub>Geq</sub> for the equivalent level over time).
+
+## 4. `weighting_filter()` / `WeightingFilter` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -525,20 +639,21 @@ absence of weighting. The full pole/zero derivation is in the
 | `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
 | `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
 
-## Reusable filter object
+## 5. Reusable filter object
 
 If you weight many signals with the same parameters, design the filter once:
 
 ```python
 from phonometry import WeightingFilter
 
+# Uses `recording` and `fs` from the snippet above.
 wf = WeightingFilter(fs, "A")
 signals = [recording]                # your batch of recordings
 for recording in signals:
     weighted = wf.filter(recording)
 ```
 
-## High-frequency accuracy (`high_accuracy`)
+## 6. High-frequency accuracy (`high_accuracy`)
 
 A plain bilinear-transform design compresses the response near Nyquist: at
 fs = 48 kHz the A-curve error at 12.5 kHz reaches −2.7 dB, outside the IEC
@@ -549,10 +664,51 @@ filter at an internally oversampled rate (≥ 144 kHz) and decimates back, keepi
 the response within class 1 tolerances up to 16 kHz (error ≈ −0.5 dB at
 12.5 kHz for fs = 48 kHz).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf.png" alt="A-weighting high-frequency accuracy at 48 kHz: analytic curve versus plain bilinear versus oversampled design, with error subplot" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf.svg" alt="A-weighting high-frequency accuracy at 48 kHz: analytic curve versus plain bilinear versus oversampled design, with error subplot" width="80%"></picture>
 
 *The plain bilinear design (red) crosses the class 1 tolerance near 12.5 kHz;
 the oversampled design (blue) stays close to the analytic curve.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import weighting_filter
+
+# Measured response of both designs at fs = 48 kHz: weight a centered
+# unit impulse and take its spectrum...
+fs = 48000
+impulse = np.zeros(fs)
+impulse[fs // 2] = 1.0
+freqs = np.fft.rfftfreq(fs, 1 / fs)[1:]
+
+# ...versus the analytic IEC 61672-1 A-curve built from the four corner
+# frequencies of section 1, normalized to 0 dB at 1 kHz.
+f1, f2, f3, f4 = 20.599, 107.653, 737.862, 12194.217
+gain = (f4**2 * freqs**4) / ((freqs**2 + f1**2)
+        * np.sqrt((freqs**2 + f2**2) * (freqs**2 + f3**2))
+        * (freqs**2 + f4**2))
+analytic = 20 * np.log10(gain / gain[np.argmin(np.abs(freqs - 1000))])
+
+fig, ax = plt.subplots(figsize=(9, 5))
+ax.semilogx(freqs, analytic, "k--", label="Analytic (IEC 61672-1)")
+for high_accuracy, label in ((False, "Plain bilinear"),
+                             (True, "Oversampled (default)")):
+    weighted = weighting_filter(impulse, fs, curve="A",
+                                high_accuracy=high_accuracy)
+    response = 20 * np.log10(np.abs(np.fft.rfft(weighted))
+                             + np.finfo(float).eps)[1:]
+    ax.semilogx(freqs, response, label=label)
+ax.set(xlim=(1000, 20000), ylim=(-12, 3),
+       xlabel="Frequency [Hz]", ylabel="A-weighting response [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 - `high_accuracy=False` restores the legacy plain-bilinear behavior.
 - **Stateful (block) processing** always uses the legacy design: the internal
@@ -560,6 +716,9 @@ the oversampled design (blue) stays close to the analytic curve.*
   `high_accuracy=True` together with `stateful=True` raises a `ValueError`.
 
 ```python
+from phonometry import WeightingFilter, weighting_filter
+
+# Uses `recording` and `fs` from the snippet above.
 # Explicit legacy behavior
 y = weighting_filter(recording, fs, curve="A", high_accuracy=False)
 
@@ -575,6 +734,16 @@ See [Block Processing](https://jmrplens.github.io/phonometry/guides/block-proces
 
 ---
 
+**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+Part 1: Specifications* — the A, C and Z frequency-weighting curves (the
+Annex E analytic definition from four corner frequencies, normalized to 0 dB
+at 1 kHz) and the class 1 tolerances the `high_accuracy` design keeps up to
+16 kHz. ISO 7196:1995, *Acoustics — Frequency-weighting characteristic for
+infrasound measurements* — the G-weighting pole/zero definition (Table 1),
+verified against every Table 2 nominal response value (0.25 Hz to 315 Hz).
+
+---
+
 
 <!-- source: docs/time-weighting.md | canonical: https://jmrplens.github.io/phonometry/guides/time-weighting/ -->
 
@@ -583,7 +752,57 @@ See [Block Processing](https://jmrplens.github.io/phonometry/guides/block-proces
 Accurate SPL measurement requires capturing energy over specific time windows.
 phonometry implements exact time constants per **IEC 61672-1:2013**.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>
+## 1. The exponential detector
+
+A sound level meter's needle cannot follow the pressure waveform — it shows a
+running *mean square* with an exponential memory. Formally (IEC 61672-1, 3.8):
+
+$$
+\tau\ \frac{dy}{dt} + y = x^2(t)
+\quad\Longleftrightarrow\quad
+y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\ e^{-(t-\xi)/\tau}\ d\xi
+$$
+
+a first-order low-pass on the squared signal. The time constant τ sets the
+trade-off: **Fast** (125 ms) follows speech-like fluctuations, **Slow** (1 s)
+steadies the readout for quasi-stationary noise. After a step onset the
+envelope reaches 63 % of its final value in one τ and ~99.97 % after 8τ —
+that is why level analyses discard the first instants of a recording.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting.svg" alt="The exponential-detector chain: the band pressure is squared, smoothed by a one-pole RC low-pass with time constant tau, and converted to decibels, with the Fast, Slow and Impulse time constants listed" width="88%"></picture>
+
+## 2. The three time weightings
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting.gif" alt="Animation: the Fast, Slow and Impulse detectors chasing a tone burst — Fast rises and falls quickly, Slow lags, and Impulse rises fast but decays the slowest" width="88%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.svg" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import time_weighting
+
+fs = 48000
+t = np.arange(int(fs * 4)) / fs
+burst = np.zeros_like(t)  # 0.5 s noise burst (Pa) starting at t = 1 s
+rng = np.random.default_rng(42)
+burst[fs:int(1.5 * fs)] = 0.2 * rng.standard_normal(int(0.5 * fs))
+
+p0 = 2e-5
+plt.figure()
+for mode in ('fast', 'slow', 'impulse'):
+    envelope = time_weighting(burst, fs, mode=mode)
+    plt.plot(t, 10 * np.log10(np.maximum(envelope, 1e-12) / p0**2), label=mode)
+plt.xlabel('Time [s]')
+plt.ylabel('Level [dB SPL]')
+plt.legend()
+plt.show()
+```
+
+</details>
 
 * **Fast (`fast`):** τ = 125 ms. Standard for noise fluctuations.
 * **Slow (`slow`):** τ = 1000 ms. Standard for steady noise.
@@ -602,6 +821,9 @@ recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 energy_envelope = time_weighting(recording, fs, mode='fast')
 # dB SPL relative to 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
+
+print(f"Steady-state Fast level: {spl_t[-1]:.1f} dB SPL")
+# Steady-state Fast level: 77.0 dB SPL
 ```
 
 The asymmetric Impulse ballistics use two constants — a fast attack and a slow
@@ -612,24 +834,7 @@ y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{otherwise}\end{cases}
 $$
 
-## The exponential detector
-
-A sound level meter's needle cannot follow the pressure waveform — it shows a
-running *mean square* with an exponential memory. Formally (IEC 61672-1, 3.8):
-
-$$
-\tau\ \frac{dy}{dt} + y = x^2(t)
-\quad\Longleftrightarrow\quad
-y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\ e^{-(t-\xi)/\tau}\ d\xi
-$$
-
-a first-order low-pass on the squared signal. The time constant τ sets the
-trade-off: **Fast** (125 ms) follows speech-like fluctuations, **Slow** (1 s)
-steadies the readout for quasi-stationary noise. After a step onset the
-envelope reaches 63 % of its final value in one τ and ~99.8 % after 8τ —
-that is why level analyses discard the first instants of a recording.
-
-### `time_weighting()` / `TimeWeighting` parameters
+## 3. `time_weighting()` / `TimeWeighting` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -641,15 +846,48 @@ that is why level analyses discard the first instants of a recording.
 The output has the units of $x^2$: take `10*log10(y / p0**2)` for SPL or use
 the level functions, which do it for you.
 
-## Verified ballistics (IEC 61672-1 Table 4)
+## 4. Verified ballistics (IEC 61672-1 Table 4)
 
 The Fast envelope's response to 4 kHz tonebursts lands exactly on the
-standard's reference values — enforced in CI for burst durations from 1 s down
-to 1 ms (F and S weightings, class 1 acceptance limits):
+standard's reference values — the example below verifies the 200 ms Fast
+burst row; the CI suite covers the full Table 4, from 1 s down to 1 ms for F
+and 1 s down to 2 ms for S, at class 1 acceptance limits:
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.svg" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
 
-## Initial state
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import time_weighting
+
+fs = 48000
+t = np.arange(int(fs * 2)) / fs
+tone = np.sin(2 * np.pi * 4000 * t)
+
+# Steady-state Fast reference of the continuous tone
+reference = time_weighting(tone, fs, mode='fast')[int(1.5 * fs):].mean()
+
+# 200 ms burst of the same tone (IEC 61672-1 Table 4 target: -1.0 dB)
+burst = np.zeros_like(t)
+burst[int(0.5 * fs):int(0.7 * fs)] = tone[int(0.5 * fs):int(0.7 * fs)]
+envelope = time_weighting(burst, fs, mode='fast')
+env_db = 10 * np.log10(np.maximum(envelope / reference, 1e-6))
+
+plt.figure()
+plt.plot(t, env_db, label='Fast envelope')
+plt.axhline(-1.0, linestyle='--', label='IEC target −1.0 dB')
+plt.xlabel('Time [s]')
+plt.ylabel('Level re steady state [dB]')
+plt.legend()
+plt.show()
+```
+
+</details>
+
+## 5. Initial state
 
 By default, the exponential integrator starts from rest (`y[-1] = 0`). Passing
 `initial_state=None` leaves this default unspecified, while `initial_state='zero'`
@@ -657,10 +895,11 @@ requests the same zero state explicitly. If the recorded segment begins after a
 steady signal is already present, you can start from the first sample energy instead:
 
 ```python
+# Uses `recording` and `fs` from the snippet above.
 energy_envelope = time_weighting(recording, fs, mode='fast', initial_state='first')
 ```
 
-## Block processing
+## 6. Block processing
 
 For block processing, pass the last output value from the previous block as the
 next block's `initial_state` instead of resetting each block:
@@ -696,7 +935,7 @@ Concatenated block outputs are exactly equal to a single continuous call
 (verified for all three modes, mono and multichannel). Call `tw.reset()` to
 start from rest again.
 
-## Performance note
+## 7. Performance note
 
 The `impulse` mode uses an asymmetric kernel that is JIT-compiled when
 [numba](https://numba.pydata.org/) is installed (`pip install phonometry[perf]`).
@@ -705,6 +944,14 @@ Without numba a pure-Python fallback produces identical results, just slower.
 See [Integrated & Statistical Levels](https://jmrplens.github.io/phonometry/guides/levels/) for Leq/LN metrics built on
 these envelopes, and [Why phonometry](https://jmrplens.github.io/phonometry/reference/why-phonometry/) for the IEC
 61672-1 tone-burst verification.
+
+---
+
+**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+Part 1: Specifications* — the exponential time-weighting detector (clause 3.8)
+with the F and S time constants (clause 5.7), and the 4 kHz toneburst reference
+responses of Table 4 (class 1 acceptance limits) used to verify the ballistics
+in CI.
 
 ---
 
@@ -771,11 +1018,13 @@ regulations are written in terms of it.
 **L90** the background level.
 
 ```python
+import numpy as np
 from phonometry import ln_levels
 
 # A steady tone gives L10 = L50 = L90; percentiles only tell a story for a
 # *fluctuating* level. Synthesize 3 s alternating between a quiet and a
 # ~10 dB louder half-second so the statistics separate.
+fs = 48000
 rng = np.random.default_rng(0)
 segment = fs // 2                                  # 0.5 s per level
 quiet = 0.02 * rng.standard_normal(segment)        # background
@@ -787,7 +1036,7 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 # LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.svg" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%"></picture>
 
 *L10 tracks the event peaks, L50 the median level and L90 the background.*
 
@@ -819,6 +1068,8 @@ impulsive noise, so regulations always name the time weighting.
 
 ```python
 from phonometry import lc_peak, sel, sound_exposure, lex_8h
+
+# Uses `recording`, `fs` and `sensitivity` from the Leq snippet above.
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
 peak = lc_peak(recording, fs, calibration_factor=sensitivity)
@@ -860,7 +1111,7 @@ so events of any duration become directly comparable, and $N$ identical
 events sum as $+10\log_{10}N$. This is the building block of airport and
 railway noise models.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept.png" alt="A vehicle pass-by level history with its Leq over the whole event and the equal-energy one-second SEL block" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept.svg" alt="A vehicle pass-by level history with its Leq over the whole event and the equal-energy one-second SEL block" width="80%"></picture>
 
 ### Noise dose: sound exposure and LEX,8h
 
@@ -911,7 +1162,7 @@ r = composite_rating_level([(63.2, 12, 0.0),    # day
                             (51.4, 8, 10.0)])   # night  (+10) == lden
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.png" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.svg" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" width="80%"></picture>
 
 ### `lden()` / `ldn()` / `composite_rating_level()` parameters
 
@@ -921,7 +1172,7 @@ r = composite_rating_level([(63.2, 12, 0.0),    # day
 | `ldn(lday, lnight, hours=(15, 9))` | | +10 dB night (3.6.5) |
 | `composite_rating_level(periods)` | iterable of `(level_db, hours, adjustment_db)`; hours positive, finite and summing to 24 | General Formulae (5)-(6); adjustments per Table A.1 |
 
-Where you put the microphone changes the number: ISO 1996-2 fixes the receiver positions and their façade corrections:
+Where you put the microphone changes the number: ISO 1996-2 fixes the receiver positions and their façade corrections. phonometry does not implement ISO 1996-2 — the diagram is measurement context; apply the corrections to your levels before analysis:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement.svg" alt="Environmental noise measurement positions per ISO 1996-2: free field, 2 m from the facade and flush-mounted, with their corrections" width="92%"></picture>
 
@@ -937,6 +1188,7 @@ time-aligned across bands.
 ```python
 from phonometry import OctaveFilterBank
 
+# Uses `recording` from the Leq snippet above.
 bank = OctaveFilterBank(fs=48000, fraction=3)
 levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
@@ -968,6 +1220,7 @@ levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5
 ```python
 import matplotlib.pyplot as plt
 
+# Uses `levels`, `freq` and `times` from the spectrogram snippet above.
 fig, ax = plt.subplots()
 mesh = ax.pcolormesh(times, freq, levels, shading="auto")
 ax.set_yscale("log")
@@ -983,6 +1236,20 @@ ISO 9612 occupational strategies continue in
 tonal-prominence verdicts in [Prominent Discrete Tones](https://jmrplens.github.io/phonometry/guides/tone-prominence/),
 and the ISO 226 equal-loudness contours live with the perception metrics in
 [Psychoacoustics](https://jmrplens.github.io/phonometry/guides/psychoacoustics/).
+
+---
+
+**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+Part 1: Specifications* — the Fast/Slow/Impulse envelope ballistics behind
+`ln_levels`, the C-weighted peak of §5.13 (verified against the Table 5 tone
+bursts) and the sound exposure level verified against the Table 4 LAE column.
+IEC 61252, *Electroacoustics — Specifications for personal sound exposure
+meters* — the sound exposure E in Pa²h and the normalized 8 h level LEX,8h
+(≡ LEP,d), anchored at 3.2 Pa²h ⇔ exactly 90 dB. ISO 1996-1:2016, *Acoustics —
+Description, measurement and assessment of environmental noise — Part 1:
+Basic quantities and assessment procedures* — Lden (3.6.4), Ldn (3.6.5) and
+the composite whole-day rating level of clause 6.5 (Formulae 5-6, Table A.1
+adjustments).
 
 ---
 
@@ -1016,7 +1283,22 @@ random samples over a homogeneous exposure group and normalise the effective-day
 duration. The daily level is the same either way; the strategies differ in how
 the **uncertainty** is built.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.png" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.svg" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line, with the Annex D `res` computed below: task contribution bars
+# plus the LEX,8h and LEX,8h + U lines.
+res.plot()
+plt.show()
+```
+
+</details>
+
 
 ```python
 from phonometry.occupational_exposure import (
@@ -1095,7 +1377,10 @@ derived on the [Theory](https://jmrplens.github.io/phonometry/reference/theory/)
 
 All three return an `ExposureResult` with `lex_8h`, `combined_standard_uncertainty`
 $u$, `expanded_uncertainty` $U = 1.65\ u$, `upper_limit` = $L_{EX,8h} + U$,
-`sampling_advisory`, and (task-based) the per-task `tasks` breakdown.
+`sampling_advisory`, and (task-based) the per-task `tasks` breakdown; the
+result's `.plot()` draws the per-task contribution bars with the $L_{EX,8h}$
+and upper-limit lines (task-based results only, since the other strategies
+carry no per-task breakdown).
 
 ## See also
 
@@ -1150,7 +1435,7 @@ $\Delta f_c = 25 + 75\ [1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz at 1 kHz): a
 tone is masked only by the noise *inside* its critical band, so both ratios
 compare the tone against exactly that noise, not the whole spectrum.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum.png" alt="Averaged spectrum of a tone in noise with the critical band shaded and the tone-to-noise ratio annotated against its prominence criterion" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum.svg" alt="Averaged spectrum of a tone in noise with the critical band shaded and the tone-to-noise ratio annotated against its prominence criterion" width="80%"></picture>
 
 A TNR above $8 + 8.33\log_{10}(1000/f_t)$ dB (8 dB from 1 kHz up) classifies
 the tone as *prominent*; the PR criterion is $9 + 10\log_{10}(1000/f_t)$ dB.
@@ -1158,7 +1443,7 @@ Low frequencies get higher thresholds because wider relative bands mask more.
 
 ## 2. Where to measure (ECMA-74) and practice
 
-ECMA-74 (which delegates its tone assessments to ECMA-418-1) also fixes where to measure around a device:
+ECMA-74 (which delegates its tone assessments to ECMA-418-1) also fixes where to measure around a device — context only: phonometry implements the ECMA-418-1 assessments, not the ECMA-74 Annex D measurement procedure:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions.svg" alt="ECMA-74 emission measurement positions: seated operator microphone at 0.25 m and 1.20 m, and the four bystander positions at 1 m" width="92%"></picture>
 
@@ -1193,8 +1478,7 @@ Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
 **Standards.** ECMA-418-1:2024 (3rd edition), *Psychoacoustic metrics for ITT
 equipment — Part 1: Prominent discrete tones* — the tone-to-noise ratio
 (clause 11), the prominence ratio (clause 12), the critical-band model and the
-frequency-dependent prominence criteria; ECMA-74 Annex D — the emission
-measurement positions, delegating the tone assessment to ECMA-418-1.
+frequency-dependent prominence criteria.
 
 ---
 
@@ -1225,7 +1509,9 @@ analysis on the 24 Bark scale, level-dependent masking slopes — and outputs
 By definition a 1 kHz tone at 40 dB SPL is 1 sone, and every +10 phon
 doubles the sone value.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.png" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker.svg" alt="ISO 532-1 Zwicker loudness chain: 28 one-third-octave band levels, transmission and lower-critical-band grouping, core loudness of the 20 critical bands, specific loudness over Bark, integrated into total loudness N in sones and loudness level in phons" width="78%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" width="80%"></picture>
 
 *Same band level, very different loudness: energy spread over many critical
 bands (red) sums to far more sones than the same level concentrated in one
@@ -1243,11 +1529,11 @@ levels_28 = np.full(28, 60.0)                             # 28 one-third-octave 
 
 # From a raw recording: calibration_factor scales digital units to Pa
 res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
-print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")
+print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")   # 13.1 sone (77 phon)
 
 # Time-varying signals: percentile loudness N5 is the reporting standard
 res = loudness_zwicker(x, fs)          # stationary=False (default)
-print(res.n5, res.n10, res.loudness)   # N5, N10, Nmax
+print(f"{res.n5:.1f} {res.n10:.1f} {res.loudness:.1f}")   # 13.1 13.1 13.1 — N5, N10, Nmax
 
 # From 28 one-third-octave band levels (25 Hz .. 12.5 kHz)
 res = loudness_zwicker_from_spectrum(levels_28, field="diffuse")
@@ -1320,11 +1606,12 @@ normalized so the reference sound — critical-band-wide noise at 1 kHz,
 60 dB — is exactly **1.00 acum** (DIN 45692 clause 6; the derived
 $k = 0.108$ sits inside the normative window 0.105–0.115).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.png" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" width="80%"></picture>
 
 ```python
 from phonometry import sharpness_din
 
+# Uses `x`, `fs` and `sens` from the snippet above.
 s = sharpness_din(x, fs, calibration_factor=sens)      # acum
 s_aures = sharpness_din(x, fs, method="aures")          # Annex B variant
 ```
@@ -1348,7 +1635,7 @@ freqs, spl = equal_loudness_contour(40.0)   # the classic 40-phon contour
 phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.png" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" width="80%"></picture>
 
 Validity per clause 4.1: 20-90 phon (80 phon above 4 kHz); the implementation
 is verified against the Annex B tables in CI. Note this is the loudness of
@@ -1376,7 +1663,7 @@ All three are anchored so a **1 kHz tone at 40 dB SPL is ≈ 1 sone**; the value
 are not interchangeable digit-for-digit because the models differ in their
 auditory filters and their loudness summation.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison.png" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison.svg" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" width="80%"></picture>
 
 *The three models agree at the 1 sone / 40 dB anchor and diverge with level:
 Zwicker doubles the sone value every +10 phon, while the Sottek model grows
@@ -1469,12 +1756,12 @@ x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
 res = loudness_moore_glasberg_time(x, fs, field="free")
 print(f"N_max = {res.n_max:.3f} sone  ({res.loudness_level_max:.0f} phon)")   # 1.000 sone (40 phon)
-print(f"long-term loudness exceeded 5% of the time: {res.percentiles[5.0]:.3f} sone")
+print(f"long-term loudness exceeded 5% of the time: {res.percentiles[5.0]:.3f} sone")   # 0.999 sone
 
 res.plot()   # short-term S'(t) and long-term S''(t) loudness vs time
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness.png" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness.svg" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -1536,7 +1823,7 @@ print(res.specific_loudness.shape)          # (53,) average specific loudness N'
 res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness.png" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness.svg" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -1640,7 +1927,7 @@ print(f"R = {res.roughness:.4f} asper")   # 1.0735 asper (reference target 1.0)
 res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.png" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.svg" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -1696,6 +1983,25 @@ STI/STIPA, and [Theory](https://jmrplens.github.io/phonometry/reference/theory/)
 
 ---
 
+**Standards.** ISO 532-1:2017, *Acoustics — Methods for calculating
+loudness — Part 1: Zwicker method* — stationary and time-varying loudness in
+sones from the normative Annex A.4 reference program, with the N5/N10
+percentile loudness, validated against the Annex B set. ISO 532-2:2017,
+*... Part 2: Moore-Glasberg method* — stationary loudness from roex excitation
+patterns on the ERB-number scale, with explicit binaural summation.
+ISO 532-3:2023, *... Part 3: Moore-Glasberg-Schlittenlacher method* —
+time-varying short-term and long-term loudness and the peak N_max.
+DIN 45692:2009, *Messtechnische Simulation der Hörempfindung Schärfe* —
+sharpness in acum (clause 6 weighting, Annex B von Bismarck and Aures
+variants, Table A.2 targets). ISO 226:2023, *Acoustics — Normal
+equal-loudness-level contours* — the contours (Formula 1), the loudness level
+of pure tones (Formula 2) and the hearing threshold. ECMA-418-2:2025,
+*Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing
+human perception based on the Sottek Hearing Model)* — the Sottek Hearing
+Model loudness (sone_HMS), tonality (tu_HMS) and roughness (asper).
+
+---
+
 
 <!-- source: docs/speech-transmission.md | canonical: https://jmrplens.github.io/phonometry/guides/speech-transmission/ -->
 
@@ -1731,7 +2037,7 @@ m(F) = \frac{1}{\sqrt{1 + \left(2\pi F\,\frac{T_{60}}{13.8}\right)^2}}
 \cdot \frac{1}{1 + 10^{-\mathrm{SNR}/10}}
 $$
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60.png" alt="STI versus reverberation time with the IEC 60268-16 Annex F rating bands shaded" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60.svg" alt="STI versus reverberation time with the IEC 60268-16 Annex F rating bands shaded" width="80%"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" width="92%"></picture>
 
@@ -1930,7 +2236,7 @@ print(round(result.sii, 2))                # 0.46
 print(result.band_audibility.round(2))     # per-band Ai
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/speech_intelligibility_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/speech_intelligibility.png" alt="Band audibility of the standard normal-effort speech spectrum in a descending broadband noise: the light bars are the per-band audibility Ai across the 18 one-third-octave bands from 160 Hz to 8000 Hz, the darker bars the importance-weighted contribution Ii*Ai (scaled), and the overall SII is 0.46" width="90%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/speech_intelligibility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/speech_intelligibility.svg" alt="Band audibility of the standard normal-effort speech spectrum in a descending broadband noise: the light bars are the per-band audibility Ai across the 18 one-third-octave bands from 160 Hz to 8000 Hz, the darker bars the importance-weighted contribution Ii*Ai (scaled), and the overall SII is 0.46" width="90%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -1994,7 +2300,49 @@ for effort in ph.sii.VOCAL_EFFORTS:
 print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.png" alt="Two panels. Left: the four ANSI S3.5-1997 standard speech spectra — normal, raised, loud and shout — over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum. Right: the resulting Speech Intelligibility Index in a fixed broadband noise, rising from 0.12 (normal) through 0.36 and 0.59 to 0.79 (shout)" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.svg" alt="Two panels. Left: the four ANSI S3.5-1997 standard speech spectra — normal, raised, loud and shout — over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum. Right: the resulting Speech Intelligibility Index in a fixed broadband noise, rising from 0.12 (normal) through 0.36 and 0.59 to 0.79 (shout)" width="96%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import NullFormatter
+import phonometry as ph
+
+# The four ANSI S3.5-1997 Table 3 spectra and the fixed broadband noise above.
+noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
+                  32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
+efforts = ph.sii.VOCAL_EFFORTS         # ("normal", "raised", "loud", "shout")
+freqs = ph.sii.BAND_CENTERS            # the 18 one-third-octave band centres
+
+fig, (ax_s, ax_i) = plt.subplots(1, 2, figsize=(12, 5))
+
+# Left: each higher vocal effort lifts the whole speech spectrum.
+for effort in efforts:
+    ax_s.plot(freqs, ph.standard_speech_spectrum(effort), "o-",
+              label=effort.capitalize())
+ax_s.set_xscale("log")
+ax_s.set_xticks(list(freqs))
+ax_s.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax_s.xaxis.set_minor_formatter(NullFormatter())
+ax_s.set_xlabel("One-third-octave band [Hz]")
+ax_s.set_ylabel("Speech spectrum level [dB SPL]")
+ax_s.legend()
+
+# Right: the SII each spectrum reaches in the fixed noise.
+sii = [ph.speech_intelligibility_index(e, noise).sii for e in efforts]
+pos = np.arange(len(efforts))
+ax_i.bar(pos, sii)
+ax_i.set_xticks(pos)
+ax_i.set_xticklabels([e.capitalize() for e in efforts])
+ax_i.set_ylim(0.0, 1.0)
+ax_i.set_ylabel("Speech Intelligibility Index")
+plt.show()
+```
+
+</details>
 
 The vocal-effort names work anywhere a speech spectrum is expected, including as
 the first argument to `speech_intelligibility_index`.
@@ -2060,7 +2408,9 @@ print(res.frequency, res.intensity_level)                  # per band
 res.plot()   # Lp vs LI per band + the pressure-intensity index (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.png" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity.gif" alt="Animation: instantaneous intensity p times u for a progressive wave (always positive, non-zero mean, net power flows) versus a standing wave (oscillating about a zero mean, energy just sloshes)" width="88%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.svg" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%"></picture>
 
 *Left: in a plane progressive wave all pressure is transported —
 L_I ≈ L_p. Right: a standing wave carries (almost) no net energy — the
@@ -2113,9 +2463,18 @@ carries both:
   practical ceiling. Larger spacers reach lower frequencies, smaller ones
   higher.
 - **Reactive fields**: when `pressure_intensity_index` (F2 in ISO 9614-1)
-  approaches the probe's residual index δ_pI0, phase errors dominate. The
-  ISO 9614-1 Annex A field indicators and the dynamic-capability criterion
-  are available directly:
+  approaches the probe's residual index δ_pI0, phase errors dominate.
+
+Over a measurement surface, the ISO 9614-1 Annex A field indicators grade the
+scan itself. **F2**, the surface pressure-intensity indicator, is the surface
+pressure level minus the level of the mean *magnitude* of the normal
+intensity — the larger it is, the closer the measurement sits to the probe's
+phase-error floor. **F3**, the negative partial power indicator, is the same
+difference taken with the *signed* mean intensity — F3 − F2 > 0 reveals power
+flowing inward through parts of the surface. **F4**, the field non-uniformity
+indicator, is the normalised spread of the per-position intensities — the
+larger it is, the more measurement positions the surface needs. Together with
+the dynamic-capability criterion they are available directly:
 
 ```python
 import numpy as np
@@ -2146,6 +2505,17 @@ print(ld, ld > fi.f2)                                      # 8.0 True (criterion
 
 See [Theory](https://jmrplens.github.io/phonometry/reference/theory/) for the derivations and [Calibration](https://jmrplens.github.io/phonometry/guides/calibration/)
 for absolute scaling of the two channels.
+
+---
+
+**Standards.** IEC 61043:1994, *Electroacoustics — Instruments for the
+measurement of sound intensity — Measurements with pairs of pressure sensing
+microphones* — the two-microphone cross-spectral intensity estimator, the
+finite-difference bias correction and the usable-bandwidth bound (clause 7.3,
+Table 3). ISO 9614-1:1993, *Acoustics — Determination of sound power levels
+of noise sources using sound intensity — Part 1: Measurement at discrete
+points* — the pressure-intensity index, the Annex A field indicators F2, F3
+and F4, and the dynamic-capability criterion (Annex B).
 
 ---
 
@@ -2384,6 +2754,8 @@ with $te = 50$ ms → C50 (speech) and $te = 80$ ms → C80 (music), plus the
 **just-noticeable difference** (ISO 3382-1 Table A.1: EDT 5 %, C80 1 dB,
 D50 0.05, Ts 10 ms) that sets how precisely it is worth reporting.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder.gif" alt="Animation: the Schroeder decay curve emerging as the squared impulse response is integrated backward from its tail, ending with the T20 and T30 regression lines" width="88%"></picture>
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.png" alt="Squared impulse response with its Schroeder backward-integrated decay curve, and the EDT, T20 and T30 regression windows marked" width="80%"></picture>
 
 *The jagged squared IR (grey) integrates to the smooth Schroeder curve
@@ -2485,7 +2857,9 @@ distance** rD (STI = 0.50) and **privacy distance** rP (STI = 0.20) come
 from a linear regression of STI against distance. Good offices push rD
 below ~5 m; poor ones leave speech distracting past 10 m.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay.png" alt="Open-plan spatial decay: A-weighted speech level and STI against source distance on a log axis, with the D2,S regression, the Lp,A,S,4m marker at 4 m and the rD and rP distance crossings" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_plan.svg" alt="ISO 3382-3 open-plan measurement line from the source at 1 m along positions from 2 m to 16 m, feeding the four single-number quantities D2,S, Lp,A,S,4m, rD and rP" width="86%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/open_plan_decay.svg" alt="Open-plan spatial decay: A-weighted speech level and STI against source distance on a log axis, with the D2,S regression, the Lp,A,S,4m marker at 4 m and the rD and rP distance crossings" width="80%"></picture>
 
 ```python
 import numpy as np
@@ -2502,6 +2876,16 @@ print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 
 <details>
 <summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# One line: the D2,S regression rebuilt from the result fields, with the
+# rD / rP crossings marked (the figure above adds the measured points and
+# the STI axis on top of it):
+m.plot()
+plt.show()
+```
 
 ```python
 import matplotlib.pyplot as plt
@@ -2546,7 +2930,9 @@ plt.show()
 | `spl_a_speech` | 1D array | dB | same length | A-weighted speech level `Lp,A,S,n` per position |
 | `sti_values` | 1D array | — | same length | STI per position (full IEC 60268-16 method) |
 
-Returns an `OpenPlanResult` with `d2s`, `lp_as_4m`, `rd` and `rp`.
+Returns an `OpenPlanResult` with `d2s`, `lp_as_4m`, `rd` and `rp`; its
+`.plot()` redraws the Clause 6.2 spatial-decay regression from those four
+fields and marks `rd` / `rp`.
 `d2s`/`lp_as_4m` are `nan` if fewer than two positions fall in 2–16 m;
 `rd`/`rp` are `nan` when STI does not decrease with distance. The per-position
 STI can itself be measured with the STIPA tools in the
@@ -2630,6 +3016,16 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
 
 ---
 
+**Standards.** ISO 18233:2006 (application of new measurement methods — the
+swept-sine and MLS acquisition of impulse responses); ISO 3382-1:2009 and
+ISO 3382-2:2008 (reverberation time and room parameters from the Schroeder
+decay); ISO 3382-3:2012 (open-plan office speech metrics); ISO 354:2003
+(sound absorption in a reverberation room). Validated against closed-form
+decays and the standards' own parameter definitions in the
+[conformance report](CONFORMANCE.md).
+
+---
+
 
 <!-- source: docs/building-acoustics.md | canonical: https://jmrplens.github.io/phonometry/guides/building-acoustics/ -->
 
@@ -2675,7 +3071,7 @@ bands). The rating (`Rw`, `R'w`, `DnT,w` …) is the shifted reference read at
 500 Hz. The **spectrum adaptation terms** $C$ (pink noise) and $C_{tr}$
 (urban traffic) add the low-frequency penalty of a real source.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating.png" alt="Measured one-third-octave sound reduction index with the shifted ISO 717-1 reference curve and the resulting weighted rating at 500 Hz" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating.svg" alt="Measured one-third-octave sound reduction index with the shifted ISO 717-1 reference curve and the resulting weighted rating at 500 Hz" width="80%"></picture>
 
 ```python
 import numpy as np
@@ -2787,7 +3183,7 @@ at 500 Hz; for octave bands it is then reduced by 5 dB. The spectrum
 adaptation term $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$ uses the energetic sum
 over 100–2500 Hz (16-band thirds excluding 3150 Hz) or 125–2000 Hz (octaves).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating.png" alt="Measured one-third-octave normalized impact sound pressure level with the shifted ISO 717-2 reference curve and the resulting weighted rating read at 500 Hz" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating.svg" alt="Measured one-third-octave normalized impact sound pressure level with the shifted ISO 717-2 reference curve and the resulting weighted rating read at 500 Hz" width="80%"></picture>
 
 ```python
 import numpy as np
@@ -3062,7 +3458,7 @@ where $l_0 = 1$ m is the reference coupling length, $l_f$ the junction coupling
 length and $K_{ij}$ the junction's **vibration reduction index** (Annex E,
 empirical in the mass ratio $M = \log_{10}(m'_{\perp,i}/m'_i)$).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo.png" alt="Per-path sound reduction indices for the EN 12354-1 Annex H.3 example and each path's share of the transmitted energy, showing the direct path dominating at R'w = 52 dB" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo.svg" alt="Per-path sound reduction indices for the EN 12354-1 Annex H.3 example and each path's share of the transmitted energy, showing the direct path dominating at R'w = 52 dB" width="80%"></picture>
 
 ```python
 import numpy as np
@@ -3173,6 +3569,19 @@ print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT
 | `coupling_length` | float | m | > 0 | Junction coupling length `lf` |
 | `delta_r_ff` / `delta_r_fd` / `delta_r_df` | float | dB | default `0` | Lining improvements per path |
 
+### `flanking_path()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `label` | str | — | — | Display name of the path |
+| `kind` | str | — | `'Ff'` / `'Df'` / `'Fd'` | Which flanking branch the path is |
+| `r_source` / `r_receive` | float | dB | — | Weighted indices of the source-side / receive-side elements |
+| `k_ij` | float | dB | — | Junction vibration-reduction index for this path |
+| `separating_area` | float | m² | > 0 | Separating-element area `Ss` |
+| `coupling_length` | float | m | > 0 | Junction coupling length `lf` |
+| `delta_r` | float | dB | default `0` | Lining improvement on this path |
+| `kij_min` | float | dB | default `None` | When given, `k_ij` is floored at this Formula E.4 minimum |
+
 `predicted_airborne_insulation()` returns an `AirbornePredictionResult`
 (`r_prime_w`, `r_direct_w`, `paths` of `PathContribution`, `dominant`);
 `predicted_impact_insulation()` an `ImpactPredictionResult` (`l_prime_n_w`,
@@ -3198,7 +3607,9 @@ of Table 8. A two-sided interval $Y = y \pm U$ (Formula 3, $k = 1.96$ at 95 %)
 *reports* a value; the **one-sided** factor ($k = 1.65$ at 95 %) *declares
 conformity* with a requirement (Formulae 4/5).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo.png" alt="A weighted rating reported with its two-sided 95 % expanded uncertainty in situations A, B and C, the reproducibility uncertainty widest and the repeatability uncertainty narrowest" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999.svg" alt="ISO 12999-1 uncertainty flow: standard uncertainty from the tables, reduced by repeated measurements and combined in quadrature, then expanded by the Table 8 coverage factor into a two-sided report or a one-sided conformity decision" width="82%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo.svg" alt="A weighted rating reported with its two-sided 95 % expanded uncertainty in situations A, B and C, the reproducibility uncertainty widest and the repeatability uncertainty narrowest" width="80%"></picture>
 
 ```python
 from phonometry import (band_uncertainty, single_number_uncertainty,
@@ -3281,7 +3692,8 @@ laboratory R and Ln with the background-noise correction of §2; EN 12354-1:2000
 and EN 12354-2:2000 — the simplified flanking-transmission predictions of §3
 (Annex E junctions, worked examples H.3 and E.3); ISO 12999-1:2020 — the
 standard uncertainties per measurement situation and the coverage factors
-of §4.
+of §4; its precision framework builds on ISO 5725 (context, not
+implemented directly).
 
 ## See also
 
@@ -3339,10 +3751,31 @@ $\alpha$ climbs about two decades from 50 Hz to 10 kHz, and — because humidity
 sets $f_{rO}$ — sweeping the humidity moves a relaxation peak across the band, so
 the driest air is not always the least absorbing.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha.png" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency on log-log axes, for four temperature and humidity combinations, showing the f-squared low-frequency growth and the humidity-dependent relaxation roll-off" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency on log-log axes, for four temperature and humidity combinations, showing the f-squared low-frequency growth and the humidity-dependent relaxation roll-off" width="80%"></picture>
 
 *The dry 20 °C / 10 % curve absorbs most at mid frequencies, but the humid
 curves overtake it below ~200 Hz — the relaxation signature.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import air_attenuation
+
+freqs = np.geomspace(50.0, 10000.0, 400)
+fig, ax = plt.subplots()
+for temp, rh in [(20.0, 50.0), (20.0, 10.0), (0.0, 70.0), (30.0, 80.0)]:
+    ax.loglog(freqs, air_attenuation(freqs, temp, rh) * 1000.0,
+              label=f"{temp:g} °C, {rh:g} % RH")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Attenuation coefficient alpha [dB/km]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ```python
 import numpy as np
@@ -3446,7 +3879,52 @@ barrier helps most at high frequency (short wavelength) until it saturates at th
 cap, atmospheric absorption bites only at 8 kHz, and the ground dip lives in the
 mid bands.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown.png" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown.svg" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import Barrier, outdoor_propagation_attenuation
+
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+barrier = Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
+att = outdoor_propagation_attenuation(
+    200.0, 1.5, 1.5, bands, ground_source=1.0, ground_middle=1.0,
+    ground_receiver=1.0, barrier=barrier, temperature=15.0,
+    relative_humidity=70.0,
+)
+
+# One line — the same stacked breakdown with the total overlaid:
+att.plot()
+
+# By hand:
+x = np.arange(len(bands))
+fig, ax = plt.subplots()
+# Separate positive and negative baselines: a negative term (Agr is a net
+# gain at 63 Hz here) stacks below zero, and the signed heights sum to a_total.
+pos_bottom = np.zeros(len(bands))
+neg_bottom = np.zeros(len(bands))
+for term, label in [(att.a_div, "Adiv — divergence"),
+                    (att.a_atm, "Aatm — atmospheric"),
+                    (att.a_gr, "Agr — ground"),
+                    (att.a_bar, "Abar — barrier")]:
+    ax.bar(x, term, bottom=np.where(term >= 0.0, pos_bottom, neg_bottom),
+           label=label)
+    pos_bottom += np.maximum(term, 0.0)
+    neg_bottom += np.minimum(term, 0.0)
+ax.plot(x, att.a_total, "D-", color="black", label="A — total")
+ax.set_xticks(x)
+ax.set_xticklabels([f"{b:g}" for b in bands])
+ax.set_xlabel("Octave-band centre frequency [Hz]")
+ax.set_ylabel("Attenuation A [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ```python
 import numpy as np
@@ -3533,7 +4011,8 @@ diffraction (Eq. (13), $K_{met}=1$, ground term retained).
 | `projected_distance` | float or None | m | default $\sqrt{d^2-(h_s-h_r)^2}$ | Ground-plane $d_p$ |
 
 Returns an `OutdoorAttenuation` with `a_div`, `a_atm`, `a_gr`, `a_bar`,
-`a_total` and `d_omega`, all one value per band.
+`a_total` and `d_omega`, all one value per band; its `.plot()` draws the
+stacked per-band breakdown with the total overlaid (the figure above).
 
 ### `Barrier` fields
 
@@ -3554,6 +4033,23 @@ exposure that consumes A-weighted levels.
 
 ---
 
+**Standards.** ISO 9613-1:1993, *Acoustics — Attenuation of sound during
+propagation outdoors — Part 1: Calculation of the absorption of sound by the
+atmosphere* — the pure-tone attenuation coefficient $\alpha$ (Eq. (5)) with the
+oxygen and nitrogen relaxation frequencies (Eq. (3)/(4)), the Annex B humidity
+conversion and the exact Table 1 midbands (Eq. (6), Note 5). ISO 9613-2:1996,
+*Acoustics — Attenuation of sound during propagation outdoors — Part 2: General
+method of calculation* — the downwind receiver level (Eq. (3)/(4)) assembled
+from geometrical divergence (Eq. (7)), atmospheric absorption (Eq. (8)), the
+ground effect (Eq. (9), Table 3) with its A-weighted alternative
+(Eq. (10)/(11)), barrier screening (Eqs. (12)–(17)) and the meteorological
+correction (Eq. (21)/(22)). ISO 354:2003, *Acoustics — Measurement of sound
+absorption in a reverberation room* — only the clause 8.1.2.1 conversion
+$m = \alpha/(10 \lg e)$ behind `air_attenuation_m`; the reverberation-room
+method itself is covered in the [Room Acoustics guide](https://jmrplens.github.io/phonometry/guides/room-acoustics/).
+
+---
+
 
 <!-- source: docs/sound-power.md | canonical: https://jmrplens.github.io/phonometry/guides/sound-power/ -->
 
@@ -3563,7 +4059,7 @@ Sound *pressure* depends on where you stand and on the room you stand in;
 sound **power** does not. The sound power level `LW` is the total acoustic
 energy per second a source radiates, referenced to `P0 = 1 pW`, and it is
 the device-independent **emission** descriptor that goes on a datasheet,
-feeds a room prediction (ISO 12354) or is checked against a noise-emission
+feeds a room prediction (EN 12354) or is checked against a noise-emission
 limit. This page covers the three routes phonometry implements to obtain it
 and when to reach for each: an enveloping *pressure* surface in the field
 (ISO 3744/3746), the diffuse field of a *reverberation room* (ISO 3741),
@@ -3662,6 +4158,41 @@ print(np.round(res.sound_power_level, 1))               # per-band LW
 res.plot()   # sound power level bars per band, LWA in the title (needs matplotlib)
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result.svg" alt="The enveloping-surface sound power level spectrum of the ISO 3744 hemisphere example, one bar per octave band from 63 Hz to 8 kHz peaking near 500 Hz, with the A-weighted total of 92.4 dB(A) in the title" width="88%"></picture>
+
+*One bar per band: the energy-averaged surface pressure minus the background
+(`K1`) and environmental (`K2`) corrections plus the surface term
+`10 lg(S/S0)` gives `LW(f)`, and the A-weighted energy sum across bands gives
+the single-number `LWA` in the title.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# res is the SoundPowerResult computed above. One line:
+res.plot()
+plt.show()
+
+# By hand: a bar spectrum of LW with the A-weighted total in the title.
+freqs = res.frequencies
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, res.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound power level LW [dB]")
+ax.set_title(
+    f"Enveloping-surface sound power (ISO 3744)  "
+    f"LWA = {res.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
+
 The A-weighted total `LWA` is combined from the band powers with the ISO 3744
 Annex E A-weighting corrections, so it needs `frequencies`. Passing the room
 data (`reverberation_time` + `volume`, or `absorption_area`, or
@@ -3757,6 +4288,40 @@ print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 
 rev.plot()   # reverberation-room LW spectrum, LWA in the title (needs matplotlib)
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result.svg" alt="The reverberation-room sound power level spectrum of the ISO 3741 example, one bar per one-third-octave band from 100 Hz to 10 kHz falling gently with frequency, with the A-weighted total of 92.1 dB(A) in the title" width="88%"></picture>
+
+*The mean room level carried through the absorption-area, Waterhouse and
+meteorological terms of Eq. 20 gives the one-third-octave `LW(f)`, and the
+A-weighted energy sum across the 21 bands gives the `LWA` in the title.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# rev is the ReverberationSoundPowerResult computed above. One line:
+rev.plot()
+plt.show()
+
+# By hand: a bar spectrum of LW with the A-weighted total in the title.
+freqs = rev.frequencies
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, rev.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound power level LW [dB]")
+ax.set_title(
+    f"Reverberation-room sound power (ISO 3741)  "
+    f"LWA = {rev.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
 
 `levels` may be a 1D mean spectrum or a 2D `(NM, NB)` array averaged over
 positions. When the room volume, its reverberation time or the microphone
@@ -3860,6 +4425,41 @@ print(list(res.achieved_grade))                         # per-band grade
 
 res.plot()   # LW spectrum; non-positive (undeterminable) bands hatched (needs matplotlib)
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result.svg" alt="The intensity-scanning sound power level spectrum of the ISO 9614-2 example, one bar per octave band from 125 Hz to 4 kHz all near 85 dB, with the A-weighted total of 90.9 dB(A) in the title" width="88%"></picture>
+
+*The partial powers `<In,i>·Si` of the six segments sum to each band's `LW`;
+every band here nets positive power and passes the field-indicator criteria at
+engineering grade, so all six bars stand, and the A-weighted total of
+90.9 dB(A) heads the title.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# res is the SoundPowerIntensityResult computed above. One line:
+res.plot()
+plt.show()
+
+# By hand: a bar spectrum of LW with the A-weighted total in the title.
+freqs = res.frequencies
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, res.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound power level LW [dB]")
+ax.set_title(
+    f"Intensity-scanning sound power (ISO 9614-2)  "
+    f"LWA = {res.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
 
 Supplying `normal_intensity_2` (the second sweep) averages the two for the
 partial powers and evaluates criterion 3; `pressure_levels` enables `FpI`;
@@ -3973,7 +4573,7 @@ print(round(result.sound_power_level_a, 1))   # 89.3
 result.plot()   # LW spectrum, LWA in the title (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power.png" alt="The precision sound power level spectrum of a mid-frequency-peaked machine measured over the ISO 3745 hemisphere array, one bar per band peaking near 1 kHz, with the A-weighted total of 89.3 dB(A) in the title" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/precision_anechoic_power.svg" alt="The precision sound power level spectrum of a mid-frequency-peaked machine measured over the ISO 3745 hemisphere array, one bar per band peaking near 1 kHz, with the A-weighted total of 89.3 dB(A) in the title" width="88%"></picture>
 
 *One bar per band: the surface-averaged pressure plus the area, background and
 meteorological corrections give `LW(f)`, and the A-weighted energy sum across
@@ -4059,7 +4659,7 @@ print(round(result.sound_power_level_a, 1))   # 80.6
 result.plot()   # LW spectrum; the not-applicable band is hatched (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power.png" alt="The precision intensity-scanning sound power level spectrum over five one-third-octave bands, four determinate bars and a hatched, greyed 250 Hz band flagged not-applicable because its net intensity is negative, with the A-weighted total of 80.6 dB(A) in the title" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power.svg" alt="The precision intensity-scanning sound power level spectrum over five one-third-octave bands, four determinate bars and a hatched, greyed 250 Hz band flagged not-applicable because its net intensity is negative, with the A-weighted total of 80.6 dB(A) in the title" width="88%"></picture>
 
 *The 250 Hz band nets negative (more energy flowing in than out), so ISO 9614-3
 declares it not-applicable — the figure hatches and greys it while the four
@@ -4109,6 +4709,28 @@ plt.show()
   absorption area; impact and airborne insulation.
 - [Levels](https://jmrplens.github.io/phonometry/guides/levels/) — energy averaging and the A-weighting behind `LWA`.
 - [Theory](https://jmrplens.github.io/phonometry/reference/theory/) — the Waterhouse, K1/K2 and C1/C2 derivations.
+
+---
+
+**Standards.** ISO 3744:2010, *Acoustics — Determination of sound power levels
+and sound energy levels of noise sources using sound pressure — Engineering
+methods for an essentially free field over a reflecting plane* — the
+enveloping-surface method: hemisphere and box surface areas, the `K1`/`K2`
+corrections, the Annex B microphone positions and the Annex E A-weighting.
+ISO 3746:2010, *… Survey method using an enveloping measurement surface over a
+reflecting plane* — the survey grade sharing the same formulae with coarser
+criteria. ISO 3741:2010, *… Precision methods for reverberation test rooms* —
+the direct (Eq. 20) and comparison methods with the Waterhouse and
+meteorological corrections and the Table 1 qualification criteria.
+ISO 3745:2012, *… Precision methods for anechoic rooms and hemi-anechoic
+rooms* — the Clause 8 power level, the per-position background correction
+(Eq. 11), the meteorological corrections and the standardized microphone
+arrays. ISO 9614-2:1996, *Acoustics — Determination of sound power levels of
+noise sources using sound intensity — Part 2: Measurement by scanning* — the
+partial powers, the `FpI` and `F+/-` field indicators and the grade criteria.
+ISO 9614-3:2002, *… Part 3: Precision method for measurement by scanning* —
+the grade-1 scanning method, its field indicators and the clause 9.2
+not-applicable flagging.
 
 ---
 
@@ -4280,17 +4902,33 @@ identical whether you pass the raw integer array or a float conversion.
 
 ---
 
+**Standards.** IEC 60942:2017, *Electroacoustics — Sound calibrators* — the
+calibrator level and class assumptions behind `sensitivity()` (the 94 dB
+principal level and the Table 1 class tolerances) and the short-term
+level-fluctuation stability check of the reference recording (5.3.3, Table 2
+class 1 limits per nominal frequency).
+
+---
+
 
 <!-- source: docs/block-processing.md | canonical: https://jmrplens.github.io/phonometry/guides/block-processing/ -->
 
 # Block Processing
+
+Some measurements never fit in memory: an hour-long environmental recording,
+a live monitor that must report levels while the microphone is still
+capturing, or an embedded logger that only ever sees one buffer at a time. In
+all of these the signal has to be processed block by block — and the filters
+must behave exactly as if they had seen the whole signal at once.
 
 The `OctaveFilterBank`, `WeightingFilter` (for A, C, or Z-weighting) and
 `TimeWeighting` classes support block (streaming) processing: the internal
 filter state is carried between calls, so concatenated block outputs match a
 single full-signal pass.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity.png" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing.svg" alt="Two lanes comparing block processing with the filter state carried across blocks, giving one continuous envelope, versus reset each block, where the envelope restarts from zero at every seam" width="86%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity.svg" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" width="80%"></picture>
 
 *With `stateful=True` the concatenated block outputs match the continuous
 result exactly; without state, every block boundary restarts the filter
@@ -4298,18 +4936,9 @@ transient.*
 
 Create a stateful filter bank with `stateful=True`. The internal state is
 zero-initialized by default but may be initialized for step-response
-steady-state (like `scipy.signal.sosfilt_zi`) with `steady_ic=True`.
-
-Notes when using a stateful `OctaveFilterBank`:
-
-- Detrending should be disabled during block processing (`detrend=False`), as it
-  can introduce discontinuities between blocks.
-- Resampling is not supported for block processing, so you need to set
-  `resample=False`.
-- `zero_phase=True` is incompatible with stateful mode (forward-backward
-  filtering needs the whole signal).
-- Stateful `WeightingFilter` uses the legacy bilinear design
-  (`high_accuracy=False`); see [Frequency Weighting](https://jmrplens.github.io/phonometry/guides/weighting/).
+steady-state (like `scipy.signal.sosfilt_zi`) with `steady_ic=True`. The
+options that must be disabled in stateful mode are summarized in the
+[constraints table](#stateful-mode-constraints) at the end of this guide.
 
 ## Example
 
@@ -4352,7 +4981,7 @@ for block in audio_blocks:
 ```
 
 Or manage the state yourself with the functional API — see
-[Time Weighting](https://jmrplens.github.io/phonometry/guides/time-weighting/#block-processing).
+[Time Weighting](https://jmrplens.github.io/phonometry/guides/time-weighting/#6-block-processing).
 
 ## Multichannel state
 
@@ -4386,7 +5015,7 @@ for x in audio_stream(block):            # your capture callback
 | `detrend` | must be `False` | Per-block detrending creates boundary discontinuities |
 | `resample` | must be `False` | The resampler is not stateful |
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
-| `high_accuracy` (weighting) | resolves to `False` by default; explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
+| `high_accuracy` (weighting) | resolves to `False` by default — the legacy bilinear design, see [Frequency Weighting](https://jmrplens.github.io/phonometry/guides/weighting/); explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
 
 ---
@@ -4403,7 +5032,7 @@ Microphone Arrays) using **fully vectorized operations**. Input arrays of shape
 `(N_channels, N_samples)` are processed in parallel, offering significant
 performance gains over iterative loops.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel.png" alt="Stereo analysis: pink noise and logarithmic sweep resolved per channel in one-third-octave bands" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_multichannel.svg" alt="Stereo analysis: pink noise and logarithmic sweep resolved per channel in one-third-octave bands" width="80%"></picture>
 
 *Simultaneous analysis of a Stereo signal: Left Channel (Pink Noise) vs Right
 Channel (Log Sine Sweep).*
@@ -4429,6 +5058,8 @@ spl, freq = octave_filter(stereo, fs, fraction=3)
 ```
 
 ## Accepted shapes, at a glance
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multichannel_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multichannel.svg" alt="Array-shape flow: a 1-D (samples,) input reduces to a scalar and a 2-D (channels, samples) input reduces to (channels,), because the operation runs along the last axis while the channel axis is preserved" width="80%"></picture>
 
 | Input | Interpreted as | Typical output |
 | :--- | :--- | :--- |
@@ -4540,6 +5171,7 @@ All core functionality can be imported directly from the `phonometry` package.
 | `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
 | `sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6)<br>• `narrowband`: coherent Goertzel tone estimate that rejects broadband hum/noise (needs `fs`; Default: False) | `s = sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
 | `verify_filter_class` | `function` | **IEC 61260-1:2014 class check.**<br>• `bank`: an `OctaveFilterBank`<br>• `num_points`: frequency grid points per band (Default: 32768) | `result = verify_filter_class(bank)`<br><br>• `result["overall_class"]`: 1, 2 or None<br>• `result["bands"]`: per-band class and margins [dB] |
+| `class_limits` | `function` | **IEC 61260-1:2014 Table 1 acceptance limits.**<br>• `fraction`: bandwidth designator denominator b (1, 3, ...)<br>• `filter_class`: 1 or 2<br>• `omega`: normalized frequencies f/fm | `lo, hi = class_limits(3, 1, omega)`<br><br>• `lo` / `hi`: min/max relative attenuation [dB] (`hi` is `inf` outside the pass-band) |
 | `nominal_frequencies` | `function` | **ANSI Frequency generator.**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `f_cen, f_low, f_high, labels = nominal_frequencies(fraction=3)`<br><br>• `f_cen`: List of center frequencies [Hz]<br>• `f_low`: List of lower edges [Hz]<br>• `f_high`: List of upper edges [Hz]<br>• `labels`: IEC nominal frequency labels |
 | `normalized_frequencies` | `function` | **Standard IEC Frequencies.**<br>• `fraction`: 1 or 3 | `freqs = normalized_frequencies(fraction=3)`<br><br>• `freqs`: List of standard center frequencies [Hz] |
 | `sweep_signal` | `function` | **ESS excitation (ISO 18233 Annex B).**<br>• `fs`: Sample rate [Hz]<br>• `f1`: Start frequency [Hz]<br>• `f2`: Stop frequency [Hz] (≤ fs/2)<br>• `seconds`: Duration [s]<br>• `amplitude`: Peak (Default: 1.0)<br>• `fade`: Half-Hann fraction (Default: 0.01) | `s = sweep_signal(48000, 20, 20000, 3.0)`<br><br>• 1D exponential sine sweep |
@@ -5174,7 +5806,7 @@ $$
 L_{EX,8h} = 10 \log_{10}\left(\frac{E}{8\ \text{h} \cdot p_0^2}\right), \qquad p_0 = 20\ \mu\text{Pa}
 $$
 
-It is identical to $L_{EP,d}$ of Directive 86/188/EEC and $L_{EX,8h}$ of ISO 1999 (BS EN 61252:1995, 3.3 NOTES 5–6). The anchor of BS EN 61252:1995 (3.3 NOTE 4): an exposure of **3.2 Pa²h corresponds to $L_{EX,8h}$ of exactly 90 dB**.
+It is identical to $L_{EP,d}$ of Directive 86/188/EEC and $L_{EX,8h}$ of ISO 1999 (IEC 61252, 3.3 NOTES 5–6). The anchor of IEC 61252 (3.3 NOTE 4): an exposure of **3.2 Pa²h corresponds to $L_{EX,8h}$ of exactly 90 dB**.
 
 **LCpeak** (IEC 61672-1:2013, subclause 5.13) is the absolute maximum of the C-weighted sound pressure expressed in dB, $L_{Cpeak} = 20\log_{10}(\max|p_C(t)|/p_0)$ — the quantity behind the 135/137/140 dB(C) occupational action limits. The implementation is verified against the one-cycle and half-cycle reference responses of Table 5.
 
@@ -6215,7 +6847,7 @@ approach deviates significantly (> 0.8 dB) for the 50 ms burst because 125 ms
 blocks cannot resolve short transient events accurately — the result depends on
 how the burst aligns with the block boundaries.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.svg" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
 
 *Measured Fast envelopes (blue) matching the Table 4 reference values
 (dashed) within 0.1 dB for 200/50/10 ms bursts.*
@@ -6249,6 +6881,10 @@ from the official text into the test suite, so any regression fails CI:
 | ECMA-418-1:2024 | TNR/PR tone prominence: critical bandwidths, proximity spacing and prominence criteria against the worked examples in clauses 10–12 | `tests/test_tonality.py` |
 | ISO 1996-1:2016 | `lden()`, `ldn()` and `composite_rating_level()` against hand-computed formula values | `tests/test_environmental.py` |
 | IEC 60942:2017 Table 2 | Calibrator short-term stability limits (frequency-dependent, class 1) in `sensitivity()` | `tests/test_calibration_validation.py` |
+
+The full numerical report — the expected value and the value the library
+computes for every check, regenerated on every pull request — is published
+as [CONFORMANCE.md](CONFORMANCE.md).
 
 Beyond IEC 61252-style noise dose (`sound_exposure()`, `lex_8h()`), the same
 standards-first mindset shows up in the numerics: filter banks place their

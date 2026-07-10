@@ -45,7 +45,7 @@ referencia desplazada leída a 500 Hz. Los **términos de adaptación
 espectral** $C$ (ruido rosa) y $C_{tr}$ (tráfico urbano) añaden la
 penalización en baja frecuencia de una fuente real.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es.png" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es_dark.png" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es.svg" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es_dark.svg" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" style="width:80%">
 
 ```python
 import numpy as np
@@ -159,7 +159,7 @@ en 5 dB. El término de adaptación espectral $C_I = L_{n,\text{sum}} - 15 - L_{
 usa la suma energética sobre 100–2500 Hz (16 tercios excluyendo 3150 Hz) o
 125–2000 Hz (octavas).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_es.png" alt="Nivel de presión de ruido de impactos normalizado medido en tercios de octava con la curva de referencia de ISO 717-2 desplazada y el índice ponderado resultante leído a 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_es_dark.png" alt="Nivel de presión de ruido de impactos normalizado medido en tercios de octava con la curva de referencia de ISO 717-2 desplazada y el índice ponderado resultante leído a 500 Hz" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_es.svg" alt="Nivel de presión de ruido de impactos normalizado medido en tercios de octava con la curva de referencia de ISO 717-2 desplazada y el índice ponderado resultante leído a 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_es_dark.svg" alt="Nivel de presión de ruido de impactos normalizado medido en tercios de octava con la curva de referencia de ISO 717-2 desplazada y el índice ponderado resultante leído a 500 Hz" style="width:80%">
 
 ```python
 import numpy as np
@@ -439,7 +439,7 @@ de acoplamiento de la unión y $K_{ij}$ el **índice de reducción vibracional**
 la unión (Anexo E, empírico en la relación de masas
 $M = \log_{10}(m'_{\perp,i}/m'_i)$).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_es.png" alt="Índices de reducción sonora por camino para el ejemplo del Anexo H.3 de EN 12354-1 y la fracción de energía transmitida de cada camino, mostrando el camino directo dominando en R'w = 52 dB" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_es_dark.png" alt="Índices de reducción sonora por camino para el ejemplo del Anexo H.3 de EN 12354-1 y la fracción de energía transmitida de cada camino, mostrando el camino directo dominando en R'w = 52 dB" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_es.svg" alt="Índices de reducción sonora por camino para el ejemplo del Anexo H.3 de EN 12354-1 y la fracción de energía transmitida de cada camino, mostrando el camino directo dominando en R'w = 52 dB" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_es_dark.svg" alt="Índices de reducción sonora por camino para el ejemplo del Anexo H.3 de EN 12354-1 y la fracción de energía transmitida de cada camino, mostrando el camino directo dominando en R'w = 52 dB" style="width:80%">
 
 ```python
 import numpy as np
@@ -592,7 +592,7 @@ conformidad* con un requisito (Fórmulas 4/5).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999_es.svg" alt="Flujo de incertidumbre ISO 12999-1: incertidumbre típica de las tablas, reducida por mediciones repetidas y combinada en cuadratura, y luego expandida por el factor de cobertura de la Tabla 8 en un informe bilateral o una decisión de conformidad unilateral" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999_es_dark.svg" alt="Flujo de incertidumbre ISO 12999-1: incertidumbre típica de las tablas, reducida por mediciones repetidas y combinada en cuadratura, y luego expandida por el factor de cobertura de la Tabla 8 en un informe bilateral o una decisión de conformidad unilateral" style="width:82%">
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es.png" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es_dark.png" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es.svg" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es_dark.svg" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" style="width:80%">
 
 ```python
 from phonometry import (band_uncertainty, single_number_uncertainty,

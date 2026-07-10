@@ -679,16 +679,52 @@ def set_theme(dark: bool) -> None:
     )
 
 
-def themed_path(output_dir: str, filename: str) -> str:
-    """Return the output path for *filename*, adding language + theme suffixes.
+# Figures kept as PNG because SVG would be strictly heavier, for two reasons:
+#   * raster-backed (pcolormesh / specgram): the SVG would only wrap a base64
+#     bitmap ~4.5x larger than the PNG;
+#   * dense time series (thousands of vertices): every sample becomes a path
+#     coordinate, so the SVG runs 5.5-7.75x the PNG (schroeder_decay 105->820 KB,
+#     calibration_stability 99->759 KB, impulse_response 134->747 KB).
+# Both clear the ~4.5x "SVG no longer wins" bar; everything else is a vector plot
+# written as deterministic SVG (moderate 2.4x cases like sel_concept /
+# ln_levels_example stay SVG -- below the bar, and vector crispness is worth it).
+_PNG_FIGURES = frozenset(
+    {
+        "spectrogram_example",
+        "excitation_signals",
+        "schroeder_decay",
+        "calibration_stability",
+        "impulse_response",
+    }
+)
 
-    Also translates the current figure's text artists into the active
-    language: every generator calls ``plt.savefig(themed_path(...))``, so
-    this runs right before each save without patching matplotlib globally.
+
+def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
+    """Translate, theme-suffix and save the current figure.
+
+    Vector figures are written as SVG made byte-reproducible with a fixed
+    ``svg.hashsalt`` (deterministic element ids), ``svg.fonttype = "none"``
+    (text kept as ``<text>`` rather than freetype glyph outlines, so the
+    output does not depend on the font build) and no date metadata -- so
+    ``make graphs`` is stable and CI can diff it. The figures in
+    :data:`_PNG_FIGURES` stay PNG (SVG would be heavier); their metadata is
+    stripped too (matplotlib otherwise stamps a version-dependent ``Software``
+    chunk), so the PNG bytes are reproducible across matplotlib builds. In both
+    cases ``filename`` may carry any extension; the real one is chosen here.
     """
     _translate_figure(plt.gcf())
-    stem, ext = os.path.splitext(filename)
-    return os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}{ext}")
+    stem = os.path.splitext(filename)[0]
+    ext = "png" if stem in _PNG_FIGURES else "svg"
+    path = os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}.{ext}")
+    if ext == "svg":
+        plt.rcParams["svg.hashsalt"] = "phonometry"
+        plt.rcParams["svg.fonttype"] = "none"
+        kwargs.setdefault("metadata", {"Date": None})
+    else:
+        # Drop matplotlib's version-stamped Software chunk (and any date) so the
+        # committed PNGs match a fresh render on any matplotlib build in CI.
+        kwargs.setdefault("metadata", {"Software": None, "Date": None})
+    plt.savefig(path, **kwargs)
 
 
 
@@ -796,7 +832,7 @@ def generate_filter_type_comparison(output_dir: str) -> None:
     axins.set_xticklabels(["707", "1000", "1414"], fontsize=8)
 
     ax.legend(loc="lower right")
-    plt.savefig(themed_path(output_dir, "filter_type_comparison.png"))
+    save_figure(output_dir, "filter_type_comparison.png")
     plt.close()
 
 
@@ -825,12 +861,12 @@ def generate_filter_responses(output_dir: str) -> None:
             bank = OctaveFilterBank(fs=fs, fraction=fraction, order=order, limits=[12.0, 20000.0], filter_type=f_type)
             
             from phonometry.filter_design import _showfilter
-            # Draw first, then save through themed_path so the Spanish
+            # Draw first, then save through save_figure so the Spanish
             # translation pass runs on the finished figure (it rewrites the
             # live figure's text artists right before the save).
             _showfilter(bank.sos, bank.freq, bank.freq_u, bank.freq_d, fs,
                         bank.factor, show=False, plot_file=None, close=False)
-            plt.savefig(themed_path(output_dir, filename), dpi=150,
+            save_figure(output_dir, filename, dpi=150,
                         bbox_inches="tight")
             plt.close("all")
 
@@ -876,7 +912,7 @@ def generate_signal_responses(output_dir: str) -> None:
         )
         apply_axis_styling(ax, title, xlim=(11, 25000))
         ax.legend(loc="lower right")
-        plt.savefig(themed_path(output_dir, filename))
+        save_figure(output_dir, filename)
         plt.close()
 
 
@@ -952,7 +988,7 @@ def generate_multichannel_response(output_dir: str) -> None:
     # Let Y-axis autoscale
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "signal_response_multichannel.png"))
+    save_figure(output_dir, "signal_response_multichannel.png")
     plt.close()
 
 
@@ -1021,7 +1057,7 @@ def generate_decomposition_plot(output_dir: str) -> None:
         ax.grid(True, which="both", alpha=0.4, linestyle=":")
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "signal_decomposition.png"))
+    save_figure(output_dir, "signal_decomposition.png")
     plt.close()
 
 
@@ -1105,7 +1141,7 @@ def generate_weighting_responses(output_dir: str) -> None:
     axins.set_xticklabels(["500", "1k", "2.5k", "5k", "8k"], fontsize=8)
 
     ax.legend(loc="lower right")
-    plt.savefig(themed_path(output_dir, "weighting_responses.png"))
+    save_figure(output_dir, "weighting_responses.png")
     plt.close()
 
 
@@ -1149,7 +1185,7 @@ def generate_g_weighting_response(output_dir: str) -> None:
     ax.xaxis.set_minor_formatter(NullFormatter())
     ax.set_xticklabels(["0.1", "0.25", "0.5", "1", "2", "5", "10", "20", "50", "125", "315", "1k"])
     ax.legend(loc="upper right")
-    plt.savefig(themed_path(output_dir, "g_weighting_response.png"))
+    save_figure(output_dir, "g_weighting_response.png")
     plt.close()
 
 
@@ -1174,7 +1210,7 @@ def generate_equal_loudness_contours(output_dir: str) -> None:
     )
     ax.set_ylabel("Sound pressure level [dB re 20 \u00b5Pa]")
     ax.legend(loc="upper right")
-    plt.savefig(themed_path(output_dir, "equal_loudness_contours.png"))
+    save_figure(output_dir, "equal_loudness_contours.png")
     plt.close()
 
 
@@ -1218,7 +1254,7 @@ def generate_time_weighting_plot(output_dir: str) -> None:
     ax.set_ylabel("Normalized Response")
     ax.legend(loc="upper right")
     ax.set_xlim(0.8, 3.5)
-    plt.savefig(themed_path(output_dir, "time_weighting_analysis.png"))
+    save_figure(output_dir, "time_weighting_analysis.png")
     plt.close()
 
 
@@ -1245,7 +1281,7 @@ def generate_crossover_plot(output_dir: str) -> None:
 
     apply_axis_styling(ax, "Linkwitz-Riley Crossover (4th Order @ 1kHz)", xlim=(20, 20000), ylim=(-60, 5))
     ax.legend(loc="lower right")
-    plt.savefig(themed_path(output_dir, "crossover_lr4.png"))
+    save_figure(output_dir, "crossover_lr4.png")
     plt.close()
 
 
@@ -1276,7 +1312,7 @@ def generate_spectrogram_example(output_dir: str) -> None:
     ax.set_yticks(yticks)
     ax.set_yticklabels(["63", "125", "250", "500", "1k", "2k", "4k", "8k"])
     plt.colorbar(mesh, ax=ax, label=LABEL_LEVEL_DB)
-    plt.savefig(themed_path(output_dir, "spectrogram_example.png"))
+    save_figure(output_dir, "spectrogram_example.png")
     plt.close()
 
 
@@ -1315,7 +1351,7 @@ def generate_ln_levels_example(output_dir: str) -> None:
     ax.set_ylabel(LABEL_LEVEL_DB)
     ax.set_xlim(0, duration)
     ax.legend(loc="lower right")
-    plt.savefig(themed_path(output_dir, "ln_levels_example.png"))
+    save_figure(output_dir, "ln_levels_example.png")
     plt.close()
 
 
@@ -1343,7 +1379,7 @@ def generate_zero_phase_comparison(output_dir: str) -> None:
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Amplitude")
     ax.legend(loc="upper right")
-    plt.savefig(themed_path(output_dir, "zero_phase_comparison.png"))
+    save_figure(output_dir, "zero_phase_comparison.png")
     plt.close()
 
 
@@ -1400,7 +1436,7 @@ def generate_weighting_accuracy_hf(output_dir: str) -> None:
         a.set_xticklabels(["1k", "2k", "4k", "8k", "12.5k", "16k", "20k"])
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "weighting_accuracy_hf.png"))
+    save_figure(output_dir, "weighting_accuracy_hf.png")
     plt.close()
 
 
@@ -1440,7 +1476,7 @@ def generate_group_delay_comparison(output_dir: str) -> None:
     ax.set_xticks([500, 707, 1000, 1414, 2000])
     ax.set_xticklabels(["500", "707", "1k", "1.41k", "2k"])
     ax.legend(loc="upper right")
-    plt.savefig(themed_path(output_dir, "group_delay_comparison.png"))
+    save_figure(output_dir, "group_delay_comparison.png")
     plt.close()
 
 
@@ -1476,7 +1512,7 @@ def generate_tone_burst_iec(output_dir: str) -> None:
 
     fig.suptitle("4 kHz Toneburst Response vs IEC 61672-1 Table 4 (FAST)", fontweight="bold")
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "tone_burst_iec.png"))
+    save_figure(output_dir, "tone_burst_iec.png")
     plt.close()
 
 
@@ -1538,7 +1574,7 @@ def generate_block_processing_continuity(output_dir: str) -> None:
         a.set_ylabel("Amplitude")
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "block_processing_continuity.png"))
+    save_figure(output_dir, "block_processing_continuity.png")
     plt.close()
 
 
@@ -1587,7 +1623,7 @@ def generate_class_mask_overlay(output_dir: str) -> None:
     ax.set_xticks([0.125, 0.25, 0.5, 0.707, 1, 1.414, 2, 4, 8])
     ax.set_xticklabels(["0.125", "0.25", "0.5", "0.707", "1", "1.41", "2", "4", "8"])
     ax.legend(loc="upper left", fontsize=9)
-    plt.savefig(themed_path(output_dir, "class_mask_overlay.png"))
+    save_figure(output_dir, "class_mask_overlay.png")
     plt.close()
 
 
@@ -1664,7 +1700,7 @@ def generate_calibration_stability(output_dir: str) -> None:
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("F-weighted level re mean [dB]")
     ax.legend(loc="upper right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "calibration_stability.png"))
+    save_figure(output_dir, "calibration_stability.png")
     plt.close()
 
 
@@ -1704,7 +1740,7 @@ def generate_sel_concept(output_dir: str) -> None:
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Level [dBFS]")
     ax.legend(loc="lower left", fontsize=9)
-    plt.savefig(themed_path(output_dir, "sel_concept.png"))
+    save_figure(output_dir, "sel_concept.png")
     plt.close()
 
 
@@ -1751,7 +1787,7 @@ def generate_lden_profile(output_dir: str) -> None:
     ax.set_xlabel("Hour of day")
     ax.set_ylabel("Level [dB]")
     ax.legend(loc="upper left", fontsize=9, ncol=2)
-    plt.savefig(themed_path(output_dir, "lden_profile.png"))
+    save_figure(output_dir, "lden_profile.png")
     plt.close()
 
 
@@ -1790,7 +1826,7 @@ def generate_tonality_spectrum(output_dir: str) -> None:
     ax.set_xlabel("Frequency [Hz]")
     ax.set_ylabel("Bin power [dB]")
     ax.legend(loc="upper right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "tonality_spectrum.png"))
+    save_figure(output_dir, "tonality_spectrum.png")
     plt.close()
 
 
@@ -1832,7 +1868,7 @@ def generate_loudness_pattern(output_dir: str) -> None:
     ax.set_ylim(0, float(flat.specific.max()) * 1.28)
     ax.set_xticks([0, 4, 8, 12, 16, 20, 24])
     ax.legend(loc="upper right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "loudness_pattern.png"))
+    save_figure(output_dir, "loudness_pattern.png")
     plt.close()
 
 
@@ -1902,7 +1938,7 @@ def generate_sti_curve(output_dir: str) -> None:
     ax.set_xticks(t60_points)
     ax.set_xticklabels(["0.3", "0.5", "0.8", "1.2", "2", "3", "5"])
     ax.legend(loc="lower left", fontsize=9)
-    plt.savefig(themed_path(output_dir, "sti_vs_t60.png"))
+    save_figure(output_dir, "sti_vs_t60.png")
     plt.close()
 
 
@@ -1964,7 +2000,7 @@ def generate_intensity_demo(output_dir: str) -> None:
 
     fig.suptitle("Sound Intensity with a p-p Probe (IEC 61043)", fontweight="bold")
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "intensity_demo.png"))
+    save_figure(output_dir, "intensity_demo.png")
     plt.close()
 
 
@@ -2051,7 +2087,7 @@ def generate_schroeder_decay(output_dir: str) -> None:
     ax.set_ylim(-65, 3)
     ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
     ax.legend(loc="upper right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "schroeder_decay.png"))
+    save_figure(output_dir, "schroeder_decay.png")
     plt.close()
 
 
@@ -2109,7 +2145,7 @@ def generate_excitation_signals(output_dir: str) -> None:
 
     fig.suptitle("ISO 18233 excitation signals", fontweight="bold")
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "excitation_signals.png"))
+    save_figure(output_dir, "excitation_signals.png")
     plt.close()
 
 
@@ -2172,7 +2208,7 @@ def generate_impulse_response(output_dir: str) -> None:
     ax_d.legend(loc="upper right", fontsize=9)
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "impulse_response.png"))
+    save_figure(output_dir, "impulse_response.png")
     plt.close()
 
 
@@ -2239,7 +2275,7 @@ def generate_insulation_rating(output_dir: str) -> None:
          "1k", "1.25k", "1.6k", "2k", "2.5k", "3.15k"], fontsize=8)
     ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
     ax.legend(loc="lower right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "insulation_rating.png"))
+    save_figure(output_dir, "insulation_rating.png")
     plt.close()
 
 
@@ -2312,7 +2348,7 @@ def generate_impact_rating(output_dir: str) -> None:
          "1k", "1.25k", "1.6k", "2k", "2.5k", "3.15k"], fontsize=8)
     ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
     ax.legend(loc="lower left", fontsize=9)
-    plt.savefig(themed_path(output_dir, "impact_rating.png"))
+    save_figure(output_dir, "impact_rating.png")
     plt.close()
 
 
@@ -2355,7 +2391,7 @@ def generate_sharpness_weighting(output_dir: str) -> None:
     ax.set_xticks([0, 4, 8, 12, 16, 20, 24])
     ax.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax.legend(loc="upper right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "sharpness_weighting.png"))
+    save_figure(output_dir, "sharpness_weighting.png")
     plt.close()
 
 
@@ -2425,7 +2461,7 @@ def generate_open_plan_decay(output_dir: str) -> None:
     handles = [pts_spl, line_spl, mark_4m, line_sti]
     ax.legend(handles, [str(h.get_label()) for h in handles],
               loc="upper right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "open_plan_decay.png"))
+    save_figure(output_dir, "open_plan_decay.png")
     plt.close()
 
 
@@ -2503,7 +2539,7 @@ def generate_loudness_models_comparison(output_dir: str) -> None:
     ax.set_ylim(0, float(zw[-1]) * 1.08)
     ax.set_xticks([20, 30, 40, 50, 60, 70, 80])
     ax.legend(loc="upper left", fontsize=9)
-    plt.savefig(themed_path(output_dir, "loudness_models_comparison.png"))
+    save_figure(output_dir, "loudness_models_comparison.png")
     plt.close()
 
 
@@ -2541,7 +2577,7 @@ def generate_sottek_specific_loudness(output_dir: str) -> None:
     ax.set_ylim(0, float(spec.max()) * 1.25)
     ax.set_xticks([0, 4, 8, 12, 16, 20, 24])
     ax.legend(loc="upper right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "sottek_specific_loudness.png"))
+    save_figure(output_dir, "sottek_specific_loudness.png")
     plt.close()
 
 
@@ -2622,7 +2658,7 @@ def generate_tonality_roughness_demo(output_dir: str) -> None:
     fig.suptitle("Sound Quality Metrics (ECMA-418-2 Sottek Hearing Model)",
                  fontweight="bold", fontsize=13)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
-    plt.savefig(themed_path(output_dir, "tonality_roughness_demo.png"))
+    save_figure(output_dir, "tonality_roughness_demo.png")
     plt.close()
 
 
@@ -2677,7 +2713,7 @@ def generate_moore_glasberg_time_loudness(output_dir: str) -> None:
     ax.set_xlim(0, float(time[-1]))
     ax.set_ylim(0, float(stl.max()) * 1.18)
     ax.legend(loc="upper right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "moore_glasberg_time_loudness.png"))
+    save_figure(output_dir, "moore_glasberg_time_loudness.png")
     plt.close()
 
 
@@ -2767,7 +2803,7 @@ def generate_prediction_flanking_demo(output_dir: str) -> None:
             bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
                   "edgecolor": COLOR_GRID})
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "prediction_flanking_demo.png"))
+    save_figure(output_dir, "prediction_flanking_demo.png")
     plt.close()
 
 
@@ -2849,7 +2885,7 @@ def generate_insulation_uncertainty_demo(output_dir: str) -> None:
          "1k", "1.25k", "1.6k", "2k", "2.5k", "3.15k"], fontsize=8)
     ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
     ax.legend(loc="lower right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "insulation_uncertainty_demo.png"))
+    save_figure(output_dir, "insulation_uncertainty_demo.png")
     plt.close()
 
 
@@ -2881,7 +2917,7 @@ def generate_air_absorption_alpha(output_dir: str) -> None:
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.legend(loc="upper left", fontsize=10)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "air_absorption_alpha.png"))
+    save_figure(output_dir, "air_absorption_alpha.png")
     plt.close()
 
 
@@ -2932,7 +2968,7 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
     ax.set_axisbelow(True)
     ax.legend(loc="upper left", fontsize=9, ncol=2)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "outdoor_attenuation_breakdown.png"))
+    save_figure(output_dir, "outdoor_attenuation_breakdown.png")
     plt.close()
 
 
@@ -2993,7 +3029,7 @@ def generate_exposure_uncertainty(output_dir: str) -> None:
     ax.set_axisbelow(True)
     ax.legend(loc="upper right", fontsize=9)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "exposure_uncertainty.png"))
+    save_figure(output_dir, "exposure_uncertainty.png")
     plt.close()
 
 
@@ -3051,7 +3087,7 @@ def generate_absorption_rating(output_dir: str) -> None:
     ax.set_xticklabels(["250", "500", "1k", "2k", "4k"], fontsize=9)
     ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
     ax.legend(loc="lower right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "absorption_rating.png"))
+    save_figure(output_dir, "absorption_rating.png")
     plt.close()
 
 
@@ -3105,7 +3141,7 @@ def generate_airflow_resistance(output_dir: str) -> None:
     ax.set_ylim(bottom=0.0)
     ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
     ax.legend(loc="lower right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "airflow_resistance.png"))
+    save_figure(output_dir, "airflow_resistance.png")
     plt.close()
 
 
@@ -3152,7 +3188,7 @@ def generate_impedance_tube(output_dir: str) -> None:
     lines1, labels1 = ax.get_legend_handles_labels()
     lines2, labels2 = ax_r.get_legend_handles_labels()
     ax.legend(lines1 + lines2, labels1 + labels2, loc="center right", fontsize=9)
-    plt.savefig(themed_path(output_dir, "impedance_tube.png"))
+    save_figure(output_dir, "impedance_tube.png")
     plt.close()
 
 
@@ -3192,7 +3228,7 @@ def generate_scattering_coefficient(output_dir: str) -> None:
     ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
     ax.set_axisbelow(True)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "scattering_coefficient.png"))
+    save_figure(output_dir, "scattering_coefficient.png")
     plt.close()
 
 
@@ -3229,7 +3265,7 @@ def generate_diffusion_polar(output_dir: str) -> None:
         fontweight="bold", pad=20,
     )
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "diffusion_polar.png"))
+    save_figure(output_dir, "diffusion_polar.png")
     plt.close()
 
 
@@ -3277,7 +3313,7 @@ def generate_insitu_absorption(output_dir: str) -> None:
     ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax.set_axisbelow(True)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "insitu_absorption.png"))
+    save_figure(output_dir, "insitu_absorption.png")
     plt.close()
 
 
@@ -3319,7 +3355,7 @@ def generate_sound_power_pressure_result(output_dir: str) -> None:
     ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax.set_axisbelow(True)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "sound_power_pressure_result.png"))
+    save_figure(output_dir, "sound_power_pressure_result.png")
     plt.close()
 
 
@@ -3360,7 +3396,7 @@ def generate_sound_power_reverberation_result(output_dir: str) -> None:
     ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax.set_axisbelow(True)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "sound_power_reverberation_result.png"))
+    save_figure(output_dir, "sound_power_reverberation_result.png")
     plt.close()
 
 
@@ -3407,7 +3443,7 @@ def generate_sound_power_intensity_result(output_dir: str) -> None:
     ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax.set_axisbelow(True)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "sound_power_intensity_result.png"))
+    save_figure(output_dir, "sound_power_intensity_result.png")
     plt.close()
 
 
@@ -3445,7 +3481,7 @@ def generate_precision_anechoic_power(output_dir: str) -> None:
     ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax.set_axisbelow(True)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "precision_anechoic_power.png"))
+    save_figure(output_dir, "precision_anechoic_power.png")
     plt.close()
 
 
@@ -3502,7 +3538,7 @@ def generate_intensity_scan_power(output_dir: str) -> None:
     ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax.set_axisbelow(True)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "intensity_scan_power.png"))
+    save_figure(output_dir, "intensity_scan_power.png")
     plt.close()
 
 
@@ -3537,7 +3573,7 @@ def generate_vibration_weighting(output_dir: str) -> None:
     ax.grid(which="major", color=COLOR_GRID, linestyle="-", alpha=0.5)
     ax.set_axisbelow(True)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "vibration_weighting.png"))
+    save_figure(output_dir, "vibration_weighting.png")
     plt.close()
 
 
@@ -3576,7 +3612,7 @@ def generate_weighted_acceleration(output_dir: str) -> None:
     ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax.set_axisbelow(True)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "weighted_acceleration.png"))
+    save_figure(output_dir, "weighted_acceleration.png")
     plt.close()
 
 
@@ -3620,7 +3656,7 @@ def generate_daily_vibration_exposure(output_dir: str) -> None:
     ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax.set_axisbelow(True)
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "daily_vibration_exposure.png"))
+    save_figure(output_dir, "daily_vibration_exposure.png")
     plt.close()
 
 
@@ -3659,7 +3695,7 @@ def generate_speech_intelligibility(output_dir: str) -> None:
     ax.set_axisbelow(True)
     ax.legend(loc="upper right")
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "speech_intelligibility.png"))
+    save_figure(output_dir, "speech_intelligibility.png")
     plt.close()
 
 
@@ -3712,7 +3748,7 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     ax_i.set_axisbelow(True)
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "sii_vocal_efforts.png"))
+    save_figure(output_dir, "sii_vocal_efforts.png")
     plt.close()
 
 
@@ -3765,7 +3801,7 @@ def generate_impulse_prominence(output_dir: str) -> None:
     ax_k.legend(loc="upper left")
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "impulse_prominence.png"))
+    save_figure(output_dir, "impulse_prominence.png")
     plt.close()
 
 
@@ -3827,7 +3863,7 @@ def generate_multiple_shock(output_dir: str) -> None:
     ax_r.legend(loc="lower right")
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "multiple_shock.png"))
+    save_figure(output_dir, "multiple_shock.png")
     plt.close()
 
 
@@ -3872,7 +3908,7 @@ def generate_enclosed_space_absorption(output_dir: str) -> None:
         ax.legend(loc="upper right")
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "enclosed_space_absorption.png"))
+    save_figure(output_dir, "enclosed_space_absorption.png")
     plt.close()
 
 
@@ -3936,7 +3972,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     ax_rc.legend(loc="upper right")
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "room_noise_criteria.png"))
+    save_figure(output_dir, "room_noise_criteria.png")
     plt.close()
 
 
@@ -3992,7 +4028,7 @@ def generate_hearing_threshold(output_dir: str) -> None:
     ax_ref.legend(loc="upper left")
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "hearing_threshold.png"))
+    save_figure(output_dir, "hearing_threshold.png")
     plt.close()
 
 
@@ -4051,7 +4087,7 @@ def generate_noise_induced_hearing_loss(output_dir: str) -> None:
     ax_h.legend(loc="lower left")
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "noise_induced_hearing_loss.png"))
+    save_figure(output_dir, "noise_induced_hearing_loss.png")
     plt.close()
 
 
@@ -4114,7 +4150,7 @@ def generate_uncertainty(output_dir: str) -> None:
     ax_m.legend(loc="upper right")
 
     plt.tight_layout()
-    plt.savefig(themed_path(output_dir, "uncertainty_budget.png"))
+    save_figure(output_dir, "uncertainty_budget.png")
     plt.close()
 
 
@@ -4260,7 +4296,7 @@ def _translate_str(s: str) -> str:
     """Translate one label to the active language (exact + pattern + comma).
 
     Mirrors :func:`_translate_figure` for a single string, so animation labels
-    -- which are rewritten every frame and never pass through ``themed_path``
+    -- which are rewritten every frame and never pass through ``save_figure``
     -- can be localised at creation time instead.
     """
     import re as _re

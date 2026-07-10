@@ -90,7 +90,7 @@ print(round(result.sii, 2))                # 0.46
 print(result.band_audibility.round(2))     # per-band Ai
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/speech_intelligibility_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/speech_intelligibility.png" alt="Band audibility of the standard normal-effort speech spectrum in a descending broadband noise: the light bars are the per-band audibility Ai across the 18 one-third-octave bands from 160 Hz to 8000 Hz, the darker bars the importance-weighted contribution Ii*Ai (scaled), and the overall SII is 0.46" width="90%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/speech_intelligibility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/speech_intelligibility.svg" alt="Band audibility of the standard normal-effort speech spectrum in a descending broadband noise: the light bars are the per-band audibility Ai across the 18 one-third-octave bands from 160 Hz to 8000 Hz, the darker bars the importance-weighted contribution Ii*Ai (scaled), and the overall SII is 0.46" width="90%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -154,7 +154,7 @@ for effort in ph.sii.VOCAL_EFFORTS:
 print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.png" alt="Two panels. Left: the four ANSI S3.5-1997 standard speech spectra — normal, raised, loud and shout — over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum. Right: the resulting Speech Intelligibility Index in a fixed broadband noise, rising from 0.12 (normal) through 0.36 and 0.59 to 0.79 (shout)" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.svg" alt="Two panels. Left: the four ANSI S3.5-1997 standard speech spectra — normal, raised, loud and shout — over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum. Right: the resulting Speech Intelligibility Index in a fixed broadband noise, rising from 0.12 (normal) through 0.36 and 0.59 to 0.79 (shout)" width="96%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>

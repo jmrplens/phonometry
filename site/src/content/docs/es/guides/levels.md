@@ -80,7 +80,7 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 # LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (eventos) > L50 (mediana) > L90 (fondo)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_es.png" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_es_dark.png" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_es.svg" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_es_dark.svg" alt="Historia del nivel Fast de un ruido fluctuante con los niveles estadísticos L10, L50 y L90 marcados" style="width:80%">
 
 *L10 sigue los picos de los eventos, L50 el nivel mediano y L90 el fondo.*
 
@@ -157,7 +157,7 @@ de modo que los eventos de cualquier duración resultan directamente
 comparables, y $N$ eventos idénticos se suman como $+10\log_{10}N$. Es el
 bloque básico de los modelos de ruido aeroportuario y ferroviario.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_es.png" alt="Historia del nivel del paso de un vehículo con su Leq sobre el evento completo y el bloque SEL de un segundo con la misma energía" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_es_dark.png" alt="Historia del nivel del paso de un vehículo con su Leq sobre el evento completo y el bloque SEL de un segundo con la misma energía" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_es.svg" alt="Historia del nivel del paso de un vehículo con su Leq sobre el evento completo y el bloque SEL de un segundo con la misma energía" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_es_dark.svg" alt="Historia del nivel del paso de un vehículo con su Leq sobre el evento completo y el bloque SEL de un segundo con la misma energía" style="width:80%">
 
 ### Dosis de ruido: exposición sonora y LEX,8h
 
@@ -209,7 +209,7 @@ r = composite_rating_level([(63.2, 12, 0.0),    # día
                             (51.4, 8, 10.0)])   # noche (+10) == lden
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es.png" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es_dark.png" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es.svg" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es_dark.svg" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" style="width:80%">
 
 ### Parámetros de `lden()` / `ldn()` / `composite_rating_level()`
 

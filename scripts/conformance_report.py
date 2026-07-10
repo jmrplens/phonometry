@@ -31,7 +31,7 @@ import math
 import pathlib
 import sys
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Callable, Literal, Optional, cast
 
 import numpy as np
 from scipy import signal as sg
@@ -430,7 +430,9 @@ def _chk_iso532_stationary() -> Outcome:
     return Outcome(out.expected, out.computed, out.delta, out.passed and within_band)
 
 
-def _iso532_b5_signal(num: int) -> tuple[np.ndarray, int, float, str]:
+def _iso532_b5_signal(
+    num: int,
+) -> tuple[np.ndarray, int, float, Literal["free", "diffuse"]]:
     """Load a recorded ISO 532-1 Annex B.5 technical signal and its expected values.
 
     Returns the pressure signal, its sample rate, the expected maximum loudness
@@ -458,7 +460,10 @@ def _iso532_b5_signal(num: int) -> tuple[np.ndarray, int, float, str]:
     if n_channels > 1:
         raw = raw.reshape(-1, n_channels)[:, 0]
     signal = raw.astype(np.float64) / 32768.0 * (2.0 * math.sqrt(2.0))
-    return signal, int(fs), float(entry["Nmax"]), str(entry["field"])
+    field = str(entry["field"])
+    if field not in ("free", "diffuse"):
+        raise ValueError(f"unexpected sound field {field!r} in the workbook")
+    return signal, int(fs), float(entry["Nmax"]), cast(Literal["free", "diffuse"], field)
 
 
 @register(

@@ -16,13 +16,13 @@ performance gains over iterative loops.
 Channel (Log Sine Sweep).*
 
 The convention is consistent across the whole library: time is always the
-**last axis**. This applies to `octavefilter`, `OctaveFilterBank`,
+**last axis**. This applies to `octave_filter`, `OctaveFilterBank`,
 `weighting_filter`, `time_weighting`, `leq`, `laeq`, `ln_levels` and
 `spectrogram`.
 
 ```python
 import numpy as np
-from phonometry import octavefilter
+from phonometry import octave_filter
 
 # Two calibrated channels in Pa so the guide runs standalone
 fs = 48000
@@ -31,7 +31,7 @@ left = 0.2 * np.sin(2 * np.pi * 1000 * t)
 right = 0.1 * np.sin(2 * np.pi * 500 * t)
 
 stereo = np.stack([left, right])          # (2, n_samples)
-spl, freq = octavefilter(stereo, fs, fraction=3)
+spl, freq = octave_filter(stereo, fs, fraction=3)
 # spl has shape (2, n_bands): one row per channel
 ```
 
@@ -73,7 +73,7 @@ for frame in stream:
 
 Additional performance notes:
 
-- **Design cache**: `octavefilter()` reuses filter bank designs across calls
+- **Design cache**: `octave_filter()` reuses filter bank designs across calls
   with identical parameters (LRU cache, 32 entries), so calling it in a loop
   does not redesign the bank each time. `OctaveFilterBank` gives you explicit
   control over the design lifetime.

@@ -52,7 +52,7 @@ fluctuante, y por eso las normativas se redactan en términos de él.
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | array 1D o 2D | unidades digitales (o Pa si está calibrada) | no vacío | 2D es `[channels, samples]`; devuelve un nivel por canal |
 | `fs` | int | Hz | > 0 (solo `laeq`) | `leq` no necesita frecuencia de muestreo (integral RMS pura) |
-| `calibration_factor` | float | Pa por unidad digital | por defecto `1.0` | De `calculate_sensitivity()` |
+| `calibration_factor` | float | Pa por unidad digital | por defecto `1.0` | De `sensitivity()` |
 | `dbfs` | bool | — | por defecto `False` | `True`: 0 dBFS = seno RMS a fondo de escala; ignora la calibración |
 
 ## Niveles percentiles (LN)

@@ -104,7 +104,7 @@ que cualquier regresión hace fallar la CI:
 | ISO 226:2023 Anexo B | Líneas isofónicas, niveles de sonoridad y umbral de audición frente a las tablas del Anexo B | `tests/test_equal_loudness.py` |
 | ECMA-418-1:2024 | Prominencia tonal TNR/PR: anchos de banda críticos, separación de proximidad y criterios de prominencia frente a los ejemplos resueltos de los apartados 10–12 | `tests/test_tonality.py` |
 | ISO 1996-1:2016 | `lden()`, `ldn()` y `composite_rating_level()` frente a valores de las fórmulas calculados a mano | `tests/test_environmental.py` |
-| IEC 60942:2017 Tabla 2 | Límites de estabilidad a corto plazo del calibrador (dependientes de la frecuencia, clase 1) en `calculate_sensitivity()` | `tests/test_calibration_validation.py` |
+| IEC 60942:2017 Tabla 2 | Límites de estabilidad a corto plazo del calibrador (dependientes de la frecuencia, clase 1) en `sensitivity()` | `tests/test_calibration_validation.py` |
 
 Más allá de la dosis de ruido al estilo IEC 61252 (`sound_exposure()`,
 `lex_8h()`), la misma mentalidad de "primero la norma" se refleja en la parte

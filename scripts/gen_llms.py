@@ -81,11 +81,11 @@ def build_llms_txt(version: str) -> str:
         "",
         "```python",
         "import numpy as np",
-        "from phonometry import octavefilter, laeq, ln_levels",
+        "from phonometry import octave_filter, laeq, ln_levels",
         "",
         "fs = 48000",
         "x = np.random.randn(fs)              # 1 s of signal (pressure units)",
-        "spl, freq = octavefilter(x, fs, fraction=3)   # 1/3-octave band levels",
+        "spl, freq = octave_filter(x, fs, fraction=3)   # 1/3-octave band levels",
         "la = laeq(x, fs)                              # A-weighted Leq",
         "stats = ln_levels(x, fs, n=(10, 50, 90))      # statistical levels",
         "```",
@@ -93,8 +93,8 @@ def build_llms_txt(version: str) -> str:
         "If you are an AI assistant setting this up for a user: install from PyPI "
         "(no system dependencies), remember integer audio (e.g. wavfile.read int16) "
         "is handled automatically, use `calibration_factor` from "
-        "`calculate_sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` "
-        "over repeated `octavefilter()` calls in tight loops (although designs are "
+        "`sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` "
+        "over repeated `octave_filter()` calls in tight loops (although designs are "
         "cached either way).",
         "",
         "## Documentation",

@@ -43,7 +43,7 @@ import numpy as np
 
 from ._levels_math import energy_mean, energy_sum, weighted_energy_mean
 from ._types import as_float_or_array
-from ._warnings import PhonometryWarning
+from ._warnings import PhonometryWarning, _warn_renamed
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -221,16 +221,17 @@ def environmental_correction(
     *,
     absorption_area: float | np.ndarray | None = None,
     reverberation_time: float | np.ndarray | None = None,
-    room_volume: float | None = None,
+    volume: float | None = None,
     mean_absorption_coefficient: float | np.ndarray | None = None,
     room_surface: float | None = None,
+    room_volume: float | str | None = "deprecated",
 ) -> float | np.ndarray:
     """Environmental correction ``K2`` (ISO 3744:2010 Eq. A.2).
 
     ``K2 = 10*lg(1 + 4*S/A)`` where ``A`` is the equivalent sound absorption
     area of the room. ``A`` is taken directly from ``absorption_area``, or from
     the Sabine reverberation time ``A = 0,16*V/T`` (Eq. A.3, ``reverberation_
-    time`` + ``room_volume``), or from the mean absorption coefficient
+    time`` + ``volume``), or from the mean absorption coefficient
     ``A = alpha*Sv`` (Eq. A.7, ``mean_absorption_coefficient`` + ``room_
     surface``). With no room data the field is treated as free and ``K2 = 0``;
     supplying only one member of a pair raises :class:`ValueError` rather than
@@ -245,21 +246,33 @@ def environmental_correction(
     :param absorption_area: Equivalent absorption area ``A`` (m^2), scalar or
         per band.
     :param reverberation_time: Sabine ``T`` (s), scalar or per band, with
-        ``room_volume`` (Eq. A.3).
-    :param room_volume: Room volume ``V`` (m^3), with ``reverberation_time``.
+        ``volume`` (Eq. A.3).
+    :param volume: Room volume ``V`` (m^3), with ``reverberation_time``.
     :param mean_absorption_coefficient: ``alpha`` in (0, 1], scalar or per band,
         with ``room_surface`` (Eq. A.7).
     :param room_surface: Room boundary area ``Sv`` (m^2), with ``alpha``.
+    :param room_volume: Deprecated alias of ``volume`` (remove in 4.0).
     :return: ``K2`` in decibels; a scalar for scalar inputs, otherwise an array
         per band.
     """
+    if not isinstance(room_volume, str):
+        _warn_renamed(
+            "the 'room_volume' keyword of environmental_correction()",
+            "'volume'",
+        )
+        if volume is not None:
+            raise ValueError(
+                "environmental_correction() got both 'volume' and its "
+                "deprecated alias 'room_volume'; pass only 'volume'."
+            )
+        volume = room_volume
     if absorption_area is None:
         # A half-specified room pair must never be read as free field: naming
         # only one member of a pair is a mistake, not a K2 = 0 request.
-        if (reverberation_time is None) != (room_volume is None):
-            missing = "room_volume" if room_volume is None else "reverberation_time"
+        if (reverberation_time is None) != (volume is None):
+            missing = "volume" if volume is None else "reverberation_time"
             raise ValueError(
-                "reverberation_time and room_volume must be given together "
+                "reverberation_time and volume must be given together "
                 f"(Eq. A.3); '{missing}' is missing."
             )
         if (mean_absorption_coefficient is None) != (room_surface is None):
@@ -272,11 +285,11 @@ def environmental_correction(
                 "mean_absorption_coefficient and room_surface must be given "
                 f"together (Eq. A.7); '{missing}' is missing."
             )
-        if reverberation_time is not None and room_volume is not None:
+        if reverberation_time is not None and volume is not None:
             t = np.asarray(reverberation_time, dtype=np.float64)
-            if room_volume <= 0 or np.any(t <= 0.0):
-                raise ValueError("reverberation_time and room_volume must be > 0.")
-            absorption_area = 0.16 * room_volume / t
+            if volume <= 0 or np.any(t <= 0.0):
+                raise ValueError("reverberation_time and volume must be > 0.")
+            absorption_area = 0.16 * volume / t
         elif mean_absorption_coefficient is not None and room_surface is not None:
             alpha = np.asarray(mean_absorption_coefficient, dtype=np.float64)
             if room_surface <= 0 or np.any(alpha <= 0.0) or np.any(alpha > 1.0):
@@ -414,11 +427,12 @@ def sound_power_pressure(
     frequencies: np.ndarray | None = None,
     absorption_area: float | None = None,
     reverberation_time: float | None = None,
-    room_volume: float | None = None,
+    volume: float | None = None,
     mean_absorption_coefficient: float | None = None,
     room_surface: float | None = None,
     grade: Grade = "engineering",
     omc_uncertainty: float = 0.0,
+    room_volume: float | str | None = "deprecated",
 ) -> SoundPowerResult:
     """Sound power level from surface pressure levels (ISO 3744/3746:2010).
 
@@ -446,14 +460,25 @@ def sound_power_pressure(
         single spectrum ``(NB,)`` / ``(1, NB)`` broadcast to every position.
     :param frequencies: Band mid-band frequencies (Hz) for the A-weighted total.
     :param absorption_area: Equivalent absorption area ``A`` (m^2) for ``K2``.
-    :param reverberation_time: Sabine ``T`` (s), with ``room_volume``, for ``K2``.
-    :param room_volume: Room volume ``V`` (m^3), with ``reverberation_time``.
+    :param reverberation_time: Sabine ``T`` (s), with ``volume``, for ``K2``.
+    :param volume: Room volume ``V`` (m^3), with ``reverberation_time``.
     :param mean_absorption_coefficient: ``alpha``, with ``room_surface``, for ``K2``.
     :param room_surface: Room boundary area ``Sv`` (m^2), with ``alpha``.
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
     :param omc_uncertainty: ``sigma_omc`` (dB), operating/mounting instability.
+    :param room_volume: Deprecated alias of ``volume`` (remove in 4.0).
     :return: :class:`SoundPowerResult`.
     """
+    if not isinstance(room_volume, str):
+        _warn_renamed(
+            "the 'room_volume' keyword of sound_power_pressure()", "'volume'"
+        )
+        if volume is not None:
+            raise ValueError(
+                "sound_power_pressure() got both 'volume' and its deprecated "
+                "alias 'room_volume'; pass only 'volume'."
+            )
+        volume = room_volume
     grade = _check_grade(grade)
     levels = np.atleast_2d(np.asarray(levels_positions, dtype=np.float64))
     if levels.ndim != 2:
@@ -509,7 +534,7 @@ def sound_power_pressure(
         area,
         absorption_area=absorption_area,
         reverberation_time=reverberation_time,
-        room_volume=room_volume,
+        volume=volume,
         mean_absorption_coefficient=mean_absorption_coefficient,
         room_surface=room_surface,
     )

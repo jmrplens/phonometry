@@ -41,7 +41,7 @@ def test_octave_filter_basic() -> None:
     y = 100 * np.sum([np.sin(2 * np.pi * f * t) for f in freqs], axis=0)
 
     # 1. Filter and get only SPL spectrum
-    spl, freq = phonometry.octavefilter(y, fs=fs, fraction=3, order=6, limits=[12, 20000], show=False)
+    spl, freq = phonometry.octave_filter(y, fs=fs, fraction=3, order=6, limits=[12, 20000], show=False)
 
     assert len(spl) == len(freq)
     assert len(freq) > 0
@@ -71,7 +71,7 @@ def test_octave_filter_sigbands() -> None:
     y = np.sin(2 * np.pi * 1000 * t)
 
     # 2. Filter and get signals in time-domain bands
-    _, freq, xb = phonometry.octavefilter(
+    _, freq, xb = phonometry.octave_filter(
         y, fs=fs, fraction=1, order=6, limits=[500, 2000], show=False, sigbands=True
     )
 
@@ -80,7 +80,7 @@ def test_octave_filter_sigbands() -> None:
 
 
 def test_octavefilter_reuses_cached_bank(monkeypatch) -> None:
-    """Repeated octavefilter calls with identical params must not redesign the bank."""
+    """Repeated octave_filter calls with identical params must not redesign the bank."""
     from phonometry.core import OctaveFilterBank
 
     phonometry._cached_filter_bank.cache_clear()
@@ -94,11 +94,11 @@ def test_octavefilter_reuses_cached_bank(monkeypatch) -> None:
     monkeypatch.setattr(OctaveFilterBank, "__init__", counting_init)
 
     x = np.random.default_rng(0).standard_normal(4800)
-    phonometry.octavefilter(x, 48000, fraction=3)
-    phonometry.octavefilter(x, 48000, fraction=3)
+    phonometry.octave_filter(x, 48000, fraction=3)
+    phonometry.octave_filter(x, 48000, fraction=3)
     assert calls["n"] == 1
 
-    phonometry.octavefilter(x, 48000, fraction=1)  # different params -> new bank
+    phonometry.octave_filter(x, 48000, fraction=1)  # different params -> new bank
     assert calls["n"] == 2
     phonometry._cached_filter_bank.cache_clear()
 
@@ -107,8 +107,8 @@ def test_octavefilter_cached_results_identical() -> None:
     """The cached bank must return bit-identical results across calls."""
     phonometry._cached_filter_bank.cache_clear()
     x = np.random.default_rng(1).standard_normal(4800)
-    spl1, f1 = phonometry.octavefilter(x, 48000, fraction=3)
-    spl2, f2 = phonometry.octavefilter(x, 48000, fraction=3)
+    spl1, f1 = phonometry.octave_filter(x, 48000, fraction=3)
+    spl2, f2 = phonometry.octave_filter(x, 48000, fraction=3)
     np.testing.assert_array_equal(spl1, spl2)
     assert f1 == f2
 
@@ -117,8 +117,8 @@ def test_octavefilter_freq_list_is_mutation_safe() -> None:
     """Mutating the returned freq list must not corrupt the cached bank."""
     phonometry._cached_filter_bank.cache_clear()
     x = np.random.default_rng(2).standard_normal(4800)
-    _, freq1 = phonometry.octavefilter(x, 48000, fraction=1)
+    _, freq1 = phonometry.octave_filter(x, 48000, fraction=1)
     freq1[0] = -999.0  # caller mutates the returned list
-    _, freq2 = phonometry.octavefilter(x, 48000, fraction=1)
+    _, freq2 = phonometry.octave_filter(x, 48000, fraction=1)
     assert freq2[0] != -999.0
     phonometry._cached_filter_bank.cache_clear()

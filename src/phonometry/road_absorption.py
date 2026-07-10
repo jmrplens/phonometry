@@ -62,7 +62,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from ._types import Real
-from ._warnings import PhonometryWarning
+from ._warnings import PhonometryWarning, _warn_renamed
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
@@ -242,13 +242,14 @@ def _edge(n_samples: int, shape: str, *, rising: bool) -> NDArray[np.float64]:
 
 
 def adrienne_window(
-    sample_rate: float,
+    fs: float | None = None,
     *,
     flat_duration: float = _ADRIENNE_FLAT,
     leading_duration: float = _ADRIENNE_LEADING,
     trailing_duration: float = _ADRIENNE_TRAILING,
     leading_edge: str = "blackman-harris",
     trailing_edge: str = "blackman-harris",
+    sample_rate: float | str = "deprecated",
 ) -> Real:
     """Adrienne-type temporal window (ISO 13472-1:2002, Clause 6.4).
 
@@ -267,8 +268,8 @@ def adrienne_window(
     normative fixed set of timings. The lower usable frequency scales as
     ``~ 1 / T_window`` (Clause 6.4), so report the durations used.
 
-    :param sample_rate: Sampling frequency ``fs``, in hertz (ISO 13472-1
-        Clause 6.2 requires ``fs > 40 kHz`` in practice).
+    :param fs: Sampling frequency, in hertz (ISO 13472-1 Clause 6.2 requires
+        ``fs > 40 kHz`` in practice).
     :param flat_duration: Flat-portion duration, in seconds (default 5 ms).
     :param leading_duration: Leading-edge (rise) duration, in seconds; 0 gives a
         sharp step onset.
@@ -277,24 +278,36 @@ def adrienne_window(
         ``"cosine-squared"``.
     :param trailing_edge: Trailing-edge shape, ``"blackman-harris"`` or
         ``"cosine-squared"``.
+    :param sample_rate: Deprecated alias of ``fs`` (remove in 4.0).
     :return: The time-domain window, one sample per ``1 / fs`` (length
         ``round((leading + flat + trailing) * fs)`` samples).
-    :raises ValueError: If ``fs`` is not positive, a duration is negative, the
-        flat duration is not positive, or an edge shape is unknown.
+    :raises ValueError: If ``fs`` is missing or not positive, a duration is
+        negative, the flat duration is not positive, or an edge shape is
+        unknown.
     """
-    if sample_rate <= 0.0:
-        raise ValueError("'sample_rate' must be positive.")
+    if not isinstance(sample_rate, str):
+        _warn_renamed("the 'sample_rate' keyword of adrienne_window()", "'fs'")
+        if fs is not None:
+            raise ValueError(
+                "adrienne_window() got both 'fs' and its deprecated alias "
+                "'sample_rate'; pass only 'fs'."
+            )
+        fs = sample_rate
+    if fs is None:
+        raise ValueError("adrienne_window() missing required argument: 'fs'.")
+    if fs <= 0.0:
+        raise ValueError("'fs' must be positive.")
     if flat_duration <= 0.0:
         raise ValueError("'flat_duration' must be positive.")
     if leading_duration < 0.0 or trailing_duration < 0.0:
         raise ValueError("Edge durations must be non-negative.")
     if leading_edge not in _EDGE_SHAPES or trailing_edge not in _EDGE_SHAPES:
         raise ValueError(f"Edge shapes must be one of {_EDGE_SHAPES}.")
-    n_lead = int(round(leading_duration * sample_rate))
-    n_flat = int(round(flat_duration * sample_rate))
-    n_trail = int(round(trailing_duration * sample_rate))
+    n_lead = int(round(leading_duration * fs))
+    n_flat = int(round(flat_duration * fs))
+    n_trail = int(round(trailing_duration * fs))
     if n_flat <= 0:
-        raise ValueError("'flat_duration' is too short for 'sample_rate'.")
+        raise ValueError("'flat_duration' is too short for 'fs'.")
     rising = _edge(n_lead, leading_edge, rising=True)
     flat = np.ones(n_flat, dtype=np.float64)
     falling = _edge(n_trail, trailing_edge, rising=False)
@@ -338,16 +351,17 @@ def insitu_reflection_factor(
     source_height: float = DEFAULT_SOURCE_HEIGHT,
     mic_height: float = DEFAULT_MIC_HEIGHT,
     incidence_angle: float = 0.0,
-    sample_rate: float | None = None,
+    fs: float | None = None,
     delay: float | None = None,
     n: int | None = None,
+    sample_rate: float | str = "deprecated",
 ) -> Complex:
     """Complex pressure reflection factor ``r(f)`` (ISO 13472-1, Clause 4.1).
 
     ``r(f) = (1 / Kr) * Hr(f) / Hi(f)`` from the windowed reflected and incident
     impulse responses, with ``Hr``/``Hi`` their real FFTs and ``Kr`` the
     geometrical-spreading factor (or ``Kr,theta`` when ``incidence_angle`` is
-    given, Annex F). When both ``sample_rate`` and ``delay`` are supplied the
+    given, Annex F). When both ``fs`` and ``delay`` are supplied the
     reflected-path time offset is undone by ``exp(+j 2 pi f * delay)``, yielding
     the complex ``Qp`` of the Clause 4.1 NOTE (with ``delay = dtau = 2 dm / c``,
     Annex C; the frequency-dependent form of Annex G).
@@ -359,28 +373,39 @@ def insitu_reflection_factor(
     :param source_height: Source-to-plane distance ``ds``, in metres.
     :param mic_height: Microphone-to-plane distance ``dm``, in metres.
     :param incidence_angle: Incidence angle ``theta``, in radians (0 = normal).
-    :param sample_rate: Sampling frequency ``fs``, in hertz; required with
-        ``delay`` for phase restoration.
+    :param fs: Sampling frequency, in hertz; required with ``delay`` for phase
+        restoration.
     :param delay: Reflected-path delay ``dtau`` to undo, in seconds; ``None``
         returns the raw spectral ratio.
     :param n: FFT length; defaults to the longer of the two impulse responses.
+    :param sample_rate: Deprecated alias of ``fs`` (remove in 4.0).
     :return: Complex reflection factor ``r(f)`` at the ``rfft`` frequency bins.
     :raises ValueError: On empty inputs, invalid geometry, or ``delay`` given
-        without ``sample_rate``.
+        without ``fs``.
     """
+    if not isinstance(sample_rate, str):
+        _warn_renamed(
+            "the 'sample_rate' keyword of insitu_reflection_factor()", "'fs'"
+        )
+        if fs is not None:
+            raise ValueError(
+                "insitu_reflection_factor() got both 'fs' and its deprecated "
+                "alias 'sample_rate'; pass only 'fs'."
+            )
+        fs = sample_rate
     kr = geometric_spreading_factor_angle(
         incidence_angle, source_height, mic_height
     )
     hi, hr, length = _transfer_functions(incident_ir, reflected_ir, n)
     r = (hr / hi) / kr
     if delay is not None:
-        if sample_rate is None:
-            raise ValueError("'sample_rate' is required to apply 'delay'.")
-        if sample_rate <= 0.0:
-            raise ValueError("'sample_rate' must be positive.")
+        if fs is None:
+            raise ValueError("'fs' is required to apply 'delay'.")
+        if fs <= 0.0:
+            raise ValueError("'fs' must be positive.")
         # ``length`` is the exact time-domain length used for the FFTs, so
         # ``rfftfreq`` is correct for both even and odd inputs.
-        freqs = np.fft.rfftfreq(length, d=1.0 / sample_rate)
+        freqs = np.fft.rfftfreq(length, d=1.0 / fs)
         r = r * np.exp(2j * np.pi * freqs * delay)
     return np.asarray(r, dtype=np.complex128)
 
@@ -576,7 +601,7 @@ class InsituAbsorptionResult:
 def insitu_absorption_spectrum(
     incident_ir: ArrayLike,
     reflected_ir: ArrayLike,
-    sample_rate: float,
+    fs: float | None = None,
     *,
     source_height: float = DEFAULT_SOURCE_HEIGHT,
     mic_height: float = DEFAULT_MIC_HEIGHT,
@@ -585,6 +610,7 @@ def insitu_absorption_spectrum(
     f_min: float = PART1_FREQUENCY_RANGE[0],
     f_max: float = PART1_FREQUENCY_RANGE[1],
     clip_negative: bool = True,
+    sample_rate: float | str = "deprecated",
 ) -> InsituAbsorptionResult:
     """In-situ one-third-octave absorption spectrum (ISO 13472-1, Clause 4.1).
 
@@ -596,7 +622,7 @@ def insitu_absorption_spectrum(
 
     :param incident_ir: Windowed incident (direct-path) impulse response ``hi``.
     :param reflected_ir: Windowed reflected-path impulse response ``hr``.
-    :param sample_rate: Sampling frequency ``fs``, in hertz.
+    :param fs: Sampling frequency, in hertz.
     :param source_height: Source-to-plane distance ``ds``, in metres.
     :param mic_height: Microphone-to-plane distance ``dm``, in metres.
     :param incidence_angle: Incidence angle ``theta``, in radians (0 = normal).
@@ -604,12 +630,27 @@ def insitu_absorption_spectrum(
     :param f_min: Lowest band centre to report, in hertz (default 250 Hz).
     :param f_max: Highest band centre to report, in hertz (default 4000 Hz).
     :param clip_negative: Clip negative band results to zero (default ``True``).
+    :param sample_rate: Deprecated alias of ``fs`` (remove in 4.0).
     :return: An :class:`InsituAbsorptionResult` with ``.plot()``.
-    :raises ValueError: On empty inputs, invalid geometry, or non-positive
-        ``sample_rate``.
+    :raises ValueError: On empty inputs, invalid geometry, or a missing or
+        non-positive ``fs``.
     """
-    if sample_rate <= 0.0:
-        raise ValueError("'sample_rate' must be positive.")
+    if not isinstance(sample_rate, str):
+        _warn_renamed(
+            "the 'sample_rate' keyword of insitu_absorption_spectrum()", "'fs'"
+        )
+        if fs is not None:
+            raise ValueError(
+                "insitu_absorption_spectrum() got both 'fs' and its deprecated "
+                "alias 'sample_rate'; pass only 'fs'."
+            )
+        fs = sample_rate
+    if fs is None:
+        raise ValueError(
+            "insitu_absorption_spectrum() missing required argument: 'fs'."
+        )
+    if fs <= 0.0:
+        raise ValueError("'fs' must be positive.")
     hi_t = np.atleast_1d(np.asarray(incident_ir, dtype=np.float64))
     hr_t = np.atleast_1d(np.asarray(reflected_ir, dtype=np.float64))
     # Fix the FFT length explicitly so ``rfftfreq`` matches the transform used
@@ -623,7 +664,7 @@ def insitu_absorption_spectrum(
         incidence_angle=incidence_angle,
         n=length,
     )
-    freq = np.fft.rfftfreq(length, d=1.0 / sample_rate)
+    freq = np.fft.rfftfreq(length, d=1.0 / fs)
     centres, band = one_third_octave_absorption(
         freq, alpha, f_min=f_min, f_max=f_max, clip_negative=clip_negative
     )

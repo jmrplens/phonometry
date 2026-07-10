@@ -6,7 +6,7 @@ Advanced tests for input validation, edge cases, and robustness.
 import numpy as np
 import pytest
 
-from phonometry import normalizedfreq, octavefilter
+from phonometry import normalized_frequencies, octave_filter
 
 
 def test_fraction_validation() -> None:
@@ -14,19 +14,19 @@ def test_fraction_validation() -> None:
     Test the filter's behavior with standard and non-standard fractional bandwidths.
 
     **Purpose:**
-    Verify that the `octavefilter` function can handle both standard (1/1, 1/3 octave)
-    and non-standard fractions (e.g., 1/2 octave) correctly. Also ensures `normalizedfreq`
+    Verify that the `octave_filter` function can handle both standard (1/1, 1/3 octave)
+    and non-standard fractions (e.g., 1/2 octave) correctly. Also ensures `normalized_frequencies`
     restricts usage to defined standards.
 
     **Verification:**
-    - Call `octavefilter` with fraction=1 and fraction=3.
-    - Call `octavefilter` with a non-standard fraction=2.
-    - Call `normalizedfreq` with an invalid fraction.
+    - Call `octave_filter` with fraction=1 and fraction=3.
+    - Call `octave_filter` with a non-standard fraction=2.
+    - Call `normalized_frequencies` with an invalid fraction.
 
     **Expectation:**
     - Filtering should succeed and return frequency bands for all valid integer fractions.
     - Higher denominators (smaller bandwidths) should result in more bands (fraction=3 > fraction=1).
-    - `normalizedfreq` should raise a `ValueError` for non-standard fractions,
+    - `normalized_frequencies` should raise a `ValueError` for non-standard fractions,
       as it relies on a lookup table for IEC standards.
     """
     fs = 48000
@@ -34,18 +34,18 @@ def test_fraction_validation() -> None:
     x = rng.standard_normal(fs)  # 1 second of noise
 
     # Standard fractions
-    _, freq1 = octavefilter(x, fs, fraction=1)
+    _, freq1 = octave_filter(x, fs, fraction=1)
     assert len(freq1) > 0
-    _, freq3 = octavefilter(x, fs, fraction=3)
+    _, freq3 = octave_filter(x, fs, fraction=3)
     assert len(freq3) > len(freq1)
 
     # Non-standard fraction (should work mathematically via _genfreqs)
-    _, freq2 = octavefilter(x, fs, fraction=2)
+    _, freq2 = octave_filter(x, fs, fraction=2)
     assert len(freq2) > 0
 
-    # normalizedfreq only supports 1 and 3
+    # normalized_frequencies only supports 1 and 3
     with pytest.raises(ValueError, match="Normalized frequencies only available"):
-        normalizedfreq(2)
+        normalized_frequencies(2)
 
 
 def test_invalid_inputs() -> None:
@@ -73,31 +73,31 @@ def test_invalid_inputs() -> None:
 
     # Invalid limits: reversed
     with pytest.raises(ValueError, match="lower limit must be less than the upper limit"):
-        octavefilter(x, fs, limits=[20000.0, 100.0])
+        octave_filter(x, fs, limits=[20000.0, 100.0])
 
     # Invalid limits: non-positive
     with pytest.raises(ValueError, match="Limit frequencies must be positive"):
-        octavefilter(x, fs, limits=[0.0, 1000.0])
+        octave_filter(x, fs, limits=[0.0, 1000.0])
 
     # Invalid limits: wrong length
     with pytest.raises(ValueError, match="Limits must be a list of two frequencies"):
-        octavefilter(x, fs, limits=[100.0, 500.0, 1000.0])
+        octave_filter(x, fs, limits=[100.0, 500.0, 1000.0])
 
     # Invalid fs
     with pytest.raises(ValueError, match="Sample rate 'fs' must be positive"):
-        octavefilter(x, 0, limits=[100.0, 1000.0])
+        octave_filter(x, 0, limits=[100.0, 1000.0])
 
     # Invalid fraction
     with pytest.raises(ValueError, match="Bandwidth 'fraction' must be positive"):
-        octavefilter(x, fs, fraction=0)
+        octave_filter(x, fs, fraction=0)
 
     # Invalid order
     with pytest.raises(ValueError, match="Filter 'order' must be positive"):
-        octavefilter(x, fs, order=-1)
+        octave_filter(x, fs, order=-1)
 
     # Invalid filter_type
     with pytest.raises(ValueError, match="Invalid filter_type"):
-        octavefilter(x, fs, filter_type="invalid_type")
+        octave_filter(x, fs, filter_type="invalid_type")
 
 
 def test_short_signal() -> None:
@@ -124,7 +124,7 @@ def test_short_signal() -> None:
     x = rng.standard_normal(100) 
     
     # This might fail if resample produces empty array or 0 length
-    spl, freq = octavefilter(x, fs, limits=[12.0, 100.0])
+    spl, freq = octave_filter(x, fs, limits=[12.0, 100.0])
     
     assert not np.isnan(spl).any()
     assert len(spl) == len(freq)
@@ -150,7 +150,7 @@ def test_nan_handling() -> None:
     x = rng.standard_normal(4800)
     x[100] = np.nan
     
-    spl, _ = octavefilter(x, fs)
+    spl, _ = octave_filter(x, fs)
     # Expect NaNs in SPL
     assert np.isnan(spl).any()
 
@@ -172,7 +172,7 @@ def test_silence() -> None:
     fs = 48000
     x = np.zeros(fs)
     
-    spl, _ = octavefilter(x, fs)
+    spl, _ = octave_filter(x, fs)
     
     # Should be very low dB (approx -inf, but code clips to eps)
     assert np.all(spl < -100)
@@ -202,7 +202,7 @@ def test_nyquist_limit() -> None:
     # Request up to 1000Hz
     # _deleteouters should warn and remove high bands
     with pytest.warns(UserWarning, match="frequencies above fs/2 removed"):
-        _, freq = octavefilter(x, fs, limits=[10.0, 1000.0])
+        _, freq = octave_filter(x, fs, limits=[10.0, 1000.0])
         
     assert np.all(np.array(freq) < fs/2)
 
@@ -229,8 +229,8 @@ def test_high_order_stability() -> None:
     
     # Order 12 or 24 is quite high for standard IIR, but SOS is better.
     # We just want to ensure it doesn't explode into NaNs.
-    spl, _ = octavefilter(x, fs, order=12)
+    spl, _ = octave_filter(x, fs, order=12)
     assert not np.isnan(spl).any()
     
-    spl2, _ = octavefilter(x, fs, order=24)
+    spl2, _ = octave_filter(x, fs, order=24)
     assert not np.isnan(spl2).any()

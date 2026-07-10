@@ -28,7 +28,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Tuple
 
 import numpy as np
 from scipy import signal
@@ -325,7 +325,7 @@ def _assemble_tonality(
 def tonality_ecma(
     signal_in: np.ndarray,
     fs: float,
-    field: str = "free",
+    field: Literal["free", "diffuse"] = "free",
     f_low: float | None = None,
     f_high: float | None = None,
 ) -> EcmaTonality:

@@ -20,20 +20,20 @@ $$
 
 where $L_\text{cal}$ is the calibrator's level (typically 94 dB, i.e. 1 Pa),
 $p_\text{ref} = 20\ \mu\text{Pa}$ and $\tilde{x}_\text{ref}$ is the RMS of
-the recorded calibration tone in digital units. `calculate_sensitivity()` is
+the recorded calibration tone in digital units. `sensitivity()` is
 exactly that equation. The factor is valid as long as nothing in the chain
 changes — touch the gain knob and you must recalibrate.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup.svg" alt="Calibration chain: sound calibrator coupled on the microphone, preamplifier, ADC and calculate_sensitivity producing pascals per digital unit" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_dark.svg" alt="Calibration chain: sound calibrator coupled on the microphone, preamplifier, ADC and calculate_sensitivity producing pascals per digital unit" style="width:92%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup.svg" alt="Calibration chain: sound calibrator coupled on the microphone, preamplifier, ADC and sensitivity producing pascals per digital unit" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_dark.svg" alt="Calibration chain: sound calibrator coupled on the microphone, preamplifier, ADC and sensitivity producing pascals per digital unit" style="width:92%">
 
 ## Physical Calibration (Sound Level Meter)
 
 ```mermaid
 flowchart LR
     A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\ncalibrator_recording"]
-    B --> C["calculate_sensitivity()"]
+    B --> C["sensitivity()"]
     C --> D["calibration_factor\n(digital units → Pa)"]
-    D --> E["octavefilter / leq / laeq / ln_levels"]
+    D --> E["octave_filter / leq / laeq / ln_levels"]
     F["Measurement\nrecording"] --> E
     E --> G["Levels in dB SPL\n(re 20 µPa)"]
 ```
@@ -44,7 +44,7 @@ calculate the sensitivity of your measurement chain using a reference tone
 
 ```python
 import numpy as np
-from phonometry import octavefilter, calculate_sensitivity
+from phonometry import octave_filter, sensitivity
 
 # 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
 fs = 48000
@@ -56,19 +56,19 @@ calibrator_recording = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # 2. Calculate sensitivity factor
-sensitivity = calculate_sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
+sensitivity = sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
 
 # 3. Apply calibration to your measurements
-spl, freq = octavefilter(recording, fs, calibration_factor=sensitivity)
+spl, freq = octave_filter(recording, fs, calibration_factor=sensitivity)
 # Now 'spl' values are in real-world dB SPL!
 ```
 
-The same `calibration_factor` works across the whole library: `octavefilter`,
+The same `calibration_factor` works across the whole library: `octave_filter`,
 `OctaveFilterBank`, `leq`, `laeq` and `ln_levels`.
 
 ## Calibrator assumptions (IEC 60942)
 
-`calculate_sensitivity` assumes the reference recording comes from an acoustic
+`sensitivity` assumes the reference recording comes from an acoustic
 calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
 
 - The default `target_spl=94.0` matches the common 94 dB @ 1 kHz calibrator
@@ -84,7 +84,7 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
 ### Automatic stability validation
 
 When you pass the sample rate (and `validate=True`, the default),
-`calculate_sensitivity(ref, fs=fs)` checks the recording the way
+`sensitivity(ref, fs=fs)` checks the recording the way
 IEC 60942:2017 checks the calibrator itself (5.3.3): the *short-term level
 fluctuation* — the absolute difference between each of the maximum and minimum
 F-time-weighted levels and the mean level — must not exceed the Table 2 class 1
@@ -103,7 +103,7 @@ wind, handling noise:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_dark.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" style="width:80%">
 
-### `calculate_sensitivity()` parameters
+### `sensitivity()` parameters
 
 | Parameter | Type / shape | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -117,7 +117,7 @@ wind, handling noise:
 | `narrowband` | bool | — | default `False` | Estimate the tone with a coherent Goertzel detector near `frequency` (needs `fs`) instead of full-band RMS; rejects broadband hum/noise that otherwise inflates the RMS and shrinks every later level (~−0.44 dB at 20 dB SNR). Enable for noisy coupler recordings |
 
 Returns the sensitivity factor (float) to pass as `calibration_factor=` to
-`octavefilter`, `leq`, `laeq`, `ln_levels`, `lc_peak`, `sel` and the dose
+`octave_filter`, `leq`, `laeq`, `ln_levels`, `lc_peak`, `sel` and the dose
 functions.
 
 ## Digital Analysis (dBFS)
@@ -134,7 +134,7 @@ In this mode:
 
 ```python
 # Assume 'recording' is normalized between -1.0 and 1.0
-spl_dbfs, freq = octavefilter(recording, fs, dbfs=True)
+spl_dbfs, freq = octave_filter(recording, fs, dbfs=True)
 # Results will be negative (e.g., -20 dBFS)
 ```
 
@@ -149,7 +149,7 @@ like BK:
 
 ```python
 # Measure peak-holding levels for impact analysis
-spl_peak, freq = octavefilter(recording, fs, mode='peak')
+spl_peak, freq = octave_filter(recording, fs, mode='peak')
 ```
 
 :::note

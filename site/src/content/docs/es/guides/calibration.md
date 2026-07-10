@@ -22,18 +22,18 @@ $$
 donde $L_\text{cal}$ es el nivel del calibrador (típicamente 94 dB, es decir,
 1 Pa), $p_\text{ref} = 20\ \mu\text{Pa}$ y $\tilde{x}_\text{ref}$ es el RMS
 del tono de calibración grabado, en unidades digitales.
-`calculate_sensitivity()` es exactamente esa ecuación. El factor vale mientras
+`sensitivity()` es exactamente esa ecuación. El factor vale mientras
 nada cambie en la cadena — si tocas la ganancia, recalibra.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y calculate_sensitivity produciendo pascales por unidad digital" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es_dark.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y calculate_sensitivity produciendo pascales por unidad digital" style="width:92%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y sensitivity produciendo pascales por unidad digital" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es_dark.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y sensitivity produciendo pascales por unidad digital" style="width:92%">
 ## Calibración física (sonómetro)
 
 ```mermaid
 flowchart LR
     A["Tono del calibrador\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Grabación\ncalibrator_recording"]
-    B --> C["calculate_sensitivity()"]
+    B --> C["sensitivity()"]
     C --> D["calibration_factor\n(unidades digitales → Pa)"]
-    D --> E["octavefilter / leq / laeq / ln_levels"]
+    D --> E["octave_filter / leq / laeq / ln_levels"]
     F["Grabación de\nmedición"] --> E
     E --> G["Niveles en dB SPL\n(re 20 µPa)"]
 ```
@@ -44,7 +44,7 @@ referencia (p. ej. 94 dB @ 1 kHz).
 
 ```python
 import numpy as np
-from phonometry import octavefilter, calculate_sensitivity
+from phonometry import octave_filter, sensitivity
 
 # 1. Graba la señal de tu calibrador de 94 dB (1 kHz, 1 Pa RMS = 94 dB SPL)
 fs = 48000
@@ -56,19 +56,19 @@ calibrator_recording = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # 2. Calcula el factor de sensibilidad
-sensitivity = calculate_sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
+sensitivity = sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
 
 # 3. Aplica la calibración a tus mediciones
-spl, freq = octavefilter(recording, fs, calibration_factor=sensitivity)
+spl, freq = octave_filter(recording, fs, calibration_factor=sensitivity)
 # ¡Ahora los valores de 'spl' son dB SPL reales!
 ```
 
-El mismo `calibration_factor` funciona en toda la librería: `octavefilter`,
+El mismo `calibration_factor` funciona en toda la librería: `octave_filter`,
 `OctaveFilterBank`, `leq`, `laeq` y `ln_levels`.
 
 ## Supuestos del calibrador (IEC 60942)
 
-`calculate_sensitivity` asume que la grabación de referencia procede de un
+`sensitivity` asume que la grabación de referencia procede de un
 calibrador acústico según **IEC 60942** (clases LS, 1 y 2):
 
 - El `target_spl=94.0` por defecto corresponde a la salida habitual de 94 dB
@@ -84,7 +84,7 @@ calibrador acústico según **IEC 60942** (clases LS, 1 y 2):
 ### Validación automática de estabilidad
 
 Si pasas la frecuencia de muestreo (y `validate=True`, el valor por defecto),
-`calculate_sensitivity(ref, fs=fs)` comprueba la grabación igual que la
+`sensitivity(ref, fs=fs)` comprueba la grabación igual que la
 IEC 60942:2017 comprueba el calibrador (5.3.3): la *fluctuación de nivel a
 corto plazo* — el valor absoluto de la diferencia entre cada uno de los niveles
 máximo y mínimo con ponderación temporal F y el nivel medio — no debe superar
@@ -104,7 +104,7 @@ viento, ruido de manipulación:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_es.png" alt="Nivel con ponderación F de un tono de calibración estable frente a otro con AM del 3 % contra el límite de ±0,07 dB de clase 1 de IEC 60942" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_es_dark.png" alt="Nivel con ponderación F de un tono de calibración estable frente a otro con AM del 3 % contra el límite de ±0,07 dB de clase 1 de IEC 60942" style="width:80%">
 
-### Parámetros de `calculate_sensitivity()`
+### Parámetros de `sensitivity()`
 
 | Parámetro | Tipo / forma | Unidades | Rango / defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
@@ -118,7 +118,7 @@ viento, ruido de manipulación:
 | `narrowband` | bool | — | defecto `False` | Estima el tono con un detector coherente (Goertzel) cerca de `frequency` (requiere `fs`) en lugar del RMS de banda completa; rechaza el zumbido/ruido de banda ancha que si no infla el RMS y reduce todos los niveles posteriores (~−0,44 dB a 20 dB de SNR). Actívalo para grabaciones de acoplador ruidosas |
 
 Devuelve el factor de sensibilidad (float) para pasarlo como
-`calibration_factor=` a `octavefilter`, `leq`, `laeq`, `ln_levels`, `lc_peak`,
+`calibration_factor=` a `octave_filter`, `leq`, `laeq`, `ln_levels`, `lc_peak`,
 `sel` y las funciones de dosis.
 
 ## Análisis digital (dBFS)
@@ -135,7 +135,7 @@ En este modo:
 
 ```python
 # Suponiendo que 'recording' está normalizada entre -1.0 y 1.0
-spl_dbfs, freq = octavefilter(recording, fs, dbfs=True)
+spl_dbfs, freq = octave_filter(recording, fs, dbfs=True)
 # Los resultados serán negativos (p. ej. -20 dBFS)
 ```
 
@@ -149,7 +149,7 @@ como BK:
 
 ```python
 # Medir niveles de pico para análisis de impactos
-spl_peak, freq = octavefilter(recording, fs, mode='peak')
+spl_peak, freq = octave_filter(recording, fs, mode='peak')
 ```
 
 :::note

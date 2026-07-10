@@ -50,7 +50,7 @@ regulations are written in terms of it.
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D or 2D array | digital units (or Pa if calibrated) | non-empty | 2D is `[channels, samples]`; returns one level per channel |
 | `fs` | int | Hz | > 0 (`laeq` only) | `leq` needs no sample rate (pure RMS integral) |
-| `calibration_factor` | float | Pa per digital unit | default `1.0` | From `calculate_sensitivity()` |
+| `calibration_factor` | float | Pa per digital unit | default `1.0` | From `sensitivity()` |
 | `dbfs` | bool | — | default `False` | `True`: 0 dBFS = full-scale RMS sine; ignores calibration |
 
 ## Percentile levels (LN)

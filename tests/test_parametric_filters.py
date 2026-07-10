@@ -6,7 +6,7 @@ Tests for parametric filters: Weighting (A, C), Time Weighting and Linkwitz-Rile
 import numpy as np
 import pytest
 
-from phonometry import WeightingFilter, calculate_sensitivity, linkwitz_riley, octavefilter, time_weighting, weighting_filter
+from phonometry import WeightingFilter, sensitivity, linkwitz_riley, octave_filter, time_weighting, weighting_filter
 
 
 def test_calibration_logic() -> None:
@@ -14,7 +14,7 @@ def test_calibration_logic() -> None:
     Verify that calibration correctly maps digital RMS to target SPL.
 
     **Purpose:**
-    Confirm that the `calculate_sensitivity` function produces a multiplier that accurately
+    Confirm that the `sensitivity` function produces a multiplier that accurately
     scales a digital signal to a known physical Sound Pressure Level (SPL) in dB.
 
     **Verification:**
@@ -32,10 +32,10 @@ def test_calibration_logic() -> None:
     ref_signal = rms_ref * np.sqrt(2) * np.sin(2 * np.pi * 1000 * t)
     
     # Calculate sensitivity
-    factor = calculate_sensitivity(ref_signal, target_spl=94.0)
+    factor = sensitivity(ref_signal, target_spl=94.0)
     
     # Analyze same signal with that factor
-    spl, _ = octavefilter(ref_signal, fs, fraction=1, limits=[800, 1200], calibration_factor=factor)
+    spl, _ = octave_filter(ref_signal, fs, fraction=1, limits=[800, 1200], calibration_factor=factor)
     
     # It should be exactly 94 dB
     assert abs(spl[0] - 94.0) < 0.01
@@ -59,7 +59,7 @@ def test_dbfs_logic() -> None:
     t = np.linspace(0, 1, fs)
     x = np.sin(2 * np.pi * 1000 * t)
     
-    spl, _ = octavefilter(x, fs, fraction=1, limits=[800, 1200], dbfs=True)
+    spl, _ = octave_filter(x, fs, fraction=1, limits=[800, 1200], dbfs=True)
     
     assert abs(spl[0] - (-3.01)) < 0.05
 
@@ -83,8 +83,8 @@ def test_peak_mode_logic() -> None:
     x = np.zeros(fs)
     x[100] = 0.5  # Large peak
     
-    spl_rms, _ = octavefilter(x, fs, mode="rms", fraction=1)
-    spl_peak, _ = octavefilter(x, fs, mode="peak", fraction=1)
+    spl_rms, _ = octave_filter(x, fs, mode="rms", fraction=1)
+    spl_peak, _ = octave_filter(x, fs, mode="peak", fraction=1)
     
     # Peak must be greater than RMS for an impulse
     assert np.all(spl_peak > spl_rms)
@@ -417,7 +417,7 @@ def test_calculate_sensitivity_int16_matches_float() -> None:
     Verify calibration works with integer reference recordings.
 
     **Purpose:**
-    ``calculate_sensitivity`` previously squared the raw integer array,
+    ``sensitivity`` previously squared the raw integer array,
     overflowing and returning a factor ~315x too large for int16 input.
 
     **Verification:**
@@ -427,8 +427,8 @@ def test_calculate_sensitivity_int16_matches_float() -> None:
     t = np.arange(fs) / fs
     x_float = 0.5 * 32767 * np.sin(2 * np.pi * 1000 * t)
 
-    s_int = calculate_sensitivity(x_float.astype(np.int16))
-    s_float = calculate_sensitivity(x_float)
+    s_int = sensitivity(x_float.astype(np.int16))
+    s_float = sensitivity(x_float)
     np.testing.assert_allclose(s_int, s_float, rtol=1e-3)
 
 

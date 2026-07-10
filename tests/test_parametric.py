@@ -6,7 +6,7 @@ Parametric tests using pytest best practices for signal processing verification.
 import numpy as np
 import pytest
 
-from phonometry import OctaveFilterBank, octavefilter
+from phonometry import OctaveFilterBank, octave_filter
 
 
 @pytest.mark.parametrize("fraction, expected_bands", [
@@ -34,7 +34,7 @@ def test_band_count_estimates(fraction: float, expected_bands: int) -> None:
     x = np.zeros(fs)
     limits = [12.0, 20000.0]
     
-    _, freq = octavefilter(x, fs, fraction=fraction, limits=limits)
+    _, freq = octave_filter(x, fs, fraction=fraction, limits=limits)
     
     # We allow some flexibility as exact count depends on limits implementation details
     assert abs(len(freq) - expected_bands) <= 2, f"Expected approx {expected_bands} bands, got {len(freq)}"
@@ -52,7 +52,7 @@ def test_input_dtypes(dtype: np.dtype) -> None:
     **Verification:**
     - Generate random noise as float32.
     - Generate random noise as float64.
-    - Pass both to `octavefilter`.
+    - Pass both to `octave_filter`.
 
     **Expectation:**
     - The output SPL should be valid (no NaNs).
@@ -62,7 +62,7 @@ def test_input_dtypes(dtype: np.dtype) -> None:
     rng = np.random.default_rng(42)
     x = rng.standard_normal(fs).astype(dtype)
     
-    spl, _ = octavefilter(x, fs)
+    spl, _ = octave_filter(x, fs)
     assert not np.isnan(spl).any()
     assert spl.dtype == np.float64 # Internal processing is likely float64
 
@@ -94,7 +94,7 @@ def test_multichannel_shapes(channels: int) -> None:
     else:
         x = rng.standard_normal((channels, samples))
         
-    spl, freq = octavefilter(x, fs)
+    spl, freq = octave_filter(x, fs)
     
     if channels == 1:
         assert spl.ndim == 1
@@ -129,7 +129,7 @@ def test_frequency_isolation(target_freq: float, filter_type: str) -> None:
     # Generate pure tone
     x = np.sin(2 * np.pi * target_freq * t)
     
-    spl, freq = octavefilter(x, fs, fraction=1, limits=[20.0, 16000.0], filter_type=filter_type)
+    spl, freq = octave_filter(x, fs, fraction=1, limits=[20.0, 16000.0], filter_type=filter_type)
     
     # Find the band closest to target_freq
     freq_arr = np.array(freq)
@@ -177,7 +177,7 @@ def test_impulse_response_decay(filter_type: str) -> None:
     x[0] = 1.0 # Impulse
     
     # Use sigbands=True to get time domain signals
-    _, _, signals = octavefilter(x, fs, fraction=1, sigbands=True, filter_type=filter_type)
+    _, _, signals = octave_filter(x, fs, fraction=1, sigbands=True, filter_type=filter_type)
     
     for band_sig in signals:
         # Check that the end of the signal is close to zero (decayed)

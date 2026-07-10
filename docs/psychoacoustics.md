@@ -93,7 +93,7 @@ N(t) traces stay inside the standard's per-sample 5 % tolerance band.
 | `fs` | int | Hz | > 0 | |
 | `field` | str | — | `'free'` (default) / `'diffuse'` | Sound-field correction (Table A.5) |
 | `stationary` | bool | — | default `False` | `True`: single N from the averaged spectrum |
-| `calibration_factor` | float | Pa per digital unit | default `1.0` | From `calculate_sensitivity()` |
+| `calibration_factor` | float | Pa per digital unit | default `1.0` | From `sensitivity()` |
 
 Returns a `ZwickerLoudness` dataclass: `loudness` (N, sones), `loudness_level`
 (phon), `specific` (N′(z), 240 bins of 0.1 Bark), and for time-varying runs

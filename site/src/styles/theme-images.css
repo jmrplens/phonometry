@@ -11,7 +11,8 @@
   display: none;
 }
 
-/* Tier-1 animations embedded as autoplaying, looping WebM (no controls).
+/* Tier-1 animations embedded as autoplaying, looping, muted WebM with native
+   controls (a keyboard-accessible pause/stop for the motion, WCAG 2.2.2).
    Match the figure treatment: centred block, rounded, never wider than the
    reading column. Authored inline as <video style="width:NN%">. */
 .sl-markdown-content video {

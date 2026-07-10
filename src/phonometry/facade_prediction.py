@@ -109,15 +109,13 @@ class FacadeElement:
     def tau(self, total_area: float, n_bands: int) -> np.ndarray:
         """Transmission factor ``τ`` of this element for the whole façade area."""
         kind = self._kind()
+        raw = getattr(self, kind)  # the one non-None quantity, per _kind()
         if kind == "dn_e":
-            assert self.dn_e is not None  # guaranteed by _kind()
-            level = _as_array(self.dn_e, "dn_e")
+            level = _as_array(raw, "dn_e")
             weight = _A0 / total_area
         else:
             if self.area is None or self.area <= 0:
                 raise ValueError(f"Element '{self.name}': 'area' must be positive.")
-            raw = self.r if kind == "r" else self.insertion_loss
-            assert raw is not None  # guaranteed by _kind()
             level = _as_array(raw, kind)
             weight = self.area / total_area
         if level.size == 1:

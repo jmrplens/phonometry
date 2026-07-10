@@ -20,7 +20,12 @@ def test_band_importance_sums_to_one() -> None:
     # ANSI S3.5-1997 Table 3: the band-importance function is normalised.
     assert sii.BAND_IMPORTANCE.sum() == pytest.approx(1.0, abs=1e-12)
     assert sii.BAND_IMPORTANCE.size == 18
-    assert sii.BAND_CENTERS.size == 18
+    np.testing.assert_allclose(
+        sii.BAND_CENTERS,
+        [160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0,
+         1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0,
+         8000.0],
+    )
 
 
 def test_sii_standard_speech_in_quiet() -> None:

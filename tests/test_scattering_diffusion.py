@@ -165,7 +165,10 @@ def test_base_plate_scattering_zero_when_t1_equals_t3() -> None:
 # ISO 17497-1 Table 1 base-plate limits and the over-limit warning.
 # ---------------------------------------------------------------------------
 def test_table1_exact_values_spot_bands() -> None:
-    assert len(BASE_PLATE_MAX_SCATTERING) == 18
+    assert BASE_PLATE_BANDS == (
+        100, 125, 160, 200, 250, 315, 400, 500, 630,
+        800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000,
+    )
     assert BASE_PLATE_BANDS == tuple(BASE_PLATE_MAX_SCATTERING)
     assert BASE_PLATE_MAX_SCATTERING[100] == 0.05
     assert BASE_PLATE_MAX_SCATTERING[500] == 0.05

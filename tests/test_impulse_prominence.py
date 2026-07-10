@@ -50,7 +50,13 @@ def test_adjustment_formula_2_and_threshold() -> None:
 def test_governing_impulse_is_the_highest_p() -> None:
     # The impulse with the highest prominence governs (clause 7).
     result = nt.impulse_prominence([50.0, 1000.0, 200.0], [12.0, 30.0, 20.0])
-    assert result.per_impulse.shape == (3,)
+    # P = 3 lg(OR) + 2 lg(LD) per impulse (Formula 1).
+    np.testing.assert_allclose(
+        result.per_impulse,
+        [3 * np.log10(50.0) + 2 * np.log10(12.0),
+         3 * np.log10(1000.0) + 2 * np.log10(30.0),
+         3 * np.log10(200.0) + 2 * np.log10(20.0)],
+    )
     assert result.prominence == pytest.approx(float(result.per_impulse.max()))
     assert result.prominence == pytest.approx(NTACOU112_PROMINENCE, abs=1e-4)
     assert result.adjustment == pytest.approx(1.8 * (result.prominence - 5.0))

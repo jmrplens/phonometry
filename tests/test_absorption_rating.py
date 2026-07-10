@@ -56,7 +56,10 @@ def test_reference_curve_verbatim() -> None:
 
 def test_band_layout() -> None:
     assert OCTAVE_BANDS == (250, 500, 1000, 2000, 4000)
-    assert len(THIRD_OCTAVE_BANDS) == 15
+    assert THIRD_OCTAVE_BANDS == (
+        200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500,
+        3150, 4000, 5000,
+    )
     # Each octave centre is the middle of its one-third-octave triple.
     for i, octave in enumerate(OCTAVE_BANDS):
         assert THIRD_OCTAVE_BANDS[3 * i + 1] == octave

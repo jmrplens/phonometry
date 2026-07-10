@@ -19,6 +19,8 @@ ISO 354 measures the sound-absorption coefficient $\alpha_s$ of a material in
 one-third-octave bands in a reverberation room. ISO 11654:1997 turns that
 spectrum into a single-number rating comparable across products.
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso11654.svg" alt="ISO 11654 rating flow: measured alpha_s becomes practical alpha_p per octave band, the reference curve is shifted to best fit, alpha_w is read at 500 Hz with shape indicators, giving the absorption class A to E" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso11654_dark.svg" alt="ISO 11654 rating flow: measured alpha_s becomes practical alpha_p per octave band, the reference curve is shifted to best fit, alpha_w is read at 500 Hz with shape indicators, giving the absorption class A to E" style="width:82%">
+
 **Practical absorption coefficient (Clause 4.1).** The one-third-octave data are
 first grouped into octave bands, each the arithmetic mean of its three thirds:
 

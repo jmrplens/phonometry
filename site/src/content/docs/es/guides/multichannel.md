@@ -36,6 +36,8 @@ spl, freq = octave_filter(stereo, fs, fraction=3)
 
 ## Formas aceptadas, de un vistazo
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multichannel_es.svg" alt="Flujo de formas de array: una entrada 1-D (muestras,) se reduce a un escalar y una entrada 2-D (canales, muestras) se reduce a (canales,), porque la operación actúa sobre el último eje mientras el eje de canal se conserva" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multichannel_es_dark.svg" alt="Flujo de formas de array: una entrada 1-D (muestras,) se reduce a un escalar y una entrada 2-D (canales, muestras) se reduce a (canales,), porque la operación actúa sobre el último eje mientras el eje de canal se conserva" style="width:80%">
+
 | Entrada | Se interpreta como | Salida típica |
 | :--- | :--- | :--- |
 | Array 1D `(n,)` | un canal | nivel escalar / `(bands,)` |

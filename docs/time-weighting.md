@@ -22,6 +22,8 @@ steadies the readout for quasi-stationary noise. After a step onset the
 envelope reaches 63 % of its final value in one τ and ~99.97 % after 8τ —
 that is why level analyses discard the first instants of a recording.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting.svg" alt="The exponential-detector chain: the band pressure is squared, smoothed by a one-pole RC low-pass with time constant tau, and converted to decibels, with the Fast, Slow and Impulse time constants listed" width="88%"></picture>
+
 ## 2. The three time weightings
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>

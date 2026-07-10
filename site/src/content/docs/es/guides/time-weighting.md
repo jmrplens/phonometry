@@ -26,6 +26,8 @@ escalón, la envolvente alcanza el 63 % de su valor final en un τ y ~99,97 %
 tras 8τ — por eso los análisis de nivel descartan los primeros instantes de una
 grabación.
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting_es.svg" alt="La cadena del detector exponencial: la presión de banda se eleva al cuadrado, se suaviza con un paso bajo RC de un polo con constante de tiempo tau y se convierte a decibelios, con las constantes de tiempo Fast, Slow e Impulse indicadas" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting_es_dark.svg" alt="La cadena del detector exponencial: la presión de banda se eleva al cuadrado, se suaviza con un paso bajo RC de un polo con constante de tiempo tau y se convierte a decibelios, con las constantes de tiempo Fast, Slow e Impulse indicadas" style="width:88%">
+
 ## 2. Las tres ponderaciones temporales
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es_dark.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%">

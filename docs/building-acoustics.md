@@ -578,6 +578,8 @@ of Table 8. A two-sided interval $Y = y \pm U$ (Formula 3, $k = 1.96$ at 95 %)
 *reports* a value; the **one-sided** factor ($k = 1.65$ at 95 %) *declares
 conformity* with a requirement (Formulae 4/5).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999.svg" alt="ISO 12999-1 uncertainty flow: standard uncertainty from the tables, reduced by repeated measurements and combined in quadrature, then expanded by the Table 8 coverage factor into a two-sided report or a one-sided conformity decision" width="82%"></picture>
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo.png" alt="A weighted rating reported with its two-sided 95 % expanded uncertainty in situations A, B and C, the reproducibility uncertainty widest and the repeatability uncertainty narrowest" width="80%"></picture>
 
 ```python

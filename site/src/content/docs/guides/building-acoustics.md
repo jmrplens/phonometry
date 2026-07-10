@@ -560,6 +560,123 @@ print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT
 `ln_w_eq`, `delta_l_w`, `k_correction`). The simplified model carries a reported
 standard deviation of about 2 dB (Clause 5).
 
+### Façade insulation & radiated power (EN 12354-3 / -4)
+
+Parts 3 and 4 predict the two directions across the building envelope, both from
+the same energy summation of the element **transmission factors**
+$\tau = 10^{-R/10}$, area-weighted by $S_i/S$ (a small element or air path enters
+through its element-normalized level difference $D_{n,e}$ with the reference area
+$A_0 = 10\ \text{m}^2$):
+
+$$
+R' = -10 \log_{10}\!\Big( \sum_i \tfrac{S_i}{S}\,10^{-R_i/10}
+                          + \sum_k \tfrac{A_0}{S}\,10^{-D_{n,e,k}/10} \Big).
+$$
+
+**Part 3 — outdoor → indoor.** From $R'$ (Formula 10) follow the loudspeaker- and
+traffic-referenced indices $R_{45} = R'+1$ and $R_{tr,s} = R'$, and the primary
+output, the standardized level difference at 2 m (Formula 13)
+
+$$
+D_{2m,nT} = R' + \Delta L_{fs} + 10 \log_{10}\frac{V}{6\,T_0\,S}, \qquad T_0 = 0.5\ \text{s},
+$$
+
+with the façade-shape term $\Delta L_{fs}$ (Annex C; 0 dB for a flat reflecting
+façade). Single-number ratings reuse EN ISO 717-1 (`weighted_rating`).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction.svg" alt="Per-element partial sound reduction indices and the resulting façade apparent reduction R' and standardized level difference D2m,nT for the EN 12354-3 Annex F worked example, the air inlet limiting the low bands" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_dark.svg" alt="Per-element partial sound reduction indices and the resulting façade apparent reduction R' and standardized level difference D2m,nT for the EN 12354-3 Annex F worked example, the air inlet limiting the low bands" style="width:80%">
+
+```python
+from phonometry import FacadeElement, facade_sound_reduction
+
+# EN 12354-3 Annex F: an 11.3 m² façade (V = 50 m³, flat so ΔLfs = 0) of a double
+# wall, two windows and a small acoustically-treated air inlet (a Dn,e element).
+elements = [
+    FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
+    FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
+    FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+    FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
+]
+fac = facade_sound_reduction(elements, area=11.3, volume=50.0,
+                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (Rtr,s,w / Ctr / D2m,nT,w)
+```
+
+**Part 4 — indoor → outdoor.** The sound power level radiated by a segment
+(Formula 2) is $L_W = L_{p,in} + C_d - R' + 10 \log_{10}(S/S_0)$ with $S_0 = 1$ m²
+and the inside-field diffusivity term $C_d$ (Annex B; −6 dB ideal diffuse, −5 dB
+average industrial). Openings are elements whose "R" is the silencer insertion
+loss (a bare opening is 0 dB). The exterior level follows from the simplified
+Annex E attenuation $A_{tot}$ of a finite radiating side, $L_p = L_W - A_{tot}$.
+
+```python
+from phonometry import (FacadeElement, radiated_sound_power,
+                        outdoor_attenuation, outdoor_level)
+
+# EN 12354-4 Annex G, side 1: a 10×20 m concrete wall segment with a 6×4 m
+# industrial door, inside level Lp,in, Cd = -5 dB, R' capped at 40 dB (Annex G).
+bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
+seg = radiated_sound_power(
+    [FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
+     FacadeElement("door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
+    lp_in=[70, 74, 76, 72, 70, 67, 62, 57], area=200.0, c_d=-5.0,
+    r_prime_cap=40.0, octave_bands=bands)
+print(round(seg.l_w[0], 1), round(seg.l_w[1], 1))     # 59.8 61.2  (LW at 63/125 Hz)
+
+# Exterior level 5 m in front of the centre of the 60×10 m side (LWA = 62.9 dB(A)).
+a_tot = outdoor_attenuation(width=60.0, height=10.0, distance=5.0)
+print(round(a_tot, 1), round(outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
+```
+
+> **Worked-example note.** The 2000 worked examples carry small internal rounding
+> inconsistencies at the higher octave bands (Part 3's printed $R'$ disagrees with
+> its own per-element partial indices at 1 k/2 k; Part 4's $R'$ rows above 500 Hz
+> disagree with its Table G.2 inputs). The implementation is faithful to the
+> formulas — it reproduces the low bands, every single-number rating and the whole
+> Annex E propagation exactly.
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Uses `fac` (the Part 3 result) and its band centres from the snippet above.
+x = np.arange(5)
+fig, ax = plt.subplots(figsize=(9, 5.5))
+for name, rp in fac.element_r.items():
+    ax.plot(x, rp, "--", alpha=0.6, marker=".", label=f"Rp — {name}")
+ax.plot(x, fac.r_prime, "k-", lw=2.5, marker="o", label="R′ (façade)")
+ax.plot(x, fac.d_2m_nt, lw=2, marker="s", label="D2m,nT")
+ax.set_xticks(x); ax.set_xticklabels([125, 250, 500, 1000, 2000])
+ax.set_xlabel("Frequency [Hz]"); ax.set_ylabel("Index / level difference [dB]")
+ax.set_title("EN 12354-3 façade sound insulation (Annex F)")
+ax.legend(ncol=2); ax.grid(alpha=0.4)
+fig.tight_layout(); plt.show()
+```
+
+</details>
+
+### `FacadeElement` / `facade_sound_reduction()` / `radiated_sound_power()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `FacadeElement.area` | float | m² | > 0 for `r` / `insertion_loss` | Element area $S_i$ (ignored for `dn_e`) |
+| `FacadeElement.r` / `dn_e` / `insertion_loss` | float or seq | dB | give exactly one | Area element $R_i$ / small-element $D_{n,e}$ / opening insertion loss |
+| `facade_sound_reduction(area)` | float | m² | > 0 | Total façade area $S$ |
+| `facade_sound_reduction(volume)` | float | m³ | > 0 | Receiving-room volume $V$ (Formula 13) |
+| `facade_sound_reduction(delta_l_fs)` | float | dB | default `0` | Façade-shape term $\Delta L_{fs}$ (Annex C) |
+| `radiated_sound_power(lp_in)` | float or seq | dB | — | Inside level $L_{p,in}$ per band |
+| `radiated_sound_power(c_d)` | float | dB | default `-6` | Diffusivity term $C_d$ (Annex B) |
+| `radiated_sound_power(r_prime_cap)` | float | dB | default `40` (`None` off) | Field cap on $R'$ (Annex G) |
+| `outdoor_attenuation(width, height, distance)` | float | m | > 0 | Finite radiating side and reception distance (Annex E) |
+
+`facade_sound_reduction()` returns a `FacadePredictionResult` (`r_prime`, `r_45`,
+`r_tr_s`, `d_2m_nt`, `element_r`, and the `r_tr_s_w` / `d_2m_nt_w` / `c_tr` single
+numbers); `radiated_sound_power()` a `RadiatedPowerResult` (`l_w`, `r_prime`,
+`l_w_dba`). Both expose `.plot()`.
+
 ## 4. Measurement uncertainty (ISO 12999-1)
 
 A rating without an uncertainty is only half a result. ISO 12999-1 does not
@@ -662,7 +779,9 @@ ISO 717-2 — the reference-curve single-number ratings and the spectrum
 adaptation terms C, Ctr and CI; ISO 10140-2:2010, ISO 10140-3:2010 and ISO 10140-4:2010 — the
 laboratory R and Ln with the background-noise correction of §2; EN 12354-1:2000
 and EN 12354-2:2000 — the simplified flanking-transmission predictions of §3
-(Annex E junctions, worked examples H.3 and E.3); ISO 12999-1:2020 — the
+(Annex E junctions, worked examples H.3 and E.3); EN 12354-3:2000 and
+EN 12354-4:2000 — the façade sound insulation and outdoor-radiation predictions
+of §3 (Annex F and Annex G worked examples); ISO 12999-1:2020 — the
 standard uncertainties per measurement situation and the coverage factors
 of §4; its precision framework builds on ISO 5725 (context, not
 implemented directly).

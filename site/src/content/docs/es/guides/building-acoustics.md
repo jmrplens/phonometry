@@ -571,6 +571,126 @@ print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT
 `ln_w_eq`, `delta_l_w`, `k_correction`). El modelo simplificado lleva una
 desviación típica declarada de unos 2 dB (Cláusula 5).
 
+### Aislamiento de fachada y potencia radiada (EN 12354-3 / -4)
+
+Las partes 3 y 4 predicen los dos sentidos a través del cerramiento del edificio,
+ambos a partir de la misma suma energética de los **factores de transmisión** de
+los elementos $\tau = 10^{-R/10}$, ponderados por área según $S_i/S$ (un elemento
+pequeño o un paso de aire entra a través de su diferencia de nivel normalizada del
+elemento $D_{n,e}$ con el área de referencia $A_0 = 10\ \text{m}^2$):
+
+$$
+R' = -10 \log_{10}\!\Big( \sum_i \tfrac{S_i}{S}\,10^{-R_i/10}
+                          + \sum_k \tfrac{A_0}{S}\,10^{-D_{n,e,k}/10} \Big).
+$$
+
+**Parte 3 — exterior → interior.** A partir de $R'$ (Fórmula 10) se derivan los
+índices referidos a altavoz y a tráfico $R_{45} = R'+1$ y $R_{tr,s} = R'$, y la
+salida principal, la diferencia de nivel estandarizada a 2 m (Fórmula 13)
+
+$$
+D_{2m,nT} = R' + \Delta L_{fs} + 10 \log_{10}\frac{V}{6\,T_0\,S}, \qquad T_0 = 0{,}5\ \text{s},
+$$
+
+con el término de forma de la fachada $\Delta L_{fs}$ (Anexo C; 0 dB para una
+fachada plana reflectante). Los índices de un solo número reutilizan
+EN ISO 717-1 (`weighted_rating`).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_es.svg" alt="Índices de reducción sonora parciales por elemento y la reducción aparente de la fachada R' y la diferencia de nivel estandarizada D2m,nT resultantes para el ejemplo resuelto del Anexo F de EN 12354-3, con la entrada de aire limitando las bandas bajas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_es_dark.svg" alt="Índices de reducción sonora parciales por elemento y la reducción aparente de la fachada R' y la diferencia de nivel estandarizada D2m,nT resultantes para el ejemplo resuelto del Anexo F de EN 12354-3, con la entrada de aire limitando las bandas bajas" style="width:80%">
+
+```python
+from phonometry import FacadeElement, facade_sound_reduction
+
+# EN 12354-3 Anexo F: una fachada de 11.3 m² (V = 50 m³, plana con ΔLfs = 0) de una
+# doble hoja, dos ventanas y una pequeña entrada de aire con tratamiento acústico (un elemento Dn,e).
+elements = [
+    FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octava 125-2000
+    FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
+    FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+    FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # elemento pequeño
+]
+fac = facade_sound_reduction(elements, area=11.3, volume=50.0,
+                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (Rtr,s,w / Ctr / D2m,nT,w)
+```
+
+**Parte 4 — interior → exterior.** El nivel de potencia sonora radiada por un
+segmento (Fórmula 2) es $L_W = L_{p,in} + C_d - R' + 10 \log_{10}(S/S_0)$ con
+$S_0 = 1$ m² y el término de difusividad del campo interior $C_d$ (Anexo B;
+−6 dB difuso ideal, −5 dB industrial medio). Los huecos son elementos cuya «R»
+es la pérdida por inserción del silenciador (un hueco desnudo es 0 dB). El nivel
+exterior se obtiene de la atenuación simplificada $A_{tot}$ del Anexo E de un lado
+radiante finito, $L_p = L_W - A_{tot}$.
+
+```python
+from phonometry import (FacadeElement, radiated_sound_power,
+                        outdoor_attenuation, outdoor_level)
+
+# EN 12354-4 Anexo G, lado 1: un segmento de pared de hormigón de 10×20 m con una
+# puerta industrial de 6×4 m, nivel interior Lp,in, Cd = -5 dB, R' acotado a 40 dB (Anexo G).
+bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
+seg = radiated_sound_power(
+    [FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
+     FacadeElement("door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
+    lp_in=[70, 74, 76, 72, 70, 67, 62, 57], area=200.0, c_d=-5.0,
+    r_prime_cap=40.0, octave_bands=bands)
+print(round(seg.l_w[0], 1), round(seg.l_w[1], 1))     # 59.8 61.2  (LW a 63/125 Hz)
+
+# Nivel exterior a 5 m frente al centro del lado de 60×10 m (LWA = 62.9 dB(A)).
+a_tot = outdoor_attenuation(width=60.0, height=10.0, distance=5.0)
+print(round(a_tot, 1), round(outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
+```
+
+> **Nota sobre los ejemplos resueltos.** Los ejemplos resueltos de 2000 arrastran
+> pequeñas inconsistencias internas de redondeo en las bandas de octava altas (el
+> $R'$ impreso de la Parte 3 no concuerda con sus propios índices parciales por
+> elemento a 1 k/2 k; las filas de $R'$ de la Parte 4 por encima de 500 Hz no
+> concuerdan con sus entradas de la Tabla G.2). La implementación es fiel a las
+> fórmulas: reproduce exactamente las bandas bajas, todos los índices de un solo
+> número y toda la propagación del Anexo E.
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Usa `fac` (el resultado de la Parte 3) y sus centros de banda del snippet anterior.
+x = np.arange(5)
+fig, ax = plt.subplots(figsize=(9, 5.5))
+for name, rp in fac.element_r.items():
+    ax.plot(x, rp, "--", alpha=0.6, marker=".", label=f"Rp — {name}")
+ax.plot(x, fac.r_prime, "k-", lw=2.5, marker="o", label="R′ (fachada)")
+ax.plot(x, fac.d_2m_nt, lw=2, marker="s", label="D2m,nT")
+ax.set_xticks(x); ax.set_xticklabels([125, 250, 500, 1000, 2000])
+ax.set_xlabel("Frecuencia [Hz]"); ax.set_ylabel("Índice / diferencia de nivel [dB]")
+ax.set_title("Aislamiento acústico de fachada EN 12354-3 (Anexo F)")
+ax.legend(ncol=2); ax.grid(alpha=0.4)
+fig.tight_layout(); plt.show()
+```
+
+</details>
+
+### Parámetros de `FacadeElement` / `facade_sound_reduction()` / `radiated_sound_power()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `FacadeElement.area` | float | m² | > 0 para `r` / `insertion_loss` | Área del elemento $S_i$ (se ignora para `dn_e`) |
+| `FacadeElement.r` / `dn_e` / `insertion_loss` | float o secuencia | dB | dar exactamente uno | Elemento de área $R_i$ / elemento pequeño $D_{n,e}$ / pérdida por inserción del hueco |
+| `facade_sound_reduction(area)` | float | m² | > 0 | Área total de la fachada $S$ |
+| `facade_sound_reduction(volume)` | float | m³ | > 0 | Volumen de la sala receptora $V$ (Fórmula 13) |
+| `facade_sound_reduction(delta_l_fs)` | float | dB | por defecto `0` | Término de forma de la fachada $\Delta L_{fs}$ (Anexo C) |
+| `radiated_sound_power(lp_in)` | float o secuencia | dB | — | Nivel interior $L_{p,in}$ por banda |
+| `radiated_sound_power(c_d)` | float | dB | por defecto `-6` | Término de difusividad $C_d$ (Anexo B) |
+| `radiated_sound_power(r_prime_cap)` | float | dB | por defecto `40` (`None` lo desactiva) | Límite de campo sobre $R'$ (Anexo G) |
+| `outdoor_attenuation(width, height, distance)` | float | m | > 0 | Lado radiante finito y distancia de recepción (Anexo E) |
+
+`facade_sound_reduction()` devuelve un `FacadePredictionResult` (`r_prime`, `r_45`,
+`r_tr_s`, `d_2m_nt`, `element_r`, y los números únicos `r_tr_s_w` / `d_2m_nt_w` /
+`c_tr`); `radiated_sound_power()` un `RadiatedPowerResult` (`l_w`, `r_prime`,
+`l_w_dba`). Ambos exponen `.plot()`.
+
 ## 4. Incertidumbre de medición (ISO 12999-1)
 
 Un índice sin incertidumbre es solo medio resultado. ISO 12999-1 no vuelve a
@@ -675,7 +795,9 @@ los términos de adaptación espectral C, Ctr y CI; ISO 10140-2:2010, ISO 10140-
 ISO 10140-4:2010 — los R y Ln de laboratorio con la corrección de ruido de
 fondo del §2; EN 12354-1:2000 y EN 12354-2:2000 — las predicciones
 simplificadas de transmisión por flancos del §3 (uniones del Anexo E, ejemplos
-resueltos H.3 y E.3); ISO 12999-1:2020 — las incertidumbres típicas por
+resueltos H.3 y E.3); EN 12354-3:2000 y EN 12354-4:2000 — las predicciones de
+aislamiento de fachada y de radiación al exterior del §3 (ejemplos resueltos del
+Anexo F y del Anexo G); ISO 12999-1:2020 — las incertidumbres típicas por
 situación de medición y los factores de cobertura del §4; su marco de
 precisión se apoya en ISO 5725 (contexto, no implementada directamente).
 

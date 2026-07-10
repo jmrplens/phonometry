@@ -145,6 +145,17 @@ _ES_EXACT = {
         "stateful=True: los bloques igualan el resultado continuo",
     "zero_phase=True (aligned)": "zero_phase=True (alineado)",
     "0 dB @ 10 Hz": "0 dB @ 10 Hz",
+    # facade_prediction figure (EN 12354-3 Annex F)
+    "EN 12354-3 Façade Sound Insulation (Annex F example)":
+        "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
+    "Reduction index / level difference [dB]":
+        "Índice de reducción / diferencia de niveles [dB]",
+    "Rp — wall": "Rp — muro",
+    "Rp — window": "Rp — ventana",
+    "Rp — skylight": "Rp — claraboya",
+    "Rp — air inlet": "Rp — entrada de aire",
+    "R′ (façade)": "R′ (fachada)",
+    "air inlet limits the low bands": "la entrada de aire limita las bandas bajas",
     # Scattering coefficient spectrum (ISO 17497-1)
     "Random-incidence scattering coefficient (ISO 17497-1)":
         "Coeficiente de dispersión de incidencia aleatoria (ISO 17497-1)",
@@ -2859,6 +2870,61 @@ def generate_prediction_flanking_demo(output_dir: str) -> None:
     plt.close()
 
 
+def generate_facade_prediction(output_dir: str) -> None:
+    """EN 12354-3 façade airborne insulation prediction (Annex F worked example)."""
+    print("Generating facade_prediction.png...")
+    from phonometry import FacadeElement, facade_sound_reduction
+
+    bands = [125.0, 250.0, 500.0, 1000.0, 2000.0]
+    # Annex F elements: double wall, two windows (area, R) + a small air inlet (Dn,e).
+    elements = [
+        FacadeElement(name="wall", area=6.0, r=[41, 46, 52, 58, 64]),
+        FacadeElement(name="window", area=4.5, r=[23, 22, 30, 36, 37]),
+        FacadeElement(name="skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+        FacadeElement(name="air inlet", dn_e=[28, 23, 25, 38, 44]),
+    ]
+    result = facade_sound_reduction(
+        elements, area=11.3, volume=50.0, frequencies=bands, bands="octave"
+    )
+
+    x = np.arange(len(bands))
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    # Per-element partial indices Rp: thin, faded — they set the transmission floor.
+    el_colors = [COLOR_PRIMARY, COLOR_SECONDARY, "#9467bd", "#ff7f0e"]
+    for (name, rp), colour in zip(result.element_r.items(), el_colors):
+        ax.plot(x, rp, "--", color=colour, linewidth=1.1, alpha=0.65,
+                marker=".", markersize=6, label=f"Rp — {name}")
+    # Façade apparent reduction R' and standardized level difference D2m,nT.
+    ax.plot(x, result.r_prime, "-", color=COLOR_FG, linewidth=2.6, marker="o",
+            markersize=6, zorder=5, label="R′ (façade)")
+    ax.plot(x, result.d_2m_nt, "-", color=COLOR_TERTIARY, linewidth=2.2, marker="s",
+            markersize=6, zorder=5, label="D2m,nT")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{int(b)}" for b in bands])
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Reduction index / level difference [dB]")
+    ax.set_title("EN 12354-3 Façade Sound Insulation (Annex F example)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9, ncol=2)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        f"R′tr,s,w = {result.r_tr_s_w} dB   (Ctr = {result.c_tr})",
+        f"D2m,nT,w = {result.d_2m_nt_w} dB",
+        "air inlet limits the low bands",
+    ]
+    ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=11, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "facade_prediction.png")
+    plt.close()
+
+
 def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     """ISO 12999-1 per-band + single-number measurement uncertainty (situation B)."""
     print("Generating insulation_uncertainty_demo.png...")
@@ -4252,6 +4318,7 @@ def generate_all(img_dir: str) -> None:
 
     # Building-acoustics prediction / uncertainty (EN 12354-1, ISO 12999-1)
     generate_prediction_flanking_demo(img_dir)
+    generate_facade_prediction(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 
     # Outdoor propagation & occupational exposure (ISO 9613-1/2, ISO 9612)

@@ -1,0 +1,405 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Façade sound insulation and outdoor radiation prediction (EN 12354-3/-4:2000).
+
+Two companion prediction models for the building envelope, both built on the
+same energy summation of element transmission factors ``τ = 10^(-R/10)``,
+area-weighted by ``Sᵢ/S`` (small elements / air paths enter through their
+element-normalized level difference ``Dn,e`` with the reference area
+``A₀ = 10 m²``):
+
+**EN 12354-3 — outdoor → indoor (façade sound insulation).** The apparent
+sound reduction index of a façade for diffuse incidence (Formula 10)::
+
+    R' = -10 lg( Σ τe,i )         τe,i = (Sᵢ/S)·10^(-Rᵢ/10)   (Formula 15)
+                                  τe,i = (A₀/S)·10^(-Dn,e,i/10) (Formula 14)
+
+from which the loudspeaker- and traffic-referenced indices ``R45 = R' + 1``
+(Formula 11) and ``Rtr,s = R'`` (Formula 12), and the primary output, the
+standardized level difference at 2 m (Formula 13)::
+
+    D2m,nT = R' + ΔLfs + 10 lg( V / (6·T0·S) )      T0 = 0,5 s
+
+with the façade-shape term ``ΔLfs`` (Annex C; 0 dB for a flat reflecting
+façade).
+
+**EN 12354-4 — indoor → outdoor (sound radiated to the outside).** The sound
+power level radiated by a segment (Formulas 2-3)::
+
+    R' = -10 lg( Σ (Sᵢ/S)·10^(-Rᵢ/10) + Σ (A₀/S)·10^(-Dn,e,i/10) )
+    LW = Lp,in + Cd - R' + 10 lg( S / S0 )          S0 = 1 m²
+
+with the inside-field diffusivity term ``Cd`` (Annex B; -6 dB ideal diffuse,
+-5 dB average industrial). An opening is modelled here as an element whose "R"
+is the silencer insertion loss ``D`` (a bare opening is ``D = 0``), combined in
+the *same* energy sum as the structural elements over the segment area ``S`` --
+a practical extension for a mixed wall-plus-opening segment. This is NOT the
+standard's Formula (4), which treats a segment made up *only* of openings with a
+different area normalization (``S`` = the opening area) and sums its ``LW`` with
+the envelope segments only at the final energetic stage. The exterior level
+follows from the simplified Annex E attenuation ``Atot`` of a finite radiating
+side and ``Lp = LW - Atot``.
+
+Single-number ratings reuse EN ISO 717-1 via :func:`phonometry.weighted_rating`
+(exact for ``R'w + Ctr``, a good approximation for ``R'w`` — Part 3 NOTE 7).
+
+Clause/formula citations refer to EN 12354-3:2000 or EN 12354-4:2000.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from math import atan, log10, pi
+from typing import TYPE_CHECKING, Any, Sequence
+
+import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
+#: Reference absorption area ``A₀`` (Formulas 8, 14), in m².
+_A0 = 10.0
+#: Reference area ``S₀`` (Formula 2), in m².
+_S0 = 1.0
+#: Reference reverberation time ``T₀`` for dwellings (Formula 13), in s.
+_T0 = 0.5
+
+
+def _as_array(value: float | Sequence[float] | np.ndarray, name: str) -> np.ndarray:
+    """Return *value* as a 1-D float array, raising on non-finite entries."""
+    arr = np.atleast_1d(np.asarray(value, dtype=np.float64))
+    if not np.all(np.isfinite(arr)):
+        raise ValueError(f"'{name}' must contain only finite numbers.")
+    return arr
+
+
+@dataclass(frozen=True)
+class FacadeElement:
+    """One façade element as a transmission path (EN 12354-3/-4).
+
+    Provide exactly one of ``r`` (an area element, Formula 15 / Part 4 Formula 3),
+    ``dn_e`` (a small element or air path, Formula 14) or ``insertion_loss`` (an
+    opening in Part 4, modelled as an element whose reduction is the silencer's
+    insertion loss ``D`` and combined in the same energy sum -- a practical
+    extension, not the standard's separate segment-of-openings Formula 4). Per-band
+    values may be scalars or equal-length arrays.
+
+    :ivar name: Label used in results and plots.
+    :ivar area: Element area ``Sᵢ`` in m² (required for ``r`` / ``insertion_loss``;
+        ignored for ``dn_e`` small elements, which use ``A₀`` instead).
+    :ivar r: Sound reduction index ``Rᵢ`` in dB.
+    :ivar dn_e: Element-normalized level difference ``Dn,e,i`` in dB.
+    :ivar insertion_loss: Opening silencer insertion loss ``Dᵢ`` in dB.
+    """
+
+    name: str
+    area: float | None = None
+    r: float | Sequence[float] | np.ndarray | None = None
+    dn_e: float | Sequence[float] | np.ndarray | None = None
+    insertion_loss: float | Sequence[float] | np.ndarray | None = None
+
+    def _kind(self) -> str:
+        given = [k for k in ("r", "dn_e", "insertion_loss") if getattr(self, k) is not None]
+        if len(given) != 1:
+            raise ValueError(
+                f"Element '{self.name}': give exactly one of r / dn_e / insertion_loss."
+            )
+        return given[0]
+
+    def tau(self, total_area: float, n_bands: int) -> np.ndarray:
+        """Transmission factor ``τ`` of this element for the whole façade area."""
+        if total_area <= 0:
+            raise ValueError("'total_area' (façade area S) must be positive.")
+        kind = self._kind()
+        raw = getattr(self, kind)  # the one non-None quantity, per _kind()
+        label = f"{self.name} ({kind})"
+        if kind == "dn_e":
+            level = _as_array(raw, label)
+            weight = _A0 / total_area
+        else:
+            if self.area is None or self.area <= 0:
+                raise ValueError(f"Element '{self.name}': 'area' must be positive.")
+            level = _as_array(raw, label)
+            weight = self.area / total_area
+        if level.size == 1:
+            level = np.full(n_bands, float(level[0]))
+        if level.size != n_bands:
+            raise ValueError(f"Element '{self.name}': expected {n_bands} bands.")
+        return weight * 10.0 ** (-level / 10.0)
+
+
+def _band_count(elements: Sequence[FacadeElement]) -> int:
+    """Number of frequency bands implied by the elements (1 if all scalar)."""
+    sizes = set()
+    for el in elements:
+        kind = el._kind()  # exactly one of r / dn_e / insertion_loss
+        sizes.add(_as_array(getattr(el, kind), f"{el.name} ({kind})").size)
+    sizes.discard(1)
+    if len(sizes) > 1:
+        raise ValueError("Elements have inconsistent band counts.")
+    return sizes.pop() if sizes else 1
+
+
+@dataclass(frozen=True)
+class FacadePredictionResult:
+    """Predicted façade airborne insulation (EN 12354-3:2000).
+
+    :ivar r_prime: Apparent sound reduction index ``R'`` per band, in dB
+        (Formula 10).
+    :ivar r_45: ``R45 = R' + 1`` (loudspeaker method, Formula 11), in dB.
+    :ivar r_tr_s: ``Rtr,s = R'`` (traffic, Formula 12), in dB.
+    :ivar d_2m_nt: Standardized level difference ``D2m,nT`` per band, in dB
+        (Formula 13).
+    :ivar element_r: Per-element partial index ``Rp = -10 lg τ`` per band, in dB.
+    :ivar r_tr_s_w: Single-number ``Rtr,s,w`` (ISO 717-1); ``None`` if the bands
+        are not the ISO 717-1 octave/third-octave set.
+    :ivar d_2m_nt_w: Single-number ``D2m,nT,w`` (ISO 717-1); ``None`` as above.
+    :ivar c_tr: Spectrum adaptation term ``Ctr`` of ``R'`` (ISO 717-1).
+    :ivar frequencies: Band centre frequencies (Hz) for plotting; ``None`` labels
+        the axis by band index.
+    """
+
+    r_prime: np.ndarray
+    r_45: np.ndarray
+    r_tr_s: np.ndarray
+    d_2m_nt: np.ndarray
+    element_r: dict[str, np.ndarray]
+    r_tr_s_w: int | None = None
+    d_2m_nt_w: int | None = None
+    c_tr: int | None = None
+    frequencies: np.ndarray | None = None
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the per-element partial indices and the façade ``R'`` / ``D2m,nT``."""
+        from ._plotting import plot_facade_prediction
+
+        return plot_facade_prediction(self, ax=ax, **kwargs)
+
+
+@dataclass(frozen=True)
+class RadiatedPowerResult:
+    """Predicted sound power radiated to the outside by a segment (EN 12354-4).
+
+    :ivar l_w: Radiated sound power level ``LW`` per band, in dB re 1 pW
+        (Formula 2).
+    :ivar r_prime: Apparent sound reduction index ``R'`` per band, in dB
+        (Formula 3).
+    :ivar l_w_dba: A-weighted ``LW`` in dB(A), if the bands are known octave
+        bands; else ``None``.
+    :ivar frequencies: Band centre frequencies (Hz) for plotting; ``None`` labels
+        the axis by band index.
+    """
+
+    l_w: np.ndarray
+    r_prime: np.ndarray
+    l_w_dba: float | None = None
+    frequencies: np.ndarray | None = None
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the radiated sound power level ``LW`` per band."""
+        from ._plotting import plot_radiated_power
+
+        return plot_radiated_power(self, ax=ax, **kwargs)
+
+
+# A-weighting at octave-band centres 63 Hz .. 8 kHz (IEC 61672-1), for the
+# A-weighted single-number outputs of the worked examples.
+_A_WEIGHT_OCTAVE = {
+    63: -26.2, 125: -16.1, 250: -8.6, 500: -3.2,
+    1000: 0.0, 2000: 1.2, 4000: 1.0, 8000: -1.1,
+}
+
+
+def _apparent_reduction(elements: Sequence[FacadeElement], total_area: float) -> tuple[
+    np.ndarray, dict[str, np.ndarray]
+]:
+    """``R' = -10 lg(Σ τ)`` (Formula 10 / Part 4 Formula 3) and per-element ``Rp``."""
+    if not elements:
+        raise ValueError("At least one façade element is required.")
+    if total_area <= 0:
+        raise ValueError("'area' (total façade area S) must be positive.")
+    names = [el.name for el in elements]
+    if len(set(names)) != len(names):
+        raise ValueError(
+            "Façade element names must be unique (they key the per-element results)."
+        )
+    n = _band_count(elements)
+    # Sum over the element list (not a name-keyed dict), so no element is ever
+    # silently dropped, then key the per-element index by the unique names.
+    taus = [el.tau(total_area, n) for el in elements]
+    tau_total = np.sum(taus, axis=0)
+    r_prime = -10.0 * np.log10(tau_total)
+    element_r = {name: -10.0 * np.log10(t) for name, t in zip(names, taus)}
+    return r_prime, element_r
+
+
+def _single_number(values: np.ndarray, bands: str | None) -> tuple[int, int] | None:
+    """(rating, Ctr) via ISO 717-1 for 5 octave or 16 third-octave bands."""
+    from .insulation import weighted_rating
+
+    if values.size not in (5, 16):
+        return None
+    result = weighted_rating(values, bands=bands)
+    return result.rating, result.ctr
+
+
+def facade_sound_reduction(
+    elements: Sequence[FacadeElement],
+    *,
+    area: float,
+    volume: float,
+    delta_l_fs: float = 0.0,
+    bands: str | None = None,
+    frequencies: Sequence[float] | None = None,
+) -> FacadePredictionResult:
+    """Predict façade airborne sound insulation ``D2m,nT`` (EN 12354-3:2000).
+
+    Energetically combines the element transmission factors (Formula 10) into the
+    apparent sound reduction index ``R'``, then derives the loudspeaker/traffic
+    indices (Formulas 11-12) and the standardized level difference (Formula 13).
+
+    :param elements: Façade elements (see :class:`FacadeElement`); per-band
+        arrays must share a common length (5 octave or 16 third-octave bands to
+        get single-number ratings).
+    :param area: Total façade area ``S`` seen from inside, in m².
+    :param volume: Receiving-room volume ``V``, in m³ (Formula 13).
+    :param delta_l_fs: Façade-shape term ``ΔLfs`` in dB (Annex C; 0 for a flat
+        reflecting façade).
+    :param bands: ``"octave"``, ``"third-octave"`` or ``None`` (auto) for the
+        single number ratings, passed to :func:`weighted_rating`.
+    :param frequencies: Optional band centre frequencies (Hz), stored on the
+        result for plotting; must match the element band count.
+    :return: A :class:`FacadePredictionResult`.
+    """
+    delta = float(delta_l_fs)
+    v = float(volume)
+    if v <= 0:
+        raise ValueError("'volume' must be positive.")
+    r_prime, element_r = _apparent_reduction(elements, float(area))
+    if frequencies is not None and len(frequencies) != r_prime.size:
+        raise ValueError(
+            f"'frequencies' has {len(frequencies)} entries but the elements imply "
+            f"{r_prime.size} bands."
+        )
+    r_45 = r_prime + 1.0
+    r_tr_s = r_prime.copy()
+    d_2m_nt = r_prime + delta + 10.0 * log10(v / (6.0 * _T0 * float(area)))
+
+    r_tr = _single_number(r_tr_s, bands)
+    d_num = _single_number(d_2m_nt, bands)
+    return FacadePredictionResult(
+        r_prime=r_prime,
+        r_45=r_45,
+        r_tr_s=r_tr_s,
+        d_2m_nt=d_2m_nt,
+        element_r=element_r,
+        r_tr_s_w=None if r_tr is None else r_tr[0],
+        d_2m_nt_w=None if d_num is None else d_num[0],
+        c_tr=None if r_tr is None else r_tr[1],
+        frequencies=None if frequencies is None else np.asarray(frequencies, dtype=np.float64),
+    )
+
+
+def radiated_sound_power(
+    elements: Sequence[FacadeElement],
+    *,
+    lp_in: float | Sequence[float] | np.ndarray,
+    area: float,
+    c_d: float = -6.0,
+    r_prime_cap: float | None = 40.0,
+    octave_bands: Sequence[int] | None = None,
+) -> RadiatedPowerResult:
+    """Predict the sound power radiated outside by a segment (EN 12354-4:2000).
+
+    ``R'`` combines the element transmission factors (Formula 3); the radiated
+    power level is ``LW = Lp,in + Cd - R' + 10 lg(S/S0)`` (Formula 2). Openings
+    may be included as :class:`FacadeElement` entries with an ``insertion_loss``
+    (0 for a bare opening); see the module docstring for how this differs from
+    the standard's separate segment-of-openings Formula (4).
+
+    :param elements: Segment elements (see :class:`FacadeElement`).
+    :param lp_in: Inside sound pressure level ``Lp,in`` per band, in dB.
+    :param area: Segment area ``S``, in m².
+    :param c_d: Inside-field diffusivity term ``Cd`` in dB (Annex B: -6 ideal
+        diffuse, -5 average industrial building).
+    :param r_prime_cap: Practical maximum on ``R'`` per band, in dB (Annex G
+        uses 40 dB for field situations); ``None`` disables the cap.
+    :param octave_bands: Optional octave-band centre frequencies (Hz) matching
+        the per-band data; enables the A-weighted single number.
+    :return: A :class:`RadiatedPowerResult`.
+    """
+    r_prime, _ = _apparent_reduction(elements, float(area))
+    if r_prime_cap is not None:
+        r_prime = np.minimum(r_prime, float(r_prime_cap))
+    lp = _as_array(lp_in, "lp_in")
+    if lp.size == 1:
+        lp = np.full(r_prime.size, float(lp[0]))
+    if lp.size != r_prime.size:
+        raise ValueError("'lp_in' must match the element band count.")
+    if octave_bands is not None and len(octave_bands) != r_prime.size:
+        raise ValueError(
+            f"'octave_bands' has {len(octave_bands)} entries but the elements imply "
+            f"{r_prime.size} bands."
+        )
+    l_w = lp + float(c_d) - r_prime + 10.0 * log10(float(area) / _S0)
+
+    l_w_dba: float | None = None
+    if octave_bands is not None:
+        try:
+            a_weights = np.array([_A_WEIGHT_OCTAVE[int(f)] for f in octave_bands])
+        except KeyError:
+            a_weights = None  # unknown band centre; skip the A-weighted number
+        if a_weights is not None:
+            l_w_dba = float(10.0 * np.log10(np.sum(10.0 ** ((l_w + a_weights) / 10.0))))
+    freqs = None if octave_bands is None else np.asarray(octave_bands, dtype=np.float64)
+    return RadiatedPowerResult(l_w=l_w, r_prime=r_prime, l_w_dba=l_w_dba, frequencies=freqs)
+
+
+def outdoor_attenuation(width: float, height: float, distance: float) -> float:
+    """Simplified attenuation ``Atot`` of a finite radiating side (EN 12354-4 Annex E).
+
+    Reception point in front of the centre of a rectangular side ``S = width ·
+    height`` at perpendicular ``distance`` d. Uses the finite-side Formula (E.2a)
+    up to the largest side dimension and the point-source Formula (E.2b) beyond
+    it (they meet within rounding). The ``+6 dB`` for radiation into the
+    quarter-space over hard ground is built into the formula.
+
+    :param width: Side width ``L``, in m.
+    :param height: Side height ``H``, in m.
+    :param distance: Perpendicular distance ``d`` to the reception point, in m.
+    :return: ``Atot`` in dB (subtract from ``LW`` to get the exterior ``Lp``).
+    """
+    w, h, d = float(width), float(height), float(distance)
+    if min(w, h, d) <= 0:
+        raise ValueError("width, height and distance must be positive.")
+    area = w * h
+    if d > max(w, h):
+        return float(-10.0 * log10(_S0 / (pi * d * d)))  # (E.2b)
+    corridor = (4.0 * _S0 / (pi * area)) * atan(w / (2.0 * d)) * atan(h / (2.0 * d))
+    return float(-10.0 * log10(corridor))  # (E.2a)
+
+
+def outdoor_level(
+    l_w: float | Sequence[float],
+    attenuation: float | Sequence[float],
+) -> float:
+    """Exterior level from one or more radiating sides (EN 12354-4 Formula E.1).
+
+    ``Lp = 10 lg( Σ 10^(LW,k/10) ) - Atot`` for sides sharing a reception point,
+    or the per-side ``LW - Atot`` energetically summed. Pass matching sequences
+    of side power levels and their attenuations, or scalars for a single side; a
+    scalar broadcasts against an array (e.g. several sides, one common ``Atot``).
+
+    :param l_w: Radiated power level(s) ``LW`` (dB) — scalar or per side.
+    :param attenuation: Attenuation(s) ``Atot`` (dB) — scalar or per side.
+    :return: Exterior sound pressure level ``Lp`` in dB.
+    """
+    lw = np.atleast_1d(np.asarray(l_w, dtype=np.float64))
+    at = np.atleast_1d(np.asarray(attenuation, dtype=np.float64))
+    try:
+        diff = lw - at  # NumPy broadcasting (scalar vs array is allowed)
+    except ValueError as exc:
+        raise ValueError(
+            "'l_w' and 'attenuation' must have broadcast-compatible shapes."
+        ) from exc
+    return float(10.0 * np.log10(np.sum(10.0 ** (diff / 10.0))))

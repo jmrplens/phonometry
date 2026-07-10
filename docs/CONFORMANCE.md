@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **95/95 conformance checks pass** across 22 domains and 60 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **98/98 conformance checks pass** across 22 domains and 62 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -121,12 +121,15 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Building prediction &amp; uncertainty</b> — 100% (4/4)</summary>
+<summary>&#9989; <b>Building prediction &amp; uncertainty</b> — 100% (7/7)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | EN 12354-1:2000 Annex H.3 | Airborne prediction R'w (direct + 12 flanking paths) | R'w 52 dB (13 paths) | R'w 52 dB (13 paths, 52.17) | +0.17 dB | &#9989; |
 | EN 12354-2:2000 Annex E.3 | Impact prediction L'n,w = Ln,w,eq - dLw + K | 45 dB (+/-0 dB) | 45 dB | 0 dB | &#9989; |
+| EN 12354-3:2000 Annex F | Facade airborne prediction (R'tr,s,w / D2m,nT,w single numbers) | R'tr,s,w 31 (Ctr -3); D2m,nT,w 33 dB | R'tr,s,w 31 (Ctr -3); D2m,nT,w 33 dB | 0 | &#9989; |
+| EN 12354-4:2000 Annex G / Formula (2) | Radiated LW of a wall+door segment (side 1, low bands) | LW 63/125 Hz [59.8, 61.2] dB (+/-0.1) | LW [59.8, 61.2] dB | 0.038 dB | &#9989; |
+| EN 12354-4:2000 Annex E / Table G.9 | Exterior level from a finite radiating side (side 1, d = 5 m) | 36.6 dB (+/-0.05 dB) | 36.597 dB | -0.003 dB | &#9989; |
 | ISO 12999-1:2020 Table 2 | Airborne band uncertainty, situation A @ 1 kHz | 1.8 dB (+/-0 dB) | 1.8 dB | 0 dB | &#9989; |
 | ISO 12999-1:2020 Clause 8 / Table 8 | Expanded uncertainty U = 1.96 u (95 % two-sided, Rw sit. A) | 2.352 dB (+/-0 dB) | 2.352 dB | 0 dB | &#9989; |
 

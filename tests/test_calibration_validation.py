@@ -17,7 +17,7 @@ from typing import Iterator
 import numpy as np
 import pytest
 
-from phonometry import CalibrationWarning, calculate_sensitivity
+from phonometry import CalibrationWarning, sensitivity
 
 FS = 48000
 
@@ -38,43 +38,43 @@ def _assert_no_calibration_warning() -> Iterator[None]:
 
 def test_stable_tone_no_warning() -> None:
     with _assert_no_calibration_warning():
-        factor = calculate_sensitivity(_cal_tone(), fs=FS)
+        factor = sensitivity(_cal_tone(), fs=FS)
     assert factor > 0
 
 
 def test_unstable_tone_warns() -> None:
     """5% AM -> ~0.4 dB fluctuation, far beyond the 0.10 dB class 1 limit."""
     with pytest.warns(CalibrationWarning, match="fluctuation"):
-        calculate_sensitivity(_cal_tone(am_depth=0.05), fs=FS)
+        sensitivity(_cal_tone(am_depth=0.05), fs=FS)
 
 
 def test_validation_can_be_disabled() -> None:
     with _assert_no_calibration_warning():
-        calculate_sensitivity(_cal_tone(am_depth=0.05), fs=FS, validate=False)
+        sensitivity(_cal_tone(am_depth=0.05), fs=FS, validate=False)
 
 
 def test_custom_fluctuation_limit() -> None:
     with pytest.warns(CalibrationWarning):
-        calculate_sensitivity(_cal_tone(am_depth=0.05), fs=FS, max_fluctuation_db=0.1)
+        sensitivity(_cal_tone(am_depth=0.05), fs=FS, max_fluctuation_db=0.1)
     with _assert_no_calibration_warning():
-        calculate_sensitivity(_cal_tone(am_depth=0.05), fs=FS, max_fluctuation_db=1.0)
+        sensitivity(_cal_tone(am_depth=0.05), fs=FS, max_fluctuation_db=1.0)
 
 
 def test_empty_reference_raises() -> None:
     with pytest.raises(ValueError, match="empty"):
-        calculate_sensitivity(np.array([]), fs=FS)
+        sensitivity(np.array([]), fs=FS)
 
 
 def test_too_short_recording_warns() -> None:
     with pytest.warns(CalibrationWarning, match="shorter than 2 s"):
-        calculate_sensitivity(_cal_tone(seconds=1.0), fs=FS)
+        sensitivity(_cal_tone(seconds=1.0), fs=FS)
 
 
 def test_multichannel_stable_at_different_levels_no_warning() -> None:
     """Per-channel stability: a level offset between channels is not fluctuation."""
     x = np.stack([_cal_tone(), 0.5 * _cal_tone()])
     with _assert_no_calibration_warning():
-        calculate_sensitivity(x, fs=FS)
+        sensitivity(x, fs=FS)
 
 
 def test_default_limit_follows_iec_60942_2017_table2() -> None:
@@ -82,9 +82,9 @@ def test_default_limit_follows_iec_60942_2017_table2() -> None:
     within the 0.20 dB limit for a 31.5-63 Hz nominal frequency (Table 2)."""
     x = _cal_tone(am_depth=0.015)
     with pytest.warns(CalibrationWarning, match="Table 2"):
-        calculate_sensitivity(x, fs=FS)
+        sensitivity(x, fs=FS)
     with _assert_no_calibration_warning():
-        calculate_sensitivity(x, fs=FS, frequency=50.0)
+        sensitivity(x, fs=FS, frequency=50.0)
 
 
 def test_asymmetric_fluctuation_uses_max_min_vs_mean() -> None:
@@ -95,7 +95,7 @@ def test_asymmetric_fluctuation_uses_max_min_vs_mean() -> None:
     i0, i1 = int(3.0 * FS), int(3.2 * FS)
     dip[i0:i1] = 10 ** (-0.2 / 20)
     with pytest.warns(CalibrationWarning, match="fluctuation"):
-        calculate_sensitivity(x * dip, fs=FS)
+        sensitivity(x * dip, fs=FS)
 
 
 def test_narrowband_rejects_broadband_noise() -> None:
@@ -109,9 +109,9 @@ def test_narrowband_rejects_broadband_noise() -> None:
     noise *= np.sqrt(tone_power / 10 ** (10 / 10)) / np.sqrt(np.mean(noise ** 2))
     noisy = tone + noise
 
-    clean = calculate_sensitivity(tone, fs=FS, validate=False)
-    broadband = calculate_sensitivity(noisy, fs=FS, validate=False)
-    narrow = calculate_sensitivity(noisy, fs=FS, validate=False, narrowband=True)
+    clean = sensitivity(tone, fs=FS, validate=False)
+    broadband = sensitivity(noisy, fs=FS, validate=False)
+    narrow = sensitivity(noisy, fs=FS, validate=False, narrowband=True)
 
     broadband_bias_db = 20 * np.log10(broadband / clean)
     narrow_bias_db = 20 * np.log10(narrow / clean)
@@ -123,14 +123,14 @@ def test_narrowband_locks_to_off_nominal_tone() -> None:
     """A calibrator a few Hz off 1 kHz is still estimated exactly."""
     t = np.arange(int(FS * 3.0)) / FS
     tone = 0.5 * np.sin(2 * np.pi * 1003.0 * t)
-    clean = calculate_sensitivity(tone, fs=FS, validate=False)
-    narrow = calculate_sensitivity(tone, fs=FS, validate=False, narrowband=True)
+    clean = sensitivity(tone, fs=FS, validate=False)
+    narrow = sensitivity(tone, fs=FS, validate=False, narrowband=True)
     assert 20 * np.log10(narrow / clean) == pytest.approx(0.0, abs=0.01)
 
 
 def test_narrowband_requires_fs() -> None:
     with pytest.raises(ValueError, match="requires 'fs'"):
-        calculate_sensitivity(_cal_tone(), narrowband=True)
+        sensitivity(_cal_tone(), narrowband=True)
 
 
 def test_table2_row_boundaries() -> None:

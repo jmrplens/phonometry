@@ -27,7 +27,7 @@ $$
 
 ## Frequency Resolution vs FFT Bin Spacing
 
-`octavefilter` is a **time-domain fractional-octave filter bank**, not an FFT or
+`octave_filter` is a **time-domain fractional-octave filter bank**, not an FFT or
 Welch spectrum estimator. Therefore, its result does not have a frequency
 resolution in the `fs / nfft` sense.
 
@@ -47,9 +47,9 @@ band around 1 kHz is approximately:
 You can inspect the exact bands with:
 
 ```python
-from phonometry import getansifrequencies
+from phonometry import nominal_frequencies
 
-fc, fl, fu, labels = getansifrequencies(fraction=3, limits=[12, 20000])
+fc, fl, fu, labels = nominal_frequencies(fraction=3, limits=[12, 20000])
 for label, center, lower, upper in zip(labels, fc, fl, fu):
     print(label, center, lower, upper, upper - lower)
 ```
@@ -60,7 +60,7 @@ original signal and use the phonometry band edges as masks:
 ```python
 import numpy as np
 from scipy import signal
-from phonometry import octavefilter, getansifrequencies
+from phonometry import octave_filter, nominal_frequencies
 
 fs = 100_000
 # any 1D pressure signal in Pa (synthesized here so the example runs)
@@ -68,7 +68,7 @@ pressure_signal_pa = 0.02 * np.random.default_rng(0).standard_normal(fs)
 x = pressure_signal_pa
 
 # Standardized third-octave levels from phonometry.
-levels, centers = octavefilter(
+levels, centers = octave_filter(
     x,
     fs=fs,
     fraction=3,
@@ -76,7 +76,7 @@ levels, centers = octavefilter(
 )
 
 # Same standardized band definitions, including lower/upper edges.
-fc, fl, fu, labels = getansifrequencies(fraction=3, limits=[12, 20_000])
+fc, fl, fu, labels = nominal_frequencies(fraction=3, limits=[12, 20_000])
 
 # Narrowband Welch estimate on the original signal.
 nperseg = min(2**15, len(x))
@@ -105,7 +105,7 @@ fractional-octave levels, while Welch gives narrowband FFT bins. With
 Window choice and overlap affect leakage and averaging variance, but they do not
 change the bin spacing of each FFT segment.
 
-When `sigbands=True`, `octavefilter` can also return the time-domain waveform
+When `sigbands=True`, `octave_filter` can also return the time-domain waveform
 filtered by each band. Applying Welch/FFT to one selected filtered waveform can
 be useful as a diagnostic view of the content inside that filtered band, but it
 does not recover FFT bins from the scalar band levels.

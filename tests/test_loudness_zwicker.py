@@ -182,8 +182,13 @@ def test_n5_n10_use_full_rate_series(monkeypatch) -> None:
     TS 10, 0.7513..0.7752); the full-rate percentile (0.7628) is
     phase-unambiguous and sits inside that envelope. The 500 Hz
     ``loudness_vs_time`` output is unchanged (public contract)."""
-    import phonometry.loudness as L
-    from phonometry.loudness import _SR_LEVEL, _SR_LOUDNESS
+    import sys
+
+    from phonometry.loudness_zwicker import _SR_LEVEL, _SR_LOUDNESS
+
+    # The package re-exports the *function* ``loudness_zwicker``, which shadows
+    # the module attribute of the same name; go through sys.modules instead.
+    L = sys.modules["phonometry.loudness_zwicker"]
 
     seen: dict[int, np.ndarray] = {}
     orig = L._percentile

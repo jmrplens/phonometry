@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .intensity import IntensityResult
-    from .loudness import ZwickerLoudness
+    from .loudness_zwicker import ZwickerLoudness
     from .loudness_ecma import EcmaLoudness
     from .loudness_moore_glasberg import MooreGlasbergLoudness
     from .loudness_moore_glasberg_time import MooreGlasbergTimeVaryingLoudness
@@ -122,7 +122,7 @@ def plot_zwicker_loudness(
     returned; otherwise (a stationary result, or an ``ax`` was supplied) a
     single axes is returned.
 
-    :param result: A :class:`~phonometry.loudness.ZwickerLoudness`.
+    :param result: A :class:`~phonometry.loudness_zwicker.ZwickerLoudness`.
     :param ax: Existing axes to draw on, or ``None`` to create a figure.
     :param kwargs: Forwarded to the specific-loudness line ``plot`` call.
     :return: The axes, or an array of two axes for time-varying input.

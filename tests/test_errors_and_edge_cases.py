@@ -8,13 +8,13 @@ import pytest
 
 from phonometry import (
     OctaveFilterBank,
-    calculate_sensitivity,
+    sensitivity,
     linkwitz_riley,
-    octavefilter,
+    octave_filter,
     time_weighting,
     weighting_filter,
 )
-from phonometry.frequencies import getansifrequencies
+from phonometry.frequencies import nominal_frequencies
 
 
 def test_octave_filter_bank_invalid_init() -> None:
@@ -120,19 +120,19 @@ def test_calculate_sensitivity_silent() -> None:
     Prevent division by zero during calibration when the reference signal is empty or silent.
 
     **Verification:**
-    - Pass an array of zeros to `calculate_sensitivity`.
+    - Pass an array of zeros to `sensitivity`.
 
     **Expectation:**
     - Raise `ValueError`.
     """
     x = np.zeros(1000)
     with pytest.raises(ValueError, match="Reference signal is silent"):
-        calculate_sensitivity(x)
+        sensitivity(x)
 
 
 def test_octave_filter_vs_class_consistency() -> None:
     """
-    Verify that octavefilter function and OctaveFilterBank class yield identical results.
+    Verify that octave_filter function and OctaveFilterBank class yield identical results.
 
     **Purpose:**
     Ensure that the functional wrapper correctly proxies all arguments to the underlying
@@ -153,7 +153,7 @@ def test_octave_filter_vs_class_consistency() -> None:
     filter_type = "butter"
     
     # 1. Using function
-    spl_func, freq_func = octavefilter(x, fs=fs, fraction=fraction, order=order, filter_type=filter_type)
+    spl_func, freq_func = octave_filter(x, fs=fs, fraction=fraction, order=order, filter_type=filter_type)
     
     # 2. Using class
     bank = OctaveFilterBank(fs=fs, fraction=fraction, order=order, filter_type=filter_type)
@@ -172,14 +172,14 @@ def test_single_sample_signal() -> None:
     which might occur in edge-case stream processing.
 
     **Verification:**
-    - Pass a single-element array to `octavefilter`.
+    - Pass a single-element array to `octave_filter`.
 
     **Expectation:**
     - The code should return valid (though likely low) SPL values without crashing.
     """
     fs = 48000
     x = np.array([1.0])
-    spl, freq = octavefilter(x, fs)
+    spl, freq = octave_filter(x, fs)
     assert len(spl) == len(freq)
     assert not np.isnan(spl).any()
 
@@ -232,10 +232,10 @@ def test_octave_filter_bank_repr() -> None:
 def test_octavefilter_limits_none() -> None:
     """Verify None limits use package defaults and return nominal labels."""
     rng = np.random.default_rng(42)
-    spl, _ = octavefilter(rng.standard_normal(1000), 1000, limits=None)
+    spl, _ = octave_filter(rng.standard_normal(1000), 1000, limits=None)
     assert len(spl) > 0
 
-    freq, freq_d, freq_u, labels = getansifrequencies(1, limits=None)
+    freq, freq_d, freq_u, labels = nominal_frequencies(1, limits=None)
     assert len(freq) > 0
     assert len(freq) == len(freq_d) == len(freq_u) == len(labels)
     assert all(isinstance(label, str) for label in labels)

@@ -29,7 +29,7 @@ from scipy import signal
 
 from ._warnings import PhonometryWarning
 from .core import OctaveFilterBank
-from .frequencies import getansifrequencies
+from .frequencies import nominal_frequencies
 from .utils import _typesignal
 
 
@@ -521,7 +521,7 @@ def stipa_signal(
     rng = np.random.default_rng(seed)
     pink = _pink_noise(n, rng)
     t = np.arange(n) / fs
-    centers, _, _, _ = getansifrequencies(1, list(_BAND_LIMITS))
+    centers, _, _, _ = nominal_frequencies(1, list(_BAND_LIMITS))
     half_octave = 2.0**0.25
     out = np.zeros(n)
     for k in range(_NUM_BANDS):

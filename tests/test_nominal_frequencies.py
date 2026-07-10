@@ -10,9 +10,9 @@ from phonometry.frequencies import (
     _format_nominal_freq,
     _iec_e3_round,
     _nominal_freq_for_band,
-    getansifrequencies,
+    nominal_frequencies,
 )
-from phonometry import OctaveFilterBank, normalizedfreq, octavefilter
+from phonometry import OctaveFilterBank, normalized_frequencies, octave_filter
 
 
 # --- _iec_e3_round ---
@@ -61,10 +61,10 @@ def test_format_1k_and_above():
     assert _format_nominal_freq(1250.0) == "1.25k"
 
 
-# --- getansifrequencies — 4-tuple ---
+# --- nominal_frequencies — 4-tuple ---
 
 def test_getansifrequencies_returns_labels():
-    freq, _, _, labels = getansifrequencies(fraction=3)
+    freq, _, _, labels = nominal_frequencies(fraction=3)
     assert isinstance(labels, list)
     assert all(isinstance(label, str) for label in labels)
     assert len(labels) == len(freq)
@@ -73,7 +73,7 @@ def test_getansifrequencies_returns_labels():
 
 
 def test_getansifrequencies_fraction1_labels():
-    freq, _, _, labels = getansifrequencies(fraction=1)
+    freq, _, _, labels = nominal_frequencies(fraction=1)
     assert "1k" in labels
     assert len(labels) == len(freq)
 
@@ -116,24 +116,24 @@ def test_filter_nominal_true_with_sigbands():
     assert len(xb) == len(freq)
 
 
-# --- octavefilter(nominal=True) ---
+# --- octave_filter(nominal=True) ---
 
 def test_octavefilter_nominal_true():
     x = np.zeros(4800)
-    _, freq = octavefilter(x, fs=48000, fraction=3, nominal=True)
+    _, freq = octave_filter(x, fs=48000, fraction=3, nominal=True)
     assert all(isinstance(f, str) for f in freq)
     assert "1k" in freq
 
 
 def test_octavefilter_nominal_false_default():
     x = np.zeros(4800)
-    _, freq = octavefilter(x, fs=48000, fraction=3)
+    _, freq = octave_filter(x, fs=48000, fraction=3)
     assert all(isinstance(f, float) for f in freq)
 
 
 def test_normalizedfreq_fraction1_and_invalid_fraction() -> None:
-    freq = normalizedfreq(1)
+    freq = normalized_frequencies(1)
     assert 1000 in freq
 
     with pytest.raises(ValueError):
-        normalizedfreq(5)
+        normalized_frequencies(5)

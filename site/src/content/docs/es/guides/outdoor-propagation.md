@@ -47,6 +47,27 @@ es el que menos absorbe.
 *La curva seca de 20 °C / 10 % absorbe más a frecuencias medias, pero las curvas
 húmedas la superan por debajo de ~200 Hz: la firma de la relajación.*
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import air_attenuation
+
+freqs = np.geomspace(50.0, 10000.0, 400)
+fig, ax = plt.subplots()
+for temp, rh in [(20.0, 50.0), (20.0, 10.0), (0.0, 70.0), (30.0, 80.0)]:
+    ax.loglog(freqs, air_attenuation(freqs, temp, rh) * 1000.0,
+              label=f"{temp:g} °C, {rh:g} % HR")
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("Coeficiente de atenuación alpha [dB/km]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
 from phonometry import air_attenuation, air_attenuation_m
@@ -156,6 +177,48 @@ bandas medias.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_es.png" alt="Desglose por bandas de octava de la atenuación ISO 9613-2 como barra apilada de Adiv, Aatm, Agr y Abar con el total A superpuesto, para un recorrido de 200 m sobre suelo poroso con una barrera de 4 m" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_es_dark.png" alt="Desglose por bandas de octava de la atenuación ISO 9613-2 como barra apilada de Adiv, Aatm, Agr y Abar con el total A superpuesto, para un recorrido de 200 m sobre suelo poroso con una barrera de 4 m" style="width:80%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import Barrier, outdoor_propagation_attenuation
+
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+barrier = Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
+att = outdoor_propagation_attenuation(
+    200.0, 1.5, 1.5, bands, ground_source=1.0, ground_middle=1.0,
+    ground_receiver=1.0, barrier=barrier, temperature=15.0,
+    relative_humidity=70.0,
+)
+
+x = np.arange(len(bands))
+fig, ax = plt.subplots()
+# Líneas base positiva y negativa separadas: un término negativo (Agr es una
+# ganancia neta en 63 Hz aquí) se apila bajo cero, y las alturas con signo
+# suman a_total.
+pos_bottom = np.zeros(len(bands))
+neg_bottom = np.zeros(len(bands))
+for term, label in [(att.a_div, "Adiv — divergencia"),
+                    (att.a_atm, "Aatm — atmosférica"),
+                    (att.a_gr, "Agr — suelo"),
+                    (att.a_bar, "Abar — barrera")]:
+    ax.bar(x, term, bottom=np.where(term >= 0.0, pos_bottom, neg_bottom),
+           label=label)
+    pos_bottom += np.maximum(term, 0.0)
+    neg_bottom += np.minimum(term, 0.0)
+ax.plot(x, att.a_total, "D-", color="black", label="A — total")
+ax.set_xticks(x)
+ax.set_xticklabels([f"{b:g}" for b in bands])
+ax.set_xlabel("Frecuencia central de banda de octava [Hz]")
+ax.set_ylabel("Atenuación A [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
 from phonometry import (
@@ -264,3 +327,21 @@ para cómo $\alpha$ alimenta la ISO 354, y la
 [guía de exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/)
 para la exposición ocupacional (ISO 9612) que consume niveles
 ponderados A.
+
+---
+
+**Normas.** ISO 9613-1:1993, *Acoustics — Attenuation of sound during
+propagation outdoors — Part 1: Calculation of the absorption of sound by the
+atmosphere* — el coeficiente de atenuación de tono puro $\alpha$ (Ec. (5)) con
+las frecuencias de relajación del oxígeno y el nitrógeno (Ec. (3)/(4)), la
+conversión de humedad del anexo B y las frecuencias centrales exactas de la
+Tabla 1 (Ec. (6), Nota 5). ISO 9613-2:1996, *Acoustics — Attenuation of sound
+during propagation outdoors — Part 2: General method of calculation* — el nivel
+en el receptor a favor del viento (Ec. (3)/(4)) compuesto por la divergencia
+geométrica (Ec. (7)), la absorción atmosférica (Ec. (8)), el efecto del suelo
+(Ec. (9), Tabla 3) con su alternativa ponderada A (Ec. (10)/(11)), el
+apantallamiento por barreras (Ecs. (12)–(17)) y la corrección meteorológica
+(Ec. (21)/(22)). ISO 354:2003, *Acoustics — Measurement of sound absorption in
+a reverberation room* — solo la conversión $m = \alpha/(10 \lg e)$ del apartado
+8.1.2.1 tras `air_attenuation_m`; el método en sala reverberante se trata en la
+[guía de Acústica de salas](/phonometry/es/guides/room-acoustics/).

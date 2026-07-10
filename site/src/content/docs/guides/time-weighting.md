@@ -6,7 +6,53 @@ description: "Fast, Slow and Impulse ballistics per IEC 61672-1."
 Accurate SPL measurement requires capturing energy over specific time windows.
 phonometry implements exact time constants per **IEC 61672-1:2013**.
 
+## 1. The exponential detector
+
+A sound level meter's needle cannot follow the pressure waveform — it shows a
+running *mean square* with an exponential memory. Formally (IEC 61672-1, 3.8):
+
+$$
+\tau\ \frac{dy}{dt} + y = x^2(t)
+\quad\Longleftrightarrow\quad
+y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\ e^{-(t-\xi)/\tau}\ d\xi
+$$
+
+a first-order low-pass on the squared signal. The time constant τ sets the
+trade-off: **Fast** (125 ms) follows speech-like fluctuations, **Slow** (1 s)
+steadies the readout for quasi-stationary noise. After a step onset the
+envelope reaches 63 % of its final value in one τ and ~99.97 % after 8τ —
+that is why level analyses discard the first instants of a recording.
+
+## 2. The three time weightings
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" style="width:80%">
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import time_weighting
+
+fs = 48000
+t = np.arange(int(fs * 4)) / fs
+burst = np.zeros_like(t)  # 0.5 s noise burst (Pa) starting at t = 1 s
+rng = np.random.default_rng(42)
+burst[fs:int(1.5 * fs)] = 0.2 * rng.standard_normal(int(0.5 * fs))
+
+p0 = 2e-5
+plt.figure()
+for mode in ('fast', 'slow', 'impulse'):
+    envelope = time_weighting(burst, fs, mode=mode)
+    plt.plot(t, 10 * np.log10(np.maximum(envelope, 1e-12) / p0**2), label=mode)
+plt.xlabel('Time [s]')
+plt.ylabel('Level [dB SPL]')
+plt.legend()
+plt.show()
+```
+
+</details>
 
 * **Fast (`fast`):** τ = 125 ms. Standard for noise fluctuations.
 * **Slow (`slow`):** τ = 1000 ms. Standard for steady noise.
@@ -25,6 +71,9 @@ recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 energy_envelope = time_weighting(recording, fs, mode='fast')
 # dB SPL relative to 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
+
+print(f"Steady-state Fast level: {spl_t[-1]:.1f} dB SPL")
+# Steady-state Fast level: 77.0 dB SPL
 ```
 
 The asymmetric Impulse ballistics use two constants — a fast attack and a slow
@@ -35,24 +84,7 @@ y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{otherwise}\end{cases}
 $$
 
-## The exponential detector
-
-A sound level meter's needle cannot follow the pressure waveform — it shows a
-running *mean square* with an exponential memory. Formally (IEC 61672-1, 3.8):
-
-$$
-\tau\ \frac{dy}{dt} + y = x^2(t)
-\quad\Longleftrightarrow\quad
-y(t) = \frac{1}{\tau} \int_{-\infty}^{t} x^2(\xi)\ e^{-(t-\xi)/\tau}\ d\xi
-$$
-
-a first-order low-pass on the squared signal. The time constant τ sets the
-trade-off: **Fast** (125 ms) follows speech-like fluctuations, **Slow** (1 s)
-steadies the readout for quasi-stationary noise. After a step onset the
-envelope reaches 63 % of its final value in one τ and ~99.8 % after 8τ —
-that is why level analyses discard the first instants of a recording.
-
-### `time_weighting()` / `TimeWeighting` parameters
+## 3. `time_weighting()` / `TimeWeighting` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -64,15 +96,48 @@ that is why level analyses discard the first instants of a recording.
 The output has the units of $x^2$: take `10*log10(y / p0**2)` for SPL or use
 the level functions, which do it for you.
 
-## Verified ballistics (IEC 61672-1 Table 4)
+## 4. Verified ballistics (IEC 61672-1 Table 4)
 
 The Fast envelope's response to 4 kHz tonebursts lands exactly on the
-standard's reference values — enforced in CI for burst durations from 1 s down
-to 1 ms (F and S weightings, class 1 acceptance limits):
+standard's reference values — the example below verifies the 200 ms Fast
+burst row; the CI suite covers the full Table 4, from 1 s down to 1 ms for F
+and 1 s down to 2 ms for S, at class 1 acceptance limits:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%">
 
-## Initial state
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import time_weighting
+
+fs = 48000
+t = np.arange(int(fs * 2)) / fs
+tone = np.sin(2 * np.pi * 4000 * t)
+
+# Steady-state Fast reference of the continuous tone
+reference = time_weighting(tone, fs, mode='fast')[int(1.5 * fs):].mean()
+
+# 200 ms burst of the same tone (IEC 61672-1 Table 4 target: -1.0 dB)
+burst = np.zeros_like(t)
+burst[int(0.5 * fs):int(0.7 * fs)] = tone[int(0.5 * fs):int(0.7 * fs)]
+envelope = time_weighting(burst, fs, mode='fast')
+env_db = 10 * np.log10(np.maximum(envelope / reference, 1e-6))
+
+plt.figure()
+plt.plot(t, env_db, label='Fast envelope')
+plt.axhline(-1.0, linestyle='--', label='IEC target −1.0 dB')
+plt.xlabel('Time [s]')
+plt.ylabel('Level re steady state [dB]')
+plt.legend()
+plt.show()
+```
+
+</details>
+
+## 5. Initial state
 
 By default, the exponential integrator starts from rest (`y[-1] = 0`). Passing
 `initial_state=None` leaves this default unspecified, while `initial_state='zero'`
@@ -80,10 +145,11 @@ requests the same zero state explicitly. If the recorded segment begins after a
 steady signal is already present, you can start from the first sample energy instead:
 
 ```python
+# Uses `recording` and `fs` from the snippet above.
 energy_envelope = time_weighting(recording, fs, mode='fast', initial_state='first')
 ```
 
-## Block processing
+## 6. Block processing
 
 For block processing, pass the last output value from the previous block as the
 next block's `initial_state` instead of resetting each block:
@@ -119,7 +185,7 @@ Concatenated block outputs are exactly equal to a single continuous call
 (verified for all three modes, mono and multichannel). Call `tw.reset()` to
 start from rest again.
 
-## Performance note
+## 7. Performance note
 
 The `impulse` mode uses an asymmetric kernel that is JIT-compiled when
 [numba](https://numba.pydata.org/) is installed (`pip install phonometry[perf]`).
@@ -128,3 +194,11 @@ Without numba a pure-Python fallback produces identical results, just slower.
 See [Integrated & Statistical Levels](/phonometry/guides/levels/) for Leq/LN metrics built on
 these envelopes, and [Why phonometry](/phonometry/reference/why-phonometry/) for the IEC
 61672-1 tone-burst verification.
+
+---
+
+**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+Part 1: Specifications* — the exponential time-weighting detector (clause 3.8)
+with the F and S time constants (clause 5.7), and the 4 kHz toneburst reference
+responses of Table 4 (class 1 acceptance limits) used to verify the ballistics
+in CI.

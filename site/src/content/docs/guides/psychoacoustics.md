@@ -43,11 +43,11 @@ levels_28 = np.full(28, 60.0)                             # 28 one-third-octave 
 
 # From a raw recording: calibration_factor scales digital units to Pa
 res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
-print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")
+print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")   # 13.1 sone (77 phon)
 
 # Time-varying signals: percentile loudness N5 is the reporting standard
 res = loudness_zwicker(x, fs)          # stationary=False (default)
-print(res.n5, res.n10, res.loudness)   # N5, N10, Nmax
+print(f"{res.n5:.1f} {res.n10:.1f} {res.loudness:.1f}")   # 13.1 13.1 13.1 — N5, N10, Nmax
 
 # From 28 one-third-octave band levels (25 Hz .. 12.5 kHz)
 res = loudness_zwicker_from_spectrum(levels_28, field="diffuse")
@@ -125,6 +125,7 @@ $k = 0.108$ sits inside the normative window 0.105–0.115).
 ```python
 from phonometry import sharpness_din
 
+# Uses `x`, `fs` and `sens` from the snippet above.
 s = sharpness_din(x, fs, calibration_factor=sens)      # acum
 s_aures = sharpness_din(x, fs, method="aures")          # Annex B variant
 ```
@@ -269,7 +270,7 @@ x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
 res = loudness_moore_glasberg_time(x, fs, field="free")
 print(f"N_max = {res.n_max:.3f} sone  ({res.loudness_level_max:.0f} phon)")   # 1.000 sone (40 phon)
-print(f"long-term loudness exceeded 5% of the time: {res.percentiles[5.0]:.3f} sone")
+print(f"long-term loudness exceeded 5% of the time: {res.percentiles[5.0]:.3f} sone")   # 0.999 sone
 
 res.plot()   # short-term S'(t) and long-term S''(t) loudness vs time
 ```
@@ -494,3 +495,22 @@ See [Prominent Discrete Tones](/phonometry/guides/tone-prominence/) for the
 ECMA-418-1 TNR/PR prominence verdicts,
 [Speech Transmission Index](/phonometry/guides/speech-transmission/) for
 STI/STIPA, and [Theory](/phonometry/reference/theory/) for the underlying math.
+
+---
+
+**Standards.** ISO 532-1:2017, *Acoustics — Methods for calculating
+loudness — Part 1: Zwicker method* — stationary and time-varying loudness in
+sones from the normative Annex A.4 reference program, with the N5/N10
+percentile loudness, validated against the Annex B set. ISO 532-2:2017,
+*... Part 2: Moore-Glasberg method* — stationary loudness from roex excitation
+patterns on the ERB-number scale, with explicit binaural summation.
+ISO 532-3:2023, *... Part 3: Moore-Glasberg-Schlittenlacher method* —
+time-varying short-term and long-term loudness and the peak N_max.
+DIN 45692:2009, *Messtechnische Simulation der Hörempfindung Schärfe* —
+sharpness in acum (clause 6 weighting, Annex B von Bismarck and Aures
+variants, Table A.2 targets). ISO 226:2023, *Acoustics — Normal
+equal-loudness-level contours* — the contours (Formula 1), the loudness level
+of pure tones (Formula 2) and the hearing threshold. ECMA-418-2:2025,
+*Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing
+human perception based on the Sottek Hearing Model)* — the Sottek Hearing
+Model loudness (sone_HMS), tonality (tu_HMS) and roughness (asper).

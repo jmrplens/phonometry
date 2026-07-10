@@ -45,12 +45,12 @@ levels_28 = np.full(28, 60.0)                             # 28 niveles de tercio
 
 # Desde una grabación sin calibrar: calibration_factor convierte unidades digitales en Pa
 res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
-print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")
+print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")   # 13.1 sone (77 phon)
 
 # Señales variables en el tiempo: la sonoridad percentil N5 es el
 # estándar para informes
 res = loudness_zwicker(x, fs)          # stationary=False (por defecto)
-print(res.n5, res.n10, res.loudness)   # N5, N10, Nmax
+print(f"{res.n5:.1f} {res.n10:.1f} {res.loudness:.1f}")   # 13.1 13.1 13.1 — N5, N10, Nmax
 
 # Desde 28 niveles de tercio de octava (25 Hz .. 12.5 kHz)
 res = loudness_zwicker_from_spectrum(levels_28, field="diffuse")
@@ -131,6 +131,7 @@ la $k = 0{,}108$ derivada queda dentro de la ventana normativa 0,105–0,115).
 ```python
 from phonometry import sharpness_din
 
+# Usa `x`, `fs` y `sens` del snippet anterior.
 s = sharpness_din(x, fs, calibration_factor=sens)      # acum
 s_aures = sharpness_din(x, fs, method="aures")          # variante del Anexo B
 ```
@@ -279,7 +280,7 @@ x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
 res = loudness_moore_glasberg_time(x, fs, field="free")
 print(f"N_max = {res.n_max:.3f} sone  ({res.loudness_level_max:.0f} phon)")   # 1.000 sono (40 fonios)
-print(f"sonoridad de largo plazo superada el 5% del tiempo: {res.percentiles[5.0]:.3f} sone")
+print(f"sonoridad de largo plazo superada el 5% del tiempo: {res.percentiles[5.0]:.3f} sone")   # 0.999 sone
 
 res.plot()   # sonoridad de corto plazo S'(t) y de largo plazo S''(t) frente al tiempo
 ```
@@ -508,3 +509,23 @@ para los veredictos TNR/PR de ECMA-418-1, el
 [índice de transmisión del habla](/phonometry/es/guides/speech-transmission/)
 para el STI/STIPA, y [Teoría](/phonometry/es/reference/theory/) para la
 matemática subyacente.
+
+---
+
+**Normas.** ISO 532-1:2017, *Acoustics — Methods for calculating
+loudness — Part 1: Zwicker method* — sonoridad estacionaria y variable en el
+tiempo en sonos a partir del programa de referencia normativo del Anexo A.4,
+con la sonoridad percentil N5/N10, validada frente al conjunto del Anexo B.
+ISO 532-2:2017, *... Part 2: Moore-Glasberg method* — sonoridad estacionaria a
+partir de patrones de excitación roex sobre la escala del número ERB, con suma
+binaural explícita. ISO 532-3:2023, *... Part 3:
+Moore-Glasberg-Schlittenlacher method* — sonoridad variable en el tiempo de
+corto y largo plazo y el pico N_max. DIN 45692:2009, *Messtechnische
+Simulation der Hörempfindung Schärfe* — sharpness en acum (ponderación del
+apartado 6, variantes von Bismarck y Aures del Anexo B, objetivos de la
+Tabla A.2). ISO 226:2023, *Acoustics — Normal equal-loudness-level contours* —
+las curvas isofónicas (Fórmula 1), el nivel de sonoridad de tonos puros
+(Fórmula 2) y el umbral de audición. ECMA-418-2:2025, *Psychoacoustic metrics
+for ITT equipment — Part 2 (methods for describing human perception based on
+the Sottek Hearing Model)* — la sonoridad (sone_HMS), la tonalidad (tu_HMS) y
+la aspereza (asper) del modelo de Sottek.

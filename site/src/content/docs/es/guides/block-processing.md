@@ -3,6 +3,12 @@ title: "Procesado por bloques"
 description: "Flujos de streaming con estado de filtro conservado entre bloques."
 ---
 
+Algunas mediciones nunca caben en memoria: una grabación ambiental de una hora,
+un monitor en vivo que debe informar niveles mientras el micrófono sigue
+capturando, o un registrador embebido que solo ve un búfer cada vez. En todos
+esos casos la señal tiene que procesarse bloque a bloque — y los filtros deben
+comportarse exactamente como si hubieran visto la señal completa de una vez.
+
 Las clases `OctaveFilterBank`, `WeightingFilter` (para ponderación A, C o Z) y
 `TimeWeighting` admiten procesado por bloques (streaming): el estado interno del
 filtro se conserva entre llamadas, de modo que las salidas concatenadas por
@@ -17,17 +23,9 @@ transitorio del filtro.*
 Crea un banco con estado usando `stateful=True`. El estado interno se inicializa
 a cero por defecto, pero puede inicializarse al régimen permanente de la
 respuesta al escalón (como `scipy.signal.sosfilt_zi`) con `steady_ic=True`.
-
-Notas al usar un `OctaveFilterBank` con estado:
-
-- El detrending debe desactivarse en procesado por bloques (`detrend=False`), ya
-  que puede introducir discontinuidades entre bloques.
-- El remuestreo no está soportado en procesado por bloques: usa `resample=False`.
-- `zero_phase=True` es incompatible con el modo stateful (el filtrado
-  bidireccional necesita la señal completa).
-- Un `WeightingFilter` con estado usa el diseño bilineal clásico
-  (`high_accuracy=False`); consulta
-  [Ponderación frecuencial](/phonometry/es/guides/weighting/).
+Las opciones que deben desactivarse en modo stateful se resumen en la
+[tabla de restricciones](#restricciones-del-modo-con-estado) al final de esta
+guía.
 
 ## Ejemplo
 
@@ -70,7 +68,7 @@ for block in audio_blocks:
 ```
 
 O gestiona el estado tú mismo con la API funcional — consulta
-[Ponderación temporal](/phonometry/es/guides/time-weighting/#procesado-por-bloques).
+[Ponderación temporal](/phonometry/es/guides/time-weighting/#6-procesado-por-bloques).
 
 ## Estado multicanal
 
@@ -105,5 +103,5 @@ for x in audio_stream(block):            # tu callback de captura
 | `detrend` | debe ser `False` | El detrending por bloque crea discontinuidades en las fronteras |
 | `resample` | debe ser `False` | El remuestreador no conserva estado |
 | `zero_phase` | no soportado | El filtrado bidireccional necesita la señal completa |
-| `high_accuracy` (ponderación) | por defecto se resuelve a `False`; pasar `True` explícito lanza `ValueError` | El remuestreo polifásico interno es incompatible con bloques |
+| `high_accuracy` (ponderación) | por defecto se resuelve a `False` — el diseño bilineal clásico, consulta [Ponderación frecuencial](/phonometry/es/guides/weighting/); pasar `True` explícito lanza `ValueError` | El remuestreo polifásico interno es incompatible con bloques |
 | `steady_ic` | opcional | Arranca los filtros en el régimen permanente de la respuesta al escalón |

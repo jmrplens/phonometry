@@ -60,11 +60,13 @@ regulations are written in terms of it.
 **L90** the background level.
 
 ```python
+import numpy as np
 from phonometry import ln_levels
 
 # A steady tone gives L10 = L50 = L90; percentiles only tell a story for a
 # *fluctuating* level. Synthesize 3 s alternating between a quiet and a
 # ~10 dB louder half-second so the statistics separate.
+fs = 48000
 rng = np.random.default_rng(0)
 segment = fs // 2                                  # 0.5 s per level
 quiet = 0.02 * rng.standard_normal(segment)        # background
@@ -108,6 +110,8 @@ impulsive noise, so regulations always name the time weighting.
 
 ```python
 from phonometry import lc_peak, sel, sound_exposure, lex_8h
+
+# Uses `recording`, `fs` and `sensitivity` from the Leq snippet above.
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
 peak = lc_peak(recording, fs, calibration_factor=sensitivity)
@@ -226,6 +230,7 @@ time-aligned across bands.
 ```python
 from phonometry import OctaveFilterBank
 
+# Uses `recording` from the Leq snippet above.
 bank = OctaveFilterBank(fs=48000, fraction=3)
 levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
@@ -257,6 +262,7 @@ levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5
 ```python
 import matplotlib.pyplot as plt
 
+# Uses `levels`, `freq` and `times` from the spectrogram snippet above.
 fig, ax = plt.subplots()
 mesh = ax.pcolormesh(times, freq, levels, shading="auto")
 ax.set_yscale("log")
@@ -272,3 +278,17 @@ ISO 9612 occupational strategies continue in
 tonal-prominence verdicts in [Prominent Discrete Tones](tone-prominence.md),
 and the ISO 226 equal-loudness contours live with the perception metrics in
 [Psychoacoustics](psychoacoustics.md).
+
+---
+
+**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+Part 1: Specifications* — the Fast/Slow/Impulse envelope ballistics behind
+`ln_levels`, the C-weighted peak of §5.13 (verified against the Table 5 tone
+bursts) and the sound exposure level verified against the Table 4 LAE column.
+IEC 61252, *Electroacoustics — Specifications for personal sound exposure
+meters* — the sound exposure E in Pa²h and the normalized 8 h level LEX,8h
+(≡ LEP,d), anchored at 3.2 Pa²h ⇔ exactly 90 dB. ISO 1996-1:2016, *Acoustics —
+Description, measurement and assessment of environmental noise — Part 1:
+Basic quantities and assessment procedures* — Lden (3.6.4), Ldn (3.6.5) and
+the composite whole-day rating level of clause 6.5 (Formulae 5-6, Table A.1
+adjustments).

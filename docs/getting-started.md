@@ -64,12 +64,40 @@ signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 spl, freq = octave_filter(signal, fs=fs, fraction=3)
 
 print(f"Bands: {freq}")
+# Bands: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bands)
 print(f"SPL [dB]: {spl}")
+# SPL [dB]: [46.88395351 47.96774897 49.04991279 ...]  — ~90.7 dB at 100 Hz and ~90.9 dB at 1 kHz
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.png" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>
 
 *Example of a 1/3 Octave Band spectrum analysis of a complex signal.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import scipy.signal
+
+# Uses `signal`, `fs`, `spl` and `freq` from the snippet above.
+# Gray background: the raw-signal PSD (Welch), shifted to sit just below the
+# band SPLs so both spectral shapes share one axis.
+f_psd, psd = scipy.signal.welch(signal, fs, nperseg=8192)
+psd_db = 10 * np.log10(psd + 1e-12)
+psd_db += np.max(spl) - np.max(psd_db) - 5
+
+fig, ax = plt.subplots()
+ax.semilogx(f_psd, psd_db, color="gray", alpha=0.6, label="Raw signal PSD")
+ax.semilogx(freq, spl, marker="o", markerfacecolor="white",
+            label="1/3 octave bands")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("SPL [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ## Analyzing an audio file
 

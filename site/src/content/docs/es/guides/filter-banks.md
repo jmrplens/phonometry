@@ -47,7 +47,7 @@ frecuencia diezmada:
 | `order` | int | — | por defecto `6` | Orden SOS por banda |
 | `limits` | lista `[lo, hi]` | Hz | por defecto `[12, 20000]` | Rango de análisis |
 | `filter_type` | str | — | `'butter'` (por defecto), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | Ver la comparación más abajo |
-| `ripple` / `attenuation` | float | dB | `ripple` defecto `0.1`; `attenuation` defecto `72.0` | Rizado de banda de paso / atenuación de banda atenuada (cheby/ellip); `cheby2` necesita `attenuation ≥ 70` para clase 1, ya que scipy fija su suelo equirizado en exactamente este valor |
+| `ripple` / `attenuation` | float | dB | `ripple` defecto `0.1`; `attenuation` defecto `72.0` | Rizado de banda de paso / atenuación en banda atenuada (cheby/ellip); `cheby2` necesita `attenuation ≥ 70` para clase 1, ya que scipy fija su suelo equirizado en exactamente este valor |
 | `show` | bool | — | por defecto `False` | Dibuja la respuesta del banco (requiere matplotlib) |
 | `sigbands` | bool | — | por defecto `False` | Devuelve también las señales temporales por banda |
 | `mode` | str | — | `'rms'` (por defecto), `'peak'`, `'sum'` | Estadístico por banda devuelto |

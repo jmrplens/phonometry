@@ -65,12 +65,31 @@ signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 spl, freq = octave_filter(signal, fs=fs, fraction=3)
 
 print(f"Bandas: {freq}")
+# Bandas: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bandas)
 print(f"SPL [dB]: {spl}")
+# SPL [dB]: [46.88395351 47.96774897 49.04991279 ...]  — ~90.7 dB en 100 Hz y ~90.9 dB en 1 kHz
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_es.png" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_es_dark.png" alt="Análisis en tercios de octava de una señal multitono con la PSD cruda de fondo" style="width:80%">
 
 *Ejemplo de análisis espectral en tercios de octava de una señal compleja.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Usa `spl` y `freq` del snippet anterior.
+# La figura publicada superpone además la PSD de la señal cruda de fondo.
+fig, ax = plt.subplots()
+ax.semilogx(freq, spl, marker="o", markerfacecolor="white")
+ax.set_xlabel("Frecuencia [Hz]")
+ax.set_ylabel("SPL [dB]")
+plt.show()
+```
+
+</details>
 
 ## Analizar un archivo de audio
 

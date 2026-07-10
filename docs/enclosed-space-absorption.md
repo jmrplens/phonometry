@@ -86,6 +86,7 @@ result = ph.enclosed_space_reverberation(
     volume=60.0, air_condition="20C_50-70",
 )
 print(result.reverberation_time.round(2))
+# [2.13 1.03 0.62 0.48 0.43 0.42 0.4 ]
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosed_space_absorption_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosed_space_absorption.png" alt="Two panels for a 60 cubic metre office with a bare versus an acoustically-treated ceiling. Left: the equivalent absorption area per octave band, much higher across mid and high frequencies with the acoustic ceiling. Right: the reverberation time per octave band, falling from around five seconds at low frequency for the bare room to under one second with the acoustic ceiling" width="96%"></picture>

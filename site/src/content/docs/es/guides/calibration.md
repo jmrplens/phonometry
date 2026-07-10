@@ -167,3 +167,12 @@ Las señales enteras (p. ej. int16 de `scipy.io.wavfile.read`) se convierten
 internamente a float64 antes de cualquier elevación al cuadrado, así que la
 calibración y los niveles son idénticos tanto si pasas el array entero crudo
 como una conversión a float.
+
+---
+
+**Normas.** IEC 60942:2017, *Electroacoustics — Sound calibrators* — los
+supuestos de nivel y clase del calibrador en `sensitivity()` (el nivel
+principal de 94 dB y las tolerancias de clase de la Tabla 1) y la comprobación
+de estabilidad por fluctuación de nivel a corto plazo de la grabación de
+referencia (5.3.3, límites de clase 1 de la Tabla 2 según la frecuencia
+nominal).

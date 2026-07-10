@@ -102,9 +102,18 @@ carries both:
   practical ceiling. Larger spacers reach lower frequencies, smaller ones
   higher.
 - **Reactive fields**: when `pressure_intensity_index` (F2 in ISO 9614-1)
-  approaches the probe's residual index δ_pI0, phase errors dominate. The
-  ISO 9614-1 Annex A field indicators and the dynamic-capability criterion
-  are available directly:
+  approaches the probe's residual index δ_pI0, phase errors dominate.
+
+Over a measurement surface, the ISO 9614-1 Annex A field indicators grade the
+scan itself. **F2**, the surface pressure-intensity indicator, is the surface
+pressure level minus the level of the mean *magnitude* of the normal
+intensity — the larger it is, the closer the measurement sits to the probe's
+phase-error floor. **F3**, the negative partial power indicator, is the same
+difference taken with the *signed* mean intensity — F3 − F2 > 0 reveals power
+flowing inward through parts of the surface. **F4**, the field non-uniformity
+indicator, is the normalised spread of the per-position intensities — the
+larger it is, the more measurement positions the surface needs. Together with
+the dynamic-capability criterion they are available directly:
 
 ```python
 import numpy as np
@@ -135,3 +144,14 @@ print(ld, ld > fi.f2)                                      # 8.0 True (criterion
 
 See [Theory](/phonometry/reference/theory/) for the derivations and [Calibration](/phonometry/guides/calibration/)
 for absolute scaling of the two channels.
+
+---
+
+**Standards.** IEC 61043:1994, *Electroacoustics — Instruments for the
+measurement of sound intensity — Measurements with pairs of pressure sensing
+microphones* — the two-microphone cross-spectral intensity estimator, the
+finite-difference bias correction and the usable-bandwidth bound (clause 7.3,
+Table 3). ISO 9614-1:1993, *Acoustics — Determination of sound power levels
+of noise sources using sound intensity — Part 1: Measurement at discrete
+points* — the pressure-intensity index, the Annex A field indicators F2, F3
+and F4, and the dynamic-capability criterion (Annex B).

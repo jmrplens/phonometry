@@ -54,6 +54,21 @@ the unfavourable deviations sum to 0.05 (≤ 0.10), giving $\alpha_w = 0.60$; th
 500 Hz peak overshoots the shifted curve by ≥ 0.25, adding the `M` indicator, so
 the rating is $0.60(\text{M})$, class C.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import weighted_absorption
+
+# ISO 11654 Annex A.2 practical coefficients at 250/500/1000/2000/4000 Hz
+result = weighted_absorption([0.35, 1.00, 0.65, 0.60, 0.55])
+result.plot()   # practical curve vs shifted reference, deviations shaded
+plt.show()
+```
+
+</details>
+
 ```python
 from phonometry import weighted_absorption, absorption_class
 
@@ -108,6 +123,35 @@ zero-velocity specific airflow resistance.
 *The slightly super-linear pressure drop is fitted through the origin; the
 specific airflow resistance is the fit read at 0.5 mm/s.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import static_airflow_resistance
+
+area = np.pi * 0.05**2                      # 100 mm diameter cell [m^2]
+u = np.array([0.5, 1, 2, 4, 8, 12]) * 1e-3  # linear velocity [m/s]
+dp = 1.6e4 * u + 4.0e5 * u**2               # measured pressure drop [Pa]
+r = static_airflow_resistance(u, dp, area=area, thickness=0.05)
+
+u_fit = np.linspace(0.0, 13e-3, 200)
+dp_fit = r.linear_coefficient * u_fit + r.quadratic_coefficient * u_fit**2
+fig, ax = plt.subplots()
+ax.plot(u_fit * 1e3, dp_fit, label="Through-origin fit  dp = a u + b u^2")
+ax.plot(u * 1e3, dp, "o", label="Measured pressure drop")
+ax.plot(r.evaluation_velocity * 1e3, r.pressure_drop, "D",
+        label="Evaluation at 0.5 mm/s")
+ax.set_xlabel("Linear airflow velocity u [mm/s]")
+ax.set_ylabel("Pressure drop dp [Pa]")
+ax.set_title(f"R_s = {r.specific_resistance:.0f} Pa·s/m")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
 from phonometry import static_airflow_resistance
@@ -159,7 +203,7 @@ R = alternating_airflow_resistance(
     piston_stroke_specimen=14e-3, piston_stroke_termination=1.4e-3,
     frequency=2.0, cavity_volume=7.854e-4, kappa_prime=kp,
 )
-print(round(R))                   # airflow resistance R [Pa*s/m^3]
+print(round(R))                   # 222956  airflow resistance R [Pa*s/m^3]
 ```
 
 Pass the `effective_kappa` result to `alternating_airflow_resistance` for an
@@ -189,6 +233,32 @@ $$
 
 *A small level difference means a near-perfect absorber; a level difference of
 9.54 dB gives $s = 3$, $|r| = 0.5$ and $\alpha = 0.75$.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import (
+    standing_wave_absorption, standing_wave_ratio_from_level,
+    standing_wave_reflection_magnitude,
+)
+
+level_diff = np.linspace(0.5, 40.0, 300)    # L_max - L_min [dB]
+swr = standing_wave_ratio_from_level(level_diff)
+fig, ax = plt.subplots()
+ax.plot(level_diff, standing_wave_absorption(swr),
+        label="Absorption coefficient alpha")
+ax.plot(level_diff, standing_wave_reflection_magnitude(swr), "--",
+        label="Reflection factor magnitude |r|")
+ax.set_xlabel("Standing-wave level difference L_max - L_min [dB]")
+ax.set_ylabel("alpha, |r|")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ```python
 from phonometry import standing_wave_absorption, standing_wave_ratio_from_level
@@ -230,6 +300,7 @@ h12 = (np.exp(1j*k0*x2) + target*np.exp(-1j*k0*x2)) / \
 r = reflection_factor(h12, spacing=spacing, x1=x1, wavenumber=k0)
 print(np.round(absorption_from_reflection(r), 3))     # [0.75 0.75 0.75]
 print(np.round(normalized_surface_impedance(r), 2))   # Z / rho c0
+# [1.15-1.23j 1.15-1.23j 1.15-1.23j]
 ```
 
 The high-level `two_microphone_impedance` wraps this chain and returns an
@@ -272,8 +343,10 @@ ASTM E2611 quantities.
 
 ---
 
-*Standards: ISO 11654:1997, ISO 9053-1:2018, ISO 9053-2:2020, ISO 10534-1:1996,
-ISO 10534-2:1998 and ASTM E2611-19. Every equation is derived from the standard
+**Standards.** ISO 11654:1997 (weighted sound-absorption rating); ISO 9053-1:2018
+(static airflow resistance); ISO 9053-2:2020 (alternating airflow resistance);
+ISO 10534-1:1996 and ISO 10534-2:1998 (impedance tube); ASTM E2611-19
+(four-microphone transmission loss). Every equation is derived from the standard
 text; the [conformance report](CONFORMANCE.md) validates the library against the
 standards' own worked examples (ISO 11654 Annex A, ISO 9053-2 Annex A.3) and
-closed-form identities.*
+closed-form identities.

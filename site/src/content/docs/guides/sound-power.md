@@ -106,6 +106,40 @@ print(np.round(res.sound_power_level, 1))               # per-band LW
 res.plot()   # sound power level bars per band, LWA in the title (needs matplotlib)
 ```
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result.png" alt="The enveloping-surface sound power level spectrum of the ISO 3744 hemisphere example, one bar per octave band from 63 Hz to 8 kHz peaking near 500 Hz, with the A-weighted total of 92.4 dB(A) in the title" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_pressure_result_dark.png" alt="The enveloping-surface sound power level spectrum of the ISO 3744 hemisphere example, one bar per octave band from 63 Hz to 8 kHz peaking near 500 Hz, with the A-weighted total of 92.4 dB(A) in the title" style="width:88%">
+
+*One bar per band: the energy-averaged surface pressure minus the background
+(`K1`) and environmental (`K2`) corrections plus the surface term
+`10 lg(S/S0)` gives `LW(f)`, and the A-weighted energy sum across bands gives
+the single-number `LWA` in the title.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# res is the SoundPowerResult computed above. One line:
+res.plot()
+plt.show()
+
+# By hand: a bar spectrum of LW with the A-weighted total in the title.
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, res.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound power level LW [dB]")
+ax.set_title(
+    f"Enveloping-surface sound power (ISO 3744)  "
+    f"LWA = {res.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
+
 The A-weighted total `LWA` is combined from the band powers with the ISO 3744
 Annex E A-weighting corrections, so it needs `frequencies`. Passing the room
 data (`reverberation_time` + `volume`, or `absorption_area`, or
@@ -201,6 +235,39 @@ print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 
 rev.plot()   # reverberation-room LW spectrum, LWA in the title (needs matplotlib)
 ```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result.png" alt="The reverberation-room sound power level spectrum of the ISO 3741 example, one bar per one-third-octave band from 100 Hz to 10 kHz falling gently with frequency, with the A-weighted total of 92.1 dB(A) in the title" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_reverberation_result_dark.png" alt="The reverberation-room sound power level spectrum of the ISO 3741 example, one bar per one-third-octave band from 100 Hz to 10 kHz falling gently with frequency, with the A-weighted total of 92.1 dB(A) in the title" style="width:88%">
+
+*The mean room level carried through the absorption-area, Waterhouse and
+meteorological terms of Eq. 20 gives the one-third-octave `LW(f)`, and the
+A-weighted energy sum across the 21 bands gives the `LWA` in the title.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# rev is the ReverberationSoundPowerResult computed above. One line:
+rev.plot()
+plt.show()
+
+# By hand: a bar spectrum of LW with the A-weighted total in the title.
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, rev.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound power level LW [dB]")
+ax.set_title(
+    f"Reverberation-room sound power (ISO 3741)  "
+    f"LWA = {rev.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
 
 `levels` may be a 1D mean spectrum or a 2D `(NM, NB)` array averaged over
 positions. When the room volume, its reverberation time or the microphone
@@ -304,6 +371,40 @@ print(list(res.achieved_grade))                         # per-band grade
 
 res.plot()   # LW spectrum; non-positive (undeterminable) bands hatched (needs matplotlib)
 ```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result.png" alt="The intensity-scanning sound power level spectrum of the ISO 9614-2 example, one bar per octave band from 125 Hz to 4 kHz all near 85 dB, with the A-weighted total of 90.9 dB(A) in the title" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_intensity_result_dark.png" alt="The intensity-scanning sound power level spectrum of the ISO 9614-2 example, one bar per octave band from 125 Hz to 4 kHz all near 85 dB, with the A-weighted total of 90.9 dB(A) in the title" style="width:88%">
+
+*The partial powers `<In,i>·Si` of the six segments sum to each band's `LW`;
+every band here nets positive power and passes the field-indicator criteria at
+engineering grade, so all six bars stand, and the A-weighted total of
+90.9 dB(A) heads the title.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# res is the SoundPowerIntensityResult computed above. One line:
+res.plot()
+plt.show()
+
+# By hand: a bar spectrum of LW with the A-weighted total in the title.
+positions = np.arange(freqs.size)
+fig, ax = plt.subplots()
+ax.bar(positions, res.sound_power_level, width=0.7, color="#1f77b4")
+ax.set_xticks(positions)
+ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Sound power level LW [dB]")
+ax.set_title(
+    f"Intensity-scanning sound power (ISO 9614-2)  "
+    f"LWA = {res.sound_power_level_a:.1f} dB(A)")
+plt.show()
+```
+
+</details>
 
 Supplying `normal_intensity_2` (the second sweep) averages the two for the
 partial powers and evaluates criterion 3; `pressure_levels` enables `FpI`;
@@ -556,3 +657,25 @@ plt.show()
   that consume a source `LW`.
 - [Levels](/phonometry/guides/levels/) — energy averaging and the A-weighting behind `LWA`.
 - [Theory](/phonometry/reference/theory/) — the Waterhouse, K1/K2 and C1/C2 derivations.
+
+---
+
+**Standards.** ISO 3744:2010, *Acoustics — Determination of sound power levels
+and sound energy levels of noise sources using sound pressure — Engineering
+methods for an essentially free field over a reflecting plane* — the
+enveloping-surface method: hemisphere and box surface areas, the `K1`/`K2`
+corrections, the Annex B microphone positions and the Annex E A-weighting.
+ISO 3746:2010, *… Survey method using an enveloping measurement surface over a
+reflecting plane* — the survey grade sharing the same formulae with coarser
+criteria. ISO 3741:2010, *… Precision methods for reverberation test rooms* —
+the direct (Eq. 20) and comparison methods with the Waterhouse and
+meteorological corrections and the Table 1 qualification criteria.
+ISO 3745:2012, *… Precision methods for anechoic rooms and hemi-anechoic
+rooms* — the Clause 8 power level, the per-position background correction
+(Eq. 11), the meteorological corrections and the standardized microphone
+arrays. ISO 9614-2:1996, *Acoustics — Determination of sound power levels of
+noise sources using sound intensity — Part 2: Measurement by scanning* — the
+partial powers, the `FpI` and `F+/-` field indicators and the grade criteria.
+ISO 9614-3:2002, *… Part 3: Precision method for measurement by scanning* —
+the grade-1 scanning method, its field indicators and the clause 9.2
+not-applicable flagging.

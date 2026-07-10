@@ -162,6 +162,49 @@ print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL a 1 kHz
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_es.png" alt="Izquierda: los cuatro espectros de voz estándar de ANSI S3.5-1997 (normal, elevada, fuerte, grito) de 160 Hz a 8000 Hz, cada esfuerzo mayor sube todo el espectro. Derecha: el SII resultante en un ruido de banda ancha fijo, subiendo de 0,12 (normal) a 0,79 (grito)" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_es_dark.png" alt="Izquierda: los cuatro espectros de voz estándar de ANSI S3.5-1997 (normal, elevada, fuerte, grito) de 160 Hz a 8000 Hz, cada esfuerzo mayor sube todo el espectro. Derecha: el SII resultante en un ruido de banda ancha fijo, subiendo de 0,12 (normal) a 0,79 (grito)" style="width:96%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+import phonometry as ph
+
+# Los cuatro espectros de la Tabla 3 de ANSI S3.5-1997 y el ruido fijo de arriba.
+noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
+                  32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
+efforts = ph.sii.VOCAL_EFFORTS         # ("normal", "raised", "loud", "shout")
+freqs = ph.sii.BAND_CENTERS            # los 18 centros de banda de tercio de octava
+nombres = {"normal": "Normal", "raised": "Elevada",
+           "loud": "Fuerte", "shout": "Grito"}
+
+fig, (ax_s, ax_i) = plt.subplots(1, 2, figsize=(12, 5))
+
+# Izquierda: cada esfuerzo vocal mayor sube todo el espectro de voz.
+for effort in efforts:
+    ax_s.plot(freqs, ph.standard_speech_spectrum(effort), "o-",
+              label=nombres[effort])
+ax_s.set_xscale("log")
+ax_s.set_xticks(list(freqs))
+ax_s.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax_s.xaxis.set_minor_formatter(plt.NullFormatter())
+ax_s.set_xlabel("Banda de tercio de octava [Hz]")
+ax_s.set_ylabel("Nivel espectral del habla [dB SPL]")
+ax_s.legend()
+
+# Derecha: el SII que alcanza cada espectro en el ruido fijo.
+sii = [ph.speech_intelligibility_index(e, noise).sii for e in efforts]
+pos = np.arange(len(efforts))
+ax_i.bar(pos, sii)
+ax_i.set_xticks(pos)
+ax_i.set_xticklabels([nombres[e] for e in efforts])
+ax_i.set_ylim(0.0, 1.0)
+ax_i.set_ylabel("Índice de inteligibilidad del habla")
+plt.show()
+```
+
+</details>
+
 Los nombres de esfuerzo vocal funcionan en cualquier sitio donde se espere un
 espectro de voz, incluido como primer argumento de
 `speech_intelligibility_index`.

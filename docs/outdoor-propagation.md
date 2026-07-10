@@ -43,6 +43,27 @@ the driest air is not always the least absorbing.
 *The dry 20 °C / 10 % curve absorbs most at mid frequencies, but the humid
 curves overtake it below ~200 Hz — the relaxation signature.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import air_attenuation
+
+freqs = np.geomspace(50.0, 10000.0, 400)
+fig, ax = plt.subplots()
+for temp, rh in [(20.0, 50.0), (20.0, 10.0), (0.0, 70.0), (30.0, 80.0)]:
+    ax.loglog(freqs, air_attenuation(freqs, temp, rh) * 1000.0,
+              label=f"{temp:g} °C, {rh:g} % RH")
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Attenuation coefficient alpha [dB/km]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
 from phonometry import air_attenuation, air_attenuation_m
@@ -147,6 +168,42 @@ mid bands.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown.png" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" width="80%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import Barrier, outdoor_propagation_attenuation
+
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+barrier = Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
+att = outdoor_propagation_attenuation(
+    200.0, 1.5, 1.5, bands, ground_source=1.0, ground_middle=1.0,
+    ground_receiver=1.0, barrier=barrier, temperature=15.0,
+    relative_humidity=70.0,
+)
+
+x = np.arange(len(bands))
+fig, ax = plt.subplots()
+bottom = np.zeros(len(bands))
+for term, label in [(att.a_div, "Adiv — divergence"),
+                    (att.a_atm, "Aatm — atmospheric"),
+                    (att.a_gr, "Agr — ground"),
+                    (att.a_bar, "Abar — barrier")]:
+    ax.bar(x, term, bottom=bottom, label=label)
+    bottom = bottom + term
+ax.plot(x, att.a_total, "D-", color="black", label="A — total")
+ax.set_xticks(x)
+ax.set_xticklabels([f"{b:g}" for b in bands])
+ax.set_xlabel("Octave-band centre frequency [Hz]")
+ax.set_ylabel("Attenuation A [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
 from phonometry import (
@@ -250,3 +307,20 @@ The method's stated accuracy is $\pm 1$ to $\pm 3$ dB for broadband noise up to
 [Room Acoustics guide](room-acoustics.md) for how $\alpha$ feeds
 ISO 354, and the [Occupational Noise Exposure guide](occupational-exposure.md) for the ISO 9612 occupational
 exposure that consumes A-weighted levels.
+
+---
+
+**Standards.** ISO 9613-1:1993, *Acoustics — Attenuation of sound during
+propagation outdoors — Part 1: Calculation of the absorption of sound by the
+atmosphere* — the pure-tone attenuation coefficient $\alpha$ (Eq. (5)) with the
+oxygen and nitrogen relaxation frequencies (Eq. (3)/(4)), the Annex B humidity
+conversion and the exact Table 1 midbands (Eq. (6), Note 5). ISO 9613-2:1996,
+*Acoustics — Attenuation of sound during propagation outdoors — Part 2: General
+method of calculation* — the downwind receiver level (Eq. (3)/(4)) assembled
+from geometrical divergence (Eq. (7)), atmospheric absorption (Eq. (8)), the
+ground effect (Eq. (9), Table 3) with its A-weighted alternative
+(Eq. (10)/(11)), barrier screening (Eqs. (12)–(17)) and the meteorological
+correction (Eq. (21)/(22)). ISO 354:2003, *Acoustics — Measurement of sound
+absorption in a reverberation room* — only the clause 8.1.2.1 conversion
+$m = \alpha/(10 \lg e)$ behind `air_attenuation_m`; the reverberation-room
+method itself is covered in the [Room Acoustics guide](room-acoustics.md).

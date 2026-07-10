@@ -156,6 +156,47 @@ print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.png" alt="Two panels. Left: the four ANSI S3.5-1997 standard speech spectra — normal, raised, loud and shout — over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum. Right: the resulting Speech Intelligibility Index in a fixed broadband noise, rising from 0.12 (normal) through 0.36 and 0.59 to 0.79 (shout)" width="96%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+import phonometry as ph
+
+# The four ANSI S3.5-1997 Table 3 spectra and the fixed broadband noise above.
+noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
+                  32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
+efforts = ph.sii.VOCAL_EFFORTS         # ("normal", "raised", "loud", "shout")
+freqs = ph.sii.BAND_CENTERS            # the 18 one-third-octave band centres
+
+fig, (ax_s, ax_i) = plt.subplots(1, 2, figsize=(12, 5))
+
+# Left: each higher vocal effort lifts the whole speech spectrum.
+for effort in efforts:
+    ax_s.plot(freqs, ph.standard_speech_spectrum(effort), "o-",
+              label=effort.capitalize())
+ax_s.set_xscale("log")
+ax_s.set_xticks(list(freqs))
+ax_s.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+ax_s.xaxis.set_minor_formatter(plt.NullFormatter())
+ax_s.set_xlabel("One-third-octave band [Hz]")
+ax_s.set_ylabel("Speech spectrum level [dB SPL]")
+ax_s.legend()
+
+# Right: the SII each spectrum reaches in the fixed noise.
+sii = [ph.speech_intelligibility_index(e, noise).sii for e in efforts]
+pos = np.arange(len(efforts))
+ax_i.bar(pos, sii)
+ax_i.set_xticks(pos)
+ax_i.set_xticklabels([e.capitalize() for e in efforts])
+ax_i.set_ylim(0.0, 1.0)
+ax_i.set_ylabel("Speech Intelligibility Index")
+plt.show()
+```
+
+</details>
+
 The vocal-effort names work anywhere a speech spectrum is expected, including as
 the first argument to `speech_intelligibility_index`.
 

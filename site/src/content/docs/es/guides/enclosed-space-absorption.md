@@ -87,6 +87,7 @@ result = ph.enclosed_space_reverberation(
     volume=60.0, air_condition="20C_50-70",
 )
 print(result.reverberation_time.round(2))
+# [2.13 1.03 0.62 0.48 0.43 0.42 0.4 ]
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosed_space_absorption_es.png" alt="Dos paneles para una oficina de 60 metros cúbicos con techo desnudo frente a techo acústico: el área de absorción equivalente por banda de octava, mucho mayor con el techo acústico, y el tiempo de reverberación cayendo desde unos cinco segundos a baja frecuencia con el techo desnudo hasta menos de un segundo con el techo acústico" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosed_space_absorption_es_dark.png" alt="Dos paneles para una oficina de 60 metros cúbicos con techo desnudo frente a techo acústico: el área de absorción equivalente por banda de octava, mucho mayor con el techo acústico, y el tiempo de reverberación cayendo desde unos cinco segundos a baja frecuencia con el techo desnudo hasta menos de un segundo con el techo acústico" style="width:96%">

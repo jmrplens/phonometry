@@ -62,11 +62,13 @@ ponderación temporal: **L10** es el nivel superado el 10 % del tiempo (picos de
 eventos), **L50** la mediana y **L90** el nivel de fondo.
 
 ```python
+import numpy as np
 from phonometry import ln_levels
 
 # Un tono constante da L10 = L50 = L90; los percentiles solo cuentan algo con un
 # nivel *fluctuante*. Sintetizamos 3 s alternando entre medio segundo tranquilo
 # y otro ~10 dB más fuerte para que los estadísticos se separen.
+fs = 48000
 rng = np.random.default_rng(0)
 segment = fs // 2                                  # 0.5 s por nivel
 quiet = 0.02 * rng.standard_normal(segment)        # fondo
@@ -111,6 +113,8 @@ que las normativas siempre indican la ponderación temporal.
 
 ```python
 from phonometry import lc_peak, sel, sound_exposure, lex_8h
+
+# Usa `recording`, `fs` y `sensitivity` del snippet de Leq anterior.
 
 # Pico ponderado C (IEC 61672-1 §5.13): los límites de acción laborales usan esto
 peak = lc_peak(recording, fs, calibration_factor=sensitivity)
@@ -232,6 +236,7 @@ alineado en el tiempo entre bandas.
 ```python
 from phonometry import OctaveFilterBank
 
+# Usa `recording` del snippet de Leq anterior.
 bank = OctaveFilterBank(fs=48000, fraction=3)
 levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bandas, ventanas) — listo para pcolormesh(times, freq, levels)
@@ -263,6 +268,7 @@ bandas normalizadas de tercio de octava.*
 ```python
 import matplotlib.pyplot as plt
 
+# Usa `levels`, `freq` y `times` del snippet del espectrograma anterior.
 fig, ax = plt.subplots()
 mesh = ax.pcolormesh(times, freq, levels, shading="auto")
 ax.set_yscale("log")
@@ -281,3 +287,18 @@ los veredictos de prominencia tonal de ECMA-418-1 en
 [Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/), y las
 curvas isofónicas de ISO 226 viven con las métricas de percepción en
 [Psicoacústica](/phonometry/es/guides/psychoacoustics/).
+
+---
+
+**Normas.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+Part 1: Specifications* — la ponderación temporal Fast/Slow/Impulse de la
+envolvente de `ln_levels`, el pico ponderado C del §5.13 (verificado contra
+las ráfagas de tono de la Tabla 5) y el nivel de exposición sonora verificado
+contra la columna LAE de la Tabla 4. IEC 61252, *Electroacoustics —
+Specifications for personal sound exposure meters* — la exposición sonora E en
+Pa²h y el nivel normalizado a 8 h LEX,8h (≡ LEP,d), anclados en
+3,2 Pa²h ⇔ exactamente 90 dB. ISO 1996-1:2016, *Acoustics — Description,
+measurement and assessment of environmental noise — Part 1: Basic quantities
+and assessment procedures* — Lden (3.6.4), Ldn (3.6.5) y el nivel de
+evaluación compuesto de jornada completa del apartado 6.5 (Fórmulas 5-6,
+ajustes de la Tabla A.1).

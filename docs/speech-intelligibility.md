@@ -162,6 +162,7 @@ print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import NullFormatter
 import phonometry as ph
 
 # The four ANSI S3.5-1997 Table 3 spectra and the fixed broadband noise above.
@@ -179,7 +180,7 @@ for effort in efforts:
 ax_s.set_xscale("log")
 ax_s.set_xticks(list(freqs))
 ax_s.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
-ax_s.xaxis.set_minor_formatter(plt.NullFormatter())
+ax_s.xaxis.set_minor_formatter(NullFormatter())
 ax_s.set_xlabel("One-third-octave band [Hz]")
 ax_s.set_ylabel("Speech spectrum level [dB SPL]")
 ax_s.legend()

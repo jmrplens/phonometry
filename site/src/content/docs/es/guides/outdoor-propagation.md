@@ -195,13 +195,19 @@ att = outdoor_propagation_attenuation(
 
 x = np.arange(len(bands))
 fig, ax = plt.subplots()
-bottom = np.zeros(len(bands))
+# Líneas base positiva y negativa separadas: un término negativo (Agr es una
+# ganancia neta en 63 Hz aquí) se apila bajo cero, y las alturas con signo
+# suman a_total.
+pos_bottom = np.zeros(len(bands))
+neg_bottom = np.zeros(len(bands))
 for term, label in [(att.a_div, "Adiv — divergencia"),
                     (att.a_atm, "Aatm — atmosférica"),
                     (att.a_gr, "Agr — suelo"),
                     (att.a_bar, "Abar — barrera")]:
-    ax.bar(x, term, bottom=bottom, label=label)
-    bottom = bottom + term
+    ax.bar(x, term, bottom=np.where(term >= 0.0, pos_bottom, neg_bottom),
+           label=label)
+    pos_bottom += np.maximum(term, 0.0)
+    neg_bottom += np.minimum(term, 0.0)
 ax.plot(x, att.a_total, "D-", color="black", label="A — total")
 ax.set_xticks(x)
 ax.set_xticklabels([f"{b:g}" for b in bands])

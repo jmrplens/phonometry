@@ -27,7 +27,8 @@ freqs = np.fft.rfftfreq(fs, 1 / fs)
 fig, ax = plt.subplots(figsize=(9, 5))
 for curve in ("A", "C", "Z"):
     spectrum = np.fft.rfft(weighting_filter(impulse, fs, curve=curve))
-    ax.semilogx(freqs[1:], 20 * np.log10(np.abs(spectrum[1:])), label=curve)
+    ax.semilogx(freqs[1:], 20 * np.log10(np.abs(spectrum[1:]) + np.finfo(float).eps),
+                label=curve)
 ax.set(xlim=(10, 20000), ylim=(-80, 10),
        xlabel="Frequency [Hz]", ylabel="Response [dB]")
 ax.grid(True, which="both", alpha=0.3)
@@ -113,7 +114,8 @@ freqs = np.fft.rfftfreq(impulse.size, 1 / fs)
 spectrum = np.fft.rfft(weighting_filter(impulse, fs, curve="G"))
 
 fig, ax = plt.subplots(figsize=(9, 5))
-ax.semilogx(freqs[1:], 20 * np.log10(np.abs(spectrum[1:])))
+ax.semilogx(freqs[1:],
+            20 * np.log10(np.abs(spectrum[1:]) + np.finfo(float).eps))
 ax.plot(10, 0, "o", color="tab:red", label="0 dB at 10 Hz")
 ax.set(xlim=(0.1, 1000), ylim=(-90, 15),
        xlabel="Frequency [Hz]", ylabel="G-weighting response [dB]")
@@ -200,7 +202,8 @@ for high_accuracy, label in ((False, "Plain bilinear"),
                              (True, "Oversampled (default)")):
     weighted = weighting_filter(impulse, fs, curve="A",
                                 high_accuracy=high_accuracy)
-    response = 20 * np.log10(np.abs(np.fft.rfft(weighted)))[1:]
+    response = 20 * np.log10(np.abs(np.fft.rfft(weighted))
+                             + np.finfo(float).eps)[1:]
     ax.semilogx(freqs, response, label=label)
 ax.set(xlim=(1000, 20000), ylim=(-12, 3),
        xlabel="Frequency [Hz]", ylabel="A-weighting response [dB]")

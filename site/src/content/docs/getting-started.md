@@ -79,13 +79,22 @@ print(f"SPL [dB]: {spl}")
 
 ```python
 import matplotlib.pyplot as plt
+import scipy.signal
 
-# Uses `spl` and `freq` from the snippet above.
-# The committed figure additionally overlays the raw-signal PSD in the background.
+# Uses `signal`, `fs`, `spl` and `freq` from the snippet above.
+# Gray background: the raw-signal PSD (Welch), shifted to sit just below the
+# band SPLs so both spectral shapes share one axis.
+f_psd, psd = scipy.signal.welch(signal, fs, nperseg=8192)
+psd_db = 10 * np.log10(psd + 1e-12)
+psd_db += np.max(spl) - np.max(psd_db) - 5
+
 fig, ax = plt.subplots()
-ax.semilogx(freq, spl, marker="o", markerfacecolor="white")
+ax.semilogx(f_psd, psd_db, color="gray", alpha=0.6, label="Raw signal PSD")
+ax.semilogx(freq, spl, marker="o", markerfacecolor="white",
+            label="1/3 octave bands")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("SPL [dB]")
+ax.legend()
 plt.show()
 ```
 

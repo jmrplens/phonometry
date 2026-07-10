@@ -2871,17 +2871,22 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
     )
     x = np.arange(len(bands))
     fig, ax = plt.subplots(figsize=(11, 6.4))
-    ax.bar(x, att.a_div, color=COLOR_PRIMARY, edgecolor=COLOR_FG, linewidth=0.6,
-           label="Adiv — divergence", zorder=3)
-    ax.bar(x, att.a_atm, bottom=att.a_div, color=COLOR_TERTIARY,
-           edgecolor=COLOR_FG, linewidth=0.6, label="Aatm — atmospheric",
-           zorder=3)
-    base = att.a_div + att.a_atm
-    ax.bar(x, att.a_gr, bottom=base, color="#9467bd", edgecolor=COLOR_FG,
-           linewidth=0.6, label="Agr — ground", zorder=3)
-    base = base + att.a_gr
-    ax.bar(x, att.a_bar, bottom=base, color="#ff7f0e", edgecolor=COLOR_FG,
-           linewidth=0.6, label="Abar — barrier", zorder=3)
+    # Separate positive and negative cumulative baselines so a negative term
+    # (Agr is a net gain at 63 Hz here) stacks below zero instead of being
+    # drawn on top of the previous bars; the signed heights sum to a_total.
+    pos_bottom = np.zeros(len(bands))
+    neg_bottom = np.zeros(len(bands))
+    for term, color, label in [
+        (att.a_div, COLOR_PRIMARY, "Adiv — divergence"),
+        (att.a_atm, COLOR_TERTIARY, "Aatm — atmospheric"),
+        (att.a_gr, "#9467bd", "Agr — ground"),
+        (att.a_bar, "#ff7f0e", "Abar — barrier"),
+    ]:
+        bottom = np.where(term >= 0.0, pos_bottom, neg_bottom)
+        ax.bar(x, term, bottom=bottom, color=color, edgecolor=COLOR_FG,
+               linewidth=0.6, label=label, zorder=3)
+        pos_bottom += np.maximum(term, 0.0)
+        neg_bottom += np.minimum(term, 0.0)
     ax.plot(x, att.a_total, marker="D", color=COLOR_SECONDARY, linewidth=2.0,
             markersize=6, markerfacecolor="white", markeredgewidth=1.4,
             zorder=5, label="A — total")
@@ -3332,34 +3337,34 @@ def generate_sound_power_reverberation_result(output_dir: str) -> None:
 def generate_sound_power_intensity_result(output_dir: str) -> None:
     """ISO 9614-2: intensity-scanning LW spectrum from segment sweeps."""
     print("Generating sound_power_intensity_result.png...")
-    import warnings
-
     from phonometry import sound_power_intensity
 
     # The sound-power guide's section-3 example: two repeated intensity sweeps
     # over 6 surface segments and 6 octave bands, with the segment surface SPL
     # and the probe's pressure-residual intensity index. The partial powers
     # In_i * Si sum to the band LW; every band passes the field-indicator
-    # criteria at engineering grade here.
+    # criteria at engineering grade here (no SoundPowerWarning fires).
     freqs = np.array([125, 250, 500, 1000, 2000, 4000], dtype=float)
     areas = np.full(6, 0.5)
     rng = np.random.default_rng(0)
     scan1 = np.abs(rng.normal(1e-4, 2e-5, size=(6, 6)))
     scan2 = scan1 * (1.0 + rng.normal(0.0, 0.02, size=(6, 6)))
     pressure = np.full((6, 6), 80.0)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        result = sound_power_intensity(
-            scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
-            pressure_residual_index=12.0, frequencies=freqs,
-            band_type="octave", grade="engineering",
-        )
+    result = sound_power_intensity(
+        scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
+        pressure_residual_index=12.0, frequencies=freqs,
+        band_type="octave", grade="engineering",
+    )
 
     lw = result.sound_power_level
     lwa = result.sound_power_level_a
     positions = np.arange(freqs.size, dtype=float)
     fig, ax = plt.subplots(figsize=(10, 6.3))
-    ax.bar(positions, np.nan_to_num(lw), width=0.7, color=COLOR_PRIMARY,
+    # Plot only the determinable (finite-LW) bands; an undeterminable band
+    # (net inflow -> NaN) is left as a gap rather than faked to 0 dB. All six
+    # bands are finite with this synthetic data, so this is future-proofing.
+    finite = np.isfinite(lw)
+    ax.bar(positions[finite], lw[finite], width=0.7, color=COLOR_PRIMARY,
            edgecolor=COLOR_FG, linewidth=0.7, zorder=3)
     ax.set_xticks(positions)
     ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")

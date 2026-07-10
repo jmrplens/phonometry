@@ -20,7 +20,7 @@ $$
 a first-order low-pass on the squared signal. The time constant τ sets the
 trade-off: **Fast** (125 ms) follows speech-like fluctuations, **Slow** (1 s)
 steadies the readout for quasi-stationary noise. After a step onset the
-envelope reaches 63 % of its final value in one τ and ~99.8 % after 8τ —
+envelope reaches 63 % of its final value in one τ and ~99.97 % after 8τ —
 that is why level analyses discard the first instants of a recording.
 
 ## 2. The three time weightings
@@ -99,8 +99,9 @@ the level functions, which do it for you.
 ## 4. Verified ballistics (IEC 61672-1 Table 4)
 
 The Fast envelope's response to 4 kHz tonebursts lands exactly on the
-standard's reference values — enforced in CI for burst durations from 1 s down
-to 1 ms (F and S weightings, class 1 acceptance limits):
+standard's reference values — the example below verifies the 200 ms Fast
+burst row; the CI suite covers the full Table 4, from 1 s down to 1 ms for F
+and 1 s down to 2 ms for S, at class 1 acceptance limits:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" style="width:80%">
 

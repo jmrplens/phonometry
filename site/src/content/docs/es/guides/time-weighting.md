@@ -22,7 +22,7 @@ $$
 un paso-bajo de primer orden sobre la señal al cuadrado. La constante de tiempo
 τ fija el compromiso: **Fast** (125 ms) sigue fluctuaciones del tipo del habla
 y **Slow** (1 s) estabiliza la lectura para ruido cuasi estacionario. Tras un
-escalón, la envolvente alcanza el 63 % de su valor final en un τ y ~99,8 %
+escalón, la envolvente alcanza el 63 % de su valor final en un τ y ~99,97 %
 tras 8τ — por eso los análisis de nivel descartan los primeros instantes de una
 grabación.
 
@@ -102,8 +102,9 @@ usa las funciones de nivel, que lo hacen por ti.
 ## 4. Respuesta temporal verificada (IEC 61672-1, Tabla 4)
 
 La respuesta de la envolvente Fast a ráfagas de tono de 4 kHz cae exactamente
-sobre los valores de referencia de la norma — verificado en CI para duraciones
-de 1 s a 1 ms (ponderaciones F y S, límites de aceptación de clase 1):
+sobre los valores de referencia de la norma — el ejemplo de abajo verifica la
+fila de la ráfaga Fast de 200 ms; la batería de CI cubre la Tabla 4 completa,
+de 1 s a 1 ms en F y de 1 s a 2 ms en S, con límites de aceptación de clase 1:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_es_dark.png" alt="Respuestas de la envolvente Fast a ráfagas de 200, 50 y 10 ms alcanzando exactamente los valores de la Tabla 4 de IEC 61672-1" style="width:80%">
 

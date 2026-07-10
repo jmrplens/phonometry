@@ -79,13 +79,22 @@ print(f"SPL [dB]: {spl}")
 
 ```python
 import matplotlib.pyplot as plt
+import scipy.signal
 
-# Usa `spl` y `freq` del snippet anterior.
-# La figura publicada superpone además la PSD de la señal cruda de fondo.
+# Usa `signal`, `fs`, `spl` y `freq` del snippet anterior.
+# Fondo gris: la PSD de la señal cruda (Welch), desplazada justo por debajo
+# de los SPL de banda para comparar ambas formas espectrales en un mismo eje.
+f_psd, psd = scipy.signal.welch(signal, fs, nperseg=8192)
+psd_db = 10 * np.log10(psd + 1e-12)
+psd_db += np.max(spl) - np.max(psd_db) - 5
+
 fig, ax = plt.subplots()
-ax.semilogx(freq, spl, marker="o", markerfacecolor="white")
+ax.semilogx(f_psd, psd_db, color="gray", alpha=0.6, label="PSD de la señal cruda")
+ax.semilogx(freq, spl, marker="o", markerfacecolor="white",
+            label="Bandas de 1/3 de octava")
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("SPL [dB]")
+ax.legend()
 plt.show()
 ```
 

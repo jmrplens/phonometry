@@ -128,6 +128,7 @@ res.plot()
 plt.show()
 
 # A mano: un espectro de barras de LW con el total ponderado A en el título.
+freqs = res.frequencies
 positions = np.arange(freqs.size)
 fig, ax = plt.subplots()
 ax.bar(positions, res.sound_power_level, width=0.7, color="#1f77b4")
@@ -260,6 +261,7 @@ rev.plot()
 plt.show()
 
 # A mano: un espectro de barras de LW con el total ponderado A en el título.
+freqs = rev.frequencies
 positions = np.arange(freqs.size)
 fig, ax = plt.subplots()
 ax.bar(positions, rev.sound_power_level, width=0.7, color="#1f77b4")
@@ -400,6 +402,7 @@ res.plot()
 plt.show()
 
 # A mano: un espectro de barras de LW con el total ponderado A en el título.
+freqs = res.frequencies
 positions = np.arange(freqs.size)
 fig, ax = plt.subplots()
 ax.bar(positions, res.sound_power_level, width=0.7, color="#1f77b4")

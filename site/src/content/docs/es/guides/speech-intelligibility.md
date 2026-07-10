@@ -168,6 +168,7 @@ print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL a 1 kHz
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import NullFormatter
 import phonometry as ph
 
 # Los cuatro espectros de la Tabla 3 de ANSI S3.5-1997 y el ruido fijo de arriba.
@@ -187,7 +188,7 @@ for effort in efforts:
 ax_s.set_xscale("log")
 ax_s.set_xticks(list(freqs))
 ax_s.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
-ax_s.xaxis.set_minor_formatter(plt.NullFormatter())
+ax_s.xaxis.set_minor_formatter(NullFormatter())
 ax_s.set_xlabel("Banda de tercio de octava [Hz]")
 ax_s.set_ylabel("Nivel espectral del habla [dB SPL]")
 ax_s.legend()

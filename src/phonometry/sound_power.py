@@ -255,7 +255,9 @@ def environmental_correction(
     :return: ``K2`` in decibels; a scalar for scalar inputs, otherwise an array
         per band.
     """
-    if not isinstance(room_volume, str):
+    # An explicit None matches the old default and stays silent; only a real
+    # value through the deprecated alias warns.
+    if not isinstance(room_volume, str) and room_volume is not None:
         _warn_renamed(
             "the 'room_volume' keyword of environmental_correction()",
             "'volume'",
@@ -469,7 +471,7 @@ def sound_power_pressure(
     :param room_volume: Deprecated alias of ``volume`` (remove in 4.0).
     :return: :class:`SoundPowerResult`.
     """
-    if not isinstance(room_volume, str):
+    if not isinstance(room_volume, str) and room_volume is not None:
         _warn_renamed(
             "the 'room_volume' keyword of sound_power_pressure()", "'volume'"
         )

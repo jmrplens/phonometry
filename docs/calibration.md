@@ -55,10 +55,10 @@ calibrator_recording = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # 2. Calculate sensitivity factor
-sensitivity = sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
+calibration_factor = sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
 
 # 3. Apply calibration to your measurements
-spl, freq = octave_filter(recording, fs, calibration_factor=sensitivity)
+spl, freq = octave_filter(recording, fs, calibration_factor=calibration_factor)
 # Now 'spl' values are in real-world dB SPL!
 ```
 

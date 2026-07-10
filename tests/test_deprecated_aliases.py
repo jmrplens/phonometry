@@ -184,3 +184,15 @@ def test_sound_power_pressure_room_volume_warns_and_forwards() -> None:
     np.testing.assert_allclose(
         legacy.sound_power_level, canonical.sound_power_level
     )
+
+
+def test_room_volume_explicit_none_stays_silent() -> None:
+    # None was the old default; passing it through the deprecated alias must
+    # not warn (only a real value does).
+    import warnings
+
+    import phonometry as ph
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        ph.environmental_correction(50.0, absorption_area=10.0, room_volume=None)

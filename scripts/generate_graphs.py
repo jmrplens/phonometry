@@ -164,6 +164,11 @@ _ES_EXACT = {
     "D (level difference)": "D (diferencia de nivel)",
     "DnT (standardized)": "DnT (estandarizada)",
     "octave bands, T0 = 0.5 s": "bandas de octava, T0 = 0,5 s",
+    # absorption_uncertainty figure (ISO 12999-2)
+    "ISO 12999-2 Sound Absorption Coefficient Uncertainty":
+        "Incertidumbre del coeficiente de absorción sonora (ISO 12999-2)",
+    "+/-U (k = 2), reproducibility": "±U (k = 2), reproducibilidad",
+    "alpha_s (ISO 354)": "alpha_s (ISO 354)",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3102,6 +3107,55 @@ def generate_survey_insulation(output_dir: str) -> None:
     plt.close()
 
 
+def generate_absorption_uncertainty(output_dir: str) -> None:
+    """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
+    print("Generating absorption_uncertainty...")
+    from phonometry import sound_absorption_coefficient_uncertainty
+
+    # The standard's worked Example (Table 4): a measured sound absorption
+    # coefficient alpha_s per one-third-octave band and its reproducibility
+    # expanded uncertainty at k = 2.
+    freqs = np.array([63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+                      630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000],
+                     dtype=float)
+    alpha_s = np.array([0.33, 0.35, 0.39, 0.38, 0.37, 0.36, 0.36, 0.36, 0.43,
+                        0.49, 0.58, 0.63, 0.68, 0.71, 0.73, 0.75, 0.77, 0.79,
+                        0.81, 0.81])
+    res = sound_absorption_coefficient_uncertainty(alpha_s, freqs, confidence=0.95)
+    u = res.expanded_uncertainty
+
+    x = np.arange(len(freqs))
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.fill_between(x, alpha_s - u, alpha_s + u, color=COLOR_TERTIARY, alpha=0.22,
+                    zorder=0, label="+/-U (k = 2), reproducibility")
+    ax.plot(x, alpha_s, "-", color=COLOR_PRIMARY, linewidth=2.4, marker="o",
+            markersize=6, zorder=5, label="alpha_s (ISO 354)")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{int(b)}" for b in freqs], rotation=45, fontsize=8)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Sound absorption coefficient")
+    ax.set_ylim(0.0, 1.15)
+    ax.set_title("ISO 12999-2 Sound Absorption Coefficient Uncertainty",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "sigma_R = m alpha_s + n  (Table 1)",
+        "U = k u,  k = 2  (95 %)",
+    ]
+    ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=11, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "absorption_uncertainty.png")
+    plt.close()
+
+
 def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     """ISO 12999-1 per-band + single-number measurement uncertainty (situation B)."""
     print("Generating insulation_uncertainty_demo.png...")
@@ -4499,6 +4553,7 @@ def generate_all(img_dir: str) -> None:
     generate_facade_prediction(img_dir)
     generate_intensity_insulation(img_dir)
     generate_survey_insulation(img_dir)
+    generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 
     # Outdoor propagation & occupational exposure (ISO 9613-1/2, ISO 9612)

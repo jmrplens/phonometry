@@ -1211,6 +1211,74 @@ def _chk_iso12999_expanded() -> Outcome:
     return numeric(expected, computed, 1e-9, unit="dB", places=6)
 
 
+@register(
+    "Building prediction & uncertainty",
+    "ISO 12999-2:2020 Table 4 / Formula (1)",
+    "Absorption coefficient +/-U (k=2), reproducibility, 20 x 1/3-oct bands",
+)
+def _chk_iso12999_2_table4() -> Outcome:
+    res = ph.sound_absorption_coefficient_uncertainty(
+        ref.ISO12999_2_TABLE4_ALPHA_S, ref.ISO12999_2_TABLE4_FREQ, confidence=0.95
+    )
+    got = res.reported_expanded_uncertainty
+    expected = np.asarray(ref.ISO12999_2_TABLE4_U_K2, dtype=float)
+    ok = bool(np.array_equal(got, expected))
+    return Outcome(
+        expected=f"U(k=2) = {expected.tolist()}",
+        computed=f"U(k=2) = {got.tolist()}",
+        delta="exact",
+        passed=ok,
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "ISO 12999-2:2020 Table 5 / Formula (4)",
+    "Practical coefficient +/-U (k=2), reproducibility, 5 octave bands",
+)
+def _chk_iso12999_2_table5() -> Outcome:
+    res = ph.practical_coefficient_uncertainty(
+        ref.ISO12999_2_TABLE5_ALPHA_P, ref.ISO12999_2_TABLE5_FREQ
+    )
+    got = res.reported_expanded_uncertainty
+    expected = np.asarray(ref.ISO12999_2_TABLE5_U_K2, dtype=float)
+    ok = bool(np.array_equal(got, expected))
+    return Outcome(
+        expected=f"U(k=2) = {expected.tolist()}",
+        computed=f"U(k=2) = {got.tolist()}",
+        delta="exact",
+        passed=ok,
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "ISO 12999-2:2020 Clause 7, Examples 1/2",
+    "Single-number U (k=2): alpha_w and DLalpha,NRD",
+)
+def _chk_iso12999_2_single_numbers() -> Outcome:
+    u_aw = float(
+        ph.weighted_coefficient_uncertainty(
+            ref.ISO12999_2_ALPHA_W_EXAMPLE
+        ).reported_expanded_uncertainty[0]
+    )
+    u_dl = float(
+        ph.single_number_rating_uncertainty(
+            ref.ISO12999_2_DLALPHA_EXAMPLE
+        ).reported_expanded_uncertainty[0]
+    )
+    ok = (
+        u_aw == ref.ISO12999_2_ALPHA_W_U_K2 and u_dl == ref.ISO12999_2_DLALPHA_U_K2
+    )
+    return Outcome(
+        expected=f"alpha_w +/-{ref.ISO12999_2_ALPHA_W_U_K2}, "
+        f"DLalpha +/-{ref.ISO12999_2_DLALPHA_U_K2} dB",
+        computed=f"alpha_w +/-{u_aw}, DLalpha +/-{u_dl} dB",
+        delta="exact",
+        passed=ok,
+    )
+
+
 # ===========================================================================
 # Domain 8 - Outdoor propagation & occupational exposure
 # ===========================================================================

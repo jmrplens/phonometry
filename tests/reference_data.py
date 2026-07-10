@@ -682,3 +682,31 @@ ISO15186_1_REF_RI = ISO717_1_ANNEX_C_R  # target intensity SRI (16 bands)
 ISO15186_1_REF_RIW = 30  # RI,w through the ISO 717-1 engine
 ISO15186_1_KC_BANDS = (125.0, 250.0, 500.0, 1000.0, 2000.0)
 ISO15186_1_KC_B2 = [1.735, 0.954, 0.503, 0.259, 0.131]  # 10 lg(1+61,4/f), 3 dp
+
+# ---------------------------------------------------------------------------
+# ISO 12999-2:2020 - measurement uncertainty for sound absorption.
+# The standard's own worked examples are the oracle: Table 4 (sound absorption
+# coefficient alpha_s and expanded uncertainty +/-U at k=2, reproducibility,
+# one-third-octave 63-5000 Hz) and Table 5 (practical coefficient alpha_p,
+# octave 250-4000 Hz). Example 1: alpha_w = 0,70 (MH) +/- 0,07 (k=2);
+# Example 2: DLalpha,NRD = (8,1 +/- 1,6) dB (k=2).
+# ---------------------------------------------------------------------------
+ISO12999_2_TABLE4_FREQ = [
+    63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+    630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000,
+]
+ISO12999_2_TABLE4_ALPHA_S = [
+    0.33, 0.35, 0.39, 0.38, 0.37, 0.36, 0.36, 0.36, 0.43, 0.49,
+    0.58, 0.63, 0.68, 0.71, 0.73, 0.75, 0.77, 0.79, 0.81, 0.81,
+]
+ISO12999_2_TABLE4_U_K2 = [
+    0.33, 0.26, 0.22, 0.17, 0.13, 0.11, 0.09, 0.08, 0.08, 0.08,
+    0.08, 0.08, 0.08, 0.09, 0.09, 0.09, 0.10, 0.11, 0.13, 0.16,
+]
+ISO12999_2_TABLE5_FREQ = [250, 500, 1000, 2000, 4000]
+ISO12999_2_TABLE5_ALPHA_P = [0.50, 0.65, 0.70, 0.85, 0.80]
+ISO12999_2_TABLE5_U_K2 = [0.09, 0.08, 0.08, 0.08, 0.10]
+ISO12999_2_ALPHA_W_EXAMPLE = 0.70
+ISO12999_2_ALPHA_W_U_K2 = 0.07
+ISO12999_2_DLALPHA_EXAMPLE = 8.1
+ISO12999_2_DLALPHA_U_K2 = 1.6

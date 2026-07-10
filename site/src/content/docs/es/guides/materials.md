@@ -354,12 +354,80 @@ micrófonos `(H1, H2, H3, H4)` medidas en cada carga; sus métodos
 `absorption_hard_backed`, `characteristic_impedance_material`,
 `material_wavenumber`) leen entonces las magnitudes de ASTM E2611.
 
+## 4. Incertidumbre de medida de la absorción (ISO 12999-2)
+
+Un coeficiente de absorción valorado significa poco sin su incertidumbre. La
+ISO 12999-2:2020 da la incertidumbre típica $u$ de las magnitudes que produce una
+medida en cámara reverberante (ISO 354) y sus valoraciones (ISO 11654, EN 1793-1),
+estimada a partir de ensayos interlaboratorio según ISO 5725. Es la compañera —
+en absorción sonora— de la incertidumbre de aislamiento de la ISO 12999-1
+([Acústica de la edificación](/phonometry/es/guides/building-acoustics/)).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty_es.svg" alt="Incertidumbre del coeficiente de absorción sonora ISO 12999-2: el espectro medido de alpha_s en bandas de tercio de octava de 63 Hz a 5000 Hz con una banda sombreada de más-menos U con factor de cobertura k = 2, reproduciendo el ejemplo resuelto de la Tabla 4 de la norma" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty_es_dark.svg" alt="Incertidumbre del coeficiente de absorción sonora ISO 12999-2: el espectro medido de alpha_s en bandas de tercio de octava de 63 Hz a 5000 Hz con una banda sombreada de más-menos U con factor de cobertura k = 2, reproduciendo el ejemplo resuelto de la Tabla 4 de la norma" style="width:80%">
+
+**Bandas de tercio de octava (cláusula 5).** Para el coeficiente de absorción, la
+desviación típica de reproducibilidad es $\sigma_R = m\,\alpha_s + n$ (fórmula (1)),
+y para el área de absorción equivalente $\sigma_R = m\,A_T + n\,S$ con
+$S = 10\ \text{m}^2$ (fórmula (2)), donde $m$ y $n$ son las constantes dependientes
+de la frecuencia de la Tabla 1 (63–5000 Hz). El valor de repetibilidad es
+$\sigma_r = 0{,}6\,\sigma_R$ (fórmula (3)).
+
+**Coeficiente práctico (cláusula 6).** Para el coeficiente práctico de ISO 11654,
+$\sigma_R = m\,\alpha_p + n$ en bandas de octava con las constantes de la Tabla 2
+(250–4000 Hz); de nuevo $\sigma_r = 0{,}6\,\sigma_R$.
+
+**Números únicos (cláusula 7).** El coeficiente ponderado $\alpha_w$ tiene una
+incertidumbre típica constante ($\sigma_R = 0{,}035$, $\sigma_r = 0{,}020$); la
+valoración de número único $DL_{\alpha,\text{NRD}}$ de EN 1793-1 escala con el
+valor ($\sigma_R = 0{,}10\,DL_\alpha$, $\sigma_r = 0{,}02\,DL_\alpha$).
+
+**Notificación (cláusula 8).** La incertidumbre expandida es $U = k\,u$
+(fórmula (10)) con el factor de cobertura $k$ de la Tabla 3 ($k = 2{,}0$ al 95 %,
+gaussiano). El $U$ notificado se redondea a dos decimales para los coeficientes de
+absorción y a un decimal para el área equivalente y $DL_{\alpha,\text{NRD}}$.
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import sound_absorption_coefficient_uncertainty
+
+# Ejemplo resuelto de la Tabla 4 de ISO 12999-2: alpha_s por tercio de octava.
+freqs = [63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+         630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+alpha_s = [0.33, 0.35, 0.39, 0.38, 0.37, 0.36, 0.36, 0.36, 0.43, 0.49,
+           0.58, 0.63, 0.68, 0.71, 0.73, 0.75, 0.77, 0.79, 0.81, 0.81]
+result = sound_absorption_coefficient_uncertainty(alpha_s, freqs, confidence=0.95)
+result.plot()   # alpha_s con la banda +/-U (k = 2) de reproducibilidad
+plt.show()
+```
+</details>
+
+```python
+from phonometry import (
+    sound_absorption_coefficient_uncertainty,
+    weighted_coefficient_uncertainty,
+    single_number_rating_uncertainty,
+)
+
+# Incertidumbre de reproducibilidad de alpha_s a 1000 Hz (Tabla 1: m=0,040, n=0,015).
+r = sound_absorption_coefficient_uncertainty([0.68], [1000], confidence=0.95)
+print(round(float(r.standard_uncertainty[0]), 4))            # 0.0422 (sigma_R)
+print(float(r.reported_expanded_uncertainty[0]))             # 0.08  (U, k=2)
+
+# Valoraciones de número único (ejemplos resueltos de la cláusula 7).
+print(float(weighted_coefficient_uncertainty(0.70).reported_expanded_uncertainty[0]))  # 0.07
+print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[0]))   # 1.6
+```
+
 ---
 
 **Normas.** ISO 11654:1997 (valoración ponderada de absorción sonora);
 ISO 9053-1:2018 (resistencia estática al flujo de aire); ISO 9053-2:2020
 (resistencia alterna al flujo de aire); BS EN ISO 10534-1:2001 y BS EN ISO 10534-2:2001
 (tubo de impedancia); ASTM E2611-19 (pérdida por transmisión de cuatro
-micrófonos). Toda ecuación se deriva del texto de la norma y se valida frente a
+micrófonos); ISO 12999-2:2020 (incertidumbre de medida de la absorción sonora).
+Toda ecuación se deriva del texto de la norma y se valida frente a
 los ejemplos resueltos de las propias normas (ISO 11654 Anexo A, ISO 9053-2
-Anexo A.3) e identidades en forma cerrada.
+Anexo A.3, ISO 12999-2 Tablas 4/5) e identidades en forma cerrada.

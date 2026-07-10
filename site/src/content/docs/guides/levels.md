@@ -79,7 +79,7 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 # LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.png" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.svg" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.svg" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" style="width:80%">
 
 *L10 tracks the event peaks, L50 the median level and L90 the background.*
 
@@ -154,7 +154,7 @@ so events of any duration become directly comparable, and $N$ identical
 events sum as $+10\log_{10}N$. This is the building block of airport and
 railway noise models.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept.png" alt="A vehicle pass-by level history with its Leq over the whole event and the equal-energy one-second SEL block" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_dark.png" alt="A vehicle pass-by level history with its Leq over the whole event and the equal-energy one-second SEL block" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept.svg" alt="A vehicle pass-by level history with its Leq over the whole event and the equal-energy one-second SEL block" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_dark.svg" alt="A vehicle pass-by level history with its Leq over the whole event and the equal-energy one-second SEL block" style="width:80%">
 
 ### Noise dose: sound exposure and LEX,8h
 
@@ -205,7 +205,7 @@ r = composite_rating_level([(63.2, 12, 0.0),    # day
                             (51.4, 8, 10.0)])   # night  (+10) == lden
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.png" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_dark.png" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.svg" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_dark.svg" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" style="width:80%">
 
 ### `lden()` / `ldn()` / `composite_rating_level()` parameters
 

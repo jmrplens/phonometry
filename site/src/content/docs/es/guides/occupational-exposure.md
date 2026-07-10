@@ -33,7 +33,7 @@ de exposición homogéneo y normalizan la duración efectiva de la jornada. El n
 diario es el mismo en ambos casos; las estrategias difieren en cómo se construye
 la **incertidumbre**.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_es.png" alt="Exposición por tareas del anexo D de la ISO 9612: las tres contribuciones de tarea a LEX,8h como barras, la línea del LEX,8h diario sumado en energía y la banda del límite superior unilateral al 95 % LEX,8h + U por encima" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_es_dark.png" alt="Exposición por tareas del anexo D de la ISO 9612: las tres contribuciones de tarea a LEX,8h como barras, la línea del LEX,8h diario sumado en energía y la banda del límite superior unilateral al 95 % LEX,8h + U por encima" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_es.svg" alt="Exposición por tareas del anexo D de la ISO 9612: las tres contribuciones de tarea a LEX,8h como barras, la línea del LEX,8h diario sumado en energía y la banda del límite superior unilateral al 95 % LEX,8h + U por encima" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_es_dark.svg" alt="Exposición por tareas del anexo D de la ISO 9612: las tres contribuciones de tarea a LEX,8h como barras, la línea del LEX,8h diario sumado en energía y la banda del límite superior unilateral al 95 % LEX,8h + U por encima" style="width:80%">
 
 <details>
 <summary>Mostrar el código de esta figura</summary>

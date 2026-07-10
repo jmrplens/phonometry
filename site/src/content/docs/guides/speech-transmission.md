@@ -34,7 +34,7 @@ m(F) = \frac{1}{\sqrt{1 + \left(2\pi F\,\frac{T_{60}}{13.8}\right)^2}}
 \cdot \frac{1}{1 + 10^{-\mathrm{SNR}/10}}
 $$
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60.png" alt="STI versus reverberation time with the IEC 60268-16 Annex F rating bands shaded" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_dark.png" alt="STI versus reverberation time with the IEC 60268-16 Annex F rating bands shaded" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60.svg" alt="STI versus reverberation time with the IEC 60268-16 Annex F rating bands shaded" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_dark.svg" alt="STI versus reverberation time with the IEC 60268-16 Annex F rating bands shaded" style="width:80%">
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_dark.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" style="width:92%">
 

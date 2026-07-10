@@ -38,7 +38,7 @@ $\alpha$ climbs about two decades from 50 Hz to 10 kHz, and — because humidity
 sets $f_{rO}$ — sweeping the humidity moves a relaxation peak across the band, so
 the driest air is not always the least absorbing.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha.png" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency on log-log axes, for four temperature and humidity combinations, showing the f-squared low-frequency growth and the humidity-dependent relaxation roll-off" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency on log-log axes, for four temperature and humidity combinations, showing the f-squared low-frequency growth and the humidity-dependent relaxation roll-off" width="80%"></picture>
 
 *The dry 20 °C / 10 % curve absorbs most at mid frequencies, but the humid
 curves overtake it below ~200 Hz — the relaxation signature.*
@@ -166,7 +166,7 @@ barrier helps most at high frequency (short wavelength) until it saturates at th
 cap, atmospheric absorption bites only at 8 kHz, and the ground dip lives in the
 mid bands.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown.png" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/outdoor_attenuation_breakdown.svg" alt="ISO 9613-2 per-octave-band attenuation breakdown as a stacked bar of Adiv, Aatm, Agr and Abar with the total A overlaid, for a 200 m path over porous ground with a 4 m barrier" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>

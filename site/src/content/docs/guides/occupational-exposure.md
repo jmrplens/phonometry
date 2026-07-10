@@ -28,7 +28,7 @@ random samples over a homogeneous exposure group and normalise the effective-day
 duration. The daily level is the same either way; the strategies differ in how
 the **uncertainty** is built.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.png" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_dark.png" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.svg" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_dark.svg" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" style="width:80%">
 
 <details>
 <summary>Show the code for this figure</summary>

@@ -27,7 +27,7 @@ doubles the sone value.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker.svg" alt="ISO 532-1 Zwicker loudness chain: 28 one-third-octave band levels, transmission and lower-critical-band grouping, core loudness of the 20 critical bands, specific loudness over Bark, integrated into total loudness N in sones and loudness level in phons" style="width:78%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_dark.svg" alt="ISO 532-1 Zwicker loudness chain: 28 one-third-octave band levels, transmission and lower-critical-band grouping, core loudness of the 20 critical bands, specific loudness over Bark, integrated into total loudness N in sones and loudness level in phons" style="width:78%">
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.png" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_dark.png" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_dark.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" style="width:80%">
 
 *Same band level, very different loudness: energy spread over many critical
 bands (red) sums to far more sones than the same level concentrated in one
@@ -122,7 +122,7 @@ normalized so the reference sound — critical-band-wide noise at 1 kHz,
 60 dB — is exactly **1.00 acum** (DIN 45692 clause 6; the derived
 $k = 0.108$ sits inside the normative window 0.105–0.115).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.png" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.png" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" style="width:80%">
 
 ```python
 from phonometry import sharpness_din
@@ -151,7 +151,7 @@ freqs, spl = equal_loudness_contour(40.0)   # the classic 40-phon contour
 phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.png" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.png" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%">
 
 Validity per clause 4.1: 20-90 phon (80 phon above 4 kHz); the implementation
 is verified against the Annex B tables in CI. Note this is the loudness of
@@ -179,7 +179,7 @@ All three are anchored so a **1 kHz tone at 40 dB SPL is ≈ 1 sone**; the value
 are not interchangeable digit-for-digit because the models differ in their
 auditory filters and their loudness summation.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison.png" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_dark.png" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison.svg" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_dark.svg" alt="Loudness of a 1 kHz tone as a function of level for the Zwicker, Moore-Glasberg and Sottek models, all passing through 1 sone at 40 dB SPL" style="width:80%">
 
 *The three models agree at the 1 sone / 40 dB anchor and diverge with level:
 Zwicker doubles the sone value every +10 phon, while the Sottek model grows
@@ -277,7 +277,7 @@ print(f"long-term loudness exceeded 5% of the time: {res.percentiles[5.0]:.3f} s
 res.plot()   # short-term S'(t) and long-term S''(t) loudness vs time
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness.png" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_dark.png" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness.svg" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_dark.svg" alt="Short-term and long-term Moore-Glasberg loudness traces for a tone burst, showing the fast attack of the short-term loudness and the slower release of the long-term loudness" style="width:80%">
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -339,7 +339,7 @@ print(res.specific_loudness.shape)          # (53,) average specific loudness N'
 res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness.png" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_dark.png" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness.svg" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_dark.svg" alt="Sottek Hearing Model average specific loudness N'(z) over the 53 Bark_HMS bands for a 1 kHz tone, peaking at the tone's critical band" style="width:80%">
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -443,7 +443,7 @@ print(f"R = {res.roughness:.4f} asper")   # 1.0735 asper (reference target 1.0)
 res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.png" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_dark.png" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.svg" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_dark.svg" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" style="width:80%">
 
 <details>
 <summary>Show the code for this figure</summary>

@@ -28,7 +28,7 @@ that is why level analyses discard the first instants of a recording.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting.gif" alt="Animation: the Fast, Slow and Impulse detectors chasing a tone burst — Fast rises and falls quickly, Slow lags, and Impulse rises fast but decays the slowest" width="88%"></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.png" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.svg" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -106,7 +106,7 @@ standard's reference values — the example below verifies the 200 ms Fast
 burst row; the CI suite covers the full Table 4, from 1 s down to 1 ms for F
 and 1 s down to 2 ms for S, at class 1 acceptance limits:
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.png" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_burst_iec.svg" alt="Fast envelope responses to 200, 50 and 10 ms tone bursts peaking exactly at the IEC 61672-1 Table 4 reference values" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>

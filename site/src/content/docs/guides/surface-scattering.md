@@ -91,7 +91,7 @@ print(np.round(result.scattering[[0, 6, 12]], 3))   # [0.011 0.428 0.844]
 result.plot()   # s(f) on a log-frequency axis, 0 to 1 (needs matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient.png" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_dark.png" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" style="width:88%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient.svg" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/scattering_coefficient_dark.svg" alt="The random-incidence scattering coefficient s of a diffusing surface over the 13 one-third-octave bands from 250 to 4000 Hz, rising smoothly from near zero at low frequency towards 0.84 at 4 kHz" style="width:88%">
 
 *The scattering coefficient climbs with frequency: at low frequency the surface
 relief is small compared with the wavelength and the reflection stays specular
@@ -202,7 +202,7 @@ print(round(result.coefficient, 2))   # 0.82
 result.plot()   # polar reflected response, d in the title (needs matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar.png" alt="A polar plot of the reflected sound-pressure level of a diffusing surface over 37 receivers from -90 to 90 degrees, the response spread almost uniformly over angle, giving an autocorrelation diffusion coefficient d of about 0.82" style="width:72%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_dark.png" alt="A polar plot of the reflected sound-pressure level of a diffusing surface over 37 receivers from -90 to 90 degrees, the response spread almost uniformly over angle, giving an autocorrelation diffusion coefficient d of about 0.82" style="width:72%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar.svg" alt="A polar plot of the reflected sound-pressure level of a diffusing surface over 37 receivers from -90 to 90 degrees, the response spread almost uniformly over angle, giving an autocorrelation diffusion coefficient d of about 0.82" style="width:72%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diffusion_polar_dark.svg" alt="A polar plot of the reflected sound-pressure level of a diffusing surface over 37 receivers from -90 to 90 degrees, the response spread almost uniformly over angle, giving an autocorrelation diffusion coefficient d of about 0.82" style="width:72%">
 
 *The reflected energy fills the whole semicircle rather than concentrating in a
 specular lobe, so the autocorrelation diffusion coefficient is high
@@ -328,7 +328,7 @@ print(np.round(result.absorption[[0, 6, 12]], 2))  # [0.31 0.65 1.  ]
 result.plot()   # alpha(f) bar chart over 250-4000 Hz (needs matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption.png" alt="An in-situ one-third-octave road-surface absorption spectrum computed by the reflection-factor route from a synthetic road reflection, rising from about 0.3 at 250 Hz to near 1.0 above 2 kHz" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption_dark.png" alt="An in-situ one-third-octave road-surface absorption spectrum computed by the reflection-factor route from a synthetic road reflection, rising from about 0.3 at 250 Hz to near 1.0 above 2 kHz" style="width:88%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption.svg" alt="An in-situ one-third-octave road-surface absorption spectrum computed by the reflection-factor route from a synthetic road reflection, rising from about 0.3 at 250 Hz to near 1.0 above 2 kHz" style="width:88%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_absorption_dark.svg" alt="An in-situ one-third-octave road-surface absorption spectrum computed by the reflection-factor route from a synthetic road reflection, rising from about 0.3 at 250 Hz to near 1.0 above 2 kHz" style="width:88%">
 
 *The absorption rises with frequency because the surface reflects less of the
 high-frequency energy, exactly as the low-pass reflection factor $r_0(f)$

@@ -42,7 +42,7 @@ altos porque unas bandas relativamente más anchas enmascaran más.
 
 ## 2. Dónde medir (ECMA-74) y práctica
 
-ECMA-74 (que delega la evaluación tonal en ECMA-418-1) también fija dónde medir alrededor de un equipo:
+ECMA-74 (que delega la evaluación tonal en ECMA-418-1) también fija dónde medir alrededor de un equipo — solo contexto: phonometry implementa las evaluaciones de ECMA-418-1, no el procedimiento de medida del Anexo D de ECMA-74:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_es.svg" alt="Posiciones de medida de emisión ECMA-74: micrófono del operador sentado a 0,25 m y 1,20 m, y las cuatro posiciones de observador a 1 m" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_es_dark.svg" alt="Posiciones de medida de emisión ECMA-74: micrófono del operador sentado a 0,25 m y 1,20 m, y las cuatro posiciones de observador a 1 m" style="width:92%">
 
@@ -80,6 +80,4 @@ Ambos devuelven un `ToneAssessment(frequency, ratio_db, criterion_db, prominent)
 **Normas.** ECMA-418-1:2024 (3.ª edición), *Psychoacoustic metrics for ITT
 equipment — Part 1: Prominent discrete tones* — la relación tono-ruido
 (apartado 11), la relación de prominencia (apartado 12), el modelo de banda
-crítica y los criterios de prominencia dependientes de la frecuencia; el
-Anexo D de ECMA-74 — las posiciones de medida de emisión, que delegan la
-evaluación tonal en ECMA-418-1.
+crítica y los criterios de prominencia dependientes de la frecuencia.

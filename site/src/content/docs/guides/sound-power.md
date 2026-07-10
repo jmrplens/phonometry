@@ -7,7 +7,7 @@ Sound *pressure* depends on where you stand and on the room you stand in;
 sound **power** does not. The sound power level `LW` is the total acoustic
 energy per second a source radiates, referenced to `P0 = 1 pW`, and it is
 the device-independent **emission** descriptor that goes on a datasheet,
-feeds a room prediction (ISO 12354) or is checked against a noise-emission
+feeds a room prediction (EN 12354) or is checked against a noise-emission
 limit. This page covers the routes phonometry implements to obtain it
 and when to reach for each: an enveloping *pressure* surface in the field
 (ISO 3744/3746), the diffuse field of a *reverberation room* (ISO 3741),

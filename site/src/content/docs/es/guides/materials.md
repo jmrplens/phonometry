@@ -354,7 +354,7 @@ micrófonos `(H1, H2, H3, H4)` medidas en cada carga; sus métodos
 
 **Normas.** ISO 11654:1997 (valoración ponderada de absorción sonora);
 ISO 9053-1:2018 (resistencia estática al flujo de aire); ISO 9053-2:2020
-(resistencia alterna al flujo de aire); ISO 10534-1:1996 e ISO 10534-2:1998
+(resistencia alterna al flujo de aire); BS EN ISO 10534-1:2001 y BS EN ISO 10534-2:2001
 (tubo de impedancia); ASTM E2611-19 (pérdida por transmisión de cuatro
 micrófonos). Toda ecuación se deriva del texto de la norma y se valida frente a
 los ejemplos resueltos de las propias normas (ISO 11654 Anexo A, ISO 9053-2

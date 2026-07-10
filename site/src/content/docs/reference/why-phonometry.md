@@ -102,6 +102,10 @@ from the official text into the test suite, so any regression fails CI:
 | ISO 1996-1:2016 | `lden()`, `ldn()` and `composite_rating_level()` against hand-computed formula values | `tests/test_environmental.py` |
 | IEC 60942:2017 Table 2 | Calibrator short-term stability limits (frequency-dependent, class 1) in `sensitivity()` | `tests/test_calibration_validation.py` |
 
+The full numerical report — the expected value and the value the library
+computes for every check, regenerated on every pull request — is published
+as [the conformance report](/phonometry/reference/conformance/).
+
 Beyond IEC 61252-style noise dose (`sound_exposure()`, `lex_8h()`), the same
 standards-first mindset shows up in the numerics: filter banks place their
 −3 dB points on the **ANSI S1.11 / IEC 61260-1** band edges for every

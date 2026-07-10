@@ -199,6 +199,11 @@ print(result["bands"][0])
 # {'freq': 12.589254117941678, 'class': 1, 'margin_class1_db': 0.39999999999997266, 'margin_class2_db': 0.5999999999999727}
 ```
 
+The Table 1 acceptance mask itself is public too: `class_limits(fraction,
+filter_class, omega)` returns the minimum/maximum relative-attenuation
+limits at normalized frequencies Ω = f/fm — the same limits the verifier
+and the figure below use.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay.png" alt="Butterworth band response threading between the forbidden regions of the IEC 61260-1 class 1 acceptance mask" width="80%"></picture>
 
 *The order-6 Butterworth response (blue) threads between the forbidden
@@ -292,4 +297,5 @@ Table 1 class 1 / class 2 acceptance limits (with the fractional-octave
 breakpoint mapping and log-frequency interpolation) verified in §6.
 ANSI S1.11-2004, *Octave-Band and Fractional-Octave-Band Analog and Digital
 Filters* — the band-edge convention on which every bank places its −3 dB
-points.
+points. ISO 266 — the preferred-frequency series behind the nominal band
+labels reported by `nominal_frequencies`.

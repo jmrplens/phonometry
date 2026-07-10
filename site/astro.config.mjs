@@ -270,29 +270,46 @@ export default defineConfig({
           items: ['getting-started'],
         },
         {
-          label: 'Signal processing & instrumentation',
-          translations: { es: 'Procesado e instrumentación' },
+          label: 'Signal processing & filters',
+          translations: { es: 'Procesado de señal y filtros' },
           items: [
             'guides/filter-banks',
             'guides/block-processing',
             'guides/multichannel',
-            'guides/calibration',
           ],
+        },
+        {
+          label: 'Instrumentation, calibration & compliance',
+          translations: { es: 'Instrumentación, calibración y conformidad' },
+          items: ['guides/calibration'],
         },
         {
           label: 'Levels & weighting',
           translations: { es: 'Niveles y ponderación' },
           items: [
             'guides/levels',
-            'guides/occupational-exposure',
             'guides/weighting',
             'guides/time-weighting',
           ],
         },
         {
-          label: 'Perception & speech',
-          translations: { es: 'Percepción e inteligibilidad' },
-          items: ['guides/psychoacoustics', 'guides/speech-transmission', 'guides/speech-intelligibility', 'guides/hearing-threshold', 'guides/noise-induced-hearing-loss'],
+          label: 'Psychoacoustics',
+          translations: { es: 'Psicoacústica' },
+          items: ['guides/psychoacoustics', 'guides/tone-prominence'],
+        },
+        {
+          label: 'Speech & intelligibility',
+          translations: { es: 'Habla e inteligibilidad' },
+          items: ['guides/speech-transmission', 'guides/speech-intelligibility'],
+        },
+        {
+          label: 'Hearing & occupational exposure',
+          translations: { es: 'Audición y exposición laboral' },
+          items: [
+            'guides/hearing-threshold',
+            'guides/noise-induced-hearing-loss',
+            'guides/occupational-exposure',
+          ],
         },
         {
           label: 'Sound power & intensity',
@@ -308,10 +325,13 @@ export default defineConfig({
           items: [
             'guides/room-acoustics',
             'guides/enclosed-space-absorption',
-            'guides/materials',
-            'guides/surface-scattering',
             'guides/room-noise',
           ],
+        },
+        {
+          label: 'Materials & surfaces',
+          translations: { es: 'Materiales y superficies' },
+          items: ['guides/materials', 'guides/surface-scattering'],
         },
         {
           label: 'Building acoustics & insulation',
@@ -321,7 +341,7 @@ export default defineConfig({
         {
           label: 'Environmental acoustics',
           translations: { es: 'Acústica ambiental' },
-          items: ['guides/outdoor-propagation', 'guides/tone-prominence', 'guides/impulse-prominence'],
+          items: ['guides/outdoor-propagation', 'guides/impulse-prominence'],
         },
         {
           label: 'Human vibration',
@@ -336,7 +356,12 @@ export default defineConfig({
         {
           label: 'Reference',
           translations: { es: 'Referencia' },
-          items: ['reference/api', 'reference/theory', 'reference/why-phonometry'],
+          items: [
+            'reference/api',
+            'reference/theory',
+            'reference/why-phonometry',
+            'reference/conformance',
+          ],
         },
       ],
     }),

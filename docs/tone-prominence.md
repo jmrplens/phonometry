@@ -38,7 +38,7 @@ Low frequencies get higher thresholds because wider relative bands mask more.
 
 ## 2. Where to measure (ECMA-74) and practice
 
-ECMA-74 (which delegates its tone assessments to ECMA-418-1) also fixes where to measure around a device:
+ECMA-74 (which delegates its tone assessments to ECMA-418-1) also fixes where to measure around a device — context only: phonometry implements the ECMA-418-1 assessments, not the ECMA-74 Annex D measurement procedure:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions.svg" alt="ECMA-74 emission measurement positions: seated operator microphone at 0.25 m and 1.20 m, and the four bystander positions at 1 m" width="92%"></picture>
 
@@ -73,5 +73,4 @@ Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
 **Standards.** ECMA-418-1:2024 (3rd edition), *Psychoacoustic metrics for ITT
 equipment — Part 1: Prominent discrete tones* — the tone-to-noise ratio
 (clause 11), the prominence ratio (clause 12), the critical-band model and the
-frequency-dependent prominence criteria; ECMA-74 Annex D — the emission
-measurement positions, delegating the tone assessment to ECMA-418-1.
+frequency-dependent prominence criteria.

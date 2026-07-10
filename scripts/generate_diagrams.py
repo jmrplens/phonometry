@@ -2483,7 +2483,7 @@ def _d_nihl(s: SVG, th: Theme) -> None:
            13, th.muted, "middle")
 
 
-def _d_ntacou112(s: SVG, th: Theme) -> None:
+def _d_impulse_prominence(s: SVG, th: Theme) -> None:
     """Impulsive-sound prominence and the LAeq adjustment (NT ACOU 112:2002)."""
     cx = 450.0
     bw, bh = 640.0, 60.0
@@ -2520,7 +2520,7 @@ def _d_ntacou112(s: SVG, th: Theme) -> None:
            13, th.muted, "middle")
 
 
-def _d_iso2631_5(s: SVG, th: Theme) -> None:
+def _d_multiple_shock(s: SVG, th: Theme) -> None:
     """Multiple-shock spinal-response dose and injury risk (ISO 2631-5:2018)."""
     cx = 450.0
     bw, bh = 660.0, 58.0
@@ -2559,7 +2559,7 @@ def _d_iso2631_5(s: SVG, th: Theme) -> None:
            th.muted, "middle")
 
 
-def _d_en12354_6(s: SVG, th: Theme) -> None:
+def _d_enclosed_space_absorption(s: SVG, th: Theme) -> None:
     """Absorption area and reverberation time of a room (EN 12354-6:2003)."""
     cx = 450.0
     bw, bh = 660.0, 58.0
@@ -2669,13 +2669,13 @@ DIAGRAMS = {
         _d_nihl,
         "Noise-induced hearing loss (ISO 1999): NIPTS and HTLAN", 470),
     "diagram_ntacou112": (
-        _d_ntacou112,
+        _d_impulse_prominence,
         "Impulsive-sound prominence and LAeq adjustment (NT ACOU 112)", 520),
     "diagram_iso2631_5": (
-        _d_iso2631_5,
+        _d_multiple_shock,
         "Multiple-shock spinal-response dose and injury risk (ISO 2631-5)", 580),
     "diagram_en12354_6": (
-        _d_en12354_6,
+        _d_enclosed_space_absorption,
         "Absorption area and reverberation time of a room (EN 12354-6)", 410),
 }
 

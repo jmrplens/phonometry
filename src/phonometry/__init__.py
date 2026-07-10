@@ -43,13 +43,13 @@ from .hearing import (
     age_threshold,
     reference_threshold,
 )
-from .iso1999 import (
+from .noise_induced_hearing_loss import (
     HtlanResult,
     NiptsResult,
     htlan,
     nipts,
 )
-from .en12354_6 import (
+from .enclosed_space_absorption import (
     ReverberationResult,
     air_absorption_area,
     enclosed_space_reverberation,
@@ -58,7 +58,7 @@ from .en12354_6 import (
     object_fraction,
     reverberation_time,
 )
-from .iso2631_5 import (
+from .multiple_shock_vibration import (
     MultipleShockResult,
     acceleration_dose,
     compression_dose,
@@ -74,8 +74,8 @@ from .iso2631_5 import (
     static_stress,
     ultimate_strength,
 )
-from .ntacou112 import (
-    ImpulseProminence,
+from .impulse_prominence import (
+    ImpulseProminenceResult,
     impulse_adjustment,
     impulse_prominence,
     predicted_prominence,
@@ -485,7 +485,7 @@ __all__ = [
     "impulse_adjustment",
     "impulse_prominence",
     "rating_level",
-    "ImpulseProminence",
+    "ImpulseProminenceResult",
     "seat_to_spine_transfer",
     "spinal_response",
     "response_peaks",

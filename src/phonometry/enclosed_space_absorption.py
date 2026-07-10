@@ -221,9 +221,9 @@ class ReverberationResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_en12354_6
+        from ._plotting import plot_enclosed_space_absorption
 
-        return plot_en12354_6(self, ax=ax, **kwargs)
+        return plot_enclosed_space_absorption(self, ax=ax, **kwargs)
 
 
 def enclosed_space_reverberation(

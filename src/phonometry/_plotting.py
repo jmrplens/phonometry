@@ -38,10 +38,10 @@ if TYPE_CHECKING:
     from .room_acoustics import DecayCurve, RoomAcousticsResult
     from .room_ir import ImpulseResponseResult
     from .hearing import AgeThresholdResult
-    from .en12354_6 import ReverberationResult
-    from .iso1999 import HtlanResult, NiptsResult
-    from .iso2631_5 import MultipleShockResult
-    from .ntacou112 import ImpulseProminence
+    from .enclosed_space_absorption import ReverberationResult
+    from .noise_induced_hearing_loss import HtlanResult, NiptsResult
+    from .multiple_shock_vibration import MultipleShockResult
+    from .impulse_prominence import ImpulseProminenceResult
     from .room_noise import NCResult, RCResult
     from .tonality_ecma import EcmaTonality
     from .roughness_ecma import EcmaRoughness
@@ -1511,7 +1511,7 @@ def plot_nipts(
 ) -> Axes:
     """Median NIPTS spectrum with the 10-90 % fractile band (ISO 1999).
 
-    :param result: A :class:`~phonometry.iso1999.NiptsResult`.
+    :param result: A :class:`~phonometry.noise_induced_hearing_loss.NiptsResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param kwargs: Forwarded to the median line ``plot``.
     :return: The axes.
@@ -1547,7 +1547,7 @@ def plot_htlan(
 ) -> Axes:
     """Age, noise and combined hearing threshold components (ISO 1999, 6.1).
 
-    :param result: A :class:`~phonometry.iso1999.HtlanResult`.
+    :param result: A :class:`~phonometry.noise_induced_hearing_loss.HtlanResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param kwargs: Forwarded to the combined-threshold line ``plot``.
     :return: The axes.
@@ -1579,16 +1579,16 @@ def plot_htlan(
 
 
 def plot_impulse_prominence(
-    result: "ImpulseProminence", ax: Axes | None = None, **kwargs: Any
+    result: "ImpulseProminenceResult", ax: Axes | None = None, **kwargs: Any
 ) -> Axes:
     """Adjustment curve ``KI(P)`` with the candidate impulses marked.
 
-    :param result: An :class:`~phonometry.ntacou112.ImpulseProminence`.
+    :param result: An :class:`~phonometry.impulse_prominence.ImpulseProminenceResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param kwargs: Forwarded to the impulses ``scatter``.
     :return: The axes.
     """
-    from .ntacou112 import ADJUSTMENT_THRESHOLD, impulse_adjustment
+    from .impulse_prominence import ADJUSTMENT_THRESHOLD, impulse_adjustment
 
     ax = ax if ax is not None else _new_axes()
     per = np.asarray(result.per_impulse, dtype=np.float64)
@@ -1616,12 +1616,12 @@ def plot_impulse_prominence(
     return ax
 
 
-def plot_en12354_6(
+def plot_enclosed_space_absorption(
     result: "ReverberationResult", ax: Axes | None = None, **kwargs: Any
 ) -> Axes:
     """Reverberation time over the octave bands (EN 12354-6).
 
-    :param result: A :class:`~phonometry.en12354_6.ReverberationResult`.
+    :param result: A :class:`~phonometry.enclosed_space_absorption.ReverberationResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param kwargs: Forwarded to the reverberation-time ``plot``.
     :return: The axes.
@@ -1647,12 +1647,12 @@ def plot_multiple_shock(
 ) -> Axes:
     """Injury-probability curve ``P(R)`` with this assessment's ``R`` marked.
 
-    :param result: A :class:`~phonometry.iso2631_5.MultipleShockResult`.
+    :param result: A :class:`~phonometry.multiple_shock_vibration.MultipleShockResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param kwargs: Forwarded to the ``R`` marker ``scatter``.
     :return: The axes.
     """
-    from .iso2631_5 import injury_probability
+    from .multiple_shock_vibration import injury_probability
 
     ax = ax if ax is not None else _new_axes()
     r10, r50, r90 = result.risk_thresholds

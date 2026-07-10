@@ -39,12 +39,16 @@ left to the caller. Accuracy of the method is stated in Table 5 (clause 9): with
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from .air_absorption import air_attenuation
 from ._warnings import _warn_renamed
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 #: Reference distance ``d0`` in the divergence term (ISO 9613-2:1996, Eq. (7)), m.
 _D0 = 1.0
@@ -139,6 +143,16 @@ class OutdoorAttenuation:
     a_bar: NDArray[np.float64]
     a_total: NDArray[np.float64]
     d_omega: NDArray[np.float64]
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the stacked per-band attenuation terms with the total.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_outdoor_attenuation
+
+        return plot_outdoor_attenuation(self, ax=ax, **kwargs)
 
 
 # --------------------------------------------------------------------------- #

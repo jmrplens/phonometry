@@ -184,6 +184,10 @@ att = outdoor_propagation_attenuation(
     relative_humidity=70.0,
 )
 
+# One line — the same stacked breakdown with the total overlaid:
+att.plot()
+
+# By hand:
 x = np.arange(len(bands))
 fig, ax = plt.subplots()
 # Separate positive and negative baselines: a negative term (Agr is a net
@@ -294,7 +298,8 @@ diffraction (Eq. (13), $K_{met}=1$, ground term retained).
 | `projected_distance` | float or None | m | default $\sqrt{d^2-(h_s-h_r)^2}$ | Ground-plane $d_p$ |
 
 Returns an `OutdoorAttenuation` with `a_div`, `a_atm`, `a_gr`, `a_bar`,
-`a_total` and `d_omega`, all one value per band.
+`a_total` and `d_omega`, all one value per band; its `.plot()` draws the
+stacked per-band breakdown with the total overlaid (the figure above).
 
 ### `Barrier` fields
 

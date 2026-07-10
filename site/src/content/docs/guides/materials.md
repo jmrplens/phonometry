@@ -308,7 +308,8 @@ The high-level `two_microphone_impedance` wraps this chain and returns an
 `ImpedanceTubeResult` with absorption, reflection factor, surface impedance and
 normalised impedance, applying the plane-wave frequency-range check and optional
 tube attenuation; correct any microphone mismatch beforehand with
-`apply_mic_calibration`.
+`apply_mic_calibration`. Its `.plot()` draws the absorption spectrum
+$\alpha(f)$ with the reflection-factor magnitude $|r|$ overlaid.
 
 **Transmission loss (ASTM E2611).** With four microphones — two upstream, two
 downstream of the sample — a two-load (or one-load) measurement recovers the

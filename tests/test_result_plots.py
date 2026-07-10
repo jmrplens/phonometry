@@ -101,6 +101,102 @@ def _intensity() -> ph.IntensityResult:
     return ph.sound_intensity(p1, p2, FS, spacing=0.012, fraction=3, limits=[125, 4000])
 
 
+def _open_plan() -> ph.OpenPlanResult:
+    positions = np.array([2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0])
+    spl = 57.0 - 7.0 * np.log2(positions / 4.0)
+    sti = np.clip(0.9 - 0.055 * positions, 0.0, 1.0)
+    return ph.open_plan_metrics(positions, spl, sti)
+
+
+def _outdoor() -> ph.OutdoorAttenuation:
+    bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+    barrier = ph.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
+    return ph.outdoor_propagation_attenuation(
+        200.0, 1.5, 1.5, bands, ground_source=1.0, ground_middle=1.0,
+        ground_receiver=1.0, barrier=barrier, temperature=15.0,
+        relative_humidity=70.0,
+    )
+
+
+def _impedance_tube() -> ph.ImpedanceTubeResult:
+    f = np.linspace(200.0, 1600.0, 60)
+    r_true = 0.6 * np.exp(-f / 1200.0) * np.exp(0.8j)
+    k = 2.0 * np.pi * f / 343.2
+    s, x1 = 0.05, 0.12
+    phase = np.exp(2j * k * x1)
+    h12 = (np.exp(-1j * k * s) + r_true * phase * np.exp(1j * k * s)) / (
+        1.0 + r_true * phase
+    )
+    return ph.two_microphone_impedance(
+        h12, frequency=f, spacing=s, x1=x1, speed_of_sound=343.2,
+        characteristic_impedance=407.0,
+    )
+
+
+_MC_QUANTITIES = (
+    ph.Quantity(74.0, 0.0, name="Reading"),
+    ph.rectangular(0.0, 0.20, name="Calibration"),
+    ph.Quantity(0.0, 0.35, dof=9, name="Position"),
+)
+
+
+def _monte_carlo() -> ph.MonteCarloResult:
+    return ph.monte_carlo(
+        lambda a, b, c: a + b + c, _MC_QUANTITIES, trials=2000, seed=7,
+        keep_samples=True,
+    )
+
+
+def _exposure() -> ph.ExposureResult:
+    tasks = [
+        ph.Task((86.4, 86.7, 87.0), 2.0, label="grinding"),
+        ph.Task((80.1, 80.9, 80.5), 3.0, label="welding"),
+        ph.Task((75.0, 74.6, 74.9), 3.0, label="assembly"),
+    ]
+    return ph.task_based_exposure(tasks)
+
+
+def _static_airflow() -> ph.StaticAirflowResult:
+    u = np.array([0.2e-3, 0.4e-3, 0.6e-3, 0.8e-3, 1.0e-3])
+    dp = 30000.0 * u + 4.0e6 * u**2
+    return ph.static_airflow_resistance(u, dp, area=0.01, thickness=0.05)
+
+
+def _airborne_prediction() -> ph.AirbornePredictionResult:
+    paths = []
+    for name, rw, k_ff, k_side, lf in (
+        ("floor", 49.0, 12.4, 8.9, 4.5),
+        ("facade", 42.0, 12.6, 6.7, 2.55),
+    ):
+        ff, df, fd = ph.flanking_element(
+            label=name, r_flanking=rw, r_separating=57.0, k_ff=k_ff,
+            k_fd=k_side, k_df=k_side, separating_area=11.5, coupling_length=lf,
+        )
+        paths.extend((ff, df, fd))
+    return ph.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
+
+
+def _impact_prediction() -> ph.ImpactPredictionResult:
+    return ph.predicted_impact_insulation(
+        ln_w_eq=78.0, delta_l_w=17.0, k_correction=2.0
+    )
+
+
+def _airborne_insulation() -> ph.AirborneInsulationResult:
+    return ph.airborne_insulation(
+        [70.0, 72.0, 74.0], [40.0, 41.0, 42.0], [0.5, 0.5, 0.5],
+        area=10.0, volume=50.0,
+    )
+
+
+def _impact_insulation() -> ph.ImpactInsulationResult:
+    return ph.impact_insulation([60.0, 61.0, 62.0], [0.5, 0.5, 0.5], volume=50.0)
+
+
+def _band_uncertainty() -> ph.BandUncertainty:
+    return ph.band_uncertainty("airborne", "B")
+
+
 def _intensity_wide() -> ph.IntensityResult:
     """IntensityResult with band centres spanning two decades (100 Hz-10 kHz)
     so the log-axis bar-width scaling can be checked at the extremes."""
@@ -337,6 +433,17 @@ _KWARG_PLOT_CASES = [
     ("decay_curve", lambda: ph.decay_curve(_exp_ir(seconds=1.0, t60=0.6), FS), "line"),
     ("facade", lambda: ph.facade_insulation(
         [70.0, 72.0, 74.0], [40.0, 41.0, 42.0], [0.5, 0.5, 0.5]), "line"),
+    ("open_plan", _open_plan, "line"),
+    ("outdoor", _outdoor, "line"),
+    ("impedance_tube", _impedance_tube, "line"),
+    ("monte_carlo", _monte_carlo, "bar"),
+    ("exposure", _exposure, "bar"),
+    ("static_airflow", _static_airflow, "line"),
+    ("airborne_prediction", _airborne_prediction, "bar"),
+    ("impact_prediction", _impact_prediction, "bar"),
+    ("airborne_insulation", _airborne_insulation, "line"),
+    ("impact_insulation", _impact_insulation, "line"),
+    ("band_uncertainty", _band_uncertainty, "line"),
 ]
 
 
@@ -436,7 +543,10 @@ def test_room_acoustics_invalid_bands_are_hatched() -> None:
     patches = axes[0].patches
     assert len(patches) == 3 * n  # EDT/T20/T30 grouped bars
     hatched = [p for p in patches if p.get_hatch()]
-    greyed = [p for p in patches if p.get_facecolor()[:3] == plt.matplotlib.colors.to_rgb("#bbbbbb")]
+    greyed = [
+        p for p in patches
+        if p.get_facecolor()[:3] == plt.matplotlib.colors.to_rgb(_plotting._C_MUTED)
+    ]
     # Exactly one bar per series (EDT/T20/T30) is invalid -> 3 hatched/greyed.
     assert len(hatched) == 3
     assert len(greyed) == 3
@@ -559,10 +669,224 @@ def test_decay_curve_plot_without_fits() -> None:
 
 
 # --------------------------------------------------------------------------
+# Open-plan spatial decay (ISO 3382-3)
+# --------------------------------------------------------------------------
+def test_open_plan_plot_line_and_markers() -> None:
+    res = _open_plan()
+    ax = res.plot()
+    # the regression line passes through Lp,A,S,4m at 4 m.
+    line = ax.lines[0]
+    x, y = np.asarray(line.get_xdata()), np.asarray(line.get_ydata())
+    at4 = float(np.interp(4.0, x, y))
+    assert at4 == pytest.approx(res.lp_as_4m, abs=0.05)
+    # slope over one doubling equals -D2,S.
+    at8 = float(np.interp(8.0, x, y))
+    assert at4 - at8 == pytest.approx(res.d2s, abs=0.05)
+    # rD / rP are marked as vertical lines at their distances.
+    vlines = [
+        np.asarray(ln.get_xdata())[0] for ln in ax.lines
+        if np.asarray(ln.get_xdata()).size == 2
+        and np.asarray(ln.get_xdata())[0] == np.asarray(ln.get_xdata())[1]
+    ]
+    assert any(v == pytest.approx(res.rd) for v in vlines)
+    assert any(v == pytest.approx(res.rp) for v in vlines)
+    plt.close("all")
+
+
+def test_open_plan_plot_without_regression_raises() -> None:
+    bare = ph.OpenPlanResult(
+        d2s=float("nan"), lp_as_4m=float("nan"), rd=float("nan"), rp=float("nan")
+    )
+    with pytest.raises(ValueError, match="regression"):
+        bare.plot()
+
+
+# --------------------------------------------------------------------------
+# Outdoor attenuation breakdown (ISO 9613-2)
+# --------------------------------------------------------------------------
+def test_outdoor_plot_stacks_terms_to_total() -> None:
+    res = _outdoor()
+    ax = res.plot()
+    n = res.frequencies.size
+    # four stacked terms -> 4 bars per band; signed heights sum to a_total.
+    assert len(ax.patches) == 4 * n
+    heights = np.array([p.get_height() for p in ax.patches]).reshape(4, n)
+    np.testing.assert_allclose(heights.sum(axis=0), res.a_total, atol=1e-9)
+    # the ground term is a net gain (negative) at 63 Hz in this scenario.
+    assert res.a_gr[0] < 0.0
+    # the total line echoes a_total.
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), res.a_total)
+    plt.close("all")
+
+
+# --------------------------------------------------------------------------
+# Impedance tube (ISO 10534-2)
+# --------------------------------------------------------------------------
+def test_impedance_tube_plot_alpha_and_reflection() -> None:
+    res = _impedance_tube()
+    ax = res.plot()
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), res.absorption)
+    np.testing.assert_allclose(ax.lines[1].get_ydata(), np.abs(res.reflection))
+    assert ax.get_ylim() == (0.0, 1.05)
+    plt.close("all")
+
+
+# --------------------------------------------------------------------------
+# Monte Carlo output distribution (GUM Supplement 1)
+# --------------------------------------------------------------------------
+def test_monte_carlo_plot_histogram_and_interval() -> None:
+    res = _monte_carlo()
+    assert res.samples is not None and res.samples.size == res.trials
+    ax = res.plot()
+    bars = [
+        p for p in ax.patches
+        if "coverage interval" not in str(p.get_label())
+    ]
+    assert bars, "expected histogram bars"
+    # the coverage-interval axvspan matches the result's interval.
+    spans = [
+        p for p in ax.patches
+        if "coverage interval" in str(p.get_label())
+    ]
+    assert spans, "expected the coverage-interval axvspan"
+    low, high = res.interval
+    assert spans[0].get_x() == pytest.approx(low)
+    assert spans[0].get_x() + spans[0].get_width() == pytest.approx(high)
+    plt.close("all")
+
+
+def test_monte_carlo_plot_without_samples_raises() -> None:
+    res = ph.monte_carlo(
+        lambda a, b, c: a + b + c, _MC_QUANTITIES, trials=200, seed=7
+    )
+    assert res.samples is None
+    with pytest.raises(ValueError, match="keep_samples"):
+        res.plot()
+
+
+# --------------------------------------------------------------------------
+# Occupational exposure (ISO 9612)
+# --------------------------------------------------------------------------
+def test_exposure_plot_task_bars_and_lex_line() -> None:
+    res = _exposure()
+    ax = res.plot()
+    heights = [p.get_height() for p in ax.patches]
+    np.testing.assert_allclose(
+        heights, [t.lex_8h_contribution for t in res.tasks]
+    )
+    hlines = [
+        np.asarray(ln.get_ydata())[0] for ln in ax.lines
+        if np.asarray(ln.get_ydata()).size == 2
+        and np.asarray(ln.get_ydata())[0] == np.asarray(ln.get_ydata())[1]
+    ]
+    assert any(v == pytest.approx(res.lex_8h) for v in hlines)
+    assert any(v == pytest.approx(res.upper_limit) for v in hlines)
+    plt.close("all")
+
+
+def test_exposure_plot_without_tasks_raises() -> None:
+    levels = np.full(5, 80.0)
+    res = ph.job_based_exposure(levels, 6.0)
+    assert not res.tasks
+    with pytest.raises(ValueError, match="per-task"):
+        res.plot()
+
+
+# --------------------------------------------------------------------------
+# Static airflow resistance (ISO 9053-1)
+# --------------------------------------------------------------------------
+def test_static_airflow_plot_curve_through_evaluation_point() -> None:
+    res = _static_airflow()
+    ax = res.plot()
+    x, y = ax.lines[0].get_xdata(), ax.lines[0].get_ydata()
+    # x is in mm/s; the fitted curve passes through the evaluation point.
+    at_eval = float(np.interp(res.evaluation_velocity * 1e3, x, y))
+    assert at_eval == pytest.approx(res.pressure_drop, rel=1e-3)
+    plt.close("all")
+
+
+# --------------------------------------------------------------------------
+# EN 12354 predictions
+# --------------------------------------------------------------------------
+def test_airborne_prediction_plot_sorted_shares() -> None:
+    res = _airborne_prediction()
+    ax = res.plot()
+    heights = [p.get_height() for p in ax.patches]
+    assert heights == sorted(heights, reverse=True)
+    assert sum(heights) == pytest.approx(100.0)
+    assert f"{res.r_prime_w:.1f}" in ax.get_title()
+    plt.close("all")
+
+
+def test_impact_prediction_plot_terms() -> None:
+    res = _impact_prediction()
+    ax = res.plot()
+    heights = [p.get_height() for p in ax.patches]
+    np.testing.assert_allclose(
+        heights,
+        [res.ln_w_eq, -res.delta_l_w, res.k_correction, res.l_prime_n_w],
+    )
+    plt.close("all")
+
+
+# --------------------------------------------------------------------------
+# ISO 16283 field insulation spectra
+# --------------------------------------------------------------------------
+def test_airborne_insulation_plot_curves() -> None:
+    res = _airborne_insulation()
+    ax = res.plot()
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), res.dnt)
+    np.testing.assert_allclose(ax.lines[1].get_ydata(), res.d)
+    assert res.r_prime is not None
+    np.testing.assert_allclose(ax.lines[2].get_ydata(), res.r_prime)
+    plt.close("all")
+
+
+def test_impact_insulation_plot_curves_and_label_kwarg() -> None:
+    res = _impact_insulation()
+    ax = res.plot(label="my measurement")
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), res.l_n_t)
+    labels = [str(ln.get_label()) for ln in ax.lines]
+    # user label styles only the primary curve; companions keep theirs.
+    assert "my measurement" in labels
+    assert any("L'_n" in lbl for lbl in labels)
+    plt.close("all")
+
+
+# --------------------------------------------------------------------------
+# ISO 12999-1 band uncertainty
+# --------------------------------------------------------------------------
+def test_band_uncertainty_plot_spectrum() -> None:
+    res = _band_uncertainty()
+    ax = res.plot()
+    freqs, u = res.to_arrays()
+    np.testing.assert_allclose(ax.lines[0].get_xdata(), freqs)
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), u)
+    assert "12999" in ax.get_title()
+    plt.close("all")
+
+
+# --------------------------------------------------------------------------
 # Common contract: ax=None creates a figure; passing ax composes
 # --------------------------------------------------------------------------
 def test_single_axes_plots_accept_external_ax() -> None:
-    for res in (_zwicker_stationary(), _sti(), _airborne_rating(), _sound_power()):
+    for res in (
+        _zwicker_stationary(),
+        _sti(),
+        _airborne_rating(),
+        _sound_power(),
+        _open_plan(),
+        _outdoor(),
+        _impedance_tube(),
+        _monte_carlo(),
+        _exposure(),
+        _static_airflow(),
+        _airborne_prediction(),
+        _impact_prediction(),
+        _airborne_insulation(),
+        _impact_insulation(),
+        _band_uncertainty(),
+    ):
         fig, ax = plt.subplots()
         out = res.plot(ax=ax)
         assert out is ax

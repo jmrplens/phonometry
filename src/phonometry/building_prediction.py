@@ -45,7 +45,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import isfinite, log10
-from typing import Literal, Sequence
+from typing import TYPE_CHECKING, Any, Literal, Sequence
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 #: Reference coupling length ``l0`` in Formula (28a), in metres (Clause 4.4.1).
 _L0 = 1.0
@@ -145,6 +148,16 @@ class AirbornePredictionResult:
     paths: tuple[PathContribution, ...]
     dominant: PathContribution
 
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the per-path shares of the transmitted energy.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_airborne_prediction
+
+        return plot_airborne_prediction(self, ax=ax, **kwargs)
+
 
 @dataclass(frozen=True)
 class ImpactPredictionResult:
@@ -161,6 +174,16 @@ class ImpactPredictionResult:
     ln_w_eq: float
     delta_l_w: float
     k_correction: float
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the Formula 21 terms and the resulting ``L'n,w``.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_impact_prediction
+
+        return plot_impact_prediction(self, ax=ax, **kwargs)
 
 
 def _check_finite(value: float, name: str) -> float:

@@ -44,12 +44,15 @@ from __future__ import annotations
 import warnings
 from dataclasses import dataclass, field, replace
 from math import log10, sqrt
-from typing import Any, Dict, Literal, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Literal, Sequence, Tuple
 
 import numpy as np
 
 from ._levels_math import energy_mean
 from ._warnings import PhonometryWarning, _warn_renamed
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 #: Reference duration T0 = 8 h (Clause 4).
 _T0: float = 8.0
@@ -277,6 +280,18 @@ class ExposureResult:
     def upper_limit(self) -> float:
         """Upper limit ``LEX,8h + U`` of the one-sided 95 % interval, dB."""
         return self.lex_8h + self.expanded_uncertainty
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the per-task contributions with the ``LEX,8h`` line.
+
+        Only task-based results carry per-task contributions (the job and
+        full-day strategies raise :class:`ValueError`). Requires matplotlib
+        (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_occupational_exposure
+
+        return plot_occupational_exposure(self, ax=ax, **kwargs)
 
 
 # --------------------------------------------------------------------------- #

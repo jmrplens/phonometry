@@ -35,6 +35,21 @@ la **incertidumbre**.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_es.png" alt="Exposición por tareas del anexo D de la ISO 9612: las tres contribuciones de tarea a LEX,8h como barras, la línea del LEX,8h diario sumado en energía y la banda del límite superior unilateral al 95 % LEX,8h + U por encima" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_es_dark.png" alt="Exposición por tareas del anexo D de la ISO 9612: las tres contribuciones de tarea a LEX,8h como barras, la línea del LEX,8h diario sumado en energía y la banda del límite superior unilateral al 95 % LEX,8h + U por encima" style="width:80%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# En una línea, con el `res` del anexo D calculado más abajo: barras de
+# contribución por tarea más las líneas de LEX,8h y LEX,8h + U.
+res.plot()
+plt.show()
+```
+
+</details>
+
+
 ```python
 from phonometry.occupational_exposure import (
     Task, task_based_exposure, job_based_exposure, full_day_exposure,
@@ -116,7 +131,10 @@ en la página de [Teoría](/phonometry/es/reference/theory/).
 
 Las tres devuelven un `ExposureResult` con `lex_8h`, `combined_standard_uncertainty`
 $u$, `expanded_uncertainty` $U = 1{,}65\ u$, `upper_limit` = $L_{EX,8h} + U$,
-`sampling_advisory` y (basada en tareas) el desglose por tarea en `tasks`.
+`sampling_advisory` y (basada en tareas) el desglose por tarea en `tasks`; el
+`.plot()` del resultado dibuja las barras de contribución por tarea con las
+líneas de $L_{EX,8h}$ y del límite superior (solo resultados por tareas: las
+otras estrategias no llevan desglose por tarea).
 
 ## Véase también
 

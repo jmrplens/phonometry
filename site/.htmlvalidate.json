@@ -4,6 +4,7 @@
   ],
   "rules": {
     "element-permitted-content": "off",
+    "no-autoplay": "off",
     "no-deprecated-attr": "off",
     "no-implicit-button-type": "off",
     "no-inline-style": "off",
@@ -13,7 +14,6 @@
     "text-content": "off",
     "unique-landmark": "off",
     "valid-id": "off",
-    "void-style": "off",
-    "no-autoplay": "off"
+    "void-style": "off"
   }
 }

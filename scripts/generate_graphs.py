@@ -434,7 +434,7 @@ _ES_EXACT = {
     "Progressive wave — net power flows":
         "Onda progresiva — fluye potencia neta",
     "Standing wave — energy sloshes":
-        "Onda estacionaria — la energía chapotea",
+        "Onda estacionaria — la energía va y viene",
     "amplitude (normalized)": "amplitud (normalizada)",
     "Instantaneous sound intensity p·u":
         "Intensidad sonora instantánea p·u",
@@ -4534,9 +4534,13 @@ def animate_schroeder(output_dir: str) -> None:
 
     # Regression lines drawn once the sweep finishes: slope -60/T over each
     # evaluation range, extended to the -60 dB crossing at t = T.
-    def _fit(rng_db: tuple[float, float]) -> tuple[float, float]:
+    def _fit(rng_db: tuple[float, float]) -> tuple[float, float] | None:
         mask = (level <= -rng_db[0]) & (level >= -rng_db[1])
+        if int(mask.sum()) < 2:
+            return None
         slope, intercept = np.polyfit(time[mask], level[mask], 1)
+        if slope >= 0.0:   # a non-decaying fit has no meaningful -60 dB crossing
+            return None
         return float(slope), float(intercept)
 
     fits = []
@@ -4544,11 +4548,14 @@ def animate_schroeder(output_dir: str) -> None:
         (_T20_RANGE, COLOR_SECONDARY, "--", "T20 fit"),
         (_T30_RANGE, COLOR_TERTIARY, "-.", "T30 fit"),
     ):
-        slope, intercept = _fit(rng_db)
+        fit = _fit(rng_db)
+        if fit is None:
+            continue
+        slope, intercept = fit
         fits.append((color, style, key,
                      (-intercept / slope, (-60.0 - intercept) / slope)))
     tmax = float(time.max())
-    xmax = max(tmax, max(f[3][1] for f in fits)) * 1.03
+    xmax = max([tmax, *(f[3][1] for f in fits)]) * 1.03
 
     fig, ax = _new_anim_fig()
     ax.set_xlim(0, xmax)
@@ -4599,6 +4606,13 @@ def animate_schroeder(output_dir: str) -> None:
 
 def generate_animations(output_dir: str) -> None:
     """Render every Tier-1 animation in the active language/theme."""
+    import shutil
+
+    if shutil.which("ffmpeg") is None:
+        raise RuntimeError(
+            "ffmpeg was not found on PATH; it is required to encode the "
+            "animation WebM/GIF outputs. Install ffmpeg and retry."
+        )
     animate_time_weighting_ballistics(output_dir)
     animate_onset_detection(output_dir)
     animate_instantaneous_intensity(output_dir)

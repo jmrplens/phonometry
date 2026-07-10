@@ -1,6 +1,6 @@
 ---
 title: "Niveles integrados y estadísticos"
-description: "Leq, LAeq, percentiles L10/L50/L90 y espectrogramas de octava."
+description: "Leq, LAeq, percentiles L10/L50/L90, LCpeak/SEL y dosis de ruido (IEC 61252), Lden y niveles de evaluación (ISO 1996-1), y espectrogramas de octava."
 ---
 
 Métricas de ruido ambiental calculadas directamente sobre la señal cruda
@@ -180,193 +180,10 @@ duración al mismo nivel son +3 dB.
 | `sound_exposure(x, fs, duration_hours=None, ...)` | `duration_hours` trata `x` como muestra de ese periodo | E [Pa²h] | IEC 61252 |
 | `lex_8h(x, fs, duration_hours=None, ...)` | misma semántica de muestreo | LEX,8h [dB] | IEC 61252 (≡ LEP,d) |
 
-## Estrategias de exposición al ruido en el trabajo e incertidumbre (ISO 9612)
-
-`lex_8h`, más arriba, convierte *una* grabación en un nivel diario. La
-ISO 9612:2009 —el método de ingeniería (clase de exactitud 2)— es el diseño de
-la medición *en torno* a esa primitiva: cómo muestrear una jornada laboral real,
-cómo combinar las partes y cómo adjuntar la incertidumbre normativa que necesita
-todo informe de higiene laboral. El módulo `occupational_exposure` añade las tres
-**estrategias de medición** y el presupuesto de incertidumbre del **anexo C**
-sobre la maquinaria del promediado en energía.
-
-La estrategia *basada en tareas* (apartado 9) divide la jornada nominal en
-tareas, toma $I \ge 3$ muestras por tarea y suma en energía las contribuciones de
-cada tarea
-
-$$
-L_{EX,8h,m} = L_{p,A,eqT,m} + 10 \log_{10}(T_m/T_0), \qquad T_0 = 8\ \text{h},
-$$
-
-de modo que una tarea ruidosa pero corta contribuye poco. Las estrategias
-*basada en la función* (apartado 10) y *de jornada completa* (apartado 11) toman
-en cambio $N \ge 5$ (o tres jornadas completas) muestras aleatorias sobre un grupo
-de exposición homogéneo y normalizan la duración efectiva de la jornada. El nivel
-diario es el mismo en ambos casos; las estrategias difieren en cómo se construye
-la **incertidumbre**.
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_es.png" alt="Exposición por tareas del anexo D de la ISO 9612: las tres contribuciones de tarea a LEX,8h como barras, la línea del LEX,8h diario sumado en energía y la banda del límite superior unilateral al 95 % LEX,8h + U por encima" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_es_dark.png" alt="Exposición por tareas del anexo D de la ISO 9612: las tres contribuciones de tarea a LEX,8h como barras, la línea del LEX,8h diario sumado en energía y la banda del límite superior unilateral al 95 % LEX,8h + U por encima" style="width:80%">
-
-```python
-from phonometry.occupational_exposure import (
-    Task, task_based_exposure, job_based_exposure, full_day_exposure,
-)
-
-# ISO 9612 anexo D — la jornada de un soldador dividida en tres tareas. El nivel
-# de cada tarea es el promedio en energía de sus muestras Lp,A,eqT; las
-# duraciones llevan un rango medido.
-tasks = [
-    Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
-    Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
-         duration_range=(4.0, 6.0), label="welding"),
-    Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
-         duration_range=(1.0, 2.0), label="cutting/grinding"),
-]
-res = task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
-print(f"LEX,8h = {res.lex_8h:.1f} dB   U = {res.expanded_uncertainty:.1f} dB")
-# LEX,8h = 84.3 dB   U = 2.7 dB
-print(f"one-sided 95 % upper limit LEX,8h + U = {res.upper_limit:.1f} dB")   # 87.0 dB
-for t in res.tasks:
-    print(f"  {t.label:<16} Lp,A,eqT = {t.lp_aeqt:5.1f}   contributes {t.lex_8h_contribution:5.1f} dB")
-#   planning/breaks  Lp,A,eqT =  70.0   contributes  62.7 dB
-#   welding          Lp,A,eqT =  80.8   contributes  78.7 dB
-#   cutting/grinding Lp,A,eqT =  90.1   contributes  82.8 dB
-
-# La misma jornada medida basada en la función (anexo E) y de jornada completa
-# (anexo F): ambas usan el presupuesto de muestreo Ec C.9 / Tabla C.4 con
-# k = 1.65 (unilateral 95 %).
-job = job_based_exposure([88.1, 86.1, 89.7, 86.5, 91.1, 86.7], effective_duration_hours=7.5)
-full = full_day_exposure([88.0, 91.9, 87.6, 90.4, 89.0, 88.4], effective_duration_hours=9.25)
-print(f"job      LEX,8h = {job.lex_8h:.1f} dB   U = {job.expanded_uncertainty:.1f} dB")
-# job      LEX,8h = 88.2 dB   U = 3.8 dB
-print(f"full-day LEX,8h = {full.lex_8h:.1f} dB   U = {full.expanded_uncertainty:.1f} dB")
-# full-day LEX,8h = 90.1 dB   U = 3.4 dB
-```
-
-Conviene detallar dos sutilezas. Primero, el factor de cobertura es $k = 1.65$
-para un intervalo **unilateral** al 95 % (apartado 14), porque al higienista solo
-le importa la cota *superior*: `res.upper_limit` = $L_{EX,8h} + U$ es el valor por
-debajo del cual queda el 95 % de las mediciones, el número que se compara con un
-valor de acción. Segundo, los métodos por tareas y por función ponderan de forma
-distinta la *misma* dispersión de muestras. La incertidumbre de muestreo de la
-tarea $u_{1a}$ (Ec. C.6) divide la suma de desviaciones al cuadrado entre
-$I(I-1)$ —el error típico de la media, menor en un factor $\sqrt{I}$—, mientras
-que la incertidumbre de muestreo por función/jornada completa $u_1$ (Ec. C.12) es
-la desviación típica muestral simple con denominador $N-1$, cuya contribución
-$c_1 u_1$ se lee luego de la **Tabla C.4** en función de $(N, u_1)$. La misma
-dispersión bruta infla, por tanto, más la estimación por función, que es la
-penalización que el estándar impone a un muestreo más grueso y con menos
-muestras. (El $L_{EX,8h}$ por función impreso es $88.2$ dB donde el anexo E
-declara $88.1$: el estándar redondea el nivel de jornada efectiva a $88.4$ antes
-de la normalización de la duración; la biblioteca lo mantiene sin redondear.)
-
-Cuando las muestras de una tarea abarcan **3 dB o más** (apartado 9.3), o la
-contribución por función $c_1 u_1$ supera 3,5 dB (apartado 10.4), o se cubren
-demasiado pocos trabajadores (duración acumulada de la Tabla 1), el resultado fija
-`sampling_advisory=True` y, con `warn=True`, emite una `OccupationalExposureWarning` que
-recomienda más mediciones. Los niveles de pico $L_{p,Cpeak}$ se declaran **sin**
-incertidumbre —el anexo C no da método para ellos (Tabla C.5, Nota 1)—, así que
-la incertidumbre de pico queda fuera del alcance. Los tres ejemplos resueltos de
-los anexos D/E/F anteriores se reproducen con la precisión impresa de la norma
-(el redondeo final del anexo E se explica más arriba), y la teoría se deriva
-en la página de [Teoría](/phonometry/es/reference/theory/).
-
-### Parámetros de `task_based_exposure()` / `job_based_exposure()` / `full_day_exposure()`
-
-| Parámetro | Se aplica a | Tipo | Unidades | Rango / def. | Notas |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `tasks` | tarea | lista de `Task` | — | ≥ 1 | Cada `Task` tiene `samples`, `duration_hours`, `duration_range`/`duration_samples` opcionales, `label`, `instrument` |
-| `samples` | función / jornada | secuencia | dB | ≥ 2 (≥ 5 / ≥ 3 recomendado) | Muestras aleatorias `Lp,A,eqT` |
-| `effective_duration_hours` | función / jornada | float | h | > 0 | Duración efectiva de la jornada $T_e$ |
-| `instrument` | todas | str | — | `'class1'`, `'class2'`, `'personal_exposimeter'` (def.) | Selecciona $u_2$ (Tabla C.5) |
-| `u3` | todas | float | dB | def. `1.0` | Incertidumbre de posición del micrófono (apartado C.6) |
-| `include_duration_uncertainty` | tarea | bool | — | def. `True` | `False` omite el término $(c_{1b}u_{1b})^2$ (anexo D caso a) |
-| `n_workers` / `sample_duration_hours` | función | int / float | — / h | def. `None` | Comprobación de duración acumulada de la Tabla 1 |
-| `warn` | todas | bool | — | def. `True` | Emitir `OccupationalExposureWarning` para los avisos de muestreo |
-
-Las tres devuelven un `ExposureResult` con `lex_8h`, `combined_standard_uncertainty`
-$u$, `expanded_uncertainty` $U = 1.65\ u$, `upper_limit` = $L_{EX,8h} + U$,
-`sampling_advisory` y (basada en tareas) el desglose por tarea en `tasks`.
-
-## Nivel de sonoridad de tonos puros (ISO 226:2023)
-
-Las curvas isofónicas normales relacionan el SPL de un tono puro con su *nivel
-de sonoridad* percibido en fonos (el SPL de un tono de 1 kHz igual de fuerte).
-`equal_loudness_contour(phon)` evalúa la Fórmula (1) de ISO 226:2023 en las 29
-frecuencias preferentes de tercio de octava de la Tabla 1,
-`loudness_level(spl, frequency)` es la inversa exacta (Fórmula 2) y
-`hearing_threshold()` devuelve la columna del umbral de audición:
-
-```python
-from phonometry import equal_loudness_contour, loudness_level
-
-freqs, spl = equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonos
-phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonos
-```
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonos con la curva del umbral de audición" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es_dark.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonos con la curva del umbral de audición" style="width:80%">
-
-Validez según el apartado 4.1: 20–90 fonos (80 fonos por encima de 4 kHz); la
-implementación se verifica en CI contra las tablas del Anexo B. Ojo: esto es la
-sonoridad de *tonos puros* — la sonoridad de señales arbitrarias (sonos,
-ISO 532) es una feature distinta, prevista más adelante.
-
-## Tonos discretos prominentes (ECMA-418-1)
-
-Los componentes tonales del ruido de maquinaria molestan mucho más de lo que
-sugiere su nivel. ECMA-418-1:2024 (referenciada por el Anexo D de ECMA-74)
-define dos métodos FFT para decidir si un tono discreto es *prominente*:
-`tone_to_noise_ratio()` compara el nivel del tono con el ruido enmascarante de
-su banda crítica (apartado 11) y `prominence_ratio()` compara la banda crítica
-centrada en el tono con las dos bandas contiguas (apartado 12). Ambos devuelven
-un veredicto estructurado frente a los criterios de prominencia dependientes de
-la frecuencia:
-
-```python
-import numpy as np
-from phonometry import tone_to_noise_ratio, prominence_ratio
-
-fs = 48000
-rng = np.random.default_rng(0)
-t = np.arange(fs) / fs
-x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # tono de 1 kHz en ruido
-tnr = tone_to_noise_ratio(x, fs)            # pico más alto, o tone_freq=...
-pr = prominence_ratio(x, fs, tone_freq=1000.0)
-print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
-```
-
-Los métodos se apoyan en la **banda crítica** — el ancho de banda de análisis
-del oído, $\Delta f_c = 25 + 75\ [1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz a
-1 kHz): a un tono solo lo enmascara el ruido que hay *dentro* de su banda
-crítica, así que ambos ratios comparan el tono exactamente con ese ruido, no
-con todo el espectro.
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es.png" alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es_dark.png" alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia" style="width:80%">
-
-Un TNR por encima de $8 + 8.33\log_{10}(1000/f_t)$ dB (8 dB de 1 kHz hacia
-arriba) clasifica el tono como *prominente*; el criterio del PR es
-$9 + 10\log_{10}(1000/f_t)$ dB. Las frecuencias bajas reciben umbrales más
-altos porque unas bandas relativamente más anchas enmascaran más.
-
-ECMA-74 (que delega la evaluación tonal en ECMA-418-1) también fija dónde medir alrededor de un equipo:
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_es.svg" alt="Posiciones de medida de emisión ECMA-74: micrófono del operador sentado a 0,25 m y 1,20 m, y las cuatro posiciones de observador a 1 m" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_es_dark.svg" alt="Posiciones de medida de emisión ECMA-74: micrófono del operador sentado a 0,25 m y 1,20 m, y las cuatro posiciones de observador a 1 m" style="width:92%">
-
-Los tonos secundarios próximos en la misma banda crítica se combinan según el
-apartado 11.6; para complejos armónicos evalúa cada componente (`tone_freq=`).
-Ambos métodos trabajan sobre espectros promediados RMS con ventana Hann y no
-necesitan calibración absoluta (los ratios son diferencias de nivel).
-
-### Parámetros de `tone_to_noise_ratio()` / `prominence_ratio()`
-
-| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
-| :--- | :--- | :--- | :--- | :--- |
-| `x` | array 1D | cualquiera (vale sin calibrar) | ≥ `fs/resolution_hz` muestras | Los ratios son diferencias de nivel: la calibración se cancela |
-| `fs` | int | Hz | > 0 | |
-| `tone_freq` | float, opcional | Hz | 89,1–11 200; por defecto `None` | `None` evalúa el pico más alto del rango de interés |
-| `resolution_hz` | float | Hz | > 0; por defecto `1.0` | La banda del tono debe quedar dentro del 15 % de la banda crítica (apartado 11.2) |
-
-Ambos devuelven un `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
+`lex_8h` califica *una* grabación; componer una jornada laboral completa a
+partir de muestras por tarea o por función —con el presupuesto normativo de
+incertidumbre de la ISO 9612— continúa en
+[Exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/).
 
 ## Ruido ambiental: Lden, Ldn y niveles de evaluación (ISO 1996-1)
 
@@ -402,8 +219,10 @@ Dónde pones el micrófono cambia el número: ISO 1996-2 fija las posiciones del
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_es.svg" alt="Posiciones de medida de ruido ambiental según ISO 1996-2: campo libre, a 2 m de la fachada y enrasado, con sus correcciones" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_es_dark.svg" alt="Posiciones de medida de ruido ambiental según ISO 1996-2: campo libre, a 2 m de la fachada y enrasado, con sus correcciones" style="width:92%">
 
-Combínalo con `laeq()` por periodo para ir de grabaciones a Lden, y con
-`tone_to_noise_ratio()` / `prominence_ratio()` para justificar ajustes tonales.
+Combínalo con `laeq()` por periodo para ir de grabaciones a Lden, y con los
+veredictos `tone_to_noise_ratio()` / `prominence_ratio()` de
+[Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/) para
+justificar ajustes tonales.
 
 ## Espectrograma de octavas (niveles vs tiempo)
 
@@ -455,4 +274,10 @@ fig.colorbar(mesh, label="Nivel [dB]")
 Consulta [Calibración y dBFS](/phonometry/es/guides/calibration/) para
 convertir unidades digitales a SPL físico, y
 [Ponderación temporal](/phonometry/es/guides/time-weighting/) para los
-detalles de la envolvente.
+detalles de la envolvente. Las estrategias ocupacionales de la ISO 9612
+continúan en
+[Exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/),
+los veredictos de prominencia tonal de ECMA-418-1 en
+[Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/), y las
+curvas isofónicas de ISO 226 viven con las métricas de percepción en
+[Psicoacústica](/phonometry/es/guides/psychoacoustics/).

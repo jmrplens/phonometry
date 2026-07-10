@@ -472,9 +472,40 @@ print(round(res.r_prime_w, 1))                          # 52.2  ->  R'w = 52 dB
 print(res.dominant.label, round(res.dominant.fraction, 2))   # Dd 0.33 (domina el directo)
 ```
 
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+# Usa `paths` y `res` del snippet anterior.
+# Índice de reducción sonora por camino y fracción de energía transmitida de cada
+# camino para el resultado del Anexo H.3 calculado arriba.
+labels = [p.label for p in res.paths]
+r_w = [p.r_w for p in res.paths]
+frac = [100.0 * p.fraction for p in res.paths]
+
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9, 6), sharex=True)
+ax1.bar(labels, r_w, color="tab:blue")
+ax1.axhline(res.r_prime_w, ls="--", color="k", label=f"R'w = {res.r_prime_w:.1f} dB")
+ax1.set_ylabel("Rij,w del camino [dB]"); ax1.legend()
+ax2.bar(labels, frac, color="tab:orange")
+ax2.set_ylabel("Fracción de energía [%]"); ax2.set_xlabel("Camino de transmisión")
+for ax in (ax1, ax2):
+    ax.tick_params(axis="x", rotation=45)
+fig.suptitle("EN 12354-1 Anexo H.3 — transmisión por flancos")
+fig.tight_layout()
+plt.show()
+```
+
+</details>
+
 Cada camino de flanco añadido rebaja estrictamente $R'_w$ por debajo del directo
 $R_{Dd,w} = 57$; `res.paths` expone la fracción de energía transmitida de cada
-camino, de modo que el camino dominante queda visible. La Cláusula 4.4.2 también
+camino, de modo que el camino dominante queda visible. `flanking_element` es una
+función de conveniencia que construye de una vez los tres caminos de una unión; el constructor
+de camino único que hay detrás, `flanking_path`, construye un camino `Ff`, `Df`
+o `Fd` cada vez (Fórmula 28a). La Cláusula 4.4.2 también
 impone un límite inferior $K_{ij} \ge K_{ij,\min}$ a partir de la geometría de la
 unión: calcúlalo con `junction_min_vibration_reduction` y pásalo a
 `flanking_path(..., kij_min=...)`, que eleva un $K_{ij}$ por debajo del límite
@@ -507,33 +538,6 @@ print(round(ln_eq, 1), k, round(imp.l_prime_n_w, 1))     # 76.2 2 45.2  ->  L'n,
 print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT,w
 ```
 
-<details>
-<summary>Ver el código de esta figura</summary>
-
-```python
-import matplotlib.pyplot as plt
-
-# Índice de reducción sonora por camino y fracción de energía transmitida de cada
-# camino para el resultado del Anexo H.3 calculado arriba.
-labels = [p.label for p in res.paths]
-r_w = [p.r_w for p in res.paths]
-frac = [100.0 * p.fraction for p in res.paths]
-
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(9, 6), sharex=True)
-ax1.bar(labels, r_w, color="tab:blue")
-ax1.axhline(res.r_prime_w, ls="--", color="k", label=f"R'w = {res.r_prime_w:.1f} dB")
-ax1.set_ylabel("Rij,w del camino [dB]"); ax1.legend()
-ax2.bar(labels, frac, color="tab:orange")
-ax2.set_ylabel("Fracción de energía [%]"); ax2.set_xlabel("Camino de transmisión")
-for ax in (ax1, ax2):
-    ax.tick_params(axis="x", rotation=45)
-fig.suptitle("EN 12354-1 Anexo H.3 — transmisión por flancos")
-fig.tight_layout()
-plt.show()
-```
-
-</details>
-
 ### Parámetros de `junction_vibration_reduction()` / `flanking_element()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
@@ -547,6 +551,19 @@ plt.show()
 | `separating_area` | float | m² | > 0 | Superficie del elemento separador `Ss` |
 | `coupling_length` | float | m | > 0 | Longitud de acoplamiento de la unión `lf` |
 | `delta_r_ff` / `delta_r_fd` / `delta_r_df` | float | dB | por defecto `0` | Mejoras del trasdosado por camino |
+
+### Parámetros de `flanking_path()`
+
+| Parámetro | Tipo | Unidades | Rango / defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `label` | str | — | — | Nombre visible del camino |
+| `kind` | str | — | `'Ff'` / `'Df'` / `'Fd'` | Rama de flanco del camino |
+| `r_source` / `r_receive` | float | dB | — | Índices ponderados de los elementos lado emisor / lado receptor |
+| `k_ij` | float | dB | — | Índice de reducción vibracional de la unión para este camino |
+| `separating_area` | float | m² | > 0 | Área del elemento separador `Ss` |
+| `coupling_length` | float | m | > 0 | Longitud de acoplamiento `lf` |
+| `delta_r` | float | dB | def.: `0` | Mejora por revestimiento en este camino |
+| `kij_min` | float | dB | def.: `None` | Si se da, `k_ij` se acota inferiormente a este mínimo de la Fórmula E.4 |
 
 `predicted_airborne_insulation()` devuelve un `AirbornePredictionResult`
 (`r_prime_w`, `r_direct_w`, `paths` de `PathContribution`, `dominant`);
@@ -645,6 +662,19 @@ plt.show()
 `uncertain_value()` un `UncertainValue` (`value`, `standard_uncertainty`,
 `coverage_factor`, `expanded_uncertainty`, `.lower`, `.upper`). El mapa de solo
 lectura `COVERAGE_FACTORS` expone la Tabla 8 indexada por `(confidence, one_sided)`.
+
+---
+
+**Normas.** ISO 16283-1:2014, ISO 16283-2 e ISO 16283-3:2016, *Acoustics —
+Field measurement of sound insulation in buildings and of building elements* —
+las diferencias de nivel, normalizaciones y métodos de elemento del §1;
+ISO 717-1 e ISO 717-2 — los índices de un solo número por curva de referencia y
+los términos de adaptación espectral C, Ctr y CI; ISO 10140-2:2010, ISO 10140-3:2010 e
+ISO 10140-4:2010 — los R y Ln de laboratorio con la corrección de ruido de
+fondo del §2; EN 12354-1:2000 y EN 12354-2:2000 — las predicciones
+simplificadas de transmisión por flancos del §3 (uniones del Anexo E, ejemplos
+resueltos H.3 y E.3); ISO 12999-1:2020 — las incertidumbres típicas por
+situación de medición y los factores de cobertura del §4.
 
 ## Véase también
 

@@ -1,6 +1,6 @@
 ---
 title: "Integrated and Statistical Levels"
-description: "Leq, LAeq, L10/L50/L90 percentile levels and octave spectrograms."
+description: "Leq, LAeq, L10/L50/L90 percentile levels, LCpeak/SEL and noise dose (IEC 61252), Lden and rating levels (ISO 1996-1), and octave spectrograms."
 ---
 
 Environmental noise metrics computed directly from the raw (calibrated) signal.
@@ -177,184 +177,9 @@ is +3 dB.
 | `sound_exposure(x, fs, duration_hours=None, ...)` | `duration_hours` treats `x` as a sample of that period | E [Pa²h] | IEC 61252 |
 | `lex_8h(x, fs, duration_hours=None, ...)` | same sampling semantics | LEX,8h [dB] | IEC 61252 (≡ LEP,d) |
 
-## Occupational noise exposure strategies and uncertainty (ISO 9612)
-
-`lex_8h` above turns *one* recording into a daily level. ISO 9612:2009 — the
-engineering method (accuracy grade 2) — is the survey design *around* that
-primitive: how to sample a real working day, how to combine the pieces, and how
-to attach the normative uncertainty every occupational-hygiene report needs. The
-`occupational_exposure` module adds the three **measurement strategies** and the
-**Annex C** uncertainty budget on top of the energy-average machinery.
-
-The *task-based* strategy (Clause 9) splits the nominal day into tasks, takes
-$I \ge 3$ samples per task, and energy-sums the task contributions
-
-$$
-L_{EX,8h,m} = L_{p,A,eqT,m} + 10 \log_{10}(T_m/T_0), \qquad T_0 = 8\ \text{h},
-$$
-
-so a loud but short task contributes little. The *job-based* (Clause 10) and
-*full-day* (Clause 11) strategies instead take $N \ge 5$ (or three whole-day)
-random samples over a homogeneous exposure group and normalise the effective-day
-duration. The daily level is the same either way; the strategies differ in how
-the **uncertainty** is built.
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.png" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_dark.png" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" style="width:80%">
-
-```python
-from phonometry.occupational_exposure import (
-    Task, task_based_exposure, job_based_exposure, full_day_exposure,
-)
-
-# ISO 9612 Annex D — a welder's day split into three tasks. Each task level is
-# the energy average of its Lp,A,eqT samples; durations carry a measured range.
-tasks = [
-    Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
-    Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
-         duration_range=(4.0, 6.0), label="welding"),
-    Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
-         duration_range=(1.0, 2.0), label="cutting/grinding"),
-]
-res = task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
-print(f"LEX,8h = {res.lex_8h:.1f} dB   U = {res.expanded_uncertainty:.1f} dB")
-# LEX,8h = 84.3 dB   U = 2.7 dB
-print(f"one-sided 95 % upper limit LEX,8h + U = {res.upper_limit:.1f} dB")   # 87.0 dB
-for t in res.tasks:
-    print(f"  {t.label:<16} Lp,A,eqT = {t.lp_aeqt:5.1f}   contributes {t.lex_8h_contribution:5.1f} dB")
-#   planning/breaks  Lp,A,eqT =  70.0   contributes  62.7 dB
-#   welding          Lp,A,eqT =  80.8   contributes  78.7 dB
-#   cutting/grinding Lp,A,eqT =  90.1   contributes  82.8 dB
-
-# The same shift measured job-based (Annex E) and full-day (Annex F): both use
-# the Eq C.9 / Table C.4 sampling budget with k = 1.65 (one-sided 95 %).
-job = job_based_exposure([88.1, 86.1, 89.7, 86.5, 91.1, 86.7], effective_duration_hours=7.5)
-full = full_day_exposure([88.0, 91.9, 87.6, 90.4, 89.0, 88.4], effective_duration_hours=9.25)
-print(f"job      LEX,8h = {job.lex_8h:.1f} dB   U = {job.expanded_uncertainty:.1f} dB")
-# job      LEX,8h = 88.2 dB   U = 3.8 dB
-print(f"full-day LEX,8h = {full.lex_8h:.1f} dB   U = {full.expanded_uncertainty:.1f} dB")
-# full-day LEX,8h = 90.1 dB   U = 3.4 dB
-```
-
-Two subtleties are worth spelling out. First, the coverage factor is
-$k = 1.65$ for a **one-sided** 95 % interval (Clause 14), because a hygienist
-cares only about the *upper* bound: `res.upper_limit` = $L_{EX,8h} + U$ is the
-value 95 % of measurements fall below, the number compared against an action
-limit. Second, the task and job methods weight the *same* spread of samples
-differently. The task sampling uncertainty $u_{1a}$ (Eq. C.6) divides the summed
-squared deviations by $I(I-1)$ — the standard error of the mean, smaller by a
-factor $\sqrt{I}$ — whereas the job/full-day sampling uncertainty $u_1$ (Eq. C.12)
-is the plain sample standard deviation with denominator $N-1$, whose contribution
-$c_1 u_1$ is then read from **Table C.4** as a function of $(N, u_1)$. The same
-raw scatter therefore inflates the job estimate more, which is the standard's
-built-in penalty for coarser, fewer samples. (The printed job $L_{EX,8h}$ is
-$88.2$ dB where Annex E reports $88.1$: the standard rounds the effective-day
-level to $88.4$ before the duration normalisation; the library keeps it
-unrounded.)
-
-When a task's samples span **3 dB or more** (Clause 9.3), or the job contribution
-$c_1 u_1$ exceeds 3.5 dB (Clause 10.4), or too few workers are covered
-(Table 1 cumulative-duration), the result sets `sampling_advisory=True` and, with
-`warn=True`, emits an `OccupationalExposureWarning` recommending more measurements. Peak
-levels $L_{p,Cpeak}$ are reported **without** an uncertainty — Annex C gives no
-method for them (Table C.5, Note 1), so peak-uncertainty is out of scope. The
-three Annex D/E/F worked examples above are reproduced to the standard's printed
-precision (Annex E's final rounding is disclosed above), and the theory is
-derived on the [Theory](/phonometry/reference/theory/) page.
-
-### `task_based_exposure()` / `job_based_exposure()` / `full_day_exposure()` parameters
-
-| Parameter | Applies to | Type | Units | Range / default | Notes |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `tasks` | task | list of `Task` | — | ≥ 1 | Each `Task` has `samples`, `duration_hours`, optional `duration_range`/`duration_samples`, `label`, `instrument` |
-| `samples` | job / full-day | sequence | dB | ≥ 2 (≥ 5 / ≥ 3 advised) | Random `Lp,A,eqT` samples |
-| `effective_duration_hours` | job / full-day | float | h | > 0 | Effective working-day duration $T_e$ |
-| `instrument` | all | str | — | `'class1'`, `'class2'`, `'personal_exposimeter'` (default) | Selects $u_2$ (Table C.5) |
-| `u3` | all | float | dB | default `1.0` | Microphone-position uncertainty (Clause C.6) |
-| `include_duration_uncertainty` | task | bool | — | default `True` | `False` omits the $(c_{1b}u_{1b})^2$ term (Annex D case a) |
-| `n_workers` / `sample_duration_hours` | job | int / float | — / h | default `None` | Table 1 cumulative-duration check |
-| `warn` | all | bool | — | default `True` | Emit `OccupationalExposureWarning` for the sampling advisories |
-
-All three return an `ExposureResult` with `lex_8h`, `combined_standard_uncertainty`
-$u$, `expanded_uncertainty` $U = 1.65\ u$, `upper_limit` = $L_{EX,8h} + U$,
-`sampling_advisory`, and (task-based) the per-task `tasks` breakdown.
-
-## Loudness level of pure tones (ISO 226:2023)
-
-The normal equal-loudness-level contours relate the SPL of a pure tone to its
-perceived *loudness level* in phons (the SPL of an equally loud 1 kHz tone).
-`equal_loudness_contour(phon)` evaluates ISO 226:2023 Formula (1) at the 29
-preferred third-octave frequencies of Table 1, `loudness_level(spl, frequency)`
-is the exact inverse (Formula 2), and `hearing_threshold()` returns the
-threshold-of-hearing column:
-
-```python
-from phonometry import equal_loudness_contour, loudness_level
-
-freqs, spl = equal_loudness_contour(40.0)   # the classic 40-phon contour
-phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
-```
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.png" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.png" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%">
-
-Validity per clause 4.1: 20-90 phon (80 phon above 4 kHz); the implementation
-is verified against the Annex B tables in CI. Note this is the loudness of
-*pure tones* - loudness of arbitrary signals (ISO 532 sones) is a different,
-upcoming feature.
-
-## Prominent discrete tones (ECMA-418-1)
-
-Tonal components in machinery noise are far more annoying than their level
-suggests. ECMA-418-1:2024 (referenced by ECMA-74 Annex D) gives two FFT-based
-methods to decide whether a discrete tone is *prominent*:
-`tone_to_noise_ratio()` compares the tone level with the masking noise in its
-critical band (clause 11), and `prominence_ratio()` compares the critical band
-centred on the tone with the two contiguous bands (clause 12). Both return a
-structured verdict against the frequency-dependent prominence criteria:
-
-```python
-import numpy as np
-from phonometry import tone_to_noise_ratio, prominence_ratio
-
-fs = 48000
-rng = np.random.default_rng(0)
-t = np.arange(fs) / fs
-x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # 1 kHz tone in noise
-tnr = tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
-pr = prominence_ratio(x, fs, tone_freq=1000.0)
-print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
-```
-
-
-The methods hinge on the **critical band** — the ear's analysis bandwidth,
-$\Delta f_c = 25 + 75\ [1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz at 1 kHz): a
-tone is masked only by the noise *inside* its critical band, so both ratios
-compare the tone against exactly that noise, not the whole spectrum.
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum.png" alt="Averaged spectrum of a tone in noise with the critical band shaded and the tone-to-noise ratio annotated against its prominence criterion" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_dark.png" alt="Averaged spectrum of a tone in noise with the critical band shaded and the tone-to-noise ratio annotated against its prominence criterion" style="width:80%">
-
-A TNR above $8 + 8.33\log_{10}(1000/f_t)$ dB (8 dB from 1 kHz up) classifies
-the tone as *prominent*; the PR criterion is $9 + 10\log_{10}(1000/f_t)$ dB.
-Low frequencies get higher thresholds because wider relative bands mask more.
-
-ECMA-74 (which delegates its tone assessments to ECMA-418-1) also fixes where to measure around a device:
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions.svg" alt="ECMA-74 emission measurement positions: seated operator microphone at 0.25 m and 1.20 m, and the four bystander positions at 1 m" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_dark.svg" alt="ECMA-74 emission measurement positions: seated operator microphone at 0.25 m and 1.20 m, and the four bystander positions at 1 m" style="width:92%">
-
-Proximate secondary tones in the same critical band are combined per
-clause 11.6; for harmonic complexes assess each component (`tone_freq=`).
-Both methods work on Hann-windowed, RMS-averaged spectra and need no absolute
-calibration (the ratios are level differences).
-
-### `tone_to_noise_ratio()` / `prominence_ratio()` parameters
-
-| Parameter | Type | Units | Range / default | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| `x` | 1D array | any (uncalibrated OK) | ≥ `fs/resolution_hz` samples | Ratios are level differences: calibration cancels out |
-| `fs` | int | Hz | > 0 | |
-| `tone_freq` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
-| `resolution_hz` | float | Hz | > 0; default `1.0` | Tone band must stay within 15 % of the critical band (clause 11.2) |
-
-Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
+`lex_8h` rates *one* recording; assembling a full working day from task or
+job samples — with the normative ISO 9612 uncertainty budget — continues in
+[Occupational Noise Exposure](/phonometry/guides/occupational-exposure/).
 
 ## Environmental noise: Lden, Ldn and rating levels (ISO 1996-1)
 
@@ -376,7 +201,6 @@ r = composite_rating_level([(63.2, 12, 0.0),    # day
                             (51.4, 8, 10.0)])   # night  (+10) == lden
 ```
 
-
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.png" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_dark.png" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" style="width:80%">
 
 ### `lden()` / `ldn()` / `composite_rating_level()` parameters
@@ -392,7 +216,8 @@ Where you put the microphone changes the number: ISO 1996-2 fixes the receiver p
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement.svg" alt="Environmental noise measurement positions per ISO 1996-2: free field, 2 m from the facade and flush-mounted, with their corrections" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_dark.svg" alt="Environmental noise measurement positions per ISO 1996-2: free field, 2 m from the facade and flush-mounted, with their corrections" style="width:92%">
 
 Combine with `laeq()` per time period to go from recordings to Lden, and with
-`tone_to_noise_ratio()` / `prominence_ratio()` to justify tonal adjustments.
+the `tone_to_noise_ratio()` / `prominence_ratio()` verdicts of
+[Prominent Discrete Tones](/phonometry/guides/tone-prominence/) to justify tonal adjustments.
 
 ## Octave Spectrogram (levels over time)
 
@@ -442,4 +267,9 @@ fig.colorbar(mesh, label="Level [dB]")
 ```
 
 See [Calibration and dBFS](/phonometry/guides/calibration/) to convert digital units to physical
-SPL, and [Time Weighting](/phonometry/guides/time-weighting/) for the envelope details.
+SPL, and [Time Weighting](/phonometry/guides/time-weighting/) for the envelope details. The
+ISO 9612 occupational strategies continue in
+[Occupational Noise Exposure](/phonometry/guides/occupational-exposure/), the ECMA-418-1
+tonal-prominence verdicts in [Prominent Discrete Tones](/phonometry/guides/tone-prominence/),
+and the ISO 226 equal-loudness contours live with the perception metrics in
+[Psychoacoustics](/phonometry/guides/psychoacoustics/).

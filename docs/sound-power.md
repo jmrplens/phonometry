@@ -547,7 +547,7 @@ plt.show()
 - [Sound Intensity (p-p)](intensity.md) — the two-microphone probe, its
   finite-difference bias and the ISO 9614-1 field indicators behind the
   scanning method.
-- [Room and Building Acoustics](room-acoustics.md) — the reverberation time
+- [Room Acoustics](room-acoustics.md) — the reverberation time
   and equivalent absorption area (ISO 354) that feed `K2` and the ISO 3741
   absorption area; impact and airborne insulation.
 - [Levels](levels.md) — energy averaging and the A-weighting behind `LWA`.

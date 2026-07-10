@@ -28,12 +28,12 @@ contra las curvas — se reporta como **banda determinante**.
 import numpy as np
 import phonometry as ph
 
-# Octave-band SPL, 16 Hz - 8000 Hz (a ventilation-dominated room).
+# SPL en bandas de octava, 16 Hz - 8000 Hz (una sala dominada por la ventilación).
 spl = np.array([62.0, 62.0, 59.0, 57.0, 52.0, 42.0, 35.0, 29.0, 24.0, 19.0])
 
 nc = ph.noise_criterion(spl)
 print(round(nc.rating, 1))        # 42.5
-print(nc.governing_frequency)     # 250.0  (the tangent band)
+print(nc.governing_frequency)     # 250.0  (la banda tangente)
 ```
 
 Como la calificación interpola entre las curvas tabuladas es un número continuo:
@@ -69,7 +69,7 @@ import phonometry as ph
 spl = np.array([62.0, 62.0, 59.0, 57.0, 52.0, 42.0, 35.0, 29.0, 24.0, 19.0])
 
 rc = ph.room_criterion(spl)
-print(rc.label)             # RC-35(R)   -  a rumbly room
+print(rc.label)             # RC-35(R)   -  una sala retumbante
 print(round(rc.lmf, 1))     # 35.3
 print(rc.classification)    # R
 ```
@@ -90,12 +90,12 @@ import phonometry as ph
 
 spl = np.array([62.0, 62.0, 59.0, 57.0, 52.0, 42.0, 35.0, 29.0, 24.0, 19.0])
 
-# One line each:
+# En una línea cada uno:
 ph.noise_criterion(spl).plot()
 ph.room_criterion(spl).plot()
 plt.show()
 
-# By hand, mirroring what NCResult.plot() / RCResult.plot() draw:
+# A mano, reproduciendo lo que dibujan NCResult.plot() / RCResult.plot():
 from phonometry.room_noise import NC_CURVES, NC_INDICES, OCTAVE_BANDS
 nc, rc = ph.noise_criterion(spl), ph.room_criterion(spl)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))

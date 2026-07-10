@@ -130,7 +130,7 @@ parámetro `dbfs=True`.
 
 En este modo:
 
-* **0 dBFS** corresponde a un nivel numérico de señal de 1.0 (RMS o pico).
+* **0 dBFS** corresponde a un nivel numérico de señal de 1,0 (RMS o pico).
 * `calibration_factor` no aplica (dBFS es relativo al fondo de escala digital).
 * Útil para analizar headroom, mastering digital o señales normalizadas.
 

@@ -26,14 +26,14 @@ temperatura. La ISO 9613-1:1993, Ec. (5) reúne todo esto en el coeficiente de
 atenuación de tono puro $\alpha$, en decibelios por metro:
 
 $$
-\alpha = 8.686\ f^2 \Big[ 1.84\times10^{-11} \big(p_a/p_r\big)^{-1} \big(T/T_0\big)^{1/2}
-       + \big(T/T_0\big)^{-5/2} \big( 0.01275\ \tfrac{e^{-2239.1/T}}{f_{rO} + f^2/f_{rO}}
-       + 0.1068\ \tfrac{e^{-3352.0/T}}{f_{rN} + f^2/f_{rN}} \big) \Big],
+\alpha = 8{,}686\ f^2 \Big[ 1{,}84\times10^{-11} \big(p_a/p_r\big)^{-1} \big(T/T_0\big)^{1/2}
+       + \big(T/T_0\big)^{-5/2} \big( 0{,}01275\ \tfrac{e^{-2239{,}1/T}}{f_{rO} + f^2/f_{rO}}
+       + 0{,}1068\ \tfrac{e^{-3352{,}0/T}}{f_{rN} + f^2/f_{rN}} \big) \Big],
 $$
 
 con las frecuencias de relajación del oxígeno y el nitrógeno $f_{rO}$, $f_{rN}$
-(Ec. (3)/(4)), las condiciones de referencia $T_0 = 293.15$ K y
-$p_r = 101.325$ kPa (apartado 4.2), y la concentración molar de vapor de agua $h$
+(Ec. (3)/(4)), las condiciones de referencia $T_0 = 293{,}15$ K y
+$p_r = 101{,}325$ kPa (apartado 4.2), y la concentración molar de vapor de agua $h$
 obtenida de la humedad relativa mediante la conversión psicrométrica del anexo B.
 Dominan la forma dos rasgos: a baja frecuencia $\alpha \propto f^2$, por lo que
 sube con fuerza; y cerca de cada frecuencia de relajación el término
@@ -199,7 +199,7 @@ apartado 8—.
 
 Cuando solo importa el nivel ponderado A en el receptor y el sonido viaja sobre
 suelo poroso o mayoritariamente poroso (y no es un tono puro), el 7.3.2 ofrece
-una forma cerrada más simple $A_{gr} = 4.8 - \frac{2 h_m}{d}\left(17 + \frac{300}{d}\right) \ge 0$
+una forma cerrada más simple $A_{gr} = 4{,}8 - \frac{2 h_m}{d}\left(17 + \frac{300}{d}\right) \ge 0$
 (Ec. (10), los resultados negativos se recortan a cero), acompañada del índice de
 ángulo sólido $D_\Omega$ (Ec. (11)) que debe entonces sumarse a $D_c$. Se exponen
 como `ground_attenuation_alternative` y `directivity_omega`, pero **no se conectan

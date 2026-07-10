@@ -28,14 +28,14 @@ print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 ```
 
 Los métodos se apoyan en la **banda crítica** — el ancho de banda de análisis
-del oído, $\Delta f_c = 25 + 75\ [1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz a
+del oído, $\Delta f_c = 25 + 75\ [1 + 1{,}4(f/1000)^2]^{0{,}69}$ Hz (162 Hz a
 1 kHz): a un tono solo lo enmascara el ruido que hay *dentro* de su banda
 crítica, así que ambos ratios comparan el tono exactamente con ese ruido, no
 con todo el espectro.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es.png" alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es_dark.png" alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia" style="width:80%">
 
-Un TNR por encima de $8 + 8.33\log_{10}(1000/f_t)$ dB (8 dB de 1 kHz hacia
+Un TNR por encima de $8 + 8{,}33\log_{10}(1000/f_t)$ dB (8 dB de 1 kHz hacia
 arriba) clasifica el tono como *prominente*; el criterio del PR es
 $9 + 10\log_{10}(1000/f_t)$ dB. Las frecuencias bajas reciben umbrales más
 altos porque unas bandas relativamente más anchas enmascaran más.

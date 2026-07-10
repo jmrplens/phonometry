@@ -38,8 +38,8 @@ partir de una semianchura $a$ se construyen con `rectangular` ($a/\sqrt{3}$),
 ```python
 import phonometry as ph
 
-# A-weighted level: a reading plus zero-mean calibration, instrument and
-# positional corrections. The model is their sum.
+# Nivel ponderado A: una lectura más correcciones de calibración, de
+# instrumento y de posición de media cero. El modelo es su suma.
 quantities = [
     ph.Quantity(74.0, 0.0, name="Reading"),
     ph.rectangular(0.0, 0.20, name="Calibration"),
@@ -87,7 +87,7 @@ mc = ph.monte_carlo(lambda a, b, c, d: a + b + c + d, quantities,
                     trials=1_000_000, coverage=0.95, seed=1)
 
 print(round(mc.value, 2))                 # 74.0
-print(round(mc.standard_uncertainty, 3))  # 0.407 dB  (matches uc above)
+print(round(mc.standard_uncertainty, 3))  # 0.407 dB  (coincide con la uc de arriba)
 print([round(x, 2) for x in mc.interval]) # [73.2, 74.8]
 ```
 
@@ -119,11 +119,11 @@ result = ph.combine_uncertainty(model, quantities)
 mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1)
 k, U = result.expanded(0.95)
 
-# One line for the budget:
+# En una línea, el balance:
 result.plot()
 plt.show()
 
-# By hand, both panels — budget bars and the Monte Carlo output distribution:
+# A mano, ambos paneles — las barras del balance y la distribución de salida de Monte Carlo:
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 5.4))
 ax1.barh(result.names, result.contributions)
 ax1.axvline(result.combined_uncertainty, ls="--",

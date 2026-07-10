@@ -48,20 +48,20 @@ nivel de régimen estacionario.
 
 | Duración de la ráfaga | Objetivo IEC (dB) | phonometry (dB) | Error (dB) | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| 200 ms | −1.0 | −0.98 | +0.02 | ✅ PASA |
-| 50 ms | −4.8 | −4.82 | −0.02 | ✅ PASA |
-| 10 ms | −11.1 | −11.14 | −0.04 | ✅ PASA |
-| 1 ms | −20.9 | −20.99 | −0.09 | ✅ PASA |
+| 200 ms | −1,0 | −0,98 | +0,02 | ✅ PASA |
+| 50 ms | −4,8 | −4,82 | −0,02 | ✅ PASA |
+| 10 ms | −11,1 | −11,14 | −0,04 | ✅ PASA |
+| 1 ms | −20,9 | −20,99 | −0,09 | ✅ PASA |
 
 **Resultados de python-acoustics (FAST, pasando la señal al cuadrado como
 requiere esa librería):**
 
 | Duración de la ráfaga | Objetivo IEC (dB) | python-acoustics (dB) | Error (dB) | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| 200 ms | −1.0 | −0.97 | +0.03 | ✅ PASA |
-| 50 ms | −4.8 | −3.93 | **+0.87** | ⚠️ FALLA |
-| 10 ms | −11.1 | −10.90 | +0.20 | ✅ PASA |
-| 1 ms | −20.9 | −20.90 | +0.00 | ✅ PASA |
+| 200 ms | −1,0 | −0,97 | +0,03 | ✅ PASA |
+| 50 ms | −4,8 | −3,93 | **+0,87** | ⚠️ FALLA |
+| 10 ms | −11,1 | −10,90 | +0,20 | ✅ PASA |
+| 1 ms | −20,9 | −20,90 | +0,00 | ✅ PASA |
 
 phonometry mantiene alta precisión en todos los casos. El enfoque por bloques
 se desvía significativamente (más de 0,8 dB) en la ráfaga de 50 ms porque los
@@ -124,7 +124,7 @@ interno (consulta
   phonometry para sus cálculos de niveles ponderados en lugar de
   reimplementarlos.
 - **MoSQITo** se centra en métricas psicoacústicas de calidad sonora
-  (sonoridad, agudeza, aspereza). Complementa a phonometry en lugar de
+  (sonoridad, sharpness —agudeza—, aspereza). Complementa a phonometry en lugar de
   solaparse con ella: no cubre la metrología de niveles sonoros (filtros de
   ponderación, ponderación temporal, Leq/SEL/Lden, calibración) y no declara
   verificación por conformidad frente a las tablas de tolerancias de las

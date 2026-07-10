@@ -33,12 +33,12 @@ z(Q)\,s$, usando $s_u$ cuando $z \ge 0$ y $s_l$ en caso contrario.
 ```python
 import phonometry as ph
 
-# Median threshold shift of a 65-year-old man, all audiometric frequencies.
+# Desviación mediana del umbral de un hombre de 65 años, todas las frecuencias audiométricas.
 result = ph.age_threshold(65, "male", fractile=0.5)
 print(result.median.round(1))     # [ 6.6  7.6  8.  9.  10.4 13.4 16.3 21.6 26.2 33.7 39.5]
-print(result.median[8].round(1))  # 26.2 dB at 4000 Hz
+print(result.median[8].round(1))  # 26.2 dB a 4000 Hz
 
-# The worst-hearing decile (90th percentile) at 4000 Hz:
+# El decil que peor oye (percentil 90) a 4000 Hz:
 print(ph.age_threshold(65, "male", fractile=0.9).threshold[8].round(1))  # 50.3
 ```
 
@@ -59,7 +59,7 @@ import phonometry as ph
 
 print(ph.reference_threshold("free-field"))
 # [22.1 11.4  4.4  2.4  2.4  2.4 -1.3 -5.8 -5.4  4.3 12.6]
-print(ph.reference_threshold("diffuse-field")[4])   # 0.8 dB at 1000 Hz
+print(ph.reference_threshold("diffuse-field")[4])   # 0.8 dB a 1000 Hz
 ```
 
 Ambos campos coinciden en baja frecuencia y divergen por encima de 1 kHz
@@ -77,11 +77,11 @@ import matplotlib.pyplot as plt
 import phonometry as ph
 from phonometry.hearing import AUDIOMETRIC_FREQUENCIES as f
 
-# One line for the age distribution:
+# En una línea, la distribución por edad:
 ph.age_threshold(70, "male", 0.5).plot()
 plt.show()
 
-# By hand, both panels:
+# A mano, ambos paneles:
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 for age in (20, 40, 60, 80):
     r = ph.age_threshold(age, "male", 0.5)

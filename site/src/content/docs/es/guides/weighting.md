@@ -61,8 +61,8 @@ plana de ~100 fonios (niveles altos). IEC 61672-1:2013 (Anexo E) define ambas
 analíticamente a partir de cuatro frecuencias de esquina:
 
 $$
-f_1 = 20.599\ \text{Hz}, \quad f_2 = 107.653\ \text{Hz}, \quad
-f_3 = 737.862\ \text{Hz}, \quad f_4 = 12194.217\ \text{Hz}
+f_1 = 20{,}599\ \text{Hz}, \quad f_2 = 107{,}653\ \text{Hz}, \quad
+f_3 = 737{,}862\ \text{Hz}, \quad f_4 = 12194{,}217\ \text{Hz}
 $$
 
 C es un paso-banda con polos dobles en $f_1$ y $f_4$ (2 ceros en el origen);

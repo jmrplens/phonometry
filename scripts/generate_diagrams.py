@@ -676,15 +676,18 @@ _ES: dict[str, str] = {
     "from a spectrum, or from a calibrated signal via the Annex A filterbank":
         "de un espectro, o de una señal calibrada mediante el banco de filtros "
         "del Anexo A",
-    "Transmission a₀ and lower critical bands  (Clause 5.4, Table A.4)":
-        "Transmisión a₀ y bandas críticas inferiores  (Cláusula 5.4, Tabla A.4)",
-    "free/diffuse-field correction; 25-250 Hz grouped into 3 critical bands":
-        "corrección de campo libre/difuso; 25-250 Hz agrupadas en 3 bandas "
-        "críticas",
+    "Equal-loudness correction and lower critical bands  "
+    "(Clause 5.4, Table A.3)":
+        "Corrección de igual sonoridad y bandas críticas inferiores  "
+        "(Cláusula 5.4, Tabla A.3)",
+    "the 11 lowest bands grouped into 3 critical bands, 25-250 Hz":
+        "las 11 bandas más bajas agrupadas en 3 bandas críticas, 25-250 Hz",
     "Core loudness of the 20 critical bands  (Tables A.4-A.7)":
         "Sonoridad de núcleo de las 20 bandas críticas  (Tablas A.4-A.7)",
-    "with the threshold in quiet LTQ (Table A.3)":
-        "con el umbral en silencio LTQ (Tabla A.3)",
+    "a₀ transmission (A.4), diffuse-field DDF (A.5), threshold in quiet "
+    "LTQ (A.6)":
+        "transmisión a₀ (A.4), DDF de campo difuso (A.5), umbral en silencio "
+        "LTQ (A.6)",
     "Specific loudness  N′(z)  over 0.1-Bark steps to 24 Bark":
         "Sonoridad específica  N′(z)  en pasos de 0,1 Bark hasta 24 Bark",
     "upper masking slopes added band to band (Table A.9)":
@@ -3009,11 +3012,13 @@ def _d_zwicker(s: SVG, th: Theme) -> None:
         s.text(cx, y + 25, l1, 17, th.fg, "middle", bold=True)
         s.text(cx, y + 45, l2, 13, th.muted, "middle")
 
-    _step(132, "Transmission a₀ and lower critical bands  (Clause 5.4, Table A.4)",
-          "free/diffuse-field correction; 25-250 Hz grouped into 3 critical bands",
+    _step(132, "Equal-loudness correction and lower critical bands  "
+          "(Clause 5.4, Table A.3)",
+          "the 11 lowest bands grouped into 3 critical bands, 25-250 Hz",
           th.primary)
     _step(218, "Core loudness of the 20 critical bands  (Tables A.4-A.7)",
-          "with the threshold in quiet LTQ (Table A.3)", th.fg)
+          "a₀ transmission (A.4), diffuse-field DDF (A.5), threshold in quiet "
+          "LTQ (A.6)", th.fg)
     _step(304, "Specific loudness  N′(z)  over 0.1-Bark steps to 24 Bark",
           "upper masking slopes added band to band (Table A.9)", th.secondary)
     for y0, y1 in ((190, 218), (276, 304)):

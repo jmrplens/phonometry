@@ -157,6 +157,13 @@ _ES_EXACT = {
     "Sound reduction index [dB]": "Índice de reducción sonora [dB]",
     "Kc adaptation": "Adaptación Kc",
     "RI (intensity)": "RI (intensidad)",
+    # survey_insulation figure (ISO 10052)
+    "ISO 10052 Survey Method: Reverberation-Index Correction":
+        "Método de control ISO 10052: corrección por índice de reverberación",
+    "Level difference [dB]": "Diferencia de nivel [dB]",
+    "D (level difference)": "D (diferencia de nivel)",
+    "DnT (standardized)": "DnT (estandarizada)",
+    "octave bands, T0 = 0.5 s": "bandas de octava, T0 = 0,5 s",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3046,6 +3053,55 @@ def generate_intensity_insulation(output_dir: str) -> None:
     plt.close()
 
 
+def generate_survey_insulation(output_dir: str) -> None:
+    """ISO 10052 survey method: the reverberation-index correction D -> DnT."""
+    print("Generating survey_insulation...")
+    from phonometry import reverberation_index, survey_airborne_insulation
+
+    bands = [125.0, 250.0, 500.0, 1000.0, 2000.0]
+    # A masonry partition: raw level difference D and the measured receiving-
+    # room reverberation time T per octave band.
+    l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
+    l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
+    t = np.array([0.7, 0.6, 0.5, 0.45, 0.4])
+    k = reverberation_index(t)
+    res = survey_airborne_insulation(l1, l2, k, volume=50.0)
+    assert res.rating is not None
+
+    x = np.arange(len(bands))
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    # Shade the reverberation-index correction k between D and DnT.
+    ax.fill_between(x, res.d, res.d_nt, color=COLOR_TERTIARY, alpha=0.18,
+                    zorder=0, label="k = 10 lg(T/T0)")
+    ax.plot(x, res.d, "--", color=COLOR_PRIMARY, linewidth=1.8, marker="o",
+            markersize=6, zorder=5, label="D (level difference)")
+    ax.plot(x, res.d_nt, "-", color=COLOR_FG, linewidth=2.6, marker="s",
+            markersize=6, zorder=5, label="DnT (standardized)")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{int(b)}" for b in bands])
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Level difference [dB]")
+    ax.set_title("ISO 10052 Survey Method: Reverberation-Index Correction",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        f"DnT,w = {res.rating.rating} dB  (C = {res.rating.c})",
+        "octave bands, T0 = 0.5 s",
+    ]
+    ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=11, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "survey_insulation.png")
+    plt.close()
+
+
 def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     """ISO 12999-1 per-band + single-number measurement uncertainty (situation B)."""
     print("Generating insulation_uncertainty_demo.png...")
@@ -4442,6 +4498,7 @@ def generate_all(img_dir: str) -> None:
     generate_prediction_flanking_demo(img_dir)
     generate_facade_prediction(img_dir)
     generate_intensity_insulation(img_dir)
+    generate_survey_insulation(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 
     # Outdoor propagation & occupational exposure (ISO 9613-1/2, ISO 9612)

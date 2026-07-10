@@ -191,6 +191,16 @@ class AirborneInsulationResult:
     dnt: np.ndarray
     r_prime: np.ndarray | None
 
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the per-band insulation quantities (``DnT``, ``D``, ``R'``).
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_airborne_insulation
+
+        return plot_airborne_insulation(self, ax=ax, **kwargs)
+
 
 @dataclass(frozen=True)
 class WeightedRatingResult:
@@ -250,6 +260,16 @@ class ImpactInsulationResult:
 
     l_n_t: np.ndarray
     l_n: np.ndarray | None
+
+    def plot(self, ax: Axes | None = None, **kwargs: Any) -> Axes:
+        """Plot the per-band impact levels (``L'nT`` and, if present, ``L'n``).
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_impact_insulation
+
+        return plot_impact_insulation(self, ax=ax, **kwargs)
 
 
 @dataclass(frozen=True)

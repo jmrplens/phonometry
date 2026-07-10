@@ -352,6 +352,13 @@ print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 <summary>Show the code for this figure</summary>
 
 ```python
+# One line: the D2,S regression rebuilt from the result fields, with the
+# rD / rP crossings marked (the figure above adds the measured points and
+# the STI axis on top of it):
+m.plot()
+```
+
+```python
 import matplotlib.pyplot as plt
 
 # Spatial decay: measured Lp,A,S vs distance on a log axis, the D2,S
@@ -394,7 +401,9 @@ plt.show()
 | `spl_a_speech` | 1D array | dB | same length | A-weighted speech level `Lp,A,S,n` per position |
 | `sti_values` | 1D array | — | same length | STI per position (full IEC 60268-16 method) |
 
-Returns an `OpenPlanResult` with `d2s`, `lp_as_4m`, `rd` and `rp`.
+Returns an `OpenPlanResult` with `d2s`, `lp_as_4m`, `rd` and `rp`; its
+`.plot()` redraws the Clause 6.2 spatial-decay regression from those four
+fields and marks `rd` / `rp`.
 `d2s`/`lp_as_4m` are `nan` if fewer than two positions fall in 2–16 m;
 `rd`/`rp` are `nan` when STI does not decrease with distance. The per-position
 STI can itself be measured with the STIPA tools in the

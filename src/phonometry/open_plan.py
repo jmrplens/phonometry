@@ -32,9 +32,12 @@ STI > 0,20 in all positions" (Clause 6.3).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 #: Reference distance for the logarithmic distance axis of D2,S
 #: (ISO 3382-3:2012, 6.2, Equation (5)): r0 = 1 m.
@@ -80,6 +83,18 @@ class OpenPlanResult:
     lp_as_4m: float
     rd: float
     rp: float
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the spatial decay of speech with ``rD``/``rP`` marked.
+
+        Redraws the Clause 6.2 regression line from ``d2s`` and
+        ``lp_as_4m`` and marks the distraction and privacy distances.
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_open_plan
+
+        return plot_open_plan(self, ax=ax, **kwargs)
 
 
 def _linear_fit(x: np.ndarray, y: np.ndarray) -> Tuple[float, float]:

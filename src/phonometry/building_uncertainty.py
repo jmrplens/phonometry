@@ -46,9 +46,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from math import sqrt
 from types import MappingProxyType
-from typing import Dict, Literal, Mapping, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Literal, Mapping, Sequence, Tuple
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 Situation = Literal["A", "B", "C"]
 Measurand = Literal["airborne", "impact", "impact_reduction"]
@@ -211,6 +214,16 @@ class BandUncertainty:
             np.asarray(self.frequencies, dtype=float),
             np.asarray(self.uncertainties, dtype=float),
         )
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the per-band standard uncertainty spectrum.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_band_uncertainty
+
+        return plot_band_uncertainty(self, ax=ax, **kwargs)
 
 
 @dataclass(frozen=True)

@@ -193,6 +193,10 @@ att = outdoor_propagation_attenuation(
     relative_humidity=70.0,
 )
 
+# En una línea — el mismo desglose apilado con el total superpuesto:
+att.plot()
+
+# A mano:
 x = np.arange(len(bands))
 fig, ax = plt.subplots()
 # Líneas base positiva y negativa separadas: un término negativo (Agr es una
@@ -307,7 +311,8 @@ suelo).
 | `projected_distance` | float o None | m | def. $\sqrt{d^2-(h_s-h_r)^2}$ | $d_p$ proyectada sobre el suelo |
 
 Devuelve un `OutdoorAttenuation` con `a_div`, `a_atm`, `a_gr`, `a_bar`,
-`a_total` y `d_omega`, todos un valor por banda.
+`a_total` y `d_omega`, todos un valor por banda; su `.plot()` dibuja el
+desglose apilado por bandas con el total superpuesto (la figura anterior).
 
 ### Campos de `Barrier`
 

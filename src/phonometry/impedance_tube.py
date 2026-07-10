@@ -40,12 +40,16 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from ._types import Real
 from ._warnings import PhonometryWarning
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 Complex = NDArray[np.complex128]
 
@@ -465,6 +469,16 @@ class ImpedanceTubeResult:
     surface_impedance: Complex
     normalized_impedance: Complex
     absorption: Real
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the absorption spectrum ``alpha(f)`` with ``|r|`` overlaid.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from ._plotting import plot_impedance_tube
+
+        return plot_impedance_tube(self, ax=ax, **kwargs)
 
 
 def two_microphone_impedance(

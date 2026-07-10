@@ -869,6 +869,81 @@ separado se combinan primero con `combine_subareas` (Fórmulas (11)-(12)).*
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
 `surface_pressure_intensity_indicator()` y `combine_subareas()` devuelven arrays.
 
+## 6. Método de control en campo (ISO 10052)
+
+Los métodos de ingeniería anteriores compran precisión con esfuerzo —
+micrófonos barridos, tiempos de reverberación por banda, corrección de ruido de
+fondo cuidadosa—. Para una comprobación rápida en una vivienda, ISO 10052 define
+un **método de control (survey)**: bandas de octava, un sonómetro de mano y una
+sola magnitud — el **índice de reverberación** `k = 10 lg(T/T0)` (`T0 = 0,5 s`)
+— que arrastra la corrección de la sala receptora. Cada magnitud del control es
+entonces una simple suma de `k`: la diferencia de niveles estandarizada
+`DnT = D + k`, la normalizada `Dn = D + k + 10 lg(A0 T0 / (0,16 V))`, la aparente
+`R' = D + k + 10 lg(S T0 / (0,16 V))` (usando `V/7,5` como `S` cuando es mayor) y,
+para impactos y fachadas, `L'nT = Li - k` y `D2m,nT = D2m + k`. Las referencias a
+cláusulas siguen ISO 10052:2021; las fórmulas y la tabla del índice de
+reverberación son idénticas en la armonizada EN ISO 10052:2004+A1:2010.
+
+El índice de reverberación se **mide** —pasa el tiempo de reverberación a
+`reverberation_index(T)`— o, en un control, se **estima** a partir del tipo de
+sala y el volumen con `estimate_reverberation_index(V, room)` (Tabla 4:
+amueblada `"kitchen"` / `"bathroom"` / `"furnished"`, o las clases de
+construcción sin amueblar `"a"`–`"h"` y las mixtas `"a+e"`…`"d+h"`). Una cuarta
+magnitud propia de este método es el **ruido de equipos de servicio** `LXY` — la
+media energética de tres posiciones ponderadas A o C.
+
+```python
+import numpy as np
+from phonometry import (reverberation_index, estimate_reverberation_index,
+                        survey_airborne_insulation, survey_service_equipment_level)
+
+# Niveles por banda de octava (125-2000 Hz) y el T medido de la sala receptora.
+l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
+l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
+k = reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
+res = survey_airborne_insulation(l1, l2, k, volume=50.0, area=12.0)
+print(np.round(res.d_nt, 1))          # [34.5 39.8 45.  50.5 54. ]  DnT = D + k
+print(res.rating.rating, res.rating.c)        # 49 -1  ->  DnT,w (C)
+print(res.r_prime_rating.rating)               # 48  ->  R'w
+
+# ¿Sin T medido? Estima k con la Tabla 4 (paredes pesadas, suelo duro,
+# 35-60 m³ -> clase "g").
+k_est = estimate_reverberation_index(50.0, "g")
+print(k_est)                                   # [4.5 5.  5.5 5.5 5.5]
+
+# Ruido de equipos de servicio: media energética de tres posiciones (dB(A)).
+se = survey_service_equipment_level([35.0, 30.0, 32.0], 3.0, volume=50.0)
+print(round(float(se.l_xy), 1), round(float(se.l_xy_nt), 1))   # 32.8 29.8
+
+res.plot()   # DnT vs curva de referencia ISO 717-1 desplazada (necesita matplotlib)
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation_es.svg" alt="Aislamiento aéreo por el método de control: la diferencia de niveles bruta D y la estandarizada DnT en las cinco bandas de octava, con la corrección por índice de reverberación k sombreada entre ambas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation_es_dark.svg" alt="Aislamiento aéreo por el método de control: la diferencia de niveles bruta D y la estandarizada DnT en las cinco bandas de octava, con la corrección por índice de reverberación k sombreada entre ambas" style="width:80%">
+
+*El índice de reverberación `k = 10 lg(T/T0)` desplaza la diferencia de niveles
+bruta `D` hacia la estandarizada `DnT` — hacia arriba donde la sala es viva
+(`T > T0`), hacia abajo donde es apagada. El índice automático solo se forma con
+exactamente 5 valores de octava (o 16 de tercio de octava).*
+
+### Parámetros de `survey_airborne_insulation()` y afines
+
+| Parámetro | Tipo | Unidades | Rango / def. | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `l1` / `l2` | array 1D o 2D | dB | uno/banda, o `(posiciones, bandas)` | Niveles emisor / receptor (o exterior `l1_2m`) |
+| `li` | array 1D o 2D | dB | uno/banda, o `(posiciones, bandas)` | Niveles de impacto (media energética de posiciones) |
+| `reverberation_index` | escalar o array 1D | dB | uno por banda | `k` de `reverberation_index` o `estimate_reverberation_index`; `survey_service_equipment_level()` también acepta un `k` escalar |
+| `volume` | float | m³ | > 0 | Volumen receptor `V` (para `Dn` / `L'n` / `R'` / normalizadas) |
+| `area` | float | m² | > 0 | Área de partición común `S` (aéreo `R'`; regla `V/7,5`) |
+| `measurements` | array | dB | exactamente 3 | Posiciones de equipo de servicio (`survey_service_equipment_level`) |
+| `room` | str | — | `"kitchen"`/`"bathroom"`/`"furnished"`/`"a"`–`"h"`/`"a+e"`… | Clase de sala para `estimate_reverberation_index` (Tabla 4) |
+
+`survey_airborne_insulation()` devuelve un `SurveyAirborneResult` (`d`, `d_nt`,
+`d_n`, `r_prime`, `rating`, `r_prime_rating`); `survey_impact_insulation()` un
+`SurveyImpactResult` (`l_i`, `l_nt`, `l_n`, `rating`);
+`survey_facade_insulation()` un `SurveyFacadeResult`;
+`survey_service_equipment_level()` un `SurveyServiceEquipmentResult` (`l_xy`,
+`l_xy_nt`, `l_xy_n`).
+
 ---
 
 **Normas.** ISO 16283-1:2014, ISO 16283-2 e ISO 16283-3:2016, *Acoustics —
@@ -886,7 +961,10 @@ situación de medición y los factores de cobertura del §4; su marco de
 precisión se apoya en ISO 5725 (contexto, no implementada directamente);
 ISO 15186-1:2000 e ISO 15186-2:2003 — el índice de reducción sonora por
 intensidad $R_I$, su forma modificada por $K_c$ y la diferencia de niveles
-normalizada por elemento del §5 (laboratorio y campo).
+normalizada por elemento del §5 (laboratorio y campo); ISO 10052:2021
+(armonizada como EN ISO 10052:2004+A1:2010) — el método de control en campo del
+§6: la corrección por índice de reverberación, las magnitudes aérea, de impacto
+y de fachada estandarizadas/normalizadas, y el ruido de equipos de servicio.
 
 ## Véase también
 

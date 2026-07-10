@@ -851,6 +851,81 @@ otherwise). Subareas scanned separately are combined first with
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
 `surface_pressure_intensity_indicator()` and `combine_subareas()` return arrays.
 
+## 6. Field survey method (ISO 10052)
+
+The engineering methods above buy accuracy with effort — swept microphones,
+per-band reverberation times, careful background correction. For a quick check
+in a dwelling, ISO 10052 defines a **survey (control) method**: octave bands, a
+hand-held meter, and a single quantity — the **reverberation index**
+`k = 10 lg(T/T0)` (`T0 = 0.5 s`) — to carry the receiving-room correction. Every
+survey quantity is then just an addition of `k`: the standardized level
+difference `DnT = D + k`, the normalized `Dn = D + k + 10 lg(A0 T0 / (0.16 V))`,
+the apparent `R' = D + k + 10 lg(S T0 / (0.16 V))` (using `V/7.5` for `S` where
+that is larger), and, for impacts and façades, `L'nT = Li - k` and
+`D2m,nT = D2m + k`. The clause references follow ISO 10052:2021; the formulas
+and the reverberation-index table are identical in the harmonized
+EN ISO 10052:2004+A1:2010.
+
+The reverberation index is either **measured** — feed the reverberation time to
+`reverberation_index(T)` — or, in a control survey, **estimated** from the room
+type and volume with `estimate_reverberation_index(V, room)` (Table 4:
+furnished `"kitchen"` / `"bathroom"` / `"furnished"`, or the unfurnished
+construction classes `"a"`–`"h"` and the mixed `"a+e"`…`"d+h"`). A fourth
+quantity unique to this method is **service-equipment noise** `LXY` — the
+energy average of three A- or C-weighted positions.
+
+```python
+import numpy as np
+from phonometry import (reverberation_index, estimate_reverberation_index,
+                        survey_airborne_insulation, survey_service_equipment_level)
+
+# Octave-band levels (125-2000 Hz) and the measured receiving-room T.
+l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
+l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
+k = reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
+res = survey_airborne_insulation(l1, l2, k, volume=50.0, area=12.0)
+print(np.round(res.d_nt, 1))          # [34.5 39.8 45.  50.5 54. ]  DnT = D + k
+print(res.rating.rating, res.rating.c)        # 49 -1  ->  DnT,w (C)
+print(res.r_prime_rating.rating)               # 48  ->  R'w
+
+# No reverberation time measured? Estimate k from Table 4 (heavy walls, hard
+# floor, 35-60 m3 -> class "g").
+k_est = estimate_reverberation_index(50.0, "g")
+print(k_est)                                   # [4.5 5.  5.5 5.5 5.5]
+
+# Service-equipment noise: energy average of three A-weighted positions.
+se = survey_service_equipment_level([35.0, 30.0, 32.0], 3.0, volume=50.0)
+print(round(float(se.l_xy), 1), round(float(se.l_xy_nt), 1))   # 32.8 29.8
+
+res.plot()   # DnT vs shifted ISO 717-1 reference (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation.svg" alt="Survey-method airborne insulation: the raw level difference D and the standardized DnT across the five octave bands, with the reverberation-index correction k shaded between them" width="80%"></picture>
+
+*The reverberation index `k = 10 lg(T/T0)` shifts the raw level difference `D`
+into the standardized `DnT` — up where the room is live (`T > T0`), down where
+it is dead. The automatic rating is formed only for exactly 5 octave (or 16
+one-third-octave) values.*
+
+### `survey_airborne_insulation()` and friends — parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `l1` / `l2` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Source / receiving (or outdoor `l1_2m`) levels |
+| `li` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Impact levels (energy-averaged over positions) |
+| `reverberation_index` | scalar or 1D array | dB | one per band | `k` from `reverberation_index` or `estimate_reverberation_index`; `survey_service_equipment_level()` also accepts a scalar `k` |
+| `volume` | float | m³ | > 0 | Receiving-room `V` (for `Dn` / `L'n` / `R'` / normalized) |
+| `area` | float | m² | > 0 | Common-partition `S` (airborne `R'`; `V/7.5` rule applied) |
+| `measurements` | array | dB | exactly 3 | Service-equipment positions (`survey_service_equipment_level`) |
+| `room` | str | — | `"kitchen"`/`"bathroom"`/`"furnished"`/`"a"`–`"h"`/`"a+e"`… | `estimate_reverberation_index` room class (Table 4) |
+
+`survey_airborne_insulation()` returns a `SurveyAirborneResult` (`d`, `d_nt`,
+`d_n`, `r_prime`, `rating`, `r_prime_rating`); `survey_impact_insulation()` a
+`SurveyImpactResult` (`l_i`, `l_nt`, `l_n`, `rating`);
+`survey_facade_insulation()` a `SurveyFacadeResult`;
+`survey_service_equipment_level()` a `SurveyServiceEquipmentResult` (`l_xy`,
+`l_xy_nt`, `l_xy_n`).
+
 ---
 
 **Standards.** ISO 16283-1:2014, ISO 16283-2 and ISO 16283-3:2016, *Acoustics —
@@ -867,7 +942,10 @@ standard uncertainties per measurement situation and the coverage factors
 of §4; its precision framework builds on ISO 5725 (context, not
 implemented directly); ISO 15186-1:2000 and ISO 15186-2:2003 — the
 sound-intensity sound reduction index $R_I$, its $K_c$-modified form and the
-element normalized level difference of §5 (laboratory and field).
+element normalized level difference of §5 (laboratory and field);
+ISO 10052:2021 (harmonized as EN ISO 10052:2004+A1:2010) — the field survey
+method of §6: the reverberation-index correction, the standardized/normalized
+airborne, impact and façade quantities, and service-equipment noise.
 
 ## See also
 

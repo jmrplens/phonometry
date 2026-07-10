@@ -166,6 +166,18 @@ from .intensity_insulation import (
     intensity_sound_reduction,
     surface_pressure_intensity_indicator,
 )
+from .survey_insulation import (
+    SurveyAirborneResult,
+    SurveyFacadeResult,
+    SurveyImpactResult,
+    SurveyServiceEquipmentResult,
+    estimate_reverberation_index,
+    reverberation_index,
+    survey_airborne_insulation,
+    survey_facade_insulation,
+    survey_impact_insulation,
+    survey_service_equipment_level,
+)
 from .open_plan import OpenPlanResult, open_plan_metrics
 from .sound_power import (
     MeteorologicalCorrection,
@@ -763,6 +775,16 @@ __all__ = [
     "adaptation_term_kc",
     "surface_pressure_intensity_indicator",
     "combine_subareas",
+    "reverberation_index",
+    "estimate_reverberation_index",
+    "survey_airborne_insulation",
+    "SurveyAirborneResult",
+    "survey_impact_insulation",
+    "SurveyImpactResult",
+    "survey_facade_insulation",
+    "SurveyFacadeResult",
+    "survey_service_equipment_level",
+    "SurveyServiceEquipmentResult",
     "lden",
     "ldn",
     "composite_rating_level",

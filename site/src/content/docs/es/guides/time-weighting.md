@@ -33,7 +33,7 @@ lenta — conmutando por muestra según el signo del cambio:
 
 $$
 y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
-\alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{en otro caso}\end{cases}
+\alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0{,}035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1{,}5)} & \text{en otro caso}\end{cases}
 $$
 
 ## El detector exponencial

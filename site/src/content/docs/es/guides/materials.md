@@ -28,34 +28,34 @@ $$
 \alpha_{p,i} = \tfrac{1}{3}\big(\alpha_{i1} + \alpha_{i2} + \alpha_{i3}\big),
 $$
 
-evaluado al segundo decimal y luego redondeado en pasos de $0.05$ (la NOTA de la
-cláusula 4.1 fija el redondeo, p. ej. $0.92 \to 0.90$); las medias redondeadas
-por encima de $1.00$ se fijan en $1.00$. Las cinco bandas de valoración son 250,
+evaluado al segundo decimal y luego redondeado en pasos de $0{,}05$ (la NOTA de la
+cláusula 4.1 fija el redondeo, p. ej. $0{,}92 \to 0{,}90$); las medias redondeadas
+por encima de $1{,}00$ se fijan en $1{,}00$. Las cinco bandas de valoración son 250,
 500, 1000, 2000 y 4000 Hz.
 
 **Absorción ponderada (cláusula 4.2).** Una curva de referencia fija
-$\{250{:}\,0.80,\ 500{:}\,1.00,\ 1000{:}\,1.00,\ 2000{:}\,1.00,\ 4000{:}\,0.90\}$
-se desplaza hacia abajo, hacia el $\alpha_p$ medido, en pasos de $0.05$ hasta que
+$\{250{:}\,0{,}80,\ 500{:}\,1{,}00,\ 1000{:}\,1{,}00,\ 2000{:}\,1{,}00,\ 4000{:}\,0{,}90\}$
+se desplaza hacia abajo, hacia el $\alpha_p$ medido, en pasos de $0{,}05$ hasta que
 la suma de las desviaciones **desfavorables** —tomadas solo donde la medida
 queda por debajo de la curva desplazada, con magnitud
-$(\text{curva} - \text{medida})$— no supera $0.10$. El coeficiente ponderado
+$(\text{curva} - \text{medida})$— no supera $0{,}10$. El coeficiente ponderado
 $\alpha_w$ es el valor de la curva desplazada leído a 500 Hz.
 
 **Indicadores de forma (cláusula 4.3).** Cuando un coeficiente práctico supera la
-curva desplazada en $0.25$ o más, se añade un indicador de forma: `L` a 250 Hz,
+curva desplazada en $0{,}25$ o más, se añade un indicador de forma: `L` a 250 Hz,
 `M` a 500 o 1000 Hz, `H` a 2000 o 4000 Hz (p. ej. `0.60(M)`).
 
 **Clase de absorción (Tabla B.1).** Por último, $\alpha_w$ se asigna a una clase:
 A (0,90–1,00), B (0,80–0,85), C (0,60–0,75), D (0,30–0,55), E (0,15–0,25) o "no
-clasificado" (0,00–0,10). Como $\alpha_w$ es siempre un múltiplo de $0.05$, estos
+clasificado" (0,00–0,10). Como $\alpha_w$ es siempre un múltiplo de $0{,}05$, estos
 rangos particionan la rejilla de forma exacta.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_rating_es.png" alt="Valoración ponderada de absorción sonora de ISO 11654: el espectro de absorción práctica trazado frente a la curva de referencia desplazada de 250 Hz a 4000 Hz, con la desviación desfavorable a 250 Hz sombreada y el coeficiente ponderado alpha_w leído a 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_rating_es_dark.png" alt="Valoración ponderada de absorción sonora de ISO 11654: el espectro de absorción práctica trazado frente a la curva de referencia desplazada de 250 Hz a 4000 Hz, con la desviación desfavorable a 250 Hz sombreada y el coeficiente ponderado alpha_w leído a 500 Hz" style="width:80%">
 
 *El ejemplo resuelto del Anexo A.2: la curva de referencia se desplaza hacia
 abajo 0,40 hasta que las desviaciones desfavorables suman 0,05 (≤ 0,10), dando
-$\alpha_w = 0.60$; el pico de 500 Hz sobrepasa la curva desplazada en ≥ 0,25,
-añadiendo el indicador `M`, de modo que la valoración es $0.60(\text{M})$, clase
+$\alpha_w = 0{,}60$; el pico de 500 Hz sobrepasa la curva desplazada en ≥ 0,25,
+añadiendo el indicador `M`, de modo que la valoración es $0{,}60(\text{M})$, clase
 C.*
 
 ```python
@@ -104,7 +104,7 @@ resistividad al flujo de aire $\sigma$ es $R_s$ por metro de espesor.
 por escalones y la diferencia de presión se traza frente a la velocidad lineal
 $u = q_v/A$. Se ajusta una regresión de al menos segundo orden **forzada a pasar
 por el origen**, $\Delta p = a\,u + b\,u^2$, y $\Delta p$ y $R_s$ se leen a la
-velocidad de referencia $u = 0.5\ \text{mm/s}$ (cláusula 7.5); la velocidad más
+velocidad de referencia $u = 0{,}5\ \text{mm/s}$ (cláusula 7.5); la velocidad más
 alta no debe superar los 15 mm/s. Como $R_s = \Delta p/u = a + b\,u$, el término
 lineal $a$ es la resistencia específica al flujo de aire a velocidad nula.
 
@@ -151,7 +151,7 @@ $$
 
 con $S$ y $V$ la superficie y el volumen de la cavidad y $b$ el espesor de la
 capa límite térmica. Para la cavidad de ejemplo del Anexo A.3 esto da
-$\kappa' = 1.370$, cerca de un 2 % por debajo del adiabático 1,4008.
+$\kappa' = 1{,}370$, cerca de un 2 % por debajo del adiabático 1,4008.
 
 ```python
 from phonometry import effective_kappa, alternating_airflow_resistance
@@ -170,7 +170,7 @@ print(round(R))                   # resistencia al flujo de aire R [Pa*s/m^3]
 
 Pasa el resultado de `effective_kappa` a `alternating_airflow_resistance` para
 una cifra conforme al Anexo A; en caso contrario, su argumento `kappa_prime`
-adopta por defecto el adiabático sin corregir 1.4. La llamada avisa (mediante
+adopta por defecto el adiabático sin corregir 1,4. La llamada avisa (mediante
 `AirflowResistanceWarning`) cuando la frecuencia del pistón sale de 1–4 Hz o
 fallan los criterios de validez de las Fórmulas (3)/(4).
 
@@ -196,7 +196,7 @@ $$
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_es.png" alt="Método de la razón de onda estacionaria de ISO 10534-1: el coeficiente de absorción y la magnitud del factor de reflexión en función de la diferencia de nivel de la onda estacionaria, mostrando que una diferencia de 9,54 dB corresponde a una razón de onda estacionaria de 3, una magnitud de reflexión de 0,5 y una absorción de 0,75" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_es_dark.png" alt="Método de la razón de onda estacionaria de ISO 10534-1: el coeficiente de absorción y la magnitud del factor de reflexión en función de la diferencia de nivel de la onda estacionaria, mostrando que una diferencia de 9,54 dB corresponde a una razón de onda estacionaria de 3, una magnitud de reflexión de 0,5 y una absorción de 0,75" style="width:80%">
 
 *Una diferencia de nivel pequeña significa un absorbente casi perfecto; una
-diferencia de nivel de 9,54 dB da $s = 3$, $|r| = 0.5$ y $\alpha = 0.75$.*
+diferencia de nivel de 9,54 dB da $s = 3$, $|r| = 0{,}5$ y $\alpha = 0{,}75$.*
 
 ```python
 from phonometry import standing_wave_absorption, standing_wave_ratio_from_level

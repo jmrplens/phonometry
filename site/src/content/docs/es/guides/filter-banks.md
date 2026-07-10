@@ -11,7 +11,7 @@ comparables entre arquitecturas.
 ## Bandas de octava fraccionaria: las matemáticas
 
 IEC 61260-1:2014 construye cada banda a partir de la razón de octava en base 10
-$G = 10^{3/10} \approx 1.99526$ (es decir, "una octava" *no* es exactamente 2).
+$G = 10^{3/10} \approx 1{,}99526$ (es decir, "una octava" *no* es exactamente 2).
 Para la fracción de banda $1/b$, las frecuencias centrales y los bordes de
 banda siguen (5.2-5.5):
 
@@ -21,21 +21,21 @@ f_1 = f_m G^{-1/2b}, \quad f_2 = f_m G^{+1/2b}
 $$
 
 de modo que cada banda de tercio de octava abarca
-$G^{1/3} \approx 1.2589 \approx 10^{1/10}$ — diez bandas por década, y por eso
+$G^{1/3} \approx 1{,}2589 \approx 10^{1/10}$ — diez bandas por década, y por eso
 las frecuencias nominales (25, 31,5, 40 …) se repiten escaladas por 10.
 phonometry diseña cada banda como una cascada SOS cuyos puntos de −3 dB caen
 exactamente en $f_1$ y $f_2$ en todas las arquitecturas — para Chebyshev II,
 Elíptico y Bessel eso exige pre-deformar (pre-warping) el mapeo analítico de los
 bordes de banda en lugar de confiar en la parametrización por defecto de SciPy.
 
-### Decimación multitasa
+### Diezmado multitasa
 
 Una banda de tercio de octava de 25 Hz a 48 kHz abarca unos 5,8 Hz — el
 0,024 % de Nyquist — con coeficientes tan rígidos que se vuelven
 numéricamente inestables. El banco lo evita filtrando las bandas bajas a una
-frecuencia decimada:
+frecuencia diezmada:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es.svg" alt="Decimación multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un filtro paso bajo antialias y decimación, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es_dark.svg" alt="Decimación multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un paso-bajo antialiasing y diezmado, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es.svg" alt="Diezmado multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un paso-bajo antialiasing y diezmado, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es_dark.svg" alt="Diezmado multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un paso-bajo antialiasing y diezmado, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%">
 
 ### Parámetros de `octave_filter()` / `OctaveFilterBank`
 
@@ -47,7 +47,7 @@ frecuencia decimada:
 | `order` | int | — | por defecto `6` | Orden SOS por banda |
 | `limits` | lista `[lo, hi]` | Hz | por defecto `[12, 20000]` | Rango de análisis |
 | `filter_type` | str | — | `'butter'` (por defecto), `'cheby1'`, `'cheby2'`, `'ellip'`, `'bessel'` | Ver la comparación más abajo |
-| `ripple` / `attenuation` | float | dB | `ripple` defecto `0.1`; `attenuation` defecto `72.0` | Rizado de banda de paso / atenuación de banda eliminada (cheby/ellip); `cheby2` necesita `attenuation ≥ 70` para clase 1, ya que scipy fija su suelo equirizado en exactamente este valor |
+| `ripple` / `attenuation` | float | dB | `ripple` defecto `0.1`; `attenuation` defecto `72.0` | Rizado de banda de paso / atenuación en banda atenuada (cheby/ellip); `cheby2` necesita `attenuation ≥ 70` para clase 1, ya que scipy fija su suelo equirizado en exactamente este valor |
 | `show` | bool | — | por defecto `False` | Dibuja la respuesta del banco (requiere matplotlib) |
 | `sigbands` | bool | — | por defecto `False` | Devuelve también las señales temporales por banda |
 | `mode` | str | — | `'rms'` (por defecto), `'peak'`, `'sum'` | Estadístico por banda devuelto |
@@ -111,6 +111,8 @@ x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 spl, freq = octave_filter(x, fs, filter_type='butter')
 ```
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_es.png" alt="Respuesta en frecuencia del banco Butterworth de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_es_dark.png" alt="Respuesta en frecuencia del banco Butterworth de tercio de octava" style="width:60%">
+
 ### 2. Chebyshev I (`cheby1`)
 
 Los filtros Chebyshev tipo I ofrecen una **caída más abrupta** que Butterworth a
@@ -122,18 +124,22 @@ cerca de las frecuencias de corte.
 spl, freq = octave_filter(x, fs, filter_type='cheby1', ripple=0.1)
 ```
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_es.png" alt="Respuesta en frecuencia del banco Chebyshev I de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_es_dark.png" alt="Respuesta en frecuencia del banco Chebyshev I de tercio de octava" style="width:60%">
+
 ### 3. Chebyshev II (`cheby2`)
 
 También llamado Chebyshev inverso, tiene **banda de paso plana** y rizado en la
 banda atenuada. Ofrece una caída más rápida que Butterworth sin afectar a la
 señal en la banda de paso. Los bordes de la banda atenuada se colocan
 automáticamente para que los puntos de −3 dB caigan en los bordes de banda
-(`attenuation` debe ser > 3.01 dB).
+(`attenuation` debe ser > 3,01 dB).
 
 ```python
 # Banda de paso plana, 72 dB de atenuación por defecto (clase 1)
 spl, freq = octave_filter(x, fs, filter_type='cheby2')
 ```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_es.png" alt="Respuesta en frecuencia del banco Chebyshev II de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_es_dark.png" alt="Respuesta en frecuencia del banco Chebyshev II de tercio de octava" style="width:60%">
 
 ### 4. Elíptico (`ellip`)
 
@@ -146,6 +152,8 @@ la atenuada.
 spl, freq = octave_filter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_es.png" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_es_dark.png" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:60%">
+
 ### 5. Bessel (`bessel`)
 
 Los filtros Bessel están optimizados para una **respuesta de fase lineal** y un
@@ -156,6 +164,8 @@ mejor que ningún otro tipo, pero tienen la caída más lenta.
 # Ideal para análisis de pulsos y preservación de transitorios
 spl, freq = octave_filter(x, fs, filter_type='bessel')
 ```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_es.png" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_es_dark.png" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:60%">
 
 ### 6. Linkwitz-Riley (`linkwitz_riley`)
 

@@ -234,7 +234,7 @@ energía en una frontera temprano/tardío dan la **claridad** y la
 
 $$
 C_{te} = 10 \log_{10} \frac{\int_0^{te} p^2\ dt}{\int_{te}^{\infty} p^2\ dt}\ \text{dB}, \qquad
-D_{50} = \frac{\int_0^{0.05} p^2\ dt}{\int_0^{\infty} p^2\ dt},
+D_{50} = \frac{\int_0^{0{,}05} p^2\ dt}{\int_0^{\infty} p^2\ dt},
 $$
 
 con $te = 50$ ms → C50 (habla) y $te = 80$ ms → C80 (música), más el
@@ -425,8 +425,8 @@ es la diferencia de las dos áreas de Sabine, y dividiendo por el área cubierta
 se obtiene el coeficiente de absorción:
 
 $$
-A = \frac{55.3\ V}{c\ T} - 4 V m, \qquad
-\alpha_s = \frac{A_2 - A_1}{S}, \qquad c = 331 + 0.6\ t ,
+A = \frac{55{,}3\ V}{c\ T} - 4 V m, \qquad
+\alpha_s = \frac{A_2 - A_1}{S}, \qquad c = 331 + 0{,}6\ t ,
 $$
 
 con $c$ a partir de la temperatura del aire de la sala $t$ en °C (válida

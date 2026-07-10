@@ -35,12 +35,12 @@ recortado a cero (cláusula 6.3.2).
 ```python
 import phonometry as ph
 
-# Median NIPTS after 20 years at an 8 h-normalised level of 90 dB(A).
+# NIPTS mediano tras 20 años a un nivel normalizado a 8 h de 90 dB(A).
 r = ph.nipts(90.0, 20.0, fractile=0.5)
 print(r.frequencies.astype(int))  # [ 500 1000 2000 3000 4000 6000]
 print(r.median.round(1))          # [ 0.   0.1  4.1 10.2 12.9  8.5]
 
-# The most-susceptible tenth of the population (90th percentile):
+# El décimo más susceptible de la población (percentil 90):
 print(ph.nipts(90.0, 20.0, fractile=0.9).value.round(1))
 # [ 0.   0.1  7.7 16.2 17.8 13.6]
 ```
@@ -67,11 +67,11 @@ NIPTS. `htlan` evalúa ambas componentes y su combinación.
 ```python
 import phonometry as ph
 
-# A 60-year-old man, 30 years at 95 dB(A), median.
+# Un hombre de 60 años, 30 años a 95 dB(A), mediana.
 h = ph.htlan(60, "male", 95.0, 30.0, fractile=0.5)
-print(h.htla.round(1))       # [ 6.   7.8 12.5 16.6 20.2 25.9]  age alone
-print(h.nipts.round(1))      # [ 0.5  3.  11.8 21.6 24.8 17.6]  noise alone
-print(h.threshold.round(1))  # [ 6.5 10.7 23.  35.2 40.8 39.8]  age + noise
+print(h.htla.round(1))       # [ 6.   7.8 12.5 16.6 20.2 25.9]  solo edad
+print(h.nipts.round(1))      # [ 0.5  3.  11.8 21.6 24.8 17.6]  solo ruido
+print(h.threshold.round(1))  # [ 6.5 10.7 23.  35.2 40.8 39.8]  edad + ruido
 ```
 
 A 4 kHz la componente de edad (20,2 dB) y la de ruido (24,8 dB) se combinan en
@@ -87,11 +87,11 @@ import matplotlib.pyplot as plt
 import phonometry as ph
 from phonometry.noise_induced_hearing_loss import NIPTS_FREQUENCIES as f
 
-# One line for the NIPTS spectrum with its fractile band:
+# En una línea, el espectro NIPTS con su banda de fractiles:
 ph.nipts(95.0, 40.0, 0.9).plot()
 plt.show()
 
-# By hand, both panels:
+# A mano, ambos paneles:
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 for yr in (10, 20, 30, 40):
     ax1.plot(f, ph.nipts(95.0, yr, 0.5).median, "o-", label=f"{yr} yr")

@@ -32,7 +32,7 @@ mantiene m = 1 (STI = 1); la reverberación filtra paso-bajo la envolvente
 siguiendo la forma cerrada de Schroeder, y el ruido estacionario la escala:
 
 $$
-m(F) = \frac{1}{\sqrt{1 + \left(2\pi F\ \frac{T_{60}}{13.8}\right)^2}}
+m(F) = \frac{1}{\sqrt{1 + \left(2\pi F\ \frac{T_{60}}{13{,}8}\right)^2}}
 \cdot \frac{1}{1 + 10^{-\mathrm{SNR}/10}}
 $$
 

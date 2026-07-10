@@ -155,7 +155,7 @@ sala `Lp(ST)`, el área de absorción de Sabine `A = (55.26/c)·(V/T60)` y una
 cadena de pequeñas correcciones (ISO 3741 Ec. 20):
 
 $$
-L_W = \bar{L}_p + 10 \log_{10}\frac{A}{A_0} + 4.34\ \frac{A}{S}
+L_W = \bar{L}_p + 10 \log_{10}\frac{A}{A_0} + 4{,}34\ \frac{A}{S}
       + 10 \log_{10}\left( 1 + \frac{S c}{8 V f} \right) + C_1 + C_2 - 6 .
 $$
 
@@ -167,8 +167,8 @@ los micrófonos del interior no captan. `C1` (cantidad de referencia) y `C2`
 de referencia de 23 °C y 101,325 kPa,
 
 $$
-C_1 = -10 \log_{10}\frac{p_s}{p_{s0}} + 5 \log_{10}\frac{273.15 + \theta}{314}, \qquad
-C_2 = -10 \log_{10}\frac{p_s}{p_{s0}} + 15 \log_{10}\frac{273.15 + \theta}{296},
+C_1 = -10 \log_{10}\frac{p_s}{p_{s0}} + 5 \log_{10}\frac{273{,}15 + \theta}{314}, \qquad
+C_2 = -10 \log_{10}\frac{p_s}{p_{s0}} + 15 \log_{10}\frac{273{,}15 + \theta}{296},
 $$
 
 con la velocidad del sonido `c = 20.05·√(273 + θ)`. El **método de comparación**

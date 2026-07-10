@@ -8,7 +8,7 @@ description: "Normas, matemáticas y decisiones de diseño detrás de phonometry
 Las frecuencias centrales (fm) y los bordes (f1, f2) usan una razón en base 10:
 
 $$
-G = 10^{0.3}
+G = 10^{0{,}3}
 $$
 
 **Frecuencia central:**
@@ -193,11 +193,11 @@ flowchart LR
 La función de transferencia de la ponderación A:
 
 $$
-R_A(f) = \frac{12194^2 \cdot f^4}{(f^2 + 20.6^2)\sqrt{(f^2 + 107.7^2)(f^2 + 737.9^2)}(f^2 + 12194^2)}
+R_A(f) = \frac{12194^2 \cdot f^4}{(f^2 + 20{,}6^2)\sqrt{(f^2 + 107{,}7^2)(f^2 + 737{,}9^2)}(f^2 + 12194^2)}
 $$
 
 $$
-A(f) = 20 \log_{10}(R_A(f)) + 2.00
+A(f) = 20 \log_{10}(R_A(f)) + 2{,}00
 $$
 
 El filtro digital se obtiene de los polos/ceros analógicos mediante la
@@ -232,10 +232,10 @@ La curva G extiende la ponderación frecuencial al rango de los infrasonidos. La
 
 $$
 z_{1..4} = 0, \qquad
-p = 2\pi \left\lbrace -0.707 \pm j0.707,\  -19.27 \pm j5.16,\  -14.11 \pm j14.11,\  -5.16 \pm j19.27 \right\rbrace \ \text{Hz}
+p = 2\pi \left\lbrace -0{,}707 \pm j0{,}707,\  -19{,}27 \pm j5{,}16,\  -14{,}11 \pm j14{,}11,\  -5{,}16 \pm j19{,}27 \right\rbrace \ \text{Hz}
 $$
 
-La ganancia $k$ se elige para que la respuesta sea exactamente **0 dB a 10 Hz** (apartado 4):
+La ganancia $k$ se elige para que la respuesta sea exactamente **0 dB a 10 Hz** (cláusula 4):
 
 $$
 k = \left| \frac{\prod_i (j\omega_{10} - p_i)}{\prod_i (j\omega_{10} - z_i)} \right|, \qquad \omega_{10} = 2\pi \cdot 10 \ \text{rad/s}
@@ -249,16 +249,16 @@ Consulta la [guía de ponderación frecuencial](/phonometry/es/guides/weighting/
 
 ## Líneas isofónicas (ISO 226:2023)
 
-Un tono tiene un *nivel de sonoridad* de $L_N$ fonios cuando se juzga igual de sonoro que un tono puro de 1 kHz a $L_N$ dB SPL. La Fórmula (1) de ISO 226:2023 (apartado 4.1, p. 2) da el SPL de un tono puro a la frecuencia $f$ que alcanza el nivel de sonoridad $L_N$:
+Un tono tiene un *nivel de sonoridad* de $L_N$ fonios cuando se juzga igual de sonoro que un tono puro de 1 kHz a $L_N$ dB SPL. La Fórmula (1) de ISO 226:2023 (cláusula 4.1, p. 2) da el SPL de un tono puro a la frecuencia $f$ que alcanza el nivel de sonoridad $L_N$:
 
 $$
-L_f = \frac{10}{\alpha_f} \log_{10}\left[ \left(4 \cdot 10^{-10}\right)^{0.3 - \alpha_f} \left( 10^{\ 0.03 L_N} - 10^{\ 0.072} \right) + 10^{\ \alpha_f (T_f + L_U)/10} \right] - L_U
+L_f = \frac{10}{\alpha_f} \log_{10}\left[ \left(4 \cdot 10^{-10}\right)^{0{,}3 - \alpha_f} \left( 10^{\ 0{,}03 L_N} - 10^{\ 0{,}072} \right) + 10^{\ \alpha_f (T_f + L_U)/10} \right] - L_U
 $$
 
-La Fórmula (2) (apartado 4.2) la invierte, devolviendo el nivel de sonoridad de un tono a SPL $L_f$:
+La Fórmula (2) (cláusula 4.2) la invierte, devolviendo el nivel de sonoridad de un tono a SPL $L_f$:
 
 $$
-L_N = \frac{100}{3} \log_{10}\left[ \frac{10^{\ \alpha_f (L_f + L_U)/10} - 10^{\ \alpha_f (T_f + L_U)/10}}{\left(4 \cdot 10^{-10}\right)^{0.3 - \alpha_f}} + 10^{\ 0.072} \right]
+L_N = \frac{100}{3} \log_{10}\left[ \frac{10^{\ \alpha_f (L_f + L_U)/10} - 10^{\ \alpha_f (T_f + L_U)/10}}{\left(4 \cdot 10^{-10}\right)^{0{,}3 - \alpha_f}} + 10^{\ 0{,}072} \right]
 $$
 
 Los tres parámetros provienen de la Tabla 1 (p. 4), tabulados en las 29 frecuencias preferentes de tercio de octava de ISO 266 desde 20 Hz hasta 12,5 kHz:
@@ -273,21 +273,21 @@ Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) pa
 
 ## Prominencia tonal: TNR y PR (ECMA-418-1)
 
-Ambos métodos operan sobre un espectro de potencia con ventana de Hann promediado en RMS (apartados 11.1 / 12.1) y usan el modelo de bandas críticas del apartado 10. El ancho de banda crítico centrado en un tono a $f$ es (Fórmula 2):
+Ambos métodos operan sobre un espectro de potencia con ventana de Hann promediado en RMS (cláusulas 11.1 / 12.1) y usan el modelo de bandas críticas de la cláusula 10. El ancho de banda crítico centrado en un tono a $f$ es (Fórmula 2):
 
 $$
-\Delta f_c = 25.0 + 75.0 \left(1.0 + 1.4 \left(\tfrac{f}{1000}\right)^2\right)^{0.69} \ \text{Hz}
+\Delta f_c = 25{,}0 + 75{,}0 \left(1{,}0 + 1{,}4 \left(\tfrac{f}{1000}\right)^2\right)^{0{,}69} \ \text{Hz}
 $$
 
 Los bordes de banda se colocan **aritméticamente** para $f \le 500$ Hz (Fórmulas 4–5): $f_{1,2} = f \mp \Delta f_c / 2$, y **geométricamente** por encima (Fórmulas 7–8): $f_1 = -\Delta f_c/2 + \sqrt{\Delta f_c^2 + 4 f^2}/2$, $f_2 = f_1 + \Delta f_c$.
 
-**TNR** (apartado 11). La banda del tono abarca los mínimos espectrales a ambos lados del pico dentro del 15 % de $\Delta f_c$ (apartado 11.2). A la potencia del tono se le resta la recta que conecta los bins de los bordes de banda (Fórmula 9): sobre los $N$ bins de la banda del tono, $P_t = \sum_k P_k - (P_{\text{lo}} + P_{\text{hi}})\ N/2$. La potencia del ruido enmascarante es la potencia restante de la banda crítica reescalada al ancho de banda crítico completo (Fórmula 10): $P_n = (P_{\text{band}} - P_t) \cdot \Delta f_c / \Delta f_{\text{band}}$, y $\mathrm{TNR} = 10\log_{10}(P_t/P_n)$ (Fórmula 11). El criterio de prominencia (Fórmulas 12–13) es
+**TNR** (cláusula 11). La banda del tono abarca los mínimos espectrales a ambos lados del pico dentro del 15 % de $\Delta f_c$ (cláusula 11.2). A la potencia del tono se le resta la recta que conecta los bins de los bordes de banda (Fórmula 9): sobre los $N$ bins de la banda del tono, $P_t = \sum_k P_k - (P_{\text{lo}} + P_{\text{hi}})\ N/2$. La potencia del ruido enmascarante es la potencia restante de la banda crítica reescalada al ancho de banda crítico completo (Fórmula 10): $P_n = (P_{\text{band}} - P_t) \cdot \Delta f_c / \Delta f_{\text{band}}$, y $\mathrm{TNR} = 10\log_{10}(P_t/P_n)$ (Fórmula 11). El criterio de prominencia (Fórmulas 12–13) es
 
 $$
-\mathrm{TNR}_{\text{crit}} = \begin{cases} 8.0 + 8.33 \log_{10}(1000/f_t) \ \text{dB} & f_t < 1\ \text{kHz} \\ 8.0 \ \text{dB} & f_t \ge 1\ \text{kHz} \end{cases}
+\mathrm{TNR}_{\text{crit}} = \begin{cases} 8{,}0 + 8{,}33 \log_{10}(1000/f_t) \ \text{dB} & f_t < 1\ \text{kHz} \\ 8{,}0 \ \text{dB} & f_t \ge 1\ \text{kHz} \end{cases}
 $$
 
-**PR** (apartado 12) compara el nivel de la banda crítica centrada en el tono, $L_M$, con la potencia media de las dos bandas críticas **contiguas** $L_L$, $L_U$ (bordes según las Fórmulas ajustadas 21–22 con las Tablas 2–3): $\mathrm{PR} = 10\log_{10} P_M - 10\log_{10}\left[(P_L + P_U)/2\right]$ (Fórmula 23). Para $f_t \le 171.4$ Hz la banda inferior se trunca en 20 Hz y su potencia se reescala a un **ancho de banda de 100 Hz** (Fórmula 24). El criterio (Fórmulas 25–26) es 9,0 dB para $f_t \ge 1$ kHz, y crece como $9.0 + 10.0\log_{10}(1000/f_t)$ por debajo. Los tonos se evalúan dentro del rango de interés de 89,1 Hz – 11,2 kHz (apartados 11.5 / 12.6).
+**PR** (cláusula 12) compara el nivel de la banda crítica centrada en el tono, $L_M$, con la potencia media de las dos bandas críticas **contiguas** $L_L$, $L_U$ (bordes según las Fórmulas ajustadas 21–22 con las Tablas 2–3): $\mathrm{PR} = 10\log_{10} P_M - 10\log_{10}\left[(P_L + P_U)/2\right]$ (Fórmula 23). Para $f_t \le 171{,}4$ Hz la banda inferior se trunca en 20 Hz y su potencia se reescala a un **ancho de banda de 100 Hz** (Fórmula 24). El criterio (Fórmulas 25–26) es 9,0 dB para $f_t \ge 1$ kHz, y crece como $9{,}0 + 10{,}0\log_{10}(1000/f_t)$ por debajo. Los tonos se evalúan dentro del rango de interés de 89,1 Hz – 11,2 kHz (cláusulas 11.5 / 12.6).
 
 Consulta la [guía de tonos discretos prominentes](/phonometry/es/guides/tone-prominence/) para su uso.
 
@@ -313,7 +313,7 @@ $$
 
 Es idéntico al $L_{EP,d}$ de la Directiva 86/188/CEE y al $L_{EX,8h}$ de ISO 1999 (BS EN 61252:1995, 3.3 NOTAS 5–6). El ancla de BS EN 61252:1995 (3.3 NOTA 4): una exposición de **3,2 Pa²h corresponde a un $L_{EX,8h}$ de exactamente 90 dB**.
 
-**LCpeak** (IEC 61672-1:2013, subapartado 5.13) es el máximo absoluto de la presión sonora ponderada C expresado en dB, $L_{Cpeak} = 20\log_{10}(\max|p_C(t)|/p_0)$ — la magnitud detrás de los límites de acción laborales de 135/137/140 dB(C). La implementación se verifica contra las respuestas de referencia de un ciclo y de medio ciclo de la Tabla 5.
+**LCpeak** (IEC 61672-1:2013, subcláusula 5.13) es el máximo absoluto de la presión sonora ponderada C expresado en dB, $L_{Cpeak} = 20\log_{10}(\max|p_C(t)|/p_0)$ — la magnitud detrás de los límites de acción laborales de 135/137/140 dB(C). La implementación se verifica contra las respuestas de referencia de un ciclo y de medio ciclo de la Tabla 5.
 
 Consulta la [guía de niveles](/phonometry/es/guides/levels/) para su uso y la [guía de calibración](/phonometry/es/guides/calibration/) para configurar la escala absoluta.
 
@@ -322,19 +322,19 @@ Consulta la [guía de niveles](/phonometry/es/guides/levels/) para su uso y la [
 El **nivel día-tarde-noche** $L_{den}$ (ISO 1996-1:2016, 3.6.4) es un promedio energético sobre las 24 h del día con penalizaciones de **+5 dB para la tarde** y **+10 dB para la noche**:
 
 $$
-L_{den} = 10 \log_{10}\left\lbrace\frac{1}{24}\left[ t_d\ 10^{0.1 L_{day}} + t_e\ 10^{0.1 (L_{evening} + 5)} + t_n\ 10^{0.1 (L_{night} + 10)} \right]\right\rbrace
+L_{den} = 10 \log_{10}\left\lbrace\frac{1}{24}\left[ t_d\ 10^{0{,}1 L_{day}} + t_e\ 10^{0{,}1 (L_{evening} + 5)} + t_n\ 10^{0{,}1 (L_{night} + 10)} \right]\right\rbrace
 $$
 
 con duraciones de periodo por defecto $(t_d, t_e, t_n) = (12, 4, 8)$ h — cada país puede definir los periodos de forma distinta (3.6.4 Nota 1). El **nivel día-noche** $L_{dn}$ (3.6.5) prescinde del periodo de tarde:
 
 $$
-L_{dn} = 10 \log_{10}\left\lbrace\frac{1}{24}\left[ t_d\ 10^{0.1 L_{day}} + t_n\ 10^{0.1 (L_{night} + 10)} \right]\right\rbrace, \qquad (t_d, t_n) = (15, 9)\ \text{h}
+L_{dn} = 10 \log_{10}\left\lbrace\frac{1}{24}\left[ t_d\ 10^{0{,}1 L_{day}} + t_n\ 10^{0{,}1 (L_{night} + 10)} \right]\right\rbrace, \qquad (t_d, t_n) = (15, 9)\ \text{h}
 $$
 
 Ambos son casos particulares del **nivel de evaluación compuesto de día completo** (6.5, que generaliza las Fórmulas 5–6), donde cada periodo $i$ aporta su nivel de evaluación $L_i$ más un ajuste $K_i$, ponderado por su fracción del día:
 
 $$
-L_R = 10 \log_{10}\left[ \sum_i \frac{h_i}{24}\ 10^{0.1 (L_i + K_i)} \right], \qquad \sum_i h_i = 24\ \text{h}
+L_R = 10 \log_{10}\left[ \sum_i \frac{h_i}{24}\ 10^{0{,}1 (L_i + K_i)} \right], \qquad \sum_i h_i = 24\ \text{h}
 $$
 
 Los ajustes $K_i$ cubren las penalizaciones horarias (ISO 1996-1 Tabla A.1: tarde 5 dB, noche 10 dB) así como los ajustes por carácter de la fuente — p. ej. penalizaciones tonales, que las evaluaciones TNR/PR de ECMA-418-1 permiten justificar objetivamente.
@@ -355,7 +355,7 @@ $$
 K_I = 1{,}8\ (P - 5)\ \text{dB} \quad (P > 5;\ \text{si no, } K_I = 0),
 $$
 
-y el nivel de valoración de la jornada completa combina energéticamente los periodos ajustados (cláusula 8, Nota 1):
+y el nivel de evaluación de la jornada completa combina energéticamente los periodos ajustados (cláusula 8, Nota 1):
 
 $$
 L_{Ar,T} = 10 \lg\Big[ \frac{1}{T} \sum_N \Delta t_N\ 10^{(L_{Aeq,N} + K_{I,N})/10} \Big].
@@ -375,7 +375,7 @@ El oído analiza el sonido en **bandas críticas**: regiones de frecuencia dentr
 4. **Sonoridad núcleo** — cada una de las 20 bandas críticas se transforma con los niveles de umbral en silencio $L_{TQ}$ de la Tabla A.6 (tras la adaptación de ancho de banda DCB de la Tabla A.7):
 
 $$
-N_c = 0.0635 \cdot 10^{0.025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0.25} - 1 \right] \ \text{sonos/Bark}, \qquad s = 0.25
+N_c = 0{,}0635 \cdot 10^{0{,}025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0{,}25} - 1 \right] \ \text{sonos/Bark}, \qquad s = 0{,}25
 $$
 
 (la forma que da el programa de referencia a la transformación de sonoridad de Zwicker; las bandas por debajo del umbral aportan cero).
@@ -386,15 +386,15 @@ $$
 N = \int_0^{24} N'(z)\ dz \ \ \text{sonos}
 $$
 
-Para sonidos variables en el tiempo, un decaimiento temporal no lineal (constantes de tiempo 5/15/75 ms, apartado 6.3) y la ponderación dependiente de la duración de la sonoridad total (paso-bajos de 3,5 ms y 70 ms ponderados 0,47/0,53, apartado 6.4) preceden a la salida de sonoridad frente al tiempo a 500 Hz y a los percentiles N5/N10 (apartado 6.5).
+Para sonidos variables en el tiempo, un decaimiento temporal no lineal (constantes de tiempo 5/15/75 ms, cláusula 6.3) y la ponderación dependiente de la duración de la sonoridad total (paso-bajos de 3,5 ms y 70 ms ponderados 0,47/0,53, cláusula 6.4) preceden a la salida de sonoridad frente al tiempo a 500 Hz y a los percentiles N5/N10 (cláusula 6.5).
 
-**Sonos y fonios** quedan ligados por el ancla de 1 kHz (1 sono = 40 fonios; apartado 5.6):
+**Sonos y fonios** quedan ligados por el ancla de 1 kHz (1 sono = 40 fonios; cláusula 5.6):
 
 $$
 N = 2^{(L_N - 40)/10} \ \text{sonos} \qquad \Longleftrightarrow \qquad L_N = 40 + 10 \log_2 N \ \text{fonios} \qquad (N \ge 1)
 $$
 
-por debajo de 1 sono el programa de referencia usa $L_N = 40 (N + 0.0005)^{0.35}$, con suelo en 3 fonios.
+por debajo de 1 sono el programa de referencia usa $L_N = 40 (N + 0{,}0005)^{0{,}35}$, con suelo en 3 fonios.
 
 Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) para su uso.
 
@@ -416,7 +416,7 @@ $$
 N'(i) = C \left[ \left( G\ \frac{E(i)}{E_0} + A \right)^{\alpha} - A^{\alpha} \right]
 $$
 
-con la constante de calibración $C = 0.0617$ sonos/Cam (ISO 532-2; $0.063$ en ISO 532-3). La sonoridad total es el área bajo el patrón,
+con la constante de calibración $C = 0{,}0617$ sonos/Cam (ISO 532-2; $0{,}063$ en ISO 532-3). La sonoridad total es el área bajo el patrón,
 
 $$
 N = \int N'(i)\ di \ \ \text{sonos}
@@ -434,7 +434,7 @@ usando una constante de tiempo rápida en el ataque y una más lenta en la relaj
 
 ### Modelo de Sottek (ECMA-418-2:2025)
 
-ECMA-418-2 construye sus tres métricas sobre un único front-end auditivo (Cláusula 5): un filtro de oído externo/medio, un banco de 53 filtros paso-banda solapados de tipo gammatone espaciados en la escala Bark_HMS ($z = 0.5$ a $26.5$), rectificación de media onda y un RMS de bloque corto $\tilde{p}(l, z)$ por banda $z$ y bloque temporal $l$. Una no linealidad compresiva (Fórmula 23) convierte el RMS de banda en la **sonoridad de base específica** $N'_{\mathrm{basis}}(l, z)$, cuya constante de calibración $c_N$ fija un tono de 1 kHz / 40 dB SPL en 1 sone_HMS. La sonoridad ensambla las sonoridades tonal y de ruido (abajo) sobre bandas y tiempo (Fórmulas 113–117); crece unas $1.65\times$ por cada 10 dB, más lentamente que el factor de 2 de Zwicker — una propiedad intrínseca de la suma de Sottek.
+ECMA-418-2 construye sus tres métricas sobre un único front-end auditivo (Cláusula 5): un filtro de oído externo/medio, un banco de 53 filtros paso-banda solapados de tipo gammatone espaciados en la escala Bark_HMS ($z = 0{,}5$ a $26{,}5$), rectificación de media onda y un RMS de bloque corto $\tilde{p}(l, z)$ por banda $z$ y bloque temporal $l$. Una no linealidad compresiva (Fórmula 23) convierte el RMS de banda en la **sonoridad de base específica** $N'_{\mathrm{basis}}(l, z)$, cuya constante de calibración $c_N$ fija un tono de 1 kHz / 40 dB SPL en 1 sone_HMS. La sonoridad ensambla las sonoridades tonal y de ruido (abajo) sobre bandas y tiempo (Fórmulas 113–117); crece unas $1{,}65\times$ por cada 10 dB, más lentamente que el factor de 2 de Zwicker — una propiedad intrínseca de la suma de Sottek.
 
 ### Tonalidad — autocorrelación de la señal de banda (ECMA-418-2)
 
@@ -504,7 +504,7 @@ $$
 truncado a 1,0. STIPA (Anexo B) muestrea la misma física con solo dos frecuencias de modulación por banda (Tabla B.1) sobre una señal de prueba con índice de modulación de fuente 0,55; las profundidades recibidas se miden por correlación seno/coseno de las envolventes de intensidad $I_k(t)$ filtradas paso-bajo a ~100 Hz sobre un número entero de periodos de modulación:
 
 $$
-m_{dr} = \frac{2 \sqrt{\left( \sum_t I_k(t) \sin 2 \pi f_m t \right)^2 + \left( \sum_t I_k(t) \cos 2 \pi f_m t \right)^2}}{\sum_t I_k(t)}, \qquad m = \frac{m_{dr}}{0.55}
+m_{dr} = \frac{2 \sqrt{\left( \sum_t I_k(t) \sin 2 \pi f_m t \right)^2 + \left( \sum_t I_k(t) \cos 2 \pi f_m t \right)^2}}{\sum_t I_k(t)}, \qquad m = \frac{m_{dr}}{0{,}55}
 $$
 
 Consulta la [guía del índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) para su uso.
@@ -579,9 +579,9 @@ $$
 \frac{\sin(k \Delta r)}{k \Delta r}, \qquad k = \frac{2 \pi f}{c}
 $$
 
-— el apartado 7.3 de IEC 61043 especifica la respuesta en intensidad de la sonda con exactamente este argumento y la Tabla 3 la tabula (p. ej. −10,5 dB a 6,3 kHz para un separador de 25 mm). Por debajo de $f = 0.1 c / \Delta r$ (es decir, $k \Delta r$ por debajo de 0,63) el sesgo se mantiene dentro de unos 0,3 dB; `bias_correction` proporciona el factor recíproco por banda y `max_valid_frequency` la cota.
+— la cláusula 7.3 de IEC 61043 especifica la respuesta en intensidad de la sonda con exactamente este argumento y la Tabla 3 la tabula (p. ej. −10,5 dB a 6,3 kHz para un separador de 25 mm). Por debajo de $f = 0{,}1 c / \Delta r$ (es decir, $k \Delta r$ por debajo de 0,63) el sesgo se mantiene dentro de unos 0,3 dB; `bias_correction` proporciona el factor recíproco por banda y `max_valid_frequency` la cota.
 
-El **índice presión-intensidad** $\delta_{pI} = L_p - L_I$ mide cuán reactivo es el campo: en una onda plana progresiva libre vale $10 \log_{10}(\rho_0 c / 400) = 0.14$ dB, mientras que valores grandes delatan campos reactivos o ruidosos en los que domina el error de fase entre canales. El Anexo A de ISO 9614-1:1993 lo generaliza sobre una superficie de medición como el indicador F2 (con F3 para la potencia parcial negativa y F4 para la no uniformidad del campo), y la **capacidad dinámica** del instrumento $L_d = \delta_{pI0} - K$ (índice presión-intensidad residual menos el factor de error de sesgo: 10 dB para los grados 1/2, 7 dB para el grado 3) debe superar F2 para que la medición sea válida (criterio 1).
+El **índice presión-intensidad** $\delta_{pI} = L_p - L_I$ mide cuán reactivo es el campo: en una onda plana progresiva libre vale $10 \log_{10}(\rho_0 c / 400) = 0{,}14$ dB, mientras que valores grandes delatan campos reactivos o ruidosos en los que domina el error de fase entre canales. El Anexo A de ISO 9614-1:1993 lo generaliza sobre una superficie de medición como el indicador F2 (con F3 para la potencia parcial negativa y F4 para la no uniformidad del campo), y la **capacidad dinámica** del instrumento $L_d = \delta_{pI0} - K$ (índice presión-intensidad residual menos el factor de error de sesgo: 10 dB para los grados 1/2, 7 dB para el grado 3) debe superar F2 para que la medición sea válida (criterio 1).
 
 Consulta la [guía de intensidad sonora](/phonometry/es/guides/intensity/) para su uso.
 
@@ -622,10 +622,10 @@ El tiempo de reverberación es un ajuste por mínimos cuadrados $L = a + b t$ so
 Repartir la energía en una frontera temprano/tardío $t_e$ da el índice temprano-tardío y el cociente de definición:
 
 $$
-C_{te} = 10 \log_{10} \frac{\int_0^{t_e} p^2\ dt}{\int_{t_e}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0.05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
+C_{te} = 10 \log_{10} \frac{\int_0^{t_e} p^2\ dt}{\int_{t_e}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0{,}05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
 $$
 
-con $t_e = 50$ ms (C50, habla) o 80 ms (C80, música), y el **tiempo central** $T_s = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. Para un decaimiento puramente exponencial tienen formas cerradas $C_{te} = 10 \log_{10}(e^{a t_e} - 1)$ y $T_s = 1/a$; a $T = 1$ s ($a = 13.8155$) evalúan a C80 = 3,05 dB, C50 = −0,02 dB, D50 = 0,499 y Ts = 72,4 ms — los valores que reproduce la implementación. Las JND de la Tabla A.1 (EDT 5 %, C80 1 dB, D50 0,05, Ts 10 ms) acotan con qué finura merece la pena informar cada una.
+con $t_e = 50$ ms (C50, habla) o 80 ms (C80, música), y el **tiempo central** $T_s = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. Para un decaimiento puramente exponencial tienen formas cerradas $C_{te} = 10 \log_{10}(e^{a t_e} - 1)$ y $T_s = 1/a$; a $T = 1$ s ($a = 13{,}8155$) evalúan a C80 = 3,05 dB, C50 = −0,02 dB, D50 = 0,499 y Ts = 72,4 ms — los valores que reproduce la implementación. Las JND de la Tabla A.1 (EDT 5 %, C80 1 dB, D50 0,05, Ts 10 ms) acotan con qué finura merece la pena informar cada una.
 
 ### Decaimiento espacial en oficinas diáfanas (ISO 3382-3, Cláusula 6)
 
@@ -639,7 +639,7 @@ La distancia de distracción rD y la distancia de privacidad rP son las distanci
 
 ### Aislamiento en campo e índice ponderado (ISO 16283-1, ISO 717-1)
 
-Por banda de tercio de octava, la diferencia de niveles $D = L_1 - L_2$ (promediada en energía sobre las posiciones de micrófono, $L = 10 \log_{10}[(1/n) \sum_i 10^{L_i/10}]$) se normaliza de dos formas: la diferencia de niveles estandarizada $D_{nT} = D + 10 \log_{10}(T/T_0)$ con $T_0 = 0.5$ s (de modo que $D_{nT} = D$ cuando $T = T_0$), y el índice de reducción sonora aparente $R' = D + 10 \log_{10}(S/A)$ con el área de absorción de Sabine $A = 0.16\ V / T$, por tanto $R' = D + 10 \log_{10}[S T / (0.16\ V)]$.
+Por banda de tercio de octava, la diferencia de niveles $D = L_1 - L_2$ (promediada en energía sobre las posiciones de micrófono, $L = 10 \log_{10}[(1/n) \sum_i 10^{L_i/10}]$) se normaliza de dos formas: la diferencia de niveles estandarizada $D_{nT} = D + 10 \log_{10}(T/T_0)$ con $T_0 = 0{,}5$ s (de modo que $D_{nT} = D$ cuando $T = T_0$), y el índice de reducción sonora aparente $R' = D + 10 \log_{10}(S/A)$ con el área de absorción de Sabine $A = 0{,}16\ V / T$, por tanto $R' = D + 10 \log_{10}[S T / (0{,}16\ V)]$.
 
 El índice de un solo número (ISO 717-1, Cláusula 4.4) desplaza la **curva de referencia** de la Tabla 3 en pasos de 1 dB hacia la curva medida hasta que la suma de desviaciones *desfavorables* $\sum_i \max(0, \text{ref}_i + k - \text{meas}_i)$ es máxima pero $\le$ 32,0 dB (16 tercios) o 10,0 dB (5 octavas); el índice $R_w$ es la referencia desplazada a 500 Hz. Los **términos de adaptación espectral** son $C = X_{A1} - X_w$ y $C_{tr} = X_{A2} - X_w$ con $X_{Aj} = -10 \log_{10} \sum_i 10^{(L_{ij} - X_i)/10}$ (espectros de la Tabla 4: n.º 1 ruido rosa, n.º 2 tráfico urbano), cada uno redondeado a un entero. El ejemplo resuelto del Anexo C de ISO 717-1 ($R_w = 30$, $C = -2$, $C_{tr} = -3$, suma desfavorable 31,8 dB) se reproduce exactamente.
 
@@ -649,7 +649,7 @@ El aislamiento a impactos cambia la fuente aérea por una **máquina de impactos
 normalizada** y califica el nivel de la sala receptora, así que las convenciones
 de signo se invierten. Los niveles de impactos estandarizado y normalizado son $L'_{nT} = L_i - 10 \log_{10}(T/T_0)$
 (el término de reverberación se *resta*, al contrario que $D_{nT}$) y
-$L'_n = L_i + 10 \log_{10}(A/A_0)$ con $A_0 = 10$ m² y $A = 0.16\ V/T$. El índice
+$L'_n = L_i + 10 \log_{10}(A/A_0)$ con $A_0 = 10$ m² y $A = 0{,}16\ V/T$. El índice
 de ISO 717-2 desplaza la curva de referencia de la Tabla 3 hasta que $\sum_i \max(0, \text{meas}_i - (\text{ref}_i + k))$
 es máxima pero $\le$ 32,0 dB (16 tercios) o 10,0 dB (5 octavas) —la desviación
 *desfavorable* cuenta ahora donde la **medición supera** la referencia (el ruido
@@ -664,10 +664,10 @@ ISO 717-1 ejecutada sobre las curvas negadas.
 
 La absorción sonora (ISO 354) mide el área de absorción equivalente a partir de
 la relación de Sabine aplicada a una sala reverberante vacía y con la muestra:
-$A = 55.3\ V/(c\ T) - 4 V m$ (el término $4 V m$ es la absorción del aire, $m$ el
+$A = 55{,}3\ V/(c\ T) - 4 V m$ (el término $4 V m$ es la absorción del aire, $m$ el
 coeficiente de atenuación en potencia en 1/m), de modo que el área de la muestra
 es $A_T = A_2 - A_1$ y su coeficiente $\alpha_s = A_T/S$. Con la velocidad del
-sonido de la Ec. (6), $c = 331 + 0.6\ t$ (°C), y $m$ convertido de un
+sonido de la Ec. (6), $c = 331 + 0{,}6\ t$ (°C), y $m$ convertido de un
 coeficiente de atenuación de ISO 9613-1 mediante $m = \alpha / (10 \lg e)$. Como
 la difracción y la dispersión de borde interceptan más que el área plana de la
 muestra, $\alpha_s$ se deja sin saturar y puede superar 1,0 (Cláusula 3.7
@@ -682,17 +682,17 @@ qué magnitud se normaliza. El par a ruido aéreo es el índice de reducción so
 directo de laboratorio $R = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 10140-2) frente
 al índice aparente de campo $R' = L_1 - L_2 + 10 \log_{10}(S/A)$ (ISO 16283-1),
 la misma forma cerrada evaluada con el $A$ conocido de la instalación o el
-$A = 0.16\ V/T$ medido de la sala. El par a impactos es el nivel normalizado de
+$A = 0{,}16\ V/T$ medido de la sala. El par a impactos es el nivel normalizado de
 laboratorio $L_n = L_i + 10 \log_{10}(A/A_0)$ (ISO 10140-3) frente al $L'_n$ de
 campo (ISO 16283-2), ambos referidos a $A_0 = 10$ m². Antes de formar cualquiera
 de ellos, el nivel de la sala receptora se corrige por ruido de fondo mediante la
 resta energética $L = 10 \log_{10}(10^{L_{sb}/10} - 10^{L_b/10})$ para un margen
-señal-fondo de 6–15 dB, saturada en un valor fijo de $1.3$ dB (el límite de
+señal-fondo de 6–15 dB, saturada en un valor fijo de $1{,}3$ dB (el límite de
 medición) en 6 dB o por debajo y omitida en 15 dB o por encima (ISO 10140-4,
 Cláusula 4.3), el análogo de laboratorio de la regla 6/10 dB de ISO 16283-1. La
 extensión a fachadas (ISO 16283-3) sustituye el nivel de la sala emisora por el
 nivel 2 m frente a la fachada, $D_{2m} = L_{1,2m} - L_2$, y añade una corrección
-fija por ángulo de incidencia al índice de reducción sonora del elemento, $-1.5$
+fija por ángulo de incidencia al índice de reducción sonora del elemento, $-1{,}5$
 dB para el método del altavoz a 45° ($R'_{45°}$) y $-3$ dB para el método de
 tráfico rodado con todos los ángulos ($R'_{tr,s}$); los tres llevan el número
 único a ruido aéreo de ISO 717-1.
@@ -726,7 +726,7 @@ $l_f$ la longitud de acoplamiento de la unión y $l_0 = 1$ m la longitud de
 acoplamiento de referencia. $K_{ij}$ es el **índice de reducción vibracional** de
 la unión (Anexo E), una función empírica de la relación de masas
 $M = \log_{10}(m'_{\perp,i}/m'_i)$ — para una unión rígida en cruz
-$K_{13} = 8.7 + 17.1 M + 5.7 M^2$ (a través) y $K_{12} = 8.7 + 5.7 M^2$
+$K_{13} = 8{,}7 + 17{,}1 M + 5{,}7 M^2$ (a través) y $K_{12} = 8{,}7 + 5{,}7 M^2$
 (en esquina), leídos a 500 Hz — acotada en su mínimo $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
 (1/S_i + 1/S_j)]$ (Fórmula 29). Dos trasdosados se combinan como
 $\max(a,b) + \min(a,b)/2$ (Fórmulas 30/31). La contrapartida a impactos
@@ -784,7 +784,7 @@ ruido aéreo (Tablas 2/3), $L_n$/$L'_n$ a impactos (Tabla 4 por banda, solo
 situaciones B/C; la Tabla 5 de un solo número añade una estimación en situación
 A) y la reducción del revestimiento $\Delta L$ (Tablas 6/7, solo situación A).
 La incertidumbre expandida es $U = k\ u$ (Fórmula 2) con el factor de cobertura
-$k$ de la Tabla 8 (al 95 %, $k = 1.96$ bilateral, $k = 1.65$ unilateral; se impone
+$k$ de la Tabla 8 (al 95 %, $k = 1{,}96$ bilateral, $k = 1{,}65$ unilateral; se impone
 un mínimo $k = 1$). Un intervalo bilateral $Y = y \pm U$ informa un valor
 (Fórmula 3); un factor unilateral declara conformidad, $y - U > $ requisito para
 un límite inferior (Fórmula 5) o $y + U <$ requisito para un límite superior
@@ -810,14 +810,14 @@ temperatura. La ISO 9613-1:1993, Ec. (5) da el coeficiente de atenuación de ton
 puro $\alpha$ en decibelios por metro:
 
 $$
-\alpha = 8.686\ f^2 \Big[ 1.84\times10^{-11} \big(p_a/p_r\big)^{-1} \big(T/T_0\big)^{1/2}
-       + \big(T/T_0\big)^{-5/2} \big( 0.01275\ \tfrac{e^{-2239.1/T}}{f_{rO} + f^2/f_{rO}}
-       + 0.1068\ \tfrac{e^{-3352.0/T}}{f_{rN} + f^2/f_{rN}} \big) \Big],
+\alpha = 8{,}686\ f^2 \Big[ 1{,}84\times10^{-11} \big(p_a/p_r\big)^{-1} \big(T/T_0\big)^{1/2}
+       + \big(T/T_0\big)^{-5/2} \big( 0{,}01275\ \tfrac{e^{-2239{,}1/T}}{f_{rO} + f^2/f_{rO}}
+       + 0{,}1068\ \tfrac{e^{-3352{,}0/T}}{f_{rN} + f^2/f_{rN}} \big) \Big],
 $$
 
 con las frecuencias de relajación del oxígeno y el nitrógeno $f_{rO}$, $f_{rN}$
-de la Ec. (3)/(4), las condiciones de referencia $T_0 = 293.15$ K,
-$p_r = 101.325$ kPa (apartado 4.2) y la concentración molar de vapor de agua $h$
+de la Ec. (3)/(4), las condiciones de referencia $T_0 = 293{,}15$ K,
+$p_r = 101{,}325$ kPa (cláusula 4.2) y la concentración molar de vapor de agua $h$
 a partir de la humedad relativa (anexo B). A baja frecuencia
 $\alpha \propto f^2$; cerca de cada frecuencia de relajación el término
 correspondiente alcanza un máximo y decae, razón por la que $\alpha$ sube dos
@@ -841,7 +841,7 @@ $$
 A = A_{div} + A_{atm} + A_{gr} + A_{bar} + A_{misc}.
 $$
 
-La biblioteca implementa los cuatro términos generales del apartado 7; el
+La biblioteca implementa los cuatro términos generales de la cláusula 7; el
 $A_{misc}$ informativo (vegetación, zonas industriales, edificación) y las
 reflexiones se dejan a criterio del usuario. La **divergencia geométrica** es la
 expansión esférica desde una fuente puntual,
@@ -853,7 +853,7 @@ la ISO 9613-1 anterior. El **efecto del suelo** $A_{gr} = A_s + A_r + A_m$
 funciones $a'/b'/c'/d'$ de la Tabla 3 y su factor de suelo $G$ (0 duro,
 1 poroso); un $A_{gr}$ negativo es una ganancia neta por la reflexión en el
 suelo. Una forma alternativa, solo ponderada A,
-$A_{gr} = 4.8 - (2 h_m/d)[17 + 300/d] \ge 0$ (Ec. (10)) se ofrece para suelo
+$A_{gr} = 4{,}8 - (2 h_m/d)[17 + 300/d] \ge 0$ (Ec. (10)) se ofrece para suelo
 poroso cuando solo importa el nivel ponderado A, acompañada del índice de ángulo
 sólido $D_\Omega$ (Ec. (11)). El **apantallamiento** por una barrera es la
 pérdida por inserción por difracción
@@ -879,20 +879,20 @@ ruido de banda ancha hasta 1000 m (Tabla 5).
 La ISO 9612:2009 es el método de ingeniería (clase de exactitud 2) para el nivel
 diario de exposición al ruido de un trabajador $L_{EX,8h}$, normalizado a una
 jornada nominal de 8 h. Tres **estrategias de medición** cambian esfuerzo por
-representatividad. El método *basado en tareas* (apartado 9) divide la jornada en
+representatividad. El método *basado en tareas* (cláusula 9) divide la jornada en
 tareas, promedia en energía $I \ge 3$ muestras por tarea (Ec. 7) y suma en
 energía las contribuciones de cada tarea
 $L_{EX,8h,m} = L_{p,A,eqT,m} + 10 \log_{10}(T_m/T_0)$ (Ec. 9/10). El método
-*basado en la función* (apartado 10) promedia en energía $N \ge 5$ muestras
+*basado en la función* (cláusula 10) promedia en energía $N \ge 5$ muestras
 aleatorias sobre un grupo de exposición homogéneo (Ec. 11) y normaliza la
 duración efectiva de la jornada (Ec. 12); el método *de jornada completa*
-(apartado 11) hace la misma aritmética sobre mediciones de jornada completa
+(cláusula 11) hace la misma aritmética sobre mediciones de jornada completa
 (Ec. 13).
 
 El presupuesto de incertidumbre del **anexo C** es normativo. La incertidumbre
 típica combinada es $u^2 = \sum c_i^2 u_i^2$ (C.1) y la incertidumbre expandida es
-$U = k\ u$ con $k = 1.65$ para un intervalo **unilateral** al 95 %
-(apartado 14), de modo que el límite superior declarado es $L_{EX,8h} + U$. Los
+$U = k\ u$ con $k = 1{,}65$ para un intervalo **unilateral** al 95 %
+(cláusula 14), de modo que el límite superior declarado es $L_{EX,8h} + U$. Los
 métodos por tareas y por función difieren de forma instructiva: la incertidumbre
 de muestreo del ruido de la tarea $u_{1a}$ divide la suma de desviaciones al
 cuadrado entre $I(I-1)$ —el error típico de la media (Ec. C.6)—, mientras que la
@@ -904,11 +904,11 @@ $c_{1a}$ (Ec. C.4) y $c_{1b}$ (Ec. C.5) y una incertidumbre opcional de la
 duración de la tarea $u_{1b}$ (Ec. C.7); el presupuesto por función/jornada
 completa (Ec. C.9) lee $c_1 u_1$ de la Tabla C.4 en función de $(N, u_1)$ y suma
 en cuadratura la incertidumbre del instrumento $u_2$ (Tabla C.5) y la
-incertidumbre de posición del micrófono $u_3 = 1.0$ dB. Los niveles de pico
+incertidumbre de posición del micrófono $u_3 = 1{,}0$ dB. Los niveles de pico
 $L_{p,Cpeak}$ se declaran sin incertidumbre: el anexo C no da método para ellos
 (Tabla C.5, Nota 1). Los tres ejemplos resueltos de los anexos D (tarea,
-$L_{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (función, $88.1$ dB, $3.8$ dB) y F
-(jornada completa, $90.1$ dB, $3.4$ dB) se reproducen con la precisión impresa
+$L_{EX,8h} = 84{,}3$ dB, $U = 2{,}7$ dB), E (función, $88{,}1$ dB, $3{,}8$ dB) y F
+(jornada completa, $90{,}1$ dB, $3{,}4$ dB) se reproducen con la precisión impresa
 de la norma: todos los intermedios del anexo E son exactos dígito a dígito, y su
 nivel final difiere solo por el redondeo previo que la propia norma aplica al
 nivel efectivo de la jornada (véase la [guía de exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/)).
@@ -938,7 +938,7 @@ libre en su cociente, $K_2 = 10 \log_{10}(1 + 4 S/A)$, con $A$ el área de
 absorción equivalente de la sala. El área de la superficie es la forma cerrada
 de la geometría: una semiesfera $S = 2 \pi r^2$ sobre un plano reflectante
 (dividida entre dos y entre cuatro para dos y tres planos), una caja de un plano
-$S = 4(ab + bc + ca)$ con $a = 0.5\ l_1 + d$, $b = 0.5\ l_2 + d$,
+$S = 4(ab + bc + ca)$ con $a = 0{,}5\ l_1 + d$, $b = 0{,}5\ l_2 + d$,
 $c = l_3 + d$. ISO 3746 (control) comparte las matemáticas con criterios más
 laxos. La incertidumbre expandida es $U = 2 \sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}$.
 
@@ -974,11 +974,11 @@ con los valores de $\sigma_{R0}$ por banda de las Tablas 2/3.
 En un campo difuso cualificado la densidad de energía estacionaria
 $w = 4P/(A c)$ liga la potencia a la absorción de la sala, dando
 $L_W = \bar{L}_p + 10 \log_{10}(A/A_0) - 6$ más correcciones de orden superior,
-con $A = (55.26/c)(V/T_{60})$ y $c = 20.05 \sqrt{273 + \theta}$. La **corrección
+con $A = (55{,}26/c)(V/T_{60})$ y $c = 20{,}05 \sqrt{273 + \theta}$. La **corrección
 de Waterhouse** $10 \log_{10}(1 + S c/(8 V f))$ compensa la energía extra
 almacenada en la capa límite que los micrófonos del interior no captan
 ($S c/(8 V f) = S \lambda/(8 V)$, así que se desvanece al subir la frecuencia);
-el término $4.34\ A/S$ es la corrección del aire por recorrido libre medio, y
+el término $4{,}34\ A/S$ es la corrección del aire por recorrido libre medio, y
 $C_1$, $C_2$ llevan el resultado a las condiciones meteorológicas de referencia
 (23 °C, 101,325 kPa). El **método de comparación** resta una fuente de
 referencia de potencia conocida medida en la misma sala,

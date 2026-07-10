@@ -21,13 +21,13 @@ la sala **emisora** ($L_1$) y en la sala **receptora** ($L_2$) por banda de
 tercio de octava y forma la diferencia de niveles $D = L_1 - L_2$. Dos
 normalizaciones la hacen comparable entre salas. La **diferencia de niveles
 estandarizada** refiere el tiempo de reverberación de la sala receptora $T$ a
-$T_0 = 0.5$ s (de modo que con $T = 0.5$ s, $D_{nT} = D$ exactamente), y el
+$T_0 = 0{,}5$ s (de modo que con $T = 0{,}5$ s, $D_{nT} = D$ exactamente), y el
 **índice de reducción sonora aparente** normaliza por la superficie del
 cerramiento $S$ y el área de absorción de Sabine $A$:
 
 $$
 D_{nT} = D + 10 \log_{10} \frac{T}{T_0}, \qquad
-R' = D + 10 \log_{10} \frac{S}{A}, \qquad A = \frac{0.16\ V}{T}.
+R' = D + 10 \log_{10} \frac{S}{A}, \qquad A = \frac{0{,}16\ V}{T}.
 $$
 
 Las posiciones se promedian en energía con
@@ -138,11 +138,11 @@ aéreo, pero con un cambio de signo en el término de reverberación:
 $$
 L'_{nT} = L_i - 10 \log_{10} \frac{T}{T_0}, \qquad
 L'_n = L_i + 10 \log_{10} \frac{A}{A_0}, \quad
-A_0 = 10\ \text{m}^2,\ A = \frac{0.16\ V}{T}.
+A_0 = 10\ \text{m}^2,\ A = \frac{0{,}16\ V}{T}.
 $$
 
-El nivel de impactos **estandarizado** $L'_{nT}$ ($T_0 = 0.5$ s para viviendas)
-solo necesita el $T$ de la sala receptora, así que con $T = 0.5$ s es igual a
+El nivel de impactos **estandarizado** $L'_{nT}$ ($T_0 = 0{,}5$ s para viviendas)
+solo necesita el $T$ de la sala receptora, así que con $T = 0{,}5$ s es igual a
 $L_i$; el nivel **normalizado** $L'_n$ (referido a un área de absorción de
 10 m²) necesita además el volumen de la sala receptora. Fíjate en el signo
 **menos** —más reverberación *reduce* $L'_{nT}$, al contrario que el $D_{nT}$
@@ -253,14 +253,14 @@ D_{2m,nT} = D_{2m} + 10 \log_{10}\frac{T}{T_0}, \quad
 D_{2m,n} = D_{2m} - 10 \log_{10}\frac{A}{A_0},
 $$
 
-con $T_0 = 0.5$ s, $A_0 = 10$ m² y $A = 0.16\ V/T$ (viviendas). Cuando el
+con $T_0 = 0{,}5$ s, $A_0 = 10$ m² y $A = 0{,}16\ V/T$ (viviendas). Cuando el
 micrófono se sitúa **sobre el elemento de ensayo** (nivel superficial $L_{1,s}$),
 el método del *elemento* también da un índice de reducción sonora aparente, que
-lleva una corrección fija por ángulo de incidencia: $-1.5$ dB para el método del
+lleva una corrección fija por ángulo de incidencia: $-1{,}5$ dB para el método del
 altavoz a 45° y $-3$ dB para el método de tráfico rodado con todos los ángulos:
 
 $$
-R'_{45°} = L_{1,s} - L_2 + 10 \log_{10}\frac{S}{A} - 1.5, \qquad
+R'_{45°} = L_{1,s} - L_2 + 10 \log_{10}\frac{S}{A} - 1{,}5, \qquad
 R'_{tr,s} = L_{1,s} - L_2 + 10 \log_{10}\frac{S}{A} - 3.
 $$
 
@@ -329,7 +329,7 @@ flotante, una ventana— se lleva a un **laboratorio** cualificado (ISO 10140),
 donde la transmisión por flancos suprimida hace que la transmisión *directa* sea
 toda la historia. Las fórmulas pierden sus primas: el **índice de reducción
 sonora** $R$ (no $R'$) y el **nivel de impactos normalizado** $L_n$ (no $L'_n$),
-con el área de absorción de la sala receptora $A = 0.16\ V/T$ ahora una propiedad
+con el área de absorción de la sala receptora $A = 0{,}16\ V/T$ ahora una propiedad
 conocida de la instalación:
 
 $$
@@ -586,8 +586,8 @@ de medición** (Cláusula 5.2):
 | **C** | misma ubicación, mismo operador repetido | repetibilidad $\sigma_r$ |
 
 La incertidumbre expandida es $U = k\ u$ (Fórmula 2) con el factor de cobertura
-$k$ de la Tabla 8. Un intervalo bilateral $Y = y \pm U$ (Fórmula 3, $k = 1.96$ al
-95 %) *informa* un valor; el factor **unilateral** ($k = 1.65$ al 95 %) *declara
+$k$ de la Tabla 8. Un intervalo bilateral $Y = y \pm U$ (Fórmula 3, $k = 1{,}96$ al
+95 %) *informa* un valor; el factor **unilateral** ($k = 1{,}65$ al 95 %) *declara
 conformidad* con un requisito (Fórmulas 4/5).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es.png" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es_dark.png" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" style="width:80%">

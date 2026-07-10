@@ -1,11 +1,25 @@
 /* Show the figure variant that matches the active Starlight theme.
-   Figures are generated in both themes by scripts/generate_graphs.py (make graphs). */
-[data-theme='light'] img.dark-only {
+   Figures are generated in both themes by scripts/generate_graphs.py (make graphs).
+   The same light-only/dark-only switch covers the Tier-1 animation <video>s. */
+[data-theme='light'] img.dark-only,
+[data-theme='light'] video.dark-only {
   display: none;
 }
 
-[data-theme='dark'] img.light-only {
+[data-theme='dark'] img.light-only,
+[data-theme='dark'] video.light-only {
   display: none;
+}
+
+/* Tier-1 animations embedded as autoplaying, looping WebM (no controls).
+   Match the figure treatment: centred block, rounded, never wider than the
+   reading column. Authored inline as <video style="width:NN%">. */
+.sl-markdown-content video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-inline: auto;
+  border-radius: 6px;
 }
 
 /* ------------------------------------------------------------------ *

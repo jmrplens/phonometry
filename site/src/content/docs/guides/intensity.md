@@ -49,6 +49,8 @@ print(res.frequency, res.intensity_level)                  # per band
 res.plot()   # Lp vs LI per band + the pressure-intensity index (needs matplotlib)
 ```
 
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity.webm" autoplay loop muted playsinline role="img" aria-label="Animation: instantaneous intensity p times u for a progressive wave (always positive, non-zero mean, net power flows) versus a standing wave (oscillating about a zero mean, energy just sloshes)" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_dark.webm" autoplay loop muted playsinline role="img" aria-label="Animation: instantaneous intensity p times u for a progressive wave (always positive, non-zero mean, net power flows) versus a standing wave (oscillating about a zero mean, energy just sloshes)" style="width:88%"></video>
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.png" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.png" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" style="width:92%">
 
 *Left: in a plane progressive wave all pressure is transported —

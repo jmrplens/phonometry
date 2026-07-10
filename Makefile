@@ -46,6 +46,12 @@ graphs:
 	$(PYTHON) scripts/generate_graphs.py
 	$(PYTHON) scripts/generate_diagrams.py
 
+# Regenerate the Tier-1 documentation animations (WebM for the site, GIF for
+# the GitHub docs). Kept out of `graphs`/CI because the ffmpeg encoding is slow
+# and video is not byte-reproducible across platforms; run manually to refresh.
+animations:
+	$(PYTHON) scripts/generate_graphs.py --animations
+
 # Regenerate the fallback social-preview card (site/public/og-image.png).
 # Kept out of `graphs`/CI so the committed designed asset is not clobbered on
 # every build; run manually to refresh it deterministically when needed.
@@ -79,5 +85,5 @@ coverage:
 
 check: lint security test
 
-.PHONY: install lint format security snyk sonar graphs og llms conformance \
-	install-hooks test coverage check
+.PHONY: install lint format security snyk sonar graphs animations og llms \
+	conformance install-hooks test coverage check

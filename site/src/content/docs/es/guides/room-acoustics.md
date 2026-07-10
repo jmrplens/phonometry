@@ -243,6 +243,8 @@ tiene una **diferencia apenas perceptible** (ISO 3382-1 Tabla A.1: EDT 5 %,
 C80 1 dB, D50 0,05, Ts 10 ms) que fija con qué precisión merece la pena
 informarlo.
 
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_es.webm" autoplay loop muted playsinline role="img" aria-label="Animación: la curva de caída de Schroeder emergiendo al integrar la respuesta al impulso al cuadrado hacia atrás desde su cola, terminando con las rectas de regresión T20 y T30" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_es_dark.webm" autoplay loop muted playsinline role="img" aria-label="Animación: la curva de caída de Schroeder emergiendo al integrar la respuesta al impulso al cuadrado hacia atrás desde su cola, terminando con las rectas de regresión T20 y T30" style="width:88%"></video>
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_es.png" alt="Respuesta al impulso al cuadrado con su curva de decaimiento integrada hacia atrás de Schroeder, y las ventanas de regresión EDT, T20 y T30 marcadas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_es_dark.png" alt="Respuesta al impulso al cuadrado con su curva de decaimiento integrada hacia atrás de Schroeder, y las ventanas de regresión EDT, T20 y T30 marcadas" style="width:80%">
 
 *La RI al cuadrado dentada (gris) se integra hasta la curva suave de

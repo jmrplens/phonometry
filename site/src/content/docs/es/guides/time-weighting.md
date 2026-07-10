@@ -30,6 +30,8 @@ grabación.
 
 ## 2. Las tres ponderaciones temporales
 
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting_es.webm" autoplay loop muted playsinline role="img" aria-label="Animación: los detectores Rápida, Lenta e Impulso persiguiendo una ráfaga de tono — Rápida sube y baja rápido, Lenta va con retraso, e Impulso sube rápido pero decae más lento" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting_es_dark.webm" autoplay loop muted playsinline role="img" aria-label="Animación: los detectores Rápida, Lenta e Impulso persiguiendo una ráfaga de tono — Rápida sube y baja rápido, Lenta va con retraso, e Impulso sube rápido pero decae más lento" style="width:88%"></video>
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_es_dark.png" alt="Respuestas de las ponderaciones temporales Fast, Slow e Impulse a una ráfaga de ruido" style="width:80%">
 
 <details>

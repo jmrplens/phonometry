@@ -341,6 +341,30 @@ Los ajustes $K_i$ cubren las penalizaciones horarias (ISO 1996-1 Tabla A.1: tard
 
 Consulta la [guía de niveles](/phonometry/es/guides/levels/) para su uso.
 
+## Prominencia de sonidos impulsivos (NT ACOU 112)
+
+Un impulso molesta más allá de su energía, por lo que las evaluaciones ambientales según ISO 1996-2 penalizan los periodos con sonidos impulsivos prominentes; NT ACOU 112:2002 hace objetiva esa penalización. A partir del historial de nivel ponderado A con ponderación temporal F de un único evento, la tasa de crecimiento (dB/s) y la diferencia de nivel (dB) del arranque — que cualifica cuando supera los 10 dB/s (cláusulas 4.5–4.7) — predicen la prominencia percibida (cláusula 7, Fórmula 1):
+
+$$
+P = 3 \lg(\text{tasa de crecimiento}) + 2 \lg(\text{diferencia de nivel}),
+$$
+
+diseñada para alcanzar en torno a 15 en impulsos muy súbitos e intensos. El ajuste al nivel del periodo de medición toma el impulso determinante (el de mayor $P$) (cláusula 8, Fórmula 2):
+
+$$
+K_I = 1{,}8\ (P - 5)\ \text{dB} \quad (P > 5;\ \text{si no, } K_I = 0),
+$$
+
+y el nivel de valoración de la jornada completa combina energéticamente los periodos ajustados (cláusula 8, Nota 1):
+
+$$
+L_{Ar,T} = 10 \lg\Big[ \frac{1}{T} \sum_N \Delta t_N\ 10^{(L_{Aeq,N} + K_{I,N})/10} \Big].
+$$
+
+$K_I$ es exactamente el tipo de ajuste por carácter de la fuente que entra en el nivel de evaluación compuesto de ISO 1996-1 anterior. Los anclajes $P(1000\ \text{dB/s}, 30\ \text{dB}) = 9 + 2\lg 30 = 11{,}95$ y $K_I(P{=}10) = 9{,}0$ dB se reproducen exactamente.
+
+Consulta la [guía de prominencia de sonidos impulsivos](/phonometry/es/guides/impulse-prominence/) para su uso.
+
 ## Sonoridad de Zwicker (ISO 532-1)
 
 El oído analiza el sonido en **bandas críticas**: regiones de frecuencia dentro de las cuales la energía se suma antes de formarse la sonoridad. La **escala Bark** transforma la frecuencia en razón de banda crítica $z$, de 0 a 24 Bark, e ISO 532-1:2017 muestrea la sonoridad específica $N'(z)$ en pasos de 0,1 Bark (240 valores). La implementación es un port de sala limpia del programa de referencia normativo de la norma (Anexo A.4) y procede por etapas:
@@ -438,6 +462,17 @@ $$
 
 (Fórmulas 65–111). El valor único $R$ es el percentil 90 de $R(l_{50})$ en el tiempo (Cláusula 7.1.10); la constante $c_R$ (Fórmula 104) calibra el sonido de referencia — un portador de 1 kHz modulado en amplitud al 100 % a 70 Hz y 60 dB SPL — a 1 asper.
 
+### Sharpness (DIN 45692)
+
+El sharpness condensa en un solo número el énfasis en alta frecuencia de un sonido: el primer momento ponderado por $g(z)$ del patrón de sonoridad específica estacionaria de ISO 532-1 (DIN 45692:2009, Ecuación 1):
+
+$$
+S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz} \ \text{acum}, \qquad
+g(z) = \begin{cases} 1 & z \le 15{,}8\ \text{Bark} \\ 0{,}15\ e^{0{,}42 (z - 15{,}8)} + 0{,}85 & z > 15{,}8\ \text{Bark} \end{cases}
+$$
+
+evaluado sobre la misma malla de 240 puntos a 0,1 Bark. La constante $k$ no está codificada a mano, sino que se deriva del requisito de calibración (cláusula 6): un ruido de banda estrecha de una banda crítica de ancho, 920–1080 Hz a 60 dB SPL, puntúa exactamente 1 acum — la $k = 0{,}108$ derivada cae dentro de la ventana normativa $0{,}105 \le k < 0{,}115$ (cláusula 5.2). Las ponderaciones informativas del Anexo B se ofrecen bajo el mismo anclaje de 1 acum: von Bismarck (codo en 15 Bark, $0{,}2\ e^{0{,}308(z-15)} + 0{,}8$) y Aures (dependiente de la sonoridad, $g(z) = 0{,}078\ (e^{0{,}171 z}/z)\ N/\ln(0{,}05 N + 1)$). Los objetivos de banda estrecha de la Tabla A.2 se reproducen dentro de la tolerancia de la cláusula 6 (5 % o 0,05 acum): 0,38 acum a 250 Hz, 1,00 a 1 kHz, 1,78 a 2,5 kHz, 2,82 a 4 kHz.
+
 Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) para su uso.
 
 ## Transferencia de modulación y STI (IEC 60268-16)
@@ -474,6 +509,50 @@ $$
 
 Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) para su uso.
 
+## Índice de inteligibilidad del habla (ANSI S3.5)
+
+Mientras el STI caracteriza un canal de transmisión, el SII (ANSI S3.5-1997) predice la inteligibilidad a partir de lo que el oyente puede oír realmente: 18 bandas de tercio de octava de 160 Hz a 8 kHz, cada una con su importancia de banda $I_i$ (Tabla 3, $\sum I_i = 1$, con máximo cerca de 2 kHz). Todas las entradas son niveles espectrales equivalentes (cláusulas 3.11/3.55). El habla se enmascara a sí misma hacia arriba: el espectro de enmascaramiento de cada banda $Z_i$ (cláusula 5.4) acumula las bandas inferiores con pendientes $C_i = -80 + 0{,}6\,(B_i + 10 \lg f_i - 6{,}353)$ dB, y la perturbación es la suma energética del enmascaramiento y del suelo auditivo, $D_i = 10 \lg(10^{0{,}1 Z_i} + 10^{0{,}1 X'_i})$ con $X'_i = X_i + T'_i$ el espectro de ruido interno de referencia más el desplazamiento del umbral de audición del oyente (cláusulas 5.5/5.6). La audibilidad de banda recorta el margen habla-perturbación al intervalo $[0, 1]$ (cláusula 5.8), un factor de distorsión de nivel descuenta la presentación excesivamente alta (cláusula 5.7), y el índice suma (cláusula 6):
+
+$$
+A_i = \operatorname{clip}\Big( \frac{E'_i - D_i + 15}{30},\ 0,\ 1 \Big), \qquad
+L_i = \operatorname{clip}\Big( 1 - \frac{E'_i - U_i - 10}{160},\ 0,\ 1 \Big), \qquad
+\mathrm{SII} = \sum_{i=1}^{18} I_i\ L_i\ A_i .
+$$
+
+Los espectros normalizados de habla de la Tabla 3 para los esfuerzos vocales normal, elevado, fuerte y grito están incorporados (25,01 / 33,86 / 42,16 / 51,31 dB a 1 kHz); el $U_i$ del factor de distorsión de nivel es siempre el espectro de esfuerzo normal. Los anclajes: el espectro de esfuerzo normal en silencio con audición normal puntúa SII ≈ 0,996, los valores de referencia del espectro de enmascaramiento se reproducen a $10^{-4}$, y los espectros por esfuerzo vocal están verificados de forma cruzada frente a las implementaciones de referencia de Google y CRAN.
+
+Consulta la [guía de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/) para su uso.
+
+## Umbrales de audición y presbiacusia (ISO 389-7, ISO 7029)
+
+ISO 389-7:2006 Tabla 1 fija el umbral de audición de referencia de adultos jóvenes otológicamente normales — el SPL en campo libre y campo difuso que corresponde a 0 dB HL en las 11 frecuencias audiométricas de 125 Hz a 8 kHz (22,1 dB a 125 Hz en ambos campos, 2,4/0,8 dB libre/difuso a 1 kHz, divergiendo en alta frecuencia hasta 12,6 frente a 6,8 dB a 8 kHz). ISO 7029:2017 describe cómo se desplaza estadísticamente ese umbral con la edad: la desviación mediana respecto a los 18 años es (cláusula 4.2, Tabla 1)
+
+$$
+\Delta H_{md} = a\ (Y - 18)^b \ \text{dB},
+$$
+
+y cualquier fractil sigue un modelo gaussiano bilateral (cláusula 4.4), $\Delta H_Q = \Delta H_{md} + z(Q)\ s$, usando la dispersión superior $s_u$ para $z \ge 0$ (peor que la mediana) y la inferior $s_l$ en caso contrario — cada una un polinomio de grado 5 en $Y - 18$ por sexo y frecuencia (cláusula 4.3, Tablas 2–5). A los 18 años toda desviación es cero por construcción. Las fórmulas están establecidas hasta los 80 años a 2 kHz y por debajo, y hasta los 70 años por encima; más allá la evaluación es una extrapolación. Anclajes: a los 60 años las medianas evalúan a 7,85 dB (hombre, 1 kHz), 20,21 dB (hombre, 4 kHz) y 15,32 dB (mujer, 4 kHz) — la fórmula de la Tabla 1 a $10^{-3}$.
+
+Consulta la [guía de umbral de audición](/phonometry/es/guides/hearing-threshold/) para su uso.
+
+## Pérdida auditiva inducida por ruido (ISO 1999)
+
+ISO 1999:2013 predice el desplazamiento permanente del umbral que acumula una población expuesta a ruido. El desplazamiento mediano inducido por ruido (NIPTS) para 10–40 años de exposición es (cláusula 6.3.1, Fórmula 2, Tabla 1):
+
+$$
+N_{50} = \big[ u + v \lg(t/t_0) \big]\ (L_{EX,8h} - L_0)^2, \qquad t_0 = 1\ \text{año},
+$$
+
+cuadrático en el exceso sobre el nivel de inicio dependiente de la frecuencia $L_0$ (75 dB a 4 kHz — la banda más sensible — hasta 93 dB a 500 Hz) y cero por debajo; para menos de 10 años escala como $\lg(t+1)/\lg 11$ (Fórmula 3). Los fractiles añaden la dispersión, $N_Q = N_{50} + z\ d_{u,l}$ con $d = (X + Y \lg t)(L_{EX,8h} - L_0)^2$ (cláusula 6.3.2, Fórmulas 4–7, Tablas 2/3), acotada en cero; la convención cuenta la fracción de la población con el desplazamiento *menor*, así que $Q = 0{,}9$ es el decil más susceptible (rango fiable 0,05–0,95). El nivel de umbral de audición asociado a edad y ruido (HTLAN) combina el NIPTS con la componente de edad de ISO 7029 al mismo fractil mediante la suma comprimida (cláusula 6.1, Fórmula 1):
+
+$$
+H' = H + N - \frac{H\ N}{120}.
+$$
+
+Los ejemplos resueltos del Anexo D (Tablas D.1–D.4; p. ej. 100 dB / 40 años a 3 kHz: 29/38/60 dB en los fractiles 0,10/0,50/0,90) se reproducen exactamente con el redondeo a enteros de la norma, y el valor a mano de la Fórmula 2 a 4 kHz / 20 años / 90 dB es $N_{50} = 12{,}94$ dB.
+
+Consulta la [guía de pérdida auditiva inducida por ruido](/phonometry/es/guides/noise-induced-hearing-loss/) para su uso.
+
 ## Intensidad sonora (IEC 61043)
 
 La intensidad sonora es el flujo de potencia acústica promediado en el tiempo $I = \overline{p u}$. La velocidad de partícula se obtiene de la **ecuación de Euler** (conservación del momento linealizada):
@@ -506,6 +585,11 @@ El **índice presión-intensidad** $\delta_{pI} = L_p - L_I$ mide cuán reactivo
 
 Consulta la [guía de intensidad sonora](/phonometry/es/guides/intensity/) para su uso.
 
+## Criterios de ruido de salas (ANSI S12.2)
+
+ANSI/ASA S12.2-2019 valora el ruido de fondo estacionario de una sala frente a familias de curvas por bandas de octava (16 Hz – 8 kHz). El **índice NC** usa el método de tangencia sobre las curvas de la Tabla 1 (NC-15 a NC-70): cada banda medida se interpola frente a los valores tabulados de las curvas, el índice es el mayor valor por banda y la banda que lo fija es la banda determinante — la interpolación hace el índice continuo (un NC-42,5 se informa como tal, sin ajustarlo a una curva). El contorno **RC Mark II** (Anexo D) es una recta pura de −5 dB/octava anclada a su valor a 1000 Hz con un suelo en baja frecuencia de $\max(\mathrm{RC} + 25,\ 55)$ dB a 16/31,5 Hz; el índice es la media aritmética de los niveles a 500/1000/2000 Hz redondeada a un entero (cláusula D.4), y la etiqueta de calidad espectral compara el espectro con el contorno de referencia (cláusula D.3): retumbo "R" cuando alguna banda a 500 Hz o por debajo lo supera en más de 5 dB, siseo "H" cuando alguna banda a 1 kHz o por encima lo supera en más de 3 dB (ambos a la vez, "RH"), y neutro "N" en otro caso — informado como p. ej. RC-35(N). Los contornos RC generados reproducen la Tabla D.1 dígito a dígito, y realimentar cualquier curva NC de la Tabla 1 devuelve su propio índice. NCB, RNC (Anexo A) y el QAI (cláusula D.5) quedan deliberadamente fuera de alcance.
+
+Consulta la [guía de criterios de ruido de salas](/phonometry/es/guides/room-noise/) para su uso.
 
 ## Acústica de salas y edificación (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)
 
@@ -655,6 +739,37 @@ Anexo E.3 de EN 12354-2 ($L'_{n,w} = 45$ dB) se reproducen exactamente; se
 declara que el modelo simplificado tiene una desviación típica de unos 2 dB
 (Cláusula 5).
 
+### Absorción sonora en recintos (EN 12354-6)
+
+EN 12354-6:2003 predice el área de absorción equivalente de un recinto a
+partir de sus partes (el modelo normativo de la Cláusula 4). El total
+(Fórmula 1) suma las superficies, los objetos y el aire:
+
+$$
+A = \sum_i \alpha_{s,i}\ S_i + \sum_j A_{obj,j} + \sum_k \alpha_{s,k}\ S_k + A_{air},
+\qquad A_{air} = 4\ m\ V\ (1 - \psi),
+$$
+
+con $m$ el coeficiente de atenuación en potencia del aire (Fórmula 2; la
+Tabla 1 lo tabula para seis climas de temperatura/humedad sobre las bandas de
+octava de 125 Hz a 8 kHz), $\psi = \sum V_{obj} / V$ la fracción de volumen
+ocupada por objetos (Fórmula 3), y un objeto duro irregular aproximado por
+$A_{obj} = V_{obj}^{2/3}$ (Fórmula 4). El tiempo de reverberación se sigue de
+Sabine aplicado al volumen libre (cláusula 4.4, Fórmula 5):
+
+$$
+T = \frac{55{,}3}{c_0}\ \frac{V\ (1 - \psi)}{A},
+$$
+
+con $c_0 = 345{,}6$ m/s elegido para que $55{,}3/c_0$ sea el familiar
+$0{,}16$ (cláusula 4.4 NOTA). Los tres casos resueltos del Anexo E se
+reproducen: la sala desnuda de 29,75 m³ da $A = 2{,}26$ m² y $T = 2{,}1$ s a
+1 kHz, y añadir objetos duros ($\psi \approx 0{,}072$) sube $A$ a 5,03 m² y
+baja $T$ a 0,9 s. El método informativo del Anexo D para espacios irregulares
+y absorción distribuida de forma no uniforme queda fuera de alcance.
+
+Consulta la [guía de absorción sonora en recintos](/phonometry/es/guides/enclosed-space-absorption/) para su uso.
+
 ### Incertidumbre de medición (ISO 12999-1)
 
 ISO 12999-1 proporciona la incertidumbre de las magnitudes anteriores a partir de
@@ -800,7 +915,7 @@ nivel efectivo de la jornada (véase la [guía de Niveles](/phonometry/es/guides
 Consulta la [guía de Propagación en exteriores](/phonometry/es/guides/outdoor-propagation/)
 y la [guía de Niveles](/phonometry/es/guides/levels/) para su uso.
 
-## Determinación de la potencia sonora (ISO 3744/3746, ISO 3741, ISO 9614-2)
+## Determinación de la potencia sonora (ISO 3744/3745/3746, ISO 3741, ISO 9614-2/3)
 
 El nivel de potencia sonora $L_W = 10 \log_{10}(P/P_0)$ ($P_0 = 1$ pW) es una
 magnitud de *emisión*: a diferencia de un nivel de presión, no depende de la
@@ -825,6 +940,33 @@ de la geometría: una semiesfera $S = 2 \pi r^2$ sobre un plano reflectante
 $S = 4(ab + bc + ca)$ con $a = 0.5\ l_1 + d$, $b = 0.5\ l_2 + d$,
 $c = l_3 + d$. ISO 3746 (control) comparte las matemáticas con criterios más
 laxos. La incertidumbre expandida es $U = 2 \sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}$.
+
+### Grado de precisión en salas anecoicas (ISO 3745)
+
+ISO 3745:2012 es el hermano de grado 1 (precisión): una sala anecoica o
+semianecoica cualificada elimina el campo reverberante, así que no hay término
+$K_2$ y las correcciones pasan a ser meteorológicas. El nivel de potencia es
+$L_W = \bar{L}_p + 10 \lg(S/S_0) + C_1 + C_2 + C_3$ (Ec. 14/15) sobre una
+esfera completa $S = 4 \pi r^2$ o una semiesfera $S = 2 \pi r^2$, con la
+corrección por ruido de fondo $K_{1i} = -10 \lg(1 - 10^{-0{,}1 \Delta L_{pi}})$
+aplicada por posición de micrófono *antes* del promedio energético (Ec. 11) —
+no hace falta corrección por encima de un margen de 15 dB, y por debajo de
+10 dB (250 Hz – 5 kHz) o 6 dB (bandas extremas) la corrección se satura y el
+resultado se marca como cota superior (cláusula 9.4.2). Los términos
+meteorológicos son
+$C_1 = -10 \lg(p_s/p_{s0}) + 5 \lg[(273 + \theta)/\theta_0]$ y
+$C_2 = -10 \lg(p_s/p_{s0}) + 15 \lg[(273 + \theta)/\theta_1]$ con
+$\theta_0 = 314$ K, $\theta_1 = 296$ K — en la referencia de 23 °C /
+101,325 kPa, $C_2 = 0$ exactamente y $C_1 = -0{,}128$ dB — y
+$C_3 = A_0 (1{,}0053 - 0{,}0012 A_0)^{1{,}6}$ con $A_0 = a(f)\ r$ restituye la
+absorción del aire de ISO 9613-1 sobre el radio de medición. Las
+disposiciones de micrófonos de los Anexos D/E están incorporadas como tablas de coordenadas
+exactas dígito a dígito (40 posiciones de igual área; el juego espejo 21–40 se
+añade cuando la dispersión del SPL por banda supera $N_M/2$, cláusula 9.3.2),
+y las mismas posiciones dan el índice de directividad
+$DI_i = L_{pi} - \bar{L}_p$ (Ec. 21). El ejemplo de incertidumbre de la
+cláusula 10.5, $U = 2\sqrt{0{,}5^2 + 2{,}0^2} = 4{,}12$ dB, se reproduce, junto
+con los valores de $\sigma_{R0}$ por banda de las Tablas 2/3.
 
 ### Sala reverberante (ISO 3741)
 
@@ -861,4 +1003,314 @@ $F_{pI}$. Una banda obtiene el grado de ingeniería cuando $L_d > F_{pI}$,
 $F_{+/-} \le 3$ dB y los dos barridos repetidos coinciden dentro del límite de
 la Tabla 2.
 
+### Barrido de intensidad de precisión (ISO 9614-3)
+
+ISO 9614-3:2002 eleva el método de barrido al grado de precisión con una
+maquinaria de indicadores más estricta. Las potencias parciales
+$P_i = I_{n,i} S_i$ (Ec. 5) se suman como antes, pero la validez descansa
+ahora en los indicadores presión-intensidad con y sin signo
+$F_{pIn} = \bar{L}_p - L_{In}$ (Ecs. B.3/B.6 — los F2/F3 de ISO 9614-1) y en
+la no uniformidad normalizada de la intensidad $F_S$ (Ec. B.8), a través de
+cinco criterios de aceptación (Anexo C): repetibilidad del barrido
+$|L_{In}(1) - L_{In}(2)| \le s/2$ (C.1), capacidad dinámica
+$L_d = \delta_{pI0} - K \ge F_{pIn}(\text{con signo})$ con el factor de error
+de sesgo de precisión $K = 10$ dB (C.2),
+$F_{pIn}(\text{con signo}) - F_{pIn}(\text{sin signo}) \le 3$ dB (C.3),
+$F_S \le 2$ (C.4) y la convergencia de densidad de barrido
+$0{,}83 \le F_S(1)/F_S(2) \le 1{,}2$ (C.5). La Ec. 10 normaliza el resultado a
+las condiciones meteorológicas de referencia,
+$L_{W0} = L_W - 15 \lg[(B/101325) \cdot 296{,}15/(273{,}15 + \theta)]$. Las
+bandas con potencia neta negativa son no determinables (cláusula 9.2) y se
+marcan. Una intensidad normal uniforme recupera la potencia exactamente
+(100 µW sobre 3,75 m² → 80,0 dB re 1 pW), con independencia de cómo se
+segmente la superficie.
+
 Consulta la [guía de potencia sonora](/phonometry/es/guides/sound-power/) para su uso.
+
+## Dispersión superficial y difusión (ISO 17497-1, ISO 17497-2)
+
+### Coeficiente de dispersión a incidencia aleatoria (ISO 17497-1)
+
+Una superficie rugosa reparte la energía reflejada en una parte especular y
+otra dispersa; el coeficiente de dispersión $s$ es la fracción de energía no
+especular. ISO 17497-1:2004+A1:2014 lo mide en una sala reverberante con la
+muestra sobre una mesa giratoria: cuatro tiempos de reverberación — con la
+mesa parada y girando, cada uno sin y con la muestra (Tabla 2) — dan la
+absorción a incidencia aleatoria $\alpha_s$ (cláusula 8.1.1, Fórmula 1) y la
+absorción *especular* $\alpha_{spec}$ (cláusula 8.1.2, Fórmula 4). La
+rotación decorrelaciona las reflexiones dispersas entre decaimientos, de modo
+que se promedian y se registran como "absorción" extra, y el coeficiente de
+dispersión se sigue (cláusula 8.1.3, Fórmula 5):
+
+$$
+s = \frac{\alpha_{spec} - \alpha_s}{1 - \alpha_s},
+$$
+
+siendo cada $\alpha$ una diferencia de Sabine entre dos condiciones,
+$55{,}3 (V/S) [1/(c_b T_b) - 1/(c_a T_a)] - 4 (V/S)(m_b - m_a)$, con
+$c = 343{,}2 \sqrt{(273{,}15 + t)/293{,}15}$ (Fórmula 2) y $m$ de ISO 9613-1
+mediante $m = \alpha_{dB}/(10 \lg e)$ (Fórmula 3). La propia placa base debe
+dispersar poco: la Tabla 1 acota su coeficiente (Fórmula 6) a 0,05–0,25 entre
+100 Hz y 5 kHz (cláusula 6.2). El $s$ negativo se trunca a cero para su
+presentación (cláusula 8.3), pero los valores por encima de 1 en bandas
+cercanas al rasante se conservan (cláusula 6.3.2). La cadena de incertidumbre
+del Anexo A ($u_\alpha$, Fórmulas A.3/A.4; $u_s$, Fórmula A.5; $U = 2 u_s$)
+está implementada. Como la norma no imprime ningún ejemplo resuelto, el
+oráculo es una cadena sintética de extremo a extremo ($V = 200$ m³,
+$S = 10$ m², $T = 8{,}0/6{,}0/7{,}5/5{,}0$ s → $s = 0{,}093$) más el valor a
+mano de la Fórmula A.5, $u_s = 0{,}0297$.
+
+### Coeficiente de difusión direccional (ISO 17497-2)
+
+ISO 17497-2:2012 mide, en campo libre, cuán uniformemente reparte una
+superficie su respuesta polar reflejada sobre $n$ micrófonos. El coeficiente
+basado en autocorrelación (cláusula 8.1, Fórmula 5) es
+
+$$
+d_\theta = \frac{\left( \sum_i p_i \right)^2 - \sum_i p_i^2}{(n - 1) \sum_i p_i^2},
+\qquad p_i = 10^{L_i/10},
+$$
+
+1 para una respuesta perfectamente uniforme y tendiendo a 0 para un único
+lóbulo especular; la Fórmula 6 es la forma ponderada por área con
+$N_i = A_i / A_{min}$ a partir de los factores de ángulo sólido de la
+Fórmula 8 ($A_i = (4\pi/\Delta\phi) \sin^2(\Delta\theta/4)$ en el cénit).
+Normalizar frente a un reflector plano de referencia del mismo tamaño elimina
+la difracción de borde (cláusula 8.2, Fórmula 7):
+$d_{\theta,n} = (d_\theta - d_{\theta,r})/(1 - d_{\theta,r})$. El valor a
+incidencia aleatoria promedia los ángulos de fuente con pesos 1:3:3:3:3 para
+0°, ±30°, ±60° (cláusula 8.4). Anclajes: niveles (70, 74, 68, 72) dB →
+$d = 0{,}7367$; factor de área del cénit 1,5710.
+
+Consulta la [guía de dispersión superficial](/phonometry/es/guides/surface-scattering/) para su uso.
+
+## Absorción in situ de superficies de carretera (ISO 13472-1, ISO 13472-2)
+
+ISO 13472-1:2002 (método de superficie extendida) recupera la absorción a
+incidencia normal de un pavimento en su emplazamiento, con un micrófono sobre
+él: las componentes directa y reflejada de una respuesta al impulso se separan
+con la **técnica de sustracción** y la **ventana de Adrienne** (cláusula 6.4:
+un flanco de subida abrupto, una meseta obligatoria de 5 ms y un flanco de
+bajada Blackman-Harris), y
+
+$$
+\alpha(f) = 1 - \frac{1}{K_r^2} \left| \frac{H_r(f)}{H_i(f)} \right|^2,
+\qquad K_r = \frac{d_s - d_m}{d_s + d_m} = \frac{2}{3}
+$$
+
+para la geometría obligatoria $d_s = 1{,}25$ m, $d_m = 0{,}25$ m
+(cláusula 4.2, Anexo C) — $K_r$ es el cociente de expansión esférica entre el
+camino directo y el de la imagen. Referenciar la medición del pavimento a otra
+sobre una superficie muy reflectante cancela toda la cadena electroacústica
+junto con $K_r$ (Anexo B). La ventana de 5 ms acota el área muestreada (forma
+cerrada del Anexo A: radio ≈ 1,34 m para la geometría normalizada) y el rango
+válido es de 250 Hz a 4 kHz en tercios de octava. ISO 13472-2:2010 (método
+puntual, 250–1600 Hz) acopla en cambio un pequeño tubo de impedancia a la
+superficie y remite las matemáticas al método de función de transferencia de
+ISO 10534-2 de más abajo (sus cláusulas 4/5.7/6.6) — la implementación
+reutiliza ese módulo, añadiendo la geometría y los límites de validez de la
+Parte 2 ($f_u = 0{,}58\ c_0/d$; cotas de separación de micrófonos
+$0{,}45\ c_0/f_{max}$ y $0{,}05\ c_0/f_{min}$, cláusula 5.4) y la corrección
+sustractiva del Anexo A por pérdidas internas del sistema.
+
+Consulta la [guía de dispersión superficial](/phonometry/es/guides/surface-scattering/) para su uso.
+
+## Caracterización de materiales acústicos (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)
+
+### Absorción sonora ponderada (ISO 11654)
+
+ISO 11654:1997 condensa una curva de absorción en tercios de octava de ISO 354
+en un solo número. El coeficiente práctico $\alpha_p$ promedia los tres
+tercios de cada octava de 250 Hz a 4 kHz y redondea a pasos de 0,05
+(cláusula 4.1). La curva de referencia (0,80, 1,00, 1,00, 1,00, 0,90 en
+250–4000 Hz) se desplaza después hacia abajo en pasos de 0,05 hasta que la
+suma de desviaciones desfavorables — contadas solo donde la medición queda
+*por debajo* de la curva desplazada — es $\le 0{,}10$; $\alpha_w$ es la curva
+desplazada a 500 Hz (cláusula 4.2). Un indicador de forma señala el exceso de
+absorción $\ge 0{,}25$ sobre la curva desplazada: L a 250 Hz, M a
+500/1000 Hz, H a 2000/4000 Hz (cláusula 4.3), y el Anexo B informativo asigna
+$\alpha_w$ a las clases de absorción A–E. Como toda magnitud es múltiplo de
+0,05, la implementación hace toda la aritmética de la malla en veinteavos
+enteros, dejando la búsqueda del desplazamiento y las fronteras de clase
+exactas y a salvo del punto flotante. Los dos ejemplos resueltos del Anexo A
+se reproducen: $\alpha_p = (0{,}35, 0{,}70, 0{,}65, 0{,}60, 0{,}55)$ →
+$\alpha_w = 0{,}60$, clase C; y subir 500 Hz a 1,00 mantiene
+$\alpha_w = 0{,}60$ pero añade el indicador, "0,60(M)".
+
+### Resistencia al flujo de aire (ISO 9053-1/2)
+
+La resistividad al flujo $\sigma = R\,A/d$ es el parámetro de transporte clave
+de un absorbente poroso. ISO 9053-1:2018 (método estático) hace pasar un flujo
+estacionario por la muestra y ajusta $\Delta p = a\,u + b\,u^2$ por el origen
+(cláusula 7.5); como $R_s = \Delta p / u = a + b\,u$, el coeficiente lineal es
+la resistencia específica a velocidad nula, informada a la velocidad de
+referencia $u = 0{,}5$ mm/s. ISO 9053-2:2020 (método alternante) sustituye el
+caudalímetro por un pistón a ~2 Hz y un micrófono en una cavidad cerrada
+(cláusula 8.7, Fórmula 2):
+
+$$
+R = \kappa'\ \frac{p_s}{2 \pi f V}\ \frac{h_t}{h_s}\ 10^{(L_{ps} - L_{pt})/20}
+$$
+
+— solo entra una *diferencia* de niveles, así que el equipo de medición sonora
+no necesita calibración absoluta. El exponente efectivo $\kappa'$ (Anexo A,
+Fórmula A.7) corrige el $\kappa$ adiabático por la conducción de calor a las
+paredes a través de la capa límite térmica $b = \sqrt{2 c_0 l_h / \omega}$
+(Fórmulas A.4/A.5). El ejemplo resuelto del Anexo A.3 (cilindro cerrado de
+100 mm a 2 Hz: $b = 1{,}83$ mm, $\kappa' = 1{,}370 = 0{,}978\,\kappa$) se
+reproduce, y se aplican las salvaguardas de validez de la Fórmula 3 (cociente
+de transferencia < 0,3) y la Fórmula 4 (margen de 10 dB sobre el fondo).
+
+### Tubo de impedancia (ISO 10534-1, ISO 10534-2, ASTM E2611)
+
+Un tubo por debajo de su frecuencia de corte ($f d < 0{,}58\ c_0$ circular,
+$< 0{,}50\ c_0$ rectangular; límites de separación de micrófonos
+$f s < 0{,}45\ c_0$ y $f > c_0/(20 s)$; cláusulas 4.2–4.5) solo propaga ondas
+planas, así que el factor de reflexión superficial de una muestra es
+plenamente observable. ISO 10534-2 (método de función de transferencia)
+compara la función de transferencia medida entre dos micrófonos $H_{12}$ con
+las analíticas incidente y reflejada $H_I = e^{-j k_0 s}$,
+$H_R = e^{+j k_0 s}$ (Anexo D) para dar (cláusula 7, Ec. 17):
+
+$$
+r = \frac{H_{12} - H_I}{H_R - H_{12}}\ e^{2 j k_0 x_1}, \qquad
+\alpha = 1 - |r|^2, \qquad \frac{Z}{\rho c_0} = \frac{1 + r}{1 - r},
+$$
+
+con la cota inferior de atenuación del número de onda complejo
+$k_0'' = 1{,}94 \times 10^{-2} \sqrt{f}/(c_0 d)$ (Ec. A.18). ISO 10534-1
+(método de la razón de onda estacionaria) es el clásico en forma cerrada:
+$|r| = (s - 1)/(s + 1)$ a partir de la razón máximo/mínimo
+$s = 10^{\Delta L/20}$ y la fase desde la posición del primer mínimo
+(Ecs. 12–26) — una SWR de 3 da exactamente $|r| = 0{,}5$ y
+$\alpha = 0{,}75$. ASTM E2611-19 añade la transmisión: cuatro micrófonos
+descomponen los campos aguas arriba y abajo en las ondas $A, B, C, D$
+(Ecs. 17–20) y una resolución con dos cargas (o con una carga para muestra
+simétrica) da la **matriz de transferencia** 2×2 de la muestra,
+$[p; u]_0 = T\,[p; u]_d$ (Ecs. 16/22–24), de la que sale la pérdida por
+transmisión a incidencia normal con terminación anecoica (Ecs. 25/26)
+
+$$
+TL = 20 \lg \frac{\left| T_{11} + T_{12}/\rho c + \rho c\ T_{21} + T_{22} \right|}{2},
+$$
+
+más la reflexión con fondo rígido
+$R = (T_{11} - \rho c\,T_{21})/(T_{11} + \rho c\,T_{21})$ (Ec. 27), el número
+de onda del material $\arccos(T_{11})/d$ (Ec. 29) y la impedancia
+característica $\sqrt{T_{12}/T_{21}}$ (Ec. 30). Las tres normas conservan
+deliberadamente su propio convenio de signos y sus unidades de temperatura
+(ISO en kelvin, ASTM en Celsius), y las resoluciones de cargas casi singulares
+emiten un aviso. Como ninguna norma imprime un ejemplo numérico, los oráculos
+son identidades físicas: la matriz analítica de una capa de aire
+($\det T = 1$, $T_{11} = T_{22}$, TL = 0 dB, $|R| = 1$ con fondo rígido),
+recorridos de ida y vuelta sintéticos que recuperan una $r$ conocida y la
+recuperación con dos cargas de una muestra recíproca asimétrica.
+
+Consulta la [guía de materiales](/phonometry/es/guides/materials/) para su uso.
+
+## Vibración en humanos (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directiva 2002/44/CE)
+
+La respuesta humana a la vibración depende de la frecuencia, el eje y la parte
+del cuerpo, así que la aceleración se filtra con las ponderaciones
+frecuenciales de ISO 8041-1:2017 antes de cualquier métrica. Cada ponderación
+es la cascada analógica $H(s) = H_h(s) H_l(s) H_t(s) H_s(s)$ (Fórmula 5):
+etapas Butterworth de dos polos de limitación de banda paso-alto y paso-bajo
+(Fórmulas 1/2), una transición aceleración–velocidad (Fórmula 3, que porta la
+única ganancia no unitaria, $K = 1{,}024$ para Wb) y un escalón ascendente
+(Fórmula 4), con las frecuencias de esquina y los factores Q de la Tabla 3;
+una esquina en infinito colapsa su etapa a la unidad (NOTAs de la Tabla 3). Wk
+(cuerpo completo vertical) y Wd (horizontal) de ISO 2631-1, Wm (edificios,
+ISO 2631-2), Wb (ferrocarril, ISO 2631-4), Wc/We/Wj (respaldo, rotacional,
+cabeza) y Wh (mano-brazo, ISO 5349-1) más Wf (mareo) están implementadas desde
+la cascada exacta — el filtro se aplica como la respuesta compleja exacta vía
+FFT (magnitud *y* fase), no como una aproximación digital deformada por la
+bilineal — y las tablas de objetivos de diseño del Anexo B de ISO 8041-1
+(B.1–B.9) se reproducen al 0,1 %.
+
+Las métricas ponderadas siguen ISO 2631-1:1997: rms móvil con integración
+lineal o exponencial (Ecs. 2/3), el **MTVV** como su máximo (Ec. 4), el
+**VDV** de cuarta potencia $= (\int a_w^4\, dt)^{1/4}$ en m/s^1,75 (Ec. 5), el
+factor de cresta con el método básico considerado adecuado hasta 9
+(cláusula 6.2) y el valor total de vibración
+$a_v = \sqrt{\sum_j k_j^2 a_{wj}^2}$ (Ec. 10). La exposición mano-brazo sigue
+ISO 5349-1:2001: $a_{hv}$ (Ec. 1, todos los $k = 1$), exposición diaria
+$A(8) = a_{hv} \sqrt{T/T_0}$ con $T_0 = 8$ h (Ec. 2), exposiciones parciales
+combinadas en cuadratura (ISO 5349-2:2001, Ecs. 1–3), y el modelo de riesgo
+vascular del Anexo C, $D_y = 31{,}8\ A(8)^{-1{,}06}$, para los años hasta una
+prevalencia del 10 % de dedo blanco. Los valores de acción y límite de la
+Directiva 2002/44/CE están incorporados: mano-brazo $A(8)$ 2,5/5,0 m/s²,
+cuerpo completo $A(8)$ 0,5/1,15 m/s² o VDV 9,1/21,0 m/s^1,75 (Artículo 3).
+Los ejemplos resueltos de ISO 5349-2 se reproducen (E.2.1: 7,4 m/s² durante
+2,5 h → $A(8) = 4{,}1$ m/s²; E.3 forestal, tres herramientas → 3,6 m/s²),
+igual que las filas de duración de exposición de la Tabla C.1 de ISO 5349-1.
+
+### Choques múltiples (ISO 2631-5)
+
+Los choques repetidos dañan la columna lumbar por la compresión de pico y no
+por la energía media, así que ISO 2631-5:2018 sustituye la ponderación Wk por
+la función de transferencia asiento-columna de la cláusula 5.2 (Fórmula 1: un
+cero complejo y seis pares de polos complejos, unidad en continua, resonancia
+cerca de 5 Hz — $|H| \approx 1{,}54$ a 5 Hz) y acumula los picos positivos de la
+respuesta espinal con una dosis de sexta potencia (Palmgren-Miner)
+(cláusula 5.3, Fórmulas 3/4):
+
+$$
+D_z = 1{,}07 \left( \sum_i A_{z,i}^6 \right)^{1/6}, \qquad
+D_{zd} = D_z\ (t_d / t_m)^{1/6}.
+$$
+
+El Anexo C convierte la dosis diaria en una tensión compresiva
+$S_d = m_z D_{zd}$ ($m_z = 0{,}029/0{,}025$ MPa por m/s² para el hombre de
+82 kg / la mujer de 64 kg), sigue la resistencia última decreciente con la
+edad $S_u = 6{,}75 - S_{age}(b + i)$ y forma la variable de tensión acumulada
+$R$ (Fórmulas C.3/C.4), llevada a una probabilidad de lesión por la ley de
+Weibull de la Tabla C.1, $\Pi = 1 - e^{-(R/\alpha)^\beta}$. El filtro espinal
+se evalúa analíticamente en el dominio de la frecuencia y se valida frente a
+la tabulación del filtro digital a 256 Hz del Anexo D dentro de la tolerancia
+de la cláusula 5.2; el ejemplo resuelto del Anexo C (cinco choques de 40 m/s²
+al día durante 20 años) se reproduce: $D_{zd} = 55{,}97$ m/s², $R = 1{,}22$,
+$\Pi = 0{,}37$. El modelo espinal de elementos finitos del Anexo A
+(distribuido por ISO como software aparte) queda fuera de alcance.
+
+Consulta la [guía de vibración en humanos](/phonometry/es/guides/human-vibration/) y la
+[guía de vibración con choques múltiples](/phonometry/es/guides/multiple-shock-vibration/) para su uso.
+
+## Incertidumbre de medida (ISO/IEC Guide 98-3 — GUM y Suplemento 1)
+
+Los presupuestos de dominio como ISO 12999-1 y el Anexo C de ISO 9612 son
+instancias del marco general de la GUM (ISO/IEC Guide 98-3:2008). Dado un
+modelo de medición $y = f(x_1, \ldots, x_N)$, la ley de propagación de la
+incertidumbre (cláusula 5) combina las incertidumbres típicas de entrada a
+través de coeficientes de sensibilidad:
+
+$$
+u_c^2(y) = \sum_{i=1}^{N} \left( \frac{\partial f}{\partial x_i} \right)^2 u^2(x_i),
+$$
+
+generalizada a $(c \odot u)^{\top} r\ (c \odot u)$ para entradas
+correlacionadas. Las sensibilidades se obtienen por diferencias centradas
+sobre el modelo del usuario (paso escalado a $10^{-3}$ de cada incertidumbre
+de entrada), así que no hacen falta derivadas parciales a mano. Las entradas
+de Tipo B entran por las reglas de semiancho de la cláusula 4.3: rectangular
+$a/\sqrt{3}$ (4.3.7), triangular $a/\sqrt{6}$ (4.3.9), en U $a/\sqrt{2}$. La
+incertidumbre expandida $U = k\,u_c$ toma $k$ de la distribución t con los
+grados de libertad efectivos de Welch–Satterthwaite (Anexo G.4):
+
+$$
+\nu_{\mathrm{eff}} = \frac{u_c^4}{\sum_i u_i^4 / \nu_i}.
+$$
+
+El **Suplemento 1** (ISO/IEC Guide 98-3-1:2008) propaga en cambio las
+distribuciones completas: $10^6$ extracciones de Monte Carlo (cláusula 6.4) a
+través del mismo modelo dan $u(y)$ y el intervalo de cobertura
+probabilísticamente simétrico a partir de los fractiles
+$\frac{1}{2}(1 \mp p)$ (cláusula 7.7) — la vía cuando el modelo es no lineal o
+la salida visiblemente no gaussiana. Los ejemplos de las propias Guías se
+reproducen: el modelo aditivo de cuatro términos da $u_c = 2{,}0$ y el
+intervalo Monte Carlo al 95 % $\pm 3{,}88$ de la cláusula 9.2/Tabla 3 del
+Suplemento 1 (cuatro entradas rectangulares — la salida es casi trapezoidal,
+no gaussiana, así que el intervalo es más estrecho que $\pm 1{,}96\,u$), y el
+ejemplo del bloque patrón del Anexo H.1 de la GUM da
+$k = t_{0{,}99}(\nu_{\mathrm{eff}} = 16) = 2{,}92$ y $U_{99} = 93$ nm.
+
+Consulta la [guía de incertidumbre de medida](/phonometry/es/guides/gum-uncertainty/) para su uso.

@@ -413,6 +413,36 @@ _ES_EXACT = {
     "Reflection factor magnitude |r|": "Módulo del factor de reflexión |r|",
     "ISO 10534-1 Standing-Wave-Ratio Method":
         "Método de la razón de onda estacionaria (ISO 10534-1)",
+    # --- Tanda 11: Tier-1 animation labels ---
+    "tone burst": "ráfaga de tono",
+    "Fast (125 ms)": "Rápida (125 ms)",
+    "Slow (1000 ms)": "Lenta (1000 ms)",
+    "Impulse (35 ms / 1.5 s)": "Impulso (35 ms / 1,5 s)",
+    "Time-weighting ballistics (IEC 61672-1)":
+        "Balística de la ponderación temporal (IEC 61672-1)",
+    "Mean-square response (normalized)":
+        "Respuesta cuadrática media (normalizada)",
+    "L_AF history": "Historia de L_AF",
+    "onset (> 10 dB/s)": "inicio (> 10 dB/s)",
+    "Impulse onset detection (NT ACOU 112)":
+        "Detección del inicio de impulso (NT ACOU 112)",
+    "A-weighted level L_AF [dB]": "Nivel ponderado A L_AF [dB]",
+    "listening…": "escuchando…",
+    "pressure p": "presión p",
+    "velocity u": "velocidad u",
+    "intensity p·u": "intensidad p·u",
+    "Progressive wave — net power flows":
+        "Onda progresiva — fluye potencia neta",
+    "Standing wave — energy sloshes":
+        "Onda estacionaria — la energía va y viene",
+    "amplitude (normalized)": "amplitud (normalizada)",
+    "Instantaneous sound intensity p·u":
+        "Intensidad sonora instantánea p·u",
+    "T20 fit": "ajuste T20",
+    "T30 fit": "ajuste T30",
+    "Schroeder backward integration (ISO 3382)":
+        "Integración inversa de Schroeder (ISO 3382)",
+    "integrating from the tail →": "integrando desde la cola →",
 }
 
 _ES_PATTERNS = [
@@ -4203,18 +4233,414 @@ def generate_all(img_dir: str) -> None:
     generate_moore_glasberg_time_loudness(img_dir)
 
 
+# ===========================================================================
+# Animations (Tier 1 pilot)
+# ---------------------------------------------------------------------------
+# Deterministic FuncAnimation clips of the level-vs-time phenomena the library
+# already computes. Each is rendered to WebM (site <video>) in all four
+# language x theme variants, and to an animated GIF for the English GitHub
+# docs (both themes). Kept out of generate_all()/`make graphs` so ordinary
+# PNG regeneration stays fast; produced by `make animations`.
+# ===========================================================================
+
+_ANIM_FPS = 20
+_ANIM_SECONDS = 6
+_ANIM_FRAMES = _ANIM_FPS * _ANIM_SECONDS
+_ANIM_FIGSIZE = (8.0, 4.5)   # inches at _ANIM_DPI -> 800 x 450 px
+_ANIM_DPI = 100
+# The GitHub-docs GIF is a compact fallback for the smooth site WebM: a lower
+# frame rate, smaller frame and capped palette keep even the detail-dense
+# clips (the p·u oscillations) near half a megabyte.
+_GIF_FPS = 12
+_GIF_SCALE = 640
+_GIF_COLORS = 64
+
+
+def _translate_str(s: str) -> str:
+    """Translate one label to the active language (exact + pattern + comma).
+
+    Mirrors :func:`_translate_figure` for a single string, so animation labels
+    -- which are rewritten every frame and never pass through ``themed_path``
+    -- can be localised at creation time instead.
+    """
+    import re as _re
+
+    if _LANG == "en" or not s:
+        return s
+    if s in _ES_EXACT:
+        out = _ES_EXACT[s]
+    else:
+        out = s
+        for pat, repl in _ES_PATTERNS:
+            new, n = _re.subn(pat, repl, s)
+            if n:
+                out = new
+                break
+    if "$" not in out and _re.search(r"\d\.\d", out):
+        out = _re.sub(r"(?<![\d.A-Za-z])(\d+)\.(\d+)(?![.\d])", r"\1,\2", out)
+    return out
+
+
+def _anim_path(output_dir: str, stem: str, ext: str) -> str:
+    """Animation output path with the active language + theme suffixes."""
+    return os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}.{ext}")
+
+
+def _new_anim_fig() -> tuple[Any, Any]:
+    """A fixed-size themed figure for a clip (constant canvas across frames)."""
+    fig, ax = plt.subplots(figsize=_ANIM_FIGSIZE, dpi=_ANIM_DPI, layout="constrained")
+    ax.grid(True, color=COLOR_GRID, linestyle="--", alpha=0.5)
+    return fig, ax
+
+
+def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
+                    make_gif: bool = True) -> None:
+    """Write *anim* to WebM (always) and, for English, an animated GIF.
+
+    The GIF is derived from the just-written WebM with an ffmpeg palette pass
+    so the GitHub docs get a compact, self-contained loop; the site embeds the
+    WebM directly. ``savefig.bbox`` is forced to ``standard`` so every frame
+    keeps the same canvas size (a ``tight`` box would jitter and break the
+    encoder).
+    """
+    import subprocess
+
+    from matplotlib.animation import FFMpegWriter
+
+    webm = _anim_path(output_dir, stem, "webm")
+    writer = FFMpegWriter(
+        fps=_ANIM_FPS, codec="libvpx-vp9",
+        extra_args=["-b:v", "0", "-crf", "40", "-pix_fmt", "yuv420p",
+                    "-an", "-loglevel", "error"],
+    )
+    with plt.rc_context({"savefig.bbox": "standard"}):
+        anim.save(webm, writer=writer, dpi=_ANIM_DPI,
+                  savefig_kwargs={"facecolor": fig.get_facecolor()})
+    made_gif = False
+    if make_gif and _LANG == "en":
+        gif = _anim_path(output_dir, stem, "gif")
+        palette = os.path.join(output_dir, f".{stem}{_FILENAME_SUFFIX}_pal.png")
+        vf = f"fps={_GIF_FPS},scale={_GIF_SCALE}:-1:flags=lanczos"
+        subprocess.run(
+            ["ffmpeg", "-y", "-loglevel", "error", "-i", webm, "-vf",
+             f"{vf},palettegen=max_colors={_GIF_COLORS}:stats_mode=diff",
+             "-update", "1", palette],
+            check=True)
+        subprocess.run(
+            ["ffmpeg", "-y", "-loglevel", "error", "-i", webm, "-i", palette,
+             "-lavfi", f"{vf}[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=3",
+             "-loop", "0", gif], check=True)
+        os.remove(palette)
+        made_gif = True
+    plt.close(fig)
+    theme = "dark" if _FILENAME_SUFFIX else "light"
+    print(f"  {stem} [{_LANG} {theme}] -> webm" + (" + gif" if made_gif else ""))
+
+
+def animate_time_weighting_ballistics(output_dir: str) -> None:
+    """F/S/I exponential detectors chasing a tone burst (IEC 61672-1)."""
+    from matplotlib.animation import FuncAnimation
+
+    from phonometry import time_weighting
+
+    T = _translate_str
+    fs = 8000
+    t = np.linspace(0, 4.0, int(fs * 4.0), endpoint=False)
+    # A steady 250 Hz tone burst (unit amplitude) from 1.0 s to 2.5 s. The
+    # carrier is high enough that even the 35 ms Impulse detector smooths the
+    # squared ripple, so each detector shows its own clean rise and decay
+    # (a noise burst would drown the ballistics in fluctuation).
+    x = np.zeros_like(t)
+    on = (t >= 1.0) & (t < 2.5)
+    x[on] = np.sin(2 * np.pi * 250 * t[on])
+    ref = 0.5  # mean square of a unit-amplitude tone
+    fast = time_weighting(x, fs, mode="fast") / ref
+    slow = time_weighting(x, fs, mode="slow") / ref
+    imp = time_weighting(x, fs, mode="impulse") / ref
+
+    fig, ax = _new_anim_fig()
+    ax.set_xlim(0.6, 4.0)
+    ax.set_ylim(0, 1.2)
+    ax.axvspan(1.0, 2.5, color=COLOR_GRID, alpha=0.4, lw=0)
+    ax.text(1.75, 1.14, T("tone burst"), ha="center", va="top", color=COLOR_FG,
+            fontsize=9, alpha=0.8)
+    (l_f,) = ax.plot([], [], color=COLOR_PRIMARY, lw=2.2, label=T("Fast (125 ms)"))
+    (l_s,) = ax.plot([], [], color=COLOR_SECONDARY, lw=2.2, label=T("Slow (1000 ms)"))
+    (l_i,) = ax.plot([], [], color="#7e57c2", lw=1.8, ls="-.",
+                     label=T("Impulse (35 ms / 1.5 s)"))
+    cursor = ax.axvline(0.6, color=COLOR_FG, lw=1.0, alpha=0.45)
+    readout = ax.text(0.985, 0.96, "", transform=ax.transAxes, ha="right",
+                      va="top", family="monospace", fontsize=11, color=COLOR_FG)
+    ax.set_title(T("Time-weighting ballistics (IEC 61672-1)"), fontweight="bold")
+    ax.set_xlabel(T("Time [s]"))
+    ax.set_ylabel(T("Mean-square response (normalized)"))
+    ax.legend(loc="upper left", fontsize=9)
+
+    tmin, tmax = 0.6, 4.0
+
+    def update(k: int) -> tuple[Any, ...]:
+        tc = tmin + (tmax - tmin) * k / (_ANIM_FRAMES - 1)
+        m = t <= tc
+        l_f.set_data(t[m], fast[m])
+        l_s.set_data(t[m], slow[m])
+        l_i.set_data(t[m], imp[m])
+        cursor.set_xdata([tc, tc])
+        i = max(0, min(len(t) - 1, int(round(tc * fs))))
+        readout.set_text(T(f"F {fast[i]:.2f}\nS {slow[i]:.2f}\nI {imp[i]:.2f}"))
+        return l_f, l_s, l_i, cursor, readout
+
+    anim = FuncAnimation(fig, update, frames=_ANIM_FRAMES,
+                         interval=1000 / _ANIM_FPS, blit=False)
+    _save_animation(anim, fig, output_dir, "anim_time_weighting")
+
+
+def animate_onset_detection(output_dir: str) -> None:
+    """An impulse onset drawn on L_AF, with OR/LD/P/KI live (NT ACOU 112)."""
+    from matplotlib.animation import FuncAnimation
+
+    from phonometry import impulse_adjustment, predicted_prominence
+
+    T = _translate_str
+    fs = 500
+    t = np.linspace(0, 3.0, int(fs * 3.0), endpoint=False)
+    ls, le = 55.0, 85.0    # start and end level of the onset, dB
+    t0, rise = 1.0, 0.05   # onset at 1.0 s, lasting 50 ms
+    laf = np.full_like(t, ls)
+    ramp = (t >= t0) & (t < t0 + rise)
+    laf[ramp] = ls + (le - ls) * 0.5 * (1 - np.cos(np.pi * (t[ramp] - t0) / rise))
+    after = t >= t0 + rise
+    laf[after] = ls + (le - ls) * np.exp(-(t[after] - t0 - rise) / 0.6)
+    onset_rate = (le - ls) / rise      # 600 dB/s
+    level_diff = le - ls               # 30 dB
+    prom = float(predicted_prominence(onset_rate, level_diff))
+    ki = float(impulse_adjustment(prom))
+    is_onset = np.gradient(laf, t) > 10.0   # clauses 4.5-4.7
+
+    fig, ax = _new_anim_fig()
+    ax.set_xlim(0.6, 3.0)
+    ax.set_ylim(45, 95)
+    (base,) = ax.plot([], [], color=COLOR_PRIMARY, lw=2.0, label=T("L_AF history"))
+    (hot,) = ax.plot([], [], color=COLOR_SECONDARY, lw=3.6,
+                     label=T("onset (> 10 dB/s)"))
+    cursor = ax.axvline(0.6, color=COLOR_FG, lw=1.0, alpha=0.45)
+    ann = ax.text(0.985, 0.06, "", transform=ax.transAxes, ha="right",
+                  va="bottom", family="monospace", fontsize=11, color=COLOR_FG)
+    ax.set_title(T("Impulse onset detection (NT ACOU 112)"), fontweight="bold")
+    ax.set_xlabel(T("Time [s]"))
+    ax.set_ylabel(T("A-weighted level L_AF [dB]"))
+    ax.legend(loc="upper right", fontsize=9)
+    tmin, tmax = 0.6, 3.0
+
+    def update(k: int) -> tuple[Any, ...]:
+        tc = tmin + (tmax - tmin) * k / (_ANIM_FRAMES - 1)
+        m = t <= tc
+        base.set_data(t[m], laf[m])
+        oh = m & is_onset
+        hot.set_data(t[oh], laf[oh])
+        cursor.set_xdata([tc, tc])
+        if tc >= t0 + rise:
+            ann.set_text(T(f"OR {onset_rate:.0f} dB/s\nLD {level_diff:.0f} dB\n"
+                           f"P {prom:.1f}\nKI {ki:.1f} dB"))
+        else:
+            ann.set_text(T("listening…"))
+        return base, hot, cursor, ann
+
+    anim = FuncAnimation(fig, update, frames=_ANIM_FRAMES,
+                         interval=1000 / _ANIM_FPS, blit=False)
+    _save_animation(anim, fig, output_dir, "anim_onset_detection")
+
+
+def animate_instantaneous_intensity(output_dir: str) -> None:
+    """Instantaneous p·u: a progressive wave flows, a standing wave sloshes."""
+    from matplotlib.animation import FuncAnimation
+
+    T = _translate_str
+    t = np.linspace(0, 3.0, 600)
+    w = 2 * np.pi * 2.0
+    # Progressive: p and u in phase -> p·u >= 0, non-zero mean (net flow).
+    # Standing (at a point): p and u 90 deg out of phase -> p·u averages zero.
+    panels_data = [
+        ("Progressive wave — net power flows",
+         np.sin(w * t), np.sin(w * t)),
+        ("Standing wave — energy sloshes",
+         np.cos(w * t), np.sin(w * t)),
+    ]
+    fig, axes = plt.subplots(1, 2, figsize=_ANIM_FIGSIZE, dpi=_ANIM_DPI,
+                             layout="constrained", sharey=True)
+    panels = []
+    for ax, (title, p, u) in zip(axes, panels_data, strict=True):
+        ax.grid(True, color=COLOR_GRID, linestyle="--", alpha=0.5)
+        ax.set_xlim(0, 3.0)
+        ax.set_ylim(-1.15, 1.15)
+        ax.plot(t, p, color=COLOR_PRIMARY, alpha=0.35, lw=1.2, label=T("pressure p"))
+        ax.plot(t, u, color=COLOR_TERTIARY, alpha=0.35, lw=1.2,
+                label=T("velocity u"))
+        (iline,) = ax.plot([], [], color=COLOR_SECONDARY, lw=2.0,
+                           label=T("intensity p·u"))
+        mline = ax.axhline(0.0, color=COLOR_FG, ls="--", lw=1.0, alpha=0.65)
+        cursor = ax.axvline(0.0, color=COLOR_FG, lw=1.0, alpha=0.4)
+        txt = ax.text(0.5, 0.02, "", transform=ax.transAxes, ha="center",
+                      va="bottom", family="monospace", fontsize=10, color=COLOR_FG)
+        ax.set_title(T(title), fontweight="bold", fontsize=11)
+        ax.set_xlabel(T("Time [s]"))
+        ax.legend(loc="upper right", fontsize=8)
+        panels.append({"ax": ax, "I": p * u, "iline": iline, "mline": mline,
+                       "cursor": cursor, "txt": txt, "fill": None})
+    axes[0].set_ylabel(T("amplitude (normalized)"))
+    fig.suptitle(T("Instantaneous sound intensity p·u"), fontweight="bold")
+
+    def update(k: int) -> tuple[Any, ...]:
+        tc = 3.0 * k / (_ANIM_FRAMES - 1)
+        arts: list[Any] = []
+        for pn in panels:
+            idx = max(1, int(np.searchsorted(t, tc)))
+            pn["iline"].set_data(t[:idx], pn["I"][:idx])
+            if pn["fill"] is not None:
+                pn["fill"].remove()
+            pn["fill"] = pn["ax"].fill_between(t[:idx], 0.0, pn["I"][:idx],
+                                               color=COLOR_SECONDARY, alpha=0.22)
+            mean = float(np.mean(pn["I"][:idx]))
+            pn["mline"].set_ydata([mean, mean])
+            pn["cursor"].set_xdata([tc, tc])
+            pn["txt"].set_text(T(f"⟨p·u⟩ = {mean:+.2f}"))
+            arts += [pn["iline"], pn["fill"], pn["mline"], pn["cursor"], pn["txt"]]
+        return tuple(arts)
+
+    anim = FuncAnimation(fig, update, frames=_ANIM_FRAMES,
+                         interval=1000 / _ANIM_FPS, blit=False)
+    _save_animation(anim, fig, output_dir, "anim_instantaneous_intensity")
+
+
+def animate_schroeder(output_dir: str) -> None:
+    """Backward integration of p²(t) revealing the decay curve (ISO 3382)."""
+    from matplotlib.animation import FuncAnimation
+
+    from phonometry import decay_curve, room_parameters
+    from phonometry.room_acoustics import _T20_RANGE, _T30_RANGE, _onset_index
+
+    T = _translate_str
+    fs, reverb_t = 48000, 1.2
+    rng = np.random.default_rng(2026)
+    t = np.arange(int(2.0 * fs)) / fs
+    ir = (rng.standard_normal(t.size) * np.exp(-6.9077 * t / reverb_t)
+          + rng.standard_normal(t.size) * 10.0 ** (-45.0 / 20.0))
+    time, level = decay_curve(ir, fs)
+    res = room_parameters(ir, fs, limits=None)
+    t20, t30 = float(res.t20[0]), float(res.t30[0])
+    p2 = ir.astype(np.float64) ** 2
+    p2 = p2[_onset_index(p2):]
+    t_raw = np.arange(p2.size) / fs
+    raw_db = 10.0 * np.log10(np.maximum(p2, p2.max() * 1e-12) / p2.max())
+
+    # Regression lines drawn once the sweep finishes: slope -60/T over each
+    # evaluation range, extended to the -60 dB crossing at t = T.
+    def _fit(rng_db: tuple[float, float]) -> tuple[float, float] | None:
+        mask = (level <= -rng_db[0]) & (level >= -rng_db[1])
+        if int(mask.sum()) < 2:
+            return None
+        slope, intercept = np.polyfit(time[mask], level[mask], 1)
+        if slope >= 0.0:   # a non-decaying fit has no meaningful -60 dB crossing
+            return None
+        return float(slope), float(intercept)
+
+    fits = []
+    for rng_db, color, style, key in (
+        (_T20_RANGE, COLOR_SECONDARY, "--", "T20 fit"),
+        (_T30_RANGE, COLOR_TERTIARY, "-.", "T30 fit"),
+    ):
+        fit = _fit(rng_db)
+        if fit is None:
+            continue
+        slope, intercept = fit
+        fits.append((color, style, key,
+                     (-intercept / slope, (-60.0 - intercept) / slope)))
+    tmax = float(time.max())
+    xmax = max([tmax, *(f[3][1] for f in fits)]) * 1.03
+
+    fig, ax = _new_anim_fig()
+    ax.set_xlim(0, xmax)
+    ax.set_ylim(-65, 3)
+    ax.plot(t_raw, raw_db, color="gray", alpha=0.25, lw=0.6,
+            label=T("Raw squared IR level"))
+    (curve,) = ax.plot([], [], color=COLOR_PRIMARY, lw=2.4,
+                       label=T("Schroeder decay curve"))
+    fit_lines = []
+    for color, style, key, span in fits:
+        (fl,) = ax.plot([], [], color=color, ls=style, lw=1.7, label=T(key))
+        fit_lines.append((fl, span))
+    front = ax.axvline(tmax, color=COLOR_FG, lw=1.3, alpha=0.55)
+    fill = {"art": None}
+    ann = ax.text(0.035, 0.06, "", transform=ax.transAxes, ha="left", va="bottom",
+                  family="monospace", fontsize=11, color=COLOR_FG)
+    ax.set_title(T("Schroeder backward integration (ISO 3382)"), fontweight="bold")
+    ax.set_xlabel(T("Time [s]"))
+    ax.set_ylabel(T("Level [dB]"))
+    ax.legend(loc="upper right", fontsize=9)
+
+    reveal = int(_ANIM_FRAMES * 0.8)   # sweep for 80% of frames, then annotate
+
+    def update(k: int) -> tuple[Any, ...]:
+        xf = tmax * (1.0 - k / (reveal - 1)) if k < reveal else 0.0
+        m = time >= xf
+        curve.set_data(time[m], level[m])
+        front.set_xdata([xf, xf])
+        if fill["art"] is not None:
+            fill["art"].remove()
+        mr = t_raw >= xf
+        fill["art"] = ax.fill_between(t_raw[mr], -65, raw_db[mr],
+                                      color=COLOR_SECONDARY, alpha=0.12)
+        arts: list[Any] = [curve, front, fill["art"], ann]
+        if k >= reveal:
+            for fl, (t_lo, t_hi) in fit_lines:
+                fl.set_data([t_lo, t_hi], [0.0, -60.0])
+                arts.append(fl)
+            ann.set_text(T(f"T20 = {t20:.2f} s\nT30 = {t30:.2f} s"))
+        else:
+            ann.set_text(T("integrating from the tail →"))
+        return tuple(arts)
+
+    anim = FuncAnimation(fig, update, frames=_ANIM_FRAMES,
+                         interval=1000 / _ANIM_FPS, blit=False)
+    _save_animation(anim, fig, output_dir, "anim_schroeder")
+
+
+def generate_animations(output_dir: str) -> None:
+    """Render every Tier-1 animation in the active language/theme."""
+    import shutil
+
+    if shutil.which("ffmpeg") is None:
+        raise RuntimeError(
+            "ffmpeg was not found on PATH; it is required to encode the "
+            "animation WebM/GIF outputs. Install ffmpeg and retry."
+        )
+    animate_time_weighting_ballistics(output_dir)
+    animate_onset_detection(output_dir)
+    animate_instantaneous_intensity(output_dir)
+    animate_schroeder(output_dir)
+
+
 if __name__ == "__main__":
     img_dir = ".github/images"
     os.makedirs(img_dir, exist_ok=True)
 
-    # Every figure is produced four times: light/dark theme x English/Spanish
-    # ("_dark" / "_es" / "_es_dark" suffixes) so both site languages can
-    # follow the user's mode.
+    # `--animations` renders only the Tier-1 clips (slow ffmpeg encoding, kept
+    # out of the default PNG run); `--all` does both. Every asset is produced
+    # four times: light/dark theme x English/Spanish ("_dark" / "_es" /
+    # "_es_dark" suffixes) so both site languages follow the user's mode.
+    only_anim = "--animations" in sys.argv
+    do_figs = not only_anim or "--all" in sys.argv
+    do_anim = only_anim or "--all" in sys.argv
+
     for lang in ("en", "es"):
         set_lang(lang)
         for dark in (False, True):
             set_theme(dark)
-            print(f"--- Generating {lang} {'dark' if dark else 'light'} theme figures ---")
-            generate_all(img_dir)
+            mode = f"{lang} {'dark' if dark else 'light'}"
+            if do_figs:
+                print(f"--- Generating {mode} theme figures ---")
+                generate_all(img_dir)
+            if do_anim:
+                print(f"--- Generating {mode} animations ---")
+                generate_animations(img_dir)
 
     print("Graphics generated successfully.")

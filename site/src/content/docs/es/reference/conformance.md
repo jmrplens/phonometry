@@ -8,7 +8,7 @@ prueba que hay detrás: cada métrica se implementa a partir del texto de la
 norma que la rige, y un **informe numérico de conformidad** fija cada
 comprobación a una norma, una cláusula o tabla, el valor esperado normativo y
 el valor que la librería calcula realmente, con la desviación y un veredicto
-de pasa/falla.
+de pasa/no pasa.
 
 El informe es un documento autogenerado que la CI regenera en **cada pull
 request** — la build falla si se desincroniza del código — de modo que siempre
@@ -28,7 +28,7 @@ está en sincronía con la librería publicada:
   de salas y de la edificación, potencia sonora, materiales, vibración,
   incertidumbre, ...): `Norma | Magnitud | Esperado | Calculado | Delta |
   Estado`, donde los valores esperados provienen de los ejemplos resueltos de
-  las propias normas o de formas cerradas sintetizadas a un resultado
+  las propias normas o de expresiones en forma cerrada sintetizadas a un resultado
   conocido.
 
 ## Cómo se genera

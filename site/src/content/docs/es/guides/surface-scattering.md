@@ -418,6 +418,6 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metros)
 dispersión), ISO 17497-2:2012 (coeficiente de difusión), ISO 13472-1:2002
 (absorción in situ, superficie extensa), ISO 13472-2:2010 (absorción in situ,
 método puntual), e ISO 9613-1:1993 — solo el coeficiente de atenuación de
-tono puro α que consumen las relaciones del aire del apartado 8 de
+tono puro α que consumen las relaciones de atenuación del aire del apartado 8 de
 ISO 17497-1 (Ecs. (2)/(3)); el modelo completo de absorción atmosférica se
 cubre en [Propagación en exteriores](/phonometry/es/guides/outdoor-propagation/).

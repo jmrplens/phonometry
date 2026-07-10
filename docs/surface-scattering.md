@@ -407,7 +407,7 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
 coefficient), ISO 17497-2:2012 (diffusion coefficient), ISO 13472-1:2002 (in-situ
 absorption, extended surface), ISO 13472-2:2010 (in-situ absorption, spot
 method), and ISO 9613-1:1993 — only the pure-tone attenuation coefficient
-α consumed by the ISO 17497-1 Clause 8 air relations (Eqs. (2)/(3)); the
+α consumed by the ISO 17497-1 Clause 8 air-attenuation relations (Eqs. (2)/(3)); the
 full atmospheric-absorption model is covered in
 [Outdoor Sound Propagation](outdoor-propagation.md). Numerical conformance against the standards' worked examples and closed
 forms is tracked in [CONFORMANCE.md](CONFORMANCE.md).

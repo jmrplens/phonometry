@@ -311,5 +311,5 @@ Tabla 1 (con el mapeo de breakpoints a fraccionales y la interpolación en
 frecuencia logarítmica) verificados en el §6. ANSI S1.11-2004, *Octave-Band
 and Fractional-Octave-Band Analog and Digital Filters* — el convenio de
 bordes de banda sobre el que cada banco sitúa sus puntos de −3 dB. ISO 266
-— la serie de frecuencias preferentes tras las etiquetas nominales de banda
+— la serie de frecuencias preferentes en la que se basan las etiquetas nominales de banda
 que devuelve `nominal_frequencies`.

@@ -3,7 +3,7 @@ title: "Conformance report"
 description: "The auto-generated numerical conformance report: every check pins a standard clause's expected value against the value the library computes, regenerated and enforced in CI."
 ---
 
-phonometry's differential asset is not the feature list but the proof behind
+phonometry's key differentiator is not the feature list but the proof behind
 it: every metric is implemented from the governing standard's text, and a
 **numerical conformance report** pins each check to a standard, a clause or
 table, the normative expected value and the value the library actually
@@ -18,10 +18,10 @@ sync with the released library:
 ## What it contains
 
 - **Filter classes** — the IEC 61260-1:2014 class verdict per filter
-  architecture, with the measured relative attenuation at the *binding* band,
+  architecture, with the measured relative attenuation at the *governing* band,
   the class-1 limit it must clear and the margin in dB.
 - **Frequency weightings** — A/C (IEC 61672-1 Table 3) and G (ISO 7196 A.3)
-  deviations from the nominal curves, judged at the binding frequency with the
+  deviations from the nominal curves, judged at the governing frequency with the
   applicable tolerance band and headroom.
 - **One conformance table per domain** (levels, psychoacoustics, room and
   building acoustics, sound power, materials, vibration, uncertainty, ...):

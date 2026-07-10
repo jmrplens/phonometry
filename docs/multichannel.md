@@ -36,6 +36,8 @@ spl, freq = octave_filter(stereo, fs, fraction=3)
 
 ## Accepted shapes, at a glance
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multichannel_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multichannel.svg" alt="Array-shape flow: a 1-D (samples,) input reduces to a scalar and a 2-D (channels, samples) input reduces to (channels,), because the operation runs along the last axis while the channel axis is preserved" width="80%"></picture>
+
 | Input | Interpreted as | Typical output |
 | :--- | :--- | :--- |
 | `(n,)` 1D array | one channel | scalar level / `(bands,)` |

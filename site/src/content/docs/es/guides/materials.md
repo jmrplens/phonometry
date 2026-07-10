@@ -20,6 +20,8 @@ ISO 354 mide el coeficiente de absorción sonora $\alpha_s$ de un material en
 bandas de tercio de octava en una sala reverberante. ISO 11654:1997 convierte
 ese espectro en una valoración de número único comparable entre productos.
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso11654_es.svg" alt="Flujo de valoración ISO 11654: el alpha_s medido pasa a alpha_p práctico por banda de octava, la curva de referencia se desplaza hasta el mejor ajuste, alpha_w se lee a 500 Hz con indicadores de forma, dando la clase de absorción A a E" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso11654_es_dark.svg" alt="Flujo de valoración ISO 11654: el alpha_s medido pasa a alpha_p práctico por banda de octava, la curva de referencia se desplaza hasta el mejor ajuste, alpha_w se lee a 500 Hz con indicadores de forma, dando la clase de absorción A a E" style="width:82%">
+
 **Coeficiente de absorción práctico (cláusula 4.1).** Los datos de tercio de
 octava se agrupan primero en bandas de octava, cada una la media aritmética de
 sus tres tercios:

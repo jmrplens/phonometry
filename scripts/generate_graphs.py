@@ -145,6 +145,12 @@ _ES_EXACT = {
         "stateful=True: los bloques igualan el resultado continuo",
     "zero_phase=True (aligned)": "zero_phase=True (alineado)",
     "0 dB @ 10 Hz": "0 dB @ 10 Hz",
+    # filter_class0_mask figure (IEC 61260:1995 / ANSI S1.11-2004 class 0)
+    "Pass-band Class 0/1/2 Limits (IEC 61260:1995 / ANSI S1.11-2004)":
+        "Límites de clase 0/1/2 en banda de paso (IEC 61260:1995 / ANSI S1.11-2004)",
+    "Class 0 corridor": "Corredor de clase 0",
+    "Class 1 corridor": "Corredor de clase 1",
+    "Class 2 corridor": "Corredor de clase 2",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -1644,6 +1650,57 @@ def generate_class_mask_overlay(output_dir: str) -> None:
     ax.set_xticklabels(["0.125", "0.25", "0.5", "0.707", "1", "1.41", "2", "4", "8"])
     ax.legend(loc="upper left", fontsize=9)
     save_figure(output_dir, "class_mask_overlay.png")
+    plt.close()
+
+
+def generate_filter_class0_mask(output_dir: str) -> None:
+    """Pass-band class 0/1/2 maximum corridors (IEC 61260:1995 / ANSI S1.11-2004)."""
+    print("Generating filter_class0_mask...")
+    fs = 48000
+    from phonometry.compliance import class_limits
+
+    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200], filter_type="butter")
+    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    fm = bank.freq[idx]
+    fsd = fs / bank.factor[idx]
+    w, h = scipy_signal.sosfreqz(bank.sos[idx], worN=2 ** 15, fs=fsd)
+    attenuation = -20 * np.log10(np.abs(h) + 1e-12)
+    a_ref = float(np.interp(fm, w, attenuation))
+    omega = w / fm
+
+    # Restrict to the pass-band [G**-1/2, G**+1/2] where a finite max applies
+    # (beyond the band edges the maximum limit is +inf, so plotting there would
+    # misleadingly show the filter's natural roll-off "exceeding" a corridor).
+    g_octave = 10 ** (3 / 10)  # octave ratio G (IEC 61260)
+    edge_lo, edge_hi = g_octave ** -0.5, g_octave ** 0.5
+    pb = (omega >= edge_lo) & (omega <= edge_hi)
+    omega, delta_a = omega[pb], (attenuation - a_ref)[pb]
+    grid = np.linspace(edge_lo, edge_hi, 1500)
+
+    _, ax = plt.subplots(figsize=(10, 6.5))
+    # Nested min/max corridors: class 0 (+-0.15 dB reference) is the tightest.
+    for cls, colour, name in ((2, COLOR_TERTIARY, "Class 2 corridor"),
+                              (1, COLOR_SECONDARY, "Class 1 corridor"),
+                              (0, COLOR_PRIMARY, "Class 0 corridor")):
+        lo, hi = class_limits(1.0, cls, grid, edition="1995")
+        ax.plot(grid, hi, color=colour, linewidth=1.4, label=name)
+        ax.plot(grid, lo, color=colour, linewidth=1.4)
+    ax.plot(omega, delta_a, color=COLOR_FG, linewidth=2.2,
+            label="Butterworth order 6 (1 kHz octave band)")
+
+    ax.set_xscale("log")
+    ax.set_xlim(edge_lo, edge_hi)
+    ax.set_ylim(-0.7, 6)
+    ax.set_title("Pass-band Class 0/1/2 Limits (IEC 61260:1995 / ANSI S1.11-2004)",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel("Normalized frequency  f / fm")
+    ax.set_ylabel("Relative attenuation ΔA [dB]")
+    ax.set_xticks([0.707, 0.841, 1, 1.189, 1.414])
+    ax.set_xticklabels(["0.707", "0.841", "1", "1.189", "1.414"])
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())  # keep only explicit ticks
+    ax.grid(which="major", color=COLOR_GRID, linestyle=":", alpha=0.4)
+    ax.legend(loc="upper center", fontsize=9)
+    save_figure(output_dir, "filter_class0_mask.png")
     plt.close()
 
 
@@ -4297,6 +4354,7 @@ def generate_all(img_dir: str) -> None:
     generate_tone_burst_iec(img_dir)
     generate_block_processing_continuity(img_dir)
     generate_class_mask_overlay(img_dir)
+    generate_filter_class0_mask(img_dir)
     generate_weighting_class_mask(img_dir)
     generate_calibration_stability(img_dir)
     generate_sel_concept(img_dir)

@@ -410,6 +410,46 @@ far-stopband class 1 limit (scipy pins the cheby2 equiripple floor at exactly
 not meet class limits at order 6: passband ripple (cheby1/ellip) and slow
 roll-off (bessel) violate the mask.
 
+### Class 0 (IEC 61260:1995 / ANSI S1.11-2004)
+
+The tightest performance class, **class 0**, was defined by the earlier
+**IEC 61260:1995** and its US twin **ANSI S1.11-2004** (both withdrawn/superseded
+but still referenced for laboratory-grade instruments); IEC 61260-1:2014 dropped
+it. Its class 1/2 masks differ slightly from the 2014 edition, so it lives behind
+an `edition` switch rather than being mixed into the 2014 mask:
+
+```python
+result = verify_filter_class(bank, edition="1995")   # classes 0, 1, 2
+print(result["overall_class"])          # 0  (the default Butterworth clears it)
+print(result["bands"][0]["margin_class0_db"])
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask.svg" alt="Nested pass-band acceptance corridors for class 0, 1 and 2 of IEC 61260:1995 with the order-6 Butterworth response sitting inside the tightest class 0 corridor" width="80%"></picture>
+
+*The class 0 corridor (±0.15 dB at mid-band) is the tightest; class 1 (±0.3 dB)
+and class 2 (±0.5 dB) are progressively wider. The order-6 Butterworth threads
+inside class 0 across the whole pass-band.*
+
+**Which architecture reaches which class?** The library's **default — Butterworth
+order 6 — already meets class 0** in the usual configurations (octave and
+third-octave, 32 kHz–96 kHz), so no special setup is needed for laboratory-grade
+banks. The other architectures cannot be tuned to class 0 because they trade the
+IEC mask for a different property *by construction*:
+
+| Architecture | Best class (order 6, fs 48 kHz) | Why |
+| :--- | :---: | :--- |
+| `butter` (default) | **0** | Maximally-flat pass-band, monotone roll-off — fits the mask |
+| `cheby2` | 1 | Flat pass-band but the mask relationship binds at class 1 |
+| `cheby1` | — | Pass-band ripple violates the flatness limit |
+| `ellip` | — | Pass- and stop-band ripple |
+| `bessel` | — | Flat group delay bought with a slow roll-off |
+
+So the sensible default is the common one (Butterworth order 6): it is already
+class 0 where the physics allows, and the alternative architectures are
+deliberate opt-ins whose purpose (steeper roll-off, linear phase) is
+incompatible with the class mask. Raise the order only if a specific
+high-`fraction` / near-Nyquist band needs more margin.
+
 ## 7. Signal Decomposition and Stability
 
 By setting `sigbands=True`, you can retrieve the time-domain components of each
@@ -487,8 +527,10 @@ fractional-octave-band filters — Part 1: Specifications* — the base-10 mid
 frequencies and band edges of §1 (5.2-5.5), the nominal band labels, and the
 Table 1 class 1 / class 2 acceptance limits (with the fractional-octave
 breakpoint mapping and log-frequency interpolation) verified in §6.
-ANSI S1.11-2004, *Octave-Band and Fractional-Octave-Band Analog and Digital
-Filters* — the band-edge convention on which every bank places its −3 dB
+IEC 61260:1995 and ANSI S1.11-2004, *Octave-Band and Fractional-Octave-Band …
+Filters* — the withdrawn edition's Table 1 (identical between the two) supplies
+the stricter class 0 mask offered by ``edition="1995"``, and the band-edge
+convention on which every bank places its −3 dB
 points. ISO 266 — the preferred-frequency series behind the nominal band
 labels reported by `nominal_frequencies`.
 
@@ -5357,8 +5399,8 @@ All core functionality can be imported directly from the `phonometry` package.
 | `composite_rating_level` | `function` | **Whole-day composite rating (ISO 1996-1 §6.5).**<br>• `periods`: list of (level_db, hours, adjustment_db) summing 24 h | `r = composite_rating_level([(63, 12, 0), (58, 4, 5), (51, 8, 10)])` |
 | `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
 | `sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6)<br>• `narrowband`: coherent Goertzel tone estimate that rejects broadband hum/noise (needs `fs`; Default: False) | `s = sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
-| `verify_filter_class` | `function` | **IEC 61260-1:2014 class check.**<br>• `bank`: an `OctaveFilterBank`<br>• `num_points`: frequency grid points per band (Default: 32768) | `result = verify_filter_class(bank)`<br><br>• `result["overall_class"]`: 1, 2 or None<br>• `result["bands"]`: per-band class and margins [dB] |
-| `class_limits` | `function` | **IEC 61260-1:2014 Table 1 acceptance limits.**<br>• `fraction`: bandwidth designator denominator b (1, 3, ...)<br>• `filter_class`: 1 or 2<br>• `omega`: normalized frequencies f/fm | `lo, hi = class_limits(3, 1, omega)`<br><br>• `lo` / `hi`: min/max relative attenuation [dB] (`hi` is `inf` outside the pass-band) |
+| `verify_filter_class` | `function` | **IEC 61260 class check.**<br>• `bank`: an `OctaveFilterBank`<br>• `num_points`: frequency grid points per band (Default: 32768)<br>• `edition`: `'2014'` (classes 1/2, default) or `'1995'` (IEC 61260:1995 / ANSI S1.11-2004, adds class 0) | `result = verify_filter_class(bank, edition="1995")`<br><br>• `result["overall_class"]`: 0/1/2 or None<br>• `result["bands"]`: per-band class and `margin_class<c>_db` [dB] |
+| `class_limits` | `function` | **IEC 61260 Table 1 acceptance limits.**<br>• `fraction`: bandwidth designator denominator b (1, 3, ...)<br>• `filter_class`: 1 or 2 (`'2014'`); 0, 1 or 2 (`'1995'`)<br>• `omega`: normalized frequencies f/fm<br>• `edition`: `'2014'` (default) or `'1995'` | `lo, hi = class_limits(3, 0, omega, edition="1995")`<br><br>• `lo` / `hi`: min/max relative attenuation [dB] (`hi` is `inf` outside the pass-band) |
 | `verify_weighting_class` | `function` | **IEC 61672-1:2013 Table 3 weighting check.**<br>• `wf`: a `WeightingFilter` (A, C or Z) | `result = verify_weighting_class(wf)`<br><br>• `result["overall_class"]`: 1, 2 or None<br>• `result["bands"]`: per-frequency class, deviation and margins [dB] |
 | `weighting_class_limits` | `function` | **IEC 61672-1:2013 Table 3 acceptance limits.**<br>• `weighting_class`: 1 or 2 | `f, lo, hi = weighting_class_limits(1)`<br><br>• `f`: 34 nominal frequencies [Hz]<br>• `lo` / `hi`: lower/upper deviation limits [dB] (`lo` is `-inf` where one-sided) |
 | `nominal_frequencies` | `function` | **ANSI Frequency generator.**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `f_cen, f_low, f_high, labels = nominal_frequencies(fraction=3)`<br><br>• `f_cen`: List of center frequencies [Hz]<br>• `f_low`: List of lower edges [Hz]<br>• `f_high`: List of upper edges [Hz]<br>• `labels`: IEC nominal frequency labels |

@@ -68,6 +68,33 @@ IEC61672_TABLE3: list[tuple[float, float, float, float, float]] = [
 ]
 
 # ---------------------------------------------------------------------------
+# IEC 61260:1995 / EN 61260:1995 Table 1 == ANSI S1.11-2004 Table 1 (octave-band
+# limits on relative attenuation, dB). Independently transcribed and verified
+# digit-for-digit between the two standards, which agree exactly. This edition
+# adds the stricter class 0 (dropped by IEC 61260-1:2014). Rows give the octave
+# breakpoint exponent x of Omega = G**x (G = 10**0.3) and the limits per class.
+# The pass-band minimum is a constant per class; the max is interpolated across
+# the pass-band breakpoints and the min across the stop-band breakpoints.
+# ---------------------------------------------------------------------------
+IEC61260_1995_PASSBAND_MIN = {0: -0.15, 1: -0.3, 2: -0.5}
+# (exponent, class 0 max, class 1 max, class 2 max)
+IEC61260_1995_PASSBAND_MAX: list[tuple[float, float, float, float]] = [
+    (0.0, 0.15, 0.3, 0.5),
+    (0.125, 0.2, 0.4, 0.6),
+    (0.25, 0.4, 0.6, 0.8),
+    (0.375, 1.1, 1.3, 1.6),
+    (0.5, 4.5, 5.0, 5.5),
+]
+# (exponent, class 0 min, class 1 min, class 2 min)
+IEC61260_1995_STOPBAND_MIN: list[tuple[float, float, float, float]] = [
+    (0.5, 2.3, 2.0, 1.6),
+    (1.0, 18.0, 17.5, 16.5),
+    (2.0, 42.5, 42.0, 41.0),
+    (3.0, 62.0, 61.0, 55.0),
+    (4.0, 75.0, 70.0, 60.0),
+]
+
+# ---------------------------------------------------------------------------
 # ISO 7196:1995 Table 2 - nominal G-weighting response at one-third-octave
 # frequencies (standard page 2). Row = (freq_Hz, dB). Annex A.3 gives the
 # instrumentation tolerance of +/- 1 dB from 1 Hz to 20 Hz.

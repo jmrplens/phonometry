@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **98/98 conformance checks pass** across 22 domains and 62 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **99/99 conformance checks pass** across 22 domains and 63 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -41,12 +41,13 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | G | 48 kHz | +0.047 dB @ 1 Hz | 1 Hz | +0.047 dB | [-1.00, +1.00] dB | +0.953 dB |
 
 <details>
-<summary>&#9989; <b>Filters &amp; weightings</b> — 100% (5/5)</summary>
+<summary>&#9989; <b>Filters &amp; weightings</b> — 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | IEC 61260-1:2014 Table 1 | Octave-band filter class (butterworth, fs=48 kHz) | class 1 | class 1 (margin +0.400 dB) | +0.400 dB | &#9989; |
 | IEC 61260-1:2014 Table 1 | One-third-octave filter class (butterworth, fs=48 kHz) | class 1 | class 1 (margin +0.400 dB) | +0.400 dB | &#9989; |
+| IEC 61260:1995 / ANSI S1.11-2004 Table 1 | Class 0 (strictest) octave-band filter (butterworth, fs=48 kHz) | class 0 | class 0 (margin +0.150 dB) | +0.150 dB | &#9989; |
 | IEC 61672-1:2013 Table 3 | A-weighting deviation vs class-1 limits (fs=48 kHz) | deviation within limits @ 1000 Hz | +0.000 dB in [-0.70, +0.70] dB | headroom +0.700 dB | &#9989; |
 | IEC 61672-1:2013 Table 3 | C-weighting deviation vs class-1 limits (fs=48 kHz) | deviation within limits @ 1000 Hz | +0.000 dB in [-0.70, +0.70] dB | headroom +0.700 dB | &#9989; |
 | ISO 7196:1995 Table 2 / A.3 | G-weighting deviation vs +/-1 dB tolerance (fs=48 kHz) | deviation within limits @ 1 Hz | +0.047 dB in [-1.00, +1.00] dB | headroom +0.953 dB | &#9989; |

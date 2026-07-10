@@ -219,6 +219,49 @@ far-stopband class 1 limit (scipy pins the cheby2 equiripple floor at exactly
 not meet class limits at order 6: passband ripple (cheby1/ellip) and slow
 roll-off (bessel) violate the mask.
 
+### Class 0 (IEC 61260:1995 / ANSI S1.11-2004)
+
+The tightest performance class, **class 0**, was defined by the earlier
+**IEC 61260:1995** and its US twin **ANSI S1.11-2004** (both withdrawn/superseded
+but still referenced for laboratory-grade instruments); IEC 61260-1:2014 dropped
+it. Its class 1/2 masks differ slightly from the 2014 edition, so it lives behind
+an `edition` switch rather than being mixed into the 2014 mask:
+
+```python
+result = verify_filter_class(bank, edition="1995")   # classes 0, 1, 2
+print(result["overall_class"])          # 0  (the default Butterworth clears it)
+print(result["bands"][0]["margin_class0_db"])
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask.svg" alt="Nested pass-band acceptance corridors for class 0, 1 and 2 of IEC 61260:1995 with the order-6 Butterworth response sitting inside the tightest class 0 corridor" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask_dark.svg" alt="Nested pass-band acceptance corridors for class 0, 1 and 2 of IEC 61260:1995 with the order-6 Butterworth response sitting inside the tightest class 0 corridor" style="width:80%">
+
+*The class 0 corridor (±0.15 dB at mid-band) is the tightest; class 1 (±0.3 dB)
+and class 2 (±0.5 dB) are progressively wider. The order-6 Butterworth threads
+inside class 0 across the whole pass-band.*
+
+**Which architecture reaches which class?** The library's **default — Butterworth
+order 6 — meets class 0** in the configurations the conformance suite verifies
+(octave and third-octave banks at 48 kHz), so no special setup is needed for
+laboratory-grade banks in that range. The table below reports the best class
+each architecture reaches under that same order-6 / 48 kHz setup; the other
+architectures fall short of class 0 because they trade the IEC mask for a
+different property *by construction*:
+
+| Architecture | Best class (order 6, fs 48 kHz) | Why |
+| :--- | :---: | :--- |
+| `butter` (default) | **0** | Maximally-flat pass-band, monotone roll-off — fits the mask |
+| `cheby2` | 1 | Flat pass-band but the mask relationship binds at class 1 |
+| `cheby1` | — | Pass-band ripple violates the flatness limit |
+| `ellip` | — | Pass- and stop-band ripple |
+| `bessel` | — | Flat group delay bought with a slow roll-off |
+
+So the sensible default is the common one (Butterworth order 6): it clears
+class 0 in the verified configurations, while the alternative architectures are
+deliberate opt-ins whose purpose (steeper roll-off, linear phase) works against
+the class mask. Away from these settings — very high `fraction` or near-Nyquist
+bands — always re-run `verify_filter_class` to confirm the class you need, and
+raise the order if a band needs more margin.
+
 ## 7. Signal Decomposition and Stability
 
 By setting `sigbands=True`, you can retrieve the time-domain components of each
@@ -297,7 +340,9 @@ fractional-octave-band filters — Part 1: Specifications* — the base-10 mid
 frequencies and band edges of §1 (5.2-5.5), the nominal band labels, and the
 Table 1 class 1 / class 2 acceptance limits (with the fractional-octave
 breakpoint mapping and log-frequency interpolation) verified in §6.
-ANSI S1.11-2004, *Octave-Band and Fractional-Octave-Band Analog and Digital
-Filters* — the band-edge convention on which every bank places its −3 dB
+IEC 61260:1995 and ANSI S1.11-2004, *Octave-Band and Fractional-Octave-Band …
+Filters* — the withdrawn edition's Table 1 (identical between the two) supplies
+the stricter class 0 mask offered by `edition="1995"`, and the band-edge
+convention on which every bank places its −3 dB
 points. ISO 266 — the preferred-frequency series behind the nominal band
 labels reported by `nominal_frequencies`.

@@ -1,13 +1,20 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """
-Tests for the IEC 61260-1:2014 filter class verifier.
+Tests for the IEC 61260 filter class verifier (2014 classes 1/2 and the
+1995 / ANSI S1.11-2004 edition that adds class 0).
 """
 
 import numpy as np
 import pytest
 
+import reference_data as ref
 from phonometry import OctaveFilterBank, verify_filter_class
-from phonometry.compliance import class_limits
+from phonometry.compliance import (
+    _PASSBAND_MAX_1995,
+    _PASSBAND_MIN_1995,
+    _STOPBAND_MIN_1995,
+    class_limits,
+)
 
 
 def test_class_limits_table1_anchor_values() -> None:
@@ -94,3 +101,85 @@ def test_invalid_inputs_raise() -> None:
         class_limits(1.0, 3, np.array([1.0]))
     with pytest.raises(ValueError, match="fraction"):
         class_limits(-1.0, 1, np.array([1.0]))
+
+
+# ---------------------------------------------------------------------------
+# IEC 61260:1995 / ANSI S1.11-2004 edition (adds class 0)
+# ---------------------------------------------------------------------------
+
+
+def test_1995_tables_match_reference_data() -> None:
+    """The module's 1995 mask reproduces the shared reference_data transcription."""
+    assert _PASSBAND_MIN_1995 == ref.IEC61260_1995_PASSBAND_MIN
+    assert [tuple(r) for r in _PASSBAND_MAX_1995] == [
+        tuple(r) for r in ref.IEC61260_1995_PASSBAND_MAX
+    ]
+    assert [tuple(r) for r in _STOPBAND_MIN_1995] == [
+        tuple(r) for r in ref.IEC61260_1995_STOPBAND_MIN
+    ]
+
+
+def test_1995_class0_anchor_values() -> None:
+    """class_limits reproduces the Table 1 class-0 anchors (octave band)."""
+    g = 10 ** (3 / 10)
+    lo, hi = class_limits(1.0, 0, np.array([1.0]), edition="1995")
+    assert (lo[0], hi[0]) == (-0.15, 0.15)          # Omega = 1
+    lo, hi = class_limits(1.0, 0, np.array([g ** 0.5 * 0.999999]), edition="1995")
+    assert hi[0] == pytest.approx(4.5, abs=1e-3)     # pass-band edge max
+    lo, _ = class_limits(1.0, 0, np.array([g ** 0.5 * 1.000001]), edition="1995")
+    assert lo[0] == pytest.approx(2.3, abs=1e-3)     # stop-band edge min
+    lo, _ = class_limits(1.0, 0, np.array([g]), edition="1995")
+    assert lo[0] == pytest.approx(18.0, abs=1e-6)    # G**1 min
+
+
+def test_1995_class0_is_strictest() -> None:
+    """At every breakpoint class 0 <= class 1 <= class 2 max, and min ordering."""
+    g = 10 ** (3 / 10)
+    omega = g ** np.linspace(0, 1.5, 40)
+    lo0, hi0 = class_limits(1.0, 0, omega, edition="1995")
+    lo1, hi1 = class_limits(1.0, 1, omega, edition="1995")
+    lo2, hi2 = class_limits(1.0, 2, omega, edition="1995")
+    # Tighter class => smaller (or equal) maximum allowance in the pass-band.
+    pb = omega <= g ** 0.5
+    assert np.all(hi0[pb] <= hi1[pb] + 1e-9)
+    assert np.all(hi1[pb] <= hi2[pb] + 1e-9)
+    # ...and a larger (or equal) minimum: the corridor floor rises with strictness.
+    assert np.all(lo0[pb] >= lo1[pb] - 1e-9)
+    assert np.all(lo1[pb] >= lo2[pb] - 1e-9)
+
+
+def test_butter_meets_class0_1995() -> None:
+    """The default order-6 Butterworth bank clears the strict 1995 class 0."""
+    bank = OctaveFilterBank(fs=48000, fraction=3, order=6)
+    result = verify_filter_class(bank, edition="1995")
+    assert result["overall_class"] == 0, result
+    band = result["bands"][0]
+    assert set(band) == {
+        "freq", "class", "margin_class0_db", "margin_class1_db", "margin_class2_db"
+    }
+    # A class-0 band must clear class 1 and class 2 by at least as much.
+    for b in result["bands"]:
+        assert b["margin_class0_db"] <= b["margin_class1_db"] + 1e-9
+        assert b["margin_class1_db"] <= b["margin_class2_db"] + 1e-9
+
+
+def test_2014_default_unaffected_by_edition_support() -> None:
+    """The default edition still reports only classes 1/2 (no class-0 key)."""
+    bank = OctaveFilterBank(fs=48000, fraction=3, order=6)
+    result = verify_filter_class(bank)
+    assert result["overall_class"] == 1
+    assert set(result["bands"][0]) == {
+        "freq", "class", "margin_class1_db", "margin_class2_db"
+    }
+
+
+def test_1995_rejects_out_of_range_class_and_bad_edition() -> None:
+    with pytest.raises(ValueError, match="filter_class"):
+        class_limits(1.0, 3, np.array([1.0]), edition="1995")
+    with pytest.raises(ValueError, match="filter_class"):
+        class_limits(1.0, 0, np.array([1.0]))  # class 0 invalid for 2014
+    with pytest.raises(ValueError, match="edition"):
+        class_limits(1.0, 1, np.array([1.0]), edition="2020")
+    bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000])
+    with pytest.raises(ValueError, match="edition"):
+        verify_filter_class(bank, edition="2020")

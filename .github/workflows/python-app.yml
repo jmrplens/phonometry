@@ -64,12 +64,13 @@ jobs:
         fi
 
   # The committed documentation figures (.github/images) must equal a fresh
-  # `make graphs` run. The vector SVGs are byte-reproducible (fixed svg.hashsalt,
-  # svg.fonttype=none, no date metadata) and the raster/dense PNGs strip the
-  # version-stamped Software chunk -- but text layout still uses matplotlib's
-  # bundled DejaVu metrics, so the check pins the exact matplotlib the committed
-  # files were generated with. Bump this pin (and rerun `make graphs`) together
-  # whenever the figures are regenerated against a newer matplotlib.
+  # `make graphs` run. Byte reproducibility needs the exact rendering + compute
+  # stack the committed files were generated with: matplotlib/fonttools/pillow
+  # fix SVG text layout and PNG encoding, numpy/scipy fix the computed data (and
+  # therefore the plotted path coordinates). That full stack is pinned in
+  # requirements-figures.txt -- pinning matplotlib alone is not enough, a newer
+  # numpy or fonttools silently shifts a few figures. Bump that file together
+  # with a fresh `make graphs` regeneration.
   figures:
     name: Documentation figures up to date
     runs-on: ubuntu-latest
@@ -82,12 +83,12 @@ jobs:
       with:
         python-version: "3.13"
         cache: 'pip'
-    - name: Install runtime dependencies (matplotlib pinned for byte stability)
+    - name: Install the locked figure-rendering stack
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install 'matplotlib==3.11.0'
         pip install -e .
+        # Pin the render+compute stack last so it wins over looser deps.
+        pip install -r requirements-figures.txt
     - name: Regenerate figures and diagrams
       run: make graphs
     - name: Fail if any committed figure is stale

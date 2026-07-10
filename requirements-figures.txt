@@ -1,0 +1,22 @@
+# Locked rendering + compute stack for the reproducible-figures CI check
+# (the "Documentation figures up to date" job in python-app.yml).
+#
+# The committed .github/images figures are byte-reproducible only against a
+# fixed stack: matplotlib/fonttools/pillow fix SVG text layout and PNG
+# encoding, while numpy/scipy/contourpy fix the *computed* data and therefore
+# the plotted path coordinates. Pinning only matplotlib is not enough -- a new
+# numpy or fonttools release silently shifts a few figures.
+#
+# Bump these together with a fresh `make graphs` regeneration (generate the
+# figures with exactly this stack, then commit both). Generated from the
+# maintainer's venv that produced the committed figures.
+matplotlib==3.11.0
+fonttools==4.63.0
+numpy==2.5.1
+scipy==1.18.0
+pillow==12.3.0
+contourpy==1.3.3
+kiwisolver==1.5.0
+pyparsing==3.3.2
+cycler==0.12.1
+python-dateutil==2.9.0.post0

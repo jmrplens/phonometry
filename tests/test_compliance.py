@@ -82,7 +82,7 @@ def test_stateful_bank_matches_stateless_design() -> None:
     r_stateful = verify_filter_class(stateful)
     r_stateless = verify_filter_class(stateless)
     assert r_stateful["overall_class"] == r_stateless["overall_class"]
-    for a, b in zip(r_stateful["bands"], r_stateless["bands"]):
+    for a, b in zip(r_stateful["bands"], r_stateless["bands"], strict=True):
         assert a["margin_class1_db"] == pytest.approx(b["margin_class1_db"])
 
 

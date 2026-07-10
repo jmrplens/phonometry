@@ -31,6 +31,7 @@ from phonometry import (
     impact_insulation,
     weighted_impact_rating,
 )
+from reference_data import ISO717_2_ANNEX_C1_LN
 
 # ISO 717-2 Table 3 reference values.
 _REF_IMPACT_THIRD = [
@@ -41,10 +42,8 @@ _INDEX_500_THIRD = 7
 _INDEX_500_OCTAVE = 2
 
 # ISO 717-2 Annex C, Table C.1 measured Ln (one-third octave, 100-3150).
-_ANNEX_C1_LN = [
-    62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
-    73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2,
-]
+# Shared oracle with the CI conformance report (tests/reference_data.py).
+_ANNEX_C1_LN = list(ISO717_2_ANNEX_C1_LN)
 # ISO 717-2 Annex C, Table C.3 measured Ln (octave, 125-2000).
 _ANNEX_C3_LN = [65.3, 64.5, 58.0, 55.8, 43.0]
 
@@ -163,14 +162,16 @@ def test_measured_data_rounded_to_one_decimal() -> None:
 
 
 def test_weighted_impact_rating_rejects_bad_length() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Expected 16 one-third-octave"):
         weighted_impact_rating([1.0, 2.0, 3.0])
 
 
 def test_weighted_impact_rating_rejects_nan() -> None:
     bad = list(_ANNEX_C1_LN)
     bad[0] = float("nan")
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'values_by_band' must contain only finite values"
+    ):
         weighted_impact_rating(bad)
 
 
@@ -256,12 +257,16 @@ def test_impact_energy_averages_positions() -> None:
 
 
 def test_impact_rejects_length_mismatch() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'li' and 't2' must share the same band count"
+    ):
         impact_insulation(np.array([60.0, 60.0]), np.array([0.5]))
 
 
 def test_impact_rejects_bad_reverberation_time() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'t2' must contain positive, finite values"
+    ):
         impact_insulation(np.array([60.0]), np.array([0.0]))
 
 

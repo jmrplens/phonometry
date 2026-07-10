@@ -9,8 +9,11 @@ reference threshold against the ISO 389-7 Table 1 values.
 
 from __future__ import annotations
 
+from itertools import pairwise
+
 import numpy as np
 import pytest
+from reference_data import ISO389_7_REF_FREE_1KHZ, ISO7029_MEDIAN_MALE_60_4KHZ
 
 from phonometry import hearing as h
 
@@ -40,14 +43,14 @@ def test_median_matches_reference_values() -> None:
     # Reference median deviations computed from the Table 1 formula.
     male = h.age_threshold(60, "male", 0.5)
     assert male.median[4] == pytest.approx(7.8473, abs=1e-3)   # 1000 Hz
-    assert male.median[8] == pytest.approx(20.2085, abs=1e-3)  # 4000 Hz
+    assert male.median[8] == pytest.approx(ISO7029_MEDIAN_MALE_60_4KHZ, abs=1e-3)  # 4000 Hz
     female = h.age_threshold(60, "female", 0.5)
     assert female.median[8] == pytest.approx(15.3218, abs=1e-3)
 
 
 def test_median_increases_with_age() -> None:
     m = [h.age_threshold(a, "male", 0.5).median[8] for a in (18, 30, 50, 70)]
-    assert all(x < y for x, y in zip(m, m[1:]))
+    assert all(x < y for x, y in pairwise(m))
     assert m[0] == pytest.approx(0.0, abs=1e-12)
 
 
@@ -70,7 +73,7 @@ def test_reference_threshold_matches_iso389_7() -> None:
     free = h.reference_threshold("free-field")
     diffuse = h.reference_threshold("diffuse-field")
     # ISO 389-7:2006 Table 1 (audiometric frequencies).
-    assert free[4] == pytest.approx(2.4)    # 1000 Hz free-field
+    assert free[4] == pytest.approx(ISO389_7_REF_FREE_1KHZ)  # 1000 Hz free-field
     assert free[10] == pytest.approx(12.6)  # 8000 Hz free-field
     assert diffuse[4] == pytest.approx(0.8)  # 1000 Hz diffuse-field
     # Free- and diffuse-field agree at low frequencies, diverge higher up.

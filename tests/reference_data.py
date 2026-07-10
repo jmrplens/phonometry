@@ -4,14 +4,15 @@
 Tables transcribed verbatim from the published standards. Both the test
 suite (``tests/test_*.py``) and the CI conformance report
 (``scripts/conformance_report.py``) import these constants, so the report's
-expected values can never drift from what the tests assert. The PR-B
-building-acoustics, PR-E scattering/in-situ/precision-power and PR-F
-human-vibration oracles are the exception: their test modules re-hardcode the
-values inline rather than import them, and dedicated consistency tests
-(``test_building_reference_data_matches_published_oracles``,
-``test_scattering_insitu_precision_reference_data_matches_oracles`` and
-``test_human_vibration_reference_data_matches_oracles``) pin this shared table
-to those same published results so neither copy can drift.
+expected values can never drift from what the tests assert. Test modules
+either import a constant directly where they assert it, or - where the
+oracle lives inside a larger inline table (e.g. the ISO 1999 Annex D or
+ANSI S12.2 Table D.1 transcriptions) - pin the inline copy to the shared
+constant with an explicit consistency assertion. The PR-B building-acoustics
+and PR-F human-vibration oracles are additionally pinned to their published
+values by dedicated tests in ``tests/test_conformance_report.py``
+(``test_building_reference_data_matches_published_oracles`` and
+``test_human_vibration_reference_data_matches_oracles``).
 
 This module is deliberately dependency-free (stdlib only) so it can be
 imported in the ``pr-comment`` CI job, which installs the runtime
@@ -523,9 +524,51 @@ ISO2631_5_PI_MALE = 0.37  # probability of lumbar injury (Formula C.5)
 
 # ---------------------------------------------------------------------------
 # Sound absorption in enclosed spaces - EN 12354-6:2003, Annex E worked
-# example (29,75 m3 room, 1000 Hz octave band). Case 1 (bare) A = 2,26 m2,
-# T = 2,1 s; Case 2 (with hard objects) A = 5,03 m2.
+# example (4,54 x 2,73 x 2,40 = 29,75 m3 room, 1000 Hz octave band). Case 1
+# (bare) A = 2,26 m2, T = 2,1 s; Case 2 (with hard objects) A = 5,03 m2.
+# The six bare-room surfaces are (area_m2, alpha at 1000 Hz): floor, ceiling,
+# long wall, side wall, side wall, glass facade.
 # ---------------------------------------------------------------------------
+EN12354_6_ANNEX_E_VOLUME = 29.75  # room volume (m3)
+EN12354_6_ANNEX_E_BARE_SURFACES: list[tuple[float, float]] = [
+    (12.39, 0.05),  # floor
+    (12.39, 0.02),  # ceiling
+    (10.90, 0.04),  # long wall
+    (10.90, 0.04),  # side wall
+    (6.55, 0.04),   # side wall
+    (6.55, 0.04),   # glass facade
+]
 EN12354_6_A_BARE = 2.26  # equivalent absorption area, bare room (m2)
 EN12354_6_T_BARE = 2.1  # reverberation time, bare room (s)
 EN12354_6_A_OBJECTS = 5.03  # equivalent absorption area, with objects (m2)
+
+# ---------------------------------------------------------------------------
+# Prominent discrete tones - ECMA-418-1:2024, clause-EXAMPLE anchors
+# (transcribed from the official PDF, printed to one decimal).
+# Clause 10 Formula (2): critical band around ft = 1 kHz is
+# f1,c = 922,2 Hz .. f2,c = 1084,4 Hz, width dfc = 162,2 Hz (117,3 Hz at
+# 500 Hz). Clause 11.6 Formula (14): proximity spacing dfprox = 23 Hz at
+# 150 Hz and 63,8 Hz at 850 Hz.
+# ---------------------------------------------------------------------------
+ECMA418_1_DFC_1KHZ = 162.2  # critical bandwidth at 1 kHz (Hz)
+ECMA418_1_DFC_500HZ = 117.3  # critical bandwidth at 500 Hz (Hz)
+ECMA418_1_F1_1KHZ = 922.2  # lower critical-band edge at 1 kHz (Hz)
+ECMA418_1_F2_1KHZ = 1084.4  # upper critical-band edge at 1 kHz (Hz)
+ECMA418_1_PROX_150HZ = 23.0  # proximity spacing at 150 Hz (Hz)
+ECMA418_1_PROX_850HZ = 63.8  # proximity spacing at 850 Hz (Hz)
+
+# ---------------------------------------------------------------------------
+# ISO 717-2 Annex C, Table C.1 - measured normalized impact sound pressure
+# level Ln (100-3150 Hz, one-third-octave, laboratory). The worked example
+# gives Ln,w = 79 dB, CI = -11 dB with an unfavourable-deviation sum of
+# 28,0 dB.
+# ---------------------------------------------------------------------------
+ISO717_2_ANNEX_C1_LN: list[float] = [
+    62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+    73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2,
+]
+ISO717_2_ANNEX_C1_EXPECTED = {
+    "ln_w": 79,
+    "ci": -11,
+    "unfavourable_sum": 28.0,
+}

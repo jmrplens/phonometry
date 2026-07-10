@@ -101,13 +101,15 @@ def test_kij_lightweight_facade_minimum() -> None:
 
 
 def test_kij_invalid_inputs() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'mass_ratio' must be positive"):
         junction_vibration_reduction("rigid_cross", "through", 0.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'mass_ratio' must be positive"):
         junction_vibration_reduction("rigid_cross", "through", -1.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'junction_type' must be one of"):
         junction_vibration_reduction("unknown", "through", 1.0)  # type: ignore[arg-type]
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'path' must be 'through' or 'corner'"
+    ):
         junction_vibration_reduction("rigid_cross", "diagonal", 1.0)  # type: ignore[arg-type]
 
 
@@ -116,7 +118,10 @@ def test_kij_min_formula_29() -> None:
     lf, si, sj = 4.5, 11.5, 19.6
     expected = 10.0 * math.log10(4.5 * (1.0 / 11.5 + 1.0 / 19.6))
     assert junction_min_vibration_reduction(lf, si, sj) == pytest.approx(expected)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="'coupling_length', 's_i' and 's_j' must be positive",
+    ):
         junction_min_vibration_reduction(0.0, 11.5, 19.6)
 
 
@@ -162,12 +167,17 @@ def test_flanking_element_triplet() -> None:
 
 
 def test_flanking_path_invalid() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'kind' must be 'Ff', 'Df' or 'Fd'"
+    ):
         flanking_path(
             label="x", kind="XX", r_source=40.0, r_receive=40.0,  # type: ignore[arg-type]
             k_ij=5.0, separating_area=11.5, coupling_length=4.5,
         )
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="'separating_area' and 'coupling_length' must be positive",
+    ):
         flanking_path(
             label="x", kind="Ff", r_source=40.0, r_receive=40.0,
             k_ij=5.0, separating_area=-1.0, coupling_length=4.5,
@@ -331,7 +341,7 @@ def test_airborne_dominant_path_is_weakest() -> None:
 def test_equivalent_impact_level_annex_e3() -> None:
     # Concrete floor m' = 322 kg/m² -> Ln,w,eq = 164 - 35 lg(322) = 76.2 dB.
     assert equivalent_impact_level(322.0) == pytest.approx(76.2, abs=0.1)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'mass_per_area' must be positive"):
         equivalent_impact_level(0.0)
 
 
@@ -347,7 +357,10 @@ def test_impact_flanking_correction_table_cells() -> None:
     assert impact_flanking_correction(900.0, 100.0) == 6
     assert impact_flanking_correction(900.0, 500.0) == 2
     assert impact_flanking_correction(500.0, 100.0) == 4
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="'separating_mass' and 'flanking_mass' must be positive",
+    ):
         impact_flanking_correction(-1.0, 100.0)
 
 
@@ -374,7 +387,7 @@ def test_standardized_impact_level_annex_e3() -> None:
     # L'nT,w = L'n,w - 10 lg(V/30) = 45 - 10 lg(50/30) = 42.8 -> 43 dB.
     assert standardized_impact_level(45.0, 50.0) == pytest.approx(42.8, abs=0.1)
     assert round(standardized_impact_level(45.0, 50.0)) == 43
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'volume' must be positive"):
         standardized_impact_level(45.0, 0.0)
 
 
@@ -386,5 +399,7 @@ def test_impact_covering_improves_level() -> None:
 
 
 def test_impact_non_finite_rejected() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'ln_w_eq' must be a finite number"
+    ):
         predicted_impact_insulation(ln_w_eq=float("nan"))

@@ -12,6 +12,11 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from reference_data import (
+    ANSIS12_2_NC40_SELF,
+    ANSIS12_2_RC31_63HZ,
+    ANSIS12_2_RC35_LMF,
+)
 
 from phonometry import room_noise as rn
 
@@ -30,7 +35,7 @@ def test_nc_table_row_matches_standard() -> None:
     )
 
 
-@pytest.mark.parametrize("index", [15.0, 25.0, 40.0, 50.0, 70.0])
+@pytest.mark.parametrize("index", [15.0, 25.0, ANSIS12_2_NC40_SELF, 50.0, 70.0])
 def test_nc_curve_returns_its_own_rating(index: float) -> None:
     # Feeding an NC curve back through the tangency method returns its value.
     result = rn.noise_criterion(rn.nc_curve(index))
@@ -63,6 +68,9 @@ def test_rc_curves_match_table_d1() -> None:
     }
     for index, row in expected.items():
         np.testing.assert_allclose(rn.rc_curve(index), row)
+    # Pin the inline Table D.1 transcription to the shared reference_data
+    # constant used by the CI conformance report (RC-31 curve at 63 Hz).
+    assert expected[31.0][2] == ANSIS12_2_RC31_63HZ
 
 
 def test_rc_low_frequency_floor() -> None:
@@ -75,7 +83,7 @@ def test_rc_low_frequency_floor() -> None:
 def test_rc_neutral_spectrum() -> None:
     result = rn.room_criterion(rn.rc_curve(35.0))
     assert result.rating == 35
-    assert result.lmf == pytest.approx(35.0)
+    assert result.lmf == pytest.approx(ANSIS12_2_RC35_LMF)
     assert result.classification == "N"
     assert result.label == "RC-35(N)"
 

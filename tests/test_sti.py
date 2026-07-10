@@ -16,6 +16,7 @@ Validation vectors:
 """
 
 import warnings
+from itertools import pairwise
 
 import numpy as np
 import pytest
@@ -153,7 +154,7 @@ def test_exponential_decay_matches_analytic_schroeder_mtf():
         assert got == pytest.approx(_analytic_decay_sti(t60), abs=0.01)
         stis.append(got)
     # Monotonic: longer reverberation always degrades intelligibility.
-    assert all(a > b for a, b in zip(stis, stis[1:]))
+    assert all(a > b for a, b in pairwise(stis))
 
 
 def test_snr_degradation_on_impulse_response():
@@ -219,8 +220,14 @@ def test_masking_amdb_is_vectorized_and_continuous():
 # STIPA: direct method and test-signal generator
 # ---------------------------------------------------------------------------
 
-def test_stipa_loopback_ideal_channel():
-    x = stipa_signal(FS, seconds=18.0, seed=1234)
+@pytest.fixture(scope="module")
+def stipa_18s_seed1234() -> np.ndarray:
+    """The 18 s seed-1234 STIPA test signal, generated once for the module."""
+    return stipa_signal(FS, seconds=18.0, seed=1234)
+
+
+def test_stipa_loopback_ideal_channel(stipa_18s_seed1234: np.ndarray):
+    x = stipa_18s_seed1234
     result = stipa(x, FS)
     # Ideal loopback recovers STI 0.998 and min MTF 0.943 at 18 s; lock those
     # in (was >= 0.95 / > 0.9, several x looser than the achieved accuracy).
@@ -230,7 +237,7 @@ def test_stipa_loopback_ideal_channel():
     assert np.all(result.mtf > 0.93)
 
 
-def test_stipa_short_recording_warns():
+def test_stipa_short_recording_warns(stipa_18s_seed1234: np.ndarray):
     """A recording shorter than the recommended 15 s biases the recovered
     modulation depths (and STI) low; stipa should warn (IEC 60268-16 STIPA
     practice recommends 15 s to 25 s)."""
@@ -238,21 +245,20 @@ def test_stipa_short_recording_warns():
     with pytest.warns(UserWarning, match="15"):
         stipa(short, FS)
     # No warning at the recommended length.
-    long = stipa_signal(FS, seconds=18.0, seed=1234)
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        stipa(long, FS)
+        stipa(stipa_18s_seed1234, FS)
 
 
-def test_stipa_with_noise_is_monotonic():
-    x = stipa_signal(FS, seconds=18.0, seed=1234)
+def test_stipa_with_noise_is_monotonic(stipa_18s_seed1234: np.ndarray):
+    x = stipa_18s_seed1234
     rng = np.random.default_rng(7)
     rms = float(np.sqrt(np.mean(x**2)))
     stis = []
     for snr_db in (30.0, 10.0, 0.0):
         noise = rng.standard_normal(x.size) * rms * 10.0 ** (-snr_db / 20.0)
         stis.append(stipa(x + noise, FS).sti)
-    assert all(a > b for a, b in zip(stis, stis[1:]))
+    assert all(a > b for a, b in pairwise(stis))
     assert stis[-1] < 0.7  # 0 dB broadband SNR is clearly degraded
 
 

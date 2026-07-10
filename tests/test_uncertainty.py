@@ -14,6 +14,7 @@ import math
 
 import numpy as np
 import pytest
+from reference_data import GUM_ADDITIVE_UC, GUM_COVERAGE_K99_16, GUM_WELCH_VEFF
 
 from phonometry import uncertainty as u
 
@@ -27,13 +28,13 @@ def test_additive_model_combined_uncertainty() -> None:
     qs = [u.Quantity(0.0, 1.0) for _ in range(4)]
     result = u.combine_uncertainty(_add4, qs)
     assert result.value == pytest.approx(0.0)
-    assert result.combined_uncertainty == pytest.approx(2.0, abs=1e-6)
+    assert result.combined_uncertainty == pytest.approx(GUM_ADDITIVE_UC, abs=1e-6)
     np.testing.assert_allclose(result.sensitivities, 1.0, atol=1e-6)
 
 
 def test_coverage_factor_matches_gum_table() -> None:
     # GUM Annex H.1 / Table G.2: t at p=0.99, v=16 -> k = 2.92.
-    assert u.coverage_factor(0.99, 16) == pytest.approx(2.92, abs=5e-3)
+    assert u.coverage_factor(0.99, 16) == pytest.approx(GUM_COVERAGE_K99_16, abs=5e-3)
     # Large dof approaches the normal quantile.
     assert u.coverage_factor(0.95) == pytest.approx(1.960, abs=1e-3)
     assert u.coverage_factor(0.9545) == pytest.approx(2.0, abs=1e-3)
@@ -49,7 +50,7 @@ def test_welch_satterthwaite_effective_dof() -> None:
     # Equal contributions each with dof v -> v_eff = N*v (Annex G.4).
     qs = [u.Quantity(0.0, 1.0, dof=10) for _ in range(4)]
     result = u.combine_uncertainty(_add4, qs)
-    assert result.effective_dof == pytest.approx(40.0, abs=1e-6)
+    assert result.effective_dof == pytest.approx(GUM_WELCH_VEFF, abs=1e-6)
 
 
 def test_all_type_b_gives_infinite_dof() -> None:

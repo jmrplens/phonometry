@@ -619,14 +619,14 @@ def _chk_mg_time_loudness() -> Outcome:
 
 
 # ===========================================================================
-# Domain 4 - Speech intelligibility
+# Domain 4 - Speech transmission (IEC 60268-16)
 # ===========================================================================
 _NUM_STI_BANDS = 7
 _NUM_MOD_FREQS = 14
 
 
 @register(
-    "Speech intelligibility",
+    "Speech transmission (IEC 60268-16)",
     "IEC 60268-16:2020 A.2.2",
     "STI weighting-factor pair (500 Hz + 1 kHz bands)",
 )
@@ -638,7 +638,7 @@ def _chk_sti_weighting_pair() -> Outcome:
 
 
 @register(
-    "Speech intelligibility",
+    "Speech transmission (IEC 60268-16)",
     "IEC 60268-16:2020 A.3.1.2",
     "Uniform MTF m=0.5 maps to STI=0.5",
 )
@@ -773,6 +773,32 @@ def _chk_room_t30() -> Outcome:
 
 @register(
     "Room & building acoustics",
+    "ISO 18233:2006 (swept-sine method)",
+    "Sweep deconvolution recovers a known IIR response",
+)
+def _chk_iso18233_sweep_deconvolution() -> Outcome:
+    # Closed-form identity: an exponential sweep through a known Butterworth
+    # band-pass, deconvolved back, must reproduce the filter's freqz response.
+    b, a = sg.butter(4, [200.0, 2000.0], btype="band", fs=_FS)
+    x = ph.sweep_signal(_FS, 20.0, 20000.0, 2.0)
+    y = sg.lfilter(b, a, x)
+    ir = np.asarray(ph.impulse_response(y, x, _FS, length=16384))
+    freqs = np.fft.rfftfreq(ir.size, d=1.0 / _FS)
+    h_est = np.fft.rfft(ir)
+    _, h_true = sg.freqz(b, a, worN=freqs, fs=_FS)
+    mask = (freqs >= 300.0) & (freqs <= 1500.0)
+    worst = float(np.max(np.abs(
+        20.0 * np.log10(np.abs(h_est[mask])) - 20.0 * np.log10(np.abs(h_true[mask]))
+    )))
+    # Linear deconvolution is exact in-band up to windowing/regularisation
+    # leakage; 0.1 dB is the demonstrated in-band bound (tests/test_room_ir.py)
+    # with the same 300-1500 Hz evaluation band, well inside the sweep edges.
+    return numeric(0.0, worst, 0.1, unit="dB", places=4,
+                   expected_label="0 dB in-band error (+/-0.1 dB)")
+
+
+@register(
+    "Room & building acoustics",
     "ISO 717-1 Annex C, Table C.1",
     "Weighted sound reduction index Rw (C;Ctr)",
 )
@@ -784,6 +810,27 @@ def _chk_iso717_rw() -> Outcome:
         expected=f"Rw {exp['rw']} (C {exp['c']}; Ctr {exp['ctr']})",
         computed=f"Rw {res.rating} (C {res.c}; Ctr {res.ctr})",
         delta=f"sum {res.unfavourable_sum:.1f} dB",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-2 Annex C, Table C.1",
+    "Weighted impact sound pressure level Ln,w (CI)",
+)
+def _chk_iso717_2_lnw() -> Outcome:
+    # Worked example: Ln,w = 79 dB, CI = -11 dB, unfavourable sum 28,0 dB.
+    # Integer ratings and CI must match exactly; the unfavourable sum is a
+    # one-decimal tabulated intermediate, so 1e-9 = exact up to float noise.
+    exp = ref.ISO717_2_ANNEX_C1_EXPECTED
+    res = ph.weighted_impact_rating(ref.ISO717_2_ANNEX_C1_LN)
+    sum_ok = abs(res.unfavourable_sum - exp["unfavourable_sum"]) <= 1e-9
+    ok = res.rating == exp["ln_w"] and res.ci == exp["ci"] and sum_ok
+    return Outcome(
+        expected=f"Ln,w {exp['ln_w']} (CI {exp['ci']}; sum {exp['unfavourable_sum']:.1f} dB)",
+        computed=f"Ln,w {res.rating} (CI {res.ci}; sum {res.unfavourable_sum:.1f} dB)",
+        delta=f"{res.rating - exp['ln_w']:+d} dB",
         passed=ok,
     )
 
@@ -830,8 +877,16 @@ def _chk_facade_r45() -> Outcome:
         surface_level=np.full(n, ref.ISO16283_3_R45_SURFACE_LEVEL_DB),
     )
     assert res.r_prime is not None
+    # The expected value is rebuilt from its components, so the -1,5 dB
+    # oblique-incidence correction constant is exercised explicitly.
+    expected = (
+        ref.ISO16283_3_R45_SURFACE_LEVEL_DB
+        - ref.ISO16283_3_R45_RECEIVE_LEVEL_DB
+        - ref.ISO16283_3_R45_LOUDSPEAKER_CORRECTION_DB
+    )
+    assert expected == ref.ISO16283_3_R45_EXPECTED_DB
     computed = float(np.asarray(res.r_prime)[0])
-    return numeric(ref.ISO16283_3_R45_EXPECTED_DB, computed, 1e-9, unit="dB", places=6)
+    return numeric(expected, computed, 1e-9, unit="dB", places=6)
 
 
 @register(
@@ -941,6 +996,9 @@ def _chk_iso12999_expanded() -> Outcome:
     return numeric(expected, computed, 1e-9, unit="dB", places=6)
 
 
+# ===========================================================================
+# Domain 8 - Outdoor propagation & occupational exposure
+# ===========================================================================
 def _iso9613_table1(point: tuple[float, float, float, float]) -> Outcome:
     """Compare air_attenuation against an ISO 9613-1 Table 1 grid point (dB/km)."""
     temp, rh, freq, alpha_km = point
@@ -953,7 +1011,7 @@ def _iso9613_table1(point: tuple[float, float, float, float]) -> Outcome:
 
 
 @register(
-    "Room & building acoustics",
+    "Outdoor propagation & occupational exposure",
     "ISO 9613-1:1993 Table 1",
     "Air attenuation @ 10 degC, 70 %, 1 kHz",
 )
@@ -962,7 +1020,7 @@ def _chk_iso9613_table1_mid() -> Outcome:
 
 
 @register(
-    "Room & building acoustics",
+    "Outdoor propagation & occupational exposure",
     "ISO 9613-1:1993 Table 1",
     "Air attenuation @ 0 degC, 20 %, 2 kHz",
 )
@@ -970,9 +1028,7 @@ def _chk_iso9613_table1_corner() -> Outcome:
     return _iso9613_table1(ref.ISO9613_1_TABLE1_CORNER)
 
 
-# ===========================================================================
-# Domain 8 - Outdoor propagation & occupational exposure
-# ===========================================================================
+
 @register(
     "Outdoor propagation & occupational exposure",
     "ISO 9613-2:1996 Eq. (7)",
@@ -1155,7 +1211,48 @@ def _chk_iso9053_2_kappa() -> Outcome:
 @register(_MATERIALS, "ISO 10534-1:1996 Eqs (9)/(13)/(14)", "Absorption from standing-wave ratio s=3")
 def _chk_iso10534_1_swr() -> Outcome:
     alpha = float(ph.standing_wave_absorption(ref.ISO10534_1_SWR))
-    return numeric(ref.ISO10534_1_ABSORPTION, alpha, 1e-9, places=4)
+    # The intermediate |r| = (s-1)/(s+1) (Eq. (13)) must match its shared
+    # oracle too, so both steps of the chain are pinned.
+    from phonometry.impedance_tube import standing_wave_reflection_magnitude
+
+    r_mag = float(standing_wave_reflection_magnitude(ref.ISO10534_1_SWR))
+    out = numeric(ref.ISO10534_1_ABSORPTION, alpha, 1e-9, places=4)
+    r_ok = abs(r_mag - ref.ISO10534_1_REFLECTION_MAGNITUDE) <= 1e-9
+    # Show both chained values so a |r| failure is visible in the report.
+    expected = (
+        f"alpha {out.expected}, \\|r\\| {ref.ISO10534_1_REFLECTION_MAGNITUDE:g}"
+    )
+    computed = f"alpha {out.computed}, \\|r\\| {r_mag:.4f}"
+    return Outcome(expected, computed, out.delta, out.passed and r_ok)
+
+
+@register(
+    _MATERIALS,
+    "ISO 10534-2 Eq. (17) / Annex D",
+    "Two-microphone round trip recovers a known reflection factor",
+)
+def _chk_iso10534_2_roundtrip() -> Outcome:
+    # Synthesise the transfer function H12 of a known complex r via the
+    # Annex D field equations (Eq. (D.7)), then recover r with the library's
+    # Eq. (17) reduction. Synthesis and reduction share only the plane-wave
+    # field model, so this is an algebraic identity: the only residual is
+    # float rounding, hence the 1e-9 tolerance.
+    from phonometry.impedance_tube import reflection_factor, tube_wavenumber
+
+    f = np.array([500.0, 1000.0, 1800.0])
+    x1, spacing, c0 = 0.12, 0.03, 343.2
+    r_true = 0.3 - 0.4j
+    k0 = np.asarray(tube_wavenumber(f, c0))
+    x2 = x1 - spacing
+    h12 = (
+        (np.exp(1j * k0 * x2) + r_true * np.exp(-1j * k0 * x2))
+        / (np.exp(1j * k0 * x1) + r_true * np.exp(-1j * k0 * x1))
+    )
+    r = reflection_factor(h12, spacing=spacing, x1=x1, wavenumber=k0)
+    err = float(np.max(np.abs(np.asarray(r) - r_true)))
+    # NOTE: no pipe characters in the label (it lands in a Markdown table cell).
+    return numeric(0.0, err, 1e-9, places=9,
+                   expected_label="abs(r - (0.3-0.4j)) = 0 (identity, +/-1e-9)")
 
 
 # ---------------------------------------------------------------------------
@@ -1498,23 +1595,70 @@ def _chk_multiple_shock_probability() -> Outcome:
 
 _ABS = "Sound absorption in enclosed spaces (EN 12354-6)"
 
-_ENCLOSED_SPACE_SURFACES = [
-    (12.39, 0.05), (12.39, 0.02), (10.90, 0.04),
-    (10.90, 0.04), (6.55, 0.04), (6.55, 0.04),
-]
-
 
 @register(_ABS, "EN 12354-6:2003 Formula 1", "Equivalent absorption area, Annex E bare room")
 def _chk_enclosed_space_area() -> Outcome:
-    value = float(ph.equivalent_absorption_area(_ENCLOSED_SPACE_SURFACES))
+    value = float(ph.equivalent_absorption_area(ref.EN12354_6_ANNEX_E_BARE_SURFACES))
     return numeric(ref.EN12354_6_A_BARE, value, 0.01, unit="m2", places=2)
 
 
 @register(_ABS, "EN 12354-6:2003 Formula 5", "Reverberation time, Annex E bare room")
 def _chk_enclosed_space_rt() -> Outcome:
-    area = ph.equivalent_absorption_area(_ENCLOSED_SPACE_SURFACES)
-    value = float(ph.reverberation_time(area, 29.75))
+    area = ph.equivalent_absorption_area(ref.EN12354_6_ANNEX_E_BARE_SURFACES)
+    value = float(ph.reverberation_time(area, ref.EN12354_6_ANNEX_E_VOLUME))
     return numeric(ref.EN12354_6_T_BARE, value, 0.05, unit="s", places=1)
+
+
+_TONES = "Prominent discrete tones (ECMA-418-1)"
+
+
+@register(_TONES, "ECMA-418-1:2024 Clause 10 Formula (2)", "Critical band at 1 kHz (f1,c / f2,c / dfc)")
+def _chk_ecma418_1_critical_band() -> Outcome:
+    from phonometry.tonality import _critical_band
+
+    f1, f2, dfc = _critical_band(1000.0)
+    # 0.05 Hz = half a unit in the last printed digit (the clause EXAMPLE
+    # values are given to one decimal: 922,2 / 1084,4 / 162,2 Hz).
+    out = numeric(ref.ECMA418_1_DFC_1KHZ, float(dfc), 0.05, unit="Hz", places=2)
+    edges_ok = (
+        abs(float(f1) - ref.ECMA418_1_F1_1KHZ) <= 0.05
+        and abs(float(f2) - ref.ECMA418_1_F2_1KHZ) <= 0.05
+    )
+    return Outcome(
+        expected=(
+            f"dfc {out.expected}; edges {ref.ECMA418_1_F1_1KHZ:g}"
+            f"-{ref.ECMA418_1_F2_1KHZ:g} Hz"
+        ),
+        computed=f"dfc {out.computed}; edges {float(f1):.1f}-{float(f2):.1f} Hz",
+        delta=out.delta,
+        passed=out.passed and edges_ok,
+    )
+
+
+@register(_TONES, "ECMA-418-1:2024 Clause 11.6 Formula (14)", "Proximity spacing dfprox at 150 / 850 Hz")
+def _chk_ecma418_1_proximity_spacing() -> Outcome:
+    from phonometry.tonality import _proximity_spacing
+
+    v150 = float(_proximity_spacing(150.0))
+    v850 = float(_proximity_spacing(850.0))
+    # 0.5 Hz = half a unit in the last printed digit of the coarser EXAMPLE
+    # value (the standard prints 23 Hz with no decimals; 63,8 Hz with one).
+    ok = (
+        abs(v150 - ref.ECMA418_1_PROX_150HZ) <= 0.5
+        and abs(v850 - ref.ECMA418_1_PROX_850HZ) <= 0.5
+    )
+    return Outcome(
+        expected=(
+            f"{ref.ECMA418_1_PROX_150HZ:g} Hz @ 150 Hz; "
+            f"{ref.ECMA418_1_PROX_850HZ:g} Hz @ 850 Hz (+/-0.5 Hz)"
+        ),
+        computed=f"{v150:.1f} Hz; {v850:.1f} Hz",
+        delta=(
+            f"{v150 - ref.ECMA418_1_PROX_150HZ:+.3f}; "
+            f"{v850 - ref.ECMA418_1_PROX_850HZ:+.3f} Hz"
+        ),
+        passed=ok,
+    )
 
 
 # ===========================================================================

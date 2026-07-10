@@ -115,3 +115,26 @@ def test_weighting_filter_multichannel():
     stateful_out = np.concatenate(blocks, axis=-1)
     np.testing.assert_allclose(stateful_out, ref_out, rtol=1e-10, atol=1e-12)
 
+
+def test_stateful_weighting_invalid_fs_raises():
+    """Non-positive sample rates must be rejected at construction."""
+    from phonometry import WeightingFilter
+    with pytest.raises(ValueError, match="must be positive"):
+        WeightingFilter(fs=0, stateful=True)
+    with pytest.raises(ValueError, match="must be positive"):
+        WeightingFilter(fs=-48000, stateful=True)
+
+
+def test_stateful_weighting_high_accuracy_raises():
+    """high_accuracy resampling is incompatible with block processing."""
+    from phonometry import WeightingFilter
+    with pytest.raises(ValueError, match="not compatible with stateful"):
+        WeightingFilter(fs=48000, stateful=True, high_accuracy=True)
+
+
+def test_stateful_weighting_invalid_curve_raises():
+    """Unknown weighting curves must be rejected at construction."""
+    from phonometry import WeightingFilter
+    with pytest.raises(ValueError, match="must be 'A', 'C', 'G' or 'Z'"):
+        WeightingFilter(fs=48000, curve="B", stateful=True)
+

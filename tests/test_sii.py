@@ -12,13 +12,20 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from reference_data import (
+    ANSIS3_5_BAND_IMPORTANCE_SUM,
+    ANSIS3_5_LOUD_1KHZ,
+    ANSIS3_5_STANDARD_QUIET,
+)
 
 from phonometry import sii
 
 
 def test_band_importance_sums_to_one() -> None:
     # ANSI S3.5-1997 Table 3: the band-importance function is normalised.
-    assert sii.BAND_IMPORTANCE.sum() == pytest.approx(1.0, abs=1e-12)
+    assert sii.BAND_IMPORTANCE.sum() == pytest.approx(
+        ANSIS3_5_BAND_IMPORTANCE_SUM, abs=1e-12
+    )
     assert sii.BAND_IMPORTANCE.size == 18
     np.testing.assert_allclose(
         sii.BAND_CENTERS,
@@ -31,7 +38,7 @@ def test_band_importance_sums_to_one() -> None:
 def test_sii_standard_speech_in_quiet() -> None:
     # Standard normal-effort spectrum, quiet field, normal hearing.
     result = sii.speech_intelligibility_index("normal")
-    assert result.sii == pytest.approx(0.9958, abs=5e-4)
+    assert result.sii == pytest.approx(ANSIS3_5_STANDARD_QUIET, abs=5e-4)
     assert 0.0 <= result.sii <= 1.0
 
 
@@ -82,7 +89,7 @@ def test_vocal_effort_spectra_spot_values() -> None:
     # ANSI S3.5-1997 Table 3, cross-verified against reference implementations
     # (Google speech_intelligibility_index, R CRAN SII) at 1 kHz (band 8).
     assert sii.standard_speech_spectrum("raised")[8] == pytest.approx(33.86)
-    assert sii.standard_speech_spectrum("loud")[8] == pytest.approx(42.16)
+    assert sii.standard_speech_spectrum("loud")[8] == pytest.approx(ANSIS3_5_LOUD_1KHZ)
     assert sii.standard_speech_spectrum("shout")[8] == pytest.approx(51.31)
     assert sii.VOCAL_EFFORTS == ("normal", "raised", "loud", "shout")
 

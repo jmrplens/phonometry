@@ -41,8 +41,12 @@ def ref_1k_40() -> EcmaTonality:
 
 @pytest.fixture(scope="module")
 def broadband_noise() -> EcmaTonality:
-    """A broadband-noise result, computed once for the module."""
-    return tonality_ecma(_noise(60.0), FS)
+    """A broadband-noise result, computed once for the module.
+
+    0.8 s: a qualitative reference (noise stays far below a tone), so it only
+    needs to clear the transient-discard window, not the calibration length.
+    """
+    return tonality_ecma(_noise(60.0, seconds=0.8), FS)
 
 
 # --------------------------------------------------------------------------
@@ -55,6 +59,16 @@ def test_calibration_1khz_40db_is_one_tu(ref_1k_40: EcmaTonality) -> None:
     # allows c_T to vary within 0.25 %, and implementation differences add a
     # little more, so a 3 % window is comfortably tight.
     assert ref_1k_40.tonality == pytest.approx(1.0, abs=0.03)
+
+
+def test_calibration_constant_is_the_tabulated_c_t() -> None:
+    # Clause 6.2.8 tabulates c_T = 2.8758615; the implementation must use the
+    # standard's value verbatim (shared oracle in tests/reference_data.py).
+    from reference_data import ECMA418_2_TONALITY_C_T
+
+    from phonometry.tonality_ecma import _C_T
+
+    assert _C_T == ECMA418_2_TONALITY_C_T
 
 
 # --------------------------------------------------------------------------
@@ -81,7 +95,8 @@ def test_tonal_frequency_tracks_tone(ref_1k_40: EcmaTonality) -> None:
 
 
 def test_tonal_frequency_tracks_a_second_tone() -> None:
-    result = tonality_ecma(_tone(2000.0, 50.0), FS)
+    # Frequency tracking is spectral, not duration-driven: 0.7 s suffices.
+    result = tonality_ecma(_tone(2000.0, 50.0, seconds=0.7), FS)
     peak_band = int(np.argmax(result.specific_tonality))
     assert result.tonal_frequencies[peak_band] == pytest.approx(2000.0, rel=0.05)
 
@@ -103,7 +118,9 @@ def test_short_signal_averages_over_all_blocks() -> None:
 
 
 def test_silence_is_zero() -> None:
-    result = tonality_ecma(np.zeros(int(FS * 1.2)), FS)
+    # Pure-property check: zero in, zero out at any length past the
+    # transient-discard window, so 0.6 s is enough.
+    result = tonality_ecma(np.zeros(int(FS * 0.6)), FS)
     assert result.tonality == 0.0
     assert np.all(result.specific_tonality == 0.0)
 
@@ -115,8 +132,9 @@ def test_specific_tonality_peaks_near_tone(ref_1k_40: EcmaTonality) -> None:
 
 def test_user_band_excluding_tone_lowers_tonality() -> None:
     # Restricting the time-dependent maximum search (Formulae 56-61) to bands
-    # above the tone removes the tonal event, driving T towards 0.
-    restricted = tonality_ecma(_tone(1000.0, 40.0), FS, f_low=3000.0)
+    # above the tone removes the tonal event, driving T towards 0. A 0.7 s
+    # segment is enough: the property is spectral, not duration-driven.
+    restricted = tonality_ecma(_tone(1000.0, 40.0, seconds=0.7), FS, f_low=3000.0)
     assert restricted.tonality < 0.2
 
 
@@ -148,8 +166,11 @@ def test_band_range_uses_edge_midpoints() -> None:
 
 
 def test_free_and_diffuse_fields_differ() -> None:
-    free = tonality_ecma(_tone(1000.0, 60.0), FS, field="free").tonality
-    diffuse = tonality_ecma(_tone(1000.0, 60.0), FS, field="diffuse").tonality
+    # Property check (ear-filter difference), not a calibration: 0.7 s is
+    # enough for a stable value in both fields.
+    x = _tone(1000.0, 60.0, seconds=0.7)
+    free = tonality_ecma(x, FS, field="free").tonality
+    diffuse = tonality_ecma(x, FS, field="diffuse").tonality
     assert free > 0.5 and diffuse > 0.5
     assert free != diffuse
 

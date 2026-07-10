@@ -14,6 +14,11 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from reference_data import (
+    ISO1999_N10_3K_100_40,
+    ISO1999_N10_4K_90_20,
+    ISO1999_N50_4K_90_20,
+)
 
 from phonometry import noise_induced_hearing_loss as m
 
@@ -26,6 +31,17 @@ _ANNEX_D = {
     (100.0, 40.0): [(5, 7, 11), (8, 11, 19), (16, 24, 39), (29, 38, 60),
                     (30, 41, 56), (19, 30, 48)],
 }
+
+
+def test_annex_d_table_pins_shared_reference_data() -> None:
+    """Pin the inline Annex D transcription to ``tests/reference_data.py``.
+
+    The CI conformance report asserts the shared constants; this guard keeps
+    the (larger) inline table and the shared scalars from drifting apart.
+    """
+    assert _ANNEX_D[(90.0, 20.0)][4][1] == ISO1999_N50_4K_90_20  # 4 kHz median
+    assert _ANNEX_D[(90.0, 20.0)][4][2] == ISO1999_N10_4K_90_20  # 4 kHz, worst 10 %
+    assert _ANNEX_D[(100.0, 40.0)][3][2] == ISO1999_N10_3K_100_40  # 3 kHz, worst 10 %
 
 
 @pytest.mark.parametrize(("key", "expected"), _ANNEX_D.items())

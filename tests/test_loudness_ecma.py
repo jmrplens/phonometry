@@ -42,29 +42,46 @@ def test_calibration_1khz_40db_is_one_sone(ref_1k_40: EcmaLoudness) -> None:
     assert ref_1k_40.loudness == pytest.approx(1.0, abs=0.03)
 
 
+def test_calibration_constant_is_the_tabulated_c_n() -> None:
+    # Clause 5.1.8 tabulates c_N = 0.0211964; the implementation must use the
+    # standard's value verbatim (shared oracle in tests/reference_data.py).
+    from reference_data import ECMA418_2_LOUDNESS_C_N
+
+    from phonometry.loudness_ecma import _C_N
+
+    assert _C_N == ECMA418_2_LOUDNESS_C_N
+
+
 # --------------------------------------------------------------------------
 # Internal cross-checks
 # --------------------------------------------------------------------------
 
 
 def test_monotonic_in_level() -> None:
-    values = [loudness_ecma(_tone(1000.0, lvl), FS).loudness for lvl in (20, 40, 60, 80)]
-    assert values[0] < values[1] < values[2] < values[3]
+    # Monotonicity is level-driven, not duration-driven: 0.6 s segments and
+    # three levels suffice (the 0.6 s / 40 dB anchor also holds 1 sone within
+    # 3 % in the CI conformance check, which uses the same duration).
+    values = [
+        loudness_ecma(_tone(1000.0, lvl, seconds=0.6), FS).loudness
+        for lvl in (20, 40, 80)
+    ]
+    assert values[0] < values[1] < values[2]
     # 40 dB is the 1-sone anchor; higher levels are clearly louder.
     assert values[1] == pytest.approx(1.0, abs=0.03)
-    assert values[2] > 2.0
-    assert values[3] > 5.0
+    assert values[2] > 5.0
 
 
 def test_silence_is_zero() -> None:
-    result = loudness_ecma(np.zeros(int(FS * 1.2)), FS)
+    # Pure-property check: zero in, zero out at any length past the
+    # transient-discard window, so 0.6 s is enough.
+    result = loudness_ecma(np.zeros(int(FS * 0.6)), FS)
     assert result.loudness == 0.0
     assert np.all(result.specific_loudness == 0.0)
 
 
 def test_subthreshold_tone_is_inaudible() -> None:
     # A 1 kHz tone at -10 dB SPL is well below the threshold in quiet.
-    result = loudness_ecma(_tone(1000.0, -10.0), FS)
+    result = loudness_ecma(_tone(1000.0, -10.0, seconds=0.6), FS)
     assert result.loudness < 0.01
 
 
@@ -79,8 +96,11 @@ def test_specific_loudness_peaks_near_tone(ref_1k_40: EcmaLoudness) -> None:
 
 
 def test_free_and_diffuse_fields_differ() -> None:
-    free = loudness_ecma(_tone(1000.0, 60.0), FS, field="free").loudness
-    diffuse = loudness_ecma(_tone(1000.0, 60.0), FS, field="diffuse").loudness
+    # Property check (ear-filter difference), not a calibration: 0.6 s is
+    # enough for a stable value in both fields.
+    x = _tone(1000.0, 60.0, seconds=0.6)
+    free = loudness_ecma(x, FS, field="free").loudness
+    diffuse = loudness_ecma(x, FS, field="diffuse").loudness
     # Both plausible loudspeaker-range values, but the ear filter differs.
     assert free > 1.0 and diffuse > 1.0
     assert free != diffuse
@@ -88,7 +108,7 @@ def test_free_and_diffuse_fields_differ() -> None:
 
 def test_resampling_matches_native_rate() -> None:
     fs_alt = 44100
-    t = np.arange(int(fs_alt * 1.2)) / fs_alt
+    t = np.arange(int(fs_alt * 0.6)) / fs_alt
     amp = np.sqrt(2.0) * 2e-5 * 10 ** (40.0 / 20.0)
     x = amp * np.sin(2.0 * np.pi * 1000.0 * t)
     resampled = loudness_ecma(x, fs_alt).loudness

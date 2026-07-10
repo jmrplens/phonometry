@@ -76,6 +76,17 @@ def test_anchor_single_ear_is_two_thirds_of_binaural() -> None:
     assert binaural / monaural == pytest.approx(1.5, abs=0.02)
 
 
+def test_calibration_constant_is_the_tabulated_c() -> None:
+    # ISO 532-2 Formula (7) tabulates C = 0.0617 sone/Cam; the implementation
+    # must use the standard's value verbatim (shared oracle in
+    # tests/reference_data.py).
+    from reference_data import ISO532_2_C
+
+    from phonometry.loudness_moore_glasberg import _C_SONE
+
+    assert _C_SONE == ISO532_2_C
+
+
 # --------------------------------------------------------------------------
 # Annex B.1 - sinusoidal tones
 # --------------------------------------------------------------------------
@@ -335,17 +346,23 @@ def test_diotic_alias_matches_binaural() -> None:
 
 
 def test_invalid_inputs() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="field must be one of"):
         loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="near")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="presentation must be one of"):
         loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], presentation="mono")
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="component frequencies must be positive"
+    ):
         loudness_moore_glasberg_from_spectrum([(-10.0, 40.0)])
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="components must contain only finite values"
+    ):
         loudness_moore_glasberg_from_spectrum([(1000.0, np.inf)])
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="band_levels must contain exactly"):
         loudness_moore_glasberg_from_third_octave([60.0] * 10)  # wrong length
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Input signal 'x' cannot be empty"):
         loudness_moore_glasberg(np.array([]), FS)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'fs' must be a positive sampling rate"
+    ):
         loudness_moore_glasberg(np.ones(100), -1.0)

@@ -12,6 +12,14 @@ Anchors transcribed from the official PDF:
 
 import numpy as np
 import pytest
+from reference_data import (
+    ECMA418_1_DFC_500HZ,
+    ECMA418_1_DFC_1KHZ,
+    ECMA418_1_F1_1KHZ,
+    ECMA418_1_F2_1KHZ,
+    ECMA418_1_PROX_150HZ,
+    ECMA418_1_PROX_850HZ,
+)
 
 from phonometry import prominence_ratio, tone_to_noise_ratio
 from phonometry.tonality import _critical_band, _proximity_spacing
@@ -20,8 +28,11 @@ FS = 48000
 
 
 def _tone_in_noise(
-    tone_freq: float, tone_rms: float, noise_rms: float, seconds: float = 30.0
+    tone_freq: float, tone_rms: float, noise_rms: float, seconds: float = 8.0
 ) -> np.ndarray:
+    # 8 s default (was 30 s): enough averaging for the qualitative criteria
+    # tests and the 0.4 dB TNR anchor (re-measured error ~0.15 dB at 8 s);
+    # the two 0.1 dB exact anchors request 16 s explicitly below.
     rng = np.random.default_rng(1234)
     t = np.arange(int(FS * seconds)) / FS
     tone = np.sqrt(2.0) * tone_rms * np.sin(2 * np.pi * tone_freq * t)
@@ -30,20 +41,21 @@ def _tone_in_noise(
 
 
 def test_critical_band_examples() -> None:
-    """Clause 10 and 12.2 worked examples from the standard text."""
+    """Clause 10 and 12.2 worked examples from the standard text (shared
+    oracles in tests/reference_data.py, also used by the CI report)."""
     _, _, dfc_1k = _critical_band(1000.0)
-    assert dfc_1k == pytest.approx(162.2, abs=0.05)
+    assert dfc_1k == pytest.approx(ECMA418_1_DFC_1KHZ, abs=0.05)
     _, _, dfc_500 = _critical_band(500.0)
-    assert dfc_500 == pytest.approx(117.3, abs=0.05)
+    assert dfc_500 == pytest.approx(ECMA418_1_DFC_500HZ, abs=0.05)
     f1, f2, _ = _critical_band(1000.0)
-    assert f1 == pytest.approx(922.2, abs=0.05)
-    assert f2 == pytest.approx(1084.4, abs=0.05)
+    assert f1 == pytest.approx(ECMA418_1_F1_1KHZ, abs=0.05)
+    assert f2 == pytest.approx(ECMA418_1_F2_1KHZ, abs=0.05)
 
 
 def test_proximity_spacing_examples() -> None:
     """Clause 11.6 Formula (14) worked examples."""
-    assert _proximity_spacing(150.0) == pytest.approx(23.0, abs=0.5)
-    assert _proximity_spacing(850.0) == pytest.approx(63.8, abs=0.5)
+    assert _proximity_spacing(150.0) == pytest.approx(ECMA418_1_PROX_150HZ, abs=0.5)
+    assert _proximity_spacing(850.0) == pytest.approx(ECMA418_1_PROX_850HZ, abs=0.5)
 
 
 def test_tnr_of_synthetic_tone_matches_analytic() -> None:
@@ -79,7 +91,9 @@ def test_tnr_prominence_criteria() -> None:
 def test_pr_of_synthetic_tone_matches_analytic() -> None:
     """PR = 10*lg((Pt + N0*dfM) / (0.5*N0*(dfL + dfU)))."""
     tone_rms, noise_rms = 0.1, 0.05
-    x = _tone_in_noise(1000.0, tone_rms, noise_rms)
+    # 16 s (was 30 s): the 0.1 dB tolerance needs more spectral averaging than
+    # the 8 s default (measured error: 0.12 dB at 8 s, 0.037 dB at 16 s).
+    x = _tone_in_noise(1000.0, tone_rms, noise_rms, seconds=16.0)
     n0 = noise_rms**2 / (FS / 2)
     from phonometry.tonality import _LOWER_EDGE_COEFFS, _UPPER_EDGE_COEFFS, _fitted_edge
 
@@ -102,7 +116,7 @@ def test_pr_criteria_and_noise_only() -> None:
     assert loud.prominent
 
     rng = np.random.default_rng(7)
-    noise = rng.standard_normal(FS * 20)
+    noise = rng.standard_normal(FS * 8)
     result = prominence_ratio(noise, FS, tone_freq=1000.0)
     assert not result.prominent
     assert abs(result.ratio_db) < 3.0  # flat spectrum: bands nearly equal
@@ -122,7 +136,9 @@ def test_tnr_proximate_tones_combine() -> None:
     """Clause 11.6: two tones 30 Hz apart at 1 kHz (always proximate at
     1 kHz+) are assessed as one tone with their combined level."""
     rng = np.random.default_rng(99)
-    t = np.arange(FS * 30) / FS
+    # 16 s (was 30 s): the 0.1 dB tolerance needs more spectral averaging than
+    # the 8 s default (measured error: 0.18 dB at 8 s, 0.025 dB at 16 s).
+    t = np.arange(FS * 16) / FS
     x = (
         np.sqrt(2) * 0.1 * np.sin(2 * np.pi * 1000 * t)
         + np.sqrt(2) * 0.1 * np.sin(2 * np.pi * 1030 * t)

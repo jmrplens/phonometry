@@ -25,6 +25,13 @@ import warnings
 
 import numpy as np
 import pytest
+from reference_data import (
+    ISO9053_2_ANNEX_A_BOUNDARY_LAYER,
+    ISO9053_2_ANNEX_A_FREQUENCY,
+    ISO9053_2_ANNEX_A_KAPPA_PRIME,
+    ISO9053_2_ANNEX_A_SURFACE,
+    ISO9053_2_ANNEX_A_VOLUME,
+)
 
 from phonometry.airflow_resistance import (
     AirflowResistanceWarning,
@@ -247,26 +254,32 @@ def test_alternating_invalid_inputs_raise(kwargs: dict[str, float]) -> None:
 # --- Annex A (normative): effective ratio of specific heats kappa' -----------
 # Worked example, ISO 9053-2:2020 Annex A.3 (page-verified oracle): closed cylinder
 # 100 mm x 100 mm -> V = 7.854e-4 m3, S = 0.0471 m2; IEC 61094-2:2009 air properties
-# at 23 C; f = 2 Hz give b = 1.83e-3 m and kappa' = kappa*0.978 = 1.370.
+# at 23 C; f = 2 Hz give b = 1.83e-3 m and kappa' = kappa*0.978 = 1.370. The inputs
+# and expected values are imported from tests/reference_data.py (shared with the
+# CI conformance report).
 
 def test_thermal_boundary_layer_thickness_annex_a_example() -> None:
-    b = thermal_boundary_layer_thickness(frequency=2.0)
-    assert b == pytest.approx(1.83e-3, abs=5e-6)
+    b = thermal_boundary_layer_thickness(frequency=ISO9053_2_ANNEX_A_FREQUENCY)
+    assert b == pytest.approx(ISO9053_2_ANNEX_A_BOUNDARY_LAYER, abs=5e-6)
 
 
 def test_effective_kappa_annex_a_example() -> None:
     kappa_prime = effective_kappa(
-        cavity_surface=0.0471, cavity_volume=7.854e-4, frequency=2.0
+        cavity_surface=ISO9053_2_ANNEX_A_SURFACE,
+        cavity_volume=ISO9053_2_ANNEX_A_VOLUME,
+        frequency=ISO9053_2_ANNEX_A_FREQUENCY,
     )
     # Standard prints kappa' = kappa*0.978 = 1.370 (kappa = 1.4008).
-    assert kappa_prime == pytest.approx(1.370, abs=5e-4)
+    assert kappa_prime == pytest.approx(ISO9053_2_ANNEX_A_KAPPA_PRIME, abs=5e-4)
     assert kappa_prime == pytest.approx(1.4008 * 0.978, abs=1e-3)
 
 
 def test_effective_kappa_below_adiabatic() -> None:
     # Heat conduction always lowers kappa below the adiabatic value.
     kappa_prime = effective_kappa(
-        cavity_surface=0.0471, cavity_volume=7.854e-4, frequency=2.0
+        cavity_surface=ISO9053_2_ANNEX_A_SURFACE,
+        cavity_volume=ISO9053_2_ANNEX_A_VOLUME,
+        frequency=ISO9053_2_ANNEX_A_FREQUENCY,
     )
     assert kappa_prime < 1.4008
 

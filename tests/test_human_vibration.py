@@ -276,7 +276,7 @@ def test_hav_daily_exposure_matches_partial_combination() -> None:
     values = [3.0, 5.0]
     durations = [2 * 3600.0, 1 * 3600.0]
     direct = hv.hav_daily_exposure(values, durations)
-    partials = [hv.partial_exposure(v, d) for v, d in zip(values, durations)]
+    partials = [hv.partial_exposure(v, d) for v, d in zip(values, durations, strict=True)]
     assert direct == pytest.approx(hv.combine_partial_exposures(partials))
 
 

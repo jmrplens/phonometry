@@ -249,11 +249,13 @@ clase 1 (±0,3 dB) y la clase 2 (±0,5 dB) son progresivamente más anchas. El
 Butterworth de orden 6 serpentea dentro de la clase 0 en toda la banda de paso.*
 
 **¿Qué arquitectura alcanza qué clase?** El **valor por defecto de la biblioteca
-— Butterworth de orden 6 — ya cumple clase 0** en las configuraciones habituales
-(octava y tercio de octava, 32 kHz–96 kHz), así que no hace falta ninguna
-configuración especial para bancos de laboratorio. Las demás arquitecturas no
-pueden ajustarse a clase 0 porque cambian la máscara IEC por otra propiedad *por
-construcción*:
+— Butterworth de orden 6 — cumple clase 0** en las configuraciones que verifica
+el conjunto de conformidad (bancos de octava y tercio de octava a 48 kHz), así
+que no hace falta ninguna configuración especial para bancos de laboratorio en
+ese rango. La tabla siguiente indica la mejor clase que alcanza cada arquitectura
+con esa misma configuración de orden 6 / 48 kHz; las demás arquitecturas se
+quedan por debajo de clase 0 porque cambian la máscara IEC por otra propiedad
+*por construcción*:
 
 | Arquitectura | Mejor clase (orden 6, fs 48 kHz) | Por qué |
 | :--- | :---: | :--- |
@@ -263,11 +265,13 @@ construcción*:
 | `ellip` | — | Rizado en banda de paso y atenuada |
 | `bessel` | — | Retardo de grupo plano a costa de una caída lenta |
 
-Así que el valor por defecto sensato es el habitual (Butterworth de orden 6): ya
-es clase 0 donde la física lo permite, y las arquitecturas alternativas son
-opciones deliberadas cuyo propósito (caída más abrupta, fase lineal) es
-incompatible con la máscara de clase. Sube el orden solo si una banda concreta
-con `fraction` alto o cercana a Nyquist necesita más margen.
+Así que el valor por defecto sensato es el habitual (Butterworth de orden 6):
+supera la clase 0 en las configuraciones verificadas, mientras que las
+arquitecturas alternativas son opciones deliberadas cuyo propósito (caída más
+abrupta, fase lineal) va en contra de la máscara de clase. Fuera de estos
+ajustes —`fraction` muy alto o bandas cercanas a Nyquist— vuelve a ejecutar
+`verify_filter_class` para confirmar la clase que necesitas, y sube el orden si
+una banda necesita más margen.
 
 ## 7. Descomposición de la señal y estabilidad
 

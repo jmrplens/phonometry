@@ -240,10 +240,12 @@ and class 2 (±0.5 dB) are progressively wider. The order-6 Butterworth threads
 inside class 0 across the whole pass-band.*
 
 **Which architecture reaches which class?** The library's **default — Butterworth
-order 6 — already meets class 0** in the usual configurations (octave and
-third-octave, 32 kHz–96 kHz), so no special setup is needed for laboratory-grade
-banks. The other architectures cannot be tuned to class 0 because they trade the
-IEC mask for a different property *by construction*:
+order 6 — meets class 0** in the configurations the conformance suite verifies
+(octave and third-octave banks at 48 kHz), so no special setup is needed for
+laboratory-grade banks in that range. The table below reports the best class
+each architecture reaches under that same order-6 / 48 kHz setup; the other
+architectures fall short of class 0 because they trade the IEC mask for a
+different property *by construction*:
 
 | Architecture | Best class (order 6, fs 48 kHz) | Why |
 | :--- | :---: | :--- |
@@ -253,11 +255,12 @@ IEC mask for a different property *by construction*:
 | `ellip` | — | Pass- and stop-band ripple |
 | `bessel` | — | Flat group delay bought with a slow roll-off |
 
-So the sensible default is the common one (Butterworth order 6): it is already
-class 0 where the physics allows, and the alternative architectures are
-deliberate opt-ins whose purpose (steeper roll-off, linear phase) is
-incompatible with the class mask. Raise the order only if a specific
-high-`fraction` / near-Nyquist band needs more margin.
+So the sensible default is the common one (Butterworth order 6): it clears
+class 0 in the verified configurations, while the alternative architectures are
+deliberate opt-ins whose purpose (steeper roll-off, linear phase) works against
+the class mask. Away from these settings — very high `fraction` or near-Nyquist
+bands — always re-run `verify_filter_class` to confirm the class you need, and
+raise the order if a band needs more margin.
 
 ## 7. Signal Decomposition and Stability
 

@@ -16,8 +16,8 @@ IEC 61260-1:2014 defines only classes 1 and 2. **Class 0** (the tightest,
 laboratory-grade class) lives only in the withdrawn **IEC 61260:1995 /
 EN 61260:1995 Table 1** and its US twin **ANSI S1.11-2004 Table 1**, whose
 class 1/2 masks differ numerically from the 2014 edition (e.g. the 2014
-pass-band reference tolerance is +-0,4 dB for class 1 vs +-0,3 dB in 1995, and
-the 2014 stop-band edge minimum is +1,2 dB vs +2,0 dB in 1995). The two editions
+pass-band reference tolerance is ±0.4 dB for class 1 vs ±0.3 dB in 1995, and
+the 2014 stop-band edge minimum is +1.2 dB vs +2.0 dB in 1995). The two editions
 are therefore kept as separate mask tables selected by the ``edition`` argument
 (``"2014"`` default -> classes 1/2; ``"1995"`` -> classes 0/1/2). The 1995 /
 ANSI-2004 octave-band table was transcribed digit-for-digit and cross-checked

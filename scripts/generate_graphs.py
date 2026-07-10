@@ -1655,7 +1655,7 @@ def generate_class_mask_overlay(output_dir: str) -> None:
 
 def generate_filter_class0_mask(output_dir: str) -> None:
     """Pass-band class 0/1/2 maximum corridors (IEC 61260:1995 / ANSI S1.11-2004)."""
-    print("Generating filter_class0_mask.png...")
+    print("Generating filter_class0_mask...")
     fs = 48000
     from phonometry.compliance import class_limits
 

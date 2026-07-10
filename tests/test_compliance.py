@@ -136,13 +136,16 @@ def test_1995_class0_is_strictest() -> None:
     """At every breakpoint class 0 <= class 1 <= class 2 max, and min ordering."""
     g = 10 ** (3 / 10)
     omega = g ** np.linspace(0, 1.5, 40)
-    _, hi0 = class_limits(1.0, 0, omega, edition="1995")
-    _, hi1 = class_limits(1.0, 1, omega, edition="1995")
-    _, hi2 = class_limits(1.0, 2, omega, edition="1995")
+    lo0, hi0 = class_limits(1.0, 0, omega, edition="1995")
+    lo1, hi1 = class_limits(1.0, 1, omega, edition="1995")
+    lo2, hi2 = class_limits(1.0, 2, omega, edition="1995")
     # Tighter class => smaller (or equal) maximum allowance in the pass-band.
     pb = omega <= g ** 0.5
     assert np.all(hi0[pb] <= hi1[pb] + 1e-9)
     assert np.all(hi1[pb] <= hi2[pb] + 1e-9)
+    # ...and a larger (or equal) minimum: the corridor floor rises with strictness.
+    assert np.all(lo0[pb] >= lo1[pb] - 1e-9)
+    assert np.all(lo1[pb] >= lo2[pb] - 1e-9)
 
 
 def test_butter_meets_class0_1995() -> None:

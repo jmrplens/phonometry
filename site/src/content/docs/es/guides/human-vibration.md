@@ -253,7 +253,7 @@ plt.show()
 
 Para la vibración transmitida a la mano, el Anexo C de ISO 5349-1 relaciona la
 exposición diaria con la vida media de grupo $D_y$ (en años) que produce el dedo
-blanco por vibración en el 10 % de un grupo expuesto, $D_y = 31.8\,A(8)^{-1.06}$
+blanco por vibración en el 10 % de un grupo expuesto, $D_y = 31{,}8\,A(8)^{-1{,}06}$
 (ec. (C.1)):
 
 ```python

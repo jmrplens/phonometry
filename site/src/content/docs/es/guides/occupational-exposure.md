@@ -53,27 +53,27 @@ tasks = [
 res = task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
 print(f"LEX,8h = {res.lex_8h:.1f} dB   U = {res.expanded_uncertainty:.1f} dB")
 # LEX,8h = 84.3 dB   U = 2.7 dB
-print(f"one-sided 95 % upper limit LEX,8h + U = {res.upper_limit:.1f} dB")   # 87.0 dB
+print(f"límite superior unilateral 95 % LEX,8h + U = {res.upper_limit:.1f} dB")   # 87.0 dB
 for t in res.tasks:
-    print(f"  {t.label:<16} Lp,A,eqT = {t.lp_aeqt:5.1f}   contributes {t.lex_8h_contribution:5.1f} dB")
-#   planning/breaks  Lp,A,eqT =  70.0   contributes  62.7 dB
-#   welding          Lp,A,eqT =  80.8   contributes  78.7 dB
-#   cutting/grinding Lp,A,eqT =  90.1   contributes  82.8 dB
+    print(f"  {t.label:<16} Lp,A,eqT = {t.lp_aeqt:5.1f}   aporta {t.lex_8h_contribution:5.1f} dB")
+#   planning/breaks  Lp,A,eqT =  70.0   aporta  62.7 dB
+#   welding          Lp,A,eqT =  80.8   aporta  78.7 dB
+#   cutting/grinding Lp,A,eqT =  90.1   aporta  82.8 dB
 
 # La misma jornada medida basada en la función (anexo E) y de jornada completa
 # (anexo F): ambas usan el presupuesto de muestreo Ec C.9 / Tabla C.4 con
 # k = 1.65 (unilateral 95 %).
 job = job_based_exposure([88.1, 86.1, 89.7, 86.5, 91.1, 86.7], effective_duration_hours=7.5)
 full = full_day_exposure([88.0, 91.9, 87.6, 90.4, 89.0, 88.4], effective_duration_hours=9.25)
-print(f"job      LEX,8h = {job.lex_8h:.1f} dB   U = {job.expanded_uncertainty:.1f} dB")
-# job      LEX,8h = 88.2 dB   U = 3.8 dB
-print(f"full-day LEX,8h = {full.lex_8h:.1f} dB   U = {full.expanded_uncertainty:.1f} dB")
-# full-day LEX,8h = 90.1 dB   U = 3.4 dB
+print(f"función          LEX,8h = {job.lex_8h:.1f} dB   U = {job.expanded_uncertainty:.1f} dB")
+# función          LEX,8h = 88.2 dB   U = 3.8 dB
+print(f"jornada completa LEX,8h = {full.lex_8h:.1f} dB   U = {full.expanded_uncertainty:.1f} dB")
+# jornada completa LEX,8h = 90.1 dB   U = 3.4 dB
 ```
 
 ## 2. El presupuesto de incertidumbre del anexo C
 
-Conviene detallar dos sutilezas. Primero, el factor de cobertura es $k = 1.65$
+Conviene detallar dos sutilezas. Primero, el factor de cobertura es $k = 1{,}65$
 para un intervalo **unilateral** al 95 % (apartado 14), porque al higienista solo
 le importa la cota *superior*: `res.upper_limit` = $L_{EX,8h} + U$ es el valor por
 debajo del cual queda el 95 % de las mediciones, el número que se compara con un
@@ -86,8 +86,8 @@ la desviación típica muestral simple con denominador $N-1$, cuya contribución
 $c_1 u_1$ se lee luego de la **Tabla C.4** en función de $(N, u_1)$. La misma
 dispersión bruta infla, por tanto, más la estimación por función, que es la
 penalización que el estándar impone a un muestreo más grueso y con menos
-muestras. (El $L_{EX,8h}$ por función impreso es $88.2$ dB donde el anexo E
-declara $88.1$: el estándar redondea el nivel de jornada efectiva a $88.4$ antes
+muestras. (El $L_{EX,8h}$ por función impreso es $88{,}2$ dB donde el anexo E
+declara $88{,}1$: el estándar redondea el nivel de jornada efectiva a $88{,}4$ antes
 de la normalización de la duración; la biblioteca lo mantiene sin redondear.)
 
 Cuando las muestras de una tarea abarcan **3 dB o más** (apartado 9.3), o la
@@ -115,7 +115,7 @@ en la página de [Teoría](/phonometry/es/reference/theory/).
 | `warn` | todas | bool | — | def. `True` | Emitir `OccupationalExposureWarning` para los avisos de muestreo |
 
 Las tres devuelven un `ExposureResult` con `lex_8h`, `combined_standard_uncertainty`
-$u$, `expanded_uncertainty` $U = 1.65\ u$, `upper_limit` = $L_{EX,8h} + U$,
+$u$, `expanded_uncertainty` $U = 1{,}65\ u$, `upper_limit` = $L_{EX,8h} + U$,
 `sampling_advisory` y (basada en tareas) el desglose por tarea en `tasks`.
 
 ## Véase también

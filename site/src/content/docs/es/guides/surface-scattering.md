@@ -37,12 +37,12 @@ convierte en un coeficiente de absorción de Sabine con el propio término de
 atenuación del aire de la norma:
 
 $$
-\alpha = 55.3\,\frac{V}{S}\left(\frac{1}{c_2 T_2} - \frac{1}{c_1 T_1}\right)
+\alpha = 55{,}3\,\frac{V}{S}\left(\frac{1}{c_2 T_2} - \frac{1}{c_1 T_1}\right)
         - 4\,\frac{V}{S}\,(m_2 - m_1),
 $$
 
 donde $V$ es el volumen de la sala, $S$ el área de la muestra, $T$ el tiempo de
-reverberación, $c$ la velocidad del sonido (ec. (2): $c = 343.2\sqrt{(273.15+t)/293.15}$)
+reverberación, $c$ la velocidad del sonido (ec. (2): $c = 343{,}2\sqrt{(273{,}15+t)/293{,}15}$)
 y $m$ el coeficiente de atenuación en potencia del aire. El par **inmóvil** da la
 absorción de incidencia aleatoria $\alpha_s$ (ec. (1)); el par **en rotación** da
 la absorción especular $\alpha_{spec}$ (ec. (4)).
@@ -212,7 +212,7 @@ result.plot()   # respuesta polar reflejada, d en el título (requiere matplotli
 
 *La energía reflejada llena todo el semicírculo en lugar de concentrarse en un
 lóbulo especular, de modo que el coeficiente de difusión por autocorrelación es
-alto ($d \approx 0.82$). Una superficie plana colapsaría la respuesta en un pico
+alto ($d \approx 0{,}82$). Una superficie plana colapsaría la respuesta en un pico
 estrecho y llevaría $d$ hacia cero.*
 
 <details>
@@ -260,7 +260,7 @@ $$
 K_r = \frac{d_s - d_m}{d_s + d_m},
 $$
 
-que vale $2/3$ para la geometría obligatoria $d_s = 1.25$ m, $d_m = 0.25$ m. La
+que vale $2/3$ para la geometría obligatoria $d_s = 1{,}25$ m, $d_m = 0{,}25$ m. La
 absorción se obtiene de los espectros incidente y reflejado enventanados $H_i$,
 $H_r$:
 
@@ -372,7 +372,7 @@ plt.show()
 **Área máxima muestreada (Anexo A).** La ventana temporal finita limita cuánta
 superficie contribuye a la reflexión. El área máxima muestreada es un círculo
 cuyo radio la librería calcula a partir de la geometría y la anchura de la
-ventana; el ejemplo trabajado del Anexo A ($d_s = 1.25$ m, $d_m = 0.25$ m,
+ventana; el ejemplo trabajado del Anexo A ($d_s = 1{,}25$ m, $d_m = 0{,}25$ m,
 $c = 340$ m/s, ventana plana de 5 ms) da unos 1,34 m.
 
 ```python
@@ -395,11 +395,11 @@ rutina de tubo de impedancia `two_microphone_impedance` (véase la
 debajo de
 
 $$
-f_u = 0.58\,\frac{c_0}{d},
+f_u = 0{,}58\,\frac{c_0}{d},
 $$
 
 con $d$ el diámetro del tubo, y el espaciado de micrófonos $s$ debe situarse entre
-$0.05\,c_0/f_{min}$ y $0.45\,c_0/f_{max}$. El rango informado son las bandas de
+$0{,}05\,c_0/f_{min}$ y $0{,}45\,c_0/f_{max}$. El rango informado son las bandas de
 tercio de octava de 250 a 1600 Hz.
 
 ```python

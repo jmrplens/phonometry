@@ -20,14 +20,14 @@ un sistema de sonido. Para esto último, consulta la
 [guía del índice de transmisión del habla](/phonometry/es/guides/speech-transmission/).
 :::
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_speech_intelligibility_es.svg" alt="El flujo de cálculo del SII: tres entradas de nivel espectral equivalente (habla Ei', ruido Ni', umbral auditivo Ti') alimentan la etapa de automáscara del habla y propagación de la máscara (nivel espectral de enmascaramiento equivalente Zi), después la perturbación equivalente Di, después la función de audibilidad de banda Ai acotada a [0, 1], y por último la suma ponderada por importancia de banda SII sobre las 18 bandas de tercio de octava" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_speech_intelligibility_es_dark.svg" alt="El flujo de cálculo del SII: tres entradas de nivel espectral equivalente (habla Ei', ruido Ni', umbral auditivo Ti') alimentan la etapa de automáscara del habla y propagación de la máscara (nivel espectral de enmascaramiento equivalente Zi), después la perturbación equivalente Di, después la función de audibilidad de banda Ai acotada a [0, 1], y por último la suma ponderada por importancia de banda SII sobre las 18 bandas de tercio de octava" style="width:94%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_speech_intelligibility_es.svg" alt="El flujo de cálculo del SII: tres entradas de nivel espectral equivalente (habla Ei', ruido Ni', umbral de audición Ti') alimentan la etapa de automáscara del habla y propagación de la máscara (nivel espectral de enmascaramiento equivalente Zi), después la perturbación equivalente Di, después la función de audibilidad de banda Ai acotada a [0, 1], y por último la suma ponderada por importancia de banda SII sobre las 18 bandas de tercio de octava" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_speech_intelligibility_es_dark.svg" alt="El flujo de cálculo del SII: tres entradas de nivel espectral equivalente (habla Ei', ruido Ni', umbral de audición Ti') alimentan la etapa de automáscara del habla y propagación de la máscara (nivel espectral de enmascaramiento equivalente Zi), después la perturbación equivalente Di, después la función de audibilidad de banda Ai acotada a [0, 1], y por último la suma ponderada por importancia de banda SII sobre las 18 bandas de tercio de octava" style="width:94%">
 
 ## 1. Entradas y la función de importancia de banda
 
 Las tres entradas son **niveles espectrales equivalentes** (ANSI S3.5-1997,
 cláusulas 3.11 y 3.55) muestreados en los 18 centros de banda de tercio de
 octava: el nivel espectral del habla $E_i'$, el nivel espectral del ruido $N_i'$
-(ambos en dB SPL) y el umbral auditivo $T_i'$ (en dB HL). Cada banda $i$
+(ambos en dB SPL) y el umbral de audición $T_i'$ (en dB HL). Cada banda $i$
 contribuye a la inteligibilidad en proporción a su **función de importancia de
 banda** $I_i$ (ANSI S3.5-1997 Tabla 3, material de habla promedio), que suma uno
 sobre las 18 bandas.
@@ -41,7 +41,7 @@ print(round(result.sii, 3))          # 0.996  (casi todo audible)
 print(round(ph.sii.BAND_IMPORTANCE.sum(), 6))   # 1.0
 ```
 
-Sin ruido y con un umbral auditivo normal, el espectro de habla estándar es casi
+Sin ruido y con un umbral de audición normal, el espectro de habla estándar es casi
 totalmente audible, por lo que el índice se acerca a uno; el pequeño déficit es
 la propia **automáscara del habla** del oyente.
 
@@ -54,8 +54,8 @@ propaga **hacia arriba** en frecuencia con una pendiente dependiente del nivel
 para dar el nivel espectral de enmascaramiento equivalente $Z_i$ (cláusula 5.4):
 
 $$
-Z_i = 10\log_{10}\!\left(10^{0.1 N_i'} + \sum_{k<i}
-      10^{0.1\left(B_k + 3.32\,C_k\,\log_{10}(0.89\,f_i/f_k)\right)}\right).
+Z_i = 10\log_{10}\!\left(10^{0{,}1 N_i'} + \sum_{k<i}
+      10^{0{,}1\left(B_k + 3{,}32\,C_k\,\log_{10}(0{,}89\,f_i/f_k)\right)}\right).
 $$
 
 El enmascaramiento se combina con el ruido interno equivalente
@@ -132,7 +132,7 @@ plt.show()
 
 </details>
 
-Un umbral auditivo elevado (`threshold=`) sube el ruido interno equivalente y
+Un umbral de audición elevado (`threshold=`) sube el ruido interno equivalente y
 reduce el índice, igual que lo hace añadir ruido de enmascaramiento. El
 `SIIResult` también lleva el enmascaramiento por banda $Z_i$, la perturbación
 $D_i$, la audibilidad $A_i$ y la importancia $I_i$, y su `.plot()` dibuja la
@@ -157,7 +157,7 @@ for effort in ph.sii.VOCAL_EFFORTS:
     print(effort, round(ph.speech_intelligibility_index(effort, noise).sii, 2))
 # normal 0.12 | raised 0.36 | loud 0.59 | shout 0.79
 
-print(ph.standard_speech_spectrum("loud")[8])  # 42,16 dB SPL a 1 kHz
+print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL a 1 kHz
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_es.png" alt="Izquierda: los cuatro espectros de voz estándar de ANSI S3.5-1997 (normal, elevada, fuerte, grito) de 160 Hz a 8000 Hz, cada esfuerzo mayor sube todo el espectro. Derecha: el SII resultante en un ruido de banda ancha fijo, subiendo de 0,12 (normal) a 0,79 (grito)" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_es_dark.png" alt="Izquierda: los cuatro espectros de voz estándar de ANSI S3.5-1997 (normal, elevada, fuerte, grito) de 160 Hz a 8000 Hz, cada esfuerzo mayor sube todo el espectro. Derecha: el SII resultante en un ruido de banda ancha fijo, subiendo de 0,12 (normal) a 0,79 (grito)" style="width:96%">

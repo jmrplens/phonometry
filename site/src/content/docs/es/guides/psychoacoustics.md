@@ -124,7 +124,7 @@ $$
 con $g(z) = 1$ hasta 15,8 Bark y creciendo exponencialmente a partir de ahí, y
 $k$ normalizada para que el sonido de referencia — ruido de ancho de banda
 crítico a 1 kHz, 60 dB — sea exactamente **1,00 acum** (DIN 45692 apartado 6;
-la $k = 0.108$ derivada queda dentro de la ventana normativa 0,105–0,115).
+la $k = 0{,}108$ derivada queda dentro de la ventana normativa 0,105–0,115).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es.png" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es_dark.png" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%">
 
@@ -142,7 +142,7 @@ norma.
 ## Nivel de sonoridad de tonos puros (ISO 226:2023)
 
 Las curvas isofónicas normales relacionan el SPL de un tono puro con su *nivel
-de sonoridad* percibido en fonos (el SPL de un tono de 1 kHz igual de fuerte).
+de sonoridad* percibido en fonios (el SPL de un tono de 1 kHz igual de fuerte).
 `equal_loudness_contour(phon)` evalúa la Fórmula (1) de ISO 226:2023 en las 29
 frecuencias preferentes de tercio de octava de la Tabla 1,
 `loudness_level(spl, frequency)` es la inversa exacta (Fórmula 2) y
@@ -151,13 +151,13 @@ frecuencias preferentes de tercio de octava de la Tabla 1,
 ```python
 from phonometry import equal_loudness_contour, loudness_level
 
-freqs, spl = equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonos
-phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonos
+freqs, spl = equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonios
+phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonios
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonos con la curva del umbral de audición" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es_dark.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonos con la curva del umbral de audición" style="width:80%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es_dark.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%">
 
-Validez según el apartado 4.1: 20–90 fonos (80 fonos por encima de 4 kHz); la
+Validez según el apartado 4.1: 20–90 fonios (80 fonios por encima de 4 kHz); la
 implementación se verifica en CI contra las tablas del Anexo B. Ojo: esto es la
 sonoridad de *tonos puros* — la sonoridad de señales arbitrarias en sonos es lo
 que calculan los modelos ISO 532 de esta página.
@@ -344,7 +344,7 @@ res = loudness_ecma(x, fs, field="free")
 print(f"N = {res.loudness:.3f} sone_HMS")   # 0.996 sone_HMS
 print(res.specific_loudness.shape)          # (53,) sonoridad específica media N'(z)
 
-res.plot()   # sonoridad específica media N'(z) + N(l) dependiente del tiempo a 187,5 Hz
+res.plot()   # sonoridad específica media N'(z) + N(l) dependiente del tiempo a 187.5 Hz
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es.png" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es_dark.png" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%">

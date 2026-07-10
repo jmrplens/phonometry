@@ -158,7 +158,7 @@ _ES: dict[str, str] = {
     "KI = 1.8·(P − 5) dB for P > 5, else 0":
         "KI = 1.8·(P − 5) dB si P > 5, si no 0",
     "Rating level  LAr,T = 10·lg( (1/T) Σ Δt·10^((LAeq+KI)/10) )":
-        "Nivel de valoración  LAr,T = 10·lg( (1/T) Σ Δt·10^((LAeq+KI)/10) )",
+        "Nivel de evaluación  LAr,T = 10·lg( (1/T) Σ Δt·10^((LAeq+KI)/10) )",
     "impulse-adjusted level over the reference time  (Note 1)":
         "nivel ajustado por impulsos sobre el tiempo de referencia  (Nota 1)",
     "Vertical seat acceleration  az(t)":

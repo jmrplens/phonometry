@@ -1,6 +1,6 @@
 ---
 title: "Prominencia de sonidos impulsivos (NT ACOU 112)"
-description: "El método Nordtest NT ACOU 112:2002 para la prominencia de los sonidos impulsivos: la prominencia prevista P a partir de la tasa de crecimiento y la diferencia de nivel de cada impulso (cláusula 7), el ajuste graduado KI que se suma al LAeq (cláusula 8) y el nivel de valoración sobre un intervalo de tiempo de referencia."
+description: "El método Nordtest NT ACOU 112:2002 para la prominencia de los sonidos impulsivos: la prominencia prevista P a partir de la tasa de crecimiento y la diferencia de nivel de cada impulso (cláusula 7), el ajuste graduado KI que se suma al LAeq (cláusula 8) y el nivel de evaluación sobre un intervalo de tiempo de referencia."
 ---
 
 El ruido con impulsos prominentes — martilleo, remachado, hinca de pilotes — es
@@ -11,7 +11,7 @@ prominencia se lee de dos propiedades del arranque de cada impulso en el
 historial de nivel ponderado A con ponderación temporal F: la rapidez con que
 crece (la **tasa de crecimiento**) y cuánto crece (la **diferencia de nivel**).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112_es.svg" alt="Flujo desde el historial de nivel ponderado A (un arranque es donde el gradiente supera 10 dB/s) hasta la tasa de crecimiento y la diferencia de nivel, la prominencia prevista P = 3 lg(OR) + 2 lg(LD), el ajuste KI = 1,8 (P - 5) para P mayor que 5, y el nivel de valoración sobre el tiempo de referencia" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112_es_dark.svg" alt="Flujo desde el historial de nivel ponderado A (un arranque es donde el gradiente supera 10 dB/s) hasta la tasa de crecimiento y la diferencia de nivel, la prominencia prevista P = 3 lg(OR) + 2 lg(LD), el ajuste KI = 1,8 (P - 5) para P mayor que 5, y el nivel de valoración sobre el tiempo de referencia" style="width:82%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112_es.svg" alt="Flujo desde el historial de nivel ponderado A (un arranque es donde el gradiente supera 10 dB/s) hasta la tasa de crecimiento y la diferencia de nivel, la prominencia prevista P = 3 lg(OR) + 2 lg(LD), el ajuste KI = 1,8 (P - 5) para P mayor que 5, y el nivel de evaluación sobre el tiempo de referencia" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112_es_dark.svg" alt="Flujo desde el historial de nivel ponderado A (un arranque es donde el gradiente supera 10 dB/s) hasta la tasa de crecimiento y la diferencia de nivel, la prominencia prevista P = 3 lg(OR) + 2 lg(LD), el ajuste KI = 1,8 (P - 5) para P mayor que 5, y el nivel de evaluación sobre el tiempo de referencia" style="width:82%">
 
 ## 1. Prominencia prevista (cláusula 7)
 
@@ -42,7 +42,7 @@ Un solo impulso se evalúa directamente con `predicted_prominence`:
 ```python
 import phonometry as ph
 
-# P = 3*lg(1000) + 2*lg(30) = 9 + 2,95 = 11,95.
+# P = 3*lg(1000) + 2*lg(30) = 9 + 2.95 = 11.95.
 print(round(ph.predicted_prominence(1000.0, 30.0), 4))  # 11.9542
 ```
 
@@ -63,7 +63,7 @@ print(float(ph.impulse_adjustment(5.0)))   # 0.0 dB (en el umbral)
 ```
 
 El ajuste se aplica al `LAeq,30min` del evento con la prominencia más alta. El
-**nivel de valoración** sobre un tiempo de referencia mayor combina los niveles
+**nivel de evaluación** sobre un tiempo de referencia mayor combina los niveles
 equivalentes ajustados por impulso de los subintervalos (cláusula 8, Nota 1):
 
 $$
@@ -74,7 +74,7 @@ $$
 ```python
 import phonometry as ph
 
-# Dos periodos de 30 min: uno impulsivo (KI = 7,6 dB), otro tranquilo.
+# Dos periodos de 30 min: uno impulsivo (KI = 7.6 dB), otro tranquilo.
 print(round(ph.rating_level([72.0, 66.0], [7.6, 0.0], [30.0, 30.0], 60.0), 2))
 # 76.78 dB
 ```
@@ -112,5 +112,5 @@ impulsos marcados. El método es un complemento a la medida de ruido ambiental d
 
 **Normas.** NT ACOU 112:2002 (Nordtest), *Prominence of impulsive sounds and for
 adjustment of LAeq* — la prominencia prevista (cláusula 7, Fórmula 1), el ajuste
-al LAeq (cláusula 8, Fórmula 2) y el nivel de valoración (cláusula 8, Nota 1),
+al LAeq (cláusula 8, Fórmula 2) y el nivel de evaluación (cláusula 8, Nota 1),
 con el arranque definido en las cláusulas 4.5-4.7.

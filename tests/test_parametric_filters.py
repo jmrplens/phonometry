@@ -412,7 +412,7 @@ def test_time_weighting_int16_no_overflow() -> None:
     np.testing.assert_allclose(env_int[-1], env_float[-1], rtol=1e-3)
 
 
-def test_calculate_sensitivity_int16_matches_float() -> None:
+def test_sensitivity_int16_matches_float() -> None:
     """
     Verify calibration works with integer reference recordings.
 

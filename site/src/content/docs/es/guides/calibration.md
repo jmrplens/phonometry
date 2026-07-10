@@ -26,6 +26,7 @@ del tono de calibración grabado, en unidades digitales.
 nada cambie en la cadena — si tocas la ganancia, recalibra.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y sensitivity produciendo pascales por unidad digital" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup_es_dark.svg" alt="Cadena de calibración: calibrador acústico acoplado al micrófono, preamplificador, ADC y sensitivity produciendo pascales por unidad digital" style="width:92%">
+
 ## Calibración física (sonómetro)
 
 ```mermaid

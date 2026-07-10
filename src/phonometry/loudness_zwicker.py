@@ -44,6 +44,7 @@ from ._zwicker_data import (
     USL_SLOPES,
     ZUP_BARK_LIMITS,
 )
+from ._validation import require_positive
 from .utils import _typesignal
 
 # Reference intensity for band levels: I_REF = (20 uPa)^2, so that
@@ -656,8 +657,7 @@ def loudness_zwicker(
     diffuse = _validate_field(field)
     if fs <= 0:
         raise ValueError(f"'fs' must be a positive sampling rate, got {fs!r}.")
-    if calibration_factor <= 0:
-        raise ValueError("'calibration_factor' must be positive.")
+    require_positive(calibration_factor, "calibration_factor")
     pressure = _typesignal(x)
     if pressure.ndim != 1:
         raise ValueError(

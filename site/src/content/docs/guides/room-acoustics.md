@@ -399,7 +399,7 @@ Returns an `OpenPlanResult` with `d2s`, `lp_as_4m`, `rd` and `rp`.
 `d2s`/`lp_as_4m` are `nan` if fewer than two positions fall in 2–16 m;
 `rd`/`rp` are `nan` when STI does not decrease with distance. The per-position
 STI can itself be measured with the STIPA tools in the
-[Psychoacoustics guide](/phonometry/guides/psychoacoustics/).
+[Speech Transmission Index guide](/phonometry/guides/speech-transmission/).
 
 ## 4. Sound absorption (ISO 354)
 
@@ -466,8 +466,10 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
   laboratory and predicted sound insulation between spaces, and its measurement uncertainty.
 - [Sound Power](/phonometry/guides/sound-power/) — the `LW` methods that consume the
   ISO 354 absorption area (the ISO 3744 `K2` and the ISO 3741 absorption term).
-- [Psychoacoustics and Speech Intelligibility](/phonometry/guides/psychoacoustics/) — STI/STIPA
-  feeds the open-plan `sti_values`; loudness and sharpness.
+- [Speech Transmission Index](/phonometry/guides/speech-transmission/) — the STI/STIPA
+  measurement that feeds the open-plan `sti_values`.
+- [Psychoacoustics](/phonometry/guides/psychoacoustics/) — loudness, sharpness and the other
+  perception metrics of what the room delivers.
 - [Filter Banks](/phonometry/guides/filter-banks/) — the IEC 61260 fractional-octave filters
   used for band decay curves and insulation spectra.
 - [Levels](/phonometry/guides/levels/) — energy averaging and the level metrics behind

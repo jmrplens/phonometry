@@ -1,14 +1,18 @@
 ---
-title: "Psicoacústica e inteligibilidad del habla"
-description: "Sonoridad de Zwicker (ISO 532-1), Moore-Glasberg (ISO 532-2/3) y Sottek (ECMA-418-2), sharpness (DIN 45692), tonalidad y aspereza, además del índice de transmisión del habla STI/STIPA (IEC 60268-16)."
+title: "Psicoacústica"
+description: "Sonoridad de Zwicker (ISO 532-1), Moore-Glasberg (ISO 532-2/3) y Sottek (ECMA-418-2), sharpness (DIN 45692), curvas isofónicas de ISO 226, y tonalidad y aspereza de ECMA-418-2."
 ---
 
 Las métricas de nivel dicen cuánta *presión sonora* hay; las métricas
 psicoacústicas dicen qué *percibe* realmente quien escucha. Esta página cubre
-la sonoridad (ISO 532-1), el sharpness (DIN 45692) y el índice de transmisión
-del habla (IEC 60268-16), y luego los modelos avanzados de sonoridad, tonalidad
+la sonoridad (ISO 532-1), el sharpness (DIN 45692) y las curvas isofónicas de
+tonos puros (ISO 226), y luego los modelos avanzados de sonoridad, tonalidad
 y aspereza de Moore-Glasberg (ISO 532-2/3) y del modelo de Sottek
-(ECMA-418-2).
+(ECMA-418-2). Las métricas de habla tienen guía propia: el STI/STIPA de canal
+de transmisión en el
+[índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) y
+el SII basado en audibilidad en el
+[índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/).
 
 ## Sonoridad en sonos (ISO 532-1, Zwicker)
 
@@ -135,100 +139,28 @@ CI verifica los valores objetivo de la Tabla A.2 (desde 0,38 acum a 250 Hz
 hasta 2,82 acum a 4 kHz) dentro de la tolerancia del 5 % / 0,05 acum de la
 norma.
 
-## Índice de transmisión del habla (IEC 60268-16)
+## Nivel de sonoridad de tonos puros (ISO 226:2023)
 
-La reverberación y el ruido no amortiguan el habla de manera uniforme —
-emborronan su *envolvente*: las modulaciones lentas de intensidad
-(0,63–12,5 Hz) que transportan las sílabas. El STI cuantifica cuánta de esa
-modulación sobrevive de la boca al oído, por banda de octava, como la
-**función de transferencia de modulación (MTF)** m(F). Un canal tipo delta
-mantiene m = 1 (STI = 1); la reverberación filtra paso-bajo la envolvente
-siguiendo la forma cerrada de Schroeder, y el ruido estacionario la escala:
-
-$$
-m(F) = \frac{1}{\sqrt{1 + \left(2\pi F\ \frac{T_{60}}{13.8}\right)^2}}
-\cdot \frac{1}{1 + 10^{-\mathrm{SNR}/10}}
-$$
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_es.png" alt="STI frente al tiempo de reverberación con las bandas de calificación del Anexo F de IEC 60268-16 sombreadas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_es_dark.png" alt="STI frente al tiempo de reverberación con las bandas de calificación del Anexo F de IEC 60268-16 sombreadas" style="width:80%">
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_es.svg" alt="Cadena de medición del STI: señal de la fuente STIPA a través de la sala hasta el micrófono y el análisis de la MTF" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_es_dark.svg" alt="Cadena de medición del STI: señal de la fuente STIPA a través de la sala hasta el micrófono y el análisis de la MTF" style="width:92%">
+Las curvas isofónicas normales relacionan el SPL de un tono puro con su *nivel
+de sonoridad* percibido en fonos (el SPL de un tono de 1 kHz igual de fuerte).
+`equal_loudness_contour(phon)` evalúa la Fórmula (1) de ISO 226:2023 en las 29
+frecuencias preferentes de tercio de octava de la Tabla 1,
+`loudness_level(spl, frequency)` es la inversa exacta (Fórmula 2) y
+`hearing_threshold()` devuelve la columna del umbral de audición:
 
 ```python
-import numpy as np
-from phonometry import sti_from_impulse_response, stipa, stipa_signal
+from phonometry import equal_loudness_contour, loudness_level
 
-fs = 48000
-# Una respuesta al impulso medida en la sala (decaimiento sintetizado para que el ejemplo funcione)
-ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
-
-# Método indirecto: desde una respuesta al impulso medida en la sala
-res = sti_from_impulse_response(ir, fs, snr=25.0)
-print(f"STI = {res.sti:.2f}  ({res.rating})")   # p. ej. 0.62 (D)
-
-# Medición STIPA directa: reproduce stipa_signal() en la sala y grábala
-test = stipa_signal(fs, seconds=18.0, level_db=80.0)
-recording = test                       # en la práctica, la señal del micrófono tras la reproducción
-res = stipa(recording, fs)
-res.plot()   # barras del índice de transferencia de modulación (MTI) por banda; STI y valoración en el título
+freqs, spl = equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonos
+phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonos
 ```
 
-<details>
-<summary>Ver el código de esta figura</summary>
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonos con la curva del umbral de audición" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es_dark.png" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonos con la curva del umbral de audición" style="width:80%">
 
-```python
-import matplotlib.pyplot as plt
-
-# STI frente al tiempo de reverberación: barre sti_from_impulse_response sobre
-# decaimientos exponenciales sintéticos (ruido blanco x exp(-6.9077 t / T60))
-# en una rejilla de T60 — exactamente la física de la curva de arriba:
-rng = np.random.default_rng(0)
-t60_grid = np.array([0.3, 0.5, 0.8, 1.2, 1.6, 2.0, 2.5, 3.0, 4.0, 5.0])
-sti_values = []
-for t60 in t60_grid:
-    t = np.arange(int(2 * t60 * fs)) / fs
-    ir = rng.standard_normal(t.size) * np.exp(-6.9077 * t / t60)
-    sti_values.append(sti_from_impulse_response(ir, fs).sti)
-
-fig, ax = plt.subplots()
-ax.semilogx(t60_grid, sti_values, "o-")
-ax.set_xlabel("Tiempo de reverberación T60 [s]")
-ax.set_ylabel("STI")
-ax.set_ylim(0.0, 1.0)
-ax.grid(True, which="both", alpha=0.3)
-plt.show()
-```
-
-</details>
-
-`stipa` emite un `UserWarning` cuando la grabación es más corta que los 15 s
-recomendados (práctica STIPA de IEC 60268-16, de 15 s a 25 s): por debajo de eso
-las componentes de modulación lentas se promedian sobre muy pocos periodos y el
-STI queda sesgado a la baja (un lazo ideal da STI ≈ 0,944 a 5 s frente a
-≈ 0,998 a 18 s).
-
-La implementación sigue la **Edición 5 (2020)**: el PDF normativo de la
-Edición 4 es la base y cada cambio de la Ed. 5 está atribuido a su fuente en el
-código — el único delta numérico es el espectro de habla masculina revisado del
-apartado A.6.1. CI comprueba los vectores de verificación de la propia norma:
-los seis pares de bandas de los factores de ponderación a ±0,001 STI, la tabla
-de correspondencia m ↔ STI, los puntos de control del enmascaramiento
-dependiente del nivel y decaimientos con la forma de Schroeder a cuatro valores
-de T₆₀.
-
-### Parámetros de `sti_from_impulse_response()` / `stipa()`
-
-| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
-| :--- | :--- | :--- | :--- | :--- |
-| `ir` / `x` | array 1D | cualquiera / Pa | no vacío | Respuesta al impulso (indirecto) o grabación STIPA (directo) |
-| `fs` | int | Hz | > 0 | |
-| `snr` | float o vector de 7, opcional | dB | por defecto `None` | Añade la degradación por ruido estacionario |
-| `level` | vector de 7, opcional | dB SPL | por defecto `None` | Activa el enmascaramiento auditivo + umbral de recepción (Tablas A.2/A.3) |
-| `ambient` | vector de 7, opcional | dB SPL | requiere `level` | Niveles de banda del ruido ambiente |
-| `reference` | array 1D, opcional (`stipa`) | — | por defecto `None` | Señal de la fuente medida en lugar del m = 0,55 nominal |
-
-Ambas devuelven `STIResult`: `sti`, `mti` (7 bandas), `mtf` (7×14 o 7×2),
-`band_levels`, `rating` (letra del Anexo F, `A+`…`U`).
+Validez según el apartado 4.1: 20–90 fonos (80 fonos por encima de 4 kHz); la
+implementación se verifica en CI contra las tablas del Anexo B. Ojo: esto es la
+sonoridad de *tonos puros* — la sonoridad de señales arbitrarias en sonos es lo
+que calculan los modelos ISO 532 de esta página.
 
 ## Modelos avanzados de sonoridad y calidad sonora
 
@@ -571,6 +503,8 @@ R(l50)), `specific_roughness` (R′(z), 53 bandas), `bark`, `centre_frequencies`
 `time`, `roughness_vs_time` (R(l50)), `specific_roughness_vs_time`
 (array de (n_times, 53)), `field`.
 
-Consulta [Niveles](/phonometry/es/guides/levels/) para las métricas de
-tonalidad y [Teoría](/phonometry/es/reference/theory/) para la matemática
-subyacente.
+Consulta [Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/)
+para los veredictos TNR/PR de ECMA-418-1, el
+[índice de transmisión del habla](/phonometry/es/guides/speech-transmission/)
+para el STI/STIPA, y [Teoría](/phonometry/es/reference/theory/) para la
+matemática subyacente.

@@ -264,7 +264,7 @@ The three parameters come from Table 1 (p. 4), tabulated at the 29 preferred thi
 
 The standard specifies **no interpolation** between the tabulated frequencies. Formula (1) is specified for **20 phon to 90 phon** between 20 Hz and 4 kHz, and only up to **80 phon between 5 kHz and 12.5 kHz** — above 80 phon the contour therefore stops at 4 kHz. Values outside these limits from Formula (2) are extrapolations the standard labels as informative only.
 
-See the [Levels guide](/phonometry/guides/levels/) for usage.
+See the [Psychoacoustics guide](/phonometry/guides/psychoacoustics/) for usage.
 
 ## Tone prominence: TNR and PR (ECMA-418-1)
 
@@ -284,7 +284,7 @@ $$
 
 **PR** (clause 12) compares the level of the critical band centred on the tone, $L_M$, with the mean power of the two **contiguous** critical bands $L_L$, $L_U$ (edges from the fitted Formulae 21–22 with Tables 2–3): $\mathrm{PR} = 10\log_{10} P_M - 10\log_{10}\left[(P_L + P_U)/2\right]$ (Formula 23). For $f_t \le 171.4$ Hz the lower band is truncated at 20 Hz and its power rescaled to a **100 Hz bandwidth** (Formula 24). The criterion (Formulae 25–26) is 9.0 dB at $f_t \ge 1$ kHz, rising as $9.0 + 10.0\log_{10}(1000/f_t)$ below. Tones are assessed within the 89.1 Hz – 11.2 kHz range of interest (clauses 11.5 / 12.6).
 
-See the [Levels guide](/phonometry/guides/levels/) for usage.
+See the [Prominent Discrete Tones guide](/phonometry/guides/tone-prominence/) for usage.
 
 ## Event and dose metrics
 
@@ -502,7 +502,7 @@ $$
 m_{dr} = \frac{2 \sqrt{\left( \sum_t I_k(t) \sin 2 \pi f_m t \right)^2 + \left( \sum_t I_k(t) \cos 2 \pi f_m t \right)^2}}{\sum_t I_k(t)}, \qquad m = \frac{m_{dr}}{0.55}
 $$
 
-See the [Psychoacoustics guide](/phonometry/guides/psychoacoustics/) for usage.
+See the [Speech Transmission Index guide](/phonometry/guides/speech-transmission/) for usage.
 
 ## Speech Intelligibility Index (ANSI S3.5)
 
@@ -783,7 +783,8 @@ Uncorrelated components combine in quadrature $u_c = \sqrt{\sum u_i^2}$
 (Formula A.7), and the uncorrelated single-number uncertainty is the
 energy-weighted quadrature sum of the band uncertainties (Formula B.2).
 
-See the [Room and Building Acoustics guide](/phonometry/guides/room-acoustics/) for usage.
+See the [Room Acoustics](/phonometry/guides/room-acoustics/) and
+[Building Acoustics](/phonometry/guides/building-acoustics/) guides for usage.
 
 ## Outdoor propagation and occupational exposure (ISO 9613-1/2, ISO 9612)
 
@@ -890,10 +891,10 @@ examples of Annexes D (task, $L_{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (job,
 $88.1$ dB, $3.8$ dB) and F (full-day, $90.1$ dB, $3.4$ dB) are reproduced to
 the standard's printed precision — every intermediate of Annex E is digit-exact,
 and its final level differs only by the standard's own pre-rounding of the
-effective-day level (see the [Levels guide](/phonometry/guides/levels/)).
+effective-day level (see the [Occupational Noise Exposure guide](/phonometry/guides/occupational-exposure/)).
 
 See the [Outdoor Propagation guide](/phonometry/guides/outdoor-propagation/) and the
-[Levels guide](/phonometry/guides/levels/) for usage.
+[Occupational Noise Exposure guide](/phonometry/guides/occupational-exposure/) for usage.
 
 ## Sound power determination (ISO 3744/3745/3746, ISO 3741, ISO 9614-2/3)
 

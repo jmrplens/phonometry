@@ -10,6 +10,13 @@ listener, `1` when the whole speech-bearing spectrum is audible. This page
 covers the **one-third-octave-band method** of **ANSI S3.5-1997 (R2017)** — 18
 bands from 160 Hz to 8000 Hz.
 
+> [!NOTE]
+> **SII vs STI.** The SII predicts intelligibility from *audibility* — how much
+> of the speech spectrum clears the noise and the hearing threshold at the
+> listener's ear — while the STI characterises a *transmission channel*: how
+> much of the speech modulation a room or sound system preserves. For the
+> latter, see the [Speech Transmission Index guide](speech-transmission.md).
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_speech_intelligibility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_speech_intelligibility.svg" alt="The SII computation flow: three equivalent-spectrum-level inputs (speech Ei', noise Ni', hearing threshold Ti') feed the self-speech masking and spread-of-masking stage (equivalent masking spectrum level Zi), then the equivalent disturbance Di, then the band-audibility function Ai clipped to [0, 1], and finally the band-importance-weighted sum SII = sum of Ii*Ai over the 18 one-third-octave bands" width="94%"></picture>
 
 ## 1. Inputs and the band-importance function

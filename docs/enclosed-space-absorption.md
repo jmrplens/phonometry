@@ -7,7 +7,7 @@ room and its **reverberation time** from the absorption of its surfaces and
 objects — the design counterpart of the measured reverberation time. It is the
 absorption member of the EN 12354 building-acoustics family (the airborne and
 impact insulation members live in
-[Room and Building Acoustics](room-acoustics.md)).
+[Building Acoustics](building-acoustics.md)).
 phonometry implements the normative Clause 4 model. (The informative Annex D
 method for irregular spaces is out of scope.)
 
@@ -112,7 +112,7 @@ plt.show()
 The `ReverberationResult` carries the per-band absorption area and reverberation
 time, the volume and the object fraction, and its `.plot()` draws the
 reverberation-time spectrum. This is the prediction counterpart of the measured
-reverberation time in [Room and Building Acoustics](room-acoustics.md)
+reverberation time in [Room Acoustics](room-acoustics.md)
 (ISO 3382) and of the reverberation-room absorption of
 [Acoustic Materials](materials.md) (ISO 354).
 

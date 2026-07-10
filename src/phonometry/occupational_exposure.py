@@ -44,12 +44,12 @@ from __future__ import annotations
 import warnings
 from dataclasses import dataclass, field, replace
 from math import log10, sqrt
-from typing import Dict, Literal, Sequence, Tuple
+from typing import Any, Dict, Literal, Sequence, Tuple
 
 import numpy as np
 
 from ._levels_math import energy_mean
-from ._warnings import PhonometryWarning
+from ._warnings import PhonometryWarning, _warn_renamed
 
 #: Reference duration T0 = 8 h (Clause 4).
 _T0: float = 8.0
@@ -73,7 +73,7 @@ INSTRUMENT_U2: Dict[str, float] = {
 }
 
 
-class ExposureWarning(PhonometryWarning):
+class OccupationalExposureWarning(PhonometryWarning):
     """Advisory raised when an ISO 9612 sampling rule recommends more measurements."""
 
 
@@ -303,7 +303,7 @@ def task_based_exposure(
     :param u3: Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0).
     :param include_duration_uncertainty: Include the ``(c1b*u1b)^2`` duration term
         (Eq C.3). When False the budget omits it (ISO 9612 Annex D case a).
-    :param warn: Emit :class:`ExposureWarning` when a task triggers the 3 dB
+    :param warn: Emit :class:`OccupationalExposureWarning` when a task triggers the 3 dB
         spread rule (Clause 9.3).
     :return: An :class:`ExposureResult` with per-task contributions.
     """
@@ -362,7 +362,7 @@ def task_based_exposure(
                 f"Task '{label}': the {n} measurements span {sample_range:.1f} dB "
                 "(>= 3 dB); ISO 9612 Clause 9.3 recommends additional measurements, "
                 "subdivision, or longer measurement durations.",
-                ExposureWarning,
+                OccupationalExposureWarning,
                 stacklevel=2,
             )
         contributions.append(
@@ -433,7 +433,7 @@ def _sampled_exposure(
             f"Job/full-day sampling contribution c1*u1 = {c1u1:.1f} dB exceeds "
             "3.5 dB (ISO 9612 Table C.4 / Clause 10.4); revise the exposure group "
             "or increase the number of measurements.",
-            ExposureWarning,
+            OccupationalExposureWarning,
             stacklevel=3,
         )
     return ExposureResult(
@@ -479,7 +479,7 @@ def job_based_exposure(
         Table 1 and an advisory is raised if it falls short.
     :param sample_duration_hours: Optional per-sample duration (hours) for the
         Table 1 cumulative-duration check.
-    :param warn: Emit :class:`ExposureWarning` for the Table C.4 / Table 1 advisories.
+    :param warn: Emit :class:`OccupationalExposureWarning` for the Table C.4 / Table 1 advisories.
     :return: An :class:`ExposureResult`.
     """
     if sample_duration_hours is not None and sample_duration_hours <= 0.0:
@@ -495,7 +495,7 @@ def job_based_exposure(
                 warnings.warn(
                     f"Cumulative measurement duration {cumulative:.2f} h is below the "
                     f"Table 1 minimum of {required:.2f} h for {n_workers} workers.",
-                    ExposureWarning,
+                    OccupationalExposureWarning,
                     stacklevel=2,
                 )
             result = _with_advisory(result)
@@ -522,7 +522,7 @@ def full_day_exposure(
     :param effective_duration_hours: Effective working-day duration ``T_e``, hours.
     :param instrument: Instrument class selecting ``u2`` (Table C.5).
     :param u3: Microphone-position standard uncertainty, dB (Clause C.6 gives 1.0).
-    :param warn: Emit :class:`ExposureWarning` for the 3 dB spread rule and the
+    :param warn: Emit :class:`OccupationalExposureWarning` for the 3 dB spread rule and the
         Table C.4 advisory.
     :return: An :class:`ExposureResult`.
     """
@@ -532,7 +532,7 @@ def full_day_exposure(
         warnings.warn(
             f"Only three full-day measurements spanning {float(arr.max() - arr.min()):.1f} dB "
             "(>= 3 dB); ISO 9612 Clause 11.3 requires at least two additional measurements.",
-            ExposureWarning,
+            OccupationalExposureWarning,
             stacklevel=2,
         )
     return _sampled_exposure(
@@ -543,3 +543,19 @@ def full_day_exposure(
 def _with_advisory(result: ExposureResult) -> ExposureResult:
     """Return a copy of ``result`` with the sampling advisory flag set."""
     return replace(result, sampling_advisory=True)
+
+
+# --- Deprecated alias (phonometry 3.1 rename; remove in 4.0) -------------
+
+def __getattr__(name: str) -> Any:
+    """PEP 562 shim warning for the renamed warning class.
+
+    Returns the class object itself, so ``isinstance``/``except`` checks and
+    warning filters against the old name keep matching the new one.
+    """
+    if name == "ExposureWarning":
+        _warn_renamed("ExposureWarning", "OccupationalExposureWarning")
+        return OccupationalExposureWarning
+    raise AttributeError(
+        f"module 'phonometry.occupational_exposure' has no attribute {name!r}"
+    )

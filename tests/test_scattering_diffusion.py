@@ -26,7 +26,7 @@ import numpy as np
 import pytest
 
 from phonometry.scattering_diffusion import (
-    BASE_PLATE_BANDS_HZ,
+    BASE_PLATE_BANDS,
     BASE_PLATE_MAX_SCATTERING,
     TWO_DIMENSIONAL_SOURCE_WEIGHTS,
     DiffusionResult,
@@ -165,8 +165,11 @@ def test_base_plate_scattering_zero_when_t1_equals_t3() -> None:
 # ISO 17497-1 Table 1 base-plate limits and the over-limit warning.
 # ---------------------------------------------------------------------------
 def test_table1_exact_values_spot_bands() -> None:
-    assert len(BASE_PLATE_MAX_SCATTERING) == 18
-    assert BASE_PLATE_BANDS_HZ == tuple(BASE_PLATE_MAX_SCATTERING)
+    assert BASE_PLATE_BANDS == (
+        100, 125, 160, 200, 250, 315, 400, 500, 630,
+        800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000,
+    )
+    assert BASE_PLATE_BANDS == tuple(BASE_PLATE_MAX_SCATTERING)
     assert BASE_PLATE_MAX_SCATTERING[100] == 0.05
     assert BASE_PLATE_MAX_SCATTERING[500] == 0.05
     assert BASE_PLATE_MAX_SCATTERING[630] == 0.10
@@ -179,7 +182,7 @@ def test_table1_exact_values_spot_bands() -> None:
 
 
 def test_base_plate_within_limits_no_warning() -> None:
-    values = {b: BASE_PLATE_MAX_SCATTERING[b] for b in BASE_PLATE_BANDS_HZ}
+    values = {b: BASE_PLATE_MAX_SCATTERING[b] for b in BASE_PLATE_BANDS}
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         exceeded = check_base_plate_scattering(values)
@@ -187,7 +190,7 @@ def test_base_plate_within_limits_no_warning() -> None:
 
 
 def test_base_plate_over_limit_warns_and_lists_bands() -> None:
-    values = {b: 0.0 for b in BASE_PLATE_BANDS_HZ}
+    values = {b: 0.0 for b in BASE_PLATE_BANDS}
     values[100] = 0.06  # limit 0.05
     values[5000] = 0.30  # limit 0.25
     with pytest.warns(ScatteringDiffusionWarning):
@@ -196,7 +199,7 @@ def test_base_plate_over_limit_warns_and_lists_bands() -> None:
 
 
 def test_base_plate_checker_accepts_sequence() -> None:
-    seq = [BASE_PLATE_MAX_SCATTERING[b] for b in BASE_PLATE_BANDS_HZ]
+    seq = [BASE_PLATE_MAX_SCATTERING[b] for b in BASE_PLATE_BANDS]
     assert check_base_plate_scattering(seq) == ()
 
 
@@ -416,7 +419,7 @@ def test_base_plate_checker_rejects_wrong_length() -> None:
 
 
 def test_base_plate_checker_rejects_missing_band() -> None:
-    incomplete = {b: 0.0 for b in BASE_PLATE_BANDS_HZ if b != 500}
+    incomplete = {b: 0.0 for b in BASE_PLATE_BANDS if b != 500}
     with pytest.raises(ValueError):
         check_base_plate_scattering(incomplete)
 

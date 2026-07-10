@@ -31,7 +31,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: site/pnpm-lock.yaml
       - name: Regenerate llms.txt from docs (freshness guarantee)
-        run: python3 scripts/gen_llms.py
+        run: python3 scripts/generate_llms.py
       - name: Check EN/ES translation parity
         run: node scripts/check-i18n-parity.mjs
         working-directory: site

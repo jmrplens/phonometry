@@ -937,7 +937,7 @@ def _chk_iso12999_table2_band() -> Outcome:
 def _chk_iso12999_expanded() -> Outcome:
     u = ref.ISO12999_1_RW_A_STANDARD_UNCERTAINTY
     expected = ref.ISO12999_1_COVERAGE_K_95 * u
-    computed = float(ph.expanded_uncertainty(u, coverage=0.95))
+    computed = float(ph.insulation_expanded_uncertainty(u, coverage=0.95))
     return numeric(expected, computed, 1e-9, unit="dB", places=6)
 
 
@@ -1350,19 +1350,19 @@ _SII = "Speech intelligibility (ANSI S3.5-1997)"
 @register(_SII, "ANSI S3.5-1997 Table 3", "Band-importance function normalisation")
 def _chk_sii_band_importance_sum() -> Outcome:
     total = float(ph.sii.BAND_IMPORTANCE.sum())
-    return numeric(ref.SII_BAND_IMPORTANCE_SUM, total, 1e-9, places=6)
+    return numeric(ref.ANSIS3_5_BAND_IMPORTANCE_SUM, total, 1e-9, places=6)
 
 
 @register(_SII, "ANSI S3.5-1997 clause 5.4", "Equivalent masking spectrum level at 200 Hz")
 def _chk_sii_masking() -> Outcome:
     result = ph.speech_intelligibility_index("normal")
-    return numeric(ref.SII_MASKING_Z_200HZ, float(result.masking[1]), 1e-3, places=3)
+    return numeric(ref.ANSIS3_5_MASKING_Z_200HZ, float(result.masking[1]), 1e-3, places=3)
 
 
 @register(_SII, "ANSI S3.5-1997 clause 6", "SII, standard speech in quiet, normal hearing")
 def _chk_sii_standard_quiet() -> Outcome:
     result = ph.speech_intelligibility_index("normal")
-    return numeric(ref.SII_STANDARD_QUIET, result.sii, 5e-4, places=4)
+    return numeric(ref.ANSIS3_5_STANDARD_QUIET, result.sii, 5e-4, places=4)
 
 
 @register(_SII, "ANSI S3.5-1997 Table 3", "Loud-effort speech spectrum level at 1 kHz")
@@ -1370,22 +1370,22 @@ def _chk_sii_loud_spectrum() -> Outcome:
     from phonometry.sii import standard_speech_spectrum
 
     value = float(standard_speech_spectrum("loud")[8])
-    return numeric(ref.SII_LOUD_1KHZ, value, 1e-9, unit="dB", places=2)
+    return numeric(ref.ANSIS3_5_LOUD_1KHZ, value, 1e-9, unit="dB", places=2)
 
 
 _NTA = "Impulsive-sound prominence (NT ACOU 112)"
 
 
 @register(_NTA, "NT ACOU 112:2002 Formula 1", "Predicted prominence, OR=1000 dB/s, LD=30 dB")
-def _chk_ntacou_prominence() -> Outcome:
+def _chk_impulse_prominence() -> Outcome:
     value = float(ph.predicted_prominence(1000.0, 30.0))
-    return numeric(ref.NTACOU_PROMINENCE, value, 1e-4, places=4)
+    return numeric(ref.NTACOU112_PROMINENCE, value, 1e-4, places=4)
 
 
 @register(_NTA, "NT ACOU 112:2002 Formula 2", "Adjustment KI to LAeq at prominence P=10")
-def _chk_ntacou_adjustment() -> Outcome:
+def _chk_impulse_adjustment() -> Outcome:
     value = float(ph.impulse_adjustment(10.0))
-    return numeric(ref.NTACOU_ADJUSTMENT_P10, value, 1e-9, unit="dB", places=3)
+    return numeric(ref.NTACOU112_ADJUSTMENT_P10, value, 1e-9, unit="dB", places=3)
 
 
 _RN = "Room noise (ANSI S12.2-2019)"
@@ -1394,17 +1394,17 @@ _RN = "Room noise (ANSI S12.2-2019)"
 @register(_RN, "ANSI S12.2-2019 Table 1", "NC-40 curve, tangency self-consistency")
 def _chk_rn_nc_self() -> Outcome:
     rating = ph.noise_criterion(ph.nc_curve(40.0)).rating
-    return numeric(ref.RN_NC40_SELF, rating, 1e-9, places=3)
+    return numeric(ref.ANSIS12_2_NC40_SELF, rating, 1e-9, places=3)
 
 
 @register(_RN, "ANSI S12.2-2019 Table D.1", "RC-31 Mark II curve, 63 Hz level")
 def _chk_rn_rc_curve() -> Outcome:
-    return numeric(ref.RN_RC31_63HZ, float(ph.rc_curve(31.0)[2]), 1e-9, places=3)
+    return numeric(ref.ANSIS12_2_RC31_63HZ, float(ph.rc_curve(31.0)[2]), 1e-9, places=3)
 
 
 @register(_RN, "ANSI S12.2-2019 clause D.4", "RC-35 curve, mid-frequency average LMF")
 def _chk_rn_rc_lmf() -> Outcome:
-    return numeric(ref.RN_RC35_LMF, ph.room_criterion(ph.rc_curve(35.0)).lmf, 1e-9, places=3)
+    return numeric(ref.ANSIS12_2_RC35_LMF, ph.room_criterion(ph.rc_curve(35.0)).lmf, 1e-9, places=3)
 
 
 _HEAR = "Hearing threshold (ISO 7029 / ISO 389-7)"
@@ -1413,19 +1413,19 @@ _HEAR = "Hearing threshold (ISO 7029 / ISO 389-7)"
 @register(_HEAR, "ISO 7029:2017 Table 1", "Median threshold, male age 60 at 4 kHz")
 def _chk_hearing_median() -> Outcome:
     value = float(ph.age_threshold(60, "male", 0.5).median[8])
-    return numeric(ref.HEARING_MEDIAN_MALE_60_4KHZ, value, 1e-3, unit="dB", places=3)
+    return numeric(ref.ISO7029_MEDIAN_MALE_60_4KHZ, value, 1e-3, unit="dB", places=3)
 
 
 @register(_HEAR, "ISO 7029:2017 Table 2", "Upper spread su, male age 60 at 1 kHz")
 def _chk_hearing_spread() -> Outcome:
     value = float(ph.age_threshold(60, "male", 0.5).spread_upper[4])
-    return numeric(ref.HEARING_SU_MALE_60_1KHZ, value, 1e-3, unit="dB", places=3)
+    return numeric(ref.ISO7029_SU_MALE_60_1KHZ, value, 1e-3, unit="dB", places=3)
 
 
 @register(_HEAR, "ISO 389-7:2006 Table 1", "Free-field reference threshold at 1 kHz")
 def _chk_hearing_reference() -> Outcome:
     value = float(ph.reference_threshold("free-field")[4])
-    return numeric(ref.HEARING_REF_FREE_1KHZ, value, 1e-9, unit="dB", places=3)
+    return numeric(ref.ISO389_7_REF_FREE_1KHZ, value, 1e-9, unit="dB", places=3)
 
 
 _GUM = "Measurement uncertainty (GUM / Supplement 1)"

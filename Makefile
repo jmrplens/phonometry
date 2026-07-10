@@ -53,7 +53,7 @@ og:
 	$(PYTHON) -c "import sys; sys.path.insert(0, 'scripts'); import generate_graphs as g; g.generate_og_image()"
 
 llms:
-	$(PYTHON) scripts/gen_llms.py
+	$(PYTHON) scripts/generate_llms.py
 
 # Regenerate the committed, versioned numerical conformance report. The
 # --file-header flag prepends the "do not hand-edit" note; the body is exactly

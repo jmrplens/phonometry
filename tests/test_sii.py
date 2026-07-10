@@ -20,7 +20,12 @@ def test_band_importance_sums_to_one() -> None:
     # ANSI S3.5-1997 Table 3: the band-importance function is normalised.
     assert sii.BAND_IMPORTANCE.sum() == pytest.approx(1.0, abs=1e-12)
     assert sii.BAND_IMPORTANCE.size == 18
-    assert sii.BAND_CENTRES.size == 18
+    np.testing.assert_allclose(
+        sii.BAND_CENTERS,
+        [160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0,
+         1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0,
+         8000.0],
+    )
 
 
 def test_sii_standard_speech_in_quiet() -> None:
@@ -85,7 +90,7 @@ def test_vocal_effort_spectra_spot_values() -> None:
 def test_vocal_effort_overall_level_increases() -> None:
     # The overall speech level grows with vocal effort (Table 3): reconstruct
     # each spectrum's overall free-field SPL and check it is monotone.
-    f = sii.BAND_CENTRES
+    f = sii.BAND_CENTERS
     bw = (2.0 ** (1 / 6) - 2.0 ** (-1 / 6)) * f
     overall = [
         10.0 * np.log10(
@@ -134,7 +139,7 @@ def test_result_fields_present() -> None:
     assert result.band_importance.shape == (18,)
     assert result.disturbance.shape == (18,)
     assert result.masking.shape == (18,)
-    np.testing.assert_allclose(result.frequencies, sii.BAND_CENTRES)
+    np.testing.assert_allclose(result.frequencies, sii.BAND_CENTERS)
 
 
 def test_plot_returns_axes() -> None:

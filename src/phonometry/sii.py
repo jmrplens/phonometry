@@ -29,12 +29,14 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike
 
+from ._warnings import _warn_renamed
+
 # ---------------------------------------------------------------------------
 # Normative constants - ANSI S3.5-1997, one-third-octave-band method (Table 3).
 # ---------------------------------------------------------------------------
 
 #: One-third-octave band centre frequencies, in hertz (18 bands, Table 3).
-BAND_CENTRES: np.ndarray = np.array(
+BAND_CENTERS: np.ndarray = np.array(
     [160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0,
      1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0],
     dtype=np.float64,
@@ -85,7 +87,7 @@ REFERENCE_INTERNAL_NOISE: np.ndarray = np.array(
     dtype=np.float64,
 )
 
-_N_BANDS = BAND_CENTRES.size
+_N_BANDS = BAND_CENTERS.size
 VOCAL_EFFORTS: tuple[str, ...] = ("normal", "raised", "loud", "shout")
 
 
@@ -185,7 +187,7 @@ def speech_intelligibility_index(
         if threshold is None
         else _as_band_vector(threshold, "threshold")
     )
-    f = BAND_CENTRES
+    f = BAND_CENTERS
 
     # Clause 5.4 - self-speech masking and the upward spread of masking.
     v = e - 24.0
@@ -216,3 +218,13 @@ def speech_intelligibility_index(
         disturbance=d,
         masking=z,
     )
+
+
+# --- Deprecated alias (phonometry 3.1 rename; remove in 4.0) -------------
+
+def __getattr__(name: str) -> Any:
+    """PEP 562 shim warning for the renamed band-center constant."""
+    if name == "BAND_CENTRES":
+        _warn_renamed("BAND_CENTRES", "BAND_CENTERS")
+        return BAND_CENTERS
+    raise AttributeError(f"module 'phonometry.sii' has no attribute {name!r}")

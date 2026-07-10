@@ -96,7 +96,7 @@ from the official text into the test suite, so any regression fails CI:
 | IEC 61672-1:2013 Table 5 | `lc_peak()` one-cycle/half-cycle peak responses, class 1 limits | `tests/test_levels.py` |
 | IEC 61260-1:2014 Table 1 | Filter-bank class 1/2 acceptance limits via `verify_filter_class()` | `tests/test_compliance.py` |
 | ISO 7196:1995 Table 2 | G weighting (infrasound) at every nominal response value, 0.25–315 Hz | `tests/test_g_weighting.py` |
-| ISO 226:2023 Annex B | Equal-loudness contours, loudness levels and hearing threshold against the Annex B tables | `tests/test_equal_loudness.py` |
+| ISO 226:2023 Annex B | Equal-loudness contours, loudness levels and hearing threshold against the Annex B tables | `tests/test_loudness_contours.py` |
 | ECMA-418-1:2024 | TNR/PR tone prominence: critical bandwidths, proximity spacing and prominence criteria against the worked examples in clauses 10–12 | `tests/test_tonality.py` |
 | ISO 1996-1:2016 | `lden()`, `ldn()` and `composite_rating_level()` against hand-computed formula values | `tests/test_environmental.py` |
 | IEC 60942:2017 Table 2 | Calibrator short-term stability limits (frequency-dependent, class 1) in `sensitivity()` | `tests/test_calibration_validation.py` |

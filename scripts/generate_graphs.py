@@ -3496,9 +3496,9 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     """ANSI S3.5-1997 Table 3 standard speech spectra by vocal effort."""
     print("Generating sii_vocal_efforts.png...")
     from phonometry import speech_intelligibility_index, standard_speech_spectrum
-    from phonometry.sii import BAND_CENTRES, VOCAL_EFFORTS
+    from phonometry.sii import BAND_CENTERS, VOCAL_EFFORTS
 
-    freqs = BAND_CENTRES
+    freqs = BAND_CENTERS
     # Distinct hues (not COLOR_GRID, which blends into the gridlines and is
     # near-invisible on a light background) for the four ordered efforts.
     colours = {"normal": COLOR_TERTIARY, "raised": "#7f7f7f",

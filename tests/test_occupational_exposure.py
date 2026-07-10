@@ -19,7 +19,7 @@ from phonometry.occupational_exposure import (
     COVERAGE_FACTOR,
     INSTRUMENT_U2,
     ExposureResult,
-    ExposureWarning,
+    OccupationalExposureWarning,
     Task,
     TaskContribution,
     full_day_exposure,
@@ -140,7 +140,7 @@ def _annex_d_tasks() -> list[Task]:
 
 def test_annex_d_task_levels_and_contributions():
     """Annex D: task levels 80.8/90.1 dB and contributions 62.7/78.8/82.8 dB."""
-    with pytest.warns(ExposureWarning):  # cutting/grinding spans > 3 dB
+    with pytest.warns(OccupationalExposureWarning):  # cutting/grinding spans > 3 dB
         result = task_based_exposure(_annex_d_tasks())
     by_label = {t.label: t for t in result.tasks}
     assert by_label["welding"].lp_aeqt == pytest.approx(80.8, abs=0.05)
@@ -252,7 +252,7 @@ def test_annex_e_table1_satisfied_no_advisory():
 def test_job_based_below_table1_minimum_warns():
     """Too-short cumulative duration raises the Table 1 advisory."""
     samples = [88.0, 86.0, 89.0, 86.0, 91.0]
-    with pytest.warns(ExposureWarning):
+    with pytest.warns(OccupationalExposureWarning):
         result = job_based_exposure(
             samples, 8.0, n_workers=18, sample_duration_hours=0.5
         )
@@ -279,7 +279,7 @@ def test_annex_f_full_day():
 
 def test_full_day_three_measurements_spread_advisory():
     """Three full-day measurements spanning >= 3 dB trip the Clause 11.3 advisory."""
-    with pytest.warns(ExposureWarning):
+    with pytest.warns(OccupationalExposureWarning):
         result = full_day_exposure([85.0, 89.0, 86.0], 8.0)
     assert result.sampling_advisory is True
 
@@ -296,7 +296,7 @@ def test_full_day_three_close_measurements_no_advisory():
 def test_job_based_high_spread_triggers_c4_advisory():
     """A large sampling spread pushes c1*u1 above 3.5 dB and warns (Clause 10.4)."""
     samples = [70.0, 80.0, 90.0, 75.0, 85.0]  # wide spread, small N
-    with pytest.warns(ExposureWarning):
+    with pytest.warns(OccupationalExposureWarning):
         result = job_based_exposure(samples, 8.0)
     assert result.c1u1 is not None and result.c1u1 > 3.5
     assert result.sampling_advisory is True

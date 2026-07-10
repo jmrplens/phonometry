@@ -511,7 +511,7 @@ Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) pa
 
 ## Índice de inteligibilidad del habla (ANSI S3.5)
 
-Mientras el STI caracteriza un canal de transmisión, el SII (ANSI S3.5-1997) predice la inteligibilidad a partir de lo que el oyente puede oír realmente: 18 bandas de tercio de octava de 160 Hz a 8 kHz, cada una con su importancia de banda $I_i$ (Tabla 3, $\sum I_i = 1$, con máximo cerca de 2 kHz). Todas las entradas son niveles espectrales equivalentes (cláusulas 3.11/3.55). El habla se enmascara a sí misma hacia arriba: el espectro de enmascaramiento de cada banda $Z_i$ (cláusula 5.4) acumula las bandas inferiores con pendientes $C_i = -80 + 0{,}6\,(B_i + 10 \lg f_i - 6{,}353)$ dB, y la perturbación es la suma energética del enmascaramiento y del suelo auditivo, $D_i = 10 \lg(10^{0.1 Z_i} + 10^{0.1 X'_i})$ con $X'_i = X_i + T'_i$ el espectro de ruido interno de referencia más el desplazamiento del umbral de audición del oyente (cláusulas 5.5/5.6). La audibilidad de banda recorta el margen habla-perturbación al intervalo $[0, 1]$ (cláusula 5.8), un factor de distorsión de nivel descuenta la presentación excesivamente alta (cláusula 5.7), y el índice suma (cláusula 6):
+Mientras el STI caracteriza un canal de transmisión, el SII (ANSI S3.5-1997) predice la inteligibilidad a partir de lo que el oyente puede oír realmente: 18 bandas de tercio de octava de 160 Hz a 8 kHz, cada una con su importancia de banda $I_i$ (Tabla 3, $\sum I_i = 1$, con máximo cerca de 2 kHz). Todas las entradas son niveles espectrales equivalentes (cláusulas 3.11/3.55). El habla se enmascara a sí misma hacia arriba: el espectro de enmascaramiento de cada banda $Z_i$ (cláusula 5.4) acumula las bandas inferiores con pendientes $C_i = -80 + 0{,}6\,(B_i + 10 \lg f_i - 6{,}353)$ dB, y la perturbación es la suma energética del enmascaramiento y del suelo auditivo, $D_i = 10 \lg(10^{0{,}1 Z_i} + 10^{0{,}1 X'_i})$ con $X'_i = X_i + T'_i$ el espectro de ruido interno de referencia más el desplazamiento del umbral de audición del oyente (cláusulas 5.5/5.6). La audibilidad de banda recorta el margen habla-perturbación al intervalo $[0, 1]$ (cláusula 5.8), un factor de distorsión de nivel descuenta la presentación excesivamente alta (cláusula 5.7), y el índice suma (cláusula 6):
 
 $$
 A_i = \operatorname{clip}\Big( \frac{E'_i - D_i + 15}{30},\ 0,\ 1 \Big), \qquad
@@ -948,7 +948,7 @@ semianecoica cualificada elimina el campo reverberante, así que no hay término
 $K_2$ y las correcciones pasan a ser meteorológicas. El nivel de potencia es
 $L_W = \bar{L}_p + 10 \lg(S/S_0) + C_1 + C_2 + C_3$ (Ec. 14/15) sobre una
 esfera completa $S = 4 \pi r^2$ o una semiesfera $S = 2 \pi r^2$, con la
-corrección por ruido de fondo $K_{1i} = -10 \lg(1 - 10^{-0.1 \Delta L_{pi}})$
+corrección por ruido de fondo $K_{1i} = -10 \lg(1 - 10^{-0{,}1 \Delta L_{pi}})$
 aplicada por posición de micrófono *antes* del promedio energético (Ec. 11) —
 no hace falta corrección por encima de un margen de 15 dB, y por debajo de
 10 dB (250 Hz – 5 kHz) o 6 dB (bandas extremas) la corrección se satura y el

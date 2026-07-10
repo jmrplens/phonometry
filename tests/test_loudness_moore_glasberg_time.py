@@ -187,9 +187,13 @@ def test_silence_is_zero() -> None:
 
 
 def test_louder_tone_is_louder() -> None:
-    """Peak long-term loudness increases monotonically with level."""
+    """Peak long-term loudness increases monotonically with level.
+
+    0.7 s segments: monotonicity in level is duration-independent once the
+    long-term averager has settled (attack ~100 ms).
+    """
     values = [
-        loudness_moore_glasberg_time(_tone(1000.0, lvl), FS).n_max
+        loudness_moore_glasberg_time(_tone(1000.0, lvl, duration=0.7), FS).n_max
         for lvl in (30.0, 50.0, 70.0)
     ]
     assert values[0] < values[1] < values[2]
@@ -219,8 +223,12 @@ def test_result_fields_and_percentiles() -> None:
 
 
 def test_diotic_equals_binaural_and_exceeds_monaural() -> None:
-    """Binaural (diotic) loudness exceeds the single-ear monaural loudness."""
-    tone = _tone(1000.0, 60.0)
+    """Binaural (diotic) loudness exceeds the single-ear monaural loudness.
+
+    0.7 s: the binaural-vs-monaural gain is a spectral property, not a
+    duration effect.
+    """
+    tone = _tone(1000.0, 60.0, duration=0.7)
     binaural = loudness_moore_glasberg_time(tone, FS, presentation="binaural")
     monaural = loudness_moore_glasberg_time(
         tone, FS, field="eardrum", presentation="monaural"
@@ -229,8 +237,11 @@ def test_diotic_equals_binaural_and_exceeds_monaural() -> None:
 
 
 def test_stereo_input_accepted() -> None:
-    """A two-channel (n, 2) signal is accepted as the two ear signals."""
-    tone = _tone(1000.0, 60.0)
+    """A two-channel (n, 2) signal is accepted as the two ear signals.
+
+    0.7 s: the (n, 2)-input/diotic equivalence is exact at any length.
+    """
+    tone = _tone(1000.0, 60.0, duration=0.7)
     stereo = np.column_stack([tone, tone])
     res = loudness_moore_glasberg_time(stereo, FS)
     mono = loudness_moore_glasberg_time(tone, FS)
@@ -263,9 +274,12 @@ def test_dichotic_ltl_is_per_ear_then_summed() -> None:
     per-ear-then-sum long-term loudness must differ from smoothing the binaural
     sum (the old behaviour); for a diotic input the two are provably identical.
     """
-    left = np.concatenate([_tone(1000.0, 75.0, 0.3), np.zeros(int(0.7 * FS))])
+    # Halved (0.5 s) dichotic transient: the per-ear-vs-summed AGC difference
+    # is ~1.16 sone here, > 10x the 0.1 threshold, so the shorter signal keeps
+    # the same discriminating power at half the cost.
+    left = np.concatenate([_tone(1000.0, 75.0, 0.15), np.zeros(int(0.35 * FS))])
     right = np.concatenate(
-        [np.zeros(int(0.3 * FS)), _tone(1000.0, 55.0, 0.4), np.zeros(int(0.3 * FS))]
+        [np.zeros(int(0.15 * FS)), _tone(1000.0, 55.0, 0.2), np.zeros(int(0.15 * FS))]
     )
     n = min(left.size, right.size)
     res = loudness_moore_glasberg_time(np.column_stack([left[:n], right[:n]]), FS)
@@ -273,8 +287,9 @@ def test_dichotic_ltl_is_per_ear_then_summed() -> None:
     # (a) The fix changes the dichotic result substantially.
     assert np.max(np.abs(res.long_term_loudness - old)) > 0.1
 
-    # (b) A diotic input is byte-identical to the old sum-then-AGC (regression).
-    tone = _tone(1000.0, 60.0)
+    # (b) A diotic input is byte-identical to the old sum-then-AGC (regression);
+    # the identity is algebraic, so 0.7 s is as strong as any length.
+    tone = _tone(1000.0, 60.0, duration=0.7)
     diotic = loudness_moore_glasberg_time(np.column_stack([tone, tone]), FS)
     assert np.array_equal(
         diotic.long_term_loudness, _sum_then_agc(diotic.short_term_loudness)
@@ -323,15 +338,19 @@ def test_low_freq_band_not_truncated_across_sample_rates() -> None:
 def test_invalid_inputs_raise() -> None:
     """Invalid field, presentation, sampling rate and signal raise ValueError."""
     tone = _tone(1000.0, 40.0, duration=0.1)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="field must be one of"):
         loudness_moore_glasberg_time(tone, FS, field="bogus")
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="presentation must be one of"):
         loudness_moore_glasberg_time(tone, FS, presentation="bogus")
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'fs' must be a positive sampling rate"
+    ):
         loudness_moore_glasberg_time(tone, -1.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Input signal cannot be empty"):
         loudness_moore_glasberg_time(np.array([]), FS)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="Input signal must contain only finite values"
+    ):
         loudness_moore_glasberg_time(np.array([1.0, np.nan, 2.0]), FS)
 
 

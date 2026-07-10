@@ -116,9 +116,13 @@ def test_reflected_path_delay() -> None:
 
 
 def test_geometry_guards() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'source_height' and 'mic_height' must be positive"
+    ):
         geometric_spreading_factor(0.0, 0.25)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'source_height' must exceed 'mic_height'"
+    ):
         geometric_spreading_factor(0.25, 1.25)  # source must exceed mic
 
 
@@ -209,9 +213,9 @@ def test_reference_correction_cancels_kr_and_chain(recwarn: pytest.WarningsRecor
 
 
 def test_reflection_input_guards() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Impulse responses must be non-empty"):
         insitu_reflection_factor([], [1.0, 2.0])
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'fs' is required to apply 'delay'"):
         insitu_reflection_factor([1.0, 2.0], [1.0, 2.0], delay=1e-3)  # no fs
 
 
@@ -294,13 +298,13 @@ def test_adrienne_blackman_harris_edges_meet_flat_at_unity() -> None:
 
 
 def test_adrienne_window_guards() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'fs' must be positive"):
         adrienne_window(0.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'flat_duration' must be positive"):
         adrienne_window(FS, flat_duration=0.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Edge durations must be non-negative"):
         adrienne_window(FS, leading_duration=-1e-3)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Edge shapes must be one of"):
         adrienne_window(FS, trailing_edge="triangular")
 
 
@@ -335,9 +339,13 @@ def test_one_third_octave_clipping() -> None:
 
 
 def test_one_third_octave_guards() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="must be non-empty and equal-length"
+    ):
         one_third_octave_absorption([250.0, 500.0], [0.1])
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="must be non-empty and equal-length"
+    ):
         one_third_octave_absorption([], [])
 
 
@@ -361,9 +369,9 @@ def test_insitu_absorption_spectrum_mid_bands_are_one_minus_r0_sq() -> None:
 def test_insitu_absorption_spectrum_rejects_nonpositive_fs() -> None:
     hi = _incident_ir()
     hr = 0.4 * np.roll(hi, 96)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'fs' must be positive"):
         insitu_absorption_spectrum(hi, hr, 0.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'fs' must be positive"):
         insitu_absorption_spectrum(hi, hr, -48000.0)
 
 
@@ -403,9 +411,11 @@ def test_msa_major_axis_reduces_to_normal_at_zero_projection() -> None:
 
 
 def test_msa_guards() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'window_width' must be positive"):
         max_sampled_area_radius(0.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'projected_distance' must be non-negative"
+    ):
         msa_major_axis(5e-3, -1.0)
 
 
@@ -469,11 +479,13 @@ def test_spot_internal_loss_clips_negative() -> None:
 
 
 def test_spot_guards() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'diameter' must be positive"):
         spot_tube_upper_frequency(0.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'f_min' must be less than 'f_max'"
+    ):
         spot_microphone_spacing_bounds(340.0, f_min=1800.0, f_max=220.0)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="must share a shape"):
         spot_internal_loss_correction([0.1, 0.2], [0.1])
 
 

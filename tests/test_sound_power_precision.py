@@ -87,17 +87,19 @@ def test_precision_positions_hemisphere_z_nonnegative() -> None:
 
 
 def test_precision_positions_invalid_surface_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'surface' must be 'sphere' or 'hemisphere'"
+    ):
         precision_positions("box", radius=1.0)  # type: ignore[arg-type]
 
 
 def test_precision_positions_missing_radius_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="A positive 'radius' is required"):
         precision_positions("sphere")
 
 
 def test_precision_positions_bad_count_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="'count' must be 20"):
         precision_positions("sphere", radius=1.0, count=30)
 
 
@@ -158,7 +160,9 @@ def test_k1_is_per_position() -> None:
 
 
 def test_k1_frequency_length_mismatch_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="must match the number of 'frequencies'"
+    ):
         precision_background_correction(
             np.array([[56.0, 57.0]]), np.array([[50.0, 50.0]]), np.array([200.0])
         )
@@ -204,7 +208,9 @@ def test_c3_from_air_absorption() -> None:
 
 
 def test_meteorological_invalid_pressure_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'static_pressure' must be positive"
+    ):
         meteorological_corrections(23.0, 0.0)
 
 
@@ -224,7 +230,9 @@ def test_uncertainty_one_sided_k_1p6() -> None:
 
 
 def test_uncertainty_bad_coverage_factor_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'coverage_factor' must be positive"
+    ):
         precision_uncertainty(0.5, 2.0, 0.0)
 
 
@@ -301,7 +309,10 @@ def test_hemisphere_per_band_uncertainty_uses_table2() -> None:
 
 def test_anechoic_background_requires_frequencies() -> None:
     """K1 needs the band centres to pick the 6/10 dB floor."""
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="'frequencies' are required with 'background_levels'",
+    ):
         sound_power_anechoic(
             np.full((40, 1), 80.0),
             "hemisphere",
@@ -328,17 +339,22 @@ def test_anechoic_full_chain_with_k1() -> None:
 
 
 def test_anechoic_invalid_surface_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'surface' must be 'sphere' or 'hemisphere'"
+    ):
         sound_power_anechoic(np.full((40, 1), 70.0), "box", radius=1.0)  # type: ignore[arg-type]
 
 
 def test_anechoic_missing_radius_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="A positive 'radius' is required"):
         sound_power_anechoic(np.full((40, 1), 70.0), "sphere")
 
 
 def test_anechoic_areas_wrong_length_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="'areas' must have one value per microphone position",
+    ):
         sound_power_anechoic(
             np.full((40, 1), 70.0), "sphere", radius=1.0, areas=np.full(10, 1.0)
         )
@@ -407,12 +423,14 @@ def test_lw0_shift_off_reference() -> None:
 
 
 def test_intensity_areas_mismatch_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'partial_intensity' first axis"
+    ):
         sound_power_intensity_precision(np.full((3,), 1e-5), np.array([1.0, 1.0]))
 
 
 def test_intensity_nonpositive_area_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="All 'areas' must be positive"):
         sound_power_intensity_precision(np.full((2,), 1e-5), np.array([1.0, 0.0]))
 
 
@@ -575,7 +593,9 @@ def test_criterion_1_without_limit_raises() -> None:
     i_n = np.full((4, 1), 2.0e-6)
     lp = np.full((4, 1), 60.0)
     ind = precision_field_indicators(i_n, lp)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="Criterion 1 needs the limit s"
+    ):
         precision_qualification(
             ind,
             scan_intensity_level_1=np.array([70.0]),
@@ -584,7 +604,10 @@ def test_criterion_1_without_limit_raises() -> None:
 
 
 def test_field_indicators_shape_mismatch_raises() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="'segment_intensity' and 'segment_pressure_levels' must have",
+    ):
         precision_field_indicators(np.full((4, 1), 1e-6), np.full((3, 1), 60.0))
 
 

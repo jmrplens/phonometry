@@ -69,6 +69,16 @@ def test_calibration_1khz_70hz_is_one_asper(ref_calibration: EcmaRoughness) -> N
     assert ref_calibration.roughness == pytest.approx(1.0735, abs=0.01)
 
 
+def test_calibration_constant_is_the_tabulated_c_r() -> None:
+    # Formula 104 tabulates c_R = 0.0180685; the implementation must use the
+    # standard's value verbatim (shared oracle in tests/reference_data.py).
+    from reference_data import ECMA418_2_ROUGHNESS_C_R
+
+    from phonometry.roughness_ecma import _C_R
+
+    assert _C_R == ECMA418_2_ROUGHNESS_C_R
+
+
 # --------------------------------------------------------------------------
 # Standard's qualitative behaviours
 # --------------------------------------------------------------------------

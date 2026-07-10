@@ -58,7 +58,7 @@ TABLE2 = {
 def test_table2_airborne_every_band(situation, col):
     result = band_uncertainty("airborne", situation)
     assert list(result.frequencies) == FREQ_FULL
-    for f, u in zip(result.frequencies, result.uncertainties):
+    for f, u in zip(result.frequencies, result.uncertainties, strict=True):
         assert u == pytest.approx(TABLE2[int(f)][col]), f"{situation} @ {f} Hz"
 
 
@@ -79,7 +79,7 @@ def test_table4_impact_every_band(situation, col):
     result = band_uncertainty("impact", situation)
     assert list(result.frequencies) == FREQ_IMPACT
     assert 500 not in result.frequencies  # 2020 edition drops 500 Hz
-    for f, u in zip(result.frequencies, result.uncertainties):
+    for f, u in zip(result.frequencies, result.uncertainties, strict=True):
         assert u == pytest.approx(TABLE4[int(f)][col]), f"{situation} @ {f} Hz"
 
 
@@ -100,7 +100,7 @@ TABLE6_A = [
 def test_table6_reduction_every_band():
     result = band_uncertainty("impact_reduction", "A")
     assert list(result.frequencies) == FREQ_FULL
-    for u, expected in zip(result.uncertainties, TABLE6_A):
+    for u, expected in zip(result.uncertainties, TABLE6_A, strict=True):
         assert u == pytest.approx(expected)
 
 
@@ -123,7 +123,7 @@ def test_tabled1_sigma_r95_bands():
     result = band_uncertainty("airborne", "A", upper_limit=True)
     assert result.upper_limit is True
     assert list(result.frequencies) == FREQ_FULL
-    for u, expected in zip(result.uncertainties, TABLED1):
+    for u, expected in zip(result.uncertainties, TABLED1, strict=True):
         assert u == pytest.approx(expected)
 
 
@@ -142,7 +142,7 @@ def test_table1_maximum_repeatability():
         1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3, 1.3,
     ]
     assert list(result.frequencies) == FREQ_FULL
-    for u, e in zip(result.uncertainties, expected):
+    for u, e in zip(result.uncertainties, expected, strict=True):
         assert u == pytest.approx(e)
 
 
@@ -182,7 +182,7 @@ def test_airborne_aliases_share_row():
     [("ln_w", (1.5, 1.0, 0.5)), ("ln_w+ci", (1.5, 1.0, 0.6))],
 )
 def test_table5_impact_single_number(quantity, expected):
-    for situation, e in zip("ABC", expected):
+    for situation, e in zip("ABC", expected, strict=True):
         assert single_number_uncertainty(quantity, situation) == pytest.approx(e)
 
 

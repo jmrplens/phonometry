@@ -168,14 +168,16 @@ def test_measured_data_rounded_to_one_decimal() -> None:
 
 
 def test_weighted_rating_rejects_bad_length() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Expected 16 one-third-octave"):
         weighted_rating([1.0, 2.0, 3.0])
 
 
 def test_weighted_rating_rejects_nan() -> None:
     bad = list(_ANNEX_C_R)
     bad[0] = float("nan")
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'values_by_band' must contain only finite values"
+    ):
         weighted_rating(bad)
 
 
@@ -282,14 +284,19 @@ def test_airborne_energy_averages_positions() -> None:
 
 
 def test_airborne_rejects_length_mismatch() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="'l1', 'l2' and 't2' must share the same band count",
+    ):
         airborne_insulation(
             np.array([80.0, 80.0]), np.array([40.0]), np.array([0.5])
         )
 
 
 def test_airborne_requires_both_area_and_volume() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="'area' and 'volume' must be given together"
+    ):
         airborne_insulation(
             np.array([80.0]), np.array([40.0]), np.array([0.5]), area=10.0
         )

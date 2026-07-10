@@ -103,7 +103,7 @@ plt.xscale("log"); plt.legend(); plt.show()
 
 </details>
 
-The `ImpulseProminence` carries the `per_impulse` prominences, the governing
+The `ImpulseProminenceResult` carries the `per_impulse` prominences, the governing
 `prominence` and its `adjustment`, and its `.plot()` draws the `KI(P)` curve
 with the impulses marked. The method is a supplement to the environmental-noise
 measurement of [ISO 1996-2](/phonometry/guides/levels/).

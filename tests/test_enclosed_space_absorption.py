@@ -15,7 +15,7 @@ from reference_data import (
     EN12354_6_T_BARE,
 )
 
-from phonometry import en12354_6 as m
+from phonometry import enclosed_space_absorption as m
 
 _VOLUME = 29.75
 # The six surfaces of the bare room (area, absorption coefficient at 1000 Hz).

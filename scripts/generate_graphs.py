@@ -3545,7 +3545,7 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     plt.close()
 
 
-def generate_ntacou112(output_dir: str) -> None:
+def generate_impulse_prominence(output_dir: str) -> None:
     """NT ACOU 112: predicted prominence and the LAeq adjustment."""
     print("Generating impulse_prominence.png...")
     from phonometry import (
@@ -3553,7 +3553,7 @@ def generate_ntacou112(output_dir: str) -> None:
         impulse_prominence,
         predicted_prominence,
     )
-    from phonometry.ntacou112 import ADJUSTMENT_THRESHOLD
+    from phonometry.impulse_prominence import ADJUSTMENT_THRESHOLD
 
     fig, (ax_p, ax_k) = plt.subplots(1, 2, figsize=(12.5, 5.4))
 
@@ -3598,7 +3598,7 @@ def generate_ntacou112(output_dir: str) -> None:
     plt.close()
 
 
-def generate_iso2631_5(output_dir: str) -> None:
+def generate_multiple_shock(output_dir: str) -> None:
     """ISO 2631-5: seat-to-spine transmissibility and the injury probability."""
     print("Generating multiple_shock.png...")
     from phonometry import (
@@ -3608,7 +3608,7 @@ def generate_iso2631_5(output_dir: str) -> None:
         injury_risk,
         seat_to_spine_transfer,
     )
-    from phonometry.iso2631_5 import (
+    from phonometry.multiple_shock_vibration import (
         MZ_MALE,
         RISK_THRESHOLDS_MALE,
     )
@@ -3656,11 +3656,11 @@ def generate_iso2631_5(output_dir: str) -> None:
     plt.close()
 
 
-def generate_en12354_6(output_dir: str) -> None:
+def generate_enclosed_space_absorption(output_dir: str) -> None:
     """EN 12354-6: absorption area and reverberation time of a room."""
     print("Generating enclosed_space_absorption.png...")
     from phonometry import enclosed_space_reverberation
-    from phonometry.en12354_6 import OCTAVE_BANDS
+    from phonometry.enclosed_space_absorption import OCTAVE_BANDS
 
     # A 5 x 4 x 3 m office (60 m3): hard plaster walls and floor; the ceiling is
     # either bare plaster or lined with an absorbing acoustic tile.
@@ -3821,11 +3821,11 @@ def generate_hearing_threshold(output_dir: str) -> None:
     plt.close()
 
 
-def generate_nihl(output_dir: str) -> None:
+def generate_noise_induced_hearing_loss(output_dir: str) -> None:
     """ISO 1999 noise-induced permanent threshold shift and HTLAN combination."""
     print("Generating noise_induced_hearing_loss.png...")
     from phonometry import htlan, nipts
-    from phonometry.iso1999 import NIPTS_FREQUENCIES
+    from phonometry.noise_induced_hearing_loss import NIPTS_FREQUENCIES
 
     freqs = NIPTS_FREQUENCIES
     fig, (ax_n, ax_h) = plt.subplots(1, 2, figsize=(12.5, 5.6))
@@ -4018,7 +4018,7 @@ def generate_all(img_dir: str) -> None:
     # Speech intelligibility (ANSI S3.5-1997): band audibility and the SII.
     generate_speech_intelligibility(img_dir)
     generate_sii_vocal_efforts(img_dir)
-    generate_ntacou112(img_dir)
+    generate_impulse_prominence(img_dir)
 
     # Room-noise criteria (ANSI S12.2-2019): NC tangency and RC Mark II.
     generate_room_noise_criteria(img_dir)
@@ -4027,13 +4027,13 @@ def generate_all(img_dir: str) -> None:
     generate_hearing_threshold(img_dir)
 
     # Noise-induced hearing loss (ISO 1999 NIPTS and HTLAN).
-    generate_nihl(img_dir)
+    generate_noise_induced_hearing_loss(img_dir)
 
     # Multiple-shock whole-body vibration (ISO 2631-5 Clause 5 + Annex C).
-    generate_iso2631_5(img_dir)
+    generate_multiple_shock(img_dir)
 
     # Sound absorption in enclosed spaces (EN 12354-6 Clause 4).
-    generate_en12354_6(img_dir)
+    generate_enclosed_space_absorption(img_dir)
 
     # Measurement uncertainty (GUM Guide 98-3 + Supplement 1 Monte Carlo).
     generate_uncertainty(img_dir)

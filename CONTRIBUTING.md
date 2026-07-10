@@ -80,6 +80,41 @@ Optionally run `make install-hooks` once to install a pre-commit hook that does
 this automatically when relevant sources change; the CI check is the enforcement,
 the hook is just convenience.
 
+## 🏷️ Naming Conventions
+
+All identifiers follow PEP 8 with the project-specific rules below (validated
+against numpy/scipy, pandas, matplotlib, scikit-learn, statsmodels and librosa).
+
+| Group | Convention | Examples |
+|---|---|---|
+| Modules | `snake_case` **concept** name, ≤3-4 words — never a standard number (the standard designation lives in the docstring and the guide) | `noise_induced_hearing_loss.py`, `sound_power.py` |
+| Classes | `PascalCase`; the primary result of a computation is `<Concept>Result`; psychoacoustic family `<Method><Metric>` is sanctioned; value/input objects get a plain name | `ImpulseProminenceResult`, `ZwickerLoudness`, `Quantity` |
+| Functions | `snake_case` noun phrase for computations; a verb only for actions/predicates; no `get_`/`calculate_` prefixes | `reverberation_time`, `apply_weighting`, `sensitivity` (not `calculate_sensitivity`) |
+| Public constants | `UPPER_SNAKE_CASE`, **no unit suffixes** — units go in the docstring | `OCTAVE_BANDS`, `REFERENCE_ACCELERATION` |
+| Private constants | `_UPPER_SNAKE` named after the standard's table | `_TABLE1`, `_UVL0` |
+| Parameters | `snake_case` with the canonical vocabulary: `fs`, `frequencies`, `volume`, `relative_humidity`, `temperature`, `x` (time signal); durations carry `_s`/`_hours` only where mixed units coexist | — |
+| Type aliases / Literals | `PascalCase` aliases; plain-string `Literal` values | `Real`, `Sex = Literal["male", "female"]` |
+| Warnings | `<Topic>Warning`, all inheriting from `PhonometryWarning` | `OccupationalExposureWarning` |
+| Spelling | American English in identifiers | `normalized_frequencies`, `BAND_CENTERS` |
+| Tests | `test_<module>.py`, 1:1 with the module; cross-cutting suites get a descriptive name | `test_impulse_prominence.py` |
+
+### Deprecations
+
+Renames of **published** API keep the old name working for one cycle:
+
+- Warn with `warnings.warn(msg, DeprecationWarning, stacklevel=...)` using
+  the NEP 23 message format (deprecated-since version, removal version, and
+  the replacement to use). Pick the `stacklevel` so the warning points at the
+  *caller's* line: `2` when warning directly from the deprecated function,
+  `3` when the warning is emitted through a shared helper.
+- Renamed **modules**: keep a shim using a PEP 562 module `__getattr__`
+  (scipy pattern).
+- Renamed **keyword arguments**: accept the old keyword with a `"deprecated"`
+  string sentinel default (scikit-learn pattern) and forward to the new one.
+- Each alias gets a `pytest.warns(DeprecationWarning)` test.
+- Deprecated names are removed only in a **major** release. Unpublished API
+  (merged since the last release) is renamed outright, without shims.
+
 ## 📦 Releasing
 
 Releases are fully automated from the repository-root `VERSION` file:

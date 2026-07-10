@@ -10,10 +10,18 @@ limits. Fractional-octave-band breakpoints are derived with Formulas (9) and
 linearly in lg(Omega) per Formula (11) (subclause 5.10.6). Relative attenuation
 is ``deltaA(Omega) = A(Omega) - Aref`` (Formula 8) with ``A = Lin - Lout``
 (Formula 7); here ``Aref`` is the attenuation at the exact mid-band frequency
-(subclause 5.9: the pass-band reference attenuation). IEC 61260-1:2014 defines
-only classes 1 and 2 (the withdrawn IEC 61260:1995 / ANSI S1.11-2004 class 0 is
-not covered here: its class 1/2 masks differ numerically from the 2014 edition,
-so mixing a 1995 class-0 column into the 2014 mask would be inconsistent).
+(subclause 5.9: the pass-band reference attenuation).
+
+IEC 61260-1:2014 defines only classes 1 and 2. **Class 0** (the tightest,
+laboratory-grade class) lives only in the withdrawn **IEC 61260:1995 /
+EN 61260:1995 Table 1** and its US twin **ANSI S1.11-2004 Table 1**, whose
+class 1/2 masks differ numerically from the 2014 edition (e.g. the 2014
+pass-band reference tolerance is +-0,4 dB for class 1 vs +-0,3 dB in 1995, and
+the 2014 stop-band edge minimum is +1,2 dB vs +2,0 dB in 1995). The two editions
+are therefore kept as separate mask tables selected by the ``edition`` argument
+(``"2014"`` default -> classes 1/2; ``"1995"`` -> classes 0/1/2). The 1995 /
+ANSI-2004 octave-band table was transcribed digit-for-digit and cross-checked
+between the two standards (they agree exactly).
 
 **Weightings.** A/C/Z frequency-weighting acceptance limits transcribed from
 BS EN 61672-1:2013, **Table 3** (standard page 22): the design-goal responses
@@ -63,6 +71,49 @@ _STOPBAND_MIN: List[Tuple[float, float, float]] = [
     (4.0, 70.0, 60.0),    # and >= G**4: constant
 ]
 
+# EN 61260:1995 / IEC 61260:1995 Table 1 == ANSI S1.11-2004 Table 1 (verified
+# identical digit-for-digit between both standards). Same layout as the 2014
+# tables above, plus a class-0 column. Pass-band min is constant per class. The
+# fractional-octave breakpoint mapping is the same as the 2014 edition: 1995
+# Annex B equation (10) is identical to 2014 Formula (9), so _map_breakpoint is
+# reused unchanged for both editions.
+_PASSBAND_MAX_1995: List[Tuple[float, float, float, float]] = [
+    # (exponent, class 0 max, class 1 max, class 2 max)
+    (0.0, 0.15, 0.3, 0.5),   # Omega = 1
+    (1 / 8, 0.2, 0.4, 0.6),
+    (1 / 4, 0.4, 0.6, 0.8),
+    (3 / 8, 1.1, 1.3, 1.6),
+    (1 / 2, 4.5, 5.0, 5.5),  # G**(1/2) - epsilon
+]
+_PASSBAND_MIN_1995 = {0: -0.15, 1: -0.3, 2: -0.5}
+_STOPBAND_MIN_1995: List[Tuple[float, float, float, float]] = [
+    # (exponent, class 0 min, class 1 min, class 2 min)
+    (1 / 2, 2.3, 2.0, 1.6),  # G**(1/2) + epsilon
+    (1.0, 18.0, 17.5, 16.5),
+    (2.0, 42.5, 42.0, 41.0),
+    (3.0, 62.0, 61.0, 55.0),
+    (4.0, 75.0, 70.0, 60.0),  # and >= G**4: constant
+]
+
+# Per-edition mask spec: ordered classes (best -> worst), the three limit tables
+# and the column index of each class within the (exponent, ...) rows.
+_FILTER_EDITIONS: Dict[str, Dict[str, Any]] = {
+    "2014": {
+        "classes": (1, 2),
+        "passband_max": _PASSBAND_MAX,
+        "passband_min": _PASSBAND_MIN,
+        "stopband_min": _STOPBAND_MIN,
+        "col": {1: 1, 2: 2},
+    },
+    "1995": {
+        "classes": (0, 1, 2),
+        "passband_max": _PASSBAND_MAX_1995,
+        "passband_min": _PASSBAND_MIN_1995,
+        "stopband_min": _STOPBAND_MIN_1995,
+        "col": {0: 1, 1: 2, 2: 3},
+    },
+}
+
 
 def _map_breakpoint(exponent: float, fraction: float) -> float:
     """
@@ -78,23 +129,33 @@ def _map_breakpoint(exponent: float, fraction: float) -> float:
 
 
 def class_limits(
-    fraction: float, filter_class: int, omega: np.ndarray
+    fraction: float, filter_class: int, omega: np.ndarray, *, edition: str = "2014"
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Acceptance limits on relative attenuation at normalized frequencies.
 
     :param fraction: Bandwidth designator denominator b (1 for octave,
         3 for one-third octave, ...).
-    :param filter_class: 1 or 2 (IEC 61260-1:2014 performance class).
+    :param filter_class: Performance class: 1 or 2 for ``edition="2014"``;
+        0, 1 or 2 for ``edition="1995"``.
     :param omega: Normalized frequencies f/fm (> 0).
+    :param edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
+        (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2).
     :return: Tuple (minimum, maximum) relative attenuation in dB per point;
         the maximum is ``+inf`` outside the pass-band.
     """
-    if filter_class not in (1, 2):
-        raise ValueError("filter_class must be 1 or 2.")
+    spec = _FILTER_EDITIONS.get(edition)
+    if spec is None:
+        raise ValueError("edition must be '2014' or '1995'.")
+    if filter_class not in spec["classes"]:
+        raise ValueError(
+            f"filter_class must be one of {spec['classes']} for edition '{edition}'."
+        )
     if fraction <= 0:
         raise ValueError("'fraction' must be positive.")
-    col = 1 if filter_class == 1 else 2
+    col = spec["col"][filter_class]
+    passband_max = spec["passband_max"]
+    stopband_min = spec["stopband_min"]
 
     omega_arr = np.asarray(omega, dtype=np.float64)
     if np.any(omega_arr <= 0):
@@ -102,10 +163,10 @@ def class_limits(
     # Formula (10): low side mirrors the high side.
     omega_h = np.where(omega_arr < 1.0, 1.0 / omega_arr, omega_arr)
 
-    pass_x = np.array([_map_breakpoint(x, fraction) for x, _, _ in _PASSBAND_MAX])
-    pass_y = np.array([row[col] for row in _PASSBAND_MAX])
-    stop_x = np.array([_map_breakpoint(x, fraction) for x, _, _ in _STOPBAND_MIN])
-    stop_y = np.array([row[col] for row in _STOPBAND_MIN])
+    pass_x = np.array([_map_breakpoint(row[0], fraction) for row in passband_max])
+    pass_y = np.array([row[col] for row in passband_max])
+    stop_x = np.array([_map_breakpoint(row[0], fraction) for row in stopband_min])
+    stop_y = np.array([row[col] for row in stopband_min])
 
     edge = pass_x[-1]  # mapped G**(1/2): the band-edge frequency ratio
     in_pass = omega_h <= edge
@@ -114,7 +175,7 @@ def class_limits(
     maximum = np.empty_like(omega_h)
 
     # Pass-band: constant min, interpolated max (linear in lg(Omega), Formula 11).
-    minimum[in_pass] = _PASSBAND_MIN[filter_class]
+    minimum[in_pass] = spec["passband_min"][filter_class]
     maximum[in_pass] = np.interp(np.log10(omega_h[in_pass]), np.log10(pass_x), pass_y)
 
     # Stop-band: interpolated min (constant beyond the last breakpoint), max +inf.
@@ -125,13 +186,15 @@ def class_limits(
     return minimum, maximum
 
 
-def verify_filter_class(bank: OctaveFilterBank, num_points: int = 2 ** 15) -> Dict[str, Any]:
+def verify_filter_class(
+    bank: OctaveFilterBank, num_points: int = 2 ** 15, *, edition: str = "2014"
+) -> Dict[str, Any]:
     """
-    Verify a filter bank against the IEC 61260-1:2014 class limits.
+    Verify a filter bank against the IEC 61260 class limits.
 
     Each band's relative attenuation (referenced to the attenuation at its
-    exact mid-band frequency) is checked against the class 1 and class 2
-    acceptance limits of Table 1, evaluated on a dense frequency grid up to
+    exact mid-band frequency) is checked against every acceptance-limit class of
+    the selected edition's Table 1, evaluated on a dense frequency grid up to
     the band's processing Nyquist. The Table 1 breakpoint frequencies inside
     that range are always included in the evaluation, so the pass-band
     constraints are checked even if the grid were coarse. Frequencies beyond
@@ -142,19 +205,25 @@ def verify_filter_class(bank: OctaveFilterBank, num_points: int = 2 ** 15) -> Di
     :param bank: The filter bank to verify (its designed SOS are analyzed;
         works for stateful and stateless banks alike).
     :param num_points: Number of frequency grid points per band (>= 16).
-    :return: Dict with ``overall_class`` (1, 2 or None) and ``bands``: a list
-        of ``{"freq", "class", "margin_class1_db", "margin_class2_db"}``
-        where a positive margin means the limits are met with that much room.
+    :param edition: ``"2014"`` (IEC 61260-1:2014, classes 1/2) or ``"1995"``
+        (IEC 61260:1995 / ANSI S1.11-2004, adds the stricter class 0).
+    :return: Dict with ``overall_class`` (the strictest class every band meets,
+        or ``None``) and ``bands``: a list of ``{"freq", "class",
+        "margin_class<c>_db"}`` for each class ``c`` of the edition, where a
+        positive margin means the limits are met with that much room.
     """
     if num_points < 16:
         raise ValueError("'num_points' must be at least 16.")
+    spec = _FILTER_EDITIONS.get(edition)
+    if spec is None:
+        raise ValueError("edition must be '2014' or '1995'.")
+    classes_ordered: Tuple[int, ...] = spec["classes"]  # best -> worst
 
     bands: List[Dict[str, Any]] = []
 
     # Table 1 breakpoints (both sides) that must always be evaluated.
-    breakpoint_omegas = np.array(
-        [_map_breakpoint(x, bank.fraction) for x, _, _ in _PASSBAND_MAX + _STOPBAND_MIN]
-    )
+    rows = list(spec["passband_max"]) + list(spec["stopband_min"])
+    breakpoint_omegas = np.array([_map_breakpoint(row[0], bank.fraction) for row in rows])
     breakpoint_omegas = np.concatenate([1.0 / breakpoint_omegas, breakpoint_omegas])
 
     for idx in range(bank.num_bands):
@@ -180,8 +249,8 @@ def verify_filter_class(bank: OctaveFilterBank, num_points: int = 2 ** 15) -> Di
             delta_a = np.concatenate([delta_a, delta_extra])
 
         margins: Dict[int, float] = {}
-        for cls in (1, 2):
-            minimum, maximum = class_limits(bank.fraction, cls, omega)
+        for cls in classes_ordered:
+            minimum, maximum = class_limits(bank.fraction, cls, omega, edition=edition)
             low_margin = float(np.min(delta_a - minimum))
             finite = np.isfinite(maximum)
             high_margin = (
@@ -189,27 +258,22 @@ def verify_filter_class(bank: OctaveFilterBank, num_points: int = 2 ** 15) -> Di
             )
             margins[cls] = min(low_margin, high_margin)
 
-        band_class = 1 if margins[1] >= 0 else (2 if margins[2] >= 0 else None)
-        bands.append(
-            {
-                "freq": fm,
-                "class": band_class,
-                "margin_class1_db": margins[1],
-                "margin_class2_db": margins[2],
-            }
+        band_class: int | None = next(
+            (cls for cls in classes_ordered if margins[cls] >= 0), None
         )
+        band_entry: Dict[str, Any] = {"freq": fm, "class": band_class}
+        for cls in classes_ordered:
+            band_entry[f"margin_class{cls}_db"] = margins[cls]
+        bands.append(band_entry)
 
     if not bands:
         # No bands to verify: never report compliance vacuously.
         return {"overall_class": None, "bands": []}
 
     classes = [band["class"] for band in bands]
-    if all(c == 1 for c in classes):
-        overall: int | None = 1
-    elif all(c in (1, 2) for c in classes):
-        overall = 2
-    else:
-        overall = None
+    # The strictest class every band meets is the worst (largest) per-band class;
+    # None if any band meets no class.
+    overall: int | None = None if None in classes else max(classes)
 
     return {"overall_class": overall, "bands": bands}
 

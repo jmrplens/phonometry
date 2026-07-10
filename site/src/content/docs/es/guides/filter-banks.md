@@ -227,6 +227,48 @@ de paso de +0,400 dB que Butterworth). Chebyshev I, Elíptico y Bessel no cumple
 los límites de clase con orden 6: el rizado de banda de paso (cheby1/ellip) y la
 caída lenta (bessel) violan la máscara.
 
+### Clase 0 (IEC 61260:1995 / ANSI S1.11-2004)
+
+La clase de prestaciones más estricta, la **clase 0**, la definió la edición
+anterior **IEC 61260:1995** y su gemela estadounidense **ANSI S1.11-2004**
+(ambas retiradas/sustituidas pero aún referenciadas para instrumentos de
+laboratorio); IEC 61260-1:2014 la eliminó. Sus máscaras de clase 1/2 difieren
+ligeramente de la edición de 2014, así que vive tras un conmutador `edition` en
+lugar de mezclarse con la máscara de 2014:
+
+```python
+result = verify_filter_class(bank, edition="1995")   # clases 0, 1, 2
+print(result["overall_class"])          # 0  (el Butterworth por defecto la supera)
+print(result["bands"][0]["margin_class0_db"])
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask_es.svg" alt="Corredores de aceptación anidados en la banda de paso para las clases 0, 1 y 2 de IEC 61260:1995 con la respuesta Butterworth de orden 6 dentro del corredor de clase 0 más estrecho" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_class0_mask_es_dark.svg" alt="Corredores de aceptación anidados en la banda de paso para las clases 0, 1 y 2 de IEC 61260:1995 con la respuesta Butterworth de orden 6 dentro del corredor de clase 0 más estrecho" style="width:80%">
+
+*El corredor de clase 0 (±0,15 dB en el centro de banda) es el más estrecho; la
+clase 1 (±0,3 dB) y la clase 2 (±0,5 dB) son progresivamente más anchas. El
+Butterworth de orden 6 serpentea dentro de la clase 0 en toda la banda de paso.*
+
+**¿Qué arquitectura alcanza qué clase?** El **valor por defecto de la biblioteca
+— Butterworth de orden 6 — ya cumple clase 0** en las configuraciones habituales
+(octava y tercio de octava, 32 kHz–96 kHz), así que no hace falta ninguna
+configuración especial para bancos de laboratorio. Las demás arquitecturas no
+pueden ajustarse a clase 0 porque cambian la máscara IEC por otra propiedad *por
+construcción*:
+
+| Arquitectura | Mejor clase (orden 6, fs 48 kHz) | Por qué |
+| :--- | :---: | :--- |
+| `butter` (por defecto) | **0** | Banda de paso máximamente plana, caída monótona — encaja en la máscara |
+| `cheby2` | 1 | Banda de paso plana pero la relación de la máscara limita en clase 1 |
+| `cheby1` | — | El rizado de banda de paso viola el límite de planitud |
+| `ellip` | — | Rizado en banda de paso y atenuada |
+| `bessel` | — | Retardo de grupo plano a costa de una caída lenta |
+
+Así que el valor por defecto sensato es el habitual (Butterworth de orden 6): ya
+es clase 0 donde la física lo permite, y las arquitecturas alternativas son
+opciones deliberadas cuyo propósito (caída más abrupta, fase lineal) es
+incompatible con la máscara de clase. Sube el orden solo si una banda concreta
+con `fraction` alto o cercana a Nyquist necesita más margen.
+
 ## 7. Descomposición de la señal y estabilidad
 
 Con `sigbands=True` puedes recuperar las componentes en el dominio del tiempo de
@@ -308,8 +350,10 @@ fractional-octave-band filters — Part 1: Specifications* — las frecuencias
 centrales y los bordes de banda en base 10 del §1 (5.2-5.5), las etiquetas
 nominales de banda y los límites de aceptación de clase 1 / clase 2 de la
 Tabla 1 (con el mapeo de breakpoints a fraccionales y la interpolación en
-frecuencia logarítmica) verificados en el §6. ANSI S1.11-2004, *Octave-Band
-and Fractional-Octave-Band Analog and Digital Filters* — el convenio de
-bordes de banda sobre el que cada banco sitúa sus puntos de −3 dB. ISO 266
+frecuencia logarítmica) verificados en el §6. IEC 61260:1995 y ANSI S1.11-2004,
+*Octave-Band and Fractional-Octave-Band … Filters* — la Tabla 1 de la edición
+retirada (idéntica entre ambas) aporta la máscara de clase 0 más estricta que
+ofrece `edition="1995"`, y el convenio de bordes de banda sobre el que cada
+banco sitúa sus puntos de −3 dB. ISO 266
 — la serie de frecuencias preferentes en la que se basan las etiquetas nominales de banda
 que devuelve `nominal_frequencies`.

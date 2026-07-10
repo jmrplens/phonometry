@@ -87,6 +87,15 @@ _ES_EXACT = {
         "Prohibido para clase 1 (atenuaci\u00f3n insuficiente)",
     "Forbidden for class 1 (too much attenuation)":
         "Prohibido para clase 1 (atenuaci\u00f3n excesiva)",
+    # weighting_class_mask figure (IEC 61672-1 Table 3 verifier)
+    "Weighting Deviation vs IEC 61672-1:2013 Table 3 Limits":
+        "Desviaci\u00f3n de ponderaci\u00f3n vs l\u00edmites de la Tabla 3 de IEC 61672-1:2013",
+    "Class 1 acceptance region": "Regi\u00f3n de aceptaci\u00f3n de clase 1",
+    "Class 1 upper/lower limit": "L\u00edmite superior/inferior de clase 1",
+    "Class 2 upper/lower limit": "L\u00edmite superior/inferior de clase 2",
+    "A weighting deviation (48 kHz)": "Desviaci\u00f3n de ponderaci\u00f3n A (48 kHz)",
+    "C weighting deviation (48 kHz)": "Desviaci\u00f3n de ponderaci\u00f3n C (48 kHz)",
+    "Deviation from design goal [dB]": "Desviaci\u00f3n del objetivo de dise\u00f1o [dB]",
     "Frequency Weighting Curves (IEC 61672-1)":
         "Curvas de ponderaci\u00f3n frecuencial (IEC 61672-1)",
     "Group Delay Comparison (1 kHz Octave Band, Order 6)":
@@ -1624,6 +1633,49 @@ def generate_class_mask_overlay(output_dir: str) -> None:
     ax.set_xticklabels(["0.125", "0.25", "0.5", "0.707", "1", "1.41", "2", "4", "8"])
     ax.legend(loc="upper left", fontsize=9)
     save_figure(output_dir, "class_mask_overlay.png")
+    plt.close()
+
+
+def generate_weighting_class_mask(output_dir: str) -> None:
+    """A/C weighting deviation against the IEC 61672-1:2013 Table 3 mask."""
+    print("Generating weighting_class_mask.png...")
+    from phonometry import WeightingFilter, verify_weighting_class, weighting_class_limits
+
+    freqs, lower1, upper1 = weighting_class_limits(1)
+    _, lower2, upper2 = weighting_class_limits(2)
+    floor, ceil = -7.0, 7.0  # plotting bounds; -inf limits clip to the floor
+    lo1 = np.clip(lower1, floor, ceil)
+    lo2 = np.clip(lower2, floor, ceil)
+
+    _, ax = plt.subplots(figsize=(10, 6.5))
+    # Allowed corridor for class 1 (between lower and upper limit).
+    ax.fill_between(freqs, lo1, upper1, color=COLOR_PRIMARY, alpha=0.10,
+                    step="mid", label="Class 1 acceptance region")
+    ax.plot(freqs, upper1, color=COLOR_SECONDARY, linewidth=1.3, drawstyle="steps-mid",
+            label="Class 1 upper/lower limit")
+    ax.plot(freqs, lo1, color=COLOR_SECONDARY, linewidth=1.3, drawstyle="steps-mid")
+    ax.plot(freqs, upper2, color=COLOR_TERTIARY, linestyle=":", linewidth=1.1,
+            drawstyle="steps-mid", label="Class 2 upper/lower limit")
+    ax.plot(freqs, lo2, color=COLOR_TERTIARY, linestyle=":", linewidth=1.1,
+            drawstyle="steps-mid")
+
+    for curve, colour, marker in (("A", COLOR_PRIMARY, "o"), ("C", "#9467bd", "s")):
+        result = verify_weighting_class(WeightingFilter(48000, curve))
+        f = np.array([b["freq"] for b in result["bands"]])
+        dev = np.array([b["deviation_db"] for b in result["bands"]])
+        ax.plot(f, dev, color=colour, linewidth=1.6, marker=marker, markersize=4,
+                label=f"{curve} weighting deviation (48 kHz)")
+
+    ax.set_xscale("log")
+    ax.set_xlim(10, 20000)
+    ax.set_ylim(floor, ceil)
+    ax.set_title("Weighting Deviation vs IEC 61672-1:2013 Table 3 Limits",
+                 fontweight="bold", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Deviation from design goal [dB]")
+    ax.grid(which="both", color=COLOR_GRID, linestyle=":", alpha=0.4)
+    ax.legend(loc="lower center", fontsize=8, ncol=2)
+    save_figure(output_dir, "weighting_class_mask.png")
     plt.close()
 
 
@@ -4179,6 +4231,7 @@ def generate_all(img_dir: str) -> None:
     generate_tone_burst_iec(img_dir)
     generate_block_processing_continuity(img_dir)
     generate_class_mask_overlay(img_dir)
+    generate_weighting_class_mask(img_dir)
     generate_calibration_stability(img_dir)
     generate_sel_concept(img_dir)
     generate_lden_profile(img_dir)

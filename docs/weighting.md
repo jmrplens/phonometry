@@ -235,12 +235,76 @@ for block in blocks:
 See [Block Processing](block-processing.md) for the streaming workflow and
 [Theory](theory.md) for the analytic curve definitions.
 
+## 7. Verifying the IEC 61672-1 class
+
+`verify_weighting_class` checks a weighting filter against the acceptance
+limits of **IEC 61672-1:2013** (Table 3). It evaluates the filter's relative
+response at each nominal frequency below Nyquist, subtracts the design-goal
+weighting, and reports the performance class per frequency with its margin in
+dB:
+
+```python
+from phonometry import WeightingFilter, verify_weighting_class
+
+result = verify_weighting_class(WeightingFilter(48000, "A"))
+print(result["overall_class"])          # 1
+print(result["bands"][20])
+# {'freq': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
+```
+
+The Table 3 acceptance mask itself is public too: `weighting_class_limits(1)`
+returns the 34 nominal frequencies with the lower/upper deviation limits (a
+lower limit of `-inf` means only the upper limit applies). The limits qualify
+the *deviation* from the design goal, so they are the same for A, C and Z.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_class_mask.svg" alt="A and C weighting deviations at 48 kHz threading within the IEC 61672-1 Table 3 class 1 acceptance corridor, with the wider class 2 limits dotted" width="80%"></picture>
+
+*The oversampled A and C designs (blue, purple) stay near zero deviation,
+well inside the class 1 corridor (shaded); the wider class 2 limits are
+dotted. The corridor widens at the band extremes where only a one-sided
+limit applies.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import WeightingFilter, verify_weighting_class, weighting_class_limits
+
+freqs, lower1, upper1 = weighting_class_limits(1)
+_, lower2, upper2 = weighting_class_limits(2)
+lo1, lo2 = np.clip(lower1, -7, 7), np.clip(lower2, -7, 7)
+
+fig, ax = plt.subplots(figsize=(10, 6.5))
+ax.fill_between(freqs, lo1, upper1, step="mid", alpha=0.10,
+                label="Class 1 acceptance region")
+ax.plot(freqs, upper1, drawstyle="steps-mid", label="Class 1 upper/lower limit")
+ax.plot(freqs, lo1, drawstyle="steps-mid", color="C1")
+ax.plot(freqs, upper2, ":", drawstyle="steps-mid", label="Class 2 upper/lower limit")
+ax.plot(freqs, lo2, ":", drawstyle="steps-mid", color="C2")
+
+for curve, marker in (("A", "o"), ("C", "s")):
+    bands = verify_weighting_class(WeightingFilter(48000, curve))["bands"]
+    f = [b["freq"] for b in bands]
+    dev = [b["deviation_db"] for b in bands]
+    ax.plot(f, dev, marker=marker, label=f"{curve} weighting deviation (48 kHz)")
+
+ax.set(xscale="log", xlim=(10, 20000), ylim=(-7, 7),
+       xlabel="Frequency [Hz]", ylabel="Deviation from design goal [dB]")
+ax.legend(fontsize=8, ncol=2)
+plt.show()
+```
+
+</details>
+
 ---
 
 **Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — the A, C and Z frequency-weighting curves (the
 Annex E analytic definition from four corner frequencies, normalized to 0 dB
-at 1 kHz) and the class 1 tolerances the `high_accuracy` design keeps up to
-16 kHz. ISO 7196:1995, *Acoustics — Frequency-weighting characteristic for
+at 1 kHz), the class 1 tolerances the `high_accuracy` design keeps up to
+16 kHz, and the Table 3 class 1/class 2 acceptance limits checked by
+`verify_weighting_class`. ISO 7196:1995, *Acoustics — Frequency-weighting characteristic for
 infrasound measurements* — the G-weighting pole/zero definition (Table 1),
 verified against every Table 2 nominal response value (0.25 Hz to 315 Hz).

@@ -29,6 +29,7 @@ PAGES = [
     ("tone-prominence.md", "guides/tone-prominence"),
     ("psychoacoustics.md", "guides/psychoacoustics"),
     ("speech-transmission.md", "guides/speech-transmission"),
+    ("speech-intelligibility.md", "guides/speech-intelligibility"),
     ("intensity.md", "guides/intensity"),
     ("room-acoustics.md", "guides/room-acoustics"),
     ("building-acoustics.md", "guides/building-acoustics"),

@@ -478,6 +478,7 @@ print(res.dominant.label, round(res.dominant.fraction, 2))   # Dd 0.33 (domina e
 ```python
 import matplotlib.pyplot as plt
 
+# Usa `paths` y `res` del snippet anterior.
 # Índice de reducción sonora por camino y fracción de energía transmitida de cada
 # camino para el resultado del Anexo H.3 calculado arriba.
 labels = [p.label for p in res.paths]
@@ -550,6 +551,19 @@ print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT
 | `separating_area` | float | m² | > 0 | Superficie del elemento separador `Ss` |
 | `coupling_length` | float | m | > 0 | Longitud de acoplamiento de la unión `lf` |
 | `delta_r_ff` / `delta_r_fd` / `delta_r_df` | float | dB | por defecto `0` | Mejoras del trasdosado por camino |
+
+### Parámetros de `flanking_path()`
+
+| Parámetro | Tipo | Unidades | Rango / defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `label` | str | — | — | Nombre visible del camino |
+| `kind` | str | — | `'Ff'` / `'Df'` / `'Fd'` | Rama de flanco del camino |
+| `r_source` / `r_receive` | float | dB | — | Índices ponderados de los elementos lado emisor / lado receptor |
+| `k_ij` | float | dB | — | Índice de reducción vibracional de la unión para este camino |
+| `separating_area` | float | m² | > 0 | Área del elemento separador `Ss` |
+| `coupling_length` | float | m | > 0 | Longitud de acoplamiento `lf` |
+| `delta_r` | float | dB | def.: `0` | Mejora por revestimiento en este camino |
+| `kij_min` | float | dB | def.: `None` | Si se da, `k_ij` se acota inferiormente a este mínimo de la Fórmula E.4 |
 
 `predicted_airborne_insulation()` devuelve un `AirbornePredictionResult`
 (`r_prime_w`, `r_direct_w`, `paths` de `PathContribution`, `dominant`);
@@ -655,7 +669,7 @@ lectura `COVERAGE_FACTORS` expone la Tabla 8 indexada por `(confidence, one_side
 Field measurement of sound insulation in buildings and of building elements* —
 las diferencias de nivel, normalizaciones y métodos de elemento del §1;
 ISO 717-1 e ISO 717-2 — los índices de un solo número por curva de referencia y
-los términos de adaptación espectral C, Ctr y CI; ISO 10140-2:2010 e
+los términos de adaptación espectral C, Ctr y CI; ISO 10140-2:2010, ISO 10140-3:2010 e
 ISO 10140-4:2010 — los R y Ln de laboratorio con la corrección de ruido de
 fondo del §2; EN 12354-1:2000 y EN 12354-2:2000 — las predicciones
 simplificadas de transmisión por flancos del §3 (uniones del Anexo E, ejemplos

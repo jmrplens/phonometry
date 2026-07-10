@@ -61,7 +61,11 @@ res.plot()   # per-band modulation transfer index (MTI) bars, STI + rating in th
 <summary>Show the code for this figure</summary>
 
 ```python
+import numpy as np
 import matplotlib.pyplot as plt
+from phonometry import sti_from_impulse_response
+
+fs = 48000
 
 # STI vs reverberation time: sweep sti_from_impulse_response over synthetic
 # exponential decays (white noise x exp(-6.9077 t / T60)) at a T60 grid —

@@ -65,7 +65,11 @@ res.plot()   # barras del índice de transferencia de modulación (MTI) por band
 <summary>Ver el código de esta figura</summary>
 
 ```python
+import numpy as np
 import matplotlib.pyplot as plt
+from phonometry import sti_from_impulse_response
+
+fs = 48000
 
 # STI frente al tiempo de reverberación: barre sti_from_impulse_response sobre
 # decaimientos exponenciales sintéticos (ruido blanco x exp(-6.9077 t / T60))

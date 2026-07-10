@@ -469,6 +469,7 @@ print(res.dominant.label, round(res.dominant.fraction, 2))   # Dd 0.33 (direct d
 ```python
 import matplotlib.pyplot as plt
 
+# Uses `paths` and `res` from the snippet above.
 # Per-path sound reduction index and each path's share of the transmitted
 # energy for the Annex H.3 result computed above.
 labels = [p.label for p in res.paths]
@@ -539,6 +540,19 @@ print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT
 | `separating_area` | float | m² | > 0 | Separating-element area `Ss` |
 | `coupling_length` | float | m | > 0 | Junction coupling length `lf` |
 | `delta_r_ff` / `delta_r_fd` / `delta_r_df` | float | dB | default `0` | Lining improvements per path |
+
+### `flanking_path()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `label` | str | — | — | Display name of the path |
+| `kind` | str | — | `'Ff'` / `'Df'` / `'Fd'` | Which flanking branch the path is |
+| `r_source` / `r_receive` | float | dB | — | Weighted indices of the source-side / receive-side elements |
+| `k_ij` | float | dB | — | Junction vibration-reduction index for this path |
+| `separating_area` | float | m² | > 0 | Separating-element area `Ss` |
+| `coupling_length` | float | m | > 0 | Junction coupling length `lf` |
+| `delta_r` | float | dB | default `0` | Lining improvement on this path |
+| `kij_min` | float | dB | default `None` | When given, `k_ij` is floored at this Formula E.4 minimum |
 
 `predicted_airborne_insulation()` returns an `AirbornePredictionResult`
 (`r_prime_w`, `r_direct_w`, `paths` of `PathContribution`, `dominant`);
@@ -643,7 +657,7 @@ plt.show()
 Field measurement of sound insulation in buildings and of building elements* —
 the level differences, normalisations and element methods of §1; ISO 717-1 and
 ISO 717-2 — the reference-curve single-number ratings and the spectrum
-adaptation terms C, Ctr and CI; ISO 10140-2:2010 and ISO 10140-4:2010 — the
+adaptation terms C, Ctr and CI; ISO 10140-2:2010, ISO 10140-3:2010 and ISO 10140-4:2010 — the
 laboratory R and Ln with the background-noise correction of §2; EN 12354-1:2000
 and EN 12354-2:2000 — the simplified flanking-transmission predictions of §3
 (Annex E junctions, worked examples H.3 and E.3); ISO 12999-1:2020 — the

@@ -979,6 +979,55 @@ def _chk_intensity_kc_annexb() -> Outcome:
     )
 
 
+@register(
+    "Room & building acoustics",
+    "ISO 10052:2021 Clause 3.6",
+    "Survey R' applies the V/7,5 minimum-area rule",
+)
+def _chk_survey_rprime_area_rule() -> Outcome:
+    # V/7,5 = 120/7,5 = 16 m^2 > S = 5 m^2, so the larger value replaces S.
+    # With k = 0 (T = T0), R' = D + 10 lg(16 * T0 / (0,16 V)).
+    v, s, d = 120.0, 5.0, 30.0
+    res = ph.survey_airborne_insulation(
+        np.full(5, 70.0), np.full(5, 40.0), np.zeros(5), volume=v, area=s
+    )
+    assert res.r_prime is not None
+    s_eff = v / 7.5
+    expected = d + 10.0 * np.log10(s_eff * 0.5 / (0.16 * v))
+    return numeric(expected, float(res.r_prime[0]), 1e-9, unit="dB", places=6)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10052:2021 Clause 3.16",
+    "Service-equipment LXY is the 3-position energy average",
+)
+def _chk_survey_service_equipment() -> Outcome:
+    # Energy average of 35 / 30 / 32 dB(A), then standardized by k.
+    levels = [35.0, 30.0, 32.0]
+    res = ph.survey_service_equipment_level(levels, 3.0, volume=50.0)
+    expected = 10.0 * np.log10(sum(10.0 ** (0.1 * x) for x in levels) / 3.0)
+    return numeric(expected, float(np.asarray(res.l_xy)[()]), 1e-9, unit="dB", places=6)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10052:2021 Table 4",
+    "Reverberation-index estimate (35 <= V < 60, type g)",
+)
+def _chk_survey_reverberation_estimate() -> Outcome:
+    # Table 4 row 'g' for 35 <= V < 60: 4,5 / 5 / 5,5 / 5,5 / 5,5 dB.
+    expected = [4.5, 5.0, 5.5, 5.5, 5.5]
+    got = np.asarray(ph.estimate_reverberation_index(50.0, "g"), dtype=float)
+    ok = bool(np.array_equal(got, expected))
+    return Outcome(
+        expected=f"k = {expected} dB",
+        computed=f"k = {got.tolist()} dB",
+        delta="exact",
+        passed=ok,
+    )
+
+
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================

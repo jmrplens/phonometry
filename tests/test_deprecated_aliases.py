@@ -196,3 +196,73 @@ def test_room_volume_explicit_none_stays_silent() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", DeprecationWarning)
         ph.environmental_correction(50.0, absorption_area=10.0, room_volume=None)
+
+
+# --------------------------------------------------------------------------- #
+# Renamed constants (unit suffixes dropped) and the renamed warning class,
+# aliased through module-level PEP 562 __getattr__ (constants cannot warn as
+# wrappers). Each alias exists in its home module and, when re-exported, at
+# the package root.
+# --------------------------------------------------------------------------- #
+def test_octave_bands_hz_warns_and_delegates() -> None:
+    from phonometry import absorption_rating
+
+    with pytest.warns(DeprecationWarning, match="use OCTAVE_BANDS"):
+        legacy = ph.OCTAVE_BANDS_HZ
+    assert legacy is ph.OCTAVE_BANDS
+    with pytest.warns(DeprecationWarning, match="deprecated since phonometry 3.1"):
+        module_legacy = absorption_rating.OCTAVE_BANDS_HZ
+    assert module_legacy is absorption_rating.OCTAVE_BANDS
+
+
+def test_third_octave_bands_hz_warns_and_delegates() -> None:
+    from phonometry import absorption_rating
+
+    with pytest.warns(DeprecationWarning, match="use THIRD_OCTAVE_BANDS"):
+        legacy = ph.THIRD_OCTAVE_BANDS_HZ
+    assert legacy is ph.THIRD_OCTAVE_BANDS
+    with pytest.warns(DeprecationWarning, match="deprecated since phonometry 3.1"):
+        module_legacy = absorption_rating.THIRD_OCTAVE_BANDS_HZ
+    assert module_legacy is absorption_rating.THIRD_OCTAVE_BANDS
+
+
+def test_base_plate_bands_hz_warns_and_delegates() -> None:
+    from phonometry import scattering_diffusion
+
+    with pytest.warns(DeprecationWarning, match="use BASE_PLATE_BANDS"):
+        legacy = ph.BASE_PLATE_BANDS_HZ
+    assert legacy is ph.BASE_PLATE_BANDS
+    with pytest.warns(DeprecationWarning, match="deprecated since phonometry 3.1"):
+        module_legacy = scattering_diffusion.BASE_PLATE_BANDS_HZ
+    assert module_legacy is scattering_diffusion.BASE_PLATE_BANDS
+
+
+def test_band_centres_warns_and_delegates() -> None:
+    from phonometry import sii
+
+    with pytest.warns(DeprecationWarning, match="use BAND_CENTERS"):
+        legacy = sii.BAND_CENTRES
+    assert legacy is sii.BAND_CENTERS
+
+
+def test_exposure_warning_warns_and_delegates() -> None:
+    from phonometry import occupational_exposure
+
+    with pytest.warns(DeprecationWarning, match="use OccupationalExposureWarning"):
+        legacy = ph.ExposureWarning
+    # Same class object: isinstance/except/filters via the old name still match.
+    assert legacy is ph.OccupationalExposureWarning
+    with pytest.warns(DeprecationWarning, match="deprecated since phonometry 3.1"):
+        module_legacy = occupational_exposure.ExposureWarning
+    assert module_legacy is ph.OccupationalExposureWarning
+
+
+def test_renamed_attribute_shims_reject_unknown_names() -> None:
+    from phonometry import absorption_rating, occupational_exposure
+
+    with pytest.raises(AttributeError, match="phonometry"):
+        _ = ph.does_not_exist
+    with pytest.raises(AttributeError, match="absorption_rating"):
+        _ = absorption_rating.does_not_exist
+    with pytest.raises(AttributeError, match="occupational_exposure"):
+        _ = occupational_exposure.does_not_exist

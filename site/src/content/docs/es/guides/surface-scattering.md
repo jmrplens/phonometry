@@ -131,16 +131,16 @@ tercio de octava; la librería expone esos límites y un comprobador.
 
 ```python
 from phonometry import (
-    BASE_PLATE_BANDS_HZ, BASE_PLATE_MAX_SCATTERING, check_base_plate_scattering,
+    BASE_PLATE_BANDS, BASE_PLATE_MAX_SCATTERING, check_base_plate_scattering,
 )
 
 # Los techos normativos por banda (Tabla 1): 0.05 hasta 500 Hz, ascendiendo a 0.25.
-# BASE_PLATE_BANDS_HZ es la tupla de bandas; BASE_PLATE_MAX_SCATTERING asigna banda -> techo.
-print(BASE_PLATE_BANDS_HZ[0], BASE_PLATE_MAX_SCATTERING[100])   # 100 0.05
+# BASE_PLATE_BANDS es la tupla de bandas; BASE_PLATE_MAX_SCATTERING asigna banda -> techo.
+print(BASE_PLATE_BANDS[0], BASE_PLATE_MAX_SCATTERING[100])   # 100 0.05
 
 # Una placa base cuya dispersión medida se mantiene bajo el techo pasa en silencio;
 # una banda que lo supera lanza un ScatteringDiffusionWarning que lista las infractoras.
-check_base_plate_scattering([0.02] * len(BASE_PLATE_BANDS_HZ))
+check_base_plate_scattering([0.02] * len(BASE_PLATE_BANDS))
 ```
 
 ## 2. Coeficiente de difusión (ISO 17497-2)

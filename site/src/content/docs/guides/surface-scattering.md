@@ -127,16 +127,16 @@ those limits and a checker.
 
 ```python
 from phonometry import (
-    BASE_PLATE_BANDS_HZ, BASE_PLATE_MAX_SCATTERING, check_base_plate_scattering,
+    BASE_PLATE_BANDS, BASE_PLATE_MAX_SCATTERING, check_base_plate_scattering,
 )
 
 # The normative per-band ceilings (Table 1): 0.05 up to 500 Hz, rising to 0.25.
-# BASE_PLATE_BANDS_HZ is the band tuple; BASE_PLATE_MAX_SCATTERING maps band -> ceiling.
-print(BASE_PLATE_BANDS_HZ[0], BASE_PLATE_MAX_SCATTERING[100])   # 100 0.05
+# BASE_PLATE_BANDS is the band tuple; BASE_PLATE_MAX_SCATTERING maps band -> ceiling.
+print(BASE_PLATE_BANDS[0], BASE_PLATE_MAX_SCATTERING[100])   # 100 0.05
 
 # A base plate whose measured scattering stays under the ceiling passes silently;
 # an over-limit band raises a ScatteringDiffusionWarning listing the offenders.
-check_base_plate_scattering([0.02] * len(BASE_PLATE_BANDS_HZ))
+check_base_plate_scattering([0.02] * len(BASE_PLATE_BANDS))
 ```
 
 ## 2. Diffusion coefficient (ISO 17497-2)

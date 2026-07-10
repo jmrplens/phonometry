@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `meteorological_correction()`. `DEFAULT_FREQUENCIES` gives the nominal octave
   bands.
 - `task_based_exposure()`, `job_based_exposure()` and `full_day_exposure()`
-  (with `Task`, `ExposureResult` and `ExposureWarning`) — ISO 9612:2009 daily
+  (with `Task`, `ExposureResult` and `OccupationalExposureWarning`) — ISO 9612:2009 daily
   noise exposure LEX,8h by the three measurement strategies and the normative
   Annex C uncertainty budget (k = 1,65 one-sided 95 %, the C.6 I(I−1) vs
   C.12 N−1 sampling asymmetry, Table C.4 and the LEX,8h + U upper limit); the

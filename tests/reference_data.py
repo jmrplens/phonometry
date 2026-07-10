@@ -456,18 +456,18 @@ DIRECTIVE_2002_44_WBV_ELV = 1.15  # A(8) m/s^2, Art. 3(2)(b)
 # the standard normal-effort spectrum in quiet; the index for that condition
 # with normal hearing is the standard-procedure result.
 # ---------------------------------------------------------------------------
-SII_BAND_IMPORTANCE_SUM = 1.0  # ANSI S3.5-1997 Table 3, sum of Ii
-SII_MASKING_Z_200HZ = -1.665  # Zi at 200 Hz, standard spectrum in quiet
-SII_STANDARD_QUIET = 0.9958  # SII, standard normal speech, quiet, normal hearing
-SII_LOUD_1KHZ = 42.16  # Table 3, loud-effort standard speech spectrum at 1 kHz
+ANSIS3_5_BAND_IMPORTANCE_SUM = 1.0  # ANSI S3.5-1997 Table 3, sum of Ii
+ANSIS3_5_MASKING_Z_200HZ = -1.665  # Zi at 200 Hz, standard spectrum in quiet
+ANSIS3_5_STANDARD_QUIET = 0.9958  # SII, standard normal speech, quiet, normal hearing
+ANSIS3_5_LOUD_1KHZ = 42.16  # Table 3, loud-effort standard speech spectrum at 1 kHz
 
 # ---------------------------------------------------------------------------
 # Prominence of impulsive sounds - NT ACOU 112:2002.
 # P = 3*lg(1000) + 2*lg(30) = 11.9542 (Formula 1); the adjustment at P = 10 is
 # KI = 1.8*(10 - 5) = 9.0 dB (Formula 2).
 # ---------------------------------------------------------------------------
-NTACOU_PROMINENCE = 11.9542  # P for onset rate 1000 dB/s, level difference 30 dB
-NTACOU_ADJUSTMENT_P10 = 9.0  # KI at P = 10
+NTACOU112_PROMINENCE = 11.9542  # P for onset rate 1000 dB/s, level difference 30 dB
+NTACOU112_ADJUSTMENT_P10 = 9.0  # KI at P = 10
 
 # ---------------------------------------------------------------------------
 # Room-noise criteria - ANSI/ASA S12.2-2019.
@@ -475,9 +475,9 @@ NTACOU_ADJUSTMENT_P10 = 9.0  # KI at P = 10
 # NC value; the RC Mark II curves reproduce Table D.1 (the 63 Hz level of the
 # RC-31 curve is 51 dB); the mid-frequency average of the RC-35 curve is 35 dB.
 # ---------------------------------------------------------------------------
-RN_NC40_SELF = 40.0  # NC-40 curve -> tangency rating (Table 1)
-RN_RC31_63HZ = 51.0  # RC-31 curve, 63 Hz octave-band level (Table D.1)
-RN_RC35_LMF = 35.0  # RC-35 curve, mid-frequency average LMF (clause D.4)
+ANSIS12_2_NC40_SELF = 40.0  # NC-40 curve -> tangency rating (Table 1)
+ANSIS12_2_RC31_63HZ = 51.0  # RC-31 curve, 63 Hz octave-band level (Table D.1)
+ANSIS12_2_RC35_LMF = 35.0  # RC-35 curve, mid-frequency average LMF (clause D.4)
 
 # ---------------------------------------------------------------------------
 # Hearing thresholds - ISO 7029:2017 (age) and ISO 389-7:2006 (reference).
@@ -486,9 +486,9 @@ RN_RC35_LMF = 35.0  # RC-35 curve, mid-frequency average LMF (clause D.4)
 # at 1 kHz age 60 male it is 10.15 dB. The free-field reference threshold at
 # 1 kHz is 2.4 dB (ISO 389-7 Table 1).
 # ---------------------------------------------------------------------------
-HEARING_MEDIAN_MALE_60_4KHZ = 20.2085  # dB, ISO 7029 Table 1 median formula
-HEARING_SU_MALE_60_1KHZ = 10.1533  # dB, ISO 7029 Table 2 upper spread
-HEARING_REF_FREE_1KHZ = 2.4  # dB, ISO 389-7 Table 1 free-field
+ISO7029_MEDIAN_MALE_60_4KHZ = 20.2085  # dB, ISO 7029 Table 1 median formula
+ISO7029_SU_MALE_60_1KHZ = 10.1533  # dB, ISO 7029 Table 2 upper spread
+ISO389_7_REF_FREE_1KHZ = 2.4  # dB, ISO 389-7 Table 1 free-field
 
 # ---------------------------------------------------------------------------
 # Measurement uncertainty - ISO/IEC Guide 98-3 (GUM) and Supplement 1.

@@ -45,14 +45,14 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from ._types import Real
-from ._warnings import PhonometryWarning
+from ._warnings import PhonometryWarning, _warn_renamed
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
 
 __all__ = [
-    "BASE_PLATE_BANDS_HZ",
+    "BASE_PLATE_BANDS",
     "BASE_PLATE_MAX_SCATTERING",
     "TWO_DIMENSIONAL_SOURCE_WEIGHTS",
     "DiffusionResult",
@@ -99,7 +99,7 @@ _DB_PER_NEPER = 10.0 * math.log10(math.e)
 
 #: One-third-octave centre frequencies of ISO 17497-1 Table 1, in Hz
 #: (equivalent full-scale ``f / N``), 100 Hz to 5000 Hz.
-BASE_PLATE_BANDS_HZ: tuple[int, ...] = (
+BASE_PLATE_BANDS: tuple[int, ...] = (
     100, 125, 160, 200, 250, 315, 400, 500, 630,
     800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000,
 )
@@ -505,7 +505,7 @@ def check_base_plate_scattering(
 
     :param scattering: Measured base-plate scattering coefficients, either a
         mapping keyed by one-third-octave centre frequency (Hz) or a sequence
-        of 18 values ordered as :data:`BASE_PLATE_BANDS_HZ`.
+        of 18 values ordered as :data:`BASE_PLATE_BANDS`.
     :return: Tuple of the centre frequencies (Hz) that exceed the limit, in
         ascending order (empty if the base plate is compliant).
     :raises ValueError: for a mapping missing a band or a sequence of the
@@ -513,7 +513,7 @@ def check_base_plate_scattering(
     """
     if isinstance(scattering, Mapping):
         values: dict[int, float] = {}
-        for band in BASE_PLATE_BANDS_HZ:
+        for band in BASE_PLATE_BANDS:
             if band in scattering:
                 values[band] = float(scattering[band])
             elif float(band) in scattering:
@@ -521,19 +521,19 @@ def check_base_plate_scattering(
             else:
                 raise ValueError(
                     f"scattering mapping is missing band {band} Hz; "
-                    f"expected keys {BASE_PLATE_BANDS_HZ}"
+                    f"expected keys {BASE_PLATE_BANDS}"
                 )
     else:
         arr = np.asarray(scattering, dtype=np.float64)
-        if arr.ndim != 1 or arr.size != len(BASE_PLATE_BANDS_HZ):
+        if arr.ndim != 1 or arr.size != len(BASE_PLATE_BANDS):
             raise ValueError(
-                f"scattering must have {len(BASE_PLATE_BANDS_HZ)} values for "
-                f"bands {BASE_PLATE_BANDS_HZ}, got shape {arr.shape}"
+                f"scattering must have {len(BASE_PLATE_BANDS)} values for "
+                f"bands {BASE_PLATE_BANDS}, got shape {arr.shape}"
             )
-        values = dict(zip(BASE_PLATE_BANDS_HZ, arr.tolist()))
+        values = dict(zip(BASE_PLATE_BANDS, arr.tolist()))
     exceeded = tuple(
         band
-        for band in BASE_PLATE_BANDS_HZ
+        for band in BASE_PLATE_BANDS
         if values[band] > BASE_PLATE_MAX_SCATTERING[band]
     )
     if exceeded:
@@ -870,3 +870,15 @@ def random_incidence_diffusion(
     if total <= 0.0:
         raise ValueError("The total source weight must be positive.")
     return float(np.sum(w * d) / total)
+
+
+# --- Deprecated alias (phonometry 3.1 rename; remove in 4.0) -------------
+
+def __getattr__(name: str) -> Any:
+    """PEP 562 shim warning for the renamed band constant."""
+    if name == "BASE_PLATE_BANDS_HZ":
+        _warn_renamed("BASE_PLATE_BANDS_HZ", "BASE_PLATE_BANDS")
+        return BASE_PLATE_BANDS
+    raise AttributeError(
+        f"module 'phonometry.scattering_diffusion' has no attribute {name!r}"
+    )

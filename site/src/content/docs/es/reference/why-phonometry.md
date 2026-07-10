@@ -101,7 +101,7 @@ que cualquier regresión hace fallar la CI:
 | IEC 61672-1:2013 Tabla 5 | Respuestas de pico de un ciclo/medio ciclo de `lc_peak()`, límites de clase 1 | `tests/test_levels.py` |
 | IEC 61260-1:2014 Tabla 1 | Límites de aceptación de clase 1/2 del banco de filtros mediante `verify_filter_class()` | `tests/test_compliance.py` |
 | ISO 7196:1995 Tabla 2 | Ponderación G (infrasonidos) en todos los valores nominales de respuesta, 0,25–315 Hz | `tests/test_g_weighting.py` |
-| ISO 226:2023 Anexo B | Líneas isofónicas, niveles de sonoridad y umbral de audición frente a las tablas del Anexo B | `tests/test_equal_loudness.py` |
+| ISO 226:2023 Anexo B | Líneas isofónicas, niveles de sonoridad y umbral de audición frente a las tablas del Anexo B | `tests/test_loudness_contours.py` |
 | ECMA-418-1:2024 | Prominencia tonal TNR/PR: anchos de banda críticos, separación de proximidad y criterios de prominencia frente a los ejemplos resueltos de los apartados 10–12 | `tests/test_tonality.py` |
 | ISO 1996-1:2016 | `lden()`, `ldn()` y `composite_rating_level()` frente a valores de las fórmulas calculados a mano | `tests/test_environmental.py` |
 | IEC 60942:2017 Tabla 2 | Límites de estabilidad a corto plazo del calibrador (dependientes de la frecuencia, clase 1) en `sensitivity()` | `tests/test_calibration_validation.py` |

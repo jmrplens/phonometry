@@ -913,7 +913,7 @@ one-third-octave) values.*
 | :--- | :--- | :--- | :--- | :--- |
 | `l1` / `l2` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Source / receiving (or outdoor `l1_2m`) levels |
 | `li` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Impact levels (energy-averaged over positions) |
-| `reverberation_index` | 1D array | dB | one per band | `k` from `reverberation_index` or `estimate_reverberation_index` |
+| `reverberation_index` | scalar or 1D array | dB | one per band | `k` from `reverberation_index` or `estimate_reverberation_index`; `survey_service_equipment_level()` also accepts a scalar `k` |
 | `volume` | float | m³ | > 0 | Receiving-room `V` (for `Dn` / `L'n` / `R'` / normalized) |
 | `area` | float | m² | > 0 | Common-partition `S` (airborne `R'`; `V/7.5` rule applied) |
 | `measurements` | array | dB | exactly 3 | Service-equipment positions (`survey_service_equipment_level`) |

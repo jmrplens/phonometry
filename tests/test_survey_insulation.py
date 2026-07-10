@@ -169,6 +169,12 @@ def test_service_equipment_index_shape_mismatch_raises() -> None:
         survey_service_equipment_level([35.0, 30.0, 32.0], [3.0, 2.0])
 
 
+def test_service_equipment_scalar_measurements_raises_cleanly() -> None:
+    # A 0-d input must give a clean ValueError, not an IndexError.
+    with pytest.raises(ValueError, match="exactly three"):
+        survey_service_equipment_level(35.0, 3.0)  # type: ignore[arg-type]
+
+
 # ---------------------------------------------------------------------------
 # Reverberation-index shape validation shared by the measurement functions
 # ---------------------------------------------------------------------------
@@ -244,6 +250,15 @@ def test_estimate_furnished_aliases() -> None:
     np.testing.assert_allclose(estimate_reverberation_index(10.0, "others"), base)
 
 
+def test_estimate_room_is_case_and_space_insensitive() -> None:
+    """Room labels are normalized (trimmed + lower-cased) before lookup."""
+    base = estimate_reverberation_index(10.0, "kitchen")
+    np.testing.assert_allclose(estimate_reverberation_index(10.0, " Kitchen "), base)
+    np.testing.assert_allclose(estimate_reverberation_index(10.0, "KITCHEN"), base)
+    furn = estimate_reverberation_index(10.0, "furnished")
+    np.testing.assert_allclose(estimate_reverberation_index(10.0, " OTHER "), furn)
+
+
 def test_estimate_volume_range_boundaries() -> None:
     """Boundaries follow V<15, 15<=V<35, 35<=V<60, 60<=V<=150."""
     # type a straddling the 15 m³ boundary: <15 vs 15-35 rows differ.
@@ -267,7 +282,8 @@ def test_estimate_feeds_survey_functions() -> None:
 def test_estimate_rejects_bad_inputs() -> None:
     with pytest.raises(ValueError, match="at most 150"):
         estimate_reverberation_index(200.0, "a")
-    with pytest.raises(ValueError, match="not tabulated"):
+    # The error names the actual volume range, not an internal index.
+    with pytest.raises(ValueError, match=r"60 <= V <= 150"):
         estimate_reverberation_index(100.0, "kitchen")  # only V < 35
     with pytest.raises(ValueError, match="not tabulated"):
         estimate_reverberation_index(10.0, "z")

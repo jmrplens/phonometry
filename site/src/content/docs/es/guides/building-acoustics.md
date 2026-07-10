@@ -886,7 +886,7 @@ reverberación son idénticas en la armonizada EN ISO 10052:2004+A1:2010.
 
 El índice de reverberación se **mide** —pasa el tiempo de reverberación a
 `reverberation_index(T)`— o, en un control, se **estima** a partir del tipo de
-sala y el volumen con `estimate_reverberation_index(V, room)` (Table 4:
+sala y el volumen con `estimate_reverberation_index(V, room)` (Tabla 4:
 amueblada `"kitchen"` / `"bathroom"` / `"furnished"`, o las clases de
 construcción sin amueblar `"a"`–`"h"` y las mixtas `"a+e"`…`"d+h"`). Una cuarta
 magnitud propia de este método es el **ruido de equipos de servicio** `LXY` — la
@@ -906,8 +906,8 @@ print(np.round(res.d_nt, 1))          # [34.5 39.8 45.  50.5 54. ]  DnT = D + k
 print(res.rating.rating, res.rating.c)        # 49 -1  ->  DnT,w (C)
 print(res.r_prime_rating.rating)               # 48  ->  R'w
 
-# ¿Sin T medido? Estima k con la Table 4 (paredes pesadas, suelo duro,
-# 35-60 m3 -> clase "g").
+# ¿Sin T medido? Estima k con la Tabla 4 (paredes pesadas, suelo duro,
+# 35-60 m³ -> clase "g").
 k_est = estimate_reverberation_index(50.0, "g")
 print(k_est)                                   # [4.5 5.  5.5 5.5 5.5]
 
@@ -931,11 +931,11 @@ exactamente 5 valores de octava (o 16 de tercio de octava).*
 | :--- | :--- | :--- | :--- | :--- |
 | `l1` / `l2` | array 1D o 2D | dB | uno/banda, o `(posiciones, bandas)` | Niveles emisor / receptor (o exterior `l1_2m`) |
 | `li` | array 1D o 2D | dB | uno/banda, o `(posiciones, bandas)` | Niveles de impacto (media energética de posiciones) |
-| `reverberation_index` | array 1D | dB | uno por banda | `k` de `reverberation_index` o `estimate_reverberation_index` |
+| `reverberation_index` | escalar o array 1D | dB | uno por banda | `k` de `reverberation_index` o `estimate_reverberation_index`; `survey_service_equipment_level()` también acepta un `k` escalar |
 | `volume` | float | m³ | > 0 | Volumen receptor `V` (para `Dn` / `L'n` / `R'` / normalizadas) |
 | `area` | float | m² | > 0 | Área de partición común `S` (aéreo `R'`; regla `V/7,5`) |
 | `measurements` | array | dB | exactamente 3 | Posiciones de equipo de servicio (`survey_service_equipment_level`) |
-| `room` | str | — | `"kitchen"`/`"bathroom"`/`"furnished"`/`"a"`–`"h"`/`"a+e"`… | Clase de sala para `estimate_reverberation_index` (Table 4) |
+| `room` | str | — | `"kitchen"`/`"bathroom"`/`"furnished"`/`"a"`–`"h"`/`"a+e"`… | Clase de sala para `estimate_reverberation_index` (Tabla 4) |
 
 `survey_airborne_insulation()` devuelve un `SurveyAirborneResult` (`d`, `d_nt`,
 `d_n`, `r_prime`, `rating`, `r_prime_rating`); `survey_impact_insulation()` un

@@ -1022,7 +1022,7 @@ def _chk_survey_reverberation_estimate() -> Outcome:
     ok = bool(np.array_equal(got, expected))
     return Outcome(
         expected=f"k = {expected} dB",
-        computed=f"k = {list(got)} dB",
+        computed=f"k = {got.tolist()} dB",
         delta="exact",
         passed=ok,
     )

@@ -95,7 +95,7 @@ _TABLE3_VOLUME_LIMITS = (15.0, 35.0, 60.0, 150.0)
 #: Reverberation index data transcribed digit-for-digit from ISO 10052:2021,
 #: Table 4 (identical to Table 3 of EN ISO 10052:2004+A1:2010). Keyed by the
 #: volume-range index (0: V < 15, 1: 15 <= V < 35, 2: 35 <= V < 60,
-#: 3: 60 <= V < 150) then the room type; each value is the six-tuple
+#: 3: 60 <= V <= 150) then the room type; each value is the six-tuple
 #: (125, 250, 500, 1000, 2000 Hz, A/C-weighted) in dB. Room types: the
 #: furnished categories ``"kitchen"`` / ``"bathroom"`` (only tabulated for
 #: V < 35) and ``"furnished"`` (the general furnished room), and the
@@ -151,7 +151,7 @@ _TABLE3: dict[int, dict[str, tuple[float, float, float, float, float, float]]] =
         "c+g": (3.0, 4.5, 5.0, 5.5, 5.0, 5.5),
         "d+h": (3.5, 4.5, 5.0, 5.0, 5.5, 5.5),
     },
-    3: {  # 60 <= V < 150
+    3: {  # 60 <= V <= 150
         "furnished": (0.5, 0.5, 0.5, 0.5, 0.0, 0.5),
         "a": (1.0, 2.5, 2.5, 2.0, 1.5, 2.0),
         "b": (2.5, 4.0, 4.5, 3.5, 2.5, 3.5),
@@ -258,12 +258,24 @@ def estimate_reverberation_index(
     )
 
     entries = _TABLE3[idx]
-    key = "furnished" if room in ("furnished", "other", "others") else room
+    room_norm = room.strip().lower()
+    key = (
+        "furnished"
+        if room_norm in ("furnished", "other", "others")
+        else room_norm
+    )
     if key not in entries:
         available = ", ".join(sorted(entries))
+        limits = _TABLE3_VOLUME_LIMITS
+        if idx == 0:
+            rng = f"V < {limits[0]:g}"
+        elif idx == len(limits) - 1:
+            rng = f"{limits[idx - 1]:g} <= V <= {limits[idx]:g}"
+        else:
+            rng = f"{limits[idx - 1]:g} <= V < {limits[idx]:g}"
         raise ValueError(
-            f"'room' {room!r} is not tabulated for V in the range with index "
-            f"{idx}; available: {available}."
+            f"'room' {room!r} is not tabulated for the volume range "
+            f"{rng} (m³); available: {available}."
         )
     row = entries[key]
     return float(row[5]) if weighted else np.asarray(row[:5], dtype=np.float64)
@@ -400,7 +412,7 @@ def survey_airborne_insulation(
     area: float | None = None,
 ) -> SurveyAirborneResult:
     """
-    Airborne sound insulation between rooms, survey method (ISO 10052:2004).
+    Airborne sound insulation between rooms, survey method (ISO 10052:2021).
 
     Computes, per octave band, the level difference ``D = L1 - L2``
     (Clause 3.2), the standardized level difference ``DnT = D + k``
@@ -464,7 +476,7 @@ def survey_impact_insulation(
     volume: float | None = None,
 ) -> SurveyImpactResult:
     """
-    Impact sound insulation between rooms, survey method (ISO 10052:2004).
+    Impact sound insulation between rooms, survey method (ISO 10052:2021).
 
     Computes, per octave band, the energy-average impact sound pressure level
     ``Li`` (Clause 3.7), the standardized impact level ``L'nT = Li - k``
@@ -500,7 +512,7 @@ def survey_facade_insulation(
     volume: float | None = None,
 ) -> SurveyFacadeResult:
     """
-    Façade sound insulation, survey method (ISO 10052:2004).
+    Façade sound insulation, survey method (ISO 10052:2021).
 
     Computes, per octave band, the façade level difference
     ``D2m = L1,2m - L2`` (Clause 3.13), the standardized façade level
@@ -540,7 +552,7 @@ def survey_service_equipment_level(
     volume: float | None = None,
 ) -> SurveyServiceEquipmentResult:
     """
-    Service-equipment sound pressure level, survey method (ISO 10052:2004).
+    Service-equipment sound pressure level, survey method (ISO 10052:2021).
 
     Computes the service-equipment level ``LXY = 10 lg[(1/3) sum 10^(0,1
     LXY,i)]`` (Clause 3.16) as the energy average of the three measurement
@@ -562,9 +574,10 @@ def survey_service_equipment_level(
         are inconsistent, or if ``volume`` is not positive.
     """
     m = _finite_bands(measurements, "measurements")
-    if m.shape[0] != 3:
+    if m.ndim not in (1, 2) or m.shape[0] != 3:
         raise ValueError(
-            "'measurements' must give exactly three measurement positions."
+            "'measurements' must give exactly three measurement positions "
+            "(three scalars, or a (3, bands) array)."
         )
     l_xy = np.asarray(energy_average_level(m, axis=0), dtype=np.float64)
 

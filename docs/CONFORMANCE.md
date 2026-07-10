@@ -122,7 +122,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 15186-1:2000 Annex B | Adaptation term Kc: reference-room (B.1) reduces to (B.2) | max abs(B.1 - B.2) <= 0,001 dB | 2.59e-04 dB (Kc@1k = 0.259 dB) | 2.59e-04 dB | &#9989; |
 | ISO 10052:2021 Clause 3.6 | Survey R' applies the V/7,5 minimum-area rule | 26.197888 dB (+/-0 dB) | 26.197888 dB | 0 dB | &#9989; |
 | ISO 10052:2021 Clause 3.16 | Service-equipment LXY is the 3-position energy average | 32.823329 dB (+/-0 dB) | 32.823329 dB | 0 dB | &#9989; |
-| ISO 10052:2021 Table 4 | Reverberation-index estimate (35 <= V < 60, type g) | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | k = [np.float64(4.5), np.float64(5.0), np.float64(5.5), np.float64(5.5), np.float64(5.5)] dB | exact | &#9989; |
+| ISO 10052:2021 Table 4 | Reverberation-index estimate (35 <= V < 60, type g) | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | exact | &#9989; |
 
 </details>
 

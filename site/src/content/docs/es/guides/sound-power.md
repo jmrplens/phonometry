@@ -98,7 +98,7 @@ print(mic_xyz.shape)                                    # (10, 3)
 res = sound_power_pressure(
     levels, "hemisphere", radius=1.5, reflecting_planes=1,
     background_levels=background, frequencies=freqs,
-    reverberation_time=0.6, room_volume=300.0,          # datos de sala -> K2
+    reverberation_time=0.6, volume=300.0,          # datos de sala -> K2
 )
 print(round(res.surface_area, 2))                       # 14.14 m^2 (= 2*pi*1.5^2)
 print(round(float(res.environmental_correction[0]), 2)) # K2 = 2.32 dB
@@ -111,7 +111,7 @@ res.plot()   # barras de nivel de potencia sonora por banda; LWA en el título (
 
 El total ponderado A `LWA` se combina a partir de las potencias por banda con
 las correcciones de ponderación A del Anexo E de ISO 3744, así que necesita
-`frequencies`. Pasar los datos de sala (`reverberation_time` + `room_volume`,
+`frequencies`. Pasar los datos de sala (`reverberation_time` + `volume`,
 o `absorption_area`, o `mean_absorption_coefficient` + `room_surface`) habilita
 `K2`; omítelos y el campo se trata como libre (`K2 = 0`). Si el margen de fondo
 cae por debajo del criterio del grado o `K2` supera el límite de validez, un
@@ -131,7 +131,7 @@ determinación se devuelve igualmente.
 | `background_levels` | array 2D o espectro | dB | `(NM, NB)`, o `(NB,)` / `(1, NB)` | Habilita `K1`; un espectro único se difunde a todas las posiciones |
 | `frequencies` | array 1D | Hz | centros de banda nominales | Habilita `LWA` (Anexo E) |
 | `absorption_area` | float o array 1D | m² | > 0 | `A` para `K2` (directo); un array por banda → `K2` por banda |
-| `reverberation_time`, `room_volume` | float/array, float | s, m³ | > 0 | `A = 0.16 V/T` para `K2`; `T` por banda → `K2` por banda |
+| `reverberation_time`, `volume` | float/array, float | s, m³ | > 0 | `A = 0.16 V/T` para `K2`; `T` por banda → `K2` por banda |
 | `mean_absorption_coefficient`, `room_surface` | float/array, float | —, m² | `(0,1]`, > 0 | `A = α·Sv` (Ec. A.7); `α` por banda → `K2` por banda |
 | `grade` | str | — | `'engineering'` (por defecto) / `'survey'` | ISO 3744 vs ISO 3746 |
 | `omc_uncertainty` | float | dB | por defecto `0.0` | `σomc`, inestabilidad de operación/montaje, incorporada a `U` |

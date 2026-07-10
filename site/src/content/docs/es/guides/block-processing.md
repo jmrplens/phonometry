@@ -40,7 +40,7 @@ import soundfile as sf
 from phonometry import OctaveFilterBank, WeightingFilter
 
 fs = 48000
-octavefilter = OctaveFilterBank(fs, 1, stateful=True, resample=False)
+octave_filter = OctaveFilterBank(fs, 1, stateful=True, resample=False)
 afilter = WeightingFilter(fs, "A", stateful=True)
 
 for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
@@ -49,7 +49,7 @@ for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
     weighted = afilter.filter(block)
 
     # Dividir en bandas de octava
-    block_spl, _, block_output = octavefilter.filter(weighted, sigbands=True, detrend=False)
+    block_spl, _, block_output = octave_filter.filter(weighted, sigbands=True, detrend=False)
 
     # procesado posterior de la señal
     ...

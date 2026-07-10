@@ -53,7 +53,7 @@ Analyze a signal and get the Sound Pressure Level (SPL) per frequency band.
 
 ```python
 import numpy as np
-from phonometry import octavefilter
+from phonometry import octave_filter
 
 fs = 48000
 t = np.linspace(0, 1, fs, endpoint=False)
@@ -61,7 +61,7 @@ t = np.linspace(0, 1, fs, endpoint=False)
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # Apply 1/3 octave filter bank
-spl, freq = octavefilter(signal, fs=fs, fraction=3)
+spl, freq = octave_filter(signal, fs=fs, fraction=3)
 
 print(f"Bands: {freq}")
 print(f"SPL [dB]: {spl}")
@@ -75,7 +75,7 @@ print(f"SPL [dB]: {spl}")
 
 ```python
 from scipy.io import wavfile
-from phonometry import octavefilter
+from phonometry import octave_filter
 
 # Load standard WAV file
 fs, signal = wavfile.read("measurement.wav")
@@ -83,7 +83,7 @@ fs, signal = wavfile.read("measurement.wav")
 # Analyze
 # Note: To obtain real-world SPL values, you must calibrate the input.
 # See the Calibration guide.
-spl, freq = octavefilter(signal, fs=fs, fraction=3)
+spl, freq = octave_filter(signal, fs=fs, fraction=3)
 ```
 
 Integer audio (e.g. int16 WAV data) is converted to float64 internally, so it is

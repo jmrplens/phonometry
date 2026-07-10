@@ -13,11 +13,11 @@ provided as alternative methods.
 
 from __future__ import annotations
 
-from typing import List
+from typing import List, Literal
 
 import numpy as np
 
-from .loudness import ZwickerLoudness, loudness_zwicker
+from .loudness_zwicker import ZwickerLoudness, loudness_zwicker
 
 _DZ = 0.1  # Bark step of the ISO 532-1 specific-loudness pattern
 _Z = np.arange(1, 241) * _DZ  # Bark bin centers (0.1 .. 24.0), reference convention
@@ -130,7 +130,9 @@ def _k_aures() -> float:
     return _K_AURES
 
 
-def sharpness_din_from_specific(specific: np.ndarray, method: str = "din") -> float:
+def sharpness_din_from_specific(
+    specific: np.ndarray, method: Literal["din", "aures", "bismarck"] = "din"
+) -> float:
     """
     Sharpness in acum from a specific-loudness pattern (DIN 45692 Eq. 1).
 
@@ -155,8 +157,8 @@ def sharpness_din_from_specific(specific: np.ndarray, method: str = "din") -> fl
 def sharpness_din(
     x: List[float] | np.ndarray,
     fs: int,
-    field: str = "free",
-    method: str = "din",
+    field: Literal["free", "diffuse"] = "free",
+    method: Literal["din", "aures", "bismarck"] = "din",
     calibration_factor: float = 1.0,
 ) -> float:
     """

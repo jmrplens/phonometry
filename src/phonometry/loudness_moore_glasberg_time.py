@@ -44,7 +44,7 @@ by definition of the sone; the additive spectral calibration of clause 7.3
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Sequence, Tuple
 
 import numpy as np
 
@@ -624,8 +624,8 @@ def loudness_moore_glasberg_time(
     signal: Sequence[float] | np.ndarray,
     fs: float,
     *,
-    field: str = "free",
-    presentation: str = "binaural",
+    field: Literal["free", "diffuse", "eardrum"] = "free",
+    presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
     percentiles: Sequence[float] = (1.0, 5.0, 10.0, 50.0, 90.0, 95.0),
 ) -> MooreGlasbergTimeVaryingLoudness:
     """Time-varying loudness of a calibrated pressure signal (ISO 532-3:2023).

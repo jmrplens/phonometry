@@ -37,7 +37,7 @@ frecuencia decimada:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es.svg" alt="Decimación multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un filtro paso bajo antialias y decimación, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es_dark.svg" alt="Decimación multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un paso-bajo antialiasing y diezmado, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%">
 
-### Parámetros de `octavefilter()` / `OctaveFilterBank`
+### Parámetros de `octave_filter()` / `OctaveFilterBank`
 
 | Parámetro | Tipo | Unidades | Rango / por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
@@ -73,11 +73,11 @@ en el punto de cruce a −3 dB.
 
 | Tipo | Nombre | Ejemplo de uso | Ideal para |
 | :--- | :--- | :--- | :--- |
-| `butter` | **Butterworth** | `octavefilter(x, fs, filter_type='butter')` | Medición acústica general. |
-| `cheby1` | **Chebyshev I** | `octavefilter(x, fs, filter_type='cheby1', ripple=0.1)` | Caída más abrupta a costa de rizado. |
-| `cheby2` | **Chebyshev II** | `octavefilter(x, fs, filter_type='cheby2')` | Banda de paso plana con ceros en la banda atenuada. |
-| `ellip` | **Elíptico** | `octavefilter(x, fs, filter_type='ellip', ripple=0.1)` | Máxima selectividad. |
-| `bessel` | **Bessel** | `octavefilter(x, fs, filter_type='bessel')` | Preservar la forma de los transitorios. |
+| `butter` | **Butterworth** | `octave_filter(x, fs, filter_type='butter')` | Medición acústica general. |
+| `cheby1` | **Chebyshev I** | `octave_filter(x, fs, filter_type='cheby1', ripple=0.1)` | Caída más abrupta a costa de rizado. |
+| `cheby2` | **Chebyshev II** | `octave_filter(x, fs, filter_type='cheby2')` | Banda de paso plana con ceros en la banda atenuada. |
+| `ellip` | **Elíptico** | `octave_filter(x, fs, filter_type='ellip', ripple=0.1)` | Máxima selectividad. |
+| `bessel` | **Bessel** | `octave_filter(x, fs, filter_type='bessel')` | Preservar la forma de los transitorios. |
 
 ## Galería de respuestas del banco
 
@@ -101,14 +101,14 @@ de las bandas de frecuencia.
 
 ```python
 import numpy as np
-from phonometry import octavefilter
+from phonometry import octave_filter
 
 # Una señal calibrada en Pa para que la guía funcione por sí sola
 fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Medición estándar por defecto
-spl, freq = octavefilter(x, fs, filter_type='butter')
+spl, freq = octave_filter(x, fs, filter_type='butter')
 ```
 
 ### 2. Chebyshev I (`cheby1`)
@@ -119,7 +119,7 @@ cerca de las frecuencias de corte.
 
 ```python
 # Selectividad con 0.1 dB de rizado en la banda de paso
-spl, freq = octavefilter(x, fs, filter_type='cheby1', ripple=0.1)
+spl, freq = octave_filter(x, fs, filter_type='cheby1', ripple=0.1)
 ```
 
 ### 3. Chebyshev II (`cheby2`)
@@ -132,7 +132,7 @@ automáticamente para que los puntos de −3 dB caigan en los bordes de banda
 
 ```python
 # Banda de paso plana, 72 dB de atenuación por defecto (clase 1)
-spl, freq = octavefilter(x, fs, filter_type='cheby2')
+spl, freq = octave_filter(x, fs, filter_type='cheby2')
 ```
 
 ### 4. Elíptico (`ellip`)
@@ -143,7 +143,7 @@ la atenuada.
 
 ```python
 # Máxima selectividad para aislamiento extremo entre bandas
-spl, freq = octavefilter(x, fs, filter_type='ellip', ripple=0.1)
+spl, freq = octave_filter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
 ### 5. Bessel (`bessel`)
@@ -154,7 +154,7 @@ mejor que ningún otro tipo, pero tienen la caída más lenta.
 
 ```python
 # Ideal para análisis de pulsos y preservación de transitorios
-spl, freq = octavefilter(x, fs, filter_type='bessel')
+spl, freq = octave_filter(x, fs, filter_type='bessel')
 ```
 
 ### 6. Linkwitz-Riley (`linkwitz_riley`)
@@ -214,7 +214,7 @@ arquitecturas (p. ej. Butterworth vs Chebyshev) a la fase y al transitorio.
 
 ```python
 import numpy as np
-from phonometry import octavefilter
+from phonometry import octave_filter
 
 # 1. Generar una señal (suma de 250 Hz y 1000 Hz)
 fs = 48000
@@ -222,8 +222,8 @@ t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
 y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # 2. Comparar arquitecturas (Butterworth vs Chebyshev II)
-spl_b, freq, xb_butter = octavefilter(y, fs=fs, fraction=1, sigbands=True, filter_type='butter')
-spl_c2, _, xb_cheby2 = octavefilter(y, fs=fs, fraction=1, sigbands=True, filter_type='cheby2')
+spl_b, freq, xb_butter = octave_filter(y, fs=fs, fraction=1, sigbands=True, filter_type='butter')
+spl_c2, _, xb_cheby2 = octave_filter(y, fs=fs, fraction=1, sigbands=True, filter_type='cheby2')
 
 # 'xb_butter' y 'xb_cheby2' contienen las señales por banda en el dominio del tiempo
 ```

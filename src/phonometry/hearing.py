@@ -24,7 +24,7 @@ component with this age component) is not part of this module.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -201,7 +201,7 @@ def _spread(coeffs: np.ndarray, u: float) -> np.ndarray:
 
 def age_threshold(
     age: float,
-    sex: str = "male",
+    sex: Literal["male", "female"] = "male",
     fractile: float = 0.5,
     frequencies: ArrayLike | None = None,
 ) -> AgeThresholdResult:

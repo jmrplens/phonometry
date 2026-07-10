@@ -27,7 +27,7 @@ $$
 
 ## Resolución frecuencial vs separación de bins FFT
 
-`octavefilter` es un **banco de filtros de octava fraccional en el dominio del
+`octave_filter` es un **banco de filtros de octava fraccional en el dominio del
 tiempo**, no un estimador espectral FFT/Welch. Por tanto, su resultado no tiene
 una resolución frecuencial en el sentido `fs / nfft`.
 
@@ -47,9 +47,9 @@ octava en torno a 1 kHz es aproximadamente:
 Puedes inspeccionar las bandas exactas con:
 
 ```python
-from phonometry import getansifrequencies
+from phonometry import nominal_frequencies
 
-fc, fl, fu, labels = getansifrequencies(fraction=3, limits=[12, 20000])
+fc, fl, fu, labels = nominal_frequencies(fraction=3, limits=[12, 20000])
 for label, center, lower, upper in zip(labels, fc, fl, fu):
     print(label, center, lower, upper, upper - lower)
 ```
@@ -61,7 +61,7 @@ máscaras:
 ```python
 import numpy as np
 from scipy import signal
-from phonometry import octavefilter, getansifrequencies
+from phonometry import octave_filter, nominal_frequencies
 
 fs = 100_000
 # cualquier señal de presión 1D en Pa (se sintetiza para que el ejemplo funcione)
@@ -69,7 +69,7 @@ pressure_signal_pa = 0.02 * np.random.default_rng(0).standard_normal(fs)
 x = pressure_signal_pa
 
 # Niveles de tercio de octava normalizados de phonometry.
-levels, centers = octavefilter(
+levels, centers = octave_filter(
     x,
     fs=fs,
     fraction=3,
@@ -77,7 +77,7 @@ levels, centers = octavefilter(
 )
 
 # Las mismas definiciones de banda, incluidos los bordes.
-fc, fl, fu, labels = getansifrequencies(fraction=3, limits=[12, 20_000])
+fc, fl, fu, labels = nominal_frequencies(fraction=3, limits=[12, 20_000])
 
 # Estimación Welch de banda estrecha sobre la señal original.
 nperseg = min(2**15, len(x))
@@ -106,7 +106,7 @@ fraccional normalizados, mientras Welch da bins FFT de banda estrecha. Con
 La ventana y el solape afectan al leakage y a la varianza del promediado, pero
 no cambian la separación de bins de cada segmento FFT.
 
-Con `sigbands=True`, `octavefilter` también puede devolver la forma de onda
+Con `sigbands=True`, `octave_filter` también puede devolver la forma de onda
 filtrada por cada banda. Aplicar Welch/FFT a una de esas señales puede servir
 como vista diagnóstica del contenido dentro de esa banda, pero no recupera bins
 FFT a partir de los niveles escalares por banda.

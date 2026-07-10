@@ -8,7 +8,7 @@ from typing import cast
 import matplotlib.pyplot as plt
 import numpy as np
 
-from phonometry import octavefilter
+from phonometry import octave_filter
 
 
 def generate_pink_noise(samples: int) -> np.ndarray:
@@ -59,7 +59,7 @@ def test_pink_noise_flatness() -> None:
     samples = int(fs * duration)
     x = generate_pink_noise(samples)
 
-    spl, freq = octavefilter(x, fs=fs, fraction=3, order=6, limits=[20, 20000])
+    spl, freq = octave_filter(x, fs=fs, fraction=3, order=6, limits=[20, 20000])
 
     mean_spl = np.mean(spl)
 

@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -238,7 +238,7 @@ def nipts(
 
 def htlan(
     age: float,
-    sex: str,
+    sex: Literal["male", "female"],
     l_ex: float,
     years: float,
     fractile: float = 0.5,

@@ -25,7 +25,7 @@ text and is out of scope.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -249,7 +249,7 @@ def static_stress(mz: float = MZ_MALE) -> float:
     return mz * GRAVITY
 
 
-def ultimate_strength(age: ArrayLike, *, sex: str = "male") -> np.ndarray:
+def ultimate_strength(age: ArrayLike, *, sex: Literal["male", "female"] = "male") -> np.ndarray:
     """Ultimate lumbar strength ``Su`` at an age (Annex C, Formula C.4).
 
     :param age: Age ``b + i``, in years.
@@ -268,7 +268,7 @@ def injury_risk(
     start_age: float,
     years: int,
     days_per_year: float,
-    sex: str = "male",
+    sex: Literal["male", "female"] = "male",
     mz: float | None = None,
 ) -> float:
     """Cumulative injury stress variable ``R`` (Annex C, Formula C.3).
@@ -306,7 +306,7 @@ def injury_risk(
     return float(total ** (1.0 / DOSE_EXPONENT))
 
 
-def injury_probability(risk: ArrayLike, *, sex: str = "male") -> np.ndarray | float:
+def injury_probability(risk: ArrayLike, *, sex: Literal["male", "female"] = "male") -> np.ndarray | float:
     """Probability of lumbar injury ``P(R)`` (Annex C, Formula C.5).
 
     :param risk: The stress variable ``R`` (see :func:`injury_risk`); scalar or
@@ -344,7 +344,7 @@ class MultipleShockResult:
         injury for this sex (Table C.2).
     """
 
-    sex: str
+    sex: Literal["male", "female"]
     acceleration_dose: float
     daily_dose: float
     compression_dose: float
@@ -376,7 +376,7 @@ def multiple_shock_assessment(
     days_per_year: float,
     exposure_time: float | None = None,
     measurement_time: float | None = None,
-    sex: str = "male",
+    sex: Literal["male", "female"] = "male",
     mz: float | None = None,
 ) -> MultipleShockResult:
     """Full multiple-shock assessment from a seat acceleration time history.

@@ -162,7 +162,7 @@ barrier = Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
 att = outdoor_propagation_attenuation(
     200.0, source_height=1.5, receiver_height=1.5, frequencies=bands,
     ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
-    barrier=barrier, temperature=15.0, humidity=70.0,
+    barrier=barrier, temperature=15.0, relative_humidity=70.0,
 )
 print(np.round(att.a_div, 1))     # [57. 57. 57. 57. 57. 57. 57. 57.]  divergence
 print(np.round(att.a_gr, 2))      # [-4.65  2.34 13.79  9.76  1.3  -0.   -0.   -0.  ]
@@ -173,7 +173,7 @@ print(np.round(att.a_total, 1))   # [66.2 68.3 71.  73.9 77.1 78.8 82.3 96. ]
 lw = np.full(len(bands), 95.0)
 lp = predicted_receiver_level(
     lw, 200.0, 1.5, 1.5, bands, 1.0, 1.0, 1.0,
-    barrier=barrier, temperature=15.0, humidity=70.0,
+    barrier=barrier, temperature=15.0, relative_humidity=70.0,
 )
 print(np.round(lp, 1))            # [28.8 26.7 24.  21.1 17.9 16.2 12.7 -1. ]
 ```
@@ -228,7 +228,7 @@ diffraction (Eq. (13), $K_{met}=1$, ground term retained).
 | `frequencies` | 1D array | Hz | default 8 octaves 63–8000 | `DEFAULT_FREQUENCIES` |
 | `ground_source` / `ground_middle` / `ground_receiver` | float | — | `[0, 1]`, default `0.0` | Ground factor $G$ (0 hard, 1 porous) |
 | `barrier` | `Barrier` or None | — | default `None` | Screening obstacle |
-| `temperature` / `humidity` / `pressure` | float | °C / % / kPa | 20 / 70 / 101.325 | Passed to $A_{atm}$ |
+| `temperature` / `relative_humidity` / `pressure` | float | °C / % / kPa | 20 / 70 / 101.325 | Passed to $A_{atm}$ |
 | `projected_distance` | float or None | m | default $\sqrt{d^2-(h_s-h_r)^2}$ | Ground-plane $d_p$ |
 
 Returns an `OutdoorAttenuation` with `a_div`, `a_atm`, `a_gr`, `a_bar`,

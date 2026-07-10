@@ -95,7 +95,7 @@ print(mic_xyz.shape)                                    # (10, 3)
 res = sound_power_pressure(
     levels, "hemisphere", radius=1.5, reflecting_planes=1,
     background_levels=background, frequencies=freqs,
-    reverberation_time=0.6, room_volume=300.0,          # room data -> K2
+    reverberation_time=0.6, volume=300.0,          # room data -> K2
 )
 print(round(res.surface_area, 2))                       # 14.14 m^2 (= 2*pi*1.5^2)
 print(round(float(res.environmental_correction[0]), 2)) # K2 = 2.32 dB
@@ -108,7 +108,7 @@ res.plot()   # sound power level bars per band, LWA in the title (needs matplotl
 
 The A-weighted total `LWA` is combined from the band powers with the ISO 3744
 Annex E A-weighting corrections, so it needs `frequencies`. Passing the room
-data (`reverberation_time` + `room_volume`, or `absorption_area`, or
+data (`reverberation_time` + `volume`, or `absorption_area`, or
 `mean_absorption_coefficient` + `room_surface`) enables `K2`; omit it and the
 field is treated as free (`K2 = 0`). If the background margin drops below the
 grade criterion or `K2` exceeds the validity limit, a `SoundPowerWarning`
@@ -127,7 +127,7 @@ flags that the levels are upper bounds — the determination still returns.
 | `background_levels` | 2D array or spectrum | dB | `(NM, NB)`, or `(NB,)` / `(1, NB)` | Enables `K1`; a single spectrum broadcasts to every position |
 | `frequencies` | 1D array | Hz | nominal band centres | Enables `LWA` (Annex E) |
 | `absorption_area` | float or 1D array | m² | > 0 | `A` for `K2` (direct); per-band array → per-band `K2` |
-| `reverberation_time`, `room_volume` | float/array, float | s, m³ | > 0 | `A = 0.16 V/T` for `K2`; per-band `T` → per-band `K2` |
+| `reverberation_time`, `volume` | float/array, float | s, m³ | > 0 | `A = 0.16 V/T` for `K2`; per-band `T` → per-band `K2` |
 | `mean_absorption_coefficient`, `room_surface` | float/array, float | —, m² | `(0,1]`, > 0 | `A = α·Sv` (Eq. A.7); per-band `α` → per-band `K2` |
 | `grade` | str | — | `'engineering'` (default) / `'survey'` | ISO 3744 vs ISO 3746 |
 | `omc_uncertainty` | float | dB | default `0.0` | `σomc`, operating/mounting instability, folded into `U` |

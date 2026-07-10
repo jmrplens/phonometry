@@ -8,12 +8,12 @@ import time
 import numpy as np
 
 import phonometry
-from phonometry import OctaveFilterBank, octavefilter
+from phonometry import OctaveFilterBank, octave_filter
 
 
 def test_filterbank_reuse_performance() -> None:
     """
-    Verify that reusing OctaveFilterBank is faster than calling octavefilter multiple times.
+    Verify that reusing OctaveFilterBank is faster than calling octave_filter multiple times.
     
     **Purpose:**
     The refactored class-based approach allows pre-calculating SOS coefficients.
@@ -35,12 +35,12 @@ def test_filterbank_reuse_performance() -> None:
     num_iterations = 10
     
     # 1. Using functional API with a cold design cache on every call.
-    # octavefilter() now caches bank designs, so clear it each iteration to
+    # octave_filter() now caches bank designs, so clear it each iteration to
     # measure the redesign cost this test is about.
     start_func = time.time()
     for _ in range(num_iterations):
         phonometry._cached_filter_bank.cache_clear()
-        octavefilter(x, fs)
+        octave_filter(x, fs)
     time_func = time.time() - start_func
     
     # 2. Using FilterBank class (designs once)

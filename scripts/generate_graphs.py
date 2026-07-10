@@ -1,7 +1,7 @@
 import os
 import sys
 from functools import lru_cache
-from typing import Any
+from typing import Any, Literal
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -2861,7 +2861,7 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
     barrier = Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
     att = outdoor_propagation_attenuation(
         200.0, 1.5, 1.5, bands, ground_source=1.0, ground_middle=1.0,
-        ground_receiver=1.0, barrier=barrier, temperature=15.0, humidity=70.0,
+        ground_receiver=1.0, barrier=barrier, temperature=15.0, relative_humidity=70.0,
     )
     x = np.arange(len(bands))
     fig, ax = plt.subplots(figsize=(11, 6.4))
@@ -3630,7 +3630,11 @@ def generate_multiple_shock(output_dir: str) -> None:
 
     # --- Right: injury probability Pi(R) with the Annex C male example. ---
     grid = np.linspace(0.0, 3.0, 300)
-    for sex, colour in (("male", COLOR_PRIMARY), ("female", COLOR_SECONDARY)):
+    sexes: tuple[tuple[Literal["male", "female"], str], ...] = (
+        ("male", COLOR_PRIMARY),
+        ("female", COLOR_SECONDARY),
+    )
+    for sex, colour in sexes:
         prob = 100.0 * injury_probability(grid, sex=sex)
         ax_r.plot(grid, prob, color=colour, label=f"{sex}")
     # The worked example: five 40 m/s2 peaks, 82 kg male -> R = 1.22.

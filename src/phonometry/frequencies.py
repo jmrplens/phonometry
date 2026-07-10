@@ -11,10 +11,10 @@ from typing import List, Tuple
 
 import numpy as np
 
-from ._warnings import PhonometryWarning
+from ._warnings import PhonometryWarning, _warn_renamed
 
 
-def getansifrequencies(
+def nominal_frequencies(
     fraction: float,
     limits: List[float] | None = None,
 ) -> Tuple[List[float], List[float], List[float], List[str]]:
@@ -127,7 +127,7 @@ def _genfreqs(
     :param fs: Sample rate.
     :return: Tuple of center, lower, upper frequencies, and nominal labels.
     """
-    freq, freq_d, freq_u, labels = getansifrequencies(fraction, limits)
+    freq, freq_d, freq_u, labels = nominal_frequencies(fraction, limits)
     freq, freq_d, freq_u = _deleteouters(freq, freq_d, freq_u, fs)
     # _deleteouters only removes trailing bands above Nyquist, so slice labels
     labels = labels[: len(freq)]
@@ -147,7 +147,7 @@ def _iec_e3_round(f: float) -> float:
 @lru_cache(maxsize=4)
 def _extended_preferred(frac: int) -> List[float]:
     """Cached expansion of the IEC preferred frequency table across decades."""
-    base = normalizedfreq(frac)
+    base = normalized_frequencies(frac)
     return [f * (10 ** d) for d in range(-3, 4) for f in base]
 
 
@@ -155,7 +155,7 @@ def _nominal_freq_for_band(exact_freq: float, fraction: float) -> float:
     """Return IEC 61260-1 nominal frequency (float) for an exact mid-band frequency.
 
     For standard fractions (1, 3), snaps to the IEC preferred table via
-    ``normalizedfreq``.  For non-standard fractions, falls back to Annex E.3
+    ``normalized_frequencies``.  For non-standard fractions, falls back to Annex E.3
     significant-figure rounding (``_iec_e3_round``).
     """
     frac = round(fraction)
@@ -172,7 +172,7 @@ def _format_nominal_freq(f: float) -> str:
     return f"{f:g}"
 
 
-def normalizedfreq(fraction: int) -> List[float]:
+def normalized_frequencies(fraction: int) -> List[float]:
     """
     Get standardized IEC center frequencies.
 
@@ -190,3 +190,21 @@ def normalizedfreq(fraction: int) -> List[float]:
     if fraction not in predefined:
         raise ValueError("Normalized frequencies only available for fraction=1 or 3")
     return predefined[fraction]
+
+
+# --------------------------------------------------------------------------- #
+# Deprecated aliases (pre-3.1 names; remove in the next major).
+# --------------------------------------------------------------------------- #
+def getansifrequencies(
+    fraction: float,
+    limits: List[float] | None = None,
+) -> Tuple[List[float], List[float], List[float], List[str]]:
+    """Deprecated alias of :func:`nominal_frequencies`."""
+    _warn_renamed("getansifrequencies()", "nominal_frequencies()")
+    return nominal_frequencies(fraction, limits)
+
+
+def normalizedfreq(fraction: int) -> List[float]:
+    """Deprecated alias of :func:`normalized_frequencies`."""
+    _warn_renamed("normalizedfreq()", "normalized_frequencies()")
+    return normalized_frequencies(fraction)

@@ -7,15 +7,20 @@ Implementation according to ANSI s1.11-2004 and IEC 61260-1-2014.
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import List, Tuple, overload, Literal
+from typing import Any, List, Tuple, overload, Literal
 
 import numpy as np
 
-from .calibration import CalibrationWarning, calculate_sensitivity
+from .calibration import CalibrationWarning, calculate_sensitivity, sensitivity
 from .environmental import composite_rating_level, lden, ldn
 from .compliance import verify_filter_class
 from .core import FilterBankWarning, OctaveFilterBank
-from .frequencies import getansifrequencies, normalizedfreq
+from .frequencies import (
+    getansifrequencies,
+    nominal_frequencies,
+    normalized_frequencies,
+    normalizedfreq,
+)
 from .intensity import (
     FieldIndicators,
     IntensityResult,
@@ -24,7 +29,7 @@ from .intensity import (
     sound_intensity,
 )
 from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
-from .loudness import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
+from .loudness_zwicker import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
 from .loudness_ecma import EcmaLoudness, loudness_ecma
 from .loudness_moore_glasberg import (
     MooreGlasbergLoudness,
@@ -358,7 +363,7 @@ from .room_ir import (
     sweep_signal,
 )
 from ._plotting import plot_excitation
-from ._warnings import PhonometryWarning
+from ._warnings import PhonometryWarning, _warn_renamed
 from .building_prediction import (
     AirbornePredictionResult,
     FlankingPath,
@@ -413,6 +418,10 @@ from ._version import __version__
 __all__ = [
     "PhonometryWarning",
     "__version__",
+    "octave_filter",
+    "nominal_frequencies",
+    "normalized_frequencies",
+    # Deprecated aliases (remove in 4.0)
     "octavefilter",
     "getansifrequencies",
     "normalizedfreq",
@@ -423,7 +432,8 @@ __all__ = [
     "time_weighting",
     "TimeWeighting",
     "linkwitz_riley",
-    "calculate_sensitivity",
+    "sensitivity",
+    "calculate_sensitivity",  # deprecated alias (remove in 4.0)
     "leq",
     "laeq",
     "ln_levels",
@@ -785,7 +795,7 @@ def _cached_filter_bank(
     calibration_factor: float,
     dbfs: bool,
 ) -> OctaveFilterBank:
-    """Design (or reuse) a stateless filter bank for octavefilter()."""
+    """Design (or reuse) a stateless filter bank for octave_filter()."""
     return OctaveFilterBank(
         fs=fs,
         fraction=fraction,
@@ -800,7 +810,7 @@ def _cached_filter_bank(
 
 
 @overload
-def octavefilter(
+def octave_filter(
     x: List[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
@@ -821,7 +831,7 @@ def octavefilter(
 
 
 @overload
-def octavefilter(
+def octave_filter(
     x: List[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
@@ -842,7 +852,7 @@ def octavefilter(
 
 
 @overload
-def octavefilter(
+def octave_filter(
     x: List[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
@@ -863,7 +873,7 @@ def octavefilter(
 
 
 @overload
-def octavefilter(
+def octave_filter(
     x: List[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
@@ -883,7 +893,7 @@ def octavefilter(
 ) -> Tuple[np.ndarray, List[str], List[np.ndarray]]: ...
 
 
-def octavefilter(
+def octave_filter(
     x: List[float] | np.ndarray,  # NOSONAR - public API
     fs: int,
     fraction: float = 1,
@@ -974,3 +984,9 @@ def octavefilter(
         )
 
     return filter_bank.filter(x, sigbands=sigbands, mode=mode, detrend=detrend, nominal=nominal)  # type: ignore[call-overload,no-any-return]
+
+
+def octavefilter(*args: Any, **kwargs: Any) -> Any:
+    """Deprecated alias of :func:`octave_filter`."""
+    _warn_renamed("octavefilter()", "octave_filter()")
+    return octave_filter(*args, **kwargs)

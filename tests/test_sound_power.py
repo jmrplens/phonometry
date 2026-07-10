@@ -124,7 +124,7 @@ def test_k2_closed_form_from_absorption() -> None:
 
 def test_k2_from_reverberation_time_sabine() -> None:
     """A = 0,16*V/T; V=300, T=1,2 -> A=40; S=40 -> K2=10*lg(1+4)=6,9897 dB."""
-    k2 = environmental_correction(40.0, reverberation_time=1.2, room_volume=300.0)
+    k2 = environmental_correction(40.0, reverberation_time=1.2, volume=300.0)
     assert k2 == pytest.approx(6.9897, abs=1e-4)
 
 
@@ -136,13 +136,13 @@ def test_k2_no_room_data_is_free_field_zero() -> None:
 
 def test_k2_reverberation_time_without_volume_raises() -> None:
     """Half-specified room (T without V) must not silently give K2 = 0."""
-    with pytest.raises(ValueError, match="room_volume"):
+    with pytest.raises(ValueError, match="volume"):
         environmental_correction(40.0, reverberation_time=1.2)
 
 
-def test_k2_room_volume_without_reverberation_time_raises() -> None:
+def test_k2_volume_without_reverberation_time_raises() -> None:
     with pytest.raises(ValueError, match="reverberation_time"):
-        environmental_correction(40.0, room_volume=300.0)
+        environmental_correction(40.0, volume=300.0)
 
 
 def test_k2_mean_absorption_without_room_surface_raises() -> None:
@@ -158,7 +158,7 @@ def test_k2_room_surface_without_mean_absorption_raises() -> None:
 def test_partial_room_data_raises_via_sound_power_pressure() -> None:
     """The partial-pair guard is enforced through sound_power_pressure too."""
     levels = np.full((10, 1), 90.0)
-    with pytest.raises(ValueError, match="room_volume"):
+    with pytest.raises(ValueError, match="volume"):
         sound_power_pressure(levels, "hemisphere", radius=2.0, reverberation_time=1.2)
 
 
@@ -358,7 +358,7 @@ def test_k2_per_band_from_reverberation_time() -> None:
     """Eq. A.3: A = 0,16*V/T per band gives a per-band K2."""
     t = np.array([1.0, 2.0, 4.0])
     v = 300.0
-    k2 = environmental_correction(40.0, reverberation_time=t, room_volume=v)
+    k2 = environmental_correction(40.0, reverberation_time=t, volume=v)
     expected = 10.0 * np.log10(1.0 + 4.0 * 40.0 / (0.16 * v / t))
     assert np.allclose(k2, expected)
 
@@ -376,7 +376,7 @@ def test_per_band_k2_flows_into_sound_power() -> None:
     t = np.array([1.0, 2.0, 4.0])
     volume = 2000.0  # large enough that per-band K2 stays under the 4 dB limit
     res = sound_power_pressure(
-        levels, "hemisphere", radius=2.0, reverberation_time=t, room_volume=volume
+        levels, "hemisphere", radius=2.0, reverberation_time=t, volume=volume
     )
     a = 0.16 * volume / t
     expected_k2 = 10.0 * np.log10(1.0 + 4.0 * res.surface_area / a)

@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any, List, Literal, Tuple
 
 import numpy as np
 from scipy import signal
@@ -542,7 +542,7 @@ def _assemble_loudness(
 def loudness_ecma(
     signal_in: np.ndarray,
     fs: float,
-    field: str = "free",
+    field: Literal["free", "diffuse"] = "free",
 ) -> EcmaLoudness:
     """Psychoacoustic loudness per ECMA-418-2:2025 (Sottek Hearing Model).
 

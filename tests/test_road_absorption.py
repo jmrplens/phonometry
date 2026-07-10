@@ -167,7 +167,7 @@ def test_phase_restoration_recovers_real_reflection() -> None:
     delay = shift / FS
     r0 = 0.6
     hr = kr * r0 * np.roll(hi, shift)
-    r = insitu_reflection_factor(hi, hr, sample_rate=FS, delay=delay)
+    r = insitu_reflection_factor(hi, hr, fs=FS, delay=delay)
     # After undoing exp(-j2pi f tau) the reflection factor is ~ real r0.
     np.testing.assert_allclose(r.real[1:], r0, atol=1e-6)
     np.testing.assert_allclose(r.imag[1:], 0.0, atol=1e-6)
@@ -182,7 +182,7 @@ def test_phase_restoration_recovers_real_reflection_odd_length() -> None:
     delay = shift / FS
     r0 = 0.6
     hr = kr * r0 * np.roll(hi, shift)
-    r = insitu_reflection_factor(hi, hr, sample_rate=FS, delay=delay)
+    r = insitu_reflection_factor(hi, hr, fs=FS, delay=delay)
     np.testing.assert_allclose(r.real[1:], r0, atol=1e-6)
     np.testing.assert_allclose(r.imag[1:], 0.0, atol=1e-6)
 
@@ -212,7 +212,7 @@ def test_reflection_input_guards() -> None:
     with pytest.raises(ValueError):
         insitu_reflection_factor([], [1.0, 2.0])
     with pytest.raises(ValueError):
-        insitu_reflection_factor([1.0, 2.0], [1.0, 2.0], delay=1e-3)  # no sample_rate
+        insitu_reflection_factor([1.0, 2.0], [1.0, 2.0], delay=1e-3)  # no fs
 
 
 # --------------------------------------------------------------------------- #
@@ -358,7 +358,7 @@ def test_insitu_absorption_spectrum_mid_bands_are_one_minus_r0_sq() -> None:
     np.testing.assert_allclose(result.absorption, 1.0 - r0**2, atol=1e-6)
 
 
-def test_insitu_absorption_spectrum_rejects_nonpositive_sample_rate() -> None:
+def test_insitu_absorption_spectrum_rejects_nonpositive_fs() -> None:
     hi = _incident_ir()
     hr = 0.4 * np.roll(hi, 96)
     with pytest.raises(ValueError):

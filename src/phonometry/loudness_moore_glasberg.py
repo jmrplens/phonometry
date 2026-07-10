@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, List, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, List, Literal, Sequence, Tuple
 
 import numpy as np
 
@@ -764,8 +764,8 @@ def _as_components(
 def loudness_moore_glasberg_from_spectrum(
     components: Sequence[Tuple[float, float]] | np.ndarray,
     *,
-    field: str = "free",
-    presentation: str = "binaural",
+    field: Literal["free", "diffuse", "eardrum"] = "free",
+    presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
 ) -> MooreGlasbergLoudness:
     """Moore-Glasberg loudness from a sinusoidal-component spectrum.
 
@@ -823,8 +823,8 @@ def _third_octave_components(
 def loudness_moore_glasberg_from_third_octave(
     band_levels: Sequence[float] | np.ndarray,
     *,
-    field: str = "free",
-    presentation: str = "binaural",
+    field: Literal["free", "diffuse", "eardrum"] = "free",
+    presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
 ) -> MooreGlasbergLoudness:
     """Moore-Glasberg loudness from 29 one-third-octave band levels.
 
@@ -895,8 +895,8 @@ def loudness_moore_glasberg(
     x: List[float] | np.ndarray,
     fs: float,
     *,
-    field: str = "free",
-    presentation: str = "binaural",
+    field: Literal["free", "diffuse", "eardrum"] = "free",
+    presentation: Literal["binaural", "diotic", "monaural"] = "binaural",
 ) -> MooreGlasbergLoudness:
     """Moore-Glasberg loudness of a calibrated stationary pressure signal.
 

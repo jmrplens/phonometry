@@ -75,7 +75,7 @@ Or browse the Markdown docs on GitHub:
 
 ```python
 import numpy as np
-from phonometry import octavefilter
+from phonometry import octave_filter
 
 fs = 48000
 t = np.linspace(0, 1, fs, endpoint=False)
@@ -83,7 +83,7 @@ t = np.linspace(0, 1, fs, endpoint=False)
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # Apply 1/3 octave filter bank
-spl, freq = octavefilter(signal, fs=fs, fraction=3)
+spl, freq = octave_filter(signal, fs=fs, fraction=3)
 
 print(f"Bands: {freq}")
 print(f"SPL [dB]: {spl}")

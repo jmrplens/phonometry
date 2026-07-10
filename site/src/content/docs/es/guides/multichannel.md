@@ -16,12 +16,12 @@ ganancias de rendimiento significativas frente a bucles iterativos.
 derecho (barrido senoidal logarítmico).*
 
 La convención es consistente en toda la librería: el tiempo siempre es el
-**último eje**. Aplica a `octavefilter`, `OctaveFilterBank`, `weighting_filter`,
+**último eje**. Aplica a `octave_filter`, `OctaveFilterBank`, `weighting_filter`,
 `time_weighting`, `leq`, `laeq`, `ln_levels` y `spectrogram`.
 
 ```python
 import numpy as np
-from phonometry import octavefilter
+from phonometry import octave_filter
 
 # Dos canales calibrados en Pa para que la guía funcione por sí sola
 fs = 48000
@@ -30,7 +30,7 @@ left = 0.2 * np.sin(2 * np.pi * 1000 * t)
 right = 0.1 * np.sin(2 * np.pi * 500 * t)
 
 stereo = np.stack([left, right])          # (2, n_samples)
-spl, freq = octavefilter(stereo, fs, fraction=3)
+spl, freq = octave_filter(stereo, fs, fraction=3)
 # spl tiene forma (2, n_bands): una fila por canal
 ```
 
@@ -72,7 +72,7 @@ for frame in stream:
 
 Notas adicionales de rendimiento:
 
-- **Caché de diseño**: `octavefilter()` reutiliza los diseños del banco entre
+- **Caché de diseño**: `octave_filter()` reutiliza los diseños del banco entre
   llamadas con parámetros idénticos (caché LRU de 32 entradas), así que llamarla
   en bucle no rediseña el banco cada vez. `OctaveFilterBank` te da control
   explícito sobre el ciclo de vida del diseño.

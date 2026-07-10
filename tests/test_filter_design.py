@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 from scipy import signal as sg
 
-from phonometry import OctaveFilterBank, octavefilter
+from phonometry import OctaveFilterBank, octave_filter
 from phonometry.filter_design import _design_sos_filter, _showfilter
 
 
@@ -62,8 +62,8 @@ def test_cheby2_broadband_levels_match_butter() -> None:
     """
     rng = np.random.default_rng(42)
     x = rng.standard_normal(48000 * 5)
-    spl_b, _ = octavefilter(x, 48000, fraction=3, filter_type="butter", limits=[100, 10000])
-    spl_c, _ = octavefilter(x, 48000, fraction=3, filter_type="cheby2", limits=[100, 10000])
+    spl_b, _ = octave_filter(x, 48000, fraction=3, filter_type="butter", limits=[100, 10000])
+    spl_c, _ = octave_filter(x, 48000, fraction=3, filter_type="cheby2", limits=[100, 10000])
     diff = np.asarray(spl_c) - np.asarray(spl_b)
     assert np.abs(diff).max() < 0.5, f"max deviation {np.abs(diff).max():.2f} dB"
 
@@ -190,14 +190,14 @@ def test_cheby2_default_bank_meets_class1(fraction: float) -> None:
 
 
 def test_functional_octavefilter_cheby2_default_meets_class1() -> None:
-    """The functional octavefilter() wrapper defaults attenuation to 72 dB so a
+    """The functional octave_filter() wrapper defaults attenuation to 72 dB so a
     cheby2 call meets IEC 61260-1 class 1, matching OctaveFilterBank (F1 follow-up:
     the wrapper previously still defaulted to 60 dB)."""
     import inspect
 
     from phonometry import verify_filter_class
 
-    default_att = inspect.signature(octavefilter).parameters["attenuation"].default
+    default_att = inspect.signature(octave_filter).parameters["attenuation"].default
     assert default_att == 72.0
     # A bank built with the wrapper's own default passes class 1; and the
     # functional call itself runs without raising.
@@ -207,5 +207,5 @@ def test_functional_octavefilter_cheby2_default_meets_class1() -> None:
     )
     assert verify_filter_class(bank)["overall_class"] == 1
     x = np.random.default_rng(0).standard_normal(48000)
-    spl, _ = octavefilter(x, 48000, fraction=1, filter_type="cheby2", limits=[100, 5000])
+    spl, _ = octave_filter(x, 48000, fraction=1, filter_type="cheby2", limits=[100, 5000])
     assert np.all(np.isfinite(spl))

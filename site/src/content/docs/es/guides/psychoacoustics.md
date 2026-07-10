@@ -99,7 +99,7 @@ dentro de la banda de tolerancia del 5 % por muestra que fija la norma.
 | `fs` | int | Hz | > 0 | |
 | `field` | str | — | `'free'` (por defecto) / `'diffuse'` | Corrección de campo sonoro (Tabla A.5) |
 | `stationary` | bool | — | por defecto `False` | `True`: un único N a partir del espectro promediado |
-| `calibration_factor` | float | Pa por unidad digital | por defecto `1.0` | De `calculate_sensitivity()` |
+| `calibration_factor` | float | Pa por unidad digital | por defecto `1.0` | De `sensitivity()` |
 
 Devuelve un dataclass `ZwickerLoudness`: `loudness` (N, sonos),
 `loudness_level` (fonios), `specific` (N′(z), 240 bins de 0,1 Bark) y, para los

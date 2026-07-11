@@ -1028,6 +1028,43 @@ def _chk_survey_reverberation_estimate() -> Outcome:
     )
 
 
+@register(
+    "Room & building acoustics",
+    "ISO 717-2:2020 Table 4 / Clause 5.2",
+    "Reference-floor weighted level Ln,r,0,w and CI (ISO 16251-1 ΔLw anchor)",
+)
+def _chk_iso717_2_reference_floor() -> Outcome:
+    res = ph.weighted_impact_rating(ref.ISO717_2_REFERENCE_FLOOR_LN_R0)
+    ok = (
+        res.rating == ref.ISO717_2_REFERENCE_FLOOR_LN_R0_W
+        and res.ci == ref.ISO717_2_REFERENCE_FLOOR_CI
+    )
+    return Outcome(
+        expected=f"Ln,r,0,w = {ref.ISO717_2_REFERENCE_FLOOR_LN_R0_W} dB, "
+        f"CI = {ref.ISO717_2_REFERENCE_FLOOR_CI} dB",
+        computed=f"Ln,r,0,w = {res.rating} dB, CI = {res.ci} dB",
+        delta="exact",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 16251-1:2014 / ISO 717-2 Formula (2)",
+    "Floor-covering ΔLw: zero improvement gives ΔLw = 0",
+)
+def _chk_iso16251_zero_improvement() -> Outcome:
+    import numpy as _np
+
+    dlw = ph.weighted_impact_improvement(_np.zeros(16))
+    return Outcome(
+        expected="ΔLw = 0 dB (ΔL = 0 -> Ln,r = Ln,r,0)",
+        computed=f"ΔLw = {dlw} dB",
+        delta="exact",
+        passed=(dlw == 0),
+    )
+
+
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================

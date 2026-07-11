@@ -944,6 +944,66 @@ exactamente 5 valores de octava (o 16 de tercio de octava).*
 `survey_service_equipment_level()` un `SurveyServiceEquipmentResult` (`l_xy`,
 `l_xy_nt`, `l_xy_n`).
 
+## 7. Mejora a impacto de revestimientos de suelo (ISO 16251-1)
+
+La ISO 16251-1:2014 es un método de laboratorio para la **mejora del aislamiento
+a ruido de impactos** $\Delta L$ de un revestimiento de suelo blando y de reacción
+local (moqueta, PVC, linóleo). Las dos salas de ISO 10140 se sustituyen por una
+pequeña placa de hormigón con apoyo elástico; una máquina de impactos normalizada
+la excita y se mide el **nivel de aceleración** estructural en la cara inferior con
+y sin el revestimiento. Para revestimientos de reacción local, esa diferencia de
+niveles de aceleración equivale a la reducción de ruido de impactos de ISO 10140.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_es.svg" alt="Mejora a impacto de revestimientos de suelo ISO 16251-1: la mejora delta-L de una moqueta blanda creciendo con la frecuencia en bandas de tercio de octava de 100 Hz a 3150 Hz, con el área de mejora sombreada y el número único ponderado delta-Lw anotado" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_es_dark.svg" alt="Mejora a impacto de revestimientos de suelo ISO 16251-1: la mejora delta-L de una moqueta blanda creciendo con la frecuencia en bandas de tercio de octava de 100 Hz a 3150 Hz, con el área de mejora sombreada y el número único ponderado delta-Lw anotado" style="width:80%">
+
+**Nivel de aceleración (Fórmula (1)).** $L_a = 10\lg(\langle a^2\rangle / a_0^2)$ dB,
+referencia $a_0 = 10^{-6}\ \text{m/s}^2$. La **corrección de ruido de fondo
+(Fórmula (2))** sigue la regla de tres ramas de ISO 10140 (sin cambio si ≥ 15 dB;
+sustracción energética para 6 ≤ margen < 15 dB; el límite de 1,3 dB por debajo de
+6 dB, marcado como $> \Delta L$). La mejora es la diferencia promediada por
+posiciones $\Delta L = L_0 - L_1$ (Fórmulas (3)/(4)); las octavas siguen
+$\Delta L_\text{oct} = -10\lg[\tfrac{1}{3}\sum 10^{-\Delta L_n/10}]$ (Fórmula (5)).
+
+**Mejora ponderada.** $\Delta L_w$ es la reducción ponderada de ISO 717-2: la
+mejora se aplica al **suelo de referencia** pesado $L_{n,r,0}$ (ISO 717-2 Tabla 4),
+$L_{n,r} = L_{n,r,0} - \Delta L$, y $\Delta L_w = 78 - L_{n,r,w}$ — calculada por
+`weighted_impact_improvement()`, que reutiliza el motor de valoración de ISO 717-2.
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import impact_improvement
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500,
+         630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
+bare = np.full(16, 78.0)                       # nivel de aceleración de la placa desnuda
+covering = bare - np.array([0, 0, 1, 2, 4, 7, 11, 15,
+                            18, 21, 23, 25, 27, 28, 29, 30])
+res = impact_improvement(bare, covering, freqs)
+print(res.delta_lw)   # mejora ponderada delta-Lw (ISO 717-2)
+res.plot()
+plt.show()
+```
+</details>
+
+```python
+from phonometry import impact_improvement, weighted_impact_improvement
+
+# delta-Lw directo de un espectro de mejora (16 bandas de tercio de octava):
+delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
+print(weighted_impact_improvement(delta_l))    # p. ej. 19 dB
+
+# A partir de los niveles de aceleración medidos (desnudo/cubierto) y un fondo:
+res = impact_improvement(bare_levels, covered_levels, freqs, background=bg)
+res.improvement       # delta-L por banda
+res.delta_lw          # número único ponderado (None fuera de las 16 bandas de valoración)
+res.limited           # bandas en el límite de medida de 1,3 dB (> delta-L)
+res.octave_bands()    # (frec. de octava, delta-L_oct) vía Fórmula (5)
+```
+
 ---
 
 **Normas.** ISO 16283-1:2014, ISO 16283-2 e ISO 16283-3:2016, *Acoustics —
@@ -964,7 +1024,10 @@ intensidad $R_I$, su forma modificada por $K_c$ y la diferencia de niveles
 normalizada por elemento del §5 (laboratorio y campo); ISO 10052:2021
 (armonizada como EN ISO 10052:2004+A1:2010) — el método de control en campo del
 §6: la corrección por índice de reverberación, las magnitudes aérea, de impacto
-y de fachada estandarizadas/normalizadas, y el ruido de equipos de servicio.
+y de fachada estandarizadas/normalizadas, y el ruido de equipos de servicio;
+ISO 16251-1:2014 — el método de laboratorio en maqueta pequeña para la mejora a
+impactos $\Delta L$ de revestimientos de suelo del §7, con $\Delta L_w$ vía el
+suelo de referencia de ISO 717-2.
 
 ## Véase también
 

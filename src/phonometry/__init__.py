@@ -146,6 +146,7 @@ from .insulation import (
     energy_average_level,
     facade_insulation,
     impact_insulation,
+    weighted_impact_improvement,
     weighted_impact_rating,
     weighted_rating,
 )
@@ -165,6 +166,13 @@ from .intensity_insulation import (
     intensity_element_normalized_difference,
     intensity_sound_reduction,
     surface_pressure_intensity_indicator,
+)
+from .floor_covering_improvement import (
+    FloorCoveringImprovementResult,
+    acceleration_level,
+    background_corrected_level,
+    impact_improvement,
+    improvement_octave_bands,
 )
 from .survey_insulation import (
     SurveyAirborneResult,
@@ -767,6 +775,13 @@ __all__ = [
     "weighted_rating",
     "WeightedRatingResult",
     "weighted_impact_rating",
+    "weighted_impact_improvement",
+    # ISO 16251-1 floor-covering impact sound improvement
+    "FloorCoveringImprovementResult",
+    "acceleration_level",
+    "background_corrected_level",
+    "impact_improvement",
+    "improvement_octave_bands",
     "ImpactRatingResult",
     "facade_insulation",
     "FacadeInsulationResult",

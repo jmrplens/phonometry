@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **107/107 conformance checks pass** across 22 domains and 66 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **109/109 conformance checks pass** across 22 domains and 67 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -106,7 +106,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (13/13)</summary>
+<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (15/15)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -123,6 +123,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 10052:2021 Clause 3.6 | Survey R' applies the V/7,5 minimum-area rule | 26.197888 dB (+/-0 dB) | 26.197888 dB | 0 dB | &#9989; |
 | ISO 10052:2021 Clause 3.16 | Service-equipment LXY is the 3-position energy average | 32.823329 dB (+/-0 dB) | 32.823329 dB | 0 dB | &#9989; |
 | ISO 10052:2021 Table 4 | Reverberation-index estimate (35 <= V < 60, type g) | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | exact | &#9989; |
+| ISO 717-2:2020 Table 4 / Clause 5.2 | Reference-floor weighted level Ln,r,0,w and CI (ISO 16251-1 ΔLw anchor) | Ln,r,0,w = 78 dB, CI = -11 dB | Ln,r,0,w = 78 dB, CI = -11 dB | exact | &#9989; |
+| ISO 16251-1:2014 / ISO 717-2 Formula (2) | Floor-covering ΔLw: zero improvement gives ΔLw = 0 | ΔLw = 0 dB (ΔL = 0 -> Ln,r = Ln,r,0) | ΔLw = 0 dB | exact | &#9989; |
 
 </details>
 

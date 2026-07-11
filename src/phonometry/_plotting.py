@@ -37,6 +37,7 @@ if TYPE_CHECKING:
     from .building_prediction import AirbornePredictionResult, ImpactPredictionResult
     from .building_uncertainty import BandUncertainty
     from .facade_prediction import FacadePredictionResult, RadiatedPowerResult
+    from .floor_covering_improvement import FloorCoveringImprovementResult
     from .impedance_tube import ImpedanceTubeResult
     from .insulation import (
         AirborneInsulationResult,
@@ -2500,4 +2501,40 @@ def plot_absorption_uncertainty(
     )
     ax.grid(True, which="both", alpha=0.3)
     ax.legend()
+    return ax
+
+
+def plot_floor_covering_improvement(
+    result: "FloorCoveringImprovementResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Impact-sound improvement spectrum ΔL of a floor covering (ISO 16251-1).
+
+    :param result: A
+        :class:`~phonometry.floor_covering_improvement.FloorCoveringImprovementResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the improvement-curve ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs, dl = result.frequencies, result.improvement
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("marker", "o")
+    ax.plot(freqs, dl, **kwargs)
+    # Mark bands at the limit of measurement (reported as > delta-L).
+    if result.limited.size and bool(np.any(result.limited)):
+        ax.plot(
+            freqs[result.limited], dl[result.limited], ls="", marker="v",
+            color=_C_SECONDARY, ms=9, mfc="none", mew=1.6, zorder=5,
+            label="limit of measurement (> delta-L)",
+        )
+    _freq_axis(ax, freqs)
+    ax.set_ylabel("Improvement of impact sound insulation delta-L [dB]")
+    ax.set_ylim(bottom=0.0)
+    title = "ISO 16251-1 Floor-Covering Impact Sound Improvement"
+    if result.delta_lw is not None:
+        title += f"  (delta-Lw = {result.delta_lw} dB)"
+    ax.set_title(title)
+    ax.grid(True, which="both", alpha=0.3)
+    if ax.get_legend_handles_labels()[0]:
+        ax.legend()
     return ax

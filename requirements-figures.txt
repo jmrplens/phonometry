@@ -1,11 +1,14 @@
-# Locked rendering + compute stack for the reproducible-figures CI check
+# Locked rendering + compute stack for the figures CI check
 # (the "Documentation figures up to date" job in python-app.yml).
 #
-# The committed .github/images figures are byte-reproducible only against a
-# fixed stack: matplotlib/fonttools/pillow fix SVG text layout and PNG
-# encoding, while numpy/scipy/contourpy fix the *computed* data and therefore
-# the plotted path coordinates. Pinning only matplotlib is not enough -- a new
-# numpy or fonttools release silently shifts a few figures.
+# This pins the figure *structure*, not the last bit of every coordinate:
+# matplotlib/fonttools/pillow fix SVG text layout and PNG encoding, while
+# numpy/scipy/contourpy fix the computed data. Pinning only matplotlib is not
+# enough -- a new numpy or fonttools release changes element ordering, labels
+# or dimensions, which the structural comparison in scripts/check_figures.py
+# treats as a real change. Cross-CPU ~1-ULP coordinate drift, by contrast, is
+# absorbed by that script's numeric tolerance, so the stack does not have to
+# byte-match the runner hardware.
 #
 # Bump these together with a fresh `make graphs` regeneration (generate the
 # figures with exactly this stack, then commit both). Generated from the

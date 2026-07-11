@@ -337,7 +337,7 @@ export default defineConfig({
         {
           label: 'Building acoustics & insulation',
           translations: { es: 'Acústica de la edificación y aislamiento' },
-          items: ['guides/building-acoustics'],
+          items: ['guides/building-acoustics', 'guides/dynamic-stiffness'],
         },
         {
           label: 'Environmental acoustics',

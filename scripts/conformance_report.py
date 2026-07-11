@@ -1236,6 +1236,40 @@ def _chk_iso10848_loss_factor() -> Outcome:
     )
 
 
+# --- Dynamic stiffness of resilient materials (EN 29052-1:1992) ---
+@register(
+    "Room & building acoustics",
+    "EN 29052-1:1992 Formula 4",
+    "Apparent dynamic stiffness s't = 4π²·m't·fr²  (m't=200 kg/m², fr=25 Hz)",
+)
+def _chk_en29052_apparent() -> Outcome:
+    computed = float(ph.apparent_dynamic_stiffness(25.0, 200.0)) / 1e6
+    expected = 4.0 * math.pi**2 * 200.0 * 25.0**2 / 1e6
+    return numeric(expected, computed, 1e-6, unit="MN/m³", places=6)
+
+
+@register(
+    "Room & building acoustics",
+    "EN 29052-1:1992 clause 8.2 NOTE",
+    "Enclosed-gas stiffness s'a·d = 111 MN·mm/m³ (p₀=0,1 MPa, ε=0,9)",
+)
+def _chk_en29052_enclosed_gas() -> Outcome:
+    # NOTE: s'a = 111/d MN/m3 for d in mm; the closed form gives 100/0,9 = 111.11.
+    sa_mn = float(ph.enclosed_gas_stiffness(0.020, 0.9)) / 1e6   # d = 20 mm
+    return numeric(111.111111 / 20.0, sa_mn, 1e-4, unit="MN/m³", places=5)
+
+
+@register(
+    "Room & building acoustics",
+    "EN 29052-1:1992 Formula 2",
+    "Floating-floor natural frequency f0 = (1/2π)√(s'/m')  (s'=10 MN/m³, m'=100 kg/m²)",
+)
+def _chk_en29052_resonance() -> Outcome:
+    computed = float(ph.natural_frequency(10.0e6, 100.0))
+    expected = math.sqrt(10.0e6 / 100.0) / (2.0 * math.pi)
+    return numeric(expected, computed, 1e-6, unit="Hz", places=5)
+
+
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================

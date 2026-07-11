@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **126/126 conformance checks pass** across 23 domains and 76 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **129/129 conformance checks pass** across 23 domains and 79 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -122,7 +122,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (24/24)</summary>
+<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (27/27)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -150,6 +150,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 7626-1:2011 Annex A | SDOF driving-point mobility peak |Y(f0)| = 1/c  (c=5 N·s/m) | 0.2 m/(N·s) (+/-0.000001 m/(N·s)) | 0.2 m/(N·s) | 0 m/(N·s) | &#9989; |
 | ISO 7626-1:2011 Annex A | SDOF static receptance H(0) = 1/k  (k=8000 N/m) | 0.000125 m/N (+/-0.0001%) | 0.000125 m/N | 0 m/N | &#9989; |
 | ISO 7626-1:2011 Table 1 | FRF reciprocity: impedance × mobility = 1  (at 37 Hz) | 1 (= Z·Y) | 1 | 0 | &#9989; |
+| ISO 10846-2:2008 3.17 | Transfer-stiffness level Lk = 20 lg(|k|/k0), k0 = 1 N/m  (|k| = 1 MN/m) | 120 dB (+/-0 dB) | 120 dB | 0 dB | &#9989; |
+| ISO 10846-3:2002 Formula (1) | Indirect method k2,1 = -(2πf)²·m2·T  (f=500 Hz, m2=10 kg, T=0,01) | -986960.4 N/m (+/-0.1%) | -986960.4 N/m | 0 N/m | &#9989; |
+| ISO 10846-1:2008 Table A.2 | FRF relation k = jω·Z at 250 Hz  (|k| recovered from impedance) | 1001249.2 N/m (+/-0.0001%) | 1001249.2 N/m | 0 N/m | &#9989; |
 
 </details>
 

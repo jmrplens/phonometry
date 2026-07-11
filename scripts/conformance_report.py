@@ -1307,6 +1307,42 @@ def _chk_iso7626_reciprocity() -> Outcome:
     return numeric(1.0, abs(z * y), 1e-9, expected_label="1 (= Z·Y)")
 
 
+# --- Dynamic transfer stiffness of resilient elements (ISO 10846) ---
+@register(
+    "Room & building acoustics",
+    "ISO 10846-2:2008 3.17",
+    "Transfer-stiffness level Lk = 20 lg(|k|/k0), k0 = 1 N/m  (|k| = 1 MN/m)",
+)
+def _chk_iso10846_level() -> Outcome:
+    lk = float(ph.transfer_stiffness_level(1.0e6))
+    return numeric(120.0, lk, 1e-6, unit="dB")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-3:2002 Formula (1)",
+    "Indirect method k2,1 = -(2πf)²·m2·T  (f=500 Hz, m2=10 kg, T=0,01)",
+)
+def _chk_iso10846_indirect() -> Outcome:
+    f, m2, t = 500.0, 10.0, 0.01
+    expected = -((2.0 * math.pi * f) ** 2) * m2 * t
+    computed = complex(ph.transfer_stiffness_indirect(f, t + 0j, m2)).real
+    return numeric(expected, computed, 1e-3, rel=True, unit="N/m", places=1)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-1:2008 Table A.2",
+    "FRF relation k = jω·Z at 250 Hz  (|k| recovered from impedance)",
+)
+def _chk_iso10846_stiffness_impedance() -> Outcome:
+    f = 250.0
+    w = 2.0 * math.pi * f
+    k = 1.0e6 + 1j * 5.0e4
+    z = complex(ph.convert_frf(k, f, "dynamic_stiffness", "impedance"))
+    return numeric(abs(k), abs(1j * w * z), 1e-6, rel=True, unit="N/m", places=1)
+
+
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================

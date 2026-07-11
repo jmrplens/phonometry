@@ -222,6 +222,15 @@ _ES_EXACT = {
     r"Accelerance $|A|$ (× k/$\omega_0^2$)":
         r"Accelerancia $|A|$ (× k/$\omega_0^2$)",
     "resonance $f_0$": "resonancia $f_0$",
+    # transfer_stiffness figure (ISO 10846)
+    "ISO 10846 Dynamic Transfer Stiffness":
+        "Rigidez dinámica de transferencia ISO 10846",
+    r"Transfer stiffness level $L_k$ [dB re 1 N/m]":
+        r"Nivel de rigidez de transferencia $L_k$ [dB re 1 N/m]",
+    r"true $L_k$ of $k_{2,1}=k+j\omega c$":
+        r"$L_k$ real de $k_{2,1}=k+j\omega c$",
+    r"indirect method $-(2\pi f)^2 m_2 T$":
+        r"método indirecto $-(2\pi f)^2 m_2 T$",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3414,6 +3423,58 @@ def generate_mechanical_mobility(output_dir: str) -> None:
     plt.close()
 
 
+def generate_transfer_stiffness(output_dir: str) -> None:
+    """ISO 10846 dynamic transfer stiffness: true vs indirect-method recovery."""
+    print("Generating transfer_stiffness...")
+    from phonometry import (
+        base_transmissibility,
+        transfer_stiffness_indirect,
+        transfer_stiffness_level,
+    )
+
+    # Kelvin-Voigt isolator k + jwc, loaded by a blocking mass m2.
+    k, c, m2 = 1.0e6, 120.0, 8.0
+    f0 = np.sqrt(k / m2) / (2.0 * np.pi)
+    freq = np.logspace(np.log10(f0 / 5.0), np.log10(f0 * 40.0), 600)
+    w = 2.0 * np.pi * freq
+
+    k_true = k + 1j * w * c                                # exact transfer stiffness
+    t = base_transmissibility(freq, m2, k, c)              # mass-loaded transmissibility
+    k_indirect = transfer_stiffness_indirect(freq, t, m2)  # ISO 10846-3 Eq. (1)
+
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.semilogx(freq, transfer_stiffness_level(k_true), color=COLOR_PRIMARY,
+                linewidth=2.2, label=r"true $L_k$ of $k_{2,1}=k+j\omega c$")
+    ax.semilogx(freq, transfer_stiffness_level(k_indirect), color=COLOR_SECONDARY,
+                linewidth=2.0, linestyle="--",
+                label=r"indirect method $-(2\pi f)^2 m_2 T$")
+    ax.axvline(f0, color=COLOR_GRID, linestyle=":", linewidth=1.2,
+               label="resonance $f_0$")
+    ax.axvspan(freq[0], 3.0 * f0, color=COLOR_GRID, alpha=0.12)
+
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel(r"Transfer stiffness level $L_k$ [dB re 1 N/m]")
+    ax.set_title("ISO 10846 Dynamic Transfer Stiffness", fontweight="bold", pad=12)
+    ax.set_xlim(freq[0], freq[-1])
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.legend(loc="upper left", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "Kelvin-Voigt: k = 1 MN/m, c = 120 N.s/m",
+        f"blocking mass m2 = 8 kg,  f0 = {f0:.1f} Hz",
+        "indirect valid for T << 1  (f >> f0)",
+        "shaded: T not small -> method invalid",
+    ]
+    ax.text(0.985, 0.05, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=10, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "transfer_stiffness.svg")
+    plt.close()
+
+
 def generate_absorption_uncertainty(output_dir: str) -> None:
     """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
     print("Generating absorption_uncertainty...")
@@ -4914,6 +4975,7 @@ def generate_all(img_dir: str) -> None:
     generate_reverberation_models(img_dir)
     generate_dynamic_stiffness(img_dir)
     generate_mechanical_mobility(img_dir)
+    generate_transfer_stiffness(img_dir)
     generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 

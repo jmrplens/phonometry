@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from .reverberation_prediction import ReverberationModelResult
     from .dynamic_stiffness import DynamicStiffnessResult
     from .mechanical_mobility import MobilityResult
+    from .transfer_stiffness import TransferStiffnessResult
     from .impedance_tube import ImpedanceTubeResult
     from .insulation import (
         AirborneInsulationResult,
@@ -2072,6 +2073,29 @@ def plot_mobility(
     ax.set_xlabel("Frequency [Hz]")
     ax.set_ylabel("Mobility $|Y|$ [m/(N·s)]")
     ax.set_title("ISO 7626-1 mechanical mobility")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_transfer_stiffness(
+    result: "TransferStiffnessResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Dynamic transfer stiffness level ``L_k(f)`` on a log-frequency axis.
+
+    :param result: A :class:`~phonometry.transfer_stiffness.TransferStiffnessResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the level ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    level = np.asarray(result.level, dtype=np.float64)
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.semilogx(freq, level, label=r"$L_k = 20\,\lg(|k_{2,1}|/k_0)$", **kwargs)
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel(r"Transfer stiffness level $L_k$ [dB re 1 N/m]")
+    ax.set_title("ISO 10846 dynamic transfer stiffness")
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     return ax

@@ -17,6 +17,15 @@ else
     PNPM = pnpm
 endif
 
+# Deterministic figure rendering: pin numerical thread pools to one thread and
+# fix the hash seed BEFORE the interpreter starts, so multi-threaded reductions
+# and set ordering cannot perturb the committed SVG/PNG bytes across machines
+# (this is what made the heavy compute figures flaky on CI). The scripts also
+# set the thread vars internally; PYTHONHASHSEED can only be set from here.
+FIGURE_ENV = OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+	NUMEXPR_NUM_THREADS=1 NUMBA_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 \
+	PYTHONHASHSEED=0
+
 install:
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install -r requirements.txt
@@ -43,8 +52,8 @@ sonar:
 	@if [ -f .env ]; then export $$(cat .env | xargs) && $(PNPM) exec sonar-scanner; else $(PNPM) exec sonar-scanner; fi
 
 graphs:
-	$(PYTHON) scripts/generate_graphs.py
-	$(PYTHON) scripts/generate_diagrams.py
+	$(FIGURE_ENV) $(PYTHON) scripts/generate_graphs.py
+	$(FIGURE_ENV) $(PYTHON) scripts/generate_diagrams.py
 
 # Regenerate the Tier-1 documentation animations (WebM for the site, GIF for
 # the GitHub docs). Kept out of `graphs`/CI because the ffmpeg encoding is slow

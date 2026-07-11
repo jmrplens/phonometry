@@ -138,6 +138,13 @@ from .vibration_sound_power import (
     velocity_level,
     velocity_level_from_acceleration,
 )
+from .structure_borne_power import (
+    StructureBornePowerResult,
+    plate_loss_factor,
+    reception_plate_power,
+    spatial_mean_velocity_level,
+    structure_borne_power_level,
+)
 from .multiple_shock_vibration import (
     MultipleShockResult,
     acceleration_dose,
@@ -698,6 +705,11 @@ __all__ = [
     "VibrationSoundPowerResult",
     "REFERENCE_VELOCITY",
     "NORMALIZED_IMPEDANCE",
+    "spatial_mean_velocity_level",
+    "plate_loss_factor",
+    "structure_borne_power_level",
+    "reception_plate_power",
+    "StructureBornePowerResult",
     "combine_uncertainty",
     "monte_carlo",
     "rectangular",

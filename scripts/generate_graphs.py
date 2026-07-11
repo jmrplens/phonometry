@@ -240,6 +240,13 @@ _ES_EXACT = {
         "Parte 1 límite superior ($\\varepsilon$ = 1)",
     "Part 2 engineering ($\\varepsilon$ measured)":
         "Parte 2 ingeniería ($\\varepsilon$ medido)",
+    # structure_borne_power figure (EN 15657)
+    "EN 15657 Characteristic Structure-Borne Sound Power":
+        "Potencia sonora estructural característica EN 15657",
+    r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]":
+        r"Nivel de potencia estructural $L_{Ws}$ [dB re 1 pW]",
+    "low-mobility plate": "placa de baja movilidad",
+    "high-mobility plate": "placa de alta movilidad",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3538,6 +3545,52 @@ def generate_vibration_sound_power(output_dir: str) -> None:
     plt.close()
 
 
+def generate_structure_borne_power(output_dir: str) -> None:
+    """EN 15657 characteristic structure-borne sound power by reception plate."""
+    print("Generating structure_borne_power...")
+    from phonometry import reception_plate_power
+
+    bands = np.array([50.0, 100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
+    # A pump-like source on a low-mobility (heavy) and a high-mobility (light)
+    # reception plate; the two determinations should agree within the method.
+    lv_low = np.array([88.0, 90.0, 87.0, 84.0, 80.0, 76.0, 71.0])
+    lv_high = lv_low + 6.0                      # lighter plate vibrates more
+    res_low = reception_plate_power(lv_low, bands, mass_per_area=600.0, area=2.0,
+                                    reverberation_time=0.8)
+    res_high = reception_plate_power(lv_high, bands, mass_per_area=150.0, area=2.0,
+                                     reverberation_time=0.5)
+
+    x = np.arange(bands.size)
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.bar(x - 0.2, res_low.power_level, width=0.4, color=COLOR_PRIMARY,
+           edgecolor=COLOR_FG, linewidth=0.6, label="low-mobility plate")
+    ax.bar(x + 0.2, res_high.power_level, width=0.4, color=COLOR_SECONDARY,
+           edgecolor=COLOR_FG, linewidth=0.6, label="high-mobility plate")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{b:g}" for b in bands])
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel(r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]")
+    ax.set_title("EN 15657 Characteristic Structure-Borne Sound Power",
+                 fontweight="bold", pad=12)
+    ax.grid(which="major", axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.legend(loc="upper right", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "LWs = 10 lg(2 pi f eta m S) + Lv - 60 dB",
+        "eta = 2.2/(f Ts),  v0 = 1 nm/s",
+        "reception-plate method (clause 7)",
+    ]
+    ax.text(0.015, 0.02, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="left", fontsize=9, color=COLOR_FG, family="monospace",
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "structure_borne_power.svg")
+    plt.close()
+
+
 def generate_absorption_uncertainty(output_dir: str) -> None:
     """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
     print("Generating absorption_uncertainty...")
@@ -5040,6 +5093,7 @@ def generate_all(img_dir: str) -> None:
     generate_mechanical_mobility(img_dir)
     generate_transfer_stiffness(img_dir)
     generate_vibration_sound_power(img_dir)
+    generate_structure_borne_power(img_dir)
     generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 

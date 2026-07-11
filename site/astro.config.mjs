@@ -346,6 +346,7 @@ export default defineConfig({
             'guides/mechanical-mobility',
             'guides/transfer-stiffness',
             'guides/vibration-sound-power',
+            'guides/structure-borne-power',
           ],
         },
         {

@@ -1377,6 +1377,30 @@ def _chk_iso7849_impedance_term() -> Outcome:
     return numeric(10.0 * math.log10(411.0 / 400.0), lw - 80.0, 1e-9, unit="dB")
 
 
+# --- Structure-borne sound power of building equipment (EN 15657) ---
+@register(
+    "Room & building acoustics",
+    "EN 15657:2018 Formula (14)",
+    "Reception-plate L_Ws = resonant-plate power P = ωη(mS)⟨v²⟩  (round-trip)",
+)
+def _chk_en15657_power_balance() -> Outcome:
+    lv, f, m, s, eta = 82.0, 800.0, 15.0, 1.5, 0.02
+    lw = float(ph.structure_borne_power_level(lv, f, m, s, eta))
+    v2 = (1e-9) ** 2 * 10.0 ** (0.1 * lv)
+    p = 2.0 * math.pi * f * eta * (m * s) * v2
+    return numeric(10.0 * math.log10(p / 1e-12), lw, 1e-6, unit="dB", places=3)
+
+
+@register(
+    "Room & building acoustics",
+    "EN 15657:2018 Formula (13)",
+    "Plate loss factor η = 2,2/(f·Ts) at 1 kHz, Ts = 0,3 s",
+)
+def _chk_en15657_loss_factor() -> Outcome:
+    eta = float(ph.plate_loss_factor([1000.0], 0.3)[0])
+    return numeric(2.2 / (1000.0 * 0.3), eta, 1e-9)
+
+
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================

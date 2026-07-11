@@ -42,6 +42,7 @@ if TYPE_CHECKING:
     from .reverberation_prediction import ReverberationModelResult
     from .dynamic_stiffness import DynamicStiffnessResult
     from .mechanical_mobility import MobilityResult
+    from .structure_borne_power import StructureBornePowerResult
     from .transfer_stiffness import TransferStiffnessResult
     from .vibration_sound_power import VibrationSoundPowerResult
     from .impedance_tube import ImpedanceTubeResult
@@ -2102,6 +2103,40 @@ def plot_transfer_stiffness(
     return ax
 
 
+def _plot_band_level_bars(
+    ax: Axes | None,
+    levels: np.ndarray,
+    frequencies: np.ndarray | None,
+    total_level: float,
+    *,
+    ylabel: str,
+    title: str,
+    **kwargs: Any,
+) -> Axes:
+    """Per-band level bar chart with a band-summed total line (shared helper)."""
+    ax = ax if ax is not None else _new_axes()
+    lw = np.asarray(levels, dtype=np.float64)
+    n = lw.size
+    if frequencies is not None:
+        labels = [f"{f:g}" for f in np.asarray(frequencies)]
+        ax.set_xlabel("Frequency [Hz]")
+    else:
+        labels = [str(i + 1) for i in range(n)]
+        ax.set_xlabel("Band")
+    positions = np.arange(n)
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.bar(positions, lw, width=0.7, edgecolor=_C_EDGE, linewidth=0.6, **kwargs)
+    ax.set_xticks(positions)
+    ax.set_xticklabels(labels)
+    ax.axhline(total_level, color=_C_REFERENCE, ls="--", lw=1.2,
+               label=f"total {total_level:.1f} dB")
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, axis="y", alpha=0.3)
+    return ax
+
+
 def plot_vibration_sound_power(
     result: "VibrationSoundPowerResult", ax: Axes | None = None, **kwargs: Any
 ) -> Axes:
@@ -2112,27 +2147,28 @@ def plot_vibration_sound_power(
     :param kwargs: Forwarded to the bar ``plot``.
     :return: The axes.
     """
-    ax = ax if ax is not None else _new_axes()
-    lw = np.asarray(result.sound_power_level, dtype=np.float64)
-    n = lw.size
-    if result.frequencies is not None:
-        labels = [f"{f:g}" for f in np.asarray(result.frequencies)]
-        ax.set_xlabel("Frequency [Hz]")
-    else:
-        labels = [str(i + 1) for i in range(n)]
-        ax.set_xlabel("Band")
-    positions = np.arange(n)
-    kwargs.setdefault("color", _C_PRIMARY)
-    ax.bar(positions, lw, width=0.7, edgecolor=_C_EDGE, linewidth=0.6, **kwargs)
-    ax.set_xticks(positions)
-    ax.set_xticklabels(labels)
-    ax.axhline(result.total_level, color=_C_REFERENCE, ls="--", lw=1.2,
-               label=f"total {result.total_level:.1f} dB")
-    ax.set_ylabel(r"Sound power level $L_W$ [dB re 1 pW]")
-    ax.set_title("ISO/TS 7849 sound power from surface vibration")
-    ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
-    return ax
+    return _plot_band_level_bars(
+        ax, result.sound_power_level, result.frequencies, result.total_level,
+        ylabel=r"Sound power level $L_W$ [dB re 1 pW]",
+        title="ISO/TS 7849 sound power from surface vibration", **kwargs,
+    )
+
+
+def plot_structure_borne_power(
+    result: "StructureBornePowerResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Characteristic structure-borne sound power level per band (EN 15657).
+
+    :param result: A :class:`~phonometry.structure_borne_power.StructureBornePowerResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the bar ``plot``.
+    :return: The axes.
+    """
+    return _plot_band_level_bars(
+        ax, result.power_level, result.frequencies, result.total_level,
+        ylabel=r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]",
+        title="EN 15657 characteristic structure-borne sound power", **kwargs,
+    )
 
 
 def plot_multiple_shock(

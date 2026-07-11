@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **137/137 conformance checks pass** across 23 domains and 83 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **144/144 conformance checks pass** across 24 domains and 84 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -358,6 +358,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 |:---|:---|:---|:---|:---|:---:|
 | ECMA-418-1:2024 Clause 10 Formula (2) | Critical band at 1 kHz (f1,c / f2,c / dfc) | dfc 162.2 Hz (+/-0.05 Hz); edges 922.2-1084.4 Hz | dfc 162.22 Hz; edges 922.2-1084.4 Hz | 0.017 Hz | &#9989; |
 | ECMA-418-1:2024 Clause 11.6 Formula (14) | Proximity spacing dfprox at 150 / 850 Hz | 23 Hz @ 150 Hz; 63.8 Hz @ 850 Hz (+/-0.5 Hz) | 23.0 Hz; 63.8 Hz | +0.004; +0.044 Hz | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Tonal audibility (ISO/PAS 20065)</b> — 100% (7/7)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ISO/PAS 20065:2016 Formulae (12)-(14) | Audibility at 137.3 Hz, Annex E spectrum 1 | 4.99 dB (+/-0.05 dB) | 5.01 dB | 0.022 dB | &#9989; |
+| ISO/PAS 20065:2016 Formula (13) | Masking index av at 137.3 / 592.2 Hz | -2.02 dB @ 137.3 Hz; -2.4 dB @ 592.2 Hz (+/-0.005 dB) | -2.017 dB; -2.400 dB | +0.003; +0.000 dB | &#9989; |
+| ISO/PAS 20065:2016 Formula (20) | Mean audibility of the five spectra, Annex E | 6.96 dB (+/-0.05 dB) | 6.98 dB | 0.018 dB | &#9989; |
+| ISO/PAS 20065:2016 Formula (6) | Mean narrow-band level LS from spectrum, Table E.1 | 49.22 dB (+/-0.02 dB) | 49.22 dB | -0.001 dB | &#9989; |
+| ISO/PAS 20065:2016 Formula (8) | Tone level LT from spectrum, Table E.1 | 67.96 dB (+/-0.02 dB) | 67.96 dB | -0.005 dB | &#9989; |
+| ISO/PAS 20065:2016 Clause 5.3.8 | Tone detection over the spectrum, Table E.1 | tones at [118.4, 137.3, 158.8] Hz | tones at [118.4, 137.3, 158.8] Hz | exact | &#9989; |
+| ISO/PAS 20065:2016 Formula (17) | Multi-tone FG combination, Table E.1 | 72.15 dB (+/-0.02 dB) | 72.15 dB | -0.002 dB | &#9989; |
 
 </details>
 

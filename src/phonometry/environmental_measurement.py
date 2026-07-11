@@ -366,10 +366,11 @@ def gaussian_residual_level(
     if l90 is not None:
         spread = median - _finite(l90, "l90")
         divisor = _GAUSS_DIVISOR_L90
-    else:
-        assert l95 is not None
+    elif l95 is not None:
         spread = median - _finite(l95, "l95")
         divisor = _GAUSS_DIVISOR_L95
+    else:  # unreachable: the check above guarantees exactly one is supplied
+        raise ValueError("Supply exactly one of 'l90' or 'l95'.")
     return float(median + _GAUSS_CONSTANT * (spread / divisor) ** 2)
 
 

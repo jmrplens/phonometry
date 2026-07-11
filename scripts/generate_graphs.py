@@ -169,6 +169,12 @@ _ES_EXACT = {
         "Incertidumbre del coeficiente de absorción sonora (ISO 12999-2)",
     "+/-U (k = 2), reproducibility": "±U (k = 2), reproducibilidad",
     "alpha_s (ISO 354)": "alpha_s (ISO 354)",
+    # floor_covering_improvement figure (ISO 16251-1)
+    "ISO 16251-1 Floor-Covering Impact Sound Improvement":
+        "Mejora a impacto de revestimientos de suelo (ISO 16251-1)",
+    "Improvement of impact sound insulation [dB]":
+        "Mejora del aislamiento a impactos [dB]",
+    "delta-L (improvement)": "delta-L (mejora)",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3107,6 +3113,52 @@ def generate_survey_insulation(output_dir: str) -> None:
     plt.close()
 
 
+def generate_floor_covering_improvement(output_dir: str) -> None:
+    """ISO 16251-1 floor-covering impact-sound improvement spectrum ΔL with ΔLw."""
+    print("Generating floor_covering_improvement...")
+    from phonometry import impact_improvement
+
+    freqs = [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0,
+             630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0]
+    # A soft carpet: acceleration levels on the bare plate and with the covering.
+    bare = np.full(16, 78.0)
+    covering = bare - np.array([0, 0, 1, 2, 4, 7, 11, 15, 18, 21,
+                                23, 25, 27, 28, 29, 30], dtype=float)
+    res = impact_improvement(bare, covering, freqs)
+    assert res.delta_lw is not None
+
+    x = np.arange(len(freqs))
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.fill_between(x, 0.0, res.improvement, color=COLOR_TERTIARY, alpha=0.18,
+                    zorder=0)
+    ax.plot(x, res.improvement, "-", color=COLOR_PRIMARY, linewidth=2.4,
+            marker="o", markersize=6, zorder=5, label="delta-L (improvement)")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{int(b)}" for b in freqs], rotation=45, fontsize=8)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Improvement of impact sound insulation [dB]")
+    ax.set_ylim(bottom=0.0)
+    ax.set_title("ISO 16251-1 Floor-Covering Impact Sound Improvement",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        f"delta-Lw = {res.delta_lw} dB  (ISO 717-2)",
+        "one-third octave, mock-up (a0 = 1e-6 m/s^2)",
+    ]
+    ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=11, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "floor_covering_improvement.png")
+    plt.close()
+
+
 def generate_absorption_uncertainty(output_dir: str) -> None:
     """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
     print("Generating absorption_uncertainty...")
@@ -4553,6 +4605,7 @@ def generate_all(img_dir: str) -> None:
     generate_facade_prediction(img_dir)
     generate_intensity_insulation(img_dir)
     generate_survey_insulation(img_dir)
+    generate_floor_covering_improvement(img_dir)
     generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 

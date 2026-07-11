@@ -11,8 +11,17 @@ Run directly or via ``make graphs``.
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
-from dataclasses import dataclass
+
+# Deterministic output: pin numerical thread pools to a single thread before any
+# numeric backend initializes (see generate_graphs.py for the rationale).
+for _threads_var in (
+    "OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS",
+    "NUMEXPR_NUM_THREADS", "NUMBA_NUM_THREADS", "VECLIB_MAXIMUM_THREADS",
+):
+    os.environ.setdefault(_threads_var, "1")
+
+from collections.abc import Callable  # noqa: E402
+from dataclasses import dataclass  # noqa: E402
 
 
 @dataclass(frozen=True)

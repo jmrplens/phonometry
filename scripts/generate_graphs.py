@@ -1,17 +1,29 @@
 import os
 import sys
-from functools import lru_cache
-from typing import Any, Literal
 
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
-import numpy as np
-from scipy import signal as scipy_signal
+# Deterministic figure output: pin every numerical thread pool to a single
+# thread BEFORE numpy/scipy/numba import their backends, so multi-threaded
+# reductions cannot reorder floating-point sums and perturb the rendered bytes
+# across machines (the CI "Documentation figures" job runs on a different core
+# count than a dev box, which is what made the heavy compute figures flaky).
+for _threads_var in (
+    "OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS",
+    "NUMEXPR_NUM_THREADS", "NUMBA_NUM_THREADS", "VECLIB_MAXIMUM_THREADS",
+):
+    os.environ.setdefault(_threads_var, "1")
+
+from functools import lru_cache  # noqa: E402
+from typing import Any, Literal  # noqa: E402
+
+import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.ticker as mticker  # noqa: E402
+import numpy as np  # noqa: E402
+from scipy import signal as scipy_signal  # noqa: E402
 
 # Add src to path to use the local package
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-from phonometry import OctaveFilterBank
+from phonometry import OctaveFilterBank  # noqa: E402
 
 # Constants for professional styling
 # ---------------------------------------------------------------------------

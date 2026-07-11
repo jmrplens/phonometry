@@ -1270,6 +1270,43 @@ def _chk_en29052_resonance() -> Outcome:
     return numeric(expected, computed, 1e-6, unit="Hz", places=5)
 
 
+# --- Mechanical mobility (ISO 7626-1:2011) ---
+# SDOF resonator m=2 kg, k=8000 N/m, c=5 N.s/m; f0 = sqrt(k/m)/(2pi).
+_MOB_M, _MOB_K, _MOB_C = 2.0, 8000.0, 5.0
+_MOB_F0 = math.sqrt(_MOB_K / _MOB_M) / (2.0 * math.pi)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-1:2011 Annex A",
+    "SDOF driving-point mobility peak |Y(f0)| = 1/c  (c=5 N·s/m)",
+)
+def _chk_iso7626_mobility_peak() -> Outcome:
+    y0 = complex(ph.sdof_mobility(_MOB_F0, _MOB_M, _MOB_K, _MOB_C))
+    return numeric(1.0 / _MOB_C, abs(y0), 1e-6, unit="m/(N·s)", places=6)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-1:2011 Annex A",
+    "SDOF static receptance H(0) = 1/k  (k=8000 N/m)",
+)
+def _chk_iso7626_static_receptance() -> Outcome:
+    h = complex(ph.sdof_receptance(1e-6, _MOB_M, _MOB_K, _MOB_C))
+    return numeric(1.0 / _MOB_K, h.real, 1e-6, unit="m/N", rel=True, places=8)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-1:2011 Table 1",
+    "FRF reciprocity: impedance × mobility = 1  (at 37 Hz)",
+)
+def _chk_iso7626_reciprocity() -> Outcome:
+    y = complex(ph.sdof_mobility(37.0, _MOB_M, _MOB_K, _MOB_C))
+    z = complex(ph.convert_frf(y, 37.0, "mobility", "impedance"))
+    return numeric(1.0, abs(z * y), 1e-9, expected_label="1 (= Z·Y)")
+
+
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================

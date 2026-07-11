@@ -340,6 +340,11 @@ export default defineConfig({
           items: ['guides/building-acoustics', 'guides/dynamic-stiffness'],
         },
         {
+          label: 'Structure-borne sound & vibration',
+          translations: { es: 'Ruido estructural y vibración' },
+          items: ['guides/mechanical-mobility'],
+        },
+        {
           label: 'Environmental acoustics',
           translations: { es: 'Acústica ambiental' },
           items: ['guides/outdoor-propagation', 'guides/impulse-prominence'],

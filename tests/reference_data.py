@@ -789,3 +789,71 @@ EVEREST_EX1_BANDS = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
 EVEREST_EX1_FLOOR_ALPHA = [0.01, 0.01, 0.015, 0.02, 0.02, 0.02]   # concrete
 EVEREST_EX1_SHELL_ALPHA = [0.29, 0.10, 0.05, 0.04, 0.07, 0.09]    # gypsum board
 EVEREST_EX1_RT = [0.54, 1.53, 2.87, 3.39, 2.06, 1.63]             # printed RT60, s
+
+# ---------------------------------------------------------------------------
+# ISO/PAS 20065:2016 tonal audibility -- Annex E combustion-engine example.
+# Spectrum 1 (the one with the greatest decisive audibility), Tables E.2/E.3;
+# line spacing Δf = 2.7 Hz (Table E.1). The engineering-method chain
+# (LG Formula (12), av Formula (13), ΔL Formula (14)) reproduces the printed
+# per-tone ΔL to <= 0.03 dB (the residual is the standard's 2-decimal
+# rounding). Each tone: (fT, LS, LT, printed ΔL).
+ISO20065_LINE_SPACING = 2.7
+ISO20065_ANNEX_E_TONES = [
+    (118.4, 48.91, 64.56, 1.92),
+    (137.3, 49.22, 67.96, 4.99),
+    (158.8, 50.50, 68.63, 4.37),
+    (314.9, 52.85, 68.50, 1.78),
+    (433.4, 58.29, 73.17, 0.87),
+    (592.2, 59.53, 78.31, 4.55),
+    (629.8, 59.71, 75.00, 1.01),
+    (643.3, 61.98, 79.75, 3.47),
+    (1582.7, 54.16, 71.07, 0.73),
+]
+# Table E.2: masking index av at 137.3 Hz and 592.2 Hz (Formula (13)).
+ISO20065_AV_137 = -2.02
+ISO20065_AV_592 = -2.40
+# Table E.2: critical-band level LG at 137.3 Hz (Formula (12)), LS = 49.22 dB.
+ISO20065_LG_137 = 64.98
+# Decisive audibilities ΔLj of the five staggered spectra (Table E.3/E.4, bold)
+# and their energy-mean mean audibility ΔL (Formula (20)); printed ΔL = 6.96 dB.
+ISO20065_DECISIVE_AUDIBILITIES = [9.18, 6.04, 7.46, 2.67, 7.17]
+ISO20065_MEAN_AUDIBILITY = 6.96
+
+# Table E.1 -- the 38 narrow-band lines (fi, Li) of the critical band about the
+# 137.3 Hz tone of spectrum 1 (Δf = 2.7 Hz). The from-spectrum front-end must
+# reproduce the tabulated mean narrow-band level LS2 = 49.22 dB (Formula (6),
+# iterative Annex D, with the −1.76 dB Hanning correction confirmed by
+# DIN 45681:2005-03 5.3.2) and tone level LT2 = 67.96 dB (Formula (8)).
+ISO20065_E1_FREQUENCIES = [
+    96.9, 99.6, 102.3, 105.0, 107.7, 110.4, 113.0, 115.7, 118.4, 121.1,
+    123.8, 126.5, 129.2, 131.9, 134.6, 137.3, 140.0, 142.7, 145.3, 148.0,
+    150.7, 153.4, 156.1, 158.8, 161.5, 164.2, 166.9, 169.6, 172.3, 175.0,
+    177.6, 180.3, 183.0, 185.7, 188.4, 191.1, 193.8, 196.5,
+]
+ISO20065_E1_LEVELS = [
+    49.40, 50.68, 50.09, 53.37, 44.47, 50.91, 51.41, 59.40, 64.54, 57.57,
+    51.02, 50.76, 59.93, 62.94, 58.49, 65.87, 62.66, 50.25, 51.32, 52.30,
+    52.58, 53.15, 67.04, 67.27, 57.40, 57.17, 52.56, 51.39, 52.49, 47.68,
+    51.26, 49.03, 61.42, 59.52, 48.43, 50.84, 48.20, 55.95,
+]
+ISO20065_E1_LS = 49.22   # mean narrow-band level of the 137.3 Hz tone (Table E.1)
+ISO20065_E1_LT = 67.96   # tone level of the 137.3 Hz tone (single, Table E.2)
+# Full-spectrum front-end on Table E.1: peak detection finds the three tones,
+# and the multi-tone "FG" combination (Formula 17) sums their tonal lines to
+# LT = 72.15 dB (Table E.2 row "2 FG"). Their mean narrow-band levels (Table E.2)
+# are LS = 48.91 / 49.22 / 50.50 dB. (The FG decisive audibility ΔL = 9.18 dB
+# needs the *complete* spectrum: Table E.1 is truncated to the 137.3 Hz critical
+# band, so the 158.8 Hz tone's LS is underestimated from it.)
+ISO20065_E1_TONE_FREQUENCIES = [118.4, 137.3, 158.8]
+ISO20065_E1_TONE_LS = [48.91, 49.22, 50.50]
+ISO20065_E1_LT_FG = 72.15
+
+# Two-tone separation frequency fD (Formulae (18)/(19), Clause 5.3.8): two tones
+# in one critical band, both below 1000 Hz, are rated separately (not FG-combined)
+# when |fT1 − fT2| exceeds fD = 21·10^(1.2·|lg(fT/212)|^1.8) Hz, evaluated at the
+# more prominent tone. No ISO/PAS 20065 worked example exercises this branch (the
+# Annex E band groups three tones); the values below reproduce the DIN 45681:2005-03
+# Annex J reference program (fD = 21 * 10 ^ (1.2 * Abs(Log(fT / 212) / Log(10)) ^ 1.8)).
+# fD bottoms out at 21 Hz at the reference fT = 212 Hz (the |lg| minimum).
+ISO20065_FD_212 = 21.00
+ISO20065_FD_137 = 24.09

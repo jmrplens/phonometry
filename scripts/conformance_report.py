@@ -2351,6 +2351,119 @@ def _chk_ecma418_1_proximity_spacing() -> Outcome:
     )
 
 
+_TONE_AUD = "Tonal audibility (ISO/PAS 20065)"
+
+
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Formulae (12)-(14)", "Audibility at 137.3 Hz, Annex E spectrum 1")
+def _chk_iso20065_audibility() -> Outcome:
+    fT, ls, lt, expected = ref.ISO20065_ANNEX_E_TONES[1]  # 137.3 Hz tone
+    value = ph.tone_audibility(lt, ls, fT, ref.ISO20065_LINE_SPACING)
+    # 0.05 dB absorbs the standard's 2-decimal table rounding of LS/LT/LG/av.
+    return numeric(expected, value, 0.05, unit="dB", places=2)
+
+
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Formula (13)", "Masking index av at 137.3 / 592.2 Hz")
+def _chk_iso20065_masking_index() -> Outcome:
+    av137 = ph.masking_index(137.3)
+    av592 = ph.masking_index(592.2)
+    ok = (
+        abs(av137 - ref.ISO20065_AV_137) <= 0.005
+        and abs(av592 - ref.ISO20065_AV_592) <= 0.005
+    )
+    return Outcome(
+        expected=f"{ref.ISO20065_AV_137:g} dB @ 137.3 Hz; "
+        f"{ref.ISO20065_AV_592:g} dB @ 592.2 Hz (+/-0.005 dB)",
+        computed=f"{av137:.3f} dB; {av592:.3f} dB",
+        delta=f"{av137 - ref.ISO20065_AV_137:+.3f}; "
+        f"{av592 - ref.ISO20065_AV_592:+.3f} dB",
+        passed=ok,
+    )
+
+
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Formula (20)", "Mean audibility of the five spectra, Annex E")
+def _chk_iso20065_mean_audibility() -> Outcome:
+    value = ph.mean_audibility(ref.ISO20065_DECISIVE_AUDIBILITIES)
+    # 0.05 dB absorbs the 2-decimal rounding of the tabulated decisive values.
+    return numeric(ref.ISO20065_MEAN_AUDIBILITY, value, 0.05, unit="dB", places=2)
+
+
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Formula (6)", "Mean narrow-band level LS from spectrum, Table E.1")
+def _chk_iso20065_mean_narrowband_level() -> Outcome:
+    value = ph.mean_narrowband_level(
+        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3
+    )
+    # Iterative Formula (6) with Hanning correction; 0.02 dB absorbs rounding.
+    return numeric(ref.ISO20065_E1_LS, value, 0.02, unit="dB", places=2)
+
+
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Formula (8)", "Tone level LT from spectrum, Table E.1")
+def _chk_iso20065_tone_level() -> Outcome:
+    ls = ph.mean_narrowband_level(
+        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3
+    )
+    value = ph.tone_level(
+        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3, ls
+    )
+    return numeric(ref.ISO20065_E1_LT, value, 0.02, unit="dB", places=2)
+
+
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Clause 5.3.8", "Tone detection over the spectrum, Table E.1")
+def _chk_iso20065_peak_detection() -> Outcome:
+    result = ph.analyze_spectrum(
+        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+    )
+    found = sorted(round(float(f), 1) for f in result.tone_frequencies)
+    expected = sorted(ref.ISO20065_E1_TONE_FREQUENCIES)
+    ok = found == expected
+    return Outcome(
+        expected=f"tones at {expected} Hz",
+        computed=f"tones at {found} Hz",
+        delta="exact" if ok else "mismatch",
+        passed=ok,
+    )
+
+
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Formula (17)", "Multi-tone FG combination, Table E.1")
+def _chk_iso20065_fg_combination() -> Outcome:
+    value = ph.combined_tone_level(
+        ref.ISO20065_E1_LEVELS,
+        ref.ISO20065_E1_FREQUENCIES,
+        ref.ISO20065_E1_TONE_FREQUENCIES,
+        ref.ISO20065_E1_TONE_LS,
+    )
+    return numeric(ref.ISO20065_E1_LT_FG, value, 0.02, unit="dB", places=2)
+
+
+@register(
+    _TONE_AUD,
+    "ISO/PAS 20065:2016 Formulae (18)/(19)",
+    "Two-tone separation fD (DIN 45681 Annex J), 137.3 / 212 Hz",
+)
+def _chk_iso20065_two_tone_separation() -> Outcome:
+    fd_137 = ph.two_tone_separation_frequency(137.3)
+    fd_212 = ph.two_tone_separation_frequency(212.0)
+    # Annex E consistency: the 118.4/137.3 Hz pair is combined, not separated
+    # (|Δf| = 18.9 Hz < fD ≈ 24 Hz at the more prominent tone).
+    annex_e_combined = not ph.resolve_tones_separately(118.4, 137.3, 4.0, 5.0)
+    ok = (
+        round(fd_137, 2) == ref.ISO20065_FD_137
+        and round(fd_212, 2) == ref.ISO20065_FD_212
+        and annex_e_combined
+    )
+    return Outcome(
+        expected=(
+            f"fD(137.3)={ref.ISO20065_FD_137}, fD(212)={ref.ISO20065_FD_212} Hz; "
+            "Annex E pair combined"
+        ),
+        computed=(
+            f"fD(137.3)={fd_137:.2f}, fD(212)={fd_212:.2f} Hz; "
+            f"Annex E pair {'combined' if annex_e_combined else 'separated'}"
+        ),
+        delta="exact" if ok else "mismatch",
+        passed=ok,
+    )
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

@@ -15,6 +15,7 @@ Full documentation for phonometry. Also available as a website:
 - [Time Weighting](time-weighting.md) — Fast, Slow, Impulse ballistics
 - [Psychoacoustics](psychoacoustics.md) — Zwicker, Moore-Glasberg and Sottek loudness, sharpness, equal-loudness contours (ISO 226), tonality and roughness
 - [Prominent discrete tones](tone-prominence.md) — the ECMA-418-1 tone-to-noise and prominence ratios that decide whether a discrete tone is prominent and justify tonal rating adjustments
+- [Tonal audibility of tones in noise](tone-audibility.md) — the ISO/PAS 20065 engineering method for the audibility ΔL of a tone above the masking threshold: the critical band about the tone, the critical-band masking level, the masking index, and the decisive and mean audibility
 - [Speech Transmission Index](speech-transmission.md) — how much of the speech envelope a room or sound system preserves: the IEC 60268-16 modulation transfer function, indirect method and direct STIPA measurement
 - [Speech Intelligibility Index](speech-intelligibility.md) — the ANSI S3.5-1997 one-third-octave-band SII: band-importance weighting (Table 3), self-speech and upward spread of masking, band audibility, and the index in noise and hearing loss
 - [Hearing threshold](hearing-threshold.md) — the age-related hearing threshold distribution (ISO 7029:2017) and the free-field/diffuse-field reference threshold of hearing (ISO 389-7:2006)

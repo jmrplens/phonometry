@@ -2434,6 +2434,36 @@ def _chk_iso20065_fg_combination() -> Outcome:
     return numeric(ref.ISO20065_E1_LT_FG, value, 0.02, unit="dB", places=2)
 
 
+@register(
+    _TONE_AUD,
+    "ISO/PAS 20065:2016 Formulae (18)/(19)",
+    "Two-tone separation fD (DIN 45681 Annex J), 137.3 / 212 Hz",
+)
+def _chk_iso20065_two_tone_separation() -> Outcome:
+    fd_137 = ph.two_tone_separation_frequency(137.3)
+    fd_212 = ph.two_tone_separation_frequency(212.0)
+    # Annex E consistency: the 118.4/137.3 Hz pair is combined, not separated
+    # (|Δf| = 18.9 Hz < fD ≈ 24 Hz at the more prominent tone).
+    annex_e_combined = not ph.resolve_tones_separately(118.4, 137.3, 4.0, 5.0)
+    ok = (
+        round(fd_137, 2) == ref.ISO20065_FD_137
+        and round(fd_212, 2) == ref.ISO20065_FD_212
+        and annex_e_combined
+    )
+    return Outcome(
+        expected=(
+            f"fD(137.3)={ref.ISO20065_FD_137}, fD(212)={ref.ISO20065_FD_212} Hz; "
+            "Annex E pair combined"
+        ),
+        computed=(
+            f"fD(137.3)={fd_137:.2f}, fD(212)={fd_212:.2f} Hz; "
+            f"Annex E pair {'combined' if annex_e_combined else 'separated'}"
+        ),
+        delta="exact" if ok else "mismatch",
+        passed=ok,
+    )
+
+
 # ===========================================================================
 # Markdown rendering
 # ===========================================================================

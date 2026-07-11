@@ -232,8 +232,10 @@ from .tone_audibility import (
     masking_index,
     mean_audibility,
     mean_narrowband_level,
+    resolve_tones_separately,
     tone_audibility,
     tone_level,
+    two_tone_separation_frequency,
 )
 from .parametric_filters import (
     TimeWeighting,
@@ -1014,6 +1016,8 @@ __all__ = [
     "tone_level",
     "analyze_spectrum",
     "combined_tone_level",
+    "two_tone_separation_frequency",
+    "resolve_tones_separately",
     "tone_audibility",
     "assess_tones",
     "mean_audibility",

@@ -33,8 +33,10 @@ from phonometry import (
     masking_index,
     mean_audibility,
     mean_narrowband_level,
+    resolve_tones_separately,
     tone_audibility,
     tone_level,
+    two_tone_separation_frequency,
 )
 
 
@@ -292,6 +294,75 @@ def test_combined_tone_level_rejects_length_mismatch() -> None:
         combined_tone_level(
             ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, [137.3], [49.0, 50.0]
         )
+
+
+# ---------------------------------------------------------------------------
+# Separate evaluation of two tones below 1000 Hz (Formulae (18)/(19))
+#
+# No numeric worked example exercises this branch (the Annex E band groups three
+# tones, so the "exactly two tones" rule never fires there). These tests fix the
+# closed-form Formula (19) and the decision logic against the DIN 45681 Annex J
+# reference program; they are logic/consistency checks, not a numeric oracle.
+# ---------------------------------------------------------------------------
+def test_separation_frequency_minimum_at_reference() -> None:
+    # fD = 21·10^(1.2·|lg(fT/212)|^1.8): the |lg| makes fT = 212 Hz the minimum,
+    # where the exponent vanishes and fD = 21 Hz exactly.
+    assert two_tone_separation_frequency(212.0) == pytest.approx(21.0)
+
+
+def test_separation_frequency_matches_reference_program() -> None:
+    # Reproduce the DIN 45681 Annex J expression verbatim:
+    #   fD = 21 * 10 ^ (1.2 * Abs(Log(fT / 212) / Log(10)) ^ 1.8)
+    for ft in (88.0, 137.3, 300.0, 500.0, 999.0):
+        expected = 21.0 * 10.0 ** (1.2 * abs(math.log10(ft / 212.0)) ** 1.8)
+        assert two_tone_separation_frequency(ft) == pytest.approx(expected)
+
+
+def test_separation_frequency_grows_either_side_of_reference() -> None:
+    # The absolute value gives a symmetric-in-log minimum at 212 Hz.
+    base = two_tone_separation_frequency(212.0)
+    assert two_tone_separation_frequency(120.0) > base
+    assert two_tone_separation_frequency(600.0) > base
+
+
+def test_separation_frequency_rejects_bad_frequency() -> None:
+    with pytest.raises(ValueError, match="tone_frequency"):
+        two_tone_separation_frequency(0.0)
+
+
+def test_resolve_separately_true_when_far_apart() -> None:
+    # 200/260 Hz, both < 1000 Hz, |Δf| = 60 Hz ≫ fD(200) ≈ 21 Hz → separate.
+    assert resolve_tones_separately(200.0, 260.0, 3.0, 2.0) is True
+
+
+def test_resolve_separately_false_when_close() -> None:
+    # Annex E tones 118.4/137.3 Hz: |Δf| = 18.9 Hz < fD(137.3) ≈ 24.1 Hz →
+    # combined. This is consistent with the Annex E FG grouping.
+    assert resolve_tones_separately(118.4, 137.3, 4.0, 5.0) is False
+
+
+def test_resolve_separately_false_at_or_above_1000hz() -> None:
+    # The rule only applies when BOTH tones lie below 1000 Hz.
+    assert resolve_tones_separately(1200.0, 1400.0, 3.0, 2.0) is False
+    assert resolve_tones_separately(900.0, 1100.0, 3.0, 2.0) is False
+
+
+def test_resolve_separately_uses_more_prominent_tone() -> None:
+    # fT is the tone with the larger ΔL; which tone dominates picks the threshold
+    # and, at a spacing that straddles the two thresholds, flips the decision.
+    f1, f2 = 300.0, 323.1  # |Δf| = 23.1 Hz
+    d_lo = two_tone_separation_frequency(f1)  # ≈ 23.02 Hz
+    d_hi = two_tone_separation_frequency(f2)  # ≈ 23.91 Hz
+    assert d_lo < abs(f2 - f1) < d_hi
+    assert resolve_tones_separately(f1, f2, 5.0, 3.0) is True  # fT = 300, thr low
+    assert resolve_tones_separately(f1, f2, 3.0, 5.0) is False  # fT = 323.1, thr hi
+
+
+def test_resolve_separately_rejects_bad_input() -> None:
+    with pytest.raises(ValueError):
+        resolve_tones_separately(-1.0, 200.0, 1.0, 1.0)
+    with pytest.raises(ValueError):
+        resolve_tones_separately(200.0, 260.0, math.nan, 1.0)
 
 
 # ---------------------------------------------------------------------------

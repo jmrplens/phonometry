@@ -847,3 +847,13 @@ ISO20065_E1_LT = 67.96   # tone level of the 137.3 Hz tone (single, Table E.2)
 ISO20065_E1_TONE_FREQUENCIES = [118.4, 137.3, 158.8]
 ISO20065_E1_TONE_LS = [48.91, 49.22, 50.50]
 ISO20065_E1_LT_FG = 72.15
+
+# Two-tone separation frequency fD (Formulae (18)/(19), Clause 5.3.8): two tones
+# in one critical band, both below 1000 Hz, are rated separately (not FG-combined)
+# when |fT1 − fT2| exceeds fD = 21·10^(1.2·|lg(fT/212)|^1.8) Hz, evaluated at the
+# more prominent tone. No ISO/PAS 20065 worked example exercises this branch (the
+# Annex E band groups three tones); the values below reproduce the DIN 45681:2005-03
+# Annex J reference program (fD = 21 * 10 ^ (1.2 * Abs(Log(fT / 212) / Log(10)) ^ 1.8)).
+# fD bottoms out at 21 Hz at the reference fT = 212 Hz (the |lg| minimum).
+ISO20065_FD_212 = 21.00
+ISO20065_FD_137 = 24.09

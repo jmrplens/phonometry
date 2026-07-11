@@ -152,6 +152,40 @@ norma madre DIN 45681:2005-03). La detección de picos y la combinación FG se
 verifican contra el ejemplo resuelto del Anexo E (las tres frecuencias de tono y
 `LT = 72,15 dB`).
 
+### 5.1 Dos tonos por debajo de 1000 Hz
+
+Cuando **exactamente dos** tonos comparten una banda crítica y ambos están por
+debajo de 1000 Hz, el oído todavía puede distinguirlos — y entonces se evalúan
+*por separado* en lugar de combinarse en FG — si su diferencia de frecuencia
+`|fT1 − fT2|` (Fórmula 18) supera
+
+```text
+fD = 21·10^(1,2·|lg(fT/212)|^1,8)  Hz     (Fórmula 19, 88 Hz < fT < 1000 Hz)
+```
+
+evaluada en el tono más prominente `fT` (el de mayor audibilidad `ΔL`). El umbral
+alcanza su mínimo de `21 Hz` en `fT = 212 Hz` y crece a ambos lados.
+`two_tone_separation_frequency` da `fD`; `resolve_tones_separately` aplica la
+decisión.
+
+```python
+import phonometry as ph
+
+ph.two_tone_separation_frequency(212.0)             # 21,0 Hz (mínimo)
+ph.resolve_tones_separately(200.0, 260.0, 3.0, 2.0) # True  → evaluar por separado
+ph.resolve_tones_separately(118.4, 137.3, 4.0, 5.0) # False → combinar (Δf < fD)
+```
+
+:::note
+Ningún ejemplo resuelto de ISO/PAS 20065 ejercita esta rama — la banda del Anexo
+E agrupa *tres* tonos, así que la regla de «exactamente dos tonos» nunca se
+dispara ahí. La fórmula y la decisión se implementan en clean-room desde el texto
+y se verifican contra el programa de referencia del Anexo J de
+**DIN 45681:2005-03** (`fD = 21 * 10 ^ (1.2 * Abs(Log(fT / 212) / Log(10)) ^
+1.8)`). Como refuerzo, evaluado en los tonos del Anexo E el umbral (`≈ 24 Hz` en
+137,3 Hz) los mantiene combinados, coherente con la agrupación FG de ese ejemplo.
+:::
+
 ## Normas
 
 ISO/PAS 20065:2016, *Acoustics — Objective method for assessing the audibility
@@ -163,7 +197,8 @@ audibilidad `ΔL = LT − LG − av` (Fórmula 14) y la audibilidad media energ�
 D) y el nivel del tono `LT` (Fórmula 8) se calculan desde el espectro de banda
 crítica, y `analyze_spectrum` añade la detección de picos (apartado 5.3.8) con
 los criterios de distinción (apartado 5.3.4) y la combinación multitono `FG`
-(Fórmula 17). La corrección de ancho de banda de Hanning de −1,76 dB, el
+(Fórmula 17), además de la evaluación separada de dos tonos por debajo de 1000 Hz
+(Fórmulas 18/19). La corrección de ancho de banda de Hanning de −1,76 dB, el
 procedimiento iterativo del nivel de enmascaramiento y la lógica de
 detección/combinación están confirmados frente a la norma madre
 **DIN 45681:2005-03** (su programa de referencia del Anexo J). La conformidad se

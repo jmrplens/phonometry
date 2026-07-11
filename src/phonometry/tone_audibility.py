@@ -46,6 +46,14 @@ On the Annex E example these recover the three tones and their combined tone
 level ``LT = 72.15 dB``. A decisive audibility reproduced exactly needs the
 *complete* narrow-band spectrum: a spectrum truncated to one critical band
 mis-estimates the mean narrow-band level of tones near its edges.
+
+**Two tones below 1000 Hz.** When *exactly two* tones share a critical band and
+both lie below 1000 Hz, the ear can still resolve them if their spacing exceeds
+``fD = 21·10^(1.2·|lg(fT/212)|^1.8)`` Hz (Formulae (18)/(19)); they are then
+rated separately instead of combined. :func:`two_tone_separation_frequency` and
+:func:`resolve_tones_separately` implement this branch (Clause 5.3.8), which no
+ISO/PAS 20065 worked example exercises — it is verified against the DIN 45681
+Annex J reference program rather than a numeric oracle.
 """
 
 from __future__ import annotations
@@ -573,6 +581,91 @@ def combined_tone_level(
     return energy_sum_level(
         lev[sorted(marked)], effective_bandwidth_factor=effective_bandwidth_factor
     )
+
+
+# --------------------------------------------------------------------------- #
+# Separate evaluation of two tones below 1000 Hz (Clause 5.3.8, Formulae (18)/(19))
+# --------------------------------------------------------------------------- #
+#: Scale factor of the two-tone separation frequency fD (Formula (19)), in Hz.
+_SEPARATION_SCALE = 21.0
+#: Inner coefficient of the two-tone separation frequency fD (Formula (19)).
+_SEPARATION_COEFFICIENT = 1.2
+#: Reference frequency of the two-tone separation frequency fD (Formula (19)), Hz.
+_SEPARATION_REFERENCE = 212.0
+#: Exponent of the two-tone separation frequency fD (Formula (19)).
+_SEPARATION_EXPONENT = 1.8
+#: Upper frequency of the separate two-tone evaluation (Clause 5.3.8), in Hz.
+_TWO_TONE_MAX_FREQUENCY = 1000.0
+
+
+def two_tone_separation_frequency(tone_frequency: float) -> float:
+    """Frequency-difference threshold ``fD`` for resolving two tones (Formula (19)).
+
+    ``fD = 21·10^(1.2·|lg(fT/212)|^1.8)`` Hz. When *exactly two* tones fall in one
+    critical band and both lie below 1000 Hz, the human ear can still tell them
+    apart — and they are then rated *separately* rather than combined into a
+    single "FG" tone (Formula (17)) — if their frequency difference
+    ``|fT1 − fT2|`` (Formula (18)) exceeds this threshold. ``fT`` is the frequency
+    of the more prominent tone (the larger audibility ``ΔL``). The threshold is
+    ``21 Hz`` at ``fT = 212 Hz`` and grows on either side; the formula is defined
+    over ``88 Hz < fT < 1000 Hz`` (Clause 5.3.8, Annex D, Note 3).
+
+    .. note::
+        No numeric worked example exercises this branch — the Annex E
+        combustion-engine spectrum groups *three* tones in its critical band, so
+        the "exactly two tones" rule never fires there. The formula and decision
+        rule are implemented clean-room from the ISO/PAS 20065 text and verified
+        against the DIN 45681:2005-03 Annex J reference program
+        (``fD = 21 * 10 ^ (1.2 * Abs(Log(fT / 212) / Log(10)) ^ 1.8)``), but are
+        *not* anchored on a numeric oracle.
+
+    :param tone_frequency: Frequency ``fT`` of the more prominent tone, in Hz.
+    :return: Separation-frequency threshold ``fD``, in Hz.
+    :raises ValueError: If ``tone_frequency`` is not positive/finite.
+    """
+    ft = _positive(tone_frequency, "tone_frequency")
+    exponent = (
+        _SEPARATION_COEFFICIENT
+        * abs(np.log10(ft / _SEPARATION_REFERENCE)) ** _SEPARATION_EXPONENT
+    )
+    return float(_SEPARATION_SCALE * 10.0**exponent)
+
+
+def resolve_tones_separately(
+    tone1_frequency: float,
+    tone2_frequency: float,
+    audibility1: float,
+    audibility2: float,
+) -> bool:
+    """Whether two tones in one critical band are rated separately (Clause 5.3.8).
+
+    Returns ``True`` when two tones sharing a critical band are evaluated on their
+    own instead of being combined into a single FG tone (Formula (17)): both tone
+    frequencies lie below 1000 Hz *and* their frequency difference
+    ``|fT1 − fT2|`` (Formula (18)) exceeds the separation frequency ``fD``
+    (Formula (19)) evaluated at the more prominent tone (the larger audibility
+    ``ΔL``). Otherwise the tones are combined. This mirrors the DIN 45681 Annex J
+    reference program (``If l = 2 And fT1 < 1000 And fT2 < 1000`` … ``If |fT1 −
+    fT2| > fD Then auflösen``); see :func:`two_tone_separation_frequency` for the
+    verification status.
+
+    :param tone1_frequency: Frequency ``fT1`` of the first tone, in Hz.
+    :param tone2_frequency: Frequency ``fT2`` of the second tone, in Hz.
+    :param audibility1: Audibility ``ΔL1`` of the first tone, in dB (Formula (14)).
+    :param audibility2: Audibility ``ΔL2`` of the second tone, in dB (Formula (14)).
+        On a tie (``ΔL1 == ΔL2``) the first tone is taken as the more prominent.
+    :return: ``True`` if the tones are rated separately, ``False`` if combined.
+    :raises ValueError: If a frequency is not positive/finite or an audibility is
+        not finite.
+    """
+    f1 = _positive(tone1_frequency, "tone1_frequency")
+    f2 = _positive(tone2_frequency, "tone2_frequency")
+    dl1 = _finite(audibility1, "audibility1")
+    dl2 = _finite(audibility2, "audibility2")
+    if f1 >= _TWO_TONE_MAX_FREQUENCY or f2 >= _TWO_TONE_MAX_FREQUENCY:
+        return False
+    dominant = f1 if dl1 >= dl2 else f2
+    return abs(f1 - f2) > two_tone_separation_frequency(dominant)
 
 
 # --------------------------------------------------------------------------- #

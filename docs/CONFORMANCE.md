@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **144/144 conformance checks pass** across 24 domains and 84 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **145/145 conformance checks pass** across 24 domains and 84 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -362,7 +362,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Tonal audibility (ISO/PAS 20065)</b> — 100% (7/7)</summary>
+<summary>&#9989; <b>Tonal audibility (ISO/PAS 20065)</b> — 100% (8/8)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -373,6 +373,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO/PAS 20065:2016 Formula (8) | Tone level LT from spectrum, Table E.1 | 67.96 dB (+/-0.02 dB) | 67.96 dB | -0.005 dB | &#9989; |
 | ISO/PAS 20065:2016 Clause 5.3.8 | Tone detection over the spectrum, Table E.1 | tones at [118.4, 137.3, 158.8] Hz | tones at [118.4, 137.3, 158.8] Hz | exact | &#9989; |
 | ISO/PAS 20065:2016 Formula (17) | Multi-tone FG combination, Table E.1 | 72.15 dB (+/-0.02 dB) | 72.15 dB | -0.002 dB | &#9989; |
+| ISO/PAS 20065:2016 Formulae (18)/(19) | Two-tone separation fD (DIN 45681 Annex J), 137.3 / 212 Hz | fD(137.3)=24.09, fD(212)=21.0 Hz; Annex E pair combined | fD(137.3)=24.09, fD(212)=21.00 Hz; Annex E pair combined | exact | &#9989; |
 
 </details>
 

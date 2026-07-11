@@ -144,6 +144,37 @@ matches the parent standard DIN 45681:2005-03 reference program). The peak
 detection and FG combination above are verified against the Annex E worked
 example (the three tone frequencies and `LT = 72.15 dB`).
 
+### 5.1 Two tones below 1000 Hz
+
+When **exactly two** tones share a critical band and both lie below 1000 Hz, the
+ear can still tell them apart — so they are rated *separately* rather than
+FG-combined — if their frequency difference `|fT1 − fT2|` (Formula 18) exceeds
+
+```text
+fD = 21·10^(1.2·|lg(fT/212)|^1.8)  Hz     (Formula 19, 88 Hz < fT < 1000 Hz)
+```
+
+evaluated at the more prominent tone `fT` (the larger audibility `ΔL`). The
+threshold bottoms out at `21 Hz` at `fT = 212 Hz` and grows on either side.
+`two_tone_separation_frequency` gives `fD`; `resolve_tones_separately` applies
+the decision.
+
+```python
+import phonometry as ph
+
+ph.two_tone_separation_frequency(212.0)             # 21.0 Hz (minimum)
+ph.resolve_tones_separately(200.0, 260.0, 3.0, 2.0) # True  → rate separately
+ph.resolve_tones_separately(118.4, 137.3, 4.0, 5.0) # False → combine (Δf < fD)
+```
+
+> **No numeric oracle.** No ISO/PAS 20065 worked example exercises this branch —
+> the Annex E band groups *three* tones, so the "exactly two tones" rule never
+> fires there. The formula and decision are implemented clean-room from the text
+> and verified against the **DIN 45681:2005-03** Annex J reference program
+> (`fD = 21 * 10 ^ (1.2 * Abs(Log(fT / 212) / Log(10)) ^ 1.8)`). Reassuringly,
+> evaluated at the Annex E tones the threshold (`≈ 24 Hz` at 137.3 Hz) keeps
+> them combined, consistent with that example's FG grouping.
+
 <details>
 <summary>Show the code for this figure</summary>
 
@@ -171,7 +202,8 @@ level `LG` (Formula 12), the masking index `av` (Formula 13), the audibility
 (Formula 20). The mean narrow-band level `LS` (Formula 6, iterative Annex D) and
 tone level `LT` (Formula 8) are computed from the critical-band spectrum, and
 `analyze_spectrum` adds peak detection (Clause 5.3.8) with the distinctness
-criteria (Clause 5.3.4) and the multi-tone `FG` combination (Formula 17). The
+criteria (Clause 5.3.4) and the multi-tone `FG` combination (Formula 17), plus
+the separate evaluation of two tones below 1000 Hz (Formulae 18/19). The
 −1.76 dB Hanning bandwidth correction, the iterative masking-level procedure and
 the detection/combination logic are confirmed against the parent standard
 **DIN 45681:2005-03** (its Annex J reference program). Conformance is anchored on

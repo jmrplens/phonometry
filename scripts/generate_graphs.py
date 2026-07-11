@@ -231,6 +231,15 @@ _ES_EXACT = {
         r"$L_k$ real de $k_{2,1}=k+j\omega c$",
     r"indirect method $-(2\pi f)^2 m_2 T$":
         r"método indirecto $-(2\pi f)^2 m_2 T$",
+    # vibration_sound_power figure (ISO/TS 7849)
+    "ISO/TS 7849 Sound Power from Surface Vibration":
+        "Potencia sonora desde vibración superficial ISO/TS 7849",
+    r"Sound power level $L_W$ [dB re 1 pW]":
+        r"Nivel de potencia sonora $L_W$ [dB re 1 pW]",
+    "Part 1 upper limit ($\\varepsilon$ = 1)":
+        "Parte 1 límite superior ($\\varepsilon$ = 1)",
+    "Part 2 engineering ($\\varepsilon$ measured)":
+        "Parte 2 ingeniería ($\\varepsilon$ medido)",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -553,6 +562,8 @@ _ES_EXACT = {
 
 _ES_PATTERNS = [
     (r"^(\d+) yr$", r"\1 años"),
+    (r"^total \(limit\) (.+) dB$", r"total (límite) \1 dB"),
+    (r"^total \(eng\.\) (.+) dB$", r"total (ing.) \1 dB"),
     (r"^Governing  \$K_I\$ = (\d+)\.(\d+) dB$", r"Determinante  $K_I$ = \1,\2 dB"),
     # The mathtext ($R$) makes the later decimal-comma pass skip this label, so
     # convert the decimal here as part of the translation.
@@ -3475,6 +3486,58 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     plt.close()
 
 
+def generate_vibration_sound_power(output_dir: str) -> None:
+    """ISO/TS 7849 sound power from surface vibration: upper limit vs engineering."""
+    print("Generating vibration_sound_power...")
+    from phonometry import radiated_sound_power_level
+
+    bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+    # A plausible surface velocity level spectrum and a measured radiation factor.
+    lv = np.array([78.0, 82.0, 85.0, 83.0, 79.0, 74.0])
+    eps = np.array([0.20, 0.45, 0.75, 0.95, 1.00, 1.00])
+    area = 1.6
+
+    lw_max = radiated_sound_power_level(lv, area)                    # Part 1, eps=1
+    lw_eng = radiated_sound_power_level(lv, area, radiation_factor=eps)  # Part 2
+
+    x = np.arange(bands.size)
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.bar(x - 0.2, lw_max, width=0.4, color=COLOR_SECONDARY, edgecolor=COLOR_FG,
+           linewidth=0.6, label="Part 1 upper limit ($\\varepsilon$ = 1)")
+    ax.bar(x + 0.2, lw_eng, width=0.4, color=COLOR_PRIMARY, edgecolor=COLOR_FG,
+           linewidth=0.6, label="Part 2 engineering ($\\varepsilon$ measured)")
+
+    total_max = 10.0 * np.log10(np.sum(10.0 ** (0.1 * lw_max)))
+    total_eng = 10.0 * np.log10(np.sum(10.0 ** (0.1 * lw_eng)))
+    ax.axhline(total_max, color=COLOR_SECONDARY, ls="--", lw=1.2,
+               label=f"total (limit) {total_max:.1f} dB")
+    ax.axhline(total_eng, color=COLOR_PRIMARY, ls="--", lw=1.2,
+               label=f"total (eng.) {total_eng:.1f} dB")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{b:g}" for b in bands])
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel(r"Sound power level $L_W$ [dB re 1 pW]")
+    ax.set_title("ISO/TS 7849 Sound Power from Surface Vibration",
+                 fontweight="bold", pad=12)
+    ax.grid(which="major", axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.legend(loc="upper right", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "LW = Lv + 10 lg(S/S0) + 10 lg(e) + 10 lg(411/400)",
+        f"S = {area:g} m2,  S0 = 1 m2",
+        "Part 1: e = 1 -> upper limit LW,max",
+    ]
+    ax.text(0.015, 0.02, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="left", fontsize=9, color=COLOR_FG, family="monospace",
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "vibration_sound_power.svg")
+    plt.close()
+
+
 def generate_absorption_uncertainty(output_dir: str) -> None:
     """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
     print("Generating absorption_uncertainty...")
@@ -4976,6 +5039,7 @@ def generate_all(img_dir: str) -> None:
     generate_dynamic_stiffness(img_dir)
     generate_mechanical_mobility(img_dir)
     generate_transfer_stiffness(img_dir)
+    generate_vibration_sound_power(img_dir)
     generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 

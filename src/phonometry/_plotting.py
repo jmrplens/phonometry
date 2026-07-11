@@ -43,6 +43,7 @@ if TYPE_CHECKING:
     from .dynamic_stiffness import DynamicStiffnessResult
     from .mechanical_mobility import MobilityResult
     from .transfer_stiffness import TransferStiffnessResult
+    from .vibration_sound_power import VibrationSoundPowerResult
     from .impedance_tube import ImpedanceTubeResult
     from .insulation import (
         AirborneInsulationResult,
@@ -2098,6 +2099,39 @@ def plot_transfer_stiffness(
     ax.set_title("ISO 10846 dynamic transfer stiffness")
     ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_vibration_sound_power(
+    result: "VibrationSoundPowerResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Radiated sound power level per band (ISO/TS 7849).
+
+    :param result: A :class:`~phonometry.vibration_sound_power.VibrationSoundPowerResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the bar ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    lw = np.asarray(result.sound_power_level, dtype=np.float64)
+    n = lw.size
+    if result.frequencies is not None:
+        labels = [f"{f:g}" for f in np.asarray(result.frequencies)]
+        ax.set_xlabel("Frequency [Hz]")
+    else:
+        labels = [str(i + 1) for i in range(n)]
+        ax.set_xlabel("Band")
+    positions = np.arange(n)
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.bar(positions, lw, width=0.7, edgecolor=_C_EDGE, linewidth=0.6, **kwargs)
+    ax.set_xticks(positions)
+    ax.set_xticklabels(labels)
+    ax.axhline(result.total_level, color=_C_REFERENCE, ls="--", lw=1.2,
+               label=f"total {result.total_level:.1f} dB")
+    ax.set_ylabel(r"Sound power level $L_W$ [dB re 1 pW]")
+    ax.set_title("ISO/TS 7849 sound power from surface vibration")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, axis="y", alpha=0.3)
     return ax
 
 

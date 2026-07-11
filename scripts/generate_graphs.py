@@ -194,6 +194,15 @@ _ES_EXACT = {
         "Índice de reducción vibracional Kij [dB]",
     "Kij (ISO 10848)": "Kij (ISO 10848)",
     "mean Kij (200-1250 Hz)": "Kij medio (200-1250 Hz)",
+    # tonal_audibility figure (ISO 1996-2)
+    "ISO 1996-2 Tonal Adjustment": "Ajuste tonal ISO 1996-2",
+    r"Tonal audibility $\Delta L_{ta}$ [dB]":
+        r"Audibilidad tonal $\Delta L_{ta}$ [dB]",
+    r"Tonal adjustment $K_t$ [dB]": r"Ajuste tonal $K_t$ [dB]",
+    r"$K_t(\Delta L_{ta})$ (Formulae C.4-C.6)":
+        r"$K_t(\Delta L_{ta})$ (Fórmulas C.4-C.6)",
+    "Annex C.5 examples": "ejemplos del Anexo C.5",
+    "mid-range tone": "tono de rango medio",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -4277,6 +4286,55 @@ def generate_impulse_prominence(output_dir: str) -> None:
     plt.close()
 
 
+def generate_tonal_audibility(output_dir: str) -> None:
+    """ISO 1996-2: tonal adjustment Kt(ΔLta) with the Annex C.5 examples."""
+    print("Generating tonal_audibility...")
+    from phonometry import assess_tonal_audibility, tonal_adjustment
+
+    # The four ISO 1996-2:2007 Annex C.5 worked examples: (Lpt, Lpn, fc).
+    examples = [(46.7, 37.3, 4000.0), (54.1, 45.2, 430.0),
+                (53.6, 45.5, 755.0), (54.6, 45.5, 308.0)]
+    assessed = [assess_tonal_audibility(lpt, lpn, fc) for lpt, lpn, fc in examples]
+    # A synthetic mid-range tone to exercise the sloped branch.
+    mid = assess_tonal_audibility(50.0, 44.0, 500.0)
+
+    grid = np.linspace(0.0, 15.0, 300)
+    curve = np.array([tonal_adjustment(d) for d in grid])
+
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.plot(grid, curve, "-", color=COLOR_PRIMARY, linewidth=2.4, zorder=5,
+            label=r"$K_t(\Delta L_{ta})$ (Formulae C.4-C.6)")
+    for x in (4.0, 10.0):
+        ax.axvline(x, color=COLOR_GRID, linestyle=":", alpha=0.8, zorder=1)
+    ax.scatter([a.audibility for a in assessed], [a.adjustment for a in assessed],
+               color=COLOR_SECONDARY, marker="o", s=70, zorder=6,
+               label="Annex C.5 examples")
+    ax.scatter([mid.audibility], [mid.adjustment], color=COLOR_TERTIARY,
+               marker="*", s=150, zorder=7, label="mid-range tone")
+
+    ax.set_xlabel(r"Tonal audibility $\Delta L_{ta}$ [dB]")
+    ax.set_ylabel("Tonal adjustment $K_t$ [dB]")
+    ax.set_ylim(-0.3, 6.6)
+    ax.set_title("ISO 1996-2 Tonal Adjustment", fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower right", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "Kt = 0            (dLta < 4)",
+        "Kt = dLta - 4  (4 <= dLta <= 10)",
+        "Kt = 6            (dLta > 10)",
+    ]
+    ax.text(0.015, 0.97, "\n".join(info), transform=ax.transAxes,
+            va="top", ha="left", fontsize=10, color=COLOR_FG, family="monospace",
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "tonal_audibility.png")
+    plt.close()
+
+
 def generate_multiple_shock(output_dir: str) -> None:
     """ISO 2631-5: seat-to-spine transmissibility and the injury probability."""
     print("Generating multiple_shock.png...")
@@ -4728,6 +4786,7 @@ def generate_all(img_dir: str) -> None:
     generate_noise_induced_hearing_loss(img_dir)
 
     # Multiple-shock whole-body vibration (ISO 2631-5 Clause 5 + Annex C).
+    generate_tonal_audibility(img_dir)
     generate_multiple_shock(img_dir)
 
     # Sound absorption in enclosed spaces (EN 12354-6 Clause 4).

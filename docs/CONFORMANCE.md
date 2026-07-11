@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **112/112 conformance checks pass** across 22 domains and 68 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **115/115 conformance checks pass** across 22 domains and 69 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -55,13 +55,16 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Levels &amp; dosimetry</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>Levels &amp; dosimetry</b> — 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | IEC 61672-1:2013 (Leq) | Leq of a 1 Pa 1 kHz sine | 90.97 dB (+/-0.05 dB) | 90.969 dB | -0.001 dB | &#9989; |
 | IEC 61252:1995 (LEX,8h) | 8 h exposure to 90 dB(A) noise | 90 dB (+/-0.05 dB) | 90.008 dB | 0.008 dB | &#9989; |
 | ISO 1996-1:2016 3.6.4 | Lden, constant 60 dB in day/evening/night | 66.3952 dB (+/-0 dB) | 66.3952 dB | 0 dB | &#9989; |
+| ISO 1996-2:2007 Annex C.5 Example 1 | Tonal audibility ΔLta (Formula C.3), 4 kHz tone | 13.7 dB (+/-0.05 dB) | 13.66 dB | -0.044 dB | &#9989; |
+| ISO 1996-2:2007 Annex C.5 Example 1 | Tonal adjustment Kt (Formulae C.4-C.6) | 6 dB (+/-0 dB) | 6 dB | 0 dB | &#9989; |
+| ISO 1996-2:2017 Annex G.2 | Combined measurement uncertainty u = √(Σ(cj·uj)²) | 2.18 dB (+/-0.01 dB) | 2.18 dB | -0.002 dB | &#9989; |
 
 </details>
 

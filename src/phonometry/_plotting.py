@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from .floor_covering_improvement import FloorCoveringImprovementResult
     from .reverberation_prediction import ReverberationModelResult
     from .dynamic_stiffness import DynamicStiffnessResult
+    from .mechanical_mobility import MobilityResult
     from .impedance_tube import ImpedanceTubeResult
     from .insulation import (
         AirborneInsulationResult,
@@ -2044,6 +2045,34 @@ def plot_dynamic_stiffness(
     ax.set_title("EN 29052-1 floating-floor resonance")
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="upper left", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_mobility(
+    result: "MobilityResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Mobility magnitude ``|Y(f)|`` on log-log axes (ISO 7626-1).
+
+    :param result: A :class:`~phonometry.mechanical_mobility.MobilityResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the magnitude ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    mag = np.asarray(result.magnitude, dtype=np.float64)
+    kwargs.setdefault("color", _C_PRIMARY)
+    label = "driving-point mobility" if result.driving_point else "transfer mobility"
+    ax.loglog(freq, mag, label=label, **kwargs)
+    # Mark the mobility peak (a resonance for a driving-point FRF).
+    peak = int(np.argmax(mag))
+    ax.plot(freq[peak], mag[peak], "o", color=_C_REFERENCE, zorder=5,
+            label=f"peak at {freq[peak]:.1f} Hz")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Mobility $|Y|$ [m/(N·s)]")
+    ax.set_title("ISO 7626-1 mechanical mobility")
+    ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     return ax
 

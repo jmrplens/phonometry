@@ -213,6 +213,15 @@ _ES_EXACT = {
         r"Rigidez dinámica por unidad de área $s'$ [MN/m³]",
     r"Natural frequency $f_0$ [Hz]": r"Frecuencia natural $f_0$ [Hz]",
     "design point": "punto de diseño",
+    # mechanical_mobility figure (ISO 7626-1)
+    "ISO 7626-1 Mechanical Mobility FRFs":
+        "FRF de movilidad mecánica ISO 7626-1",
+    "Normalized FRF magnitude": "Magnitud FRF normalizada",
+    "Receptance $|H|$ (× k)": "Receptancia $|H|$ (× k)",
+    r"Mobility $|Y|$ (× k/$\omega_0$)": r"Movilidad $|Y|$ (× k/$\omega_0$)",
+    r"Accelerance $|A|$ (× k/$\omega_0^2$)":
+        r"Accelerancia $|A|$ (× k/$\omega_0^2$)",
+    "resonance $f_0$": "resonancia $f_0$",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3354,6 +3363,57 @@ def generate_dynamic_stiffness(output_dir: str) -> None:
     plt.close()
 
 
+def generate_mechanical_mobility(output_dir: str) -> None:
+    """ISO 7626-1 receptance/mobility/accelerance of a SDOF resonator."""
+    print("Generating mechanical_mobility...")
+    from phonometry import (
+        convert_frf,
+        resonance_frequency,
+        sdof_receptance,
+    )
+
+    m, k, c = 2.0, 8000.0, 5.0
+    f0 = resonance_frequency(m, k)
+    freq = np.logspace(np.log10(f0 / 20.0), np.log10(f0 * 20.0), 600)
+    w0 = 2.0 * np.pi * f0
+    h = sdof_receptance(freq, m, k, c)
+    y = convert_frf(h, freq, "receptance", "mobility")
+    a = convert_frf(h, freq, "receptance", "accelerance")
+    # Normalise each FRF to O(1) near resonance so all three share one axis.
+    curves = [
+        (np.abs(h) * k, COLOR_PRIMARY, "Receptance $|H|$ (× k)"),
+        (np.abs(y) * k / w0, COLOR_SECONDARY, r"Mobility $|Y|$ (× k/$\omega_0$)"),
+        (np.abs(a) * k / w0**2, COLOR_TERTIARY, r"Accelerance $|A|$ (× k/$\omega_0^2$)"),
+    ]
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    for mag, color, label in curves:
+        ax.loglog(freq, mag, color=color, linewidth=2.0, label=label)
+    ax.axvline(f0, color=COLOR_GRID, linestyle="--", linewidth=1.2,
+               label="resonance $f_0$")
+
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Normalized FRF magnitude")
+    ax.set_title("ISO 7626-1 Mechanical Mobility FRFs", fontweight="bold", pad=12)
+    ax.set_xlim(freq[0], freq[-1])
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.legend(loc="lower center", fontsize=9, ncol=2)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "SDOF: m = 2 kg, k = 8000 N/m, c = 5 N.s/m",
+        "H = 1/(k - w^2 m + j w c)",
+        "Y = j w H,   A = -w^2 H  (Table 1)",
+        f"f0 = {f0:.1f} Hz,  |Y(f0)| = 1/c",
+    ]
+    ax.text(0.985, 0.97, "\n".join(info), transform=ax.transAxes,
+            va="top", ha="right", fontsize=10, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "mechanical_mobility.svg")
+    plt.close()
+
+
 def generate_absorption_uncertainty(output_dir: str) -> None:
     """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
     print("Generating absorption_uncertainty...")
@@ -4853,6 +4913,7 @@ def generate_all(img_dir: str) -> None:
     generate_flanking_transmission(img_dir)
     generate_reverberation_models(img_dir)
     generate_dynamic_stiffness(img_dir)
+    generate_mechanical_mobility(img_dir)
     generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 

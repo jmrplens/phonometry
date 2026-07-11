@@ -106,6 +106,16 @@ from .dynamic_stiffness import (
     installed_dynamic_stiffness,
     natural_frequency,
 )
+from .mechanical_mobility import (
+    FRF_UNITS,
+    MobilityResult,
+    convert_frf,
+    resonance_frequency,
+    sdof_accelerance,
+    sdof_mobility,
+    sdof_mobility_result,
+    sdof_receptance,
+)
 from .multiple_shock_vibration import (
     MultipleShockResult,
     acceleration_dose,
@@ -640,6 +650,14 @@ __all__ = [
     "floating_floor_resonance",
     "DynamicStiffnessResult",
     "DynamicStiffnessWarning",
+    "convert_frf",
+    "sdof_receptance",
+    "sdof_mobility",
+    "sdof_accelerance",
+    "sdof_mobility_result",
+    "resonance_frequency",
+    "MobilityResult",
+    "FRF_UNITS",
     "combine_uncertainty",
     "monte_carlo",
     "rectangular",

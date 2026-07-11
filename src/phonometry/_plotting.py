@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from .flanking_transmission import VibrationReductionResult
     from .floor_covering_improvement import FloorCoveringImprovementResult
     from .reverberation_prediction import ReverberationModelResult
+    from .dynamic_stiffness import DynamicStiffnessResult
     from .impedance_tube import ImpedanceTubeResult
     from .insulation import (
         AirborneInsulationResult,
@@ -2006,6 +2007,43 @@ def plot_reverberation_models(
     )
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_dynamic_stiffness(
+    result: "DynamicStiffnessResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Floating-floor natural frequency ``f0(s')`` with the design point marked.
+
+    :param result: A
+        :class:`~phonometry.dynamic_stiffness.DynamicStiffnessResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the design-point ``scatter``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    m = result.floor_mass_per_area
+    s_mn = result.dynamic_stiffness / 1e6
+    grid = np.logspace(np.log10(max(s_mn * 0.2, 1e-2)), np.log10(s_mn * 5.0), 240)
+    f0 = np.sqrt(grid * 1e6 / m) / (2.0 * np.pi)
+    ax.plot(grid, f0, color=_C_PRIMARY,
+            label=rf"$f_0 = \frac{{1}}{{2\pi}}\sqrt{{s'/m'}}$,  $m'$ = {m:g} kg/m²")
+    ax.axhline(result.natural_frequency, color=_C_MUTED, ls=":", lw=0.8)
+    ax.plot([s_mn, s_mn], [0.0, result.natural_frequency], color=_C_MUTED, ls=":", lw=0.8)
+
+    kwargs.setdefault("color", _C_REFERENCE)
+    kwargs.setdefault("zorder", 5)
+    kwargs.setdefault("s", 80)
+    ax.scatter([s_mn], [result.natural_frequency],
+               label=f"$s'$ = {s_mn:.2f} MN/m³,  $f_0$ = {result.natural_frequency:.1f} Hz",
+               **kwargs)
+    ax.set_xscale("log")
+    ax.set_xlabel("Dynamic stiffness per unit area $s'$ [MN/m³]")
+    ax.set_ylabel("Natural frequency $f_0$ [Hz]")
+    ax.set_title("EN 29052-1 floating-floor resonance")
+    ax.set_ylim(bottom=0.0)
+    ax.legend(loc="upper left", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     return ax
 

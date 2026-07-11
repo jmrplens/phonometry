@@ -71,6 +71,17 @@ PNG_RMS_TOL = 2.0
 # with this pattern partition a file into fixed text and numeric values.
 _TOKEN = re.compile(rb"-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?")
 
+# matplotlib derives clip-path / marker / collection ids by hashing the literal
+# ``str()`` of the underlying float geometry (see backend_svg._make_id). A
+# cross-CPU 1-ULP wobble in that geometry avalanches the whole SHA256, so the
+# id *text* would change even though the figure is numerically identical -- the
+# exact drift this check exists to tolerate. Canonicalising every id and its
+# ``url(#...)`` / ``href="#..."`` references to placeholders numbered by first
+# appearance removes the hash text from the structural comparison while still
+# catching a genuine change (an id added, removed, reordered, or a reference
+# repointed changes the placeholder sequence).
+_IDREF = re.compile(rb'(\bid="|url\(#|xlink:href="#|\bhref="#)([A-Za-z_][\w.:\-]*)')
+
 
 def _committed(path: str) -> bytes | None:
     """Return the bytes of ``path`` as committed at HEAD, or ``None``."""
@@ -92,8 +103,22 @@ def _tracked_files() -> set[str]:
     return {line for line in result.stdout.splitlines() if line}
 
 
+def _canonicalize_ids(data: bytes) -> bytes:
+    """Rewrite hash-derived ids/references to first-appearance placeholders."""
+    mapping: dict[bytes, bytes] = {}
+
+    def repl(match: re.Match[bytes]) -> bytes:
+        token = match.group(2)
+        placeholder = mapping.setdefault(token, b"ID%d" % len(mapping))
+        return match.group(1) + placeholder
+
+    return _IDREF.sub(repl, data)
+
+
 def _svg_within_tolerance(old: bytes, new: bytes) -> bool:
     """True if two SVGs match structurally and numerically within tolerance."""
+    old = _canonicalize_ids(old)
+    new = _canonicalize_ids(new)
     if _TOKEN.split(old) != _TOKEN.split(new):
         return False  # non-numeric structure (elements/text/colours) differs
     old_nums = _TOKEN.findall(old)

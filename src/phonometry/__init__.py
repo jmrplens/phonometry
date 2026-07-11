@@ -145,6 +145,17 @@ from .structure_borne_power import (
     spatial_mean_velocity_level,
     structure_borne_power_level,
 )
+from .installed_structure_borne import (
+    REFERENCE_AREA,
+    InstalledSourceResult,
+    coupling_term,
+    coupling_term_force_source,
+    coupling_term_velocity_source,
+    installed_source_prediction,
+    installed_structure_borne_power_level,
+    structure_borne_pressure_level_path,
+    total_structure_borne_pressure_level,
+)
 from .multiple_shock_vibration import (
     MultipleShockResult,
     acceleration_dose,
@@ -710,6 +721,15 @@ __all__ = [
     "structure_borne_power_level",
     "reception_plate_power",
     "StructureBornePowerResult",
+    "coupling_term",
+    "coupling_term_force_source",
+    "coupling_term_velocity_source",
+    "installed_structure_borne_power_level",
+    "structure_borne_pressure_level_path",
+    "total_structure_borne_pressure_level",
+    "installed_source_prediction",
+    "InstalledSourceResult",
+    "REFERENCE_AREA",
     "combine_uncertainty",
     "monte_carlo",
     "rectangular",

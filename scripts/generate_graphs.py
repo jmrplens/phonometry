@@ -247,6 +247,15 @@ _ES_EXACT = {
         r"Nivel de potencia estructural $L_{Ws}$ [dB re 1 pW]",
     "low-mobility plate": "placa de baja movilidad",
     "high-mobility plate": "placa de alta movilidad",
+    # installed_structure_borne figure (EN 12354-5)
+    "EN 12354-5 Installed Structure-Borne Sound":
+        "Ruido estructural instalado EN 12354-5",
+    r"characteristic $L_{Ws,c}$ (EN 15657)":
+        r"característica $L_{Ws,c}$ (EN 15657)",
+    r"installed $L_{Ws,inst}$ = $L_{Ws,c}-D_C$":
+        r"instalada $L_{Ws,inst}$ = $L_{Ws,c}-D_C$",
+    "paths $L_{n,s,ij}$": "caminos $L_{n,s,ij}$",
+    r"total $L_{n,s}$": r"total $L_{n,s}$",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3591,6 +3600,68 @@ def generate_structure_borne_power(output_dir: str) -> None:
     plt.close()
 
 
+def generate_installed_structure_borne(output_dir: str) -> None:
+    """EN 12354-5 installed structure-borne sound: characteristic power to SPL."""
+    print("Generating installed_structure_borne...")
+    from phonometry import (
+        coupling_term,
+        installed_source_prediction,
+        installed_structure_borne_power_level,
+    )
+
+    bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+    lws_c = np.array([78.0, 82.0, 84.0, 81.0, 77.0, 72.0, 66.0])   # EN 15657 source
+    # Frequency-dependent source / receiver point mobilities (illustrative).
+    ys = (2.0e-4 + 1.0e-4j) * (bands / 250.0)
+    yi = (3.0e-5 + 1.0e-5j) * np.ones_like(bands)
+    dc = np.array([float(coupling_term(a, b)) for a, b in zip(ys, yi)])
+    lws_inst = installed_structure_borne_power_level(lws_c, dc)
+    paths = [
+        {"adjustment_term": 6.0,
+         "flanking_reduction_index": np.array([44., 47., 50., 53., 56., 59., 62.]),
+         "element_area": 12.0},
+        {"adjustment_term": 7.0,
+         "flanking_reduction_index": np.array([46., 49., 52., 55., 58., 61., 64.]),
+         "element_area": 9.0},
+    ]
+    res = installed_source_prediction(lws_c, dc, paths, frequencies=bands)
+
+    x = np.arange(bands.size)
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.plot(x, lws_c, color=COLOR_SECONDARY, marker="o", lw=2.0,
+            label=r"characteristic $L_{Ws,c}$ (EN 15657)")
+    ax.plot(x, lws_inst, color=COLOR_TERTIARY, marker="s", lw=2.0,
+            label=r"installed $L_{Ws,inst}$ = $L_{Ws,c}-D_C$")
+    for k, p in enumerate(res.path_levels):
+        ax.plot(x, p, color=COLOR_GRID, lw=1.0, ls=":", marker=".",
+                label="paths $L_{n,s,ij}$" if k == 0 else None)
+    ax.plot(x, res.total_level, color=COLOR_PRIMARY, marker="D", lw=2.4,
+            label=r"total $L_{n,s}$")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{b:g}" for b in bands])
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Level [dB]")
+    ax.set_title("EN 12354-5 Installed Structure-Borne Sound",
+                 fontweight="bold", pad=12)
+    ax.grid(which="major", axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.legend(loc="upper right", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "DC = 10 lg(|Ys+Yi|^2 / (|Ys| Re Yi))",
+        "Ln,s,ij = LWs,inst - Dsa - Rij - 10 lg(Si/S0) - 10 lg(A0/4)",
+        "Ln,s = 10 lg(sum 10^(Ln,s,ij/10)),  S0 = A0 = 10 m2",
+    ]
+    ax.text(0.015, 0.02, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="left", fontsize=8.5, color=COLOR_FG, family="monospace",
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "installed_structure_borne.svg")
+    plt.close()
+
+
 def generate_absorption_uncertainty(output_dir: str) -> None:
     """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
     print("Generating absorption_uncertainty...")
@@ -5094,6 +5165,7 @@ def generate_all(img_dir: str) -> None:
     generate_transfer_stiffness(img_dir)
     generate_vibration_sound_power(img_dir)
     generate_structure_borne_power(img_dir)
+    generate_installed_structure_borne(img_dir)
     generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 

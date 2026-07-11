@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **134/134 conformance checks pass** across 23 domains and 82 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **137/137 conformance checks pass** across 23 domains and 83 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -122,7 +122,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (32/32)</summary>
+<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (35/35)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -158,6 +158,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO/TS 7849-1:2009 Formula (12) | Impedance term: L_W − L_v = 10 lg(411/400) at ε = 1, S = S0 | 0.1178 dB (+/-0 dB) | 0.1178 dB | 0 dB | &#9989; |
 | EN 15657:2018 Formula (14) | Reception-plate L_Ws = resonant-plate power P = ωη(mS)⟨v²⟩  (round-trip) | 55.545 dB (+/-0 dB) | 55.545 dB | 0 dB | &#9989; |
 | EN 15657:2018 Formula (13) | Plate loss factor η = 2,2/(f·Ts) at 1 kHz, Ts = 0,3 s | 0.0073 (+/-0) | 0.0073 | 0 | &#9989; |
+| EN 12354-5:2009 Formula (19b/19c) | Coupling term → force-source limit 10 lg(|Ys|/Re{Yi}) as |Ys|≫|Yi| | 40 dB (+/-0.01 dB) | 40.001 dB | 0.001 dB | &#9989; |
+| EN 12354-5:2009 Formula (18b) | Installed power L_Ws,inst = L_Ws,c − D_C  (80 − 10,828 dB) | 69.172 dB (+/-0 dB) | 69.172 dB | 0 dB | &#9989; |
+| EN 12354-5:2009 Formula (18a) | Path SPL area/absorption terms −10 lg(S/S0) − 10 lg(A0/4), S0=A0=10 m² | -3.979 dB (+/-0 dB) | -3.979 dB | 0 dB | &#9989; |
 
 </details>
 

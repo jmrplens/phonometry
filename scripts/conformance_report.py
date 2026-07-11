@@ -1401,6 +1401,40 @@ def _chk_en15657_loss_factor() -> Outcome:
     return numeric(2.2 / (1000.0 * 0.3), eta, 1e-9)
 
 
+# --- Installed structure-borne sound from equipment (EN 12354-5) ---
+@register(
+    "Room & building acoustics",
+    "EN 12354-5:2009 Formula (19b/19c)",
+    "Coupling term → force-source limit 10 lg(|Ys|/Re{Yi}) as |Ys|≫|Yi|",
+)
+def _chk_en12354_5_coupling_limit() -> Outcome:
+    ys, yi = 1e-3 + 0j, 1e-7 + 0j
+    dc = float(ph.coupling_term(ys, yi))
+    limit = float(ph.coupling_term_force_source(ys, yi))
+    return numeric(limit, dc, 1e-2, unit="dB", places=3)
+
+
+@register(
+    "Room & building acoustics",
+    "EN 12354-5:2009 Formula (18b)",
+    "Installed power L_Ws,inst = L_Ws,c − D_C  (80 − 10,828 dB)",
+)
+def _chk_en12354_5_installed_power() -> Outcome:
+    lw = float(ph.installed_structure_borne_power_level(80.0, 10.828))
+    return numeric(69.172, lw, 1e-6, unit="dB", places=3)
+
+
+@register(
+    "Room & building acoustics",
+    "EN 12354-5:2009 Formula (18a)",
+    "Path SPL area/absorption terms −10 lg(S/S0) − 10 lg(A0/4), S0=A0=10 m²",
+)
+def _chk_en12354_5_path_terms() -> Outcome:
+    # With S = S0 the area term is 0, leaving −10 lg(10/4) = −3,979 dB.
+    lp = float(ph.structure_borne_pressure_level_path(0.0, 0.0, 0.0, 10.0))
+    return numeric(-10.0 * math.log10(10.0 / 4.0), lp, 1e-9, unit="dB", places=3)
+
+
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================

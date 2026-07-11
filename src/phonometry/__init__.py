@@ -13,6 +13,25 @@ import numpy as np
 
 from .calibration import CalibrationWarning, calculate_sensitivity, sensitivity
 from .environmental import composite_rating_level, lden, ldn
+from .environmental_measurement import (
+    RepeatedMeasurementResult,
+    ResidualCorrectionResult,
+    TonalAssessmentResult,
+    assess_tonal_audibility,
+    combined_standard_uncertainty,
+    critical_bandwidth,
+    gaussian_residual_level,
+    residual_correction_uncertainty,
+    residual_sound_correction,
+    tonal_adjustment,
+    tonal_adjustment_from_mean_audibility,
+    tonal_audibility,
+    tonal_seeking_survey,
+    uncertainty_from_repeated_measurements,
+)
+from .environmental_measurement import (
+    expanded_uncertainty as environmental_expanded_uncertainty,
+)
 from .compliance import (
     class_limits,
     verify_filter_class,
@@ -830,6 +849,21 @@ __all__ = [
     "lden",
     "ldn",
     "composite_rating_level",
+    "critical_bandwidth",
+    "tonal_audibility",
+    "tonal_adjustment",
+    "assess_tonal_audibility",
+    "tonal_adjustment_from_mean_audibility",
+    "tonal_seeking_survey",
+    "residual_sound_correction",
+    "gaussian_residual_level",
+    "combined_standard_uncertainty",
+    "environmental_expanded_uncertainty",
+    "residual_correction_uncertainty",
+    "uncertainty_from_repeated_measurements",
+    "TonalAssessmentResult",
+    "ResidualCorrectionResult",
+    "RepeatedMeasurementResult",
     "CalibrationWarning",
     "verify_filter_class",
     "class_limits",

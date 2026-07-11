@@ -67,6 +67,7 @@ if TYPE_CHECKING:
     )
     from .noise_induced_hearing_loss import HtlanResult, NiptsResult
     from .multiple_shock_vibration import MultipleShockResult
+    from .environmental_measurement import TonalAssessmentResult
     from .impulse_prominence import ImpulseProminenceResult
     from .room_noise import NCResult, RCResult
     from .scattering_diffusion import DiffusionResult, ScatteringResult
@@ -1895,6 +1896,43 @@ def plot_impulse_prominence(
     ax.set_xlabel("Predicted prominence $P$")
     ax.set_ylabel("Adjustment $K_I$ [dB]")
     ax.set_title("NT ACOU 112 — impulse adjustment to $L_{Aeq}$")
+    ax.set_ylim(bottom=0.0)
+    ax.legend(loc="upper left", fontsize="small")
+    ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_tonal_adjustment(
+    result: "TonalAssessmentResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Tonal adjustment curve ``Kt(ΔLta)`` with the assessed tone marked.
+
+    :param result: A
+        :class:`~phonometry.environmental_measurement.TonalAssessmentResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the assessed-tone ``scatter``.
+    :return: The axes.
+    """
+    from .environmental_measurement import tonal_adjustment
+
+    ax = ax if ax is not None else _new_axes()
+    top = max(result.audibility, 12.0) + 1.0
+    grid = np.linspace(0.0, top, 200)
+    curve = np.array([tonal_adjustment(d) for d in grid], dtype=np.float64)
+    ax.plot(grid, curve, color=_C_PRIMARY, label=r"$K_t(\Delta L_{ta})$")
+    ax.axvline(4.0, color=_C_MUTED, ls=":", label=r"knees $\Delta L_{ta}=4,\,10$ dB")
+    ax.axvline(10.0, color=_C_MUTED, ls=":")
+
+    kwargs.setdefault("color", _C_REFERENCE)
+    kwargs.setdefault("zorder", 4)
+    kwargs.setdefault("s", 90)
+    kwargs.setdefault("marker", "*")
+    ax.scatter([result.audibility], [result.adjustment],
+               label=rf"$\Delta L_{{ta}}$ = {result.audibility:.1f} dB,  "
+                     rf"$K_t$ = {result.adjustment:.1f} dB", **kwargs)
+    ax.set_xlabel(r"Tonal audibility $\Delta L_{ta}$ [dB]")
+    ax.set_ylabel("Tonal adjustment $K_t$ [dB]")
+    ax.set_title("ISO 1996-2 tonal adjustment")
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="upper left", fontsize="small")
     ax.grid(True, alpha=0.3)

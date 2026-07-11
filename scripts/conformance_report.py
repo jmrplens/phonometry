@@ -418,6 +418,38 @@ def _chk_lden() -> Outcome:
     return numeric(60.0 + offset, computed, 1e-6, unit="dB", places=4)
 
 
+@register(
+    "Levels & dosimetry",
+    "ISO 1996-2:2007 Annex C.5 Example 1",
+    "Tonal audibility ΔLta (Formula C.3), 4 kHz tone",
+)
+def _chk_iso1996_2_tonal_audibility() -> Outcome:
+    lpt, lpn, fc, delta_expected, _kt = ref.ISO1996_2_TONAL_EXAMPLES[0]
+    computed = ph.tonal_audibility(lpt, lpn, fc)
+    return numeric(delta_expected, computed, 0.05, unit="dB", places=2)
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1996-2:2007 Annex C.5 Example 1",
+    "Tonal adjustment Kt (Formulae C.4-C.6)",
+)
+def _chk_iso1996_2_tonal_adjustment() -> Outcome:
+    lpt, lpn, fc, _delta, kt_expected = ref.ISO1996_2_TONAL_EXAMPLES[0]
+    computed = ph.tonal_adjustment(ph.tonal_audibility(lpt, lpn, fc))
+    return numeric(kt_expected, computed, 1e-9, unit="dB", places=2)
+
+
+@register(
+    "Levels & dosimetry",
+    "ISO 1996-2:2017 Annex G.2",
+    "Combined measurement uncertainty u = √(Σ(cj·uj)²)",
+)
+def _chk_iso1996_2_uncertainty() -> Outcome:
+    computed = ph.combined_standard_uncertainty(ref.ISO1996_2_G2_CONTRIBUTIONS)
+    return numeric(ref.ISO1996_2_G2_COMBINED, computed, 0.01, unit="dB", places=2)
+
+
 # ===========================================================================
 # Domain 3 - Psychoacoustics
 # ===========================================================================

@@ -751,3 +751,21 @@ ISO10848_ABS_C0 = 343.0
 ISO10848_ABS_LENGTH_AT_FREF = 1.2660717015974685  # 2.2*pi**2*10/(0.5*343)
 # Total loss factor, η = 2.2/(f·Ts). f = 1000 Hz, Ts = 0.5 s -> 0.0044 exactly.
 ISO10848_LOSS_FACTOR = 0.0044
+
+# ---------------------------------------------------------------------------
+# ISO 1996-2 tonal audibility -- Annex C.5 worked examples (2007/2009 edition).
+# Each row: (tone level Lpt, masking noise Lpn, band centre fc, printed ΔLta,
+# printed Kt). Examples 1/2/4 reproduce Formula (C.3) to < 0.05 dB; example 3
+# is printed 10.6 but (C.3) gives ~11.2 (rounding in the printed figure), so it
+# is used only as a loose check.
+ISO1996_2_TONAL_EXAMPLES = [
+    (46.7, 37.3, 4000.0, 13.7, 6.0),   # Example 1 (Fig C.3)
+    (54.1, 45.2, 430.0, 11.1, 6.0),    # Example 2 (Fig C.4)
+    (53.6, 45.5, 755.0, 10.7, 6.0),    # Example 4 (Fig C.6)
+]
+ISO1996_2_TONAL_EXAMPLE3 = (54.6, 45.5, 308.0, 10.6, 6.0)  # loose (rounding)
+# Annex G.2 -- single 1 h measurement uncertainty budget. The tabulated
+# per-component products cj*uj (dB) combine to u = 2.18 dB; expanded (k = 2) 4.36.
+ISO1996_2_G2_CONTRIBUTIONS = [0.59, 0.3, 2.0, 0.40, 0.38]
+ISO1996_2_G2_COMBINED = 2.18
+ISO1996_2_G2_EXPANDED = 4.36

@@ -219,7 +219,7 @@ r = composite_rating_level([(63.2, 12, 0.0),    # día
 | `ldn(lday, lnight, hours=(15, 9))` | | +10 dB noche (3.6.5) |
 | `composite_rating_level(periods)` | iterable de `(level_db, hours, adjustment_db)` | Fórmulas generales (5)-(6); ajustes según la Tabla A.1 |
 
-Dónde pones el micrófono cambia el número: ISO 1996-2 fija las posiciones del receptor y sus correcciones de fachada. phonometry no implementa ISO 1996-2 — el diagrama es contexto de medida; aplica las correcciones a tus niveles antes del análisis:
+Dónde pones el micrófono cambia el número: ISO 1996-2 fija las posiciones del receptor y sus correcciones de fachada. El diagrama es contexto de medida; aplica las correcciones a tus niveles antes del análisis:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_es.svg" alt="Posiciones de medida de ruido ambiental según ISO 1996-2: campo libre, a 2 m de la fachada y enrasado, con sus correcciones" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_es_dark.svg" alt="Posiciones de medida de ruido ambiental según ISO 1996-2: campo libre, a 2 m de la fachada y enrasado, con sus correcciones" style="width:92%">
 
@@ -227,6 +227,69 @@ Combínalo con `laeq()` por periodo para ir de grabaciones a Lden, y con los
 veredictos `tone_to_noise_ratio()` / `prominence_ratio()` de
 [Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/) para
 justificar ajustes tonales.
+
+## Determinación de niveles: ajuste tonal, ruido residual e incertidumbre (ISO 1996-2)
+
+ISO 1996-2:2017 es la parte de **determinación**: cómo el nivel medido se
+convierte en nivel de valoración y se reporta con su incertidumbre. La *suma* del
+nivel de valoración y las penalizaciones por periodo están en ISO 1996-1 (arriba);
+ISO 1996-2 aporta el ajuste tonal, la corrección de ruido residual y el
+presupuesto de incertidumbre.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_es.svg" alt="Ajuste tonal Kt de ISO 1996-2 como función a tramos de la audibilidad tonal: cero por debajo de 4 dB, creciendo linealmente hasta 6 dB entre 4 y 10 dB, y 6 dB por encima, con los cuatro ejemplos resueltos del Anexo C.5 y un tono de rango medio marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_es_dark.svg" alt="Ajuste tonal Kt de ISO 1996-2 como función a tramos de la audibilidad tonal: cero por debajo de 4 dB, creciendo linealmente hasta 6 dB entre 4 y 10 dB, y 6 dB por encima, con los cuatro ejemplos resueltos del Anexo C.5 y un tono de rango medio marcados" style="width:80%">
+
+**Ajuste tonal (método de ingeniería, Anexo C).** A partir del nivel tonal
+sumado en energía $L_{pt}$ y el nivel de ruido enmascarante $L_{pn}$ en la banda
+crítica alrededor de un tono, la audibilidad sobre el umbral de enmascaramiento es
+$\Delta L_{ta} = L_{pt} - L_{pn} + 2 + \lg[1 + (f_c/502)^{2.5}]$ dB (Fórmula (C.3)),
+y el ajuste es $K_t = 0$ para $\Delta L_{ta} < 4$, $K_t = \Delta L_{ta} - 4$ para
+$4 \le \Delta L_{ta} \le 10$ y $K_t = 6$ por encima (Fórmulas (C.4)–(C.6)). El
+ancho de banda crítico es 100 Hz hasta 500 Hz y el 20 % de $f_c$ por encima
+(Tabla C.1). El **método de cribado** en tercios de octava (`tonal_seeking_survey`)
+marca una banda que supera a ambas vecinas en 15/8/5 dB (baja/media/alta), y
+`tonal_adjustment_from_mean_audibility` mapea la audibilidad media de ISO/PAS 20065
+a $K_t$ (Tabla J.1).
+
+**Corrección de ruido residual (Cláusula 10.4).** `residual_sound_correction()`
+aplica $L = 10\lg(10^{L'/10} - 10^{L_\text{res}/10})$ (Fórmula (16)) y marca un
+residual dentro de 3 dB del nivel medido como cota superior solamente.
+`gaussian_residual_level()` estima el residual a partir de niveles percentiles
+(Anexo I).
+
+**Incertidumbre de medición (Cláusula 4, Anexo F).**
+`combined_standard_uncertainty()` forma $u = \sqrt{\sum (c_j u_j)^2}$ (Fórmula (2))
+y `environmental_expanded_uncertainty()` aplica $k = 2$ (95 %) o $k = 1.3$ (80 %);
+`residual_correction_uncertainty()` lleva la sensibilidad de la corrección residual
+(Fórmulas (F.7)/(F.8)) y `uncertainty_from_repeated_measurements()` la
+incertidumbre típica de mediciones repetidas (Fórmulas (17)–(20)).
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import assess_tonal_audibility
+
+# ISO 1996-2:2007 Anexo C.5, Ejemplo 2 (dos tonos cerca de 400 Hz):
+res = assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
+                              centre_frequency=430.0)
+print(res.audibility, res.adjustment)   # ΔLta ≈ 11,1 dB -> Kt = 6 dB
+res.plot()
+plt.show()
+```
+</details>
+
+```python
+from phonometry import (
+    assess_tonal_audibility, residual_sound_correction,
+    combined_standard_uncertainty, environmental_expanded_uncertainty,
+)
+
+kt = assess_tonal_audibility(54.1, 45.2, 430.0).adjustment      # 6 dB
+corr = residual_sound_correction(measured_level=58.0, residual_level=50.0)
+u = combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38])  # 2,18 dB (G.2)
+environmental_expanded_uncertainty(u)                            # 4,36 dB (k = 2)
+```
 
 ## Espectrograma de octavas (niveles vs tiempo)
 

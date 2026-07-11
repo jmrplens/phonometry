@@ -1006,6 +1006,87 @@ res.octave_bands()    # (frec. de octava, delta-L_oct) vía Fórmula (5)
 
 ---
 
+## 8. Transmisión por flancos en laboratorio (ISO 10848)
+
+ISO 10848:2006/2010 es el método de laboratorio que **mide** el **índice de
+reducción vibracional** de unión $K_{ij}$ que la predicción EN 12354 del §3
+toma como entrada, junto con los descriptores globales de flanco $D_{n,f}$
+(aéreo) y $L_{n,f}$ (impacto). Es la contraparte de medición de la función
+empírica `junction_vibration_reduction()` del §3.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_es.svg" alt="Índice de reducción vibracional de unión Kij ISO 10848 creciendo entre 100 Hz y 5000 Hz en tercios de octava para una unión rígida en T de dos paredes pesadas, con el Kij medio de un solo número entre 200 y 1250 Hz en línea discontinua" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_es_dark.svg" alt="Índice de reducción vibracional de unión Kij ISO 10848 creciendo entre 100 Hz y 5000 Hz en tercios de octava para una unión rígida en T de dos paredes pesadas, con el Kij medio de un solo número entre 200 y 1250 Hz en línea discontinua" style="width:80%">
+
+**Índice de reducción vibracional (Fórmula (13)).**
+$K_{ij} = \overline{D}_{v,ij} + 10\lg\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, a
+partir de la diferencia de nivel de velocidad promediada en dirección
+$\overline{D}_{v,ij} = \tfrac{1}{2}(D_{v,ij} + D_{v,ji})$ (Fórmula (11), que hace
+$K_{ij}$ simétrico), la longitud de unión de arista común $l_{ij}$ y las
+**longitudes de absorción equivalentes**
+$a_j = 2.2\pi^2 S_j /(T_{s,j} c_0)\sqrt{f_\text{ref}/f}$ (Fórmula (12),
+$f_\text{ref} = 1000$ Hz). Para elementos ligeros y bien amortiguados
+$a_j = S_j / l_0$ ($l_0 = 1$ m) y la Fórmula (13) se reduce a la Fórmula (14)
+simplificada. El **factor de pérdidas total** asociado es $\eta = 2.2/(f T_s)$.
+
+**Descriptores globales.** $D_{n,f} = L_1 - L_2 - 10\lg(A/A_0)$ (Fórmula (4),
+aéreo) y $L_{n,f} = L_2 + 10\lg(A/A_0)$ (Fórmula (5), máquina de impactos),
+$A_0 = 10\ \text{m}^2$; sus números únicos $D_{n,f,w}$ / $L_{n,f,w}$ reutilizan
+los motores de ISO 717. El número único $\overline{K}_{ij}$ es la media
+aritmética entre 200 y 1250 Hz (Anexo A).
+
+**Validez.** $K_{ij}$ se apoya en una simplificación de análisis estadístico de
+energía: `strong_coupling_satisfied()` comprueba la desigualdad de la
+Fórmula (15), y —para las uniones pesadas de la Parte 4— `modal_density()`,
+`band_mode_count()` y `modal_overlap_factor()` (Fórmulas (5)/(4)/(6)) marcan las
+bandas donde el número de modos es demasiado bajo para que $K_{ij}$ sea fiable.
+Como ISO 10848 no contiene ningún ejemplo numérico resuelto, la conformidad se
+ancla en identidades de forma cerrada ($K_{ij}$ simplificado, $a_j$ a
+$f_\text{ref}$, $\eta$).
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration_reduction_index
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
+         800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+# Diferencia de nivel de velocidad promediada en dirección de una unión en T (dB):
+dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
+               9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
+res = vibration_reduction_index(
+    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
+    structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
+)
+print(res.single_number)   # Kij medio entre 200 y 1250 Hz (Anexo A)
+res.plot()
+plt.show()
+```
+</details>
+
+```python
+from phonometry import (
+    direction_averaged_level_difference, vibration_reduction_index,
+    normalized_flanking_level_difference, modal_overlap_factor,
+)
+
+# Kij desde ambas direcciones de excitación (simétrico por el promedio direccional):
+dbar = direction_averaged_level_difference(dv_ij, dv_ji)
+res = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+                                structural_reverberation_time_i=ts_i,
+                                structural_reverberation_time_j=ts_j)
+res.k_ij           # Kij por banda (Fórmula (13))
+res.single_number  # Kij medio entre 200 y 1250 Hz, o None sin ese conjunto de bandas
+res.octave_bands() # Kij combinado en bandas de octava
+
+# Descriptor global aéreo de flanco y una comprobación de validez de la Parte 4:
+dnf = normalized_flanking_level_difference(l1, l2, absorption_area)
+m = modal_overlap_factor(area, critical_freq, ts)   # M < 0.25 -> excluir banda
+```
+
+---
+
 **Normas.** ISO 16283-1:2014, ISO 16283-2 e ISO 16283-3:2016, *Acoustics —
 Field measurement of sound insulation in buildings and of building elements* —
 las diferencias de nivel, normalizaciones y métodos de elemento del §1;
@@ -1027,7 +1108,12 @@ normalizada por elemento del §5 (laboratorio y campo); ISO 10052:2021
 y de fachada estandarizadas/normalizadas, y el ruido de equipos de servicio;
 ISO 16251-1:2014 — el método de laboratorio en maqueta pequeña para la mejora a
 impactos $\Delta L$ de revestimientos de suelo del §7, con $\Delta L_w$ vía el
-suelo de referencia de ISO 717-2.
+suelo de referencia de ISO 717-2; ISO 10848-1:2006, ISO 10848-2:2006,
+ISO 10848-3:2006 e ISO 10848-4:2010 — la medición en laboratorio de la
+transmisión por flancos del §8: el índice de reducción vibracional $K_{ij}$, la
+longitud de absorción equivalente, los descriptores de flanco normalizados
+$D_{n,f}$ / $L_{n,f}$ y las comprobaciones de validez por solapamiento modal que
+alimentan la predicción EN 12354 del §3.
 
 ## Véase también
 

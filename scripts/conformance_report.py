@@ -1065,6 +1065,75 @@ def _chk_iso16251_zero_improvement() -> Outcome:
     )
 
 
+@register(
+    "Room & building acoustics",
+    "ISO 10848-1:2006 Formula (14)",
+    "Flanking Kij (simplified) matches closed form",
+)
+def _chk_iso10848_kij_simplified() -> Outcome:
+    # No worked example in the standard; anchor on the closed form recomputed
+    # independently here (delta is "exact" to keep the report byte-stable).
+    res = ph.vibration_reduction_index(
+        [ref.ISO10848_KIJ_DBAR],
+        ref.ISO10848_KIJ_LIJ,
+        ref.ISO10848_KIJ_AREA,
+        ref.ISO10848_KIJ_AREA,
+    )
+    computed = float(res.k_ij[0])
+    expected = ref.ISO10848_KIJ_DBAR + 10.0 * math.log10(
+        ref.ISO10848_KIJ_LIJ / math.sqrt(ref.ISO10848_KIJ_AREA**2)
+    )
+    return Outcome(
+        expected=f"Kij = {expected:.4f} dB",
+        computed=f"Kij = {computed:.4f} dB",
+        delta="exact",
+        passed=abs(computed - expected) < 1e-9,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10848-1:2006 Formula (12)",
+    "Flanking equivalent absorption length aj at f_ref",
+)
+def _chk_iso10848_absorption_length() -> Outcome:
+    a = ph.equivalent_absorption_length(
+        ref.ISO10848_ABS_AREA,
+        ref.ISO10848_ABS_TS,
+        [1000.0],
+        speed_of_sound=ref.ISO10848_ABS_C0,
+    )
+    computed = float(a[0])
+    # aj at f = f_ref (sqrt(f_ref/f) = 1): aj = 2,2·π²·S/(Ts·c0).
+    expected = (
+        2.2 * math.pi**2 * ref.ISO10848_ABS_AREA
+        / (ref.ISO10848_ABS_TS * ref.ISO10848_ABS_C0)
+    )
+    return Outcome(
+        expected=f"aj = {expected:.4f} m",
+        computed=f"aj = {computed:.4f} m",
+        delta="exact",
+        passed=abs(computed - expected) < 1e-9,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10848-1:2006 Clause 7.3.1",
+    "Flanking total loss factor η = 2,2/(f·Ts)",
+)
+def _chk_iso10848_loss_factor() -> Outcome:
+    eta = ph.total_loss_factor([1000.0], [0.5])
+    computed = float(eta[0])
+    expected = 2.2 / (1000.0 * 0.5)
+    return Outcome(
+        expected=f"η = {expected:.4f}",
+        computed=f"η = {computed:.4f}",
+        delta="exact",
+        passed=abs(computed - expected) < 1e-12,
+    )
+
+
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================

@@ -934,3 +934,43 @@ def weighted_impact_rating(
         measured=measured,
         shifted_reference=ref - shift,
     )
+
+
+#: ISO 717-2:2020 Table 4 — normalized impact sound pressure level ``Ln,r,0`` of
+#: the heavyweight reference floor, 16 one-third-octave bands 100 Hz to 3150 Hz,
+#: in dB. Its weighted rating is ``Ln,r,0,w = 78 dB`` (Clause 5.2).
+_IMPACT_REFERENCE_FLOOR = (
+    67.0, 67.5, 68.0, 68.5, 69.0, 69.5, 70.0, 70.5,
+    71.0, 71.5, 72.0, 72.0, 72.0, 72.0, 72.0, 72.0,
+)
+_IMPACT_REFERENCE_FLOOR_RATING = 78  # Ln,r,0,w (Table 4 / Clause 5.2)
+
+
+def weighted_impact_improvement(
+    delta_l: Sequence[float] | np.ndarray,
+) -> int:
+    """Weighted reduction of impact sound pressure level ``ΔLw`` (ISO 717-2:2020 §5).
+
+    Relates a measured improvement spectrum ``ΔL`` to the heavyweight reference
+    floor of Table 4: the reference level with the covering is
+    ``Ln,r = Ln,r,0 − ΔL`` (Formula (1)) and the weighted improvement is
+    ``ΔLw = Ln,r,0,w − Ln,r,w = 78 − Ln,r,w`` (Formula (2)), where ``Ln,r,w`` is
+    the ISO 717-2 weighted rating of ``Ln,r`` from :func:`weighted_impact_rating`.
+
+    :param delta_l: The reduction of impact sound pressure level ``ΔL`` per band,
+        in dB — 16 one-third-octave values from 100 Hz to 3150 Hz (e.g. from a
+        floor-covering measurement to ISO 10140-3 or ISO 16251-1).
+    :return: The weighted reduction ``ΔLw``, in dB (rounded, per ISO 717-2).
+    :raises ValueError: If ``delta_l`` is not 16 one-third-octave values, or is
+        non-finite.
+    """
+    dl = np.asarray(delta_l, dtype=np.float64)
+    if dl.shape != (16,):
+        raise ValueError(
+            "'delta_l' must give the 16 one-third-octave values 100-3150 Hz."
+        )
+    if not np.all(np.isfinite(dl)):
+        raise ValueError("'delta_l' must contain only finite values.")
+    ln_r = np.asarray(_IMPACT_REFERENCE_FLOOR, dtype=np.float64) - dl
+    ln_r_w = weighted_impact_rating(ln_r).rating
+    return _IMPACT_REFERENCE_FLOOR_RATING - ln_r_w

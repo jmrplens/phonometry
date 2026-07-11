@@ -710,3 +710,21 @@ ISO12999_2_ALPHA_W_EXAMPLE = 0.70
 ISO12999_2_ALPHA_W_U_K2 = 0.07
 ISO12999_2_DLALPHA_EXAMPLE = 8.1
 ISO12999_2_DLALPHA_U_K2 = 1.6
+
+# ---------------------------------------------------------------------------
+# ISO 16251-1:2014 - impact sound improvement of floor coverings (mock-up).
+# The standard's Annex B "Table B.1" is a blank report form (no numeric worked
+# example), so the conformance anchor is the ISO 717-2:2020 reference floor:
+# weighted_impact_rating(Ln,r,0) must return exactly 78 dB (CI = -11), and a
+# zero improvement must give Delta-Lw = 0 (Formula 2: Delta-Lw = 78 - Ln,r,w).
+# ---------------------------------------------------------------------------
+ISO717_2_REFERENCE_FLOOR_FREQ = [
+    100, 125, 160, 200, 250, 315, 400, 500,
+    630, 800, 1000, 1250, 1600, 2000, 2500, 3150,
+]
+ISO717_2_REFERENCE_FLOOR_LN_R0 = [
+    67.0, 67.5, 68.0, 68.5, 69.0, 69.5, 70.0, 70.5,
+    71.0, 71.5, 72.0, 72.0, 72.0, 72.0, 72.0, 72.0,
+]
+ISO717_2_REFERENCE_FLOOR_LN_R0_W = 78
+ISO717_2_REFERENCE_FLOOR_CI = -11

@@ -927,6 +927,67 @@ one-third-octave) values.*
 `survey_service_equipment_level()` a `SurveyServiceEquipmentResult` (`l_xy`,
 `l_xy_nt`, `l_xy_n`).
 
+## 7. Floor-covering impact improvement (ISO 16251-1)
+
+ISO 16251-1:2014 is a laboratory method for the **improvement of impact sound
+insulation** $\Delta L$ of a soft, locally-reacting floor covering (carpet, PVC,
+linoleum). The two ISO 10140 rooms are replaced by a small softly-supported
+concrete plate; a standard tapping machine excites it and the structure-borne
+**acceleration level** on the underside is measured with and without the
+covering. For locally-reacting coverings that acceleration-level difference
+equals the ISO 10140 impact sound reduction.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement.svg" alt="ISO 16251-1 floor-covering impact sound improvement: the improvement delta-L of a soft carpet rising with frequency across one-third-octave bands from 100 Hz to 3150 Hz, with the shaded improvement area and the weighted single-number delta-Lw annotated" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_dark.svg" alt="ISO 16251-1 floor-covering impact sound improvement: the improvement delta-L of a soft carpet rising with frequency across one-third-octave bands from 100 Hz to 3150 Hz, with the shaded improvement area and the weighted single-number delta-Lw annotated" style="width:80%">
+
+**Acceleration level (Formula (1)).** $L_a = 10\lg(\langle a^2\rangle / a_0^2)$ dB,
+reference $a_0 = 10^{-6}\ \text{m/s}^2$. **Background correction (Formula (2))**
+follows the ISO 10140 three-branch rule (unchanged ≥ 15 dB; energy subtraction
+for 6 ≤ margin < 15 dB; the 1.3 dB limit below 6 dB, flagged as $> \Delta L$).
+The improvement is the position-averaged difference
+$\Delta L = L_0 - L_1$ (Formulae (3)/(4)); octaves follow
+$\Delta L_\text{oct} = -10\lg[\tfrac{1}{3}\sum 10^{-\Delta L_n/10}]$ (Formula (5)).
+
+**Weighted improvement.** $\Delta L_w$ is the ISO 717-2 weighted reduction: the
+improvement is applied to the heavyweight **reference floor** $L_{n,r,0}$
+(ISO 717-2 Table 4), $L_{n,r} = L_{n,r,0} - \Delta L$, and
+$\Delta L_w = 78 - L_{n,r,w}$ — computed by `weighted_impact_improvement()`, which
+reuses the verified ISO 717-2 rating engine.
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import impact_improvement
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500,
+         630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
+bare = np.full(16, 78.0)                       # bare-plate acceleration level
+covering = bare - np.array([0, 0, 1, 2, 4, 7, 11, 15,
+                            18, 21, 23, 25, 27, 28, 29, 30])
+res = impact_improvement(bare, covering, freqs)
+print(res.delta_lw)   # weighted improvement delta-Lw (ISO 717-2)
+res.plot()
+plt.show()
+```
+</details>
+
+```python
+from phonometry import impact_improvement, weighted_impact_improvement
+
+# delta-Lw straight from an improvement spectrum (16 one-third-octave bands):
+delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
+print(weighted_impact_improvement(delta_l))    # e.g. 19 dB
+
+# From the measured bare/covered acceleration levels, with a background trace:
+res = impact_improvement(bare_levels, covered_levels, freqs, background=bg)
+res.improvement       # delta-L per band
+res.delta_lw          # weighted single number (None off the 16 rating bands)
+res.limited           # bands at the 1.3 dB limit of measurement (> delta-L)
+res.octave_bands()    # (octave freqs, delta-L_oct) via Formula (5)
+```
+
 ---
 
 **Standards.** ISO 16283-1:2014, ISO 16283-2 and ISO 16283-3:2016, *Acoustics —
@@ -946,7 +1007,10 @@ sound-intensity sound reduction index $R_I$, its $K_c$-modified form and the
 element normalized level difference of §5 (laboratory and field);
 ISO 10052:2021 (harmonized as EN ISO 10052:2004+A1:2010) — the field survey
 method of §6: the reverberation-index correction, the standardized/normalized
-airborne, impact and façade quantities, and service-equipment noise.
+airborne, impact and façade quantities, and service-equipment noise;
+ISO 16251-1:2014 — the small-mock-up laboratory method for the impact-sound
+improvement $\Delta L$ of floor coverings of §7, with $\Delta L_w$ via the
+ISO 717-2 reference floor.
 
 ## See also
 

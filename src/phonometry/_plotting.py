@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     from .facade_prediction import FacadePredictionResult, RadiatedPowerResult
     from .flanking_transmission import VibrationReductionResult
     from .floor_covering_improvement import FloorCoveringImprovementResult
+    from .reverberation_prediction import ReverberationModelResult
     from .impedance_tube import ImpedanceTubeResult
     from .insulation import (
         AirborneInsulationResult,
@@ -1959,6 +1960,52 @@ def plot_enclosed_space_absorption(
     ax.set_ylabel("Reverberation time $T$ [s]")
     ax.set_title("EN 12354-6 reverberation time")
     ax.set_ylim(bottom=0.0)
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_reverberation_models(
+    result: "ReverberationModelResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Reverberation time by five statistical models over the bands.
+
+    Draws the Sabine, Eyring, Millington-Sette, Fitzroy and Arau-Puchades
+    curves, with Arau-Puchades emphasised as the recommended model for a
+    non-uniform absorption distribution.
+
+    :param result: A
+        :class:`~phonometry.reverberation_prediction.ReverberationModelResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to every curve ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freq = np.asarray(result.frequencies, dtype=np.float64)
+    styles = (
+        ("Sabine", result.sabine, _C_SECONDARY, "s", 1.4),
+        ("Eyring", result.eyring, _C_TERTIARY, "^", 1.4),
+        ("Millington-Sette", result.millington_sette, _C_QUATERNARY, "v", 1.4),
+        ("Fitzroy", result.fitzroy, _C_MUTED, "D", 1.4),
+        ("Arau-Puchades", result.arau_puchades, _C_PRIMARY, "o", 2.4),
+    )
+    for label, curve, color, marker, lw in styles:
+        ax.plot(
+            freq,
+            np.asarray(curve, dtype=np.float64),
+            color=color,
+            marker=marker,
+            lw=lw,
+            label=label,
+            **kwargs,
+        )
+    _freq_axis(ax, freq)
+    ax.set_ylabel("Reverberation time $T$ [s]")
+    ax.set_title(
+        f"Reverberation-time models — $V$ = {result.volume:.0f} m³, "
+        f"$S$ = {result.surface_area:.0f} m²"
+    )
+    ax.set_ylim(bottom=0.0)
+    ax.legend(loc="best", fontsize="small")
     ax.grid(True, which="both", alpha=0.3)
     return ax
 

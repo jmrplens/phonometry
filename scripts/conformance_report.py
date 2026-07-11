@@ -450,6 +450,76 @@ def _chk_iso1996_2_uncertainty() -> Outcome:
     return numeric(ref.ISO1996_2_G2_COMBINED, computed, 0.01, unit="dB", places=2)
 
 
+# ---------------------------------------------------------------------------
+# Reverberation-time prediction (Sabine / Eyring / Millington / Fitzroy /
+# Arau-Puchades). No source carries a machine-readable worked example, so the
+# checks anchor on hand-computed closed-form values and the model identities.
+# ---------------------------------------------------------------------------
+# Shoebox 8x5x3 m: V = 120 m3, S = 158 m2. Values hand-derived with the default
+# c0 = 343 m/s (Sabine constant k = 24 ln10 / c0 = 0.161113...).
+_RT_DIMS = (8.0, 5.0, 3.0)
+_RT_VOLUME = 120.0
+_RT_SURFACES = [
+    (40.0, 0.2), (40.0, 0.2), (24.0, 0.2), (24.0, 0.2), (15.0, 0.2), (15.0, 0.2)
+]
+
+
+@register(
+    "Room acoustics",
+    "Sabine (W. C. Sabine, 1922)",
+    "Reverberation time T = k·V/A  (V=120 m³, S=158 m², α=0.2)",
+)
+def _chk_sabine_rt() -> Outcome:
+    computed = float(ph.sabine_reverberation_time(_RT_VOLUME, _RT_SURFACES))
+    return numeric(0.6118246547, computed, 1e-6, unit="s", places=6)
+
+
+@register(
+    "Room acoustics",
+    "Everest, Master Handbook of Acoustics 4th ed, Fig. 7-22",
+    "Sabine RT, worked Example 1 @ 1 kHz (untreated 23.3×16×10 ft room, SI)",
+)
+def _chk_sabine_everest() -> Outcome:
+    surfaces = [
+        (ref.EVEREST_EX1_FLOOR_AREA, ref.EVEREST_EX1_FLOOR_ALPHA[3]),
+        (ref.EVEREST_EX1_SHELL_AREA, ref.EVEREST_EX1_SHELL_ALPHA[3]),
+    ]
+    computed = float(ph.sabine_reverberation_time(ref.EVEREST_EX1_VOLUME, surfaces))
+    return numeric(ref.EVEREST_EX1_RT[3], computed, 0.02, unit="s", places=3)
+
+
+@register(
+    "Room acoustics",
+    "Eyring (Norris-Eyring, 1930)",
+    "Reverberation time T = k·V/(-S·ln(1-ᾱ))  (α=0.2)",
+)
+def _chk_eyring_rt() -> Outcome:
+    computed = float(ph.eyring_reverberation_time(_RT_VOLUME, _RT_SURFACES))
+    return numeric(0.5483686633, computed, 1e-6, unit="s", places=6)
+
+
+@register(
+    "Room acoustics",
+    "Arau-Puchades (Acustica 65, 1988, Formula 18)",
+    "T (α=0.5/0.1/0.1 per wall pair, dims 8×5×3 m)",
+)
+def _chk_arau_rt() -> Outcome:
+    computed = float(ph.arau_puchades_reverberation_time(_RT_DIMS, (0.5, 0.1, 0.1)))
+    return numeric(0.8121469281, computed, 1e-6, unit="s", places=6)
+
+
+@register(
+    "Room acoustics",
+    "Model identity (uniform absorption)",
+    "Arau-Puchades ≡ Eyring when ᾱ is uniform",
+)
+def _chk_arau_eyring_identity() -> Outcome:
+    eyring = float(ph.eyring_reverberation_time(_RT_VOLUME, _RT_SURFACES))
+    arau = float(ph.arau_puchades_reverberation_time(_RT_DIMS, (0.2, 0.2, 0.2)))
+    return numeric(eyring, arau, 1e-9, unit="s", places=6,
+                   expected_label=f"{eyring:.6f} s (= Eyring)")
+
+
 # ===========================================================================
 # Domain 3 - Psychoacoustics
 # ===========================================================================

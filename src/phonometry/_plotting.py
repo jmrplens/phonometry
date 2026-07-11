@@ -37,6 +37,7 @@ if TYPE_CHECKING:
     from .building_prediction import AirbornePredictionResult, ImpactPredictionResult
     from .building_uncertainty import BandUncertainty
     from .facade_prediction import FacadePredictionResult, RadiatedPowerResult
+    from .flanking_transmission import VibrationReductionResult
     from .floor_covering_improvement import FloorCoveringImprovementResult
     from .impedance_tube import ImpedanceTubeResult
     from .insulation import (
@@ -1411,6 +1412,48 @@ def plot_excitation(
 # ---------------------------------------------------------------------------
 # Surface scattering & diffusion (ISO 17497)
 # ---------------------------------------------------------------------------
+
+
+def plot_vibration_reduction(
+    result: "VibrationReductionResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Vibration reduction index ``Kij`` versus frequency (ISO 10848).
+
+    Draws the per-band ``Kij`` and, when available, a dashed line at the
+    single-number mean ``K̄ij`` (200-1250 Hz, Annex A). Falls back to a
+    band-index axis when the result carries no frequencies.
+
+    :param result: A
+        :class:`~phonometry.flanking_transmission.VibrationReductionResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``Kij`` curve ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    k_ij = np.asarray(result.k_ij, dtype=np.float64)
+    kwargs.setdefault("marker", "o")
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("label", "$K_{ij}$")
+    if result.frequencies is not None:
+        freqs = np.asarray(result.frequencies, dtype=np.float64)
+        ax.plot(freqs, k_ij, **kwargs)
+        _freq_axis(ax, freqs)
+    else:
+        ax.plot(np.arange(k_ij.size), k_ij, **kwargs)
+        ax.set_xlabel("Band index")
+    if result.single_number is not None:
+        ax.axhline(
+            result.single_number,
+            color=_C_REFERENCE,
+            ls="--",
+            lw=1.0,
+            label=rf"$\overline{{K}}_{{ij}}$ = {result.single_number:.1f} dB",
+        )
+    ax.set_ylabel("Vibration reduction index $K_{ij}$ [dB]")
+    ax.set_title("Vibration reduction index (ISO 10848)")
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+    return ax
 
 
 def plot_scattering_coefficient(

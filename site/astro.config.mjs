@@ -342,7 +342,11 @@ export default defineConfig({
         {
           label: 'Structure-borne sound & vibration',
           translations: { es: 'Ruido estructural y vibración' },
-          items: ['guides/mechanical-mobility', 'guides/transfer-stiffness'],
+          items: [
+            'guides/mechanical-mobility',
+            'guides/transfer-stiffness',
+            'guides/vibration-sound-power',
+          ],
         },
         {
           label: 'Environmental acoustics',

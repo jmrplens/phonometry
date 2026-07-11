@@ -1343,6 +1343,40 @@ def _chk_iso10846_stiffness_impedance() -> Outcome:
     return numeric(abs(k), abs(1j * w * z), 1e-6, rel=True, unit="N/m", places=1)
 
 
+# --- Sound power from surface vibration (ISO/TS 7849-1/-2) ---
+@register(
+    "Room & building acoustics",
+    "ISO/TS 7849-1:2009 Formula (8)",
+    "Calibration L_v from â = 9,81 m/s² at 100 Hz  (standard's EXAMPLE)",
+)
+def _chk_iso7849_calibration() -> Outcome:
+    lv = float(ph.velocity_level_from_acceleration(9.81, 100.0))
+    return numeric(106.9, lv, 0.05, unit="dB", places=1)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO/TS 7849-2:2009 Formula (15)",
+    "L_W from L_v via measured radiation factor = 10 lg(P/P0)  (round-trip)",
+)
+def _chk_iso7849_power_round_trip() -> Outcome:
+    p, s, v2 = 3.0e-4, 2.0, (1.0e-3) ** 2
+    eps = float(ph.radiation_factor(p, s, v2))
+    lv = float(ph.velocity_level(math.sqrt(v2)))
+    lw = float(ph.radiated_sound_power_level(lv, s, radiation_factor=eps))
+    return numeric(10.0 * math.log10(p / 1e-12), lw, 1e-6, unit="dB", places=3)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO/TS 7849-1:2009 Formula (12)",
+    "Impedance term: L_W − L_v = 10 lg(411/400) at ε = 1, S = S0",
+)
+def _chk_iso7849_impedance_term() -> Outcome:
+    lw = float(ph.radiated_sound_power_level(80.0, 1.0))
+    return numeric(10.0 * math.log10(411.0 / 400.0), lw - 80.0, 1e-9, unit="dB")
+
+
 # ===========================================================================
 # Domain 7 - Building prediction & uncertainty
 # ===========================================================================

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **129/129 conformance checks pass** across 23 domains and 79 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **132/132 conformance checks pass** across 23 domains and 81 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -122,7 +122,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (27/27)</summary>
+<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (30/30)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -153,6 +153,9 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 10846-2:2008 3.17 | Transfer-stiffness level Lk = 20 lg(|k|/k0), k0 = 1 N/m  (|k| = 1 MN/m) | 120 dB (+/-0 dB) | 120 dB | 0 dB | &#9989; |
 | ISO 10846-3:2002 Formula (1) | Indirect method k2,1 = -(2πf)²·m2·T  (f=500 Hz, m2=10 kg, T=0,01) | -986960.4 N/m (+/-0.1%) | -986960.4 N/m | 0 N/m | &#9989; |
 | ISO 10846-1:2008 Table A.2 | FRF relation k = jω·Z at 250 Hz  (|k| recovered from impedance) | 1001249.2 N/m (+/-0.0001%) | 1001249.2 N/m | 0 N/m | &#9989; |
+| ISO/TS 7849-1:2009 Formula (8) | Calibration L_v from â = 9,81 m/s² at 100 Hz  (standard's EXAMPLE) | 106.9 dB (+/-0.1 dB) | 106.9 dB | -0.02 dB | &#9989; |
+| ISO/TS 7849-2:2009 Formula (15) | L_W from L_v via measured radiation factor = 10 lg(P/P0)  (round-trip) | 84.771 dB (+/-0 dB) | 84.771 dB | 0 dB | &#9989; |
+| ISO/TS 7849-1:2009 Formula (12) | Impedance term: L_W − L_v = 10 lg(411/400) at ε = 1, S = S0 | 0.1178 dB (+/-0 dB) | 0.1178 dB | 0 dB | &#9989; |
 
 </details>
 

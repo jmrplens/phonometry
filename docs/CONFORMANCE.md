@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **132/132 conformance checks pass** across 23 domains and 81 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **134/134 conformance checks pass** across 23 domains and 82 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -122,7 +122,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (30/30)</summary>
+<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (32/32)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -156,6 +156,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO/TS 7849-1:2009 Formula (8) | Calibration L_v from â = 9,81 m/s² at 100 Hz  (standard's EXAMPLE) | 106.9 dB (+/-0.1 dB) | 106.9 dB | -0.02 dB | &#9989; |
 | ISO/TS 7849-2:2009 Formula (15) | L_W from L_v via measured radiation factor = 10 lg(P/P0)  (round-trip) | 84.771 dB (+/-0 dB) | 84.771 dB | 0 dB | &#9989; |
 | ISO/TS 7849-1:2009 Formula (12) | Impedance term: L_W − L_v = 10 lg(411/400) at ε = 1, S = S0 | 0.1178 dB (+/-0 dB) | 0.1178 dB | 0 dB | &#9989; |
+| EN 15657:2018 Formula (14) | Reception-plate L_Ws = resonant-plate power P = ωη(mS)⟨v²⟩  (round-trip) | 55.545 dB (+/-0 dB) | 55.545 dB | 0 dB | &#9989; |
+| EN 15657:2018 Formula (13) | Plate loss factor η = 2,2/(f·Ts) at 1 kHz, Ts = 0,3 s | 0.0073 (+/-0) | 0.0073 | 0 | &#9989; |
 
 </details>
 

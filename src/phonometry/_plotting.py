@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     from .floor_covering_improvement import FloorCoveringImprovementResult
     from .reverberation_prediction import ReverberationModelResult
     from .dynamic_stiffness import DynamicStiffnessResult
+    from .installed_structure_borne import InstalledSourceResult
     from .mechanical_mobility import MobilityResult
     from .structure_borne_power import StructureBornePowerResult
     from .transfer_stiffness import TransferStiffnessResult
@@ -2169,6 +2170,40 @@ def plot_structure_borne_power(
         ylabel=r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]",
         title="EN 15657 characteristic structure-borne sound power", **kwargs,
     )
+
+
+def plot_installed_structure_borne(
+    result: "InstalledSourceResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Per-path and total normalised structure-borne SPL (EN 12354-5).
+
+    :param result: An :class:`~phonometry.installed_structure_borne.InstalledSourceResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the total-level ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    paths = np.atleast_2d(np.asarray(result.path_levels, dtype=np.float64))
+    total = np.atleast_1d(np.asarray(result.total_level, dtype=np.float64))
+    n_bands = total.size
+    if result.frequencies is not None:
+        x = np.asarray(result.frequencies, dtype=np.float64)
+        ax.set_xscale("log")
+        ax.set_xlabel("Frequency [Hz]")
+    else:
+        x = np.arange(1, n_bands + 1, dtype=np.float64)
+        ax.set_xlabel("Band")
+    for k, path in enumerate(paths):
+        ax.plot(x, path, color=_C_MUTED, lw=1.0, ls=":", marker=".",
+                label="paths" if k == 0 else None)
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("lw", 2.2)
+    ax.plot(x, total, label=r"total $L_{n,s}$", **kwargs)
+    ax.set_ylabel(r"Normalised SPL $L_{n,s}$ [dB]")
+    ax.set_title("EN 12354-5 installed structure-borne sound")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
 
 
 def plot_multiple_shock(

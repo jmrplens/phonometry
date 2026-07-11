@@ -325,6 +325,7 @@ export default defineConfig({
           items: [
             'guides/room-acoustics',
             'guides/enclosed-space-absorption',
+            'guides/reverberation-prediction',
             'guides/room-noise',
           ],
         },

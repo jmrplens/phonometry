@@ -1,0 +1,286 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""Tests for the reverberation-time prediction models.
+
+The source texts (Arau-Puchades 1988; Carrion Isbert; Everest) carry worked
+examples, but none is machine-readable as a clean oracle, so the suite anchors
+on hand-computed values of the closed-form expressions and on the structural
+identities that relate the models: every model collapses to Eyring for a
+uniform absorption distribution, and Eyring collapses to Sabine as the
+absorption tends to zero.
+
+Reference constants use the Sabine numerator ``k = 24 ln 10 / c0`` with the
+default ``c0 = 343 m/s`` (``k = 0.161113...``).
+"""
+
+from __future__ import annotations
+
+import math
+
+import numpy as np
+import pytest
+
+import reference_data as ref
+from phonometry import (
+    ReverberationModelResult,
+    arau_puchades_reverberation_time,
+    eyring_reverberation_time,
+    fitzroy_reverberation_time,
+    mean_absorption,
+    millington_sette_reverberation_time,
+    reverberation_time_models,
+    sabine_reverberation_time,
+)
+
+# A shoebox 8 x 5 x 3 m: V = 120 m3, S = 2(40 + 24 + 15) = 158 m2.
+DIMS = (8.0, 5.0, 3.0)
+VOLUME = 120.0
+SURFACE = 158.0
+# Its six boundary surfaces, one entry per wall (two per axis).
+UNIFORM_SURFACES = [
+    (40.0, 0.2), (40.0, 0.2),   # z-pair (floor/ceiling)
+    (24.0, 0.2), (24.0, 0.2),   # y-pair
+    (15.0, 0.2), (15.0, 0.2),   # x-pair
+]
+
+_K = 24.0 * math.log(10.0) / 343.0
+
+
+# ---------------------------------------------------------------------------
+# Hand-computed closed-form values
+# ---------------------------------------------------------------------------
+def test_sabine_hand_value() -> None:
+    """Sabine: A = 158*0.2 = 31.6, T = k*120/31.6 = 0.611825 s."""
+    t = sabine_reverberation_time(VOLUME, UNIFORM_SURFACES)
+    assert t == pytest.approx(0.6118246547, abs=1e-6)
+    assert t == pytest.approx(_K * VOLUME / (SURFACE * 0.2), abs=1e-9)
+
+
+def test_eyring_hand_value() -> None:
+    """Eyring: -158*ln(0.8) = 35.2567, T = k*120/35.2567 = 0.548369 s."""
+    t = eyring_reverberation_time(VOLUME, UNIFORM_SURFACES)
+    assert t == pytest.approx(0.5483686633, abs=1e-6)
+
+
+def test_millington_hand_value() -> None:
+    """Millington (V=100): -(60 ln0.7 + 40 ln0.4) = 58.0521, T = 0.277533 s."""
+    t = millington_sette_reverberation_time(100.0, [(60.0, 0.3), (40.0, 0.6)])
+    assert t == pytest.approx(0.2775330330, abs=1e-6)
+
+
+def test_mean_absorption() -> None:
+    assert mean_absorption(UNIFORM_SURFACES) == pytest.approx(0.2)
+    # Area-weighted, not arithmetic: 90 % of the area at 0.1, 10 % at 0.9.
+    assert mean_absorption([(90.0, 0.1), (10.0, 0.9)]) == pytest.approx(0.18)
+
+
+# ---------------------------------------------------------------------------
+# Real worked oracle -- Everest, Master Handbook of Acoustics 4th ed, Fig. 7-22
+# ---------------------------------------------------------------------------
+def test_sabine_matches_everest_example1() -> None:
+    """SI Sabine reproduces the six printed RT60 of Example 1 to <= 0.02 s.
+
+    The imperial worked example (RT60 = 0.049 V / Sa) is converted to SI; the
+    residual is the book rounding its 0.049 constant. A genuine numeric oracle
+    anchored on measured concrete/gypsum absorption coefficients.
+    """
+    for i, band in enumerate(ref.EVEREST_EX1_BANDS):
+        surfaces = [
+            (ref.EVEREST_EX1_FLOOR_AREA, ref.EVEREST_EX1_FLOOR_ALPHA[i]),
+            (ref.EVEREST_EX1_SHELL_AREA, ref.EVEREST_EX1_SHELL_ALPHA[i]),
+        ]
+        t = sabine_reverberation_time(ref.EVEREST_EX1_VOLUME, surfaces)
+        assert t == pytest.approx(ref.EVEREST_EX1_RT[i], abs=0.02), f"band {band} Hz"
+
+
+# ---------------------------------------------------------------------------
+# Structural identities
+# ---------------------------------------------------------------------------
+def test_uniform_absorption_all_models_equal_eyring() -> None:
+    """Every model collapses to Eyring for a uniform absorption distribution."""
+    eyring = eyring_reverberation_time(VOLUME, UNIFORM_SURFACES)
+    milli = millington_sette_reverberation_time(VOLUME, UNIFORM_SURFACES)
+    fitz = fitzroy_reverberation_time(DIMS, (0.2, 0.2, 0.2))
+    arau = arau_puchades_reverberation_time(DIMS, (0.2, 0.2, 0.2))
+    assert milli == pytest.approx(eyring, abs=1e-12)
+    assert fitz == pytest.approx(eyring, abs=1e-12)
+    assert arau == pytest.approx(eyring, abs=1e-12)
+
+
+def test_eyring_reduces_to_sabine_in_the_low_absorption_limit() -> None:
+    """As alpha -> 0, -S ln(1-alpha_bar) -> S alpha_bar = A, so Eyring -> Sabine."""
+    faint = [(area, 0.001) for area, _ in UNIFORM_SURFACES]
+    sabine = sabine_reverberation_time(VOLUME, faint)
+    eyring = eyring_reverberation_time(VOLUME, faint)
+    assert eyring == pytest.approx(sabine, rel=1e-3)
+    # Eyring is always the shorter time (it never overestimates like Sabine).
+    assert eyring < sabine
+
+
+def test_sabine_overestimates_at_high_absorption() -> None:
+    """With strong absorption Sabine gives a longer time than Eyring."""
+    strong = [(area, 0.6) for area, _ in UNIFORM_SURFACES]
+    assert sabine_reverberation_time(VOLUME, strong) > eyring_reverberation_time(
+        VOLUME, strong
+    )
+
+
+# ---------------------------------------------------------------------------
+# Axial models on a non-uniform (anisotropic) distribution
+# ---------------------------------------------------------------------------
+def test_arau_and_fitzroy_non_uniform_hand_values() -> None:
+    """Absorption 0.5 on the x-pair, 0.1 elsewhere (dims 8x5x3).
+
+    Axial Eyring times are Tx=0.176535, Ty=Tz=1.161393 s. The area-weighted
+    geometric mean (Arau) is 0.812147 s, the arithmetic mean (Fitzroy)
+    0.974394 s -- hand-computed with c0 = 343 m/s.
+    """
+    absorptions = (0.5, 0.1, 0.1)
+    arau = arau_puchades_reverberation_time(DIMS, absorptions)
+    fitz = fitzroy_reverberation_time(DIMS, absorptions)
+    assert arau == pytest.approx(0.8121469281, abs=1e-6)
+    assert fitz == pytest.approx(0.9743944340, abs=1e-6)
+
+
+def test_arau_never_exceeds_fitzroy() -> None:
+    """AM-GM: the geometric mean (Arau) <= the arithmetic mean (Fitzroy)."""
+    absorptions = (0.5, 0.1, 0.1)
+    assert arau_puchades_reverberation_time(
+        DIMS, absorptions
+    ) <= fitzroy_reverberation_time(DIMS, absorptions)
+
+
+def test_axial_means_lie_between_extremes() -> None:
+    """Both axial means fall between the fastest and slowest axial time."""
+    absorptions = (0.5, 0.1, 0.1)
+    tx = _K * VOLUME / (-SURFACE * math.log(1.0 - 0.5))
+    ty = _K * VOLUME / (-SURFACE * math.log(1.0 - 0.1))
+    for model in (arau_puchades_reverberation_time, fitzroy_reverberation_time):
+        t = model(DIMS, absorptions)
+        assert tx <= t <= ty
+
+
+# ---------------------------------------------------------------------------
+# Air absorption
+# ---------------------------------------------------------------------------
+def test_air_absorption_shortens_reverberation() -> None:
+    """The 4mV air term adds absorption, so T falls."""
+    dry = eyring_reverberation_time(VOLUME, UNIFORM_SURFACES)
+    humid = eyring_reverberation_time(VOLUME, UNIFORM_SURFACES, air_attenuation=0.003)
+    assert humid < dry
+    # Explicit denominator: -S ln0.8 + 4*m*V.
+    expected = _K * VOLUME / (-SURFACE * math.log(0.8) + 4.0 * 0.003 * VOLUME)
+    assert humid == pytest.approx(expected, abs=1e-9)
+
+
+# ---------------------------------------------------------------------------
+# Per-band arrays and the bundled front-end
+# ---------------------------------------------------------------------------
+def test_per_band_arrays() -> None:
+    alpha = np.array([0.1, 0.2, 0.4])
+    surfaces = [(area, alpha) for area, _ in UNIFORM_SURFACES]
+    t = eyring_reverberation_time(VOLUME, surfaces)
+    assert isinstance(t, np.ndarray)
+    assert t.shape == (3,)
+    # Higher absorption -> shorter time, monotonically.
+    assert t[0] > t[1] > t[2]
+
+
+def test_reverberation_time_models_bundle() -> None:
+    freqs = [125.0, 250.0, 500.0, 1000.0]
+    res = reverberation_time_models(
+        DIMS, ([0.1, 0.15, 0.2, 0.3], 0.2, 0.25), frequencies=freqs
+    )
+    assert isinstance(res, ReverberationModelResult)
+    assert res.volume == pytest.approx(VOLUME)
+    assert res.surface_area == pytest.approx(SURFACE)
+    for curve in res.models.values():
+        assert curve.shape == (4,)
+    # Sabine is the longest estimate band by band.
+    assert np.all(res.sabine >= res.eyring - 1e-9)
+    assert set(res.models) == {
+        "Sabine", "Eyring", "Millington-Sette", "Fitzroy", "Arau-Puchades"
+    }
+
+
+def test_models_scalar_absorption_broadcasts() -> None:
+    res = reverberation_time_models(DIMS, (0.2, 0.2, 0.2))
+    assert res.frequencies.shape == (1,)
+    # Uniform: the four Eyring-family models coincide; Sabine is longer.
+    eyring_family = [res.eyring[0], res.millington_sette[0], res.fitzroy[0],
+                     res.arau_puchades[0]]
+    assert np.allclose(eyring_family, res.eyring[0])
+    assert res.sabine[0] > res.eyring[0]
+
+
+# ---------------------------------------------------------------------------
+# Validation
+# ---------------------------------------------------------------------------
+def test_empty_surfaces_raise() -> None:
+    with pytest.raises(ValueError, match="at least one surface"):
+        sabine_reverberation_time(VOLUME, [])
+
+
+def test_absorption_out_of_range_raises() -> None:
+    with pytest.raises(ValueError, match=r"\[0, 1\)"):
+        sabine_reverberation_time(VOLUME, [(10.0, 1.0)])
+    with pytest.raises(ValueError, match=r"\[0, 1\)"):
+        eyring_reverberation_time(VOLUME, [(10.0, -0.1)])
+
+
+def test_perfectly_reflecting_room_raises() -> None:
+    with pytest.raises(ValueError, match="non-positive"):
+        sabine_reverberation_time(VOLUME, [(10.0, 0.0)])
+
+
+def test_non_positive_volume_raises() -> None:
+    with pytest.raises(ValueError, match="volume"):
+        sabine_reverberation_time(0.0, UNIFORM_SURFACES)
+
+
+def test_negative_air_attenuation_raises() -> None:
+    with pytest.raises(ValueError, match="air_attenuation"):
+        sabine_reverberation_time(VOLUME, UNIFORM_SURFACES, air_attenuation=-1.0)
+
+
+def test_bad_dimensions_raise() -> None:
+    with pytest.raises(ValueError, match="three room lengths"):
+        arau_puchades_reverberation_time((8.0, 5.0), (0.2, 0.2, 0.2))
+
+
+def test_bad_absorptions_length_raises() -> None:
+    with pytest.raises(ValueError, match="three wall pairs"):
+        fitzroy_reverberation_time(DIMS, (0.2, 0.2))
+
+
+def test_mismatched_surface_band_counts_raise() -> None:
+    """Per-band coefficients with different band counts get a clear error."""
+    surfaces = [(40.0, [0.1, 0.2, 0.3]), (40.0, [0.1, 0.2])]
+    with pytest.raises(ValueError, match="incompatible shapes"):
+        eyring_reverberation_time(VOLUME, surfaces)
+
+
+def test_mismatched_axis_band_counts_raise() -> None:
+    """A 6-band x-pair against a 4-band y-pair is reported, not a raw NumPy error."""
+    with pytest.raises(ValueError, match="incompatible shapes"):
+        arau_puchades_reverberation_time(
+            DIMS, ([0.1, 0.2, 0.3, 0.4, 0.5, 0.6], [0.1, 0.2, 0.3, 0.4], 0.2)
+        )
+
+
+def test_mismatched_air_band_count_raises() -> None:
+    """Air attenuation with a different band count than the surfaces is caught."""
+    surfaces = [(158.0, [0.2, 0.3, 0.4])]
+    with pytest.raises(ValueError, match="incompatible shapes"):
+        sabine_reverberation_time(VOLUME, surfaces, air_attenuation=[0.001, 0.002])
+
+
+# ---------------------------------------------------------------------------
+# Plotting
+# ---------------------------------------------------------------------------
+def test_plot_returns_axes() -> None:
+    pytest.importorskip("matplotlib")
+    import matplotlib
+
+    matplotlib.use("Agg")
+    res = reverberation_time_models(DIMS, (0.2, 0.15, 0.3), frequencies=[125.0, 250.0])
+    assert res.plot() is not None

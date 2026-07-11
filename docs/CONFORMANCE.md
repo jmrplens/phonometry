@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **115/115 conformance checks pass** across 22 domains and 69 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **120/120 conformance checks pass** across 23 domains and 74 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -65,6 +65,19 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 1996-2:2007 Annex C.5 Example 1 | Tonal audibility ΔLta (Formula C.3), 4 kHz tone | 13.7 dB (+/-0.05 dB) | 13.66 dB | -0.044 dB | &#9989; |
 | ISO 1996-2:2007 Annex C.5 Example 1 | Tonal adjustment Kt (Formulae C.4-C.6) | 6 dB (+/-0 dB) | 6 dB | 0 dB | &#9989; |
 | ISO 1996-2:2017 Annex G.2 | Combined measurement uncertainty u = √(Σ(cj·uj)²) | 2.18 dB (+/-0.01 dB) | 2.18 dB | -0.002 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Room acoustics</b> — 100% (5/5)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Sabine (W. C. Sabine, 1922) | Reverberation time T = k·V/A  (V=120 m³, S=158 m², α=0.2) | 0.611825 s (+/-0.000001 s) | 0.611825 s | 0 s | &#9989; |
+| Everest, Master Handbook of Acoustics 4th ed, Fig. 7-22 | Sabine RT, worked Example 1 @ 1 kHz (untreated 23.3×16×10 ft room, SI) | 3.39 s (+/-0.02 s) | 3.402 s | 0.012 s | &#9989; |
+| Eyring (Norris-Eyring, 1930) | Reverberation time T = k·V/(-S·ln(1-ᾱ))  (α=0.2) | 0.548369 s (+/-0.000001 s) | 0.548369 s | 0 s | &#9989; |
+| Arau-Puchades (Acustica 65, 1988, Formula 18) | T (α=0.5/0.1/0.1 per wall pair, dims 8×5×3 m) | 0.812147 s (+/-0.000001 s) | 0.812147 s | 0 s | &#9989; |
+| Model identity (uniform absorption) | Arau-Puchades ≡ Eyring when ᾱ is uniform | 0.548369 s (= Eyring) | 0.548369 s | 0 s | &#9989; |
 
 </details>
 

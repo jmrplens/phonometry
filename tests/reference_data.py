@@ -769,3 +769,23 @@ ISO1996_2_TONAL_EXAMPLE3 = (54.6, 45.5, 308.0, 10.6, 6.0)  # loose (rounding)
 ISO1996_2_G2_CONTRIBUTIONS = [0.59, 0.3, 2.0, 0.40, 0.38]
 ISO1996_2_G2_COMBINED = 2.18
 ISO1996_2_G2_EXPANDED = 4.36
+
+# ---------------------------------------------------------------------------
+# Reverberation-time prediction -- real worked oracle.
+# F. A. Everest & K. C. Pohlmann, *Master Handbook of Acoustics*, 4th ed.,
+# Fig. 7-22 "Reverberation Calculation: Example 1": an untreated 23.3 x 16 x 10 ft
+# room (concrete floor + 1/2" gypsum-board walls/ceiling) solved with the Sabine
+# equation RT60 = 0.049 V / Sa (imperial). Converting the areas and volume to SI
+# and evaluating the module's SI Sabine (k = 24 ln10 / 343) reproduces the six
+# printed reverberation times to <= 0.012 s (the residual is the book rounding
+# the imperial 0.049 constant). This anchors the whole family on measured
+# material data, not only on the closed-form identities.
+_FT2 = 0.3048 ** 2   # square foot -> m2
+_FT3 = 0.3048 ** 3   # cubic foot -> m3
+EVEREST_EX1_VOLUME = 3728.0 * _FT3            # 105.565 m3
+EVEREST_EX1_FLOOR_AREA = 373.0 * _FT2         # concrete floor, 34.653 m2
+EVEREST_EX1_SHELL_AREA = 1159.0 * _FT2        # gypsum walls+ceiling, 107.675 m2
+EVEREST_EX1_BANDS = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+EVEREST_EX1_FLOOR_ALPHA = [0.01, 0.01, 0.015, 0.02, 0.02, 0.02]   # concrete
+EVEREST_EX1_SHELL_ALPHA = [0.29, 0.10, 0.05, 0.04, 0.07, 0.09]    # gypsum board
+EVEREST_EX1_RT = [0.54, 1.53, 2.87, 3.39, 2.06, 1.63]             # printed RT60, s

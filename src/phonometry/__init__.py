@@ -87,6 +87,16 @@ from .enclosed_space_absorption import (
     object_fraction,
     reverberation_time,
 )
+from .reverberation_prediction import (
+    ReverberationModelResult,
+    arau_puchades_reverberation_time,
+    eyring_reverberation_time,
+    fitzroy_reverberation_time,
+    mean_absorption,
+    millington_sette_reverberation_time,
+    reverberation_time_models,
+    sabine_reverberation_time,
+)
 from .multiple_shock_vibration import (
     MultipleShockResult,
     acceleration_dose,
@@ -606,6 +616,14 @@ __all__ = [
     "reverberation_time",
     "enclosed_space_reverberation",
     "ReverberationResult",
+    "mean_absorption",
+    "sabine_reverberation_time",
+    "eyring_reverberation_time",
+    "millington_sette_reverberation_time",
+    "fitzroy_reverberation_time",
+    "arau_puchades_reverberation_time",
+    "reverberation_time_models",
+    "ReverberationModelResult",
     "combine_uncertainty",
     "monte_carlo",
     "rectangular",

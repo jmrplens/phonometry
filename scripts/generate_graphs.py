@@ -203,6 +203,9 @@ _ES_EXACT = {
         r"$K_t(\Delta L_{ta})$ (Fórmulas C.4-C.6)",
     "Annex C.5 examples": "ejemplos del Anexo C.5",
     "mid-range tone": "tono de rango medio",
+    # reverberation_models figure (Sabine / Eyring / Millington / Fitzroy / Arau)
+    "Reverberation-time prediction models":
+        "Modelos de predicción del tiempo de reverberación",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3239,6 +3242,65 @@ def generate_flanking_transmission(output_dir: str) -> None:
     plt.close()
 
 
+def generate_reverberation_models(output_dir: str) -> None:
+    """Sabine/Eyring/Millington/Fitzroy/Arau reverberation time over octaves."""
+    print("Generating reverberation_models...")
+    from phonometry import air_attenuation_m, reverberation_time_models
+
+    bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+    # A 10 x 7 x 3.5 m room (V = 245 m3, S = 259 m2) with a strongly anisotropic
+    # absorption distribution: a very absorptive floor/ceiling pair (carpet plus
+    # an acoustic ceiling) against hard end walls and lightly treated side walls.
+    # This is where the axial models (Fitzroy, Arau-Puchades) part company with
+    # the isotropic Sabine and Eyring estimates.
+    alpha_x = [0.06, 0.07, 0.08, 0.09, 0.10, 0.10]   # hard end walls
+    alpha_y = [0.12, 0.14, 0.16, 0.18, 0.20, 0.20]   # lightly treated side walls
+    alpha_z = [0.30, 0.50, 0.65, 0.78, 0.82, 0.80]   # carpet + acoustic ceiling
+    m = air_attenuation_m(bands, 20.0, 50.0)
+    res = reverberation_time_models(
+        (10.0, 7.0, 3.5), (alpha_x, alpha_y, alpha_z),
+        air_attenuation=m, frequencies=bands,
+    )
+
+    x = np.arange(len(bands))
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    styles = [
+        ("Sabine", res.sabine, COLOR_SECONDARY, "s", 1.8),
+        ("Eyring", res.eyring, COLOR_TERTIARY, "^", 1.8),
+        ("Millington-Sette", res.millington_sette, "#9467bd", "v", 1.8),
+        ("Fitzroy", res.fitzroy, "#ff7f0e", "D", 1.8),
+        ("Arau-Puchades", res.arau_puchades, COLOR_PRIMARY, "o", 2.6),
+    ]
+    for label, curve, color, marker, lw in styles:
+        ax.plot(x, curve, color=color, linewidth=lw, marker=marker,
+                markersize=6, label=label, zorder=5)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{int(b)}" for b in bands])
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel(r"Reverberation time $T$ [s]")
+    ax.set_title("Reverberation-time prediction models", fontweight="bold", pad=12)
+    ax.set_ylim(bottom=0.0)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "room 10 x 7 x 3.5 m",
+        "V = 245 m^3, S = 259 m^2",
+        "anisotropic: absorptive floor/ceiling",
+        "c0 = 343 m/s, air at 20 C / 50 % RH",
+    ]
+    ax.text(0.015, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="left", fontsize=11, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "reverberation_models.svg")
+    plt.close()
+
+
 def generate_absorption_uncertainty(output_dir: str) -> None:
     """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
     print("Generating absorption_uncertainty...")
@@ -4736,6 +4798,7 @@ def generate_all(img_dir: str) -> None:
     generate_survey_insulation(img_dir)
     generate_floor_covering_improvement(img_dir)
     generate_flanking_transmission(img_dir)
+    generate_reverberation_models(img_dir)
     generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 

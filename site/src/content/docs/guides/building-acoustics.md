@@ -990,6 +990,85 @@ res.octave_bands()    # (octave freqs, delta-L_oct) via Formula (5)
 
 ---
 
+## 8. Laboratory flanking transmission (ISO 10848)
+
+ISO 10848:2006/2010 is the laboratory method that **measures** the junction
+**vibration reduction index** $K_{ij}$ that the EN 12354 prediction of §3 takes
+as an input, together with the overall flanking descriptors $D_{n,f}$
+(airborne) and $L_{n,f}$ (impact). It is the measurement counterpart of the
+empirical `junction_vibration_reduction()` of §3.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission.svg" alt="ISO 10848 junction vibration reduction index Kij rising across one-third-octave bands from 100 Hz to 5000 Hz for a rigid T-junction of two heavy walls, with the single-number mean Kij over 200-1250 Hz drawn as a dashed line" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_dark.svg" alt="ISO 10848 junction vibration reduction index Kij rising across one-third-octave bands from 100 Hz to 5000 Hz for a rigid T-junction of two heavy walls, with the single-number mean Kij over 200-1250 Hz drawn as a dashed line" style="width:80%">
+
+**Vibration reduction index (Formula (13)).**
+$K_{ij} = \overline{D}_{v,ij} + 10\lg\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, from
+the direction-averaged velocity level difference
+$\overline{D}_{v,ij} = \tfrac{1}{2}(D_{v,ij} + D_{v,ji})$ (Formula (11), which
+makes $K_{ij}$ symmetric), the common-edge junction length $l_{ij}$ and the
+**equivalent absorption lengths** $a_j = 2.2\pi^2 S_j /(T_{s,j} c_0)\sqrt{f_\text{ref}/f}$
+(Formula (12), $f_\text{ref} = 1000$ Hz). For lightweight well-damped elements
+$a_j = S_j / l_0$ ($l_0 = 1$ m) and Formula (13) reduces to the simplified
+Formula (14). The related **total loss factor** is $\eta = 2.2/(f T_s)$.
+
+**Overall descriptors.** $D_{n,f} = L_1 - L_2 - 10\lg(A/A_0)$ (Formula (4),
+airborne) and $L_{n,f} = L_2 + 10\lg(A/A_0)$ (Formula (5), tapping machine),
+$A_0 = 10\ \text{m}^2$; their $D_{n,f,w}$ / $L_{n,f,w}$ single numbers reuse the
+ISO 717 rating engines. The single-number $\overline{K}_{ij}$ is the arithmetic
+mean over 200–1250 Hz (Annex A).
+
+**Validity.** $K_{ij}$ rests on a statistical-energy-analysis simplification:
+`strong_coupling_satisfied()` checks the Formula (15) inequality, and — for the
+heavy junctions of Part 4 — `modal_density()`, `band_mode_count()` and
+`modal_overlap_factor()` (Formulae (5)/(4)/(6)) flag the bands where the mode
+count is too low for $K_{ij}$ to be reliable. Because ISO 10848 contains no
+worked numeric example, conformance is anchored on closed-form identities
+(simplified $K_{ij}$, $a_j$ at $f_\text{ref}$, $\eta$).
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration_reduction_index
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
+         800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+# Direction-averaged velocity level difference of a rigid T-junction (dB):
+dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
+               9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
+res = vibration_reduction_index(
+    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
+    structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
+)
+print(res.single_number)   # mean Kij over 200-1250 Hz (Annex A)
+res.plot()
+plt.show()
+```
+</details>
+
+```python
+from phonometry import (
+    direction_averaged_level_difference, vibration_reduction_index,
+    normalized_flanking_level_difference, modal_overlap_factor,
+)
+
+# Kij from both excitation directions (symmetric via the direction average):
+dbar = direction_averaged_level_difference(dv_ij, dv_ji)
+res = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+                                structural_reverberation_time_i=ts_i,
+                                structural_reverberation_time_j=ts_j)
+res.k_ij           # Kij per band (Formula (13))
+res.single_number  # mean Kij over 200-1250 Hz, or None without the band set
+res.octave_bands() # Kij combined into octave bands
+
+# Overall airborne flanking descriptor and a Part-4 modal-overlap validity check:
+dnf = normalized_flanking_level_difference(l1, l2, absorption_area)
+m = modal_overlap_factor(area, critical_freq, ts)   # M < 0.25 -> exclude band
+```
+
+---
+
 **Standards.** ISO 16283-1:2014, ISO 16283-2 and ISO 16283-3:2016, *Acoustics —
 Field measurement of sound insulation in buildings and of building elements* —
 the level differences, normalisations and element methods of §1; ISO 717-1 and
@@ -1010,7 +1089,11 @@ method of §6: the reverberation-index correction, the standardized/normalized
 airborne, impact and façade quantities, and service-equipment noise;
 ISO 16251-1:2014 — the small-mock-up laboratory method for the impact-sound
 improvement $\Delta L$ of floor coverings of §7, with $\Delta L_w$ via the
-ISO 717-2 reference floor.
+ISO 717-2 reference floor; ISO 10848-1:2006, ISO 10848-2:2006, ISO 10848-3:2006
+and ISO 10848-4:2010 — the laboratory measurement of flanking transmission of
+§8: the vibration reduction index $K_{ij}$, the equivalent absorption length,
+the normalized flanking descriptors $D_{n,f}$ / $L_{n,f}$ and the
+modal-overlap validity checks that feed the EN 12354 prediction of §3.
 
 ## See also
 

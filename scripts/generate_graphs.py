@@ -187,6 +187,13 @@ _ES_EXACT = {
     "Improvement of impact sound insulation [dB]":
         "Mejora del aislamiento a impactos [dB]",
     "delta-L (improvement)": "delta-L (mejora)",
+    # flanking_transmission figure (ISO 10848)
+    "ISO 10848 Junction Vibration Reduction Index":
+        "Índice de reducción vibracional de unión (ISO 10848)",
+    "Vibration reduction index Kij [dB]":
+        "Índice de reducción vibracional Kij [dB]",
+    "Kij (ISO 10848)": "Kij (ISO 10848)",
+    "mean Kij (200-1250 Hz)": "Kij medio (200-1250 Hz)",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3171,6 +3178,58 @@ def generate_floor_covering_improvement(output_dir: str) -> None:
     plt.close()
 
 
+def generate_flanking_transmission(output_dir: str) -> None:
+    """ISO 10848 vibration reduction index Kij per band with the mean K̄ij."""
+    print("Generating flanking_transmission...")
+    from phonometry import vibration_reduction_index
+
+    freqs = [100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0,
+             800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0]
+    # A rigid T-junction of two heavy walls: measured direction-averaged velocity
+    # level difference rising gently with frequency (typical laboratory data).
+    dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7, 9.2, 9.8,
+                   10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
+    res = vibration_reduction_index(
+        dv, junction_length=4.0, area_i=12.0, area_j=10.0,
+        frequency=freqs,
+        structural_reverberation_time_i=0.35,
+        structural_reverberation_time_j=0.40,
+    )
+    assert res.single_number is not None
+
+    x = np.arange(len(freqs))
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.plot(x, res.k_ij, "-", color=COLOR_PRIMARY, linewidth=2.4, marker="o",
+            markersize=6, zorder=5, label="Kij (ISO 10848)")
+    ax.axhline(res.single_number, color=COLOR_SECONDARY, linestyle="--",
+               linewidth=1.6, zorder=4, label="mean Kij (200-1250 Hz)")
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{int(b)}" for b in freqs], rotation=45, fontsize=8)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Vibration reduction index Kij [dB]")
+    ax.set_title("ISO 10848 Junction Vibration Reduction Index",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "rigid T-junction, two heavy walls",
+        "lij = 4 m, Si = 12 m^2, Sj = 10 m^2",
+        "Formula (13), one-third octave",
+        f"mean Kij = {res.single_number:.1f} dB",
+    ]
+    ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=11, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "flanking_transmission.png")
+    plt.close()
+
+
 def generate_absorption_uncertainty(output_dir: str) -> None:
     """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
     print("Generating absorption_uncertainty...")
@@ -4618,6 +4677,7 @@ def generate_all(img_dir: str) -> None:
     generate_intensity_insulation(img_dir)
     generate_survey_insulation(img_dir)
     generate_floor_covering_improvement(img_dir)
+    generate_flanking_transmission(img_dir)
     generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 

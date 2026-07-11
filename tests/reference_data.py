@@ -728,3 +728,26 @@ ISO717_2_REFERENCE_FLOOR_LN_R0 = [
 ]
 ISO717_2_REFERENCE_FLOOR_LN_R0_W = 78
 ISO717_2_REFERENCE_FLOOR_CI = -11
+
+# ---------------------------------------------------------------------------
+# ISO 10848-1:2006 — flanking transmission (vibration reduction index Kij).
+# The standard contains NO worked numeric example anywhere in Parts 1-4, so
+# these are closed-form identities synthesized to hand-checkable results (the
+# clean-room oracle strategy). Each expected value is a literal computed by
+# hand from the transcribed formula so it is independent of the library code.
+# ---------------------------------------------------------------------------
+# Simplified Kij, Formula (14): Kij = D̄v,ij + 10 lg(lij / sqrt(Si·Sj)).
+# D̄v,ij = 5 dB, lij = 2 m, Si = Sj = 4 m² -> 10 lg(2/4) = -3.0102999566 dB.
+ISO10848_KIJ_DBAR = 5.0
+ISO10848_KIJ_LIJ = 2.0
+ISO10848_KIJ_AREA = 4.0
+ISO10848_KIJ_SIMPLIFIED = 1.9897000434  # 5 + 10*log10(0.5)
+# Equivalent absorption length, Formula (12), at f = f_ref = 1000 Hz (so the
+# sqrt(f_ref/f) factor is 1): aj = 2.2·π²·S/(Ts·c0).
+# S = 10 m², Ts = 0.5 s, c0 = 343 m/s -> 2.2·π²·10/(0.5·343).
+ISO10848_ABS_AREA = 10.0
+ISO10848_ABS_TS = 0.5
+ISO10848_ABS_C0 = 343.0
+ISO10848_ABS_LENGTH_AT_FREF = 1.2660717015974685  # 2.2*pi**2*10/(0.5*343)
+# Total loss factor, η = 2.2/(f·Ts). f = 1000 Hz, Ts = 0.5 s -> 0.0044 exactly.
+ISO10848_LOSS_FACTOR = 0.0044

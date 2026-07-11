@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from .installed_structure_borne import InstalledSourceResult
     from .mechanical_mobility import MobilityResult
     from .structure_borne_power import StructureBornePowerResult
+    from .tone_audibility import ToneAudibilityResult
     from .transfer_stiffness import TransferStiffnessResult
     from .vibration_sound_power import VibrationSoundPowerResult
     from .impedance_tube import ImpedanceTubeResult
@@ -1943,6 +1944,45 @@ def plot_tonal_adjustment(
     ax.set_ylim(bottom=0.0)
     ax.legend(loc="upper left", fontsize="small")
     ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_tone_audibility(
+    result: "ToneAudibilityResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Per-tone audibility ``ΔL`` against tone frequency (ISO/PAS 20065).
+
+    Draws one bar per tone with the decisive (most audible) tone emphasised and
+    the ``ΔL = 0`` audibility threshold marked; tones above it are present.
+
+    :param result: A :class:`~phonometry.tone_audibility.ToneAudibilityResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the bar ``bar`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.tone_frequencies, dtype=np.float64)
+    delta = np.asarray(result.audibilities, dtype=np.float64)
+    positions = np.arange(freqs.size)
+    decisive = int(np.argmax(delta))
+    colors = [_C_PRIMARY] * freqs.size
+    colors[decisive] = _C_REFERENCE
+
+    kwargs.setdefault("width", 0.7)
+    bars = ax.bar(positions, delta, color=colors, edgecolor=_C_EDGE, **kwargs)
+    bars[decisive].set_label(
+        rf"decisive $\Delta L$ = {result.decisive_audibility:.1f} dB "
+        rf"@ {result.decisive_frequency:g} Hz"
+    )
+    ax.axhline(0.0, color=_C_MUTED, ls="--", lw=1.0, label=r"threshold $\Delta L=0$ dB")
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax.set_xlabel("Tone frequency [Hz]")
+    ax.set_ylabel(r"Audibility $\Delta L$ [dB]")
+    ax.set_title("ISO/PAS 20065 tonal audibility")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
     return ax
 
 

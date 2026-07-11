@@ -256,6 +256,10 @@ _ES_EXACT = {
         r"instalada $L_{Ws,inst}$ = $L_{Ws,c}-D_C$",
     "paths $L_{n,s,ij}$": "caminos $L_{n,s,ij}$",
     r"total $L_{n,s}$": r"total $L_{n,s}$",
+    # tone_audibility figure (ISO/PAS 20065)
+    "ISO/PAS 20065 Tonal Audibility": "Audibilidad tonal ISO/PAS 20065",
+    r"Audibility $\Delta L$ [dB]": r"Audibilidad $\Delta L$ [dB]",
+    r"threshold $\Delta L = 0$ dB": r"umbral $\Delta L = 0$ dB",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -580,6 +584,9 @@ _ES_PATTERNS = [
     (r"^(\d+) yr$", r"\1 años"),
     (r"^total \(limit\) (.+) dB$", r"total (límite) \1 dB"),
     (r"^total \(eng\.\) (.+) dB$", r"total (ing.) \1 dB"),
+    # tone_audibility decisive legend (mathtext skips the decimal-comma pass).
+    (r"^decisive \$\\Delta L\$ = (\d+)\.(\d+) dB @ (\d+)\.(\d+) Hz$",
+     r"decisiva $\\Delta L$ = \1,\2 dB @ \3,\4 Hz"),
     (r"^Governing  \$K_I\$ = (\d+)\.(\d+) dB$", r"Determinante  $K_I$ = \1,\2 dB"),
     # The mathtext ($R$) makes the later decimal-comma pass skip this label, so
     # convert the decimal here as part of the translation.
@@ -3662,6 +3669,60 @@ def generate_installed_structure_borne(output_dir: str) -> None:
     plt.close()
 
 
+def generate_tone_audibility(output_dir: str) -> None:
+    """ISO/PAS 20065 tonal audibility: per-tone ΔL of the Annex E example."""
+    print("Generating tone_audibility...")
+    from phonometry import assess_tones
+
+    # Annex E combustion-engine example, spectrum 1 (Tables E.2/E.3),
+    # line spacing Δf = 2.7 Hz. Each tuple is (fT, LS, LT).
+    tones = [
+        (118.4, 48.91, 64.56), (137.3, 49.22, 67.96), (158.8, 50.50, 68.63),
+        (314.9, 52.85, 68.50), (433.4, 58.29, 73.17), (592.2, 59.53, 78.31),
+        (629.8, 59.71, 75.00), (643.3, 61.98, 79.75), (1582.7, 54.16, 71.07),
+    ]
+    freqs = [t[0] for t in tones]
+    res = assess_tones(freqs, [t[2] for t in tones], [t[1] for t in tones], 2.7)
+
+    x = np.arange(len(freqs))
+    decisive = int(np.argmax(res.audibilities))
+    colors = [COLOR_PRIMARY] * len(freqs)
+    colors[decisive] = COLOR_SECONDARY
+
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.bar(x, res.audibilities, width=0.7, color=colors, edgecolor=COLOR_FG,
+           linewidth=0.6)
+    ax.axhline(0.0, color=COLOR_FG, ls="--", lw=1.0,
+               label=r"threshold $\Delta L = 0$ dB")
+    ax.bar([decisive], [res.audibilities[decisive]], width=0.7,
+           color=COLOR_SECONDARY, edgecolor=COLOR_FG, linewidth=0.6,
+           label=(rf"decisive $\Delta L$ = {res.decisive_audibility:.1f} dB "
+                  rf"@ {res.decisive_frequency:g} Hz"))
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel(r"Audibility $\Delta L$ [dB]")
+    ax.set_title("ISO/PAS 20065 Tonal Audibility", fontweight="bold", pad=12)
+    ax.grid(which="major", axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "dfc = 25 + 75 (1 + 1.4 (fT/1000)^2)^0.69",
+        "LG = LS + 10 lg(dfc/df),  av = -2 - lg(1 + (f/502)^2.5)",
+        "dL = LT - LG - av  (combustion engine, Annex E)",
+    ]
+    ax.text(0.015, 0.02, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="left", fontsize=8.5, color=COLOR_FG, family="monospace",
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "tone_audibility.svg")
+    plt.close()
+
+
 def generate_absorption_uncertainty(output_dir: str) -> None:
     """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
     print("Generating absorption_uncertainty...")
@@ -5166,6 +5227,7 @@ def generate_all(img_dir: str) -> None:
     generate_vibration_sound_power(img_dir)
     generate_structure_borne_power(img_dir)
     generate_installed_structure_borne(img_dir)
+    generate_tone_audibility(img_dir)
     generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 

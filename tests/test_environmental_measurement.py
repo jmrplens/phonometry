@@ -124,11 +124,16 @@ def test_survey_below_threshold_not_flagged() -> None:
 # Residual-noise correction (Formula 16, Annex I)
 # ---------------------------------------------------------------------------
 def test_residual_correction_formula16() -> None:
-    res = residual_sound_correction(58.0, 50.0)
-    expected = 10.0 * np.log10(10.0 ** 5.8 - 10.0 ** 5.0)
-    assert res.corrected_level == pytest.approx(expected)
-    assert res.margin == pytest.approx(8.0)
+    # Independent hand value: a source 10 dB above the residual (L'=60, Lres=50)
+    # gives 10*lg(10^6 - 10^5) = 10*lg(9e5) = 59.5424 dB.
+    res = residual_sound_correction(60.0, 50.0)
+    assert res.corrected_level == pytest.approx(59.5424, abs=1e-3)
+    assert res.margin == pytest.approx(10.0)
     assert res.reliable
+    # a second point cross-checked by hand: 58 over 50 -> 57.2506 dB
+    assert residual_sound_correction(58.0, 50.0).corrected_level == pytest.approx(
+        57.2506, abs=1e-3
+    )
 
 
 def test_residual_correction_unreliable_warns() -> None:
@@ -143,12 +148,10 @@ def test_residual_not_below_raises() -> None:
 
 
 def test_gaussian_residual_i1_i2() -> None:
-    assert gaussian_residual_level(50.0, l90=40.0) == pytest.approx(
-        50.0 + 0.115 * (10.0 / 1.28) ** 2
-    )
-    assert gaussian_residual_level(50.0, l95=38.0) == pytest.approx(
-        50.0 + 0.115 * (12.0 / 1.65) ** 2
-    )
+    # Independent hand values: (I.1) 50 + 0.115*(10/1.28)^2 = 57.019;
+    # (I.2) 50 + 0.115*(12/1.65)^2 = 56.0826.
+    assert gaussian_residual_level(50.0, l90=40.0) == pytest.approx(57.019, abs=1e-3)
+    assert gaussian_residual_level(50.0, l95=38.0) == pytest.approx(56.0826, abs=1e-3)
 
 
 def test_gaussian_residual_needs_one_percentile() -> None:
@@ -188,13 +191,14 @@ def test_expanded_uncertainty_bad_confidence() -> None:
 
 
 def test_residual_correction_uncertainty_f9() -> None:
-    """Formulae (F.7)/(F.8)/(F.9): sensitivity-weighted quadrature."""
-    lp, lres, u_lp, u_res = 58.0, 50.0, 0.5, 2.0
-    m = 10.0 ** (-0.1 * (lp - lres))
-    c_lp = 1.0 / (1.0 - m)
-    c_res = -m / (1.0 - m)
-    expected = np.hypot(c_lp * u_lp, c_res * u_res)
-    assert residual_correction_uncertainty(lp, lres, u_lp, u_res) == pytest.approx(expected)
+    """Formulae (F.7)/(F.8)/(F.9): sensitivity-weighted quadrature.
+
+    Independent hand value for (L'=58, Lres=50, uL'=0.5, ures=2.0): m=10^-0.8,
+    cL'=1.18834, cres=-0.18834 -> uL = hypot(0.59417, 0.37667) = 0.7035 dB.
+    """
+    assert residual_correction_uncertainty(58.0, 50.0, 0.5, 2.0) == pytest.approx(
+        0.7035, abs=1e-3
+    )
 
 
 def test_repeated_measurements() -> None:
@@ -202,12 +206,11 @@ def test_repeated_measurements() -> None:
     levels = [58.0, 59.0, 57.0, 60.0]
     res = uncertainty_from_repeated_measurements(levels)
     assert isinstance(res, RepeatedMeasurementResult)
-    # Lk is the energy mean (Formula 18); the uncertainty (Formula 20) takes the
-    # deviations from that energy mean, not from the arithmetic mean.
-    lk = 10.0 * np.log10(np.mean(10.0 ** (0.1 * np.array(levels))))
-    expected_uk = np.sqrt(np.sum((np.array(levels) - lk) ** 2) / (len(levels) - 1))
-    assert res.mean_level == pytest.approx(lk)
-    assert res.standard_uncertainty == pytest.approx(expected_uk)
+    # Independent hand values for [58, 59, 57, 60]: the energy mean (Formula 18)
+    # is 58.6428 dB and the standard uncertainty (Formula 20, deviations from
+    # that energy mean, N-1 denominator) is 1.3015 dB.
+    assert res.mean_level == pytest.approx(58.6428, abs=1e-3)
+    assert res.standard_uncertainty == pytest.approx(1.3015, abs=1e-3)
     assert res.n == 4
 
 

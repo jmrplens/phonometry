@@ -206,6 +206,13 @@ _ES_EXACT = {
     # reverberation_models figure (Sabine / Eyring / Millington / Fitzroy / Arau)
     "Reverberation-time prediction models":
         "Modelos de predicción del tiempo de reverberación",
+    # dynamic_stiffness figure (EN 29052-1)
+    "EN 29052-1 Floating-Floor Resonance":
+        "Resonancia de suelo flotante EN 29052-1",
+    r"Dynamic stiffness per unit area $s'$ [MN/m³]":
+        r"Rigidez dinámica por unidad de área $s'$ [MN/m³]",
+    r"Natural frequency $f_0$ [Hz]": r"Frecuencia natural $f_0$ [Hz]",
+    "design point": "punto de diseño",
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)":
         "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
@@ -3301,6 +3308,52 @@ def generate_reverberation_models(output_dir: str) -> None:
     plt.close()
 
 
+def generate_dynamic_stiffness(output_dir: str) -> None:
+    """EN 29052-1 floating-floor natural frequency f0(s') for typical floors."""
+    print("Generating dynamic_stiffness...")
+    from phonometry import natural_frequency
+
+    s_mn = np.logspace(np.log10(2.0), np.log10(100.0), 300)   # MN/m3
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    # Two typical floating-floor masses per unit area (light vs heavy screed).
+    for m, color, label in ((40.0, COLOR_SECONDARY, "m' = 40 kg/m^2"),
+                             (120.0, COLOR_PRIMARY, "m' = 120 kg/m^2")):
+        f0 = np.asarray(natural_frequency(s_mn * 1e6, m), dtype=float)
+        ax.plot(s_mn, f0, color=color, linewidth=2.2, label=label)
+
+    # A worked design point: s' = 10 MN/m3 on the 120 kg/m2 floor.
+    s0, m0 = 10.0, 120.0
+    f00 = float(natural_frequency(s0 * 1e6, m0))
+    ax.scatter([s0], [f00], color=COLOR_TERTIARY, s=90, zorder=6,
+               label=f"design point ({s0:g} MN/m^3, {f00:.0f} Hz)")
+    ax.plot([s0, s0], [0, f00], color=COLOR_GRID, ls=":", lw=1.0, zorder=1)
+    ax.plot([s_mn[0], s0], [f00, f00], color=COLOR_GRID, ls=":", lw=1.0, zorder=1)
+
+    ax.set_xscale("log")
+    ax.set_xlabel(r"Dynamic stiffness per unit area $s'$ [MN/m³]")
+    ax.set_ylabel(r"Natural frequency $f_0$ [Hz]")
+    ax.set_title("EN 29052-1 Floating-Floor Resonance", fontweight="bold", pad=12)
+    ax.set_ylim(bottom=0.0)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=10)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "f0 = (1/2pi) sqrt(s'/m')  (Formula 2)",
+        "s'  = s't + s'a  (clause 8.2)",
+        "s't = 4 pi^2 m't fr^2  (Formula 4)",
+        "s'a = p0/(d eps) ~ 111/d MN/m^3  (NOTE)",
+    ]
+    ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=10, color=COLOR_FG,
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "dynamic_stiffness.svg")
+    plt.close()
+
+
 def generate_absorption_uncertainty(output_dir: str) -> None:
     """ISO 12999-2 absorption-coefficient uncertainty: alpha_s with a +/-U ribbon."""
     print("Generating absorption_uncertainty...")
@@ -4799,6 +4852,7 @@ def generate_all(img_dir: str) -> None:
     generate_floor_covering_improvement(img_dir)
     generate_flanking_transmission(img_dir)
     generate_reverberation_models(img_dir)
+    generate_dynamic_stiffness(img_dir)
     generate_absorption_uncertainty(img_dir)
     generate_insulation_uncertainty_demo(img_dir)
 

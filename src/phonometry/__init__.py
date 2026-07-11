@@ -97,6 +97,15 @@ from .reverberation_prediction import (
     reverberation_time_models,
     sabine_reverberation_time,
 )
+from .dynamic_stiffness import (
+    DynamicStiffnessResult,
+    DynamicStiffnessWarning,
+    apparent_dynamic_stiffness,
+    enclosed_gas_stiffness,
+    floating_floor_resonance,
+    installed_dynamic_stiffness,
+    natural_frequency,
+)
 from .multiple_shock_vibration import (
     MultipleShockResult,
     acceleration_dose,
@@ -624,6 +633,13 @@ __all__ = [
     "arau_puchades_reverberation_time",
     "reverberation_time_models",
     "ReverberationModelResult",
+    "apparent_dynamic_stiffness",
+    "enclosed_gas_stiffness",
+    "installed_dynamic_stiffness",
+    "natural_frequency",
+    "floating_floor_resonance",
+    "DynamicStiffnessResult",
+    "DynamicStiffnessWarning",
     "combine_uncertainty",
     "monte_carlo",
     "rectangular",

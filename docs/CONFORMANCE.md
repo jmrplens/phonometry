@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **168/168 conformance checks pass** across 29 domains and 98 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **174/174 conformance checks pass** across 30 domains and 104 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -414,6 +414,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 17208-1:2016 | Radiated noise level from RMS pressure and distance, dB re 1 µPa·m | 46.0206 (+/-0.0001) | 46.0206 | 0 | &#9989; |
 | ISO 17208-2:2019 (Formula 3) | Lloyd's-mirror surface correction ΔL at a known k·d_s | -3.5211 (+/-0.0001) | -3.5211 | 0 | &#9989; |
 | ISO 18406:2017 (Formulae 8-9) | Cumulative SEL of N identical strikes = SEL_ss + 10·lg(N) | 196.9897 (+/-0) | 196.9897 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Underwater sound propagation (transmission loss)</b> — 100% (6/6)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Mackenzie (1981) nine-term equation | Speed of sound at 25 °C, 35 ‰, 1000 m (canonical check value), m/s | 1550.744 m/s (+/-0.01 m/s) | 1550.744 m/s | 0 m/s | &#9989; |
+| UNESCO/Chen-Millero vs Mackenzie | Sound-speed agreement at 10 °C, 35 ‰, 1000 m (cross-model), m/s | 1506.264 m/s (+/-1 m/s) | 1506.524 m/s | 0.261 m/s | &#9989; |
+| Spherical spreading 20·lg(R) | Geometrical spreading loss at R = 1000 m, dB | 60 dB (+/-0 dB) | 60 dB | 0 dB | &#9989; |
+| Thorp (1967) absorption | Volume absorption α at 10 kHz (cold deep water), dB/km | 1.1498 dB/km (+/-0 dB/km) | 1.1498 dB/km | 0 dB/km | &#9989; |
+| Ainslie-McColm (1998) vs Francois-Garrison (1982) | Absorption agreement at 10 kHz, 10 °C, 35 ‰, 0 m, pH 8, dB/km | 0.9603 dB/km (+/-0.096 dB/km) | 0.9866 dB/km | 0.026 dB/km | &#9989; |
+| Passive sonar equation (Urick/Etter) | Figure of merit SL − (NL − DI) − DT, dB | 85 dB (+/-0 dB) | 85 dB | 0 dB | &#9989; |
 
 </details>
 

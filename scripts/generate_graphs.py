@@ -525,6 +525,10 @@ _ES_EXACT = {
     "Pressure [Pa]": "Presión [Pa]",
     "Number of strikes N": "Número de golpes N",
     "Cumulative SEL [dB re 1 µPa²·s]": "SEL acumulado [dB re 1 µPa²·s]",
+    "ICAO Aircraft Flyover — Effective Perceived Noise Level (Annex 16)":
+        "Sobrevuelo de aeronave ICAO — Nivel efectivo de ruido percibido (Anexo 16)",
+    "Level [PNdB]": "Nivel [PNdB]",
+    "10 dB-down window": "Ventana 10 dB por debajo",
     # Building acoustics (EN 12354-1 flanking prediction, ISO 12999-1 uncertainty)
     "EN 12354-1 Flanking Transmission (Annex H.3 example)":
         "Transmisión por flancos EN 12354-1 (ejemplo del Anexo H.3)",
@@ -3308,6 +3312,50 @@ def generate_pile_driving(output_dir: str) -> None:
     plt.close()
 
 
+def generate_epnl(output_dir: str) -> None:
+    """ICAO aircraft-flyover EPNL: PNL/PNLT time history with the 10 dB-down window."""
+    print("Generating epnl...")
+    from phonometry import NOY_BANDS, effective_perceived_noise_level
+
+    k = 41
+    dt = 0.5
+    idx = np.arange(k)
+    # Broadband flyover spectrum with a mid-frequency emphasis, modulated by a
+    # Gaussian overall-level envelope; a fan tone in the 2500 Hz band adds a
+    # tone correction near the closest-point-of-approach.
+    shape = 15.0 * np.exp(-((np.log10(NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5)
+    gain = 30.0 * np.exp(-((idx - 20.0) ** 2) / (2 * 5.0**2)) - 5.0
+    spectra = (55.0 + shape)[None, :] + gain[:, None]
+    spectra[:, 17] += 12.0 * np.exp(-((idx - 20.0) ** 2) / (2 * 6.0**2))
+    res = effective_perceived_noise_level(spectra, dt)
+    kf, kl = res.band_limits
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.axvspan(res.times[kf], res.times[kl], color=COLOR_TERTIARY, alpha=0.15,
+               label="10 dB-down window")
+    ax.plot(res.times, res.pnl, color="#8c8c8c", linestyle="--", linewidth=1.4,
+            label="PNL")
+    ax.plot(res.times, res.pnlt, color=COLOR_PRIMARY, linewidth=2.2, label="PNLT")
+    km = int(np.argmax(res.pnlt))
+    ax.plot([res.times[km]], [res.pnltm], "o", color=COLOR_SECONDARY, markersize=9,
+            label=f"PNLTM = {res.pnltm:.1f} PNdB")
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Level [PNdB]")
+    ax.set_title(
+        "ICAO Aircraft Flyover — Effective Perceived Noise Level (Annex 16)",
+        fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.text(0.02, 0.95,
+            f"EPNL = {res.epnl:.1f} EPNdB\nD = {res.duration_correction:+.1f} dB",
+            transform=ax.transAxes, va="top", fontsize=10,
+            bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
+    plt.tight_layout()
+    save_figure(output_dir, "epnl.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -5725,6 +5773,9 @@ def generate_all(img_dir: str) -> None:
     # level (ISO 17208) and pile-driving sound exposure (ISO 18406).
     generate_ship_source_level(img_dir)
     generate_pile_driving(img_dir)
+
+    # Aircraft noise (plan-19B): ICAO Annex 16 Effective Perceived Noise Level.
+    generate_epnl(img_dir)
 
 
 # ===========================================================================

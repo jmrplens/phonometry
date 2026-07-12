@@ -81,8 +81,15 @@ def hydrophone_depths(
     """
     cpa = _positive(cpa_distance, "cpa_distance")
     ang = np.asarray(angles, dtype=np.float64)
-    if ang.size == 0 or np.any(ang <= 0.0) or np.any(ang >= 90.0):
-        raise ValueError("'angles' must lie in the open interval (0, 90) degrees.")
+    if (
+        ang.size == 0
+        or not np.all(np.isfinite(ang))
+        or np.any(ang <= 0.0)
+        or np.any(ang >= 90.0)
+    ):
+        raise ValueError(
+            "'angles' must be finite and lie in the open interval (0, 90) degrees."
+        )
     return np.asarray(cpa * np.tan(np.radians(ang)), dtype=np.float64)
 
 

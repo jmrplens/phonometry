@@ -102,6 +102,14 @@ def test_hydrophone_depths_rejects_bad_angles() -> None:
         hydrophone_depths(100.0, angles=(90.0,))
 
 
+def test_hydrophone_depths_rejects_non_finite_angles() -> None:
+    # NaN/inf angles must be rejected, not silently yield NaN depths.
+    with pytest.raises(ValueError):
+        hydrophone_depths(100.0, angles=(np.nan,))
+    with pytest.raises(ValueError):
+        hydrophone_depths(100.0, angles=(np.inf,))
+
+
 def test_source_level_uncertainty_bands() -> None:
     assert source_level_uncertainty(63.0) == 5.0
     assert source_level_uncertainty(100.0) == 5.0

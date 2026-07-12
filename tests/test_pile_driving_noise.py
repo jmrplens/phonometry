@@ -69,6 +69,12 @@ def test_cumulative_sel_identical_rejects_zero_strikes() -> None:
         cumulative_sel_identical(180.0, 0)
 
 
+def test_cumulative_sel_identical_rejects_fractional_strikes() -> None:
+    # A non-integer count must be rejected, not silently truncated to int().
+    with pytest.raises(ValueError):
+        cumulative_sel_identical(180.0, 1.9)  # type: ignore[arg-type]
+
+
 def test_pile_strike_metrics_bundle_and_plot() -> None:
     x = _pulse(100.0, 0.25)
     res = pile_strike_metrics(x, FS)

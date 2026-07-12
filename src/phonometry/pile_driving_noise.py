@@ -77,13 +77,17 @@ def cumulative_sel_identical(sel_ss: float, n_strikes: int) -> float:
     :param sel_ss: Single-strike SEL, in dB re 1 µPa²·s.
     :param n_strikes: Number of (identical) strikes, ``N ≥ 1``.
     :return: Cumulative SEL, in dB re 1 µPa²·s.
-    :raises ValueError: If ``n_strikes`` is below 1.
+    :raises ValueError: If ``n_strikes`` is not a whole number ``≥ 1``.
     """
-    if int(n_strikes) < 1:
+    n_float = float(n_strikes)
+    if not n_float.is_integer():
+        raise ValueError("'n_strikes' must be a whole number of strikes.")
+    n = int(n_float)
+    if n < 1:
         raise ValueError("'n_strikes' must be at least 1.")
     if not np.isfinite(sel_ss):
         raise ValueError("'sel_ss' must be finite.")
-    return float(float(sel_ss) + 10.0 * np.log10(int(n_strikes)))
+    return float(float(sel_ss) + 10.0 * np.log10(n))
 
 
 def _pulse_duration(pressure: "NDArray[np.float64]", fs: float) -> float:

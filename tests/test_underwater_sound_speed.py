@@ -42,7 +42,7 @@ def test_three_models_agree_in_common_domain() -> None:
     c_d = sea_water_sound_speed(10.0, 35.0, 1000.0, model="del_grosso", **kw)
     c_m = sea_water_sound_speed(10.0, 35.0, 1000.0, model="mackenzie", **kw)
     assert c_u == pytest.approx(1506.52, abs=0.05)
-    assert c_d == pytest.approx(1505.68, abs=0.05)
+    assert c_d == pytest.approx(1506.31, abs=0.05)
     assert c_m == pytest.approx(1506.26, abs=0.05)
     assert max(abs(c_u - c_d), abs(c_u - c_m), abs(c_d - c_m)) < 1.0
 

@@ -2777,6 +2777,17 @@ def _chk_uwp_unesco() -> Outcome:
 
 @register(
     _UW_PROP,
+    "Del Grosso (1974) vs Mackenzie",
+    "Sound-speed agreement at 10 °C, 35 ‰, 1000 m (cross-model), m/s",
+)
+def _chk_uwp_del_grosso() -> Outcome:
+    expected = ph.sea_water_sound_speed(10.0, 35.0, 1000.0, model="mackenzie")
+    got = ph.sea_water_sound_speed(10.0, 35.0, 1000.0, model="del_grosso")
+    return numeric(expected, got, 1.0, unit="m/s", places=3)
+
+
+@register(
+    _UW_PROP,
     "Spherical spreading 20·lg(R)",
     "Geometrical spreading loss at R = 1000 m, dB",
 )

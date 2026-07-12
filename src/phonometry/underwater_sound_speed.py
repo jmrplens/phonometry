@@ -197,7 +197,7 @@ def sea_water_sound_speed(
     if key == "unesco":
         return _unesco(t, s, pressure_bar)
     if key == "del_grosso":
-        return _del_grosso(t, s, pressure_bar / _KGCM2_PER_BAR)
+        return _del_grosso(t, s, pressure_bar * _KGCM2_PER_BAR)
     raise ValueError(f"'model' must be one of {_MODELS}, got {model!r}.")
 
 

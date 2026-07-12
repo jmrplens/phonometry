@@ -576,7 +576,9 @@ def plot_psychoacoustic_annoyance(
     colors = [_C_REFERENCE, _C_PRIMARY, _C_PRIMARY]
     positions = np.arange(len(labels))
     kwargs.setdefault("width", 0.6)
-    ax.bar(positions, values, color=colors, edgecolor=_C_EDGE, **kwargs)
+    kwargs.setdefault("color", colors)
+    kwargs.setdefault("edgecolor", _C_EDGE)
+    ax.bar(positions, values, **kwargs)
     ax.set_xticks(positions)
     ax.set_xticklabels(labels)
     ax.set_ylabel("Value")

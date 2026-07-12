@@ -205,10 +205,13 @@ def _cross_covariance(x: "NDArray[np.float64]", y: "NDArray[np.float64]") -> flo
     num = float(np.sum(x * y)) - sx * sy / n
     dx = float(np.sum(x * x)) - sx * sx / n
     dy = float(np.sum(y * y)) - sy * sy / n
-    denom = np.sqrt(dx * dy)
-    if denom <= 0.0:
+    # Guard against catastrophic cancellation: for a (near-)constant band
+    # envelope dx or dy can turn slightly negative, and sqrt(dx*dy) would then
+    # be NaN (which slips past a ``denom <= 0`` test and poisons the sum).
+    product = dx * dy
+    if product <= 0.0:
         return 0.0
-    return float(num / denom)
+    return float(num / np.sqrt(product))
 
 
 def _validate_signal(x: "NDArray[np.float64]") -> "NDArray[np.float64]":
@@ -222,15 +225,19 @@ def _validate_signal(x: "NDArray[np.float64]") -> "NDArray[np.float64]":
     return sig
 
 
+#: Monotone frequency grid and its Bark image for the numerical inversion of
+#: Eq. 3, built once at import (see :func:`_bark_center_hz`).
+_INV_GRID_HZ = np.linspace(20.0, 20000.0, 20000)
+_INV_GRID_BARK = _hz_to_bark(_INV_GRID_HZ)
+
+
 def _bark_center_hz(z: "NDArray[np.float64] | float") -> Any:
     """Approximate inverse of :func:`_hz_to_bark` for a band centre (Hz).
 
     Accepts a scalar or an array of critical-band rates and returns the matching
-    frequencies by numerical inversion of Eq. 3 on a monotone grid.
+    frequencies by numerical inversion of Eq. 3 on a precomputed monotone grid.
     """
-    grid = np.linspace(20.0, 20000.0, 20000)
-    zz = _hz_to_bark(grid)
-    return np.interp(z, zz, grid)
+    return np.interp(z, _INV_GRID_BARK, _INV_GRID_HZ)
 
 
 def _analyze(sig: "NDArray[np.float64]") -> tuple["NDArray[np.float64]", "NDArray[np.float64]", "NDArray[np.float64]"]:

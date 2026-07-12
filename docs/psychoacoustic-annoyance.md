@@ -172,6 +172,9 @@ ax2.plot(fm_tone, f_tone, "s--", color="tab:green", label="AM tone (signal model
 ax.axvline(4.0, ls="--", color="0.4")
 ax.set_xlabel("Modulation frequency f_mod [Hz]")
 ax.set_ylabel("Fluctuation strength F [vacil]")
+h1, l1 = ax.get_legend_handles_labels()
+h2, l2 = ax2.get_legend_handles_labels()
+ax.legend(h1 + h2, l1 + l2, loc="upper right")
 plt.show()
 ```
 

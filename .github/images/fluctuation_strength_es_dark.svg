@@ -565,15 +565,15 @@ z
    </g>
    <g id="legend_1">
     <g id="patch_8">
-     <path d="M 327.956406 77.580234 
-L 662.759219 77.580234 
-Q 664.559219 77.580234 664.559219 75.780234 
+     <path d="M 327.956406 77.220234 
+L 662.759219 77.220234 
+Q 664.559219 77.220234 664.559219 75.420234 
 L 664.559219 35.098125 
 Q 664.559219 33.298125 662.759219 33.298125 
 L 327.956406 33.298125 
 Q 326.156406 33.298125 326.156406 35.098125 
-L 326.156406 75.780234 
-Q 326.156406 77.580234 327.956406 77.580234 
+L 326.156406 75.420234 
+Q 326.156406 77.220234 327.956406 77.220234 
 z
 " style="opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
@@ -587,18 +587,18 @@ L 347.756406 40.946719
      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="354.956406" y="44.096719" transform="rotate(-0 354.956406 44.096719)">Ruido de banda ancha AM (forma cerrada, 60 dB), máximo 3,7 vacil</text>
     </g>
     <g id="line2d_58">
-     <path d="M 329.756406 54.807422 
-L 338.756406 54.807422 
-L 347.756406 54.807422 
+     <path d="M 329.756406 54.447422 
+L 338.756406 54.447422 
+L 347.756406 54.447422 
 " style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #ffffff; stroke-opacity: 0.7"/>
     </g>
     <g id="text_22">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="354.956406" y="57.957422" transform="rotate(-0 354.956406 57.957422)">máximo a 4 Hz</text>
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="354.956406" y="57.597422" transform="rotate(-0 354.956406 57.597422)">referencia 4 Hz</text>
     </g>
     <g id="line2d_59">
-     <path d="M 329.756406 68.668125 
-L 338.756406 68.668125 
-L 347.756406 68.668125 
+     <path d="M 329.756406 68.308125 
+L 338.756406 68.308125 
+L 347.756406 68.308125 
 " style="fill: none; stroke-dasharray: 6.66,2.88; stroke-dashoffset: 0; stroke: #2ca02c; stroke-width: 1.8"/>
      <defs>
       <path id="md78b316311" d="M -3.5 3.5 
@@ -609,11 +609,11 @@ z
 " style="stroke: #2ca02c; stroke-linejoin: miter"/>
      </defs>
      <g>
-      <use xlink:href="#md78b316311" x="338.756406" y="68.668125" style="fill: #2ca02c; stroke: #2ca02c; stroke-linejoin: miter"/>
+      <use xlink:href="#md78b316311" x="338.756406" y="68.308125" style="fill: #2ca02c; stroke: #2ca02c; stroke-linejoin: miter"/>
      </g>
     </g>
     <g id="text_23">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="354.956406" y="71.818125" transform="rotate(-0 354.956406 71.818125)">Tono AM (modelo de señal, 70 dB), máximo 1,09 vacil</text>
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="354.956406" y="71.458125" transform="rotate(-0 354.956406 71.458125)">Tono AM (modelo de señal, 70 dB), máximo 1,09 vacil</text>
     </g>
    </g>
    <g id="line2d_60">

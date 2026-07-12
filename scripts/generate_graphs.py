@@ -491,7 +491,7 @@ _ES_EXACT = {
     "Fluctuation strength F [vacil]": "Intensidad de fluctuación F [vacil]",
     "AM-tone F, signal model [vacil]":
         "F de tono AM, modelo de señal [vacil]",
-    "peak at 4 Hz": "máximo a 4 Hz",
+    "4 Hz reference": "referencia 4 Hz",
     "Psychoacoustic Annoyance vs Loudness (Fastl & Zwicker)":
         "Molestia psicoacústica vs sonoridad (Fastl y Zwicker)",
     "Percentile loudness N5 [sone]": "Sonoridad percentil N5 [sonios]",
@@ -2964,7 +2964,7 @@ def generate_fluctuation_strength(output_dir: str) -> None:
     ax.plot(fmod[bbn_peak], f_bbn[bbn_peak], "o", color=COLOR_PRIMARY,
             markersize=8, markerfacecolor="white", markeredgewidth=1.6, zorder=6)
     ax.axvline(4.0, color=COLOR_FG, linestyle="--", linewidth=1.0, alpha=0.7,
-               label="peak at 4 Hz")
+               label="4 Hz reference")
     ax.set_xlabel("Modulation frequency f_mod [Hz]")
     ax.set_ylabel("Fluctuation strength F [vacil]")
     ax.set_ylim(0.0, float(f_bbn.max()) * 1.18)

@@ -865,7 +865,7 @@ ISO20065_FD_137 = 24.09
 # PA is exact. Worked tuple (N5, S, F, R) = (30 sone, 2.0 acum, 0.5 vacil,
 # 0.3 asper) -> the terms and PA computed by hand from Eqs 16.2-16.4:
 #   wS  = (2.0 - 1.75) * 0.25 * lg(30 + 10)          = 0.100129
-#   wFR = (2.18 / 30**0.4) * (0.4*0.5 + 0.6*0.3)     = 0.212475
+#   wFR = (2.18 / 30**0.4) * (0.4*0.5 + 0.6*0.3)     = 0.212516
 #   PA  = 30 * sqrt(1 + wS**2 + wFR**2)              = 30.8167
 PA_WORKED_INPUT = (30.0, 2.0, 0.5, 0.3)  # (N5, S, F, R)
 PA_WORKED_WS = 0.100129

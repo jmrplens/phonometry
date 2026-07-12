@@ -140,3 +140,115 @@ def perceived_noise_level(spl: "NDArray[np.float64] | list[float]") -> float:
     if total <= 0.0:
         return 0.0
     return float(40.0 + _PNL_FACTOR * np.log10(total))
+
+
+#: First band of the tone-correction routine (band 3 = 80 Hz, 0-based index 2).
+_TONE_START = 2
+
+
+def _tone_background(
+    spl: "NDArray[np.float64] | list[float]",
+) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+    """Tone-correction background level ``SPL''`` and excess ``F`` (App. 2 §4.3).
+
+    Implements Steps 1-8 of the slope ("encircling") method: slopes, the
+    encircling of irregular slopes, the adjusted spectrum ``SPL'``, its smoothed
+    slopes, the background ``SPL''`` and the tone excess ``F = SPL − SPL''``.
+    Bands 1-2 (50, 63 Hz) do not participate; the routine starts at 80 Hz.
+
+    :return: ``(spl_background, excess_f)``, each length 24; entries below the
+        start band are zero.
+    """
+    sig = _validate_spectrum(spl)
+    n = 24
+    start = _TONE_START
+
+    # Step 1: slopes s(i) = SPL(i) − SPL(i−1), starting at band 4 (index 3).
+    s = np.full(n, np.nan)
+    for i in range(start + 1, n):
+        s[i] = sig[i] - sig[i - 1]
+
+    # Step 2: encircle a slope where |s(i) − s(i−1)| > 5.
+    s_enc = np.zeros(n, dtype=bool)
+    for i in range(start + 1, n):
+        if not np.isnan(s[i]) and not np.isnan(s[i - 1]) and abs(s[i] - s[i - 1]) > 5.0:
+            s_enc[i] = True
+
+    # Step 3: mark which SPL value to adjust.
+    spl_marked = np.zeros(n, dtype=bool)
+    for i in range(start + 1, n):
+        if not s_enc[i]:
+            continue
+        if s[i] > 0.0 and (np.isnan(s[i - 1]) or s[i] > s[i - 1]):
+            spl_marked[i] = True
+        elif s[i] <= 0.0 and not np.isnan(s[i - 1]) and s[i - 1] > 0.0:
+            spl_marked[i - 1] = True
+
+    # Step 4: adjusted spectrum SPL'.
+    spl2 = sig.copy()
+    for i in range(start, n):
+        if spl_marked[i]:
+            if i < n - 1:
+                spl2[i] = 0.5 * (sig[i - 1] + sig[i + 1])
+            else:  # last band: SPL'(24) = SPL(23) + s(23)
+                spl2[i] = sig[i - 1] + s[i - 1]
+
+    # Step 5: new slopes s'(i); s'(start) = s'(start+1); imaginary 25th slope.
+    sp = np.full(n, np.nan)
+    for i in range(start + 1, n):
+        sp[i] = spl2[i] - spl2[i - 1]
+    sp[start] = sp[start + 1]
+    s_imaginary = sp[n - 1]
+
+    # Step 6: 3-point running mean s̄(i), i = start … n−2.
+    sbar = np.full(n, np.nan)
+    for i in range(start, n - 1):
+        third = sp[i + 2] if i + 2 < n else s_imaginary
+        sbar[i] = (sp[i] + sp[i + 1] + third) / 3.0
+
+    # Step 7: background SPL''(start) = SPL(start); accumulate the smoothed slopes.
+    spl3 = np.full(n, np.nan)
+    spl3[start] = sig[start]
+    for i in range(start + 1, n):
+        spl3[i] = spl3[i - 1] + sbar[i - 1]
+
+    # Step 8: tone excess F = SPL − SPL''.
+    excess = np.zeros(n)
+    for i in range(start, n):
+        excess[i] = sig[i] - spl3[i]
+
+    spl3 = np.where(np.isnan(spl3), 0.0, spl3)
+    return np.asarray(spl3, dtype=np.float64), np.asarray(excess, dtype=np.float64)
+
+
+def _tone_factor(excess: float, frequency: float) -> float:
+    """Tone-correction factor ``C`` from the excess ``F`` (App. 2 Table A2-2)."""
+    if not np.isfinite(excess) or excess < 1.5:
+        return 0.0
+    if 500.0 <= frequency <= 5000.0:
+        if excess < 3.0:
+            return 2.0 * excess / 3.0 - 1.0
+        if excess < 20.0:
+            return excess / 3.0
+        return 20.0 / 3.0
+    if excess < 3.0:
+        return excess / 3.0 - 0.5
+    if excess < 20.0:
+        return excess / 6.0
+    return 10.0 / 3.0
+
+
+def tone_correction(spl: "NDArray[np.float64] | list[float]") -> float:
+    """Tone-correction factor ``C`` for a spectrum (ICAO Annex 16 App. 2 §4.3).
+
+    The maximum over bands of the tone-correction factor derived from the tone
+    excess ``F`` above the smoothed background, with the 1.5 dB threshold, the
+    500 Hz / 5000 Hz frequency split and the 6⅔ dB cap of Table A2-2.
+
+    :param spl: The 24 one-third-octave-band sound pressure levels, in dB.
+    :return: The tone-correction factor ``C``, in dB (0 if no tones qualify).
+    :raises ValueError: If the spectrum is not 24 finite levels.
+    """
+    _, excess = _tone_background(spl)
+    factors = [_tone_factor(float(excess[i]), float(NOY_BANDS[i])) for i in range(24)]
+    return float(max(factors))

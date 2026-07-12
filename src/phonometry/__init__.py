@@ -34,6 +34,7 @@ from .environmental_measurement import (
 )
 from .compliance import (
     class_limits,
+    verify_aircraft_noise_system,
     verify_filter_class,
     verify_weighting_class,
     weighting_class_limits,
@@ -1132,6 +1133,7 @@ __all__ = [
     "RepeatedMeasurementResult",
     "CalibrationWarning",
     "verify_filter_class",
+    "verify_aircraft_noise_system",
     "class_limits",
     "verify_weighting_class",
     "weighting_class_limits",

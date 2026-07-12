@@ -313,6 +313,11 @@ export default defineConfig({
           items: ['guides/underwater-acoustics'],
         },
         {
+          label: 'Aircraft noise',
+          translations: { es: 'Ruido de aeronaves' },
+          items: ['guides/aircraft-noise'],
+        },
+        {
           label: 'Hearing & occupational exposure',
           translations: { es: 'Audición y exposición laboral' },
           items: [

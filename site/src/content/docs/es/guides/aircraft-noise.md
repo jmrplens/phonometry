@@ -1,0 +1,109 @@
+---
+title: "Ruido de aeronaves: nivel efectivo de ruido percibido"
+description: "El nivel efectivo de ruido percibido (EPNL) de la ICAO Anexo 16 Vol. I Apéndice 2: la molestia percibida y el PNL, la corrección tonal por el método de pendientes, la corrección por duración de 10 dB por debajo, y el verificador de sistema de medida IEC 61265."
+---
+
+El **nivel efectivo de ruido percibido (EPNL)** es la métrica de certificación
+acústica de las aeronaves de transporte. Condensa una historia temporal
+espectral de tercio de octava (cada medio segundo) de un sobrevuelo en un único
+número, en EPNdB, mediante cinco pasos del **Anexo 16 de la ICAO, Vol. I,
+Apéndice 2**. Esta página cubre las cuatro primitivas que construyen la métrica
+y el verificador de sistema de medida IEC 61265. Cada magnitud se valida contra
+los ejemplos trabajados del Manual Técnico Ambiental (ETM) Vol. I, ICAO
+Doc 9501.
+
+## Molestia percibida y PNL
+
+Cada uno de los 24 niveles de banda de tercio de octava (50 Hz–10 kHz) se
+convierte en una **molestia** percibida en noys mediante la ley analítica a
+trozos de la Tabla A2-3, y se combinan en la molestia total
+`N = 0.85·n_max + 0.15·Σn` y el nivel de ruido percibido
+`PNL = 40 + (10/lg2)·lg N`.
+
+```python
+import phonometry as ph
+
+noys = ph.perceived_noisiness(spl)      # noys por banda (spl = 24 niveles, dB)
+pnl = ph.perceived_noise_level(spl)      # PNdB
+```
+
+## Corrección tonal
+
+Las irregularidades espectrales (tonos de ventilador/turbina) se penalizan con
+una **corrección tonal** `C`, hallada con el método de pendientes ("encircling"):
+las pendientes se suavizan a un espectro de fondo `SPL''`, el exceso tonal
+`F = SPL − SPL''` por encima de 1,5 dB se mapea a un factor de corrección
+(división de frecuencia en 500 Hz / 5000 Hz, con tope de 6⅔ dB) y se toma el
+máximo sobre las bandas. La implementación reproduce exactamente el ejemplo del
+turbofán de la Tabla 3-7 del ETM Vol. I (`C = 2,0 dB` en 2500 Hz).
+
+```python
+c = ph.tone_correction(spl)              # dB; se suma al PNL para dar PNLT
+```
+
+## EPNL
+
+Sobre el sobrevuelo, `PNLT = PNL + C`, su máximo es `PNLTM`, y la métrica integra
+`PNLT` sobre la ventana de 10 dB por debajo (los registros más cercanos a
+`PNLTM − 10` a cada lado) normalizada a 10 s, de modo que `EPNL = PNLTM + D` con
+la corrección por duración `D`.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/epnl_es.svg" alt="Historia temporal del nivel de ruido percibido de un sobrevuelo de aeronave: PNL y el PNLT corregido por tonos en función del tiempo, con el máximo PNLTM marcado y la ventana de integración de 10 dB por debajo sombreada, anotada con el EPNL resultante y la corrección por duración" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/epnl_es_dark.svg" alt="Historia temporal del nivel de ruido percibido de un sobrevuelo de aeronave: PNL y el PNLT corregido por tonos en función del tiempo, con el máximo PNLTM marcado y la ventana de integración de 10 dB por debajo sombreada, anotada con el EPNL resultante y la corrección por duración" style="width:82%">
+
+```python
+import phonometry as ph
+
+# spectra: un array (K, 24) de niveles de tercio de octava muestreado cada dt s
+res = ph.effective_perceived_noise_level(spectra, dt=0.5)
+print(res.epnl, res.pnltm, res.duration_correction, res.band_limits)
+res.plot()   # historia temporal PNL/PNLT (requiere matplotlib)
+```
+
+`effective_perceived_noise_level` devuelve un `EPNLResult` con el `pnl` por
+registro, la `tone_correction`, el `pnlt`, el máximo `pnltm`, la
+`duration_correction`, el `epnl` y los `band_limits` de 10 dB por debajo. El
+ejemplo del método integrado en condiciones de referencia de la Tabla 4-4 del
+ETM Vol. I se reproduce como `EPNL = 92,6 EPNdB`.
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import phonometry as ph
+
+k, dt = 41, 0.5
+idx = np.arange(k)
+shape = 15.0 * np.exp(-((np.log10(ph.NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5)
+gain = 30.0 * np.exp(-((idx - 20.0) ** 2) / (2 * 5.0**2)) - 5.0
+spectra = (55.0 + shape)[None, :] + gain[:, None]
+spectra[:, 17] += 12.0 * np.exp(-((idx - 20.0) ** 2) / (2 * 6.0**2))  # tono de ventilador 2500 Hz
+ph.effective_perceived_noise_level(spectra, dt).plot()
+```
+
+</details>
+
+## Verificación del sistema de medida (IEC 61265)
+
+`verify_aircraft_noise_system` comprueba el rendimiento medido contra las
+tolerancias de la IEC 61265:1995: los límites de respuesta direccional del
+micrófono (Tabla 1) y los límites escalares de respuesta en frecuencia,
+linealidad y resolución. El filtrado de tercio de octava lo cubre la
+verificación de clase 2 de filtros IEC 61260 de la librería.
+
+```python
+import phonometry as ph
+
+report = ph.verify_aircraft_noise_system(
+    directional={4000.0: {30: 0.4, 60: 0.9, 90: 1.9, 120: 2.4, 150: 2.4}},
+    frequency_response={1000.0: 1.2},
+)
+print(report["passed"], report["checks"])
+```
+
+---
+
+**Normas.** ICAO Anexo 16 Vol. I Apéndice 2 (procedimiento EPNL), ICAO Doc 9501
+ETM Vol. I (oráculos de ejemplo trabajado), IEC 61265:1995 (tolerancias del
+sistema de medida). La cadena completa de corrección de certificación y las
+curvas de ruido de aeropuerto quedan fuera del alcance aquí.

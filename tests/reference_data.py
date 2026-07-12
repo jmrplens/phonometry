@@ -886,3 +886,23 @@ FS_CALIBRATION_VACIL = 1.00
 # r >= 0.9, band-pass peak at 4 Hz, within ~2x), not the exact figures.
 FS_AM_TONE_FMOD_HZ = [1.0, 2.0, 4.0, 8.0, 16.0, 32.0]
 FS_AM_TONE_70DB_LITERATURE = [0.39, 0.84, 1.25, 1.30, 0.36, 0.06]
+
+# ---------------------------------------------------------------------------
+# Electroacoustic distortion (IEC 60268-3:2013) and frequency response
+# (Bendat & Piersol, Random Data 4e). All quantities are exact analytic
+# oracles evaluated on synthetic signals with known harmonic / intermodulation
+# amplitudes, or on a known LTI path.
+# ---------------------------------------------------------------------------
+# A 1 kHz fundamental (a1 = 1) with harmonics a2 = 0.1, a3 = 0.05, a4 = 0.02.
+#   THD_F = sqrt(a2^2 + a3^2 + a4^2) / a1            = 0.1135782
+#   THD_R = sqrt(a2^2 + a3^2 + a4^2) / sqrt(sum a^2) = 0.1128526
+#   d2    = a2 / sqrt(sum a^2)                       = 0.0993612
+DISTORTION_HARMONICS = (1.0, 0.1, 0.05, 0.02)  # a1..a4
+DISTORTION_THD_F = 0.11357816691600547
+DISTORTION_THD_R = 0.11285260010027609
+DISTORTION_D2 = 0.09936117403949127
+
+# Ordinary coherence of a signal-plus-independent-noise output with a flat
+# (frequency-independent) SNR: gamma^2 = SNR / (1 + SNR). At SNR = 10 -> 0.90909.
+COHERENCE_SNR = 10.0
+COHERENCE_EXPECTED = COHERENCE_SNR / (1.0 + COHERENCE_SNR)

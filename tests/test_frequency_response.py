@@ -1,0 +1,115 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""Tests for the frequency-response / coherence estimators (Bendat & Piersol).
+
+The H1/H2 estimators recover a known LTI response, the coherence is unity for a
+noiseless path and drops to ``SNR/(1+SNR)`` with additive output noise, and H2
+is biased high (relative to H1) when the output is noisy.
+"""
+
+from __future__ import annotations
+
+import matplotlib
+
+matplotlib.use("Agg")
+import numpy as np
+import pytest
+from scipy import signal as sp_signal
+
+import reference_data as ref
+from phonometry import FrequencyResponseResult, coherence, transfer_function
+
+FS = 48000
+N = 400000
+
+
+def _known_system() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """White-noise input through a first-order low-pass IIR; return x, y, b, a."""
+    rng = np.random.default_rng(1)
+    x = rng.standard_normal(N)
+    b, a = sp_signal.butter(1, 2000.0 / (FS / 2.0), btype="low")
+    y = sp_signal.lfilter(b, a, x)
+    return x, y, b, a
+
+
+def test_h1_recovers_known_magnitude_and_phase() -> None:
+    x, y, b, a = _known_system()
+    res = transfer_function(x, y, FS, estimator="H1")
+    _, h = sp_signal.freqz(b, a, worN=res.frequencies, fs=FS)
+    idx = int(np.argmin(np.abs(res.frequencies - 1000.0)))
+    assert abs(res.response[idx]) == pytest.approx(abs(h[idx]), rel=0.02)
+    assert res.phase[idx] == pytest.approx(np.angle(h[idx]), abs=0.02)
+
+
+def test_h2_recovers_known_magnitude() -> None:
+    x, y, b, a = _known_system()
+    res = transfer_function(x, y, FS, estimator="H2")
+    _, h = sp_signal.freqz(b, a, worN=res.frequencies, fs=FS)
+    idx = int(np.argmin(np.abs(res.frequencies - 1000.0)))
+    # Noiseless path: H1 and H2 agree with the true response.
+    assert abs(res.response[idx]) == pytest.approx(abs(h[idx]), rel=0.02)
+
+
+def test_coherence_unity_for_noiseless_path() -> None:
+    x, y, _, _ = _known_system()
+    f, g = coherence(x, y, FS)
+    band = (f > 100.0) & (f < 5000.0)
+    assert np.mean(g[band]) == pytest.approx(1.0, abs=1e-3)
+    assert np.all(g <= 1.0 + 1e-9) and np.all(g >= 0.0)
+
+
+def test_coherence_matches_snr_formula() -> None:
+    # Identity system so the SNR is flat across frequency: y = x + noise with
+    # x-power 1 and noise-power 1/SNR -> gamma^2 = SNR/(1+SNR).
+    rng = np.random.default_rng(3)
+    x = rng.standard_normal(N)
+    noise = rng.standard_normal(N) * np.sqrt(1.0 / ref.COHERENCE_SNR)
+    y = x + noise
+    f, g = coherence(x, y, FS)
+    band = (f > 500.0) & (f < 20000.0)
+    assert np.mean(g[band]) == pytest.approx(ref.COHERENCE_EXPECTED, abs=0.01)
+
+
+def test_h2_biased_above_h1_with_output_noise() -> None:
+    x, y, _, _ = _known_system()
+    rng = np.random.default_rng(4)
+    noise = rng.standard_normal(N) * np.sqrt(np.mean(y**2) / 5.0)
+    yn = y + noise
+    h1 = transfer_function(x, yn, FS, estimator="H1")
+    h2 = transfer_function(x, yn, FS, estimator="H2")
+    idx = int(np.argmin(np.abs(h1.frequencies - 1000.0)))
+    # Output noise inflates Gyy, so |H2| > |H1| in the noisy band.
+    assert abs(h2.response[idx]) > abs(h1.response[idx])
+
+
+def test_result_fields_and_plot() -> None:
+    x, y, _, _ = _known_system()
+    res = transfer_function(x, y, FS)
+    assert isinstance(res, FrequencyResponseResult)
+    assert res.estimator == "H1"
+    assert res.magnitude_db.shape == res.frequencies.shape
+    axes = res.plot()
+    assert len(axes) == 3
+
+
+def test_rejects_mismatched_lengths() -> None:
+    with pytest.raises(ValueError):
+        transfer_function(np.zeros(1000), np.zeros(500), FS)
+
+
+def test_rejects_bad_estimator_and_overlap() -> None:
+    x = np.zeros(1000)
+    with pytest.raises(ValueError):
+        transfer_function(x, x, FS, estimator="H3")  # type: ignore[arg-type]
+    with pytest.raises(ValueError):
+        transfer_function(x, x, FS, overlap=1.0)
+
+
+def test_rejects_bad_nperseg() -> None:
+    x = np.zeros(1000)
+    with pytest.raises(ValueError):
+        transfer_function(x, x, FS, nperseg=5000)
+
+
+def test_rejects_too_short_signal() -> None:
+    with pytest.raises(ValueError):
+        coherence(np.zeros(10), np.zeros(10), FS)

@@ -2510,6 +2510,152 @@ def _chk_fluctuation_strength_calibration() -> Outcome:
 
 
 # ===========================================================================
+# Electroacoustics: distortion & frequency response (IEC 60268-3 / Bendat)
+# ===========================================================================
+_ELECTRO = "Electroacoustics: distortion & frequency response"
+
+
+def _electro_fs() -> int:
+    return 48000
+
+
+def _electro_harmonic_signal() -> np.ndarray:
+    fs = _electro_fs()
+    t = np.arange(fs) / fs  # 1 s, tones on integer bins
+    a1, a2, a3, a4 = ref.DISTORTION_HARMONICS
+    sig = (
+        a1 * np.sin(2.0 * np.pi * 1000.0 * t)
+        + a2 * np.sin(2.0 * np.pi * 2000.0 * t)
+        + a3 * np.sin(2.0 * np.pi * 3000.0 * t)
+        + a4 * np.sin(2.0 * np.pi * 4000.0 * t)
+    )
+    return np.asarray(sig, dtype=np.float64)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.2-3)",
+    "THD (rel. fundamental) of a synthetic 4-harmonic signal",
+)
+def _chk_thd_f() -> Outcome:
+    value = ph.thd(_electro_harmonic_signal(), _electro_fs(), 1000.0, kind="F")
+    return numeric(ref.DISTORTION_THD_F, value, 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.5)",
+    "2nd-order harmonic distortion d2 (rel. total)",
+)
+def _chk_harmonic_d2() -> Outcome:
+    value = ph.harmonic_distortion(_electro_harmonic_signal(), _electro_fs(), 1000.0, 2)
+    return numeric(ref.DISTORTION_D2, value, 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.7)",
+    "SMPTE modulation distortion of a known two-tone signal",
+)
+def _chk_smpte() -> Outcome:
+    fs = _electro_fs()
+    t = np.arange(fs) / fs
+    fl, fh, ah = 250.0, 8000.0, 0.25
+
+    def tone(f: float, a: float) -> np.ndarray:
+        return a * np.sin(2.0 * np.pi * f * t)
+
+    x = (
+        tone(fl, 1.0)
+        + tone(fh, ah)
+        + tone(fh + fl, 0.02)
+        + tone(fh - fl, 0.02)
+        + tone(fh + 2 * fl, 0.01)
+        + tone(fh - 2 * fl, 0.01)
+    )
+    expected = math.sqrt(0.02**2 + 0.02**2 + 0.01**2 + 0.01**2) / ah
+    return numeric(expected, ph.modulation_distortion(x, fs, fl, fh), 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.8)",
+    "CCIF difference-frequency distortion (2nd order) of a two-tone signal",
+)
+def _chk_ccif() -> Outcome:
+    fs = _electro_fs()
+    t = np.arange(fs) / fs
+    f1, f2 = 13000.0, 14000.0
+
+    def tone(f: float, a: float) -> np.ndarray:
+        return a * np.sin(2.0 * np.pi * f * t)
+
+    x = tone(f1, 0.5) + tone(f2, 0.5) + tone(f2 - f1, 0.03)
+    return numeric(
+        0.03 / 0.5,
+        ph.difference_frequency_distortion(x, fs, f1, f2, order=2),
+        1e-4,
+        places=6,
+    )
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.9)",
+    "DIM of the 15 kHz / 3.15 kHz signal (Table 2, 9 products)",
+)
+def _chk_dim() -> Outcome:
+    fs = _electro_fs()
+    t = np.arange(fs) / fs
+    fsine, fsq = 15000.0, 3150.0
+    comps = sorted(
+        round(abs(k * fsq - fsine), 6) for k in range(1, 10) if abs(k * fsq - fsine) < fsine
+    )
+    amps = [0.01 * (i + 1) for i in range(len(comps))]
+    # 15 kHz sine + the strong 3.15 kHz fundamental + the nine products.
+    x = np.sin(2.0 * np.pi * fsine * t) + 0.8 * np.sin(2.0 * np.pi * fsq * t)
+    for c, a in zip(comps, amps):
+        x = x + a * np.sin(2.0 * np.pi * c * t)
+    expected = math.sqrt(sum(a**2 for a in amps))
+    return numeric(expected, ph.dynamic_intermodulation_distortion(x, fs), 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "Bendat & Piersol, Random Data 4e",
+    "H1 recovers a known first-order IIR gain at 1 kHz",
+)
+def _chk_h1_gain() -> Outcome:
+    fs = _electro_fs()
+    rng = np.random.default_rng(1)
+    x = rng.standard_normal(200000)
+    b, a = sg.butter(1, 2000.0 / (fs / 2.0), btype="low")
+    y = sg.lfilter(b, a, x)
+    res = ph.transfer_function(x, y, fs, estimator="H1")
+    _, h = sg.freqz(b, a, worN=res.frequencies, fs=fs)
+    idx = int(np.argmin(np.abs(res.frequencies - 1000.0)))
+    return numeric(
+        float(np.abs(h[idx])), float(np.abs(res.response[idx])), 0.02, rel=True, places=4
+    )
+
+
+@register(
+    _ELECTRO,
+    "Bendat & Piersol, Random Data 4e",
+    "Ordinary coherence = 1 for a noiseless LTI path",
+)
+def _chk_coherence_unity() -> Outcome:
+    fs = _electro_fs()
+    rng = np.random.default_rng(1)
+    x = rng.standard_normal(200000)
+    b, a = sg.butter(1, 2000.0 / (fs / 2.0), btype="low")
+    y = sg.lfilter(b, a, x)
+    f, g = ph.coherence(x, y, fs)
+    band = (f > 100.0) & (f < 5000.0)
+    return numeric(1.0, float(np.mean(g[band])), 1e-3, places=6)
+
+
+# ===========================================================================
 # Markdown rendering
 # ===========================================================================
 def _snap(value: float, eps: float = 5e-4) -> float:

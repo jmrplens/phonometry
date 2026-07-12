@@ -842,14 +842,16 @@ def plot_wind_turbine_tonality(
     :param kwargs: Forwarded to the spectrum ``plot`` call.
     :return: The axes.
     """
+    from .wind_turbine_noise import _critical_band_edges
+
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     levels = np.asarray(result.levels, dtype=np.float64)
-    fc, cbw = result.tone_frequency, result.critical_bandwidth
+    fc = result.tone_frequency
+    lo, hi = _critical_band_edges(fc)
     kwargs.setdefault("color", _C_PRIMARY)
     ax.plot(freqs, levels, lw=1.0, label="Narrowband spectrum", **kwargs)
-    ax.axvspan(fc - cbw / 2.0, fc + cbw / 2.0, color=_C_TERTIARY, alpha=0.12,
-               label="Critical band")
+    ax.axvspan(lo, hi, color=_C_TERTIARY, alpha=0.12, label="Critical band")
     ax.axhline(result.masking_level, color=_C_MUTED, ls="--", lw=1.0,
                label=f"Masking level ({result.masking_level:.1f} dB)")
     ax.plot([fc], [result.tone_level], "o", color=_C_REFERENCE,

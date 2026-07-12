@@ -3364,6 +3364,7 @@ def generate_wind_turbine_tonality(output_dir: str) -> None:
     """IEC 61400-11 wind-turbine tonal audibility: narrowband spectrum + masking."""
     print("Generating wind_turbine_tonality...")
     from phonometry import wind_turbine_tonality
+    from phonometry.wind_turbine_noise import _critical_band_edges
 
     # A narrowband spectrum: a shaped broadband floor with a blade-passing-style
     # tone near 200 Hz, at 2 Hz resolution.
@@ -3376,12 +3377,12 @@ def generate_wind_turbine_tonality(output_dir: str) -> None:
     res = wind_turbine_tonality(levels, freqs, tone_frequency=200.0)
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.axvspan(res.tone_frequency - res.critical_bandwidth / 2.0,
-               res.tone_frequency + res.critical_bandwidth / 2.0,
-               color=COLOR_TERTIARY, alpha=0.15, label="Critical band")
+    band_lo, band_hi = _critical_band_edges(res.tone_frequency)
+    ax.axvspan(band_lo, band_hi, color=COLOR_TERTIARY, alpha=0.15,
+               label="Critical band")
     ax.plot(freqs, levels, color=COLOR_PRIMARY, linewidth=1.0,
             label="Narrowband spectrum")
-    ax.axhline(res.masking_level, color=COLOR_GRID, linestyle="--", linewidth=1.2,
+    ax.axhline(res.masking_level, color="#ff7f0e", linestyle="--", linewidth=1.5,
                label=f"Masking level = {res.masking_level:.1f} dB")
     ax.plot([res.tone_frequency], [res.tone_level], "o", color=COLOR_SECONDARY,
             markersize=9, label=f"Tone = {res.tone_level:.1f} dB")

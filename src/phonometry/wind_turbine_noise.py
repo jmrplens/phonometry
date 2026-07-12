@@ -110,6 +110,20 @@ def critical_bandwidth(fc: float) -> float:
     return float(25.0 + 75.0 * (1.0 + 1.4 * (f / 1000.0) ** 2) ** 0.69)
 
 
+def _critical_band_edges(fc: float) -> "tuple[float, float]":
+    """Lower and upper edges of the critical band about a tone (Hz).
+
+    For a candidate tone in the 20-70 Hz range the band is the fixed absolute
+    20-120 Hz band (subclause 9.5.3), not one centred on ``fc``; otherwise it is
+    the Zwicker critical band ``fc ± CBW/2``.
+    """
+    f = _positive(fc, "fc")
+    if _LOW_FREQ_MIN <= f <= _LOW_FREQ_MAX:
+        return _LOW_FREQ_MIN, _LOW_FREQ_MIN + _LOW_FREQ_BANDWIDTH
+    cbw = critical_bandwidth(f)
+    return f - cbw / 2.0, f + cbw / 2.0
+
+
 def _energy_mean(levels_db: "NDArray[np.float64]") -> float:
     return float(10.0 * np.log10(np.mean(10.0 ** (levels_db / 10.0))))
 
@@ -177,7 +191,7 @@ def wind_turbine_tonality(
     :param frequencies: Line frequencies, in Hz (uniform spacing).
     :param tone_frequency: Candidate tone frequency, in Hz; if ``None`` the
         highest-level line is used.
-    :return: A :class:`TonalAudibilityResult`.
+    :return: A :class:`WindTurbineTonalityResult`.
     :raises ValueError: If the inputs are invalid.
     """
     lv = np.asarray(levels, dtype=np.float64)
@@ -186,18 +200,17 @@ def wind_turbine_tonality(
         raise ValueError("'levels' and 'frequencies' must be 1-D and the same length (>= 3).")
     if not (np.all(np.isfinite(lv)) and np.all(np.isfinite(fr))):
         raise ValueError("'levels' and 'frequencies' must be finite.")
-    df = float(np.median(np.diff(fr)))
-    if df <= 0.0:
+    diffs = np.diff(fr)
+    if np.any(diffs <= 0.0):
         raise ValueError("'frequencies' must be strictly increasing.")
+    df = float(np.median(diffs))
+    if np.any(np.abs(diffs - df) > 0.25 * df):
+        raise ValueError("'frequencies' must be uniformly spaced (a narrowband spectrum).")
 
     peak = int(np.argmax(lv)) if tone_frequency is None else int(np.argmin(np.abs(fr - tone_frequency)))
     fc = float(fr[peak])
     cbw = critical_bandwidth(fc)
-    if _LOW_FREQ_MIN <= fc <= _LOW_FREQ_MAX:
-        # Fixed 20-120 Hz absolute band (subclause 9.5.3), not centred on fc.
-        lo, hi = _LOW_FREQ_MIN, _LOW_FREQ_MIN + _LOW_FREQ_BANDWIDTH
-    else:
-        lo, hi = fc - cbw / 2.0, fc + cbw / 2.0
+    lo, hi = _critical_band_edges(fc)
     in_band = (fr >= lo) & (fr <= hi)
     band = lv[in_band]
 

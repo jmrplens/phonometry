@@ -118,6 +118,18 @@ def test_tonal_audibility_rejects_short_input() -> None:
         wind_turbine_tonality([1.0, 2.0], [10.0, 12.0])
 
 
+def test_tonal_audibility_rejects_non_monotonic_frequencies() -> None:
+    # A non-increasing frequency axis is not a valid narrowband spectrum.
+    with pytest.raises(ValueError, match="strictly increasing"):
+        wind_turbine_tonality([30.0, 30.0, 30.0], [100.0, 98.0, 104.0])
+
+
+def test_tonal_audibility_rejects_non_uniform_spacing() -> None:
+    # Formulae 30-34 assume a uniform frequency resolution df.
+    with pytest.raises(ValueError, match="uniformly spaced"):
+        wind_turbine_tonality([30.0, 30.0, 30.0, 30.0], [100.0, 102.0, 104.0, 120.0])
+
+
 def test_tonal_audibility_plot_smoke_and_export() -> None:
     import phonometry
 

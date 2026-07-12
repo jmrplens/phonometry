@@ -296,7 +296,7 @@ L 675.543544 370.23407
    <g id="line2d_28">
     <path d="M 40.925781 134.890758 
 L 705.763437 134.890758 
-" clip-path="url(#p34e9268f4e)" style="fill: none; stroke-dasharray: 4.44,1.92; stroke-dashoffset: 0; stroke: #555555; stroke-width: 1.2"/>
+" clip-path="url(#p34e9268f4e)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #ff7f0e; stroke-width: 1.5"/>
    </g>
    <g id="line2d_29">
     <defs>
@@ -394,7 +394,7 @@ L 581.051562 53.607422
      <path d="M 563.051562 67.108125 
 L 572.051562 67.108125 
 L 581.051562 67.108125 
-" style="fill: none; stroke-dasharray: 4.44,1.92; stroke-dashoffset: 0; stroke: #555555; stroke-width: 1.2"/>
+" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #ff7f0e; stroke-width: 1.5"/>
     </g>
     <g id="text_20">
      <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="588.251562" y="70.258125" transform="rotate(-0 588.251562 70.258125)">Masking level = 55.6 dB</text>

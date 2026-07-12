@@ -1,11 +1,13 @@
 ← [Documentation index](README.md)
 
-# Underwater sound propagation: transmission loss, sound speed and the sonar equation
+# Underwater sound propagation: transmission loss, sound speed, sonar, seabed and ambient noise
 
 Closed-form underwater propagation: the **transmission loss** (geometrical
-spreading plus volume absorption), the **speed of sound** in sea water and the
-**sonar equation**. These complement the underwater reference levels
-(ISO 18405/17208/18406) in [Underwater Acoustics](underwater-acoustics.md).
+spreading plus volume absorption), the **speed of sound** in sea water, the
+**sonar equation**, **seabed reflection loss** and the **ocean ambient-noise**
+spectrum (wind, thermal and shipping-traffic contributions). These complement
+the underwater reference levels (ISO 18405/17208/18406) in
+[Underwater Acoustics](underwater-acoustics.md).
 
 ## 1. Transmission loss
 
@@ -101,8 +103,106 @@ ph.active_sonar_equation(220.0, 70.0, target_strength=15.0, noise_level=60.0,
                          directivity_index=20.0, detection_threshold=10.0)
 ```
 
-All levels are in dB (re a plane wave of 1 µPa rms; spectrum levels, i.e.
-referred to a 1 Hz band).
+Sonar, propagation and ambient levels are in dB re a plane wave of 1 µPa rms
+(spectrum levels are referred to a 1 Hz band). Source levels (§6) instead use
+the source convention, dB re 1 µPa²/Hz **at 1 m**.
+
+## 4. Seabed reflection loss
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection.svg" alt="Bottom reflection loss versus grazing angle for a fast sandy seabed: zero loss below the critical grazing angle (total reflection) rising sharply above it" width="82%">
+</picture>
+
+A plane wave striking the seabed reflects with the fluid–fluid **Rayleigh
+reflection coefficient** (Medwin & Clay). For a faster bottom (`c2 > c1`) there
+is a **critical grazing angle** `φc = arccos(c1/c2)`, below which the wave is
+totally reflected (`|R| = 1`, zero loss). The bottom loss is `BL = −20·lg|R|`.
+
+```python
+import numpy as np
+import phonometry as ph
+
+phi = np.linspace(0.0, 90.0, 361)   # grazing angle from the interface, degrees
+bl = ph.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,  # water
+                               rho2=1900.0, c2=1650.0)         # sand
+print(bl.critical_angle)            # 24.6° for this sand/water pair
+bl.plot()                           # bottom loss vs grazing angle (needs matplotlib)
+```
+
+`bottom_reflection_loss` returns a `BottomLossResult` with `reflection_loss`,
+the complex `reflection_coefficient` and the `critical_angle` (`None` for a
+slower bottom). `reflection_coefficient(…)` and `critical_angle(c1, c2)` are
+also exposed directly. The model is lossless (real densities and sound speeds);
+sediment attenuation is out of scope.
+
+## 5. Ocean ambient noise
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise.svg" alt="Wenz ambient-noise spectrum levels for two wind speeds: wind-dominated at mid frequencies falling at 5 dB per octave and thermal noise rising above about 50 kHz" width="82%">
+</picture>
+
+The ambient-noise spectrum level (dB re 1 µPa²/Hz) is the energy sum of the two
+physically grounded Wenz components: **wind / sea-surface** noise via the "rule
+of fives" (`25 − (5/3)·10·(lg f_kHz − lg(U/5))`, 25 dB at 1 kHz for 5 knots) and
+**Mellen thermal** noise (`4π·k·T·ρ·f²/c`, dominant above ~50 kHz). A
+**shipping** spectrum may be supplied by the caller — for example one predicted
+by the traffic model in §6.
+
+```python
+import numpy as np
+import phonometry as ph
+
+freqs = np.logspace(2, 5.5, 300)
+noise = ph.ocean_ambient_noise(freqs, wind_speed_knots=15.0)
+noise.plot()   # composite spectrum with wind/thermal components (needs matplotlib)
+
+# Individual components are available directly:
+ph.wind_noise_spectrum(1000.0, 5.0)      # 25 dB (the rule-of-fives anchor)
+ph.thermal_noise_spectrum(5e4)           # molecular thermal-noise limit
+```
+
+The wind component is strictly valid over roughly 500 Hz–5 kHz; the wide example
+range keeps it plotted mainly to show where the thermal component takes over
+above ~50 kHz (the wind curve beyond ~5 kHz is an extrapolation). The
+low-frequency turbulence band and a built-in distant-shipping model are out of
+scope (Wenz notes these bands are strongly variable); a shipping spectrum is
+supplied through the `shipping` argument.
+
+## 6. Ship-traffic source level
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise.svg" alt="JOMOPANS-ECHO predicted source-level spectra for a container ship, a cruise ship and a tug: cargo vessels show a low-frequency hump below 100 Hz" width="82%">
+</picture>
+
+When no measured spectrum is available, a ship's underwater source level can be
+**estimated** from its class, speed and length. Three semi-empirical models are
+available: **JOMOPANS-ECHO** (MacGillivray & de Jong 2021, per vessel class,
+validated against 1862 measurements, the default), **RANDI 3.1** and
+**Wales & Heitmeyer** (2002). All return the source spectral-density level and
+the decidecade-band source level.
+
+```python
+import phonometry as ph
+
+# A container ship at 18 knots, 300 m long (JOMOPANS-ECHO default):
+ship = ph.ship_source_spectrum(18.0, 300.0, vessel_class="containership")
+ship.plot()                     # source spectral density vs frequency
+
+print(ph.VESSEL_CLASSES)        # the 13 JOMOPANS-ECHO vessel classes
+
+# Feed the predicted spectrum into the ambient noise as the shipping term:
+noise = ph.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
+                               shipping=ship.source_psd)
+```
+
+`ship_source_spectrum` returns a `ShipTrafficSpectrum` with `source_psd`
+(dB re 1 µPa²/Hz m) and `band_level` (dB re 1 µPa m). Cargo vessels (container
+ships, bulkers, vehicle carriers, tankers) carry an extra low-frequency hump
+below 100 Hz. The implementation is validated to the authors' own reference
+calculator (File S1) to better than 0.01 dB.
 
 ## Standards & sources
 
@@ -110,6 +210,13 @@ referred to a 1 Hz band).
   Del Grosso (1974), Mackenzie (1981), Leroy & Parthiot (1998).
 - Absorption: Francois & Garrison (1982), Ainslie & McColm (1998), Thorp (1967).
 - Sonar equation: Urick, *Principles of Underwater Sound*.
+- Seabed reflection: Medwin & Clay, *Fundamentals of Acoustical Oceanography*
+  (Rayleigh fluid–fluid reflection coefficient).
+- Ambient noise: Wenz (1962); Carey & Evans, *Ocean Ambient Noise* (2011) — the
+  wind "rule of fives" and the Mellen thermal-noise derivation.
+- Ship-traffic source level: MacGillivray & de Jong (2021),
+  *J. Mar. Sci. Eng.* 9(4) 369 (CC-BY, JOMOPANS-ECHO), which also reproduces
+  RANDI 3.1 and Wales & Heitmeyer (2002).
 
 Numerical solvers (ray tracing, normal modes, the parabolic equation) are a
 separate, future addition.

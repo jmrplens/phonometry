@@ -68,6 +68,25 @@ def require_choice(value: str, name: str, options: tuple[str, ...]) -> str:
     return value
 
 
+def require_positive_array(x: ArrayLike, name: str) -> np.ndarray:
+    """Coerce *x* to a 1-D float64 array of strictly positive, finite values.
+
+    :param x: The input (scalar or 1-D array-like).
+    :param name: Parameter name used in the error message.
+    :return: The validated ``float64`` array (at least 1-D).
+    :raises ValueError: for an empty, multi-dimensional, non-finite or
+        non-positive input.
+    """
+    arr = np.atleast_1d(np.asarray(x, dtype=np.float64))
+    if arr.ndim != 1 or arr.size == 0:
+        raise ValueError(f"'{name}' must be a non-empty 1-D array.")
+    if not np.all(np.isfinite(arr)):
+        raise ValueError(f"'{name}' must be finite.")
+    if np.any(arr <= 0.0):
+        raise ValueError(f"'{name}' must be strictly positive.")
+    return arr
+
+
 def require_1d_signal(x: ArrayLike, name: str = "signal") -> np.ndarray:
     """Coerce *x* to a float64 array and require a 1-D time series.
 

@@ -266,6 +266,23 @@ from .sonar_equation import (
     active_sonar_equation,
     passive_sonar_equation,
 )
+from .seabed_reflection import (
+    BottomLossResult,
+    bottom_reflection_loss,
+    critical_angle,
+    reflection_coefficient,
+)
+from .ocean_ambient_noise import (
+    AmbientNoiseResult,
+    ocean_ambient_noise,
+    thermal_noise_spectrum,
+    wind_noise_spectrum,
+)
+from .ship_traffic_noise import (
+    VESSEL_CLASSES,
+    ShipTrafficSpectrum,
+    ship_source_spectrum,
+)
 from .ship_radiated_noise import (
     ShipSourceLevelResult,
     hydrophone_depths,
@@ -758,6 +775,17 @@ __all__ = [
     "passive_sonar_equation",
     "active_sonar_equation",
     "SonarEquationResult",
+    "critical_angle",
+    "reflection_coefficient",
+    "bottom_reflection_loss",
+    "BottomLossResult",
+    "wind_noise_spectrum",
+    "thermal_noise_spectrum",
+    "ocean_ambient_noise",
+    "AmbientNoiseResult",
+    "ship_source_spectrum",
+    "ShipTrafficSpectrum",
+    "VESSEL_CLASSES",
     "radiated_noise_level",
     "hydrophone_depths",
     "source_level_uncertainty",

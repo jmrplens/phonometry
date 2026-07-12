@@ -2835,6 +2835,54 @@ def _chk_uwp_sonar() -> Outcome:
     return numeric(85.0, res.figure_of_merit, 1e-9, unit="dB", places=4)
 
 
+@register(
+    _UW_PROP,
+    "Seabed reflection (Rayleigh, normal incidence)",
+    "Bottom loss at 90° grazing, sand ρ=1900 c=1650 over water, dB",
+)
+def _chk_uwp_seabed() -> Outcome:
+    # Normal-incidence oracle: R = (Z2 − Z1)/(Z2 + Z1), BL = −20·lg|R|.
+    z1, z2 = 1000.0 * 1500.0, 1900.0 * 1650.0
+    expected = -20.0 * math.log10(abs((z2 - z1) / (z2 + z1)))
+    res = ph.bottom_reflection_loss(90.0, rho1=1000.0, c1=1500.0, rho2=1900.0, c2=1650.0)
+    return numeric(expected, float(res.reflection_loss[0]), 1e-6, unit="dB", places=4)
+
+
+@register(
+    _UW_PROP,
+    "Wenz wind noise (rule of fives)",
+    "Wind spectrum level at 1 kHz, 5 kn (canonical anchor), dB re 1 µPa²/Hz",
+)
+def _chk_uwp_wind_noise() -> Outcome:
+    got = float(ph.wind_noise_spectrum(1000.0, 5.0)[0])
+    return numeric(25.0, got, 1e-9, unit="dB", places=4)
+
+
+@register(
+    _UW_PROP,
+    "Mellen thermal noise",
+    "Thermal spectrum level at 50 kHz, 16.85 °C (physical), dB re 1 µPa²/Hz",
+)
+def _chk_uwp_thermal_noise() -> Outcome:
+    f, t, rho, c = 5.0e4, 16.85, 1025.0, 1500.0
+    p2 = 4.0 * math.pi * 1.380649e-23 * (t + 273.15) * rho * f**2 / c
+    expected = 10.0 * math.log10(p2 / (1e-6) ** 2)
+    got = float(ph.thermal_noise_spectrum(f, temperature=t, density=rho, sound_speed=c)[0])
+    return numeric(expected, got, 1e-6, unit="dB", places=4)
+
+
+@register(
+    _UW_PROP,
+    "JOMOPANS-ECHO ship source level",
+    "Bulker V=13.5 kn L=211 m band level at 1 kHz (File S1 oracle), dB re 1 µPa m",
+)
+def _chk_uwp_ship_traffic() -> Outcome:
+    # Oracle: authors' Excel reference calculator (File S1), decidecade band.
+    s = ph.ship_source_spectrum(13.5, 211.0, vessel_class="bulker", model="jomopans-echo")
+    idx = int(min(range(len(s.frequency)), key=lambda i: abs(s.frequency[i] - 1000.0)))
+    return numeric(161.394, float(s.band_level[idx]), 1e-2, unit="dB", places=3)
+
+
 # ===========================================================================
 # Aircraft noise (ICAO Annex 16 EPNL / IEC 61265)
 # ===========================================================================

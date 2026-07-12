@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **175/175 conformance checks pass** across 30 domains and 105 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **179/179 conformance checks pass** across 30 domains and 109 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -418,7 +418,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Underwater sound propagation (transmission loss)</b> — 100% (7/7)</summary>
+<summary>&#9989; <b>Underwater sound propagation (transmission loss)</b> — 100% (11/11)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -429,6 +429,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Thorp (1967) absorption | Volume absorption α at 10 kHz (cold deep water), dB/km | 1.1498 dB/km (+/-0 dB/km) | 1.1498 dB/km | 0 dB/km | &#9989; |
 | Ainslie-McColm (1998) vs Francois-Garrison (1982) | Absorption agreement at 10 kHz, 10 °C, 35 ‰, 0 m, pH 8, dB/km | 0.9603 dB/km (+/-0.096 dB/km) | 0.9866 dB/km | 0.026 dB/km | &#9989; |
 | Passive sonar equation (Urick/Etter) | Figure of merit SL − (NL − DI) − DT, dB | 85 dB (+/-0 dB) | 85 dB | 0 dB | &#9989; |
+| Seabed reflection (Rayleigh, normal incidence) | Bottom loss at 90° grazing, sand ρ=1900 c=1650 over water, dB | 9.0506 dB (+/-0 dB) | 9.0506 dB | 0 dB | &#9989; |
+| Wenz wind noise (rule of fives) | Wind spectrum level at 1 kHz, 5 kn (canonical anchor), dB re 1 µPa²/Hz | 25 dB (+/-0 dB) | 25 dB | 0 dB | &#9989; |
+| Mellen thermal noise | Thermal spectrum level at 50 kHz, 16.85 °C (physical), dB re 1 µPa²/Hz | 19.3426 dB (+/-0 dB) | 19.3426 dB | 0 dB | &#9989; |
+| JOMOPANS-ECHO ship source level | Bulker V=13.5 kn L=211 m band level at 1 kHz (File S1 oracle), dB re 1 µPa m | 161.394 dB (+/-0.01 dB) | 161.394 dB | 0 dB | &#9989; |
 
 </details>
 

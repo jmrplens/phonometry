@@ -533,6 +533,25 @@ _ES_EXACT = {
         "Audibilidad tonal de aerogenerador (IEC 61400-11)",
     "Narrowband spectrum": "Espectro de banda estrecha",
     "Critical band": "Banda crítica",
+    # Underwater propagation (plan-22 P1): transmission loss, sound speed, sonar.
+    "Underwater Transmission Loss (Francois–Garrison)":
+        "Pérdida por transmisión submarina (Francois–Garrison)",
+    "Range [m]": "Distancia [m]",
+    "Transmission loss [dB]": "Pérdida por transmisión [dB]",
+    "Total transmission loss": "Pérdida por transmisión total",
+    "Geometrical spreading": "Ensanchamiento geométrico",
+    "Volume absorption": "Absorción de volumen",
+    "Sea-Water Sound-Speed Profile (UNESCO)":
+        "Perfil de velocidad del sonido en agua de mar (UNESCO)",
+    "Sound speed [m/s]": "Velocidad del sonido [m/s]",
+    "Depth [m]": "Profundidad [m]",
+    "UNESCO sound speed": "Velocidad del sonido UNESCO",
+    "Sound-channel axis": "Eje del canal sonoro",
+    "Passive Sonar Equation": "Ecuación del sonar pasivo",
+    "Signal excess [dB]": "Exceso de señal [dB]",
+    "Signal excess": "Exceso de señal",
+    "Detection limit (SE = 0)": "Límite de detección (SE = 0)",
+    "Figure of merit": "Figura de mérito",
     # Building acoustics (EN 12354-1 flanking prediction, ISO 12999-1 uncertainty)
     "EN 12354-1 Flanking Transmission (Annex H.3 example)":
         "Transmisión por flancos EN 12354-1 (ejemplo del Anexo H.3)",
@@ -629,6 +648,10 @@ _ES_EXACT = {
 }
 
 _ES_PATTERNS = [
+    (r"^f = 10 kHz, α = (.+) dB/km\npractical spreading \(R₀ = 1000 m\)$",
+     "f = 10 kHz, α = \\1 dB/km\\nensanchamiento práctico (R₀ = 1000 m)"),
+    (r"^SL = 140, NL = 60, DI = 15, DT = 8 dB\nfigure of merit = (.+) dB$",
+     "SL = 140, NL = 60, DI = 15, DT = 8 dB\\nfigura de mérito = \\1 dB"),
     (r"^(\d+) yr$", r"\1 años"),
     (r"^total \(limit\) (.+) dB$", r"total (límite) \1 dB"),
     (r"^total \(eng\.\) (.+) dB$", r"total (ing.) \1 dB"),
@@ -3403,6 +3426,101 @@ def generate_wind_turbine_tonality(output_dir: str) -> None:
     plt.close()
 
 
+def generate_underwater_transmission_loss(output_dir: str) -> None:
+    """Underwater TL vs range: geometrical spreading + volume absorption."""
+    print("Generating underwater_transmission_loss...")
+    from phonometry import transmission_loss
+
+    ranges = np.linspace(10.0, 20_000.0, 400)
+    res = transmission_loss(
+        ranges, 10_000.0, law="practical", transition_range=1000.0,
+        temperature=10.0, salinity=35.0, depth=100.0, model="francois-garrison",
+    )
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(res.range_m, res.tl, color=COLOR_PRIMARY, linewidth=2.0,
+            label="Total transmission loss")
+    ax.plot(res.range_m, res.spreading, color="#8c8c8c", linestyle="--", linewidth=1.4,
+            label="Geometrical spreading")
+    ax.plot(res.range_m, res.absorption, color=COLOR_SECONDARY, linestyle=":", linewidth=1.6,
+            label="Volume absorption")
+    ax.set_xlabel("Range [m]")
+    ax.set_ylabel("Transmission loss [dB]")
+    ax.set_title("Underwater Transmission Loss (Francois–Garrison)",
+                 fontweight="bold", pad=12)
+    ax.invert_yaxis()
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower right", fontsize=9)
+    ax.text(0.02, 0.05,
+            f"f = 10 kHz, α = {res.absorption_coefficient:.2f} dB/km\n"
+            "practical spreading (R₀ = 1000 m)",
+            transform=ax.transAxes, va="bottom", fontsize=10,
+            bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
+    plt.tight_layout()
+    save_figure(output_dir, "underwater_transmission_loss.svg")
+    plt.close()
+
+
+def generate_underwater_sound_speed(output_dir: str) -> None:
+    """Sea-water sound-speed profile (UNESCO): mixed layer, thermocline, deep channel."""
+    print("Generating underwater_sound_speed...")
+    from phonometry import sound_speed_profile
+
+    depths = np.linspace(0.0, 3000.0, 121)
+    # A warm mixed layer (18 °C to 80 m), a thermocline down to 4 °C at 1000 m,
+    # then an isothermal deep layer; the pressure term then lifts c with depth.
+    temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
+    prof = sound_speed_profile(depths, temps, 35.0, model="unesco")
+    axis_depth = depths[int(np.argmin(prof.sound_speed))]
+    fig, ax = plt.subplots(figsize=(7, 8))
+    ax.plot(prof.sound_speed, prof.depth, color=COLOR_PRIMARY, linewidth=2.0,
+            label="UNESCO sound speed")
+    ax.axhline(axis_depth, color=COLOR_SECONDARY, linestyle="--", linewidth=1.4,
+               label="Sound-channel axis")
+    ax.set_xlabel("Sound speed [m/s]")
+    ax.set_ylabel("Depth [m]")
+    ax.set_title("Sea-Water Sound-Speed Profile (UNESCO)",
+                 fontweight="bold", pad=12)
+    ax.invert_yaxis()
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "underwater_sound_speed.svg")
+    plt.close()
+
+
+def generate_sonar_equation(output_dir: str) -> None:
+    """Passive sonar equation: signal excess vs transmission loss."""
+    print("Generating sonar_equation...")
+    from phonometry import passive_sonar_equation
+
+    tl = np.linspace(40.0, 120.0, 400)
+    res = passive_sonar_equation(140.0, tl, 60.0, directivity_index=15.0,
+                                 detection_threshold=8.0)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(res.transmission_loss, res.signal_excess, color=COLOR_PRIMARY, linewidth=2.0,
+            label="Signal excess")
+    ax.axhline(0.0, color=COLOR_SECONDARY, linestyle="--", linewidth=1.4,
+               label="Detection limit (SE = 0)")
+    ax.axvline(res.figure_of_merit, color="#8c8c8c", linestyle=":", linewidth=1.6,
+               label="Figure of merit")
+    ax.set_xlabel("Transmission loss [dB]")
+    ax.set_ylabel("Signal excess [dB]")
+    ax.set_title("Passive Sonar Equation", fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.text(0.02, 0.05,
+            f"SL = 140, NL = 60, DI = 15, DT = 8 dB\n"
+            f"figure of merit = {res.figure_of_merit:.1f} dB",
+            transform=ax.transAxes, va="bottom", fontsize=10,
+            bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
+    plt.tight_layout()
+    save_figure(output_dir, "sonar_equation.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -5826,6 +5944,12 @@ def generate_all(img_dir: str) -> None:
 
     # Wind-turbine noise (plan-19B2): IEC 61400-11 tonal audibility.
     generate_wind_turbine_tonality(img_dir)
+
+    # Underwater propagation (plan-22 P1): transmission loss, sound-speed
+    # profile and the sonar equation.
+    generate_underwater_transmission_loss(img_dir)
+    generate_underwater_sound_speed(img_dir)
+    generate_sonar_equation(img_dir)
 
 
 # ===========================================================================

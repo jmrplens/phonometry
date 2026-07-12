@@ -92,6 +92,9 @@ if TYPE_CHECKING:
     from .pile_driving_noise import PileStrikeResult
     from .aircraft_noise import EPNLResult
     from .wind_turbine_noise import WindTurbineTonalityResult
+    from .underwater_sound_speed import SoundSpeedProfile
+    from .underwater_propagation import TransmissionLossResult
+    from .sonar_equation import SonarEquationResult
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -857,6 +860,88 @@ def plot_wind_turbine_tonality(
     ax.set_xlabel("Frequency [Hz]")
     ax.set_ylabel("Level [dB]")
     ax.set_title(f"IEC 61400-11 tonal audibility ΔLₐ = {result.tonal_audibility:.1f} dB")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_sound_speed_profile(
+    result: "SoundSpeedProfile", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Sound-speed profile: speed vs depth, with depth increasing downward.
+
+    :param result: A :class:`~phonometry.underwater_sound_speed.SoundSpeedProfile`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the profile ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    depth = np.asarray(result.depth, dtype=np.float64)
+    speed = np.asarray(result.sound_speed, dtype=np.float64)
+    label = f"{result.model} c(z)"
+    ax.plot(speed, depth, **{"color": _C_PRIMARY, "lw": 1.4, "label": label, **kwargs})
+    if not ax.yaxis_inverted():
+        ax.invert_yaxis()
+    ax.set_xlabel("Sound speed [m/s]")
+    ax.set_ylabel("Depth [m]")
+    ax.set_title("Sea-water sound-speed profile")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="lower left", fontsize="small")
+    return ax
+
+
+def plot_transmission_loss(
+    result: "TransmissionLossResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Transmission loss versus range, with spreading and absorption split out.
+
+    Loss increases downward (the usual TL convention).
+
+    :param result: A :class:`~phonometry.underwater_propagation.TransmissionLossResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the total-TL ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    r = np.asarray(result.range_m, dtype=np.float64)
+    label = f"Total TL ({result.frequency / 1000.0:.3g} kHz)"
+    ax.plot(r, np.asarray(result.tl), **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    ax.plot(r, np.asarray(result.spreading), color=_C_MUTED, lw=1.0, ls="--",
+            label=f"Spreading ({result.law})")
+    ax.plot(r, np.asarray(result.absorption), color=_C_SECONDARY, lw=1.0, ls=":",
+            label=f"Absorption ({result.absorption_coefficient:.3g} dB/km)")
+    ax.set_xlabel("Range [m]")
+    ax.set_ylabel("Transmission loss [dB]")
+    ax.set_title(f"Underwater transmission loss ({result.model})")
+    if not ax.yaxis_inverted():
+        ax.invert_yaxis()
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="lower right", fontsize="small")
+    return ax
+
+
+def plot_sonar_equation(
+    result: "SonarEquationResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Signal excess versus transmission loss, with the detection limit (SE = 0).
+
+    :param result: A :class:`~phonometry.sonar_equation.SonarEquationResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the signal-excess ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    tl = np.asarray(result.transmission_loss, dtype=np.float64)
+    se = np.asarray(result.signal_excess, dtype=np.float64)
+    order = np.argsort(tl)
+    label = f"Signal excess ({result.mode})"
+    ax.plot(tl[order], se[order], **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    ax.axhline(0.0, color=_C_REFERENCE, ls="--", lw=1.0, label="Detection limit (SE = 0)")
+    ax.axvline(result.figure_of_merit, color=_C_MUTED, ls=":", lw=1.0,
+               label=f"Figure of merit = {result.figure_of_merit:.1f} dB")
+    ax.set_xlabel("Transmission loss [dB]")
+    ax.set_ylabel("Signal excess [dB]")
+    ax.set_title("Sonar equation")
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     return ax

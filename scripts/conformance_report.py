@@ -2744,6 +2744,71 @@ def _chk_uw_cumulative_sel() -> Outcome:
 
 
 # ===========================================================================
+# Aircraft noise (ICAO Annex 16 EPNL / IEC 61265)
+# ===========================================================================
+_AIRCRAFT = "Aircraft noise (ICAO Annex 16 / IEC 61265)"
+
+# ICAO Doc 9501 ETM Vol. I (2018) Table 3-7 turbofan spectrum (bands 1-2 blank).
+_ETM_SPL_37 = [
+    -999.0, -999.0, 70.0, 62.0, 70.0, 80.0, 82.0, 83.0, 76.0, 80.0,
+    80.0, 79.0, 78.0, 80.0, 78.0, 76.0, 79.0, 85.0, 79.0, 78.0, 71.0, 60.0, 54.0, 45.0,
+]
+# ICAO Doc 9501 ETM Vol. I (2018) Table 4-4 integrated-method EPNL example.
+_ETM_PNLTR_44 = [
+    84.62, 85.84, 85.37, 88.57, 88.82, 88.03, 88.76, 87.06, 86.92, 90.39, 89.89,
+    91.00, 90.08, 89.71, 89.61, 90.21, 91.14, 92.10, 93.68, 94.89, 95.87, 97.06,
+    97.40, 96.23, 94.73, 92.30, 88.75, 86.96, 85.41, 83.88, 83.01,
+]
+_ETM_DTR_44 = [
+    0.3950, 0.3950, 0.3951, 0.3951, 0.3952, 0.3953, 0.3954, 0.3956, 0.3957, 0.3960,
+    0.3963, 0.3967, 0.3973, 0.3981, 0.3992, 0.4009, 0.4033, 0.4066, 0.4108, 0.4153,
+    0.4196, 0.4231, 0.4256, 0.4273, 0.4285, 0.4294, 0.4299, 0.4304, 0.4307, 0.4309,
+    0.4311,
+]
+
+
+@register(
+    _AIRCRAFT,
+    "ICAO Annex 16 Vol. I App. 2 Table A2-3",
+    "Perceived noisiness at SPL(b), 1 kHz band, in noys",
+)
+def _chk_ac_noy() -> Outcome:
+    spl = np.full(24, -999.0)
+    spl[13] = 40.0  # 1000 Hz, SPL(b) -> n = 1
+    return numeric(1.0, float(ph.perceived_noisiness(spl)[13]), 1e-6, places=4)
+
+
+@register(
+    _AIRCRAFT,
+    "ICAO Doc 9501 ETM Vol. I Table 3-7",
+    "Tone correction of the turbofan example, dB",
+)
+def _chk_ac_tone() -> Outcome:
+    return numeric(2.0, ph.tone_correction(_ETM_SPL_37), 1e-6, places=4)
+
+
+@register(
+    _AIRCRAFT,
+    "ICAO Doc 9501 ETM Vol. I Table 4-4",
+    "Integrated-method reference EPNL, EPNdB",
+)
+def _chk_ac_epnl() -> Outcome:
+    epnl, _, _, _ = ph.epnl_from_pnlt(np.array(_ETM_PNLTR_44), np.array(_ETM_DTR_44))
+    return numeric(92.61892, epnl, 1e-2, unit="EPNdB", places=3)
+
+
+@register(
+    _AIRCRAFT,
+    "IEC 61265:1995 Table 1",
+    "Directional-response tolerance at 4 kHz / 90°, dB",
+)
+def _chk_ac_iec61265() -> Outcome:
+    from phonometry.compliance import _iec61265_directional_limit
+
+    return numeric(2.0, _iec61265_directional_limit(4000.0, 90.0), 1e-9, unit="dB", places=1)
+
+
+# ===========================================================================
 # Markdown rendering
 # ===========================================================================
 def _snap(value: float, eps: float = 5e-4) -> float:

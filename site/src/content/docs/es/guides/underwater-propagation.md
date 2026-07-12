@@ -1,12 +1,13 @@
 ---
-title: "Propagación submarina: pérdida por transmisión, velocidad del sonido y ecuación del sonar"
-description: "Propagación submarina de forma cerrada: ensanchamiento geométrico más absorción de volumen (Francois-Garrison, Ainslie-McColm, Thorp), la velocidad del sonido en agua de mar (UNESCO/Chen-Millero, Del Grosso, Mackenzie) y la ecuación del sonar pasiva/activa."
+title: "Propagación submarina: pérdida por transmisión, velocidad del sonido, sonar, fondo y ruido ambiental"
+description: "Propagación submarina de forma cerrada: ensanchamiento geométrico más absorción de volumen (Francois-Garrison, Ainslie-McColm, Thorp), la velocidad del sonido en agua de mar (UNESCO/Chen-Millero, Del Grosso, Mackenzie), la ecuación del sonar, la pérdida por reflexión en el fondo (Rayleigh) y el espectro de ruido ambiental oceánico (viento/térmico de Wenz más tráfico marítimo JOMOPANS-ECHO)."
 ---
 
 Propagación submarina de forma cerrada, complemento de los niveles de referencia
 de la página de [Acústica submarina](/phonometry/es/guides/underwater-acoustics/):
-la **pérdida por transmisión**, la **velocidad del sonido** en agua de mar y la
-**ecuación del sonar**.
+la **pérdida por transmisión**, la **velocidad del sonido** en agua de mar, la
+**ecuación del sonar**, la **pérdida por reflexión en el fondo** y el espectro de
+**ruido ambiental oceánico**.
 
 ## Pérdida por transmisión
 
@@ -73,5 +74,67 @@ se.plot()   # exceso de señal frente a pérdida por transmisión
 ```
 
 Todos los niveles están en dB (re una onda plana de 1 µPa rms; niveles
-espectrales). Los solvers numéricos (trazado de rayos, modos normales, ecuación
-parabólica) son una adición futura aparte.
+espectrales).
+
+## Pérdida por reflexión en el fondo
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_es.svg" alt="Pérdida por reflexión en el fondo frente al ángulo rasante para un fondo arenoso rápido: pérdida nula por debajo del ángulo rasante crítico, creciendo bruscamente por encima" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_es_dark.svg" alt="Pérdida por reflexión en el fondo frente al ángulo rasante para un fondo arenoso rápido: pérdida nula por debajo del ángulo rasante crítico, creciendo bruscamente por encima" style="width:82%">
+
+Una onda plana que incide en el fondo se refleja con el **coeficiente de
+reflexión de Rayleigh** fluido–fluido. Para un fondo más rápido (`c2 > c1`)
+existe un **ángulo rasante crítico** `φc = arccos(c1/c2)`, por debajo del cual la
+onda se refleja totalmente (`|R| = 1`, pérdida nula). La pérdida es
+`BL = −20·lg|R|`.
+
+```python
+import numpy as np
+import phonometry as ph
+
+phi = np.linspace(0.0, 90.0, 361)   # ángulo rasante desde la interfaz, grados
+bl = ph.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,   # agua
+                               rho2=1900.0, c2=1650.0)          # arena
+print(bl.critical_angle)            # 24,6°
+bl.plot()   # pérdida por reflexión frente al ángulo rasante
+```
+
+## Ruido ambiental oceánico
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise_es.svg" alt="Niveles espectrales de ruido ambiental de Wenz para dos velocidades de viento, con el ruido de viento cayendo 5 dB por octava y el ruido térmico creciendo por encima de unos 50 kHz" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise_es_dark.svg" alt="Niveles espectrales de ruido ambiental de Wenz para dos velocidades de viento, con el ruido de viento cayendo 5 dB por octava y el ruido térmico creciendo por encima de unos 50 kHz" style="width:82%">
+
+El nivel espectral de ruido ambiental es la suma energética de las componentes
+físicas de Wenz: el ruido de **viento / superficie** por la "regla de los cincos"
+(25 dB a 1 kHz con 5 nudos) y el ruido **térmico de Mellen** (dominante por
+encima de ~50 kHz). El espectro de **tráfico** lo aporta quien llama.
+
+```python
+import numpy as np
+import phonometry as ph
+
+freqs = np.logspace(2, 5.5, 300)
+noise = ph.ocean_ambient_noise(freqs, wind_speed_knots=15.0)
+noise.plot()   # espectro compuesto con las componentes viento/térmico
+```
+
+## Nivel de fuente del tráfico marítimo
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise_es.svg" alt="Espectros de nivel de fuente predichos por JOMOPANS-ECHO para un portacontenedores, un crucero y un remolcador, con los buques de carga mostrando una joroba de baja frecuencia por debajo de 100 Hz" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise_es_dark.svg" alt="Espectros de nivel de fuente predichos por JOMOPANS-ECHO para un portacontenedores, un crucero y un remolcador, con los buques de carga mostrando una joroba de baja frecuencia por debajo de 100 Hz" style="width:82%">
+
+Cuando no hay espectro medido, el nivel de fuente de un buque puede
+**estimarse** a partir de su clase, velocidad y eslora con **JOMOPANS-ECHO**
+(MacGillivray & de Jong 2021, por defecto, validado contra 1862 medidas),
+**RANDI 3.1** o **Wales & Heitmeyer** (2002).
+
+```python
+import phonometry as ph
+
+ship = ph.ship_source_spectrum(18.0, 300.0, vessel_class="containership")
+ship.plot()                     # densidad espectral de fuente frente a frecuencia
+print(ph.VESSEL_CLASSES)        # las 13 clases de buque de JOMOPANS-ECHO
+
+# Alimenta la predicción al ruido ambiental como término de tráfico:
+noise = ph.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
+                               shipping=ship.source_psd)
+```
+
+Los solvers numéricos (trazado de rayos, modos normales, ecuación parabólica)
+son una adición futura aparte.

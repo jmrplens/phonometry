@@ -552,6 +552,20 @@ _ES_EXACT = {
     "Signal excess": "Exceso de señal",
     "Detection limit (SE = 0)": "Límite de detección (SE = 0)",
     "Figure of merit": "Figura de mérito",
+    # Underwater propagation (plan-22 P1 PR-2): seabed, ambient noise, traffic.
+    "Seabed Reflection Loss (Rayleigh)":
+        "Pérdida por reflexión en el fondo (Rayleigh)",
+    "Grazing angle [°]": "Ángulo rasante [°]",
+    "Bottom loss [dB]": "Pérdida por reflexión [dB]",
+    "Bottom loss (sand)": "Pérdida por reflexión (arena)",
+    "Water ρ = 1000, c = 1500\nSand ρ = 1900, c = 1650":
+        "Agua ρ = 1000, c = 1500\nArena ρ = 1900, c = 1650",
+    "Ocean Ambient Noise (Wenz)": "Ruido ambiental oceánico (Wenz)",
+    "Spectrum level [dB re 1 µPa²/Hz]": "Nivel espectral [dB re 1 µPa²/Hz]",
+    "Ship Traffic Source Level (JOMOPANS-ECHO)":
+        "Nivel de fuente del tráfico marítimo (JOMOPANS-ECHO)",
+    "Source spectral density [dB re 1 µPa²/Hz m]":
+        "Densidad espectral de fuente [dB re 1 µPa²/Hz m]",
     # Building acoustics (EN 12354-1 flanking prediction, ISO 12999-1 uncertainty)
     "EN 12354-1 Flanking Transmission (Annex H.3 example)":
         "Transmisión por flancos EN 12354-1 (ejemplo del Anexo H.3)",
@@ -3521,6 +3535,91 @@ def generate_sonar_equation(output_dir: str) -> None:
     plt.close()
 
 
+def generate_seabed_reflection(output_dir: str) -> None:
+    """Seabed reflection loss vs grazing angle, marking the critical angle."""
+    print("Generating seabed_reflection...")
+    from phonometry import bottom_reflection_loss
+
+    phi = np.linspace(0.0, 90.0, 361)
+    res = bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0, rho2=1900.0, c2=1650.0)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(res.grazing_angle, res.reflection_loss, color=COLOR_PRIMARY, linewidth=2.0,
+            label="Bottom loss (sand)")
+    if res.critical_angle is not None:
+        ax.axvline(res.critical_angle, color=COLOR_SECONDARY, linestyle="--", linewidth=1.4,
+                   label=f"Critical angle ({res.critical_angle:.1f}°)")
+    ax.set_xlabel("Grazing angle [°]")
+    ax.set_ylabel("Bottom loss [dB]")
+    ax.set_title("Seabed Reflection Loss (Rayleigh)", fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.text(0.02, 0.95,
+            "Water ρ = 1000, c = 1500\nSand ρ = 1900, c = 1650",
+            transform=ax.transAxes, va="top", fontsize=10,
+            bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
+    plt.tight_layout()
+    save_figure(output_dir, "seabed_reflection.svg")
+    plt.close()
+
+
+def generate_ocean_ambient_noise(output_dir: str) -> None:
+    """Wenz ambient-noise curves: wind + thermal energy sum vs frequency."""
+    print("Generating ocean_ambient_noise...")
+    from phonometry import ocean_ambient_noise
+
+    freqs = np.logspace(2, 5.5, 300)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    for u, color in ((5.0, COLOR_SECONDARY), (20.0, COLOR_PRIMARY)):
+        res = ocean_ambient_noise(freqs, wind_speed_knots=u)
+        _plot_ambient_curve(res, u, color)
+    ax.set_xscale("log")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Spectrum level [dB re 1 µPa²/Hz]")
+    ax.set_title("Ocean Ambient Noise (Wenz)", fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "ocean_ambient_noise.svg")
+    plt.close()
+
+
+def _plot_ambient_curve(res: object, wind_speed: float, color: str) -> None:
+    ax = plt.gca()
+    ax.plot(res.frequency, res.spectrum_level, color=color, linewidth=2.0,  # type: ignore[attr-defined]
+            label=f"Total ({wind_speed:.0f} kn)")
+    ax.plot(res.frequency, res.wind, color=color, linewidth=1.0, linestyle="--", alpha=0.6)  # type: ignore[attr-defined]
+    ax.plot(res.frequency, res.thermal, color="#8c8c8c", linewidth=1.0, linestyle=":", alpha=0.8)  # type: ignore[attr-defined]
+
+
+def generate_ship_traffic_noise(output_dir: str) -> None:
+    """JOMOPANS-ECHO ship source-level spectra for three vessel classes."""
+    print("Generating ship_traffic_noise...")
+    from phonometry import ship_source_spectrum
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    cases = (
+        ("containership", 18.0, 300.0, COLOR_PRIMARY),
+        ("cruise", 17.1, 250.0, COLOR_SECONDARY),
+        ("tug", 3.7, 30.0, "#8c8c8c"),
+    )
+    for vessel_class, speed, length, color in cases:
+        s = ship_source_spectrum(speed, length, vessel_class=vessel_class)
+        ax.plot(s.frequency, s.source_psd, color=color, linewidth=2.0,
+                label=f"{vessel_class} ({speed:.0f} kn, {length:.0f} m)")
+    ax.set_xscale("log")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Source spectral density [dB re 1 µPa²/Hz m]")
+    ax.set_title("Ship Traffic Source Level (JOMOPANS-ECHO)", fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "ship_traffic_noise.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -5950,6 +6049,12 @@ def generate_all(img_dir: str) -> None:
     generate_underwater_transmission_loss(img_dir)
     generate_underwater_sound_speed(img_dir)
     generate_sonar_equation(img_dir)
+
+    # Underwater propagation (plan-22 P1 PR-2): seabed reflection, ambient
+    # noise (Wenz) and ship-traffic source level (JOMOPANS-ECHO).
+    generate_seabed_reflection(img_dir)
+    generate_ocean_ambient_noise(img_dir)
+    generate_ship_traffic_noise(img_dir)
 
 
 # ===========================================================================

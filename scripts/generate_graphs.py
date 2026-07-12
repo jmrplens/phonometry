@@ -501,6 +501,16 @@ _ES_EXACT = {
     "Sharp: S = 3.5 acum": "Aguda: S = 3,5 acum",
     "Rough + fluctuating: F = 1.2 vacil, R = 0.7 asper":
         "Áspera + fluctuante: F = 1,2 vacil, R = 0,7 asper",
+    # Electroacoustics (IEC 60268-3 distortion; Bendat & Piersol response)
+    "Harmonic Distortion of a Single-Tone Test (IEC 60268-3)":
+        "Distorsión armónica de un ensayo con tono único (IEC 60268-3)",
+    "Magnitude spectrum": "Espectro de magnitud",
+    "Harmonics n·f₁": "Armónicos n·f₁",
+    "Level re fundamental [dB]": "Nivel respecto al fundamental [dB]",
+    "Frequency Response and Coherence (Bendat & Piersol)":
+        "Respuesta en frecuencia y coherencia (Bendat y Piersol)",
+    "True |H|": "|H| verdadero",
+    "Estimated |H| (H1)": "|H| estimado (H1)",
     # Building acoustics (EN 12354-1 flanking prediction, ISO 12999-1 uncertainty)
     "EN 12354-1 Flanking Transmission (Annex H.3 example)":
         "Transmisión por flancos EN 12354-1 (ejemplo del Anexo H.3)",
@@ -3066,6 +3076,127 @@ def generate_psychoacoustic_annoyance(output_dir: str) -> None:
     plt.close()
 
 
+_FS_ELECTRO = 48000  # audio sample rate for the electroacoustic demos
+
+
+def generate_distortion(output_dir: str) -> None:
+    """Annotated harmonic spectrum with the THD of a synthetic amplifier output."""
+    print("Generating distortion...")
+    from phonometry import harmonic_analysis
+
+    fs = _FS_ELECTRO
+    n = fs  # 1 s -> 1 Hz bins; every harmonic lands on a bin
+    t = np.arange(n) / fs
+    f0 = 1000.0
+    # A 1 kHz fundamental with a decaying harmonic series over a broadband
+    # noise floor, the kind of output an amplifier under a single-tone test
+    # produces. The noise makes THD+N exceed the harmonic-only THD (it also
+    # counts the noise), while SINAD reports the noise-and-distortion headroom.
+    amps = {1: 1.0, 2: 0.02, 3: 0.012, 4: 0.006, 5: 0.003}
+    sig = sum(a * np.sin(2 * np.pi * k * f0 * t) for k, a in amps.items())
+    rng = np.random.default_rng(2026)
+    sig = sig + rng.standard_normal(n) * 1.2e-2
+
+    res = harmonic_analysis(sig, fs, f0, n_harmonics=len(amps))
+
+    # Magnitude spectrum (coherent-gain normalised) in dB re the fundamental.
+    window = np.hanning(n)
+    spectrum = np.abs(np.fft.rfft(sig * window)) * 2.0 / np.sum(window)
+    freqs = np.fft.rfftfreq(n, d=1.0 / fs)
+    ref = np.max(spectrum)
+    spec_db = 20.0 * np.log10(np.maximum(spectrum, 1e-12) / ref)
+
+    fig, ax = plt.subplots(figsize=(10, 6.0))
+    ax.plot(freqs, spec_db, color=COLOR_PRIMARY, linewidth=1.0, alpha=0.8,
+            label="Magnitude spectrum")
+    hz = np.asarray(res.harmonic_frequencies)
+    ha = np.asarray(res.harmonic_amplitudes)
+    hdb = 20.0 * np.log10(np.maximum(ha, 1e-12) / ha[0])
+    ax.plot(hz, hdb, "o", color=COLOR_SECONDARY, markersize=7, zorder=6,
+            label="Harmonics n·f₁")
+    for k, (fk, lk) in enumerate(zip(hz, hdb), start=1):
+        ax.annotate(f"n={k}", xy=(fk, lk), xytext=(0, 7),
+                    textcoords="offset points", ha="center", fontsize=8,
+                    color=COLOR_FG)
+
+    ax.set_xlim(0.0, 9000.0)
+    ax.set_ylim(-100.0, 8.0)
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Level re fundamental [dB]")
+    ax.set_title("Harmonic Distortion of a Single-Tone Test (IEC 60268-3)",
+                 fontweight="bold", pad=12)
+    ax.grid(which="major", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        f"THD (F) = {res.thd_f * 100:.2f}%",
+        f"THD (R) = {res.thd_r * 100:.2f}%",
+        f"THD+N   = {res.thd_plus_noise * 100:.2f}%",
+        f"SINAD   = {res.sinad_db:.1f} dB",
+    ]
+    ax.text(0.015, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="left", fontsize=9, color=COLOR_FG,
+            family="monospace",
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "distortion.svg")
+    plt.close()
+
+
+def generate_frequency_response(output_dir: str) -> None:
+    """Bode magnitude and coherence of an estimated frequency response (H1)."""
+    print("Generating frequency_response...")
+    from scipy import signal as sp_signal
+
+    from phonometry import transfer_function
+
+    fs = _FS_ELECTRO
+    n = 400000
+    rng = np.random.default_rng(7)
+    x = rng.standard_normal(n)
+    # A resonant second-order band-pass "device under test".
+    b, a = sp_signal.butter(2, [400.0, 4000.0], btype="band", fs=fs)
+    y = sp_signal.lfilter(b, a, x)
+    # Additive output noise pulls the coherence down where the signal is weak.
+    y = y + rng.standard_normal(n) * np.sqrt(np.mean(y**2)) * 0.05
+
+    res = transfer_function(x, y, fs, estimator="H1")
+    _, h_true = sp_signal.freqz(b, a, worN=res.frequencies, fs=fs)
+    pos = res.frequencies > 0.0
+    freqs = res.frequencies[pos]
+    true_db = 20.0 * np.log10(np.maximum(np.abs(h_true[pos]), 1e-12))
+
+    fig, (ax_mag, ax_coh) = plt.subplots(
+        2, 1, figsize=(10, 7.2), sharex=True,
+        gridspec_kw={"height_ratios": [2.0, 1.0]})
+    ax_mag.semilogx(freqs, true_db, color=COLOR_FG, linestyle="--",
+                    linewidth=1.6, alpha=0.7, label="True |H|")
+    ax_mag.semilogx(freqs, res.magnitude_db[pos], color=COLOR_PRIMARY,
+                    linewidth=1.8, label="Estimated |H| (H1)")
+    ax_mag.set_ylabel("Magnitude [dB]")
+    ax_mag.set_ylim(-80.0, 5.0)
+    ax_mag.set_title("Frequency Response and Coherence (Bendat & Piersol)",
+                     fontweight="bold", pad=12)
+    ax_mag.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_mag.set_axisbelow(True)
+    ax_mag.legend(loc="lower center", fontsize=9)
+
+    ax_coh.semilogx(freqs, res.coherence[pos], color=COLOR_TERTIARY,
+                    linewidth=1.8)
+    ax_coh.set_ylabel(r"Coherence $\gamma^2$")
+    ax_coh.set_xlabel("Frequency [Hz]")
+    ax_coh.set_ylim(0.0, 1.05)
+    ax_coh.set_xlim(20.0, fs / 2.0)
+    ax_coh.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_coh.set_axisbelow(True)
+    plt.tight_layout()
+    save_figure(output_dir, "frequency_response.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -5473,6 +5604,11 @@ def generate_all(img_dir: str) -> None:
     # and psychoacoustic annoyance (Fastl & Zwicker Eqs 16.2-16.4).
     generate_fluctuation_strength(img_dir)
     generate_psychoacoustic_annoyance(img_dir)
+
+    # Electroacoustics (plan-18): distortion metrics (IEC 60268-3) and
+    # frequency-response / coherence estimators (Bendat & Piersol).
+    generate_distortion(img_dir)
+    generate_frequency_response(img_dir)
 
 
 # ===========================================================================

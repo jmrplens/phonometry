@@ -303,6 +303,11 @@ export default defineConfig({
           items: ['guides/speech-transmission', 'guides/speech-intelligibility'],
         },
         {
+          label: 'Electroacoustics',
+          translations: { es: 'Electroacústica' },
+          items: ['guides/electroacoustics'],
+        },
+        {
           label: 'Hearing & occupational exposure',
           translations: { es: 'Audición y exposición laboral' },
           items: [

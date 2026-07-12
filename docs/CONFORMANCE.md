@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **148/148 conformance checks pass** across 25 domains and 87 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **155/155 conformance checks pass** across 26 domains and 89 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -385,6 +385,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Fastl & Zwicker Eqs (16.2)-(16.4) | Psychoacoustic annoyance, worked (N5,S,F,R) tuple | 30.8167 (+/-0.001) | 30.8167 | 0 | &#9989; |
 | Fastl & Zwicker Eq (10.2) | Fluctuation strength of AM broadband noise (60 dB, m=1, 4 Hz) | 3.6943 vacil (+/-0.001 vacil) | 3.6943 vacil | 0 vacil | &#9989; |
 | Fastl & Zwicker Ch. 10 / Osses et al. 2016 | Fluctuation-strength calibration: 1 kHz / 60 dB / m=1 / 4 Hz AM tone | 1 vacil (+/-0.05 vacil) | 1 vacil | 0 vacil | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b> — 100% (7/7)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| IEC 60268-3:2013 (14.12.2-3) | THD (rel. fundamental) of a synthetic 4-harmonic signal | 0.113578 (+/-0.0001) | 0.113578 | 0 | &#9989; |
+| IEC 60268-3:2013 (14.12.5) | 2nd-order harmonic distortion d2 (rel. total) | 0.099361 (+/-0.0001) | 0.099361 | 0 | &#9989; |
+| IEC 60268-3:2013 (14.12.7) | SMPTE modulation distortion of a known two-tone signal | 0.126491 (+/-0.0001) | 0.126491 | 0 | &#9989; |
+| IEC 60268-3:2013 (14.12.8) | CCIF difference-frequency distortion (2nd order) of a two-tone signal | 0.06 (+/-0.0001) | 0.06 | 0 | &#9989; |
+| IEC 60268-3:2013 (14.12.9) | DIM of the 15 kHz / 3.15 kHz signal (Table 2, 9 products) | 0.168819 (+/-0.0001) | 0.168819 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e | H1 recovers a known first-order IIR gain at 1 kHz | 0.8954 (+/-2%) | 0.8954 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e | Ordinary coherence = 1 for a noiseless LTI path | 1 (+/-0.001) | 1 | 0 | &#9989; |
 
 </details>
 

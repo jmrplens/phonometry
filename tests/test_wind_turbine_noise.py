@@ -77,6 +77,35 @@ def test_tonal_audibility_synthetic_tone() -> None:
     assert res.is_audible is True
 
 
+def test_low_frequency_fixed_critical_band() -> None:
+    # A candidate tone at 40 Hz uses the FIXED 20-120 Hz band, not one centred
+    # on 40 Hz. Loud lines below 20 Hz must be excluded (a centred band
+    # [-10, 90] would wrongly fold them into the tone/masking classification).
+    df = 2.0
+    freqs = np.arange(0.0, 140.0 + df, df)
+    levels = np.full(freqs.size, 30.0)
+    levels[freqs < 20.0] = 58.0  # excluded by the fixed 20-120 band
+    levels[int(np.argmin(np.abs(freqs - 40.0)))] = 60.0
+    res = wind_turbine_tonality(levels, freqs, tone_frequency=40.0)
+    # Only the 40 Hz tone survives -> single tone line, masking noise = 30 dB.
+    assert res.tone_level == pytest.approx(60.0, abs=0.05)
+    assert res.masking_level == pytest.approx(30.0 + 10.0 * np.log10(100.0 / 3.0), abs=0.05)
+
+
+def test_non_contiguous_tone_lines_counted() -> None:
+    # IEC 61400-11+A1:2018: tone lines need not be adjacent to the peak. Two
+    # separated lines within 10 dB of the peak both count toward L_pt.
+    df = 2.0
+    freqs = np.arange(240.0, 360.0 + df, df)
+    levels = np.full(freqs.size, 30.0)
+    levels[int(np.argmin(np.abs(freqs - 300.0)))] = 60.0
+    levels[int(np.argmin(np.abs(freqs - 260.0)))] = 56.0  # isolated, within 10 dB
+    res = wind_turbine_tonality(levels, freqs)
+    # Both separated tones (no Hanning: neither run has >= 2 adjacent lines).
+    expected = 10.0 * np.log10(10.0**6.0 + 10.0**5.6)
+    assert res.tone_level == pytest.approx(expected, abs=0.05)
+
+
 def test_tonal_audibility_flat_spectrum_not_audible() -> None:
     freqs = np.arange(440.0, 560.0, 2.0)
     levels = np.full(freqs.size, 30.0)

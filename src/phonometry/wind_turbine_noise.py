@@ -114,10 +114,6 @@ def _energy_mean(levels_db: "NDArray[np.float64]") -> float:
     return float(10.0 * np.log10(np.mean(10.0 ** (levels_db / 10.0))))
 
 
-def _energy_sum(levels_db: "NDArray[np.float64]") -> float:
-    return float(10.0 * np.log10(np.sum(10.0 ** (levels_db / 10.0))))
-
-
 #: Tone-classification margins (dB): masking-line criterion and tone criterion.
 _MASKING_MARGIN = 6.0
 _TONE_MARGIN = 6.0
@@ -197,7 +193,12 @@ def wind_turbine_tonality(
     peak = int(np.argmax(lv)) if tone_frequency is None else int(np.argmin(np.abs(fr - tone_frequency)))
     fc = float(fr[peak])
     cbw = critical_bandwidth(fc)
-    in_band = np.abs(fr - fc) <= cbw / 2.0
+    if _LOW_FREQ_MIN <= fc <= _LOW_FREQ_MAX:
+        # Fixed 20-120 Hz absolute band (subclause 9.5.3), not centred on fc.
+        lo, hi = _LOW_FREQ_MIN, _LOW_FREQ_MIN + _LOW_FREQ_BANDWIDTH
+    else:
+        lo, hi = fc - cbw / 2.0, fc + cbw / 2.0
+    in_band = (fr >= lo) & (fr <= hi)
     band = lv[in_band]
 
     # L_70%: energy mean of the 70 % lowest-level lines in the critical band.
@@ -207,20 +208,24 @@ def wind_turbine_tonality(
     l_pn_avg = _energy_mean(masking) if masking.size else l70
     tone_threshold = l_pn_avg + _TONE_MARGIN
 
-    # Tone lines: the contiguous run about the peak above the tone threshold and
-    # within 10 dB of the peak level.
+    # Tone lines (9.5.3, "adjacent" struck out by A1:2018): every line in the
+    # critical band above the tone threshold and within 10 dB of the peak,
+    # whether or not contiguous with it.
     peak_level = float(lv[peak])
-    tone_idx = [peak]
-    for step in (-1, 1):
-        i = peak + step
-        while 0 <= i < lv.size and in_band[i] and lv[i] > tone_threshold \
-                and peak_level - lv[i] <= _TONE_GROUP_DROP:
-            tone_idx.append(i)
-            i += step
-    tone_lines = lv[np.array(sorted(tone_idx))]
-    l_pt = _energy_sum(tone_lines)
-    if tone_lines.size >= 2:  # Hanning: divide the summed energy by 1.5.
-        l_pt -= 10.0 * np.log10(_HANNING_ENBW_FACTOR)
+    is_tone = in_band & (lv > tone_threshold) & (peak_level - lv <= _TONE_GROUP_DROP)
+    tone_positions = np.nonzero(is_tone)[0]
+    if tone_positions.size == 0:
+        tone_positions = np.array([peak])
+    # Energy-sum the tone lines per contiguous run (9.5.5), applying the Hanning
+    # ÷1.5 correction to any run that spans two or more adjacent lines.
+    runs = np.split(tone_positions, np.nonzero(np.diff(tone_positions) != 1)[0] + 1)
+    tone_energy = 0.0
+    for run in runs:
+        run_energy = float(np.sum(10.0 ** (lv[run] / 10.0)))
+        if run.size >= 2:
+            run_energy /= _HANNING_ENBW_FACTOR
+        tone_energy += run_energy
+    l_pt = 10.0 * np.log10(tone_energy)
 
     enbw = _HANNING_ENBW_FACTOR * df
     l_pn = l_pn_avg + 10.0 * np.log10(cbw / enbw)

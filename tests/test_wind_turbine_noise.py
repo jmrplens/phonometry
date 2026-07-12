@@ -125,9 +125,11 @@ def test_tonal_audibility_rejects_non_monotonic_frequencies() -> None:
 
 
 def test_tonal_audibility_rejects_non_uniform_spacing() -> None:
-    # Formulae 30-34 assume a uniform frequency resolution df.
+    # Formulae 30-34 assume a uniform frequency resolution df. A near-miss axis
+    # (2, 2, 2.4 Hz) that a loose 25 % tolerance would accept — but which biases
+    # df and the ENBW/masking level — must be rejected by the tight tolerance.
     with pytest.raises(ValueError, match="uniformly spaced"):
-        wind_turbine_tonality([30.0, 30.0, 30.0, 30.0], [100.0, 102.0, 104.0, 120.0])
+        wind_turbine_tonality([30.0, 30.0, 30.0, 30.0], [100.0, 102.0, 104.0, 106.4])
 
 
 def test_tonal_audibility_plot_smoke_and_export() -> None:
@@ -136,4 +138,7 @@ def test_tonal_audibility_plot_smoke_and_export() -> None:
     levels, freqs = _synthetic_tone()
     res = phonometry.wind_turbine_tonality(levels, freqs)
     assert res.plot() is not None
+    # Caller-supplied plot kwargs must override the defaults, not collide with
+    # them (no duplicate-keyword TypeError).
+    assert res.plot(lw=2.0, label="spectrum") is not None
     assert phonometry.apparent_sound_power_level is apparent_sound_power_level

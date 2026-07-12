@@ -2834,7 +2834,7 @@ def _chk_wt_critical_bandwidth() -> Outcome:
 def _chk_wt_apparent_power() -> Outcome:
     r1 = 150.0
     expected = 100.0 - 6.0 + 10.0 * math.log10(4.0 * math.pi * r1**2)
-    return numeric(expected, ph.apparent_sound_power_level([100.0], r1), 1e-4, places=4)
+    return numeric(expected, ph.apparent_sound_power_level([100.0], r1), 1e-4, unit="dB", places=4)
 
 
 @register(

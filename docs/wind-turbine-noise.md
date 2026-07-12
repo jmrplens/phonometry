@@ -25,6 +25,8 @@ pressure doubling.
 ```python
 import phonometry as ph
 
+# Background-corrected A-weighted one-third-octave band levels L_p,i (dB).
+band_levels = [55.0, 58.0, 60.0, 57.0, 54.0]
 r1 = ph.slant_distance(hub_height=80.0, rotor_diameter=100.0)
 lwa = ph.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 ```
@@ -54,9 +56,16 @@ $$
 reported when `ΔL_a ≥ −3 dB`; a tone is audible when `ΔL_a > 0`.
 
 ```python
+import numpy as np
 import phonometry as ph
 
-res = ph.wind_turbine_tonality(levels, frequencies)   # levels/frequencies: narrowband
+# A uniformly-spaced narrowband spectrum (2 Hz resolution): a flat 30 dB floor
+# with a discrete 60 dB tone at 500 Hz.
+frequencies = np.arange(440.0, 562.0, 2.0)
+levels = np.full(frequencies.size, 30.0)
+levels[np.argmin(np.abs(frequencies - 500.0))] = 60.0
+
+res = ph.wind_turbine_tonality(levels, frequencies)
 print(res.tone_frequency, res.tonality, res.tonal_audibility, res.is_audible)
 res.plot()   # spectrum + critical band + masking level (needs matplotlib)
 ```

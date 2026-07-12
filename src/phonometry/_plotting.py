@@ -818,8 +818,7 @@ def plot_epnl(result: "EPNLResult", ax: Axes | None = None, **kwargs: Any) -> Ax
     t = np.asarray(result.times, dtype=np.float64)
     kf, kl = result.band_limits
     ax.plot(t, np.asarray(result.pnl), color=_C_MUTED, lw=1.0, ls="--", label="PNL")
-    kwargs.setdefault("color", _C_PRIMARY)
-    ax.plot(t, np.asarray(result.pnlt), lw=1.4, label="PNLT", **kwargs)
+    ax.plot(t, np.asarray(result.pnlt), **{"color": _C_PRIMARY, "lw": 1.4, "label": "PNLT", **kwargs})
     ax.axvspan(t[kf], t[kl], color=_C_TERTIARY, alpha=0.15, label="10 dB-down window")
     km = int(np.argmax(np.asarray(result.pnlt)))
     ax.plot([t[km]], [result.pnltm], "o", color=_C_REFERENCE,
@@ -849,8 +848,7 @@ def plot_wind_turbine_tonality(
     levels = np.asarray(result.levels, dtype=np.float64)
     fc = result.tone_frequency
     lo, hi = _critical_band_edges(fc)
-    kwargs.setdefault("color", _C_PRIMARY)
-    ax.plot(freqs, levels, lw=1.0, label="Narrowband spectrum", **kwargs)
+    ax.plot(freqs, levels, **{"color": _C_PRIMARY, "lw": 1.0, "label": "Narrowband spectrum", **kwargs})
     ax.axvspan(lo, hi, color=_C_TERTIARY, alpha=0.12, label="Critical band")
     ax.axhline(result.masking_level, color=_C_MUTED, ls="--", lw=1.0,
                label=f"Masking level ({result.masking_level:.1f} dB)")

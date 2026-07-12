@@ -135,8 +135,6 @@ _TONE_MARGIN = 6.0
 _TONE_GROUP_DROP = 10.0
 #: Audibility criterion constants of Formula 34.
 _LA_OFFSET, _LA_PIVOT, _LA_EXP = -2.0, 502.0, 2.5
-#: Report threshold (dB): a tone with ΔL_a below this is "no relevant tone".
-_AUDIBILITY_REPORT_LIMIT = -3.0
 
 
 @dataclass(frozen=True)
@@ -204,7 +202,7 @@ def wind_turbine_tonality(
     if np.any(diffs <= 0.0):
         raise ValueError("'frequencies' must be strictly increasing.")
     df = float(np.median(diffs))
-    if np.any(np.abs(diffs - df) > 0.25 * df):
+    if np.any(np.abs(diffs - df) > 1e-3 * df):
         raise ValueError("'frequencies' must be uniformly spaced (a narrowband spectrum).")
 
     peak = int(np.argmax(lv)) if tone_frequency is None else int(np.argmin(np.abs(fr - tone_frequency)))

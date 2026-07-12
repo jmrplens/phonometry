@@ -76,6 +76,7 @@ rotor_diameter) -> float`, `apparent_sound_power_level(band_levels, r1) -> float
 tone_frequency=None) -> TonalAudibilityResult`.
 
 - [ ] Failing test on the synthetic tone above:
+
 ```python
 df = 2.0
 freqs = np.arange(440.0, 560.0 + df, df)
@@ -90,6 +91,7 @@ assert res.audibility_criterion == pytest.approx(-2.299, abs=0.01)
 assert res.tonal_audibility == pytest.approx(16.38, abs=0.06)
 assert res.is_audible is True
 ```
+
 - [ ] Implement the chain (auto-detect the tone as the max line if
   `tone_frequency` is None; window the critical band about it; classify lines;
   Eqs 31-34). Run, commit `feat(wind-turbine): tonal audibility chain (IEC 61400-11 Eqs 30-34)`.
@@ -139,6 +141,7 @@ level and the tone line marked); `TonalAudibilityResult.plot`.
   Commit `docs(wind-turbine): EN guide + site EN/ES, api-reference, indices`.
 
 ## Self-review checklist
+
 - Oracles independent: closed-form CBW/geometry/K_T + hand-derived synthetic-tone
   audibility (not mirrored from the SUT).
 - Signatures consistent (`TonalAudibilityResult` fields used by `.plot()`).

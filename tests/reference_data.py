@@ -906,3 +906,10 @@ DISTORTION_D2 = 0.09936117403949127
 # (frequency-independent) SNR: gamma^2 = SNR / (1 + SNR). At SNR = 10 -> 0.90909.
 COHERENCE_SNR = 10.0
 COHERENCE_EXPECTED = COHERENCE_SNR / (1.0 + COHERENCE_SNR)
+
+# ---------------------------------------------------------------------------
+# Underwater acoustics (ISO 18405 / 17208 / 18406). Reference pressure 1 µPa,
+# reference exposure 1 µPa²·s. Level offset between the in-air (20 µPa) and
+# underwater (1 µPa) references: 20·lg(20) = 26.0206 dB.
+# ---------------------------------------------------------------------------
+UW_REFERENCE_OFFSET_DB = 26.020599913279624

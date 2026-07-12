@@ -511,6 +511,20 @@ _ES_EXACT = {
         "Respuesta en frecuencia y coherencia (Bendat y Piersol)",
     "True |H|": "|H| verdadero",
     "Estimated |H| (H1)": "|H| estimado (H1)",
+    # Underwater acoustics (ISO 17208 ship radiated noise; ISO 18406 pile driving)
+    "Ship Equivalent Monopole Source Level (ISO 17208-2)":
+        "Nivel de fuente monopolar equivalente de buque (ISO 17208-2)",
+    "Source level Ls": "Nivel de fuente Ls",
+    "Radiated noise level": "Nivel de ruido radiado",
+    "Surface correction ΔL [dB]": "Corrección de superficie ΔL [dB]",
+    "Surface correction ΔL": "Corrección de superficie ΔL",
+    "Level [dB re 1 µPa·m]": "Nivel [dB re 1 µPa·m]",
+    "Percussive Pile-Driving Strike (ISO 18406)":
+        "Golpe de hincado de pilotes por percusión (ISO 18406)",
+    "Time [ms]": "Tiempo [ms]",
+    "Pressure [Pa]": "Presión [Pa]",
+    "Number of strikes N": "Número de golpes N",
+    "Cumulative SEL [dB re 1 µPa²·s]": "SEL acumulado [dB re 1 µPa²·s]",
     # Building acoustics (EN 12354-1 flanking prediction, ISO 12999-1 uncertainty)
     "EN 12354-1 Flanking Transmission (Annex H.3 example)":
         "Transmisión por flancos EN 12354-1 (ejemplo del Anexo H.3)",
@@ -3197,6 +3211,103 @@ def generate_frequency_response(output_dir: str) -> None:
     plt.close()
 
 
+def generate_ship_source_level(output_dir: str) -> None:
+    """Ship equivalent monopole source level and the ΔL surface correction."""
+    print("Generating ship_source_level...")
+    from phonometry import monopole_source_level
+
+    # One-third-octave centres 20 Hz-20 kHz and a plausible broadband ship RNL
+    # that rolls off with frequency; draught 6 m -> source depth 4.2 m.
+    freqs = np.array([20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315,
+                      400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150,
+                      4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000],
+                     dtype=float)
+    rnl = 175.0 - 12.0 * np.log10(freqs / 20.0)
+    res = monopole_source_level(rnl, freqs, draught=6.0)
+
+    fig, ax = plt.subplots(figsize=(10, 6.0))
+    ax.semilogx(freqs, res.source_level, "o-", color=COLOR_PRIMARY, linewidth=2.0,
+                markersize=4, label="Source level Ls")
+    ax.semilogx(freqs, res.radiated_noise_level, "s--", color=COLOR_SECONDARY,
+                linewidth=1.6, markersize=3, alpha=0.8, label="Radiated noise level")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Level [dB re 1 µPa·m]")
+    ax.set_title("Ship Equivalent Monopole Source Level (ISO 17208-2)",
+                 fontweight="bold", pad=12)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+
+    twin = ax.twinx()
+    twin.semilogx(freqs, res.surface_correction, ":", color=COLOR_TERTIARY,
+                  linewidth=2.0, label="Surface correction ΔL")
+    twin.set_ylabel("Surface correction ΔL [dB]")
+
+    lines, labels = ax.get_legend_handles_labels()
+    tlines, tlabels = twin.get_legend_handles_labels()
+    ax.legend(lines + tlines, labels + tlabels, loc="lower left", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "Ls = LRN + ΔL",
+        "ΔL = -10 lg[(2u^4+14u^2)/(14+2u^2+u^4)]",
+        "u = k d_s,  d_s = 0.7 D = 4.2 m",
+    ]
+    ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=8.5, color=COLOR_FG,
+            family="monospace",
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "ship_source_level.svg")
+    plt.close()
+
+
+def generate_pile_driving(output_dir: str) -> None:
+    """Pile-driving strike waveform, single-strike SEL and cumulative-SEL growth."""
+    print("Generating pile_driving...")
+    from phonometry import cumulative_sel_identical, pile_strike_metrics
+
+    fs = 48000
+    dur = 0.3
+    t = np.arange(int(dur * fs)) / fs
+    # An impulsive strike: a short rise then an exponentially decaying ring.
+    envelope = np.where(t < 0.01, t / 0.01, np.exp(-(t - 0.01) / 0.04))
+    pressure = 8000.0 * envelope * np.sin(2.0 * np.pi * 180.0 * t)
+    res = pile_strike_metrics(pressure, fs)
+
+    # Cumulative SEL growth over a driving sequence of identical strikes.
+    strikes = np.arange(1, 2001)
+    sel_cum = np.array([cumulative_sel_identical(res.single_strike_sel, int(n))
+                        for n in strikes])
+
+    fig, (ax_w, ax_c) = plt.subplots(
+        2, 1, figsize=(10, 7.2),
+        gridspec_kw={"height_ratios": [1.4, 1.0]})
+    ax_w.plot(t * 1e3, pressure, color=COLOR_PRIMARY, linewidth=0.8)
+    peak_idx = int(np.argmax(np.abs(pressure)))
+    ax_w.plot([t[peak_idx] * 1e3], [pressure[peak_idx]], "o", color=COLOR_SECONDARY,
+              markersize=8, label=f"Peak = {res.peak_spl:.0f} dB re 1 µPa")
+    ax_w.set_xlabel("Time [ms]")
+    ax_w.set_ylabel("Pressure [Pa]")
+    ax_w.set_title("Percussive Pile-Driving Strike (ISO 18406)",
+                   fontweight="bold", pad=12)
+    ax_w.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_w.set_axisbelow(True)
+    ax_w.legend(loc="upper right", fontsize=9)
+
+    ax_c.semilogx(strikes, sel_cum, color=COLOR_TERTIARY, linewidth=2.2)
+    ax_c.set_xlabel("Number of strikes N")
+    ax_c.set_ylabel("Cumulative SEL [dB re 1 µPa²·s]")
+    ax_c.set_title(
+        f"SEL_ss = {res.single_strike_sel:.0f} dB;  "
+        f"SEL_cum = SEL_ss + 10 lg(N)", fontsize=10)
+    ax_c.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_c.set_axisbelow(True)
+    plt.tight_layout()
+    save_figure(output_dir, "pile_driving.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -5609,6 +5720,11 @@ def generate_all(img_dir: str) -> None:
     # frequency-response / coherence estimators (Bendat & Piersol).
     generate_distortion(img_dir)
     generate_frequency_response(img_dir)
+
+    # Underwater acoustics (plan-19A): ship radiated noise / monopole source
+    # level (ISO 17208) and pile-driving sound exposure (ISO 18406).
+    generate_ship_source_level(img_dir)
+    generate_pile_driving(img_dir)
 
 
 # ===========================================================================

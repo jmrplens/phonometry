@@ -88,6 +88,8 @@ if TYPE_CHECKING:
     from .psychoacoustic_annoyance import PsychoacousticAnnoyanceResult
     from .distortion import HarmonicDistortionResult
     from .frequency_response import FrequencyResponseResult
+    from .ship_radiated_noise import ShipSourceLevelResult
+    from .pile_driving_noise import PileStrikeResult
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -694,6 +696,107 @@ def plot_frequency_response(
     axes[2].set_xlabel("Frequency [Hz]")
     axes[2].set_ylim(0.0, 1.05)
     axes[2].grid(True, which="both", alpha=0.3)
+    return axes
+
+
+# ---------------------------------------------------------------------------
+# Underwater acoustics (ISO 17208 ship radiated noise, ISO 18406 pile driving)
+# ---------------------------------------------------------------------------
+
+
+def plot_ship_source_level(
+    result: "ShipSourceLevelResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Radiated noise level, source level and the ΔL surface correction.
+
+    Draws the input RNL and the equivalent monopole source level ``Ls`` versus
+    frequency, with the Lloyd's-mirror correction ``ΔL`` on a twin axis.
+
+    :param result: A
+        :class:`~phonometry.ship_radiated_noise.ShipSourceLevelResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the source-level ``semilogx`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    rnl = np.asarray(result.radiated_noise_level, dtype=np.float64)
+    ls = np.asarray(result.source_level, dtype=np.float64)
+    dl = np.asarray(result.surface_correction, dtype=np.float64)
+
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("label", "Source level Ls")
+    ax.semilogx(freqs, ls, "o-", **kwargs)
+    ax.semilogx(freqs, rnl, "s--", color=_C_REFERENCE, label="Radiated noise level")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Level [dB re 1 µPa·m]")
+    ax.grid(True, which="both", alpha=0.3)
+    ax.set_axisbelow(True)
+
+    twin = ax.twinx()
+    twin.semilogx(freqs, dl, ":", color=_C_TERTIARY, label="Surface correction ΔL")
+    twin.set_ylabel("Surface correction ΔL [dB]")
+
+    lines, labels = ax.get_legend_handles_labels()
+    tlines, tlabels = twin.get_legend_handles_labels()
+    ax.legend(lines + tlines, labels + tlabels, loc="best", fontsize="small")
+    ax.set_title(
+        "ISO 17208-2 equivalent monopole source level "
+        f"(d_s = {result.source_depth:.1f} m, c = {result.sound_speed:.0f} m/s)"
+    )
+    return ax
+
+
+def plot_pile_strike(
+    result: "PileStrikeResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes | np.ndarray:
+    """Pile-strike pressure waveform and its cumulative energy.
+
+    Two stacked panels: the pressure waveform with the peak marked on top, and
+    the normalised cumulative energy with the 5 %/95 % pulse-duration bounds
+    below. With ``ax`` given, only the waveform panel is drawn on it.
+
+    :param result: A :class:`~phonometry.pile_driving_noise.PileStrikeResult`.
+    :param ax: Existing axes for the waveform panel, or ``None`` for a fresh
+        two-panel figure.
+    :param kwargs: Forwarded to the waveform ``plot`` call.
+    :return: The waveform axes (``ax`` given) or the array of two axes.
+    """
+    pressure = np.asarray(result.pressure, dtype=np.float64)
+    fs = float(result.fs)
+    t = np.arange(pressure.size) / fs
+    energy = np.cumsum(pressure**2)
+    total = float(energy[-1]) if energy.size else 0.0
+    cum = energy / total if total > 0.0 else energy
+    peak_idx = int(np.argmax(np.abs(pressure)))
+    color = kwargs.pop("color", _C_PRIMARY)
+
+    def _waveform(axw: Axes) -> None:
+        axw.plot(t, pressure, color=color, lw=0.8, **kwargs)
+        axw.plot([t[peak_idx]], [pressure[peak_idx]], "o", color=_C_REFERENCE,
+                 label=f"Peak ({result.peak_spl:.0f} dB re 1 µPa)")
+        axw.set_ylabel("Pressure [Pa]")
+        axw.grid(True, alpha=0.3)
+        axw.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+
+    if ax is not None:
+        _waveform(ax)
+        ax.set_xlabel("Time [s]")
+        ax.set_title(f"ISO 18406 pile strike (SEL_ss = {result.single_strike_sel:.0f} dB)")
+        return ax
+
+    axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.0))
+    _waveform(axes[0])
+    axes[0].set_title(
+        f"ISO 18406 pile strike (SEL_ss = {result.single_strike_sel:.0f} dB re 1 µPa²·s)"
+    )
+    axes[1].plot(t, cum, color=_C_TERTIARY, label="Cumulative energy")
+    for frac in (0.05, 0.95):
+        axes[1].axhline(frac, color=_C_MUTED, ls="--", lw=0.8)
+    axes[1].set_ylabel("Cumulative energy (norm.)")
+    axes[1].set_xlabel("Time [s]")
+    axes[1].set_title(f"90 % pulse duration = {result.pulse_duration * 1e3:.0f} ms")
+    axes[1].grid(True, alpha=0.3)
     return axes
 
 

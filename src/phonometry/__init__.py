@@ -239,6 +239,15 @@ from .frequency_response import (
     coherence,
     transfer_function,
 )
+from .underwater_acoustics import (
+    UNDERWATER_REFERENCE_EXPOSURE,
+    UNDERWATER_REFERENCE_PRESSURE,
+    in_air_to_underwater_spl,
+    peak_sound_pressure_level,
+    sound_exposure_level,
+    sound_pressure_level,
+    underwater_to_in_air_spl,
+)
 from .tonality import (
     TonalityWarning,
     ToneAssessment,
@@ -684,6 +693,13 @@ __all__ = [
     "transfer_function",
     "coherence",
     "FrequencyResponseResult",
+    "UNDERWATER_REFERENCE_PRESSURE",
+    "UNDERWATER_REFERENCE_EXPOSURE",
+    "sound_pressure_level",
+    "sound_exposure_level",
+    "peak_sound_pressure_level",
+    "underwater_to_in_air_spl",
+    "in_air_to_underwater_spl",
     "equal_loudness_contour",
     "loudness_level",
     "hearing_threshold",

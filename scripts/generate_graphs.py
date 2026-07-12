@@ -529,6 +529,10 @@ _ES_EXACT = {
         "Sobrevuelo de aeronave ICAO — Nivel efectivo de ruido percibido (Anexo 16)",
     "Level [PNdB]": "Nivel [PNdB]",
     "10 dB-down window": "Ventana 10 dB por debajo",
+    "Wind-Turbine Tonal Audibility (IEC 61400-11)":
+        "Audibilidad tonal de aerogenerador (IEC 61400-11)",
+    "Narrowband spectrum": "Espectro de banda estrecha",
+    "Critical band": "Banda crítica",
     # Building acoustics (EN 12354-1 flanking prediction, ISO 12999-1 uncertainty)
     "EN 12354-1 Flanking Transmission (Annex H.3 example)":
         "Transmisión por flancos EN 12354-1 (ejemplo del Anexo H.3)",
@@ -3356,6 +3360,49 @@ def generate_epnl(output_dir: str) -> None:
     plt.close()
 
 
+def generate_wind_turbine_tonality(output_dir: str) -> None:
+    """IEC 61400-11 wind-turbine tonal audibility: narrowband spectrum + masking."""
+    print("Generating wind_turbine_tonality...")
+    from phonometry import wind_turbine_tonality
+    from phonometry.wind_turbine_noise import _critical_band_edges
+
+    # A narrowband spectrum: a shaped broadband floor with a blade-passing-style
+    # tone near 200 Hz, at 2 Hz resolution.
+    df = 2.0
+    freqs = np.arange(50.0, 400.0 + df, df)
+    floor = 42.0 - 6.0 * np.log10(freqs / 100.0)
+    tone_bin = int(np.argmin(np.abs(freqs - 200.0)))
+    levels = floor.copy()
+    levels[tone_bin] += 22.0
+    res = wind_turbine_tonality(levels, freqs, tone_frequency=200.0)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    band_lo, band_hi = _critical_band_edges(res.tone_frequency)
+    ax.axvspan(band_lo, band_hi, color=COLOR_TERTIARY, alpha=0.15,
+               label="Critical band")
+    ax.plot(freqs, levels, color=COLOR_PRIMARY, linewidth=1.0,
+            label="Narrowband spectrum")
+    ax.axhline(res.masking_level, color="#ff7f0e", linestyle="--", linewidth=1.5,
+               label=f"Masking level = {res.masking_level:.1f} dB")
+    ax.plot([res.tone_frequency], [res.tone_level], "o", color=COLOR_SECONDARY,
+            markersize=9, label=f"Tone = {res.tone_level:.1f} dB")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Level [dB]")
+    ax.set_title("Wind-Turbine Tonal Audibility (IEC 61400-11)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.text(0.02, 0.95,
+            f"Tonal audibility ΔLₐ = {res.tonal_audibility:.1f} dB\n"
+            f"{'audible' if res.is_audible else 'not audible'}",
+            transform=ax.transAxes, va="top", fontsize=10,
+            bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
+    plt.tight_layout()
+    save_figure(output_dir, "wind_turbine_tonality.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -5776,6 +5823,9 @@ def generate_all(img_dir: str) -> None:
 
     # Aircraft noise (plan-19B): ICAO Annex 16 Effective Perceived Noise Level.
     generate_epnl(img_dir)
+
+    # Wind-turbine noise (plan-19B2): IEC 61400-11 tonal audibility.
+    generate_wind_turbine_tonality(img_dir)
 
 
 # ===========================================================================

@@ -318,6 +318,11 @@ export default defineConfig({
           items: ['guides/aircraft-noise'],
         },
         {
+          label: 'Wind-turbine noise',
+          translations: { es: 'Ruido de aerogeneradores' },
+          items: ['guides/wind-turbine-noise'],
+        },
+        {
           label: 'Hearing & occupational exposure',
           translations: { es: 'Audición y exposición laboral' },
           items: [

@@ -93,6 +93,7 @@ if TYPE_CHECKING:
     from .aircraft_noise import EPNLResult
     from .wind_turbine_noise import WindTurbineTonalityResult
     from .underwater_sound_speed import SoundSpeedProfile
+    from .underwater_propagation import TransmissionLossResult
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -885,6 +886,36 @@ def plot_sound_speed_profile(
     ax.set_title("Sea-water sound-speed profile")
     ax.grid(True, alpha=0.3)
     ax.legend(loc="lower left", fontsize="small")
+    return ax
+
+
+def plot_transmission_loss(
+    result: "TransmissionLossResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Transmission loss versus range, with spreading and absorption split out.
+
+    Loss increases downward (the usual TL convention).
+
+    :param result: A :class:`~phonometry.underwater_propagation.TransmissionLossResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the total-TL ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    r = np.asarray(result.range_m, dtype=np.float64)
+    label = f"Total TL ({result.frequency / 1000.0:.3g} kHz)"
+    ax.plot(r, np.asarray(result.tl), **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    ax.plot(r, np.asarray(result.spreading), color=_C_MUTED, lw=1.0, ls="--",
+            label=f"Spreading ({result.law})")
+    ax.plot(r, np.asarray(result.absorption), color=_C_SECONDARY, lw=1.0, ls=":",
+            label=f"Absorption ({result.absorption_coefficient:.3g} dB/km)")
+    ax.set_xlabel("Range [m]")
+    ax.set_ylabel("Transmission loss [dB]")
+    ax.set_title(f"Underwater transmission loss ({result.model})")
+    if not ax.yaxis_inverted():
+        ax.invert_yaxis()
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="lower right", fontsize="small")
     return ax
 
 

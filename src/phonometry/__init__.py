@@ -255,6 +255,12 @@ from .underwater_sound_speed import (
     sea_water_sound_speed,
     sound_speed_profile,
 )
+from .underwater_propagation import (
+    TransmissionLossResult,
+    seawater_absorption,
+    spreading_loss,
+    transmission_loss,
+)
 from .ship_radiated_noise import (
     ShipSourceLevelResult,
     hydrophone_depths,
@@ -740,6 +746,10 @@ __all__ = [
     "sound_speed_profile",
     "SoundSpeedProfile",
     "depth_to_pressure",
+    "spreading_loss",
+    "seawater_absorption",
+    "transmission_loss",
+    "TransmissionLossResult",
     "radiated_noise_level",
     "hydrophone_depths",
     "source_level_uncertainty",

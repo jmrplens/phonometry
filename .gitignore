@@ -65,8 +65,9 @@ snyk.sarif
 issues_final*.json
 node_modules/
 
-# Local work plans
+# Local work plans (brainstorming specs, implementation plans, source library)
 plan/
+docs/superpowers/
 
 # Astro docs site
 site/node_modules/

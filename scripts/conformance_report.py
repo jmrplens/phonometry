@@ -2744,6 +2744,98 @@ def _chk_uw_cumulative_sel() -> Outcome:
 
 
 # ===========================================================================
+# Underwater sound propagation (transmission loss, closed-form)
+# ===========================================================================
+_UW_PROP = "Underwater sound propagation (transmission loss)"
+
+
+@register(
+    _UW_PROP,
+    "Mackenzie (1981) nine-term equation",
+    "Speed of sound at 25 °C, 35 ‰, 1000 m (canonical check value), m/s",
+)
+def _chk_uwp_mackenzie() -> Outcome:
+    return numeric(
+        1550.744,
+        ph.sea_water_sound_speed(25.0, 35.0, 1000.0, model="mackenzie"),
+        1e-2,
+        unit="m/s",
+        places=3,
+    )
+
+
+@register(
+    _UW_PROP,
+    "UNESCO/Chen-Millero vs Mackenzie",
+    "Sound-speed agreement at 10 °C, 35 ‰, 1000 m (cross-model), m/s",
+)
+def _chk_uwp_unesco() -> Outcome:
+    expected = ph.sea_water_sound_speed(10.0, 35.0, 1000.0, model="mackenzie")
+    got = ph.sea_water_sound_speed(10.0, 35.0, 1000.0, model="unesco")
+    return numeric(expected, got, 1.0, unit="m/s", places=3)
+
+
+@register(
+    _UW_PROP,
+    "Del Grosso (1974) vs Mackenzie",
+    "Sound-speed agreement at 10 °C, 35 ‰, 1000 m (cross-model), m/s",
+)
+def _chk_uwp_del_grosso() -> Outcome:
+    expected = ph.sea_water_sound_speed(10.0, 35.0, 1000.0, model="mackenzie")
+    got = ph.sea_water_sound_speed(10.0, 35.0, 1000.0, model="del_grosso")
+    return numeric(expected, got, 1.0, unit="m/s", places=3)
+
+
+@register(
+    _UW_PROP,
+    "Spherical spreading 20·lg(R)",
+    "Geometrical spreading loss at R = 1000 m, dB",
+)
+def _chk_uwp_spreading() -> Outcome:
+    return numeric(
+        20.0 * math.log10(1000.0),
+        float(ph.spreading_loss([1000.0], law="spherical")[0]),
+        1e-9,
+        unit="dB",
+        places=4,
+    )
+
+
+@register(
+    _UW_PROP,
+    "Thorp (1967) absorption",
+    "Volume absorption α at 10 kHz (cold deep water), dB/km",
+)
+def _chk_uwp_thorp() -> Outcome:
+    f = 10.0  # kHz
+    expected = 1.0936 * (0.1 * f**2 / (1 + f**2) + 40 * f**2 / (4100 + f**2))
+    got = float(ph.seawater_absorption(10_000.0, model="thorp")[0])
+    return numeric(expected, got, 1e-6, unit="dB/km", places=4)
+
+
+@register(
+    _UW_PROP,
+    "Ainslie-McColm (1998) vs Francois-Garrison (1982)",
+    "Absorption agreement at 10 kHz, 10 °C, 35 ‰, 0 m, pH 8, dB/km",
+)
+def _chk_uwp_absorption_agreement() -> Outcome:
+    kw = dict(temperature=10.0, salinity=35.0, depth=0.0, ph=8.0)
+    fg = float(ph.seawater_absorption(10_000.0, model="francois-garrison", **kw)[0])
+    am = float(ph.seawater_absorption(10_000.0, model="ainslie-mccolm", **kw)[0])
+    return numeric(fg, am, 0.1 * fg, unit="dB/km", places=4)
+
+
+@register(
+    _UW_PROP,
+    "Passive sonar equation (Urick/Etter)",
+    "Figure of merit SL − (NL − DI) − DT, dB",
+)
+def _chk_uwp_sonar() -> Outcome:
+    res = ph.passive_sonar_equation(140.0, 80.0, 60.0, directivity_index=10.0, detection_threshold=5.0)
+    return numeric(85.0, res.figure_of_merit, 1e-9, unit="dB", places=4)
+
+
+# ===========================================================================
 # Aircraft noise (ICAO Annex 16 EPNL / IEC 61265)
 # ===========================================================================
 _AIRCRAFT = "Aircraft noise (ICAO Annex 16 / IEC 61265)"

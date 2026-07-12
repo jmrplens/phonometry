@@ -310,7 +310,7 @@ export default defineConfig({
         {
           label: 'Underwater acoustics',
           translations: { es: 'Acústica submarina' },
-          items: ['guides/underwater-acoustics'],
+          items: ['guides/underwater-acoustics', 'guides/underwater-propagation'],
         },
         {
           label: 'Aircraft noise',

@@ -84,6 +84,8 @@ if TYPE_CHECKING:
     from .sound_power_reverberation import ReverberationSoundPowerResult
     from .tonality_ecma import EcmaTonality
     from .roughness_ecma import EcmaRoughness
+    from .fluctuation_strength import FluctuationStrengthResult
+    from .psychoacoustic_annoyance import PsychoacousticAnnoyanceResult
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -523,6 +525,70 @@ def plot_ecma_roughness(
     ax_heat.set_xlabel("Time [s]")
     ax_heat.set_ylabel("Critical-band rate z [Bark_HMS]")
     return axes
+
+
+def plot_fluctuation_strength(
+    result: "FluctuationStrengthResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Specific fluctuation strength ``f(z)`` against critical-band rate.
+
+    Draws the per-filter specific fluctuation strength over the Bark scale,
+    annotated with the overall ``F`` in vacil.
+
+    :param result: A
+        :class:`~phonometry.fluctuation_strength.FluctuationStrengthResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    z = np.asarray(result.bark_axis, dtype=np.float64)
+    spec = np.asarray(result.specific, dtype=np.float64)
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.plot(z, spec, **kwargs)
+    ax.fill_between(z, spec, color=kwargs["color"], alpha=0.25)
+    ax.set_xlabel("Critical-band rate z [Bark]")
+    ax.set_ylabel(r"Specific fluctuation strength $f'(z)$ [vacil/Bark]")
+    ax.set_title(f"Fluctuation strength F = {result.fluctuation_strength:.2f} vacil")
+    ax.set_ylim(bottom=0.0)
+    ax.grid(True, alpha=0.3)
+    ax.set_axisbelow(True)
+    return ax
+
+
+def plot_psychoacoustic_annoyance(
+    result: "PsychoacousticAnnoyanceResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Psychoacoustic annoyance with its ``wS`` and ``wFR`` term contributions.
+
+    Draws the PA value alongside the two loudness-weighted terms so the
+    sharpness and fluctuation/roughness contributions are visible.
+
+    :param result: A :class:`~phonometry.psychoacoustic_annoyance.
+        PsychoacousticAnnoyanceResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the bar ``bar`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    labels = ["PA", r"$w_S$", r"$w_{FR}$"]
+    values = [result.annoyance, result.w_s, result.w_fr]
+    colors = [_C_REFERENCE, _C_PRIMARY, _C_PRIMARY]
+    positions = np.arange(len(labels))
+    kwargs.setdefault("width", 0.6)
+    kwargs.setdefault("color", colors)
+    kwargs.setdefault("edgecolor", _C_EDGE)
+    ax.bar(positions, values, **kwargs)
+    ax.set_xticks(positions)
+    ax.set_xticklabels(labels)
+    ax.set_ylabel("Value")
+    ax.set_title(
+        f"Psychoacoustic annoyance PA = {result.annoyance:.1f} "
+        f"(N5 = {result.n5:.1f} sone)"
+    )
+    ax.grid(True, axis="y", alpha=0.3)
+    ax.set_axisbelow(True)
+    return ax
 
 
 # ---------------------------------------------------------------------------

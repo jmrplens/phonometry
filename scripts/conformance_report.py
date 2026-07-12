@@ -2465,6 +2465,51 @@ def _chk_iso20065_two_tone_separation() -> Outcome:
 
 
 # ===========================================================================
+# Psychoacoustic annoyance & fluctuation strength (Fastl & Zwicker)
+# ===========================================================================
+_PA_FS = "Psychoacoustic annoyance & fluctuation strength (Fastl & Zwicker)"
+
+
+@register(
+    _PA_FS,
+    "Fastl & Zwicker Eqs (16.2)-(16.4)",
+    "Psychoacoustic annoyance, worked (N5,S,F,R) tuple",
+)
+def _chk_psychoacoustic_annoyance() -> Outcome:
+    n5, s, f, r = ref.PA_WORKED_INPUT
+    value = ph.psychoacoustic_annoyance(n5, s, f, r).annoyance
+    return numeric(ref.PA_WORKED_VALUE, value, 1e-3, places=4)
+
+
+@register(
+    _PA_FS,
+    "Fastl & Zwicker Eq (10.2)",
+    "Fluctuation strength of AM broadband noise (60 dB, m=1, 4 Hz)",
+)
+def _chk_fluctuation_strength_am_noise() -> Outcome:
+    value = ph.fluctuation_strength_am_noise(60.0, 1.0, 4.0)
+    return numeric(ref.FS_BBN_60_1_4, value, 1e-3, unit="vacil", places=4)
+
+
+@register(
+    _PA_FS,
+    "Fastl & Zwicker Ch. 10 / Osses et al. 2016",
+    "Fluctuation-strength calibration: 1 kHz / 60 dB / m=1 / 4 Hz AM tone",
+)
+def _chk_fluctuation_strength_calibration() -> Outcome:
+    # The signal model is anchored (clean-room) so the 1-vacil reference tone
+    # returns 1.00 vacil through its own front-end. No numeric standard exists.
+    fs = 48000
+    t = np.arange(int(fs * 2.0)) / fs
+    tone = (1.0 + np.sin(2.0 * np.pi * 4.0 * t)) * np.sin(2.0 * np.pi * 1000.0 * t)
+    tone = tone / np.sqrt(np.mean(tone**2)) * 2e-5 * 10.0 ** (60.0 / 20.0)
+    value = ph.fluctuation_strength(tone, fs).fluctuation_strength
+    return numeric(
+        ref.FS_CALIBRATION_VACIL, value, 0.05, unit="vacil", places=3
+    )
+
+
+# ===========================================================================
 # Markdown rendering
 # ===========================================================================
 def _snap(value: float, eps: float = 5e-4) -> float:

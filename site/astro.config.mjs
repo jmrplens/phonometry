@@ -295,7 +295,7 @@ export default defineConfig({
         {
           label: 'Psychoacoustics',
           translations: { es: 'Psicoacústica' },
-          items: ['guides/psychoacoustics', 'guides/tone-prominence', 'guides/tone-audibility'],
+          items: ['guides/psychoacoustics', 'guides/tone-prominence', 'guides/tone-audibility', 'guides/psychoacoustic-annoyance'],
         },
         {
           label: 'Speech & intelligibility',

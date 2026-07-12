@@ -211,6 +211,16 @@ from .sti import (
 )
 from .tonality_ecma import EcmaTonality, tonality_ecma
 from .roughness_ecma import EcmaRoughness, roughness_ecma
+from .fluctuation_strength import (
+    FluctuationStrengthResult,
+    fluctuation_strength,
+    fluctuation_strength_am_noise,
+)
+from .psychoacoustic_annoyance import (
+    PsychoacousticAnnoyanceResult,
+    psychoacoustic_annoyance,
+    psychoacoustic_annoyance_from_signal,
+)
 from .tonality import (
     TonalityWarning,
     ToneAssessment,
@@ -636,6 +646,12 @@ __all__ = [
     "EcmaRoughness",
     "sharpness_din",
     "sharpness_din_from_specific",
+    "fluctuation_strength",
+    "fluctuation_strength_am_noise",
+    "FluctuationStrengthResult",
+    "psychoacoustic_annoyance",
+    "psychoacoustic_annoyance_from_signal",
+    "PsychoacousticAnnoyanceResult",
     "equal_loudness_contour",
     "loudness_level",
     "hearing_threshold",

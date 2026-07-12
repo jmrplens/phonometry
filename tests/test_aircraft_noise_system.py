@@ -56,5 +56,21 @@ def test_out_of_range_frequency_raises() -> None:
         verify_aircraft_noise_system(directional={20.0: {90: 0.5}})
 
 
+def test_out_of_range_angle_raises() -> None:
+    with pytest.raises(ValueError):
+        verify_aircraft_noise_system(directional={4000.0: {0.0: 0.5}})
+    with pytest.raises(ValueError):
+        verify_aircraft_noise_system(directional={4000.0: {160.0: 0.5}})
+
+
+def test_linearity_rejects_unknown_key() -> None:
+    with pytest.raises(ValueError):
+        verify_aircraft_noise_system(linearity={"refernce": 0.3})
+
+
+def test_resolution_rejects_negative() -> None:
+    assert verify_aircraft_noise_system(resolution=-1.0)["passed"] is False
+
+
 def test_empty_call_not_passed() -> None:
     assert verify_aircraft_noise_system()["passed"] is False

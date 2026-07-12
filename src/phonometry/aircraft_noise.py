@@ -259,19 +259,22 @@ _EPNL_REFERENCE_TIME = 10.0
 _TEN_DB_DOWN = 10.0
 
 
-def _ten_db_down_limits(pnlt: "NDArray[np.float64]", threshold: float, km: int) -> "tuple[int, int]":
-    """The 10 dB-down record indices ``(kF, kL)`` around the peak record ``km``.
+def _ten_db_down_limits(pnlt: "NDArray[np.float64]", threshold: float) -> "tuple[int, int]":
+    """The 10 dB-down record indices ``(kF, kL)`` of the integration window.
 
-    ``kF``/``kL`` are the records whose PNLT is nearest to ``PNLTM − 10`` on the
-    rising / falling side. The search takes the first (from the start) and last
-    (from the end) records that reach the threshold, so an interior dip below
-    the threshold does not truncate the integration window; the nearer of the
-    two samples bracketing each crossing is then chosen.
+    ``kF``/``kL`` are the records whose PNLT is nearest to ``PNLTM − 10``. The
+    search takes the **first** (from the start) and **last** (from the end)
+    records that reach the threshold, then the nearer of the two samples
+    bracketing each crossing. Spanning the outermost crossings is deliberate:
+    App. 2 §4.5 (and FAR-36 §A36.4.5) require the *largest possible duration*
+    for multi-lobed histories, so an interior dip below the threshold must not
+    truncate the window. ``PNLTM`` is always ``≥ threshold``, so the search
+    never comes up empty.
     """
     n = pnlt.size
     above = np.nonzero(pnlt >= threshold)[0]
-    if above.size == 0:
-        return km, km
+    if above.size == 0:  # pragma: no cover - PNLTM >= threshold guarantees a hit
+        return 0, n - 1
 
     first = int(above[0])
     if first > 0 and abs(pnlt[first - 1] - threshold) < abs(pnlt[first] - threshold):
@@ -309,15 +312,14 @@ def epnl_from_pnlt(
     if p.ndim != 1 or p.size < 1 or not np.all(np.isfinite(p)):
         raise ValueError("'pnlt' must be a non-empty finite 1-D sequence.")
     dt_raw = np.asarray(dt, dtype=np.float64)
-    dt_arr = np.full(p.shape, float(dt_raw.item())) if dt_raw.ndim == 0 else dt_raw
+    dt_arr = np.full(p.shape, float(dt_raw.reshape(-1)[0])) if dt_raw.size == 1 else dt_raw
     if dt_arr.shape != p.shape or np.any(dt_arr <= 0.0) or not np.all(np.isfinite(dt_arr)):
         raise ValueError("'dt' must be positive and match 'pnlt' in length.")
     if reference_time <= 0.0 or not np.isfinite(reference_time):
         raise ValueError("'reference_time' must be a positive, finite number.")
 
     pnltm = float(np.max(p))
-    km = int(np.argmax(p))
-    kf, kl = _ten_db_down_limits(p, pnltm - _TEN_DB_DOWN, km)
+    kf, kl = _ten_db_down_limits(p, pnltm - _TEN_DB_DOWN)
     energy = np.sum(10.0 ** (p[kf : kl + 1] / 10.0) * dt_arr[kf : kl + 1])
     epnl = float(10.0 * np.log10(energy) - 10.0 * np.log10(reference_time))
     return epnl, pnltm, kf, kl
@@ -388,8 +390,8 @@ def effective_perceived_noise_level(
 
     k = arr.shape[0]
     dt_raw = np.asarray(dt, dtype=np.float64)
-    if dt_raw.ndim == 0:
-        times = np.arange(k, dtype=np.float64) * float(dt_raw.item())
+    if dt_raw.size == 1:
+        times = np.arange(k, dtype=np.float64) * float(dt_raw.reshape(-1)[0])
     else:
         times = np.concatenate([[0.0], np.cumsum(dt_raw)[:-1]])
     return EPNLResult(

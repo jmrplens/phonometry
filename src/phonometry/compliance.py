@@ -466,7 +466,10 @@ def _iec61265_directional_limit(frequency: float, angle: float) -> float:
         None,
     )
     if row is None:
-        raise ValueError("'frequency' is outside the IEC 61265 range 50 Hz-10 kHz.")
+        raise ValueError(
+            "'frequency' is not an IEC 61265 tabulated one-third-octave band "
+            "(50 Hz-1.6 kHz, then 2, 2.5, 3.15, 4, 5, 6.3, 8, 10 kHz)."
+        )
     if angle <= 0.0 or angle > _IEC61265_ANGLES[-1]:
         raise ValueError("'angle' must lie in (0, 150] degrees.")
     col = next(i for i, a in enumerate(_IEC61265_ANGLES) if a >= angle)
@@ -528,6 +531,8 @@ def verify_aircraft_noise_system(
 
     if linearity is not None:
         for kind, dev in linearity.items():
+            if kind not in ("reference", "other"):
+                raise ValueError("linearity keys must be 'reference' or 'other'.")
             limit = 0.4 if kind == "reference" else 0.5
             checks.append(
                 {
@@ -539,12 +544,13 @@ def verify_aircraft_noise_system(
             )
 
     if resolution is not None:
+        res = float(resolution)
         checks.append(
             {
                 "quantity": "resolution",
                 "limit": 0.1,
-                "value": float(resolution),
-                "ok": float(resolution) <= 0.1,
+                "value": res,
+                "ok": bool(np.isfinite(res)) and 0.0 <= res <= 0.1,
             }
         )
 

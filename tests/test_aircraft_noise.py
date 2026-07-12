@@ -139,6 +139,14 @@ def test_effective_perceived_noise_level_bundle() -> None:
     assert res.band_limits[0] <= int(np.argmax(res.pnlt)) <= res.band_limits[1]
 
 
+def test_epnl_single_element_dt_treated_as_scalar() -> None:
+    # A one-element dt (list or 1-D array) broadcasts like a scalar.
+    p = np.array([90.0, 95.0, 90.0])
+    a, *_ = epnl_from_pnlt(p, [0.5])
+    b, *_ = epnl_from_pnlt(p, 0.5)
+    assert a == pytest.approx(b, rel=1e-12)
+
+
 def test_effective_perceived_noise_level_rejects_bad_shape() -> None:
     with pytest.raises(ValueError):
         effective_perceived_noise_level(np.zeros((5, 10)))

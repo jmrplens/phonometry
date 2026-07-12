@@ -2657,6 +2657,93 @@ def _chk_coherence_unity() -> Outcome:
 
 
 # ===========================================================================
+# Underwater acoustics (ISO 18405 / 17208 / 18406)
+# ===========================================================================
+_UNDERWATER = "Underwater acoustics (ISO 18405/17208/18406)"
+
+
+@register(
+    _UNDERWATER,
+    "ISO 18405:2017 / ISO 18406 Formula 7",
+    "Sound pressure level of a synthetic tone, dB re 1 µPa",
+)
+def _chk_uw_spl() -> Outcome:
+    fs = 48000
+    t = np.arange(fs) / fs
+    amp = 2.0  # Pa
+    x = amp * np.sin(2.0 * np.pi * 500.0 * t)
+    expected = 20.0 * math.log10((amp / math.sqrt(2.0)) / 1e-6)
+    return numeric(expected, ph.sound_pressure_level(x), 1e-4, places=4)
+
+
+@register(
+    _UNDERWATER,
+    "ISO 18405:2017 / ISO 18406 Formulae 3-4",
+    "Sound exposure level of a 2 s tone, dB re 1 µPa²·s",
+)
+def _chk_uw_sel() -> Outcome:
+    fs = 48000
+    t = np.arange(2 * fs) / fs
+    amp = 1.0
+    x = amp * np.sin(2.0 * np.pi * 500.0 * t)
+    spl = 20.0 * math.log10((amp / math.sqrt(2.0)) / 1e-6)
+    expected = spl + 10.0 * math.log10(2.0)
+    return numeric(expected, ph.sound_exposure_level(x, fs), 1e-3, places=4)
+
+
+@register(
+    _UNDERWATER,
+    "ISO 18406:2017 (6.4.2.1.3)",
+    "Peak sound pressure level of a known waveform, dB re 1 µPa",
+)
+def _chk_uw_peak() -> Outcome:
+    fs = 48000
+    t = np.arange(fs) / fs
+    amp = 3.0
+    x = amp * np.sin(2.0 * np.pi * 500.0 * t)
+    expected = 20.0 * math.log10(amp / 1e-6)
+    return numeric(expected, ph.peak_sound_pressure_level(x), 1e-4, places=4)
+
+
+@register(
+    _UNDERWATER,
+    "ISO 17208-1:2016",
+    "Radiated noise level from RMS pressure and distance, dB re 1 µPa·m",
+)
+def _chk_uw_rnl() -> Outcome:
+    expected = 20.0 * math.log10(2.0) + 40.0  # p = 2 µPa, r = 100 m
+    return numeric(expected, ph.radiated_noise_level(2e-6, 100.0), 1e-4, places=4)
+
+
+@register(
+    _UNDERWATER,
+    "ISO 17208-2:2019 (Formula 3)",
+    "Lloyd's-mirror surface correction ΔL at a known k·d_s",
+)
+def _chk_uw_delta_l() -> Outcome:
+    draught, c, f = 10.0, 1500.0, 200.0
+    ds = 0.7 * draught
+    u = 2.0 * math.pi * f / c * ds
+    expected = -10.0 * math.log10((2 * u**4 + 14 * u**2) / (14 + 2 * u**2 + u**4))
+    res = ph.monopole_source_level(120.0, f, draught, c=c)
+    return numeric(expected, float(res.surface_correction[0]), 1e-4, places=4)
+
+
+@register(
+    _UNDERWATER,
+    "ISO 18406:2017 (Formulae 8-9)",
+    "Cumulative SEL of N identical strikes = SEL_ss + 10·lg(N)",
+)
+def _chk_uw_cumulative_sel() -> Outcome:
+    return numeric(
+        180.0 + 10.0 * math.log10(50),
+        ph.cumulative_sel_identical(180.0, 50),
+        1e-6,
+        places=4,
+    )
+
+
+# ===========================================================================
 # Markdown rendering
 # ===========================================================================
 def _snap(value: float, eps: float = 5e-4) -> float:

@@ -308,6 +308,11 @@ export default defineConfig({
           items: ['guides/electroacoustics'],
         },
         {
+          label: 'Underwater acoustics',
+          translations: { es: 'Acústica submarina' },
+          items: ['guides/underwater-acoustics'],
+        },
+        {
           label: 'Hearing & occupational exposure',
           translations: { es: 'Audición y exposición laboral' },
           items: [

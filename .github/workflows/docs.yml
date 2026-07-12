@@ -33,10 +33,15 @@ jobs:
           corepack enable
           corepack prepare pnpm@latest --activate
           pnpm --version
+      - name: Resolve pnpm store path
+        # Derive the store path from pnpm itself rather than hardcoding it: it
+        # varies with pnpm version and XDG configuration.
+        run: echo "PNPM_STORE=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+        working-directory: site
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
-          path: ~/.local/share/pnpm/store
+          path: ${{ env.PNPM_STORE }}
           key: pnpm-store-${{ runner.os }}-${{ hashFiles('site/pnpm-lock.yaml') }}
           restore-keys: pnpm-store-${{ runner.os }}-
       - name: Regenerate llms.txt from docs (freshness guarantee)

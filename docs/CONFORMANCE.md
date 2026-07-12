@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **165/165 conformance checks pass** across 28 domains and 97 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **168/168 conformance checks pass** across 29 domains and 98 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -426,6 +426,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ICAO Doc 9501 ETM Vol. I Table 3-7 | Tone correction of the turbofan example, dB | 2 (+/-0) | 2 | 0 | &#9989; |
 | ICAO Doc 9501 ETM Vol. I Table 4-4 | Integrated-method reference EPNL, EPNdB | 92.619 EPNdB (+/-0.01 EPNdB) | 92.619 EPNdB | 0 EPNdB | &#9989; |
 | IEC 61265:1995 Table 1 | Directional-response tolerance at 4 kHz / 90°, dB | 2 dB (+/-0 dB) | 2 dB | 0 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Wind-turbine noise (IEC 61400-11)</b> — 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| IEC 61400-11:2012 Formula 30 | Critical bandwidth about a 500 Hz tone, Hz | 117.255 Hz (+/-0 Hz) | 117.255 Hz | 0 Hz | &#9989; |
+| IEC 61400-11:2012 Formula 26 | Apparent sound power level of a single band, dB re 1 pW | 148.5139 (+/-0.0001) | 148.5139 | 0 | &#9989; |
+| IEC 61400-11:2012 Formulae 31-34 | Tonal audibility of a synthetic clean tone, dB | 16.38 dB (+/-0.06 dB) | 16.38 dB | -0.001 dB | &#9989; |
 
 </details>
 

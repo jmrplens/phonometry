@@ -2809,6 +2809,49 @@ def _chk_ac_iec61265() -> Outcome:
 
 
 # ===========================================================================
+# Wind-turbine noise (IEC 61400-11)
+# ===========================================================================
+_WIND_TURBINE = "Wind-turbine noise (IEC 61400-11)"
+
+
+@register(
+    _WIND_TURBINE,
+    "IEC 61400-11:2012 Formula 30",
+    "Critical bandwidth about a 500 Hz tone, Hz",
+)
+def _chk_wt_critical_bandwidth() -> Outcome:
+    from phonometry.wind_turbine_noise import critical_bandwidth
+
+    expected = 25.0 + 75.0 * (1.0 + 1.4 * (500.0 / 1000.0) ** 2) ** 0.69
+    return numeric(expected, critical_bandwidth(500.0), 1e-6, unit="Hz", places=3)
+
+
+@register(
+    _WIND_TURBINE,
+    "IEC 61400-11:2012 Formula 26",
+    "Apparent sound power level of a single band, dB re 1 pW",
+)
+def _chk_wt_apparent_power() -> Outcome:
+    r1 = 150.0
+    expected = 100.0 - 6.0 + 10.0 * math.log10(4.0 * math.pi * r1**2)
+    return numeric(expected, ph.apparent_sound_power_level([100.0], r1), 1e-4, places=4)
+
+
+@register(
+    _WIND_TURBINE,
+    "IEC 61400-11:2012 Formulae 31-34",
+    "Tonal audibility of a synthetic clean tone, dB",
+)
+def _chk_wt_tonal_audibility() -> Outcome:
+    df = 2.0
+    freqs = np.arange(440.0, 560.0 + df, df)
+    levels = np.full(freqs.size, 30.0)
+    levels[int(np.argmin(np.abs(freqs - 500.0)))] = 60.0
+    res = ph.wind_turbine_tonality(levels, freqs)
+    return numeric(16.38, res.tonal_audibility, 6e-2, unit="dB", places=2)
+
+
+# ===========================================================================
 # Markdown rendering
 # ===========================================================================
 def _snap(value: float, eps: float = 5e-4) -> float:

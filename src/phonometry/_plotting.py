@@ -91,6 +91,7 @@ if TYPE_CHECKING:
     from .ship_radiated_noise import ShipSourceLevelResult
     from .pile_driving_noise import PileStrikeResult
     from .aircraft_noise import EPNLResult
+    from .wind_turbine_noise import WindTurbineTonalityResult
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -817,8 +818,7 @@ def plot_epnl(result: "EPNLResult", ax: Axes | None = None, **kwargs: Any) -> Ax
     t = np.asarray(result.times, dtype=np.float64)
     kf, kl = result.band_limits
     ax.plot(t, np.asarray(result.pnl), color=_C_MUTED, lw=1.0, ls="--", label="PNL")
-    kwargs.setdefault("color", _C_PRIMARY)
-    ax.plot(t, np.asarray(result.pnlt), lw=1.4, label="PNLT", **kwargs)
+    ax.plot(t, np.asarray(result.pnlt), **{"color": _C_PRIMARY, "lw": 1.4, "label": "PNLT", **kwargs})
     ax.axvspan(t[kf], t[kl], color=_C_TERTIARY, alpha=0.15, label="10 dB-down window")
     km = int(np.argmax(np.asarray(result.pnlt)))
     ax.plot([t[km]], [result.pnltm], "o", color=_C_REFERENCE,
@@ -826,6 +826,37 @@ def plot_epnl(result: "EPNLResult", ax: Axes | None = None, **kwargs: Any) -> Ax
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Level [PNdB]")
     ax.set_title(f"ICAO EPNL = {result.epnl:.1f} EPNdB (D = {result.duration_correction:+.1f} dB)")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_wind_turbine_tonality(
+    result: "WindTurbineTonalityResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Narrowband spectrum with the critical band, masking level and the tone.
+
+    :param result: A :class:`~phonometry.wind_turbine_noise.WindTurbineTonalityResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the spectrum ``plot`` call.
+    :return: The axes.
+    """
+    from .wind_turbine_noise import _critical_band_edges
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    fc = result.tone_frequency
+    lo, hi = _critical_band_edges(fc)
+    ax.plot(freqs, levels, **{"color": _C_PRIMARY, "lw": 1.0, "label": "Narrowband spectrum", **kwargs})
+    ax.axvspan(lo, hi, color=_C_TERTIARY, alpha=0.12, label="Critical band")
+    ax.axhline(result.masking_level, color=_C_MUTED, ls="--", lw=1.0,
+               label=f"Masking level ({result.masking_level:.1f} dB)")
+    ax.plot([fc], [result.tone_level], "o", color=_C_REFERENCE,
+            label=f"Tone ({result.tone_level:.1f} dB)")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Level [dB]")
+    ax.set_title(f"IEC 61400-11 tonal audibility ΔLₐ = {result.tonal_audibility:.1f} dB")
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     return ax

@@ -21,10 +21,27 @@ from phonometry import (
     radiated_noise_level,
     source_level_uncertainty,
 )
+from phonometry.ship_radiated_noise import _surface_correction
 
 
 def _delta_l(u: float) -> float:
     return -10.0 * np.log10((2 * u**4 + 14 * u**2) / (14 + 2 * u**2 + u**4))
+
+
+@pytest.mark.parametrize(
+    ("u", "expected_delta_l"),
+    [
+        # Hand-computed independently of the implementation:
+        #   u = 1: (2 + 14) / (14 + 2 + 1) = 16/17 -> -10 lg(16/17) = +0.2633 dB
+        (1.0, 0.263289387),
+        #   u = 2: (2·16 + 14·4) / (14 + 8 + 16) = 88/38 -> -10 lg(88/38) = -3.6470 dB
+        (2.0, -3.646990755),
+    ],
+)
+def test_surface_correction_independent_anchors(u: float, expected_delta_l: float) -> None:
+    # With c = 2π and d_s = 1 m, u = k·d_s = (2πf/c)·1 = f, so f = u sets u exactly.
+    delta_l = _surface_correction(np.array([u]), source_depth=1.0, sound_speed=2.0 * np.pi)
+    assert float(delta_l[0]) == pytest.approx(expected_delta_l, abs=1e-7)
 
 
 def test_radiated_noise_level_closed_form() -> None:

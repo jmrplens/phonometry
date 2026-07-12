@@ -47,12 +47,15 @@ def _positive(value: float, name: str) -> float:
     return scalar
 
 
-def _validate_pressure(pressure: "NDArray[np.float64] | list[float]") -> "NDArray[np.float64]":
+def _validate_pressure(
+    pressure: "NDArray[np.float64] | list[float]", *, min_samples: int = 1
+) -> "NDArray[np.float64]":
     sig = np.asarray(pressure, dtype=np.float64)
     if sig.ndim != 1:
         raise ValueError("'pressure' must be one-dimensional.")
-    if sig.size < 1:
-        raise ValueError("'pressure' must contain at least one sample.")
+    if sig.size < min_samples:
+        plural = "sample" if min_samples == 1 else "samples"
+        raise ValueError(f"'pressure' must contain at least {min_samples} {plural}.")
     if not np.all(np.isfinite(sig)):
         raise ValueError("'pressure' must be finite.")
     return sig

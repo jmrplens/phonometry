@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .underwater_acoustics import UNDERWATER_REFERENCE_PRESSURE
+from .underwater_acoustics import UNDERWATER_REFERENCE_PRESSURE, _positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -41,13 +41,6 @@ _SOURCE_DEPTH_FRACTION = 0.7
 _REFERENCE_DISTANCE = 1.0
 #: ISO 17208-1 standard depression angles (degrees) for the three hydrophones.
 _STANDARD_ANGLES = (15.0, 30.0, 45.0)
-
-
-def _positive(value: float, name: str) -> float:
-    scalar = float(value)
-    if not np.isfinite(scalar) or scalar <= 0.0:
-        raise ValueError(f"'{name}' must be a positive, finite number.")
-    return scalar
 
 
 def radiated_noise_level(rms_pressure: float, distance: float) -> float:

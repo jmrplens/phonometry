@@ -23,6 +23,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .underwater_acoustics import (
+    _positive,
+    _validate_pressure,
     peak_sound_pressure_level,
     sound_exposure_level,
     sound_pressure_level,
@@ -35,24 +37,6 @@ if TYPE_CHECKING:
 #: Lower/upper cumulative-energy fractions defining the 90 % pulse duration.
 _ENERGY_LOW = 0.05
 _ENERGY_HIGH = 0.95
-
-
-def _positive(value: float, name: str) -> float:
-    scalar = float(value)
-    if not np.isfinite(scalar) or scalar <= 0.0:
-        raise ValueError(f"'{name}' must be a positive, finite number.")
-    return scalar
-
-
-def _validate_pressure(pressure: "NDArray[np.float64] | list[float]") -> "NDArray[np.float64]":
-    sig = np.asarray(pressure, dtype=np.float64)
-    if sig.ndim != 1:
-        raise ValueError("'pressure' must be one-dimensional.")
-    if sig.size < 2:
-        raise ValueError("'pressure' must contain at least two samples.")
-    if not np.all(np.isfinite(sig)):
-        raise ValueError("'pressure' must be finite.")
-    return sig
 
 
 def single_strike_sel(pressure: "NDArray[np.float64] | list[float]", fs: float) -> float:
@@ -153,7 +137,7 @@ def pile_strike_metrics(
     :return: A :class:`PileStrikeResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    sig = _validate_pressure(pressure)
+    sig = _validate_pressure(pressure, min_samples=2)
     fs_v = _positive(fs, "fs")
     return PileStrikeResult(
         single_strike_sel=sound_exposure_level(sig, fs_v),

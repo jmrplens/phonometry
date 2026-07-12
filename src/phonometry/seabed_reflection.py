@@ -89,11 +89,12 @@ def reflection_coefficient(
     z2 = r2 * cs
     num = z2 * cos_t1 - z1 * cos_t2
     den = z2 * cos_t1 + z1 * cos_t2
+    with np.errstate(divide="ignore", invalid="ignore"):
+        r = num / den
     # Singular limit: with no sound-speed contrast (c1 == c2) at exactly grazing
-    # incidence, cos_t1 = cos_t2 = 0 gives 0/0. The angle-independent limit is
-    # the normal-incidence coefficient (z2 − z1)/(z2 + z1).
-    safe_den = np.where(den == 0.0, 1.0, den)
-    r = np.where(den == 0.0, (z2 - z1) / (z2 + z1), num / safe_den)
+    # incidence, cos_t1 = cos_t2 = 0 gives 0/0 (NaN). The angle-independent limit
+    # is the normal-incidence coefficient (z2 − z1)/(z2 + z1).
+    r = np.where(np.isnan(r), (z2 - z1) / (z2 + z1), r)
     return np.asarray(r, dtype=np.complex128)
 
 

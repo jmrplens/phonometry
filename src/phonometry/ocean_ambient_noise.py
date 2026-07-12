@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ._validation import require_positive, require_positive_array
+from ._validation import require_non_negative, require_positive, require_positive_array
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -61,9 +61,9 @@ def wind_noise_spectrum(
     :raises ValueError: If the inputs are invalid (a negative wind speed).
     """
     f_khz = require_positive_array(frequency_hz, "frequency_hz") / 1000.0
-    if wind_speed_knots == 0.0:
+    u = require_non_negative(wind_speed_knots, "wind_speed_knots")
+    if u <= 0.0:  # calm sea: no wind-driven noise (u is non-negative here)
         return np.full(f_khz.shape, -np.inf, dtype=np.float64)
-    u = require_positive(wind_speed_knots, "wind_speed_knots")
     nl = 25.0 - (5.0 / 3.0) * 10.0 * (np.log10(f_khz) - np.log10(u / _WIND_REF_KNOTS))
     return np.asarray(nl, dtype=np.float64)
 

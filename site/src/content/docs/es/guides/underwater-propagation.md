@@ -1,5 +1,5 @@
 ---
-title: "Propagación submarina: pérdida por transmisión, velocidad del sonido, sonar, fondo y ruido ambiental"
+title: "Propagación submarina del sonido"
 description: "Propagación submarina de forma cerrada: ensanchamiento geométrico más absorción de volumen (Francois-Garrison, Ainslie-McColm, Thorp), la velocidad del sonido en agua de mar (UNESCO/Chen-Millero, Del Grosso, Mackenzie), la ecuación del sonar, la pérdida por reflexión en el fondo (Rayleigh) y el espectro de ruido ambiental oceánico (viento/térmico de Wenz más tráfico marítimo JOMOPANS-ECHO)."
 ---
 

@@ -1,5 +1,5 @@
 ---
-title: "Underwater sound propagation: transmission loss, sound speed, sonar, seabed and ambient noise"
+title: "Underwater sound propagation"
 description: "Closed-form underwater propagation: geometrical spreading plus volume absorption (Francois-Garrison, Ainslie-McColm, Thorp), the speed of sound in sea water (UNESCO/Chen-Millero, Del Grosso, Mackenzie), the sonar equation, seabed reflection loss (Rayleigh) and the ocean ambient-noise spectrum (Wenz wind/thermal plus JOMOPANS-ECHO ship traffic)."
 ---
 

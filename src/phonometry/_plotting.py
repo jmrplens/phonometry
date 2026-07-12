@@ -95,6 +95,9 @@ if TYPE_CHECKING:
     from .underwater_sound_speed import SoundSpeedProfile
     from .underwater_propagation import TransmissionLossResult
     from .sonar_equation import SonarEquationResult
+    from .seabed_reflection import BottomLossResult
+    from .ocean_ambient_noise import AmbientNoiseResult
+    from .ship_traffic_noise import ShipTrafficSpectrum
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -943,6 +946,87 @@ def plot_sonar_equation(
     ax.set_ylabel("Signal excess [dB]")
     ax.set_title("Sonar equation")
     ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_bottom_loss(
+    result: "BottomLossResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Bottom reflection loss versus grazing angle, marking the critical angle.
+
+    :param result: A :class:`~phonometry.seabed_reflection.BottomLossResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the bottom-loss ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    phi = np.asarray(result.grazing_angle, dtype=np.float64)
+    loss = np.asarray(result.reflection_loss, dtype=np.float64)
+    ax.plot(phi, loss, **{"color": _C_PRIMARY, "lw": 1.6, "label": "Bottom loss", **kwargs})
+    if result.critical_angle is not None:
+        ax.axvline(result.critical_angle, color=_C_REFERENCE, ls="--", lw=1.0,
+                   label=f"Critical angle = {result.critical_angle:.1f}°")
+    ax.set_xlabel("Grazing angle [°]")
+    ax.set_ylabel("Bottom loss [dB]")
+    ax.set_title("Seabed reflection loss")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_ambient_noise(
+    result: "AmbientNoiseResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Composite ambient-noise spectrum and its components versus frequency.
+
+    :param result: An :class:`~phonometry.ocean_ambient_noise.AmbientNoiseResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the composite-level ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    f = np.asarray(result.frequency, dtype=np.float64)
+    label = f"Total ({result.wind_speed_knots:.1f} kn)"
+    ax.plot(f, np.asarray(result.spectrum_level),
+            **{"color": _C_PRIMARY, "lw": 1.8, "label": label, **kwargs})
+    ax.plot(f, np.asarray(result.wind), color=_C_SECONDARY, lw=1.0, ls="--", label="Wind")
+    ax.plot(f, np.asarray(result.thermal), color=_C_TERTIARY, lw=1.0, ls=":", label="Thermal")
+    if result.shipping is not None:
+        ax.plot(f, np.asarray(result.shipping), color=_C_REFERENCE, lw=1.0, ls="-.",
+                label="Shipping")
+    ax.set_xscale("log")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Spectrum level [dB re 1 µPa²/Hz]")
+    ax.set_title("Ocean ambient noise")
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_ship_traffic_spectrum(
+    result: "ShipTrafficSpectrum", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Predicted ship source spectral-density level versus frequency.
+
+    :param result: A :class:`~phonometry.ship_traffic_noise.ShipTrafficSpectrum`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the source-PSD ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    f = np.asarray(result.frequency, dtype=np.float64)
+    psd = np.asarray(result.source_psd, dtype=np.float64)
+    if result.vessel_class is not None:
+        label = f"{result.model} ({result.vessel_class})"
+    else:
+        label = result.model
+    ax.plot(f, psd, **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    ax.set_xscale("log")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Source spectral density [dB re 1 µPa²/Hz at 1 m]")
+    ax.set_title("Ship traffic source level")
+    ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     return ax
 

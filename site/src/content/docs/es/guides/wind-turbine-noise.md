@@ -1,5 +1,5 @@
 ---
-title: "Ruido de aerogeneradores: potencia sonora aparente y audibilidad tonal"
+title: "Ruido de aerogeneradores: potencia y audibilidad tonal"
 description: "La emisión acústica de aerogeneradores de la IEC 61400-11: el nivel de potencia sonora aparente referido al centro del rotor y la cadena de audibilidad tonal (banda crítica de Zwicker, nivel de ruido de enmascaramiento y criterio de audibilidad) que decide si un tono discreto es audible."
 ---
 

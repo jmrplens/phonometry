@@ -1,5 +1,5 @@
 ---
-title: "Wind-turbine noise: apparent sound power and tonal audibility"
+title: "Wind-turbine noise: sound power and tonal audibility"
 description: "The IEC 61400-11 wind-turbine acoustic emission: the apparent sound power level referred to the rotor centre, and the tonal-audibility chain (Zwicker critical band, masking-noise level and the audibility criterion) that decides whether a discrete tone is audible."
 ---
 

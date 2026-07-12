@@ -249,6 +249,12 @@ from .underwater_acoustics import (
     sound_pressure_level,
     underwater_to_in_air_spl,
 )
+from .underwater_sound_speed import (
+    SoundSpeedProfile,
+    depth_to_pressure,
+    sea_water_sound_speed,
+    sound_speed_profile,
+)
 from .ship_radiated_noise import (
     ShipSourceLevelResult,
     hydrophone_depths,
@@ -730,6 +736,10 @@ __all__ = [
     "peak_sound_pressure_level",
     "underwater_to_in_air_spl",
     "in_air_to_underwater_spl",
+    "sea_water_sound_speed",
+    "sound_speed_profile",
+    "SoundSpeedProfile",
+    "depth_to_pressure",
     "radiated_noise_level",
     "hydrophone_depths",
     "source_level_uncertainty",

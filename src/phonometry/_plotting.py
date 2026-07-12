@@ -92,6 +92,7 @@ if TYPE_CHECKING:
     from .pile_driving_noise import PileStrikeResult
     from .aircraft_noise import EPNLResult
     from .wind_turbine_noise import WindTurbineTonalityResult
+    from .underwater_sound_speed import SoundSpeedProfile
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -859,6 +860,31 @@ def plot_wind_turbine_tonality(
     ax.set_title(f"IEC 61400-11 tonal audibility ΔLₐ = {result.tonal_audibility:.1f} dB")
     ax.grid(True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_sound_speed_profile(
+    result: "SoundSpeedProfile", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Sound-speed profile: speed vs depth, with depth increasing downward.
+
+    :param result: A :class:`~phonometry.underwater_sound_speed.SoundSpeedProfile`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the profile ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    depth = np.asarray(result.depth, dtype=np.float64)
+    speed = np.asarray(result.sound_speed, dtype=np.float64)
+    label = f"{result.model} c(z)"
+    ax.plot(speed, depth, **{"color": _C_PRIMARY, "lw": 1.4, "label": label, **kwargs})
+    if not ax.yaxis_inverted():
+        ax.invert_yaxis()
+    ax.set_xlabel("Sound speed [m/s]")
+    ax.set_ylabel("Depth [m]")
+    ax.set_title("Sea-water sound-speed profile")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="lower left", fontsize="small")
     return ax
 
 

@@ -170,7 +170,9 @@ def transfer_function(
             gyy.astype(np.complex128),
             gyx,
             out=np.zeros_like(gxy),
-            where=gyx != 0.0,
+            # |gyx|^2 > 0 guards division by a zero denominator without a
+            # float equality check or the sqrt in np.abs.
+            where=gyx.real**2 + gyx.imag**2 > 0.0,
         )
     denom = gxx * gyy
     coh = np.divide(

@@ -485,6 +485,22 @@ _ES_EXACT = {
     "1 kHz burst, 200 ms": "Ráfaga de 1 kHz, 200 ms",
     "Fast attack / release": "Ataque / relajación rápidos",
     "Slow integration": "Integración lenta",
+    # Fluctuation strength + psychoacoustic annoyance (Fastl & Zwicker; Osses 2016)
+    "Fluctuation Strength — 4 Hz Band-Pass Characteristic":
+        "Intensidad de fluctuación — característica de paso de banda a 4 Hz",
+    "Fluctuation strength F [vacil]": "Intensidad de fluctuación F [vacil]",
+    "AM-tone F, signal model [vacil]":
+        "F de tono AM, modelo de señal [vacil]",
+    "4 Hz reference": "referencia 4 Hz",
+    "Psychoacoustic Annoyance vs Loudness (Fastl & Zwicker)":
+        "Molestia psicoacústica vs sonoridad (Fastl y Zwicker)",
+    "Percentile loudness N5 [sone]": "Sonoridad percentil N5 [sonios]",
+    "Psychoacoustic annoyance PA": "Molestia psicoacústica PA",
+    "Baseline: S = 1.75 acum, F = R = 0":
+        "Base: S = 1,75 acum, F = R = 0",
+    "Sharp: S = 3.5 acum": "Aguda: S = 3,5 acum",
+    "Rough + fluctuating: F = 1.2 vacil, R = 0.7 asper":
+        "Áspera + fluctuante: F = 1,2 vacil, R = 0,7 asper",
     # Building acoustics (EN 12354-1 flanking prediction, ISO 12999-1 uncertainty)
     "EN 12354-1 Flanking Transmission (Annex H.3 example)":
         "Transmisión por flancos EN 12354-1 (ejemplo del Anexo H.3)",
@@ -631,6 +647,14 @@ _ES_PATTERNS = [
      r"Ruido puro (T = \1 tu_HMS)"),
     (r"^Peak R = (.+) asper @ (.+) Hz$",
      r"Máximo R = \1 asper @ \2 Hz"),
+    (r"^AM broadband noise \(closed form, 60 dB\), peak (.+) vacil$",
+     r"Ruido de banda ancha AM (forma cerrada, 60 dB), máximo \1 vacil"),
+    (r"^AM tone \(signal model, 70 dB\), peak (.+) vacil$",
+     r"Tono AM (modelo de señal, 70 dB), máximo \1 vacil"),
+    (r"^Worked example \(PA = (.+)\)$",
+     r"Ejemplo resuelto (PA = \1)"),
+    (r"^PA = (.+)\nwS = (.+), wFR = (.+)$",
+     "PA = \\1\\nwS = \\2, wFR = \\3"),
     (r"^Short-term loudness STL \(STL peak = (.+) sone\)$",
      r"Sonoridad a corto plazo STL (STL máx = \1 sonios)"),
     (r"^Long-term loudness LTL \(LTL peak = (.+) sone\)$",
@@ -2893,6 +2917,152 @@ def generate_tonality_roughness_demo(output_dir: str) -> None:
                  fontweight="bold", fontsize=13)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
     save_figure(output_dir, "tonality_roughness_demo.png")
+    plt.close()
+
+
+@lru_cache(maxsize=None)
+def _fluctuation_am_tone_sweep() -> tuple[np.ndarray, np.ndarray]:
+    """Osses 2016 signal-model F of a 1 kHz / 70 dB / 100 %-AM tone vs f_mod.
+
+    Cached (language/theme independent): the signal model is run once for the
+    modulation-frequency sweep {1, 2, 4, 8, 16, 32} Hz. Reproduces the band-pass
+    sensation with its maximum at 4 Hz (Osses 2016 Table 1 trend).
+    """
+    from phonometry import fluctuation_strength
+
+    dur = 2.0
+    t = np.arange(int(dur * _FS_PSY)) / _FS_PSY
+    carrier = np.sin(2.0 * np.pi * 1000.0 * t)
+    fmods = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 32.0])
+    f_vals = []
+    for fm in fmods:
+        am = (1.0 + np.sin(2.0 * np.pi * fm * t)) * carrier
+        am = am / np.sqrt(np.mean(am ** 2)) * _P_REF * 10.0 ** (70.0 / 20.0)
+        f_vals.append(fluctuation_strength(am, float(_FS_PSY)).fluctuation_strength)
+    return fmods, np.array(f_vals)
+
+
+def generate_fluctuation_strength(output_dir: str) -> None:
+    """Fluctuation strength F vs modulation frequency: the 4 Hz band-pass peak."""
+    print("Generating fluctuation_strength...")
+    from phonometry import fluctuation_strength_am_noise
+
+    # Exact closed form (Fastl & Zwicker Eq. 10.2) for AM broadband noise at
+    # 60 dB, 100 % modulation, swept over f_mod on a log axis.
+    fmod = np.logspace(np.log10(0.5), np.log10(32.0), 240)
+    f_bbn = np.array([fluctuation_strength_am_noise(60.0, 1.0, fm) for fm in fmod])
+    bbn_peak = int(np.argmax(f_bbn))
+
+    # Osses 2016 signal model on an AM tone (70 dB), same modulation sweep.
+    fm_tone, f_tone = _fluctuation_am_tone_sweep()
+    tone_peak = int(np.argmax(f_tone))
+
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.semilogx(fmod, f_bbn, color=COLOR_PRIMARY, linewidth=2.4,
+                label=(f"AM broadband noise (closed form, 60 dB), "
+                       f"peak {f_bbn[bbn_peak]:.1f} vacil"))
+    ax.plot(fmod[bbn_peak], f_bbn[bbn_peak], "o", color=COLOR_PRIMARY,
+            markersize=8, markerfacecolor="white", markeredgewidth=1.6, zorder=6)
+    ax.axvline(4.0, color=COLOR_FG, linestyle="--", linewidth=1.0, alpha=0.7,
+               label="4 Hz reference")
+    ax.set_xlabel("Modulation frequency f_mod [Hz]")
+    ax.set_ylabel("Fluctuation strength F [vacil]")
+    ax.set_ylim(0.0, float(f_bbn.max()) * 1.18)
+    ax.set_title("Fluctuation Strength — 4 Hz Band-Pass Characteristic",
+                 fontweight="bold", pad=12)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
+    ax.set_xticks([0.5, 1, 2, 4, 8, 16, 32])
+    ax.set_xticklabels(["0.5", "1", "2", "4", "8", "16", "32"])
+
+    # Overlay the signal-model AM-tone sweep on a secondary axis (its absolute
+    # scale differs from the broadband closed form, but the band-pass shape and
+    # 4 Hz maximum coincide).
+    ax2 = ax.twinx()
+    ax2.plot(fm_tone, f_tone, "s--", color=COLOR_TERTIARY, linewidth=1.8,
+             markersize=7, label=(f"AM tone (signal model, 70 dB), "
+                                  f"peak {f_tone[tone_peak]:.2f} vacil"))
+    ax2.set_ylabel("AM-tone F, signal model [vacil]", color=COLOR_TERTIARY)
+    ax2.tick_params(axis="y", labelcolor=COLOR_TERTIARY)
+    ax2.set_ylim(0.0, float(f_tone.max()) * 1.18)
+
+    lines1, labels1 = ax.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax.legend(lines1 + lines2, labels1 + labels2, loc="upper right", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "F = 5.8 (1.25 m - 0.25)(0.05 L - 1)",
+        "    / [(fmod/5)^2 + 4/fmod + 1.5]  vacil",
+    ]
+    ax.text(0.015, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="left", fontsize=8.5, color=COLOR_FG,
+            family="monospace",
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "fluctuation_strength.svg")
+    plt.close()
+
+
+def generate_psychoacoustic_annoyance(output_dir: str) -> None:
+    """Psychoacoustic annoyance PA vs loudness N5 for three sensation profiles."""
+    print("Generating psychoacoustic_annoyance...")
+    from phonometry import psychoacoustic_annoyance
+
+    n5 = np.linspace(4.0, 60.0, 200)
+    # (label, sharpness [acum], fluctuation strength [vacil], roughness [asper],
+    #  colour, linestyle).
+    profiles = [
+        ("Baseline: S = 1.75 acum, F = R = 0", 1.75, 0.0, 0.0,
+         COLOR_FG, "--"),
+        ("Sharp: S = 3.5 acum", 3.5, 0.0, 0.0, COLOR_PRIMARY, "-"),
+        ("Rough + fluctuating: F = 1.2 vacil, R = 0.7 asper", 2.0, 1.2, 0.7,
+         COLOR_TERTIARY, "-"),
+    ]
+
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    for label, s, f, r, color, ls in profiles:
+        pa = np.array([psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5])
+        lw = 1.6 if ls == "--" else 2.4
+        alpha = 0.7 if ls == "--" else 1.0
+        ax.plot(n5, pa, color=color, linestyle=ls, linewidth=lw, alpha=alpha,
+                label=label)
+
+    # Worked example: N5 = 30 sone, S = 2.0 acum, F = 0.5 vacil, R = 0.3 asper.
+    ex = psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)
+    ax.plot([30.0], [ex.annoyance], "o", color=COLOR_SECONDARY, markersize=10,
+            markerfacecolor="white", markeredgewidth=2.0, zorder=6,
+            label=f"Worked example (PA = {ex.annoyance:.2f})")
+    ax.annotate(f"PA = {ex.annoyance:.2f}\nwS = {ex.w_s:.3f}, wFR = {ex.w_fr:.3f}",
+                xy=(30.0, ex.annoyance), xytext=(33.0, ex.annoyance * 0.72),
+                fontsize=9, color=COLOR_FG,
+                arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_FG})
+
+    ax.set_xlabel("Percentile loudness N5 [sone]")
+    ax.set_ylabel("Psychoacoustic annoyance PA")
+    ax.set_xlim(0.0, 62.0)
+    ax.set_ylim(0.0, None)
+    ax.set_title("Psychoacoustic Annoyance vs Loudness (Fastl & Zwicker)",
+                 fontweight="bold", pad=12)
+    ax.grid(which="major", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        "PA = N5 sqrt(1 + wS^2 + wFR^2)",
+        "wS  = (S - 1.75) 0.25 lg(N5 + 10)",
+        "wFR = (2.18 / N5^0.4)(0.4 F + 0.6 R)",
+    ]
+    ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=8.5, color=COLOR_FG,
+            family="monospace",
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+    plt.tight_layout()
+    save_figure(output_dir, "psychoacoustic_annoyance.svg")
     plt.close()
 
 
@@ -5298,6 +5468,11 @@ def generate_all(img_dir: str) -> None:
     generate_sottek_specific_loudness(img_dir)
     generate_tonality_roughness_demo(img_dir)
     generate_moore_glasberg_time_loudness(img_dir)
+
+    # Fluctuation strength (Fastl & Zwicker Eq. 10.2 + Osses 2016 signal model)
+    # and psychoacoustic annoyance (Fastl & Zwicker Eqs 16.2-16.4).
+    generate_fluctuation_strength(img_dir)
+    generate_psychoacoustic_annoyance(img_dir)
 
 
 # ===========================================================================

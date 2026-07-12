@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **155/155 conformance checks pass** across 26 domains and 89 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **161/161 conformance checks pass** across 27 domains and 93 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -400,6 +400,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60268-3:2013 (14.12.9) | DIM of the 15 kHz / 3.15 kHz signal (Table 2, 9 products) | 0.168819 (+/-0.0001) | 0.168819 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e | H1 recovers a known first-order IIR gain at 1 kHz | 0.8954 (+/-2%) | 0.8954 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e | Ordinary coherence = 1 for a noiseless LTI path | 1 (+/-0.001) | 1 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Underwater acoustics (ISO 18405/17208/18406)</b> — 100% (6/6)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ISO 18405:2017 / ISO 18406 Formula 7 | Sound pressure level of a synthetic tone, dB re 1 µPa | 123.0103 (+/-0.0001) | 123.0103 | 0 | &#9989; |
+| ISO 18405:2017 / ISO 18406 Formulae 3-4 | Sound exposure level of a 2 s tone, dB re 1 µPa²·s | 120 (+/-0.001) | 120 | 0 | &#9989; |
+| ISO 18406:2017 (6.4.2.1.3) | Peak sound pressure level of a known waveform, dB re 1 µPa | 129.5424 (+/-0.0001) | 129.5424 | 0 | &#9989; |
+| ISO 17208-1:2016 | Radiated noise level from RMS pressure and distance, dB re 1 µPa·m | 46.0206 (+/-0.0001) | 46.0206 | 0 | &#9989; |
+| ISO 17208-2:2019 (Formula 3) | Lloyd's-mirror surface correction ΔL at a known k·d_s | -3.5211 (+/-0.0001) | -3.5211 | 0 | &#9989; |
+| ISO 18406:2017 (Formulae 8-9) | Cumulative SEL of N identical strikes = SEL_ss + 10·lg(N) | 196.9897 (+/-0) | 196.9897 | 0 | &#9989; |
 
 </details>
 

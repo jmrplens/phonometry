@@ -140,8 +140,8 @@ def seawater_absorption(
     :param depth: Depth, in metres (``>= 0``).
     :param ph: Acidity (used by Francois-Garrison and Ainslie-McColm; default 8).
     :param model: ``"francois-garrison"`` (default), ``"ainslie-mccolm"`` or
-        ``"thorp"`` (frequency-only, ignores ``temperature``/``salinity``/
-        ``depth``/``ph``).
+        ``"thorp"`` (the Thorp 1967 frequency-only form of Etter, valid below
+        ~50 kHz; ignores ``temperature``/``salinity``/``depth``/``ph``).
     :return: Absorption coefficient per frequency, in dB/km.
     :raises ValueError: If ``model`` is unknown or an input is invalid.
     """

@@ -1,4 +1,6 @@
-# Underwater Sound Propagation
+← [Documentation index](README.md)
+
+# Underwater sound propagation: transmission loss, sound speed and the sonar equation
 
 Closed-form underwater propagation: the **transmission loss** (geometrical
 spreading plus volume absorption), the **speed of sound** in sea water and the
@@ -24,8 +26,10 @@ import numpy as np
 import phonometry as ph
 
 # Absorption coefficient at 10 kHz, 10 °C, 35 ppt, 100 m, pH 8 (dB/km).
+# seawater_absorption accepts scalar or array frequencies and returns an array.
 alpha = ph.seawater_absorption(10e3, temperature=10.0, salinity=35.0,
-                               depth=100.0, model="francois-garrison")
+                               depth=100.0, model="francois-garrison")[0]
+print(f"α = {alpha:.3f} dB/km")
 
 ranges = np.linspace(10.0, 20_000.0, 400)
 tl = ph.transmission_loss(ranges, 10e3, law="practical", transition_range=1000.0,

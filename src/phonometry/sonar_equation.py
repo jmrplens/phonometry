@@ -57,7 +57,9 @@ class SonarEquationResult:
         detection limit ``SE = 0``, in dB.
     :ivar transmission_loss: The transmission-loss values, in dB.
     :ivar source_level: Source level ``SL``, in dB.
-    :ivar noise_level: Noise (or reverberation) level used for masking, in dB.
+    :ivar noise_level: Background noise level ``NL`` input, in dB. The masking
+        term is ``NL − DI``, except when ``reverberation_limited`` is true, where
+        the reverberation level ``RL`` masks instead.
     :ivar directivity_index: Receiver directivity index ``DI``, in dB.
     :ivar detection_threshold: Detection threshold ``DT``, in dB.
     :ivar target_strength: Target strength ``TS``, in dB (``None`` for passive).

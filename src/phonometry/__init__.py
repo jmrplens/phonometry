@@ -248,6 +248,20 @@ from .underwater_acoustics import (
     sound_pressure_level,
     underwater_to_in_air_spl,
 )
+from .ship_radiated_noise import (
+    ShipSourceLevelResult,
+    hydrophone_depths,
+    monopole_source_level,
+    radiated_noise_level,
+    source_level_uncertainty,
+)
+from .pile_driving_noise import (
+    PileStrikeResult,
+    cumulative_sel,
+    cumulative_sel_identical,
+    pile_strike_metrics,
+    single_strike_sel,
+)
 from .tonality import (
     TonalityWarning,
     ToneAssessment,
@@ -700,6 +714,16 @@ __all__ = [
     "peak_sound_pressure_level",
     "underwater_to_in_air_spl",
     "in_air_to_underwater_spl",
+    "radiated_noise_level",
+    "hydrophone_depths",
+    "source_level_uncertainty",
+    "monopole_source_level",
+    "ShipSourceLevelResult",
+    "single_strike_sel",
+    "cumulative_sel",
+    "cumulative_sel_identical",
+    "pile_strike_metrics",
+    "PileStrikeResult",
     "equal_loudness_contour",
     "loudness_level",
     "hearing_threshold",

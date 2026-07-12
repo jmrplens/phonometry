@@ -71,6 +71,19 @@ def test_no_critical_angle_for_slow_bottom() -> None:
     assert np.all(res.reflection_loss > 0.0)
 
 
+def test_zero_grazing_equal_speeds_no_nan() -> None:
+    # Singular case: phi = 0 and c1 == c2 gives 0/0; the analytic limit is the
+    # angle-independent normal-incidence coefficient (z2 − z1)/(z2 + z1).
+    res = bottom_reflection_loss(0.0, rho1=1000.0, c1=1500.0, rho2=1900.0, c2=1500.0)
+    z1, z2 = 1000.0 * 1500.0, 1900.0 * 1500.0
+    expected_r = (z2 - z1) / (z2 + z1)
+    assert np.isfinite(res.reflection_coefficient[0])
+    assert float(np.real(res.reflection_coefficient[0])) == pytest.approx(expected_r, abs=1e-9)
+    assert float(res.reflection_loss[0]) == pytest.approx(
+        -20.0 * np.log10(abs(expected_r)), abs=1e-9
+    )
+
+
 def test_grazing_angle_out_of_range_rejected() -> None:
     with pytest.raises(ValueError, match="grazing_angle"):
         reflection_coefficient(120.0, **_WATER, **_SAND)

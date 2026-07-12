@@ -36,6 +36,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ._validation import require_positive, require_positive_array
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
@@ -68,13 +70,6 @@ _VESSEL_CLASSES: dict[str, tuple[float, bool, float, float]] = {
 VESSEL_CLASSES: tuple[str, ...] = tuple(sorted(_VESSEL_CLASSES))
 
 
-def _positive(value: float, name: str) -> float:
-    scalar = float(value)
-    if not np.isfinite(scalar) or scalar <= 0.0:
-        raise ValueError(f"'{name}' must be a positive, finite number.")
-    return scalar
-
-
 def _default_bands() -> "NDArray[np.float64]":
     """Decidecade band centres 10 Hz-31.5 kHz (indices -20..15), in Hz."""
     i = np.arange(-20, 16, dtype=np.float64)
@@ -84,10 +79,7 @@ def _default_bands() -> "NDArray[np.float64]":
 def _clean_frequency(frequency_hz: "NDArray[np.float64] | list[float] | None") -> "NDArray[np.float64]":
     if frequency_hz is None:
         return _default_bands()
-    f = np.atleast_1d(np.asarray(frequency_hz, dtype=np.float64))
-    if f.size == 0 or not np.all(np.isfinite(f)) or np.any(f <= 0.0):
-        raise ValueError("'frequency_hz' must be finite and strictly positive.")
-    return f
+    return require_positive_array(frequency_hz, "frequency_hz")
 
 
 def _jomopans_echo(
@@ -97,8 +89,8 @@ def _jomopans_echo(
     if key not in _VESSEL_CLASSES:
         raise ValueError(f"'vessel_class' must be one of {VESSEL_CLASSES}, got {vessel_class!r}.")
     v_c, cargo, d_lo, d_hi = _VESSEL_CLASSES[key]
-    v = _positive(speed_knots, "speed_knots")
-    length = _positive(length_m, "length_m")
+    v = require_positive(speed_knots, "speed_knots")
+    length = require_positive(length_m, "length_m")
     hump = cargo & (f < 100.0)
     k = np.where(hump, 208.0, 191.0)
     j = np.where(hump, 2.0, 0.0)
@@ -116,8 +108,8 @@ def _jomopans_echo(
 
 
 def _randi(f: "NDArray[np.float64]", speed_knots: float, length_m: float) -> "NDArray[np.float64]":
-    v = _positive(speed_knots, "speed_knots")
-    length_ft = _positive(length_m, "length_m") * 3.28084
+    v = require_positive(speed_knots, "speed_knots")
+    length_ft = require_positive(length_m, "length_m") * 3.28084
     lf = -10.0 * np.log10(
         10.0 ** (-1.06 * np.log10(f) - 14.34) + 10.0 ** (3.32 * np.log10(f) - 21.425)
     )

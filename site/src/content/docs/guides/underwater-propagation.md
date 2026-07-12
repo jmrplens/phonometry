@@ -72,7 +72,9 @@ print(se.figure_of_merit)
 se.plot()   # signal excess vs transmission loss (needs matplotlib)
 ```
 
-All levels are in dB (re a plane wave of 1 µPa rms; spectrum levels).
+Sonar, propagation and ambient levels are in dB re a plane wave of 1 µPa rms
+(spectrum levels). Source levels (below) use the source convention, dB re
+1 µPa²/Hz **at 1 m**.
 
 ## Seabed reflection loss
 
@@ -100,7 +102,9 @@ bl.plot()   # bottom loss vs grazing angle (needs matplotlib)
 
 The ambient-noise spectrum level is the energy sum of the physically grounded
 Wenz components: **wind / sea-surface** noise via the "rule of fives" (25 dB at
-1 kHz for 5 knots) and **Mellen thermal** noise (dominant above ~50 kHz). A
+1 kHz for 5 knots, strictly valid ~500 Hz–5 kHz) and **Mellen thermal** noise
+(dominant above ~50 kHz). The wide example range keeps the wind curve plotted
+beyond ~5 kHz only as an extrapolation to show the thermal crossover. A
 **shipping** spectrum may be supplied by the caller.
 
 ```python

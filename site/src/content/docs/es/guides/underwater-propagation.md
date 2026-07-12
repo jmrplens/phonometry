@@ -73,8 +73,9 @@ print(se.figure_of_merit)
 se.plot()   # exceso de señal frente a pérdida por transmisión
 ```
 
-Todos los niveles están en dB (re una onda plana de 1 µPa rms; niveles
-espectrales).
+Los niveles de sonar, propagación y ambiental están en dB re una onda plana de
+1 µPa rms (niveles espectrales). Los niveles de fuente (más abajo) usan la
+convención de fuente, dB re 1 µPa²/Hz **a 1 m**.
 
 ## Pérdida por reflexión en el fondo
 
@@ -103,8 +104,10 @@ bl.plot()   # pérdida por reflexión frente al ángulo rasante
 
 El nivel espectral de ruido ambiental es la suma energética de las componentes
 físicas de Wenz: el ruido de **viento / superficie** por la "regla de los cincos"
-(25 dB a 1 kHz con 5 nudos) y el ruido **térmico de Mellen** (dominante por
-encima de ~50 kHz). El espectro de **tráfico** lo aporta quien llama.
+(25 dB a 1 kHz con 5 nudos, válida en ~500 Hz–5 kHz) y el ruido **térmico de
+Mellen** (dominante por encima de ~50 kHz). El rango amplio del ejemplo mantiene
+la curva de viento más allá de ~5 kHz solo como extrapolación para mostrar el
+cruce con el térmico. El espectro de **tráfico** lo aporta quien llama.
 
 ```python
 import numpy as np

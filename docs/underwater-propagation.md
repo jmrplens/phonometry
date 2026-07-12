@@ -103,8 +103,9 @@ ph.active_sonar_equation(220.0, 70.0, target_strength=15.0, noise_level=60.0,
                          directivity_index=20.0, detection_threshold=10.0)
 ```
 
-All levels are in dB (re a plane wave of 1 µPa rms; spectrum levels, i.e.
-referred to a 1 Hz band).
+Sonar, propagation and ambient levels are in dB re a plane wave of 1 µPa rms
+(spectrum levels are referred to a 1 Hz band). Source levels (§6) instead use
+the source convention, dB re 1 µPa²/Hz **at 1 m**.
 
 ## 4. Seabed reflection loss
 
@@ -162,8 +163,11 @@ ph.wind_noise_spectrum(1000.0, 5.0)      # 25 dB (the rule-of-fives anchor)
 ph.thermal_noise_spectrum(5e4)           # molecular thermal-noise limit
 ```
 
-The low-frequency turbulence band and a built-in distant-shipping model are out
-of scope (Wenz notes these bands are strongly variable); a shipping spectrum is
+The wind component is strictly valid over roughly 500 Hz–5 kHz; the wide example
+range keeps it plotted mainly to show where the thermal component takes over
+above ~50 kHz (the wind curve beyond ~5 kHz is an extrapolation). The
+low-frequency turbulence band and a built-in distant-shipping model are out of
+scope (Wenz notes these bands are strongly variable); a shipping spectrum is
 supplied through the `shipping` argument.
 
 ## 6. Ship-traffic source level

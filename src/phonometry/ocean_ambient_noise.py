@@ -30,6 +30,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ._validation import require_positive, require_positive_array
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
@@ -42,22 +44,6 @@ _P_REF = 1e-6
 _WIND_REF_KNOTS = 5.0
 
 
-def _positive_array(values: "NDArray[np.float64] | list[float] | float", name: str) -> "NDArray[np.float64]":
-    arr = np.atleast_1d(np.asarray(values, dtype=np.float64))
-    if arr.size == 0 or not np.all(np.isfinite(arr)):
-        raise ValueError(f"'{name}' must be finite and non-empty.")
-    if np.any(arr <= 0.0):
-        raise ValueError(f"'{name}' must be strictly positive.")
-    return arr
-
-
-def _positive(value: float, name: str) -> float:
-    scalar = float(value)
-    if not np.isfinite(scalar) or scalar <= 0.0:
-        raise ValueError(f"'{name}' must be a positive, finite number.")
-    return scalar
-
-
 def wind_noise_spectrum(
     frequency_hz: "NDArray[np.float64] | list[float] | float", wind_speed_knots: float
 ) -> "NDArray[np.float64]":
@@ -68,12 +54,16 @@ def wind_noise_spectrum(
     doubling of wind speed). Valid over roughly 500 Hz-5 kHz.
 
     :param frequency_hz: Frequency, in Hz (scalar or array).
-    :param wind_speed_knots: Wind speed ``U``, in knots.
+    :param wind_speed_knots: Wind speed ``U``, in knots. A calm sea (``0``) has
+        no wind-driven noise, returning ``-inf`` (zero contribution in the
+        energy sum).
     :return: Wind-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
-    :raises ValueError: If the inputs are invalid.
+    :raises ValueError: If the inputs are invalid (a negative wind speed).
     """
-    f_khz = _positive_array(frequency_hz, "frequency_hz") / 1000.0
-    u = _positive(wind_speed_knots, "wind_speed_knots")
+    f_khz = require_positive_array(frequency_hz, "frequency_hz") / 1000.0
+    if wind_speed_knots == 0.0:
+        return np.full(f_khz.shape, -np.inf, dtype=np.float64)
+    u = require_positive(wind_speed_knots, "wind_speed_knots")
     nl = 25.0 - (5.0 / 3.0) * 10.0 * (np.log10(f_khz) - np.log10(u / _WIND_REF_KNOTS))
     return np.asarray(nl, dtype=np.float64)
 
@@ -97,12 +87,12 @@ def thermal_noise_spectrum(
     :return: Thermal-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
     :raises ValueError: If the inputs are invalid.
     """
-    f = _positive_array(frequency_hz, "frequency_hz")
+    f = require_positive_array(frequency_hz, "frequency_hz")
     t_kelvin = float(temperature) + 273.15
     if not np.isfinite(t_kelvin) or t_kelvin <= 0.0:
         raise ValueError("'temperature' must be above absolute zero.")
-    rho = _positive(density, "density")
-    c = _positive(sound_speed, "sound_speed")
+    rho = require_positive(density, "density")
+    c = require_positive(sound_speed, "sound_speed")
     p2 = 4.0 * np.pi * _BOLTZMANN * t_kelvin * rho * f**2 / c
     return np.asarray(10.0 * np.log10(p2 / _P_REF**2), dtype=np.float64)
 
@@ -158,7 +148,7 @@ def ocean_ambient_noise(
     :return: An :class:`AmbientNoiseResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    f = _positive_array(frequency_hz, "frequency_hz")
+    f = require_positive_array(frequency_hz, "frequency_hz")
     wind = wind_noise_spectrum(f, wind_speed_knots)
     thermal = thermal_noise_spectrum(f, temperature=temperature, density=density,
                                      sound_speed=sound_speed)

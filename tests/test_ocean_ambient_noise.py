@@ -86,7 +86,17 @@ def test_invalid_inputs_rejected() -> None:
     with pytest.raises(ValueError, match="frequency"):
         wind_noise_spectrum(-1.0, 5.0)
     with pytest.raises(ValueError, match="wind_speed"):
-        wind_noise_spectrum(1000.0, 0.0)
+        wind_noise_spectrum(1000.0, -1.0)
+
+
+def test_calm_sea_zero_wind_returns_minus_inf() -> None:
+    # A calm sea (0 knots) has no wind-driven noise: -inf dB (0 energy).
+    assert float(wind_noise_spectrum(1000.0, 0.0)[0]) == -np.inf
+    # In the composite, the wind term then drops out (thermal only here).
+    res = ocean_ambient_noise([5e4], wind_speed_knots=0.0)
+    assert np.isneginf(res.wind[0])
+    assert np.isfinite(res.spectrum_level[0])
+    assert float(res.spectrum_level[0]) == pytest.approx(float(res.thermal[0]), abs=1e-9)
 
 
 def test_ambient_plot_smoke() -> None:

@@ -564,8 +564,10 @@ _ES_EXACT = {
     "Spectrum level [dB re 1 µPa²/Hz]": "Nivel espectral [dB re 1 µPa²/Hz]",
     "Ship Traffic Source Level (JOMOPANS-ECHO)":
         "Nivel de fuente del tráfico marítimo (JOMOPANS-ECHO)",
-    "Source spectral density [dB re 1 µPa²/Hz m]":
-        "Densidad espectral de fuente [dB re 1 µPa²/Hz m]",
+    "Source spectral density [dB re 1 µPa²/Hz at 1 m]":
+        "Densidad espectral de fuente [dB re 1 µPa²/Hz a 1 m]",
+    "Wind": "Viento",
+    "Thermal": "Térmico",
     # Building acoustics (EN 12354-1 flanking prediction, ISO 12999-1 uncertainty)
     "EN 12354-1 Flanking Transmission (Annex H.3 example)":
         "Transmisión por flancos EN 12354-1 (ejemplo del Anexo H.3)",
@@ -3570,9 +3572,10 @@ def generate_ocean_ambient_noise(output_dir: str) -> None:
 
     freqs = np.logspace(2, 5.5, 300)
     fig, ax = plt.subplots(figsize=(10, 6))
-    for u, color in ((5.0, COLOR_SECONDARY), (20.0, COLOR_PRIMARY)):
+    # Label the wind/thermal components only once to avoid repeated legend rows.
+    for i, (u, color) in enumerate(((5.0, COLOR_SECONDARY), (20.0, COLOR_PRIMARY))):
         res = ocean_ambient_noise(freqs, wind_speed_knots=u)
-        _plot_ambient_curve(res, u, color)
+        _plot_ambient_curve(res, u, color, label_components=(i == 0))
     ax.set_xscale("log")
     ax.set_xlabel("Frequency [Hz]")
     ax.set_ylabel("Spectrum level [dB re 1 µPa²/Hz]")
@@ -3585,12 +3588,15 @@ def generate_ocean_ambient_noise(output_dir: str) -> None:
     plt.close()
 
 
-def _plot_ambient_curve(res: object, wind_speed: float, color: str) -> None:
+def _plot_ambient_curve(res: object, wind_speed: float, color: str,
+                        label_components: bool = False) -> None:
     ax = plt.gca()
     ax.plot(res.frequency, res.spectrum_level, color=color, linewidth=2.0,  # type: ignore[attr-defined]
             label=f"Total ({wind_speed:.0f} kn)")
-    ax.plot(res.frequency, res.wind, color=color, linewidth=1.0, linestyle="--", alpha=0.6)  # type: ignore[attr-defined]
-    ax.plot(res.frequency, res.thermal, color="#8c8c8c", linewidth=1.0, linestyle=":", alpha=0.8)  # type: ignore[attr-defined]
+    ax.plot(res.frequency, res.wind, color=color, linewidth=1.0, linestyle="--", alpha=0.6,  # type: ignore[attr-defined]
+            label="Wind" if label_components else None)
+    ax.plot(res.frequency, res.thermal, color="#8c8c8c", linewidth=1.0, linestyle=":", alpha=0.8,  # type: ignore[attr-defined]
+            label="Thermal" if label_components else None)
 
 
 def generate_ship_traffic_noise(output_dir: str) -> None:
@@ -3610,7 +3616,7 @@ def generate_ship_traffic_noise(output_dir: str) -> None:
                 label=f"{vessel_class} ({speed:.0f} kn, {length:.0f} m)")
     ax.set_xscale("log")
     ax.set_xlabel("Frequency [Hz]")
-    ax.set_ylabel("Source spectral density [dB re 1 µPa²/Hz m]")
+    ax.set_ylabel("Source spectral density [dB re 1 µPa²/Hz at 1 m]")
     ax.set_title("Ship Traffic Source Level (JOMOPANS-ECHO)", fontweight="bold", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)

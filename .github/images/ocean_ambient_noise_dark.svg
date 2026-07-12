@@ -682,15 +682,15 @@ L 705.503125 28.318125
    </g>
    <g id="legend_1">
     <g id="patch_7">
-     <path d="M 614.272656 62.519531 
-L 699.203125 62.519531 
-Q 701.003125 62.519531 701.003125 60.719531 
+     <path d="M 614.272656 89.520938 
+L 699.203125 89.520938 
+Q 701.003125 89.520938 701.003125 87.720938 
 L 701.003125 34.618125 
 Q 701.003125 32.818125 699.203125 32.818125 
 L 614.272656 32.818125 
 Q 612.472656 32.818125 612.472656 34.618125 
-L 612.472656 60.719531 
-Q 612.472656 62.519531 614.272656 62.519531 
+L 612.472656 87.720938 
+Q 612.472656 89.520938 614.272656 89.520938 
 z
 " style="opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
@@ -707,10 +707,28 @@ L 634.072656 40.106719
      <path d="M 616.072656 53.607422 
 L 625.072656 53.607422 
 L 634.072656 53.607422 
-" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #d62728; stroke-opacity: 0.6"/>
     </g>
     <g id="text_13">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="641.272656" y="56.757422" transform="rotate(-0 641.272656 56.757422)">Total (20 kn)</text>
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="641.272656" y="56.757422" transform="rotate(-0 641.272656 56.757422)">Wind</text>
+    </g>
+    <g id="line2d_85">
+     <path d="M 616.072656 67.108125 
+L 625.072656 67.108125 
+L 634.072656 67.108125 
+" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #8c8c8c; stroke-opacity: 0.8"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="641.272656" y="70.258125" transform="rotate(-0 641.272656 70.258125)">Thermal</text>
+    </g>
+    <g id="line2d_86">
+     <path d="M 616.072656 80.608828 
+L 625.072656 80.608828 
+L 634.072656 80.608828 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="641.272656" y="83.758828" transform="rotate(-0 641.272656 83.758828)">Total (20 kn)</text>
     </g>
    </g>
   </g>

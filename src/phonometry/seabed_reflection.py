@@ -28,16 +28,11 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ._validation import require_positive
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
-
-
-def _positive(value: float, name: str) -> float:
-    scalar = float(value)
-    if not np.isfinite(scalar) or scalar <= 0.0:
-        raise ValueError(f"'{name}' must be a positive, finite number.")
-    return scalar
 
 
 def critical_angle(c1: float, c2: float) -> float:
@@ -51,8 +46,8 @@ def critical_angle(c1: float, c2: float) -> float:
     :return: The critical grazing angle, in degrees.
     :raises ValueError: If ``c2 <= c1`` (no critical angle exists).
     """
-    cw = _positive(c1, "c1")
-    cs = _positive(c2, "c2")
+    cw = require_positive(c1, "c1")
+    cs = require_positive(c2, "c2")
     if cs <= cw:
         raise ValueError("A critical angle exists only when c2 > c1 (faster sediment).")
     return float(np.degrees(np.arccos(cw / cs)))
@@ -82,10 +77,10 @@ def reflection_coefficient(
         raise ValueError("'grazing_angle' must be finite and non-empty.")
     if np.any(phi < 0.0) or np.any(phi > 90.0):
         raise ValueError("'grazing_angle' must be within [0, 90] degrees.")
-    r1 = _positive(rho1, "rho1")
-    cw = _positive(c1, "c1")
-    r2 = _positive(rho2, "rho2")
-    cs = _positive(c2, "c2")
+    r1 = require_positive(rho1, "rho1")
+    cw = require_positive(c1, "c1")
+    r2 = require_positive(rho2, "rho2")
+    cs = require_positive(c2, "c2")
     phi_rad = np.radians(phi)
     cos_t1 = np.sin(phi_rad)  # θ1 from normal = 90° − φ
     sin_t2 = (cs / cw) * np.cos(phi_rad)
@@ -94,7 +89,12 @@ def reflection_coefficient(
     z2 = r2 * cs
     num = z2 * cos_t1 - z1 * cos_t2
     den = z2 * cos_t1 + z1 * cos_t2
-    return np.asarray(num / den, dtype=np.complex128)
+    # Singular limit: with no sound-speed contrast (c1 == c2) at exactly grazing
+    # incidence, cos_t1 = cos_t2 = 0 gives 0/0. The angle-independent limit is
+    # the normal-incidence coefficient (z2 − z1)/(z2 + z1).
+    safe_den = np.where(den == 0.0, 1.0, den)
+    r = np.where(den == 0.0, (z2 - z1) / (z2 + z1), num / safe_den)
+    return np.asarray(r, dtype=np.complex128)
 
 
 @dataclass(frozen=True)

@@ -566,7 +566,7 @@ L 705.885937 100.255823
      </g>
     </g>
     <g id="text_10">
-     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="14.798438" y="206.415781" transform="rotate(-90 14.798438 206.415781)">Source spectral density [dB re 1 µPa²/Hz m]</text>
+     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="14.798438" y="206.415781" transform="rotate(-90 14.798438 206.415781)">Source spectral density [dB re 1 µPa²/Hz at 1 m]</text>
     </g>
    </g>
    <g id="line2d_77">

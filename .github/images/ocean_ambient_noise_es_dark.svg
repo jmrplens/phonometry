@@ -682,15 +682,15 @@ L 700.73125 28.798125
    </g>
    <g id="legend_1">
     <g id="patch_7">
-     <path d="M 609.500781 62.999531 
-L 694.43125 62.999531 
-Q 696.23125 62.999531 696.23125 61.199531 
+     <path d="M 609.500781 90.360938 
+L 694.43125 90.360938 
+Q 696.23125 90.360938 696.23125 88.560938 
 L 696.23125 35.098125 
 Q 696.23125 33.298125 694.43125 33.298125 
 L 609.500781 33.298125 
 Q 607.700781 33.298125 607.700781 35.098125 
-L 607.700781 61.199531 
-Q 607.700781 62.999531 609.500781 62.999531 
+L 607.700781 88.560938 
+Q 607.700781 90.360938 609.500781 90.360938 
 z
 " style="opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
@@ -707,10 +707,28 @@ L 629.300781 40.586719
      <path d="M 611.300781 54.087422 
 L 620.300781 54.087422 
 L 629.300781 54.087422 
-" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #d62728; stroke-opacity: 0.6"/>
     </g>
     <g id="text_13">
-     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="636.500781" y="57.237422" transform="rotate(-0 636.500781 57.237422)">Total (20 kn)</text>
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="636.500781" y="57.237422" transform="rotate(-0 636.500781 57.237422)">Viento</text>
+    </g>
+    <g id="line2d_85">
+     <path d="M 611.300781 67.948125 
+L 620.300781 67.948125 
+L 629.300781 67.948125 
+" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #8c8c8c; stroke-opacity: 0.8"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="636.500781" y="71.098125" transform="rotate(-0 636.500781 71.098125)">Térmico</text>
+    </g>
+    <g id="line2d_86">
+     <path d="M 611.300781 81.448828 
+L 620.300781 81.448828 
+L 629.300781 81.448828 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="636.500781" y="84.598828" transform="rotate(-0 636.500781 84.598828)">Total (20 kn)</text>
     </g>
    </g>
   </g>

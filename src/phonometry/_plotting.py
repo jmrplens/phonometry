@@ -1024,7 +1024,7 @@ def plot_ship_traffic_spectrum(
     ax.plot(f, psd, **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
     ax.set_xscale("log")
     ax.set_xlabel("Frequency [Hz]")
-    ax.set_ylabel("Source spectral density [dB re 1 µPa²/Hz m]")
+    ax.set_ylabel("Source spectral density [dB re 1 µPa²/Hz at 1 m]")
     ax.set_title("Ship traffic source level")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")

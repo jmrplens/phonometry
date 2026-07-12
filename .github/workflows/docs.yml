@@ -22,14 +22,23 @@ jobs:
           persist-credentials: false
           # Full history: add-sitemap-lastmod.mjs stamps per-file git dates.
           fetch-depth: 0
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 11
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: pnpm
-          cache-dependency-path: site/pnpm-lock.yaml
+      - name: Enable latest pnpm via corepack
+        # corepack ships with Node and installs pnpm cleanly. We avoid
+        # pnpm/action-setup, whose bundled installer crashes while self-updating
+        # to the latest release ("Cannot use 'in' operator ... integrity").
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm --version
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('site/pnpm-lock.yaml') }}
+          restore-keys: pnpm-store-${{ runner.os }}-
       - name: Regenerate llms.txt from docs (freshness guarantee)
         run: python3 scripts/generate_llms.py
       - name: Check EN/ES translation parity

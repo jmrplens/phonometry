@@ -18,10 +18,25 @@ import pytest
 from phonometry.aircraft_noise import (
     NOY_BANDS,
     _tone_background,
+    effective_perceived_noise_level,
+    epnl_from_pnlt,
     perceived_noise_level,
     perceived_noisiness,
     tone_correction,
 )
+
+# ICAO Doc 9501 ETM Vol. I (2018) Table 4-4 integrated-method EPNL example.
+_PNLTR_44 = [
+    84.62, 85.84, 85.37, 88.57, 88.82, 88.03, 88.76, 87.06, 86.92, 90.39, 89.89,
+    91.00, 90.08, 89.71, 89.61, 90.21, 91.14, 92.10, 93.68, 94.89, 95.87, 97.06,
+    97.40, 96.23, 94.73, 92.30, 88.75, 86.96, 85.41, 83.88, 83.01,
+]
+_DTR_44 = [
+    0.3950, 0.3950, 0.3951, 0.3951, 0.3952, 0.3953, 0.3954, 0.3956, 0.3957, 0.3960,
+    0.3963, 0.3967, 0.3973, 0.3981, 0.3992, 0.4009, 0.4033, 0.4066, 0.4108, 0.4153,
+    0.4196, 0.4231, 0.4256, 0.4273, 0.4285, 0.4294, 0.4299, 0.4304, 0.4307, 0.4309,
+    0.4311,
+]
 
 _B = list(NOY_BANDS)
 
@@ -94,3 +109,50 @@ def test_tone_correction_background_column() -> None:
 
 def test_tone_correction_none_when_flat() -> None:
     assert tone_correction(np.full(24, 60.0)) == 0.0
+
+
+def test_epnl_table_44() -> None:
+    # ETM Vol. I Table 4-4: integrated-method reference EPNL = 92.61892 EPNdB,
+    # PNLTM = 97.40, window records 4-28 (0-based 3-27).
+    epnl, pnltm, kf, kl = epnl_from_pnlt(np.array(_PNLTR_44), np.array(_DTR_44))
+    assert pnltm == pytest.approx(97.40, abs=1e-6)
+    assert (kf, kl) == (3, 27)
+    assert epnl == pytest.approx(92.61892, abs=1e-2)
+
+
+def test_epnl_uniform_dt_matches_energy_sum() -> None:
+    # With dt=0.5 and T0=10, EPNL = 10 lg(Σ 0.5·10^(PNLT/10)) − 10 lg(10).
+    p = np.array([90.0, 95.0, 90.0])  # all within 10 dB of the peak
+    epnl, pnltm, kf, kl = epnl_from_pnlt(p, 0.5)
+    expected = 10.0 * np.log10(np.sum(0.5 * 10.0 ** (p / 10.0))) - 10.0 * np.log10(10.0)
+    assert epnl == pytest.approx(expected, rel=1e-9)
+    assert (kf, kl) == (0, 2)
+
+
+def test_effective_perceived_noise_level_bundle() -> None:
+    rng = np.random.default_rng(0)
+    peak = 20.0 * np.exp(-((np.arange(20) - 10.0) ** 2) / 8.0)
+    spectra = 60.0 + peak[:, None] + rng.standard_normal((20, 24))
+    res = effective_perceived_noise_level(spectra)
+    assert res.pnlt.shape == (20,)
+    assert res.epnl <= res.pnltm  # duration correction is <= 0 here
+    assert res.band_limits[0] <= int(np.argmax(res.pnlt)) <= res.band_limits[1]
+
+
+def test_effective_perceived_noise_level_rejects_bad_shape() -> None:
+    with pytest.raises(ValueError):
+        effective_perceived_noise_level(np.zeros((5, 10)))
+
+
+def test_epnl_result_plot_smoke() -> None:
+    rng = np.random.default_rng(0)
+    peak = 20.0 * np.exp(-((np.arange(20) - 10.0) ** 2) / 8.0)
+    spectra = 60.0 + peak[:, None] + rng.standard_normal((20, 24))
+    res = effective_perceived_noise_level(spectra)
+    assert res.plot() is not None
+
+
+def test_epnl_exposed_at_package_top_level() -> None:
+    import phonometry
+
+    assert phonometry.effective_perceived_noise_level is effective_perceived_noise_level

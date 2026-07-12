@@ -252,3 +252,154 @@ def tone_correction(spl: "NDArray[np.float64] | list[float]") -> float:
     _, excess = _tone_background(spl)
     factors = [_tone_factor(float(excess[i]), float(NOY_BANDS[i])) for i in range(24)]
     return float(max(factors))
+
+
+#: EPNL duration reference time ``T0`` (s) and the level drop for the limits.
+_EPNL_REFERENCE_TIME = 10.0
+_TEN_DB_DOWN = 10.0
+
+
+def _ten_db_down_limits(pnlt: "NDArray[np.float64]", threshold: float, km: int) -> "tuple[int, int]":
+    """The 10 dB-down record indices ``(kF, kL)`` around the peak record ``km``.
+
+    ``kF``/``kL`` are the records whose PNLT is nearest to ``PNLTM − 10`` on the
+    rising / falling side. The search takes the first (from the start) and last
+    (from the end) records that reach the threshold, so an interior dip below
+    the threshold does not truncate the integration window; the nearer of the
+    two samples bracketing each crossing is then chosen.
+    """
+    n = pnlt.size
+    above = np.nonzero(pnlt >= threshold)[0]
+    if above.size == 0:
+        return km, km
+
+    first = int(above[0])
+    if first > 0 and abs(pnlt[first - 1] - threshold) < abs(pnlt[first] - threshold):
+        kf = first - 1
+    else:
+        kf = first
+
+    last = int(above[-1])
+    if last < n - 1 and abs(pnlt[last + 1] - threshold) < abs(pnlt[last] - threshold):
+        kl = last + 1
+    else:
+        kl = last
+    return kf, kl
+
+
+def epnl_from_pnlt(
+    pnlt: "NDArray[np.float64] | list[float]",
+    dt: "float | NDArray[np.float64] | list[float]" = 0.5,
+    *,
+    reference_time: float = _EPNL_REFERENCE_TIME,
+) -> "tuple[float, float, int, int]":
+    """EPNL from a tone-corrected perceived-noise-level time history (App. 2 §4.5-4.6).
+
+    ``EPNL = 10·lg( Σ_{kF..kL} 10^{PNLT(k)/10}·Δt(k) ) − 10·lg(T0)`` with the
+    10 dB-down integration limits about the maximum ``PNLTM``.
+
+    :param pnlt: The tone-corrected perceived noise levels ``PNLT(k)``, in PNdB.
+    :param dt: Per-record duration, in s (scalar broadcast or per record).
+    :param reference_time: Normalising time ``T0``, in s (default 10).
+    :return: ``(epnl, pnltm, kF, kL)`` -- EPNL in EPNdB, the peak PNLTM, and the
+        0-based 10 dB-down record indices (inclusive).
+    :raises ValueError: If the inputs are invalid.
+    """
+    p = np.atleast_1d(np.asarray(pnlt, dtype=np.float64))
+    if p.ndim != 1 or p.size < 1 or not np.all(np.isfinite(p)):
+        raise ValueError("'pnlt' must be a non-empty finite 1-D sequence.")
+    dt_raw = np.asarray(dt, dtype=np.float64)
+    dt_arr = np.full(p.shape, float(dt_raw.item())) if dt_raw.ndim == 0 else dt_raw
+    if dt_arr.shape != p.shape or np.any(dt_arr <= 0.0) or not np.all(np.isfinite(dt_arr)):
+        raise ValueError("'dt' must be positive and match 'pnlt' in length.")
+    if reference_time <= 0.0 or not np.isfinite(reference_time):
+        raise ValueError("'reference_time' must be a positive, finite number.")
+
+    pnltm = float(np.max(p))
+    km = int(np.argmax(p))
+    kf, kl = _ten_db_down_limits(p, pnltm - _TEN_DB_DOWN, km)
+    energy = np.sum(10.0 ** (p[kf : kl + 1] / 10.0) * dt_arr[kf : kl + 1])
+    epnl = float(10.0 * np.log10(energy) - 10.0 * np.log10(reference_time))
+    return epnl, pnltm, kf, kl
+
+
+@dataclass(frozen=True)
+class EPNLResult:
+    """Effective Perceived Noise Level of an aircraft flyover (ICAO Annex 16).
+
+    :ivar frequencies: The 24 one-third-octave band centre frequencies, in Hz.
+    :ivar times: Record times, in s.
+    :ivar pnl: Perceived noise level per record, in PNdB.
+    :ivar tone_correction: Tone-correction factor per record, in dB.
+    :ivar pnlt: Tone-corrected perceived noise level per record, in PNdB.
+    :ivar pnltm: Maximum tone-corrected perceived noise level, in PNdB.
+    :ivar duration_correction: Duration correction ``D = EPNL − PNLTM``, in dB.
+    :ivar epnl: Effective perceived noise level, in EPNdB.
+    :ivar band_limits: The 0-based 10 dB-down record indices ``(kF, kL)``.
+    """
+
+    frequencies: "NDArray[np.float64]"
+    times: "NDArray[np.float64]"
+    pnl: "NDArray[np.float64]"
+    tone_correction: "NDArray[np.float64]"
+    pnlt: "NDArray[np.float64]"
+    pnltm: float
+    duration_correction: float
+    epnl: float
+    band_limits: "tuple[int, int]"
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the PNL and PNLT time histories with PNLTM and the 10 dB-down band."""
+        from ._plotting import plot_epnl
+
+        return plot_epnl(self, ax=ax, **kwargs)
+
+
+def effective_perceived_noise_level(
+    spectra: "NDArray[np.float64] | list[list[float]]",
+    dt: "float | NDArray[np.float64] | list[float]" = 0.5,
+    *,
+    reference_time: float = _EPNL_REFERENCE_TIME,
+) -> EPNLResult:
+    """Effective Perceived Noise Level from a spectral time history (ICAO Annex 16).
+
+    Each record (row) is a 24-band one-third-octave spectrum sampled every
+    ``dt`` seconds. The per-record ``PNL`` and tone correction ``C`` give
+    ``PNLT = PNL + C``; the maximum ``PNLTM`` and the duration correction over
+    the 10 dB-down window give ``EPNL = PNLTM + D``.
+
+    :param spectra: Spectral time history, shape ``(K, 24)``, in dB.
+    :param dt: Per-record duration, in s (scalar or per record, default 0.5).
+    :param reference_time: Normalising time ``T0``, in s (default 10).
+    :return: An :class:`EPNLResult`.
+    :raises ValueError: If the input is not a ``(K, 24)`` finite array.
+    """
+    arr = np.asarray(spectra, dtype=np.float64)
+    if arr.ndim != 2 or arr.shape[1] != 24 or arr.shape[0] < 1:
+        raise ValueError("'spectra' must have shape (K, 24).")
+    if not np.all(np.isfinite(arr)):
+        raise ValueError("'spectra' must be finite.")
+
+    pnl = np.array([perceived_noise_level(row) for row in arr])
+    corr = np.array([tone_correction(row) for row in arr])
+    pnlt = pnl + corr
+
+    epnl, pnltm, kf, kl = epnl_from_pnlt(pnlt, dt, reference_time=reference_time)
+
+    k = arr.shape[0]
+    dt_raw = np.asarray(dt, dtype=np.float64)
+    if dt_raw.ndim == 0:
+        times = np.arange(k, dtype=np.float64) * float(dt_raw.item())
+    else:
+        times = np.concatenate([[0.0], np.cumsum(dt_raw)[:-1]])
+    return EPNLResult(
+        frequencies=NOY_BANDS.copy(),
+        times=times,
+        pnl=pnl,
+        tone_correction=corr,
+        pnlt=pnlt,
+        pnltm=pnltm,
+        duration_correction=float(epnl - pnltm),
+        epnl=epnl,
+        band_limits=(kf, kl),
+    )

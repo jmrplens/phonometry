@@ -94,6 +94,7 @@ if TYPE_CHECKING:
     from .wind_turbine_noise import WindTurbineTonalityResult
     from .underwater_sound_speed import SoundSpeedProfile
     from .underwater_propagation import TransmissionLossResult
+    from .sonar_equation import SonarEquationResult
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -916,6 +917,33 @@ def plot_transmission_loss(
         ax.invert_yaxis()
     ax.grid(True, alpha=0.3)
     ax.legend(loc="lower right", fontsize="small")
+    return ax
+
+
+def plot_sonar_equation(
+    result: "SonarEquationResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Signal excess versus transmission loss, with the detection limit (SE = 0).
+
+    :param result: A :class:`~phonometry.sonar_equation.SonarEquationResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the signal-excess ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    tl = np.asarray(result.transmission_loss, dtype=np.float64)
+    se = np.asarray(result.signal_excess, dtype=np.float64)
+    order = np.argsort(tl)
+    label = f"Signal excess ({result.mode})"
+    ax.plot(tl[order], se[order], **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    ax.axhline(0.0, color=_C_REFERENCE, ls="--", lw=1.0, label="Detection limit (SE = 0)")
+    ax.axvline(result.figure_of_merit, color=_C_MUTED, ls=":", lw=1.0,
+               label=f"Figure of merit = {result.figure_of_merit:.1f} dB")
+    ax.set_xlabel("Transmission loss [dB]")
+    ax.set_ylabel("Signal excess [dB]")
+    ax.set_title("Sonar equation")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     return ax
 
 

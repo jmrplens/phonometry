@@ -261,6 +261,11 @@ from .underwater_propagation import (
     spreading_loss,
     transmission_loss,
 )
+from .sonar_equation import (
+    SonarEquationResult,
+    active_sonar_equation,
+    passive_sonar_equation,
+)
 from .ship_radiated_noise import (
     ShipSourceLevelResult,
     hydrophone_depths,
@@ -750,6 +755,9 @@ __all__ = [
     "seawater_absorption",
     "transmission_loss",
     "TransmissionLossResult",
+    "passive_sonar_equation",
+    "active_sonar_equation",
+    "SonarEquationResult",
     "radiated_noise_level",
     "hydrophone_depths",
     "source_level_uncertainty",

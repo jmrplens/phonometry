@@ -34,6 +34,7 @@ from .environmental_measurement import (
 )
 from .compliance import (
     class_limits,
+    verify_aircraft_noise_system,
     verify_filter_class,
     verify_weighting_class,
     weighting_class_limits,
@@ -261,6 +262,15 @@ from .pile_driving_noise import (
     cumulative_sel_identical,
     pile_strike_metrics,
     single_strike_sel,
+)
+from .aircraft_noise import (
+    NOY_BANDS,
+    EPNLResult,
+    effective_perceived_noise_level,
+    epnl_from_pnlt,
+    perceived_noise_level,
+    perceived_noisiness,
+    tone_correction,
 )
 from .tonality import (
     TonalityWarning,
@@ -724,6 +734,13 @@ __all__ = [
     "cumulative_sel_identical",
     "pile_strike_metrics",
     "PileStrikeResult",
+    "perceived_noisiness",
+    "perceived_noise_level",
+    "tone_correction",
+    "effective_perceived_noise_level",
+    "epnl_from_pnlt",
+    "EPNLResult",
+    "NOY_BANDS",
     "equal_loudness_contour",
     "loudness_level",
     "hearing_threshold",
@@ -1116,6 +1133,7 @@ __all__ = [
     "RepeatedMeasurementResult",
     "CalibrationWarning",
     "verify_filter_class",
+    "verify_aircraft_noise_system",
     "class_limits",
     "verify_weighting_class",
     "weighting_class_limits",

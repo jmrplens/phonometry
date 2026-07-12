@@ -90,6 +90,7 @@ if TYPE_CHECKING:
     from .frequency_response import FrequencyResponseResult
     from .ship_radiated_noise import ShipSourceLevelResult
     from .pile_driving_noise import PileStrikeResult
+    from .aircraft_noise import EPNLResult
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -798,6 +799,36 @@ def plot_pile_strike(
     axes[1].set_title(f"90 % pulse duration = {result.pulse_duration * 1e3:.0f} ms")
     axes[1].grid(True, alpha=0.3)
     return axes
+
+
+def plot_epnl(result: "EPNLResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """PNL and PNLT time histories with PNLTM and the 10 dB-down window.
+
+    The perceived noise level and its tone-corrected counterpart are drawn
+    against time; the maximum ``PNLTM`` is marked and the 10 dB-down integration
+    band (records ``kF``..``kL``) is shaded, annotated with the EPNL.
+
+    :param result: An :class:`~phonometry.aircraft_noise.EPNLResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the PNLT ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    t = np.asarray(result.times, dtype=np.float64)
+    kf, kl = result.band_limits
+    ax.plot(t, np.asarray(result.pnl), color=_C_MUTED, lw=1.0, ls="--", label="PNL")
+    kwargs.setdefault("color", _C_PRIMARY)
+    ax.plot(t, np.asarray(result.pnlt), lw=1.4, label="PNLT", **kwargs)
+    ax.axvspan(t[kf], t[kl], color=_C_TERTIARY, alpha=0.15, label="10 dB-down window")
+    km = int(np.argmax(np.asarray(result.pnlt)))
+    ax.plot([t[km]], [result.pnltm], "o", color=_C_REFERENCE,
+            label=f"PNLTM = {result.pnltm:.1f} PNdB")
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Level [PNdB]")
+    ax.set_title(f"ICAO EPNL = {result.epnl:.1f} EPNdB (D = {result.duration_correction:+.1f} dB)")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
 
 
 # ---------------------------------------------------------------------------

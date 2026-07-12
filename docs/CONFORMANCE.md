@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **161/161 conformance checks pass** across 27 domains and 93 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **165/165 conformance checks pass** across 28 domains and 97 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -414,6 +414,18 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 17208-1:2016 | Radiated noise level from RMS pressure and distance, dB re 1 µPa·m | 46.0206 (+/-0.0001) | 46.0206 | 0 | &#9989; |
 | ISO 17208-2:2019 (Formula 3) | Lloyd's-mirror surface correction ΔL at a known k·d_s | -3.5211 (+/-0.0001) | -3.5211 | 0 | &#9989; |
 | ISO 18406:2017 (Formulae 8-9) | Cumulative SEL of N identical strikes = SEL_ss + 10·lg(N) | 196.9897 (+/-0) | 196.9897 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b> — 100% (4/4)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ICAO Annex 16 Vol. I App. 2 Table A2-3 | Perceived noisiness at SPL(b), 1 kHz band, in noys | 1 (+/-0) | 1 | 0 | &#9989; |
+| ICAO Doc 9501 ETM Vol. I Table 3-7 | Tone correction of the turbofan example, dB | 2 (+/-0) | 2 | 0 | &#9989; |
+| ICAO Doc 9501 ETM Vol. I Table 4-4 | Integrated-method reference EPNL, EPNdB | 92.619 EPNdB (+/-0.01 EPNdB) | 92.619 EPNdB | 0 EPNdB | &#9989; |
+| IEC 61265:1995 Table 1 | Directional-response tolerance at 4 kHz / 90°, dB | 2 dB (+/-0 dB) | 2 dB | 0 dB | &#9989; |
 
 </details>
 

@@ -116,6 +116,17 @@ def test_weighted_thd_attenuates_low_harmonics() -> None:
     assert 0.0 < weighted < plain
 
 
+def test_weighted_thd_rejects_bad_notch_q() -> None:
+    with pytest.raises(ValueError):
+        weighted_thd(_tone(1000.0), FS, 1000.0, notch_q=5.0)
+
+
+def test_thd_plus_noise_rejects_fundamental_above_nyquist() -> None:
+    # A fundamental at/above fs/2 cannot be notched (iirnotch would fail).
+    with pytest.raises(ValueError):
+        thd_plus_noise(_tone(1000.0), FS, FS / 2.0)
+
+
 def test_modulation_distortion_smpte() -> None:
     # Carrier f_high = 8 kHz (amp 0.25), modulator f_low = 250 Hz; 2nd-order
     # sidebands at f_high +/- f_low (0.02 each), 3rd-order at f_high +/- 2 f_low
@@ -171,7 +182,9 @@ def test_dynamic_intermodulation_distortion() -> None:
     comps = sorted(
         round(abs(k * fsq - fsine), 6) for k in range(1, 10) if abs(k * fsq - fsine) < fsine
     )
-    assert len(comps) == 9 and max(comps) == pytest.approx(13350.0)
+    assert comps == pytest.approx(
+        [750.0, 2400.0, 3900.0, 5550.0, 7050.0, 8700.0, 10200.0, 11850.0, 13350.0]
+    )
     amps = [0.01 * (i + 1) for i in range(len(comps))]
     # The captured DIM signal ALSO carries the strong 3.15 kHz square-wave
     # fundamental (0.8, ~in the 1:4 ratio); it must not be mistaken for a

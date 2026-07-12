@@ -81,7 +81,7 @@ def _spectra(
     """Return ``(freqs, Gxy, Gxx, Gyy)`` from Welch-averaged Hann segments."""
     from scipy import signal as sp_signal
 
-    noverlap = int(round(overlap * nperseg))
+    noverlap = min(int(round(overlap * nperseg)), nperseg - 1)
     kw = dict(fs=fs, window="hann", nperseg=nperseg, noverlap=noverlap, detrend=False)
     freqs, gxy = sp_signal.csd(x, y, **kw)
     _, gxx = sp_signal.welch(x, **kw)
@@ -170,7 +170,7 @@ def transfer_function(
             gyy.astype(np.complex128),
             gyx,
             out=np.zeros_like(gxy),
-            where=np.abs(gyx) > 0.0,
+            where=gyx != 0.0,
         )
     denom = gxx * gyy
     coh = np.divide(

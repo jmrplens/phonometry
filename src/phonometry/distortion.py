@@ -43,6 +43,11 @@ _DEFAULT_NOTCH_Q = 2.0
 #: each end of the notched residual so the ``filtfilt`` start/stop transient does
 #: not leak fundamental energy into the THD+N residual.
 _NOTCH_SETTLE_CYCLES = 8.0
+#: Harmonic peak-search half-width, as a fraction of the fundamental. Wide
+#: enough to catch a harmonic under window leakage or a slightly mistuned
+#: fundamental, but well inside ±f0 so a nearby non-harmonic tone is not latched
+#: onto a harmonic bin.
+_HARMONIC_SEARCH_FACTOR = 0.1
 
 
 def _positive(value: float, name: str) -> float:
@@ -111,7 +116,7 @@ def _harmonic_amplitudes(
     f0 = _fundamental_frequency(freqs, amp) if fundamental is None else float(fundamental)
     if f0 <= 0.0:
         raise ValueError("Could not determine a positive fundamental frequency.")
-    search = f0 * 0.5
+    search = f0 * _HARMONIC_SEARCH_FACTOR
     nyquist = fs / 2.0
     amps = []
     for k in range(1, n_harmonics + 1):
@@ -208,6 +213,10 @@ def _notched_residual(
     """Signal with the fundamental removed by the AES17 standard notch filter."""
     from scipy import signal as sp_signal
 
+    if f0 >= fs / 2.0:
+        raise ValueError(
+            "'fundamental' must be below the Nyquist frequency (fs / 2)."
+        )
     b, a = sp_signal.iirnotch(f0, notch_q, fs)
     return np.asarray(sp_signal.filtfilt(b, a, signal), dtype=np.float64)
 
@@ -328,6 +337,8 @@ def weighted_thd(
     fs_v = _positive(fs, "fs")
     if weighting not in ("A", "C"):
         raise ValueError("'weighting' must be 'A' or 'C'.")
+    if not 1.2 <= float(notch_q) <= 3.0:
+        raise ValueError("'notch_q' must be within the AES17 range [1.2, 3].")
     if fundamental is None:
         freqs, amp = _amplitude_spectrum(sig, fs_v, window)
         f0 = _fundamental_frequency(freqs, amp)

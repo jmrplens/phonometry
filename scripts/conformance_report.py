@@ -2519,15 +2519,20 @@ def _electro_fs() -> int:
     return 48000
 
 
+def _electro_tone(t: np.ndarray, freq: float, amp: float) -> np.ndarray:
+    """A single sine of amplitude ``amp`` at ``freq`` over the time base ``t``."""
+    return amp * np.sin(2.0 * np.pi * freq * t)
+
+
 def _electro_harmonic_signal() -> np.ndarray:
     fs = _electro_fs()
     t = np.arange(fs) / fs  # 1 s, tones on integer bins
     a1, a2, a3, a4 = ref.DISTORTION_HARMONICS
     sig = (
-        a1 * np.sin(2.0 * np.pi * 1000.0 * t)
-        + a2 * np.sin(2.0 * np.pi * 2000.0 * t)
-        + a3 * np.sin(2.0 * np.pi * 3000.0 * t)
-        + a4 * np.sin(2.0 * np.pi * 4000.0 * t)
+        _electro_tone(t, 1000.0, a1)
+        + _electro_tone(t, 2000.0, a2)
+        + _electro_tone(t, 3000.0, a3)
+        + _electro_tone(t, 4000.0, a4)
     )
     return np.asarray(sig, dtype=np.float64)
 
@@ -2561,17 +2566,13 @@ def _chk_smpte() -> Outcome:
     fs = _electro_fs()
     t = np.arange(fs) / fs
     fl, fh, ah = 250.0, 8000.0, 0.25
-
-    def tone(f: float, a: float) -> np.ndarray:
-        return a * np.sin(2.0 * np.pi * f * t)
-
     x = (
-        tone(fl, 1.0)
-        + tone(fh, ah)
-        + tone(fh + fl, 0.02)
-        + tone(fh - fl, 0.02)
-        + tone(fh + 2 * fl, 0.01)
-        + tone(fh - 2 * fl, 0.01)
+        _electro_tone(t, fl, 1.0)
+        + _electro_tone(t, fh, ah)
+        + _electro_tone(t, fh + fl, 0.02)
+        + _electro_tone(t, fh - fl, 0.02)
+        + _electro_tone(t, fh + 2 * fl, 0.01)
+        + _electro_tone(t, fh - 2 * fl, 0.01)
     )
     expected = math.sqrt(0.02**2 + 0.02**2 + 0.01**2 + 0.01**2) / ah
     return numeric(expected, ph.modulation_distortion(x, fs, fl, fh), 1e-4, places=6)
@@ -2586,11 +2587,11 @@ def _chk_ccif() -> Outcome:
     fs = _electro_fs()
     t = np.arange(fs) / fs
     f1, f2 = 13000.0, 14000.0
-
-    def tone(f: float, a: float) -> np.ndarray:
-        return a * np.sin(2.0 * np.pi * f * t)
-
-    x = tone(f1, 0.5) + tone(f2, 0.5) + tone(f2 - f1, 0.03)
+    x = (
+        _electro_tone(t, f1, 0.5)
+        + _electro_tone(t, f2, 0.5)
+        + _electro_tone(t, f2 - f1, 0.03)
+    )
     return numeric(
         0.03 / 0.5,
         ph.difference_frequency_distortion(x, fs, f1, f2, order=2),
@@ -2613,9 +2614,9 @@ def _chk_dim() -> Outcome:
     )
     amps = [0.01 * (i + 1) for i in range(len(comps))]
     # 15 kHz sine + the strong 3.15 kHz fundamental + the nine products.
-    x = np.sin(2.0 * np.pi * fsine * t) + 0.8 * np.sin(2.0 * np.pi * fsq * t)
+    x = _electro_tone(t, fsine, 1.0) + _electro_tone(t, fsq, 0.8)
     for c, a in zip(comps, amps):
-        x = x + a * np.sin(2.0 * np.pi * c * t)
+        x = x + _electro_tone(t, c, a)
     expected = math.sqrt(sum(a**2 for a in amps))
     return numeric(expected, ph.dynamic_intermodulation_distortion(x, fs), 1e-4, places=6)
 

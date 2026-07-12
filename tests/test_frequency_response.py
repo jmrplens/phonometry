@@ -104,6 +104,13 @@ def test_rejects_bad_estimator_and_overlap() -> None:
         transfer_function(x, x, FS, overlap=1.0)
 
 
+def test_high_overlap_does_not_crash() -> None:
+    # overlap close to 1.0 must clamp noverlap to nperseg - 1, not raise.
+    x, y, _, _ = _known_system()
+    res = transfer_function(x, y, FS, overlap=0.99)
+    assert np.all(np.isfinite(res.coherence))
+
+
 def test_rejects_bad_nperseg() -> None:
     x = np.zeros(1000)
     with pytest.raises(ValueError):

@@ -1,0 +1,220 @@
+← [Documentation index](README.md)
+
+# Psychoacoustic annoyance and fluctuation strength (Fastl & Zwicker)
+
+How *annoying* a sound is depends on more than how loud it is. Fastl & Zwicker,
+*Psychoacoustics: Facts and Models*, combine four psychoacoustic sensations —
+**loudness**, **sharpness**, **roughness** and **fluctuation strength** — into a
+single **psychoacoustic annoyance** `PA`, a scalar that grows with loudness and
+is lifted further when the sound is sharp, rough or slowly fluctuating. This page
+covers the exact `PA` model (Eqs 16.2–16.4), the **fluctuation strength** it
+consumes — both the closed form for amplitude-modulated broadband noise
+(Eq. 10.2) and the Osses et al. (2016) signal model — and the signal
+convenience that derives all four sensations from a recording.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance.svg" alt="Psychoacoustic annoyance PA against percentile loudness N5 for three sensation profiles: a neutral baseline where PA equals N5, a sharp sound and a rough-and-fluctuating sound both lifted above the baseline, with the worked example PA = 30.82 marked" width="82%"></picture>
+
+## 1. The four sensations
+
+Psychoacoustic annoyance rests on four hearing sensations, each with its own
+model and unit in the library:
+
+- **Loudness** — the percentile loudness `N5` (the loudness exceeded 5 % of the
+  time), in **sone**, from the ISO 532-1 Zwicker time-varying model
+  (`loudness_zwicker`, see [Psychoacoustics](psychoacoustics.md)).
+- **Sharpness** `S`, in **acum** — the spectral balance towards high
+  frequencies, DIN 45692 (`sharpness_din`).
+- **Roughness** `R`, in **asper** — the harshness of fast (~70 Hz) amplitude
+  modulation, ECMA-418-2 Sottek model (`roughness_ecma`).
+- **Fluctuation strength** `F`, in **vacil** — the sensation of slow (~4 Hz)
+  loudness fluctuation (§3 below).
+
+## 2. Psychoacoustic annoyance (Eqs 16.2–16.4)
+
+The exact model (Fastl & Zwicker Eq. 16.2; origin Widmann 1992) scales `N5` by a
+factor that grows with the sharpness weighting `wS` and the combined
+roughness/fluctuation weighting `wFR`:
+
+$$
+PA = N_5\sqrt{1 + w_S^2 + w_{FR}^2}, \qquad
+w_S = (S - 1.75)\,0.25\,\lg(N_5 + 10)\ \ (S > 1.75\ \mathrm{acum}), \qquad
+w_{FR} = \frac{2.18}{N_5^{0.4}}\,(0.4\,F + 0.6\,R).
+$$
+
+`wS` is zero for `S ≤ 1.75 acum` (sharpness only adds annoyance above that
+threshold); `wFR` weights roughness more heavily than fluctuation strength
+(0.6 vs 0.4). `psychoacoustic_annoyance` takes the four quantities directly and
+returns the annoyance together with the two intermediate weightings:
+
+```python
+import phonometry as ph
+
+res = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)   # N5, S, F, R
+print(round(res.annoyance, 4))   # 30.8167
+print(round(res.w_s, 4), round(res.w_fr, 4))   # 0.1001 0.2125
+```
+
+The figure above sweeps `PA` against `N5` for three profiles: a neutral baseline
+(`S = 1.75 acum`, `F = R = 0`, so `PA = N5`), a sharp sound and a
+rough-and-fluctuating sound — both lifted above the baseline — with the worked
+example marked.
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import phonometry as ph
+
+n5 = np.linspace(4.0, 60.0, 200)
+profiles = [
+    ("Baseline: S = 1.75 acum, F = R = 0", 1.75, 0.0, 0.0),
+    ("Sharp: S = 3.5 acum", 3.5, 0.0, 0.0),
+    ("Rough + fluctuating: F = 1.2 vacil, R = 0.7 asper", 2.0, 1.2, 0.7),
+]
+fig, ax = plt.subplots()
+for label, s, f, r in profiles:
+    pa = [ph.psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5]
+    ax.plot(n5, pa, label=label)
+
+ex = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)
+ax.plot([30.0], [ex.annoyance], "o", label=f"Worked example (PA = {ex.annoyance:.2f})")
+ax.set_xlabel("Percentile loudness N5 [sone]")
+ax.set_ylabel("Psychoacoustic annoyance PA")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+### 2.1 From a signal (engineering estimate)
+
+`psychoacoustic_annoyance_from_signal` is a convenience that derives all four
+sensations from a calibrated pressure signal and combines them: `N5` from the
+ISO 532-1 Zwicker time-varying loudness, `S` from DIN 45692 sharpness, `R` from
+the ECMA-418-2 Sottek roughness and `F` from the fluctuation-strength signal
+model.
+
+```python
+import phonometry as ph
+
+res = ph.psychoacoustic_annoyance_from_signal(x, fs, field="free")
+print(res.annoyance, res.n5, res.sharpness, res.roughness, res.fluctuation_strength)
+```
+
+> **Model-mixing caveat.** This composite mixes model families — Zwicker-family
+> `N5` and `S`, Sottek `R` and Osses `F`. The `PA` model was calibrated with
+> Zwicker-family sensations, so treat the signal convenience as an *engineering
+> estimate*. For exact, reproducible results, compute the four quantities with
+> whichever models you trust and pass them to `psychoacoustic_annoyance`
+> directly (the four-argument function is the exact model).
+
+## 3. Fluctuation strength
+
+**Fluctuation strength** `F` (vacil) quantifies the perception of *slow* loudness
+fluctuation. Like roughness it is a band-pass sensation of the modulation
+frequency, but it peaks about an order of magnitude lower — at `fmod ≈ 4 Hz`
+rather than the ~70 Hz roughness peak. By definition, a 1 kHz tone at 60 dB,
+100 % amplitude-modulated at 4 Hz, produces `1 vacil`.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength.svg" alt="Fluctuation strength versus modulation frequency on a log axis: the closed-form AM broadband-noise curve and the AM-tone signal-model sweep both show a band-pass characteristic peaking at 4 Hz" width="82%"></picture>
+
+### 3.1 Closed form for AM broadband noise (Eq. 10.2)
+
+For sinusoidally amplitude-modulated broadband noise, Fastl & Zwicker give a
+closed form (Eq. 10.2) in modulation factor `m`, level `L` and modulation
+frequency `fmod`:
+
+$$
+F = \frac{5.8\,(1.25\,m - 0.25)\,[0.05\,(L/\mathrm{dB}) - 1]}
+{(f_{mod}/5\,\mathrm{Hz})^2 + (4\,\mathrm{Hz}/f_{mod}) + 1.5}\ \ \mathrm{vacil}.
+$$
+
+The denominator is the `4 Hz` band-pass: it bottoms out near `fmod ≈ 3.7 Hz` and
+rises on either side. The result is clamped at `0` (the sensation vanishes below
+~20 dB or `m < 0.2`). This exact form is the value to quote for AM broadband
+noise.
+
+```python
+import phonometry as ph
+
+print(round(ph.fluctuation_strength_am_noise(60.0, 1.0, 4.0), 4))   # 3.6943 vacil
+```
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import phonometry as ph
+
+# Exact closed form (Eq. 10.2), AM broadband noise at 60 dB, 100 % modulation:
+fmod = np.logspace(np.log10(0.5), np.log10(32.0), 240)
+f_bbn = [ph.fluctuation_strength_am_noise(60.0, 1.0, fm) for fm in fmod]
+
+# Osses 2016 signal model on a 1 kHz / 70 dB AM tone over the same sweep:
+fs = 48000
+t = np.arange(int(2.0 * fs)) / fs
+carrier = np.sin(2 * np.pi * 1000 * t)
+fm_tone = [1.0, 2.0, 4.0, 8.0, 16.0, 32.0]
+f_tone = []
+for fm in fm_tone:
+    am = (1.0 + np.sin(2 * np.pi * fm * t)) * carrier
+    am = am / np.sqrt(np.mean(am ** 2)) * 2e-5 * 10 ** (70 / 20)
+    f_tone.append(ph.fluctuation_strength(am, float(fs)).fluctuation_strength)
+
+fig, ax = plt.subplots()
+ax.semilogx(fmod, f_bbn, label="AM broadband noise (closed form)")
+ax2 = ax.twinx()
+ax2.plot(fm_tone, f_tone, "s--", color="tab:green", label="AM tone (signal model)")
+ax.axvline(4.0, ls="--", color="0.4")
+ax.set_xlabel("Modulation frequency f_mod [Hz]")
+ax.set_ylabel("Fluctuation strength F [vacil]")
+plt.show()
+```
+
+</details>
+
+### 3.2 The Osses 2016 signal model
+
+`fluctuation_strength` implements the Osses et al. (2016) signal model: it builds
+an excitation pattern over 47 auditory filters, extracts the `~4 Hz` envelope
+modulation per band, weights and combines it, and returns the overall `F` (vacil)
+plus the specific fluctuation strength over the Bark axis and the time-dependent
+trace.
+
+```python
+import phonometry as ph
+
+res = ph.fluctuation_strength(x, fs)
+print(res.fluctuation_strength)   # vacil
+res.plot()   # specific fluctuation strength F′(z) over the Bark axis (needs matplotlib)
+```
+
+> **No numeric standard.** Fluctuation strength has no ISO/IEC standard. This is
+> a clean-room implementation from the Osses 2016 paper, calibrated so that the
+> `1 kHz / 60 dB / m = 1 / 4 Hz` AM tone reads `1.00 vacil` by construction, and
+> cross-checked against the Osses 2016 Table 1 literature values and the open
+> SQAT reference (used only as a numeric oracle). Over the `70 dB` AM-tone sweep
+> `fmod ∈ {1, 2, 4, 8, 16, 32} Hz` it gives `[0.42, 0.79, 1.09, 1.05, 0.19,
+> 0.10]` vacil against the literature `[0.39, 0.84, 1.25, 1.30, 0.36, 0.06]`
+> (Pearson `r = 0.98`, correct `4 Hz` peak, within ~2×). FM-tone accuracy is
+> explicitly not pursued. For **AM broadband noise** the signal model overshoots
+> the absolute level (it spreads the modulated energy across bands) — quote the
+> closed form `fluctuation_strength_am_noise` (§3.1) for that stimulus.
+
+---
+
+**Standards.** Fastl & Zwicker (2006), *Psychoacoustics: Facts and Models*
+(Springer): psychoacoustic annoyance `PA = N5·√(1 + wS² + wFR²)` with the
+sharpness weighting `wS` and roughness/fluctuation weighting `wFR`
+(Eqs 16.2–16.4; origin Widmann 1992), and the closed form for the fluctuation
+strength of amplitude-modulated broadband noise (Eq. 10.2). The fluctuation-
+strength signal model follows Osses García & Kohlrausch (2016), *Modelling the
+sensation of fluctuation strength* (ICA 2016) — clean-room, with no numeric
+standard: calibrated to `1 vacil` at the reference AM tone and cross-checked
+against the paper's Table 1 literature trends and the open SQAT reference oracle.
+The four sensations reuse the library's ISO 532-1 loudness, DIN 45692 sharpness
+and ECMA-418-2 roughness (see [Psychoacoustics](psychoacoustics.md)).

@@ -69,7 +69,7 @@ Two new modules, following the one-method-per-module convention
 
 ### `src/phonometry/fluctuation_strength.py`
 
-- `fluctuation_strength(signal, fs, *, field='free') -> FluctuationStrengthResult`
+- `fluctuation_strength(signal, fs) -> FluctuationStrengthResult` (free-field only; the Osses 2016 model has no diffuse variant)
   — general signal model (Osses 2016 / Eq 10.3): auditory filtering into
   critical bands → temporal envelope per band → modulation analysis →
   specific fluctuation strength integrated over the Bark scale with the 4-Hz

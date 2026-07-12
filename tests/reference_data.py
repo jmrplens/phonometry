@@ -857,3 +857,32 @@ ISO20065_E1_LT_FG = 72.15
 # fD bottoms out at 21 Hz at the reference fT = 212 Hz (the |lg| minimum).
 ISO20065_FD_212 = 21.00
 ISO20065_FD_137 = 24.09
+
+# ---------------------------------------------------------------------------
+# Psychoacoustic annoyance (Fastl & Zwicker Eq. 16.2-16.4; Widmann 1992) and
+# fluctuation strength (Fastl & Zwicker Ch. 10; Osses et al. 2016).
+# ---------------------------------------------------------------------------
+# PA is exact. Worked tuple (N5, S, F, R) = (30 sone, 2.0 acum, 0.5 vacil,
+# 0.3 asper) -> the terms and PA computed by hand from Eqs 16.2-16.4:
+#   wS  = (2.0 - 1.75) * 0.25 * lg(30 + 10)          = 0.100129
+#   wFR = (2.18 / 30**0.4) * (0.4*0.5 + 0.6*0.3)     = 0.212475
+#   PA  = 30 * sqrt(1 + wS**2 + wFR**2)              = 30.8167
+PA_WORKED_INPUT = (30.0, 2.0, 0.5, 0.3)  # (N5, S, F, R)
+PA_WORKED_WS = 0.100129
+PA_WORKED_WFR = 0.212516
+PA_WORKED_VALUE = 30.8167
+
+# Fluctuation strength closed form for AM broadband noise (Fastl & Zwicker
+# Eq. 10.2), exact. F(L=60 dB, m=1, fmod=4 Hz):
+#   5.8*(1.25-0.25)*(0.05*60-1) / ((4/5)**2 + (4/4) + 1.5) = 11.6/3.14 = 3.6943
+FS_BBN_60_1_4 = 3.6943
+# Fluctuation strength calibration definition: 1 kHz tone, 60 dB, m=1, 4 Hz AM
+# is 1 vacil (Fastl & Zwicker Ch. 10; the signal model is anchored to it).
+FS_CALIBRATION_VACIL = 1.00
+
+# Fluctuation-strength signal-model cross-check (Osses 2016 Table 1): literature
+# values for a 1 kHz AM tone at 70 dB, m=1, over fmod = {1,2,4,8,16,32} Hz. No
+# numeric standard exists; the Osses model reproduces these TRENDS (Pearson
+# r >= 0.9, band-pass peak at 4 Hz, within ~2x), not the exact figures.
+FS_AM_TONE_FMOD_HZ = [1.0, 2.0, 4.0, 8.0, 16.0, 32.0]
+FS_AM_TONE_70DB_LITERATURE = [0.39, 0.84, 1.25, 1.30, 0.36, 0.06]

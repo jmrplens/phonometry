@@ -272,6 +272,12 @@ from .aircraft_noise import (
     perceived_noisiness,
     tone_correction,
 )
+from .wind_turbine_noise import (
+    WindTurbineTonalityResult,
+    apparent_sound_power_level,
+    slant_distance,
+    wind_turbine_tonality,
+)
 from .tonality import (
     TonalityWarning,
     ToneAssessment,
@@ -741,6 +747,10 @@ __all__ = [
     "epnl_from_pnlt",
     "EPNLResult",
     "NOY_BANDS",
+    "apparent_sound_power_level",
+    "slant_distance",
+    "wind_turbine_tonality",
+    "WindTurbineTonalityResult",
     "equal_loudness_contour",
     "loudness_level",
     "hearing_threshold",

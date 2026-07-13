@@ -1,7 +1,7 @@
-ruff>=0.15.20
-mypy>=2.1.0
+ruff>=0.15.21
+mypy>=2.2.0
 bandit>=1.9.4
-types-setuptools>=82.0.0.20260518
+types-setuptools>=83.0.0.20260706
 pytest>=9.1.1
 pytest-cov>=7.1.0
 matplotlib>=3.10.9  # required by the result-object .plot() tests

@@ -104,7 +104,7 @@ if TYPE_CHECKING:
         RayTraceResult,
     )
     from .aircraft_atmospheric_absorption import AircraftBandAttenuation
-    from .airport_noise import NpdLevelResult
+    from .airport_noise import FlyoverResult, NoiseContourResult, NpdLevelResult
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -1183,6 +1183,64 @@ def plot_npd_level(result: "NpdLevelResult", ax: Axes | None = None, **kwargs: A
     ax.set_title("Noise-power-distance curve (ECAC Doc 29)")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_flyover(result: "FlyoverResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """Per-segment contributions to a single-event level (ECAC Doc 29).
+
+    Bars show each flight-path segment's event level; the dashed line marks the
+    energy-summed total (SEL) or the maximum (LAmax).
+
+    :param result: A :class:`~phonometry.airport_noise.FlyoverResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the bar call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    seg = np.asarray(result.segment_levels, dtype=np.float64)
+    # Non-finite segment contributions (e.g. a fully-attenuated segment) are
+    # dropped so Matplotlib does not choke on them.
+    seg = np.where(np.isfinite(seg), seg, np.nan)
+    idx = np.arange(seg.size)
+    metric = "SEL" if result.metric == "exposure" else "LAmax"
+    ax.bar(idx, seg, **{"color": _C_PRIMARY, "alpha": 0.85, **kwargs})
+    if np.isfinite(result.level):
+        ax.axhline(result.level, color=_C_REFERENCE, ls="--", lw=1.2,
+                   label=f"Total {metric} = {result.level:.1f} dB")
+    ax.set_xlabel("Segment index")
+    ax.set_ylabel(f"Segment {metric} [dB]")
+    ax.set_title("Single-event segment contributions (ECAC Doc 29)")
+    ax.grid(True, axis="y", alpha=0.3)
+    if np.isfinite(result.level):
+        ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_noise_contour(result: "NoiseContourResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """Filled single-event noise contours over the ground plane (ECAC Doc 29).
+
+    :param result: A :class:`~phonometry.airport_noise.NoiseContourResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to ``contourf``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    x = np.asarray(result.x, dtype=np.float64) / 1000.0
+    y = np.asarray(result.y, dtype=np.float64) / 1000.0
+    lvl = np.asarray(result.level, dtype=np.float64)
+    finite = lvl[np.isfinite(lvl)]
+    top = float(np.ceil(np.max(finite) / 5.0) * 5.0) if finite.size else 100.0
+    levels = np.arange(top - 30.0, top + 0.1, 5.0)
+    # Mask non-finite cells (e.g. degenerate paths) so they render blank.
+    masked = np.ma.masked_invalid(lvl)
+    cf = ax.contourf(x, y, masked, **{"levels": levels, "cmap": "viridis", "extend": "both", **kwargs})
+    ax.contour(x, y, masked, levels=levels, colors="k", linewidths=0.4, alpha=0.5)
+    ax.figure.colorbar(cf, ax=ax, label=f"{'SEL' if result.metric == 'exposure' else 'LAmax'} [dB]")
+    ax.set_xlabel("x [km]")
+    ax.set_ylabel("y [km]")
+    ax.set_title("Aircraft noise contour (ECAC Doc 29)")
+    ax.set_aspect("equal", adjustable="box")
     return ax
 
 

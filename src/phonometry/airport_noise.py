@@ -16,7 +16,7 @@ starts by reading a level from this table for an arbitrary power and distance.
   an :class:`NpdLevelResult` with a ``.plot()``.
 
 The single-event stage segments a flight path and adjusts the NPD baseline per
-segment (§4.3-4.7): :func:`impedance_adjustment` (Eq. 4-6/4-7),
+segment (§4.3-4.5): :func:`impedance_adjustment` (Eq. 4-6/4-7),
 :func:`lateral_attenuation` (β, ℓ), :func:`engine_installation_correction`
 (φ, mounting), :func:`duration_correction`, the finite-segment
 :func:`noise_fraction` and, behind takeoff ground-roll segments, the
@@ -194,6 +194,7 @@ def start_of_roll_directivity(
 
     :param azimuth_deg: Azimuth ``ψ`` from the forward axis to the observer, in
         degrees (``ψ = arccos(q/dSOR)``, in ``[90, 180]`` behind the aircraft).
+        Values below 90° return 0; values above 180° are clamped to 180°.
     :param distance_m: Distance ``dSOR`` from the observer to the segment start,
         in metres.
     :param engine: ``"jet"`` (turbofan, Eq. 4-24a) or ``"turboprop"`` (Eq. 4-24b).

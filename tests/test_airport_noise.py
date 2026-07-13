@@ -301,6 +301,17 @@ def test_event_level_ground_roll_applies_directivity() -> None:
             == pytest.approx(event_level(path, ahead, _NP, _ND, _NSEL, _NMAX).level))
     with pytest.raises(ValueError, match="ground_roll"):
         event_level(path, obs, _NP, _ND, _NSEL, _NMAX, ground_roll=[True, False])
+    # The directivity is also applied on the maximum metric (Eq. 4-9a) and with
+    # a propeller mounting (turboprop ΔSOR curve).
+    max_plain = event_level(path, obs, _NP, _ND, _NSEL, _NMAX, metric="maximum").level
+    max_roll = event_level(path, obs, _NP, _ND, _NSEL, _NMAX, metric="maximum",
+                           ground_roll=[True]).level
+    assert max_roll != pytest.approx(max_plain)
+    prop_roll = event_level(path, obs, _NP, _ND, _NSEL, _NMAX, mounting="propeller",
+                            ground_roll=[True]).level
+    jet_roll = event_level(path, obs, _NP, _ND, _NSEL, _NMAX, mounting="wing",
+                           ground_roll=[True]).level
+    assert prop_roll != pytest.approx(jet_roll)  # different SOR curves
 
 
 @pytest.mark.parametrize(("q", "length", "le_minus_lmax", "df_ref"), _WB_NOISE_FRACTION)

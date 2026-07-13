@@ -9,7 +9,7 @@ working unchanged."""
 from __future__ import annotations
 
 from ._plot.common import plot_absorption_uncertainty as plot_absorption_uncertainty
-from ._plot.common import plot_age_threshold as plot_age_threshold
+from ._plot.hearing import plot_age_threshold as plot_age_threshold
 from ._plot.common import plot_airborne_insulation as plot_airborne_insulation
 from ._plot.common import plot_airborne_prediction as plot_airborne_prediction
 from ._plot.common import plot_aircraft_band_attenuation as plot_aircraft_band_attenuation
@@ -33,7 +33,7 @@ from ._plot.psychoacoustics import plot_fluctuation_strength as plot_fluctuation
 from ._plot.common import plot_flyover as plot_flyover
 from ._plot.common import plot_frequency_response as plot_frequency_response
 from ._plot.common import plot_harmonic_distortion as plot_harmonic_distortion
-from ._plot.common import plot_htlan as plot_htlan
+from ._plot.hearing import plot_htlan as plot_htlan
 from ._plot.common import plot_impact_insulation as plot_impact_insulation
 from ._plot.common import plot_impact_prediction as plot_impact_prediction
 from ._plot.common import plot_impact_rating as plot_impact_rating
@@ -42,18 +42,18 @@ from ._plot.common import plot_impulse_prominence as plot_impulse_prominence
 from ._plot.common import plot_impulse_response as plot_impulse_response
 from ._plot.common import plot_insitu_absorption as plot_insitu_absorption
 from ._plot.common import plot_installed_structure_borne as plot_installed_structure_borne
-from ._plot.common import plot_intensity as plot_intensity
+from ._plot.emission import plot_intensity as plot_intensity
 from ._plot.common import plot_mobility as plot_mobility
 from ._plot.metrology import plot_monte_carlo as plot_monte_carlo
 from ._plot.psychoacoustics import plot_moore_glasberg_loudness as plot_moore_glasberg_loudness
 from ._plot.psychoacoustics import plot_moore_glasberg_time_loudness as plot_moore_glasberg_time_loudness
 from ._plot.common import plot_multiple_shock as plot_multiple_shock
-from ._plot.common import plot_nipts as plot_nipts
+from ._plot.hearing import plot_nipts as plot_nipts
 from ._plot.common import plot_noise_contour as plot_noise_contour
 from ._plot.common import plot_noise_criterion as plot_noise_criterion
 from ._plot.common import plot_normal_modes as plot_normal_modes
 from ._plot.common import plot_npd_level as plot_npd_level
-from ._plot.common import plot_occupational_exposure as plot_occupational_exposure
+from ._plot.hearing import plot_occupational_exposure as plot_occupational_exposure
 from ._plot.common import plot_open_plan as plot_open_plan
 from ._plot.common import plot_outdoor_attenuation as plot_outdoor_attenuation
 from ._plot.common import plot_parabolic_equation as plot_parabolic_equation
@@ -68,12 +68,12 @@ from ._plot.common import plot_rotorcraft_hemisphere as plot_rotorcraft_hemisphe
 from ._plot.common import plot_scattering_coefficient as plot_scattering_coefficient
 from ._plot.common import plot_ship_source_level as plot_ship_source_level
 from ._plot.common import plot_ship_traffic_spectrum as plot_ship_traffic_spectrum
-from ._plot.common import plot_sii as plot_sii
+from ._plot.hearing import plot_sii as plot_sii
 from ._plot.common import plot_sonar_equation as plot_sonar_equation
-from ._plot.common import plot_sound_power as plot_sound_power
+from ._plot.emission import plot_sound_power as plot_sound_power
 from ._plot.common import plot_sound_speed_profile as plot_sound_speed_profile
 from ._plot.common import plot_static_airflow as plot_static_airflow
-from ._plot.common import plot_sti as plot_sti
+from ._plot.hearing import plot_sti as plot_sti
 from ._plot.common import plot_structure_borne_power as plot_structure_borne_power
 from ._plot.common import plot_tonal_adjustment as plot_tonal_adjustment
 from ._plot.psychoacoustics import plot_tone_audibility as plot_tone_audibility
@@ -81,7 +81,7 @@ from ._plot.common import plot_transfer_stiffness as plot_transfer_stiffness
 from ._plot.common import plot_transmission_loss as plot_transmission_loss
 from ._plot.metrology import plot_uncertainty_budget as plot_uncertainty_budget
 from ._plot.common import plot_vibration_reduction as plot_vibration_reduction
-from ._plot.common import plot_vibration_sound_power as plot_vibration_sound_power
+from ._plot.emission import plot_vibration_sound_power as plot_vibration_sound_power
 from ._plot.common import plot_vibration_weighting as plot_vibration_weighting
 from ._plot.common import plot_weighted_absorption as plot_weighted_absorption
 from ._plot.common import plot_weighted_rating as plot_weighted_rating

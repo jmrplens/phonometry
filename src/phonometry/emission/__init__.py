@@ -1,0 +1,93 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""emission domain of phonometry (see module docstrings)."""
+
+from __future__ import annotations
+
+from .intensity import (
+    FieldIndicators,
+    IntensityResult,
+    dynamic_capability_index,
+    field_indicators,
+    sound_intensity,
+)
+from .sound_power import (
+    MeteorologicalCorrection,
+    PrecisionCriteria,
+    PrecisionFieldIndicators,
+    PrecisionIntensityResult,
+    PrecisionSoundPowerResult,
+    SoundPowerResult,
+    SoundPowerWarning,
+    background_noise_correction,
+    environmental_correction,
+    measurement_positions,
+    meteorological_corrections,
+    precision_background_correction,
+    precision_field_indicators,
+    precision_positions,
+    precision_qualification,
+    precision_uncertainty,
+    sound_power_anechoic,
+    sound_power_intensity_precision,
+    sound_power_pressure,
+)
+from .sound_power_intensity import SoundPowerIntensityResult, sound_power_intensity
+from .sound_power_reverberation import (
+    ReverberationSoundPowerResult,
+    sound_power_comparison,
+    sound_power_reverberation,
+)
+from .vibration_sound_power import (
+    NORMALIZED_IMPEDANCE,
+    REFERENCE_VELOCITY,
+    VibrationSoundPowerResult,
+    extraneous_velocity_correction,
+    mean_velocity_level,
+    radiated_sound_power_level,
+    radiation_factor,
+    sound_power_from_vibration,
+    velocity_level,
+    velocity_level_from_acceleration,
+)
+
+__all__ = [
+    "FieldIndicators",
+    "IntensityResult",
+    "MeteorologicalCorrection",
+    "NORMALIZED_IMPEDANCE",
+    "PrecisionCriteria",
+    "PrecisionFieldIndicators",
+    "PrecisionIntensityResult",
+    "PrecisionSoundPowerResult",
+    "REFERENCE_VELOCITY",
+    "ReverberationSoundPowerResult",
+    "SoundPowerIntensityResult",
+    "SoundPowerResult",
+    "SoundPowerWarning",
+    "VibrationSoundPowerResult",
+    "background_noise_correction",
+    "dynamic_capability_index",
+    "environmental_correction",
+    "extraneous_velocity_correction",
+    "field_indicators",
+    "mean_velocity_level",
+    "measurement_positions",
+    "meteorological_corrections",
+    "precision_background_correction",
+    "precision_field_indicators",
+    "precision_positions",
+    "precision_qualification",
+    "precision_uncertainty",
+    "radiated_sound_power_level",
+    "radiation_factor",
+    "sound_intensity",
+    "sound_power_anechoic",
+    "sound_power_comparison",
+    "sound_power_from_vibration",
+    "sound_power_intensity",
+    "sound_power_intensity_precision",
+    "sound_power_pressure",
+    "sound_power_reverberation",
+    "velocity_level",
+    "velocity_level_from_acceleration",
+]

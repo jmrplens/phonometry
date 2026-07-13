@@ -49,7 +49,7 @@ import phonometry as ph  # noqa: E402
 from phonometry import OctaveFilterBank, WeightingFilter  # noqa: E402
 from phonometry.metrology.compliance import class_limits, verify_filter_class  # noqa: E402
 from phonometry.psychoacoustics.sharpness import reference_sound  # noqa: E402
-from phonometry.sti import _sti_from_mtf  # noqa: E402
+from phonometry.hearing.sti import _sti_from_mtf  # noqa: E402
 
 
 # ===========================================================================
@@ -834,7 +834,7 @@ def _reverb_bracket(
     """Independent re-implementation of the ISO 3741 Eq. (20) bracket.
 
     The two constants below are deliberately different and mirror the library
-    (:func:`phonometry.sound_power_reverberation._speed_of_sound` and its C1/C2
+    (:func:`phonometry.emission.sound_power_reverberation._speed_of_sound` and its C1/C2
     terms): the speed of sound uses the rounded 273 of ISO 3741 clause 9.1.4
     (``c = 20,05*sqrt(273 + theta)``), while the C1/C2 barometric corrections
     use the exact absolute-zero offset 273.15 in their temperature ratios.
@@ -1777,7 +1777,7 @@ def _chk_iso9613_2_barrier_double_cap() -> Outcome:
 
 def _iso9612_annex_d_tasks() -> list[ph.Task]:
     """Rebuild the ISO 9612 Annex D Task objects from the shared input table."""
-    from phonometry.occupational_exposure import Task
+    from phonometry.hearing.occupational_exposure import Task
 
     tasks = []
     for samples, duration, drange in ref.ISO9612_ANNEX_D_TASKS:
@@ -2154,7 +2154,7 @@ def _chk_sii_standard_quiet() -> Outcome:
 
 @register(_SII, "ANSI S3.5-1997 Table 3", "Loud-effort speech spectrum level at 1 kHz")
 def _chk_sii_loud_spectrum() -> Outcome:
-    from phonometry.sii import standard_speech_spectrum
+    from phonometry.hearing.sii import standard_speech_spectrum
 
     value = float(standard_speech_spectrum("loud")[8])
     return numeric(ref.ANSIS3_5_LOUD_1KHZ, value, 1e-9, unit="dB", places=2)

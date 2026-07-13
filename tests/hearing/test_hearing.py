@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
-"""Tests for :mod:`phonometry.hearing` (ISO 7029:2017 and ISO 389-7:2006).
+"""Tests for :mod:`phonometry.hearing.threshold` (ISO 7029:2017 and ISO 389-7:2006).
 
 The age-related model is validated against the standard's own boundary
 behaviour (at age 18 the median deviation is zero and the spreads equal the
@@ -15,7 +15,7 @@ import numpy as np
 import pytest
 from reference_data import ISO389_7_REF_FREE_1KHZ, ISO7029_MEDIAN_MALE_60_4KHZ
 
-from phonometry import hearing as h
+from phonometry.hearing import threshold as h
 
 
 def test_frequency_and_table_shapes() -> None:

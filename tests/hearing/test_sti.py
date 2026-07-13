@@ -22,7 +22,7 @@ import numpy as np
 import pytest
 
 from phonometry import STIResult, sti_from_impulse_response, stipa, stipa_signal
-from phonometry.sti import (
+from phonometry.hearing.sti import (
     _ALPHA_MALE,
     _BETA_MALE,
     _MOD_FREQS,

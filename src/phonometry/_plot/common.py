@@ -45,7 +45,6 @@ if TYPE_CHECKING:
     from ..mechanical_mobility import MobilityResult
     from ..structure_borne_power import StructureBornePowerResult
     from ..transfer_stiffness import TransferStiffnessResult
-    from ..vibration_sound_power import VibrationSoundPowerResult
     from ..impedance_tube import ImpedanceTubeResult
     from ..insulation import (
         AirborneInsulationResult,
@@ -54,29 +53,22 @@ if TYPE_CHECKING:
         ImpactRatingResult,
         WeightedRatingResult,
     )
-    from ..intensity import IntensityResult
-    from ..occupational_exposure import ExposureResult
     from ..open_plan import OpenPlanResult
     from ..outdoor_propagation import OutdoorAttenuation
     from ..road_absorption import InsituAbsorptionResult
     from ..room_acoustics import DecayCurve, RoomAcousticsResult
     from ..room_ir import ImpulseResponseResult
-    from ..hearing import AgeThresholdResult
     from ..enclosed_space_absorption import ReverberationResult
     from ..human_vibration import (
         DailyVibrationExposure,
         WeightedSpectrum,
         WeightingResponse,
     )
-    from ..noise_induced_hearing_loss import HtlanResult, NiptsResult
     from ..multiple_shock_vibration import MultipleShockResult
     from ..environmental_measurement import TonalAssessmentResult
     from ..impulse_prominence import ImpulseProminenceResult
     from ..room_noise import NCResult, RCResult
     from ..scattering_diffusion import DiffusionResult, ScatteringResult
-    from ..sound_power import SoundPowerResult
-    from ..sound_power_intensity import SoundPowerIntensityResult
-    from ..sound_power_reverberation import ReverberationSoundPowerResult
     from ..distortion import HarmonicDistortionResult
     from ..frequency_response import FrequencyResponseResult
     from ..ship_radiated_noise import ShipSourceLevelResult
@@ -97,8 +89,6 @@ if TYPE_CHECKING:
     from ..aircraft_atmospheric_absorption import AircraftBandAttenuation
     from ..airport_noise import FlyoverResult, NoiseContourResult, NpdLevelResult
     from ..rotorcraft_noise import RotorcraftHemisphere
-    from ..sii import SIIResult
-    from ..sti import STIResult
 
 _INSTALL_HINT = (
     "Plotting requires matplotlib. Install it with: pip install phonometry[plot]"
@@ -941,59 +931,8 @@ def plot_noise_contour(result: "NoiseContourResult", ax: Axes | None = None, **k
 # ---------------------------------------------------------------------------
 
 
-def plot_sti(result: STIResult, ax: Axes | None = None, **kwargs: Any) -> Axes:
-    """Per-band modulation transfer index bars with the STI and rating.
-
-    :param result: A :class:`~phonometry.sti.STIResult`.
-    :param ax: Existing axes, or ``None`` to create a figure.
-    :param kwargs: Forwarded to :meth:`~matplotlib.axes.Axes.bar`.
-    :return: The axes.
-    """
-    ax = ax if ax is not None else _new_axes()
-    mti = np.asarray(result.mti, dtype=np.float64)
-    positions = np.arange(mti.size)
-    kwargs.setdefault("color", _C_PRIMARY)
-    ax.bar(positions, mti, **kwargs)
-    if mti.size == len(_STI_BAND_CENTERS):
-        _band_axis(ax, np.asarray(_STI_BAND_CENTERS))
-    else:
-        ax.set_xticks(positions)
-        ax.set_xlabel("Band")
-    ax.set_ylabel("Modulation transfer index MTI")
-    ax.set_ylim(0.0, 1.0)
-    ax.set_title(f"IEC 60268-16 STI = {result.sti:.2f}  (rating {result.rating})")
-    ax.grid(True, axis="y", alpha=0.3)
-    return ax
 
 
-def plot_sii(result: "SIIResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
-    """Per-band audibility and its importance-weighted contribution to the SII.
-
-    :param result: A :class:`~phonometry.sii.SIIResult`.
-    :param ax: Existing axes, or ``None`` to create a figure.
-    :param kwargs: Forwarded to the weighted-contribution :meth:`bar`.
-    :return: The axes.
-    """
-    ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies, dtype=np.float64)
-    audibility = np.asarray(result.band_audibility, dtype=np.float64)
-    contribution = audibility * np.asarray(result.band_importance, dtype=np.float64)
-    positions = _band_axis(ax, freqs)
-    ax.bar(positions, audibility, color=_C_PRIMARY_LIGHT,
-           label="Band audibility $A_i$")
-    kwargs.setdefault("color", _C_PRIMARY)
-    # A fully masked speech signal (SII = 0) has an all-zero contribution;
-    # keep the zero bars rather than dividing 0/0 into NaN.
-    peak = float(contribution.max()) if contribution.size else 0.0
-    scaled = contribution / peak if peak > 0.0 else contribution
-    ax.bar(positions, scaled, width=0.5,
-           label=r"Importance-weighted $I_i A_i$ (scaled)", **kwargs)
-    ax.set_ylabel("Band audibility")
-    ax.set_ylim(0.0, 1.0)
-    ax.set_title(f"ANSI S3.5 SII = {result.sii:.3f}")
-    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
-    return ax
 
 
 # ---------------------------------------------------------------------------
@@ -1463,68 +1402,6 @@ def _draw_decay_times(
 # ---------------------------------------------------------------------------
 
 
-def plot_sound_power(
-    result: (
-        "SoundPowerResult | ReverberationSoundPowerResult"
-        " | SoundPowerIntensityResult | Any"
-    ),
-    ax: Axes | None = None,
-    **kwargs: Any,
-) -> Axes:
-    """Sound power level spectrum with the A-weighted total annotated.
-
-    Works for :class:`~phonometry.sound_power.SoundPowerResult`,
-    :class:`~phonometry.sound_power_reverberation.ReverberationSoundPowerResult`
-    and :class:`~phonometry.sound_power_intensity.SoundPowerIntensityResult`;
-    for the intensity (scanning) variant the bands where the net power is
-    non-positive (``negative_band``) are hatched and greyed as unusable.
-
-    :param result: A sound-power result object exposing
-        ``sound_power_level``, ``sound_power_level_a`` and (optionally)
-        ``frequencies`` and ``negative_band``.
-    :param ax: Existing axes, or ``None`` to create a figure.
-    :param kwargs: Forwarded to the band :meth:`~matplotlib.axes.Axes.bar`.
-    :return: The axes.
-    """
-    ax = ax if ax is not None else _new_axes()
-    lw = np.asarray(result.sound_power_level, dtype=np.float64)
-    n = lw.size
-    freqs = getattr(result, "frequencies", None)
-    if freqs is None:
-        positions = _band_axis(
-            ax, [f"Band {i + 1}" for i in range(n)], xlabel="Band"
-        )
-    else:
-        positions = _band_axis(ax, np.asarray(freqs, dtype=np.float64))
-
-    # ``negative_band`` (ISO 9614-2) and ``not_applicable_band`` (ISO 9614-3)
-    # both flag bands whose net power is non-positive and therefore unusable.
-    negative = getattr(result, "negative_band", None)
-    if negative is None:
-        negative = getattr(result, "not_applicable_band", None)
-    neg = (
-        np.asarray(negative, dtype=bool)
-        if negative is not None
-        else np.zeros(n, dtype=bool)
-    )
-    colors = [_C_MUTED if b else _C_PRIMARY for b in neg]
-    kwargs.setdefault("color", colors)
-    bars = ax.bar(positions, np.nan_to_num(lw), **kwargs)
-    _hatch_invalid(bars, neg)
-
-    ax.set_ylabel("Sound power level LW [dB]")
-    designation = _sound_power_designation(result)
-    lwa = float(result.sound_power_level_a)
-    if np.isfinite(lwa):
-        ax.set_title(f"{designation} sound power spectrum  (LWA = {lwa:.1f} dB(A))")
-    else:
-        ax.set_title(f"{designation} sound power spectrum")
-    if np.any(neg):
-        ax.plot([], [], color=_C_MUTED, marker="s", ls="", label="Non-positive band")
-    if np.any(neg) or "label" in kwargs:
-        ax.legend(loc="best", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
-    return ax
 
 
 def _sound_power_designation(result: Any) -> str:
@@ -1535,8 +1412,8 @@ def _sound_power_designation(result: Any) -> str:
     methods (:class:`~phonometry.sound_power.SoundPowerResult` and any other
     duck-typed result) fall back to ISO 3744/3746.
     """
-    from ..sound_power_intensity import SoundPowerIntensityResult
-    from ..sound_power_reverberation import ReverberationSoundPowerResult
+    from ..emission.sound_power_intensity import SoundPowerIntensityResult
+    from ..emission.sound_power_reverberation import ReverberationSoundPowerResult
 
     if isinstance(result, ReverberationSoundPowerResult):
         return "ISO 3741"
@@ -1563,60 +1440,6 @@ def _bar_width(positions: np.ndarray, k: float = 0.2) -> np.ndarray:
     return k * np.asarray(positions, dtype=np.float64)
 
 
-def plot_intensity(
-    result: IntensityResult, ax: Axes | None = None, **kwargs: Any
-) -> Axes:
-    """Pressure vs intensity level per band with the pressure-intensity index.
-
-    Draws Lp and LI per band and, on a twin axis, the per-band
-    pressure-intensity index ``Lp - LI`` (the reactivity indicator); the
-    total index is annotated in the title.
-
-    :param result: An :class:`~phonometry.intensity.IntensityResult` with
-        per-band data (obtained by requesting a band ``fraction``).
-    :param ax: Existing axes, or ``None`` to create a figure.
-    :param kwargs: Forwarded to the pressure-level curve ``plot`` call.
-    :return: The axes.
-    :raises ValueError: If the result carries no per-band data.
-    """
-    if result.frequency is None:
-        raise ValueError(
-            "plot() needs per-band intensity data; call sound_intensity(...) "
-            "with a 'fraction' to obtain it."
-        )
-    ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequency, dtype=np.float64)
-    lp = np.asarray(result.pressure_level, dtype=np.float64)
-    li = np.asarray(result.intensity_level, dtype=np.float64)
-    index = np.asarray(result.pressure_intensity_index, dtype=np.float64)
-
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("label", "Pressure level Lp")
-    ax.plot(freqs, lp, "o-", **kwargs)
-    ax.plot(freqs, li, "s--", color=_C_REFERENCE, label="Intensity level LI")
-    _freq_axis(ax, freqs)
-    ax.set_ylabel("Level [dB]")
-    ax.grid(True, which="both", alpha=0.3)
-
-    twin = ax.twinx()
-    twin.bar(
-        freqs,
-        index,
-        width=_bar_width(freqs),
-        color=_C_TERTIARY,
-        alpha=0.25,
-        label="δpI = Lp - LI",
-    )
-    twin.set_ylabel("Pressure-intensity index δpI [dB]")
-
-    lines, labels = ax.get_legend_handles_labels()
-    tlines, tlabels = twin.get_legend_handles_labels()
-    ax.legend(lines + tlines, labels + tlabels, loc="best", fontsize="small")
-    ax.set_title(
-        "ISO 9614 Lp vs LI  "
-        f"(total δpI = {result.total_pressure_intensity_index:.1f} dB)"
-    )
-    return ax
 
 
 # ---------------------------------------------------------------------------
@@ -2177,35 +2000,6 @@ def plot_room_criterion(
 # ---------------------------------------------------------------------------
 
 
-def plot_age_threshold(
-    result: "AgeThresholdResult", ax: Axes | None = None, **kwargs: Any
-) -> Axes:
-    """Median age-related hearing threshold with the 10-90 % fractile band.
-
-    :param result: An :class:`~phonometry.hearing.AgeThresholdResult`.
-    :param ax: Existing axes, or ``None`` to create a figure.
-    :param kwargs: Forwarded to the median line ``plot``.
-    :return: The axes.
-    """
-    ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies, dtype=np.float64)
-    median = np.asarray(result.median, dtype=np.float64)
-    su = np.asarray(result.spread_upper, dtype=np.float64)
-    sl = np.asarray(result.spread_lower, dtype=np.float64)
-
-    _fractile_band(ax, freqs, median, sl, su, color=_C_PRIMARY_LIGHT)
-    kwargs.setdefault("color", _C_PRIMARY)
-    ax.plot(freqs, median, "o-", label="Median", **kwargs)
-    if abs(result.fractile - 0.5) > 1e-9:
-        ax.plot(freqs, np.asarray(result.threshold, dtype=np.float64), "s--",
-                color=_C_REFERENCE, label=f"Fractile {result.fractile:g}")
-    _freq_axis(ax, freqs)
-    ax.set_ylabel("Threshold deviation from age 18 [dB]")
-    ax.invert_yaxis()  # audiogram convention: worse hearing downward
-    ax.set_title(f"ISO 7029 hearing threshold — {result.sex}, age {result.age:g}")
-    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
-    return ax
 
 
 # ---------------------------------------------------------------------------
@@ -2213,69 +2007,8 @@ def plot_age_threshold(
 # ---------------------------------------------------------------------------
 
 
-def plot_nipts(
-    result: "NiptsResult", ax: Axes | None = None, **kwargs: Any
-) -> Axes:
-    """Median NIPTS spectrum with the 10-90 % fractile band (ISO 1999).
-
-    :param result: A :class:`~phonometry.noise_induced_hearing_loss.NiptsResult`.
-    :param ax: Existing axes, or ``None`` to create a figure.
-    :param kwargs: Forwarded to the median line ``plot``.
-    :return: The axes.
-    """
-    ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies, dtype=np.float64)
-    median = np.asarray(result.median, dtype=np.float64)
-    du = np.asarray(result.spread_upper, dtype=np.float64)
-    dl = np.asarray(result.spread_lower, dtype=np.float64)
-
-    _fractile_band(ax, freqs, median, dl, du, color=_C_SECONDARY_LIGHT, floor=0.0)
-    kwargs.setdefault("color", _C_SECONDARY)
-    ax.plot(freqs, median, "o-", label="Median $N_{50}$", **kwargs)
-    if abs(result.fractile - 0.5) > 1e-9:
-        ax.plot(freqs, np.asarray(result.value, dtype=np.float64), "s--",
-                color=_C_REFERENCE, label=f"Fractile {result.fractile:g}")
-    _freq_axis(ax, freqs)
-    ax.set_ylabel("NIPTS [dB]")
-    ax.invert_yaxis()  # audiogram convention: worse hearing downward
-    ax.set_title(
-        f"ISO 1999 NIPTS — $L_{{EX,8h}}$ = {result.l_ex:g} dB, "
-        f"{result.years:g} yr"
-    )
-    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
-    return ax
 
 
-def plot_htlan(
-    result: "HtlanResult", ax: Axes | None = None, **kwargs: Any
-) -> Axes:
-    """Age, noise and combined hearing threshold components (ISO 1999, 6.1).
-
-    :param result: A :class:`~phonometry.noise_induced_hearing_loss.HtlanResult`.
-    :param ax: Existing axes, or ``None`` to create a figure.
-    :param kwargs: Forwarded to the combined-threshold line ``plot``.
-    :return: The axes.
-    """
-    ax = ax if ax is not None else _new_axes()
-    freqs = np.asarray(result.frequencies, dtype=np.float64)
-    ax.plot(freqs, np.asarray(result.htla, dtype=np.float64), "o-",
-            color=_C_PRIMARY, label="Age (HTLA, ISO 7029)")
-    ax.plot(freqs, np.asarray(result.nipts, dtype=np.float64), "^-",
-            color=_C_SECONDARY, label="Noise (NIPTS)")
-    kwargs.setdefault("color", _C_REFERENCE)
-    ax.plot(freqs, np.asarray(result.threshold, dtype=np.float64), "s--",
-            label="Age + noise (HTLAN)", **kwargs)
-    _freq_axis(ax, freqs)
-    ax.set_ylabel("Hearing threshold level [dB]")
-    ax.invert_yaxis()  # audiogram convention: worse hearing downward
-    ax.set_title(
-        f"ISO 1999 HTLAN — {result.sex}, age {result.age:g}, "
-        f"{result.l_ex:g} dB / {result.years:g} yr"
-    )
-    ax.legend(loc="lower left", fontsize="small")
-    ax.grid(True, which="both", alpha=0.3)
-    return ax
 
 
 # ---------------------------------------------------------------------------
@@ -2552,21 +2285,6 @@ def _plot_band_level_bars(
     return ax
 
 
-def plot_vibration_sound_power(
-    result: "VibrationSoundPowerResult", ax: Axes | None = None, **kwargs: Any
-) -> Axes:
-    """Radiated sound power level per band (ISO/TS 7849).
-
-    :param result: A :class:`~phonometry.vibration_sound_power.VibrationSoundPowerResult`.
-    :param ax: Existing axes, or ``None`` to create a figure.
-    :param kwargs: Forwarded to the bar ``plot``.
-    :return: The axes.
-    """
-    return _plot_band_level_bars(
-        ax, result.sound_power_level, result.frequencies, result.total_level,
-        ylabel=r"Sound power level $L_W$ [dB re 1 pW]",
-        title="ISO/TS 7849 sound power from surface vibration", **kwargs,
-    )
 
 
 def plot_structure_borne_power(
@@ -2831,52 +2549,6 @@ def plot_impedance_tube(
 # ---------------------------------------------------------------------------
 
 
-def plot_occupational_exposure(
-    result: "ExposureResult", ax: Axes | None = None, **kwargs: Any
-) -> Axes:
-    """Per-task contributions to the daily exposure level (ISO 9612).
-
-    One bar per task (its contribution to ``LEX,8h``), with the combined
-    ``LEX,8h`` and the one-sided upper limit ``LEX,8h + U`` as horizontal
-    lines.
-
-    :param result: An
-        :class:`~phonometry.occupational_exposure.ExposureResult` from the
-        task-based strategy (the one that carries per-task contributions).
-    :param ax: Existing axes, or ``None`` to create a figure.
-    :param kwargs: Forwarded to the task :meth:`~matplotlib.axes.Axes.bar`.
-    :return: The axes.
-    :raises ValueError: If the result carries no per-task contributions.
-    """
-    if not result.tasks:
-        raise ValueError(
-            "plot() needs per-task contributions; only task_based_exposure() "
-            "results carry them (the job/full-day strategies do not)."
-        )
-    ax = ax if ax is not None else _new_axes()
-    contributions = [t.lex_8h_contribution for t in result.tasks]
-    labels = [t.label for t in result.tasks]
-    positions = np.arange(len(contributions), dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
-    ax.bar(positions, contributions, **kwargs)
-    ax.set_xticks(positions)
-    ax.set_xticklabels(labels, rotation=45, ha="right")
-
-    ax.axhline(result.lex_8h, color=_C_REFERENCE, ls="--",
-               label=f"$L_{{EX,8h}}$ = {result.lex_8h:.1f} dB")
-    ax.axhline(result.upper_limit, color=_C_MUTED, ls=":",
-               label=f"$L_{{EX,8h}} + U$ = {result.upper_limit:.1f} dB")
-    top = max(result.upper_limit, max(contributions))
-    bottom = min(0.0, min(contributions))
-    ax.set_ylim(bottom * 1.12 if bottom < 0.0 else 0.0, top * 1.12)
-    ax.set_ylabel("A-weighted level [dB]")
-    ax.set_title(
-        f"ISO 9612 daily noise exposure — $L_{{EX,8h}}$ = "
-        f"{result.lex_8h:.1f} dB (U = {result.expanded_uncertainty:.1f} dB)"
-    )
-    ax.legend(loc="lower right", fontsize="small")
-    ax.grid(True, axis="y", alpha=0.3)
-    return ax
 
 
 # ---------------------------------------------------------------------------

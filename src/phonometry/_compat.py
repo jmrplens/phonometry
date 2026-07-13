@@ -48,6 +48,16 @@ _MOVED: dict[str, str] = {
     "phonometry.tonality": "phonometry.psychoacoustics.tonality",
     "phonometry.tonality_ecma": "phonometry.psychoacoustics.tonality_ecma",
     "phonometry.tone_audibility": "phonometry.psychoacoustics.tone_audibility",
+    "phonometry.hearing": "phonometry.hearing.threshold",
+    "phonometry.noise_induced_hearing_loss": "phonometry.hearing.noise_induced_hearing_loss",
+    "phonometry.occupational_exposure": "phonometry.hearing.occupational_exposure",
+    "phonometry.sii": "phonometry.hearing.sii",
+    "phonometry.sti": "phonometry.hearing.sti",
+    "phonometry.intensity": "phonometry.emission.intensity",
+    "phonometry.sound_power": "phonometry.emission.sound_power",
+    "phonometry.sound_power_intensity": "phonometry.emission.sound_power_intensity",
+    "phonometry.sound_power_reverberation": "phonometry.emission.sound_power_reverberation",
+    "phonometry.vibration_sound_power": "phonometry.emission.vibration_sound_power",
     # <migrate:auto>
 }
 

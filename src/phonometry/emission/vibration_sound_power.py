@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike
 
-from ._internal.validation import require_positive
+from .._internal.validation import require_positive
 
 #: Reference vibratory velocity ``v0`` (ISO/TS 7849, Equation 3), m/s.
 REFERENCE_VELOCITY: float = 5.0e-8
@@ -255,7 +255,7 @@ class VibrationSoundPowerResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_vibration_sound_power
+        from .._plot.emission import plot_vibration_sound_power
 
         return plot_vibration_sound_power(self, ax=ax, **kwargs)
 

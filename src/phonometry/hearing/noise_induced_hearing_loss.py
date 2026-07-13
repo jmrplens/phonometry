@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from .hearing import age_threshold
+from .threshold import age_threshold
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -100,7 +100,7 @@ class NiptsResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_nipts
+        from .._plot.hearing import plot_nipts
 
         return plot_nipts(self, ax=ax, **kwargs)
 
@@ -138,7 +138,7 @@ class HtlanResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_htlan
+        from .._plot.hearing import plot_htlan
 
         return plot_htlan(self, ax=ax, **kwargs)
 

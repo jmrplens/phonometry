@@ -31,7 +31,7 @@ import numpy as np
 
 from ._internal.types import as_float_or_array
 from ._internal.validation import require_1d_signal, require_choice, require_positive
-from .hearing import SEXES as _SEXES
+from .hearing.threshold import SEXES as _SEXES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

@@ -53,7 +53,7 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-from ._internal.levels_math import weighted_energy_mean
+from .._internal.levels_math import weighted_energy_mean
 from .intensity import dynamic_capability_index
 from .sound_power import SoundPowerWarning, _a_weighting_corrections, _check_grade
 
@@ -146,7 +146,7 @@ class SoundPowerIntensityResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_sound_power
+        from .._plot.emission import plot_sound_power
 
         return plot_sound_power(self, ax=ax, **kwargs)
 

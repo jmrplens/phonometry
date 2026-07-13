@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
-"""Tests for :mod:`phonometry.sii` (Speech Intelligibility Index, ANSI S3.5-1997).
+"""Tests for :mod:`phonometry.hearing.sii` (Speech Intelligibility Index, ANSI S3.5-1997).
 
 The one-third-octave-band procedure is validated against the standard's own
 tabulated constants (the Table 3 band-importance function sums to one) and its
@@ -18,7 +18,7 @@ from reference_data import (
     ANSIS3_5_STANDARD_QUIET,
 )
 
-from phonometry import sii
+from phonometry.hearing import sii
 
 
 def test_band_importance_sums_to_one() -> None:

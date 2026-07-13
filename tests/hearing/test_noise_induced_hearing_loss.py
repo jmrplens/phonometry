@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
-"""Tests for :mod:`phonometry.noise_induced_hearing_loss` (noise-induced hearing loss).
+"""Tests for :mod:`phonometry.hearing.noise_induced_hearing_loss` (noise-induced hearing loss).
 
 Validated against the worked examples of ISO 1999:2013 Annex D (Tables D.1 to
 D.4), which tabulate the NIPTS in dB for the six audiometric frequencies, four
@@ -20,7 +20,7 @@ from reference_data import (
     ISO1999_N50_4K_90_20,
 )
 
-from phonometry import noise_induced_hearing_loss as m
+from phonometry.hearing import noise_induced_hearing_loss as m
 
 # Annex D, per (level, years): rows are the six frequencies 500..6000 Hz,
 # columns the (90 %, 50 %, 10 %) fractiles -> here (0.10, 0.50, 0.90).

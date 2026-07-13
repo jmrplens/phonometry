@@ -171,7 +171,7 @@ class AgeThresholdResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_age_threshold
+        from .._plot.hearing import plot_age_threshold
 
         return plot_age_threshold(self, ax=ax, **kwargs)
 

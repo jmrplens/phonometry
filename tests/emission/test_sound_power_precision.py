@@ -15,7 +15,7 @@ Physics / standard anchors:
 import numpy as np
 import pytest
 
-from phonometry.sound_power import (
+from phonometry.emission.sound_power import (
     MeteorologicalCorrection,
     PrecisionCriteria,
     PrecisionFieldIndicators,
@@ -30,7 +30,7 @@ from phonometry.sound_power import (
     sound_power_anechoic,
     sound_power_intensity_precision,
 )
-from phonometry.sound_power import (
+from phonometry.emission.sound_power import (
     _TABLE_D1,
     _TABLE_E1,
     _TABLE_E2,

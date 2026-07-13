@@ -48,8 +48,8 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Sequence, Tuple
 
 import numpy as np
 
-from ._internal.levels_math import energy_mean
-from ._internal.warnings import PhonometryWarning, _warn_renamed
+from .._internal.levels_math import energy_mean
+from .._internal.warnings import PhonometryWarning, _warn_renamed
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -289,7 +289,7 @@ class ExposureResult:
         (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_occupational_exposure
+        from .._plot.hearing import plot_occupational_exposure
 
         return plot_occupational_exposure(self, ax=ax, **kwargs)
 

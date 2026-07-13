@@ -15,7 +15,7 @@ import math
 
 import pytest
 
-from phonometry.occupational_exposure import (
+from phonometry.hearing.occupational_exposure import (
     COVERAGE_FACTOR,
     INSTRUMENT_U2,
     ExposureResult,

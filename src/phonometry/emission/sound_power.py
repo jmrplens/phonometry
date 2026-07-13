@@ -41,9 +41,9 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Tuple, cast
 
 import numpy as np
 
-from ._internal.levels_math import energy_mean, energy_sum, weighted_energy_mean
-from ._internal.types import as_float_or_array
-from ._internal.warnings import PhonometryWarning, _warn_renamed
+from .._internal.levels_math import energy_mean, energy_sum, weighted_energy_mean
+from .._internal.types import as_float_or_array
+from .._internal.warnings import PhonometryWarning, _warn_renamed
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -174,7 +174,7 @@ class SoundPowerResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_sound_power
+        from .._plot.emission import plot_sound_power
 
         return plot_sound_power(self, ax=ax, **kwargs)
 
@@ -758,7 +758,7 @@ class PrecisionSoundPowerResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_sound_power
+        from .._plot.emission import plot_sound_power
 
         return plot_sound_power(self, ax=ax, **kwargs)
 
@@ -1213,7 +1213,7 @@ class PrecisionIntensityResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_sound_power
+        from .._plot.emission import plot_sound_power
 
         return plot_sound_power(self, ax=ax, **kwargs)
 

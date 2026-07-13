@@ -46,7 +46,7 @@ from .metrology.frequencies import (
     normalized_frequencies,
     normalizedfreq,
 )
-from .intensity import (
+from .emission.intensity import (
     FieldIndicators,
     IntensityResult,
     dynamic_capability_index,
@@ -68,12 +68,12 @@ from .psychoacoustics.loudness_moore_glasberg_time import (
 )
 from .psychoacoustics.loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
 from .psychoacoustics.sharpness import sharpness_din, sharpness_din_from_specific
-from .hearing import (
+from .hearing.threshold import (
     AgeThresholdResult,
     age_threshold,
     reference_threshold,
 )
-from .noise_induced_hearing_loss import (
+from .hearing.noise_induced_hearing_loss import (
     HtlanResult,
     NiptsResult,
     htlan,
@@ -127,7 +127,7 @@ from .transfer_stiffness import (
     transfer_stiffness_indirect,
     transfer_stiffness_level,
 )
-from .vibration_sound_power import (
+from .emission.vibration_sound_power import (
     NORMALIZED_IMPEDANCE,
     REFERENCE_VELOCITY,
     VibrationSoundPowerResult,
@@ -198,12 +198,12 @@ from .room_noise import (
     rc_curve,
     room_criterion,
 )
-from .sii import (
+from .hearing.sii import (
     SIIResult,
     speech_intelligibility_index,
     standard_speech_spectrum,
 )
-from .sti import (
+from .hearing.sti import (
     STIResult,
     STIWarning,
     sti_from_impulse_response,
@@ -430,7 +430,7 @@ from .survey_insulation import (
     survey_service_equipment_level,
 )
 from .open_plan import OpenPlanResult, open_plan_metrics
-from .sound_power import (
+from .emission.sound_power import (
     MeteorologicalCorrection,
     PrecisionCriteria,
     PrecisionFieldIndicators,
@@ -451,12 +451,12 @@ from .sound_power import (
     sound_power_intensity_precision,
     sound_power_pressure,
 )
-from .sound_power_reverberation import (
+from .emission.sound_power_reverberation import (
     ReverberationSoundPowerResult,
     sound_power_comparison,
     sound_power_reverberation,
 )
-from .sound_power_intensity import (
+from .emission.sound_power_intensity import (
     SoundPowerIntensityResult,
     sound_power_intensity,
 )
@@ -712,7 +712,7 @@ from .absorption_uncertainty import (
     single_number_rating_uncertainty,
     weighted_coefficient_uncertainty,
 )
-from .occupational_exposure import (
+from .hearing.occupational_exposure import (
     COVERAGE_FACTOR,
     INSTRUMENT_U2,
     ExposureResult,

@@ -2253,7 +2253,7 @@ def generate_sti_curve(output_dir: str) -> None:
     t60_points = [0.3, 0.5, 0.8, 1.2, 2.0, 3.0, 5.0]
 
     # The 14 full-STI modulation frequencies and the male alpha/beta
-    # factors of IEC 60268-16 Ed.5 Table A.1 (phonometry.sti keeps them
+    # factors of IEC 60268-16 Ed.5 Table A.1 (phonometry.hearing.sti keeps them
     # private, so they are restated here for the analytic reference).
     mod_freqs = np.array([0.63, 0.80, 1.00, 1.25, 1.60, 2.00, 2.50,
                           3.15, 4.00, 5.00, 6.30, 8.00, 10.0, 12.5])
@@ -4961,7 +4961,7 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
 def generate_exposure_uncertainty(output_dir: str) -> None:
     """ISO 9612 Annex D task-based exposure with its expanded uncertainty."""
     print("Generating exposure_uncertainty.png...")
-    from phonometry.occupational_exposure import Task, task_based_exposure
+    from phonometry.hearing.occupational_exposure import Task, task_based_exposure
 
     tasks = [
         Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
@@ -5348,7 +5348,7 @@ def generate_sound_power_pressure_result(output_dir: str) -> None:
 def generate_sound_power_reverberation_result(output_dir: str) -> None:
     """ISO 3741: reverberation-room LW spectrum (direct method)."""
     print("Generating sound_power_reverberation_result.png...")
-    from phonometry import sound_power_reverberation
+    from phonometry.emission import sound_power_reverberation
 
     # The sound-power guide's section-2 example: one-third-octave mean room
     # SPL from 100 Hz to 10 kHz in a qualified 200 m^3 reverberation room with
@@ -5389,7 +5389,7 @@ def generate_sound_power_reverberation_result(output_dir: str) -> None:
 def generate_sound_power_intensity_result(output_dir: str) -> None:
     """ISO 9614-2: intensity-scanning LW spectrum from segment sweeps."""
     print("Generating sound_power_intensity_result.png...")
-    from phonometry import sound_power_intensity
+    from phonometry.emission import sound_power_intensity
 
     # The sound-power guide's section-3 example: two repeated intensity sweeps
     # over 6 surface segments and 6 octave bands, with the segment surface SPL
@@ -5689,7 +5689,7 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     """ANSI S3.5-1997 Table 3 standard speech spectra by vocal effort."""
     print("Generating sii_vocal_efforts.png...")
     from phonometry import speech_intelligibility_index, standard_speech_spectrum
-    from phonometry.sii import BAND_CENTERS, VOCAL_EFFORTS
+    from phonometry.hearing.sii import BAND_CENTERS, VOCAL_EFFORTS
 
     freqs = BAND_CENTERS
     # Distinct hues (not COLOR_GRID, which blends into the gridlines and is
@@ -6015,7 +6015,7 @@ def generate_hearing_threshold(output_dir: str) -> None:
     """ISO 7029 age-related threshold and ISO 389-7 reference threshold."""
     print("Generating hearing_threshold.png...")
     from phonometry import age_threshold, reference_threshold
-    from phonometry.hearing import AUDIOMETRIC_FREQUENCIES
+    from phonometry.hearing.threshold import AUDIOMETRIC_FREQUENCIES
 
     freqs = AUDIOMETRIC_FREQUENCIES
     fig, (ax_age, ax_ref) = plt.subplots(1, 2, figsize=(12.5, 5.6))
@@ -6071,7 +6071,7 @@ def generate_noise_induced_hearing_loss(output_dir: str) -> None:
     """ISO 1999 noise-induced permanent threshold shift and HTLAN combination."""
     print("Generating noise_induced_hearing_loss.png...")
     from phonometry import htlan, nipts
-    from phonometry.noise_induced_hearing_loss import NIPTS_FREQUENCIES
+    from phonometry.hearing.noise_induced_hearing_loss import NIPTS_FREQUENCIES
 
     freqs = NIPTS_FREQUENCIES
     fig, (ax_n, ax_h) = plt.subplots(1, 2, figsize=(12.5, 5.6))

@@ -27,10 +27,10 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 from scipy import signal
 
-from ._internal.warnings import PhonometryWarning
-from .metrology.core import OctaveFilterBank
-from .metrology.frequencies import nominal_frequencies
-from ._internal.utils import _typesignal
+from .._internal.warnings import PhonometryWarning
+from ..metrology.core import OctaveFilterBank
+from ..metrology.frequencies import nominal_frequencies
+from .._internal.utils import _typesignal
 
 
 class STIWarning(PhonometryWarning):
@@ -113,7 +113,7 @@ class STIResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_sti
+        from .._plot.hearing import plot_sti
 
         return plot_sti(self, ax=ax, **kwargs)
 

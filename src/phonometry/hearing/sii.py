@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike
 
-from ._internal.warnings import _warn_renamed
+from .._internal.warnings import _warn_renamed
 
 # ---------------------------------------------------------------------------
 # Normative constants - ANSI S3.5-1997, one-third-octave-band method (Table 3).
@@ -118,7 +118,7 @@ class SIIResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_sii
+        from .._plot.hearing import plot_sii
 
         return plot_sii(self, ax=ax, **kwargs)
 

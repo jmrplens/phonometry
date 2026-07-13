@@ -369,6 +369,53 @@ _D0_M = (2.0 / np.pi) * _VREF_MS * 1.0
 _NPD_FLOOR_M = 30.0
 
 
+def _ground_track_offset(
+    seg: "NDArray[np.float64]", s1: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+) -> float:
+    """Horizontal perpendicular distance to the ground track (projected to z = 0)."""
+    seg_g = seg.copy()
+    seg_g[2] = 0.0
+    gl = float(np.linalg.norm(seg_g))
+    if gl <= 0.0:  # vertical ground track (degenerate): horizontal offset from s1
+        return float(np.hypot(obs[0] - s1[0], obs[1] - s1[1]))
+    ug = seg_g / gl
+    og = obs - s1
+    og[2] = 0.0
+    return float(np.linalg.norm(og - np.dot(og, ug) * ug))
+
+
+def _segment_angles(
+    u: "NDArray[np.float64]", s1: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+    q: float, length: float, dp: float, lateral: float,
+    z_foot: float, z_near: float, bank_deg: float,
+) -> "tuple[float, float]":
+    """Elevation ``beta`` and depression ``phi`` for one segment, in degrees.
+
+    §4.5.5 equivalent level path (Fig. 4-6): rotating the observer-segment
+    triangle about the ground track makes the elevation of the perpendicular
+    point ``β = arccos(ℓ/dp)``, which differs from ``atan2(z, ℓ)`` on inclined
+    segments. Alongside the segment ``β`` uses that equivalent angle; behind or
+    ahead it uses the nearest segment end over the same horizontal offset.
+    The engine-installation depression angle ``φ = β_p − ε`` uses the equivalent
+    angle of the perpendicular point on the EXTENDED line (Eq. 4-17), with the
+    bank angle ``ε`` signed positive for observers to starboard (§4.5.2).
+    """
+    if lateral <= 0.0:  # directly overhead: elevation/depression are ±90°
+        beta = 90.0 if z_near >= 0.0 else -90.0
+        return beta, (90.0 if z_foot >= 0.0 else -90.0) - float(bank_deg)
+    eq_angle = float(np.degrees(np.arccos(np.clip(lateral / dp, 0.0, 1.0)))) if dp > 0.0 else 90.0
+    eq_angle = eq_angle if z_foot >= 0.0 else -eq_angle
+    if 0.0 <= q <= length:
+        beta = eq_angle
+    else:
+        beta = float(np.degrees(np.arctan2(z_near, lateral)))
+    # Observer side: starboard is to the right of the flight direction
+    # (right-of-heading has a negative z-component cross product).
+    side = float(np.sign(u[0] * (obs[1] - s1[1]) - u[1] * (obs[0] - s1[0])))
+    phi = eq_angle + side * float(bank_deg)
+    return beta, phi
+
+
 def _segment_geometry(
     s1: "NDArray[np.float64]", s2: "NDArray[np.float64]", obs: "NDArray[np.float64]",
     bank_deg: float = 0.0,
@@ -392,41 +439,11 @@ def _segment_geometry(
     d1 = float(np.linalg.norm(obs - s1))
     d2 = float(np.linalg.norm(obs - s2))
     ds = d1 if q < 0.0 else (d2 if q > length else dp)
-    # Horizontal perpendicular distance to the ground track (project to z = 0).
-    seg_g = seg.copy()
-    seg_g[2] = 0.0
-    gl = float(np.linalg.norm(seg_g))
-    if gl > 0.0:
-        ug = seg_g / gl
-        og = obs - s1
-        og[2] = 0.0
-        lateral = float(np.linalg.norm(og - np.dot(og, ug) * ug))
-    else:  # vertical ground track (degenerate): use horizontal offset from s1
-        lateral = float(np.hypot(obs[0] - s1[0], obs[1] - s1[1]))
-    # §4.5.5 equivalent level path (Fig. 4-6): rotating the observer-segment
-    # triangle about the ground track makes the elevation of the perpendicular
-    # point β = arccos(ℓ/dp), which differs from atan2(z, ℓ) on inclined
-    # segments. Alongside the segment β uses that equivalent angle; behind or
-    # ahead it uses the nearest segment end over the same horizontal offset.
-    # The engine-installation depression angle φ = β_p − ε uses the equivalent
-    # angle of the perpendicular point on the EXTENDED line (Eq. 4-17), with
-    # the bank angle ε signed positive for observers to starboard (§4.5.2).
+    lateral = _ground_track_offset(seg, s1, obs)
     z_foot = float(foot[2] - obs[2])
     z_near = float((s1[2] if q < 0.0 else (s2[2] if q > length else foot[2])) - obs[2])
-    if lateral > 0.0:
-        eq_angle = float(np.degrees(np.arccos(np.clip(lateral / dp, 0.0, 1.0)))) if dp > 0.0 else 90.0
-        eq_angle = eq_angle if z_foot >= 0.0 else -eq_angle
-        if 0.0 <= q <= length:
-            beta = eq_angle
-        else:
-            beta = float(np.degrees(np.arctan2(z_near, lateral)))
-        # Observer side: starboard is to the right of the flight direction.
-        side = float(np.sign(u[0] * (obs[1] - s1[1]) - u[1] * (obs[0] - s1[0])))
-        starboard = -side  # right-of-heading has negative z-component cross product
-        phi = eq_angle - starboard * float(bank_deg)
-    else:  # directly overhead: elevation/depression are ±90° by sign of height
-        beta = 90.0 if z_near >= 0.0 else -90.0
-        phi = (90.0 if z_foot >= 0.0 else -90.0) - float(bank_deg)
+    beta, phi = _segment_angles(u, s1, obs, q, length, dp, lateral,
+                                z_foot, z_near, bank_deg)
     return length, q, dp, ds, beta, phi, lateral
 
 

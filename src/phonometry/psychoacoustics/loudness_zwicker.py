@@ -44,8 +44,8 @@ from ._zwicker_data import (
     USL_SLOPES,
     ZUP_BARK_LIMITS,
 )
-from ._internal.validation import require_positive
-from ._internal.utils import _typesignal
+from .._internal.validation import require_positive
+from .._internal.utils import _typesignal
 
 # Reference intensity for band levels: I_REF = (20 uPa)^2, so that
 # L = 10*lg(p^2 / I_REF) equals the SPL re 20 uPa of a pressure signal
@@ -117,7 +117,7 @@ class ZwickerLoudness:
         present.  Requires matplotlib (``pip install phonometry[plot]``);
         returns the :class:`~matplotlib.axes.Axes` (or array thereof).
         """
-        from ._plotting import plot_zwicker_loudness
+        from .._plot.psychoacoustics import plot_zwicker_loudness
 
         return plot_zwicker_loudness(self, ax=ax, **kwargs)
 

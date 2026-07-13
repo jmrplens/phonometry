@@ -88,7 +88,7 @@ class PsychoacousticAnnoyanceResult:
 
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
         """Plot the PA value and the ``wS`` / ``wFR`` term contributions."""
-        from ._plotting import plot_psychoacoustic_annoyance
+        from .._plot.psychoacoustics import plot_psychoacoustic_annoyance
 
         return plot_psychoacoustic_annoyance(self, ax=ax, **kwargs)
 

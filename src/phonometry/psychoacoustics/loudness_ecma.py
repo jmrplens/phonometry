@@ -40,8 +40,8 @@ from scipy import signal
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-from ._internal.validation import require_1d_signal
-from ._internal.utils import _typesignal
+from .._internal.validation import require_1d_signal
+from .._internal.utils import _typesignal
 
 # --------------------------------------------------------------------------
 # Global constants (Clause 5)
@@ -182,7 +182,7 @@ class EcmaLoudness:
         Adds a loudness-vs-time panel.  Requires matplotlib
         (``pip install phonometry[plot]``).
         """
-        from ._plotting import plot_ecma_loudness
+        from .._plot.psychoacoustics import plot_ecma_loudness
 
         return plot_ecma_loudness(self, ax=ax, **kwargs)
 

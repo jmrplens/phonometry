@@ -2167,7 +2167,7 @@ def generate_tonality_spectrum(output_dir: str) -> None:
     """Annotated spectrum for the tone-to-noise ratio method."""
     print("Generating tonality_spectrum.png...")
     from phonometry import tone_to_noise_ratio
-    from phonometry.tonality import _averaged_spectrum, _critical_band
+    from phonometry.psychoacoustics.tonality import _averaged_spectrum, _critical_band
 
     fs = 48000
     rng = np.random.default_rng(21)
@@ -2727,7 +2727,7 @@ def generate_impact_rating(output_dir: str) -> None:
 def generate_sharpness_weighting(output_dir: str) -> None:
     """DIN 45692 sharpness weighting g(z): DIN vs Aures vs von Bismarck."""
     print("Generating sharpness_weighting.png...")
-    from phonometry.sharpness import _Z, _g_aures, _g_bismarck, _g_din
+    from phonometry.psychoacoustics.sharpness import _Z, _g_aures, _g_bismarck, _g_din
 
     z = _Z                       # 0.1 .. 24 Bark, 0.1-Bark steps
     total_n = 4.0                # reference loudness for the Aures variant (sone)
@@ -2918,7 +2918,7 @@ def generate_loudness_models_comparison(output_dir: str) -> None:
 @lru_cache(maxsize=None)
 def _sottek_specific_data() -> tuple[np.ndarray, np.ndarray, float]:
     """ECMA-418-2 specific loudness N'(z) of a 1 kHz / 60 dB tone."""
-    from phonometry import loudness_ecma
+    from phonometry.psychoacoustics import loudness_ecma
 
     el = loudness_ecma(_pure_tone(1000.0, 60.0, 1.0), _FS_PSY)
     return el.bark.copy(), el.specific_loudness.copy(), float(el.loudness)
@@ -2956,7 +2956,7 @@ def generate_sottek_specific_loudness(output_dir: str) -> None:
 @lru_cache(maxsize=None)
 def _tonality_data() -> tuple[np.ndarray, np.ndarray, float, np.ndarray, np.ndarray, float]:
     """ECMA-418-2 tonality T(t) for a 1 kHz tone-in-noise vs pure noise."""
-    from phonometry import tonality_ecma
+    from phonometry.psychoacoustics import tonality_ecma
 
     rng = np.random.default_rng(2026)
     dur = 2.0
@@ -2974,7 +2974,7 @@ def _tonality_data() -> tuple[np.ndarray, np.ndarray, float, np.ndarray, np.ndar
 @lru_cache(maxsize=None)
 def _roughness_sweep_data() -> tuple[np.ndarray, np.ndarray]:
     """ECMA-418-2 roughness R vs AM frequency, 1 kHz carrier, 100 % AM, 60 dB."""
-    from phonometry import roughness_ecma
+    from phonometry.psychoacoustics import roughness_ecma
 
     dur = 1.0
     t = np.arange(int(dur * _FS_PSY)) / _FS_PSY
@@ -3042,7 +3042,7 @@ def _fluctuation_am_tone_sweep() -> tuple[np.ndarray, np.ndarray]:
     modulation-frequency sweep {1, 2, 4, 8, 16, 32} Hz. Reproduces the band-pass
     sensation with its maximum at 4 Hz (Osses 2016 Table 1 trend).
     """
-    from phonometry import fluctuation_strength
+    from phonometry.psychoacoustics import fluctuation_strength
 
     dur = 2.0
     t = np.arange(int(dur * _FS_PSY)) / _FS_PSY
@@ -3123,7 +3123,7 @@ def generate_fluctuation_strength(output_dir: str) -> None:
 def generate_psychoacoustic_annoyance(output_dir: str) -> None:
     """Psychoacoustic annoyance PA vs loudness N5 for three sensation profiles."""
     print("Generating psychoacoustic_annoyance...")
-    from phonometry import psychoacoustic_annoyance
+    from phonometry.psychoacoustics import psychoacoustic_annoyance
 
     n5 = np.linspace(4.0, 60.0, 200)
     # (label, sharpness [acum], fluctuation strength [vacil], roughness [asper],
@@ -3920,7 +3920,7 @@ def generate_rotorcraft_ground_effect(output_dir: str) -> None:
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
-    from phonometry import loudness_moore_glasberg_time
+    from phonometry.psychoacoustics import loudness_moore_glasberg_time
 
     dur = 0.8
     t = np.arange(int(dur * _FS_PSY)) / _FS_PSY

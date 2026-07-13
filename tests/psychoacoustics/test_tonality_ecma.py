@@ -66,7 +66,7 @@ def test_calibration_constant_is_the_tabulated_c_t() -> None:
     # standard's value verbatim (shared oracle in tests/reference_data.py).
     from reference_data import ECMA418_2_TONALITY_C_T
 
-    from phonometry.tonality_ecma import _C_T
+    from phonometry.psychoacoustics.tonality_ecma import _C_T
 
     assert _C_T == ECMA418_2_TONALITY_C_T
 
@@ -143,8 +143,8 @@ def test_band_range_uses_edge_midpoints() -> None:
     # by the centre frequency.  For an f_low that lies between band z's centre
     # F(z) and its upper boundary (F(z)+F(z+0.5))/2, band z must still be the
     # lower edge z_L (a centre-frequency threshold would wrongly exclude it).
-    from phonometry.loudness_ecma import _F_CENTRE
-    from phonometry.tonality_ecma import _band_range
+    from phonometry.psychoacoustics.loudness_ecma import _F_CENTRE
+    from phonometry.psychoacoustics.tonality_ecma import _band_range
 
     z = 20
     upper_mid = 0.5 * (_F_CENTRE[z] + _F_CENTRE[z + 1])

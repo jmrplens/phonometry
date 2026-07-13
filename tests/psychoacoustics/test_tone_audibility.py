@@ -239,7 +239,7 @@ def test_analyze_spectrum_137hz_tone_audibility() -> None:
 def test_detect_tone_at_first_line_not_dropped() -> None:
     # Regression: a peak on the very first line must not be skipped because the
     # left-neighbour test wrapped around to the last line (lev[-1]).
-    from phonometry.tone_audibility import _detect_tones
+    from phonometry.psychoacoustics.tone_audibility import _detect_tones
 
     freqs = np.arange(100.0, 100.0 + 2.7 * 40, 2.7)
     levels = np.full(freqs.size, 50.0)

@@ -82,7 +82,7 @@ def test_calibration_constant_is_the_tabulated_c() -> None:
     # tests/reference_data.py).
     from reference_data import ISO532_2_C
 
-    from phonometry.loudness_moore_glasberg import _C_SONE
+    from phonometry.psychoacoustics.loudness_moore_glasberg import _C_SONE
 
     assert _C_SONE == ISO532_2_C
 

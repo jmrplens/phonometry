@@ -20,16 +20,16 @@ from ._plot.common import plot_daily_exposure as plot_daily_exposure
 from ._plot.common import plot_decay_curve as plot_decay_curve
 from ._plot.common import plot_diffusion_polar as plot_diffusion_polar
 from ._plot.common import plot_dynamic_stiffness as plot_dynamic_stiffness
-from ._plot.common import plot_ecma_loudness as plot_ecma_loudness
-from ._plot.common import plot_ecma_roughness as plot_ecma_roughness
-from ._plot.common import plot_ecma_tonality as plot_ecma_tonality
+from ._plot.psychoacoustics import plot_ecma_loudness as plot_ecma_loudness
+from ._plot.psychoacoustics import plot_ecma_roughness as plot_ecma_roughness
+from ._plot.psychoacoustics import plot_ecma_tonality as plot_ecma_tonality
 from ._plot.common import plot_enclosed_space_absorption as plot_enclosed_space_absorption
 from ._plot.common import plot_epnl as plot_epnl
 from ._plot.common import plot_excitation as plot_excitation
 from ._plot.common import plot_facade_insulation as plot_facade_insulation
 from ._plot.common import plot_facade_prediction as plot_facade_prediction
 from ._plot.common import plot_floor_covering_improvement as plot_floor_covering_improvement
-from ._plot.common import plot_fluctuation_strength as plot_fluctuation_strength
+from ._plot.psychoacoustics import plot_fluctuation_strength as plot_fluctuation_strength
 from ._plot.common import plot_flyover as plot_flyover
 from ._plot.common import plot_frequency_response as plot_frequency_response
 from ._plot.common import plot_harmonic_distortion as plot_harmonic_distortion
@@ -45,8 +45,8 @@ from ._plot.common import plot_installed_structure_borne as plot_installed_struc
 from ._plot.common import plot_intensity as plot_intensity
 from ._plot.common import plot_mobility as plot_mobility
 from ._plot.metrology import plot_monte_carlo as plot_monte_carlo
-from ._plot.common import plot_moore_glasberg_loudness as plot_moore_glasberg_loudness
-from ._plot.common import plot_moore_glasberg_time_loudness as plot_moore_glasberg_time_loudness
+from ._plot.psychoacoustics import plot_moore_glasberg_loudness as plot_moore_glasberg_loudness
+from ._plot.psychoacoustics import plot_moore_glasberg_time_loudness as plot_moore_glasberg_time_loudness
 from ._plot.common import plot_multiple_shock as plot_multiple_shock
 from ._plot.common import plot_nipts as plot_nipts
 from ._plot.common import plot_noise_contour as plot_noise_contour
@@ -58,7 +58,7 @@ from ._plot.common import plot_open_plan as plot_open_plan
 from ._plot.common import plot_outdoor_attenuation as plot_outdoor_attenuation
 from ._plot.common import plot_parabolic_equation as plot_parabolic_equation
 from ._plot.common import plot_pile_strike as plot_pile_strike
-from ._plot.common import plot_psychoacoustic_annoyance as plot_psychoacoustic_annoyance
+from ._plot.psychoacoustics import plot_psychoacoustic_annoyance as plot_psychoacoustic_annoyance
 from ._plot.common import plot_radiated_power as plot_radiated_power
 from ._plot.common import plot_ray_trace as plot_ray_trace
 from ._plot.common import plot_reverberation_models as plot_reverberation_models
@@ -76,7 +76,7 @@ from ._plot.common import plot_static_airflow as plot_static_airflow
 from ._plot.common import plot_sti as plot_sti
 from ._plot.common import plot_structure_borne_power as plot_structure_borne_power
 from ._plot.common import plot_tonal_adjustment as plot_tonal_adjustment
-from ._plot.common import plot_tone_audibility as plot_tone_audibility
+from ._plot.psychoacoustics import plot_tone_audibility as plot_tone_audibility
 from ._plot.common import plot_transfer_stiffness as plot_transfer_stiffness
 from ._plot.common import plot_transmission_loss as plot_transmission_loss
 from ._plot.metrology import plot_uncertainty_budget as plot_uncertainty_budget
@@ -87,4 +87,4 @@ from ._plot.common import plot_weighted_absorption as plot_weighted_absorption
 from ._plot.common import plot_weighted_rating as plot_weighted_rating
 from ._plot.common import plot_weighted_spectrum as plot_weighted_spectrum
 from ._plot.common import plot_wind_turbine_tonality as plot_wind_turbine_tonality
-from ._plot.common import plot_zwicker_loudness as plot_zwicker_loudness
+from ._plot.psychoacoustics import plot_zwicker_loudness as plot_zwicker_loudness

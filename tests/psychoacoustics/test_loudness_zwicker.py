@@ -184,11 +184,11 @@ def test_n5_n10_use_full_rate_series(monkeypatch) -> None:
     ``loudness_vs_time`` output is unchanged (public contract)."""
     import sys
 
-    from phonometry.loudness_zwicker import _SR_LEVEL, _SR_LOUDNESS
+    from phonometry.psychoacoustics.loudness_zwicker import _SR_LEVEL, _SR_LOUDNESS
 
     # The package re-exports the *function* ``loudness_zwicker``, which shadows
     # the module attribute of the same name; go through sys.modules instead.
-    L = sys.modules["phonometry.loudness_zwicker"]
+    L = sys.modules["phonometry.psychoacoustics.loudness_zwicker"]
 
     seen: dict[int, np.ndarray] = {}
     orig = L._percentile

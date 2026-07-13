@@ -741,7 +741,7 @@ class ToneAudibilityResult:
 
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
         """Plot the per-tone audibility ``ΔL`` against tone frequency."""
-        from ._plotting import plot_tone_audibility
+        from .._plot.psychoacoustics import plot_tone_audibility
 
         return plot_tone_audibility(self, ax=ax, **kwargs)
 

@@ -22,7 +22,7 @@ from reference_data import (
 )
 
 from phonometry import prominence_ratio, tone_to_noise_ratio
-from phonometry.tonality import _critical_band, _proximity_spacing
+from phonometry.psychoacoustics.tonality import _critical_band, _proximity_spacing
 
 FS = 48000
 
@@ -95,7 +95,7 @@ def test_pr_of_synthetic_tone_matches_analytic() -> None:
     # the 8 s default (measured error: 0.12 dB at 8 s, 0.037 dB at 16 s).
     x = _tone_in_noise(1000.0, tone_rms, noise_rms, seconds=16.0)
     n0 = noise_rms**2 / (FS / 2)
-    from phonometry.tonality import _LOWER_EDGE_COEFFS, _UPPER_EDGE_COEFFS, _fitted_edge
+    from phonometry.psychoacoustics.tonality import _LOWER_EDGE_COEFFS, _UPPER_EDGE_COEFFS, _fitted_edge
 
     f1_m, f2_m, _ = _critical_band(1000.0)
     df_l = f1_m - _fitted_edge(1000.0, _LOWER_EDGE_COEFFS)

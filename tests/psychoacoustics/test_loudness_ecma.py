@@ -47,7 +47,7 @@ def test_calibration_constant_is_the_tabulated_c_n() -> None:
     # standard's value verbatim (shared oracle in tests/reference_data.py).
     from reference_data import ECMA418_2_LOUDNESS_C_N
 
-    from phonometry.loudness_ecma import _C_N
+    from phonometry.psychoacoustics.loudness_ecma import _C_N
 
     assert _C_N == ECMA418_2_LOUDNESS_C_N
 

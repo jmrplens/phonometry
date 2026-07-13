@@ -74,7 +74,7 @@ def test_calibration_constant_is_the_tabulated_c_r() -> None:
     # standard's value verbatim (shared oracle in tests/reference_data.py).
     from reference_data import ECMA418_2_ROUGHNESS_C_R
 
-    from phonometry.roughness_ecma import _C_R
+    from phonometry.psychoacoustics.roughness_ecma import _C_R
 
     assert _C_R == ECMA418_2_ROUGHNESS_C_R
 

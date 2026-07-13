@@ -13,8 +13,8 @@ import numpy as np
 import pytest
 from scipy import signal as sp_signal
 
-from phonometry import loudness_zwicker, sharpness_din, sharpness_din_from_specific
-from phonometry.sharpness import reference_sound
+from phonometry.psychoacoustics import loudness_zwicker, sharpness_din, sharpness_din_from_specific
+from phonometry.psychoacoustics.sharpness import reference_sound
 
 FS = 48000
 
@@ -56,7 +56,7 @@ def test_reference_signal_is_one_acum() -> None:
 
 def test_k_in_normative_range() -> None:
     """Clause 5.2: the normalization constant satisfies 0.105 <= k < 0.115."""
-    from phonometry.sharpness import _k_din
+    from phonometry.psychoacoustics.sharpness import _k_din
 
     assert 0.105 <= _k_din() < 0.115
 

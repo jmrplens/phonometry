@@ -48,7 +48,7 @@ import reference_data as ref  # noqa: E402
 import phonometry as ph  # noqa: E402
 from phonometry import OctaveFilterBank, WeightingFilter  # noqa: E402
 from phonometry.metrology.compliance import class_limits, verify_filter_class  # noqa: E402
-from phonometry.sharpness import reference_sound  # noqa: E402
+from phonometry.psychoacoustics.sharpness import reference_sound  # noqa: E402
 from phonometry.sti import _sti_from_mtf  # noqa: E402
 
 
@@ -2304,7 +2304,7 @@ _TONES = "Prominent discrete tones (ECMA-418-1)"
 
 @register(_TONES, "ECMA-418-1:2024 Clause 10 Formula (2)", "Critical band at 1 kHz (f1,c / f2,c / dfc)")
 def _chk_ecma418_1_critical_band() -> Outcome:
-    from phonometry.tonality import _critical_band
+    from phonometry.psychoacoustics.tonality import _critical_band
 
     f1, f2, dfc = _critical_band(1000.0)
     # 0.05 Hz = half a unit in the last printed digit (the clause EXAMPLE
@@ -2327,7 +2327,7 @@ def _chk_ecma418_1_critical_band() -> Outcome:
 
 @register(_TONES, "ECMA-418-1:2024 Clause 11.6 Formula (14)", "Proximity spacing dfprox at 150 / 850 Hz")
 def _chk_ecma418_1_proximity_spacing() -> Outcome:
-    from phonometry.tonality import _proximity_spacing
+    from phonometry.psychoacoustics.tonality import _proximity_spacing
 
     v150 = float(_proximity_spacing(150.0))
     v850 = float(_proximity_spacing(850.0))

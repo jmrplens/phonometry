@@ -361,7 +361,7 @@ class MooreGlasbergTimeVaryingLoudness:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.  See :mod:`._plotting`.
         """
-        from ._plotting import plot_moore_glasberg_time_loudness
+        from .._plot.psychoacoustics import plot_moore_glasberg_time_loudness
 
         return plot_moore_glasberg_time_loudness(self, ax=ax, **kwargs)
 

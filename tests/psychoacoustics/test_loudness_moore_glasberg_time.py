@@ -31,7 +31,7 @@ from phonometry import (
     MooreGlasbergTimeVaryingLoudness,
     loudness_moore_glasberg_time,
 )
-from phonometry.loudness_moore_glasberg_time import _ALPHA_AL, _ALPHA_RL
+from phonometry.psychoacoustics.loudness_moore_glasberg_time import _ALPHA_AL, _ALPHA_RL
 
 FS = 32000.0  # the Annex B/C sampling rate; keeps reference tones on FFT bins
 
@@ -319,7 +319,7 @@ def test_low_freq_band_not_truncated_across_sample_rates() -> None:
     """
     import importlib
 
-    _mgt_mod = importlib.import_module("phonometry.loudness_moore_glasberg_time")
+    _mgt_mod = importlib.import_module("phonometry.psychoacoustics.loudness_moore_glasberg_time")
 
     def _band_level(fs: float) -> float:
         p_rms = 2e-5 * 10.0 ** (60.0 / 20.0)
@@ -368,7 +368,7 @@ def test_three_channel_input_is_rejected() -> None:
     # be silently flattened and must be rejected.
     import numpy as np
     import pytest
-    from phonometry import loudness_moore_glasberg_time
+    from phonometry.psychoacoustics import loudness_moore_glasberg_time
 
     cube = np.zeros((2, 2, 2400))
     with pytest.raises(ValueError, match="mono .1-D. or two-channel"):

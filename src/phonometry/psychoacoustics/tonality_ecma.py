@@ -58,8 +58,8 @@ from .loudness_ecma import (
     _specific_basis_loudness,
     _tonal_estimate,
 )
-from ._internal.validation import require_1d_signal
-from ._internal.utils import _typesignal
+from .._internal.validation import require_1d_signal
+from .._internal.utils import _typesignal
 
 # Noise reduction sigmoid parameters (Table 7), reused on the tonality path.
 _NR_ALPHA = 20.0
@@ -108,7 +108,7 @@ class EcmaTonality:
         Adds a tonality-vs-time panel. Requires matplotlib
         (``pip install phonometry[plot]``).
         """
-        from ._plotting import plot_ecma_tonality
+        from .._plot.psychoacoustics import plot_ecma_tonality
 
         return plot_ecma_tonality(self, ax=ax, **kwargs)
 

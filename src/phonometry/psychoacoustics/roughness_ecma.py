@@ -69,8 +69,8 @@ from .loudness_ecma import (
     _ear_filter_sos,
     _specific_basis_loudness,
 )
-from ._internal.validation import require_1d_signal
-from ._internal.utils import _typesignal
+from .._internal.validation import require_1d_signal
+from .._internal.utils import _typesignal
 
 # --------------------------------------------------------------------------
 # Roughness-specific constants (Clause 7.1.1)
@@ -177,7 +177,7 @@ class EcmaRoughness:
         Draws the time-dependent roughness R(l50) and a specific-roughness
         heatmap. Requires matplotlib (``pip install phonometry[plot]``).
         """
-        from ._plotting import plot_ecma_roughness
+        from .._plot.psychoacoustics import plot_ecma_roughness
 
         return plot_ecma_roughness(self, ax=ax, **kwargs)
 

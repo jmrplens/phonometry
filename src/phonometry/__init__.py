@@ -54,20 +54,20 @@ from .intensity import (
     sound_intensity,
 )
 from .metrology.levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
-from .loudness_zwicker import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
-from .loudness_ecma import EcmaLoudness, loudness_ecma
-from .loudness_moore_glasberg import (
+from .psychoacoustics.loudness_zwicker import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
+from .psychoacoustics.loudness_ecma import EcmaLoudness, loudness_ecma
+from .psychoacoustics.loudness_moore_glasberg import (
     MooreGlasbergLoudness,
     loudness_moore_glasberg,
     loudness_moore_glasberg_from_spectrum,
     loudness_moore_glasberg_from_third_octave,
 )
-from .loudness_moore_glasberg_time import (
+from .psychoacoustics.loudness_moore_glasberg_time import (
     MooreGlasbergTimeVaryingLoudness,
     loudness_moore_glasberg_time,
 )
-from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
-from .sharpness import sharpness_din, sharpness_din_from_specific
+from .psychoacoustics.loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
+from .psychoacoustics.sharpness import sharpness_din, sharpness_din_from_specific
 from .hearing import (
     AgeThresholdResult,
     age_threshold,
@@ -210,14 +210,14 @@ from .sti import (
     stipa,
     stipa_signal,
 )
-from .tonality_ecma import EcmaTonality, tonality_ecma
-from .roughness_ecma import EcmaRoughness, roughness_ecma
-from .fluctuation_strength import (
+from .psychoacoustics.tonality_ecma import EcmaTonality, tonality_ecma
+from .psychoacoustics.roughness_ecma import EcmaRoughness, roughness_ecma
+from .psychoacoustics.fluctuation_strength import (
     FluctuationStrengthResult,
     fluctuation_strength,
     fluctuation_strength_am_noise,
 )
-from .psychoacoustic_annoyance import (
+from .psychoacoustics.psychoacoustic_annoyance import (
     PsychoacousticAnnoyanceResult,
     psychoacoustic_annoyance,
     psychoacoustic_annoyance_from_signal,
@@ -346,13 +346,13 @@ from .wind_turbine_noise import (
     slant_distance,
     wind_turbine_tonality,
 )
-from .tonality import (
+from .psychoacoustics.tonality import (
     TonalityWarning,
     ToneAssessment,
     prominence_ratio,
     tone_to_noise_ratio,
 )
-from .tone_audibility import (
+from .psychoacoustics.tone_audibility import (
     HANNING_BANDWIDTH_FACTOR,
     NO_TONE_AUDIBILITY,
     ToneAudibilityResult,

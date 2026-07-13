@@ -46,8 +46,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-from ._internal.validation import require_1d_signal
-from ._internal.utils import _typesignal
+from .._internal.validation import require_1d_signal
+from .._internal.utils import _typesignal
 
 # ---------------------------------------------------------------------------
 # Fixed transfer functions (clauses 7.2, 7.3, Table 1)
@@ -532,7 +532,7 @@ class MooreGlasbergLoudness:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.  See :mod:`._plotting`.
         """
-        from ._plotting import plot_moore_glasberg_loudness
+        from .._plot.psychoacoustics import plot_moore_glasberg_loudness
 
         return plot_moore_glasberg_loudness(self, ax=ax, **kwargs)
 

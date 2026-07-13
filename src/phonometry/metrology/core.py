@@ -11,10 +11,10 @@ from typing import List, Tuple, cast, overload, Literal
 import numpy as np
 from scipy import signal
 
-from ._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning
 from .filter_design import _cheby2_headroom, _design_sos_filter
 from .frequencies import _genfreqs
-from ._internal.utils import _downsamplingfactor, _resample_to_length, _typesignal
+from .._internal.utils import _downsamplingfactor, _resample_to_length, _typesignal
 
 
 class FilterBankWarning(PhonometryWarning):

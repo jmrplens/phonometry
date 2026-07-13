@@ -6,7 +6,7 @@ Tests for IEC 61260-1 nominal frequency helpers and opt-in nominal label support
 import numpy as np
 import pytest
 
-from phonometry.frequencies import (
+from phonometry.metrology.frequencies import (
     _format_nominal_freq,
     _iec_e3_round,
     _nominal_freq_for_band,

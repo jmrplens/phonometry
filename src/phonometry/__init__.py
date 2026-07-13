@@ -11,7 +11,7 @@ from typing import Any, List, Tuple, overload, Literal
 
 import numpy as np
 
-from .calibration import CalibrationWarning, calculate_sensitivity, sensitivity
+from .metrology.calibration import CalibrationWarning, calculate_sensitivity, sensitivity
 from .environmental import composite_rating_level, lden, ldn
 from .environmental_measurement import (
     RepeatedMeasurementResult,
@@ -32,15 +32,15 @@ from .environmental_measurement import (
 from .environmental_measurement import (
     expanded_uncertainty as environmental_expanded_uncertainty,
 )
-from .compliance import (
+from .metrology.compliance import (
     class_limits,
     verify_aircraft_noise_system,
     verify_filter_class,
     verify_weighting_class,
     weighting_class_limits,
 )
-from .core import FilterBankWarning, OctaveFilterBank
-from .frequencies import (
+from .metrology.core import FilterBankWarning, OctaveFilterBank
+from .metrology.frequencies import (
     getansifrequencies,
     nominal_frequencies,
     normalized_frequencies,
@@ -53,7 +53,7 @@ from .intensity import (
     field_indicators,
     sound_intensity,
 )
-from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
+from .metrology.levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
 from .loudness_zwicker import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
 from .loudness_ecma import EcmaLoudness, loudness_ecma
 from .loudness_moore_glasberg import (
@@ -180,7 +180,7 @@ from .impulse_prominence import (
     predicted_prominence,
     rating_level,
 )
-from .uncertainty import (
+from .metrology.uncertainty import (
     MonteCarloResult,
     Quantity,
     UncertaintyResult,
@@ -372,7 +372,7 @@ from .tone_audibility import (
     tone_level,
     two_tone_separation_frequency,
 )
-from .parametric_filters import (
+from .metrology.parametric_filters import (
     TimeWeighting,
     WeightingFilter,
     linkwitz_riley,

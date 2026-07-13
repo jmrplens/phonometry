@@ -9,7 +9,7 @@ import pytest
 
 import reference_data as ref
 from phonometry import OctaveFilterBank, verify_filter_class
-from phonometry.compliance import (
+from phonometry.metrology.compliance import (
     _PASSBAND_MAX_1995,
     _PASSBAND_MIN_1995,
     _STOPBAND_MIN_1995,

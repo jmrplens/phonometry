@@ -136,7 +136,7 @@ def test_narrowband_requires_fs() -> None:
 def test_table2_row_boundaries() -> None:
     """IEC 60942:2017 Table 2: 160 Hz belongs to the 0.07 dB row and 63 Hz
     to the 0.20 dB row; the open interval between them gets 0.10 dB."""
-    from phonometry.calibration import _class1_fluctuation_limit
+    from phonometry.metrology.calibration import _class1_fluctuation_limit
 
     assert _class1_fluctuation_limit(63.0) == pytest.approx(0.20)
     assert _class1_fluctuation_limit(100.0) == pytest.approx(0.10)

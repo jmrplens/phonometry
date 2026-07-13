@@ -28,8 +28,8 @@ if TYPE_CHECKING:
 from scipy import signal
 
 from ._internal.warnings import PhonometryWarning
-from .core import OctaveFilterBank
-from .frequencies import nominal_frequencies
+from .metrology.core import OctaveFilterBank
+from .metrology.frequencies import nominal_frequencies
 from ._internal.utils import _typesignal
 
 

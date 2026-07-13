@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
-"""Tests for :mod:`phonometry.uncertainty` (GUM Guide 98-3 and Supplement 1).
+"""Tests for :mod:`phonometry.metrology.uncertainty` (GUM Guide 98-3 and Supplement 1).
 
 Validated against the Guides' own worked examples: the combined uncertainty of
 the additive model (Supplement 1 clause 9.2), the coverage factor of the
@@ -16,7 +16,7 @@ import numpy as np
 import pytest
 from reference_data import GUM_ADDITIVE_UC, GUM_COVERAGE_K99_16, GUM_WELCH_VEFF
 
-from phonometry import uncertainty as u
+from phonometry.metrology import uncertainty as u
 
 
 def _add4(a, b, c, d):  # type: ignore[no-untyped-def]

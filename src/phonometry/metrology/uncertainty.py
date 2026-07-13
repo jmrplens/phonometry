@@ -129,7 +129,7 @@ class UncertaintyResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_uncertainty_budget
+        from .._plot.metrology import plot_uncertainty_budget
 
         return plot_uncertainty_budget(self, ax=ax, **kwargs)
 
@@ -163,7 +163,7 @@ class MonteCarloResult:
         keep_samples=True)``. Requires matplotlib (``pip install
         phonometry[plot]``); returns the :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_monte_carlo
+        from .._plot.metrology import plot_monte_carlo
 
         return plot_monte_carlo(self, ax=ax, **kwargs)
 

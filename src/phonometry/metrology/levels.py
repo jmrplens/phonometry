@@ -10,9 +10,9 @@ from typing import Dict, List, Sequence
 import numpy as np
 from scipy import signal
 
-from ._internal.types import as_float_or_array
+from .._internal.types import as_float_or_array
 from .parametric_filters import time_weighting, weighting_filter
-from ._internal.utils import _typesignal
+from .._internal.utils import _typesignal
 
 _REF_PRESSURE = 2e-5
 

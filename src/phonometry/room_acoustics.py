@@ -45,7 +45,7 @@ from typing import TYPE_CHECKING, Any, List, Tuple
 
 import numpy as np
 
-from .core import OctaveFilterBank
+from .metrology.core import OctaveFilterBank
 from ._internal.utils import _typesignal
 
 if TYPE_CHECKING:

@@ -13,7 +13,7 @@ from typing import List, Tuple, cast
 import numpy as np
 from scipy import signal
 
-from ._internal.utils import _typesignal
+from .._internal.utils import _typesignal
 
 try:
     from numba import jit as _numba_jit

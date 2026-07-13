@@ -44,7 +44,7 @@ from ._plot.common import plot_insitu_absorption as plot_insitu_absorption
 from ._plot.common import plot_installed_structure_borne as plot_installed_structure_borne
 from ._plot.common import plot_intensity as plot_intensity
 from ._plot.common import plot_mobility as plot_mobility
-from ._plot.common import plot_monte_carlo as plot_monte_carlo
+from ._plot.metrology import plot_monte_carlo as plot_monte_carlo
 from ._plot.common import plot_moore_glasberg_loudness as plot_moore_glasberg_loudness
 from ._plot.common import plot_moore_glasberg_time_loudness as plot_moore_glasberg_time_loudness
 from ._plot.common import plot_multiple_shock as plot_multiple_shock
@@ -79,7 +79,7 @@ from ._plot.common import plot_tonal_adjustment as plot_tonal_adjustment
 from ._plot.common import plot_tone_audibility as plot_tone_audibility
 from ._plot.common import plot_transfer_stiffness as plot_transfer_stiffness
 from ._plot.common import plot_transmission_loss as plot_transmission_loss
-from ._plot.common import plot_uncertainty_budget as plot_uncertainty_budget
+from ._plot.metrology import plot_uncertainty_budget as plot_uncertainty_budget
 from ._plot.common import plot_vibration_reduction as plot_vibration_reduction
 from ._plot.common import plot_vibration_sound_power as plot_vibration_sound_power
 from ._plot.common import plot_vibration_weighting as plot_vibration_weighting

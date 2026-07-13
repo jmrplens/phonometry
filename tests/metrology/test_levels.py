@@ -150,7 +150,7 @@ def test_lc_peak_steady_1khz() -> None:
 def test_lc_peak_exceeds_lc_by_crest_factor() -> None:
     """For a steady sine, LCpeak - LC = 20*log10(sqrt(2)) = 3.01 dB."""
     from phonometry import lc_peak, leq
-    from phonometry.parametric_filters import weighting_filter
+    from phonometry.metrology.parametric_filters import weighting_filter
 
     # 10 ms ramps: enough to avoid the onset click without biasing the RMS
     x = _faded(_tone(1000, seconds=1.0), ramp=0.01)
@@ -185,7 +185,7 @@ def test_lc_peak_multichannel_and_dbfs() -> None:
 def test_lc_peak_iec_table5(cycles: float, freq: float, ref: float, tol: float) -> None:
     """One-cycle / half-cycle bursts must reproduce Table 5 within class 1."""
     from phonometry import lc_peak, leq
-    from phonometry.parametric_filters import weighting_filter
+    from phonometry.metrology.parametric_filters import weighting_filter
 
     fs = 96000
     t = np.arange(int(fs * 1.0)) / fs
@@ -220,7 +220,7 @@ def test_lc_peak_iec_table5(cycles: float, freq: float, ref: float, tol: float) 
 def test_lc_peak_iec_table5_48k(cycles: float, freq: float, ref: float, tol: float) -> None:
     """Table 5 reference differences must also hold at fs = 48 kHz."""
     from phonometry import lc_peak, leq
-    from phonometry.parametric_filters import weighting_filter
+    from phonometry.metrology.parametric_filters import weighting_filter
 
     fs = 48000
     t = np.arange(int(fs * 1.0)) / fs
@@ -245,7 +245,7 @@ def _lcpeak_analytic_steady(x: np.ndarray, fs: int) -> float:
     verified independent of the C-weighting gain. Measured from a transient-free
     middle window so it isolates the peak-detection accuracy.
     """
-    from phonometry.parametric_filters import weighting_filter
+    from phonometry.metrology.parametric_filters import weighting_filter
 
     w = weighting_filter(x, fs, "C")
     mid = w[int(0.4 * w.shape[-1]):int(0.6 * w.shape[-1])]

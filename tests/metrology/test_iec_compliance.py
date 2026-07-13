@@ -103,7 +103,7 @@ def test_delta_ref_equation7_consistency() -> None:
 def _burst_sel_response_db(duration: float) -> float:
     """LAE of a 4 kHz toneburst relative to the steady A-weighted level."""
     from phonometry import leq, sel
-    from phonometry.parametric_filters import weighting_filter
+    from phonometry.metrology.parametric_filters import weighting_filter
 
     total = 3.0
     t = np.arange(int(FS * total)) / FS

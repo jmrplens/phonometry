@@ -331,7 +331,7 @@ def weighted_thd(
     :return: Weighted THD, as a ratio.
     :raises ValueError: If the inputs are invalid.
     """
-    from .parametric_filters import weighting_filter
+    from .metrology.parametric_filters import weighting_filter
 
     sig = _validate_signal(signal)
     fs_v = _positive(fs, "fs")

@@ -47,7 +47,7 @@ import reference_data as ref  # noqa: E402
 
 import phonometry as ph  # noqa: E402
 from phonometry import OctaveFilterBank, WeightingFilter  # noqa: E402
-from phonometry.compliance import class_limits, verify_filter_class  # noqa: E402
+from phonometry.metrology.compliance import class_limits, verify_filter_class  # noqa: E402
 from phonometry.sharpness import reference_sound  # noqa: E402
 from phonometry.sti import _sti_from_mtf  # noqa: E402
 
@@ -2227,7 +2227,7 @@ def _chk_gum_additive() -> Outcome:
 
 @register(_GUM, "ISO/IEC Guide 98-3 Table G.2", "Coverage factor, p=0.99, v=16")
 def _chk_gum_coverage() -> Outcome:
-    from phonometry.uncertainty import coverage_factor
+    from phonometry.metrology.uncertainty import coverage_factor
 
     return numeric(ref.GUM_COVERAGE_K99_16, coverage_factor(0.99, 16), 5e-3, places=3)
 
@@ -3157,7 +3157,7 @@ def _chk_ac_epnl() -> Outcome:
     "Directional-response tolerance at 4 kHz / 90°, dB",
 )
 def _chk_ac_iec61265() -> Outcome:
-    from phonometry.compliance import _iec61265_directional_limit
+    from phonometry.metrology.compliance import _iec61265_directional_limit
 
     return numeric(2.0, _iec61265_directional_limit(4000.0, 90.0), 1e-9, unit="dB", places=1)
 

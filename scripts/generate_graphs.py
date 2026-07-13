@@ -66,7 +66,7 @@ _ES_EXACT = {
         "marcadores: nodos NPD tabulados\nlíneas: interpolación log-lineal",
     "25 °C, 70% RH\nsolid: SAE band, dashed: pure-tone mid-band":
         "25 °C, 70% HR\ncontinuo: banda SAE, discontinuo: tono puro medio de banda",
-    # Emitted by phonometry.filter_design._showfilter (not by this script);
+    # Emitted by phonometry.metrology.filter_design._showfilter (not by this script);
     # do not remove as "orphans".
     "Filter Bank Frequency Response": "Respuesta en frecuencia del banco de filtros",
     "Amplitude [dB]": "Amplitud [dB]",
@@ -1138,7 +1138,7 @@ def generate_filter_responses(output_dir: str) -> None:
             print(f"Generating {filename}...")
             bank = OctaveFilterBank(fs=fs, fraction=fraction, order=order, limits=[12.0, 20000.0], filter_type=f_type)
             
-            from phonometry.filter_design import _showfilter
+            from phonometry.metrology.filter_design import _showfilter
             # Draw first, then save through save_figure so the Spanish
             # translation pass runs on the finished figure (it rewrites the
             # live figure's text artists right before the save).
@@ -1861,7 +1861,7 @@ def generate_class_mask_overlay(output_dir: str) -> None:
     print("Generating class_mask_overlay.png...")
     fs = 48000
 
-    from phonometry.compliance import class_limits
+    from phonometry.metrology.compliance import class_limits
 
     bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200], filter_type="butter")
     idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
@@ -1909,7 +1909,7 @@ def generate_filter_class0_mask(output_dir: str) -> None:
     """Pass-band class 0/1/2 maximum corridors (IEC 61260:1995 / ANSI S1.11-2004)."""
     print("Generating filter_class0_mask...")
     fs = 48000
-    from phonometry.compliance import class_limits
+    from phonometry.metrology.compliance import class_limits
 
     bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200], filter_type="butter")
     idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))

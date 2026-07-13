@@ -226,7 +226,7 @@ def test_impulse_kernel_python_fallback_matches_numba() -> None:
     falls back to the undecorated kernel, which must be functionally
     identical.
     """
-    from phonometry import parametric_filters as pf
+    from phonometry.metrology import parametric_filters as pf
 
     rng = np.random.default_rng(3)
     x_t = np.ascontiguousarray(rng.standard_normal((500, 2)) ** 2)

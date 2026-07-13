@@ -17,7 +17,7 @@ from phonometry import (
     verify_weighting_class,
     weighting_class_limits,
 )
-from phonometry.compliance import _WEIGHTING_TABLE3
+from phonometry.metrology.compliance import _WEIGHTING_TABLE3
 from reference_data import IEC61672_TABLE3 as TABLE3
 
 

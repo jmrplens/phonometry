@@ -28,6 +28,14 @@ from ._internal.warnings import _warn_renamed
 _MOVED: dict[str, str] = {
     "phonometry.utils": "phonometry._internal.utils",
     "phonometry._warnings": "phonometry._internal.warnings",
+    "phonometry.calibration": "phonometry.metrology.calibration",
+    "phonometry.compliance": "phonometry.metrology.compliance",
+    "phonometry.core": "phonometry.metrology.core",
+    "phonometry.filter_design": "phonometry.metrology.filter_design",
+    "phonometry.frequencies": "phonometry.metrology.frequencies",
+    "phonometry.levels": "phonometry.metrology.levels",
+    "phonometry.parametric_filters": "phonometry.metrology.parametric_filters",
+    "phonometry.uncertainty": "phonometry.metrology.uncertainty",
     # <migrate:auto>
 }
 

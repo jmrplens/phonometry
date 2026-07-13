@@ -11,7 +11,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from ._internal.warnings import PhonometryWarning, _warn_renamed
+from .._internal.warnings import PhonometryWarning, _warn_renamed
 
 
 def nominal_frequencies(

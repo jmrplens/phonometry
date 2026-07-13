@@ -310,6 +310,13 @@ from .airport_noise import (
     npd_level,
     start_of_roll_directivity,
 )
+from .rotorcraft_noise import (
+    RotorcraftHemisphere,
+    atmospheric_adjustment,
+    ground_effect_adjustment,
+    hemisphere_source_level,
+    spherical_spreading_adjustment,
+)
 from .ship_radiated_noise import (
     ShipSourceLevelResult,
     hydrophone_depths,
@@ -834,6 +841,11 @@ __all__ = [
     "noise_contour",
     "FlyoverResult",
     "NoiseContourResult",
+    "RotorcraftHemisphere",
+    "hemisphere_source_level",
+    "spherical_spreading_adjustment",
+    "atmospheric_adjustment",
+    "ground_effect_adjustment",
     "radiated_noise_level",
     "hydrophone_depths",
     "source_level_uncertainty",

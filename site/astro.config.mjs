@@ -318,6 +318,11 @@ export default defineConfig({
           items: ['guides/aircraft-noise'],
         },
         {
+          label: 'Rotorcraft noise',
+          translations: { es: 'Ruido de rotorcraft' },
+          items: ['guides/rotorcraft-noise'],
+        },
+        {
           label: 'Wind-turbine noise',
           translations: { es: 'Ruido de aerogeneradores' },
           items: ['guides/wind-turbine-noise'],

@@ -479,6 +479,45 @@ def _validate_ground_roll(
     return gr
 
 
+def _attenuation_geometry(
+    s1: "NDArray[np.float64]", s2: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+    q: float, length: float, beta: float, phi: float, lateral: float,
+    key: str, roll_behind: bool, roll_ahead: bool,
+) -> "tuple[float, float, float]":
+    """Lateral-attenuation and installation angles for one segment (§4.5.5).
+
+    Returns ``(beta_att, ell_att, phi_att)``: the general equivalent-path
+    values, or the nearest-end geometry (``beta1 = asin(z1/d1)``,
+    ``l = OC1 = sqrt(d1^2 - z1^2)`` and the d2/z2 analogues) for maximum-level
+    metrics behind/ahead of the segment and for exposure metrics behind
+    takeoff / ahead of landing ground roll.
+    """
+    behind, ahead = q < 0.0, q > length
+    use_end = (key == "maximum" and (behind or ahead)) or roll_behind or roll_ahead
+    if not use_end:
+        return beta, lateral, phi
+    end, sign = (s2, 1.0) if ahead else (s1, 1.0)
+    d_end = float(np.linalg.norm(obs - end))
+    z_end = float(end[2] - obs[2])
+    if d_end <= 0.0:
+        return 90.0, 0.0, 90.0
+    beta_end = float(np.degrees(np.arcsin(np.clip(z_end / d_end, -1.0, 1.0)))) * sign
+    oc = float(np.sqrt(max(d_end**2 - z_end**2, 0.0)))
+    return beta_end, oc, beta_end
+
+
+def _segment_noise_fraction(
+    q: float, length: float, d_lambda: float,
+    roll_behind: bool, roll_ahead: bool,
+) -> float:
+    """Finite-segment fraction: general Eq. 4-20 or the reduced roll forms."""
+    if roll_behind:
+        return noise_fraction(0.0, length, d_lambda)      # Eq. 4-21a
+    if roll_ahead:
+        return noise_fraction(length, length, d_lambda)   # Eq. 4-21b
+    return noise_fraction(q, length, d_lambda)            # Eq. 4-20
+
+
 def _event_level_core(
     pts: "NDArray[np.float64]", obs: "NDArray[np.float64]",
     p: "NDArray[np.float64]", d: "NDArray[np.float64]",
@@ -516,27 +555,8 @@ def _event_level_core(
         roll_ahead = is_landing and q > length   # ahead of the landing rollout
         behind, ahead = q < 0.0, q > length
 
-        # §4.5.5: for maximum-level metrics generally, and for exposure metrics
-        # behind takeoff / ahead of landing ground roll, the lateral-attenuation
-        # parameters come from the nearest segment END on the equivalent level
-        # path: beta1 = asin(z1/d1), l = OC1 = sqrt(d1^2 - z1^2) (and the d2/z2
-        # analogues ahead). The engine-installation depression angle follows the
-        # same equivalent geometry on those branches.
-        d1 = float(np.linalg.norm(obs - s1))
-        d2 = float(np.linalg.norm(obs - s2))
-        z1 = float(s1[2] - obs[2])
-        z2 = float(s2[2] - obs[2])
-        beta1 = float(np.degrees(np.arcsin(np.clip(z1 / d1, -1.0, 1.0)))) if d1 > 0 else 90.0
-        beta2 = float(np.degrees(np.arcsin(np.clip(z2 / d2, -1.0, 1.0)))) if d2 > 0 else 90.0
-        oc1 = float(np.sqrt(max(d1**2 - z1**2, 0.0)))
-        oc2 = float(np.sqrt(max(d2**2 - z2**2, 0.0)))
-        use_end_geometry = (key == "maximum" and (behind or ahead)) or roll_behind or roll_ahead
-        if use_end_geometry:
-            beta_att, ell_att = (beta1, oc1) if not ahead else (beta2, oc2)
-            phi_att = beta_att
-        else:
-            beta_att, ell_att, phi_att = beta, lateral, phi
-
+        beta_att, ell_att, phi_att = _attenuation_geometry(
+            s1, s2, obs, q, length, beta, phi, lateral, key, roll_behind, roll_ahead)
         frac = np.clip(q / length, 0.0, 1.0)
         p_seg = np.sqrt(max(p1**2 + frac * (p2**2 - p1**2), 0.0))
         lam_att = lateral_attenuation(beta_att, ell_att)
@@ -562,12 +582,7 @@ def _event_level_core(
                     "segment with zero mean speed (stationary segment in 'path').")
             dv = duration_correction(vref, v_seg)
             d_lambda = _D0_M * 10.0 ** ((le_d - lm_d) / 10.0)
-            if roll_behind:
-                df = noise_fraction(0.0, length, d_lambda)     # Eq. 4-21a
-            elif roll_ahead:
-                df = noise_fraction(length, length, d_lambda)  # Eq. 4-21b
-            else:
-                df = noise_fraction(q, length, d_lambda)       # Eq. 4-20
+            df = _segment_noise_fraction(q, length, d_lambda, roll_behind, roll_ahead)
             seg_levels.append(le_d + imp + dv + di - lam_att + df + sor)
 
     seg_arr = np.asarray(seg_levels, dtype=np.float64)

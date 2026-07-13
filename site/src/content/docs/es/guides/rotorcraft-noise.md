@@ -50,6 +50,11 @@ recibido = (lv
             + ph.ground_effect_adjustment(freqs, 150.0, 1.5, 500.0, flow_resistivity="D"))
 ```
 
+La base de datos estándar está registrada a 60 m, el valor por defecto. Si un
+hemisferio usa otra distancia polar (`h.distance`, p. ej. anillos de hover a
+70 m), pásala a los dos ajustes dependientes de la distancia como
+`reference_distance=h.distance`.
+
 Validado contra la Tabla 4 de la guía NORAH2 (las 31 bandas), el ensanchamiento
 inverso al cuadrado de forma cerrada, los límites analíticos de suelo rígido y
 rasante del efecto de suelo, consultas bilineales fuera de nodo sobre los

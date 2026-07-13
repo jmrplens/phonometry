@@ -276,13 +276,6 @@ class RotorcraftHemisphere:
         return np.asarray(cached, dtype=np.float64)
 
 
-def _emission_unit_vector(azimuth_deg: float, polar_deg: float) -> "NDArray[np.float64]":
-    """Unit emission direction (Eq. 11 with rh = 1): x=cosθ, y=sinθ·sinφ, z=sinθ·cosφ."""
-    phi = np.radians(azimuth_deg)
-    theta = np.radians(polar_deg)
-    return np.array([np.cos(theta), np.sin(theta) * np.sin(phi), np.sin(theta) * np.cos(phi)])
-
-
 def hemisphere_source_level(
     hemisphere: RotorcraftHemisphere, azimuth_deg: float, polar_deg: float,
 ) -> "NDArray[np.float64]":
@@ -352,10 +345,13 @@ def _fill_grid(
     guidance under Eq. 14/15. Bands with no filled bin at all stay ``NaN``.
     """
     n_az, n_po, n_f = levels.shape
-    vecs = np.empty((n_az * n_po, 3), dtype=np.float64)
-    for i in range(n_az):
-        for j in range(n_po):
-            vecs[i * n_po + j] = _emission_unit_vector(azimuth[i], polar[j])
+    # Unit emission directions (Eq. 11 with rh = 1): x = cosθ, y = sinθ·sinφ,
+    # z = sinθ·cosφ, one row per (φ, θ) bin in row-major grid order.
+    phi = np.radians(azimuth)[:, None]
+    theta = np.radians(polar)[None, :]
+    vecs = np.stack([np.broadcast_to(np.cos(theta), (n_az, n_po)),
+                     np.sin(theta) * np.sin(phi),
+                     np.sin(theta) * np.cos(phi)], axis=-1).reshape(-1, 3)
     dots = np.clip(vecs @ vecs.T, -1.0, 1.0)
     flat = levels.reshape(n_az * n_po, n_f).copy()
     for b in range(n_f):

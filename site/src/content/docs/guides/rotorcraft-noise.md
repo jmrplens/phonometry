@@ -50,6 +50,10 @@ received = (lv
             + ph.ground_effect_adjustment(freqs, 150.0, 1.5, 500.0, flow_resistivity="D"))
 ```
 
+The standard database is recorded at 60 m, the default. If a hemisphere uses a
+different polar distance (`h.distance`, e.g. 70 m hover rings), pass it to both
+distance-dependent adjustments as `reference_distance=h.distance`.
+
 Validated against the NORAH2 guidance Table 4 (all 31 bands), the closed-form
 inverse-square spreading, the analytic rigid-ground and grazing limits of the
 ground effect, off-node bilinear lookups on the reference hemispheres of all

@@ -42,7 +42,43 @@ from .rating import (
     ldn,
 )
 
+from .measurement import (
+    EnvironmentalMeasurementWarning,
+    RepeatedMeasurementResult,
+    ResidualCorrectionResult,
+    TonalAssessmentResult,
+    assess_tonal_audibility,
+    combined_standard_uncertainty,
+    critical_bandwidth,
+    expanded_uncertainty,
+    gaussian_residual_level,
+    residual_correction_uncertainty,
+    residual_sound_correction,
+    tonal_adjustment,
+    tonal_adjustment_from_mean_audibility,
+    tonal_audibility,
+    tonal_seeking_survey,
+    uncertainty_from_repeated_measurements,
+)
+
 __all__ = [
+    "EnvironmentalMeasurementWarning",
+    "RepeatedMeasurementResult",
+    "ResidualCorrectionResult",
+    "TonalAssessmentResult",
+    "assess_tonal_audibility",
+    "combined_standard_uncertainty",
+    "critical_bandwidth",
+    "expanded_uncertainty",
+    "gaussian_residual_level",
+    "residual_correction_uncertainty",
+    "residual_sound_correction",
+    "tonal_adjustment",
+    "tonal_adjustment_from_mean_audibility",
+    "tonal_audibility",
+    "tonal_seeking_survey",
+    "uncertainty_from_repeated_measurements",
+
     "composite_rating_level",
     "lden",
     "ldn",

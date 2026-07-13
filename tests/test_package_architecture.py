@@ -105,3 +105,23 @@ def test_subpackage_imports_in_fresh_interpreter(pkg: str) -> None:
         [sys.executable, "-c", f"import phonometry.{pkg}"],
         check=True, capture_output=True, timeout=120,
     )
+
+
+def test_subpackage_reexports_cover_facade_imports() -> None:
+    """Every name the facade imports from a domain submodule must also be
+    reachable on the subpackage namespace (the ``env.name`` usage pattern)."""
+    import importlib
+
+    facade = ast.parse((SRC / "__init__.py").read_text(encoding="utf-8"))
+    missing: list[str] = []
+    for node in facade.body:
+        if not isinstance(node, ast.ImportFrom) or node.level != 1 or not node.module:
+            continue
+        parts = node.module.split(".")
+        if len(parts) != 2 or parts[0].startswith("_"):
+            continue
+        pkg = importlib.import_module(f"phonometry.{parts[0]}")
+        for alias in node.names:
+            if not hasattr(pkg, alias.name):
+                missing.append(f"phonometry.{parts[0]}.{alias.name}")
+    assert not missing, "facade imports not re-exported by their subpackage:\n" + "\n".join(missing)

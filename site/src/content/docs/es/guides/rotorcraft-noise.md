@@ -14,9 +14,10 @@ ajuste de propagación `ΔLp = ΔLs + ΔLa + ΔLg`.
 
 Un `RotorcraftHemisphere` contiene los niveles de banda sobre la malla
 azimut/polar. `hemisphere_source_level` lee el nivel en una dirección de emisión
-arbitraria, bilineal en el dominio de energía sobre los cuatro bins vecinos
-(Ec. 13); fuera de la cobertura medida recurre al bin lleno angularmente más
-cercano (Ec. 14/15).
+arbitraria: primero rellena los huecos de la malla desde los bins llenos
+angularmente más cercanos (Ec. 14/15, con caché) y después interpola bilineal en
+el dominio de energía sobre los cuatro bins vecinos (Ec. 13), de modo que las
+celdas parcialmente medidas se mantienen continuas con sus esquinas medidas.
 
 ```python
 import phonometry as ph
@@ -49,10 +50,12 @@ recibido = (lv
             + ph.ground_effect_adjustment(freqs, 150.0, 1.5, 500.0, flow_resistivity="D"))
 ```
 
-Validado contra la Tabla 4 de la guía NORAH2 (atenuación atmosférica), el
-ensanchamiento inverso al cuadrado de forma cerrada, los límites analíticos de
-suelo rígido y rasante del efecto de suelo, y la interpolación exacta del
-hemisferio en los nodos de la malla.
+Validado contra la Tabla 4 de la guía NORAH2 (las 31 bandas), el ensanchamiento
+inverso al cuadrado de forma cerrada, los límites analíticos de suelo rígido y
+rasante del efecto de suelo, consultas bilineales fuera de nodo sobre los
+hemisferios de referencia de los once tipos de helicóptero, y de extremo a
+extremo contra los historiales de evento único del prototipo NORAH2 (0.1 dB(A)
+sobre suelo duro, 0.5 dB sobre suelo blando).
 
 ---
 

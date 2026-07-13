@@ -17,7 +17,8 @@ NORAH2 guidance SC03.D1.5d, the basis of ECAC Doc 32):
   nearest-bin fill outside the measured coverage (Eq. 14/15).
 * :func:`spherical_spreading_adjustment` -- ``ΔLs = −20·log10(r/60)`` (Eq. 24).
 * :func:`atmospheric_adjustment` -- ``ΔLa = −α(f)·(r−60)`` with the ISO 9613-1
-  pure-tone coefficient (Eq. 26/27), reusing :func:`~phonometry.air_absorption.air_attenuation`.
+  pure-tone coefficient (Eq. 26/27), reusing
+  :func:`~phonometry.environmental.air_absorption.air_attenuation`.
 * :func:`ground_effect_adjustment` -- ``ΔLg`` for a point source over an impedance
   plane (Chien-Soroka, Eq. 28-35) with the Delany-Bazley one-parameter impedance
   and the CNOSSOS flow-resistivity classes.
@@ -58,19 +59,26 @@ _FLOW_RESISTIVITY = {
 }
 
 
-def spherical_spreading_adjustment(distance: float) -> float:
+def spherical_spreading_adjustment(
+    distance: float, *, reference_distance: float = _RH,
+) -> float:
     """Spherical-spreading adjustment ``ΔLs`` of the hemisphere level (Eq. 24).
 
-    The hemisphere levels are defined at the 60 m reference distance, so at slant
-    distance ``r`` the geometric spreading adjustment is ``ΔLs = −20·log10(r/60)``.
+    The hemisphere levels are defined at the reference distance ``rh`` (60 m in
+    the standard database), so at slant distance ``r`` the geometric spreading
+    adjustment is ``ΔLs = −20·log10(r/rh)``.
 
     :param distance: Slant distance ``r`` from the rotorcraft to the observer, in
         metres (``> 0``).
+    :param reference_distance: Hemisphere reference distance ``rh``, in metres
+        (default 60). Pass :attr:`RotorcraftHemisphere.distance` when the data
+        uses a non-standard polar distance (e.g. 70 m hover rings).
     :return: The spreading adjustment ``ΔLs``, in dB (added to the level).
-    :raises ValueError: If ``distance`` is not strictly positive.
+    :raises ValueError: If a distance is not strictly positive.
     """
     r = require_positive(distance, "distance")
-    return float(-20.0 * np.log10(r / _RH))
+    rh = require_positive(reference_distance, "reference_distance")
+    return float(-20.0 * np.log10(r / rh))
 
 
 def atmospheric_adjustment(
@@ -80,31 +88,60 @@ def atmospheric_adjustment(
     temperature: float = 25.0,
     relative_humidity: float = 70.0,
     pressure: float = 101.325,
+    reference_distance: float = _RH,
 ) -> "NDArray[np.float64]":
     """Atmospheric-absorption adjustment ``ΔLa`` of the hemisphere level (Eq. 26/27).
 
-    The hemisphere already includes absorption out to the 60 m reference distance,
-    so only the excess path ``r − 60`` is corrected: ``ΔLa = −α(f)·(r − 60)`` with
-    the ISO 9613-1 pure-tone coefficient ``α`` (per ECAC Doc 32 Eq. 27, evaluated
-    at the ICAO reference atmosphere by default). Reproduces the guidance Table 4.
+    The hemisphere already includes absorption out to the reference distance
+    ``rh``, so only the excess path ``r − rh`` is corrected:
+    ``ΔLa = −α(f)·(r − rh)`` with the ISO 9613-1 pure-tone coefficient ``α``
+    evaluated at the exact band centre (Eq. 26/27, ICAO reference atmosphere by
+    default). This matches the guidance Eq. 27 to 0.02 dB/km and the NORAH2
+    reference implementation. The guidance's alternative per-band mapping (SAE
+    method by Rickley et al., its Table 4) coincides below 3.15 kHz and deviates
+    by up to 2.2 dB/km at 8-10 kHz; for a path-dependent band mapping use
+    :func:`~phonometry.aircraft.atmospheric_absorption.sae_band_attenuation`.
+
+    .. note::
+        The printed guidance Eq. 27 pairs the coefficient ``6.6928e-6`` with
+        ``fr,O = 630.7`` Hz, which evaluates to nonsense (14.3 dB/km at 500 Hz
+        against Table 4's 3.1). The physically correct pairing (``6.6928e-6``
+        with the oxygen relaxation frequency, ``1.3415e-6`` with 630.7 Hz)
+        reproduces Table 4 and this implementation to 0.02 dB/km; do not
+        "fix" the code by transcribing the typo.
+
+    Bands below the 50 Hz floor of the ISO 9613-1 tabulation (the NORAH grid
+    starts at 10 Hz) use the same analytic formulas; the advisory out-of-range
+    warning is suppressed here because ``α`` is negligible there (Table 4 lists
+    0.0 dB/km for every band up to 50 Hz).
 
     :param frequencies: One-third-octave-band centre frequencies, in Hz.
-    :param distance: Slant distance ``r``, in metres (``>= 60``; below 60 m the
-        adjustment is a small positive value, i.e. less absorption than the
+    :param distance: Slant distance ``r``, in metres (``>= rh``; below ``rh``
+        the adjustment is a small positive value, i.e. less absorption than the
         reference path).
     :param temperature: Air temperature, in °C (default 25 °C, ICAO reference).
     :param relative_humidity: Relative humidity, in % (default 70 %).
     :param pressure: Ambient pressure, in kPa (default 101.325).
+    :param reference_distance: Hemisphere reference distance ``rh``, in metres
+        (default 60). Pass :attr:`RotorcraftHemisphere.distance` when the data
+        uses a non-standard polar distance.
     :return: The adjustment ``ΔLa`` per band, in dB (added to the level, ``<= 0``
-        for ``r >= 60``).
-    :raises ValueError: If ``distance`` is not strictly positive.
+        for ``r >= rh``).
+    :raises ValueError: If a distance is not strictly positive.
     """
-    from ..environmental.air_absorption import air_attenuation
+    import warnings
+
+    from ..environmental.air_absorption import AtmosphericAbsorptionWarning, air_attenuation
 
     f = require_positive_array(frequencies, "frequencies")
     r = require_positive(distance, "distance")
-    alpha = air_attenuation(f, temperature, relative_humidity, pressure, exact_midband=True)
-    return np.asarray(-alpha * (r - _RH), dtype=np.float64)
+    rh = require_positive(reference_distance, "reference_distance")
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore", message="One or more frequencies are outside",
+            category=AtmosphericAbsorptionWarning)
+        alpha = air_attenuation(f, temperature, relative_humidity, pressure, exact_midband=True)
+    return np.asarray(-alpha * (r - rh), dtype=np.float64)
 
 
 def _delany_bazley_impedance(
@@ -140,7 +177,11 @@ def ground_effect_adjustment(
     :param horizontal_distance: Horizontal source-receiver distance ``dp``, in
         metres (``> 0``).
     :param flow_resistivity: Ground flow resistivity ``σ`` in Pa·s/m², or a
-        CNOSSOS class letter ``"A"``-``"H"`` (default ``"G"``, hard surface).
+        CNOSSOS class letter ``"A"``-``"H"``. The default ``"G"`` (20e6, hard
+        surfaces) is the CNOSSOS class covering the paved surroundings typical
+        of heliports; the guidance's own suggestions, concrete ``σ = 65e6`` for
+        city areas and grass ``σ = 200e3`` for rural areas (§A.4.3), can be
+        passed as numeric values.
     :return: The adjustment ``ΔLg`` per band, in dB (added to the level).
     :raises ValueError: If the inputs are invalid.
     """
@@ -197,7 +238,11 @@ class RotorcraftHemisphere:
     :ivar polar: Polar angles ``θ``, in degrees, shape ``(P,)`` (``0`` forward …
         ``180`` rearward).
     :ivar levels: Band levels, in dB, shape ``(A, P, F)``.
-    :ivar distance: Reference distance, in metres (default 60).
+    :ivar distance: Reference distance, in metres (default 60). The standard
+        NORAH database uses 60 m; when the data uses another polar distance
+        (e.g. 70 m hover rings), pass this value as ``reference_distance`` to
+        :func:`spherical_spreading_adjustment` and :func:`atmospheric_adjustment`
+        so the propagation chain honours it.
     """
 
     frequencies: "NDArray[np.float64]"
@@ -212,6 +257,17 @@ class RotorcraftHemisphere:
 
         return plot_rotorcraft_hemisphere(self, ax=ax, **kwargs)
 
+    def _filled(self) -> "NDArray[np.float64]":
+        """The gap-filled level grid (Eq. 14/15), computed once and cached."""
+        cached = self.__dict__.get("_filled_cache")
+        if cached is None:
+            cached = _fill_grid(
+                np.asarray(self.azimuth, dtype=np.float64),
+                np.asarray(self.polar, dtype=np.float64),
+                np.asarray(self.levels, dtype=np.float64))
+            object.__setattr__(self, "_filled_cache", cached)
+        return np.asarray(cached, dtype=np.float64)
+
 
 def _emission_unit_vector(azimuth_deg: float, polar_deg: float) -> "NDArray[np.float64]":
     """Unit emission direction (Eq. 11 with rh = 1): x=cosθ, y=sinθ·sinφ, z=sinθ·cosφ."""
@@ -225,10 +281,18 @@ def hemisphere_source_level(
 ) -> "NDArray[np.float64]":
     """Interpolated source level ``L(fc, φ, θ)`` from a hemisphere (Eq. 13-15).
 
-    Bilinear interpolation in the energy domain over the four neighbouring
-    azimuth/polar bins (Eq. 13). Outside the measured coverage (or where a
-    neighbour is missing) the nearest filled bin by angular distance
-    ``ρ = arccos(x·x_{m,n})`` is used (Eq. 14/15, constant-value extrapolation).
+    The grid is first gap-filled by nearest-bin constant-value extrapolation
+    (Eq. 14/15, computed once per hemisphere and cached), then the query is a
+    bilinear interpolation in the energy domain over the four neighbouring
+    azimuth/polar bins (Eq. 13). Filling the grid before interpolating keeps
+    partially-measured cells continuous with their fully-measured neighbours
+    (the valid corners still contribute) instead of snapping to a single bin.
+
+    Queries outside the grid clamp to the boundary node and edge-interpolate;
+    Eq. 14/15 taken literally would return the single nearest node, which
+    coincides on the boundary nodes but is discontinuous alongside them, so the
+    smoother clamp is intentional. Bands with no filled bin anywhere in the
+    grid return ``NaN``.
 
     :param hemisphere: The :class:`RotorcraftHemisphere` source description.
     :param azimuth_deg: Emission azimuth ``φ``, in degrees.
@@ -237,72 +301,64 @@ def hemisphere_source_level(
     """
     az = np.asarray(hemisphere.azimuth, dtype=np.float64)
     po = np.asarray(hemisphere.polar, dtype=np.float64)
-    lv = np.asarray(hemisphere.levels, dtype=np.float64)
+    lv = hemisphere._filled()
     phi = float(np.clip(azimuth_deg, az[0], az[-1]))
     theta = float(np.clip(polar_deg, po[0], po[-1]))
 
-    ia = int(np.clip(np.searchsorted(az, phi) - 1, 0, az.size - 2))
-    ip = int(np.clip(np.searchsorted(po, theta) - 1, 0, po.size - 2))
-    da = az[ia + 1] - az[ia]
-    dp = po[ip + 1] - po[ip]
-    wa = (phi - az[ia]) / da if da > 0.0 else 0.0
-    wp = (theta - po[ip]) / dp if dp > 0.0 else 0.0
+    ia, wa = _axis_cell(az, phi)
+    ip, wp = _axis_cell(po, theta)
     corners = [(ia, ip, (1 - wa) * (1 - wp)), (ia + 1, ip, wa * (1 - wp)),
                (ia, ip + 1, (1 - wa) * wp), (ia + 1, ip + 1, wa * wp)]
 
-    out = np.zeros(hemisphere.frequencies.shape, dtype=np.float64)
-    energy = np.zeros_like(out)
-    weight_ok = np.ones_like(out, dtype=bool)
+    energy = np.zeros(hemisphere.frequencies.shape, dtype=np.float64)
     for i, j, w in corners:
         if w <= 0.0:
             continue
-        band = lv[i, j, :]
-        finite = np.isfinite(band)
-        energy = np.where(finite, energy + w * 10.0 ** (band / 10.0), energy)
-        weight_ok &= finite
-    with np.errstate(divide="ignore"):
-        out = np.where((energy > 0.0) & weight_ok, 10.0 * np.log10(energy), np.nan)
-
-    # Nearest-bin fill (Eq. 14/15) for bands with any missing corner.
-    missing = ~np.isfinite(out)
-    if np.any(missing):
-        target = _emission_unit_vector(phi, theta)
-        best = _nearest_filled_bin(hemisphere, target, missing)
-        out = np.where(missing, best, out)
-    return out
-
-
-def _nearest_filled_bin(
-    hemisphere: RotorcraftHemisphere, target: "NDArray[np.float64]",
-    missing: "NDArray[np.bool_]",
-) -> "NDArray[np.float64]":
-    """Angularly-nearest filled bin per band (Eq. 14/15, ρ=arccos(x·x_mn)).
-
-    Where several bins are equally near (common on symmetric grids), their
-    energetic average is taken, as required by the guidance under Eq. 14/15.
-    """
-    az = np.asarray(hemisphere.azimuth, dtype=np.float64)
-    po = np.asarray(hemisphere.polar, dtype=np.float64)
-    lv = np.asarray(hemisphere.levels, dtype=np.float64)
-    tol = 1e-9
-    best_rho = np.full(hemisphere.frequencies.shape, np.inf, dtype=np.float64)
-    energy = np.zeros(hemisphere.frequencies.shape, dtype=np.float64)
-    count = np.zeros(hemisphere.frequencies.shape, dtype=np.float64)
-    for i in range(az.size):
-        for j in range(po.size):
-            band = lv[i, j, :]
-            finite = np.isfinite(band) & missing
-            if not np.any(finite):
-                continue
-            vec = _emission_unit_vector(az[i], po[j])
-            rho = float(np.arccos(np.clip(np.dot(target, vec), -1.0, 1.0)))
-            e = 10.0 ** (np.where(finite, band, 0.0) / 10.0)
-            closer = finite & (rho < best_rho - tol)      # strictly nearer: reset
-            best_rho = np.where(closer, rho, best_rho)
-            energy = np.where(closer, e, energy)
-            count = np.where(closer, 1.0, count)
-            tie = finite & ~closer & (np.abs(rho - best_rho) <= tol)  # equidistant: accumulate
-            energy = np.where(tie, energy + e, energy)
-            count = np.where(tie, count + 1.0, count)
+        energy = energy + w * 10.0 ** (lv[i, j, :] / 10.0)
     with np.errstate(divide="ignore", invalid="ignore"):
-        return np.where(count > 0.0, 10.0 * np.log10(energy / count), np.nan)
+        return np.asarray(10.0 * np.log10(energy), dtype=np.float64)
+
+
+def _axis_cell(nodes: "NDArray[np.float64]", value: float) -> "tuple[int, float]":
+    """Lower cell index and fractional weight of ``value`` on a node axis.
+
+    Size-1 axes (a single measured row or column) are handled explicitly: the
+    only node is the cell with zero fractional weight.
+    """
+    if nodes.size == 1:
+        return 0, 0.0
+    i = int(np.clip(np.searchsorted(nodes, value) - 1, 0, nodes.size - 2))
+    step = nodes[i + 1] - nodes[i]
+    return i, float((value - nodes[i]) / step) if step > 0.0 else 0.0
+
+
+def _fill_grid(
+    azimuth: "NDArray[np.float64]", polar: "NDArray[np.float64]",
+    levels: "NDArray[np.float64]",
+) -> "NDArray[np.float64]":
+    """Nearest-bin gap fill of a hemisphere grid (Eq. 14/15).
+
+    Every empty ``(φ, θ)`` bin of each band takes the level of its angularly
+    nearest filled bin, ``ρ = arccos(x·x_{m,n})``, compared through the dot
+    product itself (monotone in ``ρ`` and, unlike the angle, well-conditioned
+    near ``ρ = 0``). Equally-near bins are energy-averaged, as required by the
+    guidance under Eq. 14/15. Bands with no filled bin at all stay ``NaN``.
+    """
+    n_az, n_po, n_f = levels.shape
+    vecs = np.empty((n_az * n_po, 3), dtype=np.float64)
+    for i in range(n_az):
+        for j in range(n_po):
+            vecs[i * n_po + j] = _emission_unit_vector(azimuth[i], polar[j])
+    dots = np.clip(vecs @ vecs.T, -1.0, 1.0)
+    flat = levels.reshape(n_az * n_po, n_f).copy()
+    for b in range(n_f):
+        band = flat[:, b]
+        filled = np.isfinite(band)
+        if filled.all() or not filled.any():
+            continue
+        d = dots[np.ix_(~filled, filled)]
+        nearest = d >= d.max(axis=1, keepdims=True) - 1e-9   # ties: energy average
+        e = 10.0 ** (band[filled] / 10.0)
+        flat[~filled, b] = 10.0 * np.log10(
+            (nearest * e).sum(axis=1) / nearest.sum(axis=1))
+    return flat.reshape(n_az, n_po, n_f)

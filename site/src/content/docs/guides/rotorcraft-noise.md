@@ -13,10 +13,11 @@ that source at a receiver adds the propagation adjustment
 ## The noise hemisphere
 
 A `RotorcraftHemisphere` holds the band levels on the azimuth/polar grid.
-`hemisphere_source_level` reads the level at an arbitrary emission direction,
-bilinear in the energy domain over the four neighbouring bins (Eq. 13); outside
-the measured coverage it falls back to the angularly-nearest filled bin
-(Eq. 14/15).
+`hemisphere_source_level` reads the level at an arbitrary emission direction:
+the grid is first gap-filled from the angularly-nearest filled bins (Eq. 14/15,
+cached), then the lookup is bilinear in the energy domain over the four
+neighbouring bins (Eq. 13), so partially-measured cells stay continuous with
+their measured corners.
 
 ```python
 import phonometry as ph
@@ -49,10 +50,11 @@ received = (lv
             + ph.ground_effect_adjustment(freqs, 150.0, 1.5, 500.0, flow_resistivity="D"))
 ```
 
-Validated against the NORAH2 guidance Table 4 (atmospheric attenuation), the
-closed-form inverse-square spreading, the analytic rigid-ground and grazing
-limits of the ground effect, and exact hemisphere interpolation at the grid
-nodes.
+Validated against the NORAH2 guidance Table 4 (all 31 bands), the closed-form
+inverse-square spreading, the analytic rigid-ground and grazing limits of the
+ground effect, off-node bilinear lookups on the reference hemispheres of all
+eleven rotorcraft types, and end to end against the NORAH2 prototype's
+single-event histories (0.1 dB(A) over hard ground, 0.5 dB over soft ground).
 
 ---
 

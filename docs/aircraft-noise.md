@@ -178,10 +178,58 @@ curve = ph.npd_curve(powers, distances, levels, power=20000.0)
 curve.plot()   # NPD curve with the tabulated nodes (needs matplotlib)
 ```
 
-This is the NPD engine that underpins the segmentation and contour stages of the
-method; those further stages (flight-path segmentation, lateral attenuation, the
-finite-segment noise fraction and the receptor-grid contour integration) are a
-separate follow-up.
+## 7. Airport noise contours (single event)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour_dark.png">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour.png" alt="Single-event SEL contour of a departure: an elongated footprint along the flight track, loudest near the ground roll and decaying as the aircraft climbs away" width="90%">
+</picture>
+
+The full ECAC Doc 29 single-event calculation places a flight path's noise at a
+receiver by breaking the path into segments and, for each, correcting the NPD
+baseline level (§4.3-4.5):
+
+- **`impedance_adjustment(T, p)`** — corrects the NPD data from their reference
+  air impedance (409.81 N·s/m³) to the aerodrome's temperature and pressure
+  (Eq. 4-6/4-7; +0.074 dB under the standard atmosphere).
+- **`lateral_attenuation(β, ℓ)`** — excess lateral attenuation over soft ground
+  (Eq. 4-18/4-19, AIR-5662).
+- **`engine_installation_correction(φ, mounting)`** — lateral-directivity term
+  for wing/fuselage/propeller installations (Eq. 4-15/4-16).
+- **`duration_correction(Vref, Vseg)`** — the speed/duration adjustment for
+  exposure levels (Eq. 4-14).
+- **`noise_fraction(q, λ, dλ)`** — the finite-segment energy fraction (Eq. 4-20).
+
+`event_level` assembles these (Eq. 4-8) and sums the segments into the exposure
+level `SEL` (Eq. 4-11) or the maximum level `LAmax` (Eq. 4-10); `noise_contour`
+evaluates `event_level` over a ground grid to produce a noise contour.
+
+```python
+import numpy as np
+import phonometry as ph
+
+# NPD tables (SEL and LAmax) for one aircraft, two power settings.
+powers = [8000.0, 12000.0]
+distances = [60.0, 240.0, 960.0, 3840.0]
+sel = [[98.0, 86.0, 74.0, 62.0], [104.0, 92.0, 80.0, 68.0]]
+lmax = [[94.0, 82.0, 70.0, 58.0], [100.0, 88.0, 76.0, 64.0]]
+
+# A departure flight path: columns x, y, z (m), power, speed (m/s).
+xs = np.linspace(0.0, 18000.0, 40)
+path = np.column_stack([xs, np.zeros_like(xs), np.clip((xs - 1500) * 0.11, 0, 2500),
+                        np.where(xs < 3000, 12000.0, 10000.0), np.full_like(xs, 82.3)])
+
+ph.event_level(path, [2000.0, 500.0, 0.0], powers, distances, sel, lmax)  # SEL at a point
+contour = ph.noise_contour(path, powers, distances, sel, lmax,
+                           x=np.linspace(-2500, 20000, 60), y=np.linspace(-6000, 6000, 48))
+contour.plot()   # SEL contour over the ground (needs matplotlib)
+```
+
+Validated against the **ECAC Doc 29 5th ed. Vol 3 Part 1 reference workbook**:
+the segment geometry (β, φ), lateral attenuation, engine installation and noise
+fraction reproduce the reference values to < 0.01 dB, and the segment energy sum
+matches the reference `SEL`. The start-of-roll directivity `ΔSOR` (behind takeoff
+ground-roll segments) is the one deferred term.
 
 ---
 
@@ -194,6 +242,9 @@ Table 4-4 integrated-method EPNL) used as numeric oracles. IEC 61265:1995,
 performance tolerances. SAE ARP 5534:2021, *Application of Pure-Tone
 Atmospheric Absorption Losses to One-Third-Octave-Band Data*: the SAE-Method
 band attenuation (Eqs. 7–10), with the pure-tone coefficient from ISO 9613-1.
-ECAC Doc 29, 4th ed., Vol 2 (2016) §4.2: the NPD event-level interpolation
-(Eqs. 4-3/4-4) — the engine of the airport-contour method; its segmentation,
-lateral-attenuation and contour-integration stages are a separate follow-up.
+ECAC Doc 29, 4th ed., Vol 2 (2016): the NPD event-level interpolation (§4.2) and
+the single-event segment calculation — duration (§4.5.1), engine installation
+(§4.5.3), lateral attenuation (§4.5.4, AIR-5662), the finite-segment noise
+fraction (§4.5.6) and segment summation (§4.3) — through to ground-grid noise
+contours. The start-of-roll directivity (§4.5.7) is out of scope, and the full
+Vol 3 Part 1 reference-case cross-check is pending the ECAC results workbook.

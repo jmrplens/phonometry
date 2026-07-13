@@ -141,8 +141,37 @@ levels = [[98.5, 92.0, 83.6, 76.8, 63.9, 56.8],
 ph.npd_curve(powers, distances, levels, power=20000.0).plot()
 ```
 
-This is the NPD engine underneath the method; the segmentation, lateral
-attenuation and contour-grid stages are a separate follow-up.
+This is the NPD engine underneath the method.
+
+## Airport noise contours (single event)
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour.png" alt="Single-event SEL contour of a departure: an elongated footprint along the flight track, loudest near the ground roll" style="width:90%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour_dark.png" alt="Single-event SEL contour of a departure: an elongated footprint along the flight track, loudest near the ground roll" style="width:90%">
+
+The full single-event calculation breaks a flight path into segments and
+corrects the NPD baseline per segment (§4.3-4.5): `impedance_adjustment` (T, p),
+`lateral_attenuation` (β,ℓ), `engine_installation_correction` (φ, mounting),
+`duration_correction` and the finite-segment `noise_fraction`. `event_level`
+assembles and sums them into `SEL`/`LAmax`, and `noise_contour` evaluates it over
+a ground grid.
+
+```python
+import numpy as np
+import phonometry as ph
+
+powers = [8000.0, 12000.0]; distances = [60.0, 240.0, 960.0, 3840.0]
+sel = [[98.0, 86.0, 74.0, 62.0], [104.0, 92.0, 80.0, 68.0]]
+lmax = [[94.0, 82.0, 70.0, 58.0], [100.0, 88.0, 76.0, 64.0]]
+xs = np.linspace(0.0, 18000.0, 40)
+path = np.column_stack([xs, np.zeros_like(xs), np.clip((xs-1500)*0.11, 0, 2500),
+                        np.where(xs < 3000, 12000.0, 10000.0), np.full_like(xs, 82.3)])
+ph.noise_contour(path, powers, distances, sel, lmax,
+                 x=np.linspace(-2500, 20000, 60), y=np.linspace(-6000, 6000, 48)).plot()
+```
+
+Validated against the ECAC Doc 29 5th ed. Vol 3 Part 1 reference workbook: the
+segment geometry, lateral attenuation, engine installation and noise fraction
+reproduce the reference values to < 0.01 dB, and the segment energy sum matches
+the reference `SEL`. The start-of-roll directivity is the one deferred term.
 
 ---
 
@@ -150,5 +179,7 @@ attenuation and contour-grid stages are a separate follow-up.
 ETM Vol. I (worked-example oracles), IEC 61265:1995 (measurement-system
 tolerances), SAE ARP 5534:2021 (SAE-Method band absorption; pure-tone coefficient
 from ISO 9613-1), ECAC Doc 29 4th ed. Vol 2 §4.2 (NPD event-level
-interpolation). The remaining ECAC contour stages (segmentation, lateral
-attenuation, contour integration) are a separate follow-up.
+interpolation), the single-event segment calculation (impedance adjustment,
+duration, engine installation, lateral attenuation, noise fraction, summation)
+and ground-grid noise contours, validated against the Doc 29 5th ed. Vol 3
+Part 1 reference workbook. Start-of-roll directivity (§4.5.7) is out of scope.

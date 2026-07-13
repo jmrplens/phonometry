@@ -145,8 +145,38 @@ levels = [[98.5, 92.0, 83.6, 76.8, 63.9, 56.8],
 ph.npd_curve(powers, distances, levels, power=20000.0).plot()
 ```
 
-Es el motor NPD que sustenta el método; las etapas de segmentación, atenuación
-lateral e integración de contornos en malla son un desarrollo posterior aparte.
+Es el motor NPD que sustenta el método.
+
+## Contornos de ruido de aeropuerto (evento único)
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour.png" alt="Contorno SEL de un despegue: huella alargada a lo largo de la trayectoria, más intensa cerca del rodaje" style="width:90%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour_dark.png" alt="Contorno SEL de un despegue: huella alargada a lo largo de la trayectoria, más intensa cerca del rodaje" style="width:90%">
+
+El cálculo de evento único trocea la trayectoria en segmentos y corrige el nivel
+base NPD por segmento (§4.3-4.5): `impedance_adjustment` (T, p),
+`lateral_attenuation` (β,ℓ), `engine_installation_correction` (φ, montaje),
+`duration_correction` y la fracción de segmento finito `noise_fraction`.
+`event_level` los ensambla y suma en `SEL`/`LAmax`, y `noise_contour` lo evalúa
+sobre una malla en tierra.
+
+```python
+import numpy as np
+import phonometry as ph
+
+powers = [8000.0, 12000.0]; distances = [60.0, 240.0, 960.0, 3840.0]
+sel = [[98.0, 86.0, 74.0, 62.0], [104.0, 92.0, 80.0, 68.0]]
+lmax = [[94.0, 82.0, 70.0, 58.0], [100.0, 88.0, 76.0, 64.0]]
+xs = np.linspace(0.0, 18000.0, 40)
+path = np.column_stack([xs, np.zeros_like(xs), np.clip((xs-1500)*0.11, 0, 2500),
+                        np.where(xs < 3000, 12000.0, 10000.0), np.full_like(xs, 82.3)])
+ph.noise_contour(path, powers, distances, sel, lmax,
+                 x=np.linspace(-2500, 20000, 60), y=np.linspace(-6000, 6000, 48)).plot()
+```
+
+Validado contra el workbook de referencia de ECAC Doc 29 5ª ed. Vol 3 Parte 1:
+la geometría de segmento, la atenuación lateral, la instalación del motor y la
+fracción de ruido reproducen los valores de referencia con < 0,01 dB, y la suma
+energética de segmentos coincide con el `SEL` de referencia. La directividad de
+inicio de rodaje es el único término diferido.
 
 ---
 
@@ -154,6 +184,8 @@ lateral e integración de contornos en malla son un desarrollo posterior aparte.
 ETM Vol. I (oráculos de ejemplo trabajado), IEC 61265:1995 (tolerancias del
 sistema de medida), SAE ARP 5534:2021 (absorción de banda por el método SAE;
 coeficiente de tono puro de ISO 9613-1), ECAC Doc 29 4ª ed. Vol 2 §4.2
-(interpolación NPD del nivel de evento). Las demás etapas de contorno de ECAC
-(segmentación, atenuación lateral, integración de contornos) son un desarrollo
-posterior aparte.
+(interpolación NPD del nivel de evento) y el cálculo de evento único por
+segmentos (ajuste de impedancia, duración, instalación del motor, atenuación
+lateral, fracción de ruido, suma) hasta los contornos en malla de tierra,
+validado contra el workbook de referencia de la Doc 29 5ª ed. Vol 3 Parte 1. La
+directividad de inicio de rodaje (§4.5.7) queda fuera del alcance.

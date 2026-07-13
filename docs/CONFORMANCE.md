@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **182/182 conformance checks pass** across 31 domains and 112 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **184/184 conformance checks pass** across 31 domains and 114 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -448,10 +448,12 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b> — 100% (4/4)</summary>
+<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b> — 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
+| SAE ARP 5534 band-attenuation continuity | SAE-Method δ_B at the 150 dB branch split (Eq. 7 vs Eq. 8), dB | 123.95 dB (+/-0.01 dB) | 123.953 dB | 0.003 dB | &#9989; |
+| SAE ARP 5534 pure-tone coefficient (ISO 9613-1) | Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m | 0.006186 dB/m (+/-0 dB/m) | 0.006186 dB/m | 0 dB/m | &#9989; |
 | ICAO Annex 16 Vol. I App. 2 Table A2-3 | Perceived noisiness at SPL(b), 1 kHz band, in noys | 1 (+/-0) | 1 | 0 | &#9989; |
 | ICAO Doc 9501 ETM Vol. I Table 3-7 | Tone correction of the turbofan example, dB | 2 (+/-0) | 2 | 0 | &#9989; |
 | ICAO Doc 9501 ETM Vol. I Table 4-4 | Integrated-method reference EPNL, EPNdB | 92.619 EPNdB (+/-0.01 EPNdB) | 92.619 EPNdB | 0 EPNdB | &#9989; |

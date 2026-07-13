@@ -103,6 +103,7 @@ if TYPE_CHECKING:
         ParabolicEquationResult,
         RayTraceResult,
     )
+    from .aircraft_atmospheric_absorption import AircraftBandAttenuation
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -1129,6 +1130,33 @@ def plot_parabolic_equation(
     ax.set_xlabel(_LABEL_RANGE_KM)
     ax.set_ylabel(_LABEL_DEPTH_M)
     ax.set_title("Parabolic-equation transmission loss")
+    return ax
+
+
+def plot_aircraft_band_attenuation(
+    result: "AircraftBandAttenuation", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """One-third-octave-band and pure-tone mid-band attenuation versus frequency.
+
+    :param result: An
+        :class:`~phonometry.aircraft_atmospheric_absorption.AircraftBandAttenuation`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the band-attenuation ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    f = np.asarray(result.frequency, dtype=np.float64)
+    label = f"SAE band ({result.path_length:.0f} m)"
+    ax.plot(f, np.asarray(result.band_attenuation),
+            **{"color": _C_PRIMARY, "lw": 1.6, "marker": "o", "ms": 3, "label": label, **kwargs})
+    ax.plot(f, np.asarray(result.midband_attenuation), color=_C_SECONDARY, lw=1.0, ls="--",
+            label="Pure-tone mid-band (ISO 9613-1)")
+    ax.set_xscale("log")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Attenuation [dB]")
+    ax.set_title("Aircraft atmospheric absorption (SAE ARP 5534)")
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc="upper left", fontsize="small")
     return ax
 
 

@@ -2937,6 +2937,31 @@ def _chk_uwn_pe() -> Outcome:
 # ===========================================================================
 _AIRCRAFT = "Aircraft noise (ICAO Annex 16 / IEC 61265)"
 
+
+@register(
+    _AIRCRAFT,
+    "SAE ARP 5534 band-attenuation continuity",
+    "SAE-Method δ_B at the 150 dB branch split (Eq. 7 vs Eq. 8), dB",
+)
+def _chk_arp5534_continuity() -> Outcome:
+    # The two SAE-Method branches meet at δ_t = 150 dB (Eqs. 7-8).
+    a, b, c, d, e = 0.867942, 0.111761, 0.95824, 0.008191, 1.6
+    eq7 = a * 150.0 * (1.0 + b * (c - d * 150.0)) ** e
+    eq8 = 9.2 + 0.765 * 150.0
+    return numeric(eq8, eq7, 0.01, unit="dB", places=3)
+
+
+@register(
+    _AIRCRAFT,
+    "SAE ARP 5534 pure-tone coefficient (ISO 9613-1)",
+    "Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m",
+)
+def _chk_arp5534_coefficient() -> Outcome:
+    # ARP 5534 §3.1: the pure-tone coefficient is the ISO 9613-1 one.
+    expected = float(ph.air_attenuation(1000.0, 25.0, 70.0, 101.325, exact_midband=True))
+    res = ph.sae_band_attenuation([1000.0], 1000.0, temperature=25.0, relative_humidity=70.0)
+    return numeric(expected, float(res.coefficient[0]), 1e-9, unit="dB/m", places=6)
+
 # ICAO Doc 9501 ETM Vol. I (2018) Table 3-7 turbofan spectrum (bands 1-2 blank).
 _ETM_SPL_37 = [
     -999.0, -999.0, 70.0, 62.0, 70.0, 80.0, 82.0, 83.0, 76.0, 80.0,

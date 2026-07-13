@@ -118,6 +118,39 @@ report = ph.verify_aircraft_noise_system(
 print(report["passed"], report["checks"])
 ```
 
+## 5. Atmospheric absorption (SAE ARP 5534)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption.svg" alt="Aircraft atmospheric absorption versus frequency for two path lengths: the SAE-Method one-third-octave-band attenuation rises with frequency and stays below the pure-tone mid-band value at high absorption" width="82%">
+</picture>
+
+Correcting a measured flyover spectrum to reference atmospheric conditions
+needs the one-third-octave-band attenuation over the path. The pure-tone
+coefficient is the ISO 9613-1 one (identical, per ARP 5534 §3.1) already
+provided by `air_attenuation`; `sae_band_attenuation` adds the **SAE Method**
+(ARP 5534 §3.2.2), a regression that maps the pure-tone mid-band path-length
+attenuation `δ_t = α·s` to the band attenuation `δ_B` and stays consistent with
+the ISO/ANSI Exact Method well beyond the 50 dB limit of the older Approximate
+Method.
+
+```python
+import numpy as np
+import phonometry as ph
+
+freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz–10 kHz thirds
+att = ph.sae_band_attenuation(freqs, path_length=7620.0,
+                              temperature=25.0, relative_humidity=70.0)
+print(att.band_attenuation)   # δ_B per band, dB
+att.plot()                    # band vs pure-tone mid-band (needs matplotlib)
+```
+
+`sae_band_attenuation` returns an `AircraftBandAttenuation` with `band_attenuation`
+(`δ_B`), `midband_attenuation` (`δ_t = α·s`) and the pure-tone `coefficient`
+(`α`, dB/m). The SAE Method is valid roughly 6–32 °C and 20–95 % RH (the 14 CFR
+Part 36 test window), over path lengths to 7620 m, and is reciprocal
+(source↔receiver).
+
 ---
 
 **Standards.** ICAO Annex 16, *Environmental Protection*, Vol. I, *Aircraft
@@ -126,6 +159,7 @@ tone correction Table A2-2, duration correction). ICAO Doc 9501, *Environmental
 Technical Manual*, Vol. I: the worked examples (Table 3-7 tone correction,
 Table 4-4 integrated-method EPNL) used as numeric oracles. IEC 61265:1995,
 *Instruments for the measurement of aircraft noise*: the measurement-system
-performance tolerances. The full certification correction chain (atmospheric
-absorption, reference-condition corrections) and airport noise contours are out
-of scope here.
+performance tolerances. SAE ARP 5534:2021, *Application of Pure-Tone
+Atmospheric Absorption Losses to One-Third-Octave-Band Data*: the SAE-Method
+band attenuation (Eqs. 7–10), with the pure-tone coefficient from ISO 9613-1.
+Airport noise contours (ECAC Doc 29) remain out of scope here.

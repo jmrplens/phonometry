@@ -47,7 +47,14 @@ def _edges() -> set[tuple[str, str, str]]:
         pkg = _package_of(path)
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
-            if not isinstance(node, ast.ImportFrom) or node.level == 0:
+            if not isinstance(node, ast.ImportFrom):
+                continue
+            if node.level == 0:
+                # Absolute self-imports would bypass the relative-import rules.
+                if node.module and (node.module == "phonometry"
+                                    or node.module.startswith("phonometry.")):
+                    pytest.fail(f"{path.relative_to(SRC)}: absolute self-import "
+                                f"'{node.module}' (use relative imports)")
                 continue
             target = node.module or ""
             head = target.split(".")[0] if target else ""

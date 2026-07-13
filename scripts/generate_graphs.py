@@ -3668,6 +3668,7 @@ def generate_numerical_propagation(output_dir: str) -> None:
                                   n_depth_points=1024)
     tl = pe_field.transmission_loss
     vmax = float(np.percentile(tl[np.isfinite(tl)], 95))
+    tl = np.where(np.isfinite(tl), tl, vmax)  # clip the infinite zero-range column
     img = axes[1].imshow(tl, cmap="viridis_r", vmin=vmax - 50.0, vmax=vmax,
                          aspect="auto", origin="upper", interpolation="bilinear",
                          extent=(0.0, 100.0, float(zprof[-1]), 0.0))

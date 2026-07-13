@@ -167,6 +167,21 @@ def test_invalid_inputs_rejected() -> None:
         normal_modes(20.0, *_ISO, source_depth=50.0, receiver_depth=50.0, bottom="soft")
     with pytest.raises(ValueError, match="source_depth"):
         parabolic_equation(50.0, *_ISO, source_depth=150.0)
+    with pytest.raises(ValueError, match="launch_angles_deg"):
+        ray_trace(*_ISO, source_depth=50.0, launch_angles_deg=[90.0])  # not forward
+    with pytest.raises(ValueError, match="range_step"):
+        parabolic_equation(50.0, *_ISO, source_depth=50.0, max_range=1000.0,
+                           range_step=2000.0)
+
+
+def test_ray_trace_steep_angle_reaches_max_range() -> None:
+    # Range-marching guarantees every valid ray spans [0, max_range], even steep
+    # ones (arc-length marching would fall short here).
+    res = ray_trace(*_ISO, source_depth=100.0, launch_angles_deg=[60.0],
+                    max_range=5000.0, n_steps=3000)
+    assert res.ranges[0, -1] == pytest.approx(5000.0)
+    # Depth stays within the water column at all times (reflections folded).
+    assert np.all((res.depths >= 0.0) & (res.depths <= _ISO[0][-1]))
 
 
 def test_plots_smoke() -> None:

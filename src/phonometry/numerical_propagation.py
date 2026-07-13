@@ -150,7 +150,7 @@ def normal_modes(
     ranges = (
         np.linspace(100.0, 10_000.0, 400)
         if ranges_m is None
-        else np.atleast_1d(np.asarray(ranges_m, dtype=np.float64))
+        else np.asarray(ranges_m, dtype=np.float64).ravel()
     )
     if np.any(ranges <= 0.0) or not np.all(np.isfinite(ranges)):
         raise ValueError("'ranges_m' must be finite and positive.")
@@ -180,8 +180,11 @@ def normal_modes(
         idx = np.arange(1, n - 1)
         main = k2[idx] - 2.0 * inv_dz2
         off = np.full(idx.size - 1, inv_dz2)
-    mat = np.diag(main) + np.diag(off, 1) + np.diag(off, -1)
-    eigvals, eigvecs = np.linalg.eigh(mat)
+    # The operator is symmetric tridiagonal; solve directly from the diagonals
+    # (O(N²) time, O(N) memory) rather than materialising a dense N×N matrix.
+    from scipy.linalg import eigh_tridiagonal
+
+    eigvals, eigvecs = eigh_tridiagonal(main, off)
     kr2 = eigvals
     prop = kr2 > 0.0
     kr = np.sqrt(kr2[prop])
@@ -290,61 +293,55 @@ def ray_trace(
     rmax = require_positive(max_range, "max_range")
     if int(n_steps) < 2:
         raise ValueError("'n_steps' must be at least 2.")
-    angles = np.atleast_1d(np.asarray(launch_angles_deg, dtype=np.float64))
+    angles = np.asarray(launch_angles_deg, dtype=np.float64).ravel()
     if angles.size == 0 or not np.all(np.isfinite(angles)):
         raise ValueError("'launch_angles_deg' must be finite and non-empty.")
+    if np.any(np.abs(angles) >= 90.0):
+        raise ValueError("'launch_angles_deg' must be within (-90, 90) degrees (forward rays).")
 
     # Fine grid for c(z) and its gradient dc/dz (piecewise-linear profile).
     zf = np.linspace(0.0, water_depth, max(512, z_prof.size * 8))
     cf = np.interp(zf, z_prof, c_prof)
     dcf = np.gradient(cf, zf)
 
+    # March in range r (not arc length): every valid ray then spans [0, rmax] in
+    # n_steps regardless of its launch angle. State is (z, ζ); ξ = cosθ0/c(zs) is
+    # invariant for c(z). From dz/ds, dζ/ds and dr/ds = c·ξ:
+    #   dz/dr = ζ/ξ,   dζ/dr = −(dc/dz)/(c³·ξ).
     def deriv(
-        z_arr: "NDArray[np.float64]", xi_arr: "NDArray[np.float64]", zeta_arr: "NDArray[np.float64]"
-    ) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
-        # Vectorised over all rays at once (data-parallel): dr/ds, dz/ds, dζ/ds.
+        z_arr: "NDArray[np.float64]", zeta_arr: "NDArray[np.float64]", xi_arr: "NDArray[np.float64]"
+    ) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+        # Vectorised over all rays at once (data-parallel).
         cc = np.interp(z_arr, zf, cf)
         dc = np.interp(z_arr, zf, dcf)
-        return cc * xi_arr, cc * zeta_arr, -dc / cc**2
+        return zeta_arr / xi_arr, -dc / (cc**3 * xi_arr)
 
-    # Arc-length step: rays are ~horizontal, so total length ~ rmax; pad ×1.5.
-    ds = 1.5 * rmax / (int(n_steps) - 1)
-    n_rays = angles.size
     ns = int(n_steps)
-    ray_r = np.zeros((n_rays, ns))
-    ray_z = np.zeros((n_rays, ns))
-
+    dr = rmax / (ns - 1)
+    ranges = np.linspace(0.0, rmax, ns)
     c0 = float(np.interp(zs, zf, cf))
     th = np.radians(angles)
-    r = np.zeros(n_rays)
-    z = np.full(n_rays, zs)
-    xi = np.cos(th) / c0  # Snell invariant per ray (constant for c(z))
+    xi = np.cos(th) / c0  # Snell invariant per ray (> 0 since |θ0| < 90°)
+    z = np.full(angles.size, zs)
     zeta = np.sin(th) / c0
+    ray_z = np.zeros((angles.size, ns))
     ray_z[:, 0] = zs
-    done = np.zeros(n_rays, dtype=bool)
+    two_d = 2.0 * water_depth
     for s in range(1, ns):
-        k1r, k1z, k1zeta = deriv(z, xi, zeta)
-        k2r, k2z, k2zeta = deriv(z + 0.5 * ds * k1z, xi, zeta + 0.5 * ds * k1zeta)
-        k3r, k3z, k3zeta = deriv(z + 0.5 * ds * k2z, xi, zeta + 0.5 * ds * k2zeta)
-        k4r, k4z, k4zeta = deriv(z + ds * k3z, xi, zeta + ds * k3zeta)
-        step = ~done
-        r = r + step * ds / 6.0 * (k1r + 2 * k2r + 2 * k3r + k4r)
-        z = z + step * ds / 6.0 * (k1z + 2 * k2z + 2 * k3z + k4z)
-        zeta = zeta + step * ds / 6.0 * (k1zeta + 2 * k2zeta + 2 * k3zeta + k4zeta)
-        # Reflect at the surface (z<0) and the bottom (z>D): mirror the slowness.
-        below = z < 0.0
-        z = np.where(below, -z, z)
-        zeta = np.where(below, -zeta, zeta)
-        above = z > water_depth
-        z = np.where(above, 2.0 * water_depth - z, z)
-        zeta = np.where(above, -zeta, zeta)
-        ray_r[:, s] = r
+        k1z, k1zeta = deriv(z, zeta, xi)
+        k2z, k2zeta = deriv(z + 0.5 * dr * k1z, zeta + 0.5 * dr * k1zeta, xi)
+        k3z, k3zeta = deriv(z + 0.5 * dr * k2z, zeta + 0.5 * dr * k2zeta, xi)
+        k4z, k4zeta = deriv(z + dr * k3z, zeta + dr * k3zeta, xi)
+        z = z + dr / 6.0 * (k1z + 2 * k2z + 2 * k3z + k4z)
+        zeta = zeta + dr / 6.0 * (k1zeta + 2 * k2zeta + 2 * k3zeta + k4zeta)
+        # Fold any overshoot (arbitrarily many surface/bottom crossings) back
+        # into [0, D] with a triangle wave, flipping ζ once per crossing.
+        zmod = np.mod(z, two_d)
+        upper = zmod > water_depth
+        z = np.where(upper, two_d - zmod, zmod)
+        zeta = np.where(upper, -zeta, zeta)
         ray_z[:, s] = z
-        done |= r >= rmax
-        if done.all():
-            ray_r[:, s:] = r[:, None]
-            ray_z[:, s:] = z[:, None]
-            break
+    ray_r = np.broadcast_to(ranges, ray_z.shape).copy()
 
     return RayTraceResult(
         launch_angles=angles,
@@ -423,6 +420,8 @@ def parabolic_equation(
         raise ValueError("'source_depth' must lie within the water column.")
     rmax = require_positive(max_range, "max_range")
     dr = require_positive(range_step, "range_step")
+    if dr > rmax:
+        raise ValueError("'range_step' must not exceed 'max_range'.")
     n = int(n_depth_points)
     if n < 16:
         raise ValueError("'n_depth_points' must be at least 16.")

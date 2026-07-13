@@ -1093,7 +1093,7 @@ def plot_parabolic_equation(
     :param result: A
         :class:`~phonometry.numerical_propagation.ParabolicEquationResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param kwargs: Forwarded to ``pcolormesh``.
+    :param kwargs: Forwarded to ``imshow``.
     :return: The axes.
     """
     ax = ax if ax is not None else _new_axes()
@@ -1102,6 +1102,9 @@ def plot_parabolic_equation(
     tl = np.asarray(result.transmission_loss, dtype=np.float64)
     finite = tl[np.isfinite(tl)]
     vmax = float(np.percentile(finite, 95)) if finite.size else 100.0
+    # The zero-range column is infinite (1/√r); clip non-finite samples to vmax
+    # so imshow does not render them as a spurious stripe.
+    tl = np.where(np.isfinite(tl), tl, vmax)
     # imshow renders the field as a single raster image (no per-cell vector
     # quads), which avoids moiré and keeps the figure light.
     img = ax.imshow(

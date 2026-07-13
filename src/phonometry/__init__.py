@@ -79,7 +79,7 @@ from .hearing.noise_induced_hearing_loss import (
     htlan,
     nipts,
 )
-from .enclosed_space_absorption import (
+from .room.enclosed_space_absorption import (
     ReverberationResult,
     air_absorption_area,
     enclosed_space_reverberation,
@@ -88,7 +88,7 @@ from .enclosed_space_absorption import (
     object_fraction,
     reverberation_time,
 )
-from .reverberation_prediction import (
+from .room.reverberation_prediction import (
     ReverberationModelResult,
     arau_puchades_reverberation_time,
     eyring_reverberation_time,
@@ -98,7 +98,7 @@ from .reverberation_prediction import (
     reverberation_time_models,
     sabine_reverberation_time,
 )
-from .dynamic_stiffness import (
+from .materials.dynamic_stiffness import (
     DynamicStiffnessResult,
     DynamicStiffnessWarning,
     apparent_dynamic_stiffness,
@@ -139,14 +139,14 @@ from .emission.vibration_sound_power import (
     velocity_level,
     velocity_level_from_acceleration,
 )
-from .structure_borne_power import (
+from .building.structure_borne_power import (
     StructureBornePowerResult,
     plate_loss_factor,
     reception_plate_power,
     spatial_mean_velocity_level,
     structure_borne_power_level,
 )
-from .installed_structure_borne import (
+from .building.installed_structure_borne import (
     REFERENCE_AREA,
     InstalledSourceResult,
     coupling_term,
@@ -190,7 +190,7 @@ from .metrology.uncertainty import (
     triangular,
     u_shaped,
 )
-from .room_noise import (
+from .room.room_noise import (
     NCResult,
     RCResult,
     nc_curve,
@@ -379,7 +379,7 @@ from .metrology.parametric_filters import (
     time_weighting,
     weighting_filter,
 )
-from .insulation import (
+from .building.insulation import (
     AirborneInsulationResult,
     FacadeInsulationResult,
     ImpactInsulationResult,
@@ -393,7 +393,7 @@ from .insulation import (
     weighted_impact_rating,
     weighted_rating,
 )
-from .lab_insulation import (
+from .building.lab_insulation import (
     LabAirborneInsulationResult,
     LabImpactInsulationResult,
     LabInsulationWarning,
@@ -401,7 +401,7 @@ from .lab_insulation import (
     lab_airborne_insulation,
     lab_impact_insulation,
 )
-from .intensity_insulation import (
+from .building.intensity_insulation import (
     IntensityElementNormalizedResult,
     IntensityReductionResult,
     adaptation_term_kc,
@@ -410,14 +410,14 @@ from .intensity_insulation import (
     intensity_sound_reduction,
     surface_pressure_intensity_indicator,
 )
-from .floor_covering_improvement import (
+from .building.floor_covering_improvement import (
     FloorCoveringImprovementResult,
     acceleration_level,
     background_corrected_level,
     impact_improvement,
     improvement_octave_bands,
 )
-from .survey_insulation import (
+from .building.survey_insulation import (
     SurveyAirborneResult,
     SurveyFacadeResult,
     SurveyImpactResult,
@@ -429,7 +429,7 @@ from .survey_insulation import (
     survey_impact_insulation,
     survey_service_equipment_level,
 )
-from .open_plan import OpenPlanResult, open_plan_metrics
+from .room.open_plan import OpenPlanResult, open_plan_metrics
 from .emission.sound_power import (
     MeteorologicalCorrection,
     PrecisionCriteria,
@@ -460,7 +460,7 @@ from .emission.sound_power_intensity import (
     SoundPowerIntensityResult,
     sound_power_intensity,
 )
-from .scattering_diffusion import (
+from .materials.scattering_diffusion import (
     BASE_PLATE_BANDS,
     BASE_PLATE_MAX_SCATTERING,
     TWO_DIMENSIONAL_SOURCE_WEIGHTS,
@@ -485,7 +485,7 @@ from .scattering_diffusion import (
     specular_absorption_coefficient,
     speed_of_sound,
 )
-from .road_absorption import (
+from .materials.road_absorption import (
     DEFAULT_MIC_HEIGHT,
     DEFAULT_SOURCE_HEIGHT,
     DEFAULT_SPEED_OF_SOUND,
@@ -546,13 +546,13 @@ from .human_vibration import (
     weighted_acceleration,
     weighting_factors,
 )
-from .room_acoustics import (
+from .room.room_acoustics import (
     DecayCurve,
     RoomAcousticsResult,
     decay_curve,
     room_parameters,
 )
-from .sound_absorption import (
+from .materials.sound_absorption import (
     AbsorptionWarning,
     absorption_area,
     absorption_coefficient,
@@ -563,7 +563,7 @@ from .air_absorption import (
     air_attenuation,
     air_attenuation_m,
 )
-from .impedance_tube import (
+from .materials.impedance_tube import (
     ImpedanceTubeResult,
     ImpedanceTubeWarning,
     TransferMatrix,
@@ -594,7 +594,7 @@ from .impedance_tube import (
     two_microphone_impedance,
     wave_decomposition,
 )
-from .airflow_resistance import (
+from .materials.airflow_resistance import (
     AirflowResistanceWarning,
     StaticAirflowResult,
     airflow_resistance,
@@ -607,7 +607,7 @@ from .airflow_resistance import (
     static_airflow_resistance,
     thermal_boundary_layer_thickness,
 )
-from .absorption_rating import (
+from .materials.absorption_rating import (
     OCTAVE_BANDS,
     REFERENCE_CURVE,
     THIRD_OCTAVE_BANDS,
@@ -630,7 +630,7 @@ from .outdoor_propagation import (
     outdoor_propagation_attenuation,
     predicted_receiver_level,
 )
-from .room_ir import (
+from .room.room_ir import (
     ImpulseResponseResult,
     ImpulseResponseWarning,
     impulse_response,
@@ -641,7 +641,7 @@ from .room_ir import (
 )
 from ._plotting import plot_excitation
 from ._internal.warnings import PhonometryWarning, _warn_renamed
-from .building_prediction import (
+from .building.building_prediction import (
     AirbornePredictionResult,
     FlankingPath,
     ImpactPredictionResult,
@@ -657,7 +657,7 @@ from .building_prediction import (
     predicted_impact_insulation,
     standardized_impact_level,
 )
-from .facade_prediction import (
+from .building.facade_prediction import (
     FacadeElement,
     FacadePredictionResult,
     RadiatedPowerResult,
@@ -666,7 +666,7 @@ from .facade_prediction import (
     outdoor_level,
     radiated_sound_power,
 )
-from .flanking_transmission import (
+from .building.flanking_transmission import (
     FlankingImpactLevelResult,
     FlankingLevelDifferenceResult,
     VibrationReductionResult,
@@ -684,7 +684,7 @@ from .flanking_transmission import (
     vibration_reduction_index,
     vibration_reduction_index_from_flanking,
 )
-from .building_uncertainty import (
+from .building.building_uncertainty import (
     COVERAGE_FACTORS,
     BandUncertainty,
     UncertainValue,
@@ -703,7 +703,7 @@ from .building_uncertainty import (
     single_number_uncertainty_uncorrelated,
     uncertain_value,
 )
-from .absorption_uncertainty import (
+from .materials.absorption_uncertainty import (
     AbsorptionUncertaintyResult,
     sound_absorption_coefficient_uncertainty,
     absorption_coverage_factor,

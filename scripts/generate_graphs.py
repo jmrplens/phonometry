@@ -2380,7 +2380,7 @@ def generate_schroeder_decay(output_dir: str) -> None:
     """Schroeder backward integration with T20/T30/EDT regressions (ISO 3382)."""
     print("Generating schroeder_decay.png...")
     from phonometry import decay_curve, room_parameters
-    from phonometry.room_acoustics import (
+    from phonometry.room.room_acoustics import (
         _EDT_RANGE,
         _T20_RANGE,
         _T30_RANGE,
@@ -2587,7 +2587,7 @@ def generate_impulse_response(output_dir: str) -> None:
 def generate_insulation_rating(output_dir: str) -> None:
     """ISO 717-1 weighted rating: measured R', shifted reference, deviations."""
     print("Generating insulation_rating.png...")
-    from phonometry.insulation import (
+    from phonometry.building.insulation import (
         _INDEX_500_THIRD,
         _REF_THIRD_OCTAVE,
         weighted_rating,
@@ -2654,7 +2654,7 @@ def generate_insulation_rating(output_dir: str) -> None:
 def generate_impact_rating(output_dir: str) -> None:
     """ISO 717-2 weighted impact rating: measured Ln, shifted reference, CI."""
     print("Generating impact_rating.png...")
-    from phonometry.insulation import (
+    from phonometry.building.insulation import (
         _INDEX_500_THIRD,
         _REF_IMPACT_THIRD_OCTAVE,
         weighted_impact_rating,
@@ -3975,7 +3975,7 @@ def generate_moore_glasberg_time_loudness(output_dir: str) -> None:
 def generate_prediction_flanking_demo(output_dir: str) -> None:
     """EN 12354-1 simplified flanking prediction (Annex H.3 worked example)."""
     print("Generating prediction_flanking_demo.png...")
-    from phonometry.building_prediction import (
+    from phonometry.building.building_prediction import (
         FlankingPath,
         flanking_element,
         predicted_airborne_insulation,
@@ -4796,13 +4796,13 @@ def generate_absorption_uncertainty(output_dir: str) -> None:
 def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     """ISO 12999-1 per-band + single-number measurement uncertainty (situation B)."""
     print("Generating insulation_uncertainty_demo.png...")
-    from phonometry.building_uncertainty import (
+    from phonometry.building.building_uncertainty import (
         band_uncertainty,
         insulation_coverage_factor,
         insulation_expanded_uncertainty,
         single_number_uncertainty,
     )
-    from phonometry.insulation import weighted_rating
+    from phonometry.building.insulation import weighted_rating
 
     # Reuse the ISO 717-1 Annex C measured R' curve (100 Hz .. 3150 Hz); its
     # weighted rating is R'w = 30 dB.
@@ -5906,7 +5906,7 @@ def generate_enclosed_space_absorption(output_dir: str) -> None:
     """EN 12354-6: absorption area and reverberation time of a room."""
     print("Generating enclosed_space_absorption.png...")
     from phonometry import enclosed_space_reverberation
-    from phonometry.enclosed_space_absorption import OCTAVE_BANDS
+    from phonometry.room.enclosed_space_absorption import OCTAVE_BANDS
 
     # A 5 x 4 x 3 m office (60 m3): hard plaster walls and floor; the ceiling is
     # either bare plaster or lined with an absorbing acoustic tile.
@@ -5951,7 +5951,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     """ANSI S12.2-2019: NC tangency rating and RC Mark II classification."""
     print("Generating room_noise_criteria.png...")
     from phonometry import noise_criterion, room_criterion
-    from phonometry.room_noise import NC_CURVES, NC_INDICES, OCTAVE_BANDS
+    from phonometry.room.room_noise import NC_CURVES, NC_INDICES, OCTAVE_BANDS
 
     # A ventilation-dominated room spectrum: the low-frequency bands rise well
     # above the sloped RC reference (a rumble tag under RC Mark II) while the
@@ -6649,7 +6649,7 @@ def animate_schroeder(output_dir: str) -> None:
     from matplotlib.animation import FuncAnimation
 
     from phonometry import decay_curve, room_parameters
-    from phonometry.room_acoustics import _T20_RANGE, _T30_RANGE, _onset_index
+    from phonometry.room.room_acoustics import _T20_RANGE, _T30_RANGE, _onset_index
 
     T = _translate_str
     fs, reverb_t = 48000, 1.2

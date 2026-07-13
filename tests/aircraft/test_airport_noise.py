@@ -490,3 +490,45 @@ def test_noise_contour_accepts_bank() -> None:
     assert level.level[0, 0] == pytest.approx(level.level[1, 0])
     with pytest.raises(ValueError, match="bank"):
         noise_contour(path, _NP, _ND, _NSEL, _NMAX, bank=[1.0, 2.0], **kw)
+
+
+def test_contour_grid_matches_scalar_event_level() -> None:
+    # The vectorised grid kernel must reproduce the per-point scalar path to
+    # machine precision for every feature combination: takeoff roll (SOR,
+    # Eq. 4-21a), landing rollout (Eq. 4-21b), bank, both metrics and both
+    # engine mountings.
+    path = [
+        [-500.0, 0.0, 0.0, 8000.0, 0.0],       # takeoff ground roll
+        [800.0, 0.0, 0.0, 10000.0, 80.0],      # rotation
+        [2500.0, 100.0, 300.0, 10000.0, _VREF],  # climb, slight turn
+        [4500.0, 400.0, 700.0, 9000.0, _VREF],
+    ]
+    gr = [True, False, False]
+    lr = [False, False, False]
+    bank = [0.0, 0.0, 8.0]
+    x = np.linspace(-2000.0, 5000.0, 9)
+    y = np.linspace(-1500.0, 1500.0, 7)
+    for metric in ("exposure", "maximum"):
+        for mounting in ("wing", "propeller"):
+            res = noise_contour(path, _NP, _ND, _NSEL, _NMAX, x=x, y=y,
+                                metric=metric, mounting=mounting,
+                                ground_roll=gr, landing_roll=lr, bank=bank)
+            for iy, yv in enumerate(y):
+                for ix, xv in enumerate(x):
+                    ref = event_level(path, [xv, yv, 0.0], _NP, _ND, _NSEL,
+                                      _NMAX, metric=metric, mounting=mounting,
+                                      ground_roll=gr, landing_roll=lr,
+                                      bank=bank).level
+                    assert res.level[iy, ix] == pytest.approx(ref, abs=1e-9), (
+                        metric, mounting, xv, yv)
+    # Landing rollout branch, separately (ahead-of-rollout geometry).
+    land = [[0.0, 0.0, 300.0, 9000.0, _VREF], [2000.0, 0.0, 0.0, 8000.0, 70.0],
+            [3200.0, 0.0, 0.0, 4000.0, 0.0]]
+    lmask = [False, True]
+    res = noise_contour(land, _NP, _ND, _NSEL, _NMAX, x=[1000.0, 4000.0],
+                        y=[-200.0, 200.0], landing_roll=lmask)
+    for iy, yv in enumerate([-200.0, 200.0]):
+        for ix, xv in enumerate([1000.0, 4000.0]):
+            ref = event_level(land, [xv, yv, 0.0], _NP, _ND, _NSEL, _NMAX,
+                              landing_roll=lmask).level
+            assert res.level[iy, ix] == pytest.approx(ref, abs=1e-9)

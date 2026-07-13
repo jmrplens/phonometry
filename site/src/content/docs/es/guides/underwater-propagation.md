@@ -139,5 +139,37 @@ noise = ph.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
                                shipping=ship.source_psd)
 ```
 
-Los solvers numéricos (trazado de rayos, modos normales, ecuación parabólica)
-son una adición futura aparte.
+## Solvers numéricos
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_es.png" alt="Un perfil de velocidad del sonido de Munk, trayectorias de rayos formando zonas de convergencia, y la pérdida por transmisión de modos normales frente a la ecuación parabólica coincidiendo en tendencia" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_es_dark.png" alt="Un perfil de velocidad del sonido de Munk, trayectorias de rayos formando zonas de convergencia, y la pérdida por transmisión de modos normales frente a la ecuación parabólica coincidiendo en tendencia" style="width:100%">
+
+Para entornos independientes de la distancia el campo puede calcularse
+numéricamente con tres solvers (Jensen et al., *Computational Ocean Acoustics*):
+
+- **`normal_modes`** — el problema de autovalores de Sturm-Liouville separado en
+  profundidad, resuelto por diferencias finitas y sumado en pérdida por
+  transmisión (validado contra los modos exactos de la guía ideal).
+- **`ray_trace`** — las ecuaciones de trayectoria de rayos integradas con
+  Runge-Kutta, vectorizadas sobre todos los rayos a la vez (validado contra los
+  arcos de círculo de un gradiente lineal).
+- **`parabolic_equation`** — la PE estándar (Tappert) por el algoritmo split-step
+  de Fourier (validado contra el esparcimiento esférico en campo libre).
+
+```python
+import numpy as np
+import phonometry as ph
+
+z = np.linspace(0.0, 5000.0, 60)
+eta = 2.0 * (z - 1300.0) / 1300.0
+c = 1500.0 * (1.0 + 0.00737 * (eta - 1.0 + np.exp(-eta)))   # perfil de Munk
+ph.ray_trace(z, c, source_depth=1000.0,
+             launch_angles_deg=np.linspace(-12, 12, 21), max_range=100e3).plot()
+
+modes = ph.normal_modes(50.0, [0.0, 200.0], [1500.0, 1500.0],
+                        source_depth=50.0, receiver_depth=100.0)
+ph.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1500.0],
+                      source_depth=50.0, max_range=20e3).plot()
+```
+
+Los tres asumen una columna de agua independiente de la distancia con superficie
+de presión-liberada.

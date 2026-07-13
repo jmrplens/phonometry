@@ -98,6 +98,11 @@ if TYPE_CHECKING:
     from .seabed_reflection import BottomLossResult
     from .ocean_ambient_noise import AmbientNoiseResult
     from .ship_traffic_noise import ShipTrafficSpectrum
+    from .numerical_propagation import (
+        NormalModeResult,
+        ParabolicEquationResult,
+        RayTraceResult,
+    )
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -136,6 +141,11 @@ _C_EDGE: Final = "#555555"
 
 #: Standard-normal quantile of 0.9 (the 10 % / 90 % fractile offset).
 _Z90: Final = 1.2816
+
+#: Common axis labels reused across the underwater-propagation plots.
+_LABEL_DEPTH_M: Final = "Depth [m]"
+_LABEL_TL_DB: Final = "Transmission loss [dB]"
+_LABEL_RANGE_KM: Final = "Range [km]"
 
 
 def _import_pyplot() -> Any:
@@ -886,7 +896,7 @@ def plot_sound_speed_profile(
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
     ax.set_xlabel("Sound speed [m/s]")
-    ax.set_ylabel("Depth [m]")
+    ax.set_ylabel(_LABEL_DEPTH_M)
     ax.set_title("Sea-water sound-speed profile")
     ax.grid(True, alpha=0.3)
     ax.legend(loc="lower left", fontsize="small")
@@ -914,7 +924,7 @@ def plot_transmission_loss(
     ax.plot(r, np.asarray(result.absorption), color=_C_SECONDARY, lw=1.0, ls=":",
             label=f"Absorption ({result.absorption_coefficient:.3g} dB/km)")
     ax.set_xlabel("Range [m]")
-    ax.set_ylabel("Transmission loss [dB]")
+    ax.set_ylabel(_LABEL_TL_DB)
     ax.set_title(f"Underwater transmission loss ({result.model})")
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
@@ -942,7 +952,7 @@ def plot_sonar_equation(
     ax.axhline(0.0, color=_C_REFERENCE, ls="--", lw=1.0, label="Detection limit (SE = 0)")
     ax.axvline(result.figure_of_merit, color=_C_MUTED, ls=":", lw=1.0,
                label=f"Figure of merit = {result.figure_of_merit:.1f} dB")
-    ax.set_xlabel("Transmission loss [dB]")
+    ax.set_xlabel(_LABEL_TL_DB)
     ax.set_ylabel("Signal excess [dB]")
     ax.set_title("Sonar equation")
     ax.grid(True, alpha=0.3)
@@ -1028,6 +1038,97 @@ def plot_ship_traffic_spectrum(
     ax.set_title("Ship traffic source level")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_normal_modes(
+    result: "NormalModeResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Normal-mode transmission loss versus range (loss increasing downward).
+
+    :param result: A :class:`~phonometry.numerical_propagation.NormalModeResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the transmission-loss ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    r = np.asarray(result.ranges, dtype=np.float64)
+    tl = np.asarray(result.transmission_loss, dtype=np.float64)
+    label = f"{result.wavenumbers.size} modes ({result.frequency:.0f} Hz)"
+    ax.plot(r / 1000.0, tl, **{"color": _C_PRIMARY, "lw": 1.2, "label": label, **kwargs})
+    ax.set_xlabel(_LABEL_RANGE_KM)
+    ax.set_ylabel(_LABEL_TL_DB)
+    ax.set_title("Normal-mode transmission loss")
+    if not ax.yaxis_inverted():
+        ax.invert_yaxis()
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="lower right", fontsize="small")
+    return ax
+
+
+def plot_ray_trace(result: "RayTraceResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """Ray paths through the water column (depth increasing downward).
+
+    :param result: A :class:`~phonometry.numerical_propagation.RayTraceResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to each ray ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    r = np.asarray(result.ranges, dtype=np.float64)
+    z = np.asarray(result.depths, dtype=np.float64)
+    for i in range(r.shape[0]):
+        ax.plot(r[i] / 1000.0, z[i], **{"color": _C_PRIMARY, "lw": 0.7, "alpha": 0.7, **kwargs})
+    ax.plot([0.0], [result.source_depth], "o", color=_C_REFERENCE, label="Source")
+    ax.set_xlabel(_LABEL_RANGE_KM)
+    ax.set_ylabel(_LABEL_DEPTH_M)
+    ax.set_title("Ray trace")
+    if not ax.yaxis_inverted():
+        ax.invert_yaxis()
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="lower right", fontsize="small")
+    return ax
+
+
+def plot_parabolic_equation(
+    result: "ParabolicEquationResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Parabolic-equation transmission-loss field (range x depth).
+
+    :param result: A
+        :class:`~phonometry.numerical_propagation.ParabolicEquationResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to ``imshow``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    r = np.asarray(result.ranges, dtype=np.float64) / 1000.0
+    z = np.asarray(result.depths, dtype=np.float64)
+    tl = np.asarray(result.transmission_loss, dtype=np.float64)
+    finite = tl[np.isfinite(tl)]
+    vmax = float(np.percentile(finite, 95)) if finite.size else 100.0
+    # The zero-range column is infinite (1/√r); clip non-finite samples to vmax
+    # so imshow does not render them as a spurious stripe.
+    tl = np.where(np.isfinite(tl), tl, vmax)
+    # imshow renders the field as a single raster image (no per-cell vector
+    # quads), which avoids moiré and keeps the figure light.
+    img = ax.imshow(
+        tl,
+        **{
+            "cmap": "viridis_r",
+            "vmin": vmax - 50.0,
+            "vmax": vmax,
+            "aspect": "auto",
+            "origin": "upper",
+            "interpolation": "bilinear",
+            "extent": (float(r[0]), float(r[-1]), float(z[-1]), float(z[0])),
+            **kwargs,
+        },
+    )
+    ax.figure.colorbar(img, ax=ax, label=_LABEL_TL_DB)
+    ax.set_xlabel(_LABEL_RANGE_KM)
+    ax.set_ylabel(_LABEL_DEPTH_M)
+    ax.set_title("Parabolic-equation transmission loss")
     return ax
 
 

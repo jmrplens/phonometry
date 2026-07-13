@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **195/195 conformance checks pass** across 32 domains and 125 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **196/196 conformance checks pass** across 32 domains and 126 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -470,13 +470,14 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Rotorcraft noise (ECAC Doc 32 / NORAH2)</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>Rotorcraft noise (ECAC Doc 32 / NORAH2)</b> — 100% (4/4)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | ECAC Doc 32 atmospheric attenuation (Table 4) | ΔLa over a 1 km excess path at 1 kHz vs the NORAH2 guidance Table 4, dB | 6.3 dB (+/-0.2 dB) | 6.186 dB | -0.114 dB | &#9989; |
 | ECAC Doc 32 spherical spreading | ΔLs at ten times the 60 m hemisphere reference distance (Eq. 24), dB | -20 dB (+/-0 dB) | -20 dB | 0 dB | &#9989; |
 | ECAC Doc 32 ground effect (rigid limit) | ΔLg over a rigid surface at grazing incidence tends to +6 dB (Eq. 29), dB | 6 dB (+/-1 dB) | 6 dB | 0.002 dB | &#9989; |
+| ECAC Doc 32 propagation chain (NORAH2 prototype) | LA of a single-hemisphere emission vs the NORAH2 prototype single-event history (R22 approach, 223.66 m slant), dB(A) | 55.87 dB(A) (+/-0.1 dB(A)) | 55.886 dB(A) | 0.016 dB(A) | &#9989; |
 
 </details>
 

@@ -17,9 +17,11 @@ shielding, follow in later work.
 
 A `RotorcraftHemisphere` holds the band levels on the azimuth/polar grid (with
 missing bins marked `NaN`). `hemisphere_source_level` reads the source level at an
-arbitrary emission direction, bilinear in the energy domain over the four
-neighbouring bins (Doc 32 Eq. 13); outside the measured coverage it falls back to
-the angularly-nearest filled bin (Eq. 14/15).
+arbitrary emission direction: the grid is first gap-filled by nearest-bin
+constant-value extrapolation (Eq. 14/15, equally-near bins energy-averaged;
+computed once and cached), then the lookup is bilinear in the energy domain over
+the four neighbouring bins (Doc 32 Eq. 13), so partially-measured cells stay
+continuous with their measured corners.
 
 ```python
 import numpy as np
@@ -38,9 +40,11 @@ The hemisphere level at 60 m is carried to the receiver by three adjustments
 
 - **`spherical_spreading_adjustment(r)`** — `ΔLs = −20·log10(r/60)` (Eq. 24).
 - **`atmospheric_adjustment(freqs, r)`** — `ΔLa = −α(f)·(r − 60)` with the
-  ISO 9613-1 pure-tone coefficient (Eq. 26/27), reusing the library's
-  `air_attenuation`. At the ICAO reference atmosphere this reproduces the NORAH2
-  guidance Table 4 (one-third-octave attenuation per km).
+  ISO 9613-1 pure-tone coefficient at the exact band centre (Eq. 26/27), reusing
+  the library's `air_attenuation`; this is what the NORAH2 reference
+  implementation computes. The guidance's alternative SAE (Rickley) band mapping,
+  tabulated in its Table 4, coincides below 3.15 kHz and deviates by up to
+  2.2 dB/km at 8-10 kHz.
 - **`ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity=…)`** — the
   interference between the direct and ground-reflected rays over an impedance
   plane (Chien-Soroka, Eq. 28-35), with the Delany-Bazley one-parameter impedance
@@ -63,10 +67,18 @@ received = (lv
             + ph.ground_effect_adjustment(freqs, 150.0, 1.5, 500.0, flow_resistivity="D"))
 ```
 
-Validated against the NORAH2 guidance Table 4 (atmospheric attenuation, < 0.7 dB
-to 4 kHz), the closed-form inverse-square spreading, the analytic rigid-ground
-`+6 dB` and grazing limits of the ground effect, and exact hemisphere
-interpolation at the grid nodes.
+The standard database is recorded at 60 m, the default. If a hemisphere uses a
+different polar distance (`h.distance`, e.g. 70 m hover rings), pass it to both
+distance-dependent adjustments:
+`spherical_spreading_adjustment(r, reference_distance=h.distance)` and
+`atmospheric_adjustment(freqs, r, reference_distance=h.distance)`.
+
+Validated against the NORAH2 guidance Table 4 (all 31 bands, 10 Hz-10 kHz), the
+closed-form inverse-square spreading, the analytic rigid-ground `+6 dB` and
+grazing limits of the ground effect, off-node bilinear lookups on the reference
+hemispheres of all eleven rotorcraft types, and end to end against the NORAH2
+prototype: single-hemisphere emissions of its reference single-event histories
+are reproduced to 0.1 dB(A) over hard ground (0.5 dB over soft ground).
 
 ---
 

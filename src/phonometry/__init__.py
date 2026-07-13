@@ -222,7 +222,7 @@ from .psychoacoustics.psychoacoustic_annoyance import (
     psychoacoustic_annoyance,
     psychoacoustic_annoyance_from_signal,
 )
-from .distortion import (
+from .electroacoustics.distortion import (
     HarmonicDistortionResult,
     difference_frequency_distortion,
     dynamic_intermodulation_distortion,
@@ -235,12 +235,12 @@ from .distortion import (
     total_difference_frequency_distortion,
     weighted_thd,
 )
-from .frequency_response import (
+from .electroacoustics.frequency_response import (
     FrequencyResponseResult,
     coherence,
     transfer_function,
 )
-from .underwater_acoustics import (
+from .underwater.acoustics import (
     UNDERWATER_REFERENCE_EXPOSURE,
     UNDERWATER_REFERENCE_PRESSURE,
     in_air_to_underwater_spl,
@@ -249,41 +249,41 @@ from .underwater_acoustics import (
     sound_pressure_level,
     underwater_to_in_air_spl,
 )
-from .underwater_sound_speed import (
+from .underwater.sound_speed import (
     SoundSpeedProfile,
     depth_to_pressure,
     sea_water_sound_speed,
     sound_speed_profile,
 )
-from .underwater_propagation import (
+from .underwater.propagation import (
     TransmissionLossResult,
     seawater_absorption,
     spreading_loss,
     transmission_loss,
 )
-from .sonar_equation import (
+from .underwater.sonar_equation import (
     SonarEquationResult,
     active_sonar_equation,
     passive_sonar_equation,
 )
-from .seabed_reflection import (
+from .underwater.seabed_reflection import (
     BottomLossResult,
     bottom_reflection_loss,
     critical_angle,
     reflection_coefficient,
 )
-from .ocean_ambient_noise import (
+from .underwater.ocean_ambient_noise import (
     AmbientNoiseResult,
     ocean_ambient_noise,
     thermal_noise_spectrum,
     wind_noise_spectrum,
 )
-from .ship_traffic_noise import (
+from .underwater.ship_traffic_noise import (
     VESSEL_CLASSES,
     ShipTrafficSpectrum,
     ship_source_spectrum,
 )
-from .numerical_propagation import (
+from .underwater.numerical_propagation import (
     NormalModeResult,
     ParabolicEquationResult,
     RayTraceResult,
@@ -291,11 +291,11 @@ from .numerical_propagation import (
     parabolic_equation,
     ray_trace,
 )
-from .aircraft_atmospheric_absorption import (
+from .aircraft.atmospheric_absorption import (
     AircraftBandAttenuation,
     sae_band_attenuation,
 )
-from .airport_noise import (
+from .aircraft.airport_noise import (
     FlyoverResult,
     NoiseContourResult,
     NpdLevelResult,
@@ -310,28 +310,28 @@ from .airport_noise import (
     npd_level,
     start_of_roll_directivity,
 )
-from .rotorcraft_noise import (
+from .aircraft.rotorcraft_noise import (
     RotorcraftHemisphere,
     atmospheric_adjustment,
     ground_effect_adjustment,
     hemisphere_source_level,
     spherical_spreading_adjustment,
 )
-from .ship_radiated_noise import (
+from .underwater.ship_radiated_noise import (
     ShipSourceLevelResult,
     hydrophone_depths,
     monopole_source_level,
     radiated_noise_level,
     source_level_uncertainty,
 )
-from .pile_driving_noise import (
+from .underwater.pile_driving_noise import (
     PileStrikeResult,
     cumulative_sel,
     cumulative_sel_identical,
     pile_strike_metrics,
     single_strike_sel,
 )
-from .aircraft_noise import (
+from .aircraft.aircraft_noise import (
     NOY_BANDS,
     EPNLResult,
     effective_perceived_noise_level,

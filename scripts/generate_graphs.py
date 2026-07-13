@@ -3611,7 +3611,7 @@ def generate_seabed_reflection(output_dir: str) -> None:
 def generate_ocean_ambient_noise(output_dir: str) -> None:
     """Wenz ambient-noise curves: wind + thermal energy sum vs frequency."""
     print("Generating ocean_ambient_noise...")
-    from phonometry import ocean_ambient_noise
+    from phonometry.underwater import ocean_ambient_noise
 
     freqs = np.logspace(2, 5.5, 300)
     fig, ax = plt.subplots(figsize=(10, 6))

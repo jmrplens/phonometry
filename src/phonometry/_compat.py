@@ -93,6 +93,22 @@ _MOVED: dict[str, str] = {
     "phonometry.impulse_prominence": "phonometry.environmental.impulse_prominence",
     "phonometry.outdoor_propagation": "phonometry.environmental.outdoor_propagation",
     "phonometry.wind_turbine_noise": "phonometry.environmental.wind_turbine_noise",
+    "phonometry.aircraft_atmospheric_absorption": "phonometry.aircraft.atmospheric_absorption",
+    "phonometry.aircraft_noise": "phonometry.aircraft.aircraft_noise",
+    "phonometry.airport_noise": "phonometry.aircraft.airport_noise",
+    "phonometry.rotorcraft_noise": "phonometry.aircraft.rotorcraft_noise",
+    "phonometry.numerical_propagation": "phonometry.underwater.numerical_propagation",
+    "phonometry.ocean_ambient_noise": "phonometry.underwater.ocean_ambient_noise",
+    "phonometry.pile_driving_noise": "phonometry.underwater.pile_driving_noise",
+    "phonometry.seabed_reflection": "phonometry.underwater.seabed_reflection",
+    "phonometry.ship_radiated_noise": "phonometry.underwater.ship_radiated_noise",
+    "phonometry.ship_traffic_noise": "phonometry.underwater.ship_traffic_noise",
+    "phonometry.sonar_equation": "phonometry.underwater.sonar_equation",
+    "phonometry.underwater_acoustics": "phonometry.underwater.acoustics",
+    "phonometry.underwater_propagation": "phonometry.underwater.propagation",
+    "phonometry.underwater_sound_speed": "phonometry.underwater.sound_speed",
+    "phonometry.distortion": "phonometry.electroacoustics.distortion",
+    "phonometry.frequency_response": "phonometry.electroacoustics.frequency_response",
     # <migrate:auto>
 }
 

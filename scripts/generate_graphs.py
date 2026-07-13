@@ -66,7 +66,7 @@ _ES_EXACT = {
         "marcadores: nodos NPD tabulados\nlíneas: interpolación log-lineal",
     "25 °C, 70% RH\nsolid: SAE band, dashed: pure-tone mid-band":
         "25 °C, 70% HR\ncontinuo: banda SAE, discontinuo: tono puro medio de banda",
-    # Emitted by phonometry.filter_design._showfilter (not by this script);
+    # Emitted by phonometry.metrology.filter_design._showfilter (not by this script);
     # do not remove as "orphans".
     "Filter Bank Frequency Response": "Respuesta en frecuencia del banco de filtros",
     "Amplitude [dB]": "Amplitud [dB]",
@@ -1138,7 +1138,7 @@ def generate_filter_responses(output_dir: str) -> None:
             print(f"Generating {filename}...")
             bank = OctaveFilterBank(fs=fs, fraction=fraction, order=order, limits=[12.0, 20000.0], filter_type=f_type)
             
-            from phonometry.filter_design import _showfilter
+            from phonometry.metrology.filter_design import _showfilter
             # Draw first, then save through save_figure so the Spanish
             # translation pass runs on the finished figure (it rewrites the
             # live figure's text artists right before the save).
@@ -1861,7 +1861,7 @@ def generate_class_mask_overlay(output_dir: str) -> None:
     print("Generating class_mask_overlay.png...")
     fs = 48000
 
-    from phonometry.compliance import class_limits
+    from phonometry.metrology.compliance import class_limits
 
     bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200], filter_type="butter")
     idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
@@ -1909,7 +1909,7 @@ def generate_filter_class0_mask(output_dir: str) -> None:
     """Pass-band class 0/1/2 maximum corridors (IEC 61260:1995 / ANSI S1.11-2004)."""
     print("Generating filter_class0_mask...")
     fs = 48000
-    from phonometry.compliance import class_limits
+    from phonometry.metrology.compliance import class_limits
 
     bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200], filter_type="butter")
     idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
@@ -2167,7 +2167,7 @@ def generate_tonality_spectrum(output_dir: str) -> None:
     """Annotated spectrum for the tone-to-noise ratio method."""
     print("Generating tonality_spectrum.png...")
     from phonometry import tone_to_noise_ratio
-    from phonometry.tonality import _averaged_spectrum, _critical_band
+    from phonometry.psychoacoustics.tonality import _averaged_spectrum, _critical_band
 
     fs = 48000
     rng = np.random.default_rng(21)
@@ -2253,7 +2253,7 @@ def generate_sti_curve(output_dir: str) -> None:
     t60_points = [0.3, 0.5, 0.8, 1.2, 2.0, 3.0, 5.0]
 
     # The 14 full-STI modulation frequencies and the male alpha/beta
-    # factors of IEC 60268-16 Ed.5 Table A.1 (phonometry.sti keeps them
+    # factors of IEC 60268-16 Ed.5 Table A.1 (phonometry.hearing.sti keeps them
     # private, so they are restated here for the analytic reference).
     mod_freqs = np.array([0.63, 0.80, 1.00, 1.25, 1.60, 2.00, 2.50,
                           3.15, 4.00, 5.00, 6.30, 8.00, 10.0, 12.5])
@@ -2380,7 +2380,7 @@ def generate_schroeder_decay(output_dir: str) -> None:
     """Schroeder backward integration with T20/T30/EDT regressions (ISO 3382)."""
     print("Generating schroeder_decay.png...")
     from phonometry import decay_curve, room_parameters
-    from phonometry.room_acoustics import (
+    from phonometry.room.room_acoustics import (
         _EDT_RANGE,
         _T20_RANGE,
         _T30_RANGE,
@@ -2587,7 +2587,7 @@ def generate_impulse_response(output_dir: str) -> None:
 def generate_insulation_rating(output_dir: str) -> None:
     """ISO 717-1 weighted rating: measured R', shifted reference, deviations."""
     print("Generating insulation_rating.png...")
-    from phonometry.insulation import (
+    from phonometry.building.insulation import (
         _INDEX_500_THIRD,
         _REF_THIRD_OCTAVE,
         weighted_rating,
@@ -2654,7 +2654,7 @@ def generate_insulation_rating(output_dir: str) -> None:
 def generate_impact_rating(output_dir: str) -> None:
     """ISO 717-2 weighted impact rating: measured Ln, shifted reference, CI."""
     print("Generating impact_rating.png...")
-    from phonometry.insulation import (
+    from phonometry.building.insulation import (
         _INDEX_500_THIRD,
         _REF_IMPACT_THIRD_OCTAVE,
         weighted_impact_rating,
@@ -2727,7 +2727,7 @@ def generate_impact_rating(output_dir: str) -> None:
 def generate_sharpness_weighting(output_dir: str) -> None:
     """DIN 45692 sharpness weighting g(z): DIN vs Aures vs von Bismarck."""
     print("Generating sharpness_weighting.png...")
-    from phonometry.sharpness import _Z, _g_aures, _g_bismarck, _g_din
+    from phonometry.psychoacoustics.sharpness import _Z, _g_aures, _g_bismarck, _g_din
 
     z = _Z                       # 0.1 .. 24 Bark, 0.1-Bark steps
     total_n = 4.0                # reference loudness for the Aures variant (sone)
@@ -2918,7 +2918,7 @@ def generate_loudness_models_comparison(output_dir: str) -> None:
 @lru_cache(maxsize=None)
 def _sottek_specific_data() -> tuple[np.ndarray, np.ndarray, float]:
     """ECMA-418-2 specific loudness N'(z) of a 1 kHz / 60 dB tone."""
-    from phonometry import loudness_ecma
+    from phonometry.psychoacoustics import loudness_ecma
 
     el = loudness_ecma(_pure_tone(1000.0, 60.0, 1.0), _FS_PSY)
     return el.bark.copy(), el.specific_loudness.copy(), float(el.loudness)
@@ -2956,7 +2956,7 @@ def generate_sottek_specific_loudness(output_dir: str) -> None:
 @lru_cache(maxsize=None)
 def _tonality_data() -> tuple[np.ndarray, np.ndarray, float, np.ndarray, np.ndarray, float]:
     """ECMA-418-2 tonality T(t) for a 1 kHz tone-in-noise vs pure noise."""
-    from phonometry import tonality_ecma
+    from phonometry.psychoacoustics import tonality_ecma
 
     rng = np.random.default_rng(2026)
     dur = 2.0
@@ -2974,7 +2974,7 @@ def _tonality_data() -> tuple[np.ndarray, np.ndarray, float, np.ndarray, np.ndar
 @lru_cache(maxsize=None)
 def _roughness_sweep_data() -> tuple[np.ndarray, np.ndarray]:
     """ECMA-418-2 roughness R vs AM frequency, 1 kHz carrier, 100 % AM, 60 dB."""
-    from phonometry import roughness_ecma
+    from phonometry.psychoacoustics import roughness_ecma
 
     dur = 1.0
     t = np.arange(int(dur * _FS_PSY)) / _FS_PSY
@@ -3042,7 +3042,7 @@ def _fluctuation_am_tone_sweep() -> tuple[np.ndarray, np.ndarray]:
     modulation-frequency sweep {1, 2, 4, 8, 16, 32} Hz. Reproduces the band-pass
     sensation with its maximum at 4 Hz (Osses 2016 Table 1 trend).
     """
-    from phonometry import fluctuation_strength
+    from phonometry.psychoacoustics import fluctuation_strength
 
     dur = 2.0
     t = np.arange(int(dur * _FS_PSY)) / _FS_PSY
@@ -3123,7 +3123,7 @@ def generate_fluctuation_strength(output_dir: str) -> None:
 def generate_psychoacoustic_annoyance(output_dir: str) -> None:
     """Psychoacoustic annoyance PA vs loudness N5 for three sensation profiles."""
     print("Generating psychoacoustic_annoyance...")
-    from phonometry import psychoacoustic_annoyance
+    from phonometry.psychoacoustics import psychoacoustic_annoyance
 
     n5 = np.linspace(4.0, 60.0, 200)
     # (label, sharpness [acum], fluctuation strength [vacil], roughness [asper],
@@ -3446,7 +3446,7 @@ def generate_wind_turbine_tonality(output_dir: str) -> None:
     """IEC 61400-11 wind-turbine tonal audibility: narrowband spectrum + masking."""
     print("Generating wind_turbine_tonality...")
     from phonometry import wind_turbine_tonality
-    from phonometry.wind_turbine_noise import _critical_band_edges
+    from phonometry.environmental.wind_turbine_noise import _critical_band_edges
 
     # A narrowband spectrum: a shaped broadband floor with a blade-passing-style
     # tone near 200 Hz, at 2 Hz resolution.
@@ -3611,7 +3611,7 @@ def generate_seabed_reflection(output_dir: str) -> None:
 def generate_ocean_ambient_noise(output_dir: str) -> None:
     """Wenz ambient-noise curves: wind + thermal energy sum vs frequency."""
     print("Generating ocean_ambient_noise...")
-    from phonometry import ocean_ambient_noise
+    from phonometry.underwater import ocean_ambient_noise
 
     freqs = np.logspace(2, 5.5, 300)
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -3920,7 +3920,7 @@ def generate_rotorcraft_ground_effect(output_dir: str) -> None:
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
-    from phonometry import loudness_moore_glasberg_time
+    from phonometry.psychoacoustics import loudness_moore_glasberg_time
 
     dur = 0.8
     t = np.arange(int(dur * _FS_PSY)) / _FS_PSY
@@ -3975,7 +3975,7 @@ def generate_moore_glasberg_time_loudness(output_dir: str) -> None:
 def generate_prediction_flanking_demo(output_dir: str) -> None:
     """EN 12354-1 simplified flanking prediction (Annex H.3 worked example)."""
     print("Generating prediction_flanking_demo.png...")
-    from phonometry.building_prediction import (
+    from phonometry.building.building_prediction import (
         FlankingPath,
         flanking_element,
         predicted_airborne_insulation,
@@ -4796,13 +4796,13 @@ def generate_absorption_uncertainty(output_dir: str) -> None:
 def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     """ISO 12999-1 per-band + single-number measurement uncertainty (situation B)."""
     print("Generating insulation_uncertainty_demo.png...")
-    from phonometry.building_uncertainty import (
+    from phonometry.building.building_uncertainty import (
         band_uncertainty,
         insulation_coverage_factor,
         insulation_expanded_uncertainty,
         single_number_uncertainty,
     )
-    from phonometry.insulation import weighted_rating
+    from phonometry.building.insulation import weighted_rating
 
     # Reuse the ISO 717-1 Annex C measured R' curve (100 Hz .. 3150 Hz); its
     # weighted rating is R'w = 30 dB.
@@ -4961,7 +4961,7 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
 def generate_exposure_uncertainty(output_dir: str) -> None:
     """ISO 9612 Annex D task-based exposure with its expanded uncertainty."""
     print("Generating exposure_uncertainty.png...")
-    from phonometry.occupational_exposure import Task, task_based_exposure
+    from phonometry.hearing.occupational_exposure import Task, task_based_exposure
 
     tasks = [
         Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
@@ -5348,7 +5348,7 @@ def generate_sound_power_pressure_result(output_dir: str) -> None:
 def generate_sound_power_reverberation_result(output_dir: str) -> None:
     """ISO 3741: reverberation-room LW spectrum (direct method)."""
     print("Generating sound_power_reverberation_result.png...")
-    from phonometry import sound_power_reverberation
+    from phonometry.emission import sound_power_reverberation
 
     # The sound-power guide's section-2 example: one-third-octave mean room
     # SPL from 100 Hz to 10 kHz in a qualified 200 m^3 reverberation room with
@@ -5389,7 +5389,7 @@ def generate_sound_power_reverberation_result(output_dir: str) -> None:
 def generate_sound_power_intensity_result(output_dir: str) -> None:
     """ISO 9614-2: intensity-scanning LW spectrum from segment sweeps."""
     print("Generating sound_power_intensity_result.png...")
-    from phonometry import sound_power_intensity
+    from phonometry.emission import sound_power_intensity
 
     # The sound-power guide's section-3 example: two repeated intensity sweeps
     # over 6 surface segments and 6 octave bands, with the segment surface SPL
@@ -5689,7 +5689,7 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     """ANSI S3.5-1997 Table 3 standard speech spectra by vocal effort."""
     print("Generating sii_vocal_efforts.png...")
     from phonometry import speech_intelligibility_index, standard_speech_spectrum
-    from phonometry.sii import BAND_CENTERS, VOCAL_EFFORTS
+    from phonometry.hearing.sii import BAND_CENTERS, VOCAL_EFFORTS
 
     freqs = BAND_CENTERS
     # Distinct hues (not COLOR_GRID, which blends into the gridlines and is
@@ -5746,7 +5746,7 @@ def generate_impulse_prominence(output_dir: str) -> None:
         impulse_prominence,
         predicted_prominence,
     )
-    from phonometry.impulse_prominence import ADJUSTMENT_THRESHOLD
+    from phonometry.environmental.impulse_prominence import ADJUSTMENT_THRESHOLD
 
     fig, (ax_p, ax_k) = plt.subplots(1, 2, figsize=(12.5, 5.4))
 
@@ -5850,7 +5850,7 @@ def generate_multiple_shock(output_dir: str) -> None:
         injury_risk,
         seat_to_spine_transfer,
     )
-    from phonometry.multiple_shock_vibration import (
+    from phonometry.vibration.multiple_shock_vibration import (
         MZ_MALE,
         RISK_THRESHOLDS_MALE,
     )
@@ -5906,7 +5906,7 @@ def generate_enclosed_space_absorption(output_dir: str) -> None:
     """EN 12354-6: absorption area and reverberation time of a room."""
     print("Generating enclosed_space_absorption.png...")
     from phonometry import enclosed_space_reverberation
-    from phonometry.enclosed_space_absorption import OCTAVE_BANDS
+    from phonometry.room.enclosed_space_absorption import OCTAVE_BANDS
 
     # A 5 x 4 x 3 m office (60 m3): hard plaster walls and floor; the ceiling is
     # either bare plaster or lined with an absorbing acoustic tile.
@@ -5951,7 +5951,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
     """ANSI S12.2-2019: NC tangency rating and RC Mark II classification."""
     print("Generating room_noise_criteria.png...")
     from phonometry import noise_criterion, room_criterion
-    from phonometry.room_noise import NC_CURVES, NC_INDICES, OCTAVE_BANDS
+    from phonometry.room.room_noise import NC_CURVES, NC_INDICES, OCTAVE_BANDS
 
     # A ventilation-dominated room spectrum: the low-frequency bands rise well
     # above the sloped RC reference (a rumble tag under RC Mark II) while the
@@ -6015,7 +6015,7 @@ def generate_hearing_threshold(output_dir: str) -> None:
     """ISO 7029 age-related threshold and ISO 389-7 reference threshold."""
     print("Generating hearing_threshold.png...")
     from phonometry import age_threshold, reference_threshold
-    from phonometry.hearing import AUDIOMETRIC_FREQUENCIES
+    from phonometry.hearing.threshold import AUDIOMETRIC_FREQUENCIES
 
     freqs = AUDIOMETRIC_FREQUENCIES
     fig, (ax_age, ax_ref) = plt.subplots(1, 2, figsize=(12.5, 5.6))
@@ -6071,7 +6071,7 @@ def generate_noise_induced_hearing_loss(output_dir: str) -> None:
     """ISO 1999 noise-induced permanent threshold shift and HTLAN combination."""
     print("Generating noise_induced_hearing_loss.png...")
     from phonometry import htlan, nipts
-    from phonometry.noise_induced_hearing_loss import NIPTS_FREQUENCIES
+    from phonometry.hearing.noise_induced_hearing_loss import NIPTS_FREQUENCIES
 
     freqs = NIPTS_FREQUENCIES
     fig, (ax_n, ax_h) = plt.subplots(1, 2, figsize=(12.5, 5.6))
@@ -6649,7 +6649,7 @@ def animate_schroeder(output_dir: str) -> None:
     from matplotlib.animation import FuncAnimation
 
     from phonometry import decay_curve, room_parameters
-    from phonometry.room_acoustics import _T20_RANGE, _T30_RANGE, _onset_index
+    from phonometry.room.room_acoustics import _T20_RANGE, _T30_RANGE, _onset_index
 
     T = _translate_str
     fs, reverb_t = 48000, 1.2

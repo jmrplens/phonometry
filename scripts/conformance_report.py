@@ -47,9 +47,9 @@ import reference_data as ref  # noqa: E402
 
 import phonometry as ph  # noqa: E402
 from phonometry import OctaveFilterBank, WeightingFilter  # noqa: E402
-from phonometry.compliance import class_limits, verify_filter_class  # noqa: E402
-from phonometry.sharpness import reference_sound  # noqa: E402
-from phonometry.sti import _sti_from_mtf  # noqa: E402
+from phonometry.metrology.compliance import class_limits, verify_filter_class  # noqa: E402
+from phonometry.psychoacoustics.sharpness import reference_sound  # noqa: E402
+from phonometry.hearing.sti import _sti_from_mtf  # noqa: E402
 
 
 # ===========================================================================
@@ -834,7 +834,7 @@ def _reverb_bracket(
     """Independent re-implementation of the ISO 3741 Eq. (20) bracket.
 
     The two constants below are deliberately different and mirror the library
-    (:func:`phonometry.sound_power_reverberation._speed_of_sound` and its C1/C2
+    (:func:`phonometry.emission.sound_power_reverberation._speed_of_sound` and its C1/C2
     terms): the speed of sound uses the rounded 273 of ISO 3741 clause 9.1.4
     (``c = 20,05*sqrt(273 + theta)``), while the C1/C2 barometric corrections
     use the exact absolute-zero offset 273.15 in their temperature ratios.
@@ -1777,7 +1777,7 @@ def _chk_iso9613_2_barrier_double_cap() -> Outcome:
 
 def _iso9612_annex_d_tasks() -> list[ph.Task]:
     """Rebuild the ISO 9612 Annex D Task objects from the shared input table."""
-    from phonometry.occupational_exposure import Task
+    from phonometry.hearing.occupational_exposure import Task
 
     tasks = []
     for samples, duration, drange in ref.ISO9612_ANNEX_D_TASKS:
@@ -1903,7 +1903,7 @@ def _chk_iso10534_1_swr() -> Outcome:
     alpha = float(ph.standing_wave_absorption(ref.ISO10534_1_SWR))
     # The intermediate |r| = (s-1)/(s+1) (Eq. (13)) must match its shared
     # oracle too, so both steps of the chain are pinned.
-    from phonometry.impedance_tube import standing_wave_reflection_magnitude
+    from phonometry.materials.impedance_tube import standing_wave_reflection_magnitude
 
     r_mag = float(standing_wave_reflection_magnitude(ref.ISO10534_1_SWR))
     out = numeric(ref.ISO10534_1_ABSORPTION, alpha, 1e-9, places=4)
@@ -1927,7 +1927,7 @@ def _chk_iso10534_2_roundtrip() -> Outcome:
     # Eq. (17) reduction. Synthesis and reduction share only the plane-wave
     # field model, so this is an algebraic identity: the only residual is
     # float rounding, hence the 1e-9 tolerance.
-    from phonometry.impedance_tube import reflection_factor, tube_wavenumber
+    from phonometry.materials.impedance_tube import reflection_factor, tube_wavenumber
 
     f = np.array([500.0, 1000.0, 1800.0])
     x1, spacing, c0 = 0.12, 0.03, 343.2
@@ -2154,7 +2154,7 @@ def _chk_sii_standard_quiet() -> Outcome:
 
 @register(_SII, "ANSI S3.5-1997 Table 3", "Loud-effort speech spectrum level at 1 kHz")
 def _chk_sii_loud_spectrum() -> Outcome:
-    from phonometry.sii import standard_speech_spectrum
+    from phonometry.hearing.sii import standard_speech_spectrum
 
     value = float(standard_speech_spectrum("loud")[8])
     return numeric(ref.ANSIS3_5_LOUD_1KHZ, value, 1e-9, unit="dB", places=2)
@@ -2227,7 +2227,7 @@ def _chk_gum_additive() -> Outcome:
 
 @register(_GUM, "ISO/IEC Guide 98-3 Table G.2", "Coverage factor, p=0.99, v=16")
 def _chk_gum_coverage() -> Outcome:
-    from phonometry.uncertainty import coverage_factor
+    from phonometry.metrology.uncertainty import coverage_factor
 
     return numeric(ref.GUM_COVERAGE_K99_16, coverage_factor(0.99, 16), 5e-3, places=3)
 
@@ -2304,7 +2304,7 @@ _TONES = "Prominent discrete tones (ECMA-418-1)"
 
 @register(_TONES, "ECMA-418-1:2024 Clause 10 Formula (2)", "Critical band at 1 kHz (f1,c / f2,c / dfc)")
 def _chk_ecma418_1_critical_band() -> Outcome:
-    from phonometry.tonality import _critical_band
+    from phonometry.psychoacoustics.tonality import _critical_band
 
     f1, f2, dfc = _critical_band(1000.0)
     # 0.05 Hz = half a unit in the last printed digit (the clause EXAMPLE
@@ -2327,7 +2327,7 @@ def _chk_ecma418_1_critical_band() -> Outcome:
 
 @register(_TONES, "ECMA-418-1:2024 Clause 11.6 Formula (14)", "Proximity spacing dfprox at 150 / 850 Hz")
 def _chk_ecma418_1_proximity_spacing() -> Outcome:
-    from phonometry.tonality import _proximity_spacing
+    from phonometry.psychoacoustics.tonality import _proximity_spacing
 
     v150 = float(_proximity_spacing(150.0))
     v850 = float(_proximity_spacing(850.0))
@@ -3157,7 +3157,7 @@ def _chk_ac_epnl() -> Outcome:
     "Directional-response tolerance at 4 kHz / 90°, dB",
 )
 def _chk_ac_iec61265() -> Outcome:
-    from phonometry.compliance import _iec61265_directional_limit
+    from phonometry.metrology.compliance import _iec61265_directional_limit
 
     return numeric(2.0, _iec61265_directional_limit(4000.0, 90.0), 1e-9, unit="dB", places=1)
 
@@ -3174,7 +3174,7 @@ _WIND_TURBINE = "Wind-turbine noise (IEC 61400-11)"
     "Critical bandwidth about a 500 Hz tone, Hz",
 )
 def _chk_wt_critical_bandwidth() -> Outcome:
-    from phonometry.wind_turbine_noise import critical_bandwidth
+    from phonometry.environmental.wind_turbine_noise import critical_bandwidth
 
     expected = 25.0 + 75.0 * (1.0 + 1.4 * (500.0 / 1000.0) ** 2) ** 0.69
     return numeric(expected, critical_bandwidth(500.0), 1e-6, unit="Hz", places=3)

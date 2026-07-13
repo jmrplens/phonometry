@@ -1,0 +1,182 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""Plot renderers for the environmental domain (lazy imports from result .plot())."""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
+
+from .common import (
+    _C_MUTED,
+    _C_PRIMARY,
+    _C_PRIMARY_LIGHT,
+    _C_QUATERNARY,
+    _C_REFERENCE,
+    _C_SECONDARY,
+    _C_TERTIARY,
+    _LEGEND_UPPER_RIGHT,
+    _band_axis,
+    _new_axes,
+)
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from ..environmental.outdoor_propagation import OutdoorAttenuation
+    from ..environmental.measurement import TonalAssessmentResult
+    from ..environmental.impulse_prominence import ImpulseProminenceResult
+    from ..environmental.wind_turbine_noise import WindTurbineTonalityResult
+
+def plot_wind_turbine_tonality(
+    result: "WindTurbineTonalityResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Narrowband spectrum with the critical band, masking level and the tone.
+
+    :param result: A :class:`~phonometry.wind_turbine_noise.WindTurbineTonalityResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the spectrum ``plot`` call.
+    :return: The axes.
+    """
+    from ..environmental.wind_turbine_noise import _critical_band_edges
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    fc = result.tone_frequency
+    lo, hi = _critical_band_edges(fc)
+    ax.plot(freqs, levels, **{"color": _C_PRIMARY, "lw": 1.0, "label": "Narrowband spectrum", **kwargs})
+    ax.axvspan(lo, hi, color=_C_TERTIARY, alpha=0.12, label="Critical band")
+    ax.axhline(result.masking_level, color=_C_MUTED, ls="--", lw=1.0,
+               label=f"Masking level ({result.masking_level:.1f} dB)")
+    ax.plot([fc], [result.tone_level], "o", color=_C_REFERENCE,
+            label=f"Tone ({result.tone_level:.1f} dB)")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Level [dB]")
+    ax.set_title(f"IEC 61400-11 tonal audibility ΔLₐ = {result.tonal_audibility:.1f} dB")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+def plot_impulse_prominence(
+    result: "ImpulseProminenceResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Adjustment curve ``KI(P)`` with the candidate impulses marked.
+
+    :param result: An :class:`~phonometry.impulse_prominence.ImpulseProminenceResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the impulses ``scatter``.
+    :return: The axes.
+    """
+    from ..environmental.impulse_prominence import ADJUSTMENT_THRESHOLD, impulse_adjustment
+
+    ax = ax if ax is not None else _new_axes()
+    per = np.asarray(result.per_impulse, dtype=np.float64)
+    per_max = float(per.max()) if per.size else 0.0
+    p_max = max(per_max, result.prominence, 15.0) + 1.0
+    grid = np.linspace(0.0, p_max, 200)
+    ax.plot(grid, impulse_adjustment(grid), color=_C_PRIMARY,
+            label=r"$K_I = 1.8\,(P-5)$")
+    ax.axvline(ADJUSTMENT_THRESHOLD, color=_C_MUTED, ls=":",
+               label=f"threshold $P = {ADJUSTMENT_THRESHOLD:g}$")
+
+    kwargs.setdefault("color", _C_PRIMARY_LIGHT)
+    kwargs.setdefault("zorder", 3)
+    ax.scatter(per, impulse_adjustment(per), label="Impulses", **kwargs)
+    ax.scatter([result.prominence], [result.adjustment], color=_C_REFERENCE,
+               zorder=4, s=90, marker="*",
+               label=f"Governing  P = {result.prominence:.2f},  "
+                     f"$K_I$ = {result.adjustment:.1f} dB")
+    ax.set_xlabel("Predicted prominence $P$")
+    ax.set_ylabel("Adjustment $K_I$ [dB]")
+    ax.set_title("NT ACOU 112 — impulse adjustment to $L_{Aeq}$")
+    ax.set_ylim(bottom=0.0)
+    ax.legend(loc="upper left", fontsize="small")
+    ax.grid(True, alpha=0.3)
+    return ax
+
+def plot_tonal_adjustment(
+    result: "TonalAssessmentResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Tonal adjustment curve ``Kt(ΔLta)`` with the assessed tone marked.
+
+    :param result: A
+        :class:`~phonometry.environmental_measurement.TonalAssessmentResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the assessed-tone ``scatter``.
+    :return: The axes.
+    """
+    from ..environmental.measurement import tonal_adjustment
+
+    ax = ax if ax is not None else _new_axes()
+    top = max(result.audibility, 12.0) + 1.0
+    grid = np.linspace(0.0, top, 200)
+    curve = np.array([tonal_adjustment(d) for d in grid], dtype=np.float64)
+    ax.plot(grid, curve, color=_C_PRIMARY, label=r"$K_t(\Delta L_{ta})$")
+    ax.axvline(4.0, color=_C_MUTED, ls=":", label=r"knees $\Delta L_{ta}=4,\,10$ dB")
+    ax.axvline(10.0, color=_C_MUTED, ls=":")
+
+    kwargs.setdefault("color", _C_REFERENCE)
+    kwargs.setdefault("zorder", 4)
+    kwargs.setdefault("s", 90)
+    kwargs.setdefault("marker", "*")
+    ax.scatter([result.audibility], [result.adjustment],
+               label=rf"$\Delta L_{{ta}}$ = {result.audibility:.1f} dB,  "
+                     rf"$K_t$ = {result.adjustment:.1f} dB", **kwargs)
+    ax.set_xlabel(r"Tonal audibility $\Delta L_{ta}$ [dB]")
+    ax.set_ylabel("Tonal adjustment $K_t$ [dB]")
+    ax.set_title("ISO 1996-2 tonal adjustment")
+    ax.set_ylim(bottom=0.0)
+    ax.legend(loc="upper left", fontsize="small")
+    ax.grid(True, alpha=0.3)
+    return ax
+
+def plot_outdoor_attenuation(
+    result: "OutdoorAttenuation", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Stacked per-band attenuation terms with the total overlaid (ISO 9613-2).
+
+    The divergence, atmospheric, ground and barrier terms are stacked per
+    octave band on separate positive and negative baselines (the ground
+    effect can be a net *gain*), and the total attenuation ``A`` is drawn
+    as the primary marker line on top.
+
+    :param result: An
+        :class:`~phonometry.outdoor_propagation.OutdoorAttenuation`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the total-attenuation ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    positions = _band_axis(ax, freqs)
+    n = freqs.size
+
+    # Separate positive and negative cumulative baselines so a negative term
+    # stacks below zero instead of being drawn on top of the previous bars;
+    # the signed heights sum to a_total.
+    pos_bottom = np.zeros(n)
+    neg_bottom = np.zeros(n)
+    terms = (
+        (result.a_div, _C_PRIMARY, "$A_{div}$ — divergence"),
+        (result.a_atm, _C_TERTIARY, "$A_{atm}$ — atmospheric"),
+        (result.a_gr, _C_QUATERNARY, "$A_{gr}$ — ground"),
+        (result.a_bar, _C_SECONDARY, "$A_{bar}$ — barrier"),
+    )
+    for values, color, label in terms:
+        term = np.asarray(values, dtype=np.float64)
+        bottom = np.where(term >= 0.0, pos_bottom, neg_bottom)
+        ax.bar(positions, term, bottom=bottom, color=color, label=label)
+        pos_bottom += np.maximum(term, 0.0)
+        neg_bottom += np.minimum(term, 0.0)
+
+    kwargs.setdefault("color", _C_REFERENCE)
+    kwargs.setdefault("marker", "D")
+    kwargs.setdefault("label", "$A$ — total")
+    ax.plot(positions, np.asarray(result.a_total, dtype=np.float64),
+            zorder=4, **kwargs)
+    ax.axhline(0.0, color=_C_MUTED, lw=0.8)
+    ax.set_ylabel("Attenuation A [dB]")
+    ax.set_title("ISO 9613-2 attenuation breakdown")
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, axis="y", alpha=0.3)
+    return ax

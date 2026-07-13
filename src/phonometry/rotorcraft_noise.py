@@ -150,8 +150,15 @@ def ground_effect_adjustment(
     hs = max(require_non_negative(source_height, "source_height"), 0.1)
     hr = max(require_non_negative(receiver_height, "receiver_height"), 0.1)
     dp = require_positive(horizontal_distance, "horizontal_distance")
-    sigma = _FLOW_RESISTIVITY[flow_resistivity.strip().upper()] if isinstance(
-        flow_resistivity, str) else require_positive(flow_resistivity, "flow_resistivity")
+    if isinstance(flow_resistivity, str):
+        key = flow_resistivity.strip().upper()
+        if key not in _FLOW_RESISTIVITY:
+            valid = ", ".join(sorted(_FLOW_RESISTIVITY))
+            raise ValueError(
+                f"'flow_resistivity' class must be one of {valid}, got {flow_resistivity!r}.")
+        sigma = _FLOW_RESISTIVITY[key]
+    else:
+        sigma = require_positive(flow_resistivity, "flow_resistivity")
 
     r1 = np.hypot(dp, hs - hr)                    # direct path
     r2 = np.hypot(dp, hs + hr)                    # reflected path (image source)
@@ -168,8 +175,7 @@ def ground_effect_adjustment(
     psi = np.angle(q)
 
     a = 0.727 * f * dr / _C
-    with np.errstate(invalid="ignore", divide="ignore"):
-        sinc = np.where(a == 0.0, 1.0, np.sin(a) / a)
+    sinc = np.sinc(a / np.pi)                                 # sin(a)/a, = 1 at a = 0
     inter = sinc * np.cos(6.325 * f * dr / _C + psi)          # I (Eq. 30)
     ratio = r1 / r2
     arg = 1.0 + ratio**2 * q_mag**2 + 2.0 * ratio * q_mag * inter
@@ -239,8 +245,8 @@ def hemisphere_source_level(
     ip = int(np.clip(np.searchsorted(po, theta) - 1, 0, po.size - 2))
     da = az[ia + 1] - az[ia]
     dp = po[ip + 1] - po[ip]
-    wa = 0.0 if da == 0 else (phi - az[ia]) / da
-    wp = 0.0 if dp == 0 else (theta - po[ip]) / dp
+    wa = (phi - az[ia]) / da if da > 0.0 else 0.0
+    wp = (theta - po[ip]) / dp if dp > 0.0 else 0.0
     corners = [(ia, ip, (1 - wa) * (1 - wp)), (ia + 1, ip, wa * (1 - wp)),
                (ia, ip + 1, (1 - wa) * wp), (ia + 1, ip + 1, wa * wp)]
 
@@ -248,7 +254,7 @@ def hemisphere_source_level(
     energy = np.zeros_like(out)
     weight_ok = np.ones_like(out, dtype=bool)
     for i, j, w in corners:
-        if w == 0.0:
+        if w <= 0.0:
             continue
         band = lv[i, j, :]
         finite = np.isfinite(band)

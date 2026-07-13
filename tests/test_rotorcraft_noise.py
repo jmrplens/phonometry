@@ -71,7 +71,7 @@ def test_ground_effect_class_letters_and_values_agree() -> None:
 def test_ground_effect_invalid_inputs() -> None:
     with pytest.raises(ValueError, match="horizontal_distance"):
         ground_effect_adjustment([500.0], 100.0, 1.5, 0.0)
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError, match="flow_resistivity"):
         ground_effect_adjustment([500.0], 100.0, 1.5, 300.0, flow_resistivity="Z")
 
 

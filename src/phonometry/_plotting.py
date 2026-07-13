@@ -1224,7 +1224,7 @@ def plot_rotorcraft_hemisphere(
     """Fore-aft directivity section of a rotorcraft noise hemisphere (ECAC Doc 32).
 
     Plots the source level versus polar angle θ (0° forward → 180° rearward) in the
-    vertical plane (azimuth φ = 0) for one one-third-octave band.
+    vertical plane (azimuth φ = 0) for a single one-third-octave band.
 
     :param result: A :class:`~phonometry.rotorcraft_noise.RotorcraftHemisphere`.
     :param ax: Existing axes, or ``None`` to create a figure.

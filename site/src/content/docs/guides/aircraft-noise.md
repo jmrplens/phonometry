@@ -99,9 +99,32 @@ report = ph.verify_aircraft_noise_system(
 print(report["passed"], report["checks"])
 ```
 
+## Atmospheric absorption (SAE ARP 5534)
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption.svg" alt="Aircraft atmospheric absorption versus frequency for two path lengths; the SAE-Method band attenuation stays below the pure-tone mid-band value at high absorption" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption_dark.svg" alt="Aircraft atmospheric absorption versus frequency for two path lengths; the SAE-Method band attenuation stays below the pure-tone mid-band value at high absorption" style="width:82%">
+
+Correcting a measured flyover to reference atmospheric conditions needs the
+one-third-octave-band attenuation over the path. The pure-tone coefficient is
+the ISO 9613-1 one (identical, per ARP 5534 §3.1) provided by `air_attenuation`;
+`sae_band_attenuation` adds the **SAE Method** (ARP 5534 §3.2.2) mapping the
+pure-tone mid-band path attenuation `δ_t = α·s` to the band attenuation `δ_B`,
+consistent with the Exact Method well beyond the 50 dB Approximate-Method limit.
+
+```python
+import numpy as np
+import phonometry as ph
+
+freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz–10 kHz thirds
+att = ph.sae_band_attenuation(freqs, path_length=7620.0,
+                              temperature=25.0, relative_humidity=70.0)
+att.plot()   # band vs pure-tone mid-band (needs matplotlib)
+```
+
+Valid roughly 6–32 °C, 20–95 % RH (14 CFR Part 36 window), to 7620 m, reciprocal.
+
 ---
 
 **Standards.** ICAO Annex 16 Vol. I Appendix 2 (EPNL procedure), ICAO Doc 9501
 ETM Vol. I (worked-example oracles), IEC 61265:1995 (measurement-system
-tolerances). The full certification correction chain and airport noise contours
-are out of scope here.
+tolerances), SAE ARP 5534:2021 (SAE-Method band absorption; pure-tone coefficient
+from ISO 9613-1). Airport noise contours (ECAC Doc 29) remain out of scope here.

@@ -291,6 +291,10 @@ from .numerical_propagation import (
     parabolic_equation,
     ray_trace,
 )
+from .aircraft_atmospheric_absorption import (
+    AircraftBandAttenuation,
+    sae_band_attenuation,
+)
 from .ship_radiated_noise import (
     ShipSourceLevelResult,
     hydrophone_depths,
@@ -800,6 +804,8 @@ __all__ = [
     "NormalModeResult",
     "RayTraceResult",
     "ParabolicEquationResult",
+    "sae_band_attenuation",
+    "AircraftBandAttenuation",
     "radiated_noise_level",
     "hydrophone_depths",
     "source_level_uncertainty",

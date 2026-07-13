@@ -35,6 +35,11 @@ _LANG_SUFFIX = ""
 
 _ES_EXACT = {
     "Frequency [Hz]": "Frecuencia [Hz]",
+    "Aircraft Atmospheric Absorption (SAE ARP 5534)":
+        "Absorción atmosférica aeronáutica (SAE ARP 5534)",
+    "Attenuation [dB]": "Atenuación [dB]",
+    "25 °C, 70% RH\nsolid: SAE band, dashed: pure-tone mid-band":
+        "25 °C, 70% HR\ncontinuo: banda SAE, discontinuo: tono puro medio de banda",
     # Emitted by phonometry.filter_design._showfilter (not by this script);
     # do not remove as "orphans".
     "Filter Bank Frequency Response": "Respuesta en frecuencia del banco de filtros",
@@ -675,6 +680,7 @@ _ES_PATTERNS = [
      "f = 10 kHz, α = \\1 dB/km\\nensanchamiento práctico (R₀ = 1000 m)"),
     (r"^SL = 140, NL = 60, DI = 15, DT = 8 dB\nfigure of merit = (.+) dB$",
      "SL = 140, NL = 60, DI = 15, DT = 8 dB\\nfigura de mérito = \\1 dB"),
+    (r"^SAE band \((\d+) m\)$", r"banda SAE (\1 m)"),
     (r"^(\d+) yr$", r"\1 años"),
     (r"^total \(limit\) (.+) dB$", r"total (límite) \1 dB"),
     (r"^total \(eng\.\) (.+) dB$", r"total (ing.) \1 dB"),
@@ -3700,6 +3706,35 @@ def generate_numerical_propagation(output_dir: str) -> None:
     plt.close()
 
 
+def generate_aircraft_atmospheric_absorption(output_dir: str) -> None:
+    """SAE ARP 5534 band vs pure-tone mid-band atmospheric attenuation."""
+    print("Generating aircraft_atmospheric_absorption...")
+    from phonometry import sae_band_attenuation
+
+    freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)  # 50 Hz - 10 kHz thirds
+    fig, ax = plt.subplots(figsize=(10, 6))
+    for s, color in ((1000.0, COLOR_SECONDARY), (7620.0, COLOR_PRIMARY)):
+        res = sae_band_attenuation(freqs, s, temperature=25.0, relative_humidity=70.0)
+        ax.plot(res.frequency, res.band_attenuation, color=color, linewidth=2.0,
+                marker="o", markersize=3, label=f"SAE band ({s:.0f} m)")
+        ax.plot(res.frequency, res.midband_attenuation, color=color, linewidth=1.0,
+                linestyle="--", alpha=0.6)
+    ax.set_xscale("log")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Attenuation [dB]")
+    ax.set_title("Aircraft Atmospheric Absorption (SAE ARP 5534)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+    ax.text(0.98, 0.05, "25 °C, 70% RH\nsolid: SAE band, dashed: pure-tone mid-band",
+            transform=ax.transAxes, va="bottom", ha="right", fontsize=9,
+            bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
+    plt.tight_layout()
+    save_figure(output_dir, "aircraft_atmospheric_absorption.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -6138,6 +6173,9 @@ def generate_all(img_dir: str) -> None:
 
     # Underwater propagation (plan-22 P2): numerical solvers (modes/rays/PE).
     generate_numerical_propagation(img_dir)
+
+    # Aircraft atmospheric absorption (plan-23 A): SAE ARP 5534 band method.
+    generate_aircraft_atmospheric_absorption(img_dir)
 
 
 # ===========================================================================

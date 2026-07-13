@@ -43,6 +43,8 @@ def test_linear_power_interpolation() -> None:
 
 def test_monotonic_decrease_with_distance() -> None:
     lv = npd_level(_P, _D, _L, 1500.0, np.array([200.0, 400.0, 800.0, 1600.0]))
+    # At the tabulated nodes the P = 1500 row is the mean of the two power rows.
+    assert np.allclose(lv, [105.0, 99.0, 93.0, 87.0])
     assert np.all(np.diff(lv) < 0.0)
 
 

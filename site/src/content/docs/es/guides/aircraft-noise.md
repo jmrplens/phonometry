@@ -153,5 +153,7 @@ lateral e integración de contornos en malla son un desarrollo posterior aparte.
 **Normas.** ICAO Anexo 16 Vol. I Apéndice 2 (procedimiento EPNL), ICAO Doc 9501
 ETM Vol. I (oráculos de ejemplo trabajado), IEC 61265:1995 (tolerancias del
 sistema de medida), SAE ARP 5534:2021 (absorción de banda por el método SAE;
-coeficiente de tono puro de ISO 9613-1). Las curvas de ruido de aeropuerto
-(ECAC Doc 29) quedan fuera del alcance aquí.
+coeficiente de tono puro de ISO 9613-1), ECAC Doc 29 4ª ed. Vol 2 §4.2
+(interpolación NPD del nivel de evento). Las demás etapas de contorno de ECAC
+(segmentación, atenuación lateral, integración de contornos) son un desarrollo
+posterior aparte.

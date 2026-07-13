@@ -149,4 +149,6 @@ attenuation and contour-grid stages are a separate follow-up.
 **Standards.** ICAO Annex 16 Vol. I Appendix 2 (EPNL procedure), ICAO Doc 9501
 ETM Vol. I (worked-example oracles), IEC 61265:1995 (measurement-system
 tolerances), SAE ARP 5534:2021 (SAE-Method band absorption; pure-tone coefficient
-from ISO 9613-1). Airport noise contours (ECAC Doc 29) remain out of scope here.
+from ISO 9613-1), ECAC Doc 29 4th ed. Vol 2 §4.2 (NPD event-level
+interpolation). The remaining ECAC contour stages (segmentation, lateral
+attenuation, contour integration) are a separate follow-up.

@@ -1171,10 +1171,12 @@ def plot_npd_level(result: "NpdLevelResult", ax: Axes | None = None, **kwargs: A
     """
     ax = ax if ax is not None else _new_axes()
     d = np.asarray(result.distance, dtype=np.float64)
+    lvl = np.asarray(result.level, dtype=np.float64)
+    td = np.asarray(result.table_distances, dtype=np.float64)
+    tl = np.asarray(result.table_levels, dtype=np.float64)
     label = f"NPD (P = {result.power:g})"
-    ax.plot(d, np.asarray(result.level), **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
-    ax.plot(np.asarray(result.table_distances), np.asarray(result.table_levels), "o",
-            color=_C_REFERENCE, ms=4, label="Tabulated")
+    ax.plot(d, lvl, **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    ax.plot(td, tl, "o", color=_C_REFERENCE, ms=4, label="Tabulated")
     ax.set_xscale("log")
     ax.set_xlabel("Slant distance [m]")
     ax.set_ylabel("Event level [dB]")

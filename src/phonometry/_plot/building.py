@@ -26,6 +26,13 @@ from .common import (
 )
 
 if TYPE_CHECKING:
+    from ..building.insulation import (
+        AirborneInsulationResult,
+        FacadeInsulationResult,
+        ImpactInsulationResult,
+        ImpactRatingResult,
+        WeightedRatingResult,
+    )
     from matplotlib.axes import Axes
     from ..building.building_prediction import AirbornePredictionResult, ImpactPredictionResult
     from ..building.building_uncertainty import BandUncertainty

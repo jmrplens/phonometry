@@ -142,6 +142,11 @@ _C_EDGE: Final = "#555555"
 #: Standard-normal quantile of 0.9 (the 10 % / 90 % fractile offset).
 _Z90: Final = 1.2816
 
+#: Common axis labels reused across the underwater-propagation plots.
+_LABEL_DEPTH_M: Final = "Depth [m]"
+_LABEL_TL_DB: Final = "Transmission loss [dB]"
+_LABEL_RANGE_KM: Final = "Range [km]"
+
 
 def _import_pyplot() -> Any:
     """Import :mod:`matplotlib.pyplot` lazily with an actionable error."""
@@ -891,7 +896,7 @@ def plot_sound_speed_profile(
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
     ax.set_xlabel("Sound speed [m/s]")
-    ax.set_ylabel("Depth [m]")
+    ax.set_ylabel(_LABEL_DEPTH_M)
     ax.set_title("Sea-water sound-speed profile")
     ax.grid(True, alpha=0.3)
     ax.legend(loc="lower left", fontsize="small")
@@ -919,7 +924,7 @@ def plot_transmission_loss(
     ax.plot(r, np.asarray(result.absorption), color=_C_SECONDARY, lw=1.0, ls=":",
             label=f"Absorption ({result.absorption_coefficient:.3g} dB/km)")
     ax.set_xlabel("Range [m]")
-    ax.set_ylabel("Transmission loss [dB]")
+    ax.set_ylabel(_LABEL_TL_DB)
     ax.set_title(f"Underwater transmission loss ({result.model})")
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
@@ -947,7 +952,7 @@ def plot_sonar_equation(
     ax.axhline(0.0, color=_C_REFERENCE, ls="--", lw=1.0, label="Detection limit (SE = 0)")
     ax.axvline(result.figure_of_merit, color=_C_MUTED, ls=":", lw=1.0,
                label=f"Figure of merit = {result.figure_of_merit:.1f} dB")
-    ax.set_xlabel("Transmission loss [dB]")
+    ax.set_xlabel(_LABEL_TL_DB)
     ax.set_ylabel("Signal excess [dB]")
     ax.set_title("Sonar equation")
     ax.grid(True, alpha=0.3)
@@ -1051,8 +1056,8 @@ def plot_normal_modes(
     tl = np.asarray(result.transmission_loss, dtype=np.float64)
     label = f"{result.wavenumbers.size} modes ({result.frequency:.0f} Hz)"
     ax.plot(r / 1000.0, tl, **{"color": _C_PRIMARY, "lw": 1.2, "label": label, **kwargs})
-    ax.set_xlabel("Range [km]")
-    ax.set_ylabel("Transmission loss [dB]")
+    ax.set_xlabel(_LABEL_RANGE_KM)
+    ax.set_ylabel(_LABEL_TL_DB)
     ax.set_title("Normal-mode transmission loss")
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
@@ -1075,8 +1080,8 @@ def plot_ray_trace(result: "RayTraceResult", ax: Axes | None = None, **kwargs: A
     for i in range(r.shape[0]):
         ax.plot(r[i] / 1000.0, z[i], **{"color": _C_PRIMARY, "lw": 0.7, "alpha": 0.7, **kwargs})
     ax.plot([0.0], [result.source_depth], "o", color=_C_REFERENCE, label="Source")
-    ax.set_xlabel("Range [km]")
-    ax.set_ylabel("Depth [m]")
+    ax.set_xlabel(_LABEL_RANGE_KM)
+    ax.set_ylabel(_LABEL_DEPTH_M)
     ax.set_title("Ray trace")
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
@@ -1120,9 +1125,9 @@ def plot_parabolic_equation(
             **kwargs,
         },
     )
-    ax.figure.colorbar(img, ax=ax, label="Transmission loss [dB]")
-    ax.set_xlabel("Range [km]")
-    ax.set_ylabel("Depth [m]")
+    ax.figure.colorbar(img, ax=ax, label=_LABEL_TL_DB)
+    ax.set_xlabel(_LABEL_RANGE_KM)
+    ax.set_ylabel(_LABEL_DEPTH_M)
     ax.set_title("Parabolic-equation transmission loss")
     return ax
 

@@ -174,6 +174,14 @@ def test_invalid_inputs_rejected() -> None:
                            range_step=2000.0)
 
 
+def test_parabolic_equation_covers_max_range_when_step_not_divisor() -> None:
+    # A range step that does not divide max_range must still cover it (the grid
+    # extends to at least max_range, not silently short).
+    res = parabolic_equation(50.0, *_ISO, source_depth=50.0, max_range=1000.0,
+                             range_step=300.0, n_depth_points=64)
+    assert res.ranges[-1] >= 1000.0
+
+
 def test_ray_trace_steep_angle_reaches_max_range() -> None:
     # Range-marching guarantees every valid ray spans [0, max_range], even steep
     # ones (arc-length marching would fall short here).

@@ -56,7 +56,7 @@ def _clean_profile(
         raise ValueError("'depths' and 'sound_speeds' must be finite.")
     if np.any(np.diff(z) <= 0.0):
         raise ValueError("'depths' must be strictly increasing.")
-    if z[0] != 0.0:
+    if abs(float(z[0])) > 1e-9:
         raise ValueError("'depths' must start at the surface z = 0.")
     if np.any(c <= 0.0):
         raise ValueError("'sound_speeds' must be strictly positive.")
@@ -442,7 +442,9 @@ def parabolic_equation(
         np.exp(-0.5 * k0**2 * (z - zs) ** 2) - np.exp(-0.5 * k0**2 * (z + zs) ** 2)
     )
 
-    n_r = int(np.floor(rmax / dr)) + 1
+    # ceil so the range grid always covers max_range even when range_step does
+    # not divide it evenly (the last sample may sit just beyond max_range).
+    n_r = int(np.ceil(rmax / dr)) + 1
     ranges = np.asarray(np.arange(n_r) * dr, dtype=np.float64)
     tl = np.zeros((n, n_r), dtype=np.float64)
     half_phase = np.exp(0.5j * k0 * (nsq - 1.0) * dr)  # phase screen exp(i k0/2 (n²−1) Δr)

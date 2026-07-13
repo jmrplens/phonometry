@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-07-13
+
 ### Added
 
 - `air_attenuation()` and `air_attenuation_m()` (with the
@@ -212,8 +214,149 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   response still carries energy at the end of the MLS period, the symptom of
   an impulse response longer than one period aliasing circularly (choose a
   higher MLS order).
+- `practical_absorption_coefficient()`, `weighted_absorption()` and
+  `absorption_class()` — practical sound-absorption coefficient and the weighted
+  rating αw with shape indicators (L/M/H) and class A–E per ISO 11654:1997.
+- Impedance-tube absorption, surface impedance and transmission loss
+  (`impedance_tube` module) per ISO 10534-1/-2:1998 (standing-wave and
+  transfer-function methods) and the four-microphone transmission-loss method of
+  ASTM E2611, with the ISO/ASTM speed-of-sound and air-density models.
+- `airflow_resistance()`, `specific_airflow_resistance()`, `airflow_resistivity()`
+  and `static_airflow_resistance()` — airflow resistance of porous materials by
+  the steady (ISO 9053-1:2018) and alternating (ISO 9053-2:2020) methods.
+- `random_incidence_absorption()`, `specular_absorption_coefficient()`,
+  `directional_diffusion()` and the ISO 17497-1/-2 scattering/diffusion
+  coefficients — scattering and diffusion of surfaces (ISO 17497-1:2004 random-
+  incidence scattering, ISO 17497-2:2012 directional diffusion).
+- In-situ road-surface absorption (`road_absorption` module) per
+  ISO 13472-1/-2 (extended surface and Adrienne temporal-windowing methods) with
+  the geometric-spreading and reflection-factor machinery.
+- Precision sound power in an anechoic/hemi-anechoic room (ISO 3745:2012) and by
+  discrete-point intensity scanning (ISO 9614-3:2002).
+- Human vibration exposure (`human_vibration` module) per ISO 8041-1:2017 /
+  ISO 2631-1:1997 (whole-body) and ISO 5349-1:2001 (hand-arm): the frequency
+  weightings, running RMS/MTVV, vibration dose value (VDV), motion-sickness dose,
+  daily exposure A(8), HAV daily exposure and lifetime VWF, and the
+  Directive 2002/44/EC action/limit-value assessment.
+- `spinal_response()`, `acceleration_dose()`, `daily_dose()` and `daily_dose_multi()`
+  (`multiple_shock_vibration` module) — adverse health effect of multiple shocks
+  on the lumbar spine per ISO 2631-5:2018 (seat-to-spine models, the Se dose and
+  daily equivalent static compressive stress Sed).
+- `verify_weighting_class()` — frequency-weighting (A/C/Z) conformance to the
+  IEC 61672-1:2013 Table 3 class-1/2 acceptance limits.
+- `verify_filter_class()` — one-third-octave and octave band-filter conformance
+  to IEC 61260-1:2014 / ANSI S1.11-2004, including class 0.
+- `speech_intelligibility_index()` and `standard_speech_spectrum()` — the Speech
+  Intelligibility Index per ANSI S3.5-1997 (critical-band, one-third-octave and
+  octave procedures) with the standard normal/raised/loud/shout vocal-effort
+  speech spectra.
+- `noise_criterion()` / `room_criterion()` — NC and RC Mark II room-noise ratings
+  per ANSI/ASA S12.2-2019.
+- `age_threshold()` and `reference_threshold()` — age-associated hearing threshold
+  (median and percentiles) per ISO 7029:2017 with the ISO 389-7:2019 free/diffuse-
+  field reference threshold of hearing.
+- `nipts()` and `htlan()` — noise-induced permanent threshold shift and the
+  hearing threshold level associated with age and noise per ISO 1999:2013.
+- Measurement uncertainty (`uncertainty` module): `rectangular()`, `triangular()`,
+  `u_shaped()`, `combine_uncertainty()`, `coverage_factor()`,
+  `expanded_uncertainty()` and `monte_carlo()` — the GUM framework (ISO/IEC
+  Guide 98-3:2008) law-of-propagation-of-uncertainty and the Supplement 1 Monte
+  Carlo method.
+- `impulse_prominence()`, `impulse_adjustment()` and `rating_level()` — impulsive-
+  sound prominence and the LAeq adjustment/rating level per Nordtest NT ACOU 112.
+- Environmental-noise determination per ISO 1996-2:2017: the tonal-audibility
+  adjustment (engineering method) and the associated measurement uncertainty.
+- Reverberation-time prediction from room geometry and surface absorption by the
+  Sabine, Eyring, Millington-Sette, Fitzroy and Arau-Puchades models.
+- Façade sound insulation and indoor→outdoor radiation prediction per
+  EN 12354-3:2000 and EN 12354-4:2000.
+- Sound absorption in enclosed spaces (`enclosed_space_absorption` module) —
+  `equivalent_absorption_area()` and `enclosed_space_reverberation()` per
+  EN 12354-6:2003 (surface and object absorption, air absorption, reverberation
+  time).
+- Sound insulation by the intensity method per ISO 15186-1:2000
+  (intensity-based sound reduction index).
+- Field survey method per ISO 10052:2021, including the Table 3 reverberation-
+  time estimator.
+- Sound-absorption measurement uncertainty (`absorption_uncertainty` module) per
+  ISO 12999-2:2020.
+- Impact-sound improvement of floor coverings on a lightweight mock-up per
+  ISO 16251-1:2014.
+- Laboratory flanking transmission per ISO 10848 (the vibration reduction index
+  Kij from velocity-level differences).
+- `apparent_dynamic_stiffness()`, `installed_dynamic_stiffness()`,
+  `natural_frequency()` and `floating_floor_resonance()` — dynamic stiffness of
+  resilient materials per EN 29052-1:1992.
+- `sdof_mobility()`, `sdof_accelerance()`, `sdof_receptance()`, `convert_frf()`
+  and `resonance_frequency()` — mechanical mobility and the frequency-response-
+  function family per ISO 7626-1:2011.
+- `transfer_stiffness_direct()`, `transfer_stiffness_indirect()`,
+  `transfer_stiffness_level()`, `loss_factor()` and `base_transmissibility()` —
+  dynamic transfer stiffness of resilient elements per ISO 10846 (direct and
+  indirect/transmissibility methods).
+- `radiated_sound_power_level()`, `radiation_factor()`, `mean_velocity_level()`
+  and `velocity_level_from_acceleration()` — sound power radiated from a vibrating
+  surface per ISO/TS 7849-1/-2:2009.
+- `structure_borne_power_level()`, `reception_plate_power()` and
+  `spatial_mean_velocity_level()` — structure-borne sound power of building
+  equipment by the reception-plate method per EN 15657:2017.
+- `installed_structure_borne_power_level()`, `installed_source_prediction()` and
+  the coupling-term functions — installed structure-borne sound from building
+  equipment per EN 12354-5:2009.
+- `tonal_audibility()` (`tone_audibility` module) — objective audibility of tones
+  in noise by the Aures method per ISO/PAS 20065:2016 (tonal audibility ΔL and
+  the tonal adjustment K).
+- `psychoacoustic_annoyance()` and `psychoacoustic_annoyance_from_signal()` —
+  Fastl & Zwicker psychoacoustic annoyance from loudness, sharpness, roughness
+  and fluctuation strength.
+- `thd()`, `thd_plus_noise()`, `sinad()`, `weighted_thd()` and
+  `modulation_distortion()` — harmonic and intermodulation distortion per
+  IEC 60268-3 / AES17, and `transfer_function()` / `coherence()` — H1/H2 frequency-
+  response and coherence estimators (Bendat & Piersol).
+- Underwater acoustics reference levels and metrics (`underwater_acoustics`):
+  `sound_pressure_level()`, `sound_exposure_level()`, `peak_sound_pressure_level()`
+  and the in-air↔underwater conversions per ISO 18405:2017; ship radiated-noise
+  source levels (`ship_radiated_noise`) per ISO 17208-1/-2 with the ISO 18406
+  hydrophone-depth and uncertainty machinery; and pile-driving SEL metrics
+  (`pile_driving_noise`), single-strike and cumulative.
+- Underwater sound propagation: `transmission_loss()`, `spreading_loss()` and
+  `seawater_absorption()` (`underwater_propagation`); `sea_water_sound_speed()`
+  and `sound_speed_profile()` (`underwater_sound_speed`); and the passive/active
+  `sonar_equation`.
+- Underwater seabed reflection (`seabed_reflection`: `critical_angle()`,
+  `reflection_coefficient()`, `bottom_reflection_loss()`), ambient noise, and
+  shipping-traffic source spectra (`ship_traffic_noise`, JOMOPANS-ECHO).
+- Numerical underwater propagation solvers (`numerical_propagation`):
+  `normal_modes()`, `ray_trace()` and `parabolic_equation()`.
+- Aircraft noise (`aircraft_noise`): `perceived_noisiness()`,
+  `perceived_noise_level()`, `tone_correction()`, `epnl_from_pnlt()` and
+  `effective_perceived_noise_level()` — the Effective Perceived Noise Level per
+  ICAO Annex 16 Vol. I Appendix 2 — plus `verify_aircraft_noise_system()`
+  (IEC 61265 measurement-system tolerances).
+- Wind-turbine noise (`wind_turbine_noise`): `apparent_sound_power_level()`,
+  `slant_distance()` and `wind_turbine_tonality()` per IEC 61400-11.
+- `sae_band_attenuation()` — one-third-octave-band atmospheric absorption by the
+  SAE Method of SAE ARP 5534:2021 (pure-tone coefficient from ISO 9613-1).
+- Airport noise (`airport_noise`, ECAC Doc 29): `npd_level()` / `npd_curve()`
+  noise-power-distance interpolation; the single-event `event_level()` and
+  ground-grid `noise_contour()` with the segment corrections
+  `impedance_adjustment()`, `lateral_attenuation()`,
+  `engine_installation_correction()`, `duration_correction()`,
+  `noise_fraction()` and `start_of_roll_directivity()`.
+- Rotorcraft noise (`rotorcraft_noise`, ECAC Doc 32 / NORAH2): the
+  `RotorcraftHemisphere` source with `hemisphere_source_level()`, and the
+  propagation adjustments `spherical_spreading_adjustment()`,
+  `atmospheric_adjustment()` and `ground_effect_adjustment()` (Chien-Soroka).
 
 ### Changed
+
+- Library-wide audit: shared input-validation and energy-summation helpers,
+  consistent numeric types and a common warning base; the `.plot()` convention
+  completed on every public result object; concept-based renames of the public
+  API carried through a deprecation cycle; the three overloaded guides split by
+  topic; and full EN/ES bilingual documentation with a complete API reference.
+- Documentation figures migrated to deterministic, byte-reproducible SVG (with a
+  tolerance-based CI check), new explanatory diagrams and Tier-1 animations added.
 
 - `decay_curve()` now returns a `DecayCurve` dataclass (`time`, `level`,
   `band`) with a `.plot()` method instead of a bare `(time, level)` tuple.
@@ -419,7 +562,8 @@ Chebyshev I/II, Elliptic, Bessel), A/C/Z weighting, Fast/Slow/Impulse time
 weighting, Linkwitz-Riley crossover, calibration and dBFS modes,
 multichannel support.
 
-[Unreleased]: https://github.com/jmrplens/phonometry/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/jmrplens/phonometry/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/jmrplens/phonometry/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/jmrplens/phonometry/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/jmrplens/phonometry/compare/v1.2.3...v2.0.0
 [1.2.3]: https://github.com/jmrplens/PyOctaveBand/compare/v1.2.2...v1.2.3

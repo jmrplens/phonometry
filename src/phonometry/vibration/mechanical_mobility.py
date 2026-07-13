@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike, NDArray
 
-from ._internal.validation import require_non_negative, require_positive
+from .._internal.validation import require_non_negative, require_positive
 
 # ---------------------------------------------------------------------------
 # FRF taxonomy (ISO 7626-1 Table 1).
@@ -242,7 +242,7 @@ class MobilityResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_mobility
+        from .._plot.vibration import plot_mobility
 
         return plot_mobility(self, ax=ax, **kwargs)
 

@@ -166,7 +166,7 @@ class WindTurbineTonalityResult:
 
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
         """Plot the narrowband spectrum with the critical band and masking level."""
-        from ._plotting import plot_wind_turbine_tonality
+        from .._plot.environmental import plot_wind_turbine_tonality
 
         return plot_wind_turbine_tonality(self, ax=ax, **kwargs)
 

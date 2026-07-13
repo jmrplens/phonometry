@@ -29,9 +29,9 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ._internal.types import as_float_or_array
-from ._internal.validation import require_1d_signal, require_choice, require_positive
-from .hearing.threshold import SEXES as _SEXES
+from .._internal.types import as_float_or_array
+from .._internal.validation import require_1d_signal, require_choice, require_positive
+from ..hearing.threshold import SEXES as _SEXES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -361,7 +361,7 @@ class MultipleShockResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_multiple_shock
+        from .._plot.vibration import plot_multiple_shock
 
         return plot_multiple_shock(self, ax=ax, **kwargs)
 

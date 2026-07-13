@@ -16,7 +16,7 @@ from reference_data import (
 )
 from scipy.signal import freqz
 
-from phonometry import multiple_shock_vibration as v
+from phonometry.vibration import multiple_shock_vibration as v
 
 # Annex D digital filter coefficients for fs = 256 Hz (Table D.1).
 _ANNEX_D_B = [

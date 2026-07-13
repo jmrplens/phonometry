@@ -3174,7 +3174,7 @@ _WIND_TURBINE = "Wind-turbine noise (IEC 61400-11)"
     "Critical bandwidth about a 500 Hz tone, Hz",
 )
 def _chk_wt_critical_bandwidth() -> Outcome:
-    from phonometry.wind_turbine_noise import critical_bandwidth
+    from phonometry.environmental.wind_turbine_noise import critical_bandwidth
 
     expected = 25.0 + 75.0 * (1.0 + 1.4 * (500.0 / 1000.0) ** 2) ** 0.69
     return numeric(expected, critical_bandwidth(500.0), 1e-6, unit="Hz", places=3)

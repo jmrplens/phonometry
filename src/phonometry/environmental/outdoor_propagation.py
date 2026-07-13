@@ -45,7 +45,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from .air_absorption import air_attenuation
-from ._internal.warnings import _warn_renamed
+from .._internal.warnings import _warn_renamed
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -150,7 +150,7 @@ class OutdoorAttenuation:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_outdoor_attenuation
+        from .._plot.environmental import plot_outdoor_attenuation
 
         return plot_outdoor_attenuation(self, ax=ax, **kwargs)
 

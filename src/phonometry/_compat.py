@@ -83,6 +83,16 @@ _MOVED: dict[str, str] = {
     "phonometry.lab_insulation": "phonometry.building.lab_insulation",
     "phonometry.structure_borne_power": "phonometry.building.structure_borne_power",
     "phonometry.survey_insulation": "phonometry.building.survey_insulation",
+    "phonometry.human_vibration": "phonometry.vibration.human_vibration",
+    "phonometry.mechanical_mobility": "phonometry.vibration.mechanical_mobility",
+    "phonometry.multiple_shock_vibration": "phonometry.vibration.multiple_shock_vibration",
+    "phonometry.transfer_stiffness": "phonometry.vibration.transfer_stiffness",
+    "phonometry.air_absorption": "phonometry.environmental.air_absorption",
+    "phonometry.environmental": "phonometry.environmental.rating",
+    "phonometry.environmental_measurement": "phonometry.environmental.measurement",
+    "phonometry.impulse_prominence": "phonometry.environmental.impulse_prominence",
+    "phonometry.outdoor_propagation": "phonometry.environmental.outdoor_propagation",
+    "phonometry.wind_turbine_noise": "phonometry.environmental.wind_turbine_noise",
     # <migrate:auto>
 }
 

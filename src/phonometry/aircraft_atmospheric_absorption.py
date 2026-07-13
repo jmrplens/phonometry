@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from .air_absorption import air_attenuation
+from .environmental.air_absorption import air_attenuation
 from ._internal.validation import require_non_negative, require_positive_array
 
 if TYPE_CHECKING:

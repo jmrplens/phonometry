@@ -73,7 +73,7 @@ class ImpulseProminenceResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_impulse_prominence
+        from .._plot.environmental import plot_impulse_prominence
 
         return plot_impulse_prominence(self, ax=ax, **kwargs)
 

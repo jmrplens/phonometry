@@ -58,9 +58,9 @@ import numpy as np
 
 from numpy.typing import ArrayLike, NDArray
 
-from ._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning
 
-from .materials.sound_absorption import attenuation_from_alpha
+from ..materials.sound_absorption import attenuation_from_alpha
 
 #: Reference air temperature ``T0`` (ISO 9613-1:1993, clause 4.2), in kelvins.
 _T0 = 293.15

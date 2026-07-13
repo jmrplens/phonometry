@@ -14,7 +14,7 @@ matplotlib.use("Agg")
 import numpy as np
 import pytest
 
-from phonometry.wind_turbine_noise import (
+from phonometry.environmental.wind_turbine_noise import (
     apparent_sound_power_level,
     critical_bandwidth,
     slant_distance,

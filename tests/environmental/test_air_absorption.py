@@ -70,7 +70,7 @@ def test_table1_agreement_is_tight() -> None:
 # --- Reference conditions (clause 4.2 / Annex B) ----------------------------
 
 def test_reference_condition_constants() -> None:
-    from phonometry.air_absorption import _PR, _T0, _T01
+    from phonometry.environmental.air_absorption import _PR, _T0, _T01
 
     assert _T0 == 293.15  # 20 degC
     assert _PR == 101.325  # one standard atmosphere, kPa

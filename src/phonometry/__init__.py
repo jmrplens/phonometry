@@ -12,8 +12,8 @@ from typing import Any, List, Tuple, overload, Literal
 import numpy as np
 
 from .metrology.calibration import CalibrationWarning, calculate_sensitivity, sensitivity
-from .environmental import composite_rating_level, lden, ldn
-from .environmental_measurement import (
+from .environmental.rating import composite_rating_level, lden, ldn
+from .environmental.measurement import (
     RepeatedMeasurementResult,
     ResidualCorrectionResult,
     TonalAssessmentResult,
@@ -29,7 +29,7 @@ from .environmental_measurement import (
     tonal_seeking_survey,
     uncertainty_from_repeated_measurements,
 )
-from .environmental_measurement import (
+from .environmental.measurement import (
     expanded_uncertainty as environmental_expanded_uncertainty,
 )
 from .metrology.compliance import (
@@ -107,7 +107,7 @@ from .materials.dynamic_stiffness import (
     installed_dynamic_stiffness,
     natural_frequency,
 )
-from .mechanical_mobility import (
+from .vibration.mechanical_mobility import (
     FRF_UNITS,
     MobilityResult,
     convert_frf,
@@ -117,7 +117,7 @@ from .mechanical_mobility import (
     sdof_mobility_result,
     sdof_receptance,
 )
-from .transfer_stiffness import (
+from .vibration.transfer_stiffness import (
     REFERENCE_STIFFNESS,
     TransferStiffnessResult,
     base_transmissibility,
@@ -157,7 +157,7 @@ from .building.installed_structure_borne import (
     structure_borne_pressure_level_path,
     total_structure_borne_pressure_level,
 )
-from .multiple_shock_vibration import (
+from .vibration.multiple_shock_vibration import (
     MultipleShockResult,
     acceleration_dose,
     compression_dose,
@@ -173,7 +173,7 @@ from .multiple_shock_vibration import (
     static_stress,
     ultimate_strength,
 )
-from .impulse_prominence import (
+from .environmental.impulse_prominence import (
     ImpulseProminenceResult,
     impulse_adjustment,
     impulse_prominence,
@@ -340,7 +340,7 @@ from .aircraft_noise import (
     perceived_noisiness,
     tone_correction,
 )
-from .wind_turbine_noise import (
+from .environmental.wind_turbine_noise import (
     WindTurbineTonalityResult,
     apparent_sound_power_level,
     slant_distance,
@@ -512,7 +512,7 @@ from .materials.road_absorption import (
     spot_microphone_spacing_bounds,
     spot_tube_upper_frequency,
 )
-from .human_vibration import (
+from .vibration.human_vibration import (
     HAV_EAV_A8,
     HAV_ELV_A8,
     REFERENCE_ACCELERATION,
@@ -558,7 +558,7 @@ from .materials.sound_absorption import (
     absorption_coefficient,
     attenuation_from_alpha,
 )
-from .air_absorption import (
+from .environmental.air_absorption import (
     AtmosphericAbsorptionWarning,
     air_attenuation,
     air_attenuation_m,
@@ -616,7 +616,7 @@ from .materials.absorption_rating import (
     practical_absorption_coefficient,
     weighted_absorption,
 )
-from .outdoor_propagation import (
+from .environmental.outdoor_propagation import (
     DEFAULT_FREQUENCIES,
     Barrier,
     OutdoorAttenuation,

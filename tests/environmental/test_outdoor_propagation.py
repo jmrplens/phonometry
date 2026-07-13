@@ -21,7 +21,7 @@ Normative anchors (ISO 9613-2:1996):
 
 Primary oracles: the exact closed forms above (Adiv digit-exact points, the
 Table 3 function limits, the barrier caps and C3 transition) and consistency of
-Aatm with ``phonometry.air_absorption``.
+Aatm with ``phonometry.environmental.air_absorption``.
 """
 
 from __future__ import annotations
@@ -222,7 +222,7 @@ class TestBarrier:
 
     def test_c3_transition_single_to_triple(self) -> None:
         # Eq. (15): e -> 0 gives C3 = 1 (matches single); e >> lambda gives C3 -> 3.
-        from phonometry.outdoor_propagation import _c3_double
+        from phonometry.environmental.outdoor_propagation import _c3_double
 
         lam = 340.0 / 500.0
         assert _c3_double(lam, 1e-6) == pytest.approx(1.0, abs=1e-3)

@@ -55,8 +55,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from ._internal.types import Real
-from ._internal.warnings import PhonometryWarning
+from .._internal.types import Real
+from .._internal.warnings import PhonometryWarning
 from scipy import signal as sig
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
@@ -277,7 +277,7 @@ class WeightingResponse:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
-        from ._plotting import plot_vibration_weighting
+        from .._plot.vibration import plot_vibration_weighting
 
         return plot_vibration_weighting(self, ax=ax, **kwargs)
 
@@ -378,7 +378,7 @@ class WeightedSpectrum:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
-        from ._plotting import plot_weighted_spectrum
+        from .._plot.vibration import plot_weighted_spectrum
 
         return plot_weighted_spectrum(self, ax=ax, **kwargs)
 
@@ -800,7 +800,7 @@ class DailyVibrationExposure:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
-        from ._plotting import plot_daily_exposure
+        from .._plot.vibration import plot_daily_exposure
 
         return plot_daily_exposure(self, ax=ax, **kwargs)
 

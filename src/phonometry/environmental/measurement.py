@@ -47,7 +47,7 @@ from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
 
-from ._internal.warnings import PhonometryWarning
+from .._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -180,7 +180,7 @@ class TonalAssessmentResult:
 
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
         """Plot the ``Kt(ΔLta)`` adjustment curve with this tone marked."""
-        from ._plotting import plot_tonal_adjustment
+        from .._plot.environmental import plot_tonal_adjustment
 
         return plot_tonal_adjustment(self, ax=ax, **kwargs)
 

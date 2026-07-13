@@ -27,7 +27,7 @@ from phonometry import (
     tonal_seeking_survey,
     uncertainty_from_repeated_measurements,
 )
-from phonometry.environmental_measurement import EnvironmentalMeasurementWarning
+from phonometry.environmental.measurement import EnvironmentalMeasurementWarning
 
 
 # ---------------------------------------------------------------------------

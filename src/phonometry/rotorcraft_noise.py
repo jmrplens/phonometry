@@ -99,7 +99,7 @@ def atmospheric_adjustment(
         for ``r >= 60``).
     :raises ValueError: If ``distance`` is not strictly positive.
     """
-    from .air_absorption import air_attenuation
+    from .environmental.air_absorption import air_attenuation
 
     f = require_positive_array(frequencies, "frequencies")
     r = require_positive(distance, "distance")

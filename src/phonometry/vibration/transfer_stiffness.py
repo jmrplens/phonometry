@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike, NDArray
 
-from ._internal.validation import require_non_negative, require_positive
+from .._internal.validation import require_non_negative, require_positive
 from .mechanical_mobility import convert_frf
 
 #: Reference dynamic stiffness for the level ``L_k`` (ISO 10846-2/-3, 3.17), N/m.
@@ -226,7 +226,7 @@ class TransferStiffnessResult:
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
-        from ._plotting import plot_transfer_stiffness
+        from .._plot.vibration import plot_transfer_stiffness
 
         return plot_transfer_stiffness(self, ax=ax, **kwargs)
 

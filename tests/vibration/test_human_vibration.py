@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
-"""Tests for :mod:`phonometry.human_vibration`.
+"""Tests for :mod:`phonometry.vibration.human_vibration`.
 
 The frequency weightings are validated against the ISO 8041-1:2017 Annex B
 design-goal factors (Tables B.1-B.9) and the Table 1 reference-frequency
@@ -16,7 +16,7 @@ import math
 import numpy as np
 import pytest
 
-from phonometry import human_vibration as hv
+from phonometry.vibration import human_vibration as hv
 
 
 def _fc(n: int) -> float:

@@ -125,6 +125,29 @@ att.plot()   # banda frente a tono puro medio de banda (requiere matplotlib)
 
 Válido ~6–32 °C, 20–95 % HR (ventana 14 CFR Part 36), hasta 7620 m, recíproco.
 
+## Ruido de aeropuerto: el motor NPD (ECAC Doc 29)
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise_es.svg" alt="Curvas nivel-potencia-distancia para dos ajustes de potencia; el nivel de evento cae log-linealmente con la distancia oblicua entre los nodos tabulados" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise_es_dark.svg" alt="Curvas nivel-potencia-distancia para dos ajustes de potencia; el nivel de evento cae log-linealmente con la distancia oblicua entre los nodos tabulados" style="width:82%">
+
+El método de ruido de aeropuerto de ECAC Doc 29 describe la aeronave con tablas
+**nivel-potencia-distancia (NPD)**. `npd_level` lee el nivel de evento
+(`LAmax`/`SEL`) para una potencia y distancia arbitrarias, interpolando
+linealmente en potencia (Ec. 4-3) y log-linealmente en distancia oblicua
+(Ec. 4-4).
+
+```python
+import phonometry as ph
+
+powers = [12000.0, 20000.0]
+distances = [200.0, 400.0, 1000.0, 2000.0, 6300.0, 10000.0]
+levels = [[98.5, 92.0, 83.6, 76.8, 63.9, 56.8],
+          [107.2, 100.9, 92.7, 86.0, 72.9, 65.6]]
+ph.npd_curve(powers, distances, levels, power=20000.0).plot()
+```
+
+Es el motor NPD que sustenta el método; las etapas de segmentación, atenuación
+lateral e integración de contornos en malla son un desarrollo posterior aparte.
+
 ---
 
 **Normas.** ICAO Anexo 16 Vol. I Apéndice 2 (procedimiento EPNL), ICAO Doc 9501

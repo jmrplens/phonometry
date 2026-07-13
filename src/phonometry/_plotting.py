@@ -104,6 +104,7 @@ if TYPE_CHECKING:
         RayTraceResult,
     )
     from .aircraft_atmospheric_absorption import AircraftBandAttenuation
+    from .airport_noise import NpdLevelResult
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -1157,6 +1158,29 @@ def plot_aircraft_band_attenuation(
     ax.set_title("Aircraft atmospheric absorption (SAE ARP 5534)")
     ax.grid(True, which="both", alpha=0.3)
     ax.legend(loc="upper left", fontsize="small")
+    return ax
+
+
+def plot_npd_level(result: "NpdLevelResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """NPD event level versus slant distance (log axis), with the tabulated nodes.
+
+    :param result: An :class:`~phonometry.airport_noise.NpdLevelResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the interpolated-curve ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    d = np.asarray(result.distance, dtype=np.float64)
+    label = f"NPD (P = {result.power:g})"
+    ax.plot(d, np.asarray(result.level), **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    ax.plot(np.asarray(result.table_distances), np.asarray(result.table_levels), "o",
+            color=_C_REFERENCE, ms=4, label="Tabulated")
+    ax.set_xscale("log")
+    ax.set_xlabel("Slant distance [m]")
+    ax.set_ylabel("Event level [dB]")
+    ax.set_title("Noise-power-distance curve (ECAC Doc 29)")
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     return ax
 
 

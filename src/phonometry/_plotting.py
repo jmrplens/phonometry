@@ -1199,16 +1199,21 @@ def plot_flyover(result: "FlyoverResult", ax: Axes | None = None, **kwargs: Any)
     """
     ax = ax if ax is not None else _new_axes()
     seg = np.asarray(result.segment_levels, dtype=np.float64)
+    # Non-finite segment contributions (e.g. a fully-attenuated segment) are
+    # dropped so Matplotlib does not choke on them.
+    seg = np.where(np.isfinite(seg), seg, np.nan)
     idx = np.arange(seg.size)
     metric = "SEL" if result.metric == "exposure" else "LAmax"
     ax.bar(idx, seg, **{"color": _C_PRIMARY, "alpha": 0.85, **kwargs})
-    ax.axhline(result.level, color=_C_REFERENCE, ls="--", lw=1.2,
-               label=f"Total {metric} = {result.level:.1f} dB")
+    if np.isfinite(result.level):
+        ax.axhline(result.level, color=_C_REFERENCE, ls="--", lw=1.2,
+                   label=f"Total {metric} = {result.level:.1f} dB")
     ax.set_xlabel("Segment index")
     ax.set_ylabel(f"Segment {metric} [dB]")
     ax.set_title("Single-event segment contributions (ECAC Doc 29)")
     ax.grid(True, axis="y", alpha=0.3)
-    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    if np.isfinite(result.level):
+        ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     return ax
 
 
@@ -1227,8 +1232,10 @@ def plot_noise_contour(result: "NoiseContourResult", ax: Axes | None = None, **k
     finite = lvl[np.isfinite(lvl)]
     top = float(np.ceil(np.max(finite) / 5.0) * 5.0) if finite.size else 100.0
     levels = np.arange(top - 30.0, top + 0.1, 5.0)
-    cf = ax.contourf(x, y, lvl, **{"levels": levels, "cmap": "viridis", "extend": "both", **kwargs})
-    ax.contour(x, y, lvl, levels=levels, colors="k", linewidths=0.4, alpha=0.5)
+    # Mask non-finite cells (e.g. degenerate paths) so they render blank.
+    masked = np.ma.masked_invalid(lvl)
+    cf = ax.contourf(x, y, masked, **{"levels": levels, "cmap": "viridis", "extend": "both", **kwargs})
+    ax.contour(x, y, masked, levels=levels, colors="k", linewidths=0.4, alpha=0.5)
     ax.figure.colorbar(cf, ax=ax, label=f"{'SEL' if result.metric == 'exposure' else 'LAmax'} [dB]")
     ax.set_xlabel("x [km]")
     ax.set_ylabel("y [km]")

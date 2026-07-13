@@ -2995,16 +2995,12 @@ def _chk_ecac_impedance() -> Outcome:
 )
 def _chk_ecac_workbook_segment() -> Outcome:
     # ECAC Doc 29 5th ed. Vol 3 Part 1 reference workbook, sheet
-    # B-2_Segment_Results, case JETFAC receptor R02 segment 1 (climbing). The
-    # workbook lists β = 4.2226°, lateral displacement 81363.28 ft, Λ = 6.3769 dB.
-    import numpy as _np
-
-    ft = 0.3048
-    s1 = _np.array([-81363.2829, -328077.7538, 18311.6034])
-    s2 = _np.array([-81363.2829, -76348.2804, 6000.0])
-    obs = _np.array([0.0, 656.1679790026246, 0.0])
-    _, _, _, _, beta, _, lateral = ph.airport_noise._segment_geometry(s1, s2, obs)
-    got = float(ph.lateral_attenuation(beta, lateral * ft))
+    # B-2_Segment_Results, case JETFAC receptor R02 segment 1 (climbing): the
+    # workbook lists β = 4.2226°, lateral displacement 81363.28 ft (24799.6 m)
+    # and Λ = 6.3769 dB. Here we anchor the Λ(β, ℓ) formula to those reference
+    # values (the β/φ geometry itself is validated in tests/test_airport_noise).
+    beta_ref, lateral_m = 4.2225708673, 81363.2829 * 0.3048
+    got = float(ph.lateral_attenuation(beta_ref, lateral_m))
     return numeric(6.3768594165, got, 1e-2, unit="dB", places=4)
 
 

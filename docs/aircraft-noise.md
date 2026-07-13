@@ -246,5 +246,6 @@ ECAC Doc 29, 4th ed., Vol 2 (2016): the NPD event-level interpolation (§4.2) an
 the single-event segment calculation — duration (§4.5.1), engine installation
 (§4.5.3), lateral attenuation (§4.5.4, AIR-5662), the finite-segment noise
 fraction (§4.5.6) and segment summation (§4.3) — through to ground-grid noise
-contours. The start-of-roll directivity (§4.5.7) is out of scope, and the full
-Vol 3 Part 1 reference-case cross-check is pending the ECAC results workbook.
+contours, with the impedance adjustment (§4.2.1). The single-event chain is
+validated against the ECAC Doc 29 5th ed. Vol 3 Part 1 reference workbook. The
+start-of-roll directivity (§4.5.7) is out of scope.

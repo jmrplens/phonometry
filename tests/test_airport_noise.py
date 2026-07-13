@@ -303,3 +303,19 @@ def test_event_level_invalid_inputs() -> None:
         lateral_attenuation(30.0, -1.0)
     with pytest.raises(ValueError, match="mounting"):
         engine_installation_correction(20.0, "tail")
+    # Non-finite path, negative power and non-positive speed are rejected.
+    with pytest.raises(ValueError, match="finite"):
+        event_level([[0.0, 0.0, np.inf, 1e4, _VREF], good[1]], [0.0, 100.0, 0.0],
+                    _NP, _ND, _NSEL, _NMAX)
+    with pytest.raises(ValueError, match="power"):
+        event_level([[0.0, 0.0, 300.0, -1.0, _VREF], good[1]], [0.0, 100.0, 0.0],
+                    _NP, _ND, _NSEL, _NMAX)
+    with pytest.raises(ValueError, match="speed"):
+        event_level([[0.0, 0.0, 300.0, 1e4, 0.0], good[1]], [0.0, 100.0, 0.0],
+                    _NP, _ND, _NSEL, _NMAX)
+
+
+def test_impedance_adjustment_rejects_absolute_zero() -> None:
+    from phonometry.airport_noise import impedance_adjustment
+    with pytest.raises(ValueError, match="absolute zero"):
+        impedance_adjustment(-300.0, 101.325)

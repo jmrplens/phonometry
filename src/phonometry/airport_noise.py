@@ -166,6 +166,8 @@ def impedance_adjustment(temperature: float = _T0_C, pressure: float = _P0_KPA) 
     p = float(pressure)
     if not (np.isfinite(t) and np.isfinite(p) and p > 0.0):
         raise ValueError("'pressure' must be positive and inputs finite.")
+    if t <= -273.15:
+        raise ValueError("'temperature' must be above absolute zero (−273.15 °C).")
     delta = p / _P0_KPA
     theta = (t + 273.15) / (_T0_C + 273.15)
     zc = _ZC_STD * delta / np.sqrt(theta)
@@ -384,6 +386,66 @@ class FlyoverResult:
         return plot_flyover(self, ax=ax, **kwargs)
 
 
+def _validate_path(path: "NDArray[np.float64] | list[list[float]]") -> "NDArray[np.float64]":
+    """Coerce and validate a flight path to a finite ``(N, 5)`` array."""
+    pts = np.asarray(path, dtype=np.float64)
+    if pts.ndim != 2 or pts.shape[1] != 5 or pts.shape[0] < 2:
+        raise ValueError("'path' must have shape (N, 5) with N >= 2 (x,y,z,power,speed).")
+    if not np.all(np.isfinite(pts)):
+        raise ValueError("'path' must contain only finite values.")
+    if np.any(pts[:, 3] < 0.0):
+        raise ValueError("'path' power settings (column 4) must be non-negative.")
+    if np.any(pts[:, 4] <= 0.0):
+        raise ValueError("'path' speeds (column 5) must be strictly positive.")
+    return pts
+
+
+def _event_level_core(
+    pts: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+    p: "NDArray[np.float64]", d: "NDArray[np.float64]",
+    le: "NDArray[np.float64]", lm: "NDArray[np.float64]",
+    vref: float, imp: float, mounting: str, key: str,
+) -> "tuple[float, NDArray[np.float64]]":
+    """Segment loop and summation shared by :func:`event_level`/:func:`noise_contour`.
+
+    ``pts`` must be pre-validated and ``p, d, le, lm`` pre-cleaned; this hot path
+    is called once per grid point by :func:`noise_contour`, so all input coercion
+    is hoisted out to the callers.
+    """
+    seg_levels = []
+    for i in range(pts.shape[0] - 1):
+        s1, s2 = pts[i, :3], pts[i + 1, :3]
+        p1, p2 = pts[i, 3], pts[i + 1, 3]
+        v1, v2 = pts[i, 4], pts[i + 1, 4]
+        length, q, dp, ds, beta, phi, lateral = _segment_geometry(s1, s2, obs)
+        if length <= 0.0:
+            continue
+        frac = np.clip(q / length, 0.0, 1.0)
+        p_seg = np.sqrt(max(p1**2 + frac * (p2**2 - p1**2), 0.0))
+        lam_att = lateral_attenuation(beta, lateral)
+        di = engine_installation_correction(phi, mounting)
+        if key == "maximum":
+            base = float(npd_level(p, d, lm, p_seg, ds)[0])
+            seg_levels.append(base + imp + di - lam_att)
+        else:
+            le_dp = float(npd_level(p, d, le, p_seg, dp)[0])
+            lm_dp = float(npd_level(p, d, lm, p_seg, dp)[0])
+            v_seg = np.sqrt(max(v1**2 + frac * (v2**2 - v1**2), 0.0))
+            dv = duration_correction(vref, v_seg)
+            d_lambda = _D0_M * 10.0 ** ((le_dp - lm_dp) / 10.0)
+            df = noise_fraction(q, length, d_lambda)
+            seg_levels.append(le_dp + imp + dv + di - lam_att + df)
+
+    seg_arr = np.asarray(seg_levels, dtype=np.float64)
+    if seg_arr.size == 0:
+        total = float("-inf")
+    elif key == "maximum":
+        total = float(np.max(seg_arr))
+    else:
+        total = float(10.0 * np.log10(np.sum(10.0 ** (seg_arr / 10.0))))
+    return total, seg_arr
+
+
 def event_level(
     path: "NDArray[np.float64] | list[list[float]]",
     observer: "NDArray[np.float64] | list[float]",
@@ -421,9 +483,7 @@ def event_level(
     :return: A :class:`FlyoverResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    pts = np.asarray(path, dtype=np.float64)
-    if pts.ndim != 2 or pts.shape[1] != 5 or pts.shape[0] < 2:
-        raise ValueError("'path' must have shape (N, 5) with N >= 2 (x,y,z,power,speed).")
+    pts = _validate_path(path)
     obs = np.asarray(observer, dtype=np.float64).ravel()
     if obs.shape != (3,) or not np.all(np.isfinite(obs)):
         raise ValueError("'observer' must be a finite (x, y, z) point.")
@@ -432,41 +492,9 @@ def event_level(
         raise ValueError("'metric' must be 'exposure' or 'maximum'.")
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
-    vref = float(reference_speed)
     imp = impedance_adjustment(temperature, pressure)
-
-    seg_levels = []
-    for i in range(pts.shape[0] - 1):
-        s1, s2 = pts[i, :3], pts[i + 1, :3]
-        p1, p2 = pts[i, 3], pts[i + 1, 3]
-        v1, v2 = pts[i, 4], pts[i + 1, 4]
-        length, q, dp, ds, beta, phi, lateral = _segment_geometry(s1, s2, obs)
-        if length <= 0.0:
-            continue
-        frac = np.clip(q / length, 0.0, 1.0)
-        p_seg = np.sqrt(max(p1**2 + frac * (p2**2 - p1**2), 0.0))
-        lam_att = lateral_attenuation(beta, lateral)
-        di = engine_installation_correction(phi, mounting)
-        if key == "maximum":
-            base = float(npd_level(p, d, lm, p_seg, ds)[0])
-            seg_levels.append(base + imp + di - lam_att)
-        else:
-            base = float(npd_level(p, d, le, p_seg, dp)[0])
-            v_seg = np.sqrt(max(v1**2 + frac * (v2**2 - v1**2), 1e-9))
-            dv = duration_correction(vref, v_seg)
-            le_dp = float(npd_level(p, d, le, p_seg, dp)[0])
-            lm_dp = float(npd_level(p, d, lm, p_seg, dp)[0])
-            d_lambda = _D0_M * 10.0 ** ((le_dp - lm_dp) / 10.0)
-            df = noise_fraction(q, length, d_lambda)
-            seg_levels.append(base + imp + dv + di - lam_att + df)
-
-    seg_arr = np.asarray(seg_levels, dtype=np.float64)
-    if seg_arr.size == 0:
-        total = float("-inf")
-    elif key == "maximum":
-        total = float(np.max(seg_arr))
-    else:
-        total = float(10.0 * np.log10(np.sum(10.0 ** (seg_arr / 10.0))))
+    total, seg_arr = _event_level_core(
+        pts, obs, p, d, le, lm, float(reference_speed), imp, mounting, key)
     return FlyoverResult(level=total, metric=key, segment_levels=seg_arr, observer=obs)
 
 
@@ -530,13 +558,22 @@ def noise_contour(
     gy = np.asarray(y, dtype=np.float64).ravel()
     if gx.size < 2 or gy.size < 2:
         raise ValueError("'x' and 'y' must each have at least two grid points.")
+    # Validate and clean the shared inputs once, not per grid point.
+    pts = _validate_path(path)
+    key = metric.strip().lower()
+    if key not in ("exposure", "maximum"):
+        raise ValueError("'metric' must be 'exposure' or 'maximum'.")
+    p, d, le = _clean_table(powers, distances, exposure_levels)
+    _, _, lm = _clean_table(powers, distances, maximum_levels)
+    vref = float(reference_speed)
+    imp = impedance_adjustment(temperature, pressure)
     grid = np.empty((gy.size, gx.size), dtype=np.float64)
-    for iy, yy in enumerate(gy):
-        for ix, xx in enumerate(gx):
-            grid[iy, ix] = event_level(
-                path, [float(xx), float(yy), 0.0], powers, distances, exposure_levels,
-                maximum_levels,
-                reference_speed=reference_speed, mounting=mounting, metric=metric,
-                temperature=temperature, pressure=pressure,
-            ).level
-    return NoiseContourResult(x=gx, y=gy, level=grid, metric=metric.strip().lower())
+    obs = np.empty(3, dtype=np.float64)
+    obs[2] = 0.0
+    for iy in range(gy.size):
+        obs[1] = gy[iy]
+        for ix in range(gx.size):
+            obs[0] = gx[ix]
+            grid[iy, ix] = _event_level_core(
+                pts, obs, p, d, le, lm, vref, imp, mounting, key)[0]
+    return NoiseContourResult(x=gx, y=gy, level=grid, metric=key)

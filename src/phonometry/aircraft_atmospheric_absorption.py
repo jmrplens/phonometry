@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from .air_absorption import air_attenuation
+from ._validation import require_non_negative, require_positive_array
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -114,12 +115,8 @@ def sae_band_attenuation(
     :return: An :class:`AircraftBandAttenuation`.
     :raises ValueError: If the inputs are invalid.
     """
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    if f.size == 0 or not np.all(np.isfinite(f)) or np.any(f <= 0.0):
-        raise ValueError("'frequencies' must be finite and strictly positive.")
-    s = float(path_length)
-    if not np.isfinite(s) or s < 0.0:
-        raise ValueError("'path_length' must be non-negative and finite.")
+    f = require_positive_array(frequencies, "frequencies")
+    s = require_non_negative(path_length, "path_length")
 
     # Pure-tone coefficient at the exact mid-band frequency (ISO 9613-1).
     alpha = air_attenuation(f, temperature, relative_humidity, pressure, exact_midband=True)

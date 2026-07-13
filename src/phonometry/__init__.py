@@ -295,6 +295,11 @@ from .aircraft_atmospheric_absorption import (
     AircraftBandAttenuation,
     sae_band_attenuation,
 )
+from .airport_noise import (
+    NpdLevelResult,
+    npd_curve,
+    npd_level,
+)
 from .ship_radiated_noise import (
     ShipSourceLevelResult,
     hydrophone_depths,
@@ -806,6 +811,9 @@ __all__ = [
     "ParabolicEquationResult",
     "sae_band_attenuation",
     "AircraftBandAttenuation",
+    "npd_level",
+    "npd_curve",
+    "NpdLevelResult",
     "radiated_noise_level",
     "hydrophone_depths",
     "source_level_uncertainty",

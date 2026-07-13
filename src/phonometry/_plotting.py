@@ -105,6 +105,7 @@ if TYPE_CHECKING:
     )
     from .aircraft_atmospheric_absorption import AircraftBandAttenuation
     from .airport_noise import FlyoverResult, NoiseContourResult, NpdLevelResult
+    from .rotorcraft_noise import RotorcraftHemisphere
     from .sii import SIIResult
     from .sti import STIResult
     from .uncertainty import MonteCarloResult, UncertaintyResult
@@ -1214,6 +1215,38 @@ def plot_flyover(result: "FlyoverResult", ax: Axes | None = None, **kwargs: Any)
     ax.grid(True, axis="y", alpha=0.3)
     if np.isfinite(result.level):
         ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_rotorcraft_hemisphere(
+    result: "RotorcraftHemisphere", ax: Axes | None = None, *, band: float | None = None,
+    **kwargs: Any) -> Axes:
+    """Fore-aft directivity section of a rotorcraft noise hemisphere (ECAC Doc 32).
+
+    Plots the source level versus polar angle θ (0° forward → 180° rearward) in the
+    vertical plane (azimuth φ = 0) for a single one-third-octave band.
+
+    :param result: A :class:`~phonometry.rotorcraft_noise.RotorcraftHemisphere`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param band: Band centre frequency to plot, in Hz (default: the loudest band).
+    :param kwargs: Forwarded to ``plot``.
+    :return: The axes.
+    """
+    from .rotorcraft_noise import hemisphere_source_level
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    theta = np.linspace(float(result.polar[0]), float(result.polar[-1]), 181)
+    grid = np.array([hemisphere_source_level(result, 0.0, t) for t in theta])
+    idx = int(np.argmin(np.abs(freqs - band))) if band is not None else int(
+        np.nanargmax(np.nansum(10.0 ** (grid / 10.0), axis=0)))
+    ax.plot(theta, grid[:, idx], **{"color": _C_PRIMARY, "lw": 1.8,
+            "label": f"{freqs[idx]:.0f} Hz (φ = 0°)", **kwargs})
+    ax.set_xlabel("Polar angle θ [°]  (0° forward → 180° rearward)")
+    ax.set_ylabel("Source level at 60 m [dB]")
+    ax.set_title("Rotorcraft noise hemisphere directivity (ECAC Doc 32)")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     return ax
 
 

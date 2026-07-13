@@ -3054,6 +3054,43 @@ def _chk_ecac_npd() -> Outcome:
     return numeric(97.0, got, 1e-9, unit="dB", places=4)
 
 
+_ROTORCRAFT = "Rotorcraft noise (ECAC Doc 32 / NORAH2)"
+
+
+@register(
+    _ROTORCRAFT,
+    "ECAC Doc 32 atmospheric attenuation (Table 4)",
+    "ΔLa over a 1 km excess path at 1 kHz vs the NORAH2 guidance Table 4, dB",
+)
+def _chk_doc32_atmospheric() -> Outcome:
+    # NORAH2 guidance Table 4: 6.3 dB/km at 1 kHz (ICAO reference conditions).
+    got = -float(ph.atmospheric_adjustment([1000.0], 1000.0 + 60.0)[0])
+    return numeric(6.3, got, 0.2, unit="dB", places=3)
+
+
+@register(
+    _ROTORCRAFT,
+    "ECAC Doc 32 spherical spreading",
+    "ΔLs at ten times the 60 m hemisphere reference distance (Eq. 24), dB",
+)
+def _chk_doc32_spreading() -> Outcome:
+    return numeric(-20.0, float(ph.spherical_spreading_adjustment(600.0)), 1e-9,
+                   unit="dB", places=3)
+
+
+@register(
+    _ROTORCRAFT,
+    "ECAC Doc 32 ground effect (rigid limit)",
+    "ΔLg over a rigid surface at grazing incidence tends to +6 dB (Eq. 29), dB",
+)
+def _chk_doc32_ground() -> Outcome:
+    # Over a near-rigid surface (Zs -> inf), coherent reflection at a small path
+    # difference reinforces the direct ray towards the +6.02 dB pressure-doubling
+    # limit. A low frequency and near-grazing geometry approaches it.
+    got = float(ph.ground_effect_adjustment([20.0], 50.0, 1.2, 400.0, flow_resistivity="H")[0])
+    return numeric(6.0, got, 1.0, unit="dB", places=2)
+
+
 @register(
     _AIRCRAFT,
     "SAE ARP 5534 pure-tone coefficient (ISO 9613-1)",

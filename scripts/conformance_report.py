@@ -2136,7 +2136,7 @@ _SII = "Speech intelligibility (ANSI S3.5-1997)"
 
 @register(_SII, "ANSI S3.5-1997 Table 3", "Band-importance function normalisation")
 def _chk_sii_band_importance_sum() -> Outcome:
-    total = float(ph.sii.BAND_IMPORTANCE.sum())
+    total = float(ph.hearing.sii.BAND_IMPORTANCE.sum())
     return numeric(ref.ANSIS3_5_BAND_IMPORTANCE_SUM, total, 1e-9, places=6)
 
 
@@ -3026,6 +3026,30 @@ def _chk_ecac_start_of_roll_prop() -> Outcome:
     # directivity (Eq. 4-24b) is +1.0943 dB.
     got = float(ph.start_of_roll_directivity(128.182381, 254.4361, "turboprop"))
     return numeric(1.09434, got, 1e-2, unit="dB", places=4)
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 workbook event assembly (JETFDS/R03, behind SOR)",
+    "Energy sum of the reference per-segment SELs vs the B-1 event total, dB",
+)
+def _chk_doc29_event_assembly() -> Outcome:
+    # Doc 29 5th ed. Vol 3 Part 1 workbook, departure case JETFDS receptor R03
+    # (centreline behind the start of roll): the Eq. 4-11 energy sum of the 29
+    # reference segment SELs must reproduce the B-1 total 74.73 dB. No oracle
+    # exists for per-event LAmax, non-zero bank angles or the Annex 16
+    # bandsharing adjustment (no ETM worked example); registered gaps.
+    import sys as _sys
+    from pathlib import Path as _P
+
+    tests_dir = str(_P(__file__).resolve().parent.parent / "tests" / "aircraft")
+    if tests_dir not in _sys.path:
+        _sys.path.insert(0, tests_dir)
+    from doc29_workbook_data import B1, SEGMENTS  # noqa: PLC0415
+
+    rows = SEGMENTS[("JETFDS", "R03")]
+    total = 10.0 * math.log10(sum(10.0 ** (r[-1] / 10.0) for r in rows))
+    return numeric(B1[("JETFDS", "R03")], total, 1e-2, unit="dB", places=3)
 
 
 @register(

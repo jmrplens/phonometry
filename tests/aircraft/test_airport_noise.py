@@ -295,10 +295,16 @@ def test_event_level_ground_roll_applies_directivity() -> None:
     # Behind SOR, ψ is obtuse; the two differ by exactly ΔSOR plus the reduced
     # noise-fraction switch, so the ground-roll level is not equal to the plain one.
     assert rolled != pytest.approx(plain)
-    # Ahead of the segment the flag makes no difference (ΔSOR only applies behind).
-    ahead = [1000.0, 150.0, 0.0]
-    assert (event_level(path, ahead, _NP, _ND, _NSEL, _NMAX, ground_roll=[True]).level
-            == pytest.approx(event_level(path, ahead, _NP, _ND, _NSEL, _NMAX).level))
+    # Ahead of the segment no ΔSOR applies, but the runway segment still uses
+    # the Eq. 4-13b average speed, so the flagged level differs from the plain
+    # airborne treatment exactly by the duration-correction delta.
+    ahead = [2000.0, 150.0, 0.0]  # q > λ: truly ahead of the segment
+    from phonometry.aircraft.airport_noise import duration_correction as _dc
+    plain_ahead = event_level(path, ahead, _NP, _ND, _NSEL, _NMAX).level
+    flagged_ahead = event_level(path, ahead, _NP, _ND, _NSEL, _NMAX, ground_roll=[True]).level
+    vref = 160.0 * 0.514444
+    expected_delta = _dc(vref, 0.5 * (40.0 + 60.0)) - _dc(vref, 60.0)
+    assert flagged_ahead - plain_ahead == pytest.approx(expected_delta, abs=1e-9)
     with pytest.raises(ValueError, match="ground_roll"):
         event_level(path, obs, _NP, _ND, _NSEL, _NMAX, ground_roll=[True, False])
     # The directivity is also applied on the maximum metric (Eq. 4-9a) and with
@@ -386,3 +392,101 @@ def test_impedance_adjustment_rejects_absolute_zero() -> None:
     from phonometry.aircraft.airport_noise import impedance_adjustment
     with pytest.raises(ValueError, match="absolute zero"):
         impedance_adjustment(-300.0, 101.325)
+
+
+# --------------------------------------------------------------------------- #
+# Doc 29 Vol 3 Part 1 reference workbook: seven-receptor assembly oracle
+# --------------------------------------------------------------------------- #
+from doc29_workbook_data import B1, SEGMENTS  # noqa: E402
+
+
+@pytest.mark.parametrize("case", sorted(B1))
+def test_workbook_segment_assembly_reproduces_event_sel(case: tuple[str, str]) -> None:
+    # Eq. 4-9b assembly from the workbook's own per-segment terms must
+    # reproduce each segment SEL and the B-1 event total (Eq. 4-11), for all
+    # seven branch-covering receptor events.
+    totals = []
+    for row in SEGMENTS[case]:
+        (_, _, _, di, lam, base, dv, df, sor, imp, seg_sel) = row
+        assembled = base + dv + di - lam + df + imp + sor
+        assert assembled == pytest.approx(seg_sel, abs=2e-3)
+        totals.append(seg_sel)
+    total = 10.0 * np.log10(np.sum(10.0 ** (np.asarray(totals) / 10.0)))
+    assert total == pytest.approx(B1[case], abs=6e-3)
+
+
+def test_workbook_behind_sor_geometry_matches_h1_fix() -> None:
+    # JETFDC/R03 seg 1 (behind the start of roll on the centreline): the
+    # nearest-end geometry gives beta1 = asin(z1/d1) ~ 0.115 deg and
+    # l = OC1 = d1, hence Lambda = 8.689 dB and Delta_I(fuselage) = -3.000 dB
+    # (workbook sheet B-2). The old track-perpendicular geometry returned
+    # lateral = 0 and beta = 90 deg, zeroing both terms.
+    d1_ft, beta_ref = 1640.4, 0.1146
+    ft = 0.3048
+    z1 = d1_ft * np.sin(np.radians(beta_ref))
+    oc1 = np.sqrt(d1_ft**2 - z1**2)
+    assert lateral_attenuation(beta_ref, oc1 * ft) == pytest.approx(8.689, abs=2e-3)
+    assert engine_installation_correction(beta_ref, "fuselage") == pytest.approx(-3.000, abs=2e-3)
+    # End-to-end: a centreline receptor behind a takeoff-roll segment now gets
+    # a materially attenuated level instead of the unattenuated one.
+    path = [[0.0, 0.0, 0.5, 12000.0, 0.0], [1500.0, 0.0, 0.5, 12000.0, 40.0]]
+    behind = [-500.0, 0.0, 0.0]
+    lvl = event_level(path, behind, _NP, _ND, _NSEL, _NMAX, mounting="fuselage",
+                      ground_roll=[True]).level
+    assert np.isfinite(lvl)
+    seg = event_level(path, behind, _NP, _ND, _NSEL, _NMAX, mounting="fuselage",
+                      ground_roll=[True]).segment_levels
+    assert seg.size == 1
+
+
+def test_landing_roll_ahead_branch() -> None:
+    # Ahead of a landing rollout: ds baseline, reduced fraction Eq. 4-21b,
+    # nearest-end geometry and no SOR. The flagged result must differ from the
+    # plain treatment and must NOT include a SOR term (identical for jet and
+    # turboprop mounting up to the Delta_I difference).
+    path = [[0.0, 0.0, 0.5, 8000.0, 70.0], [1200.0, 0.0, 0.5, 8000.0, 30.0]]
+    ahead = [3000.0, 400.0, 0.0]
+    plain = event_level(path, ahead, _NP, _ND, _NSEL, _NMAX).level
+    landing = event_level(path, ahead, _NP, _ND, _NSEL, _NMAX, landing_roll=[True]).level
+    assert landing != pytest.approx(plain)
+    # Zero-speed start is legitimate on runway segments (Eq. 4-13b mean speed).
+    v0 = [[0.0, 0.0, 0.5, 12000.0, 0.0], [800.0, 0.0, 0.5, 12000.0, 30.0],
+          [4000.0, 0.0, 250.0, 12000.0, 80.0]]
+    lvl = event_level(v0, [2000.0, 600.0, 0.0], _NP, _ND, _NSEL, _NMAX,
+                      ground_roll=[True, False]).level
+    assert np.isfinite(lvl)
+
+
+def test_npd_floor_observer_on_track() -> None:
+    # M4: a receiver exactly under the (ground-level) path no longer crashes;
+    # the NPD lookup clamps to the recommended 30 m floor (Doc 29 section 4.2).
+    path = [[0.0, 0.0, 0.0, 10000.0, _VREF], [2000.0, 0.0, 0.0, 10000.0, _VREF]]
+    lvl = event_level(path, [1000.0, 0.0, 0.0], _NP, _ND, _NSEL, _NMAX).level
+    assert np.isfinite(lvl)
+
+
+def test_bank_angle_side_asymmetry() -> None:
+    # L2: with bank, starboard and port receivers see different Delta_I
+    # (phi = beta -/+ epsilon per section 4.5.2); without bank they are equal.
+    path = [[0.0, 0.0, 300.0, 10000.0, _VREF], [3000.0, 0.0, 400.0, 10000.0, _VREF]]
+    right = event_level(path, [1500.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX, bank=[10.0]).level
+    left = event_level(path, [1500.0, -500.0, 0.0], _NP, _ND, _NSEL, _NMAX, bank=[10.0]).level
+    same_r = event_level(path, [1500.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX).level
+    same_l = event_level(path, [1500.0, -500.0, 0.0], _NP, _ND, _NSEL, _NMAX).level
+    assert right != pytest.approx(left)
+    assert same_r == pytest.approx(same_l)
+    with pytest.raises(ValueError, match="bank"):
+        event_level(path, [0.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX, bank=[1.0, 2.0])
+
+
+def test_noise_contour_accepts_bank() -> None:
+    # API parity with event_level: bank threads through to the contour grid
+    # and produces the same port/starboard asymmetry.
+    path = [[0.0, 0.0, 300.0, 10000.0, _VREF], [3000.0, 0.0, 400.0, 10000.0, _VREF]]
+    kw = dict(x=[1400.0, 1600.0], y=[-500.0, 500.0])
+    banked = noise_contour(path, _NP, _ND, _NSEL, _NMAX, bank=[10.0], **kw)
+    level = noise_contour(path, _NP, _ND, _NSEL, _NMAX, **kw)
+    assert banked.level[0, 0] != pytest.approx(banked.level[1, 0])
+    assert level.level[0, 0] == pytest.approx(level.level[1, 0])
+    with pytest.raises(ValueError, match="bank"):
+        noise_contour(path, _NP, _ND, _NSEL, _NMAX, bank=[1.0, 2.0], **kw)

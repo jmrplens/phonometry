@@ -148,6 +148,7 @@ _TONE_START = 2
 
 def _tone_background(
     spl: "NDArray[np.float64] | list[float]",
+    start: int | None = None,
 ) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
     """Tone-correction background level ``SPL''`` and excess ``F`` (App. 2 §4.3).
 
@@ -161,7 +162,7 @@ def _tone_background(
     """
     sig = _validate_spectrum(spl)
     n = 24
-    start = _TONE_START
+    start = _TONE_START if start is None else start
 
     # Step 1: slopes s(i) = SPL(i) − SPL(i−1), starting at band 4 (index 3).
     s = np.full(n, np.nan)
@@ -238,7 +239,8 @@ def _tone_factor(excess: float, frequency: float) -> float:
     return 10.0 / 3.0
 
 
-def tone_correction(spl: "NDArray[np.float64] | list[float]") -> float:
+def tone_correction(spl: "NDArray[np.float64] | list[float]", *,
+                    start_band: int = _TONE_START) -> float:
     """Tone-correction factor ``C`` for a spectrum (ICAO Annex 16 App. 2 §4.3).
 
     The maximum over bands of the tone-correction factor derived from the tone
@@ -246,10 +248,15 @@ def tone_correction(spl: "NDArray[np.float64] | list[float]") -> float:
     500 Hz / 5000 Hz frequency split and the 6⅔ dB cap of Table A2-2.
 
     :param spl: The 24 one-third-octave-band sound pressure levels, in dB.
+    :param start_band: First band index of the slope analysis (App. 2 §4.3.1
+        Step 1). The default 2 (80 Hz) is the aeroplane procedure; helicopters
+        and tilt-rotors use 0 (50 Hz).
     :return: The tone-correction factor ``C``, in dB (0 if no tones qualify).
     :raises ValueError: If the spectrum is not 24 finite levels.
     """
-    _, excess = _tone_background(spl)
+    if not 0 <= int(start_band) <= 3:
+        raise ValueError("'start_band' must be between 0 (50 Hz) and 3 (100 Hz).")
+    _, excess = _tone_background(spl, start=int(start_band))
     factors = [_tone_factor(float(excess[i]), float(NOY_BANDS[i])) for i in range(24)]
     return float(max(factors))
 
@@ -295,11 +302,22 @@ def epnl_from_pnlt(
     dt: "float | NDArray[np.float64] | list[float]" = 0.5,
     *,
     reference_time: float = _EPNL_REFERENCE_TIME,
+    tone_corrections: "NDArray[np.float64] | list[float] | None" = None,
 ) -> "tuple[float, float, int, int]":
     """EPNL from a tone-corrected perceived-noise-level time history (App. 2 §4.5-4.6).
 
     ``EPNL = 10·lg( Σ_{kF..kL} 10^{PNLT(k)/10}·Δt(k) ) − 10·lg(T0)`` with the
-    10 dB-down integration limits about the maximum ``PNLTM``.
+    10 dB-down integration limits about the maximum ``PNLTM``. The exact
+    ``−10·lg(T0)`` form is used rather than the Annex's rounded constant 13 for
+    uniform 0.5 s records (difference 0.0103 dB); the ETM Table 4-4 integrated
+    reference reproduces the exact form to five decimals.
+
+    When ``tone_corrections`` is given, the **bandsharing adjustment** ``ΔB``
+    (App. 2 §4.4.2/4.4.3, ETM GM/AMC A2 4.4.2) is applied: if the tone
+    correction at the PNLTM record is below the average of the records within
+    one second of it (five records for the uniform 0.5 s cadence), ``ΔB`` is
+    that shortfall, added to PNLTM before the 10 dB-down window is found and
+    included in the reported EPNL.
 
     :param pnlt: The tone-corrected perceived noise levels ``PNLT(k)``, in PNdB.
     :param dt: Per-record duration, in s (scalar broadcast or per record).
@@ -318,10 +336,19 @@ def epnl_from_pnlt(
     if reference_time <= 0.0 or not np.isfinite(reference_time):
         raise ValueError("'reference_time' must be a positive, finite number.")
 
-    pnltm = float(np.max(p))
+    km = int(np.argmax(p))
+    delta_b = 0.0
+    if tone_corrections is not None:
+        c = np.atleast_1d(np.asarray(tone_corrections, dtype=np.float64))
+        if c.shape != p.shape or not np.all(np.isfinite(c)):
+            raise ValueError("'tone_corrections' must match 'pnlt' in length and be finite.")
+        t_mid = np.cumsum(dt_arr) - 0.5 * dt_arr
+        window = c[np.abs(t_mid - t_mid[km]) <= 1.0 + 1e-9]
+        delta_b = max(0.0, float(np.mean(window)) - float(c[km]))
+    pnltm = float(p[km]) + delta_b
     kf, kl = _ten_db_down_limits(p, pnltm - _TEN_DB_DOWN)
     energy = np.sum(10.0 ** (p[kf : kl + 1] / 10.0) * dt_arr[kf : kl + 1])
-    epnl = float(10.0 * np.log10(energy) - 10.0 * np.log10(reference_time))
+    epnl = float(10.0 * np.log10(energy) - 10.0 * np.log10(reference_time)) + delta_b
     return epnl, pnltm, kf, kl
 
 
@@ -334,7 +361,10 @@ class EPNLResult:
     :ivar pnl: Perceived noise level per record, in PNdB.
     :ivar tone_correction: Tone-correction factor per record, in dB.
     :ivar pnlt: Tone-corrected perceived noise level per record, in PNdB.
-    :ivar pnltm: Maximum tone-corrected perceived noise level, in PNdB.
+    :ivar pnltm: Maximum tone-corrected perceived noise level, in PNdB,
+        including the bandsharing adjustment ``ΔB`` (App. 2 §4.4.3).
+    :ivar bandsharing_adjustment: The bandsharing adjustment ``ΔB``, in dB
+        (zero unless the tone correction at PNLTM is suppressed).
     :ivar duration_correction: Duration correction ``D = EPNL − PNLTM``, in dB.
     :ivar epnl: Effective perceived noise level, in EPNdB.
     :ivar band_limits: The 0-based 10 dB-down record indices ``(kF, kL)``.
@@ -346,6 +376,7 @@ class EPNLResult:
     tone_correction: "NDArray[np.float64]"
     pnlt: "NDArray[np.float64]"
     pnltm: float
+    bandsharing_adjustment: float
     duration_correction: float
     epnl: float
     band_limits: "tuple[int, int]"
@@ -386,7 +417,8 @@ def effective_perceived_noise_level(
     corr = np.array([tone_correction(row) for row in arr])
     pnlt = pnl + corr
 
-    epnl, pnltm, kf, kl = epnl_from_pnlt(pnlt, dt, reference_time=reference_time)
+    epnl, pnltm, kf, kl = epnl_from_pnlt(
+        pnlt, dt, reference_time=reference_time, tone_corrections=corr)
 
     k = arr.shape[0]
     dt_raw = np.asarray(dt, dtype=np.float64)
@@ -401,6 +433,7 @@ def effective_perceived_noise_level(
         tone_correction=corr,
         pnlt=pnlt,
         pnltm=pnltm,
+        bandsharing_adjustment=float(pnltm - float(np.max(pnlt))),
         duration_correction=float(epnl - pnltm),
         epnl=epnl,
         band_limits=(kf, kl),

@@ -365,6 +365,55 @@ def npd_curve(
 #: Reference speed 160 kn in m/s and the noise-fraction d0 = (2/π)·Vref·t0 (m).
 _VREF_MS = 160.0 * 0.514444
 _D0_M = (2.0 / np.pi) * _VREF_MS * 1.0
+#: Recommended lower limit on NPD lookup distances, in metres (Doc 29 §4.2).
+_NPD_FLOOR_M = 30.0
+
+
+def _ground_track_offset(
+    seg: "NDArray[np.float64]", s1: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+) -> float:
+    """Horizontal perpendicular distance to the ground track (projected to z = 0)."""
+    seg_g = seg.copy()
+    seg_g[2] = 0.0
+    gl = float(np.linalg.norm(seg_g))
+    if gl <= 0.0:  # vertical ground track (degenerate): horizontal offset from s1
+        return float(np.hypot(obs[0] - s1[0], obs[1] - s1[1]))
+    ug = seg_g / gl
+    og = obs - s1
+    og[2] = 0.0
+    return float(np.linalg.norm(og - np.dot(og, ug) * ug))
+
+
+def _segment_angles(
+    u: "NDArray[np.float64]", s1: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+    q: float, length: float, dp: float, lateral: float,
+    z_foot: float, z_near: float, bank_deg: float,
+) -> "tuple[float, float]":
+    """Elevation ``beta`` and depression ``phi`` for one segment, in degrees.
+
+    §4.5.5 equivalent level path (Fig. 4-6): rotating the observer-segment
+    triangle about the ground track makes the elevation of the perpendicular
+    point ``β = arccos(ℓ/dp)``, which differs from ``atan2(z, ℓ)`` on inclined
+    segments. Alongside the segment ``β`` uses that equivalent angle; behind or
+    ahead it uses the nearest segment end over the same horizontal offset.
+    The engine-installation depression angle ``φ = β_p − ε`` uses the equivalent
+    angle of the perpendicular point on the EXTENDED line (Eq. 4-17), with the
+    bank angle ``ε`` signed positive for observers to starboard (§4.5.2).
+    """
+    if lateral <= 0.0:  # directly overhead: elevation/depression are ±90°
+        beta = 90.0 if z_near >= 0.0 else -90.0
+        return beta, (90.0 if z_foot >= 0.0 else -90.0) - float(bank_deg)
+    eq_angle = float(np.degrees(np.arccos(np.clip(lateral / dp, 0.0, 1.0)))) if dp > 0.0 else 90.0
+    eq_angle = eq_angle if z_foot >= 0.0 else -eq_angle
+    if 0.0 <= q <= length:
+        beta = eq_angle
+    else:
+        beta = float(np.degrees(np.arctan2(z_near, lateral)))
+    # Observer side: starboard is to the right of the flight direction
+    # (right-of-heading has a negative z-component cross product).
+    side = float(np.sign(u[0] * (obs[1] - s1[1]) - u[1] * (obs[0] - s1[0])))
+    phi = eq_angle + side * float(bank_deg)
+    return beta, phi
 
 
 def _segment_geometry(
@@ -390,27 +439,11 @@ def _segment_geometry(
     d1 = float(np.linalg.norm(obs - s1))
     d2 = float(np.linalg.norm(obs - s2))
     ds = d1 if q < 0.0 else (d2 if q > length else dp)
-    # Horizontal perpendicular distance to the ground track (project to z = 0).
-    seg_g = seg.copy()
-    seg_g[2] = 0.0
-    gl = float(np.linalg.norm(seg_g))
-    if gl > 0.0:
-        ug = seg_g / gl
-        og = obs - s1
-        og[2] = 0.0
-        lateral = float(np.linalg.norm(og - np.dot(og, ug) * ug))
-    else:  # vertical ground track (degenerate): use horizontal offset from s1
-        lateral = float(np.hypot(obs[0] - s1[0], obs[1] - s1[1]))
-    # Heights above the observer: perpendicular foot on the extended line (for φ)
-    # and nearest actual segment point (for β) — §4.5.5 equivalent level path.
+    lateral = _ground_track_offset(seg, s1, obs)
     z_foot = float(foot[2] - obs[2])
     z_near = float((s1[2] if q < 0.0 else (s2[2] if q > length else foot[2])) - obs[2])
-    if lateral > 0.0:
-        beta = float(np.degrees(np.arctan2(z_near, lateral)))
-        phi = float(np.degrees(np.arctan2(z_foot, lateral))) - float(bank_deg)
-    else:  # directly overhead: elevation/depression are ±90° by sign of height
-        beta = 90.0 if z_near >= 0.0 else -90.0
-        phi = (90.0 if z_foot >= 0.0 else -90.0) - float(bank_deg)
+    beta, phi = _segment_angles(u, s1, obs, q, length, dp, lateral,
+                                z_foot, z_near, bank_deg)
     return length, q, dp, ds, beta, phi, lateral
 
 
@@ -446,8 +479,8 @@ def _validate_path(path: "NDArray[np.float64] | list[list[float]]") -> "NDArray[
         raise ValueError("'path' must contain only finite values.")
     if np.any(pts[:, 3] < 0.0):
         raise ValueError("'path' power settings (column 4) must be non-negative.")
-    if np.any(pts[:, 4] <= 0.0):
-        raise ValueError("'path' speeds (column 5) must be strictly positive.")
+    if np.any(pts[:, 4] < 0.0):
+        raise ValueError("'path' speeds (column 5) must be non-negative.")
     return pts
 
 
@@ -463,20 +496,77 @@ def _validate_ground_roll(
     return gr
 
 
+def _validate_bank(
+    bank: "NDArray[np.float64] | list[float] | None", n_points: int,
+) -> "NDArray[np.float64] | None":
+    """Coerce an optional per-segment bank-angle array (length ``N-1``)."""
+    if bank is None:
+        return None
+    bk = np.asarray(bank, dtype=np.float64).ravel()
+    if bk.shape != (n_points - 1,):
+        raise ValueError(f"'bank' must have length {n_points - 1} (one per segment).")
+    return bk
+
+
+def _attenuation_geometry(
+    s1: "NDArray[np.float64]", s2: "NDArray[np.float64]", obs: "NDArray[np.float64]",
+    q: float, length: float, beta: float, phi: float, lateral: float,
+    key: str, roll_behind: bool, roll_ahead: bool,
+) -> "tuple[float, float, float]":
+    """Lateral-attenuation and installation angles for one segment (§4.5.5).
+
+    Returns ``(beta_att, ell_att, phi_att)``: the general equivalent-path
+    values, or the nearest-end geometry (``beta1 = asin(z1/d1)``,
+    ``l = OC1 = sqrt(d1^2 - z1^2)`` and the d2/z2 analogues) for maximum-level
+    metrics behind/ahead of the segment and for exposure metrics behind
+    takeoff / ahead of landing ground roll.
+    """
+    behind, ahead = q < 0.0, q > length
+    use_end = (key == "maximum" and (behind or ahead)) or roll_behind or roll_ahead
+    if not use_end:
+        return beta, lateral, phi
+    end = s2 if ahead else s1
+    d_end = float(np.linalg.norm(obs - end))
+    z_end = float(end[2] - obs[2])
+    if d_end <= 0.0:
+        return 90.0, 0.0, 90.0
+    beta_end = float(np.degrees(np.arcsin(np.clip(z_end / d_end, -1.0, 1.0))))
+    oc = float(np.hypot(obs[0] - end[0], obs[1] - end[1]))
+    return beta_end, oc, beta_end
+
+
+def _segment_noise_fraction(
+    q: float, length: float, d_lambda: float,
+    roll_behind: bool, roll_ahead: bool,
+) -> float:
+    """Finite-segment fraction: general Eq. 4-20 or the reduced roll forms."""
+    if roll_behind:
+        return noise_fraction(0.0, length, d_lambda)      # Eq. 4-21a
+    if roll_ahead:
+        return noise_fraction(length, length, d_lambda)   # Eq. 4-21b
+    return noise_fraction(q, length, d_lambda)            # Eq. 4-20
+
+
 def _event_level_core(
     pts: "NDArray[np.float64]", obs: "NDArray[np.float64]",
     p: "NDArray[np.float64]", d: "NDArray[np.float64]",
     le: "NDArray[np.float64]", lm: "NDArray[np.float64]",
     vref: float, imp: float, mounting: str, key: str,
     ground_roll: "NDArray[np.bool_] | None" = None,
+    landing_roll: "NDArray[np.bool_] | None" = None,
+    bank: "NDArray[np.float64] | None" = None,
 ) -> "tuple[float, NDArray[np.float64]]":
     """Segment loop and summation shared by :func:`event_level`/:func:`noise_contour`.
 
     ``pts`` must be pre-validated and ``p, d, le, lm`` pre-cleaned; this hot path
     is called once per grid point by :func:`noise_contour`, so all input coercion
-    is hoisted out to the callers. ``ground_roll`` (length ``N-1``) marks takeoff
-    ground-roll segments, which receive the start-of-roll directivity and reduced
-    noise fraction behind the aircraft (§4.5.6-4.5.7).
+    is hoisted out to the callers. ``ground_roll`` marks takeoff ground-roll
+    segments (start-of-roll directivity and reduced noise fraction behind the
+    aircraft, Eq. 4-21a/4-22..4-25) and ``landing_roll`` marks landing rollout
+    segments (reduced fraction Eq. 4-21b ahead, semi-circular directivity, no
+    SOR); both use the §4.5.5 nearest-end lateral geometry and the Eq. 4-13b
+    average segment speed. NPD lookups clamp to the recommended 30 m floor
+    (Doc 29 §4.2).
     """
     engine = "turboprop" if mounting.strip().lower() in ("propeller", "prop") else "jet"
     seg_levels = []
@@ -484,30 +574,42 @@ def _event_level_core(
         s1, s2 = pts[i, :3], pts[i + 1, :3]
         p1, p2 = pts[i, 3], pts[i + 1, 3]
         v1, v2 = pts[i, 4], pts[i + 1, 4]
-        length, q, dp, ds, beta, phi, lateral = _segment_geometry(s1, s2, obs)
+        eps = float(bank[i]) if bank is not None else 0.0
+        length, q, dp, ds, beta, phi, lateral = _segment_geometry(s1, s2, obs, bank_deg=eps)
         if length <= 0.0:
             continue
-        # Behind a takeoff ground-roll segment (q < 0): use the max-level distance
-        # ds for the NPD baseline, the reduced (q = 0) noise fraction, and add the
-        # start-of-roll directivity ΔSOR (Eq. 4-9, 4-21a, 4-22/4-25).
-        roll_behind = ground_roll is not None and bool(ground_roll[i]) and q < 0.0
+        is_takeoff = ground_roll is not None and bool(ground_roll[i])
+        is_landing = landing_roll is not None and bool(landing_roll[i])
+        roll_behind = is_takeoff and q < 0.0     # behind the start of roll
+        roll_ahead = is_landing and q > length   # ahead of the landing rollout
+        beta_att, ell_att, phi_att = _attenuation_geometry(
+            s1, s2, obs, q, length, beta, phi, lateral, key, roll_behind, roll_ahead)
         frac = np.clip(q / length, 0.0, 1.0)
         p_seg = np.sqrt(max(p1**2 + frac * (p2**2 - p1**2), 0.0))
-        lam_att = lateral_attenuation(beta, lateral)
-        di = engine_installation_correction(phi, mounting)
+        lam_att = lateral_attenuation(beta_att, ell_att)
+        di = engine_installation_correction(phi_att, mounting)
         sor = start_of_roll_directivity(np.degrees(np.arccos(np.clip(q / ds, -1.0, 1.0))),
-                                        ds, engine) if roll_behind else 0.0
+                                        max(ds, 1e-9), engine) if roll_behind else 0.0
         if key == "maximum":
-            base = float(npd_level(p, d, lm, p_seg, ds)[0])
+            base = float(npd_level(p, d, lm, p_seg, max(ds, _NPD_FLOOR_M))[0])
             seg_levels.append(base + imp + di - lam_att + sor)
         else:
-            dist = ds if roll_behind else dp
+            dist = max(ds if (roll_behind or roll_ahead) else dp, _NPD_FLOOR_M)
             le_d = float(npd_level(p, d, le, p_seg, dist)[0])
             lm_d = float(npd_level(p, d, lm, p_seg, dist)[0])
-            v_seg = np.sqrt(max(v1**2 + frac * (v2**2 - v1**2), 0.0))
+            if is_takeoff or is_landing:
+                # Eq. 4-13b: runway segments use the arithmetic mean speed,
+                # regardless of the observer position (V = 0 endpoints are
+                # legitimate at the very start of the takeoff roll).
+                v_seg = 0.5 * (v1 + v2)
+            else:
+                v_seg = np.sqrt(max(v1**2 + frac * (v2**2 - v1**2), 0.0))
+            if v_seg <= 0.0:
+                raise ValueError(
+                    "segment with zero mean speed (stationary segment in 'path').")
             dv = duration_correction(vref, v_seg)
             d_lambda = _D0_M * 10.0 ** ((le_d - lm_d) / 10.0)
-            df = noise_fraction(0.0 if roll_behind else q, length, d_lambda)
+            df = _segment_noise_fraction(q, length, d_lambda, roll_behind, roll_ahead)
             seg_levels.append(le_d + imp + dv + di - lam_att + df + sor)
 
     seg_arr = np.asarray(seg_levels, dtype=np.float64)
@@ -534,6 +636,8 @@ def event_level(
     temperature: float = _T0_C,
     pressure: float = _P0_KPA,
     ground_roll: "NDArray[np.bool_] | list[bool] | None" = None,
+    landing_roll: "NDArray[np.bool_] | list[bool] | None" = None,
+    bank: "NDArray[np.float64] | list[float] | None" = None,
 ) -> FlyoverResult:
     """Single-event noise level of a flight path at a receiver (ECAC Doc 29).
 
@@ -558,7 +662,14 @@ def event_level(
     :param ground_roll: Optional boolean mask of length ``N-1`` marking takeoff
         ground-roll segments; these receive the start-of-roll directivity ``ΔSOR``
         and reduced noise fraction behind the aircraft (§4.5.6-4.5.7).
-    :return: A :class:`FlyoverResult`.
+    :param landing_roll: Optional boolean mask of length ``N-1`` marking landing
+        rollout segments; ahead of them the reduced fraction (Eq. 4-21b), the
+        nearest-end lateral geometry and no directivity term apply (§4.5.5-4.5.6).
+    :param bank: Optional per-segment bank angle ``ε`` in degrees (length
+        ``N-1``); the depression angle becomes ``φ = β − ε`` with the §4.5.2
+        sign convention (positive for observers to starboard of the track).
+    :return: A :class:`FlyoverResult`. If every segment is degenerate
+        (zero length) the level is ``-inf``.
     :raises ValueError: If the inputs are invalid.
     """
     pts = _validate_path(path)
@@ -569,11 +680,13 @@ def event_level(
     if key not in ("exposure", "maximum"):
         raise ValueError("'metric' must be 'exposure' or 'maximum'.")
     gr = _validate_ground_roll(ground_roll, pts.shape[0])
+    lr = _validate_ground_roll(landing_roll, pts.shape[0])
+    bk = _validate_bank(bank, pts.shape[0])
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
     imp = impedance_adjustment(temperature, pressure)
     total, seg_arr = _event_level_core(
-        pts, obs, p, d, le, lm, float(reference_speed), imp, mounting, key, gr)
+        pts, obs, p, d, le, lm, float(reference_speed), imp, mounting, key, gr, lr, bk)
     return FlyoverResult(level=total, metric=key, segment_levels=seg_arr, observer=obs)
 
 
@@ -614,6 +727,8 @@ def noise_contour(
     temperature: float = _T0_C,
     pressure: float = _P0_KPA,
     ground_roll: "NDArray[np.bool_] | list[bool] | None" = None,
+    landing_roll: "NDArray[np.bool_] | list[bool] | None" = None,
+    bank: "NDArray[np.float64] | list[float] | None" = None,
 ) -> NoiseContourResult:
     """Single-event noise level over a ground grid (ECAC Doc 29 contour).
 
@@ -633,6 +748,10 @@ def noise_contour(
     :param pressure: Aerodrome air pressure, in kPa (impedance adjustment).
     :param ground_roll: Optional boolean mask (length ``N-1``) of takeoff
         ground-roll segments (see :func:`event_level`).
+    :param landing_roll: Optional boolean mask (length ``N-1``) of landing
+        rollout segments (see :func:`event_level`).
+    :param bank: Optional per-segment bank angle ``ε`` in degrees, length
+        ``N-1`` (see :func:`event_level`).
     :return: A :class:`NoiseContourResult`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -646,6 +765,8 @@ def noise_contour(
     if key not in ("exposure", "maximum"):
         raise ValueError("'metric' must be 'exposure' or 'maximum'.")
     gr = _validate_ground_roll(ground_roll, pts.shape[0])
+    lr = _validate_ground_roll(landing_roll, pts.shape[0])
+    bk = _validate_bank(bank, pts.shape[0])
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
     vref = float(reference_speed)
@@ -658,5 +779,5 @@ def noise_contour(
         for ix in range(gx.size):
             obs[0] = gx[ix]
             grid[iy, ix] = _event_level_core(
-                pts, obs, p, d, le, lm, vref, imp, mounting, key, gr)[0]
+                pts, obs, p, d, le, lm, vref, imp, mounting, key, gr, lr, bk)[0]
     return NoiseContourResult(x=gx, y=gy, level=grid, metric=key)

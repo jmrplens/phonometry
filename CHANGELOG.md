@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `EPNLResult.bandsharing_adjustment`, and a `start_band` parameter on
   `tone_correction` for the helicopter 50 Hz procedure.
 
+### Changed
+
+- ECAC Doc 29 `noise_contour` now evaluates the grid with one vectorised pass
+  per flight-path segment instead of a per-point Python loop; numerically
+  identical (guarded by the golden baseline and a scalar-equivalence test)
+  and ~45x faster on small grids, several hundred times on production-size
+  grids (30 000 points in ~0.2 s).
+
 ### Fixed
 
 - ECAC Doc 29: behind takeoff ground-roll segments the lateral attenuation and

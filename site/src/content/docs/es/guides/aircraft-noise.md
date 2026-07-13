@@ -101,9 +101,34 @@ report = ph.verify_aircraft_noise_system(
 print(report["passed"], report["checks"])
 ```
 
+## Absorción atmosférica (SAE ARP 5534)
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption_es.svg" alt="Absorción atmosférica aeronáutica frente a la frecuencia para dos distancias; la atenuación de banda del método SAE queda por debajo del valor de tono puro medio de banda a alta absorción" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption_es_dark.svg" alt="Absorción atmosférica aeronáutica frente a la frecuencia para dos distancias; la atenuación de banda del método SAE queda por debajo del valor de tono puro medio de banda a alta absorción" style="width:82%">
+
+Corregir un sobrevuelo medido a condiciones atmosféricas de referencia requiere
+la atenuación en bandas de 1/3 de octava sobre el trayecto. El coeficiente de
+tono puro es el de ISO 9613-1 (idéntico, según ARP 5534 §3.1) que da
+`air_attenuation`; `sae_band_attenuation` añade el **método SAE** (ARP 5534
+§3.2.2) que mapea la atenuación de trayecto de tono puro medio de banda
+`δ_t = α·s` a la atenuación de banda `δ_B`, consistente con el método exacto
+mucho más allá del límite de 50 dB del método aproximado.
+
+```python
+import numpy as np
+import phonometry as ph
+
+freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # tercios 50 Hz–10 kHz
+att = ph.sae_band_attenuation(freqs, path_length=7620.0,
+                              temperature=25.0, relative_humidity=70.0)
+att.plot()   # banda frente a tono puro medio de banda (requiere matplotlib)
+```
+
+Válido ~6–32 °C, 20–95 % HR (ventana 14 CFR Part 36), hasta 7620 m, recíproco.
+
 ---
 
 **Normas.** ICAO Anexo 16 Vol. I Apéndice 2 (procedimiento EPNL), ICAO Doc 9501
 ETM Vol. I (oráculos de ejemplo trabajado), IEC 61265:1995 (tolerancias del
-sistema de medida). La cadena completa de corrección de certificación y las
-curvas de ruido de aeropuerto quedan fuera del alcance aquí.
+sistema de medida), SAE ARP 5534:2021 (absorción de banda por el método SAE;
+coeficiente de tono puro de ISO 9613-1). Las curvas de ruido de aeropuerto
+(ECAC Doc 29) quedan fuera del alcance aquí.

@@ -1,0 +1,3 @@
+# Mechanical commits excluded from git blame (register with:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs)
+# 3.2 modularization move/split commits are appended at the end of Phase 1.

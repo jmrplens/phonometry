@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike, NDArray
 
-from ._validation import require_non_negative, require_positive
+from ._internal.validation import require_non_negative, require_positive
 
 # ---------------------------------------------------------------------------
 # FRF taxonomy (ISO 7626-1 Table 1).

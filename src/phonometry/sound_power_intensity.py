@@ -53,7 +53,7 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-from ._levels_math import weighted_energy_mean
+from ._internal.levels_math import weighted_energy_mean
 from .intensity import dynamic_capability_index
 from .sound_power import SoundPowerWarning, _a_weighting_corrections, _check_grade
 

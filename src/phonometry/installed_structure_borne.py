@@ -47,7 +47,7 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike
 
-from ._validation import require_positive
+from ._internal.validation import require_positive
 
 #: Reference area ``S0 = A0`` of EN 12354-5 (Formula 18a), m^2.
 REFERENCE_AREA: float = 10.0

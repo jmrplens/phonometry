@@ -47,7 +47,7 @@ from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
 
-from ._warnings import PhonometryWarning
+from ._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

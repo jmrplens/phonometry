@@ -47,9 +47,9 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 from scipy import signal
 
-from ._levels_math import energy_mean
+from ._internal.levels_math import energy_mean
 from .frequencies import _genfreqs
-from .utils import _typesignal
+from ._internal.utils import _typesignal
 
 #: Reference sound intensity, in watts per square metre (ISO 9614-1, A.2.3).
 _I0 = 1.0e-12

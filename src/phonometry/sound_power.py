@@ -41,9 +41,9 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Tuple, cast
 
 import numpy as np
 
-from ._levels_math import energy_mean, energy_sum, weighted_energy_mean
-from ._types import as_float_or_array
-from ._warnings import PhonometryWarning, _warn_renamed
+from ._internal.levels_math import energy_mean, energy_sum, weighted_energy_mean
+from ._internal.types import as_float_or_array
+from ._internal.warnings import PhonometryWarning, _warn_renamed
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

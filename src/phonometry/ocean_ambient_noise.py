@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ._validation import require_non_negative, require_positive, require_positive_array
+from ._internal.validation import require_non_negative, require_positive, require_positive_array
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

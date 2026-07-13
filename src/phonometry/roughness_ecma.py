@@ -69,8 +69,8 @@ from .loudness_ecma import (
     _ear_filter_sos,
     _specific_basis_loudness,
 )
-from ._validation import require_1d_signal
-from .utils import _typesignal
+from ._internal.validation import require_1d_signal
+from ._internal.utils import _typesignal
 
 # --------------------------------------------------------------------------
 # Roughness-specific constants (Clause 7.1.1)

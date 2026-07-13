@@ -52,7 +52,7 @@ import warnings
 
 import numpy as np
 
-from ._warnings import PhonometryWarning
+from ._internal.warnings import PhonometryWarning
 
 from .insulation import (
     ImpactRatingResult,

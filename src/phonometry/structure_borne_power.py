@@ -47,7 +47,7 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike
 
-from ._validation import require_positive
+from ._internal.validation import require_positive
 from .flanking_transmission import total_loss_factor
 
 #: EN 15657 vibratory velocity reference ``v0`` (= ISO 1683 10^-9 m/s), m/s.

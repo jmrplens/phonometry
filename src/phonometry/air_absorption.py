@@ -58,7 +58,7 @@ import numpy as np
 
 from numpy.typing import ArrayLike, NDArray
 
-from ._warnings import PhonometryWarning
+from ._internal.warnings import PhonometryWarning
 
 from .sound_absorption import attenuation_from_alpha
 

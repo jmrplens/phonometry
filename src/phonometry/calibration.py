@@ -10,7 +10,7 @@ from typing import List
 
 import numpy as np
 
-from ._warnings import PhonometryWarning, _warn_renamed
+from ._internal.warnings import PhonometryWarning, _warn_renamed
 
 
 class CalibrationWarning(PhonometryWarning):

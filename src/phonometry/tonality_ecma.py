@@ -58,8 +58,8 @@ from .loudness_ecma import (
     _specific_basis_loudness,
     _tonal_estimate,
 )
-from ._validation import require_1d_signal
-from .utils import _typesignal
+from ._internal.validation import require_1d_signal
+from ._internal.utils import _typesignal
 
 # Noise reduction sigmoid parameters (Table 7), reused on the tonality path.
 _NR_ALPHA = 20.0

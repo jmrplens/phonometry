@@ -42,8 +42,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 import numpy as np
 from scipy import signal
 
-from ._warnings import PhonometryWarning
-from .utils import _typesignal
+from ._internal.warnings import PhonometryWarning
+from ._internal.utils import _typesignal
 
 
 class ImpulseResponseWarning(PhonometryWarning):

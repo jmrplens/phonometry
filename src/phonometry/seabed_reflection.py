@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ._validation import require_positive
+from ._internal.validation import require_positive
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

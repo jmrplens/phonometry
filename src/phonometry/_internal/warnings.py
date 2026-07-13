@@ -16,7 +16,8 @@ class PhonometryWarning(UserWarning):
     """Base class for all phonometry warnings."""
 
 
-def _warn_renamed(old: str, new: str, *, stacklevel: int = 3) -> None:
+def _warn_renamed(old: str, new: str, *, stacklevel: int = 3,
+                  since: str = "3.1") -> None:
     """Emit the NEP 23 rename notice for a deprecated alias.
 
     Shared helper for the one-cycle deprecation shims (renamed modules,
@@ -27,9 +28,10 @@ def _warn_renamed(old: str, new: str, *, stacklevel: int = 3) -> None:
     :param old: The deprecated name, as shown to the user.
     :param new: The canonical replacement, as shown to the user.
     :param stacklevel: Frames between :func:`warnings.warn` and the caller.
+    :param since: The phonometry minor release that deprecated the name.
     """
     warnings.warn(
-        f"{old} is deprecated since phonometry 3.1 and will be removed in "
+        f"{old} is deprecated since phonometry {since} and will be removed in "
         f"4.0; use {new}.",
         DeprecationWarning,
         stacklevel=stacklevel,

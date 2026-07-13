@@ -91,8 +91,8 @@ from typing import TYPE_CHECKING, Any, Sequence, Tuple
 
 import numpy as np
 
-from ._levels_math import energy_mean, energy_sum
-from ._types import as_float_or_array
+from ._internal.levels_math import energy_mean, energy_sum
+from ._internal.types import as_float_or_array
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

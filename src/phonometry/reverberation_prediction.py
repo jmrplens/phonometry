@@ -57,8 +57,8 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike, NDArray
 
-from ._types import as_float_or_array
-from ._validation import require_non_negative, require_positive
+from ._internal.types import as_float_or_array
+from ._internal.validation import require_non_negative, require_positive
 
 # ---------------------------------------------------------------------------
 # Constants.

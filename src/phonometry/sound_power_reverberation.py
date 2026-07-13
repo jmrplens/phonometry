@@ -47,7 +47,7 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-from ._levels_math import energy_mean, energy_sum
+from ._internal.levels_math import energy_mean, energy_sum
 from .sound_power import (
     SoundPowerWarning,
     _a_weighting_corrections,

@@ -57,6 +57,7 @@ exclude_dirs = ["tests", ".venv"]
 relative_files = true
 
 [tool.pytest.ini_options]
+pythonpath = ["tests"]
 filterwarnings = [
     "ignore:Low sampling rate:UserWarning",
 ]

@@ -640,7 +640,7 @@ from .room_ir import (
     sweep_signal,
 )
 from ._plotting import plot_excitation
-from ._warnings import PhonometryWarning, _warn_renamed
+from ._internal.warnings import PhonometryWarning, _warn_renamed
 from .building_prediction import (
     AirbornePredictionResult,
     FlankingPath,
@@ -1572,3 +1572,9 @@ def __getattr__(name: str) -> Any:
         ) from None
     _warn_renamed(name, canonical)
     return globals()[canonical]
+
+
+# Deprecated module-path aliases for the 3.2 package reorganization: importing
+# the package installs sys.modules shims for every moved public module (see
+# phonometry/_compat.py; removed in 4.0).
+from . import _compat as _compat  # noqa: E402

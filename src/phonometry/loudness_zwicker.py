@@ -44,8 +44,8 @@ from ._zwicker_data import (
     USL_SLOPES,
     ZUP_BARK_LIMITS,
 )
-from ._validation import require_positive
-from .utils import _typesignal
+from ._internal.validation import require_positive
+from ._internal.utils import _typesignal
 
 # Reference intensity for band levels: I_REF = (20 uPa)^2, so that
 # L = 10*lg(p^2 / I_REF) equals the SPL re 20 uPa of a pressure signal

@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike
 
-from ._validation import require_positive
+from ._internal.validation import require_positive
 
 #: Reference vibratory velocity ``v0`` (ISO/TS 7849, Equation 3), m/s.
 REFERENCE_VELOCITY: float = 5.0e-8

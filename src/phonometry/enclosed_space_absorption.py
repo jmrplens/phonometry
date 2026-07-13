@@ -35,8 +35,8 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike
 
-from ._types import as_float_or_array
-from ._validation import require_fraction, require_positive
+from ._internal.types import as_float_or_array
+from ._internal.validation import require_fraction, require_positive
 
 # ---------------------------------------------------------------------------
 # Normative constants.

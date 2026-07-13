@@ -29,8 +29,8 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
-from ._types import as_float_or_array
-from ._validation import require_1d_signal, require_choice, require_positive
+from ._internal.types import as_float_or_array
+from ._internal.validation import require_1d_signal, require_choice, require_positive
 from .hearing import SEXES as _SEXES
 
 if TYPE_CHECKING:

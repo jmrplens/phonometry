@@ -44,8 +44,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import ArrayLike
 
-from ._types import Real
-from ._warnings import PhonometryWarning, _warn_renamed
+from ._internal.types import Real
+from ._internal.warnings import PhonometryWarning, _warn_renamed
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes

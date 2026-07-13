@@ -27,10 +27,10 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 from scipy import signal
 
-from ._warnings import PhonometryWarning
+from ._internal.warnings import PhonometryWarning
 from .core import OctaveFilterBank
 from .frequencies import nominal_frequencies
-from .utils import _typesignal
+from ._internal.utils import _typesignal
 
 
 class STIWarning(PhonometryWarning):

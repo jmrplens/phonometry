@@ -46,8 +46,8 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-from ._validation import require_1d_signal
-from .utils import _typesignal
+from ._internal.validation import require_1d_signal
+from ._internal.utils import _typesignal
 
 # ---------------------------------------------------------------------------
 # Fixed transfer functions (clauses 7.2, 7.3, Table 1)

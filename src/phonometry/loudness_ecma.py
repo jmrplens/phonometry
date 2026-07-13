@@ -40,8 +40,8 @@ from scipy import signal
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-from ._validation import require_1d_signal
-from .utils import _typesignal
+from ._internal.validation import require_1d_signal
+from ._internal.utils import _typesignal
 
 # --------------------------------------------------------------------------
 # Global constants (Clause 5)

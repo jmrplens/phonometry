@@ -45,7 +45,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from .air_absorption import air_attenuation
-from ._warnings import _warn_renamed
+from ._internal.warnings import _warn_renamed
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

@@ -70,7 +70,7 @@ import numpy as np
 
 from numpy.typing import ArrayLike, NDArray
 
-from ._warnings import PhonometryWarning
+from ._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes

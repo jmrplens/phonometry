@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **179/179 conformance checks pass** across 30 domains and 109 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **182/182 conformance checks pass** across 31 domains and 112 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -433,6 +433,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Wenz wind noise (rule of fives) | Wind spectrum level at 1 kHz, 5 kn (canonical anchor), dB re 1 µPa²/Hz | 25 dB (+/-0 dB) | 25 dB | 0 dB | &#9989; |
 | Mellen thermal noise | Thermal spectrum level at 50 kHz, 16.85 °C (physical), dB re 1 µPa²/Hz | 19.3426 dB (+/-0 dB) | 19.3426 dB | 0 dB | &#9989; |
 | JOMOPANS-ECHO ship source level | Bulker V=13.5 kn L=211 m band level at 1 kHz (File S1 oracle), dB re 1 µPa m | 161.394 dB (+/-0.01 dB) | 161.394 dB | 0 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Underwater numerical propagation (modes / rays / PE)</b> — 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Normal modes vs ideal waveguide | Fundamental horizontal wavenumber kr1 at 20 Hz, 100 m (analytic), rad/m | 0.077662 rad/m (+/-0.0001 rad/m) | 0.077662 rad/m | 0 rad/m | &#9989; |
+| Ray tracing vs linear gradient | Turning depth of a 10° ray, c = 1500 + 0.05z (circular arc), m | 462.8 m (+/-1 m) | 462.8 m | 0 m | &#9989; |
+| Parabolic equation vs free field | PE transmission loss at 2 km, homogeneous medium (spherical spreading), dB | 66.021 dB (+/-0.1 dB) | 66.021 dB | 0 dB | &#9989; |
 
 </details>
 

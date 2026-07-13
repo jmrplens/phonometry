@@ -564,6 +564,13 @@ _ES_EXACT = {
     "Spectrum level [dB re 1 µPa²/Hz]": "Nivel espectral [dB re 1 µPa²/Hz]",
     "Ship Traffic Source Level (JOMOPANS-ECHO)":
         "Nivel de fuente del tráfico marítimo (JOMOPANS-ECHO)",
+    "Ray trace (Munk profile)": "Trazado de rayos (perfil de Munk)",
+    "Source": "Fuente",
+    "Range [km]": "Distancia [km]",
+    "Parabolic equation (50 Hz)": "Ecuación parabólica (50 Hz)",
+    "Modes vs PE (50 Hz, z = 120 m)": "Modos vs PE (50 Hz, z = 120 m)",
+    "Normal modes": "Modos normales",
+    "Parabolic equation": "Ecuación parabólica",
     "Source spectral density [dB re 1 µPa²/Hz at 1 m]":
         "Densidad espectral de fuente [dB re 1 µPa²/Hz a 1 m]",
     "Wind": "Viento",
@@ -930,6 +937,7 @@ _PNG_FIGURES = frozenset(
         "schroeder_decay",
         "calibration_stability",
         "impulse_response",
+        "numerical_propagation",
     }
 )
 
@@ -3626,6 +3634,72 @@ def generate_ship_traffic_noise(output_dir: str) -> None:
     plt.close()
 
 
+def generate_numerical_propagation(output_dir: str) -> None:
+    """Three numerical solvers: ray paths, the PE field and modes-vs-PE loss."""
+    print("Generating numerical_propagation...")
+    from phonometry import normal_modes, parabolic_equation, ray_trace
+
+    # A Munk deep-water sound-speed profile for the ray / PE panels.
+    zprof = np.linspace(0.0, 5000.0, 60)
+    eta = 2.0 * (zprof - 1300.0) / 1300.0
+    cprof = 1500.0 * (1.0 + 0.00737 * (eta - 1.0 + np.exp(-eta)))
+
+    fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+
+    # (a) Ray trace through the Munk profile (vectorised over rays).
+    rt = ray_trace(zprof, cprof, source_depth=1000.0,
+                   launch_angles_deg=np.linspace(-12.0, 12.0, 13),
+                   max_range=100_000.0, n_steps=6000)
+    for i in range(rt.ranges.shape[0]):
+        axes[0].plot(rt.ranges[i] / 1000.0, rt.depths[i], color=COLOR_PRIMARY,
+                     linewidth=0.6, alpha=0.7)
+    axes[0].plot([0.0], [1000.0], "o", color=COLOR_SECONDARY, label="Source")
+    axes[0].invert_yaxis()
+    axes[0].set_xlabel("Range [km]")
+    axes[0].set_ylabel("Depth [m]")
+    axes[0].set_title("Ray trace (Munk profile)", fontweight="bold")
+    axes[0].grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    axes[0].legend(loc="upper right", fontsize=9)
+
+    # (b) Parabolic-equation transmission-loss field for the same environment;
+    # imshow renders a single raster image (the figure is a PNG).
+    pe_field = parabolic_equation(50.0, zprof, cprof, source_depth=1000.0,
+                                  max_range=100_000.0, range_step=25.0,
+                                  n_depth_points=1024)
+    tl = pe_field.transmission_loss
+    vmax = float(np.percentile(tl[np.isfinite(tl)], 95))
+    tl = np.where(np.isfinite(tl), tl, vmax)  # clip the infinite zero-range column
+    img = axes[1].imshow(tl, cmap="viridis_r", vmin=vmax - 50.0, vmax=vmax,
+                         aspect="auto", origin="upper", interpolation="bilinear",
+                         extent=(0.0, 100.0, float(zprof[-1]), 0.0))
+    fig.colorbar(img, ax=axes[1], label="Transmission loss [dB]")
+    axes[1].set_xlabel("Range [km]")
+    axes[1].set_ylabel("Depth [m]")
+    axes[1].set_title("Parabolic equation (50 Hz)", fontweight="bold")
+
+    # (c) Transmission loss vs range: modes and PE agree for a shallow gradient.
+    r = np.linspace(100.0, 20_000.0, 400)
+    nm = normal_modes(50.0, [0.0, 200.0], [1500.0, 1530.0], source_depth=30.0,
+                      receiver_depth=120.0, ranges_m=r, n_depth_points=800)
+    pe = parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1530.0], source_depth=30.0,
+                            max_range=20_000.0, range_step=20.0, n_depth_points=512)
+    zi = int(np.argmin(np.abs(pe.depths - 120.0)))
+    axes[2].plot(nm.ranges / 1000.0, nm.transmission_loss, color=COLOR_PRIMARY,
+                 linewidth=1.0, label="Normal modes")
+    axes[2].plot(pe.ranges / 1000.0, pe.transmission_loss[zi], color=COLOR_SECONDARY,
+                 linewidth=0.8, alpha=0.7, label="Parabolic equation")
+    axes[2].invert_yaxis()
+    axes[2].set_xlabel("Range [km]")
+    axes[2].set_ylabel("Transmission loss [dB]")
+    axes[2].set_title("Modes vs PE (50 Hz, z = 120 m)", fontweight="bold")
+    axes[2].grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    axes[2].legend(loc="upper right", fontsize=9)
+
+    plt.tight_layout()
+    save_figure(output_dir, "numerical_propagation.png")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -6061,6 +6135,9 @@ def generate_all(img_dir: str) -> None:
     generate_seabed_reflection(img_dir)
     generate_ocean_ambient_noise(img_dir)
     generate_ship_traffic_noise(img_dir)
+
+    # Underwater propagation (plan-22 P2): numerical solvers (modes/rays/PE).
+    generate_numerical_propagation(img_dir)
 
 
 # ===========================================================================

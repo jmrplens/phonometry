@@ -204,6 +204,57 @@ ships, bulkers, vehicle carriers, tankers) carry an extra low-frequency hump
 below 100 Hz. The implementation is validated to the authors' own reference
 calculator (File S1) to better than 0.01 dB.
 
+## 7. Numerical solvers (normal modes, rays, parabolic equation)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_dark.png">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation.png" alt="Three numerical solvers: a Munk sound-speed profile, ray paths forming convergence zones, and transmission loss versus range from the normal-mode and parabolic-equation solvers agreeing in trend" width="100%">
+</picture>
+
+For range-independent (horizontally stratified) environments the field can be
+computed numerically. Three solvers are provided (Jensen et al.,
+*Computational Ocean Acoustics*):
+
+- **`normal_modes`** solves the depth-separated Sturm-Liouville eigenvalue
+  problem by finite differences and sums the propagating modes into the
+  transmission loss. Validated against the ideal (pressure-release) waveguide's
+  exact modes.
+- **`ray_trace`** integrates the ray-trajectory equations (Runge-Kutta,
+  vectorised over all rays at once) through a sound-speed profile, reflecting at
+  the surface and bottom. Validated against the circular-arc paths of a linear
+  gradient.
+- **`parabolic_equation`** marches the standard (Tappert) PE with the split-step
+  Fourier algorithm. Validated against free-field spherical spreading; it agrees
+  with the normal-mode transmission loss in trend.
+
+```python
+import numpy as np
+import phonometry as ph
+
+# A Munk deep-water profile.
+z = np.linspace(0.0, 5000.0, 60)
+eta = 2.0 * (z - 1300.0) / 1300.0
+c = 1500.0 * (1.0 + 0.00737 * (eta - 1.0 + np.exp(-eta)))
+
+rays = ph.ray_trace(z, c, source_depth=1000.0,
+                    launch_angles_deg=np.linspace(-12.0, 12.0, 21), max_range=100e3)
+rays.plot()   # ray paths / convergence zones (needs matplotlib)
+
+# Shallow isovelocity waveguide: modes and PE.
+modes = ph.normal_modes(50.0, [0.0, 200.0], [1500.0, 1500.0],
+                        source_depth=50.0, receiver_depth=100.0)
+print(modes.wavenumbers.size, "propagating modes")
+field = ph.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1500.0],
+                              source_depth=50.0, max_range=20e3)
+field.plot()  # TL field over range x depth (needs matplotlib)
+```
+
+`normal_modes` returns a `NormalModeResult` (`wavenumbers`, `mode_functions`,
+`transmission_loss`); `ray_trace` a `RayTraceResult` (`ranges`, `depths` per
+ray); `parabolic_equation` a `ParabolicEquationResult` (the `transmission_loss`
+field). All assume a range-independent water column with a pressure-release
+surface.
+
 ## Standards & sources
 
 - Speed of sound: UNESCO / Chen & Millero (1977, Wong & Zhu 1995 ITS-90),
@@ -217,6 +268,7 @@ calculator (File S1) to better than 0.01 dB.
 - Ship-traffic source level: MacGillivray & de Jong (2021),
   *J. Mar. Sci. Eng.* 9(4) 369 (CC-BY, JOMOPANS-ECHO), which also reproduces
   RANDI 3.1 and Wales & Heitmeyer (2002).
-
-Numerical solvers (ray tracing, normal modes, the parabolic equation) are a
-separate, future addition.
+- Numerical solvers: Jensen, Kuperman, Porter & Schmidt,
+  *Computational Ocean Acoustics* (2nd ed., Springer 2011) — normal modes
+  (Ch. 5), ray tracing (Ch. 3) and the split-step Fourier parabolic equation
+  (Ch. 6).

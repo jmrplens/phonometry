@@ -2884,6 +2884,55 @@ def _chk_uwp_ship_traffic() -> Outcome:
 
 
 # ===========================================================================
+# Underwater numerical propagation (Jensen et al., modes / rays / PE)
+# ===========================================================================
+_UW_NUM = "Underwater numerical propagation (modes / rays / PE)"
+
+
+@register(
+    _UW_NUM,
+    "Normal modes vs ideal waveguide",
+    "Fundamental horizontal wavenumber kr1 at 20 Hz, 100 m (analytic), rad/m",
+)
+def _chk_uwn_modes() -> Outcome:
+    d, c, f = 100.0, 1500.0, 20.0
+    k = 2.0 * math.pi * f / c
+    kr1 = math.sqrt(k**2 - (math.pi / d) ** 2)
+    res = ph.normal_modes(f, [0.0, d], [c, c], source_depth=36.0, receiver_depth=46.0,
+                          bottom="pressure-release", n_depth_points=800)
+    return numeric(kr1, float(res.wavenumbers[0]), 1e-4, unit="rad/m", places=6)
+
+
+@register(
+    _UW_NUM,
+    "Ray tracing vs linear gradient",
+    "Turning depth of a 10° ray, c = 1500 + 0.05z (circular arc), m",
+)
+def _chk_uwn_rays() -> Outcome:
+    c0, g = 1500.0, 0.05
+    xi = math.cos(math.radians(10.0)) / c0
+    z_turn = (1.0 / xi - c0) / g
+    res = ph.ray_trace([0.0, 2000.0], [c0, c0 + g * 2000.0], source_depth=0.0,
+                       launch_angles_deg=[10.0], max_range=10_500.0, n_steps=20_000)
+    return numeric(z_turn, float(res.depths[0].max()), 1.0, unit="m", places=2)
+
+
+@register(
+    _UW_NUM,
+    "Parabolic equation vs free field",
+    "PE transmission loss at 2 km, homogeneous medium (spherical spreading), dB",
+)
+def _chk_uwn_pe() -> Outcome:
+    res = ph.parabolic_equation(50.0, [0.0, 20_000.0], [1500.0, 1500.0],
+                                source_depth=10_000.0, max_range=3000.0,
+                                range_step=2.0, n_depth_points=8192)
+    zi = int(min(range(res.depths.size), key=lambda i: abs(res.depths[i] - 10_000.0)))
+    ri = int(min(range(res.ranges.size), key=lambda i: abs(res.ranges[i] - 2000.0)))
+    return numeric(20.0 * math.log10(2000.0), float(res.transmission_loss[zi][ri]),
+                   0.1, unit="dB", places=3)
+
+
+# ===========================================================================
 # Aircraft noise (ICAO Annex 16 EPNL / IEC 61265)
 # ===========================================================================
 _AIRCRAFT = "Aircraft noise (ICAO Annex 16 / IEC 61265)"

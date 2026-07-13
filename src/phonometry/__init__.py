@@ -283,6 +283,14 @@ from .ship_traffic_noise import (
     ShipTrafficSpectrum,
     ship_source_spectrum,
 )
+from .numerical_propagation import (
+    NormalModeResult,
+    ParabolicEquationResult,
+    RayTraceResult,
+    normal_modes,
+    parabolic_equation,
+    ray_trace,
+)
 from .ship_radiated_noise import (
     ShipSourceLevelResult,
     hydrophone_depths,
@@ -786,6 +794,12 @@ __all__ = [
     "ship_source_spectrum",
     "ShipTrafficSpectrum",
     "VESSEL_CLASSES",
+    "normal_modes",
+    "ray_trace",
+    "parabolic_equation",
+    "NormalModeResult",
+    "RayTraceResult",
+    "ParabolicEquationResult",
     "radiated_noise_level",
     "hydrophone_depths",
     "source_level_uncertainty",

@@ -2940,6 +2940,72 @@ _AIRCRAFT = "Aircraft noise (ICAO Annex 16 / IEC 61265)"
 
 @register(
     _AIRCRAFT,
+    "ECAC Doc 29 noise fraction (half path)",
+    "Finite-segment correction ΔF for a perpendicular foot at the segment start, dB",
+)
+def _chk_ecac_noise_fraction() -> Outcome:
+    # A half-infinite segment (Sp at the start) receives half the energy: −3.01 dB.
+    got = float(ph.noise_fraction(0.0, 10_000.0, 100.0))
+    return numeric(-10.0 * math.log10(2.0), got, 1e-3, unit="dB", places=4)
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 single-event chain",
+    "SEL of a long level flyover vs the infinite-path limit LE∞ + ΔI − Λ, dB",
+)
+def _chk_ecac_event_level() -> Outcome:
+    # A long straight level segment through the CPA reduces to the infinite-path
+    # baseline plus the geometry corrections (ΔF → 0, ΔV = 0 at Vref).
+    npd_p = [8000.0, 12000.0]
+    npd_d = [60.0, 120.0, 240.0, 480.0, 960.0, 1920.0, 3840.0]
+    sel = [[98.0, 92.0, 86.0, 80.0, 74.0, 68.0, 62.0], [102.0, 96.0, 90.0, 84.0, 78.0, 72.0, 66.0]]
+    lmax = [[94.0, 88.0, 82.0, 76.0, 70.0, 64.0, 58.0], [98.0, 92.0, 86.0, 80.0, 74.0, 68.0, 62.0]]
+    vref = 160.0 * 0.514444
+    import numpy as _np
+
+    xs = _np.linspace(-40000.0, 40000.0, 801)
+    path = _np.column_stack([xs, _np.zeros_like(xs), _np.full_like(xs, 300.0),
+                             _np.full_like(xs, 10000.0), _np.full_like(xs, vref)])
+    got = ph.event_level(path, [0.0, 300.0, 0.0], npd_p, npd_d, sel, lmax, metric="exposure").level
+    dp = math.hypot(300.0, 300.0)
+    beta = math.degrees(math.acos(300.0 / dp))
+    expected = (float(ph.npd_level(npd_p, npd_d, sel, 10000.0, dp)[0])
+                + ph.impedance_adjustment()
+                + ph.engine_installation_correction(beta, "wing")
+                - ph.lateral_attenuation(beta, 300.0))
+    return numeric(expected, float(got), 1e-2, unit="dB", places=3)
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 impedance adjustment (standard atmosphere)",
+    "Acoustic-impedance adjustment of NPD data at 15 °C / 101.325 kPa (Eq. 4-6/4-7), dB",
+)
+def _chk_ecac_impedance() -> Outcome:
+    # ECAC Doc 29 Vol 2 §4.2.1 states the standard-atmosphere adjustment is
+    # +0.074 dB (ρc = 416.86, reference impedance 409.81 N·s/m³).
+    return numeric(0.074, float(ph.impedance_adjustment()), 5e-4, unit="dB", places=4)
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 reference workbook (segment Λ)",
+    "Lateral attenuation of a climbing segment vs the ECAC Vol 3 Part 1 workbook, dB",
+)
+def _chk_ecac_workbook_segment() -> Outcome:
+    # ECAC Doc 29 5th ed. Vol 3 Part 1 reference workbook, sheet
+    # B-2_Segment_Results, case JETFAC receptor R02 segment 1 (climbing): the
+    # workbook lists β = 4.2226°, lateral displacement 81363.28 ft (24799.6 m)
+    # and Λ = 6.3769 dB. Here we anchor the Λ(β, ℓ) formula to those reference
+    # values (the β/φ geometry itself is validated in tests/test_airport_noise).
+    beta_ref, lateral_m = 4.2225708673, 81363.2829 * 0.3048
+    got = float(ph.lateral_attenuation(beta_ref, lateral_m))
+    return numeric(6.3768594165, got, 1e-2, unit="dB", places=4)
+
+
+@register(
+    _AIRCRAFT,
     "SAE ARP 5534 band-attenuation continuity",
     "SAE-Method δ_B at the 150 dB branch split (Eq. 7 vs Eq. 8), dB",
 )

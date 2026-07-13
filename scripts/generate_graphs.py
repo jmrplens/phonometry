@@ -40,6 +40,11 @@ _ES_EXACT = {
     "Attenuation [dB]": "Atenuación [dB]",
     "Noise-Power-Distance Curves (ECAC Doc 29)":
         "Curvas nivel-potencia-distancia (ECAC Doc 29)",
+    "Aircraft Departure SEL Contour (ECAC Doc 29)":
+        "Contorno SEL de despegue (ECAC Doc 29)",
+    "Aircraft noise contour (ECAC Doc 29)": "Contorno de ruido de aeronave (ECAC Doc 29)",
+    "x [km]": "x [km]",
+    "y [km]": "y [km]",
     "Slant distance [m]": "Distancia oblicua [m]",
     "Event level [dB]": "Nivel de evento [dB]",
     "markers: tabulated NPD nodes\nlines: log-linear interpolation":
@@ -950,6 +955,7 @@ _PNG_FIGURES = frozenset(
         "calibration_stability",
         "impulse_response",
         "numerical_propagation",
+        "airport_contour",
     }
 )
 
@@ -3774,6 +3780,33 @@ def generate_airport_noise(output_dir: str) -> None:
     plt.close()
 
 
+def generate_airport_contour(output_dir: str) -> None:
+    """ECAC Doc 29 single-event SEL contour for a departure flight path."""
+    print("Generating airport_contour...")
+    from phonometry import noise_contour
+
+    powers = [8000.0, 12000.0]
+    distances = [60.0, 120.0, 240.0, 480.0, 960.0, 1920.0, 3840.0, 7680.0]
+    sel = [[98.0, 92.0, 86.0, 80.0, 74.0, 68.0, 62.0, 56.0],
+           [104.0, 98.0, 92.0, 86.0, 80.0, 74.0, 68.0, 62.0]]
+    lmax = [[94.0, 88.0, 82.0, 76.0, 70.0, 64.0, 58.0, 52.0],
+            [100.0, 94.0, 88.0, 82.0, 76.0, 70.0, 64.0, 58.0]]
+    vref = 160.0 * 0.514444
+    # Departure: ground roll then climb along +x.
+    xs = np.linspace(0.0, 18000.0, 40)
+    z = np.clip((xs - 1500.0) * 0.11, 0.0, 2500.0)
+    power = np.where(xs < 3000.0, 12000.0, 10000.0)
+    path = np.column_stack([xs, np.zeros_like(xs), z, power, np.full_like(xs, vref)])
+    res = noise_contour(path, powers, distances, sel, lmax,
+                        x=np.linspace(-2500.0, 20000.0, 56), y=np.linspace(-6000.0, 6000.0, 44))
+    ax = res.plot()
+    plt.gcf().set_size_inches(10, 5.5)
+    ax.set_title("Aircraft Departure SEL Contour (ECAC Doc 29)", fontweight="bold", pad=12)
+    plt.tight_layout()
+    save_figure(output_dir, "airport_contour.png")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -6218,6 +6251,7 @@ def generate_all(img_dir: str) -> None:
 
     # Airport noise (plan-23 B1): ECAC Doc 29 noise-power-distance curves.
     generate_airport_noise(img_dir)
+    generate_airport_contour(img_dir)
 
 
 # ===========================================================================

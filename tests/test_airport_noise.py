@@ -14,7 +14,20 @@ matplotlib.use("Agg")
 import numpy as np
 import pytest
 
-from phonometry.airport_noise import NpdLevelResult, npd_curve, npd_level
+from phonometry.airport_noise import (
+    FlyoverResult,
+    NoiseContourResult,
+    NpdLevelResult,
+    _segment_geometry,
+    duration_correction,
+    engine_installation_correction,
+    event_level,
+    lateral_attenuation,
+    noise_contour,
+    noise_fraction,
+    npd_curve,
+    npd_level,
+)
 
 # Two powers, four log-spaced distances; levels drop 6 dB per doubling.
 _P = [1000.0, 2000.0]
@@ -82,3 +95,227 @@ def test_invalid_table_rejected() -> None:
         npd_level([2000.0, 1000.0], _D, _L[::-1], 1500.0, 200.0)
     with pytest.raises(ValueError, match="distance"):
         npd_level(_P, _D, _L, 1000.0, -100.0)
+
+
+# --- Single-event correction terms (ECAC Doc 29 §4.5) ----------------------
+
+# NPD used by the flight-path tests: two powers, SEL and Lmax vs distance.
+_NP = [8000.0, 12000.0]
+_ND = [60.0, 120.0, 240.0, 480.0, 960.0, 1920.0, 3840.0]
+_NSEL = [[98.0, 92.0, 86.0, 80.0, 74.0, 68.0, 62.0],
+         [102.0, 96.0, 90.0, 84.0, 78.0, 72.0, 66.0]]
+_NMAX = [[94.0, 88.0, 82.0, 76.0, 70.0, 64.0, 58.0],
+         [98.0, 92.0, 86.0, 80.0, 74.0, 68.0, 62.0]]
+_VREF = 160.0 * 0.514444
+
+
+def test_lateral_attenuation_limits() -> None:
+    assert lateral_attenuation(60.0, 2000.0) == pytest.approx(0.0)  # β >= 50°
+    assert lateral_attenuation(-5.0, 2000.0) == pytest.approx(10.857)  # β < 0
+    assert lateral_attenuation(0.0, 2000.0) == pytest.approx(10.857)  # ℓ > 914, β = 0
+    # Γ(914) = 1.089·(1−e^-2.505) ≈ 1.0, so Λ(0°,914) ≈ Λ(0°) = 10.857.
+    assert lateral_attenuation(0.0, 914.0) == pytest.approx(10.857, abs=0.02)
+
+
+def test_engine_installation_values() -> None:
+    assert engine_installation_correction(0.0, "propeller") == pytest.approx(0.0)
+    # ΔI(0) = 10·b·log10(a): wing and fuselage.
+    assert engine_installation_correction(0.0, "wing") == pytest.approx(
+        10.0 * 0.062 * np.log10(0.0039), abs=1e-6)
+    assert engine_installation_correction(0.0, "fuselage") == pytest.approx(
+        10.0 * 0.329 * np.log10(0.1225), abs=1e-6)
+    # For φ < 0 the correction is clamped to ΔI(0).
+    assert engine_installation_correction(-15.0, "wing") == pytest.approx(
+        engine_installation_correction(0.0, "wing"))
+
+
+def test_duration_correction() -> None:
+    assert duration_correction(_VREF, _VREF) == pytest.approx(0.0)
+    assert duration_correction(_VREF, 2.0 * _VREF) == pytest.approx(-10.0 * np.log10(2.0))
+
+
+def test_noise_fraction_limits() -> None:
+    # A long symmetric segment captures ~all the energy: ΔF -> 0.
+    assert noise_fraction(5000.0, 10000.0, 100.0) == pytest.approx(0.0, abs=1e-3)
+    # A half-infinite segment (perpendicular foot at the start) -> half energy.
+    assert noise_fraction(0.0, 10000.0, 100.0) == pytest.approx(-10.0 * np.log10(2.0), abs=1e-3)
+
+
+def test_impedance_adjustment() -> None:
+    from phonometry.airport_noise import impedance_adjustment
+    # Under the standard atmosphere (15 °C, 101.325 kPa) the adjustment is the
+    # ECAC-documented +0.074 dB (Doc 29 Vol 2 §4.2.1).
+    assert impedance_adjustment() == pytest.approx(0.074, abs=5e-4)
+    assert impedance_adjustment(15.0, 101.325) == pytest.approx(0.074, abs=5e-4)
+    # Hotter, lower-pressure air is less dense: negative adjustment.
+    assert impedance_adjustment(35.0, 95.0) < 0.0
+    with pytest.raises(ValueError, match="pressure"):
+        impedance_adjustment(15.0, 0.0)
+
+
+def test_event_level_long_level_flyover_matches_infinite_path() -> None:
+    # A long straight level segment through the CPA reduces to the infinite-path
+    # baseline plus the geometry corrections (ΔF -> 0, ΔV = 0 at Vref):
+    #   SEL = LE∞(P, dp) + ΔI(β) − Λ(β, ℓ).
+    xs = np.linspace(-40000.0, 40000.0, 801)
+    path = np.column_stack([xs, np.zeros_like(xs), np.full_like(xs, 300.0),
+                            np.full_like(xs, 10000.0), np.full_like(xs, _VREF)])
+    res = event_level(path, [0.0, 300.0, 0.0], _NP, _ND, _NSEL, _NMAX, metric="exposure")
+    assert isinstance(res, FlyoverResult)
+    dp = np.hypot(300.0, 300.0)
+    lateral, beta = 300.0, np.degrees(np.arccos(300.0 / dp))
+    from phonometry.airport_noise import impedance_adjustment
+    expected = (npd_level(_NP, _ND, _NSEL, 10000.0, dp)[0]
+                + impedance_adjustment()
+                + engine_installation_correction(beta, "wing")
+                - lateral_attenuation(beta, lateral))
+    assert res.level == pytest.approx(float(expected), abs=1e-3)
+
+
+def test_event_level_maximum_metric() -> None:
+    xs = np.linspace(-20000.0, 20000.0, 401)
+    path = np.column_stack([xs, np.zeros_like(xs), np.full_like(xs, 300.0),
+                            np.full_like(xs, 10000.0), np.full_like(xs, _VREF)])
+    res = event_level(path, [0.0, 300.0, 0.0], _NP, _ND, _NSEL, _NMAX, metric="maximum")
+    dp = np.hypot(300.0, 300.0)
+    lateral, beta = 300.0, np.degrees(np.arccos(300.0 / dp))
+    from phonometry.airport_noise import impedance_adjustment
+    expected = (npd_level(_NP, _ND, _NMAX, 10000.0, dp)[0]
+                + impedance_adjustment()
+                + engine_installation_correction(beta, "wing")
+                - lateral_attenuation(beta, lateral))
+    assert res.level == pytest.approx(float(expected), abs=1e-3)
+
+
+def test_event_level_duplicate_waypoint_is_skipped() -> None:
+    # A repeated path point makes a zero-length segment; it must be dropped
+    # cleanly (no NaN/divide warning) and not change the result.
+    base = [[-20000.0, 0.0, 300.0, 10000.0, _VREF], [0.0, 0.0, 300.0, 10000.0, _VREF],
+            [20000.0, 0.0, 300.0, 10000.0, _VREF]]
+    dup = [base[0], base[1], base[1], base[2]]  # duplicate the middle point
+    obs = [0.0, 300.0, 0.0]
+    r_base = event_level(base, obs, _NP, _ND, _NSEL, _NMAX).level
+    with np.errstate(all="raise"):  # any NaN/divide would raise here
+        r_dup = event_level(dup, obs, _NP, _ND, _NSEL, _NMAX).level
+    assert r_dup == pytest.approx(r_base, abs=1e-9)
+
+
+def test_flyover_plot() -> None:
+    xs = np.linspace(-20000.0, 20000.0, 201)
+    path = np.column_stack([xs, np.zeros_like(xs), np.full_like(xs, 300.0),
+                            np.full_like(xs, 10000.0), np.full_like(xs, _VREF)])
+    res = event_level(path, [0.0, 300.0, 0.0], _NP, _ND, _NSEL, _NMAX)
+    assert isinstance(res, FlyoverResult)
+    assert res.segment_levels.size == 200
+    assert res.plot() is not None
+
+
+def test_event_level_farther_receiver_is_quieter() -> None:
+    xs = np.linspace(-20000.0, 20000.0, 401)
+    path = np.column_stack([xs, np.zeros_like(xs), np.full_like(xs, 300.0),
+                            np.full_like(xs, 10000.0), np.full_like(xs, _VREF)])
+    near = event_level(path, [0.0, 300.0, 0.0], _NP, _ND, _NSEL, _NMAX).level
+    far = event_level(path, [0.0, 3000.0, 0.0], _NP, _ND, _NSEL, _NMAX).level
+    assert far < near
+
+
+# --- Reference workbook oracle (ECAC Doc 29 5th ed. Vol 3 Part 1) ----------
+#
+# Segment geometry and per-segment corrections extracted from the official ECAC
+# Doc 29 reference workbook (sheet B-2_Segment_Results, case JETFAC, receptor
+# R02), independent of this implementation. Coordinates are in feet, the
+# receptor sits at (0, 656.168, 0) ft. Each row lists the segment endpoints and
+# the workbook's β (deg), φ (deg), lateral attenuation Λ (dB) and engine
+# installation ΔI (dB, fuselage-mounted). Segment 8 is level (β = φ); segment 1
+# climbs, so β and φ differ.
+_WB_OBS_FT = (0.0, 656.1679790026246, 0.0)
+_WB_SEGMENTS = [
+    # S1 (ft),                          S2 (ft),                        β,      φ,      Λ,      ΔI
+    ((-81363.2829, -328077.7538, 18311.6034), (-81363.2829, -76348.2804, 6000.0),
+     4.2225708673, 1.5708068190, 6.3768594165, -2.9923618950),
+    ((-80116.5875, -13598.8229, 3000.0), (-78594.3067, -10334.4492, 3000.0),
+     2.5797296415, 2.5797296415, 7.8166038498, -2.9794464291),
+]
+
+
+# Noise-fraction ΔF from the same workbook rows: (q, length, LE∞−Lmax, ΔF), all
+# in feet. dλ = d0·10^((LE∞−Lmax)/10) with d0 = (2/π)·Vref·t0 in feet.
+_WB_NOISE_FRACTION = [
+    (329236.0, 252030.4, 45.86 - 12.85, -5.787),
+    (28482.0, 3607.3, 46.15 - 13.32, -21.635),
+    (35032.1, 546.2, 46.97 - 14.58, -29.447),
+]
+
+
+@pytest.mark.parametrize(("q", "length", "le_minus_lmax", "df_ref"), _WB_NOISE_FRACTION)
+def test_reference_workbook_noise_fraction(
+    q: float, length: float, le_minus_lmax: float, df_ref: float,
+) -> None:
+    d0_ft = (2.0 / np.pi) * 270.05 * 1.0  # Vref = 160 kn = 270.05 ft/s, t0 = 1 s
+    d_lambda = d0_ft * 10.0 ** (le_minus_lmax / 10.0)
+    # abs=0.01: LE∞−Lmax is hardcoded to the workbook's 2-decimal precision.
+    assert noise_fraction(q, length, d_lambda) == pytest.approx(df_ref, abs=1e-2)
+
+
+@pytest.mark.parametrize(("s1", "s2", "beta_ref", "phi_ref", "lam_ref", "di_ref"), _WB_SEGMENTS)
+def test_reference_workbook_segment_terms(
+    s1: tuple[float, float, float],
+    s2: tuple[float, float, float],
+    beta_ref: float,
+    phi_ref: float,
+    lam_ref: float,
+    di_ref: float,
+) -> None:
+    ft = 0.3048
+    _, _, _, _, beta, phi, lateral = _segment_geometry(
+        np.array(s1), np.array(s2), np.array(_WB_OBS_FT))
+    # β and φ match the reference to <0.01° (the small residual on the climbing
+    # segment is the workbook's equivalent-level-path height convention).
+    assert beta == pytest.approx(beta_ref, abs=0.01)
+    assert phi == pytest.approx(phi_ref, abs=0.01)
+    # The physical corrections reproduce the reference to <0.01 dB. Λ's Γ term
+    # needs the lateral displacement in metres.
+    assert lateral_attenuation(beta, lateral * ft) == pytest.approx(lam_ref, abs=0.01)
+    assert engine_installation_correction(phi, "fuselage") == pytest.approx(di_ref, abs=0.01)
+
+
+def test_noise_contour_shape_and_plot() -> None:
+    xs = np.linspace(0.0, 15000.0, 40)
+    path = np.column_stack([xs, np.zeros_like(xs), np.clip(xs * 0.1, 0.0, 2000.0),
+                            np.full_like(xs, 10000.0), np.full_like(xs, _VREF)])
+    res = noise_contour(path, _NP, _ND, _NSEL, _NMAX,
+                        x=np.linspace(-2000.0, 16000.0, 24), y=np.linspace(-4000.0, 4000.0, 20))
+    assert isinstance(res, NoiseContourResult)
+    assert res.level.shape == (20, 24)
+    # Highest level is near the track (y = 0); much lower far to the side.
+    iy0 = int(np.argmin(np.abs(res.y)))
+    assert np.max(res.level[iy0]) > np.max(res.level[0])
+    assert res.plot() is not None
+
+
+def test_event_level_invalid_inputs() -> None:
+    with pytest.raises(ValueError, match="path"):
+        event_level([[0.0, 0.0, 0.0, 1.0, 1.0]], [0.0, 0.0, 0.0], _NP, _ND, _NSEL, _NMAX)
+    good = [[0.0, 0.0, 300.0, 10000.0, _VREF], [1000.0, 0.0, 300.0, 10000.0, _VREF]]
+    with pytest.raises(ValueError, match="metric"):
+        event_level(good, [0.0, 100.0, 0.0], _NP, _ND, _NSEL, _NMAX, metric="Lden")
+    with pytest.raises(ValueError, match="lateral_m"):
+        lateral_attenuation(30.0, -1.0)
+    with pytest.raises(ValueError, match="mounting"):
+        engine_installation_correction(20.0, "tail")
+    # Non-finite path, negative power and non-positive speed are rejected.
+    with pytest.raises(ValueError, match="finite"):
+        event_level([[0.0, 0.0, np.inf, 1e4, _VREF], good[1]], [0.0, 100.0, 0.0],
+                    _NP, _ND, _NSEL, _NMAX)
+    with pytest.raises(ValueError, match="power"):
+        event_level([[0.0, 0.0, 300.0, -1.0, _VREF], good[1]], [0.0, 100.0, 0.0],
+                    _NP, _ND, _NSEL, _NMAX)
+    with pytest.raises(ValueError, match="speed"):
+        event_level([[0.0, 0.0, 300.0, 1e4, 0.0], good[1]], [0.0, 100.0, 0.0],
+                    _NP, _ND, _NSEL, _NMAX)
+
+
+def test_impedance_adjustment_rejects_absolute_zero() -> None:
+    from phonometry.airport_noise import impedance_adjustment
+    with pytest.raises(ValueError, match="absolute zero"):
+        impedance_adjustment(-300.0, 101.325)

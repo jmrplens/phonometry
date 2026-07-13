@@ -199,6 +199,11 @@ baseline level (§4.3-4.5):
 - **`duration_correction(Vref, Vseg)`** — the speed/duration adjustment for
   exposure levels (Eq. 4-14).
 - **`noise_fraction(q, λ, dλ)`** — the finite-segment energy fraction (Eq. 4-20).
+- **`start_of_roll_directivity(ψ, dSOR, engine)`** — the rearward jet/turboprop
+  directivity behind takeoff ground-roll segments (Eq. 4-22/4-24/4-25). Pass a
+  boolean `ground_roll` mask to `event_level`/`noise_contour` to flag the takeoff
+  ground-roll segments; behind them the reduced (q = 0) noise fraction and `ΔSOR`
+  are applied (Eq. 4-9).
 
 `event_level` assembles these (Eq. 4-8) and sums the segments into the exposure
 level `SEL` (Eq. 4-11) or the maximum level `LAmax` (Eq. 4-10); `noise_contour`
@@ -226,10 +231,10 @@ contour.plot()   # SEL contour over the ground (needs matplotlib)
 ```
 
 Validated against the **ECAC Doc 29 5th ed. Vol 3 Part 1 reference workbook**:
-the segment geometry (β, φ), lateral attenuation, engine installation and noise
-fraction reproduce the reference values to < 0.01 dB, and the segment energy sum
-matches the reference `SEL`. The start-of-roll directivity `ΔSOR` (behind takeoff
-ground-roll segments) is the one deferred term.
+the segment geometry (β, φ), lateral attenuation, engine installation, noise
+fraction and the start-of-roll directivity `ΔSOR` (turbofan and turboprop, all
+124 ground-roll reference rows to < 0.01 dB) reproduce the reference values, and
+the segment energy sum matches the reference `SEL`.
 
 ---
 
@@ -245,7 +250,7 @@ band attenuation (Eqs. 7–10), with the pure-tone coefficient from ISO 9613-1.
 ECAC Doc 29, 4th ed., Vol 2 (2016): the NPD event-level interpolation (§4.2) and
 the single-event segment calculation — duration (§4.5.1), engine installation
 (§4.5.3), lateral attenuation (§4.5.4, AIR-5662), the finite-segment noise
-fraction (§4.5.6) and segment summation (§4.3) — through to ground-grid noise
-contours, with the impedance adjustment (§4.2.1). The single-event chain is
-validated against the ECAC Doc 29 5th ed. Vol 3 Part 1 reference workbook. The
-start-of-roll directivity (§4.5.7) is out of scope.
+fraction (§4.5.6), the start-of-roll directivity (§4.5.7) and segment summation
+(§4.3) — through to ground-grid noise contours, with the impedance adjustment
+(§4.2.1). The single-event chain is validated against the ECAC Doc 29 5th ed.
+Vol 3 Part 1 reference workbook.

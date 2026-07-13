@@ -27,6 +27,7 @@ from phonometry.airport_noise import (
     noise_fraction,
     npd_curve,
     npd_level,
+    start_of_roll_directivity,
 )
 
 # Two powers, four log-spaced distances; levels drop 6 dB per doubling.
@@ -245,6 +246,61 @@ _WB_NOISE_FRACTION = [
     (28482.0, 3607.3, 46.15 - 13.32, -21.635),
     (35032.1, 546.2, 46.97 - 14.58, -29.447),
 ]
+
+
+# Start-of-roll directivity ΔSOR from the workbook (sheet B-2, cases JETFDC and
+# PROPDC): (ψ°, dSOR[m], ΔSOR, engine). ψ = arccos(q/dSOR), all dSOR < 762 m so
+# no distance scaling. ECAC Doc 29 Vol 3 Part 1 reference workbook.
+_WB_SOR = [
+    (96.031600, 201.1120, -0.80450, "jet"),
+    (112.889545, 217.0934, 0.31961, "jet"),
+    (133.519719, 275.8080, 0.00558, "jet"),
+    (101.133998, 203.8352, -0.98974, "turboprop"),
+    (128.182381, 254.4361, 1.09434, "turboprop"),
+    (150.518805, 406.3875, -7.09359, "turboprop"),
+]
+
+
+@pytest.mark.parametrize(("psi", "dsor", "sor_ref", "engine"), _WB_SOR)
+def test_reference_workbook_start_of_roll(
+    psi: float, dsor: float, sor_ref: float, engine: str,
+) -> None:
+    assert start_of_roll_directivity(psi, dsor, engine) == pytest.approx(sor_ref, abs=0.01)
+
+
+def test_start_of_roll_directivity_properties() -> None:
+    # Ahead of / abeam the aircraft (ψ < 90°): no rearward directivity.
+    assert start_of_roll_directivity(45.0, 500.0, "jet") == 0.0
+    assert start_of_roll_directivity(89.9, 500.0, "turboprop") == 0.0
+    # Beyond the 762 m normalising distance the correction scales by dSOR,0/dSOR.
+    near = start_of_roll_directivity(180.0, 762.0, "jet")
+    assert start_of_roll_directivity(180.0, 1524.0, "jet") == pytest.approx(near / 2.0)
+    # "propeller"/"prop" are accepted aliases for the turboprop curve.
+    assert start_of_roll_directivity(120.0, 300.0, "prop") == pytest.approx(
+        start_of_roll_directivity(120.0, 300.0, "turboprop"))
+    with pytest.raises(ValueError, match="engine"):
+        start_of_roll_directivity(120.0, 300.0, "rocket")
+    with pytest.raises(ValueError, match="distance_m"):
+        start_of_roll_directivity(120.0, -1.0, "jet")
+
+
+def test_event_level_ground_roll_applies_directivity() -> None:
+    # A takeoff ground-roll segment along +x from the origin; a receiver behind
+    # the start of roll (negative x) must gain the ΔSOR directivity relative to
+    # the same geometry without the ground-roll flag.
+    path = [[0.0, 0.0, 0.0, 12000.0, 40.0], [1500.0, 0.0, 0.0, 12000.0, 60.0]]
+    obs = [-400.0, 150.0, 0.0]
+    plain = event_level(path, obs, _NP, _ND, _NSEL, _NMAX).level
+    rolled = event_level(path, obs, _NP, _ND, _NSEL, _NMAX, ground_roll=[True]).level
+    # Behind SOR, ψ is obtuse; the two differ by exactly ΔSOR plus the reduced
+    # noise-fraction switch, so the ground-roll level is not equal to the plain one.
+    assert rolled != pytest.approx(plain)
+    # Ahead of the segment the flag makes no difference (ΔSOR only applies behind).
+    ahead = [1000.0, 150.0, 0.0]
+    assert (event_level(path, ahead, _NP, _ND, _NSEL, _NMAX, ground_roll=[True]).level
+            == pytest.approx(event_level(path, ahead, _NP, _ND, _NSEL, _NMAX).level))
+    with pytest.raises(ValueError, match="ground_roll"):
+        event_level(path, obs, _NP, _ND, _NSEL, _NMAX, ground_roll=[True, False])
 
 
 @pytest.mark.parametrize(("q", "length", "le_minus_lmax", "df_ref"), _WB_NOISE_FRACTION)

@@ -314,9 +314,10 @@ def epnl_from_pnlt(
 
     When ``tone_corrections`` is given, the **bandsharing adjustment** ``ΔB``
     (App. 2 §4.4.2/4.4.3, ETM GM/AMC A2 4.4.2) is applied: if the tone
-    correction at the PNLTM record is below the average of the five records
-    within one second of it, ``ΔB`` is that shortfall, added to PNLTM before
-    the 10 dB-down window is found and included in the reported EPNL.
+    correction at the PNLTM record is below the average of the records within
+    one second of it (five records for the uniform 0.5 s cadence), ``ΔB`` is
+    that shortfall, added to PNLTM before the 10 dB-down window is found and
+    included in the reported EPNL.
 
     :param pnlt: The tone-corrected perceived noise levels ``PNLT(k)``, in PNdB.
     :param dt: Per-record duration, in s (scalar broadcast or per record).
@@ -341,7 +342,8 @@ def epnl_from_pnlt(
         c = np.atleast_1d(np.asarray(tone_corrections, dtype=np.float64))
         if c.shape != p.shape or not np.all(np.isfinite(c)):
             raise ValueError("'tone_corrections' must match 'pnlt' in length and be finite.")
-        window = c[max(0, km - 2):km + 3]
+        t_mid = np.cumsum(dt_arr) - 0.5 * dt_arr
+        window = c[np.abs(t_mid - t_mid[km]) <= 1.0 + 1e-9]
         delta_b = max(0.0, float(np.mean(window)) - float(c[km]))
     pnltm = float(p[km]) + delta_b
     kf, kl = _ten_db_down_limits(p, pnltm - _TEN_DB_DOWN)

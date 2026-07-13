@@ -496,13 +496,13 @@ def _attenuation_geometry(
     use_end = (key == "maximum" and (behind or ahead)) or roll_behind or roll_ahead
     if not use_end:
         return beta, lateral, phi
-    end, sign = (s2, 1.0) if ahead else (s1, 1.0)
+    end = s2 if ahead else s1
     d_end = float(np.linalg.norm(obs - end))
     z_end = float(end[2] - obs[2])
     if d_end <= 0.0:
         return 90.0, 0.0, 90.0
-    beta_end = float(np.degrees(np.arcsin(np.clip(z_end / d_end, -1.0, 1.0)))) * sign
-    oc = float(np.sqrt(max(d_end**2 - z_end**2, 0.0)))
+    beta_end = float(np.degrees(np.arcsin(np.clip(z_end / d_end, -1.0, 1.0))))
+    oc = float(np.hypot(obs[0] - end[0], obs[1] - end[1]))
     return beta_end, oc, beta_end
 
 
@@ -705,6 +705,7 @@ def noise_contour(
     pressure: float = _P0_KPA,
     ground_roll: "NDArray[np.bool_] | list[bool] | None" = None,
     landing_roll: "NDArray[np.bool_] | list[bool] | None" = None,
+    bank: "NDArray[np.float64] | list[float] | None" = None,
 ) -> NoiseContourResult:
     """Single-event noise level over a ground grid (ECAC Doc 29 contour).
 
@@ -726,6 +727,8 @@ def noise_contour(
         ground-roll segments (see :func:`event_level`).
     :param landing_roll: Optional boolean mask (length ``N-1``) of landing
         rollout segments (see :func:`event_level`).
+    :param bank: Optional per-segment bank angle ``ε`` in degrees, length
+        ``N-1`` (see :func:`event_level`).
     :return: A :class:`NoiseContourResult`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -740,6 +743,11 @@ def noise_contour(
         raise ValueError("'metric' must be 'exposure' or 'maximum'.")
     gr = _validate_ground_roll(ground_roll, pts.shape[0])
     lr = _validate_ground_roll(landing_roll, pts.shape[0])
+    bk = None
+    if bank is not None:
+        bk = np.asarray(bank, dtype=np.float64).ravel()
+        if bk.shape != (pts.shape[0] - 1,):
+            raise ValueError(f"'bank' must have length {pts.shape[0] - 1} (one per segment).")
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
     vref = float(reference_speed)
@@ -752,5 +760,5 @@ def noise_contour(
         for ix in range(gx.size):
             obs[0] = gx[ix]
             grid[iy, ix] = _event_level_core(
-                pts, obs, p, d, le, lm, vref, imp, mounting, key, gr, lr)[0]
+                pts, obs, p, d, le, lm, vref, imp, mounting, key, gr, lr, bk)[0]
     return NoiseContourResult(x=gx, y=gy, level=grid, metric=key)

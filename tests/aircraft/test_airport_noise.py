@@ -477,3 +477,16 @@ def test_bank_angle_side_asymmetry() -> None:
     assert same_r == pytest.approx(same_l)
     with pytest.raises(ValueError, match="bank"):
         event_level(path, [0.0, 500.0, 0.0], _NP, _ND, _NSEL, _NMAX, bank=[1.0, 2.0])
+
+
+def test_noise_contour_accepts_bank() -> None:
+    # API parity with event_level: bank threads through to the contour grid
+    # and produces the same port/starboard asymmetry.
+    path = [[0.0, 0.0, 300.0, 10000.0, _VREF], [3000.0, 0.0, 400.0, 10000.0, _VREF]]
+    kw = dict(x=[1400.0, 1600.0], y=[-500.0, 500.0])
+    banked = noise_contour(path, _NP, _ND, _NSEL, _NMAX, bank=[10.0], **kw)
+    level = noise_contour(path, _NP, _ND, _NSEL, _NMAX, **kw)
+    assert banked.level[0, 0] != pytest.approx(banked.level[1, 0])
+    assert level.level[0, 0] == pytest.approx(level.level[1, 0])
+    with pytest.raises(ValueError, match="bank"):
+        noise_contour(path, _NP, _ND, _NSEL, _NMAX, bank=[1.0, 2.0], **kw)

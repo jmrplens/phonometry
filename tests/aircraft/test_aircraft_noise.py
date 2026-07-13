@@ -187,6 +187,22 @@ def test_bandsharing_adjustment_applied() -> None:
     assert same_epnl == pytest.approx(plain_epnl)
 
 
+def test_bandsharing_window_scales_with_record_duration() -> None:
+    # The one-second window is time-based, not a fixed five-record slice:
+    # with 1 s records only the immediate neighbours fall within +/- 1 s.
+    from phonometry.aircraft.aircraft_noise import epnl_from_pnlt
+
+    pnlt = np.array([80.0, 90.0, 95.0, 100.0, 95.0, 90.0, 80.0])
+    c = np.array([0.0, 2.0, 2.0, 0.0, 2.0, 2.0, 0.0])
+    _, pnltm_1s, _, _ = epnl_from_pnlt(pnlt, 1.0, tone_corrections=c)
+    plain = float(np.max(pnlt))
+    # Window = [2, 0, 2] -> mean 4/3 -> Delta_B = 4/3.
+    assert pnltm_1s - plain == pytest.approx(4.0 / 3.0)
+    # Per-record durations follow the same rule (uniform 1 s array).
+    _, pnltm_arr, _, _ = epnl_from_pnlt(pnlt, np.full(7, 1.0), tone_corrections=c)
+    assert pnltm_arr == pytest.approx(pnltm_1s)
+
+
 def test_effective_epnl_exposes_bandsharing_field() -> None:
     rng = np.random.default_rng(7)
     spectra = 60.0 + 5.0 * rng.standard_normal((9, 24))

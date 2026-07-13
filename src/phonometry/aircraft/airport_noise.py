@@ -33,7 +33,7 @@ Doc 29 5th ed. Vol 3 Part 1 reference workbook.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
 
@@ -784,6 +784,76 @@ def _grid_noise_fraction(
             dtype=np.float64)
 
 
+class _GridContext(NamedTuple):
+    """Per-call constants of the vectorised contour kernel."""
+
+    obs: "NDArray[np.float64]"
+    p: "NDArray[np.float64]"
+    le: "NDArray[np.float64]"
+    lm: "NDArray[np.float64]"
+    logd_tab: "NDArray[np.float64]"
+    vref: float
+    imp: float
+    mount_key: str
+    engine_jet: bool
+    maximum: bool
+
+
+def _grid_segment_level(
+    ctx: _GridContext, seg_pts: "NDArray[np.float64]", eps: float,
+    is_takeoff: bool, is_landing: bool,
+) -> "NDArray[np.float64]":
+    """Per-observer event level of one non-degenerate segment (Eq. 4-8/4-9).
+
+    Assembles the NPD baseline and every correction through the ``_grid_*``
+    helpers, mirroring one iteration of the scalar :func:`_event_level_core`
+    loop expression for expression.
+    """
+    s1, s2 = seg_pts[0, :3], seg_pts[1, :3]
+    seg = s2 - s1
+    length = float(np.linalg.norm(seg))
+    u = seg / length
+    obs = ctx.obs
+    q, dp_, ds, behind, ahead, lateral, z_foot, z_near = _grid_segment_frame(
+        s1, s2, u, length, obs)
+    beta, phi = _grid_angles(u, s1, obs, dp_, lateral, z_foot, z_near,
+                             behind, ahead, eps)
+    roll_behind = behind & is_takeoff
+    roll_ahead = ahead & is_landing
+    use_end = roll_behind | roll_ahead
+    if ctx.maximum:
+        use_end = use_end | behind | ahead
+    beta_att, ell_att, phi_att = _grid_attenuation_geometry(
+        s1, s2, obs, beta, phi, lateral, ahead, use_end)
+    lam_att = _grid_lateral_attenuation(beta_att, ell_att)
+    di = _grid_installation(phi_att, ctx.mount_key)
+    frac = np.clip(q / length, 0.0, 1.0)
+    p1, p2 = seg_pts[0, 3], seg_pts[1, 3]
+    p_seg = np.sqrt(np.maximum(p1**2 + frac * (p2**2 - p1**2), 0.0))
+    sor = _grid_sor(q, ds, roll_behind, ctx.engine_jet) if is_takeoff else 0.0
+    if ctx.maximum:
+        base = _npd_level_grid(ctx.p, ctx.lm, ctx.logd_tab, p_seg,
+                               np.maximum(ds, _NPD_FLOOR_M))
+        return np.asarray(base + ctx.imp + di - lam_att + sor, dtype=np.float64)
+    dist = np.maximum(np.where(use_end, ds, dp_), _NPD_FLOOR_M)
+    le_d = _npd_level_grid(ctx.p, ctx.le, ctx.logd_tab, p_seg, dist)
+    lm_d = _npd_level_grid(ctx.p, ctx.lm, ctx.logd_tab, p_seg, dist)
+    v1, v2 = seg_pts[0, 4], seg_pts[1, 4]
+    if is_takeoff or is_landing:
+        # Eq. 4-13b: runway segments use the arithmetic mean speed.
+        v_seg = np.full(obs.shape[0], 0.5 * (v1 + v2))
+    else:
+        v_seg = np.sqrt(np.maximum(v1**2 + frac * (v2**2 - v1**2), 0.0))
+    if np.any(v_seg <= 0.0):
+        raise ValueError(
+            "segment with zero mean speed (stationary segment in 'path').")
+    dv = 10.0 * np.log10(ctx.vref / v_seg)
+    d_lambda = _D0_M * 10.0 ** ((le_d - lm_d) / 10.0)
+    df = _grid_noise_fraction(q, length, d_lambda, roll_behind, roll_ahead)
+    return np.asarray(le_d + ctx.imp + dv + di - lam_att + df + sor,
+                      dtype=np.float64)
+
+
 def _grid_event_levels(
     pts: "NDArray[np.float64]", obs: "NDArray[np.float64]",
     p: "NDArray[np.float64]", d: "NDArray[np.float64]",
@@ -797,73 +867,37 @@ def _grid_event_levels(
 
     ``obs`` has shape ``(G, 3)``; returns the event level per observer, shape
     ``(G,)``. One pass per segment with every quantity broadcast over the
-    observers through the ``_grid_*`` helpers, each of which mirrors its
-    scalar counterpart expression for expression, so both paths agree to
-    machine precision; the golden baseline and the scalar-equivalence test
-    guard that.
+    observers through :func:`_grid_segment_level` and the ``_grid_*`` helpers,
+    each of which mirrors its scalar counterpart expression for expression, so
+    both paths agree to machine precision; the golden baseline and the
+    scalar-equivalence test guard that.
     """
     mount_key = mounting.strip().lower()
     engine_installation_correction(0.0, mounting)   # validate 'mounting' once
     if not (np.isfinite(vref) and vref > 0.0):
         raise ValueError("'reference_speed' must be positive.")
-    engine_jet = mount_key not in ("propeller", "prop")
-    logd_tab = np.log10(d)
+    ctx = _GridContext(obs, p, le, lm, np.log10(d), vref, imp, mount_key,
+                       mount_key not in ("propeller", "prop"), key == "maximum")
     n_obs = obs.shape[0]
     total = np.full(n_obs, -np.inf)
     energy = np.zeros(n_obs)
     any_segment = False
     for i in range(pts.shape[0] - 1):
-        s1, s2 = pts[i, :3], pts[i + 1, :3]
-        seg = s2 - s1
-        length = float(np.linalg.norm(seg))
-        if length <= 0.0:  # degenerate (duplicate waypoints): skip
-            continue
+        if float(np.linalg.norm(pts[i + 1, :3] - pts[i, :3])) <= 0.0:
+            continue  # degenerate (duplicate waypoints): skip
         any_segment = True
-        u = seg / length
         eps = float(bank[i]) if bank is not None else 0.0
-        q, dp_, ds, behind, ahead, lateral, z_foot, z_near = _grid_segment_frame(
-            s1, s2, u, length, obs)
-        beta, phi = _grid_angles(u, s1, obs, dp_, lateral, z_foot, z_near,
-                                 behind, ahead, eps)
-        is_takeoff = ground_roll is not None and bool(ground_roll[i])
-        is_landing = landing_roll is not None and bool(landing_roll[i])
-        roll_behind = behind & is_takeoff
-        roll_ahead = ahead & is_landing
-        use_end = roll_behind | roll_ahead
-        if key == "maximum":
-            use_end = use_end | behind | ahead
-        beta_att, ell_att, phi_att = _grid_attenuation_geometry(
-            s1, s2, obs, beta, phi, lateral, ahead, use_end)
-        lam_att = _grid_lateral_attenuation(beta_att, ell_att)
-        di = _grid_installation(phi_att, mount_key)
-        frac = np.clip(q / length, 0.0, 1.0)
-        p1, p2 = pts[i, 3], pts[i + 1, 3]
-        p_seg = np.sqrt(np.maximum(p1**2 + frac * (p2**2 - p1**2), 0.0))
-        sor = _grid_sor(q, ds, roll_behind, engine_jet) if is_takeoff else 0.0
-        if key == "maximum":
-            base = _npd_level_grid(p, lm, logd_tab, p_seg,
-                                   np.maximum(ds, _NPD_FLOOR_M))
-            total = np.maximum(total, base + imp + di - lam_att + sor)
-            continue
-        dist = np.maximum(np.where(use_end, ds, dp_), _NPD_FLOOR_M)
-        le_d = _npd_level_grid(p, le, logd_tab, p_seg, dist)
-        lm_d = _npd_level_grid(p, lm, logd_tab, p_seg, dist)
-        v1, v2 = pts[i, 4], pts[i + 1, 4]
-        if is_takeoff or is_landing:
-            # Eq. 4-13b: runway segments use the arithmetic mean speed.
-            v_seg = np.full(n_obs, 0.5 * (v1 + v2))
+        seg_level = _grid_segment_level(
+            ctx, pts[i:i + 2], eps,
+            ground_roll is not None and bool(ground_roll[i]),
+            landing_roll is not None and bool(landing_roll[i]))
+        if ctx.maximum:
+            total = np.maximum(total, seg_level)
         else:
-            v_seg = np.sqrt(np.maximum(v1**2 + frac * (v2**2 - v1**2), 0.0))
-        if np.any(v_seg <= 0.0):
-            raise ValueError(
-                "segment with zero mean speed (stationary segment in 'path').")
-        dv = 10.0 * np.log10(vref / v_seg)
-        d_lambda = _D0_M * 10.0 ** ((le_d - lm_d) / 10.0)
-        df = _grid_noise_fraction(q, length, d_lambda, roll_behind, roll_ahead)
-        energy += 10.0 ** ((le_d + imp + dv + di - lam_att + df + sor) / 10.0)
+            energy += 10.0 ** (seg_level / 10.0)
     if not any_segment:
         return np.full(n_obs, -np.inf)
-    if key == "maximum":
+    if ctx.maximum:
         return total
     with np.errstate(divide="ignore"):
         return np.asarray(10.0 * np.log10(energy), dtype=np.float64)

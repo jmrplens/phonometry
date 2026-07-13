@@ -112,8 +112,10 @@ def atmospheric_adjustment(
 
     Bands below the 50 Hz floor of the ISO 9613-1 tabulation (the NORAH grid
     starts at 10 Hz) use the same analytic formulas; the advisory out-of-range
-    warning is suppressed here because ``α`` is negligible there (Table 4 lists
-    0.0 dB/km for every band up to 50 Hz).
+    warning is suppressed because ``α`` is negligible there (Table 4 lists
+    0.0 dB/km for every band up to 50 Hz). The suppression only applies while
+    every band stays within the 10 kHz top of the NORAH grid; above that the
+    advisory warning propagates, since ``α`` is large and extrapolated.
 
     :param frequencies: One-third-octave-band centre frequencies, in Hz.
     :param distance: Slant distance ``r``, in metres (``>= rh``; below ``rh``
@@ -137,9 +139,10 @@ def atmospheric_adjustment(
     r = require_positive(distance, "distance")
     rh = require_positive(reference_distance, "reference_distance")
     with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "ignore", message="One or more frequencies are outside",
-            category=AtmosphericAbsorptionWarning)
+        if f.max() <= 10000.0:
+            warnings.filterwarnings(
+                "ignore", message="One or more frequencies are outside",
+                category=AtmosphericAbsorptionWarning)
         alpha = air_attenuation(f, temperature, relative_humidity, pressure, exact_midband=True)
     return np.asarray(-alpha * (r - rh), dtype=np.float64)
 
@@ -258,7 +261,11 @@ class RotorcraftHemisphere:
         return plot_rotorcraft_hemisphere(self, ax=ax, **kwargs)
 
     def _filled(self) -> "NDArray[np.float64]":
-        """The gap-filled level grid (Eq. 14/15), computed once and cached."""
+        """The gap-filled level grid (Eq. 14/15), computed once and cached.
+
+        The cache relies on the frozen-dataclass contract: mutating the
+        ``levels`` array in place after the first lookup leaves it stale.
+        """
         cached = self.__dict__.get("_filled_cache")
         if cached is None:
             cached = _fill_grid(

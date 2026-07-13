@@ -15,8 +15,8 @@ ajuste de propagación `ΔLp = ΔLs + ΔLa + ΔLg`.
 Un `RotorcraftHemisphere` contiene los niveles de banda sobre la malla
 azimut/polar. `hemisphere_source_level` lee el nivel en una dirección de emisión
 arbitraria: primero rellena los huecos de la malla desde los bins llenos
-angularmente más cercanos (Ec. 14/15, con caché) y después interpola bilineal en
-el dominio de energía sobre los cuatro bins vecinos (Ec. 13), de modo que las
+angularmente más cercanos (Ec. 14/15, con caché) y después interpola de forma
+bilineal en el dominio de energía sobre los cuatro bins vecinos (Ec. 13), de modo que las
 celdas parcialmente medidas se mantienen continuas con sus esquinas medidas.
 
 ```python

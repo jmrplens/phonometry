@@ -27,8 +27,9 @@ from phonometry.aircraft.rotorcraft_noise import (
 # km (dB) at ICAO reference conditions (25 °C, 70 % RH, 101.325 kPa). Independent
 # oracle. Per-band tolerance: the module implements the guidance Eq. 27 pure-tone
 # coefficient (which the NORAH2 prototype uses), while Table 4 tabulates the SAE
-# (Rickley) band mapping; both coincide below 800 Hz and drift apart towards
-# 8-10 kHz (up to 2.2 dB/km), which the wider high-band tolerances make explicit.
+# (Rickley) band mapping; both agree to ~0.05 dB/km below 800 Hz and to
+# ~0.3 dB/km up to 3.15 kHz, then drift apart towards 8-10 kHz (up to
+# 2.2 dB/km), which the wider high-band tolerances make explicit.
 _TABLE4 = {
     10: 0.0, 12.5: 0.0, 16: 0.0, 20: 0.0, 25: 0.0, 31.5: 0.0, 40: 0.0, 50: 0.0,
     63: 0.1, 80: 0.1, 100: 0.2, 125: 0.3, 160: 0.5, 200: 0.7, 250: 1.1,
@@ -72,6 +73,12 @@ def test_atmospheric_low_bands_do_not_warn() -> None:
         warnings.simplefilter("error")
         la = atmospheric_adjustment(np.array(list(_TABLE4), dtype=float), 1060.0)
     assert np.all(la <= 0.0)
+    # Above the 10 kHz top of the NORAH grid alpha is large and extrapolated:
+    # the advisory warning must still propagate there.
+    from phonometry.environmental.air_absorption import AtmosphericAbsorptionWarning
+
+    with pytest.warns(AtmosphericAbsorptionWarning):
+        atmospheric_adjustment([16000.0], 1060.0)
 
 
 def test_adjustments_honour_reference_distance() -> None:
@@ -282,7 +289,9 @@ def test_reference_hemisphere_all_types(rotorcraft: str, spectrum: list[float]) 
 # hemispheres listed in _TYPE_SPECTRA; the raw database is not redistributed).
 # Three query points per rotorcraft type, each in a different grid cell and
 # band. Corner order: [L(φ0,θ0), L(φ0,θ1), L(φ1,θ0), L(φ1,θ1)]; the expected
-# level is the energy-domain bilinear value (Eq. 13) at the query weights.
+# level is the energy-domain bilinear value (Eq. 13) at the query weights,
+# evaluated offline: a pinned regression on real corner data rather than an
+# external oracle (the propagation-chain rows below are the external oracle).
 _BILINEAR_QUERIES = [
     # (φ, θ, cell φ0/φ1, cell θ0/θ1, band index into _TYPE_BANDS-like triple)
     (5.0, 95.0, (0.0, 10.0), (90.0, 100.0)),

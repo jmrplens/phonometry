@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- ECAC Doc 29 airport noise: landing-rollout modelling (`landing_roll` mask;
+  reduced noise fraction Eq. 4-21b, nearest-end geometry, no directivity term)
+  and per-segment bank angle (`bank`, §4.5.2 sign convention). ICAO Annex 16
+  EPNL: the bandsharing adjustment ΔB (App. 2 §4.4.2/4.4.3), exposed as
+  `EPNLResult.bandsharing_adjustment`, and a `start_band` parameter on
+  `tone_correction` for the helicopter 50 Hz procedure.
+
+### Fixed
+
+- ECAC Doc 29: behind takeoff ground-roll segments the lateral attenuation and
+  installation effect now use the §4.5.5 nearest-end geometry (previously the
+  track perpendicular, which zeroed both terms on the extended centreline and
+  overpredicted behind-the-runway levels by up to about 10 dB); runway segments
+  use the Eq. 4-13b average speed (V = 0 start-of-roll waypoints are now
+  accepted); the exposure elevation angle on inclined segments follows the
+  equivalent-level-path convention (Fig. 4-6); maximum-level metrics use the
+  nearest-end lateral geometry behind/ahead; NPD lookups clamp to the
+  recommended 30 m floor (also fixes a crash for receivers exactly under the
+  path). Validated against seven branch-covering receptor events of the ECAC
+  Doc 29 Vol 3 Part 1 reference workbook.
+
 ## [3.2.0] - 2026-07-13
 
 ### Added

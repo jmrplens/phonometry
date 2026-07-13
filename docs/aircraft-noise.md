@@ -262,6 +262,13 @@ fraction and the start-of-roll directivity `ΔSOR` (turbofan and turboprop, all
 124 ground-roll reference rows to < 0.01 dB) reproduce the reference values, and
 the segment energy sum matches the reference `SEL`.
 
+The model also covers the landing rollout (`landing_roll` mask: reduced noise
+fraction Eq. 4-21b, nearest-end geometry, no directivity term), per-segment
+bank angle (`bank`, §4.5.2 sign convention), the §4.5.5 nearest-end lateral
+geometry behind takeoff roll, the Eq. 4-13b average runway-segment speed and
+the recommended 30 m floor on NPD lookups. Seven branch-covering receptor
+events of the reference workbook are reproduced end-to-end in the test suite.
+
 ---
 
 **Standards.** ICAO Annex 16, *Environmental Protection*, Vol. I, *Aircraft

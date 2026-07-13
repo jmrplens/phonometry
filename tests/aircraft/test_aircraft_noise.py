@@ -164,3 +164,33 @@ def test_epnl_exposed_at_package_top_level() -> None:
     import phonometry
 
     assert phonometry.effective_perceived_noise_level is effective_perceived_noise_level
+
+
+def test_bandsharing_adjustment_applied() -> None:
+    # App. 2 section 4.4.2/4.4.3 (ETM GM/AMC A2 4.4.2): when the tone
+    # correction at the PNLTM record dips below the average of the five
+    # records within one second of it, Delta_B is the shortfall, added to
+    # PNLTM before the 10 dB-down window and included in EPNL. Hand-built
+    # case: C = [2, 2, 0, 2, 2] around the peak -> Delta_B = 1.6.
+    from phonometry.aircraft.aircraft_noise import epnl_from_pnlt
+
+    pnlt = np.array([80.0, 90.0, 95.0, 100.0, 95.0, 90.0, 80.0])
+    c = np.array([0.0, 2.0, 2.0, 0.0, 2.0, 2.0, 0.0])
+    plain_epnl, plain_pnltm, _, _ = epnl_from_pnlt(pnlt, 0.5)
+    adj_epnl, adj_pnltm, _, _ = epnl_from_pnlt(pnlt, 0.5, tone_corrections=c)
+    assert adj_pnltm - plain_pnltm == pytest.approx(1.6)
+    assert adj_epnl - plain_epnl == pytest.approx(1.6)
+    # No suppression at the peak -> Delta_B = 0.
+    c2 = np.array([0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0])
+    same_epnl, same_pnltm, _, _ = epnl_from_pnlt(pnlt, 0.5, tone_corrections=c2)
+    assert same_pnltm == pytest.approx(plain_pnltm)
+    assert same_epnl == pytest.approx(plain_epnl)
+
+
+def test_effective_epnl_exposes_bandsharing_field() -> None:
+    rng = np.random.default_rng(7)
+    spectra = 60.0 + 5.0 * rng.standard_normal((9, 24))
+    from phonometry import effective_perceived_noise_level
+    res = effective_perceived_noise_level(spectra, 0.5)
+    assert res.bandsharing_adjustment >= 0.0
+    assert res.pnltm == pytest.approx(float(np.max(res.pnlt)) + res.bandsharing_adjustment)

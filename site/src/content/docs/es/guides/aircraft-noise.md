@@ -186,6 +186,14 @@ fracción de ruido y la directividad de inicio de rodaje (turbofán y turbohéli
 reproducen los valores de referencia con < 0,01 dB, y la suma energética de
 segmentos coincide con el `SEL` de referencia.
 
+El modelo cubre también el rodaje de aterrizaje (máscara `landing_roll`:
+fracción de ruido reducida Ec. 4-21b, geometría al extremo más cercano, sin
+término de directividad), el ángulo de alabeo por segmento (`bank`, convención
+de signo de §4.5.2), la geometría lateral §4.5.5 al extremo más cercano detrás
+del rodaje de despegue, la velocidad media Ec. 4-13b en segmentos de pista y el
+suelo recomendado de 30 m en las consultas NPD. Siete eventos de receptor del
+workbook de referencia se reproducen end-to-end en la suite de tests.
+
 ---
 
 **Normas.** ICAO Anexo 16 Vol. I Apéndice 2 (procedimiento EPNL), ICAO Doc 9501

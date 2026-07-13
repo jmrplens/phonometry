@@ -20,7 +20,23 @@ from .occupational_exposure import (
 from .sii import SIIResult, speech_intelligibility_index, standard_speech_spectrum
 from .sti import STIResult, STIWarning, sti_from_impulse_response, stipa, stipa_signal
 
+from .threshold import (
+    AUDIOMETRIC_FREQUENCIES,
+    AgeThresholdResult,
+    FIELDS,
+    SEXES,
+    age_threshold,
+    reference_threshold,
+)
+
 __all__ = [
+    "AUDIOMETRIC_FREQUENCIES",
+    "AgeThresholdResult",
+    "FIELDS",
+    "SEXES",
+    "age_threshold",
+    "reference_threshold",
+
     "COVERAGE_FACTOR",
     "ExposureResult",
     "HtlanResult",

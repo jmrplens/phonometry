@@ -25,7 +25,7 @@ from ._plot.psychoacoustics import plot_ecma_roughness as plot_ecma_roughness
 from ._plot.psychoacoustics import plot_ecma_tonality as plot_ecma_tonality
 from ._plot.room import plot_enclosed_space_absorption as plot_enclosed_space_absorption
 from ._plot.aircraft import plot_epnl as plot_epnl
-from ._plot.common import plot_excitation as plot_excitation
+from ._plot.room import plot_excitation as plot_excitation
 from ._plot.building import plot_facade_insulation as plot_facade_insulation
 from ._plot.building import plot_facade_prediction as plot_facade_prediction
 from ._plot.building import plot_floor_covering_improvement as plot_floor_covering_improvement

@@ -4,6 +4,37 @@
 
 All core functionality can be imported directly from the `phonometry` package.
 
+## Namespaces
+
+Since 3.2 the library is organized into twelve domain subpackages. The flat
+top-level API remains the primary, fully supported surface (every name below
+imports from `phonometry` unchanged), and each domain can also be used as a
+namespace:
+
+```python
+from phonometry import aircraft as air
+
+contour = air.noise_contour(path, powers, distances, sel, lmax, x=gx, y=gy)
+```
+
+| Subpackage | Scope |
+| :--- | :--- |
+| `phonometry.metrology` | Filter banks, weighting and time weighting, levels, calibration, IEC verifiers, GUM uncertainty |
+| `phonometry.psychoacoustics` | Loudness (Zwicker, ECMA, Moore-Glasberg), sharpness, tonality, roughness, fluctuation strength, annoyance, tonal audibility |
+| `phonometry.hearing` | Hearing threshold, NIHL, occupational exposure, SII, STI |
+| `phonometry.emission` | Sound power (ISO 3740 family), sound intensity, vibration-based power |
+| `phonometry.room` | Room acoustics (ISO 3382), impulse responses, open-plan, room-noise criteria, reverberation prediction, EN 12354-6 |
+| `phonometry.materials` | Absorption (ISO 354/11654), impedance tube, airflow resistance, scattering/diffusion, road absorption, dynamic stiffness |
+| `phonometry.building` | Sound insulation measurement and prediction (EN 12354, ISO 717/16283/10140/15186/10052/10848), structure-borne sound |
+| `phonometry.vibration` | Human vibration (ISO 2631/5349/8041), multiple shocks, mobility (ISO 7626), transfer stiffness (ISO 10846) |
+| `phonometry.environmental` | Rating levels, ISO 1996-2 measurement, outdoor propagation (ISO 9613), wind-turbine noise, impulsive prominence |
+| `phonometry.aircraft` | EPNL (ICAO Annex 16), SAE ARP 5534 absorption, airport contours (ECAC Doc 29), rotorcraft (ECAC Doc 32) |
+| `phonometry.underwater` | ISO 18405/17208/18406 levels, propagation, sound speed, sonar equation, seabed, ambient and ship-traffic noise, numerical solvers |
+| `phonometry.electroacoustics` | Distortion (IEC 60268-3 / AES17), transfer function and coherence |
+
+The pre-3.2 flat module paths (for example `phonometry.insulation`) keep
+importing for one deprecation cycle and warn on use; they are removed in 4.0.
+
 | Name | Type | Description (Inputs) | Usage Snippet (Outputs) |
 | :--- | :--- | :--- | :--- |
 | `octave_filter` | `function` | **High-level analysis.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc. (Default: 1)<br>• `order`: Filter order (Default: 6)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `filter_type`: 'butter', 'cheby1', 'cheby2', 'ellip', 'bessel' (Default: 'butter')<br>• `sigbands`: Return time signals (Default: False)<br>• `detrend`: Remove DC offset (Default: True)<br>• `calibration_factor`: Sensitivity multiplier (Default: 1.0)<br>• `dbfs`: Output in dBFS instead of dB SPL (Default: False)<br>• `mode`: 'rms' or 'peak' (Default: 'rms')<br>• `nominal`: IEC 61260-1 nominal labels (Default: False)<br>• `show`: Plot response (Default: False)<br>• `plot_file`: Path to save plot (Default: None)<br>• `ripple`: Passband ripple [dB] (for cheby1/ellip)<br>• `attenuation`: Stopband atten. [dB] (Default: 72; for cheby2/ellip — cheby2 needs >= 70 dB for class 1) | `spl, freq = octave_filter(x, fs, ...)`<br>• `spl`: levels [dB]<br>• `freq`: frequencies [Hz]<br><br>**With `sigbands=True`:**<br>`spl, freq, xb = octave_filter(x, fs, sigbands=True)`<br>• `xb`: List of filtered signals (one per band)<br><br>**Calibrated usage:**<br>`spl, f = octave_filter(x, fs, calibration_factor=0.05)` |

@@ -639,7 +639,7 @@ from .room.room_ir import (
     mls_signal,
     sweep_signal,
 )
-from ._plotting import plot_excitation
+from ._plot.room import plot_excitation
 from ._internal.warnings import PhonometryWarning, _warn_renamed
 from .building.building_prediction import (
     AirbornePredictionResult,

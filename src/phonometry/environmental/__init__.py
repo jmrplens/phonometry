@@ -36,7 +36,17 @@ from .wind_turbine_noise import (
     wind_turbine_tonality,
 )
 
+from .rating import (
+    composite_rating_level,
+    lden,
+    ldn,
+)
+
 __all__ = [
+    "composite_rating_level",
+    "lden",
+    "ldn",
+
     "AtmosphericAbsorptionWarning",
     "Barrier",
     "DEFAULT_FREQUENCIES",

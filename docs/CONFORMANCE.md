@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **191/191 conformance checks pass** across 31 domains and 121 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **194/194 conformance checks pass** across 32 domains and 124 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -465,6 +465,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ICAO Doc 9501 ETM Vol. I Table 3-7 | Tone correction of the turbofan example, dB | 2 (+/-0) | 2 | 0 | &#9989; |
 | ICAO Doc 9501 ETM Vol. I Table 4-4 | Integrated-method reference EPNL, EPNdB | 92.619 EPNdB (+/-0.01 EPNdB) | 92.619 EPNdB | 0 EPNdB | &#9989; |
 | IEC 61265:1995 Table 1 | Directional-response tolerance at 4 kHz / 90°, dB | 2 dB (+/-0 dB) | 2 dB | 0 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Rotorcraft noise (ECAC Doc 32 / NORAH2)</b> — 100% (3/3)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ECAC Doc 32 atmospheric attenuation (Table 4) | ΔLa over a 1 km excess path at 1 kHz vs the NORAH2 guidance Table 4, dB | 6.3 dB (+/-0.2 dB) | 6.186 dB | -0.114 dB | &#9989; |
+| ECAC Doc 32 spherical spreading | ΔLs at ten times the 60 m hemisphere reference distance (Eq. 24), dB | -20 dB (+/-0 dB) | -20 dB | 0 dB | &#9989; |
+| ECAC Doc 32 ground effect (rigid limit) | ΔLg over a rigid surface at grazing incidence tends to +6 dB (Eq. 29), dB | 6 dB (+/-1 dB) | 6 dB | 0.002 dB | &#9989; |
 
 </details>
 

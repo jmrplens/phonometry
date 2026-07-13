@@ -51,6 +51,13 @@ _ES_EXACT = {
     "180° behind": "180° detrás",
     "radial axis: ΔSOR [dB] relative to abeam  ·  dSOR = 300 m":
         "eje radial: ΔSOR [dB] relativo al través  ·  dSOR = 300 m",
+    "Rotorcraft Ground Effect (ECAC Doc 32, Chien-Soroka)":
+        "Efecto de suelo de rotorcraft (ECAC Doc 32, Chien-Soroka)",
+    "One-third-octave-band centre frequency [Hz]":
+        "Frecuencia central de banda de 1/3 de octava [Hz]",
+    "Ground-effect adjustment ΔLg [dB]": "Ajuste por efecto de suelo ΔLg [dB]",
+    "Hard (asphalt/concrete, class G)": "Duro (asfalto/hormigón, clase G)",
+    "Soft (grass/pasture, class D)": "Blando (hierba/pasto, clase D)",
     "x [km]": "x [km]",
     "y [km]": "y [km]",
     "Slant distance [m]": "Distancia oblicua [m]",
@@ -700,6 +707,8 @@ _ES_PATTERNS = [
     (r"^SL = 140, NL = 60, DI = 15, DT = 8 dB\nfigure of merit = (.+) dB$",
      "SL = 140, NL = 60, DI = 15, DT = 8 dB\\nfigura de mérito = \\1 dB"),
     (r"^SAE band \((\d+) m\)$", r"banda SAE (\1 m)"),
+    (r"^source (\d+) m, receiver (.+) m, offset (\d+) m$",
+     r"fuente \1 m, receptor \2 m, offset \3 m"),
     (r"^(\d+) yr$", r"\1 años"),
     (r"^total \(limit\) (.+) dB$", r"total (límite) \1 dB"),
     (r"^total \(eng\.\) (.+) dB$", r"total (ing.) \1 dB"),
@@ -3876,6 +3885,38 @@ def generate_airport_sor(output_dir: str) -> None:
     plt.close()
 
 
+def generate_rotorcraft_ground_effect(output_dir: str) -> None:
+    """ECAC Doc 32 ground-effect ΔLg vs frequency for soft vs hard ground."""
+    print("Generating rotorcraft_ground_effect...")
+    from phonometry import ground_effect_adjustment
+
+    freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz-10 kHz thirds
+    hs, hr, dp = 150.0, 1.5, 500.0                         # overflight geometry
+    grass = ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity="D")
+    asphalt = ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity="G")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.axhline(0.0, color=COLOR_FG, lw=1.0, alpha=0.5)
+    ax.plot(freqs, asphalt, color=COLOR_PRIMARY, lw=2.0, marker="o", ms=3,
+            label="Hard (asphalt/concrete, class G)")
+    ax.plot(freqs, grass, color=COLOR_SECONDARY, lw=2.0, marker="s", ms=3,
+            label="Soft (grass/pasture, class D)")
+    ax.set_xscale("log")
+    ax.set_xlabel("One-third-octave-band centre frequency [Hz]")
+    ax.set_ylabel("Ground-effect adjustment ΔLg [dB]")
+    ax.set_title("Rotorcraft Ground Effect (ECAC Doc 32, Chien-Soroka)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.6, which="both")
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", fontsize=9)
+    ax.text(0.98, 0.05, f"source {hs:.0f} m, receiver {hr:.1f} m, offset {dp:.0f} m",
+            transform=ax.transAxes, ha="right", va="bottom", fontsize=9,
+            bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
+    plt.tight_layout()
+    save_figure(output_dir, "rotorcraft_ground_effect.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -6322,6 +6363,7 @@ def generate_all(img_dir: str) -> None:
     generate_airport_noise(img_dir)
     generate_airport_contour(img_dir)
     generate_airport_sor(img_dir)
+    generate_rotorcraft_ground_effect(img_dir)
 
 
 # ===========================================================================

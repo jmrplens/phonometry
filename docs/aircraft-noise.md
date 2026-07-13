@@ -151,6 +151,38 @@ att.plot()                    # band vs pure-tone mid-band (needs matplotlib)
 Part 36 test window), over path lengths to 7620 m, and is reciprocal
 (source↔receiver).
 
+## 6. Airport noise: the NPD engine (ECAC Doc 29)
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise.svg" alt="Noise-power-distance curves for two engine power settings: the event level falls log-linearly with slant distance between the tabulated nodes, higher power giving a higher level" width="82%">
+</picture>
+
+The ECAC Doc 29 airport-noise method describes an aircraft with **noise-power-
+distance (NPD)** tables — the event level (`LAmax` or `SEL`) of steady straight
+flight versus engine power and slant distance. `npd_level` reads an event level
+for an arbitrary power and distance, interpolating **linearly in power**
+(Eq. 4-3) and **log-linearly in distance** (Eq. 4-4), extrapolating from the
+terminal segments beyond the tabulated envelope.
+
+```python
+import phonometry as ph
+
+powers = [12000.0, 20000.0]                      # e.g. net thrust, N
+distances = [200.0, 400.0, 1000.0, 2000.0, 6300.0, 10000.0]
+levels = [[98.5, 92.0, 83.6, 76.8, 63.9, 56.8],
+          [107.2, 100.9, 92.7, 86.0, 72.9, 65.6]]
+ph.npd_level(powers, distances, levels, power=16000.0, distance=1500.0)
+
+curve = ph.npd_curve(powers, distances, levels, power=20000.0)
+curve.plot()   # NPD curve with the tabulated nodes (needs matplotlib)
+```
+
+This is the NPD engine that underpins the segmentation and contour stages of the
+method; those further stages (flight-path segmentation, lateral attenuation, the
+finite-segment noise fraction and the receptor-grid contour integration) are a
+separate follow-up.
+
 ---
 
 **Standards.** ICAO Annex 16, *Environmental Protection*, Vol. I, *Aircraft
@@ -162,4 +194,6 @@ Table 4-4 integrated-method EPNL) used as numeric oracles. IEC 61265:1995,
 performance tolerances. SAE ARP 5534:2021, *Application of Pure-Tone
 Atmospheric Absorption Losses to One-Third-Octave-Band Data*: the SAE-Method
 band attenuation (Eqs. 7–10), with the pure-tone coefficient from ISO 9613-1.
-Airport noise contours (ECAC Doc 29) remain out of scope here.
+ECAC Doc 29, 4th ed., Vol 2 (2016) §4.2: the NPD event-level interpolation
+(Eqs. 4-3/4-4) — the engine of the airport-contour method; its segmentation,
+lateral-attenuation and contour-integration stages are a separate follow-up.

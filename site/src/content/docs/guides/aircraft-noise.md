@@ -122,9 +122,33 @@ att.plot()   # band vs pure-tone mid-band (needs matplotlib)
 
 Valid roughly 6–32 °C, 20–95 % RH (14 CFR Part 36 window), to 7620 m, reciprocal.
 
+## Airport noise: the NPD engine (ECAC Doc 29)
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise.svg" alt="Noise-power-distance curves for two engine power settings, the event level falling log-linearly with slant distance between the tabulated nodes" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise_dark.svg" alt="Noise-power-distance curves for two engine power settings, the event level falling log-linearly with slant distance between the tabulated nodes" style="width:82%">
+
+The ECAC Doc 29 airport-noise method describes an aircraft with **noise-power-
+distance (NPD)** tables. `npd_level` reads the event level (`LAmax`/`SEL`) for an
+arbitrary power and distance, interpolating linearly in power (Eq. 4-3) and
+log-linearly in slant distance (Eq. 4-4).
+
+```python
+import phonometry as ph
+
+powers = [12000.0, 20000.0]
+distances = [200.0, 400.0, 1000.0, 2000.0, 6300.0, 10000.0]
+levels = [[98.5, 92.0, 83.6, 76.8, 63.9, 56.8],
+          [107.2, 100.9, 92.7, 86.0, 72.9, 65.6]]
+ph.npd_curve(powers, distances, levels, power=20000.0).plot()
+```
+
+This is the NPD engine underneath the method; the segmentation, lateral
+attenuation and contour-grid stages are a separate follow-up.
+
 ---
 
 **Standards.** ICAO Annex 16 Vol. I Appendix 2 (EPNL procedure), ICAO Doc 9501
 ETM Vol. I (worked-example oracles), IEC 61265:1995 (measurement-system
 tolerances), SAE ARP 5534:2021 (SAE-Method band absorption; pure-tone coefficient
-from ISO 9613-1). Airport noise contours (ECAC Doc 29) remain out of scope here.
+from ISO 9613-1), ECAC Doc 29 4th ed. Vol 2 §4.2 (NPD event-level
+interpolation). The remaining ECAC contour stages (segmentation, lateral
+attenuation, contour integration) are a separate follow-up.

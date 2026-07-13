@@ -38,6 +38,12 @@ _ES_EXACT = {
     "Aircraft Atmospheric Absorption (SAE ARP 5534)":
         "Absorción atmosférica aeronáutica (SAE ARP 5534)",
     "Attenuation [dB]": "Atenuación [dB]",
+    "Noise-Power-Distance Curves (ECAC Doc 29)":
+        "Curvas nivel-potencia-distancia (ECAC Doc 29)",
+    "Slant distance [m]": "Distancia oblicua [m]",
+    "Event level [dB]": "Nivel de evento [dB]",
+    "markers: tabulated NPD nodes\nlines: log-linear interpolation":
+        "marcadores: nodos NPD tabulados\nlíneas: interpolación log-lineal",
     "25 °C, 70% RH\nsolid: SAE band, dashed: pure-tone mid-band":
         "25 °C, 70% HR\ncontinuo: banda SAE, discontinuo: tono puro medio de banda",
     # Emitted by phonometry.filter_design._showfilter (not by this script);
@@ -3735,6 +3741,39 @@ def generate_aircraft_atmospheric_absorption(output_dir: str) -> None:
     plt.close()
 
 
+def generate_airport_noise(output_dir: str) -> None:
+    """ECAC Doc 29 noise-power-distance interpolation for two power settings."""
+    print("Generating airport_noise...")
+    from phonometry import npd_curve
+
+    # A schematic NPD table (SEL vs slant distance) for two thrust settings.
+    powers = [12000.0, 20000.0]
+    distances = [200.0, 400.0, 630.0, 1000.0, 2000.0, 4000.0, 6300.0, 10000.0]
+    levels = [
+        [98.5, 92.0, 88.2, 83.6, 76.8, 69.4, 63.9, 56.8],
+        [107.2, 100.9, 97.2, 92.7, 86.0, 78.5, 72.9, 65.6],
+    ]
+    fig, ax = plt.subplots(figsize=(10, 6))
+    for p, color in ((20000.0, COLOR_PRIMARY), (12000.0, COLOR_SECONDARY)):
+        res = npd_curve(powers, distances, levels, p)
+        ax.plot(res.distance, res.level, color=color, linewidth=2.0,
+                label=f"P = {p:.0f} N")
+        ax.plot(res.table_distances, res.table_levels, "o", color=color, markersize=4)
+    ax.set_xscale("log")
+    ax.set_xlabel("Slant distance [m]")
+    ax.set_ylabel("Event level [dB]")
+    ax.set_title("Noise-Power-Distance Curves (ECAC Doc 29)", fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.text(0.02, 0.05, "markers: tabulated NPD nodes\nlines: log-linear interpolation",
+            transform=ax.transAxes, va="bottom", fontsize=9,
+            bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
+    plt.tight_layout()
+    save_figure(output_dir, "airport_noise.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -6176,6 +6215,9 @@ def generate_all(img_dir: str) -> None:
 
     # Aircraft atmospheric absorption (plan-23 A): SAE ARP 5534 band method.
     generate_aircraft_atmospheric_absorption(img_dir)
+
+    # Airport noise (plan-23 B1): ECAC Doc 29 noise-power-distance curves.
+    generate_airport_noise(img_dir)
 
 
 # ===========================================================================

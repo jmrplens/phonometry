@@ -2953,6 +2953,19 @@ def _chk_arp5534_continuity() -> Outcome:
 
 @register(
     _AIRCRAFT,
+    "ECAC Doc 29 NPD interpolation",
+    "Log-linear NPD level at the log-midpoint distance (Eq. 4-4), dB",
+)
+def _chk_ecac_npd() -> Outcome:
+    # Log-midpoint distance -> arithmetic mean of the bracketing node levels.
+    p, d = [1000.0, 2000.0], [200.0, 400.0, 800.0, 1600.0]
+    lv = [[100.0, 94.0, 88.0, 82.0], [110.0, 104.0, 98.0, 92.0]]
+    got = float(ph.npd_level(p, d, lv, 1000.0, math.sqrt(200.0 * 400.0))[0])
+    return numeric(97.0, got, 1e-9, unit="dB", places=4)
+
+
+@register(
+    _AIRCRAFT,
     "SAE ARP 5534 pure-tone coefficient (ISO 9613-1)",
     "Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m",
 )

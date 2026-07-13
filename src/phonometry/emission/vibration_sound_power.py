@@ -1,0 +1,297 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Airborne sound power from surface vibration (ISO/TS 7849-1/-2:2009).
+
+The airborne sound power a machine radiates through the structure-borne
+vibration of its outer surface is estimated from the surface vibratory velocity
+and a **radiation factor** ``epsilon`` (the radiation efficiency). The radiated
+power is (ISO/TS 7849-1, Equation 6)::
+
+    P = Z_c * <v**2> * S * epsilon                              [W]
+
+with ``Z_c`` the characteristic impedance of air, ``<v**2>`` the mean-square
+vibratory velocity averaged over the radiating area ``S``. The vibratory
+velocity is reported as a **level** re ``v0 = 5e-8 m/s`` (Equation 3)::
+
+    L_v = 10 lg(<v**2> / v0**2) = 20 lg(v / v0)                 [dB]
+
+so the A-weighted sound power level follows in logarithmic form (ISO/TS 7849-1,
+Equation 12; ISO/TS 7849-2, Equation 15)::
+
+    L_W = L_v + 10 lg(S / S0) + 10 lg(epsilon) + 10 lg(Z_c,n / Z_c,0)   [dB]
+
+where ``S0 = 1 m2``, the normalized characteristic impedance ``Z_c,n =
+411 N.s/m3`` (at 23 degC, 101,3 kPa) and the reference acoustic impedance
+``Z_c,0 = 400 N.s/m3`` give the fixed ``10 lg(411/400) = 0,118 dB`` term.
+
+The two parts differ only in ``epsilon``:
+
+* **Part 1 (survey)** assumes ``epsilon = 1`` and yields the *upper limit*
+  ``L_W,max`` of the radiated power, needing only ``<v**2>`` and ``S``.
+* **Part 2 (engineering)** applies a frequency-band radiation factor
+  ``epsilon_j`` determined (per ISO 9614) as ``epsilon_j = P_j /
+  (Z_c,n <v_j**2> S)`` (Equation 8).
+
+This module feeds the structure-borne source characterisation standards
+(ISO 9611, EN 15657, EN 12354-5).
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
+from numpy.typing import ArrayLike
+
+from .._internal.validation import require_positive
+
+#: Reference vibratory velocity ``v0`` (ISO/TS 7849, Equation 3), m/s.
+REFERENCE_VELOCITY: float = 5.0e-8
+#: Normalized characteristic impedance ``Z_c,n`` at 23 degC, 101,3 kPa, N.s/m3.
+NORMALIZED_IMPEDANCE: float = 411.0
+#: Reference acoustic impedance of air ``Z_c,0``, N.s/m3.
+REFERENCE_IMPEDANCE: float = 400.0
+#: Reference sound power ``P0``, W.
+REFERENCE_SOUND_POWER: float = 1.0e-12
+#: Reference area ``S0``, m2.
+REFERENCE_AREA: float = 1.0
+
+#: ISO/TS 7849-1 Table 2 — correction K1A (dB) for extraneous vibratory velocity
+#: keyed by the integer level difference dLv (dB). dLv >= 10 -> 0; dLv < 3 -> 3.
+_K1A_TABLE: dict[int, float] = {3: 3.0, 4: 2.0, 5: 2.0, 6: 1.0,
+                                7: 1.0, 8: 1.0, 9: 1.0, 10: 0.0}
+
+
+def velocity_level(
+    velocity: ArrayLike, *, reference: float = REFERENCE_VELOCITY
+) -> np.ndarray:
+    """Vibratory velocity level ``L_v = 20 lg(v/v0)`` (ISO/TS 7849-1, Eq. 3).
+
+    :param velocity: R.m.s. vibratory velocity ``v`` (scalar or array), in m/s.
+    :param reference: Reference velocity ``v0`` (Default: 5e-8 m/s).
+    :return: The velocity level ``L_v``, in dB re ``v0``.
+    :raises ValueError: for a non-positive reference.
+    """
+    reference = require_positive(reference, "reference")
+    v = np.asarray(velocity, dtype=np.float64)
+    return np.asarray(20.0 * np.log10(np.abs(v) / reference), dtype=np.float64)
+
+
+def velocity_level_from_acceleration(
+    peak_acceleration: ArrayLike,
+    frequency: ArrayLike,
+    *,
+    reference: float = REFERENCE_VELOCITY,
+) -> np.ndarray:
+    """Velocity level from a sinusoidal acceleration (ISO/TS 7849-1, Eq. 8).
+
+    ``L_v = 20 lg( a_peak / (2 pi f v0 sqrt(2)) )`` — used to convert a
+    calibration acceleration to the equivalent r.m.s. velocity level.
+
+    :param peak_acceleration: Peak acceleration ``a_peak`` (scalar or array),
+        in m/s^2.
+    :param frequency: Frequency ``f``, in hertz.
+    :param reference: Reference velocity ``v0`` (Default: 5e-8 m/s).
+    :return: The velocity level ``L_v``, in dB re ``v0``.
+    :raises ValueError: for a non-positive frequency or reference.
+    """
+    reference = require_positive(reference, "reference")
+    a = np.asarray(peak_acceleration, dtype=np.float64)
+    f = np.asarray(frequency, dtype=np.float64)
+    if np.any(f <= 0.0):
+        raise ValueError("'frequency' must be positive.")
+    v_rms = np.abs(a) / (2.0 * np.pi * f * np.sqrt(2.0))
+    return np.asarray(20.0 * np.log10(v_rms / reference), dtype=np.float64)
+
+
+def mean_velocity_level(
+    levels: ArrayLike, areas: ArrayLike | None = None
+) -> float:
+    """Mean vibratory velocity level over the surface (ISO/TS 7849-1, Eq. 10/11).
+
+    With uniformly distributed positions (``areas`` is ``None``) this is the
+    energetic average (Equation 10); with per-position partial areas it is the
+    area-weighted average (Equation 11).
+
+    :param levels: Velocity levels ``L_v,i`` at the positions, in dB.
+    :param areas: Partial areas ``S_i`` (Equation 11), or ``None`` for the
+        uniform energetic average (Equation 10).
+    :return: The mean velocity level, in dB.
+    """
+    lv = np.asarray(levels, dtype=np.float64)
+    energy = 10.0 ** (0.1 * lv)
+    if areas is None:
+        mean_energy = float(np.mean(energy))
+    else:
+        s = np.asarray(areas, dtype=np.float64)
+        if s.shape != lv.shape:
+            raise ValueError("'areas' must match the shape of 'levels'.")
+        mean_energy = float(np.sum(s * energy) / np.sum(s))
+    return float(10.0 * np.log10(mean_energy))
+
+
+def radiation_factor(
+    sound_power: ArrayLike,
+    area: float,
+    mean_square_velocity: ArrayLike,
+    *,
+    impedance: float = NORMALIZED_IMPEDANCE,
+) -> np.ndarray:
+    """A-weighted radiation factor ``epsilon`` (ISO/TS 7849-1 Eq. 4, -2 Eq. 8).
+
+    ``epsilon = P / (Z_c <v**2> S)`` — the sound-radiation efficiency, from an
+    independently measured radiated power (ISO 9614), the surface area and the
+    mean-square vibratory velocity.
+
+    :param sound_power: Radiated airborne sound power ``P`` (scalar or array),
+        in W.
+    :param area: Radiating surface area ``S``, in m^2 (> 0).
+    :param mean_square_velocity: Mean-square vibratory velocity ``<v**2>``, in
+        (m/s)^2.
+    :param impedance: Characteristic impedance ``Z_c`` (Default: 411 N.s/m^3).
+    :return: The radiation factor ``epsilon`` (dimensionless).
+    :raises ValueError: for a non-positive area or impedance.
+    """
+    area = require_positive(area, "area")
+    impedance = require_positive(impedance, "impedance")
+    p = np.asarray(sound_power, dtype=np.float64)
+    v2 = np.asarray(mean_square_velocity, dtype=np.float64)
+    return np.asarray(p / (impedance * v2 * area), dtype=np.float64)
+
+
+def radiated_sound_power_level(
+    velocity_level: ArrayLike,
+    area: float,
+    *,
+    radiation_factor: ArrayLike = 1.0,
+    reference_area: float = REFERENCE_AREA,
+    normalized_impedance: float = NORMALIZED_IMPEDANCE,
+    reference_impedance: float = REFERENCE_IMPEDANCE,
+) -> np.ndarray:
+    """Radiated sound power level (ISO/TS 7849-1 Eq. 12, -2 Eq. 15).
+
+    ``L_W = L_v + 10 lg(S/S0) + 10 lg(epsilon) + 10 lg(Z_c,n/Z_c,0)``.
+    With the default ``radiation_factor = 1`` this is the Part 1 *upper limit*
+    ``L_W,max``; pass a measured ``epsilon`` for the Part 2 engineering value.
+
+    :param velocity_level: Mean vibratory velocity level ``L_v`` (scalar or
+        array, e.g. per band), in dB re 5e-8 m/s.
+    :param area: Radiating surface area ``S``, in m^2 (> 0).
+    :param radiation_factor: Radiation factor ``epsilon`` (Default: 1.0).
+    :param reference_area: Reference area ``S0`` (Default: 1 m^2).
+    :param normalized_impedance: ``Z_c,n`` (Default: 411 N.s/m^3).
+    :param reference_impedance: ``Z_c,0`` (Default: 400 N.s/m^3).
+    :return: The sound power level ``L_W``, in dB re 1 pW.
+    :raises ValueError: for a non-positive area, reference area or impedance.
+    """
+    area = require_positive(area, "area")
+    reference_area = require_positive(reference_area, "reference_area")
+    normalized_impedance = require_positive(normalized_impedance,
+                                            "normalized_impedance")
+    reference_impedance = require_positive(reference_impedance,
+                                           "reference_impedance")
+    lv = np.asarray(velocity_level, dtype=np.float64)
+    eps = np.asarray(radiation_factor, dtype=np.float64)
+    lw = (
+        lv
+        + 10.0 * np.log10(area / reference_area)
+        + 10.0 * np.log10(eps)
+        + 10.0 * np.log10(normalized_impedance / reference_impedance)
+    )
+    return np.asarray(lw, dtype=np.float64)
+
+
+def extraneous_velocity_correction(level_difference: float) -> float:
+    """Correction K1A for extraneous vibration (ISO/TS 7849-1, Table 2).
+
+    ``dLv`` is the difference between the operating and the extraneous vibratory
+    velocity levels. The correction is subtracted from the measured level; per
+    the standard ``dLv >= 10 dB`` gives 0 dB, and ``dLv < 3 dB`` uses the 3 dB
+    value (the result is then an upper boundary). The level difference is
+    rounded to the nearest integer decibel to index the standard's table.
+
+    :param level_difference: Level difference ``dLv``, in dB.
+    :return: The correction ``K1A`` to subtract, in dB.
+    """
+    if level_difference >= 10.0:
+        return 0.0
+    if level_difference < 3.0:
+        return 3.0
+    return _K1A_TABLE[int(round(level_difference))]
+
+
+@dataclass(frozen=True)
+class VibrationSoundPowerResult:
+    """Sound power radiated by surface vibration (ISO/TS 7849).
+
+    :ivar frequencies: Band centre frequencies, in hertz, or ``None`` for a
+        single broadband value.
+    :ivar velocity_level: Mean vibratory velocity level ``L_v`` per band, in dB.
+    :ivar sound_power_level: Radiated sound power level ``L_W`` per band, in dB.
+    :ivar radiation_factor: Radiation factor ``epsilon`` per band.
+    :ivar area: Radiating surface area ``S``, in m^2.
+    """
+
+    velocity_level: np.ndarray
+    sound_power_level: np.ndarray
+    radiation_factor: np.ndarray
+    area: float
+    frequencies: np.ndarray | None = None
+
+    @property
+    def total_level(self) -> float:
+        """Band-summed sound power level ``10 lg(sum 10^(0.1 L_Wj))``, in dB."""
+        lw = np.asarray(self.sound_power_level, dtype=np.float64)
+        return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * lw))))
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the radiated sound power level per band.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from .._plot.emission import plot_vibration_sound_power
+
+        return plot_vibration_sound_power(self, ax=ax, **kwargs)
+
+
+def sound_power_from_vibration(
+    velocity_level: ArrayLike,
+    area: float,
+    *,
+    radiation_factor: ArrayLike = 1.0,
+    frequencies: ArrayLike | None = None,
+) -> VibrationSoundPowerResult:
+    """Bundle a sound-power-from-vibration determination (ISO/TS 7849).
+
+    :param velocity_level: Mean vibratory velocity level ``L_v`` (per band), dB.
+    :param area: Radiating surface area ``S``, in m^2 (> 0).
+    :param radiation_factor: Radiation factor ``epsilon`` (Default: 1.0 -> the
+        Part 1 upper limit); scalar or per band.
+    :param frequencies: Band centre frequencies, in hertz, or ``None``.
+    :return: The :class:`VibrationSoundPowerResult`.
+    """
+    lv = np.atleast_1d(np.asarray(velocity_level, dtype=np.float64))
+    eps = np.broadcast_to(
+        np.asarray(radiation_factor, dtype=np.float64), lv.shape
+    ).astype(np.float64)
+    lw = radiated_sound_power_level(lv, area, radiation_factor=eps)
+    freq = None
+    if frequencies is not None:
+        freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+        if freq.shape != lv.shape:
+            raise ValueError(
+                "'frequencies' must match the shape of 'velocity_level'."
+            )
+    return VibrationSoundPowerResult(
+        velocity_level=lv,
+        sound_power_level=np.asarray(lw, dtype=np.float64),
+        radiation_factor=eps,
+        area=float(area),
+        frequencies=freq,
+    )

@@ -2,7 +2,7 @@
 
 > Octave-band and fractional octave-band filter bank for Python signals in the time domain. Compliant with ANSI S1.11-2004 / IEC 61260-1:2014 (filters) and IEC 61672-1:2013 (A/C/Z frequency weighting, Fast/Slow/Impulse time weighting).
 
-phonometry v3.0.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). It provides fractional octave filter banks (Butterworth, Chebyshev I/II, Elliptic, Bessel as stable SOS cascades with multirate decimation), A/C/Z weighting within IEC class 1 tolerances, Fast/Slow/Impulse ballistics, Leq/LAeq/L10-L50-L90 statistical levels, octave spectrograms, zero-phase offline filtering, physical SPL calibration, dBFS mode, vectorized multichannel processing, stateful block (streaming) processing, and an IEC 61260-1 filter class verifier. Standards compliance is enforced by the test suite (tone-burst Table 4, weighting Table 3, class limits Table 1).
+phonometry v3.1.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). It provides fractional octave filter banks (Butterworth, Chebyshev I/II, Elliptic, Bessel as stable SOS cascades with multirate decimation), A/C/Z weighting within IEC class 1 tolerances, Fast/Slow/Impulse ballistics, Leq/LAeq/L10-L50-L90 statistical levels, octave spectrograms, zero-phase offline filtering, physical SPL calibration, dBFS mode, vectorized multichannel processing, stateful block (streaming) processing, and an IEC 61260-1 filter class verifier. Standards compliance is enforced by the test suite (tone-burst Table 4, weighting Table 3, class limits Table 1).
 
 Install:
 

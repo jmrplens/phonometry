@@ -99,6 +99,16 @@ print(f"Bands: {freq}")
 print(f"SPL [dB]: {spl}")
 ```
 
+Since 3.2 the library also exposes twelve domain namespaces (the flat API
+above remains the primary surface):
+
+```python
+from phonometry import building, underwater
+
+r = building.airborne_insulation(...)
+tl = underwater.transmission_loss(...)
+```
+
 <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%">
 
 *1/3 Octave Band spectrum analysis of a complex signal. More examples in the

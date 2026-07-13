@@ -81,7 +81,7 @@ def test_octave_filter_sigbands() -> None:
 
 def test_octave_filter_reuses_cached_bank(monkeypatch) -> None:
     """Repeated octave_filter calls with identical params must not redesign the bank."""
-    from phonometry.core import OctaveFilterBank
+    from phonometry.metrology.core import OctaveFilterBank
 
     phonometry._cached_filter_bank.cache_clear()
     calls = {"n": 0}

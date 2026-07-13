@@ -1,0 +1,137 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Tests for the IEC 61672-1:2013 frequency-weighting class verifier
+(``verify_weighting_class`` / ``weighting_class_limits``).
+
+The design-goal responses and class 1 limits in the verifier's Table 3
+transcription are cross-checked against the independent ``reference_data``
+copy shared with the CI conformance report, so a typo in either surfaces.
+"""
+
+import math
+
+import pytest
+
+from phonometry import (
+    WeightingFilter,
+    verify_weighting_class,
+    weighting_class_limits,
+)
+from phonometry.metrology.compliance import _WEIGHTING_TABLE3
+from reference_data import IEC61672_TABLE3 as TABLE3
+
+
+def test_masks_match_reference_data() -> None:
+    """The module's Table 3 (freq, A, C, class1 upper/lower) equals reference_data."""
+    assert len(_WEIGHTING_TABLE3) == len(TABLE3) == 34
+    for row, ref in zip(_WEIGHTING_TABLE3, TABLE3):
+        assert row[:5] == pytest.approx(ref, nan_ok=False), f"mismatch at {ref[0]} Hz"
+
+
+def test_weighting_class_limits_shape_and_known_values() -> None:
+    freqs, lower1, upper1 = weighting_class_limits(1)
+    _, lower2, upper2 = weighting_class_limits(2)
+    assert len(freqs) == 34
+    i1k = freqs.tolist().index(1000.0)
+    # 1 kHz reference point: +-0.7 (class 1), +-1.0 (class 2).
+    assert (lower1[i1k], upper1[i1k]) == (-0.7, 0.7)
+    assert (lower2[i1k], upper2[i1k]) == (-1.0, 1.0)
+    # One-sided limits at the extreme bands (lower = -inf).
+    i10 = freqs.tolist().index(10.0)
+    assert math.isinf(lower1[i10]) and lower1[i10] < 0
+    assert upper1[i10] == 3.0
+    # Asymmetric class 1 limit at 16 kHz.
+    i16k = freqs.tolist().index(16000.0)
+    assert (lower1[i16k], upper1[i16k]) == (-16.0, 2.5)
+
+
+@pytest.mark.parametrize("fs", [48000, 96000])
+@pytest.mark.parametrize("curve", ["A", "C", "Z"])
+def test_high_accuracy_weightings_are_class1(fs: int, curve: str) -> None:
+    """A/C/Z high-accuracy filters meet class 1 at every in-range frequency."""
+    result = verify_weighting_class(WeightingFilter(fs, curve))
+    assert result["overall_class"] == 1
+    assert all(b["class"] == 1 for b in result["bands"])
+    assert all(b["margin_class1_db"] >= 0 for b in result["bands"])
+
+
+def test_z_weighting_zero_deviation() -> None:
+    """Z is a flat bypass: zero deviation and full class-1 margin everywhere."""
+    result = verify_weighting_class(WeightingFilter(48000, "Z"))
+    assert all(b["deviation_db"] == 0.0 for b in result["bands"])
+    assert result["overall_class"] == 1
+
+
+def test_band_dict_keys_and_deviation_sign() -> None:
+    result = verify_weighting_class(WeightingFilter(48000, "A"))
+    band = result["bands"][0]
+    assert set(band) == {
+        "freq",
+        "class",
+        "deviation_db",
+        "margin_class1_db",
+        "margin_class2_db",
+    }
+    # A weighting strongly attenuates 10 Hz; relative to 1 kHz the design goal
+    # is -70.4 dB, so a compliant filter's deviation stays small.
+    assert abs(band["deviation_db"]) < 3.0
+
+
+def test_frequencies_above_nyquist_are_dropped() -> None:
+    """Only Table 3 frequencies below fs/2 are evaluated."""
+    result = verify_weighting_class(WeightingFilter(16000, "A"))
+    assert max(b["freq"] for b in result["bands"]) < 8000.0
+
+
+@pytest.mark.parametrize("fs,expected", [(32000, 2), (24000, 2)])
+def test_plain_bilinear_degrades_to_class2(fs: int, expected: int) -> None:
+    """Without oversampling the bilinear warping fails class 1 near Nyquist."""
+    result = verify_weighting_class(WeightingFilter(fs, "A", high_accuracy=False))
+    assert result["overall_class"] == expected
+    assert any(b["class"] != 1 for b in result["bands"])
+
+
+def test_invalid_class_raises() -> None:
+    with pytest.raises(ValueError):
+        weighting_class_limits(0)
+    with pytest.raises(ValueError):
+        weighting_class_limits(3)
+
+
+def _tone_gain_db(wf: WeightingFilter, fs: int, f0: float) -> float:
+    """Steady-state RMS gain of *wf* at f0 (time-domain, independent method)."""
+    import numpy as np
+
+    duration = max(0.5, 12 / f0)
+    t = np.arange(int(fs * duration)) / fs
+    x = np.sin(2 * np.pi * f0 * t)
+    y = wf.filter(x)
+    n0 = int(0.2 * fs)  # skip the transient
+    return float(20 * np.log10(np.std(y[n0:]) / np.std(x[n0:])))
+
+
+def test_deviation_matches_independent_tone_measurement() -> None:
+    """Cross-check the sosfreqz deviations against a time-domain tone RMS.
+
+    ``verify_weighting_class`` reads the designed SOS in the frequency domain;
+    this recomputes the deviation from a filtered pure tone (relative to the
+    1 kHz tone, matching the verifier's normalization), an independent method.
+    They must agree to within the RMS-estimation error.
+    """
+    fs = 48000
+    wf = WeightingFilter(fs, "A")  # stateless, so it can be reused per tone
+    bands = {b["freq"]: b["deviation_db"] for b in verify_weighting_class(wf)["bands"]}
+    ref_1k = _tone_gain_db(wf, fs, 1000.0)
+    for f0 in (63.0, 250.0, 1000.0, 4000.0, 8000.0):
+        measured = _tone_gain_db(wf, fs, f0) - ref_1k
+        design = {row[0]: row[1] for row in _WEIGHTING_TABLE3}[f0]
+        assert bands[f0] == pytest.approx(measured - design, abs=0.15), f"{f0} Hz"
+
+
+def test_response_is_deterministic() -> None:
+    """The verifier reads the designed SOS, so repeated runs are identical."""
+    a = verify_weighting_class(WeightingFilter(48000, "A"))
+    b = verify_weighting_class(WeightingFilter(48000, "A"))
+    assert [x["deviation_db"] for x in a["bands"]] == [
+        x["deviation_db"] for x in b["bands"]
+    ]

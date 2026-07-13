@@ -29,7 +29,7 @@ def test_loudness_module_attribute_access_warns_and_delegates() -> None:
     import phonometry.loudness  # noqa: F401  (PEP 562 shim; import is silent)
 
     shim = sys.modules["phonometry.loudness"]
-    target = sys.modules["phonometry.loudness_zwicker"]
+    target = sys.modules["phonometry.psychoacoustics.loudness_zwicker"]
     with pytest.warns(DeprecationWarning, match="loudness_zwicker"):
         cls = shim.ZwickerLoudness
     assert cls is target.ZwickerLoudness
@@ -266,3 +266,125 @@ def test_renamed_attribute_shims_reject_unknown_names() -> None:
         _ = absorption_rating.does_not_exist
     with pytest.raises(AttributeError, match="occupational_exposure"):
         _ = occupational_exposure.does_not_exist
+
+
+# --------------------------------------------------------------------------- #
+# 3.2 package reorganization: every pre-move public module path must remain
+# importable (silently) for one deprecation cycle. Frozen snapshot; do NOT
+# regenerate from the live tree (that would defeat its purpose).
+# --------------------------------------------------------------------------- #
+_PRE_MOVE_MODULE_PATHS = [
+    "phonometry.absorption_rating",
+    "phonometry.absorption_uncertainty",
+    "phonometry.air_absorption",
+    "phonometry.aircraft_atmospheric_absorption",
+    "phonometry.aircraft_noise",
+    "phonometry.airflow_resistance",
+    "phonometry.airport_noise",
+    "phonometry.building_prediction",
+    "phonometry.building_uncertainty",
+    "phonometry.calibration",
+    "phonometry.compliance",
+    "phonometry.core",
+    "phonometry.distortion",
+    "phonometry.dynamic_stiffness",
+    "phonometry.enclosed_space_absorption",
+    "phonometry.environmental",
+    "phonometry.environmental_measurement",
+    "phonometry.facade_prediction",
+    "phonometry.filter_design",
+    "phonometry.flanking_transmission",
+    "phonometry.floor_covering_improvement",
+    "phonometry.fluctuation_strength",
+    "phonometry.frequencies",
+    "phonometry.frequency_response",
+    "phonometry.hearing",
+    "phonometry.human_vibration",
+    "phonometry.impedance_tube",
+    "phonometry.impulse_prominence",
+    "phonometry.installed_structure_borne",
+    "phonometry.insulation",
+    "phonometry.intensity",
+    "phonometry.intensity_insulation",
+    "phonometry.lab_insulation",
+    "phonometry.levels",
+    "phonometry.loudness",
+    "phonometry.loudness_contours",
+    "phonometry.loudness_ecma",
+    "phonometry.loudness_moore_glasberg",
+    "phonometry.loudness_moore_glasberg_time",
+    "phonometry.loudness_zwicker",
+    "phonometry.mechanical_mobility",
+    "phonometry.multiple_shock_vibration",
+    "phonometry.noise_induced_hearing_loss",
+    "phonometry.numerical_propagation",
+    "phonometry.occupational_exposure",
+    "phonometry.ocean_ambient_noise",
+    "phonometry.open_plan",
+    "phonometry.outdoor_propagation",
+    "phonometry.parametric_filters",
+    "phonometry.pile_driving_noise",
+    "phonometry._plotting",
+    "phonometry.psychoacoustic_annoyance",
+    "phonometry.reverberation_prediction",
+    "phonometry.road_absorption",
+    "phonometry.room_acoustics",
+    "phonometry.room_ir",
+    "phonometry.room_noise",
+    "phonometry.rotorcraft_noise",
+    "phonometry.roughness_ecma",
+    "phonometry.scattering_diffusion",
+    "phonometry.seabed_reflection",
+    "phonometry.sharpness",
+    "phonometry.ship_radiated_noise",
+    "phonometry.ship_traffic_noise",
+    "phonometry.sii",
+    "phonometry.sonar_equation",
+    "phonometry.sound_absorption",
+    "phonometry.sound_power",
+    "phonometry.sound_power_intensity",
+    "phonometry.sound_power_reverberation",
+    "phonometry.sti",
+    "phonometry.structure_borne_power",
+    "phonometry.survey_insulation",
+    "phonometry.tonality",
+    "phonometry.tonality_ecma",
+    "phonometry.tone_audibility",
+    "phonometry.transfer_stiffness",
+    "phonometry.uncertainty",
+    "phonometry.underwater_acoustics",
+    "phonometry.underwater_propagation",
+    "phonometry.underwater_sound_speed",
+    "phonometry.utils",
+    "phonometry.vibration_sound_power",
+    "phonometry._warnings",
+    "phonometry.wind_turbine_noise",
+]
+
+
+@pytest.mark.parametrize("path", _PRE_MOVE_MODULE_PATHS)
+def test_pre_move_module_path_still_imports(path: str) -> None:
+    import importlib
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        module = importlib.import_module(path)  # import itself must be silent
+    assert module is sys.modules[path]
+
+
+def test_moved_module_shims_warn_and_delegate() -> None:
+    import importlib
+
+    from phonometry._compat import _MOVED
+
+    for old, new in _MOVED.items():
+        shim = importlib.import_module(old)
+        target = importlib.import_module(new)
+        public = [n for n in dir(target) if not n.startswith("_")]
+        if not public:  # pragma: no cover - all shim targets export names
+            continue
+        with pytest.warns(DeprecationWarning, match="deprecated since phonometry"):
+            attr = getattr(shim, public[0])
+        assert attr is getattr(target, public[0])
+        assert set(public) <= set(dir(shim))

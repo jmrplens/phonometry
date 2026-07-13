@@ -11,9 +11,9 @@ from typing import Any, List, Tuple, overload, Literal
 
 import numpy as np
 
-from .calibration import CalibrationWarning, calculate_sensitivity, sensitivity
-from .environmental import composite_rating_level, lden, ldn
-from .environmental_measurement import (
+from .metrology.calibration import CalibrationWarning, calculate_sensitivity, sensitivity
+from .environmental.rating import composite_rating_level, lden, ldn
+from .environmental.measurement import (
     RepeatedMeasurementResult,
     ResidualCorrectionResult,
     TonalAssessmentResult,
@@ -29,57 +29,57 @@ from .environmental_measurement import (
     tonal_seeking_survey,
     uncertainty_from_repeated_measurements,
 )
-from .environmental_measurement import (
+from .environmental.measurement import (
     expanded_uncertainty as environmental_expanded_uncertainty,
 )
-from .compliance import (
+from .metrology.compliance import (
     class_limits,
     verify_aircraft_noise_system,
     verify_filter_class,
     verify_weighting_class,
     weighting_class_limits,
 )
-from .core import FilterBankWarning, OctaveFilterBank
-from .frequencies import (
+from .metrology.core import FilterBankWarning, OctaveFilterBank
+from .metrology.frequencies import (
     getansifrequencies,
     nominal_frequencies,
     normalized_frequencies,
     normalizedfreq,
 )
-from .intensity import (
+from .emission.intensity import (
     FieldIndicators,
     IntensityResult,
     dynamic_capability_index,
     field_indicators,
     sound_intensity,
 )
-from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
-from .loudness_zwicker import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
-from .loudness_ecma import EcmaLoudness, loudness_ecma
-from .loudness_moore_glasberg import (
+from .metrology.levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
+from .psychoacoustics.loudness_zwicker import ZwickerLoudness, loudness_zwicker, loudness_zwicker_from_spectrum
+from .psychoacoustics.loudness_ecma import EcmaLoudness, loudness_ecma
+from .psychoacoustics.loudness_moore_glasberg import (
     MooreGlasbergLoudness,
     loudness_moore_glasberg,
     loudness_moore_glasberg_from_spectrum,
     loudness_moore_glasberg_from_third_octave,
 )
-from .loudness_moore_glasberg_time import (
+from .psychoacoustics.loudness_moore_glasberg_time import (
     MooreGlasbergTimeVaryingLoudness,
     loudness_moore_glasberg_time,
 )
-from .loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
-from .sharpness import sharpness_din, sharpness_din_from_specific
-from .hearing import (
+from .psychoacoustics.loudness_contours import equal_loudness_contour, hearing_threshold, loudness_level
+from .psychoacoustics.sharpness import sharpness_din, sharpness_din_from_specific
+from .hearing.threshold import (
     AgeThresholdResult,
     age_threshold,
     reference_threshold,
 )
-from .noise_induced_hearing_loss import (
+from .hearing.noise_induced_hearing_loss import (
     HtlanResult,
     NiptsResult,
     htlan,
     nipts,
 )
-from .enclosed_space_absorption import (
+from .room.enclosed_space_absorption import (
     ReverberationResult,
     air_absorption_area,
     enclosed_space_reverberation,
@@ -88,7 +88,7 @@ from .enclosed_space_absorption import (
     object_fraction,
     reverberation_time,
 )
-from .reverberation_prediction import (
+from .room.reverberation_prediction import (
     ReverberationModelResult,
     arau_puchades_reverberation_time,
     eyring_reverberation_time,
@@ -98,7 +98,7 @@ from .reverberation_prediction import (
     reverberation_time_models,
     sabine_reverberation_time,
 )
-from .dynamic_stiffness import (
+from .materials.dynamic_stiffness import (
     DynamicStiffnessResult,
     DynamicStiffnessWarning,
     apparent_dynamic_stiffness,
@@ -107,7 +107,7 @@ from .dynamic_stiffness import (
     installed_dynamic_stiffness,
     natural_frequency,
 )
-from .mechanical_mobility import (
+from .vibration.mechanical_mobility import (
     FRF_UNITS,
     MobilityResult,
     convert_frf,
@@ -117,7 +117,7 @@ from .mechanical_mobility import (
     sdof_mobility_result,
     sdof_receptance,
 )
-from .transfer_stiffness import (
+from .vibration.transfer_stiffness import (
     REFERENCE_STIFFNESS,
     TransferStiffnessResult,
     base_transmissibility,
@@ -127,7 +127,7 @@ from .transfer_stiffness import (
     transfer_stiffness_indirect,
     transfer_stiffness_level,
 )
-from .vibration_sound_power import (
+from .emission.vibration_sound_power import (
     NORMALIZED_IMPEDANCE,
     REFERENCE_VELOCITY,
     VibrationSoundPowerResult,
@@ -139,14 +139,14 @@ from .vibration_sound_power import (
     velocity_level,
     velocity_level_from_acceleration,
 )
-from .structure_borne_power import (
+from .building.structure_borne_power import (
     StructureBornePowerResult,
     plate_loss_factor,
     reception_plate_power,
     spatial_mean_velocity_level,
     structure_borne_power_level,
 )
-from .installed_structure_borne import (
+from .building.installed_structure_borne import (
     REFERENCE_AREA,
     InstalledSourceResult,
     coupling_term,
@@ -157,7 +157,7 @@ from .installed_structure_borne import (
     structure_borne_pressure_level_path,
     total_structure_borne_pressure_level,
 )
-from .multiple_shock_vibration import (
+from .vibration.multiple_shock_vibration import (
     MultipleShockResult,
     acceleration_dose,
     compression_dose,
@@ -173,14 +173,14 @@ from .multiple_shock_vibration import (
     static_stress,
     ultimate_strength,
 )
-from .impulse_prominence import (
+from .environmental.impulse_prominence import (
     ImpulseProminenceResult,
     impulse_adjustment,
     impulse_prominence,
     predicted_prominence,
     rating_level,
 )
-from .uncertainty import (
+from .metrology.uncertainty import (
     MonteCarloResult,
     Quantity,
     UncertaintyResult,
@@ -190,7 +190,7 @@ from .uncertainty import (
     triangular,
     u_shaped,
 )
-from .room_noise import (
+from .room.room_noise import (
     NCResult,
     RCResult,
     nc_curve,
@@ -198,31 +198,31 @@ from .room_noise import (
     rc_curve,
     room_criterion,
 )
-from .sii import (
+from .hearing.sii import (
     SIIResult,
     speech_intelligibility_index,
     standard_speech_spectrum,
 )
-from .sti import (
+from .hearing.sti import (
     STIResult,
     STIWarning,
     sti_from_impulse_response,
     stipa,
     stipa_signal,
 )
-from .tonality_ecma import EcmaTonality, tonality_ecma
-from .roughness_ecma import EcmaRoughness, roughness_ecma
-from .fluctuation_strength import (
+from .psychoacoustics.tonality_ecma import EcmaTonality, tonality_ecma
+from .psychoacoustics.roughness_ecma import EcmaRoughness, roughness_ecma
+from .psychoacoustics.fluctuation_strength import (
     FluctuationStrengthResult,
     fluctuation_strength,
     fluctuation_strength_am_noise,
 )
-from .psychoacoustic_annoyance import (
+from .psychoacoustics.psychoacoustic_annoyance import (
     PsychoacousticAnnoyanceResult,
     psychoacoustic_annoyance,
     psychoacoustic_annoyance_from_signal,
 )
-from .distortion import (
+from .electroacoustics.distortion import (
     HarmonicDistortionResult,
     difference_frequency_distortion,
     dynamic_intermodulation_distortion,
@@ -235,12 +235,12 @@ from .distortion import (
     total_difference_frequency_distortion,
     weighted_thd,
 )
-from .frequency_response import (
+from .electroacoustics.frequency_response import (
     FrequencyResponseResult,
     coherence,
     transfer_function,
 )
-from .underwater_acoustics import (
+from .underwater.acoustics import (
     UNDERWATER_REFERENCE_EXPOSURE,
     UNDERWATER_REFERENCE_PRESSURE,
     in_air_to_underwater_spl,
@@ -249,41 +249,41 @@ from .underwater_acoustics import (
     sound_pressure_level,
     underwater_to_in_air_spl,
 )
-from .underwater_sound_speed import (
+from .underwater.sound_speed import (
     SoundSpeedProfile,
     depth_to_pressure,
     sea_water_sound_speed,
     sound_speed_profile,
 )
-from .underwater_propagation import (
+from .underwater.propagation import (
     TransmissionLossResult,
     seawater_absorption,
     spreading_loss,
     transmission_loss,
 )
-from .sonar_equation import (
+from .underwater.sonar_equation import (
     SonarEquationResult,
     active_sonar_equation,
     passive_sonar_equation,
 )
-from .seabed_reflection import (
+from .underwater.seabed_reflection import (
     BottomLossResult,
     bottom_reflection_loss,
     critical_angle,
     reflection_coefficient,
 )
-from .ocean_ambient_noise import (
+from .underwater.ocean_ambient_noise import (
     AmbientNoiseResult,
     ocean_ambient_noise,
     thermal_noise_spectrum,
     wind_noise_spectrum,
 )
-from .ship_traffic_noise import (
+from .underwater.ship_traffic_noise import (
     VESSEL_CLASSES,
     ShipTrafficSpectrum,
     ship_source_spectrum,
 )
-from .numerical_propagation import (
+from .underwater.numerical_propagation import (
     NormalModeResult,
     ParabolicEquationResult,
     RayTraceResult,
@@ -291,11 +291,11 @@ from .numerical_propagation import (
     parabolic_equation,
     ray_trace,
 )
-from .aircraft_atmospheric_absorption import (
+from .aircraft.atmospheric_absorption import (
     AircraftBandAttenuation,
     sae_band_attenuation,
 )
-from .airport_noise import (
+from .aircraft.airport_noise import (
     FlyoverResult,
     NoiseContourResult,
     NpdLevelResult,
@@ -310,28 +310,28 @@ from .airport_noise import (
     npd_level,
     start_of_roll_directivity,
 )
-from .rotorcraft_noise import (
+from .aircraft.rotorcraft_noise import (
     RotorcraftHemisphere,
     atmospheric_adjustment,
     ground_effect_adjustment,
     hemisphere_source_level,
     spherical_spreading_adjustment,
 )
-from .ship_radiated_noise import (
+from .underwater.ship_radiated_noise import (
     ShipSourceLevelResult,
     hydrophone_depths,
     monopole_source_level,
     radiated_noise_level,
     source_level_uncertainty,
 )
-from .pile_driving_noise import (
+from .underwater.pile_driving_noise import (
     PileStrikeResult,
     cumulative_sel,
     cumulative_sel_identical,
     pile_strike_metrics,
     single_strike_sel,
 )
-from .aircraft_noise import (
+from .aircraft.aircraft_noise import (
     NOY_BANDS,
     EPNLResult,
     effective_perceived_noise_level,
@@ -340,19 +340,19 @@ from .aircraft_noise import (
     perceived_noisiness,
     tone_correction,
 )
-from .wind_turbine_noise import (
+from .environmental.wind_turbine_noise import (
     WindTurbineTonalityResult,
     apparent_sound_power_level,
     slant_distance,
     wind_turbine_tonality,
 )
-from .tonality import (
+from .psychoacoustics.tonality import (
     TonalityWarning,
     ToneAssessment,
     prominence_ratio,
     tone_to_noise_ratio,
 )
-from .tone_audibility import (
+from .psychoacoustics.tone_audibility import (
     HANNING_BANDWIDTH_FACTOR,
     NO_TONE_AUDIBILITY,
     ToneAudibilityResult,
@@ -372,14 +372,14 @@ from .tone_audibility import (
     tone_level,
     two_tone_separation_frequency,
 )
-from .parametric_filters import (
+from .metrology.parametric_filters import (
     TimeWeighting,
     WeightingFilter,
     linkwitz_riley,
     time_weighting,
     weighting_filter,
 )
-from .insulation import (
+from .building.insulation import (
     AirborneInsulationResult,
     FacadeInsulationResult,
     ImpactInsulationResult,
@@ -393,7 +393,7 @@ from .insulation import (
     weighted_impact_rating,
     weighted_rating,
 )
-from .lab_insulation import (
+from .building.lab_insulation import (
     LabAirborneInsulationResult,
     LabImpactInsulationResult,
     LabInsulationWarning,
@@ -401,7 +401,7 @@ from .lab_insulation import (
     lab_airborne_insulation,
     lab_impact_insulation,
 )
-from .intensity_insulation import (
+from .building.intensity_insulation import (
     IntensityElementNormalizedResult,
     IntensityReductionResult,
     adaptation_term_kc,
@@ -410,14 +410,14 @@ from .intensity_insulation import (
     intensity_sound_reduction,
     surface_pressure_intensity_indicator,
 )
-from .floor_covering_improvement import (
+from .building.floor_covering_improvement import (
     FloorCoveringImprovementResult,
     acceleration_level,
     background_corrected_level,
     impact_improvement,
     improvement_octave_bands,
 )
-from .survey_insulation import (
+from .building.survey_insulation import (
     SurveyAirborneResult,
     SurveyFacadeResult,
     SurveyImpactResult,
@@ -429,8 +429,8 @@ from .survey_insulation import (
     survey_impact_insulation,
     survey_service_equipment_level,
 )
-from .open_plan import OpenPlanResult, open_plan_metrics
-from .sound_power import (
+from .room.open_plan import OpenPlanResult, open_plan_metrics
+from .emission.sound_power import (
     MeteorologicalCorrection,
     PrecisionCriteria,
     PrecisionFieldIndicators,
@@ -451,16 +451,16 @@ from .sound_power import (
     sound_power_intensity_precision,
     sound_power_pressure,
 )
-from .sound_power_reverberation import (
+from .emission.sound_power_reverberation import (
     ReverberationSoundPowerResult,
     sound_power_comparison,
     sound_power_reverberation,
 )
-from .sound_power_intensity import (
+from .emission.sound_power_intensity import (
     SoundPowerIntensityResult,
     sound_power_intensity,
 )
-from .scattering_diffusion import (
+from .materials.scattering_diffusion import (
     BASE_PLATE_BANDS,
     BASE_PLATE_MAX_SCATTERING,
     TWO_DIMENSIONAL_SOURCE_WEIGHTS,
@@ -485,7 +485,7 @@ from .scattering_diffusion import (
     specular_absorption_coefficient,
     speed_of_sound,
 )
-from .road_absorption import (
+from .materials.road_absorption import (
     DEFAULT_MIC_HEIGHT,
     DEFAULT_SOURCE_HEIGHT,
     DEFAULT_SPEED_OF_SOUND,
@@ -512,7 +512,7 @@ from .road_absorption import (
     spot_microphone_spacing_bounds,
     spot_tube_upper_frequency,
 )
-from .human_vibration import (
+from .vibration.human_vibration import (
     HAV_EAV_A8,
     HAV_ELV_A8,
     REFERENCE_ACCELERATION,
@@ -546,24 +546,24 @@ from .human_vibration import (
     weighted_acceleration,
     weighting_factors,
 )
-from .room_acoustics import (
+from .room.room_acoustics import (
     DecayCurve,
     RoomAcousticsResult,
     decay_curve,
     room_parameters,
 )
-from .sound_absorption import (
+from .materials.sound_absorption import (
     AbsorptionWarning,
     absorption_area,
     absorption_coefficient,
     attenuation_from_alpha,
 )
-from .air_absorption import (
+from .environmental.air_absorption import (
     AtmosphericAbsorptionWarning,
     air_attenuation,
     air_attenuation_m,
 )
-from .impedance_tube import (
+from .materials.impedance_tube import (
     ImpedanceTubeResult,
     ImpedanceTubeWarning,
     TransferMatrix,
@@ -594,7 +594,7 @@ from .impedance_tube import (
     two_microphone_impedance,
     wave_decomposition,
 )
-from .airflow_resistance import (
+from .materials.airflow_resistance import (
     AirflowResistanceWarning,
     StaticAirflowResult,
     airflow_resistance,
@@ -607,7 +607,7 @@ from .airflow_resistance import (
     static_airflow_resistance,
     thermal_boundary_layer_thickness,
 )
-from .absorption_rating import (
+from .materials.absorption_rating import (
     OCTAVE_BANDS,
     REFERENCE_CURVE,
     THIRD_OCTAVE_BANDS,
@@ -616,7 +616,7 @@ from .absorption_rating import (
     practical_absorption_coefficient,
     weighted_absorption,
 )
-from .outdoor_propagation import (
+from .environmental.outdoor_propagation import (
     DEFAULT_FREQUENCIES,
     Barrier,
     OutdoorAttenuation,
@@ -630,7 +630,7 @@ from .outdoor_propagation import (
     outdoor_propagation_attenuation,
     predicted_receiver_level,
 )
-from .room_ir import (
+from .room.room_ir import (
     ImpulseResponseResult,
     ImpulseResponseWarning,
     impulse_response,
@@ -639,9 +639,9 @@ from .room_ir import (
     mls_signal,
     sweep_signal,
 )
-from ._plotting import plot_excitation
-from ._warnings import PhonometryWarning, _warn_renamed
-from .building_prediction import (
+from ._plot.room import plot_excitation
+from ._internal.warnings import PhonometryWarning, _warn_renamed
+from .building.building_prediction import (
     AirbornePredictionResult,
     FlankingPath,
     ImpactPredictionResult,
@@ -657,7 +657,7 @@ from .building_prediction import (
     predicted_impact_insulation,
     standardized_impact_level,
 )
-from .facade_prediction import (
+from .building.facade_prediction import (
     FacadeElement,
     FacadePredictionResult,
     RadiatedPowerResult,
@@ -666,7 +666,7 @@ from .facade_prediction import (
     outdoor_level,
     radiated_sound_power,
 )
-from .flanking_transmission import (
+from .building.flanking_transmission import (
     FlankingImpactLevelResult,
     FlankingLevelDifferenceResult,
     VibrationReductionResult,
@@ -684,7 +684,7 @@ from .flanking_transmission import (
     vibration_reduction_index,
     vibration_reduction_index_from_flanking,
 )
-from .building_uncertainty import (
+from .building.building_uncertainty import (
     COVERAGE_FACTORS,
     BandUncertainty,
     UncertainValue,
@@ -703,7 +703,7 @@ from .building_uncertainty import (
     single_number_uncertainty_uncorrelated,
     uncertain_value,
 )
-from .absorption_uncertainty import (
+from .materials.absorption_uncertainty import (
     AbsorptionUncertaintyResult,
     sound_absorption_coefficient_uncertainty,
     absorption_coverage_factor,
@@ -712,7 +712,7 @@ from .absorption_uncertainty import (
     single_number_rating_uncertainty,
     weighted_coefficient_uncertainty,
 )
-from .occupational_exposure import (
+from .hearing.occupational_exposure import (
     COVERAGE_FACTOR,
     INSTRUMENT_U2,
     ExposureResult,
@@ -1572,3 +1572,9 @@ def __getattr__(name: str) -> Any:
         ) from None
     _warn_renamed(name, canonical)
     return globals()[canonical]
+
+
+# Deprecated module-path aliases for the 3.2 package reorganization: importing
+# the package installs sys.modules shims for every moved public module (see
+# phonometry/_compat.py; removed in 4.0).
+from . import _compat as _compat  # noqa: E402

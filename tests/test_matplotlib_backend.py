@@ -43,7 +43,7 @@ def test_filter_design_has_no_toplevel_matplotlib_import() -> None:
     import ast
     import inspect
 
-    from phonometry import filter_design
+    from phonometry.metrology import filter_design
 
     tree = ast.parse(inspect.getsource(filter_design))
 
@@ -72,7 +72,7 @@ def test_showfilter_raises_helpful_error_without_matplotlib(monkeypatch) -> None
     import numpy as np
     import pytest
 
-    from phonometry import filter_design
+    from phonometry.metrology import filter_design
 
     real_import = builtins.__import__
 

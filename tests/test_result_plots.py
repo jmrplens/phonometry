@@ -26,7 +26,7 @@ import numpy as np  # noqa: E402
 import pytest  # noqa: E402
 
 import phonometry as ph  # noqa: E402
-from phonometry import _plotting  # noqa: E402
+from phonometry._plot import common as _plotting  # noqa: E402
 
 FS = 48000
 RNG = np.random.default_rng(20260707)

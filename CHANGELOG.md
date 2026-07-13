@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Twelve domain namespaces: `phonometry.metrology`, `.psychoacoustics`,
+  `.hearing`, `.emission`, `.room`, `.materials`, `.building`, `.vibration`,
+  `.environmental`, `.aircraft`, `.underwater` and `.electroacoustics`, each a
+  curated subpackage usable as `from phonometry import aircraft as air`. The
+  flat top-level API is unchanged and remains the primary surface.
+
+### Changed
+
+- The internal package layout is reorganized into the domain subpackages
+  above; every pre-3.2 flat module path (for example `phonometry.insulation`,
+  `phonometry.underwater_acoustics`) keeps importing for one deprecation
+  cycle and warns on attribute access. They are removed in 4.0.
+
+### Deprecated
+
+- The pre-3.2 flat module paths (see Changed). Pickles created with 3.2
+  reference the new module paths and will not unpickle under 3.1.
+
 ## [3.1.0] - 2026-07-13
 
 ### Added

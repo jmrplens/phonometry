@@ -3006,6 +3006,30 @@ def _chk_ecac_workbook_segment() -> Outcome:
 
 @register(
     _AIRCRAFT,
+    "ECAC Doc 29 start-of-roll directivity (jet)",
+    "ΔSOR behind a takeoff ground-roll segment vs the Vol 3 Part 1 workbook, dB",
+)
+def _chk_ecac_start_of_roll() -> Outcome:
+    # ECAC Doc 29 5th ed. Vol 3 Part 1 workbook, case JETFDC: at ψ = 112.8895°,
+    # dSOR = 217.09 m the turbofan directivity (Eq. 4-24a) is +0.3196 dB.
+    got = float(ph.start_of_roll_directivity(112.889545, 217.0934, "jet"))
+    return numeric(0.31961, got, 1e-2, unit="dB", places=4)
+
+
+@register(
+    _AIRCRAFT,
+    "ECAC Doc 29 start-of-roll directivity (turboprop)",
+    "ΔSOR behind a takeoff ground-roll segment (turboprop, Eq. 4-24b), dB",
+)
+def _chk_ecac_start_of_roll_prop() -> Outcome:
+    # Same workbook, case PROPDC: at ψ = 128.1824°, dSOR = 254.44 m the turboprop
+    # directivity (Eq. 4-24b) is +1.0943 dB.
+    got = float(ph.start_of_roll_directivity(128.182381, 254.4361, "turboprop"))
+    return numeric(1.09434, got, 1e-2, unit="dB", places=4)
+
+
+@register(
+    _AIRCRAFT,
     "SAE ARP 5534 band-attenuation continuity",
     "SAE-Method δ_B at the 150 dB branch split (Eq. 7 vs Eq. 8), dB",
 )

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **189/189 conformance checks pass** across 31 domains and 119 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **191/191 conformance checks pass** across 31 domains and 121 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -448,7 +448,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b> — 100% (11/11)</summary>
+<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b> — 100% (13/13)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -456,6 +456,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ECAC Doc 29 single-event chain | SEL of a long level flyover vs the infinite-path limit LE∞ + ΔI − Λ, dB | 83.444 dB (+/-0.01 dB) | 83.444 dB | 0 dB | &#9989; |
 | ECAC Doc 29 impedance adjustment (standard atmosphere) | Acoustic-impedance adjustment of NPD data at 15 °C / 101.325 kPa (Eq. 4-6/4-7), dB | 0.074 dB (+/-0.0005 dB) | 0.0741 dB | 0 dB | &#9989; |
 | ECAC Doc 29 reference workbook (segment Λ) | Lateral attenuation of a climbing segment vs the ECAC Vol 3 Part 1 workbook, dB | 6.3769 dB (+/-0.01 dB) | 6.3769 dB | 0 dB | &#9989; |
+| ECAC Doc 29 start-of-roll directivity (jet) | ΔSOR behind a takeoff ground-roll segment vs the Vol 3 Part 1 workbook, dB | 0.3196 dB (+/-0.01 dB) | 0.3196 dB | 0 dB | &#9989; |
+| ECAC Doc 29 start-of-roll directivity (turboprop) | ΔSOR behind a takeoff ground-roll segment (turboprop, Eq. 4-24b), dB | 1.0943 dB (+/-0.01 dB) | 1.0944 dB | 0 dB | &#9989; |
 | SAE ARP 5534 band-attenuation continuity | SAE-Method δ_B at the 150 dB branch split (Eq. 7 vs Eq. 8), dB | 123.95 dB (+/-0.01 dB) | 123.953 dB | 0.003 dB | &#9989; |
 | ECAC Doc 29 NPD interpolation | Log-linear NPD level at the log-midpoint distance (Eq. 4-4), dB | 97 dB (+/-0 dB) | 97 dB | 0 dB | &#9989; |
 | SAE ARP 5534 pure-tone coefficient (ISO 9613-1) | Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m | 0.006186 dB/m (+/-0 dB/m) | 0.006186 dB/m | 0 dB/m | &#9989; |

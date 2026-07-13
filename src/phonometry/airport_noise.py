@@ -18,10 +18,12 @@ starts by reading a level from this table for an arbitrary power and distance.
 The single-event stage segments a flight path and adjusts the NPD baseline per
 segment (§4.3-4.5): :func:`impedance_adjustment` (Eq. 4-6/4-7),
 :func:`lateral_attenuation` (β, ℓ), :func:`engine_installation_correction`
-(φ, mounting), :func:`duration_correction` and the finite-segment
-:func:`noise_fraction`. :func:`event_level` assembles and sums them into the
-``SEL``/``LAmax`` of a movement, and :func:`noise_contour` evaluates it over a
-ground grid. Start-of-roll ground-roll directivity (§4.5.7) is out of scope.
+(φ, mounting), :func:`duration_correction`, the finite-segment
+:func:`noise_fraction` and, behind takeoff ground-roll segments, the
+:func:`start_of_roll_directivity` ``ΔSOR`` (§4.5.7). :func:`event_level`
+assembles and sums them into the ``SEL``/``LAmax`` of a movement (mark takeoff
+ground-roll segments with its ``ground_roll`` mask), and :func:`noise_contour`
+evaluates it over a ground grid.
 
 Source (clean-room, implemented from the standard text): ECAC Doc 29, 4th ed.,
 Vol 2 (2016), §4.2-4.5. Validated per-term and end-to-end against the ECAC
@@ -172,6 +174,55 @@ def impedance_adjustment(temperature: float = _T0_C, pressure: float = _P0_KPA) 
     theta = (t + 273.15) / (_T0_C + 273.15)
     zc = _ZC_STD * delta / np.sqrt(theta)
     return float(10.0 * np.log10(zc / _ZC_REF))
+
+
+#: Normalising distance for the start-of-roll directivity scaling (762 m), Eq. 4-25.
+_DSOR0_M = 762.0
+
+
+def start_of_roll_directivity(
+    azimuth_deg: float, distance_m: float, engine: str = "jet") -> float:
+    """Start-of-roll (ground-roll) directivity correction ``ΔSOR`` (Eq. 4-22/4-25).
+
+    Behind a takeoff ground-roll segment, jet-exhaust noise radiates a lobed
+    rearward pattern. ``ΔSOR`` adjusts the segment level relative to the level to
+    the side of the start of roll, as a function of the azimuth ``ψ`` between the
+    aircraft forward axis and the observer (Eq. 4-24a for turbofan jets, 4-24b for
+    turboprops), scaled beyond 762 m by ``dSOR,0/dSOR`` (Eq. 4-25). It is only
+    applied behind takeoff ground-roll segments (``90° ≤ ψ ≤ 180°``); ahead of the
+    aircraft (``ψ < 90°``) it is zero.
+
+    :param azimuth_deg: Azimuth ``ψ`` from the forward axis to the observer, in
+        degrees (``ψ = arccos(q/dSOR)``, in ``[90, 180]`` behind the aircraft).
+        Values below 90° return 0; values above 180° are clamped to 180°.
+    :param distance_m: Distance ``dSOR`` from the observer to the segment start,
+        in metres.
+    :param engine: ``"jet"`` (turbofan, Eq. 4-24a) or ``"turboprop"`` (Eq. 4-24b).
+    :return: The directivity correction ``ΔSOR``, in dB (added to the level).
+    :raises ValueError: If ``engine`` is unknown or the inputs are invalid.
+    """
+    psi = float(azimuth_deg)
+    dsor = float(distance_m)
+    if not (np.isfinite(psi) and np.isfinite(dsor) and dsor > 0.0):
+        raise ValueError("'distance_m' must be positive and inputs finite.")
+    key = engine.strip().lower()
+    if key not in ("jet", "turbofan", "turboprop", "prop", "propeller"):
+        raise ValueError(f"'engine' must be 'jet' or 'turboprop', got {engine!r}.")
+    if psi < 90.0:  # ahead of / abeam the aircraft: no rearward directivity
+        return 0.0
+    psi = min(psi, 180.0)
+    if key in ("jet", "turbofan"):
+        r = np.pi * psi / 180.0
+        d0 = (2329.44 - 8.0573 * psi + 11.51 * np.exp(r)
+              - 3.4601 * psi / np.log(r) - 17403338.3 * np.log(r) / psi**2)
+    else:
+        d0 = (-34643.898 + 30722161.987 / psi - 11491573930.510 / psi**2
+              + 2349285669062.0 / psi**3 - 283584441904272.0 / psi**4
+              + 20227150391251300.0 / psi**5 - 790084471305203000.0 / psi**6
+              + 13050687178273800000.0 / psi**7)
+    if dsor > _DSOR0_M:
+        d0 *= _DSOR0_M / dsor
+    return float(d0)
 
 
 def _clean_table(
@@ -400,18 +451,34 @@ def _validate_path(path: "NDArray[np.float64] | list[list[float]]") -> "NDArray[
     return pts
 
 
+def _validate_ground_roll(
+    ground_roll: "NDArray[np.bool_] | list[bool] | None", n_points: int,
+) -> "NDArray[np.bool_] | None":
+    """Coerce and validate the ground-roll segment mask (length ``N-1``)."""
+    if ground_roll is None:
+        return None
+    gr = np.asarray(ground_roll, dtype=bool).ravel()
+    if gr.shape != (n_points - 1,):
+        raise ValueError(f"'ground_roll' must have length {n_points - 1} (one per segment).")
+    return gr
+
+
 def _event_level_core(
     pts: "NDArray[np.float64]", obs: "NDArray[np.float64]",
     p: "NDArray[np.float64]", d: "NDArray[np.float64]",
     le: "NDArray[np.float64]", lm: "NDArray[np.float64]",
     vref: float, imp: float, mounting: str, key: str,
+    ground_roll: "NDArray[np.bool_] | None" = None,
 ) -> "tuple[float, NDArray[np.float64]]":
     """Segment loop and summation shared by :func:`event_level`/:func:`noise_contour`.
 
     ``pts`` must be pre-validated and ``p, d, le, lm`` pre-cleaned; this hot path
     is called once per grid point by :func:`noise_contour`, so all input coercion
-    is hoisted out to the callers.
+    is hoisted out to the callers. ``ground_roll`` (length ``N-1``) marks takeoff
+    ground-roll segments, which receive the start-of-roll directivity and reduced
+    noise fraction behind the aircraft (§4.5.6-4.5.7).
     """
+    engine = "turboprop" if mounting.strip().lower() in ("propeller", "prop") else "jet"
     seg_levels = []
     for i in range(pts.shape[0] - 1):
         s1, s2 = pts[i, :3], pts[i + 1, :3]
@@ -420,21 +487,28 @@ def _event_level_core(
         length, q, dp, ds, beta, phi, lateral = _segment_geometry(s1, s2, obs)
         if length <= 0.0:
             continue
+        # Behind a takeoff ground-roll segment (q < 0): use the max-level distance
+        # ds for the NPD baseline, the reduced (q = 0) noise fraction, and add the
+        # start-of-roll directivity ΔSOR (Eq. 4-9, 4-21a, 4-22/4-25).
+        roll_behind = ground_roll is not None and bool(ground_roll[i]) and q < 0.0
         frac = np.clip(q / length, 0.0, 1.0)
         p_seg = np.sqrt(max(p1**2 + frac * (p2**2 - p1**2), 0.0))
         lam_att = lateral_attenuation(beta, lateral)
         di = engine_installation_correction(phi, mounting)
+        sor = start_of_roll_directivity(np.degrees(np.arccos(np.clip(q / ds, -1.0, 1.0))),
+                                        ds, engine) if roll_behind else 0.0
         if key == "maximum":
             base = float(npd_level(p, d, lm, p_seg, ds)[0])
-            seg_levels.append(base + imp + di - lam_att)
+            seg_levels.append(base + imp + di - lam_att + sor)
         else:
-            le_dp = float(npd_level(p, d, le, p_seg, dp)[0])
-            lm_dp = float(npd_level(p, d, lm, p_seg, dp)[0])
+            dist = ds if roll_behind else dp
+            le_d = float(npd_level(p, d, le, p_seg, dist)[0])
+            lm_d = float(npd_level(p, d, lm, p_seg, dist)[0])
             v_seg = np.sqrt(max(v1**2 + frac * (v2**2 - v1**2), 0.0))
             dv = duration_correction(vref, v_seg)
-            d_lambda = _D0_M * 10.0 ** ((le_dp - lm_dp) / 10.0)
-            df = noise_fraction(q, length, d_lambda)
-            seg_levels.append(le_dp + imp + dv + di - lam_att + df)
+            d_lambda = _D0_M * 10.0 ** ((le_d - lm_d) / 10.0)
+            df = noise_fraction(0.0 if roll_behind else q, length, d_lambda)
+            seg_levels.append(le_d + imp + dv + di - lam_att + df + sor)
 
     seg_arr = np.asarray(seg_levels, dtype=np.float64)
     if seg_arr.size == 0:
@@ -459,14 +533,15 @@ def event_level(
     metric: str = "exposure",
     temperature: float = _T0_C,
     pressure: float = _P0_KPA,
+    ground_roll: "NDArray[np.bool_] | list[bool] | None" = None,
 ) -> FlyoverResult:
     """Single-event noise level of a flight path at a receiver (ECAC Doc 29).
 
-    Assembles the segment event levels (Eq. 4-8) — NPD baseline plus the duration,
-    engine-installation, lateral-attenuation and finite-segment (noise-fraction)
-    corrections — and combines them into the exposure level ``SEL`` (energy sum,
-    Eq. 4-11) or the maximum level (Eq. 4-10). Airborne segments only (ground-roll
-    start-of-roll directivity is out of scope).
+    Assembles the segment event levels (Eq. 4-8/4-9) — NPD baseline plus the
+    duration, engine-installation, lateral-attenuation and finite-segment
+    (noise-fraction) corrections, and the start-of-roll directivity behind takeoff
+    ground-roll segments — and combines them into the exposure level ``SEL``
+    (energy sum, Eq. 4-11) or the maximum level (Eq. 4-10).
 
     :param path: Flight-path points, shape ``(N, 5)``: columns ``x, y, z`` (m),
         engine power setting and speed (m/s). ``N-1`` segments are formed.
@@ -480,6 +555,9 @@ def event_level(
     :param metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
     :param temperature: Aerodrome air temperature, in °C (impedance adjustment).
     :param pressure: Aerodrome air pressure, in kPa (impedance adjustment).
+    :param ground_roll: Optional boolean mask of length ``N-1`` marking takeoff
+        ground-roll segments; these receive the start-of-roll directivity ``ΔSOR``
+        and reduced noise fraction behind the aircraft (§4.5.6-4.5.7).
     :return: A :class:`FlyoverResult`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -490,11 +568,12 @@ def event_level(
     key = metric.strip().lower()
     if key not in ("exposure", "maximum"):
         raise ValueError("'metric' must be 'exposure' or 'maximum'.")
+    gr = _validate_ground_roll(ground_roll, pts.shape[0])
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
     imp = impedance_adjustment(temperature, pressure)
     total, seg_arr = _event_level_core(
-        pts, obs, p, d, le, lm, float(reference_speed), imp, mounting, key)
+        pts, obs, p, d, le, lm, float(reference_speed), imp, mounting, key, gr)
     return FlyoverResult(level=total, metric=key, segment_levels=seg_arr, observer=obs)
 
 
@@ -534,6 +613,7 @@ def noise_contour(
     metric: str = "exposure",
     temperature: float = _T0_C,
     pressure: float = _P0_KPA,
+    ground_roll: "NDArray[np.bool_] | list[bool] | None" = None,
 ) -> NoiseContourResult:
     """Single-event noise level over a ground grid (ECAC Doc 29 contour).
 
@@ -551,6 +631,8 @@ def noise_contour(
     :param metric: ``"exposure"`` (SEL) or ``"maximum"`` (LAmax).
     :param temperature: Aerodrome air temperature, in °C (impedance adjustment).
     :param pressure: Aerodrome air pressure, in kPa (impedance adjustment).
+    :param ground_roll: Optional boolean mask (length ``N-1``) of takeoff
+        ground-roll segments (see :func:`event_level`).
     :return: A :class:`NoiseContourResult`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -563,6 +645,7 @@ def noise_contour(
     key = metric.strip().lower()
     if key not in ("exposure", "maximum"):
         raise ValueError("'metric' must be 'exposure' or 'maximum'.")
+    gr = _validate_ground_roll(ground_roll, pts.shape[0])
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
     vref = float(reference_speed)
@@ -575,5 +658,5 @@ def noise_contour(
         for ix in range(gx.size):
             obs[0] = gx[ix]
             grid[iy, ix] = _event_level_core(
-                pts, obs, p, d, le, lm, vref, imp, mounting, key)[0]
+                pts, obs, p, d, le, lm, vref, imp, mounting, key, gr)[0]
     return NoiseContourResult(x=gx, y=gy, level=grid, metric=key)

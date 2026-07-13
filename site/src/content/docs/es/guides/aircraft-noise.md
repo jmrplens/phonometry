@@ -154,9 +154,17 @@ Es el motor NPD que sustenta el método.
 El cálculo de evento único trocea la trayectoria en segmentos y corrige el nivel
 base NPD por segmento (§4.3-4.5): `impedance_adjustment` (T, p),
 `lateral_attenuation` (β,ℓ), `engine_installation_correction` (φ, montaje),
-`duration_correction` y la fracción de segmento finito `noise_fraction`.
+`duration_correction`, la fracción de segmento finito `noise_fraction` y, detrás
+de los segmentos de rodaje de despegue, `start_of_roll_directivity` (ΔSOR).
 `event_level` los ensambla y suma en `SEL`/`LAmax`, y `noise_contour` lo evalúa
-sobre una malla en tierra.
+sobre una malla en tierra (marca los segmentos de rodaje con una máscara
+`ground_roll`).
+
+La directividad de inicio de rodaje es la radiación trasera lobulada del ruido
+de chorro: máxima hacia un acimut ψ ≈ 120° respecto al morro, y decreciente al
+través (ψ = 90°) y directamente detrás (ψ = 180°).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor_es.svg" alt="Diagrama polar de la directividad de inicio de rodaje ΔSOR sobre el semicírculo trasero para reactor turbofán y turbohélice, con un lóbulo cerca de 120° respecto al morro" style="width:75%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor_es_dark.svg" alt="Diagrama polar de la directividad de inicio de rodaje ΔSOR sobre el semicírculo trasero para reactor turbofán y turbohélice, con un lóbulo cerca de 120° respecto al morro" style="width:75%">
 
 ```python
 import numpy as np
@@ -173,10 +181,10 @@ ph.noise_contour(path, powers, distances, sel, lmax,
 ```
 
 Validado contra el workbook de referencia de ECAC Doc 29 5ª ed. Vol 3 Parte 1:
-la geometría de segmento, la atenuación lateral, la instalación del motor y la
-fracción de ruido reproducen los valores de referencia con < 0,01 dB, y la suma
-energética de segmentos coincide con el `SEL` de referencia. La directividad de
-inicio de rodaje es el único término diferido.
+la geometría de segmento, la atenuación lateral, la instalación del motor, la
+fracción de ruido y la directividad de inicio de rodaje (turbofán y turbohélice)
+reproducen los valores de referencia con < 0,01 dB, y la suma energética de
+segmentos coincide con el `SEL` de referencia.
 
 ---
 
@@ -186,6 +194,6 @@ sistema de medida), SAE ARP 5534:2021 (absorción de banda por el método SAE;
 coeficiente de tono puro de ISO 9613-1), ECAC Doc 29 4ª ed. Vol 2 §4.2
 (interpolación NPD del nivel de evento) y el cálculo de evento único por
 segmentos (ajuste de impedancia, duración, instalación del motor, atenuación
-lateral, fracción de ruido, suma) hasta los contornos en malla de tierra,
-validado contra el workbook de referencia de la Doc 29 5ª ed. Vol 3 Parte 1. La
-directividad de inicio de rodaje (§4.5.7) queda fuera del alcance.
+lateral, fracción de ruido, directividad de inicio de rodaje, suma) hasta los
+contornos en malla de tierra, validado contra el workbook de referencia de la
+Doc 29 5ª ed. Vol 3 Parte 1.

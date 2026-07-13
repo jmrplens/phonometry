@@ -150,9 +150,16 @@ This is the NPD engine underneath the method.
 The full single-event calculation breaks a flight path into segments and
 corrects the NPD baseline per segment (§4.3-4.5): `impedance_adjustment` (T, p),
 `lateral_attenuation` (β,ℓ), `engine_installation_correction` (φ, mounting),
-`duration_correction` and the finite-segment `noise_fraction`. `event_level`
+`duration_correction`, the finite-segment `noise_fraction` and, behind takeoff
+ground-roll segments, `start_of_roll_directivity` (ΔSOR). `event_level`
 assembles and sums them into `SEL`/`LAmax`, and `noise_contour` evaluates it over
-a ground grid.
+a ground grid (mark the ground-roll segments with a `ground_roll` mask).
+
+The start-of-roll directivity is the lobed rearward radiation of jet-exhaust
+noise: strongest near an azimuth ψ ≈ 120° from the nose, falling off abeam
+(ψ = 90°) and directly behind (ψ = 180°).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft, both showing a lobe near 120° from the nose" style="width:75%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor_dark.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft, both showing a lobe near 120° from the nose" style="width:75%">
 
 ```python
 import numpy as np
@@ -169,9 +176,9 @@ ph.noise_contour(path, powers, distances, sel, lmax,
 ```
 
 Validated against the ECAC Doc 29 5th ed. Vol 3 Part 1 reference workbook: the
-segment geometry, lateral attenuation, engine installation and noise fraction
-reproduce the reference values to < 0.01 dB, and the segment energy sum matches
-the reference `SEL`. The start-of-roll directivity is the one deferred term.
+segment geometry, lateral attenuation, engine installation, noise fraction and
+the start-of-roll directivity (turbofan and turboprop) reproduce the reference
+values to < 0.01 dB, and the segment energy sum matches the reference `SEL`.
 
 ---
 
@@ -180,6 +187,6 @@ ETM Vol. I (worked-example oracles), IEC 61265:1995 (measurement-system
 tolerances), SAE ARP 5534:2021 (SAE-Method band absorption; pure-tone coefficient
 from ISO 9613-1), ECAC Doc 29 4th ed. Vol 2 §4.2 (NPD event-level
 interpolation), the single-event segment calculation (impedance adjustment,
-duration, engine installation, lateral attenuation, noise fraction, summation)
-and ground-grid noise contours, validated against the Doc 29 5th ed. Vol 3
-Part 1 reference workbook. Start-of-roll directivity (§4.5.7) is out of scope.
+duration, engine installation, lateral attenuation, noise fraction, start-of-roll
+directivity, summation) and ground-grid noise contours, validated against the
+Doc 29 5th ed. Vol 3 Part 1 reference workbook.

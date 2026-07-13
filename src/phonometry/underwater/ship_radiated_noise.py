@@ -94,10 +94,15 @@ def hydrophone_depths(
 
 
 def source_level_uncertainty(frequency: float) -> float:
-    """Tabulated expanded source-level uncertainty (ISO 17208-2), in dB.
+    """Tabulated expanded source-level uncertainty (ISO 17208-2 §5), in dB.
 
-    5 dB for the low band (≤100 Hz), 3 dB for the mid band (125 Hz–16 kHz) and
-    4 dB for the high band (>16 kHz). These are representative values, not exact.
+    5 dB for the low-frequency bands (the standard lists 10 Hz-100 Hz; values
+    below 10 Hz reuse it), 3 dB for the mid-frequency bands (125 Hz-16 kHz)
+    and 4 dB for the high-frequency bands. The standard's own wording leaves
+    the 20 kHz band unassigned (its high band starts "above 20 000 Hz");
+    this implementation takes the conservative reading and applies the 4 dB
+    high-band value from just above 16 kHz. These are representative values,
+    not exact.
 
     :param frequency: One-third-octave band centre frequency, in Hz.
     :return: The representative expanded uncertainty, in dB.

@@ -70,11 +70,19 @@ def depth_to_pressure(depth: float, latitude: float = 45.0) -> float:
     z = _finite(depth, "depth")
     if z < 0.0:
         raise ValueError("'depth' must be non-negative.")
-    phi = np.radians(_finite(latitude, "latitude"))
+    return float(_pressure_mpa(z, _finite(latitude, "latitude")))
+
+
+def _pressure_mpa(
+    z: "float | NDArray[np.float64]", latitude_deg: float,
+) -> "float | NDArray[np.float64]":
+    """Leroy & Parthiot standard-ocean pressure, array-capable kernel."""
+    phi = np.radians(latitude_deg)
     h45 = 1.00818e-2 * z + 2.465e-8 * z**2 - 1.25e-13 * z**3 + 2.8e-19 * z**4
     g = 9.7803 * (1.0 + 5.3e-3 * np.sin(phi) ** 2)
     k = (g - 2e-5 * z) / (9.80612 - 2e-5 * z)
-    return float(h45 * k)
+    result: "float | NDArray[np.float64]" = h45 * k
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -82,8 +90,11 @@ def depth_to_pressure(depth: float, latitude: float = 45.0) -> float:
 # ---------------------------------------------------------------------------
 
 
-def _mackenzie(t: float, s: float, depth: float) -> float:
-    return float(
+def _mackenzie(
+    t: "float | NDArray[np.float64]", s: "float | NDArray[np.float64]",
+    depth: "float | NDArray[np.float64]",
+) -> "float | NDArray[np.float64]":
+    return (
         1448.96
         + 4.591 * t
         - 5.304e-2 * t**2
@@ -119,7 +130,10 @@ _A = (
 )
 
 
-def _unesco(t: float, s: float, pressure_bar: float) -> float:
+def _unesco(
+    t: "float | NDArray[np.float64]", s: "float | NDArray[np.float64]",
+    pressure_bar: "float | NDArray[np.float64]",
+) -> "float | NDArray[np.float64]":
     p = pressure_bar
     cw = (
         sum(_C[i][0] * t**i for i in range(6))
@@ -135,7 +149,7 @@ def _unesco(t: float, s: float, pressure_bar: float) -> float:
     )
     b = -1.922e-2 - 4.42e-5 * t + (7.3637e-5 + 1.7950e-7 * t) * p
     d = 1.727e-3 - 7.9836e-6 * p
-    return float(cw + a * s + b * s**1.5 + d * s**2)
+    return cw + a * s + b * s**1.5 + d * s**2
 
 
 # ---------------------------------------------------------------------------
@@ -143,7 +157,10 @@ def _unesco(t: float, s: float, pressure_bar: float) -> float:
 # ---------------------------------------------------------------------------
 
 
-def _del_grosso(t: float, s: float, pressure_kgcm2: float) -> float:
+def _del_grosso(
+    t: "float | NDArray[np.float64]", s: "float | NDArray[np.float64]",
+    pressure_kgcm2: "float | NDArray[np.float64]",
+) -> "float | NDArray[np.float64]":
     p = pressure_kgcm2
     c000 = 1402.392
     d_ct = 0.5012285e1 * t - 0.551184e-1 * t**2 + 0.221649e-3 * t**3
@@ -161,7 +178,7 @@ def _del_grosso(t: float, s: float, pressure_kgcm2: float) -> float:
         + 0.4857614e-5 * s**2 * t * p
         - 0.1616745e-8 * s**2 * p**2
     )
-    return float(c000 + d_ct + d_cs + d_cp + d_cstp)
+    return c000 + d_ct + d_cs + d_cp + d_cstp
 
 
 def sea_water_sound_speed(
@@ -182,6 +199,14 @@ def sea_water_sound_speed(
         (used by ``"unesco"`` and ``"del_grosso"``; default 45°).
     :return: The sound speed ``c``, in m/s.
     :raises ValueError: If ``model`` is unknown or an input is non-finite.
+
+    .. note::
+        Each equation is a fit over a bounded oceanographic domain and
+        **extrapolates silently outside it** (e.g. Del Grosso abused at
+        T = 40 °C, S = 0, z = 11 km returns an unphysical ~1995 m/s).
+        Published validity domains: UNESCO/Chen-Millero T 0-40 °C, S 0-40,
+        P 0-1000 bar; Del Grosso T 0-30 °C, S 30-40, P 0-1000 kg/cm²;
+        Mackenzie T 2-30 °C, S 25-40, depth 0-8000 m.
     """
     t = _finite(temperature, "temperature")
     s = _finite(salinity, "salinity")
@@ -192,12 +217,12 @@ def sea_water_sound_speed(
         raise ValueError("'depth' must be non-negative.")
     key = model.strip().lower()
     if key == "mackenzie":
-        return _mackenzie(t, s, z)
+        return float(_mackenzie(t, s, z))
     pressure_bar = depth_to_pressure(z, latitude) * _BAR_PER_MPA
     if key == "unesco":
-        return _unesco(t, s, pressure_bar)
+        return float(_unesco(t, s, pressure_bar))
     if key == "del_grosso":
-        return _del_grosso(t, s, pressure_bar * _KGCM2_PER_BAR)
+        return float(_del_grosso(t, s, pressure_bar * _KGCM2_PER_BAR))
     raise ValueError(f"'model' must be one of {_MODELS}, got {model!r}.")
 
 
@@ -253,12 +278,16 @@ def sound_speed_profile(
     sal = np.broadcast_to(np.asarray(salinities, dtype=np.float64), z.shape)
     if not (np.all(np.isfinite(temp)) and np.all(np.isfinite(sal))):
         raise ValueError("'temperatures' and 'salinities' must be finite.")
-    c = np.array(
-        [
-            sea_water_sound_speed(float(ti), float(si), float(zi), model=model, latitude=latitude)
-            for zi, ti, si in zip(z, temp, sal)
-        ],
-        dtype=np.float64,
-    )
+    key = model.strip().lower()
+    lat = _finite(latitude, "latitude")
+    if key == "mackenzie":
+        c_any = _mackenzie(temp, sal, z)
+    elif key in ("unesco", "del_grosso"):
+        pressure_bar = np.asarray(_pressure_mpa(z, lat)) * _BAR_PER_MPA
+        c_any = (_unesco(temp, sal, pressure_bar) if key == "unesco"
+                 else _del_grosso(temp, sal, pressure_bar * _KGCM2_PER_BAR))
+    else:
+        raise ValueError(f"'model' must be one of {_MODELS}, got {model!r}.")
+    c = np.asarray(c_any, dtype=np.float64)
     gradient = np.gradient(c, z)
     return SoundSpeedProfile(depth=z, sound_speed=c, gradient=gradient, model=model.strip().lower())

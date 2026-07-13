@@ -4,7 +4,7 @@ Numerical models of underwater sound propagation (range-independent ocean).
 
 Three complementary numerical solvers for the acoustic field in a
 horizontally-stratified ocean waveguide, complementing the closed-form
-transmission loss of :mod:`phonometry.underwater_propagation`:
+transmission loss of :mod:`phonometry.underwater.propagation`:
 
 * :func:`normal_modes` -- the normal-mode expansion. Solves the depth-separated
   Sturm-Liouville eigenvalue problem by finite differences and assembles the
@@ -111,13 +111,21 @@ def normal_modes(
     ranges_m: "NDArray[np.float64] | list[float] | None" = None,
     density: float = 1000.0,
     bottom: str = "pressure-release",
-    n_depth_points: int = 400,
+    n_depth_points: "int | None" = None,
 ) -> NormalModeResult:
     """Normal-mode transmission loss for a range-independent waveguide.
 
     Solves the depth-separated Sturm-Liouville problem (Jensen Eq. 5.3) on a
     uniform finite-difference grid, then assembles the coherent transmission
     loss from the propagating modes (Eq. 5.17).
+
+    The finite-difference eigenvalues carry an ``O(dz²)`` error that grows with
+    the mode's vertical wavenumber, so near-cutoff modes need a fine grid. Two
+    guards apply: eigenvalues inside the scheme's error band
+    (``kr² ≤ max(k²)²·dz²/12``) are discarded as numerically indistinguishable
+    from cutoff, and a :class:`~phonometry.PhonometryWarning` is emitted when a
+    retained mode sits within ten times that band (increase ``n_depth_points``
+    to resolve it).
 
     :param frequency_hz: Source frequency, in Hz.
     :param depths: Depth samples of the sound-speed profile, in metres, starting
@@ -129,7 +137,10 @@ def normal_modes(
         100 m to 10 km.
     :param density: Water density (constant), in kg/m3.
     :param bottom: ``"pressure-release"`` (default) or ``"rigid"``.
-    :param n_depth_points: Number of finite-difference depth points.
+    :param n_depth_points: Number of finite-difference depth points. Default
+        (``None``): derived from the physics as
+        ``max(400, ceil(60·D·f/c_min))``, which keeps the near-cutoff
+        eigenvalue error small at any frequency/depth combination.
     :return: A :class:`NormalModeResult`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -144,6 +155,9 @@ def normal_modes(
     key = bottom.strip().lower()
     if key not in _BOTTOM_TYPES:
         raise ValueError(f"'bottom' must be one of {_BOTTOM_TYPES}, got {bottom!r}.")
+    if n_depth_points is None:
+        n_depth_points = max(400, int(np.ceil(
+            60.0 * water_depth * f / float(np.min(c_prof)))))
     if int(n_depth_points) < 8:
         raise ValueError("'n_depth_points' must be at least 8.")
 
@@ -181,12 +195,28 @@ def normal_modes(
         main = k2[idx] - 2.0 * inv_dz2
         off = np.full(idx.size - 1, inv_dz2)
     # The operator is symmetric tridiagonal; solve directly from the diagonals
-    # (O(N²) time, O(N) memory) rather than materialising a dense N×N matrix.
+    # and restrict the solve to the propagating band kr² > 0 (`select="v"`)
+    # rather than computing the full spectrum.
     from scipy.linalg import eigh_tridiagonal
 
-    eigvals, eigvecs = eigh_tridiagonal(main, off)
+    k2_max = float(k2.max())
+    eigvals, eigvecs = eigh_tridiagonal(
+        main, off, select="v", select_range=(0.0, k2_max * (1.0 + 1e-12)))
     kr2 = eigvals
-    prop = kr2 > 0.0
+    # Discard eigenvalues inside the O(dz²) discretisation-error band about
+    # cutoff: the FD scheme can push a truly evanescent mode marginally above
+    # zero (a spurious propagating mode) and biases genuine near-cutoff modes.
+    fd_floor = k2_max**2 * dz**2 / 12.0
+    prop = kr2 > fd_floor
+    if np.any(prop & (kr2 <= 10.0 * fd_floor)):
+        import warnings
+
+        from .._internal.warnings import PhonometryWarning
+
+        warnings.warn(
+            "normal_modes: retained near-cutoff mode(s) lie within 10x the"
+            " finite-difference error band; increase 'n_depth_points' to"
+            " resolve them accurately.", PhonometryWarning, stacklevel=2)
     kr = np.sqrt(kr2[prop])
     order = np.argsort(kr)[::-1]  # descending kr (mode 1 first)
     kr = kr[order]
@@ -207,8 +237,14 @@ def normal_modes(
         if norm > 0.0:
             psi[m] /= np.sqrt(norm)
 
-    psi_s = np.array([np.interp(zs, z, psi[m]) for m in range(n_modes)])
-    psi_r = np.array([np.interp(zr, z, psi[m]) for m in range(n_modes)])
+    # Linear interpolation of every mode at zs/zr in one shot (uniform grid).
+    def _modes_at(zq: float) -> "NDArray[np.float64]":
+        i = int(np.clip(np.searchsorted(z, zq) - 1, 0, z.size - 2))
+        w = (zq - z[i]) / (z[i + 1] - z[i])
+        return np.asarray(psi[:, i] * (1.0 - w) + psi[:, i + 1] * w)
+
+    psi_s = _modes_at(zs)
+    psi_r = _modes_at(zr)
 
     # Coherent TL (Eq. 5.14/5.17): p = i/(ρ√(8πr)) e^{-iπ/4} Σ Ψm(zs)Ψm(zr) e^{i kr r}/√kr
     r = ranges
@@ -299,10 +335,11 @@ def ray_trace(
     if np.any(np.abs(angles) >= 90.0):
         raise ValueError("'launch_angles_deg' must be within (-90, 90) degrees (forward rays).")
 
-    # Fine grid for c(z) and its gradient dc/dz (piecewise-linear profile).
-    zf = np.linspace(0.0, water_depth, max(512, z_prof.size * 8))
-    cf = np.interp(zf, z_prof, c_prof)
-    dcf = np.gradient(cf, zf)
+    # The profile is piecewise linear, so c(z) interpolates exactly and dc/dz
+    # is piecewise CONSTANT with jumps at the profile nodes; evaluating the
+    # gradient per segment keeps thermocline kinks sharp (a smoothed gradient
+    # on an interpolated fine grid biases turning depths by metres).
+    seg_grad = np.diff(c_prof) / np.diff(z_prof)
 
     # March in range r (not arc length): every valid ray then spans [0, rmax] in
     # n_steps regardless of its launch angle. State is (z, ζ); ξ = cosθ0/c(zs) is
@@ -312,14 +349,15 @@ def ray_trace(
         z_arr: "NDArray[np.float64]", zeta_arr: "NDArray[np.float64]", xi_arr: "NDArray[np.float64]"
     ) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
         # Vectorised over all rays at once (data-parallel).
-        cc = np.interp(z_arr, zf, cf)
-        dc = np.interp(z_arr, zf, dcf)
-        return zeta_arr / xi_arr, -dc / (cc**3 * xi_arr)
+        cc = np.interp(z_arr, z_prof, c_prof)
+        seg = np.clip(np.searchsorted(z_prof, z_arr, side="right") - 1,
+                      0, seg_grad.size - 1)
+        return zeta_arr / xi_arr, -seg_grad[seg] / (cc**3 * xi_arr)
 
     ns = int(n_steps)
     dr = rmax / (ns - 1)
     ranges = np.linspace(0.0, rmax, ns)
-    c0 = float(np.interp(zs, zf, cf))
+    c0 = float(np.interp(zs, z_prof, c_prof))
     th = np.radians(angles)
     xi = np.cos(th) / c0  # Snell invariant per ray (> 0 since |θ0| < 90°)
     z = np.full(angles.size, zs)
@@ -399,6 +437,13 @@ def parabolic_equation(
     ``z = 0`` and bottom at ``z = water_depth``. The envelope is related to
     pressure by ``p = ψ e^{i(k0 r − π/4)}/√r`` and ``TL = −20·log10(|ψ|/√r)``
     (Eqs. 6.70-6.71), using a Gaussian starter.
+
+    The standard PE is **paraxial**: it is accurate for propagation within
+    roughly ±15-20° of the horizontal (Jensen §6.2). Steep modes therefore
+    carry a phase error that shows at short and intermediate range in
+    shallow-waveguide problems (a few dB against the exact field below a few
+    water depths of range), converging at long range; the free-field
+    calibration itself is exact to ~1e-4 dB at the default ``range_step``.
 
     :param frequency_hz: Source frequency, in Hz.
     :param depths: Depth samples of the profile, in metres, from ``z = 0``.

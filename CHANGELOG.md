@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Underwater validation: independent image-source absolute TL anchors for the
+  normal-mode and parabolic-equation solvers, the published UNESCO EOS-80
+  canonical sound-speed check value (Fofonoff & Millard 1983), six additional
+  JOMOPANS File S1 oracle rows, the Ainslie-McColm Table I reference oceans
+  against Francois-Garrison, and Wenz-chart graphical anchors for the wind
+  noise; two new conformance checks (198 total).
 - ECAC Doc 32 rotorcraft: `reference_distance` parameter on
   `spherical_spreading_adjustment` and `atmospheric_adjustment` for hemispheres
   recorded at a non-standard polar distance, and an end-to-end propagation-chain
@@ -32,6 +38,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Underwater Wenz wind noise was referenced to the historical 20 µPa
+  (0.0002 dyn/cm²) pressure while labelled dB re 1 µPa: every wind spectrum
+  level (and the ambient composite) was 26.02 dB low and the wind/thermal
+  crossover appeared at ~12 kHz instead of ~63 kHz. The rule-of-fives anchor
+  is now 25 + 20·lg(20) = 51.02 dB re 1 µPa²/Hz at 1 kHz / 5 kn, matching the
+  published Wenz chart; slopes unchanged, figures regenerated.
+- Underwater `normal_modes` derives its default depth grid from the physics,
+  restricts the eigensolve to the propagating band, discards eigenvalues
+  inside the finite-difference error band about cutoff (previously a spurious
+  extra mode could appear at under-resolved settings) and warns when a
+  retained near-cutoff mode needs a finer grid.
+- Underwater `ray_trace` evaluates the sound-speed gradient exactly per
+  profile segment instead of smoothing kinks through an interpolated fine
+  grid (turning-depth errors of metres on thermocline profiles).
+- Underwater documentation accuracy: ISO 17208-2 uncertainty band edges and
+  the standard's 16-20 kHz gap, Ainslie-McColm ~10 % agreement caveat at
+  domain corners, the inherent Francois-Garrison A3 step at 20 °C, published
+  validity domains of the sound-speed equations, wind-speed validity of the
+  Wenz law, the paraxial (~±15-20°) validity of the standard PE, and stale
+  cross-references; `sound_speed_profile` now evaluates in a single
+  vectorised pass.
 - ECAC Doc 32 rotorcraft: hemisphere gap-fill now fills the grid first and
   interpolates over all four corners (Eq. 14/15 before Eq. 13), so cells with
   some missing corners keep their measured corners instead of snapping to the

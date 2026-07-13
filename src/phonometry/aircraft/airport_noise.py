@@ -479,6 +479,18 @@ def _validate_ground_roll(
     return gr
 
 
+def _validate_bank(
+    bank: "NDArray[np.float64] | list[float] | None", n_points: int,
+) -> "NDArray[np.float64] | None":
+    """Coerce an optional per-segment bank-angle array (length ``N-1``)."""
+    if bank is None:
+        return None
+    bk = np.asarray(bank, dtype=np.float64).ravel()
+    if bk.shape != (n_points - 1,):
+        raise ValueError(f"'bank' must have length {n_points - 1} (one per segment).")
+    return bk
+
+
 def _attenuation_geometry(
     s1: "NDArray[np.float64]", s2: "NDArray[np.float64]", obs: "NDArray[np.float64]",
     q: float, length: float, beta: float, phi: float, lateral: float,
@@ -553,8 +565,6 @@ def _event_level_core(
         is_landing = landing_roll is not None and bool(landing_roll[i])
         roll_behind = is_takeoff and q < 0.0     # behind the start of roll
         roll_ahead = is_landing and q > length   # ahead of the landing rollout
-        behind, ahead = q < 0.0, q > length
-
         beta_att, ell_att, phi_att = _attenuation_geometry(
             s1, s2, obs, q, length, beta, phi, lateral, key, roll_behind, roll_ahead)
         frac = np.clip(q / length, 0.0, 1.0)
@@ -654,11 +664,7 @@ def event_level(
         raise ValueError("'metric' must be 'exposure' or 'maximum'.")
     gr = _validate_ground_roll(ground_roll, pts.shape[0])
     lr = _validate_ground_roll(landing_roll, pts.shape[0])
-    bk = None
-    if bank is not None:
-        bk = np.asarray(bank, dtype=np.float64).ravel()
-        if bk.shape != (pts.shape[0] - 1,):
-            raise ValueError(f"'bank' must have length {pts.shape[0] - 1} (one per segment).")
+    bk = _validate_bank(bank, pts.shape[0])
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
     imp = impedance_adjustment(temperature, pressure)
@@ -743,11 +749,7 @@ def noise_contour(
         raise ValueError("'metric' must be 'exposure' or 'maximum'.")
     gr = _validate_ground_roll(ground_roll, pts.shape[0])
     lr = _validate_ground_roll(landing_roll, pts.shape[0])
-    bk = None
-    if bank is not None:
-        bk = np.asarray(bank, dtype=np.float64).ravel()
-        if bk.shape != (pts.shape[0] - 1,):
-            raise ValueError(f"'bank' must have length {pts.shape[0] - 1} (one per segment).")
+    bk = _validate_bank(bank, pts.shape[0])
     p, d, le = _clean_table(powers, distances, exposure_levels)
     _, _, lm = _clean_table(powers, distances, maximum_levels)
     vref = float(reference_speed)

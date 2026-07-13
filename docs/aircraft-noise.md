@@ -205,9 +205,35 @@ baseline level (§4.3-4.5):
   ground-roll segments; behind them the reduced (q = 0) noise fraction and `ΔSOR`
   are applied (Eq. 4-9).
 
-`event_level` assembles these (Eq. 4-8) and sums the segments into the exposure
+`ΔSOR` is what makes the departure footprint bulge rearward behind the runway:
+jet-exhaust noise radiates a lobed pattern in the rear arc, strongest at an
+azimuth `ψ ≈ 120°` from the nose and falling away both abeam (`ψ = 90°`) and
+directly behind (`ψ = 180°`).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft: both show a lobe near 120° from the nose and fall off directly behind the aircraft" width="70%">
+</picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import phonometry as ph
+
+az = np.linspace(90.0, 270.0, 361)              # rearward semicircle
+psi = np.where(az <= 180.0, az, 360.0 - az)     # ΔSOR is left/right symmetric
+jet = [ph.start_of_roll_directivity(p, 300.0, "jet") for p in psi]
+prop = [ph.start_of_roll_directivity(p, 300.0, "turboprop") for p in psi]
+```
+
+</details>
+
+`event_level` assembles these (Eq. 4-8/4-9) and sums the segments into the exposure
 level `SEL` (Eq. 4-11) or the maximum level `LAmax` (Eq. 4-10); `noise_contour`
-evaluates `event_level` over a ground grid to produce a noise contour.
+evaluates `event_level` over a ground grid to produce a noise contour. Mark the
+takeoff ground-roll segments with the boolean `ground_roll` mask.
 
 ```python
 import numpy as np

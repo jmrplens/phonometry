@@ -157,7 +157,14 @@ base NPD por segmento (§4.3-4.5): `impedance_adjustment` (T, p),
 `duration_correction`, la fracción de segmento finito `noise_fraction` y, detrás
 de los segmentos de rodaje de despegue, `start_of_roll_directivity` (ΔSOR).
 `event_level` los ensambla y suma en `SEL`/`LAmax`, y `noise_contour` lo evalúa
-sobre una malla en tierra.
+sobre una malla en tierra (marca los segmentos de rodaje con una máscara
+`ground_roll`).
+
+La directividad de inicio de rodaje es la radiación trasera lobulada del ruido
+de chorro: máxima hacia un acimut ψ ≈ 120° respecto al morro, y decreciente al
+través (ψ = 90°) y directamente detrás (ψ = 180°).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor_es.svg" alt="Diagrama polar de la directividad de inicio de rodaje ΔSOR sobre el semicírculo trasero para reactor turbofán y turbohélice, con un lóbulo cerca de 120° respecto al morro" style="width:75%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor_es_dark.svg" alt="Diagrama polar de la directividad de inicio de rodaje ΔSOR sobre el semicírculo trasero para reactor turbofán y turbohélice, con un lóbulo cerca de 120° respecto al morro" style="width:75%">
 
 ```python
 import numpy as np

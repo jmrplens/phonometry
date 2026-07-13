@@ -153,7 +153,13 @@ corrects the NPD baseline per segment (§4.3-4.5): `impedance_adjustment` (T, p)
 `duration_correction`, the finite-segment `noise_fraction` and, behind takeoff
 ground-roll segments, `start_of_roll_directivity` (ΔSOR). `event_level`
 assembles and sums them into `SEL`/`LAmax`, and `noise_contour` evaluates it over
-a ground grid.
+a ground grid (mark the ground-roll segments with a `ground_roll` mask).
+
+The start-of-roll directivity is the lobed rearward radiation of jet-exhaust
+noise: strongest near an azimuth ψ ≈ 120° from the nose, falling off abeam
+(ψ = 90°) and directly behind (ψ = 180°).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft, both showing a lobe near 120° from the nose" style="width:75%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor_dark.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft, both showing a lobe near 120° from the nose" style="width:75%">
 
 ```python
 import numpy as np

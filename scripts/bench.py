@@ -257,8 +257,12 @@ def _write_golden() -> None:
 
     for name, fn in CASES.items():
         arr = np.asarray(fn(), dtype=np.float64).ravel()
-        vals = ", ".join(_literal(float(v)) for v in arr)
-        lines.append(f'    "{name}": np.array([{vals}]),')
+        chunks = [
+            ", ".join(_literal(float(v)) for v in arr[i:i + 4])
+            for i in range(0, arr.size, 4)
+        ]
+        vals = ",\n        ".join(chunks)
+        lines.append(f'    "{name}": np.array([\n        {vals},\n    ]),')
         print(f"captured {name}: {arr.size} values")
     lines.append("}")
     lines.append("")

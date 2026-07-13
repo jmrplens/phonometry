@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- ECAC Doc 32 rotorcraft: `reference_distance` parameter on
+  `spherical_spreading_adjustment` and `atmospheric_adjustment` for hemispheres
+  recorded at a non-standard polar distance, and an end-to-end propagation-chain
+  oracle against the NORAH2 prototype single-event histories (0.1 dB(A) over
+  hard ground) plus off-node bilinear spot checks on the reference hemispheres
+  of all eleven rotorcraft types.
 - ECAC Doc 29 airport noise: landing-rollout modelling (`landing_roll` mask;
   reduced noise fraction Eq. 4-21b, nearest-end geometry, no directivity term)
   and per-segment bank angle (`bank`, §4.5.2 sign convention). ICAO Annex 16
@@ -18,6 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- ECAC Doc 32 rotorcraft: hemisphere gap-fill now fills the grid first and
+  interpolates over all four corners (Eq. 14/15 before Eq. 13), so cells with
+  some missing corners keep their measured corners instead of snapping to the
+  single nearest bin; nearest-bin ties are compared through dot products
+  (well-conditioned near zero angular distance); single-row/column grids are
+  handled explicitly; the low-band advisory warning is no longer emitted for
+  the standard 10-40 Hz NORAH bands; and the atmospheric docstring states the
+  pure-tone choice and its deviation from the guidance's SAE band mapping
+  (up to 2.2 dB/km at 8-10 kHz) instead of overclaiming Table 4.
 - ECAC Doc 29: behind takeoff ground-roll segments the lateral attenuation and
   installation effect now use the §4.5.5 nearest-end geometry (previously the
   track perpendicular, which zeroed both terms on the extended centreline and

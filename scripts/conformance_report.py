@@ -3116,6 +3116,42 @@ def _chk_doc32_ground() -> Outcome:
 
 
 @register(
+    _ROTORCRAFT,
+    "ECAC Doc 32 propagation chain (NORAH2 prototype)",
+    "LA of a single-hemisphere emission vs the NORAH2 prototype single-event"
+    " history (R22 approach, 223.66 m slant), dB(A)",
+)
+def _chk_doc32_chain() -> Outcome:
+    # NORAH2 prototype ARP Case 4 (R22_H1_APP_STD2_NE, mic at the origin,
+    # hr = 0.2 m, sigma = 1e6 Pa·s/m2), row t = 831.26 s: the nearest-hemisphere
+    # source spectrum propagated with dLs + dLa + dLg and A-weighted reproduces
+    # the tabulated LA = 55.87 dB(A). Spectrum: R22_Approach_53kts_12deg at
+    # (phi, theta) = (-88.70, 108.43) deg (EASA.2020.FC.06, (c) EASA).
+    bands = np.array([10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0,
+                      80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0,
+                      500.0, 630.0, 800.0, 1000.0, 1250.0, 1600.0, 2000.0,
+                      2500.0, 3150.0, 4000.0, 5000.0, 6300.0, 8000.0, 10000.0])
+    spec = np.array([35.8, 52.2, 70.0, 63.6, 48.4, 59.2, 53.1, 63.3, 61.2,
+                     74.6, 68.7, 61.8, 65.7, 59.7, 59.7, 63.6, 57.9, 57.7,
+                     58.6, 61.0, 61.9, 64.7, 65.7, 65.6, 64.1, 61.6, 57.9,
+                     55.8, 56.4, 53.4, 52.9])
+    f1, f2, f3, f4 = 20.598997, 107.65265, 737.86223, 12194.217
+
+    def _ra(x: "np.ndarray") -> "np.ndarray":
+        return (f4**2 * x**4) / ((x**2 + f1**2)
+                                 * np.sqrt((x**2 + f2**2) * (x**2 + f3**2))
+                                 * (x**2 + f4**2))
+
+    level = (spec + float(ph.spherical_spreading_adjustment(223.66))
+             + ph.atmospheric_adjustment(bands, 223.66)
+             + ph.ground_effect_adjustment(bands, 5.0, 0.2, 223.607,
+                                           flow_resistivity=1.0e6)
+             + 20.0 * np.log10(_ra(bands) / _ra(np.array(1000.0))))
+    got = float(10.0 * np.log10(np.sum(10.0 ** (level / 10.0))))
+    return numeric(55.87, got, 0.1, unit="dB(A)", places=3)
+
+
+@register(
     _AIRCRAFT,
     "SAE ARP 5534 pure-tone coefficient (ISO 9613-1)",
     "Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m",

@@ -140,7 +140,7 @@ def plot_rotorcraft_hemisphere(
     Plots the source level versus polar angle θ (0° forward → 180° rearward) in the
     vertical plane (azimuth φ = 0) for a single one-third-octave band.
 
-    :param result: A :class:`~phonometry.rotorcraft_noise.RotorcraftHemisphere`.
+    :param result: A :class:`~phonometry.aircraft.rotorcraft_noise.RotorcraftHemisphere`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param band: Band centre frequency to plot, in Hz (default: the loudest band).
     :param kwargs: Forwarded to ``plot``.

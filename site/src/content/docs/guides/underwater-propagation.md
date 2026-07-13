@@ -137,5 +137,37 @@ noise = ph.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
                                shipping=ship.source_psd)
 ```
 
-Numerical solvers (ray tracing, normal modes, the parabolic equation) are a
-separate, future addition.
+## Numerical solvers
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation.png" alt="A Munk sound-speed profile, ray paths forming convergence zones, and normal-mode versus parabolic-equation transmission loss agreeing in trend" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_dark.png" alt="A Munk sound-speed profile, ray paths forming convergence zones, and normal-mode versus parabolic-equation transmission loss agreeing in trend" style="width:100%">
+
+For range-independent environments the field can be computed numerically with
+three solvers (Jensen et al., *Computational Ocean Acoustics*):
+
+- **`normal_modes`** — the depth-separated Sturm-Liouville eigenproblem solved by
+  finite differences, summed into transmission loss (validated against the ideal
+  waveguide's exact modes).
+- **`ray_trace`** — the ray-trajectory equations integrated with Runge-Kutta,
+  vectorised over all rays at once (validated against a linear gradient's
+  circular arcs).
+- **`parabolic_equation`** — the standard (Tappert) PE via the split-step Fourier
+  algorithm (validated against free-field spherical spreading).
+
+```python
+import numpy as np
+import phonometry as ph
+
+z = np.linspace(0.0, 5000.0, 60)
+eta = 2.0 * (z - 1300.0) / 1300.0
+c = 1500.0 * (1.0 + 0.00737 * (eta - 1.0 + np.exp(-eta)))   # Munk profile
+ph.ray_trace(z, c, source_depth=1000.0,
+             launch_angles_deg=np.linspace(-12, 12, 21), max_range=100e3).plot()
+
+modes = ph.normal_modes(50.0, [0.0, 200.0], [1500.0, 1500.0],
+                        source_depth=50.0, receiver_depth=100.0)
+ph.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1500.0],
+                      source_depth=50.0, max_range=20e3).plot()
+```
+
+All three assume a range-independent water column with a pressure-release
+surface.

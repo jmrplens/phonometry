@@ -308,6 +308,7 @@ from .airport_noise import (
     noise_fraction,
     npd_curve,
     npd_level,
+    start_of_roll_directivity,
 )
 from .ship_radiated_noise import (
     ShipSourceLevelResult,
@@ -828,6 +829,7 @@ __all__ = [
     "duration_correction",
     "noise_fraction",
     "impedance_adjustment",
+    "start_of_roll_directivity",
     "event_level",
     "noise_contour",
     "FlyoverResult",

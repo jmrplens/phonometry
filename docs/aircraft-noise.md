@@ -199,10 +199,41 @@ baseline level (§4.3-4.5):
 - **`duration_correction(Vref, Vseg)`** — the speed/duration adjustment for
   exposure levels (Eq. 4-14).
 - **`noise_fraction(q, λ, dλ)`** — the finite-segment energy fraction (Eq. 4-20).
+- **`start_of_roll_directivity(ψ, dSOR, engine)`** — the rearward jet/turboprop
+  directivity behind takeoff ground-roll segments (Eq. 4-22/4-24/4-25). Pass a
+  boolean `ground_roll` mask to `event_level`/`noise_contour` to flag the takeoff
+  ground-roll segments; behind them the reduced (q = 0) noise fraction and `ΔSOR`
+  are applied (Eq. 4-9).
 
-`event_level` assembles these (Eq. 4-8) and sums the segments into the exposure
+`ΔSOR` is what makes the departure footprint bulge rearward behind the runway:
+jet-exhaust noise radiates a lobed pattern in the rear arc, strongest at an
+azimuth `ψ ≈ 120°` from the nose and falling away both abeam (`ψ = 90°`) and
+directly behind (`ψ = 180°`).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft: both show a lobe near 120° from the nose and fall off directly behind the aircraft" width="70%">
+</picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import phonometry as ph
+
+az = np.linspace(90.0, 270.0, 361)              # rearward semicircle
+psi = np.where(az <= 180.0, az, 360.0 - az)     # ΔSOR is left/right symmetric
+jet = [ph.start_of_roll_directivity(p, 300.0, "jet") for p in psi]
+prop = [ph.start_of_roll_directivity(p, 300.0, "turboprop") for p in psi]
+```
+
+</details>
+
+`event_level` assembles these (Eq. 4-8/4-9) and sums the segments into the exposure
 level `SEL` (Eq. 4-11) or the maximum level `LAmax` (Eq. 4-10); `noise_contour`
-evaluates `event_level` over a ground grid to produce a noise contour.
+evaluates `event_level` over a ground grid to produce a noise contour. Mark the
+takeoff ground-roll segments with the boolean `ground_roll` mask.
 
 ```python
 import numpy as np
@@ -226,10 +257,10 @@ contour.plot()   # SEL contour over the ground (needs matplotlib)
 ```
 
 Validated against the **ECAC Doc 29 5th ed. Vol 3 Part 1 reference workbook**:
-the segment geometry (β, φ), lateral attenuation, engine installation and noise
-fraction reproduce the reference values to < 0.01 dB, and the segment energy sum
-matches the reference `SEL`. The start-of-roll directivity `ΔSOR` (behind takeoff
-ground-roll segments) is the one deferred term.
+the segment geometry (β, φ), lateral attenuation, engine installation, noise
+fraction and the start-of-roll directivity `ΔSOR` (turbofan and turboprop, all
+124 ground-roll reference rows to < 0.01 dB) reproduce the reference values, and
+the segment energy sum matches the reference `SEL`.
 
 ---
 
@@ -245,7 +276,7 @@ band attenuation (Eqs. 7–10), with the pure-tone coefficient from ISO 9613-1.
 ECAC Doc 29, 4th ed., Vol 2 (2016): the NPD event-level interpolation (§4.2) and
 the single-event segment calculation — duration (§4.5.1), engine installation
 (§4.5.3), lateral attenuation (§4.5.4, AIR-5662), the finite-segment noise
-fraction (§4.5.6) and segment summation (§4.3) — through to ground-grid noise
-contours, with the impedance adjustment (§4.2.1). The single-event chain is
-validated against the ECAC Doc 29 5th ed. Vol 3 Part 1 reference workbook. The
-start-of-roll directivity (§4.5.7) is out of scope.
+fraction (§4.5.6), the start-of-roll directivity (§4.5.7) and segment summation
+(§4.3) — through to ground-grid noise contours, with the impedance adjustment
+(§4.2.1). The single-event chain is validated against the ECAC Doc 29 5th ed.
+Vol 3 Part 1 reference workbook.

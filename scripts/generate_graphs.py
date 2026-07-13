@@ -43,6 +43,14 @@ _ES_EXACT = {
     "Aircraft Departure SEL Contour (ECAC Doc 29)":
         "Contorno SEL de despegue (ECAC Doc 29)",
     "Aircraft noise contour (ECAC Doc 29)": "Contorno de ruido de aeronave (ECAC Doc 29)",
+    "Start-of-Roll Directivity ΔSOR (ECAC Doc 29 §4.5.7)":
+        "Directividad de inicio de rodaje ΔSOR (ECAC Doc 29 §4.5.7)",
+    "Turbofan jet (Eq. 4-24a)": "Reactor turbofán (Ec. 4-24a)",
+    "Turboprop (Eq. 4-24b)": "Turbohélice (Ec. 4-24b)",
+    "90°\nabeam": "90°\ntravés",
+    "180° behind": "180° detrás",
+    "radial axis: ΔSOR [dB] relative to abeam  ·  dSOR = 300 m":
+        "eje radial: ΔSOR [dB] relativo al través  ·  dSOR = 300 m",
     "x [km]": "x [km]",
     "y [km]": "y [km]",
     "Slant distance [m]": "Distancia oblicua [m]",
@@ -3807,6 +3815,67 @@ def generate_airport_contour(output_dir: str) -> None:
     plt.close()
 
 
+def generate_airport_sor(output_dir: str) -> None:
+    """ECAC Doc 29 start-of-roll directivity: the rearward jet/turboprop lobe."""
+    print("Generating airport_sor...")
+    from phonometry import start_of_roll_directivity
+
+    dsor = 300.0  # < 762 m normalising distance: no distance de-emphasis
+    # ΔSOR is defined only in the rearward arc (ψ from 90° abeam to 180° directly
+    # behind, symmetric left/right), so only that half-disc is drawn. Azimuth is
+    # measured clockwise from the nose; 90°/270° = abeam, 180° = directly behind.
+    az = np.linspace(90.0, 270.0, 361)
+    psi = np.where(az <= 180.0, az, 360.0 - az)
+    jet = np.array([start_of_roll_directivity(p, dsor, "jet") for p in psi])
+    prop = np.array([start_of_roll_directivity(p, dsor, "turboprop") for p in psi])
+
+    # A polar Axes always reserves the full circle's square bounding box, which
+    # wastes the upper half for a rearward half-disc. So the half-rose is drawn
+    # by hand on a plain, equal-aspect Axes: the radius encodes ΔSOR offset from
+    # the −16 dB origin, and the y-limits crop tightly to a wide rectangle.
+    r0 = -16.0                                   # radial origin (dB)
+    def _xy(a_deg: "np.ndarray | float", rr: "np.ndarray | float") -> tuple[Any, Any]:
+        t = np.radians(a_deg)                    # azimuth clockwise from nose (up)
+        return rr * np.sin(t), rr * np.cos(t)
+
+    fig, ax = plt.subplots(figsize=(9.0, 5.0))
+    for a in (90.0, 120.0, 150.0, 180.0, 210.0, 240.0, 270.0):  # radial spokes
+        sx, sy = _xy(a, np.array([2.0, 16.0]))
+        ax.plot(sx, sy, color=COLOR_FG, linestyle="--", linewidth=0.9, alpha=0.28, zorder=0)
+    for g in (-4.0, -8.0, -12.0):                # inner radial grid arcs (dB)
+        gx, gy = _xy(az, g - r0)
+        ax.plot(gx, gy, color=COLOR_FG, linestyle="--", linewidth=0.9, alpha=0.28, zorder=0)
+    # The 0 dB (abeam-reference) arc is the outer boundary: draw it solid and bold.
+    bx, by = _xy(az, 0.0 - r0)
+    ax.plot(bx, by, color=COLOR_FG, linestyle="-", linewidth=1.4, alpha=0.55, zorder=2)
+    for a, lbl in ((90.0, "90°\nabeam"), (120.0, "120°"), (150.0, "150°"),
+                   (180.0, "180° behind"), (210.0, "150°"), (240.0, "120°"),
+                   (270.0, "90°\nabeam")):
+        tx, ty = _xy(a, 19.4)
+        ax.text(tx, ty, lbl, fontsize=9, color=COLOR_FG, ha="center", va="center")
+    for data, color, label in ((jet, COLOR_PRIMARY, "Turbofan jet (Eq. 4-24a)"),
+                               (prop, COLOR_SECONDARY, "Turboprop (Eq. 4-24b)")):
+        dx, dy = _xy(az, data - r0)
+        ax.fill(dx, dy, color=color, alpha=0.12, zorder=1)
+        ax.plot(dx, dy, color=color, linewidth=2.2, zorder=3, label=label)
+    for g in (0.0, -4.0, -8.0, -12.0):           # radial dB labels down the centre
+        ax.text(0.6, -(g - r0), f"{g:.0f}", fontsize=8, color=COLOR_FG, ha="left",
+                va="center", zorder=4)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    ax.set_xlim(-21.0, 21.0)
+    ax.set_ylim(-20.2, 1.5)
+    ax.set_title("Start-of-Roll Directivity ΔSOR (ECAC Doc 29 §4.5.7)",
+                 fontweight="bold", pad=6)
+    ax.text(0.0, 1.0, "radial axis: ΔSOR [dB] relative to abeam  ·  dSOR = 300 m",
+            fontsize=9, color=COLOR_FG, ha="center", va="bottom")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.02), ncol=2, fontsize=9,
+              frameon=False)
+    plt.tight_layout()
+    save_figure(output_dir, "airport_sor.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -6252,6 +6321,7 @@ def generate_all(img_dir: str) -> None:
     # Airport noise (plan-23 B1): ECAC Doc 29 noise-power-distance curves.
     generate_airport_noise(img_dir)
     generate_airport_contour(img_dir)
+    generate_airport_sor(img_dir)
 
 
 # ===========================================================================

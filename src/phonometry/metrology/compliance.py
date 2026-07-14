@@ -421,6 +421,36 @@ def _weighting_response_db(wf: WeightingFilter, frequencies: np.ndarray) -> np.n
     return np.asarray(gain_db[:-1] - gain_db[-1], dtype=np.float64)  # relative to 1 kHz
 
 
+def _weighting_band_verdicts(
+    freqs_nom: np.ndarray,
+    deviation: np.ndarray,
+    limits1: Tuple[np.ndarray, np.ndarray],
+    limits2: Tuple[np.ndarray, np.ndarray],
+) -> List[Dict[str, Any]]:
+    """Per-band class verdicts against the Table 3 acceptance limits.
+
+    Margin = distance to the nearer limit; a -inf lower limit makes that side
+    non-binding (its term is +inf), i.e. an upper-only limit.
+    """
+    lower1, upper1 = limits1
+    lower2, upper2 = limits2
+    bands: List[Dict[str, Any]] = []
+    for i, fm in enumerate(freqs_nom):
+        m1 = min(upper1[i] - deviation[i], deviation[i] - lower1[i])
+        m2 = min(upper2[i] - deviation[i], deviation[i] - lower2[i])
+        band_class = 1 if m1 >= 0 else (2 if m2 >= 0 else None)
+        bands.append(
+            {
+                "freq": float(fm),
+                "class": band_class,
+                "deviation_db": float(deviation[i]),
+                "margin_class1_db": float(m1),
+                "margin_class2_db": float(m2),
+            }
+        )
+    return bands
+
+
 def _between_nominals_sweep(
     wf: WeightingFilter,
     freqs_exact: np.ndarray,
@@ -537,22 +567,9 @@ def verify_weighting_class(
     lower1, upper1 = lower1_all[in_range], upper1_all[in_range]
     lower2, upper2 = lower2_all[in_range], upper2_all[in_range]
 
-    bands: List[Dict[str, Any]] = []
-    for i, fm in enumerate(freqs_nom):
-        # Margin = distance to the nearer limit; a -inf lower limit makes that
-        # side non-binding (its term is +inf), i.e. an upper-only limit.
-        m1 = min(upper1[i] - deviation[i], deviation[i] - lower1[i])
-        m2 = min(upper2[i] - deviation[i], deviation[i] - lower2[i])
-        band_class = 1 if m1 >= 0 else (2 if m2 >= 0 else None)
-        bands.append(
-            {
-                "freq": float(fm),
-                "class": band_class,
-                "deviation_db": float(deviation[i]),
-                "margin_class1_db": float(m1),
-                "margin_class2_db": float(m2),
-            }
-        )
+    bands = _weighting_band_verdicts(
+        freqs_nom, deviation, (lower1, upper1), (lower2, upper2)
+    )
 
     if not bands:
         return {

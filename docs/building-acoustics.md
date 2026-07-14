@@ -123,6 +123,34 @@ ISO 717-1 reference curve.
 `r_prime` or `None`); `weighted_rating()` returns a `WeightedRatingResult`
 (`rating`, `c`, `ctr`, `unfavourable_sum`, all integers except the sum).
 
+### Enlarged frequency ranges and one-decimal ratings
+
+When the measurement covers more than the core 100–3150 Hz bands, ISO 717-1
+Annex B defines additional adaptation terms with the range as a subscript
+($C_{50\text{–}3150}$, $C_{50\text{–}5000}$, $C_{100\text{–}5000}$ and the
+$C_{tr}$ counterparts), computed with the Table B.1 spectra over the enlarged
+range. `weighted_rating_extended` takes the band values *with their centre
+frequencies* and returns the core rating plus every extended term the input
+covers (the impact counterpart `weighted_impact_rating_extended` adds
+$C_{I,50\text{–}2500}$). With `one_decimal=True` the reference curve shifts in
+0.1 dB steps and all reductions keep one decimal: the variant ISO 717
+prescribes "for the expression of uncertainty" and ISO 12999-1 Annex B
+requires when stating the uncertainty of a single-number value.
+
+```python
+from phonometry import weighted_rating_extended
+
+freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+         630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+r_ext = [18.7, 19.2, 20.0, *R, 26.8, 29.2]     # ISO 717-1 Annex C, Table C.2
+ext = weighted_rating_extended(r_ext, freqs)
+print(ext.rating, ext.c, ext.ctr, ext.c_50_5000, ext.ctr_50_5000)
+# 30 -2 -3 -2 -4   ->  Rw(C;Ctr;C50-5000;Ctr,50-5000) = 30(-2;-3;-2;-4)
+
+one_dp = weighted_rating_extended(r_ext, freqs, one_decimal=True)
+print(one_dp.rating)   # 30.0, the 0.1 dB-step rating for uncertainty statements
+```
+
 ### Impact sound (ISO 16283-2, ISO 717-2)
 
 Footstep noise is rated the other way round. Instead of how much a floor
@@ -153,6 +181,11 @@ ISO 717-1. The rating (`Ln,w`, `L'n,w`, `L'nT,w`) is the shifted reference read
 at 500 Hz; for octave bands it is then reduced by 5 dB. The spectrum
 adaptation term $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$ uses the energetic sum
 over 100–2500 Hz (16-band thirds excluding 3150 Hz) or 125–2000 Hz (octaves).
+For measurements extended down to 50 Hz,
+`weighted_impact_rating_extended` additionally returns the enlarged-range
+term $C_{I,50\text{–}2500}$ (A.2.1 NOTE), and with `one_decimal=True` the
+0.1 dB-step rating used in uncertainty statements (it reproduces the printed
+$L_{n,r,0,w} = 77.6$ dB and $C_{I,r,0} = -10.3$ dB of A.2.2).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating.svg" alt="Measured one-third-octave normalized impact sound pressure level with the shifted ISO 717-2 reference curve and the resulting weighted rating read at 500 Hz" width="80%"></picture>
 
@@ -495,15 +528,20 @@ Every added flanking path strictly lowers $R'_w$ below the direct $R_{Dd,w} = 57
 path is visible. `flanking_element` is a convenience that builds one junction's
 three paths at once; the single-path constructor behind it, `flanking_path`,
 builds one `Ff`, `Df` or `Fd` path at a time (Formula 28a). Clause 4.4.2 also
-enforces a floor $K_{ij} \ge K_{ij,\min}$ from the junction geometry — compute
-it with `junction_min_vibration_reduction` and pass it to
+enforces a floor $K_{ij} \ge K_{ij,\min}$ from the junction geometry
+(Formula 29). Pass the flanking-element area to
+`flanking_element(..., flanking_area=...)` and the clamp is applied
+automatically per path; or compute the floor yourself with
+`junction_min_vibration_reduction` and pass it to
 `flanking_path(..., kij_min=...)`, which raises a below-floor $K_{ij}$ to the
 minimum:
 
 ```python
 from phonometry import junction_min_vibration_reduction
 # Kij,min = 10 lg[lf·l0·(1/Si + 1/Sj)]; large elements give a low (here negative)
-# floor, so a realistic tabulated Kij is rarely clamped.
+# floor, so a realistic tabulated Kij is rarely clamped; but small, light
+# elements can push it above the tabulated value (e.g. lf = 4 m, S = 1.5 m²
+# gives 7.3 dB, over the 5 dB lightweight floor).
 print(round(junction_min_vibration_reduction(coupling_length=4.5,
                                              s_i=11.5, s_j=11.5), 1))     # -1.1
 ```
@@ -523,22 +561,32 @@ ln_eq = equivalent_impact_level(322.0)                   # 164 - 35 lg(m')
 k = impact_flanking_correction(322.0, 145.0)             # Table 1 (sep 322, flk 145)
 imp = predicted_impact_insulation(ln_w_eq=ln_eq, delta_l_w=33.0, k_correction=k)
 print(round(ln_eq, 1), k, round(imp.l_prime_n_w, 1))     # 76.2 2 45.2  ->  L'n,w = 45 dB
-print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT,w
+
+# Exact Formula (3): L'nT,w = L'n,w - 10 lg(0.032 V). Annex E.3's own rounding
+# of the factor to 10 lg(V/30) sits 0.18 dB below; both give L'nT,w = 43 dB.
+print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.2  L'nT,w
 ```
+
+The airborne counterpart of that closure is Formula (5b),
+$D_{nT} = R' + 10\lg(0.32\,V/S_s)$, exposed as `standardized_level_difference`;
+it closes the Annex H.3 example (`standardized_level_difference(52.2, 50.0,
+11.5)` gives 53.6 dB, the printed $V/(3S)$ chain 53.8 dB, both rounding to
+$D_{nT,w} = 54$ dB).
 
 ### `junction_vibration_reduction()` / `flanking_element()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `junction_type` | str | — | `'rigid_cross'` / `'rigid_t'` / `'flexible_t'` / `'lightweight_facade'` | Junction geometry (Annex E) |
-| `path` | str | — | `'through'` (K13) / `'corner'` (K12 = K23) | Path branch |
+| `junction_type` | str | — | `'rigid_cross'` / `'rigid_t'` / `'flexible_t'` / `'lightweight_facade'` / `'lightweight_double_homogeneous'` / `'lightweight_double_coupled'` / `'corner'` / `'thickness_change'` | Junction geometry (Annex E.3-E.9) |
+| `path` | str | — | `'through'` (K13) / `'corner'` (K12 = K23) / `'double_leaf'` (K24) | Path branch |
 | `mass_ratio` | float | — | > 0 | `m'⊥,i / m'i` (Formula E.2) |
-| `frequency` | float | Hz | default `500` | Only `flexible_t` is frequency-dependent |
+| `frequency` | float | Hz | default `500` | `flexible_t` and the E.7/E.8 double-leaf junctions are frequency-dependent |
 | `r_flanking` / `r_separating` | float | dB | — | Weighted indices of the flanking / separating element |
 | `k_ff` / `k_fd` / `k_df` | float | dB | — | Junction `Kij` for the three paths |
 | `separating_area` | float | m² | > 0 | Separating-element area `Ss` |
 | `coupling_length` | float | m | > 0 | Junction coupling length `lf` |
 | `delta_r_ff` / `delta_r_fd` / `delta_r_df` | float | dB | default `0` | Lining improvements per path |
+| `flanking_area` | float | m² | default `None` | Flanking-element area `SF`; enables the automatic `Kij,min` clamp (Clause 4.4.2 / Formula 29) |
 
 ### `flanking_path()` parameters
 
@@ -551,7 +599,7 @@ print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT
 | `separating_area` | float | m² | > 0 | Separating-element area `Ss` |
 | `coupling_length` | float | m | > 0 | Junction coupling length `lf` |
 | `delta_r` | float | dB | default `0` | Lining improvement on this path |
-| `kij_min` | float | dB | default `None` | When given, `k_ij` is floored at this Formula E.4 minimum |
+| `kij_min` | float | dB | default `None` | When given, `k_ij` is floored at this Formula (29) minimum |
 
 `predicted_airborne_insulation()` returns an `AirbornePredictionResult`
 (`r_prime_w`, `r_direct_w`, `paths` of `PathContribution`, `dominant`);
@@ -581,7 +629,10 @@ D_{2m,nT} = R' + \Delta L_{fs} + 10 \log_{10}\frac{V}{6\,T_0\,S}, \qquad T_0 = 0
 $$
 
 with the façade-shape term $\Delta L_{fs}$ (Annex C; 0 dB for a flat reflecting
-façade). Single-number ratings reuse EN ISO 717-1 (`weighted_rating`).
+façade; `facade_shape_level_difference` looks it up from the Figure C.2 table
+for galleries, balconies and terraces, interpolating over the underside
+absorption $\alpha_w$). Single-number ratings reuse EN ISO 717-1
+(`weighted_rating`).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction.svg" alt="Per-element partial sound reduction indices and the resulting façade apparent reduction R' and standardized level difference D2m,nT for the EN 12354-3 Annex F worked example, the air inlet limiting the low bands" width="80%"></picture>
 
@@ -614,7 +665,9 @@ from phonometry import (FacadeElement, radiated_sound_power,
                         outdoor_attenuation, outdoor_level)
 
 # EN 12354-4 Annex G, side 1: a 10×20 m concrete wall segment with a 6×4 m
-# industrial door, inside level Lp,in, Cd = -5 dB, R' capped at 40 dB (Annex G).
+# industrial door, inside level Lp,in, Cd = -5 dB. The 40 dB cap on R' is an
+# Annex G example footnote (field leaks), not part of Formula (2)/(3): pass it
+# explicitly to reproduce Annex G; by default no cap is applied.
 bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
 seg = radiated_sound_power(
     [FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
@@ -666,10 +719,10 @@ fig.tight_layout(); plt.show()
 | `FacadeElement.r` / `dn_e` / `insertion_loss` | float or seq | dB | give exactly one | Area element $R_i$ / small-element $D_{n,e}$ / opening insertion loss |
 | `facade_sound_reduction(area)` | float | m² | > 0 | Total façade area $S$ |
 | `facade_sound_reduction(volume)` | float | m³ | > 0 | Receiving-room volume $V$ (Formula 13) |
-| `facade_sound_reduction(delta_l_fs)` | float | dB | default `0` | Façade-shape term $\Delta L_{fs}$ (Annex C) |
+| `facade_sound_reduction(delta_l_fs)` | float | dB | default `0` | Façade-shape term $\Delta L_{fs}$ (Annex C; look it up with `facade_shape_level_difference`) |
 | `radiated_sound_power(lp_in)` | float or seq | dB | — | Inside level $L_{p,in}$ per band |
 | `radiated_sound_power(c_d)` | float | dB | default `-6` | Diffusivity term $C_d$ (Annex B) |
-| `radiated_sound_power(r_prime_cap)` | float | dB | default `40` (`None` off) | Field cap on $R'$ (Annex G) |
+| `radiated_sound_power(r_prime_cap)` | float | dB | default `None` (off) | Optional field cap on $R'$, an Annex G example footnote (it uses 40 dB), not part of Formula (2)/(3) |
 | `radiated_sound_power(octave_bands)` | seq of int | Hz | default `None` | Octave centres matching the bands; enables the A-weighted $L_{WA}$ |
 | `facade_sound_reduction(frequencies)` | seq | Hz | default `None`; length = band count | Band centres carried on the result for plotting |
 | `outdoor_attenuation(width, height, distance)` | float | m | > 0 | Finite radiating side and reception distance (Annex E) |
@@ -831,7 +884,9 @@ where $K_c$ is largest — so an intensity measurement reproduces the ISO 10140-
 pressure result. The automatic rating is formed only for exactly 16
 one-third-octave or 5 octave values (`rating`/`rating_modified` are `None`
 otherwise). Subareas scanned separately are combined first with
-`combine_subareas` (Formulas (11)-(12)).*
+`combine_subareas` (Formulas (11)-(12)); a subarea whose net energy flows back
+towards the specimen enters with a negative area, applying the minus-sign rule
+of Clause 6.4.6 while $S_m$ keeps the unsigned area sum.*
 
 ### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
 
@@ -950,7 +1005,13 @@ $\Delta L_\text{oct} = -10\lg[\tfrac{1}{3}\sum 10^{-\Delta L_n/10}]$ (Formula (5
 improvement is applied to the heavyweight **reference floor** $L_{n,r,0}$
 (ISO 717-2 Table 4), $L_{n,r} = L_{n,r,0} - \Delta L$, and
 $\Delta L_w = 78 - L_{n,r,w}$ — computed by `weighted_impact_improvement()`, which
-reuses the verified ISO 717-2 rating engine.
+reuses the verified ISO 717-2 rating engine. A clause 6.3 measurement spans 18
+bands (100–5000 Hz, optionally extended to 50 Hz); the rating is formed on the
+100–3150 Hz sub-range of whatever spectrum contains it. The statement of
+results (clause 8 e)) also carries the spectrum adaptation term
+$C_{I,\Delta} = C_{I,r,0} - C_{I,r}$ (ISO 717-2:2020 Formula (A.4)), exposed as
+`ci_delta` on the result and standalone as
+`impact_improvement_adaptation_term()`.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -982,7 +1043,8 @@ print(weighted_impact_improvement(delta_l))    # e.g. 19 dB
 # From the measured bare/covered acceleration levels, with a background trace:
 res = impact_improvement(bare_levels, covered_levels, freqs, background=bg)
 res.improvement       # delta-L per band
-res.delta_lw          # weighted single number (None off the 16 rating bands)
+res.delta_lw          # weighted single number (rated on the 100-3150 Hz sub-range)
+res.ci_delta          # spectrum adaptation term CI,delta (Formula (A.4))
 res.limited           # bands at the 1.3 dB limit of measurement (> delta-L)
 res.octave_bands()    # (octave freqs, delta-L_oct) via Formula (5)
 ```
@@ -1013,13 +1075,17 @@ Formula (14). The related **total loss factor** is $\eta = 2.2/(f T_s)$.
 airborne) and $L_{n,f} = L_2 + 10\lg(A/A_0)$ (Formula (5), tapping machine),
 $A_0 = 10\ \text{m}^2$; their $D_{n,f,w}$ / $L_{n,f,w}$ single numbers reuse the
 ISO 717 rating engines. The single-number $\overline{K}_{ij}$ is the arithmetic
-mean over 200–1250 Hz (Annex A).
+mean over 200–1250 Hz for one-third-octave bands, or over 125–1000 Hz for
+octave bands (Annex A).
 
 **Validity.** $K_{ij}$ rests on a statistical-energy-analysis simplification:
 `strong_coupling_satisfied()` checks the Formula (15) inequality, and — for the
 heavy junctions of Part 4 — `modal_density()`, `band_mode_count()` and
-`modal_overlap_factor()` (Formulae (5)/(4)/(6)) flag the bands where the mode
-count is too low for $K_{ij}$ to be reliable. Because ISO 10848 contains no
+`modal_overlap_factor()` (Formulae (5)/(4)/(6)) quantify where the mode count
+is too low for $K_{ij}$ to be reliable. Pass the per-band modal overlap factor
+to `vibration_reduction_index(..., modal_overlap=M)`: bands with $M < 0.25$
+are flagged in `result.bracketed` and excluded from the single-number
+$\overline{K}_{ij}$, as Part 4 Clause 9 requires. Because ISO 10848 contains no
 worked numeric example, conformance is anchored on closed-form identities
 (simplified $K_{ij}$, $a_j$ at $f_\text{ref}$, $\eta$).
 
@@ -1059,11 +1125,14 @@ res = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
                                 structural_reverberation_time_j=ts_j)
 res.k_ij           # Kij per band (Formula (13))
 res.single_number  # mean Kij over 200-1250 Hz, or None without the band set
-res.octave_bands() # Kij combined into octave bands
+res.octave_bands() # Kij in octave bands (its single number averages 125-1000 Hz)
 
 # Overall airborne flanking descriptor and a Part-4 modal-overlap validity check:
 dnf = normalized_flanking_level_difference(l1, l2, absorption_area)
-m = modal_overlap_factor(area, critical_freq, ts)   # M < 0.25 -> exclude band
+m = modal_overlap_factor(area, critical_freq, ts)
+res_m = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+                                  modal_overlap=m)   # M < 0.25 bands bracketed
+res_m.bracketed    # per-band flags; bracketed bands leave the single number
 ```
 
 ---

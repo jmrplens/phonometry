@@ -5,14 +5,17 @@
 Building service equipment — pumps, fans, boilers, sanitary appliances —
 injects **structure-borne sound power** into the building structure it is fixed
 to, which then re-radiates as airborne noise in adjoining rooms. **EN 15657:2018**
-characterises such a source by its *characteristic structure-borne sound power
-level* `L_Ws`, measured with the **reception-plate method**: the source is
-mounted on a plate of known mass per unit area `m` and area `S` whose structural
-loss factor `η` is known, and the plate's spatial-average vibratory velocity is
-measured. `L_Ws` (with the plate mobility) is the source term of the EN 12354-5
-installed-equipment prediction.
+measures it with the **reception-plate method**: the source is mounted on a
+plate of known mass per unit area `m` and area `S` whose structural loss factor
+`η` is known, and the plate's spatial-average vibratory velocity is measured.
+Formula (14) gives the power *injected into that particular plate*; the
+plate-independent source quantities (the equivalent blocked force,
+Formula 15; the characteristic reception-plate power level `L_Wsn`,
+Formula 17; and the equivalent free velocity and source mobility,
+Formulae 18/19) are derived from it and are what the EN 12354-5
+installed-equipment prediction consumes.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power.svg" alt="Characteristic structure-borne sound power level per one-third-octave band of a source determined on a low-mobility and a high-mobility reception plate, which agree within the method" width="82%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power.svg" alt="Reception-plate structure-borne sound power level per one-third-octave band of a source determined on a low-mobility and a high-mobility reception plate, which agree within the method" width="82%"></picture>
 
 ## 1. The reception-plate relations
 
@@ -43,7 +46,7 @@ bands = np.array([100.0, 200.0, 400.0, 800.0])
 lv_i = np.array([88.0, 90.0, 87.0, 89.0, 86.0, 90.0])   # six plate positions @ 200 Hz
 print(round(ph.spatial_mean_velocity_level(lv_i), 2))    # 88.6 dB re 1 nm/s
 
-# Characteristic power level from the reception plate (loss factor from Ts):
+# Power level injected into the reception plate (loss factor from Ts):
 res = ph.reception_plate_power(
     velocity_level=np.array([90.0, 87.0, 82.0, 77.0]),
     frequency=bands, mass_per_area=600.0, area=2.0, reverberation_time=0.8,
@@ -58,11 +61,54 @@ Two reception plates bracket the installation conditions. On the *low-mobility*
 (heavy) plate the source's own dynamics barely change the plate's point mobility
 or loss factor; the *high-mobility* (light) plate is dynamically loaded by the
 source, so its reverberation time and mobility are measured with the source
-attached. The characteristic power level plus the plate's point mobility (see
-[mechanical mobility](mechanical-mobility.md)) provide the source description
-for the EN 12354-5 model. The direct source-side counterpart is the ISO 9611
-free velocity level (re `5·10⁻⁸ m/s`) measured at the contact points of
-resiliently mounted machinery.
+attached. The plate-injected power plus the plate's point mobility (see
+[mechanical mobility](mechanical-mobility.md)) yield the source description
+for the EN 12354-5 model through the conversion chain below.
+
+## 3. From plate power to source quantities (Formulae 15–19)
+
+The plate-injected `L_Ws` is **not** a source descriptor: the same source
+injects a different power into a different receiver. EN 15657 derives the
+plate-independent quantities: the **equivalent blocked force level**
+(Formula 15, re `F₀ = 10⁻⁶ N`) from the low-mobility plate,
+
+$$
+L_{Fb,eq} = L_{Ws,\mathrm{low}} - 10\lg\frac{\mathrm{Re}\{Y_{R,\mathrm{low,eq}}\}}{Y_0},
+$$
+
+the **characteristic reception-plate power level** that EN 12354-5 consumes
+(Formula 17), referred to the standard 10 cm concrete plate of characteristic
+mobility `Y_R,∞,low = 5·10⁻⁶ m/(N·s)` (clause 7.2.4),
+
+$$
+L_{Wsn} = L_{Fb,eq} + 10\lg\frac{Y_{R,\infty,\mathrm{low}}}{Y_0},
+$$
+
+and, from the high-mobility plate, the **equivalent free velocity level**
+(Formula 18, re `10⁻⁹ m/s`) and the **source mobility** `|Y_S,eq|`
+(Formula 19). The EN 12354-5 Annex I mobility correction
+(`installed_power_from_reception_plate`, see
+[installed structure-borne sound](installed-structure-borne.md)) then refers
+`L_Wsn` to the actual receiving element.
+
+```python
+import phonometry as ph
+
+# EN 12354-5 Annex I.3 (flushing cistern, wall contact, 63 Hz): measured on a
+# plate of Y = 5.34e-6 m/(N·s); the wall's characteristic mobility is 24.1e-6.
+lfb = ph.equivalent_blocked_force_level(61.7, 5.34e-6)      # Formula (15)
+lwsn = ph.characteristic_reception_plate_power(lfb)         # Formula (17)
+inst = ph.installed_power_from_reception_plate(lwsn, 24.1e-6)  # Annex I
+print(round(float(lwsn), 1), round(float(inst), 1))         # 61.4 68.2  (Table I.8)
+
+# Free velocity (Formula 18) + blocked force close the source mobility (19):
+lvf = ph.equivalent_free_velocity_level(70.0, 1.0e-2)
+print(float(ph.source_mobility_from_levels(lvf, lfb)))      # |Y_S,eq| in m/(N·s)
+```
+
+The direct source-side counterpart is the ISO 9611 free velocity level (re
+`v₀ = 5·10⁻⁸ m/s`) measured at the contact points of resiliently mounted
+machinery; its equation (9) position average is `mean_free_velocity_level()`.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -93,8 +139,13 @@ plt.xlabel("Frequency [Hz]"); plt.ylabel("$L_{Ws}$ [dB re 1 pW]"); plt.show()
 buildings — Laboratory measurement of structure-borne sound from building
 service equipment for all installation conditions*: the reception-plate method
 (clause 7), the spatial mean velocity level (Formula 12), the plate loss factor
-`η = 2.2/(f·Ts)` (Formula 13) and the characteristic structure-borne sound power
-level `L_Ws` (Formula 14). The plate velocity levels are referred to
-`v₀ = 10⁻⁹ m/s`. Conformance is anchored on the resonant-plate power balance
-`P = ω·η·(m·S)·⟨v²⟩` (of which Formula 14 is the level) and the loss-factor
-identity.
+`η = 2.2/(f·Ts)` (Formula 13), the plate-injected power level `L_Ws`
+(Formula 14) and the source-quantity chain: equivalent blocked force
+(Formula 15), characteristic reception-plate power level (Formula 17,
+`Y_R,∞,low = 5·10⁻⁶ m/(N·s)`), equivalent free velocity (Formula 18) and
+source mobility (Formula 19). ISO 9611:1996: the free-velocity source
+characterization (equation (9), `v₀ = 5·10⁻⁸ m/s`). The plate velocity levels
+are referred to `v₀ = 10⁻⁹ m/s`. Conformance is anchored on the resonant-plate
+power balance `P = ω·η·(m·S)·⟨v²⟩` (of which Formula 14 is the level), the
+loss-factor identity, and the EN 12354-5 Annex I.3 Table I.8 conversion of the
+flushing-cistern source.

@@ -30,6 +30,7 @@ from phonometry import (
     FacadeElement,
     FacadePredictionResult,
     RadiatedPowerResult,
+    facade_shape_level_difference,
     facade_sound_reduction,
     outdoor_attenuation,
     outdoor_level,
@@ -190,6 +191,56 @@ def test_annex_g_rprime_cap() -> None:
     assert np.allclose(res.r_prime[:4], ref.EN12354_4_ANNEX_G_CONCRETE_R[:4])
 
 
+def test_rprime_cap_off_by_default() -> None:
+    """The 40 dB cap is an Annex G example footnote, not Formula (2)/(3):
+    by default R' is the bare energy sum, uncapped."""
+    res = radiated_sound_power(
+        [FacadeElement(name="wall", area=100.0, r=[60.0])],
+        lp_in=90.0, area=100.0,
+    )
+    assert res.r_prime[0] == pytest.approx(60.0)
+    # LW then follows the bare Formula (2): 90 - 6 - 60 + 20 = 44 dB.
+    assert res.l_w[0] == pytest.approx(44.0)
+
+
+@pytest.mark.parametrize("shape,height,alpha,expected", ref.EN12354_3_ANNEX_C_DLFS)
+def test_facade_shape_level_difference_table(
+    shape: str, height: float, alpha: float, expected: float
+) -> None:
+    """ΔLfs lookup reproduces the Annex C Figure C.2 cells."""
+    assert facade_shape_level_difference(
+        shape, line_of_sight=height, absorption=alpha
+    ) == pytest.approx(expected)
+
+
+def test_facade_shape_level_difference_interpolates_alpha() -> None:
+    # Balcony 6, 1,5-2,5 m: -1 / 1 / 3 over αw 0,3 / 0,6 / 0,9.
+    mid = facade_shape_level_difference(
+        "balcony_6", line_of_sight=2.0, absorption=0.45
+    )
+    assert mid == pytest.approx(0.0)  # halfway between -1 and 1
+    # αw outside the tabulated range clamps to the edge column.
+    assert facade_shape_level_difference(
+        "balcony_6", line_of_sight=2.0, absorption=1.0
+    ) == pytest.approx(3.0)
+    assert facade_shape_level_difference(
+        "balcony_6", line_of_sight=2.0, absorption=0.1
+    ) == pytest.approx(-1.0)
+
+
+def test_facade_shape_level_difference_does_not_apply() -> None:
+    with pytest.raises(ValueError, match="does not apply"):
+        facade_shape_level_difference("gallery_2", line_of_sight=2.0)
+    with pytest.raises(ValueError, match="does not apply"):
+        facade_shape_level_difference("gallery_5", line_of_sight=1.0)
+    with pytest.raises(ValueError, match="Unknown facade shape"):
+        facade_shape_level_difference("igloo")
+    with pytest.raises(ValueError, match="absorption"):
+        facade_shape_level_difference("balcony_6", absorption=1.5)
+    with pytest.raises(ValueError, match="line_of_sight"):
+        facade_shape_level_difference("balcony_6", line_of_sight=-1.0)
+
+
 def test_opening_insertion_loss() -> None:
     """A bare opening (insertion_loss = 0) transmits its full area fraction.
 
@@ -239,16 +290,24 @@ def test_annex_e_attenuation(
 
 
 def test_annex_e_exterior_level() -> None:
-    """Lp = LW - A'tot for the side-1 (d=5) and side-4 (d=25) reception points."""
-    w1, h1, _, _ = ref.EN12354_4_ANNEX_G_ATTENUATION[0]
+    """Lp = LW - A'tot for all four Table G.9 reception cells."""
     lp1 = outdoor_level(
-        ref.EN12354_4_ANNEX_G_SIDE1_LWA, outdoor_attenuation(w1, h1, 5.0)
+        ref.EN12354_4_ANNEX_G_SIDE1_LWA, outdoor_attenuation(60.0, 10.0, 5.0)
     )
     assert lp1 == pytest.approx(ref.EN12354_4_ANNEX_G_LP_SIDE1_D5, abs=0.05)
     lp4 = outdoor_level(
         ref.EN12354_4_ANNEX_G_SIDE4_LWA, outdoor_attenuation(100.0, 10.0, 25.0)
     )
     assert lp4 == pytest.approx(ref.EN12354_4_ANNEX_G_LP_SIDE4_D25, abs=0.05)
+    # Remaining Table G.9 cells: side 1 at 25 m and side 4 at 5 m.
+    lp1_far = outdoor_level(
+        ref.EN12354_4_ANNEX_G_SIDE1_LWA, outdoor_attenuation(60.0, 10.0, 25.0)
+    )
+    assert lp1_far == pytest.approx(ref.EN12354_4_ANNEX_G_LP_SIDE1_D25, abs=0.05)
+    lp4_near = outdoor_level(
+        ref.EN12354_4_ANNEX_G_SIDE4_LWA, outdoor_attenuation(100.0, 10.0, 5.0)
+    )
+    assert lp4_near == pytest.approx(ref.EN12354_4_ANNEX_G_LP_SIDE4_D5, abs=0.05)
 
 
 def test_outdoor_level_energy_sum() -> None:

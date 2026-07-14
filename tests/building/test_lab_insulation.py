@@ -22,6 +22,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+import reference_data as ref
 from phonometry import (
     LabAirborneInsulationResult,
     LabImpactInsulationResult,
@@ -298,3 +299,52 @@ def test_plot_without_rating_raises() -> None:
     )
     with pytest.raises(ValueError, match="rating"):
         res.plot()
+
+
+# ---------------------------------------------------------------------------
+# ISO 10140-5:2010+A1 reference elements (Tables B.1 / C.1) - printed anchors
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("r_name,rating_name", [
+    ("ISO10140_5_B1_HEAVY_WALL_R", "ISO10140_5_B1_HEAVY_WALL_RATING"),
+    ("ISO10140_5_B1_HEAVY_FLOOR_R", "ISO10140_5_B1_HEAVY_FLOOR_RATING"),
+    ("ISO10140_5_B1_LIGHT_WALL_R", "ISO10140_5_B1_LIGHT_WALL_RATING"),
+])
+def test_reference_element_airborne_end_to_end(
+    r_name: str, rating_name: str
+) -> None:
+    """Table B.1 reference elements reproduce their printed Rw (C; Ctr).
+
+    End to end: with S = A (S = 10 m2, A = 0,16*50/0,8 = 10 m2) the level
+    difference equals the tabulated R, so the whole ISO 10140-2 Formula (2)
+    -> ISO 717-1 chain must return the printed single numbers.
+    """
+    r = np.asarray(getattr(ref, r_name), dtype=float)
+    rw, c, ctr = getattr(ref, rating_name)
+    res = lab_airborne_insulation(
+        np.full(16, 90.0), 90.0 - r, np.full(16, 0.8), area=10.0, volume=50.0
+    )
+    np.testing.assert_allclose(res.r, r, atol=1e-9)
+    assert res.rating is not None
+    assert (res.rating.rating, res.rating.c, res.rating.ctr) == (rw, c, ctr)
+
+
+@pytest.mark.parametrize("ln_name,rating_name", [
+    ("ISO10140_5_C1_FLOOR_C1C2_LN", "ISO10140_5_C1_FLOOR_C1C2_RATING"),
+    ("ISO10140_5_C1_FLOOR_C3_LN", "ISO10140_5_C1_FLOOR_C3_RATING"),
+])
+def test_reference_floor_impact_end_to_end(
+    ln_name: str, rating_name: str
+) -> None:
+    """Table C.1 reference floors reproduce their printed Ln,t,r,0,w (CI).
+
+    End to end: with A = A0 (V = 31,25 m3, T = 0,5 s -> A = 10 m2) the
+    receiving level equals the tabulated Ln, so the ISO 10140-3 Formula (1)
+    -> ISO 717-2 chain must return the printed single numbers.
+    """
+    ln = np.asarray(getattr(ref, ln_name), dtype=float)
+    lnw, ci = getattr(ref, rating_name)
+    res = lab_impact_insulation(ln, np.full(16, 0.5), volume=31.25)
+    np.testing.assert_allclose(res.l_n, ln, atol=1e-9)
+    assert res.rating is not None
+    assert (res.rating.rating, res.rating.ci) == (lnw, ci)

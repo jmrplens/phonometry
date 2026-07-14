@@ -7,9 +7,11 @@ two form a mass-spring system whose **natural frequency** governs how much the
 floor improves impact and airborne insulation. **EN 29052-1:1992** (identical to
 ISO 9052-1:1989) measures the **dynamic stiffness per unit area** `s'` of the
 resilient layer from the resonance of a standard load plate on a
-200 mm × 200 mm specimen. `s'` is the input to the floating-floor impact
-improvement (ISO 16251) covered in [Building acoustics](building-acoustics.md)
-and to the EN 12354-2 impact model.
+200 mm × 200 mm specimen. `s'` is the input to the floating-floor term of the
+EN 12354-2 impact model covered in
+[Building acoustics](building-acoustics.md). (ISO 16251-1 does not apply here:
+its scope is limited to soft, locally-reacting floor coverings and explicitly
+excludes floating floors.)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness.svg" alt="Floating-floor natural frequency as a function of the resilient layer's dynamic stiffness per unit area, for a light 40 kg/m² and a heavy 120 kg/m² floating floor, on a logarithmic stiffness axis, with a worked design point at 10 MN/m³ marked" width="82%"></picture>
 

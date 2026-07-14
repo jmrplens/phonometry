@@ -129,6 +129,20 @@ ISO717_1_ANNEX_C_EXPECTED = {
     "ctr": -3,
     "unfavourable_sum": 31.8,
 }
+# ISO 717-1:2020 Annex C, Table C.2 - the same element measured over the
+# enlarged range 50-5000 Hz (21 bands). The worked example states
+# Rw(C;Ctr;C50-5000;Ctr,50-5000) = 30 (-2; -3; -2; -4) dB, with the printed
+# intermediate sums -10 lg = 28,212 (spectrum No. 1) / 26,355 (No. 2).
+ISO717_1_ANNEX_C2_R_50_5000: list[float] = [
+    18.7, 19.2, 20.0, *ISO717_1_ANNEX_C_R, 26.8, 29.2,
+]
+ISO717_1_ANNEX_C2_EXPECTED = {
+    "rw": 30,
+    "c": -2,
+    "ctr": -3,
+    "c_50_5000": -2,
+    "ctr_50_5000": -4,
+}
 
 # ---------------------------------------------------------------------------
 # ISO 226:2023 Table B.1 - normal equal-loudness-level contours. Row =
@@ -220,6 +234,23 @@ EN12354_1_ANNEX_H3_ELEMENTS: list[tuple[str, float, float, float, float]] = [
 ]
 EN12354_1_ANNEX_H3_NUM_PATHS = 13
 EN12354_1_ANNEX_H3_RPRIME_W = 52  # 52,2 dB rounds to 52
+# All twelve printed flanking-path values of the H.3 results table (dB): for
+# each element the standard prints RFd = RDf (the "R_1d"/"R_D1" rows are the
+# same value) and RFf. Keyed by element label -> (R_Ff, R_Fd = R_Df).
+EN12354_1_ANNEX_H3_PATH_RW: dict[str, tuple[float, float]] = {
+    "floor": (65.5, 66.0),
+    "ceiling": (64.5, 64.8),
+    "facade": (61.1, 62.7),
+    "intwall": (73.0, 67.2),
+}
+# Formula (5b) closure of both H.3 examples: V = 50 m3, Ss = 11,5 m2. The
+# standard prints DnT,w = 52,2 + 10 lg[50/(3 x 11,5)] = 53,8 ~ 54 dB and (with
+# the floating floor) 52,7 + 1,6 = 54,3 ~ 54 dB; the exact Formula (5b) factor
+# 0,32 V/Ss gives 53,6 / 54,1 dB - same integer ratings.
+EN12354_1_ANNEX_H3_VOLUME = 50.0
+EN12354_1_ANNEX_H3_DNT_W = 54
+EN12354_1_ANNEX_H3_DNT_W_PRINTED = 53.8   # with the standard's V/(3 S) rounding
+EN12354_1_ANNEX_H3_DNT_W_SECOND = 54      # second example: 54,3 ~ 54 dB
 
 # ---------------------------------------------------------------------------
 # EN 12354-2:2000 Annex E.3 impact prediction worked example. A concrete floor
@@ -246,6 +277,11 @@ EN12354_2_ANNEX_E3_LPRIME_N_W = 45
 # partial indices sum to R' = 35,8 / 38,0 dB at 1 k / 2 k, whereas its R' row
 # prints 35,4 / 37,5 - an internal rounding inconsistency in the 2000 example;
 # the low bands (125-500 Hz) and every single-number rating are exact.
+# NOTE 2: the printed D2m,nT row of Annex F equals R' + 1,5 dB, whereas
+# Formula (13) with V = 50 m3, S = 11,3 m2, T0 = 0,5 s gives
+# 10 lg(50/(6*0,5*11,3)) = +1,69 dB - another internal inconsistency of the
+# 2000 example. The module implements the formula; the single-number oracle
+# D2m,nT,w = 33 reproduces either way.
 # ---------------------------------------------------------------------------
 EN12354_3_ANNEX_F_BANDS = (125.0, 250.0, 500.0, 1000.0, 2000.0)
 EN12354_3_ANNEX_F_AREA = 11.3
@@ -298,6 +334,34 @@ EN12354_4_ANNEX_G_ATTENUATION: list[tuple[float, float, float, float]] = [
 ]
 EN12354_4_ANNEX_G_LP_SIDE1_D5 = 36.6
 EN12354_4_ANNEX_G_LP_SIDE4_D25 = 37.3
+# Remaining Table G.9 cells: Lp = LWA - A'tot for the other two reception
+# points (side 1 at 25 m; side 4 at 5 m).
+EN12354_4_ANNEX_G_LP_SIDE1_D25 = 28.5  # 62,9 - 34,4
+EN12354_4_ANNEX_G_LP_SIDE4_D5 = 44.6   # 72,9 - 28,3
+
+# ---------------------------------------------------------------------------
+# EN 12354-3:2000 Annex C, Figure C.2 - facade-shape level difference ΔLfs
+# (dB). Sample cells transcribed from the figure (verified against the page
+# render; the 2017 DIN EN ISO 12354-3 Tabelle C.1 tabulates identical
+# values). Row = (shape, line_of_sight_m, alpha_w, dLfs_dB).
+# ---------------------------------------------------------------------------
+EN12354_3_ANNEX_C_DLFS: list[tuple[str, float, float, float]] = [
+    ("plane_facade", 1.0, 0.3, 0.0),
+    ("plane_facade", 3.0, 0.9, 0.0),
+    ("gallery_2", 1.0, 0.3, -1.0),
+    ("gallery_3", 2.0, 0.9, 2.0),
+    ("gallery_4", 2.0, 0.6, 1.0),
+    ("gallery_5", 3.0, 0.6, 4.0),
+    ("balcony_6", 1.0, 0.3, -1.0),
+    ("balcony_6", 2.0, 0.6, 1.0),
+    ("balcony_6", 3.0, 0.9, 3.0),
+    ("balcony_7", 2.0, 0.9, 4.0),
+    ("balcony_8", 3.0, 0.3, 1.0),
+    ("terrace_open", 2.0, 0.6, 4.0),
+    ("terrace_closed", 1.0, 0.3, 3.0),
+    ("terrace_closed", 2.0, 0.6, 6.0),
+    ("terrace_closed", 3.0, 0.9, 7.0),
+]
 
 # ---------------------------------------------------------------------------
 # ISO 12999-1:2020 measurement uncertainty. Table 2 (Clause 7.2) tabulates the
@@ -309,6 +373,32 @@ EN12354_4_ANNEX_G_LP_SIDE4_D25 = 37.3
 ISO12999_1_TABLE2_AIRBORNE_A_1000HZ = 1.8
 ISO12999_1_COVERAGE_K_95 = 1.96
 ISO12999_1_RW_A_STANDARD_UNCERTAINTY = 1.2
+
+# ISO 12999-1:2020 Annex B worked example. Table B.1 gives a measured Ri
+# spectrum (21 one-third-octave bands 50-5000 Hz) with the Table 2
+# situation-A uncertainties ui; Table B.2 the resulting one-decimal single
+# numbers (0,1 dB reference-curve shift per B.2) and their uncertainties:
+# correlated per Formulae (B.3)-(B.6), uncorrelated per Formula (B.2).
+ISO12999_1_ANNEX_B_FREQ: list[float] = [
+    50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+    630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000,
+]
+ISO12999_1_ANNEX_B_RI: list[float] = [
+    39.5, 40.3, 41.6, 43.1, 43.3, 43.1, 42.5, 44.7, 48.0, 50.5, 53.2,
+    55.9, 58.1, 60.0, 62.2, 63.7, 65.4, 66.8, 68.4, 68.8, 65.1,
+]
+ISO12999_1_ANNEX_B_UI: list[float] = [
+    6.8, 4.6, 3.8, 3.0, 2.7, 2.4, 2.1, 1.8, 1.8, 1.8, 1.8,
+    1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 1.9, 2.0, 2.4, 2.8,
+]
+ISO12999_1_ANNEX_B_RW = 57.4               # one-decimal Rw (B.2)
+ISO12999_1_ANNEX_B_RW_C50_5000 = 56.4      # one-decimal Rw + C50-5000
+ISO12999_1_ANNEX_B_RW_CTR50_5000 = 51.1    # one-decimal Rw + Ctr,50-5000
+ISO12999_1_ANNEX_B_U_CORR_RW = 1.9         # u(Rw), correlated (B.6)
+ISO12999_1_ANNEX_B_U_CORR_C = 2.1          # u(Rw+C50-5000), correlated (B.5)
+ISO12999_1_ANNEX_B_U_CORR_CTR = 2.6        # u(Rw+Ctr,50-5000), correlated
+ISO12999_1_ANNEX_B_U_UNCORR_C = 0.6        # u(Rw+C50-5000), uncorrelated (B.2)
+ISO12999_1_ANNEX_B_U_UNCORR_CTR = 0.8      # u(Rw+Ctr,50-5000), uncorrelated
 
 # ---------------------------------------------------------------------------
 # ISO 9613-1:1993 Table 1 - pure-tone atmospheric-absorption attenuation
@@ -652,7 +742,10 @@ ECMA418_1_PROX_850HZ = 63.8  # proximity spacing at 850 Hz (Hz)
 # ISO 717-2 Annex C, Table C.1 - measured normalized impact sound pressure
 # level Ln (100-3150 Hz, one-third-octave, laboratory). The worked example
 # gives Ln,w = 79 dB, CI = -11 dB with an unfavourable-deviation sum of
-# 28,0 dB.
+# 28,0 dB. CI = -11 pins the ISO 717-2:2013 Annex C print: the 2020 reprint
+# of this example says CI = -10 because its Ln,sum (83,5238 -> 84) erroneously
+# includes the 3 150 Hz band, contradicting its own A.2.1 (100-2500 Hz);
+# summing 100-2500 Hz gives 83,2613 -> 83 and CI = -11.
 # ---------------------------------------------------------------------------
 ISO717_2_ANNEX_C1_LN: list[float] = [
     62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
@@ -663,6 +756,32 @@ ISO717_2_ANNEX_C1_EXPECTED = {
     "ci": -11,
     "unfavourable_sum": 28.0,
 }
+# Same Table C.1, right-hand columns: the floor WITH the floor covering.
+# Ln,w = 64 dB, CI = -3 dB, unfavourable-deviation sum 30,0 dB.
+ISO717_2_ANNEX_C1_COVERED_LN: list[float] = [
+    59.1, 59.5, 61.6, 63.2, 65.3, 66.5, 67.7, 67.0,
+    67.1, 66.5, 66.1, 62.5, 57.9, 52.7, 47.0, 48.0,
+]
+ISO717_2_ANNEX_C1_COVERED_EXPECTED = {
+    "ln_w": 64,
+    "ci": -3,
+    "unfavourable_sum": 30.0,
+}
+
+# ---------------------------------------------------------------------------
+# ISO 717-2 Annex C, Table C.2 - reduction of impact sound pressure level ΔL
+# of a floor covering on the standard reference floor. The worked example
+# gives ΔLw = 15 dB (Ln,r,w = 63 dB). The module additionally derives
+# CI,Δ = CI,r,0 - CI,r = -11 - (-2) = -9 dB from the normative Table 4
+# reference floor (the printed C.2 chain uses a misprinted 800 Hz reference
+# value 71,0 instead of Table 4's 71,5 and reaches CI,r = -3).
+# ---------------------------------------------------------------------------
+ISO717_2_ANNEX_C2_DELTA_L: list[float] = [
+    3.0, 3.7, 1.9, 3.0, 3.2, 3.5, 4.0, 6.1,
+    6.7, 7.0, 7.7, 10.8, 15.2, 20.3, 25.4, 23.2,
+]
+ISO717_2_ANNEX_C2_DELTA_LW = 15
+ISO717_2_ANNEX_C2_CI_DELTA = -9
 
 # ---------------------------------------------------------------------------
 # ISO 15186-1:2000 - sound insulation measured with sound intensity.
@@ -671,17 +790,26 @@ ISO717_2_ANNEX_C1_EXPECTED = {
 # on the identity that, when the receiving-side intensity levels are chosen so
 # that RI reproduces the ISO 717-1 Annex C airborne curve above, the ISO 717-1
 # engine returns the same Rw = 30 dB through the intensity path. The
-# adaptation term Kc (Annex B) values below are from Formula (B.2)
-# Kc = 10 lg(1 + 61,4/f); Formula (B.1) with the reference room
-# (Sb2 = 117 m², V2 = 81 m³, c = 340 m/s) reduces to (B.2) within 0,001 dB.
+# adaptation term Kc (Annex B) oracle is the standard's own printed
+# Table B.1 (18 one-third-octave rows, 50-2500 Hz, one decimal): the
+# Formula (B.2) approximation Kc = 10 lg(1 + 61,4/f) reproduces every row at
+# 1 dp, and Formula (B.1) with the reference room (Sb2 = 117 m², V2 = 81 m³,
+# c = 340 m/s) reduces to (B.2) within 0,001 dB.
 # ---------------------------------------------------------------------------
 ISO15186_1_REF_LP1 = 85.0  # flat source-room level (dB)
 ISO15186_1_REF_SM = 12.0  # measurement-surface area (m²)
 ISO15186_1_REF_S = 10.0  # specimen area (m²)
 ISO15186_1_REF_RI = ISO717_1_ANNEX_C_R  # target intensity SRI (16 bands)
 ISO15186_1_REF_RIW = 30  # RI,w through the ISO 717-1 engine
-ISO15186_1_KC_BANDS = (125.0, 250.0, 500.0, 1000.0, 2000.0)
-ISO15186_1_KC_B2 = [1.735, 0.954, 0.503, 0.259, 0.131]  # 10 lg(1+61,4/f), 3 dp
+# Printed Table B.1: (frequency_Hz, Kc_dB) as published (one decimal).
+ISO15186_1_KC_TABLE_B1: list[tuple[float, float]] = [
+    (50.0, 3.5), (63.0, 3.0), (80.0, 2.5), (100.0, 2.1), (125.0, 1.7),
+    (160.0, 1.4), (200.0, 1.2), (250.0, 1.0), (315.0, 0.8), (400.0, 0.6),
+    (500.0, 0.5), (630.0, 0.4), (800.0, 0.3), (1000.0, 0.3), (1250.0, 0.2),
+    (1600.0, 0.2), (2000.0, 0.1), (2500.0, 0.1),
+]
+ISO15186_1_KC_BANDS = tuple(f for f, _ in ISO15186_1_KC_TABLE_B1)
+ISO15186_1_KC_B1_PRINTED = [kc for _, kc in ISO15186_1_KC_TABLE_B1]
 
 # ---------------------------------------------------------------------------
 # ISO 12999-2:2020 - measurement uncertainty for sound absorption.
@@ -913,3 +1041,97 @@ COHERENCE_EXPECTED = COHERENCE_SNR / (1.0 + COHERENCE_SNR)
 # underwater (1 µPa) references: 20·lg(20) = 26.0206 dB.
 # ---------------------------------------------------------------------------
 UW_REFERENCE_OFFSET_DB = 26.020599913279624
+
+# ---------------------------------------------------------------------------
+# EN 12354-5:2009 Annex I - installed structure-borne sound worked examples
+# (octave bands 63-2000 Hz). The printed tables carry one-decimal
+# intermediates, so chained values reproduce within +/-0,15 dB.
+# ---------------------------------------------------------------------------
+EN12354_5_ANNEX_I_BANDS: tuple[float, ...] = (63, 125, 250, 500, 1000, 2000)
+
+# I.2 whirlpool bath (Tables I.6a/I.7). Floor power component: the laboratory
+# characteristic reception-plate levels L_Ws,n,1 (re Y_inf,rec = 5e-6 m/Ns)
+# are corrected to the installed floor (Y_inf,1 = 1.25e-6 m/Ns -> -6,0 dB);
+# path 11 then follows Formula (18a) with the -4 dB area/absorption terms of
+# the example (S_i = S0 = 10 m2). Table I.7 totals the whirlpool at 26 dB(A).
+EN12354_5_I6A_LWSN_FLOOR = [67.6, 67.3, 64.4, 48.4, 42.5, 41.3]
+EN12354_5_I6A_LWSN_INST_FLOOR = [61.6, 61.3, 58.4, 42.4, 36.5, 35.3]
+EN12354_5_I6A_Y_FLOOR = 1.25e-6  # m/(N.s)
+EN12354_5_I6A_DSA_FLOOR = [-26.1, -24.8, -30.3, -36.6, -40.8, -46.6]
+EN12354_5_I6A_R11 = [48.4, 48.9, 57.3, 66.2, 72.9, 81.2]
+EN12354_5_I6A_LNS_11 = [35.4, 33.3, 27.4, 8.8, 0.4, -3.3]
+
+# I.3 flushing cistern (Tables I.8/I.9). Source measured on a reception plate
+# of Y_plate = 5.34e-6 m/Ns; characteristic level L_Ws,c via
+# +10 lg(Y_source/Y_plate) (Y_source = 1.0e-3 m/Ns); D_C per Formula (19c);
+# Dsa per (20b); four paths per Formula (18a); total per Formula (17).
+EN12354_5_I8_PLATE_MOBILITY = 5.34e-6  # m/(N.s)
+EN12354_5_I8_Y_SOURCE = 1.0e-3  # m/(N.s)
+EN12354_5_I8_Y_WALL = 24.1e-6  # m/(N.s)
+EN12354_5_I8_Y_FLOOR = 1.65e-6  # m/(N.s)
+EN12354_5_I8_WALL_LWS = [61.7, 59.8, 47.2, 44.9, 38.8, 27.2]  # measured
+EN12354_5_I8_WALL_INSTALLED = [68.2, 66.3, 53.7, 51.5, 45.4, 33.7]
+EN12354_5_I8_WALL_LWSC = [84.4, 82.5, 69.9, 67.6, 61.6, 49.9]
+EN12354_5_I8_FLOOR_LWS = [57.4, 56.2, 44.0, 42.4, 34.9, 28.9]  # measured
+EN12354_5_I8_FLOOR_INSTALLED = [52.3, 51.1, 38.9, 37.3, 29.8, 23.8]
+EN12354_5_I8_FLOOR_LWSC = [80.1, 78.9, 66.7, 65.1, 57.6, 51.6]
+EN12354_5_I9_DC_WALL = 16.2  # dB, all bands
+EN12354_5_I9_DC_FLOOR = 27.8  # dB, all bands
+EN12354_5_I9_DSA_WALL = [-13.6, -17.3, -17.4, -20.0, -26.9, -32.9]
+EN12354_5_I9_DSA_FLOOR = [-15.5, -19.4, -26.7, -33.2, -39.1, -44.8]
+EN12354_5_I9_S_WALL = 12.8  # m2
+EN12354_5_I9_S_FLOOR = 15.4  # m2
+EN12354_5_I9_R_WALL_FLOOR = [43.0, 46.0, 50.2, 54.7, 64.6, 73.0]
+EN12354_5_I9_R_WALL_WALL = [37.0, 41.2, 35.9, 37.7, 49.0, 57.8]
+EN12354_5_I9_R_FLOOR_FLOOR = [42.4, 45.9, 50.1, 54.7, 64.6, 73.0]
+EN12354_5_I9_R_FLOOR_WALL = [29.1, 32.3, 43.7, 53.5, 62.1, 70.1]
+EN12354_5_I9_LNS_WALL_FLOOR = [33.8, 32.6, 15.9, 11.7, 2.6, -11.4]
+EN12354_5_I9_LNS_WALL_WALL = [39.8, 37.4, 30.1, 28.7, 18.3, 3.8]
+EN12354_5_I9_LNS_FLOOR_FLOOR = [19.5, 18.7, 9.7, 9.9, -1.5, -10.3]
+EN12354_5_I9_LNS_FLOOR_WALL = [32.8, 32.3, 16.1, 11.1, 1.0, -7.4]
+EN12354_5_I9_LNS_TOTAL = [41.4, 39.6, 30.5, 28.9, 18.5, 4.4]
+EN12354_5_I9_LNS_TOTAL_A = 29  # dB(A)
+EN12354_5_ANNEX_I_TOL = 0.15  # dB - one-decimal table intermediates
+
+# ---------------------------------------------------------------------------
+# ISO 9611:1996 - characterization of structure-borne sound sources by the
+# free velocity of the contact points. Equation (9) mean velocity level over
+# N positions (energy mean), v0 = 5e-8 m/s (clause 7). No numeric example in
+# the standard; the anchor is the closed form recomputed by hand:
+# levels 70/72/74 dB -> 10 lg((10^7 + 10^7.2 + 10^7.4)/3) = 72.3017 dB.
+# ---------------------------------------------------------------------------
+ISO9611_MEAN_LEVELS = (70.0, 72.0, 74.0)
+ISO9611_MEAN_EXPECTED = 72.30174601124772
+ISO9611_FREE_VELOCITY_REFERENCE = 5.0e-8  # m/s
+
+# ---------------------------------------------------------------------------
+# ISO 10140-5:2010+A1 - reference building elements (real printed end-to-end
+# anchors). Annex B Table B.1 gives the sound reduction index R of three
+# airborne reference elements (16 one-third-octave bands 100-3150 Hz) with
+# their printed weighted ratings; Annex C Table C.1 gives the normalized
+# impact sound pressure levels of two lightweight reference floors with
+# their printed Ln,t,r,0,w (CI).
+# ---------------------------------------------------------------------------
+ISO10140_5_B1_HEAVY_WALL_R: list[float] = [
+    40, 40, 40, 40, 41, 43.5, 46.1, 48.5,
+    51, 53.6, 56, 58.4, 61.1, 63.6, 65, 65,
+]
+ISO10140_5_B1_HEAVY_WALL_RATING = (53, -1, -5)  # Rw (C; Ctr)
+ISO10140_5_B1_HEAVY_FLOOR_R: list[float] = [
+    40, 40, 40, 40, 40, 41.8, 44.4, 46.8,
+    49.3, 51.9, 54.4, 56.8, 59.5, 61.9, 64.3, 65,
+]
+ISO10140_5_B1_HEAVY_FLOOR_RATING = (52, -1, -5)
+ISO10140_5_B1_LIGHT_WALL_R: list[float] = [
+    27, 27, 27, 27, 27, 27, 27, 27,
+    28, 30.5, 32.8, 35.1, 37.6, 40, 42.3, 44.6,
+]
+ISO10140_5_B1_LIGHT_WALL_RATING = (33, -1, -2)
+ISO10140_5_C1_FLOOR_C1C2_LN: list[float] = [
+    78, 78, 78, 78, 78, 78, 76, 74, 72, 69, 66, 63, 60, 57, 54, 51,
+]
+ISO10140_5_C1_FLOOR_C1C2_RATING = (72, 0)  # Ln,t,r,0,w (CI)
+ISO10140_5_C1_FLOOR_C3_LN: list[float] = [
+    69, 72, 75, 78, 78, 78, 78, 78, 78, 76, 74, 72, 69, 66, 63, 60,
+]
+ISO10140_5_C1_FLOOR_C3_RATING = (75, -3)

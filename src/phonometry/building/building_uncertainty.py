@@ -535,6 +535,11 @@ def single_number_uncertainty_uncorrelated(
         raise ValueError("band_uncertainties and reference_differences differ in length.")
     if np.any(u_arr < 0):
         raise ValueError("Band uncertainties must be non-negative.")
+    if not np.all(np.isfinite(u_arr)) or not np.all(np.isfinite(d_arr)):
+        raise ValueError(
+            "band_uncertainties and reference_differences must contain only "
+            "finite values."
+        )
     energies = np.power(10.0, d_arr / 10.0)
     weights = energies / energies.sum()
     return float(sqrt(np.sum((weights * u_arr) ** 2)))

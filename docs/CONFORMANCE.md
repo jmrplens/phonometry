@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **198/198 conformance checks pass** across 32 domains and 128 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **210/210 conformance checks pass** across 32 domains and 130 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -122,20 +122,25 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (35/35)</summary>
+<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (42/42)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | ISO 3382-2:2008 5.3.3 | T30 from a synthetic exponential decay (T=1.0 s) | 1 s (+/-1%) | 1 s | 0 s | &#9989; |
 | ISO 18233:2006 (swept-sine method) | Sweep deconvolution recovers a known IIR response | 0 dB in-band error (+/-0.1 dB) | 0.0006 dB | 0.001 dB | &#9989; |
 | ISO 717-1 Annex C, Table C.1 | Weighted sound reduction index Rw (C;Ctr) | Rw 30 (C -2; Ctr -3) | Rw 30 (C -2; Ctr -3) | sum 31.8 dB | &#9989; |
+| ISO 717-1:2020 Annex C, Table C.2 | Enlarged range 50-5000 Hz: Rw (C; Ctr; C50-5000; Ctr,50-5000) | Rw 30 (C -2; Ctr -3; C50-5000 -2; Ctr,50-5000 -4) | Rw 30 (C -2; Ctr -3; C50-5000 -2; Ctr,50-5000 -4) | exact | &#9989; |
 | ISO 717-2 Annex C, Table C.1 | Weighted impact sound pressure level Ln,w (CI) | Ln,w 79 (CI -11; sum 28.0 dB) | Ln,w 79 (CI -11; sum 28.0 dB) | +0 dB | &#9989; |
+| ISO 717-2 Annex C, Table C.1 (covered) | Weighted impact level of the floor WITH covering Ln,w (CI) | Ln,w 64 (CI -3; sum 30.0 dB) | Ln,w 64 (CI -3; sum 30.0 dB) | +0 dB | &#9989; |
+| ISO 717-2 Annex C, Table C.2 | Floor-covering improvement ΔLw and CI,Δ (Formulae (2)/(A.4); CI,Δ from the normative Table 4 floor, not the 2020 print's misprinted C.2 chain) | ΔLw 15 dB; CI,Δ -9 dB (Table 4 reference floor) | ΔLw 15 dB; CI,Δ -9 dB | +0 dB | &#9989; |
 | ISO 354:2003 Eq. 5/8 | Sabine inversion recovers absorption area | 9.212828 m^2 (+/-0 m^2) | 9.212828 m^2 | 0 m^2 | &#9989; |
 | ISO 3382-3:2012 Clause 6.2 | Open-plan spatial decay rate D2,S (-6 dB/doubling) | 6 dB (+/-0 dB) | 6 dB | 0 dB | &#9989; |
 | ISO 16283-3:2016 Clause 3.12 | Facade R'45 isolates the -1.5 dB incidence correction (S=A) | 38.5 dB (+/-0 dB) | 38.5 dB | 0 dB | &#9989; |
 | ISO 10140-2:2010 Formula (2) | Lab airborne R on the ISO 717-1 reference shape -> Rw = 54 | Rw 54 dB | Rw 54 dB | +0 dB | &#9989; |
-| ISO 15186-1:2000 Formula (7) | Intensity RI on the ISO 717-1 reference shape -> RI,w = 30 | RI,w 30 dB | RI,w 30 dB | +0 dB | &#9989; |
-| ISO 15186-1:2000 Annex B | Adaptation term Kc: reference-room (B.1) reduces to (B.2) | max abs(B.1 - B.2) <= 0,001 dB | 2.59e-04 dB (Kc@1k = 0.259 dB) | 2.59e-04 dB | &#9989; |
+| ISO 10140-5:2010+A1 Annex B, Table B.1 | Reference elements end-to-end: printed Rw (C; Ctr) of all three | Rw(C;Ctr) = 53(-1;-5) / 52(-1;-5) / 33(-1;-2) | 53(-1;-5) / 52(-1;-5) / 33(-1;-2) | exact | &#9989; |
+| ISO 10140-5:2010+A1 Annex C, Table C.1 | Reference floors end-to-end: printed Ln,t,r,0,w (CI) of both | Ln,t,r,0,w(CI) = 72(0) / 75(-3) | 72(0) / 75(-3) | exact | &#9989; |
+| ISO 15186-1:2000 Formula (7) | Intensity RI on the ISO 717-1 reference shape -> RI,w = 30 | RI,w 30 dB (scalar anchor RI = 34 dB) | RI,w 30 dB (RI = 34 dB) | +0 dB | &#9989; |
+| ISO 15186-1:2000 Annex B, Table B.1 | Adaptation term Kc: all 18 printed rows; (B.1) reduces to (B.2) | max abs(Kc - Table B.1) <= 0,05 dB (1 dp print) | 0.046 dB (B.1 vs B.2: 4.33e-04 dB) | 0.046 dB | &#9989; |
 | ISO 10052:2021 Clause 3.6 | Survey R' applies the V/7,5 minimum-area rule | 26.197888 dB (+/-0 dB) | 26.197888 dB | 0 dB | &#9989; |
 | ISO 10052:2021 Clause 3.16 | Service-equipment LXY is the 3-position energy average | 32.823329 dB (+/-0 dB) | 32.823329 dB | 0 dB | &#9989; |
 | ISO 10052:2021 Table 4 | Reverberation-index estimate (35 <= V < 60, type g) | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | k = [4.5, 5.0, 5.5, 5.5, 5.5] dB | exact | &#9989; |
@@ -147,7 +152,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | EN 29052-1:1992 Formula 4 | Apparent dynamic stiffness s't = 4π²·m't·fr²  (m't=200 kg/m², fr=25 Hz) | 4.934802 MN/m³ (+/-0.000001 MN/m³) | 4.934802 MN/m³ | 0 MN/m³ | &#9989; |
 | EN 29052-1:1992 clause 8.2 NOTE | Enclosed-gas stiffness s'a·d = 111 MN·mm/m³ (p₀=0,1 MPa, ε=0,9) | 5.55556 MN/m³ (+/-0.0001 MN/m³) | 5.55556 MN/m³ | 0 MN/m³ | &#9989; |
 | EN 29052-1:1992 Formula 2 | Floating-floor natural frequency f0 = (1/2π)√(s'/m')  (s'=10 MN/m³, m'=100 kg/m²) | 50.32921 Hz (+/-0 Hz) | 50.32921 Hz | 0 Hz | &#9989; |
-| ISO 7626-1:2011 Annex A | SDOF driving-point mobility peak |Y(f0)| = 1/c  (c=5 N·s/m) | 0.2 m/(N·s) (+/-0.000001 m/(N·s)) | 0.2 m/(N·s) | 0 m/(N·s) | &#9989; |
+| ISO 7626-1:2011 Annex A | SDOF driving-point mobility peak mag(Y(f0)) = 1/c  (c=5 N·s/m) | 0.2 m/(N·s) (+/-0.000001 m/(N·s)) | 0.2 m/(N·s) | 0 m/(N·s) | &#9989; |
 | ISO 7626-1:2011 Annex A | SDOF static receptance H(0) = 1/k  (k=8000 N/m) | 0.000125 m/N (+/-0.0001%) | 0.000125 m/N | 0 m/N | &#9989; |
 | ISO 7626-1:2011 Table 1 | FRF reciprocity: impedance × mobility = 1  (at 37 Hz) | 1 (= Z·Y) | 1 | 0 | &#9989; |
 | ISO 10846-2:2008 3.17 | Transfer-stiffness level Lk = 20 lg(|k|/k0), k0 = 1 N/m  (|k| = 1 MN/m) | 120 dB (+/-0 dB) | 120 dB | 0 dB | &#9989; |
@@ -158,23 +163,30 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO/TS 7849-1:2009 Formula (12) | Impedance term: L_W − L_v = 10 lg(411/400) at ε = 1, S = S0 | 0.1178 dB (+/-0 dB) | 0.1178 dB | 0 dB | &#9989; |
 | EN 15657:2018 Formula (14) | Reception-plate L_Ws = resonant-plate power P = ωη(mS)⟨v²⟩  (round-trip) | 55.545 dB (+/-0 dB) | 55.545 dB | 0 dB | &#9989; |
 | EN 15657:2018 Formula (13) | Plate loss factor η = 2,2/(f·Ts) at 1 kHz, Ts = 0,3 s | 0.0073 (+/-0) | 0.0073 | 0 | &#9989; |
-| EN 12354-5:2009 Formula (19b/19c) | Coupling term → force-source limit 10 lg(|Ys|/Re{Yi}) as |Ys|≫|Yi| | 40 dB (+/-0.01 dB) | 40.001 dB | 0.001 dB | &#9989; |
-| EN 12354-5:2009 Formula (18b) | Installed power L_Ws,inst = L_Ws,c − D_C  (80 − 10,828 dB) | 69.172 dB (+/-0 dB) | 69.172 dB | 0 dB | &#9989; |
-| EN 12354-5:2009 Formula (18a) | Path SPL area/absorption terms −10 lg(S/S0) − 10 lg(A0/4), S0=A0=10 m² | -3.979 dB (+/-0 dB) | -3.979 dB | 0 dB | &#9989; |
+| EN 15657:2018 Formulae (15)/(17) + EN 12354-5 Annex I.3 | Source conversion chain reproduces Table I.8 (wall, installed) | max abs(L_Ws,inst - Table I.8) <= 0,15 dB | 0.055 dB | 0.055 dB | &#9989; |
+| ISO 9611:1996 eq. (9) | Mean free velocity level (energy mean, v0 = 5e-8 m/s) | 72.3017 dB (+/-0 dB) | 72.3017 dB | 0 dB | &#9989; |
+| EN 12354-5:2009 Formula (19b/19c) | Coupling term → force-source limit 10 lg(mag(Ys)/Re{Yi}) as mag(Ys) ≫ mag(Yi) | 40 dB (+/-0.01 dB) | 40.001 dB | 0.001 dB | &#9989; |
+| EN 12354-5:2009 Annex I.3, Table I.9 | Flushing cistern: four paths + Formula (17) total -> 29 dB(A) | max path/total dev <= 0.15 dB; total 29 dB(A) | 0.055 dB; 29.3 dB(A) | 0.055 dB | &#9989; |
+| EN 12354-5:2009 Annex I.2, Table I.6a | Whirlpool floor component: mobility correction + path 11 | max abs(dev vs Table I.6a) <= 0,15 dB | 0.1 dB | 0.1 dB | &#9989; |
 
 </details>
 
 <details>
-<summary>&#9989; <b>Building prediction &amp; uncertainty</b> — 100% (10/10)</summary>
+<summary>&#9989; <b>Building prediction &amp; uncertainty</b> — 100% (15/15)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | EN 12354-1:2000 Annex H.3 | Airborne prediction R'w (direct + 12 flanking paths) | R'w 52 dB (13 paths) | R'w 52 dB (13 paths, 52.17) | +0.17 dB | &#9989; |
+| EN 12354-1:2000 Annex H.3 (paths) | All 12 printed flanking-path values Rij,w | max abs(Rij,w - printed) <= 0,05 dB | 0.042 dB | 0.042 dB | &#9989; |
+| EN 12354-1:2000 Formula (5b) / Annex H.3 | DnT,w closure from R'w (both H.3 examples -> 54 dB) | DnT,w 54 dB (printed 53,8/54,3) | DnT,w 53.63 / 54.13 dB | -0.17 dB vs printed | &#9989; |
 | EN 12354-2:2000 Annex E.3 | Impact prediction L'n,w = Ln,w,eq - dLw + K | 45 dB (+/-0 dB) | 45 dB | 0 dB | &#9989; |
+| EN 12354-2:2000 Formula (3) / Annex E.3 | Standardized impact level L'nT,w (exact 0,032 V form -> 43 dB) | L'nT,w 43 dB (exact 42,96; E.3 prints 42,8) | L'nT,w 42.96 dB | -0.001 dB | &#9989; |
 | EN 12354-3:2000 Annex F | Facade airborne prediction (R'tr,s,w / D2m,nT,w single numbers) | R'tr,s,w 31 (Ctr -3); D2m,nT,w 33 dB | R'tr,s,w 31 (Ctr -3); D2m,nT,w 33 dB | 0 | &#9989; |
 | EN 12354-4:2000 Annex G / Formula (2) | Radiated LW of a wall+door segment (side 1, low bands) | LW 63/125 Hz [59.8, 61.2] dB (+/-0.1) | LW [59.8, 61.2] dB | 0.038 dB | &#9989; |
-| EN 12354-4:2000 Annex E / Table G.9 | Exterior level from a finite radiating side (side 1, d = 5 m) | 36.6 dB (+/-0.05 dB) | 36.597 dB | -0.003 dB | &#9989; |
+| EN 12354-4:2000 Annex E / Table G.9 | Exterior level of all four Table G.9 reception cells | Lp 36,6 / 28,5 / 44,6 / 37,3 dB (+/-0,05) | Lp 36.6 / 28.5 / 44.6 / 37.3 dB | 0.046 dB | &#9989; |
 | ISO 12999-1:2020 Table 2 | Airborne band uncertainty, situation A @ 1 kHz | 1.8 dB (+/-0 dB) | 1.8 dB | 0 dB | &#9989; |
+| ISO 12999-1:2020 Annex B, Table B.2 | One-decimal single numbers Rw / Rw+C50-5000 / Rw+Ctr,50-5000 | 57.4 / 56.4 / 51.1 dB | 57.4 / 56.4 / 51.1 dB | +0.00 dB | &#9989; |
+| ISO 12999-1:2020 Annex B, Formulae (B.2)/(B.6) | Single-number uncertainties (uncorrelated 0,6/0,8; correlated u(Rw) 1,9) | u_uncorr 0.6 / 0.8 dB; u_corr(Rw) 1.9 dB | 0.60 / 0.79 dB; 1.90 dB | -0.00 dB | &#9989; |
 | ISO 12999-1:2020 Clause 8 / Table 8 | Expanded uncertainty U = 1.96 u (95 % two-sided, Rw sit. A) | 2.352 dB (+/-0 dB) | 2.352 dB | 0 dB | &#9989; |
 | ISO 12999-2:2020 Table 4 / Formula (1) | Absorption coefficient +/-U (k=2), reproducibility, 20 x 1/3-oct bands | U(k=2) = [0.33, 0.26, 0.22, 0.17, 0.13, 0.11, 0.09, 0.08, 0.08, 0.08, 0.08, 0.08, 0.08, 0.09, 0.09, 0.09, 0.1, 0.11, 0.13, 0.16] | U(k=2) = [0.33, 0.26, 0.22, 0.17, 0.13, 0.11, 0.09, 0.08, 0.08, 0.08, 0.08, 0.08, 0.08, 0.09, 0.09, 0.09, 0.1, 0.11, 0.13, 0.16] | exact | &#9989; |
 | ISO 12999-2:2020 Table 5 / Formula (4) | Practical coefficient +/-U (k=2), reproducibility, 5 octave bands | U(k=2) = [0.09, 0.08, 0.08, 0.08, 0.1] | U(k=2) = [0.09, 0.08, 0.08, 0.08, 0.1] | exact | &#9989; |

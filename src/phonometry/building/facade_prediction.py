@@ -306,7 +306,7 @@ def radiated_sound_power(
     lp_in: float | Sequence[float] | np.ndarray,
     area: float,
     c_d: float = -6.0,
-    r_prime_cap: float | None = 40.0,
+    r_prime_cap: float | None = None,
     octave_bands: Sequence[int] | None = None,
 ) -> RadiatedPowerResult:
     """Predict the sound power radiated outside by a segment (EN 12354-4:2000).
@@ -322,8 +322,11 @@ def radiated_sound_power(
     :param area: Segment area ``S``, in m².
     :param c_d: Inside-field diffusivity term ``Cd`` in dB (Annex B: -6 ideal
         diffuse, -5 average industrial building).
-    :param r_prime_cap: Practical maximum on ``R'`` per band, in dB (Annex G
-        uses 40 dB for field situations); ``None`` disables the cap.
+    :param r_prime_cap: Optional practical maximum on ``R'`` per band, in dB.
+        This cap is **not** part of Formula (2)/(3): it appears only as a
+        footnote of the Annex G worked example ("R' limited to 40 dB" for
+        field situations with unavoidable leaks). Pass ``40.0`` to reproduce
+        Annex G; the default ``None`` computes the bare formulas.
     :param octave_bands: Optional octave-band centre frequencies (Hz) matching
         the per-band data; enables the A-weighted single number.
     :return: A :class:`RadiatedPowerResult`.
@@ -361,8 +364,11 @@ def outdoor_attenuation(width: float, height: float, distance: float) -> float:
     Reception point in front of the centre of a rectangular side ``S = width ·
     height`` at perpendicular ``distance`` d. Uses the finite-side Formula (E.2a)
     up to the largest side dimension and the point-source Formula (E.2b) beyond
-    it (they meet within rounding). The ``+6 dB`` for radiation into the
-    quarter-space over hard ground is built into the formula.
+    it, following the Annex E Note 3 switching rule. The two branches do not
+    join continuously at the switch distance: for a square 10 m x 10 m side
+    the step is about -0,7 dB (about -0,3 dB for a 60 m x 10 m side), an
+    artefact of the standard's own simplification. The ``+6 dB`` for radiation
+    into the quarter-space over hard ground is built into the formula.
 
     :param width: Side width ``L``, in m.
     :param height: Side height ``H``, in m.
@@ -377,6 +383,86 @@ def outdoor_attenuation(width: float, height: float, distance: float) -> float:
         return float(-10.0 * log10(_S0 / (pi * d * d)))  # (E.2b)
     corridor = (4.0 * _S0 / (pi * area)) * atan(w / (2.0 * d)) * atan(h / (2.0 * d))
     return float(-10.0 * log10(corridor))  # (E.2a)
+
+
+#: EN 12354-3:2000 Annex C, Figure C.2 — façade-shape level difference ΔLfs
+#: (dB). Keyed by shape; each value maps the line-of-sight height bin
+#: (0: < 1,5 m; 1: 1,5 m to 2,5 m; 2: > 2,5 m) to the (αw ≤ 0,3; 0,6; ≥ 0,9)
+#: triple, or None where the figure prints "does not apply". The 2017 edition
+#: (DIN EN ISO 12354-3, Tabelle C.1) tabulates identical values.
+_DELTA_LFS: dict[str, tuple[tuple[float, float, float] | None, ...]] = {
+    "plane_facade": ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)),
+    "gallery_2": ((-1.0, -1.0, 0.0), None, None),
+    "gallery_3": ((-1.0, -1.0, 0.0), (-1.0, 0.0, 2.0), (1.0, 1.0, 2.0)),
+    "gallery_4": ((0.0, 0.0, 1.0), (0.0, 1.0, 3.0), (2.0, 2.0, 3.0)),
+    "gallery_5": (None, None, (3.0, 4.0, 6.0)),
+    "balcony_6": ((-1.0, -1.0, 0.0), (-1.0, 1.0, 3.0), (1.0, 2.0, 3.0)),
+    "balcony_7": ((0.0, 0.0, 1.0), (0.0, 2.0, 4.0), (2.0, 3.0, 4.0)),
+    "balcony_8": ((1.0, 1.0, 2.0), (1.0, 1.0, 2.0), (1.0, 1.0, 2.0)),
+    "terrace_open": ((1.0, 1.0, 1.0), (3.0, 4.0, 5.0), (4.0, 4.0, 5.0)),
+    "terrace_closed": ((3.0, 3.0, 3.0), (5.0, 6.0, 7.0), (6.0, 6.0, 7.0)),
+}
+
+#: αw grid of the Figure C.2 columns (≤ 0,3; 0,6; ≥ 0,9).
+_DLFS_ALPHAS = (0.3, 0.6, 0.9)
+
+
+def facade_shape_level_difference(
+    shape: str,
+    *,
+    line_of_sight: float = 0.0,
+    absorption: float = 0.3,
+) -> float:
+    """Façade-shape level difference ``ΔLfs`` (EN 12354-3:2000 Annex C).
+
+    Looks up Figure C.2 for the level difference caused by the exterior shape
+    of the façade (gallery, balcony or terrace), as a function of the height
+    of the line of sight from the source on the façade plane and the weighted
+    sound absorption coefficient ``αw`` (EN ISO 11654) of the underside of the
+    balcony/roof above. The value feeds ``delta_l_fs`` of
+    :func:`facade_sound_reduction` (Formula 13). Intermediate ``αw`` values
+    are interpolated linearly between the tabulated 0,3 / 0,6 / 0,9 columns,
+    as the annex allows; outside that range the edge column applies. The
+    2017 edition tabulates the same values (Tabelle C.1).
+
+    Shapes follow the Figure C.2 numbering: ``"plane_facade"`` (1, always
+    0 dB), ``"gallery_2"`` to ``"gallery_5"`` (2-5), ``"balcony_6"`` to
+    ``"balcony_8"`` (6-8) and ``"terrace_open"`` / ``"terrace_closed"`` (9,
+    open or closed fence).
+
+    :param shape: Façade shape key (see above).
+    :param line_of_sight: Height of the line of sight from the source at the
+        façade plane, in m (bins: below 1,5 m; 1,5 m to 2,5 m; above 2,5 m).
+    :param absorption: Weighted absorption coefficient ``αw`` of the underside
+        above the façade (default 0,3 — reflecting).
+    :return: ``ΔLfs``, in dB.
+    :raises ValueError: For an unknown shape, a negative height/absorption, or
+        a shape/height combination the figure marks "does not apply".
+    """
+    try:
+        rows = _DELTA_LFS[shape]
+    except KeyError:
+        valid = ", ".join(sorted(_DELTA_LFS))
+        raise ValueError(f"Unknown facade shape {shape!r}. Valid: {valid}.") from None
+    h = float(line_of_sight)
+    aw = float(absorption)
+    if not (np.isfinite(h) and h >= 0.0):
+        raise ValueError("'line_of_sight' must be a non-negative height in m.")
+    if not (np.isfinite(aw) and 0.0 <= aw <= 1.0):
+        raise ValueError("'absorption' must be an αw between 0 and 1.")
+    if h < 1.5:
+        row_index = 0
+    elif h <= 2.5:
+        row_index = 1
+    else:
+        row_index = 2
+    row = rows[row_index]
+    if row is None:
+        raise ValueError(
+            f"Figure C.2 marks shape {shape!r} as 'does not apply' for a "
+            f"line-of-sight height of {h:g} m."
+        )
+    return float(np.interp(aw, _DLFS_ALPHAS, row))
 
 
 def outdoor_level(

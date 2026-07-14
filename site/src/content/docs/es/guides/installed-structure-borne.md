@@ -7,10 +7,17 @@ La **EN 12354-5:2009** predice el nivel de presión sonora en un recinto recepto
 causado por equipos de servicio del edificio (bombas, ventiladores, ascensores,
 instalaciones de agua) que inyectan **ruido estructural** en el edificio. Cierra
 la cadena de vibroacústica estructural: la fuente se describe por su nivel de
-potencia sonora estructural característica `L_Ws,c`
-([EN 15657](/phonometry/es/guides/structure-borne-power/)), las movilidades
-puntuales de fuente y receptor fijan cuánta potencia se acopla realmente a la
-estructura, y la transmisión del edificio la lleva al recinto receptor.
+potencia sonora estructural característica `L_Ws,c`, derivado de la medición
+sobre placa receptora de EN 15657 mediante la conversión de las Fórmulas
+(15)/(17) y una corrección de movilidad (**no** el nivel bruto inyectado en la
+placa; véase [EN 15657](/phonometry/es/guides/structure-borne-power/)); las
+movilidades puntuales de fuente y receptor fijan cuánta potencia se acopla
+realmente a la estructura, y la transmisión del edificio la lleva al recinto
+receptor. La corrección de movilidad del Anexo I,
+`installed_power_from_reception_plate`, refiere el nivel característico de
+placa receptora `L_Ws,n` al receptor real,
+`L_Ws,inst = L_Ws,n + 10 lg(Y_∞,i / Y_∞,rec)` con `Y_∞,rec = 5·10⁻⁶ m/(N·s)`;
+con la movilidad de la fuente en su lugar da `L_Ws,c` (Anexo I.3, Tabla I.8).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne_es.svg" alt="La cascada de EN 12354-5 por banda de octava: potencia característica, potencia instalada tras el término de acoplamiento, niveles de presión sonora por camino y su total energético" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne_es_dark.svg" alt="La cascada de EN 12354-5 por banda de octava: potencia característica, potencia instalada tras el término de acoplamiento, niveles de presión sonora por camino y su total energético" style="width:82%">
 
@@ -106,6 +113,10 @@ due to service equipment*: el término de acoplamiento (cláusula 4.4.3, Fórmul
 19a-19e), el nivel de potencia estructural instalada (Fórmula 18b), el término de
 ajuste estructura-a-aéreo (cláusula 4.4.4, Fórmulas 20a/20b) y el nivel de presión
 sonora normalizado por camino y su combinación energética (Fórmulas 18a, 17). La
-conformidad se ancla en el límite de fuente de fuerza del término de acoplamiento,
-la identidad de potencia instalada y los términos de área/absorción de la Fórmula
-18a. `D_sa` y `R_ij,ref` son entradas (de medición / EN 12354-1 / Anexos D y F).
+conformidad se ancla en el límite de fuente de fuerza del término de
+acoplamiento y en los ejemplos resueltos del propio Anexo I de la norma: la
+bañera de hidromasaje de I.2 (Tabla I.6a: corrección de movilidad y camino 11)
+y la cisterna de I.3 (Tablas I.8/I.9: conversión de la fuente, los cuatro
+caminos de transmisión, el total de la Fórmula 17 y su cierre a 29 dB(A)),
+dentro del redondeo de ±0,15 dB de los intermedios impresos con un decimal.
+`D_sa` y `R_ij,ref` son entradas (de medición / EN 12354-1 / Anexos D y F).

@@ -1,14 +1,18 @@
 ← [Documentation index](README.md)
 
-# Errata found in published standards and guidance documents
+# Errata found in published sources
 
 During the clean-room implementation of this library, every formula, constant
 and worked example is re-derived and recomputed independently from the source
 documents. That process occasionally surfaces defects in the sources
 themselves: misprints, worked examples that contradict their own normative
 text, and ambiguous wording. This file records each confirmed case with the
-evidence, what the library does about it, and whether it has been reported to
-the issuing body.
+evidence, what the library does about it, and whether it has been reported.
+
+The registry covers every kind of published source the library implements
+from: standards (ISO, IEC, EN), guidance documents and technical reports
+(EASA, ECAC, NRL), textbooks and journal papers. Non-normative sources are
+marked as such in their entry.
 
 Entries describe the specific printed editions cited. A defect listed here is
 not a defect of the method; in every case the intended reading could be

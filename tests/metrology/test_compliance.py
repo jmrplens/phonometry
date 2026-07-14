@@ -93,6 +93,21 @@ def test_stateful_bank_matches_stateless_design() -> None:
         assert a["margin_class1_db"] == pytest.approx(b["margin_class1_db"])
 
 
+def test_coarse_grid_breakpoints_evaluated_exactly() -> None:
+    """The Table 1 breakpoints are evaluated with sosfreqz at their exact
+    frequencies, not interpolated off the grid: even the permitted 16-point
+    floor reproduces the dense-grid verdict and binding margin (interpolation
+    used to yield garbage margins around -190 dB there)."""
+    bank = OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[100, 5000],
+                            filter_type="butter")
+    dense = verify_filter_class(bank)
+    coarse = verify_filter_class(bank, num_points=16)
+    assert coarse["overall_class"] == dense["overall_class"] == 1
+    m_dense = min(b["margin_class1_db"] for b in dense["bands"])
+    m_coarse = min(b["margin_class1_db"] for b in coarse["bands"])
+    assert m_coarse == pytest.approx(m_dense, abs=0.05)
+
+
 def test_invalid_inputs_raise() -> None:
     bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000])
     with pytest.raises(ValueError, match="num_points"):
@@ -183,3 +198,16 @@ def test_1995_rejects_out_of_range_class_and_bad_edition() -> None:
     bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000])
     with pytest.raises(ValueError, match="edition"):
         verify_filter_class(bank, edition="2020")
+
+
+def test_map_breakpoint_reproduces_table_f1() -> None:
+    """IEC 61260-1:2014 Table F.1: the Formula (9) mapping reproduces every
+    printed one-third-octave (b = 3) breakpoint and reciprocal to the five
+    printed decimals."""
+    from phonometry.metrology.compliance import _map_breakpoint
+    from reference_data import IEC61260_TABLE_F1
+
+    for exponent, (omega, reciprocal) in IEC61260_TABLE_F1.items():
+        got = _map_breakpoint(exponent, 3)
+        assert got == pytest.approx(omega, abs=5e-6), exponent
+        assert 1.0 / got == pytest.approx(reciprocal, abs=5e-6), exponent

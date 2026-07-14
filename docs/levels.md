@@ -244,16 +244,22 @@ exceeding both neighbours by 15/8/5 dB (low/mid/high), and
 $K_t$ (Table J.1).
 
 **Residual-noise correction (Clause 10.4).** `residual_sound_correction()`
-applies $L = 10\lg(10^{L'/10} - 10^{L_\text{res}/10})$ (Formula (16)) and flags a
-residual within 3 dB of the measured level as an upper bound only.
-`gaussian_residual_level()` estimates the residual from percentile levels (Annex I).
+applies $L = 10\lg(10^{L'/10} - 10^{L_\text{res}/10})$ (Formula (16)). With a
+residual within 3 dB of the measured level no correction is allowed: the
+*uncorrected* measured level $L'$ is then the reportable value, as an upper
+bound of the specific sound (exposed as `reportable_upper_bound`, with
+`reliable=False`). `gaussian_residual_level()` estimates the residual from
+percentile levels (Annex I) and rejects inverted percentile orderings.
 
 **Measurement uncertainty (Clause 4, Annex F).** `combined_standard_uncertainty()`
 forms $u = \sqrt{\sum (c_j u_j)^2}$ (Formula (2)) and
 `environmental_expanded_uncertainty()` applies $k = 2$ (95 %) or $k = 1.3$ (80 %);
 `residual_correction_uncertainty()` carries the residual-correction sensitivity
 (Formulae (F.7)/(F.8)) and `uncertainty_from_repeated_measurements()` the
-repeated-measurement standard uncertainty (Formulae (17)–(20)).
+repeated-measurement standard uncertainty — the primary energy-domain route
+(Formulae (17)+(19)), with the level-domain Note 2 substitute (Formula (20))
+reported alongside as `approximate_uncertainty` and a warning when the levels
+spread beyond 3 dB, where the substitute grossly inflates.
 
 <details>
 <summary>Show the code for this figure</summary>

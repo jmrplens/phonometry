@@ -17,20 +17,29 @@ graduated adjustment follows (clause 8):
 
 and the rating level over a reference time interval combines the adjusted
 sub-interval levels (clause 8, Note 1). An impulse qualifies when its onset
-rate exceeds 10 dB/s (clauses 4.5-4.7).
+rate exceeds 10 dB/s (clauses 4.5-4.7); non-qualifying level rises receive
+no adjustment (clause 8 applies only "for sounds with onset rates larger
+than 10 dB/s").
 """
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.warnings import PhonometryWarning
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
 from numpy.typing import ArrayLike
+
+
+class ImpulseProminenceWarning(PhonometryWarning):
+    """A supplied level rise does not qualify as an impulse (clause 4.5)."""
 
 # ---------------------------------------------------------------------------
 # Normative constants (NT ACOU 112:2002).
@@ -56,14 +65,20 @@ class ImpulseProminenceResult:
     :ivar onset_rates: Onset rate of each impulse, in dB/s.
     :ivar level_differences: Level difference of each impulse, in dB.
     :ivar per_impulse: Predicted prominence ``P`` of each impulse (Formula 1).
-    :ivar prominence: The governing prominence (the highest ``P``, clause 7).
+    :ivar qualifies: Whether each event qualifies as an impulse: onset rate
+        above 10 dB/s (clause 4.5; clause 8 applies the adjustment "for
+        sounds with onset rates larger than 10 dB/s" only).
+    :ivar prominence: The governing prominence: the highest ``P`` among the
+        qualifying impulses (clause 7), or the highest overall (informational)
+        when none qualifies.
     :ivar adjustment: The LAeq adjustment ``KI``, in dB, of the governing
-        impulse (Formula 2).
+        qualifying impulse (Formula 2); 0 dB when no event qualifies.
     """
 
     onset_rates: np.ndarray
     level_differences: np.ndarray
     per_impulse: np.ndarray
+    qualifies: np.ndarray
     prominence: float
     adjustment: float
 
@@ -108,6 +123,9 @@ def impulse_adjustment(prominence: ArrayLike) -> np.ndarray:
 
     ``KI = 1.8*(P - 5)`` dB for ``P > 5``, else ``0`` dB. The adjustment is made
     to ``LAeq,30min`` on the basis of the single impulse with the highest ``P``.
+    This helper applies the bare Formula 2; the clause 8 onset-rate
+    qualification (> 10 dB/s, clause 4.5) is enforced by
+    :func:`impulse_prominence`.
 
     :param prominence: Predicted prominence ``P``.
     :return: The adjustment ``KI``, in dB, clamped at zero.
@@ -122,8 +140,13 @@ def impulse_prominence(
     """Governing prominence and adjustment of a set of impulses (clauses 7-8).
 
     Evaluates the predicted prominence of each candidate impulse (Formula 1),
-    takes the highest as the governing prominence (clause 7) and derives its
-    ``LAeq`` adjustment (Formula 2).
+    takes the highest among the *qualifying* impulses as the governing
+    prominence (clause 7) and derives its ``LAeq`` adjustment (Formula 2).
+    An event qualifies as an impulse only when its onset rate exceeds
+    10 dB/s (clause 4.5); clause 8 applies the adjustment "for sounds with
+    onset rates larger than 10 dB/s" only, so non-qualifying events cannot
+    produce a ``KI`` (an :class:`ImpulseProminenceWarning` reports them and
+    the adjustment is 0 dB when no event qualifies).
 
     :param onset_rates: Onset rate of each impulse, in dB/s (> 0).
     :param level_differences: Level difference of each impulse, in dB (> 0).
@@ -142,13 +165,28 @@ def impulse_prominence(
             f"got {orate.shape} and {ld.shape}."
         )
     per_impulse = predicted_prominence(orate, ld)
-    governing = float(np.max(per_impulse))
+    qualifies = orate > ONSET_RATE_LIMIT
+    if not np.all(qualifies):
+        warnings.warn(
+            "One or more level rises have onset rates at or below 10 dB/s: "
+            "they do not qualify as impulses (NT ACOU 112, clauses 4.5/8) "
+            "and cannot produce a KI adjustment.",
+            ImpulseProminenceWarning,
+            stacklevel=2,
+        )
+    if np.any(qualifies):
+        governing = float(np.max(per_impulse[qualifies]))
+        adjustment = float(impulse_adjustment(governing))
+    else:
+        governing = float(np.max(per_impulse))  # informational only
+        adjustment = 0.0
     return ImpulseProminenceResult(
         onset_rates=orate,
         level_differences=ld,
         per_impulse=per_impulse,
+        qualifies=qualifies,
         prominence=governing,
-        adjustment=float(impulse_adjustment(governing)),
+        adjustment=adjustment,
     )
 
 

@@ -10,6 +10,7 @@ from .air_absorption import (
 )
 from .impulse_prominence import (
     ImpulseProminenceResult,
+    ImpulseProminenceWarning,
     impulse_adjustment,
     impulse_prominence,
     predicted_prominence,
@@ -30,6 +31,7 @@ from .outdoor_propagation import (
     predicted_receiver_level,
 )
 from .wind_turbine_noise import (
+    WindTurbineNoiseWarning,
     WindTurbineTonalityResult,
     apparent_sound_power_level,
     slant_distance,
@@ -87,7 +89,9 @@ __all__ = [
     "Barrier",
     "DEFAULT_FREQUENCIES",
     "ImpulseProminenceResult",
+    "ImpulseProminenceWarning",
     "OutdoorAttenuation",
+    "WindTurbineNoiseWarning",
     "WindTurbineTonalityResult",
     "air_attenuation",
     "air_attenuation_m",

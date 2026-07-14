@@ -94,6 +94,26 @@ IEC61260_1995_STOPBAND_MIN: list[tuple[float, float, float, float]] = [
     (4.0, 75.0, 70.0, 60.0),
 ]
 
+# IEC 61260-1:2014 Table F.1 (informative annex F): normalized frequency
+# breakpoints of the one-third-octave-band (b = 3) acceptance masks, i.e. the
+# Formula (9) mapping of the octave-band breakpoints G**x, printed to five
+# decimals with their reciprocals. The best published oracle for the
+# Formula (9)/(10) breakpoint mapping. Rows: exponent x -> (Omega, 1/Omega).
+IEC61260_TABLE_F1: dict[float, tuple[float, float]] = {
+    1 / 8: (1.02667, 0.97402),
+    1 / 4: (1.05575, 0.94719),
+    3 / 8: (1.08746, 0.91958),
+    1 / 2: (1.12202, 0.89125),
+    1.0: (1.29437, 0.77257),
+    2.0: (1.88173, 0.53143),
+    3.0: (3.05365, 0.32748),
+    4.0: (5.39195, 0.18546),
+}
+# IEC 61260-1:2014 E.3.4 worked rounding examples (nominal frequencies for
+# b = 24): 41,567 Hz -> 41,6 Hz (MSD 4: three significant figures) and
+# 8 785,2 Hz -> 8 800 Hz (MSD 8: two significant figures).
+IEC61260_E34_EXAMPLES = [(41.567, 41.6), (8785.2, 8800.0)]
+
 # ---------------------------------------------------------------------------
 # ISO 7196:1995 Table 2 - nominal G-weighting response at one-third-octave
 # frequencies (standard page 2). Row = (freq_Hz, dB). Annex A.3 gives the
@@ -468,6 +488,24 @@ ISO9613_2_GROUND_AGR_250_POROUS = 17.2  # 2*(-1,5 + 10,1), hs=hr=0, Gs=Gr=1
 ISO9613_2_BARRIER_CAP_SINGLE = 20.0  # clause 7.4 single-diffraction limit, dB
 ISO9613_2_BARRIER_CAP_DOUBLE = 25.0  # clause 7.4 double-diffraction limit, dB
 
+# ISO 9613-2:1996 Table 2: atmospheric attenuation coefficient alpha (dB/km)
+# for the eight nominal octave bands, six atmospheric conditions, transcribed
+# from the printed table (page 5). The values come from ISO 9613-1 at the
+# EXACT base-10 midband frequencies; the recomputation agrees with every cell
+# to half a unit of the last printed digit, except 15 degC / 80 % / 1 kHz
+# where the print gives 4,1 while the exact-midband recomputation yields
+# 4,151 (rounds to 4,2) -- a print-side rounding artifact of ~0.05 dB/km.
+ISO9613_2_TABLE2_BANDS = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
+ISO9613_2_TABLE2 = {
+    # (temperature degC, relative humidity %): alpha per band, dB/km
+    (10.0, 70.0): (0.1, 0.4, 1.0, 1.9, 3.7, 9.7, 32.8, 117.0),
+    (20.0, 70.0): (0.1, 0.3, 1.1, 2.8, 5.0, 9.0, 22.9, 76.6),
+    (30.0, 70.0): (0.1, 0.3, 1.0, 3.1, 7.4, 12.7, 23.1, 59.3),
+    (15.0, 20.0): (0.3, 0.6, 1.2, 2.7, 8.2, 28.2, 88.8, 202.0),
+    (15.0, 50.0): (0.1, 0.5, 1.2, 2.2, 4.2, 10.8, 36.2, 129.0),
+    (15.0, 80.0): (0.1, 0.3, 1.1, 2.4, 4.1, 8.3, 23.7, 82.8),
+}
+
 # ---------------------------------------------------------------------------
 # ISO 9612:2009 occupational noise exposure — the three normative worked
 # examples (Annexes D/E/F), reproduced digit-for-digit by the test suite. Each
@@ -830,6 +868,63 @@ ISO389_7_REF_FREE_1KHZ = 2.4  # dB, ISO 389-7 Table 1 free-field
 GUM_ADDITIVE_UC = 2.0  # combined standard uncertainty, additive model
 GUM_COVERAGE_K99_16 = 2.92  # coverage factor t at p=0.99, v=16
 GUM_WELCH_VEFF = 40.0  # Welch-Satterthwaite effective degrees of freedom
+
+# GUM Annex H.1 end-gauge calibration, end to end: model
+# l = lS + d - lS*(dalpha*theta + alphaS*dtheta) with the H.1.3 inputs
+# (value, u, dof): lS = 50 000 623 nm (25, 18); d = 215 nm (9.7, 25.6);
+# alphaS = 11.5e-6 /degC (1.2e-6, inf); theta = -0.1 degC (0.41, inf);
+# dalpha = 0 (0.58e-6, 50); dtheta = 0 (0.029, 2). Published results
+# (H.1.4-H.1.6): l = 50 000 838 nm; uc = 32 nm (unrounded 31.71);
+# contributions (25, 9.7, 0, 0, 2.9, 16.7) nm -- alphaS and theta are
+# genuinely flat directions at the estimates; veff = 16 (truncated from
+# 16.66, G.4.2); U99 = 93 nm at k(0.99, 16) = 2.92 (interpolation at the
+# untruncated veff, permitted by G.4.2 NOTE 1, gives 92.1 nm).
+GUM_H1_INPUTS = [
+    # (value, standard uncertainty, dof)
+    (50_000_623.0, 25.0, 18.0),        # lS, nm
+    (215.0, 9.7, 25.6),                # d, nm
+    (11.5e-6, 1.2e-6, math.inf),       # alphaS, 1/degC
+    (-0.1, 0.41, math.inf),            # theta, degC
+    (0.0, 0.58e-6, 50.0),              # dalpha, 1/degC
+    (0.0, 0.029, 2.0),                 # dtheta, degC
+]
+GUM_H1_VALUE = 50_000_838.0            # nm
+GUM_H1_UC = 31.71                      # nm (printed 32)
+GUM_H1_CONTRIBUTIONS = [25.0, 9.7, 0.0, 0.0, 2.9, 16.7]
+GUM_H1_VEFF = 16.66                    # (printed truncated to 16)
+GUM_H1_U99 = 92.1                      # nm at the untruncated veff (printed 93)
+
+# GUM Annex H.2 simultaneous resistance/reactance measurement: the only
+# published numeric oracle of the correlated Equation (16) path. Five
+# simultaneous observation sets of (V / V, I / mA, phi / rad) from Table H.2;
+# their means, standard deviations of the means and sample correlation
+# coefficients (r(V,I) = -0.36, r(V,phi) = 0.86, r(I,phi) = -0.65 after
+# 2-decimal print rounding) feed R = (V/I) cos phi, X = (V/I) sin phi,
+# Z = V/I. Published results (Table H.3): R = 127.732 ohm, uc = 0.071;
+# X = 219.847 ohm, uc = 0.295; Z = 254.260 ohm, uc = 0.236. The uc reproduce
+# with the correlations computed from the observations; the 2-decimal printed
+# r values give uc(R) = 0.070 (their rounding).
+GUM_H2_OBSERVATIONS = [
+    (5.007, 19.663, 1.0456),
+    (4.994, 19.639, 1.0438),
+    (5.005, 19.640, 1.0468),
+    (4.990, 19.685, 1.0428),
+    (4.999, 19.678, 1.0433),
+]
+GUM_H2_RESULTS = {                     # measurand: (value / ohm, uc / ohm)
+    "R": (127.732, 0.071),
+    "X": (219.847, 0.295),
+    "Z": (254.260, 0.236),
+}
+
+# GUM Supplement 1 clause 9.2 additive model Y = X1+X2+X3+X4: the 95 %
+# probabilistically symmetric coverage intervals. Table 2 (standard Gaussian
+# inputs): +/-3.92 (analytic; GUF identical). Table 3 (rectangular inputs of
+# unit standard deviation): u(y) = 2.00 and +/-3.88, analytically
+# 2*sqrt(3)*(2 - (3/5)^(1/4)) = 3.8807 (Annex E).
+GUMS1_TABLE2_INTERVAL_95 = 3.92
+GUMS1_TABLE3_INTERVAL_95 = 3.88
+GUMS1_TABLE3_U = 2.00
 
 # ---------------------------------------------------------------------------
 # Noise-induced hearing loss - ISO 1999:2013, Annex D worked examples (dB).
@@ -1264,6 +1359,69 @@ ISO20065_E3_FG = {
 # fD bottoms out at 21 Hz at the reference fT = 212 Hz (the |lg| minimum).
 ISO20065_FD_212 = 21.00
 ISO20065_FD_137 = 24.09
+
+# ---------------------------------------------------------------------------
+# DIN 45681:2005-03 Anhang I, Beispiel I.3 -- wind-energy-plant example (the
+# parent standard's second end-to-end oracle, independent of the ISO/PAS 20065
+# Annex E combustion-engine example above). Line spacing 2.6917 Hz.
+# ---------------------------------------------------------------------------
+# Tabelle I.9: the 39 narrow-band lines (fi, Li) of the critical band about
+# the 298.8 Hz decisive tone of spectrum j = 24 (of 53).
+DIN45681_I9_FREQUENCIES = [
+    253.0, 255.7, 258.4, 261.1, 263.8, 266.5, 269.2, 271.9, 274.5, 277.2,
+    279.9, 282.6, 285.3, 288.0, 290.7, 293.4, 296.1, 298.8, 301.5, 304.2,
+    306.8, 309.5, 312.2, 314.9, 317.6, 320.3, 323.0, 325.7, 328.4, 331.1,
+    333.8, 336.5, 339.1, 341.8, 344.5, 347.2, 349.9, 352.6, 355.3,
+]
+DIN45681_I9_LEVELS = [
+    37.83, 38.45, 38.23, 38.74, 40.37, 47.09, 45.59, 43.27, 46.73, 46.54,
+    51.81, 49.74, 50.95, 52.50, 55.45, 55.32, 61.55, 66.68, 64.77, 57.80,
+    55.75, 43.29, 46.26, 47.47, 46.22, 40.64, 38.10, 42.13, 46.34, 39.03,
+    37.42, 42.59, 41.93, 41.81, 50.24, 52.30, 48.38, 36.27, 40.63,
+]
+DIN45681_LINE_SPACING = 2.6917
+# Tabelle I.10 decisive-tone row (j = 24, k = 2): fT, dL, LS, LT, LG, av, u.
+DIN45681_I10_DECISIVE = (298.8, 12.52, 41.71, 68.10, 57.68, -2.10, 3.18)
+# Tabelle I.10 rows k = 4 and k = 5 (705.2 / 732.1 Hz) share one critical
+# band; both lie below 1000 Hz and their spacing (26.9 Hz) is below the
+# Formula (19) separation frequency, so the print combines them into the
+# "5 FG" row: (fT, dL, LS, LT_FG, LG, av, u).
+DIN45681_I10_K4 = (705.2, 1.35, 39.35, 55.12)     # (fT, dL, LS, LT)
+DIN45681_I10_K5 = (732.1, 1.51, 38.26, 54.23)
+DIN45681_I10_5FG = (732.1, 3.22, 38.26, 55.95, 55.28, -2.55, 3.67)
+# Tabelle I.11 (parameters of the 53 spectra), rows j = 45 and j = 48:
+# (fT, dL, LS, LT, LG, av, u). The from-levels chain (Formulae (12)-(14))
+# reproduces the printed dL/LG/av columns.
+DIN45681_I11_J45 = (258.4, 3.04, 42.24, 59.11, 58.14, -2.08, 2.69)
+DIN45681_I11_J48 = (228.8, 6.11, 38.32, 58.24, 54.19, -2.06, 3.00)
+# Tabelle I.6 row "6 FG" (combustion-engine spectrum 1, the ISO Annex E
+# example): tones k = 6/7/8 (LT = 78.31 / 75.00 / 79.75 dB) share the 592.2 Hz
+# critical band. The printed dL = 9.12 dB reproduces from the *plain*
+# Formula (17) energy sum of the three tone levels (82.87 dB) through the
+# audibility chain at 592.2 Hz (LS = 59.53); the printed LT column (81.11 dB)
+# is consistent with the Anmerkung-2 shared-line dedupe instead and does NOT
+# reproduce the printed dL -- the two printed cells contradict each other, so
+# only the dL chain is pinned.
+DIN45681_I6_6FG_TONE_LEVELS = [78.31, 75.00, 79.75]
+DIN45681_I6_6FG = (592.2, 9.12, 59.53, -2.40)     # (fT, dL, LS, av)
+# Anhang I.3 Step 3/5: mean audibility over the 53 spectra and the resulting
+# tone adjustment (DIN Abschnitt 6 Tabelle 1 == ISO 1996-2 Table J.1).
+DIN45681_I3_MEAN_AUDIBILITY = 6.38
+DIN45681_I3_KT = 4
+# Tabelle A.1 (informative): printed critical bandwidths dfc (Hz, integer)
+# of the frequency groups at the tabulated tone frequencies fT. Every row
+# matches Formula (2) to <= 0.5 Hz except 250 Hz, where the print gives
+# 105 Hz while Formula (2) yields 104.47 Hz (integer-rounds to 104); the
+# table cites 5.2 for the computation, so the 250 Hz cell is a print quirk
+# (possibly carried over from Zwicker's literature table).
+DIN45681_A1_BANDWIDTHS = [
+    (100.0, 101.0), (150.0, 102.0), (250.0, 105.0), (350.0, 109.0),
+    (450.0, 114.0), (570.0, 122.0), (700.0, 133.0), (840.0, 145.0),
+    (1000.0, 162.0), (1170.0, 182.0), (1370.0, 207.0), (1600.0, 239.0),
+    (1850.0, 277.0), (2150.0, 325.0), (2500.0, 386.0), (2900.0, 460.0),
+    (3400.0, 559.0), (4000.0, 685.0), (4800.0, 867.0), (5800.0, 1111.0),
+    (7000.0, 1426.0), (8500.0, 1851.0), (10500.0, 2463.0), (13500.0, 3469.0),
+]
 
 # ---------------------------------------------------------------------------
 # Psychoacoustic annoyance (Fastl & Zwicker Eq. 16.2-16.4; Widmann 1992) and

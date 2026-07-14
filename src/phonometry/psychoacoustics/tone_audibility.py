@@ -40,12 +40,16 @@ against the parent standard DIN 45681:2005-03.
 **Whole-spectrum detection.** :func:`analyze_spectrum` runs the full front-end
 over a spectrum — mean narrow-band level per line, peak detection (Clause 5.3.8
 Step 1), tone level, the distinctness test (Clause 5.3.4) and audibility — and
-returns the distinct, audible tones. :func:`combined_tone_level` performs the
-multi-tone "FG" combination (Formula (17)) for tones sharing a critical band.
-On the Annex E example these recover the three tones and their combined tone
-level ``LT = 72.15 dB``. A decisive audibility reproduced exactly needs the
-*complete* narrow-band spectrum: a spectrum truncated to one critical band
-mis-estimates the mean narrow-band level of tones near its edges.
+returns the distinct, audible tones. It then applies Step 3: tones sharing a
+critical band have their tone levels energy-summed (Formula (17), via
+:func:`combined_tone_level`, shared lines counted once) into an "FG" entry
+rated at the most audible member, unless the exactly-two-tones-below-1000-Hz
+exception (Formulae (18)/(19)) keeps them separate. On the Annex E example
+this recovers the three tones, their combined tone level ``LT = 72.15 dB``
+and the decisive FG audibility ``ΔL = 9.18 dB``. A decisive audibility
+reproduced exactly needs the *complete* narrow-band spectrum: a spectrum
+truncated to one critical band mis-estimates the mean narrow-band level of
+tones near its edges.
 
 **Two tones below 1000 Hz.** When *exactly two* tones share a critical band and
 both lie below 1000 Hz, the ear can still resolve them if their spacing exceeds
@@ -67,6 +71,13 @@ averaged, the extended uncertainty **shall** be taken into consideration.
 A-weighted per IEC 61672-1 before the analysis. This module is
 weighting-agnostic — pass A-weighted levels (the Annex E oracles are
 A-weighted); it does not apply the weighting itself.
+
+**Application frequency range.** The functions accept any positive tone
+frequency, but the standards state narrower ranges: DIN 45681:2005-03 (5.3.2)
+restricts the method to ``fT >= 90 Hz`` and the ISO/PAS 20065 scope starts at
+50 Hz; the two-tone separation frequency (Formula (19)) is printed for
+``fT < 1000 Hz`` (with a lower bound of 88 Hz in the DIN print, 50 Hz in the
+ISO one). Results outside these ranges are extrapolations.
 
 **Distinctness edge steepness (DIN-vs-ISO print difference).** The 5.3.4
 edge-steepness test follows the DIN 45681 ``fT/sqrt(2)``-on-both-edges
@@ -232,19 +243,25 @@ def energy_sum_level(
     *,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
-    """Energy sum of the tonal spectral lines with window correction (Formula (8)).
+    """Energy sum of the tonal spectral lines with window correction (Formulae (7)/(8)).
 
-    ``LT = 10·lg(Σ 10^(Li/10)) + 10·lg(Δf/Δfe)`` dB, the tone level from the
-    ``K`` lines carrying tone energy. The window correction ``10·lg(Δf/Δfe)`` is
-    ``−1.76 dB`` for a Hanning window (``Δfe = 1.5·Δf``, Annex A) and ``0 dB``
-    for a rectangular window (``Δfe = Δf``). (The mean narrow-band level ``LS``
-    of Formula (6) is the analogous *energy average*; :func:`mean_narrowband_level`
-    and :func:`tone_level` derive ``LS`` and ``LT`` from a critical-band spectrum.)
+    For a single line (``K = 1``) the tone level is that line's level with *no*
+    bandwidth correction, ``LT = L1`` (Formula (7)). For ``K > 1`` lines,
+    ``LT = 10·lg(Σ 10^(Li/10)) + 10·lg(Δf/Δfe)`` dB (Formula (8)); the window
+    correction ``10·lg(Δf/Δfe)`` is ``−1.76 dB`` for a Hanning window
+    (``Δfe = 1.5·Δf``, Annex A) and ``0 dB`` for a rectangular window
+    (``Δfe = Δf``). The DIN 45681:2005-03 Annex J reference program applies the
+    same split (``If l = 1 Then LT = 10*Log(LT)/Log(10)`` with no ``−1.76``).
+    (The mean narrow-band level ``LS`` of Formula (6) is the analogous *energy
+    average* and always carries the correction; :func:`mean_narrowband_level`
+    and :func:`tone_level` derive ``LS`` and ``LT`` from a critical-band
+    spectrum.)
 
     :param line_levels: Narrow-band levels ``Li`` of the tonal lines to sum,
         in dB.
     :param effective_bandwidth_factor: ``Δfe/Δf``; 1.5 for a Hanning window
-        (the default), 1.0 for a rectangular window.
+        (the default), 1.0 for a rectangular window. Ignored for a single
+        line (Formula (7) applies no correction at ``K = 1``).
     :return: Corrected energy-sum level, in dB.
     :raises ValueError: If ``line_levels`` is empty/non-finite or the factor is
         not positive/finite.
@@ -255,6 +272,10 @@ def energy_sum_level(
     if not np.all(np.isfinite(levels)):
         raise ValueError("'line_levels' must be finite.")
     factor = _positive(effective_bandwidth_factor, "effective_bandwidth_factor")
+    if levels.size == 1:
+        # Formula (7): a single-line tone takes its level unchanged; the
+        # bandwidth correction applies only to sums of K > 1 lines.
+        return float(levels[0])
     total = np.sum(10.0 ** (levels / 10.0))
     return float(10.0 * np.log10(total) - 10.0 * np.log10(factor))
 
@@ -387,7 +408,8 @@ def tone_level(
     The tone energy is carried by the run of lines contiguous with the peak at
     ``tone_frequency`` whose level stays above both ``LS + 6 dB`` and
     ``L_peak − 10 dB`` (Clause 5.3.3); their energy sum with the window
-    correction is ``LT`` (via :func:`energy_sum_level`).
+    correction is ``LT`` (via :func:`energy_sum_level`). A single-line run
+    takes its level unchanged (Formula (7), no bandwidth correction).
 
     :param levels: Narrow-band levels ``Li`` of the spectrum, in dB.
     :param frequencies: The line frequencies, in Hz (strictly increasing).
@@ -538,6 +560,39 @@ def _detect_tones(
     return tones
 
 
+def _step3_groups(
+    tones: "list[tuple[float, float, float, float, float, list[int]]]",
+) -> "list[tuple[int, ...]]":
+    """Clause 5.3.8 Step 3 clusters of tones sharing a critical band.
+
+    Each tone's own critical band yields a candidate set; the bandwidth grows
+    with frequency, so the candidate sets of a chain of tones need not be
+    identical even when they overlap. Candidates sharing a member therefore
+    merge into one connected component, giving exactly one FG entry per
+    cluster. Clusters of exactly two tones below 1000 Hz further apart than
+    fD are rated separately (Formulae (18)/(19)) and yield no FG entry.
+    """
+    clusters: list[set[int]] = []
+    for band_tone in tones:
+        f1, f2 = critical_band_corners(band_tone[0])
+        members = {i for i, t in enumerate(tones) if f1 <= t[0] <= f2}
+        if len(members) < 2:
+            continue
+        for c in [c for c in clusters if c & members]:
+            members |= c
+        clusters = [c for c in clusters if not (c & members)]
+        clusters.append(members)
+    groups: list[tuple[int, ...]] = []
+    for cluster in clusters:
+        members_t = tuple(sorted(cluster))
+        if len(members_t) == 2:
+            (ta, tb) = (tones[members_t[0]], tones[members_t[1]])
+            if resolve_tones_separately(ta[0], tb[0], ta[4], tb[4]):
+                continue  # rated separately, no FG entry
+        groups.append(members_t)
+    return groups
+
+
 def analyze_spectrum(
     levels: "ArrayLike",
     frequencies: "ArrayLike",
@@ -548,22 +603,33 @@ def analyze_spectrum(
     """Detect and rate the audible tones of a narrow-band spectrum (Clause 5.3.8).
 
     Runs the full front-end: the mean narrow-band level (Formula (6)) per line,
-    peak detection (Step 1), the tone level (Formula (8)), the distinctness test
-    (Clause 5.3.4) and the audibility (Formula (14)). Only distinct tones with a
-    positive audibility are returned, bundled by :func:`assess_tones`.
+    peak detection (Step 1), the tone level (Formulae (7)/(8)), the distinctness
+    test (Clause 5.3.4) and the audibility (Formula (14)). Only distinct tones
+    with a positive audibility are returned, bundled by :func:`assess_tones`.
 
-    The multi-tone "FG" combination (Formula (17)) is provided separately by
-    :func:`combined_tone_level`. Reproducing a decisive audibility exactly
-    requires the *complete* narrow-band spectrum — a spectrum truncated to a
-    single critical band gives the wrong mean narrow-band level for tones near
-    its edges.
+    **Same-band combination (Step 3).** When several audible tones fall in one
+    critical band, the clause *requires* their tone levels to be energy-summed
+    (Formula (17), shared lines counted once) and the audibility recomputed at
+    the frequency of the most audible member — unless *exactly two* tones below
+    1000 Hz are spaced further apart than the separation frequency ``fD``
+    (Formulae (18)/(19)), in which case they stay rated separately. The result
+    therefore contains the individual audible tones *plus* one combined "FG"
+    entry per multi-tone critical band, mirroring the DIN 45681 Annex I tables;
+    :attr:`ToneAudibilityResult.group_sizes` tells them apart (1 = single tone,
+    ``N >= 2`` = FG entry combining ``N`` tones). The decisive audibility
+    (Step 4) is the maximum over all entries, FG entries included.
+
+    Reproducing a decisive audibility exactly requires the *complete*
+    narrow-band spectrum — a spectrum truncated to a single critical band gives
+    the wrong mean narrow-band level for tones near its edges.
 
     :param levels: Narrow-band levels ``Li`` of the spectrum, in dB.
     :param frequencies: The line frequencies, in Hz (strictly increasing).
     :param line_spacing: Line spacing (frequency resolution) ``Δf``, in Hz.
     :param effective_bandwidth_factor: ``Δfe/Δf``; 1.5 for a Hanning window
         (the default), 1.0 for a rectangular window.
-    :return: A :class:`ToneAudibilityResult` of the detected audible tones.
+    :return: A :class:`ToneAudibilityResult` of the detected audible tones and
+        their same-band FG combinations.
     :raises ValueError: If the spectrum is invalid or no audible tone is found.
     """
     lev, freq = _validate_spectrum(levels, frequencies)
@@ -571,12 +637,13 @@ def analyze_spectrum(
     factor = _positive(effective_bandwidth_factor, "effective_bandwidth_factor")
     detected = _detect_tones(lev, freq, df, factor)
 
-    tones = []
+    tones = []  # (freq, LT, LS, U, dL, low, high) of each audible tone
     for peak, low, high, ls in detected:
         lt = energy_sum_level(
             lev[low : high + 1], effective_bandwidth_factor=factor
         )
-        if tone_audibility(lt, ls, float(freq[peak]), df) > 0.0:
+        delta = tone_audibility(lt, ls, float(freq[peak]), df)
+        if delta > 0.0:
             # Extended uncertainty U (Clause 6) from the K tone lines and the
             # M noise lines of the final Formula (6) iteration.
             _, kept = _mean_narrowband_level_lines(
@@ -585,15 +652,52 @@ def analyze_spectrum(
             u = audibility_uncertainty(
                 lev[low : high + 1], lev[kept], float(freq[peak]), df
             )
-            tones.append((float(freq[peak]), lt, ls, u))
+            tones.append((float(freq[peak]), lt, ls, u, delta, kept))
     if not tones:
         raise ValueError("No audible tone was detected in the spectrum.")
-    return assess_tones(
-        [t[0] for t in tones],
-        [t[1] for t in tones],
-        [t[2] for t in tones],
+
+    # Clause 5.3.8 Step 3: combine the tone levels of tones sharing a critical
+    # band (Formula (17)), rated at the most audible member — except exactly
+    # two tones below 1000 Hz further apart than fD (Formulae (18)/(19)).
+    groups = _step3_groups(tones)
+
+    entries = [(t[0], t[1], t[2], t[3], 1) for t in tones]
+    for group in groups:
+        anchor = max((tones[i] for i in group), key=lambda t: t[4])
+        lt_fg = combined_tone_level(
+            lev,
+            freq,
+            [tones[i][0] for i in group],
+            [tones[i][2] for i in group],
+            effective_bandwidth_factor=factor,
+        )
+        # Clause 6 note for summated tones: the N summated tone levels stand
+        # in for the K tone-containing lines of the uncertainty.
+        u_fg = audibility_uncertainty(
+            [tones[i][1] for i in group], lev[anchor[5]], anchor[0], df
+        )
+        entries.append((anchor[0], lt_fg, anchor[2], u_fg, len(group)))
+
+    result = assess_tones(
+        [e[0] for e in entries],
+        [e[1] for e in entries],
+        [e[2] for e in entries],
         df,
-        extended_uncertainties=[t[3] for t in tones],
+        extended_uncertainties=[e[3] for e in entries],
+    )
+    return ToneAudibilityResult(
+        tone_frequencies=result.tone_frequencies,
+        tone_levels=result.tone_levels,
+        mean_narrowband_levels=result.mean_narrowband_levels,
+        line_spacing=result.line_spacing,
+        critical_bandwidths=result.critical_bandwidths,
+        lower_corners=result.lower_corners,
+        upper_corners=result.upper_corners,
+        critical_band_levels=result.critical_band_levels,
+        masking_indices=result.masking_indices,
+        audibilities=result.audibilities,
+        extended_uncertainties=result.extended_uncertainties,
+        group_sizes=np.array([e[4] for e in entries], dtype=np.int_),
     )
 
 
@@ -888,6 +992,12 @@ class ToneAudibilityResult:
         when the per-line levels needed to compute them were not available
         (:func:`assess_tones` from bare levels). Clause 6: **shall** be taken
         into consideration when fewer than 12 spectra have been averaged.
+    :ivar group_sizes: Number of tones behind each entry, or ``None`` when the
+        Step 3 combination was not performed (:func:`assess_tones` from bare
+        levels). ``1`` marks an individual tone; ``N >= 2`` marks a combined
+        "FG" entry whose tone level energy-sums ``N`` tones sharing a critical
+        band (Clause 5.3.8 Step 3, Formula (17)), rated at the most audible
+        member's frequency.
     """
 
     tone_frequencies: "NDArray[np.float64]"
@@ -901,6 +1011,7 @@ class ToneAudibilityResult:
     masking_indices: "NDArray[np.float64]"
     audibilities: "NDArray[np.float64]"
     extended_uncertainties: "NDArray[np.float64] | None" = None
+    group_sizes: "NDArray[np.int_] | None" = None
 
     @property
     def audible(self) -> "NDArray[np.bool_]":

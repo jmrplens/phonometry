@@ -133,7 +133,11 @@ to the caller.
 
 The geometry of the screening term fixes the vocabulary — the diffraction edge
 splits the source-to-receiver distance into $d_{ss}$ and $d_{sr}$, and the extra
-path length over the edge is $z = d_{ss} + d_{sr} - d$:
+path length over the edge is $z = d_{ss} + d_{sr} - d$. When the line of sight
+passes *above* the top edge, the standard gives $z$ a negative sign
+(`Barrier(line_of_sight_clear=True)`) and Eq. (14) still applies with
+$K_{met} = 1$: $D_z$ falls continuously from $10 \lg 3 \approx 4.8$ dB at
+grazing incidence to zero as the clearance deepens, never below zero.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry.svg" alt="ISO 9613-2 source-barrier-receiver geometry: a point source at height hs, a barrier whose top edge splits the path into dss and dsr, and a receiver at height hr, with the blocked direct ray and the diffracted ray over the edge, the path difference z and the Dz formula" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry_dark.svg" alt="ISO 9613-2 source-barrier-receiver geometry: a point source at height hs, a barrier whose top edge splits the path into dss and dsr, and a receiver at height hr, with the blocked direct ray and the diffracted ray over the edge, the path difference z and the Dz formula" style="width:92%">
 
@@ -145,9 +149,13 @@ path length over the edge is $z = d_{ss} + d_{sr} - d$:
   1 m reference distance.
 * **Atmospheric absorption** $A_{atm} = \alpha\ d$ (Eq. (8)) with $\alpha$ the
   ISO 9613-1 coefficient — negligible at low frequency, dominant at 8 kHz over
-  long paths. The ISO 9613-2 functions default to 20 °C and 70 % relative
-  humidity — one of the Table 2 reference atmospheres the standard tabulates —
-  while `air_attenuation` itself defaults to the ISO 9613-1 usual 50 %.
+  long paths. $\alpha$ is evaluated at the *exact* base-10 midband behind each
+  nominal band label (7 943.3 Hz for "8 kHz"), the convention behind the
+  ISO 9613-2 Table 2 coefficients (the nominal-frequency evaluation runs
+  ~1.3 % high at 8 kHz). The ISO 9613-2 functions default to 20 °C and 70 %
+  relative humidity — one of the Table 2 reference atmospheres the standard
+  tabulates — while `air_attenuation` itself defaults to the ISO 9613-1
+  usual 50 %.
 * **Ground effect** $A_{gr} = A_s + A_r + A_m$ (Eq. (9)) sums a source, receiver
   and middle region, each from the Table 3 functions $a'/b'/c'/d'$ and its
   ground factor $G$ (0 = hard/reflective, 1 = porous/absorbing). A **negative**
@@ -312,6 +320,7 @@ stacked per-band breakdown with the total overlaid (the figure above).
 | `edge_separation` | float or None | m | `None` | $e$; given ⇒ double diffraction (25 dB cap) |
 | `ground_reflections_by_image` | bool | — | `False` | `True` ⇒ $C_2 = 40$ |
 | `lateral` | bool | — | `False` | `True` ⇒ vertical-edge diffraction (Eq. (13)) |
+| `line_of_sight_clear` | bool | — | `False` | `True` ⇒ the sight line passes above the top edge: the path difference takes a negative sign and Kmet = 1 (text after Eq. (16)) |
 
 The method's stated accuracy is $\pm 1$ to $\pm 3$ dB for broadband noise up to
 1000 m (Table 5). See the [Theory](/phonometry/reference/theory/) page for the full derivation, the

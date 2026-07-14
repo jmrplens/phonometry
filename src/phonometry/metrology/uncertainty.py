@@ -19,6 +19,13 @@ Uncertainty in Measurement*:
 Input quantities are described by :class:`Quantity`; :func:`rectangular`,
 :func:`triangular` and :func:`u_shaped` build Type B quantities from a
 half-width (clause 4.3).
+
+Scope notes: :func:`monte_carlo` runs a **fixed** number of trials and reports
+the probabilistically symmetric interval only -- the adaptive procedure of
+Supplement 1 clause 7.9 and the shortest coverage interval of 5.3.4 are not
+implemented; its inputs are sampled independently (the multivariate-Gaussian
+path of 6.4.8 for non-independent quantities is not implemented -- use
+:func:`combine_uncertainty` with ``correlation`` for correlated budgets).
 """
 
 from __future__ import annotations
@@ -35,7 +42,14 @@ if TYPE_CHECKING:
 
 from numpy.typing import ArrayLike
 
+from .._internal.warnings import PhonometryWarning
+
 Model = Callable[..., float]
+
+
+class UncertaintyWarning(PhonometryWarning):
+    """A GUM propagation fell back outside its nominal assumptions."""
+
 
 #: Recognised probability density functions for the Monte Carlo method.
 DISTRIBUTIONS: tuple[str, ...] = ("gaussian", "rectangular", "triangular", "u-shaped")
@@ -103,7 +117,12 @@ class UncertaintyResult:
     :ivar combined_uncertainty: Combined standard uncertainty ``uc(y)``.
     :ivar sensitivities: Sensitivity coefficients ``ci = df/dxi``.
     :ivar contributions: Per-input contributions ``|ci| u(xi)`` to ``uc(y)``.
-    :ivar effective_dof: Welch-Satterthwaite effective degrees of freedom.
+    :ivar effective_dof: Welch-Satterthwaite effective degrees of freedom
+        (Annex G.4, defined for independent inputs). For a correlated budget
+        with finite input dof it is ``NaN`` (undefined: the GUM has no
+        correlated form and ``expanded()`` then needs an explicit factor);
+        with all-infinite input dof it is ``inf`` (normal-distribution coverage
+        factor), since the GUM defines no correlated Welch-Satterthwaite form.
     :ivar names: Input labels aligned with the arrays above.
     """
 
@@ -114,12 +133,29 @@ class UncertaintyResult:
     effective_dof: float
     names: tuple[str, ...] = field(default=())
 
-    def expanded(self, coverage: float = 0.95) -> tuple[float, float]:
+    def expanded(
+        self, coverage: float = 0.95, *, coverage_factor_override: "float | None" = None
+    ) -> tuple[float, float]:
         """Coverage factor ``k`` and expanded uncertainty ``U = k*uc``.
 
         :param coverage: Coverage probability in (0, 1); ``0.95`` by default.
+        :param coverage_factor_override: Explicit ``k``. Required for a
+            correlated budget with finite input degrees of freedom, where the
+            GUM defines no effective-dof formula (``effective_dof`` is NaN).
         :return: The pair ``(k, U)`` (GUM clause 6, Annex G).
+        :raises ValueError: If the effective dof are undefined and no
+            explicit coverage factor is given.
         """
+        if coverage_factor_override is not None:
+            k = float(coverage_factor_override)
+            return k, k * self.combined_uncertainty
+        if math.isnan(self.effective_dof):
+            raise ValueError(
+                "The effective degrees of freedom are undefined for a "
+                "correlated budget with finite input dof (the GUM defines "
+                "no Welch-Satterthwaite form there): pass an explicit "
+                "coverage_factor_override."
+            )
         k = coverage_factor(coverage, self.effective_dof)
         return k, k * self.combined_uncertainty
 
@@ -169,17 +205,45 @@ class MonteCarloResult:
 
 
 def _sensitivity(model: Model, values: np.ndarray, uncertainties: np.ndarray) -> np.ndarray:
-    """Central-difference sensitivity coefficients ``df/dxi`` (GUM 5.1.3)."""
+    """Central-difference sensitivity coefficients ``df/dxi`` (GUM 5.1.3).
+
+    The step is ``max(u(xi), sqrt(eps) |xi|)`` -- GUM 5.1.4 NOTE 2 itself
+    suggests ``dxi = u(xi)`` -- with a floating-point guard of a few ULP of
+    ``xi`` and an absolute floor for all-zero inputs, so a tiny uncertainty
+    on a large value can no longer underflow the perturbation and silently
+    zero the sensitivity (e.g. ``xi = 1e9``, ``u = 1e-6``).
+    """
+    import warnings
+
     n = values.size
     coeffs = np.empty(n)
+    sqrt_eps = math.sqrt(float(np.finfo(np.float64).eps))
     for i in range(n):
-        # Step scaled to the input uncertainty, with a floor for zero-u inputs.
-        step = (uncertainties[i] if uncertainties[i] > 0.0 else 1.0) * 1e-3
+        # GUM 5.1.4 NOTE 2 suggests the step u(xi); a 64-ULP floor keeps the
+        # perturbation representable for large-magnitude inputs without
+        # abandoning locality (a sqrt(eps)*|xi| floor would probe the model
+        # far outside the uncertainty region for large xi).
+        step = float(uncertainties[i])
+        if step <= 0.0:
+            step = sqrt_eps
+        step = max(step, 64.0 * float(np.spacing(abs(values[i]))))
         up = values.copy()
         down = values.copy()
         up[i] += step
         down[i] -= step
-        coeffs[i] = (model(*up) - model(*down)) / (2.0 * step)
+        f_up = float(model(*up))
+        f_down = float(model(*down))
+        if f_up == f_down and uncertainties[i] > 0.0:
+            warnings.warn(
+                f"The model output does not change when input {i + 1} is "
+                f"perturbed by its evaluation step ({step:.3g}): its "
+                "sensitivity evaluates to exactly zero and its uncertainty "
+                "does not propagate. This is legitimate for genuinely flat "
+                "directions (e.g. GUM H.1) but worth verifying.",
+                UncertaintyWarning,
+                stacklevel=3,
+            )
+        coeffs[i] = (f_up - f_down) / (2.0 * step)
     return coeffs
 
 
@@ -194,7 +258,12 @@ def combine_uncertainty(
     :param quantities: The input :class:`Quantity` objects, in the order the
         model takes its arguments.
     :param correlation: Optional ``N x N`` correlation matrix ``r_ij`` between
-        the inputs; ``None`` treats them as uncorrelated.
+        the inputs; ``None`` treats them as uncorrelated. With a non-identity
+        matrix and finite input dof the effective degrees of freedom are
+        ``NaN`` (undefined; the GUM defines no correlated
+        fallback -- Welch-Satterthwaite holds for independent inputs only)
+        and an :class:`UncertaintyWarning` is issued when finite input dof
+        would otherwise have been propagated.
     :return: An :class:`UncertaintyResult` with ``uc(y)``, the sensitivity
         coefficients, the contributions and the effective degrees of freedom.
     :raises ValueError: for no inputs or a malformed correlation matrix.
@@ -222,17 +291,37 @@ def combine_uncertainty(
     coeffs = _sensitivity(model, values, uncert)
     contributions = np.abs(coeffs) * uncert  # ui(y) = |ci| u(xi)
 
-    if r is None:
+    correlated = r is not None and not np.allclose(r, np.eye(n))
+    if r is None or not correlated:
         variance = float(np.sum(contributions**2))
     else:
         signed = coeffs * uncert
         variance = float(signed @ r @ signed)
     combined = math.sqrt(max(variance, 0.0))
 
-    # Welch-Satterthwaite effective degrees of freedom (Annex G.4).
+    # Welch-Satterthwaite effective degrees of freedom (Annex G.4). Formula
+    # (G.2b) is derived for independent input quantities only and the GUM
+    # defines no correlated form: a correlated budget with finite input dof
+    # therefore carries NO effective dof (NaN), and expanded() requires an
+    # explicit coverage factor from the caller. With all input dof infinite
+    # the output is treated as normal and veff stays infinite.
     dofs = np.array([q.dof for q in quantities], dtype=np.float64)
     finite = np.isfinite(dofs)
-    if combined > 0.0 and np.any(finite & (contributions > 0.0)):
+    if correlated and np.any(finite):
+        effective_dof = math.nan
+        import warnings
+
+        warnings.warn(
+            "Welch-Satterthwaite (GUM G.4.1) is defined for independent "
+            "inputs only and the GUM defines no correlated form: the "
+            "effective degrees of freedom are undefined (NaN) for this "
+            "budget, and expanded() requires an explicit coverage_factor.",
+            UncertaintyWarning,
+            stacklevel=2,
+        )
+    elif correlated:
+        effective_dof = math.inf
+    elif combined > 0.0 and np.any(finite & (contributions > 0.0)):
         terms = np.where(finite, contributions**4 / np.where(finite, dofs, 1.0), 0.0)
         denom = float(np.sum(terms))
         effective_dof = combined**4 / denom if denom > 0.0 else math.inf
@@ -319,10 +408,18 @@ def monte_carlo(
     reports the sample mean, the sample standard deviation and the
     probabilistically symmetric coverage interval (clause 7.7).
 
+    The inputs are sampled **independently**: the Supplement's
+    multivariate-Gaussian path for non-independent quantities (6.4.8) is not
+    implemented (use :func:`combine_uncertainty` with ``correlation`` for a
+    correlated budget). The number of trials is fixed (the adaptive procedure
+    of clause 7.9 is not implemented) and the reported interval is the
+    probabilistically symmetric one (not the 5.3.4 shortest interval).
+
     :param model: The measurement function ``f(x1, ..., xN)`` returning ``y``;
         it must accept array arguments (vectorised over the trials).
     :param quantities: The input :class:`Quantity` objects, in argument order.
-    :param trials: Number of Monte Carlo trials ``M``.
+    :param trials: Number of Monte Carlo trials ``M`` (at least 2; the sample
+        standard deviation needs two values).
     :param coverage: Coverage probability of the reported interval.
     :param seed: Optional seed for the random generator (reproducibility).
     :param keep_samples: Retain the raw output sample on the result (one
@@ -333,8 +430,8 @@ def monte_carlo(
     """
     if len(quantities) == 0:
         raise ValueError("at least one input quantity is required.")
-    if trials <= 0:
-        raise ValueError("trials must be positive.")
+    if trials < 2:
+        raise ValueError("trials must be at least 2.")
     if not 0.0 < coverage < 1.0:
         raise ValueError(f"coverage must be in (0, 1); got {coverage}.")
 

@@ -61,7 +61,15 @@ coverage factor $k = t_p(\nu_\text{eff})$ from the $t$-distribution at the
 (Annex G.4). Here the single Type A input (9 degrees of freedom) pulls
 $\nu_\text{eff}$ down to about 16, so $k = 2.11$ rather than the large-sample
 1.96. Correlated inputs are handled by passing a correlation matrix; a fully
-correlated sum then adds linearly instead of in quadrature.
+correlated sum then adds linearly instead of in quadrature. Because the GUM
+defines Welch–Satterthwaite for *independent* inputs only, a correlated budget
+falls back to $\nu_\text{eff} = \infty$ (GUM 6.3.3): `expanded()` then uses
+the normal-distribution coverage factor, and a warning reports that finite
+input degrees of freedom were not propagated. This chain reproduces the GUM's
+own worked examples end to end: the Annex H.1 end-gauge budget
+($u_c = 31.7$ nm, $U_{99} = 92$ nm against the printed 32/93) and the Annex
+H.2 correlated resistance measurement ($u_c(R) = 0.071\ \Omega$,
+$u_c(X) = 0.295\ \Omega$, $u_c(Z) = 0.236\ \Omega$ from Table H.3).
 
 ## 2. The Monte Carlo method (Supplement 1)
 
@@ -70,6 +78,11 @@ Gaussian assumption for the output can be inaccurate. `monte_carlo` instead
 draws samples of each input from its PDF, evaluates the model over all trials
 and reports the mean, the standard deviation and the **probabilistically
 symmetric coverage interval** (equal probability in each tail, clause 7.7).
+The inputs are sampled independently — the Supplement's multivariate-Gaussian
+path for non-independent quantities (6.4.8) is not implemented, so correlated
+budgets belong to `combine_uncertainty` — the number of trials is fixed (no
+adaptive 7.9 procedure, at least 2 trials) and the interval is the symmetric
+one, not the 5.3.4 shortest interval.
 
 ```python
 import phonometry as ph

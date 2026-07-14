@@ -43,10 +43,12 @@ class WeightingFilter:
             oversampled rate (target >= 144 kHz) so the response stays within
             IEC 61672-1 class 1 tolerances up to 16 kHz. At 48 kHz this
             oversamples x3, keeping the deviation from the analytic curve to
-            about -0.44 dB @16k / -0.85 dB @20k; the plain bilinear design
-            exceeds class 1 limits at 12.5 kHz for fs <= 48 kHz. Defaults to
-            True except in stateful mode (the internal FIR resampling is
-            incompatible with block processing).
+            about -0.44 dB @16k / -0.85 dB @20k. The plain bilinear design
+            still holds class 1 at fs = 44.1/48 kHz (about -2.7 dB at
+            12.5 kHz, inside the +2.0/-5.0 class 1 limits) but degrades to
+            class 2 for fs <= 32 kHz. Defaults to True except in stateful
+            mode (the internal FIR resampling is incompatible with block
+            processing).
         """
         if fs <= 0:
             raise ValueError("Sample rate 'fs' must be positive.")

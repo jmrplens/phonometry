@@ -78,9 +78,71 @@ def test_band_dict_keys_and_deviation_sign() -> None:
 
 
 def test_frequencies_above_nyquist_are_dropped() -> None:
-    """Only Table 3 frequencies below fs/2 are evaluated."""
+    """Only Table 3 rows whose exact frequency is below fs/2 are evaluated.
+
+    At fs = 16 kHz the "8 kHz" row IS evaluated (its exact base-10 frequency,
+    7 943.3 Hz, is below Nyquist) while 10 kHz and above are dropped.
+    """
     result = verify_weighting_class(WeightingFilter(16000, "A"))
-    assert max(b["freq"] for b in result["bands"]) < 8000.0
+    assert max(b["freq"] for b in result["bands"]) == 8000.0
+
+
+def test_low_fs_verdict_is_flagged_range_limited() -> None:
+    """Dropping Table 3 rows that carry finite lower limits (class 1 has them
+    up to 16 kHz) must flag the verdict as range-limited: a 16 kHz-sampled
+    system cannot demonstrate full class-1 conformance over 10 Hz-20 kHz."""
+    result = verify_weighting_class(WeightingFilter(16000, "A"))
+    assert result["range_limited"] is True
+    result_full = verify_weighting_class(WeightingFilter(48000, "A"))
+    assert result_full["range_limited"] is False
+
+
+def test_deviation_evaluated_at_exact_base10_frequency() -> None:
+    """The SOS is evaluated at the exact base-10 frequency behind each nominal
+    label (Table 3 NOTE; IEC 61672-3 subclause 13.3), not at the label itself:
+    the reported deviation at "16 kHz" equals the response at 15 848.9 Hz
+    minus the Table 3 design goal."""
+    import numpy as np
+    from scipy import signal as sg
+
+    wf = WeightingFilter(96000, "A")
+    result = verify_weighting_class(wf)
+    band = next(b for b in result["bands"] if b["freq"] == 16000.0)
+    exact = 10.0 ** (np.round(10.0 * np.log10(16000.0)) / 10.0)  # 15848.93 Hz
+    fs_proc = wf.fs * wf._oversample
+    _, h = sg.sosfreqz(wf.sos, worN=np.array([exact, 1000.0]), fs=fs_proc)
+    response = 20.0 * np.log10(np.abs(h))
+    deviation = (response[0] - response[1]) - (-6.6)  # Table 3 A @ 16 kHz
+    assert band["deviation_db"] == pytest.approx(deviation, abs=1e-9)
+
+
+def test_notch_between_nominals_fails_the_sweep() -> None:
+    """Adversarial 5.5.7 case: an iirnotch at 900 Hz (between the 800 and
+    1000 Hz nominals) leaves every nominal-frequency verdict at class 1 but
+    must fail the between-nominals sweep, so no class can be assigned."""
+    import numpy as np
+    from scipy import signal as sg
+
+    wf = WeightingFilter(48000, "A")
+    fs_proc = wf.fs * wf._oversample
+    b, a = sg.iirnotch(900.0, 30.0, fs=fs_proc)
+    wf.sos = np.vstack([wf.sos, sg.tf2sos(b, a)])
+    result = verify_weighting_class(wf)
+    assert all(bd["class"] == 1 for bd in result["bands"])
+    assert result["between_nominals"]["margin_class1_db"] < 0.0
+    assert result["between_nominals"]["margin_class2_db"] < 0.0
+    assert 800.0 < result["between_nominals"]["worst_freq"] < 1000.0
+    assert result["overall_class"] is None
+
+
+def test_sweep_result_reported_for_compliant_filter() -> None:
+    result = verify_weighting_class(WeightingFilter(48000, "A"))
+    between = result["between_nominals"]
+    assert set(between) == {"worst_freq", "margin_class1_db", "margin_class2_db"}
+    assert between["margin_class1_db"] >= 0.0
+    wf = WeightingFilter(48000, "A")
+    with pytest.raises(ValueError, match="sweep_points"):
+        verify_weighting_class(wf, sweep_points=8)
 
 
 @pytest.mark.parametrize("fs,expected", [(32000, 2), (24000, 2)])

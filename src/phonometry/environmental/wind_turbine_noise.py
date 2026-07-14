@@ -24,14 +24,21 @@ uncertainty budgets) is out of scope; these are the underlying closed forms.
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.warnings import PhonometryWarning
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+
+class WindTurbineNoiseWarning(PhonometryWarning):
+    """The tonality inputs leave the standard's stated domain of validity."""
 
 #: Reference area ``S0`` for the apparent sound power level (m²).
 _REFERENCE_AREA = 1.0
@@ -51,21 +58,34 @@ def _positive(value: float, name: str) -> float:
     return scalar
 
 
-def slant_distance(hub_height: float, rotor_diameter: float) -> float:
+def slant_distance(
+    hub_height: float, rotor_diameter: float, *, rotor_axis: str = "horizontal"
+) -> float:
     """Slant distance ``R1`` from the rotor centre to the ground microphone.
 
     With the reference microphone on the ground at the horizontal distance
-    ``R0 = H + D/2`` (IEC 61400-11 Formula 1) and the rotor centre at height
-    ``H``, the slant distance is ``R1 = sqrt(H² + R0²)``.
+    ``R0`` and the rotor centre at height ``H``, the slant distance is
+    ``R1 = sqrt(H² + R0²)``. For a horizontal-axis turbine ``R0 = H + D/2``
+    (IEC 61400-11 Formula 1); for a vertical-axis turbine ``R0 = H + D``
+    (Formula 2, with ``H`` the height of the equator of the rotor).
 
-    :param hub_height: Hub height ``H`` (ground to rotor centre), in m.
+    :param hub_height: Hub height ``H`` (ground to rotor centre; for a
+        vertical-axis turbine, to the rotor equator), in m.
     :param rotor_diameter: Rotor diameter ``D``, in m.
+    :param rotor_axis: ``"horizontal"`` (Formula 1, the default) or
+        ``"vertical"`` (Formula 2).
     :return: The slant distance ``R1``, in m.
-    :raises ValueError: If a dimension is not positive.
+    :raises ValueError: If a dimension is not positive or ``rotor_axis`` is
+        not one of the two orientations.
     """
     h = _positive(hub_height, "hub_height")
     d = _positive(rotor_diameter, "rotor_diameter")
-    r0 = h + d / 2.0
+    if rotor_axis == "horizontal":
+        r0 = h + d / 2.0
+    elif rotor_axis == "vertical":
+        r0 = h + d
+    else:
+        raise ValueError("'rotor_axis' must be 'horizontal' or 'vertical'.")
     return float(np.hypot(h, r0))
 
 
@@ -79,7 +99,12 @@ def apparent_sound_power_level(
     pressure doubling; ``S0 = 1 m²``.
 
     :param band_levels: Background-corrected A-weighted band sound pressure
-        levels ``L_p,i``, in dB (scalar or per band).
+        levels ``L_p,i``, in dB (scalar or per band). The 61400-11-specific
+        background correction (Formula 23 subtraction with the 3-6 dB
+        asterisk marking and the <= 3 dB not-reported rule, subclause 9.3) is
+        out of scope here and must be applied beforehand; note its rule set
+        differs from the ISO 1996-2 correction in
+        :func:`phonometry.environmental.measurement.residual_sound_correction`.
     :param r1: Slant distance ``R1`` to the rotor centre, in m.
     :return: The apparent sound power level ``L_WA``, in dB re 1 pW.
     :raises ValueError: If the inputs are invalid.
@@ -131,7 +156,10 @@ def _energy_mean(levels_db: "NDArray[np.float64]") -> float:
 #: Tone-classification margins (dB): masking-line criterion and tone criterion.
 _MASKING_MARGIN = 6.0
 _TONE_MARGIN = 6.0
-#: A tone line stays grouped with the peak while within this level of it (dB).
+#: 9.5.2 possible-tone margin above the screening energy average (dB).
+_POSSIBLE_TONE_MARGIN = 6.0
+#: Tone lines stay classified while within this level of the highest tone line
+#: (dB, subclause 9.5.3: "within 10 dB of the highest level").
 _TONE_GROUP_DROP = 10.0
 #: Audibility criterion constants of Formula 34.
 _LA_OFFSET, _LA_PIVOT, _LA_EXP = -2.0, 502.0, 2.5
@@ -141,14 +169,25 @@ _LA_OFFSET, _LA_PIVOT, _LA_EXP = -2.0, 502.0, 2.5
 class WindTurbineTonalityResult:
     """Tonal audibility of a narrowband spectrum (IEC 61400-11).
 
-    :ivar tone_frequency: The candidate tone frequency, in Hz.
-    :ivar critical_bandwidth: The critical bandwidth about the tone, in Hz.
+    :ivar tone_frequency: The frequency of the identified tone: the spectral
+        line with the highest level among the lines classified as "tone"
+        (subclause 9.5.4; also the ``f`` of Formula 34). When no tone is
+        identified (``has_identified_tone`` is ``False``) this falls back to
+        the candidate line.
+    :ivar critical_bandwidth: The critical bandwidth about the candidate, Hz.
     :ivar tone_level: Tone level ``L_pt`` (energy sum of the tone lines), in dB.
     :ivar masking_level: Masking-noise level ``L_pn``, in dB.
     :ivar tonality: Tonality ``ΔL_tn = L_pt − L_pn``, in dB.
     :ivar audibility_criterion: The criterion ``L_a`` (Formula 34), in dB.
     :ivar tonal_audibility: Tonal audibility ``ΔL_a = ΔL_tn − L_a``, in dB.
-    :ivar is_audible: Whether the tone is audible (``ΔL_a > 0``).
+    :ivar is_audible: Whether an identified tone is audible
+        (``ΔL_a > 0`` *and* ``has_identified_tone``).
+    :ivar has_identified_tone: Whether the candidate passed the 9.5.2
+        possible-tone screening *and* at least one spectral line was
+        classified as "tone" (subclause 9.5.4). When ``False`` the numeric
+        fields are non-standard fallbacks (the standard defines no tonality
+        for such a spectrum) and the spectrum must be **excluded** from the
+        9.5.1 energy averaging of ``ΔL_a,j,k`` over the spectra of a bin.
     :ivar frequencies: The narrowband line frequencies, in Hz.
     :ivar levels: The narrowband line levels, in dB.
     """
@@ -161,6 +200,7 @@ class WindTurbineTonalityResult:
     audibility_criterion: float
     tonal_audibility: float
     is_audible: bool
+    has_identified_tone: bool
     frequencies: "NDArray[np.float64]"
     levels: "NDArray[np.float64]"
 
@@ -171,27 +211,11 @@ class WindTurbineTonalityResult:
         return plot_wind_turbine_tonality(self, ax=ax, **kwargs)
 
 
-def wind_turbine_tonality(
+def _validate_narrowband(
     levels: "NDArray[np.float64] | list[float]",
     frequencies: "NDArray[np.float64] | list[float]",
-    *,
-    tone_frequency: "float | None" = None,
-) -> WindTurbineTonalityResult:
-    """Tonal audibility of a narrowband spectrum (IEC 61400-11 Formulae 30-34).
-
-    From a uniformly-spaced narrowband spectrum, classifies the lines in the
-    critical band about the candidate tone into masking noise and tone lines,
-    forms the masking-noise level ``L_pn`` (Formula 31), the tonality
-    ``ΔL_tn = L_pt − L_pn`` (Formula 32), the audibility criterion ``L_a``
-    (Formula 34) and the tonal audibility ``ΔL_a = ΔL_tn − L_a`` (Formula 33).
-
-    :param levels: Narrowband line levels, in dB (A-weighted, 1-2 Hz resolution).
-    :param frequencies: Line frequencies, in Hz (uniform spacing).
-    :param tone_frequency: Candidate tone frequency, in Hz; if ``None`` the
-        highest-level line is used.
-    :return: A :class:`WindTurbineTonalityResult`.
-    :raises ValueError: If the inputs are invalid.
-    """
+) -> "tuple[NDArray[np.float64], NDArray[np.float64], float]":
+    """Coerce and validate a uniformly-spaced narrowband spectrum."""
     lv = np.asarray(levels, dtype=np.float64)
     fr = np.asarray(frequencies, dtype=np.float64)
     if lv.ndim != 1 or lv.shape != fr.shape or lv.size < 3:
@@ -204,11 +228,103 @@ def wind_turbine_tonality(
     df = float(np.median(diffs))
     if np.any(np.abs(diffs - df) > 1e-3 * df):
         raise ValueError("'frequencies' must be uniformly spaced (a narrowband spectrum).")
+    return lv, fr, df
 
-    peak = int(np.argmax(lv)) if tone_frequency is None else int(np.argmin(np.abs(fr - tone_frequency)))
+
+def _candidate_peak(
+    lv: "NDArray[np.float64]", fr: "NDArray[np.float64]",
+    tone_frequency: "float | None",
+) -> int:
+    """Index of the candidate line: the spectrum maximum, or the validated
+    nearest bin to the requested frequency."""
+    if tone_frequency is None:
+        return int(np.argmax(lv))
+    tf = float(tone_frequency)
+    if not np.isfinite(tf) or tf < float(fr[0]) or tf > float(fr[-1]):
+        raise ValueError(
+            "'tone_frequency' must be finite and inside the spectrum's "
+            f"frequency range [{fr[0]:.1f}, {fr[-1]:.1f}] Hz."
+        )
+    return int(np.argmin(np.abs(fr - tf)))
+
+
+def _screen_possible_tone(
+    lv: "NDArray[np.float64]", in_band: "NDArray[np.bool_]", peak: int,
+) -> bool:
+    """9.5.2 possible-tone screen: local maximum more than 6 dB above the
+    critical-band energy average that excludes the maximum line and its two
+    adjacent lines."""
+    screen_indices = np.nonzero(in_band)[0]
+    screen_indices = screen_indices[np.abs(screen_indices - peak) > 1]
+    local_max = (peak == 0 or lv[peak] >= lv[peak - 1]) and (
+        peak == lv.size - 1 or lv[peak] >= lv[peak + 1]
+    )
+    return bool(
+        screen_indices.size
+        and local_max
+        and lv[peak] > _energy_mean(lv[screen_indices]) + _POSSIBLE_TONE_MARGIN
+    )
+
+
+def wind_turbine_tonality(
+    levels: "NDArray[np.float64] | list[float]",
+    frequencies: "NDArray[np.float64] | list[float]",
+    *,
+    tone_frequency: "float | None" = None,
+) -> WindTurbineTonalityResult:
+    """Tonal audibility of a narrowband spectrum (IEC 61400-11 Formulae 30-34).
+
+    From a uniformly-spaced narrowband spectrum, screens the candidate as a
+    possible tone (subclause 9.5.2: a local maximum more than 6 dB above the
+    critical-band energy average excluding the maximum and its two adjacent
+    lines), classifies the lines in the critical band about the candidate into
+    masking noise and tone lines, forms the masking-noise level ``L_pn``
+    (Formula 31), the tonality ``ΔL_tn = L_pt − L_pn`` (Formula 32), the
+    audibility criterion ``L_a`` (Formula 34) and the tonal audibility
+    ``ΔL_a = ΔL_tn − L_a`` (Formula 33).
+
+    Per subclause 9.5.3 the tone lines are those above ``L_pn,avg + 6 dB``
+    *and* within 10 dB of the highest such line; the frequency of the tone is
+    that highest line (9.5.4), which also anchors ``L_a``. When the candidate
+    fails the 9.5.2 screening or no line classifies as "tone", the result
+    carries ``has_identified_tone = False``: its numeric fields are
+    non-standard fallbacks and the spectrum must be excluded from the 9.5.1
+    bin averaging (see :class:`WindTurbineTonalityResult`).
+
+    Spectra must extend over the whole critical band: a truncated band leaves
+    the masking average over the surviving lines while Formula 31 still scales
+    to the full bandwidth, so a :class:`WindTurbineNoiseWarning` is issued.
+    Candidates below 20 Hz are outside the standard's analysis range (the
+    critical band would extend to negative frequencies) and are rejected.
+
+    :param levels: Narrowband line levels, in dB (A-weighted, 1-2 Hz resolution).
+    :param frequencies: Line frequencies, in Hz (uniform spacing).
+    :param tone_frequency: Candidate tone frequency, in Hz; if ``None`` the
+        highest-level line is used.
+    :return: A :class:`WindTurbineTonalityResult`.
+    :raises ValueError: If the inputs are invalid or the candidate lies below
+        20 Hz.
+    """
+    lv, fr, df = _validate_narrowband(levels, frequencies)
+
+    peak = _candidate_peak(lv, fr, tone_frequency)
     fc = float(fr[peak])
+    if fc < _LOW_FREQ_MIN:
+        raise ValueError(
+            "The candidate tone lies below 20 Hz: outside the standard's "
+            "analysis range (the critical band would extend below 0 Hz)."
+        )
     cbw = critical_bandwidth(fc)
     lo, hi = _critical_band_edges(fc)
+    if fr[0] > lo + 1e-9 or fr[-1] < hi - 1e-9:
+        warnings.warn(
+            "The spectrum does not cover the whole critical band "
+            f"[{lo:.1f}, {hi:.1f}] Hz: the masking level is averaged over the "
+            "surviving lines while Formula 31 scales to the full bandwidth, "
+            "biasing the tonal audibility.",
+            WindTurbineNoiseWarning,
+            stacklevel=2,
+        )
     in_band = (fr >= lo) & (fr <= hi)
     band = lv[in_band]
 
@@ -219,14 +335,28 @@ def wind_turbine_tonality(
     l_pn_avg = _energy_mean(masking) if masking.size else l70
     tone_threshold = l_pn_avg + _TONE_MARGIN
 
+    possible_tone = _screen_possible_tone(lv, in_band, peak)
+
     # Tone lines (9.5.3, "adjacent" struck out by A1:2018): every line in the
-    # critical band above the tone threshold and within 10 dB of the peak,
+    # critical band above the tone threshold and within 10 dB of the highest
+    # such line ("the line having the greatest level is identified; lines are
+    # then only classified as tone if within 10 dB of the highest level"),
     # whether or not contiguous with it.
-    peak_level = float(lv[peak])
-    is_tone = in_band & (lv > tone_threshold) & (peak_level - lv <= _TONE_GROUP_DROP)
+    above = in_band & (lv > tone_threshold)
+    if np.any(above):
+        highest_level = float(np.max(lv[above]))
+        is_tone = above & (highest_level - lv <= _TONE_GROUP_DROP)
+    else:
+        is_tone = above
     tone_positions = np.nonzero(is_tone)[0]
-    if tone_positions.size == 0:
+    has_identified_tone = possible_tone and tone_positions.size > 0
+    if not has_identified_tone:
+        # Non-standard fallback so the numeric fields stay defined; flagged
+        # by has_identified_tone = False.
         tone_positions = np.array([peak])
+    # The frequency of the tone is the classified line with the highest level
+    # (9.5.4); it anchors the reported frequency and Formula 34.
+    f_tone = float(fr[tone_positions[int(np.argmax(lv[tone_positions]))]])
     # Energy-sum the tone lines per contiguous run (9.5.5), applying the Hanning
     # ÷1.5 correction to any run that spans two or more adjacent lines.
     runs = np.split(tone_positions, np.nonzero(np.diff(tone_positions) != 1)[0] + 1)
@@ -241,18 +371,19 @@ def wind_turbine_tonality(
     enbw = _HANNING_ENBW_FACTOR * df
     l_pn = l_pn_avg + 10.0 * np.log10(cbw / enbw)
     tonality = l_pt - l_pn
-    l_a = _LA_OFFSET - np.log10(1.0 + (fc / _LA_PIVOT) ** _LA_EXP)
+    l_a = _LA_OFFSET - np.log10(1.0 + (f_tone / _LA_PIVOT) ** _LA_EXP)
     delta_la = float(tonality - l_a)
 
     return WindTurbineTonalityResult(
-        tone_frequency=fc,
+        tone_frequency=f_tone,
         critical_bandwidth=cbw,
         tone_level=float(l_pt),
         masking_level=float(l_pn),
         tonality=float(tonality),
         audibility_criterion=float(l_a),
         tonal_audibility=delta_la,
-        is_audible=bool(delta_la > 0.0),
+        is_audible=bool(delta_la > 0.0 and has_identified_tone),
+        has_identified_tone=has_identified_tone,
         frequencies=fr,
         levels=lv,
     )

@@ -119,7 +119,9 @@ class UncertaintyResult:
     :ivar contributions: Per-input contributions ``|ci| u(xi)`` to ``uc(y)``.
     :ivar effective_dof: Welch-Satterthwaite effective degrees of freedom
         (Annex G.4, defined for independent inputs). For a correlated budget
-        it is ``inf`` -- the GUM 6.3.3 fallback (normal-distribution coverage
+        with finite input dof it is ``NaN`` (undefined: the GUM has no
+        correlated form and ``expanded()`` then needs an explicit factor);
+        with all-infinite input dof it is ``inf`` (normal-distribution coverage
         factor), since the GUM defines no correlated Welch-Satterthwaite form.
     :ivar names: Input labels aligned with the arrays above.
     """
@@ -131,12 +133,29 @@ class UncertaintyResult:
     effective_dof: float
     names: tuple[str, ...] = field(default=())
 
-    def expanded(self, coverage: float = 0.95) -> tuple[float, float]:
+    def expanded(
+        self, coverage: float = 0.95, *, coverage_factor_override: "float | None" = None
+    ) -> tuple[float, float]:
         """Coverage factor ``k`` and expanded uncertainty ``U = k*uc``.
 
         :param coverage: Coverage probability in (0, 1); ``0.95`` by default.
+        :param coverage_factor_override: Explicit ``k``. Required for a
+            correlated budget with finite input degrees of freedom, where the
+            GUM defines no effective-dof formula (``effective_dof`` is NaN).
         :return: The pair ``(k, U)`` (GUM clause 6, Annex G).
+        :raises ValueError: If the effective dof are undefined and no
+            explicit coverage factor is given.
         """
+        if coverage_factor_override is not None:
+            k = float(coverage_factor_override)
+            return k, k * self.combined_uncertainty
+        if math.isnan(self.effective_dof):
+            raise ValueError(
+                "The effective degrees of freedom are undefined for a "
+                "correlated budget with finite input dof (the GUM defines "
+                "no Welch-Satterthwaite form there): pass an explicit "
+                "coverage_factor_override."
+            )
         k = coverage_factor(coverage, self.effective_dof)
         return k, k * self.combined_uncertainty
 
@@ -200,10 +219,14 @@ def _sensitivity(model: Model, values: np.ndarray, uncertainties: np.ndarray) ->
     coeffs = np.empty(n)
     sqrt_eps = math.sqrt(float(np.finfo(np.float64).eps))
     for i in range(n):
-        step = max(float(uncertainties[i]), sqrt_eps * abs(float(values[i])))
+        # GUM 5.1.4 NOTE 2 suggests the step u(xi); a 64-ULP floor keeps the
+        # perturbation representable for large-magnitude inputs without
+        # abandoning locality (a sqrt(eps)*|xi| floor would probe the model
+        # far outside the uncertainty region for large xi).
+        step = float(uncertainties[i])
         if step <= 0.0:
             step = sqrt_eps
-        step = max(step, 4.0 * float(np.spacing(abs(values[i]))))
+        step = max(step, 64.0 * float(np.spacing(abs(values[i]))))
         up = values.copy()
         down = values.copy()
         up[i] += step
@@ -236,7 +259,8 @@ def combine_uncertainty(
         model takes its arguments.
     :param correlation: Optional ``N x N`` correlation matrix ``r_ij`` between
         the inputs; ``None`` treats them as uncorrelated. With a non-identity
-        matrix the effective degrees of freedom are ``inf`` (GUM 6.3.3
+        matrix and finite input dof the effective degrees of freedom are
+        ``NaN`` (undefined; the GUM defines no correlated
         fallback -- Welch-Satterthwaite holds for independent inputs only)
         and an :class:`UncertaintyWarning` is issued when finite input dof
         would otherwise have been propagated.
@@ -276,25 +300,27 @@ def combine_uncertainty(
     combined = math.sqrt(max(variance, 0.0))
 
     # Welch-Satterthwaite effective degrees of freedom (Annex G.4). Formula
-    # (G.2b) is derived for independent input quantities only; the GUM has no
-    # correlated form, so a correlated budget takes the GUM 6.3.3 fallback
-    # (infinite dof, i.e. the normal-distribution coverage factor).
+    # (G.2b) is derived for independent input quantities only and the GUM
+    # defines no correlated form: a correlated budget with finite input dof
+    # therefore carries NO effective dof (NaN), and expanded() requires an
+    # explicit coverage factor from the caller. With all input dof infinite
+    # the output is treated as normal and veff stays infinite.
     dofs = np.array([q.dof for q in quantities], dtype=np.float64)
     finite = np.isfinite(dofs)
-    if correlated:
-        effective_dof = math.inf
-        if np.any(finite):
-            import warnings
+    if correlated and np.any(finite):
+        effective_dof = math.nan
+        import warnings
 
-            warnings.warn(
-                "Welch-Satterthwaite (GUM G.4.1) is defined for independent "
-                "inputs only; with a correlation matrix the effective degrees "
-                "of freedom are taken as infinite (GUM 6.3.3 fallback), so "
-                "expanded() uses the normal-distribution coverage factor and "
-                "the finite input dof are not propagated.",
-                UncertaintyWarning,
-                stacklevel=2,
-            )
+        warnings.warn(
+            "Welch-Satterthwaite (GUM G.4.1) is defined for independent "
+            "inputs only and the GUM defines no correlated form: the "
+            "effective degrees of freedom are undefined (NaN) for this "
+            "budget, and expanded() requires an explicit coverage_factor.",
+            UncertaintyWarning,
+            stacklevel=2,
+        )
+    elif correlated:
+        effective_dof = math.inf
     elif combined > 0.0 and np.any(finite & (contributions > 0.0)):
         terms = np.where(finite, contributions**4 / np.where(finite, dofs, 1.0), 0.0)
         denom = float(np.sum(terms))

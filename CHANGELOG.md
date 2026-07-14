@@ -257,11 +257,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - ISO 9613-2 `atmospheric_absorption` evaluates alpha at the exact base-10
   midbands (the Table 2 convention; ~1,3 % high at 8 kHz before); grazing
   barrier geometry (z = 0) now yields Dz = 10 lg 3 instead of 0.
-- GUM `combine_uncertainty`: correlated budgets take the 6.3.3 infinite-dof
-  fallback instead of a meaningless Welch-Satterthwaite value (r = 0,999
-  with nu = 5 produced k95 ~ 2e151); the finite-difference step is
-  max(u(xi), sqrt(eps)|xi|) with a spacing guard, so a tiny uncertainty on
-  a large value no longer underflows to uc = 0; `monte_carlo` rejects
+- GUM `combine_uncertainty`: a correlated budget with finite input degrees
+  of freedom carries undefined effective dof (the GUM defines no correlated
+  Welch-Satterthwaite form; r = 0,999 with nu = 5 previously produced
+  k95 ~ 2e151) and `expanded()` then requires an explicit coverage factor;
+  the finite-difference step is the input uncertainty with a 64-ULP floor,
+  preserving locality for large-magnitude inputs while a tiny uncertainty
+  on a large value no longer underflows to uc = 0; `monte_carlo` rejects
   trials < 2.
 - NT ACOU 112: level rises with onset rates at or below 10 dB/s no longer
   produce a KI adjustment (clauses 4.5/8).

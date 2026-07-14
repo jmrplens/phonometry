@@ -205,24 +205,51 @@ def test_result_fields_and_plot() -> None:
     plt.close("all")
 
 
-def test_correlated_budget_uses_normal_coverage_fallback() -> None:
-    """GUM G.4.1 derives Welch-Satterthwaite for independent inputs only:
-    a correlated budget takes effective_dof = inf (GUM 6.3.3 fallback) with a
-    warning, instead of a meaningless (possibly ~1e-5) effective dof that
-    explodes the coverage factor."""
+def test_correlated_budget_requires_explicit_coverage_factor() -> None:
+    """GUM G.4.1 derives Welch-Satterthwaite for independent inputs only and
+    the GUM defines no correlated form: with finite input dof the effective
+    dof are undefined (NaN) and expanded() demands an explicit coverage
+    factor, instead of a meaningless (possibly ~1e-5) effective dof that
+    explodes the coverage factor or an invented normal fallback."""
     qs = [u.Quantity(10.0, 0.1, dof=5), u.Quantity(10.0, 0.1, dof=5)]
     r = np.array([[1.0, 0.999], [0.999, 1.0]])
     with pytest.warns(u.UncertaintyWarning, match="Welch-Satterthwaite"):
         result = u.combine_uncertainty(lambda a, b: a - b, qs, correlation=r)
-    assert math.isinf(result.effective_dof)
-    k, big = result.expanded(0.95)
-    assert k == pytest.approx(1.960, abs=1e-3)
-    # uc = sqrt(2*(1-r)) * 0.1 ~ 0.00447; U stays sane (was ~1e149 via the
+    assert math.isnan(result.effective_dof)
+    # uc = sqrt(2*(1-r)) * 0.1 ~ 0.00447; sane (was ~1e149 via the
     # Welch-Satterthwaite pathology).
     assert result.combined_uncertainty == pytest.approx(
         0.1 * math.sqrt(2.0 * (1.0 - 0.999)), rel=1e-6
     )
+    with pytest.raises(ValueError, match="coverage_factor_override"):
+        result.expanded(0.95)
+    k, big = result.expanded(coverage_factor_override=2.0)
+    assert k == 2.0
     assert big < 0.02
+
+
+def test_correlated_budget_with_infinite_dof_stays_normal() -> None:
+    """All-infinite input dof: the output is treated as normal regardless of
+    correlation, so veff stays infinite and no warning fires."""
+    qs = [u.Quantity(10.0, 0.1), u.Quantity(10.0, 0.1)]
+    r = np.array([[1.0, 0.5], [0.5, 1.0]])
+    result = u.combine_uncertainty(lambda a, b: a + b, qs, correlation=r)
+    assert math.isinf(result.effective_dof)
+    k, _ = result.expanded(0.95)
+    assert k == pytest.approx(1.960, abs=1e-3)
+
+
+def test_sensitivity_step_stays_local_on_nonlinear_model() -> None:
+    """The finite-difference step is the input uncertainty with only a
+    64-ULP floor: for a large-magnitude input with structure at the
+    uncertainty scale, a sqrt(eps)*|x| step (~15 units at 1e9) would probe
+    far outside the uncertainty region and bias the sensitivity."""
+    x0, ux = 1.0e9, 1.0e-3
+    model = lambda x: math.sin((x - 1.0e9) / 1.0e-2)  # noqa: E731
+    result = u.combine_uncertainty(model, [u.Quantity(x0, ux)])
+    # d/dx sin((x-x0)/1e-2) at x0 = 100; sensitivity must be ~100, not the
+    # aliased near-zero value a 15-unit step returns.
+    assert abs(result.sensitivities[0]) == pytest.approx(100.0, rel=0.05)
 
 
 def test_identity_correlation_keeps_welch_satterthwaite() -> None:

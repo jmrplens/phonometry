@@ -333,6 +333,7 @@ desglose apilado por bandas con el total superpuesto (la figura anterior).
 | `edge_separation` | float o None | m | `None` | $e$; si se da ⇒ difracción doble (límite 25 dB) |
 | `ground_reflections_by_image` | bool | — | `False` | `True` ⇒ $C_2 = 40$ |
 | `lateral` | bool | — | `False` | `True` ⇒ difracción por borde vertical (Ec. (13)) |
+| `line_of_sight_clear` | bool | — | `False` | `True` ⇒ la línea de visión pasa por encima del borde superior: la diferencia de camino toma signo negativo y Kmet = 1 (texto tras la Ec. (16)) |
 
 La exactitud declarada del método es de $\pm 1$ a $\pm 3$ dB para ruido de banda
 ancha hasta 1000 m (Tabla 5). Consulta la página de [Teoría](/phonometry/es/reference/theory/)

@@ -290,7 +290,16 @@ def wind_turbine_tonality(
     """
     lv, fr, df = _validate_narrowband(levels, frequencies)
 
-    peak = int(np.argmax(lv)) if tone_frequency is None else int(np.argmin(np.abs(fr - tone_frequency)))
+    if tone_frequency is None:
+        peak = int(np.argmax(lv))
+    else:
+        tf = float(tone_frequency)
+        if not np.isfinite(tf) or tf < float(fr[0]) or tf > float(fr[-1]):
+            raise ValueError(
+                "'tone_frequency' must be finite and inside the spectrum's "
+                f"frequency range [{fr[0]:.1f}, {fr[-1]:.1f}] Hz."
+            )
+        peak = int(np.argmin(np.abs(fr - tf)))
     fc = float(fr[peak])
     if fc < _LOW_FREQ_MIN:
         raise ValueError(
@@ -333,7 +342,7 @@ def wind_turbine_tonality(
         is_tone = above
     tone_positions = np.nonzero(is_tone)[0]
     has_identified_tone = possible_tone and tone_positions.size > 0
-    if tone_positions.size == 0:
+    if not has_identified_tone:
         # Non-standard fallback so the numeric fields stay defined; flagged
         # by has_identified_tone = False.
         tone_positions = np.array([peak])

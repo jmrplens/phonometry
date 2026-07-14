@@ -319,6 +319,7 @@ stacked per-band breakdown with the total overlaid (the figure above).
 | `edge_separation` | float or None | m | `None` | $e$; given ⇒ double diffraction (25 dB cap) |
 | `ground_reflections_by_image` | bool | — | `False` | `True` ⇒ $C_2 = 40$ |
 | `lateral` | bool | — | `False` | `True` ⇒ vertical-edge diffraction (Eq. (13)) |
+| `line_of_sight_clear` | bool | — | `False` | `True` ⇒ the sight line passes above the top edge: the path difference takes a negative sign and Kmet = 1 (text after Eq. (16)) |
 
 The method's stated accuracy is $\pm 1$ to $\pm 3$ dB for broadband noise up to
 1000 m (Table 5). See the [Theory](theory.md) page for the full derivation, the

@@ -2321,7 +2321,12 @@ def _chk_iso9613_2_table2_grid() -> Outcome:
             tol = 0.5 if printed >= 100.0 else 0.05
             if (temp, rh, band) == (15.0, 80.0, 1000.0):
                 tol = 0.06
-            worst = max(worst, abs(float(got) - printed) / tol)
+            residual = abs(float(got) - printed) / tol
+            if not math.isfinite(residual):
+                return Outcome(expected="finite Table 2 residuals",
+                               computed=f"non-finite at {band} Hz", delta="inf",
+                               passed=False)
+            worst = max(worst, residual)
     return Outcome(
         expected="all 48 cells within half a printed digit",
         computed=f"worst residual {worst:.3f} x tolerance",

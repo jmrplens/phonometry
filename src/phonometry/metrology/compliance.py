@@ -254,8 +254,10 @@ def verify_filter_class(
         # Guarantee the Table 1 breakpoints (pass-band included) are evaluated,
         # exactly (sosfreqz at the breakpoint frequencies, not interpolated
         # off the grid, so a coarse grid cannot smooth a dip across them).
-        omega_max = float(omega.max())
-        extra = breakpoint_omegas[(breakpoint_omegas > 0) & (breakpoint_omegas <= omega_max)]
+        # Cut at the processing Nyquist, not omega.max(): the sosfreqz grid
+        # stops short of Nyquist and must not exclude checkable breakpoints.
+        omega_nyq = fsd / 2.0 / fm
+        extra = breakpoint_omegas[(breakpoint_omegas > 0) & (breakpoint_omegas <= omega_nyq)]
         if extra.size:
             _, h_extra = signal.sosfreqz(bank.sos[idx], worN=extra * fm, fs=fsd)
             att_extra = -20.0 * np.log10(np.abs(h_extra) + np.finfo(float).eps)
@@ -506,7 +508,11 @@ def verify_weighting_class(
     design goal must stay within the *larger* of the two adjacent Table 3
     limits. Without it a resonance or notch between the nominal frequencies
     would go unnoticed. Both the per-frequency verdicts and the sweep must
-    pass for ``overall_class``.
+    pass for ``overall_class``. The sweep samples ``sweep_points`` grid
+    frequencies; a violation narrower than the grid spacing could in
+    principle fall between samples, so raise ``sweep_points`` for
+    higher-Q suspects (the verdict attests the sampled grid, not a
+    continuous proof).
 
     The response is taken from the designed second-order sections (evaluated
     with ``sosfreqz`` at their design rate), so it is exact and deterministic;
@@ -544,13 +550,11 @@ def verify_weighting_class(
     _, lower1_all, upper1_all = weighting_class_limits(1)
     _, lower2_all, upper2_all = weighting_class_limits(2)
 
-    # Rows with a finite lower limit that fall beyond Nyquist cannot be
-    # demonstrated: the verdict is then range-limited (not full Table 3).
+    # Any Table 3 row beyond Nyquist cannot be demonstrated (its acceptance
+    # limits and the adjacent between-nominal interval go unchecked), so the
+    # verdict is then range-limited, not full Table 3 conformance.
     dropped = ~in_range
-    range_limited = bool(
-        np.any(dropped & np.isfinite(lower1_all))
-        or np.any(dropped & np.isfinite(lower2_all))
-    )
+    range_limited = bool(np.any(dropped))
 
     freqs_nom = nominal[in_range]
     freqs_exact = exact[in_range]

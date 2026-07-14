@@ -1,14 +1,18 @@
 ← [Documentation index](README.md)
 
-# Errata found in published standards and guidance documents
+# Errata found in published sources
 
 During the clean-room implementation of this library, every formula, constant
 and worked example is re-derived and recomputed independently from the source
 documents. That process occasionally surfaces defects in the sources
 themselves: misprints, worked examples that contradict their own normative
 text, and ambiguous wording. This file records each confirmed case with the
-evidence, what the library does about it, and whether it has been reported to
-the issuing body.
+evidence, what the library does about it, and whether it has been reported.
+
+The registry covers every kind of published source the library implements
+from: standards (ISO, IEC, EN), guidance documents and technical reports
+(EASA, ECAC, NRL), textbooks and journal papers. Non-normative sources are
+marked as such in their entry.
 
 Entries describe the specific printed editions cited. A defect listed here is
 not a defect of the method; in every case the intended reading could be
@@ -195,6 +199,22 @@ to the issuing body, with date and reference).
 - **Library behaviour:** the regression test pins the reproducible rows and
   excludes the contradicting cells with the rationale in the test.
 - **Status:** unreported (technical report rather than a standard).
+
+## Medwin & Clay, Fundamentals of Acoustical Oceanography (1998) — Eq. 3.4.29
+
+- **Location:** the Francois-Garrison boric-acid term as transcribed by the
+  textbook (Eq. 3.4.29).
+- **The print:** the boric-acid factor is printed as A1 = (8,68/c)·10^(0,78 pH − 5).
+- **The problem:** the original paper (Francois & Garrison 1982, JASA 72,
+  Part II, Eq. (10) and Fig. 7) prints 8,86; the digits are transposed. Only
+  8,86 reproduces the paper's own Table IV: with 8,68 the boric-dominated
+  cells at 0,6 to 30 kHz sit up to 1,7 % below the printed totals (worst
+  relative case 2 kHz, 10 °C, S = 35: 0,1209 vs the printed 0,123 dB/km).
+- **Evidence:** recomputation of all sampled Table IV cells under both
+  coefficients against the paper's printed values.
+- **Library behaviour:** implements the paper's 8,86 with a defensive note;
+  the pinned Table IV set includes the boric-dominated rows.
+- **Status:** unreported (textbook rather than a standard).
 
 ---
 

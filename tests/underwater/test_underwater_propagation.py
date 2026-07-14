@@ -1,7 +1,8 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """Tests for underwater transmission loss (spreading + volume absorption).
 
-Oracles: the closed-form spreading laws (hand recomputation), the Thorp,
+Oracles: the printed Francois & Garrison (1982, Part II) Table IV absorption
+values, the closed-form spreading laws (hand recomputation), the Thorp,
 Francois-Garrison and Ainslie-McColm absorption formulae (independent inline
 recomputation), and the mutual agreement of Francois-Garrison and Ainslie-McColm
 (the latter's paper states within 10 % of the former).
@@ -54,12 +55,63 @@ def test_thorp_absorption_recompute() -> None:
     assert got[0] == pytest.approx(1.1498, abs=1e-3)
 
 
+# Francois & Garrison, J. Acoust. Soc. Am. 72 (6), 1982, Part II, Table IV:
+# total absorption alpha in dB/km at depth 0, pH 8 (factual reference values,
+# transcribed from the printed page and cross-checked by recomputation).
+# Points selected to span 0.4 kHz - 1 MHz, -1.8 to 30 degC and both tabulated
+# salinities; each entry carries the unit of its last printed digit (ULP) and
+# the module agrees within half of it, i.e. to the print's own rounding
+# (measured max |dev| 0.45 ULP).
+#
+# The module implements the ORIGINAL paper's boric-acid factor A1 = (8.86/c)
+# x 10^(0.78 pH - 5) (Eq. (10)/Fig. 7); the Medwin & Clay transcription
+# prints 8.68 (digit transposition), which sits up to 4.6 ULP below the
+# print in the boric-dominated 0.6-30 kHz cells (see docs/ERRATA.md). The
+# boric-dominated rows below therefore pin the corrected constant directly.
+_FG_TABLE_IV = [
+    # (f kHz, T degC, S ppt, alpha dB/km, ULP)
+    (0.4, 10.0, 30.0, 0.015, 0.001),
+    (2.0, 10.0, 35.0, 0.123, 0.001),   # boric-dominated
+    (10.0, 30.0, 35.0, 0.606, 0.001),  # boric-dominated
+    (10.0, -1.8, 35.0, 1.36, 0.01),
+    (14.0, 20.0, 35.0, 1.29, 0.01),
+    (20.0, -1.8, 35.0, 4.40, 0.01),
+    (20.0, 10.0, 35.0, 3.35, 0.01),
+    (40.0, 4.0, 35.0, 11.5, 0.1),
+    (50.0, 20.0, 35.0, 13.0, 0.1),
+    (60.0, -1.8, 30.0, 13.6, 0.1),
+    (80.0, 16.0, 35.0, 28.6, 0.1),
+    (100.0, 0.0, 30.0, 21.0, 0.1),
+    (100.0, 10.0, 35.0, 33.6, 0.1),
+    (140.0, 25.0, 35.0, 58.4, 0.1),
+    (200.0, 0.0, 35.0, 40.6, 0.1),
+    (200.0, 30.0, 30.0, 79.3, 0.1),
+    (300.0, 10.0, 35.0, 73.1, 0.1),
+    (500.0, 10.0, 35.0, 125.0, 1.0),
+    (700.0, 4.0, 35.0, 228.0, 1.0),
+    (1000.0, 0.0, 30.0, 513.0, 1.0),
+    (1000.0, 30.0, 35.0, 344.0, 1.0),
+]
+
+
+@pytest.mark.parametrize(("f_khz", "t", "s", "alpha_ref", "ulp"), _FG_TABLE_IV)
+def test_francois_garrison_part2_table_iv_printed_values(
+    f_khz: float, t: float, s: float, alpha_ref: float, ulp: float,
+) -> None:
+    got = seawater_absorption(f_khz * 1000.0, temperature=t, salinity=s,
+                              depth=0.0, ph=8.0, model="francois-garrison")
+    assert float(got[0]) == pytest.approx(alpha_ref, abs=0.5 * ulp)
+
+
 def test_francois_garrison_recompute() -> None:
-    # Independent inline recomputation at 10 kHz, 10 C, 35 ppt, 0 m, pH 8.
+    # Independent inline recomputation at 10 kHz, 10 C, 35 ppt, 0 m, pH 8,
+    # with the ORIGINAL paper's boric coefficient 8.86 (F&G 1982 Part II,
+    # Eq. (10)/Fig. 7; the Medwin & Clay transcription prints 8.68, a digit
+    # transposition -- see the note above _FG_TABLE_IV and docs/ERRATA.md).
     f = 10.0
     t, s, z, ph = 10.0, 35.0, 0.0, 8.0
     c = 1412 + 3.21 * t + 1.19 * s + 0.0167 * z
-    a1 = (8.68 / c) * 10 ** (0.78 * ph - 5)
+    a1 = (8.86 / c) * 10 ** (0.78 * ph - 5)
     f1 = 2.8 * (s / 35) ** 0.5 * 10 ** (4 - 1245 / (273 + t))
     a2 = 21.44 * (s / c) * (1 + 0.025 * t)
     f2 = 8.17 * 10 ** (8 - 1990 / (273 + t)) / (1 + 0.0018 * (s - 35))

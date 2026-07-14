@@ -1,9 +1,11 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """Tests for the speed of sound in sea water (UNESCO / Del Grosso / Mackenzie).
 
-Oracles: the canonical Mackenzie check value 1550.744 m/s (published, absolute),
-mutual agreement of the three independent equations within their common domain,
-and the Leroy & Parthiot standard-ocean pressure.
+Oracles: the printed Wong & Zhu (1995) ITS-90 check tables (Tables III and IV,
+the exact refit the module implements), the canonical Mackenzie check value
+1550.744 m/s (published, absolute), mutual agreement of the three independent
+equations within their common domain, and the Leroy & Parthiot standard-ocean
+pressure.
 """
 
 from __future__ import annotations
@@ -15,11 +17,79 @@ import numpy as np
 import pytest
 
 from phonometry.underwater.sound_speed import (
+    _KGCM2_PER_BAR,
     SoundSpeedProfile,
+    _del_grosso,
+    _unesco,
     depth_to_pressure,
     sea_water_sound_speed,
     sound_speed_profile,
 )
+
+# Wong & Zhu, J. Acoust. Soc. Am. 97 (3), 1995, Table III: speed of sound in
+# sea water (m/s) from the t90-corrected UNESCO/Chen-Millero polynomial
+# (factual reference values, transcribed from the printed page and
+# cross-checked by recomputation). Grid: (pressure bar, t90 degC, S PSU, m/s).
+_WONG_ZHU_TABLE_III = [
+    (0, 0, 25, 1435.790),
+    (100, 10, 25, 1494.127),
+    (500, 20, 25, 1593.613),
+    (1000, 40, 25, 1719.171),
+    (0, 30, 30, 1540.416),
+    (200, 0, 30, 1475.448),
+    (600, 20, 30, 1615.686),
+    (1000, 10, 30, 1653.261),
+    (0, 0, 35, 1449.139),
+    (300, 30, 35, 1595.909),
+    (500, 20, 35, 1604.492),
+    (900, 40, 35, 1712.175),
+    (1000, 0, 35, 1623.150),
+    (0, 40, 40, 1568.141),
+    (400, 10, 40, 1562.547),
+    (700, 30, 40, 1666.500),
+    (1000, 20, 40, 1692.195),
+]
+
+# Wong & Zhu 1995, Table IV: same check grid for the t90-corrected Del Grosso
+# polynomial (factual reference values). The table lists pressure in bars;
+# Del Grosso's equation takes kg/cm2 (1 bar = _KGCM2_PER_BAR kg/cm2).
+_WONG_ZHU_TABLE_IV = [
+    (0, 0, 25, 1435.711),
+    (100, 10, 25, 1494.457),
+    (500, 20, 25, 1597.743),
+    (1000, 40, 25, 1734.533),
+    (0, 40, 30, 1558.221),
+    (200, 0, 30, 1475.105),
+    (500, 30, 30, 1622.209),
+    (1000, 10, 30, 1653.848),
+    (0, 0, 35, 1449.083),
+    (300, 30, 35, 1593.159),
+    (500, 20, 35, 1603.679),
+    (900, 40, 35, 1704.948),
+    (1000, 0, 35, 1622.269),
+    (0, 40, 40, 1568.053),
+    (400, 10, 40, 1562.595),
+    (700, 30, 40, 1665.789),
+    (1000, 20, 40, 1695.212),
+]
+
+
+@pytest.mark.parametrize(("p_bar", "t90", "s", "c_ref"), _WONG_ZHU_TABLE_III)
+def test_unesco_wong_zhu_table_iii_printed_check_values(
+    p_bar: float, t90: float, s: float, c_ref: float,
+) -> None:
+    # The module implements exactly this refit, so it must agree at the
+    # table's printed resolution (0.001 m/s; measured max |dev| 0.0005 m/s).
+    assert float(_unesco(t90, s, p_bar)) == pytest.approx(c_ref, abs=1e-3)
+
+
+@pytest.mark.parametrize(("p_bar", "t90", "s", "c_ref"), _WONG_ZHU_TABLE_IV)
+def test_del_grosso_wong_zhu_table_iv_printed_check_values(
+    p_bar: float, t90: float, s: float, c_ref: float,
+) -> None:
+    # Same printed-decimal tolerance (measured max |dev| 0.0005 m/s).
+    assert float(_del_grosso(t90, s, p_bar * _KGCM2_PER_BAR)) == pytest.approx(
+        c_ref, abs=1e-3)
 
 
 def test_mackenzie_canonical_check_value() -> None:
@@ -90,7 +160,5 @@ def test_unesco_published_canonical_check_value() -> None:
     # SVEL(S = 40, T68 = 40 C, P = 10000 dbar) = 1731.995 m/s. The module uses
     # the Wong-Zhu ITS-90 refit, so convert T90 = T68/1.00024; the tolerance
     # covers the published refit residual (~0.01 m/s).
-    from phonometry.underwater.sound_speed import _unesco
-
     assert float(_unesco(40.0 / 1.00024, 40.0, 1000.0)) == pytest.approx(
         1731.995, abs=0.02)

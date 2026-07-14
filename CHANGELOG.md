@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Underwater printed-source oracles promoted to tests and the conformance
+  report: the Wong & Zhu (1995) ITS-90 check tables pin the UNESCO and
+  Del Grosso sound-speed refits at 17 printed grid points each (agreement
+  within the printed 0.001 m/s resolution), the Francois & Garrison (1982,
+  Part II) Table IV pins the total seawater absorption at 21 printed points
+  spanning 0.4 kHz-1 MHz (within half a unit of the last printed digit), and
+  the Wales & Heitmeyer (2002) ensemble merchant-ship mean spectrum is pinned
+  against the paper's printed closed form and asymptote statements
+  (exponents -3.6/-1.76, 340 Hz breakpoint).
 - `docs/ERRATA.md`: a versioned registry of the defects found in published
   standards and guidance documents during implementation (misprints, worked
   examples contradicting their own normative text, ambiguous wording), each
@@ -111,6 +120,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Underwater Francois-Garrison absorption used the Medwin & Clay textbook
+  transcription of the boric-acid factor (8.68/c); the original paper prints
+  8.86/c and only that value reproduces the paper's own Table IV (the
+  transcription biased boric-dominated bands at 0.6-30 kHz by up to 1.7 %).
 - ISO 10846-3 indirect method returned out-of-validity results silently:
   `transfer_stiffness_indirect` now computes the per-band transmissibility
   magnitude and emits a `PhonometryWarning` where |T| > 0,1 (Inequality (2):

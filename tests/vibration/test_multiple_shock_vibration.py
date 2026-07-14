@@ -10,25 +10,18 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from reference_data import (
+    ISO2631_5_ANNEX_D_A,
+    ISO2631_5_ANNEX_D_B,
+    ISO2631_5_ANNEX_D_FS,
     ISO2631_5_DZD_MALE,
     ISO2631_5_PI_MALE,
+    ISO2631_5_R_FEMALE,
     ISO2631_5_R_MALE,
+    ISO2631_5_SD_FEMALE,
 )
 from scipy.signal import freqz
 
 from phonometry.vibration import multiple_shock_vibration as v
-
-# Annex D digital filter coefficients for fs = 256 Hz (Table D.1).
-_ANNEX_D_B = [
-    -0.000005710, 0.000020010, 0.001373900, 0.014541920, 0.025152310,
-    -0.014242050, -0.044262840, -0.008888510, 0.017715720, 0.010216420,
-    0.002030740, 0.000055980,
-]
-_ANNEX_D_A = [
-    1.000000000, -3.323217600, 4.256126150, -1.980417270, -1.488735470,
-    3.329511290, -2.949072140, 1.653403410, -0.635677800, 0.167519420,
-    -0.028076980, 0.002348730,
-]
 
 
 # ---------------------------------------------------------------------------
@@ -46,7 +39,11 @@ def test_transfer_matches_annex_d_filter() -> None:
     # clause 5.2 magnitude tolerance (+/-0.04 up to 40 Hz, +/-0.08 to 80 Hz).
     freqs = np.array([0.5, 2.0, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0])
     formula = np.abs(v.seat_to_spine_transfer(freqs))
-    _, h = freqz(_ANNEX_D_B, _ANNEX_D_A, worN=2.0 * np.pi * freqs / 256.0)
+    _, h = freqz(
+        ISO2631_5_ANNEX_D_B,
+        ISO2631_5_ANNEX_D_A,
+        worN=2.0 * np.pi * freqs / ISO2631_5_ANNEX_D_FS,
+    )
     np.testing.assert_allclose(formula, np.abs(h), atol=0.04)
 
 
@@ -145,12 +142,12 @@ def test_annex_c_male_worked_example() -> None:
 
 
 def test_annex_c_female_worked_example() -> None:
-    # Same exposure, 64 kg female: Sd ~ 1.40 MPa, R ~ 0.97 (Annex C note 5).
+    # Same exposure, 64 kg female: Sd = 1,40 MPa, R = 0,97 (Annex C NOTE 5).
     dz = v.dose_from_peaks([40.0] * 5)
     sd = v.compression_dose(dz, mz=v.MZ_FEMALE)
-    assert sd == pytest.approx(1.40, abs=0.01)
+    assert sd == pytest.approx(ISO2631_5_SD_FEMALE, abs=0.01)
     r = v.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="female")
-    assert r == pytest.approx(0.97, abs=0.02)
+    assert r == pytest.approx(ISO2631_5_R_FEMALE, abs=0.02)
 
 
 def test_static_stress_male() -> None:

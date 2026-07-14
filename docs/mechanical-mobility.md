@@ -9,10 +9,12 @@ depends only on whether the motion is a displacement, a velocity or an
 acceleration, and each has a force-per-motion reciprocal. **ISO 7626-1:2011**
 (*Mechanical vibration and shock — Experimental determination of mechanical
 mobility — Part 1: Basic terms and definitions, and transducer specifications*)
-defines the whole family (Table 1) and the single-degree-of-freedom (SDOF)
-reference resonator (Annex A). This FRF backbone underpins the structure-borne
-source and transmission standards — ISO 9611, ISO 10846, EN 15657 and
-EN 12354-5.
+defines the whole family (Table 1, with the 3.1.2 mobility definition), and the
+classic closed-form single-degree-of-freedom (SDOF) resonator serves as the
+reference for those definitions. **ISO 7626-2:2015** adds the measurement side:
+FRF estimation from measured signals and its acceptance criteria. This FRF
+backbone underpins the structure-borne source and transmission standards —
+ISO 9611, ISO 10846, EN 15657 and EN 12354-5.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility.svg" alt="Normalized receptance, mobility and accelerance magnitudes of a single-degree-of-freedom resonator on a log-log frequency axis, all peaking at the resonance where the mobility is stiffness-controlled below and mass-controlled above" width="82%"></picture>
 
@@ -30,7 +32,11 @@ power of `jω`, and each has a force-per-motion reciprocal:
 
 `convert_frf` moves between any two of the six FRFs, pivoting through the
 receptance. A **driving-point** FRF has the response and force at the same point
-(`i = j`); a **transfer** FRF has them at different points.
+(`i = j`); a **transfer** FRF has them at different points. Note that the
+force-per-motion kinds are element-wise reciprocals — the *free* quantities of
+ISO 7626-1, 3.1.4; the *blocked* matrix quantities of Table 1 do not invert
+element-wise for multi-coordinate systems (Table 1 also names `F/a` the
+"effective mass", the quantity called apparent mass here).
 
 ```python
 import phonometry as ph
@@ -41,10 +47,11 @@ print(round(abs(ph.convert_frf(Y, 80.0, "mobility", "impedance")), 1))     # 500
 print(f"{abs(ph.convert_frf(Y, 80.0, 'mobility', 'accelerance')):.3f}")    # 1.005  1/kg
 ```
 
-## 2. The SDOF reference resonator (Annex A)
+## 2. The SDOF reference resonator (closed form)
 
-The canonical closed-form reference is a mass `m`, viscous damping `c` and
-stiffness `k`, whose receptance is
+The canonical closed-form reference — expressed in the Table 1 / 3.1.2 FRF
+taxonomy — is a mass `m`, viscous damping `c` and stiffness `k`, whose
+receptance is
 
 $$
 H(\omega) = \frac{1}{k - \omega^2 m + j\,\omega c}, \qquad
@@ -67,7 +74,36 @@ print(round(y0.real, 4), round(y0.imag, 6))   # 0.2 0.0   -> |Y(f0)| = 1/c
 print(round(complex(ph.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1/k
 ```
 
-## 3. The `MobilityResult` bundle
+## 3. Measured FRFs and their acceptance criteria (ISO 7626-2)
+
+Processing measured random-excitation records per ISO 7626-2, 8.1.3 — the H1
+estimator `Ĥ = G(response, force)/G(force, force)` — and the ordinary coherence
+`γ² = |Gxy|²/(Gxx·Gyy)` used for its data-quality checks are the library's
+existing spectral estimators [`transfer_function` and
+`coherence`](electroacoustics.md) (H1 is their default). On top of them,
+two ISO 7626-2 acceptance criteria are provided:
+
+* **Operational rigid-mass calibration (7.5.2).** The measured FRF of a freely
+  suspended rigid block of known mass must agree within ±5 % with `|A| = 1/m`
+  (accelerance) or `|Y| = 1/(2πf·m)` (mobility).
+* **Random error (Annex A + 8.1.3).** Enough spectra must be averaged that the
+  normalized random error `ε = √((1−γ²)/(2nγ²))` at each resonance of a
+  driving-point mobility is below 5 %.
+
+```python
+import numpy as np
+import phonometry as ph
+
+# A 10 kg calibration block: |A| must be 1/m = 0.100 1/kg at every frequency.
+f = np.array([20.0, 100.0, 500.0])
+res = ph.rigid_mass_calibration_check([0.100, 0.102, 0.097], f, mass=10.0)
+print(res.passed, res.within_tolerance.tolist())   # True [True, True, True]
+
+# The Annex A example: coherence 0.8 needs about 75 averages for < 5 %.
+print(round(float(ph.random_error_percent(0.8, 75)), 2))   # 4.08  %
+```
+
+## 4. The `MobilityResult` bundle
 
 `sdof_mobility_result` bundles the FRF over frequency into a `MobilityResult`,
 which exposes `.magnitude`, `.phase`, `.to(target)` (any Table-1 kind) and a
@@ -110,8 +146,15 @@ plt.legend(); plt.show()
 
 **Standards.** ISO 7626-1:2011, *Mechanical vibration and shock — Experimental
 determination of mechanical mobility — Part 1: Basic terms and definitions, and
-transducer specifications* — the FRF family and its reciprocals (Table 1), the
-driving-point / transfer distinction, and the single-degree-of-freedom reference
-resonator (Annex A). Conformance is anchored on the closed-form SDOF identities:
-the driving-point mobility peak `|Y(ω0)| = 1/c`, the static receptance
-`H(0) = 1/k`, and the exact Table-1 reciprocity `impedance·mobility = 1`.
+transducer specifications* — the FRF family and its reciprocals (Table 1, the
+3.1.2 mobility and 3.1.4 free-quantity definitions) and the driving-point /
+transfer distinction. ISO 7626-2:2015, *Part 2: Measurements using single-point
+translation excitation with an attached vibration exciter* — the 8.1.3 H1
+processing of random excitation, the 7.5.2 rigid-mass operational calibration
+(±5 %) and the Annex A random-error criterion (< 5 % at resonances).
+Conformance is anchored on the closed-form SDOF identities (consistent with the
+Table 1 / 3.1.2 definitions): the driving-point mobility peak `|Y(ω0)| = 1/c`,
+the static receptance `H(0) = 1/k`, the exact Table-1 reciprocity
+`impedance·mobility = 1`, the rigid-mass calibration values (`|A| = 0.100` 1/kg
+for 10 kg; `|Y| = 1.59155e-4` m/(N·s) at 100 Hz) and the Annex A example
+(γ² = 0.8, n = 75 → ε = 4.08 %).

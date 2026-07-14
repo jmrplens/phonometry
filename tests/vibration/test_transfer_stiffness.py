@@ -13,13 +13,16 @@ back through the indirect relation recovers the element stiffness at ``T << 1``.
 from __future__ import annotations
 
 import math
+import warnings
 
 import numpy as np
 import pytest
 
 from phonometry import (
+    PhonometryWarning,
     TransferStiffnessResult,
     base_transmissibility,
+    blocking_force_ratio,
     convert_frf,
     indirect_transfer_stiffness_result,
     loss_factor,
@@ -27,6 +30,7 @@ from phonometry import (
     transfer_stiffness_indirect,
     transfer_stiffness_level,
 )
+from phonometry.vibration.transfer_stiffness import TRANSMISSIBILITY_LIMIT
 
 
 # ---------------------------------------------------------------------------
@@ -52,6 +56,14 @@ def test_level_rejects_non_positive_reference() -> None:
         transfer_stiffness_level(1e6, reference=0.0)
 
 
+def test_level_rejects_zero_stiffness() -> None:
+    # A dead channel (|k| = 0) has no level; -inf must not propagate silently.
+    with pytest.raises(ValueError, match="zero"):
+        transfer_stiffness_level(0.0)
+    with pytest.raises(ValueError, match="dead-channel"):
+        transfer_stiffness_level([1e6, 0.0 + 0.0j])
+
+
 # ---------------------------------------------------------------------------
 # Loss factor (ISO 10846-1, 3.8)
 # ---------------------------------------------------------------------------
@@ -59,6 +71,14 @@ def test_loss_factor_is_tan_phase() -> None:
     # k = k0 (1 + j eta)  ->  Im/Re = eta
     assert loss_factor(1e6 * (1.0 + 0.05j)) == pytest.approx(0.05)
     assert loss_factor(1e6 + 1j * 3e4) == pytest.approx(0.03)
+
+
+def test_loss_factor_rejects_purely_imaginary_stiffness() -> None:
+    # Re(k) = 0 -> eta = Im/Re is undefined, not inf.
+    with pytest.raises(ValueError, match="purely imaginary"):
+        loss_factor(1j * 1e6)
+    with pytest.raises(ValueError, match="purely imaginary"):
+        loss_factor([1e6 + 1e4j, 0.0 + 5e5j])
 
 
 # ---------------------------------------------------------------------------
@@ -73,6 +93,14 @@ def test_direct_method_preserves_phase() -> None:
     # A phase lag in the force appears directly in k2,1.
     k = transfer_stiffness_direct(2.0 * np.exp(1j * 0.3), 1e-3 + 0j)
     assert np.angle(complex(k)) == pytest.approx(0.3)
+
+
+def test_direct_method_rejects_zero_displacement() -> None:
+    # A dead u1 channel must raise, not return an infinite stiffness.
+    with pytest.raises(ValueError, match="input_displacement"):
+        transfer_stiffness_direct(5.0 + 0j, 0.0 + 0j)
+    with pytest.raises(ValueError, match="dead input channel"):
+        transfer_stiffness_direct([5.0, 4.0], [1e-6, 0.0])
 
 
 # ---------------------------------------------------------------------------
@@ -107,6 +135,91 @@ def test_indirect_rejects_bad_inputs() -> None:
         transfer_stiffness_indirect(0.0, 0.01 + 0j, 10.0)
     with pytest.raises(ValueError, match="blocking_mass"):
         transfer_stiffness_indirect(500.0, 0.01 + 0j, 0.0)
+
+
+# ---------------------------------------------------------------------------
+# Validity of the T << 1 approximation (ISO 10846-3, 6.1, Inequality 2)
+# ---------------------------------------------------------------------------
+def test_indirect_warns_above_transmissibility_limit() -> None:
+    # |T| = 0.5 violates Inequality (2) (DeltaL1,2 < 20 dB): a warning fires.
+    with pytest.warns(PhonometryWarning, match="Inequality"):
+        transfer_stiffness_indirect(50.0, 0.5 + 0j, 10.0)
+
+
+def test_indirect_silent_within_transmissibility_limit() -> None:
+    # |T| = 0.05 satisfies Inequality (2): no PhonometryWarning is emitted.
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", PhonometryWarning)
+        transfer_stiffness_indirect(500.0, 0.05 + 0j, 10.0)
+        transfer_stiffness_indirect(500.0, TRANSMISSIBILITY_LIMIT + 0j, 10.0)
+
+
+def test_result_helper_warns_above_transmissibility_limit() -> None:
+    f = np.array([100.0, 200.0])
+    t = np.array([0.5 + 0j, 0.02 + 0j])
+    with pytest.warns(PhonometryWarning, match="ISO 10846-3"):
+        indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+
+
+def test_indirect_bias_at_the_validity_limit_is_within_1_db() -> None:
+    """At |T| = 0.1 (DeltaL1,2 = 20 dB) the undamped mass-spring model gives
+    k_indirect = 1.1 k: a 0.83 dB (10 %) bias, inside the 1 dB (12 %) bound."""
+    k, m = 1e6, 1.0
+    f = math.sqrt(11.0 * k / m) / (2.0 * math.pi)  # omega^2 m = 11 k -> T = -0.1
+    t = complex(base_transmissibility(f, m, k))
+    assert abs(t) == pytest.approx(TRANSMISSIBILITY_LIMIT)
+    k_rec = complex(transfer_stiffness_indirect(f, t, m))
+    assert abs(k_rec) / k == pytest.approx(1.1)
+    bias_db = 20.0 * math.log10(abs(k_rec) / k)
+    assert bias_db == pytest.approx(0.828, abs=0.001)
+    assert bias_db <= 1.0 and abs(k_rec) / k - 1.0 <= 0.12
+
+
+def test_linearity_criterion_10_db_step() -> None:
+    """ISO 10846-2/-3, 7.6: input spectra 10 dB apart must give transfer-
+    stiffness levels within 1.5 dB - exact equality for a linear element."""
+    u_a, step = 1e-6 + 0j, 10.0 ** (-10.0 / 20.0)
+    k = 1e6 + 3e4j
+    lk_a = float(transfer_stiffness_level(transfer_stiffness_direct(k * u_a, u_a)))
+    u_b = u_a * step
+    lk_b = float(transfer_stiffness_level(transfer_stiffness_direct(k * u_b, u_b)))
+    assert abs(lk_a - lk_b) <= 1.5
+    assert lk_a == pytest.approx(lk_b, abs=1e-9)
+
+
+def test_indirect_still_recovers_kelvin_voigt_below_the_warning() -> None:
+    """The valid-range identity of Formula (1) is unchanged by the guard."""
+    k, c, m = 1e6, 200.0, 5.0
+    f = 30.0 * math.sqrt(k / m) / (2.0 * math.pi)  # T << 1
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", PhonometryWarning)
+        t = base_transmissibility(f, m, k, c)
+        k_rec = complex(transfer_stiffness_indirect(f, t, m))
+    assert k_rec == pytest.approx(k + 1j * (2.0 * math.pi * f) * c, rel=5e-3)
+
+
+# ---------------------------------------------------------------------------
+# Blocking-force approximation (ISO 10846-1, Equations 6 and 7)
+# ---------------------------------------------------------------------------
+def test_blocking_force_ratio_at_the_ten_percent_limit() -> None:
+    """|k2,2/kt| = 0.1 gives F2/F2,b = 1/1.1 = 0.9091 - within 10 % (Eq. 7)."""
+    ratio = complex(blocking_force_ratio(1e5, 1e6))
+    assert ratio == pytest.approx(1.0 / 1.1)
+    assert abs(abs(ratio) - 1.0) <= 0.10
+
+
+def test_blocking_force_ratio_stiff_termination_is_unity() -> None:
+    # An infinitely stiff receiver takes exactly the blocking force.
+    assert complex(blocking_force_ratio(1e5, 1e12)) == pytest.approx(1.0, abs=1e-6)
+
+
+def test_blocking_force_ratio_complex_and_validation() -> None:
+    k22, kt = 1e5 + 1e4j, 2e6 + 5e5j
+    assert complex(blocking_force_ratio(k22, kt)) == pytest.approx(
+        1.0 / (1.0 + k22 / kt)
+    )
+    with pytest.raises(ValueError, match="termination_stiffness"):
+        blocking_force_ratio(1e5, 0.0)
 
 
 # ---------------------------------------------------------------------------

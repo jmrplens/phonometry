@@ -15,6 +15,11 @@ import math
 
 import numpy as np
 import pytest
+from reference_data import (
+    ISO8041_1_ANNEX_B_FACTORS,
+    ISO8041_1_TABLE4_TRANSITIONS,
+    ISO8041_1_TABLE5_TOLERANCES,
+)
 
 from phonometry.vibration import human_vibration as hv
 
@@ -70,6 +75,40 @@ def test_table_1_reference_frequency_factors(
     """|H| at the Table 1 reference frequency matches the tabulated factor."""
     got = hv.weighting_factors(name, freq)[0]
     assert got == pytest.approx(expected, rel=1.5e-3)
+
+
+def test_annex_b_full_tables_reproduce() -> None:
+    """Every printed Annex B factor (Tables B.1-B.9, 318 bands) reproduces."""
+    for name, rows in ISO8041_1_ANNEX_B_FACTORS.items():
+        for n, printed in rows:
+            got = float(hv.weighting_factors(name, _fc(n))[0])
+            # The tables print four significant figures (<= 0,05 % rounding).
+            assert got == pytest.approx(printed, rel=1e-3), (name, n)
+
+
+def _tolerance_region(freq: float, name: str) -> int:
+    """Table 5 tolerance region index of ``freq`` for weighting ``name``."""
+    ft1, ft2, ft3, ft4 = ISO8041_1_TABLE4_TRANSITIONS[name]
+    if freq <= ft1:
+        return 0
+    if freq < ft2:
+        return 1
+    if freq <= ft3:
+        return 2
+    if freq < ft4:
+        return 3
+    return 4
+
+
+def test_table_5_tolerance_envelope() -> None:
+    """|H| stays inside the Table 5 envelope of the printed design goal
+    at every Annex B one-third-octave band, for all nine weightings."""
+    for name, rows in ISO8041_1_ANNEX_B_FACTORS.items():
+        for n, printed in rows:
+            freq = _fc(n)
+            upper, lower = ISO8041_1_TABLE5_TOLERANCES[_tolerance_region(freq, name)]
+            ratio = float(hv.weighting_factors(name, freq)[0]) / printed - 1.0
+            assert -lower <= ratio <= upper, (name, n, ratio)
 
 
 def test_iso5349_1_wh_third_octave_table_a2() -> None:

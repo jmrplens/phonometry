@@ -1,6 +1,6 @@
 ---
 title: "Movilidad mecánica y la familia de FRF (ISO 7626-1)"
-description: "La familia de funciones de respuesta en frecuencia movimiento-por-fuerza de la ISO 7626-1:2011: receptancia, movilidad y acelerancia con sus recíprocas rigidez dinámica, impedancia y masa aparente (Tabla 1), la conversión a través de la receptancia como pivote y el resonador de referencia de un grado de libertad cuya movilidad en el punto de excitación alcanza 1/c en resonancia (Anexo A)."
+description: "La familia de funciones de respuesta en frecuencia movimiento-por-fuerza de la ISO 7626-1:2011: receptancia, movilidad y acelerancia con sus recíprocas rigidez dinámica, impedancia y masa aparente (Tabla 1), la conversión a través de la receptancia como pivote, el resonador SDOF en forma cerrada cuya movilidad en el punto de excitación alcanza 1/c en resonancia y los criterios de aceptación del lado de medición de la ISO 7626-2:2015."
 ---
 
 La **movilidad** mecánica es el cociente complejo entre una respuesta en
@@ -8,10 +8,12 @@ velocidad y la fuerza que la produce, `Y = v/F`. Es un miembro de una familia de
 **funciones de respuesta en frecuencia** (FRF) movimiento-por-fuerza: cuál se usa
 depende solo de si el movimiento es un desplazamiento, una velocidad o una
 aceleración, y cada una tiene una recíproca fuerza-por-movimiento. La
-**ISO 7626-1:2011** define la familia completa (Tabla 1) y el resonador de
-referencia de un grado de libertad (SDOF, Anexo A). Esta base de FRF sustenta las
-normas de fuente y transmisión de ruido estructural: ISO 9611, ISO 10846,
-EN 15657 y EN 12354-5.
+**ISO 7626-1:2011** define la familia completa (Tabla 1, con la definición de
+movilidad del 3.1.2), y el clásico resonador de un grado de libertad (SDOF) en
+forma cerrada sirve de referencia para esas definiciones. La **ISO 7626-2:2015**
+añade el lado de medición: la estimación de FRF a partir de señales medidas y
+sus criterios de aceptación. Esta base de FRF sustenta las normas de fuente y
+transmisión de ruido estructural: ISO 9611, ISO 10846, EN 15657 y EN 12354-5.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_es.svg" alt="Magnitudes normalizadas de receptancia, movilidad y acelerancia de un resonador de un grado de libertad en un eje de frecuencia log-log, todas con máximo en la resonancia" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_es_dark.svg" alt="Magnitudes normalizadas de receptancia, movilidad y acelerancia de un resonador de un grado de libertad en un eje de frecuencia log-log, todas con máximo en la resonancia" style="width:82%">
 
@@ -31,7 +33,11 @@ fuerza-por-movimiento:
 `convert_frf` pasa entre cualquiera de las seis FRF, usando la receptancia como
 pivote. Una FRF de **punto de excitación** tiene la respuesta y la fuerza en el
 mismo punto (`i = j`); una FRF de **transferencia** las tiene en puntos
-distintos.
+distintos. Los tipos fuerza-por-movimiento son recíprocas elemento a elemento,
+es decir, las magnitudes *libres* de la ISO 7626-1, 3.1.4; las magnitudes
+matriciales *bloqueadas* de la Tabla 1 no se invierten elemento a elemento en
+sistemas de varias coordenadas (la Tabla 1 llama además "masa efectiva" a
+`F/a`, la magnitud aquí denominada masa aparente).
 
 ```python
 import phonometry as ph
@@ -42,10 +48,11 @@ print(round(abs(ph.convert_frf(Y, 80.0, "mobility", "impedance")), 1))     # 500
 print(f"{abs(ph.convert_frf(Y, 80.0, 'mobility', 'accelerance')):.3f}")    # 1.005  1/kg
 ```
 
-## 2. El resonador SDOF de referencia (Anexo A)
+## 2. El resonador SDOF de referencia (forma cerrada)
 
-La referencia canónica en forma cerrada es una masa `m`, un amortiguamiento
-viscoso `c` y una rigidez `k`, cuya receptancia es
+La referencia canónica en forma cerrada, expresada en la taxonomía de FRF de la
+Tabla 1 / 3.1.2, es una masa `m`, un amortiguamiento viscoso `c` y una rigidez
+`k`, cuya receptancia es
 
 $$
 H(\omega) = \frac{1}{k - \omega^2 m + j\,\omega c}, \qquad
@@ -68,7 +75,38 @@ print(round(y0.real, 4), round(y0.imag, 6))   # 0.2 0.0   -> |Y(f0)| = 1/c
 print(round(complex(ph.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1/k
 ```
 
-## 3. El objeto `MobilityResult`
+## 3. FRF medidas y sus criterios de aceptación (ISO 7626-2)
+
+El procesado de registros medidos con excitación aleatoria según la
+ISO 7626-2, 8.1.3 (el estimador H1,
+`Ĥ = G(respuesta, fuerza)/G(fuerza, fuerza)`) y la coherencia ordinaria
+`γ² = |Gxy|²/(Gxx·Gyy)` de sus comprobaciones de calidad son los estimadores
+espectrales ya existentes de la biblioteca, [`transfer_function` y
+`coherence`](/phonometry/es/guides/electroacoustics/) (H1 es su valor por
+defecto). Sobre ellos se ofrecen dos criterios de aceptación de la ISO 7626-2:
+
+* **Calibración operacional con masa rígida (7.5.2).** La FRF medida de un
+  bloque rígido de masa conocida, suspendido libremente, debe coincidir dentro
+  de ±5 % con `|A| = 1/m` (acelerancia) o `|Y| = 1/(2πf·m)` (movilidad).
+* **Error aleatorio (Anexo A + 8.1.3).** Deben promediarse suficientes
+  espectros para que el error aleatorio normalizado `ε = √((1−γ²)/(2nγ²))` en
+  cada resonancia de una movilidad de punto de excitación quede por debajo
+  del 5 %.
+
+```python
+import numpy as np
+import phonometry as ph
+
+# Un bloque de calibración de 10 kg: |A| debe ser 1/m = 0,100 1/kg en toda frecuencia.
+f = np.array([20.0, 100.0, 500.0])
+res = ph.rigid_mass_calibration_check([0.100, 0.102, 0.097], f, mass=10.0)
+print(res.passed, res.within_tolerance.tolist())   # True [True, True, True]
+
+# El ejemplo del Anexo A: coherencia 0,8 necesita unos 75 promedios para < 5 %.
+print(round(float(ph.random_error_percent(0.8, 75)), 2))   # 4.08  %
+```
+
+## 4. El objeto `MobilityResult`
 
 `sdof_mobility_result` agrupa la FRF en frecuencia en un `MobilityResult`, que
 expone `.magnitude`, `.phase`, `.to(target)` (cualquier tipo de la Tabla 1) y un
@@ -111,9 +149,16 @@ plt.legend(); plt.show()
 
 **Normas.** ISO 7626-1:2011, *Mechanical vibration and shock — Experimental
 determination of mechanical mobility — Part 1: Basic terms and definitions, and
-transducer specifications* — la familia de FRF y sus recíprocas (Tabla 1), la
-distinción punto de excitación / transferencia y el resonador de referencia de
-un grado de libertad (Anexo A). La conformidad se ancla en las identidades en
-forma cerrada del SDOF: el máximo de movilidad en el punto de excitación
-`|Y(ω0)| = 1/c`, la receptancia estática `H(0) = 1/k` y la reciprocidad exacta
-de la Tabla 1 `impedancia·movilidad = 1`.
+transducer specifications* — la familia de FRF y sus recíprocas (Tabla 1, con
+las definiciones de movilidad del 3.1.2 y de magnitud libre del 3.1.4) y la
+distinción punto de excitación / transferencia. ISO 7626-2:2015, *Part 2:
+Measurements using single-point translation excitation with an attached
+vibration exciter* — el procesado H1 de excitación aleatoria del 8.1.3, la
+calibración operacional con masa rígida del 7.5.2 (±5 %) y el criterio de error
+aleatorio del Anexo A (< 5 % en las resonancias). La conformidad se ancla en
+las identidades en forma cerrada del SDOF (coherentes con las definiciones de
+la Tabla 1 / 3.1.2): el máximo de movilidad en el punto de excitación
+`|Y(ω0)| = 1/c`, la receptancia estática `H(0) = 1/k`, la reciprocidad exacta
+de la Tabla 1 `impedancia·movilidad = 1`, los valores de la calibración con
+masa rígida (`|A| = 0,100` 1/kg para 10 kg; `|Y| = 1,59155e-4` m/(N·s) a
+100 Hz) y el ejemplo del Anexo A (γ² = 0,8, n = 75 → ε = 4,08 %).

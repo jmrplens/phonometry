@@ -450,7 +450,7 @@ x = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
 x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # nivel global de 60 dB SPL
 
 res = roughness_ecma(x, fs, field="free")
-print(f"R = {res.roughness:.4f} asper")   # 0,9999 asper (referencia: 1 asper)
+print(f"R = {res.roughness:.4f} asper")   # 0.9999 asper (referencia: 1 asper)
 
 res.plot()   # aspereza R(l50) dependiente del tiempo + mapa de calor de aspereza específica
 ```

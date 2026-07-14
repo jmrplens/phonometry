@@ -124,9 +124,67 @@ def test_signal_am_tone_sweep_tracks_literature() -> None:
     # Pearson correlation with the literature trend.
     r = float(np.corrcoef(model, lit)[0, 1])
     assert r >= 0.9
-    # Every point within a factor of ~2 of the literature value.
+    # Every point within a factor of ~2.1 of the literature value (the 16 Hz
+    # point sits at 0.48x with the corrected Bark constant).
     ratio = model / lit
-    assert np.all((ratio > 0.5) & (ratio < 2.1))
+    assert np.all((ratio > 0.45) & (ratio < 2.2))
+
+
+def test_signal_carrier_sweep_tracks_fig_10_5() -> None:
+    # Carrier-frequency sweep of the AM tone (70 dB, m=1, fmod=4 Hz) against
+    # the measured reference values (tests/reference_data.py) and the
+    # qualitative F&Z Fig. 10.5 trend. Would have caught the 10x Bark-constant
+    # typo: with 0.76e-4 the sweep read (0.56, ..., 1.10) -- rising toward
+    # 8 kHz instead of rolling off.
+    model = {
+        fc: fluctuation_strength(_am_tone(fc, 70.0, 1.0, 4.0), _FS).fluctuation_strength
+        for fc in ref.FS_CARRIER_SWEEP_HZ
+    }
+    for fc, expected in zip(ref.FS_CARRIER_SWEEP_HZ, ref.FS_CARRIER_SWEEP_VACIL):
+        assert model[fc] == pytest.approx(expected, rel=0.15), (
+            f"fc={fc:g} Hz: F={model[fc]:.3f} vs {expected} vacil"
+        )
+    # F&Z Fig. 10.5 trend: low-mid carrier plateau, clear roll-off at 8 kHz.
+    plateau = [model[fc] for fc in (125.0, 250.0, 500.0, 1000.0)]
+    assert max(plateau) / min(plateau) < 1.6  # plateau, no strong slope
+    assert model[8000.0] < 0.75 * min(plateau)  # 8 kHz roll-off
+
+
+def _am_bbn(level_db: float, m: float, fmod: float, dur: float = 4.0,
+            seed: int = 1234, bandwidth_hz: float = 16000.0) -> np.ndarray:
+    """AM broadband noise (band-limited white), overall level in dB SPL."""
+    rng = np.random.default_rng(seed)
+    n = int(_FS * dur)
+    x = rng.standard_normal(n)
+    spec = np.fft.rfft(x)
+    spec[np.fft.rfftfreq(n, 1.0 / _FS) > bandwidth_hz] = 0.0
+    x = np.fft.irfft(spec, n=n)
+    t = np.arange(n) / _FS
+    x = (1.0 + m * np.sin(2 * np.pi * fmod * t)) * x
+    return np.asarray(x / np.sqrt(np.mean(x**2)) * _P_REF * 10 ** (level_db / 20))
+
+
+def test_signal_am_bbn_sweep_tracks_literature_trend() -> None:
+    # Osses 2016 Table 1, AM BBN row (BW 16 kHz, 60 dB, m=1): trend-only
+    # cross-check. The excitation front-end spreads the modulated energy
+    # across bands and overshoots the absolute pass-band level by up to ~3x
+    # (documented in the module docstring), so only the band-pass shape, the
+    # correlation and the high-fmod tail are asserted. (The FM-tone row of
+    # Table 1 is deliberately not pinned: FM accuracy is not pursued.)
+    model = np.array(
+        [
+            fluctuation_strength(_am_bbn(60.0, 1.0, fm), _FS).fluctuation_strength
+            for fm in ref.FS_AM_TONE_FMOD_HZ
+        ]
+    )
+    lit = np.array(ref.FS_AM_BBN_60DB_LITERATURE)
+    assert int(np.argmax(model)) == 2  # band-pass peak at 4 Hz
+    assert float(np.corrcoef(model, lit)[0, 1]) >= 0.9
+    # The 16/32 Hz tail is not inflated by the energy spreading: within 50 %.
+    assert model[4] == pytest.approx(lit[4], rel=0.5)
+    assert model[5] == pytest.approx(lit[5], rel=0.5)
+    # Pass-band overshoot stays bounded (regression guard on the ~3x figure).
+    assert np.all(model / lit < 3.5)
 
 
 def test_signal_rejects_bad_inputs() -> None:

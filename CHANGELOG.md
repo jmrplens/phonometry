@@ -9,6 +9,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- ISO/PAS 20065:2016 extended uncertainty of the audibility (Clauses 5.4/6):
+  `audibility_uncertainty` propagates the uniform 3 dB narrow-band level
+  uncertainty through the audibility chain to the extended uncertainty U
+  (90 % bilateral coverage, k = 1,645) and `mean_audibility_uncertainty`
+  combines the per-spectrum values through the Formula (20) mean;
+  `analyze_spectrum` reports the per-tone U on its result. Verified against
+  the printed Table E.2 U column (decisive tone to 0,006 dB), the 2 FG row
+  and the Annex E Step 4 mean uncertainty (1,38 dB).
+- ISO 532-1 stationary `time_skip` parameter (Annex B.1's TimeSkip: the
+  stationary calculation starts from 0,2 s when validating against the
+  official recordings, excluding leading silence and the filterbank
+  transient from the mean square).
+- Psychoacoustics oracle expansion: the shipped ISO 532-1 Annex B.4 Test
+  signal 13 and a B.3 pink-noise bounds check; all 21 DIN 45692 Table A.2
+  rows and all 20 Table A.3 broadband rows at the normative 5 % / 0,05 acum
+  tolerance (plus a non-definitional Table A.2 conformance row at 2,5 kHz);
+  the ISO 532-2 Annex B phon columns; the ISO 532-3 Annex C.3 multi-tone
+  complexes, the C.1.2/C.1.3 sone columns and the Annex C.1 anchor pinned at
+  32/44,1/48 kHz native rates; the ECMA-418-2 decision thresholds as
+  constants-tests (audibility 0,01 sone_HMS, prominent tonality 0,4 tu_HMS,
+  prominent roughness 0,2 asper); a loudness/tonality N'_tonal
+  cross-consistency test on the shared Clause 6.2 intermediate; the
+  fluctuation-strength carrier sweep (F&Z Fig. 10.5 trend) and the Osses
+  Table 1 AM-broadband-noise row as a trend cross-check; and the full
+  ISO/PAS 20065 Tables E.2/E.3/E.4 columns (LG, av, band limits, per-tone
+  and mean uncertainties, all-spectra tone records).
+- ECMA-418-1 TNR/PR degenerate-input warnings: peaks within one bin of the
+  89,1 Hz / 11,2 kHz range edge (bin snapping can flip the prominence
+  verdict) and critical bands at numeric-noise power (silence, DC) now warn;
+  the `prominent` verdict is documented as the numeric criterion only (the
+  clause 11.8/12.8 aural examination and clause 8/9 hearing-threshold screen
+  are the caller's responsibility).
+- `docs/ERRATA.md` entries for the review findings: the ECMA-418-1 clause
+  4.1.2 "11 220 Hz" range misprint, the internally inconsistent
+  ECMA-418-2 clause 5.1.5.2 last-block formula, the ISO/PAS 20065 clause
+  5.3.4 edge-steepness print that contradicts the executable DIN 45681
+  Annex J program, and the Osses 2016 Eq. (3) Bark-constant exponent typo.
+
 - Underwater printed-source oracles promoted to tests and the conformance
   report: the Wong & Zhu (1995) ITS-90 check tables pin the UNESCO and
   Del Grosso sound-speed refits at 17 printed grid points each (agreement
@@ -120,6 +158,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Psychoacoustic annoyance combined the weightings as
+  N5*sqrt(1 + wS^2 + wFR^2) where Fastl & Zwicker Eq. (16.2) prints
+  PA = N5*(1 + sqrt(wS^2 + wFR^2)); every PA with a nonzero
+  sharpness/fluctuation/roughness contribution was 13-29 % low, and the
+  worked reference value had been hand-computed with the same wrong form.
+  The worked tuple now anchors PA = 37,0478.
+- ECMA-418-2 roughness omitted the mandatory Clause 5.1.2 5 ms fade-in and
+  its calibration signal was synthesized with the carrier (not the overall
+  signal) at 60 dB SPL. With both corrected the chain reproduces the
+  Clause 7 reference to 0,99990 asper with the tabulated c_R; the former
+  "+7,35 % clean-room methodology variance" narrative was wrong and is
+  removed everywhere.
+- ECMA-418-2 loudness skipped the cross-block-size-group ACF recomputation
+  of Clause 6.2.3 (tonal content near the block-size boundaries was
+  mis-stated by up to -9,5 %); loudness and tonality now share one full
+  Clause 6.2.3 tonal/noise split and report identical N'_tonal. The 1 kHz /
+  40 dB calibration computes 0,9845 sone_HMS with the verbatim c_N; the
+  residual's origin is documented in the module. The common time grid is
+  sized from the 1024-sample stage (no more trailing edge-held samples) and
+  the tonality band-range arguments are validated per Formulae 56/57.
+- Fluctuation strength transcribed the misprinted Bark constant 0,76e-4 from
+  Osses 2016 Eq. (3); the Zwicker-Terhardt formula and the paper's own
+  anchors require 0,76e-3. The 47 filter centres now span 50 Hz-13,2 kHz
+  (was 491 Hz-20 kHz with 12 duplicate edge bands) and carrier-frequency
+  behaviour matches F&Z Fig. 10.5 (C_FS = 0,279, near the paper's 0,2490).
+- ISO 532-1 Annex B validation tests had silently skipped since the test
+  tree reorganization (broken relative fixtures path behind a skip guard);
+  the path is fixed and an in-repo presence assertion prevents a recurrence.
+- DIN 45692 Aures/von Bismarck sharpness variants used self-derived
+  normalization constants where Formulas (B.1)/(B.2) print the literal
+  k = 0,11 (every Aures result was +4,2 % against the published formula);
+  the reference sound now lands near, not exactly at, 1 acum
+  (0,96/1,02 acum) and is asserted non-circularly.
+- ISO 532-1 filterbank tables were mislabelled (Table A.1 is the reference
+  section; the per-band deviations and gains are Table A.2), and the
+  sone-to-phon mapping documents the reference-program provenance of its
+  exact 10/lg 2 factor and 3 phon floor.
 - Underwater Francois-Garrison absorption used the Medwin & Clay textbook
   transcription of the boric-acid factor (8.68/c); the original paper prints
   8.86/c and only that value reproduces the paper's own Table IV (the

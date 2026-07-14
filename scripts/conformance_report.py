@@ -615,8 +615,41 @@ def _chk_iso532_b5_diffuse() -> Outcome:
     "Sharpness of the standard 1 kHz reference signal",
 )
 def _chk_sharpness_reference() -> Outcome:
+    # Definitional: the clause 5.2 constant k is derived so this very signal
+    # reads 1.00 acum. The independent Table A.2 oracle is checked below.
     computed = float(ph.sharpness_din(reference_sound(), _FS))
     return numeric(1.0, computed, 1e-9, unit="acum", places=6)
+
+
+@register(
+    "Psychoacoustics",
+    "DIN 45692:2009 Table A.2",
+    "Sharpness of critical-band noise at 2.5 kHz (2320-2700 Hz, 4 sone)",
+)
+def _chk_sharpness_table_a2() -> Outcome:
+    # Independent (non-definitional) oracle: the hearing-test Sollwert for
+    # the 2.5 kHz critical-band noise is 1.78 acum at the clause 6 loudness
+    # of 4 sone; permitted deviation 5 % or 0.05 acum.
+    from scipy import signal as sp_signal
+
+    def narrowband(level_db: float) -> np.ndarray:
+        rng = np.random.default_rng(7)
+        white = rng.standard_normal(_FS * 2)
+        sos = sp_signal.butter(
+            8, [2320.0, 2700.0], btype="band", fs=_FS, output="sos"
+        )
+        nb = sp_signal.sosfilt(sos, white)
+        return np.asarray(
+            nb / np.sqrt(np.mean(nb**2)) * 2e-5 * 10 ** (level_db / 20)
+        )
+
+    lo, hi = 30.0, 90.0
+    for _ in range(13):  # set the clause 6 loudness of 4 sone
+        mid = (lo + hi) / 2
+        n = ph.loudness_zwicker(narrowband(mid), _FS, stationary=True).loudness
+        lo, hi = (mid, hi) if n < 4.0 else (lo, mid)
+    computed = float(ph.sharpness_din(narrowband((lo + hi) / 2), _FS))
+    return numeric(1.78, computed, 0.05 * 1.78, unit="acum", places=3)
 
 
 @register(
@@ -644,11 +677,18 @@ def _spl_tone(freq: float, level_db: float, seconds: float) -> np.ndarray:
 def _am_tone(
     fc: float, fmod: float, depth: float, level_db: float, seconds: float
 ) -> np.ndarray:
-    """Amplitude-modulated tone, carrier RMS at ``level_db`` (pressure in Pa)."""
+    """Amplitude-modulated tone at an OVERALL RMS level (pressure in Pa).
+
+    ECMA-418-2 Clause 7 states the calibration level as the sound pressure
+    level of the signal, i.e. the overall RMS level of the modulated waveform.
+    """
     t = np.arange(int(_FS * seconds)) / _FS
-    amp = math.sqrt(2.0) * 2e-5 * 10.0 ** (level_db / 20.0)
-    carrier = amp * (1.0 + depth * np.cos(2.0 * np.pi * fmod * t))
-    return np.asarray(carrier * np.sin(2.0 * np.pi * fc * t))
+    x = (1.0 + depth * np.cos(2.0 * np.pi * fmod * t)) * np.sin(
+        2.0 * np.pi * fc * t
+    )
+    return np.asarray(
+        x * (2e-5 * 10.0 ** (level_db / 20.0)) / np.sqrt(np.mean(x**2))
+    )
 
 
 @register(
@@ -657,6 +697,9 @@ def _am_tone(
     "HMS loudness of a 1 kHz / 40 dB tone (c_N=0.0211964)",
 )
 def _chk_ecma_loudness() -> Outcome:
+    # With the full Clause 6.2.3 band averaging the chain computes 0.9845
+    # sone_HMS for the calibration tone; the residual's origin is documented
+    # in the loudness_ecma module docstring (c_N stays the verbatim value).
     computed = float(ph.loudness_ecma(_spl_tone(1000.0, 40.0, 0.6), _FS).loudness)
     return numeric(
         ref.ECMA418_2_LOUDNESS_1KHZ_40DB_SONE,
@@ -686,27 +729,19 @@ def _chk_ecma_tonality() -> Outcome:
 @register(
     "Psychoacoustics",
     "ECMA-418-2:2025 Clause 7",
-    "HMS roughness of a 1 kHz / 70 Hz / m=1 / 60 dB tone (c_R=0.0180685)",
+    "HMS roughness of a 1 kHz / 70 Hz / m=1 / overall 60 dB tone (c_R=0.0180685)",
 )
 def _chk_ecma_roughness() -> Outcome:
-    # The standard target is 1.0 asper; this clean-room chain deterministically
-    # computes ~1.0735 (+7.35 %, documented methodology variance). The check
-    # pins the clean-room value, NOT the 1.0 target.
+    # Clause 7 calibration: the reference signal at an overall sound pressure
+    # level of 60 dB SPL is 1 asper (computed: 0.9999 with the tabulated c_R).
     sig = _am_tone(1000.0, 70.0, 1.0, 60.0, 2.0)
     computed = float(ph.roughness_ecma(sig, _FS).roughness)
-    target = ref.ECMA418_2_ROUGHNESS_STANDARD_TARGET_ASPER
-    out = numeric(
-        ref.ECMA418_2_ROUGHNESS_CLEANROOM_ASPER,
+    return numeric(
+        ref.ECMA418_2_ROUGHNESS_1KHZ_70HZ_60DB_ASPER,
         computed,
         0.01,
         unit="asper",
         places=4,
-    )
-    return Outcome(
-        expected=f"{out.expected} [clean-room; standard target {target:g}]",
-        computed=out.computed,
-        delta=out.delta,
-        passed=out.passed,
     )
 
 
@@ -3050,6 +3085,26 @@ def _chk_iso20065_mean_narrowband_level() -> Outcome:
     )
     # Iterative Formula (6) with Hanning correction; 0.02 dB absorbs rounding.
     return numeric(ref.ISO20065_E1_LS, value, 0.02, unit="dB", places=2)
+
+
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Clause 6", "Extended uncertainty U of the 137.3 Hz tone, Table E.2")
+def _chk_iso20065_uncertainty() -> Outcome:
+    res = ph.analyze_spectrum(
+        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+    )
+    assert res.extended_uncertainties is not None
+    by_freq = dict(zip(res.tone_frequencies, res.extended_uncertainties))
+    # Table E.2, run index k = 2: U = 2.79 dB (90 % bilateral coverage).
+    return numeric(ref.ISO20065_E2_U[1], float(by_freq[137.3]), 0.02, unit="dB", places=2)
+
+
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Formulae (28)-(29)", "Extended uncertainty of the mean audibility, Annex E Step 4")
+def _chk_iso20065_mean_uncertainty() -> Outcome:
+    u_j = [row[6] for row in ref.ISO20065_E4_DECISIVE_ROWS]
+    value = ph.mean_audibility_uncertainty(ref.ISO20065_DECISIVE_AUDIBILITIES, u_j)
+    return numeric(
+        ref.ISO20065_E4_MEAN_UNCERTAINTY, value, 0.01, unit="dB", places=2
+    )
 
 
 @register(_TONE_AUD, "ISO/PAS 20065:2016 Formula (8)", "Tone level LT from spectrum, Table E.1")

@@ -92,6 +92,16 @@ print(round(res.decisive_audibility, 2), res.decisive_frequency)  # 5.01 137.3
 print(round(ph.mean_audibility([9.18, 6.04, 7.46, 2.67, 7.17]), 2))  # 6.98 dB
 ```
 
+### 3.1 Incertidumbre extendida de la audibilidad
+
+La cláusula 5.4 asocia a cada audibilidad una incertidumbre extendida `U`
+(bilateral al 90 %), y la cláusula 6 la hace obligatoria cuando se han
+promediado menos de 12 espectros. `assess_tones` la calcula por tono
+(`res.extended_uncertainties`), `audibility_uncertainty` la evalúa
+directamente desde las líneas del espectro y `mean_audibility_uncertainty`
+la propaga a la audibilidad media energética de un conjunto de espectros
+(Anexo E: `U = 2.80 dB` para el tono de 137.3 Hz frente al 2,79 impreso).
+
 ## 4. Desde el espectro de banda estrecha
 
 Dadas las líneas FFT de la banda crítica en torno a un tono,

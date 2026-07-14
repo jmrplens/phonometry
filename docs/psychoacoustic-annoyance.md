@@ -36,7 +36,7 @@ factor that grows with the sharpness weighting `wS` and the combined
 roughness/fluctuation weighting `wFR`:
 
 $$
-PA = N_5\sqrt{1 + w_S^2 + w_{FR}^2}, \qquad
+PA = N_5\left(1 + \sqrt{w_S^2 + w_{FR}^2}\right), \qquad
 w_S = (S - 1.75)\,0.25\,\lg(N_5 + 10)\ \ (S > 1.75\ \mathrm{acum}), \qquad
 w_{FR} = \frac{2.18}{N_5^{0.4}}\,(0.4\,F + 0.6\,R).
 $$
@@ -50,7 +50,7 @@ returns the annoyance together with the two intermediate weightings:
 import phonometry as ph
 
 res = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)   # N5, S, F, R
-print(round(res.annoyance, 4))   # 30.8167
+print(round(res.annoyance, 4))   # 37.0478
 print(round(res.w_s, 4), round(res.w_fr, 4))   # 0.1001 0.2125
 ```
 
@@ -201,9 +201,9 @@ res.plot()   # specific fluctuation strength F′(z) over the Bark axis (needs m
 > `1 kHz / 60 dB / m = 1 / 4 Hz` AM tone reads `1.00 vacil` by construction, and
 > cross-checked against the Osses 2016 Table 1 literature values and the open
 > SQAT reference (used only as a numeric oracle). Over the `70 dB` AM-tone sweep
-> `fmod ∈ {1, 2, 4, 8, 16, 32} Hz` it gives `[0.42, 0.79, 1.09, 1.05, 0.19,
-> 0.10]` vacil against the literature `[0.39, 0.84, 1.25, 1.30, 0.36, 0.06]`
-> (Pearson `r = 0.98`, correct `4 Hz` peak, within ~2×). FM-tone accuracy is
+> `fmod ∈ {1, 2, 4, 8, 16, 32} Hz` it gives `[0.40, 0.79, 1.09, 1.05, 0.17,
+> 0.09]` vacil against the literature `[0.39, 0.84, 1.25, 1.30, 0.36, 0.06]`
+> (Pearson `r = 0.98`, correct `4 Hz` peak, within ~2.1×). FM-tone accuracy is
 > explicitly not pursued. For **AM broadband noise** the signal model overshoots
 > the absolute level (it spreads the modulated energy across bands) — quote the
 > closed form `fluctuation_strength_am_noise` (§3.1) for that stimulus.
@@ -211,7 +211,7 @@ res.plot()   # specific fluctuation strength F′(z) over the Bark axis (needs m
 ---
 
 **Standards.** Fastl & Zwicker (2006), *Psychoacoustics: Facts and Models*
-(Springer): psychoacoustic annoyance `PA = N5·√(1 + wS² + wFR²)` with the
+(Springer): psychoacoustic annoyance `PA = N5·(1 + √(wS² + wFR²))` with the
 sharpness weighting `wS` and roughness/fluctuation weighting `wFR`
 (Eqs 16.2–16.4; origin Widmann 1992), and the closed form for the fluctuation
 strength of amplitude-modulated broadband noise (Eq. 10.2). The fluctuation-

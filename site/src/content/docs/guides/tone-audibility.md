@@ -87,6 +87,16 @@ print(round(res.decisive_audibility, 2), res.decisive_frequency)  # 5.01 137.3
 print(round(ph.mean_audibility([9.18, 6.04, 7.46, 2.67, 7.17]), 2))  # 6.98 dB
 ```
 
+### 3.1 Extended uncertainty of the audibility
+
+Clause 5.4 attaches a 90 % bilateral extended uncertainty `U` to every
+audibility, and clause 6 makes it mandatory whenever fewer than 12 spectra
+have been averaged. `assess_tones` computes it per tone
+(`res.extended_uncertainties`), `audibility_uncertainty` evaluates it straight
+from the spectrum lines, and `mean_audibility_uncertainty` propagates it to
+the energy-averaged audibility of a spectrum set (Annex E: `U = 2.80 dB` for
+the 137.3 Hz tone against the printed 2,79).
+
 ## 4. From the narrow-band spectrum
 
 Given the FFT lines of the critical band about a tone, `mean_narrowband_level`

@@ -71,6 +71,30 @@ def test_calibration_constant_is_the_tabulated_c_t() -> None:
     assert _C_T == ECMA418_2_TONALITY_C_T
 
 
+def test_decision_thresholds_are_the_standard_constants() -> None:
+    # The standard's verbatim decision criteria (its only numeric anchors
+    # beyond the calibration points): prominence 0.4 tu_HMS (Clause 6.3),
+    # prominent roughness 0.2 asper (Clause 7.2) and the 0.01 sone_HMS
+    # audibility criterion on the total basis loudness (Clause 5.1.9).
+    import reference_data as ref
+
+    from phonometry.psychoacoustics.loudness_ecma import (
+        AUDIBILITY_THRESHOLD_SONE_HMS,
+    )
+    from phonometry.psychoacoustics.roughness_ecma import (
+        PROMINENT_ROUGHNESS_ASPER,
+    )
+    from phonometry.psychoacoustics.tonality_ecma import (
+        PROMINENT_TONALITY_TU_HMS,
+    )
+
+    assert PROMINENT_TONALITY_TU_HMS == ref.ECMA418_2_PROMINENT_TONALITY_TU
+    assert PROMINENT_ROUGHNESS_ASPER == ref.ECMA418_2_PROMINENT_ROUGHNESS_ASPER
+    assert (
+        AUDIBILITY_THRESHOLD_SONE_HMS == ref.ECMA418_2_AUDIBILITY_THRESHOLD_SONE
+    )
+
+
 # --------------------------------------------------------------------------
 # Standard's qualitative behaviours
 # --------------------------------------------------------------------------
@@ -136,6 +160,51 @@ def test_user_band_excluding_tone_lowers_tonality() -> None:
     # segment is enough: the property is spectral, not duration-driven.
     restricted = tonality_ecma(_tone(1000.0, 40.0, seconds=0.7), FS, f_low=3000.0)
     assert restricted.tonality < 0.2
+
+
+def test_loudness_and_tonality_share_the_tonal_split(monkeypatch) -> None:
+    """Loudness and tonality must report the same underlying N'_tonal(l, z).
+
+    Clause 8.1.1 builds the loudness on the Clause 6.2 outputs, so the two
+    metrics have to agree on the shared intermediate, not just at their
+    endpoints. Both modules call the same ``_tonal_noise_split``; this test
+    spies on it through both call sites and asserts the recorded
+    N'_tonal(l, z) arrays are identical.
+    """
+    import sys
+
+    from phonometry import loudness_ecma
+
+    L = sys.modules["phonometry.psychoacoustics.loudness_ecma"]
+    T = sys.modules["phonometry.psychoacoustics.tonality_ecma"]
+    assert T._tonal_noise_split is L._tonal_noise_split
+
+    recorded = []
+    orig = L._tonal_noise_split
+
+    def spy(x, field):
+        out = orig(x, field)
+        recorded.append(out[0].copy())  # N'_tonal(l, z)
+        return out
+
+    monkeypatch.setattr(L, "_tonal_noise_split", spy)
+    monkeypatch.setattr(T, "_tonal_noise_split", spy)
+    sig = _tone(1000.0, 40.0, seconds=0.7)
+    loudness_ecma(sig, FS)
+    tonality_ecma(sig, FS)
+    assert len(recorded) == 2
+    assert np.array_equal(recorded[0], recorded[1])
+
+
+def test_band_range_rejects_out_of_range_edges() -> None:
+    # Formulae 56/57 preconditions: 16 Hz < f_L, f_H < 20 kHz, f_L < f_H.
+    x = _tone(1000.0, 40.0, seconds=0.5)
+    with pytest.raises(ValueError, match="16 Hz"):
+        tonality_ecma(x, FS, f_low=10.0)
+    with pytest.raises(ValueError, match="20 kHz"):
+        tonality_ecma(x, FS, f_high=25000.0)
+    with pytest.raises(ValueError, match="below 'f_high'"):
+        tonality_ecma(x, FS, f_low=2000.0, f_high=500.0)
 
 
 def test_band_range_uses_edge_midpoints() -> None:

@@ -55,6 +55,28 @@ def test_anchor_1khz_40db_is_one_sone() -> None:
     assert res.loudness_level_max == pytest.approx(40.0, abs=0.3)
 
 
+@pytest.mark.parametrize(
+    ("fs", "expected_n_max"),
+    [(32000.0, 0.9918), (44100.0, 0.9926), (48000.0, 0.9900)],
+)
+def test_anchor_holds_at_native_sample_rates(fs: float, expected_n_max: float) -> None:
+    """The Annex C.1 anchor at the documented native-fs conformance mode.
+
+    The module processes at the native sampling rate instead of the
+    clause 5 32 kHz conversion (see the module docstring); this pins the
+    anchor n_max at the three common rates (0.3 % cross-rate spread, far
+    inside the 2.8 phon expanded uncertainty of clause 8) so a change to
+    the spectral plan or calibration shows up here. A 0.5 s tone is used:
+    the long-term smoothing has not fully settled there, which makes the
+    pin sensitive to the temporal chain as well; at 1.3 s the same anchor
+    reads 1.0000/1.0000/0.9982.
+    """
+    t = np.arange(int(round(0.5 * fs))) / fs
+    x = np.sqrt(2.0) * 2e-5 * 10.0 ** (40.0 / 20.0) * np.sin(2.0 * np.pi * 1000.0 * t)
+    res = loudness_moore_glasberg_time(x, fs)
+    assert res.n_max == pytest.approx(expected_n_max, abs=0.003)
+
+
 # --------------------------------------------------------------------------
 # Annex C.1 - 1 kHz tone loudness vs level (primary tone oracle)
 # --------------------------------------------------------------------------
@@ -107,6 +129,64 @@ def test_annex_c1_other_tones(
         _tone(frequency, level_db), FS, field=field, presentation=presentation
     )
     assert res.loudness_level_max == pytest.approx(phon, abs=1.2)
+
+
+# Annex C.1 sone columns (previously only the phon values were pinned).
+_C1_SONE = [
+    # frequency, field, presentation, level -> printed peak LTL in sone
+    (3000.0, "free", "binaural", 20.0, 0.37),
+    (3000.0, "free", "binaural", 40.0, 1.9),
+    (3000.0, "free", "binaural", 60.0, 7.2),
+    (3000.0, "free", "binaural", 80.0, 26.4),
+    (1000.0, "eardrum", "monaural", 20.0, 0.06),
+    (1000.0, "eardrum", "monaural", 40.0, 0.54),
+    (1000.0, "eardrum", "monaural", 60.0, 2.3),
+    (1000.0, "eardrum", "monaural", 80.0, 8.6),
+]
+
+
+@pytest.mark.parametrize("frequency, field, presentation, level_db, sone", _C1_SONE)
+def test_annex_c1_sone_values(
+    frequency: float, field: str, presentation: str, level_db: float, sone: float
+) -> None:
+    """Annex C.1.2/C.1.3 peak long-term loudness in sone.
+
+    Values print to two decimals; the absolute floor covers their rounding
+    half-width at the quiet end.
+    """
+    res = loudness_moore_glasberg_time(
+        _tone(frequency, level_db), FS, field=field, presentation=presentation
+    )
+    assert res.n_max == pytest.approx(sone, rel=0.02, abs=0.005)
+
+
+# --------------------------------------------------------------------------
+# Annex C.3 - multi-tone complexes (pure tones, fully reproducible)
+# --------------------------------------------------------------------------
+
+_C3_CASES = [
+    # component frequencies, level per tone, printed sone, printed phon
+    ([1500.0, 1600.0, 1700.0], 60.0, 6.36, 66.7),
+    ([1000.0, 1600.0, 2400.0], 60.0, 12.8, 77.3),
+    ([float(f) for f in range(100, 1001, 100)], 30.0, 1.88, 48.5),
+]
+
+
+@pytest.mark.parametrize("freqs, level_db, sone, phon", _C3_CASES)
+def test_annex_c3_multi_tone(
+    freqs: list, level_db: float, sone: float, phon: float
+) -> None:
+    """Annex C.3 multi-tone complexes reproduce the printed peak LTL.
+
+    Computed values sit within 2.5 % (sone) / 0.4 phon of the print (the
+    close-tone complex C.3.1 is the worst case); tolerances hold those
+    margins with a little headroom, well inside the 2.8 phon expanded
+    uncertainty.
+    """
+    x = np.sum([_tone(f, level_db) for f in freqs], axis=0)
+    res = loudness_moore_glasberg_time(x, FS)
+    assert res.n_max == pytest.approx(sone, rel=0.04)
+    assert res.loudness_level_max == pytest.approx(phon, abs=0.5)
 
 
 # --------------------------------------------------------------------------
@@ -301,6 +381,11 @@ def test_anchor_oracle_is_byte_identical() -> None:
 
     The dichotic-path fix must leave every diotic/monaural oracle bit-for-bit
     identical; this pins the definitional anchor to full float precision.
+
+    NOTE: the pinned number is this implementation's own output, NOT a
+    conformance oracle from the standard (those are the Annex C values
+    asserted elsewhere in this file). It only detects unintended numerical
+    drift; update it deliberately when the chain legitimately changes.
     """
     res = loudness_moore_glasberg_time(_tone(1000.0, 40.0), FS)
     assert res.n_max == pytest.approx(1.0000044713237626, abs=1e-12)

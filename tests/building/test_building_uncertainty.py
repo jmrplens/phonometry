@@ -498,11 +498,9 @@ def test_annex_b_correlated_adaptation_sum_uncertainties() -> None:
 
 
 def test_uncorrelated_rejects_non_finite_reference_differences() -> None:
+    nan_reference = [0.0, float("nan")]
+    inf_uncertainty = [1.0, float("inf")]
     with pytest.raises(ValueError, match="finite"):
-        single_number_uncertainty_uncorrelated(
-            [1.0, 1.0], [0.0, float("nan")]
-        )
+        single_number_uncertainty_uncorrelated([1.0, 1.0], nan_reference)
     with pytest.raises(ValueError, match="finite"):
-        single_number_uncertainty_uncorrelated(
-            [1.0, float("inf")], [0.0, 0.0]
-        )
+        single_number_uncertainty_uncorrelated(inf_uncertainty, [0.0, 0.0])

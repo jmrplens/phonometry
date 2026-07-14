@@ -450,7 +450,13 @@ def facade_shape_level_difference(
         raise ValueError("'line_of_sight' must be a non-negative height in m.")
     if not (np.isfinite(aw) and 0.0 <= aw <= 1.0):
         raise ValueError("'absorption' must be an αw between 0 and 1.")
-    row = rows[0 if h < 1.5 else (1 if h <= 2.5 else 2)]
+    if h < 1.5:
+        row_index = 0
+    elif h <= 2.5:
+        row_index = 1
+    else:
+        row_index = 2
+    row = rows[row_index]
     if row is None:
         raise ValueError(
             f"Figure C.2 marks shape {shape!r} as 'does not apply' for a "

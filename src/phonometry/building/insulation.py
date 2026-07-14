@@ -231,6 +231,10 @@ _EXTENDED_RANGES: dict[str, tuple[
 _CI_50_2500_FREQS: Tuple[float, ...] = _FREQ_50_5000[:18]
 
 
+_VALUES_1D_MSG = "'values_by_band' must be one-dimensional."
+_VALUES_FINITE_MSG = "'values_by_band' must contain only finite values."
+
+
 @dataclass(frozen=True)
 class AirborneInsulationResult:
     """Per-band field airborne sound insulation (ISO 16283-1:2014).
@@ -665,9 +669,9 @@ def weighted_rating(
     """
     data = np.asarray(values_by_band, dtype=np.float64)
     if data.ndim != 1:
-        raise ValueError("'values_by_band' must be one-dimensional.")
+        raise ValueError(_VALUES_1D_MSG)
     if not np.all(np.isfinite(data)):
-        raise ValueError("'values_by_band' must contain only finite values.")
+        raise ValueError(_VALUES_FINITE_MSG)
 
     reference, limit, index_500, spectrum1, spectrum2 = _resolve_band_set(
         int(data.size), bands
@@ -989,9 +993,9 @@ def weighted_impact_rating(
     """
     data = np.asarray(values_by_band, dtype=np.float64)
     if data.ndim != 1:
-        raise ValueError("'values_by_band' must be one-dimensional.")
+        raise ValueError(_VALUES_1D_MSG)
     if not np.all(np.isfinite(data)):
-        raise ValueError("'values_by_band' must contain only finite values.")
+        raise ValueError(_VALUES_FINITE_MSG)
 
     reference, limit, index_500, octave_offset, ci_bands = (
         _resolve_impact_band_set(int(data.size), bands)
@@ -1179,9 +1183,9 @@ def _validated_extended_input(
     """Validate the extended-range input; return (measured, freqs, core_idx)."""
     data = np.asarray(values_by_band, dtype=np.float64)
     if data.ndim != 1:
-        raise ValueError("'values_by_band' must be one-dimensional.")
+        raise ValueError(_VALUES_1D_MSG)
     if not np.all(np.isfinite(data)):
-        raise ValueError("'values_by_band' must contain only finite values.")
+        raise ValueError(_VALUES_FINITE_MSG)
     if frequencies is None:
         if data.size != len(_FREQ_THIRD_OCTAVE):
             raise ValueError(

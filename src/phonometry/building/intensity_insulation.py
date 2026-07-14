@@ -287,7 +287,7 @@ def combine_subareas(
         )
     if not np.all(np.isfinite(levels)):
         raise ValueError("'l_in' must contain only finite values.")
-    if not np.all(np.isfinite(areas)) or np.any(areas == 0.0):
+    if not np.all(np.isfinite(areas)) or not np.all(np.abs(areas) > 0.0):
         raise ValueError(
             "'measurement_area' must contain non-zero, finite areas (negative "
             "marks a reverse-flow subarea, Clause 6.4.6)."

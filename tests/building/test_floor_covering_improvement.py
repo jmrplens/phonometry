@@ -134,8 +134,9 @@ def test_ci_delta_zero_improvement_is_zero() -> None:
 
 
 def test_ci_delta_validation() -> None:
+    short = np.zeros(5)
     with pytest.raises(ValueError, match="16 one-third-octave"):
-        impact_improvement_adaptation_term(np.zeros(5))
+        impact_improvement_adaptation_term(short)
     bad = np.zeros(16)
     bad[3] = np.nan
     with pytest.raises(ValueError, match="finite"):

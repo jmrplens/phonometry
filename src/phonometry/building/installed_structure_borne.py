@@ -82,7 +82,7 @@ def _nonzero_magnitude(values: ArrayLike, name: str) -> np.ndarray:
     """Validate a finite, non-zero (complex) mobility magnitude."""
     arr = np.asarray(values, dtype=np.complex128)
     mag = np.abs(arr)
-    if not np.all(np.isfinite(mag)) or np.any(mag == 0.0):
+    if not np.all(np.isfinite(mag)) or not np.all(mag > 0.0):
         raise ValueError(f"'{name}' must be finite and non-zero.")
     return arr
 

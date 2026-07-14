@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **229/229 conformance checks pass** across 32 domains and 131 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **232/232 conformance checks pass** across 32 domains and 134 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -449,7 +449,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Underwater sound propagation (transmission loss)</b> — 100% (12/12)</summary>
+<summary>&#9989; <b>Underwater sound propagation (transmission loss)</b> — 100% (15/15)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -458,7 +458,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Del Grosso (1974) vs Mackenzie | Sound-speed agreement at 10 °C, 35 ‰, 1000 m (cross-model), m/s | 1506.264 m/s (+/-1 m/s) | 1506.313 m/s | 0.049 m/s | &#9989; |
 | Spherical spreading 20·lg(R) | Geometrical spreading loss at R = 1000 m, dB | 60 dB (+/-0 dB) | 60 dB | 0 dB | &#9989; |
 | Thorp (1967) absorption | Volume absorption α at 10 kHz (cold deep water), dB/km | 1.1498 dB/km (+/-0 dB/km) | 1.1498 dB/km | 0 dB/km | &#9989; |
-| Ainslie-McColm (1998) vs Francois-Garrison (1982) | Absorption agreement at 10 kHz, 10 °C, 35 ‰, 0 m, pH 8, dB/km | 0.9603 dB/km (+/-0.096 dB/km) | 0.9866 dB/km | 0.026 dB/km | &#9989; |
+| Ainslie-McColm (1998) vs Francois-Garrison (1982) | Absorption agreement at 10 kHz, 10 °C, 35 ‰, 0 m, pH 8, dB/km | 0.9626 dB/km (+/-0.0963 dB/km) | 0.9866 dB/km | 0.024 dB/km | &#9989; |
+| Francois-Garrison (1982) Part II Table IV | Absorption α at 100 kHz, 10 °C, 35 ‰, 0 m, pH 8 (printed value), dB/km | 33.6 dB/km (+/-0.05 dB/km) | 33.63 dB/km | 0.03 dB/km | &#9989; |
+| Del Grosso refit (Wong-Zhu 1995 Table IV) | c(t90 = 20 °C, S = 35, P = 500 bar) vs the printed check table, m/s | 1603.679 m/s (+/-0.001 m/s) | 1603.679 m/s | 0 m/s | &#9989; |
+| Wales-Heitmeyer (2002) ensemble spectrum | Merchant-ship source PSD at 100 Hz (printed equation), dB re 1 µPa²/Hz | 158.45 dB (+/-0.001 dB) | 158.45 dB | 0 dB | &#9989; |
 | Passive sonar equation (Urick/Etter) | Figure of merit SL − (NL − DI) − DT, dB | 85 dB (+/-0 dB) | 85 dB | 0 dB | &#9989; |
 | Seabed reflection (Rayleigh, normal incidence) | Bottom loss at 90° grazing, sand ρ=1900 c=1650 over water, dB | 9.0506 dB (+/-0 dB) | 9.0506 dB | 0 dB | &#9989; |
 | Wenz wind noise (rule of fives) | Wind spectrum level at 1 kHz, 5 kn (canonical anchor), dB re 1 µPa²/Hz | 51.0206 dB (+/-0.0001 dB) | 51.0206 dB | 0 dB | &#9989; |

@@ -3,8 +3,9 @@
 
 Oracle for JOMOPANS-ECHO: the authors' own Excel reference implementation
 (File S1 of MacGillivray & de Jong 2021), cached values for a Bulker sailing at
-13.5 kn with length 211 m, in decidecade bands. RANDI and Wales-Heitmeyer are
-checked for their qualitative source-model behaviour.
+13.5 kn with length 211 m, in decidecade bands. RANDI is pinned against the
+printed Table 2 of the RANDI 3.1 physics report, and Wales-Heitmeyer against
+the mean-spectrum equation and asymptote statements printed in the 2002 paper.
 """
 
 from __future__ import annotations
@@ -78,6 +79,49 @@ def test_randi_and_wales_heitmeyer_run() -> None:
     # Both give physically plausible source PSD near 100-160 dB at 1 kHz.
     assert 100.0 < _at(r, 1000.0)[0] < 200.0
     assert 100.0 < _at(w, 1000.0)[0] < 200.0
+
+
+# Wales & Heitmeyer, J. Acoust. Soc. Am. 111 (3), 2002: the printed ensemble
+# mean-spectrum equation S(f) = 230.0 - 10 lg(f^3.594)
+# + 10 lg((1 + (f/340)^2)^0.917), dB re 1 uPa^2/Hz at 1 m, valid 30-1200 Hz
+# (factual reference values). Anchors below are hand-evaluated from that
+# printed closed form at frequencies spanning the validity band.
+_WALES_HEITMEYER_EQ = [
+    (30.0, 176.9431),
+    (50.0, 169.0242),
+    (100.0, 158.4504),
+    (200.0, 148.4844),
+    (340.0, 141.7791),  # printed breakpoint frequency
+    (400.0, 139.9420),
+    (600.0, 135.7862),
+    (1000.0, 131.2083),
+    (1200.0, 129.6866),
+]
+
+
+def test_wales_heitmeyer_printed_equation_values() -> None:
+    freqs = [f for f, _ in _WALES_HEITMEYER_EQ]
+    s = ship_source_spectrum(model="wales-heitmeyer", frequency_hz=freqs)
+    for (_, psd_ref), psd in zip(_WALES_HEITMEYER_EQ, s.source_psd):
+        assert float(psd) == pytest.approx(psd_ref, abs=1e-3)
+
+
+def test_wales_heitmeyer_printed_asymptotes() -> None:
+    # The paper states the low-frequency power-law exponent is -3.6, the
+    # high-frequency exponent -1.76 (= 3.594 - 2 x 0.917) and the breakpoint
+    # between the asymptotes 340 Hz.
+    lo = ship_source_spectrum(model="wales-heitmeyer", frequency_hz=[30.0, 60.0])
+    lo_exp = float(lo.source_psd[1] - lo.source_psd[0]) / (10.0 * np.log10(2.0))
+    assert lo_exp == pytest.approx(-3.6, abs=0.05)
+    hi = ship_source_spectrum(model="wales-heitmeyer", frequency_hz=[6800.0, 13600.0])
+    hi_exp = float(hi.source_psd[1] - hi.source_psd[0]) / (10.0 * np.log10(2.0))
+    assert hi_exp == pytest.approx(-1.76, abs=0.01)
+    # At the 340 Hz breakpoint the correction term lifts the pure power law
+    # by 10 lg(2^0.917) = 2.7604 dB.
+    at = ship_source_spectrum(model="wales-heitmeyer", frequency_hz=[340.0])
+    power_law_only = 230.0 - 10.0 * 3.594 * np.log10(340.0)
+    assert float(at.source_psd[0]) - power_law_only == pytest.approx(
+        10.0 * np.log10(2.0**0.917), abs=1e-9)
 
 
 def test_wales_heitmeyer_ignores_speed_and_length() -> None:

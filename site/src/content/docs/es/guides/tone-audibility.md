@@ -56,9 +56,11 @@ a_v = -2 - \lg\!\Big[1 + \big(\tfrac{f}{502}\big)^{2{,}5}\Big], \qquad
 $$
 
 Un tono proporcionado es *audible* cuando `ΔL > 0`. `Δf` es el espaciado de líneas
-(resolución en frecuencia); las sumas energéticas llevan una corrección de
-ventana de `10·lg(Δf/Δfe)` (`−1,76 dB` para la ventana de Hanning recomendada,
-`Δfe = 1,5·Δf`).
+(resolución en frecuencia); las sumas energéticas sobre `K > 1` líneas llevan
+una corrección de ventana de `10·lg(Δf/Δfe)` (`−1,76 dB` para la ventana de
+Hanning recomendada, `Δfe = 1,5·Δf`, Fórmula (8)), mientras que un tono de una
+sola línea (`K = 1`) toma su nivel sin cambios (Fórmula (7), sin corrección de
+ancho de banda).
 
 ```python
 import phonometry as ph
@@ -109,8 +111,9 @@ Dadas las líneas FFT de la banda crítica en torno a un tono,
 (media energética, descartando toda línea que supere en más de 6 dB la `LS` en
 curso, hasta estabilizarse en ±0,005 dB o quedar menos de cinco líneas por lado
 — Anexo D) y `tone_level` suma las líneas tonales contiguas al pico (por encima
-de `LS + 6 dB` y de `L_pico − 10 dB`). Ambas llevan la corrección de ancho de
-banda de Hanning de −1,76 dB.
+de `LS + 6 dB` y de `L_pico − 10 dB`). La media lleva siempre la corrección de
+ancho de banda de Hanning de −1,76 dB; el nivel del tono solo cuando el tramo
+abarca más de una línea (Fórmulas (7)/(8)).
 
 ```python
 import phonometry as ph
@@ -137,18 +140,29 @@ print(round(ph.tone_audibility(lt, ls, 137.3, 2.7), 2))   # 5.01 dB
 banda estrecha por línea, detección de picos (apartado 5.3.8 Paso 1, un tono no
 puede estar en un flanco), nivel del tono, el criterio de distinción (apartado
 5.3.4: ancho de banda `≤ 26·(1 + 0,001·fT)` Hz y pendiente de flanco `≥ 24 dB`)
-y la audibilidad — y devuelve los tonos distintos y audibles.
-`combined_tone_level` realiza la combinación multitono «FG» (Fórmula 17) para
-tonos que comparten una banda crítica.
+y la audibilidad — y devuelve los tonos distintos y audibles. Después aplica
+el **Paso 3**: los tonos audibles que comparten una banda crítica suman
+energéticamente sus niveles de tono (Fórmula 17, líneas compartidas contadas
+una sola vez, vía `combined_tone_level`) en una entrada combinada «FG»
+valorada en el miembro más audible — salvo que la excepción de exactamente
+dos tonos por debajo de 1000 Hz de §5.1 los mantenga separados. El
+`group_sizes` del resultado distingue tonos individuales (`1`) de entradas FG
+(`N ≥ 2`), y la audibilidad decisiva (Paso 4) es el máximo sobre todas las
+entradas.
 
 ```python
 import phonometry as ph
 
 # El mismo espectro de la Tabla E.1 de arriba.
 res = ph.analyze_spectrum(levels, freqs, 2.7)
-print([round(f, 1) for f in res.tone_frequencies])   # [118.4, 137.3, 158.8]
+singles = res.group_sizes == 1
+print([round(f, 1) for f in res.tone_frequencies[singles]])  # [118.4, 137.3, 158.8]
 
-# Combinación FG de los tres tonos (LS de la Tabla E.2 de la norma):
+# El Paso 3 ya combinó los tres tonos de la misma banda en una entrada FG:
+fg = res.group_sizes > 1
+print(int(res.group_sizes[fg][0]), round(float(res.tone_levels[fg][0]), 2))  # 3 72.15
+
+# La misma combinación de la Fórmula 17, llamada directamente (LS de la Tabla E.2):
 lt_fg = ph.combined_tone_level(levels, freqs, [118.4, 137.3, 158.8],
                                [48.91, 49.22, 50.50])
 print(round(lt_fg, 2))                                # 72.15

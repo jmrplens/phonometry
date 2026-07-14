@@ -9,6 +9,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Clause 5.3.8 Step 3 inside `analyze_spectrum` (DIN 45681 / ISO PAS 20065):
+  audible tones sharing a critical band are energy-summed (Formula (17),
+  shared lines counted once) into a combined FG entry rated at the most
+  audible member, with the exactly-two-tones-below-1000-Hz separation
+  exception (Formulae (18)/(19)); the new `group_sizes` field on
+  `ToneAudibilityResult` tells single tones from FG entries and the decisive
+  audibility now follows Step 4 as printed.
+- DIN 45681:2005-03 Anhang I oracle: the Tabelle I.9 wind-energy-plant
+  spectrum reproduces the decisive Tabelle I.10 row end to end (LS 41,71 /
+  LT 68,10 / dL 12,52 / u 3,18 dB), Tabelle I.11 rows j = 45/48 pin the
+  Formulae (12)-(14) chain, the printed 5 FG row pins the two-tone
+  combination decision, and Tabelle A.1 pins Formula (2) at 24 printed
+  bandwidths.
+- `verify_weighting_class`: a dense IEC 61672-1 5.5.7 sweep between the
+  nominal frequencies (analytic Annex E design goal, larger of the adjacent
+  limits) so a resonance or notch between nominals can no longer pass, and a
+  `range_limited` flag when Table 3 rows with finite lower limits fall
+  beyond Nyquist.
+- `Barrier(line_of_sight_clear=True)`: the ISO 9613-2 negative-z sign
+  convention when the sight line passes above the top edge; Eq. (14) is
+  evaluated with Kmet = 1 and Dz decays continuously from 10 lg 3 at grazing
+  to 0, never granting screening credit below the sight line.
+- `wind_turbine_tonality`: the IEC 61400-11 9.5.2 possible-tone screening
+  and a `has_identified_tone` flag (spectra without an identified tone must
+  be excluded from the 9.5.1 bin averaging); `slant_distance` gains the
+  vertical-axis Formula 2 (`rotor_axis="vertical"`, R0 = H + D).
+- `uncertainty_from_repeated_measurements`: the primary ISO 1996-2
+  Formulae (17)+(19) energy-domain route as `standard_uncertainty`, with the
+  Note 2 substitute kept as `approximate_uncertainty` and a spread warning.
+- `ResidualCorrectionResult.reportable_upper_bound`: the uncorrected
+  measured level, the value 10.4 permits reporting when the margin is 3 dB
+  or less; `ImpulseProminenceResult.qualifies`: the NT ACOU 112 clause 4.5
+  onset-rate qualification mask.
+- Published-oracle promotions: GUM Annex H.1 end to end through
+  `combine_uncertainty` (uc = 31,71 nm, U99 = 92,1 nm), GUM Annex H.2 as the
+  correlated Equation (16) oracle (uc(R/X/Z) = 0,071/0,295/0,236 ohm),
+  GUM-S1 Tables 2 and 3 coverage intervals (+/-3,92 Gaussian, +/-3,88
+  rectangular with a seeded Monte Carlo conformance entry), the full
+  ISO 9613-2 Table 2 grid (6 conditions x 8 octave bands at exact midbands)
+  and the IEC 61260-1 Table F.1 breakpoints with both E.3.4 rounding
+  examples.
+- New warning classes: `WindTurbineNoiseWarning`, `UncertaintyWarning` and
+  `ImpulseProminenceWarning`.
 - `itu_r_468_weighting`: the ITU-R BS.468-4 Table 1 weighting-network
   response (identical to the IEC 60268-1 Appendix A network that
   IEC 60268-3 14.12.11 requires), interpolated per the recommendation's own
@@ -192,6 +235,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- DIN 45681 / ISO PAS 20065 single-line tones: the tone level of a K = 1 run
+  is the line level itself (Formula (7)); the Hanning bandwidth correction
+  applies only to K > 1 sums (Formula (8)). The unconditional -1,76 dB
+  understated every single-line audibility and could flip weak
+  near-bin-centred tones to inaudible.
+- `verify_weighting_class` and the conformance report's A/C branch evaluate
+  the SOS at the exact base-10 frequencies behind the Table 3 nominal labels
+  (Table 3 NOTE; IEC 61672-3 13.3), removing a pairing bias of up to
+  0,27 dB; `verify_filter_class` evaluates the Table 1 breakpoints exactly
+  with `sosfreqz` instead of interpolating off the grid (the 16-point floor
+  now reproduces the dense-grid verdict).
+- IEC 61400-11 tone classification anchors the 10 dB cut, the reported tone
+  frequency and the Formula 34 criterion to the highest classified tone
+  line (9.5.3/9.5.4), not the probed candidate; truncated critical bands
+  warn and candidates below 20 Hz are rejected.
+- ISO 1996-2 residual correction: with a margin of 3 dB or less no
+  correction is allowed and the uncorrected level is the reportable upper
+  bound (the previous wording inverted the bound);
+  `gaussian_residual_level` rejects inverted percentile orderings.
+- ISO 9613-2 `atmospheric_absorption` evaluates alpha at the exact base-10
+  midbands (the Table 2 convention; ~1,3 % high at 8 kHz before); grazing
+  barrier geometry (z = 0) now yields Dz = 10 lg 3 instead of 0.
+- GUM `combine_uncertainty`: correlated budgets take the 6.3.3 infinite-dof
+  fallback instead of a meaningless Welch-Satterthwaite value (r = 0,999
+  with nu = 5 produced k95 ~ 2e151); the finite-difference step is
+  max(u(xi), sqrt(eps)|xi|) with a spacing guard, so a tiny uncertainty on
+  a large value no longer underflows to uc = 0; `monte_carlo` rejects
+  trials < 2.
+- NT ACOU 112: level rises with onset rates at or below 10 dB/s no longer
+  produce a KI adjustment (clauses 4.5/8).
+- `sensitivity()` rejects non-finite reference samples (a NaN propagated
+  silently to a NaN calibration factor); docstring thresholds aligned with
+  IEC 60942:2017 Table 2 and the plain-bilinear weighting class notes with
+  the measured behaviour (class 1 holds at 44,1/48 kHz, degrades at
+  fs <= 32 kHz).
 - SII (ANSI S3.5-1997): the equivalent disturbance spectrum level is the
   clause 5.6 maximum of the equivalent masking and internal noise levels,
   not their energy sum; the index for a hearing-impaired listener in

@@ -64,7 +64,16 @@ los **grados de libertad efectivos** dados por la fórmula de Welch–Satterthwa
 $\nu_\text{ef}$ hasta unos 16, de modo que $k = 2{,}11$ en lugar del 1,96 de
 gran muestra. Las entradas correlacionadas se tratan pasando una matriz de
 correlación; una suma totalmente correlacionada se suma entonces linealmente en
-vez de en cuadratura.
+vez de en cuadratura. Como la GUM define Welch–Satterthwaite solo para
+entradas *independientes*, un presupuesto correlacionado recurre a
+$\nu_\text{ef} = \infty$ (GUM 6.3.3): `expanded()` usa entonces el factor de
+cobertura de la distribución normal, y un aviso informa de que los grados de
+libertad finitos de las entradas no se propagaron. Esta cadena reproduce de
+principio a fin los ejemplos resueltos de la propia GUM: el presupuesto del
+calibre del anexo H.1 ($u_c = 31{,}7$ nm, $U_{99} = 92$ nm frente a los 32/93
+impresos) y la medida correlacionada de resistencia del anexo H.2
+($u_c(R) = 0{,}071\ \Omega$, $u_c(X) = 0{,}295\ \Omega$,
+$u_c(Z) = 0{,}236\ \Omega$ de la Tabla H.3).
 
 ## 2. El método de Monte Carlo (Suplemento 1)
 
@@ -73,6 +82,12 @@ hipótesis gaussiana de la GUM para la salida puede ser inexacta. `monte_carlo`
 en cambio muestrea cada entrada de su PDF, evalúa el modelo sobre todos los
 ensayos y reporta la media, la desviación típica y el **intervalo de cobertura
 simétrico en probabilidad** (igual probabilidad en cada cola, cláusula 7.7).
+Las entradas se muestrean de forma independiente —la vía gaussiana
+multivariante del Suplemento para magnitudes no independientes (6.4.8) no está
+implementada, así que los presupuestos correlacionados corresponden a
+`combine_uncertainty`—, el número de ensayos es fijo (sin el procedimiento
+adaptativo de 7.9, mínimo 2 ensayos) y el intervalo es el simétrico, no el
+intervalo más corto de 5.3.4.
 
 ```python
 import phonometry as ph

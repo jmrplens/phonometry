@@ -139,7 +139,12 @@ informativos y se dejan a criterio del usuario—.
 
 La geometría del término de apantallamiento fija el vocabulario: el borde de
 difracción divide la distancia fuente-receptor en $d_{ss}$ y $d_{sr}$, y el
-exceso de recorrido sobre el borde es $z = d_{ss} + d_{sr} - d$:
+exceso de recorrido sobre el borde es $z = d_{ss} + d_{sr} - d$. Cuando la
+línea de visión pasa *por encima* del borde superior, la norma da a $z$ signo
+negativo (`Barrier(line_of_sight_clear=True)`) y la Ec. (14) sigue
+aplicándose con $K_{met} = 1$: $D_z$ cae de forma continua desde
+$10 \lg 3 \approx 4{,}8$ dB en incidencia rasante hasta cero al aumentar el
+margen libre, sin bajar nunca de cero.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry_es.svg" alt="Geometría fuente-barrera-receptor de la ISO 9613-2: una fuente puntual a altura hs, una barrera cuyo borde superior divide el recorrido en dss y dsr, y un receptor a altura hr, con el rayo directo bloqueado y el rayo difractado sobre el borde, la diferencia de camino z y la fórmula de Dz" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry_es_dark.svg" alt="Geometría fuente-barrera-receptor de la ISO 9613-2: una fuente puntual a altura hs, una barrera cuyo borde superior divide el recorrido en dss y dsr, y un receptor a altura hr, con el rayo directo bloqueado y el rayo difractado sobre el borde, la diferencia de camino z y la fórmula de Dz" style="width:92%">
 
@@ -151,7 +156,11 @@ exceso de recorrido sobre el borde es $z = d_{ss} + d_{sr} - d$:
   fija el nivel a la distancia de referencia de 1 m.
 * **Absorción atmosférica** $A_{atm} = \alpha\ d$ (Ec. (8)) con $\alpha$ el
   coeficiente de la ISO 9613-1 —despreciable a baja frecuencia, dominante a 8 kHz
-  en recorridos largos—. Las funciones de la ISO 9613-2 usan por defecto 20 °C y
+  en recorridos largos—. $\alpha$ se evalúa en la frecuencia central *exacta*
+  en base 10 de cada banda nominal (7 943,3 Hz para «8 kHz»), la convención de
+  los coeficientes de la Tabla 2 de la ISO 9613-2 (la evaluación en la
+  frecuencia nominal queda ~1,3 % alta a 8 kHz). Las funciones de la ISO
+  9613-2 usan por defecto 20 °C y
   una humedad relativa del 70 % —una de las atmósferas de referencia que la norma
   tabula en su Tabla 2—, mientras que `air_attenuation` usa por defecto el 50 %
   habitual de la ISO 9613-1.

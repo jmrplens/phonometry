@@ -716,17 +716,26 @@ ISO717_2_ANNEX_C1_EXPECTED = {
 # on the identity that, when the receiving-side intensity levels are chosen so
 # that RI reproduces the ISO 717-1 Annex C airborne curve above, the ISO 717-1
 # engine returns the same Rw = 30 dB through the intensity path. The
-# adaptation term Kc (Annex B) values below are from Formula (B.2)
-# Kc = 10 lg(1 + 61,4/f); Formula (B.1) with the reference room
-# (Sb2 = 117 m², V2 = 81 m³, c = 340 m/s) reduces to (B.2) within 0,001 dB.
+# adaptation term Kc (Annex B) oracle is the standard's own printed
+# Table B.1 (18 one-third-octave rows, 50-2500 Hz, one decimal): the
+# Formula (B.2) approximation Kc = 10 lg(1 + 61,4/f) reproduces every row at
+# 1 dp, and Formula (B.1) with the reference room (Sb2 = 117 m², V2 = 81 m³,
+# c = 340 m/s) reduces to (B.2) within 0,001 dB.
 # ---------------------------------------------------------------------------
 ISO15186_1_REF_LP1 = 85.0  # flat source-room level (dB)
 ISO15186_1_REF_SM = 12.0  # measurement-surface area (m²)
 ISO15186_1_REF_S = 10.0  # specimen area (m²)
 ISO15186_1_REF_RI = ISO717_1_ANNEX_C_R  # target intensity SRI (16 bands)
 ISO15186_1_REF_RIW = 30  # RI,w through the ISO 717-1 engine
-ISO15186_1_KC_BANDS = (125.0, 250.0, 500.0, 1000.0, 2000.0)
-ISO15186_1_KC_B2 = [1.735, 0.954, 0.503, 0.259, 0.131]  # 10 lg(1+61,4/f), 3 dp
+# Printed Table B.1: (frequency_Hz, Kc_dB) as published (one decimal).
+ISO15186_1_KC_TABLE_B1: list[tuple[float, float]] = [
+    (50.0, 3.5), (63.0, 3.0), (80.0, 2.5), (100.0, 2.1), (125.0, 1.7),
+    (160.0, 1.4), (200.0, 1.2), (250.0, 1.0), (315.0, 0.8), (400.0, 0.6),
+    (500.0, 0.5), (630.0, 0.4), (800.0, 0.3), (1000.0, 0.3), (1250.0, 0.2),
+    (1600.0, 0.2), (2000.0, 0.1), (2500.0, 0.1),
+]
+ISO15186_1_KC_BANDS = tuple(f for f, _ in ISO15186_1_KC_TABLE_B1)
+ISO15186_1_KC_B1_PRINTED = [kc for _, kc in ISO15186_1_KC_TABLE_B1]
 
 # ---------------------------------------------------------------------------
 # ISO 12999-2:2020 - measurement uncertainty for sound absorption.

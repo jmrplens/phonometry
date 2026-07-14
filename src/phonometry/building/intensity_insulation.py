@@ -253,15 +253,26 @@ def combine_subareas(
 
     ``LIn = 10 lg[ (1/Sm) sum_i Smi 10^(0,1 LIni) ]`` dB
 
-    with the total measured area ``Sm = sum_i Smi`` (Formula (12)).
+    with the total measured area ``Sm = sum_i |Smi|`` (Formula (12)).
+
+    **Negative-direction subareas (Clause 6.4.6).** When the sound intensity
+    of a subarea has a negative direction (net energy flowing back towards
+    the specimen), the standard requires a minus sign before that ``Smi`` in
+    Formula (11). Express this by passing the subarea's area as a *negative*
+    number: its energy is subtracted in the numerator while ``Sm`` keeps the
+    unsigned area sum.
 
     :param l_in: Per-subarea intensity levels as a ``(subareas, bands)``
-        array (one row per subarea), in dB.
+        array (one row per subarea), in dB (magnitude of the intensity).
     :param measurement_area: Subarea areas ``Smi``, in m² (one per row).
+        Negative values mark reverse-flow subareas per Clause 6.4.6; zero is
+        invalid.
     :return: A tuple ``(LIn, Sm)`` with the combined level per band, in dB,
-        and the total measured area, in m².
+        and the total measured area ``Sm = sum |Smi|``, in m².
     :raises ValueError: If the shapes are inconsistent or values non-finite,
-        or if any subarea area is not positive.
+        if any subarea area is zero, or if the signed energy sum of
+        Formula (11) is not positive in some band (the reverse flows cancel
+        or exceed the forward flow, so no level exists).
     """
     levels = np.asarray(l_in, dtype=np.float64)
     if levels.ndim != 2:
@@ -276,11 +287,20 @@ def combine_subareas(
         )
     if not np.all(np.isfinite(levels)):
         raise ValueError("'l_in' must contain only finite values.")
-    if not np.all(np.isfinite(areas)) or np.any(areas <= 0.0):
-        raise ValueError("'measurement_area' must contain positive values.")
+    if not np.all(np.isfinite(areas)) or np.any(areas == 0.0):
+        raise ValueError(
+            "'measurement_area' must contain non-zero, finite areas (negative "
+            "marks a reverse-flow subarea, Clause 6.4.6)."
+        )
 
-    sm = float(np.sum(areas))
+    sm = float(np.sum(np.abs(areas)))
     energy = np.sum(areas[:, None] * 10.0 ** (0.1 * levels), axis=0)
+    if np.any(energy <= 0.0):
+        raise ValueError(
+            "The signed subarea energy sum of Formula (11) is not positive in "
+            "at least one band: the negative-direction subareas cancel or "
+            "exceed the forward flow, so no combined intensity level exists."
+        )
     l_in_total = 10.0 * np.log10(energy / sm)
     return l_in_total, sm
 

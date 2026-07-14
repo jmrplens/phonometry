@@ -1039,6 +1039,14 @@ def _chk_lab_airborne_rw() -> Outcome:
     "Intensity RI on the ISO 717-1 reference shape -> RI,w = 30",
 )
 def _chk_intensity_ri_rw() -> Outcome:
+    # Hand-computed scalar anchor pinning the Formula (7) constants (the
+    # curve construction below inverts the same formula, so -6 dB and
+    # 10 lg(Sm/S) would cancel there): Lp1 = 80, LIn = 40, Sm = S
+    # -> RI = 80 - 6 - 40 - 0 = 34 dB exactly.
+    scalar = ph.intensity_sound_reduction(
+        [80.0], [40.0], measurement_area=10.0, area=10.0
+    )
+    scalar_ok = abs(float(scalar.r_i[0]) - 34.0) <= 1e-9
     # Choose LIn so that RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)] lands exactly on
     # the ISO 717-1 Annex C curve; the rating engine must then return Rw = 30.
     ref_ri = np.asarray(ref.ISO15186_1_REF_RI, dtype=float)
@@ -1051,32 +1059,34 @@ def _chk_intensity_ri_rw() -> Outcome:
     on_curve = bool(np.allclose(np.asarray(res.r_i), ref_ri))
     expected = ref.ISO15186_1_REF_RIW
     return Outcome(
-        expected=f"RI,w {expected} dB",
-        computed=f"RI,w {res.rating.rating} dB",
+        expected=f"RI,w {expected} dB (scalar anchor RI = 34 dB)",
+        computed=f"RI,w {res.rating.rating} dB (RI = {float(scalar.r_i[0]):g} dB)",
         delta=f"{res.rating.rating - expected:+d} dB",
-        passed=on_curve and res.rating.rating == expected,
+        passed=scalar_ok and on_curve and res.rating.rating == expected,
     )
 
 
 @register(
     "Room & building acoustics",
-    "ISO 15186-1:2000 Annex B",
-    "Adaptation term Kc: reference-room (B.1) reduces to (B.2)",
+    "ISO 15186-1:2000 Annex B, Table B.1",
+    "Adaptation term Kc: all 18 printed rows; (B.1) reduces to (B.2)",
 )
 def _chk_intensity_kc_annexb() -> Outcome:
-    # Formula (B.1) with Sb2 = 117 m², V2 = 81 m³, c = 340 m/s must reproduce
-    # the room-independent approximation Kc = 10 lg(1 + 61,4/f) of (B.2).
+    # The printed Table B.1 (18 one-third-octave rows, one decimal) is the
+    # independent oracle; additionally Formula (B.1) with Sb2 = 117 m²,
+    # V2 = 81 m³, c = 340 m/s must reduce to (B.2) Kc = 10 lg(1 + 61,4/f).
     b2 = ph.adaptation_term_kc(ref.ISO15186_1_KC_BANDS)
     b1 = ph.adaptation_term_kc(
         ref.ISO15186_1_KC_BANDS, boundary_area=117.0, volume=81.0
     )
-    tab = np.asarray(ref.ISO15186_1_KC_B2, dtype=float)
+    printed = np.asarray(ref.ISO15186_1_KC_B1_PRINTED, dtype=float)
+    worst = float(np.max(np.abs(b2 - printed)))
     delta = float(np.max(np.abs(b1 - b2)))
-    passed = bool(np.allclose(b2, tab, atol=5e-4)) and delta <= 1e-3
+    passed = worst <= 0.05 and delta <= 1e-3
     return Outcome(
-        expected="max abs(B.1 - B.2) <= 0,001 dB",
-        computed=f"{delta:.2e} dB (Kc@1k = {b2[3]:.3f} dB)",
-        delta=f"{delta:.2e} dB",
+        expected="max abs(Kc - Table B.1) <= 0,05 dB (1 dp print)",
+        computed=f"{worst:.3f} dB (B.1 vs B.2: {delta:.2e} dB)",
+        delta=f"{worst:.3f} dB",
         passed=passed,
     )
 

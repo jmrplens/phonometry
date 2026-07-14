@@ -249,12 +249,13 @@ def test_difference_frequency_dc_offset_not_counted() -> None:
 
 
 def test_difference_frequency_rejects_bad_args() -> None:
+    tone = _tone(1000.0)
     with pytest.raises(ValueError):
-        difference_frequency_distortion(_tone(1000.0), FS, 2000.0, 1000.0)
+        difference_frequency_distortion(tone, FS, 2000.0, 1000.0)
     with pytest.raises(ValueError):
-        difference_frequency_distortion(_tone(1000.0), FS, 1000.0, 2000.0, order=4)
+        difference_frequency_distortion(tone, FS, 1000.0, 2000.0, order=4)
     with pytest.raises(ValueError):
-        total_difference_frequency_distortion(_tone(1000.0), FS, 2000.0, 1000.0)
+        total_difference_frequency_distortion(tone, FS, 2000.0, 1000.0)
 
 
 def test_dynamic_intermodulation_distortion() -> None:
@@ -409,8 +410,9 @@ def test_thd_clipped_sine_fourier_oracle() -> None:
 def test_thd_raises_when_no_harmonic_below_nyquist() -> None:
     # A 20 kHz fundamental at fs = 48 kHz has its 2nd harmonic above
     # Nyquist: the THD is undefined and must raise, not return 0.
+    tone_hf = _tone(20000.0)
     with pytest.raises(ValueError, match="Nyquist"):
-        thd(_tone(20000.0), FS, 20000.0)
+        thd(tone_hf, FS, 20000.0)
 
 
 def test_dim_full_signal_regression() -> None:

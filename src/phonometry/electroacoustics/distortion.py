@@ -467,7 +467,7 @@ def itu_r_468_weighting(frequencies: ArrayLike) -> "NDArray[np.float64]":
     above = log_f > log_table[-1]
     out[below] = table_db[0] + lo_slope * (log_f[below] - log_table[0])
     out[above] = table_db[-1] + hi_slope * (log_f[above] - log_table[-1])
-    out[f == 0.0] = -np.inf
+    out[~(f > 0.0)] = -np.inf
     return out
 
 

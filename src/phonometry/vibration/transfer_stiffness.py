@@ -97,7 +97,7 @@ def transfer_stiffness_level(
     """
     reference = require_positive(reference, "reference")
     magnitude = np.abs(np.asarray(stiffness, dtype=np.complex128))
-    if np.any(magnitude == 0.0):
+    if not np.all(magnitude > 0.0):
         raise ValueError(
             "'stiffness' contains zero magnitudes; a zero (dead-channel) "
             "stiffness has no level."
@@ -118,7 +118,7 @@ def loss_factor(stiffness: ArrayLike) -> np.ndarray:
         for which the loss factor is undefined.
     """
     k = np.asarray(stiffness, dtype=np.complex128)
-    if np.any(k.real == 0.0):
+    if not np.all(np.abs(k.real) > 0.0):
         raise ValueError(
             "'stiffness' contains purely imaginary values (Re = 0); the loss "
             "factor eta = Im/Re is undefined there."
@@ -142,7 +142,7 @@ def transfer_stiffness_direct(
     """
     f2b = np.asarray(blocking_force, dtype=np.complex128)
     u1 = np.asarray(input_displacement, dtype=np.complex128)
-    if np.any(u1 == 0.0):
+    if not np.all(np.abs(u1) > 0.0):
         raise ValueError(
             "'input_displacement' contains zeros (dead input channel); the "
             "ratio k2,1 = F2,b/u1 is undefined there."
@@ -236,7 +236,7 @@ def blocking_force_ratio(
     """
     k22 = np.asarray(driving_point_stiffness, dtype=np.complex128)
     kt = np.asarray(termination_stiffness, dtype=np.complex128)
-    if np.any(kt == 0.0):
+    if not np.all(np.abs(kt) > 0.0):
         raise ValueError("'termination_stiffness' must be non-zero.")
     return np.asarray(1.0 / (1.0 + k22 / kt), dtype=np.complex128)
 

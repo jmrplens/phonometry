@@ -166,7 +166,8 @@ def convert_frf(
             )
     omega = _omega(frequency)
     val = np.asarray(value, dtype=np.complex128)
-    if (_FRF_TYPES[source][1] or _FRF_TYPES[target][1]) and np.any(val == 0.0):
+    if ((_FRF_TYPES[source][1] or _FRF_TYPES[target][1])
+            and not np.all(np.abs(val) > 0.0)):
         raise ValueError(
             "'value' contains zeros (dead channel); converting "
             f"{source!r} to {target!r} takes a reciprocal, which is "

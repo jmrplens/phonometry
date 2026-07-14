@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `docs/ERRATA.md`: a versioned registry of the defects found in published
+  standards and guidance documents during implementation (misprints, worked
+  examples contradicting their own normative text, ambiguous wording), each
+  with the evidence, the library's disposition and a report status.
 - ISO 7626-2:2015 measurement-side acceptance criteria:
   `rigid_mass_calibration_check` implements the 7.5.2 operational calibration
   on a rigid block of known mass (|A| = 1/m or |Y| = 1/(2 pi f m) within

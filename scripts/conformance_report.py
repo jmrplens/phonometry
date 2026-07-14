@@ -942,6 +942,9 @@ def _chk_iso717_rw() -> Outcome:
 )
 def _chk_iso717_2_lnw() -> Outcome:
     # Worked example: Ln,w = 79 dB, CI = -11 dB, unfavourable sum 28,0 dB.
+    # CI = -11 is the ISO 717-2:2013 Annex C print; the 2020 reprint of this
+    # example is internally inconsistent with its own A.2.1 (it sums the
+    # 3 150 Hz band into Ln,sum and prints CI = -10).
     # Integer ratings and CI must match exactly; the unfavourable sum is a
     # one-decimal tabulated intermediate, so 1e-9 = exact up to float noise.
     exp = ref.ISO717_2_ANNEX_C1_EXPECTED
@@ -952,6 +955,47 @@ def _chk_iso717_2_lnw() -> Outcome:
         expected=f"Ln,w {exp['ln_w']} (CI {exp['ci']}; sum {exp['unfavourable_sum']:.1f} dB)",
         computed=f"Ln,w {res.rating} (CI {res.ci}; sum {res.unfavourable_sum:.1f} dB)",
         delta=f"{res.rating - exp['ln_w']:+d} dB",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-2 Annex C, Table C.1 (covered)",
+    "Weighted impact level of the floor WITH covering Ln,w (CI)",
+)
+def _chk_iso717_2_lnw_covered() -> Outcome:
+    exp = ref.ISO717_2_ANNEX_C1_COVERED_EXPECTED
+    res = ph.weighted_impact_rating(ref.ISO717_2_ANNEX_C1_COVERED_LN)
+    sum_ok = abs(res.unfavourable_sum - exp["unfavourable_sum"]) <= 1e-9
+    ok = res.rating == exp["ln_w"] and res.ci == exp["ci"] and sum_ok
+    return Outcome(
+        expected=f"Ln,w {exp['ln_w']} (CI {exp['ci']}; sum {exp['unfavourable_sum']:.1f} dB)",
+        computed=f"Ln,w {res.rating} (CI {res.ci}; sum {res.unfavourable_sum:.1f} dB)",
+        delta=f"{res.rating - exp['ln_w']:+d} dB",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-2 Annex C, Table C.2",
+    "Floor-covering improvement ΔLw and CI,Δ (Formulae (2)/(A.4))",
+)
+def _chk_iso717_2_c2_improvement() -> Outcome:
+    dlw = ph.weighted_impact_improvement(ref.ISO717_2_ANNEX_C2_DELTA_L)
+    ci_d = ph.impact_improvement_adaptation_term(ref.ISO717_2_ANNEX_C2_DELTA_L)
+    ok = (
+        dlw == ref.ISO717_2_ANNEX_C2_DELTA_LW
+        and ci_d == ref.ISO717_2_ANNEX_C2_CI_DELTA
+    )
+    return Outcome(
+        expected=(
+            f"ΔLw {ref.ISO717_2_ANNEX_C2_DELTA_LW} dB; "
+            f"CI,Δ {ref.ISO717_2_ANNEX_C2_CI_DELTA} dB (Table 4 reference floor)"
+        ),
+        computed=f"ΔLw {dlw} dB; CI,Δ {ci_d} dB",
+        delta=f"{dlw - ref.ISO717_2_ANNEX_C2_DELTA_LW:+d} dB",
         passed=ok,
     )
 

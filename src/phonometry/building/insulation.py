@@ -944,6 +944,9 @@ _IMPACT_REFERENCE_FLOOR = (
     71.0, 71.5, 72.0, 72.0, 72.0, 72.0, 72.0, 72.0,
 )
 _IMPACT_REFERENCE_FLOOR_RATING = 78  # Ln,r,0,w (Table 4 / Clause 5.2)
+#: Spectrum adaptation term of the bare reference floor (ISO 717-2:2020
+#: Clause A.2.2): ``CI,r,0 = −11 dB``.
+_IMPACT_REFERENCE_FLOOR_CI = -11
 
 
 def weighted_impact_improvement(
@@ -974,3 +977,34 @@ def weighted_impact_improvement(
     ln_r = np.asarray(_IMPACT_REFERENCE_FLOOR, dtype=np.float64) - dl
     ln_r_w = weighted_impact_rating(ln_r).rating
     return _IMPACT_REFERENCE_FLOOR_RATING - ln_r_w
+
+
+def impact_improvement_adaptation_term(
+    delta_l: Sequence[float] | np.ndarray,
+) -> int:
+    """Spectrum adaptation term ``CI,Δ`` of a floor covering (ISO 717-2:2020 A.2.2).
+
+    ``CI,Δ = CI,r,0 − CI,r`` (Formula (A.4)) with ``CI,r,0 = −11 dB`` (the
+    bare Table 4 reference floor) and ``CI,r`` the ISO 717-2 spectrum
+    adaptation term of the reference floor with the covering under test,
+    ``Ln,r = Ln,r,0 − ΔL`` (Formula (1)). Together with
+    :func:`weighted_impact_improvement` it yields the single-number reduction
+    for a flat spectrum, ``ΔLlin = ΔLw + CI,Δ`` (Formula (A.5)). ISO 16251-1
+    Clause 8 e) requires this term in the statement of results.
+
+    :param delta_l: The reduction of impact sound pressure level ``ΔL`` per
+        band, in dB — 16 one-third-octave values from 100 Hz to 3150 Hz.
+    :return: The spectrum adaptation term ``CI,Δ``, in dB (integer).
+    :raises ValueError: If ``delta_l`` is not 16 one-third-octave values, or
+        is non-finite.
+    """
+    dl = np.asarray(delta_l, dtype=np.float64)
+    if dl.shape != (16,):
+        raise ValueError(
+            "'delta_l' must give the 16 one-third-octave values 100-3150 Hz."
+        )
+    if not np.all(np.isfinite(dl)):
+        raise ValueError("'delta_l' must contain only finite values.")
+    ln_r = np.asarray(_IMPACT_REFERENCE_FLOOR, dtype=np.float64) - dl
+    ci_r = weighted_impact_rating(ln_r).ci
+    return _IMPACT_REFERENCE_FLOOR_CI - ci_r

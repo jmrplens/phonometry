@@ -697,7 +697,10 @@ ECMA418_1_PROX_850HZ = 63.8  # proximity spacing at 850 Hz (Hz)
 # ISO 717-2 Annex C, Table C.1 - measured normalized impact sound pressure
 # level Ln (100-3150 Hz, one-third-octave, laboratory). The worked example
 # gives Ln,w = 79 dB, CI = -11 dB with an unfavourable-deviation sum of
-# 28,0 dB.
+# 28,0 dB. CI = -11 pins the ISO 717-2:2013 Annex C print: the 2020 reprint
+# of this example says CI = -10 because its Ln,sum (83,5238 -> 84) erroneously
+# includes the 3 150 Hz band, contradicting its own A.2.1 (100-2500 Hz);
+# summing 100-2500 Hz gives 83,2613 -> 83 and CI = -11.
 # ---------------------------------------------------------------------------
 ISO717_2_ANNEX_C1_LN: list[float] = [
     62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
@@ -708,6 +711,32 @@ ISO717_2_ANNEX_C1_EXPECTED = {
     "ci": -11,
     "unfavourable_sum": 28.0,
 }
+# Same Table C.1, right-hand columns: the floor WITH the floor covering.
+# Ln,w = 64 dB, CI = -3 dB, unfavourable-deviation sum 30,0 dB.
+ISO717_2_ANNEX_C1_COVERED_LN: list[float] = [
+    59.1, 59.5, 61.6, 63.2, 65.3, 66.5, 67.7, 67.0,
+    67.1, 66.5, 66.1, 62.5, 57.9, 52.7, 47.0, 48.0,
+]
+ISO717_2_ANNEX_C1_COVERED_EXPECTED = {
+    "ln_w": 64,
+    "ci": -3,
+    "unfavourable_sum": 30.0,
+}
+
+# ---------------------------------------------------------------------------
+# ISO 717-2 Annex C, Table C.2 - reduction of impact sound pressure level ΔL
+# of a floor covering on the standard reference floor. The worked example
+# gives ΔLw = 15 dB (Ln,r,w = 63 dB). The module additionally derives
+# CI,Δ = CI,r,0 - CI,r = -11 - (-2) = -9 dB from the normative Table 4
+# reference floor (the printed C.2 chain uses a misprinted 800 Hz reference
+# value 71,0 instead of Table 4's 71,5 and reaches CI,r = -3).
+# ---------------------------------------------------------------------------
+ISO717_2_ANNEX_C2_DELTA_L: list[float] = [
+    3.0, 3.7, 1.9, 3.0, 3.2, 3.5, 4.0, 6.1,
+    6.7, 7.0, 7.7, 10.8, 15.2, 20.3, 25.4, 23.2,
+]
+ISO717_2_ANNEX_C2_DELTA_LW = 15
+ISO717_2_ANNEX_C2_CI_DELTA = -9
 
 # ---------------------------------------------------------------------------
 # ISO 15186-1:2000 - sound insulation measured with sound intensity.

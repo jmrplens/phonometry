@@ -11,10 +11,17 @@ from phonometry import (
     acceleration_level,
     background_corrected_level,
     impact_improvement,
+    impact_improvement_adaptation_term,
     improvement_octave_bands,
     weighted_impact_improvement,
     weighted_impact_rating,
 )
+
+#: The clause 6.3 measurement range: 18 one-third-octave bands 100-5000 Hz.
+_CLAUSE_63_FREQS = [
+    100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0,
+    800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0, 5000.0,
+]
 
 
 # ---------------------------------------------------------------------------
@@ -105,6 +112,64 @@ def test_impact_improvement_difference_and_rating() -> None:
     # ΔLw computed automatically for the 16 rating bands.
     assert res.delta_lw == weighted_impact_improvement(res.improvement)
     assert not bool(np.any(res.limited))
+
+
+def test_annex_c2_improvement_oracle() -> None:
+    """ISO 717-2 Annex C Table C.2: ΔLw = 15 dB and CI,Δ = -9 dB."""
+    dl = np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L)
+    assert weighted_impact_improvement(dl) == ref.ISO717_2_ANNEX_C2_DELTA_LW
+    assert (
+        impact_improvement_adaptation_term(dl) == ref.ISO717_2_ANNEX_C2_CI_DELTA
+    )
+    # End-to-end through the ISO 16251-1 front-end.
+    bare = np.full(16, 75.0)
+    res = impact_improvement(bare, bare - dl, ref.ISO717_2_REFERENCE_FLOOR_FREQ)
+    assert res.delta_lw == ref.ISO717_2_ANNEX_C2_DELTA_LW
+    assert res.ci_delta == ref.ISO717_2_ANNEX_C2_CI_DELTA
+
+
+def test_ci_delta_zero_improvement_is_zero() -> None:
+    # ΔL = 0 leaves the reference floor unchanged: CI,r = CI,r,0 -> CI,Δ = 0.
+    assert impact_improvement_adaptation_term(np.zeros(16)) == 0
+
+
+def test_ci_delta_validation() -> None:
+    with pytest.raises(ValueError, match="16 one-third-octave"):
+        impact_improvement_adaptation_term(np.zeros(5))
+    bad = np.zeros(16)
+    bad[3] = np.nan
+    with pytest.raises(ValueError, match="finite"):
+        impact_improvement_adaptation_term(bad)
+
+
+def test_clause_63_18_band_spectrum_rates_on_sub_range() -> None:
+    """A clause 6.3 spectrum (18 bands 100-5000 Hz) now yields ΔLw and CI,Δ
+    from its 100-3150 Hz sub-range."""
+    dl16 = np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L)
+    dl18 = np.concatenate([dl16, [22.0, 21.0]])  # 4 k / 5 kHz extensions
+    bare = np.full(18, 75.0)
+    res = impact_improvement(bare, bare - dl18, _CLAUSE_63_FREQS)
+    assert res.delta_lw == ref.ISO717_2_ANNEX_C2_DELTA_LW
+    assert res.ci_delta == ref.ISO717_2_ANNEX_C2_CI_DELTA
+
+
+def test_extended_21_band_spectrum_rates_on_sub_range() -> None:
+    """The optional 50/63/80 Hz extension also rates on 100-3150 Hz."""
+    freqs = [50.0, 63.0, 80.0, *_CLAUSE_63_FREQS]
+    dl = np.concatenate([[1.0, 1.5, 2.0], ref.ISO717_2_ANNEX_C2_DELTA_L, [22.0, 21.0]])
+    bare = np.full(21, 75.0)
+    res = impact_improvement(bare, bare - dl, freqs)
+    assert res.delta_lw == ref.ISO717_2_ANNEX_C2_DELTA_LW
+    assert res.ci_delta == ref.ISO717_2_ANNEX_C2_CI_DELTA
+
+
+def test_spectrum_missing_rating_bands_stays_unrated() -> None:
+    # Without the full 100-3150 Hz sub-range no rating is formed.
+    freqs = _CLAUSE_63_FREQS[:15]  # stops at 2500 Hz
+    bare = np.full(15, 75.0)
+    res = impact_improvement(bare, bare - 5.0, freqs)
+    assert res.delta_lw is None
+    assert res.ci_delta is None
 
 
 def test_impact_improvement_with_background_flags_limited() -> None:

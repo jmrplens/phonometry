@@ -34,7 +34,12 @@ the three one-third-octave values in each octave.
 
 **Weighted improvement.** ``ΔLw`` is the ISO 717-2 weighted reduction of impact
 sound pressure level (Clause 6.5), computed with the heavyweight reference floor
-via :func:`phonometry.weighted_impact_improvement`.
+via :func:`phonometry.weighted_impact_improvement` on the 16 rating bands
+100 Hz to 3150 Hz — a wider clause 6.3 spectrum (18 bands 100-5000 Hz,
+optionally extended to 50 Hz) is rated on that sub-range. The statement of
+results (Clause 8 e)) also carries the spectrum adaptation term ``CI,Δ``
+(ISO 717-2:2020 Formula (A.4)) via
+:func:`phonometry.impact_improvement_adaptation_term`.
 """
 
 from __future__ import annotations
@@ -44,7 +49,10 @@ from typing import TYPE_CHECKING, Any, Sequence
 
 import numpy as np
 
-from .insulation import weighted_impact_improvement
+from .insulation import (
+    impact_improvement_adaptation_term,
+    weighted_impact_improvement,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -141,13 +149,20 @@ class FloorCoveringImprovementResult:
         measurement (reported as ``> ΔL``); all ``False`` when no background
         correction was applied.
     :ivar delta_lw: Weighted improvement ``ΔLw`` (ISO 717-2), in dB, or ``None``
-        when the spectrum is not the 16 one-third-octave bands 100-3150 Hz.
+        when the spectrum does not contain the 16 one-third-octave rating
+        bands 100-3150 Hz. A wider clause 6.3 spectrum (e.g. the 18 bands
+        100-5000 Hz, optionally extended down to 50 Hz) is rated on its
+        100-3150 Hz sub-range.
+    :ivar ci_delta: Spectrum adaptation term ``CI,Δ`` (ISO 717-2:2020
+        Formula (A.4); required in the ISO 16251-1 Clause 8 e) statement of
+        results), in dB, or ``None`` when ``delta_lw`` is ``None``.
     """
 
     frequencies: np.ndarray
     improvement: np.ndarray
     limited: np.ndarray
     delta_lw: int | None
+    ci_delta: int | None = None
 
     def octave_bands(self) -> tuple[np.ndarray, np.ndarray]:
         """Return ``(octave_freqs, ΔLoct)`` via Formula (5) (needs 16 1/3-oct bands)."""
@@ -164,11 +179,37 @@ class FloorCoveringImprovementResult:
         return plot_floor_covering_improvement(self, ax=ax, **kwargs)
 
 
-def _rating(improvement: np.ndarray, frequencies: np.ndarray) -> int | None:
-    """ΔLw when the spectrum is exactly the 16 rating bands 100-3150 Hz, else None."""
-    if frequencies.shape == (16,) and np.allclose(frequencies, _RATING_FREQS):
-        return weighted_impact_improvement(improvement)
-    return None
+def _rating_slice(frequencies: np.ndarray) -> np.ndarray | None:
+    """Indices of the 16 rating bands 100-3150 Hz within ``frequencies``.
+
+    Clause 6.3 measures over 18 bands 100-5000 Hz (optionally extended down
+    to 50 Hz); the ISO 717-2 rating of clause 6.5 uses the 100-3150 Hz
+    sub-range. Returns ``None`` when the spectrum does not contain all 16
+    rating bands (nominal centres matched within 6 %).
+    """
+    if frequencies.ndim != 1:
+        return None
+    indices: list[int] = []
+    for target in _RATING_FREQS:
+        candidates = np.nonzero(np.abs(frequencies - target) <= 0.06 * target)[0]
+        if candidates.size != 1:
+            return None
+        indices.append(int(candidates[0]))
+    return np.asarray(indices, dtype=np.intp)
+
+
+def _rating(
+    improvement: np.ndarray, frequencies: np.ndarray
+) -> tuple[int | None, int | None]:
+    """``(ΔLw, CI,Δ)`` over the 100-3150 Hz sub-range, or ``(None, None)``."""
+    idx = _rating_slice(frequencies)
+    if idx is None:
+        return None, None
+    rated = improvement[idx]
+    return (
+        weighted_impact_improvement(rated),
+        impact_improvement_adaptation_term(rated),
+    )
 
 
 def impact_improvement(
@@ -233,11 +274,13 @@ def impact_improvement(
     else:
         improvement = delta_per_position
         limited = limited_pos
+    delta_lw, ci_delta = _rating(improvement, freqs)
     return FloorCoveringImprovementResult(
         frequencies=freqs,
         improvement=improvement,
         limited=limited,
-        delta_lw=_rating(improvement, freqs),
+        delta_lw=delta_lw,
+        ci_delta=ci_delta,
     )
 
 

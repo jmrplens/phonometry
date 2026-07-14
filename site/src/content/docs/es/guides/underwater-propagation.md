@@ -104,7 +104,8 @@ bl.plot()   # pérdida por reflexión frente al ángulo rasante
 
 El nivel espectral de ruido ambiental es la suma energética de las componentes
 físicas de Wenz: el ruido de **viento / superficie** por la "regla de los cincos"
-(25 dB a 1 kHz con 5 nudos, válida en ~500 Hz–5 kHz) y el ruido **térmico de
+(el ancla histórica de 25 dB a 1 kHz con 5 nudos es re 20 µPa, es decir ~51 dB
+re 1 µPa; válida en ~500 Hz–5 kHz) y el ruido **térmico de
 Mellen** (dominante por encima de ~50 kHz). El rango amplio del ejemplo mantiene
 la curva de viento más allá de ~5 kHz solo como extrapolación para mostrar el
 cruce con el térmico. El espectro de **tráfico** lo aporta quien llama.

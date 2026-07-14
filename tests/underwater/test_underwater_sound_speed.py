@@ -83,3 +83,14 @@ def test_profile_plot_smoke() -> None:
     depths = np.linspace(0.0, 1000.0, 11)
     prof = sound_speed_profile(depths, 12.0, 35.0)
     assert prof.plot() is not None
+
+
+def test_unesco_published_canonical_check_value() -> None:
+    # Fofonoff & Millard 1983 (UNESCO Tech. Pap. Mar. Sci. 44) canonical check:
+    # SVEL(S = 40, T68 = 40 C, P = 10000 dbar) = 1731.995 m/s. The module uses
+    # the Wong-Zhu ITS-90 refit, so convert T90 = T68/1.00024; the tolerance
+    # covers the published refit residual (~0.01 m/s).
+    from phonometry.underwater.sound_speed import _unesco
+
+    assert float(_unesco(40.0 / 1.00024, 40.0, 1000.0)) == pytest.approx(
+        1731.995, abs=0.02)

@@ -114,3 +114,24 @@ def test_transmission_loss_rejects_nonpositive_range() -> None:
 def test_transmission_loss_plot_smoke() -> None:
     res = transmission_loss(np.linspace(10.0, 10000.0, 50), 12_000.0)
     assert res.plot() is not None
+
+
+def test_ainslie_mccolm_table_i_oceans_within_ten_percent_of_fg() -> None:
+    # Ainslie & McColm 1998 Table I reference oceans: the paper's Fig. 2 claim
+    # (simplified formula within 10 % of Francois-Garrison) holds across
+    # 100 Hz - 1 MHz for all four (measured headroom >= 1.65 %).
+    oceans = [  # (pH, S, T, z_km)
+        (7.7, 34.0, 4.0, 1.0),    # Pacific
+        (8.2, 40.0, 22.0, 0.2),   # Red Sea
+        (8.2, 30.0, -1.5, 0.0),   # Arctic
+        (7.9, 8.0, 4.0, 0.0),     # Baltic
+    ]
+    f = np.logspace(2, 6, 200)
+    for ph_v, s, t, z_km in oceans:
+        fg = seawater_absorption(f, temperature=t, salinity=s,
+                                 depth=z_km * 1000.0, ph=ph_v,
+                                 model="francois-garrison")
+        am = seawater_absorption(f, temperature=t, salinity=s,
+                                 depth=z_km * 1000.0, ph=ph_v,
+                                 model="ainslie-mccolm")
+        assert float(np.max(np.abs(am - fg) / fg)) <= 0.10, (ph_v, s, t, z_km)

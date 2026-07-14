@@ -315,6 +315,34 @@ EN12354_4_ANNEX_G_ATTENUATION: list[tuple[float, float, float, float]] = [
 ]
 EN12354_4_ANNEX_G_LP_SIDE1_D5 = 36.6
 EN12354_4_ANNEX_G_LP_SIDE4_D25 = 37.3
+# Remaining Table G.9 cells: Lp = LWA - A'tot for the other two reception
+# points (side 1 at 25 m; side 4 at 5 m).
+EN12354_4_ANNEX_G_LP_SIDE1_D25 = 28.5  # 62,9 - 34,4
+EN12354_4_ANNEX_G_LP_SIDE4_D5 = 44.6   # 72,9 - 28,3
+
+# ---------------------------------------------------------------------------
+# EN 12354-3:2000 Annex C, Figure C.2 - facade-shape level difference ΔLfs
+# (dB). Sample cells transcribed from the figure (verified against the page
+# render; the 2017 DIN EN ISO 12354-3 Tabelle C.1 tabulates identical
+# values). Row = (shape, line_of_sight_m, alpha_w, dLfs_dB).
+# ---------------------------------------------------------------------------
+EN12354_3_ANNEX_C_DLFS: list[tuple[str, float, float, float]] = [
+    ("plane_facade", 1.0, 0.3, 0.0),
+    ("plane_facade", 3.0, 0.9, 0.0),
+    ("gallery_2", 1.0, 0.3, -1.0),
+    ("gallery_3", 2.0, 0.9, 2.0),
+    ("gallery_4", 2.0, 0.6, 1.0),
+    ("gallery_5", 3.0, 0.6, 4.0),
+    ("balcony_6", 1.0, 0.3, -1.0),
+    ("balcony_6", 2.0, 0.6, 1.0),
+    ("balcony_6", 3.0, 0.9, 3.0),
+    ("balcony_7", 2.0, 0.9, 4.0),
+    ("balcony_8", 3.0, 0.3, 1.0),
+    ("terrace_open", 2.0, 0.6, 4.0),
+    ("terrace_closed", 1.0, 0.3, 3.0),
+    ("terrace_closed", 2.0, 0.6, 6.0),
+    ("terrace_closed", 3.0, 0.9, 7.0),
+]
 
 # ---------------------------------------------------------------------------
 # ISO 12999-1:2020 measurement uncertainty. Table 2 (Clause 7.2) tabulates the

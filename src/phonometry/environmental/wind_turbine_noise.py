@@ -231,6 +231,23 @@ def _validate_narrowband(
     return lv, fr, df
 
 
+def _candidate_peak(
+    lv: "NDArray[np.float64]", fr: "NDArray[np.float64]",
+    tone_frequency: "float | None",
+) -> int:
+    """Index of the candidate line: the spectrum maximum, or the validated
+    nearest bin to the requested frequency."""
+    if tone_frequency is None:
+        return int(np.argmax(lv))
+    tf = float(tone_frequency)
+    if not np.isfinite(tf) or tf < float(fr[0]) or tf > float(fr[-1]):
+        raise ValueError(
+            "'tone_frequency' must be finite and inside the spectrum's "
+            f"frequency range [{fr[0]:.1f}, {fr[-1]:.1f}] Hz."
+        )
+    return int(np.argmin(np.abs(fr - tf)))
+
+
 def _screen_possible_tone(
     lv: "NDArray[np.float64]", in_band: "NDArray[np.bool_]", peak: int,
 ) -> bool:
@@ -290,16 +307,7 @@ def wind_turbine_tonality(
     """
     lv, fr, df = _validate_narrowband(levels, frequencies)
 
-    if tone_frequency is None:
-        peak = int(np.argmax(lv))
-    else:
-        tf = float(tone_frequency)
-        if not np.isfinite(tf) or tf < float(fr[0]) or tf > float(fr[-1]):
-            raise ValueError(
-                "'tone_frequency' must be finite and inside the spectrum's "
-                f"frequency range [{fr[0]:.1f}, {fr[-1]:.1f}] Hz."
-            )
-        peak = int(np.argmin(np.abs(fr - tf)))
+    peak = _candidate_peak(lv, fr, tone_frequency)
     fc = float(fr[peak])
     if fc < _LOW_FREQ_MIN:
         raise ValueError(

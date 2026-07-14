@@ -99,7 +99,11 @@ def _francois_garrison(
     f_khz: "NDArray[np.float64]", t: float, s: float, z_m: float, ph: float
 ) -> "NDArray[np.float64]":
     c = 1412.0 + 3.21 * t + 1.19 * s + 0.0167 * z_m
-    a1 = (8.68 / c) * 10.0 ** (0.78 * ph - 5.0)
+    # Boric-acid factor A1 = (8.86/c)*10^(0.78 pH - 5) per the original paper
+    # (Francois & Garrison 1982 Part II, Eq. (10)/Fig. 7), whose own Table IV
+    # reproduces only with 8.86; the Medwin & Clay transcription prints 8.68
+    # (digit transposition), biasing boric-dominated bands by up to 1.7 %.
+    a1 = (8.86 / c) * 10.0 ** (0.78 * ph - 5.0)
     f1 = 2.8 * (s / 35.0) ** 0.5 * 10.0 ** (4.0 - 1245.0 / (273.0 + t))
     a2 = 21.44 * (s / c) * (1.0 + 0.025 * t)
     p2 = 1.0 - 1.37e-4 * z_m + 6.2e-9 * z_m**2

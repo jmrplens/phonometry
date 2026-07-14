@@ -63,17 +63,16 @@ def test_thorp_absorption_recompute() -> None:
 # the module agrees within half of it, i.e. to the print's own rounding
 # (measured max |dev| 0.45 ULP).
 #
-# NOTE (documented discrepancy, not tested): the module implements the
-# Medwin & Clay transcription with the boric-acid factor A1 = (8.68/c)
-# x 10^(0.78 pH - 5), while the paper's Fig. 7 / Eq. (10) print 8.86/c. With
-# 8.86 every Table IV cell agrees within 0.5 ULP; with 8.68 the boric-
-# dominated cells at 0.6-30 kHz sit up to 4.6 ULP below the print (worst
-# 10 kHz, 30 degC, S = 35: 0.6014 vs the printed 0.606 dB/km; largest
-# relative gap -1.7 % at 2 kHz, 10 degC, S = 35: 0.1209 vs 0.123). Those
-# cells are therefore excluded here rather than forced.
+# The module implements the ORIGINAL paper's boric-acid factor A1 = (8.86/c)
+# x 10^(0.78 pH - 5) (Eq. (10)/Fig. 7); the Medwin & Clay transcription
+# prints 8.68 (digit transposition), which sits up to 4.6 ULP below the
+# print in the boric-dominated 0.6-30 kHz cells (see docs/ERRATA.md). The
+# boric-dominated rows below therefore pin the corrected constant directly.
 _FG_TABLE_IV = [
     # (f kHz, T degC, S ppt, alpha dB/km, ULP)
     (0.4, 10.0, 30.0, 0.015, 0.001),
+    (2.0, 10.0, 35.0, 0.123, 0.001),   # boric-dominated
+    (10.0, 30.0, 35.0, 0.606, 0.001),  # boric-dominated
     (10.0, -1.8, 35.0, 1.36, 0.01),
     (14.0, 20.0, 35.0, 1.29, 0.01),
     (20.0, -1.8, 35.0, 4.40, 0.01),
@@ -105,13 +104,14 @@ def test_francois_garrison_part2_table_iv_printed_values(
 
 
 def test_francois_garrison_recompute() -> None:
-    # Independent inline recomputation at 10 kHz, 10 C, 35 ppt, 0 m, pH 8.
-    # (8.68 is the Medwin & Clay transcription the module implements; the
-    # paper's own Fig. 7 prints 8.86 -- see the note above _FG_TABLE_IV.)
+    # Independent inline recomputation at 10 kHz, 10 C, 35 ppt, 0 m, pH 8,
+    # with the ORIGINAL paper's boric coefficient 8.86 (F&G 1982 Part II,
+    # Eq. (10)/Fig. 7; the Medwin & Clay transcription prints 8.68, a digit
+    # transposition -- see the note above _FG_TABLE_IV and docs/ERRATA.md).
     f = 10.0
     t, s, z, ph = 10.0, 35.0, 0.0, 8.0
     c = 1412 + 3.21 * t + 1.19 * s + 0.0167 * z
-    a1 = (8.68 / c) * 10 ** (0.78 * ph - 5)
+    a1 = (8.86 / c) * 10 ** (0.78 * ph - 5)
     f1 = 2.8 * (s / 35) ** 0.5 * 10 ** (4 - 1245 / (273 + t))
     a2 = 21.44 * (s / c) * (1 + 0.025 * t)
     f2 = 8.17 * 10 ** (8 - 1990 / (273 + t)) / (1 + 0.0018 * (s - 35))

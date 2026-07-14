@@ -828,7 +828,11 @@ ISO2631_5_R_MALE = 1.22  # cumulative stress variable R (Formula C.3)
 ISO2631_5_PI_MALE = 0.37  # probability of lumbar injury (Formula C.5)
 # Annex C NOTE 5: the same exposure for a 64 kg female (mz = 0,025 MPa/(m/s2)).
 ISO2631_5_SD_FEMALE = 1.40  # daily compressive stress Sd, MPa (Formula C.1)
-ISO2631_5_R_FEMALE = 0.97  # cumulative stress variable R (Formula C.3)
+ISO2631_5_R_FEMALE = 0.97  # cumulative stress variable R (Formula C.3).
+# Exact recomputation of NOTE 5 (mz = 0,025, Sage = 0,039, b = 20, n = 20)
+# gives R = 0.9621, which rounds to 0.96; the printed 0.97 is a last-digit
+# inconsistency of the standard's own note (the male path reproduces the
+# printed 1.22 exactly with the identical code). Tolerance 0.01 covers it.
 
 # ISO 2631-5:2018 Annex D, Table D.1: digital-filter realization of the
 # clause 5.2 seat-to-spine transfer function (Formula 1) at fs = 256 Hz,

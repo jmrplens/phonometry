@@ -140,7 +140,10 @@ def normal_modes(
     :param n_depth_points: Number of finite-difference depth points. Default
         (``None``): derived from the physics as
         ``max(400, ceil(60·D·f/c_min))``, which keeps the near-cutoff
-        eigenvalue error small at any frequency/depth combination.
+        eigenvalue error small at any frequency/depth combination, capped at
+        20 000 points (very high ``f·D`` products exceed the cap; the
+        near-cutoff warning then indicates whether the capped grid suffices,
+        and an explicit ``n_depth_points`` overrides the cap).
     :return: A :class:`NormalModeResult`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -156,8 +159,8 @@ def normal_modes(
     if key not in _BOTTOM_TYPES:
         raise ValueError(f"'bottom' must be one of {_BOTTOM_TYPES}, got {bottom!r}.")
     if n_depth_points is None:
-        n_depth_points = max(400, int(np.ceil(
-            60.0 * water_depth * f / float(np.min(c_prof)))))
+        n_depth_points = min(20_000, max(400, int(np.ceil(
+            60.0 * water_depth * f / float(np.min(c_prof))))))
     if int(n_depth_points) < 8:
         raise ValueError("'n_depth_points' must be at least 8.")
 

@@ -125,12 +125,11 @@ _RANDI_TABLE2 = [
 
 @pytest.mark.parametrize(("length_ft", "speed_kn", "levels"), _RANDI_TABLE2)
 def test_randi_reproduces_report_table_2(
-    length_ft: float, speed_kn: float, levels: dict,
+    length_ft: float, speed_kn: float, levels: "dict[float, float]",
 ) -> None:
     from phonometry.underwater.ship_traffic_noise import _randi
 
     f = np.array(sorted(levels))
     got = _randi(f, speed_kn, length_ft * 0.3048)
-    for freq, ref in sorted(levels.items()):
-        idx = int(np.argmin(np.abs(f - freq)))
+    for idx, (freq, ref) in enumerate(sorted(levels.items())):
         assert float(got[idx]) == pytest.approx(ref, abs=0.1), freq

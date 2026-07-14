@@ -101,6 +101,33 @@ class NormalModeResult:
         return plot_normal_modes(self, ax=ax, **kwargs)
 
 
+def _propagating_band(
+    eigvals: "NDArray[np.float64]", eigvecs: "NDArray[np.float64]",
+    k2_max: float, dz: float,
+) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+    """Propagating wavenumbers (descending) and mode columns, cutoff-guarded.
+
+    Discards eigenvalues inside the O(dz²) discretisation-error band about
+    cutoff: the FD scheme can push a truly evanescent mode marginally above
+    zero (a spurious propagating mode) and biases genuine near-cutoff modes;
+    warns when a retained mode sits within ten times that band.
+    """
+    fd_floor = k2_max**2 * dz**2 / 12.0
+    prop = eigvals > fd_floor
+    if np.any(prop & (eigvals <= 10.0 * fd_floor)):
+        import warnings
+
+        from .._internal.warnings import PhonometryWarning
+
+        warnings.warn(
+            "normal_modes: retained near-cutoff mode(s) lie within 10x the"
+            " finite-difference error band; increase 'n_depth_points' to"
+            " resolve them accurately.", PhonometryWarning, stacklevel=3)
+    kr = np.sqrt(eigvals[prop])
+    order = np.argsort(kr)[::-1]  # descending kr (mode 1 first)
+    return kr[order], eigvecs[:, prop][:, order]
+
+
 def normal_modes(
     frequency_hz: float,
     depths: "NDArray[np.float64] | list[float]",
@@ -205,25 +232,7 @@ def normal_modes(
     k2_max = float(k2.max())
     eigvals, eigvecs = eigh_tridiagonal(
         main, off, select="v", select_range=(0.0, k2_max * (1.0 + 1e-12)))
-    kr2 = eigvals
-    # Discard eigenvalues inside the O(dz²) discretisation-error band about
-    # cutoff: the FD scheme can push a truly evanescent mode marginally above
-    # zero (a spurious propagating mode) and biases genuine near-cutoff modes.
-    fd_floor = k2_max**2 * dz**2 / 12.0
-    prop = kr2 > fd_floor
-    if np.any(prop & (kr2 <= 10.0 * fd_floor)):
-        import warnings
-
-        from .._internal.warnings import PhonometryWarning
-
-        warnings.warn(
-            "normal_modes: retained near-cutoff mode(s) lie within 10x the"
-            " finite-difference error band; increase 'n_depth_points' to"
-            " resolve them accurately.", PhonometryWarning, stacklevel=2)
-    kr = np.sqrt(kr2[prop])
-    order = np.argsort(kr)[::-1]  # descending kr (mode 1 first)
-    kr = kr[order]
-    shapes_int = eigvecs[:, prop][:, order]  # (n_unknowns, n_modes)
+    kr, shapes_int = _propagating_band(eigvals, eigvecs, k2_max, dz)
 
     # Rebuild full-depth mode functions with the boundary nodes.
     n_modes = kr.size

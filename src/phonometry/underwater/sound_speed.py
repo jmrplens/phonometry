@@ -278,6 +278,8 @@ def sound_speed_profile(
     sal = np.broadcast_to(np.asarray(salinities, dtype=np.float64), z.shape)
     if not (np.all(np.isfinite(temp)) and np.all(np.isfinite(sal))):
         raise ValueError("'temperatures' and 'salinities' must be finite.")
+    if np.any(sal < 0.0):
+        raise ValueError("'salinities' must be non-negative.")
     key = model.strip().lower()
     lat = _finite(latitude, "latitude")
     if key == "mackenzie":

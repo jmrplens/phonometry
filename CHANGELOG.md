@@ -13,8 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   normal-mode and parabolic-equation solvers, the published UNESCO EOS-80
   canonical sound-speed check value (Fofonoff & Millard 1983), six additional
   JOMOPANS File S1 oracle rows, the Ainslie-McColm Table I reference oceans
-  against Francois-Garrison, and Wenz-chart graphical anchors for the wind
-  noise; two new conformance checks (198 total).
+  against Francois-Garrison, Wenz-chart graphical anchors for the wind noise,
+  and the RANDI 3.1 report's representative source levels (Table 2) for the
+  ship-spectrum model; two new conformance checks (198 total).
 - ECAC Doc 32 rotorcraft: `reference_distance` parameter on
   `spherical_spreading_adjustment` and `atmospheric_adjustment` for hemispheres
   recorded at a non-standard polar distance, and an end-to-end propagation-chain

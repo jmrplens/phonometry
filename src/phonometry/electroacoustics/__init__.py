@@ -5,10 +5,12 @@ from __future__ import annotations
 
 from .distortion import (
     HarmonicDistortionResult,
+    ModulationDistortionResult,
     difference_frequency_distortion,
     dynamic_intermodulation_distortion,
     harmonic_analysis,
     harmonic_distortion,
+    itu_r_468_weighting,
     modulation_distortion,
     sinad,
     thd,
@@ -21,11 +23,13 @@ from .frequency_response import FrequencyResponseResult, coherence, transfer_fun
 __all__ = [
     "FrequencyResponseResult",
     "HarmonicDistortionResult",
+    "ModulationDistortionResult",
     "coherence",
     "difference_frequency_distortion",
     "dynamic_intermodulation_distortion",
     "harmonic_analysis",
     "harmonic_distortion",
+    "itu_r_468_weighting",
     "modulation_distortion",
     "sinad",
     "thd",

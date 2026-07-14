@@ -1,15 +1,16 @@
 ---
 title: "Electroacústica: distorsión y respuesta en frecuencia"
-description: "Distorsión IEC 60268-3 — distorsión armónica total y de orden n, THD+N y SINAD (AES17), intermodulación SMPTE y CCIF, intermodulación dinámica (DIM) y THD ponderada — más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria."
+description: "Distorsión IEC 60268-3 — distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por frecuencia diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468 — más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria."
 ---
 
 Dos pilares de la caracterización de equipos de audio, a partir de una señal
 capturada: cuánto **distorsiona** un amplificador o un transductor un tono de
 prueba, y qué **respuesta en frecuencia** revela una medición de entrada/salida.
 Esta página cubre el conjunto de distorsión de la IEC 60268-3 — distorsión
-armónica total y de orden n, THD+N y SINAD (AES17), las mediciones de
-intermodulación SMPTE y CCIF, la intermodulación dinámica (DIM) y la THD
-ponderada — y los estimadores de respuesta en frecuencia `H1`/`H2` de Bendat y
+armónica total y de orden n, THD+N y SINAD a través del ancho de banda de
+medición AES17, la intermodulación por órdenes de modulación y por frecuencia
+diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468 — y
+los estimadores de respuesta en frecuencia `H1`/`H2` de Bendat y
 Piersol con la coherencia ordinaria `γ²`. Toda magnitud tiene un oráculo
 analítico exacto, así que los valores son verificables y no ajustados.
 
@@ -78,7 +79,8 @@ plt.show()
 
 Mientras que la THD cuenta solo los armónicos, la **THD+N** compara *todo salvo
 el fundamental* — armónicos **y** ruido — con la señal total. AES17 elimina el
-fundamental con un filtro de muesca normalizado (`1,2 ≤ Q ≤ 3`) y toma la razón
+fundamental con un filtro de muesca normalizado (`1,2 ≤ Q ≤ 3`, validado sobre
+la respuesta *aplicada* de fase cero según la cláusula 5.2.8) y toma la razón
 entre el residuo y el RMS total; el **SINAD** es su recíproco en dB:
 
 $$
@@ -86,54 +88,82 @@ $$
 \mathrm{SINAD} = -20\lg(\mathrm{THD{+}N})\ \mathrm{dB}.
 $$
 
+Ambas tensiones se miden a través del ancho de banda de medición AES17 — un paso
+alto de 20 Hz más el paso bajo normalizado en 20 kHz (cláusulas 5.2.5 y 6.3.1) —
+de modo que un offset de continua o el ruido ultrasónico a frecuencias de
+muestreo altas no cuentan como "ruido". El borde de banda es configurable, y
+`bandwidth=None` desactiva la cadena y mide toda la banda de Nyquist.
+
 ```python
 import phonometry as ph
 
 ratio = ph.thd_plus_noise(signal, fs, 1000.0)          # razón (0..)
 db = ph.thd_plus_noise(signal, fs, 1000.0, as_db=True)  # 20·lg(razón) dB
 sinad_db = ph.sinad(signal, fs, 1000.0)                 # = -db
+wide = ph.thd_plus_noise(signal, fs, 1000.0, bandwidth=None)  # Nyquist completa
 ```
 
-Como la THD+N incluye el suelo de ruido, es igual o mayor que la THD de solo
-armónicos; el `SINAD` es el correspondiente margen señal-a-ruido-y-distorsión en
-dB. La muesca descarta internamente un transitorio de arranque/parada, así que la
-medición requiere una captura estacionaria y suficientemente larga.
+Como la THD+N incluye el suelo de ruido en banda, es igual o mayor que la THD de
+solo armónicos; el `SINAD` es el correspondiente margen señal-a-ruido-y-distorsión
+en dB (una magnitud derivada de la THD+N de AES17 — la propia AES17 no define el
+SINAD). La muesca descarta internamente un transitorio de arranque/parada, así
+que la medición requiere una captura estacionaria y suficientemente larga.
 
 ### 2.1 THD ponderada (IEC 60268-3 14.12.11)
 
-`weighted_thd` pondera en frecuencia el residuo tras la muesca (ponderación A por
-defecto) antes de tomar la razón, de modo que se tiene en cuenta el énfasis
-perceptual de los productos de distorsión:
+`weighted_thd` pondera en frecuencia el residuo tras la muesca antes de tomar la
+razón, de modo que se tiene en cuenta el énfasis perceptual de los productos de
+distorsión. La ponderación por defecto es la red que exige la cláusula — la
+curva del Apéndice A de la IEC 60268-1, es decir la ITU-R BS.468-4, con su pico
+de +12,2 dB cerca de 6,3 kHz (expuesta como `itu_r_468_weighting`); `'A'` y
+`'C'` se mantienen como opciones etiquetadas. Según la cláusula, la medición
+ponderada solo es válida para frecuencias fundamentales entre 31,5 Hz y 400 Hz:
 
 ```python
 import phonometry as ph
 
-print(ph.weighted_thd(signal, fs, 1000.0, weighting="A"))
+print(ph.weighted_thd(signal, fs, 100.0))                  # red ITU-R 468
+print(ph.weighted_thd(signal, fs, 100.0, weighting="A"))   # variante ponderada A
+print(ph.itu_r_468_weighting([6300.0]))                    # [+12.2] dB
 ```
 
 ## 3. Distorsión por intermodulación (IEC 60268-3 14.12.7–10)
 
 Cuando dos tonos atraviesan una no linealidad, laten entre sí y producen
-productos de suma y diferencia. La IEC 60268-3 normaliza tres ensayos:
+productos de suma y diferencia. La IEC 60268-3 normaliza tres ensayos, cada uno
+con su definición por órdenes:
 
-- **Distorsión de modulación** (tipo SMPTE, 14.12.7): un tono grave grande
-  `f_low` y un tono agudo pequeño `f_high` (1:4). La distorsión de orden n es el
-  RMS de las bandas laterales en `f_high ± (n−1)·f_low`, respecto a `f_high`.
-- **Distorsión por frecuencia diferencia** (tipo CCIF, 14.12.8): dos tonos agudos
-  iguales `f₁ < f₂`. El segundo orden queda en `f₂ − f₁`; el tercero en
-  `2f₁ − f₂` y `2f₂ − f₁`. `total_difference_frequency_distortion` combina ambos
-  en RMS.
+- **Distorsión de modulación** (14.12.7): un tono grave grande `f_low` y un
+  tono agudo pequeño `f_high` (preferiblemente 4:1). Los valores por orden son
+  sumas *aritméticas* de las amplitudes de las bandas laterales respecto a la
+  salida en `f_high`: `d_m,2 = (a_{f₂+f₁} + a_{f₂−f₁})/a_{f₂}` y
+  `d_m,3 = (a_{f₂+2f₁} + a_{f₂−2f₁})/a_{f₂}`. El resultado también lleva el
+  valor `smpte` de RMS combinado que reportan los analizadores tipo SMPTE (no
+  es una magnitud IEC).
+- **Distorsión por frecuencia diferencia** (14.12.8): dos tonos agudos iguales
+  `f₁ < f₂`, referida a `U_{2,ref} = 2·U_{2,f₂}` (la suma de las amplitudes de
+  ambos tonos): `d_d,2 = a_{f₂−f₁}/(a_{f₁}+a_{f₂})` y la suma aritmética
+  `d_d,3 = (a_{2f₂−f₁} + a_{2f₁−f₂})/(a_{f₁}+a_{f₂})`.
+- **Distorsión total por frecuencia diferencia** (14.12.10): un ensayo de dos
+  tonos específico (`f₁ = 2f₀`, `f₂ = 3f₀ − δ`; los tonos normalizados de
+  8 kHz y 11,95 kHz son los valores por defecto) donde solo cuentan los dos
+  productos en banda en `f₀ ∓ δ`:
+  `d_TDFD = √(a²_{f₂−f₁} + a²_{2f₁−f₂}) / (a_{f₁} + a_{f₂})`.
 - **Intermodulación dinámica** (DIM, 14.12.9): un seno de 15 kHz más una onda
-  cuadrada de 3,15 kHz filtrada en paso bajo (1:4). La DIM es el RMS de los
-  productos de intermodulación `|k·f_square ± f_sine|` que caen por debajo de
-  `f_sine` (Tabla 2 de la IEC 60268-3), respecto al seno de 15 kHz.
+  cuadrada de 3,15 kHz filtrada en paso bajo (1:4 pico a pico). La DIM es el
+  RMS de los productos de intermodulación `|k·f_square ± f_sine|` que caen por
+  debajo de `f_sine` (Tabla 2 de la IEC 60268-3), respecto a la amplitud del
+  seno de 15 kHz (la definición de 14.12.9.1; el denominador impreso en
+  14.12.9.2 f) es un defecto editorial, véase la
+  [fe de erratas](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md)).
 
 ```python
 import phonometry as ph
 
-smpte = ph.modulation_distortion(signal, fs, 60.0, 7000.0)          # SMPTE
-ccif2 = ph.difference_frequency_distortion(signal, fs, 13e3, 14e3, order=2)  # CCIF
-ccif_total = ph.total_difference_frequency_distortion(signal, fs, 13e3, 14e3)
+md = ph.modulation_distortion(signal, fs, 60.0, 7000.0)
+print(md.d2, md.d3, md.smpte)                                       # 14.12.7
+dfd2 = ph.difference_frequency_distortion(signal, fs, 13e3, 14e3, order=2)
+tdfd = ph.total_difference_frequency_distortion(signal, fs)         # 8/11,95 kHz
 dim = ph.dynamic_intermodulation_distortion(signal, fs)             # DIM (15k/3,15k)
 ```
 
@@ -198,13 +228,18 @@ plt.show()
 ---
 
 **Normas.** IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*
-(cláusulas 14.12.2–14.12.11): distorsión armónica total `THD_F`/`THD_R`,
-distorsión armónica de orden n `dₙ`, intermodulación de modulación (SMPTE) y por
-frecuencia diferencia (CCIF), distorsión total por frecuencia diferencia,
-intermodulación dinámica (DIM) y THD ponderada. AES17-2015, *Measurement of
-digital audio equipment* (cláusula 6.3): la razón THD+N mediante el filtro de
-muesca normalizado, y el SINAD. Bendat y Piersol (2010), *Random Data: Analysis
-and Measurement Procedures* (4ª ed., Wiley): los estimadores de respuesta en
-frecuencia `H1` y `H2` y la coherencia ordinaria `γ²`. Todas las magnitudes se
-verifican contra oráculos analíticos exactos (señales sintéticas con amplitudes
-armónicas/de intermodulación conocidas y un camino LTI conocido).
+(cláusulas 14.12.2–14.12.11): distorsión armónica total `THD_F`/`THD_R` (la
+fórmula de 14.12.3.2 define la forma R), distorsión armónica de orden n `dₙ`,
+la intermodulación por órdenes de modulación (`d_m,n`) y por frecuencia
+diferencia (`d_d,n`), distorsión total por frecuencia diferencia,
+intermodulación dinámica (DIM) y la THD ponderada ITU-R BS.468-4 / IEC 60268-1.
+AES17-2015, *Measurement of digital audio equipment* (cláusulas 5.2.5, 5.2.8 y
+6.3.1): la razón THD+N mediante el filtro de muesca normalizado y el ancho de
+banda de medición normalizado; el SINAD se deriva de ella. ITU-R BS.468-4: la
+respuesta nominal de la red de ponderación. Bendat y Piersol (2010), *Random
+Data: Analysis and Measurement Procedures* (4ª ed., Wiley): los estimadores de
+respuesta en frecuencia `H1` y `H2` y la coherencia ordinaria `γ²`. Todas las
+magnitudes se verifican contra oráculos analíticos exactos (señales sintéticas
+con amplitudes armónicas/de intermodulación conocidas, un oráculo de Fourier de
+seno recortado, una síntesis completa de la señal de ensayo DIM y un camino LTI
+conocido).

@@ -24,6 +24,11 @@ from phonometry.hearing import noise_induced_hearing_loss as m
 
 # Annex D, per (level, years): rows are the six frequencies 500..6000 Hz,
 # columns the (90 %, 50 %, 10 %) fractiles -> here (0.10, 0.50, 0.90).
+# Rounding note: the standard's own printed cells carry intermediate rounding;
+# at half-integer boundaries a recomputed cell can differ by 1 dB from the
+# print. Known case (Table D.4, not pinned here): 100 dB, 10 years, 3000 Hz,
+# 10 % prints 41 where the unrounded value is 41.52 (rounds to 42). If a D.4
+# row is ever added, allow that +/-1 dB ambiguity.
 _ANNEX_D = {
     (85.0, 40.0): [(0, 0, 0), (0, 0, 0), (1, 2, 2), (3, 5, 7), (5, 7, 9), (2, 4, 6)],
     (90.0, 20.0): [(0, 0, 0), (0, 0, 0), (2, 4, 8), (7, 10, 16), (9, 13, 18), (4, 8, 14)],

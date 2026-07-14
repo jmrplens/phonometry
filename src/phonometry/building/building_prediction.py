@@ -334,6 +334,9 @@ def junction_vibration_reduction(
                 "The E.7 double-leaf branch (K24) is given only for "
                 "mass ratios m2/m1 > 3."
             )
+        # Sign per EN 12354-1:2000 (E.7), whose Figure E.9 curve corroborates
+        # it; ISO 12354-1:2017 E.3.5 prints +14,1 M with no supporting figure
+        # (see docs/ERRATA.md).
         return 3.0 - 14.1 * m + 5.7 * m * m
     if junction_type == "lightweight_double_coupled":
         if path == "through":

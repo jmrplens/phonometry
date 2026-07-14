@@ -71,12 +71,13 @@ to the issuing body, with date and reference).
   printed 0,97 with a tolerance that documents the recomputed 0,9621.
 - **Status:** unreported.
 
-## EN 12354-1:2000 — Annex E.5 (K24 clamp misprint)
+## EN 12354-1:2000 Annex E.5 / ISO 12354-1:2017 E.3.4 (K24 clamp misprint)
 
-- **Location:** Annex E, clause E.5 (double-leaf lightweight element coupled
-  to a homogeneous element).
+- **Location:** EN 12354-1:2000, Annex E, clause E.5, and ISO 12354-1:2017,
+  E.3.4 NOTE 4 (wall junction with flexible interlayers).
 - **The print:** the bound on the K24 junction term is printed as
-  "0 ≤ K24 ≤ −4 dB", an empty interval.
+  "0 ≤ K24 ≤ −4 dB", an empty interval; the 2017 edition repeats the 2000
+  misprint verbatim.
 - **The problem:** the interval is impossible as printed; the accompanying
   figure and the physics (the term is a reduction bounded below) indicate
   −4 dB ≤ K24 ≤ 0 dB.
@@ -84,6 +85,23 @@ to the issuing body, with date and reference).
   figure's curve family.
 - **Library behaviour:** implements the clamp as −4 ≤ K24 ≤ 0 with a misprint
   note in the docstring.
+- **Status:** unreported.
+
+## ISO 12354-1:2017 — E.3.5 (double-leaf junction K24 sign)
+
+- **Location:** E.3.5, Figure E.7 (junction of lightweight double leaf wall
+  and homogeneous elements), K24 formula.
+- **The print:** K24 = 3,0 + 14,1 M + 5,7 M² dB (for m2/m1 > 3).
+- **The problem:** EN 12354-1:2000 prints the same relation as
+  K24 = 3,0 − 14,1 M + 5,7 M² (Figure E.9, Formula (E.7)), and the 2000
+  edition's own K24 curve in that figure decreases with m2/m1, corroborating
+  the minus sign; the 2017 edition prints no corresponding curve. The two
+  editions contradict each other and the internally consistent
+  formula-plus-figure pair is the 2000 one.
+- **Evidence:** page renders of both editions (ISO 12354-1:2017 printed
+  p. 47; EN 12354-1:2000 printed p. 48).
+- **Library behaviour:** implements the 2000 edition it cites (minus sign),
+  with a code note recording the 2017 contradiction.
 - **Status:** unreported.
 
 ## EN 12354-2:2000 — Formula (3) vs Annex E.3 (standardized impact level)
@@ -223,6 +241,27 @@ to the issuing body, with date and reference).
 - **Library behaviour:** follows the DIN/sqrt(2) reading (it matches the
   only executable reference), with the choice recorded in
   [`tone_audibility.py`](../src/phonometry/psychoacoustics/tone_audibility.py).
+- **Status:** unreported.
+
+## IEC 60268-3:2013 — clause 14.12.9.2 f) (DIM denominator)
+
+- **Location:** clause 14.12.9.2, item f), the formula for the dynamic
+  intermodulation distortion d_DIM.
+- **The print:** the denominator of the printed formula is "U2".
+- **The problem:** the defining clause 14.12.9.1 states the ratio of the
+  r.m.s. sum of the Table 2 intermodulation product voltages "to the
+  amplitude of the output voltage at the frequency f_s" — i.e. the 15 kHz
+  sine component U_s, the Otala convention. The symbol U2 is used throughout
+  14.12 for the total output voltage, which contradicts 14.12.9.1 (the test
+  signal is dominated by the 3,15 kHz square wave, so the two denominators
+  differ by several dB). Item d) of the same clause measures "the amplitudes
+  of the sinusoidal signal U_s", which the f) formula then never uses.
+- **Evidence:** side-by-side reading of 14.12.9.1, 14.12.9.2 d) and
+  14.12.9.2 f); the historical DIM literature (Otala) defines the ratio to
+  the sine amplitude.
+- **Library behaviour:** follows the 14.12.9.1 definition (reference = the
+  output amplitude at f_s), with a code comment at the reference measurement
+  in [`distortion.py`](../src/phonometry/electroacoustics/distortion.py).
 - **Status:** unreported.
 
 ## NORAH2 rotorcraft guidance SC03.D1.5d (EASA.2020.FC.06) — Eq. (27)

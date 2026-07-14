@@ -183,7 +183,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | EN 12354-2:2000 Formula (3) / Annex E.3 | Standardized impact level L'nT,w (exact 0,032 V form -> 43 dB) | L'nT,w 43 dB (exact 42,96; E.3 prints 42,8) | L'nT,w 42.96 dB | -0.001 dB | &#9989; |
 | EN 12354-3:2000 Annex F | Facade airborne prediction (R'tr,s,w / D2m,nT,w single numbers) | R'tr,s,w 31 (Ctr -3); D2m,nT,w 33 dB | R'tr,s,w 31 (Ctr -3); D2m,nT,w 33 dB | 0 | &#9989; |
 | EN 12354-4:2000 Annex G / Formula (2) | Radiated LW of a wall+door segment (side 1, low bands) | LW 63/125 Hz [59.8, 61.2] dB (+/-0.1) | LW [59.8, 61.2] dB | 0.038 dB | &#9989; |
-| EN 12354-4:2000 Annex E / Table G.9 | Exterior level from a finite radiating side (side 1, d = 5 m) | 36.6 dB (+/-0.05 dB) | 36.597 dB | -0.003 dB | &#9989; |
+| EN 12354-4:2000 Annex E / Table G.9 | Exterior level of all four Table G.9 reception cells | Lp 36,6 / 28,5 / 44,6 / 37,3 dB (+/-0,05) | Lp 36.6 / 28.5 / 44.6 / 37.3 dB | 0.046 dB | &#9989; |
 | ISO 12999-1:2020 Table 2 | Airborne band uncertainty, situation A @ 1 kHz | 1.8 dB (+/-0 dB) | 1.8 dB | 0 dB | &#9989; |
 | ISO 12999-1:2020 Annex B, Table B.2 | One-decimal single numbers Rw / Rw+C50-5000 / Rw+Ctr,50-5000 | 57.4 / 56.4 / 51.1 dB | 57.4 / 56.4 / 51.1 dB | +0.00 dB | &#9989; |
 | ISO 12999-1:2020 Annex B, Formulae (B.2)/(B.6) | Single-number uncertainties (uncorrelated 0,6/0,8; correlated u(Rw) 1,9) | u_uncorr 0.6 / 0.8 dB; u_corr(Rw) 1.9 dB | 0.60 / 0.79 dB; 1.90 dB | -0.00 dB | &#9989; |

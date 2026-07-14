@@ -1868,18 +1868,32 @@ def _chk_en12354_4_radiated() -> Outcome:
 @register(
     "Building prediction & uncertainty",
     "EN 12354-4:2000 Annex E / Table G.9",
-    "Exterior level from a finite radiating side (side 1, d = 5 m)",
+    "Exterior level of all four Table G.9 reception cells",
 )
 def _chk_en12354_4_propagation() -> Outcome:
-    w, h, d, a_tot = ref.EN12354_4_ANNEX_G_ATTENUATION[0]
-    att = ph.outdoor_attenuation(w, h, d)
-    lp = ph.outdoor_level(ref.EN12354_4_ANNEX_G_SIDE1_LWA, att)
-    att_ok = abs(att - a_tot) <= 0.05
-    return numeric(
-        ref.EN12354_4_ANNEX_G_LP_SIDE1_D5, lp, 0.05, unit="dB", places=3
-    ) if att_ok else Outcome(
-        expected=f"A'tot {a_tot} dB", computed=f"A'tot {att:.2f} dB",
-        delta=f"{att - a_tot:+.2f} dB", passed=False,
+    # (width, height, distance, printed A'tot, side LWA, printed Lp).
+    cells = [
+        (*ref.EN12354_4_ANNEX_G_ATTENUATION[0],
+         ref.EN12354_4_ANNEX_G_SIDE1_LWA, ref.EN12354_4_ANNEX_G_LP_SIDE1_D5),
+        (*ref.EN12354_4_ANNEX_G_ATTENUATION[1],
+         ref.EN12354_4_ANNEX_G_SIDE1_LWA, ref.EN12354_4_ANNEX_G_LP_SIDE1_D25),
+        (*ref.EN12354_4_ANNEX_G_ATTENUATION[2],
+         ref.EN12354_4_ANNEX_G_SIDE4_LWA, ref.EN12354_4_ANNEX_G_LP_SIDE4_D5),
+        (*ref.EN12354_4_ANNEX_G_ATTENUATION[3],
+         ref.EN12354_4_ANNEX_G_SIDE4_LWA, ref.EN12354_4_ANNEX_G_LP_SIDE4_D25),
+    ]
+    worst = 0.0
+    computed_lp = []
+    for w, h, d, a_tot, lwa, lp_expected in cells:
+        att = float(ph.outdoor_attenuation(w, h, d))
+        lp = float(ph.outdoor_level(lwa, att))
+        worst = max(worst, abs(att - a_tot), abs(lp - lp_expected))
+        computed_lp.append(lp)
+    return Outcome(
+        expected="Lp 36,6 / 28,5 / 44,6 / 37,3 dB (+/-0,05)",
+        computed="Lp " + " / ".join(f"{v:.1f}" for v in computed_lp) + " dB",
+        delta=f"{worst:.3f} dB",
+        passed=worst <= 0.05,
     )
 
 

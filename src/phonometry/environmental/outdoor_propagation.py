@@ -90,6 +90,13 @@ class Barrier:
     :param lateral: When ``True`` the diffraction is around a vertical edge
         (Eq. (13)): ``Abar = Dz`` (the ground term is not cancelled) and
         ``Kmet = 1``. Default ``False`` selects top-edge diffraction (Eq. (12)).
+    :param line_of_sight_clear: When ``True`` the line of sight between source
+        and receiver passes *above* the top edge: ISO 9613-2:1996 (text after
+        Eq. (16)) then gives the path difference ``z`` a negative sign, and
+        Eq. (14) is still evaluated (with ``Kmet = 1``, Eq. (18)), so ``Dz``
+        falls continuously from ``10 lg 3 = 4.8 dB`` at grazing to 0 for
+        deeper geometries. The edge distances stay the unsigned geometric
+        lengths; only the sign convention of ``z`` changes.
     """
 
     source_to_edge: float
@@ -98,6 +105,7 @@ class Barrier:
     edge_separation: float | None = None
     ground_reflections_by_image: bool = False
     lateral: bool = False
+    line_of_sight_clear: bool = False
 
     def __post_init__(self) -> None:
         if self.source_to_edge < 0.0 or self.edge_to_receiver < 0.0:
@@ -216,6 +224,13 @@ def atmospheric_absorption(
     at each octave-band midband frequency. Eq. (8) writes ``alpha`` in dB/km with
     ``Aatm = alpha_dBkm * d / 1000``; the two forms are identical.
 
+    ``alpha`` is evaluated at the *exact* base-10 midband frequency behind
+    each nominal band label (e.g. 7 943.3 Hz for the "8 kHz" band), the
+    convention behind the ISO 9613-2 Table 2 coefficients (they come from
+    ISO 9613-1 Table 1 at exact midbands; at 8 kHz the nominal-frequency
+    evaluation would run ~1.3 % high). Each supplied frequency is snapped to
+    the nearest exact midband.
+
     :param distance: Source-to-receiver distance ``d``, in metres.
     :param frequencies: Octave-band midband frequencies, in hertz.
     :param temperature: Air temperature, in degrees Celsius.
@@ -227,7 +242,9 @@ def atmospheric_absorption(
     relative_humidity = _resolve_humidity(
         "atmospheric_absorption", relative_humidity, humidity
     )
-    alpha = air_attenuation(frequencies, temperature, relative_humidity, pressure)
+    alpha = air_attenuation(
+        frequencies, temperature, relative_humidity, pressure, exact_midband=True
+    )
     return np.asarray(alpha * distance, dtype=np.float64)
 
 
@@ -305,7 +322,10 @@ def ground_attenuation(
     :param distance: Straight-line source-to-receiver distance ``d``, in metres.
     :param source_height: Source height ``hs`` above ground, in metres.
     :param receiver_height: Receiver height ``hr`` above ground, in metres.
-    :param frequencies: Octave-band midband frequencies, in hertz.
+    :param frequencies: Octave-band midband frequencies, in hertz. Table 3 is
+        defined for the eight nominal octave bands 63 Hz-8 kHz only; any other
+        requested frequency is snapped to the nearest nominal octave band for
+        the Table 3 lookup.
     :param ground_source: Ground factor ``Gs`` of the source region ([0, 1]).
     :param ground_middle: Ground factor ``Gm`` of the middle region ([0, 1]).
     :param ground_receiver: Ground factor ``Gr`` of the receiver region ([0, 1]).
@@ -415,9 +435,14 @@ def barrier_attenuation(
     with ``C2 = 20`` (or 40 when ground reflections are handled by image
     sources), ``C3 = 1`` for single diffraction or Eq. (15) for double, the
     pathlength difference ``z`` (Eq. (16)/(17)), ``lambda = 340/f`` and the
-    meteorological factor ``Kmet`` (Eq. (18)). ``Dz`` is limited to 20 dB (single)
-    or 25 dB (double). When the line of sight clears the top edge (``z <= 0``) the
-    barrier gives no attenuation and ``Dz = 0``.
+    meteorological factor ``Kmet`` (Eq. (18), 1 for ``z <= 0``). ``Dz`` is
+    limited to 20 dB (single) or 25 dB (double). When the line of sight passes
+    above the top edge (``Barrier(line_of_sight_clear=True)``) ``z`` takes a
+    negative sign (ISO 9613-2:1996, text after Eq. (16)) and Eq. (14) still
+    applies: ``Dz`` falls continuously from ``10 lg 3 = 4.8 dB`` at grazing
+    (``z = 0``) towards 0 as the clearance deepens, clamped at 0 (the
+    logarithm's argument is floored at 1 -- a barrier below the sight line
+    never amplifies).
 
     :param barrier: Barrier geometry (:class:`Barrier`).
     :param distance: Straight-line source-to-receiver distance ``d``, in metres.
@@ -441,23 +466,26 @@ def barrier_attenuation(
     else:
         z = float(np.hypot(dss + dsr, a) - distance)
         limit = _DZ_LIMIT_SINGLE
+    if barrier.line_of_sight_clear:
+        # Eq. (16) sign convention: the diffracted path is still longer than
+        # the direct one, but z is given a negative sign when the sight line
+        # clears the top edge.
+        z = -z
 
     c2 = 40.0 if barrier.ground_reflections_by_image else 20.0
     if barrier.lateral or z <= 0.0:
-        kmet = 1.0
+        kmet = 1.0  # Eq. (18): Kmet = 1 for z <= 0 and for lateral diffraction
     else:
         kmet = float(np.exp(-(1.0 / 2000.0)
                             * np.sqrt(dss * dsr * distance / (2.0 * z))))
 
     out = np.empty_like(freqs)
     for i, f in enumerate(freqs):
-        if z <= 0.0:
-            out[i] = 0.0
-            continue
         lam = _C_SOUND / float(f)
         c3 = _c3_double(lam, e) if e is not None else 1.0
-        # z > 0 here, so arg >= 3 and Dz = 10 lg(arg) is always positive.
-        arg = 3.0 + (c2 / lam) * c3 * z * kmet
+        # For z >= 0 the argument is >= 3; for negative z it decreases below 3
+        # and is floored at 1 so Dz >= 0 (Dz -> 0 around z ~ -lambda/10).
+        arg = max(3.0 + (c2 / lam) * c3 * z * kmet, 1.0)
         dz = 10.0 * np.log10(arg)
         out[i] = min(dz, limit)
     return out
@@ -539,7 +567,10 @@ def outdoor_propagation_attenuation(
     :param distance: Straight-line source-to-receiver distance ``d``, in metres.
     :param source_height: Source height ``hs`` above ground, in metres.
     :param receiver_height: Receiver height ``hr`` above ground, in metres.
-    :param frequencies: Octave-band midband frequencies, in hertz.
+    :param frequencies: Octave-band midband frequencies, in hertz. The ground
+        term snaps each frequency to the nearest nominal octave band (Table 3
+        is octave-band only) and the atmospheric term evaluates the exact
+        base-10 midband behind it (see :func:`atmospheric_absorption`).
     :param ground_source: Ground factor ``Gs`` of the source region ([0, 1],
         0 = hard, 1 = porous).
     :param ground_middle: Ground factor ``Gm`` of the middle region ([0, 1]).

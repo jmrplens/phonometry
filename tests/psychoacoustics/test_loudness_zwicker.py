@@ -26,7 +26,7 @@ FS = 48000
 # presence gate, the expected-values JSON and the Annex B.5 recordings all
 # resolve from the same directory. Defaults to the in-repo fixtures.
 DATA = pathlib.Path(os.environ.get(
-    "ISO532_1_TESTDATA", str(pathlib.Path(__file__).parent / "data" / "iso532_1")
+    "ISO532_1_TESTDATA", str(pathlib.Path(__file__).parents[1] / "data" / "iso532_1")
 ))
 # The ISO 532-1 Annex B validation data may be absent (its README documents a
 # removal policy); the tests that need it then skip rather than crash on import.
@@ -40,6 +40,24 @@ requires_iso_data = pytest.mark.skipif(
     not _ISO_DATA_PRESENT,
     reason="ISO 532-1 Annex B data absent (see tests/data/iso532_1/README.md)",
 )
+
+
+def test_iso_data_present_in_repo() -> None:
+    """The in-repo Annex B fixtures must be found by the default DATA path.
+
+    This assertion (not a skip) guards the strongest oracle of the
+    psychoacoustics suite: a broken relative path after a test-tree
+    reorganization once made all 21 Annex B validation tests silently skip
+    (they resolve their data through the ``requires_iso_data`` guard). If
+    this test fails, fix ``DATA`` above -- do not delete the test. The
+    ``ISO532_1_TESTDATA`` override still relocates the data explicitly.
+    """
+    if "ISO532_1_TESTDATA" in os.environ:
+        pytest.skip("external ISO532_1_TESTDATA override in use")
+    assert _ISO_DATA_PRESENT, (
+        f"ISO 532-1 Annex B fixtures not found at {DATA}; the 21 Annex B "
+        "validation tests would silently skip"
+    )
 
 
 def _tone(freq: float, level_db: float, seconds: float = 1.0, pad_ms: float = 100.0) -> np.ndarray:
@@ -100,6 +118,34 @@ def test_annex_b3_stationary_tones(case: str, freq: float, level: float) -> None
     )
 
 
+def _pink_noise(seconds: float, level_db: float, seed: int = 5321) -> np.ndarray:
+    """Deterministic pink noise at an overall SPL (dB re 20 uPa)."""
+    rng = np.random.default_rng(seed)
+    n = int(FS * seconds)
+    spec = np.fft.rfft(rng.standard_normal(n))
+    freqs = np.fft.rfftfreq(n, d=1.0 / FS)
+    spec[1:] /= np.sqrt(freqs[1:])  # 1/f power shape
+    spec[0] = 0.0
+    x = np.fft.irfft(spec, n=n)
+    return np.asarray(x / np.sqrt(np.mean(x**2)) * 2e-5 * 10 ** (level_db / 20))
+
+
+@requires_iso_data
+def test_annex_b3_pink_noise_bounds() -> None:
+    """Annex B.3 Test signal 5 (pink noise, 60 dB overall, stationary).
+
+    The workbook tabulates N = 10.4978 with the tolerance band
+    [Nmin, Nmax] = [9.97291, 11.02269]. The ISO WAV is not regenerable
+    bit-exactly (stochastic), so a deterministic pink-noise realization at
+    the stated overall level is checked against the workbook bounds only.
+    """
+    exp = EXPECTED["Test signal 5"]
+    res = loudness_zwicker(_pink_noise(5.0, 60.0), FS, stationary=True)
+    assert exp["Nmin"] <= res.loudness <= exp["Nmax"], (
+        f"pink noise: N={res.loudness:.4f} outside [{exp['Nmin']}, {exp['Nmax']}]"
+    )
+
+
 def test_1khz_60db_anchor() -> None:
     """Definitional anchor: a 1 kHz tone at 40 phon is 1 sone; 60 dB -> 4 sone
     (each 10 phon doubles loudness)."""
@@ -142,10 +188,15 @@ def _read_wav_pa(path: pathlib.Path, peak_rms_db: float) -> tuple[np.ndarray, in
     return x * (target / peak_rms), fs
 
 
+# Annex B.4 Test signals 6-9 (30 -> 80 dB level ramps): the workbook holds
+# their Nmax/N5 expectations, but the electronic-attachment WAVs are not
+# shipped in-repo and the ramp durations are not stated in the Annex B prose,
+# so the signals cannot be regenerated. Add them here if the attachment WAVs
+# ever become shippable.
 @pytest.mark.parametrize(
     ("case", "num", "level"),
     [("Test signal 10", 10, 70.0), ("Test signal 11", 11, 70.0),
-     ("Test signal 12", 12, 70.0)],
+     ("Test signal 12", 12, 70.0), ("Test signal 13", 13, 80.0)],
 )
 @requires_iso_data
 def test_annex_b4_tone_pulses(case: str, num: int, level: float) -> None:

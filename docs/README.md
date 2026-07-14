@@ -55,6 +55,7 @@ Full documentation for phonometry. Also available as a website:
 - [Theory](theory.md) — standards, math and design decisions
 - [Why phonometry](why-phonometry.md) — IEC compliance vs other libraries
 - [Conformance report](CONFORMANCE.md) — auto-generated numerical validation: every check pins a standard clause's expected value against the library's computed value, regenerated in CI
+- [Standards errata](ERRATA.md) — defects found in the published standards themselves during implementation: misprints, examples contradicting their own normative text, ambiguous wording, each with evidence and the library's disposition
 
 ## Development
 

@@ -101,8 +101,9 @@ bl.plot()   # bottom loss vs grazing angle (needs matplotlib)
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise.svg" alt="Wenz ambient-noise spectrum levels for two wind speeds, with wind noise falling at 5 dB per octave and thermal noise rising above about 50 kHz" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise_dark.svg" alt="Wenz ambient-noise spectrum levels for two wind speeds, with wind noise falling at 5 dB per octave and thermal noise rising above about 50 kHz" style="width:82%">
 
 The ambient-noise spectrum level is the energy sum of the physically grounded
-Wenz components: **wind / sea-surface** noise via the "rule of fives" (25 dB at
-1 kHz for 5 knots, strictly valid ~500 Hz–5 kHz) and **Mellen thermal** noise
+Wenz components: **wind / sea-surface** noise via the "rule of fives" (the
+historical 25 dB anchor at 1 kHz for 5 knots is re 20 µPa, i.e. ~51 dB re 1 µPa;
+strictly valid ~500 Hz–5 kHz) and **Mellen thermal** noise
 (dominant above ~50 kHz). The wide example range keeps the wind curve plotted
 beyond ~5 kHz only as an extrapolation to show the thermal crossover. A
 **shipping** spectrum may be supplied by the caller.

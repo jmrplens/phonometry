@@ -2,8 +2,10 @@
 """Tests for ocean ambient-noise spectrum levels (Wenz framework).
 
 Oracles (independent of the implementation): the wind "rule of fives" anchor
-(25 dB at 1 kHz for 5 knots, −5 dB/octave, +5 dB per doubling of wind speed) and
-the Mellen thermal-noise formula ``<p²> = 4π·k·T·ρ·f²/c`` computed directly.
+(25 dB re 20 µPa = 51.02 dB re 1 µPa at 1 kHz for 5 knots, −5 dB/octave, +5 dB
+per doubling of wind speed), graphical anchors read off the published Wenz
+chart (Etter 2003, Figs. 6.2/6.5, axes in dB re 1 µPa), and the Mellen
+thermal-noise formula ``<p²> = 4π·k·T·ρ·f²/c`` computed directly.
 """
 
 from __future__ import annotations
@@ -26,8 +28,28 @@ _P_REF = 1e-6
 
 
 def test_wind_rule_of_fives_anchor() -> None:
-    # 25 dB spectrum level at 1 kHz for 5 knots.
-    assert float(wind_noise_spectrum(1000.0, 5.0)[0]) == pytest.approx(25.0, abs=1e-9)
+    # Wenz/Knudsen: 25 dB re 0.0002 dyn/cm2 (20 uPa) at 1 kHz for 5 knots,
+    # i.e. 25 + 20*lg(20) = 51.0206 dB re 1 uPa (ISO 18405 reference).
+    expected = 25.0 + 20.0 * np.log10(20.0)
+    assert float(wind_noise_spectrum(1000.0, 5.0)[0]) == pytest.approx(expected, abs=1e-9)
+
+
+def test_wind_matches_published_wenz_chart() -> None:
+    # Graphical anchors from the published Wenz chart (Etter 2003, axes in
+    # dB re 1 uPa): ~50 dB at 1 kHz for 4-6 kn (Fig. 6.2) and ~35 dB at
+    # 10 kHz for the Knudsen sea-state-1/2 curve (Fig. 6.5, ~5 kn).
+    assert float(wind_noise_spectrum(1000.0, 5.0)[0]) == pytest.approx(50.0, abs=3.0)
+    assert float(wind_noise_spectrum(10000.0, 5.0)[0]) == pytest.approx(35.0, abs=3.0)
+
+
+def test_wind_thermal_crossover_near_wenz_chart() -> None:
+    # With the 1 uPa anchor the 5 kn wind and thermal curves cross where the
+    # Wenz chart shows it, in the tens of kHz (about 63 kHz), not ~12 kHz as
+    # the 20 uPa-anchored level would give.
+    f = np.logspace(3.5, 5.5, 2001)
+    res = ocean_ambient_noise(f, wind_speed_knots=5.0)
+    cross = f[np.argmin(np.abs(res.wind - res.thermal))]
+    assert 40e3 < cross < 90e3
 
 
 def test_wind_minus_five_db_per_octave() -> None:

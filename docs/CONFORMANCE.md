@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **196/196 conformance checks pass** across 32 domains and 126 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **198/198 conformance checks pass** across 32 domains and 128 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -418,7 +418,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Underwater sound propagation (transmission loss)</b> — 100% (11/11)</summary>
+<summary>&#9989; <b>Underwater sound propagation (transmission loss)</b> — 100% (12/12)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -430,18 +430,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Ainslie-McColm (1998) vs Francois-Garrison (1982) | Absorption agreement at 10 kHz, 10 °C, 35 ‰, 0 m, pH 8, dB/km | 0.9603 dB/km (+/-0.096 dB/km) | 0.9866 dB/km | 0.026 dB/km | &#9989; |
 | Passive sonar equation (Urick/Etter) | Figure of merit SL − (NL − DI) − DT, dB | 85 dB (+/-0 dB) | 85 dB | 0 dB | &#9989; |
 | Seabed reflection (Rayleigh, normal incidence) | Bottom loss at 90° grazing, sand ρ=1900 c=1650 over water, dB | 9.0506 dB (+/-0 dB) | 9.0506 dB | 0 dB | &#9989; |
-| Wenz wind noise (rule of fives) | Wind spectrum level at 1 kHz, 5 kn (canonical anchor), dB re 1 µPa²/Hz | 25 dB (+/-0 dB) | 25 dB | 0 dB | &#9989; |
+| Wenz wind noise (rule of fives) | Wind spectrum level at 1 kHz, 5 kn (canonical anchor), dB re 1 µPa²/Hz | 51.0206 dB (+/-0.0001 dB) | 51.0206 dB | 0 dB | &#9989; |
 | Mellen thermal noise | Thermal spectrum level at 50 kHz, 16.85 °C (physical), dB re 1 µPa²/Hz | 19.3426 dB (+/-0 dB) | 19.3426 dB | 0 dB | &#9989; |
 | JOMOPANS-ECHO ship source level | Bulker V=13.5 kn L=211 m band level at 1 kHz (File S1 oracle), dB re 1 µPa m | 161.394 dB (+/-0.01 dB) | 161.394 dB | 0 dB | &#9989; |
+| UNESCO sound speed (EOS-80 canonical value) | SVEL(S = 40, T68 = 40 °C, P = 1000 bar) vs Fofonoff & Millard 1983, m/s | 1731.995 m/s (+/-0.02 m/s) | 1732.004 m/s | 0.009 m/s | &#9989; |
 
 </details>
 
 <details>
-<summary>&#9989; <b>Underwater numerical propagation (modes / rays / PE)</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>Underwater numerical propagation (modes / rays / PE)</b> — 100% (4/4)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | Normal modes vs ideal waveguide | Fundamental horizontal wavenumber kr1 at 20 Hz, 100 m (analytic), rad/m | 0.077662 rad/m (+/-0.0001 rad/m) | 0.077662 rad/m | 0 rad/m | &#9989; |
+| Normal modes vs image-source oracle | Absolute TL at 1 km in the ideal waveguide (converged image sum), dB | 48.238 dB (+/-0.02 dB) | 48.239 dB | 0.001 dB | &#9989; |
 | Ray tracing vs linear gradient | Turning depth of a 10° ray, c = 1500 + 0.05z (circular arc), m | 462.8 m (+/-1 m) | 462.8 m | 0 m | &#9989; |
 | Parabolic equation vs free field | PE transmission loss at 2 km, homogeneous medium (spherical spreading), dB | 66.021 dB (+/-0.1 dB) | 66.021 dB | 0 dB | &#9989; |
 

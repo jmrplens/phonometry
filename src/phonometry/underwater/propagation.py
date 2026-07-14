@@ -17,7 +17,10 @@ absorption:
 Sources (clean-room, implemented from the published equations): Francois &
 Garrison, JASA 72 (1982) via Medwin & Clay; Ainslie & McColm, JASA 103 (1998);
 Thorp (1967) via Etter (2003). Absorption is validated by the mutual agreement of
-Francois-Garrison and Ainslie-McColm (within ~10 %, as the latter's paper states).
+Francois-Garrison and Ainslie-McColm (~10 % as the latter's paper states;
+marginally exceeded at the extreme corners of the stated domain, e.g. 10.4 % at
+T = −6 °C / 1 MHz and 12.3 % at z = 7 km — a property of the published
+simplification, both transcriptions verified digit-for-digit).
 """
 
 from __future__ import annotations
@@ -101,6 +104,9 @@ def _francois_garrison(
     a2 = 21.44 * (s / c) * (1.0 + 0.025 * t)
     p2 = 1.0 - 1.37e-4 * z_m + 6.2e-9 * z_m**2
     f2 = 8.17 * 10.0 ** (8.0 - 1990.0 / (273.0 + t)) / (1.0 + 0.0018 * (s - 35.0))
+    # The two published A3 cubics do not meet exactly at the 20 C switch
+    # (step of 1e-7*f^2 dB/km, i.e. 0.1 dB/km at 1 MHz, 0.03 % of alpha there);
+    # inherent in the Francois-Garrison coefficients -- do not "fix" it.
     if t <= 20.0:
         a3 = 4.937e-4 - 2.59e-5 * t + 9.11e-7 * t**2 - 1.50e-8 * t**3
     else:

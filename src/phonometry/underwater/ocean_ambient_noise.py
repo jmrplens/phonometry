@@ -6,8 +6,9 @@ Deep-water ambient-noise **spectrum levels** (dB re 1 µPa²/Hz) from the two
 physically grounded components of the Wenz curves:
 
 * :func:`wind_noise_spectrum` -- wind / sea-surface (Knudsen) noise via Wenz's
-  "rule of fives", ``NL = 25 − (5/3)·10·(lg f − lg(U/5))`` (``f`` in kHz, ``U``
-  in knots), valid over roughly 500 Hz-5 kHz.
+  "rule of fives", ``NL = 51.02 − (5/3)·10·(lg f − lg(U/5))`` (``f`` in kHz,
+  ``U`` in knots; the historical 25 dB anchor is re 20 µPa and becomes
+  ``25 + 20·lg(20)`` re 1 µPa), valid over roughly 500 Hz-5 kHz.
 * :func:`thermal_noise_spectrum` -- the molecular thermal-noise limit (Mellen
   1952), ``<p²(f)> = 4π·k·T·ρ·f²/c`` (Pa²/Hz), dominant above ~50 kHz.
 
@@ -42,6 +43,11 @@ _BOLTZMANN = 1.380649e-23
 _P_REF = 1e-6
 #: Wind-noise reference wind speed for the rule of fives (knots).
 _WIND_REF_KNOTS = 5.0
+#: Rule-of-fives anchor at 1 kHz / 5 kn, re 1 µPa²/Hz. Wenz/Knudsen state
+#: "25 dB (5 × 5)" **re 0.0002 dyn/cm² = 20 µPa** (the historical reference
+#: pressure); converting to the ISO 18405 1 µPa reference adds
+#: ``20·lg(20) ≈ 26.02`` dB.
+_WIND_ANCHOR_DB = 25.0 + 20.0 * np.log10(20.0)
 
 
 def wind_noise_spectrum(
@@ -49,9 +55,13 @@ def wind_noise_spectrum(
 ) -> "NDArray[np.float64]":
     """Wind / sea-surface noise spectrum level (Wenz rule of fives), dB re 1 µPa²/Hz.
 
-    ``NL(f, U) = 25 − (5/3)·10·(lg f − lg(U/5))`` with ``f`` in kHz and ``U`` in
-    knots (spectrum level 25 dB at 1 kHz for 5 knots; −5 dB/octave; +5 dB per
-    doubling of wind speed). Valid over roughly 500 Hz-5 kHz.
+    ``NL(f, U) = 51.02 − (5/3)·10·(lg f − lg(U/5))`` with ``f`` in kHz and ``U``
+    in knots: −5 dB per octave and +5 dB per doubling of wind speed about the
+    canonical anchor, which Wenz/Knudsen state as "25 dB (5 × 5)" at 1 kHz for
+    5 knots **re 0.0002 dyn/cm² (20 µPa)**, i.e. ``25 + 20·lg(20) ≈ 51.02`` dB
+    once referenced to the ISO 18405 1 µPa. Valid over roughly 500 Hz-5 kHz
+    and winds of 2.5-40 knots (the stated range of the wind-doubling law);
+    outside both the formula extrapolates.
 
     :param frequency_hz: Frequency, in Hz (scalar or array).
     :param wind_speed_knots: Wind speed ``U``, in knots. A calm sea (``0``) has
@@ -64,7 +74,8 @@ def wind_noise_spectrum(
     u = require_non_negative(wind_speed_knots, "wind_speed_knots")
     if u <= 0.0:  # calm sea: no wind-driven noise (u is non-negative here)
         return np.full(f_khz.shape, -np.inf, dtype=np.float64)
-    nl = 25.0 - (5.0 / 3.0) * 10.0 * (np.log10(f_khz) - np.log10(u / _WIND_REF_KNOTS))
+    nl = _WIND_ANCHOR_DB - (5.0 / 3.0) * 10.0 * (
+        np.log10(f_khz) - np.log10(u / _WIND_REF_KNOTS))
     return np.asarray(nl, dtype=np.float64)
 
 

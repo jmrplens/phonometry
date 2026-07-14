@@ -201,3 +201,34 @@ def test_plots_smoke() -> None:
     assert nm.plot() is not None
     assert rt.plot() is not None
     assert pe.plot() is not None
+
+
+# Independent absolute TL anchors: converged image-source sum (|m| <= 4000)
+# for the ideal pressure-release waveguide D = 100 m, c = 1500 m/s, f = 20 Hz,
+# zs = 36 m, zr = 46 m, rho = 1000 kg/m3, TL = -20*lg(4*pi*|p|). Unlike the
+# analytic modal-sum test, this oracle does not share the Eq. 5.14 prefactor
+# with the implementation, so it pins the absolute calibration.
+_IMAGE_SOURCE_TL = [
+    (200.0, 39.145), (500.0, 42.297), (1000.0, 48.238),
+    (3000.0, 52.137), (5000.0, 53.165),
+]
+
+
+def test_normal_modes_match_image_source_oracle() -> None:
+    ranges = [r for r, _ in _IMAGE_SOURCE_TL]
+    res = normal_modes(20.0, [0.0, 100.0], [1500.0, 1500.0],
+                       source_depth=36.0, receiver_depth=46.0,
+                       ranges_m=ranges, n_depth_points=3000)
+    for (rng, tl_ref), tl_mod in zip(_IMAGE_SOURCE_TL, res.transmission_loss):
+        assert tl_mod == pytest.approx(tl_ref, abs=0.02), rng
+
+
+def test_parabolic_equation_long_range_absolute_anchor() -> None:
+    # The paraxial PE converges to the exact field at long range: pin the
+    # absolute calibration against the 5 km image-source anchor.
+    res = parabolic_equation(20.0, [0.0, 100.0], [1500.0, 1500.0],
+                             source_depth=36.0, max_range=5000.0,
+                             range_step=5.0, n_depth_points=1024)
+    iz = int(np.argmin(np.abs(res.depths - 46.0)))
+    tl = float(res.transmission_loss[iz, -1])
+    assert tl == pytest.approx(53.165, abs=0.05)

@@ -145,7 +145,7 @@ sediment attenuation is out of scope.
 
 The ambient-noise spectrum level (dB re 1 µPa²/Hz) is the energy sum of the two
 physically grounded Wenz components: **wind / sea-surface** noise via the "rule
-of fives" (`25 − (5/3)·10·(lg f_kHz − lg(U/5))`, 25 dB at 1 kHz for 5 knots) and
+of fives" (`51.02 − (5/3)·10·(lg f_kHz − lg(U/5))`: the historical "25 dB (5 × 5)" anchor at 1 kHz for 5 knots is re 20 µPa, i.e. `25 + 20·lg(20) ≈ 51.02` dB re 1 µPa) and
 **Mellen thermal** noise (`4π·k·T·ρ·f²/c`, dominant above ~50 kHz). A
 **shipping** spectrum may be supplied by the caller — for example one predicted
 by the traffic model in §6.
@@ -159,7 +159,7 @@ noise = ph.ocean_ambient_noise(freqs, wind_speed_knots=15.0)
 noise.plot()   # composite spectrum with wind/thermal components (needs matplotlib)
 
 # Individual components are available directly:
-ph.wind_noise_spectrum(1000.0, 5.0)      # 25 dB (the rule-of-fives anchor)
+ph.wind_noise_spectrum(1000.0, 5.0)      # 51.02 dB (rule-of-fives anchor re 1 µPa)
 ph.thermal_noise_spectrum(5e4)           # molecular thermal-noise limit
 ```
 

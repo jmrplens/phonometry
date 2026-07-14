@@ -2854,8 +2854,11 @@ def _chk_uwp_seabed() -> Outcome:
     "Wind spectrum level at 1 kHz, 5 kn (canonical anchor), dB re 1 µPa²/Hz",
 )
 def _chk_uwp_wind_noise() -> Outcome:
+    # Wenz/Knudsen "25 dB (5 x 5)" is re 0.0002 dyn/cm2 = 20 uPa; re 1 uPa
+    # (ISO 18405) the anchor is 25 + 20*lg(20) = 51.0206 dB (matches the
+    # published Wenz chart: ~50 dB at 1 kHz for 4-6 kn).
     got = float(ph.wind_noise_spectrum(1000.0, 5.0)[0])
-    return numeric(25.0, got, 1e-9, unit="dB", places=4)
+    return numeric(51.0206, got, 1e-4, unit="dB", places=4)
 
 
 @register(
@@ -2886,6 +2889,21 @@ def _chk_uwp_ship_traffic() -> Outcome:
 # ===========================================================================
 # Underwater numerical propagation (Jensen et al., modes / rays / PE)
 # ===========================================================================
+@register(
+    _UW_PROP,
+    "UNESCO sound speed (EOS-80 canonical value)",
+    "SVEL(S = 40, T68 = 40 °C, P = 1000 bar) vs Fofonoff & Millard 1983, m/s",
+)
+def _chk_uwp_unesco_canonical() -> Outcome:
+    # Published canonical check of the UNESCO algorithm; the module implements
+    # the Wong-Zhu ITS-90 refit, so T90 = T68/1.00024 and the tolerance covers
+    # the published refit residual.
+    from phonometry.underwater.sound_speed import _unesco
+
+    got = float(_unesco(40.0 / 1.00024, 40.0, 1000.0))
+    return numeric(1731.995, got, 0.02, unit="m/s", places=3)
+
+
 _UW_NUM = "Underwater numerical propagation (modes / rays / PE)"
 
 
@@ -2901,6 +2919,21 @@ def _chk_uwn_modes() -> Outcome:
     res = ph.normal_modes(f, [0.0, d], [c, c], source_depth=36.0, receiver_depth=46.0,
                           bottom="pressure-release", n_depth_points=800)
     return numeric(kr1, float(res.wavenumbers[0]), 1e-4, unit="rad/m", places=6)
+
+
+@register(
+    _UW_NUM,
+    "Normal modes vs image-source oracle",
+    "Absolute TL at 1 km in the ideal waveguide (converged image sum), dB",
+)
+def _chk_uwn_modes_absolute() -> Outcome:
+    # Independent absolute anchor (does not share the Eq. 5.14 prefactor with
+    # the implementation): converged image-source sum for D = 100 m, f = 20 Hz,
+    # zs = 36 m, zr = 46 m gives TL(1 km) = 48.238 dB.
+    res = ph.normal_modes(20.0, [0.0, 100.0], [1500.0, 1500.0], source_depth=36.0,
+                          receiver_depth=46.0, ranges_m=[1000.0],
+                          n_depth_points=3000)
+    return numeric(48.238, float(res.transmission_loss[0]), 0.02, unit="dB", places=3)
 
 
 @register(

@@ -52,6 +52,9 @@ _DEFAULT_NOTCH_Q = 2.0
 #: ``Q_design = Q sqrt(1 + sqrt(2))`` makes the effective Q equal the request
 #: (without this the applied Q is 0.644x nominal: a requested 2.0 acted as
 #: 1.29, and requests below ~1.87 silently fell outside the AES17 range).
+#: The relation is exact for the analogue prototype; the bilinear warp
+#: degrades it near Nyquist (about +5 % at f0 = fs/4.8), which stays inside
+#: the AES17 [1.2, 3] window for the default Q.
 _FILTFILT_NOTCH_Q_FACTOR = float(np.sqrt(1.0 + np.sqrt(2.0)))
 #: AES17 measurement-bandwidth chain (5.2.5 / 6.3.1): the analyzer passband is
 #: 20 Hz to the upper band-edge frequency (default 20 kHz).

@@ -541,8 +541,8 @@ def _sone_to_phon(loudness: float) -> float:
     floor below is the reference main program's behaviour and appears in
     no printed formula; it only affects N < 2.3e-4 sone (deep silence).
     Confirmed line by line against the attachment's Annex A.4 reference
-    source (``f_sone_to_phon``: ``40. * pow(Loudness + .0005, .35)`` with
-    an explicit ``if (LoudnessLevel < 3.) LoudnessLevel = 3.;`` floor,
+    source (its sone-to-phon conversion adds the same 0.0005 offset inside
+    the 0.35-power branch and applies an explicit 3-phon floor,
     else ``10. * log(Loudness) / log(2.) + 40.``).
     """
     if loudness < 1.0:
@@ -563,8 +563,8 @@ def _percentile(values: np.ndarray, percentile: int) -> float:
     Annex B.5 results (N5 within the clause 6.1 tolerance for all twelve
     technical signals, Nmax to < 0.01 %). Confirmed line by line against
     the attachment's Annex A.4 reference source (``f_calc_percentile``:
-    ``Np = (int)((1 - Percentile / 100.) * (NumSamples))``, then the mean
-    of ``pSortBuffer[Np - 1]`` and ``pSortBuffer[Np]`` on the ascending
+    the reference program truncates (1 - X/100)*n to an integer index and
+    averages that sorted sample with its predecessor on the ascending
     sort). The workbooks' own B.5 N5 header values are not reproducible
     from their published traces with any Annex A percentile reading, so
     the headers are held to the 5-6 % tolerance only.

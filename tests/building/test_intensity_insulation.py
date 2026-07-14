@@ -100,10 +100,10 @@ def test_ri_rating_none_off_band_count() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_kc_b2_matches_reference() -> None:
-    """The B.2 approximation reproduces the tabulated anchors."""
+def test_kc_reproduces_printed_table_b1() -> None:
+    """Kc reproduces all 18 printed Table B.1 rows at one decimal place."""
     kc = adaptation_term_kc(ref.ISO15186_1_KC_BANDS)
-    np.testing.assert_allclose(kc, ref.ISO15186_1_KC_B2, atol=5e-4)
+    np.testing.assert_allclose(kc, ref.ISO15186_1_KC_B1_PRINTED, atol=0.05)
 
 
 def test_kc_b1_reference_room_reduces_to_b2() -> None:
@@ -192,8 +192,30 @@ def test_combine_subareas_validation() -> None:
         combine_subareas([40.0, 42.0], [5.0])
     with pytest.raises(ValueError, match="one area per subarea"):
         combine_subareas([[40.0, 42.0], [40.0, 42.0]], [5.0])
-    with pytest.raises(ValueError, match="positive"):
+    with pytest.raises(ValueError, match="non-zero"):
         combine_subareas([[40.0], [42.0]], [5.0, 0.0])
+
+
+def test_combine_subareas_negative_direction_rule() -> None:
+    """Clause 6.4.6: a reverse-flow subarea enters Formula (11) with -Smi
+    while Sm keeps the unsigned area sum (Formula (12))."""
+    # Forward 9 m2 at 50 dB, reverse 1 m2 at 40 dB (~10 % reverse power).
+    lin, sm = combine_subareas([[50.0], [40.0]], [9.0, -1.0])
+    expected = 10.0 * np.log10((9.0 * 10**5.0 - 1.0 * 10**4.0) / 10.0)
+    assert lin[0] == pytest.approx(expected)
+    assert sm == pytest.approx(10.0)  # Sm = sum(|Smi|)
+    # The unsigned sum would overestimate LIn by 10 lg(9,1/8,9) ~ 0,1 dB of
+    # numerator energy for this case; check the exact signed/unsigned gap.
+    unsigned, _ = combine_subareas([[50.0], [40.0]], [9.0, 1.0])
+    assert unsigned[0] - lin[0] == pytest.approx(10.0 * np.log10(9.1 / 8.9))
+
+
+def test_combine_subareas_reverse_flow_dominating_raises() -> None:
+    # Reverse energy equal to (or exceeding) the forward flow leaves no level.
+    with pytest.raises(ValueError, match="not positive"):
+        combine_subareas([[50.0], [50.0]], [5.0, -5.0])
+    with pytest.raises(ValueError, match="not positive"):
+        combine_subareas([[50.0], [53.0]], [5.0, -5.0])
 
 
 # ---------------------------------------------------------------------------

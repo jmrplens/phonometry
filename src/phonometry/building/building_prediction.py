@@ -30,9 +30,13 @@ path (Formula 28a) ``Rij,w = (Ri,w + Rj,w)/2 + ΔRij,w + Kij + 10 lg(Ss/(l0·lf)
 where ``l0 = 1 m`` is the reference coupling length.
 
 **Junctions — Annex E.** The vibration reduction index ``Kij`` of rigid cross
-(E.3) and T (E.4) junctions, junctions with flexible interlayers (E.5) and
-lightweight façade junctions (E.6) are empirical functions of the mass ratio
-``M = lg(m'⊥,i / m'i)``. A minimum value ``Kij,min`` follows from Formula (29).
+(E.3) and T (E.4) junctions, junctions with flexible interlayers (E.5),
+lightweight façade junctions (E.6), junctions of lightweight double-leaf walls
+with homogeneous elements (E.7) or with other coupled double-leaf walls (E.8),
+and corners / thickness changes (E.9) are empirical functions of the mass
+ratio ``M = lg(m'⊥,i / m'i)``. A minimum value ``Kij,min`` follows from
+the Kij,min relation of Clause 4.4.2 (printed as Eq. (23)
+in the BS EN 12354-1:2000 edition).
 
 **Impact — Formula (21).** ``L'n,w = Ln,w,eq − ΔLw + K`` with the bare-floor
 equivalent level ``Ln,w,eq`` (Annex B ``164 − 35 lg(m'/m'0)``), the covering
@@ -43,6 +47,7 @@ Clause citations refer to EN 12354-1:2000 (airborne) or EN 12354-2:2000 (impact)
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from math import isfinite, log10
 from typing import TYPE_CHECKING, Any, Literal, Sequence
@@ -71,13 +76,35 @@ _M0 = 1.0
 _LN_EQ_A = 164.0
 _LN_EQ_B = 35.0
 
-#: Reference volume ``V0`` of Formula (3), in m³ (Part 2).
-_V0_IMPACT = 30.0
+#: Validity envelope of the Annex B closed form ``164 − 35 lg(m')``, in kg/m²
+#: (Part 2, Annex B: homogeneous floors of 100 kg/m² to 600 kg/m²).
+_LN_EQ_MASS_MIN = 100.0
+_LN_EQ_MASS_MAX = 600.0
+
+#: Standardization constant of Formula (3) (Part 2):
+#: ``L'nT = L'n − 10 lg(0,16·V/(A0·T0)) = L'n − 10 lg(0,032·V)`` with
+#: ``A0 = 10 m²`` and ``T0 = 0,5 s``. The standard's own Annex E.3 rounds the
+#: factor to ``10 lg(V/30)`` (1/0,032 = 31,25 ≈ 30); this module keeps the
+#: exact Formula (3) form.
+_IMPACT_STANDARDIZATION = 0.032
+
+#: Standardization constant of Formula (5b) (Part 1):
+#: ``DnT = R' + 10 lg(0,16·V/(T0·Ss)) = R' + 10 lg(0,32·V/Ss)`` with
+#: ``T0 = 0,5 s``. The Annex H.3 worked example rounds the factor to
+#: ``10 lg(V/(3·Ss))`` (1/0,32 = 3,125 ≈ 3); this module keeps the exact
+#: Formula (5b) form (both round to the same integer in H.3).
+_AIRBORNE_STANDARDIZATION = 0.32
+
+#: Characteristic frequency ``fk`` of the frequency-dependent lightweight
+#: double-leaf junctions (Annex E, Formulas (E.7)/(E.8)), in hertz.
+_FK_DOUBLE_LEAF = 500.0
 
 JunctionType = Literal[
-    "rigid_cross", "rigid_t", "flexible_t", "lightweight_facade"
+    "rigid_cross", "rigid_t", "flexible_t", "lightweight_facade",
+    "lightweight_double_homogeneous", "lightweight_double_coupled",
+    "corner", "thickness_change",
 ]
-PathKind = Literal["through", "corner"]
+PathKind = Literal["through", "corner", "double_leaf"]
 
 #: Table 1 of EN 12354-2:2000 — flanking correction ``K`` (dB). Row key is the
 #: separating-floor mass, column key the mean flanking-element mass (kg/m²).
@@ -208,7 +235,9 @@ def junction_vibration_reduction(
     ``M = lg(mass_ratio)`` where ``mass_ratio = m'⊥,i / m'i`` is the mass per
     unit area of the perpendicular element over that of the element carrying the
     path (Formula E.2). ``path`` selects the *through* branch (in-line elements,
-    ``K13``) or the *corner* branch (``K12 = K23``).
+    ``K13``), the *corner* branch (``K12 = K23``) or, for double-leaf
+    separating walls, the *double-leaf* branch (``K24``, the path between the
+    two flanking legs across the double leaf).
 
     Supported ``junction_type`` values and their formulas:
 
@@ -219,20 +248,42 @@ def junction_vibration_reduction(
     - ``"flexible_t"`` (E.5, wall junction with flexible interlayers): through
       ``5,7 + 14,1 M + 5,7 M² + 2·Δ1``; corner ``5,7 + 5,7 M² + Δ1`` with
       ``Δ1 = 10 lg(f/f1)`` for ``f > f1`` (else 0) and ``f1 = 125 Hz`` for the
-      typical interlayer ``E1/t1 ≈ 100 MN/m³``.
+      typical interlayer ``E1/t1 ≈ 100 MN/m³``; double-leaf
+      ``K24 = 3,7 + 14,1 M + 5,7 M²`` clamped to ``−4 dB ≤ K24 ≤ 0 dB``.
+      (The 2000 print states the clamp as "0 ≤ K24 ≤ −4 dB", an obvious
+      misprint of the bounds' order.)
     - ``"lightweight_facade"`` (E.6): through ``max(5 + 10 M, 5)``;
       corner ``10 + 10 |M|``.
+    - ``"lightweight_double_homogeneous"`` (E.7, lightweight double-leaf wall
+      joined to homogeneous elements): through
+      ``max(10 + 20 M − 3,3 lg(f/fk), 10)``; corner
+      ``10 + 10 |M| + 3,3 lg(f/fk)``; double-leaf
+      ``K24 = 3,0 − 14,1 M + 5,7 M²`` (given only for ``m2/m1 > 3``); with
+      ``fk = 500 Hz``.
+    - ``"lightweight_double_coupled"`` (E.8, junction of lightweight coupled
+      double-leaf walls): through ``max(10 + 20 M − 3,3 lg(f/fk), 10)``;
+      corner ``10 + 10 |M| − 3,3 lg(f/fk)``; with ``fk = 500 Hz``.
+    - ``"corner"`` (E.9 A, two elements meeting at a corner): corner
+      ``K12 = max(15 |M| − 3, −2)`` (``= K21``); the only path.
+    - ``"thickness_change"`` (E.9 B, thickness change in an element): through
+      ``K12 = 5 M² − 5`` (``= K21``); the only path.
 
     :param junction_type: Junction geometry (see above).
-    :param path: ``"through"`` (K13) or ``"corner"`` (K12 = K23).
+    :param path: ``"through"`` (K13; also the single K12 path of a thickness
+        change), ``"corner"`` (K12 = K23; also the single path of a corner) or
+        ``"double_leaf"`` (K24).
     :param mass_ratio: ``m'⊥,i / m'i`` (must be positive).
     :param frequency: Frequency at which ``Kij`` is evaluated, in Hz; only the
-        ``"flexible_t"`` junction is frequency dependent. Defaults to 500 Hz, the
-        value used by the simplified model (Clause 4.4.2).
+        ``"flexible_t"`` (through/corner) and the E.7/E.8 lightweight
+        double-leaf junctions are frequency dependent. Defaults to 500 Hz, the
+        value used by the simplified model (Clause 4.4.2), at which the
+        E.7/E.8 ``lg(f/fk)`` terms vanish.
     :param f1: Interlayer characteristic frequency for ``"flexible_t"``, in Hz.
     :return: ``Kij``, in dB.
     :raises ValueError: If ``mass_ratio`` is not positive, ``frequency``/``f1``
-        are not positive, or an unknown ``junction_type``/``path`` is given.
+        are not positive, an unknown ``junction_type``/``path`` is given, the
+        requested path does not exist for the junction, or the E.7 double-leaf
+        branch is requested outside its ``m2/m1 > 3`` validity.
     """
     ratio = _check_finite(mass_ratio, "mass_ratio")
     if ratio <= 0.0:
@@ -241,38 +292,90 @@ def junction_vibration_reduction(
         raise ValueError("'frequency' must be positive.")
     if _check_finite(f1, "f1") <= 0.0:
         raise ValueError("'f1' must be positive.")
-    if path not in ("through", "corner"):
-        raise ValueError("'path' must be 'through' or 'corner'.")
+    if path not in ("through", "corner", "double_leaf"):
+        raise ValueError("'path' must be 'through', 'corner' or 'double_leaf'.")
 
     m = log10(ratio)
     delta1 = 10.0 * log10(frequency / f1) if frequency > f1 else 0.0
+    # Frequency term of the E.7/E.8 lightweight double-leaf junctions.
+    lg_f_fk = log10(frequency / _FK_DOUBLE_LEAF)
 
     if junction_type == "rigid_cross":
         if path == "through":
             return 8.7 + 17.1 * m + 5.7 * m * m
-        return 8.7 + 5.7 * m * m
+        if path == "corner":
+            return 8.7 + 5.7 * m * m
     if junction_type == "rigid_t":
         if path == "through":
             return 5.7 + 14.1 * m + 5.7 * m * m
-        return 5.7 + 5.7 * m * m
+        if path == "corner":
+            return 5.7 + 5.7 * m * m
     if junction_type == "flexible_t":
         if path == "through":
             return 5.7 + 14.1 * m + 5.7 * m * m + 2.0 * delta1
-        return 5.7 + 5.7 * m * m + delta1
+        if path == "corner":
+            return 5.7 + 5.7 * m * m + delta1
+        # (E.5) K24, clamped to −4..0 dB (the print's "0 ≤ K24 ≤ −4 dB" read
+        # with the bounds in ascending order).
+        return min(max(3.7 + 14.1 * m + 5.7 * m * m, -4.0), 0.0)
     if junction_type == "lightweight_facade":
         if path == "through":
             return max(5.0 + 10.0 * m, 5.0)
-        return 10.0 + 10.0 * abs(m)
+        if path == "corner":
+            return 10.0 + 10.0 * abs(m)
+    if junction_type == "lightweight_double_homogeneous":
+        if path == "through":
+            return max(10.0 + 20.0 * m - 3.3 * lg_f_fk, 10.0)
+        if path == "corner":
+            return 10.0 + 10.0 * abs(m) + 3.3 * lg_f_fk
+        # (E.7) K24 is given only for m2/m1 > 3.
+        if ratio <= 3.0:
+            raise ValueError(
+                "The E.7 double-leaf branch (K24) is given only for "
+                "mass ratios m2/m1 > 3."
+            )
+        return 3.0 - 14.1 * m + 5.7 * m * m
+    if junction_type == "lightweight_double_coupled":
+        if path == "through":
+            return max(10.0 + 20.0 * m - 3.3 * lg_f_fk, 10.0)
+        if path == "corner":
+            return 10.0 + 10.0 * abs(m) - 3.3 * lg_f_fk
+    if junction_type == "corner":
+        if path == "corner":
+            return max(15.0 * abs(m) - 3.0, -2.0)
+        raise ValueError(
+            "A 'corner' junction has the single path K12 = K21; use "
+            "path='corner'."
+        )
+    if junction_type == "thickness_change":
+        if path == "through":
+            return 5.0 * m * m - 5.0
+        raise ValueError(
+            "A 'thickness_change' junction has the single in-line path "
+            "K12 = K21; use path='through'."
+        )
+    if junction_type in (
+        "rigid_cross", "rigid_t", "lightweight_facade",
+        "lightweight_double_coupled",
+    ):
+        raise ValueError(
+            f"Junction type {junction_type!r} has no 'double_leaf' (K24) "
+            "branch in EN 12354-1 Annex E."
+        )
     raise ValueError(
         "'junction_type' must be one of 'rigid_cross', 'rigid_t', "
-        "'flexible_t', 'lightweight_facade'."
+        "'flexible_t', 'lightweight_facade', "
+        "'lightweight_double_homogeneous', 'lightweight_double_coupled', "
+        "'corner', 'thickness_change'."
     )
 
 
 def junction_min_vibration_reduction(
     coupling_length: float, s_i: float, s_j: float
 ) -> float:
-    """Minimum vibration reduction index ``Kij,min`` (EN 12354-1 Formula 29).
+    """Minimum vibration reduction index ``Kij,min`` (EN 12354-1 Clause 4.4.2).
+
+    Printed as Eq. (23) in the BS EN 12354-1:2000 edition.
 
     ``Kij,min = 10 lg[ lf · l0 · (1/Si + 1/Sj) ]`` with the reference coupling
     length ``l0 = 1 m``. When the tabulated ``Kij`` is below this value, the
@@ -386,6 +489,7 @@ def flanking_element(
     delta_r_ff: float = 0.0,
     delta_r_fd: float = 0.0,
     delta_r_df: float = 0.0,
+    flanking_area: float | None = None,
 ) -> tuple[FlankingPath, FlankingPath, FlankingPath]:
     """Build the three flanking paths (Ff, Df, Fd) of one flanking element.
 
@@ -394,13 +498,16 @@ def flanking_element(
     (Clause 4.4.1). Returns the ``Ff``, ``Df`` and ``Fd`` paths that this element
     contributes across its junction with the separating element.
 
-    .. note::
-        Clause 4.4.2 requires ``Kij ≥ Kij,min``. This wrapper does not clamp
-        (each of ``KFf``/``KFd``/``KDf`` has its own ``Kij,min`` from the two
-        element areas of that junction). Compute the floor per path with
-        :func:`junction_min_vibration_reduction` and pass already-clamped
-        ``k_ff``/``k_fd``/``k_df`` here, or call :func:`flanking_path` directly
-        with its ``kij_min`` argument, to avoid silent non-compliance.
+    **Kij,min (Clause 4.4.2).** When ``flanking_area`` is given,
+    the mandatory floor ``Kij ≥ Kij,min`` is applied automatically per path:
+    ``KFf`` is clamped to ``10 lg[lf·l0·(2/SF)]`` (both junction elements are
+    the flanking element) and ``KFd``/``KDf`` to
+    ``10 lg[lf·l0·(1/SF + 1/Ss)]`` (flanking and separating element), via
+    :func:`junction_min_vibration_reduction`. Without ``flanking_area`` the
+    per-path floors cannot be formed from the available geometry, so the raw
+    ``k_ff``/``k_fd``/``k_df`` are used unchanged — compute the floors
+    yourself (or call :func:`flanking_path` with ``kij_min``) in that case to
+    stay within Clause 4.4.2.
 
     :param label: Base name; paths are labelled ``"<label>-Ff"`` etc.
     :param r_flanking: Weighted sound reduction index of the flanking element.
@@ -413,22 +520,38 @@ def flanking_element(
     :param delta_r_ff: Combined lining improvement for the Ff path, in dB.
     :param delta_r_fd: Combined lining improvement for the Fd path, in dB.
     :param delta_r_df: Combined lining improvement for the Df path, in dB.
+    :param flanking_area: Flanking-element area ``SF = Sf``, in m². Enables
+        the automatic ``Kij,min`` clamp (Clause 4.4.2); ``None`` skips it.
     :return: The ``(Ff, Df, Fd)`` :class:`FlankingPath` triple.
+    :raises ValueError: If a geometry value is not positive or an input is
+        non-finite.
     """
+    kij_min_ff: float | None = None
+    kij_min_cross: float | None = None
+    if flanking_area is not None:
+        kij_min_ff = junction_min_vibration_reduction(
+            coupling_length, flanking_area, flanking_area
+        )
+        kij_min_cross = junction_min_vibration_reduction(
+            coupling_length, flanking_area, separating_area
+        )
     ff = flanking_path(
         label=f"{label}-Ff", kind="Ff", r_source=r_flanking,
         r_receive=r_flanking, k_ij=k_ff, separating_area=separating_area,
         coupling_length=coupling_length, delta_r=delta_r_ff,
+        kij_min=kij_min_ff,
     )
     df = flanking_path(
         label=f"{label}-Df", kind="Df", r_source=r_separating,
         r_receive=r_flanking, k_ij=k_df, separating_area=separating_area,
         coupling_length=coupling_length, delta_r=delta_r_df,
+        kij_min=kij_min_cross,
     )
     fd = flanking_path(
         label=f"{label}-Fd", kind="Fd", r_source=r_flanking,
         r_receive=r_separating, k_ij=k_fd, separating_area=separating_area,
         coupling_length=coupling_length, delta_r=delta_r_fd,
+        kij_min=kij_min_cross,
     )
     return ff, df, fd
 
@@ -492,16 +615,27 @@ def equivalent_impact_level(mass_per_area: float) -> float:
     """Bare-floor equivalent weighted impact level ``Ln,w,eq`` (Part 2, Annex B).
 
     ``Ln,w,eq = 164 − 35 lg(m'/m'0)`` with ``m'0 = 1 kg/m²`` — the closed form
-    used in the Annex E worked example for a homogeneous concrete floor.
+    used in the Annex E worked example for a homogeneous concrete floor. The
+    Annex B relation is stated for homogeneous floors of 100 kg/m² to
+    600 kg/m²; outside that envelope the value is an extrapolation and a
+    :class:`UserWarning` is emitted.
 
     :param mass_per_area: Mass per unit area ``m'`` of the bare floor, in kg/m²
-        (must be positive).
+        (must be positive; the Annex B relation covers 100-600 kg/m²).
     :return: ``Ln,w,eq``, in dB.
     :raises ValueError: If ``mass_per_area`` is not positive.
     """
     m = _check_finite(mass_per_area, "mass_per_area")
     if m <= 0.0:
         raise ValueError("'mass_per_area' must be positive.")
+    if not (_LN_EQ_MASS_MIN <= m <= _LN_EQ_MASS_MAX):
+        warnings.warn(
+            f"mass_per_area = {m:g} kg/m² lies outside the 100-600 kg/m² "
+            "envelope of the EN 12354-2 Annex B relation "
+            "Ln,w,eq = 164 - 35 lg(m'); the result is an extrapolation.",
+            UserWarning,
+            stacklevel=2,
+        )
     return _LN_EQ_A - _LN_EQ_B * log10(m / _M0)
 
 
@@ -566,8 +700,11 @@ def predicted_impact_insulation(
 def standardized_impact_level(l_prime_n_w: float, volume: float) -> float:
     """Standardized apparent impact level ``L'nT,w`` (EN 12354-2 Formula 3).
 
-    ``L'nT,w = L'n,w − 10 lg(V/V0)`` with the reference receiving-room volume
-    ``V0 = 30 m³``.
+    ``L'nT,w = L'n,w − 10 lg(0,16·V/(A0·T0)) = L'n,w − 10 lg(0,032·V)`` with
+    ``A0 = 10 m²`` and ``T0 = 0,5 s`` — the exact Formula (3) form. The
+    standard's own Annex E.3 worked example rounds the factor to
+    ``10 lg(V/30)`` (1/0,032 = 31,25 ≈ 30), 0,18 dB below the exact form;
+    both round to the same integer rating in E.3.
 
     :param l_prime_n_w: Apparent weighted normalized impact level ``L'n,w``, dB.
     :param volume: Receiving-room volume ``V``, in m³ (must be positive).
@@ -578,4 +715,34 @@ def standardized_impact_level(l_prime_n_w: float, volume: float) -> float:
     v = _check_finite(volume, "volume")
     if v <= 0.0:
         raise ValueError("'volume' must be positive.")
-    return lnw - 10.0 * log10(v / _V0_IMPACT)
+    return lnw - 10.0 * log10(_IMPACT_STANDARDIZATION * v)
+
+
+def standardized_level_difference(
+    r_prime_w: float, volume: float, separating_area: float
+) -> float:
+    """Standardized level difference ``DnT,w`` from ``R'w`` (EN 12354-1 Formula 5b).
+
+    ``DnT = R' + 10 lg(0,16·V/(T0·Ss)) = R' + 10 lg(0,32·V/Ss)`` with
+    ``T0 = 0,5 s`` — the exact Formula (5b) form, applied to the weighted
+    single numbers of the simplified model (Clause 4.4). The Annex H.3 worked
+    example rounds the factor to ``10 lg(V/(3·Ss))`` (1/0,32 = 3,125 ≈ 3),
+    printing ``52,2 + 1,6 = 53,8 dB`` where the exact form gives 53,6 dB;
+    both round to the same ``DnT,w = 54 dB``.
+
+    :param r_prime_w: Apparent weighted sound reduction index ``R'w``, in dB
+        (see :func:`predicted_airborne_insulation`).
+    :param volume: Receiving-room volume ``V``, in m³ (must be positive).
+    :param separating_area: Separating-element area ``Ss``, in m² (must be
+        positive).
+    :return: ``DnT,w``, in dB.
+    :raises ValueError: If ``volume`` or ``separating_area`` is not positive.
+    """
+    rw = _check_finite(r_prime_w, "r_prime_w")
+    v = _check_finite(volume, "volume")
+    ss = _check_finite(separating_area, "separating_area")
+    if v <= 0.0:
+        raise ValueError("'volume' must be positive.")
+    if ss <= 0.0:
+        raise ValueError("'separating_area' must be positive.")
+    return rw + 10.0 * log10(_AIRBORNE_STANDARDIZATION * v / ss)

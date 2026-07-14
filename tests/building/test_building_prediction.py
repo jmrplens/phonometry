@@ -9,9 +9,11 @@ EN 12354-1 Annex H.3 (airborne, R'w = 52 dB) and EN 12354-2 Annex E.3
 from __future__ import annotations
 
 import math
+import warnings
 
 import pytest
 
+import reference_data as ref
 from phonometry import (
     combine_linings,
     equivalent_impact_level,
@@ -23,6 +25,7 @@ from phonometry import (
     predicted_airborne_insulation,
     predicted_impact_insulation,
     standardized_impact_level,
+    standardized_level_difference,
 )
 
 
@@ -100,6 +103,90 @@ def test_kij_lightweight_facade_minimum() -> None:
     ) == pytest.approx(20.0)
 
 
+def test_kij_flexible_t_double_leaf_clamped() -> None:
+    # (E.5) K24 = 3.7 + 14.1 M + 5.7 M^2, clamped to -4..0 dB (the print's
+    # "0 <= K24 <= -4 dB" read with the bounds in ascending order).
+    # M = lg(0.1) = -1: 3.7 - 14.1 + 5.7 = -4.7 -> clamps to -4.
+    assert junction_vibration_reduction(
+        "flexible_t", "double_leaf", 0.1
+    ) == pytest.approx(-4.0)
+    # M = 0: 3.7 -> clamps to 0 (upper bound).
+    assert junction_vibration_reduction(
+        "flexible_t", "double_leaf", 1.0
+    ) == pytest.approx(0.0)
+    # M = lg(0.316) = -0.5: 3.7 - 7.05 + 1.425 = -1.925 (inside the clamp).
+    m = math.log10(0.316227766)
+    assert junction_vibration_reduction(
+        "flexible_t", "double_leaf", 0.316227766
+    ) == pytest.approx(3.7 + 14.1 * m + 5.7 * m * m)
+
+
+def test_kij_lightweight_double_homogeneous_e7() -> None:
+    # (E.7): K13 = 10 + 20 M - 3.3 lg(f/fk), min 10; K12 = 10 + 10|M|
+    # + 3.3 lg(f/fk); K24 = 3.0 - 14.1 M + 5.7 M^2 for m2/m1 > 3; fk = 500 Hz.
+    m = math.log10(5.0)
+    assert junction_vibration_reduction(
+        "lightweight_double_homogeneous", "through", 5.0
+    ) == pytest.approx(10.0 + 20.0 * m)  # f = fk -> lg term vanishes
+    assert junction_vibration_reduction(
+        "lightweight_double_homogeneous", "through", 5.0, frequency=1000.0
+    ) == pytest.approx(10.0 + 20.0 * m - 3.3 * math.log10(2.0))
+    # The 10 dB floor binds for small ratios.
+    assert junction_vibration_reduction(
+        "lightweight_double_homogeneous", "through", 1.0
+    ) == pytest.approx(10.0)
+    assert junction_vibration_reduction(
+        "lightweight_double_homogeneous", "corner", 5.0, frequency=1000.0
+    ) == pytest.approx(10.0 + 10.0 * m + 3.3 * math.log10(2.0))
+    assert junction_vibration_reduction(
+        "lightweight_double_homogeneous", "double_leaf", 5.0
+    ) == pytest.approx(3.0 - 14.1 * m + 5.7 * m * m)
+    with pytest.raises(ValueError, match="m2/m1 > 3"):
+        junction_vibration_reduction(
+            "lightweight_double_homogeneous", "double_leaf", 2.0
+        )
+
+
+def test_kij_lightweight_double_coupled_e8() -> None:
+    # (E.8): K13 as E.7; K12 = 10 + 10|M| - 3.3 lg(f/fk); no K24 branch.
+    m = math.log10(4.0)
+    assert junction_vibration_reduction(
+        "lightweight_double_coupled", "through", 4.0, frequency=2000.0
+    ) == pytest.approx(10.0 + 20.0 * m - 3.3 * math.log10(4.0))
+    assert junction_vibration_reduction(
+        "lightweight_double_coupled", "corner", 4.0, frequency=2000.0
+    ) == pytest.approx(10.0 + 10.0 * m - 3.3 * math.log10(4.0))
+    with pytest.raises(ValueError, match="no 'double_leaf'"):
+        junction_vibration_reduction(
+            "lightweight_double_coupled", "double_leaf", 4.0
+        )
+
+
+def test_kij_corner_and_thickness_change_e9() -> None:
+    # (E.9) A corner: K12 = 15|M| - 3, minimum -2 dB; B change: K12 = 5 M^2 - 5.
+    assert junction_vibration_reduction("corner", "corner", 10.0) == pytest.approx(12.0)
+    assert junction_vibration_reduction("corner", "corner", 0.1) == pytest.approx(12.0)
+    # |M| small: 15*0 - 3 = -3 clamps to the -2 dB minimum.
+    assert junction_vibration_reduction("corner", "corner", 1.0) == pytest.approx(-2.0)
+    m = math.log10(3.0)
+    assert junction_vibration_reduction(
+        "thickness_change", "through", 3.0
+    ) == pytest.approx(5.0 * m * m - 5.0)
+    # M = 0 (no change) gives the -5 dB minimum of the parabola.
+    assert junction_vibration_reduction(
+        "thickness_change", "through", 1.0
+    ) == pytest.approx(-5.0)
+    with pytest.raises(ValueError, match="single path"):
+        junction_vibration_reduction("corner", "through", 10.0)
+    with pytest.raises(ValueError, match="single in-line path"):
+        junction_vibration_reduction("thickness_change", "corner", 3.0)
+
+
+def test_kij_double_leaf_path_rejected_for_rigid_junctions() -> None:
+    with pytest.raises(ValueError, match="no 'double_leaf'"):
+        junction_vibration_reduction("rigid_cross", "double_leaf", 2.0)
+
+
 def test_kij_invalid_inputs() -> None:
     with pytest.raises(ValueError, match="'mass_ratio' must be positive"):
         junction_vibration_reduction("rigid_cross", "through", 0.0)
@@ -108,7 +195,7 @@ def test_kij_invalid_inputs() -> None:
     with pytest.raises(ValueError, match="'junction_type' must be one of"):
         junction_vibration_reduction("unknown", "through", 1.0)  # type: ignore[arg-type]
     with pytest.raises(
-        ValueError, match="'path' must be 'through' or 'corner'"
+        ValueError, match="'path' must be 'through', 'corner' or 'double_leaf'"
     ):
         junction_vibration_reduction("rigid_cross", "diagonal", 1.0)  # type: ignore[arg-type]
 
@@ -164,6 +251,45 @@ def test_flanking_element_triplet() -> None:
     assert fd.r_ij_w == pytest.approx(66.0, abs=0.05)
     assert df.r_ij_w == pytest.approx(66.0, abs=0.05)
     assert (ff.kind, df.kind, fd.kind) == ("Ff", "Df", "Fd")
+
+
+def test_flanking_element_applies_kij_min_from_geometry() -> None:
+    # Clause 4.4.2 (Eq. (23) in the BS:2000 print): with the flanking area, each path is
+    # clamped to its own Kij,min. Small light elements (lf = 4 m, SF = 1.5 m2)
+    # give KFf,min = 10 lg(4*(2/1.5)) = 7.27 dB, above a raw 5 dB Kij.
+    lf, sf, ss = 4.0, 1.5, 11.5
+    ff, df, fd = flanking_element(
+        label="light", r_flanking=30.0, r_separating=57.0,
+        k_ff=5.0, k_fd=5.0, k_df=5.0, separating_area=ss,
+        coupling_length=lf, flanking_area=sf,
+    )
+    min_ff = junction_min_vibration_reduction(lf, sf, sf)
+    min_cross = junction_min_vibration_reduction(lf, sf, ss)
+    assert min_ff == pytest.approx(7.27, abs=0.01)
+    base_ff = 30.0 + 10.0 * math.log10(ss / lf)
+    base_cross = (30.0 + 57.0) / 2.0 + 10.0 * math.log10(ss / lf)
+    assert ff.r_ij_w == pytest.approx(base_ff + min_ff)
+    assert df.r_ij_w == pytest.approx(base_cross + max(min_cross, 5.0))
+    assert fd.r_ij_w == pytest.approx(base_cross + max(min_cross, 5.0))
+    # Without the flanking area the raw Kij is used unchanged (documented).
+    ff_raw, _, _ = flanking_element(
+        label="light", r_flanking=30.0, r_separating=57.0,
+        k_ff=5.0, k_fd=5.0, k_df=5.0, separating_area=ss, coupling_length=lf,
+    )
+    assert ff_raw.r_ij_w == pytest.approx(base_ff + 5.0)
+
+
+def test_flanking_element_kij_min_is_noop_for_annex_h_geometry() -> None:
+    # The Annex H.3 floor junction floors are far below the tabulated Kij
+    # (Kij,min ~ -2 dB there), so passing the areas leaves the oracle intact.
+    ff, df, fd = flanking_element(
+        label="floor", r_flanking=49.0, r_separating=57.0,
+        k_ff=12.4, k_fd=8.9, k_df=8.9, separating_area=11.5,
+        coupling_length=4.5, flanking_area=13.5,
+    )
+    assert ff.r_ij_w == pytest.approx(65.5, abs=0.05)
+    assert fd.r_ij_w == pytest.approx(66.0, abs=0.05)
+    assert df.r_ij_w == pytest.approx(66.0, abs=0.05)
 
 
 def test_flanking_path_invalid() -> None:
@@ -236,6 +362,29 @@ def test_airborne_annex_h_example() -> None:
     # 1 direct + 12 flanking paths, energy fractions sum to 1.
     assert len(result.paths) == 13
     assert sum(c.fraction for c in result.paths) == pytest.approx(1.0)
+
+
+def test_airborne_annex_h_all_twelve_path_values() -> None:
+    """Every printed H.3 path Rij,w reproduces to the table's 0,1 dB."""
+    by_label = {p.label: p.r_w for p in predicted_airborne_insulation(
+        r_direct=57.0, flanking_paths=_annex_h_paths()
+    ).paths}
+    for element, (r_ff, r_cross) in ref.EN12354_1_ANNEX_H3_PATH_RW.items():
+        assert by_label[f"{element}-Ff"] == pytest.approx(r_ff, abs=0.05)
+        assert by_label[f"{element}-Fd"] == pytest.approx(r_cross, abs=0.05)
+        assert by_label[f"{element}-Df"] == pytest.approx(r_cross, abs=0.05)
+
+
+def test_airborne_annex_h_dnt_closures() -> None:
+    """Formula (5b) closes both H.3 examples to DnT,w = 54 dB."""
+    v, ss = ref.EN12354_1_ANNEX_H3_VOLUME, ref.EN12354_1_ANNEX_H3_SEPARATING_AREA
+    first = standardized_level_difference(52.2, v, ss)
+    assert round(first) == ref.EN12354_1_ANNEX_H3_DNT_W
+    # The printed 53,8 dB uses the standard's own V/(3 S) rounding; the exact
+    # 0,32 V/Ss form sits 0,18 dB below it.
+    assert first == pytest.approx(ref.EN12354_1_ANNEX_H3_DNT_W_PRINTED, abs=0.2)
+    second = standardized_level_difference(52.7, v, ss)
+    assert round(second) == ref.EN12354_1_ANNEX_H3_DNT_W_SECOND
 
 
 def test_airborne_second_example_floating_floor() -> None:
@@ -384,11 +533,52 @@ def test_impact_prediction_from_raw_equivalent() -> None:
 
 
 def test_standardized_impact_level_annex_e3() -> None:
-    # L'nT,w = L'n,w - 10 lg(V/30) = 45 - 10 lg(50/30) = 42.8 -> 43 dB.
-    assert standardized_impact_level(45.0, 50.0) == pytest.approx(42.8, abs=0.1)
+    # Exact Formula (3): L'nT,w = L'n,w - 10 lg(0.032 V) = 45 - 10 lg(1.6)
+    # = 42.96 dB. Annex E.3's own "10 lg(V/30)" rounding gives 42.78; both
+    # round to 43 dB.
+    exact = 45.0 - 10.0 * math.log10(0.032 * 50.0)
+    assert standardized_impact_level(45.0, 50.0) == pytest.approx(exact)
+    assert standardized_impact_level(45.0, 50.0) == pytest.approx(42.96, abs=0.01)
     assert round(standardized_impact_level(45.0, 50.0)) == 43
     with pytest.raises(ValueError, match="'volume' must be positive"):
         standardized_impact_level(45.0, 0.0)
+
+
+def test_standardized_impact_level_exact_vs_e3_rounding() -> None:
+    # The exact 0.032 V factor sits 10 lg(31.25/30) = 0.177 dB above the E.3
+    # V/30 chain for every volume.
+    for v in (20.0, 50.0, 120.0):
+        exact = standardized_impact_level(60.0, v)
+        e3 = 60.0 - 10.0 * math.log10(v / 30.0)
+        assert exact - e3 == pytest.approx(10.0 * math.log10(31.25 / 30.0))
+
+
+def test_standardized_level_difference_annex_h3_closure() -> None:
+    # Formula (5b): DnT,w = R'w + 10 lg(0.32 V/Ss). H.3 prints
+    # 52.2 + 10 lg[50/(3 x 11.5)] = 53.8 (V/(3 S) rounding of 1/0.32 = 3.125);
+    # the exact form gives 53.6; both round to 54 dB.
+    dnt = standardized_level_difference(52.2, 50.0, 11.5)
+    assert dnt == pytest.approx(52.2 + 10.0 * math.log10(0.32 * 50.0 / 11.5))
+    assert dnt == pytest.approx(53.63, abs=0.01)
+    assert round(dnt) == 54
+    # Second H.3 example (floating floor): 52.7 + 1.6 = 54.3 -> 54 dB.
+    assert round(standardized_level_difference(52.7, 50.0, 11.5)) == 54
+    with pytest.raises(ValueError, match="'volume' must be positive"):
+        standardized_level_difference(52.2, 0.0, 11.5)
+    with pytest.raises(ValueError, match="'separating_area' must be positive"):
+        standardized_level_difference(52.2, 50.0, 0.0)
+
+
+def test_equivalent_impact_level_warns_outside_envelope() -> None:
+    # Annex B covers 100-600 kg/m2; outside it the closed form extrapolates.
+    with pytest.warns(UserWarning, match="100-600"):
+        equivalent_impact_level(50.0)
+    with pytest.warns(UserWarning, match="extrapolation"):
+        equivalent_impact_level(800.0)
+    # Inside the envelope no warning is emitted.
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        equivalent_impact_level(322.0)
 
 
 def test_impact_covering_improves_level() -> None:

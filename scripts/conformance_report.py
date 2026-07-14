@@ -937,11 +937,43 @@ def _chk_iso717_rw() -> Outcome:
 
 @register(
     "Room & building acoustics",
+    "ISO 717-1:2020 Annex C, Table C.2",
+    "Enlarged range 50-5000 Hz: Rw (C; Ctr; C50-5000; Ctr,50-5000)",
+)
+def _chk_iso717_1_extended() -> Outcome:
+    exp = ref.ISO717_1_ANNEX_C2_EXPECTED
+    freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+             630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+    res = ph.weighted_rating_extended(ref.ISO717_1_ANNEX_C2_R_50_5000, freqs)
+    ok = (
+        res.rating == exp["rw"] and res.c == exp["c"] and res.ctr == exp["ctr"]
+        and res.c_50_5000 == exp["c_50_5000"]
+        and res.ctr_50_5000 == exp["ctr_50_5000"]
+    )
+    return Outcome(
+        expected=(
+            f"Rw {exp['rw']} (C {exp['c']}; Ctr {exp['ctr']}; "
+            f"C50-5000 {exp['c_50_5000']}; Ctr,50-5000 {exp['ctr_50_5000']})"
+        ),
+        computed=(
+            f"Rw {res.rating:g} (C {res.c:g}; Ctr {res.ctr:g}; "
+            f"C50-5000 {res.c_50_5000:g}; Ctr,50-5000 {res.ctr_50_5000:g})"
+        ),
+        delta="exact",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
     "ISO 717-2 Annex C, Table C.1",
     "Weighted impact sound pressure level Ln,w (CI)",
 )
 def _chk_iso717_2_lnw() -> Outcome:
     # Worked example: Ln,w = 79 dB, CI = -11 dB, unfavourable sum 28,0 dB.
+    # CI = -11 is the ISO 717-2:2013 Annex C print; the 2020 reprint of this
+    # example is internally inconsistent with its own A.2.1 (it sums the
+    # 3 150 Hz band into Ln,sum and prints CI = -10).
     # Integer ratings and CI must match exactly; the unfavourable sum is a
     # one-decimal tabulated intermediate, so 1e-9 = exact up to float noise.
     exp = ref.ISO717_2_ANNEX_C1_EXPECTED
@@ -952,6 +984,48 @@ def _chk_iso717_2_lnw() -> Outcome:
         expected=f"Ln,w {exp['ln_w']} (CI {exp['ci']}; sum {exp['unfavourable_sum']:.1f} dB)",
         computed=f"Ln,w {res.rating} (CI {res.ci}; sum {res.unfavourable_sum:.1f} dB)",
         delta=f"{res.rating - exp['ln_w']:+d} dB",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-2 Annex C, Table C.1 (covered)",
+    "Weighted impact level of the floor WITH covering Ln,w (CI)",
+)
+def _chk_iso717_2_lnw_covered() -> Outcome:
+    exp = ref.ISO717_2_ANNEX_C1_COVERED_EXPECTED
+    res = ph.weighted_impact_rating(ref.ISO717_2_ANNEX_C1_COVERED_LN)
+    sum_ok = abs(res.unfavourable_sum - exp["unfavourable_sum"]) <= 1e-9
+    ok = res.rating == exp["ln_w"] and res.ci == exp["ci"] and sum_ok
+    return Outcome(
+        expected=f"Ln,w {exp['ln_w']} (CI {exp['ci']}; sum {exp['unfavourable_sum']:.1f} dB)",
+        computed=f"Ln,w {res.rating} (CI {res.ci}; sum {res.unfavourable_sum:.1f} dB)",
+        delta=f"{res.rating - exp['ln_w']:+d} dB",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 717-2 Annex C, Table C.2",
+    "Floor-covering improvement ΔLw and CI,Δ (Formulae (2)/(A.4); CI,Δ from"
+    " the normative Table 4 floor, not the 2020 print's misprinted C.2 chain)",
+)
+def _chk_iso717_2_c2_improvement() -> Outcome:
+    dlw = ph.weighted_impact_improvement(ref.ISO717_2_ANNEX_C2_DELTA_L)
+    ci_d = ph.impact_improvement_adaptation_term(ref.ISO717_2_ANNEX_C2_DELTA_L)
+    ok = (
+        dlw == ref.ISO717_2_ANNEX_C2_DELTA_LW
+        and ci_d == ref.ISO717_2_ANNEX_C2_CI_DELTA
+    )
+    return Outcome(
+        expected=(
+            f"ΔLw {ref.ISO717_2_ANNEX_C2_DELTA_LW} dB; "
+            f"CI,Δ {ref.ISO717_2_ANNEX_C2_CI_DELTA} dB (Table 4 reference floor)"
+        ),
+        computed=f"ΔLw {dlw} dB; CI,Δ {ci_d} dB",
+        delta=f"{dlw - ref.ISO717_2_ANNEX_C2_DELTA_LW:+d} dB",
         passed=ok,
     )
 
@@ -1035,10 +1109,78 @@ def _chk_lab_airborne_rw() -> Outcome:
 
 @register(
     "Room & building acoustics",
+    "ISO 10140-5:2010+A1 Annex B, Table B.1",
+    "Reference elements end-to-end: printed Rw (C; Ctr) of all three",
+)
+def _chk_iso10140_5_reference_elements() -> Outcome:
+    rows = [
+        (ref.ISO10140_5_B1_HEAVY_WALL_R, ref.ISO10140_5_B1_HEAVY_WALL_RATING),
+        (ref.ISO10140_5_B1_HEAVY_FLOOR_R, ref.ISO10140_5_B1_HEAVY_FLOOR_RATING),
+        (ref.ISO10140_5_B1_LIGHT_WALL_R, ref.ISO10140_5_B1_LIGHT_WALL_RATING),
+    ]
+    computed = []
+    ok = True
+    for r, expected in rows:
+        # S = A (10 m2) so the ISO 10140-2 chain returns R = L1 - L2 exactly.
+        res = ph.lab_airborne_insulation(
+            np.full(16, 90.0), 90.0 - np.asarray(r, dtype=float),
+            np.full(16, 0.8), area=10.0, volume=50.0,
+        )
+        assert res.rating is not None
+        got = (res.rating.rating, res.rating.c, res.rating.ctr)
+        computed.append(got)
+        ok = ok and got == expected
+    return Outcome(
+        expected="Rw(C;Ctr) = 53(-1;-5) / 52(-1;-5) / 33(-1;-2)",
+        computed=" / ".join(f"{rw}({c};{ctr})" for rw, c, ctr in computed),
+        delta="exact",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-5:2010+A1 Annex C, Table C.1",
+    "Reference floors end-to-end: printed Ln,t,r,0,w (CI) of both",
+)
+def _chk_iso10140_5_reference_floors() -> Outcome:
+    rows = [
+        (ref.ISO10140_5_C1_FLOOR_C1C2_LN, ref.ISO10140_5_C1_FLOOR_C1C2_RATING),
+        (ref.ISO10140_5_C1_FLOOR_C3_LN, ref.ISO10140_5_C1_FLOOR_C3_RATING),
+    ]
+    computed = []
+    ok = True
+    for ln, expected in rows:
+        # A = A0 (V = 31,25 m3, T = 0,5 s) so Ln equals the receiving level.
+        res = ph.lab_impact_insulation(
+            np.asarray(ln, dtype=float), np.full(16, 0.5), volume=31.25
+        )
+        assert res.rating is not None
+        got = (res.rating.rating, res.rating.ci)
+        computed.append(got)
+        ok = ok and got == expected
+    return Outcome(
+        expected="Ln,t,r,0,w(CI) = 72(0) / 75(-3)",
+        computed=" / ".join(f"{lnw}({ci})" for lnw, ci in computed),
+        delta="exact",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
     "ISO 15186-1:2000 Formula (7)",
     "Intensity RI on the ISO 717-1 reference shape -> RI,w = 30",
 )
 def _chk_intensity_ri_rw() -> Outcome:
+    # Hand-computed scalar anchor pinning the Formula (7) constants (the
+    # curve construction below inverts the same formula, so -6 dB and
+    # 10 lg(Sm/S) would cancel there): Lp1 = 80, LIn = 40, Sm = S
+    # -> RI = 80 - 6 - 40 - 0 = 34 dB exactly.
+    scalar = ph.intensity_sound_reduction(
+        [80.0], [40.0], measurement_area=10.0, area=10.0
+    )
+    scalar_ok = abs(float(scalar.r_i[0]) - 34.0) <= 1e-9
     # Choose LIn so that RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)] lands exactly on
     # the ISO 717-1 Annex C curve; the rating engine must then return Rw = 30.
     ref_ri = np.asarray(ref.ISO15186_1_REF_RI, dtype=float)
@@ -1051,32 +1193,34 @@ def _chk_intensity_ri_rw() -> Outcome:
     on_curve = bool(np.allclose(np.asarray(res.r_i), ref_ri))
     expected = ref.ISO15186_1_REF_RIW
     return Outcome(
-        expected=f"RI,w {expected} dB",
-        computed=f"RI,w {res.rating.rating} dB",
+        expected=f"RI,w {expected} dB (scalar anchor RI = 34 dB)",
+        computed=f"RI,w {res.rating.rating} dB (RI = {float(scalar.r_i[0]):g} dB)",
         delta=f"{res.rating.rating - expected:+d} dB",
-        passed=on_curve and res.rating.rating == expected,
+        passed=scalar_ok and on_curve and res.rating.rating == expected,
     )
 
 
 @register(
     "Room & building acoustics",
-    "ISO 15186-1:2000 Annex B",
-    "Adaptation term Kc: reference-room (B.1) reduces to (B.2)",
+    "ISO 15186-1:2000 Annex B, Table B.1",
+    "Adaptation term Kc: all 18 printed rows; (B.1) reduces to (B.2)",
 )
 def _chk_intensity_kc_annexb() -> Outcome:
-    # Formula (B.1) with Sb2 = 117 m², V2 = 81 m³, c = 340 m/s must reproduce
-    # the room-independent approximation Kc = 10 lg(1 + 61,4/f) of (B.2).
+    # The printed Table B.1 (18 one-third-octave rows, one decimal) is the
+    # independent oracle; additionally Formula (B.1) with Sb2 = 117 m²,
+    # V2 = 81 m³, c = 340 m/s must reduce to (B.2) Kc = 10 lg(1 + 61,4/f).
     b2 = ph.adaptation_term_kc(ref.ISO15186_1_KC_BANDS)
     b1 = ph.adaptation_term_kc(
         ref.ISO15186_1_KC_BANDS, boundary_area=117.0, volume=81.0
     )
-    tab = np.asarray(ref.ISO15186_1_KC_B2, dtype=float)
+    printed = np.asarray(ref.ISO15186_1_KC_B1_PRINTED, dtype=float)
+    worst = float(np.max(np.abs(b2 - printed)))
     delta = float(np.max(np.abs(b1 - b2)))
-    passed = bool(np.allclose(b2, tab, atol=5e-4)) and delta <= 1e-3
+    passed = worst <= 0.05 and delta <= 1e-3
     return Outcome(
-        expected="max abs(B.1 - B.2) <= 0,001 dB",
-        computed=f"{delta:.2e} dB (Kc@1k = {b2[3]:.3f} dB)",
-        delta=f"{delta:.2e} dB",
+        expected="max abs(Kc - Table B.1) <= 0,05 dB (1 dp print)",
+        computed=f"{worst:.3f} dB (B.1 vs B.2: {delta:.2e} dB)",
+        delta=f"{worst:.3f} dB",
         passed=passed,
     )
 
@@ -1279,7 +1423,7 @@ _MOB_F0 = math.sqrt(_MOB_K / _MOB_M) / (2.0 * math.pi)
 @register(
     "Room & building acoustics",
     "ISO 7626-1:2011 Annex A",
-    "SDOF driving-point mobility peak |Y(f0)| = 1/c  (c=5 N·s/m)",
+    "SDOF driving-point mobility peak mag(Y(f0)) = 1/c  (c=5 N·s/m)",
 )
 def _chk_iso7626_mobility_peak() -> Outcome:
     y0 = complex(ph.sdof_mobility(_MOB_F0, _MOB_M, _MOB_K, _MOB_C))
@@ -1401,11 +1545,46 @@ def _chk_en15657_loss_factor() -> Outcome:
     return numeric(2.2 / (1000.0 * 0.3), eta, 1e-9)
 
 
+@register(
+    "Room & building acoustics",
+    "EN 15657:2018 Formulae (15)/(17) + EN 12354-5 Annex I.3",
+    "Source conversion chain reproduces Table I.8 (wall, installed)",
+)
+def _chk_en15657_conversion_chain() -> Outcome:
+    # Measured plate power (Y_plate = 5,34e-6) -> blocked force (15) ->
+    # characteristic reception-plate level (17, Y_R,inf,low = 5e-6) ->
+    # Annex I mobility correction to the wall (Y_wall = 24,1e-6). The printed
+    # Table I.8 row is the oracle (one-decimal intermediates, +/-0,15 dB).
+    lwsn = ph.characteristic_reception_plate_power(
+        ph.equivalent_blocked_force_level(
+            ref.EN12354_5_I8_WALL_LWS, ref.EN12354_5_I8_PLATE_MOBILITY
+        )
+    )
+    installed = ph.installed_power_from_reception_plate(
+        lwsn, ref.EN12354_5_I8_Y_WALL
+    )
+    worst = float(np.max(np.abs(
+        np.asarray(installed) - np.asarray(ref.EN12354_5_I8_WALL_INSTALLED)
+    )))
+    return numeric(0.0, worst, ref.EN12354_5_ANNEX_I_TOL, unit="dB", places=3,
+                   expected_label="max abs(L_Ws,inst - Table I.8) <= 0,15 dB")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 9611:1996 eq. (9)",
+    "Mean free velocity level (energy mean, v0 = 5e-8 m/s)",
+)
+def _chk_iso9611_mean_velocity() -> Outcome:
+    computed = float(ph.mean_free_velocity_level(ref.ISO9611_MEAN_LEVELS))
+    return numeric(ref.ISO9611_MEAN_EXPECTED, computed, 1e-9, unit="dB", places=4)
+
+
 # --- Installed structure-borne sound from equipment (EN 12354-5) ---
 @register(
     "Room & building acoustics",
     "EN 12354-5:2009 Formula (19b/19c)",
-    "Coupling term → force-source limit 10 lg(|Ys|/Re{Yi}) as |Ys|≫|Yi|",
+    "Coupling term → force-source limit 10 lg(mag(Ys)/Re{Yi}) as mag(Ys) ≫ mag(Yi)",
 )
 def _chk_en12354_5_coupling_limit() -> Outcome:
     ys, yi = 1e-3 + 0j, 1e-7 + 0j
@@ -1416,23 +1595,75 @@ def _chk_en12354_5_coupling_limit() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "EN 12354-5:2009 Formula (18b)",
-    "Installed power L_Ws,inst = L_Ws,c − D_C  (80 − 10,828 dB)",
+    "EN 12354-5:2009 Annex I.3, Table I.9",
+    "Flushing cistern: four paths + Formula (17) total -> 29 dB(A)",
 )
-def _chk_en12354_5_installed_power() -> Outcome:
-    lw = float(ph.installed_structure_borne_power_level(80.0, 10.828))
-    return numeric(69.172, lw, 1e-6, unit="dB", places=3)
+def _chk_en12354_5_annex_i9() -> Outcome:
+    # The standard's own end-to-end worked example (replaces the former
+    # formula-restatement checks of Formulae (18a)/(18b), which could not
+    # catch a mistranscribed constant): both power components through
+    # D_C (Table I.9), Formula (18a) per path and the energetic total.
+    tol = ref.EN12354_5_ANNEX_I_TOL
+    inst_wall = ph.installed_structure_borne_power_level(
+        ref.EN12354_5_I8_WALL_LWSC, ref.EN12354_5_I9_DC_WALL
+    )
+    inst_floor = ph.installed_structure_borne_power_level(
+        ref.EN12354_5_I8_FLOOR_LWSC, ref.EN12354_5_I9_DC_FLOOR
+    )
+    paths = [
+        (inst_wall, ref.EN12354_5_I9_DSA_WALL, ref.EN12354_5_I9_R_WALL_FLOOR,
+         ref.EN12354_5_I9_S_WALL, ref.EN12354_5_I9_LNS_WALL_FLOOR),
+        (inst_wall, ref.EN12354_5_I9_DSA_WALL, ref.EN12354_5_I9_R_WALL_WALL,
+         ref.EN12354_5_I9_S_WALL, ref.EN12354_5_I9_LNS_WALL_WALL),
+        (inst_floor, ref.EN12354_5_I9_DSA_FLOOR, ref.EN12354_5_I9_R_FLOOR_FLOOR,
+         ref.EN12354_5_I9_S_FLOOR, ref.EN12354_5_I9_LNS_FLOOR_FLOOR),
+        (inst_floor, ref.EN12354_5_I9_DSA_FLOOR, ref.EN12354_5_I9_R_FLOOR_WALL,
+         ref.EN12354_5_I9_S_FLOOR, ref.EN12354_5_I9_LNS_FLOOR_WALL),
+    ]
+    worst = 0.0
+    rows = []
+    for inst, dsa, rij, s_i, expected in paths:
+        lns = ph.structure_borne_pressure_level_path(inst, dsa, rij, s_i)
+        worst = max(worst, float(np.max(np.abs(lns - np.asarray(expected)))))
+        rows.append(np.asarray(lns))
+    total = ph.total_structure_borne_pressure_level(np.vstack(rows))
+    worst = max(worst, float(np.max(np.abs(
+        total - np.asarray(ref.EN12354_5_I9_LNS_TOTAL)
+    ))))
+    a_weights = np.array([-26.2, -16.1, -8.6, -3.2, 0.0, 1.2])
+    lns_a = float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (total + a_weights)))))
+    ok = worst <= tol and round(lns_a) == ref.EN12354_5_I9_LNS_TOTAL_A
+    return Outcome(
+        expected=f"max path/total dev <= {tol} dB; total "
+        f"{ref.EN12354_5_I9_LNS_TOTAL_A} dB(A)",
+        computed=f"{worst:.3f} dB; {lns_a:.1f} dB(A)",
+        delta=f"{worst:.3f} dB",
+        passed=ok,
+    )
 
 
 @register(
     "Room & building acoustics",
-    "EN 12354-5:2009 Formula (18a)",
-    "Path SPL area/absorption terms −10 lg(S/S0) − 10 lg(A0/4), S0=A0=10 m²",
+    "EN 12354-5:2009 Annex I.2, Table I.6a",
+    "Whirlpool floor component: mobility correction + path 11",
 )
-def _chk_en12354_5_path_terms() -> Outcome:
-    # With S = S0 the area term is 0, leaving −10 lg(10/4) = −3,979 dB.
-    lp = float(ph.structure_borne_pressure_level_path(0.0, 0.0, 0.0, 10.0))
-    return numeric(-10.0 * math.log10(10.0 / 4.0), lp, 1e-9, unit="dB", places=3)
+def _chk_en12354_5_annex_i6a() -> Outcome:
+    tol = ref.EN12354_5_ANNEX_I_TOL
+    inst = ph.installed_power_from_reception_plate(
+        ref.EN12354_5_I6A_LWSN_FLOOR, ref.EN12354_5_I6A_Y_FLOOR
+    )
+    dev_inst = float(np.max(np.abs(
+        np.asarray(inst) - np.asarray(ref.EN12354_5_I6A_LWSN_INST_FLOOR)
+    )))
+    lns = ph.structure_borne_pressure_level_path(
+        inst, ref.EN12354_5_I6A_DSA_FLOOR, ref.EN12354_5_I6A_R11, 10.0
+    )
+    dev_path = float(np.max(np.abs(
+        np.asarray(lns) - np.asarray(ref.EN12354_5_I6A_LNS_11)
+    )))
+    worst = max(dev_inst, dev_path)
+    return numeric(0.0, worst, tol, unit="dB", places=3,
+                   expected_label="max abs(dev vs Table I.6a) <= 0,15 dB")
 
 
 # ===========================================================================
@@ -1473,6 +1704,49 @@ def _chk_en12354_1_airborne() -> Outcome:
 
 @register(
     "Building prediction & uncertainty",
+    "EN 12354-1:2000 Annex H.3 (paths)",
+    "All 12 printed flanking-path values Rij,w",
+)
+def _chk_en12354_1_h3_paths() -> Outcome:
+    res = ph.predicted_airborne_insulation(
+        r_direct=ref.EN12354_1_ANNEX_H3_R_DIRECT, flanking_paths=_annex_h3_paths()
+    )
+    by_label = {p.label: p.r_w for p in res.paths}
+    worst = 0.0
+    for element, (r_ff, r_cross) in ref.EN12354_1_ANNEX_H3_PATH_RW.items():
+        for suffix, expected in (("Ff", r_ff), ("Fd", r_cross), ("Df", r_cross)):
+            worst = max(worst, abs(by_label[f"{element}-{suffix}"] - expected))
+    return numeric(0.0, worst, 0.05, unit="dB", places=3,
+                   expected_label="max abs(Rij,w - printed) <= 0,05 dB")
+
+
+@register(
+    "Building prediction & uncertainty",
+    "EN 12354-1:2000 Formula (5b) / Annex H.3",
+    "DnT,w closure from R'w (both H.3 examples -> 54 dB)",
+)
+def _chk_en12354_1_dnt_closure() -> Outcome:
+    v = ref.EN12354_1_ANNEX_H3_VOLUME
+    ss = ref.EN12354_1_ANNEX_H3_SEPARATING_AREA
+    first = float(ph.standardized_level_difference(52.2, v, ss))
+    second = float(ph.standardized_level_difference(52.7, v, ss))
+    ok = (
+        round(first) == ref.EN12354_1_ANNEX_H3_DNT_W
+        and round(second) == ref.EN12354_1_ANNEX_H3_DNT_W_SECOND
+        # The printed 53,8 dB uses the standard's own V/(3 S) rounding of the
+        # exact 0,32 V/Ss factor (0,18 dB apart).
+        and abs(first - ref.EN12354_1_ANNEX_H3_DNT_W_PRINTED) <= 0.2
+    )
+    return Outcome(
+        expected=f"DnT,w {ref.EN12354_1_ANNEX_H3_DNT_W} dB (printed 53,8/54,3)",
+        computed=f"DnT,w {first:.2f} / {second:.2f} dB",
+        delta=f"{first - ref.EN12354_1_ANNEX_H3_DNT_W_PRINTED:+.2f} dB vs printed",
+        passed=ok,
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
     "EN 12354-2:2000 Annex E.3",
     "Impact prediction L'n,w = Ln,w,eq - dLw + K",
 )
@@ -1491,6 +1765,24 @@ def _chk_en12354_2_impact() -> Outcome:
         ref.EN12354_2_ANNEX_E3_LPRIME_N_W, computed, 1e-9, unit="dB", places=6
     )
     return Outcome(out.expected, out.computed, out.delta, out.passed and k_ok)
+
+
+@register(
+    "Building prediction & uncertainty",
+    "EN 12354-2:2000 Formula (3) / Annex E.3",
+    "Standardized impact level L'nT,w (exact 0,032 V form -> 43 dB)",
+)
+def _chk_en12354_2_standardized() -> Outcome:
+    # Exact Formula (3): 45 - 10 lg(0,032 x 50) = 42,96 dB. The E.3 chain's own
+    # "10 lg(V/30)" rounding gives 42,8 dB; both round to 43 dB.
+    lnt = float(ph.standardized_impact_level(45.0, 50.0))
+    ok = round(lnt) == 43 and abs(lnt - 42.96) <= 0.01
+    return Outcome(
+        expected="L'nT,w 43 dB (exact 42,96; E.3 prints 42,8)",
+        computed=f"L'nT,w {lnt:.2f} dB",
+        delta=f"{lnt - 42.96:+.3f} dB",
+        passed=ok,
+    )
 
 
 def _en12354_3_annex_f() -> "ph.FacadePredictionResult":
@@ -1577,18 +1869,32 @@ def _chk_en12354_4_radiated() -> Outcome:
 @register(
     "Building prediction & uncertainty",
     "EN 12354-4:2000 Annex E / Table G.9",
-    "Exterior level from a finite radiating side (side 1, d = 5 m)",
+    "Exterior level of all four Table G.9 reception cells",
 )
 def _chk_en12354_4_propagation() -> Outcome:
-    w, h, d, a_tot = ref.EN12354_4_ANNEX_G_ATTENUATION[0]
-    att = ph.outdoor_attenuation(w, h, d)
-    lp = ph.outdoor_level(ref.EN12354_4_ANNEX_G_SIDE1_LWA, att)
-    att_ok = abs(att - a_tot) <= 0.05
-    return numeric(
-        ref.EN12354_4_ANNEX_G_LP_SIDE1_D5, lp, 0.05, unit="dB", places=3
-    ) if att_ok else Outcome(
-        expected=f"A'tot {a_tot} dB", computed=f"A'tot {att:.2f} dB",
-        delta=f"{att - a_tot:+.2f} dB", passed=False,
+    # (width, height, distance, printed A'tot, side LWA, printed Lp).
+    cells = [
+        (*ref.EN12354_4_ANNEX_G_ATTENUATION[0],
+         ref.EN12354_4_ANNEX_G_SIDE1_LWA, ref.EN12354_4_ANNEX_G_LP_SIDE1_D5),
+        (*ref.EN12354_4_ANNEX_G_ATTENUATION[1],
+         ref.EN12354_4_ANNEX_G_SIDE1_LWA, ref.EN12354_4_ANNEX_G_LP_SIDE1_D25),
+        (*ref.EN12354_4_ANNEX_G_ATTENUATION[2],
+         ref.EN12354_4_ANNEX_G_SIDE4_LWA, ref.EN12354_4_ANNEX_G_LP_SIDE4_D5),
+        (*ref.EN12354_4_ANNEX_G_ATTENUATION[3],
+         ref.EN12354_4_ANNEX_G_SIDE4_LWA, ref.EN12354_4_ANNEX_G_LP_SIDE4_D25),
+    ]
+    worst = 0.0
+    computed_lp = []
+    for w, h, d, a_tot, lwa, lp_expected in cells:
+        att = float(ph.outdoor_attenuation(w, h, d))
+        lp = float(ph.outdoor_level(lwa, att))
+        worst = max(worst, abs(att - a_tot), abs(lp - lp_expected))
+        computed_lp.append(lp)
+    return Outcome(
+        expected="Lp 36,6 / 28,5 / 44,6 / 37,3 dB (+/-0,05)",
+        computed="Lp " + " / ".join(f"{v:.1f}" for v in computed_lp) + " dB",
+        delta=f"{worst:.3f} dB",
+        passed=worst <= 0.05,
     )
 
 
@@ -1603,6 +1909,79 @@ def _chk_iso12999_table2_band() -> Outcome:
     computed = float(res.uncertainties[idx])
     return numeric(
         ref.ISO12999_1_TABLE2_AIRBORNE_A_1000HZ, computed, 1e-9, unit="dB", places=3
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "ISO 12999-1:2020 Annex B, Table B.2",
+    "One-decimal single numbers Rw / Rw+C50-5000 / Rw+Ctr,50-5000",
+)
+def _chk_iso12999_annex_b_values() -> Outcome:
+    res = ph.weighted_rating_extended(
+        ref.ISO12999_1_ANNEX_B_RI, ref.ISO12999_1_ANNEX_B_FREQ,
+        one_decimal=True,
+    )
+    assert res.c_50_5000 is not None and res.ctr_50_5000 is not None
+    rw = float(res.rating)
+    rw_c = rw + float(res.c_50_5000)
+    rw_ctr = rw + float(res.ctr_50_5000)
+    ok = (
+        abs(rw - ref.ISO12999_1_ANNEX_B_RW) <= 1e-9
+        and abs(rw_c - ref.ISO12999_1_ANNEX_B_RW_C50_5000) <= 1e-9
+        and abs(rw_ctr - ref.ISO12999_1_ANNEX_B_RW_CTR50_5000) <= 1e-9
+    )
+    return Outcome(
+        expected=(
+            f"{ref.ISO12999_1_ANNEX_B_RW} / {ref.ISO12999_1_ANNEX_B_RW_C50_5000}"
+            f" / {ref.ISO12999_1_ANNEX_B_RW_CTR50_5000} dB"
+        ),
+        computed=f"{rw:.1f} / {rw_c:.1f} / {rw_ctr:.1f} dB",
+        delta=f"{rw - ref.ISO12999_1_ANNEX_B_RW:+.2f} dB",
+        passed=ok,
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "ISO 12999-1:2020 Annex B, Formulae (B.2)/(B.6)",
+    "Single-number uncertainties (uncorrelated 0,6/0,8; correlated u(Rw) 1,9)",
+)
+def _chk_iso12999_annex_b_uncertainties() -> Outcome:
+    from phonometry.building.insulation import (  # noqa: PLC0415
+        _SPECTRUM1_50_5000,
+        _SPECTRUM2_50_5000,
+    )
+
+    ri = np.asarray(ref.ISO12999_1_ANNEX_B_RI, dtype=float)
+    ui = np.asarray(ref.ISO12999_1_ANNEX_B_UI, dtype=float)
+    u_c = float(ph.single_number_uncertainty_uncorrelated(
+        ui, np.asarray(_SPECTRUM1_50_5000, dtype=float) - ri
+    ))
+    u_ctr = float(ph.single_number_uncertainty_uncorrelated(
+        ui, np.asarray(_SPECTRUM2_50_5000, dtype=float) - ri
+    ))
+    up = ph.weighted_rating_extended(
+        ri + ui, ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
+    ).rating
+    down = ph.weighted_rating_extended(
+        ri - ui, ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
+    ).rating
+    u_rw = (float(up) - float(down)) / 2.0
+    ok = (
+        round(u_c, 1) == ref.ISO12999_1_ANNEX_B_U_UNCORR_C
+        and round(u_ctr, 1) == ref.ISO12999_1_ANNEX_B_U_UNCORR_CTR
+        and abs(u_rw - ref.ISO12999_1_ANNEX_B_U_CORR_RW) <= 1e-9
+    )
+    return Outcome(
+        expected=(
+            f"u_uncorr {ref.ISO12999_1_ANNEX_B_U_UNCORR_C} / "
+            f"{ref.ISO12999_1_ANNEX_B_U_UNCORR_CTR} dB; "
+            f"u_corr(Rw) {ref.ISO12999_1_ANNEX_B_U_CORR_RW} dB"
+        ),
+        computed=f"{u_c:.2f} / {u_ctr:.2f} dB; {u_rw:.2f} dB",
+        delta=f"{u_rw - ref.ISO12999_1_ANNEX_B_U_CORR_RW:+.2f} dB",
+        passed=ok,
     )
 
 

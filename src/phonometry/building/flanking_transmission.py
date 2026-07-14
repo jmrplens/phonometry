@@ -51,8 +51,12 @@ a parameter so a facility can pin its own value.
 
 **Frequency range (Part 1, Clause 7.5).** The mandatory one-third-octave range
 is 100 Hz to 5000 Hz (18 bands). The single-number ``Kij`` is the arithmetic
-mean over 200 Hz to 1250 Hz (Annex A); the automatic mean is formed only when
-that band set is present in the supplied frequencies.
+mean over 200 Hz to 1250 Hz for one-third-octave bands, or over 125 Hz to
+1000 Hz for octave bands (Annex A); the automatic mean is formed only when
+the corresponding band set is present in the supplied frequencies. For heavy
+junctions (Part 4, Clause 9) bands whose modal overlap factor is below 0,25
+are bracketed and excluded from the single-number mean when the per-band
+``modal_overlap`` is supplied.
 """
 
 from __future__ import annotations
@@ -97,10 +101,20 @@ _DEFAULT_SPEED_OF_SOUND = 343.0
 #: Constant ``1,8`` in the thin-plate critical frequency (Part 1, Formula (20)).
 _CRITICAL_FREQUENCY_CONSTANT = 1.8
 
-#: One-third-octave band range of the single-number ``Kij`` (Annex A): the
-#: arithmetic mean is taken over 200 Hz to 1250 Hz inclusive.
+#: Band range of the single-number ``Kij`` (ISO 10848-1:2006 Annex A): the
+#: arithmetic mean is taken over 200 Hz to 1250 Hz inclusive for
+#: one-third-octave bands, or 125 Hz to 1000 Hz inclusive for octave bands.
 _SINGLE_NUMBER_LOW = 200.0
 _SINGLE_NUMBER_HIGH = 1250.0
+_SINGLE_NUMBER_LOW_OCTAVE = 125.0
+_SINGLE_NUMBER_HIGH_OCTAVE = 1000.0
+
+#: Modal-overlap threshold below which a band is bracketed and excluded from
+#: the single-number rating (ISO 10848-4:2010, Clause 9): ``M < 0,25``.
+_MODAL_OVERLAP_EXCLUSION = 0.25
+
+#: Nominal octave-band centre frequencies used to validate octave grouping.
+_OCTAVE_CENTRES = (31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
 
 
 def _as_1d(values: float | Sequence[float] | np.ndarray, name: str) -> np.ndarray:
@@ -253,13 +267,20 @@ class VibrationReductionResult:
     :ivar k_ij: Vibration reduction index ``Kij`` per band, in dB (Formula (13)
         or the simplified Formula (14)).
     :ivar single_number: Arithmetic-mean single-number ``K̄ij`` over
-        200 Hz to 1250 Hz (Annex A), in dB, or ``None`` when the frequencies do
-        not cover that band set.
+        200 Hz to 1250 Hz (one-third octave) or 125 Hz to 1000 Hz (octave)
+        per Annex A, in dB, or ``None`` when the frequencies do not cover the
+        corresponding band set. Bands bracketed for poor modal overlap
+        (ISO 10848-4:2010 Clause 9) are excluded from the mean.
+    :ivar bracketed: Per-band boolean flags, ``True`` where the modal overlap
+        factor is below 0,25 so the band is bracketed and excluded from the
+        single-number rating (ISO 10848-4:2010 Clause 9), or ``None`` when no
+        modal overlap was supplied.
     """
 
     frequencies: np.ndarray | None
     k_ij: np.ndarray
     single_number: float | None
+    bracketed: np.ndarray | None = None
 
     def octave_bands(self) -> "VibrationReductionResult":
         """Combine one-third-octave ``Kij`` into octave bands.
@@ -267,10 +288,14 @@ class VibrationReductionResult:
         ``Kij,oct = −10 lg[ (1/3) Σ 10^(−Kij/10) ]`` over each group of three
         one-third-octave bands (Part 2/3/4). Requires a band count that is a
         multiple of three and, for the frequency labels, that frequencies were
-        supplied.
+        supplied; supplied frequencies must group into whole octave triples
+        (lower/centre/upper one-third around an octave centre). The octave
+        single-number ``K̄ij`` is averaged over 125 Hz to 1000 Hz (Annex A).
+        An octave band is bracketed when any of its one-third-octave bands is.
 
         :return: A new :class:`VibrationReductionResult` on octave centres.
-        :raises ValueError: If the band count is not a multiple of three.
+        :raises ValueError: If the band count is not a multiple of three, or
+            the frequencies do not open on complete octave triples.
         """
         if self.k_ij.size % 3 != 0:
             raise ValueError(
@@ -280,11 +305,19 @@ class VibrationReductionResult:
         oct_k = -10.0 * np.log10(np.mean(10.0 ** (-groups / 10.0), axis=1))
         oct_f: np.ndarray | None = None
         if self.frequencies is not None:
-            oct_f = self.frequencies.reshape(-1, 3)[:, 1]
+            freq_groups = self.frequencies.reshape(-1, 3)
+            _validate_octave_triples(freq_groups)
+            oct_f = freq_groups[:, 1]
+        oct_bracketed: np.ndarray | None = None
+        if self.bracketed is not None:
+            oct_bracketed = np.any(self.bracketed.reshape(-1, 3), axis=1)
         return VibrationReductionResult(
             frequencies=oct_f,
             k_ij=oct_k,
-            single_number=_single_number_kij(oct_f, oct_k),
+            single_number=_single_number_kij(
+                oct_f, oct_k, bracketed=oct_bracketed, band_type="octave"
+            ),
+            bracketed=oct_bracketed,
         )
 
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
@@ -298,13 +331,65 @@ class VibrationReductionResult:
         return plot_vibration_reduction(self, ax=ax, **kwargs)
 
 
+def _validate_octave_triples(freq_groups: np.ndarray) -> None:
+    """Require each frequency triple to be the thirds of one octave band.
+
+    Each group of three one-third-octave centres must open on an octave
+    triple: the middle frequency is a nominal octave centre and the outer
+    two sit one third below/above it (ratio ``2^(1/3)``, 6 % tolerance).
+    """
+    centres = np.asarray(_OCTAVE_CENTRES)
+    for low, mid, high in freq_groups:
+        nearest = centres[np.argmin(np.abs(centres - mid))]
+        third = 2.0 ** (1.0 / 3.0)
+        aligned = (
+            abs(mid - nearest) <= 0.06 * nearest
+            and abs(low - mid / third) <= 0.06 * (mid / third)
+            and abs(high - mid * third) <= 0.06 * (mid * third)
+        )
+        if not aligned:
+            raise ValueError(
+                "octave_bands() needs whole octave triples: the group "
+                f"({low:g}, {mid:g}, {high:g}) Hz is not the three "
+                "one-third-octave bands of one octave. Start the input at "
+                "the lower third of an octave band."
+            )
+
+
+def _detect_band_type(frequencies: "np.ndarray | None") -> str:
+    """``"octave"`` when consecutive centres step by ~2, else third-octave."""
+    if frequencies is None or frequencies.size < 2:
+        return "third-octave"
+    ratio = float(np.median(frequencies[1:] / frequencies[:-1]))
+    return "octave" if ratio > 1.6 else "third-octave"
+
+
 def _single_number_kij(
-    frequencies: np.ndarray | None, k_ij: np.ndarray
+    frequencies: np.ndarray | None,
+    k_ij: np.ndarray,
+    *,
+    bracketed: np.ndarray | None = None,
+    band_type: str = "third-octave",
 ) -> float | None:
-    """Arithmetic-mean ``K̄ij`` over 200-1250 Hz (Annex A), or ``None``."""
+    """Arithmetic-mean ``K̄ij`` (Annex A), or ``None``.
+
+    Averages over 200-1250 Hz (one-third octave) or 125-1000 Hz (octave).
+    Bands flagged as ``bracketed`` (modal overlap below 0,25, ISO 10848-4
+    Clause 9) are excluded; the mean is ``None`` if no band remains. The
+    average runs over the bands *present* inside the range: a spectrum that
+    does not cover the full Annex A range yields the mean of its available
+    in-range bands (the standard's measurement procedure covers the full
+    range, so partial coverage indicates incomplete input data).
+    """
     if frequencies is None:
         return None
-    mask = (frequencies >= _SINGLE_NUMBER_LOW) & (frequencies <= _SINGLE_NUMBER_HIGH)
+    if band_type == "octave":
+        low, high = _SINGLE_NUMBER_LOW_OCTAVE, _SINGLE_NUMBER_HIGH_OCTAVE
+    else:
+        low, high = _SINGLE_NUMBER_LOW, _SINGLE_NUMBER_HIGH
+    mask = (frequencies >= low) & (frequencies <= high)
+    if bracketed is not None:
+        mask &= ~bracketed
     if not np.any(mask):
         return None
     return float(np.mean(k_ij[mask]))
@@ -320,6 +405,7 @@ def vibration_reduction_index(
     structural_reverberation_time_i: float | Sequence[float] | np.ndarray | None = None,
     structural_reverberation_time_j: float | Sequence[float] | np.ndarray | None = None,
     speed_of_sound: float = _DEFAULT_SPEED_OF_SOUND,
+    modal_overlap: Sequence[float] | np.ndarray | None = None,
 ) -> VibrationReductionResult:
     """Vibration reduction index ``Kij`` (Formula (13), or simplified (14)).
 
@@ -344,6 +430,11 @@ def vibration_reduction_index(
     :param structural_reverberation_time_j: ``Ts,j`` per band (or a single
         value), in s.
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s.
+    :param modal_overlap: Modal overlap factor ``M`` per band for the heavier
+        (least-overlapped) of the two elements (see
+        :func:`modal_overlap_factor`). When supplied, bands with ``M < 0,25``
+        are flagged as bracketed and excluded from the single-number ``K̄ij``
+        (ISO 10848-4:2010, Clause 9).
     :return: A :class:`VibrationReductionResult`.
     :raises ValueError: On incompatible band counts, non-positive geometry, or
         if only one of the two structural reverberation times is supplied.
@@ -381,11 +472,19 @@ def vibration_reduction_index(
         a_i = np.full(dv.size, s_i / _REFERENCE_LENGTH, dtype=np.float64)
         a_j = np.full(dv.size, s_j / _REFERENCE_LENGTH, dtype=np.float64)
 
+    bracketed: np.ndarray | None = None
+    if modal_overlap is not None:
+        m = _positive_array(modal_overlap, "modal_overlap")
+        m = _broadcast(m, dv.size, "modal_overlap")
+        bracketed = np.asarray(m < _MODAL_OVERLAP_EXCLUSION, dtype=np.bool_)
+
     k_ij = dv + 10.0 * np.log10(lij / np.sqrt(a_i * a_j))
     return VibrationReductionResult(
         frequencies=freq,
         k_ij=k_ij,
-        single_number=_single_number_kij(freq, k_ij),
+        single_number=_single_number_kij(
+            freq, k_ij, bracketed=bracketed, band_type=_detect_band_type(freq)),
+        bracketed=bracketed,
     )
 
 
@@ -658,8 +757,11 @@ def modal_overlap_factor(
     """Modal overlap factor ``M = 2,2 · n / Ts`` (Part 4, Formula (6)).
 
     With the modal density ``n`` from :func:`modal_density`. Part 4 prefers
-    ``M ≥ 1`` at 250 Hz and above; ``M < 0,25`` bands are bracketed and excluded
-    from the single-number rating.
+    ``M ≥ 1`` at 250 Hz and above, and requires bands with ``M < 0,25`` to be
+    bracketed in the report and excluded from the single-number rating
+    (Clause 9). This function only computes ``M``; pass it to
+    :func:`vibration_reduction_index` via ``modal_overlap`` to apply the
+    bracketing and single-number exclusion.
 
     :param area: Element area ``S``, in m².
     :param critical_frequency: Critical frequency ``fc``, in Hz.

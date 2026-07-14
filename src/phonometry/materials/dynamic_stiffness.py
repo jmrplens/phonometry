@@ -39,8 +39,11 @@ then obtained by airflow resistivity ``r`` (clause 8.2)::
                               s't >> s'a, otherwise s' cannot be resolved.
 
 This module is the resilient-layer characterisation feeding the floating-floor
-impact improvement of :mod:`phonometry.floor_covering_improvement` (ISO 16251)
-and the EN 12354-2 impact model.
+term of the EN 12354-2 impact model
+(:mod:`phonometry.building.building_prediction`). It does **not** feed
+ISO 16251-1 (:mod:`phonometry.building.floor_covering_improvement`), whose
+scope is limited to soft, locally-reacting floor coverings — floating floors
+are explicitly excluded there.
 """
 
 from __future__ import annotations

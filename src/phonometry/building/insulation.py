@@ -34,6 +34,17 @@ reduced to one decimal place before use (Clause 4.4, footnote 1). The
 reference values, spectra and shifting rule are identical in the 2013 and
 2020 editions of ISO 717-1.
 
+**Enlarged frequency ranges (ISO 717-1 Annex B; ISO 717-2 A.2.1 NOTE).**
+When measurements cover an enlarged range, additional adaptation terms are
+stated with the range as a subscript: ``C50-3150``, ``C50-5000``,
+``C100-5000`` (and the ``Ctr`` counterparts) with the Table B.1 spectra, and
+``CI,50-2500`` for impact. :func:`weighted_rating_extended` and
+:func:`weighted_impact_rating_extended` compute them alongside the core
+rating. Both accept ``one_decimal=True`` for the "1/10 dB for the expression
+of uncertainty" variant of Clauses 4.4/4.5 (reference-curve shift in 0,1 dB
+steps and one-decimal reductions), which ISO 12999-1:2020 Annex B requires
+when stating the uncertainty of single-number values.
+
 **Field impact quantities (ISO 16283-2).** With the tapping machine as the
 impact source this module forms, from the energy-average impact sound
 pressure level ``Li`` in the receiving room, the standardized impact sound
@@ -172,6 +183,56 @@ _SPECTRUM2_THIRD: Tuple[int, ...] = (
 _SPECTRUM1_OCTAVE: Tuple[int, ...] = (-21, -14, -8, -5, -4)
 #: Spectrum No. 2 (for Ctr), octave 125-2000 Hz.
 _SPECTRUM2_OCTAVE: Tuple[int, ...] = (-14, -10, -7, -4, -6)
+
+# --- ISO 717-1:2020 Table B.1 spectra for the enlarged frequency ranges ----
+# One-third-octave sound levels, A-weighted and normalized to 0 dB over each
+# range. Spectrum No. 1 has one column for C50-3150 and one shared column for
+# C50-5000 and C100-5000; spectrum No. 2 has a single column valid for Ctr in
+# any enlarged range.
+
+#: One-third-octave band centre frequencies, 50 Hz to 5000 Hz (21 bands).
+_FREQ_50_5000: Tuple[float, ...] = (
+    50.0, 63.0, 80.0, *_FREQ_THIRD_OCTAVE, 4000.0, 5000.0,
+)
+#: Spectrum No. 1 column for C50-3150 (19 bands, 50-3150 Hz).
+_SPECTRUM1_50_3150: Tuple[int, ...] = (
+    -40, -36, -33, -29, -26, -23, -21, -19, -17, -15,
+    -13, -12, -11, -10, -9, -9, -9, -9, -9,
+)
+#: Spectrum No. 1 column for C50-5000 and C100-5000 (21 bands, 50-5000 Hz;
+#: the 100-5000 Hz range uses the same column restricted to its bands).
+_SPECTRUM1_50_5000: Tuple[int, ...] = (
+    -41, -37, -34, -30, -27, -24, -22, -20, -18, -16, -14,
+    -13, -12, -11, -10, -10, -10, -10, -10, -10, -10,
+)
+#: Spectrum No. 2 column for Ctr in any enlarged range (21 bands, 50-5000 Hz).
+_SPECTRUM2_50_5000: Tuple[int, ...] = (
+    -25, -23, -21, -20, -20, -18, -16, -15, -14, -13, -12,
+    -11, -9, -8, -9, -10, -11, -13, -15, -16, -18,
+)
+
+#: The enlarged one-third-octave adaptation ranges of ISO 717-1:2020 Annex B
+#: (airborne): descriptor suffix -> (band frequencies, spectrum No. 1 levels,
+#: spectrum No. 2 levels).
+_EXTENDED_RANGES: dict[str, tuple[
+    Tuple[float, ...], Tuple[int, ...], Tuple[int, ...]
+]] = {
+    "50_3150": (
+        _FREQ_50_5000[:19], _SPECTRUM1_50_3150, _SPECTRUM2_50_5000[:19]
+    ),
+    "50_5000": (_FREQ_50_5000, _SPECTRUM1_50_5000, _SPECTRUM2_50_5000),
+    "100_5000": (
+        _FREQ_50_5000[3:], _SPECTRUM1_50_5000[3:], _SPECTRUM2_50_5000[3:]
+    ),
+}
+
+#: The enlarged CI summation range of ISO 717-2:2020 A.2.1 NOTE: 50-2500 Hz
+#: (18 one-third-octave bands).
+_CI_50_2500_FREQS: Tuple[float, ...] = _FREQ_50_5000[:18]
+
+
+_VALUES_1D_MSG = "'values_by_band' must be one-dimensional."
+_VALUES_FINITE_MSG = "'values_by_band' must contain only finite values."
 
 
 @dataclass(frozen=True)
@@ -358,6 +419,16 @@ def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
     Rounds each value to the nearest tenth of a decibel, half away from
     zero (``floor(x*10 + 0,5)/10`` for non-negative values, mirrored for
     negative ones).
+
+    .. note::
+        This rounds negative halves *away from zero* (−0,05 → −0,1), whereas
+        the adaptation-term reductions (:func:`_adaptation_term`,
+        :func:`_impact_ci`) use the ISO 80000-1 footnote form
+        ``floor(x + 0,5)`` which rounds them *towards* +∞ (−0,5 → 0). The two
+        conventions differ only for exactly-half negative values, which do
+        not occur with realistic (positive-level) insulation data; the
+        difference is documented here rather than unified so each function
+        keeps the literal form of its clause.
     """
     rounded: np.ndarray = np.sign(values) * np.floor(np.abs(values) * 10.0 + 0.5) / 10.0
     return rounded
@@ -523,28 +594,42 @@ def _resolve_band_set(
 
 
 def _best_shift(
-    measured: np.ndarray, reference: np.ndarray, limit: float
-) -> Tuple[int, float]:
-    """Largest 1 dB shift with unfavourable-deviation sum within ``limit``.
+    measured: np.ndarray,
+    reference: np.ndarray,
+    limit: float,
+    step: float = 1.0,
+) -> Tuple[float, float]:
+    """Largest ``step``-sized shift with unfavourable-deviation sum in ``limit``.
 
-    Shifts the reference by integer ``k`` and returns the largest ``k``
-    for which ``sum max(0, reference + k - measured) <= limit`` (the sum
-    is monotone non-decreasing in ``k``), together with that sum.
+    Shifts the reference by multiples of ``step`` and returns the largest
+    shift for which ``sum max(0, reference + shift - measured) <= limit``
+    (the sum is monotone non-decreasing in the shift), together with that
+    sum. ``step`` is 1 dB for the standard rating (ISO 717-1 Clause 4.4 /
+    ISO 717-2 Clause 4.3) or 0,1 dB for the one-decimal rating used in
+    uncertainty statements (ISO 717 "1/10 dB for the expression of
+    uncertainty"; ISO 12999-1:2020 Annex B.2 requires the 0,1 dB steps).
 
     Measured levels are multiples of 0,1 dB (Clause 4.4 footnote 1) and the
-    reference and shift are integers, so every deviation sum is a true
-    multiple of 0,1 dB; a small tolerance absorbs floating-point noise so
-    that a sum of exactly 32,0 (or 10,0) dB is not spuriously rejected.
+    reference is integer, so with both step sizes every deviation sum is a
+    true multiple of 0,1 dB; a small tolerance absorbs floating-point noise
+    so that a sum of exactly 32,0 (or 10,0) dB is not spuriously rejected.
+    The shift is searched on an integer grid of ``step`` ticks to keep the
+    0,1 dB steps exact.
     """
+    scale = round(1.0 / step)
+    if scale < 1 or abs(scale * step - 1.0) > 1e-12:
+        raise ValueError("'step' must divide 1 dB exactly (e.g. 1.0 or 0.1).")
     # Start below any feasible shift, then climb while the bound holds.
-    k = int(np.floor(np.min(measured - reference))) - 1
+    n = (int(np.floor(np.min(measured - reference))) - 1) * scale
     while True:
-        next_sum = float(np.sum(np.maximum(0.0, reference + (k + 1) - measured)))
+        candidate = (n + 1) / scale
+        next_sum = float(np.sum(np.maximum(0.0, reference + candidate - measured)))
         if next_sum > limit + _SHIFT_TOLERANCE:
             break
-        k += 1
-    unfavourable = float(np.sum(np.maximum(0.0, reference + k - measured)))
-    return k, unfavourable
+        n += 1
+    shift = n / scale
+    unfavourable = float(np.sum(np.maximum(0.0, reference + shift - measured)))
+    return shift, unfavourable
 
 
 def _adaptation_term(
@@ -584,9 +669,9 @@ def weighted_rating(
     """
     data = np.asarray(values_by_band, dtype=np.float64)
     if data.ndim != 1:
-        raise ValueError("'values_by_band' must be one-dimensional.")
+        raise ValueError(_VALUES_1D_MSG)
     if not np.all(np.isfinite(data)):
-        raise ValueError("'values_by_band' must contain only finite values.")
+        raise ValueError(_VALUES_FINITE_MSG)
 
     reference, limit, index_500, spectrum1, spectrum2 = _resolve_band_set(
         int(data.size), bands
@@ -595,7 +680,7 @@ def weighted_rating(
     ref = np.asarray(reference, dtype=np.float64)
 
     shift, unfavourable = _best_shift(measured, ref, limit)
-    rating = int(reference[index_500]) + shift
+    rating = int(reference[index_500]) + int(round(shift))
     c = _adaptation_term(measured, spectrum1, rating)
     ctr = _adaptation_term(measured, spectrum2, rating)
     centers = _FREQ_THIRD_OCTAVE if data.size == 16 else _FREQ_OCTAVE
@@ -908,9 +993,9 @@ def weighted_impact_rating(
     """
     data = np.asarray(values_by_band, dtype=np.float64)
     if data.ndim != 1:
-        raise ValueError("'values_by_band' must be one-dimensional.")
+        raise ValueError(_VALUES_1D_MSG)
     if not np.all(np.isfinite(data)):
-        raise ValueError("'values_by_band' must contain only finite values.")
+        raise ValueError(_VALUES_FINITE_MSG)
 
     reference, limit, index_500, octave_offset, ci_bands = (
         _resolve_impact_band_set(int(data.size), bands)
@@ -923,7 +1008,7 @@ def weighted_impact_rating(
     # shift is k = -m, so the rating is ref_500 - m. The unfavourable sum
     # is identical under negation.
     shift, unfavourable = _best_shift(-measured, -ref, limit)
-    rating = int(reference[index_500]) - shift + octave_offset
+    rating = int(reference[index_500]) - int(round(shift)) + octave_offset
     ci = _impact_ci(measured, rating, ci_bands)
     centers = _FREQ_THIRD_OCTAVE if data.size == 16 else _FREQ_OCTAVE
     return ImpactRatingResult(
@@ -944,6 +1029,9 @@ _IMPACT_REFERENCE_FLOOR = (
     71.0, 71.5, 72.0, 72.0, 72.0, 72.0, 72.0, 72.0,
 )
 _IMPACT_REFERENCE_FLOOR_RATING = 78  # Ln,r,0,w (Table 4 / Clause 5.2)
+#: Spectrum adaptation term of the bare reference floor (ISO 717-2:2020
+#: Clause A.2.2): ``CI,r,0 = −11 dB``.
+_IMPACT_REFERENCE_FLOOR_CI = -11
 
 
 def weighted_impact_improvement(
@@ -974,3 +1062,282 @@ def weighted_impact_improvement(
     ln_r = np.asarray(_IMPACT_REFERENCE_FLOOR, dtype=np.float64) - dl
     ln_r_w = weighted_impact_rating(ln_r).rating
     return _IMPACT_REFERENCE_FLOOR_RATING - ln_r_w
+
+
+def impact_improvement_adaptation_term(
+    delta_l: Sequence[float] | np.ndarray,
+) -> int:
+    """Spectrum adaptation term ``CI,Δ`` of a floor covering (ISO 717-2:2020 A.2.2).
+
+    ``CI,Δ = CI,r,0 − CI,r`` (Formula (A.4)) with ``CI,r,0 = −11 dB`` (the
+    bare Table 4 reference floor) and ``CI,r`` the ISO 717-2 spectrum
+    adaptation term of the reference floor with the covering under test,
+    ``Ln,r = Ln,r,0 − ΔL`` (Formula (1)). Together with
+    :func:`weighted_impact_improvement` it yields the single-number reduction
+    for a flat spectrum, ``ΔLlin = ΔLw + CI,Δ`` (Formula (A.5)). ISO 16251-1
+    Clause 8 e) requires this term in the statement of results.
+
+    :param delta_l: The reduction of impact sound pressure level ``ΔL`` per
+        band, in dB — 16 one-third-octave values from 100 Hz to 3150 Hz.
+    :return: The spectrum adaptation term ``CI,Δ``, in dB (integer).
+    :raises ValueError: If ``delta_l`` is not 16 one-third-octave values, or
+        is non-finite.
+    """
+    dl = np.asarray(delta_l, dtype=np.float64)
+    if dl.shape != (16,):
+        raise ValueError(
+            "'delta_l' must give the 16 one-third-octave values 100-3150 Hz."
+        )
+    if not np.all(np.isfinite(dl)):
+        raise ValueError("'delta_l' must contain only finite values.")
+    ln_r = np.asarray(_IMPACT_REFERENCE_FLOOR, dtype=np.float64) - dl
+    ci_r = weighted_impact_rating(ln_r).ci
+    return _IMPACT_REFERENCE_FLOOR_CI - ci_r
+
+
+# --- ISO 717 enlarged frequency ranges and one-decimal ratings ------------
+
+
+@dataclass(frozen=True)
+class ExtendedWeightedRatingResult:
+    """Weighted rating with the enlarged-range adaptation terms (ISO 717-1 Annex B).
+
+    All values are integers unless the result was computed with
+    ``one_decimal=True`` (the "1/10 dB for the expression of uncertainty"
+    variant of Clauses 4.4/4.5), in which case they carry one decimal place.
+    An extended term is ``None`` when the supplied bands do not cover its
+    frequency range.
+
+    :ivar rating: Weighted rating (``Rw``, ``R'w``, ...) from the core
+        100-3150 Hz bands, in dB.
+    :ivar c: Core spectrum adaptation term ``C`` (100-3150 Hz), in dB.
+    :ivar ctr: Core spectrum adaptation term ``Ctr`` (100-3150 Hz), in dB.
+    :ivar c_50_3150: ``C50-3150``, in dB, or ``None``.
+    :ivar c_50_5000: ``C50-5000``, in dB, or ``None``.
+    :ivar c_100_5000: ``C100-5000``, in dB, or ``None``.
+    :ivar ctr_50_3150: ``Ctr,50-3150``, in dB, or ``None``.
+    :ivar ctr_50_5000: ``Ctr,50-5000``, in dB, or ``None``.
+    :ivar ctr_100_5000: ``Ctr,100-5000``, in dB, or ``None``.
+    :ivar core: The integer-mode :class:`WeightedRatingResult` of the core
+        bands (independent of ``one_decimal``), for plotting and the
+        unfavourable-deviation sum.
+    """
+
+    rating: float
+    c: float
+    ctr: float
+    c_50_3150: float | None
+    c_50_5000: float | None
+    c_100_5000: float | None
+    ctr_50_3150: float | None
+    ctr_50_5000: float | None
+    ctr_100_5000: float | None
+    core: WeightedRatingResult
+
+
+@dataclass(frozen=True)
+class ExtendedImpactRatingResult:
+    """Weighted impact rating with ``CI,50-2500`` (ISO 717-2:2020 A.2.1 NOTE).
+
+    Values are integers unless computed with ``one_decimal=True``.
+
+    :ivar rating: Weighted impact rating (``Ln,w``, ...) from the core
+        100-3150 Hz bands, in dB.
+    :ivar ci: Core spectrum adaptation term ``CI`` (100-2500 Hz), in dB.
+    :ivar ci_50_2500: Enlarged-range term ``CI,50-2500``, in dB, or ``None``
+        when the supplied bands do not cover 50-2500 Hz.
+    :ivar core: The integer-mode :class:`ImpactRatingResult` of the core
+        bands (independent of ``one_decimal``).
+    """
+
+    rating: float
+    ci: float
+    ci_50_2500: float | None
+    core: ImpactRatingResult
+
+
+def _reduce(value: float, one_decimal: bool) -> float:
+    """Round half-up to an integer, or to one decimal (ISO 80000-1 footnote)."""
+    if one_decimal:
+        return math.floor(value * 10.0 + 0.5) / 10.0
+    return float(math.floor(value + 0.5))
+
+
+def _match_bands(
+    frequencies: np.ndarray, targets: Tuple[float, ...]
+) -> np.ndarray | None:
+    """Indices of ``targets`` within ``frequencies`` (6 % tolerance), or None."""
+    indices: list[int] = []
+    for target in targets:
+        hits = np.nonzero(np.abs(frequencies - target) <= 0.06 * target)[0]
+        if hits.size != 1:
+            return None
+        indices.append(int(hits[0]))
+    return np.asarray(indices, dtype=np.intp)
+
+
+def _validated_extended_input(
+    values_by_band: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray | None,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Validate the extended-range input; return (measured, freqs, core_idx)."""
+    data = np.asarray(values_by_band, dtype=np.float64)
+    if data.ndim != 1:
+        raise ValueError(_VALUES_1D_MSG)
+    if not np.all(np.isfinite(data)):
+        raise ValueError(_VALUES_FINITE_MSG)
+    if frequencies is None:
+        if data.size != len(_FREQ_THIRD_OCTAVE):
+            raise ValueError(
+                "Without 'frequencies' the input must be the 16 core "
+                "one-third-octave bands 100-3150 Hz; pass the band centre "
+                "frequencies for an enlarged range."
+            )
+        freqs = np.asarray(_FREQ_THIRD_OCTAVE, dtype=np.float64)
+    else:
+        freqs = np.asarray(frequencies, dtype=np.float64)
+        if freqs.shape != data.shape:
+            raise ValueError(
+                "'frequencies' must have one value per band of "
+                "'values_by_band'."
+            )
+        if not np.all(np.isfinite(freqs)) or np.any(freqs <= 0.0):
+            raise ValueError("'frequencies' must contain positive values.")
+    core_idx = _match_bands(freqs, _FREQ_THIRD_OCTAVE)
+    if core_idx is None:
+        raise ValueError(
+            "The input must contain the 16 core one-third-octave bands "
+            "100-3150 Hz (ISO 717 rates the single number on that range)."
+        )
+    return _round_half_up_tenths(data), freqs, core_idx
+
+
+def weighted_rating_extended(
+    values_by_band: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray | None = None,
+    *,
+    one_decimal: bool = False,
+) -> ExtendedWeightedRatingResult:
+    """Weighted rating with enlarged-range adaptation terms (ISO 717-1 Annex B).
+
+    Computes the weighted rating from the core one-third-octave bands
+    100-3150 Hz (Clause 4.4) and, for every enlarged frequency range covered
+    by the input, the additional spectrum adaptation terms of Annex B
+    (``C50-3150``, ``C50-5000``, ``C100-5000`` and the ``Ctr`` counterparts)
+    with the Table B.1 spectra: ``Cj = XAj − Xw`` where ``XAj`` sums over the
+    bands of the enlarged range (Clause 4.5 with Annex B).
+
+    With ``one_decimal=True`` the reference-curve shift runs in 0,1 dB steps
+    and every reduction keeps one decimal place — the variant Clauses 4.4/4.5
+    prescribe "for the expression of uncertainty" and ISO 12999-1:2020
+    Annex B requires for the uncertainty of single-number values.
+
+    :param values_by_band: Measured band quantities (``R``, ``R'``, ``Dn``,
+        ``DnT`` ...) in dB, one-third-octave bands.
+    :param frequencies: Band centre frequencies, in Hz (one per value).
+        ``None`` assumes exactly the 16 core bands 100-3150 Hz. The 16 core
+        bands must always be present; extended terms are formed for each
+        Annex B range whose bands are all present.
+    :param one_decimal: Use the 0,1 dB shift and one-decimal reductions.
+    :return: An :class:`ExtendedWeightedRatingResult`.
+    :raises ValueError: If the input is not one-dimensional and finite, the
+        band counts differ, or the core bands are missing.
+    """
+    measured, freqs, core_idx = _validated_extended_input(
+        values_by_band, frequencies
+    )
+    core_measured = measured[core_idx]
+    ref = np.asarray(_REF_THIRD_OCTAVE, dtype=np.float64)
+    step = 0.1 if one_decimal else 1.0
+    shift, _ = _best_shift(core_measured, ref, _MAX_UNFAVOURABLE_THIRD, step)
+    rating = float(_REF_THIRD_OCTAVE[_INDEX_500_THIRD]) + shift
+
+    def _term(bands: np.ndarray, spectrum: Sequence[int]) -> float:
+        x_aj = -energy_sum(np.asarray(spectrum, dtype=np.float64) - bands)
+        return _reduce(float(x_aj), one_decimal) - rating
+
+    c = _term(core_measured, _SPECTRUM1_THIRD)
+    ctr = _term(core_measured, _SPECTRUM2_THIRD)
+    extended: dict[str, float | None] = {}
+    for suffix, (band_freqs, spectrum1, spectrum2) in _EXTENDED_RANGES.items():
+        idx = _match_bands(freqs, band_freqs)
+        if idx is None:
+            extended[f"c_{suffix}"] = None
+            extended[f"ctr_{suffix}"] = None
+            continue
+        for name, spectrum in ((f"c_{suffix}", spectrum1), (f"ctr_{suffix}", spectrum2)):
+            term = _term(measured[idx], spectrum)
+            extended[name] = term if one_decimal else int(term)
+
+    return ExtendedWeightedRatingResult(
+        rating=rating if one_decimal else int(rating),
+        c=c if one_decimal else int(c),
+        ctr=ctr if one_decimal else int(ctr),
+        c_50_3150=extended["c_50_3150"],
+        c_50_5000=extended["c_50_5000"],
+        c_100_5000=extended["c_100_5000"],
+        ctr_50_3150=extended["ctr_50_3150"],
+        ctr_50_5000=extended["ctr_50_5000"],
+        ctr_100_5000=extended["ctr_100_5000"],
+        core=weighted_rating(np.asarray(values_by_band, dtype=np.float64)[core_idx]),
+    )
+
+
+def weighted_impact_rating_extended(
+    values_by_band: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray | None = None,
+    *,
+    one_decimal: bool = False,
+) -> ExtendedImpactRatingResult:
+    """Weighted impact rating with ``CI,50-2500`` (ISO 717-2:2020 A.2.1).
+
+    Computes the weighted impact rating from the core one-third-octave bands
+    100-3150 Hz (Clause 4.3) and, when the input covers 50-2500 Hz, the
+    enlarged-range spectrum adaptation term ``CI,50-2500`` of the A.2.1 NOTE:
+    the energetic sum runs over 50-2500 Hz instead of 100-2500 Hz in
+    Formula (A.1), ``CI = Ln,sum − 15 − Ln,w``.
+
+    With ``one_decimal=True`` the reference-curve shift runs in 0,1 dB steps
+    and the sums keep one decimal place (Clauses 4.3.1/4.4; e.g. the
+    reference floor yields ``Ln,r,0,w = 77,6 dB`` and ``CI,r,0 = −10,3 dB``
+    as printed in A.2.2).
+
+    :param values_by_band: Measured impact levels (``Ln``, ``L'n``, ``L'nT``)
+        in dB, one-third-octave bands.
+    :param frequencies: Band centre frequencies, in Hz (one per value).
+        ``None`` assumes exactly the 16 core bands 100-3150 Hz.
+    :param one_decimal: Use the 0,1 dB shift and one-decimal reductions.
+    :return: An :class:`ExtendedImpactRatingResult`.
+    :raises ValueError: If the input is not one-dimensional and finite, the
+        band counts differ, or the core bands are missing.
+    """
+    measured, freqs, core_idx = _validated_extended_input(
+        values_by_band, frequencies
+    )
+    core_measured = measured[core_idx]
+    ref = np.asarray(_REF_IMPACT_THIRD_OCTAVE, dtype=np.float64)
+    step = 0.1 if one_decimal else 1.0
+    # Impact shift = airborne search on the negated curves (see
+    # weighted_impact_rating).
+    shift, _ = _best_shift(-core_measured, -ref, _MAX_UNFAVOURABLE_THIRD, step)
+    rating = float(_REF_IMPACT_THIRD_OCTAVE[_INDEX_500_THIRD]) - shift
+
+    def _ci_over(bands: np.ndarray) -> float:
+        l_sum = _reduce(float(energy_sum(bands)), one_decimal)
+        return l_sum - 15.0 - rating
+
+    ci = _ci_over(core_measured[:_CI_THIRD_OCTAVE_BANDS])
+    idx = _match_bands(freqs, _CI_50_2500_FREQS)
+    ci_50_2500: float | None = None
+    if idx is not None:
+        value = _ci_over(measured[idx])
+        ci_50_2500 = value if one_decimal else int(value)
+
+    return ExtendedImpactRatingResult(
+        rating=rating if one_decimal else int(rating),
+        ci=ci if one_decimal else int(ci),
+        ci_50_2500=ci_50_2500,
+        core=weighted_impact_rating(
+            np.asarray(values_by_band, dtype=np.float64)[core_idx]
+        ),
+    )

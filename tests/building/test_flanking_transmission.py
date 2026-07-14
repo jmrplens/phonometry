@@ -166,6 +166,92 @@ def test_octave_bands_requires_multiple_of_three() -> None:
         res.octave_bands()
 
 
+def test_octave_single_number_averages_125_to_1000() -> None:
+    """Octave K̄ij averages 125-1000 Hz (Annex A), not the 1/3-octave range.
+
+    A Kij rising 1 dB per band (3 dB/octave) makes the two ranges differ:
+    averaging the octave values over 250-1000 Hz only (the wrong 200-1250 Hz
+    mask applied to octave centres) would sit 1.5 dB above the correct
+    125-1000 Hz average.
+    """
+    k = np.arange(len(THIRD_OCTAVE), dtype=float)  # 1 dB per third band
+    res = vibration_reduction_index(k, 2.0, 4.0, 4.0, frequency=THIRD_OCTAVE)
+    oct_res = res.octave_bands()
+    assert oct_res.frequencies is not None
+    freqs = oct_res.frequencies
+    mask = (freqs >= 125.0) & (freqs <= 1000.0)
+    assert mask.sum() == 4  # 125, 250, 500, 1000 Hz
+    expected = float(np.mean(oct_res.k_ij[mask]))
+    assert oct_res.single_number == pytest.approx(expected)
+    # Regression guard for the previous 200-1250 Hz mask on octave centres.
+    wrong_mask = (freqs >= 200.0) & (freqs <= 1250.0)
+    wrong = float(np.mean(oct_res.k_ij[wrong_mask]))
+    assert wrong - expected == pytest.approx(1.5, abs=0.01)
+
+
+def test_octave_bands_reject_misaligned_triples() -> None:
+    """Groups crossing octave boundaries are rejected (frequencies given)."""
+    freqs = THIRD_OCTAVE[2:14]  # 12 bands starting at 160 Hz
+    res = vibration_reduction_index(
+        np.zeros(len(freqs)), 2.0, 4.0, 4.0, frequency=freqs
+    )
+    with pytest.raises(ValueError, match="octave triples"):
+        res.octave_bands()
+
+
+# ---------------------------------------------------------------------------
+# ISO 10848-4 Clause 9 modal-overlap bracketing
+# ---------------------------------------------------------------------------
+def test_modal_overlap_brackets_and_excludes_bands() -> None:
+    """Bands with M < 0,25 are flagged and left out of the single number."""
+    k = np.arange(len(THIRD_OCTAVE), dtype=float)
+    m = np.full(len(THIRD_OCTAVE), 1.0)
+    m[3] = 0.1  # 200 Hz: inside the 200-1250 Hz single-number range
+    res = vibration_reduction_index(
+        k, 2.0, 4.0, 4.0, frequency=THIRD_OCTAVE, modal_overlap=m
+    )
+    assert res.bracketed is not None
+    assert bool(res.bracketed[3]) and res.bracketed.sum() == 1
+    freqs = np.asarray(THIRD_OCTAVE, dtype=float)
+    mask = (freqs >= 200.0) & (freqs <= 1250.0) & (m >= 0.25)
+    assert res.single_number == pytest.approx(float(np.mean(res.k_ij[mask])))
+
+
+def test_modal_overlap_all_bracketed_gives_no_single_number() -> None:
+    res = vibration_reduction_index(
+        np.zeros(len(THIRD_OCTAVE)), 2.0, 4.0, 4.0,
+        frequency=THIRD_OCTAVE, modal_overlap=np.full(len(THIRD_OCTAVE), 0.1),
+    )
+    assert res.single_number is None
+    assert res.bracketed is not None and bool(np.all(res.bracketed))
+
+
+def test_modal_overlap_propagates_to_octave_bands() -> None:
+    """An octave band is bracketed when any of its thirds is."""
+    m = np.full(len(THIRD_OCTAVE), 1.0)
+    m[4] = 0.2  # 250 Hz third -> 250 Hz octave bracketed
+    res = vibration_reduction_index(
+        np.zeros(len(THIRD_OCTAVE)), 2.0, 4.0, 4.0,
+        frequency=THIRD_OCTAVE, modal_overlap=m,
+    )
+    oct_res = res.octave_bands()
+    assert oct_res.bracketed is not None
+    assert oct_res.bracketed.tolist() == [False, True, False, False, False, False]
+    # 250 Hz octave excluded: mean over 125, 500 and 1000 Hz only.
+    assert oct_res.frequencies is not None
+    keep = np.isin(oct_res.frequencies, [125.0, 500.0, 1000.0])
+    assert oct_res.single_number == pytest.approx(
+        float(np.mean(oct_res.k_ij[keep]))
+    )
+
+
+def test_modal_overlap_rejects_nonpositive() -> None:
+    with pytest.raises(ValueError, match="modal_overlap"):
+        vibration_reduction_index(
+            [5.0], 2.0, 4.0, 4.0, frequency=[500.0], modal_overlap=[0.0]
+        )
+
+
 # ---------------------------------------------------------------------------
 # Overall flanking descriptors Dn,f / Ln,f
 # ---------------------------------------------------------------------------

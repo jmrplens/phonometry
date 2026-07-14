@@ -272,8 +272,8 @@ _ES_EXACT = {
     "Part 2 engineering ($\\varepsilon$ measured)":
         "Parte 2 ingeniería ($\\varepsilon$ medido)",
     # structure_borne_power figure (EN 15657)
-    "EN 15657 Characteristic Structure-Borne Sound Power":
-        "Potencia sonora estructural característica EN 15657",
+    "EN 15657 Reception-Plate Structure-Borne Sound Power":
+        "Potencia sonora estructural en placa receptora EN 15657",
     r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]":
         r"Nivel de potencia estructural $L_{Ws}$ [dB re 1 pW]",
     "low-mobility plate": "placa de baja movilidad",
@@ -4583,7 +4583,7 @@ def generate_vibration_sound_power(output_dir: str) -> None:
 
 
 def generate_structure_borne_power(output_dir: str) -> None:
-    """EN 15657 characteristic structure-borne sound power by reception plate."""
+    """EN 15657 structure-borne sound power injected into the reception plate."""
     print("Generating structure_borne_power...")
     from phonometry import reception_plate_power
 
@@ -4608,7 +4608,7 @@ def generate_structure_borne_power(output_dir: str) -> None:
     ax.set_xticklabels([f"{b:g}" for b in bands])
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel(r"Structure-borne power level $L_{Ws}$ [dB re 1 pW]")
-    ax.set_title("EN 15657 Characteristic Structure-Borne Sound Power",
+    ax.set_title("EN 15657 Reception-Plate Structure-Borne Sound Power",
                  fontweight="bold", pad=12)
     ax.grid(which="major", axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.legend(loc="upper right", fontsize=9)

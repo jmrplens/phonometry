@@ -146,3 +146,142 @@ def test_plot_returns_axes() -> None:
         mass_per_area=25.0, area=1.2, loss_factor=0.01,
     )
     assert res.plot() is not None
+
+
+# ---------------------------------------------------------------------------
+# EN 15657 source-quantity conversion chain (Formulae 15/17/18/19)
+# ---------------------------------------------------------------------------
+
+def test_blocked_force_level_formula_15() -> None:
+    """L_Fb,eq = L_Ws,low - 10 lg(Re{Y}/Y0), dB re 1e-6 N."""
+    from phonometry import equivalent_blocked_force_level
+
+    lfb = equivalent_blocked_force_level(61.7, 5.34e-6)
+    assert float(lfb) == pytest.approx(61.7 - 10.0 * math.log10(5.34e-6))
+    # A complex plate mobility uses its real part (Formula 16).
+    lfb_c = equivalent_blocked_force_level(61.7, 5.34e-6 + 2e-6j)
+    assert float(lfb_c) == pytest.approx(float(lfb))
+    with pytest.raises(ValueError, match="positive real part"):
+        equivalent_blocked_force_level(61.7, -1e-6)
+
+
+def test_characteristic_reception_plate_power_formula_17() -> None:
+    """L_Wsn = L_Fb,eq + 10 lg(Y_R,inf,low/Y0), Y_R,inf,low = 5e-6 m/(N.s)."""
+    from phonometry import (
+        characteristic_reception_plate_power,
+        equivalent_blocked_force_level,
+    )
+
+    lfb = equivalent_blocked_force_level(61.7, 5.34e-6)
+    lwsn = characteristic_reception_plate_power(lfb)
+    assert float(lwsn) == pytest.approx(
+        61.7 + 10.0 * math.log10(5.0e-6 / 5.34e-6)
+    )
+    with pytest.raises(ValueError, match="characteristic_mobility"):
+        characteristic_reception_plate_power(100.0, characteristic_mobility=0.0)
+
+
+def test_conversion_chain_reproduces_annex_i8_wall() -> None:
+    """(15)+(17) then the Annex I mobility correction reproduce Table I.8."""
+    import reference_data as ref
+    from phonometry import (
+        characteristic_reception_plate_power,
+        equivalent_blocked_force_level,
+        installed_power_from_reception_plate,
+    )
+
+    lwsn = characteristic_reception_plate_power(
+        equivalent_blocked_force_level(
+            ref.EN12354_5_I8_WALL_LWS, ref.EN12354_5_I8_PLATE_MOBILITY
+        )
+    )
+    installed = installed_power_from_reception_plate(
+        lwsn, ref.EN12354_5_I8_Y_WALL
+    )
+    np.testing.assert_allclose(
+        installed, ref.EN12354_5_I8_WALL_INSTALLED,
+        atol=ref.EN12354_5_ANNEX_I_TOL,
+    )
+
+
+def test_free_velocity_level_formula_18_real_mobility() -> None:
+    """For a real plate mobility, (18) reduces to L_Ws + 10 lg(Y) + 60.
+
+    Independent anchor from the physics rather than the code: for a real Y
+    the injected power is P = v_f**2 / Y, so v_f**2 = P*Y and
+    L_vf = 10 lg(P*Y/(1e-9)**2) with P in watts.
+    """
+    from phonometry import equivalent_free_velocity_level
+
+    p_watt = 1e-12 * 10.0 ** (70.0 / 10.0)
+    y = 1.0e-2
+    expected = 10.0 * math.log10(p_watt * y / 1e-9**2)
+    lvf = equivalent_free_velocity_level(70.0, y)
+    assert float(lvf) == pytest.approx(expected)
+    assert float(lvf) == pytest.approx(70.0 + 10.0 * math.log10(y) + 60.0)
+    with pytest.raises(ValueError, match="positive real part"):
+        equivalent_free_velocity_level(70.0, -1.0e-2)
+
+
+def test_formulas_15_18_19_are_mutually_consistent() -> None:
+    """(15) + (18) must combine through (19) into |Y_S,eq| = v_f / F_b.
+
+    Synthesize a source of known free velocity and blocked force measured on
+    ideal low- and high-mobility plates, then recover the source mobility.
+    """
+    from phonometry import (
+        equivalent_blocked_force_level,
+        equivalent_free_velocity_level,
+        source_mobility_from_levels,
+    )
+
+    y_source = 2.5e-4          # true |Y_S|, m/(N s)
+    v_free = 3.2e-6            # true free velocity, m/s
+    f_blocked = v_free / y_source
+    y_low = 5.0e-6             # low-mobility plate: F ~ F_b, P = F_b**2 Re{Y}
+    lw_low = 10.0 * math.log10(f_blocked**2 * y_low / 1e-12)
+    y_high = 1.0e-2            # high-mobility plate: v ~ v_f, P = v_f**2 / Y
+    lw_high = 10.0 * math.log10(v_free**2 / y_high / 1e-12)
+    lfb = equivalent_blocked_force_level(lw_low, y_low)
+    lvf = equivalent_free_velocity_level(lw_high, y_high)
+    y_rec = source_mobility_from_levels(lvf, lfb)
+    assert float(y_rec) == pytest.approx(y_source, rel=1e-9)
+
+
+def test_source_mobility_formula_19_round_trip() -> None:
+    """(19) recovers a known source mobility from the level pair.
+
+    Physical identity: a source of free velocity v_f and blocked force F_b
+    has |Y_S| = v_f/F_b; expressing both as levels re 1e-9 m/s and 1e-6 N
+    must return exactly that ratio.
+    """
+    from phonometry import source_mobility_from_levels
+
+    v_f, f_b = 1.0e-4, 2.0e-2  # m/s, N -> |Y_S| = 5e-3 m/(N.s)
+    lvf = 20.0 * math.log10(v_f / 1.0e-9)
+    lfb = 20.0 * math.log10(f_b / 1.0e-6)
+    y_s = float(source_mobility_from_levels(lvf, lfb))
+    assert y_s == pytest.approx(v_f / f_b, rel=1e-12)
+
+
+def test_iso9611_mean_free_velocity_level() -> None:
+    """ISO 9611:1996 eq. (9): the energy mean over positions."""
+    import reference_data as ref
+    from phonometry import mean_free_velocity_level
+    from phonometry.building.structure_borne_power import (
+        FREE_VELOCITY_REFERENCE,
+    )
+
+    assert FREE_VELOCITY_REFERENCE == ref.ISO9611_FREE_VELOCITY_REFERENCE
+    assert mean_free_velocity_level(ref.ISO9611_MEAN_LEVELS) == pytest.approx(
+        ref.ISO9611_MEAN_EXPECTED
+    )
+    # Uniform levels are a fixed point of the energy mean.
+    assert mean_free_velocity_level([66.0, 66.0]) == pytest.approx(66.0)
+
+
+def test_power_level_rejects_nonpositive_loss_factor() -> None:
+    with pytest.raises(ValueError, match="loss_factor"):
+        structure_borne_power_level(80.0, 1000.0, 10.0, 1.0, 0.0)
+    with pytest.raises(ValueError, match="loss_factor"):
+        structure_borne_power_level(80.0, 1000.0, 10.0, 1.0, [0.01, -0.01])

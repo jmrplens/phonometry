@@ -7,7 +7,16 @@ building service equipment that injects **structure-borne sound** into the
 building. The chain closes the structural-vibroacoustics series:
 
 1. The source strength is its *characteristic structure-borne sound power level*
-   ``L_Ws,c`` (measured per EN 15657; see :mod:`phonometry.structure_borne_power`).
+   ``L_Ws,c``. It is **not** the raw reception-plate power of EN 15657
+   Formula (14): that plate-injected level must first be converted to the
+   plate-independent ``L_Ws,n`` (EN 15657 Formulae (15)/(17); see
+   :mod:`phonometry.building.structure_borne_power`) and then referred to the
+   actual receiver with the Annex I mobility correction
+   (:func:`installed_power_from_reception_plate`),
+   ``L_Ws,inst,i = L_Ws,n + 10 lg(Y_inf,i / Y_inf,rec)`` with the reference
+   plate mobility ``Y_inf,rec = 5e-6 m/(N.s)`` — or equivalently to the
+   characteristic level ``L_Ws,c = L_Ws,n + 10 lg(Y_s / Y_inf,rec)`` with the
+   source mobility (Annex I.3, Table I.8), from which ``D_C`` is subtracted.
 2. Only part of that power is actually injected into the supporting element; the
    loss is the **coupling term** ``D_C`` (clause 4.4.3), always positive, set by
    the source mobility ``Y_s`` and the receiver mobility ``Y_i`` (Formula 19b)::
@@ -52,6 +61,32 @@ from .._internal.validation import require_positive
 #: Reference area ``S0 = A0`` of EN 12354-5 (Formula 18a), m^2.
 REFERENCE_AREA: float = 10.0
 
+#: Characteristic mobility ``Y_inf,rec`` of the EN 15657 reference reception
+#: plate (10 cm concrete; EN 12354-5 Annex I / EN 15657:2018 7.2.4), m/(N.s).
+REFERENCE_PLATE_MOBILITY: float = 5.0e-6
+
+
+def _positive_real_part(values: ArrayLike, name: str) -> np.ndarray:
+    """Validate that the real part of a mobility/impedance is positive."""
+    arr = np.asarray(values, dtype=np.complex128)
+    re = np.real(arr)
+    if (not np.all(np.isfinite(arr.real)) or not np.all(np.isfinite(arr.imag))
+            or np.any(re <= 0.0)):
+        raise ValueError(
+            f"'{name}' must be finite with a positive real part (a passive "
+            "receiver dissipates power)."
+        )
+    return arr
+
+
+def _nonzero_magnitude(values: ArrayLike, name: str) -> np.ndarray:
+    """Validate a finite, non-zero (complex) mobility magnitude."""
+    arr = np.asarray(values, dtype=np.complex128)
+    mag = np.abs(arr)
+    if not np.all(np.isfinite(mag)) or not np.all(mag > 0.0):
+        raise ValueError(f"'{name}' must be finite and non-zero.")
+    return arr
+
 
 def coupling_term(
     source_mobility: ArrayLike,
@@ -66,14 +101,18 @@ def coupling_term(
     transfer mobility of an elastic support (Formula 19e; 0 for a rigid
     connection, Formula 19b).
 
-    :param source_mobility: Source point mobility ``Y_s`` (complex), in m/(N.s).
-    :param receiver_mobility: Receiver point mobility ``Y_i`` (complex).
+    :param source_mobility: Source point mobility ``Y_s`` (complex, non-zero),
+        in m/(N.s).
+    :param receiver_mobility: Receiver point mobility ``Y_i`` (complex,
+        positive real part).
     :param transfer_mobility: Elastic-support transfer mobility ``Y_k``
         (Default: 0.0).
     :return: The coupling term ``D_C``, in dB (>= 0 for passive systems).
+    :raises ValueError: if ``Y_s`` is zero/non-finite or ``Re{Y_i}`` is not
+        positive and finite.
     """
-    ys = np.asarray(source_mobility, dtype=np.complex128)
-    yi = np.asarray(receiver_mobility, dtype=np.complex128)
+    ys = _nonzero_magnitude(source_mobility, "source_mobility")
+    yi = _positive_real_part(receiver_mobility, "receiver_mobility")
     yk = np.asarray(transfer_mobility, dtype=np.complex128)
     numerator = np.abs(ys + yi + yk) ** 2
     denominator = np.abs(ys) * np.real(yi)
@@ -87,12 +126,15 @@ def coupling_term_force_source(
 
     ``D_C = 10 lg(|Y_s| / Re{Y_i})``.
 
-    :param source_mobility: Source point mobility ``Y_s`` (complex).
-    :param receiver_mobility: Receiver point mobility ``Y_i`` (complex).
+    :param source_mobility: Source point mobility ``Y_s`` (complex, non-zero).
+    :param receiver_mobility: Receiver point mobility ``Y_i`` (complex,
+        positive real part).
     :return: The coupling term ``D_C``, in dB.
+    :raises ValueError: if ``Y_s`` is zero/non-finite or ``Re{Y_i}`` is not
+        positive and finite.
     """
-    ys = np.abs(np.asarray(source_mobility, dtype=np.complex128))
-    yi = np.real(np.asarray(receiver_mobility, dtype=np.complex128))
+    ys = np.abs(_nonzero_magnitude(source_mobility, "source_mobility"))
+    yi = np.real(_positive_real_part(receiver_mobility, "receiver_mobility"))
     return np.asarray(10.0 * np.log10(ys / yi), dtype=np.float64)
 
 
@@ -103,13 +145,59 @@ def coupling_term_velocity_source(
 
     ``D_C = -10 lg(|Y_s| Re{Z_i})``.
 
-    :param source_mobility: Source point mobility ``Y_s`` (complex).
-    :param receiver_impedance: Receiver point impedance ``Z_i`` (complex).
+    :param source_mobility: Source point mobility ``Y_s`` (complex, non-zero).
+    :param receiver_impedance: Receiver point impedance ``Z_i`` (complex,
+        positive real part).
     :return: The coupling term ``D_C``, in dB.
+    :raises ValueError: if ``Y_s`` is zero/non-finite or ``Re{Z_i}`` is not
+        positive and finite.
     """
-    ys = np.abs(np.asarray(source_mobility, dtype=np.complex128))
-    zi = np.real(np.asarray(receiver_impedance, dtype=np.complex128))
+    ys = np.abs(_nonzero_magnitude(source_mobility, "source_mobility"))
+    zi = np.real(_positive_real_part(receiver_impedance, "receiver_impedance"))
     return np.asarray(-10.0 * np.log10(ys * zi), dtype=np.float64)
+
+
+def installed_power_from_reception_plate(
+    reception_plate_level: ArrayLike,
+    receiver_mobility: ArrayLike,
+    *,
+    plate_mobility: float = REFERENCE_PLATE_MOBILITY,
+) -> np.ndarray:
+    """Mobility correction of the reception-plate power (EN 12354-5, Annex I).
+
+    ``L_Ws,inst,i = L_Ws,n,i + 10 lg(Y_inf,i / Y_inf,rec)`` — refers the
+    characteristic reception-plate power level ``L_Ws,n`` (EN 15657
+    Formula (17), re the 10 cm concrete plate ``Y_inf,rec = 5e-6 m/(N.s)``)
+    to the characteristic mobility ``Y_inf,i`` of the actual receiving
+    element (floor, wall), yielding the installed power of that element as in
+    the Annex I.2 whirlpool example. The same correction with the *source*
+    mobility instead of ``Y_inf,i`` yields the characteristic level
+    ``L_Ws,c`` (Annex I.3, Table I.8), from which
+    :func:`installed_structure_borne_power_level` subtracts ``D_C``.
+
+    :param reception_plate_level: Power level to re-refer (per band), in dB re
+        1 pW: either the characteristic level ``L_Ws,n`` (EN 15657 Formula 17,
+        referred to the default 5e-6 m/(N.s) plate) or a raw Formula (14)
+        plate power together with the mobility of the plate it was measured
+        on, passed as ``plate_mobility``.
+    :param receiver_mobility: Characteristic mobility ``Y_inf,i`` of the
+        receiving element (per band; complex values use their magnitude), in
+        m/(N.s).
+    :param plate_mobility: Mobility the input level is referred to
+        (Default: the EN 15657 reference plate, ``Y_inf,rec = 5e-6 m/(N.s)``;
+        pass the measured plate mobility when the input is a raw Formula (14)
+        level).
+    :return: The mobility-corrected power level, in dB re 1 pW.
+    :raises ValueError: for a non-positive receiver or plate mobility.
+    """
+    plate_mobility = require_positive(plate_mobility, "plate_mobility")
+    lw = np.asarray(reception_plate_level, dtype=np.float64)
+    y_i = np.abs(np.asarray(receiver_mobility, dtype=np.complex128))
+    if not np.all(np.isfinite(y_i)) or np.any(y_i <= 0.0):
+        raise ValueError("'receiver_mobility' must be finite and non-zero.")
+    return np.asarray(
+        lw + 10.0 * np.log10(y_i / plate_mobility), dtype=np.float64
+    )
 
 
 def installed_structure_borne_power_level(
@@ -120,7 +208,9 @@ def installed_structure_borne_power_level(
     ``L_Ws,inst,i = L_Ws,c - D_C,i``.
 
     :param characteristic_power_level: Characteristic level ``L_Ws,c`` (per
-        band), in dB (from EN 15657).
+        band), in dB — the EN 15657 reception-plate level converted with
+        Formulae (15)/(17) and the source-mobility correction (see the module
+        docstring), **not** the raw plate-injected Formula (14) level.
     :param coupling_term: Coupling term ``D_C,i`` (per band), in dB.
     :return: The installed structure-borne power level ``L_Ws,inst``, in dB.
     """

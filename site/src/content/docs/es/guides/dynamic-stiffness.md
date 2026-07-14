@@ -8,10 +8,11 @@ ambos forman un sistema masa-resorte cuya **frecuencia natural** determina cuán
 mejora el suelo el aislamiento a impacto y aéreo. **EN 29052-1:1992** (idéntica a
 ISO 9052-1:1989) mide la **rigidez dinámica por unidad de área** `s'` de la capa
 resiliente a partir de la resonancia de una placa de carga normalizada sobre una
-probeta de 200 mm × 200 mm. `s'` es la entrada a la mejora a impacto del suelo
-flotante (ISO 16251) tratada en
-[Acústica de la edificación](/phonometry/es/guides/building-acoustics/) y al
-modelo de impacto de EN 12354-2.
+probeta de 200 mm × 200 mm. `s'` es la entrada al término de suelo flotante del
+modelo de impacto de EN 12354-2 tratado en
+[Acústica de la edificación](/phonometry/es/guides/building-acoustics/). (La
+ISO 16251-1 no aplica aquí: su alcance se limita a revestimientos blandos de
+reacción local y excluye expresamente los suelos flotantes.)
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness_es.svg" alt="Frecuencia natural del suelo flotante frente a la rigidez dinámica por unidad de área de la capa resiliente para un suelo flotante ligero y uno pesado, con un punto de diseño" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness_es_dark.svg" alt="Frecuencia natural del suelo flotante frente a la rigidez dinámica por unidad de área de la capa resiliente para un suelo flotante ligero y uno pesado, con un punto de diseño" style="width:82%">
 

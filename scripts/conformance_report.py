@@ -259,7 +259,11 @@ def _weighting_deviation(curve: str, fs: int) -> WeightingDeviation:
     else:
         col = 1 if curve == "A" else 2
         rows = [r for r in ref.IEC61672_TABLE3 if r[0] < fs / 2]
-        freqs = np.array([r[0] for r in rows], dtype=float)
+        # Table 3 NOTE: the design goals are computed at the exact base-10
+        # frequencies 1000 * 10^(0.1 (n - 30)) behind the nominal labels
+        # (15 848.9 Hz for "16 k"); evaluate the SOS there, as the G branch
+        # above and IEC 61672-3:2013 subclause 13.3 do.
+        freqs = np.array([10 ** (round(10 * math.log10(r[0])) / 10) for r in rows])
         nominal = np.array([r[col] for r in rows])
         upper = np.array([r[3] for r in rows])
         lower = np.array([r[4] for r in rows])
@@ -3185,7 +3189,9 @@ def _chk_iso20065_peak_detection() -> Outcome:
     result = ph.analyze_spectrum(
         ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
     )
-    found = sorted(round(float(f), 1) for f in result.tone_frequencies)
+    assert result.group_sizes is not None
+    singles = result.group_sizes == 1
+    found = sorted(round(float(f), 1) for f in result.tone_frequencies[singles])
     expected = sorted(ref.ISO20065_E1_TONE_FREQUENCIES)
     ok = found == expected
     return Outcome(
@@ -3194,6 +3200,21 @@ def _chk_iso20065_peak_detection() -> Outcome:
         delta="exact" if ok else "mismatch",
         passed=ok,
     )
+
+
+@register(
+    _TONE_AUD,
+    "ISO/PAS 20065:2016 Clause 5.3.8 Step 3",
+    "Same-band FG combination inside analyze_spectrum, Table E.2 row 2 FG",
+)
+def _chk_iso20065_step3_fg() -> Outcome:
+    result = ph.analyze_spectrum(
+        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+    )
+    assert result.group_sizes is not None
+    fg = result.group_sizes > 1
+    value = float(result.tone_levels[fg][0]) if int(fg.sum()) == 1 else float("nan")
+    return numeric(ref.ISO20065_E1_LT_FG, value, 0.02, unit="dB", places=2)
 
 
 @register(_TONE_AUD, "ISO/PAS 20065:2016 Formula (17)", "Multi-tone FG combination, Table E.1")

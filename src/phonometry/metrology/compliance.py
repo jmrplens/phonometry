@@ -143,6 +143,15 @@ def class_limits(
         (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2).
     :return: Tuple (minimum, maximum) relative attenuation in dB per point;
         the maximum is ``+inf`` outside the pass-band.
+
+    .. note::
+        The exact band-edge point ``Omega = G^(1/2)`` is treated as pass-band.
+        The 1995 edition's Table 1 prints a dedicated minimum (+2.3/+2.0/
+        +1.6 dB) *at* that single frequency, which this convention relaxes to
+        the pass-band minimum; the discrepancy has measure zero -- any
+        continuous response violating the edge row is caught at ``edge + eps``
+        by the interpolated stop-band mask. The 2014 edition defines only
+        ``G^(1/2) -+ eps`` rows, which the masks match exactly.
     """
     spec = _FILTER_EDITIONS.get(edition)
     if spec is None:
@@ -231,22 +240,27 @@ def verify_filter_class(
         fsd = bank.fs / float(bank.factor[idx])
         w, h = signal.sosfreqz(bank.sos[idx], worN=num_points, fs=fsd)
 
-        # Attenuation relative to the mid-band attenuation (Formulas 7-8).
+        # Attenuation relative to the mid-band attenuation (Formulas 7-8),
+        # with the reference evaluated exactly at the mid-band frequency.
         attenuation = -20.0 * np.log10(np.abs(h) + np.finfo(float).eps)
-        a_ref = float(np.interp(fm, w, attenuation))
+        _, h_ref = signal.sosfreqz(bank.sos[idx], worN=np.array([fm]), fs=fsd)
+        a_ref = float(-20.0 * np.log10(np.abs(h_ref[0]) + np.finfo(float).eps))
         delta_all = attenuation - a_ref
 
         omega = w / fm
         valid = omega > 0
         omega, delta_a = omega[valid], delta_all[valid]
 
-        # Guarantee the Table 1 breakpoints (pass-band included) are evaluated.
+        # Guarantee the Table 1 breakpoints (pass-band included) are evaluated,
+        # exactly (sosfreqz at the breakpoint frequencies, not interpolated
+        # off the grid, so a coarse grid cannot smooth a dip across them).
         omega_max = float(omega.max())
         extra = breakpoint_omegas[(breakpoint_omegas > 0) & (breakpoint_omegas <= omega_max)]
         if extra.size:
-            delta_extra = np.interp(extra * fm, w, delta_all)
+            _, h_extra = signal.sosfreqz(bank.sos[idx], worN=extra * fm, fs=fsd)
+            att_extra = -20.0 * np.log10(np.abs(h_extra) + np.finfo(float).eps)
             omega = np.concatenate([omega, extra])
-            delta_a = np.concatenate([delta_a, delta_extra])
+            delta_a = np.concatenate([delta_a, att_extra - a_ref])
 
         margins: Dict[int, float] = {}
         for cls in classes_ordered:
@@ -322,6 +336,54 @@ _WEIGHTING_TABLE3: List[Tuple[float, float, float, float, float, float, float]] 
 
 _WEIGHTING_COL = {"A": 1, "C": 2, "Z": None}
 
+# IEC 61672-1:2013 Annex E pole frequencies of the analytic A/C design goals
+# (E.4.1-E.4.8); identical to the constants the WeightingFilter design uses.
+_F1 = 20.598997
+_F2 = 107.65265
+_F3 = 737.86223
+_F4 = 12194.217
+
+
+def _exact_base10(frequencies: np.ndarray) -> np.ndarray:
+    """Exact base-10 frequencies ``1000 * 10^(n/10)`` behind nominal labels.
+
+    IEC 61672-1:2013 Table 3 NOTE: the tabulated weightings are computed at
+    the exact frequencies ``f = 1000 * 10^(0.1 (n - 30))``, not at the nominal
+    labels (e.g. 15 848.9 Hz behind "16 kHz").
+    """
+    return np.asarray(
+        10.0 ** (np.round(10.0 * np.log10(frequencies)) / 10.0), dtype=np.float64
+    )
+
+
+def _analytic_weighting_db(curve: str, frequencies: np.ndarray) -> np.ndarray:
+    """Analytic design-goal weighting (IEC 61672-1:2013 Annex E), re 1 kHz.
+
+    Evaluates the exact A/C(/Z) transfer-function magnitudes of E.4.1/E.4.2 at
+    ``frequencies`` and normalizes to the 1 kHz value, reproducing every
+    Table 3 design goal after 0.1 dB rounding.
+    """
+    f = np.asarray(frequencies, dtype=np.float64)
+    if curve == "Z":
+        return np.zeros_like(f)
+
+    def _c_gain(x: np.ndarray) -> np.ndarray:
+        x2 = x**2
+        return np.asarray(
+            (_F4**2 * x2) / ((x2 + _F1**2) * (x2 + _F4**2)), dtype=np.float64
+        )
+
+    def _a_gain(x: np.ndarray) -> np.ndarray:
+        x2 = x**2
+        return np.asarray(
+            _c_gain(x) * x2 / np.sqrt((x2 + _F2**2) * (x2 + _F3**2)),
+            dtype=np.float64,
+        )
+
+    gain = _a_gain if curve == "A" else _c_gain
+    ref = gain(np.asarray([1000.0]))[0]
+    return np.asarray(20.0 * np.log10(gain(f) / ref), dtype=np.float64)
+
 
 def weighting_class_limits(
     weighting_class: int,
@@ -359,51 +421,89 @@ def _weighting_response_db(wf: WeightingFilter, frequencies: np.ndarray) -> np.n
     return np.asarray(gain_db[:-1] - gain_db[-1], dtype=np.float64)  # relative to 1 kHz
 
 
-def verify_weighting_class(wf: WeightingFilter) -> Dict[str, Any]:
+def verify_weighting_class(
+    wf: WeightingFilter, *, sweep_points: int = 4096
+) -> Dict[str, Any]:
     """
     Verify a frequency-weighting filter against IEC 61672-1:2013 Table 3.
 
     The filter's relative response (normalized to its 1 kHz gain) is evaluated
-    at each Table 3 nominal frequency below the Nyquist frequency, and the
-    deviation from the design-goal weighting is checked against the class 1 and
-    class 2 acceptance limits (subclause 5.5.6, "measured deviations ... at the
-    nominal frequencies"). The response is taken from the designed second-order
-    sections (evaluated with ``sosfreqz`` at their design rate), so it is exact
-    and deterministic; it does not model the runtime resampling stages that
-    ``high_accuracy`` adds around them, whose anti-alias response is flat across
-    the audio band checked here. The ``Z`` weighting is a flat bypass and always
-    complies.
+    at the *exact* base-10 frequency behind each Table 3 nominal label below
+    the Nyquist frequency (Table 3 NOTE: the design goals are computed at
+    ``f = 1000 * 10^(0.1 (n - 30))``, e.g. 15 848.9 Hz for "16 kHz"; IEC
+    61672-3:2013 subclause 13.3 tests the deviation at the same exact
+    frequencies). The deviation from the design-goal weighting is checked
+    against the class 1 and class 2 acceptance limits.
+
+    A dense logarithmic sweep between the checked frequencies additionally
+    enforces subclause 5.5.7: at any frequency between two adjacent nominal
+    frequencies, the deviation of the response from the analytic Annex E
+    design goal must stay within the *larger* of the two adjacent Table 3
+    limits. Without it a resonance or notch between the nominal frequencies
+    would go unnoticed. Both the per-frequency verdicts and the sweep must
+    pass for ``overall_class``.
+
+    The response is taken from the designed second-order sections (evaluated
+    with ``sosfreqz`` at their design rate), so it is exact and deterministic;
+    it does not model the runtime resampling stages that ``high_accuracy``
+    adds around them, whose anti-alias response is flat across the audio band
+    checked here. The ``Z`` weighting is a flat bypass and always complies.
+
+    When Table 3 rows that carry a *finite lower* acceptance limit fall at or
+    above the Nyquist frequency (e.g. the 8-16 kHz class 1 rows of a 16 kHz
+    sampled system), they cannot be checked and ``range_limited`` is ``True``:
+    the returned class then attests conformance over the checked frequencies
+    only, not full Table 3 conformance over 10 Hz to 20 kHz.
 
     :param wf: The weighting filter to verify (``A``, ``C`` or ``Z``).
-    :return: Dict with ``overall_class`` (1, 2 or None) and ``bands``: a list of
-        ``{"freq", "class", "deviation_db", "margin_class1_db",
-        "margin_class2_db"}`` where a positive margin means the limits are met
-        with that much room.
+    :param sweep_points: Number of points of the 5.5.7 between-nominals sweep
+        (>= 64).
+    :return: Dict with ``overall_class`` (1, 2 or None), ``range_limited``
+        (see above), ``bands``: a list of ``{"freq", "class", "deviation_db",
+        "margin_class1_db", "margin_class2_db"}`` where ``freq`` is the
+        nominal label, a positive margin means the limits are met with that
+        much room, and ``between_nominals``: ``{"worst_freq",
+        "margin_class1_db", "margin_class2_db"}`` for the sweep.
     """
     if wf.curve not in _WEIGHTING_COL:
         raise ValueError("Weighting curve must be 'A', 'C' or 'Z'.")
+    if sweep_points < 64:
+        raise ValueError("'sweep_points' must be at least 64.")
     col = _WEIGHTING_COL[wf.curve]
 
     nyquist = wf.fs / 2.0
-    freqs = np.array([row[0] for row in _WEIGHTING_TABLE3], dtype=np.float64)
-    in_range = freqs < nyquist
-    freqs = freqs[in_range]
+    nominal = np.array([row[0] for row in _WEIGHTING_TABLE3], dtype=np.float64)
+    exact = _exact_base10(nominal)
+    in_range = exact < nyquist
 
-    design = (
-        np.zeros_like(freqs)
-        if col is None
-        else np.array([row[col] for row in _WEIGHTING_TABLE3], dtype=np.float64)[in_range]
+    _, lower1_all, upper1_all = weighting_class_limits(1)
+    _, lower2_all, upper2_all = weighting_class_limits(2)
+
+    # Rows with a finite lower limit that fall beyond Nyquist cannot be
+    # demonstrated: the verdict is then range-limited (not full Table 3).
+    dropped = ~in_range
+    range_limited = bool(
+        np.any(dropped & np.isfinite(lower1_all))
+        or np.any(dropped & np.isfinite(lower2_all))
     )
-    response = _weighting_response_db(wf, freqs)
+
+    freqs_nom = nominal[in_range]
+    freqs_exact = exact[in_range]
+    design = (
+        np.zeros_like(freqs_exact)
+        if col is None
+        else np.array(
+            [row[col] for row in _WEIGHTING_TABLE3], dtype=np.float64
+        )[in_range]
+    )
+    response = _weighting_response_db(wf, freqs_exact)
     deviation = response - design
 
-    _, lower1, upper1 = weighting_class_limits(1)
-    _, lower2, upper2 = weighting_class_limits(2)
-    lower1, upper1 = lower1[in_range], upper1[in_range]
-    lower2, upper2 = lower2[in_range], upper2[in_range]
+    lower1, upper1 = lower1_all[in_range], upper1_all[in_range]
+    lower2, upper2 = lower2_all[in_range], upper2_all[in_range]
 
     bands: List[Dict[str, Any]] = []
-    for i, fm in enumerate(freqs):
+    for i, fm in enumerate(freqs_nom):
         # Margin = distance to the nearer limit; a -inf lower limit makes that
         # side non-binding (its term is +inf), i.e. an upper-only limit.
         m1 = min(upper1[i] - deviation[i], deviation[i] - lower1[i])
@@ -420,17 +520,52 @@ def verify_weighting_class(wf: WeightingFilter) -> Dict[str, Any]:
         )
 
     if not bands:
-        return {"overall_class": None, "bands": []}
+        return {
+            "overall_class": None,
+            "range_limited": range_limited,
+            "bands": [],
+            "between_nominals": None,
+        }
+
+    # Subclause 5.5.7 sweep: between two adjacent (exact) nominal frequencies
+    # the acceptance limits are the larger of the two adjacent Table 3 limits;
+    # the design goal there is the analytic Annex E response.
+    grid = np.geomspace(freqs_exact[0], freqs_exact[-1], sweep_points)
+    sweep_dev = _weighting_response_db(wf, grid) - _analytic_weighting_db(
+        wf.curve, grid
+    )
+    seg = np.clip(np.searchsorted(freqs_exact, grid, side="right") - 1, 0,
+                  freqs_exact.size - 2)
+    up1 = np.maximum(upper1[seg], upper1[seg + 1])
+    lo1 = np.minimum(lower1[seg], lower1[seg + 1])
+    up2 = np.maximum(upper2[seg], upper2[seg + 1])
+    lo2 = np.minimum(lower2[seg], lower2[seg + 1])
+    sweep_m1 = np.minimum(up1 - sweep_dev, sweep_dev - lo1)
+    sweep_m2 = np.minimum(up2 - sweep_dev, sweep_dev - lo2)
+    worst = int(np.argmin(sweep_m1))
+    between: Dict[str, float] = {
+        "worst_freq": float(grid[worst]),
+        "margin_class1_db": float(np.min(sweep_m1)),
+        "margin_class2_db": float(np.min(sweep_m2)),
+    }
 
     classes = [band["class"] for band in bands]
-    if all(c == 1 for c in classes):
+    if all(c == 1 for c in classes) and between["margin_class1_db"] >= 0.0:
         overall: int | None = 1
-    elif all(c in (1, 2) for c in classes):
+    elif (
+        all(c in (1, 2) for c in classes)
+        and between["margin_class2_db"] >= 0.0
+    ):
         overall = 2
     else:
         overall = None
 
-    return {"overall_class": overall, "bands": bands}
+    return {
+        "overall_class": overall,
+        "range_limited": range_limited,
+        "bands": bands,
+        "between_nominals": between,
+    }
 
 
 # ---------------------------------------------------------------------------

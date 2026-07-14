@@ -1423,7 +1423,7 @@ _MOB_F0 = math.sqrt(_MOB_K / _MOB_M) / (2.0 * math.pi)
 @register(
     "Room & building acoustics",
     "ISO 7626-1:2011 Annex A",
-    "SDOF driving-point mobility peak |Y(f0)| = 1/c  (c=5 N·s/m)",
+    "SDOF driving-point mobility peak mag(Y(f0)) = 1/c  (c=5 N·s/m)",
 )
 def _chk_iso7626_mobility_peak() -> Outcome:
     y0 = complex(ph.sdof_mobility(_MOB_F0, _MOB_M, _MOB_K, _MOB_C))
@@ -1584,7 +1584,7 @@ def _chk_iso9611_mean_velocity() -> Outcome:
 @register(
     "Room & building acoustics",
     "EN 12354-5:2009 Formula (19b/19c)",
-    "Coupling term → force-source limit 10 lg(|Ys|/Re{Yi}) as |Ys|≫|Yi|",
+    "Coupling term → force-source limit 10 lg(mag(Ys)/Re{Yi}) as mag(Ys) ≫ mag(Yi)",
 )
 def _chk_en12354_5_coupling_limit() -> Outcome:
     ys, yi = 1e-3 + 0j, 1e-7 + 0j

@@ -70,9 +70,10 @@ def _positive_real_part(values: ArrayLike, name: str) -> np.ndarray:
     """Validate that the real part of a mobility/impedance is positive."""
     arr = np.asarray(values, dtype=np.complex128)
     re = np.real(arr)
-    if not np.all(np.isfinite(re)) or np.any(re <= 0.0):
+    if (not np.all(np.isfinite(arr.real)) or not np.all(np.isfinite(arr.imag))
+            or np.any(re <= 0.0)):
         raise ValueError(
-            f"'{name}' must have a positive, finite real part (a passive "
+            f"'{name}' must be finite with a positive real part (a passive "
             "receiver dissipates power)."
         )
     return arr
@@ -174,13 +175,18 @@ def installed_power_from_reception_plate(
     ``L_Ws,c`` (Annex I.3, Table I.8), from which
     :func:`installed_structure_borne_power_level` subtracts ``D_C``.
 
-    :param reception_plate_level: Characteristic reception-plate power level
-        ``L_Ws,n`` (per band), in dB re 1 pW.
+    :param reception_plate_level: Power level to re-refer (per band), in dB re
+        1 pW: either the characteristic level ``L_Ws,n`` (EN 15657 Formula 17,
+        referred to the default 5e-6 m/(N.s) plate) or a raw Formula (14)
+        plate power together with the mobility of the plate it was measured
+        on, passed as ``plate_mobility``.
     :param receiver_mobility: Characteristic mobility ``Y_inf,i`` of the
         receiving element (per band; complex values use their magnitude), in
         m/(N.s).
-    :param plate_mobility: Reference plate mobility ``Y_inf,rec``
-        (Default: 5e-6 m/(N.s)).
+    :param plate_mobility: Mobility the input level is referred to
+        (Default: the EN 15657 reference plate, ``Y_inf,rec = 5e-6 m/(N.s)``;
+        pass the measured plate mobility when the input is a raw Formula (14)
+        level).
     :return: The mobility-corrected power level, in dB re 1 pW.
     :raises ValueError: for a non-positive receiver or plate mobility.
     """

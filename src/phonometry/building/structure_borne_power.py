@@ -288,10 +288,12 @@ def equivalent_blocked_force_level(
     :raises ValueError: if ``Re{plate_mobility}`` is not positive and finite.
     """
     lw = np.asarray(power_level, dtype=np.float64)
-    y_re = np.real(np.asarray(plate_mobility, dtype=np.complex128))
-    if not np.all(np.isfinite(y_re)) or np.any(y_re <= 0.0):
+    y = np.asarray(plate_mobility, dtype=np.complex128)
+    y_re = np.real(y)
+    if (not np.all(np.isfinite(y.real)) or not np.all(np.isfinite(y.imag))
+            or np.any(y_re <= 0.0)):
         raise ValueError(
-            "'plate_mobility' must have a positive, finite real part."
+            "'plate_mobility' must be finite with a positive real part."
         )
     return np.asarray(
         lw - 10.0 * np.log10(y_re / REFERENCE_MOBILITY), dtype=np.float64
@@ -354,9 +356,10 @@ def equivalent_free_velocity_level(
     lw = np.asarray(power_level, dtype=np.float64)
     y = np.asarray(plate_mobility, dtype=np.complex128)
     y_re = np.real(y)
-    if not np.all(np.isfinite(y_re)) or np.any(y_re <= 0.0):
+    if (not np.all(np.isfinite(y.real)) or not np.all(np.isfinite(y.imag))
+            or np.any(y_re <= 0.0)):
         raise ValueError(
-            "'plate_mobility' must have a positive, finite real part."
+            "'plate_mobility' must be finite with a positive real part."
         )
     term = np.abs(y) ** 2 / (y_re * REFERENCE_MOBILITY)
     return np.asarray(lw + 10.0 * np.log10(term) + 60.0, dtype=np.float64)

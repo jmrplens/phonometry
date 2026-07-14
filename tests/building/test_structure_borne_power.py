@@ -161,7 +161,7 @@ def test_blocked_force_level_formula_15() -> None:
     # A complex plate mobility uses its real part (Formula 16).
     lfb_c = equivalent_blocked_force_level(61.7, 5.34e-6 + 2e-6j)
     assert float(lfb_c) == pytest.approx(float(lfb))
-    with pytest.raises(ValueError, match="positive, finite real part"):
+    with pytest.raises(ValueError, match="positive real part"):
         equivalent_blocked_force_level(61.7, -1e-6)
 
 
@@ -219,7 +219,7 @@ def test_free_velocity_level_formula_18_real_mobility() -> None:
     lvf = equivalent_free_velocity_level(70.0, y)
     assert float(lvf) == pytest.approx(expected)
     assert float(lvf) == pytest.approx(70.0 + 10.0 * math.log10(y) + 60.0)
-    with pytest.raises(ValueError, match="positive, finite real part"):
+    with pytest.raises(ValueError, match="positive real part"):
         equivalent_free_velocity_level(70.0, -1.0e-2)
 
 

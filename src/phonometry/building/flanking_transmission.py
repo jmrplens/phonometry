@@ -375,7 +375,11 @@ def _single_number_kij(
 
     Averages over 200-1250 Hz (one-third octave) or 125-1000 Hz (octave).
     Bands flagged as ``bracketed`` (modal overlap below 0,25, ISO 10848-4
-    Clause 9) are excluded; the mean is ``None`` if no band remains.
+    Clause 9) are excluded; the mean is ``None`` if no band remains. The
+    average runs over the bands *present* inside the range: a spectrum that
+    does not cover the full Annex A range yields the mean of its available
+    in-range bands (the standard's measurement procedure covers the full
+    range, so partial coverage indicates incomplete input data).
     """
     if frequencies is None:
         return None

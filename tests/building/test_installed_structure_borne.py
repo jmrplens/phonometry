@@ -308,13 +308,13 @@ def test_annex_i3_cistern_full_chain_table_i9() -> None:
 
 def test_coupling_terms_validate_mobilities() -> None:
     """Re{Y_i} <= 0 or Y_s = 0 raise instead of yielding NaN/inf silently."""
-    with pytest.raises(ValueError, match="positive, finite real part"):
+    with pytest.raises(ValueError, match="positive real part"):
         coupling_term(1e-4 + 0j, -1e-5 + 0j)
-    with pytest.raises(ValueError, match="positive, finite real part"):
+    with pytest.raises(ValueError, match="positive real part"):
         coupling_term(1e-4 + 0j, 1e-5j)  # purely imaginary receiver
     with pytest.raises(ValueError, match="finite and non-zero"):
         coupling_term(0.0, 1e-5 + 0j)
-    with pytest.raises(ValueError, match="positive, finite real part"):
+    with pytest.raises(ValueError, match="positive real part"):
         coupling_term_force_source(1e-4 + 0j, 0.0 + 0j)
     with pytest.raises(ValueError, match="finite and non-zero"):
         coupling_term_velocity_source(0.0, 1e4 + 0j)

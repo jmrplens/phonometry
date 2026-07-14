@@ -253,8 +253,33 @@ def test_analyze_spectrum_detects_annex_e_tones() -> None:
     result = analyze_spectrum(
         ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
     )
-    found = sorted(round(float(f), 1) for f in result.tone_frequencies)
+    assert result.group_sizes is not None
+    singles = result.group_sizes == 1
+    found = sorted(round(float(f), 1) for f in result.tone_frequencies[singles])
     assert found == sorted(ref.ISO20065_E1_TONE_FREQUENCIES)
+
+
+def test_analyze_spectrum_step3_combines_annex_e_band() -> None:
+    # Clause 5.3.8 Step 3 inside analyze_spectrum: the three tones share the
+    # critical band, so a combined FG entry appears with the Table E.2 "2 FG"
+    # tone level LT = 72.15 dB (Formula (17), shared lines counted once).
+    result = analyze_spectrum(
+        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+    )
+    assert result.group_sizes is not None
+    fg = result.group_sizes > 1
+    assert int(np.sum(fg)) == 1
+    assert int(result.group_sizes[fg][0]) == 3
+    assert result.tone_levels[fg][0] == pytest.approx(
+        ref.ISO20065_E1_LT_FG, abs=0.02
+    )
+    # Step 4: the decisive audibility is the FG entry (Table E.2 rates the
+    # group at the most audible member; on the *truncated* E.1 spectrum the
+    # 158.8 Hz tone's masking level is underestimated, so the anchor differs
+    # from the full-spectrum printed one, but the decisive entry is the FG).
+    assert result.decisive_audibility == pytest.approx(
+        float(np.max(result.audibilities[fg])), abs=1e-12
+    )
 
 
 def test_analyze_spectrum_137hz_tone_audibility() -> None:
@@ -551,7 +576,11 @@ def test_table_e2_uncertainty_of_the_137hz_tone() -> None:
         ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
     )
     assert res.extended_uncertainties is not None
-    by_freq = dict(zip(res.tone_frequencies, res.extended_uncertainties))
+    assert res.group_sizes is not None
+    singles = res.group_sizes == 1
+    by_freq = dict(
+        zip(res.tone_frequencies[singles], res.extended_uncertainties[singles])
+    )
     assert by_freq[137.3] == pytest.approx(2.79, abs=0.02)
     assert by_freq[118.4] == pytest.approx(3.66, abs=0.1)
     assert by_freq[158.8] == pytest.approx(3.51, abs=0.1)
@@ -638,3 +667,133 @@ def test_table_e3_decisive_audibilities_and_mean() -> None:
     assert mean_audibility(decisives) == pytest.approx(
         ref.ISO20065_MEAN_AUDIBILITY, abs=0.05
     )
+
+
+# ---------------------------------------------------------------------------
+# DIN 45681:2005-03 Anhang I, Beispiel I.3 (wind-energy plant): the parent
+# standard's second end-to-end oracle, independent of the ISO/PAS 20065
+# Annex E example. Line spacing 2.6917 Hz.
+# ---------------------------------------------------------------------------
+def test_din_anhang_i_decisive_tone_from_spectrum() -> None:
+    """Tabelle I.9 -> I.10 row k = 2 (j = 24): the from-levels chain
+    reproduces the printed LS = 41.71, LT = 68.10, LG = 57.68, av = -2.10
+    and decisive dL = 12.52 dB (2-decimal print rounding)."""
+    ft, dl_p, ls_p, lt_p, lg_p, av_p, _u = ref.DIN45681_I10_DECISIVE
+    df = ref.DIN45681_LINE_SPACING
+    ls = mean_narrowband_level(
+        ref.DIN45681_I9_LEVELS, ref.DIN45681_I9_FREQUENCIES, ft
+    )
+    lt = tone_level(ref.DIN45681_I9_LEVELS, ref.DIN45681_I9_FREQUENCIES, ft, ls)
+    assert ls == pytest.approx(ls_p, abs=0.02)
+    assert lt == pytest.approx(lt_p, abs=0.02)
+    assert critical_band_level(ls, ft, df) == pytest.approx(lg_p, abs=0.02)
+    assert masking_index(ft) == pytest.approx(av_p, abs=0.01)
+    assert tone_audibility(lt, ls, ft, df) == pytest.approx(dl_p, abs=0.03)
+
+
+def test_din_anhang_i_decisive_tone_uncertainty() -> None:
+    """Tabelle I.10 row k = 2: the Clause 6 / Anhang G extended uncertainty of
+    the decisive tone reproduces the printed u = 3.18 dB from the K = 4 tone
+    lines and the M noise lines of the final Formula (6) iteration."""
+    from phonometry.psychoacoustics.tone_audibility import (
+        _mean_narrowband_level_lines,
+    )
+
+    ft = ref.DIN45681_I10_DECISIVE[0]
+    lev = np.asarray(ref.DIN45681_I9_LEVELS)
+    freqs = np.asarray(ref.DIN45681_I9_FREQUENCIES)
+    _, kept = _mean_narrowband_level_lines(lev, freqs, ft)
+    # Bold tone lines of Tabelle I.9: 296.1-304.2 Hz (indices 16..19).
+    u = audibility_uncertainty(lev[16:20], lev[kept], ft, ref.DIN45681_LINE_SPACING)
+    assert u == pytest.approx(ref.DIN45681_I10_DECISIVE[6], abs=0.02)
+
+
+def test_din_anhang_i_analyze_spectrum_end_to_end() -> None:
+    """analyze_spectrum on the Tabelle I.9 lines finds exactly the decisive
+    298.8 Hz tone with the printed audibility and uncertainty."""
+    res = analyze_spectrum(
+        ref.DIN45681_I9_LEVELS,
+        ref.DIN45681_I9_FREQUENCIES,
+        ref.DIN45681_LINE_SPACING,
+    )
+    assert res.tone_frequencies.size == 1
+    assert res.decisive_frequency == pytest.approx(298.8, abs=0.05)
+    assert res.decisive_audibility == pytest.approx(
+        ref.DIN45681_I10_DECISIVE[1], abs=0.03
+    )
+    assert res.extended_uncertainties is not None
+    assert res.extended_uncertainties[0] == pytest.approx(
+        ref.DIN45681_I10_DECISIVE[6], abs=0.02
+    )
+
+
+def test_din_anhang_i_two_tone_rule_matches_5fg_row() -> None:
+    """Tabelle I.10 rows k = 4/5 (705.2 / 732.1 Hz, 26.9 Hz apart, both below
+    1000 Hz) are printed combined ("5 FG"): the Formula (18)/(19) decision
+    must NOT separate them -- the only printed outcome of the two-tone rule.
+    The FG chain then reproduces the printed dL = 3.22 dB from the printed
+    combined LT = 55.95 dB at the more audible member (732.1 Hz)."""
+    ft4, dl4, _ls4, _lt4 = ref.DIN45681_I10_K4
+    ft5, dl5, ls5, _lt5 = ref.DIN45681_I10_K5
+    assert resolve_tones_separately(ft4, ft5, dl4, dl5) is False
+    ft, dl_p, ls_p, lt_fg, lg_p, av_p, _u = ref.DIN45681_I10_5FG
+    assert ls_p == ls5
+    df = ref.DIN45681_LINE_SPACING
+    assert critical_band_level(ls_p, ft, df) == pytest.approx(lg_p, abs=0.02)
+    assert masking_index(ft) == pytest.approx(av_p, abs=0.01)
+    assert tone_audibility(lt_fg, ls_p, ft, df) == pytest.approx(dl_p, abs=0.03)
+
+
+def test_din_anhang_i11_rows_j45_j48_chain() -> None:
+    """Tabelle I.11 rows j = 45 / j = 48: the Formulae (12)-(14) chain from
+    the printed LS/LT reproduces the printed LG, av and dL columns."""
+    df = ref.DIN45681_LINE_SPACING
+    for ft, dl_p, ls_p, lt_p, lg_p, av_p, _u in (
+        ref.DIN45681_I11_J45,
+        ref.DIN45681_I11_J48,
+    ):
+        assert critical_band_level(ls_p, ft, df) == pytest.approx(lg_p, abs=0.02)
+        assert masking_index(ft) == pytest.approx(av_p, abs=0.01)
+        assert tone_audibility(lt_p, ls_p, ft, df) == pytest.approx(dl_p, abs=0.03)
+
+
+def test_din_tabelle_i6_6fg_plain_sum_reproduces_printed_audibility() -> None:
+    """Tabelle I.6 row "6 FG": the printed dL = 9.12 dB reproduces from the
+    plain Formula (17) energy sum of the three tone levels (82.87 dB) through
+    the chain at 592.2 Hz. (The row's printed LT cell, 81.11 dB, follows the
+    Anmerkung-2 shared-line dedupe instead and contradicts the printed dL;
+    only the dL chain is pinned, see reference_data.)"""
+    ft, dl_p, ls_p, _av_p = ref.DIN45681_I6_6FG
+    lt = energy_sum_level(
+        ref.DIN45681_I6_6FG_TONE_LEVELS, effective_bandwidth_factor=1.0
+    )
+    assert lt == pytest.approx(82.87, abs=0.01)
+    assert tone_audibility(lt, ls_p, ft, ref.DIN45681_LINE_SPACING) == (
+        pytest.approx(dl_p, abs=0.03)
+    )
+
+
+def test_din_anhang_i3_mean_audibility_maps_to_kt_4() -> None:
+    """Anhang I.3 Steps 3/5: the printed mean audibility 6.38 dB maps to
+    KT = 4 dB (DIN Abschnitt 6 Tabelle 1 == ISO 1996-2:2017 Table J.1)."""
+    from phonometry import tonal_adjustment_from_mean_audibility
+
+    assert tonal_adjustment_from_mean_audibility(
+        ref.DIN45681_I3_MEAN_AUDIBILITY
+    ) == ref.DIN45681_I3_KT
+
+
+def test_din_tabelle_a1_critical_bandwidths() -> None:
+    """Tabelle A.1: Formula (2) reproduces every printed (integer-rounded)
+    critical bandwidth from 100 Hz to 13.5 kHz, except the 250 Hz print
+    quirk recorded in reference_data (printed 105 vs Formula (2) 104.47)."""
+    for ft, dfc_printed in ref.DIN45681_A1_BANDWIDTHS:
+        computed = critical_bandwidth_engineering(ft)
+        if ft == 250.0:
+            assert computed == pytest.approx(104.47, abs=0.01)
+            assert dfc_printed == 105.0
+        else:
+            # abs 0.5 covers the integer print; the informative table drifts
+            # from Formula (2) by up to ~0.03 % at the top rows (3469 printed
+            # vs 3467.9 computed at 13.5 kHz), covered by the rel term.
+            assert computed == pytest.approx(dfc_printed, abs=0.5, rel=5e-4)

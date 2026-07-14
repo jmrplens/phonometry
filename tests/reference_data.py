@@ -1266,6 +1266,69 @@ ISO20065_FD_212 = 21.00
 ISO20065_FD_137 = 24.09
 
 # ---------------------------------------------------------------------------
+# DIN 45681:2005-03 Anhang I, Beispiel I.3 -- wind-energy-plant example (the
+# parent standard's second end-to-end oracle, independent of the ISO/PAS 20065
+# Annex E combustion-engine example above). Line spacing 2.6917 Hz.
+# ---------------------------------------------------------------------------
+# Tabelle I.9: the 39 narrow-band lines (fi, Li) of the critical band about
+# the 298.8 Hz decisive tone of spectrum j = 24 (of 53).
+DIN45681_I9_FREQUENCIES = [
+    253.0, 255.7, 258.4, 261.1, 263.8, 266.5, 269.2, 271.9, 274.5, 277.2,
+    279.9, 282.6, 285.3, 288.0, 290.7, 293.4, 296.1, 298.8, 301.5, 304.2,
+    306.8, 309.5, 312.2, 314.9, 317.6, 320.3, 323.0, 325.7, 328.4, 331.1,
+    333.8, 336.5, 339.1, 341.8, 344.5, 347.2, 349.9, 352.6, 355.3,
+]
+DIN45681_I9_LEVELS = [
+    37.83, 38.45, 38.23, 38.74, 40.37, 47.09, 45.59, 43.27, 46.73, 46.54,
+    51.81, 49.74, 50.95, 52.50, 55.45, 55.32, 61.55, 66.68, 64.77, 57.80,
+    55.75, 43.29, 46.26, 47.47, 46.22, 40.64, 38.10, 42.13, 46.34, 39.03,
+    37.42, 42.59, 41.93, 41.81, 50.24, 52.30, 48.38, 36.27, 40.63,
+]
+DIN45681_LINE_SPACING = 2.6917
+# Tabelle I.10 decisive-tone row (j = 24, k = 2): fT, dL, LS, LT, LG, av, u.
+DIN45681_I10_DECISIVE = (298.8, 12.52, 41.71, 68.10, 57.68, -2.10, 3.18)
+# Tabelle I.10 rows k = 4 and k = 5 (705.2 / 732.1 Hz) share one critical
+# band; both lie below 1000 Hz and their spacing (26.9 Hz) is below the
+# Formula (19) separation frequency, so the print combines them into the
+# "5 FG" row: (fT, dL, LS, LT_FG, LG, av, u).
+DIN45681_I10_K4 = (705.2, 1.35, 39.35, 55.12)     # (fT, dL, LS, LT)
+DIN45681_I10_K5 = (732.1, 1.51, 38.26, 54.23)
+DIN45681_I10_5FG = (732.1, 3.22, 38.26, 55.95, 55.28, -2.55, 3.67)
+# Tabelle I.11 (parameters of the 53 spectra), rows j = 45 and j = 48:
+# (fT, dL, LS, LT, LG, av, u). The from-levels chain (Formulae (12)-(14))
+# reproduces the printed dL/LG/av columns.
+DIN45681_I11_J45 = (258.4, 3.04, 42.24, 59.11, 58.14, -2.08, 2.69)
+DIN45681_I11_J48 = (228.8, 6.11, 38.32, 58.24, 54.19, -2.06, 3.00)
+# Tabelle I.6 row "6 FG" (combustion-engine spectrum 1, the ISO Annex E
+# example): tones k = 6/7/8 (LT = 78.31 / 75.00 / 79.75 dB) share the 592.2 Hz
+# critical band. The printed dL = 9.12 dB reproduces from the *plain*
+# Formula (17) energy sum of the three tone levels (82.87 dB) through the
+# audibility chain at 592.2 Hz (LS = 59.53); the printed LT column (81.11 dB)
+# is consistent with the Anmerkung-2 shared-line dedupe instead and does NOT
+# reproduce the printed dL -- the two printed cells contradict each other, so
+# only the dL chain is pinned.
+DIN45681_I6_6FG_TONE_LEVELS = [78.31, 75.00, 79.75]
+DIN45681_I6_6FG = (592.2, 9.12, 59.53, -2.40)     # (fT, dL, LS, av)
+# Anhang I.3 Step 3/5: mean audibility over the 53 spectra and the resulting
+# tone adjustment (DIN Abschnitt 6 Tabelle 1 == ISO 1996-2 Table J.1).
+DIN45681_I3_MEAN_AUDIBILITY = 6.38
+DIN45681_I3_KT = 4
+# Tabelle A.1 (informative): printed critical bandwidths dfc (Hz, integer)
+# of the frequency groups at the tabulated tone frequencies fT. Every row
+# matches Formula (2) to <= 0.5 Hz except 250 Hz, where the print gives
+# 105 Hz while Formula (2) yields 104.47 Hz (integer-rounds to 104); the
+# table cites 5.2 for the computation, so the 250 Hz cell is a print quirk
+# (possibly carried over from Zwicker's literature table).
+DIN45681_A1_BANDWIDTHS = [
+    (100.0, 101.0), (150.0, 102.0), (250.0, 105.0), (350.0, 109.0),
+    (450.0, 114.0), (570.0, 122.0), (700.0, 133.0), (840.0, 145.0),
+    (1000.0, 162.0), (1170.0, 182.0), (1370.0, 207.0), (1600.0, 239.0),
+    (1850.0, 277.0), (2150.0, 325.0), (2500.0, 386.0), (2900.0, 460.0),
+    (3400.0, 559.0), (4000.0, 685.0), (4800.0, 867.0), (5800.0, 1111.0),
+    (7000.0, 1426.0), (8500.0, 1851.0), (10500.0, 2463.0), (13500.0, 3469.0),
+]
+
+# ---------------------------------------------------------------------------
 # Psychoacoustic annoyance (Fastl & Zwicker Eq. 16.2-16.4; Widmann 1992) and
 # fluctuation strength (Fastl & Zwicker Ch. 10; Osses et al. 2016).
 # ---------------------------------------------------------------------------

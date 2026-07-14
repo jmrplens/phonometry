@@ -13,11 +13,13 @@ back through the indirect relation recovers the element stiffness at ``T << 1``.
 from __future__ import annotations
 
 import math
+import warnings
 
 import numpy as np
 import pytest
 
 from phonometry import (
+    PhonometryWarning,
     TransferStiffnessResult,
     base_transmissibility,
     convert_frf,
@@ -27,6 +29,7 @@ from phonometry import (
     transfer_stiffness_indirect,
     transfer_stiffness_level,
 )
+from phonometry.vibration.transfer_stiffness import TRANSMISSIBILITY_LIMIT
 
 
 # ---------------------------------------------------------------------------
@@ -107,6 +110,41 @@ def test_indirect_rejects_bad_inputs() -> None:
         transfer_stiffness_indirect(0.0, 0.01 + 0j, 10.0)
     with pytest.raises(ValueError, match="blocking_mass"):
         transfer_stiffness_indirect(500.0, 0.01 + 0j, 0.0)
+
+
+# ---------------------------------------------------------------------------
+# Validity of the T << 1 approximation (ISO 10846-3, 6.1, Inequality 2)
+# ---------------------------------------------------------------------------
+def test_indirect_warns_above_transmissibility_limit() -> None:
+    # |T| = 0.5 violates Inequality (2) (DeltaL1,2 < 20 dB): a warning fires.
+    with pytest.warns(PhonometryWarning, match="Inequality"):
+        transfer_stiffness_indirect(50.0, 0.5 + 0j, 10.0)
+
+
+def test_indirect_silent_within_transmissibility_limit() -> None:
+    # |T| = 0.05 satisfies Inequality (2): no PhonometryWarning is emitted.
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", PhonometryWarning)
+        transfer_stiffness_indirect(500.0, 0.05 + 0j, 10.0)
+        transfer_stiffness_indirect(500.0, TRANSMISSIBILITY_LIMIT + 0j, 10.0)
+
+
+def test_result_helper_warns_above_transmissibility_limit() -> None:
+    f = np.array([100.0, 200.0])
+    t = np.array([0.5 + 0j, 0.02 + 0j])
+    with pytest.warns(PhonometryWarning, match="ISO 10846-3"):
+        indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+
+
+def test_indirect_still_recovers_kelvin_voigt_below_the_warning() -> None:
+    """The valid-range identity of Formula (1) is unchanged by the guard."""
+    k, c, m = 1e6, 200.0, 5.0
+    f = 30.0 * math.sqrt(k / m) / (2.0 * math.pi)  # T << 1
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", PhonometryWarning)
+        t = base_transmissibility(f, m, k, c)
+        k_rec = complex(transfer_stiffness_indirect(f, t, m))
+    assert k_rec == pytest.approx(k + 1j * (2.0 * math.pi * f) * c, rel=5e-3)
 
 
 # ---------------------------------------------------------------------------

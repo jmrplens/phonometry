@@ -32,7 +32,11 @@ Two laboratory methods determine ``k2,1``:
 
       k2,1 = -(2 pi f)**2 (m2 + mf) T          for  T << 1
 
-  where ``mf`` is the mass of the output flange of the test element.
+  where ``mf`` is the mass of the output flange of the test element. The
+  approximation is valid only where ``|T| <= 0.1`` (Inequality (2):
+  ``DeltaL1,2 >= 20 dB``) and while the blocking mass still behaves rigidly,
+  ``10 lg(m2,eff**2/m2**2) <= 1 dB`` (Inequality (3)); see
+  :func:`transfer_stiffness_indirect`.
 
 The dynamic transfer stiffness is a member of the frequency-response-function
 family (ISO 10846-1, Annex A / Table A.2): ``k = j omega Z = -omega**2 m_eff``,
@@ -44,6 +48,7 @@ prediction standards (ISO 9611, EN 15657, EN 12354-5).
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -55,10 +60,17 @@ if TYPE_CHECKING:
 from numpy.typing import ArrayLike, NDArray
 
 from .._internal.validation import require_non_negative, require_positive
+from .._internal.warnings import PhonometryWarning
 from .mechanical_mobility import convert_frf
 
 #: Reference dynamic stiffness for the level ``L_k`` (ISO 10846-2/-3, 3.17), N/m.
 REFERENCE_STIFFNESS: float = 1.0
+
+#: Validity limit on the vibration transmissibility magnitude for the indirect
+#: method (ISO 10846-3:2002, 6.1, Inequality (2)): measurements are valid only
+#: where ``DeltaL1,2 = La1 - La2 >= 20 dB``, i.e. ``|T| <= 0.1``, which keeps
+#: the ``T << 1`` approximation of Formula (1) accurate within 1 dB (12 %).
+TRANSMISSIBILITY_LIMIT: float = 0.1
 
 
 def _omega(frequency: ArrayLike) -> NDArray[np.float64]:
@@ -132,6 +144,20 @@ def transfer_stiffness_indirect(
     ``mf``), derived from the measured vibration transmissibility ``T = u2/u1``.
     Valid for ``T << 1`` (i.e. well above the mass/spring resonance).
 
+    **Validity (ISO 10846-3, clause 6).** The ``T << 1`` approximation of
+    Formula (1) is required accurate within 1 dB, i.e. within 12 % of the
+    calculated stiffness magnitude. This holds only where Inequality (2) is
+    met: ``DeltaL1,2 = La1 - La2 >= 20 dB``, i.e. ``|T| <= 0.1``
+    (:data:`TRANSMISSIBILITY_LIMIT`). Bands with ``|T|`` above that limit —
+    routine near or below the mass/spring resonance — trigger a
+    :class:`~phonometry.PhonometryWarning`; treat those bands as outside the
+    valid frequency range of the test arrangement. The upper frequency limit
+    ``f3`` additionally requires the blocking mass to vibrate as a rigid
+    body: results are valid only while its effective mass ``m2,eff``, measured
+    per Formula (4) as ``m2,eff = 2 F2 / (a'1 + a''1)`` (two accelerometers
+    spaced ``D = sqrt(S)`` across the contact area), stays within 1 dB of the
+    rigid mass, ``10 lg(m2,eff**2 / m2**2) <= 1 dB`` (Inequality (3), 6.2.3).
+
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param transmissibility: Vibration transmissibility ``T = u2/u1`` (complex,
         scalar or array; velocity and acceleration ratios have the same value).
@@ -139,11 +165,24 @@ def transfer_stiffness_indirect(
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The dynamic transfer stiffness ``k2,1``, in N/m.
     :raises ValueError: for a non-positive frequency or blocking mass.
+    :warns PhonometryWarning: where any ``|T| > 0.1`` (Inequality (2) violated).
     """
     blocking_mass = require_positive(blocking_mass, "blocking_mass")
     flange_mass = require_non_negative(flange_mass, "flange_mass")
     omega = _omega(frequency)
     t = np.asarray(transmissibility, dtype=np.complex128)
+    magnitude = np.abs(t)
+    if np.any(magnitude > TRANSMISSIBILITY_LIMIT):
+        worst = float(np.max(magnitude))
+        warnings.warn(
+            f"|T| up to {worst:.3g} exceeds {TRANSMISSIBILITY_LIMIT:g} "
+            "(DeltaL1,2 < 20 dB): ISO 10846-3 Inequality (2) is violated and "
+            "the T << 1 approximation of Formula (1) is no longer accurate "
+            "within 1 dB (12 %); those bands lie outside the valid frequency "
+            "range of the indirect method.",
+            PhonometryWarning,
+            stacklevel=2,
+        )
     return np.asarray(
         -(omega**2) * (blocking_mass + flange_mass) * t, dtype=np.complex128
     )
@@ -240,11 +279,16 @@ def indirect_transfer_stiffness_result(
 ) -> TransferStiffnessResult:
     """Indirect-method transfer stiffness bundled as a :class:`TransferStiffnessResult`.
 
+    See :func:`transfer_stiffness_indirect` for the ISO 10846-3 validity
+    conditions (Inequalities (2) and (3)); bands with ``|T| > 0.1`` trigger a
+    :class:`~phonometry.PhonometryWarning`.
+
     :param frequency: Frequencies ``f``, in hertz (array).
     :param transmissibility: Vibration transmissibility ``T = u2/u1`` (complex).
     :param blocking_mass: Blocking mass ``m2``, in kg (> 0).
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The :class:`TransferStiffnessResult` (indirect method).
+    :warns PhonometryWarning: where any ``|T| > 0.1`` (Inequality (2) violated).
     """
     freq = np.asarray(frequency, dtype=np.float64)
     k = transfer_stiffness_indirect(

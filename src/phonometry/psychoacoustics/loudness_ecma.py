@@ -326,27 +326,32 @@ def _specific_basis_loudness(rms: np.ndarray, band: int) -> np.ndarray:
 # --------------------------------------------------------------------------
 
 
-def _band_acf(rect: np.ndarray, s_b: int) -> np.ndarray:
+def _band_acf(rect: np.ndarray, s_b: int, energy: np.ndarray | None = None) -> np.ndarray:
     """Unbiased, normalized ACF of the rectified blocks (Formulae 27-29).
 
     ``rect`` is (n_blocks, s_b). Returns phi_z(m) of shape
     ``(n_blocks, 2*s_b)`` with valid values for 0 <= m < 3/4 s_b.
+    ``energy`` optionally passes a precomputed ``rect**2``.
     """
     n_fft = 2 * s_b
     spec = np.fft.fft(rect, n=n_fft, axis=1)
     unscaled = np.real(np.fft.ifft(np.abs(spec) ** 2, axis=1))  # Formula 27/28
     # Cumulative block energy from both ends for the unbiased normalization.
-    energy = rect**2
+    if energy is None:
+        energy = rect**2
     csum = np.cumsum(energy[:, ::-1], axis=1)[:, ::-1]  # sum_{n'>=m} p^2(n')
-    m_max = (3 * s_b) // 4
+    m_max = (3 * s_b) // 4  # 0 <= m < m_max < s_b
     out = np.zeros_like(unscaled)
-    # sum_{n'=0..s_b-m-1} p^2(n') = total - sum_{n'>=s_b-m}
-    total = csum[:, 0:1]
-    for m in range(m_max):
-        left = total[:, 0] - (csum[:, s_b - m] if (s_b - m) < s_b else 0.0)
-        right = csum[:, m] if m < s_b else 0.0
-        denom = np.sqrt(left * right + _EPS)
-        out[:, m] = unscaled[:, m] / denom
+    # sum_{n'=0..s_b-m-1} p^2(n') = total - sum_{n'>=s_b-m}; the lag loop is
+    # written as elementwise column arithmetic (bit-identical to a per-lag
+    # loop): m = 0 keeps the full energy, m >= 1 subtracts csum[:, s_b - m].
+    total = csum[:, 0]
+    left = np.empty((rect.shape[0], m_max))
+    left[:, 0] = total
+    left[:, 1:] = total[:, None] - csum[:, s_b - m_max + 1 : s_b][:, ::-1]
+    right = csum[:, :m_max]
+    denom = np.sqrt(left * right + _EPS)
+    out[:, :m_max] = unscaled[:, :m_max] / denom
     return out
 
 
@@ -370,9 +375,10 @@ def _scaled_acf_at(
         return cached
     seg = _segment_bs(p_bands[band], block_size, n_new)
     rect = np.where(seg > 0.0, seg, 0.0)  # Formula 21
-    rms = np.sqrt((2.0 / block_size) * np.sum(rect**2, axis=1))  # Formula 22
+    energy = rect**2  # shared by Formula 22 and the ACF normalization
+    rms = np.sqrt((2.0 / block_size) * np.sum(energy, axis=1))  # Formula 22
     basis = _specific_basis_loudness(rms, band)  # Formulae 23-25
-    acf = _band_acf(rect, block_size)  # Formulae 27-29
+    acf = _band_acf(rect, block_size, energy)  # Formulae 27-29
     scaled = np.asarray(acf * basis[:, None], dtype=np.float64)  # Formula 30
     cache[key] = scaled
     return scaled
@@ -411,11 +417,13 @@ def _average_bands_full(
         if reach == 0:
             out.append(native)
             continue
-        stack = [
-            _scaled_acf_at(p_bands, band + off, block_size, n_new, cache)
-            for off in range(-reach, reach + 1)
-        ]
-        out.append(np.mean(np.stack(stack, axis=0), axis=0))
+        # Sequential accumulation; bit-identical to np.mean over a stacked
+        # axis for <= 8 terms (below numpy's pairwise-summation block) while
+        # avoiding the stacked copy.
+        acc = _scaled_acf_at(p_bands, band - reach, block_size, n_new, cache).copy()
+        for off in range(-reach + 1, reach + 1):
+            acc += _scaled_acf_at(p_bands, band + off, block_size, n_new, cache)
+        out.append(acc / float(2 * reach + 1))
     return out
 
 

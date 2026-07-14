@@ -149,3 +149,24 @@ def test_free_and_diffuse_differ() -> None:
     free = roughness_ecma(sig, FS, field="free").roughness
     diffuse = roughness_ecma(sig, FS, field="diffuse").roughness
     assert free != diffuse
+
+
+def test_time_dependent_pchip_batch_matches_per_band_bitwise() -> None:
+    # _time_dependent interpolates all 53 bands with one axis-0 pchip; that
+    # must stay bit-identical to the per-band interpolator loop it replaced.
+    from scipy.interpolate import PchipInterpolator
+
+    from phonometry.psychoacoustics.roughness_ecma import _CBF, _R_S50
+
+    rng = np.random.default_rng(20260715)
+    block_times = np.arange(9) * (4096.0 / FS)
+    a_lz = np.abs(rng.standard_normal((block_times.size, _CBF)))
+    grid = np.arange(int(np.floor(block_times[-1] * _R_S50)) + 1) / _R_S50
+    batched = PchipInterpolator(block_times, a_lz, axis=0)(grid)
+    per_band = np.column_stack(
+        [
+            PchipInterpolator(block_times, a_lz[:, band])(grid)
+            for band in range(_CBF)
+        ]
+    )
+    assert np.array_equal(batched, per_band)

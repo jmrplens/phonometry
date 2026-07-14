@@ -158,3 +158,104 @@ def test_plot_smoke(ref_1k_40: EcmaLoudness) -> None:
     matplotlib.use("Agg")
     axes = ref_1k_40.plot()
     assert axes.shape == (2,)
+
+
+# --------------------------------------------------------------------------
+# Vectorized-kernel equivalence (bitwise) against retained reference loops
+# --------------------------------------------------------------------------
+
+
+def _reference_band_acf(rect: np.ndarray, s_b: int) -> np.ndarray:
+    """Per-lag loop form of the unbiased normalized ACF (Formulae 27-29).
+
+    Retained reference for the column-vectorized ``_band_acf``: the
+    production kernel must reproduce this loop bit for bit.
+    """
+    from phonometry.psychoacoustics.loudness_ecma import _EPS
+
+    n_fft = 2 * s_b
+    spec = np.fft.fft(rect, n=n_fft, axis=1)
+    unscaled = np.real(np.fft.ifft(np.abs(spec) ** 2, axis=1))
+    energy = rect**2
+    csum = np.cumsum(energy[:, ::-1], axis=1)[:, ::-1]
+    m_max = (3 * s_b) // 4
+    out = np.zeros_like(unscaled)
+    total = csum[:, 0:1]
+    for m in range(m_max):
+        left = total[:, 0] - (csum[:, s_b - m] if (s_b - m) < s_b else 0.0)
+        right = csum[:, m] if m < s_b else 0.0
+        denom = np.sqrt(left * right + _EPS)
+        out[:, m] = unscaled[:, m] / denom
+    return out
+
+
+def _short_band_signals() -> tuple[list, int]:
+    """Clause 5 front-end band-pass signals for a short two-tone signal."""
+    from scipy import signal as sp_signal
+
+    from phonometry.psychoacoustics.loudness_ecma import (
+        _CBF,
+        _auditory_bandpass,
+        _ear_filter_sos,
+        _preprocess,
+    )
+
+    t = np.arange(int(FS * 0.15)) / FS
+    x = 0.02 * np.sin(2.0 * np.pi * 1000.0 * t) + 0.01 * np.sin(
+        2.0 * np.pi * 4000.0 * t
+    )
+    padded, _, n_new = _preprocess(x)
+    p_om = sp_signal.sosfilt(_ear_filter_sos("free"), padded)
+    return [_auditory_bandpass(p_om, band) for band in range(_CBF)], n_new
+
+
+def test_band_acf_matches_reference_loop_bitwise() -> None:
+    # The vectorized lag normalization must be bit-identical to the per-lag
+    # reference loop for every block size (1024 and 8192 cover the extremes).
+    from phonometry.psychoacoustics.loudness_ecma import (
+        _band_acf,
+        _S_B,
+        _segment_bs,
+    )
+
+    p_bands, n_new = _short_band_signals()
+    for band in (0, 20, 30, 52):
+        s_b = int(_S_B[band])
+        seg = _segment_bs(p_bands[band], s_b, n_new)
+        rect = np.where(seg > 0.0, seg, 0.0)
+        got = _band_acf(rect, s_b, rect**2)
+        ref = _reference_band_acf(rect, s_b)
+        assert np.array_equal(got, ref), band
+
+
+def test_average_bands_matches_stacked_mean_bitwise() -> None:
+    # The sequential neighbour accumulation of _average_bands_full must be
+    # bit-identical to the stacked np.mean formulation it replaced.
+    import importlib
+
+    le = importlib.import_module("phonometry.psychoacoustics.loudness_ecma")
+
+    p_bands, n_new = _short_band_signals()
+    got = le._average_bands_full(p_bands, n_new)
+
+    cache: dict = {}
+    for band in range(le._CBF):
+        block_size = int(le._S_B[band])
+        n_b = le._N_B_BY_SB[block_size]
+        native = le._scaled_acf_at(p_bands, band, block_size, n_new, cache)
+        if n_b == 0:
+            ref = native
+        elif band == 0:
+            other = le._scaled_acf_at(p_bands, 1, block_size, n_new, cache)
+            ref = 0.5 * (native + other)
+        else:
+            reach = min(n_b, band, le._CBF - 1 - band)
+            if reach == 0:
+                ref = native
+            else:
+                stack = [
+                    le._scaled_acf_at(p_bands, band + off, block_size, n_new, cache)
+                    for off in range(-reach, reach + 1)
+                ]
+                ref = np.mean(np.stack(stack, axis=0), axis=0)
+        assert np.array_equal(got[band], ref), band

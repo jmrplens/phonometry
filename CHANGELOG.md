@@ -227,6 +227,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- ECMA-418-2 chain: the per-lag Python loop of the unbiased ACF
+  normalization (Formulae 27-29) is now column-vectorised, the Clause 6.2.3
+  neighbour-band averaging accumulates without the stacked copy, the block
+  RMS reuses the ACF energy array, and the roughness Clause 7.1.7 pchip
+  interpolation runs all 53 bands in one call. Outputs are bit-identical
+  (guarded by bitwise equivalence tests against retained reference loops and
+  the golden baseline); on the 0.5 s bench signal `loudness_ecma` drops from
+  2.78 s to 2.00 s, `tonality_ecma` from 2.74 s to 2.01 s and
+  `roughness_ecma` from 0.24 s to 0.23 s. The remaining runtime is the
+  standard-mandated 16384-point DFTs, which no bit-preserving reformulation
+  (rfft, one-sided magnitudes, batched or alternative FFT backends) can
+  reduce.
 - ECAC Doc 29 `noise_contour` now evaluates the grid with one vectorised pass
   per flight-path segment instead of a per-point Python loop; numerically
   identical (guarded by the golden baseline and a scalar-equivalence test)

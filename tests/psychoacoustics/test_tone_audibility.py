@@ -173,12 +173,41 @@ def test_mean_narrowband_level_rectangular_higher() -> None:
 
 
 def test_tone_level_single_line_when_isolated() -> None:
-    # A lone peak far above its neighbours yields just itself (minus Hanning).
+    # A lone peak far above its neighbours yields just itself: Formula (7)
+    # applies no bandwidth correction to a K = 1 run (DIN 45681 Annex J:
+    # "If l = 1 Then LT = 10*Log(LT)/Log(10)", no -1.76).
     freqs = [100.0, 102.7, 105.4, 108.1, 110.8]
     levels = [40.0, 41.0, 70.0, 41.0, 40.0]
     ls = 45.0
     lt = tone_level(levels, freqs, 105.4, ls)
-    assert lt == pytest.approx(70.0 - 10.0 * math.log10(1.5), abs=1e-6)
+    assert lt == pytest.approx(70.0, abs=1e-9)
+
+
+def test_energy_sum_single_line_has_no_bandwidth_correction() -> None:
+    # Formula (7): LT = L1 for K = 1; the Hanning correction is K > 1 only.
+    assert energy_sum_level([53.0]) == pytest.approx(53.0, abs=1e-12)
+    assert energy_sum_level([53.0], effective_bandwidth_factor=1.0) == (
+        pytest.approx(53.0, abs=1e-12)
+    )
+
+
+def test_single_line_tone_audibility_flip_regression() -> None:
+    # H1 regression (Formula (7) vs (8)): a single-line tone 13 dB above a
+    # flat 40 dB noise floor (line spacing 2.6917 Hz, tone near 301.5 Hz).
+    # Formula (7) gives LT = 53.0 dB and dL = +0.90 dB (audible); wrongly
+    # applying the K > 1 Hanning correction (-1.76 dB) flips the verdict to
+    # "no audible tone".
+    df = 2.6917
+    freqs = df * np.arange(20, 201)          # 53.8 Hz .. 538.3 Hz
+    levels = np.full(freqs.size, 40.0)
+    tone_index = int(np.argmin(np.abs(freqs - 301.5)))
+    levels[tone_index] = 53.0
+    result = analyze_spectrum(levels, freqs, df)
+    assert result.tone_frequencies.size == 1
+    assert result.tone_frequencies[0] == pytest.approx(freqs[tone_index])
+    assert result.tone_levels[0] == pytest.approx(53.0, abs=1e-9)
+    assert result.audibilities[0] == pytest.approx(0.90, abs=0.02)
+    assert bool(result.audible[0])
 
 
 def test_mean_narrowband_level_empty_critical_band_raises() -> None:

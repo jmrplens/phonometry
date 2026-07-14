@@ -232,19 +232,25 @@ def energy_sum_level(
     *,
     effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
 ) -> float:
-    """Energy sum of the tonal spectral lines with window correction (Formula (8)).
+    """Energy sum of the tonal spectral lines with window correction (Formulae (7)/(8)).
 
-    ``LT = 10·lg(Σ 10^(Li/10)) + 10·lg(Δf/Δfe)`` dB, the tone level from the
-    ``K`` lines carrying tone energy. The window correction ``10·lg(Δf/Δfe)`` is
-    ``−1.76 dB`` for a Hanning window (``Δfe = 1.5·Δf``, Annex A) and ``0 dB``
-    for a rectangular window (``Δfe = Δf``). (The mean narrow-band level ``LS``
-    of Formula (6) is the analogous *energy average*; :func:`mean_narrowband_level`
-    and :func:`tone_level` derive ``LS`` and ``LT`` from a critical-band spectrum.)
+    For a single line (``K = 1``) the tone level is that line's level with *no*
+    bandwidth correction, ``LT = L1`` (Formula (7)). For ``K > 1`` lines,
+    ``LT = 10·lg(Σ 10^(Li/10)) + 10·lg(Δf/Δfe)`` dB (Formula (8)); the window
+    correction ``10·lg(Δf/Δfe)`` is ``−1.76 dB`` for a Hanning window
+    (``Δfe = 1.5·Δf``, Annex A) and ``0 dB`` for a rectangular window
+    (``Δfe = Δf``). The DIN 45681:2005-03 Annex J reference program applies the
+    same split (``If l = 1 Then LT = 10*Log(LT)/Log(10)`` with no ``−1.76``).
+    (The mean narrow-band level ``LS`` of Formula (6) is the analogous *energy
+    average* and always carries the correction; :func:`mean_narrowband_level`
+    and :func:`tone_level` derive ``LS`` and ``LT`` from a critical-band
+    spectrum.)
 
     :param line_levels: Narrow-band levels ``Li`` of the tonal lines to sum,
         in dB.
     :param effective_bandwidth_factor: ``Δfe/Δf``; 1.5 for a Hanning window
-        (the default), 1.0 for a rectangular window.
+        (the default), 1.0 for a rectangular window. Ignored for a single
+        line (Formula (7) applies no correction at ``K = 1``).
     :return: Corrected energy-sum level, in dB.
     :raises ValueError: If ``line_levels`` is empty/non-finite or the factor is
         not positive/finite.
@@ -255,6 +261,10 @@ def energy_sum_level(
     if not np.all(np.isfinite(levels)):
         raise ValueError("'line_levels' must be finite.")
     factor = _positive(effective_bandwidth_factor, "effective_bandwidth_factor")
+    if levels.size == 1:
+        # Formula (7): a single-line tone takes its level unchanged; the
+        # bandwidth correction applies only to sums of K > 1 lines.
+        return float(levels[0])
     total = np.sum(10.0 ** (levels / 10.0))
     return float(10.0 * np.log10(total) - 10.0 * np.log10(factor))
 
@@ -387,7 +397,8 @@ def tone_level(
     The tone energy is carried by the run of lines contiguous with the peak at
     ``tone_frequency`` whose level stays above both ``LS + 6 dB`` and
     ``L_peak − 10 dB`` (Clause 5.3.3); their energy sum with the window
-    correction is ``LT`` (via :func:`energy_sum_level`).
+    correction is ``LT`` (via :func:`energy_sum_level`). A single-line run
+    takes its level unchanged (Formula (7), no bandwidth correction).
 
     :param levels: Narrow-band levels ``Li`` of the spectrum, in dB.
     :param frequencies: The line frequencies, in Hz (strictly increasing).

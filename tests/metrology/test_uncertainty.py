@@ -180,6 +180,9 @@ def test_invalid_inputs_raise() -> None:
             correlation=np.array([[1.0, 1.5], [1.5, 1.0]]))
     with pytest.raises(ValueError, match="trials"):
         u.monte_carlo(_add4, [u.Quantity(0, 1)], trials=0)
+    with pytest.raises(ValueError, match="at least 2"):
+        # trials=1 used to return NaN (ddof=1) with a raw numpy warning.
+        u.monte_carlo(_add4, [u.Quantity(0, 1)], trials=1)
     with pytest.raises(ValueError, match="coverage"):
         u.monte_carlo(_add4, [u.Quantity(0, 1)], coverage=2.0)
     with pytest.raises(ValueError, match="at least one"):
@@ -199,3 +202,55 @@ def test_result_fields_and_plot() -> None:
     ax = result.plot()
     assert isinstance(ax, plt.Axes)
     plt.close("all")
+
+
+def test_correlated_budget_uses_normal_coverage_fallback() -> None:
+    """GUM G.4.1 derives Welch-Satterthwaite for independent inputs only:
+    a correlated budget takes effective_dof = inf (GUM 6.3.3 fallback) with a
+    warning, instead of a meaningless (possibly ~1e-5) effective dof that
+    explodes the coverage factor."""
+    qs = [u.Quantity(10.0, 0.1, dof=5), u.Quantity(10.0, 0.1, dof=5)]
+    r = np.array([[1.0, 0.999], [0.999, 1.0]])
+    with pytest.warns(u.UncertaintyWarning, match="Welch-Satterthwaite"):
+        result = u.combine_uncertainty(lambda a, b: a - b, qs, correlation=r)
+    assert math.isinf(result.effective_dof)
+    k, big = result.expanded(0.95)
+    assert k == pytest.approx(1.960, abs=1e-3)
+    # uc = sqrt(2*(1-r)) * 0.1 ~ 0.00447; U stays sane (was ~1e149 via the
+    # Welch-Satterthwaite pathology).
+    assert result.combined_uncertainty == pytest.approx(
+        0.1 * math.sqrt(2.0 * (1.0 - 0.999)), rel=1e-6
+    )
+    assert big < 0.02
+
+
+def test_identity_correlation_keeps_welch_satterthwaite() -> None:
+    """An explicit identity matrix is the uncorrelated case: the finite input
+    dof still propagate (no fallback, no warning)."""
+    qs = [u.Quantity(0.0, 1.0, dof=10) for _ in range(4)]
+    result = u.combine_uncertainty(_add4, qs, correlation=np.eye(4))
+    assert result.effective_dof == pytest.approx(40.0, abs=1e-6)
+
+
+def test_sensitivity_step_survives_tiny_relative_uncertainty() -> None:
+    """M10 regression: xi = 1e9 with u = 1e-6 used to underflow the 1e-9
+    perturbation below np.spacing(1e9) = 1.2e-7, zeroing both sensitivities
+    and reporting uc = 0. The step max(u, sqrt(eps)|x|) recovers the exact
+    uc = sqrt(2) * 1e-6."""
+    qs = [u.Quantity(1e9, 1e-6), u.Quantity(1e9, 1e-6)]
+    result = u.combine_uncertainty(lambda a, b: a + b, qs)
+    np.testing.assert_allclose(result.sensitivities, 1.0, rtol=1e-6)
+    assert result.combined_uncertainty == pytest.approx(
+        math.sqrt(2.0) * 1e-6, rel=1e-6
+    )
+
+
+def test_flat_direction_warns_but_computes() -> None:
+    """A model genuinely flat along one input (here b, multiplied by zero)
+    warns that its uncertainty does not propagate, and the rest of the budget
+    is unaffected."""
+    qs = [u.Quantity(3.0, 0.1), u.Quantity(4.0, 0.2)]
+    with pytest.warns(u.UncertaintyWarning, match="does not change"):
+        result = u.combine_uncertainty(lambda a, b: a + 0.0 * b, qs)
+    assert result.contributions[1] == pytest.approx(0.0)
+    assert result.combined_uncertainty == pytest.approx(0.1, rel=1e-9)

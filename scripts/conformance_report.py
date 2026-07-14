@@ -3087,6 +3087,26 @@ def _chk_iso20065_mean_narrowband_level() -> Outcome:
     return numeric(ref.ISO20065_E1_LS, value, 0.02, unit="dB", places=2)
 
 
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Clause 6", "Extended uncertainty U of the 137.3 Hz tone, Table E.2")
+def _chk_iso20065_uncertainty() -> Outcome:
+    res = ph.analyze_spectrum(
+        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+    )
+    assert res.extended_uncertainties is not None
+    by_freq = dict(zip(res.tone_frequencies, res.extended_uncertainties))
+    # Table E.2, run index k = 2: U = 2.79 dB (90 % bilateral coverage).
+    return numeric(ref.ISO20065_E2_U[1], float(by_freq[137.3]), 0.02, unit="dB", places=2)
+
+
+@register(_TONE_AUD, "ISO/PAS 20065:2016 Formulae (28)-(29)", "Extended uncertainty of the mean audibility, Annex E Step 4")
+def _chk_iso20065_mean_uncertainty() -> Outcome:
+    u_j = [row[6] for row in ref.ISO20065_E4_DECISIVE_ROWS]
+    value = ph.mean_audibility_uncertainty(ref.ISO20065_DECISIVE_AUDIBILITIES, u_j)
+    return numeric(
+        ref.ISO20065_E4_MEAN_UNCERTAINTY, value, 0.01, unit="dB", places=2
+    )
+
+
 @register(_TONE_AUD, "ISO/PAS 20065:2016 Formula (8)", "Tone level LT from spectrum, Table E.1")
 def _chk_iso20065_tone_level() -> Outcome:
     ls = ph.mean_narrowband_level(

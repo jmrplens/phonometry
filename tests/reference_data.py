@@ -1154,6 +1154,81 @@ ISO20065_E1_TONE_FREQUENCIES = [118.4, 137.3, 158.8]
 ISO20065_E1_TONE_LS = [48.91, 49.22, 50.50]
 ISO20065_E1_LT_FG = 72.15
 
+# Table E.2 full columns for spectrum 1, k = 1..9 (same tone order as
+# ISO20065_ANNEX_E_TONES): critical-band level LG (Formula (12)), masking
+# index av (Formula (13)), extended uncertainty U of the individual spectrum
+# (Clause 6) and the printed band limits (f1, f2). The printed f1/f2 are the
+# first/last FFT lines *inside* the analytic Formula (4)/(5) band, not the
+# analytic corners themselves (line-snapped).
+ISO20065_E2_LG = [64.66, 64.98, 66.28, 68.84, 74.52, 76.16, 76.44, 78.74, 73.60]
+ISO20065_E2_AV = [-2.01, -2.02, -2.02, -2.12, -2.23, -2.40, -2.44, -2.46, -3.27]
+ISO20065_E2_U = [3.66, 2.79, 3.51, 2.46, 3.09, 2.82, 2.67, 3.56, 2.27]
+ISO20065_E2_BAND_LIMITS = [
+    (80.70, 177.60), (96.90, 196.50), (118.40, 215.30), (266.50, 371.40),
+    (382.20, 492.60), (535.60, 656.80), (570.60, 694.40), (584.10, 707.90),
+    (1469.60, 1703.80),
+]
+# Table E.2 "2 FG" row (the decisive FG group at 137.3 Hz): U = 3.21 dB. The
+# Clause 6 note for summated tones reads "the sum of all tone-containing
+# narrow-band levels ... is to be used for K": the reading that reproduces
+# the printed value uses the N summated TONE levels (E.2 rows 1-3) as the K
+# summands (3.215 dB); the union of the individual tonal lines gives 2.18 dB.
+ISO20065_E2_FG_U = 3.21
+ISO20065_E2_FG_TONE_LEVELS = [64.56, 67.96, 68.63]  # LT of tones 1..3
+# Table E.1 NOTE 1 prints LS1 = 49.91 / LS3 = 49.90 dB for the flanking tones
+# computed from the truncated E.1 band. These do NOT reproduce from the E.1
+# lines with the Annex D iteration (measured 49.51 / 49.36 dB) under any
+# tested exclusion-rule variant; the note's exact recipe is unstated, so the
+# values are recorded here without an assertion. (The full-spectrum Table E.2
+# values, 48.91 / 50.50 dB, are the pinned oracles.)
+ISO20065_E1_NOTE1_LS = {118.4: 49.91, 158.8: 49.90}
+
+# Table E.4 - decisive-tone parameters of the five staggered spectra:
+# (fT, printed dL, LS, LT, LG, av, U). FG rows carry the combined LT of
+# Formula (17). The audibility chain dL = LT - LG - av reproduces the
+# printed dL to <= 0.03 dB (2-decimal rounding of the intermediates).
+ISO20065_E4_DECISIVE_ROWS = [
+    (137.3, 9.18, 49.22, 72.15, 64.98, -2.02, 3.21),
+    (430.7, 6.04, 55.06, 75.11, 71.29, -2.23, 2.95),
+    (137.3, 7.46, 50.40, 71.61, 66.16, -2.02, 2.44),
+    (433.4, 2.67, 55.12, 71.79, 71.35, -2.23, 2.52),
+    (137.3, 7.17, 50.70, 71.61, 66.46, -2.02, 2.14),
+]
+# Annex E Step 4: extended uncertainty of the mean audibility over the five
+# spectra (Formulae (28)/(29)), printed U = +/-1.38 dB, checked against the
+# 1.4 dB margin for < 12 spectra.
+ISO20065_E4_MEAN_UNCERTAINTY = 1.38
+
+# Table E.3 - all tonal components of the five spectra: per spectrum j, the
+# printed (fT, dL) pairs, plus the FG audibilities where several tones share
+# a critical band. The decisive audibility of each spectrum (bold in the
+# print) is the maximum over both lists and reproduces
+# ISO20065_DECISIVE_AUDIBILITIES; the narrow-band lines of spectra 2-5 are
+# not printed, so these rows serve as a data-consistency record rather than
+# a from-levels chain.
+ISO20065_E3_TONES = {
+    1: [(118.4, 1.92), (137.3, 4.99), (158.8, 4.37), (314.9, 1.78),
+        (433.4, 0.87), (592.2, 4.55), (629.8, 1.01), (643.3, 3.47),
+        (1582.7, 0.73)],
+    2: [(156.1, 0.52), (430.7, 6.04), (465.7, 0.60), (963.6, 4.11),
+        (1512.7, 0.27), (1590.8, 3.42)],
+    3: [(118.4, 1.77), (137.3, 2.99), (158.8, 2.71), (433.4, 1.78),
+        (589.5, 2.56), (643.3, 1.40), (963.6, 0.34), (1512.7, 2.44),
+        (1580.0, 3.48)],
+    4: [(156.1, 0.65), (433.4, 2.67), (465.7, 0.25), (643.3, 0.40),
+        (707.9, 0.35), (963.6, 1.61), (1580.0, 2.14)],
+    5: [(118.4, 1.48), (137.3, 2.95), (156.1, 1.50), (433.4, 0.93),
+        (640.6, 2.63), (699.8, 1.73), (942.1, 0.00), (960.9, 1.88),
+        (1512.7, 0.37), (1590.8, 2.52)],
+}
+ISO20065_E3_FG = {
+    1: [(137.3, 9.18), (592.2, 9.12)],
+    2: [(1590.8, 3.52)],
+    3: [(137.3, 7.46), (1580.0, 4.48)],
+    4: [],
+    5: [(137.3, 7.17), (960.9, 2.32), (1590.8, 2.82)],
+}
+
 # Two-tone separation frequency fD (Formulae (18)/(19), Clause 5.3.8): two tones
 # in one critical band, both below 1000 Hz, are rated separately (not FG-combined)
 # when |fT1 − fT2| exceeds fD = 21·10^(1.2·|lg(fT/212)|^1.8) Hz, evaluated at the

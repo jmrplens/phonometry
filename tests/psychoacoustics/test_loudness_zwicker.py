@@ -146,6 +146,30 @@ def test_annex_b3_pink_noise_bounds() -> None:
     )
 
 
+def test_stationary_time_skip() -> None:
+    """Annex B.1 TimeSkip: the stationary calculation "shall start from
+    0,2 s" when validating against the official Annex B WAVs, so their
+    leading silence and the filterbank onset do not dilute the mean square.
+    A tone with 150 ms of leading silence (like the shipped WAVs) reads low
+    without the skip and recovers the steady-tone value with it; invalid
+    skips raise."""
+    lead = np.zeros(int(FS * 0.15))
+    x = np.concatenate([lead, _tone(1000.0, 60.0, seconds=1.0, pad_ms=0.0)])
+    n_all = loudness_zwicker(x, FS, stationary=True).loudness
+    n_skip = loudness_zwicker(x, FS, stationary=True, time_skip=0.2).loudness
+    n_steady = loudness_zwicker(
+        _tone(1000.0, 60.0, seconds=1.0, pad_ms=0.0), FS, stationary=True
+    ).loudness
+    assert n_skip > n_all  # leading silence no longer dilutes the mean square
+    # ~1 % residual vs the from-onset tone: that one still contains the
+    # broadband onset click the skip removes.
+    assert n_skip == pytest.approx(n_steady, rel=0.02)
+    with pytest.raises(ValueError, match="time_skip"):
+        loudness_zwicker(x, FS, stationary=True, time_skip=-0.1)
+    with pytest.raises(ValueError, match="time_skip"):
+        loudness_zwicker(x, FS, stationary=True, time_skip=2.0)
+
+
 def test_1khz_60db_anchor() -> None:
     """Definitional anchor: a 1 kHz tone at 40 phon is 1 sone; 60 dB -> 4 sone
     (each 10 phon doubles loudness)."""

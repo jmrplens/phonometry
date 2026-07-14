@@ -15,11 +15,11 @@ from __future__ import annotations
 import numpy as np
 
 # --------------------------------------------------------------------------
-# ISO 532-1:2017, Table A.1 - Third-octave-band filter coefficients for
+# ISO 532-1:2017, Tables A.1/A.2 - Third-octave-band filter coefficients for
 # 48 kHz sampling rate.  Each of the 28 bands (25 Hz .. 12.5 kHz) is a
-# cascade of three second-order sections.  The standard tabulates a
-# reference section plus, per band and stage, the *deviations* from that
-# reference; the working coefficients are (reference - deviation).
+# cascade of three second-order sections.  Table A.1 tabulates the reference
+# section; Table A.2 the per-band/per-stage *deviations* from it (and the
+# stage gains); the working coefficients are (reference - deviation).
 # Column order per stage: b0, b1, b2, a0, a1, a2.
 # --------------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ FILTER_REFERENCE_COEFFS = np.array(
     ]
 )
 
-#: Coefficient deviations from the reference section (Table A.1),
+#: Coefficient deviations from the reference section (Table A.2),
 #: shape (28 bands, 3 stages, 6 coefficients).
 FILTER_DELTA_COEFFS = np.array(
     [

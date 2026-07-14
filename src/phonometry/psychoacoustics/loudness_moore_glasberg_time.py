@@ -39,6 +39,20 @@ standard asks to report (clause 9).  A steady 1 kHz tone at 40 dB SPL presented
 binaurally in a free field yields a long-term loudness of 1.000 sone (40 phon)
 by definition of the sone; the additive spectral calibration of clause 7.3
 (nominally +3.32 dB per component) is set so this anchor holds exactly.
+
+**Conformance mode for the sampling rate.**  Clause 5 prescribes converting
+the input to 32 kHz and clause 7.3 uses fixed 2048-point FFTs; this
+implementation deliberately processes at the **native sampling rate** and
+grows the FFT to ``max(2048, next_pow2(segment))`` so the 64 ms Hann window
+is never truncated at 44.1/48 kHz (see
+``test_low_freq_band_not_truncated_across_sample_rates``).  The spectral
+calibration ``_SPECTRAL_CAL_DB`` was fixed against the 32 kHz anchor; at
+other rates the Annex C.1 anchor reproduces with a 0.3 % cross-rate spread
+(a 0.5 s tone reads ``n_max`` = 0.9918 / 0.9926 / 0.9900 at 32 / 44.1 /
+48 kHz; a settled 1.3 s tone 1.0000 / 1.0000 / 0.9982), far inside the
+standard's 2.8 phon expanded uncertainty.  These values are pinned by the
+test suite; resample to 32 kHz first if letter-of-standard processing is
+required.
 """
 
 from __future__ import annotations

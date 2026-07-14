@@ -615,8 +615,41 @@ def _chk_iso532_b5_diffuse() -> Outcome:
     "Sharpness of the standard 1 kHz reference signal",
 )
 def _chk_sharpness_reference() -> Outcome:
+    # Definitional: the clause 5.2 constant k is derived so this very signal
+    # reads 1.00 acum. The independent Table A.2 oracle is checked below.
     computed = float(ph.sharpness_din(reference_sound(), _FS))
     return numeric(1.0, computed, 1e-9, unit="acum", places=6)
+
+
+@register(
+    "Psychoacoustics",
+    "DIN 45692:2009 Table A.2",
+    "Sharpness of critical-band noise at 2.5 kHz (2320-2700 Hz, 4 sone)",
+)
+def _chk_sharpness_table_a2() -> Outcome:
+    # Independent (non-definitional) oracle: the hearing-test Sollwert for
+    # the 2.5 kHz critical-band noise is 1.78 acum at the clause 6 loudness
+    # of 4 sone; permitted deviation 5 % or 0.05 acum.
+    from scipy import signal as sp_signal
+
+    def narrowband(level_db: float) -> np.ndarray:
+        rng = np.random.default_rng(7)
+        white = rng.standard_normal(_FS * 2)
+        sos = sp_signal.butter(
+            8, [2320.0, 2700.0], btype="band", fs=_FS, output="sos"
+        )
+        nb = sp_signal.sosfilt(sos, white)
+        return np.asarray(
+            nb / np.sqrt(np.mean(nb**2)) * 2e-5 * 10 ** (level_db / 20)
+        )
+
+    lo, hi = 30.0, 90.0
+    for _ in range(13):  # set the clause 6 loudness of 4 sone
+        mid = (lo + hi) / 2
+        n = ph.loudness_zwicker(narrowband(mid), _FS, stationary=True).loudness
+        lo, hi = (mid, hi) if n < 4.0 else (lo, mid)
+    computed = float(ph.sharpness_din(narrowband((lo + hi) / 2), _FS))
+    return numeric(1.78, computed, 0.05 * 1.78, unit="acum", places=3)
 
 
 @register(

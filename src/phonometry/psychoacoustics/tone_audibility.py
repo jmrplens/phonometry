@@ -72,6 +72,13 @@ A-weighted per IEC 61672-1 before the analysis. This module is
 weighting-agnostic — pass A-weighted levels (the Annex E oracles are
 A-weighted); it does not apply the weighting itself.
 
+**Application frequency range.** The functions accept any positive tone
+frequency, but the standards state narrower ranges: DIN 45681:2005-03 (5.3.2)
+restricts the method to ``fT >= 90 Hz`` and the ISO/PAS 20065 scope starts at
+50 Hz; the two-tone separation frequency (Formula (19)) is printed for
+``fT < 1000 Hz`` (with a lower bound of 88 Hz in the DIN print, 50 Hz in the
+ISO one). Results outside these ranges are extrapolations.
+
 **Distinctness edge steepness (DIN-vs-ISO print difference).** The 5.3.4
 edge-steepness test follows the DIN 45681 ``fT/sqrt(2)``-on-both-edges
 reading, matching its executable Annex J reference program; the ISO/PAS

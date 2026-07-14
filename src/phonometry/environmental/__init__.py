@@ -10,6 +10,7 @@ from .air_absorption import (
 )
 from .impulse_prominence import (
     ImpulseProminenceResult,
+    ImpulseProminenceWarning,
     impulse_adjustment,
     impulse_prominence,
     predicted_prominence,
@@ -88,6 +89,7 @@ __all__ = [
     "Barrier",
     "DEFAULT_FREQUENCIES",
     "ImpulseProminenceResult",
+    "ImpulseProminenceWarning",
     "OutdoorAttenuation",
     "WindTurbineNoiseWarning",
     "WindTurbineTonalityResult",

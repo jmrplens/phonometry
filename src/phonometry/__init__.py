@@ -186,6 +186,7 @@ from .vibration.multiple_shock_vibration import (
 )
 from .environmental.impulse_prominence import (
     ImpulseProminenceResult,
+    ImpulseProminenceWarning,
     impulse_adjustment,
     impulse_prominence,
     predicted_prominence,
@@ -932,6 +933,7 @@ __all__ = [
     "impulse_prominence",
     "rating_level",
     "ImpulseProminenceResult",
+    "ImpulseProminenceWarning",
     "seat_to_spine_transfer",
     "spinal_response",
     "response_peaks",

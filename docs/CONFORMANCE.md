@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **210/210 conformance checks pass** across 32 domains and 130 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **229/229 conformance checks pass** across 32 domains and 131 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -122,7 +122,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (42/42)</summary>
+<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (50/50)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -152,12 +152,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | EN 29052-1:1992 Formula 4 | Apparent dynamic stiffness s't = 4π²·m't·fr²  (m't=200 kg/m², fr=25 Hz) | 4.934802 MN/m³ (+/-0.000001 MN/m³) | 4.934802 MN/m³ | 0 MN/m³ | &#9989; |
 | EN 29052-1:1992 clause 8.2 NOTE | Enclosed-gas stiffness s'a·d = 111 MN·mm/m³ (p₀=0,1 MPa, ε=0,9) | 5.55556 MN/m³ (+/-0.0001 MN/m³) | 5.55556 MN/m³ | 0 MN/m³ | &#9989; |
 | EN 29052-1:1992 Formula 2 | Floating-floor natural frequency f0 = (1/2π)√(s'/m')  (s'=10 MN/m³, m'=100 kg/m²) | 50.32921 Hz (+/-0 Hz) | 50.32921 Hz | 0 Hz | &#9989; |
-| ISO 7626-1:2011 Annex A | SDOF driving-point mobility peak mag(Y(f0)) = 1/c  (c=5 N·s/m) | 0.2 m/(N·s) (+/-0.000001 m/(N·s)) | 0.2 m/(N·s) | 0 m/(N·s) | &#9989; |
-| ISO 7626-1:2011 Annex A | SDOF static receptance H(0) = 1/k  (k=8000 N/m) | 0.000125 m/N (+/-0.0001%) | 0.000125 m/N | 0 m/N | &#9989; |
+| ISO 7626-1:2011 Table 1 / 3.1.2 | Closed-form SDOF driving-point mobility peak mag(Y(f0)) = 1/c  (c=5 N·s/m) | 0.2 m/(N·s) (+/-0.000001 m/(N·s)) | 0.2 m/(N·s) | 0 m/(N·s) | &#9989; |
+| ISO 7626-1:2011 Table 1 / 3.1.2 | Closed-form SDOF static receptance H(0) = 1/k  (k=8000 N/m) | 0.000125 m/N (+/-0.0001%) | 0.000125 m/N | 0 m/N | &#9989; |
 | ISO 7626-1:2011 Table 1 | FRF reciprocity: impedance × mobility = 1  (at 37 Hz) | 1 (= Z·Y) | 1 | 0 | &#9989; |
 | ISO 10846-2:2008 3.17 | Transfer-stiffness level Lk = 20 lg(|k|/k0), k0 = 1 N/m  (|k| = 1 MN/m) | 120 dB (+/-0 dB) | 120 dB | 0 dB | &#9989; |
 | ISO 10846-3:2002 Formula (1) | Indirect method k2,1 = -(2πf)²·m2·T  (f=500 Hz, m2=10 kg, T=0,01) | -986960.4 N/m (+/-0.1%) | -986960.4 N/m | 0 N/m | &#9989; |
 | ISO 10846-1:2008 Table A.2 | FRF relation k = jω·Z at 250 Hz  (|k| recovered from impedance) | 1001249.2 N/m (+/-0.0001%) | 1001249.2 N/m | 0 N/m | &#9989; |
+| ISO 7626-2:2015 7.5.2 | Rigid-mass calibration: accelerance mag(A) = 1/m  (m=10 kg) | 0.1 1/kg (+/-0 1/kg) | 0.1 1/kg | 0 1/kg | &#9989; |
+| ISO 7626-2:2015 7.5.2 | Rigid-mass calibration: mobility mag(Y) = 1/(2πf·m) at 100 Hz  (m=10 kg) | 0.0001592 m/(N·s) (+/-0.001%) | 0.0001592 m/(N·s) | 0 m/(N·s) | &#9989; |
+| ISO 7626-2:2015 Annex A | Normalized random error ε = √((1−γ²)/(2nγ²)): γ²=0,8, n=75 → 4,08 % (< 5 %) | 4.08 % (+/-0.01 %) | 4.08 % | 0.002 % | &#9989; |
+| ISO 7626-1:2011 Table 1 | Rigid 1 kg mass at ω = 1000 rad/s: mobility 1e-3, compliance 1e-6 (decades) | 0.001 m/(N·s) (+/-1e-07%) | 0.001 m/(N·s) | 0 m/(N·s) | &#9989; |
+| ISO 10846-3:2002 6.1 Inequality (2) | Indirect-method validity limit mag(T) = 0,1 ↔ ΔL1,2 = 20 dB | 20 dB (+/-0 dB) | 20 dB | 0 dB | &#9989; |
+| ISO 10846-3:2002 6.1 | Model bias at the validity limit: k_ind/k = 1,1 (0,83 dB ≤ 1 dB, 10 % ≤ 12 %) | 1.1 (+/-1e-07%) | 1.1 | 0 | &#9989; |
+| ISO 10846-1:2008 Equation (6) | Delivered/blocking force F2/F2,b = 1/1,1 at mag(k2,2/kt) = 0,1 (within 10 %) | 0.9091 (+/-0) | 0.9091 | 0 | &#9989; |
+| ISO 10846-2:2008 / -3:2002 7.6 | Linearity: ΔLk ≤ 1,5 dB for input spectra 10 dB apart (linear element: 0) | ΔLk ≤ 1,5 dB (7.6 c) | 0 dB | 0 dB | &#9989; |
 | ISO/TS 7849-1:2009 Formula (8) | Calibration L_v from â = 9,81 m/s² at 100 Hz  (standard's EXAMPLE) | 106.9 dB (+/-0.1 dB) | 106.9 dB | -0.02 dB | &#9989; |
 | ISO/TS 7849-2:2009 Formula (15) | L_W from L_v via measured radiation factor = 10 lg(P/P0)  (round-trip) | 84.771 dB (+/-0 dB) | 84.771 dB | 0 dB | &#9989; |
 | ISO/TS 7849-1:2009 Formula (12) | Impedance term: L_W − L_v = 10 lg(411/400) at ε = 1, S = S0 | 0.1178 dB (+/-0 dB) | 0.1178 dB | 0 dB | &#9989; |
@@ -262,13 +270,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Human vibration (ISO 8041 / 2631 / 5349)</b> — 100% (7/7)</summary>
+<summary>&#9989; <b>Human vibration (ISO 8041 / 2631 / 5349)</b> — 100% (15/15)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | ISO 8041-1:2017 Table B.8 | Wk design-goal factor at 6,31 Hz | 1.054 (+/-0.1%) | 1.0544 | 0 | &#9989; |
 | ISO 8041-1:2017 Table B.9 | Wm design-goal factor at 1,585 Hz | 0.9342 (+/-0.1%) | 0.9342 | 0 | &#9989; |
 | ISO 8041-1:2017 Table 1 | Wh factor at the 500 rad/s reference | 0.202 (+/-0.15%) | 0.202 | 0 | &#9989; |
+| ISO 8041-1:2017 Table B.1 | Wb design-goal factor at 6,31 Hz | 1.054 (+/-0.1%) | 1.0545 | 0 | &#9989; |
+| ISO 8041-1:2017 Table B.1 | Wb design-goal factors at 1 / 100 Hz | max rel dev ≤ 0,1 % | 0.000267 | 0 | &#9989; |
+| ISO 8041-1:2017 Table 1 | Wc factor at the 100 rad/s reference | 0.5145 (+/-0.1%) | 0.5145 | 0 | &#9989; |
+| ISO 8041-1:2017 Table 1 + Table B.3 | Wd factors at the 100 rad/s reference and 1 Hz | max rel dev ≤ 0,1 % | 0.000162 | 0 | &#9989; |
+| ISO 8041-1:2017 Table B.4 | We design-goal factor at 8 Hz | 0.1263 (+/-0.1%) | 0.1263 | 0 | &#9989; |
+| ISO 8041-1:2017 Table B.5 | Wf design-goal factors at 0,1585 / 0,1 Hz | max rel dev ≤ 0,1 % | 0.000098 | 0 | &#9989; |
+| ISO 8041-1:2017 Table B.7 | Wj design-goal factors at 6,31 / 8 Hz | max rel dev ≤ 0,1 % | 0.00001 | 0 | &#9989; |
+| ISO 8041-1:2017 Table 5 + Annex B | All nine weightings inside the tolerance envelope (318 printed bands) | 0 bands outside the Table 5 tolerances | 0 | 0 | &#9989; |
 | ISO 5349-2:2001 Example E.2.1 | Single-tool daily exposure A(8) | 4.1 m/s^2 (+/-0.05 m/s^2) | 4.14 m/s^2 | 0.037 m/s^2 | &#9989; |
 | ISO 5349-2:2001 Example E.3 | Forestry three-task A(8) | 3.6 m/s^2 (+/-0.05 m/s^2) | 3.61 m/s^2 | 0.01 m/s^2 | &#9989; |
 | ISO 5349-1:2001 Eq. (C.1) | VWF 10 % lifetime Dy at A(8)=7 | 4 yr (+/-0.1 yr) | 4.04 yr | 0.042 yr | &#9989; |
@@ -343,13 +359,16 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Multiple-shock whole-body vibration (ISO 2631-5)</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>Multiple-shock whole-body vibration (ISO 2631-5)</b> — 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | ISO 2631-5:2018 Formula 3 | Daily acceleration dose, 5 x 40 m/s2 peaks | 55.97 m/s2 (+/-0.01 m/s2) | 55.97 m/s2 | -0.002 m/s2 | &#9989; |
 | ISO 2631-5:2018 Formula C.3 | Stress variable R, Annex C male example | 1.22 (+/-0.01) | 1.22 | 0 | &#9989; |
 | ISO 2631-5:2018 Formula C.5 | Injury probability, Annex C male example | 0.37 (+/-0.01) | 0.37 | -0.003 | &#9989; |
+| ISO 2631-5:2018 Annex C NOTE 5 | Compressive stress Sd, female example | 1.4 MPa (+/-0.01 MPa) | 1.4 MPa | -0.001 MPa | &#9989; |
+| ISO 2631-5:2018 Annex C NOTE 5 | Stress variable R, female example | 0.97 (+/-0.01) | 0.96 | -0.008 | &#9989; |
+| ISO 2631-5:2018 Formula 1 vs Annex D Table D.1 | Seat-to-spine transfer vs the 256 Hz digital filter (0,5-80 Hz) | max abs(Formula 1 - filter) ≤ 0,04 | 0.001 | 0.001 | &#9989; |
 
 </details>
 

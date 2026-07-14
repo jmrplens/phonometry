@@ -8,7 +8,9 @@ as the g(z)-weighted first moment of the specific loudness pattern
 the reference sound - critical-band-wide narrowband noise at 1 kHz
 (920 Hz to 1080 Hz) at 60 dB overall level - yields exactly 1.00 acum
 (clause 6). The informative Annex B variants of Aures and von Bismarck are
-provided as alternative methods.
+provided as alternative methods with the literal factor 0.11 printed in
+Formulas (B.1)/(B.2); with it the reference sound lands near, not exactly
+at, 1.00 acum (~0.96 Aures / ~1.02 von Bismarck through this front-end).
 """
 
 from __future__ import annotations
@@ -90,8 +92,16 @@ def _reference_specific() -> np.ndarray:
 
 
 _K_DIN: float | None = None
-_K_BISMARCK: float | None = None
-_K_AURES: float | None = None
+
+#: Literal factor of the informative Annex B variants, Formulas (B.1)/(B.2):
+#: S_A = 0,11 * moment_A and S_B = 0,11 * moment_B. Unlike the normative
+#: clause 5.2 k (derived so the reference sound is exactly 1.00 acum), the
+#: Annex prints a fixed 0.11 -- with it the clause 6 reference sound lands
+#: NEAR, not exactly at, 1 acum through this front-end (measured ~0.96 acum
+#: for Aures and ~1.02 for von Bismarck). Deriving per-variant constants
+#: instead would shift every Aures result ~4 % against other implementations
+#: of the published formulas, so the literal is used.
+_K_ANNEX_B = 0.11
 
 
 def _k_din() -> float:
@@ -102,32 +112,6 @@ def _k_din() -> float:
         if not 0.105 <= _K_DIN < 0.115:  # pragma: no cover - sanity guard
             raise RuntimeError(f"k={_K_DIN} outside the DIN 45692 range")
     return _K_DIN
-
-
-def _k_bismarck() -> float:
-    """von Bismarck (Annex B) normalization constant, derived like ``_k_din``
-    so the clause 6 reference sound yields exactly 1.00 acum (replacing the
-    hard-coded 0.11 literal)."""
-    global _K_BISMARCK
-    if _K_BISMARCK is None:
-        _K_BISMARCK = 1.0 / _moment(_reference_specific(), "bismarck")
-        if not 0.08 <= _K_BISMARCK < 0.15:  # pragma: no cover - sanity guard
-            raise RuntimeError(f"k_bismarck={_K_BISMARCK} out of range")
-    return _K_BISMARCK
-
-
-def _k_aures() -> float:
-    """Aures (Annex B) normalization constant, derived like ``_k_din`` so the
-    clause 6 reference sound yields exactly 1.00 acum (replacing the
-    hard-coded 0.11 literal). Because the Aures weighting depends on the
-    total loudness N, this anchor holds at the reference sound's loudness
-    specifically."""
-    global _K_AURES
-    if _K_AURES is None:
-        _K_AURES = 1.0 / _moment(_reference_specific(), "aures")
-        if not 0.08 <= _K_AURES < 0.15:  # pragma: no cover - sanity guard
-            raise RuntimeError(f"k_aures={_K_AURES} out of range")
-    return _K_AURES
 
 
 def sharpness_din_from_specific(
@@ -147,10 +131,10 @@ def sharpness_din_from_specific(
         raise ValueError("specific must be the 240-bin ISO 532-1 pattern.")
     if method == "din":
         return _k_din() * _moment(specific, "din")
-    if method == "bismarck":
-        return _k_bismarck() * _moment(specific, "bismarck")
-    if method == "aures":
-        return _k_aures() * _moment(specific, "aures")
+    if method in ("bismarck", "aures"):
+        # Annex B (B.1)/(B.2): the published literal 0.11, NOT a derived
+        # per-variant anchor -- see the _K_ANNEX_B note.
+        return _K_ANNEX_B * _moment(specific, method)
     raise ValueError("method must be 'din', 'aures' or 'bismarck'")
 
 

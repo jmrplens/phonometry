@@ -691,7 +691,15 @@ def _binaural_loudness(n_left: np.ndarray, n_right: np.ndarray) -> Tuple[float, 
 
 
 def _loudness_level(loudness: float) -> float:
-    """Loudness level L_N in phon from loudness N in sone (invert Table 5)."""
+    """Loudness level L_N in phon from loudness N in sone (invert Table 5).
+
+    NOTE: Table 5 ends at 120 phon and ``np.interp`` extrapolates flat, so
+    the returned loudness level saturates silently at 120 phon while the
+    sone value keeps growing (a 1 kHz tone at 130 dB returns N = 760 sone,
+    L_N = 120 phon). The standard marks that range as unvalidated; callers
+    needing a warning should check the sone value themselves. The
+    ``loudness_moore_glasberg_time`` Table 5 mapping saturates identically.
+    """
     if loudness <= 0.0:
         return 0.0
     return float(np.interp(math.log10(loudness), _LOG_T5_SONE, _T5_PHON))

@@ -26,6 +26,21 @@ cross-checked against the literature fluctuation-strength values of Fastl &
 Zwicker (Osses 2016 Table 1) and the open SQAT reference implementation. Like
 the ECMA-418-2 roughness, the model reproduces the reference trends and the
 1-vacil anchor within a documented tolerance rather than to the last digit.
+
+**Front-end deviations from Osses 2016** (besides the re-fitted ``H(fmod)``
+corners documented at ``_HP_LO``): the paper analyses 2 s frames with 90 %
+overlap and 50 ms raised-cosine gating and screens components against the
+absolute hearing threshold; this implementation uses 50 % overlap, a Hann
+analysis window and relative floors (component magnitude > max/10^4,
+excitation level > max - 60 dB), with ``k = 1`` at the filter-bank edges.
+Measured consequences: a steady 1 kHz tone returns ~0.09 vacil instead of ~0
+(analysis-window envelope leakage through the 2 Hz high-pass) and steady
+broadband noise returns ~0.4 vacil (partly physical level fluctuation of the
+noise itself).
+
+ECMA-418-2:2025 (4th ed.) introduced a normative hearing-model fluctuation
+strength (its Clause 9, block size 65536); this module implements the
+Osses/Fastl & Zwicker model, not that method.
 """
 
 from __future__ import annotations
@@ -126,9 +141,17 @@ _C_FS: float | None = None
 
 
 def _hz_to_bark(f: "NDArray[np.float64]") -> "NDArray[np.float64]":
-    """Critical-band rate z(f) in Bark (Osses 2016 Eq. 3)."""
+    """Critical-band rate z(f) in Bark (Zwicker-Terhardt; Osses 2016 Eq. 3).
+
+    Osses 2016 Eq. (3) misprints the first coefficient as 0.76e-4; the
+    Zwicker-Terhardt formula and the paper's own anchors (0.5 Bark = 50 Hz,
+    15 Bark = 2.7 kHz, 23.5 Bark = 13.2 kHz) all require 0.76e-3 (see
+    docs/ERRATA.md). With the misprinted value z(1 kHz) would be 1.05
+    instead of 8.51 Bark and the 47 filter centres would span 491 Hz-20 kHz
+    instead of 50 Hz-13.2 kHz.
+    """
     return np.asarray(
-        13.0 * np.arctan(0.76e-4 * f) + 3.5 * np.arctan((f / 7500.0) ** 2)
+        13.0 * np.arctan(0.76e-3 * f) + 3.5 * np.arctan((f / 7500.0) ** 2)
     )
 
 
@@ -406,16 +429,20 @@ def fluctuation_strength(
         0.2490 -- that was fitted to the paper's own 4096-tap FIR front-end. Here
         it is derived once from the 1-vacil reference stimulus (1 kHz, 60 dB,
         ``m = 1``, 4 Hz) run through this implementation's front-end, so the
-        reference returns **exactly 1.00 vacil by construction** (``C_FS ≈ 0.30``;
+        reference returns **exactly 1.00 vacil by construction** (``C_FS ≈ 0.28``;
         see :func:`_c_fs`).
 
         **Achieved tolerance** (against Osses 2016 Table 1 literature values):
         the reference tone is 1.00 vacil exactly; the AM-tone 70 dB sweep
         (``fmod = 1, 2, 4, 8, 16, 32`` Hz) has Pearson correlation ≈ 0.98 with
-        the literature, peaks at 4 Hz and stays within a factor ≈ 1.9 at every
-        point; the AM broadband-noise 60 dB sweep shows the correct band-pass
-        shape (maximum at 4 Hz, monotone tails). FM-tone accuracy is *not*
-        pursued -- the reference method itself overestimates it above 4 Hz.
+        the literature, peaks at 4 Hz and stays within a factor ≈ 2.1 at every
+        point; the AM-tone carrier sweep at ``fmod = 4 Hz`` reproduces the
+        Fastl & Zwicker Fig. 10.5 trend (low-mid plateau, roll-off at 8 kHz);
+        the AM broadband-noise 60 dB sweep shows the correct band-pass shape
+        (maximum at 4 Hz, monotone tails) but overshoots the absolute
+        pass-band level by up to ~3x (the excitation front-end spreads the
+        modulated energy across bands). FM-tone accuracy is *not* pursued --
+        the reference method itself overestimates it above 4 Hz.
 
     :param signal_in: Calibrated sound-pressure signal (1-D), in Pa.
     :param fs: Sample rate, in Hz (resampled to the model rate if needed).

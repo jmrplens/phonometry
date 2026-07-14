@@ -130,10 +130,11 @@ class ZwickerLoudness:
 def _filterbank_sos() -> np.ndarray:
     """Second-order sections of the 28-band filterbank at 48 kHz.
 
-    Table A.1 lists a reference section and per-band/per-stage deviations;
-    the working coefficients are (reference - deviation).  The stage gains
-    of Table A.2 are folded into the numerator, which is algebraically
-    identical to the reference code's scaling of the recursion input.
+    Table A.1 lists the reference section; Table A.2 the per-band/per-stage
+    deviations and stage gains. The working coefficients are
+    (reference - deviation), with the gains folded into the numerator --
+    algebraically identical to the reference code's scaling of the
+    recursion input.
     Returns shape (28, 3, 6) with rows ``[b0, b1, b2, 1, a1, a2]``.
     """
     sos = np.asarray(FILTER_REFERENCE_COEFFS[np.newaxis, :, :] - FILTER_DELTA_COEFFS)
@@ -149,18 +150,22 @@ def _band_center_frequency(band: int) -> float:
     return float(10.0 ** ((band - 16) / 10.0) * 1000.0)
 
 
-def _third_octave_levels(x: np.ndarray, stationary: bool) -> np.ndarray:
+def _third_octave_levels(
+    x: np.ndarray, stationary: bool, skip_samples: int = 0
+) -> np.ndarray:
     """One-third-octave band levels of a 48 kHz pressure signal.
 
     Implements the filtering, squaring, smoothing and level calculation of
     clause A.2.  For the stationary method one level per band is returned
-    (mean square over the whole signal); for the time-varying method the
-    squared output is smoothed by three cascaded first-order low-passes
-    with tau = 2/(3*fc) (fc capped at 1 kHz) and sampled every 0.5 ms
-    (SR_LEVEL = 2000 Hz).
+    (mean square over the signal from ``skip_samples`` on; Annex B.1's
+    TimeSkip); for the time-varying method the squared output is smoothed
+    by three cascaded first-order low-passes with tau = 2/(3*fc) (fc capped
+    at 1 kHz) and sampled every 0.5 ms (SR_LEVEL = 2000 Hz).
 
     :param x: Sound pressure signal in Pa at 48 kHz.
     :param stationary: Select the stationary or the time-varying method.
+    :param skip_samples: Leading samples excluded from the stationary mean
+        square (filterbank transient; ignored for the time-varying method).
     :return: Levels in dB, shape (28, 1) or (28, num_level_steps) at 2000 Hz.
     """
     num_samples = x.size
@@ -182,7 +187,8 @@ def _third_octave_levels(x: np.ndarray, stationary: bool) -> np.ndarray:
     for band in range(_N_BANDS):
         y = np.asarray(signal.sosfilt(_FILTER_SOS[band], x), dtype=np.float64)
         if stationary:
-            mean_square = float(np.mean(y * y))
+            kept = y[skip_samples:]
+            mean_square = float(np.mean(kept * kept))
             levels[band, 0] = 10.0 * math.log10((mean_square + _TINY_VALUE) / _I_REF)
         else:
             # Frequency-dependent smoothing time constant (clause A.2).
@@ -526,7 +532,15 @@ def _temporal_weighting(loudness: np.ndarray, sample_rate: float) -> np.ndarray:
 
 
 def _sone_to_phon(loudness: float) -> float:
-    """Loudness level LN in phon from loudness N in sone (clause 5.6)."""
+    """Loudness level LN in phon from loudness N in sone (clause 5.6).
+
+    Provenance notes (electronic attachment vs printed standard): the
+    factor above 1 sone is the exact 10/lg 2 = 33.2193... used by the
+    reference program, where Formula (2) prints the rounded 33,22 (the
+    difference stays below 0.005 phon even at 1000 sone). The 3.0 phon
+    floor below is the reference main program's behaviour and appears in
+    no printed formula; it only affects N < 2.3e-4 sone (deep silence).
+    """
     if loudness < 1.0:
         loudness_level: float = 40.0 * (loudness + 0.0005) ** 0.35
         return max(loudness_level, 3.0)
@@ -539,6 +553,13 @@ def _percentile(values: np.ndarray, percentile: int) -> float:
     NX is the loudness exceeded X % of the time: with the values sorted
     ascending and ``k = int((1 - X/100) * n)``, the mean of the samples at
     positions k-1 and k (clause 6.5, Annex A main program).
+
+    Provenance: this (k-1, k) mean comes from the electronic attachment's
+    main program, not from a printed formula, and is supported by the
+    Annex B.5 results (N5 within the clause 6.1 tolerance for all twelve
+    technical signals, Nmax to < 0.01 %). The workbooks' own B.5 N5 header
+    values are not reproducible from their published traces with any Annex A
+    percentile reading, so the headers are held to the 5-6 % tolerance only.
     """
     ordered = np.sort(values)
     n = ordered.size
@@ -615,6 +636,7 @@ def loudness_zwicker(
     field: Literal["free", "diffuse"] = "free",
     stationary: bool = False,
     calibration_factor: float = 1.0,
+    time_skip: float = 0.0,
 ) -> ZwickerLoudness:
     """
     Zwicker loudness of a calibrated time signal per ISO 532-1:2017.
@@ -647,6 +669,14 @@ def loudness_zwicker(
     :param stationary: Use the stationary method (clause 5) instead of the
         time-varying method (clause 6).
     :param calibration_factor: Multiplier converting ``x`` to pascals.
+    :param time_skip: Leading time, in seconds, excluded from the stationary
+        mean square (the reference implementation's TimeSkip). Annex B.1
+        states the stationary calculation "shall start from 0,2 s" when
+        validating against the official Annex B WAV files, excluding the
+        filterbank transient; the default 0.0 preserves the whole-signal
+        behaviour for synthetic steady signals. Validated always (negative,
+        non-finite or whole-signal skips raise :class:`ValueError`) but
+        applied only by the stationary method -- clause 6 has no TimeSkip.
     :return: :class:`ZwickerLoudness`.  Stationary: as in
         :func:`loudness_zwicker_from_spectrum`.  Time-varying:
         ``loudness`` is the maximum loudness Nmax, ``loudness_level`` its
@@ -684,7 +714,17 @@ def loudness_zwicker(
             )
         pressure = np.asarray(signal.resample_poly(pressure, up, down))
 
-    levels = _third_octave_levels(pressure, stationary)
+    time_skip = float(time_skip)
+    if not math.isfinite(time_skip) or time_skip < 0.0:
+        raise ValueError("'time_skip' must be a non-negative, finite time.")
+    skip_samples = int(round(time_skip * _FS_REF))
+    if skip_samples >= pressure.size:
+        raise ValueError(
+            "'time_skip' must leave at least one sample of signal "
+            f"({time_skip} s skips the whole {pressure.size / _FS_REF:.3f} s input)."
+        )
+
+    levels = _third_octave_levels(pressure, stationary, skip_samples)
     core = _core_loudness_from_levels(levels, diffuse)
 
     if stationary:

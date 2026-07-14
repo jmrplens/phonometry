@@ -25,6 +25,7 @@ from phonometry import (
     analyze_spectrum,
     assess_tones,
     audibility_from_levels,
+    audibility_uncertainty,
     combined_tone_level,
     critical_band_corners,
     critical_band_level,
@@ -32,6 +33,7 @@ from phonometry import (
     energy_sum_level,
     masking_index,
     mean_audibility,
+    mean_audibility_uncertainty,
     mean_narrowband_level,
     resolve_tones_separately,
     tone_audibility,
@@ -481,3 +483,129 @@ def test_assess_tones_rejects_empty() -> None:
 def test_assess_tones_rejects_non_positive_frequency() -> None:
     with pytest.raises(ValueError, match="positive"):
         assess_tones([0.0], [60.0], [50.0], 2.7)
+
+
+# ---------------------------------------------------------------------------
+# Table E.2 full columns: LG, av, band limits and uncertainty U
+# ---------------------------------------------------------------------------
+def test_table_e2_lg_and_av_columns() -> None:
+    """Every Table E.2 LG (Formula (12)) and av (Formula (13)) value chains
+    from the printed LS and fT to <= 0.03 dB (2-decimal print rounding)."""
+    for (ft, ls, _lt, _dl), lg_p, av_p in zip(
+        ref.ISO20065_ANNEX_E_TONES, ref.ISO20065_E2_LG, ref.ISO20065_E2_AV
+    ):
+        assert critical_band_level(ls, ft, ref.ISO20065_LINE_SPACING) == pytest.approx(
+            lg_p, abs=0.03
+        )
+        assert masking_index(ft) == pytest.approx(av_p, abs=0.01)
+
+
+def test_table_e2_band_limits_are_line_snapped() -> None:
+    """The printed Table E.2 f1/f2 are the first/last FFT lines inside the
+    analytic Formula (4)/(5) band: each printed limit lies within one line
+    spacing inside the analytic corner."""
+    df = ref.ISO20065_LINE_SPACING
+    for (ft, _ls, _lt, _dl), (f1_p, f2_p) in zip(
+        ref.ISO20065_ANNEX_E_TONES, ref.ISO20065_E2_BAND_LIMITS
+    ):
+        f1_a, f2_a = critical_band_corners(ft)
+        assert f1_a < f1_p <= f1_a + df + 0.01, f"{ft} Hz lower limit"
+        assert f2_a - df - 0.01 <= f2_p < f2_a, f"{ft} Hz upper limit"
+
+
+def test_table_e2_uncertainty_of_the_137hz_tone() -> None:
+    """analyze_spectrum reports the Clause 6 extended uncertainty; on the
+    E.1 spectrum the decisive 137.3 Hz tone reproduces the printed
+    U = 2.79 dB. The flanking tones' critical bands extend beyond the
+    truncated E.1 table, so their U reproduces within 0.1 dB only."""
+    res = analyze_spectrum(
+        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+    )
+    assert res.extended_uncertainties is not None
+    by_freq = dict(zip(res.tone_frequencies, res.extended_uncertainties))
+    assert by_freq[137.3] == pytest.approx(2.79, abs=0.02)
+    assert by_freq[118.4] == pytest.approx(3.66, abs=0.1)
+    assert by_freq[158.8] == pytest.approx(3.51, abs=0.1)
+
+
+def test_table_e2_fg_uncertainty() -> None:
+    """The '2 FG' row of Table E.2: with the N summated tone levels as the K
+    summands (the Clause 6 reading for combined tones) and the decisive
+    tone's noise lines, U reproduces the printed 3.21 dB."""
+    from phonometry.psychoacoustics.tone_audibility import (
+        _mean_narrowband_level_lines,
+    )
+
+    lev = np.asarray(ref.ISO20065_E1_LEVELS)
+    _, kept = _mean_narrowband_level_lines(
+        lev, np.asarray(ref.ISO20065_E1_FREQUENCIES), 137.3
+    )
+    u = audibility_uncertainty(
+        ref.ISO20065_E2_FG_TONE_LEVELS, lev[kept], 137.3, ref.ISO20065_LINE_SPACING
+    )
+    assert u == pytest.approx(ref.ISO20065_E2_FG_U, abs=0.01)
+
+
+def test_uncertainty_constants_and_validation() -> None:
+    from phonometry.psychoacoustics.tone_audibility import (
+        COVERAGE_FACTOR_90,
+        SIGMA_NARROWBAND_LEVEL,
+    )
+
+    # Clause 6 constants: uniform 3 dB level sigma, k = 1.645 (90 % bilateral).
+    assert SIGMA_NARROWBAND_LEVEL == 3.0
+    assert COVERAGE_FACTOR_90 == 1.645
+    with pytest.raises(ValueError, match="at least one line"):
+        audibility_uncertainty([], [50.0], 137.3, 2.7)
+    with pytest.raises(ValueError, match="finite"):
+        audibility_uncertainty([60.0, np.nan], [50.0], 137.3, 2.7)
+    with pytest.raises(ValueError, match="share their length"):
+        mean_audibility_uncertainty([9.18, 6.04], [3.21])
+
+
+# ---------------------------------------------------------------------------
+# Table E.4: decisive tones of the five spectra, and the mean uncertainty
+# ---------------------------------------------------------------------------
+def test_table_e4_decisive_chain() -> None:
+    """Each Table E.4 decisive row chains LS/LT -> LG, av, dL to the printed
+    values (<= 0.03 dB residual from the 2-decimal intermediates)."""
+    for ft, dl_p, ls, lt, lg_p, av_p, _u in ref.ISO20065_E4_DECISIVE_ROWS:
+        assert critical_band_level(ls, ft, ref.ISO20065_LINE_SPACING) == pytest.approx(
+            lg_p, abs=0.03
+        )
+        assert masking_index(ft) == pytest.approx(av_p, abs=0.01)
+        assert tone_audibility(
+            lt, ls, ft, ref.ISO20065_LINE_SPACING
+        ) == pytest.approx(dl_p, abs=0.03)
+
+
+def test_table_e4_mean_audibility_uncertainty() -> None:
+    """Annex E Step 4: the extended uncertainty of the mean audibility over
+    the five spectra (Formulae (28)/(29)) reproduces the printed 1.38 dB and
+    respects the printed 1.4 dB check margin for fewer than 12 spectra."""
+    u_j = [row[6] for row in ref.ISO20065_E4_DECISIVE_ROWS]
+    u_mean = mean_audibility_uncertainty(ref.ISO20065_DECISIVE_AUDIBILITIES, u_j)
+    assert u_mean == pytest.approx(ref.ISO20065_E4_MEAN_UNCERTAINTY, abs=0.01)
+    assert u_mean <= 1.4
+
+
+# ---------------------------------------------------------------------------
+# Table E.3: all tonal components of the five spectra (data consistency)
+# ---------------------------------------------------------------------------
+def test_table_e3_decisive_audibilities_and_mean() -> None:
+    """The decisive audibility of each spectrum is the maximum over its tone
+    and FG audibilities (Clause 5.3.8 Step 4) and matches the printed bold
+    values; their Formula (20) energy mean is the printed 6.96 dB. (The
+    narrow-band lines of spectra 2-5 are not printed, so E.3 cannot be
+    chained from levels; this locks the printed record's consistency.)"""
+    decisives = []
+    for j in sorted(ref.ISO20065_E3_TONES):
+        candidates = [dl for _f, dl in ref.ISO20065_E3_TONES[j]]
+        candidates += [dl for _f, dl in ref.ISO20065_E3_FG[j]]
+        decisives.append(max(candidates))
+    assert decisives == pytest.approx(ref.ISO20065_DECISIVE_AUDIBILITIES)
+    # 0.05 dB: the print carries 2-decimal dLj, and the standard's own mean
+    # lands at 6.96 vs the 6.98 recomputed from the rounded decisives.
+    assert mean_audibility(decisives) == pytest.approx(
+        ref.ISO20065_MEAN_AUDIBILITY, abs=0.05
+    )

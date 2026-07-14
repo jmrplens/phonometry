@@ -54,6 +54,25 @@ rated separately instead of combined. :func:`two_tone_separation_frequency` and
 :func:`resolve_tones_separately` implement this branch (Clause 5.3.8), which no
 ISO/PAS 20065 worked example exercises — it is verified against the DIN 45681
 Annex J reference program rather than a numeric oracle.
+
+**Uncertainty (Clauses 5.4/6).** :func:`audibility_uncertainty` propagates the
+uniform 3 dB narrow-band level uncertainty through the audibility chain to the
+extended uncertainty ``U`` (90 % bilateral coverage), and
+:func:`mean_audibility_uncertainty` combines the per-spectrum values through
+the Formula (20) mean. Clause 6: when fewer than 12 spectra have been
+averaged, the extended uncertainty **shall** be taken into consideration.
+:func:`analyze_spectrum` reports the per-tone ``U`` on its result.
+
+**A-weighting.** Clause 5.3.2: unweighted narrow-band spectra "shall" be
+A-weighted per IEC 61672-1 before the analysis. This module is
+weighting-agnostic — pass A-weighted levels (the Annex E oracles are
+A-weighted); it does not apply the weighting itself.
+
+**Distinctness edge steepness (DIN-vs-ISO print difference).** The 5.3.4
+edge-steepness test follows the DIN 45681 ``fT/sqrt(2)``-on-both-edges
+reading, matching its executable Annex J reference program; the ISO/PAS
+20065 print shows asymmetric formulas that contradict it (see
+``_is_distinct`` and docs/ERRATA.md).
 """
 
 from __future__ import annotations
@@ -301,6 +320,25 @@ def mean_narrowband_level(
     :raises ValueError: If the spectrum is invalid, the factor is not
         positive/finite, or no lines fall in the critical band.
     """
+    ls, _ = _mean_narrowband_level_lines(
+        levels, frequencies, tone_frequency,
+        effective_bandwidth_factor=effective_bandwidth_factor,
+    )
+    return ls
+
+
+def _mean_narrowband_level_lines(
+    levels: "ArrayLike",
+    frequencies: "ArrayLike",
+    tone_frequency: float,
+    *,
+    effective_bandwidth_factor: float = HANNING_BANDWIDTH_FACTOR,
+) -> tuple[float, list[int]]:
+    """``LS`` plus the indices of the lines kept by the final iteration.
+
+    The kept-line set is the ``M`` noise lines that Clause 6 uses in the
+    uncertainty of the audibility (see :func:`audibility_uncertainty`).
+    """
     lev, freq = _validate_spectrum(levels, frequencies)
     ft = _positive(tone_frequency, "tone_frequency")
     factor = _positive(effective_bandwidth_factor, "effective_bandwidth_factor")
@@ -333,7 +371,7 @@ def mean_narrowband_level(
             ls = new_ls
             break
         ls = new_ls
-    return ls
+    return ls, kept
 
 
 def tone_level(
@@ -408,7 +446,18 @@ def _is_distinct(
     high: int,
     line_spacing: float,
 ) -> bool:
-    """Distinctness test: bandwidth (Formula (9)) and edge steepness (10)/(11)."""
+    """Distinctness test: bandwidth (Formula (9)) and edge steepness (10)/(11)).
+
+    NOTE (DIN-vs-ISO print difference): ISO/PAS 20065:2016 5.3.4 prints
+    *asymmetric* edge-steepness formulas -- ``fT/2`` on the lower edge and
+    ``fT`` (no divisor) on the upper. DIN 45681:2005-03 prints ``fT/sqrt(2)``
+    on BOTH edges and its executable Annex J reference program does the same
+    (``Frequenz(i)/Sqr(2)``). The two cannot both be satisfied; this
+    implementation follows the DIN/sqrt(2) reading (the ISO print is
+    plausibly a typesetting corruption of it, see docs/ERRATA.md).
+    Borderline tones with a one-sided edge steepness in roughly
+    [17, 34] dB/oct flip classification between the two readings.
+    """
     n_lines = high - low + 1
     max_bandwidth = _DISTINCT_BW_CONSTANT * (1.0 + _DISTINCT_BW_SLOPE * freq[peak])
     if n_lines * line_spacing > max_bandwidth:
@@ -528,7 +577,15 @@ def analyze_spectrum(
             lev[low : high + 1], effective_bandwidth_factor=factor
         )
         if tone_audibility(lt, ls, float(freq[peak]), df) > 0.0:
-            tones.append((float(freq[peak]), lt, ls))
+            # Extended uncertainty U (Clause 6) from the K tone lines and the
+            # M noise lines of the final Formula (6) iteration.
+            _, kept = _mean_narrowband_level_lines(
+                lev, freq, float(freq[peak]), effective_bandwidth_factor=factor
+            )
+            u = audibility_uncertainty(
+                lev[low : high + 1], lev[kept], float(freq[peak]), df
+            )
+            tones.append((float(freq[peak]), lt, ls, u))
     if not tones:
         raise ValueError("No audible tone was detected in the spectrum.")
     return assess_tones(
@@ -536,6 +593,7 @@ def analyze_spectrum(
         [t[1] for t in tones],
         [t[2] for t in tones],
         df,
+        extended_uncertainties=[t[3] for t in tones],
     )
 
 
@@ -607,8 +665,8 @@ def two_tone_separation_frequency(tone_frequency: float) -> float:
     single "FG" tone (Formula (17)) — if their frequency difference
     ``|fT1 − fT2|`` (Formula (18)) exceeds this threshold. ``fT`` is the frequency
     of the more prominent tone (the larger audibility ``ΔL``). The threshold is
-    ``21 Hz`` at ``fT = 212 Hz`` and grows on either side; the formula is defined
-    over ``88 Hz < fT < 1000 Hz`` (Clause 5.3.8, Annex D, Note 3).
+    ``21 Hz`` at ``fT = 212 Hz`` and grows on either side; Formula (19) is
+    stated for ``50 Hz < fT < 1000 Hz`` (Clause 5.3.8, Annex D, Note 3).
 
     .. note::
         No numeric worked example exercises this branch — the Annex E
@@ -693,6 +751,120 @@ def mean_audibility(decisive_audibilities: "ArrayLike") -> float:
 
 
 # --------------------------------------------------------------------------- #
+# Uncertainty of the audibility (Clauses 5.4 and 6)
+# --------------------------------------------------------------------------- #
+#: Uniform standard uncertainty of every narrow-band level (Clause 6), in dB.
+SIGMA_NARROWBAND_LEVEL = 3.0
+#: Coverage factor k for a 90 % bilateral confidence interval (Clause 6).
+COVERAGE_FACTOR_90 = 1.645
+
+
+def audibility_uncertainty(
+    tone_line_levels: "ArrayLike",
+    noise_line_levels: "ArrayLike",
+    tone_frequency: float,
+    line_spacing: float,
+    *,
+    sigma_level_db: float = SIGMA_NARROWBAND_LEVEL,
+    coverage_factor: float = COVERAGE_FACTOR_90,
+) -> float:
+    """Extended uncertainty ``U`` of one tone's audibility (Clause 6).
+
+    Gaussian propagation through Formula (14) with a uniform narrow-band
+    level uncertainty (Formulae (22)-(27) and (29)):
+
+    ``sigma^2 = [sum(w_T^2)/sum(w_T)^2 + sum(w_S^2)/sum(w_S)^2] * sigma_L^2
+    + (4.34 * df/dfc)^2`` with ``w = 10^(0.1 L)`` over the ``K``
+    tone-containing lines and the ``M`` noise lines of the final Formula (6)
+    iteration. For an FG group (several tones combined in one critical band,
+    Formula (17)) pass the ``N`` summated *tone levels* as
+    ``tone_line_levels`` -- that reading reproduces the printed Table E.2 FG
+    uncertainty (3.21 dB) where a union of the individual tonal lines does
+    not -- and the most audible tone's noise lines.
+    ``U = k * sigma`` with ``k = 1.645`` (90 % bilateral coverage). No
+    uncertainty is assumed for the masking index or the line spacing; the
+    critical-bandwidth term uses ``sigma_dfc = df`` (Formula (26)). The
+    DIN 45681 Annex J reference program computes the same quantity (its
+    ``LT_Delta``/``Ls_Delta`` accumulators), differing only in printing the
+    third term without the ``df`` factor -- both readings agree to well
+    under 0.01 dB on the Annex E example.
+
+    Clause 5.4 / Clause 6: if fewer than 12 spectra have been averaged, the
+    extended uncertainty of the (mean) audibility **shall** be taken into
+    consideration; see :func:`mean_audibility_uncertainty`.
+
+    :param tone_line_levels: Levels of the ``K`` tone-containing lines, dB.
+    :param noise_line_levels: Levels of the ``M`` masking-noise lines kept by
+        the final Formula (6) iteration, dB.
+    :param tone_frequency: Tone frequency ``fT``, in Hz.
+    :param line_spacing: Line spacing ``df``, in Hz.
+    :param sigma_level_db: Standard uncertainty of each narrow-band level
+        (Clause 6 assumes a uniform 3 dB).
+    :param coverage_factor: Coverage factor ``k`` (1.645 for 90 % bilateral).
+    :return: Extended uncertainty ``U`` of the audibility, in dB.
+    :raises ValueError: If a line set is empty/non-finite or a parameter is
+        not positive/finite.
+    """
+    lt = np.asarray(tone_line_levels, dtype=np.float64)
+    ls = np.asarray(noise_line_levels, dtype=np.float64)
+    if lt.size == 0 or ls.size == 0:
+        raise ValueError("Both line sets must contain at least one line.")
+    if not (np.all(np.isfinite(lt)) and np.all(np.isfinite(ls))):
+        raise ValueError("Line levels must be finite.")
+    ft = _positive(tone_frequency, "tone_frequency")
+    df = _positive(line_spacing, "line_spacing")
+    sigma = _positive(sigma_level_db, "sigma_level_db")
+    k = _positive(coverage_factor, "coverage_factor")
+
+    w_t = 10.0 ** (0.1 * lt)
+    w_s = 10.0 ** (0.1 * ls)
+    level_term = float(
+        np.sum(w_t**2) / np.sum(w_t) ** 2 + np.sum(w_s**2) / np.sum(w_s) ** 2
+    )
+    dfc = critical_bandwidth_engineering(ft)
+    variance = level_term * sigma**2 + (4.34 * df / dfc) ** 2  # Formula (27)
+    return float(k * np.sqrt(variance))  # Formula (29)
+
+
+def mean_audibility_uncertainty(
+    decisive_audibilities: "ArrayLike",
+    extended_uncertainties: "ArrayLike",
+) -> float:
+    """Extended uncertainty ``U`` of the mean audibility (Formulae (28)/(29)).
+
+    ``U = sqrt(sum (10^(0.1*dLj) * Uj)^2) / sum 10^(0.1*dLj)`` -- the
+    energy-weighted propagation of the per-spectrum extended uncertainties
+    ``Uj`` through the Formula (20) mean (the coverage factor cancels, so
+    ``Uj`` can be passed directly). Clause 6: if fewer than 12 spectra have
+    been averaged this uncertainty **shall** be taken into consideration;
+    with 12 averages the standard reports ~+/-1.5 dB as typically achieved.
+
+    :param decisive_audibilities: Decisive audibilities ``dLj`` of the
+        spectra, in dB.
+    :param extended_uncertainties: Extended uncertainties ``Uj`` of the same
+        spectra, in dB (same length).
+    :return: Extended uncertainty of the mean audibility, in dB.
+    :raises ValueError: If the arrays are empty, non-finite or of different
+        lengths.
+    """
+    deltas = np.asarray(decisive_audibilities, dtype=np.float64)
+    uncertainties = np.asarray(extended_uncertainties, dtype=np.float64)
+    if deltas.size == 0:
+        raise ValueError("'decisive_audibilities' must not be empty.")
+    if deltas.shape != uncertainties.shape:
+        raise ValueError(
+            "'decisive_audibilities' and 'extended_uncertainties' must share "
+            "their length."
+        )
+    if not (np.all(np.isfinite(deltas)) and np.all(np.isfinite(uncertainties))):
+        raise ValueError("Inputs must be finite.")
+    weights = 10.0 ** (0.1 * deltas)
+    return float(
+        np.sqrt(np.sum((weights * uncertainties) ** 2)) / np.sum(weights)
+    )
+
+
+# --------------------------------------------------------------------------- #
 # Result
 # --------------------------------------------------------------------------- #
 @dataclass(frozen=True)
@@ -711,6 +883,11 @@ class ToneAudibilityResult:
         noise, in dB (Formula (12)).
     :ivar masking_indices: Masking indices ``av``, in dB (Formula (13)).
     :ivar audibilities: Audibilities ``ΔL``, in dB (Formula (14)).
+    :ivar extended_uncertainties: Extended uncertainties ``U`` of the
+        audibilities, in dB (Clause 6, 90 % bilateral coverage), or ``None``
+        when the per-line levels needed to compute them were not available
+        (:func:`assess_tones` from bare levels). Clause 6: **shall** be taken
+        into consideration when fewer than 12 spectra have been averaged.
     """
 
     tone_frequencies: "NDArray[np.float64]"
@@ -723,6 +900,7 @@ class ToneAudibilityResult:
     critical_band_levels: "NDArray[np.float64]"
     masking_indices: "NDArray[np.float64]"
     audibilities: "NDArray[np.float64]"
+    extended_uncertainties: "NDArray[np.float64] | None" = None
 
     @property
     def audible(self) -> "NDArray[np.bool_]":
@@ -781,6 +959,8 @@ def assess_tones(
     tone_levels: "ArrayLike",
     mean_narrowband_levels: "ArrayLike",
     line_spacing: float,
+    *,
+    extended_uncertainties: "ArrayLike | None" = None,
 ) -> ToneAudibilityResult:
     """Assess the audibility of the tones of a narrow-band spectrum.
 
@@ -793,6 +973,10 @@ def assess_tones(
     :param mean_narrowband_levels: Mean narrow-band levels ``LS`` of the masking
         noise, in dB (Formula (6)).
     :param line_spacing: Line spacing (frequency resolution) ``Δf``, in Hz.
+    :param extended_uncertainties: Optional per-tone extended uncertainties
+        ``U``, in dB (see :func:`audibility_uncertainty`; computed
+        automatically by :func:`analyze_spectrum`, which has the per-line
+        levels this level-based entry point lacks).
     :return: A :class:`ToneAudibilityResult`.
     :raises ValueError: If the arrays are empty, differ in length, or contain
         non-finite/non-positive values.
@@ -820,6 +1004,16 @@ def assess_tones(
             "'tone_levels' and 'mean_narrowband_levels' must be finite."
         )
 
+    uncertainties: "NDArray[np.float64] | None" = None
+    if extended_uncertainties is not None:
+        uncertainties = np.asarray(extended_uncertainties, dtype=np.float64)
+        if uncertainties.shape != freqs.shape:
+            raise ValueError(
+                "'extended_uncertainties' must match 'tone_frequencies' in length."
+            )
+        if not np.all(np.isfinite(uncertainties)):
+            raise ValueError("'extended_uncertainties' must be finite.")
+
     dfc = np.array([critical_bandwidth_engineering(f) for f in freqs])
     # Corner frequencies (Formulae 4/5) from the already-computed Δfc, in the
     # numerically stable form (see critical_band_corners).
@@ -839,4 +1033,5 @@ def assess_tones(
         critical_band_levels=lg,
         masking_indices=av,
         audibilities=delta,
+        extended_uncertainties=uncertainties,
     )

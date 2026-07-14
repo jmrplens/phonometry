@@ -1,6 +1,6 @@
 ---
 title: "Molestia psicoacústica e intensidad de fluctuación"
-description: "La molestia psicoacústica de Fastl y Zwicker PA = N5·√(1 + wS² + wFR²) a partir de sonoridad, nitidez, aspereza e intensidad de fluctuación (Ecs 16.2–16.4), la forma cerrada para ruido de banda ancha AM (Ec. 10.2) y el modelo de señal de intensidad de fluctuación de Osses 2016."
+description: "La molestia psicoacústica de Fastl y Zwicker PA = N5·(1 + √(wS² + wFR²)) a partir de sonoridad, nitidez, aspereza e intensidad de fluctuación (Ecs 16.2–16.4), la forma cerrada para ruido de banda ancha AM (Ec. 10.2) y el modelo de señal de intensidad de fluctuación de Osses 2016."
 ---
 
 Lo *molesto* que resulta un sonido depende de algo más que de su sonoridad.
@@ -38,7 +38,7 @@ un factor que crece con la ponderación de nitidez `wS` y la ponderación combin
 de aspereza/fluctuación `wFR`:
 
 $$
-PA = N_5\sqrt{1 + w_S^2 + w_{FR}^2}, \qquad
+PA = N_5\left(1 + \sqrt{w_S^2 + w_{FR}^2}\right), \qquad
 w_S = (S - 1{,}75)\,0{,}25\,\lg(N_5 + 10)\ \ (S > 1{,}75\ \mathrm{acum}), \qquad
 w_{FR} = \frac{2{,}18}{N_5^{0{,}4}}\,(0{,}4\,F + 0{,}6\,R).
 $$
@@ -53,7 +53,7 @@ intermedias:
 import phonometry as ph
 
 res = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)   # N5, S, F, R
-print(round(res.annoyance, 4))   # 30.8167
+print(round(res.annoyance, 4))   # 37.0478
 print(round(res.w_s, 4), round(res.w_fr, 4))   # 0.1001 0.2125
 ```
 
@@ -210,9 +210,9 @@ para que el tono AM de `1 kHz / 60 dB / m = 1 / 4 Hz` marque `1,00 vacil` por
 construcción, y contrastada con los valores de la literatura de la Tabla 1 de
 Osses 2016 y con la referencia abierta SQAT (usada solo como oráculo numérico).
 En el barrido de tono AM a `70 dB` `fmod ∈ {1, 2, 4, 8, 16, 32} Hz` da
-`[0,42, 0,79, 1,09, 1,05, 0,19, 0,10]` vacil frente a la literatura
+`[0,40, 0,79, 1,09, 1,05, 0,17, 0,09]` vacil frente a la literatura
 `[0,39, 0,84, 1,25, 1,30, 0,36, 0,06]` (`r` de Pearson `= 0,98`, máximo correcto a
-`4 Hz`, dentro de ~2×). La exactitud para tonos FM no se persigue explícitamente.
+`4 Hz`, dentro de ~2,1×). La exactitud para tonos FM no se persigue explícitamente.
 Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absoluto
 (reparte la energía modulada entre las bandas) — cite la forma cerrada
 `fluctuation_strength_am_noise` (§3.1) para ese estímulo.
@@ -221,7 +221,7 @@ Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absolu
 ## Normas
 
 Fastl y Zwicker (2006), *Psychoacoustics: Facts and Models* (Springer): la
-molestia psicoacústica `PA = N5·√(1 + wS² + wFR²)` con la ponderación de nitidez
+molestia psicoacústica `PA = N5·(1 + √(wS² + wFR²))` con la ponderación de nitidez
 `wS` y la ponderación de aspereza/fluctuación `wFR` (Ecs 16.2–16.4; origen
 Widmann 1992), y la forma cerrada para la intensidad de fluctuación del ruido de
 banda ancha modulado en amplitud (Ec. 10.2). El modelo de señal de intensidad de

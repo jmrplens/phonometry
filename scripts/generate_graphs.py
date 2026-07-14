@@ -3166,7 +3166,7 @@ def generate_psychoacoustic_annoyance(output_dir: str) -> None:
 
     panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
     info = [
-        "PA = N5 sqrt(1 + wS^2 + wFR^2)",
+        "PA = N5 (1 + sqrt(wS^2 + wFR^2))",
         "wS  = (S - 1.75) 0.25 lg(N5 + 10)",
         "wFR = (2.18 / N5^0.4)(0.4 F + 0.6 R)",
     ]

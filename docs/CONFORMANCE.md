@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **232/232 conformance checks pass** across 32 domains and 134 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **235/235 conformance checks pass** across 32 domains and 134 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -82,7 +82,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Psychoacoustics</b> — 100% (10/10)</summary>
+<summary>&#9989; <b>Psychoacoustics</b> — 100% (11/11)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -90,10 +90,11 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 532-1:2017 Annex B.5 | Time-varying loudness Nmax, technical signal 14 (aircraft, free field) | 22.6399 sone (+/-0.1%) | 22.6399 sone | 0 sone | &#9989; |
 | ISO 532-1:2017 Annex B.5 | Time-varying loudness Nmax, technical signal 15 (vehicle interior, diffuse field) | 9.6059 sone (+/-0.1%) | 9.6059 sone | 0 sone | &#9989; |
 | DIN 45692:2009 Clause 6 | Sharpness of the standard 1 kHz reference signal | 1 acum (+/-0 acum) | 1 acum | 0 acum | &#9989; |
+| DIN 45692:2009 Table A.2 | Sharpness of critical-band noise at 2.5 kHz (2320-2700 Hz, 4 sone) | 1.78 acum (+/-0.089 acum) | 1.747 acum | -0.033 acum | &#9989; |
 | ISO 226:2023 Table B.1 | Equal-loudness contour, 60 phon @ 100 Hz | 78.5 dB SPL (+/-0.05 dB SPL) | 78.504 dB SPL | 0.004 dB SPL | &#9989; |
-| ECMA-418-2:2025 Clause 5.1.8 | HMS loudness of a 1 kHz / 40 dB tone (c_N=0.0211964) | 1 sone_HMS (+/-0.03 sone_HMS) | 0.9958 sone_HMS | -0.004 sone_HMS | &#9989; |
+| ECMA-418-2:2025 Clause 5.1.8 | HMS loudness of a 1 kHz / 40 dB tone (c_N=0.0211964) | 1 sone_HMS (+/-0.03 sone_HMS) | 0.9843 sone_HMS | -0.016 sone_HMS | &#9989; |
 | ECMA-418-2:2025 Clause 6.2.8 | HMS tonality of a 1 kHz / 40 dB tone (c_T=2.8758615) | 1 tu_HMS (+/-0.03 tu_HMS) | 0.9998 tu_HMS | 0 tu_HMS | &#9989; |
-| ECMA-418-2:2025 Clause 7 | HMS roughness of a 1 kHz / 70 Hz / m=1 / 60 dB tone (c_R=0.0180685) | 1.0735 asper (+/-0.01 asper) [clean-room; standard target 1] | 1.0735 asper | 0 asper | &#9989; |
+| ECMA-418-2:2025 Clause 7 | HMS roughness of a 1 kHz / 70 Hz / m=1 / overall 60 dB tone (c_R=0.0180685) | 1 asper (+/-0.01 asper) | 0.9999 asper | 0 asper | &#9989; |
 | ISO 532-2:2017 Clause 3.17 / Annex B.1 | Moore-Glasberg loudness of a 1 kHz / 40 dB tone (C=0.0617) | 1 sone (+/-0.01 sone) | 1.0001 sone | 0 sone | &#9989; |
 | ISO 532-3:2023 Annex C.1 | Moore-Glasberg-Schlittenlacher peak LTL, steady 1 kHz / 40 dB | 1 sone (+/-0.02 sone) | 0.9996 sone | 0 sone | &#9989; |
 
@@ -393,7 +394,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Tonal audibility (ISO/PAS 20065)</b> — 100% (8/8)</summary>
+<summary>&#9989; <b>Tonal audibility (ISO/PAS 20065)</b> — 100% (10/10)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -401,6 +402,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO/PAS 20065:2016 Formula (13) | Masking index av at 137.3 / 592.2 Hz | -2.02 dB @ 137.3 Hz; -2.4 dB @ 592.2 Hz (+/-0.005 dB) | -2.017 dB; -2.400 dB | +0.003; +0.000 dB | &#9989; |
 | ISO/PAS 20065:2016 Formula (20) | Mean audibility of the five spectra, Annex E | 6.96 dB (+/-0.05 dB) | 6.98 dB | 0.018 dB | &#9989; |
 | ISO/PAS 20065:2016 Formula (6) | Mean narrow-band level LS from spectrum, Table E.1 | 49.22 dB (+/-0.02 dB) | 49.22 dB | -0.001 dB | &#9989; |
+| ISO/PAS 20065:2016 Clause 6 | Extended uncertainty U of the 137.3 Hz tone, Table E.2 | 2.79 dB (+/-0.02 dB) | 2.8 dB | 0.006 dB | &#9989; |
+| ISO/PAS 20065:2016 Formulae (28)-(29) | Extended uncertainty of the mean audibility, Annex E Step 4 | 1.38 dB (+/-0.01 dB) | 1.38 dB | -0.003 dB | &#9989; |
 | ISO/PAS 20065:2016 Formula (8) | Tone level LT from spectrum, Table E.1 | 67.96 dB (+/-0.02 dB) | 67.96 dB | -0.005 dB | &#9989; |
 | ISO/PAS 20065:2016 Clause 5.3.8 | Tone detection over the spectrum, Table E.1 | tones at [118.4, 137.3, 158.8] Hz | tones at [118.4, 137.3, 158.8] Hz | exact | &#9989; |
 | ISO/PAS 20065:2016 Formula (17) | Multi-tone FG combination, Table E.1 | 72.15 dB (+/-0.02 dB) | 72.15 dB | -0.002 dB | &#9989; |
@@ -413,7 +416,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
-| Fastl & Zwicker Eqs (16.2)-(16.4) | Psychoacoustic annoyance, worked (N5,S,F,R) tuple | 30.8167 (+/-0.001) | 30.8167 | 0 | &#9989; |
+| Fastl & Zwicker Eqs (16.2)-(16.4) | Psychoacoustic annoyance, worked (N5,S,F,R) tuple | 37.0478 (+/-0.001) | 37.0477 | 0 | &#9989; |
 | Fastl & Zwicker Eq (10.2) | Fluctuation strength of AM broadband noise (60 dB, m=1, 4 Hz) | 3.6943 vacil (+/-0.001 vacil) | 3.6943 vacil | 0 vacil | &#9989; |
 | Fastl & Zwicker Ch. 10 / Osses et al. 2016 | Fluctuation-strength calibration: 1 kHz / 60 dB / m=1 / 4 Hz AM tone | 1 vacil (+/-0.05 vacil) | 1 vacil | 0 vacil | &#9989; |
 

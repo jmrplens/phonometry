@@ -36,10 +36,14 @@ def ref_1k_40() -> EcmaLoudness:
 
 
 def test_calibration_1khz_40db_is_one_sone(ref_1k_40: EcmaLoudness) -> None:
-    # c_N is defined so the 1 kHz / 40 dB tone gives 1 sone_HMS; the standard
-    # allows c_N to vary within 0.25 %, and implementation differences add a
-    # little more, so a 3 % window is comfortably tight.
+    # c_N is defined so the 1 kHz / 40 dB tone gives 1 sone_HMS. With the
+    # full Clause 6.2.3 band averaging this chain computes 0.9845 sone_HMS;
+    # the -1.55 % residual (outside the +/-0.25 % c_N allowance) comes from
+    # the mandated averaging around the block-size-boundary bands and is
+    # documented in the module docstring -- c_N stays the verbatim constant.
     assert ref_1k_40.loudness == pytest.approx(1.0, abs=0.03)
+    # Regression pin of the deterministic chain value (not a standard target).
+    assert ref_1k_40.loudness == pytest.approx(0.9845, abs=0.005)
 
 
 def test_calibration_constant_is_the_tabulated_c_n() -> None:

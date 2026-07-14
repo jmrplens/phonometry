@@ -112,23 +112,29 @@ def test_b1_1_tone_1khz_free_binaural(level: float, sone: float, phon: float) ->
 
 
 @pytest.mark.parametrize(
-    ("level", "sone"),
-    [(20.0, 0.35), (40.0, 1.8), (60.0, 7.0), (80.0, 27.2)],
+    ("level", "sone", "phon"),
+    [(20.0, 0.35, 28.0), (40.0, 1.8, 48.0), (60.0, 7.0, 68.0), (80.0, 27.2, 87.5)],
 )
-def test_b1_2_tone_3khz_free_binaural(level: float, sone: float) -> None:
+def test_b1_2_tone_3khz_free_binaural(level: float, sone: float, phon: float) -> None:
     result = loudness_moore_glasberg_from_spectrum([(3000.0, level)])
     assert result.loudness == pytest.approx(sone, rel=0.05)
+    # Annex B.1.2 phon column (reproduces to < 0.1 phon).
+    assert result.loudness_level == pytest.approx(phon, abs=0.15)
 
 
 @pytest.mark.parametrize(
-    ("level", "sone"),
-    [(20.0, 0.07), (40.0, 0.54), (60.0, 2.31), (80.0, 8.82)],
+    ("level", "sone", "phon"),
+    [(20.0, 0.07, 14.7), (40.0, 0.54, 32.7), (60.0, 2.31, 51.5), (80.0, 8.82, 71.4)],
 )
-def test_b1_3_tone_1khz_earphone_monaural(level: float, sone: float) -> None:
+def test_b1_3_tone_1khz_earphone_monaural(
+    level: float, sone: float, phon: float
+) -> None:
     result = loudness_moore_glasberg_from_spectrum(
         [(1000.0, level)], field="eardrum", presentation="monaural"
     )
     assert result.loudness == pytest.approx(sone, rel=0.05)
+    # Annex B.1.3 phon column (reproduces to < 0.1 phon).
+    assert result.loudness_level == pytest.approx(phon, abs=0.15)
 
 
 def test_b1_4_tone_100hz_50db_free_binaural() -> None:
@@ -156,39 +162,55 @@ def test_b2_2_white_noise_bw1000_density_30db() -> None:
 
 
 @pytest.mark.parametrize(
-    ("density", "sone"),
-    [(0.0, 3.64), (20.0, 15.85), (40.0, 48.59)],
+    ("density", "sone", "phon"),
+    [(0.0, 3.64, 58.1), (20.0, 15.85, 80.0), (40.0, 48.59, 95.2)],
 )
-def test_b2_3_pink_noise(density: float, sone: float) -> None:
+def test_b2_3_pink_noise(density: float, sone: float, phon: float) -> None:
     result = loudness_moore_glasberg_from_spectrum(_pink_band(50.0, 15000.0, density))
     assert result.loudness == pytest.approx(sone, rel=0.05)
+    # Annex B.2.3 phon column (reproduces to < 0.1 phon).
+    assert result.loudness_level == pytest.approx(phon, abs=0.15)
 
 
 @pytest.mark.parametrize(
-    ("level", "sone"),
+    ("level", "sone", "phon"),
     [
-        (0.0, 0.077),
-        (10.0, 0.69),
-        (20.0, 2.54),
-        (30.0, 6.25),
-        (40.0, 12.6),
-        (50.0, 23.1),
+        (0.0, 0.077, 15.4),
+        (10.0, 0.69, 35.5),
+        (20.0, 2.54, 52.8),
+        (30.0, 6.25, 66.2),
+        (40.0, 12.6, 76.7),
+        (50.0, 23.1, 85.2),
     ],
 )
-def test_b2_4_broadband_third_octave_binaural(level: float, sone: float) -> None:
+def test_b2_4_broadband_third_octave_binaural(
+    level: float, sone: float, phon: float
+) -> None:
     result = loudness_moore_glasberg_from_third_octave([level] * 29)
     assert result.loudness == pytest.approx(sone, rel=0.05)
+    # Annex B.2.4 phon column (reproduces to < 0.1 phon).
+    assert result.loudness_level == pytest.approx(phon, abs=0.15)
 
 
 @pytest.mark.parametrize(
-    ("level", "sone"),
-    [(10.0, 0.08), (20.0, 0.72), (30.0, 2.41), (40.0, 5.55), (50.0, 10.7)],
+    ("level", "sone", "phon"),
+    [
+        (10.0, 0.08, 16.0),
+        (20.0, 0.72, 35.9),
+        (30.0, 2.41, 52.0),
+        (40.0, 5.55, 64.4),
+        (50.0, 10.7, 74.3),
+    ],
 )
-def test_b2_5_broadband_third_octave_monaural(level: float, sone: float) -> None:
+def test_b2_5_broadband_third_octave_monaural(
+    level: float, sone: float, phon: float
+) -> None:
     result = loudness_moore_glasberg_from_third_octave(
         [level] * 29, field="eardrum", presentation="monaural"
     )
     assert result.loudness == pytest.approx(sone, rel=0.05)
+    # Annex B.2.5 phon column (reproduces to < 0.1 phon).
+    assert result.loudness_level == pytest.approx(phon, abs=0.15)
 
 
 # --------------------------------------------------------------------------

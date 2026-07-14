@@ -5,6 +5,13 @@ Prominent discrete tone assessment per ECMA-418-1:2024 (3rd edition).
 Implements the tone-to-noise ratio (TNR, clause 11) and prominence ratio
 (PR, clause 12) methods on Hann-windowed, RMS-averaged FFT spectra
 (clauses 11.1 / 12.1), with the clause 10 critical-band model.
+
+The ``prominent`` verdict is the **numeric criterion only** (Formulae
+(12)/(13) resp. (25)/(26)). The standard additionally requires prominent
+tones to be confirmed by aural examination (clauses 11.8/12.8) and to pass
+the clause 8/9 lower-threshold-of-hearing screen (its Formula (1), which
+needs calibrated absolute levels); both audibility requirements are the
+caller's responsibility.
 """
 
 from __future__ import annotations
@@ -42,8 +49,46 @@ def _warn_coarse_resolution(dfc: float, df: float, ft: float) -> None:
         )
 
 # Frequency range of interest for discrete tones (clauses 11.5 / 12.6).
+# NOTE: clause 4.1.2 prints the range as "89,1 Hz and 11 220 Hz inclusive",
+# but every formula and table span of the standard uses 11 200 Hz (Tables
+# 2/3 end at 11 200; Formulae (13)/(26) treat the upper end as exclusive).
+# The printed 11 220 Hz is a standard-side typo (see docs/ERRATA.md); the
+# consistent 89.1 Hz - 11 200 Hz reading is used here.
 _F_MIN = 89.1
 _F_MAX = 11200.0
+
+#: Band power (Pa^2-like units) below which a spectrum is numeric noise: a
+#: silence or DC input yields formally finite TNR/PR values that carry no
+#: meaning, so a warning is raised (about -100 dB SPL over a critical band).
+_NOISE_FLOOR_POWER = 4e-20
+
+
+def _warn_degenerate(ft: float, band_power: float, df: float) -> None:
+    """Warn on verdicts that are numerically valid but perceptually void.
+
+    * A peak within one bin of the 89.1 Hz / 11.2 kHz range edge can snap to
+      the wrong side at coarse resolution (a tone at exactly 89.1 Hz lands on
+      an 89.0 Hz bin at 1 Hz resolution and is reported non-prominent
+      regardless of its ratio).
+    * A critical band whose power sits at numeric-noise level (silence, DC)
+      produces a meaningless ratio.
+    """
+    if abs(ft - _F_MIN) <= df or abs(ft - _F_MAX) <= df:
+        warnings.warn(
+            f"The assessed peak at {ft:.1f} Hz lies within one bin of the "
+            "89.1 Hz - 11.2 kHz range-of-interest edge; the prominence "
+            "verdict can flip with the bin snapping. Use a finer "
+            "resolution_hz or check the tone frequency.",
+            TonalityWarning,
+            stacklevel=3,
+        )
+    if band_power < _NOISE_FLOOR_POWER:
+        warnings.warn(
+            "The critical-band power is at numeric-noise level (silence or "
+            "DC input); the TNR/PR value is meaningless.",
+            TonalityWarning,
+            stacklevel=3,
+        )
 
 
 @dataclass(frozen=True)
@@ -53,6 +98,11 @@ class ToneAssessment:
     ``ratio_db`` is the tone-to-noise ratio or the prominence ratio in
     decibels depending on the producing function; ``criterion_db`` is the
     prominence limit at ``frequency`` and ``prominent`` the verdict.
+
+    ``prominent`` applies the numeric criterion only; the standard's
+    audibility requirements (aural examination per clauses 11.8/12.8 and
+    the clause 8/9 lower-threshold-of-hearing screen, which needs
+    calibrated absolute levels) are the caller's responsibility.
     """
 
     frequency: float
@@ -250,6 +300,7 @@ def tone_to_noise_ratio(
                 p_secondary = p_sec  # subtracted from the noise only (16)
 
     p_tot, n_tot = _band_power(freqs, power, f1, f2)
+    _warn_degenerate(ft, p_tot, df)
     df_tot = n_tot * df
     # Formula (10)/(16): masking noise rescaled to the critical bandwidth.
     p_noise = max(p_tot - p_tone - p_secondary, np.finfo(float).tiny) * (dfc / df_tot)
@@ -332,6 +383,7 @@ def prominence_ratio(
     f2_u = _fitted_edge(ft, _UPPER_EDGE_COEFFS)
 
     p_m, _ = _band_power(freqs, power, f1_m, f2_m)
+    _warn_degenerate(ft, p_m, df)
     p_l, n_l = _band_power(freqs, power, f1_l, f1_m)
     p_u, _ = _band_power(freqs, power, f2_m, f2_u)
     p_m = max(p_m, np.finfo(float).tiny)

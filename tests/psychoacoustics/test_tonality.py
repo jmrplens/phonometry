@@ -181,3 +181,32 @@ def test_coarse_resolution_warns_at_low_frequency() -> None:
         tone_to_noise_ratio(x, FS, tone_freq=250.0, resolution_hz=4.0)
     with pytest.warns(UserWarning, match="bins"):
         prominence_ratio(x, FS, tone_freq=250.0, resolution_hz=4.0)
+
+
+def test_range_edge_warns() -> None:
+    """A tone at exactly 89.1 Hz snaps to the 89.0 Hz bin at 1 Hz resolution
+    and lands just below the range of interest, flipping the prominence
+    verdict despite a huge ratio; the function warns about the edge."""
+    x = _tone_in_noise(89.1, 0.2, 0.002)
+    with pytest.warns(UserWarning, match="range-of-interest edge"):
+        res = tone_to_noise_ratio(x, FS, tone_freq=89.1)
+    assert res.ratio_db > 20.0  # the ratio itself is clearly tonal
+
+
+def test_numeric_noise_power_warns() -> None:
+    """Silence and DC produce formally finite TNR/PR values with no meaning;
+    the function warns that the band power is at numeric-noise level."""
+    silence = np.zeros(FS * 2)
+    with pytest.warns(UserWarning, match="numeric-noise"):
+        tone_to_noise_ratio(silence, FS, tone_freq=1000.0)
+    dc = np.full(FS * 2, 0.5)
+    with pytest.warns(UserWarning, match="numeric-noise"):
+        prominence_ratio(dc, FS, tone_freq=1000.0)
+
+
+# The clause 8/9 lower-threshold-of-hearing screen (ECMA-418-1 Formula (1),
+# coefficients near 87.3212 and 8.621226 in clause 9.1) is NOT implemented:
+# the prominent verdict is the numeric criterion only (see the module
+# docstring). If the audibility screen is ever added, extract the full
+# Formula (1) polynomial from the standard at implementation time and anchor
+# it on its printed coefficients.

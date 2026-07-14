@@ -168,6 +168,63 @@ to the issuing body, with date and reference).
   just above 16 kHz, with the gap documented.
 - **Status:** unreported.
 
+## ECMA-418-1:2024 (3rd edition) — clause 4.1.2 (upper limit of the range of interest)
+
+- **Location:** clause 4.1.2, the stated frequency range of interest for
+  discrete tones.
+- **The print:** "between 89,1 Hz and 11 220 Hz inclusive".
+- **The problem:** every formula and table of the standard uses 11 200 Hz:
+  the Table 2/3 band-edge fits end at 11 200 Hz, and Formulae (13)/(26)
+  treat the upper end of the criterion range consistently with 11 200 Hz.
+  No other clause mentions 11 220 Hz.
+- **Evidence:** cross-check of the clause 4.1.2 prose against Tables 2 and 3
+  and the criterion formulas of clauses 11.5/12.6.
+- **Library behaviour:** uses the internally consistent 89,1 Hz to
+  11 200 Hz range (upper end exclusive per the formulas), with a code note
+  in [`tonality.py`](../src/phonometry/psychoacoustics/tonality.py).
+- **Status:** unreported.
+
+## ECMA-418-2:2025 (4th edition) — clause 5.1.5.2 (last block index)
+
+- **Location:** clause 5.1.5.2, the segmentation of the zero-padded signal
+  for the roughness/fluctuation-strength block sizes.
+- **The print:** the index of the last block is given as
+  l_last = ceil((n + s_b)/s_h).
+- **The problem:** the formula is internally inconsistent: blocks placed at
+  that index overrun the zero-padded signal defined by clause 5.1.2.2, and
+  the resulting Formula (103) time grid becomes non-monotonic. The only
+  self-consistent reading is to stop at the last block that fits inside the
+  padded signal and align it flush with its end.
+- **Evidence:** direct evaluation of the block start indices against the
+  padded length for the clause 7.1.1 block/hop sizes; the flush-to-end
+  reading reproduces the Clause 7 roughness calibration (1 asper) to
+  0,9999.
+- **Library behaviour:** implements the flush-to-end reading with a code
+  note in [`roughness_ecma.py`](../src/phonometry/psychoacoustics/roughness_ecma.py).
+- **Status:** unreported.
+
+## ISO/PAS 20065:2016 — clause 5.3.4 (edge steepness of a distinct tone)
+
+- **Location:** clause 5.3.4, Formulae (10)/(11), the minimum edge steepness
+  of a distinct tone.
+- **The print:** asymmetric formulas — the lower-edge steepness is scaled by
+  f_T/2 and the upper-edge steepness by f_T (no divisor).
+- **The problem:** the parent standard DIN 45681:2005-03 prints f_T/sqrt(2)
+  on **both** edges, and its executable Annex J reference program does the
+  same (`Frequenz(i)/Sqr(2)`). The two prints cannot both be satisfied; the
+  ISO version is plausibly a typesetting corruption of the sqrt(2) factor
+  (the radical dropped on one edge and halved on the other). Versus the DIN
+  program the ISO print is sqrt(2) more lenient on the lower edge and
+  sqrt(2) stricter on the upper; borderline tones with one-sided edge
+  steepness around 17 to 34 dB/octave flip classification between the two
+  readings.
+- **Evidence:** side-by-side comparison of the ISO print, the DIN 45681
+  print and the DIN Annex J program.
+- **Library behaviour:** follows the DIN/sqrt(2) reading (it matches the
+  only executable reference), with the choice recorded in
+  [`tone_audibility.py`](../src/phonometry/psychoacoustics/tone_audibility.py).
+- **Status:** unreported.
+
 ## NORAH2 rotorcraft guidance SC03.D1.5d (EASA.2020.FC.06) — Eq. (27)
 
 - **Location:** section A.4.2, Eq. (27) (atmospheric absorption coefficient).
@@ -199,6 +256,24 @@ to the issuing body, with date and reference).
 - **Library behaviour:** the regression test pins the reproducible rows and
   excludes the contradicting cells with the rationale in the test.
 - **Status:** unreported (technical report rather than a standard).
+
+## Osses, García & Kohlrausch (2016), fluctuation-strength model — Eq. (3)
+
+- **Location:** Eq. (3), the critical-band-rate (Bark) transformation of the
+  excitation-pattern front-end.
+- **The print:** z(f) = 13·arctan(0,76·10⁻⁴·f) + 3,5·arctan((f/7500)²).
+- **The problem:** the first coefficient is the Zwicker-Terhardt 0,76·10⁻³
+  with the exponent misprinted. The paper's own anchors disprove the print:
+  it states 0,5 Bark = 50 Hz and 23,5 Bark = 13,2 kHz (section 2.1.2) and
+  15 Bark = 2,7 kHz (section 3.1), all of which require 10⁻³. With 10⁻⁴,
+  z(1 kHz) = 1,05 instead of 8,51 Bark and the model's 47 filter centres
+  would span 491 Hz to 20 kHz instead of 50 Hz to 13,2 kHz.
+- **Evidence:** evaluation of Eq. (3) under both exponents against the
+  paper's printed Bark/frequency anchors.
+- **Library behaviour:** implements 0,76·10⁻³ with a note at the formula;
+  the carrier-frequency sweep test would catch a regression to the printed
+  value ([`fluctuation_strength.py`](../src/phonometry/psychoacoustics/fluctuation_strength.py)).
+- **Status:** unreported (conference paper rather than a standard).
 
 ## Medwin & Clay, Fundamentals of Acoustical Oceanography (1998) — Eq. 3.4.29
 

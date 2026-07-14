@@ -1473,6 +1473,49 @@ def _chk_en12354_1_airborne() -> Outcome:
 
 @register(
     "Building prediction & uncertainty",
+    "EN 12354-1:2000 Annex H.3 (paths)",
+    "All 12 printed flanking-path values Rij,w",
+)
+def _chk_en12354_1_h3_paths() -> Outcome:
+    res = ph.predicted_airborne_insulation(
+        r_direct=ref.EN12354_1_ANNEX_H3_R_DIRECT, flanking_paths=_annex_h3_paths()
+    )
+    by_label = {p.label: p.r_w for p in res.paths}
+    worst = 0.0
+    for element, (r_ff, r_cross) in ref.EN12354_1_ANNEX_H3_PATH_RW.items():
+        for suffix, expected in (("Ff", r_ff), ("Fd", r_cross), ("Df", r_cross)):
+            worst = max(worst, abs(by_label[f"{element}-{suffix}"] - expected))
+    return numeric(0.0, worst, 0.05, unit="dB", places=3,
+                   expected_label="max abs(Rij,w - printed) <= 0,05 dB")
+
+
+@register(
+    "Building prediction & uncertainty",
+    "EN 12354-1:2000 Formula (5b) / Annex H.3",
+    "DnT,w closure from R'w (both H.3 examples -> 54 dB)",
+)
+def _chk_en12354_1_dnt_closure() -> Outcome:
+    v = ref.EN12354_1_ANNEX_H3_VOLUME
+    ss = ref.EN12354_1_ANNEX_H3_SEPARATING_AREA
+    first = float(ph.standardized_level_difference(52.2, v, ss))
+    second = float(ph.standardized_level_difference(52.7, v, ss))
+    ok = (
+        round(first) == ref.EN12354_1_ANNEX_H3_DNT_W
+        and round(second) == ref.EN12354_1_ANNEX_H3_DNT_W_SECOND
+        # The printed 53,8 dB uses the standard's own V/(3 S) rounding of the
+        # exact 0,32 V/Ss factor (0,18 dB apart).
+        and abs(first - ref.EN12354_1_ANNEX_H3_DNT_W_PRINTED) <= 0.2
+    )
+    return Outcome(
+        expected=f"DnT,w {ref.EN12354_1_ANNEX_H3_DNT_W} dB (printed 53,8/54,3)",
+        computed=f"DnT,w {first:.2f} / {second:.2f} dB",
+        delta=f"{first - ref.EN12354_1_ANNEX_H3_DNT_W_PRINTED:+.2f} dB vs printed",
+        passed=ok,
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
     "EN 12354-2:2000 Annex E.3",
     "Impact prediction L'n,w = Ln,w,eq - dLw + K",
 )
@@ -1491,6 +1534,24 @@ def _chk_en12354_2_impact() -> Outcome:
         ref.EN12354_2_ANNEX_E3_LPRIME_N_W, computed, 1e-9, unit="dB", places=6
     )
     return Outcome(out.expected, out.computed, out.delta, out.passed and k_ok)
+
+
+@register(
+    "Building prediction & uncertainty",
+    "EN 12354-2:2000 Formula (3) / Annex E.3",
+    "Standardized impact level L'nT,w (exact 0,032 V form -> 43 dB)",
+)
+def _chk_en12354_2_standardized() -> Outcome:
+    # Exact Formula (3): 45 - 10 lg(0,032 x 50) = 42,96 dB. The E.3 chain's own
+    # "10 lg(V/30)" rounding gives 42,8 dB; both round to 43 dB.
+    lnt = float(ph.standardized_impact_level(45.0, 50.0))
+    ok = round(lnt) == 43 and abs(lnt - 42.96) <= 0.01
+    return Outcome(
+        expected="L'nT,w 43 dB (exact 42,96; E.3 prints 42,8)",
+        computed=f"L'nT,w {lnt:.2f} dB",
+        delta=f"{lnt - 42.96:+.3f} dB",
+        passed=ok,
+    )
 
 
 def _en12354_3_annex_f() -> "ph.FacadePredictionResult":

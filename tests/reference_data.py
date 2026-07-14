@@ -220,6 +220,23 @@ EN12354_1_ANNEX_H3_ELEMENTS: list[tuple[str, float, float, float, float]] = [
 ]
 EN12354_1_ANNEX_H3_NUM_PATHS = 13
 EN12354_1_ANNEX_H3_RPRIME_W = 52  # 52,2 dB rounds to 52
+# All twelve printed flanking-path values of the H.3 results table (dB): for
+# each element the standard prints RFd = RDf (the "R_1d"/"R_D1" rows are the
+# same value) and RFf. Keyed by element label -> (R_Ff, R_Fd = R_Df).
+EN12354_1_ANNEX_H3_PATH_RW: dict[str, tuple[float, float]] = {
+    "floor": (65.5, 66.0),
+    "ceiling": (64.5, 64.8),
+    "facade": (61.1, 62.7),
+    "intwall": (73.0, 67.2),
+}
+# Formula (5b) closure of both H.3 examples: V = 50 m3, Ss = 11,5 m2. The
+# standard prints DnT,w = 52,2 + 10 lg[50/(3 x 11,5)] = 53,8 ~ 54 dB and (with
+# the floating floor) 52,7 + 1,6 = 54,3 ~ 54 dB; the exact Formula (5b) factor
+# 0,32 V/Ss gives 53,6 / 54,1 dB - same integer ratings.
+EN12354_1_ANNEX_H3_VOLUME = 50.0
+EN12354_1_ANNEX_H3_DNT_W = 54
+EN12354_1_ANNEX_H3_DNT_W_PRINTED = 53.8   # with the standard's V/(3 S) rounding
+EN12354_1_ANNEX_H3_DNT_W_SECOND = 54      # second example: 54,3 ~ 54 dB
 
 # ---------------------------------------------------------------------------
 # EN 12354-2:2000 Annex E.3 impact prediction worked example. A concrete floor

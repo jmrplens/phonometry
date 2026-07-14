@@ -656,6 +656,7 @@ from .building.building_prediction import (
     predicted_airborne_insulation,
     predicted_impact_insulation,
     standardized_impact_level,
+    standardized_level_difference,
 )
 from .building.facade_prediction import (
     FacadeElement,
@@ -1277,6 +1278,7 @@ __all__ = [
     "equivalent_impact_level",
     "impact_flanking_correction",
     "standardized_impact_level",
+    "standardized_level_difference",
     "facade_sound_reduction",
     "radiated_sound_power",
     "outdoor_attenuation",

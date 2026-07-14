@@ -18,6 +18,7 @@ from .building_prediction import (
     predicted_airborne_insulation,
     predicted_impact_insulation,
     standardized_impact_level,
+    standardized_level_difference,
 )
 from .building_uncertainty import (
     BandUncertainty,
@@ -226,6 +227,7 @@ __all__ = [
     "single_number_uncertainty_uncorrelated",
     "spatial_mean_velocity_level",
     "standardized_impact_level",
+    "standardized_level_difference",
     "strong_coupling_satisfied",
     "structure_borne_power_level",
     "structure_borne_pressure_level_path",

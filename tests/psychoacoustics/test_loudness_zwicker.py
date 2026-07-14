@@ -212,11 +212,85 @@ def _read_wav_pa(path: pathlib.Path, peak_rms_db: float) -> tuple[np.ndarray, in
     return x * (target / peak_rms), fs
 
 
-# Annex B.4 Test signals 6-9 (30 -> 80 dB level ramps): the workbook holds
-# their Nmax/N5 expectations, but the electronic-attachment WAVs are not
-# shipped in-repo and the ramp durations are not stated in the Annex B prose,
-# so the signals cannot be regenerated. Add them here if the attachment WAVs
-# ever become shippable.
+def _level_ramp_tone(freq: float) -> np.ndarray:
+    """Annex B.4 Test signals 6-8: a tone whose SPL ramps 30 dB -> 80 dB.
+
+    Parameters measured from the official electronic-attachment WAVs
+    (Annex B.1 calibration, full-scale sine = 100 dB SPL): 0.1 s of leading
+    silence, a 10 s tone whose level ramps linearly in dB at 5 dB/s from
+    30 dB to 80 dB, then 0.5 s of trailing silence (10.6 s total). A short
+    raised-cosine fade-out (5 ms) replaces the official WAVs' cut, whose
+    end-of-file transient otherwise inflates Nmax (the loudness maximum
+    falls exactly at the ramp top).
+    """
+    n_act = 10 * FS
+    tau = np.arange(n_act) / FS
+    amp = np.sqrt(2.0) * 2e-5 * 10 ** ((30.0 + 5.0 * tau) / 20.0)
+    act = amp * np.sin(2 * np.pi * freq * tau)
+    n_fade = int(0.005 * FS)
+    act[-n_fade:] *= 0.5 * (1.0 + np.cos(np.pi * np.arange(n_fade) / n_fade))
+    return np.concatenate(
+        [np.zeros(int(0.1 * FS)), act, np.zeros(int(0.5 * FS))]
+    )
+
+
+@pytest.mark.parametrize(
+    ("case", "freq"),
+    [("Test signal 6", 250.0), ("Test signal 7", 1000.0),
+     ("Test signal 8", 4000.0)],
+)
+@requires_iso_data
+def test_annex_b4_level_ramp_tones(case: str, freq: float) -> None:
+    """Annex B.4 Test signals 6-8 (tone level ramps 30 -> 80 dB, 5 dB/s).
+
+    Tolerances calibrated against the official attachment WAVs: the module
+    reproduces the workbook Nmax on the official WAVs to < 0.01 % for all
+    three signals; this regenerated synthesis lands within +0.3 % of the
+    workbook Nmax (end-of-ramp handling) and within -0.8 % on N5, so the
+    pins are 0.6 % and 2 % with about 2x headroom.
+    """
+    exp = EXPECTED[case]
+    res = loudness_zwicker(_level_ramp_tone(freq), FS, stationary=False)
+    assert res.loudness == pytest.approx(exp["Nmax"], rel=6e-3), (
+        f"{case}: Nmax={res.loudness:.4f} vs workbook {exp['Nmax']}"
+    )
+    assert res.n5 == pytest.approx(exp["N5"], rel=0.02), (
+        f"{case}: N5={res.n5:.4f} vs workbook {exp['N5']}"
+    )
+
+
+@requires_iso_data
+def test_annex_b4_pink_noise_ramp() -> None:
+    """Annex B.4 Test signal 9 (pink-noise level ramp, 5 dB/s over 10 s).
+
+    The workbook titles the ramp "0 dB - 50 dB"; the WAV's own Annex B.1
+    calibration puts the measured overall SPL at 25.85 + 5 t dB (the title
+    tracks the generator gain, not the calibrated SPL). The official WAV
+    reproduces the workbook Nmax/N5 to < 0.01 % / -0.5 % through the
+    module; a regenerated pink realization scatters by up to ~10 % around
+    the workbook values (Nmax is dominated by the last few hundred
+    milliseconds of one noise realization), so this deterministic-seed
+    synthesis is pinned at the realization-honest 10 %.
+    """
+    exp = EXPECTED["Test signal 9"]
+    n_act = 10 * FS
+    tau = np.arange(n_act) / FS
+    rng = np.random.default_rng(1)
+    spec = np.fft.rfft(rng.standard_normal(n_act))
+    freqs = np.fft.rfftfreq(n_act, d=1.0 / FS)
+    spec[1:] /= np.sqrt(freqs[1:])
+    spec[0] = 0.0
+    x = np.fft.irfft(spec, n=n_act)
+    x /= np.sqrt(np.mean(x**2))
+    act = x * 2e-5 * 10 ** ((25.85 + 5.0 * tau) / 20.0)
+    n_fade = int(0.005 * FS)
+    act[-n_fade:] *= 0.5 * (1.0 + np.cos(np.pi * np.arange(n_fade) / n_fade))
+    sig = np.concatenate([np.zeros(int(0.1 * FS)), act, np.zeros(int(0.5 * FS))])
+    res = loudness_zwicker(sig, FS, stationary=False)
+    assert res.loudness == pytest.approx(exp["Nmax"], rel=0.10)
+    assert res.n5 == pytest.approx(exp["N5"], rel=0.10)
+
+
 @pytest.mark.parametrize(
     ("case", "num", "level"),
     [("Test signal 10", 10, 70.0), ("Test signal 11", 11, 70.0),

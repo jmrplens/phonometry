@@ -3483,6 +3483,47 @@ def _chk_uwp_absorption_agreement() -> Outcome:
 
 @register(
     _UW_PROP,
+    "Francois-Garrison (1982) Part II Table IV",
+    "Absorption α at 100 kHz, 10 °C, 35 ‰, 0 m, pH 8 (printed value), dB/km",
+)
+def _chk_uwp_fg_printed_table() -> Outcome:
+    # Oracle: the printed absorption table of the source paper (J. Acoust.
+    # Soc. Am. 72(6), 1982); tolerance is half a unit of the last printed
+    # digit, i.e. the print's own rounding.
+    kw = dict(temperature=10.0, salinity=35.0, depth=0.0, ph=8.0)
+    got = float(ph.seawater_absorption(100_000.0, model="francois-garrison", **kw)[0])
+    return numeric(33.6, got, 0.05, unit="dB/km", places=3)
+
+
+@register(
+    _UW_PROP,
+    "Del Grosso refit (Wong-Zhu 1995 Table IV)",
+    "c(t90 = 20 °C, S = 35, P = 500 bar) vs the printed check table, m/s",
+)
+def _chk_uwp_del_grosso_printed_check() -> Outcome:
+    # Oracle: the printed ITS-90 check table of the refit the module
+    # implements (J. Acoust. Soc. Am. 97(3), 1995); the table lists pressure
+    # in bars, Del Grosso's polynomial takes kg/cm² (1 bar = 1.019716 kg/cm²).
+    from phonometry.underwater.sound_speed import _del_grosso
+
+    got = float(_del_grosso(20.0, 35.0, 500.0 * 1.019716))
+    return numeric(1603.679, got, 1e-3, unit="m/s", places=3)
+
+
+@register(
+    _UW_PROP,
+    "Wales-Heitmeyer (2002) ensemble spectrum",
+    "Merchant-ship source PSD at 100 Hz (printed equation), dB re 1 µPa²/Hz",
+)
+def _chk_uwp_wales_heitmeyer() -> Outcome:
+    # Oracle: the mean-spectrum closed form printed in J. Acoust. Soc. Am.
+    # 111(3), 2002, hand-evaluated at 100 Hz.
+    s = ph.ship_source_spectrum(model="wales-heitmeyer", frequency_hz=[100.0])
+    return numeric(158.4504, float(s.source_psd[0]), 1e-3, unit="dB", places=3)
+
+
+@register(
+    _UW_PROP,
     "Passive sonar equation (Urick/Etter)",
     "Figure of merit SL − (NL − DI) − DT, dB",
 )

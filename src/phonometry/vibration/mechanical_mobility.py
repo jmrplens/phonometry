@@ -3,7 +3,7 @@
 Mechanical mobility and the frequency-response-function family (ISO 7626-1:2011).
 
 Mechanical **mobility** is the complex ratio of a velocity response to the
-excitation force that produces it, ``Y_ij = v_i / F_j`` (ISO 7626-1, 3.1). It is
+excitation force that produces it, ``Y_ij = v_i / F_j`` (ISO 7626-1, 3.1.2). It is
 one of a family of motion-per-force frequency-response functions (FRFs); which
 member is used depends only on whether the motion is expressed as displacement,
 velocity or acceleration, and each has a force-per-motion reciprocal
@@ -152,16 +152,19 @@ def convert_frf(
 
 
 # ---------------------------------------------------------------------------
-# Single-degree-of-freedom reference (ISO 7626-1 Annex A).
+# Single-degree-of-freedom closed-form reference (consistent with the
+# ISO 7626-1 Table 1 / 3.1.2 FRF definitions).
 # ---------------------------------------------------------------------------
 
 
 def sdof_receptance(
     frequency: ArrayLike, mass: float, stiffness: float, damping: float
 ) -> np.ndarray:
-    """Receptance of a viscously damped SDOF resonator (ISO 7626-1, Annex A).
+    """Receptance of a viscously damped SDOF resonator (closed form).
 
-    ``H(omega) = 1 / (k - omega**2 m + j omega c)``.
+    ``H(omega) = 1 / (k - omega**2 m + j omega c)`` — the textbook
+    single-degree-of-freedom reference, expressed in the FRF taxonomy of
+    ISO 7626-1 (Table 1 / 3.1.2 definitions).
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param mass: Mass ``m``, in kg.

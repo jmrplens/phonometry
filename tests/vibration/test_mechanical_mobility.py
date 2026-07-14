@@ -1,10 +1,13 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
 """Tests for ISO 7626-1:2011 mechanical mobility and the FRF family.
 
-Anchored on the closed-form single-degree-of-freedom resonator (Annex A): at
-its resonance the driving-point mobility is purely real and equal to ``1/c``
-(the mobility peak measures the damping), the static receptance is ``1/k``, and
-the Table-1 FRFs are exact reciprocals / (jω)-powers of one another.
+Anchored on the closed-form single-degree-of-freedom resonator (consistent
+with the ISO 7626-1 Table 1 / 3.1.2 FRF definitions): at its resonance the
+driving-point mobility is purely real and equal to ``1/c`` (the mobility peak
+measures the damping), the static receptance is ``1/k``, and the Table-1 FRFs
+are exact reciprocals / (jω)-powers of one another. The ISO 7626-2:2015
+measurement-side acceptance criteria (7.5.2 rigid-mass calibration, Annex A
+random error) are anchored on the standard's own values.
 """
 
 from __future__ import annotations
@@ -32,7 +35,7 @@ F0 = math.sqrt(K / M) / (2.0 * math.pi)   # ~10.066 Hz
 
 
 # ---------------------------------------------------------------------------
-# SDOF closed-form oracles (Annex A)
+# SDOF closed-form oracles (Table 1 / 3.1.2 definitions)
 # ---------------------------------------------------------------------------
 def test_resonance_frequency() -> None:
     assert resonance_frequency(M, K) == pytest.approx(F0, rel=1e-12)

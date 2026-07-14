@@ -1415,15 +1415,16 @@ def _chk_en29052_resonance() -> Outcome:
 
 
 # --- Mechanical mobility (ISO 7626-1:2011) ---
-# SDOF resonator m=2 kg, k=8000 N/m, c=5 N.s/m; f0 = sqrt(k/m)/(2pi).
+# Closed-form SDOF resonator (consistent with the ISO 7626-1 Table 1 / 3.1.2
+# FRF definitions): m=2 kg, k=8000 N/m, c=5 N.s/m; f0 = sqrt(k/m)/(2pi).
 _MOB_M, _MOB_K, _MOB_C = 2.0, 8000.0, 5.0
 _MOB_F0 = math.sqrt(_MOB_K / _MOB_M) / (2.0 * math.pi)
 
 
 @register(
     "Room & building acoustics",
-    "ISO 7626-1:2011 Annex A",
-    "SDOF driving-point mobility peak mag(Y(f0)) = 1/c  (c=5 N·s/m)",
+    "ISO 7626-1:2011 Table 1 / 3.1.2",
+    "Closed-form SDOF driving-point mobility peak mag(Y(f0)) = 1/c  (c=5 N·s/m)",
 )
 def _chk_iso7626_mobility_peak() -> Outcome:
     y0 = complex(ph.sdof_mobility(_MOB_F0, _MOB_M, _MOB_K, _MOB_C))
@@ -1432,8 +1433,8 @@ def _chk_iso7626_mobility_peak() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "ISO 7626-1:2011 Annex A",
-    "SDOF static receptance H(0) = 1/k  (k=8000 N/m)",
+    "ISO 7626-1:2011 Table 1 / 3.1.2",
+    "Closed-form SDOF static receptance H(0) = 1/k  (k=8000 N/m)",
 )
 def _chk_iso7626_static_receptance() -> Outcome:
     h = complex(ph.sdof_receptance(1e-6, _MOB_M, _MOB_K, _MOB_C))

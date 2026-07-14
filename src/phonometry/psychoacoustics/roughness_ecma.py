@@ -31,8 +31,9 @@ chain:
 
 The optional entropy weighting of Clause 7.1.6 requires an external rotational
 speed signal and is not implemented (see ``notes-ecma418-2-roughness.md``).
-The API is monaural: the binaural combination of Clause 7.1.11 is not
-implemented -- analyse each channel separately.
+The API is monaural: the quadratic-mean binaural combination of
+Formula (112) (Clause 7.1.11) is not implemented -- analyse each channel
+separately.
 
 The calibration constant ``c_R`` of Formula (104) is the standard's tabulated
 value (not reverse-fit), and the chain reproduces the Clause 7 reference
@@ -87,6 +88,10 @@ _TRANSIENT = 16  # discard l50 in [0, 15] (Clause 7.1.8)
 
 # Calibration constant c_R (Formula 104, tabulated; adjustable +/- 0.25 %).
 _C_R = 0.0180685
+
+#: Prominence criterion (Clause 7.2): a signal has a prominent roughness when
+#: the single value R (Clause 7.1.10) exceeds this value, in asper.
+PROMINENT_ROUGHNESS_ASPER = 0.2
 _A_THRESHOLD = 0.074376  # low-rate amplitude gate (Clause 7.1.5.4)
 
 # Error-correction table E(theta), theta = 0..33 (Table 10; theta 33 is a

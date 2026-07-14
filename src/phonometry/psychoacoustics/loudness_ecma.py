@@ -38,8 +38,8 @@ same-block-size neighbours 0.996, and with the full cross-group
 recomputation 0.9845. The block-time smoothing stage and the fade-in/LP
 transient contribute < 0.01 % (the value is signal-length invariant).
 
-The API is monaural: the binaural combination of Formulae (112)/(118)
-(Clauses 7.1.11/8.1.5) is not implemented -- analyse each channel
+The API is monaural: the quadratic-mean binaural combination of
+Formula (118) (Clause 8.1.5) is not implemented -- analyse each channel
 separately.
 """
 
@@ -67,6 +67,11 @@ _P0 = 2e-5  # reference pressure p~_0 = 20 uPa (Clause 5.1.8)
 _EPS = 1e-12  # additive constant used throughout the standard
 
 _N_FADE = 240  # 5 ms fade-in, n_fadein = 0.005 * 48000 (Formula 1)
+
+#: Audibility criterion (Clause 5.1.9): a signal is considered audible when
+#: its total basis loudness (sum of the specific basis loudness over the 53
+#: bands with dz = 0.5) exceeds this value, in sone_HMS.
+AUDIBILITY_THRESHOLD_SONE_HMS = 0.01
 
 # Auditory filter bank (Clause 5.1.4)
 _DF0 = 81.9289  # delta f at f = 0 [Hz] (below Formula 10)
@@ -596,7 +601,7 @@ def loudness_ecma(
     The 1 kHz / 40 dB SPL sinusoid defines 1 sone_HMS via the calibration
     constant of Formula (23); with the full Clause 6.2.3 averaging this
     chain computes 0.9845 sone_HMS for it (see the module docstring for the
-    residual's origin). Monaural only (no Formula 118 binaural combination).
+    residual's origin). Monaural only (no Clause 8.1.5 binaural combination).
     """
     if field not in ("free", "diffuse"):
         raise ValueError("field must be 'free' or 'diffuse'")

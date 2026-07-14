@@ -19,8 +19,9 @@ same underlying N'_tonal(l, z) for the same signal; this module adds
 The calibration factor ``c_T`` of Formula (51) is fixed by the standard so
 that a 1 kHz sinusoid at 40 dB SPL yields 1 tu_HMS.
 
-The API is monaural: the binaural combination of Formula (112)
-(Clause 7.1.11) is not implemented -- analyse each channel separately.
+The API is monaural; analyse each channel separately. (Unlike its
+roughness and loudness, ECMA-418-2 defines no binaural combination for
+tonality.)
 """
 
 from __future__ import annotations
@@ -53,6 +54,10 @@ _Q_B = 0.003
 
 # Tonality calibration factor c_T (Formula 51); 1 kHz/40 dB -> 1 tu_HMS.
 _C_T = 2.8758615
+
+#: Prominence criterion (Clause 6.3): a signal has a prominent tonality when
+#: the single value T (Formula 63) exceeds this value, in tu_HMS.
+PROMINENT_TONALITY_TU_HMS = 0.4
 
 # Averaging gate (Clause 6.2.9/6.2.11) and transient discard (Clause 6.2.9).
 _T_GATE = 0.02  # tu_HMS

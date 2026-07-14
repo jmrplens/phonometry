@@ -71,6 +71,30 @@ def test_calibration_constant_is_the_tabulated_c_t() -> None:
     assert _C_T == ECMA418_2_TONALITY_C_T
 
 
+def test_decision_thresholds_are_the_standard_constants() -> None:
+    # The standard's verbatim decision criteria (its only numeric anchors
+    # beyond the calibration points): prominence 0.4 tu_HMS (Clause 6.3),
+    # prominent roughness 0.2 asper (Clause 7.2) and the 0.01 sone_HMS
+    # audibility criterion on the total basis loudness (Clause 5.1.9).
+    import reference_data as ref
+
+    from phonometry.psychoacoustics.loudness_ecma import (
+        AUDIBILITY_THRESHOLD_SONE_HMS,
+    )
+    from phonometry.psychoacoustics.roughness_ecma import (
+        PROMINENT_ROUGHNESS_ASPER,
+    )
+    from phonometry.psychoacoustics.tonality_ecma import (
+        PROMINENT_TONALITY_TU_HMS,
+    )
+
+    assert PROMINENT_TONALITY_TU_HMS == ref.ECMA418_2_PROMINENT_TONALITY_TU
+    assert PROMINENT_ROUGHNESS_ASPER == ref.ECMA418_2_PROMINENT_ROUGHNESS_ASPER
+    assert (
+        AUDIBILITY_THRESHOLD_SONE_HMS == ref.ECMA418_2_AUDIBILITY_THRESHOLD_SONE
+    )
+
+
 # --------------------------------------------------------------------------
 # Standard's qualitative behaviours
 # --------------------------------------------------------------------------

@@ -626,36 +626,47 @@ def analyze_spectrum(
     # Clause 5.3.8 Step 3: combine the tone levels of tones sharing a critical
     # band (Formula (17)), rated at the most audible member — except exactly
     # two tones below 1000 Hz further apart than fD (Formulae (18)/(19)).
-    groups: list[tuple[int, ...]] = []
+    # Each tone's own critical band yields a candidate set; the bandwidth
+    # grows with frequency, so the candidate sets of a chain of tones need
+    # not be identical even when they overlap. Candidates sharing a member
+    # therefore merge into one connected component, giving exactly one FG
+    # entry per cluster.
+    clusters: list[set[int]] = []
     for band_tone in tones:
         f1, f2 = critical_band_corners(band_tone[0])
-        members = tuple(
-            i for i, t in enumerate(tones) if f1 <= t[0] <= f2
-        )
-        if len(members) < 2 or members in groups:
+        members = {i for i, t in enumerate(tones) if f1 <= t[0] <= f2}
+        if len(members) < 2:
             continue
-        if len(members) == 2:
-            (ta, tb) = (tones[members[0]], tones[members[1]])
+        overlapping = [c for c in clusters if c & members]
+        for c in overlapping:
+            members |= c
+        clusters = [c for c in clusters if not (c & members)]
+        clusters.append(members)
+    groups: list[tuple[int, ...]] = []
+    for cluster in clusters:
+        members_t = tuple(sorted(cluster))
+        if len(members_t) == 2:
+            (ta, tb) = (tones[members_t[0]], tones[members_t[1]])
             if resolve_tones_separately(ta[0], tb[0], ta[4], tb[4]):
                 continue  # rated separately, no FG entry
-        groups.append(members)
+        groups.append(members_t)
 
     entries = [(t[0], t[1], t[2], t[3], 1) for t in tones]
-    for members in groups:
-        anchor = max((tones[i] for i in members), key=lambda t: t[4])
+    for group in groups:
+        anchor = max((tones[i] for i in group), key=lambda t: t[4])
         lt_fg = combined_tone_level(
             lev,
             freq,
-            [tones[i][0] for i in members],
-            [tones[i][2] for i in members],
+            [tones[i][0] for i in group],
+            [tones[i][2] for i in group],
             effective_bandwidth_factor=factor,
         )
         # Clause 6 note for summated tones: the N summated tone levels stand
         # in for the K tone-containing lines of the uncertainty.
         u_fg = audibility_uncertainty(
-            [tones[i][1] for i in members], lev[anchor[5]], anchor[0], df
+            [tones[i][1] for i in group], lev[anchor[5]], anchor[0], df
         )
-        entries.append((anchor[0], lt_fg, anchor[2], u_fg, len(members)))
+        entries.append((anchor[0], lt_fg, anchor[2], u_fg, len(group)))
 
     result = assess_tones(
         [e[0] for e in entries],

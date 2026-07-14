@@ -797,3 +797,20 @@ def test_din_tabelle_a1_critical_bandwidths() -> None:
             # from Formula (2) by up to ~0.03 % at the top rows (3469 printed
             # vs 3467.9 computed at 13.5 kHz), covered by the rel term.
             assert computed == pytest.approx(dfc_printed, abs=0.5, rel=5e-4)
+
+
+def test_analyze_spectrum_step3_merges_chained_clusters() -> None:
+    # The critical bandwidth grows with frequency, so a chain of tones at
+    # 900/950/1000 Hz produces three DIFFERENT own-band candidate sets
+    # ({900,950}, {900,950,1000}, {950,1000}); Step 3 must merge them into
+    # exactly one FG entry, not three overlapping combinations.
+    df = 2.5
+    freq = np.arange(200.0, 1600.0, df)
+    lev = np.full(freq.size, 40.0)
+    for ft in (900.0, 950.0, 1000.0):
+        lev[int(np.argmin(np.abs(freq - ft)))] = 65.0
+    result = analyze_spectrum(lev, freq, df)
+    assert result.group_sizes is not None
+    fg = result.group_sizes > 1
+    assert int(np.sum(fg)) == 1
+    assert int(result.group_sizes[fg][0]) == 3

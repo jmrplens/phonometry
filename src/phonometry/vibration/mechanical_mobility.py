@@ -23,8 +23,12 @@ acceleration ``-omega**2 x``, so every FRF follows from the receptance ``H``::
 
     Y = j omega H          A = -omega**2 H
     Z (impedance)      = 1 / Y
-    M (apparent mass)  = 1 / A
+    M (apparent mass)  = 1 / A     (Table 1 name: "effective mass")
     K (dyn. stiffness) = 1 / H
+
+These element-wise reciprocals are the **free** quantities of ISO 7626-1,
+3.1.4; the *blocked* matrix quantities of Table 1 do not invert element-wise
+(``Z_ij != 1/Y_ij`` for multi-coordinate systems) — see :func:`convert_frf`.
 
 :func:`convert_frf` moves between any two of the six FRFs through the receptance
 pivot. A **driving-point** FRF has the response and force at the same point
@@ -129,6 +133,19 @@ def convert_frf(
     target: str,
 ) -> np.ndarray:
     """Convert a frequency-response function between any two kinds (Table 1).
+
+    .. note::
+        The force-per-motion kinds returned here are arithmetic reciprocals of
+        the motion-per-force FRFs — the **free** quantities of ISO 7626-1,
+        3.1.4 (all other response coordinates unconstrained). They coincide
+        with the **blocked** matrix quantities of Table 1 only for a scalar
+        (single-coordinate) system: blocked matrices do not invert
+        element-wise, ``Z_ij != 1/Y_ij`` in general. For driving-point or
+        single-path use (e.g. the ISO 10846-1 Table A.2 relations) the free
+        forms are exactly what is needed; for multi-coordinate blocked
+        quantities invert the full FRF matrix instead. ISO 7626-1 Table 1
+        names ``F/a`` the **effective mass** (also known as apparent mass,
+        the name used here).
 
     :param value: The (complex) FRF value(s) of kind *source*.
     :param frequency: Frequency ``f``, in hertz (scalar or array, broadcast with
@@ -364,7 +381,14 @@ class MobilityResult:
         return np.asarray(np.angle(self.mobility), dtype=np.float64)
 
     def to(self, target: str) -> np.ndarray:
-        """Convert the mobility to another FRF kind (see :func:`convert_frf`)."""
+        """Convert the mobility to another FRF kind (see :func:`convert_frf`).
+
+        The force-per-motion kinds are element-wise reciprocals, i.e. the
+        *free* quantities of ISO 7626-1, 3.1.4: on a transfer FRF
+        (``driving_point=False``), ``to("impedance")`` returns the free
+        impedance ``1/Y_ij``, not the blocked matrix impedance of Table 1
+        (which does not invert element-wise).
+        """
         return convert_frf(self.mobility, self.frequencies, "mobility", target)
 
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":

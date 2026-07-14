@@ -129,6 +129,20 @@ ISO717_1_ANNEX_C_EXPECTED = {
     "ctr": -3,
     "unfavourable_sum": 31.8,
 }
+# ISO 717-1:2020 Annex C, Table C.2 - the same element measured over the
+# enlarged range 50-5000 Hz (21 bands). The worked example states
+# Rw(C;Ctr;C50-5000;Ctr,50-5000) = 30 (-2; -3; -2; -4) dB, with the printed
+# intermediate sums -10 lg = 28,212 (spectrum No. 1) / 26,355 (No. 2).
+ISO717_1_ANNEX_C2_R_50_5000: list[float] = [
+    18.7, 19.2, 20.0, *ISO717_1_ANNEX_C_R, 26.8, 29.2,
+]
+ISO717_1_ANNEX_C2_EXPECTED = {
+    "rw": 30,
+    "c": -2,
+    "ctr": -3,
+    "c_50_5000": -2,
+    "ctr_50_5000": -4,
+}
 
 # ---------------------------------------------------------------------------
 # ISO 226:2023 Table B.1 - normal equal-loudness-level contours. Row =
@@ -354,6 +368,32 @@ EN12354_3_ANNEX_C_DLFS: list[tuple[str, float, float, float]] = [
 ISO12999_1_TABLE2_AIRBORNE_A_1000HZ = 1.8
 ISO12999_1_COVERAGE_K_95 = 1.96
 ISO12999_1_RW_A_STANDARD_UNCERTAINTY = 1.2
+
+# ISO 12999-1:2020 Annex B worked example. Table B.1 gives a measured Ri
+# spectrum (21 one-third-octave bands 50-5000 Hz) with the Table 2
+# situation-A uncertainties ui; Table B.2 the resulting one-decimal single
+# numbers (0,1 dB reference-curve shift per B.2) and their uncertainties:
+# correlated per Formulae (B.3)-(B.6), uncorrelated per Formula (B.2).
+ISO12999_1_ANNEX_B_FREQ: list[float] = [
+    50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+    630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000,
+]
+ISO12999_1_ANNEX_B_RI: list[float] = [
+    39.5, 40.3, 41.6, 43.1, 43.3, 43.1, 42.5, 44.7, 48.0, 50.5, 53.2,
+    55.9, 58.1, 60.0, 62.2, 63.7, 65.4, 66.8, 68.4, 68.8, 65.1,
+]
+ISO12999_1_ANNEX_B_UI: list[float] = [
+    6.8, 4.6, 3.8, 3.0, 2.7, 2.4, 2.1, 1.8, 1.8, 1.8, 1.8,
+    1.8, 1.8, 1.8, 1.8, 1.8, 1.8, 1.9, 2.0, 2.4, 2.8,
+]
+ISO12999_1_ANNEX_B_RW = 57.4               # one-decimal Rw (B.2)
+ISO12999_1_ANNEX_B_RW_C50_5000 = 56.4      # one-decimal Rw + C50-5000
+ISO12999_1_ANNEX_B_RW_CTR50_5000 = 51.1    # one-decimal Rw + Ctr,50-5000
+ISO12999_1_ANNEX_B_U_CORR_RW = 1.9         # u(Rw), correlated (B.6)
+ISO12999_1_ANNEX_B_U_CORR_C = 2.1          # u(Rw+C50-5000), correlated (B.5)
+ISO12999_1_ANNEX_B_U_CORR_CTR = 2.6        # u(Rw+Ctr,50-5000), correlated
+ISO12999_1_ANNEX_B_U_UNCORR_C = 0.6        # u(Rw+C50-5000), uncorrelated (B.2)
+ISO12999_1_ANNEX_B_U_UNCORR_CTR = 0.8      # u(Rw+Ctr,50-5000), uncorrelated
 
 # ---------------------------------------------------------------------------
 # ISO 9613-1:1993 Table 1 - pure-tone atmospheric-absorption attenuation

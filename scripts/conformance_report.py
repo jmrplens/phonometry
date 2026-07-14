@@ -937,6 +937,35 @@ def _chk_iso717_rw() -> Outcome:
 
 @register(
     "Room & building acoustics",
+    "ISO 717-1:2020 Annex C, Table C.2",
+    "Enlarged range 50-5000 Hz: Rw (C; Ctr; C50-5000; Ctr,50-5000)",
+)
+def _chk_iso717_1_extended() -> Outcome:
+    exp = ref.ISO717_1_ANNEX_C2_EXPECTED
+    freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+             630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+    res = ph.weighted_rating_extended(ref.ISO717_1_ANNEX_C2_R_50_5000, freqs)
+    ok = (
+        res.rating == exp["rw"] and res.c == exp["c"] and res.ctr == exp["ctr"]
+        and res.c_50_5000 == exp["c_50_5000"]
+        and res.ctr_50_5000 == exp["ctr_50_5000"]
+    )
+    return Outcome(
+        expected=(
+            f"Rw {exp['rw']} (C {exp['c']}; Ctr {exp['ctr']}; "
+            f"C50-5000 {exp['c_50_5000']}; Ctr,50-5000 {exp['ctr_50_5000']})"
+        ),
+        computed=(
+            f"Rw {res.rating:g} (C {res.c:g}; Ctr {res.ctr:g}; "
+            f"C50-5000 {res.c_50_5000:g}; Ctr,50-5000 {res.ctr_50_5000:g})"
+        ),
+        delta="exact",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
     "ISO 717-2 Annex C, Table C.1",
     "Weighted impact sound pressure level Ln,w (CI)",
 )
@@ -1718,6 +1747,79 @@ def _chk_iso12999_table2_band() -> Outcome:
     computed = float(res.uncertainties[idx])
     return numeric(
         ref.ISO12999_1_TABLE2_AIRBORNE_A_1000HZ, computed, 1e-9, unit="dB", places=3
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "ISO 12999-1:2020 Annex B, Table B.2",
+    "One-decimal single numbers Rw / Rw+C50-5000 / Rw+Ctr,50-5000",
+)
+def _chk_iso12999_annex_b_values() -> Outcome:
+    res = ph.weighted_rating_extended(
+        ref.ISO12999_1_ANNEX_B_RI, ref.ISO12999_1_ANNEX_B_FREQ,
+        one_decimal=True,
+    )
+    assert res.c_50_5000 is not None and res.ctr_50_5000 is not None
+    rw = float(res.rating)
+    rw_c = rw + float(res.c_50_5000)
+    rw_ctr = rw + float(res.ctr_50_5000)
+    ok = (
+        abs(rw - ref.ISO12999_1_ANNEX_B_RW) <= 1e-9
+        and abs(rw_c - ref.ISO12999_1_ANNEX_B_RW_C50_5000) <= 1e-9
+        and abs(rw_ctr - ref.ISO12999_1_ANNEX_B_RW_CTR50_5000) <= 1e-9
+    )
+    return Outcome(
+        expected=(
+            f"{ref.ISO12999_1_ANNEX_B_RW} / {ref.ISO12999_1_ANNEX_B_RW_C50_5000}"
+            f" / {ref.ISO12999_1_ANNEX_B_RW_CTR50_5000} dB"
+        ),
+        computed=f"{rw:.1f} / {rw_c:.1f} / {rw_ctr:.1f} dB",
+        delta=f"{rw - ref.ISO12999_1_ANNEX_B_RW:+.2f} dB",
+        passed=ok,
+    )
+
+
+@register(
+    "Building prediction & uncertainty",
+    "ISO 12999-1:2020 Annex B, Formulae (B.2)/(B.6)",
+    "Single-number uncertainties (uncorrelated 0,6/0,8; correlated u(Rw) 1,9)",
+)
+def _chk_iso12999_annex_b_uncertainties() -> Outcome:
+    from phonometry.building.insulation import (  # noqa: PLC0415
+        _SPECTRUM1_50_5000,
+        _SPECTRUM2_50_5000,
+    )
+
+    ri = np.asarray(ref.ISO12999_1_ANNEX_B_RI, dtype=float)
+    ui = np.asarray(ref.ISO12999_1_ANNEX_B_UI, dtype=float)
+    u_c = float(ph.single_number_uncertainty_uncorrelated(
+        ui, np.asarray(_SPECTRUM1_50_5000, dtype=float) - ri
+    ))
+    u_ctr = float(ph.single_number_uncertainty_uncorrelated(
+        ui, np.asarray(_SPECTRUM2_50_5000, dtype=float) - ri
+    ))
+    up = ph.weighted_rating_extended(
+        ri + ui, ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
+    ).rating
+    down = ph.weighted_rating_extended(
+        ri - ui, ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
+    ).rating
+    u_rw = (float(up) - float(down)) / 2.0
+    ok = (
+        round(u_c, 1) == ref.ISO12999_1_ANNEX_B_U_UNCORR_C
+        and round(u_ctr, 1) == ref.ISO12999_1_ANNEX_B_U_UNCORR_CTR
+        and abs(u_rw - ref.ISO12999_1_ANNEX_B_U_CORR_RW) <= 1e-9
+    )
+    return Outcome(
+        expected=(
+            f"u_uncorr {ref.ISO12999_1_ANNEX_B_U_UNCORR_C} / "
+            f"{ref.ISO12999_1_ANNEX_B_U_UNCORR_CTR} dB; "
+            f"u_corr(Rw) {ref.ISO12999_1_ANNEX_B_U_CORR_RW} dB"
+        ),
+        computed=f"{u_c:.2f} / {u_ctr:.2f} dB; {u_rw:.2f} dB",
+        delta=f"{u_rw - ref.ISO12999_1_ANNEX_B_U_CORR_RW:+.2f} dB",
+        passed=ok,
     )
 
 

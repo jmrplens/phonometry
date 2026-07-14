@@ -87,6 +87,8 @@ from .installed_structure_borne import (
 )
 from .insulation import (
     AirborneInsulationResult,
+    ExtendedImpactRatingResult,
+    ExtendedWeightedRatingResult,
     FacadeInsulationResult,
     ImpactInsulationResult,
     ImpactRatingResult,
@@ -98,7 +100,9 @@ from .insulation import (
     impact_insulation,
     weighted_impact_improvement,
     weighted_impact_rating,
+    weighted_impact_rating_extended,
     weighted_rating,
+    weighted_rating_extended,
 )
 from .intensity_insulation import (
     IntensityElementNormalizedResult,
@@ -142,6 +146,8 @@ __all__ = [
     "AirbornePredictionResult",
     "BandUncertainty",
     "COVERAGE_FACTORS",
+    "ExtendedImpactRatingResult",
+    "ExtendedWeightedRatingResult",
     "FacadeElement",
     "FacadeInsulationResult",
     "FacadePredictionResult",
@@ -248,5 +254,7 @@ __all__ = [
     "vibration_reduction_index_from_flanking",
     "weighted_impact_improvement",
     "weighted_impact_rating",
+    "weighted_impact_rating_extended",
     "weighted_rating",
+    "weighted_rating_extended",
 ]

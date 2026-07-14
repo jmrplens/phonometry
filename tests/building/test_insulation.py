@@ -311,3 +311,131 @@ def test_field_rating_pipeline_dnt_w() -> None:
     rating = weighted_rating(res.dnt)
     # D == reference curve => rating 54 (2 dB up, sum 32,0).
     assert rating.rating == 54
+
+
+# --------------------------------------------------------------------------
+# Enlarged frequency ranges (ISO 717-1 Annex B) and one-decimal ratings
+# --------------------------------------------------------------------------
+
+def test_extended_annex_c2_enlarged_range() -> None:
+    """ISO 717-1:2020 Annex C Table C.2: Rw(C;Ctr;C50-5000;Ctr,50-5000)
+    = 30 (-2; -3; -2; -4) dB."""
+    import reference_data as ref
+    from phonometry import weighted_rating_extended
+
+    freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+             630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+    res = weighted_rating_extended(ref.ISO717_1_ANNEX_C2_R_50_5000, freqs)
+    exp = ref.ISO717_1_ANNEX_C2_EXPECTED
+    assert res.rating == exp["rw"]
+    assert res.c == exp["c"]
+    assert res.ctr == exp["ctr"]
+    assert res.c_50_5000 == exp["c_50_5000"]
+    assert res.ctr_50_5000 == exp["ctr_50_5000"]
+    # The 50-3150 and 100-5000 ranges are also covered by a 21-band input.
+    assert res.c_50_3150 is not None
+    assert res.ctr_100_5000 is not None
+    # The core result matches the plain 16-band rating.
+    assert res.core.rating == exp["rw"]
+    assert res.core.c == exp["c"]
+    assert res.core.ctr == exp["ctr"]
+
+
+def test_extended_core_only_input() -> None:
+    """A bare 16-band input yields the core terms; extended ones are None."""
+    import reference_data as ref
+    from phonometry import weighted_rating_extended
+
+    res = weighted_rating_extended(ref.ISO717_1_ANNEX_C_R)
+    assert res.rating == ref.ISO717_1_ANNEX_C_EXPECTED["rw"]
+    assert res.c == ref.ISO717_1_ANNEX_C_EXPECTED["c"]
+    assert res.ctr == ref.ISO717_1_ANNEX_C_EXPECTED["ctr"]
+    assert res.c_50_3150 is None
+    assert res.c_50_5000 is None
+    assert res.c_100_5000 is None
+    assert res.ctr_50_5000 is None
+
+
+def test_extended_18_band_100_5000_range() -> None:
+    """An 18-band 100-5000 Hz input yields C100-5000 but not the 50 Hz terms."""
+    import reference_data as ref
+    from phonometry import weighted_rating_extended
+
+    freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+             1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+    values = [*ref.ISO717_1_ANNEX_C_R, 26.8, 29.2]
+    res = weighted_rating_extended(values, freqs)
+    assert res.rating == 30
+    assert res.c_100_5000 is not None
+    assert res.ctr_100_5000 is not None
+    assert res.c_50_5000 is None
+    assert res.c_50_3150 is None
+
+
+def test_extended_requires_core_bands() -> None:
+    from phonometry import weighted_rating_extended
+
+    with pytest.raises(ValueError, match="core"):
+        weighted_rating_extended([40.0] * 10, [50, 63, 80, 100, 125, 160,
+                                               200, 250, 315, 400])
+    with pytest.raises(ValueError, match="16 core"):
+        weighted_rating_extended([40.0] * 18)
+
+
+def test_one_decimal_rating_annex_b() -> None:
+    """ISO 12999-1:2020 Annex B: the 0,1 dB shift yields Rw = 57,4 dB and the
+    one-decimal sums Rw + C50-5000 = 56,4 / Rw + Ctr,50-5000 = 51,1 dB."""
+    import reference_data as ref
+    from phonometry import weighted_rating_extended
+
+    res = weighted_rating_extended(
+        ref.ISO12999_1_ANNEX_B_RI, ref.ISO12999_1_ANNEX_B_FREQ,
+        one_decimal=True,
+    )
+    assert res.rating == pytest.approx(ref.ISO12999_1_ANNEX_B_RW)
+    assert res.c_50_5000 is not None and res.ctr_50_5000 is not None
+    assert res.rating + res.c_50_5000 == pytest.approx(
+        ref.ISO12999_1_ANNEX_B_RW_C50_5000
+    )
+    assert res.rating + res.ctr_50_5000 == pytest.approx(
+        ref.ISO12999_1_ANNEX_B_RW_CTR50_5000
+    )
+    # The integer-mode rating of the same spectrum stays an integer.
+    integer = weighted_rating_extended(
+        ref.ISO12999_1_ANNEX_B_RI, ref.ISO12999_1_ANNEX_B_FREQ
+    )
+    assert integer.rating == 57
+
+
+def test_impact_extended_ci_50_2500() -> None:
+    """CI,50-2500 sums 50-2500 Hz (A.2.1 NOTE); flat extensions with low
+    energy leave it equal to the core CI."""
+    import reference_data as ref
+    from phonometry import weighted_impact_rating_extended
+
+    freqs = [50, 63, 80, *[int(f) for f in np.asarray(
+        ref.ISO717_2_REFERENCE_FLOOR_FREQ, dtype=float)]]
+    ln = [30.0, 30.0, 30.0, *ref.ISO717_2_REFERENCE_FLOOR_LN_R0]
+    res = weighted_impact_rating_extended(ln, freqs)
+    assert res.rating == 78
+    assert res.ci == -11
+    # 30 dB extension bands are ~40 dB below the sum: CI unchanged.
+    assert res.ci_50_2500 == -11
+    # Strong low-frequency content raises the enlarged-range term.
+    ln_low = [75.0, 75.0, 75.0, *ref.ISO717_2_REFERENCE_FLOOR_LN_R0]
+    boosted = weighted_impact_rating_extended(ln_low, freqs)
+    assert boosted.ci_50_2500 is not None and boosted.ci_50_2500 > -11
+
+
+def test_impact_one_decimal_reference_floor() -> None:
+    """The 0,1 dB variant reproduces the printed uncertainty constants of
+    ISO 717-2:2020 A.2.2: Ln,r,0,w = 77,6 dB and CI,r,0 = -10,3 dB."""
+    import reference_data as ref
+    from phonometry import weighted_impact_rating_extended
+
+    res = weighted_impact_rating_extended(
+        ref.ISO717_2_REFERENCE_FLOOR_LN_R0, one_decimal=True
+    )
+    assert res.rating == pytest.approx(77.6)
+    assert res.ci == pytest.approx(-10.3)
+    assert res.core.rating == 78 and res.core.ci == -11

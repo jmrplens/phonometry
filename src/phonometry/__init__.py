@@ -381,6 +381,8 @@ from .metrology.parametric_filters import (
 )
 from .building.insulation import (
     AirborneInsulationResult,
+    ExtendedImpactRatingResult,
+    ExtendedWeightedRatingResult,
     FacadeInsulationResult,
     ImpactInsulationResult,
     ImpactRatingResult,
@@ -392,7 +394,9 @@ from .building.insulation import (
     impact_insulation,
     weighted_impact_improvement,
     weighted_impact_rating,
+    weighted_impact_rating_extended,
     weighted_rating,
+    weighted_rating_extended,
 )
 from .building.lab_insulation import (
     LabAirborneInsulationResult,
@@ -1189,8 +1193,10 @@ __all__ = [
     "impact_insulation",
     "ImpactInsulationResult",
     "weighted_rating",
+    "weighted_rating_extended",
     "WeightedRatingResult",
     "weighted_impact_rating",
+    "weighted_impact_rating_extended",
     "weighted_impact_improvement",
     # ISO 16251-1 floor-covering impact sound improvement
     "FloorCoveringImprovementResult",
@@ -1287,6 +1293,8 @@ __all__ = [
     "radiated_sound_power",
     "outdoor_attenuation",
     "outdoor_level",
+    "ExtendedImpactRatingResult",
+    "ExtendedWeightedRatingResult",
     "FacadeElement",
     "FacadePredictionResult",
     "RadiatedPowerResult",

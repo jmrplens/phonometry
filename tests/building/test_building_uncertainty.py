@@ -424,3 +424,85 @@ def test_deprecated_bare_names_warn_and_delegate():
         assert bu.coverage_factor(0.95) == insulation_coverage_factor(0.95)
     with pytest.warns(DeprecationWarning, match="insulation_expanded_uncertainty"):
         assert bu.expanded_uncertainty(1.2) == insulation_expanded_uncertainty(1.2)
+
+
+# ---------------------------------------------------------------------------
+# Annex B worked example (Tables B.1/B.2)
+# ---------------------------------------------------------------------------
+
+def test_annex_b_uncorrelated_single_number_uncertainties() -> None:
+    """Formula (B.2) on the Table B.1 spectrum gives u(Rw+C50-5000) = 0,6 dB
+    and u(Rw+Ctr,50-5000) = 0,8 dB."""
+    import reference_data as ref
+    from phonometry.building.insulation import (
+        _SPECTRUM1_50_5000,
+        _SPECTRUM2_50_5000,
+    )
+
+    ri = np.asarray(ref.ISO12999_1_ANNEX_B_RI)
+    ui = np.asarray(ref.ISO12999_1_ANNEX_B_UI)
+    u_c = single_number_uncertainty_uncorrelated(
+        ui, np.asarray(_SPECTRUM1_50_5000) - ri
+    )
+    u_ctr = single_number_uncertainty_uncorrelated(
+        ui, np.asarray(_SPECTRUM2_50_5000) - ri
+    )
+    assert u_c == pytest.approx(0.6034, abs=1e-3)
+    assert round(u_c, 1) == ref.ISO12999_1_ANNEX_B_U_UNCORR_C
+    assert u_ctr == pytest.approx(0.7924, abs=1e-3)
+    assert round(u_ctr, 1) == ref.ISO12999_1_ANNEX_B_U_UNCORR_CTR
+
+
+def test_annex_b_correlated_rw_uncertainty() -> None:
+    """Formula (B.6) with the 0,1 dB shift gives u(Rw) = 1,9 dB."""
+    import reference_data as ref
+    from phonometry import weighted_rating_extended
+
+    ri = np.asarray(ref.ISO12999_1_ANNEX_B_RI)
+    ui = np.asarray(ref.ISO12999_1_ANNEX_B_UI)
+    up = weighted_rating_extended(
+        ri + ui, ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
+    ).rating
+    down = weighted_rating_extended(
+        ri - ui, ref.ISO12999_1_ANNEX_B_FREQ, one_decimal=True
+    ).rating
+    assert (up - down) / 2.0 == pytest.approx(ref.ISO12999_1_ANNEX_B_U_CORR_RW)
+
+
+def test_annex_b_correlated_adaptation_sum_uncertainties() -> None:
+    """Formulae (B.3)-(B.5): u(Rw+C50-5000) = 2,1 dB and
+    u(Rw+Ctr,50-5000) = 2,6 dB (unrounded 2,05 / 2,63)."""
+    import reference_data as ref
+    from phonometry.building.insulation import (
+        _SPECTRUM1_50_5000,
+        _SPECTRUM2_50_5000,
+    )
+
+    ri = np.asarray(ref.ISO12999_1_ANNEX_B_RI)
+    ui = np.asarray(ref.ISO12999_1_ANNEX_B_UI)
+
+    def rw_plus_c(spectrum: np.ndarray, shift: np.ndarray) -> float:
+        return float(
+            -10.0 * np.log10(np.sum(10.0 ** ((spectrum - ri + shift) / 10.0)))
+        )
+
+    for spectrum, printed, unrounded in (
+        (np.asarray(_SPECTRUM1_50_5000, dtype=float),
+         ref.ISO12999_1_ANNEX_B_U_CORR_C, 2.05),
+        (np.asarray(_SPECTRUM2_50_5000, dtype=float),
+         ref.ISO12999_1_ANNEX_B_U_CORR_CTR, 2.63),
+    ):
+        u = (rw_plus_c(spectrum, -ui) - rw_plus_c(spectrum, +ui)) / 2.0
+        assert u == pytest.approx(unrounded, abs=0.01)
+        assert u == pytest.approx(printed, abs=0.06)
+
+
+def test_uncorrelated_rejects_non_finite_reference_differences() -> None:
+    with pytest.raises(ValueError, match="finite"):
+        single_number_uncertainty_uncorrelated(
+            [1.0, 1.0], [0.0, float("nan")]
+        )
+    with pytest.raises(ValueError, match="finite"):
+        single_number_uncertainty_uncorrelated(
+            [1.0, float("inf")], [0.0, 0.0]
+        )

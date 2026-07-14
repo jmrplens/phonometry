@@ -1,14 +1,15 @@
 ---
 title: "Electroacoustics: distortion and frequency response"
-description: "IEC 60268-3 distortion — total and nth-order harmonic distortion, THD+N and SINAD (AES17), SMPTE and CCIF intermodulation, dynamic intermodulation (DIM) and weighted THD — plus the Bendat & Piersol H1/H2 frequency-response estimators and ordinary coherence."
+description: "IEC 60268-3 distortion — total and nth-order harmonic distortion, THD+N and SINAD through the AES17 measurement bandwidth, the per-order modulation and difference-frequency intermodulation, dynamic intermodulation (DIM) and the ITU-R 468 weighted THD — plus the Bendat & Piersol H1/H2 frequency-response estimators and ordinary coherence."
 ---
 
 Two staples of audio-equipment characterisation, from a captured signal: how much
 an amplifier or transducer **distorts** a test tone, and what **frequency
 response** an input/output measurement reveals. This page covers the IEC 60268-3
 distortion set — total and nth-order harmonic distortion, THD+N and SINAD
-(AES17), the SMPTE and CCIF intermodulation measurements, dynamic intermodulation
-(DIM) and weighted THD — and the Bendat & Piersol frequency-response estimators
+through the AES17 measurement bandwidth, the per-order modulation and
+difference-frequency intermodulation, dynamic intermodulation (DIM) and the
+ITU-R 468 weighted THD — and the Bendat & Piersol frequency-response estimators
 `H1`/`H2` with the ordinary coherence `γ²`. Every quantity has an exact analytic
 oracle, so the numbers are verifiable rather than tuned.
 
@@ -77,13 +78,20 @@ plt.show()
 
 Where THD counts only the harmonics, **THD+N** compares *everything but the
 fundamental* — harmonics **and** noise — with the total signal. AES17 removes the
-fundamental with a standard notch filter (`1.2 ≤ Q ≤ 3`) and takes the ratio of
-the residual to the total RMS; **SINAD** is its reciprocal in dB:
+fundamental with a standard notch filter (`1.2 ≤ Q ≤ 3`, validated on the
+*applied* zero-phase response per clause 5.2.8) and takes the ratio of the
+residual to the total RMS; **SINAD** is its reciprocal in dB:
 
 $$
 \mathrm{THD{+}N} = \frac{V_\text{residual}}{V_\text{total}}, \qquad
 \mathrm{SINAD} = -20\lg(\mathrm{THD{+}N})\ \mathrm{dB}.
 $$
+
+Both voltages are measured through the AES17 measurement bandwidth — a 20 Hz
+high-pass plus the standard low-pass at 20 kHz (clauses 5.2.5 and 6.3.1) — so a
+DC offset or ultrasonic noise at a high sample rate does not count as "noise".
+The band edge is configurable, and `bandwidth=None` disables the chain and
+measures the full Nyquist band.
 
 ```python
 import phonometry as ph
@@ -91,47 +99,68 @@ import phonometry as ph
 ratio = ph.thd_plus_noise(signal, fs, 1000.0)          # ratio (0..)
 db = ph.thd_plus_noise(signal, fs, 1000.0, as_db=True)  # 20·lg(ratio) dB
 sinad_db = ph.sinad(signal, fs, 1000.0)                 # = -db
+wide = ph.thd_plus_noise(signal, fs, 1000.0, bandwidth=None)  # full Nyquist
 ```
 
-Because THD+N counts the noise floor, it is at or above the harmonic-only THD;
-`SINAD` is the corresponding signal-to-noise-and-distortion headroom in dB. The
-notch discards a start/stop transient internally, so the measurement wants a
-steady, sufficiently long capture.
+Because THD+N counts the in-band noise floor, it is at or above the
+harmonic-only THD; `SINAD` is the corresponding signal-to-noise-and-distortion
+headroom in dB (a quantity derived from the AES17 THD+N — AES17 itself does not
+define SINAD). The notch discards a start/stop transient internally, so the
+measurement wants a steady, sufficiently long capture.
 
 ### 2.1 Weighted THD (IEC 60268-3 14.12.11)
 
-`weighted_thd` frequency-weights the notched residual (A-weighting by default)
-before taking the ratio, so the perceptual emphasis of the distortion products is
-accounted for:
+`weighted_thd` frequency-weights the notched residual before taking the ratio,
+so the perceptual emphasis of the distortion products is accounted for. The
+default weighting is the network the clause requires — the IEC 60268-1
+Appendix A curve, i.e. ITU-R BS.468-4, which peaks at +12.2 dB near 6.3 kHz
+(exposed as `itu_r_468_weighting`); `'A'` and `'C'` remain as labelled options.
+Per the clause, the weighted measurement is valid for fundamental frequencies
+between 31.5 Hz and 400 Hz:
 
 ```python
 import phonometry as ph
 
-print(ph.weighted_thd(signal, fs, 1000.0, weighting="A"))
+print(ph.weighted_thd(signal, fs, 100.0))                  # ITU-R 468 network
+print(ph.weighted_thd(signal, fs, 100.0, weighting="A"))   # A-weighted variant
+print(ph.itu_r_468_weighting([6300.0]))                    # [+12.2] dB
 ```
 
 ## 3. Intermodulation distortion (IEC 60268-3 14.12.7–10)
 
 When two tones pass through a non-linearity they beat against each other,
-producing sum and difference products. IEC 60268-3 standardises three tests:
+producing sum and difference products. IEC 60268-3 standardises three tests,
+each with its own per-order definition:
 
-- **Modulation distortion** (SMPTE-type, 14.12.7): a large low tone `f_low` and a
-  small high tone `f_high` (1:4). The nth-order distortion is the RMS of the
-  sidebands at `f_high ± (n−1)·f_low`, relative to `f_high`.
-- **Difference-frequency distortion** (CCIF-type, 14.12.8): two equal high tones
-  `f₁ < f₂`. Second order sits at `f₂ − f₁`; third order at `2f₁ − f₂` and
-  `2f₂ − f₁`. `total_difference_frequency_distortion` combines the two in RMS.
+- **Modulation distortion** (14.12.7): a large low tone `f_low` and a small
+  high tone `f_high` (preferably 4:1). The per-order values are *arithmetic*
+  sums of the sideband amplitudes relative to the `f_high` output:
+  `d_m,2 = (a_{f₂+f₁} + a_{f₂−f₁})/a_{f₂}` and
+  `d_m,3 = (a_{f₂+2f₁} + a_{f₂−2f₁})/a_{f₂}`. The result also carries the
+  combined-RMS `smpte` value that SMPTE-type analyzers report (not an IEC
+  quantity).
+- **Difference-frequency distortion** (14.12.8): two equal high tones
+  `f₁ < f₂`, referenced to `U_{2,ref} = 2·U_{2,f₂}` (the sum of both tone
+  amplitudes): `d_d,2 = a_{f₂−f₁}/(a_{f₁}+a_{f₂})` and the arithmetic
+  `d_d,3 = (a_{2f₂−f₁} + a_{2f₁−f₂})/(a_{f₁}+a_{f₂})`.
+- **Total difference-frequency distortion** (14.12.10): a specific two-tone
+  test (`f₁ = 2f₀`, `f₂ = 3f₀ − δ`; the standard tones 8 kHz and 11.95 kHz
+  are the defaults) where only the two in-band products at `f₀ ∓ δ` count:
+  `d_TDFD = √(a²_{f₂−f₁} + a²_{2f₁−f₂}) / (a_{f₁} + a_{f₂})`.
 - **Dynamic intermodulation** (DIM, 14.12.9): a 15 kHz sine plus a
-  low-pass-filtered 3.15 kHz square wave (1:4). The DIM is the RMS of the
-  intermodulation products `|k·f_square ± f_sine|` that fall below `f_sine`
-  (IEC 60268-3 Table 2), relative to the 15 kHz sine.
+  low-pass-filtered 3.15 kHz square wave (1:4 peak-to-peak). The DIM is the
+  RMS of the intermodulation products `|k·f_square ± f_sine|` that fall below
+  `f_sine` (IEC 60268-3 Table 2), relative to the 15 kHz sine amplitude
+  (the 14.12.9.1 definition; the 14.12.9.2 f) print of the denominator is an
+  editorial defect, see [ERRATA](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md)).
 
 ```python
 import phonometry as ph
 
-smpte = ph.modulation_distortion(signal, fs, 60.0, 7000.0)          # SMPTE
-ccif2 = ph.difference_frequency_distortion(signal, fs, 13e3, 14e3, order=2)  # CCIF
-ccif_total = ph.total_difference_frequency_distortion(signal, fs, 13e3, 14e3)
+md = ph.modulation_distortion(signal, fs, 60.0, 7000.0)
+print(md.d2, md.d3, md.smpte)                                       # 14.12.7
+dfd2 = ph.difference_frequency_distortion(signal, fs, 13e3, 14e3, order=2)
+tdfd = ph.total_difference_frequency_distortion(signal, fs)         # 8/11.95 kHz
 dim = ph.dynamic_intermodulation_distortion(signal, fs)             # DIM (15k/3.15k)
 ```
 
@@ -194,13 +223,17 @@ plt.show()
 ---
 
 **Standards.** IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*
-(clauses 14.12.2–14.12.11): total harmonic distortion `THD_F`/`THD_R`, nth-order
-harmonic distortion `dₙ`, modulation (SMPTE) and difference-frequency (CCIF)
+(clauses 14.12.2–14.12.11): total harmonic distortion `THD_F`/`THD_R` (the
+14.12.3.2 formula defines the R form), nth-order harmonic distortion `dₙ`, the
+per-order modulation (`d_m,n`) and difference-frequency (`d_d,n`)
 intermodulation, total difference-frequency distortion, dynamic intermodulation
-(DIM) and weighted THD. AES17-2015, *Measurement of digital audio equipment*
-(clause 6.3): the THD+N ratio via the standard notch filter, and SINAD. Bendat &
-Piersol (2010), *Random Data: Analysis and Measurement Procedures* (4th ed.,
-Wiley): the `H1` and `H2` frequency-response estimators and the ordinary
-coherence `γ²`. All quantities are verified against exact analytic oracles
-(synthetic signals with known harmonic/intermodulation amplitudes, and a known
-LTI path).
+(DIM) and the ITU-R BS.468-4 / IEC 60268-1 weighted THD. AES17-2015,
+*Measurement of digital audio equipment* (clauses 5.2.5, 5.2.8 and 6.3.1): the
+THD+N ratio via the standard notch filter and the standard measurement
+bandwidth; SINAD is derived from it. ITU-R BS.468-4: the weighting-network
+nominal response. Bendat & Piersol (2010), *Random Data: Analysis and
+Measurement Procedures* (4th ed., Wiley): the `H1` and `H2` frequency-response
+estimators and the ordinary coherence `γ²`. All quantities are verified against
+exact analytic oracles (synthetic signals with known harmonic/intermodulation
+amplitudes, a clipped-sine Fourier oracle, a full DIM test-signal synthesis,
+and a known LTI path).

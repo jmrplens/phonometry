@@ -366,3 +366,50 @@ def test_mtf_above_1_3_warns_and_truncates():
     with pytest.warns(UserWarning, match="1.3"):
         result = _sti_from_mtf(_uniform_mtf(1.4))
     assert result.sti == 1.0
+
+
+# ---------------------------------------------------------------------------
+# Ed.5 C.3.2 - modulation-depth test, direct method (end-to-end oracle)
+# ---------------------------------------------------------------------------
+
+# Expected STI for the Ed.5 Formula (C.1) test signal at modulation scale
+# m = 0,0, 0,1, ... 1,0 (Ed.5 Table C.2 staircase), tolerance +/-0,05.
+_C32_STI_STAIRCASE = [0.0, 0.18, 0.30, 0.38, 0.44, 0.50, 0.56, 0.62,
+                      0.70, 0.82, 1.0]
+
+
+def _c32_signal(m: float, fs: int, seconds: float) -> np.ndarray:
+    """Ed.5 Formula (C.1) verification signal with sinusoidal carriers.
+
+    A_k(t) = g_k sin(2 pi fc_k t) sqrt(0,5 (1 + 0,55 m (sin 2 pi f1_k t
+    - sin 2 pi f2_k t))), with the Table B.1 modulation pairs and the
+    A.6.1 male spectrum g_k; the values here restate the standard, not
+    the implementation.
+    """
+    centers = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
+    f1 = [1.60, 1.00, 0.63, 2.00, 1.25, 0.80, 2.50]
+    f2 = [8.00, 5.00, 3.15, 10.00, 6.25, 4.00, 12.50]
+    levels_db = [-2.5, 0.5, 0.0, -6.0, -12.0, -18.0, -24.0]
+    t = np.arange(int(round(seconds * fs))) / fs
+    x = np.zeros(t.size)
+    for fc, fa, fb, level in zip(centers, f1, f2, levels_db):
+        envelope = 0.5 * (
+            1.0 + 0.55 * m * (np.sin(2 * np.pi * fa * t) - np.sin(2 * np.pi * fb * t))
+        )
+        x += (
+            10.0 ** (level / 20.0)
+            * np.sin(2 * np.pi * fc * t)
+            * np.sqrt(np.maximum(envelope, 0.0))
+        )
+    return x
+
+
+@pytest.mark.parametrize("i", range(len(_C32_STI_STAIRCASE)))
+def test_stipa_direct_method_modulation_depth_staircase(i: int) -> None:
+    """Ed.5 C.3.2: the full stipa() audio path (octave bank, intensity
+    envelopes, sine/cosine correlation, TI chain) must reproduce the
+    published STI staircase for the Formula (C.1) signal within +/-0,05."""
+    m = i / 10.0
+    x = _c32_signal(m, FS, seconds=16.0)
+    res = stipa(x, FS)
+    assert res.sti == pytest.approx(_C32_STI_STAIRCASE[i], abs=0.05)

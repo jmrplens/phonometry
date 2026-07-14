@@ -199,11 +199,18 @@ def speech_intelligibility_index(
         contrib = 10.0 ** (0.1 * (b[:i] + 3.32 * c[:i] * np.log10(0.89 * f[i] / f[:i])))
         z[i] = 10.0 * np.log10(10.0 ** (0.1 * n[i]) + np.sum(contrib))
 
-    # Clause 5.5/5.6 - equivalent internal noise and disturbance.
+    # Clause 5.5/5.6 - equivalent internal noise and disturbance. Di is "the
+    # larger of" Zi and Xi' (clause 5.6) - a maximum, not an energy sum. The
+    # official Hornsby SII worksheet computes it as =MAX() in every band, and
+    # the R CRAN worked example C.1 confirms (8000 Hz row: Di = Xi' = -7.1).
     xp = REFERENCE_INTERNAL_NOISE + t
-    d = 10.0 * np.log10(10.0 ** (0.1 * z) + 10.0 ** (0.1 * xp))
+    d = np.maximum(z, xp)
 
-    # Clause 5.7/5.8 - level distortion, band audibility and the index.
+    # Clause 5.7/5.8 - level distortion, band audibility and the index. The
+    # level-distortion factor Li compares Ei' with the *normal* standard
+    # speech spectrum plus 10 dB for every vocal effort (clause 5.7, Formula
+    # 6.19 uses Ui of Table 3 for normal vocal effort only) - confirmed
+    # against the official worksheet; not a bug.
     level_factor = np.clip(1.0 - (e - _SPEECH_NORMAL - 10.0) / 160.0, 0.0, 1.0)
     audibility = np.clip((e - d + 15.0) / 30.0, 0.0, 1.0)
     a = level_factor * audibility

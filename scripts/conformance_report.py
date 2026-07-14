@@ -804,6 +804,37 @@ def _chk_sti_uniform() -> Outcome:
     return numeric(0.5, computed, 0.01, places=4)
 
 
+@register(
+    "Speech transmission (IEC 60268-16)",
+    "IEC 60268-16:2020 C.3.2",
+    "STIPA direct method, Formula (C.1) signal at m=0.5",
+)
+def _chk_stipa_direct_method() -> Outcome:
+    # Ed.5 modulation-depth verification: the Formula (C.1) signal with
+    # sinusoidal carriers at the A.6.1 male levels, modulation scale m=0.5,
+    # must read STI = 0.50 within the published +/-0.05 through the full
+    # stipa() audio path (octave bank, envelopes, correlation, TI chain).
+    fs = 48000
+    centers = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
+    f1 = [1.60, 1.00, 0.63, 2.00, 1.25, 0.80, 2.50]
+    f2 = [8.00, 5.00, 3.15, 10.00, 6.25, 4.00, 12.50]
+    levels_db = [-2.5, 0.5, 0.0, -6.0, -12.0, -18.0, -24.0]
+    t = np.arange(16 * fs) / fs
+    x = np.zeros(t.size)
+    for fc, fa, fb, level in zip(centers, f1, f2, levels_db):
+        env = 0.5 * (
+            1.0
+            + 0.55 * 0.5 * (np.sin(2 * np.pi * fa * t) - np.sin(2 * np.pi * fb * t))
+        )
+        x += (
+            10.0 ** (level / 20.0)
+            * np.sin(2 * np.pi * fc * t)
+            * np.sqrt(np.maximum(env, 0.0))
+        )
+    computed = float(ph.stipa(x, fs).sti)
+    return numeric(0.50, computed, 0.05, places=4)
+
+
 # ===========================================================================
 # Domain 5 - Intensity & sound power
 # ===========================================================================
@@ -2796,10 +2827,41 @@ def _chk_sii_masking() -> Outcome:
     return numeric(ref.ANSIS3_5_MASKING_Z_200HZ, float(result.masking[1]), 1e-3, places=3)
 
 
+@register(_SII, "ANSI S3.5-1997 clause 5.6", "Equivalent disturbance in quiet at 5000 Hz")
+def _chk_sii_disturbance_quiet() -> Outcome:
+    # In quiet Di = max(Zi, Xi') = Xi' = -23.6 dB (Table 3) at 5000 Hz; an
+    # energy-sum disturbance would read above the reference internal noise.
+    result = ph.hearing.sii.speech_intelligibility_index("normal")
+    return numeric(
+        ref.ANSIS3_5_DISTURBANCE_5000HZ, float(result.disturbance[15]), 1e-2,
+        unit="dB", places=2,
+    )
+
+
+@register(_SII, "ANSI S3.5-1997 clause 6", "SII, noise 30 dB plus hearing loss 40 dB")
+def _chk_sii_noise_plus_loss() -> Outcome:
+    result = ph.hearing.sii.speech_intelligibility_index(
+        "normal",
+        noise_spectrum=np.full(18, 30.0),
+        threshold=np.full(18, 40.0),
+    )
+    return numeric(ref.ANSIS3_5_NOISE_PLUS_LOSS, result.sii, 1e-4, places=4)
+
+
+@register(_SII, "R CRAN 'SII' Example C.2", "One-third-octave method, independent oracle")
+def _chk_sii_r_example() -> Outcome:
+    result = ph.hearing.sii.speech_intelligibility_index(
+        np.full(18, 54.0),
+        np.array([40.0, 30.0, 20.0] + [0.0] * 15),
+        threshold=np.zeros(18),
+    )
+    return numeric(ref.ANSIS3_5_R_EXAMPLE_C2, result.sii, 1e-4, places=6)
+
+
 @register(_SII, "ANSI S3.5-1997 clause 6", "SII, standard speech in quiet, normal hearing")
 def _chk_sii_standard_quiet() -> Outcome:
     result = ph.speech_intelligibility_index("normal")
-    return numeric(ref.ANSIS3_5_STANDARD_QUIET, result.sii, 5e-4, places=4)
+    return numeric(ref.ANSIS3_5_STANDARD_QUIET, result.sii, 1e-6, places=8)
 
 
 @register(_SII, "ANSI S3.5-1997 Table 3", "Loud-effort speech spectrum level at 1 kHz")
@@ -3250,8 +3312,18 @@ def _electro_harmonic_signal() -> np.ndarray:
 
 @register(
     _ELECTRO,
-    "IEC 60268-3:2013 (14.12.2-3)",
-    "THD (rel. fundamental) of a synthetic 4-harmonic signal",
+    "IEC 60268-3:2013 (14.12.3.2)",
+    "THD (rel. total RMS, the R convention the clause defines)",
+)
+def _chk_thd_r() -> Outcome:
+    value = ph.thd(_electro_harmonic_signal(), _electro_fs(), 1000.0, kind="R")
+    return numeric(ref.DISTORTION_THD_R, value, 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "Closed-form harmonic synthesis (THD_F convention)",
+    "THD (rel. fundamental, the widespread datasheet convention)",
 )
 def _chk_thd_f() -> Outcome:
     value = ph.thd(_electro_harmonic_signal(), _electro_fs(), 1000.0, kind="F")
@@ -3268,33 +3340,46 @@ def _chk_harmonic_d2() -> Outcome:
     return numeric(ref.DISTORTION_D2, value, 1e-4, places=6)
 
 
-@register(
-    _ELECTRO,
-    "IEC 60268-3:2013 (14.12.7)",
-    "SMPTE modulation distortion of a known two-tone signal",
-)
-def _chk_smpte() -> Outcome:
+def _electro_smpte_signal() -> tuple[np.ndarray, float, float]:
     fs = _electro_fs()
     t = np.arange(fs) / fs
-    fl, fh, ah = 250.0, 8000.0, 0.25
+    fl, fh = 250.0, 8000.0
     x = (
         _electro_tone(t, fl, 1.0)
-        + _electro_tone(t, fh, ah)
+        + _electro_tone(t, fh, 0.25)
         + _electro_tone(t, fh + fl, 0.02)
         + _electro_tone(t, fh - fl, 0.02)
         + _electro_tone(t, fh + 2 * fl, 0.01)
         + _electro_tone(t, fh - 2 * fl, 0.01)
     )
-    expected = math.sqrt(0.02**2 + 0.02**2 + 0.01**2 + 0.01**2) / ah
-    return numeric(expected, ph.modulation_distortion(x, fs, fl, fh), 1e-4, places=6)
+    return x, fl, fh
 
 
 @register(
     _ELECTRO,
-    "IEC 60268-3:2013 (14.12.8)",
-    "CCIF difference-frequency distortion (2nd order) of a two-tone signal",
+    "IEC 60268-3:2013 (14.12.7.2 g)",
+    "Modulation distortion d_m,2 (arithmetic sideband sum over U_2,f2)",
 )
-def _chk_ccif() -> Outcome:
+def _chk_modulation_d2() -> Outcome:
+    x, fl, fh = _electro_smpte_signal()
+    # Sidebands 0.02 + 0.02 over the 0.25 carrier: d_m,2 = 0.16 exactly.
+    value = ph.modulation_distortion(x, _electro_fs(), fl, fh).d2
+    return numeric(0.16, value, 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.7.2 h)",
+    "Modulation distortion d_m,3 (arithmetic sideband sum over U_2,f2)",
+)
+def _chk_modulation_d3() -> Outcome:
+    x, fl, fh = _electro_smpte_signal()
+    # Sidebands 0.01 + 0.01 over the 0.25 carrier: d_m,3 = 0.08 exactly.
+    value = ph.modulation_distortion(x, _electro_fs(), fl, fh).d3
+    return numeric(0.08, value, 1e-4, places=6)
+
+
+def _electro_dfd_signal() -> tuple[np.ndarray, float, float]:
     fs = _electro_fs()
     t = np.arange(fs) / fs
     f1, f2 = 13000.0, 14000.0
@@ -3302,13 +3387,65 @@ def _chk_ccif() -> Outcome:
         _electro_tone(t, f1, 0.5)
         + _electro_tone(t, f2, 0.5)
         + _electro_tone(t, f2 - f1, 0.03)
+        + _electro_tone(t, 2 * f1 - f2, 0.02)
+        + _electro_tone(t, 2 * f2 - f1, 0.02)
     )
-    return numeric(
-        0.03 / 0.5,
-        ph.difference_frequency_distortion(x, fs, f1, f2, order=2),
-        1e-4,
-        places=6,
+    return x, f1, f2
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.8.1 a)",
+    "Difference-frequency distortion d_d,2 (over U_2,ref = 2 U_2,f2)",
+)
+def _chk_dfd_d2() -> Outcome:
+    x, f1, f2 = _electro_dfd_signal()
+    # Product 0.03 over the tone-amplitude sum 1.0: d_d,2 = 0.03 exactly.
+    value = ph.difference_frequency_distortion(x, _electro_fs(), f1, f2, order=2)
+    return numeric(0.03, value, 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.8.1 b)",
+    "Difference-frequency distortion d_d,3 (arithmetic product sum)",
+)
+def _chk_dfd_d3() -> Outcome:
+    x, f1, f2 = _electro_dfd_signal()
+    # Products 0.02 + 0.02 over the tone-amplitude sum 1.0: d_d,3 = 0.04.
+    value = ph.difference_frequency_distortion(x, _electro_fs(), f1, f2, order=3)
+    return numeric(0.04, value, 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.10)",
+    "Total difference-frequency distortion (8 kHz / 11.95 kHz tones)",
+)
+def _chk_tdfd() -> Outcome:
+    fs = _electro_fs()
+    t = np.arange(fs) / fs
+    f1, f2 = 8000.0, 11950.0
+    x = (
+        _electro_tone(t, f1, 0.5)
+        + _electro_tone(t, f2, 0.5)
+        + _electro_tone(t, f2 - f1, 0.02)
+        + _electro_tone(t, 2 * f1 - f2, 0.03)
     )
+    # Only the in-band products at f0 -/+ delta (3950/4050 Hz) enter:
+    # d_TDFD = sqrt(0.02^2 + 0.03^2) / (0.5 + 0.5) = sqrt(0.0013).
+    value = ph.total_difference_frequency_distortion(x, fs)
+    return numeric(0.03605551275463989, value, 1e-4, places=8)
+
+
+@register(
+    _ELECTRO,
+    "ITU-R BS.468-4 Table 1",
+    "Weighting network response at the 6.3 kHz peak (14.12.11 network)",
+)
+def _chk_itu_468_peak() -> Outcome:
+    value = float(ph.itu_r_468_weighting([6300.0])[0])
+    return numeric(12.2, value, 1e-9, unit="dB", places=2)
 
 
 @register(

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **235/235 conformance checks pass** across 32 domains and 134 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **244/244 conformance checks pass** across 32 domains and 138 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -101,12 +101,13 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Speech transmission (IEC 60268-16)</b> — 100% (2/2)</summary>
+<summary>&#9989; <b>Speech transmission (IEC 60268-16)</b> — 100% (3/3)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | IEC 60268-16:2020 A.2.2 | STI weighting-factor pair (500 Hz + 1 kHz bands) | 0.398 (+/-0.001) | 0.398 | 0 | &#9989; |
 | IEC 60268-16:2020 A.3.1.2 | Uniform MTF m=0.5 maps to STI=0.5 | 0.5 (+/-0.01) | 0.5 | 0 | &#9989; |
+| IEC 60268-16:2020 C.3.2 | STIPA direct method, Formula (C.1) signal at m=0.5 | 0.5 (+/-0.05) | 0.4993 | -0.001 | &#9989; |
 
 </details>
 
@@ -294,13 +295,16 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Speech intelligibility (ANSI S3.5-1997)</b> — 100% (4/4)</summary>
+<summary>&#9989; <b>Speech intelligibility (ANSI S3.5-1997)</b> — 100% (7/7)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | ANSI S3.5-1997 Table 3 | Band-importance function normalisation | 1 (+/-0) | 1 | 0 | &#9989; |
 | ANSI S3.5-1997 clause 5.4 | Equivalent masking spectrum level at 200 Hz | -1.665 (+/-0.001) | -1.665 | 0 | &#9989; |
-| ANSI S3.5-1997 clause 6 | SII, standard speech in quiet, normal hearing | 0.9958 (+/-0.0005) | 0.9958 | 0 | &#9989; |
+| ANSI S3.5-1997 clause 5.6 | Equivalent disturbance in quiet at 5000 Hz | -23.6 dB (+/-0.01 dB) | -23.6 dB | 0 dB | &#9989; |
+| ANSI S3.5-1997 clause 6 | SII, noise 30 dB plus hearing loss 40 dB | 0.2185 (+/-0.0001) | 0.2185 | 0 | &#9989; |
+| R CRAN 'SII' Example C.2 | One-third-octave method, independent oracle | 0.851375 (+/-0.0001) | 0.851375 | 0 | &#9989; |
+| ANSI S3.5-1997 clause 6 | SII, standard speech in quiet, normal hearing | 0.99582517 (+/-0.000001) | 0.99582517 | 0 | &#9989; |
 | ANSI S3.5-1997 Table 3 | Loud-effort speech spectrum level at 1 kHz | 42.16 dB (+/-0 dB) | 42.16 dB | 0 dB | &#9989; |
 
 </details>
@@ -423,14 +427,19 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b> — 100% (7/7)</summary>
+<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b> — 100% (12/12)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
-| IEC 60268-3:2013 (14.12.2-3) | THD (rel. fundamental) of a synthetic 4-harmonic signal | 0.113578 (+/-0.0001) | 0.113578 | 0 | &#9989; |
+| IEC 60268-3:2013 (14.12.3.2) | THD (rel. total RMS, the R convention the clause defines) | 0.112853 (+/-0.0001) | 0.112853 | 0 | &#9989; |
+| Closed-form harmonic synthesis (THD_F convention) | THD (rel. fundamental, the widespread datasheet convention) | 0.113578 (+/-0.0001) | 0.113578 | 0 | &#9989; |
 | IEC 60268-3:2013 (14.12.5) | 2nd-order harmonic distortion d2 (rel. total) | 0.099361 (+/-0.0001) | 0.099361 | 0 | &#9989; |
-| IEC 60268-3:2013 (14.12.7) | SMPTE modulation distortion of a known two-tone signal | 0.126491 (+/-0.0001) | 0.126491 | 0 | &#9989; |
-| IEC 60268-3:2013 (14.12.8) | CCIF difference-frequency distortion (2nd order) of a two-tone signal | 0.06 (+/-0.0001) | 0.06 | 0 | &#9989; |
+| IEC 60268-3:2013 (14.12.7.2 g) | Modulation distortion d_m,2 (arithmetic sideband sum over U_2,f2) | 0.16 (+/-0.0001) | 0.16 | 0 | &#9989; |
+| IEC 60268-3:2013 (14.12.7.2 h) | Modulation distortion d_m,3 (arithmetic sideband sum over U_2,f2) | 0.08 (+/-0.0001) | 0.08 | 0 | &#9989; |
+| IEC 60268-3:2013 (14.12.8.1 a) | Difference-frequency distortion d_d,2 (over U_2,ref = 2 U_2,f2) | 0.03 (+/-0.0001) | 0.03 | 0 | &#9989; |
+| IEC 60268-3:2013 (14.12.8.1 b) | Difference-frequency distortion d_d,3 (arithmetic product sum) | 0.04 (+/-0.0001) | 0.04 | 0 | &#9989; |
+| IEC 60268-3:2013 (14.12.10) | Total difference-frequency distortion (8 kHz / 11.95 kHz tones) | 0.03605551 (+/-0.0001) | 0.03605551 | 0 | &#9989; |
+| ITU-R BS.468-4 Table 1 | Weighting network response at the 6.3 kHz peak (14.12.11 network) | 12.2 dB (+/-0 dB) | 12.2 dB | 0 dB | &#9989; |
 | IEC 60268-3:2013 (14.12.9) | DIM of the 15 kHz / 3.15 kHz signal (Table 2, 9 products) | 0.168819 (+/-0.0001) | 0.168819 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e | H1 recovers a known first-order IIR gain at 1 kHz | 0.8954 (+/-2%) | 0.8954 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e | Ordinary coherence = 1 for a noiseless LTI path | 1 (+/-0.001) | 1 | 0 | &#9989; |

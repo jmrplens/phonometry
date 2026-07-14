@@ -9,6 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `itu_r_468_weighting`: the ITU-R BS.468-4 Table 1 weighting-network
+  response (identical to the IEC 60268-1 Appendix A network that
+  IEC 60268-3 14.12.11 requires), interpolated per the recommendation's own
+  log-frequency rule; `weighted_thd` now defaults to it (`'468'`), keeps
+  `'A'`/`'C'` as labelled options and documents the 31,5 Hz - 400 Hz
+  fundamental validity range.
+- AES17 measurement-bandwidth chain for `thd_plus_noise`, `sinad` and
+  `harmonic_analysis`: both the residual and the total signal are measured
+  through a 20 Hz high-pass plus the standard low-pass (clauses 5.2.5 /
+  6.3.1) with a configurable `bandwidth` (default 20 kHz;
+  `bandwidth=None` keeps the full-Nyquist measurement).
+- `ModulationDistortionResult`: `modulation_distortion` now returns the
+  IEC 60268-3 14.12.7 per-order values `d2`/`d3` together with the
+  SMPTE-analyzer combined RMS as the explicitly labelled `smpte` field.
+- Hearing and electroacoustics oracle expansion: the SII quiet condition at
+  the official worksheet full precision plus a discriminating
+  noise-plus-hearing-loss case and the independent R package Example C.2;
+  the IEC 60268-16 Ed.5 C.3.2 STIPA direct-method staircase (m = 0 to 1
+  through the full audio path, tolerance 0,05); the clipped-sine THD
+  Fourier constants; a full-signal DIM regression (1,536 MHz synthesis of
+  the standard test signal through a weak polynomial nonlinearity,
+  FIR-decimated to 192 kHz, checked against an exact-bin FFT oracle); the
+  H1 input-noise bias SNR/(1+SNR); the printed ITU-R 468 response values
+  with the AES17 CCIR-RMS cross-check; and the effective notch-Q
+  validation on the applied zero-phase response.
+- ISO 532-1 Annex B.4 level-ramp oracles (Test signals 6-9): the tone and
+  pink-noise ramps are regenerated from parameters measured on the official
+  electronic-attachment WAVs and pinned to the workbook Nmax/N5 with
+  tolerances calibrated against those WAVs; the sub-1-sone phon conversion
+  and the NX percentile are now confirmed line by line against the
+  attachment's Annex A.4 reference program source.
+- `docs/ERRATA.md` entry for IEC 60268-3:2013 clause 14.12.9.2 f): the
+  printed DIM denominator ("U2") contradicts the 14.12.9.1 definition
+  (the output amplitude at f_s), which the library follows.
 - ISO/PAS 20065:2016 extended uncertainty of the audibility (Clauses 5.4/6):
   `audibility_uncertainty` propagates the uniform 3 dB narrow-band level
   uncertainty through the audibility chain to the extended uncertainty U
@@ -158,6 +192,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- SII (ANSI S3.5-1997): the equivalent disturbance spectrum level is the
+  clause 5.6 maximum of the equivalent masking and internal noise levels,
+  not their energy sum; the index for a hearing-impaired listener in
+  moderate noise was underestimated by up to 0,042 (0,1841 vs the
+  standard's 0,2185 for normal speech in flat 30 dB noise with a flat
+  40 dB loss). Confirmed against the official worksheet (=MAX in every
+  band) and the R CRAN worked example.
+- IEC 60268-3 intermodulation reworked to the clause-exact quantities:
+  `modulation_distortion` reports the per-order arithmetic sideband sums
+  over the f2 output (14.12.7.2 g-h) instead of one combined RMS;
+  `difference_frequency_distortion` references U_2,ref = 2 U_2,f2 and sums
+  the third-order products arithmetically (14.12.8.1) instead of halving
+  the reference (+6 dB on d2, +3 dB on d3); and
+  `total_difference_frequency_distortion` implements 14.12.10.1 directly
+  (only the two in-band products over the tone-amplitude sum, standard
+  8 kHz / 11,95 kHz tones as defaults) instead of sqrt(d2^2 + d3^2).
+- Intermodulation product search windows no longer swallow neighbouring
+  components: octave-spaced clean tones read 0 instead of d2 = 1,0, DC
+  offsets no longer leak into d3, out-of-band products clamp to
+  (0, Nyquist), and the two TDFD products can no longer double-count.
+- THD+N/SINAD measured noise over the full Nyquist band: at fs = 192 kHz
+  white noise read +7 dB versus the AES17 band-limited value and a DC
+  offset was counted as noise; both now pass through the AES17
+  measurement-bandwidth chain by default.
+- The AES17 standard notch was designed at the nominal Q but applied
+  zero-phase (filtfilt squares the response), so the applied quality
+  factor was 0,644x nominal (a requested 2,0 acted as 1,29; requests below
+  ~1,87 silently fell outside the AES17 [1,2, 3] range). The design Q is
+  now compensated by sqrt(1 + sqrt(2)) so the applied response has the
+  requested quality factor.
+- `thd` returned 0,0 when no harmonic of the fundamental fitted below
+  Nyquist (for example a 20 kHz fundamental at fs = 48 kHz); it now raises,
+  and captures shorter than 64 samples are rejected.
+- THD/SINAD documentation labelled both THD conventions as the
+  IEC 60268-3 14.12.2-3 quantity and cited AES17 for SINAD; the R
+  convention is now identified as the 14.12.3.2 formula and SINAD as
+  derived from the AES17 THD+N (AES17 does not define SINAD).
 - Psychoacoustic annoyance combined the weightings as
   N5*sqrt(1 + wS^2 + wFR^2) where Fastl & Zwicker Eq. (16.2) prints
   PA = N5*(1 + sqrt(wS^2 + wFR^2)); every PA with a nonzero

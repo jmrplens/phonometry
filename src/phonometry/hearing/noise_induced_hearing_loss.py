@@ -179,6 +179,11 @@ def _nipts_components(l_ex: float, years: float) -> tuple[np.ndarray, np.ndarray
     # The spreads are half-Gaussian standard deviations and must stay >= 0; the
     # linear term can only turn negative for a sub-1-year extrapolation, outside
     # the standard's range, where it would otherwise invert the percentiles.
+    # Reading note (ISO 1999:2013): below 10 years the median N50 follows the
+    # Formula (3) lg(t+1)/lg(11) extrapolation, but Formulae (6)/(7) for the
+    # spreads carry no such provision, so du/dl keep the raw lg(t) here. That
+    # is a faithful reading of the standard's text; Annex D tabulates no
+    # sub-10-year fractile cells that could arbitrate it.
     du = np.maximum((xu + yu * lg_t) * excess2, 0.0)
     dl = np.maximum((xl + yl * lg_t) * excess2, 0.0)
     return n50, du, dl

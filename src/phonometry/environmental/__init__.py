@@ -30,6 +30,7 @@ from .outdoor_propagation import (
     predicted_receiver_level,
 )
 from .wind_turbine_noise import (
+    WindTurbineNoiseWarning,
     WindTurbineTonalityResult,
     apparent_sound_power_level,
     slant_distance,
@@ -88,6 +89,7 @@ __all__ = [
     "DEFAULT_FREQUENCIES",
     "ImpulseProminenceResult",
     "OutdoorAttenuation",
+    "WindTurbineNoiseWarning",
     "WindTurbineTonalityResult",
     "air_attenuation",
     "air_attenuation_m",

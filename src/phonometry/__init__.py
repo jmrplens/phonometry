@@ -354,6 +354,7 @@ from .aircraft.aircraft_noise import (
     tone_correction,
 )
 from .environmental.wind_turbine_noise import (
+    WindTurbineNoiseWarning,
     WindTurbineTonalityResult,
     apparent_sound_power_level,
     slant_distance,
@@ -890,6 +891,7 @@ __all__ = [
     "apparent_sound_power_level",
     "slant_distance",
     "wind_turbine_tonality",
+    "WindTurbineNoiseWarning",
     "WindTurbineTonalityResult",
     "equal_loudness_contour",
     "loudness_level",

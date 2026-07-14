@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- ISO 7626-2:2015 measurement-side acceptance criteria:
+  `rigid_mass_calibration_check` implements the 7.5.2 operational calibration
+  on a rigid block of known mass (|A| = 1/m or |Y| = 1/(2 pi f m) within
+  +/-5 %, per-band pass flags in a `RigidMassCalibrationResult`) and
+  `random_error_percent` the Annex A normalized random error
+  eps = sqrt((1-gamma^2)/(2 n gamma^2)) with the 8.1.3 < 5 % averaging
+  criterion; measured-FRF processing per 8.1.3 (H1) and coherence checks are
+  documented through the existing `transfer_function`/`coherence` estimators.
+- ISO 10846-1:2008 Equation (6): `blocking_force_ratio` quantifies the
+  blocking-force approximation F2/F2,b = 1/(1 + k2,2/kt) (within 10 % for
+  |k2,2| < 0,1 |kt|, Eq. (7)).
+- Vibration oracles promoted to tests and the conformance report: the nine
+  printed ISO 8041-1:2017 Annex B design-goal tables (318 bands) with a
+  Table 5 tolerance-envelope check and the Wb/Wc/Wd/We/Wf/Wj design-goal
+  points, the ISO 2631-5:2018 Annex C NOTE 5 female worked example
+  (Sd = 1,40 MPa, R = 0,97) and the Annex D Table D.1 digital-filter
+  cross-check of Formula 1, the ISO 7626-2 rigid-mass calibration values and
+  Annex A random-error example, the omega = 1000 rad/s rigid-mass decade
+  identity, the ISO 10846-3 validity anchors (|T| = 0,1 <->
+  DeltaL1,2 = 20 dB, model bias 1,1 within 1 dB / 12 %), the ISO 10846-1
+  Eq. (6) force ratio 1/1,1 and the 7.6 linearity criterion (10 dB input
+  step within 1,5 dB).
 - ISO 717 enlarged frequency ranges: `weighted_rating_extended` computes the
   Annex B spectrum adaptation terms (C50-3150, C50-5000, C100-5000 and the
   Ctr counterparts, Table B.1 spectra) and `weighted_impact_rating_extended`
@@ -85,6 +107,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- ISO 10846-3 indirect method returned out-of-validity results silently:
+  `transfer_stiffness_indirect` now computes the per-band transmissibility
+  magnitude and emits a `PhonometryWarning` where |T| > 0,1 (Inequality (2):
+  DeltaL1,2 < 20 dB, outside the 1 dB / 12 % accuracy of Formula (1)),
+  exposes the limit as `TRANSMISSIBILITY_LIMIT`, and documents the
+  blocking-mass rigidity criterion 10 lg(m2,eff^2/m2^2) <= 1 dB
+  (Inequality (3)) with the Formula (4) effective-mass measurement.
+- SDOF clause attributions for ISO 7626-1: the closed-form resonator
+  (H = 1/(k - w^2 m + jwc), peak mobility 1/c) was cited as "Annex A", which
+  covers matrix impedance/mobility relations; module, tests, docs and
+  conformance now cite it as closed form consistent with the Table 1 / 3.1.2
+  definitions, and the mobility definition citation is corrected from 3.1 to
+  3.1.2.
+- Zero-denominator edges in the vibration FRF modules raise an explicit
+  ValueError instead of propagating inf/NaN: `transfer_stiffness_direct`
+  with a zero input displacement, `transfer_stiffness_level` of a zero
+  magnitude, `loss_factor` of a purely imaginary stiffness, and
+  `convert_frf` of a zero value through a force-per-motion reciprocal.
+- Documentation: `convert_frf`/`MobilityResult.to` reciprocals are the free
+  quantities of ISO 7626-1 3.1.4 (blocked matrix quantities do not invert
+  element-wise; Table 1 names F/a the effective mass), the ISO 2631-5 input
+  record must be conditioned (DC-removed) since the seat-to-spine transfer
+  is unity at 0 Hz, and `weighted_acceleration` notes that ISO tables
+  tabulate at true one-third-octave centres 10^(n/10), not nominal labels.
 - ISO 10848 octave-band single-number Kij averaged the wrong range: the
   one-third-octave 200-1250 Hz mask was reused on octave centres, dropping
   the 125 Hz octave (a +0,5 dB bias per dB/octave of Kij slope); octave

@@ -1108,6 +1108,66 @@ def _chk_lab_airborne_rw() -> Outcome:
 
 @register(
     "Room & building acoustics",
+    "ISO 10140-5:2010+A1 Annex B, Table B.1",
+    "Reference elements end-to-end: printed Rw (C; Ctr) of all three",
+)
+def _chk_iso10140_5_reference_elements() -> Outcome:
+    rows = [
+        (ref.ISO10140_5_B1_HEAVY_WALL_R, ref.ISO10140_5_B1_HEAVY_WALL_RATING),
+        (ref.ISO10140_5_B1_HEAVY_FLOOR_R, ref.ISO10140_5_B1_HEAVY_FLOOR_RATING),
+        (ref.ISO10140_5_B1_LIGHT_WALL_R, ref.ISO10140_5_B1_LIGHT_WALL_RATING),
+    ]
+    computed = []
+    ok = True
+    for r, expected in rows:
+        # S = A (10 m2) so the ISO 10140-2 chain returns R = L1 - L2 exactly.
+        res = ph.lab_airborne_insulation(
+            np.full(16, 90.0), 90.0 - np.asarray(r, dtype=float),
+            np.full(16, 0.8), area=10.0, volume=50.0,
+        )
+        assert res.rating is not None
+        got = (res.rating.rating, res.rating.c, res.rating.ctr)
+        computed.append(got)
+        ok = ok and got == expected
+    return Outcome(
+        expected="Rw(C;Ctr) = 53(-1;-5) / 52(-1;-5) / 33(-1;-2)",
+        computed=" / ".join(f"{rw}({c};{ctr})" for rw, c, ctr in computed),
+        delta="exact",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10140-5:2010+A1 Annex C, Table C.1",
+    "Reference floors end-to-end: printed Ln,t,r,0,w (CI) of both",
+)
+def _chk_iso10140_5_reference_floors() -> Outcome:
+    rows = [
+        (ref.ISO10140_5_C1_FLOOR_C1C2_LN, ref.ISO10140_5_C1_FLOOR_C1C2_RATING),
+        (ref.ISO10140_5_C1_FLOOR_C3_LN, ref.ISO10140_5_C1_FLOOR_C3_RATING),
+    ]
+    computed = []
+    ok = True
+    for ln, expected in rows:
+        # A = A0 (V = 31,25 m3, T = 0,5 s) so Ln equals the receiving level.
+        res = ph.lab_impact_insulation(
+            np.asarray(ln, dtype=float), np.full(16, 0.5), volume=31.25
+        )
+        assert res.rating is not None
+        got = (res.rating.rating, res.rating.ci)
+        computed.append(got)
+        ok = ok and got == expected
+    return Outcome(
+        expected="Ln,t,r,0,w(CI) = 72(0) / 75(-3)",
+        computed=" / ".join(f"{lnw}({ci})" for lnw, ci in computed),
+        delta="exact",
+        passed=ok,
+    )
+
+
+@register(
+    "Room & building acoustics",
     "ISO 15186-1:2000 Formula (7)",
     "Intensity RI on the ISO 717-1 reference shape -> RI,w = 30",
 )

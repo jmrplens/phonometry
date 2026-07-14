@@ -277,6 +277,11 @@ EN12354_2_ANNEX_E3_LPRIME_N_W = 45
 # partial indices sum to R' = 35,8 / 38,0 dB at 1 k / 2 k, whereas its R' row
 # prints 35,4 / 37,5 - an internal rounding inconsistency in the 2000 example;
 # the low bands (125-500 Hz) and every single-number rating are exact.
+# NOTE 2: the printed D2m,nT row of Annex F equals R' + 1,5 dB, whereas
+# Formula (13) with V = 50 m3, S = 11,3 m2, T0 = 0,5 s gives
+# 10 lg(50/(6*0,5*11,3)) = +1,69 dB - another internal inconsistency of the
+# 2000 example. The module implements the formula; the single-number oracle
+# D2m,nT,w = 33 reproduces either way.
 # ---------------------------------------------------------------------------
 EN12354_3_ANNEX_F_BANDS = (125.0, 250.0, 500.0, 1000.0, 2000.0)
 EN12354_3_ANNEX_F_AREA = 11.3
@@ -1098,3 +1103,35 @@ EN12354_5_ANNEX_I_TOL = 0.15  # dB - one-decimal table intermediates
 ISO9611_MEAN_LEVELS = (70.0, 72.0, 74.0)
 ISO9611_MEAN_EXPECTED = 72.30174601124772
 ISO9611_FREE_VELOCITY_REFERENCE = 5.0e-8  # m/s
+
+# ---------------------------------------------------------------------------
+# ISO 10140-5:2010+A1 - reference building elements (real printed end-to-end
+# anchors). Annex B Table B.1 gives the sound reduction index R of three
+# airborne reference elements (16 one-third-octave bands 100-3150 Hz) with
+# their printed weighted ratings; Annex C Table C.1 gives the normalized
+# impact sound pressure levels of two lightweight reference floors with
+# their printed Ln,t,r,0,w (CI).
+# ---------------------------------------------------------------------------
+ISO10140_5_B1_HEAVY_WALL_R: list[float] = [
+    40, 40, 40, 40, 41, 43.5, 46.1, 48.5,
+    51, 53.6, 56, 58.4, 61.1, 63.6, 65, 65,
+]
+ISO10140_5_B1_HEAVY_WALL_RATING = (53, -1, -5)  # Rw (C; Ctr)
+ISO10140_5_B1_HEAVY_FLOOR_R: list[float] = [
+    40, 40, 40, 40, 40, 41.8, 44.4, 46.8,
+    49.3, 51.9, 54.4, 56.8, 59.5, 61.9, 64.3, 65,
+]
+ISO10140_5_B1_HEAVY_FLOOR_RATING = (52, -1, -5)
+ISO10140_5_B1_LIGHT_WALL_R: list[float] = [
+    27, 27, 27, 27, 27, 27, 27, 27,
+    28, 30.5, 32.8, 35.1, 37.6, 40, 42.3, 44.6,
+]
+ISO10140_5_B1_LIGHT_WALL_RATING = (33, -1, -2)
+ISO10140_5_C1_FLOOR_C1C2_LN: list[float] = [
+    78, 78, 78, 78, 78, 78, 76, 74, 72, 69, 66, 63, 60, 57, 54, 51,
+]
+ISO10140_5_C1_FLOOR_C1C2_RATING = (72, 0)  # Ln,t,r,0,w (CI)
+ISO10140_5_C1_FLOOR_C3_LN: list[float] = [
+    69, 72, 75, 78, 78, 78, 78, 78, 78, 76, 74, 72, 69, 66, 63, 60,
+]
+ISO10140_5_C1_FLOOR_C3_RATING = (75, -3)

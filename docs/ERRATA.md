@@ -32,7 +32,8 @@ to the issuing body, with date and reference).
 - **Evidence:** independent recomputation of both sums from the printed
   per-band levels; the 2013 edition of the same example prints CI = −11.
 - **Library behaviour:** implements A.2.1 as written and pins CI = −11 with
-  the 2013 print as the oracle (`tests/reference_data.py`, conformance check
+  the 2013 print as the oracle ([`tests/reference_data.py`](../tests/reference_data.py),
+  conformance check
   "ISO 717-2 Annex C, Table C.1").
 - **Status:** unreported.
 

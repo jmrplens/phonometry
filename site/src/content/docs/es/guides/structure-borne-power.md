@@ -1,20 +1,23 @@
 ---
 title: "Potencia sonora estructural de equipos (EN 15657)"
-description: "El método de placa receptora de EN 15657:2018 para el nivel de potencia sonora estructural característica L_Ws de equipos de servicio del edificio: el nivel de velocidad medio espacial (Fórmula 12), el factor de pérdida de la placa η = 2,2/(f·Ts) (Fórmula 13) y L_Ws = 10 lg(2πfηmS) + L_v − 60 dB (Fórmula 14), en placas de baja y alta movilidad."
+description: "El método de placa receptora de EN 15657:2018 para equipos de servicio del edificio: la potencia inyectada en la placa L_Ws = 10 lg(2πfηmS) + L_v − 60 dB (Fórmula 14) y las magnitudes de fuente independientes de la placa: fuerza bloqueada equivalente (Fórmula 15), nivel de potencia característico de placa receptora (Fórmula 17), velocidad libre y movilidad de la fuente (Fórmulas 18/19)."
 ---
 
 Los equipos de servicio del edificio —bombas, ventiladores, calderas, aparatos
 sanitarios— inyectan **potencia sonora estructural** en la estructura del
 edificio a la que están fijados, que luego se radia como ruido aéreo en los
-recintos contiguos. La **EN 15657:2018** caracteriza tal fuente por su *nivel de
-potencia sonora estructural característica* `L_Ws`, medido con el **método de la
-placa receptora**: la fuente se monta sobre una placa de masa por unidad de
+recintos contiguos. La **EN 15657:2018** la mide con el **método de la placa
+receptora**: la fuente se monta sobre una placa de masa por unidad de
 superficie `m` y área `S` conocidas, cuyo factor de pérdida estructural `η` se
-conoce, y se mide la velocidad vibratoria media espacial de la placa. `L_Ws` (con
-la movilidad de la placa) es el término de fuente de la predicción de equipos
-instalados de EN 12354-5.
+conoce, y se mide la velocidad vibratoria media espacial de la placa. La
+Fórmula (14) da la potencia *inyectada en esa placa concreta*; las magnitudes
+de fuente independientes de la placa (la fuerza bloqueada equivalente,
+Fórmula 15; el nivel de potencia característico de placa receptora `L_Wsn`,
+Fórmula 17; y la velocidad libre y movilidad equivalentes de la fuente,
+Fórmulas 18/19) se derivan de ella y son lo que consume la predicción de
+equipos instalados de EN 12354-5.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_es.svg" alt="Nivel de potencia sonora estructural característica por banda de tercio de octava determinado en una placa receptora de baja movilidad y otra de alta movilidad" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_es_dark.svg" alt="Nivel de potencia sonora estructural característica por banda de tercio de octava determinado en una placa receptora de baja movilidad y otra de alta movilidad" style="width:82%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_es.svg" alt="Nivel de potencia sonora estructural inyectada en placa receptora por banda de tercio de octava, determinado en una placa de baja movilidad y otra de alta movilidad" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_es_dark.svg" alt="Nivel de potencia sonora estructural inyectada en placa receptora por banda de tercio de octava, determinado en una placa de baja movilidad y otra de alta movilidad" style="width:82%">
 
 ## 1. Las relaciones de la placa receptora
 
@@ -60,12 +63,58 @@ Dos placas receptoras acotan las condiciones de instalación. En la placa de
 *baja movilidad* (pesada) la propia dinámica de la fuente apenas cambia la
 movilidad puntual ni el factor de pérdida de la placa; la placa de *alta
 movilidad* (ligera) se carga dinámicamente por la fuente, de modo que su tiempo
-de reverberación y su movilidad se miden con la fuente fijada. El nivel de
-potencia característica junto con la movilidad puntual de la placa (véase la
-[movilidad mecánica](/phonometry/es/guides/mechanical-mobility/)) proporcionan la
-descripción de la fuente para el modelo de EN 12354-5. El homólogo directo del
-lado de la fuente es el nivel de velocidad libre de ISO 9611 (re `5·10⁻⁸ m/s`)
-medido en los puntos de contacto de maquinaria montada elásticamente.
+de reverberación y su movilidad se miden con la fuente fijada. La potencia
+inyectada en la placa junto con su movilidad puntual (véase la
+[movilidad mecánica](/phonometry/es/guides/mechanical-mobility/)) proporcionan
+la descripción de la fuente para el modelo de EN 12354-5 a través de la cadena
+de conversión siguiente.
+
+## 3. De la potencia de placa a las magnitudes de fuente (Fórmulas 15–19)
+
+La `L_Ws` inyectada en la placa **no** es un descriptor de la fuente: la misma
+fuente inyecta una potencia distinta en un receptor distinto. La EN 15657
+deriva las magnitudes independientes de la placa: el **nivel de fuerza
+bloqueada equivalente** (Fórmula 15, re `F₀ = 10⁻⁶ N`) desde la placa de baja
+movilidad,
+
+$$
+L_{Fb,eq} = L_{Ws,\mathrm{baja}} - 10\lg\frac{\mathrm{Re}\{Y_{R,\mathrm{baja,eq}}\}}{Y_0},
+$$
+
+el **nivel de potencia característico de placa receptora** que consume
+EN 12354-5 (Fórmula 17), referido a la placa normalizada de hormigón de 10 cm
+de movilidad característica `Y_R,∞,baja = 5·10⁻⁶ m/(N·s)` (apartado 7.2.4),
+
+$$
+L_{Wsn} = L_{Fb,eq} + 10\lg\frac{Y_{R,\infty,\mathrm{baja}}}{Y_0},
+$$
+
+y, desde la placa de alta movilidad, el **nivel de velocidad libre
+equivalente** (Fórmula 18, re `10⁻⁹ m/s`) y la **movilidad de la fuente**
+`|Y_S,eq|` (Fórmula 19). La corrección de movilidad del Anexo I de EN 12354-5
+(`installed_power_from_reception_plate`, véase el
+[sonido estructural instalado](/phonometry/es/guides/installed-structure-borne/))
+refiere después `L_Wsn` al elemento receptor real.
+
+```python
+import phonometry as ph
+
+# EN 12354-5 Anexo I.3 (cisterna, contacto en pared, 63 Hz): medido sobre una
+# placa de Y = 5.34e-6 m/(N·s); la movilidad característica de la pared es 24.1e-6.
+lfb = ph.equivalent_blocked_force_level(61.7, 5.34e-6)      # Fórmula (15)
+lwsn = ph.characteristic_reception_plate_power(lfb)         # Fórmula (17)
+inst = ph.installed_power_from_reception_plate(lwsn, 24.1e-6)  # Anexo I
+print(round(float(lwsn), 1), round(float(inst), 1))         # 61.4 68.2  (Tabla I.8)
+
+# La velocidad libre (Fórmula 18) y la fuerza bloqueada cierran la movilidad (19):
+lvf = ph.equivalent_free_velocity_level(70.0, 1.0e-2)
+print(float(ph.source_mobility_from_levels(lvf, lfb)))      # |Y_S,eq| en m/(N·s)
+```
+
+El homólogo directo del lado de la fuente es el nivel de velocidad libre de
+ISO 9611 (re `v₀ = 5·10⁻⁸ m/s`) medido en los puntos de contacto de maquinaria
+montada elásticamente; su media por posiciones de la ecuación (9) es
+`mean_free_velocity_level()`.
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -96,8 +145,14 @@ plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_{Ws}$ [dB re 1 pW]"); plt.show()
 buildings — Laboratory measurement of structure-borne sound from building
 service equipment for all installation conditions*: el método de la placa
 receptora (cláusula 7), el nivel de velocidad medio espacial (Fórmula 12), el
-factor de pérdida de la placa `η = 2,2/(f·Ts)` (Fórmula 13) y el nivel de
-potencia sonora estructural característica `L_Ws` (Fórmula 14). Los niveles de
-velocidad de la placa se refieren a `v₀ = 10⁻⁹ m/s`. La conformidad se ancla en
-el balance de potencia de la placa resonante `P = ω·η·(m·S)·⟨v²⟩` (del cual la
-Fórmula 14 es el nivel) y en la identidad del factor de pérdida.
+factor de pérdida de la placa `η = 2,2/(f·Ts)` (Fórmula 13), el nivel de
+potencia inyectada en la placa `L_Ws` (Fórmula 14) y la cadena de magnitudes de
+fuente: fuerza bloqueada equivalente (Fórmula 15), nivel de potencia
+característico de placa receptora (Fórmula 17, `Y_R,∞,baja = 5·10⁻⁶ m/(N·s)`),
+velocidad libre equivalente (Fórmula 18) y movilidad de la fuente
+(Fórmula 19). ISO 9611:1996: la caracterización de fuentes por velocidad libre
+(ecuación (9), `v₀ = 5·10⁻⁸ m/s`). Los niveles de velocidad de la placa se
+refieren a `v₀ = 10⁻⁹ m/s`. La conformidad se ancla en el balance de potencia
+de la placa resonante `P = ω·η·(m·S)·⟨v²⟩` (del cual la Fórmula 14 es el
+nivel), en la identidad del factor de pérdida y en la conversión de la fuente
+de la cisterna de la Tabla I.8 del Anexo I.3 de EN 12354-5.

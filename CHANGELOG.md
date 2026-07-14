@@ -9,6 +9,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- ISO 717 enlarged frequency ranges: `weighted_rating_extended` computes the
+  Annex B spectrum adaptation terms (C50-3150, C50-5000, C100-5000 and the
+  Ctr counterparts, Table B.1 spectra) and `weighted_impact_rating_extended`
+  the CI,50-2500 term of ISO 717-2:2020 A.2.1; both offer the 0,1 dB
+  reference-curve shift and one-decimal reductions for uncertainty statements
+  (ISO 12999-1:2020 Annex B), reproducing the printed Rw = 57,4 dB example
+  and the A.2.2 constants Ln,r,0,w = 77,6 dB / CI,r,0 = -10,3 dB.
+- ISO 16251-1 statement of results: the floor-covering improvement now rates
+  any spectrum containing the 16 bands 100-3150 Hz (the clause 6.3 18-band
+  range included) and exposes the spectrum adaptation term CI,delta
+  (ISO 717-2:2020 Formula (A.4)) as `ci_delta` /
+  `impact_improvement_adaptation_term`.
+- EN 15657:2018 source-quantity chain: `equivalent_blocked_force_level`
+  (Formula 15), `characteristic_reception_plate_power` (Formula 17,
+  Y_R,inf,low = 5e-6 m/(N s)), `equivalent_free_velocity_level` (Formula 18)
+  and `source_mobility_from_levels` (Formula 19), plus the EN 12354-5 Annex I
+  mobility correction `installed_power_from_reception_plate`; the raw
+  Formula (14) level is re-documented as the plate-injected power.
+- ISO 9611:1996 `mean_free_velocity_level` (equation (9) energy mean over
+  contact points, v0 = 5e-8 m/s) with a conformance check.
+- EN 12354-1 Annex E junction families E.7 (lightweight double leaf with
+  homogeneous elements), E.8 (coupled double-leaf walls) and E.9 (corner and
+  thickness change), and the E.5 K24 double-leaf branch (clamp read as
+  -4 dB <= K24 <= 0 dB; the 2000 print's "0 <= K24 <= -4 dB" is a misprint).
+- EN 12354-1 Formula (5b) `standardized_level_difference` (DnT,w from R'w,
+  exact 0,32 V/Ss form) closing both Annex H.3 examples to 54 dB.
+- EN 12354-3 Annex C facade-shape term lookup
+  `facade_shape_level_difference` (Figure C.2, all nine shapes, alpha_w
+  interpolation).
+- ISO 10848-4 Clause 9 modal-overlap bracketing: `vibration_reduction_index`
+  accepts the per-band modal overlap factor, flags M < 0,25 bands as
+  `bracketed` and excludes them from the single-number Kij.
+- ISO 15186-1 Clause 6.4.6 negative-direction subareas: `combine_subareas`
+  accepts signed subarea areas (minus sign for reverse energy flow) with
+  Sm = sum(|Smi|), raising when the signed energy sum is not positive.
+- Oracles promoted to tests and the conformance report: ISO 717-1:2020
+  Annex C Table C.2 (enlarged 50-5000 Hz range), ISO 717-2 Annex C Table C.1
+  covered floor (64, -3, 30,0 dB) and Table C.2 improvement (15 dB,
+  CI,delta = -9 dB), ISO 12999-1:2020 Annex B single numbers and
+  uncorrelated/correlated uncertainties, all 12 printed EN 12354-1 Annex H.3
+  path values with the DnT,w closures, the remaining EN 12354-4 Table G.9
+  reception cells, ISO 10140-5 Tables B.1/C.1 reference elements and floors
+  end-to-end, the printed ISO 15186-1 Table B.1 Kc rows, and the EN 12354-5
+  Annex I whirlpool (Table I.6a) and flushing cistern (Tables I.8/I.9)
+  worked examples replacing the former formula-restatement checks.
+
 - Underwater validation: independent image-source absolute TL anchors for the
   normal-mode and parabolic-equation solvers, the published UNESCO EOS-80
   canonical sound-speed check value (Fofonoff & Millard 1983), six additional
@@ -38,6 +84,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   grids (30 000 points in ~0.2 s).
 
 ### Fixed
+
+- ISO 10848 octave-band single-number Kij averaged the wrong range: the
+  one-third-octave 200-1250 Hz mask was reused on octave centres, dropping
+  the 125 Hz octave (a +0,5 dB bias per dB/octave of Kij slope); octave
+  results now average 125-1000 Hz per Annex A, and `octave_bands()` validates
+  that the input groups into whole octave triples.
+- EN 12354-2 Formula (3) standardization used the Annex E.3 rounding
+  10 lg(V/30); `standardized_impact_level` now applies the exact
+  10 lg(0,032 V) form (the E.3 rounding stays documented), removing a
+  constant -0,18 dB bias.
+- `flanking_element` never applied the mandatory Kij,min floor of EN 12354-1
+  Clause 4.4.2 / Formula (29); passing the flanking-element area now clamps
+  each path automatically.
+- EN 12354-4 `radiated_sound_power` no longer caps R' at 40 dB by default:
+  the cap is an Annex G worked-example footnote, not part of Formula (2)/(3)
+  (pass `r_prime_cap=40.0` to reproduce Annex G).
+- `equivalent_impact_level` warns outside the 100-600 kg/m2 envelope of the
+  EN 12354-2 Annex B relation; `structure_borne_power_level` validates the
+  loss factor; the EN 12354-5 coupling terms validate source/receiver
+  mobilities instead of silently returning NaN/inf;
+  `single_number_uncertainty_uncorrelated` validates finiteness of both
+  inputs.
+- Documentation corrections: the EN 15657 Formula (14) level is the
+  reception-plate injected power (not the characteristic source level; the
+  EN 12354-5 chain needs the Formula (15)/(17) conversion), the EN 12354-4
+  Annex E (E.2a)/(E.2b) branches do not "meet within rounding" (about
+  -0,7 dB step for a square side), the `modal_overlap_factor` docstring no
+  longer claims an exclusion the code did not apply, and
+  `materials/dynamic_stiffness` no longer points to ISO 16251-1 (whose scope
+  excludes floating floors).
+
+#### Previously in Unreleased
 
 - Underwater Wenz wind noise was referenced to the historical 20 µPa
   (0.0002 dyn/cm²) pressure while labelled dB re 1 µPa: every wind spectrum

@@ -804,6 +804,37 @@ def _chk_sti_uniform() -> Outcome:
     return numeric(0.5, computed, 0.01, places=4)
 
 
+@register(
+    "Speech transmission (IEC 60268-16)",
+    "IEC 60268-16:2020 C.3.2",
+    "STIPA direct method, Formula (C.1) signal at m=0.5",
+)
+def _chk_stipa_direct_method() -> Outcome:
+    # Ed.5 modulation-depth verification: the Formula (C.1) signal with
+    # sinusoidal carriers at the A.6.1 male levels, modulation scale m=0.5,
+    # must read STI = 0.50 within the published +/-0.05 through the full
+    # stipa() audio path (octave bank, envelopes, correlation, TI chain).
+    fs = 48000
+    centers = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
+    f1 = [1.60, 1.00, 0.63, 2.00, 1.25, 0.80, 2.50]
+    f2 = [8.00, 5.00, 3.15, 10.00, 6.25, 4.00, 12.50]
+    levels_db = [-2.5, 0.5, 0.0, -6.0, -12.0, -18.0, -24.0]
+    t = np.arange(16 * fs) / fs
+    x = np.zeros(t.size)
+    for fc, fa, fb, level in zip(centers, f1, f2, levels_db):
+        env = 0.5 * (
+            1.0
+            + 0.55 * 0.5 * (np.sin(2 * np.pi * fa * t) - np.sin(2 * np.pi * fb * t))
+        )
+        x += (
+            10.0 ** (level / 20.0)
+            * np.sin(2 * np.pi * fc * t)
+            * np.sqrt(np.maximum(env, 0.0))
+        )
+    computed = float(ph.stipa(x, fs).sti)
+    return numeric(0.50, computed, 0.05, places=4)
+
+
 # ===========================================================================
 # Domain 5 - Intensity & sound power
 # ===========================================================================

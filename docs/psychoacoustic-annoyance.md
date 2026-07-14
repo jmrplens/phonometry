@@ -36,7 +36,7 @@ factor that grows with the sharpness weighting `wS` and the combined
 roughness/fluctuation weighting `wFR`:
 
 $$
-PA = N_5\sqrt{1 + w_S^2 + w_{FR}^2}, \qquad
+PA = N_5\left(1 + \sqrt{w_S^2 + w_{FR}^2}\right), \qquad
 w_S = (S - 1.75)\,0.25\,\lg(N_5 + 10)\ \ (S > 1.75\ \mathrm{acum}), \qquad
 w_{FR} = \frac{2.18}{N_5^{0.4}}\,(0.4\,F + 0.6\,R).
 $$
@@ -50,7 +50,7 @@ returns the annoyance together with the two intermediate weightings:
 import phonometry as ph
 
 res = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)   # N5, S, F, R
-print(round(res.annoyance, 4))   # 30.8167
+print(round(res.annoyance, 4))   # 37.0478
 print(round(res.w_s, 4), round(res.w_fr, 4))   # 0.1001 0.2125
 ```
 
@@ -211,7 +211,7 @@ res.plot()   # specific fluctuation strength F′(z) over the Bark axis (needs m
 ---
 
 **Standards.** Fastl & Zwicker (2006), *Psychoacoustics: Facts and Models*
-(Springer): psychoacoustic annoyance `PA = N5·√(1 + wS² + wFR²)` with the
+(Springer): psychoacoustic annoyance `PA = N5·(1 + √(wS² + wFR²))` with the
 sharpness weighting `wS` and roughness/fluctuation weighting `wFR`
 (Eqs 16.2–16.4; origin Widmann 1992), and the closed form for the fluctuation
 strength of amplitude-modulated broadband noise (Eq. 10.2). The fluctuation-

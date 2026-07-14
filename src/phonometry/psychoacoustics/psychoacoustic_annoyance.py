@@ -8,7 +8,7 @@ tracks annoyance ratings from listening experiments. The model is due to
 Widmann (1992) and is given in Fastl & Zwicker, *Psychoacoustics: Facts and
 Models* (Equations 16.2-16.4):
 
-    PA = N5 * sqrt(1 + wS**2 + wFR**2)
+    PA = N5 * (1 + sqrt(wS**2 + wFR**2))
 
 with the percentile loudness ``N5`` in sone and the two loudness-weighted terms
 
@@ -16,9 +16,11 @@ with the percentile loudness ``N5`` in sone and the two loudness-weighted terms
     wFR = (2.18 / N5**0.4) * (0.4 * F + 0.6 * R)
 
 describing sharpness ``S`` (acum) and the joint influence of fluctuation
-strength ``F`` (vacil) and roughness ``R`` (asper). There is no ISO standard
-for PA; the formula is exact and is verified by self-consistency and against
-the open SQAT reference implementation.
+strength ``F`` (vacil) and roughness ``R`` (asper). Note the "1 +" sits
+*outside* the radical (Fastl & Zwicker 2006, Eq. (16.2), p. 328). There is
+no ISO standard for PA; the formula is exact, verified against a
+hand-computed worked tuple, and matches the combination implemented by the
+open SQAT reference implementation.
 
 :func:`psychoacoustic_annoyance` evaluates the model from the four quantities
 directly. :func:`psychoacoustic_annoyance_from_signal` is a convenience that
@@ -101,7 +103,7 @@ def psychoacoustic_annoyance(
 ) -> PsychoacousticAnnoyanceResult:
     """Psychoacoustic annoyance from the four hearing sensations (16.2-16.4).
 
-    ``PA = N5 * sqrt(1 + wS**2 + wFR**2)`` with the loudness-weighted sharpness
+    ``PA = N5 * (1 + sqrt(wS**2 + wFR**2))`` with the loudness-weighted sharpness
     term ``wS`` (Equation 16.3) and the fluctuation/roughness term ``wFR``
     (Equation 16.4). The sharpness term is zero for ``S <= 1.75 acum``.
 
@@ -136,7 +138,7 @@ def psychoacoustic_annoyance(
     else:
         w_fr = 0.0
 
-    annoyance = n5_v * np.sqrt(1.0 + w_s**2 + w_fr**2)
+    annoyance = n5_v * (1.0 + np.sqrt(w_s**2 + w_fr**2))  # Eq. (16.2)
     return PsychoacousticAnnoyanceResult(
         annoyance=float(annoyance),
         n5=n5_v,

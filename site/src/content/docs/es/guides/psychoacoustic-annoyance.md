@@ -1,6 +1,6 @@
 ---
 title: "Molestia psicoacústica e intensidad de fluctuación"
-description: "La molestia psicoacústica de Fastl y Zwicker PA = N5·√(1 + wS² + wFR²) a partir de sonoridad, nitidez, aspereza e intensidad de fluctuación (Ecs 16.2–16.4), la forma cerrada para ruido de banda ancha AM (Ec. 10.2) y el modelo de señal de intensidad de fluctuación de Osses 2016."
+description: "La molestia psicoacústica de Fastl y Zwicker PA = N5·(1 + √(wS² + wFR²)) a partir de sonoridad, nitidez, aspereza e intensidad de fluctuación (Ecs 16.2–16.4), la forma cerrada para ruido de banda ancha AM (Ec. 10.2) y el modelo de señal de intensidad de fluctuación de Osses 2016."
 ---
 
 Lo *molesto* que resulta un sonido depende de algo más que de su sonoridad.
@@ -38,7 +38,7 @@ un factor que crece con la ponderación de nitidez `wS` y la ponderación combin
 de aspereza/fluctuación `wFR`:
 
 $$
-PA = N_5\sqrt{1 + w_S^2 + w_{FR}^2}, \qquad
+PA = N_5\left(1 + \sqrt{w_S^2 + w_{FR}^2}\right), \qquad
 w_S = (S - 1{,}75)\,0{,}25\,\lg(N_5 + 10)\ \ (S > 1{,}75\ \mathrm{acum}), \qquad
 w_{FR} = \frac{2{,}18}{N_5^{0{,}4}}\,(0{,}4\,F + 0{,}6\,R).
 $$
@@ -53,7 +53,7 @@ intermedias:
 import phonometry as ph
 
 res = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)   # N5, S, F, R
-print(round(res.annoyance, 4))   # 30.8167
+print(round(res.annoyance, 4))   # 37.0478
 print(round(res.w_s, 4), round(res.w_fr, 4))   # 0.1001 0.2125
 ```
 
@@ -221,7 +221,7 @@ Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absolu
 ## Normas
 
 Fastl y Zwicker (2006), *Psychoacoustics: Facts and Models* (Springer): la
-molestia psicoacústica `PA = N5·√(1 + wS² + wFR²)` con la ponderación de nitidez
+molestia psicoacústica `PA = N5·(1 + √(wS² + wFR²))` con la ponderación de nitidez
 `wS` y la ponderación de aspereza/fluctuación `wFR` (Ecs 16.2–16.4; origen
 Widmann 1992), y la forma cerrada para la intensidad de fluctuación del ruido de
 banda ancha modulado en amplitud (Ec. 10.2). El modelo de señal de intensidad de

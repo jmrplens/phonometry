@@ -1169,14 +1169,15 @@ ISO20065_FD_137 = 24.09
 # fluctuation strength (Fastl & Zwicker Ch. 10; Osses et al. 2016).
 # ---------------------------------------------------------------------------
 # PA is exact. Worked tuple (N5, S, F, R) = (30 sone, 2.0 acum, 0.5 vacil,
-# 0.3 asper) -> the terms and PA computed by hand from Eqs 16.2-16.4:
+# 0.3 asper) -> the terms and PA computed by hand from Eqs 16.2-16.4 (the
+# "1 +" of Eq. (16.2) sits OUTSIDE the radical; F&Z 2006, p. 328):
 #   wS  = (2.0 - 1.75) * 0.25 * lg(30 + 10)          = 0.100129
 #   wFR = (2.18 / 30**0.4) * (0.4*0.5 + 0.6*0.3)     = 0.212516
-#   PA  = 30 * sqrt(1 + wS**2 + wFR**2)              = 30.8167
+#   PA  = 30 * (1 + sqrt(wS**2 + wFR**2))            = 37.0478
 PA_WORKED_INPUT = (30.0, 2.0, 0.5, 0.3)  # (N5, S, F, R)
 PA_WORKED_WS = 0.100129
 PA_WORKED_WFR = 0.212516
-PA_WORKED_VALUE = 30.8167
+PA_WORKED_VALUE = 37.0478
 
 # Fluctuation strength closed form for AM broadband noise (Fastl & Zwicker
 # Eq. 10.2), exact. F(L=60 dB, m=1, fmod=4 Hz):

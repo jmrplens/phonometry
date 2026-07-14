@@ -196,6 +196,22 @@ to the issuing body, with date and reference).
   excludes the contradicting cells with the rationale in the test.
 - **Status:** unreported (technical report rather than a standard).
 
+## Medwin & Clay, Fundamentals of Acoustical Oceanography (1998) — Eq. 3.4.29
+
+- **Location:** the Francois-Garrison boric-acid term as transcribed by the
+  textbook (Eq. 3.4.29).
+- **The print:** the boric-acid factor is printed as A1 = (8,68/c)·10^(0,78 pH − 5).
+- **The problem:** the original paper (Francois & Garrison 1982, JASA 72,
+  Part II, Eq. (10) and Fig. 7) prints 8,86; the digits are transposed. Only
+  8,86 reproduces the paper's own Table IV: with 8,68 the boric-dominated
+  cells at 0,6 to 30 kHz sit up to 1,7 % below the printed totals (worst
+  relative case 2 kHz, 10 °C, S = 35: 0,1209 vs the printed 0,123 dB/km).
+- **Evidence:** recomputation of all sampled Table IV cells under both
+  coefficients against the paper's printed values.
+- **Library behaviour:** implements the paper's 8,86 with a defensive note;
+  the pinned Table IV set includes the boric-dominated rows.
+- **Status:** unreported (textbook rather than a standard).
+
 ---
 
 ## Related source properties that are not errata

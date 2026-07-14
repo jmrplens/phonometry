@@ -120,6 +120,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Underwater Francois-Garrison absorption used the Medwin & Clay textbook
+  transcription of the boric-acid factor (8.68/c); the original paper prints
+  8.86/c and only that value reproduces the paper's own Table IV (the
+  transcription biased boric-dominated bands at 0.6-30 kHz by up to 1.7 %).
 - ISO 10846-3 indirect method returned out-of-validity results silently:
   `transfer_stiffness_indirect` now computes the per-band transmissibility
   magnitude and emits a `PhonometryWarning` where |T| > 0,1 (Inequality (2):

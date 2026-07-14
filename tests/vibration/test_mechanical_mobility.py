@@ -85,6 +85,18 @@ def test_reciprocals_multiply_to_one() -> None:
     assert convert_frf(h, f, "receptance", "dynamic_stiffness") * h == pytest.approx(1.0)
 
 
+def test_rigid_mass_decade_identity_at_1000_rad_s() -> None:
+    """At omega = 1000 rad/s a rigid 1 kg mass spans exact decades:
+    accelerance 1 1/kg <-> mobility 1e-3 m/(N.s) <-> compliance 1e-6 m/N."""
+    f = 1000.0 / (2.0 * math.pi)
+    y = convert_frf(1.0, f, "apparent_mass", "mobility")
+    h = convert_frf(1.0, f, "apparent_mass", "receptance")
+    a = convert_frf(1.0, f, "apparent_mass", "accelerance")
+    assert abs(complex(y)) == pytest.approx(1.0e-3, rel=1e-12)
+    assert abs(complex(h)) == pytest.approx(1.0e-6, rel=1e-12)
+    assert abs(complex(a)) == pytest.approx(1.0, rel=1e-12)
+
+
 def test_conversion_round_trip() -> None:
     f = np.array([10.0, 20.0, 50.0, 100.0])
     y = sdof_mobility(f, M, K, C)

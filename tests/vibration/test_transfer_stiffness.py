@@ -161,6 +161,32 @@ def test_result_helper_warns_above_transmissibility_limit() -> None:
         indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
 
 
+def test_indirect_bias_at_the_validity_limit_is_within_1_db() -> None:
+    """At |T| = 0.1 (DeltaL1,2 = 20 dB) the undamped mass-spring model gives
+    k_indirect = 1.1 k: a 0.83 dB (10 %) bias, inside the 1 dB (12 %) bound."""
+    k, m = 1e6, 1.0
+    f = math.sqrt(11.0 * k / m) / (2.0 * math.pi)  # omega^2 m = 11 k -> T = -0.1
+    t = complex(base_transmissibility(f, m, k))
+    assert abs(t) == pytest.approx(TRANSMISSIBILITY_LIMIT)
+    k_rec = complex(transfer_stiffness_indirect(f, t, m))
+    assert abs(k_rec) / k == pytest.approx(1.1)
+    bias_db = 20.0 * math.log10(abs(k_rec) / k)
+    assert bias_db == pytest.approx(0.828, abs=0.001)
+    assert bias_db <= 1.0 and abs(k_rec) / k - 1.0 <= 0.12
+
+
+def test_linearity_criterion_10_db_step() -> None:
+    """ISO 10846-2/-3, 7.6: input spectra 10 dB apart must give transfer-
+    stiffness levels within 1.5 dB - exact equality for a linear element."""
+    u_a, step = 1e-6 + 0j, 10.0 ** (-10.0 / 20.0)
+    k = 1e6 + 3e4j
+    lk_a = float(transfer_stiffness_level(transfer_stiffness_direct(k * u_a, u_a)))
+    u_b = u_a * step
+    lk_b = float(transfer_stiffness_level(transfer_stiffness_direct(k * u_b, u_b)))
+    assert abs(lk_a - lk_b) <= 1.5
+    assert lk_a == pytest.approx(lk_b, abs=1e-9)
+
+
 def test_indirect_still_recovers_kelvin_voigt_below_the_warning() -> None:
     """The valid-range identity of Formula (1) is unchanged by the guard."""
     k, c, m = 1e6, 200.0, 5.0

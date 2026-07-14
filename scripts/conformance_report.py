@@ -1488,6 +1488,124 @@ def _chk_iso10846_stiffness_impedance() -> Outcome:
     return numeric(abs(k), abs(1j * w * z), 1e-6, rel=True, unit="N/m", places=1)
 
 
+@register(
+    "Room & building acoustics",
+    "ISO 7626-2:2015 7.5.2",
+    "Rigid-mass calibration: accelerance mag(A) = 1/m  (m=10 kg)",
+)
+def _chk_iso7626_2_rigid_mass_accelerance() -> Outcome:
+    res = ph.rigid_mass_calibration_check(
+        [ref.ISO7626_2_CAL_ACCELERANCE], [100.0], ref.ISO7626_2_CAL_MASS_KG
+    )
+    value = float(res.expected[0]) if res.passed else math.nan
+    return numeric(ref.ISO7626_2_CAL_ACCELERANCE, value, 1e-9, unit="1/kg", places=3)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-2:2015 7.5.2",
+    "Rigid-mass calibration: mobility mag(Y) = 1/(2πf·m) at 100 Hz  (m=10 kg)",
+)
+def _chk_iso7626_2_rigid_mass_mobility() -> Outcome:
+    res = ph.rigid_mass_calibration_check(
+        [ref.ISO7626_2_CAL_MOBILITY_100HZ],
+        [100.0],
+        ref.ISO7626_2_CAL_MASS_KG,
+        quantity="mobility",
+    )
+    value = float(res.expected[0]) if res.passed else math.nan
+    return numeric(
+        ref.ISO7626_2_CAL_MOBILITY_100HZ, value, 1e-5, rel=True,
+        unit="m/(N·s)", places=7,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-2:2015 Annex A",
+    "Normalized random error ε = √((1−γ²)/(2nγ²)): γ²=0,8, n=75 → 4,08 % (< 5 %)",
+)
+def _chk_iso7626_2_random_error() -> Outcome:
+    eps = float(ph.random_error_percent(0.8, 75))
+    return numeric(ref.ISO7626_2_RANDOM_ERROR_PCT, eps, 0.005, unit="%", places=2)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 7626-1:2011 Table 1",
+    "Rigid 1 kg mass at ω = 1000 rad/s: mobility 1e-3, compliance 1e-6 (decades)",
+)
+def _chk_iso7626_decade_identity() -> Outcome:
+    f = ref.ISO7626_1_DECADE_FREQ_HZ
+    y = abs(complex(ph.convert_frf(1.0, f, "apparent_mass", "mobility")))
+    h = abs(complex(ph.convert_frf(1.0, f, "apparent_mass", "receptance")))
+    ok = abs(h - ref.ISO7626_1_DECADE_COMPLIANCE) <= 1e-15
+    return numeric(
+        ref.ISO7626_1_DECADE_MOBILITY, y if ok else math.nan, 1e-9, rel=True,
+        unit="m/(N·s)", places=4,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-3:2002 6.1 Inequality (2)",
+    "Indirect-method validity limit mag(T) = 0,1 ↔ ΔL1,2 = 20 dB",
+)
+def _chk_iso10846_3_validity_threshold() -> Outcome:
+    delta_l = 20.0 * math.log10(1.0 / ph.TRANSMISSIBILITY_LIMIT)
+    return numeric(
+        ref.ISO10846_3_LIMIT_DELTA_L_DB, delta_l, 1e-9, unit="dB", places=1
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-3:2002 6.1",
+    "Model bias at the validity limit: k_ind/k = 1,1 (0,83 dB ≤ 1 dB, 10 % ≤ 12 %)",
+)
+def _chk_iso10846_3_validity_bias() -> Outcome:
+    # Undamped mass-spring model at omega^2 m = 11 k, i.e. T = -0,1 exactly.
+    k, m = 1.0e6, 1.0
+    f = math.sqrt(11.0 * k / m) / (2.0 * math.pi)
+    t = complex(ph.base_transmissibility(f, m, k))
+    k_ind = abs(complex(ph.transfer_stiffness_indirect(f, t, m)))
+    ratio = k_ind / k
+    bias_ok = (
+        20.0 * math.log10(ratio) <= ref.ISO10846_3_ACCURACY_DB
+        and ratio - 1.0 <= ref.ISO10846_3_ACCURACY_FRACTION
+    )
+    return numeric(
+        ref.ISO10846_3_LIMIT_BIAS_RATIO, ratio if bias_ok else math.nan,
+        1e-9, rel=True, places=4,
+    )
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-1:2008 Equation (6)",
+    "Delivered/blocking force F2/F2,b = 1/1,1 at mag(k2,2/kt) = 0,1 (within 10 %)",
+)
+def _chk_iso10846_1_blocking_force() -> Outcome:
+    value = abs(complex(ph.blocking_force_ratio(1.0e5, 1.0e6)))
+    return numeric(ref.ISO10846_1_EQ6_FORCE_RATIO, value, 1e-9, places=4)
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 10846-2:2008 / -3:2002 7.6",
+    "Linearity: ΔLk ≤ 1,5 dB for input spectra 10 dB apart (linear element: 0)",
+)
+def _chk_iso10846_linearity() -> Outcome:
+    k, u_a = 1.0e6 + 3.0e4j, 1.0e-6 + 0j
+    u_b = u_a * 10.0 ** (-ref.ISO10846_LINEARITY_STEP_DB / 20.0)
+    lk_a = float(ph.transfer_stiffness_level(ph.transfer_stiffness_direct(k * u_a, u_a)))
+    lk_b = float(ph.transfer_stiffness_level(ph.transfer_stiffness_direct(k * u_b, u_b)))
+    return numeric(
+        0.0, abs(lk_a - lk_b), ref.ISO10846_LINEARITY_TOL_DB, unit="dB", places=3,
+        expected_label="ΔLk ≤ 1,5 dB (7.6 c)",
+    )
+
+
 # --- Sound power from surface vibration (ISO/TS 7849-1/-2) ---
 @register(
     "Room & building acoustics",
@@ -2467,6 +2585,123 @@ def _chk_iso8041_wh_reference() -> Outcome:
     return numeric(ref.ISO8041_1_WH_REF_FACTOR, factor, 1.5e-3, rel=True, places=4)
 
 
+@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.1", "Wb design-goal factor at 6,31 Hz")
+def _chk_iso8041_wb_annex_b() -> Outcome:
+    factor = float(ph.weighting_factors("Wb", _true_centre(8))[0])
+    return numeric(ref.ISO8041_1_WB_FACTOR_6P31HZ, factor, 1e-3, rel=True, places=4)
+
+
+@register(
+    _HUMAN_VIB, "ISO 8041-1:2017 Table B.1", "Wb design-goal factors at 1 / 100 Hz"
+)
+def _chk_iso8041_wb_annex_b_edges() -> Outcome:
+    worst = max(
+        abs(float(ph.weighting_factors("Wb", _true_centre(n))[0]) / expected - 1.0)
+        for n, expected in (
+            (0, ref.ISO8041_1_WB_FACTOR_1HZ),
+            (20, ref.ISO8041_1_WB_FACTOR_100HZ),
+        )
+    )
+    return numeric(
+        0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0,1 %"
+    )
+
+
+@register(_HUMAN_VIB, "ISO 8041-1:2017 Table 1", "Wc factor at the 100 rad/s reference")
+def _chk_iso8041_wc_reference() -> Outcome:
+    factor = float(ph.weighting_factors("Wc", ref.ISO8041_1_WBV_REF_FREQ_HZ)[0])
+    return numeric(ref.ISO8041_1_WC_REF_FACTOR, factor, 1e-3, rel=True, places=4)
+
+
+@register(
+    _HUMAN_VIB,
+    "ISO 8041-1:2017 Table 1 + Table B.3",
+    "Wd factors at the 100 rad/s reference and 1 Hz",
+)
+def _chk_iso8041_wd_reference_and_annex_b() -> Outcome:
+    worst = max(
+        abs(
+            float(ph.weighting_factors("Wd", freq)[0]) / expected - 1.0
+        )
+        for freq, expected in (
+            (ref.ISO8041_1_WBV_REF_FREQ_HZ, ref.ISO8041_1_WD_REF_FACTOR),
+            (_true_centre(0), ref.ISO8041_1_WD_FACTOR_1HZ),
+        )
+    )
+    return numeric(
+        0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0,1 %"
+    )
+
+
+@register(_HUMAN_VIB, "ISO 8041-1:2017 Table B.4", "We design-goal factor at 8 Hz")
+def _chk_iso8041_we_annex_b() -> Outcome:
+    factor = float(ph.weighting_factors("We", _true_centre(9))[0])
+    return numeric(ref.ISO8041_1_WE_FACTOR_8HZ, factor, 1e-3, rel=True, places=4)
+
+
+@register(
+    _HUMAN_VIB, "ISO 8041-1:2017 Table B.5", "Wf design-goal factors at 0,1585 / 0,1 Hz"
+)
+def _chk_iso8041_wf_annex_b() -> Outcome:
+    worst = max(
+        abs(float(ph.weighting_factors("Wf", _true_centre(n))[0]) / expected - 1.0)
+        for n, expected in (
+            (-8, ref.ISO8041_1_WF_FACTOR_0P1585HZ),
+            (-10, ref.ISO8041_1_WF_FACTOR_0P1HZ),
+        )
+    )
+    return numeric(
+        0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0,1 %"
+    )
+
+
+@register(
+    _HUMAN_VIB, "ISO 8041-1:2017 Table B.7", "Wj design-goal factors at 6,31 / 8 Hz"
+)
+def _chk_iso8041_wj_annex_b() -> Outcome:
+    worst = max(
+        abs(float(ph.weighting_factors("Wj", _true_centre(n))[0]) / expected - 1.0)
+        for n, expected in (
+            (8, ref.ISO8041_1_WJ_FACTOR_6P31HZ),
+            (9, ref.ISO8041_1_WJ_FACTOR_8HZ),
+        )
+    )
+    return numeric(
+        0.0, worst, 1e-3, places=6, expected_label="max rel dev ≤ 0,1 %"
+    )
+
+
+@register(
+    _HUMAN_VIB,
+    "ISO 8041-1:2017 Table 5 + Annex B",
+    "All nine weightings inside the tolerance envelope (318 printed bands)",
+)
+def _chk_iso8041_table5_envelope() -> Outcome:
+    violations = 0
+    for name, rows in ref.ISO8041_1_ANNEX_B_FACTORS.items():
+        ft1, ft2, ft3, ft4 = ref.ISO8041_1_TABLE4_TRANSITIONS[name]
+        for n, printed in rows:
+            freq = _true_centre(n)
+            if freq <= ft1:
+                region = 0
+            elif freq < ft2:
+                region = 1
+            elif freq <= ft3:
+                region = 2
+            elif freq < ft4:
+                region = 3
+            else:
+                region = 4
+            upper, lower = ref.ISO8041_1_TABLE5_TOLERANCES[region]
+            ratio = float(ph.weighting_factors(name, freq)[0]) / printed - 1.0
+            if not -lower <= ratio <= upper:
+                violations += 1
+    return numeric(
+        0.0, float(violations), 0.0, places=0,
+        expected_label="0 bands outside the Table 5 tolerances",
+    )
+
+
 @register(_HUMAN_VIB, "ISO 5349-2:2001 Example E.2.1", "Single-tool daily exposure A(8)")
 def _chk_iso5349_e21() -> Outcome:
     a8 = ph.daily_exposure(7.4, 2.5 * 3600.0)
@@ -2661,6 +2896,47 @@ def _chk_multiple_shock_probability() -> Outcome:
     sd = ph.compression_dose(ph.dose_from_peaks([40.0] * 5))
     r = ph.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
     return numeric(ref.ISO2631_5_PI_MALE, float(ph.injury_probability(r)), 0.01, places=2)
+
+
+@register(
+    _MSV, "ISO 2631-5:2018 Annex C NOTE 5", "Compressive stress Sd, female example"
+)
+def _chk_multiple_shock_female_sd() -> Outcome:
+    from phonometry.vibration.multiple_shock_vibration import MZ_FEMALE
+
+    sd = ph.compression_dose(ph.dose_from_peaks([40.0] * 5), mz=MZ_FEMALE)
+    return numeric(ref.ISO2631_5_SD_FEMALE, sd, 0.01, unit="MPa", places=2)
+
+
+@register(
+    _MSV, "ISO 2631-5:2018 Annex C NOTE 5", "Stress variable R, female example"
+)
+def _chk_multiple_shock_female_r() -> Outcome:
+    from phonometry.vibration.multiple_shock_vibration import MZ_FEMALE
+
+    sd = ph.compression_dose(ph.dose_from_peaks([40.0] * 5), mz=MZ_FEMALE)
+    r = ph.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="female")
+    return numeric(ref.ISO2631_5_R_FEMALE, r, 0.01, places=2)
+
+
+@register(
+    _MSV,
+    "ISO 2631-5:2018 Formula 1 vs Annex D Table D.1",
+    "Seat-to-spine transfer vs the 256 Hz digital filter (0,5-80 Hz)",
+)
+def _chk_multiple_shock_annex_d_filter() -> Outcome:
+    freqs = np.array([0.5, 2.0, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0])
+    formula = np.abs(ph.seat_to_spine_transfer(freqs))
+    _, h = sg.freqz(
+        ref.ISO2631_5_ANNEX_D_B,
+        ref.ISO2631_5_ANNEX_D_A,
+        worN=2.0 * np.pi * freqs / ref.ISO2631_5_ANNEX_D_FS,
+    )
+    worst = float(np.max(np.abs(formula - np.abs(h))))
+    return numeric(
+        0.0, worst, 0.04, places=3,
+        expected_label="max abs(Formula 1 - filter) ≤ 0,04",
+    )
 
 
 _ABS = "Sound absorption in enclosed spaces (EN 12354-6)"

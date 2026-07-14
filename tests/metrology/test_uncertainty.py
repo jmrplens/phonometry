@@ -254,3 +254,108 @@ def test_flat_direction_warns_but_computes() -> None:
         result = u.combine_uncertainty(lambda a, b: a + 0.0 * b, qs)
     assert result.contributions[1] == pytest.approx(0.0)
     assert result.combined_uncertainty == pytest.approx(0.1, rel=1e-9)
+
+
+# ---------------------------------------------------------------------------
+# GUM Annex H.1 end-gauge calibration, end to end (published oracle)
+# ---------------------------------------------------------------------------
+def _h1_budget() -> u.UncertaintyResult:
+    from reference_data import GUM_H1_INPUTS
+
+    qs = [u.Quantity(v, unc, dof=dof) for v, unc, dof in GUM_H1_INPUTS]
+
+    def model(
+        ls: float, d: float, alpha_s: float, theta: float,
+        dalpha: float, dtheta: float,
+    ) -> float:
+        return ls + d - ls * (dalpha * theta + alpha_s * dtheta)
+
+    # alphaS and theta are genuinely flat directions at the H.1 estimates
+    # (their sensitivities vanish because dtheta = dalpha = 0): the
+    # zero-response warning is expected and documented.
+    with pytest.warns(u.UncertaintyWarning, match="does not change"):
+        return u.combine_uncertainty(model, qs)
+
+
+def test_gum_h1_end_to_end_combined_uncertainty() -> None:
+    """GUM H.1.4/H.1.6: l = 50 000 838 nm, uc = 32 nm (31.71 unrounded),
+    contributions (25, 9.7, 0, 0, 2.9, 16.7) nm, veff = 16.7 (printed
+    truncated to 16)."""
+    from reference_data import (
+        GUM_H1_CONTRIBUTIONS,
+        GUM_H1_UC,
+        GUM_H1_VALUE,
+        GUM_H1_VEFF,
+    )
+
+    result = _h1_budget()
+    assert result.value == pytest.approx(GUM_H1_VALUE, abs=0.5)
+    assert result.combined_uncertainty == pytest.approx(GUM_H1_UC, abs=0.01)
+    np.testing.assert_allclose(
+        result.contributions, GUM_H1_CONTRIBUTIONS, atol=0.05
+    )
+    assert result.effective_dof == pytest.approx(GUM_H1_VEFF, abs=0.01)
+
+
+def test_gum_h1_expanded_uncertainty_99() -> None:
+    """GUM H.1.6: U99 = 93 nm at k(0.99, veff=16) = 2.92; interpolating at
+    the untruncated veff = 16.66 (G.4.2 NOTE 1) gives 92.1 nm."""
+    from reference_data import GUM_H1_U99
+
+    result = _h1_budget()
+    k, big = result.expanded(0.99)
+    assert big == pytest.approx(GUM_H1_U99, abs=0.1)
+    # The printed route: truncate veff to 16 and use Table G.2's k = 2.92.
+    k16 = u.coverage_factor(0.99, 16.0)
+    assert k16 == pytest.approx(2.9208, abs=5e-4)
+    assert k16 * result.combined_uncertainty == pytest.approx(93.0, abs=0.7)
+
+
+# ---------------------------------------------------------------------------
+# GUM Annex H.2 correlated resistance/reactance measurement (the only
+# published numeric oracle of the correlated Equation (16) path)
+# ---------------------------------------------------------------------------
+def test_gum_h2_correlated_measurement() -> None:
+    from reference_data import GUM_H2_OBSERVATIONS, GUM_H2_RESULTS
+
+    obs = np.array(GUM_H2_OBSERVATIONS)  # columns: V / V, I / mA, phi / rad
+    obs[:, 1] *= 1e-3  # mA -> A
+    means = obs.mean(axis=0)
+    u_means = obs.std(axis=0, ddof=1) / math.sqrt(obs.shape[0])
+    r = np.corrcoef(obs.T)
+    # Table H.2 prints the correlations rounded to two decimals.
+    assert r[0, 1] == pytest.approx(-0.36, abs=0.005)
+    assert r[0, 2] == pytest.approx(0.86, abs=0.005)
+    assert r[1, 2] == pytest.approx(-0.65, abs=0.005)
+
+    qs = [u.Quantity(m, s) for m, s in zip(means, u_means)]
+    models = {
+        "R": lambda v, i, p: v / i * math.cos(p),
+        "X": lambda v, i, p: v / i * math.sin(p),
+        "Z": lambda v, i, p: v / i,
+    }
+    for name, model in models.items():
+        expected_value, expected_uc = GUM_H2_RESULTS[name]
+        if name == "Z":
+            # Z = V/I ignores phi: the zero-sensitivity warning is expected.
+            with pytest.warns(u.UncertaintyWarning, match="does not change"):
+                result = u.combine_uncertainty(model, qs, correlation=r)
+        else:
+            result = u.combine_uncertainty(model, qs, correlation=r)
+        assert result.value == pytest.approx(expected_value, abs=5e-3), name
+        assert result.combined_uncertainty == pytest.approx(
+            expected_uc, abs=1e-3
+        ), name
+
+
+def test_monte_carlo_matches_supplement1_table2_gaussian() -> None:
+    """Supplement 1 Table 2 (clause 9.2.2): four standard Gaussian Xi ->
+    u(y) = 2.00 and the 95 % symmetric interval [-3.92, 3.92]."""
+    from reference_data import GUMS1_TABLE2_INTERVAL_95
+
+    qs = [u.Quantity(0.0, 1.0) for _ in range(4)]
+    mc = u.monte_carlo(_add4, qs, trials=2_000_000, coverage=0.95, seed=7)
+    assert mc.value == pytest.approx(0.0, abs=0.01)
+    assert mc.standard_uncertainty == pytest.approx(2.0, abs=0.01)
+    assert mc.interval[0] == pytest.approx(-GUMS1_TABLE2_INTERVAL_95, abs=0.03)
+    assert mc.interval[1] == pytest.approx(GUMS1_TABLE2_INTERVAL_95, abs=0.03)

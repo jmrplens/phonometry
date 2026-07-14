@@ -198,3 +198,16 @@ def test_1995_rejects_out_of_range_class_and_bad_edition() -> None:
     bank = OctaveFilterBank(fs=48000, fraction=1, order=6, limits=[500, 2000])
     with pytest.raises(ValueError, match="edition"):
         verify_filter_class(bank, edition="2020")
+
+
+def test_map_breakpoint_reproduces_table_f1() -> None:
+    """IEC 61260-1:2014 Table F.1: the Formula (9) mapping reproduces every
+    printed one-third-octave (b = 3) breakpoint and reciprocal to the five
+    printed decimals."""
+    from phonometry.metrology.compliance import _map_breakpoint
+    from reference_data import IEC61260_TABLE_F1
+
+    for exponent, (omega, reciprocal) in IEC61260_TABLE_F1.items():
+        got = _map_breakpoint(exponent, 3)
+        assert got == pytest.approx(omega, abs=5e-6), exponent
+        assert 1.0 / got == pytest.approx(reciprocal, abs=5e-6), exponent

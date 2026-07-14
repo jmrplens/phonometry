@@ -205,9 +205,9 @@ implementation from the Osses 2016 paper, calibrated so that the
 `1 kHz / 60 dB / m = 1 / 4 Hz` AM tone reads `1.00 vacil` by construction, and
 cross-checked against the Osses 2016 Table 1 literature values and the open SQAT
 reference (used only as a numeric oracle). Over the `70 dB` AM-tone sweep
-`fmod ∈ {1, 2, 4, 8, 16, 32} Hz` it gives `[0.42, 0.79, 1.09, 1.05, 0.19, 0.10]`
+`fmod ∈ {1, 2, 4, 8, 16, 32} Hz` it gives `[0.40, 0.79, 1.09, 1.05, 0.17, 0.09]`
 vacil against the literature `[0.39, 0.84, 1.25, 1.30, 0.36, 0.06]` (Pearson
-`r = 0.98`, correct `4 Hz` peak, within ~2×). FM-tone accuracy is explicitly not
+`r = 0.98`, correct `4 Hz` peak, within ~2.1×). FM-tone accuracy is explicitly not
 pursued. For **AM broadband noise** the signal model overshoots the absolute
 level (it spreads the modulated energy across bands) — quote the closed form
 `fluctuation_strength_am_noise` (§3.1) for that stimulus.

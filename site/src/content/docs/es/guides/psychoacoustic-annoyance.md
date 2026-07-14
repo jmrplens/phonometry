@@ -210,9 +210,9 @@ para que el tono AM de `1 kHz / 60 dB / m = 1 / 4 Hz` marque `1,00 vacil` por
 construcción, y contrastada con los valores de la literatura de la Tabla 1 de
 Osses 2016 y con la referencia abierta SQAT (usada solo como oráculo numérico).
 En el barrido de tono AM a `70 dB` `fmod ∈ {1, 2, 4, 8, 16, 32} Hz` da
-`[0,42, 0,79, 1,09, 1,05, 0,19, 0,10]` vacil frente a la literatura
+`[0,40, 0,79, 1,09, 1,05, 0,17, 0,09]` vacil frente a la literatura
 `[0,39, 0,84, 1,25, 1,30, 0,36, 0,06]` (`r` de Pearson `= 0,98`, máximo correcto a
-`4 Hz`, dentro de ~2×). La exactitud para tonos FM no se persigue explícitamente.
+`4 Hz`, dentro de ~2,1×). La exactitud para tonos FM no se persigue explícitamente.
 Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absoluto
 (reparte la energía modulada entre las bandas) — cite la forma cerrada
 `fluctuation_strength_am_noise` (§3.1) para ese estímulo.

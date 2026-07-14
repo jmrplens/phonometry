@@ -1190,9 +1190,27 @@ FS_CALIBRATION_VACIL = 1.00
 # Fluctuation-strength signal-model cross-check (Osses 2016 Table 1): literature
 # values for a 1 kHz AM tone at 70 dB, m=1, over fmod = {1,2,4,8,16,32} Hz. No
 # numeric standard exists; the Osses model reproduces these TRENDS (Pearson
-# r >= 0.9, band-pass peak at 4 Hz, within ~2x), not the exact figures.
+# r >= 0.9, band-pass peak at 4 Hz, within ~2.1x), not the exact figures.
 FS_AM_TONE_FMOD_HZ = [1.0, 2.0, 4.0, 8.0, 16.0, 32.0]
 FS_AM_TONE_70DB_LITERATURE = [0.39, 0.84, 1.25, 1.30, 0.36, 0.06]
+
+# Carrier-frequency sweep of an AM tone (70 dB, m=1, fmod=4 Hz) at
+# fc = {125, 250, 500, 1000, 4000, 8000} Hz. Values measured through this
+# implementation with the corrected Zwicker-Terhardt Bark constant (0.76e-3;
+# Osses 2016 Eq. 3 misprints 0.76e-4, see docs/ERRATA.md), reproducing the
+# Fastl & Zwicker Fig. 10.5 trend: a low-mid carrier plateau and a roll-off
+# at 8 kHz. Measured-by-reviewer values, hence the generous tolerances.
+FS_CARRIER_SWEEP_HZ = [125.0, 250.0, 500.0, 1000.0, 4000.0, 8000.0]
+FS_CARRIER_SWEEP_VACIL = [0.86, 1.25, 1.03, 1.09, 0.92, 0.58]
+
+# Osses 2016 Table 1, AM broadband noise (BW 16 kHz, 60 dB, m=1) over
+# fmod = {1,2,4,8,16,32} Hz: literature values in vacil. The excitation
+# front-end spreads the modulated energy across bands and overshoots the
+# absolute pass-band level by up to ~3x, so this row is a TREND cross-check
+# (band-pass shape, Pearson correlation, high-fmod tail) only. The FM-tone
+# row of Table 1 is not pinned at all: the model documentedly does not
+# pursue FM accuracy (the reference method itself overestimates it > 4 Hz).
+FS_AM_BBN_60DB_LITERATURE = [1.12, 1.58, 1.80, 1.57, 0.48, 0.14]
 
 # ---------------------------------------------------------------------------
 # Electroacoustic distortion (IEC 60268-3:2013) and frequency response

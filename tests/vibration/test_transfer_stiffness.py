@@ -22,6 +22,7 @@ from phonometry import (
     PhonometryWarning,
     TransferStiffnessResult,
     base_transmissibility,
+    blocking_force_ratio,
     convert_frf,
     indirect_transfer_stiffness_result,
     loss_factor,
@@ -145,6 +146,30 @@ def test_indirect_still_recovers_kelvin_voigt_below_the_warning() -> None:
         t = base_transmissibility(f, m, k, c)
         k_rec = complex(transfer_stiffness_indirect(f, t, m))
     assert k_rec == pytest.approx(k + 1j * (2.0 * math.pi * f) * c, rel=5e-3)
+
+
+# ---------------------------------------------------------------------------
+# Blocking-force approximation (ISO 10846-1, Equations 6 and 7)
+# ---------------------------------------------------------------------------
+def test_blocking_force_ratio_at_the_ten_percent_limit() -> None:
+    """|k2,2/kt| = 0.1 gives F2/F2,b = 1/1.1 = 0.9091 - within 10 % (Eq. 7)."""
+    ratio = complex(blocking_force_ratio(1e5, 1e6))
+    assert ratio == pytest.approx(1.0 / 1.1)
+    assert abs(abs(ratio) - 1.0) <= 0.10
+
+
+def test_blocking_force_ratio_stiff_termination_is_unity() -> None:
+    # An infinitely stiff receiver takes exactly the blocking force.
+    assert complex(blocking_force_ratio(1e5, 1e12)) == pytest.approx(1.0, abs=1e-6)
+
+
+def test_blocking_force_ratio_complex_and_validation() -> None:
+    k22, kt = 1e5 + 1e4j, 2e6 + 5e5j
+    assert complex(blocking_force_ratio(k22, kt)) == pytest.approx(
+        1.0 / (1.0 + k22 / kt)
+    )
+    with pytest.raises(ValueError, match="termination_stiffness"):
+        blocking_force_ratio(1e5, 0.0)
 
 
 # ---------------------------------------------------------------------------

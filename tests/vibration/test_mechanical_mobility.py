@@ -16,8 +16,11 @@ import pytest
 
 from phonometry import (
     MobilityResult,
+    RigidMassCalibrationResult,
     convert_frf,
+    random_error_percent,
     resonance_frequency,
+    rigid_mass_calibration_check,
     sdof_accelerance,
     sdof_mobility,
     sdof_mobility_result,
@@ -116,6 +119,85 @@ def test_non_positive_frequency_raises() -> None:
         sdof_receptance(100.0, 0.0, K, C)
     with pytest.raises(ValueError, match="damping"):
         sdof_receptance(100.0, M, K, -1.0)
+
+
+# ---------------------------------------------------------------------------
+# Rigid-mass operational calibration (ISO 7626-2, 7.5.2)
+# ---------------------------------------------------------------------------
+def test_rigid_mass_calibration_accelerance_passes() -> None:
+    """A 10 kg rigid block has |A| = 1/m = 0.100 1/kg at every frequency."""
+    f = np.array([10.0, 100.0, 1000.0])
+    res = rigid_mass_calibration_check(np.full(3, 0.1), f, 10.0)
+    assert isinstance(res, RigidMassCalibrationResult)
+    assert res.passed
+    assert np.allclose(res.expected, 0.100)
+    assert np.allclose(res.deviation, 0.0)
+
+
+def test_rigid_mass_calibration_mobility_expected_value() -> None:
+    """|Y| = 1/(2 pi f m): 1.59155e-4 m/(N.s) at 100 Hz for m = 10 kg."""
+    y = 1.0 / (2.0 * math.pi * 100.0 * 10.0)
+    res = rigid_mass_calibration_check([y], [100.0], 10.0, quantity="mobility")
+    assert res.expected[0] == pytest.approx(1.59155e-4, rel=1e-5)
+    assert res.passed
+
+
+def test_rigid_mass_calibration_flags_out_of_tolerance_bands() -> None:
+    # +4 % passes the +/-5 % criterion; -7 % fails, only in its band.
+    f = np.array([50.0, 500.0])
+    frf = np.array([0.104, 0.093])
+    res = rigid_mass_calibration_check(frf, f, 10.0)
+    assert res.within_tolerance.tolist() == [True, False]
+    assert not res.passed
+    assert res.deviation[0] == pytest.approx(0.04)
+
+
+def test_rigid_mass_calibration_accepts_complex_frf() -> None:
+    # The criterion applies to the magnitude; phase is irrelevant.
+    frf = 0.1 * np.exp(1j * np.linspace(0.0, 1.0, 4))
+    res = rigid_mass_calibration_check(frf, [10.0, 20.0, 40.0, 80.0], 10.0)
+    assert res.passed
+
+
+def test_rigid_mass_calibration_validation() -> None:
+    with pytest.raises(ValueError, match="quantity"):
+        rigid_mass_calibration_check([0.1], [100.0], 10.0, quantity="receptance")
+    with pytest.raises(ValueError, match="mass"):
+        rigid_mass_calibration_check([0.1], [100.0], 0.0)
+    with pytest.raises(ValueError, match="same shape"):
+        rigid_mass_calibration_check([0.1, 0.1], [100.0], 10.0)
+    with pytest.raises(ValueError, match="frequency"):
+        rigid_mass_calibration_check([0.1], [0.0], 10.0)
+
+
+# ---------------------------------------------------------------------------
+# Random error of averaged FRF estimates (ISO 7626-2, Annex A + 8.1.3)
+# ---------------------------------------------------------------------------
+def test_random_error_annex_a_example() -> None:
+    """gamma2 = 0.8 with n = 75 averages gives 4.08 % < 5 % (Annex A)."""
+    eps = float(random_error_percent(0.8, 75))
+    assert eps == pytest.approx(4.08, abs=0.005)
+    assert eps < 5.0
+
+
+def test_random_error_perfect_coherence_is_zero() -> None:
+    assert float(random_error_percent(1.0, 10)) == 0.0
+
+
+def test_random_error_scales_with_averages() -> None:
+    # eps ~ 1/sqrt(n): quadrupling n halves the error.
+    one = random_error_percent(0.5, 10)
+    four = random_error_percent(0.5, 40)
+    assert float(one / four) == pytest.approx(2.0)
+
+
+def test_random_error_validation() -> None:
+    with pytest.raises(ValueError, match="n_averages"):
+        random_error_percent(0.8, 0)
+    with pytest.raises(ValueError, match="coherence"):
+        random_error_percent(0.0, 10)
+    with pytest.raises(ValueError, match="coherence"):
+        random_error_percent(1.2, 10)
 
 
 # ---------------------------------------------------------------------------

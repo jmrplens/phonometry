@@ -188,6 +188,39 @@ def transfer_stiffness_indirect(
     )
 
 
+def blocking_force_ratio(
+    driving_point_stiffness: ArrayLike, termination_stiffness: ArrayLike
+) -> np.ndarray:
+    """Ratio of the delivered force to the blocking force (ISO 10846-1, Eq. 6).
+
+    For an isolator driving a receiving structure, the output force for a
+    given source displacement ``u1`` is ``F2 = k2,1 u1 / (1 + k2,2/kt)``
+    (Equation (6)), where ``k2,2`` is the isolator's output driving-point
+    stiffness (output blocked at the input) and ``kt`` the dynamic
+    driving-point stiffness of the termination. This function returns
+
+    ``F2 / F2,b = 1 / (1 + k2,2/kt)``
+
+    the factor by which the delivered force deviates from the blocking force
+    ``F2,b = k2,1 u1`` of Equation (7). For ``|k2,2| < 0.1 |kt|`` the ratio is
+    within 10 % of unity (``1/1.1 = 0.909`` at the limit), which is the
+    stiffness mismatch that justifies characterising an isolator by its
+    blocked transfer stiffness alone.
+
+    :param driving_point_stiffness: Output driving-point stiffness ``k2,2`` of
+        the isolator (complex, scalar or array), in N/m.
+    :param termination_stiffness: Driving-point stiffness ``kt`` of the
+        receiving structure (complex, scalar or array, non-zero), in N/m.
+    :return: The complex ratio ``F2/F2,b``.
+    :raises ValueError: for a zero termination stiffness.
+    """
+    k22 = np.asarray(driving_point_stiffness, dtype=np.complex128)
+    kt = np.asarray(termination_stiffness, dtype=np.complex128)
+    if np.any(kt == 0.0):
+        raise ValueError("'termination_stiffness' must be non-zero.")
+    return np.asarray(1.0 / (1.0 + k22 / kt), dtype=np.complex128)
+
+
 def base_transmissibility(
     frequency: ArrayLike, mass: float, stiffness: float, damping: float = 0.0
 ) -> np.ndarray:

@@ -186,6 +186,7 @@ from .vibration.multiple_shock_vibration import (
 )
 from .environmental.impulse_prominence import (
     ImpulseProminenceResult,
+    ImpulseProminenceWarning,
     impulse_adjustment,
     impulse_prominence,
     predicted_prominence,
@@ -195,6 +196,7 @@ from .metrology.uncertainty import (
     MonteCarloResult,
     Quantity,
     UncertaintyResult,
+    UncertaintyWarning,
     combine_uncertainty,
     monte_carlo,
     rectangular,
@@ -354,6 +356,7 @@ from .aircraft.aircraft_noise import (
     tone_correction,
 )
 from .environmental.wind_turbine_noise import (
+    WindTurbineNoiseWarning,
     WindTurbineTonalityResult,
     apparent_sound_power_level,
     slant_distance,
@@ -890,6 +893,7 @@ __all__ = [
     "apparent_sound_power_level",
     "slant_distance",
     "wind_turbine_tonality",
+    "WindTurbineNoiseWarning",
     "WindTurbineTonalityResult",
     "equal_loudness_contour",
     "loudness_level",
@@ -929,6 +933,7 @@ __all__ = [
     "impulse_prominence",
     "rating_level",
     "ImpulseProminenceResult",
+    "ImpulseProminenceWarning",
     "seat_to_spine_transfer",
     "spinal_response",
     "response_peaks",
@@ -1022,6 +1027,7 @@ __all__ = [
     "u_shaped",
     "Quantity",
     "UncertaintyResult",
+    "UncertaintyWarning",
     "MonteCarloResult",
     "sweep_signal",
     "inverse_filter",

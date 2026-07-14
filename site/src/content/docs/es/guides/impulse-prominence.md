@@ -25,7 +25,13 @@ $$
 
 Los coeficientes se ajustaron a partir de ensayos de escucha y `P` está diseñada
 para alcanzar unos 15 en impulsos muy súbitos e intensos. El impulso con la `P`
-**más alta** en un periodo de 30 minutos es el determinante.
+**más alta** en un periodo de 30 minutos es el determinante. Una subida de
+nivel solo *cualifica* como impulso cuando su tasa de subida supera 10 dB/s
+(apartado 4.5; el apartado 8 aplica el ajuste únicamente «para sonidos con
+tasas de subida mayores de 10 dB/s»): `impulse_prominence` marca los eventos
+no cualificados en su máscara `qualifies`, avisa de ellos y nunca les permite
+fijar la prominencia determinante ni un `KI` (el ajuste es 0 dB cuando ningún
+evento cualifica).
 
 ```python
 import phonometry as ph

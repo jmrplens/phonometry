@@ -140,6 +140,16 @@ def test_residual_correction_unreliable_warns() -> None:
     with pytest.warns(EnvironmentalMeasurementWarning, match="upper bound"):
         res = residual_sound_correction(50.0, 48.0)   # margin 2 dB <= 3
     assert not res.reliable
+    # 10.4: with a margin <= 3 dB no correction is allowed; the reportable
+    # value is the UNCORRECTED measured level, as an upper bound (the
+    # corrected value estimates from below).
+    assert res.reportable_upper_bound == pytest.approx(50.0)
+    assert res.corrected_level < res.reportable_upper_bound
+
+
+def test_residual_correction_reports_measured_as_bound() -> None:
+    res = residual_sound_correction(60.0, 50.0)
+    assert res.reportable_upper_bound == pytest.approx(60.0)
 
 
 def test_residual_not_below_raises() -> None:
@@ -159,6 +169,15 @@ def test_gaussian_residual_needs_one_percentile() -> None:
         gaussian_residual_level(50.0, l90=40.0, l95=38.0)
     with pytest.raises(ValueError, match="exactly one"):
         gaussian_residual_level(50.0)
+
+
+def test_gaussian_residual_rejects_inverted_percentiles() -> None:
+    # L90 > L50 is impossible (exceedance ordering): almost certainly swapped
+    # arguments; the squared spread would otherwise hide the mistake.
+    with pytest.raises(ValueError, match="swapped"):
+        gaussian_residual_level(40.0, l90=50.0)
+    with pytest.raises(ValueError, match="swapped"):
+        gaussian_residual_level(40.0, l95=41.0)
 
 
 # ---------------------------------------------------------------------------
@@ -202,16 +221,28 @@ def test_residual_correction_uncertainty_f9() -> None:
 
 
 def test_repeated_measurements() -> None:
-    """Formulae (18)/(20): energy mean and sample standard deviation."""
+    """Formulae (17)-(20): energy mean, primary uncertainty, approximation."""
     levels = [58.0, 59.0, 57.0, 60.0]
     res = uncertainty_from_repeated_measurements(levels)
     assert isinstance(res, RepeatedMeasurementResult)
-    # Independent hand values for [58, 59, 57, 60]: the energy mean (Formula 18)
-    # is 58.6428 dB and the standard uncertainty (Formula 20, deviations from
-    # that energy mean, N-1 denominator) is 1.3015 dB.
+    # Independent hand values for [58, 59, 57, 60]: the energy mean (Formula
+    # 18) is 58.6428 dB; the primary route (Formula 17 energy-domain sk =
+    # 215423, Formula 19) gives uk = 10 lg(731618 + 215423) - 58.6428 =
+    # 1.1205 dB; the Note 2 approximation (Formula 20) gives 1.3015 dB.
     assert res.mean_level == pytest.approx(58.6428, abs=1e-3)
-    assert res.standard_uncertainty == pytest.approx(1.3015, abs=1e-3)
+    assert res.standard_uncertainty == pytest.approx(1.121, abs=2e-3)
+    assert res.approximate_uncertainty == pytest.approx(1.3015, abs=1e-3)
     assert res.n == 4
+
+
+def test_repeated_measurements_spread_levels() -> None:
+    """Spread levels: the primary Formulae (17)+(19) route stays sane
+    (3.944 dB for [50, 60, 70]) while the Note 2 approximation inflates to
+    12.183 dB and triggers the spread warning."""
+    with pytest.warns(EnvironmentalMeasurementWarning, match="Formula \\(20\\)"):
+        res = uncertainty_from_repeated_measurements([50.0, 60.0, 70.0])
+    assert res.standard_uncertainty == pytest.approx(3.944, abs=2e-3)
+    assert res.approximate_uncertainty == pytest.approx(12.183, abs=2e-3)
 
 
 def test_repeated_measurements_needs_two() -> None:

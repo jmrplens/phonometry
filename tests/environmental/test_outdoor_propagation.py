@@ -76,10 +76,21 @@ class TestGeometricDivergence:
 # --------------------------------------------------------------------------- #
 class TestAtmosphericAbsorption:
     def test_consistency_with_air_absorption(self) -> None:
+        # Aatm evaluates alpha at the exact base-10 midbands behind the
+        # nominal labels (the ISO 9613-2 Table 2 convention).
         d = 500.0
-        alpha = air_attenuation(BANDS, 15.0, 70.0, 101.325)  # dB/m
+        alpha = air_attenuation(BANDS, 15.0, 70.0, 101.325, exact_midband=True)
         got = atmospheric_absorption(d, BANDS, 15.0, 70.0, 101.325)
         assert np.allclose(got, alpha * d)
+
+    def test_exact_midband_convention_at_8khz(self) -> None:
+        # At 8 kHz / 20 C / 70 % the nominal-frequency alpha runs ~1.3 % high
+        # (77.6 vs 76.6 dB/km); Aatm must follow the exact-midband value.
+        got = atmospheric_absorption(1000.0, [8000.0], 20.0, 70.0, 101.325)
+        exact = air_attenuation([8000.0], 20.0, 70.0, 101.325, exact_midband=True)
+        nominal = air_attenuation([8000.0], 20.0, 70.0, 101.325)
+        assert got[0] == pytest.approx(float(exact[0]) * 1000.0)
+        assert got[0] < float(nominal[0]) * 1000.0
 
     def test_scales_linearly_with_distance(self) -> None:
         a1 = atmospheric_absorption(100.0, BANDS)
@@ -214,11 +225,43 @@ class TestBarrier:
         dz_d = barrier_attenuation(double, 19.0, BANDS)
         assert np.all(dz_d >= dz_s - 1e-9)
 
-    def test_line_of_sight_clears_barrier_zero(self) -> None:
-        # dss+dsr == d (barrier just on the direct line): z=0 => Dz=0.
+    def test_grazing_incidence_gives_10lg3(self) -> None:
+        # dss+dsr == d (edge exactly on the sight line): z = 0 and Eq. (14)
+        # gives Dz = 10 lg 3 = 4.77 dB -- continuous across grazing, not 0.
         b = Barrier(source_to_edge=10.0, edge_to_receiver=10.0)
         dz = barrier_attenuation(b, 20.0, BANDS)
-        assert np.allclose(dz, 0.0)
+        assert np.allclose(dz, 10.0 * math.log10(3.0))
+
+    def test_negative_z_line_of_sight_clear(self) -> None:
+        # Top edge 0.5 m below the sight line, midway at d = 100 m:
+        # z = -(2*hypot(50, 0.5) - 100) = -0.005 m, Kmet = 1 (Eq. (18)).
+        # Hand-derived Dz = 10 lg(3 - (20/lambda)*0.005): 4.74 dB at 63 Hz,
+        # 4.55 dB at 500 Hz, 2.61 dB at 4 kHz -- decaying with frequency
+        # instead of accruing screening credit.
+        edge = math.hypot(50.0, 0.5)
+        b = Barrier(source_to_edge=edge, edge_to_receiver=edge,
+                    line_of_sight_clear=True)
+        dz = barrier_attenuation(b, 100.0, [63.0, 500.0, 4000.0])
+        z = 2.0 * edge - 100.0
+        expected = [10.0 * math.log10(3.0 - (20.0 * f / 340.0) * z)
+                    for f in (63.0, 500.0, 4000.0)]
+        assert dz == pytest.approx(expected, abs=1e-9)
+        assert dz[0] == pytest.approx(4.744, abs=0.005)
+        assert dz[1] == pytest.approx(4.553, abs=0.005)
+        assert dz[2] == pytest.approx(2.610, abs=0.005)
+        # Monotone decay with frequency below the sight line.
+        assert dz[0] > dz[1] > dz[2] >= 0.0
+
+    def test_deep_clearance_tends_to_zero(self) -> None:
+        # Top edge 3 m below the sight line: no screening effect remains at
+        # mid/high frequency (Dz clamped at 0; z ~ -lambda/10 boundary).
+        edge = math.hypot(50.0, 3.0)
+        b = Barrier(source_to_edge=edge, edge_to_receiver=edge,
+                    line_of_sight_clear=True)
+        dz = barrier_attenuation(b, 100.0, BANDS)
+        assert np.all(dz >= 0.0)
+        assert np.all(np.diff(dz) <= 1e-12)
+        assert dz[-1] == pytest.approx(0.0, abs=1e-9)
 
     def test_c3_transition_single_to_triple(self) -> None:
         # Eq. (15): e -> 0 gives C3 = 1 (matches single); e >> lambda gives C3 -> 3.

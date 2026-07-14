@@ -193,3 +193,22 @@ def test_air_attenuation_m_is_alpha_over_10_lg_e() -> None:
     # m = alpha / (10 lg e) ~ alpha / 4.3429.
     np.testing.assert_allclose(m, alpha / (10.0 * math.log10(math.e)), rtol=1e-12)
     assert np.all(m > 0.0)
+
+
+def test_iso9613_2_table2_grid_exact_midbands() -> None:
+    """ISO 9613-2:1996 Table 2: alpha (dB/km) for six atmospheric conditions
+    across the eight octave bands, evaluated at the exact base-10 midbands
+    (the table's own convention). Every cell agrees to half a unit of its
+    last printed digit except the documented 15 degC / 80 % / 1 kHz print
+    quirk (printed 4,1 vs exact 4,151)."""
+    import reference_data as ref
+
+    for (temp, rh), row in ref.ISO9613_2_TABLE2.items():
+        alpha = air_attenuation(
+            ref.ISO9613_2_TABLE2_BANDS, temp, rh, 101.325, exact_midband=True
+        ) * 1000.0
+        for got, printed, band in zip(alpha, row, ref.ISO9613_2_TABLE2_BANDS):
+            tol = 0.5 if printed >= 100.0 else 0.05
+            if (temp, rh, band) == (15.0, 80.0, 1000.0):
+                tol = 0.06  # print rounding artifact, see reference_data
+            assert got == pytest.approx(printed, abs=tol), (temp, rh, band)

@@ -251,17 +251,24 @@ marca una banda que supera a ambas vecinas en 15/8/5 dB (baja/media/alta), y
 a $K_t$ (Tabla J.1).
 
 **Corrección de ruido residual (Cláusula 10.4).** `residual_sound_correction()`
-aplica $L = 10\lg(10^{L'/10} - 10^{L_\text{res}/10})$ (Fórmula (16)) y marca un
-residual dentro de 3 dB del nivel medido como cota superior solamente.
-`gaussian_residual_level()` estima el residual a partir de niveles percentiles
-(Anexo I).
+aplica $L = 10\lg(10^{L'/10} - 10^{L_\text{res}/10})$ (Fórmula (16)). Con un
+residual dentro de 3 dB del nivel medido no se permite corrección alguna: el
+valor reportable es entonces el nivel medido *sin corregir* $L'$, como cota
+superior del sonido específico (expuesto como `reportable_upper_bound`, con
+`reliable=False`). `gaussian_residual_level()` estima el residual a partir de
+niveles percentiles (Anexo I) y rechaza ordenaciones de percentiles
+invertidas.
 
 **Incertidumbre de medición (Cláusula 4, Anexo F).**
 `combined_standard_uncertainty()` forma $u = \sqrt{\sum (c_j u_j)^2}$ (Fórmula (2))
 y `environmental_expanded_uncertainty()` aplica $k = 2$ (95 %) o $k = 1.3$ (80 %);
 `residual_correction_uncertainty()` lleva la sensibilidad de la corrección residual
 (Fórmulas (F.7)/(F.8)) y `uncertainty_from_repeated_measurements()` la
-incertidumbre típica de mediciones repetidas (Fórmulas (17)–(20)).
+incertidumbre típica de mediciones repetidas — la vía primaria en el dominio
+de energía (Fórmulas (17)+(19)), con el sustituto en niveles de la Nota 2
+(Fórmula (20)) reportado al lado como `approximate_uncertainty` y un aviso
+cuando los niveles se dispersan más de 3 dB, donde el sustituto se infla
+groseramente.
 
 <details>
 <summary>Mostrar el código de esta figura</summary>

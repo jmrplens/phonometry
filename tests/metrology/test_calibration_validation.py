@@ -142,3 +142,19 @@ def test_table2_row_boundaries() -> None:
     assert _class1_fluctuation_limit(100.0) == pytest.approx(0.10)
     assert _class1_fluctuation_limit(160.0) == pytest.approx(0.07)
     assert _class1_fluctuation_limit(1000.0) == pytest.approx(0.07)
+
+
+def test_sensitivity_rejects_non_finite_samples() -> None:
+    """NaN samples propagated silently to a NaN factor before; now rejected."""
+    import numpy as np
+    import pytest
+
+    from phonometry import sensitivity
+
+    sig = np.sin(2 * np.pi * 1000.0 * np.arange(4800) / 48000.0)
+    sig[100] = np.nan
+    with pytest.raises(ValueError, match="non-finite"):
+        sensitivity(sig, fs=48000)
+    sig[100] = np.inf
+    with pytest.raises(ValueError, match="non-finite"):
+        sensitivity(sig, fs=48000)

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **244/244 conformance checks pass** across 32 domains and 138 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **251/251 conformance checks pass** across 32 domains and 139 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -35,19 +35,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 
 | Curve | fs | Max dev. from nominal (info) | Binding freq | Deviation there | Tolerance band | Headroom |
 |:---|:---:|:---:|:---:|:---:|:---:|:---:|
-| A | 48 kHz | -0.902 dB @ 20000 Hz | 1000 Hz | +0.000 dB | [-0.70, +0.70] dB | +0.700 dB |
-| A | 96 kHz | -0.515 dB @ 20000 Hz | 1000 Hz | +0.000 dB | [-0.70, +0.70] dB | +0.700 dB |
-| C | 48 kHz | -0.935 dB @ 20000 Hz | 1000 Hz | +0.000 dB | [-0.70, +0.70] dB | +0.700 dB |
+| A | 48 kHz | -0.867 dB @ 19953 Hz | 1000 Hz | +0.000 dB | [-0.70, +0.70] dB | +0.700 dB |
+| A | 96 kHz | -0.482 dB @ 19953 Hz | 1000 Hz | +0.000 dB | [-0.70, +0.70] dB | +0.700 dB |
+| C | 48 kHz | -0.900 dB @ 19953 Hz | 1000 Hz | +0.000 dB | [-0.70, +0.70] dB | +0.700 dB |
 | G | 48 kHz | +0.047 dB @ 1 Hz | 1 Hz | +0.047 dB | [-1.00, +1.00] dB | +0.953 dB |
 
 <details>
-<summary>&#9989; <b>Filters &amp; weightings</b> — 100% (6/6)</summary>
+<summary>&#9989; <b>Filters &amp; weightings</b> — 100% (7/7)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | IEC 61260-1:2014 Table 1 | Octave-band filter class (butterworth, fs=48 kHz) | class 1 | class 1 (margin +0.400 dB) | +0.400 dB | &#9989; |
 | IEC 61260-1:2014 Table 1 | One-third-octave filter class (butterworth, fs=48 kHz) | class 1 | class 1 (margin +0.400 dB) | +0.400 dB | &#9989; |
 | IEC 61260:1995 / ANSI S1.11-2004 Table 1 | Class 0 (strictest) octave-band filter (butterworth, fs=48 kHz) | class 0 | class 0 (margin +0.150 dB) | +0.150 dB | &#9989; |
+| IEC 61260-1:2014 Table F.1 | Formula (9) breakpoint mapping, b=3, Omega at G**(1/2) | 1.12202 (+/-0.00001) | 1.12202 | 0 | &#9989; |
 | IEC 61672-1:2013 Table 3 | A-weighting deviation vs class-1 limits (fs=48 kHz) | deviation within limits @ 1000 Hz | +0.000 dB in [-0.70, +0.70] dB | headroom +0.700 dB | &#9989; |
 | IEC 61672-1:2013 Table 3 | C-weighting deviation vs class-1 limits (fs=48 kHz) | deviation within limits @ 1000 Hz | +0.000 dB in [-0.70, +0.70] dB | headroom +0.700 dB | &#9989; |
 | ISO 7196:1995 Table 2 / A.3 | G-weighting deviation vs +/-1 dB tolerance (fs=48 kHz) | deviation within limits @ 1 Hz | +0.047 dB in [-1.00, +1.00] dB | headroom +0.953 dB | &#9989; |
@@ -205,12 +206,13 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Outdoor propagation &amp; occupational exposure</b> — 100% (9/9)</summary>
+<summary>&#9989; <b>Outdoor propagation &amp; occupational exposure</b> — 100% (10/10)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | ISO 9613-1:1993 Table 1 | Air attenuation @ 10 degC, 70 %, 1 kHz | 3.66 dB/km (+/-0.01 dB/km) | 3.658 dB/km | -0.002 dB/km | &#9989; |
 | ISO 9613-1:1993 Table 1 | Air attenuation @ 0 degC, 20 %, 2 kHz | 34.6 dB/km (+/-0.1 dB/km) | 34.64 dB/km | 0.04 dB/km | &#9989; |
+| ISO 9613-2:1996 Table 2 | Atmospheric attenuation grid, 6 conditions x 8 octave bands, dB/km | all 48 cells within half a printed digit | worst residual 0.939 x tolerance | 0.939 x | &#9989; |
 | ISO 9613-2:1996 Eq. (7) | Geometrical divergence Adiv = 20 lg(d/d0) + 11 at 100 m | 51 dB (+/-0 dB) | 51 dB | 0 dB | &#9989; |
 | ISO 9613-2:1996 Table 3 | Ground b'(0) porous limit -> Agr(250 Hz) = 2(-1.5 + 10.1) | 17.2 dB (+/-0 dB) | 17.2 dB | 0 dB | &#9989; |
 | ISO 9613-2:1996 clause 7.4 | Single-edge diffraction saturates at the 20 dB cap | 20 dB (+/-0 dB) | 20 dB | 0 dB | &#9989; |
@@ -342,13 +344,17 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Measurement uncertainty (GUM / Supplement 1)</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>Measurement uncertainty (GUM / Supplement 1)</b> — 100% (7/7)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
 | ISO/IEC Guide 98-3-1 clause 9.2 | Combined uncertainty, additive model | 2 (+/-0) | 2 | 0 | &#9989; |
 | ISO/IEC Guide 98-3 Table G.2 | Coverage factor, p=0.99, v=16 | 2.92 (+/-0.005) | 2.921 | 0.001 | &#9989; |
 | ISO/IEC Guide 98-3 Annex G.4 | Welch-Satterthwaite effective dof | 40 (+/-0) | 40 | 0 | &#9989; |
+| ISO/IEC Guide 98-3 Annex H.1 | End-gauge combined uncertainty uc, nm | 31.71 nm (+/-0.01 nm) | 31.71 nm | 0.001 nm | &#9989; |
+| ISO/IEC Guide 98-3 Annex H.1 | End-gauge expanded uncertainty U99, nm | 92.1 nm (+/-0.1 nm) | 92.1 nm | 0.04 nm | &#9989; |
+| ISO/IEC Guide 98-3 Annex H.2 (Table H.3) | Correlated V/I/phi budget: uc(R), ohm | 0.071 ohm (+/-0.001 ohm) | 0.071 ohm | 0 ohm | &#9989; |
+| ISO/IEC Guide 98-3-1 Table 3 (clause 9.2.3) | Seeded Monte Carlo, rectangular sum: 95 % interval endpoint | +/-3.88 (u = 2.0) | +/-3.886 (u = 2.002) | 0.006 | &#9989; |
 
 </details>
 
@@ -398,7 +404,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Tonal audibility (ISO/PAS 20065)</b> — 100% (10/10)</summary>
+<summary>&#9989; <b>Tonal audibility (ISO/PAS 20065)</b> — 100% (11/11)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -410,6 +416,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO/PAS 20065:2016 Formulae (28)-(29) | Extended uncertainty of the mean audibility, Annex E Step 4 | 1.38 dB (+/-0.01 dB) | 1.38 dB | -0.003 dB | &#9989; |
 | ISO/PAS 20065:2016 Formula (8) | Tone level LT from spectrum, Table E.1 | 67.96 dB (+/-0.02 dB) | 67.96 dB | -0.005 dB | &#9989; |
 | ISO/PAS 20065:2016 Clause 5.3.8 | Tone detection over the spectrum, Table E.1 | tones at [118.4, 137.3, 158.8] Hz | tones at [118.4, 137.3, 158.8] Hz | exact | &#9989; |
+| ISO/PAS 20065:2016 Clause 5.3.8 Step 3 | Same-band FG combination inside analyze_spectrum, Table E.2 row 2 FG | 72.15 dB (+/-0.02 dB) | 72.15 dB | -0.002 dB | &#9989; |
 | ISO/PAS 20065:2016 Formula (17) | Multi-tone FG combination, Table E.1 | 72.15 dB (+/-0.02 dB) | 72.15 dB | -0.002 dB | &#9989; |
 | ISO/PAS 20065:2016 Formulae (18)/(19) | Two-tone separation fD (DIN 45681 Annex J), 137.3 / 212 Hz | fD(137.3)=24.09, fD(212)=21.0 Hz; Annex E pair combined | fD(137.3)=24.09, fD(212)=21.00 Hz; Annex E pair combined | exact | &#9989; |
 

@@ -46,8 +46,13 @@ $$
 $$
 
 are classified into masking noise and tone lines (the 70 %-lowest energy mean,
-the `+6 dB` criteria). The masking-noise level `L_pn` follows Formula 31, the
-tonality is `ΔL_tn = L_pt − L_pn`, and the tonal audibility is
+the `+6 dB` criteria; tone lines must additionally lie within 10 dB of the
+*highest* line above the threshold, and that highest line is the frequency of
+the tone, subclauses 9.5.3/9.5.4). The candidate itself must first pass the
+9.5.2 *possible tone* screening — a local maximum more than 6 dB above the
+band energy average excluding the maximum and its adjacent lines. The
+masking-noise level `L_pn` follows Formula 31, the tonality is
+`ΔL_tn = L_pt − L_pn`, and the tonal audibility is
 
 $$
 \Delta L_a = \Delta L_{tn} - L_a, \qquad L_a = -2 - \lg\!\big[1 + (f/502)^{2.5}\big],
@@ -72,11 +77,17 @@ res.plot()   # spectrum + critical band + masking level (needs matplotlib)
 
 `wind_turbine_tonality` returns a `WindTurbineTonalityResult` with the
 `critical_bandwidth`, `tone_level`, `masking_level`, `tonality`,
-`audibility_criterion`, `tonal_audibility` and `is_audible`. The audibility
-formula is the ISO 1996-2 Annex C one; what is specific to IEC 61400-11 is the
-determination of the tone and masking levels and the Zwicker critical band from
-the spectrum. For a rating adjustment `K_T`, pass the mean audibility to the
-ISO 1996-2 `tonal_adjustment`.
+`audibility_criterion`, `tonal_audibility`, `is_audible` and
+`has_identified_tone`. When the candidate fails the 9.5.2 screening or no
+line classifies as "tone", `has_identified_tone` is `False`: the numeric
+fields are non-standard fallbacks and such spectra must be **excluded** from
+the 9.5.1 energy averaging of `ΔL_a` over the spectra of a wind-speed bin
+(`is_audible` also requires an identified tone). The tone frequency and the
+`L_a` criterion anchor to the highest classified tone line, not the probed
+candidate. The audibility formula is the ISO 1996-2 Annex C one; what is
+specific to IEC 61400-11 is the determination of the tone and masking levels
+and the Zwicker critical band from the spectrum. For a rating adjustment
+`K_T`, pass the mean audibility to the ISO 1996-2 `tonal_adjustment`.
 
 <details>
 <summary>Show the code for this figure</summary>

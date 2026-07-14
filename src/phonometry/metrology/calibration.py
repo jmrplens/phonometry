@@ -55,8 +55,9 @@ def sensitivity(
     *short-term level fluctuation* — the absolute difference between each of
     the maximum and minimum levels and the mean level — must not exceed the
     Table 2 acceptance limit for the calibrator class (class 1: 0.07 dB at
-    and above 160 Hz, relaxed to 0.10 dB below 160 Hz and 0.20 dB at or below 63 Hz
-    because the F time-weighting itself ripples at low frequencies). A larger
+    and above 160 Hz, relaxed to 0.10 dB above 63 Hz and below 160 Hz, and to
+    0.20 dB for the 31,5-63 Hz rows where the F time-weighting itself ripples;
+    below Table 2's 31,5 Hz span the strict 0.07 dB applies). A larger
     fluctuation usually means a badly coupled microphone or handling noise in
     the recording, which would silently corrupt every calibrated level; a
     :class:`CalibrationWarning` is emitted.
@@ -91,6 +92,11 @@ def sensitivity(
     signal_arr = np.asarray(ref_signal, dtype=np.float64)
     if signal_arr.size == 0:
         raise ValueError("Reference signal is empty, cannot calibrate.")
+    if not np.all(np.isfinite(signal_arr)):
+        raise ValueError(
+            "Reference signal contains non-finite samples (NaN/inf); they "
+            "would silently corrupt the calibration factor."
+        )
     if narrowband:
         if fs is None:
             raise ValueError("narrowband tone estimation requires 'fs'.")

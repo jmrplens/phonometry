@@ -30,8 +30,9 @@ import json
 import math
 import pathlib
 import sys
+import warnings
 from dataclasses import dataclass
-from typing import Callable, Literal, Optional, cast
+from typing import Any, Callable, Literal, Optional, cast
 
 import numpy as np
 from scipy import signal as sg
@@ -259,7 +260,11 @@ def _weighting_deviation(curve: str, fs: int) -> WeightingDeviation:
     else:
         col = 1 if curve == "A" else 2
         rows = [r for r in ref.IEC61672_TABLE3 if r[0] < fs / 2]
-        freqs = np.array([r[0] for r in rows], dtype=float)
+        # Table 3 NOTE: the design goals are computed at the exact base-10
+        # frequencies 1000 * 10^(0.1 (n - 30)) behind the nominal labels
+        # (15 848.9 Hz for "16 k"); evaluate the SOS there, as the G branch
+        # above and IEC 61672-3:2013 subclause 13.3 do.
+        freqs = np.array([10 ** (round(10 * math.log10(r[0])) / 10) for r in rows])
         nominal = np.array([r[col] for r in rows])
         upper = np.array([r[3] for r in rows])
         lower = np.array([r[4] for r in rows])
@@ -331,6 +336,19 @@ def _chk_butter_class0_1995() -> Outcome:
                   else "none") + f" (margin {margin:+.3f} dB)",
         delta=f"{margin:+.3f} dB",
         passed=ok,
+    )
+
+
+@register(
+    "Filters & weightings",
+    "IEC 61260-1:2014 Table F.1",
+    "Formula (9) breakpoint mapping, b=3, Omega at G**(1/2)",
+)
+def _chk_map_breakpoint_table_f1() -> Outcome:
+    from phonometry.metrology.compliance import _map_breakpoint
+
+    return numeric(
+        ref.IEC61260_TABLE_F1[0.5][0], _map_breakpoint(0.5, 3), 5e-6, places=5
     )
 
 
@@ -2282,6 +2300,41 @@ def _chk_iso9613_table1_corner() -> Outcome:
     return _iso9613_table1(ref.ISO9613_1_TABLE1_CORNER)
 
 
+@register(
+    "Outdoor propagation & occupational exposure",
+    "ISO 9613-2:1996 Table 2",
+    "Atmospheric attenuation grid, 6 conditions x 8 octave bands, dB/km",
+)
+def _chk_iso9613_2_table2_grid() -> Outcome:
+    """Every printed Table 2 cell (exact midbands) to half its last digit.
+
+    Worst residual in units of the per-cell tolerance; the documented
+    15 degC / 80 % / 1 kHz print quirk carries a 0.06 dB/km tolerance
+    (printed 4,1 vs exact-midband 4,151).
+    """
+    worst = 0.0
+    for (temp, rh), row in ref.ISO9613_2_TABLE2.items():
+        alpha = ph.air_attenuation(
+            ref.ISO9613_2_TABLE2_BANDS, temp, rh, 101.325, exact_midband=True
+        ) * 1000.0
+        for got, printed, band in zip(alpha, row, ref.ISO9613_2_TABLE2_BANDS):
+            tol = 0.5 if printed >= 100.0 else 0.05
+            if (temp, rh, band) == (15.0, 80.0, 1000.0):
+                tol = 0.06
+            residual = abs(float(got) - printed) / tol
+            if not math.isfinite(residual):
+                return Outcome(expected="finite Table 2 residuals",
+                               computed=f"non-finite at {band} Hz", delta="inf",
+                               passed=False)
+            worst = max(worst, residual)
+    return Outcome(
+        expected="all 48 cells within half a printed digit",
+        computed=f"worst residual {worst:.3f} x tolerance",
+        delta=f"{worst:.3f} x",
+        passed=worst <= 1.0,
+    )
+
+
 
 @register(
     "Outdoor propagation & occupational exposure",
@@ -2951,6 +3004,73 @@ def _chk_gum_welch() -> Outcome:
     return numeric(ref.GUM_WELCH_VEFF, result.effective_dof, 1e-6, places=3)
 
 
+def _gum_h1_result() -> "Any":
+    quantities = [ph.Quantity(v, unc, dof=dof) for v, unc, dof in ref.GUM_H1_INPUTS]
+    with warnings.catch_warnings():
+        # alphaS and theta are genuinely flat directions at the H.1 estimates.
+        warnings.simplefilter("ignore")
+        return ph.combine_uncertainty(
+            lambda ls, d, a_s, th, da, dth: ls + d - ls * (da * th + a_s * dth),
+            quantities,
+        )
+
+
+@register(_GUM, "ISO/IEC Guide 98-3 Annex H.1", "End-gauge combined uncertainty uc, nm")
+def _chk_gum_h1_uc() -> Outcome:
+    result = _gum_h1_result()
+    return numeric(ref.GUM_H1_UC, result.combined_uncertainty, 0.01, unit="nm", places=2)
+
+
+@register(_GUM, "ISO/IEC Guide 98-3 Annex H.1", "End-gauge expanded uncertainty U99, nm")
+def _chk_gum_h1_u99() -> Outcome:
+    result = _gum_h1_result()
+    _, big = result.expanded(0.99)
+    return numeric(ref.GUM_H1_U99, big, 0.1, unit="nm", places=1)
+
+
+@register(
+    _GUM,
+    "ISO/IEC Guide 98-3 Annex H.2 (Table H.3)",
+    "Correlated V/I/phi budget: uc(R), ohm",
+)
+def _chk_gum_h2_correlated() -> Outcome:
+    obs = np.array(ref.GUM_H2_OBSERVATIONS)
+    obs[:, 1] *= 1e-3  # mA -> A
+    means = obs.mean(axis=0)
+    u_means = obs.std(axis=0, ddof=1) / math.sqrt(obs.shape[0])
+    r = np.corrcoef(obs.T)
+    quantities = [ph.Quantity(m, s) for m, s in zip(means, u_means)]
+    result = ph.combine_uncertainty(
+        lambda v, i, p: v / i * math.cos(p), quantities, correlation=r
+    )
+    return numeric(
+        ref.GUM_H2_RESULTS["R"][1], result.combined_uncertainty, 1e-3,
+        unit="ohm", places=3,
+    )
+
+
+@register(
+    _GUM,
+    "ISO/IEC Guide 98-3-1 Table 3 (clause 9.2.3)",
+    "Seeded Monte Carlo, rectangular sum: 95 % interval endpoint",
+)
+def _chk_gum_s1_table3_monte_carlo() -> Outcome:
+    quantities = [ph.Quantity(0.0, 1.0, "rectangular") for _ in range(4)]
+    mc = ph.monte_carlo(
+        lambda a, b, c, d: a + b + c + d, quantities,
+        trials=1_000_000, coverage=0.95, seed=1996,
+    )
+    endpoint = 0.5 * (mc.interval[1] - mc.interval[0])
+    ok_u = abs(mc.standard_uncertainty - ref.GUMS1_TABLE3_U) <= 0.01
+    outcome = numeric(ref.GUMS1_TABLE3_INTERVAL_95, endpoint, 0.03, places=3)
+    return Outcome(
+        expected=f"+/-{ref.GUMS1_TABLE3_INTERVAL_95} (u = {ref.GUMS1_TABLE3_U})",
+        computed=f"+/-{endpoint:.3f} (u = {mc.standard_uncertainty:.3f})",
+        delta=outcome.delta,
+        passed=outcome.passed and ok_u,
+    )
+
+
 _NIHL = "Noise-induced hearing loss (ISO 1999)"
 
 
@@ -3185,7 +3305,9 @@ def _chk_iso20065_peak_detection() -> Outcome:
     result = ph.analyze_spectrum(
         ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
     )
-    found = sorted(round(float(f), 1) for f in result.tone_frequencies)
+    assert result.group_sizes is not None
+    singles = result.group_sizes == 1
+    found = sorted(round(float(f), 1) for f in result.tone_frequencies[singles])
     expected = sorted(ref.ISO20065_E1_TONE_FREQUENCIES)
     ok = found == expected
     return Outcome(
@@ -3194,6 +3316,21 @@ def _chk_iso20065_peak_detection() -> Outcome:
         delta="exact" if ok else "mismatch",
         passed=ok,
     )
+
+
+@register(
+    _TONE_AUD,
+    "ISO/PAS 20065:2016 Clause 5.3.8 Step 3",
+    "Same-band FG combination inside analyze_spectrum, Table E.2 row 2 FG",
+)
+def _chk_iso20065_step3_fg() -> Outcome:
+    result = ph.analyze_spectrum(
+        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+    )
+    assert result.group_sizes is not None
+    fg = result.group_sizes > 1
+    value = float(result.tone_levels[fg][0]) if int(fg.sum()) == 1 else float("nan")
+    return numeric(ref.ISO20065_E1_LT_FG, value, 0.02, unit="dB", places=2)
 
 
 @register(_TONE_AUD, "ISO/PAS 20065:2016 Formula (17)", "Multi-tone FG combination, Table E.1")

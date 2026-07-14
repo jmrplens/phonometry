@@ -239,15 +239,25 @@ See [Block Processing](block-processing.md) for the streaming workflow and
 
 `verify_weighting_class` checks a weighting filter against the acceptance
 limits of **IEC 61672-1:2013** (Table 3). It evaluates the filter's relative
-response at each nominal frequency below Nyquist, subtracts the design-goal
-weighting, and reports the performance class per frequency with its margin in
-dB:
+response at the *exact* base-10 frequency behind each nominal label below
+Nyquist (Table 3's design goals are computed at $f = 1000 \cdot 10^{n/10}$,
+e.g. 15 848.9 Hz for "16 kHz"; IEC 61672-3 tests at the same frequencies),
+subtracts the design-goal weighting, and reports the performance class per
+frequency with its margin in dB. A dense logarithmic sweep additionally
+enforces subclause 5.5.7 *between* the nominal frequencies — the deviation
+from the analytic Annex E goal must stay within the larger of the two
+adjacent limits, so a resonance or notch between nominals cannot pass — and
+when Table 3 rows with finite lower limits fall beyond Nyquist the verdict is
+flagged `range_limited` (it then attests the checked frequencies only, not
+full 10 Hz-20 kHz conformance):
 
 ```python
 from phonometry import WeightingFilter, verify_weighting_class
 
 result = verify_weighting_class(WeightingFilter(48000, "A"))
 print(result["overall_class"])          # 1
+print(result["range_limited"])          # False
+print(result["between_nominals"])       # {'worst_freq': ..., 'margin_class1_db': ...}
 print(result["bands"][20])
 # {'freq': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
 ```

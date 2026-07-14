@@ -243,6 +243,29 @@ to the issuing body, with date and reference).
   [`tone_audibility.py`](../src/phonometry/psychoacoustics/tone_audibility.py).
 - **Status:** unreported.
 
+## DIN 45681:2005-03 — Anhang I, Tabelle I.6, row "6 FG"
+
+- **Location:** Anhang I, Beispiel I.2 (combustion engine, spectrum j = 1),
+  Tabelle I.6, the combined row "6 FG" for the three tones k = 6/7/8
+  (592,2 / 629,8 / 643,3 Hz, tone levels 78,31 / 75,00 / 79,75 dB).
+- **The print:** L_T = 81,11 dB together with delta L = 9,12 dB (with
+  L_S = 59,53, L_G = 76,16, a_v = -2,40 at 592,2 Hz).
+- **The problem:** the two cells contradict each other. The printed
+  delta L = 9,12 dB only reproduces from the *plain* Formula (17) energy sum
+  of the three tone levels (82,87 dB): 82,87 - 76,16 + 2,40 = 9,11. The
+  printed L_T = 81,11 dB is consistent instead with the Anmerkung 2
+  shared-line dedupe (the 629,8/643,3 Hz tonal runs overlap), which would
+  give delta L = 7,35 dB. Every other FG row of the annex is internally
+  consistent (e.g. "2 FG": L_T = 72,15, delta L = 9,18, both from the same
+  sum — no lines shared there).
+- **Evidence:** recomputation of both readings from the printed per-tone
+  levels of Tabelle I.6; the same-page "2 FG" row as the consistent control.
+- **Library behaviour:** `combined_tone_level` follows Anmerkung 2 (shared
+  lines counted once), which reproduces the printed "2 FG" oracle; for the
+  "6 FG" row only the delta L chain is pinned, with the contradiction
+  recorded in `tests/reference_data.py`.
+- **Status:** unreported.
+
 ## IEC 60268-3:2013 — clause 14.12.9.2 f) (DIM denominator)
 
 - **Location:** clause 14.12.9.2, item f), the formula for the dynamic

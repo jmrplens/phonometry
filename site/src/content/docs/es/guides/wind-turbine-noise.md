@@ -32,8 +32,13 @@ lwa = ph.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 A partir de un espectro de banda estrecha (resolución 1–2 Hz), las líneas en la
 **banda crítica** alrededor del tono, `CBW = 25 + 75·[1 + 1.4·(fc/1000)²]^0.69`
 Hz, se clasifican en ruido de enmascaramiento y líneas de tono (la media
-energética del 70 % más bajo, los criterios de `+6 dB`). El nivel de
-enmascaramiento `L_pn` sigue la Fórmula 31, la tonalidad es
+energética del 70 % más bajo, los criterios de `+6 dB`; las líneas de tono
+deben además quedar a menos de 10 dB de la línea *más alta* por encima del
+umbral, y esa línea más alta es la frecuencia del tono, apartados
+9.5.3/9.5.4). El propio candidato debe superar antes el cribado de *tono
+posible* de 9.5.2: un máximo local más de 6 dB por encima de la media
+energética de la banda excluyendo el máximo y sus líneas adyacentes. El nivel
+de enmascaramiento `L_pn` sigue la Fórmula 31, la tonalidad es
 `ΔL_tn = L_pt − L_pn` y la audibilidad tonal es `ΔL_a = ΔL_tn − L_a` con
 `L_a = −2 − lg[1 + (f/502)^2.5]`, reportada cuando `ΔL_a ≥ −3 dB` y audible
 cuando `ΔL_a > 0`.
@@ -48,7 +53,14 @@ res.plot()   # espectro + banda crítica + nivel de enmascaramiento (requiere ma
 
 `wind_turbine_tonality` devuelve un `WindTurbineTonalityResult` con
 `critical_bandwidth`, `tone_level`, `masking_level`, `tonality`,
-`audibility_criterion`, `tonal_audibility` e `is_audible`. La fórmula de
+`audibility_criterion`, `tonal_audibility`, `is_audible` y
+`has_identified_tone`. Cuando el candidato no supera el cribado de 9.5.2 o
+ninguna línea se clasifica como «tono», `has_identified_tone` es `False`: los
+campos numéricos son valores de respaldo fuera de la norma y esos espectros
+deben **excluirse** del promediado energético de `ΔL_a` sobre los espectros
+de un intervalo de velocidad de viento (9.5.1); `is_audible` también exige un
+tono identificado. La frecuencia del tono y el criterio `L_a` se anclan a la
+línea de tono clasificada más alta, no al candidato sondeado. La fórmula de
 audibilidad coincide con la del Anexo C de la ISO 1996-2; lo específico de la
 IEC 61400-11 es la determinación de los niveles de tono y enmascaramiento y la
 banda crítica de Zwicker a partir del espectro. Para un ajuste de valoración

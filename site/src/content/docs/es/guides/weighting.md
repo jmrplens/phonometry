@@ -242,15 +242,26 @@ definiciones analíticas de las curvas.
 
 `verify_weighting_class` comprueba un filtro de ponderación frente a los
 límites de aceptación de **IEC 61672-1:2013** (Tabla 3). Evalúa la respuesta
-relativa del filtro en cada frecuencia nominal por debajo de Nyquist, resta la
+relativa del filtro en la frecuencia *exacta* en base 10 que hay detrás de
+cada etiqueta nominal por debajo de Nyquist (los objetivos de diseño de la
+Tabla 3 se calculan en $f = 1000 \cdot 10^{n/10}$, p. ej. 15 848,9 Hz para
+«16 kHz»; la IEC 61672-3 ensaya en esas mismas frecuencias), resta la
 ponderación objetivo de diseño e informa de la clase de prestaciones por
-frecuencia con su margen en dB:
+frecuencia con su margen en dB. Un barrido logarítmico denso impone además el
+apartado 5.5.7 *entre* las frecuencias nominales —la desviación respecto al
+objetivo analítico del anexo E debe mantenerse dentro del mayor de los dos
+límites adyacentes, de modo que una resonancia o un notch entre nominales no
+puede pasar— y, cuando filas de la Tabla 3 con límite inferior finito quedan
+por encima de Nyquist, el veredicto se marca `range_limited` (atestigua solo
+las frecuencias comprobadas, no la conformidad completa de 10 Hz a 20 kHz):
 
 ```python
 from phonometry import WeightingFilter, verify_weighting_class
 
 result = verify_weighting_class(WeightingFilter(48000, "A"))
 print(result["overall_class"])          # 1
+print(result["range_limited"])          # False
+print(result["between_nominals"])       # {'worst_freq': ..., 'margin_class1_db': ...}
 print(result["bands"][20])
 # {'freq': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
 ```

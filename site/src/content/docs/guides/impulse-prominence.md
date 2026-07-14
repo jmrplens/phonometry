@@ -25,7 +25,12 @@ $$
 
 The coefficients were fitted to listening tests and `P` is designed to peak
 around 15 for very sudden, loud impulses. The impulse with the **highest** `P`
-over a 30-minute period governs.
+over a 30-minute period governs. A level rise only *qualifies* as an impulse
+when its onset rate exceeds 10 dB/s (clause 4.5; clause 8 applies the
+adjustment "for sounds with onset rates larger than 10 dB/s" only):
+`impulse_prominence` marks non-qualifying events in its `qualifies` mask,
+warns about them, and never lets them set the governing prominence or a
+`KI` (the adjustment is 0 dB when no event qualifies).
 
 ```python
 import phonometry as ph

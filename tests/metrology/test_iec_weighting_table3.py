@@ -39,7 +39,10 @@ def test_weighting_within_class1_limits_table3(fs: int, curve: str, column: int)
     wf = WeightingFilter(fs, curve)
     failures = []
     for row in TABLE3:
-        f0 = row[0]
+        # Table 3 NOTE: the design goals are the analytic curve at the exact
+        # base-10 frequency behind the nominal label (15 848.9 Hz for "16 k"),
+        # so the tone probes that frequency.
+        f0 = float(10.0 ** (np.round(10.0 * np.log10(row[0])) / 10.0))
         if f0 >= fs / 2:
             continue
         nominal, upper, lower = row[column], row[3], row[4]

@@ -109,3 +109,27 @@ def test_plot_returns_axes() -> None:
     result = nt.impulse_prominence([1000.0, 200.0], [30.0, 15.0])
     assert isinstance(result.plot(), plt.Axes)
     plt.close("all")
+
+
+def test_onset_rate_gate_zeroes_non_qualifying_impulses() -> None:
+    """Clause 8 applies the adjustment only for onset rates above 10 dB/s
+    (clause 4.5): a 5 dB/s level rise (P = 5.30 for LD = 40 dB) must not
+    yield KI > 0."""
+    with pytest.warns(nt.ImpulseProminenceWarning, match="10 dB/s"):
+        res = nt.impulse_prominence([5.0], [40.0])
+    assert res.qualifies.tolist() == [False]
+    assert res.per_impulse[0] == pytest.approx(5.303, abs=2e-3)
+    assert res.adjustment == 0.0
+
+
+def test_onset_rate_gate_governing_from_qualifying_only() -> None:
+    """A non-qualifying event with the highest P cannot govern: the KI comes
+    from the strongest QUALIFYING impulse."""
+    with pytest.warns(nt.ImpulseProminenceWarning):
+        res = nt.impulse_prominence([8.0, 30.0], [60.0, 20.0])
+    assert res.qualifies.tolist() == [False, True]
+    p_qualifying = float(nt.predicted_prominence(30.0, 20.0))
+    assert res.prominence == pytest.approx(p_qualifying)
+    assert res.adjustment == pytest.approx(
+        float(nt.impulse_adjustment(p_qualifying))
+    )

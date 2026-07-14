@@ -53,8 +53,10 @@ a_v = -2 - \lg\!\Big[1 + \big(\tfrac{f}{502}\big)^{2.5}\Big], \qquad
 $$
 
 A supplied tone is *audible* when `ΔL > 0`. `Δf` is the line spacing (frequency
-resolution); the energy sums carry a window correction of `10·lg(Δf/Δfe)`
-(`−1.76 dB` for the recommended Hanning window, `Δfe = 1.5·Δf`).
+resolution); the energy sums over `K > 1` lines carry a window correction of
+`10·lg(Δf/Δfe)` (`−1.76 dB` for the recommended Hanning window,
+`Δfe = 1.5·Δf`, Formula (8)), while a single-line tone (`K = 1`) takes its
+level unchanged (Formula (7) — no bandwidth correction).
 
 ```python
 import phonometry as ph
@@ -104,8 +106,9 @@ Given the FFT lines of the critical band about a tone, `mean_narrowband_level`
 runs the iterative Formula 6 procedure (energy average, dropping any line more
 than 6 dB above the running `LS`, until stable within ±0.005 dB or fewer than
 five lines remain each side — Annex D) and `tone_level` sums the tonal lines
-contiguous with the peak (above both `LS + 6 dB` and `L_peak − 10 dB`). Both
-carry the −1.76 dB Hanning bandwidth correction.
+contiguous with the peak (above both `LS + 6 dB` and `L_peak − 10 dB`). The
+mean always carries the −1.76 dB Hanning bandwidth correction; the tone level
+carries it only when the run spans more than one line (Formulae (7)/(8)).
 
 ```python
 import phonometry as ph
@@ -132,17 +135,27 @@ print(round(ph.tone_audibility(lt, ls, 137.3, 2.7), 2))   # 5.01 dB
 level per line, peak detection (Clause 5.3.8 Step 1, a tone cannot sit on a
 slope), tone level, the distinctness test (Clause 5.3.4: bandwidth
 `≤ 26·(1 + 0.001·fT)` Hz and edge steepness `≥ 24 dB`) and audibility — and
-returns the distinct, audible tones. `combined_tone_level` performs the
-multi-tone "FG" combination (Formula 17) for tones sharing a critical band.
+returns the distinct, audible tones. It then applies **Step 3**: audible
+tones sharing a critical band have their tone levels energy-summed
+(Formula 17, shared lines counted once, via `combined_tone_level`) into a
+combined "FG" entry rated at the most audible member — unless the
+exactly-two-tones-below-1000-Hz exception of §5.1 keeps them separate. The
+result's `group_sizes` tells individual tones (`1`) from FG entries (`N ≥ 2`),
+and the decisive audibility (Step 4) is the maximum over all entries.
 
 ```python
 import phonometry as ph
 
 # Same Table E.1 spectrum as above.
 res = ph.analyze_spectrum(levels, freqs, 2.7)
-print([round(f, 1) for f in res.tone_frequencies])   # [118.4, 137.3, 158.8]
+singles = res.group_sizes == 1
+print([round(f, 1) for f in res.tone_frequencies[singles]])  # [118.4, 137.3, 158.8]
 
-# FG combination of the three tones (LS from the standard's Table E.2):
+# Step 3 already combined the three same-band tones into an FG entry:
+fg = res.group_sizes > 1
+print(int(res.group_sizes[fg][0]), round(float(res.tone_levels[fg][0]), 2))  # 3 72.15
+
+# The same Formula 17 combination, called directly (LS from Table E.2):
 lt_fg = ph.combined_tone_level(levels, freqs, [118.4, 137.3, 158.8],
                                [48.91, 49.22, 50.50])
 print(round(lt_fg, 2))                                # 72.15

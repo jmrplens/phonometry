@@ -137,3 +137,13 @@ def test_normalizedfreq_fraction1_and_invalid_fraction() -> None:
 
     with pytest.raises(ValueError):
         normalized_frequencies(5)
+
+
+def test_annex_e34_worked_rounding_examples() -> None:
+    """IEC 61260-1:2014 E.3.4: 41,567 -> 41,6 (MSD 4, three significant
+    figures) and 8 785,2 -> 8 800 (MSD 8, two significant figures)."""
+    from phonometry.metrology.frequencies import _iec_e3_round
+    from reference_data import IEC61260_E34_EXAMPLES
+
+    for raw, printed in IEC61260_E34_EXAMPLES:
+        assert _iec_e3_round(raw) == printed

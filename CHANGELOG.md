@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   report: the Wong & Zhu (1995) ITS-90 check tables pin the UNESCO and
   Del Grosso sound-speed refits at 17 printed grid points each (agreement
   within the printed 0.001 m/s resolution), the Francois & Garrison (1982,
-  Part II) Table IV pins the total seawater absorption at 18 printed points
+  Part II) Table IV pins the total seawater absorption at 21 printed points
   spanning 0.4 kHz-1 MHz (within half a unit of the last printed digit), and
   the Wales & Heitmeyer (2002) ensemble merchant-ship mean spectrum is pinned
   against the paper's printed closed form and asymptote statements

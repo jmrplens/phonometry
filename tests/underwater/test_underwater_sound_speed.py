@@ -17,6 +17,7 @@ import numpy as np
 import pytest
 
 from phonometry.underwater.sound_speed import (
+    _KGCM2_PER_BAR,
     SoundSpeedProfile,
     _del_grosso,
     _unesco,
@@ -51,7 +52,7 @@ _WONG_ZHU_TABLE_III = [
 
 # Wong & Zhu 1995, Table IV: same check grid for the t90-corrected Del Grosso
 # polynomial (factual reference values). The table lists pressure in bars;
-# Del Grosso's equation takes kg/cm2 (1 bar = 1.019716 kg/cm2).
+# Del Grosso's equation takes kg/cm2 (1 bar = _KGCM2_PER_BAR kg/cm2).
 _WONG_ZHU_TABLE_IV = [
     (0, 0, 25, 1435.711),
     (100, 10, 25, 1494.457),
@@ -87,7 +88,7 @@ def test_del_grosso_wong_zhu_table_iv_printed_check_values(
     p_bar: float, t90: float, s: float, c_ref: float,
 ) -> None:
     # Same printed-decimal tolerance (measured max |dev| 0.0005 m/s).
-    assert float(_del_grosso(t90, s, p_bar * 1.019716)) == pytest.approx(
+    assert float(_del_grosso(t90, s, p_bar * _KGCM2_PER_BAR)) == pytest.approx(
         c_ref, abs=1e-3)
 
 

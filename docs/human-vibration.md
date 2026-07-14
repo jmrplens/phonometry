@@ -90,7 +90,12 @@ a_w = \sqrt{\sum_i \left(W_i\,a_i\right)^2},
 $$
 
 with $W_i$ the weighting factor at band centre $i$ and $a_i$ the measured band
-acceleration.
+acceleration. The factors are evaluated at exactly the frequencies you pass;
+note that the ISO tables (ISO 8041-1 Annex B, ISO 2631-1 Table 3, ISO 5349-1
+Table A.2) tabulate $W_i$ at the *true* one-third-octave centres
+$10^{n/10}$ Hz (6.31, 7.943, 15.85, ...), not at the nominal band labels
+(6.3, 8, 16, ...) — pass true centres when comparing against the tabulated
+factors.
 
 ```python
 import numpy as np

@@ -7,7 +7,12 @@ assessment of adverse health effects for the vertical (``z``) axis.
 
 A seat-to-spine transfer function ``H(w)`` (clause 5.2, Formula 1) maps the
 measured seat acceleration ``az(t)`` to the spinal response acceleration
-``Az(t) = F^-1[H(w) * F[az(t)]]`` (Formula 2). The acceleration dose is
+``Az(t) = F^-1[H(w) * F[az(t)]]`` (Formula 2). The standard assumes a
+*conditioned* input: ``H`` has unity transmissibility at 0 Hz, so any DC
+offset in the record (e.g. the gravity component of a non-AC-coupled
+accelerometer) passes straight into ``Az(t)`` and corrupts the response
+peaks — remove the mean (high-pass) before processing. The acceleration
+dose is
 ``Dz = 1.07 * (sum_i Az,i**6)**(1/6)`` over the positive response peaks
 (Formula 3), scaled to a daily dose ``Dzd = Dz * (td/tm)**(1/6)`` (Formula 4/5).
 
@@ -123,7 +128,15 @@ def spinal_response(acceleration: ArrayLike, fs: float) -> np.ndarray:
     seat acceleration in the frequency domain and returns the time-domain
     response by the inverse transform.
 
-    :param acceleration: Measured vertical seat acceleration ``az(t)``, m/s2.
+    The input must be **conditioned (DC-removed)**: the transfer function is
+    unity at 0 Hz by design (clause 5.2), so a DC offset — e.g. the 1 g
+    gravity component of a DC-coupled accelerometer — is passed unattenuated
+    and produces a spurious constant shift in ``Az(t)`` that corrupts the
+    positive response peaks of the dose. Subtract the mean (or high-pass) of
+    ``az(t)`` before calling.
+
+    :param acceleration: Measured, conditioned (zero-mean) vertical seat
+        acceleration ``az(t)``, m/s2.
     :param fs: Sampling frequency, in hertz.
     :return: The spinal response acceleration ``Az(t)``, m/s2, same length.
     """
@@ -180,9 +193,11 @@ def acceleration_dose(acceleration: ArrayLike, fs: float) -> float:
 
     Filters the acceleration through the seat-to-spine transfer function
     (Formula 2), takes the positive response peaks and combines them by
-    Formula 3.
+    Formula 3. The input must be conditioned (DC-removed); see
+    :func:`spinal_response`.
 
-    :param acceleration: Measured vertical seat acceleration ``az(t)``, m/s2.
+    :param acceleration: Measured, conditioned (zero-mean) vertical seat
+        acceleration ``az(t)``, m/s2.
     :param fs: Sampling frequency, in hertz.
     :return: The acceleration dose ``Dz``, m/s2.
     """
@@ -382,9 +397,11 @@ def multiple_shock_assessment(
 
     Chains the Clause 5 dose and the Annex C risk: spinal response (Formula 2),
     acceleration dose (Formula 3), daily dose (Formula 4), compressive stress
-    (C.1), stress variable ``R`` (C.3) and injury probability (C.5).
+    (C.1), stress variable ``R`` (C.3) and injury probability (C.5). The input
+    must be conditioned (DC-removed); see :func:`spinal_response`.
 
-    :param acceleration: Measured vertical seat acceleration ``az(t)``, m/s2.
+    :param acceleration: Measured, conditioned (zero-mean) vertical seat
+        acceleration ``az(t)``, m/s2.
     :param fs: Sampling frequency, in hertz.
     :param start_age: Age ``b`` at which the exposure started, in years.
     :param years: Number of exposure years ``n``.

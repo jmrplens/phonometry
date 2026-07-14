@@ -26,6 +26,12 @@ $$
 A_z(t) = \mathcal{F}^{-1}\!\left[H(f)\,\mathcal{F}[a_z(t)]\right].
 $$
 
+El registro de entrada debe estar **acondicionado (sin componente continua)**:
+como `H` es unidad a 0 Hz por diseño, un offset de continua (por ejemplo, la
+componente de gravedad de 1 g de un acelerómetro acoplado en continua) pasa
+directamente a `Az(t)` y corrompe los picos positivos de respuesta de la dosis.
+Reste la media (o aplique un paso alto) antes de procesar.
+
 ```python
 import phonometry as ph
 

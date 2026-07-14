@@ -3,7 +3,7 @@
 Mechanical mobility and the frequency-response-function family (ISO 7626-1:2011).
 
 Mechanical **mobility** is the complex ratio of a velocity response to the
-excitation force that produces it, ``Y_ij = v_i / F_j`` (ISO 7626-1, 3.1). It is
+excitation force that produces it, ``Y_ij = v_i / F_j`` (ISO 7626-1, 3.1.2). It is
 one of a family of motion-per-force frequency-response functions (FRFs); which
 member is used depends only on whether the motion is expressed as displacement,
 velocity or acceleration, and each has a force-per-motion reciprocal
@@ -23,20 +23,37 @@ acceleration ``-omega**2 x``, so every FRF follows from the receptance ``H``::
 
     Y = j omega H          A = -omega**2 H
     Z (impedance)      = 1 / Y
-    M (apparent mass)  = 1 / A
+    M (apparent mass)  = 1 / A     (Table 1 name: "effective mass")
     K (dyn. stiffness) = 1 / H
+
+These element-wise reciprocals are the **free** quantities of ISO 7626-1,
+3.1.4; the *blocked* matrix quantities of Table 1 do not invert element-wise
+(``Z_ij != 1/Y_ij`` for multi-coordinate systems) — see :func:`convert_frf`.
 
 :func:`convert_frf` moves between any two of the six FRFs through the receptance
 pivot. A **driving-point** FRF has the response and force at the same point
 (``i = j``); a **transfer** FRF has them at different points.
 
 The canonical closed-form reference is the single-degree-of-freedom resonator
-of mass ``m``, viscous damping ``c`` and stiffness ``k`` (ISO 7626-1, Annex A),
-whose receptance is ``H(omega) = 1 / (k - omega**2 m + j omega c)``. At its
-resonance ``omega0 = sqrt(k/m)`` the driving-point mobility is purely real and
-equal to ``1/c`` -- the mobility peak measures the damping. This module is the
-FRF backbone for the structure-borne source and transmission standards
-(ISO 9611, ISO 10846, EN 15657, EN 12354-5).
+of mass ``m``, viscous damping ``c`` and stiffness ``k``, whose receptance is
+``H(omega) = 1 / (k - omega**2 m + j omega c)`` (consistent with the ISO 7626-1
+Table 1 / 3.1.2 definitions). At its resonance ``omega0 = sqrt(k/m)`` the
+driving-point mobility is purely real and equal to ``1/c`` -- the mobility peak
+measures the damping. This module is the FRF backbone for the structure-borne
+source and transmission standards (ISO 9611, ISO 10846, EN 15657, EN 12354-5).
+
+**Measured FRFs (ISO 7626-2:2015).** The single-point measurement side is
+covered by the library's spectral estimators: processing of random-excitation
+records per ISO 7626-2, 8.1.3 -- the H1 estimator ``H = G(response, force) /
+G(force, force)`` -- and the ordinary coherence ``gamma**2 = |Gxy|**2 /
+(Gxx Gyy)`` used for its data-quality checks are
+:func:`phonometry.electroacoustics.frequency_response.transfer_function` (with
+``estimator="H1"``, the default) and
+:func:`phonometry.electroacoustics.frequency_response.coherence`; both are
+exported at the package top level. This module adds the ISO 7626-2 acceptance
+criteria on top of them: the operational rigid-mass calibration of 7.5.2
+(:func:`rigid_mass_calibration_check`, +/- 5 %) and the Annex A normalized
+random error with its < 5 % averaging criterion (:func:`random_error_percent`).
 """
 
 from __future__ import annotations
@@ -117,6 +134,19 @@ def convert_frf(
 ) -> np.ndarray:
     """Convert a frequency-response function between any two kinds (Table 1).
 
+    .. note::
+        The force-per-motion kinds returned here are arithmetic reciprocals of
+        the motion-per-force FRFs — the **free** quantities of ISO 7626-1,
+        3.1.4 (all other response coordinates unconstrained). They coincide
+        with the **blocked** matrix quantities of Table 1 only for a scalar
+        (single-coordinate) system: blocked matrices do not invert
+        element-wise, ``Z_ij != 1/Y_ij`` in general. For driving-point or
+        single-path use (e.g. the ISO 10846-1 Table A.2 relations) the free
+        forms are exactly what is needed; for multi-coordinate blocked
+        quantities invert the full FRF matrix instead. ISO 7626-1 Table 1
+        names ``F/a`` the **effective mass** (also known as apparent mass,
+        the name used here).
+
     :param value: The (complex) FRF value(s) of kind *source*.
     :param frequency: Frequency ``f``, in hertz (scalar or array, broadcast with
         *value*).
@@ -125,7 +155,9 @@ def convert_frf(
         ``"impedance"`` or ``"apparent_mass"``.
     :param target: The FRF kind to convert to (same set).
     :return: The FRF value(s) of kind *target*, as a complex array.
-    :raises ValueError: for an unknown FRF name or a non-positive frequency.
+    :raises ValueError: for an unknown FRF name, a non-positive frequency, or
+        a zero *value* (dead channel) when the conversion involves a
+        force-per-motion reciprocal.
     """
     for name, role in ((source, "source"), (target, "target")):
         if name not in _FRF_TYPES:
@@ -134,21 +166,31 @@ def convert_frf(
             )
     omega = _omega(frequency)
     val = np.asarray(value, dtype=np.complex128)
+    if ((_FRF_TYPES[source][1] or _FRF_TYPES[target][1])
+            and not np.all(np.abs(val) > 0.0)):
+        raise ValueError(
+            "'value' contains zeros (dead channel); converting "
+            f"{source!r} to {target!r} takes a reciprocal, which is "
+            "undefined there."
+        )
     receptance = _to_receptance(val, omega, source)
     return np.asarray(_from_receptance(receptance, omega, target), dtype=np.complex128)
 
 
 # ---------------------------------------------------------------------------
-# Single-degree-of-freedom reference (ISO 7626-1 Annex A).
+# Single-degree-of-freedom closed-form reference (consistent with the
+# ISO 7626-1 Table 1 / 3.1.2 FRF definitions).
 # ---------------------------------------------------------------------------
 
 
 def sdof_receptance(
     frequency: ArrayLike, mass: float, stiffness: float, damping: float
 ) -> np.ndarray:
-    """Receptance of a viscously damped SDOF resonator (ISO 7626-1, Annex A).
+    """Receptance of a viscously damped SDOF resonator (closed form).
 
-    ``H(omega) = 1 / (k - omega**2 m + j omega c)``.
+    ``H(omega) = 1 / (k - omega**2 m + j omega c)`` — the textbook
+    single-degree-of-freedom reference, expressed in the FRF taxonomy of
+    ISO 7626-1 (Table 1 / 3.1.2 definitions).
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param mass: Mass ``m``, in kg.
@@ -205,6 +247,121 @@ def resonance_frequency(mass: float, stiffness: float) -> float:
 
 
 # ---------------------------------------------------------------------------
+# Measured-FRF acceptance checks (ISO 7626-2:2015).
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class RigidMassCalibrationResult:
+    """Operational rigid-mass calibration check (ISO 7626-2:2015, 7.5.2).
+
+    :ivar frequencies: Frequencies of the calibration FRF, in hertz.
+    :ivar measured: Measured FRF magnitude per frequency (``1/kg`` for
+        accelerance, ``m/(N.s)`` for mobility).
+    :ivar expected: Known correct magnitude of the rigid calibration block per
+        frequency: ``1/m`` (accelerance) or ``1/(2 pi f m)`` (mobility).
+    :ivar deviation: Relative deviation ``measured/expected - 1`` per frequency.
+    :ivar within_tolerance: Per-frequency pass flag ``|deviation| <= tolerance``.
+    :ivar passed: ``True`` if every frequency is within the tolerance.
+    :ivar mass: Mass ``m`` of the calibration block, in kg.
+    :ivar quantity: FRF kind checked (``"accelerance"`` or ``"mobility"``).
+    :ivar tolerance: Relative tolerance applied (the standard's is 0.05).
+    """
+
+    frequencies: np.ndarray
+    measured: np.ndarray
+    expected: np.ndarray
+    deviation: np.ndarray
+    within_tolerance: np.ndarray
+    passed: bool
+    mass: float
+    quantity: str
+    tolerance: float
+
+
+def rigid_mass_calibration_check(
+    frf: ArrayLike,
+    frequencies: ArrayLike,
+    mass: float,
+    *,
+    quantity: str = "accelerance",
+    tolerance: float = 0.05,
+) -> RigidMassCalibrationResult:
+    """Check an operational calibration on a rigid mass (ISO 7626-2, 7.5.2).
+
+    The measured frequency response of a freely suspended rigid calibration
+    block of known mass ``m`` shall agree within +/- 5 % with its known correct
+    value: the accelerance magnitude ``|A| = 1/m`` or the mobility magnitude
+    ``|Y| = 1/(2 pi f m)``. All components of the measurement chain (including
+    the attachment hardware) are connected as in the test series, so a failure
+    flags transducer, chain or attachment-compliance errors.
+
+    :param frf: Measured calibration FRF (complex or magnitude, scalar or
+        array), in 1/kg (accelerance) or m/(N.s) (mobility).
+    :param frequencies: Frequencies of *frf*, in hertz (> 0, same shape).
+    :param mass: Known mass ``m`` of the calibration block, in kg (> 0).
+    :param quantity: ``"accelerance"`` (``|A| = 1/m``) or ``"mobility"``
+        (``|Y| = 1/(omega m)``). (Default: ``"accelerance"``.)
+    :param tolerance: Relative tolerance (Default: 0.05, the +/- 5 % of 7.5.2).
+    :return: A :class:`RigidMassCalibrationResult` with per-band pass flags.
+    :raises ValueError: for an unknown quantity, non-positive mass, tolerance
+        or frequency, or mismatched shapes.
+    """
+    if quantity not in ("accelerance", "mobility"):
+        raise ValueError("'quantity' must be 'accelerance' or 'mobility'.")
+    mass = require_positive(mass, "mass")
+    tolerance = require_positive(tolerance, "tolerance")
+    freq = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    measured = np.abs(np.atleast_1d(np.asarray(frf, dtype=np.complex128)))
+    if measured.shape != freq.shape:
+        raise ValueError("'frf' and 'frequencies' must have the same shape.")
+    omega = _omega(freq)
+    if quantity == "accelerance":
+        expected = np.full_like(freq, 1.0 / mass)
+    else:
+        expected = 1.0 / (omega * mass)
+    deviation = measured / expected - 1.0
+    within = np.abs(deviation) <= tolerance
+    return RigidMassCalibrationResult(
+        frequencies=freq,
+        measured=np.asarray(measured, dtype=np.float64),
+        expected=np.asarray(expected, dtype=np.float64),
+        deviation=np.asarray(deviation, dtype=np.float64),
+        within_tolerance=within,
+        passed=bool(np.all(within)),
+        mass=mass,
+        quantity=quantity,
+        tolerance=tolerance,
+    )
+
+
+def random_error_percent(coherence: ArrayLike, n_averages: int) -> np.ndarray:
+    """Normalized random error of an averaged FRF magnitude (ISO 7626-2 Annex A).
+
+    ``eps = sqrt((1 - gamma**2) / (2 n gamma**2))``, the normalized random
+    error of the frequency-response-function magnitude estimated from ``n``
+    averaged spectra with ordinary coherence ``gamma**2`` (the relation behind
+    Figure A.2, from Bendat & Piersol). ISO 7626-2, 8.1.3 requires enough
+    averages that the error at each resonance of a driving-point mobility is
+    below 5 %: e.g. ``gamma**2 = 0.8`` needs about ``n = 75`` spectra
+    (``eps = 4.08 %``), the Annex A example.
+
+    :param coherence: Ordinary coherence ``gamma**2`` per frequency, in (0, 1].
+    :param n_averages: Number of averaged spectra ``n`` (>= 1).
+    :return: The normalized random error, in percent (same shape as input).
+    :raises ValueError: for a coherence outside (0, 1] or ``n_averages < 1``.
+    """
+    n = int(n_averages)
+    if n < 1:
+        raise ValueError("'n_averages' must be at least 1.")
+    gamma2 = np.asarray(coherence, dtype=np.float64)
+    if np.any(gamma2 <= 0.0) or np.any(gamma2 > 1.0):
+        raise ValueError("'coherence' must lie in (0, 1].")
+    eps = np.sqrt((1.0 - gamma2) / (2.0 * n * gamma2))
+    return np.asarray(100.0 * eps, dtype=np.float64)
+
+
+# ---------------------------------------------------------------------------
 # Bundled FRF result.
 # ---------------------------------------------------------------------------
 
@@ -233,7 +390,14 @@ class MobilityResult:
         return np.asarray(np.angle(self.mobility), dtype=np.float64)
 
     def to(self, target: str) -> np.ndarray:
-        """Convert the mobility to another FRF kind (see :func:`convert_frf`)."""
+        """Convert the mobility to another FRF kind (see :func:`convert_frf`).
+
+        The force-per-motion kinds are element-wise reciprocals, i.e. the
+        *free* quantities of ISO 7626-1, 3.1.4: on a transfer FRF
+        (``driving_point=False``), ``to("impedance")`` returns the free
+        impedance ``1/Y_ij``, not the blocked matrix impedance of Table 1
+        (which does not invert element-wise).
+        """
         return convert_frf(self.mobility, self.frequencies, "mobility", target)
 
     def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":

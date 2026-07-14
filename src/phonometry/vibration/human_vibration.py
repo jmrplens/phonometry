@@ -394,8 +394,18 @@ def weighted_acceleration(
     ``W_i`` of ISO 8041-1 evaluated at the band centres (ISO 5349-1 Eq. (A.1)
     is the identical construction for the hand-arm weighting ``Wh``).
 
+    .. note::
+        The weightings are evaluated at exactly the frequencies you pass. The
+        ISO tables (ISO 8041-1 Annex B, ISO 2631-1 Table 3, ISO 5349-1
+        Table A.2) tabulate ``W_i`` at the *true* one-third-octave centres
+        ``10^(n/10)`` Hz (6.31, 7.943, 15.85, ...), not at the nominal band
+        labels (6.3, 8, 16, ...). Pass true centres when comparing against
+        the tabulated factors; a nominal label (e.g. 16.0 instead of 15.85)
+        gives a slightly different ``W_i``.
+
     :param band_accelerations: r.m.s. acceleration ``a_i`` per band, in m/s2.
-    :param frequencies: Band centre frequencies, in hertz.
+    :param frequencies: Band centre frequencies, in hertz (true one-third-
+        octave centres ``10^(n/10)`` for table-conformant band values).
     :param weighting: Weighting name (one of :data:`WEIGHTING_NAMES`).
     :return: A :class:`WeightedSpectrum` with ``.plot()``.
     :raises ValueError: if the inputs differ in length or are empty.

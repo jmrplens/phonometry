@@ -356,31 +356,92 @@ def weighted_thd(
 # --------------------------------------------------------------------------- #
 # Intermodulation distortion (IEC 60268-3 14.12.7-10)
 # --------------------------------------------------------------------------- #
+
+#: Intermodulation product search half-width, in FFT bins. Wide enough to catch
+#: a product under mild window leakage, narrow enough (together with the
+#: spacing-based cap below) that neighbouring products, the primary tones and
+#: DC are never swallowed into a product's window.
+_IMD_SEARCH_BINS = 5.0
+
+
+def _imd_component(
+    freqs: "NDArray[np.float64]",
+    amp: "NDArray[np.float64]",
+    frequency: float,
+    half_width: float,
+    exclude: tuple[float, ...] = (),
+) -> float:
+    """Peak amplitude within ``±half_width`` of an intermodulation product.
+
+    Returns 0 for products outside (0, Nyquist). The window is shrunk so it
+    never contains the DC bin or an excluded component (a primary tone): a
+    product that cannot be separated from a primary reads 0 rather than the
+    primary's amplitude (e.g. octave-spaced clean tones must not report
+    ``d2 = 1``).
+    """
+    df = float(freqs[1] - freqs[0]) if freqs.size > 1 else 0.0
+    nyquist = float(freqs[-1])
+    if frequency <= 0.0 or frequency >= nyquist:
+        return 0.0
+    half = min(half_width, frequency - df)  # keep the DC bin out
+    for fx in exclude:
+        half = min(half, abs(frequency - fx) - df)
+    if half < 0.0:
+        return 0.0
+    return _tone_amplitude(freqs, amp, frequency, half)
+
+
+@dataclass(frozen=True)
+class ModulationDistortionResult:
+    """Modulation (intermodulation) distortion (IEC 60268-3 14.12.7).
+
+    :ivar d2: Second-order modulation distortion ``d_m,2`` (14.12.7.2 g):
+        the *arithmetic* sum of the sideband amplitudes at ``f2 ± f1``
+        relative to the output amplitude at ``f2``.
+    :ivar d3: Third-order modulation distortion ``d_m,3`` (14.12.7.2 h):
+        the arithmetic sum of the sidebands at ``f2 ± 2·f1`` relative to
+        the output amplitude at ``f2``.
+    :ivar smpte: Combined-RMS convention of SMPTE-type analyzers (not an
+        IEC 60268-3 quantity): ``√(Σ aₛ²) / a_f2`` over all four sidebands.
+    """
+
+    d2: float
+    d3: float
+    smpte: float
+
+
 def modulation_distortion(
     signal: "NDArray[np.float64] | list[float]",
     fs: float,
     f_low: float,
     f_high: float,
     *,
-    orders: tuple[int, ...] = (2, 3),
     window: str = "hann",
-) -> float:
-    """Modulation (SMPTE-type) intermodulation distortion (IEC 60268-3 14.12.7).
+) -> ModulationDistortionResult:
+    """Modulation distortion of the nth order (IEC 60268-3 14.12.7).
 
-    A low-frequency tone ``f_low`` (large) and a high-frequency tone ``f_high``
-    (small, 1/4 the amplitude) are applied; the ``n``-th order distortion shows
-    up as modulation sidebands at ``f_high ± (n−1)·f_low`` (2nd order at
-    ``f_high ± f_low``, 3rd order at ``f_high ± 2·f_low``). The distortion is
-    their RMS relative to ``f_high``:
-    ``d = √(Σₙ (a_{f_high+(n−1)·f_low}² + a_{f_high−(n−1)·f_low}²)) / a_{f_high}``.
+    A low-frequency tone ``f1 = f_low`` (large) and a high-frequency tone
+    ``f2 = f_high`` (small, amplitude ratio preferably 4:1) are applied; the
+    nth-order distortion shows up as modulation sidebands at
+    ``f2 ± (n−1)·f1``. Per 14.12.7.2 g)-h) the per-order values use the
+    *arithmetic* sum of the two sideband amplitudes, referenced to the output
+    voltage at ``f2``:
+
+    ``d_m,2 = (a_{f2+f1} + a_{f2−f1}) / a_{f2}`` and
+    ``d_m,3 = (a_{f2+2f1} + a_{f2−2f1}) / a_{f2}``.
+
+    (The alternative presentation ``d'_m,n = 5·d_m,n`` references the 4:1
+    reference output voltage ``U_2,ref = 5·U_2,f2`` instead.) The combined
+    root-sum-square that SMPTE-type analyzers report is returned alongside
+    as ``smpte``.
 
     :param signal: Captured signal (1-D).
     :param fs: Sample rate, in Hz.
-    :param f_low: Low modulating tone, in Hz (e.g. 60 Hz).
-    :param f_high: High carrier tone, in Hz (e.g. 7 kHz).
-    :param orders: Sideband orders summed (default 2nd and 3rd).
+    :param f_low: Low modulating tone ``f1``, in Hz (e.g. 60 Hz).
+    :param f_high: High carrier tone ``f2``, in Hz (e.g. 7 kHz).
     :param window: FFT window (default ``'hann'``).
-    :return: Modulation distortion, as a ratio.
+    :return: A :class:`ModulationDistortionResult` with ``d2``, ``d3`` and
+        the ``smpte`` combined RMS.
     :raises ValueError: If the inputs are invalid.
     """
     sig = _validate_signal(signal)
@@ -388,16 +449,25 @@ def modulation_distortion(
     fl = _positive(f_low, "f_low")
     fh = _positive(f_high, "f_high")
     freqs, amp = _amplitude_spectrum(sig, fs_v, window)
-    search = fl * 0.5
-    carrier = _tone_amplitude(freqs, amp, fh, search)
+    df = float(freqs[1] - freqs[0]) if freqs.size > 1 else 0.0
+    # Sidebands are spaced f1 apart: cap the search window well inside that.
+    half = min(_IMD_SEARCH_BINS * df, fl / 4.0)
+    carrier = _tone_amplitude(freqs, amp, fh, half)
     if carrier <= 0.0:
         raise ValueError("No carrier component found at 'f_high'.")
-    power = 0.0
-    for n in orders:
-        offset = (n - 1) * fl
-        power += _tone_amplitude(freqs, amp, fh + offset, search) ** 2
-        power += _tone_amplitude(freqs, amp, fh - offset, search) ** 2
-    return float(np.sqrt(power) / carrier)
+    sidebands = {
+        n: tuple(
+            _imd_component(freqs, amp, fh + sign * (n - 1) * fl, half, exclude=(fl, fh))
+            for sign in (1.0, -1.0)
+        )
+        for n in (2, 3)
+    }
+    d2 = (sidebands[2][0] + sidebands[2][1]) / carrier
+    d3 = (sidebands[3][0] + sidebands[3][1]) / carrier
+    smpte = float(
+        np.sqrt(sum(a**2 for pair in sidebands.values() for a in pair)) / carrier
+    )
+    return ModulationDistortionResult(d2=float(d2), d3=float(d3), smpte=smpte)
 
 
 def difference_frequency_distortion(
@@ -409,12 +479,19 @@ def difference_frequency_distortion(
     order: int = 2,
     window: str = "hann",
 ) -> float:
-    """Difference-frequency (CCIF-type) distortion (IEC 60268-3 14.12.8).
+    """Difference-frequency distortion of the nth order (IEC 60268-3 14.12.8).
 
-    Two equal-amplitude high tones ``f1 < f2`` are applied; the nth-order
-    distortion is the RMS of the difference-frequency products relative to the
-    per-tone amplitude. Second order: ``f2 − f1``. Third order:
-    ``2·f1 − f2`` and ``2·f2 − f1``.
+    Two equal-amplitude tones ``f1 < f2`` are applied. Per 14.12.8.1 the
+    reference voltage is ``U_2,ref = 2·U_2,f2`` -- realised here as the sum of
+    both measured tone amplitudes, identical for the standard equal-amplitude
+    tones -- and
+
+    ``d_d,2 = a_{f2−f1} / (a_{f1} + a_{f2})``,
+    ``d_d,3 = (a_{2f2−f1} + a_{2f1−f2}) / (a_{f1} + a_{f2})``
+
+    with the third order an *arithmetic* sum of the two products. Products
+    that fall outside (0, Nyquist) or that cannot be separated from a primary
+    tone or DC read zero.
 
     :param signal: Captured signal (1-D).
     :param fs: Sample rate, in Hz.
@@ -434,46 +511,70 @@ def difference_frequency_distortion(
     if order not in (2, 3):
         raise ValueError("'order' must be 2 or 3.")
     freqs, amp = _amplitude_spectrum(sig, fs_v, window)
-    search = (fb - fa) * 0.5 if fb > fa else fa * 0.5
-    ref = 0.5 * (
-        _tone_amplitude(freqs, amp, fa, search) + _tone_amplitude(freqs, amp, fb, search)
-    )
+    df = float(freqs[1] - freqs[0]) if freqs.size > 1 else 0.0
+    half = min(_IMD_SEARCH_BINS * df, (fb - fa) / 4.0)
+    ref = _tone_amplitude(freqs, amp, fa, half) + _tone_amplitude(freqs, amp, fb, half)
     if ref <= 0.0:
         raise ValueError("No primary tones found at 'f1'/'f2'.")
     if order == 2:
-        power = _tone_amplitude(freqs, amp, fb - fa, search) ** 2
+        value = _imd_component(freqs, amp, fb - fa, half, exclude=(fa, fb))
     else:
-        power = (
-            _tone_amplitude(freqs, amp, 2 * fa - fb, search) ** 2
-            + _tone_amplitude(freqs, amp, 2 * fb - fa, search) ** 2
-        )
-    return float(np.sqrt(power) / ref)
+        value = _imd_component(
+            freqs, amp, 2 * fa - fb, half, exclude=(fa, fb)
+        ) + _imd_component(freqs, amp, 2 * fb - fa, half, exclude=(fa, fb))
+    return float(value / ref)
 
 
 def total_difference_frequency_distortion(
     signal: "NDArray[np.float64] | list[float]",
     fs: float,
-    f1: float,
-    f2: float,
+    f1: float = 8000.0,
+    f2: float = 11950.0,
     *,
     window: str = "hann",
 ) -> float:
     """Total difference-frequency distortion (IEC 60268-3 14.12.10).
 
-    The RMS combination of the 2nd- and 3rd-order difference-frequency products:
-    ``d_tot = √(d₂² + d₃²)``.
+    A specific two-tone test with ``f1 = 2·f0`` and ``f2 = 3·f0 − δ`` (the
+    standard values, kept as defaults, are ``f1 = 8 kHz``, ``f2 = 11,95 kHz``,
+    so ``f0 = 4 kHz`` and ``δ = 50 Hz``). Only the two in-band products at
+    ``f0 ∓ δ`` enter -- the second-order product at ``f2 − f1`` and the
+    third-order product at ``2·f1 − f2`` -- combined in RMS over the
+    arithmetic sum of the two tone output amplitudes (14.12.10.2 g):
+
+    ``d_TDFD = √(a²_{f2−f1} + a²_{2f1−f2}) / (a_{f1} + a_{f2})``.
+
+    (The out-of-band product at ``2·f2 − f1`` is explicitly not part of it.)
 
     :param signal: Captured signal (1-D).
     :param fs: Sample rate, in Hz.
-    :param f1: Lower tone, in Hz.
-    :param f2: Upper tone, in Hz.
+    :param f1: Lower tone, in Hz (default 8 kHz, per 14.12.10.2 b).
+    :param f2: Upper tone, in Hz (default 11,95 kHz, per 14.12.10.2 b).
     :param window: FFT window (default ``'hann'``).
     :return: Total difference-frequency distortion, as a ratio.
     :raises ValueError: If the inputs are invalid.
     """
-    d2 = difference_frequency_distortion(signal, fs, f1, f2, order=2, window=window)
-    d3 = difference_frequency_distortion(signal, fs, f1, f2, order=3, window=window)
-    return float(np.sqrt(d2**2 + d3**2))
+    sig = _validate_signal(signal)
+    fs_v = _positive(fs, "fs")
+    fa = _positive(f1, "f1")
+    fb = _positive(f2, "f2")
+    if fa >= fb:
+        raise ValueError("'f1' must be lower than 'f2'.")
+    freqs, amp = _amplitude_spectrum(sig, fs_v, window)
+    df = float(freqs[1] - freqs[0]) if freqs.size > 1 else 0.0
+    p_lo, p_hi = fb - fa, 2 * fa - fb  # f0 - delta and f0 + delta
+    # The two products sit 2*delta apart: cap the window well inside that
+    # so they are never double-counted, besides the usual bin-based cap.
+    spacing = abs(p_hi - p_lo)
+    half = min(_IMD_SEARCH_BINS * df, (fb - fa) / 4.0)
+    if spacing > 0.0:
+        half = min(half, spacing / 4.0)
+    ref = _tone_amplitude(freqs, amp, fa, half) + _tone_amplitude(freqs, amp, fb, half)
+    if ref <= 0.0:
+        raise ValueError("No primary tones found at 'f1'/'f2'.")
+    a_lo = _imd_component(freqs, amp, p_lo, half, exclude=(fa, fb))
+    a_hi = _imd_component(freqs, amp, p_hi, half, exclude=(fa, fb))
+    return float(np.sqrt(a_lo**2 + a_hi**2) / ref)
 
 
 #: Highest square-wave harmonic order that produces a DIM difference product
@@ -528,6 +629,12 @@ def dynamic_intermodulation_distortion(
     fsq = _positive(f_square, "f_square")
     freqs, amp = _amplitude_spectrum(sig, fs_v, window)
     search = fsq * _DIM_SEARCH_FACTOR
+    # Reference: the output amplitude at f_s, per the 14.12.9.1 definition
+    # ("the ratio of the r.m.s. sum of the output voltages ... to the
+    # amplitude of the output voltage at the frequency f_s"). The 14.12.9.2 f)
+    # formula prints the denominator as "U2", which contradicts 14.12.9.1 and
+    # is an editorial defect of IEC 60268-3:2013 (see docs/ERRATA.md); the
+    # Otala convention implemented here follows the 14.12.9.1 definition.
     ref = _tone_amplitude(freqs, amp, fsine, search)
     if ref <= 0.0:
         raise ValueError("No 15 kHz sine component found.")

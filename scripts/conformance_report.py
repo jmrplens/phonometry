@@ -3330,33 +3330,46 @@ def _chk_harmonic_d2() -> Outcome:
     return numeric(ref.DISTORTION_D2, value, 1e-4, places=6)
 
 
-@register(
-    _ELECTRO,
-    "IEC 60268-3:2013 (14.12.7)",
-    "SMPTE modulation distortion of a known two-tone signal",
-)
-def _chk_smpte() -> Outcome:
+def _electro_smpte_signal() -> tuple[np.ndarray, float, float]:
     fs = _electro_fs()
     t = np.arange(fs) / fs
-    fl, fh, ah = 250.0, 8000.0, 0.25
+    fl, fh = 250.0, 8000.0
     x = (
         _electro_tone(t, fl, 1.0)
-        + _electro_tone(t, fh, ah)
+        + _electro_tone(t, fh, 0.25)
         + _electro_tone(t, fh + fl, 0.02)
         + _electro_tone(t, fh - fl, 0.02)
         + _electro_tone(t, fh + 2 * fl, 0.01)
         + _electro_tone(t, fh - 2 * fl, 0.01)
     )
-    expected = math.sqrt(0.02**2 + 0.02**2 + 0.01**2 + 0.01**2) / ah
-    return numeric(expected, ph.modulation_distortion(x, fs, fl, fh), 1e-4, places=6)
+    return x, fl, fh
 
 
 @register(
     _ELECTRO,
-    "IEC 60268-3:2013 (14.12.8)",
-    "CCIF difference-frequency distortion (2nd order) of a two-tone signal",
+    "IEC 60268-3:2013 (14.12.7.2 g)",
+    "Modulation distortion d_m,2 (arithmetic sideband sum over U_2,f2)",
 )
-def _chk_ccif() -> Outcome:
+def _chk_modulation_d2() -> Outcome:
+    x, fl, fh = _electro_smpte_signal()
+    # Sidebands 0.02 + 0.02 over the 0.25 carrier: d_m,2 = 0.16 exactly.
+    value = ph.modulation_distortion(x, _electro_fs(), fl, fh).d2
+    return numeric(0.16, value, 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.7.2 h)",
+    "Modulation distortion d_m,3 (arithmetic sideband sum over U_2,f2)",
+)
+def _chk_modulation_d3() -> Outcome:
+    x, fl, fh = _electro_smpte_signal()
+    # Sidebands 0.01 + 0.01 over the 0.25 carrier: d_m,3 = 0.08 exactly.
+    value = ph.modulation_distortion(x, _electro_fs(), fl, fh).d3
+    return numeric(0.08, value, 1e-4, places=6)
+
+
+def _electro_dfd_signal() -> tuple[np.ndarray, float, float]:
     fs = _electro_fs()
     t = np.arange(fs) / fs
     f1, f2 = 13000.0, 14000.0
@@ -3364,13 +3377,55 @@ def _chk_ccif() -> Outcome:
         _electro_tone(t, f1, 0.5)
         + _electro_tone(t, f2, 0.5)
         + _electro_tone(t, f2 - f1, 0.03)
+        + _electro_tone(t, 2 * f1 - f2, 0.02)
+        + _electro_tone(t, 2 * f2 - f1, 0.02)
     )
-    return numeric(
-        0.03 / 0.5,
-        ph.difference_frequency_distortion(x, fs, f1, f2, order=2),
-        1e-4,
-        places=6,
+    return x, f1, f2
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.8.1 a)",
+    "Difference-frequency distortion d_d,2 (over U_2,ref = 2 U_2,f2)",
+)
+def _chk_dfd_d2() -> Outcome:
+    x, f1, f2 = _electro_dfd_signal()
+    # Product 0.03 over the tone-amplitude sum 1.0: d_d,2 = 0.03 exactly.
+    value = ph.difference_frequency_distortion(x, _electro_fs(), f1, f2, order=2)
+    return numeric(0.03, value, 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.8.1 b)",
+    "Difference-frequency distortion d_d,3 (arithmetic product sum)",
+)
+def _chk_dfd_d3() -> Outcome:
+    x, f1, f2 = _electro_dfd_signal()
+    # Products 0.02 + 0.02 over the tone-amplitude sum 1.0: d_d,3 = 0.04.
+    value = ph.difference_frequency_distortion(x, _electro_fs(), f1, f2, order=3)
+    return numeric(0.04, value, 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "IEC 60268-3:2013 (14.12.10)",
+    "Total difference-frequency distortion (8 kHz / 11.95 kHz tones)",
+)
+def _chk_tdfd() -> Outcome:
+    fs = _electro_fs()
+    t = np.arange(fs) / fs
+    f1, f2 = 8000.0, 11950.0
+    x = (
+        _electro_tone(t, f1, 0.5)
+        + _electro_tone(t, f2, 0.5)
+        + _electro_tone(t, f2 - f1, 0.02)
+        + _electro_tone(t, 2 * f1 - f2, 0.03)
     )
+    # Only the in-band products at f0 -/+ delta (3950/4050 Hz) enter:
+    # d_TDFD = sqrt(0.02^2 + 0.03^2) / (0.5 + 0.5) = sqrt(0.0013).
+    value = ph.total_difference_frequency_distortion(x, fs)
+    return numeric(0.03605551275463989, value, 1e-4, places=8)
 
 
 @register(

@@ -225,6 +225,27 @@ to the issuing body, with date and reference).
   [`tone_audibility.py`](../src/phonometry/psychoacoustics/tone_audibility.py).
 - **Status:** unreported.
 
+## IEC 60268-3:2013 — clause 14.12.9.2 f) (DIM denominator)
+
+- **Location:** clause 14.12.9.2, item f), the formula for the dynamic
+  intermodulation distortion d_DIM.
+- **The print:** the denominator of the printed formula is "U2".
+- **The problem:** the defining clause 14.12.9.1 states the ratio of the
+  r.m.s. sum of the Table 2 intermodulation product voltages "to the
+  amplitude of the output voltage at the frequency f_s" — i.e. the 15 kHz
+  sine component U_s, the Otala convention. The symbol U2 is used throughout
+  14.12 for the total output voltage, which contradicts 14.12.9.1 (the test
+  signal is dominated by the 3,15 kHz square wave, so the two denominators
+  differ by several dB). Item d) of the same clause measures "the amplitudes
+  of the sinusoidal signal U_s", which the f) formula then never uses.
+- **Evidence:** side-by-side reading of 14.12.9.1, 14.12.9.2 d) and
+  14.12.9.2 f); the historical DIM literature (Otala) defines the ratio to
+  the sine amplitude.
+- **Library behaviour:** follows the 14.12.9.1 definition (reference = the
+  output amplitude at f_s), with a code comment at the reference measurement
+  in [`distortion.py`](../src/phonometry/electroacoustics/distortion.py).
+- **Status:** unreported.
+
 ## NORAH2 rotorcraft guidance SC03.D1.5d (EASA.2020.FC.06) — Eq. (27)
 
 - **Location:** section A.4.2, Eq. (27) (atmospheric absorption coefficient).

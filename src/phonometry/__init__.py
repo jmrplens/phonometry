@@ -235,6 +235,7 @@ from .psychoacoustics.psychoacoustic_annoyance import (
 )
 from .electroacoustics.distortion import (
     HarmonicDistortionResult,
+    ModulationDistortionResult,
     difference_frequency_distortion,
     dynamic_intermodulation_distortion,
     harmonic_analysis,
@@ -808,6 +809,7 @@ __all__ = [
     "dynamic_intermodulation_distortion",
     "harmonic_analysis",
     "HarmonicDistortionResult",
+    "ModulationDistortionResult",
     "transfer_function",
     "coherence",
     "FrequencyResponseResult",

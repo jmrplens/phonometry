@@ -127,10 +127,12 @@ def test_thd_plus_noise_rejects_fundamental_above_nyquist() -> None:
         thd_plus_noise(_tone(1000.0), FS, FS / 2.0)
 
 
-def test_modulation_distortion_smpte() -> None:
-    # Carrier f_high = 8 kHz (amp 0.25), modulator f_low = 250 Hz; 2nd-order
-    # sidebands at f_high +/- f_low (0.02 each), 3rd-order at f_high +/- 2 f_low
-    # (0.01 each). d = sqrt(sum sidebands^2) / carrier.
+def test_modulation_distortion_iec_per_order() -> None:
+    # IEC 60268-3 14.12.7.2 g)-h): carrier f_high = 8 kHz (amp 0.25),
+    # modulator f_low = 250 Hz; 2nd-order sidebands at f_high +/- f_low
+    # (0.02 each), 3rd-order at f_high +/- 2 f_low (0.01 each). Per-order
+    # values are ARITHMETIC sideband sums over the f_high amplitude:
+    # d_m,2 = (0.02+0.02)/0.25 = 0.16, d_m,3 = (0.01+0.01)/0.25 = 0.08.
     fl, fh, ah = 250.0, 8000.0, 0.25
     x = (
         _tone(fl)
@@ -140,13 +142,20 @@ def test_modulation_distortion_smpte() -> None:
         + _tone(fh + 2 * fl, 0.01)
         + _tone(fh - 2 * fl, 0.01)
     )
-    expected = math.sqrt(0.02**2 + 0.02**2 + 0.01**2 + 0.01**2) / ah
-    assert modulation_distortion(x, FS, fl, fh) == pytest.approx(expected, rel=1e-6)
+    res = modulation_distortion(x, FS, fl, fh)
+    assert res.d2 == pytest.approx(0.16, rel=1e-6)
+    assert res.d3 == pytest.approx(0.08, rel=1e-6)
+    # The SMPTE-analyzer combined RMS convention is kept, explicitly labelled.
+    smpte = math.sqrt(0.02**2 + 0.02**2 + 0.01**2 + 0.01**2) / ah
+    assert res.smpte == pytest.approx(smpte, rel=1e-6)
 
 
-def test_difference_frequency_distortion_ccif() -> None:
-    # Equal tones f1 = 13 kHz, f2 = 14 kHz (amp 0.5); 2nd-order product at
-    # f2 - f1 = 1 kHz (0.03); 3rd-order at 2f1 - f2, 2f2 - f1 (0.02 each).
+def test_difference_frequency_distortion_iec() -> None:
+    # IEC 60268-3 14.12.8.1: equal tones f1 = 13 kHz, f2 = 14 kHz (amp 0.5);
+    # 2nd-order product at f2 - f1 = 1 kHz (0.03); 3rd-order at 2f1 - f2 and
+    # 2f2 - f1 (0.02 each). The reference is U_2,ref = 2*U_2,f2 (the sum of
+    # both tone amplitudes = 1.0) and the 3rd order sums ARITHMETICALLY:
+    # d_d,2 = 0.03/1.0, d_d,3 = (0.02+0.02)/1.0.
     f1, f2 = 13000.0, 14000.0
     x = (
         _tone(f1, 0.5)
@@ -156,14 +165,55 @@ def test_difference_frequency_distortion_ccif() -> None:
         + _tone(2 * f2 - f1, 0.02)
     )
     assert difference_frequency_distortion(x, FS, f1, f2, order=2) == pytest.approx(
-        0.03 / 0.5, rel=1e-6
+        0.03, rel=1e-6
     )
     assert difference_frequency_distortion(x, FS, f1, f2, order=3) == pytest.approx(
-        math.sqrt(0.02**2 + 0.02**2) / 0.5, rel=1e-6
+        0.04, rel=1e-6
     )
-    total = total_difference_frequency_distortion(x, FS, f1, f2)
-    d2, d3 = 0.03 / 0.5, math.sqrt(0.02**2 + 0.02**2) / 0.5
-    assert total == pytest.approx(math.sqrt(d2**2 + d3**2), rel=1e-6)
+
+
+def test_total_difference_frequency_distortion_iec() -> None:
+    # IEC 60268-3 14.12.10: the standard tones f1 = 8 kHz, f2 = 11.95 kHz
+    # (f0 = 4 kHz, delta = 50 Hz), products U' at f2-f1 = 3950 Hz (0.02) and
+    # 2f1-f2 = 4050 Hz (0.03), tones 0.5 each. Only these two in-band
+    # products enter, rms-summed over the tone-amplitude sum:
+    # d_TDFD = sqrt(0.02^2 + 0.03^2) / (0.5 + 0.5) = sqrt(0.0013).
+    f1, f2 = 8000.0, 11950.0
+    x = (
+        _tone(f1, 0.5)
+        + _tone(f2, 0.5)
+        + _tone(f2 - f1, 0.02)
+        + _tone(2 * f1 - f2, 0.03)
+        + _tone(2 * f2 - f1, 0.05)  # out-of-band product: must NOT count
+    )
+    expected = 0.03605551275463989  # sqrt(0.0013), exact
+    assert total_difference_frequency_distortion(x, FS) == pytest.approx(
+        expected, rel=1e-6
+    )
+    # Explicit tone arguments give the same value as the standard defaults.
+    assert total_difference_frequency_distortion(x, FS, f1, f2) == pytest.approx(
+        expected, rel=1e-6
+    )
+
+
+def test_difference_frequency_clean_octave_tones_read_zero() -> None:
+    # Search-window hygiene: with octave-spaced clean tones the old
+    # half-difference window latched a primary tone and reported d2 = 1.0.
+    # A clean signal must read zero for both orders and both spacings.
+    for f1, f2 in ((1000.0, 2000.0), (1000.0, 3000.0)):
+        x = _tone(f1, 0.5) + _tone(f2, 0.5)
+        # Numerical floor only (window leakage of the FFT at ~1e-16).
+        assert difference_frequency_distortion(x, FS, f1, f2, order=2) < 1e-12
+        assert difference_frequency_distortion(x, FS, f1, f2, order=3) < 1e-12
+
+
+def test_difference_frequency_dc_offset_not_counted() -> None:
+    # 2f1 - f2 <= 0 clamps to zero and a DC offset must not leak into d3
+    # (the old window at negative/zero product frequencies included bin 0).
+    f1, f2 = 1000.0, 2500.0
+    x = _tone(f1, 0.5) + _tone(f2, 0.5) + 0.5
+    assert difference_frequency_distortion(x, FS, f1, f2, order=3) < 1e-12
+    assert difference_frequency_distortion(x, FS, f1, f2, order=2) < 1e-12
 
 
 def test_difference_frequency_rejects_bad_args() -> None:
@@ -171,6 +221,8 @@ def test_difference_frequency_rejects_bad_args() -> None:
         difference_frequency_distortion(_tone(1000.0), FS, 2000.0, 1000.0)
     with pytest.raises(ValueError):
         difference_frequency_distortion(_tone(1000.0), FS, 1000.0, 2000.0, order=4)
+    with pytest.raises(ValueError):
+        total_difference_frequency_distortion(_tone(1000.0), FS, 2000.0, 1000.0)
 
 
 def test_dynamic_intermodulation_distortion() -> None:

@@ -71,12 +71,13 @@ to the issuing body, with date and reference).
   printed 0,97 with a tolerance that documents the recomputed 0,9621.
 - **Status:** unreported.
 
-## EN 12354-1:2000 — Annex E.5 (K24 clamp misprint)
+## EN 12354-1:2000 Annex E.5 / ISO 12354-1:2017 E.3.4 (K24 clamp misprint)
 
-- **Location:** Annex E, clause E.5 (double-leaf lightweight element coupled
-  to a homogeneous element).
+- **Location:** EN 12354-1:2000, Annex E, clause E.5, and ISO 12354-1:2017,
+  E.3.4 NOTE 4 (wall junction with flexible interlayers).
 - **The print:** the bound on the K24 junction term is printed as
-  "0 ≤ K24 ≤ −4 dB", an empty interval.
+  "0 ≤ K24 ≤ −4 dB", an empty interval; the 2017 edition repeats the 2000
+  misprint verbatim.
 - **The problem:** the interval is impossible as printed; the accompanying
   figure and the physics (the term is a reduction bounded below) indicate
   −4 dB ≤ K24 ≤ 0 dB.
@@ -84,6 +85,23 @@ to the issuing body, with date and reference).
   figure's curve family.
 - **Library behaviour:** implements the clamp as −4 ≤ K24 ≤ 0 with a misprint
   note in the docstring.
+- **Status:** unreported.
+
+## ISO 12354-1:2017 — E.3.5 (double-leaf junction K24 sign)
+
+- **Location:** E.3.5, Figure E.7 (junction of lightweight double leaf wall
+  and homogeneous elements), K24 formula.
+- **The print:** K24 = 3,0 + 14,1 M + 5,7 M² dB (for m2/m1 > 3).
+- **The problem:** EN 12354-1:2000 prints the same relation as
+  K24 = 3,0 − 14,1 M + 5,7 M² (Figure E.9, Formula (E.7)), and the 2000
+  edition's own K24 curve in that figure decreases with m2/m1, corroborating
+  the minus sign; the 2017 edition prints no corresponding curve. The two
+  editions contradict each other and the internally consistent
+  formula-plus-figure pair is the 2000 one.
+- **Evidence:** page renders of both editions (ISO 12354-1:2017 printed
+  p. 47; EN 12354-1:2000 printed p. 48).
+- **Library behaviour:** implements the 2000 edition it cites (minus sign),
+  with a code note recording the 2017 contradiction.
 - **Status:** unreported.
 
 ## EN 12354-2:2000 — Formula (3) vs Annex E.3 (standardized impact level)

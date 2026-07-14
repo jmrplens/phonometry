@@ -75,7 +75,47 @@ print(round(float(res.level[-1]), 1))      # ~126  dB re 1 N/m (alta f)
 El `TransferStiffnessResult` transporta el `k₂₁` complejo y expone `.level`,
 `.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")` y `.plot()`.
 
-## 3. Relación con la familia de FRF
+## 3. Validez del método indirecto
+
+La ISO 10846-3 (apartado 6) exige que la aproximación `T ≪ 1` sea exacta dentro
+de **1 dB** (12 % de la magnitud de la rigidez), lo que acota el rango de
+frecuencia utilizable por ambos lados:
+
+* **Desadaptación de impedancias (Desigualdad 2).** Válido solo donde
+  `ΔL₁,₂ = La₁ − La₂ ≥ 20 dB`, es decir, `|T| ≤ 0,1` (la constante
+  `TRANSMISSIBILITY_LIMIT`). `transfer_stiffness_indirect` calcula el `|T|`
+  por banda y emite un `PhonometryWarning` cuando alguna banda lo supera
+  (habitual cerca o por debajo de la resonancia masa/resorte, como en la
+  figura anterior).
+* **Masa de bloqueo rígida (Desigualdad 3).** Por encima de una frecuencia
+  superior `f₃` la masa de bloqueo deja de moverse como cuerpo rígido; los
+  resultados solo son válidos mientras su masa efectiva medida
+  `m₂,eff = 2F₂/(a′₁ + a″₁)` (Ec. 4) se mantenga dentro de 1 dB de la masa
+  rígida: `10 lg(m₂,eff²/m₂²) ≤ 1 dB`.
+* **Linealidad (apartado 7.6).** Dos espectros de entrada separados 10 dB
+  deben dar niveles de rigidez de transferencia dentro de 1,5 dB.
+
+La propia idealización de la fuerza de bloqueo la cuantifica la ISO 10846-1,
+Ec. (6): para un aislador con rigidez en el punto de excitación de salida
+`k₂,₂` sobre una terminación de rigidez `k_t`, la fuerza entregada es
+`F₂/F₂,b = 1/(1 + k₂,₂/k_t)`, dentro del 10 % de la fuerza de bloqueo para
+`|k₂,₂| < 0,1 |k_t|` (Ec. 7):
+
+```python
+import warnings
+import phonometry as ph
+
+# |T| = 0,5 viola la Desigualdad (2): el resultado indirecto queda avisado.
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always")
+    ph.transfer_stiffness_indirect(50.0, 0.5, blocking_mass=10.0)
+print(caught[0].category.__name__)                     # PhonometryWarning
+
+# Aproximación de la fuerza de bloqueo en el límite del 10 % (ISO 10846-1, Ec. 6):
+print(round(abs(complex(ph.blocking_force_ratio(1e5, 1e6))), 4))   # 0.9091
+```
+
+## 4. Relación con la familia de FRF
 
 La rigidez dinámica es un miembro de la familia de funciones de respuesta en
 frecuencia (ISO 10846-1, Anexo A / Tabla A.2): es la recíproca de la receptancia
@@ -120,8 +160,12 @@ measurement of vibro-acoustic transfer properties of resilient elements*: la
 rigidez dinámica de transferencia `k₂₁ = F₂,b/u₁` y sus relaciones FRF (Parte 1,
 cláusula 5 y Anexo A / Tabla A.2), el nivel `L_k` re 1 N/m y el factor de pérdidas
 (Partes 2 y 3, cláusulas 3.8/3.17), el método directo (Parte 2) y el método
-indirecto `k₂₁ = −(2πf)²(m₂+m_f)T` (Parte 3, Fórmula 1). Las partes 4 y 5 extienden
+indirecto `k₂₁ = −(2πf)²(m₂+m_f)T` (Parte 3, Fórmula 1) con sus condiciones de
+validez (Parte 3, apartado 6: Desigualdades 2 y 3; linealidad del 7.6) y la
+aproximación de la fuerza de bloqueo (Parte 1, Ecs. 6/7). Las partes 4 y 5 extienden
 las mismas magnitudes a elementos distintos de los soportes y al método de punto
 de excitación en baja frecuencia. La conformidad se ancla en las definiciones en
 forma cerrada de la norma: el nivel de una década de rigidez, la relación de
-inercia del método indirecto y la identidad de la Tabla A.2 `k = jω·Z`.
+inercia del método indirecto, la identidad de la Tabla A.2 `k = jω·Z`, el límite
+de validez `|T| = 0,1 ↔ ΔL₁,₂ = 20 dB` con su cota de exactitud de 1 dB (12 %),
+el cociente de fuerzas de la Ec. (6) `1/1,1` y el criterio de linealidad del 7.6.

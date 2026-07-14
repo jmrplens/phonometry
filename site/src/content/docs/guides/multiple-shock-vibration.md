@@ -25,6 +25,11 @@ $$
 A_z(t) = \mathcal{F}^{-1}\!\left[H(f)\,\mathcal{F}[a_z(t)]\right].
 $$
 
+The input record must be **conditioned (DC-removed)**: because `H` is unity at
+0 Hz by design, a DC offset — e.g. the 1 g gravity component of a DC-coupled
+accelerometer — passes straight into `Az(t)` and corrupts the positive response
+peaks of the dose. Subtract the mean (or high-pass) before processing.
+
 ```python
 import phonometry as ph
 

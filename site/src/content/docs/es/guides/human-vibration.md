@@ -93,7 +93,12 @@ a_w = \sqrt{\sum_i \left(W_i\,a_i\right)^2},
 $$
 
 con $W_i$ el factor de ponderación en el centro de banda $i$ y $a_i$ la
-aceleración de banda medida.
+aceleración de banda medida. Los factores se evalúan exactamente en las
+frecuencias que se pasan; tenga en cuenta que las tablas ISO (ISO 8041-1
+Anexo B, ISO 2631-1 Tabla 3, ISO 5349-1 Tabla A.2) tabulan $W_i$ en los
+centros de tercio de octava *verdaderos* $10^{n/10}$ Hz (6,31; 7,943; 15,85;
+...), no en las etiquetas nominales de banda (6,3; 8; 16; ...): pase centros
+verdaderos al comparar con los factores tabulados.
 
 ```python
 import numpy as np

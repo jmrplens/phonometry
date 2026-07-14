@@ -73,7 +73,44 @@ print(round(float(res.level[-1]), 1))      # ~126  dB re 1 N/m (high-f)
 The `TransferStiffnessResult` carries the complex `k₂₁` and exposes `.level`,
 `.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")` and `.plot()`.
 
-## 3. Relation to the FRF family
+## 3. Validity of the indirect method
+
+ISO 10846-3 (clause 6) requires the `T ≪ 1` approximation to be accurate
+within **1 dB** (12 % of the stiffness magnitude), which bounds the usable
+frequency range on both sides:
+
+* **Impedance mismatch (Inequality 2).** Valid only where
+  `ΔL₁,₂ = La₁ − La₂ ≥ 20 dB`, i.e. `|T| ≤ 0.1` — the constant
+  `TRANSMISSIBILITY_LIMIT`. `transfer_stiffness_indirect` computes the
+  per-band `|T|` and emits a `PhonometryWarning` when any band exceeds it
+  (routine near or below the mass/spring resonance, as in the figure above).
+* **Rigid blocking mass (Inequality 3).** Above an upper frequency `f₃` the
+  blocking mass no longer moves as a rigid body; results are valid only while
+  its measured effective mass `m₂,eff = 2F₂/(a′₁ + a″₁)` (Eq. 4) stays within
+  1 dB of the rigid mass: `10 lg(m₂,eff²/m₂²) ≤ 1 dB`.
+* **Linearity (clause 7.6).** Two input spectra 10 dB apart must give
+  transfer-stiffness levels within 1.5 dB.
+
+The blocking-force idealisation itself is quantified by ISO 10846-1, Eq. (6):
+for an isolator of output driving-point stiffness `k₂,₂` on a termination of
+stiffness `k_t`, the delivered force is `F₂/F₂,b = 1/(1 + k₂,₂/k_t)` — within
+10 % of the blocking force for `|k₂,₂| < 0.1 |k_t|` (Eq. 7):
+
+```python
+import warnings
+import phonometry as ph
+
+# |T| = 0.5 violates Inequality (2): the indirect result is flagged.
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always")
+    ph.transfer_stiffness_indirect(50.0, 0.5, blocking_mass=10.0)
+print(caught[0].category.__name__)                     # PhonometryWarning
+
+# Blocking-force approximation at the 10 % limit (ISO 10846-1, Eq. 6):
+print(round(abs(complex(ph.blocking_force_ratio(1e5, 1e6))), 4))   # 0.9091
+```
+
+## 4. Relation to the FRF family
 
 The dynamic stiffness is a member of the frequency-response-function family
 (ISO 10846-1, Annex A / Table A.2): it is the reciprocal of the receptance and
@@ -118,8 +155,12 @@ measurement of vibro-acoustic transfer properties of resilient elements*: the
 dynamic transfer stiffness `k₂₁ = F₂,b/u₁` and its FRF relations (Part 1,
 clause 5 and Annex A / Table A.2), the level `L_k` re 1 N/m and the loss factor
 (Parts 2 and 3, clauses 3.8/3.17), the direct method (Part 2) and the indirect
-method `k₂₁ = −(2πf)²(m₂+m_f)T` (Part 3, Formula 1). Parts 4 and 5 extend the
+method `k₂₁ = −(2πf)²(m₂+m_f)T` (Part 3, Formula 1) with its validity
+conditions (Part 3, clause 6: Inequalities 2 and 3; clause 7.6 linearity) and
+the blocking-force approximation (Part 1, Eqs. 6/7). Parts 4 and 5 extend the
 same quantities to elements other than supports and to the driving-point
 low-frequency method. Conformance is anchored on the standard's closed-form
 definitions: the level of a decade of stiffness, the indirect inertia relation,
-and the Table-A.2 identity `k = jω·Z`.
+the Table-A.2 identity `k = jω·Z`, the `|T| = 0.1 ↔ ΔL₁,₂ = 20 dB` validity
+limit and its 1 dB (12 %) accuracy bound, the Eq. (6) force ratio `1/1.1`, and
+the 7.6 linearity criterion.

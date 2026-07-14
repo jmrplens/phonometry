@@ -27,21 +27,28 @@ def _am_tone(
     level_db: float,
     seconds: float = 2.0,
 ) -> np.ndarray:
-    """Amplitude-modulated tone, carrier RMS at ``level_db`` (pressure in Pa)."""
+    """Amplitude-modulated tone at an OVERALL RMS level (pressure in Pa).
+
+    Clause 7 states the calibration level as the sound pressure level of the
+    signal, i.e. the overall RMS level of the modulated waveform.
+    """
     t = np.arange(int(FS * seconds)) / FS
-    amp = np.sqrt(2.0) * P0 * 10.0 ** (level_db / 20.0)  # carrier peak
-    carrier = np.sin(2.0 * np.pi * fc * t)
-    return amp * (1.0 + depth * np.cos(2.0 * np.pi * fmod * t)) * carrier
+    x = (1.0 + depth * np.cos(2.0 * np.pi * fmod * t)) * np.sin(
+        2.0 * np.pi * fc * t
+    )
+    return np.asarray(
+        x * (P0 * 10.0 ** (level_db / 20.0)) / np.sqrt(np.mean(x**2))
+    )
 
 
 def _tone(fc: float, level_db: float, seconds: float = 2.0) -> np.ndarray:
-    """Unmodulated tone, carrier RMS at ``level_db``."""
+    """Unmodulated tone at ``level_db`` RMS."""
     return _am_tone(fc, 0.0, 0.0, level_db, seconds)
 
 
 @pytest.fixture(scope="module")
 def ref_calibration() -> EcmaRoughness:
-    """The 1 kHz / 70 Hz / m=1 / 60 dB calibration signal (1 asper)."""
+    """The 1 kHz / 70 Hz / m=1 / overall 60 dB calibration signal (1 asper)."""
     return roughness_ecma(_am_tone(1000.0, 70.0, 1.0, 60.0), FS)
 
 
@@ -51,22 +58,15 @@ def ref_calibration() -> EcmaRoughness:
 
 
 def test_calibration_1khz_70hz_is_one_asper(ref_calibration: EcmaRoughness) -> None:
-    """Pin the deterministic roughness of the Clause 7 calibration signal.
+    """The Clause 7 reference signal computes 1 asper.
 
-    (a) The standard's target for this 1 kHz / 70 Hz / m=1 / 60 dB SPL signal
-        is 1.0 asper (Clause 7 calibration -- the only value it tabulates).
-    (b) This clean-room implementation computes ~1.073 asper (+7.35 %). The
-        offset is documented methodology variance, not a tuning defect: c_R
-        (Formula 104) is the tabulated Clause-7 value (not reverse-fit) and the
-        front-end takes the literal reading of Formula 65 -- a per-block Hilbert
-        envelope with the plain factor-32 downsampling to 1500 Hz (Clause
-        7.1.2), which shifts the reference by a few percent versus
-        whole-signal-Hilbert / anti-aliased-decimation variants.
-    (c) This test guards against regression of that established, deterministic
-        value -- NOT against the 1.0 target. A tight window is deliberate so a
-        real change in the signal chain fails here.
+    A 1 kHz carrier, 100 % amplitude-modulated at 70 Hz, with an overall
+    sound pressure level of 60 dB SPL is defined as 1 asper; footnote 34
+    allows c_R to be adjusted by at most +/-0.25 %. With the tabulated
+    c_R = 0.0180685 (not reverse-fit) and the Clause 5.1.2 Formula (1)
+    fade-in applied in the front-end, this chain computes 0.99990 asper.
     """
-    assert ref_calibration.roughness == pytest.approx(1.0735, abs=0.01)
+    assert ref_calibration.roughness == pytest.approx(1.0, abs=0.01)
 
 
 def test_calibration_constant_is_the_tabulated_c_r() -> None:

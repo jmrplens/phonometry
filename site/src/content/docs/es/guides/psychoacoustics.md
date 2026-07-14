@@ -434,11 +434,10 @@ un ralentí diésel o de un altavoz distorsionado. Es una **métrica nueva** en
 phonometry. ECMA-418-2 extrae la envolvente de cada banda, pondera su espectro
 de modulación por la tasa y la profundidad de modulación, y correlaciona la
 modulación entre bandas; el resultado R se da en **asper**. El sonido de
-referencia (portador de 1 kHz, modulado en amplitud al 100 % a 70 Hz, 60 dB SPL)
-se define como 1 asper — esta implementación de sala limpia devuelve
-1,0735 asper (alrededor de +7 %), una varianza honesta: la constante de
-calibración tabulada c_R (Fórmula 104) se usa **sin** reajustarla hacia atrás al
-objetivo.
+referencia (portador de 1 kHz, modulado en amplitud al 100 % a 70 Hz, nivel
+global de 60 dB SPL) se define como 1 asper — esta implementación de sala
+limpia devuelve 0,9999 asper con la constante de calibración tabulada c_R
+(Fórmula 104) usada **sin** reajustarla hacia atrás al objetivo.
 
 ```python
 import numpy as np
@@ -446,12 +445,11 @@ from phonometry import roughness_ecma
 
 fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
-carrier = np.sin(2 * np.pi * 1000 * t)
-amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)                  # portador a 60 dB SPL
-x = amp * (1.0 + np.cos(2 * np.pi * 70 * t)) * carrier      # AM al 100 % a 70 Hz
+x = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
+x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # nivel global de 60 dB SPL
 
 res = roughness_ecma(x, fs, field="free")
-print(f"R = {res.roughness:.4f} asper")   # 1.0735 asper (objetivo de referencia 1.0)
+print(f"R = {res.roughness:.4f} asper")   # 0,9999 asper (referencia: 1 asper)
 
 res.plot()   # aspereza R(l50) dependiente del tiempo + mapa de calor de aspereza específica
 ```

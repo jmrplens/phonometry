@@ -33,18 +33,13 @@ The optional entropy weighting of Clause 7.1.6 requires an external rotational
 speed signal and is not implemented (see ``notes-ecma418-2-roughness.md``).
 
 The calibration constant ``c_R`` of Formula (104) is the standard's tabulated
-value, so a 1 kHz carrier 100 %-amplitude-modulated at 70 Hz at 60 dB SPL
-yields approximately 1 asper.
-
-Calibration variance: the standard's Clause 7 reference point (that 1 kHz /
-70 Hz / m = 1 / 60 dB SPL signal, defined as 1 asper) computes to ~1.073 asper
-here (+7.35 %). This is clean-room methodology variance, not a tuning defect:
-``c_R`` is the tabulated Clause-7 value (unchanged, not reverse-fit), and the
-front-end takes the literal reading of Formula 65 -- a per-block Hilbert
-envelope of each critical-band segment followed by the plain factor-32
-downsampling to 1500 Hz (Clause 7.1.2). Whole-signal-Hilbert variants and
-anti-aliased decimation shift the reference by a few percent; the value is
-deterministic and is pinned by the roughness calibration test.
+value (not reverse-fit), and the chain reproduces the Clause 7 reference
+point exactly: a 1 kHz carrier 100 %-amplitude-modulated at 70 Hz with an
+overall sound pressure level of 60 dB SPL computes to 0.9999 asper against
+the defined 1 asper. Note the level convention: Clause 7 states the *sound
+pressure level of the signal* (its overall RMS level), not the level of the
+unmodulated carrier -- a fully modulated signal whose carrier alone sits at
+60 dB is +1.76 dB hot overall and reads ~4 % high.
 """
 
 from __future__ import annotations
@@ -67,6 +62,7 @@ from .loudness_ecma import (
     _Z,
     _auditory_bandpass,
     _ear_filter_sos,
+    _fade_in,
     _specific_basis_loudness,
 )
 from .._internal.validation import require_1d_signal
@@ -200,7 +196,8 @@ def _front_end(
     Returns ``(envelopes[L, 512, Z], basis[L, Z], block_times[L], n_samples)``.
     """
     n_samples = x.size
-    padded = np.concatenate([np.zeros(_SB), x])  # start pad only (5.1.2.2)
+    # Fade-in (Formula 1) then the roughness start pad only (5.1.2.2).
+    padded = np.concatenate([np.zeros(_SB), _fade_in(x)])
     n_pad = padded.size
     p_om = signal.sosfilt(_ear_filter_sos(field), padded)
 
@@ -208,7 +205,12 @@ def _front_end(
     if not starts:
         starts = [0]
     if starts[-1] != n_pad - _SB and n_pad - _SB > starts[-1]:
-        starts.append(n_pad - _SB)  # flush-to-end last block (5.1.5.2)
+        # Flush-to-end last block. NOTE (Clause 5.1.5.2): the printed
+        # l_last = ceil((n + s_b)/s_h) would let blocks overrun the padded
+        # signal (and makes the Formula-103 time grid non-monotonic); the
+        # only self-consistent reading is to stop at the last block that
+        # fits and align it flush with the padded end, as done here.
+        starts.append(n_pad - _SB)
     start_idx = np.array(starts, dtype=np.int64)
     n_blocks = start_idx.size
     idx = start_idx[:, None] + np.arange(_SB)[None, :]
@@ -493,9 +495,9 @@ def roughness_ecma(
         the average specific roughness R'(z) (Clause 7.1.8) and the
         time-dependent roughness R(l50) (Formula 111).
 
-    A 1 kHz carrier 100 %-amplitude-modulated at 70 Hz at 60 dB SPL yields
-    approximately 1 asper by construction of the calibration constant c_R of
-    Formula (104).
+    A 1 kHz carrier 100 %-amplitude-modulated at 70 Hz with an overall level
+    of 60 dB SPL yields 1 asper (Clause 7 calibration; reproduced to 0.9999
+    asper with the tabulated c_R of Formula (104)).
     """
     if field not in ("free", "diffuse"):
         raise ValueError("field must be 'free' or 'diffuse'")

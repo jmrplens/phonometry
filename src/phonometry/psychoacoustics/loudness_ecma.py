@@ -241,16 +241,27 @@ def _auditory_bandpass(p_om: np.ndarray, band: int) -> np.ndarray:
     return np.asarray(2.0 * np.real(complex_out), dtype=np.float64)
 
 
+def _fade_in(x: np.ndarray) -> np.ndarray:
+    """Trigonometric 5 ms fade-in of the input signal (Clause 5.1.2, Formula 1).
+
+    Shared by every ECMA-418-2 metric: Formula (1) applies to the input
+    signal *before* the metric-specific zero-padding (5.1.2.1 for
+    tonality/loudness, 5.1.2.2 for roughness). Returns a faded copy.
+    """
+    x = np.asarray(x, dtype=np.float64).copy()
+    n_fade = min(_N_FADE, x.size)
+    n_idx = np.arange(n_fade)
+    x[:n_fade] *= 0.5 - 0.5 * np.cos(np.pi * n_idx / _N_FADE)
+    return x
+
+
 def _preprocess(x: np.ndarray) -> Tuple[np.ndarray, int, int]:
     """Fade-in and zero-pad the signal (Clause 5.1.2, Formulae 1-3).
 
     Returns the padded signal p(n), n_samples (original length) and n_new.
     """
-    x = np.asarray(x, dtype=np.float64).copy()
-    n_samples = x.size
-    n_fade = min(_N_FADE, n_samples)
-    n_idx = np.arange(n_fade)
-    x[:n_fade] *= 0.5 - 0.5 * np.cos(np.pi * n_idx / _N_FADE)
+    n_samples = np.asarray(x).size
+    x = _fade_in(x)
     n_new = _S_H_MAX * (math.ceil((n_samples + _S_H_MAX + _S_B_MAX) / _S_H_MAX) - 1)
     n_zeros_end = n_new - n_samples
     padded = np.concatenate(

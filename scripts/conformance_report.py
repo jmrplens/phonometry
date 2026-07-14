@@ -644,11 +644,18 @@ def _spl_tone(freq: float, level_db: float, seconds: float) -> np.ndarray:
 def _am_tone(
     fc: float, fmod: float, depth: float, level_db: float, seconds: float
 ) -> np.ndarray:
-    """Amplitude-modulated tone, carrier RMS at ``level_db`` (pressure in Pa)."""
+    """Amplitude-modulated tone at an OVERALL RMS level (pressure in Pa).
+
+    ECMA-418-2 Clause 7 states the calibration level as the sound pressure
+    level of the signal, i.e. the overall RMS level of the modulated waveform.
+    """
     t = np.arange(int(_FS * seconds)) / _FS
-    amp = math.sqrt(2.0) * 2e-5 * 10.0 ** (level_db / 20.0)
-    carrier = amp * (1.0 + depth * np.cos(2.0 * np.pi * fmod * t))
-    return np.asarray(carrier * np.sin(2.0 * np.pi * fc * t))
+    x = (1.0 + depth * np.cos(2.0 * np.pi * fmod * t)) * np.sin(
+        2.0 * np.pi * fc * t
+    )
+    return np.asarray(
+        x * (2e-5 * 10.0 ** (level_db / 20.0)) / np.sqrt(np.mean(x**2))
+    )
 
 
 @register(
@@ -686,27 +693,19 @@ def _chk_ecma_tonality() -> Outcome:
 @register(
     "Psychoacoustics",
     "ECMA-418-2:2025 Clause 7",
-    "HMS roughness of a 1 kHz / 70 Hz / m=1 / 60 dB tone (c_R=0.0180685)",
+    "HMS roughness of a 1 kHz / 70 Hz / m=1 / overall 60 dB tone (c_R=0.0180685)",
 )
 def _chk_ecma_roughness() -> Outcome:
-    # The standard target is 1.0 asper; this clean-room chain deterministically
-    # computes ~1.0735 (+7.35 %, documented methodology variance). The check
-    # pins the clean-room value, NOT the 1.0 target.
+    # Clause 7 calibration: the reference signal at an overall sound pressure
+    # level of 60 dB SPL is 1 asper (computed: 0.9999 with the tabulated c_R).
     sig = _am_tone(1000.0, 70.0, 1.0, 60.0, 2.0)
     computed = float(ph.roughness_ecma(sig, _FS).roughness)
-    target = ref.ECMA418_2_ROUGHNESS_STANDARD_TARGET_ASPER
-    out = numeric(
-        ref.ECMA418_2_ROUGHNESS_CLEANROOM_ASPER,
+    return numeric(
+        ref.ECMA418_2_ROUGHNESS_1KHZ_70HZ_60DB_ASPER,
         computed,
         0.01,
         unit="asper",
         places=4,
-    )
-    return Outcome(
-        expected=f"{out.expected} [clean-room; standard target {target:g}]",
-        computed=out.computed,
-        delta=out.delta,
-        passed=out.passed,
     )
 
 

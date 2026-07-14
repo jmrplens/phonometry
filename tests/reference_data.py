@@ -166,14 +166,12 @@ ECMA418_2_LOUDNESS_C_N = 0.0211964
 # yields 1 tu_HMS (c_T adjustable within 0.25 %).
 ECMA418_2_TONALITY_1KHZ_40DB_TU = 1.0
 ECMA418_2_TONALITY_C_T = 2.8758615
-# Roughness: Clause 7 tabulates a 1 kHz carrier, 100 % AM at 70 Hz, 60 dB SPL
-# -> 1.0 asper as the standard target. Using the tabulated c_R = 0.0180685
-# (not reverse-fit) with the literal Formula-65 front-end, this clean-room
-# implementation deterministically computes ~1.0735 asper (+7.35 %); the
-# offset is documented methodology variance, NOT a tuning defect, so the
-# conformance check pins the clean-room value, not the 1.0 target.
-ECMA418_2_ROUGHNESS_STANDARD_TARGET_ASPER = 1.0
-ECMA418_2_ROUGHNESS_CLEANROOM_ASPER = 1.0735
+# Roughness: Clause 7 defines the reference as a 1 kHz carrier, 100 % AM at
+# 70 Hz, with "a sound pressure level of 60 dB" -- the OVERALL RMS level of
+# the modulated signal (not the carrier-alone level) -> 1.0 asper. With the
+# tabulated c_R = 0.0180685 (not reverse-fit) and the Clause 5.1.2 fade-in
+# applied, the chain reproduces this anchor to 0.9999 asper.
+ECMA418_2_ROUGHNESS_1KHZ_70HZ_60DB_ASPER = 1.0
 ECMA418_2_ROUGHNESS_C_R = 0.0180685
 # ISO 532-2:2017 (Moore-Glasberg, stationary). Clause 3.17 / Annex B.1: the
 # sone is defined so a 1 kHz / 40 dB SPL tone (binaural, free field) is

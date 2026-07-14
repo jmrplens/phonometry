@@ -422,10 +422,9 @@ distorted loudspeaker. It is a **new metric** for phonometry. ECMA-418-2
 extracts each band's envelope, weights its modulation spectrum by modulation
 rate and depth, and correlates the modulation across bands; the result R is in
 **asper**. The reference sound (1 kHz carrier, 100 % amplitude-modulated at
-70 Hz, 60 dB SPL) is defined as 1 asper — this clean-room implementation
-returns 1.0735 asper (about +7 %), an honest variance: the tabulated
-calibration constant c_R (Formula 104) is used **without** reverse-fitting to
-the target.
+70 Hz, overall level 60 dB SPL) is defined as 1 asper — this clean-room
+implementation returns 0.9999 asper with the tabulated calibration constant
+c_R (Formula 104) used **without** reverse-fitting to the target.
 
 ```python
 import numpy as np
@@ -433,12 +432,11 @@ from phonometry import roughness_ecma
 
 fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
-carrier = np.sin(2 * np.pi * 1000 * t)
-amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)                  # 60 dB SPL carrier
-x = amp * (1.0 + np.cos(2 * np.pi * 70 * t)) * carrier      # 100 % AM at 70 Hz
+x = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
+x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # overall 60 dB SPL
 
 res = roughness_ecma(x, fs, field="free")
-print(f"R = {res.roughness:.4f} asper")   # 1.0735 asper (reference target 1.0)
+print(f"R = {res.roughness:.4f} asper")   # 0.9999 asper (reference: 1 asper)
 
 res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
 ```

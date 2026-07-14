@@ -31,6 +31,8 @@ chain:
 
 The optional entropy weighting of Clause 7.1.6 requires an external rotational
 speed signal and is not implemented (see ``notes-ecma418-2-roughness.md``).
+The API is monaural: the binaural combination of Clause 7.1.11 is not
+implemented -- analyse each channel separately.
 
 The calibration constant ``c_R`` of Formula (104) is the standard's tabulated
 value (not reverse-fit), and the chain reproduces the Clause 7 reference

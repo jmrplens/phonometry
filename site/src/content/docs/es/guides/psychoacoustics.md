@@ -333,7 +333,8 @@ externo/medio, un banco de 53 filtros de tipo gammatone sobre la escala Bark_HMS
 linealidad compresiva (Fórmula 23) — que **comparten** sus métricas de
 sonoridad, tonalidad y aspereza. La sonoridad N se expresa en **sone_HMS**, y el
 mismo ancla de 1 kHz/40 dB calibra el front-end (nuestro valor de sala limpia
-0,996).
+0,984, con el promediado completo de bandas de la cláusula 6.2.3; el origen
+del residuo está documentado en el docstring del módulo).
 
 ```python
 import numpy as np
@@ -344,7 +345,7 @@ t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
 res = loudness_ecma(x, fs, field="free")
-print(f"N = {res.loudness:.3f} sone_HMS")   # 0.996 sone_HMS
+print(f"N = {res.loudness:.3f} sone_HMS")   # 0.984 sone_HMS
 print(res.specific_loudness.shape)          # (53,) sonoridad específica media N'(z)
 
 res.plot()   # sonoridad específica media N'(z) + N(l) dependiente del tiempo a 187.5 Hz

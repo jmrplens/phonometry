@@ -322,7 +322,9 @@ filtering, a 53-band gammatone-like filter bank on the Bark_HMS scale
 (z = 0.5 .. 26.5), half-wave rectification, block RMS and a compressive
 nonlinearity (Formula 23) — that is **shared** by its loudness, tonality and
 roughness metrics. The loudness N is reported in **sone_HMS**, and the same
-1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.996).
+1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.984,
+with the full Clause 6.2.3 band averaging; the residual's origin is
+documented in the module docstring).
 
 ```python
 import numpy as np
@@ -333,7 +335,7 @@ t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
 res = loudness_ecma(x, fs, field="free")
-print(f"N = {res.loudness:.3f} sone_HMS")   # 0.996 sone_HMS
+print(f"N = {res.loudness:.3f} sone_HMS")   # 0.984 sone_HMS
 print(res.specific_loudness.shape)          # (53,) average specific loudness N'(z)
 
 res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz

@@ -4,15 +4,11 @@ Psychoacoustic tonality per ECMA-418-2:2025 (4th ed., Sottek Hearing Model).
 
 Clean-room implementation of the tonality signal chain of ECMA-418-2:2025
 (Clause 6.2). The shared auditory front-end (Clause 5) and the ACF-based
-tonal/noise decomposition (Clause 6.2.2-6.2.7) are reused from
-:mod:`.loudness_ecma`; this module adds
+tonal/noise decomposition with the full Clause 6.2.3 band averaging
+(Clause 6.2.2-6.2.7, :func:`loudness_ecma._tonal_noise_split`) are reused
+from :mod:`.loudness_ecma` -- loudness and tonality therefore report the
+same underlying N'_tonal(l, z) for the same signal; this module adds
 
-* the **full Clause 6.2.3 band averaging** (:func:`_average_bands_full`),
-  including the cross-block-size-group ACF recomputation that the loudness
-  path deliberately omits (see the boundary marker in
-  :func:`loudness_ecma._average_bands`);
-* the tonal frequency f_ton(l, z) (Formulae 38-39), tracked through the
-  common-grid resampling; and
 * the tonality output stages (Clause 6.2.8-6.2.11): the overall-SNR gate
   q(l) (Formulae 49-50), the time-dependent specific tonality
   T'(l, z) = c_T * q(l) * N'_tonal(l, z) (Formula 51), the average specific
@@ -22,13 +18,16 @@ tonal/noise decomposition (Clause 6.2.2-6.2.7) are reused from
 
 The calibration factor ``c_T`` of Formula (51) is fixed by the standard so
 that a 1 kHz sinusoid at 40 dB SPL yields 1 tu_HMS.
+
+The API is monaural: the binaural combination of Formula (112)
+(Clause 7.1.11) is not implemented -- analyse each channel separately.
 """
 
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Tuple
+from typing import TYPE_CHECKING, Any, Literal, Tuple
 
 import numpy as np
 from scipy import signal
@@ -41,29 +40,12 @@ from .loudness_ecma import (
     _EPS,
     _F_CENTRE,
     _FS,
-    _G_Z,
-    _INTERP,
-    _N_B_BY_SB,
     _R_SD,
-    _S_B,
-    _S_B_MAX,
     _Z,
-    _auditory_bandpass,
-    _band_acf,
-    _average_blocks,
-    _ear_filter_sos,
-    _lowpass_time,
-    _preprocess,
-    _resample_common,
-    _specific_basis_loudness,
-    _tonal_estimate,
+    _tonal_noise_split,
 )
 from .._internal.validation import require_1d_signal
 from .._internal.utils import _typesignal
-
-# Noise reduction sigmoid parameters (Table 7), reused on the tonality path.
-_NR_ALPHA = 20.0
-_NR_BETA = 0.07
 
 # Overall-SNR scaling gate q(l) (Formula 50, Table 9).
 _Q_A = 35.0
@@ -114,136 +96,6 @@ class EcmaTonality:
 
 
 # --------------------------------------------------------------------------
-# Full Clause 6.2.3 band averaging (cross-block-size-group recomputation)
-# --------------------------------------------------------------------------
-
-
-def _segment_bs(p_band: np.ndarray, block_size: int, n_new: int) -> np.ndarray:
-    """Segment a band-pass signal at an arbitrary block size (Clause 5.1.5).
-
-    Mirrors :func:`loudness_ecma._segment` but takes the block size directly so
-    a band can be re-segmented at a *foreign* block size for the cross-group
-    averaging of Clause 6.2.3. Returns an array of shape ``(n_blocks, block_size)``.
-    """
-    s_h = block_size // 4  # 75 % overlap
-    i_start = _S_B_MAX - block_size  # Formula 19
-    l_last = math.ceil((n_new + s_h) / s_h) - 1  # Formula 20
-    starts = i_start + s_h * np.arange(l_last + 1)
-    starts = starts[starts + block_size <= p_band.size]
-    idx = starts[:, None] + np.arange(block_size)[None, :]
-    return np.asarray(p_band[idx], dtype=np.float64)
-
-
-def _scaled_acf_at(
-    p_bands: List[np.ndarray],
-    band: int,
-    block_size: int,
-    n_new: int,
-    cache: Dict[Tuple[int, int], np.ndarray],
-) -> np.ndarray:
-    """Scaled ACF phi'_z(m) of ``band`` computed at ``block_size`` (Formulae 22-30).
-
-    Segments the band-pass signal at ``block_size``, half-wave rectifies
-    (Formula 21), forms the block RMS (Formula 22) and specific basis loudness
-    (Formula 25), the unbiased normalized ACF (Formulae 27-29) and scales it by
-    the basis loudness (Formula 30). Cached by ``(band, block_size)``.
-    """
-    key = (band, block_size)
-    cached = cache.get(key)
-    if cached is not None:
-        return cached
-    seg = _segment_bs(p_bands[band], block_size, n_new)
-    rect = np.where(seg > 0.0, seg, 0.0)  # Formula 21
-    rms = np.sqrt((2.0 / block_size) * np.sum(rect**2, axis=1))  # Formula 22
-    basis = _specific_basis_loudness(rms, band)  # Formulae 23-25
-    acf = _band_acf(rect, block_size)  # Formulae 27-29
-    scaled = np.asarray(acf * basis[:, None], dtype=np.float64)  # Formula 30
-    cache[key] = scaled
-    return scaled
-
-
-def _average_bands_full(
-    p_bands: List[np.ndarray], n_new: int
-) -> List[np.ndarray]:
-    """Full Clause 6.2.3 band averaging with cross-group recomputation.
-
-    For each target band z (block size B = s_b(z), reach = min(N_B, z, 52-z)),
-    the neighbouring bands are re-segmented and re-correlated **at block size
-    B** so the average is over identical block sizes (the requirement the
-    loudness path skips). The result stays on band z's native time grid.
-    """
-    cache: Dict[Tuple[int, int], np.ndarray] = {}
-    out: List[np.ndarray] = []
-    for band in range(_CBF):
-        block_size = int(_S_B[band])
-        n_b = _N_B_BY_SB[block_size]
-        native = _scaled_acf_at(p_bands, band, block_size, n_new, cache)
-        if n_b == 0:
-            out.append(native)
-            continue
-        if band == 0:  # lowest band: averaged only with the second-lowest
-            other = _scaled_acf_at(p_bands, 1, block_size, n_new, cache)
-            out.append(0.5 * (native + other))
-            continue
-        # The ``_CBF-1-band`` upper-edge term is a defensive guard that cannot
-        # fire: bands with N_B > 0 all sit at low index (0..24, block size
-        # >= 2048), so their distance to the top band (>= 28) never limits the
-        # symmetric reach (n_b <= 2).  Only the ``band`` lower-edge term bites.
-        reach = min(n_b, band, _CBF - 1 - band)
-        if reach == 0:
-            out.append(native)
-            continue
-        stack = [
-            _scaled_acf_at(p_bands, band + off, block_size, n_new, cache)
-            for off in range(-reach, reach + 1)
-        ]
-        out.append(np.mean(np.stack(stack, axis=0), axis=0))
-    return out
-
-
-# --------------------------------------------------------------------------
-# Tonal / noise loudness with tonal-frequency tracking (Clause 6.2.4-6.2.8)
-# --------------------------------------------------------------------------
-
-
-def _tonal_noise_tonality(
-    x: np.ndarray, field: str
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, int, int]:
-    """Specific tonal/noise loudness and tonal frequency on the common grid.
-
-    Returns ``(N'_tonal(l, z), N'_noise(l, z), f_ton(l, z), n_common,
-    n_samples)`` (Formulae 41-48 plus the tonal frequency of Formula 39). Uses
-    the full Clause 6.2.3 band averaging.
-    """
-    padded, n_samples, n_new = _preprocess(x)
-    p_om = signal.sosfilt(_ear_filter_sos(field), padded)
-    p_bands = [_auditory_bandpass(p_om, band) for band in range(_CBF)]
-
-    averaged = _average_blocks(_average_bands_full(p_bands, n_new))
-
-    n_common = max(averaged[b].shape[0] * int(_INTERP[b]) for b in range(_CBF))
-    n_tonal = np.zeros((n_common, _CBF))
-    n_signal = np.zeros((n_common, _CBF))
-    f_ton = np.zeros((n_common, _CBF))
-    for band in range(_CBF):
-        tonal_b, signal_b, fton_b = _tonal_estimate(averaged[band], band)
-        n_tonal[:, band] = _resample_common(tonal_b, band, n_common)
-        n_signal[:, band] = _resample_common(signal_b, band, n_common)
-        f_ton[:, band] = _resample_common(fton_b, band, n_common)
-
-    # Noise reduction (Formulae 42-48).
-    snr_hat = n_tonal / (n_signal - n_tonal + _EPS)  # Formula 42
-    n_tonal_lp = _lowpass_time(n_tonal)  # Formula 43
-    snr_lp = _lowpass_time(snr_hat)  # Formula 44
-    n_signal_lp = _lowpass_time(n_signal)
-    arg = _NR_ALPHA * (snr_lp / _G_Z[None, :] - _NR_BETA)  # Formula 45
-    nr = np.where(arg > 0.0, 1.0 - np.exp(-arg), 0.0)
-    n_tonal_final = nr * n_tonal_lp  # Formula 47
-    n_noise_final = np.maximum(n_signal_lp - n_tonal_final, 0.0)  # Formula 48
-    return n_tonal_final, n_noise_final, f_ton, n_common, n_samples
-
-
-# --------------------------------------------------------------------------
 # Tonality assembly (Clause 6.2.8-6.2.11)
 # --------------------------------------------------------------------------
 
@@ -256,7 +108,16 @@ def _band_range(f_low: float | None, f_high: float | None) -> Tuple[int, int]:
     ``f_low < (F(z) + F(z+0.5))/2`` selects z_L (Formula 56) and
     ``f_high > (F(z) + F(z-0.5))/2`` selects z_H (Formula 57).  ``mid[i]`` is
     the boundary between bands ``i`` and ``i+1`` on the 0.5-Bark_HMS grid.
+
+    Enforces the Formulae 56/57 preconditions: 16 Hz < f_L, f_H < 20 kHz and
+    f_L < f_H.
     """
+    if f_low is not None and not 16.0 < f_low:
+        raise ValueError("'f_low' must exceed 16 Hz (Formula 56).")
+    if f_high is not None and not f_high < 20000.0:
+        raise ValueError("'f_high' must be below 20 kHz (Formula 57).")
+    if f_low is not None and f_high is not None and not f_low < f_high:
+        raise ValueError("'f_low' must be below 'f_high'.")
     z_lo = 0
     z_hi = _CBF - 1
     mid = (_F_CENTRE[:-1] + _F_CENTRE[1:]) / 2.0  # inter-band boundaries
@@ -269,9 +130,7 @@ def _band_range(f_low: float | None, f_high: float | None) -> Tuple[int, int]:
         # f_high > mid[j] admits band j+1, so shift the index up by one.
         candidates = np.where(f_high > mid)[0]
         z_hi = int(candidates[-1]) + 1 if candidates.size else 0
-    if z_hi < z_lo:
-        z_lo, z_hi = z_hi, z_lo
-    return z_lo, z_hi
+    return z_lo, min(z_hi, _CBF - 1)
 
 
 def _assemble_tonality(
@@ -360,7 +219,7 @@ def tonality_ecma(
         x = signal.resample(x, int(round(x.size * _FS / fs)))
 
     z_lo, z_hi = _band_range(f_low, f_high)
-    n_tonal, n_noise, f_ton, _, n_samples = _tonal_noise_tonality(x, field)
+    n_tonal, n_noise, f_ton, _, n_samples = _tonal_noise_split(x, field)
     t_single, t_spec, f_spec, t_time, f_time, time = _assemble_tonality(
         n_tonal, n_noise, f_ton, n_samples, z_lo, z_hi
     )

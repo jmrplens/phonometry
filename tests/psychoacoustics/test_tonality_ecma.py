@@ -138,6 +138,51 @@ def test_user_band_excluding_tone_lowers_tonality() -> None:
     assert restricted.tonality < 0.2
 
 
+def test_loudness_and_tonality_share_the_tonal_split(monkeypatch) -> None:
+    """Loudness and tonality must report the same underlying N'_tonal(l, z).
+
+    Clause 8.1.1 builds the loudness on the Clause 6.2 outputs, so the two
+    metrics have to agree on the shared intermediate, not just at their
+    endpoints. Both modules call the same ``_tonal_noise_split``; this test
+    spies on it through both call sites and asserts the recorded
+    N'_tonal(l, z) arrays are identical.
+    """
+    import sys
+
+    from phonometry import loudness_ecma
+
+    L = sys.modules["phonometry.psychoacoustics.loudness_ecma"]
+    T = sys.modules["phonometry.psychoacoustics.tonality_ecma"]
+    assert T._tonal_noise_split is L._tonal_noise_split
+
+    recorded = []
+    orig = L._tonal_noise_split
+
+    def spy(x, field):
+        out = orig(x, field)
+        recorded.append(out[0].copy())  # N'_tonal(l, z)
+        return out
+
+    monkeypatch.setattr(L, "_tonal_noise_split", spy)
+    monkeypatch.setattr(T, "_tonal_noise_split", spy)
+    sig = _tone(1000.0, 40.0, seconds=0.7)
+    loudness_ecma(sig, FS)
+    tonality_ecma(sig, FS)
+    assert len(recorded) == 2
+    assert np.array_equal(recorded[0], recorded[1])
+
+
+def test_band_range_rejects_out_of_range_edges() -> None:
+    # Formulae 56/57 preconditions: 16 Hz < f_L, f_H < 20 kHz, f_L < f_H.
+    x = _tone(1000.0, 40.0, seconds=0.5)
+    with pytest.raises(ValueError, match="16 Hz"):
+        tonality_ecma(x, FS, f_low=10.0)
+    with pytest.raises(ValueError, match="20 kHz"):
+        tonality_ecma(x, FS, f_high=25000.0)
+    with pytest.raises(ValueError, match="below 'f_high'"):
+        tonality_ecma(x, FS, f_low=2000.0, f_high=500.0)
+
+
 def test_band_range_uses_edge_midpoints() -> None:
     # Formulae 56-57 select bands by the edge midpoints to the neighbours, not
     # by the centre frequency.  For an f_low that lies between band z's centre

@@ -664,6 +664,9 @@ def _am_tone(
     "HMS loudness of a 1 kHz / 40 dB tone (c_N=0.0211964)",
 )
 def _chk_ecma_loudness() -> Outcome:
+    # With the full Clause 6.2.3 band averaging the chain computes 0.9845
+    # sone_HMS for the calibration tone; the residual's origin is documented
+    # in the loudness_ecma module docstring (c_N stays the verbatim value).
     computed = float(ph.loudness_ecma(_spl_tone(1000.0, 40.0, 0.6), _FS).loudness)
     return numeric(
         ref.ECMA418_2_LOUDNESS_1KHZ_40DB_SONE,

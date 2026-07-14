@@ -3312,8 +3312,18 @@ def _electro_harmonic_signal() -> np.ndarray:
 
 @register(
     _ELECTRO,
-    "IEC 60268-3:2013 (14.12.2-3)",
-    "THD (rel. fundamental) of a synthetic 4-harmonic signal",
+    "IEC 60268-3:2013 (14.12.3.2)",
+    "THD (rel. total RMS, the R convention the clause defines)",
+)
+def _chk_thd_r() -> Outcome:
+    value = ph.thd(_electro_harmonic_signal(), _electro_fs(), 1000.0, kind="R")
+    return numeric(ref.DISTORTION_THD_R, value, 1e-4, places=6)
+
+
+@register(
+    _ELECTRO,
+    "Closed-form harmonic synthesis (THD_F convention)",
+    "THD (rel. fundamental, the widespread datasheet convention)",
 )
 def _chk_thd_f() -> Outcome:
     value = ph.thd(_electro_harmonic_signal(), _electro_fs(), 1000.0, kind="F")
@@ -3426,6 +3436,16 @@ def _chk_tdfd() -> Outcome:
     # d_TDFD = sqrt(0.02^2 + 0.03^2) / (0.5 + 0.5) = sqrt(0.0013).
     value = ph.total_difference_frequency_distortion(x, fs)
     return numeric(0.03605551275463989, value, 1e-4, places=8)
+
+
+@register(
+    _ELECTRO,
+    "ITU-R BS.468-4 Table 1",
+    "Weighting network response at the 6.3 kHz peak (14.12.11 network)",
+)
+def _chk_itu_468_peak() -> Outcome:
+    value = float(ph.itu_r_468_weighting([6300.0])[0])
+    return numeric(12.2, value, 1e-9, unit="dB", places=2)
 
 
 @register(

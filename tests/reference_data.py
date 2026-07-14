@@ -1328,6 +1328,20 @@ DISTORTION_THD_F = 0.11357816691600547
 DISTORTION_THD_R = 0.11285260010027609
 DISTORTION_D2 = 0.09936117403949127
 
+# Clipped-sine THD oracle: a unit sine symmetrically clipped at 0.7, sampled
+# at 48 samples per period, has these odd-harmonic Fourier amplitudes and
+# THD_F over n <= 10 (independent single-period Fourier series of the sampled
+# waveform). The continuous-time fundamental is b1 = (2/pi)(arcsin 0.7 +
+# 0.7 sqrt(0.51)) = 0.8118795956258127; the sampled value differs by the
+# 6.5e-4 aliasing of the clipped wave's high harmonics, so the sampled value
+# is the one pinned here.
+CLIPPED_SINE_THD_F = 0.13794482640558078
+CLIPPED_SINE_B1 = 0.8124127489373637
+CLIPPED_SINE_B3 = 0.1087038092372312
+CLIPPED_SINE_B5 = 0.0205013791213361
+CLIPPED_SINE_B7 = 0.0165310026995253
+CLIPPED_SINE_B9 = 0.0070120099075438
+
 # Ordinary coherence of a signal-plus-independent-noise output with a flat
 # (frequency-independent) SNR: gamma^2 = SNR / (1 + SNR). At SNR = 10 -> 0.90909.
 COHERENCE_SNR = 10.0

@@ -120,3 +120,18 @@ def test_rejects_bad_nperseg() -> None:
 def test_rejects_too_short_signal() -> None:
     with pytest.raises(ValueError):
         coherence(np.zeros(10), np.zeros(10), FS)
+
+
+def test_h1_input_noise_bias_matches_theory() -> None:
+    # Bendat & Piersol: noise on the MEASURED INPUT biases H1 low by
+    # SNR/(1+SNR). With input-noise power 0.25 on a unit-variance input
+    # (SNR = 4) through an identity path, |H1| -> 4/5 = 0.800; the Welch
+    # estimate at nperseg=4096 sits within 0.03 of it. Complements the
+    # output-noise coherence check above.
+    rng = np.random.default_rng(3)
+    n = 200000
+    x = rng.standard_normal(n)
+    x_measured = x + rng.standard_normal(n) * 0.5  # SNR = 1 / 0.25 = 4
+    res = transfer_function(x_measured, x, FS, estimator="H1", nperseg=4096)
+    mean_mag = float(np.mean(np.abs(res.response)))
+    assert mean_mag == pytest.approx(0.800, abs=0.03)

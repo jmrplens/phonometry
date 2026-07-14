@@ -29,10 +29,11 @@ neighbours by 15 dB (25–125 Hz), 8 dB (160–400 Hz) or 5 dB (500–10 000 Hz)
 audibility ``ΔL`` to ``Kt`` (0–6 dB).
 
 **Residual-noise correction (Clause 10.4).**
-``L = 10 lg(10^(L'/10) − 10^(Lres/10))`` (Formula (16)); a residual within 3 dB
-of the measured level makes the correction unreliable (reported as an upper
-bound only). :func:`gaussian_residual_level` estimates the residual from
-percentile levels (Annex I, Formulae (I.1)/(I.2)).
+``L = 10 lg(10^(L'/10) − 10^(Lres/10))`` (Formula (16)); with a residual
+within 3 dB of the measured level no correction is allowed — the
+*uncorrected* measured level ``L'`` is then the reportable value, as an upper
+bound of the specific sound. :func:`gaussian_residual_level` estimates the
+residual from percentile levels (Annex I, Formulae (I.1)/(I.2)).
 
 **Measurement uncertainty (Clause 4, Annex F).** ``u = √(Σ (cⱼ·uⱼ)²)``
 (Formula (2)) expanded by ``k = 2`` (95 %) or ``k = 1.3`` (80 %). The
@@ -254,6 +255,11 @@ def tonal_seeking_survey(
     5 dB (500–10 000 Hz). The two end bands (no pair of neighbours) are never
     flagged.
 
+    .. note::
+        Annex K defines the thresholds for 25 Hz to 10 kHz only. Bands
+        supplied outside that span are extrapolated with the nearest rule
+        (15 dB below 25 Hz, 5 dB above 10 kHz) — outside the standard.
+
     :param levels: One-third-octave-band time-average levels, in dB.
     :param frequencies: The band centre frequencies, in Hz (same length).
     :return: Boolean array, ``True`` where a prominent tone is present.
@@ -295,12 +301,21 @@ class ResidualCorrectionResult:
     """Residual-noise-corrected level (ISO 1996-2:2017 Clause 10.4).
 
     :ivar corrected_level: The corrected level ``L`` (Formula (16)), in dB.
+        When ``reliable`` is ``False`` the standard allows *no* correction —
+        this value is then informative only (it estimates the source from
+        below) and must not be reported as the result.
+    :ivar reportable_upper_bound: The *measured* level ``L'``, in dB. When the
+        margin is 3 dB or less, §10.4 permits reporting the measured level as
+        an upper bound of the specific sound level; this field carries that
+        reportable value.
     :ivar margin: ``L' − Lres``, in dB (measured minus residual).
     :ivar reliable: ``True`` when the residual is more than 3 dB below the
-        measured level; ``False`` when the correction is an upper bound only.
+        measured level; ``False`` when no correction is allowed and only the
+        uncorrected ``L'`` may be reported, as an upper bound.
     """
 
     corrected_level: float
+    reportable_upper_bound: float
     margin: float
     reliable: bool
 
@@ -311,8 +326,12 @@ def residual_sound_correction(
     """Correct a measured level for residual sound (Formula (16)).
 
     ``L = 10 lg(10^(L'/10) − 10^(Lres/10))``. When the residual is within 3 dB
-    of the measured level the correction is flagged as unreliable (an upper
-    bound only) and an :class:`EnvironmentalMeasurementWarning` is issued.
+    of the measured level, §10.4 allows **no** correction: the *uncorrected*
+    measured level ``L'`` is the reportable value, as an upper bound of the
+    specific sound (the corrected value would understate reliability, being
+    the lower-side estimate). The result is then flagged ``reliable = False``
+    and an :class:`EnvironmentalMeasurementWarning` is issued; report
+    ``reportable_upper_bound`` (= ``L'``), not ``corrected_level``.
 
     :param measured_level: Measured level ``L'`` including residual, in dB.
     :param residual_level: Residual (background) level ``Lres``, in dB.
@@ -333,14 +352,18 @@ def residual_sound_correction(
     reliable = margin > 3.0
     if not reliable:
         warnings.warn(
-            "Residual is within 3 dB of the measured level; the correction is "
-            "unreliable and should be reported as an upper bound only "
-            "(ISO 1996-2:2017, 10.4).",
+            "Residual is within 3 dB of the measured level; no correction is "
+            "allowed and only the uncorrected measured level may be reported, "
+            "as an upper bound (ISO 1996-2:2017, 10.4). Use "
+            "reportable_upper_bound, not corrected_level.",
             EnvironmentalMeasurementWarning,
             stacklevel=2,
         )
     return ResidualCorrectionResult(
-        corrected_level=float(corrected), margin=float(margin), reliable=reliable
+        corrected_level=float(corrected),
+        reportable_upper_bound=float(lp),
+        margin=float(margin),
+        reliable=reliable,
     )
 
 
@@ -357,8 +380,10 @@ def gaussian_residual_level(
     :param l90: Level exceeded 90 % of the time ``L90``, in dB.
     :param l95: Level exceeded 95 % of the time ``L95``, in dB.
     :return: The estimated Gaussian residual equivalent level, in dB.
-    :raises ValueError: If not exactly one of ``l90`` / ``l95`` is given, or
-        the inputs are not finite.
+    :raises ValueError: If not exactly one of ``l90`` / ``l95`` is given, the
+        inputs are not finite, or the percentile ordering is inverted
+        (``L90``/``L95`` cannot exceed ``L50`` — almost certainly swapped
+        arguments, which the squared spread would otherwise hide).
     """
     median = _finite(l50, "l50")
     if (l90 is None) == (l95 is None):
@@ -366,11 +391,18 @@ def gaussian_residual_level(
     if l90 is not None:
         spread = median - _finite(l90, "l90")
         divisor = _GAUSS_DIVISOR_L90
+        name = "l90"
     elif l95 is not None:
         spread = median - _finite(l95, "l95")
         divisor = _GAUSS_DIVISOR_L95
+        name = "l95"
     else:  # unreachable: the check above guarantees exactly one is supplied
         raise ValueError("Supply exactly one of 'l90' or 'l95'.")
+    if spread < 0.0:
+        raise ValueError(
+            f"'{name}' exceeds 'l50': the exceedance percentiles satisfy "
+            "L50 >= L90 >= L95, so the arguments look swapped."
+        )
     return float(median + _GAUSS_CONSTANT * (spread / divisor) ** 2)
 
 
@@ -463,17 +495,30 @@ def residual_correction_uncertainty(
     return float(np.sqrt((c_lp * u_lp) ** 2 + (c_res * u_res) ** 2))
 
 
+#: Level spread (max - min, dB) beyond which the Formula (20) Note 2
+#: approximation is flagged as unreliable.
+_LEVEL_SPREAD_WARNING_DB = 3.0
+
+
 @dataclass(frozen=True)
 class RepeatedMeasurementResult:
     """Energy-mean level and its uncertainty from repeats (Formulae (17)–(20)).
 
-    :ivar mean_level: Energy-mean level ``Lk = 10 lg((1/N)·Σ 10^(0.1·Li))``, dB.
-    :ivar standard_uncertainty: Standard uncertainty ``uk``, in dB.
+    :ivar mean_level: Energy-mean level ``Lk = 10 lg((1/N)·Σ 10^(0.1·Li))``, dB
+        (Formula (18)).
+    :ivar standard_uncertainty: Standard uncertainty ``uk`` by the primary
+        route, Formulae (17)+(19): the sample standard deviation ``sk`` of the
+        energy values ``10^(0.1·Li)`` mapped back to level,
+        ``uk = 10 lg(10^(0.1·Lk) + sk) − Lk``, in dB.
+    :ivar approximate_uncertainty: The Note 2 substitute (Formula (20)),
+        ``√(Σ(Li − Lk)²/(N − 1))``, in dB — valid only when the spread of the
+        ``Li`` is small; it grossly inflates for spread levels.
     :ivar n: Number of measurements.
     """
 
     mean_level: float
     standard_uncertainty: float
+    approximate_uncertainty: float
     n: int
 
 
@@ -482,22 +527,47 @@ def uncertainty_from_repeated_measurements(
 ) -> RepeatedMeasurementResult:
     """Energy mean and its uncertainty from repeated levels (Formulae (17)–(20)).
 
-    ``Lk = 10 lg((1/N)·Σ 10^(0.1·Li))`` (Formula (18)); the standard
-    uncertainty is the standard deviation of the level values
-    ``uk = √(Σ(Li − Lk)²/(N − 1))`` (Formula (20)).
+    ``Lk = 10 lg((1/N)·Σ 10^(0.1·Li))`` (Formula (18)). The standard
+    uncertainty follows the primary §10.5 route: the sample standard
+    deviation ``sk`` of the energy values ``10^(0.1·Li)`` (Formula (17))
+    propagated back to level, ``uk = 10 lg(10^(0.1·Lk) + sk) − Lk``
+    (Formula (19)). The Note 2 level-domain approximation
+    ``√(Σ(Li − Lk)²/(N − 1))`` (Formula (20)) is also reported as
+    ``approximate_uncertainty``; it is valid only "if the difference between
+    different Li is small", so a spread above 3 dB triggers an
+    :class:`EnvironmentalMeasurementWarning` (e.g. [50, 60, 70] dB gives
+    3.94 dB by Formulae (17)+(19) but 12.18 dB by Formula (20)).
 
     :param levels: The repeated measured levels ``Li``, in dB (at least two).
     :return: A :class:`RepeatedMeasurementResult`.
     :raises ValueError: If fewer than two finite levels are given.
     """
+    import warnings
+
     lev = np.asarray(levels, dtype=np.float64)
     if lev.ndim != 1 or lev.size < 2:
         raise ValueError("'levels' must be a 1-D array of at least two values.")
     if not np.all(np.isfinite(lev)):
         raise ValueError("'levels' must be finite.")
     n = int(lev.size)
-    mean_level = 10.0 * np.log10(np.mean(10.0 ** (0.1 * lev)))
-    uk = np.sqrt(np.sum((lev - mean_level) ** 2) / (n - 1))
+    energies = 10.0 ** (0.1 * lev)
+    mean_energy = float(np.mean(energies))
+    mean_level = 10.0 * np.log10(mean_energy)
+    sk = float(np.sqrt(np.sum((energies - mean_energy) ** 2) / (n - 1)))
+    uk = 10.0 * np.log10(mean_energy + sk) - mean_level
+    uk_approx = float(np.sqrt(np.sum((lev - mean_level) ** 2) / (n - 1)))
+    if float(np.max(lev) - np.min(lev)) > _LEVEL_SPREAD_WARNING_DB:
+        warnings.warn(
+            "The repeated levels spread by more than 3 dB: the Formula (20) "
+            "approximation (approximate_uncertainty) is unreliable there; "
+            "use the primary Formulae (17)+(19) standard_uncertainty "
+            "(ISO 1996-2:2017, 10.5 Note 2).",
+            EnvironmentalMeasurementWarning,
+            stacklevel=2,
+        )
     return RepeatedMeasurementResult(
-        mean_level=float(mean_level), standard_uncertainty=float(uk), n=n
+        mean_level=float(mean_level),
+        standard_uncertainty=float(uk),
+        approximate_uncertainty=uk_approx,
+        n=n,
     )

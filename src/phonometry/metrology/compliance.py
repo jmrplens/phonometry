@@ -421,6 +421,41 @@ def _weighting_response_db(wf: WeightingFilter, frequencies: np.ndarray) -> np.n
     return np.asarray(gain_db[:-1] - gain_db[-1], dtype=np.float64)  # relative to 1 kHz
 
 
+def _between_nominals_sweep(
+    wf: WeightingFilter,
+    freqs_exact: np.ndarray,
+    limits1: Tuple[np.ndarray, np.ndarray],
+    limits2: Tuple[np.ndarray, np.ndarray],
+    sweep_points: int,
+) -> Dict[str, float]:
+    """Subclause 5.5.7 sweep between adjacent exact nominal frequencies.
+
+    The acceptance limits between two adjacent nominal frequencies are the
+    larger of the two adjacent Table 3 limits; the design goal there is the
+    analytic Annex E response.
+    """
+    lower1, upper1 = limits1
+    lower2, upper2 = limits2
+    grid = np.geomspace(freqs_exact[0], freqs_exact[-1], sweep_points)
+    sweep_dev = _weighting_response_db(wf, grid) - _analytic_weighting_db(
+        wf.curve, grid
+    )
+    seg = np.clip(np.searchsorted(freqs_exact, grid, side="right") - 1, 0,
+                  freqs_exact.size - 2)
+    up1 = np.maximum(upper1[seg], upper1[seg + 1])
+    lo1 = np.minimum(lower1[seg], lower1[seg + 1])
+    up2 = np.maximum(upper2[seg], upper2[seg + 1])
+    lo2 = np.minimum(lower2[seg], lower2[seg + 1])
+    sweep_m1 = np.minimum(up1 - sweep_dev, sweep_dev - lo1)
+    sweep_m2 = np.minimum(up2 - sweep_dev, sweep_dev - lo2)
+    worst = int(np.argmin(sweep_m1))
+    return {
+        "worst_freq": float(grid[worst]),
+        "margin_class1_db": float(np.min(sweep_m1)),
+        "margin_class2_db": float(np.min(sweep_m2)),
+    }
+
+
 def verify_weighting_class(
     wf: WeightingFilter, *, sweep_points: int = 4096
 ) -> Dict[str, Any]:
@@ -527,27 +562,9 @@ def verify_weighting_class(
             "between_nominals": None,
         }
 
-    # Subclause 5.5.7 sweep: between two adjacent (exact) nominal frequencies
-    # the acceptance limits are the larger of the two adjacent Table 3 limits;
-    # the design goal there is the analytic Annex E response.
-    grid = np.geomspace(freqs_exact[0], freqs_exact[-1], sweep_points)
-    sweep_dev = _weighting_response_db(wf, grid) - _analytic_weighting_db(
-        wf.curve, grid
+    between = _between_nominals_sweep(
+        wf, freqs_exact, (lower1, upper1), (lower2, upper2), sweep_points
     )
-    seg = np.clip(np.searchsorted(freqs_exact, grid, side="right") - 1, 0,
-                  freqs_exact.size - 2)
-    up1 = np.maximum(upper1[seg], upper1[seg + 1])
-    lo1 = np.minimum(lower1[seg], lower1[seg + 1])
-    up2 = np.maximum(upper2[seg], upper2[seg + 1])
-    lo2 = np.minimum(lower2[seg], lower2[seg + 1])
-    sweep_m1 = np.minimum(up1 - sweep_dev, sweep_dev - lo1)
-    sweep_m2 = np.minimum(up2 - sweep_dev, sweep_dev - lo2)
-    worst = int(np.argmin(sweep_m1))
-    between: Dict[str, float] = {
-        "worst_freq": float(grid[worst]),
-        "margin_class1_db": float(np.min(sweep_m1)),
-        "margin_class2_db": float(np.min(sweep_m2)),
-    }
 
     classes = [band["class"] for band in bands]
     if all(c == 1 for c in classes) and between["margin_class1_db"] >= 0.0:

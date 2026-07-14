@@ -560,6 +560,39 @@ def _detect_tones(
     return tones
 
 
+def _step3_groups(
+    tones: "list[tuple[float, float, float, float, float, list[int]]]",
+) -> "list[tuple[int, ...]]":
+    """Clause 5.3.8 Step 3 clusters of tones sharing a critical band.
+
+    Each tone's own critical band yields a candidate set; the bandwidth grows
+    with frequency, so the candidate sets of a chain of tones need not be
+    identical even when they overlap. Candidates sharing a member therefore
+    merge into one connected component, giving exactly one FG entry per
+    cluster. Clusters of exactly two tones below 1000 Hz further apart than
+    fD are rated separately (Formulae (18)/(19)) and yield no FG entry.
+    """
+    clusters: list[set[int]] = []
+    for band_tone in tones:
+        f1, f2 = critical_band_corners(band_tone[0])
+        members = {i for i, t in enumerate(tones) if f1 <= t[0] <= f2}
+        if len(members) < 2:
+            continue
+        for c in [c for c in clusters if c & members]:
+            members |= c
+        clusters = [c for c in clusters if not (c & members)]
+        clusters.append(members)
+    groups: list[tuple[int, ...]] = []
+    for cluster in clusters:
+        members_t = tuple(sorted(cluster))
+        if len(members_t) == 2:
+            (ta, tb) = (tones[members_t[0]], tones[members_t[1]])
+            if resolve_tones_separately(ta[0], tb[0], ta[4], tb[4]):
+                continue  # rated separately, no FG entry
+        groups.append(members_t)
+    return groups
+
+
 def analyze_spectrum(
     levels: "ArrayLike",
     frequencies: "ArrayLike",
@@ -626,30 +659,7 @@ def analyze_spectrum(
     # Clause 5.3.8 Step 3: combine the tone levels of tones sharing a critical
     # band (Formula (17)), rated at the most audible member — except exactly
     # two tones below 1000 Hz further apart than fD (Formulae (18)/(19)).
-    # Each tone's own critical band yields a candidate set; the bandwidth
-    # grows with frequency, so the candidate sets of a chain of tones need
-    # not be identical even when they overlap. Candidates sharing a member
-    # therefore merge into one connected component, giving exactly one FG
-    # entry per cluster.
-    clusters: list[set[int]] = []
-    for band_tone in tones:
-        f1, f2 = critical_band_corners(band_tone[0])
-        members = {i for i, t in enumerate(tones) if f1 <= t[0] <= f2}
-        if len(members) < 2:
-            continue
-        overlapping = [c for c in clusters if c & members]
-        for c in overlapping:
-            members |= c
-        clusters = [c for c in clusters if not (c & members)]
-        clusters.append(members)
-    groups: list[tuple[int, ...]] = []
-    for cluster in clusters:
-        members_t = tuple(sorted(cluster))
-        if len(members_t) == 2:
-            (ta, tb) = (tones[members_t[0]], tones[members_t[1]])
-            if resolve_tones_separately(ta[0], tb[0], ta[4], tb[4]):
-                continue  # rated separately, no FG entry
-        groups.append(members_t)
+    groups = _step3_groups(tones)
 
     entries = [(t[0], t[1], t[2], t[3], 1) for t in tones]
     for group in groups:

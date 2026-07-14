@@ -201,7 +201,7 @@ def _sensitivity(model: Model, values: np.ndarray, uncertainties: np.ndarray) ->
     sqrt_eps = math.sqrt(float(np.finfo(np.float64).eps))
     for i in range(n):
         step = max(float(uncertainties[i]), sqrt_eps * abs(float(values[i])))
-        if step == 0.0:
+        if not (step > 0.0):
             step = sqrt_eps
         step = max(step, 4.0 * float(np.spacing(abs(values[i]))))
         up = values.copy()

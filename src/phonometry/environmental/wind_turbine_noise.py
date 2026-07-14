@@ -211,6 +211,44 @@ class WindTurbineTonalityResult:
         return plot_wind_turbine_tonality(self, ax=ax, **kwargs)
 
 
+def _validate_narrowband(
+    levels: "NDArray[np.float64] | list[float]",
+    frequencies: "NDArray[np.float64] | list[float]",
+) -> "tuple[NDArray[np.float64], NDArray[np.float64], float]":
+    """Coerce and validate a uniformly-spaced narrowband spectrum."""
+    lv = np.asarray(levels, dtype=np.float64)
+    fr = np.asarray(frequencies, dtype=np.float64)
+    if lv.ndim != 1 or lv.shape != fr.shape or lv.size < 3:
+        raise ValueError("'levels' and 'frequencies' must be 1-D and the same length (>= 3).")
+    if not (np.all(np.isfinite(lv)) and np.all(np.isfinite(fr))):
+        raise ValueError("'levels' and 'frequencies' must be finite.")
+    diffs = np.diff(fr)
+    if np.any(diffs <= 0.0):
+        raise ValueError("'frequencies' must be strictly increasing.")
+    df = float(np.median(diffs))
+    if np.any(np.abs(diffs - df) > 1e-3 * df):
+        raise ValueError("'frequencies' must be uniformly spaced (a narrowband spectrum).")
+    return lv, fr, df
+
+
+def _screen_possible_tone(
+    lv: "NDArray[np.float64]", in_band: "NDArray[np.bool_]", peak: int,
+) -> bool:
+    """9.5.2 possible-tone screen: local maximum more than 6 dB above the
+    critical-band energy average that excludes the maximum line and its two
+    adjacent lines."""
+    screen_indices = np.nonzero(in_band)[0]
+    screen_indices = screen_indices[np.abs(screen_indices - peak) > 1]
+    local_max = (peak == 0 or lv[peak] >= lv[peak - 1]) and (
+        peak == lv.size - 1 or lv[peak] >= lv[peak + 1]
+    )
+    return bool(
+        screen_indices.size
+        and local_max
+        and lv[peak] > _energy_mean(lv[screen_indices]) + _POSSIBLE_TONE_MARGIN
+    )
+
+
 def wind_turbine_tonality(
     levels: "NDArray[np.float64] | list[float]",
     frequencies: "NDArray[np.float64] | list[float]",
@@ -250,18 +288,7 @@ def wind_turbine_tonality(
     :raises ValueError: If the inputs are invalid or the candidate lies below
         20 Hz.
     """
-    lv = np.asarray(levels, dtype=np.float64)
-    fr = np.asarray(frequencies, dtype=np.float64)
-    if lv.ndim != 1 or lv.shape != fr.shape or lv.size < 3:
-        raise ValueError("'levels' and 'frequencies' must be 1-D and the same length (>= 3).")
-    if not (np.all(np.isfinite(lv)) and np.all(np.isfinite(fr))):
-        raise ValueError("'levels' and 'frequencies' must be finite.")
-    diffs = np.diff(fr)
-    if np.any(diffs <= 0.0):
-        raise ValueError("'frequencies' must be strictly increasing.")
-    df = float(np.median(diffs))
-    if np.any(np.abs(diffs - df) > 1e-3 * df):
-        raise ValueError("'frequencies' must be uniformly spaced (a narrowband spectrum).")
+    lv, fr, df = _validate_narrowband(levels, frequencies)
 
     peak = int(np.argmax(lv)) if tone_frequency is None else int(np.argmin(np.abs(fr - tone_frequency)))
     fc = float(fr[peak])
@@ -291,19 +318,7 @@ def wind_turbine_tonality(
     l_pn_avg = _energy_mean(masking) if masking.size else l70
     tone_threshold = l_pn_avg + _TONE_MARGIN
 
-    # 9.5.2 possible-tone screening: the candidate must be a local maximum
-    # more than 6 dB above the critical-band energy average that excludes the
-    # maximum line and its two adjacent lines.
-    screen_indices = np.nonzero(in_band)[0]
-    screen_indices = screen_indices[np.abs(screen_indices - peak) > 1]
-    local_max = (peak == 0 or lv[peak] >= lv[peak - 1]) and (
-        peak == lv.size - 1 or lv[peak] >= lv[peak + 1]
-    )
-    possible_tone = bool(
-        screen_indices.size
-        and local_max
-        and lv[peak] > _energy_mean(lv[screen_indices]) + _POSSIBLE_TONE_MARGIN
-    )
+    possible_tone = _screen_possible_tone(lv, in_band, peak)
 
     # Tone lines (9.5.3, "adjacent" struck out by A1:2018): every line in the
     # critical band above the tone threshold and within 10 dB of the highest

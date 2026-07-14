@@ -140,8 +140,9 @@ def test_sweep_result_reported_for_compliant_filter() -> None:
     between = result["between_nominals"]
     assert set(between) == {"worst_freq", "margin_class1_db", "margin_class2_db"}
     assert between["margin_class1_db"] >= 0.0
+    wf = WeightingFilter(48000, "A")
     with pytest.raises(ValueError, match="sweep_points"):
-        verify_weighting_class(WeightingFilter(48000, "A"), sweep_points=8)
+        verify_weighting_class(wf, sweep_points=8)
 
 
 @pytest.mark.parametrize("fs,expected", [(32000, 2), (24000, 2)])

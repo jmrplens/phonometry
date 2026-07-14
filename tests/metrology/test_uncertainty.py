@@ -178,13 +178,14 @@ def test_invalid_inputs_raise() -> None:
         u.combine_uncertainty(
             lambda a, b: a + b, [u.Quantity(0, 1)] * 2,
             correlation=np.array([[1.0, 1.5], [1.5, 1.0]]))
+    quantities = [u.Quantity(0, 1)]
     with pytest.raises(ValueError, match="trials"):
-        u.monte_carlo(_add4, [u.Quantity(0, 1)], trials=0)
+        u.monte_carlo(_add4, quantities, trials=0)
     with pytest.raises(ValueError, match="at least 2"):
         # trials=1 used to return NaN (ddof=1) with a raw numpy warning.
-        u.monte_carlo(_add4, [u.Quantity(0, 1)], trials=1)
+        u.monte_carlo(_add4, quantities, trials=1)
     with pytest.raises(ValueError, match="coverage"):
-        u.monte_carlo(_add4, [u.Quantity(0, 1)], coverage=2.0)
+        u.monte_carlo(_add4, quantities, coverage=2.0)
     with pytest.raises(ValueError, match="at least one"):
         u.monte_carlo(_add4, [])
 

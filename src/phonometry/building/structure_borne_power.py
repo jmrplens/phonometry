@@ -337,10 +337,12 @@ def equivalent_free_velocity_level(
 ) -> np.ndarray:
     """Equivalent free velocity level of the source (EN 15657:2018, Formula 18).
 
-    ``L_vf,eq = L_Ws,high - 10 lg(|Y_R,high,eq|**2 / (Re{Y_R,high,eq} Y0))
+    ``L_vf,eq = L_Ws,high + 10 lg(|Y_R,high,eq|**2 / (Re{Y_R,high,eq} Y0))
     + 60 dB`` in dB re 1e-9 m/s, from the power injected into the
     *high-mobility* reception plate and its equivalent (complex) point
-    mobility.
+    mobility. The plus sign follows the printed formula and the physics
+    (``v_f**2 = P |Y|**2 / Re{Y}``); it is what makes Formulae (15) and (18)
+    combine through Formula (19) into ``|Y_S,eq| = v_f / F_b``.
 
     :param power_level: Injected power level ``L_Ws,high`` (per band), in dB
         re 1 pW.
@@ -357,7 +359,7 @@ def equivalent_free_velocity_level(
             "'plate_mobility' must have a positive, finite real part."
         )
     term = np.abs(y) ** 2 / (y_re * REFERENCE_MOBILITY)
-    return np.asarray(lw - 10.0 * np.log10(term) + 60.0, dtype=np.float64)
+    return np.asarray(lw + 10.0 * np.log10(term) + 60.0, dtype=np.float64)
 
 
 def source_mobility_from_levels(

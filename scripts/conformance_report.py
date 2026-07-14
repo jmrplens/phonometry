@@ -1009,7 +1009,8 @@ def _chk_iso717_2_lnw_covered() -> Outcome:
 @register(
     "Room & building acoustics",
     "ISO 717-2 Annex C, Table C.2",
-    "Floor-covering improvement ΔLw and CI,Δ (Formulae (2)/(A.4))",
+    "Floor-covering improvement ΔLw and CI,Δ (Formulae (2)/(A.4); CI,Δ from"
+    " the normative Table 4 floor, not the 2020 print's misprinted C.2 chain)",
 )
 def _chk_iso717_2_c2_improvement() -> Outcome:
     dlw = ph.weighted_impact_improvement(ref.ISO717_2_ANNEX_C2_DELTA_L)

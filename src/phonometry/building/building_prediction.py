@@ -35,7 +35,8 @@ lightweight façade junctions (E.6), junctions of lightweight double-leaf walls
 with homogeneous elements (E.7) or with other coupled double-leaf walls (E.8),
 and corners / thickness changes (E.9) are empirical functions of the mass
 ratio ``M = lg(m'⊥,i / m'i)``. A minimum value ``Kij,min`` follows from
-Formula (29).
+the Kij,min relation of Clause 4.4.2 (printed as Eq. (23)
+in the BS EN 12354-1:2000 edition).
 
 **Impact — Formula (21).** ``L'n,w = Ln,w,eq − ΔLw + K`` with the bare-floor
 equivalent level ``Ln,w,eq`` (Annex B ``164 − 35 lg(m'/m'0)``), the covering
@@ -372,7 +373,9 @@ def junction_vibration_reduction(
 def junction_min_vibration_reduction(
     coupling_length: float, s_i: float, s_j: float
 ) -> float:
-    """Minimum vibration reduction index ``Kij,min`` (EN 12354-1 Formula 29).
+    """Minimum vibration reduction index ``Kij,min`` (EN 12354-1 Clause 4.4.2).
+
+    Printed as Eq. (23) in the BS EN 12354-1:2000 edition.
 
     ``Kij,min = 10 lg[ lf · l0 · (1/Si + 1/Sj) ]`` with the reference coupling
     length ``l0 = 1 m``. When the tabulated ``Kij`` is below this value, the
@@ -495,7 +498,7 @@ def flanking_element(
     (Clause 4.4.1). Returns the ``Ff``, ``Df`` and ``Fd`` paths that this element
     contributes across its junction with the separating element.
 
-    **Kij,min (Clause 4.4.2, Formula (29)).** When ``flanking_area`` is given,
+    **Kij,min (Clause 4.4.2).** When ``flanking_area`` is given,
     the mandatory floor ``Kij ≥ Kij,min`` is applied automatically per path:
     ``KFf`` is clamped to ``10 lg[lf·l0·(2/SF)]`` (both junction elements are
     the flanking element) and ``KFd``/``KDf`` to

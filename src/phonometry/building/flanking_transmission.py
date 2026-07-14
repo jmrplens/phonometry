@@ -356,6 +356,14 @@ def _validate_octave_triples(freq_groups: np.ndarray) -> None:
             )
 
 
+def _detect_band_type(frequencies: "np.ndarray | None") -> str:
+    """``"octave"`` when consecutive centres step by ~2, else third-octave."""
+    if frequencies is None or frequencies.size < 2:
+        return "third-octave"
+    ratio = float(np.median(frequencies[1:] / frequencies[:-1]))
+    return "octave" if ratio > 1.6 else "third-octave"
+
+
 def _single_number_kij(
     frequencies: np.ndarray | None,
     k_ij: np.ndarray,
@@ -470,7 +478,8 @@ def vibration_reduction_index(
     return VibrationReductionResult(
         frequencies=freq,
         k_ij=k_ij,
-        single_number=_single_number_kij(freq, k_ij, bracketed=bracketed),
+        single_number=_single_number_kij(
+            freq, k_ij, bracketed=bracketed, band_type=_detect_band_type(freq)),
         bracketed=bracketed,
     )
 

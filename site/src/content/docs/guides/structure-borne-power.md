@@ -47,7 +47,7 @@ bands = np.array([100.0, 200.0, 400.0, 800.0])
 lv_i = np.array([88.0, 90.0, 87.0, 89.0, 86.0, 90.0])   # six plate positions @ 200 Hz
 print(round(ph.spatial_mean_velocity_level(lv_i), 2))    # 88.6 dB re 1 nm/s
 
-# Characteristic power level from the reception plate (loss factor from Ts):
+# Power level injected into the reception plate (loss factor from Ts):
 res = ph.reception_plate_power(
     velocity_level=np.array([90.0, 87.0, 82.0, 77.0]),
     frequency=bands, mass_per_area=600.0, area=2.0, reverberation_time=0.8,

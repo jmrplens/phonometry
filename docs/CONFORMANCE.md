@@ -132,7 +132,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 717-1:2020 Annex C, Table C.2 | Enlarged range 50-5000 Hz: Rw (C; Ctr; C50-5000; Ctr,50-5000) | Rw 30 (C -2; Ctr -3; C50-5000 -2; Ctr,50-5000 -4) | Rw 30 (C -2; Ctr -3; C50-5000 -2; Ctr,50-5000 -4) | exact | &#9989; |
 | ISO 717-2 Annex C, Table C.1 | Weighted impact sound pressure level Ln,w (CI) | Ln,w 79 (CI -11; sum 28.0 dB) | Ln,w 79 (CI -11; sum 28.0 dB) | +0 dB | &#9989; |
 | ISO 717-2 Annex C, Table C.1 (covered) | Weighted impact level of the floor WITH covering Ln,w (CI) | Ln,w 64 (CI -3; sum 30.0 dB) | Ln,w 64 (CI -3; sum 30.0 dB) | +0 dB | &#9989; |
-| ISO 717-2 Annex C, Table C.2 | Floor-covering improvement ΔLw and CI,Δ (Formulae (2)/(A.4)) | ΔLw 15 dB; CI,Δ -9 dB (Table 4 reference floor) | ΔLw 15 dB; CI,Δ -9 dB | +0 dB | &#9989; |
+| ISO 717-2 Annex C, Table C.2 | Floor-covering improvement ΔLw and CI,Δ (Formulae (2)/(A.4); CI,Δ from the normative Table 4 floor, not the 2020 print's misprinted C.2 chain) | ΔLw 15 dB; CI,Δ -9 dB (Table 4 reference floor) | ΔLw 15 dB; CI,Δ -9 dB | +0 dB | &#9989; |
 | ISO 354:2003 Eq. 5/8 | Sabine inversion recovers absorption area | 9.212828 m^2 (+/-0 m^2) | 9.212828 m^2 | 0 m^2 | &#9989; |
 | ISO 3382-3:2012 Clause 6.2 | Open-plan spatial decay rate D2,S (-6 dB/doubling) | 6 dB (+/-0 dB) | 6 dB | 0 dB | &#9989; |
 | ISO 16283-3:2016 Clause 3.12 | Facade R'45 isolates the -1.5 dB incidence correction (S=A) | 38.5 dB (+/-0 dB) | 38.5 dB | 0 dB | &#9989; |

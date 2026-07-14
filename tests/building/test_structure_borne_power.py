@@ -205,13 +205,47 @@ def test_conversion_chain_reproduces_annex_i8_wall() -> None:
 
 
 def test_free_velocity_level_formula_18_real_mobility() -> None:
-    """For a real plate mobility, (18) reduces to L_Ws - 10 lg(Y) + 60."""
+    """For a real plate mobility, (18) reduces to L_Ws + 10 lg(Y) + 60.
+
+    Independent anchor from the physics rather than the code: for a real Y
+    the injected power is P = v_f**2 / Y, so v_f**2 = P*Y and
+    L_vf = 10 lg(P*Y/(1e-9)**2) with P in watts.
+    """
     from phonometry import equivalent_free_velocity_level
 
-    lvf = equivalent_free_velocity_level(70.0, 1.0e-2)
-    assert float(lvf) == pytest.approx(70.0 - 10.0 * math.log10(1.0e-2) + 60.0)
+    p_watt = 1e-12 * 10.0 ** (70.0 / 10.0)
+    y = 1.0e-2
+    expected = 10.0 * math.log10(p_watt * y / 1e-9**2)
+    lvf = equivalent_free_velocity_level(70.0, y)
+    assert float(lvf) == pytest.approx(expected)
+    assert float(lvf) == pytest.approx(70.0 + 10.0 * math.log10(y) + 60.0)
     with pytest.raises(ValueError, match="positive, finite real part"):
         equivalent_free_velocity_level(70.0, -1.0e-2)
+
+
+def test_formulas_15_18_19_are_mutually_consistent() -> None:
+    """(15) + (18) must combine through (19) into |Y_S,eq| = v_f / F_b.
+
+    Synthesize a source of known free velocity and blocked force measured on
+    ideal low- and high-mobility plates, then recover the source mobility.
+    """
+    from phonometry import (
+        equivalent_blocked_force_level,
+        equivalent_free_velocity_level,
+        source_mobility_from_levels,
+    )
+
+    y_source = 2.5e-4          # true |Y_S|, m/(N s)
+    v_free = 3.2e-6            # true free velocity, m/s
+    f_blocked = v_free / y_source
+    y_low = 5.0e-6             # low-mobility plate: F ~ F_b, P = F_b**2 Re{Y}
+    lw_low = 10.0 * math.log10(f_blocked**2 * y_low / 1e-12)
+    y_high = 1.0e-2            # high-mobility plate: v ~ v_f, P = v_f**2 / Y
+    lw_high = 10.0 * math.log10(v_free**2 / y_high / 1e-12)
+    lfb = equivalent_blocked_force_level(lw_low, y_low)
+    lvf = equivalent_free_velocity_level(lw_high, y_high)
+    y_rec = source_mobility_from_levels(lvf, lfb)
+    assert float(y_rec) == pytest.approx(y_source, rel=1e-9)
 
 
 def test_source_mobility_formula_19_round_trip() -> None:

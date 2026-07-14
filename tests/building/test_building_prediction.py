@@ -254,7 +254,7 @@ def test_flanking_element_triplet() -> None:
 
 
 def test_flanking_element_applies_kij_min_from_geometry() -> None:
-    # Clause 4.4.2 / Formula (29): with the flanking area given, each path is
+    # Clause 4.4.2 (Eq. (23) in the BS:2000 print): with the flanking area, each path is
     # clamped to its own Kij,min. Small light elements (lf = 4 m, SF = 1.5 m2)
     # give KFf,min = 10 lg(4*(2/1.5)) = 7.27 dB, above a raw 5 dB Kij.
     lf, sf, ss = 4.0, 1.5, 11.5

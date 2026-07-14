@@ -115,6 +115,17 @@ def test_unknown_frf_raises() -> None:
         convert_frf(1.0, 100.0, "mobility", "velocity")
 
 
+def test_zero_value_reciprocal_conversion_raises() -> None:
+    # A dead channel cannot be converted through a force-per-motion reciprocal.
+    with pytest.raises(ValueError, match="dead channel"):
+        convert_frf(0.0, 100.0, "mobility", "impedance")
+    with pytest.raises(ValueError, match="dead channel"):
+        convert_frf([1e-3, 0.0], 100.0, "impedance", "mobility")
+    # Motion-per-force to motion-per-force tolerates zeros (0 maps to 0).
+    out = convert_frf(0.0, 100.0, "mobility", "accelerance")
+    assert complex(out) == 0.0
+
+
 def test_non_positive_frequency_raises() -> None:
     with pytest.raises(ValueError, match="frequency"):
         convert_frf(1.0, 0.0, "receptance", "mobility")

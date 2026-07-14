@@ -155,7 +155,9 @@ def convert_frf(
         ``"impedance"`` or ``"apparent_mass"``.
     :param target: The FRF kind to convert to (same set).
     :return: The FRF value(s) of kind *target*, as a complex array.
-    :raises ValueError: for an unknown FRF name or a non-positive frequency.
+    :raises ValueError: for an unknown FRF name, a non-positive frequency, or
+        a zero *value* (dead channel) when the conversion involves a
+        force-per-motion reciprocal.
     """
     for name, role in ((source, "source"), (target, "target")):
         if name not in _FRF_TYPES:
@@ -164,6 +166,12 @@ def convert_frf(
             )
     omega = _omega(frequency)
     val = np.asarray(value, dtype=np.complex128)
+    if (_FRF_TYPES[source][1] or _FRF_TYPES[target][1]) and np.any(val == 0.0):
+        raise ValueError(
+            "'value' contains zeros (dead channel); converting "
+            f"{source!r} to {target!r} takes a reciprocal, which is "
+            "undefined there."
+        )
     receptance = _to_receptance(val, omega, source)
     return np.asarray(_from_receptance(receptance, omega, target), dtype=np.complex128)
 

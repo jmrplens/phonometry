@@ -89,13 +89,19 @@ def transfer_stiffness_level(
     ``L_k = 20 lg(|k2,1| / k0)`` dB, with ``k0`` the reference stiffness.
 
     :param stiffness: Dynamic transfer stiffness ``k2,1`` (complex or real,
-        scalar or array), in N/m.
+        scalar or array, non-zero), in N/m.
     :param reference: Reference stiffness ``k0`` (Default: 1 N/m), in N/m.
     :return: The level ``L_k``, in dB re ``k0``.
-    :raises ValueError: for a non-positive reference.
+    :raises ValueError: for a non-positive reference or a zero stiffness
+        magnitude (a dead channel has no level).
     """
     reference = require_positive(reference, "reference")
     magnitude = np.abs(np.asarray(stiffness, dtype=np.complex128))
+    if np.any(magnitude == 0.0):
+        raise ValueError(
+            "'stiffness' contains zero magnitudes; a zero (dead-channel) "
+            "stiffness has no level."
+        )
     return np.asarray(20.0 * np.log10(magnitude / reference), dtype=np.float64)
 
 
@@ -106,10 +112,17 @@ def loss_factor(stiffness: ArrayLike) -> np.ndarray:
     negligible; it is the tangent of the phase angle of the transfer stiffness.
 
     :param stiffness: Dynamic transfer stiffness ``k2,1`` (complex, scalar or
-        array), in N/m.
+        array, with a non-zero real part), in N/m.
     :return: The loss factor ``eta`` (dimensionless).
+    :raises ValueError: for a purely imaginary stiffness (``Re(k2,1) = 0``),
+        for which the loss factor is undefined.
     """
     k = np.asarray(stiffness, dtype=np.complex128)
+    if np.any(k.real == 0.0):
+        raise ValueError(
+            "'stiffness' contains purely imaginary values (Re = 0); the loss "
+            "factor eta = Im/Re is undefined there."
+        )
     return np.asarray(k.imag / k.real, dtype=np.float64)
 
 
@@ -122,11 +135,18 @@ def transfer_stiffness_direct(
     displacement phasor.
 
     :param blocking_force: Blocked output force phasor ``F2,b`` (complex), in N.
-    :param input_displacement: Input displacement phasor ``u1`` (complex), in m.
+    :param input_displacement: Input displacement phasor ``u1`` (complex,
+        non-zero), in m.
     :return: The dynamic transfer stiffness ``k2,1``, in N/m.
+    :raises ValueError: for a zero input displacement (dead input channel).
     """
     f2b = np.asarray(blocking_force, dtype=np.complex128)
     u1 = np.asarray(input_displacement, dtype=np.complex128)
+    if np.any(u1 == 0.0):
+        raise ValueError(
+            "'input_displacement' contains zeros (dead input channel); the "
+            "ratio k2,1 = F2,b/u1 is undefined there."
+        )
     return np.asarray(f2b / u1, dtype=np.complex128)
 
 

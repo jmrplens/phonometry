@@ -56,6 +56,14 @@ def test_level_rejects_non_positive_reference() -> None:
         transfer_stiffness_level(1e6, reference=0.0)
 
 
+def test_level_rejects_zero_stiffness() -> None:
+    # A dead channel (|k| = 0) has no level; -inf must not propagate silently.
+    with pytest.raises(ValueError, match="zero"):
+        transfer_stiffness_level(0.0)
+    with pytest.raises(ValueError, match="dead-channel"):
+        transfer_stiffness_level([1e6, 0.0 + 0.0j])
+
+
 # ---------------------------------------------------------------------------
 # Loss factor (ISO 10846-1, 3.8)
 # ---------------------------------------------------------------------------
@@ -63,6 +71,14 @@ def test_loss_factor_is_tan_phase() -> None:
     # k = k0 (1 + j eta)  ->  Im/Re = eta
     assert loss_factor(1e6 * (1.0 + 0.05j)) == pytest.approx(0.05)
     assert loss_factor(1e6 + 1j * 3e4) == pytest.approx(0.03)
+
+
+def test_loss_factor_rejects_purely_imaginary_stiffness() -> None:
+    # Re(k) = 0 -> eta = Im/Re is undefined, not inf.
+    with pytest.raises(ValueError, match="purely imaginary"):
+        loss_factor(1j * 1e6)
+    with pytest.raises(ValueError, match="purely imaginary"):
+        loss_factor([1e6 + 1e4j, 0.0 + 5e5j])
 
 
 # ---------------------------------------------------------------------------
@@ -77,6 +93,14 @@ def test_direct_method_preserves_phase() -> None:
     # A phase lag in the force appears directly in k2,1.
     k = transfer_stiffness_direct(2.0 * np.exp(1j * 0.3), 1e-3 + 0j)
     assert np.angle(complex(k)) == pytest.approx(0.3)
+
+
+def test_direct_method_rejects_zero_displacement() -> None:
+    # A dead u1 channel must raise, not return an infinite stiffness.
+    with pytest.raises(ValueError, match="input_displacement"):
+        transfer_stiffness_direct(5.0 + 0j, 0.0 + 0j)
+    with pytest.raises(ValueError, match="dead input channel"):
+        transfer_stiffness_direct([5.0, 4.0], [1e-6, 0.0])
 
 
 # ---------------------------------------------------------------------------

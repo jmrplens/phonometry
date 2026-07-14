@@ -102,3 +102,35 @@ def test_unknown_class_and_model_rejected() -> None:
 def test_ship_traffic_plot_smoke() -> None:
     s = ship_source_spectrum(18.0, 300.0, vessel_class="containership")
     assert s.plot() is not None
+
+
+# RANDI 3.1 Physics Description (Breeding et al., NRL/FR/7176--95-9628,
+# approved for public release; Table 2): representative source levels, dB re
+# 1 uPa at 1 m, computed from Eq. (2)-(5) with the average length and speed of
+# each Table 1 class. The module reproduces the Large Tanker and Super Tanker
+# rows to 0.06 dB at every tabulated frequency, and the Merchant/Tanker rows
+# at all but one cell each (25 Hz and 300 Hz respectively, where the printed
+# table deviates ~1-3 dB from its own equations; those cells and the Fishing
+# row, whose assumed average is not reproducible, are excluded).
+_RANDI_TABLE2 = [
+    # (length ft, speed kn, {frequency: level})
+    (337.5, 12.5, {10.0: 160.9, 50.0: 162.6, 100.0: 153.5, 300.0: 137.1}),   # Merchant
+    (450.0, 14.0, {10.0: 167.0, 25.0: 170.8, 50.0: 168.6, 100.0: 159.2}),    # Tanker
+    (600.0, 16.5, {10.0: 174.8, 25.0: 178.6, 50.0: 176.0, 100.0: 166.3,
+                   300.0: 149.3}),                                           # Large Tanker
+    (1000.0, 18.5, {10.0: 185.0, 25.0: 188.8, 50.0: 185.4, 100.0: 174.6,
+                    300.0: 156.8}),                                          # Super Tanker
+]
+
+
+@pytest.mark.parametrize(("length_ft", "speed_kn", "levels"), _RANDI_TABLE2)
+def test_randi_reproduces_report_table_2(
+    length_ft: float, speed_kn: float, levels: dict,
+) -> None:
+    from phonometry.underwater.ship_traffic_noise import _randi
+
+    f = np.array(sorted(levels))
+    got = _randi(f, speed_kn, length_ft * 0.3048)
+    for freq, ref in sorted(levels.items()):
+        idx = int(np.argmin(np.abs(f - freq)))
+        assert float(got[idx]) == pytest.approx(ref, abs=0.1), freq

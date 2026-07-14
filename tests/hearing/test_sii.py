@@ -14,7 +14,10 @@ import numpy as np
 import pytest
 from reference_data import (
     ANSIS3_5_BAND_IMPORTANCE_SUM,
+    ANSIS3_5_DISTURBANCE_5000HZ,
     ANSIS3_5_LOUD_1KHZ,
+    ANSIS3_5_NOISE_PLUS_LOSS,
+    ANSIS3_5_R_EXAMPLE_C2,
     ANSIS3_5_STANDARD_QUIET,
 )
 
@@ -36,10 +39,42 @@ def test_band_importance_sums_to_one() -> None:
 
 
 def test_sii_standard_speech_in_quiet() -> None:
-    # Standard normal-effort spectrum, quiet field, normal hearing.
+    # Standard normal-effort spectrum, quiet field, normal hearing, at the
+    # full precision of the official worksheet value.
     result = sii.speech_intelligibility_index("normal")
-    assert result.sii == pytest.approx(ANSIS3_5_STANDARD_QUIET, abs=5e-4)
+    assert result.sii == pytest.approx(ANSIS3_5_STANDARD_QUIET, abs=1e-6)
     assert 0.0 <= result.sii <= 1.0
+    # Clause 5.6: in quiet the disturbance is the reference internal noise
+    # itself, Di = max(Zi, Xi') = Xi' = -23.6 dB at 5000 Hz. An energy-sum
+    # Di would read above this wherever Zi is comparable with Xi'.
+    assert result.disturbance[15] == pytest.approx(
+        ANSIS3_5_DISTURBANCE_5000HZ, abs=1e-2
+    )
+
+
+def test_sii_noise_plus_hearing_loss() -> None:
+    # Discriminating oracle for the clause 5.6 maximum (ANSI S3.5-1997):
+    # normal speech, flat 30 dB noise, flat 40 dB hearing loss. The standard
+    # procedure gives 0.2185; an energy-sum disturbance reads 0.1841 -- an
+    # error large enough to flip an intelligibility grade.
+    result = sii.speech_intelligibility_index(
+        "normal",
+        noise_spectrum=np.full(18, 30.0),
+        threshold=np.full(18, 40.0),
+    )
+    assert result.sii == pytest.approx(ANSIS3_5_NOISE_PLUS_LOSS, abs=1e-4)
+
+
+def test_sii_r_package_example_c2() -> None:
+    # R CRAN package "SII" worked Example C.2 (independent implementation of
+    # the one-third-octave method): speech 54 dB in every band, noise 40, 30
+    # and 20 dB in the first three bands, normal hearing.
+    result = sii.speech_intelligibility_index(
+        np.full(18, 54.0),
+        np.array([40.0, 30.0, 20.0] + [0.0] * 15),
+        threshold=np.zeros(18),
+    )
+    assert result.sii == pytest.approx(ANSIS3_5_R_EXAMPLE_C2, abs=1e-4)
 
 
 def test_masking_spectrum_matches_reference() -> None:

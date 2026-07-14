@@ -2796,10 +2796,41 @@ def _chk_sii_masking() -> Outcome:
     return numeric(ref.ANSIS3_5_MASKING_Z_200HZ, float(result.masking[1]), 1e-3, places=3)
 
 
+@register(_SII, "ANSI S3.5-1997 clause 5.6", "Equivalent disturbance in quiet at 5000 Hz")
+def _chk_sii_disturbance_quiet() -> Outcome:
+    # In quiet Di = max(Zi, Xi') = Xi' = -23.6 dB (Table 3) at 5000 Hz; an
+    # energy-sum disturbance would read above the reference internal noise.
+    result = ph.hearing.sii.speech_intelligibility_index("normal")
+    return numeric(
+        ref.ANSIS3_5_DISTURBANCE_5000HZ, float(result.disturbance[15]), 1e-2,
+        unit="dB", places=2,
+    )
+
+
+@register(_SII, "ANSI S3.5-1997 clause 6", "SII, noise 30 dB plus hearing loss 40 dB")
+def _chk_sii_noise_plus_loss() -> Outcome:
+    result = ph.hearing.sii.speech_intelligibility_index(
+        "normal",
+        noise_spectrum=np.full(18, 30.0),
+        threshold=np.full(18, 40.0),
+    )
+    return numeric(ref.ANSIS3_5_NOISE_PLUS_LOSS, result.sii, 1e-4, places=4)
+
+
+@register(_SII, "R CRAN 'SII' Example C.2", "One-third-octave method, independent oracle")
+def _chk_sii_r_example() -> Outcome:
+    result = ph.hearing.sii.speech_intelligibility_index(
+        np.full(18, 54.0),
+        np.array([40.0, 30.0, 20.0] + [0.0] * 15),
+        threshold=np.zeros(18),
+    )
+    return numeric(ref.ANSIS3_5_R_EXAMPLE_C2, result.sii, 1e-4, places=6)
+
+
 @register(_SII, "ANSI S3.5-1997 clause 6", "SII, standard speech in quiet, normal hearing")
 def _chk_sii_standard_quiet() -> Outcome:
     result = ph.speech_intelligibility_index("normal")
-    return numeric(ref.ANSIS3_5_STANDARD_QUIET, result.sii, 5e-4, places=4)
+    return numeric(ref.ANSIS3_5_STANDARD_QUIET, result.sii, 1e-6, places=8)
 
 
 @register(_SII, "ANSI S3.5-1997 Table 3", "Loud-effort speech spectrum level at 1 kHz")

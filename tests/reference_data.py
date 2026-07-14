@@ -772,7 +772,23 @@ DIRECTIVE_2002_44_WBV_ELV = 1.15  # A(8) m/s^2, Art. 3(2)(b)
 # ---------------------------------------------------------------------------
 ANSIS3_5_BAND_IMPORTANCE_SUM = 1.0  # ANSI S3.5-1997 Table 3, sum of Ii
 ANSIS3_5_MASKING_Z_200HZ = -1.665  # Zi at 200 Hz, standard spectrum in quiet
-ANSIS3_5_STANDARD_QUIET = 0.9958  # SII, standard normal speech, quiet, normal hearing
+# SII for the standard normal-effort spectrum in quiet with normal hearing, at
+# the full precision of the official Hornsby SII worksheet (its column M is the
+# clause 5.6 maximum Di = max(Zi, Xi'); an energy sum instead reads 5e-6 low
+# here but up to 0.042 low in noise-plus-hearing-loss conditions).
+ANSIS3_5_STANDARD_QUIET = 0.99582516666667
+# Equivalent disturbance spectrum level Di at 5000 Hz for the same condition:
+# the quiet field leaves Di = Xi' = -23.6 dB (Table 3 reference internal
+# noise), which the clause 5.6 maximum preserves exactly.
+ANSIS3_5_DISTURBANCE_5000HZ = -23.6
+# Discriminating adverse-condition oracle (would catch an energy-sum Di):
+# normal speech, flat 30 dB noise spectrum, flat 40 dB hearing loss. Standard
+# procedure (worksheet): SII = 0.2185; the energy-sum variant reads 0.1841.
+ANSIS3_5_NOISE_PLUS_LOSS = 0.2185
+# R CRAN package "SII" worked Example C.2 (one-third-octave method,
+# independent implementation): speech 54 dB in all bands, noise 40/30/20 dB in
+# the first three bands, normal hearing.
+ANSIS3_5_R_EXAMPLE_C2 = 0.8513749
 ANSIS3_5_LOUD_1KHZ = 42.16  # Table 3, loud-effort standard speech spectrum at 1 kHz
 
 # ---------------------------------------------------------------------------

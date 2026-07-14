@@ -1484,6 +1484,41 @@ def _chk_en15657_loss_factor() -> Outcome:
     return numeric(2.2 / (1000.0 * 0.3), eta, 1e-9)
 
 
+@register(
+    "Room & building acoustics",
+    "EN 15657:2018 Formulae (15)/(17) + EN 12354-5 Annex I.3",
+    "Source conversion chain reproduces Table I.8 (wall, installed)",
+)
+def _chk_en15657_conversion_chain() -> Outcome:
+    # Measured plate power (Y_plate = 5,34e-6) -> blocked force (15) ->
+    # characteristic reception-plate level (17, Y_R,inf,low = 5e-6) ->
+    # Annex I mobility correction to the wall (Y_wall = 24,1e-6). The printed
+    # Table I.8 row is the oracle (one-decimal intermediates, +/-0,15 dB).
+    lwsn = ph.characteristic_reception_plate_power(
+        ph.equivalent_blocked_force_level(
+            ref.EN12354_5_I8_WALL_LWS, ref.EN12354_5_I8_PLATE_MOBILITY
+        )
+    )
+    installed = ph.installed_power_from_reception_plate(
+        lwsn, ref.EN12354_5_I8_Y_WALL
+    )
+    worst = float(np.max(np.abs(
+        np.asarray(installed) - np.asarray(ref.EN12354_5_I8_WALL_INSTALLED)
+    )))
+    return numeric(0.0, worst, ref.EN12354_5_ANNEX_I_TOL, unit="dB", places=3,
+                   expected_label="max abs(L_Ws,inst - Table I.8) <= 0,15 dB")
+
+
+@register(
+    "Room & building acoustics",
+    "ISO 9611:1996 eq. (9)",
+    "Mean free velocity level (energy mean, v0 = 5e-8 m/s)",
+)
+def _chk_iso9611_mean_velocity() -> Outcome:
+    computed = float(ph.mean_free_velocity_level(ref.ISO9611_MEAN_LEVELS))
+    return numeric(ref.ISO9611_MEAN_EXPECTED, computed, 1e-9, unit="dB", places=4)
+
+
 # --- Installed structure-borne sound from equipment (EN 12354-5) ---
 @register(
     "Room & building acoustics",
@@ -1499,23 +1534,75 @@ def _chk_en12354_5_coupling_limit() -> Outcome:
 
 @register(
     "Room & building acoustics",
-    "EN 12354-5:2009 Formula (18b)",
-    "Installed power L_Ws,inst = L_Ws,c − D_C  (80 − 10,828 dB)",
+    "EN 12354-5:2009 Annex I.3, Table I.9",
+    "Flushing cistern: four paths + Formula (17) total -> 29 dB(A)",
 )
-def _chk_en12354_5_installed_power() -> Outcome:
-    lw = float(ph.installed_structure_borne_power_level(80.0, 10.828))
-    return numeric(69.172, lw, 1e-6, unit="dB", places=3)
+def _chk_en12354_5_annex_i9() -> Outcome:
+    # The standard's own end-to-end worked example (replaces the former
+    # formula-restatement checks of Formulae (18a)/(18b), which could not
+    # catch a mistranscribed constant): both power components through
+    # D_C (Table I.9), Formula (18a) per path and the energetic total.
+    tol = ref.EN12354_5_ANNEX_I_TOL
+    inst_wall = ph.installed_structure_borne_power_level(
+        ref.EN12354_5_I8_WALL_LWSC, ref.EN12354_5_I9_DC_WALL
+    )
+    inst_floor = ph.installed_structure_borne_power_level(
+        ref.EN12354_5_I8_FLOOR_LWSC, ref.EN12354_5_I9_DC_FLOOR
+    )
+    paths = [
+        (inst_wall, ref.EN12354_5_I9_DSA_WALL, ref.EN12354_5_I9_R_WALL_FLOOR,
+         ref.EN12354_5_I9_S_WALL, ref.EN12354_5_I9_LNS_WALL_FLOOR),
+        (inst_wall, ref.EN12354_5_I9_DSA_WALL, ref.EN12354_5_I9_R_WALL_WALL,
+         ref.EN12354_5_I9_S_WALL, ref.EN12354_5_I9_LNS_WALL_WALL),
+        (inst_floor, ref.EN12354_5_I9_DSA_FLOOR, ref.EN12354_5_I9_R_FLOOR_FLOOR,
+         ref.EN12354_5_I9_S_FLOOR, ref.EN12354_5_I9_LNS_FLOOR_FLOOR),
+        (inst_floor, ref.EN12354_5_I9_DSA_FLOOR, ref.EN12354_5_I9_R_FLOOR_WALL,
+         ref.EN12354_5_I9_S_FLOOR, ref.EN12354_5_I9_LNS_FLOOR_WALL),
+    ]
+    worst = 0.0
+    rows = []
+    for inst, dsa, rij, s_i, expected in paths:
+        lns = ph.structure_borne_pressure_level_path(inst, dsa, rij, s_i)
+        worst = max(worst, float(np.max(np.abs(lns - np.asarray(expected)))))
+        rows.append(np.asarray(lns))
+    total = ph.total_structure_borne_pressure_level(np.vstack(rows))
+    worst = max(worst, float(np.max(np.abs(
+        total - np.asarray(ref.EN12354_5_I9_LNS_TOTAL)
+    ))))
+    a_weights = np.array([-26.2, -16.1, -8.6, -3.2, 0.0, 1.2])
+    lns_a = float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (total + a_weights)))))
+    ok = worst <= tol and round(lns_a) == ref.EN12354_5_I9_LNS_TOTAL_A
+    return Outcome(
+        expected=f"max path/total dev <= {tol} dB; total "
+        f"{ref.EN12354_5_I9_LNS_TOTAL_A} dB(A)",
+        computed=f"{worst:.3f} dB; {lns_a:.1f} dB(A)",
+        delta=f"{worst:.3f} dB",
+        passed=ok,
+    )
 
 
 @register(
     "Room & building acoustics",
-    "EN 12354-5:2009 Formula (18a)",
-    "Path SPL area/absorption terms −10 lg(S/S0) − 10 lg(A0/4), S0=A0=10 m²",
+    "EN 12354-5:2009 Annex I.2, Table I.6a",
+    "Whirlpool floor component: mobility correction + path 11",
 )
-def _chk_en12354_5_path_terms() -> Outcome:
-    # With S = S0 the area term is 0, leaving −10 lg(10/4) = −3,979 dB.
-    lp = float(ph.structure_borne_pressure_level_path(0.0, 0.0, 0.0, 10.0))
-    return numeric(-10.0 * math.log10(10.0 / 4.0), lp, 1e-9, unit="dB", places=3)
+def _chk_en12354_5_annex_i6a() -> Outcome:
+    tol = ref.EN12354_5_ANNEX_I_TOL
+    inst = ph.installed_power_from_reception_plate(
+        ref.EN12354_5_I6A_LWSN_FLOOR, ref.EN12354_5_I6A_Y_FLOOR
+    )
+    dev_inst = float(np.max(np.abs(
+        np.asarray(inst) - np.asarray(ref.EN12354_5_I6A_LWSN_INST_FLOOR)
+    )))
+    lns = ph.structure_borne_pressure_level_path(
+        inst, ref.EN12354_5_I6A_DSA_FLOOR, ref.EN12354_5_I6A_R11, 10.0
+    )
+    dev_path = float(np.max(np.abs(
+        np.asarray(lns) - np.asarray(ref.EN12354_5_I6A_LNS_11)
+    )))
+    worst = max(dev_inst, dev_path)
+    return numeric(0.0, worst, tol, unit="dB", places=3,
+                   expected_label="max abs(dev vs Table I.6a) <= 0,15 dB")
 
 
 # ===========================================================================

@@ -1036,3 +1036,65 @@ COHERENCE_EXPECTED = COHERENCE_SNR / (1.0 + COHERENCE_SNR)
 # underwater (1 µPa) references: 20·lg(20) = 26.0206 dB.
 # ---------------------------------------------------------------------------
 UW_REFERENCE_OFFSET_DB = 26.020599913279624
+
+# ---------------------------------------------------------------------------
+# EN 12354-5:2009 Annex I - installed structure-borne sound worked examples
+# (octave bands 63-2000 Hz). The printed tables carry one-decimal
+# intermediates, so chained values reproduce within +/-0,15 dB.
+# ---------------------------------------------------------------------------
+EN12354_5_ANNEX_I_BANDS: tuple[float, ...] = (63, 125, 250, 500, 1000, 2000)
+
+# I.2 whirlpool bath (Tables I.6a/I.7). Floor power component: the laboratory
+# characteristic reception-plate levels L_Ws,n,1 (re Y_inf,rec = 5e-6 m/Ns)
+# are corrected to the installed floor (Y_inf,1 = 1.25e-6 m/Ns -> -6,0 dB);
+# path 11 then follows Formula (18a) with the -4 dB area/absorption terms of
+# the example (S_i = S0 = 10 m2). Table I.7 totals the whirlpool at 26 dB(A).
+EN12354_5_I6A_LWSN_FLOOR = [67.6, 67.3, 64.4, 48.4, 42.5, 41.3]
+EN12354_5_I6A_LWSN_INST_FLOOR = [61.6, 61.3, 58.4, 42.4, 36.5, 35.3]
+EN12354_5_I6A_Y_FLOOR = 1.25e-6  # m/(N.s)
+EN12354_5_I6A_DSA_FLOOR = [-26.1, -24.8, -30.3, -36.6, -40.8, -46.6]
+EN12354_5_I6A_R11 = [48.4, 48.9, 57.3, 66.2, 72.9, 81.2]
+EN12354_5_I6A_LNS_11 = [35.4, 33.3, 27.4, 8.8, 0.4, -3.3]
+
+# I.3 flushing cistern (Tables I.8/I.9). Source measured on a reception plate
+# of Y_plate = 5.34e-6 m/Ns; characteristic level L_Ws,c via
+# +10 lg(Y_source/Y_plate) (Y_source = 1.0e-3 m/Ns); D_C per Formula (19c);
+# Dsa per (20b); four paths per Formula (18a); total per Formula (17).
+EN12354_5_I8_PLATE_MOBILITY = 5.34e-6  # m/(N.s)
+EN12354_5_I8_Y_SOURCE = 1.0e-3  # m/(N.s)
+EN12354_5_I8_Y_WALL = 24.1e-6  # m/(N.s)
+EN12354_5_I8_Y_FLOOR = 1.65e-6  # m/(N.s)
+EN12354_5_I8_WALL_LWS = [61.7, 59.8, 47.2, 44.9, 38.8, 27.2]  # measured
+EN12354_5_I8_WALL_INSTALLED = [68.2, 66.3, 53.7, 51.5, 45.4, 33.7]
+EN12354_5_I8_WALL_LWSC = [84.4, 82.5, 69.9, 67.6, 61.6, 49.9]
+EN12354_5_I8_FLOOR_LWS = [57.4, 56.2, 44.0, 42.4, 34.9, 28.9]  # measured
+EN12354_5_I8_FLOOR_INSTALLED = [52.3, 51.1, 38.9, 37.3, 29.8, 23.8]
+EN12354_5_I8_FLOOR_LWSC = [80.1, 78.9, 66.7, 65.1, 57.6, 51.6]
+EN12354_5_I9_DC_WALL = 16.2  # dB, all bands
+EN12354_5_I9_DC_FLOOR = 27.8  # dB, all bands
+EN12354_5_I9_DSA_WALL = [-13.6, -17.3, -17.4, -20.0, -26.9, -32.9]
+EN12354_5_I9_DSA_FLOOR = [-15.5, -19.4, -26.7, -33.2, -39.1, -44.8]
+EN12354_5_I9_S_WALL = 12.8  # m2
+EN12354_5_I9_S_FLOOR = 15.4  # m2
+EN12354_5_I9_R_WALL_FLOOR = [43.0, 46.0, 50.2, 54.7, 64.6, 73.0]
+EN12354_5_I9_R_WALL_WALL = [37.0, 41.2, 35.9, 37.7, 49.0, 57.8]
+EN12354_5_I9_R_FLOOR_FLOOR = [42.4, 45.9, 50.1, 54.7, 64.6, 73.0]
+EN12354_5_I9_R_FLOOR_WALL = [29.1, 32.3, 43.7, 53.5, 62.1, 70.1]
+EN12354_5_I9_LNS_WALL_FLOOR = [33.8, 32.6, 15.9, 11.7, 2.6, -11.4]
+EN12354_5_I9_LNS_WALL_WALL = [39.8, 37.4, 30.1, 28.7, 18.3, 3.8]
+EN12354_5_I9_LNS_FLOOR_FLOOR = [19.5, 18.7, 9.7, 9.9, -1.5, -10.3]
+EN12354_5_I9_LNS_FLOOR_WALL = [32.8, 32.3, 16.1, 11.1, 1.0, -7.4]
+EN12354_5_I9_LNS_TOTAL = [41.4, 39.6, 30.5, 28.9, 18.5, 4.4]
+EN12354_5_I9_LNS_TOTAL_A = 29  # dB(A)
+EN12354_5_ANNEX_I_TOL = 0.15  # dB - one-decimal table intermediates
+
+# ---------------------------------------------------------------------------
+# ISO 9611:1996 - characterization of structure-borne sound sources by the
+# free velocity of the contact points. Equation (9) mean velocity level over
+# N positions (energy mean), v0 = 5e-8 m/s (clause 7). No numeric example in
+# the standard; the anchor is the closed form recomputed by hand:
+# levels 70/72/74 dB -> 10 lg((10^7 + 10^7.2 + 10^7.4)/3) = 72.3017 dB.
+# ---------------------------------------------------------------------------
+ISO9611_MEAN_LEVELS = (70.0, 72.0, 74.0)
+ISO9611_MEAN_EXPECTED = 72.30174601124772
+ISO9611_FREE_VELOCITY_REFERENCE = 5.0e-8  # m/s

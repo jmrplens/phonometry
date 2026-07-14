@@ -185,3 +185,140 @@ def test_plot_returns_axes() -> None:
         paths, frequencies=bands,
     )
     assert res.plot() is not None
+
+
+# ---------------------------------------------------------------------------
+# EN 12354-5:2009 Annex I worked examples (the standard's own oracles)
+# ---------------------------------------------------------------------------
+
+def _aw_total(levels: np.ndarray) -> float:
+    """A-weighted energetic total over the 63-2000 Hz octaves."""
+    a = np.array([-26.2, -16.1, -8.6, -3.2, 0.0, 1.2])
+    return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * (levels + a)))))
+
+
+def test_annex_i2_whirlpool_floor_component() -> None:
+    """Tables I.6a/I.7: mobility correction and path 11 within +/-0,15 dB."""
+    import reference_data as ref
+    from phonometry import installed_power_from_reception_plate
+
+    tol = ref.EN12354_5_ANNEX_I_TOL
+    inst = installed_power_from_reception_plate(
+        ref.EN12354_5_I6A_LWSN_FLOOR, ref.EN12354_5_I6A_Y_FLOOR
+    )
+    # Y_floor = 1.25e-6 vs Y_rec = 5e-6 -> a flat 10 lg(1/4) = -6,02 dB
+    # correction (the example prints -6,0).
+    np.testing.assert_allclose(
+        inst,
+        np.asarray(ref.EN12354_5_I6A_LWSN_FLOOR) + 10.0 * np.log10(0.25),
+        atol=1e-9,
+    )
+    np.testing.assert_allclose(
+        inst, ref.EN12354_5_I6A_LWSN_INST_FLOOR, atol=tol
+    )
+    # Path 11 per Formula (18a); the example's -4 dB corresponds to
+    # S_i = S0 = 10 m2 (10 lg(10/4) = 3,98 dB).
+    lns_11 = structure_borne_pressure_level_path(
+        inst, ref.EN12354_5_I6A_DSA_FLOOR, ref.EN12354_5_I6A_R11, 10.0
+    )
+    np.testing.assert_allclose(lns_11, ref.EN12354_5_I6A_LNS_11, atol=tol)
+
+
+def test_annex_i3_cistern_source_conversion() -> None:
+    """Table I.8: measured plate power -> installed and characteristic levels."""
+    import reference_data as ref
+    from phonometry import installed_power_from_reception_plate
+
+    tol = ref.EN12354_5_ANNEX_I_TOL
+    for measured, y_i, installed, lwsc in (
+        (ref.EN12354_5_I8_WALL_LWS, ref.EN12354_5_I8_Y_WALL,
+         ref.EN12354_5_I8_WALL_INSTALLED, ref.EN12354_5_I8_WALL_LWSC),
+        (ref.EN12354_5_I8_FLOOR_LWS, ref.EN12354_5_I8_Y_FLOOR,
+         ref.EN12354_5_I8_FLOOR_INSTALLED, ref.EN12354_5_I8_FLOOR_LWSC),
+    ):
+        inst = installed_power_from_reception_plate(
+            measured, y_i, plate_mobility=ref.EN12354_5_I8_PLATE_MOBILITY
+        )
+        np.testing.assert_allclose(inst, installed, atol=tol)
+        char = installed_power_from_reception_plate(
+            measured, ref.EN12354_5_I8_Y_SOURCE,
+            plate_mobility=ref.EN12354_5_I8_PLATE_MOBILITY,
+        )
+        np.testing.assert_allclose(char, lwsc, atol=tol)
+
+
+def test_annex_i3_cistern_coupling_terms() -> None:
+    """Table I.9: D_C from the force-source limit (Formula 19c)."""
+    import reference_data as ref
+
+    dc_wall = float(coupling_term_force_source(
+        ref.EN12354_5_I8_Y_SOURCE + 0j, ref.EN12354_5_I8_Y_WALL + 0j
+    ))
+    dc_floor = float(coupling_term_force_source(
+        ref.EN12354_5_I8_Y_SOURCE + 0j, ref.EN12354_5_I8_Y_FLOOR + 0j
+    ))
+    assert dc_wall == pytest.approx(ref.EN12354_5_I9_DC_WALL, abs=0.05)
+    assert dc_floor == pytest.approx(ref.EN12354_5_I9_DC_FLOOR, abs=0.05)
+
+
+def test_annex_i3_cistern_full_chain_table_i9() -> None:
+    """Table I.9 end-to-end: all four paths, the Formula (17) total and the
+    29 dB(A) receiving-room value, within the +/-0,15 dB table rounding."""
+    import reference_data as ref
+
+    tol = ref.EN12354_5_ANNEX_I_TOL
+    lws_inst_wall = installed_structure_borne_power_level(
+        ref.EN12354_5_I8_WALL_LWSC, ref.EN12354_5_I9_DC_WALL
+    )
+    lws_inst_floor = installed_structure_borne_power_level(
+        ref.EN12354_5_I8_FLOOR_LWSC, ref.EN12354_5_I9_DC_FLOOR
+    )
+    paths = {
+        "wall>floor": structure_borne_pressure_level_path(
+            lws_inst_wall, ref.EN12354_5_I9_DSA_WALL,
+            ref.EN12354_5_I9_R_WALL_FLOOR, ref.EN12354_5_I9_S_WALL,
+        ),
+        "wall>wall": structure_borne_pressure_level_path(
+            lws_inst_wall, ref.EN12354_5_I9_DSA_WALL,
+            ref.EN12354_5_I9_R_WALL_WALL, ref.EN12354_5_I9_S_WALL,
+        ),
+        "floor>floor": structure_borne_pressure_level_path(
+            lws_inst_floor, ref.EN12354_5_I9_DSA_FLOOR,
+            ref.EN12354_5_I9_R_FLOOR_FLOOR, ref.EN12354_5_I9_S_FLOOR,
+        ),
+        "floor>wall": structure_borne_pressure_level_path(
+            lws_inst_floor, ref.EN12354_5_I9_DSA_FLOOR,
+            ref.EN12354_5_I9_R_FLOOR_WALL, ref.EN12354_5_I9_S_FLOOR,
+        ),
+    }
+    expected = {
+        "wall>floor": ref.EN12354_5_I9_LNS_WALL_FLOOR,
+        "wall>wall": ref.EN12354_5_I9_LNS_WALL_WALL,
+        "floor>floor": ref.EN12354_5_I9_LNS_FLOOR_FLOOR,
+        "floor>wall": ref.EN12354_5_I9_LNS_FLOOR_WALL,
+    }
+    for name, lns in paths.items():
+        np.testing.assert_allclose(lns, expected[name], atol=tol, err_msg=name)
+    total = total_structure_borne_pressure_level(
+        np.vstack(list(paths.values()))
+    )
+    np.testing.assert_allclose(total, ref.EN12354_5_I9_LNS_TOTAL, atol=tol)
+    assert round(_aw_total(total)) == ref.EN12354_5_I9_LNS_TOTAL_A
+
+
+def test_coupling_terms_validate_mobilities() -> None:
+    """Re{Y_i} <= 0 or Y_s = 0 raise instead of yielding NaN/inf silently."""
+    with pytest.raises(ValueError, match="positive, finite real part"):
+        coupling_term(1e-4 + 0j, -1e-5 + 0j)
+    with pytest.raises(ValueError, match="positive, finite real part"):
+        coupling_term(1e-4 + 0j, 1e-5j)  # purely imaginary receiver
+    with pytest.raises(ValueError, match="finite and non-zero"):
+        coupling_term(0.0, 1e-5 + 0j)
+    with pytest.raises(ValueError, match="positive, finite real part"):
+        coupling_term_force_source(1e-4 + 0j, 0.0 + 0j)
+    with pytest.raises(ValueError, match="finite and non-zero"):
+        coupling_term_velocity_source(0.0, 1e4 + 0j)
+    with pytest.raises(ValueError, match="receiver_mobility"):
+        from phonometry import installed_power_from_reception_plate
+
+        installed_power_from_reception_plate([60.0], 0.0)

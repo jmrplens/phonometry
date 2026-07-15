@@ -224,6 +224,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   EPNL: the bandsharing adjustment ΔB (App. 2 §4.4.2/4.4.3), exposed as
   `EPNLResult.bandsharing_adjustment`, and a `start_band` parameter on
   `tone_correction` for the helicopter 50 Hz procedure.
+- STIPA certified-bench verification: the IEC 60268-16 rev 5 verification
+  test-bench signals from stipa.info (Embedded Acoustics BV) run as a local
+  end-to-end oracle over `stipa` / `sti_from_impulse_response` (49 WAVs
+  across Annexes C.3.2 modulation-depth staircase, C.3.3 exponential decays,
+  C.4.2 filter slope, A.2.2 weighting factors and A.3.1.2 phase distortion;
+  the suite skips cleanly when the local data is absent), plus six synthetic
+  conformance checks that re-derive the same constructions in CI: the C.3.2
+  staircase at m = 0,2/0,5/0,8 (±0,01 STI), the C.3.3 RT60 = 1 s decay
+  against the closed-form Schroeder MTF (±0,005), the C.4.2 slope criterion
+  (m ≥ 0,5 under a +41 dB unmodulated adjacent-octave tone) and the
+  A.2.2/A.3.1.2 audio-path checks (257 checks total).
 
 ### Changed
 
@@ -260,6 +271,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- STI analysis filter bank is now zero-phase (forward-backward filtering):
+  the single-pass bank failed two normative verification criteria of
+  IEC 60268-16:2020 on the certified test bench - the C.4.2 filter-slope
+  test (an unmodulated tone one octave below the observed band, 41 dB
+  louder, leaked with only ~31 dB attenuation and dragged the measured m
+  down to ~0,1 against the m ≥ 0,5 criterion) and the A.3.1.2
+  phase-distortion limit (STI bias reached -0,020 at TI = 0,9 against the
+  < 0,01 criterion). Zero-phase filtering removes the phase bias by
+  construction and doubles the effective skirt attenuation to ~63 dB one
+  octave out; all 49 certified bench signals now pass (worst slope-test
+  m = 0,937, worst edge-carrier bias -0,0029). STI values on ordinary
+  signals shift by well under 0,001 (the sti_vs_t60 figures are
+  regenerated accordingly).
+- `stipa` no longer raises when an octave band of the recording carries no
+  energy: dead bands read m = 0 (TI = 0, the worst-case reading of a real
+  meter) under an `STIWarning`, so component-level verification signals
+  that deliberately occupy only some bands (IEC 60268-16 C.4.2) remain
+  measurable.
 - DIN 45681 / ISO PAS 20065 single-line tones: the tone level of a K = 1 run
   is the line level itself (Formula (7)); the Hanning bandwidth correction
   applies only to K > 1 sums (Formula (8)). The unconditional -1,76 dB

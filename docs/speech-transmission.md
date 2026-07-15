@@ -92,7 +92,7 @@ plt.show()
 `stipa` emits a `UserWarning` when the recording is shorter than the
 recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s): below that the
 slow modulation components are averaged over too few periods and the STI is
-biased low (an ideal loopback gives STI ≈ 0.944 at 5 s vs ≈ 0.998 at 18 s).
+biased low (an ideal loopback gives STI ≈ 0.956 at 5 s vs ≈ 0.998 at 18 s).
 
 The implementation follows **Edition 5 (2020)**: Edition 4's normative PDF
 is the base and every Ed. 5 change is source-attributed in the code — the
@@ -100,6 +100,18 @@ only numeric delta is the revised male speech spectrum of clause A.6.1.
 CI checks the standard's own verification vectors: the six weighting-factor
 band pairs to ±0.001 STI, the m ↔ STI mapping table, the level-dependent
 masking control points, and Schroeder-form decays at four T₆₀ values.
+
+The analyzer is also verified end to end against the **IEC 60268-16 rev 5
+verification test bench** signals from [stipa.info](https://www.stipa.info)
+(Embedded Acoustics BV): the direct-method modulation-depth staircase
+(Annex C.3.2), the indirect-method exponential decays against the closed-form
+Schroeder MTF (C.3.3), the filter-bank slope test with a +41 dB unmodulated
+adjacent-octave tone (C.4.2, m ≥ 0.5), the weighting-factor band pairs (A.2.2)
+and the filter-bank phase-distortion test with half-octave edge carriers
+(A.3.1.2, |STI bias| < 0.01 over TI = 0.1–0.9). All five suites pass with the
+level-dependent features disabled, as the bench prescribes. The 49 certified
+WAVs stay local (third-party data, not committed); CI re-derives the same
+signal constructions synthetically in the conformance suite.
 
 ### `sti_from_impulse_response()` / `stipa()` parameters
 

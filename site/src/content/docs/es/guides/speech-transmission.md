@@ -96,7 +96,7 @@ plt.show()
 `stipa` emite un `UserWarning` cuando la grabación es más corta que los 15 s
 recomendados (práctica STIPA de IEC 60268-16, de 15 s a 25 s): por debajo de eso
 las componentes de modulación lentas se promedian sobre muy pocos periodos y el
-STI queda sesgado a la baja (un lazo ideal da STI ≈ 0,944 a 5 s frente a
+STI queda sesgado a la baja (un lazo ideal da STI ≈ 0,956 a 5 s frente a
 ≈ 0,998 a 18 s).
 
 La implementación sigue la **Edición 5 (2020)**: el PDF normativo de la
@@ -107,6 +107,20 @@ los seis pares de bandas de los factores de ponderación a ±0,001 STI, la tabla
 de correspondencia m ↔ STI, los puntos de control del enmascaramiento
 dependiente del nivel y decaimientos con la forma de Schroeder a cuatro valores
 de T₆₀.
+
+El analizador también se verifica de extremo a extremo con las señales del
+**banco de verificación de IEC 60268-16 rev 5** de
+[stipa.info](https://www.stipa.info) (Embedded Acoustics BV): la escalera de
+profundidad de modulación del método directo (Anexo C.3.2), los decaimientos
+exponenciales del método indirecto frente a la MTF de Schroeder en forma
+cerrada (C.3.3), la prueba de pendiente del banco de filtros con un tono
+adyacente sin modular a +41 dB (C.4.2, m ≥ 0,5), los pares de bandas de los
+factores de ponderación (A.2.2) y la prueba de distorsión de fase del banco de
+filtros con portadoras en los bordes de media octava (A.3.1.2,
+|sesgo de STI| < 0,01 en TI = 0,1–0,9). Las cinco series pasan con las
+funciones dependientes del nivel desactivadas, como prescribe el banco. Los 49
+WAV certificados permanecen en local (datos de terceros, no versionados); CI
+reconstruye las mismas señales de forma sintética en la serie de conformidad.
 
 ### Parámetros de `sti_from_impulse_response()` / `stipa()`
 

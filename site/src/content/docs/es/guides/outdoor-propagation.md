@@ -360,3 +360,7 @@ apantallamiento por barreras (Ecs. (12)–(17)) y la corrección meteorológica
 a reverberation room* — solo la conversión $m = \alpha/(10 \lg e)$ del apartado
 8.1.2.1 tras `air_attenuation_m`; el método en sala reverberante se trata en la
 [guía de Acústica de salas](/phonometry/es/guides/room-acoustics/).
+
+## Véase también
+
+- Referencia de la API: [`environmental.outdoor_propagation`](/phonometry/es/reference/api/environment/outdoor-propagation/) y [`environmental.air_absorption`](/phonometry/es/reference/api/environment/air-absorption/).

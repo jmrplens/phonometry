@@ -172,3 +172,7 @@ ph.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1500.0],
 
 All three assume a range-independent water column with a pressure-release
 surface.
+
+## See also
+
+- API reference: [`underwater.propagation`](/phonometry/reference/api/underwater/propagation/), [`underwater.numerical_propagation`](/phonometry/reference/api/underwater/numerical-propagation/) and [`underwater.sound_speed`](/phonometry/reference/api/underwater/sound-speed/).

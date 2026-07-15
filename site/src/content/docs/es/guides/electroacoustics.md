@@ -243,3 +243,7 @@ magnitudes se verifican contra oráculos analíticos exactos (señales sintétic
 con amplitudes armónicas/de intermodulación conocidas, un oráculo de Fourier de
 seno recortado, una síntesis completa de la señal de ensayo DIM y un camino LTI
 conocido).
+
+## Véase también
+
+- Referencia de la API: [`electroacoustics.distortion`](/phonometry/es/reference/api/electroacoustics/distortion/) y [`electroacoustics.frequency_response`](/phonometry/es/reference/api/electroacoustics/frequency-response/).

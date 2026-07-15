@@ -126,3 +126,7 @@ performance of buildings from the performance of elements — Part 6: Sound
 absorption in enclosed spaces* — the total equivalent absorption area
 (clause 4.3, Formulae 1-4, Table 1) and the reverberation time (clause 4.4,
 Formula 5), validated against the three worked cases of Annex E.
+
+## See also
+
+- API reference: [`room.enclosed_space_absorption`](/phonometry/reference/api/rooms/enclosed-space-absorption/).

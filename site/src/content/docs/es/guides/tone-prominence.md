@@ -74,6 +74,7 @@ Ambos devuelven un `ToneAssessment(frequency, ratio_db, criterion_db, prominent)
   la contraparte NT ACOU 112 para el carácter impulsivo (en lugar de tonal).
 - [Teoría](/phonometry/es/reference/theory/) — el modelo de banda crítica y la
   derivación de los criterios.
+- Referencia de la API: [`psychoacoustics.tonality`](/phonometry/es/reference/api/psychoacoustics/tonality/).
 
 ---
 

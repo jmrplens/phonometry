@@ -107,3 +107,7 @@ for x in audio_stream(block):            # tu callback de captura
 | `zero_phase` | no soportado | El filtrado bidireccional necesita la señal completa |
 | `high_accuracy` (ponderación) | por defecto se resuelve a `False` — el diseño bilineal clásico, consulta [Ponderación frecuencial](/phonometry/es/guides/weighting/); pasar `True` explícito lanza `ValueError` | El remuestreo polifásico interno es incompatible con bloques |
 | `steady_ic` | opcional | Arranca los filtros en el régimen permanente de la respuesta al escalón |
+
+## Véase también
+
+- Referencia de la API: [`metrology.parametric_filters`](/phonometry/es/reference/api/filters/parametric-filters/) y [`metrology.core`](/phonometry/es/reference/api/filters/core/).

@@ -161,3 +161,7 @@ batería de conformidad se ancla en un **ejemplo resuelto real** — el Ejemplo 
 de la Fig. 7-22 de Everest, cuyos seis tiempos de reverberación de Sabine
 impresos reproduce la implementación SI con ≤ 0,02 s — reforzado por valores en
 forma cerrada calculados a mano y las identidades entre modelos.
+
+## Véase también
+
+- Referencia de la API: [`room.reverberation_prediction`](/phonometry/es/reference/api/rooms/reverberation-prediction/) y [`environmental.air_absorption`](/phonometry/es/reference/api/environment/air-absorption/).

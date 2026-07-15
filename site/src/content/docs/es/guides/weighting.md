@@ -290,3 +290,7 @@ clase 2 de la Tabla 3 que comprueba `verify_weighting_class`. ISO 7196:1995,
 *Acoustics — Frequency-weighting characteristic for infrasound measurements* — la
 definición de polos y ceros de la ponderación G (Tabla 1), verificada frente a
 todos los valores nominales de respuesta de la Tabla 2 (0,25 Hz a 315 Hz).
+
+## Véase también
+
+- Referencia de la API: [`metrology.parametric_filters`](/phonometry/es/reference/api/filters/parametric-filters/) y [`metrology.compliance`](/phonometry/es/reference/api/filters/compliance/).

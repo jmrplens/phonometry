@@ -150,3 +150,7 @@ are referred to `v₀ = 10⁻⁹ m/s`. Conformance is anchored on the resonant-p
 power balance `P = ω·η·(m·S)·⟨v²⟩` (of which Formula 14 is the level), the
 loss-factor identity, and the EN 12354-5 Annex I.3 Table I.8 conversion of the
 flushing-cistern source.
+
+## See also
+
+- API reference: [`building.structure_borne_power`](/phonometry/reference/api/building/structure-borne-power/).

@@ -360,3 +360,7 @@ Description, measurement and assessment of environmental noise — Part 1:
 Basic quantities and assessment procedures* — Lden (3.6.4), Ldn (3.6.5) and
 the composite whole-day rating level of clause 6.5 (Formulae 5-6, Table A.1
 adjustments).
+
+## See also
+
+- API reference: [`metrology.levels`](/phonometry/reference/api/levels/levels/), [`environmental.measurement`](/phonometry/reference/api/environment/measurement/) and [`environmental.rating`](/phonometry/reference/api/environment/rating/).

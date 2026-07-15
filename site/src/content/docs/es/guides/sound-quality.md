@@ -180,3 +180,7 @@ Bismarck y Aures del Anexo B, objetivos de la Tabla A.2). ECMA-418-2:2025,
 *Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing
 human perception based on the Sottek Hearing Model)* — la tonalidad (tu_HMS) y
 la aspereza (asper) del modelo de Sottek.
+
+## Véase también
+
+- Referencia de la API: [`psychoacoustics.sharpness`](/phonometry/es/reference/api/psychoacoustics/sharpness/), [`psychoacoustics.tonality_ecma`](/phonometry/es/reference/api/psychoacoustics/tonality-ecma/) y [`psychoacoustics.roughness_ecma`](/phonometry/es/reference/api/psychoacoustics/roughness-ecma/).

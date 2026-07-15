@@ -68,3 +68,7 @@ spreading, atmospheric attenuation (ISO 9613-1, Table 4) and the Chien-Soroka
 ground effect (Delany-Bazley impedance, CNOSSOS flow resistivity). Flight-path
 integration (SEL/LAmax/EPNL), ground-grid contours and terrain shielding are a
 separate later development.
+
+## See also
+
+- API reference: [`aircraft.rotorcraft_noise`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/).

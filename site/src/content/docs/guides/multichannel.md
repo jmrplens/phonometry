@@ -84,3 +84,7 @@ Additional performance notes:
   [Theory](/phonometry/reference/theory/)).
 - **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
   numba is installed (`pip install phonometry[perf]`).
+
+## See also
+
+- API reference: [`phonometry`](/phonometry/reference/api/filters/phonometry/) and [`metrology.core`](/phonometry/reference/api/filters/core/).

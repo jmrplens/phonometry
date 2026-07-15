@@ -345,3 +345,7 @@ absorption in a reverberation room* — only the clause 8.1.2.1 conversion
 $m = \alpha/(10 \lg e)$ behind `air_attenuation_m`; the reverberation-room
 method itself is covered in the
 [Room Acoustics guide](/phonometry/guides/room-acoustics/).
+
+## See also
+
+- API reference: [`environmental.outdoor_propagation`](/phonometry/reference/api/environment/outdoor-propagation/) and [`environmental.air_absorption`](/phonometry/reference/api/environment/air-absorption/).

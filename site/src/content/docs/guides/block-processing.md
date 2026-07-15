@@ -105,3 +105,7 @@ for x in audio_stream(block):            # your capture callback
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
 | `high_accuracy` (weighting) | resolves to `False` by default — the legacy bilinear design, see [Frequency Weighting](/phonometry/guides/weighting/); explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
+
+## See also
+
+- API reference: [`metrology.parametric_filters`](/phonometry/reference/api/filters/parametric-filters/) and [`metrology.core`](/phonometry/reference/api/filters/core/).

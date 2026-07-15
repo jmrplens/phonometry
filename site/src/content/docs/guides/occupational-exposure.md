@@ -135,6 +135,7 @@ carry no per-task breakdown).
   combined and expanded uncertainties.
 - [Theory](/phonometry/reference/theory/) — the derivation of the strategy formulas and the
   Annex C budget.
+- API reference: [`hearing.occupational_exposure`](/phonometry/reference/api/hearing/occupational-exposure/).
 
 ---
 

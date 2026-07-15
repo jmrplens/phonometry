@@ -336,3 +336,4 @@ outdoor-radiation predictions (Annex F and Annex G worked examples).
   the absorption member of the same EN 12354 family.
 - [Dynamic stiffness of resilient materials (EN 29052-1)](/phonometry/guides/dynamic-stiffness/):
   the s' input to the EN 12354-2 floating-floor term.
+- API reference: [`building.building_prediction`](/phonometry/reference/api/building/building-prediction/) and [`building.facade_prediction`](/phonometry/reference/api/building/facade-prediction/).

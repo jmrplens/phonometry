@@ -121,3 +121,7 @@ measurement of [ISO 1996-2](/phonometry/guides/levels/).
 for adjustment of LAeq* — the predicted prominence (clause 7, Formula 1), the
 adjustment to LAeq (clause 8, Formula 2) and the rating level (clause 8,
 Note 1), with the onset defined in clauses 4.5-4.7.
+
+## See also
+
+- API reference: [`environmental.impulse_prominence`](/phonometry/reference/api/environment/impulse-prominence/).

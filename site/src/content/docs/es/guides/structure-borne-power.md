@@ -156,3 +156,7 @@ refieren a `v₀ = 10⁻⁹ m/s`. La conformidad se ancla en el balance de poten
 de la placa resonante `P = ω·η·(m·S)·⟨v²⟩` (del cual la Fórmula 14 es el
 nivel), en la identidad del factor de pérdida y en la conversión de la fuente
 de la cisterna de la Tabla I.8 del Anexo I.3 de EN 12354-5.
+
+## Véase también
+
+- Referencia de la API: [`building.structure_borne_power`](/phonometry/es/reference/api/building/structure-borne-power/).

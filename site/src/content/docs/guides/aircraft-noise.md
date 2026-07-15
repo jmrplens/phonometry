@@ -197,3 +197,7 @@ interpolation), the single-event segment calculation (impedance adjustment,
 duration, engine installation, lateral attenuation, noise fraction, start-of-roll
 directivity, summation) and ground-grid noise contours, validated against the
 Doc 29 5th ed. Vol 3 Part 1 reference workbook.
+
+## See also
+
+- API reference: [`aircraft.aircraft_noise`](/phonometry/reference/api/aeroacoustics/aircraft-noise/), [`aircraft.airport_noise`](/phonometry/reference/api/aeroacoustics/airport-noise/) and [`aircraft.atmospheric_absorption`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/).

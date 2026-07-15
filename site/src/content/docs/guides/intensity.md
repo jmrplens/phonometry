@@ -157,3 +157,7 @@ Table 3). ISO 9614-1:1993, *Acoustics — Determination of sound power levels
 of noise sources using sound intensity — Part 1: Measurement at discrete
 points* — the pressure-intensity index, the Annex A field indicators F2, F3
 and F4, and the dynamic-capability criterion (Annex B).
+
+## See also
+
+- API reference: [`emission.intensity`](/phonometry/reference/api/power/intensity/).

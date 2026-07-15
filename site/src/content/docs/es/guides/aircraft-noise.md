@@ -160,6 +160,14 @@ de los segmentos de rodaje de despegue, `start_of_roll_directivity` (ΔSOR).
 sobre una malla en tierra (marca los segmentos de rodaje con una máscara
 `ground_roll`).
 
+El mecanismo tras estas correcciones de suelo es la interferencia de dos
+caminos: la onda directa y su reflexión en el suelo. Abajo, una fuente de
+400 Hz a 1,5 m sobre un plano rígido forma el patrón de lóbulos, con la fuente
+imagen dibujada como fantasma bajo el suelo y un receptor situado en un mínimo
+de interferencia.
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de una fuente puntual de 400 Hz a 1,5 metros sobre suelo rígido; los frentes de onda directo y reflejado en el suelo interfieren y se forma un patrón de lóbulos, la fuente imagen fantasma bajo el suelo explica la geometría y el nivel sobre un arco de 8 metros converge al modelo de fuente imagen de dos caminos con sus mínimos previstos" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de una fuente puntual de 400 Hz a 1,5 metros sobre suelo rígido; los frentes de onda directo y reflejado en el suelo interfieren y se forma un patrón de lóbulos, la fuente imagen fantasma bajo el suelo explica la geometría y el nivel sobre un arco de 8 metros converge al modelo de fuente imagen de dos caminos con sus mínimos previstos" style="width:88%"></video>
+
 La directividad de inicio de rodaje es la radiación trasera lobulada del ruido
 de chorro: máxima hacia un acimut ψ ≈ 120° respecto al morro, y decreciente al
 través (ψ = 90°) y directamente detrás (ψ = 180°).

@@ -284,6 +284,13 @@ print(round(directivity_omega(1.5, 1.5, 200.0), 2))                  # 3.01 dB
 print(round(meteorological_correction(200.0, 1.5, 1.5, 2.0), 2))     # 1.7 dB
 ```
 
+A negative $A_{gr}$ (a net gain) is plain interference: the ground-reflected
+wave adds to the direct one. Below, a 400 Hz source 1.5 m over rigid ground
+builds the lobe pattern of that interference, and the level sampled on an arc
+converges to the two-path image-source model, dips included.
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" style="width:88%"></video>
+
 ### `Barrier` and the screening term
 
 The `Barrier` dataclass describes the diffraction geometry directly, which is
@@ -293,6 +300,13 @@ double (thick-barrier) diffraction with the $C_3$ factor of Eq. (15) and the
 25 dB cap. `ground_reflections_by_image=True` switches $C_2$ from 20 to 40
 (reflections handled by image sources), and `lateral=True` selects vertical-edge
 diffraction (Eq. (13), $K_{met}=1$, ground term retained).
+
+The simulation below shows why $D_z$ grows with frequency: against the same
+2.5 m screen, a 100 Hz wavefront (λ ≈ 3.4 m) diffracts over the edge and fills
+the shadow zone, while at 500 Hz the shadow is deep and sharp. A barrier only
+works when the wavelength is short next to the path difference.
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side; the long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 10 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side; the long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 10 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB" style="width:88%"></video>
 
 ### `outdoor_propagation_attenuation()` parameters
 

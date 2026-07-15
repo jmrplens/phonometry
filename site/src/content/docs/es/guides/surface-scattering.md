@@ -166,6 +166,14 @@ sólidos desiguales, la fórmula (6) pondera por área cada energía con $N_i$ d
 fórmula (8) —y esos factores de área se evalúan en **radianes**, razón por la que
 un espaciado de 5° en el cenit produce un peso cercano a 1,57, no a 51,9.
 
+La animación siguiente ejecuta ese experimento de goniómetro numéricamente: el
+mismo frente de onda plano incide sobre un panel rígido plano y sobre un
+difusor de Schroeder (un perfil de residuos cuadráticos con N = 7), y la
+energía dispersada sobre el arco de receptores convierte un haz especular
+colimado (d = 0,32) en un abanico ancho (d = 0,63).
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_es_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de un frente de onda plano incidiendo sobre un panel rígido plano y un difusor de Schroeder de residuos cuadráticos lado a lado; el panel plano devuelve un haz especular colimado mientras que los pozos del difusor reparten la misma energía en un abanico ancho, y el campo dispersado sobre un arco de receptores da coeficientes de difusión de 0,32 frente a 0,63" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_es_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de un frente de onda plano incidiendo sobre un panel rígido plano y un difusor de Schroeder de residuos cuadráticos lado a lado; el panel plano devuelve un haz especular colimado mientras que los pozos del difusor reparten la misma energía en un abanico ancho, y el campo dispersado sobre un arco de receptores da coeficientes de difusión de 0,32 frente a 0,63" style="width:88%"></video>
+
 ```python
 import phonometry as ph
 

@@ -51,6 +51,14 @@ profile = ph.sound_speed_profile(depths, temps, 35.0, model="unesco")
 profile.plot()   # sound speed vs depth (needs matplotlib)
 ```
 
+The $c(z)$ minimum acts as a waveguide (the SOFAR channel): wavefronts that
+stray from the axis are refracted back toward it, while sound generated
+outside the channel leaks away to depth, as the simulation below shows with an
+intentionally exaggerated gradient. This trapping is why low-frequency sound
+can cross entire oceans.
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a low-frequency pulse in a SOFAR-like underwater sound channel with the sound-speed profile drawn beside the field; launched on the channel axis the wavefronts refract back toward the sound-speed minimum and stay trapped, launched near the surface the energy crosses the channel and leaks away to depth" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a low-frequency pulse in a SOFAR-like underwater sound channel with the sound-speed profile drawn beside the field; launched on the channel axis the wavefronts refract back toward the sound-speed minimum and stay trapped, launched near the surface the energy crosses the channel and leaks away to depth" style="width:88%"></video>
+
 ## Sonar equation
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation.svg" alt="The passive sonar equation: signal excess falling with transmission loss and crossing zero, the detection limit, at the figure of merit" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_dark.svg" alt="The passive sonar equation: signal excess falling with transmission loss and crossing zero, the detection limit, at the figure of merit" style="width:82%">

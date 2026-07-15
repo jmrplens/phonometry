@@ -447,10 +447,13 @@ def _time_dependent(
     t_end = float(block_times[-1])
     n50 = int(np.floor(t_end * _R_S50)) + 1
     grid = np.arange(n50) / _R_S50
-    r_est = np.zeros((n50, _CBF))
     if block_times.size >= 2:
-        for band in range(_CBF):  # piecewise cubic Hermite (Clause 7.1.7)
-            r_est[:, band] = PchipInterpolator(block_times, a_lz[:, band])(grid)
+        # Piecewise cubic Hermite (Clause 7.1.7), all 53 bands in one
+        # interpolator; pchip treats every column independently, so the
+        # result is bit-identical to a per-band loop.
+        r_est = PchipInterpolator(block_times, a_lz, axis=0)(grid)
+    else:
+        r_est = np.zeros((n50, _CBF))
     r_est = np.maximum(r_est, 0.0)  # negatives -> 0 (Clause 7.1.7)
 
     # Distribution-dependent nonlinear transform + calibration (Formulae 104-108).

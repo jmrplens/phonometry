@@ -63,6 +63,7 @@ Full documentation for phonometry. Also available as a website:
   - [Environment and transport](theory-environment-transport.md) — environmental descriptors, impulsive adjustment, outdoor propagation, occupational exposure, sound power
   - [Vibration](theory-vibration.md) — human vibration weightings and metrics, multiple-shock spinal model
 - [Why phonometry](why-phonometry.md) — IEC compliance vs other libraries
+- [Bibliography](references.md) — the books and papers behind the guides, grouped by domain, every entry with a verified DOI or official publisher link
 - [Conformance report](CONFORMANCE.md) — auto-generated numerical validation: every check pins a standard clause's expected value against the library's computed value, regenerated in CI
 - [Standards errata](ERRATA.md) — defects found in the published standards themselves during implementation: misprints, examples contradicting their own normative text, ambiguous wording, each with evidence and the library's disposition
 

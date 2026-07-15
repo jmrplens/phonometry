@@ -106,7 +106,7 @@ vibración de la sección 3:
 
 ¹ La evaluación de salud del apartado 7 se define sobre la superficie del
 asiento; la medida en x en el respaldo con `Wc`, $k = 0{,}8$ se recomienda
-pero se informa por separado (7.2.3). Las ponderaciones restantes viven en
+pero queda fuera de la evaluación de severidad del Anexo B (7.2.3). Las ponderaciones restantes viven en
 las partes complementarias: `Wm` para ocupantes de edificios en todos los
 ejes (ISO 2631-2), `Wb` para el confort de marcha ferroviaria vertical
 (ISO 2631-4) y `Wh` para la vibración transmitida a la mano en los tres ejes
@@ -328,9 +328,9 @@ distinta magnitud y duración.
   ISBN 978-0-12-303041-2.
   [Página del editor](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
   La monografía de referencia sobre vibración de cuerpo completo y transmitida
-  a la mano: la biodinámica, el malestar y la evidencia de efectos sobre la
-  salud tras las ponderaciones, las medidas de dosis y la orientación
-  exposición-respuesta de esta página.
+  a la mano: la biodinámica, la incomodidad y la evidencia de efectos sobre
+  la salud que sustentan las ponderaciones, las medidas de dosis y la
+  orientación exposición-respuesta de esta página.
 - Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
   ISBN 978-0-415-28239-0.
   [Página del editor](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).

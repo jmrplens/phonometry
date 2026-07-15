@@ -18,12 +18,12 @@ running r.m.s./MTVV and the VDV beyond it; ISO 2631-5 is the additional method
 for the regime past those, where the record contains repeated shocks. Its
 clause 4 then splits that regime in two: *severe* conditions with possible
 free fall or loss of contact with the seat and a dominant z-axis (military
-off-road vehicles, high-speed marine craft) use the Clause 5 model implemented
+off-road vehicles, high-speed marine craft) use the clause 5 model implemented
 here, while *less severe* conditions in which the occupant stays seated
 throughout (tractors, forestry and earth-moving machinery on rough ground)
 belong to the Annex A finite-element model. In case of doubt the delineation
 is quantitative: when the band-limited vertical peak acceleration exceeds
-9.81 m/s² (1 g, the free-fall threshold), Clause 5 and Annex C apply.
+9.81 m/s² (1 g, the free-fall threshold), clause 5 and Annex C apply.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t) through the spinal response, the acceleration dose Dz and daily dose Dzd, the compressive stress Sd, the age-cumulated stress variable R, and the Weibull probability of lumbar injury" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_dark.svg" alt="Flow from the vertical seat acceleration az(t) through the spinal response, the acceleration dose Dz and daily dose Dzd, the compressive stress Sd, the age-cumulated stress variable R, and the Weibull probability of lumbar injury" style="width:86%">
 

@@ -54,9 +54,9 @@ que las guías incorporan sus secciones de Referencias.
   ISBN 978-0-12-303041-2.
   [Página del editor](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
   La monografía de referencia sobre vibración de cuerpo completo y transmitida
-  a la mano: la biodinámica, el malestar y la evidencia de efectos sobre la
-  salud tras las ponderaciones, las medidas de dosis y la orientación
-  exposición-respuesta de las guías de vibración.
+  a la mano: la biodinámica, la incomodidad y la evidencia de efectos sobre
+  la salud que sustentan las ponderaciones, las medidas de dosis y la
+  orientación exposición-respuesta de las guías de vibración.
   Citado por [Vibración en humanos](/phonometry/es/guides/human-vibration/) y
   [Vibración con choques múltiples](/phonometry/es/guides/multiple-shock-vibration/).
 - Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.

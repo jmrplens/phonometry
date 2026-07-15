@@ -102,8 +102,8 @@ value of section 3:
 | Motion sickness (clause 9) | vertical | `Wf` | — | — |
 
 ¹ The health assessment of clause 7 is defined on the seat surface; the
-backrest x measurement with `Wc`, $k = 0.8$ is encouraged but reported
-separately (7.2.3). The remaining weightings live in the companion parts:
+backrest x measurement with `Wc`, $k = 0.8$ is encouraged but excluded
+from the Annex B severity assessment (7.2.3). The remaining weightings live in the companion parts:
 `Wm` for building occupants on all axes (ISO 2631-2), `Wb` for vertical rail
 ride comfort (ISO 2631-4), and `Wh` for hand-transmitted vibration on all
 three hand axes with every $k = 1$ (ISO 5349-1).

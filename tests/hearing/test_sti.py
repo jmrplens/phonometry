@@ -23,6 +23,7 @@ import pytest
 
 from phonometry import STIResult, sti_from_impulse_response, stipa, stipa_signal
 from phonometry.hearing.sti import (
+    STIWarning,
     _ALPHA_MALE,
     _BETA_MALE,
     _MOD_FREQS,
@@ -229,7 +230,7 @@ def stipa_18s_seed1234() -> np.ndarray:
 def test_stipa_loopback_ideal_channel(stipa_18s_seed1234: np.ndarray):
     x = stipa_18s_seed1234
     result = stipa(x, FS)
-    # Ideal loopback recovers STI 0.998 and min MTF 0.943 at 18 s; lock those
+    # Ideal loopback recovers STI 0.998 and min MTF 0.945 at 18 s; lock those
     # in (was >= 0.95 / > 0.9, several x looser than the achieved accuracy).
     assert result.sti >= 0.99
     assert result.rating == "A+"
@@ -342,14 +343,19 @@ def test_invalid_inputs_raise():
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
             stipa(stipa_signal(FS, seconds=18.0, seed=3)[: FS // 2], FS)
-    with pytest.raises(ValueError, match="no energy"):
-        # A pure tone leaves other octave bands empty. The 4 s clip also
-        # triggers the (correct) sub-15 s STIPA warning; silence it so the
-        # test output stays clean while we assert on the ValueError.
+    with pytest.warns(STIWarning, match="No energy in octave band"):
+        # A pure tone leaves other octave bands empty: those bands read
+        # m = 0 (TI = 0) with a warning rather than a hard error, so the
+        # IEC 60268-16 C.4.2 verification signals (energy in only two
+        # bands) remain measurable. The 4 s clip also triggers the
+        # (correct) sub-15 s STIPA warning; both are UserWarnings.
         t = np.arange(4 * FS) / FS
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", UserWarning)
-            stipa(np.sin(2 * np.pi * 1000.0 * t), FS)
+        res_tone = stipa(np.sin(2 * np.pi * 1000.0 * t), FS)
+    # The 1 kHz band carries the tone (unmodulated: m ~ 0); at least one
+    # dead band integrates to non-positive envelope energy and is pinned
+    # to exactly m = 0 instead of raising.
+    assert np.any(res_tone.mtf == 0.0)
+    assert np.all(res_tone.mtf[3] < 0.01)
 
     with pytest.raises(ValueError, match="positive"):
         stipa_signal(FS, seconds=0.0)

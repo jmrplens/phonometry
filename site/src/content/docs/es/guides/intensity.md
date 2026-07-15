@@ -133,6 +133,8 @@ ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
 print(ld, ld > fi.f2)                                      # 8.0 True (criterio 1)
 ```
 
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W" style="width:88%"></video>
+
 ### Parámetros de `sound_intensity()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |

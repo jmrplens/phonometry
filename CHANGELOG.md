@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Seven new mechanism animations (WebM + poster for the site, GIF for the
+  GitHub docs, EN + ES, light + dark): the ISO 10534-2 standing wave in the
+  impedance tube (rigid vs porous termination), the EN 12354-1 flanking
+  paths Dd/Ff/Fd/Df, the ISO 9614-2 intensity scan accumulating partial
+  powers into L_W, the ISO 18233 sweep deconvolution into the impulse
+  response, the ISO 532-1 specific-loudness pattern and its integral, the
+  same source measured in an anechoic and a reverberation room converging
+  to one L_W, and comb filtering from a single floor reflection; embedded
+  in the materials, insulation-prediction, sound-power, intensity,
+  room-acoustics and loudness guides (EN + ES) with deferred loading, plus
+  a `--anim NAME` flag on `scripts/generate_graphs.py` to re-render a
+  single clip.
 - `scripts/fdtd2d.py`: a small deterministic 2D acoustic FDTD engine
   (staggered-grid pressure-velocity leapfrog, heterogeneous c/rho maps,
   rigid walls, sponge absorbing layers, Gaussian-pulse and CW sources,

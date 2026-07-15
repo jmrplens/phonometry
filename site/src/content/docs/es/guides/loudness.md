@@ -4,11 +4,11 @@ description: "Sonoridad en sonos: Zwicker (ISO 532-1), Moore-Glasberg (ISO 532-2
 ---
 
 Las métricas de nivel dicen cuánta *presión sonora* hay; la sonoridad dice
-cuán fuerte la *percibe* realmente quien escucha. Esta página cubre los tres
-modelos de sonoridad que incluye phonometry: el método de Zwicker (ISO 532-1),
-los métodos de Moore-Glasberg (ISO 532-2/3) y la sonoridad del modelo de
-Sottek (ECMA-418-2), además de las curvas isofónicas de tonos puros (ISO 226).
-El sharpness, la tonalidad y la aspereza están en
+cuán fuerte la *percibe* realmente quien escucha. Esta página cubre las tres
+familias de modelos de sonoridad que incluye phonometry: el método de
+Zwicker (ISO 532-1), los métodos de Moore-Glasberg (ISO 532-2/3) y la
+sonoridad del modelo de Sottek (ECMA-418-2), además de las curvas isofónicas
+de tonos puros (ISO 226). El sharpness, la tonalidad y la aspereza están en
 [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/); las
 métricas de habla en el
 [índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) y
@@ -137,11 +137,11 @@ que calculan los modelos ISO 532 de esta página.
 
 ## Modelos avanzados de sonoridad
 
-La ISO 532-1 de arriba es uno de los **tres** modelos de sonoridad que incluye
-phonometry. Esta sección añade la sonoridad de **Moore-Glasberg** de
-ISO 532-2/532-3 y la sonoridad del **modelo de Sottek** de ECMA-418-2:2025,
-cuyo front-end auditivo compartido también impulsa la tonalidad y la aspereza
-de [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/).
+La ISO 532-1 de arriba es una de las **tres** familias de modelos de sonoridad
+que incluye phonometry (cuatro métodos en la tabla de abajo). Esta sección
+añade la sonoridad de **Moore-Glasberg** de ISO 532-2/532-3 y la sonoridad
+del **modelo de Sottek** de ECMA-418-2:2025, cuyo front-end auditivo
+compartido también impulsa la tonalidad y la aspereza de [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/).
 
 ### Elegir un modelo de sonoridad
 
@@ -152,9 +152,9 @@ de [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/).
 | Moore-Glasberg-Schlittenlacher | ISO 532-3:2023 | variable en el tiempo | sonos (STL/LTL) | Sonoridad variable en el tiempo con trazas de corto/largo plazo y el pico N_max |
 | Sottek (modelo auditivo) | ECMA-418-2:2025 | variable en el tiempo | sone_HMS | Comparte un único front-end auditivo con las métricas de tonalidad y aspereza de ECMA |
 
-Los tres están anclados de modo que un **tono de 1 kHz a 40 dB SPL es ≈ 1 sono**;
-los valores no son intercambiables dígito a dígito porque los modelos difieren
-en sus filtros auditivos y en su suma de sonoridad.
+Los cuatro métodos están anclados de modo que un **tono de 1 kHz a 40 dB SPL
+es ≈ 1 sono**; los valores no son intercambiables dígito a dígito porque los
+modelos difieren en sus filtros auditivos y en su suma de sonoridad.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es.svg" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_models_comparison_es_dark.svg" alt="Sonoridad de un tono de 1 kHz en función del nivel para los modelos de Zwicker, Moore-Glasberg y Sottek, todos pasando por 1 sono a 40 dB SPL" style="width:80%">
 

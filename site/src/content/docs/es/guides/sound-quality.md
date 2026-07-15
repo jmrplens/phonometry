@@ -128,9 +128,11 @@ fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
 amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)
 
-# Un tono puro (tonal, suave) frente a un tono modulado en amplitud a 70 Hz (áspero):
+# Un tono puro (tonal, suave) frente a un tono modulado en amplitud a 70 Hz
+# (áspero), ambos normalizados a un nivel global de 60 dB SPL:
 tone = amp * np.sin(2 * np.pi * 1000 * t)
-rough = amp * (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
+rough = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
+rough *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(rough**2))
 
 scores = {
     "Tono puro": (tonality_ecma(tone, fs).tonality, roughness_ecma(tone, fs).roughness),

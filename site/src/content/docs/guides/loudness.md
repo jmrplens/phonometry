@@ -5,7 +5,7 @@ description: "Loudness in sones: Zwicker (ISO 532-1), Moore-Glasberg (ISO 532-2)
 
 Level metrics tell you how much *sound pressure* there is; loudness tells you
 how loud a listener actually *perceives* it. This page covers the three
-loudness models phonometry ships: the Zwicker method (ISO 532-1), the
+loudness model families phonometry ships: the Zwicker method (ISO 532-1), the
 Moore-Glasberg methods (ISO 532-2/3) and the Sottek Hearing Model loudness
 (ECMA-418-2), plus the equal-loudness contours of pure tones (ISO 226).
 Sharpness, tonality and roughness live in
@@ -131,7 +131,8 @@ models on this page compute.
 
 ## Advanced loudness models
 
-ISO 532-1 above is one of **three** loudness models phonometry ships. This
+ISO 532-1 above is one of the **three** loudness model families phonometry
+ships (four methods in the table below). This
 section adds the **Moore-Glasberg** loudness of ISO 532-2/532-3 and the
 **Sottek Hearing Model** loudness of ECMA-418-2:2025, whose shared auditory
 front-end also powers the tonality and roughness metrics of
@@ -146,7 +147,7 @@ front-end also powers the tonality and roughness metrics of
 | Moore-Glasberg-Schlittenlacher | ISO 532-3:2023 | time-varying | sone (STL/LTL) | Time-varying loudness with short-/long-term traces and the peak N_max |
 | Sottek (Hearing Model) | ECMA-418-2:2025 | time-varying | sone_HMS | Shares one auditory front-end with the ECMA tonality and roughness metrics |
 
-All three are anchored so a **1 kHz tone at 40 dB SPL is ≈ 1 sone**; the values
+All four methods are anchored so a **1 kHz tone at 40 dB SPL is ≈ 1 sone**; the values
 are not interchangeable digit-for-digit because the models differ in their
 auditory filters and their loudness summation.
 

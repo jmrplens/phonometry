@@ -5,8 +5,9 @@
 // idempotent and cannot touch regular pages. Runs after every build.
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const dist = new URL('../dist/', import.meta.url).pathname;
+const dist = fileURLToPath(new URL('../dist/', import.meta.url));
 
 function* htmlFiles(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {

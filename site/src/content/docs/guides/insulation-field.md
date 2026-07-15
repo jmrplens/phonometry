@@ -182,7 +182,8 @@ reference** (impact noise is worse when higher) — the sign opposite to
 ISO 717-1. The rating (`Ln,w`, `L'n,w`, `L'nT,w`) is the shifted reference read
 at 500 Hz; for octave bands it is then reduced by 5 dB. The spectrum
 adaptation term $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$ uses the energetic sum
-over 100–2500 Hz (16-band thirds excluding 3150 Hz) or 125–2000 Hz (octaves).
+over 100–2500 Hz (the first 15 thirds, excluding 3150 Hz) or 125–2000 Hz
+(octaves).
 For measurements extended down to 50 Hz,
 `weighted_impact_rating_extended` additionally returns the enlarged-range
 term $C_{I,50\text{–}2500}$ (A.2.1 NOTE), and with `one_decimal=True` the

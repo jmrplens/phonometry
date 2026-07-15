@@ -185,8 +185,8 @@ medición *supera* la referencia** (el ruido de impactos es peor cuanto más
 alto) —el signo opuesto a ISO 717-1. El índice (`Ln,w`, `L'n,w`, `L'nT,w`) es
 la referencia desplazada leída a 500 Hz; para bandas de octava se reduce además
 en 5 dB. El término de adaptación espectral $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$
-usa la suma energética sobre 100–2500 Hz (16 tercios excluyendo 3150 Hz) o
-125–2000 Hz (octavas). Para mediciones ampliadas hasta 50 Hz,
+usa la suma energética sobre 100–2500 Hz (los primeros 15 tercios, excluyendo
+3150 Hz) o 125–2000 Hz (octavas). Para mediciones ampliadas hasta 50 Hz,
 `weighted_impact_rating_extended` devuelve además el término de rango ampliado
 $C_{I,50\text{–}2500}$ (NOTA de A.2.1) y, con `one_decimal=True`, el índice en
 pasos de 0,1 dB usado en las declaraciones de incertidumbre (reproduce los

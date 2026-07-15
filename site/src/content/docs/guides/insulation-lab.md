@@ -225,6 +225,7 @@ print(res.delta_lw)   # weighted improvement delta-Lw (ISO 717-2)
 res.plot()
 plt.show()
 ```
+
 </details>
 
 ```python
@@ -307,26 +308,36 @@ print(res.single_number)   # mean Kij over 200-1250 Hz (Annex A)
 res.plot()
 plt.show()
 ```
+
 </details>
 
 ```python
+import numpy as np
 from phonometry import (
     direction_averaged_level_difference, vibration_reduction_index,
     normalized_flanking_level_difference, modal_overlap_factor,
 )
 
+freqs = [200, 250, 315, 400, 500, 630, 800, 1000, 1250]
+lij, s_i, s_j = 4.0, 12.0, 10.0     # junction length (m), element areas (m^2)
+ts = np.linspace(0.30, 0.10, 9)     # structural reverberation time Ts (s)
+dv_ij = [5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7, 9.2, 9.8]    # element i excited (dB)
+dv_ji = [6.4, 6.8, 7.3, 7.8, 8.4, 8.9, 9.5, 10.0, 10.6]  # element j excited (dB)
+
 # Kij from both excitation directions (symmetric via the direction average):
 dbar = direction_averaged_level_difference(dv_ij, dv_ji)
 res = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
-                                structural_reverberation_time_i=ts_i,
-                                structural_reverberation_time_j=ts_j)
+                                structural_reverberation_time_i=ts,
+                                structural_reverberation_time_j=ts)
 res.k_ij           # Kij per band (Formula (13))
 res.single_number  # mean Kij over 200-1250 Hz, or None without the band set
 res.octave_bands() # Kij in octave bands (its single number averages 125-1000 Hz)
 
 # Overall airborne flanking descriptor and a Part-4 modal-overlap validity check:
-dnf = normalized_flanking_level_difference(l1, l2, absorption_area)
-m = modal_overlap_factor(area, critical_freq, ts)
+dnf = normalized_flanking_level_difference(np.full(9, 75.0), np.full(9, 42.0),
+                                           absorption_area=np.full(9, 12.0))
+m = modal_overlap_factor(s_i, critical_frequency=85.0,
+                         structural_reverberation_time=ts)
 res_m = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
                                   modal_overlap=m)   # M < 0.25 bands bracketed
 res_m.bracketed    # per-band flags; bracketed bands leave the single number

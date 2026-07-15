@@ -130,6 +130,8 @@ diffuse tail. Its `.plot()` shows the waveform above and the log-magnitude
 envelope with the Schroeder energy-decay curve below — the straight decay
 whose slope becomes the reverberation time in §2.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution.gif" alt="Animation: the exponential sweep crosses the room while its spectrogram builds with delayed copies from the reflections, then the inverse filter collapses the whole recording into the impulse response" width="640" height="360" loading="lazy"></picture>
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response.png" alt="Recovered room impulse response: the normalized waveform with the direct sound and reflections labelled, and below it the log-magnitude envelope in dB with the Schroeder energy-decay curve" width="88%"></picture>
 
 <details>
@@ -170,6 +172,8 @@ minimum number of source, microphone and source–microphone combinations per
 accuracy grade (survey / engineering / precision).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement.svg" alt="Room-acoustics measurement setup: a top-view room plan with two loudspeaker source positions and six microphone positions with the ISO 3382-1 spacing rules, and the ISO 3382-2 table of minimum positions for the survey, engineering and precision grades" width="94%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering.gif" alt="Animation: as the microphone height changes, the delay between the direct sound and the floor reflection shifts and the comb filter in the frequency response moves with it, which is why measurement position matters near reflecting surfaces" width="640" height="360" loading="lazy"></picture>
 
 ### `sweep_signal()` / `inverse_filter()` parameters
 

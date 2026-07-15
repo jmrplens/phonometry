@@ -14,7 +14,9 @@
 /* Tier-1 animations embedded as autoplaying, looping, muted WebM with native
    controls (a keyboard-accessible pause/stop for the motion, WCAG 2.2.2).
    Match the figure treatment: centred block, rounded, never wider than the
-   reading column. Authored inline as <video style="width:NN%">. */
+   reading column. Authored inline as <video style="width:88%">; the
+   responsive tiers below give videos the same widths as the detailed
+   plots (100% on phones, 92% on the capped desktop column). */
 .sl-markdown-content video {
   max-width: 100%;
   height: auto;
@@ -46,7 +48,8 @@
 @media (max-width: 50rem) {
   .sl-markdown-content img[style*="width:80%"],
   .sl-markdown-content img[style*="width:88%"],
-  .sl-markdown-content img[style*="width:92%"] { width: 100% !important; }
+  .sl-markdown-content img[style*="width:92%"],
+  .sl-markdown-content video[style*="width:88%"] { width: 100% !important; }
   /* keep the small schematics subordinate, but larger than on desktop */
   .sl-markdown-content img[style*="width:70%"] { width: 90% !important; }
   .sl-markdown-content img[style*="width:60%"] { width: 80% !important; }
@@ -56,5 +59,6 @@
    give the detailed plots a gentle boost, aligning them with the wide
    diagrams. Everything else keeps its authored width. */
 @media (min-width: 50.0625rem) {
-  .sl-markdown-content img[style*="width:80%"] { width: 92% !important; }
+  .sl-markdown-content img[style*="width:80%"],
+  .sl-markdown-content video[style*="width:88%"] { width: 92% !important; }
 }

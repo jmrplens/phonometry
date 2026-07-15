@@ -267,128 +267,144 @@ export default defineConfig({
         {
           label: 'Start',
           translations: { es: 'Inicio' },
-          items: ['getting-started'],
-        },
-        {
-          label: 'Signal processing & filters',
-          translations: { es: 'Procesado de señal y filtros' },
           items: [
-            'guides/filter-banks',
-            'guides/block-processing',
-            'guides/multichannel',
+            'getting-started',
+            'reference/why-phonometry',
           ],
         },
         {
-          label: 'Instrumentation, calibration & compliance',
-          translations: { es: 'Instrumentación, calibración y conformidad' },
-          items: ['guides/calibration'],
-        },
-        {
-          label: 'Levels & weighting',
-          translations: { es: 'Niveles y ponderación' },
+          label: 'Core signal analysis',
+          translations: { es: 'Análisis de señal' },
           items: [
-            'guides/levels',
-            'guides/weighting',
-            'guides/time-weighting',
+            {
+              label: 'Octave filtering',
+              translations: { es: 'Filtrado en octavas' },
+              items: ['guides/filter-banks', 'guides/block-processing', 'guides/multichannel'],
+            },
+            {
+              label: 'Levels and weighting',
+              translations: { es: 'Niveles y ponderación' },
+              items: ['guides/weighting', 'guides/time-weighting', 'guides/levels'],
+            },
+            {
+              label: 'Calibration and uncertainty',
+              translations: { es: 'Calibración e incertidumbre' },
+              items: ['guides/calibration', 'guides/gum-uncertainty'],
+            },
           ],
         },
         {
-          label: 'Psychoacoustics',
-          translations: { es: 'Psicoacústica' },
-          items: ['guides/psychoacoustics', 'guides/tone-prominence', 'guides/tone-audibility', 'guides/psychoacoustic-annoyance'],
+          label: 'Hearing and perception',
+          translations: { es: 'Audición y percepción' },
+          collapsed: true,
+          items: [
+            {
+              label: 'Psychoacoustics',
+              translations: { es: 'Psicoacústica' },
+              items: [
+                'guides/psychoacoustics',
+                'guides/tone-prominence',
+                'guides/tone-audibility',
+                'guides/psychoacoustic-annoyance',
+              ],
+            },
+            {
+              label: 'Speech',
+              translations: { es: 'Habla' },
+              items: ['guides/speech-transmission', 'guides/speech-intelligibility'],
+            },
+            {
+              label: 'Hearing and exposure',
+              translations: { es: 'Audición y exposición' },
+              items: [
+                'guides/hearing-threshold',
+                'guides/noise-induced-hearing-loss',
+                'guides/occupational-exposure',
+              ],
+            },
+          ],
         },
         {
-          label: 'Speech & intelligibility',
-          translations: { es: 'Habla e inteligibilidad' },
-          items: ['guides/speech-transmission', 'guides/speech-intelligibility'],
+          label: 'Rooms and buildings',
+          translations: { es: 'Salas y edificación' },
+          collapsed: true,
+          items: [
+            {
+              label: 'Room acoustics',
+              translations: { es: 'Acústica de salas' },
+              items: [
+                'guides/room-acoustics',
+                'guides/room-noise',
+                'guides/reverberation-prediction',
+                'guides/enclosed-space-absorption',
+              ],
+            },
+            {
+              label: 'Sound insulation',
+              translations: { es: 'Aislamiento acústico' },
+              items: [
+                'guides/building-acoustics',
+                'guides/dynamic-stiffness',
+              ],
+            },
+            {
+              label: 'Materials and surfaces',
+              translations: { es: 'Materiales y superficies' },
+              items: ['guides/materials', 'guides/surface-scattering'],
+            },
+          ],
         },
         {
-          label: 'Electroacoustics',
-          translations: { es: 'Electroacústica' },
-          items: ['guides/electroacoustics'],
+          label: 'Vibration and structure-borne sound',
+          translations: { es: 'Vibración y ruido estructural' },
+          collapsed: true,
+          items: [
+            {
+              label: 'Structure-borne sources',
+              translations: { es: 'Fuentes estructurales' },
+              items: [
+                'guides/mechanical-mobility',
+                'guides/transfer-stiffness',
+                'guides/vibration-sound-power',
+                'guides/structure-borne-power',
+                'guides/installed-structure-borne',
+              ],
+            },
+            {
+              label: 'Human vibration',
+              translations: { es: 'Vibración en humanos' },
+              items: ['guides/human-vibration', 'guides/multiple-shock-vibration'],
+            },
+          ],
+        },
+        {
+          label: 'Environment and transport',
+          translations: { es: 'Medio ambiente y transporte' },
+          collapsed: true,
+          items: [
+            {
+              label: 'Outdoor sound',
+              translations: { es: 'Sonido en exteriores' },
+              items: ['guides/outdoor-propagation', 'guides/impulse-prominence'],
+            },
+            {
+              label: 'Aircraft and wind energy',
+              translations: { es: 'Aeronaves y eólica' },
+              items: ['guides/aircraft-noise', 'guides/rotorcraft-noise', 'guides/wind-turbine-noise'],
+            },
+          ],
         },
         {
           label: 'Underwater acoustics',
           translations: { es: 'Acústica submarina' },
+          collapsed: true,
           items: ['guides/underwater-acoustics', 'guides/underwater-propagation'],
         },
         {
-          label: 'Aircraft noise',
-          translations: { es: 'Ruido de aeronaves' },
-          items: ['guides/aircraft-noise'],
-        },
-        {
-          label: 'Rotorcraft noise',
-          translations: { es: 'Ruido de rotorcraft' },
-          items: ['guides/rotorcraft-noise'],
-        },
-        {
-          label: 'Wind-turbine noise',
-          translations: { es: 'Ruido de aerogeneradores' },
-          items: ['guides/wind-turbine-noise'],
-        },
-        {
-          label: 'Hearing & occupational exposure',
-          translations: { es: 'Audición y exposición laboral' },
-          items: [
-            'guides/hearing-threshold',
-            'guides/noise-induced-hearing-loss',
-            'guides/occupational-exposure',
-          ],
-        },
-        {
-          label: 'Sound power & intensity',
-          translations: { es: 'Potencia e intensidad' },
-          items: [
-            'guides/intensity',
-            'guides/sound-power',
-          ],
-        },
-        {
-          label: 'Room acoustics',
-          translations: { es: 'Acústica de salas' },
-          items: [
-            'guides/room-acoustics',
-            'guides/enclosed-space-absorption',
-            'guides/reverberation-prediction',
-            'guides/room-noise',
-          ],
-        },
-        {
-          label: 'Materials & surfaces',
-          translations: { es: 'Materiales y superficies' },
-          items: ['guides/materials', 'guides/surface-scattering'],
-        },
-        {
-          label: 'Building acoustics & insulation',
-          translations: { es: 'Acústica de la edificación y aislamiento' },
-          items: ['guides/building-acoustics', 'guides/dynamic-stiffness'],
-        },
-        {
-          label: 'Structure-borne sound & vibration',
-          translations: { es: 'Ruido estructural y vibración' },
-          items: [
-            'guides/mechanical-mobility',
-            'guides/transfer-stiffness',
-            'guides/vibration-sound-power',
-            'guides/structure-borne-power',
-            'guides/installed-structure-borne',
-          ],
-        },
-        {
-          label: 'Environmental acoustics',
-          translations: { es: 'Acústica ambiental' },
-          items: ['guides/outdoor-propagation', 'guides/impulse-prominence'],
-        },
-        {
-          label: 'Human vibration',
-          translations: { es: 'Vibración en humanos' },
-          items: ['guides/human-vibration', 'guides/multiple-shock-vibration'],
-        },
-        {
-          label: 'Metrology & uncertainty',
-          translations: { es: 'Metrología e incertidumbre' },
-          items: ['guides/gum-uncertainty'],
+          label: 'Sources and devices',
+          translations: { es: 'Fuentes y dispositivos' },
+          collapsed: true,
+          items: ['guides/intensity', 'guides/sound-power', 'guides/electroacoustics'],
         },
         {
           label: 'Reference',
@@ -396,7 +412,6 @@ export default defineConfig({
           items: [
             'reference/api',
             'reference/theory',
-            'reference/why-phonometry',
             'reference/conformance',
           ],
         },

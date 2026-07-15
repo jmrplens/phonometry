@@ -41,9 +41,11 @@ def table_names(markdown: str) -> set[str]:
     """
     names: set[str] = set()
     for line in markdown.splitlines():
-        if not line.startswith("|"):
+        stripped = line.strip()
+        if not stripped.startswith("|"):
             continue
-        first_cell = line.split("|")[1]
+        # Split on unescaped pipes only (``\|`` is a literal pipe in a cell).
+        first_cell = re.split(r"(?<!\\)\|", stripped)[1]
         names.update(_BACKTICKED.findall(first_cell))
     return names
 

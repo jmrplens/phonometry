@@ -253,6 +253,8 @@ Some prose with `inline_code` that must not count.
 | `reverberation_index` / `estimate_reverberation_index` | `function` | ISO 10052 | `k = reverberation_index(t)` |
 | `OctaveFilterBank.spectrogram` | `method` | Band levels over time | `bank.spectrogram(x)` |
 | `.plot()` | `method` | Canonical figure | `res.plot()` |
+  | `indented_name` | `function` | Indented rows still count | `indented_name()` |
+| `piped_name` \| alias | `function` | Escaped pipe stays in the cell | `piped_name()` |
 """
 
 
@@ -265,6 +267,8 @@ def test_table_names_extracts_first_column_only() -> None:
         "estimate_reverberation_index",
         "OctaveFilterBank.spectrogram",
         ".plot()",
+        "indented_name",
+        "piped_name",
     }
     # Backticks outside tables and in later columns are ignored.
     assert "inline_code" not in names

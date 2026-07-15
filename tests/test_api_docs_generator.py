@@ -254,7 +254,7 @@ Some prose with `inline_code` that must not count.
 | `OctaveFilterBank.spectrogram` | `method` | Band levels over time | `bank.spectrogram(x)` |
 | `.plot()` | `method` | Canonical figure | `res.plot()` |
   | `indented_name` | `function` | Indented rows still count | `indented_name()` |
-| `piped_name` \| alias | `function` | Escaped pipe stays in the cell | `piped_name()` |
+| `piped_name` \\| alias | `function` | Escaped pipe stays in the cell | `piped_name()` |
 """
 
 

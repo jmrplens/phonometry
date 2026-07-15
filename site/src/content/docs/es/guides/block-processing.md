@@ -108,6 +108,21 @@ for x in audio_stream(block):            # tu callback de captura
 | `high_accuracy` (ponderación) | por defecto se resuelve a `False` — el diseño bilineal clásico, consulta [Ponderación frecuencial](/phonometry/es/guides/weighting/); pasar `True` explícito lanza `ValueError` | El remuestreo polifásico interno es incompatible con bloques |
 | `steady_ic` | opcional | Arranca los filtros en el régimen permanente de la respuesta al escalón |
 
+---
+
+**Normas.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+fractional-octave-band filters — Part 1: Specifications*, e IEC 61672-1:2013,
+*Electroacoustics — Sound level meters — Part 1: Specifications* — el
+procesado por bloques no añade contenido normativo propio: los filtros en
+streaming son los mismos diseños que rigen esas normas (consulta
+[Bancos de filtros](/phonometry/es/guides/filter-banks/),
+[Ponderación frecuencial](/phonometry/es/guides/weighting/) y
+[Ponderación temporal](/phonometry/es/guides/time-weighting/)), y conservar el
+estado interno del filtro entre bloques es exactamente lo que hace que la
+salida concatenada sea idéntica a una pasada única sobre la señal completa,
+por lo que toda afirmación de clase y tolerancia de las páginas subyacentes se
+mantiene sin cambios en uso streaming.
+
 ## Véase también
 
 - Referencia de la API: [`metrology.parametric_filters`](/phonometry/es/reference/api/filters/parametric-filters/) y [`metrology.core`](/phonometry/es/reference/api/filters/core/).

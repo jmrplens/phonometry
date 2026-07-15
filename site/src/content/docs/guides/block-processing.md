@@ -106,6 +106,20 @@ for x in audio_stream(block):            # your capture callback
 | `high_accuracy` (weighting) | resolves to `False` by default — the legacy bilinear design, see [Frequency Weighting](/phonometry/guides/weighting/); explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
 
+---
+
+**Standards.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+fractional-octave-band filters — Part 1: Specifications*, and IEC 61672-1:2013,
+*Electroacoustics — Sound level meters — Part 1: Specifications* — block
+processing adds no normative content of its own: the streamed filters are the
+same designs those standards govern (see
+[Filter Banks](/phonometry/guides/filter-banks/),
+[Frequency Weighting](/phonometry/guides/weighting/) and
+[Time Weighting](/phonometry/guides/time-weighting/)), and carrying the
+internal filter state across blocks is exactly what makes the concatenated
+output identical to a single full-signal pass, so every class and tolerance
+claim of the underlying pages holds unchanged in streaming use.
+
 ## See also
 
 - API reference: [`metrology.parametric_filters`](/phonometry/reference/api/filters/parametric-filters/) and [`metrology.core`](/phonometry/reference/api/filters/core/).

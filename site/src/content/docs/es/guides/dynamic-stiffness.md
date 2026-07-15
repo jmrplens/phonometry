@@ -10,7 +10,7 @@ ISO 9052-1:1989) mide la **rigidez dinámica por unidad de área** `s'` de la ca
 resiliente a partir de la resonancia de una placa de carga normalizada sobre una
 probeta de 200 mm × 200 mm. `s'` es la entrada al término de suelo flotante del
 modelo de impacto de EN 12354-2 tratado en
-[Acústica de la edificación](/phonometry/es/guides/building-acoustics/). (La
+[Predicción del aislamiento acústico (EN 12354)](/phonometry/es/guides/insulation-prediction/). (La
 ISO 16251-1 no aplica aquí: su alcance se limita a revestimientos blandos de
 reacción local y excluye expresamente los suelos flotantes.)
 

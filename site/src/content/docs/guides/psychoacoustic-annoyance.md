@@ -22,7 +22,7 @@ model and unit in the library:
 
 - **Loudness** — the percentile loudness `N5` (the loudness exceeded 5 % of the
   time), in **sone**, from the ISO 532-1 Zwicker time-varying model
-  (`loudness_zwicker`, see [Psychoacoustics](/phonometry/guides/psychoacoustics/)).
+  (`loudness_zwicker`, see [Loudness](/phonometry/guides/loudness/)).
 - **Sharpness** `S`, in **acum** — the spectral balance towards high
   frequencies, DIN 45692 (`sharpness_din`).
 - **Roughness** `R`, in **asper** — the harshness of fast (~70 Hz) amplitude
@@ -225,4 +225,5 @@ fluctuation strength* (ICA 2016) — clean-room, with no numeric standard:
 calibrated to `1 vacil` at the reference AM tone and cross-checked against the
 paper's Table 1 literature trends and the open SQAT reference oracle. The four
 sensations reuse the library's ISO 532-1 loudness, DIN 45692 sharpness and
-ECMA-418-2 roughness (see [Psychoacoustics](/phonometry/guides/psychoacoustics/)).
+ECMA-418-2 roughness (see [Loudness](/phonometry/guides/loudness/) and
+[Sound Quality Metrics](/phonometry/guides/sound-quality/)).

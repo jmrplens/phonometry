@@ -62,7 +62,7 @@ Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
 
 - [Levels](levels.md) — the ISO 1996-1 rating levels whose tonal adjustments
   (Table A.1) these prominence verdicts justify objectively.
-- [Psychoacoustics](psychoacoustics.md) — the ECMA-418-2 psychoacoustic
+- [Sound Quality Metrics](sound-quality.md) — the ECMA-418-2 psychoacoustic
   tonality T in tu_HMS, the hearing-model counterpart of these FFT ratios.
 - [Impulsive-sound prominence](impulse-prominence.md) — the NT ACOU 112
   counterpart for impulsive (rather than tonal) character.

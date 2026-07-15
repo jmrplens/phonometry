@@ -23,7 +23,7 @@ su propio modelo y unidad en la biblioteca:
 
 - **Sonoridad** — la sonoridad percentil `N5` (la sonoridad superada el 5 % del
   tiempo), en **sonios**, del modelo Zwicker variable en el tiempo de la ISO
-  532-1 (`loudness_zwicker`, véase [Psicoacústica](/phonometry/es/guides/psychoacoustics/)).
+  532-1 (`loudness_zwicker`, véase [Sonoridad](/phonometry/es/guides/loudness/)).
 - **Nitidez** `S`, en **acum** — el balance espectral hacia las altas
   frecuencias, DIN 45692 (`sharpness_din`).
 - **Aspereza** `R`, en **asper** — la dureza de la modulación de amplitud rápida
@@ -231,4 +231,5 @@ fluctuation strength* (ICA 2016) — clean-room, sin norma numérica: calibrado 
 literatura de la Tabla 1 del artículo y el oráculo de referencia abierto SQAT.
 Las cuatro sensaciones reutilizan la sonoridad ISO 532-1, la nitidez DIN 45692 y
 la aspereza ECMA-418-2 de la biblioteca (véase
-[Psicoacústica](/phonometry/es/guides/psychoacoustics/)).
+[Sonoridad](/phonometry/es/guides/loudness/) y
+[Métricas de calidad sonora](/phonometry/es/guides/sound-quality/)).

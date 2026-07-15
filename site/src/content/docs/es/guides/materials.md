@@ -361,7 +361,7 @@ ISO 12999-2:2020 da la incertidumbre típica $u$ de las magnitudes que produce u
 medida en cámara reverberante (ISO 354) y sus valoraciones (ISO 11654, EN 1793-1),
 estimada a partir de ensayos interlaboratorio según ISO 5725. Es la compañera —
 en absorción sonora— de la incertidumbre de aislamiento de la ISO 12999-1
-([Acústica de la edificación](/phonometry/es/guides/building-acoustics/)).
+([Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/)).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty_es.svg" alt="Incertidumbre del coeficiente de absorción sonora ISO 12999-2: el espectro medido de alpha_s en bandas de tercio de octava de 63 Hz a 5000 Hz con una banda sombreada de más-menos U con factor de cobertura k = 2, reproduciendo el ejemplo resuelto de la Tabla 4 de la norma" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty_es_dark.svg" alt="Incertidumbre del coeficiente de absorción sonora ISO 12999-2: el espectro medido de alpha_s en bandas de tercio de octava de 63 Hz a 5000 Hz con una banda sombreada de más-menos U con factor de cobertura k = 2, reproduciendo el ejemplo resuelto de la Tabla 4 de la norma" style="width:80%">
 

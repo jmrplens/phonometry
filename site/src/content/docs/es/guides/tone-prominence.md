@@ -67,7 +67,7 @@ Ambos devuelven un `ToneAssessment(frequency, ratio_db, criterion_db, prominent)
 - [Niveles](/phonometry/es/guides/levels/) — los niveles de evaluación de
   ISO 1996-1 cuyos ajustes tonales (Tabla A.1) estos veredictos de prominencia
   justifican objetivamente.
-- [Psicoacústica](/phonometry/es/guides/psychoacoustics/) — la tonalidad
+- [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/) — la tonalidad
   psicoacústica T en tu_HMS de ECMA-418-2, la contraparte de modelo auditivo de
   estos ratios FFT.
 - [Prominencia de sonidos impulsivos](/phonometry/es/guides/impulse-prominence/) —

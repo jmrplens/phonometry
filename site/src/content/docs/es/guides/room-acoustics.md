@@ -12,7 +12,7 @@ sala (ISO 3382-1/2), métricas espaciales del habla para oficinas diáfanas
 (ISO 3382-3) y, cerrando el ciclo, la absorción sonora de un material en una
 sala reverberante (ISO 354). Para el aislamiento acústico *entre* recintos —la
 misma RI medida a ambos lados de un cerramiento— consulta la guía complementaria
-[Acústica de la edificación y aislamiento](/phonometry/es/guides/building-acoustics/).
+[Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/).
 
 ## 1. Adquisición de la respuesta al impulso (ISO 18233)
 
@@ -492,14 +492,17 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
 
 ## Véase también
 
-- [Acústica de la edificación y aislamiento](/phonometry/es/guides/building-acoustics/) —
+- Aislamiento acústico [en campo](/phonometry/es/guides/insulation-field/),
+  [en laboratorio](/phonometry/es/guides/insulation-lab/) y
+  [de predicción](/phonometry/es/guides/insulation-prediction/) —
   el aislamiento acústico entre recintos en campo, laboratorio y predicción, y su incertidumbre de medición.
 - [Potencia sonora](/phonometry/es/guides/sound-power/) — los métodos de `LW` que
   consumen el área de absorción de ISO 354 (el `K2` de ISO 3744 y el término de
   absorción de ISO 3741).
 - [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) — la
   medición STI/STIPA que alimenta los `sti_values` de oficinas diáfanas.
-- [Psicoacústica](/phonometry/es/guides/psychoacoustics/) — la sonoridad, el
+- [Sonoridad](/phonometry/es/guides/loudness/) y
+  [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/) — la sonoridad, el
   sharpness y las demás métricas de percepción de lo que entrega la sala.
 - [Bancos de filtros](/phonometry/es/guides/filter-banks/) — los filtros de octava
   fraccionaria IEC 61260 usados para las curvas de decaimiento por banda y los espectros de

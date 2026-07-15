@@ -214,7 +214,8 @@ espectro de voz, incluido como primer argumento de
 
 - [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) — el
   índice de transmisión STI/STIPA que el SII complementa.
-- [Psicoacústica](/phonometry/es/guides/psychoacoustics/) — la sonoridad, el
+- [Sonoridad](/phonometry/es/guides/loudness/) y
+  [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/) — la sonoridad, el
   sharpness y las métricas de percepción de lo que oye quien escucha.
 - [Bancos de filtros](/phonometry/es/guides/filter-banks/) — las bandas de tercio de octava
   sobre las que se evalúa el SII.

@@ -2,7 +2,7 @@
 
 > Octave-band and fractional octave-band filter bank for Python signals in the time domain. Compliant with ANSI S1.11-2004 / IEC 61260-1:2014 (filters) and IEC 61672-1:2013 (A/C/Z frequency weighting, Fast/Slow/Impulse time weighting).
 
-phonometry v3.1.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). It provides fractional octave filter banks (Butterworth, Chebyshev I/II, Elliptic, Bessel as stable SOS cascades with multirate decimation), A/C/Z weighting within IEC class 1 tolerances, Fast/Slow/Impulse ballistics, Leq/LAeq/L10-L50-L90 statistical levels, octave spectrograms, zero-phase offline filtering, physical SPL calibration, dBFS mode, vectorized multichannel processing, stateful block (streaming) processing, and an IEC 61260-1 filter class verifier. Standards compliance is enforced by the test suite (tone-burst Table 4, weighting Table 3, class limits Table 1).
+phonometry v3.2.0 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). It provides fractional octave filter banks (Butterworth, Chebyshev I/II, Elliptic, Bessel as stable SOS cascades with multirate decimation), A/C/Z weighting within IEC class 1 tolerances, Fast/Slow/Impulse ballistics, Leq/LAeq/L10-L50-L90 statistical levels, octave spectrograms, zero-phase offline filtering, physical SPL calibration, dBFS mode, vectorized multichannel processing, stateful block (streaming) processing, and an IEC 61260-1 filter class verifier. Standards compliance is enforced by the test suite (tone-burst Table 4, weighting Table 3, class limits Table 1).
 
 Install:
 
@@ -36,12 +36,15 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Integrated and Statistical Levels](https://jmrplens.github.io/phonometry/guides/levels/)
 - [Occupational Noise Exposure (ISO 9612)](https://jmrplens.github.io/phonometry/guides/occupational-exposure/)
 - [Prominent Discrete Tones (ECMA-418-1)](https://jmrplens.github.io/phonometry/guides/tone-prominence/)
-- [Psychoacoustics](https://jmrplens.github.io/phonometry/guides/psychoacoustics/)
+- [Loudness](https://jmrplens.github.io/phonometry/guides/loudness/)
+- [Sound Quality Metrics](https://jmrplens.github.io/phonometry/guides/sound-quality/)
 - [Speech Transmission Index (IEC 60268-16)](https://jmrplens.github.io/phonometry/guides/speech-transmission/)
 - [Speech Intelligibility Index (SII)](https://jmrplens.github.io/phonometry/guides/speech-intelligibility/)
 - [Sound Intensity (p-p method)](https://jmrplens.github.io/phonometry/guides/intensity/)
 - [Room Acoustics](https://jmrplens.github.io/phonometry/guides/room-acoustics/)
-- [Building Acoustics & Sound Insulation](https://jmrplens.github.io/phonometry/guides/building-acoustics/)
+- [Field Insulation Measurement and Ratings](https://jmrplens.github.io/phonometry/guides/insulation-field/)
+- [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/guides/insulation-lab/)
+- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/guides/insulation-prediction/)
 - [Outdoor Sound Propagation](https://jmrplens.github.io/phonometry/guides/outdoor-propagation/)
 - [Sound Power](https://jmrplens.github.io/phonometry/guides/sound-power/)
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/)
@@ -781,15 +784,25 @@ See [Block Processing](https://jmrplens.github.io/phonometry/guides/block-proces
 
 `verify_weighting_class` checks a weighting filter against the acceptance
 limits of **IEC 61672-1:2013** (Table 3). It evaluates the filter's relative
-response at each nominal frequency below Nyquist, subtracts the design-goal
-weighting, and reports the performance class per frequency with its margin in
-dB:
+response at the *exact* base-10 frequency behind each nominal label below
+Nyquist (Table 3's design goals are computed at $f = 1000 \cdot 10^{n/10}$,
+e.g. 15 848.9 Hz for "16 kHz"; IEC 61672-3 tests at the same frequencies),
+subtracts the design-goal weighting, and reports the performance class per
+frequency with its margin in dB. A dense logarithmic sweep additionally
+enforces subclause 5.5.7 *between* the nominal frequencies — the deviation
+from the analytic Annex E goal must stay within the larger of the two
+adjacent limits, so a resonance or notch between nominals cannot pass — and
+when Table 3 rows with finite lower limits fall beyond Nyquist the verdict is
+flagged `range_limited` (it then attests the checked frequencies only, not
+full 10 Hz-20 kHz conformance):
 
 ```python
 from phonometry import WeightingFilter, verify_weighting_class
 
 result = verify_weighting_class(WeightingFilter(48000, "A"))
 print(result["overall_class"])          # 1
+print(result["range_limited"])          # False
+print(result["between_nominals"])       # {'worst_freq': ..., 'margin_class1_db': ...}
 print(result["bands"][20])
 # {'freq': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
 ```
@@ -1311,16 +1324,22 @@ exceeding both neighbours by 15/8/5 dB (low/mid/high), and
 $K_t$ (Table J.1).
 
 **Residual-noise correction (Clause 10.4).** `residual_sound_correction()`
-applies $L = 10\lg(10^{L'/10} - 10^{L_\text{res}/10})$ (Formula (16)) and flags a
-residual within 3 dB of the measured level as an upper bound only.
-`gaussian_residual_level()` estimates the residual from percentile levels (Annex I).
+applies $L = 10\lg(10^{L'/10} - 10^{L_\text{res}/10})$ (Formula (16)). With a
+residual within 3 dB of the measured level no correction is allowed: the
+*uncorrected* measured level $L'$ is then the reportable value, as an upper
+bound of the specific sound (exposed as `reportable_upper_bound`, with
+`reliable=False`). `gaussian_residual_level()` estimates the residual from
+percentile levels (Annex I) and rejects inverted percentile orderings.
 
 **Measurement uncertainty (Clause 4, Annex F).** `combined_standard_uncertainty()`
 forms $u = \sqrt{\sum (c_j u_j)^2}$ (Formula (2)) and
 `environmental_expanded_uncertainty()` applies $k = 2$ (95 %) or $k = 1.3$ (80 %);
 `residual_correction_uncertainty()` carries the residual-correction sensitivity
 (Formulae (F.7)/(F.8)) and `uncertainty_from_repeated_measurements()` the
-repeated-measurement standard uncertainty (Formulae (17)–(20)).
+repeated-measurement standard uncertainty — the primary energy-domain route
+(Formulae (17)+(19)), with the level-domain Note 2 substitute (Formula (20))
+reported alongside as `approximate_uncertainty` and a warning when the levels
+spread beyond 3 dB, where the substitute grossly inflates.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -1411,7 +1430,7 @@ ISO 9612 occupational strategies continue in
 [Occupational Noise Exposure](https://jmrplens.github.io/phonometry/guides/occupational-exposure/), the ECMA-418-1
 tonal-prominence verdicts in [Prominent Discrete Tones](https://jmrplens.github.io/phonometry/guides/tone-prominence/),
 and the ISO 226 equal-loudness contours live with the perception metrics in
-[Psychoacoustics](https://jmrplens.github.io/phonometry/guides/psychoacoustics/).
+[Loudness](https://jmrplens.github.io/phonometry/guides/loudness/).
 
 ---
 
@@ -1643,7 +1662,7 @@ Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
 
 - [Levels](https://jmrplens.github.io/phonometry/guides/levels/) — the ISO 1996-1 rating levels whose tonal adjustments
   (Table A.1) these prominence verdicts justify objectively.
-- [Psychoacoustics](https://jmrplens.github.io/phonometry/guides/psychoacoustics/) — the ECMA-418-2 psychoacoustic
+- [Sound Quality Metrics](https://jmrplens.github.io/phonometry/guides/sound-quality/) — the ECMA-418-2 psychoacoustic
   tonality T in tu_HMS, the hearing-model counterpart of these FFT ratios.
 - [Impulsive-sound prominence](impulse-prominence.md) — the NT ACOU 112
   counterpart for impulsive (rather than tonal) character.
@@ -1659,19 +1678,18 @@ frequency-dependent prominence criteria.
 ---
 
 
-<!-- source: docs/psychoacoustics.md | canonical: https://jmrplens.github.io/phonometry/guides/psychoacoustics/ -->
+<!-- source: docs/loudness.md | canonical: https://jmrplens.github.io/phonometry/guides/loudness/ -->
 
-# Psychoacoustics
+# Loudness
 
-Level metrics tell you how much *sound pressure* there is; psychoacoustic
-metrics tell you what a listener actually *perceives*. This page covers
-loudness (ISO 532-1), sharpness (DIN 45692) and the equal-loudness
-contours of pure tones (ISO 226), then the advanced Moore-Glasberg
-(ISO 532-2/3) and Sottek Hearing Model (ECMA-418-2) loudness, tonality and
-roughness models. Speech metrics live in their own guides: the
-transmission-channel STI/STIPA in
-[Speech Transmission Index](https://jmrplens.github.io/phonometry/guides/speech-transmission/) and the
-audibility-based SII in
+Level metrics tell you how much *sound pressure* there is; loudness tells you
+how loud a listener actually *perceives* it. This page covers the three
+loudness model families phonometry ships: the Zwicker method (ISO 532-1), the
+Moore-Glasberg methods (ISO 532-2/3) and the Sottek Hearing Model loudness
+(ECMA-418-2), plus the equal-loudness contours of pure tones (ISO 226).
+Sharpness, tonality and roughness live in
+[Sound Quality Metrics](https://jmrplens.github.io/phonometry/guides/sound-quality/); speech metrics in
+[Speech Transmission Index](https://jmrplens.github.io/phonometry/guides/speech-transmission/) and
 [Speech Intelligibility Index](https://jmrplens.github.io/phonometry/guides/speech-intelligibility/).
 
 ## Loudness in sones (ISO 532-1, Zwicker)
@@ -1767,34 +1785,6 @@ Returns a `ZwickerLoudness` dataclass: `loudness` (N, sones), `loudness_level`
 (phon), `specific` (N′(z), 240 bins of 0.1 Bark), and for time-varying runs
 `n5`, `n10`, `time`, `loudness_vs_time` (500 Hz trace).
 
-## Sharpness in acum (DIN 45692)
-
-Two sounds can be equally loud yet one feels "sharper" — hissy, metallic —
-because its loudness sits higher on the Bark scale. Sharpness is the
-g(z)-weighted first moment of the specific loudness pattern:
-
-$$
-S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz}\ \text{acum}
-$$
-
-with $g(z) = 1$ up to 15.8 Bark and rising exponentially beyond, and $k$
-normalized so the reference sound — critical-band-wide noise at 1 kHz,
-60 dB — is exactly **1.00 acum** (DIN 45692 clause 6; the derived
-$k = 0.108$ sits inside the normative window 0.105–0.115).
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" width="80%"></picture>
-
-```python
-from phonometry import sharpness_din
-
-# Uses `x`, `fs` and `sens` from the snippet above.
-s = sharpness_din(x, fs, calibration_factor=sens)      # acum
-s_aures = sharpness_din(x, fs, method="aures")          # Annex B variant
-```
-
-CI verifies the Table A.2 target values (0.38 acum at 250 Hz up to
-2.82 acum at 4 kHz) within the standard's 5 % / 0.05 acum tolerance.
-
 ## Loudness level of pure tones (ISO 226:2023)
 
 The normal equal-loudness-level contours relate the SPL of a pure tone to its
@@ -1818,13 +1808,14 @@ is verified against the Annex B tables in CI. Note this is the loudness of
 *pure tones* — the loudness of arbitrary signals in sones is what the ISO 532
 models on this page compute.
 
-## Advanced loudness & sound-quality models
+## Advanced loudness models
 
-ISO 532-1 above is one of **three** loudness models phonometry ships, and
-loudness is only half of the sound-quality story: two sounds of equal loudness
-can still differ in how *tonal* or how *rough* they are. This section adds the
-**Moore-Glasberg** loudness of ISO 532-2/532-3 and the **Sottek Hearing Model**
-loudness, tonality and roughness of ECMA-418-2:2025.
+ISO 532-1 above is one of the **three** loudness model families phonometry
+ships (four methods in the table below). This
+section adds the **Moore-Glasberg** loudness of ISO 532-2/532-3 and the
+**Sottek Hearing Model** loudness of ECMA-418-2:2025, whose shared auditory
+front-end also powers the tonality and roughness metrics of
+[Sound Quality Metrics](https://jmrplens.github.io/phonometry/guides/sound-quality/).
 
 ### Choosing a loudness model
 
@@ -1835,7 +1826,7 @@ loudness, tonality and roughness of ECMA-418-2:2025.
 | Moore-Glasberg-Schlittenlacher | ISO 532-3:2023 | time-varying | sone (STL/LTL) | Time-varying loudness with short-/long-term traces and the peak N_max |
 | Sottek (Hearing Model) | ECMA-418-2:2025 | time-varying | sone_HMS | Shares one auditory front-end with the ECMA tonality and roughness metrics |
 
-All three are anchored so a **1 kHz tone at 40 dB SPL is ≈ 1 sone**; the values
+All four methods are anchored so a **1 kHz tone at 40 dB SPL is ≈ 1 sone**; the values
 are not interchangeable digit-for-digit because the models differ in their
 auditory filters and their loudness summation.
 
@@ -1982,7 +1973,9 @@ filtering, a 53-band gammatone-like filter bank on the Bark_HMS scale
 (z = 0.5 .. 26.5), half-wave rectification, block RMS and a compressive
 nonlinearity (Formula 23) — that is **shared** by its loudness, tonality and
 roughness metrics. The loudness N is reported in **sone_HMS**, and the same
-1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.996).
+1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.984,
+with the full Clause 6.2.3 band averaging; the residual's origin is
+documented in the module docstring).
 
 ```python
 import numpy as np
@@ -1993,7 +1986,7 @@ t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
 res = loudness_ecma(x, fs, field="free")
-print(f"N = {res.loudness:.3f} sone_HMS")   # 0.996 sone_HMS
+print(f"N = {res.loudness:.3f} sone_HMS")   # 0.984 sone_HMS
 print(res.specific_loudness.shape)          # (53,) average specific loudness N'(z)
 
 res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz
@@ -2034,7 +2027,78 @@ Returns an `EcmaLoudness`: `loudness` (N, sone_HMS), `specific_loudness`
 (N′(z), 53 bands), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
 (N(l) at 187.5 Hz), `field`.
 
-### Tonality (ECMA-418-2)
+---
+
+**Standards.** ISO 532-1:2017, *Acoustics — Methods for calculating
+loudness — Part 1: Zwicker method* — stationary and time-varying loudness in
+sones from the normative Annex A.4 reference program, with the N5/N10
+percentile loudness, validated against the Annex B set. ISO 532-2:2017,
+*... Part 2: Moore-Glasberg method* — stationary loudness from roex excitation
+patterns on the ERB-number scale, with explicit binaural summation.
+ISO 532-3:2023, *... Part 3: Moore-Glasberg-Schlittenlacher method* —
+time-varying short-term and long-term loudness and the peak N_max.
+ISO 226:2023, *Acoustics — Normal equal-loudness-level contours* — the
+contours (Formula 1), the loudness level of pure tones (Formula 2) and the
+hearing threshold. ECMA-418-2:2025, *Psychoacoustic metrics for ITT
+equipment — Part 2 (methods for describing human perception based on the
+Sottek Hearing Model)* — the Sottek Hearing Model loudness (sone_HMS).
+
+## See also
+
+- [Sound Quality Metrics](https://jmrplens.github.io/phonometry/guides/sound-quality/): sharpness,
+  tonality and roughness, the other half of the sound-quality story.
+- [Psychoacoustic annoyance and fluctuation strength](psychoacoustic-annoyance.md):
+  the Zwicker and Fastl model that consumes the percentile loudness N5.
+- [Theory](https://jmrplens.github.io/phonometry/reference/theory/): the equations behind the loudness models.
+
+---
+
+
+<!-- source: docs/sound-quality.md | canonical: https://jmrplens.github.io/phonometry/guides/sound-quality/ -->
+
+# Sound Quality Metrics
+
+Two sounds of equal loudness can still differ in how *sharp*, how *tonal* or
+how *rough* they are. This page covers the sound-quality metrics that
+complement loudness: sharpness (DIN 45692) and the ECMA-418-2 tonality and
+roughness of the Sottek Hearing Model. Loudness itself, including the
+ECMA-418-2 loudness that shares the same auditory front-end, lives in
+[Loudness](https://jmrplens.github.io/phonometry/guides/loudness/).
+
+## Sharpness in acum (DIN 45692)
+
+Two sounds can be equally loud yet one feels "sharper" — hissy, metallic —
+because its loudness sits higher on the Bark scale. Sharpness is the
+g(z)-weighted first moment of the specific loudness pattern:
+
+$$
+S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz}\ \text{acum}
+$$
+
+with $g(z) = 1$ up to 15.8 Bark and rising exponentially beyond, and $k$
+normalized so the reference sound — critical-band-wide noise at 1 kHz,
+60 dB — is exactly **1.00 acum** (DIN 45692 clause 6; the derived
+$k = 0.108$ sits inside the normative window 0.105–0.115).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" width="80%"></picture>
+
+```python
+import numpy as np
+from phonometry import sharpness_din
+
+# A raw recording plus its calibration so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # any recording (digital units)
+sens = 1.0                                                # calibration_factor to pascals
+
+s = sharpness_din(x, fs, calibration_factor=sens)      # acum
+s_aures = sharpness_din(x, fs, method="aures")          # Annex B variant
+```
+
+CI verifies the Table A.2 target values (0.38 acum at 250 Hz up to
+2.82 acum at 4 kHz) within the standard's 5 % / 0.05 acum tolerance.
+
+## Tonality (ECMA-418-2)
 
 A tonal component — a whistle, a fan's blade-passing tone — stands out even at
 low level. ECMA-418-2 quantifies it from the **autocorrelation function** (ACF)
@@ -2059,7 +2123,7 @@ print(f"f_ton = {res.tonal_frequencies[peak]:.0f} Hz")     # 999 Hz
 res.plot()   # average specific tonality T'(z) + time-dependent T(l)
 ```
 
-#### `tonality_ecma()` parameters
+### `tonality_ecma()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -2074,7 +2138,7 @@ Returns an `EcmaTonality`: `tonality` (T, tu_HMS), `specific_tonality`
 (f_ton,z), `time`, `tonality_vs_time` (T(l)), `tonal_frequency_vs_time`,
 `field`.
 
-### Roughness (ECMA-418-2) — new capability
+## Roughness (ECMA-418-2) — new capability
 
 Roughness is the harsh, buzzing sensation of fast amplitude modulation
 (roughly 20–300 Hz, peaking near 70 Hz) — the quality of a diesel idle or a
@@ -2082,10 +2146,9 @@ distorted loudspeaker. It is a **new metric** for phonometry. ECMA-418-2
 extracts each band's envelope, weights its modulation spectrum by modulation
 rate and depth, and correlates the modulation across bands; the result R is in
 **asper**. The reference sound (1 kHz carrier, 100 % amplitude-modulated at
-70 Hz, 60 dB SPL) is defined as 1 asper — this clean-room implementation
-returns 1.0735 asper (about +7 %), an honest variance: the tabulated
-calibration constant c_R (Formula 104) is used **without** reverse-fitting to
-the target.
+70 Hz, overall level 60 dB SPL) is defined as 1 asper — this clean-room
+implementation returns 0.9999 asper with the tabulated calibration constant
+c_R (Formula 104) used **without** reverse-fitting to the target.
 
 ```python
 import numpy as np
@@ -2093,12 +2156,11 @@ from phonometry import roughness_ecma
 
 fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
-carrier = np.sin(2 * np.pi * 1000 * t)
-amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)                  # 60 dB SPL carrier
-x = amp * (1.0 + np.cos(2 * np.pi * 70 * t)) * carrier      # 100 % AM at 70 Hz
+x = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
+x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # overall 60 dB SPL
 
 res = roughness_ecma(x, fs, field="free")
-print(f"R = {res.roughness:.4f} asper")   # 1.0735 asper (reference target 1.0)
+print(f"R = {res.roughness:.4f} asper")   # 0.9999 asper (reference: 1 asper)
 
 res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
 ```
@@ -2117,9 +2179,11 @@ fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
 amp = np.sqrt(2) * 2e-5 * 10 ** (60 / 20)
 
-# A pure tone (tonal, smooth) vs a 70 Hz amplitude-modulated tone (rough):
+# A pure tone (tonal, smooth) vs a 70 Hz amplitude-modulated tone (rough),
+# both normalized to an overall level of 60 dB SPL:
 tone = amp * np.sin(2 * np.pi * 1000 * t)
-rough = amp * (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
+rough = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
+rough *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(rough**2))
 
 scores = {
     "Pure tone": (tonality_ecma(tone, fs).tonality, roughness_ecma(tone, fs).roughness),
@@ -2140,7 +2204,7 @@ plt.show()
 
 </details>
 
-#### `roughness_ecma()` parameters
+### `roughness_ecma()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -2159,22 +2223,12 @@ STI/STIPA, and [Theory](https://jmrplens.github.io/phonometry/reference/theory/)
 
 ---
 
-**Standards.** ISO 532-1:2017, *Acoustics — Methods for calculating
-loudness — Part 1: Zwicker method* — stationary and time-varying loudness in
-sones from the normative Annex A.4 reference program, with the N5/N10
-percentile loudness, validated against the Annex B set. ISO 532-2:2017,
-*... Part 2: Moore-Glasberg method* — stationary loudness from roex excitation
-patterns on the ERB-number scale, with explicit binaural summation.
-ISO 532-3:2023, *... Part 3: Moore-Glasberg-Schlittenlacher method* —
-time-varying short-term and long-term loudness and the peak N_max.
-DIN 45692:2009, *Messtechnische Simulation der Hörempfindung Schärfe* —
-sharpness in acum (clause 6 weighting, Annex B von Bismarck and Aures
-variants, Table A.2 targets). ISO 226:2023, *Acoustics — Normal
-equal-loudness-level contours* — the contours (Formula 1), the loudness level
-of pure tones (Formula 2) and the hearing threshold. ECMA-418-2:2025,
-*Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing
-human perception based on the Sottek Hearing Model)* — the Sottek Hearing
-Model loudness (sone_HMS), tonality (tu_HMS) and roughness (asper).
+**Standards.** DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
+Schärfe* — sharpness in acum (clause 6 weighting, Annex B von Bismarck and
+Aures variants, Table A.2 targets). ECMA-418-2:2025, *Psychoacoustic metrics
+for ITT equipment — Part 2 (methods for describing human perception based on
+the Sottek Hearing Model)* — the Sottek Hearing Model tonality (tu_HMS) and
+roughness (asper).
 
 ---
 
@@ -2273,7 +2327,7 @@ plt.show()
 `stipa` emits a `UserWarning` when the recording is shorter than the
 recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s): below that the
 slow modulation components are averaged over too few periods and the STI is
-biased low (an ideal loopback gives STI ≈ 0.944 at 5 s vs ≈ 0.998 at 18 s).
+biased low (an ideal loopback gives STI ≈ 0.956 at 5 s vs ≈ 0.998 at 18 s).
 
 The implementation follows **Edition 5 (2020)**: Edition 4's normative PDF
 is the base and every Ed. 5 change is source-attributed in the code — the
@@ -2281,6 +2335,18 @@ only numeric delta is the revised male speech spectrum of clause A.6.1.
 CI checks the standard's own verification vectors: the six weighting-factor
 band pairs to ±0.001 STI, the m ↔ STI mapping table, the level-dependent
 masking control points, and Schroeder-form decays at four T₆₀ values.
+
+The analyzer is also verified end to end against the **IEC 60268-16 rev 5
+verification test bench** signals from [stipa.info](https://www.stipa.info)
+(Embedded Acoustics BV): the direct-method modulation-depth staircase
+(Annex C.3.2), the indirect-method exponential decays against the closed-form
+Schroeder MTF (C.3.3), the filter-bank slope test with a +41 dB unmodulated
+adjacent-octave tone (C.4.2, m ≥ 0.5), the weighting-factor band pairs (A.2.2)
+and the filter-bank phase-distortion test with half-octave edge carriers
+(A.3.1.2, |STI bias| < 0.01 over TI = 0.1–0.9). All five suites pass with the
+level-dependent features disabled, as the bench prescribes. The 49 certified
+WAVs stay local (third-party data, not committed); CI re-derives the same
+signal constructions synthetically in the conformance suite.
 
 ### `sti_from_impulse_response()` / `stipa()` parameters
 
@@ -2303,8 +2369,8 @@ Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
   per-position STI.
 - [Speech Intelligibility Index](https://jmrplens.github.io/phonometry/guides/speech-intelligibility/) — the
   audibility-based ANSI S3.5 index that complements the STI.
-- [Psychoacoustics](https://jmrplens.github.io/phonometry/guides/psychoacoustics/) — loudness, sharpness, tonality and
-  roughness of the received sound.
+- [Loudness](https://jmrplens.github.io/phonometry/guides/loudness/) and [Sound Quality Metrics](https://jmrplens.github.io/phonometry/guides/sound-quality/) — loudness,
+  sharpness, tonality and roughness of the received sound.
 - [Theory](https://jmrplens.github.io/phonometry/reference/theory/) — the modulation-transfer derivation and the m ↔ STI
   mapping.
 
@@ -2709,7 +2775,7 @@ parameters (ISO 3382-1/2), spatial speech metrics for open-plan offices
 (ISO 3382-3) and, closing the loop, the sound absorption of a material in a
 reverberation room (ISO 354). For sound insulation *between* spaces — the same
 IR measured either side of a partition — see the companion
-[Building Acoustics & Sound Insulation guide](https://jmrplens.github.io/phonometry/guides/building-acoustics/).
+[Field Insulation Measurement and Ratings guide](https://jmrplens.github.io/phonometry/guides/insulation-field/).
 
 ## 1. Impulse-response acquisition (ISO 18233)
 
@@ -3175,14 +3241,15 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
 
 ## See also
 
-- [Building Acoustics & Sound Insulation](https://jmrplens.github.io/phonometry/guides/building-acoustics/) — field,
+- [Field](https://jmrplens.github.io/phonometry/guides/insulation-field/), [laboratory](https://jmrplens.github.io/phonometry/guides/insulation-lab/) and
+  [predicted](https://jmrplens.github.io/phonometry/guides/insulation-prediction/) sound insulation — field,
   laboratory and predicted sound insulation between spaces, and its measurement uncertainty.
 - [Sound Power](https://jmrplens.github.io/phonometry/guides/sound-power/) — the `LW` methods that consume the
   ISO 354 absorption area (the ISO 3744 `K2` and the ISO 3741 absorption term).
 - [Speech Transmission Index](https://jmrplens.github.io/phonometry/guides/speech-transmission/) — the STI/STIPA
   measurement that feeds the open-plan `sti_values`.
-- [Psychoacoustics](https://jmrplens.github.io/phonometry/guides/psychoacoustics/) — loudness, sharpness and the other
-  perception metrics of what the room delivers.
+- [Loudness](https://jmrplens.github.io/phonometry/guides/loudness/) and [Sound Quality Metrics](https://jmrplens.github.io/phonometry/guides/sound-quality/) — loudness,
+  sharpness and the other perception metrics of what the room delivers.
 - [Filter Banks](https://jmrplens.github.io/phonometry/guides/filter-banks/) — the IEC 61260 fractional-octave filters
   used for band decay curves and insulation spectra.
 - [Levels](https://jmrplens.github.io/phonometry/guides/levels/) — energy averaging and the level metrics behind
@@ -3203,21 +3270,22 @@ decays and the standards' own parameter definitions in the
 ---
 
 
-<!-- source: docs/building-acoustics.md | canonical: https://jmrplens.github.io/phonometry/guides/building-acoustics/ -->
+<!-- source: docs/insulation-field.md | canonical: https://jmrplens.github.io/phonometry/guides/insulation-field/ -->
 
-# Building Acoustics & Sound Insulation
+# Field Insulation Measurement and Ratings
 
 This guide continues from the [Room Acoustics guide](https://jmrplens.github.io/phonometry/guides/room-acoustics/):
 the same impulse response, measured either side of a partition, yields its sound
-insulation. Where room acoustics describes the sound field inside a single space,
-building acoustics describes how much of that field passes *between* spaces. This
-page follows the insulation chain — field airborne, impact and façade insulation
-with single-number ratings (ISO 16283-1/2/3, ISO 717-1/2), the laboratory
-characterisation of a building element (ISO 10140), the prediction of in-situ
-performance from flanking transmission (EN 12354-1/2), and the measurement
-uncertainty that qualifies every rating (ISO 12999-1).
+insulation. This page covers insulation measured *in the building*: field
+airborne, impact and façade insulation with single-number ratings
+(ISO 16283-1/2/3, ISO 717-1/2), the measurement uncertainty that qualifies
+every rating (ISO 12999-1) and the quick ISO 10052 survey method. The
+laboratory characterisation of an element lives in
+[Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/guides/insulation-lab/) and the prediction of
+in-situ performance in
+[Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/guides/insulation-prediction/).
 
-## 1. Field insulation and single-number ratings (ISO 16283-1, ISO 717-1)
+## Field insulation and single-number ratings (ISO 16283-1, ISO 717-1)
 
 To rate a wall or floor, measure the energy-average level in the **source**
 room ($L_1$) and the **receiving** room ($L_2$) per one-third-octave band
@@ -3328,6 +3396,34 @@ ISO 717-1 reference curve.
 `r_prime` or `None`); `weighted_rating()` returns a `WeightedRatingResult`
 (`rating`, `c`, `ctr`, `unfavourable_sum`, all integers except the sum).
 
+### Enlarged frequency ranges and one-decimal ratings
+
+When the measurement covers more than the core 100–3150 Hz bands, ISO 717-1
+Annex B defines additional adaptation terms with the range as a subscript
+($C_{50\text{–}3150}$, $C_{50\text{–}5000}$, $C_{100\text{–}5000}$ and the
+$C_{tr}$ counterparts), computed with the Table B.1 spectra over the enlarged
+range. `weighted_rating_extended` takes the band values *with their centre
+frequencies* and returns the core rating plus every extended term the input
+covers (the impact counterpart `weighted_impact_rating_extended` adds
+$C_{I,50\text{–}2500}$). With `one_decimal=True` the reference curve shifts in
+0.1 dB steps and all reductions keep one decimal: the variant ISO 717
+prescribes "for the expression of uncertainty" and ISO 12999-1 Annex B
+requires when stating the uncertainty of a single-number value.
+
+```python
+from phonometry import weighted_rating_extended
+
+freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
+         630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+r_ext = [18.7, 19.2, 20.0, *R, 26.8, 29.2]     # ISO 717-1 Annex C, Table C.2
+ext = weighted_rating_extended(r_ext, freqs)
+print(ext.rating, ext.c, ext.ctr, ext.c_50_5000, ext.ctr_50_5000)
+# 30 -2 -3 -2 -4   ->  Rw(C;Ctr;C50-5000;Ctr,50-5000) = 30(-2;-3;-2;-4)
+
+one_dp = weighted_rating_extended(r_ext, freqs, one_decimal=True)
+print(one_dp.rating)   # 30.0, the 0.1 dB-step rating for uncertainty statements
+```
+
 ### Impact sound (ISO 16283-2, ISO 717-2)
 
 Footstep noise is rated the other way round. Instead of how much a floor
@@ -3357,7 +3453,13 @@ reference** (impact noise is worse when higher) — the sign opposite to
 ISO 717-1. The rating (`Ln,w`, `L'n,w`, `L'nT,w`) is the shifted reference read
 at 500 Hz; for octave bands it is then reduced by 5 dB. The spectrum
 adaptation term $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$ uses the energetic sum
-over 100–2500 Hz (16-band thirds excluding 3150 Hz) or 125–2000 Hz (octaves).
+over 100–2500 Hz (the first 15 thirds, excluding 3150 Hz) or 125–2000 Hz
+(octaves).
+For measurements extended down to 50 Hz,
+`weighted_impact_rating_extended` additionally returns the enlarged-range
+term $C_{I,50\text{–}2500}$ (A.2.1 NOTE), and with `one_decimal=True` the
+0.1 dB-step rating used in uncertainty statements (it reproduces the printed
+$L_{n,r,0,w} = 77.6$ dB and $C_{I,r,0} = -10.3$ dB of A.2.2).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating.svg" alt="Measured one-third-octave normalized impact sound pressure level with the shifted ISO 717-2 reference curve and the resulting weighted rating read at 500 Hz" width="80%"></picture>
 
@@ -3519,10 +3621,225 @@ assumed already corrected for background noise.
 `d_2m_n` or `None`, `r_prime` or `None`, `frequencies`); feed any 16-band façade
 quantity to `weighted_rating` for its ISO 717-1 single number.
 
-## 2. Laboratory measurement (ISO 10140)
+## Measurement uncertainty (ISO 12999-1)
 
-Everything above is a **field** measurement (the primed quantities $R'$, $L'_n$):
-the number a real building achieves, flanking transmission and all. To rate an
+A rating without an uncertainty is only half a result. ISO 12999-1 does not
+re-measure anything; it tabulates the **standard uncertainty** $u$ of every
+sound-insulation quantity — derived from inter-laboratory tests — and prescribes
+how to expand and combine it. Which standard deviation is $u$ depends on the
+**measurement situation** (Clause 5.2):
+
+| Situation | Meaning | Standard uncertainty $u$ |
+| :--- | :--- | :--- |
+| **A** | laboratory characterisation (ISO 10140) | reproducibility $\sigma_R$ |
+| **B** | same location, different teams | in-situ $\sigma_{situ}$ |
+| **C** | same location, same operator repeated | repeatability $\sigma_r$ |
+
+The expanded uncertainty is $U = k\ u$ (Formula 2) with the coverage factor $k$
+of Table 8. A two-sided interval $Y = y \pm U$ (Formula 3, $k = 1.96$ at 95 %)
+*reports* a value; the **one-sided** factor ($k = 1.65$ at 95 %) *declares
+conformity* with a requirement (Formulae 4/5).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999.svg" alt="ISO 12999-1 uncertainty flow: standard uncertainty from the tables, reduced by repeated measurements and combined in quadrature, then expanded by the Table 8 coverage factor into a two-sided report or a one-sided conformity decision" width="82%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo.svg" alt="A weighted rating reported with its two-sided 95 % expanded uncertainty in situations A, B and C, the reproducibility uncertainty widest and the repeatability uncertainty narrowest" width="80%"></picture>
+
+```python
+from phonometry import (band_uncertainty, single_number_uncertainty,
+                        uncertain_value, satisfies_lower_requirement)
+
+# Situation B (same building, different teams) -> the in-situ standard deviation.
+print(single_number_uncertainty("r_w", "B"))       # 0.9  dB  (Table 3)
+u = band_uncertainty("airborne", "B")              # per-band u (Table 2)
+print(len(u.frequencies), u.uncertainties[10])     # 21 1.1  (the 500 Hz band)
+
+# Report R'w = 52 dB with a two-sided 95 % interval (k = 1.96, Table 8):
+uv = uncertain_value(52.0, "rprime_w", "B")        # aliases resolve to r_w
+print(uv.coverage_factor, round(uv.expanded_uncertainty, 1))    # 1.96 1.8
+print(round(uv.lower, 1), round(uv.upper, 1))      # 50.2 53.8  ->  52 ± 1.8 dB
+
+# Declaring conformity uses the ONE-sided factor (k = 1.65): does R'w provably
+# clear a 50 dB requirement?
+uc = uncertain_value(52.0, "rprime_w", "B", one_sided=True)
+print(satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
+```
+
+Impact quantities offer situations B/C only (Table 4, no 500 Hz band in the 2020
+edition), and $\Delta L$ only situation A. Descriptors are case-insensitive with
+aliases (`rprime_w`/`dnt_w`→`r_w`, `lprime_n_w`→`ln_w`); combine independent
+components in quadrature with `combine_uncertainties`, and reduce by $m$
+independent measurements with `reduce_by_independent_measurements` ($u/\sqrt{m}$).
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import uncertain_value
+
+# The same R'w = 52 dB reported in each situation with its two-sided 95 % U.
+situations = ["A", "B", "C"]
+vals = [uncertain_value(52.0, "r_w", s) for s in situations]
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.errorbar(situations, [v.value for v in vals],
+            yerr=[v.expanded_uncertainty for v in vals],
+            fmt="o", capsize=8, color="tab:blue")
+for s, v in zip(situations, vals):
+    ax.annotate(f"±{v.expanded_uncertainty:.1f}", (s, v.upper),
+                textcoords="offset points", xytext=(8, 4))
+ax.set_ylabel("R'w [dB]"); ax.set_xlabel("Measurement situation")
+ax.set_title("R'w = 52 dB with 95 % expanded uncertainty (ISO 12999-1)")
+fig.tight_layout()
+plt.show()
+```
+
+</details>
+
+### `band_uncertainty()` / `single_number_uncertainty()` / `uncertain_value()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `measurand` | str | — | `'airborne'` / `'impact'` / `'impact_reduction'` | Selects Table 2 / 4 / 6 |
+| `quantity` | str | — | `'r_w'`, `'ln_w'`, `'delta_lw'` (+ aliases, `+c`/`+ctr` variants) | Single-number descriptor |
+| `situation` | str | — | `'A'` / `'B'` / `'C'` | Measurement situation (Clause 5.2) |
+| `value` | float | dB | — | Best estimate `y` to attach `U` to |
+| `coverage` | float | — | default `0.95` | Confidence level (Table 8) |
+| `one_sided` | bool | — | default `False` | One-sided factor for conformity checks |
+| `upper_limit` | bool | — | default `False` | Select the σR95 upper limit (airborne, situation A) |
+
+`band_uncertainty()` returns a `BandUncertainty` (`frequencies`,
+`uncertainties`, `.to_arrays()`); `single_number_uncertainty()` a float;
+`uncertain_value()` an `UncertainValue` (`value`, `standard_uncertainty`,
+`coverage_factor`, `expanded_uncertainty`, `.lower`, `.upper`). The read-only
+`COVERAGE_FACTORS` mapping exposes Table 8 keyed by `(confidence, one_sided)`.
+
+## Field survey method (ISO 10052)
+
+The engineering methods above buy accuracy with effort — swept microphones,
+per-band reverberation times, careful background correction. For a quick check
+in a dwelling, ISO 10052 defines a **survey (control) method**: octave bands, a
+hand-held meter, and a single quantity — the **reverberation index**
+`k = 10 lg(T/T0)` (`T0 = 0.5 s`) — to carry the receiving-room correction. Every
+survey quantity is then just an addition of `k`: the standardized level
+difference `DnT = D + k`, the normalized `Dn = D + k + 10 lg(A0 T0 / (0.16 V))`,
+the apparent `R' = D + k + 10 lg(S T0 / (0.16 V))` (using `V/7.5` for `S` where
+that is larger), and, for impacts and façades, `L'nT = Li - k` and
+`D2m,nT = D2m + k`. The clause references follow ISO 10052:2021; the formulas
+and the reverberation-index table are identical in the harmonized
+EN ISO 10052:2004+A1:2010.
+
+The reverberation index is either **measured** — feed the reverberation time to
+`reverberation_index(T)` — or, in a control survey, **estimated** from the room
+type and volume with `estimate_reverberation_index(V, room)` (Table 4:
+furnished `"kitchen"` / `"bathroom"` / `"furnished"`, or the unfurnished
+construction classes `"a"`–`"h"` and the mixed `"a+e"`…`"d+h"`). A fourth
+quantity unique to this method is **service-equipment noise** `LXY` — the
+energy average of three A- or C-weighted positions.
+
+```python
+import numpy as np
+from phonometry import (reverberation_index, estimate_reverberation_index,
+                        survey_airborne_insulation, survey_service_equipment_level)
+
+# Octave-band levels (125-2000 Hz) and the measured receiving-room T.
+l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
+l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
+k = reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
+res = survey_airborne_insulation(l1, l2, k, volume=50.0, area=12.0)
+print(np.round(res.d_nt, 1))          # [34.5 39.8 45.  50.5 54. ]  DnT = D + k
+print(res.rating.rating, res.rating.c)        # 49 -1  ->  DnT,w (C)
+print(res.r_prime_rating.rating)               # 48  ->  R'w
+
+# No reverberation time measured? Estimate k from Table 4 (heavy walls, hard
+# floor, 35-60 m3 -> class "g").
+k_est = estimate_reverberation_index(50.0, "g")
+print(k_est)                                   # [4.5 5.  5.5 5.5 5.5]
+
+# Service-equipment noise: energy average of three A-weighted positions.
+se = survey_service_equipment_level([35.0, 30.0, 32.0], 3.0, volume=50.0)
+print(round(float(se.l_xy), 1), round(float(se.l_xy_nt), 1))   # 32.8 29.8
+
+res.plot()   # DnT vs shifted ISO 717-1 reference (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation.svg" alt="Survey-method airborne insulation: the raw level difference D and the standardized DnT across the five octave bands, with the reverberation-index correction k shaded between them" width="80%"></picture>
+
+*The reverberation index `k = 10 lg(T/T0)` shifts the raw level difference `D`
+into the standardized `DnT` — up where the room is live (`T > T0`), down where
+it is dead. The automatic rating is formed only for exactly 5 octave (or 16
+one-third-octave) values.*
+
+### `survey_airborne_insulation()` and friends — parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `l1` / `l2` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Source / receiving (or outdoor `l1_2m`) levels |
+| `li` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Impact levels (energy-averaged over positions) |
+| `reverberation_index` | scalar or 1D array | dB | one per band | `k` from `reverberation_index` or `estimate_reverberation_index`; `survey_service_equipment_level()` also accepts a scalar `k` |
+| `volume` | float | m³ | > 0 | Receiving-room `V` (for `Dn` / `L'n` / `R'` / normalized) |
+| `area` | float | m² | > 0 | Common-partition `S` (airborne `R'`; `V/7.5` rule applied) |
+| `measurements` | array | dB | exactly 3 | Service-equipment positions (`survey_service_equipment_level`) |
+| `room` | str | — | `"kitchen"`/`"bathroom"`/`"furnished"`/`"a"`–`"h"`/`"a+e"`… | `estimate_reverberation_index` room class (Table 4) |
+
+`survey_airborne_insulation()` returns a `SurveyAirborneResult` (`d`, `d_nt`,
+`d_n`, `r_prime`, `rating`, `r_prime_rating`); `survey_impact_insulation()` a
+`SurveyImpactResult` (`l_i`, `l_nt`, `l_n`, `rating`);
+`survey_facade_insulation()` a `SurveyFacadeResult`;
+`survey_service_equipment_level()` a `SurveyServiceEquipmentResult` (`l_xy`,
+`l_xy_nt`, `l_xy_n`).
+
+---
+
+**Standards.** ISO 16283-1:2014, ISO 16283-2 and ISO 16283-3:2016, *Acoustics —
+Field measurement of sound insulation in buildings and of building elements* —
+the level differences, normalisations and element methods; ISO 717-1 and
+ISO 717-2 — the reference-curve single-number ratings and the spectrum
+adaptation terms C, Ctr and CI; ISO 12999-1:2020 — the standard uncertainties
+per measurement situation and the coverage factors; its precision framework
+builds on ISO 5725 (context, not implemented directly); ISO 10052:2021
+(harmonized as EN ISO 10052:2004+A1:2010) — the field survey method: the
+reverberation-index correction, the standardized/normalized airborne, impact
+and façade quantities, and service-equipment noise.
+
+## See also
+
+- [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/guides/insulation-lab/): the
+  ISO 10140 element characterisation these field quantities are compared against.
+- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/guides/insulation-prediction/):
+  the in-situ performance predicted from laboratory element data.
+- [Room Acoustics](https://jmrplens.github.io/phonometry/guides/room-acoustics/) — the impulse response,
+  room parameters and sound absorption that this guide's insulation chain builds on.
+- [Levels](https://jmrplens.github.io/phonometry/guides/levels/) — energy averaging and the level metrics behind
+  source/receiving-room levels.
+- [Filter Banks](https://jmrplens.github.io/phonometry/guides/filter-banks/) — the IEC 61260 fractional-octave filters
+  used for the insulation spectra.
+- [Theory](https://jmrplens.github.io/phonometry/reference/theory/) — the reference-curve derivation behind the
+  weighted single-number ratings.
+
+---
+
+
+<!-- source: docs/insulation-lab.md | canonical: https://jmrplens.github.io/phonometry/guides/insulation-lab/ -->
+
+# Laboratory Insulation Measurement
+
+To rate a building element on its own (a wall type, a floating floor, a
+window) you take it to a qualified laboratory, where suppressed flanking makes
+the direct transmission the whole story. This page covers the laboratory
+chain: the ISO 10140 sound reduction index and normalized impact level, the
+sound-intensity alternative of ISO 15186, the small-mock-up floor-covering
+improvement of ISO 16251-1 and the flanking-transmission measurement of
+ISO 10848. Field measurement and ratings live in
+[Field Insulation Measurement and Ratings](https://jmrplens.github.io/phonometry/guides/insulation-field/), and the
+prediction that consumes these laboratory ratings in
+[Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/guides/insulation-prediction/).
+
+## Laboratory measurement (ISO 10140)
+
+An [ISO 16283 field measurement](https://jmrplens.github.io/phonometry/guides/insulation-field/) yields the primed
+quantities ($R'$, $L'_n$): the number a real building achieves, flanking
+transmission and all. To rate an
 element on its own — a wall type, a floating floor, a window — you take it to a
 qualified **laboratory** (ISO 10140), where suppressed flanking makes the
 *direct* transmission the whole story. The formulas lose their primes: the
@@ -3599,7 +3916,296 @@ one-third-octave or 5 octave values are supplied (`rating` is `None` otherwise).
 `background_correction(signal_and_background, background)` returns the corrected
 levels directly.
 
-## 3. Predicting performance (EN 12354)
+## Sound insulation by intensity (ISO 15186)
+
+The ISO 10140 laboratory method above reads the transmitted power *indirectly*, from the
+receiving-room level and its absorption area — which breaks down when flanking
+paths leak power the room integrates in anyway. The **sound-intensity** method
+(ISO 15186) sidesteps that: an intensity probe scans a measurement surface that
+encloses the specimen and measures the radiated power *directly*, so only the
+element under test contributes. It is the tool of choice when flanking is high
+(ISO 15186-1:2000, Clause 1). From the source-room level $L_{p1}$ and the
+average normal intensity level $L_{In}$ over the surface (area $S_m$), for a
+specimen of area $S$,
+
+$$
+R_I = L_{p1} - 6 - \left[ L_{In} + 10 \log_{10}\frac{S_m}{S} \right],
+$$
+
+where the $6$ dB is the diffuse-field offset between the sound pressure level
+and the incident intensity level. The same formula gives the apparent index
+$R'_I$ in the field (ISO 15186-2). Because the intensity method slightly
+*underestimates* the power radiated into a real receiving room, a **modified
+index** $R_{I,M} = R_I + K_c$ reproduces the ISO 10140-2 pressure result; the
+adaptation term $K_c$ (Annex B) is $10 \log_{10}(1 + S_{b2}\lambda/8V_2)$ for a
+well-defined room, or the room-independent $10 \log_{10}(1 + 61.4/f)$. For small
+elements the **element normalized level difference** replaces $10\lg(S_m/S)$
+with $10\lg(S_m/A_0) + 10\lg N$ ($A_0 = 10\ \text{m}^2$, $N$ element units).
+
+```python
+import numpy as np
+from phonometry import (intensity_sound_reduction, adaptation_term_kc,
+                        surface_pressure_intensity_indicator)
+
+# Source-room level Lp1 and the average normal intensity level LIn over the
+# measurement surface (Sm), for a specimen of area S; 16 one-third-octave bands.
+lp1 = np.full(16, 85.0)
+l_in = np.full(16, 40.0)
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150]   # nominal 1/3-octave centres
+kc = adaptation_term_kc(freqs)                  # Annex B (B.2)
+res = intensity_sound_reduction(lp1, l_in, measurement_area=12.0, area=10.0, kc=kc)
+print(round(float(res.r_i[0]), 2))          # 38.21  RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)]
+print(round(float(res.r_i_modified[0]), 2)) # 40.29  RI,M = RI + Kc
+print(res.rating.rating)                     # 38  ->  RI,w (ISO 717-1 engine)
+
+# Qualify the measurement surface: FpI = Lp - LIn must stay < 10 dB (< 6 dB when
+# the receiving side is absorbing); the probe's residual index must exceed FpI+10.
+fpi = surface_pressure_intensity_indicator(np.full(16, 46.0), l_in)
+print(round(float(fpi[0]), 1))               # 6.0
+
+res.plot()   # measured RI vs shifted ISO 717-1 reference (needs matplotlib)
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation.svg" alt="Intensity sound reduction index RI and the Kc-modified index RI,M across the one-third-octave bands, with the Annex B adaptation lift shaded between the two curves" width="80%"></picture>
+
+*The modified index $R_{I,M} = R_I + K_c$ lifts $R_I$ — most at the low bands,
+where $K_c$ is largest — so an intensity measurement reproduces the ISO 10140-2
+pressure result. The automatic rating is formed only for exactly 16
+one-third-octave or 5 octave values (`rating`/`rating_modified` are `None`
+otherwise). Subareas scanned separately are combined first with
+`combine_subareas` (Formulas (11)-(12)); a subarea whose net energy flows back
+towards the specimen enters with a negative area, applying the minus-sign rule
+of Clause 6.4.6 while $S_m$ keeps the unsigned area sum.*
+
+### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `lp1` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Source-room sound pressure level |
+| `l_in` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Normal intensity level over the surface |
+| `measurement_area` | float | m² | > 0 | Measurement-surface area `Sm` |
+| `area` | float | m² | > 0 | Specimen area `S` |
+| `kc` | 1D array | dB | one per band / `None` | Adaptation term for the modified index |
+| `freq` | 1D array | Hz | > 0 | Midband frequencies (`adaptation_term_kc`) |
+| `boundary_area` / `volume` | float | m² / m³ | > 0, both or neither | Room `Sb2` / `V2` for Formula (B.1) |
+
+`intensity_sound_reduction()` returns an `IntensityReductionResult` (`r_i`,
+`r_i_modified`, `rating`, `rating_modified`);
+`intensity_element_normalized_difference()` an
+`IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
+`surface_pressure_intensity_indicator()` and `combine_subareas()` return arrays.
+
+## Floor-covering impact improvement (ISO 16251-1)
+
+ISO 16251-1:2014 is a laboratory method for the **improvement of impact sound
+insulation** $\Delta L$ of a soft, locally-reacting floor covering (carpet, PVC,
+linoleum). The two ISO 10140 rooms are replaced by a small softly-supported
+concrete plate; a standard tapping machine excites it and the structure-borne
+**acceleration level** on the underside is measured with and without the
+covering. For locally-reacting coverings that acceleration-level difference
+equals the ISO 10140 impact sound reduction.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement.svg" alt="ISO 16251-1 floor-covering impact sound improvement: the improvement delta-L of a soft carpet rising with frequency across one-third-octave bands from 100 Hz to 3150 Hz, with the shaded improvement area and the weighted single-number delta-Lw annotated" width="80%"></picture>
+
+**Acceleration level (Formula (1)).** $L_a = 10\lg(\langle a^2\rangle / a_0^2)$ dB,
+reference $a_0 = 10^{-6}\ \text{m/s}^2$. **Background correction (Formula (2))**
+follows the ISO 10140 three-branch rule (unchanged ≥ 15 dB; energy subtraction
+for 6 ≤ margin < 15 dB; the 1.3 dB limit below 6 dB, flagged as $> \Delta L$).
+The improvement is the position-averaged difference
+$\Delta L = L_0 - L_1$ (Formulae (3)/(4)); octaves follow
+$\Delta L_\text{oct} = -10\lg[\tfrac{1}{3}\sum 10^{-\Delta L_n/10}]$ (Formula (5)).
+
+**Weighted improvement.** $\Delta L_w$ is the ISO 717-2 weighted reduction: the
+improvement is applied to the heavyweight **reference floor** $L_{n,r,0}$
+(ISO 717-2 Table 4), $L_{n,r} = L_{n,r,0} - \Delta L$, and
+$\Delta L_w = 78 - L_{n,r,w}$ — computed by `weighted_impact_improvement()`, which
+reuses the verified ISO 717-2 rating engine. A clause 6.3 measurement spans 18
+bands (100–5000 Hz, optionally extended to 50 Hz); the rating is formed on the
+100–3150 Hz sub-range of whatever spectrum contains it. The statement of
+results (clause 8 e)) also carries the spectrum adaptation term
+$C_{I,\Delta} = C_{I,r,0} - C_{I,r}$ (ISO 717-2:2020 Formula (A.4)), exposed as
+`ci_delta` on the result and standalone as
+`impact_improvement_adaptation_term()`.
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import impact_improvement
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500,
+         630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
+bare = np.full(16, 78.0)                       # bare-plate acceleration level
+covering = bare - np.array([0, 0, 1, 2, 4, 7, 11, 15,
+                            18, 21, 23, 25, 27, 28, 29, 30])
+res = impact_improvement(bare, covering, freqs)
+print(res.delta_lw)   # weighted improvement delta-Lw (ISO 717-2)
+res.plot()
+plt.show()
+```
+
+</details>
+
+```python
+from phonometry import impact_improvement, weighted_impact_improvement
+
+# delta-Lw straight from an improvement spectrum (16 one-third-octave bands):
+delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
+print(weighted_impact_improvement(delta_l))    # e.g. 19 dB
+
+# From the measured bare/covered acceleration levels, with a background trace:
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150]
+bare_levels = [72, 73, 74, 74, 75, 75, 76, 76, 77, 77, 78, 78, 79, 79, 80, 80]
+covered_levels = [b - d for b, d in zip(bare_levels, delta_l)]
+bg = [40.0] * 16
+res = impact_improvement(bare_levels, covered_levels, freqs, background=bg)
+res.improvement       # delta-L per band
+res.delta_lw          # weighted single number (rated on the 100-3150 Hz sub-range)
+res.ci_delta          # spectrum adaptation term CI,delta (Formula (A.4))
+res.limited           # bands at the 1.3 dB limit of measurement (> delta-L)
+res.octave_bands()    # (octave freqs, delta-L_oct) via Formula (5)
+```
+
+## Laboratory flanking transmission (ISO 10848)
+
+ISO 10848:2006/2010 is the laboratory method that **measures** the junction
+**vibration reduction index** $K_{ij}$ that the [EN 12354 prediction](https://jmrplens.github.io/phonometry/guides/insulation-prediction/) takes
+as an input, together with the overall flanking descriptors $D_{n,f}$
+(airborne) and $L_{n,f}$ (impact). It is the measurement counterpart of the
+empirical `junction_vibration_reduction()` of that prediction.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission.svg" alt="ISO 10848 junction vibration reduction index Kij rising across one-third-octave bands from 100 Hz to 5000 Hz for a rigid T-junction of two heavy walls, with the single-number mean Kij over 200-1250 Hz drawn as a dashed line" width="80%"></picture>
+
+**Vibration reduction index (Formula (13)).**
+$K_{ij} = \overline{D}_{v,ij} + 10\lg\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, from
+the direction-averaged velocity level difference
+$\overline{D}_{v,ij} = \tfrac{1}{2}(D_{v,ij} + D_{v,ji})$ (Formula (11), which
+makes $K_{ij}$ symmetric), the common-edge junction length $l_{ij}$ and the
+**equivalent absorption lengths** $a_j = 2.2\pi^2 S_j /(T_{s,j} c_0)\sqrt{f_\text{ref}/f}$
+(Formula (12), $f_\text{ref} = 1000$ Hz). For lightweight well-damped elements
+$a_j = S_j / l_0$ ($l_0 = 1$ m) and Formula (13) reduces to the simplified
+Formula (14). The related **total loss factor** is $\eta = 2.2/(f T_s)$.
+
+**Overall descriptors.** $D_{n,f} = L_1 - L_2 - 10\lg(A/A_0)$ (Formula (4),
+airborne) and $L_{n,f} = L_2 + 10\lg(A/A_0)$ (Formula (5), tapping machine),
+$A_0 = 10\ \text{m}^2$; their $D_{n,f,w}$ / $L_{n,f,w}$ single numbers reuse the
+ISO 717 rating engines. The single-number $\overline{K}_{ij}$ is the arithmetic
+mean over 200–1250 Hz for one-third-octave bands, or over 125–1000 Hz for
+octave bands (Annex A).
+
+**Validity.** $K_{ij}$ rests on a statistical-energy-analysis simplification:
+`strong_coupling_satisfied()` checks the Formula (15) inequality, and — for the
+heavy junctions of Part 4 — `modal_density()`, `band_mode_count()` and
+`modal_overlap_factor()` (Formulae (5)/(4)/(6)) quantify where the mode count
+is too low for $K_{ij}$ to be reliable. Pass the per-band modal overlap factor
+to `vibration_reduction_index(..., modal_overlap=M)`: bands with $M < 0.25$
+are flagged in `result.bracketed` and excluded from the single-number
+$\overline{K}_{ij}$, as Part 4 Clause 9 requires. Because ISO 10848 contains no
+worked numeric example, conformance is anchored on closed-form identities
+(simplified $K_{ij}$, $a_j$ at $f_\text{ref}$, $\eta$).
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration_reduction_index
+
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
+         800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
+# Direction-averaged velocity level difference of a rigid T-junction (dB):
+dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
+               9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
+res = vibration_reduction_index(
+    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
+    structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
+)
+print(res.single_number)   # mean Kij over 200-1250 Hz (Annex A)
+res.plot()
+plt.show()
+```
+
+</details>
+
+```python
+import numpy as np
+from phonometry import (
+    direction_averaged_level_difference, vibration_reduction_index,
+    normalized_flanking_level_difference, modal_overlap_factor,
+)
+
+freqs = [200, 250, 315, 400, 500, 630, 800, 1000, 1250]
+lij, s_i, s_j = 4.0, 12.0, 10.0     # junction length (m), element areas (m^2)
+ts = np.linspace(0.30, 0.10, 9)     # structural reverberation time Ts (s)
+dv_ij = [5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7, 9.2, 9.8]    # element i excited (dB)
+dv_ji = [6.4, 6.8, 7.3, 7.8, 8.4, 8.9, 9.5, 10.0, 10.6]  # element j excited (dB)
+
+# Kij from both excitation directions (symmetric via the direction average):
+dbar = direction_averaged_level_difference(dv_ij, dv_ji)
+res = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+                                structural_reverberation_time_i=ts,
+                                structural_reverberation_time_j=ts)
+res.k_ij           # Kij per band (Formula (13))
+res.single_number  # mean Kij over 200-1250 Hz, or None without the band set
+res.octave_bands() # Kij in octave bands (its single number averages 125-1000 Hz)
+
+# Overall airborne flanking descriptor and a Part-4 modal-overlap validity check:
+dnf = normalized_flanking_level_difference(np.full(9, 75.0), np.full(9, 42.0),
+                                           absorption_area=np.full(9, 12.0))
+m = modal_overlap_factor(s_i, critical_frequency=85.0,
+                         structural_reverberation_time=ts)
+res_m = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+                                  modal_overlap=m)   # M < 0.25 bands bracketed
+res_m.bracketed    # per-band flags; bracketed bands leave the single number
+```
+
+---
+
+**Standards.** ISO 10140-2:2010, ISO 10140-3:2010 and ISO 10140-4:2010 — the
+laboratory R and Ln with the background-noise correction; ISO 15186-1:2000 and
+ISO 15186-2:2003 — the sound-intensity sound reduction index $R_I$, its
+$K_c$-modified form and the element normalized level difference (laboratory
+and field); ISO 16251-1:2014 — the small-mock-up laboratory method for the
+impact-sound improvement $\Delta L$ of floor coverings, with $\Delta L_w$ via
+the ISO 717-2 reference floor; ISO 10848-1:2006, ISO 10848-2:2006,
+ISO 10848-3:2006 and ISO 10848-4:2010 — the laboratory measurement of flanking
+transmission: the vibration reduction index $K_{ij}$, the equivalent
+absorption length, the normalized flanking descriptors $D_{n,f}$ / $L_{n,f}$
+and the modal-overlap validity checks that feed the EN 12354 prediction.
+
+## See also
+
+- [Field Insulation Measurement and Ratings](https://jmrplens.github.io/phonometry/guides/insulation-field/):
+  the in-building airborne, impact and façade measurements, their single-number
+  ratings and their uncertainty.
+- [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/guides/insulation-prediction/):
+  the flanking model that consumes the laboratory $R$, $L_n$ and $K_{ij}$.
+- [Sound Power](https://jmrplens.github.io/phonometry/guides/sound-power/) — the `LW` methods that share the
+  absorption-area machinery of the receiving room.
+
+---
+
+
+<!-- source: docs/insulation-prediction.md | canonical: https://jmrplens.github.io/phonometry/guides/insulation-prediction/ -->
+
+# Predicting Sound Insulation (EN 12354)
+
+A laboratory rating describes an element in isolation; a building also
+transmits sound along every flanking path. This page covers the EN 12354
+prediction of in-situ performance from laboratory element data: the airborne
+and impact flanking models of EN 12354-1/2 with their junction vibration
+reduction indices, and the façade insulation and outdoor radiation of
+EN 12354-3/4. The measured quantities the model is checked against live in
+[Field Insulation Measurement and Ratings](https://jmrplens.github.io/phonometry/guides/insulation-field/); the
+laboratory inputs come from
+[Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/guides/insulation-lab/).
+
+## Predicting performance (EN 12354)
 
 A laboratory rating describes an element in isolation, yet the sound a building
 actually transmits also travels *around* the partition — along the floor, up the
@@ -3700,15 +4306,20 @@ Every added flanking path strictly lowers $R'_w$ below the direct $R_{Dd,w} = 57
 path is visible. `flanking_element` is a convenience that builds one junction's
 three paths at once; the single-path constructor behind it, `flanking_path`,
 builds one `Ff`, `Df` or `Fd` path at a time (Formula 28a). Clause 4.4.2 also
-enforces a floor $K_{ij} \ge K_{ij,\min}$ from the junction geometry — compute
-it with `junction_min_vibration_reduction` and pass it to
+enforces a floor $K_{ij} \ge K_{ij,\min}$ from the junction geometry
+(Formula 29). Pass the flanking-element area to
+`flanking_element(..., flanking_area=...)` and the clamp is applied
+automatically per path; or compute the floor yourself with
+`junction_min_vibration_reduction` and pass it to
 `flanking_path(..., kij_min=...)`, which raises a below-floor $K_{ij}$ to the
 minimum:
 
 ```python
 from phonometry import junction_min_vibration_reduction
 # Kij,min = 10 lg[lf·l0·(1/Si + 1/Sj)]; large elements give a low (here negative)
-# floor, so a realistic tabulated Kij is rarely clamped.
+# floor, so a realistic tabulated Kij is rarely clamped; but small, light
+# elements can push it above the tabulated value (e.g. lf = 4 m, S = 1.5 m²
+# gives 7.3 dB, over the 5 dB lightweight floor).
 print(round(junction_min_vibration_reduction(coupling_length=4.5,
                                              s_i=11.5, s_j=11.5), 1))     # -1.1
 ```
@@ -3728,22 +4339,32 @@ ln_eq = equivalent_impact_level(322.0)                   # 164 - 35 lg(m')
 k = impact_flanking_correction(322.0, 145.0)             # Table 1 (sep 322, flk 145)
 imp = predicted_impact_insulation(ln_w_eq=ln_eq, delta_l_w=33.0, k_correction=k)
 print(round(ln_eq, 1), k, round(imp.l_prime_n_w, 1))     # 76.2 2 45.2  ->  L'n,w = 45 dB
-print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT,w
+
+# Exact Formula (3): L'nT,w = L'n,w - 10 lg(0.032 V). Annex E.3's own rounding
+# of the factor to 10 lg(V/30) sits 0.18 dB below; both give L'nT,w = 43 dB.
+print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.2  L'nT,w
 ```
+
+The airborne counterpart of that closure is Formula (5b),
+$D_{nT} = R' + 10\lg(0.32\,V/S_s)$, exposed as `standardized_level_difference`;
+it closes the Annex H.3 example (`standardized_level_difference(52.2, 50.0,
+11.5)` gives 53.6 dB, the printed $V/(3S)$ chain 53.8 dB, both rounding to
+$D_{nT,w} = 54$ dB).
 
 ### `junction_vibration_reduction()` / `flanking_element()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `junction_type` | str | — | `'rigid_cross'` / `'rigid_t'` / `'flexible_t'` / `'lightweight_facade'` | Junction geometry (Annex E) |
-| `path` | str | — | `'through'` (K13) / `'corner'` (K12 = K23) | Path branch |
+| `junction_type` | str | — | `'rigid_cross'` / `'rigid_t'` / `'flexible_t'` / `'lightweight_facade'` / `'lightweight_double_homogeneous'` / `'lightweight_double_coupled'` / `'corner'` / `'thickness_change'` | Junction geometry (Annex E.3-E.9) |
+| `path` | str | — | `'through'` (K13) / `'corner'` (K12 = K23) / `'double_leaf'` (K24) | Path branch |
 | `mass_ratio` | float | — | > 0 | `m'⊥,i / m'i` (Formula E.2) |
-| `frequency` | float | Hz | default `500` | Only `flexible_t` is frequency-dependent |
+| `frequency` | float | Hz | default `500` | `flexible_t` and the E.7/E.8 double-leaf junctions are frequency-dependent |
 | `r_flanking` / `r_separating` | float | dB | — | Weighted indices of the flanking / separating element |
 | `k_ff` / `k_fd` / `k_df` | float | dB | — | Junction `Kij` for the three paths |
 | `separating_area` | float | m² | > 0 | Separating-element area `Ss` |
 | `coupling_length` | float | m | > 0 | Junction coupling length `lf` |
 | `delta_r_ff` / `delta_r_fd` / `delta_r_df` | float | dB | default `0` | Lining improvements per path |
+| `flanking_area` | float | m² | default `None` | Flanking-element area `SF`; enables the automatic `Kij,min` clamp (Clause 4.4.2 / Formula 29) |
 
 ### `flanking_path()` parameters
 
@@ -3756,7 +4377,7 @@ print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.0  L'nT
 | `separating_area` | float | m² | > 0 | Separating-element area `Ss` |
 | `coupling_length` | float | m | > 0 | Junction coupling length `lf` |
 | `delta_r` | float | dB | default `0` | Lining improvement on this path |
-| `kij_min` | float | dB | default `None` | When given, `k_ij` is floored at this Formula E.4 minimum |
+| `kij_min` | float | dB | default `None` | When given, `k_ij` is floored at this Formula (29) minimum |
 
 `predicted_airborne_insulation()` returns an `AirbornePredictionResult`
 (`r_prime_w`, `r_direct_w`, `paths` of `PathContribution`, `dominant`);
@@ -3786,7 +4407,10 @@ D_{2m,nT} = R' + \Delta L_{fs} + 10 \log_{10}\frac{V}{6\,T_0\,S}, \qquad T_0 = 0
 $$
 
 with the façade-shape term $\Delta L_{fs}$ (Annex C; 0 dB for a flat reflecting
-façade). Single-number ratings reuse EN ISO 717-1 (`weighted_rating`).
+façade; `facade_shape_level_difference` looks it up from the Figure C.2 table
+for galleries, balconies and terraces, interpolating over the underside
+absorption $\alpha_w$). Single-number ratings reuse EN ISO 717-1
+(`weighted_rating`).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction.svg" alt="Per-element partial sound reduction indices and the resulting façade apparent reduction R' and standardized level difference D2m,nT for the EN 12354-3 Annex F worked example, the air inlet limiting the low bands" width="80%"></picture>
 
@@ -3819,7 +4443,9 @@ from phonometry import (FacadeElement, radiated_sound_power,
                         outdoor_attenuation, outdoor_level)
 
 # EN 12354-4 Annex G, side 1: a 10×20 m concrete wall segment with a 6×4 m
-# industrial door, inside level Lp,in, Cd = -5 dB, R' capped at 40 dB (Annex G).
+# industrial door, inside level Lp,in, Cd = -5 dB. The 40 dB cap on R' is an
+# Annex G example footnote (field leaks), not part of Formula (2)/(3): pass it
+# explicitly to reproduce Annex G; by default no cap is applied.
 bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
 seg = radiated_sound_power(
     [FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
@@ -3871,10 +4497,10 @@ fig.tight_layout(); plt.show()
 | `FacadeElement.r` / `dn_e` / `insertion_loss` | float or seq | dB | give exactly one | Area element $R_i$ / small-element $D_{n,e}$ / opening insertion loss |
 | `facade_sound_reduction(area)` | float | m² | > 0 | Total façade area $S$ |
 | `facade_sound_reduction(volume)` | float | m³ | > 0 | Receiving-room volume $V$ (Formula 13) |
-| `facade_sound_reduction(delta_l_fs)` | float | dB | default `0` | Façade-shape term $\Delta L_{fs}$ (Annex C) |
+| `facade_sound_reduction(delta_l_fs)` | float | dB | default `0` | Façade-shape term $\Delta L_{fs}$ (Annex C; look it up with `facade_shape_level_difference`) |
 | `radiated_sound_power(lp_in)` | float or seq | dB | — | Inside level $L_{p,in}$ per band |
 | `radiated_sound_power(c_d)` | float | dB | default `-6` | Diffusivity term $C_d$ (Annex B) |
-| `radiated_sound_power(r_prime_cap)` | float | dB | default `40` (`None` off) | Field cap on $R'$ (Annex G) |
+| `radiated_sound_power(r_prime_cap)` | float | dB | default `None` (off) | Optional field cap on $R'$, an Annex G example footnote (it uses 40 dB), not part of Formula (2)/(3) |
 | `radiated_sound_power(octave_bands)` | seq of int | Hz | default `None` | Octave centres matching the bands; enables the A-weighted $L_{WA}$ |
 | `facade_sound_reduction(frequencies)` | seq | Hz | default `None`; length = band count | Band centres carried on the result for plotting |
 | `outdoor_attenuation(width, height, distance)` | float | m | > 0 | Finite radiating side and reception distance (Annex E) |
@@ -3885,432 +4511,23 @@ fig.tight_layout(); plt.show()
 numbers); `radiated_sound_power()` a `RadiatedPowerResult` (`l_w`, `r_prime`,
 `l_w_dba`). Both expose `.plot()`.
 
-## 4. Measurement uncertainty (ISO 12999-1)
-
-A rating without an uncertainty is only half a result. ISO 12999-1 does not
-re-measure anything; it tabulates the **standard uncertainty** $u$ of every
-sound-insulation quantity — derived from inter-laboratory tests — and prescribes
-how to expand and combine it. Which standard deviation is $u$ depends on the
-**measurement situation** (Clause 5.2):
-
-| Situation | Meaning | Standard uncertainty $u$ |
-| :--- | :--- | :--- |
-| **A** | laboratory characterisation (ISO 10140) | reproducibility $\sigma_R$ |
-| **B** | same location, different teams | in-situ $\sigma_{situ}$ |
-| **C** | same location, same operator repeated | repeatability $\sigma_r$ |
-
-The expanded uncertainty is $U = k\ u$ (Formula 2) with the coverage factor $k$
-of Table 8. A two-sided interval $Y = y \pm U$ (Formula 3, $k = 1.96$ at 95 %)
-*reports* a value; the **one-sided** factor ($k = 1.65$ at 95 %) *declares
-conformity* with a requirement (Formulae 4/5).
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999.svg" alt="ISO 12999-1 uncertainty flow: standard uncertainty from the tables, reduced by repeated measurements and combined in quadrature, then expanded by the Table 8 coverage factor into a two-sided report or a one-sided conformity decision" width="82%"></picture>
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo.svg" alt="A weighted rating reported with its two-sided 95 % expanded uncertainty in situations A, B and C, the reproducibility uncertainty widest and the repeatability uncertainty narrowest" width="80%"></picture>
-
-```python
-from phonometry import (band_uncertainty, single_number_uncertainty,
-                        uncertain_value, satisfies_lower_requirement)
-
-# Situation B (same building, different teams) -> the in-situ standard deviation.
-print(single_number_uncertainty("r_w", "B"))       # 0.9  dB  (Table 3)
-u = band_uncertainty("airborne", "B")              # per-band u (Table 2)
-print(len(u.frequencies), u.uncertainties[10])     # 21 1.1  (the 500 Hz band)
-
-# Report R'w = 52 dB with a two-sided 95 % interval (k = 1.96, Table 8):
-uv = uncertain_value(52.0, "rprime_w", "B")        # aliases resolve to r_w
-print(uv.coverage_factor, round(uv.expanded_uncertainty, 1))    # 1.96 1.8
-print(round(uv.lower, 1), round(uv.upper, 1))      # 50.2 53.8  ->  52 ± 1.8 dB
-
-# Declaring conformity uses the ONE-sided factor (k = 1.65): does R'w provably
-# clear a 50 dB requirement?
-uc = uncertain_value(52.0, "rprime_w", "B", one_sided=True)
-print(satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
-```
-
-Impact quantities offer situations B/C only (Table 4, no 500 Hz band in the 2020
-edition), and $\Delta L$ only situation A. Descriptors are case-insensitive with
-aliases (`rprime_w`/`dnt_w`→`r_w`, `lprime_n_w`→`ln_w`); combine independent
-components in quadrature with `combine_uncertainties`, and reduce by $m$
-independent measurements with `reduce_by_independent_measurements` ($u/\sqrt{m}$).
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-from phonometry import uncertain_value
-
-# The same R'w = 52 dB reported in each situation with its two-sided 95 % U.
-situations = ["A", "B", "C"]
-vals = [uncertain_value(52.0, "r_w", s) for s in situations]
-
-fig, ax = plt.subplots(figsize=(7, 4))
-ax.errorbar(situations, [v.value for v in vals],
-            yerr=[v.expanded_uncertainty for v in vals],
-            fmt="o", capsize=8, color="tab:blue")
-for s, v in zip(situations, vals):
-    ax.annotate(f"±{v.expanded_uncertainty:.1f}", (s, v.upper),
-                textcoords="offset points", xytext=(8, 4))
-ax.set_ylabel("R'w [dB]"); ax.set_xlabel("Measurement situation")
-ax.set_title("R'w = 52 dB with 95 % expanded uncertainty (ISO 12999-1)")
-fig.tight_layout()
-plt.show()
-```
-
-</details>
-
-### `band_uncertainty()` / `single_number_uncertainty()` / `uncertain_value()` parameters
-
-| Parameter | Type | Units | Range / default | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| `measurand` | str | — | `'airborne'` / `'impact'` / `'impact_reduction'` | Selects Table 2 / 4 / 6 |
-| `quantity` | str | — | `'r_w'`, `'ln_w'`, `'delta_lw'` (+ aliases, `+c`/`+ctr` variants) | Single-number descriptor |
-| `situation` | str | — | `'A'` / `'B'` / `'C'` | Measurement situation (Clause 5.2) |
-| `value` | float | dB | — | Best estimate `y` to attach `U` to |
-| `coverage` | float | — | default `0.95` | Confidence level (Table 8) |
-| `one_sided` | bool | — | default `False` | One-sided factor for conformity checks |
-| `upper_limit` | bool | — | default `False` | Select the σR95 upper limit (airborne, situation A) |
-
-`band_uncertainty()` returns a `BandUncertainty` (`frequencies`,
-`uncertainties`, `.to_arrays()`); `single_number_uncertainty()` a float;
-`uncertain_value()` an `UncertainValue` (`value`, `standard_uncertainty`,
-`coverage_factor`, `expanded_uncertainty`, `.lower`, `.upper`). The read-only
-`COVERAGE_FACTORS` mapping exposes Table 8 keyed by `(confidence, one_sided)`.
-
-## 5. Sound insulation by intensity (ISO 15186)
-
-The laboratory method of §2 reads the transmitted power *indirectly*, from the
-receiving-room level and its absorption area — which breaks down when flanking
-paths leak power the room integrates in anyway. The **sound-intensity** method
-(ISO 15186) sidesteps that: an intensity probe scans a measurement surface that
-encloses the specimen and measures the radiated power *directly*, so only the
-element under test contributes. It is the tool of choice when flanking is high
-(ISO 15186-1:2000, Clause 1). From the source-room level $L_{p1}$ and the
-average normal intensity level $L_{In}$ over the surface (area $S_m$), for a
-specimen of area $S$,
-
-$$
-R_I = L_{p1} - 6 - \left[ L_{In} + 10 \log_{10}\frac{S_m}{S} \right],
-$$
-
-where the $6$ dB is the diffuse-field offset between the sound pressure level
-and the incident intensity level. The same formula gives the apparent index
-$R'_I$ in the field (ISO 15186-2). Because the intensity method slightly
-*underestimates* the power radiated into a real receiving room, a **modified
-index** $R_{I,M} = R_I + K_c$ reproduces the ISO 10140-2 pressure result; the
-adaptation term $K_c$ (Annex B) is $10 \log_{10}(1 + S_{b2}\lambda/8V_2)$ for a
-well-defined room, or the room-independent $10 \log_{10}(1 + 61.4/f)$. For small
-elements the **element normalized level difference** replaces $10\lg(S_m/S)$
-with $10\lg(S_m/A_0) + 10\lg N$ ($A_0 = 10\ \text{m}^2$, $N$ element units).
-
-```python
-import numpy as np
-from phonometry import (intensity_sound_reduction, adaptation_term_kc,
-                        surface_pressure_intensity_indicator)
-
-# Source-room level Lp1 and the average normal intensity level LIn over the
-# measurement surface (Sm), for a specimen of area S; 16 one-third-octave bands.
-lp1 = np.full(16, 85.0)
-l_in = np.full(16, 40.0)
-freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
-         1000, 1250, 1600, 2000, 2500, 3150]   # nominal 1/3-octave centres
-kc = adaptation_term_kc(freqs)                  # Annex B (B.2)
-res = intensity_sound_reduction(lp1, l_in, measurement_area=12.0, area=10.0, kc=kc)
-print(round(float(res.r_i[0]), 2))          # 38.21  RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)]
-print(round(float(res.r_i_modified[0]), 2)) # 40.29  RI,M = RI + Kc
-print(res.rating.rating)                     # 38  ->  RI,w (ISO 717-1 engine)
-
-# Qualify the measurement surface: FpI = Lp - LIn must stay < 10 dB (< 6 dB when
-# the receiving side is absorbing); the probe's residual index must exceed FpI+10.
-fpi = surface_pressure_intensity_indicator(np.full(16, 46.0), l_in)
-print(round(float(fpi[0]), 1))               # 6.0
-
-res.plot()   # measured RI vs shifted ISO 717-1 reference (needs matplotlib)
-```
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation.svg" alt="Intensity sound reduction index RI and the Kc-modified index RI,M across the one-third-octave bands, with the Annex B adaptation lift shaded between the two curves" width="80%"></picture>
-
-*The modified index $R_{I,M} = R_I + K_c$ lifts $R_I$ — most at the low bands,
-where $K_c$ is largest — so an intensity measurement reproduces the ISO 10140-2
-pressure result. The automatic rating is formed only for exactly 16
-one-third-octave or 5 octave values (`rating`/`rating_modified` are `None`
-otherwise). Subareas scanned separately are combined first with
-`combine_subareas` (Formulas (11)-(12)).*
-
-### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
-
-| Parameter | Type | Units | Range / default | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| `lp1` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Source-room sound pressure level |
-| `l_in` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Normal intensity level over the surface |
-| `measurement_area` | float | m² | > 0 | Measurement-surface area `Sm` |
-| `area` | float | m² | > 0 | Specimen area `S` |
-| `kc` | 1D array | dB | one per band / `None` | Adaptation term for the modified index |
-| `freq` | 1D array | Hz | > 0 | Midband frequencies (`adaptation_term_kc`) |
-| `boundary_area` / `volume` | float | m² / m³ | > 0, both or neither | Room `Sb2` / `V2` for Formula (B.1) |
-
-`intensity_sound_reduction()` returns an `IntensityReductionResult` (`r_i`,
-`r_i_modified`, `rating`, `rating_modified`);
-`intensity_element_normalized_difference()` an
-`IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
-`surface_pressure_intensity_indicator()` and `combine_subareas()` return arrays.
-
-## 6. Field survey method (ISO 10052)
-
-The engineering methods above buy accuracy with effort — swept microphones,
-per-band reverberation times, careful background correction. For a quick check
-in a dwelling, ISO 10052 defines a **survey (control) method**: octave bands, a
-hand-held meter, and a single quantity — the **reverberation index**
-`k = 10 lg(T/T0)` (`T0 = 0.5 s`) — to carry the receiving-room correction. Every
-survey quantity is then just an addition of `k`: the standardized level
-difference `DnT = D + k`, the normalized `Dn = D + k + 10 lg(A0 T0 / (0.16 V))`,
-the apparent `R' = D + k + 10 lg(S T0 / (0.16 V))` (using `V/7.5` for `S` where
-that is larger), and, for impacts and façades, `L'nT = Li - k` and
-`D2m,nT = D2m + k`. The clause references follow ISO 10052:2021; the formulas
-and the reverberation-index table are identical in the harmonized
-EN ISO 10052:2004+A1:2010.
-
-The reverberation index is either **measured** — feed the reverberation time to
-`reverberation_index(T)` — or, in a control survey, **estimated** from the room
-type and volume with `estimate_reverberation_index(V, room)` (Table 4:
-furnished `"kitchen"` / `"bathroom"` / `"furnished"`, or the unfurnished
-construction classes `"a"`–`"h"` and the mixed `"a+e"`…`"d+h"`). A fourth
-quantity unique to this method is **service-equipment noise** `LXY` — the
-energy average of three A- or C-weighted positions.
-
-```python
-import numpy as np
-from phonometry import (reverberation_index, estimate_reverberation_index,
-                        survey_airborne_insulation, survey_service_equipment_level)
-
-# Octave-band levels (125-2000 Hz) and the measured receiving-room T.
-l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
-l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
-k = reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
-res = survey_airborne_insulation(l1, l2, k, volume=50.0, area=12.0)
-print(np.round(res.d_nt, 1))          # [34.5 39.8 45.  50.5 54. ]  DnT = D + k
-print(res.rating.rating, res.rating.c)        # 49 -1  ->  DnT,w (C)
-print(res.r_prime_rating.rating)               # 48  ->  R'w
-
-# No reverberation time measured? Estimate k from Table 4 (heavy walls, hard
-# floor, 35-60 m3 -> class "g").
-k_est = estimate_reverberation_index(50.0, "g")
-print(k_est)                                   # [4.5 5.  5.5 5.5 5.5]
-
-# Service-equipment noise: energy average of three A-weighted positions.
-se = survey_service_equipment_level([35.0, 30.0, 32.0], 3.0, volume=50.0)
-print(round(float(se.l_xy), 1), round(float(se.l_xy_nt), 1))   # 32.8 29.8
-
-res.plot()   # DnT vs shifted ISO 717-1 reference (needs matplotlib)
-```
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation.svg" alt="Survey-method airborne insulation: the raw level difference D and the standardized DnT across the five octave bands, with the reverberation-index correction k shaded between them" width="80%"></picture>
-
-*The reverberation index `k = 10 lg(T/T0)` shifts the raw level difference `D`
-into the standardized `DnT` — up where the room is live (`T > T0`), down where
-it is dead. The automatic rating is formed only for exactly 5 octave (or 16
-one-third-octave) values.*
-
-### `survey_airborne_insulation()` and friends — parameters
-
-| Parameter | Type | Units | Range / default | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| `l1` / `l2` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Source / receiving (or outdoor `l1_2m`) levels |
-| `li` | 1D or 2D array | dB | one/band, or `(positions, bands)` | Impact levels (energy-averaged over positions) |
-| `reverberation_index` | scalar or 1D array | dB | one per band | `k` from `reverberation_index` or `estimate_reverberation_index`; `survey_service_equipment_level()` also accepts a scalar `k` |
-| `volume` | float | m³ | > 0 | Receiving-room `V` (for `Dn` / `L'n` / `R'` / normalized) |
-| `area` | float | m² | > 0 | Common-partition `S` (airborne `R'`; `V/7.5` rule applied) |
-| `measurements` | array | dB | exactly 3 | Service-equipment positions (`survey_service_equipment_level`) |
-| `room` | str | — | `"kitchen"`/`"bathroom"`/`"furnished"`/`"a"`–`"h"`/`"a+e"`… | `estimate_reverberation_index` room class (Table 4) |
-
-`survey_airborne_insulation()` returns a `SurveyAirborneResult` (`d`, `d_nt`,
-`d_n`, `r_prime`, `rating`, `r_prime_rating`); `survey_impact_insulation()` a
-`SurveyImpactResult` (`l_i`, `l_nt`, `l_n`, `rating`);
-`survey_facade_insulation()` a `SurveyFacadeResult`;
-`survey_service_equipment_level()` a `SurveyServiceEquipmentResult` (`l_xy`,
-`l_xy_nt`, `l_xy_n`).
-
-## 7. Floor-covering impact improvement (ISO 16251-1)
-
-ISO 16251-1:2014 is a laboratory method for the **improvement of impact sound
-insulation** $\Delta L$ of a soft, locally-reacting floor covering (carpet, PVC,
-linoleum). The two ISO 10140 rooms are replaced by a small softly-supported
-concrete plate; a standard tapping machine excites it and the structure-borne
-**acceleration level** on the underside is measured with and without the
-covering. For locally-reacting coverings that acceleration-level difference
-equals the ISO 10140 impact sound reduction.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement.svg" alt="ISO 16251-1 floor-covering impact sound improvement: the improvement delta-L of a soft carpet rising with frequency across one-third-octave bands from 100 Hz to 3150 Hz, with the shaded improvement area and the weighted single-number delta-Lw annotated" width="80%"></picture>
-
-**Acceleration level (Formula (1)).** $L_a = 10\lg(\langle a^2\rangle / a_0^2)$ dB,
-reference $a_0 = 10^{-6}\ \text{m/s}^2$. **Background correction (Formula (2))**
-follows the ISO 10140 three-branch rule (unchanged ≥ 15 dB; energy subtraction
-for 6 ≤ margin < 15 dB; the 1.3 dB limit below 6 dB, flagged as $> \Delta L$).
-The improvement is the position-averaged difference
-$\Delta L = L_0 - L_1$ (Formulae (3)/(4)); octaves follow
-$\Delta L_\text{oct} = -10\lg[\tfrac{1}{3}\sum 10^{-\Delta L_n/10}]$ (Formula (5)).
-
-**Weighted improvement.** $\Delta L_w$ is the ISO 717-2 weighted reduction: the
-improvement is applied to the heavyweight **reference floor** $L_{n,r,0}$
-(ISO 717-2 Table 4), $L_{n,r} = L_{n,r,0} - \Delta L$, and
-$\Delta L_w = 78 - L_{n,r,w}$ — computed by `weighted_impact_improvement()`, which
-reuses the verified ISO 717-2 rating engine.
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-from phonometry import impact_improvement
-
-freqs = [100, 125, 160, 200, 250, 315, 400, 500,
-         630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
-bare = np.full(16, 78.0)                       # bare-plate acceleration level
-covering = bare - np.array([0, 0, 1, 2, 4, 7, 11, 15,
-                            18, 21, 23, 25, 27, 28, 29, 30])
-res = impact_improvement(bare, covering, freqs)
-print(res.delta_lw)   # weighted improvement delta-Lw (ISO 717-2)
-res.plot()
-plt.show()
-```
-</details>
-
-```python
-from phonometry import impact_improvement, weighted_impact_improvement
-
-# delta-Lw straight from an improvement spectrum (16 one-third-octave bands):
-delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
-print(weighted_impact_improvement(delta_l))    # e.g. 19 dB
-
-# From the measured bare/covered acceleration levels, with a background trace:
-res = impact_improvement(bare_levels, covered_levels, freqs, background=bg)
-res.improvement       # delta-L per band
-res.delta_lw          # weighted single number (None off the 16 rating bands)
-res.limited           # bands at the 1.3 dB limit of measurement (> delta-L)
-res.octave_bands()    # (octave freqs, delta-L_oct) via Formula (5)
-```
-
 ---
 
-## 8. Laboratory flanking transmission (ISO 10848)
-
-ISO 10848:2006/2010 is the laboratory method that **measures** the junction
-**vibration reduction index** $K_{ij}$ that the EN 12354 prediction of §3 takes
-as an input, together with the overall flanking descriptors $D_{n,f}$
-(airborne) and $L_{n,f}$ (impact). It is the measurement counterpart of the
-empirical `junction_vibration_reduction()` of §3.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission.svg" alt="ISO 10848 junction vibration reduction index Kij rising across one-third-octave bands from 100 Hz to 5000 Hz for a rigid T-junction of two heavy walls, with the single-number mean Kij over 200-1250 Hz drawn as a dashed line" width="80%"></picture>
-
-**Vibration reduction index (Formula (13)).**
-$K_{ij} = \overline{D}_{v,ij} + 10\lg\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, from
-the direction-averaged velocity level difference
-$\overline{D}_{v,ij} = \tfrac{1}{2}(D_{v,ij} + D_{v,ji})$ (Formula (11), which
-makes $K_{ij}$ symmetric), the common-edge junction length $l_{ij}$ and the
-**equivalent absorption lengths** $a_j = 2.2\pi^2 S_j /(T_{s,j} c_0)\sqrt{f_\text{ref}/f}$
-(Formula (12), $f_\text{ref} = 1000$ Hz). For lightweight well-damped elements
-$a_j = S_j / l_0$ ($l_0 = 1$ m) and Formula (13) reduces to the simplified
-Formula (14). The related **total loss factor** is $\eta = 2.2/(f T_s)$.
-
-**Overall descriptors.** $D_{n,f} = L_1 - L_2 - 10\lg(A/A_0)$ (Formula (4),
-airborne) and $L_{n,f} = L_2 + 10\lg(A/A_0)$ (Formula (5), tapping machine),
-$A_0 = 10\ \text{m}^2$; their $D_{n,f,w}$ / $L_{n,f,w}$ single numbers reuse the
-ISO 717 rating engines. The single-number $\overline{K}_{ij}$ is the arithmetic
-mean over 200–1250 Hz (Annex A).
-
-**Validity.** $K_{ij}$ rests on a statistical-energy-analysis simplification:
-`strong_coupling_satisfied()` checks the Formula (15) inequality, and — for the
-heavy junctions of Part 4 — `modal_density()`, `band_mode_count()` and
-`modal_overlap_factor()` (Formulae (5)/(4)/(6)) flag the bands where the mode
-count is too low for $K_{ij}$ to be reliable. Because ISO 10848 contains no
-worked numeric example, conformance is anchored on closed-form identities
-(simplified $K_{ij}$, $a_j$ at $f_\text{ref}$, $\eta$).
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-from phonometry import vibration_reduction_index
-
-freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
-         800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
-# Direction-averaged velocity level difference of a rigid T-junction (dB):
-dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
-               9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
-res = vibration_reduction_index(
-    dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
-    structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
-)
-print(res.single_number)   # mean Kij over 200-1250 Hz (Annex A)
-res.plot()
-plt.show()
-```
-</details>
-
-```python
-from phonometry import (
-    direction_averaged_level_difference, vibration_reduction_index,
-    normalized_flanking_level_difference, modal_overlap_factor,
-)
-
-# Kij from both excitation directions (symmetric via the direction average):
-dbar = direction_averaged_level_difference(dv_ij, dv_ji)
-res = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
-                                structural_reverberation_time_i=ts_i,
-                                structural_reverberation_time_j=ts_j)
-res.k_ij           # Kij per band (Formula (13))
-res.single_number  # mean Kij over 200-1250 Hz, or None without the band set
-res.octave_bands() # Kij combined into octave bands
-
-# Overall airborne flanking descriptor and a Part-4 modal-overlap validity check:
-dnf = normalized_flanking_level_difference(l1, l2, absorption_area)
-m = modal_overlap_factor(area, critical_freq, ts)   # M < 0.25 -> exclude band
-```
-
----
-
-**Standards.** ISO 16283-1:2014, ISO 16283-2 and ISO 16283-3:2016, *Acoustics —
-Field measurement of sound insulation in buildings and of building elements* —
-the level differences, normalisations and element methods of §1; ISO 717-1 and
-ISO 717-2 — the reference-curve single-number ratings and the spectrum
-adaptation terms C, Ctr and CI; ISO 10140-2:2010, ISO 10140-3:2010 and ISO 10140-4:2010 — the
-laboratory R and Ln with the background-noise correction of §2; EN 12354-1:2000
-and EN 12354-2:2000 — the simplified flanking-transmission predictions of §3
-(Annex E junctions, worked examples H.3 and E.3); EN 12354-3:2000 and
-EN 12354-4:2000 — the façade sound insulation and outdoor-radiation predictions
-of §3 (Annex F and Annex G worked examples); ISO 12999-1:2020 — the
-standard uncertainties per measurement situation and the coverage factors
-of §4; its precision framework builds on ISO 5725 (context, not
-implemented directly); ISO 15186-1:2000 and ISO 15186-2:2003 — the
-sound-intensity sound reduction index $R_I$, its $K_c$-modified form and the
-element normalized level difference of §5 (laboratory and field);
-ISO 10052:2021 (harmonized as EN ISO 10052:2004+A1:2010) — the field survey
-method of §6: the reverberation-index correction, the standardized/normalized
-airborne, impact and façade quantities, and service-equipment noise;
-ISO 16251-1:2014 — the small-mock-up laboratory method for the impact-sound
-improvement $\Delta L$ of floor coverings of §7, with $\Delta L_w$ via the
-ISO 717-2 reference floor; ISO 10848-1:2006, ISO 10848-2:2006, ISO 10848-3:2006
-and ISO 10848-4:2010 — the laboratory measurement of flanking transmission of
-§8: the vibration reduction index $K_{ij}$, the equivalent absorption length,
-the normalized flanking descriptors $D_{n,f}$ / $L_{n,f}$ and the
-modal-overlap validity checks that feed the EN 12354 prediction of §3.
+**Standards.** EN 12354-1:2000 and EN 12354-2:2000 — the simplified
+flanking-transmission predictions (Annex E junctions, worked examples H.3 and
+E.3); EN 12354-3:2000 and EN 12354-4:2000 — the façade sound insulation and
+outdoor-radiation predictions (Annex F and Annex G worked examples).
 
 ## See also
 
-- [Room Acoustics](https://jmrplens.github.io/phonometry/guides/room-acoustics/) — the impulse response,
-  room parameters and sound absorption that this guide's insulation chain builds on.
-- [Levels](https://jmrplens.github.io/phonometry/guides/levels/) — energy averaging and the level metrics behind
-  source/receiving-room levels.
-- [Filter Banks](https://jmrplens.github.io/phonometry/guides/filter-banks/) — the IEC 61260 fractional-octave filters
-  used for the insulation spectra.
-- [Sound Power](https://jmrplens.github.io/phonometry/guides/sound-power/) — the `LW` methods that share the
-  absorption-area machinery of the receiving room.
-- [Theory](https://jmrplens.github.io/phonometry/reference/theory/) — the reference-curve derivation behind the
-  weighted single-number ratings.
+- [Field Insulation Measurement and Ratings](https://jmrplens.github.io/phonometry/guides/insulation-field/):
+  the measured in-situ quantities the prediction is checked against.
+- [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/guides/insulation-lab/): the
+  ISO 10140 ratings and ISO 10848 junction data the model consumes.
+- [Sound absorption in enclosed spaces (EN 12354-6)](enclosed-space-absorption.md):
+  the absorption member of the same EN 12354 family.
+- [Dynamic stiffness of resilient materials (EN 29052-1)](dynamic-stiffness.md):
+  the s' input to the EN 12354-2 floating-floor term.
 
 ---
 
@@ -4449,7 +4666,11 @@ to the caller.
 
 The geometry of the screening term fixes the vocabulary — the diffraction edge
 splits the source-to-receiver distance into $d_{ss}$ and $d_{sr}$, and the extra
-path length over the edge is $z = d_{ss} + d_{sr} - d$:
+path length over the edge is $z = d_{ss} + d_{sr} - d$. When the line of sight
+passes *above* the top edge, the standard gives $z$ a negative sign
+(`Barrier(line_of_sight_clear=True)`) and Eq. (14) still applies with
+$K_{met} = 1$: $D_z$ falls continuously from $10 \lg 3 \approx 4.8$ dB at
+grazing incidence to zero as the clearance deepens, never below zero.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_outdoor_geometry.svg" alt="ISO 9613-2 source-barrier-receiver geometry: a point source at height hs, a barrier whose top edge splits the path into dss and dsr, and a receiver at height hr, with the blocked direct ray and the diffracted ray over the edge, the path difference z and the Dz formula" width="92%"></picture>
 
@@ -4461,9 +4682,13 @@ path length over the edge is $z = d_{ss} + d_{sr} - d$:
   1 m reference distance.
 * **Atmospheric absorption** $A_{atm} = \alpha\ d$ (Eq. (8)) with $\alpha$ the
   ISO 9613-1 coefficient — negligible at low frequency, dominant at 8 kHz over
-  long paths. The ISO 9613-2 functions default to 20 °C and 70 % relative
-  humidity — one of the Table 2 reference atmospheres the standard tabulates —
-  while `air_attenuation` itself defaults to the ISO 9613-1 usual 50 %.
+  long paths. $\alpha$ is evaluated at the *exact* base-10 midband behind each
+  nominal band label (7 943.3 Hz for "8 kHz"), the convention behind the
+  ISO 9613-2 Table 2 coefficients (the nominal-frequency evaluation runs
+  ~1.3 % high at 8 kHz). The ISO 9613-2 functions default to 20 °C and 70 %
+  relative humidity — one of the Table 2 reference atmospheres the standard
+  tabulates — while `air_attenuation` itself defaults to the ISO 9613-1
+  usual 50 %.
 * **Ground effect** $A_{gr} = A_s + A_r + A_m$ (Eq. (9)) sums a source, receiver
   and middle region, each from the Table 3 functions $a'/b'/c'/d'$ and its
   ground factor $G$ (0 = hard/reflective, 1 = porous/absorbing). A **negative**
@@ -4628,6 +4853,7 @@ stacked per-band breakdown with the total overlaid (the figure above).
 | `edge_separation` | float or None | m | `None` | $e$; given ⇒ double diffraction (25 dB cap) |
 | `ground_reflections_by_image` | bool | — | `False` | `True` ⇒ $C_2 = 40$ |
 | `lateral` | bool | — | `False` | `True` ⇒ vertical-edge diffraction (Eq. (13)) |
+| `line_of_sight_clear` | bool | — | `False` | `True` ⇒ the sight line passes above the top edge: the path difference takes a negative sign and Kmet = 1 (text after Eq. (16)) |
 
 The method's stated accuracy is $\pm 1$ to $\pm 3$ dB for broadband noise up to
 1000 m (Table 5). See the [Theory](https://jmrplens.github.io/phonometry/reference/theory/) page for the full derivation, the
@@ -5767,7 +5993,7 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `sel` | `function` | **Sound exposure level (SEL/LAE).**<br>• `x`: Whole-event signal (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'A', 'C', 'G', 'Z' or None (Default: None)<br>• `calibration_factor` / `dbfs`: as `leq` | `lae = sel(x, fs, weighting='A')`<br><br>• Event level normalized to 1 s |
 | `sound_exposure` | `function` | **A-weighted exposure E (IEC 61252).**<br>• `x`: Signal (1D or 2D)<br>• `fs`: Sample rate [Hz]<br>• `duration_hours`: exposure period represented (Default: recording length)<br>• `calibration_factor` | `E = sound_exposure(x, fs, duration_hours=8)`<br><br>• `E`: Pa²·h |
 | `lex_8h` | `function` | **Daily exposure LEX,8h / LEP,d.**<br>• Same params as `sound_exposure` | `lex = lex_8h(x, fs, duration_hours=4)`<br><br>• Normalized 8 h level [dB] |
-| `loudness_zwicker` | `function` | **Zwicker loudness (ISO 532-1:2017).**<br>• `x`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz]<br>• `field`: 'free' or 'diffuse' (Default: 'free')<br>• `stationary`: Clause 5 stationary method (Default: False)<br>• `calibration_factor`: Digital units to Pa (Default: 1.0) | `res = loudness_zwicker(x, fs)`<br><br>• `ZwickerLoudness`; time-varying runs add N5/N10 and the 500 Hz N(t) trace |
+| `loudness_zwicker` | `function` | **Zwicker loudness (ISO 532-1:2017).**<br>• `x`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz]<br>• `field`: 'free' or 'diffuse' (Default: 'free')<br>• `stationary`: Clause 5 stationary method (Default: False)<br>• `time_skip`: seconds excluded from the stationary mean square (Annex B.1 uses 0.2 s; Default: 0.0)<br>• `calibration_factor`: Digital units to Pa (Default: 1.0) | `res = loudness_zwicker(x, fs)`<br><br>• `ZwickerLoudness`; time-varying runs add N5/N10 and the 500 Hz N(t) trace |
 | `loudness_zwicker_from_spectrum` | `function` | **Stationary loudness from band levels.**<br>• `levels`: 28 one-third-octave levels, 25 Hz-12.5 kHz [dB SPL]<br>• `field`: 'free' or 'diffuse' (Default: 'free') | `res = loudness_zwicker_from_spectrum(levels)`<br><br>• `res.loudness` [sone], `res.loudness_level` [phon] |
 | `ZwickerLoudness` | `dataclass` | **Loudness result.**<br>• `loudness`: N [sone]<br>• `loudness_level`: LN [phon]<br>• `specific`: N′(z), 240 bins of 0.1 Bark<br>• `n5` / `n10`: percentile loudness (time-varying only)<br>• `time` / `loudness_vs_time`: 500 Hz trace | `res.loudness, res.n5`<br><br>• Time-varying fields are `None` for stationary results |
 | `sharpness_din` | `function` | **Sharpness in acum (DIN 45692).**<br>• `x`: Signal (1D)<br>• `fs`: Sample rate [Hz]<br>• `field`: 'free' or 'diffuse' (Default: 'free')<br>• `method`: 'din', 'aures' or 'bismarck' (Default: 'din')<br>• `calibration_factor`: Digital units to Pa (Default: 1.0) | `s = sharpness_din(x, fs)`<br><br>• `s`: sharpness [acum] |
@@ -5784,7 +6010,7 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `EcmaTonality` | `dataclass` | **Sottek tonality result.**<br>• `tonality`: T [tu_HMS]<br>• `specific_tonality`: T′(z), 53 bands<br>• `tonal_frequencies`: f_ton,z per band [Hz]<br>• `bark` / `centre_frequencies`<br>• `time` / `tonality_vs_time` / `tonal_frequency_vs_time`: T(l), f_ton(l)<br>• `field`<br>• `.plot()`: T′(z) + T(l) | `res.tonality, res.tonal_frequencies` |
 | `roughness_ecma` | `function` | **Sottek roughness (ECMA-418-2:2025), new capability.**<br>• `signal_in`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz] (resampled to 48 kHz)<br>• `field`: 'free' or 'diffuse' (Default: 'free') | `res = roughness_ecma(x, fs)`<br><br>• `EcmaRoughness`; 1 kHz/70 Hz/100 %-AM/60 dB ≈ 1 asper |
 | `EcmaRoughness` | `dataclass` | **Sottek roughness result.**<br>• `roughness`: R [asper] (90th percentile of R(l50))<br>• `specific_roughness`: R′(z), 53 bands<br>• `bark` / `centre_frequencies`<br>• `time` / `roughness_vs_time`: R(l50) at 50 Hz<br>• `specific_roughness_vs_time`: (n_times, 53)<br>• `field`<br>• `.plot()`: R(l50) + specific-roughness heatmap | `res.roughness, res.specific_roughness` |
-| `psychoacoustic_annoyance` | `function` | **Psychoacoustic annoyance PA (Fastl & Zwicker Eqs 16.2–16.4), exact model.**<br>• `n5`: percentile loudness N5 [sone]<br>• `sharpness` S [acum]<br>• `fluctuation_strength` F [vacil]<br>• `roughness` R [asper] | `res = psychoacoustic_annoyance(30, 2.0, 0.5, 0.3)`<br><br>• `PsychoacousticAnnoyanceResult`; `res.annoyance == 30.8167` |
+| `psychoacoustic_annoyance` | `function` | **Psychoacoustic annoyance PA (Fastl & Zwicker Eqs 16.2–16.4), exact model.**<br>• `n5`: percentile loudness N5 [sone]<br>• `sharpness` S [acum]<br>• `fluctuation_strength` F [vacil]<br>• `roughness` R [asper] | `res = psychoacoustic_annoyance(30, 2.0, 0.5, 0.3)`<br><br>• `PsychoacousticAnnoyanceResult`; `res.annoyance == 37.0478` |
 | `psychoacoustic_annoyance_from_signal` | `function` | **PA from a calibrated signal (convenience, engineering estimate).**<br>• `x`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz]<br>• `field`: 'free' or 'diffuse' (Default: 'free')<br>• `calibration_factor` (Default: 1.0)<br>Mixes Zwicker N5/S + Sottek R + Osses F. | `res = psychoacoustic_annoyance_from_signal(x, fs)`<br><br>• `PsychoacousticAnnoyanceResult` |
 | `PsychoacousticAnnoyanceResult` | `dataclass` | **Psychoacoustic annoyance result.**<br>• `annoyance`: PA<br>• `n5` [sone] / `sharpness` [acum] / `fluctuation_strength` [vacil] / `roughness` [asper]: the four inputs<br>• `w_s`: sharpness weighting wS<br>• `w_fr`: roughness/fluctuation weighting wFR<br>• `.plot()`: term-contribution bar | `res.annoyance, res.w_s, res.w_fr` |
 | `fluctuation_strength_am_noise` | `function` | **Fluctuation strength of AM broadband noise (Fastl & Zwicker Eq. 10.2), exact closed form.**<br>• `level_db` L [dB]<br>• `modulation_factor` m (0–1)<br>• `mod_frequency` fmod [Hz] | `fluctuation_strength_am_noise(60, 1.0, 4.0)  # 3.6943 vacil` |
@@ -5797,21 +6023,22 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `prominence_ratio` | `function` | **Prominence ratio (ECMA-418-1 §12).**<br>• Same params as `tone_to_noise_ratio` | `r = prominence_ratio(x, fs, tone_freq=1000)`<br><br>• `ToneAssessment(...)` |
 | `ToneAssessment` | `dataclass` | **Tone prominence verdict.**<br>• `frequency`: Assessed tone [Hz]<br>• `ratio_db`: TNR or PR [dB]<br>• `criterion_db`: Prominence limit at that frequency [dB]<br>• `prominent`: bool | `r = tone_to_noise_ratio(x, fs)`<br>`if r.prominent: ...` |
 | `tone_audibility` | `function` | **Tone audibility ΔL = LT−LG−av (ISO/PAS 20065 Formulae 12–14).**<br>• `tone_level` LT, `mean_narrowband_level` LS [dB]<br>• `tone_frequency` fT [Hz], `line_spacing` Δf [Hz] | `tone_audibility(67.96, 49.22, 137.3, 2.7)  # 5.01 dB` |
-| `assess_tones` | `function` | **Audibility of a spectrum's tones (ISO/PAS 20065).**<br>• `tone_frequencies` [Hz], `tone_levels` LT, `mean_narrowband_levels` LS [dB]<br>• `line_spacing` Δf [Hz] | `res = assess_tones(fT, LT, LS, 2.7)`<br><br>• `ToneAudibilityResult` |
+| `assess_tones` | `function` | **Audibility of a spectrum's tones (ISO/PAS 20065).**<br>• `tone_frequencies` [Hz], `tone_levels` LT, `mean_narrowband_levels` LS [dB]<br>• `line_spacing` Δf [Hz]<br>• `extended_uncertainties`: attach the Clause 5.4 U per tone (Default: True) | `res = assess_tones(fT, LT, LS, 2.7)`<br><br>• `ToneAudibilityResult` |
 | `critical_bandwidth_engineering` | `function` | **Critical bandwidth Δfc about a tone (Formula 2).**<br>• `tone_frequency` fT [Hz] | `critical_bandwidth_engineering(137.3)  # 101.36 Hz` |
 | `critical_band_corners` | `function` | **Corner frequencies (f₁, f₂) of the critical band (Formulae 3–5).**<br>• `tone_frequency` fT [Hz] | `f1, f2 = critical_band_corners(137.3)` |
 | `critical_band_level` | `function` | **Masking-noise level LG = LS+10lg(Δfc/Δf) (Formula 12).**<br>• `mean_narrowband_level` LS [dB], `tone_frequency` fT, `line_spacing` Δf [Hz] | `critical_band_level(49.22, 137.3, 2.7)  # 64.97 dB` |
 | `masking_index` | `function` | **Masking index av = −2−lg[1+(f/502)²·⁵] (Formula 13).**<br>• `frequency` f [Hz] | `masking_index(137.3)  # -2.02 dB` |
 | `audibility_from_levels` | `function` | **ΔL = LT − LG − av (Formula 14).**<br>• `tone_level` LT, `critical_band_level` LG, `masking_index` av [dB] | `audibility_from_levels(67.96, 64.98, -2.02)  # 5.0 dB` |
-| `energy_sum_level` | `function` | **Energy sum of lines with window correction (Formulae 6/8).**<br>• `line_levels` Li [dB]<br>• `effective_bandwidth_factor` Δfe/Δf (Default: 1.5, Hanning) | `energy_sum_level([80, 80])  # 81.25 dB` |
+| `energy_sum_level` | `function` | **Energy sum of lines with window correction (Formulae 7/8).**<br>• `line_levels` Li [dB]; a single line (K = 1) takes its level unchanged (Formula 7, no correction)<br>• `effective_bandwidth_factor` Δfe/Δf (Default: 1.5, Hanning; K > 1 only) | `energy_sum_level([80, 80])  # 81.25 dB` |
 | `mean_narrowband_level` | `function` | **Masking-noise level LS from a critical-band spectrum (Formula 6, iterative Annex D).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `ph.mean_narrowband_level(levels, freqs, 137.3)  # 49.22 dB` |
-| `tone_level` | `function` | **Tone level LT from the tonal lines about a peak (Formula 8).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz], `mean_narrowband_level` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `ph.tone_level(levels, freqs, 137.3, ls)  # 67.96 dB` |
-| `analyze_spectrum` | `function` | **Detect & rate the audible tones of a spectrum (Clause 5.3.8 + distinctness 5.3.4).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `line_spacing` Δf [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `res = ph.analyze_spectrum(levels, freqs, 2.7)`<br><br>• `ToneAudibilityResult` of detected tones |
+| `tone_level` | `function` | **Tone level LT from the tonal lines about a peak (Formulae (7)/(8): single lines take (7), without the Hanning bandwidth correction).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz], `mean_narrowband_level` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `ph.tone_level(levels, freqs, 137.3, ls)  # 67.96 dB` |
+| `audibility_uncertainty` / `mean_audibility_uncertainty` | `function` | **Extended uncertainty U of the audibility (ISO/PAS 20065 Clause 5.4/6, 90 % bilateral).**<br>• per tone: `audibility_uncertainty(tone_line_levels, noise_line_levels, tone_frequency, line_spacing)`<br>• mean: U of the energy-averaged audibility over the per-spectrum (ΔL, U) pairs<br>Mandatory when fewer than 12 spectra are averaged (Clause 6) | `u = audibility_uncertainty(lt_lines, ls_lines, 137.3, 2.7)`<br><br>• U [dB] |
+| `analyze_spectrum` | `function` | **Detect & rate the audible tones of a spectrum (Clause 5.3.8 + distinctness 5.3.4), incl. Step 3 same-band FG combination (Formula 17).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `line_spacing` Δf [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `res = ph.analyze_spectrum(levels, freqs, 2.7)`<br><br>• `ToneAudibilityResult` of detected tones + FG entries (`group_sizes`) |
 | `combined_tone_level` | `function` | **Multi-tone FG combined level (Formula 17).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequencies` [Hz], `mean_narrowband_levels` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `ph.combined_tone_level(lv, f, [118.4,137.3,158.8], ls)  # 72.15 dB` |
 | `two_tone_separation_frequency` | `function` | **Two-tone separation threshold fD = 21·10^(1.2·\|lg(fT/212)\|^1.8) Hz (Formula 19).**<br>• `tone_frequency` fT [Hz] (more prominent tone) | `ph.two_tone_separation_frequency(212.0)  # 21.0 Hz` |
 | `resolve_tones_separately` | `function` | **Rate two tones <1000 Hz separately vs combined (Formulae 18/19).**<br>• `tone1_frequency`, `tone2_frequency` [Hz]<br>• `audibility1`, `audibility2` ΔL [dB] | `ph.resolve_tones_separately(200., 260., 3., 2.)  # True` |
 | `mean_audibility` | `function` | **Energy-mean mean audibility over spectra (Formula 20).**<br>• `decisive_audibilities` ΔLj [dB]; no-tone spectra use −10 dB | `mean_audibility([9.18, 6.04, 7.46])  # dB` |
-| `ToneAudibilityResult` | `dataclass` | **Tonal audibility of a spectrum's tones (ISO/PAS 20065).**<br>• `audibilities` ΔL, `critical_band_levels` LG, `masking_indices` av [dB]<br>• `critical_bandwidths` Δfc, `lower_corners`/`upper_corners` [Hz]<br>• `audible`: ΔL > 0 mask<br>• `decisive_audibility` / `decisive_frequency`<br>• `.plot()`: per-tone ΔL vs frequency | `res.decisive_audibility, res.audible` |
+| `ToneAudibilityResult` | `dataclass` | **Tonal audibility of a spectrum's tones (ISO/PAS 20065).**<br>• `audibilities` ΔL, `critical_band_levels` LG, `masking_indices` av [dB]<br>• `critical_bandwidths` Δfc, `lower_corners`/`upper_corners` [Hz]<br>• `audible`: ΔL > 0 mask<br>• `extended_uncertainties`: Clause 5.4 U per tone [dB]<br>• `group_sizes`: 1 = single tone, N ≥ 2 = Step 3 FG entry (None from `assess_tones`)<br>• `decisive_audibility` / `decisive_frequency`<br>• `.plot()`: per-tone ΔL vs frequency | `res.decisive_audibility, res.audible` |
 | `sti_from_impulse_response` | `function` | **Full STI, indirect method (IEC 60268-16 Ed. 5).**<br>• `ir`: Impulse response (1D)<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `snr`: SNR [dB], scalar or 7 bands (Default: None)<br>• `level`: 7 speech band levels [dB SPL]; enables masking + reception threshold (Default: None)<br>• `ambient`: 7 noise band levels [dB SPL]; requires `level` | `res = sti_from_impulse_response(ir, fs, snr=25.0)`<br><br>• `STIResult` with `mtf` (7×14) |
 | `stipa` | `function` | **STIPA direct method (Annex B).**<br>• `x`: Recorded STIPA signal (1D), 15-25 s<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `reference`: Measured source signal instead of the nominal m = 0.55 (Default: None)<br>• `level` / `ambient`: as `sti_from_impulse_response`<br>• warns (`UserWarning`) if the recording is < 15 s (STI biased low) | `res = stipa(recording, fs)`<br><br>• `STIResult` with `mtf` (7×2) |
 | `stipa_signal` | `function` | **STIPA test-signal generator (A.4/A.6.1).**<br>• `fs`: Sample rate [Hz] (>= 22500)<br>• `seconds`: Duration [s] (Default: 18.0)<br>• `level_db`: RMS level [dB SPL] (Default: None → RMS 0.1)<br>• `seed`: Pink-noise seed (Default: None) | `sig = stipa_signal(48000, seconds=18.0)`<br><br>• 1D test signal, Ed. 5 male spectrum |
@@ -5831,20 +6058,20 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `tonal_adjustment_from_mean_audibility` | `function` | **Kt from mean audibility ΔL (ISO 1996-2 Table J.1).**<br>• `mean_audibility` [dB], `coarse` (Default: False) | `tonal_adjustment_from_mean_audibility(5.0)  # 3` |
 | `critical_bandwidth` | `function` | **Critical bandwidth (ISO 1996-2 Table C.1).**<br>• `centre_frequency` [Hz] (100 Hz ≤ 500 Hz, else 20 %·fc) | `critical_bandwidth(4000.0)  # 800 Hz` |
 | `tonal_seeking_survey` | `function` | **One-third-octave tonal screen (ISO 1996-2 Annex K).**<br>• `levels` [dB], `frequencies` [Hz] (15/8/5 dB neighbour rule) | `flags = tonal_seeking_survey(levels, freqs)` |
-| `residual_sound_correction` | `function` | **Residual-noise correction L = 10 lg(10^(L'/10)−10^(Lres/10)) (Formula 16).**<br>• `measured_level` L', `residual_level` Lres [dB] | `res = residual_sound_correction(58.0, 50.0)`<br><br>• `ResidualCorrectionResult` (`.corrected_level`, `.reliable`) |
-| `gaussian_residual_level` | `function` | **Residual Leq from percentiles (ISO 1996-2 Annex I).**<br>• `l50` [dB]; exactly one of `l90` / `l95` | `gaussian_residual_level(50.0, l90=40.0)` |
+| `residual_sound_correction` | `function` | **Residual-noise correction L = 10 lg(10^(L'/10)−10^(Lres/10)) (Formula 16).**<br>• `measured_level` L', `residual_level` Lres [dB] | `res = residual_sound_correction(58.0, 50.0)`<br><br>• `ResidualCorrectionResult` (`.corrected_level`, `.reportable_upper_bound`, `.reliable`) |
+| `gaussian_residual_level` | `function` | **Residual Leq from percentiles (ISO 1996-2 Annex I).**<br>• `l50` [dB]; exactly one of `l90` / `l95` (must not exceed `l50`) | `gaussian_residual_level(50.0, l90=40.0)` |
 | `combined_standard_uncertainty` | `function` | **u = √(Σ(cj·uj)²) (ISO 1996-2 Formula 2).**<br>• `contributions`: cj·uj products or (uj, cj) pairs | `u = combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38])  # 2.18` |
 | `environmental_expanded_uncertainty` | `function` | **U = k·u (ISO 1996-2 §4).**<br>• `standard_uncertainty` [dB], `confidence` 0.95 (k=2) / 0.80 (k=1.3) | `environmental_expanded_uncertainty(2.18)  # 4.36` |
 | `residual_correction_uncertainty` | `function` | **Uncertainty of the residual-corrected level (Formulae F.7-F.9).**<br>• `measured_level`, `residual_level`, `measured_uncertainty`, `residual_uncertainty` [dB] | `residual_correction_uncertainty(58, 50, 0.5, 2.0)` |
-| `uncertainty_from_repeated_measurements` | `function` | **Energy mean & uncertainty from repeats (Formulae 17-20).**<br>• `levels` [dB] (≥ 2) | `res = uncertainty_from_repeated_measurements(levels)`<br><br>• `RepeatedMeasurementResult` |
+| `uncertainty_from_repeated_measurements` | `function` | **Energy mean & uncertainty from repeats: primary Formulae (17)+(19) route, Formula (20) approximation alongside.**<br>• `levels` [dB] (≥ 2); warns when they spread > 3 dB | `res = uncertainty_from_repeated_measurements(levels)`<br><br>• `RepeatedMeasurementResult` |
 | `TonalAssessmentResult` | `dataclass` | **Tonal assessment (ISO 1996-2).**<br>• `audibility` ΔLta, `adjustment` Kt [dB]<br>• `centre_frequency`, `critical_bandwidth`; `.plot()` | `res.audibility, res.adjustment` |
-| `ResidualCorrectionResult` | `dataclass` | **Residual-corrected level (ISO 1996-2).**<br>• `corrected_level` [dB], `margin` [dB], `reliable` (> 3 dB) | `res.corrected_level, res.reliable` |
-| `RepeatedMeasurementResult` | `dataclass` | **Repeat-measurement mean & uncertainty (ISO 1996-2).**<br>• `mean_level`, `standard_uncertainty` [dB], `n` | `res.mean_level, res.standard_uncertainty` |
+| `ResidualCorrectionResult` | `dataclass` | **Residual-corrected level (ISO 1996-2).**<br>• `corrected_level` [dB], `reportable_upper_bound` = measured L' [dB], `margin` [dB], `reliable` (> 3 dB; when False report the upper bound, not the correction) | `res.corrected_level, res.reliable` |
+| `RepeatedMeasurementResult` | `dataclass` | **Repeat-measurement mean & uncertainty (ISO 1996-2).**<br>• `mean_level`, `standard_uncertainty` (Formulae (17)+(19)), `approximate_uncertainty` (Formula (20)) [dB], `n` | `res.mean_level, res.standard_uncertainty` |
 | `linkwitz_riley` | `function` | **Audio crossover.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `freq`: Crossover frequency [Hz]<br>• `order`: Any even number (Default: 4) | `lo, hi = linkwitz_riley(x, fs, freq=1000, order=4)`<br><br>• `lo`: Low-pass filtered signal<br>• `hi`: High-pass filtered signal |
 | `sensitivity` | `function`| **SPL Calibration.**<br>• `ref_signal`: Calibration signal<br>• `target_spl`: Level of calibrator (Default: 94.0)<br>• `ref_pressure`: Reference pressure (Default: 20e-6)<br>• `narrowband`: coherent Goertzel tone estimate that rejects broadband hum/noise (needs `fs`; Default: False) | `s = sensitivity(ref_signal, target_spl=94.0)`<br><br>• `s`: Float (multiplier for pressure) |
 | `verify_filter_class` | `function` | **IEC 61260 class check.**<br>• `bank`: an `OctaveFilterBank`<br>• `num_points`: frequency grid points per band (Default: 32768)<br>• `edition`: `'2014'` (classes 1/2, default) or `'1995'` (IEC 61260:1995 / ANSI S1.11-2004, adds class 0) | `result = verify_filter_class(bank, edition="1995")`<br><br>• `result["overall_class"]`: 1/2 or None (`'2014'`); 0/1/2 or None (`'1995'`)<br>• `result["bands"]`: per-band class and `margin_class<c>_db` [dB] |
 | `class_limits` | `function` | **IEC 61260 Table 1 acceptance limits.**<br>• `fraction`: bandwidth designator denominator b (1, 3, ...)<br>• `filter_class`: 1 or 2 (`'2014'`); 0, 1 or 2 (`'1995'`)<br>• `omega`: normalized frequencies f/fm<br>• `edition`: `'2014'` (default) or `'1995'` | `lo, hi = class_limits(3, 0, omega, edition="1995")`<br><br>• `lo` / `hi`: min/max relative attenuation [dB] (`hi` is `inf` outside the pass-band) |
-| `verify_weighting_class` | `function` | **IEC 61672-1:2013 Table 3 weighting check.**<br>• `wf`: a `WeightingFilter` (A, C or Z) | `result = verify_weighting_class(wf)`<br><br>• `result["overall_class"]`: 1, 2 or None<br>• `result["bands"]`: per-frequency class, deviation and margins [dB] |
+| `verify_weighting_class` | `function` | **IEC 61672-1:2013 Table 3 weighting check** at the exact base-10 frequencies, plus the 5.5.7 between-nominals sweep.<br>• `wf`: a `WeightingFilter` (A, C or Z)<br>• `sweep_points` (Default: 4096) | `result = verify_weighting_class(wf)`<br><br>• `result["overall_class"]`: 1, 2 or None<br>• `result["range_limited"]`: finite-lower-limit rows beyond Nyquist<br>• `result["bands"]`: per-frequency class, deviation and margins [dB]<br>• `result["between_nominals"]`: 5.5.7 sweep margins |
 | `weighting_class_limits` | `function` | **IEC 61672-1:2013 Table 3 acceptance limits.**<br>• `weighting_class`: 1 or 2 | `f, lo, hi = weighting_class_limits(1)`<br><br>• `f`: 34 nominal frequencies [Hz]<br>• `lo` / `hi`: lower/upper deviation limits [dB] (`lo` is `-inf` where one-sided) |
 | `nominal_frequencies` | `function` | **ANSI Frequency generator.**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `f_cen, f_low, f_high, labels = nominal_frequencies(fraction=3)`<br><br>• `f_cen`: List of center frequencies [Hz]<br>• `f_low`: List of lower edges [Hz]<br>• `f_high`: List of upper edges [Hz]<br>• `labels`: IEC nominal frequency labels |
 | `normalized_frequencies` | `function` | **Standard IEC Frequencies.**<br>• `fraction`: 1 or 3 | `freqs = normalized_frequencies(fraction=3)`<br><br>• `freqs`: List of standard center frequencies [Hz] |
@@ -5864,17 +6091,20 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `OpenPlanResult` | `dataclass` | **Open-plan single numbers.**<br>• `d2s`: Spatial decay rate [dB/doubling]<br>• `lp_as_4m`: Speech level at 4 m [dB]<br>• `rd`: Distraction distance [m]<br>• `rp`: Privacy distance [m] | `m.d2s, m.rd, m.rp`<br><br>• `nan` when undefined |
 | `airborne_insulation` | `function` | **Field airborne insulation (ISO 16283-1).**<br>• `l1`/`l2`: Source/receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Partition S [m²] (for R')<br>• `volume`: Receiving V [m³] (for R')<br>• `t0`: Reference T0 [s] (Default: 0.5) | `ins = airborne_insulation(l1, l2, t2, area=10, volume=50)`<br><br>• `AirborneInsulationResult` |
 | `weighted_rating` | `function` | **Single-number rating + C/Ctr (ISO 717-1).**<br>• `values_by_band`: 16 thirds or 5 octaves [dB]<br>• `bands`: 'third-octave', 'octave' or None | `w = weighted_rating(R)`<br><br>• `WeightedRatingResult` (Rw, C, Ctr) |
+| `weighted_rating_extended` | `function` | **Rating + enlarged-range terms (ISO 717-1 Annex B).**<br>• `values_by_band` [dB] with `frequencies` [Hz] (None = the 16 core bands)<br>• `one_decimal`: 0.1 dB shift + one-decimal reductions for uncertainty statements (Default: False) | `ext = weighted_rating_extended(r, freqs)`<br><br>• `ExtendedWeightedRatingResult` (rating, c, ctr, c_50_3150 … ctr_100_5000) |
 | `energy_average_level` | `function` | **Energy-average level (ISO 16283-1 (9)).**<br>• `levels`: Levels [dB] to average<br>• `axis`: Averaging axis (Default: -1) | `L = energy_average_level([60, 66])`<br><br>• `10 lg( mean(10^(Li/10)) )` |
 | `AirborneInsulationResult` | `dataclass` | **Field insulation per band.**<br>• `d`: Level difference D [dB]<br>• `dnt`: Standardized DnT [dB]<br>• `r_prime`: Apparent R' [dB] or None | `res.d, res.dnt, res.r_prime` |
 | `WeightedRatingResult` | `dataclass` | **Weighted rating result.**<br>• `rating`: Rw/DnT,w … [dB], int<br>• `c`: Spectrum term C, int<br>• `ctr`: Spectrum term Ctr, int<br>• `unfavourable_sum`: [dB]<br>• `band_centers`: Measured-curve centres [Hz] or None<br>• `measured`: Measured band values [dB] or None<br>• `shifted_reference`: Shifted Table 3 reference [dB] or None | `w.rating, w.c, w.ctr` |
 | `impact_insulation` | `function` | **Field impact insulation (ISO 16283-2).**<br>• `li`: Impact SPL [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `volume`: Receiving V [m³] (for L'n)<br>• `t0`: Reference T0 [s] (Default: 0.5) | `imp = impact_insulation(li, t2, volume=50)`<br><br>• `ImpactInsulationResult` (`l_n_t`, `l_n`) |
 | `weighted_impact_rating` | `function` | **Single-number impact rating + CI (ISO 717-2).**<br>• `values_by_band`: 16 thirds (100-3150 Hz) or 5 octaves (125-2000 Hz) [dB]<br>• `bands`: 'third-octave', 'octave' or None | `r = weighted_impact_rating(imp.l_n_t)`<br><br>• `ImpactRatingResult` (Ln,w, CI); octave rating carries the -5 dB rule |
+| `weighted_impact_rating_extended` | `function` | **Impact rating + CI,50-2500 (ISO 717-2:2020 A.2.1 NOTE).**<br>• `values_by_band` [dB] with `frequencies` [Hz] (None = the 16 core bands)<br>• `one_decimal`: 0.1 dB shift (reproduces Ln,r,0,w = 77.6, CI,r,0 = -10.3 of A.2.2) (Default: False) | `ext = weighted_impact_rating_extended(ln, freqs)`<br><br>• `ExtendedImpactRatingResult` (rating, ci, ci_50_2500) |
 | `weighted_impact_improvement` | `function` | **Weighted improvement ΔLw (ISO 717-2 §5).**<br>• `delta_l`: 16 one-third-octave ΔL (100-3150 Hz) [dB]<br>Applies the Table 4 reference floor: ΔLw = 78 − Ln,r,w | `weighted_impact_improvement(delta_l)`<br><br>• ΔLw [dB] (e.g. 19) |
-| `impact_improvement` | `function` | **Floor-covering improvement ΔL (ISO 16251-1).**<br>• `bare`, `with_covering`: acceleration levels L0/L1 per band [dB]<br>• `frequencies` [Hz]<br>• `background`: optional Lb per band [dB] (Formula 2) | `res = impact_improvement(l0, l1, f)`<br><br>• `FloorCoveringImprovementResult` |
+| `impact_improvement_adaptation_term` | `function` | **Spectrum adaptation term CI,Δ (ISO 717-2:2020 Formula (A.4)).**<br>• `delta_l`: 16 one-third-octave ΔL (100-3150 Hz) [dB]<br>CI,Δ = CI,r,0 − CI,r (CI,r,0 = −11 dB); ISO 16251-1 clause 8 e) | `impact_improvement_adaptation_term(delta_l)`<br><br>• CI,Δ [dB], int |
+| `impact_improvement` | `function` | **Floor-covering improvement ΔL (ISO 16251-1).**<br>• `bare`, `with_covering`: acceleration levels L0/L1 per band [dB]<br>• `frequencies` [Hz] (a clause 6.3 spectrum is rated on its 100-3150 Hz sub-range)<br>• `background`: optional Lb per band [dB] (Formula 2) | `res = impact_improvement(l0, l1, f)`<br><br>• `FloorCoveringImprovementResult` |
 | `acceleration_level` | `function` | **Vibratory acceleration level La (ISO 16251-1 Formula 1).**<br>• `acceleration`: RMS a per band [m/s²]<br>• `reference`: a0 (Default: 1e-6) | `acceleration_level(1e-3)  # 60 dB` |
 | `background_corrected_level` | `function` | **Background correction (ISO 16251-1 Formula 2).**<br>• `signal_and_background`, `background` [dB] | `L, limited = background_corrected_level(lp, lb)`<br><br>• (corrected [dB], limit-of-measurement mask) |
 | `improvement_octave_bands` | `function` | **Thirds → octaves for ΔL (ISO 16251-1 Formula 5).**<br>• `improvement`, `frequencies` (whole octave triplets) | `f_oct, dl_oct = improvement_octave_bands(dl, f)` |
-| `FloorCoveringImprovementResult` | `dataclass` | **Floor-covering improvement (ISO 16251-1).**<br>• `improvement` ΔL [dB], `delta_lw` (or None)<br>• `limited`: > ΔL mask; `.octave_bands()`, `.plot()` | `res.delta_lw, res.improvement` |
+| `FloorCoveringImprovementResult` | `dataclass` | **Floor-covering improvement (ISO 16251-1).**<br>• `improvement` ΔL [dB], `delta_lw`, `ci_delta` (or None)<br>• `limited`: > ΔL mask; `.octave_bands()`, `.plot()` | `res.delta_lw, res.ci_delta` |
 | `ImpactInsulationResult` | `dataclass` | **Impact insulation per band.**<br>• `l_n_t`: Standardized L'nT [dB]<br>• `l_n`: Normalized L'n [dB] or None | `imp.l_n_t, imp.l_n` |
 | `ImpactRatingResult` | `dataclass` | **Weighted impact rating.**<br>• `rating`: Ln,w/L'n,w/L'nT,w [dB], int<br>• `ci`: Spectrum term CI, int<br>• `unfavourable_sum`: [dB]<br>• `band_centers`: Measured-curve centres [Hz] or None<br>• `measured`: Measured impact levels [dB] or None<br>• `shifted_reference`: Shifted impact reference [dB] or None | `r.rating, r.ci` |
 | `facade_insulation` | `function` | **Field façade insulation (ISO 16283-3).**<br>• `l1_2m`/`l2`: Level 2 m in front / receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Element S [m²], `volume`: Receiving V [m³], `surface_level`: L1,s [dB] (all three for R')<br>• `method`: 'loudspeaker' (−1.5 dB) / 'road_traffic' (−3 dB)<br>• `t0`: Reference T0 [s] (Default: 0.5)<br>• `frequencies` [Hz] | `fac = facade_insulation(l1_2m, l2, t2, volume=50, area=11.5, surface_level=ls)`<br><br>• `FacadeInsulationResult` |
@@ -5884,7 +6114,7 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `intensity_sound_reduction` | `function` | **Intensity sound reduction index RI (ISO 15186-1 Formula (7)).**<br>• `lp1`: Source-room level [dB], 1D or (positions, bands)<br>• `l_in`: Normal intensity level over the surface [dB]<br>• `measurement_area`: Surface Sm [m²], `area`: Specimen S [m²]<br>• `kc`: Adaptation term per band [dB] for RI,M (Default: None) | `res = intensity_sound_reduction(lp1, l_in, measurement_area=12, area=10)`<br><br>• `IntensityReductionResult` (`r_i`, `r_i_modified`, `rating`, `rating_modified`) |
 | `adaptation_term_kc` | `function` | **Adaptation term Kc (ISO 15186-1 Annex B).**<br>• `freq`: Midband frequencies [Hz]<br>• `boundary_area`/`volume`: Room Sb2/V2 for Formula (B.1); omit both for the 10 lg(1+61,4/f) approximation (B.2) | `kc = adaptation_term_kc(freqs)`<br><br>• Kc per band [dB] |
 | `intensity_element_normalized_difference` | `function` | **Intensity element normalized level difference DI,n,e (ISO 15186-1 Formula (8)).**<br>• `lp1`/`l_in`: Source level / surface intensity level [dB]<br>• `measurement_area`: Surface Sm [m²]<br>• `n`: Element units N (Default: 1) | `d = intensity_element_normalized_difference(lp1, l_in, measurement_area=10)`<br><br>• `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`) |
-| `surface_pressure_intensity_indicator` / `combine_subareas` | `function` | **Surface indicator FpI and subarea combination (ISO 15186-1 Formulas (10)-(12)).**<br>• `lp`/`l_in`: Surface pressure / intensity levels [dB]<br>• `combine_subareas(l_in, measurement_area)`: `(subareas, bands)` levels + per-subarea areas | `fpi = surface_pressure_intensity_indicator(lp, l_in)`<br><br>• `FpI` array; `(LIn, Sm)` |
+| `surface_pressure_intensity_indicator` / `combine_subareas` | `function` | **Surface indicator FpI and subarea combination (ISO 15186-1 Formulas (10)-(12)).**<br>• `lp`/`l_in`: Surface pressure / intensity levels [dB]<br>• `combine_subareas(l_in, measurement_area)`: `(subareas, bands)` levels + per-subarea areas (negative area = reverse-flow subarea, Clause 6.4.6) | `fpi = surface_pressure_intensity_indicator(lp, l_in)`<br><br>• `FpI` array; `(LIn, Sm = Σ abs(Smi))` |
 | `reverberation_index` / `estimate_reverberation_index` | `function` | **Survey reverberation index k (ISO 10052:2021 Clause 3.3 / Table 4).**<br>• `reverberation_index(t)`: k = 10 lg(T/0.5) per band<br>• `estimate_reverberation_index(volume, room)`: k from Table 4 (`room`: `kitchen`/`bathroom`/`furnished`/`a`-`h`/`a+e`...); `weighted=True` for the A/C column | `k = reverberation_index(t)`<br><br>• k per band [dB] |
 | `survey_airborne_insulation` | `function` | **Survey airborne insulation (ISO 10052:2021 Clauses 3.2-3.6).**<br>• `l1`/`l2`: source/receiving levels [dB]<br>• `reverberation_index`: k per band [dB]<br>• `volume` (for Dn/R'), `area` (R', V/7.5 rule) | `res = survey_airborne_insulation(l1, l2, k, volume=50, area=12)`<br><br>• `SurveyAirborneResult` (`d`, `d_nt`, `d_n`, `r_prime`, `rating`, `r_prime_rating`) |
 | `survey_impact_insulation` / `survey_facade_insulation` | `function` | **Survey impact & façade insulation (ISO 10052:2021 Clauses 3.7-3.9 / 3.13-3.15).**<br>• `li` (impact) or `l1_2m`/`l2` (façade), `reverberation_index`, `volume` | `imp = survey_impact_insulation(li, k, volume=50)`<br><br>• `SurveyImpactResult` / `SurveyFacadeResult` |
@@ -5895,24 +6125,26 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `LabInsulationWarning` | `warning class` | **Limit-of-measurement condition (ISO 10140-4).**<br>Emitted by `background_correction` when a band's signal-to-background margin is ≤ 6 dB (fixed 1.3 dB cap applied) | `warnings.simplefilter('error', LabInsulationWarning)` |
 | `predicted_airborne_insulation` | `function` | **Predicted apparent airborne R'w (EN 12354-1 Formula 26).**<br>• `r_direct`: Separating-element Rs,w [dB]<br>• `flanking_paths`: sequence of `FlankingPath` (Default: ())<br>• `delta_r_direct`: Lining ΔRDd,w [dB] (Default: 0) | `res = predicted_airborne_insulation(r_direct=57, flanking_paths=paths)`<br><br>• `AirbornePredictionResult` |
 | `predicted_impact_insulation` | `function` | **Predicted apparent impact L'n,w (EN 12354-2 Formula 21).**<br>• `ln_w_eq`: Bare-floor equivalent Ln,w,eq [dB]<br>• `delta_l_w`: Covering improvement ΔLw [dB] (Default: 0)<br>• `k_correction`: Flanking K [dB] (Default: 0) | `imp = predicted_impact_insulation(ln_w_eq=76.2, delta_l_w=33, k_correction=2)`<br><br>• `ImpactPredictionResult` |
-| `junction_vibration_reduction` | `function` | **Vibration reduction index Kij (EN 12354-1 Annex E).**<br>• `junction_type`: 'rigid_cross'/'rigid_t'/'flexible_t'/'lightweight_facade'<br>• `path`: 'through' (K13) / 'corner' (K12=K23)<br>• `mass_ratio`: m'⊥,i/m'i<br>• `frequency` [Hz] (Default: 500), `f1` [Hz] (Default: 125) | `k = junction_vibration_reduction('rigid_cross', 'through', 1.61)`<br><br>• Kij [dB] |
+| `junction_vibration_reduction` | `function` | **Vibration reduction index Kij (EN 12354-1 Annex E.3-E.9).**<br>• `junction_type`: 'rigid_cross'/'rigid_t'/'flexible_t'/'lightweight_facade'/'lightweight_double_homogeneous'/'lightweight_double_coupled'/'corner'/'thickness_change'<br>• `path`: 'through' (K13) / 'corner' (K12=K23) / 'double_leaf' (K24)<br>• `mass_ratio`: m'⊥,i/m'i<br>• `frequency` [Hz] (Default: 500), `f1` [Hz] (Default: 125) | `k = junction_vibration_reduction('rigid_cross', 'through', 1.61)`<br><br>• Kij [dB] |
 | `junction_min_vibration_reduction` | `function` | **Minimum Kij,min (EN 12354-1 Formula 29).**<br>• `coupling_length`: lf [m]<br>• `s_i`, `s_j`: Element areas [m²] | `kmin = junction_min_vibration_reduction(4.5, 11.5, 11.5)`<br><br>• Kij,min [dB] |
 | `flanking_path` | `function` | **One flanking path Rij,w (EN 12354-1 Formula 28a).**<br>• `label`, `kind`: 'Ff'/'Df'/'Fd'<br>• `r_source`/`r_receive`: element indices [dB]<br>• `k_ij` [dB], `separating_area` Ss [m²], `coupling_length` lf [m]<br>• `delta_r` [dB] (Default: 0), `kij_min` [dB] clamp (Default: None) | `p = flanking_path(label='f', kind='Ff', r_source=49, r_receive=49, k_ij=12.4, separating_area=11.5, coupling_length=4.5)`<br><br>• `FlankingPath` |
-| `flanking_element` | `function` | **The three paths (Ff, Df, Fd) of one flanking element.**<br>• `label`, `r_flanking`, `r_separating` [dB]<br>• `k_ff`/`k_fd`/`k_df` [dB]<br>• `separating_area` Ss [m²], `coupling_length` lf [m]<br>• `delta_r_ff`/`delta_r_fd`/`delta_r_df` [dB] (Default: 0) | `ff, df, fd = flanking_element(label='floor', r_flanking=49, r_separating=57, k_ff=12.4, k_fd=8.9, k_df=8.9, separating_area=11.5, coupling_length=4.5)` |
+| `flanking_element` | `function` | **The three paths (Ff, Df, Fd) of one flanking element.**<br>• `label`, `r_flanking`, `r_separating` [dB]<br>• `k_ff`/`k_fd`/`k_df` [dB]<br>• `separating_area` Ss [m²], `coupling_length` lf [m]<br>• `delta_r_ff`/`delta_r_fd`/`delta_r_df` [dB] (Default: 0)<br>• `flanking_area` SF [m²] (Default: None): enables the automatic Kij,min clamp (Clause 4.4.2 / Formula 29) | `ff, df, fd = flanking_element(label='floor', r_flanking=49, r_separating=57, k_ff=12.4, k_fd=8.9, k_df=8.9, separating_area=11.5, coupling_length=4.5)` |
 | `combine_linings` | `function` | **Combine two lining improvements (EN 12354-1 Formulas 30/31).**<br>• `delta_a`, `delta_b` [dB] (pass 0 for a single lining) | `dr = combine_linings(14.0, 14.0)`<br><br>• max(a,b) + min(a,b)/2 = 21.0 [dB] |
 | `equivalent_impact_level` | `function` | **Bare-floor equivalent Ln,w,eq (EN 12354-2 Annex B).**<br>• `mass_per_area`: m' [kg/m²] | `lneq = equivalent_impact_level(322.0)`<br><br>• 164 − 35 lg(m') = 76.2 [dB] |
 | `impact_flanking_correction` | `function` | **Flanking correction K (EN 12354-2 Table 1).**<br>• `separating_mass`, `flanking_mass` [kg/m²] (nearest tabulated) | `k = impact_flanking_correction(322.0, 145.0)`<br><br>• K = 2 [dB], int |
-| `standardized_impact_level` | `function` | **Standardized L'nT,w (EN 12354-2 Formula 3).**<br>• `l_prime_n_w`: L'n,w [dB]<br>• `volume`: Receiving V [m³], V0 = 30 m³ | `lnt = standardized_impact_level(45.2, 50.0)`<br><br>• L'nT,w = 43.0 [dB] |
+| `standardized_impact_level` | `function` | **Standardized L'nT,w (EN 12354-2 Formula 3, exact 0.032·V form).**<br>• `l_prime_n_w`: L'n,w [dB]<br>• `volume`: Receiving V [m³] (Annex E.3's V/30 is the standard's own rounding) | `lnt = standardized_impact_level(45.2, 50.0)`<br><br>• L'nT,w = 43.2 [dB] |
+| `standardized_level_difference` | `function` | **DnT,w from R'w (EN 12354-1 Formula 5b, exact 0.32·V/Ss form).**<br>• `r_prime_w`: R'w [dB]<br>• `volume` V [m³], `separating_area` Ss [m²] | `dnt = standardized_level_difference(52.2, 50.0, 11.5)`<br><br>• DnT,w = 53.6 → 54 [dB] |
 | `facade_sound_reduction` | `function` | **Predicted façade insulation D2m,nT (EN 12354-3 Formula 10/13).**<br>• `elements`: sequence of `FacadeElement`<br>• `area`: Façade S [m²], `volume`: Receiving V [m³]<br>• `delta_l_fs`: ΔLfs [dB] (Default: 0), `bands`<br>• `frequencies`: band centres [Hz] (Default: None; length must equal the band count) — carried on the result for plotting | `fac = facade_sound_reduction(elements, area=11.3, volume=50.0, bands="octave")`<br><br>• `FacadePredictionResult` |
-| `radiated_sound_power` | `function` | **Radiated sound power LW (EN 12354-4 Formula 2/3).**<br>• `elements`, `lp_in`: Inside Lp,in [dB]<br>• `area`: Segment S [m²]<br>• `c_d`: Cd [dB] (Default: -6), `r_prime_cap`: R' cap [dB] (Default: 40), `octave_bands` | `seg = radiated_sound_power(elements, lp_in=lp, area=200.0, c_d=-5.0)`<br><br>• `RadiatedPowerResult` |
+| `radiated_sound_power` | `function` | **Radiated sound power LW (EN 12354-4 Formula 2/3).**<br>• `elements`, `lp_in`: Inside Lp,in [dB]<br>• `area`: Segment S [m²]<br>• `c_d`: Cd [dB] (Default: -6), `r_prime_cap`: optional R' cap [dB] (Default: None; the Annex G example footnote uses 40), `octave_bands` | `seg = radiated_sound_power(elements, lp_in=lp, area=200.0, c_d=-5.0)`<br><br>• `RadiatedPowerResult` |
 | `outdoor_attenuation` | `function` | **Finite radiating-side attenuation A'tot (EN 12354-4 Annex E).**<br>• `width`, `height`: Side dimensions [m]<br>• `distance`: Perpendicular d [m] | `a = outdoor_attenuation(60.0, 10.0, 5.0)`<br><br>• A'tot = 26.3 [dB] |
 | `outdoor_level` | `function` | **Exterior level Lp (EN 12354-4 Formula E.1).**<br>• `l_w`: Radiated LW [dB], scalar or per-side<br>• `attenuation`: A'tot [dB], scalar or per-side | `lp = outdoor_level(62.9, 26.3)`<br><br>• Lp = 36.6 [dB] |
+| `facade_shape_level_difference` | `function` | **Façade-shape term ΔLfs (EN 12354-3 Annex C, Figure C.2).**<br>• `shape`: 'plane_facade'/'gallery_2'…'gallery_5'/'balcony_6'…'balcony_8'/'terrace_open'/'terrace_closed'<br>• `line_of_sight` h [m] (Default: 0), `absorption` αw (Default: 0.3, interpolated) | `dlfs = facade_shape_level_difference('balcony_6', line_of_sight=2.0, absorption=0.6)`<br><br>• ΔLfs = 1 [dB] |
 | `FacadeElement` | `dataclass` | **One façade transmission path (EN 12354-3/-4).**<br>• give exactly one of `r`: area element [dB] / `dn_e`: small element [dB] / `insertion_loss`: opening [dB]<br>• `area`: Sᵢ [m²] (for `r` / `insertion_loss`) | `FacadeElement("window", area=4.5, r=[23, 22, 30, 36, 37])` |
 | `AirbornePredictionResult` | `dataclass` | **Predicted airborne insulation.**<br>• `r_prime_w`: Apparent R'w [dB]<br>• `r_direct_w`: Direct RDd,w [dB]<br>• `paths`: tuple of `PathContribution`<br>• `dominant`: highest-energy path | `res.r_prime_w, res.dominant.label` |
 | `ImpactPredictionResult` | `dataclass` | **Predicted impact insulation.**<br>• `l_prime_n_w`: Apparent L'n,w [dB]<br>• `ln_w_eq`, `delta_l_w`, `k_correction` [dB] | `imp.l_prime_n_w` |
 | `FlankingPath` | `dataclass` | **One flanking transmission path.**<br>• `label`, `kind`: 'Ff'/'Df'/'Fd'<br>• `r_ij_w`: Flanking index Rij,w [dB] | `p.r_ij_w` |
 | `PathContribution` | `dataclass` | **A path with its energy share.**<br>• `label`, `kind`: 'Dd'/'Ff'/'Df'/'Fd'<br>• `r_w`: Path index [dB]<br>• `fraction`: share of transmitted energy (0–1) | `c.r_w, c.fraction` |
-| `vibration_reduction_index` | `function` | **Measured vibration reduction index Kij (ISO 10848 Formula 13/14).**<br>• `velocity_level_difference`: direction-averaged D̄v,ij [dB]<br>• `junction_length` lij [m], `area_i`/`area_j` [m²]<br>• `frequency` [Hz], `structural_reverberation_time_i`/`_j` [s] (both → Formula 13; else simplified 14)<br>• `speed_of_sound` (Default: 343) | `res = vibration_reduction_index(dbar, 4.0, 12.0, 10.0, frequency=f, structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40)`<br><br>• `VibrationReductionResult` |
+| `vibration_reduction_index` | `function` | **Measured vibration reduction index Kij (ISO 10848 Formula 13/14).**<br>• `velocity_level_difference`: direction-averaged D̄v,ij [dB]<br>• `junction_length` lij [m], `area_i`/`area_j` [m²]<br>• `frequency` [Hz], `structural_reverberation_time_i`/`_j` [s] (both → Formula 13; else simplified 14)<br>• `speed_of_sound` (Default: 343)<br>• `modal_overlap`: per-band M; M < 0.25 bands bracketed and excluded from K̄ij (ISO 10848-4 Clause 9) | `res = vibration_reduction_index(dbar, 4.0, 12.0, 10.0, frequency=f, structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40)`<br><br>• `VibrationReductionResult` |
 | `direction_averaged_level_difference` | `function` | **Direction average D̄v,ij = ½(Dv,ij+Dv,ji) (ISO 10848 Formula 11).**<br>• `dv_ij`, `dv_ji` [dB] | `dbar = direction_averaged_level_difference(dv_ij, dv_ji)` |
 | `velocity_level_difference` | `function` | **Velocity level difference Dv,ij = Lv,i−Lv,j (ISO 10848 Formula 8).**<br>• `source_level`, `receive_level` [dB] | `dv = velocity_level_difference(lv_i, lv_j)` |
 | `equivalent_absorption_length` | `function` | **Equivalent absorption length aj (ISO 10848 Formula 12).**<br>• `area` Sj [m²], `structural_reverberation_time` Ts [s], `frequency` [Hz]<br>• `speed_of_sound` (Default: 343) | `a = equivalent_absorption_length(10.0, 0.5, f)` |
@@ -5923,9 +6155,9 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `critical_frequency` | `function` | **Thin-plate critical frequency fc = c0²/(1.8·cL·h·π) (ISO 10848 Formula 20).**<br>• `longitudinal_wave_speed` cL [m/s], `thickness` h [m]<br>• `speed_of_sound` (Default: 343) | `fc = critical_frequency(5500.0, 0.2)` |
 | `strong_coupling_satisfied` | `function` | **Strong-coupling validity check (ISO 10848 Formula 15).**<br>• `velocity_level_difference` D̄v,ij [dB]<br>• `mass_i`/`mass_j` [kg/m²], `critical_frequency_i`/`_j` [Hz] | `ok = strong_coupling_satisfied(dbar, 20, 20, 100, 100)`<br><br>• bool per band |
 | `modal_density` | `function` | **Modal density n = π·S·fc/c0² (ISO 10848-4 Formula 5).**<br>• `area` S [m²], `critical_frequency` fc [Hz]<br>• `speed_of_sound` (Default: 343) | `n = modal_density(10.0, 200.0)` |
-| `modal_overlap_factor` | `function` | **Modal overlap M = 2.2·n/Ts (ISO 10848-4 Formula 6).**<br>• `area`, `critical_frequency`, `structural_reverberation_time` [s] | `m = modal_overlap_factor(10.0, 200.0, ts)  # M<0.25 → exclude` |
+| `modal_overlap_factor` | `function` | **Modal overlap M = 2.2·n/Ts (ISO 10848-4 Formula 6).**<br>• `area`, `critical_frequency`, `structural_reverberation_time` [s] | `m = modal_overlap_factor(10.0, 200.0, ts)  # feed vibration_reduction_index(modal_overlap=m)` |
 | `band_mode_count` | `function` | **In-band mode count N = 0.23·f·n (ISO 10848-4 Formula 4).**<br>• `frequency` [Hz], `area`, `critical_frequency` | `n5 = band_mode_count(f, 10.0, 200.0)  # N≥5 OK` |
-| `VibrationReductionResult` | `dataclass` | **Measured Kij (ISO 10848).**<br>• `frequencies` [Hz] (or None), `k_ij` [dB]<br>• `single_number`: mean K̄ij 200–1250 Hz (or None)<br>• `.octave_bands()`, `.plot()` | `res.k_ij, res.single_number` |
+| `VibrationReductionResult` | `dataclass` | **Measured Kij (ISO 10848).**<br>• `frequencies` [Hz] (or None), `k_ij` [dB]<br>• `single_number`: mean K̄ij 200–1250 Hz (thirds) / 125–1000 Hz (octaves), or None<br>• `bracketed`: M < 0.25 flags (or None)<br>• `.octave_bands()`, `.plot()` | `res.k_ij, res.single_number` |
 | `FlankingLevelDifferenceResult` | `dataclass` | **Normalized flanking level difference Dn,f (ISO 10848).**<br>• `d_n_f` [dB], `rating`: Dn,f,w (or None)<br>• `.plot()` | `res.d_n_f, res.rating` |
 | `FlankingImpactLevelResult` | `dataclass` | **Normalized flanking impact level Ln,f (ISO 10848).**<br>• `l_n_f` [dB], `rating`: Ln,f,w (or None)<br>• `.plot()` | `res.l_n_f, res.rating` |
 | `band_uncertainty` | `function` | **One-third-octave standard uncertainty u (ISO 12999-1 Tables 2/4/6).**<br>• `measurand`: 'airborne'/'impact'/'impact_reduction'<br>• `situation`: 'A'/'B'/'C'<br>• `upper_limit`: σR95 (airborne A, Annex D) (Default: False) | `u = band_uncertainty('airborne', 'B')`<br><br>• `BandUncertainty` |
@@ -5967,12 +6199,12 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `air_attenuation_m` | `function` | **ISO 354 power attenuation m from conditions (ISO 9613-1 + ISO 354).**<br>• Same parameters as `air_attenuation` | `m = air_attenuation_m([1000, 4000], 20, 50)`<br><br>• m = α/(10 lg e) [1/m] |
 | `AtmosphericAbsorptionWarning` | `warning class` | **ISO 9613-1 out-of-range advisory.**<br>Emitted by `air_attenuation` when temperature/humidity/frequency leave the tabulated ranges or pressure exceeds 200 kPa; the result still returns | `warnings.simplefilter('error', AtmosphericAbsorptionWarning)` |
 | `geometric_divergence` | `function` | **Geometrical divergence Adiv (ISO 9613-2 Eq. 7).**<br>• `distance` d [m] | `a = geometric_divergence(100.0)`<br><br>• 20 lg(d/d₀) + 11 = 51 dB at 100 m |
-| `atmospheric_absorption` | `function` | **Atmospheric absorption term Aatm (ISO 9613-2 Eq. 8).**<br>• `distance` d [m]<br>• `frequencies` [Hz]<br>• `temperature`/`humidity`/`pressure` | `aatm = atmospheric_absorption(200, bands)`<br><br>• α·d per band [dB] |
+| `atmospheric_absorption` | `function` | **Atmospheric absorption term Aatm (ISO 9613-2 Eq. 8)**, α at the exact base-10 midbands (the Table 2 convention).<br>• `distance` d [m]<br>• `frequencies` [Hz] (snapped to exact midbands)<br>• `temperature`/`humidity`/`pressure` | `aatm = atmospheric_absorption(200, bands)`<br><br>• α·d per band [dB] |
 | `ground_attenuation` | `function` | **Ground effect Agr, general method (ISO 9613-2 7.3.1, Eq. 9).**<br>• `distance` d, `source_height` hs, `receiver_height` hr [m]<br>• `frequencies` [Hz]<br>• `ground_source`/`ground_middle`/`ground_receiver` G ∈ [0,1]<br>• `projected_distance` dp [m] | `agr = ground_attenuation(200, 2, 2, bands, 1, 1, 1)`<br><br>• As+Ar+Am per band [dB] (negative = gain) |
 | `ground_attenuation_alternative` | `function` | **Ground effect Agr, A-weighted method (ISO 9613-2 7.3.2, Eq. 10).**<br>• `distance` d [m]<br>• `mean_height` hm [m] | `agr = ground_attenuation_alternative(200, 2)`<br><br>• 4.8 − (2hm/d)·(17+300/d) ≥ 0 [dB] |
 | `directivity_omega` | `function` | **Solid-angle directivity index DΩ (ISO 9613-2 Eq. 11).**<br>• `source_height` hs, `receiver_height` hr, `projected_distance` dp [m] | `dw = directivity_omega(1.5, 1.5, 200)`<br><br>• 0…~3 dB (add to Dc for the 7.3.2 method) |
-| `Barrier` | `dataclass` | **Barrier diffraction geometry (ISO 9613-2 7.4).**<br>• `source_to_edge` dss, `edge_to_receiver` dsr [m]<br>• `parallel_distance` a [m] (Default: 0)<br>• `edge_separation` e [m] (Default: None → single diffraction)<br>• `ground_reflections_by_image` (Default: False → C₂=20)<br>• `lateral` (Default: False → top-edge) | `b = Barrier(source_to_edge=101, edge_to_receiver=101)`<br><br>• `.is_double` when e is given |
-| `barrier_attenuation` | `function` | **Barrier diffraction Dz (ISO 9613-2 Eq. 14).**<br>• `barrier`: `Barrier`<br>• `distance` d [m]<br>• `frequencies` [Hz] | `dz = barrier_attenuation(b, 200, bands)`<br><br>• 10 lg[3+(C₂/λ)C₃ z Kmet], capped 20/25 dB |
+| `Barrier` | `dataclass` | **Barrier diffraction geometry (ISO 9613-2 7.4).**<br>• `source_to_edge` dss, `edge_to_receiver` dsr [m]<br>• `parallel_distance` a [m] (Default: 0)<br>• `edge_separation` e [m] (Default: None → single diffraction)<br>• `ground_reflections_by_image` (Default: False → C₂=20)<br>• `lateral` (Default: False → top-edge)<br>• `line_of_sight_clear` (Default: False; True gives z the negative sign of Eq. 16 when the sight line passes above the edge) | `b = Barrier(source_to_edge=101, edge_to_receiver=101)`<br><br>• `.is_double` when e is given |
+| `barrier_attenuation` | `function` | **Barrier diffraction Dz (ISO 9613-2 Eq. 14).**<br>• `barrier`: `Barrier`<br>• `distance` d [m]<br>• `frequencies` [Hz] | `dz = barrier_attenuation(b, 200, bands)`<br><br>• 10 lg[3+(C₂/λ)C₃ z Kmet], capped 20/25 dB; 10 lg 3 at grazing (z = 0), decaying to ≥ 0 for negative z |
 | `meteorological_correction` | `function` | **Meteorological correction Cmet (ISO 9613-2 Eq. 21/22).**<br>• `projected_distance` dp, `source_height` hs, `receiver_height` hr [m]<br>• `c0`: factor C₀ [dB] | `c = meteorological_correction(200, 1.5, 1.5, 2.0)`<br><br>• C₀[1 − 10(hs+hr)/dp] ≥ 0 [dB] |
 | `outdoor_propagation_attenuation` | `function` | **Total octave-band attenuation A (ISO 9613-2 Eq. 4).**<br>• `distance` d, `source_height` hs, `receiver_height` hr [m]<br>• `frequencies` [Hz]<br>• `ground_source`/`ground_middle`/`ground_receiver` G<br>• `barrier`: `Barrier` or None<br>• `temperature`/`humidity`/`pressure` (Default: 20 °C/70 %/101.325 kPa, a Table 2 reference atmosphere)<br>• `projected_distance` dp [m] | `att = outdoor_propagation_attenuation(200, 2, 2, bands, 1, 1, 1)`<br><br>• `OutdoorAttenuation` term breakdown |
 | `predicted_receiver_level` | `function` | **Predicted octave-band receiver level (ISO 9613-2 Eq. 3/6).**<br>• `sound_power_level` Lw [dB]<br>• same geometry/ground/barrier/atmosphere params as `outdoor_propagation_attenuation`<br>• `directivity_index` Di, `d_omega` DΩ [dB]<br>• `c0`: subtract Cmet (Default: None) | `lp = predicted_receiver_level(lw, 200, 2, 2, bands)`<br><br>• LfT(DW) = Lw + Dc − A per band [dB] |
@@ -5996,14 +6228,16 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `SIIResult` | `dataclass` | **SII result.**<br>• `sii`: index in [0, 1]<br>• `band_audibility`: Ai per band (§5.8)<br>• `band_importance`: Ii (Table 3)<br>• `frequencies` [Hz]<br>• `speech_spectrum` / `disturbance` / `masking`: Ei′ / Di / Zi per band [dB]<br>• `.plot()` | `res.sii, res.band_audibility` |
 | `thd` | `function` | **Total harmonic distortion (IEC 60268-3 14.12.2–3).**<br>• `signal` (1D), `fs` [Hz]<br>• `fundamental` [Hz] (Default: None → largest peak)<br>• `kind`: 'F' rel. fundamental or 'R' rel. total RMS (Default: 'F')<br>• `n_harmonics` (Default: 10)<br>• `window` (Default: 'hann') | `thd(sig, fs, 1000.0, kind="F")`<br><br>• ratio (0..) |
 | `harmonic_distortion` | `function` | **nth-order harmonic distortion dₙ (IEC 60268-3 14.12.5).**<br>• `signal`, `fs`, `fundamental` [Hz], `order` n (≥ 2) | `harmonic_distortion(sig, fs, 1000.0, 2)`<br><br>• ratio (aₙ rel. total RMS) |
-| `thd_plus_noise` | `function` | **THD+N ratio (AES17-2015 6.3.1).**<br>• `signal`, `fs`, `fundamental` (Default: None)<br>• `notch_q`: 1.2–3 (Default: 2.0)<br>• `as_db`: 20·lg(ratio) dB (Default: False)<br>• `window`: FFT window for auto-detection (Default: 'hann') | `thd_plus_noise(sig, fs, 1000.0)`<br><br>• ratio, or dB if `as_db` |
-| `sinad` | `function` | **Signal-to-noise-and-distortion ratio, dB (AES17-2015).**<br>• `signal`, `fs`, `fundamental` (Default: None), `notch_q` (Default: 2.0)<br>= −(THD+N in dB) | `sinad(sig, fs, 1000.0)`<br><br>• SINAD [dB] |
-| `weighted_thd` | `function` | **Weighted THD (IEC 60268-3 14.12.11).**<br>• `signal`, `fs`, `fundamental` (Default: None)<br>• `weighting`: 'A' or 'C' (Default: 'A')<br>• `notch_q` (Default: 2.0) | `weighted_thd(sig, fs, 1000.0)`<br><br>• ratio |
-| `modulation_distortion` | `function` | **SMPTE modulation distortion (IEC 60268-3 14.12.7).**<br>• `signal`, `fs`, `f_low` [Hz], `f_high` [Hz]<br>• `orders`: sideband orders (Default: (2, 3)) | `modulation_distortion(sig, fs, 60.0, 7000.0)`<br><br>• ratio (sidebands rel. f_high) |
-| `difference_frequency_distortion` | `function` | **CCIF difference-frequency distortion (IEC 60268-3 14.12.8).**<br>• `signal`, `fs`, `f1` < `f2` [Hz]<br>• `order`: 2 or 3 (Default: 2) | `difference_frequency_distortion(sig, fs, 13e3, 14e3, order=2)`<br><br>• ratio |
-| `total_difference_frequency_distortion` | `function` | **Total difference-frequency distortion (IEC 60268-3 14.12.10).**<br>• `signal`, `fs`, `f1`, `f2` [Hz]<br>= √(d₂² + d₃²) | `total_difference_frequency_distortion(sig, fs, 13e3, 14e3)`<br><br>• ratio |
+| `thd_plus_noise` | `function` | **THD+N ratio (AES17-2015 6.3.1).**<br>• `signal`, `fs`, `fundamental` (Default: None)<br>• `notch_q`: effective Q of the applied notch, 1.2–3 (Default: 2.0)<br>• `bandwidth`: AES17 chain upper edge [Hz] (Default: 20000; None = full Nyquist); 20 Hz high-pass included<br>• `as_db`: 20·lg(ratio) dB (Default: False)<br>• `window`: FFT window for auto-detection (Default: 'hann') | `thd_plus_noise(sig, fs, 1000.0)`<br><br>• ratio, or dB if `as_db` |
+| `sinad` | `function` | **Signal-to-noise-and-distortion ratio, dB (derived from AES17 THD+N).**<br>• `signal`, `fs`, `fundamental` (Default: None), `notch_q` (Default: 2.0), `bandwidth` (Default: 20000)<br>= −(THD+N in dB) | `sinad(sig, fs, 1000.0)`<br><br>• SINAD [dB] |
+| `weighted_thd` | `function` | **Weighted THD (IEC 60268-3 14.12.11).**<br>• `signal`, `fs`, `fundamental` (Default: None)<br>• `weighting`: '468' (ITU-R BS.468-4 / IEC 60268-1, the 14.12.11 network), 'A' or 'C' (Default: '468')<br>• `notch_q` (Default: 2.0)<br>• valid for fundamentals 31.5–400 Hz | `weighted_thd(sig, fs, 100.0)`<br><br>• ratio |
+| `itu_r_468_weighting` | `function` | **ITU-R BS.468-4 weighting response (Table 1).**<br>• `frequencies` [Hz] (≥ 0)<br>• log-frequency dB interpolation per the recommendation; DC → −inf | `itu_r_468_weighting([6300.0])  # +12.2`<br><br>• dB re 1 kHz |
+| `modulation_distortion` | `function` | **Modulation distortion d_m,2 / d_m,3 (IEC 60268-3 14.12.7).**<br>• `signal`, `fs`, `f_low` [Hz], `f_high` [Hz]<br>• arithmetic sideband sums over the f₂ amplitude (14.12.7.2 g–h) | `modulation_distortion(sig, fs, 60.0, 7000.0).d2`<br><br>• `ModulationDistortionResult` |
+| `ModulationDistortionResult` | `dataclass` | **Modulation distortion result.**<br>• `d2` / `d3`: the IEC per-order values<br>• `smpte`: combined-RMS analyzer convention (not an IEC quantity) | `res.d2, res.d3, res.smpte` |
+| `difference_frequency_distortion` | `function` | **Difference-frequency distortion d_d,n (IEC 60268-3 14.12.8).**<br>• `signal`, `fs`, `f1` < `f2` [Hz]<br>• `order`: 2 or 3 (Default: 2)<br>• ref. U₂,ref = 2·U₂,f₂; 3rd order sums arithmetically | `difference_frequency_distortion(sig, fs, 13e3, 14e3, order=2)`<br><br>• ratio |
+| `total_difference_frequency_distortion` | `function` | **Total difference-frequency distortion (IEC 60268-3 14.12.10).**<br>• `signal`, `fs`<br>• `f1` (Default: 8000), `f2` (Default: 11950) [Hz]<br>= √(a²_{f₂−f₁} + a²_{2f₁−f₂}) / (a_{f₁} + a_{f₂}) | `total_difference_frequency_distortion(sig, fs)`<br><br>• ratio |
 | `dynamic_intermodulation_distortion` | `function` | **Dynamic intermodulation DIM (IEC 60268-3 14.12.9).**<br>• `signal`, `fs`<br>• `f_sine` [Hz] (Default: 15000)<br>• `f_square` [Hz] (Default: 3150) | `dynamic_intermodulation_distortion(sig, fs)`<br><br>• ratio (products rel. 15 kHz sine) |
-| `harmonic_analysis` | `function` | **Full harmonic analysis (THD, THD+N, SINAD).**<br>• `signal`, `fs`, `fundamental` (Default: None)<br>• `n_harmonics` (Default: 10), `notch_q` (Default: 2.0)<br>• `window`: FFT window (Default: 'hann') | `res = harmonic_analysis(sig, fs, 1000.0)`<br><br>• `HarmonicDistortionResult` |
+| `harmonic_analysis` | `function` | **Full harmonic analysis (THD, THD+N, SINAD).**<br>• `signal`, `fs`, `fundamental` (Default: None)<br>• `n_harmonics` (Default: 10), `notch_q` (Default: 2.0), `bandwidth` (Default: 20000)<br>• `window`: FFT window (Default: 'hann') | `res = harmonic_analysis(sig, fs, 1000.0)`<br><br>• `HarmonicDistortionResult` |
 | `HarmonicDistortionResult` | `dataclass` | **Harmonic analysis result.**<br>• `fundamental` [Hz]<br>• `harmonic_frequencies` / `harmonic_amplitudes`<br>• `thd_f` / `thd_r` / `thd_plus_noise`: ratios<br>• `sinad_db` [dB]<br>• `.plot()`: annotated harmonic spectrum | `res.thd_f, res.sinad_db` |
 | `transfer_function` | `function` | **Frequency-response estimate H1/H2 (Bendat & Piersol).**<br>• `x` (input), `y` (output), `fs` [Hz]<br>• `estimator`: 'H1' or 'H2' (Default: 'H1')<br>• `nperseg` (Default: None), `overlap` (Default: 0.5) | `res = transfer_function(x, y, fs)`<br><br>• `FrequencyResponseResult` |
 | `coherence` | `function` | **Ordinary coherence γ² (Bendat & Piersol).**<br>• `x`, `y`, `fs` [Hz]<br>• `nperseg` (Default: None), `overlap` (Default: 0.5)<br>= \|Gxy\|²/(Gxx·Gyy) ∈ [0, 1] | `f, g = coherence(x, y, fs)` |
@@ -6077,10 +6311,10 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `spherical_spreading_adjustment` | `function` | **ΔLs = −20·lg(r/60) (ECAC Doc 32 Eq. 24).**<br>• `distance` r [m] | `spherical_spreading_adjustment(600)` |
 | `atmospheric_adjustment` | `function` | **ΔLa = −α(f)·(r−60) (Eq. 26/27; ISO 9613-1 α; Table 4).**<br>• `frequencies` [Hz] / `distance` r [m]<br>• `temperature` / `relative_humidity` / `pressure` | `atmospheric_adjustment(f, 1060)` |
 | `ground_effect_adjustment` | `function` | **ΔLg over an impedance plane (Chien-Soroka, Eq. 28-35).**<br>• `frequencies` / `source_height` / `receiver_height` / `horizontal_distance`<br>• `flow_resistivity` σ or CNOSSOS class `"A"`-`"H"` | `ground_effect_adjustment(f, 150, 1.5, 500)` |
-| `slant_distance` | `function` | **Rotor-centre-to-microphone slant distance (IEC 61400-11).**<br>• `hub_height` H [m]<br>• `rotor_diameter` D [m]<br>= √(H² + (H+D/2)²) | `slant_distance(80.0, 100.0)` |
+| `slant_distance` | `function` | **Rotor-centre-to-microphone slant distance (IEC 61400-11).**<br>• `hub_height` H [m]<br>• `rotor_diameter` D [m]<br>• `rotor_axis` (Default: "horizontal" → R0 = H+D/2, Formula 1; "vertical" → R0 = H+D, Formula 2)<br>= √(H² + R0²) | `slant_distance(80.0, 100.0)` |
 | `apparent_sound_power_level` | `function` | **Apparent sound power level (IEC 61400-11 Formula 26), dB re 1 pW.**<br>• `band_levels`: background-corrected A-weighted band SPL [dB]<br>• `r1`: slant distance [m]<br>= L_p − 6 + 10·lg(4π R1²/S0) | `apparent_sound_power_level(levels, r1)` |
-| `wind_turbine_tonality` | `function` | **Tonal audibility from a narrowband spectrum (IEC 61400-11).**<br>• `levels` [dB] / `frequencies` [Hz]: 1-D, equal length (≥ 3), strictly increasing and uniformly spaced (narrowband)<br>• `tone_frequency`: optional [Hz] | `res = wind_turbine_tonality(levels, freqs)`<br><br>• `WindTurbineTonalityResult` |
-| `WindTurbineTonalityResult` | `dataclass` | **Wind-turbine tonality result.**<br>• `tone_frequency` [Hz] / `critical_bandwidth` [Hz]<br>• `tone_level` / `masking_level` / `tonality` [dB]<br>• `audibility_criterion` / `tonal_audibility` [dB]<br>• `is_audible`<br>• `.plot()`: spectrum + critical band + masking | `res.tonal_audibility, res.is_audible` |
+| `wind_turbine_tonality` | `function` | **Tonal audibility from a narrowband spectrum (IEC 61400-11), with the 9.5.2 possible-tone screening; tone lines and La anchor to the highest classified line (9.5.3/9.5.4).**<br>• `levels` [dB] / `frequencies` [Hz]: 1-D, equal length (≥ 3), strictly increasing and uniformly spaced (narrowband), covering the whole critical band<br>• `tone_frequency`: optional [Hz] (≥ 20 Hz) | `res = wind_turbine_tonality(levels, freqs)`<br><br>• `WindTurbineTonalityResult` |
+| `WindTurbineTonalityResult` | `dataclass` | **Wind-turbine tonality result.**<br>• `tone_frequency` [Hz] / `critical_bandwidth` [Hz]<br>• `tone_level` / `masking_level` / `tonality` [dB]<br>• `audibility_criterion` / `tonal_audibility` [dB]<br>• `is_audible` / `has_identified_tone` (False → exclude from 9.5.1 bin averaging)<br>• `.plot()`: spectrum + critical band + masking | `res.tonal_audibility, res.is_audible` |
 | `noise_criterion` | `function` | **NC rating, tangency method (ANSI/ASA S12.2-2019).**<br>• `levels`: octave-band SPL [dB] (the 10 bands 16 Hz–8 kHz without `frequencies`)<br>• `frequencies`: optional band centres [Hz] (subset allowed) | `nc = noise_criterion(levels)`<br><br>• `NCResult`; highest NC curve touched |
 | `room_criterion` | `function` | **RC Mark II rating (ANSI/ASA S12.2-2019 Annex D).**<br>• `levels`: octave-band SPL [dB]<br>• `frequencies`: optional band centres [Hz] | `rc = room_criterion(levels)`<br><br>• `RCResult`; LMF average + 'N'/'R'/'H'/'RH' tag |
 | `nc_curve` | `function` | **NC curve levels (Table 1).**<br>• `index`: NC designation 15–70 (intermediate values interpolated band by band) | `nc_curve(35)  # [82, 71, 60, ...]`<br><br>• 10 band levels [dB], 16 Hz–8 kHz |
@@ -6096,9 +6330,9 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `HtlanResult` | `dataclass` | **Combined HTLAN result.**<br>• `age`, `sex`, `l_ex`, `years`, `fractile`<br>• `frequencies` [Hz]<br>• `htla`: age component H [dB]<br>• `nipts`: noise component N [dB]<br>• `threshold`: combined H′ [dB]<br>• `.plot()` | `h.htla, h.nipts, h.threshold` |
 | `predicted_prominence` | `function` | **Predicted prominence P of an impulse (NT ACOU 112 Formula 1).**<br>• `onset_rate`: slope of the A/F level onset [dB/s] (> 0; qualifies above 10 dB/s)<br>• `level_difference`: level rise over the onset [dB] (> 0) | `predicted_prominence(50.0, 20.0)  # 7.7`<br><br>• P = 3 lg(rate) + 2 lg(diff) |
 | `impulse_adjustment` | `function` | **LAeq adjustment KI (Formula 2).**<br>• `prominence`: P | `impulse_adjustment(7.7)  # 4.86`<br><br>• 1.8(P − 5) dB for P > 5, else 0 |
-| `impulse_prominence` | `function` | **Governing prominence and adjustment of a set of impulses (clauses 7–8).**<br>• `onset_rates` [dB/s]<br>• `level_differences` [dB] | `r = impulse_prominence([50, 120], [20, 15])`<br><br>• `ImpulseProminenceResult` (P = 8.59, KI = 6.46 dB) |
+| `impulse_prominence` | `function` | **Governing prominence and adjustment of a set of impulses (clauses 7–8); only onset rates > 10 dB/s qualify (clause 4.5).**<br>• `onset_rates` [dB/s]<br>• `level_differences` [dB] | `r = impulse_prominence([50, 120], [20, 15])`<br><br>• `ImpulseProminenceResult` (P = 8.59, KI = 6.46 dB) |
 | `rating_level` | `function` | **Rating level LAr,T over a reference time (clause 8 Note 1).**<br>• `laeq`: LAeq,N per sub-interval [dB]<br>• `adjustment`: KI,N per sub-interval [dB]<br>• `durations`, `reference_time`: same time unit | `rating_level([55, 60], [0, 4.9], [20, 10], 30)  # 60.9` |
-| `ImpulseProminenceResult` | `dataclass` | **Impulse-prominence verdict.**<br>• `onset_rates` [dB/s], `level_differences` [dB]<br>• `per_impulse`: P of each impulse<br>• `prominence`: governing (highest) P<br>• `adjustment`: KI of the governing impulse [dB]<br>• `.plot()` | `r.prominence, r.adjustment` |
+| `ImpulseProminenceResult` | `dataclass` | **Impulse-prominence verdict.**<br>• `onset_rates` [dB/s], `level_differences` [dB]<br>• `per_impulse`: P of each impulse<br>• `qualifies`: onset rate > 10 dB/s mask (clause 4.5)<br>• `prominence`: governing (highest qualifying) P<br>• `adjustment`: KI of the governing qualifying impulse [dB] (0 when none qualifies)<br>• `.plot()` | `r.prominence, r.adjustment` |
 | `multiple_shock_assessment` | `function` | **Full multiple-shock assessment from seat acceleration (ISO 2631-5:2018).**<br>• `acceleration`: vertical seat az(t) [m/s²], `fs` [Hz]<br>• `start_age`: years, `years`: exposure years, `days_per_year`<br>• `exposure_time` / `measurement_time`: scale Dz to a daily dose (Default: None)<br>• `sex`: 'male'/'female' (Default: 'male')<br>• `mz`: MPa per m/s² (Default: sex-specific) | `res = multiple_shock_assessment(az, fs, start_age=25, years=30, days_per_year=220)`<br><br>• `MultipleShockResult` |
 | `seat_to_spine_transfer` | `function` | **Seat-to-spine transfer function H(ω) (clause 5.2 Formula 1).**<br>• `frequencies` [Hz] | `H = seat_to_spine_transfer(freqs)`<br><br>• Complex response; unity at 0 Hz |
 | `spinal_response` | `function` | **Vertical spinal response Az(t) (Formula 2).**<br>• `acceleration`: seat az(t) [m/s²]<br>• `fs` [Hz] | `Az = spinal_response(az, fs)`<br><br>• Same length as the input [m/s²] |
@@ -6132,13 +6366,18 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `floating_floor_resonance` | `function` | **Full EN 29052-1 chain → result.**<br>• `resonant_frequency`, `total_mass_per_area`, `floor_mass_per_area`<br>• `airflow_resistivity` (Default: inf), `thickness`, `porosity`, `atmospheric_pressure` | `res = floating_floor_resonance(25.0, 200.0, 120.0)`<br><br>• `DynamicStiffnessResult` |
 | `DynamicStiffnessResult` | `dataclass` | **Dynamic-stiffness measurement result.**<br>• `apparent_stiffness`/`gas_stiffness`/`dynamic_stiffness` [N/m³]<br>• `resonant_frequency` [Hz], `floor_mass_per_area` [kg/m²]<br>• `natural_frequency` [Hz]<br>• `.plot()` | `res.dynamic_stiffness, res.natural_frequency` |
 | `convert_frf` | `function` | **Convert between any two FRFs (ISO 7626-1 Table 1).**<br>• `value`: complex FRF value(s) of kind *source*<br>• `frequency` f [Hz] (scalar/array, broadcast)<br>• `source`/`target`: `receptance`/`mobility`/`accelerance`/`dynamic_stiffness`/`impedance`/`apparent_mass`<br>Pivots through the receptance H | `convert_frf(2e-3, 80.0, "mobility", "impedance")  # 500 N.s/m` |
-| `sdof_receptance` / `sdof_mobility` / `sdof_accelerance` | `function` | **SDOF resonator FRFs (ISO 7626-1 Annex A).**<br>• `frequency` f [Hz] (scalar/array)<br>• `mass` m [kg], `stiffness` k [N/m], `damping` c [N·s/m]<br>H = 1/(k − ω²m + jωc); Y = jωH; A = −ω²H | `sdof_mobility(10.07, 2.0, 8000.0, 5.0)  # |Y|=1/c on resonance` |
-| `resonance_frequency` | `function` | **Undamped SDOF natural frequency (ISO 7626-1 Annex A).**<br>• `mass` m [kg], `stiffness` k [N/m]<br>f0 = (1/2π)√(k/m) | `resonance_frequency(2.0, 8000.0)  # 10.07 Hz` |
+| `sdof_receptance` / `sdof_mobility` / `sdof_accelerance` | `function` | **Closed-form SDOF resonator FRFs (ISO 7626-1 Table 1 / 3.1.2 definitions).**<br>• `frequency` f [Hz] (scalar/array)<br>• `mass` m [kg], `stiffness` k [N/m], `damping` c [N·s/m]<br>H = 1/(k − ω²m + jωc); Y = jωH; A = −ω²H | `sdof_mobility(10.07, 2.0, 8000.0, 5.0)  # |Y|=1/c on resonance` |
+| `resonance_frequency` | `function` | **Undamped SDOF natural frequency (closed form).**<br>• `mass` m [kg], `stiffness` k [N/m]<br>f0 = (1/2π)√(k/m) | `resonance_frequency(2.0, 8000.0)  # 10.07 Hz` |
+| `rigid_mass_calibration_check` | `function` | **Operational rigid-mass calibration (ISO 7626-2 7.5.2).**<br>• `frf`: measured FRF (complex or magnitude)<br>• `frequencies` [Hz], `mass` m [kg]<br>• `quantity`: 'accelerance' (\|A\| = 1/m) / 'mobility' (\|Y\| = 1/(ωm))<br>• `tolerance` (Default: 0.05 = ±5 %) | `res = rigid_mass_calibration_check(frf, f, 10.0)`<br><br>• `RigidMassCalibrationResult` |
+| `RigidMassCalibrationResult` | `dataclass` | **Rigid-mass calibration verdict (ISO 7626-2 7.5.2).**<br>• `frequencies` [Hz], `measured`/`expected`/`deviation` per band<br>• `within_tolerance`: per-band flags, `passed`: overall<br>• `mass` [kg], `quantity`, `tolerance` | `res.passed, res.deviation` |
+| `random_error_percent` | `function` | **Normalized random error of an averaged FRF (ISO 7626-2 Annex A).**<br>• `coherence`: γ² per frequency, in (0, 1]<br>• `n_averages`: n ≥ 1<br>ε = √((1−γ²)/(2nγ²)) [%]; 8.1.3 requires < 5 % at resonances | `random_error_percent(0.8, 75)  # 4.08 %` |
 | `sdof_mobility_result` | `function` | **SDOF driving-point mobility → result.**<br>• `frequency` f [Hz] (array)<br>• `mass`, `stiffness`, `damping` | `res = sdof_mobility_result(f, 2.0, 8000.0, 5.0)`<br><br>• `MobilityResult` |
 | `MobilityResult` | `dataclass` | **Mobility FRF over frequency (ISO 7626-1).**<br>• `frequencies` [Hz], `mobility` Y [m/(N·s)]<br>• `driving_point`: bool (i = j)<br>• `.magnitude` / `.phase`<br>• `.to(target)`: any Table-1 kind<br>• `.plot()`: |Y(f)| with the resonance marked | `res.magnitude, res.to("impedance")` |
 | `transfer_stiffness_level` / `loss_factor` | `function` | **Transfer-stiffness level & loss factor (ISO 10846-2/-3 3.17, -1 3.8).**<br>• `transfer_stiffness_level(k, reference=1.0)`: Lₖ = 20 lg(\|k\|/k₀) [dB re 1 N/m]<br>• `loss_factor(k)`: η = Im(k)/Re(k) | `transfer_stiffness_level(1e6)  # 120 dB` |
 | `transfer_stiffness_direct` | `function` | **Direct method (ISO 10846-2).**<br>• `blocking_force` F₂,b [N]<br>• `input_displacement` u₁ [m]<br>k₂,₁ = F₂,b/u₁ | `transfer_stiffness_direct(5.0, 1e-6)  # 5e6 N/m` |
-| `transfer_stiffness_indirect` | `function` | **Indirect method (ISO 10846-3 Formula 1).**<br>• `frequency` f [Hz] (scalar/array)<br>• `transmissibility` T = u₂/u₁ (complex)<br>• `blocking_mass` m₂ [kg]<br>• `flange_mass` m_f [kg] (Default: 0.0)<br>k₂,₁ = −(2πf)²(m₂+m_f)T | `transfer_stiffness_indirect(500.0, 0.01, blocking_mass=10.0)` |
+| `transfer_stiffness_indirect` | `function` | **Indirect method (ISO 10846-3 Formula 1).**<br>• `frequency` f [Hz] (scalar/array)<br>• `transmissibility` T = u₂/u₁ (complex)<br>• `blocking_mass` m₂ [kg]<br>• `flange_mass` m_f [kg] (Default: 0.0)<br>k₂,₁ = −(2πf)²(m₂+m_f)T; warns (`PhonometryWarning`) where \|T\| > 0.1 (Inequality 2: ΔL1,2 < 20 dB) | `transfer_stiffness_indirect(500.0, 0.01, blocking_mass=10.0)` |
+| `TRANSMISSIBILITY_LIMIT` | `float` | **Indirect-method validity limit (ISO 10846-3 6.1, Inequality 2).**<br>0.1: \|T\| ≤ 0.1 ⇔ ΔL1,2 ≥ 20 dB keeps Formula (1) within 1 dB (12 %) | `TRANSMISSIBILITY_LIMIT  # 0.1` |
+| `blocking_force_ratio` | `function` | **Delivered/blocking force ratio (ISO 10846-1 Eq. 6).**<br>• `driving_point_stiffness` k₂,₂ [N/m] (complex)<br>• `termination_stiffness` k_t [N/m] (complex, non-zero)<br>F₂/F₂,b = 1/(1 + k₂,₂/k_t); within 10 % of 1 for \|k₂,₂\| < 0.1\|k_t\| | `blocking_force_ratio(1e5, 1e6)  # 0.909` |
 | `base_transmissibility` | `function` | **Mass-loaded Kelvin-Voigt transmissibility (model).**<br>• `frequency` f [Hz]<br>• `mass` m [kg], `stiffness` k [N/m], `damping` c [N·s/m] (Default: 0.0)<br>T = (k+jωc)/(k−ω²m+jωc) | `base_transmissibility(f, 8.0, 1e6, 120.0)` |
 | `indirect_transfer_stiffness_result` | `function` | **Indirect-method sweep → result.**<br>• `frequency` f [Hz] (array)<br>• `transmissibility` T (complex)<br>• `blocking_mass` m₂ [kg], `flange_mass` (Default: 0.0) | `res = indirect_transfer_stiffness_result(f, t, 8.0)`<br><br>• `TransferStiffnessResult` |
 | `TransferStiffnessResult` | `dataclass` | **Dynamic transfer stiffness over frequency (ISO 10846).**<br>• `frequencies` [Hz], `transfer_stiffness` k₂,₁ [N/m]<br>• `blocking_mass` m₂ [kg] or None<br>• `.magnitude` / `.level` (dB re 1 N/m) / `.loss_factor`<br>• `.to(target)`: "impedance"/"apparent_mass"<br>• `.plot()`: Lₖ(f) | `res.level, res.loss_factor` |
@@ -6150,16 +6389,20 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `sound_power_from_vibration` | `function` | **Bundle a vibration → power determination.**<br>• `velocity_level` L_v per band [dB]<br>• `area` S [m²], `radiation_factor` ε (Default: 1.0)<br>• `frequencies` [Hz] or None | `res = sound_power_from_vibration(lv, 1.6, radiation_factor=eps, frequencies=f)`<br><br>• `VibrationSoundPowerResult` |
 | `VibrationSoundPowerResult` | `dataclass` | **Sound power radiated by surface vibration (ISO/TS 7849).**<br>• `velocity_level` / `sound_power_level` / `radiation_factor` per band<br>• `area` S [m²], `frequencies` [Hz] or None<br>• `.total_level`: band-summed L_W [dB]<br>• `.plot()` | `res.sound_power_level, res.total_level` |
 | `spatial_mean_velocity_level` / `plate_loss_factor` | `function` | **Reception-plate helpers (EN 15657 Formula 12/13).**<br>• `spatial_mean_velocity_level(levels)`: 10 lg(mean 10^(Lv,i/10)) [dB]<br>• `plate_loss_factor(f, Ts)`: η = 2.2/(f·Ts) | `spatial_mean_velocity_level([78, 80, 82])` |
-| `structure_borne_power_level` | `function` | **Characteristic structure-borne power level (EN 15657 Formula 14).**<br>• `velocity_level` L_v [dB re 1e-9 m/s]<br>• `frequency` f [Hz], `mass_per_area` m [kg/m²], `area` S [m²]<br>• `loss_factor` η<br>L_Ws = 10 lg(2πfηmS) + L_v − 60 | `structure_borne_power_level(80, 1000, 10, 1, 0.01)  # 47.98 dB` |
+| `mean_free_velocity_level` | `function` | **Mean free velocity level (ISO 9611:1996 eq. (9)).**<br>• `levels`: free-velocity levels at the N contact points [dB re 5e-8 m/s]<br>Energy mean over positions | `mean_free_velocity_level([70, 72, 74])  # 72.3 dB` |
+| `structure_borne_power_level` | `function` | **Reception-plate injected power level (EN 15657 Formula 14).**<br>• `velocity_level` L_v [dB re 1e-9 m/s]<br>• `frequency` f [Hz], `mass_per_area` m [kg/m²], `area` S [m²]<br>• `loss_factor` η > 0<br>L_Ws = 10 lg(2πfηmS) + L_v − 60 (plate-specific; convert via Formulae 15/17 before EN 12354-5) | `structure_borne_power_level(80, 1000, 10, 1, 0.01)  # 47.98 dB` |
+| `equivalent_blocked_force_level` / `characteristic_reception_plate_power` | `function` | **Source quantities (EN 15657 Formulae 15/17).**<br>• `equivalent_blocked_force_level(L_Ws_low, Y_plate)`: L_Fb,eq = L_Ws − 10 lg(Re Y/Y0) [dB re 1e-6 N]<br>• `characteristic_reception_plate_power(L_Fb,eq)`: L_Wsn = L_Fb,eq + 10 lg(Y_R,∞,low/Y0), Y_R,∞,low = 5e-6 m/(N·s) | `lwsn = characteristic_reception_plate_power(equivalent_blocked_force_level(61.7, 5.34e-6))` |
+| `equivalent_free_velocity_level` / `source_mobility_from_levels` | `function` | **Source quantities (EN 15657 Formulae 18/19).**<br>• `equivalent_free_velocity_level(L_Ws_high, Y_plate)`: L_vf,eq [dB re 1e-9 m/s]<br>• `source_mobility_from_levels(L_vf,eq, L_Fb,eq)`: \|Y_S,eq\| [m/(N·s)] | `y_s = source_mobility_from_levels(lvf, lfb)` |
 | `reception_plate_power` | `function` | **Reception-plate determination → result (EN 15657 clause 7).**<br>• `velocity_level` L_v (per band), `frequency` [Hz]<br>• `mass_per_area`, `area`<br>• `loss_factor` η **or** `reverberation_time` Ts | `res = reception_plate_power(lv, f, 600, 2.0, reverberation_time=0.8)`<br><br>• `StructureBornePowerResult` |
-| `StructureBornePowerResult` | `dataclass` | **Characteristic structure-borne sound power (EN 15657).**<br>• `power_level` L_Ws / `velocity_level` / `loss_factor` per band<br>• `mass_per_area`, `area`, `frequencies` [Hz] or None<br>• `.total_level`: band-summed L_Ws [dB]<br>• `.plot()` | `res.power_level, res.total_level` |
+| `StructureBornePowerResult` | `dataclass` | **Reception-plate injected structure-borne power (EN 15657).**<br>• `power_level` L_Ws / `velocity_level` / `loss_factor` per band<br>• `mass_per_area`, `area`, `frequencies` [Hz] or None<br>• `.total_level`: band-summed L_Ws [dB]<br>• `.plot()` | `res.power_level, res.total_level` |
 | `coupling_term` / `coupling_term_force_source` / `coupling_term_velocity_source` | `function` | **Coupling term D_C (EN 12354-5 Formula 19b/c/d).**<br>• `coupling_term(Ys, Yi, transfer_mobility=0)`: 10 lg(\|Ys+Yi+Yk\|²/(\|Ys\|·Re Yi))<br>• force source: 10 lg(\|Ys\|/Re Yi)<br>• velocity source: −10 lg(\|Ys\|·Re Zi) | `coupling_term(2e-4+1e-4j, 3e-5+1e-5j)` |
-| `installed_structure_borne_power_level` | `function` | **Installed power (EN 12354-5 Formula 18b).**<br>• `characteristic_power_level` L_Ws,c [dB]<br>• `coupling_term` D_C [dB]<br>L_Ws,inst = L_Ws,c − D_C | `installed_structure_borne_power_level(82.0, 8.5)` |
+| `installed_structure_borne_power_level` | `function` | **Installed power (EN 12354-5 Formula 18b).**<br>• `characteristic_power_level` L_Ws,c [dB] (the converted EN 15657 level, not the raw Formula 14 plate power)<br>• `coupling_term` D_C [dB]<br>L_Ws,inst = L_Ws,c − D_C | `installed_structure_borne_power_level(82.0, 8.5)` |
+| `installed_power_from_reception_plate` | `function` | **Annex I mobility correction (EN 12354-5).**<br>• `reception_plate_level` L_Ws,n [dB]<br>• `receiver_mobility` Y_∞,i [m/(N·s)]<br>• `plate_mobility` Y_∞,rec (Default: 5e-6)<br>L_Ws,inst = L_Ws,n + 10 lg(Y_∞,i/Y_∞,rec); with the source mobility it yields L_Ws,c | `installed_power_from_reception_plate(67.6, 1.25e-6)  # -6 dB` |
 | `structure_borne_pressure_level_path` / `total_structure_borne_pressure_level` | `function` | **Path & total normalised SPL (EN 12354-5 Formula 18a/17).**<br>• path: L_Ws,inst − D_sa − R_ij,ref − 10 lg(S/S0) − 10 lg(A0/4)<br>• total: 10 lg(Σ 10^(L/10)) over paths (axis 0) | `total_structure_borne_pressure_level(path_levels)` |
 | `installed_source_prediction` | `function` | **Full installed-source prediction → result (EN 12354-5).**<br>• `characteristic_power_level` L_Ws,c, `coupling_term` D_C<br>• `paths`: dicts with `adjustment_term`, `flanking_reduction_index`, `element_area`<br>• `frequencies` [Hz] or None | `res = installed_source_prediction(lwc, dc, paths, frequencies=f)`<br><br>• `InstalledSourceResult` |
 | `InstalledSourceResult` | `dataclass` | **Installed structure-borne sound prediction (EN 12354-5).**<br>• `path_levels` (paths×bands), `total_level` L_n,s per band<br>• `installed_power_level` per band, `frequencies` [Hz] or None<br>• `.overall_level`: band-summed total [dB]<br>• `.plot()`: the cascade | `res.total_level, res.overall_level` |
-| `combine_uncertainty` | `function` | **GUM law of propagation of uncertainty (ISO/IEC Guide 98-3 clause 5).**<br>• `model`: measurement function f(x1…xN)<br>• `quantities`: input `Quantity` objects, in argument order<br>• `correlation`: optional N×N matrix r_ij (Default: None → uncorrelated) | `u = combine_uncertainty(lambda a, b: a*b, [Quantity(10.0, 0.1), Quantity(5.0, 0.2)])`<br><br>• `UncertaintyResult`; uc = 2.062 |
-| `monte_carlo` | `function` | **Monte Carlo propagation (Guide 98-3-1, Supplement 1).**<br>• `model`: vectorised f(x1…xN)<br>• `quantities`: input `Quantity` objects<br>• `trials`: M (Default: 1000000)<br>• `coverage`: interval probability (Default: 0.95)<br>• `seed`: reproducibility (Default: None) | `mc = monte_carlo(model, quantities, seed=1)`<br><br>• `MonteCarloResult` (mean, u, coverage interval) |
+| `combine_uncertainty` | `function` | **GUM law of propagation of uncertainty (ISO/IEC Guide 98-3 clause 5).**<br>• `model`: measurement function f(x1…xN)<br>• `quantities`: input `Quantity` objects, in argument order<br>• `correlation`: optional N×N matrix r_ij (Default: None → uncorrelated; non-identity with finite input dof → effective dof undefined, `expanded()` needs `coverage_factor_override`) | `u = combine_uncertainty(lambda a, b: a*b, [Quantity(10.0, 0.1), Quantity(5.0, 0.2)])`<br><br>• `UncertaintyResult`; uc = 2.062 |
+| `monte_carlo` | `function` | **Monte Carlo propagation (Guide 98-3-1, Supplement 1).**<br>• `model`: vectorised f(x1…xN)<br>• `quantities`: input `Quantity` objects<br>• `trials`: M ≥ 2 (Default: 1000000; fixed, no adaptive 7.9)<br>• `coverage`: interval probability (Default: 0.95)<br>• `seed`: reproducibility (Default: None)<br>• inputs sampled independently (no 6.4.8 multivariate path) | `mc = monte_carlo(model, quantities, seed=1)`<br><br>• `MonteCarloResult` (mean, u, coverage interval) |
 | `rectangular` | `function` | **Type B quantity, rectangular PDF (GUM 4.3.7).**<br>• `value`, `half_width` a, `name` | `rectangular(20.0, 0.5)`<br><br>• `Quantity` with u = a/√3 = 0.289 |
 | `triangular` | `function` | **Type B quantity, triangular PDF (GUM 4.3.9).**<br>• `value`, `half_width` a, `name` | `triangular(20.0, 0.5)`<br><br>• `Quantity` with u = a/√6 |
 | `u_shaped` | `function` | **Type B quantity, U-shaped (arcsine) PDF.**<br>• `value`, `half_width` a, `name` | `u_shaped(20.0, 0.5)`<br><br>• `Quantity` with u = a/√2 |
@@ -6310,7 +6553,7 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `FilterBankWarning` | `warning class` | **Fractional-octave filter-bank advisory.**<br>Emitted for filter-bank processing pitfalls | `warnings.simplefilter('error', FilterBankWarning)` |
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
-| `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '3.0.0'` |
+| `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '3.2.0'` |
 | `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `STIResult`, `SIIResult`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `ReverberationSoundPowerResult`, `SoundPowerIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
@@ -6605,7 +6848,7 @@ The three parameters come from Table 1 (p. 4), tabulated at the 29 preferred thi
 
 The standard specifies **no interpolation** between the tabulated frequencies. Formula (1) is specified for **20 phon to 90 phon** between 20 Hz and 4 kHz, and only up to **80 phon between 5 kHz and 12.5 kHz** — above 80 phon the contour therefore stops at 4 kHz. Values outside these limits from Formula (2) are extrapolations the standard labels as informative only.
 
-See the [Psychoacoustics guide](https://jmrplens.github.io/phonometry/guides/psychoacoustics/) for usage.
+See the [Loudness guide](https://jmrplens.github.io/phonometry/guides/loudness/) for usage.
 
 ## Tone prominence: TNR and PR (ECMA-418-1)
 
@@ -6732,7 +6975,7 @@ $$
 
 below 1 sone the reference program uses $L_N = 40 (N + 0.0005)^{0.35}$, floored at 3 phon.
 
-See the [Psychoacoustics guide](https://jmrplens.github.io/phonometry/guides/psychoacoustics/) for usage.
+See the [Loudness guide](https://jmrplens.github.io/phonometry/guides/loudness/) for usage.
 
 ## Advanced loudness models & sound quality
 
@@ -6809,7 +7052,7 @@ $$
 
 evaluated on the same 240-bin, 0.1-Bark grid. The constant $k$ is not hard-coded but derived from the calibration requirement (clause 6): a critical-band-wide narrowband noise 920–1080 Hz at 60 dB SPL scores exactly 1 acum — the derived $k = 0.108$ lands inside the normative window $0.105 \le k < 0.115$ (clause 5.2). The informative Annex B weightings are provided under the same 1-acum anchor: von Bismarck (knee at 15 Bark, $0.2\ e^{0.308(z-15)} + 0.8$) and Aures (loudness-dependent, $g(z) = 0.078\ (e^{0.171 z}/z)\ N/\ln(0.05 N + 1)$). The Table A.2 narrow-band targets are reproduced within the clause 6 tolerance (5 % or 0.05 acum): 0.38 acum at 250 Hz, 1.00 at 1 kHz, 1.78 at 2.5 kHz, 2.82 at 4 kHz.
 
-See the [Psychoacoustics guide](https://jmrplens.github.io/phonometry/guides/psychoacoustics/) for usage.
+See the [Sound Quality Metrics guide](https://jmrplens.github.io/phonometry/guides/sound-quality/) for usage.
 
 ## Modulation transfer and STI (IEC 60268-16)
 
@@ -6847,7 +7090,7 @@ See the [Speech Transmission Index guide](https://jmrplens.github.io/phonometry/
 
 ## Speech Intelligibility Index (ANSI S3.5)
 
-Where the STI characterizes a transmission channel, the SII (ANSI S3.5-1997) predicts intelligibility from what the listener can actually hear: 18 one-third-octave bands 160 Hz – 8 kHz, each contributing its band importance $I_i$ (Table 3, $\sum I_i = 1$, peaking near 2 kHz). All inputs are equivalent spectrum levels (clauses 3.11/3.55). Speech masks itself upward: each band's masking spectrum $Z_i$ (clause 5.4) accumulates the lower bands along slopes $C_i = -80 + 0.6\,(B_i + 10 \lg f_i - 6.353)$ dB, and the disturbance is the energetic sum of masking and hearing floor, $D_i = 10 \lg(10^{0.1 Z_i} + 10^{0.1 X'_i})$ with $X'_i = X_i + T'_i$ the reference internal noise spectrum plus the listener's hearing-threshold shift (clauses 5.5/5.6). The band audibility clips the speech-to-disturbance margin into $[0, 1]$ (clause 5.8), a level-distortion factor discounts overly loud presentation (clause 5.7), and the index sums (clause 6):
+Where the STI characterizes a transmission channel, the SII (ANSI S3.5-1997) predicts intelligibility from what the listener can actually hear: 18 one-third-octave bands 160 Hz – 8 kHz, each contributing its band importance $I_i$ (Table 3, $\sum I_i = 1$, peaking near 2 kHz). All inputs are equivalent spectrum levels (clauses 3.11/3.55). Speech masks itself upward: each band's masking spectrum $Z_i$ (clause 5.4) accumulates the lower bands along slopes $C_i = -80 + 0.6\,(B_i + 10 \lg f_i - 6.353)$ dB, and the disturbance is the **larger** of masking and hearing floor, $D_i = \max(Z_i, X'_i)$ (clause 5.6), with $X'_i = X_i + T'_i$ the reference internal noise spectrum plus the listener's hearing-threshold shift (clauses 5.5/5.6). The band audibility clips the speech-to-disturbance margin into $[0, 1]$ (clause 5.8), a level-distortion factor discounts overly loud presentation (clause 5.7), and the index sums (clause 6):
 
 $$
 A_i = \operatorname{clip}\Big( \frac{E'_i - D_i + 15}{30},\ 0,\ 1 \Big), \qquad
@@ -7125,7 +7368,7 @@ Uncorrelated components combine in quadrature $u_c = \sqrt{\sum u_i^2}$
 energy-weighted quadrature sum of the band uncertainties (Formula B.2).
 
 See the [Room Acoustics](https://jmrplens.github.io/phonometry/guides/room-acoustics/) and
-[Building Acoustics](https://jmrplens.github.io/phonometry/guides/building-acoustics/) guides for usage.
+[Field Insulation Measurement and Ratings](https://jmrplens.github.io/phonometry/guides/insulation-field/) guides for usage.
 
 ## Outdoor propagation and occupational exposure (ISO 9613-1/2, ISO 9612)
 

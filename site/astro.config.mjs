@@ -178,6 +178,12 @@ const jsonLd = JSON.stringify({
 export default defineConfig({
   site: siteUrl,
   base: basePath,
+  redirects: {
+    '/guides/building-acoustics/': `${basePath}/guides/insulation-field/`,
+    '/es/guides/building-acoustics/': `${basePath}/es/guides/insulation-field/`,
+    '/guides/psychoacoustics/': `${basePath}/guides/loudness/`,
+    '/es/guides/psychoacoustics/': `${basePath}/es/guides/loudness/`,
+  },
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex, rehypeTableAlign],
@@ -302,7 +308,8 @@ export default defineConfig({
               label: 'Psychoacoustics',
               translations: { es: 'Psicoacústica' },
               items: [
-                'guides/psychoacoustics',
+                'guides/loudness',
+                'guides/sound-quality',
                 'guides/tone-prominence',
                 'guides/tone-audibility',
                 'guides/psychoacoustic-annoyance',
@@ -343,7 +350,9 @@ export default defineConfig({
               label: 'Sound insulation',
               translations: { es: 'Aislamiento acústico' },
               items: [
-                'guides/building-acoustics',
+                'guides/insulation-field',
+                'guides/insulation-lab',
+                'guides/insulation-prediction',
                 'guides/dynamic-stiffness',
               ],
             },

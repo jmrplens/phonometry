@@ -10,7 +10,7 @@ ISO 9052-1:1989) measures the **dynamic stiffness per unit area** `s'` of the
 resilient layer from the resonance of a standard load plate on a
 200 mm × 200 mm specimen. `s'` is the input to the floating-floor term of the
 EN 12354-2 impact model covered in
-[Building acoustics](/phonometry/guides/building-acoustics/). (ISO 16251-1 does not apply
+[Predicting Sound Insulation (EN 12354)](/phonometry/guides/insulation-prediction/). (ISO 16251-1 does not apply
 here: its scope is limited to soft, locally-reacting floor coverings and
 explicitly excludes floating floors.)
 

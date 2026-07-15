@@ -655,7 +655,7 @@ plt.show()
 - [Room Acoustics](/phonometry/guides/room-acoustics/) — the reverberation time
   and equivalent absorption area (ISO 354) that feed `K2` and the ISO 3741
   absorption area.
-- [Building Acoustics & Sound Insulation](/phonometry/guides/building-acoustics/) — the
+- [Predicting Sound Insulation (EN 12354)](/phonometry/guides/insulation-prediction/) — the
   airborne and impact insulation ratings and the EN 12354 emission predictions
   that consume a source `LW`.
 - [Levels](/phonometry/guides/levels/) — energy averaging and the A-weighting behind `LWA`.

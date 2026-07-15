@@ -11,7 +11,7 @@ parameters (ISO 3382-1/2), spatial speech metrics for open-plan offices
 (ISO 3382-3) and, closing the loop, the sound absorption of a material in a
 reverberation room (ISO 354). For sound insulation *between* spaces — the same
 IR measured either side of a partition — see the companion
-[Building Acoustics & Sound Insulation guide](building-acoustics.md).
+[Field Insulation Measurement and Ratings guide](insulation-field.md).
 
 ## 1. Impulse-response acquisition (ISO 18233)
 
@@ -477,14 +477,15 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
 
 ## See also
 
-- [Building Acoustics & Sound Insulation](building-acoustics.md) — field,
+- [Field](insulation-field.md), [laboratory](insulation-lab.md) and
+  [predicted](insulation-prediction.md) sound insulation — field,
   laboratory and predicted sound insulation between spaces, and its measurement uncertainty.
 - [Sound Power](sound-power.md) — the `LW` methods that consume the
   ISO 354 absorption area (the ISO 3744 `K2` and the ISO 3741 absorption term).
 - [Speech Transmission Index](speech-transmission.md) — the STI/STIPA
   measurement that feeds the open-plan `sti_values`.
-- [Psychoacoustics](psychoacoustics.md) — loudness, sharpness and the other
-  perception metrics of what the room delivers.
+- [Loudness](loudness.md) and [Sound Quality Metrics](sound-quality.md) — loudness,
+  sharpness and the other perception metrics of what the room delivers.
 - [Filter Banks](filter-banks.md) — the IEC 61260 fractional-octave filters
   used for band decay curves and insulation spectra.
 - [Levels](levels.md) — energy averaging and the level metrics behind

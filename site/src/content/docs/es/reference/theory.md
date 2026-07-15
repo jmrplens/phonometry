@@ -269,7 +269,7 @@ Los tres parámetros provienen de la Tabla 1 (p. 4), tabulados en las 29 frecuen
 
 La norma **no especifica interpolación** entre las frecuencias tabuladas. La Fórmula (1) está especificada para **20 fonios a 90 fonios** entre 20 Hz y 4 kHz, y solo hasta **80 fonios entre 5 kHz y 12,5 kHz** — por encima de 80 fonios la línea isofónica se detiene, por tanto, en 4 kHz. Los valores fuera de estos límites obtenidos con la Fórmula (2) son extrapolaciones que la norma califica de meramente informativas.
 
-Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) para su uso.
+Consulta la [guía de sonoridad](/phonometry/es/guides/loudness/) para su uso.
 
 ## Prominencia tonal: TNR y PR (ECMA-418-1)
 
@@ -396,7 +396,7 @@ $$
 
 por debajo de 1 sono el programa de referencia usa $L_N = 40 (N + 0{,}0005)^{0{,}35}$, con suelo en 3 fonios.
 
-Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) para su uso.
+Consulta la [guía de sonoridad](/phonometry/es/guides/loudness/) para su uso.
 
 ## Modelos avanzados de sonoridad y calidad sonora
 
@@ -473,7 +473,7 @@ $$
 
 evaluado sobre la misma malla de 240 puntos a 0,1 Bark. La constante $k$ no está codificada a mano, sino que se deriva del requisito de calibración (cláusula 6): un ruido de banda estrecha de una banda crítica de ancho, 920–1080 Hz a 60 dB SPL, puntúa exactamente 1 acum — la $k = 0{,}108$ derivada cae dentro de la ventana normativa $0{,}105 \le k < 0{,}115$ (cláusula 5.2). Las ponderaciones informativas del Anexo B se ofrecen bajo el mismo anclaje de 1 acum: von Bismarck (codo en 15 Bark, $0{,}2\ e^{0{,}308(z-15)} + 0{,}8$) y Aures (dependiente de la sonoridad, $g(z) = 0{,}078\ (e^{0{,}171 z}/z)\ N/\ln(0{,}05 N + 1)$). Los objetivos de banda estrecha de la Tabla A.2 se reproducen dentro de la tolerancia de la cláusula 6 (5 % o 0,05 acum): 0,38 acum a 250 Hz, 1,00 a 1 kHz, 1,78 a 2,5 kHz, 2,82 a 4 kHz.
 
-Consulta la [guía de psicoacústica](/phonometry/es/guides/psychoacoustics/) para su uso.
+Consulta la [guía de métricas de calidad sonora](/phonometry/es/guides/sound-quality/) para su uso.
 
 ## Transferencia de modulación y STI (IEC 60268-16)
 
@@ -795,7 +795,7 @@ correlacionada es la suma en cuadratura ponderada en energía de las
 incertidumbres por banda (Fórmula B.2).
 
 Consulta las guías de [acústica de salas](/phonometry/es/guides/room-acoustics/) y de
-[acústica de la edificación](/phonometry/es/guides/building-acoustics/) para su uso.
+[medición del aislamiento en campo](/phonometry/es/guides/insulation-field/) para su uso.
 
 ## Propagación en exteriores y exposición al ruido en el trabajo (ISO 9613-1/2, ISO 9612)
 

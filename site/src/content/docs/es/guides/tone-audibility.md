@@ -12,7 +12,7 @@ tono prominente, la **audibilidad** `ΔL` — cuántos decibelios supera el nive
 del tono al umbral de enmascaramiento del ruido circundante. (Que un tono sea
 *molesto* es un juicio de valoración posterior e independiente.) Es el método
 detallado al que remite **ISO 1996-2:2017** (la vía simplificada del Anexo C
-está en [medición ambiental](/phonometry/es/guides/building-acoustics/)); la audibilidad
+está en [medición ambiental](/phonometry/es/guides/levels/)); la audibilidad
 media `ΔL` que produce alimenta el ajuste tonal `Kt` de ISO 1996-2.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility_es.svg" alt="Audibilidad ΔL por tono de los nueve tonos del espectro del motor de combustión del Anexo E de ISO/PAS 20065, con el tono decisivo a 137,3 Hz resaltado y el umbral ΔL = 0 dB marcado" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility_es_dark.svg" alt="Audibilidad ΔL por tono de los nueve tonos del espectro del motor de combustión del Anexo E de ISO/PAS 20065, con el tono decisivo a 137,3 Hz resaltado y el umbral ΔL = 0 dB marcado" style="width:82%">

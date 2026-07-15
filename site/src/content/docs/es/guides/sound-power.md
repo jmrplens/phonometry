@@ -667,7 +667,7 @@ plt.show()
 - [Acústica de salas](/phonometry/es/guides/room-acoustics/) — el tiempo
   de reverberación y el área de absorción sonora equivalente (ISO 354) que
   alimentan `K2` y el área de absorción de ISO 3741.
-- [Acústica de la edificación y aislamiento](/phonometry/es/guides/building-acoustics/) — los
+- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/guides/insulation-prediction/) — los
   índices de aislamiento a ruido aéreo y a impactos y las predicciones de emisión
   de EN 12354 que consumen una `LW` de fuente.
 - [Niveles](/phonometry/es/guides/levels/) — el promediado en energía y la ponderación A

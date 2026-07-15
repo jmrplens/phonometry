@@ -46,6 +46,23 @@ list grows as guides gain their References sections.
   Free companion treatment of digital-filter design and analysis, a good next
   step after the filter-bank guides.
 
+## Human vibration
+
+- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
+  ISBN 978-0-12-303041-2.
+  [Publisher page](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
+  The standard monograph on whole-body and hand-transmitted vibration: the
+  biodynamics, discomfort and health-effect evidence behind the weightings,
+  dose measures and exposure-response guidance of the vibration guides.
+  Cited by [Human Vibration](/phonometry/guides/human-vibration/) and
+  [Multiple-shock whole-body vibration](/phonometry/guides/multiple-shock-vibration/).
+- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
+  ISBN 978-0-415-28239-0.
+  [Publisher page](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
+  A compact modern textbook on the ISO 2631-1 and ISO 5349 evaluation chains,
+  from perception and comfort to the occupational exposure limits.
+  Cited by [Human Vibration](/phonometry/guides/human-vibration/).
+
 ## Metrology
 
 - Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
@@ -63,4 +80,11 @@ list grows as guides gain their References sections.
   [free PDF](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf).
   The Monte Carlo propagation of distributions implemented by the Monte Carlo
   uncertainty engine.
+  Cited by [Measurement uncertainty](/phonometry/guides/gum-uncertainty/).
+- International Organization for Standardization. (2020). *Acoustics —
+  Determination and application of measurement uncertainties in building
+  acoustics — Part 1: Sound insulation* (ISO 12999-1:2020).
+  [iso.org catalogue](https://www.iso.org/standard/73930.html).
+  The domain-specific reproducibility budget for building-acoustics
+  single-number ratings, the companion to the general GUM machinery.
   Cited by [Measurement uncertainty](/phonometry/guides/gum-uncertainty/).

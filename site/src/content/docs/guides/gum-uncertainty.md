@@ -62,11 +62,19 @@ coverage factor $k = t_p(\nu_\text{eff})$ from the $t$-distribution at the
 (Annex G.4). Here the single Type A input (9 degrees of freedom) pulls
 $\nu_\text{eff}$ down to about 16, so $k = 2.11$ rather than the large-sample
 1.96. Correlated inputs are handled by passing a correlation matrix; a fully
-correlated sum then adds linearly instead of in quadrature. Because the GUM
-defines Welch–Satterthwaite for *independent* inputs only, a correlated budget
-falls back to $\nu_\text{eff} = \infty$ (GUM 6.3.3): `expanded()` then uses
-the normal-distribution coverage factor, and a warning reports that finite
-input degrees of freedom were not propagated. This chain reproduces the GUM's
+correlated sum then adds linearly instead of in quadrature. Correlation is the
+classic silent error in a budget: two corrections traceable to the *same*
+calibrator, or two channels sharing one instrument, do not average away the
+way independent terms would, and combining them in quadrature as if they were
+uncorrelated typically understates $u_c$ (with sensitivities of opposite sign
+the bias can point the other way). Because the GUM defines Welch–Satterthwaite
+for *independent* inputs only, a correlated budget with finite input degrees
+of freedom carries no effective degrees of freedom at all: `effective_dof` is
+NaN, a warning is issued, and `expanded()` requires an explicit
+`coverage_factor_override` (e.g. $k = 2$) rather than inventing one. Only when
+every input is Type B with infinite degrees of freedom does a correlated
+budget keep $\nu_\text{eff} = \infty$ and use the normal-distribution coverage
+factor. This chain reproduces the GUM's
 own worked examples end to end: the Annex H.1 end-gauge budget
 ($u_c = 31.7$ nm, $U_{99} = 92$ nm against the printed 32/93) and the Annex
 H.2 correlated resistance measurement ($u_c(R) = 0.071\ \Omega$,
@@ -108,6 +116,23 @@ methods are validated against the Guides' own worked examples: the additive
 model of four unit inputs gives $u_c = 2.0$ (Supplement 1 clause 9.2), and four
 rectangular inputs give a Monte Carlo interval of $[-3.88,\, 3.88]$
 (Supplement 1 clause 9.2.3).
+
+When does the Monte Carlo method earn its extra cost? Whenever either of the
+GUM's two simplifications fails: the model is replaced by its first-order
+expansion, and the output distribution by a Gaussian (or a $t$). Both hold
+well for the additive level model above, which is why the two methods agree
+to three digits. They stop holding when the model is strongly non-linear over
+the span of the input uncertainties (energy-to-level conversions with wide
+inputs, products and quotients with large relative uncertainties), when a
+single non-Gaussian input dominates the budget (one large rectangular term
+makes the output nearly rectangular, and a Gaussian $\pm\,2u_c$ interval
+overcovers it), or when the output sits near a physical bound (an absorption
+coefficient near 0 or 1, a level correction that cannot cross zero), where
+the true coverage interval is asymmetric and no $Y \pm U$ statement can
+represent it. In those regimes the Monte Carlo interval is the reference:
+Supplement 1 (clause 8) treats the GUM framework as validated precisely when
+it agrees with the Monte Carlo result, and as superseded by it when it does
+not.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget.svg" alt="Two panels for the A-weighted level example. Left: the GUM uncertainty budget, a horizontal bar chart of each input's contribution to the combined uncertainty with a dashed line at uc of 0.407 dB. Right: the Monte Carlo output histogram overlaid with the GUM Gaussian and the shaded 95 percent coverage interval; the title reads Y equals 74.00 dB, U equals 0.86 dB, k equals 2.11" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_dark.svg" alt="Two panels for the A-weighted level example. Left: the GUM uncertainty budget, a horizontal bar chart of each input's contribution to the combined uncertainty with a dashed line at uc of 0.407 dB. Right: the Monte Carlo output histogram overlaid with the GUM Gaussian and the shaded 95 percent coverage interval; the title reads Y equals 74.00 dB, U equals 0.86 dB, k equals 2.11" style="width:96%">
 
@@ -167,6 +192,32 @@ retains the output `samples`, and its `.plot()` draws the output histogram
 with the coverage interval marked (the right panel above). The building-acoustics uncertainty
 of ISO 12999-1 — which combines reproducibility terms for a single-number
 rating — is a separate, domain-specific budget.
+
+## References
+
+- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
+  data — Guide to the expression of uncertainty in measurement* (JCGM
+  100:2008, the GUM). BIPM.
+  [doi:10.59161/JCGM100-2008E](https://doi.org/10.59161/JCGM100-2008E),
+  [free PDF](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf).
+  The law of propagation, the Type B evaluations and the Annex H worked
+  examples that section 1 implements and reproduces.
+- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
+  data — Supplement 1 to the "Guide to the expression of uncertainty in
+  measurement" — Propagation of distributions using a Monte Carlo method*
+  (JCGM 101:2008). BIPM.
+  [doi:10.59161/JCGM101-2008](https://doi.org/10.59161/JCGM101-2008),
+  [free PDF](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf).
+  The Monte Carlo propagation of section 2, its probabilistically symmetric
+  coverage interval and the clause 8 validation of the GUM framework against
+  the Monte Carlo result.
+- International Organization for Standardization. (2020). *Acoustics —
+  Determination and application of measurement uncertainties in building
+  acoustics — Part 1: Sound insulation* (ISO 12999-1:2020).
+  [iso.org catalogue](https://www.iso.org/standard/73930.html).
+  The domain-specific reproducibility budget for building-acoustics
+  single-number ratings, mentioned above as a separate companion to the
+  general GUM machinery.
 
 ---
 

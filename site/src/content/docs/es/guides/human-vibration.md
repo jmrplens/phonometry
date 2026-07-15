@@ -82,6 +82,36 @@ Para ponderar una señal temporal, `apply_weighting` aplica la respuesta complej
 exacta en el dominio de la frecuencia (de modo que coinciden magnitud *y* fase
 con la norma), que luego consumen las métricas de dosis en el tiempo siguientes.
 
+### Qué ponderación en qué eje
+
+La ponderación se elige por postura, punto de medida y eje, no solo por
+aplicación. ISO 2631-1 (Tablas 1 y 2, apartados 7.2.3 y 8.2.2) las asigna
+así; los factores multiplicadores $k$ reaparecen en el valor total de
+vibración de la sección 3:
+
+| Postura, punto de medida | Eje | Ponderación | $k$ salud | $k$ confort |
+| :--- | :--- | :--- | :--- | :--- |
+| Sentado, superficie del asiento | x, y | `Wd` | 1,4 | 1,0 |
+| Sentado, superficie del asiento | z | `Wk` | 1,0 | 1,0 |
+| Sentado, superficie del asiento (rotación) | rx / ry / rz | `We` | — | 0,63 / 0,40 / 0,20 m/rad |
+| Sentado, respaldo | x | `Wc` | (0,8)¹ | 0,8 |
+| Sentado, respaldo | y / z | `Wd` | — | 0,5 / 0,4 |
+| Sentado, pies | x / y / z | `Wk` | — | 0,25 / 0,25 / 0,4 |
+| De pie, suelo | x, y | `Wd` | — | 1,0 |
+| De pie, suelo | z | `Wk` | — | 1,0 |
+| Tumbado, bajo la pelvis | horizontal | `Wd` | — | 1,0 |
+| Tumbado, bajo la pelvis | vertical | `Wk` | — | 1,0 |
+| Tumbado, bajo la cabeza | vertical | `Wj` | — | 1,0 |
+| Mareo (apartado 9) | vertical | `Wf` | — | — |
+
+¹ La evaluación de salud del apartado 7 se define sobre la superficie del
+asiento; la medida en x en el respaldo con `Wc`, $k = 0{,}8$ se recomienda
+pero queda fuera de la evaluación de severidad del Anexo B (7.2.3). Las ponderaciones restantes viven en
+las partes complementarias: `Wm` para ocupantes de edificios en todos los
+ejes (ISO 2631-2), `Wb` para el confort de marcha ferroviaria vertical
+(ISO 2631-4) y `Wh` para la vibración transmitida a la mano en los tres ejes
+de la mano con todo $k = 1$ (ISO 5349-1).
+
 ## 2. Aceleración ponderada y medidas de dosis (ISO 2631-1)
 
 La evaluación básica es la **aceleración eficaz ponderada**. A partir de un
@@ -191,6 +221,25 @@ a_v = ph.vibration_total_value([0.35, 0.28, 0.62], k=[1.4, 1.4, 1.0])
 print(round(a_v, 3))     # 0.882  m/s^2
 ```
 
+**¿Salud o confort? Dos lecturas distintas de la misma medida.** La evaluación
+de *salud* del apartado 7 se mantiene por eje: cada valor eficaz ponderado por
+eje (con $k$ = 1,4 / 1,4 / 1,0 sentado) se juzga por el valor *más alto* de un
+solo eje frente a la zona de precaución de la guía de salud del Anexo B, una
+banda basada principalmente en exposiciones de 4 h a 8 h por debajo de la cual
+los efectos sobre la salud no están claramente documentados, dentro de la cual
+se indica precaución y por encima de la cual los riesgos son probables; la
+Directiva 2002/44/CE convierte esa guía en los valores de acción y límite
+exigibles de `A(8)` que se usan más abajo. La evaluación de *confort* del
+apartado 8 combina en cambio todos los ejes (y, cuando procede, respaldo, pies
+y rotación) en el valor total de vibración $a_v$ con su propio juego de $k$ y
+lo lee en la escala del Anexo C para transporte público, cuyas bandas
+deliberadamente solapadas van de "no incómodo" por debajo de 0,315 m/s² a
+"extremadamente incómodo" por encima de 2 m/s²; la norma no define ningún
+límite de confort, porque las magnitudes aceptables dependen de la duración
+del trayecto y de lo que los pasajeros intentan hacer. Como orientación, el
+umbral mediano de percepción de una vibración ponderada con `Wk` es de unos
+0,015 m/s² de pico (Anexo C).
+
 La **exposición diaria** normaliza el valor total a una jornada de referencia de
 8 horas ($T_0 = 28\,800$ s). Para una sola operación $A(8) = a_v\,\sqrt{T/T_0}$;
 varias operaciones se combinan mediante sus exposiciones parciales
@@ -272,6 +321,22 @@ de acción y límite de la directiva son la base de cualquier criterio de
 exposición. Para la exposición de cuerpo completo, `energy_equivalent_acceleration`
 da la magnitud energético-equivalente de ISO 2631-1 ec. (B.3) entre periodos de
 distinta magnitud y duración.
+
+## Referencias
+
+- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
+  ISBN 978-0-12-303041-2.
+  [Página del editor](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
+  La monografía de referencia sobre vibración de cuerpo completo y transmitida
+  a la mano: la biodinámica, la incomodidad y la evidencia de efectos sobre
+  la salud que sustentan las ponderaciones, las medidas de dosis y la
+  orientación exposición-respuesta de esta página.
+- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
+  ISBN 978-0-415-28239-0.
+  [Página del editor](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
+  Un manual moderno y compacto sobre las cadenas de evaluación de ISO 2631-1 e
+  ISO 5349, de la percepción y el confort a los límites de exposición
+  laborales.
 
 ---
 

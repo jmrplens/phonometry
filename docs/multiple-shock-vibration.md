@@ -11,6 +11,19 @@ spinal-response model and the **Annex C** health-effect assessment. (The Annex A
 / Annex E finite-element model is distributed by ISO as separate software and is
 out of scope here.)
 
+The boundary with the basic method is explicit. ISO 2631-1 declares its r.m.s.
+evaluation normally sufficient up to a crest factor of 9, and offers the
+running r.m.s./MTVV and the VDV beyond it; ISO 2631-5 is the additional method
+for the regime past those, where the record contains repeated shocks. Its
+clause 4 then splits that regime in two: *severe* conditions with possible
+free fall or loss of contact with the seat and a dominant z-axis (military
+off-road vehicles, high-speed marine craft) use the clause 5 model implemented
+here, while *less severe* conditions in which the occupant stays seated
+throughout (tractors, forestry and earth-moving machinery on rough ground)
+belong to the Annex A finite-element model. In case of doubt the delineation
+is quantitative: when the band-limited vertical peak acceleration exceeds
+9.81 m/s² (1 g, the free-fall threshold), clause 5 and Annex C apply.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5.svg" alt="Flow from the vertical seat acceleration az(t), band-limited per ISO 2631-1, through the spinal response Az(t) from the seat-to-spine transfer function (one zero, six poles), the acceleration dose Dz = 1.07 times the sixth root of the sum of the positive response peaks to the sixth power and the daily dose Dzd, the compressive stress Sd = mz times Dzd, the age-cumulated stress variable R, and finally the Weibull probability of lumbar injury" width="86%"></picture>
 
 ## 1. Spinal response (clause 5.2)
@@ -141,6 +154,14 @@ the response peaks, and its `.plot()` draws the injury-probability curve with th
 10/50/90 % risk thresholds of Table C.2. This complements the r.m.s.,
 running-r.m.s./MTVV and VDV metrics of [Human Vibration](human-vibration.md)
 (ISO 2631-1).
+
+## References
+
+- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
+  ISBN 978-0-12-303041-2.
+  [Publisher page](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
+  Background on whole-body shock exposure, spinal biodynamics and the
+  lumbar health effects that the ISO 2631-5 dose model quantifies.
 
 ---
 

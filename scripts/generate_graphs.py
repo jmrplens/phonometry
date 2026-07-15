@@ -6789,6 +6789,15 @@ _FIGURE_WEIGHTS: dict[str, float] = {
     "crossover_plot": 1.1,
 }
 
+# A registry rename must not silently degroup a cached figure (a 4x
+# recompute) or drop its scheduling weight; fail fast on import instead.
+_REGISTRY_NAMES = frozenset(
+    f.__name__.removeprefix("generate_") for f in _FIGURE_FUNCS
+)
+if not (_GROUPED_FIGURES | _FIGURE_WEIGHTS.keys()) <= _REGISTRY_NAMES:
+    _unknown = sorted((_GROUPED_FIGURES | _FIGURE_WEIGHTS.keys()) - _REGISTRY_NAMES)
+    raise RuntimeError(f"figure names not in _FIGURE_FUNCS: {_unknown}")
+
 
 def _run_figure_task(
     func_name: str, variants: tuple[tuple[str, bool], ...], img_dir: str
@@ -6867,7 +6876,13 @@ def _generate_figures_parallel(
             labels = ", ".join(
                 f"{lang} {'dark' if dark else 'light'}" for lang, dark in variants
             )
-            failures.append(f"{name} [{labels}]: {exc!r}")
+            # The executor chains the worker's formatted traceback as
+            # __cause__; keep it, or a failure only says what raised, not
+            # where in the generators.
+            detail = f"{exc!r}"
+            if exc.__cause__ is not None:
+                detail += f"\n{exc.__cause__}"
+            failures.append(f"{name} [{labels}]: {detail}")
     if failures:
         raise RuntimeError("figure generation failed:\n  " + "\n  ".join(sorted(failures)))
 

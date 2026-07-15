@@ -131,6 +131,8 @@ ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
 print(ld, ld > fi.f2)                                      # 8.0 True (criterion 1)
 ```
 
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W" style="width:88%"></video>
+
 ### `sound_intensity()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |

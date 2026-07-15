@@ -291,6 +291,8 @@ $$
 con $H_I = e^{-j k_0 s}$, $H_R = e^{+j k_0 s}$, la separación de micrófonos $s$ y
 $x_1$ la distancia de la muestra al micrófono más lejano.
 
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_standing_wave_tube_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_standing_wave_tube_es_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: las ondas incidente y reflejada se suman en una onda estacionaria dentro del tubo de impedancia; una terminación rígida da nodos profundos en la envolvente, una muestra porosa los da poco profundos, muestreados por los dos micrófonos de pared" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_standing_wave_tube_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_standing_wave_tube_es_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: las ondas incidente y reflejada se suman en una onda estacionaria dentro del tubo de impedancia; una terminación rígida da nodos profundos en la envolvente, una muestra porosa los da poco profundos, muestreados por los dos micrófonos de pared" style="width:88%"></video>
+
 ```python
 import numpy as np
 from phonometry import (

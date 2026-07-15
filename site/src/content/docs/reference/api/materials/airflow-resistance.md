@@ -12,14 +12,14 @@ Airflow resistance of porous materials: ISO 9053-1 and ISO 9053-2.
 Two standardised measurement methods share the same three quantities and units
 (ISO 9053-1:2018, Clause 3; ISO 9053-2:2020, Clause 3):
 
-- **Airflow resistance** `R = dp / q_v` in Pa*s/m3, with `dp` the air pressure
+- **Airflow resistance** `R = dp / q_v` in Pa\*s/m3, with `dp` the air pressure
   difference across the specimen (Pa) and `q_v` the volumetric airflow rate
   through it (m3/s) (ISO 9053-1:2018, 3.1).
-- **Specific airflow resistance** `R_s = R * A` in **Pa*s/m** (not Pa*s/m2),
+- **Specific airflow resistance** `R_s = R * A` in **Pa\*s/m** (not Pa\*s/m2),
   with `A` the cross-sectional area of the specimen perpendicular to the flow
   (m2) (ISO 9053-1:2018, 3.2). Equivalently `R_s = dp / u` with `u` the linear
   airflow velocity, since `u = q_v / A`.
-- **Airflow resistivity** `sigma = R_s / d` in Pa*s/m2, with `d` the specimen
+- **Airflow resistivity** `sigma = R_s / d` in Pa\*s/m2, with `d` the specimen
   thickness in the flow direction (m), for homogeneous materials
   (ISO 9053-1:2018, 3.3). Equivalently `sigma = R * A / d`.
 
@@ -77,7 +77,7 @@ Airflow resistance `R = dp / q_v` (ISO 9053-1:2018, 3.1).
 
 `pressure_drop` is the pressure difference `dp` across the specimen (Pa)
 and `volume_flow_rate` is the volumetric airflow rate `q_v` (m3/s).
-Returns `R` in Pa*s/m3.
+Returns `R` in Pa\*s/m3.
 
 ## airflow_resistivity
 
@@ -85,10 +85,10 @@ Returns `R` in Pa*s/m3.
 airflow_resistivity(specific_resistance: float, thickness: float) -> float
 ```
 
-Airflow resistivity `sigma = R_s / d` in Pa*s/m2 (ISO 9053-1:2018, 3.3).
+Airflow resistivity `sigma = R_s / d` in Pa\*s/m2 (ISO 9053-1:2018, 3.3).
 
-`specific_resistance` is `R_s` (Pa*s/m) and `thickness` is `d` (m),
-the specimen thickness in the flow direction. Returns `sigma` in Pa*s/m2.
+`specific_resistance` is `R_s` (Pa\*s/m) and `thickness` is `d` (m),
+the specimen thickness in the flow direction. Returns `sigma` in Pa\*s/m2.
 
 ## AirflowResistanceWarning
 
@@ -128,7 +128,7 @@ the airtight-termination cavity volume `V` (m3); `static_pressure` the
 atmospheric pressure `P_S` (Pa, default 101325); `kappa_prime` the
 effective ratio of specific heats `kappa'`; `background_level` the optional
 cavity background level `L_pb` (dB) for the Formula (4) check. Returns `R` in
-Pa*s/m3.
+Pa\*s/m3.
 
 `kappa_prime` defaults to the **uncorrected adiabatic** `kappa = 1.4`
 (Formula (A.1)). For a result conforming to the normative Annex A, compute the
@@ -213,15 +213,15 @@ specific_airflow_resistance(
 ) -> float
 ```
 
-Specific airflow resistance `R_s` in Pa*s/m (ISO 9053-1:2018, 3.2).
+Specific airflow resistance `R_s` in Pa\*s/m (ISO 9053-1:2018, 3.2).
 
 Two equivalent routes are accepted; supply exactly one:
 
-- `resistance` (`R`, Pa*s/m3) and `area` (`A`, m2): `R_s = R * A`.
+- `resistance` (`R`, Pa\*s/m3) and `area` (`A`, m2): `R_s = R * A`.
 - `pressure_drop` (`dp`, Pa) and `velocity` (`u`, m/s): `R_s = dp/u`
   (from `R_s = R*A` with `u = q_v/A`).
 
-The unit is pascal second per metre (Pa*s/m), not Pa*s/m2.
+The unit is pascal second per metre (Pa\*s/m), not Pa\*s/m2.
 
 ## static_airflow_resistance
 
@@ -268,13 +268,13 @@ StaticAirflowResult(
 
 Result of an ISO 9053-1:2018 stepwise (static-method) determination.
 
-`resistance` (`R`, Pa*s/m3), `specific_resistance` (`R_s`, Pa*s/m) and
-`resistivity` (`sigma`, Pa*s/m2; `None` when no thickness is supplied)
+`resistance` (`R`, Pa\*s/m3), `specific_resistance` (`R_s`, Pa\*s/m) and
+`resistivity` (`sigma`, Pa\*s/m2; `None` when no thickness is supplied)
 are evaluated at `evaluation_velocity` (m/s, the ISO 9053-1 clause 7.5
 reference 0.5 mm/s by default). `linear_coefficient` (`a`) and
 `quadratic_coefficient` (`b`) are the through-origin fit
 `dp = a*u + b*u**2` (clause 7.5); `a` is the zero-velocity specific
-airflow resistance (Pa*s/m). `pressure_drop` is the fitted `dp` at
+airflow resistance (Pa\*s/m). `pressure_drop` is the fitted `dp` at
 `evaluation_velocity` (Pa).
 
 ### StaticAirflowResult.plot()
@@ -309,7 +309,7 @@ b   = sqrt(2 * c0 * l_h / omega)           (A.4),  omega = 2*pi*f
 ```
 
 `frequency` is the piston frequency `f` (Hz); `speed_of_sound` `c0` (m/s),
-`air_density` `rho0` (kg/m3), `specific_heat_cp` `C_P` (J/(kg*K)) and
-`thermal_conductivity` `k_a` (J/(s*m*K)) are air properties, defaulting to the
+`air_density` `rho0` (kg/m3), `specific_heat_cp` `C_P` (J/(kg\*K)) and
+`thermal_conductivity` `k_a` (J/(s\*m\*K)) are air properties, defaulting to the
 IEC 61094-2:2009 values used in ISO 9053-2:2020 Annex A.3. Returns `b` in metres;
 with the Annex A.3 example (`f = 2 Hz`) this is `1.83e-3 m`.

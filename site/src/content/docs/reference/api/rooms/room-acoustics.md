@@ -73,7 +73,7 @@ integrated impulse response, Clause 6).
 | `fs` | Sample rate in Hz. |
 | `band` | Optional band centre frequency in Hz. When given, the impulse response is first filtered with the matching IEC 61260 fractional-octave filter; when None the broadband response is integrated directly. |
 | `fraction` | Bandwidth fraction of the band filter (1 = octave, 3 = one-third octave). Only used when `band` is not None. |
-| `zero_phase` | If True, filter the band with forward-backward (zero-phase) filtering, removing the octave filter's group delay before the backward integration. ISO 3382-2:2008 Clause 7.3 NOTE permits time-reversed filtering (it relaxes the B*T > 16 rule to B*T > 4); it roughly halves the low-frequency short-decay bias at 125 Hz. Only used when `band` is not None. Default False (causal). |
+| `zero_phase` | If True, filter the band with forward-backward (zero-phase) filtering, removing the octave filter's group delay before the backward integration. ISO 3382-2:2008 Clause 7.3 NOTE permits time-reversed filtering (it relaxes the B\*T > 16 rule to B\*T > 4); it roughly halves the low-frequency short-decay bias at 125 Hz. Only used when `band` is not None. Default False (causal). |
 
 **Returns:** A [`DecayCurve`](/phonometry/reference/api/rooms/room-acoustics/#decaycurve) with `time` in seconds from the direct sound and `level` in dB (0 dB at time zero), up to the noise truncation point. It unpacks as `time, level = decay_curve(...)` for backward compatibility and exposes [`DecayCurve.plot`](/phonometry/reference/api/rooms/room-acoustics/#decaycurveplot).
 
@@ -148,7 +148,7 @@ Table A.1).
 | `fs` | Sample rate in Hz. |
 | `limits` | `(f_min, f_max)` band-centre limits in Hz; default octave bands 125 Hz to 4 kHz (ISO 3382-1:2009, 5.1). Use `(100.0, 5000.0)` with `fraction=3` for the one-third-octave engineering/precision range. `None` analyses the broadband response as a single band (`frequency` is then `None`). |
 | `fraction` | Bandwidth fraction (1 = octave, 3 = one-third octave). Default 1. |
-| `zero_phase` | If True, use forward-backward (zero-phase) octave filtering, removing the filter group delay before the backward integration. ISO 3382-2:2008 Clause 7.3 NOTE permits time-reversed filtering (relaxing B*T > 16 to B*T > 4); it roughly halves the 125 Hz short-decay T30 bias (about +4.9 % -> +2.4 % at T = 0.2 s). The benefit is small next to the ~10 % measurement variance but is free and standards-sanctioned. Default False (causal filtering). |
+| `zero_phase` | If True, use forward-backward (zero-phase) octave filtering, removing the filter group delay before the backward integration. ISO 3382-2:2008 Clause 7.3 NOTE permits time-reversed filtering (relaxing B\*T > 16 to B\*T > 4); it roughly halves the 125 Hz short-decay T30 bias (about +4.9 % -> +2.4 % at T = 0.2 s). The benefit is small next to the ~10 % measurement variance but is free and standards-sanctioned. Default False (causal filtering). |
 
 **Returns:** [`RoomAcousticsResult`](/phonometry/reference/api/rooms/room-acoustics/#roomacousticsresult) with one entry per band.
 

@@ -36,7 +36,7 @@ intensity by the factor `sin(k*dr) / (k*dr)` with `k = 2*pi*f/c`;
 IEC 61043:1994 clause 7.3 specifies the probe intensity response with
 exactly this argument (`Ff = dr * f * 2 * pi / c`) and Table 3 lists
 the resulting nominal response (e.g. -10,5 dB at 6,3 kHz for a 25 mm
-separation). Below `f = 0,1 * c / dr` (k*dr \< 0,63) the bias stays
+separation). Below `f = 0,1 * c / dr` (k\*dr \< 0,63) the bias stays
 under about 0,3 dB (factor >= 0,935).
 
 Field indicators F2 (surface pressure-intensity), F3 (negative partial

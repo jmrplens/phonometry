@@ -335,6 +335,10 @@ def _inline_markdown(text: str, xref: dict[str, str], stats: RoleStats) -> str:
     text = re.sub(r"`[^`]+`", lambda m: stash(m.group(0)), text)
     # 4. Escape characters Markdown/HTML would misread in plain prose.
     text = text.replace("<", "\\<")
+    # Intraword asterisks (unit notation "Pa*s/m", math "10*lg(x)") would
+    # pair up into <em> spans; reST emphasis never sits between word
+    # characters, so escaping exactly those is safe.
+    text = re.sub(r"(?<=\w)\*(?=\w)", "\\\\*", text)
     # 5. Restore protected spans.
     return re.sub(r"\x00T(\d+)\x00", lambda m: tokens[int(m.group(1))], text)
 

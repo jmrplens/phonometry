@@ -1,0 +1,291 @@
+---
+title: "room.reverberation_prediction"
+description: "Public API of phonometry.room.reverberation_prediction (auto-generated)."
+sidebar:
+  label: "reverberation_prediction"
+---
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+Reverberation-time prediction from room geometry and absorption.
+
+Predicts the reverberation time `T` of an enclosed space from its volume,
+boundary areas and the sound-absorption coefficients of its surfaces, through
+the classical statistical-acoustics formulae. Given a diffuse field and an
+exponential energy decay, `T` is the time for the level to fall by 60 dB.
+
+Five models are provided, in order of increasing account of a non-uniform
+absorption distribution:
+
+* **Sabine** -- the original diffuse-field estimate, `T = k V / (A + 4 m V)`
+  with the total equivalent absorption area `A = sum_i S_i alpha_i` and the
+  air term `4 m V`. Exact only for low, uniform absorption.
+* **Eyring** (Norris-Eyring) -- replaces `A` by `-S ln(1 - alpha_bar)` with
+  the mean absorption `alpha_bar = A / S` over the total surface `S`;
+  correct in the strong-absorption limit where Sabine overestimates `T`.
+* **Millington-Sette** -- `-sum_i S_i ln(1 - alpha_i)` sums the Eyring term
+  per surface, so a single perfectly absorbing surface drives `T` to zero.
+* **Fitzroy** -- an *area-weighted arithmetic* mean of three axial Eyring
+  reverberation times, one per pair of opposing walls; captures rooms with the
+  absorption concentrated on one axis (e.g. a carpeted, otherwise hard room).
+* **Arau-Puchades** -- an *area-weighted geometric* mean of the same three axial
+  Eyring times (Arau-Puchades, *Acustica* 65 (1988) 163): `T = prod_i T_i **
+  (S_i / S)`. Recommended by its author over Fitzroy for anisotropic rooms.
+
+The Sabine constant is `k = 24 ln 10 / c0` (`= 55.26 / c0`); with the
+default `c0 = 343 m/s` it takes the familiar textbook value `0.161`. (The
+[`enclosed_space_absorption`](/phonometry/reference/api/rooms/enclosed-space-absorption/) EN 12354-6 model instead rounds
+`k` to `55.3` and uses `c0 = 345.6` to pin the factor at exactly `0.16`.)
+
+Air absorption enters every model through the `air_attenuation` power
+coefficient `m` (in neper per metre) as the additive term `4 m V`; obtain a
+physical `m` from temperature and humidity with
+[`phonometry.air_absorption.air_attenuation_m`](/phonometry/reference/api/environment/air-absorption/#air_attenuation_m).
+
+The Fitzroy and Arau-Puchades models require a rectangular (shoebox) room and
+take the room `dimensions` together with the mean absorption of each of the
+three wall pairs. All five reduce to Eyring for a uniform absorption
+distribution, and Eyring reduces to Sabine as the absorption tends to zero --
+the identities the conformance suite anchors on, absent a machine-readable
+worked example in the source texts.
+
+## arau_puchades_reverberation_time
+
+```python
+arau_puchades_reverberation_time(
+    dimensions: Sequence[float],
+    absorptions: Sequence[ArrayLike],
+    *,
+    air_attenuation: ArrayLike = 0.0,
+    speed_of_sound: float = 343.0,
+) -> np.ndarray | float
+```
+
+Arau-Puchades reverberation time -- area-weighted geometric mean of axial times.
+
+`T = prod_i T_i ** (S_i / S)` with `T_i` the Eyring time of the wall
+pair perpendicular to axis `i` (Arau-Puchades, *Acustica* 65 (1988) 163,
+Formula 18). Preferred by its author over Fitzroy for rooms with an
+anisotropic absorption distribution. Reduces to Eyring for a uniform
+distribution.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `dimensions` | Room lengths `(Lx, Ly, Lz)`, m. |
+| `absorptions` | Mean absorption `(alpha_x, alpha_y, alpha_z)` of the three wall pairs (perpendicular to x, y, z); each a scalar or per-band array. |
+| `air_attenuation` | Air power-attenuation coefficient `m` (1/m). |
+| `speed_of_sound` | Speed of sound `c0`, m/s. |
+
+**Returns:** The reverberation time `T`, s.
+
+## eyring_reverberation_time
+
+```python
+eyring_reverberation_time(
+    volume: float,
+    surfaces: Sequence[Surface],
+    *,
+    air_attenuation: ArrayLike = 0.0,
+    speed_of_sound: float = 343.0,
+) -> np.ndarray | float
+```
+
+Eyring (Norris-Eyring) reverberation time.
+
+`T = k V / (-S ln(1 - alpha_bar) + 4 m V)` with the total surface `S`
+and its area-weighted mean absorption `alpha_bar`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `volume` | Room volume `V`, m3. |
+| `surfaces` | Sequence of `(area, absorption_coefficient)` pairs. |
+| `air_attenuation` | Air power-attenuation coefficient `m` (1/m). |
+| `speed_of_sound` | Speed of sound `c0`, m/s. |
+
+**Returns:** The reverberation time `T`, s.
+
+## fitzroy_reverberation_time
+
+```python
+fitzroy_reverberation_time(
+    dimensions: Sequence[float],
+    absorptions: Sequence[ArrayLike],
+    *,
+    air_attenuation: ArrayLike = 0.0,
+    speed_of_sound: float = 343.0,
+) -> np.ndarray | float
+```
+
+Fitzroy reverberation time -- area-weighted arithmetic mean of axial times.
+
+`T = sum_i (S_i / S) T_i` with `T_i` the Eyring time of the wall pair
+perpendicular to axis `i` (Fitzroy, *J. Acoust. Soc. Am.* 31 (1959) 893).
+Equivalent to `T = k V / S**2 * sum_i S_i / (-ln(1 - alpha_i))` without
+air. Reduces to Eyring for a uniform absorption distribution.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `dimensions` | Room lengths `(Lx, Ly, Lz)`, m. |
+| `absorptions` | Mean absorption `(alpha_x, alpha_y, alpha_z)` of the three wall pairs (perpendicular to x, y, z); each a scalar or per-band array. |
+| `air_attenuation` | Air power-attenuation coefficient `m` (1/m). |
+| `speed_of_sound` | Speed of sound `c0`, m/s. |
+
+**Returns:** The reverberation time `T`, s.
+
+## mean_absorption
+
+```python
+mean_absorption(surfaces: Sequence[Surface]) -> np.ndarray | float
+```
+
+Area-weighted mean absorption coefficient `alpha_bar = A / S`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `surfaces` | Sequence of `(area, absorption_coefficient)` pairs; each coefficient a scalar or a per-band array. |
+
+**Returns:** The mean absorption `sum_i S_i alpha_i / sum_i S_i`; a float for scalar coefficients, otherwise a per-band array.
+
+## millington_sette_reverberation_time
+
+```python
+millington_sette_reverberation_time(
+    volume: float,
+    surfaces: Sequence[Surface],
+    *,
+    air_attenuation: ArrayLike = 0.0,
+    speed_of_sound: float = 343.0,
+) -> np.ndarray | float
+```
+
+Millington-Sette reverberation time.
+
+`T = k V / (-sum_i S_i ln(1 - alpha_i) + 4 m V)`: the Eyring absorption
+term summed surface by surface rather than through a single mean. A surface
+approaching total absorption (`alpha_i -> 1`) drives `T` to zero.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `volume` | Room volume `V`, m3. |
+| `surfaces` | Sequence of `(area, absorption_coefficient)` pairs. |
+| `air_attenuation` | Air power-attenuation coefficient `m` (1/m). |
+| `speed_of_sound` | Speed of sound `c0`, m/s. |
+
+**Returns:** The reverberation time `T`, s.
+
+## reverberation_time_models
+
+```python
+reverberation_time_models(
+    dimensions: Sequence[float],
+    absorptions: Sequence[ArrayLike],
+    *,
+    air_attenuation: ArrayLike = 0.0,
+    frequencies: ArrayLike | None = None,
+    speed_of_sound: float = 343.0,
+) -> ReverberationModelResult
+```
+
+Predict the reverberation time of a rectangular room by all five models.
+
+A convenience front-end that builds the six boundary surfaces of the room
+from `dimensions` and the three wall-pair mean absorptions, then evaluates
+[`sabine_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#sabine_reverberation_time), [`eyring_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#eyring_reverberation_time),
+[`millington_sette_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#millington_sette_reverberation_time), [`fitzroy_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#fitzroy_reverberation_time)
+and [`arau_puchades_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#arau_puchades_reverberation_time) on a common footing.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `dimensions` | Room lengths `(Lx, Ly, Lz)`, m. |
+| `absorptions` | Mean absorption `(alpha_x, alpha_y, alpha_z)` of the three wall pairs (perpendicular to x, y, z); each a scalar or a per-band array aligned with `frequencies`. |
+| `air_attenuation` | Air power-attenuation coefficient `m` (1/m), scalar or per-band. |
+| `frequencies` | Band centre frequencies, in hertz, used only to label the result and its plot; defaults to an integer index over the bands. |
+| `speed_of_sound` | Speed of sound `c0`, m/s. |
+
+**Returns:** The [`ReverberationModelResult`](/phonometry/reference/api/rooms/reverberation-prediction/#reverberationmodelresult).
+
+## ReverberationModelResult
+
+```python
+ReverberationModelResult(
+    frequencies: np.ndarray,
+    sabine: np.ndarray,
+    eyring: np.ndarray,
+    millington_sette: np.ndarray,
+    fitzroy: np.ndarray,
+    arau_puchades: np.ndarray,
+    volume: float,
+    surface_area: float,
+)
+```
+
+Predicted reverberation time of a rectangular room by five models.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | Band centre frequencies, in hertz. |
+| `sabine` | Sabine reverberation time per band, s. |
+| `eyring` | Eyring (Norris-Eyring) reverberation time per band, s. |
+| `millington_sette` | Millington-Sette reverberation time per band, s. |
+| `fitzroy` | Fitzroy reverberation time per band, s. |
+| `arau_puchades` | Arau-Puchades reverberation time per band, s. |
+| `volume` | Room volume `V`, m3. |
+| `surface_area` | Total boundary area `S`, m2. |
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+### ReverberationModelResult.models
+
+*property*
+
+The five reverberation-time curves keyed by model name.
+
+### ReverberationModelResult.plot()
+
+```python
+ReverberationModelResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the reverberation-time curves of the five models.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+## sabine_reverberation_time
+
+```python
+sabine_reverberation_time(
+    volume: float,
+    surfaces: Sequence[Surface],
+    *,
+    air_attenuation: ArrayLike = 0.0,
+    speed_of_sound: float = 343.0,
+) -> np.ndarray | float
+```
+
+Sabine reverberation time `T = k V / (A + 4 m V)`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `volume` | Room volume `V`, m3. |
+| `surfaces` | Sequence of `(area, absorption_coefficient)` pairs; each coefficient a scalar or a per-band array. |
+| `air_attenuation` | Air power-attenuation coefficient `m`, in neper per metre (scalar or per-band); see [`phonometry.air_absorption.air_attenuation_m`](/phonometry/reference/api/environment/air-absorption/#air_attenuation_m). Default `0` (air absorption neglected). |
+| `speed_of_sound` | Speed of sound `c0`, m/s (default [`DEFAULT_SPEED_OF_SOUND`](/phonometry/reference/api/materials/road-absorption/#default_speed_of_sound), giving the factor `0.161`). |
+
+**Returns:** The reverberation time `T`, s; a float for scalar inputs, otherwise a per-band array.

@@ -1,0 +1,194 @@
+---
+title: "hearing.sti"
+description: "Public API of phonometry.hearing.sti (auto-generated)."
+sidebar:
+  label: "sti"
+---
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+Speech Transmission Index (STI) per IEC 60268-16:2020 (Edition 5).
+
+Implements the full-STI indirect method from impulse responses (Schroeder
+modulation transfer function), the direct STIPA method on recorded signals
+(Annex B) and an Ed.5-conformant STIPA test-signal generator (clauses A.4
+and A.6.1). Only the male speech option exists: Edition 5 removed the
+female spectrum and weighting factors (foreword, item d).
+
+The computation chain (octave-band MTF -> auditory masking and reception
+threshold correction -> effective SNR clipped to +/-15 dB -> transmission
+indices -> band MTI -> weighted STI) is numerically identical between
+Ed.4 (2011) clauses A.5.2-A.5.6 and Ed.5; the only Ed.5 numeric change is
+the male test-signal spectrum (A.6.1).
+
+## sti_from_impulse_response
+
+```python
+sti_from_impulse_response(
+    ir: List[float] | np.ndarray,
+    fs: int,
+    snr: float | Sequence[float] | np.ndarray | None = None,
+    level: Sequence[float] | np.ndarray | None = None,
+    ambient: Sequence[float] | np.ndarray | None = None,
+) -> STIResult
+```
+
+Full STI from a room/system impulse response (indirect method).
+
+The impulse response is filtered into the seven octave bands 125 Hz -
+8 kHz (IEC 61260-1 filters) and the modulation transfer function is
+obtained from the Schroeder integral (IEC 60268-16, indirect method):
+`m_k(f_m) = |integral h_k^2(t) exp(-j 2 pi f_m t) dt| /
+integral h_k^2(t) dt` at the 14 modulation frequencies 0,63-12,5 Hz
+(A.2.2). The result then follows the standard chain: optional noise
+degradation, optional auditory masking and absolute reception
+threshold correction, effective SNR clipped to +/-15 dB, transmission
+indices, band MTIs and the male-weighted STI (Ed.5 Table A.1).
+
+When neither `level` nor `ambient` is given the level-dependent
+auditory masking and the absolute reception threshold corrections are
+skipped (they require absolute band levels), matching the common
+"noise-free indirect measurement" use of the standard.
+
+:::note
+The indirect method has a small positive MTF bias that grows
+with reverberation time for a finite noise-carrier IR. It stays within
+the IEC 60268-16 A.5.1.2 systematic-error allowance (\<= 0.01 STI) up to
+about T60 = 4 s, reaching ~+0.012 STI only in very reverberant rooms
+(T60 ~ 8 s, STI ~ 0.19). It is a property of the finite IR, not of the
+(exact) Schroeder integration, and does not depend on IR truncation.
+At very short reverberation times (T60 \< 0.25 s) the zero-phase
+analysis bank smears h^2 slightly, biasing individual low-band
+high-modulation-frequency MTF cells by up to ~0.02-0.04 while the
+STI itself stays within ~0.001.
+:::
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ir` | Impulse response (1D). |
+| `fs` | Sample rate in Hz (>= 22,5 kHz so the 8 kHz band fits). |
+| `snr` | Optional signal-to-noise ratio in dB, scalar or one value per octave band. Degrades m by 1/(1 + 10^(-SNR/10)); combined with `level` it is interpreted as ambient levels `level - snr` so noise is not applied twice. Mutually exclusive with `ambient`. |
+| `level` | Optional speech octave-band levels in dB SPL (7 values) at the listener position; enables the auditory masking (Ed.5 Table A.2) and reception threshold (Ed.5 Table A.3) corrections. |
+| `ambient` | Optional ambient noise octave-band levels in dB SPL (7 values); requires `level`. |
+
+**Returns:** [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) with `mtf` of shape (7, 14).
+
+## stipa
+
+```python
+stipa(
+    x: List[float] | np.ndarray,
+    fs: int,
+    reference: List[float] | np.ndarray | None = None,
+    level: Sequence[float] | np.ndarray | None = None,
+    ambient: Sequence[float] | np.ndarray | None = None,
+) -> STIResult
+```
+
+STIPA on a recorded test signal (direct method, Annex B).
+
+The recording is filtered into the seven octave bands, squared and
+low-passed (~100 Hz) into intensity envelopes, and the modulation
+depths at the two Table B.1 modulation frequencies of each band are
+measured with the sine/cosine correlation over an integer number of
+periods (Ed.4 A.5.2 = Ed.5). The modulation transfer values are the
+measured depths normalized by the source modulation index 0,55
+(Annex B) - or by the depths measured on `reference` when the
+actually emitted signal is supplied - and feed the same masking /
+threshold / TI / STI chain as the full method.
+
+Physical background noise is already contained in the recording; use
+`level` (and optionally `ambient`) only to enable the absolute
+level-dependent corrections, which are otherwise skipped.
+
+An [`STIWarning`](/phonometry/reference/api/speech/sti/#stiwarning) is emitted when the recording is shorter than
+the recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s),
+because the slow modulation components are then averaged over too few
+periods and the recovered modulation depths - and hence the STI - are
+biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `x` | Recorded STIPA signal (1D), 15 s to 25 s recommended. |
+| `fs` | Sample rate in Hz (>= 22,5 kHz). |
+| `reference` | Optional reference recording of the undistorted test signal; its measured modulation depths replace the nominal 0,55 as normalization (useful for non-conformant sources). |
+| `level` | Optional speech octave-band levels in dB SPL (7 values) enabling auditory masking and reception threshold corrections. |
+| `ambient` | Optional ambient noise octave-band levels in dB SPL (7 values); requires `level`. |
+
+**Returns:** [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) with `mtf` of shape (7, 2).
+
+## stipa_signal
+
+```python
+stipa_signal(
+    fs: int,
+    seconds: float = 18.0,
+    level_db: float | None = None,
+    seed: int | None = None,
+) -> np.ndarray
+```
+
+Generate an IEC 60268-16:2020 conformant STIPA test signal.
+
+Pink-noise carriers are band-limited to half-octave bands centred on
+the seven octave-band frequencies (clause A.4), set to the Ed.5 male
+speech spectrum of clause A.6.1 (`-2,5; 0,5; 0; -6; -12; -18; -24`
+dB re the 500 Hz band) and intensity-modulated with
+`0,5 (1 + 0,55 (sin 2 pi f1 t - sin 2 pi f2 t))` - the Table B.1
+frequency pair of each band, 180 degrees between components, applied
+in amplitude through its square root (Annex B).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `fs` | Sample rate in Hz (>= 22,5 kHz). |
+| `seconds` | Duration in seconds (the standard recommends 15 s to 25 s; default 18 s). |
+| `level_db` | Optional overall level in dB SPL: the output is scaled so its RMS, taken as pascals, sits at `level_db` re 20 uPa. Default (None) normalizes the RMS to 0,1 (digital full scale headroom for the 12-14 dB crest factor). |
+| `seed` | Seed for the pink-noise generator (None: random). |
+
+**Returns:** Test signal, 1D array of `round(seconds * fs)` samples.
+
+## STIResult
+
+```python
+STIResult(
+    sti: float,
+    mti: np.ndarray,
+    mtf: np.ndarray,
+    band_levels: np.ndarray | None,
+    rating: str,
+)
+```
+
+Result of a Speech Transmission Index computation.
+
+`mtf` holds the modulation transfer values actually used for the
+transmission indices, i.e. after the optional SNR / masking /
+reception-threshold corrections and after clipping to [0, 1]; its
+shape is (7, 14) for full STI and (7, 2) for STIPA. `mti` is the
+per-band modulation transfer index (7,), `band_levels` echoes the
+speech octave-band levels used for the level-dependent corrections
+(None when they were skipped) and `rating` is the Annex F
+qualification letter (`A+` .. `U`).
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+### STIResult.plot()
+
+```python
+STIResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the per-band MTI bars with the STI and rating letter.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+## STIWarning
+
+Warns about suspect STI/STIPA measurements or inputs.

@@ -1,0 +1,174 @@
+---
+title: "API Reference"
+description: "Every public function, class and constant in phonometry, generated from the source docstrings."
+---
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+The complete public API, one page per module. Every documented name can be imported directly from the top-level package:
+
+```python
+from phonometry import octave_filter, leq, sonar_equation
+```
+
+:::note
+The API reference is generated from the English source docstrings and is published in English only.
+
+La referencia de la API se genera a partir de los docstrings del código (en inglés) y se publica únicamente en inglés; las rutas en español muestran esta versión inglesa como alternativa.
+:::
+
+## Filters and frequencies
+
+| Module | Summary |
+| :--- | :--- |
+| [`phonometry`](/phonometry/reference/api/filters/phonometry/) | Convenience wrappers defined at the package top level (`phonometry/__init__.py`). |
+| [`metrology.core`](/phonometry/reference/api/filters/core/) | Core processing logic and FilterBank class for phonometry. |
+| [`metrology.parametric_filters`](/phonometry/reference/api/filters/parametric-filters/) | Weighting filters (A, C, G, Z) and time weighting utilities for audio analysis. |
+| [`metrology.frequencies`](/phonometry/reference/api/filters/frequencies/) | Frequency calculation logic according to ANSI/IEC standards. |
+| [`metrology.compliance`](/phonometry/reference/api/filters/compliance/) | IEC 61260-1:2014 filter and IEC 61672-1:2013 weighting class verification. |
+
+## Levels and calibration
+
+| Module | Summary |
+| :--- | :--- |
+| [`metrology.levels`](/phonometry/reference/api/levels/levels/) | Integrated and statistical sound levels (Leq, LAeq, LN percentiles). |
+| [`metrology.calibration`](/phonometry/reference/api/levels/calibration/) | Calibration utilities for mapping digital signals to physical SPL levels. |
+
+## Psychoacoustics
+
+| Module | Summary |
+| :--- | :--- |
+| [`psychoacoustics.loudness_zwicker`](/phonometry/reference/api/psychoacoustics/loudness-zwicker/) | Zwicker loudness for stationary and time-varying sounds per ISO 532-1:2017. |
+| [`psychoacoustics.loudness_moore_glasberg`](/phonometry/reference/api/psychoacoustics/loudness-moore-glasberg/) | Stationary loudness per ISO 532-2:2017 (Moore-Glasberg method). |
+| [`psychoacoustics.loudness_moore_glasberg_time`](/phonometry/reference/api/psychoacoustics/loudness-moore-glasberg-time/) | Time-varying loudness per ISO 532-3:2023 (Moore-Glasberg-Schlittenlacher). |
+| [`psychoacoustics.loudness_ecma`](/phonometry/reference/api/psychoacoustics/loudness-ecma/) | Psychoacoustic loudness per ECMA-418-2:2025 (4th ed., Sottek Hearing Model). |
+| [`psychoacoustics.loudness_contours`](/phonometry/reference/api/psychoacoustics/loudness-contours/) | Normal equal-loudness-level contours per ISO 226:2023. |
+| [`psychoacoustics.sharpness`](/phonometry/reference/api/psychoacoustics/sharpness/) | Sharpness per DIN 45692:2009-08. |
+| [`psychoacoustics.roughness_ecma`](/phonometry/reference/api/psychoacoustics/roughness-ecma/) | Psychoacoustic roughness per ECMA-418-2:2025 (4th ed., Sottek Hearing Model). |
+| [`psychoacoustics.tonality`](/phonometry/reference/api/psychoacoustics/tonality/) | Prominent discrete tone assessment per ECMA-418-1:2024 (3rd edition). |
+| [`psychoacoustics.tonality_ecma`](/phonometry/reference/api/psychoacoustics/tonality-ecma/) | Psychoacoustic tonality per ECMA-418-2:2025 (4th ed., Sottek Hearing Model). |
+| [`psychoacoustics.tone_audibility`](/phonometry/reference/api/psychoacoustics/tone-audibility/) | Objective audibility of tones in noise -- engineering method (ISO/PAS 20065:2016). |
+| [`psychoacoustics.fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/) | Fluctuation strength after Fastl & Zwicker / Osses et al. |
+| [`psychoacoustics.psychoacoustic_annoyance`](/phonometry/reference/api/psychoacoustics/psychoacoustic-annoyance/) | Psychoacoustic annoyance (PA) after Fastl & Zwicker. |
+
+## Speech
+
+| Module | Summary |
+| :--- | :--- |
+| [`hearing.sti`](/phonometry/reference/api/speech/sti/) | Speech Transmission Index (STI) per IEC 60268-16:2020 (Edition 5). |
+| [`hearing.sii`](/phonometry/reference/api/speech/sii/) | Speech Intelligibility Index (SII) per ANSI S3.5-1997 (R2017). |
+
+## Hearing and exposure
+
+| Module | Summary |
+| :--- | :--- |
+| [`hearing.threshold`](/phonometry/reference/api/hearing/threshold/) | Age-related hearing threshold (ISO 7029:2017) and audiometric reference zero. |
+| [`hearing.noise_induced_hearing_loss`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/) | Estimation of noise-induced hearing loss (ISO 1999:2013). |
+| [`hearing.occupational_exposure`](/phonometry/reference/api/hearing/occupational-exposure/) | Occupational noise exposure — measurement strategies and uncertainty (ISO 9612:2009). |
+
+## Room acoustics
+
+| Module | Summary |
+| :--- | :--- |
+| [`room.room_acoustics`](/phonometry/reference/api/rooms/room-acoustics/) | Room acoustic parameters from impulse responses per ISO 3382-1:2009. |
+| [`room.room_ir`](/phonometry/reference/api/rooms/room-ir/) | Impulse-response acquisition per BS EN ISO 18233:2006. |
+| [`room.room_noise`](/phonometry/reference/api/rooms/room-noise/) | Room-noise rating curves per ANSI/ASA S12.2-2019. |
+| [`room.open_plan`](/phonometry/reference/api/rooms/open-plan/) | Open-plan-office spatial metrics per ISO 3382-3:2012. |
+| [`room.reverberation_prediction`](/phonometry/reference/api/rooms/reverberation-prediction/) | Reverberation-time prediction from room geometry and absorption. |
+| [`room.enclosed_space_absorption`](/phonometry/reference/api/rooms/enclosed-space-absorption/) | Sound absorption in enclosed spaces (EN 12354-6:2003). |
+
+## Building acoustics
+
+| Module | Summary |
+| :--- | :--- |
+| [`building.insulation`](/phonometry/reference/api/building/insulation/) | Field airborne sound insulation (ISO 16283-1:2014) and impact sound. |
+| [`building.lab_insulation`](/phonometry/reference/api/building/lab-insulation/) | Laboratory sound insulation of building elements (ISO 10140). |
+| [`building.survey_insulation`](/phonometry/reference/api/building/survey-insulation/) | Field survey method for sound insulation and service-equipment noise. |
+| [`building.intensity_insulation`](/phonometry/reference/api/building/intensity-insulation/) | Sound insulation measured with sound intensity (ISO 15186). |
+| [`building.flanking_transmission`](/phonometry/reference/api/building/flanking-transmission/) | Laboratory measurement of flanking sound transmission (ISO 10848:2006/2010). |
+| [`building.facade_prediction`](/phonometry/reference/api/building/facade-prediction/) | Façade sound insulation and outdoor radiation prediction (EN 12354-3/-4:2000). |
+| [`building.building_prediction`](/phonometry/reference/api/building/building-prediction/) | Building acoustic performance prediction (EN 12354-1/-2:2000). |
+| [`building.building_uncertainty`](/phonometry/reference/api/building/building-uncertainty/) | Measurement uncertainty in building acoustics (ISO 12999-1:2020). |
+| [`building.floor_covering_improvement`](/phonometry/reference/api/building/floor-covering-improvement/) | Impact-sound improvement of floor coverings on a small mock-up (ISO 16251-1:2014). |
+| [`building.structure_borne_power`](/phonometry/reference/api/building/structure-borne-power/) | Structure-borne sound power of building equipment (EN 15657:2018; ISO 9611). |
+| [`building.installed_structure_borne`](/phonometry/reference/api/building/installed-structure-borne/) | Installed structure-borne sound from service equipment (EN 12354-5:2009). |
+
+## Materials and surfaces
+
+| Module | Summary |
+| :--- | :--- |
+| [`materials.sound_absorption`](/phonometry/reference/api/materials/sound-absorption/) | Sound absorption in a reverberation room: BS EN ISO 354:2003. |
+| [`materials.absorption_rating`](/phonometry/reference/api/materials/absorption-rating/) | Single-number rating of sound absorption (ISO 11654:1997). |
+| [`materials.absorption_uncertainty`](/phonometry/reference/api/materials/absorption-uncertainty/) | Measurement uncertainty for sound absorption (ISO 12999-2:2020). |
+| [`materials.airflow_resistance`](/phonometry/reference/api/materials/airflow-resistance/) | Airflow resistance of porous materials: ISO 9053-1 and ISO 9053-2. |
+| [`materials.dynamic_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/) | Dynamic stiffness of resilient materials under floating floors (EN 29052-1:1992). |
+| [`materials.impedance_tube`](/phonometry/reference/api/materials/impedance-tube/) | Impedance-tube material characterisation. |
+| [`materials.scattering_diffusion`](/phonometry/reference/api/materials/scattering-diffusion/) | Random-incidence scattering and directional diffusion coefficients. |
+| [`materials.road_absorption`](/phonometry/reference/api/materials/road-absorption/) | In-situ sound absorption of road surfaces (ISO 13472-1 / ISO 13472-2). |
+
+## Vibration and structure-borne
+
+| Module | Summary |
+| :--- | :--- |
+| [`vibration.mechanical_mobility`](/phonometry/reference/api/vibration/mechanical-mobility/) | Mechanical mobility and the frequency-response-function family (ISO 7626-1:2011). |
+| [`vibration.transfer_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/) | Dynamic transfer stiffness of resilient elements (ISO 10846-1/-2/-3). |
+| [`vibration.human_vibration`](/phonometry/reference/api/vibration/human-vibration/) | Human exposure to whole-body and hand-transmitted vibration. |
+| [`vibration.multiple_shock_vibration`](/phonometry/reference/api/vibration/multiple-shock-vibration/) | Whole-body vibration containing multiple shocks (ISO 2631-5:2018). |
+
+## Environmental acoustics
+
+| Module | Summary |
+| :--- | :--- |
+| [`environmental.outdoor_propagation`](/phonometry/reference/api/environment/outdoor-propagation/) | Outdoor sound propagation: ISO 9613-2:1996 general method of calculation. |
+| [`environmental.air_absorption`](/phonometry/reference/api/environment/air-absorption/) | Atmospheric absorption of sound: ISO 9613-1:1993. |
+| [`environmental.impulse_prominence`](/phonometry/reference/api/environment/impulse-prominence/) | Prominence of impulsive sounds and the LAeq adjustment (NT ACOU 112:2002). |
+| [`environmental.rating`](/phonometry/reference/api/environment/rating/) | Environmental noise descriptors per ISO 1996-1:2016. |
+| [`environmental.measurement`](/phonometry/reference/api/environment/measurement/) | Determination of environmental-noise sound pressure levels (ISO 1996-2:2017). |
+
+## Aircraft and wind energy
+
+| Module | Summary |
+| :--- | :--- |
+| [`aircraft.aircraft_noise`](/phonometry/reference/api/aeroacoustics/aircraft-noise/) | Aircraft noise certification: Effective Perceived Noise Level (ICAO Annex 16). |
+| [`aircraft.atmospheric_absorption`](/phonometry/reference/api/aeroacoustics/atmospheric-absorption/) | One-third-octave-band atmospheric absorption for aircraft noise (SAE ARP 5534). |
+| [`aircraft.airport_noise`](/phonometry/reference/api/aeroacoustics/airport-noise/) | Noise-Power-Distance (NPD) event-level interpolation (ECAC Doc 29). |
+| [`aircraft.rotorcraft_noise`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/) | Rotorcraft noise by the hemisphere method (ECAC Doc 32 / NORAH2). |
+| [`environmental.wind_turbine_noise`](/phonometry/reference/api/aeroacoustics/wind-turbine-noise/) | Wind-turbine acoustic noise (IEC 61400-11:2012+A1:2018). |
+
+## Underwater acoustics
+
+| Module | Summary |
+| :--- | :--- |
+| [`underwater.acoustics`](/phonometry/reference/api/underwater/acoustics/) | Underwater-acoustics reference levels (ISO 18405:2017). |
+| [`underwater.propagation`](/phonometry/reference/api/underwater/propagation/) | Underwater sound propagation: transmission loss (closed-form). |
+| [`underwater.sound_speed`](/phonometry/reference/api/underwater/sound-speed/) | Speed of sound in sea water (empirical equations). |
+| [`underwater.sonar_equation`](/phonometry/reference/api/underwater/sonar-equation/) | The sonar equation (passive and active), in decibels. |
+| [`underwater.ocean_ambient_noise`](/phonometry/reference/api/underwater/ocean-ambient-noise/) | Ocean ambient-noise spectrum levels (Wenz framework). |
+| [`underwater.seabed_reflection`](/phonometry/reference/api/underwater/seabed-reflection/) | Plane-wave reflection at the seabed (fluid-fluid Rayleigh model). |
+| [`underwater.ship_radiated_noise`](/phonometry/reference/api/underwater/ship-radiated-noise/) | Ship radiated noise and equivalent monopole source level (ISO 17208-1/-2). |
+| [`underwater.ship_traffic_noise`](/phonometry/reference/api/underwater/ship-traffic-noise/) | Predicted source-level spectrum of shipping traffic (semi-empirical models). |
+| [`underwater.pile_driving_noise`](/phonometry/reference/api/underwater/pile-driving-noise/) | Radiated underwater sound from percussive pile driving (ISO 18406:2017). |
+| [`underwater.numerical_propagation`](/phonometry/reference/api/underwater/numerical-propagation/) | Numerical models of underwater sound propagation (range-independent ocean). |
+
+## Sound power and intensity
+
+| Module | Summary |
+| :--- | :--- |
+| [`emission.sound_power`](/phonometry/reference/api/power/sound-power/) | Sound power level of a noise source from sound pressure measurements over an. |
+| [`emission.sound_power_intensity`](/phonometry/reference/api/power/sound-power-intensity/) | Sound power level of a noise source by sound-intensity **scanning**:. |
+| [`emission.sound_power_reverberation`](/phonometry/reference/api/power/sound-power-reverberation/) | Sound power level of a noise source measured in a reverberation test room:. |
+| [`emission.intensity`](/phonometry/reference/api/power/intensity/) | Two-microphone (p-p) sound intensity per IEC 61043:1994 and the. |
+| [`emission.vibration_sound_power`](/phonometry/reference/api/power/vibration-sound-power/) | Airborne sound power from surface vibration (ISO/TS 7849-1/-2:2009). |
+
+## Electroacoustics
+
+| Module | Summary |
+| :--- | :--- |
+| [`electroacoustics.distortion`](/phonometry/reference/api/electroacoustics/distortion/) | Distortion metrics for electroacoustic equipment (IEC 60268-3 / AES17). |
+| [`electroacoustics.frequency_response`](/phonometry/reference/api/electroacoustics/frequency-response/) | Frequency-response and coherence estimators (Bendat & Piersol). |
+
+## Uncertainty
+
+| Module | Summary |
+| :--- | :--- |
+| [`metrology.uncertainty`](/phonometry/reference/api/metrology/uncertainty/) | Measurement uncertainty by the GUM and its Monte Carlo supplement. |

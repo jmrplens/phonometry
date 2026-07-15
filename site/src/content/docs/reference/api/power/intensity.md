@@ -1,0 +1,243 @@
+---
+title: "emission.intensity"
+description: "Public API of phonometry.emission.intensity (auto-generated)."
+sidebar:
+  label: "intensity"
+---
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+Two-microphone (p-p) sound intensity per IEC 61043:1994 and the
+ISO 9614-1:1993 field indicators.
+
+A p-p probe holds two pressure microphones a fixed distance `spacing`
+(dr) apart. The mean of the two pressures is taken as the sound pressure
+at the probe reference point, while the pressure differential is used to
+derive the particle velocity component along the probe axis
+(IEC 61043:1994, definition 3.2):
+
+```text
+p(t) = (p1(t) + p2(t)) / 2
+u(t) = -(1 / (rho * dr)) * integral of (p2(t) - p1(t)) dt
+I    = < p(t) * u(t) >          (time average)
+```
+
+For stationary signals the time-averaged intensity reduces to the
+imaginary part of the one-sided cross spectrum G12 of the two microphone
+pressures (the frequency-domain form of the same finite-difference
+estimator):
+
+```text
+I(f) = -Im{G12(f)} / (2 * pi * f * rho * dr)
+```
+
+The finite-difference gradient underestimates the true plane-wave
+intensity by the factor `sin(k*dr) / (k*dr)` with `k = 2*pi*f/c`;
+IEC 61043:1994 clause 7.3 specifies the probe intensity response with
+exactly this argument (`Ff = dr * f * 2 * pi / c`) and Table 3 lists
+the resulting nominal response (e.g. -10,5 dB at 6,3 kHz for a 25 mm
+separation). Below `f = 0,1 * c / dr` (k*dr \< 0,63) the bias stays
+under about 0,3 dB (factor >= 0,935).
+
+Field indicators F2 (surface pressure-intensity), F3 (negative partial
+power) and F4 (field non-uniformity) follow ISO 9614-1:1993 Annex A
+(normative), equations (A.3)-(A.9). The dynamic capability index is
+`Ld = delta_pI0 - K` (ISO 9614-1 clause 3.12, equation (10)); the
+instrument is adequate for a measurement when `Ld > F2` (criterion 1,
+Annex B equation (B.1)).
+
+## dynamic_capability_index
+
+```python
+dynamic_capability_index(
+    pressure_residual_intensity_index: float,
+    bias_error_factor: float = 10.0,
+) -> float
+```
+
+Dynamic capability index Ld (ISO 9614-1:1993, clause 3.12).
+
+`Ld = delta_pI0 - K` (equation (10)), where `delta_pI0` is the
+instrument pressure-residual intensity index (clause 3.11, equation
+(9); determined per IEC 61043:1994, which requires the Table 2
+minima per class) and `K` the bias error factor of Table 1: 10 dB
+for precision (grade 1) and engineering (grade 2) measurements, 7 dB
+for survey (grade 3). The measurement arrangement is adequate when
+`Ld > F2` (criterion 1, Annex B equation (B.1)).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `pressure_residual_intensity_index` | delta_pI0 in decibels. |
+| `bias_error_factor` | K in decibels (default 10,0). |
+
+**Returns:** Ld in decibels.
+
+## field_indicators
+
+```python
+field_indicators(
+    pressure_levels: List[float] | np.ndarray,
+    normal_intensity: List[float] | np.ndarray,
+) -> FieldIndicators
+```
+
+ISO 9614-1:1993 Annex A field indicators F2, F3 and F4.
+
+Given the sound pressure level `Lpi` (dB) and the signed normal
+sound intensity `Ini` (W/m^2) measured at each of the N discrete
+positions on the measurement surface:
+
+- F2 = Lp - L|In| (equation (A.3)), with the surface pressure level
+  from equation (A.4) and the level of the mean magnitude of the
+  normal intensity from equation (A.5);
+- F3 = Lp - LIn (equation (A.6)), with the algebraic surface
+  intensity level from equation (A.7);
+- F4 = (1/|mean In|) * sqrt(sum((Ini - mean In)^2) / (N - 1))
+  (equations (A.8)-(A.9)).
+
+If the algebraic mean intensity is not positive the test conditions
+do not satisfy ISO 9614-1 in that band (clause A.2.3) and a
+`ValueError` is raised.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `pressure_levels` | Lpi at each position, in decibels. |
+| `normal_intensity` | Signed normal intensity Ini at each position, in W/m^2. |
+
+**Returns:** [`FieldIndicators`](/phonometry/reference/api/power/intensity/#fieldindicators).
+
+## FieldIndicators
+
+```python
+FieldIndicators(f2: float, f3: float, f4: float)
+```
+
+ISO 9614-1:1993 Annex A field indicators over a measurement surface.
+
+`f2` is the surface pressure-intensity indicator (equation (A.3)),
+`f3` the negative partial power indicator (equation (A.6)) and
+`f4` the field non-uniformity indicator (equation (A.8)).
+`f3 - f2 > 0` reveals negative partial power flowing through parts
+of the surface. The instrument's dynamic capability index must
+satisfy `Ld > f2` (criterion 1, equation (B.1)); the number of
+positions N must satisfy `N > C * f4**2` (criterion 2, equation
+(B.2)).
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+## IntensityResult
+
+```python
+IntensityResult(
+    frequency: np.ndarray | None,
+    intensity: np.ndarray | None,
+    intensity_level: np.ndarray | None,
+    pressure_level: np.ndarray | None,
+    pressure_intensity_index: np.ndarray | None,
+    direction: np.ndarray | None,
+    bias_correction: np.ndarray | None,
+    total_intensity: float,
+    total_intensity_level: float,
+    total_pressure_level: float,
+    total_pressure_intensity_index: float,
+    total_direction: int,
+    max_valid_frequency: float,
+)
+```
+
+Result of a p-p sound intensity measurement.
+
+Per-band arrays are `None` unless a band `fraction` was requested.
+`intensity` is signed (positive along the probe axis, from
+microphone 1 towards microphone 2); `intensity_level` is computed
+from the magnitude, `10*lg(|I|/1e-12)` dB, with the sign reported
+separately in `direction` (+1/-1). `pressure_intensity_index` is
+`Lp - LI` (the single-position form of the ISO 9614-1:1993 F2
+indicator, equation (A.3)). `bias_correction` is the multiplicative
+factor `(k*dr)/sin(k*dr)` compensating the finite-difference
+underestimation at each band centre (IEC 61043:1994, 7.3); it is NaN
+at and beyond the first null `k*dr >= pi`. `max_valid_frequency`
+is the usable-bandwidth bound `0,1*c/spacing` (bias \< ~0,3 dB).
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+### IntensityResult.plot()
+
+```python
+IntensityResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot Lp vs LI per band with the pressure-intensity index.
+
+Requires per-band data (call `sound_intensity(..., fraction=...)`)
+and matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+## sound_intensity
+
+```python
+sound_intensity(
+    p1: List[float] | np.ndarray,
+    p2: List[float] | np.ndarray,
+    fs: int,
+    spacing: float,
+    rho: float = 1.204,
+    c: float = 343.0,
+    fraction: int | None = None,
+    limits: List[float] | None = None,
+    bias_correct: bool = False,
+) -> IntensityResult
+```
+
+Sound intensity from a two-microphone (p-p) probe (IEC 61043:1994).
+
+The one-sided cross spectrum `G12` of the two microphone pressures
+is estimated with Welch-averaged, Hann-windowed segments
+(`scipy.signal.csd`) and converted to the intensity spectral
+density along the probe axis (definition 3.2 of IEC 61043:1994 gives
+the underlying p-p formulation):
+
+```text
+I(f) = -Im{G12(f)} / (2 * pi * f * rho * spacing)
+```
+
+Positive intensity flows from microphone 1 towards microphone 2.
+The mean-square pressure is taken from the mean signal
+`(p1 + p2)/2` at the probe reference point. When `fraction` is
+given, both quantities are integrated into octave (1) or one-third
+octave (3) bands using the ANSI S1.11/IEC 61260-1 band edges of
+[`phonometry.nominal_frequencies`](/phonometry/reference/api/filters/frequencies/#nominal_frequencies); bands without any spectral
+bin are dropped. Broadband totals are always computed (over
+`limits` when provided, otherwise over all positive frequencies).
+
+The pressure-intensity index `Lp - LI` is reported per band and
+broadband; in a free plane progressive wave it equals
+`10*lg(rho*c/400)` = 0,14 dB (IEC 61043:1994 clause 5 note), while
+large values flag reactive or noisy fields (compare with the
+instrument dynamic capability, ISO 9614-1:1993 criterion 1).
+
+Usable bandwidth: the finite-difference gradient biases the result
+by the factor `sin(k*spacing)/(k*spacing)` (IEC 61043:1994, 7.3);
+results are essentially unbiased (\< ~0,3 dB) below
+`max_valid_frequency = 0,1 * c / spacing`, and `bias_correction`
+provides the per-band compensation factor.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `p1` | Pressure signal of microphone 1, in pascals (1D). |
+| `p2` | Pressure signal of microphone 2, in pascals (1D). |
+| `fs` | Sample rate in Hz. |
+| `spacing` | Microphone separation dr, in metres. |
+| `rho` | Air density, in kg/m^3. Default 1,204 (20 degC). |
+| `c` | Speed of sound, in m/s. Default 343,0. |
+| `fraction` | `None` (broadband only), 1 (octave bands) or 3 (one-third octave bands). |
+| `limits` | [f_min, f_max] band limits in Hz (default [12, 20000], as in [`phonometry.nominal_frequencies`](/phonometry/reference/api/filters/frequencies/#nominal_frequencies)). |
+| `bias_correct` | If True, apply the per-bin finite-difference correction `(k*spacing)/sin(k*spacing)` (IEC 61043:1994, 7.3) to the intensity spectral density before summing the band and broadband totals, so the totals no longer under-read as the frequency approaches `max_valid_frequency`. The reciprocal diverges as `k*spacing -> pi` (the first spatial-aliasing null at `c/(2*spacing)`, inside the default band range for close spacings), so it is applied only over the probe's usable range — up to `k*spacing = pi/2` — and held constant beyond, keeping the totals bounded instead of letting a few near-null bins dominate them. Default False keeps the exact legacy totals; the per-band `bias_correction` factor (same clamped definition) is reported either way. |
+
+**Returns:** [`IntensityResult`](/phonometry/reference/api/power/intensity/#intensityresult).

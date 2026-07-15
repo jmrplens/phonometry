@@ -404,8 +404,9 @@ def weighted_acceleration(
         gives a slightly different ``W_i``.
 
     :param band_accelerations: r.m.s. acceleration ``a_i`` per band, in m/s2.
-    :param frequencies: Band centre frequencies, in hertz (true one-third-
-        octave centres ``10^(n/10)`` for table-conformant band values).
+    :param frequencies: Band centre frequencies, in hertz (true
+        one-third-octave centres ``10^(n/10)`` for table-conformant band
+        values).
     :param weighting: Weighting name (one of :data:`WEIGHTING_NAMES`).
     :return: A :class:`WeightedSpectrum` with ``.plot()``.
     :raises ValueError: if the inputs differ in length or are empty.

@@ -118,7 +118,7 @@ def atmospheric_adjustment(
     advisory warning propagates, since ``α`` is large and extrapolated.
 
     :param frequencies: One-third-octave-band centre frequencies, in Hz.
-    :param distance: Slant distance ``r``, in metres (``>= rh``; below ``rh``
+    :param distance: Slant distance ``r``, in metres (``> 0``; below ``rh``
         the adjustment is a small positive value, i.e. less absorption than the
         reference path).
     :param temperature: Air temperature, in °C (default 25 °C, ICAO reference).

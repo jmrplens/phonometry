@@ -212,7 +212,8 @@ def sdof_mobility(
     """Mobility of a viscously damped SDOF resonator: ``Y = j omega H``.
 
     :param frequency: Frequency ``f``, in hertz.
-    :param mass: Mass ``m``, in kg. :param stiffness: Stiffness ``k``, N/m.
+    :param mass: Mass ``m``, in kg.
+    :param stiffness: Stiffness ``k``, N/m.
     :param damping: Viscous damping ``c``, N.s/m.
     :return: The complex mobility ``Y``, in m/(N.s).
     """
@@ -226,7 +227,8 @@ def sdof_accelerance(
     """Accelerance of a viscously damped SDOF resonator: ``A = -omega**2 H``.
 
     :param frequency: Frequency ``f``, in hertz.
-    :param mass: Mass ``m``, in kg. :param stiffness: Stiffness ``k``, N/m.
+    :param mass: Mass ``m``, in kg.
+    :param stiffness: Stiffness ``k``, N/m.
     :param damping: Viscous damping ``c``, N.s/m.
     :return: The complex accelerance ``A``, in 1/kg.
     """
@@ -417,7 +419,8 @@ def sdof_mobility_result(
     """SDOF driving-point mobility bundled as a :class:`MobilityResult`.
 
     :param frequency: Frequencies ``f``, in hertz (array).
-    :param mass: Mass ``m``, in kg. :param stiffness: Stiffness ``k``, N/m.
+    :param mass: Mass ``m``, in kg.
+    :param stiffness: Stiffness ``k``, N/m.
     :param damping: Viscous damping ``c``, N.s/m.
     :return: The :class:`MobilityResult` (driving point).
     """

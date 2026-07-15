@@ -54,7 +54,8 @@ Full documentation for phonometry. Also available as a website:
 
 ## Reference
 
-- [API Reference](api-reference.md) — every public function and class
+- [API Reference](api-reference.md) — curated quick table of every public function and class
+- [Generated API reference](https://jmrplens.github.io/phonometry/reference/api/) — one page per public module, generated from the source docstrings (`make api-docs`). English only; the Spanish site serves it via locale fallback
 - [Theory](theory.md) — standards, math and design decisions
 - [Why phonometry](why-phonometry.md) — IEC compliance vs other libraries
 - [Conformance report](CONFORMANCE.md) — auto-generated numerical validation: every check pins a standard clause's expected value against the library's computed value, regenerated in CI

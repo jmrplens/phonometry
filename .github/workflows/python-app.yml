@@ -63,6 +63,43 @@ jobs:
           exit 1
         fi
 
+  # Drift gate for the generated Starlight API reference: the committed pages
+  # under site/src/content/docs/reference/api and the sidebar fragment must
+  # equal a fresh `make api-docs` run (deterministic, stdlib-only generator).
+  api-docs:
+    name: Generated API reference up to date
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install runtime dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+    - name: Regenerate the API reference
+      run: make api-docs
+    - name: Fail if the committed API reference is stale
+      run: |
+        if ! git diff --exit-code -- site/src/content/docs/reference/api site/src/generated; then
+          echo "::error::The generated API reference is out of date - run 'make api-docs' and commit the result."
+          exit 1
+        fi
+        untracked=$(git ls-files --others --exclude-standard -- site/src/content/docs/reference/api site/src/generated)
+        if [ -n "$untracked" ]; then
+          echo "::error::Generated API pages are not committed:"
+          echo "$untracked"
+          exit 1
+        fi
+
   # The committed documentation figures (.github/images) must match a fresh
   # `make graphs` run. The rendering + compute stack is pinned in
   # requirements-figures.txt so SVG *structure* (elements, text, colours) and

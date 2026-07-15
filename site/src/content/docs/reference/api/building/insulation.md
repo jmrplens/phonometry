@@ -1,0 +1,742 @@
+---
+title: "building.insulation"
+description: "Public API of phonometry.building.insulation (auto-generated)."
+sidebar:
+  label: "insulation"
+---
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+Field airborne sound insulation (ISO 16283-1:2014) and impact sound
+insulation (ISO 16283-2), with single-number weighted ratings and
+spectrum adaptation terms (ISO 717-1 airborne, ISO 717-2 impact).
+
+**Field quantities (ISO 16283-1:2014).** From the energy-average sound
+pressure levels in the source and receiving rooms this module forms the
+level difference `D = L1 - L2` (Clause 3.12, Formula (1)), the
+standardized level difference `DnT = D + 10 lg(T/T0)` with the
+reference reverberation time `T0 = 0,5 s` (Clause 3.13, Formula (2)),
+and the apparent sound reduction index
+`R' = D + 10 lg(S/A)` with the Sabine equivalent absorption area
+`A = 0,16 V / T` (Clause 3.14/3.15, Formula (4) and (5)). Source and
+receiving levels may be supplied already averaged (one value per band) or
+as several microphone positions, which are then energy-averaged with
+`10 lg( (1/n) sum 10^(Li/10) )` (Clause 7.8, Formula (9)). All
+quantities are evaluated per one-third-octave band over the core range
+100 Hz to 3150 Hz (Clause 5), the caller having already applied any
+background-noise correction (Clause 9.2).
+
+**Weighted rating (ISO 717-1).** The reference-curve method of Clause 4.4
+shifts the reference curve of Table 3 in 1 dB steps towards the measured
+curve until the sum of unfavourable deviations (measured below the
+shifted reference) is as large as possible but not more than 32,0 dB for
+the 16 one-third-octave bands (100 Hz to 3150 Hz) or 10,0 dB for the 5
+octave bands (125 Hz to 2000 Hz). The weighted rating (`Rw`, `R'w`,
+`Dn,w`, `DnT,w` ...) is the shifted reference read at 500 Hz. The
+spectrum adaptation terms are `C = XA1 - Xw` and `Ctr = XA2 - Xw`
+with `XAj = -10 lg sum 10^((Lij - Xi)/10)` rounded to an integer, using
+the A-weighted spectra No. 1 (pink noise, `C`) and No. 2 (urban traffic,
+`Ctr`) of Table 4 (Clause 4.5, Formula (1) and (2)). Input levels are
+reduced to one decimal place before use (Clause 4.4, footnote 1). The
+reference values, spectra and shifting rule are identical in the 2013 and
+2020 editions of ISO 717-1.
+
+**Enlarged frequency ranges (ISO 717-1 Annex B; ISO 717-2 A.2.1 NOTE).**
+When measurements cover an enlarged range, additional adaptation terms are
+stated with the range as a subscript: `C50-3150`, `C50-5000`,
+`C100-5000` (and the `Ctr` counterparts) with the Table B.1 spectra, and
+`CI,50-2500` for impact. [`weighted_rating_extended`](/phonometry/reference/api/building/insulation/#weighted_rating_extended) and
+[`weighted_impact_rating_extended`](/phonometry/reference/api/building/insulation/#weighted_impact_rating_extended) compute them alongside the core
+rating. Both accept `one_decimal=True` for the "1/10 dB for the expression
+of uncertainty" variant of Clauses 4.4/4.5 (reference-curve shift in 0,1 dB
+steps and one-decimal reductions), which ISO 12999-1:2020 Annex B requires
+when stating the uncertainty of single-number values.
+
+**Field impact quantities (ISO 16283-2).** With the tapping machine as the
+impact source this module forms, from the energy-average impact sound
+pressure level `Li` in the receiving room, the standardized impact sound
+pressure level `L'nT = Li - 10 lg(T/T0)` with `T0 = 0,5 s` (Clause
+3.13, Formula (1)) and the normalized impact sound pressure level
+`L'n = Li + 10 lg(A/A0)` with the Sabine absorption area `A = 0,16 V/T`
+and the reference area `A0 = 10 m²` (Clause 3.14, Formula (2)). Levels
+may be supplied already averaged or as several microphone positions, then
+energy-averaged (Clause 7.8, Formula (10)), over the core one-third-octave
+range 100 Hz to 3150 Hz (Clause 5.1).
+
+**Field façade quantities (ISO 16283-3:2016).** With an outdoor sound
+source this module forms, from the level 2 m in front of the façade
+`L1,2m` and the receiving-room level `L2`, the level difference
+`D2m = L1,2m - L2` (Clause 3.14), its standardized form
+`D2m,nT = D2m + 10 lg(T/T0)` with `T0 = 0,5 s` (Clause 3.15) and
+normalized form `D2m,n = D2m - 10 lg(A/A0)` with the Sabine absorption
+area `A = 0,16 V/T` (Clause 3.17) and reference `A0 = 10 m²`
+(Clause 3.16) — the global loudspeaker / traffic quantities
+`Dls,2m,*` / `Dtr,2m,*`. When a surface level `L1,s` (microphone on
+the test element) with the element area `S` and volume are given it
+forms the apparent sound reduction index
+`R'45° = L1,s - L2 + 10 lg(S/A) - 1,5` for the loudspeaker element method
+(Clause 3.12) or `R'tr,s = L1,s - L2 + 10 lg(S/A) - 3` for the
+road-traffic element method (Clause 3.13). These quantities are defined by
+unnumbered formulas inline in the Clause 3 terms; positions are
+energy-averaged with the surface-level formula (Clause 9.5.1, Formula (7)).
+Quantities are evaluated over the core one-third-octave range 100 Hz to
+3150 Hz (Clause 5), optionally extended to 50-5000 Hz. The façade quantity
+is airborne, so its single-number rating uses the **ISO 717-1 airborne**
+reference curve and method (Clause 2, Annex F) via [`weighted_rating`](/phonometry/reference/api/building/insulation/#weighted_rating)
+unchanged.
+
+**Weighted impact rating (ISO 717-2).** The reference-curve method of
+Clause 4.3 shifts the Table 3 impact reference curve towards the measured
+curve until the sum of unfavourable deviations (here where the
+**measurement exceeds** the reference, the sign opposite to airborne) is
+as large as possible but not more than 32,0 dB (16 one-third-octave bands)
+or 10,0 dB (5 octave bands). The rating (`Ln,w`, `L'n,w`, `L'nT,w`)
+is the shifted reference read at 500 Hz, reduced by a further 5 dB for
+octave bands (Clause 4.3.2). The spectrum adaptation term
+`CI = Ln,sum - 15 - Ln,w` uses the energetic sum `Ln,sum` over
+100 Hz to 2500 Hz (one-third octave) or 125 Hz to 2000 Hz (octave),
+rounded to an integer (Clause A.2.1, Formulae (A.1) to (A.3)). The Table 3
+reference values, the shifting rule and CI are identical in the 2013 and
+2020 editions of ISO 717-2 (the 2020 edition only adds Annex D for the
+rubber-ball heavy/soft impactor, out of scope here).
+
+## airborne_insulation
+
+```python
+airborne_insulation(
+    l1: Sequence[float] | np.ndarray,
+    l2: Sequence[float] | np.ndarray,
+    t2: Sequence[float] | np.ndarray,
+    *,
+    area: float | None = None,
+    volume: float | None = None,
+    t0: float = 0.5,
+) -> AirborneInsulationResult
+```
+
+Field airborne sound insulation per ISO 16283-1:2014.
+
+Computes, per frequency band, the level difference `D = L1 - L2`
+(Formula (1)), the standardized level difference
+`DnT = D + 10 lg(T/T0)` (Formula (2)) and, when the partition area
+and receiving-room volume are given, the apparent sound reduction
+index `R' = D + 10 lg(S/A)` with `A = 0,16 V / T` (Formula (4)
+and (5)).
+
+`l1` and `l2` may be one value per band (already energy-averaged)
+or a two-dimensional `(positions, bands)` array, in which case the
+positions are energy-averaged with Formula (9). The band levels are
+assumed already corrected for background noise (Clause 9.2).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `l1` | Source-room sound pressure levels, in dB. |
+| `l2` | Receiving-room sound pressure levels, in dB. |
+| `t2` | Receiving-room reverberation time per band, in seconds. |
+| `area` | Area `S` of the common partition, in m² (optional; required together with `volume` for `R'`). |
+| `volume` | Receiving-room volume `V`, in m³ (optional; required together with `area` for `R'`). |
+| `t0` | Reference reverberation time `T0`, in seconds (default 0,5 s for dwellings, Clause 3.13). |
+
+**Returns:** [`AirborneInsulationResult`](/phonometry/reference/api/building/insulation/#airborneinsulationresult) with `d`, `dnt` and `r_prime` (the latter `None` unless `area` and `volume` are both given).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the band counts of `l1`, `l2` and `t2` differ, if only one of `area`/`volume` is supplied, if `t2`/`t0` are not positive, or if inputs are non-finite. |
+
+## AirborneInsulationResult
+
+```python
+AirborneInsulationResult(
+    d: np.ndarray,
+    dnt: np.ndarray,
+    r_prime: np.ndarray | None,
+)
+```
+
+Per-band field airborne sound insulation (ISO 16283-1:2014).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `d` | Level difference `D = L1 - L2` per band, in dB (Clause 3.12, Formula (1)). |
+| `dnt` | Standardized level difference `DnT` per band, in dB (Clause 3.13, Formula (2)). |
+| `r_prime` | Apparent sound reduction index `R'` per band, in dB (Clause 3.14, Formula (4)), or `None` when the partition area and receiving-room volume were not supplied. |
+
+### AirborneInsulationResult.plot()
+
+```python
+AirborneInsulationResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the per-band insulation quantities (`DnT`, `D`, `R'`).
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+## energy_average_level
+
+```python
+energy_average_level(
+    levels: Sequence[float] | np.ndarray,
+    axis: int = -1,
+) -> np.ndarray | float
+```
+
+Energy-average sound pressure level (ISO 16283-1:2014, Formula (9)).
+
+Combines sound pressure levels measured at several microphone
+positions into `L = 10 lg( (1/n) sum_i 10^(Li/10) )`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | Sound pressure levels, in dB, at the `n` positions to be averaged along `axis`. |
+| `axis` | Axis over which to average (default the last axis). |
+
+**Returns:** The energy-average level, in dB; a scalar `float` when the result is zero-dimensional, otherwise an array.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `levels` is empty or contains non-finite values. |
+
+## ExtendedImpactRatingResult
+
+```python
+ExtendedImpactRatingResult(
+    rating: float,
+    ci: float,
+    ci_50_2500: float | None,
+    core: ImpactRatingResult,
+)
+```
+
+Weighted impact rating with `CI,50-2500` (ISO 717-2:2020 A.2.1 NOTE).
+
+Values are integers unless computed with `one_decimal=True`.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `rating` | Weighted impact rating (`Ln,w`, ...) from the core 100-3150 Hz bands, in dB. |
+| `ci` | Core spectrum adaptation term `CI` (100-2500 Hz), in dB. |
+| `ci_50_2500` | Enlarged-range term `CI,50-2500`, in dB, or `None` when the supplied bands do not cover 50-2500 Hz. |
+| `core` | The integer-mode [`ImpactRatingResult`](/phonometry/reference/api/building/insulation/#impactratingresult) of the core bands (independent of `one_decimal`). |
+
+## ExtendedWeightedRatingResult
+
+```python
+ExtendedWeightedRatingResult(
+    rating: float,
+    c: float,
+    ctr: float,
+    c_50_3150: float | None,
+    c_50_5000: float | None,
+    c_100_5000: float | None,
+    ctr_50_3150: float | None,
+    ctr_50_5000: float | None,
+    ctr_100_5000: float | None,
+    core: WeightedRatingResult,
+)
+```
+
+Weighted rating with the enlarged-range adaptation terms (ISO 717-1 Annex B).
+
+All values are integers unless the result was computed with
+`one_decimal=True` (the "1/10 dB for the expression of uncertainty"
+variant of Clauses 4.4/4.5), in which case they carry one decimal place.
+An extended term is `None` when the supplied bands do not cover its
+frequency range.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `rating` | Weighted rating (`Rw`, `R'w`, ...) from the core 100-3150 Hz bands, in dB. |
+| `c` | Core spectrum adaptation term `C` (100-3150 Hz), in dB. |
+| `ctr` | Core spectrum adaptation term `Ctr` (100-3150 Hz), in dB. |
+| `c_50_3150` | `C50-3150`, in dB, or `None`. |
+| `c_50_5000` | `C50-5000`, in dB, or `None`. |
+| `c_100_5000` | `C100-5000`, in dB, or `None`. |
+| `ctr_50_3150` | `Ctr,50-3150`, in dB, or `None`. |
+| `ctr_50_5000` | `Ctr,50-5000`, in dB, or `None`. |
+| `ctr_100_5000` | `Ctr,100-5000`, in dB, or `None`. |
+| `core` | The integer-mode [`WeightedRatingResult`](/phonometry/reference/api/building/insulation/#weightedratingresult) of the core bands (independent of `one_decimal`), for plotting and the unfavourable-deviation sum. |
+
+## facade_insulation
+
+```python
+facade_insulation(
+    l1_2m: Sequence[float] | np.ndarray,
+    l2: Sequence[float] | np.ndarray,
+    t2: Sequence[float] | np.ndarray,
+    *,
+    area: float | None = None,
+    volume: float | None = None,
+    surface_level: Sequence[float] | np.ndarray | None = None,
+    method: str = 'loudspeaker',
+    t0: float = 0.5,
+    frequencies: Sequence[float] | np.ndarray | None = None,
+) -> FacadeInsulationResult
+```
+
+Field façade sound insulation per ISO 16283-3:2016.
+
+Computes, per frequency band, the global-method level difference
+`D2m = L1,2m - L2` (Clause 3.14), its standardized form
+`D2m,nT = D2m + 10 lg(T/T0)` (Clause 3.15) and, when the
+receiving-room volume is given, its normalized form
+`D2m,n = D2m - 10 lg(A/A0)` with the Sabine equivalent absorption
+area `A = 0,16 V/T` (Clause 3.17) and `A0 = 10 m²` (Clause 3.16).
+When a surface level `L1,s` (microphone on the test element),
+together with the element area `S` and the volume, is supplied it
+also computes the apparent sound reduction index of the element
+method: `R'45° = L1,s - L2 + 10 lg(S/A) - 1,5` for a loudspeaker
+source (Clause 3.12) or `R'tr,s = L1,s - L2 + 10 lg(S/A) - 3` for a
+road-traffic source (Clause 3.13). The defining formulas are unnumbered
+inline in the Clause 3 terms.
+
+`l1_2m`, `l2` and `surface_level` may be one value per band
+(already energy-averaged) or a two-dimensional `(positions, bands)`
+array, in which case the positions are energy-averaged with the
+surface-level formula (Clause 9.5.1, Formula (7)). Band levels are
+assumed already corrected for background
+noise. The single-number rating uses the ISO 717-1 airborne reference
+curve (Annex F); pass the desired 16-band quantity to
+[`weighted_rating`](/phonometry/reference/api/building/insulation/#weighted_rating).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `l1_2m` | Outdoor sound pressure levels 2 m in front of the façade, in dB. |
+| `l2` | Receiving-room sound pressure levels, in dB. |
+| `t2` | Receiving-room reverberation time per band, in seconds. |
+| `area` | Area `S` of the test element, in m² (optional; required with `volume` and `surface_level` for `R'`). |
+| `volume` | Receiving-room volume `V`, in m³ (optional; required for `D2m,n` and for `R'`). |
+| `surface_level` | Outdoor surface level `L1,s` on the test element, in dB (optional; required with `area` and `volume` for `R'`). |
+| `method` | `"loudspeaker"` (45° incidence, -1,5 dB) or `"road_traffic"` (all-angle incidence, -3 dB); selects the `R'` correction (Clause 3.12 / 3.13). |
+| `t0` | Reference reverberation time `T0`, in seconds (default 0,5 s for dwellings, Clause 3.15). |
+| `frequencies` | Optional band centre frequencies, in Hz, carried on the result for plotting. |
+
+**Returns:** [`FacadeInsulationResult`](/phonometry/reference/api/building/insulation/#facadeinsulationresult) with `d_2m`, `d_2m_nt`, `d_2m_n` (`None` unless `volume` is given) and `r_prime` (`None` unless `surface_level`, `area` and `volume` are all given).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If band counts differ, if `method` is unknown, if `t2`/`t0`/`area`/`volume` are not positive, if `area` is given without `surface_level`, if `surface_level` and `area` are given without `volume`, if `frequencies` is given with a length that differs from the band count, or if inputs are non-finite. Supplying `surface_level` alone is not an error: `r_prime` simply stays `None`. |
+
+## FacadeInsulationResult
+
+```python
+FacadeInsulationResult(
+    d_2m: np.ndarray,
+    d_2m_nt: np.ndarray,
+    d_2m_n: np.ndarray | None,
+    r_prime: np.ndarray | None,
+    frequencies: np.ndarray | None = None,
+)
+```
+
+Per-band field façade sound insulation (ISO 16283-3).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `d_2m` | Level difference `D2m = L1,2m - L2` per band, in dB (Clause 3.14; `Dls,2m` loudspeaker, `Dtr,2m` traffic). |
+| `d_2m_nt` | Standardized level difference `D2m,nT = D2m + 10 lg(T/T0)` per band, in dB (Clause 3.15). |
+| `d_2m_n` | Normalized level difference `D2m,n = D2m - 10 lg(A/A0)` per band, in dB (Clause 3.16), or `None` when the receiving-room volume was not supplied. |
+| `r_prime` | Apparent sound reduction index `R'45°` (loudspeaker, Clause 3.12) or `R'tr,s` (road traffic, Clause 3.13) per band, in dB, or `None` unless a surface level together with the element area and receiving-room volume were supplied. |
+| `frequencies` | Band centre frequencies, in Hz, or `None`. |
+
+### FacadeInsulationResult.plot()
+
+```python
+FacadeInsulationResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the per-band façade insulation profile (ISO 16283-3).
+
+Draws the standardized level difference and any other available
+quantities (`D2m`, `D2m,n`, `R'`) against frequency. Requires
+matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+## impact_improvement_adaptation_term
+
+```python
+impact_improvement_adaptation_term(
+    delta_l: Sequence[float] | np.ndarray,
+) -> int
+```
+
+Spectrum adaptation term `CI,Δ` of a floor covering (ISO 717-2:2020 A.2.2).
+
+`CI,Δ = CI,r,0 − CI,r` (Formula (A.4)) with `CI,r,0 = −11 dB` (the
+bare Table 4 reference floor) and `CI,r` the ISO 717-2 spectrum
+adaptation term of the reference floor with the covering under test,
+`Ln,r = Ln,r,0 − ΔL` (Formula (1)). Together with
+[`weighted_impact_improvement`](/phonometry/reference/api/building/insulation/#weighted_impact_improvement) it yields the single-number reduction
+for a flat spectrum, `ΔLlin = ΔLw + CI,Δ` (Formula (A.5)). ISO 16251-1
+Clause 8 e) requires this term in the statement of results.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `delta_l` | The reduction of impact sound pressure level `ΔL` per band, in dB — 16 one-third-octave values from 100 Hz to 3150 Hz. |
+
+**Returns:** The spectrum adaptation term `CI,Δ`, in dB (integer).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `delta_l` is not 16 one-third-octave values, or is non-finite. |
+
+## impact_insulation
+
+```python
+impact_insulation(
+    li: Sequence[float] | np.ndarray,
+    t2: Sequence[float] | np.ndarray,
+    *,
+    volume: float | None = None,
+    t0: float = 0.5,
+) -> ImpactInsulationResult
+```
+
+Field impact sound insulation per ISO 16283-2 (tapping machine).
+
+Computes, per frequency band, the standardized impact sound pressure
+level `L'nT = Li - 10 lg(T/T0)` (Formula (1)) and, when the
+receiving-room volume is given, the normalized impact sound pressure
+level `L'n = Li + 10 lg(A/A0)` with the Sabine equivalent absorption
+area `A = 0,16 V / T` (Formula (6)) and the reference absorption area
+`A0 = 10 m²` (Formula (2)).
+
+`li` may be one value per band (already energy-averaged) or a
+two-dimensional `(positions, bands)` array, in which case the
+positions are energy-averaged with Formula (10). The band levels are
+assumed already corrected for background noise (Clause 9).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `li` | Energy-average impact sound pressure levels, in dB. |
+| `t2` | Receiving-room reverberation time per band, in seconds. |
+| `volume` | Receiving-room volume `V`, in m³ (optional; required for `L'n`). |
+| `t0` | Reference reverberation time `T0`, in seconds (default 0,5 s for dwellings, Clause 3.13). |
+
+**Returns:** [`ImpactInsulationResult`](/phonometry/reference/api/building/insulation/#impactinsulationresult) with `l_n_t` and `l_n` (the latter `None` unless `volume` is given).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the band counts of `li` and `t2` differ, if `t2`/`t0`/`volume` are not positive, or if inputs are non-finite. |
+
+## ImpactInsulationResult
+
+```python
+ImpactInsulationResult(l_n_t: np.ndarray, l_n: np.ndarray | None)
+```
+
+Per-band field impact sound insulation (ISO 16283-2).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `l_n_t` | Standardized impact sound pressure level `L'nT = Li - 10 lg(T/T0)` per band, in dB (Clause 3.13, Formula (1)). |
+| `l_n` | Normalized impact sound pressure level `L'n = Li + 10 lg(A/A0)` per band, in dB (Clause 3.14, Formula (2)), or `None` when the receiving-room volume was not supplied. |
+
+### ImpactInsulationResult.plot()
+
+```python
+ImpactInsulationResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the per-band impact levels (`L'nT` and, if present, `L'n`).
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+## ImpactRatingResult
+
+```python
+ImpactRatingResult(
+    rating: int,
+    ci: int,
+    unfavourable_sum: float,
+    band_centers: np.ndarray | None = None,
+    measured: np.ndarray | None = None,
+    shifted_reference: np.ndarray | None = None,
+)
+```
+
+Single-number weighted impact rating and CI (ISO 717-2).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `rating` | Weighted impact rating (`Ln,w`, `L'n,w`, `L'nT,w`), the shifted reference read at 500 Hz, in dB (Clause 4.3; octave-band ratings include the -5 dB reduction of Clause 4.3.2). Integer. |
+| `ci` | Spectrum adaptation term `CI` (Clause A.2.1), in dB. Integer. |
+| `unfavourable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5 bands). |
+| `band_centers` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
+| `measured` | The measured impact levels used for the rating (after the one-decimal reduction of Clause 4.3.1), in dB. Defaults to `None`. |
+| `shifted_reference` | Table 3 impact reference curve after the final shift, in dB. Defaults to `None`. |
+
+### ImpactRatingResult.plot()
+
+```python
+ImpactRatingResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the measured curve vs the shifted reference (ISO 717-2).
+
+Unfavourable deviations (measurement above the reference, the sign
+opposite to airborne) are shaded and `Ln,w (CI)` annotated.
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+## weighted_impact_improvement
+
+```python
+weighted_impact_improvement(delta_l: Sequence[float] | np.ndarray) -> int
+```
+
+Weighted reduction of impact sound pressure level `ΔLw` (ISO 717-2:2020 §5).
+
+Relates a measured improvement spectrum `ΔL` to the heavyweight reference
+floor of Table 4: the reference level with the covering is
+`Ln,r = Ln,r,0 − ΔL` (Formula (1)) and the weighted improvement is
+`ΔLw = Ln,r,0,w − Ln,r,w = 78 − Ln,r,w` (Formula (2)), where `Ln,r,w` is
+the ISO 717-2 weighted rating of `Ln,r` from [`weighted_impact_rating`](/phonometry/reference/api/building/insulation/#weighted_impact_rating).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `delta_l` | The reduction of impact sound pressure level `ΔL` per band, in dB — 16 one-third-octave values from 100 Hz to 3150 Hz (e.g. from a floor-covering measurement to ISO 10140-3 or ISO 16251-1). |
+
+**Returns:** The weighted reduction `ΔLw`, in dB (rounded, per ISO 717-2).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If `delta_l` is not 16 one-third-octave values, or is non-finite. |
+
+## weighted_impact_rating
+
+```python
+weighted_impact_rating(
+    values_by_band: Sequence[float] | np.ndarray,
+    bands: str | None = None,
+) -> ImpactRatingResult
+```
+
+Single-number weighted impact rating and CI per ISO 717-2.
+
+Applies the reference-curve method of Clause 4.3: the Table 3 impact
+reference curve is shifted in 1 dB steps towards the measured curve
+until the sum of unfavourable deviations is as large as possible but
+not more than 32,0 dB (16 one-third-octave bands, 100 Hz to 3150 Hz)
+or 10,0 dB (5 octave bands, 125 Hz to 2000 Hz). For impact sound an
+unfavourable deviation occurs where the **measurement exceeds** the
+reference (the sign opposite to ISO 717-1 airborne). The rating is the
+shifted reference read at 500 Hz; for octave bands it is then reduced
+by 5 dB (Clause 4.3.2). The spectrum adaptation term `CI` follows
+Clause A.2.1. Input values are first reduced to one decimal place
+(Clause 4.3.1, footnote 1).
+
+The shift search reuses the verified engine of [`weighted_rating`](/phonometry/reference/api/building/insulation/#weighted_rating)
+on the negated curves: minimising `Σ max(0, measured - (ref + k))`
+over `k` equals maximising `Σ max(0, (-ref) + (-k) - (-measured))`,
+the airborne problem, so no separate search is duplicated.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `values_by_band` | Measured impact levels (`Ln`, `L'n`, `L'nT`) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. |
+| `bands` | `"third-octave"`, `"octave"` or `None` to infer the band set from the number of values. |
+
+**Returns:** [`ImpactRatingResult`](/phonometry/reference/api/building/insulation/#impactratingresult) with `rating`, `ci` and `unfavourable_sum`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the number of values does not match the band set, or if any value is non-finite. |
+
+## weighted_impact_rating_extended
+
+```python
+weighted_impact_rating_extended(
+    values_by_band: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray | None = None,
+    *,
+    one_decimal: bool = False,
+) -> ExtendedImpactRatingResult
+```
+
+Weighted impact rating with `CI,50-2500` (ISO 717-2:2020 A.2.1).
+
+Computes the weighted impact rating from the core one-third-octave bands
+100-3150 Hz (Clause 4.3) and, when the input covers 50-2500 Hz, the
+enlarged-range spectrum adaptation term `CI,50-2500` of the A.2.1 NOTE:
+the energetic sum runs over 50-2500 Hz instead of 100-2500 Hz in
+Formula (A.1), `CI = Ln,sum − 15 − Ln,w`.
+
+With `one_decimal=True` the reference-curve shift runs in 0,1 dB steps
+and the sums keep one decimal place (Clauses 4.3.1/4.4; e.g. the
+reference floor yields `Ln,r,0,w = 77,6 dB` and `CI,r,0 = −10,3 dB`
+as printed in A.2.2).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `values_by_band` | Measured impact levels (`Ln`, `L'n`, `L'nT`) in dB, one-third-octave bands. |
+| `frequencies` | Band centre frequencies, in Hz (one per value). `None` assumes exactly the 16 core bands 100-3150 Hz. |
+| `one_decimal` | Use the 0,1 dB shift and one-decimal reductions. |
+
+**Returns:** An [`ExtendedImpactRatingResult`](/phonometry/reference/api/building/insulation/#extendedimpactratingresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the input is not one-dimensional and finite, the band counts differ, or the core bands are missing. |
+
+## weighted_rating
+
+```python
+weighted_rating(
+    values_by_band: Sequence[float] | np.ndarray,
+    bands: str | None = None,
+) -> WeightedRatingResult
+```
+
+Single-number weighted rating and C / Ctr per ISO 717-1.
+
+Applies the reference-curve method of Clause 4.4: the Table 3
+reference curve is shifted in 1 dB steps towards the measured curve
+until the sum of unfavourable deviations is as large as possible but
+not more than 32,0 dB (16 one-third-octave bands, 100 Hz to 3150 Hz)
+or 10,0 dB (5 octave bands, 125 Hz to 2000 Hz). The rating is the
+shifted reference read at 500 Hz. The spectrum adaptation terms
+`C` and `Ctr` follow Clause 4.5 with the Table 4 spectra No. 1 and
+No. 2. Input values are first reduced to one decimal place
+(Clause 4.4, footnote 1).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `values_by_band` | Measured band quantities (`R`, `R'`, `Dn`, `DnT` ...) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. |
+| `bands` | `"third-octave"`, `"octave"` or `None` to infer the band set from the number of values. |
+
+**Returns:** [`WeightedRatingResult`](/phonometry/reference/api/building/insulation/#weightedratingresult) with `rating`, `c`, `ctr` and `unfavourable_sum`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the number of values does not match the band set, or if any value is non-finite. |
+
+## weighted_rating_extended
+
+```python
+weighted_rating_extended(
+    values_by_band: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray | None = None,
+    *,
+    one_decimal: bool = False,
+) -> ExtendedWeightedRatingResult
+```
+
+Weighted rating with enlarged-range adaptation terms (ISO 717-1 Annex B).
+
+Computes the weighted rating from the core one-third-octave bands
+100-3150 Hz (Clause 4.4) and, for every enlarged frequency range covered
+by the input, the additional spectrum adaptation terms of Annex B
+(`C50-3150`, `C50-5000`, `C100-5000` and the `Ctr` counterparts)
+with the Table B.1 spectra: `Cj = XAj − Xw` where `XAj` sums over the
+bands of the enlarged range (Clause 4.5 with Annex B).
+
+With `one_decimal=True` the reference-curve shift runs in 0,1 dB steps
+and every reduction keeps one decimal place — the variant Clauses 4.4/4.5
+prescribe "for the expression of uncertainty" and ISO 12999-1:2020
+Annex B requires for the uncertainty of single-number values.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `values_by_band` | Measured band quantities (`R`, `R'`, `Dn`, `DnT` ...) in dB, one-third-octave bands. |
+| `frequencies` | Band centre frequencies, in Hz (one per value). `None` assumes exactly the 16 core bands 100-3150 Hz. The 16 core bands must always be present; extended terms are formed for each Annex B range whose bands are all present. |
+| `one_decimal` | Use the 0,1 dB shift and one-decimal reductions. |
+
+**Returns:** An [`ExtendedWeightedRatingResult`](/phonometry/reference/api/building/insulation/#extendedweightedratingresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the input is not one-dimensional and finite, the band counts differ, or the core bands are missing. |
+
+## WeightedRatingResult
+
+```python
+WeightedRatingResult(
+    rating: int,
+    c: int,
+    ctr: int,
+    unfavourable_sum: float,
+    band_centers: np.ndarray | None = None,
+    measured: np.ndarray | None = None,
+    shifted_reference: np.ndarray | None = None,
+)
+```
+
+Single-number weighted rating and adaptation terms (ISO 717-1).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `rating` | Weighted rating (`Rw`, `R'w`, `DnT,w` ...), the shifted reference read at 500 Hz, in dB (Clause 4.4). Integer. |
+| `c` | Spectrum adaptation term `C` (spectrum No. 1), in dB (Clause 4.5). Integer. |
+| `ctr` | Spectrum adaptation term `Ctr` (spectrum No. 2), in dB (Clause 4.5). Integer. |
+| `unfavourable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5 bands). |
+| `band_centers` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
+| `measured` | The measured band quantities used for the rating (after the one-decimal reduction of Clause 4.4), in dB. Defaults to `None`. |
+| `shifted_reference` | Table 3 reference curve after the final shift, in dB. Defaults to `None`. |
+
+### WeightedRatingResult.plot()
+
+```python
+WeightedRatingResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the measured curve vs the shifted reference (ISO 717-1).
+
+Unfavourable deviations (reference above measurement) are shaded and
+`Rw (C; Ctr)` annotated. Requires matplotlib
+(`pip install phonometry[plot]`); returns the
+`Axes`.

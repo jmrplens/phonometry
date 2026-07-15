@@ -47,8 +47,9 @@ _G = 10 ** (3 / 10)
 # BS EN 61260-1:2014 Table 1, high side (Omega >= 1), as exponents x of the
 # octave-band normalized frequency G**x with (min, max) limits per class.
 # The low side mirrors these at 1/Omega (Formula 10). The band-edge rows
-# G**(1/2 -+ epsilon) encode the discontinuity at the edge: the pass-band
-# segment carries the max limits, the stop-band segment the min limits.
+# G**(1/2 - epsilon) and G**(1/2 + epsilon) encode the discontinuity at the
+# edge: the pass-band segment carries the max limits, the stop-band segment
+# the min limits.
 #
 # Pass-band max limits (min is constant -0.4 dB class 1 / -0.6 dB class 2):
 _PASSBAND_MAX: List[Tuple[float, float, float]] = [
@@ -150,8 +151,9 @@ def class_limits(
         +1.6 dB) *at* that single frequency, which this convention relaxes to
         the pass-band minimum; the discrepancy has measure zero -- any
         continuous response violating the edge row is caught at ``edge + eps``
-        by the interpolated stop-band mask. The 2014 edition defines only
-        ``G^(1/2) -+ eps`` rows, which the masks match exactly.
+        by the interpolated stop-band mask. The 2014 edition defines only the
+        ``G^(1/2) - eps`` and ``G^(1/2) + eps`` rows, which the masks match
+        exactly.
     """
     spec = _FILTER_EDITIONS.get(edition)
     if spec is None:

@@ -76,6 +76,12 @@ og:
 llms:
 	$(PYTHON) scripts/generate_llms.py
 
+# Regenerate the committed Starlight API reference (site/src/content/docs/
+# reference/api + site/src/generated/api-sidebar.mjs) from the source
+# docstrings. CI fails if this drifts (see the api-docs job in python-app.yml).
+api-docs:
+	$(PYTHON) scripts/generate_api_docs.py
+
 # Regenerate the committed, versioned numerical conformance report. The
 # --file-header flag prepends the "do not hand-edit" note; the body is exactly
 # what the CI PR-comment harness computes. CI fails if this drifts (see the
@@ -101,4 +107,4 @@ coverage:
 check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs animations og llms \
-	conformance install-hooks test coverage check
+	api-docs conformance install-hooks test coverage check

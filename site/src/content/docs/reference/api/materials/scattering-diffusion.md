@@ -1,0 +1,727 @@
+---
+title: "materials.scattering_diffusion"
+description: "Public API of phonometry.materials.scattering_diffusion (auto-generated)."
+sidebar:
+  label: "scattering_diffusion"
+---
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+Random-incidence scattering and directional diffusion coefficients.
+
+Two complementary free-field / reverberation-room surface descriptors are
+implemented, each faithful to its own standard:
+
+* **ISO 17497-1:2004+A1:2014** - random-incidence *scattering* coefficient in
+  a reverberation room. Four reverberation times (Table 2) taken with and
+  without the test sample, with a static and a rotating turntable, give two
+  Sabine-form absorption coefficients: the random-incidence absorption
+  coefficient `alpha_s` (Clause 8.1.1, Eq. (1)) and the specular absorption
+  coefficient `alpha_spec` (Clause 8.1.2, Eq. (4)). Their ratio yields the
+  scattering coefficient `s = (alpha_spec - alpha_s) / (1 - alpha_s)`
+  (Clause 8.1.3, Eq. (5)). The turntable base plate is qualified through its
+  own scattering coefficient (Clause 8.1.4, Eq. (6)) against the Table 1
+  limits (Clause 6.2). Air properties come from the speed-of-sound and
+  energy-attenuation relations of Clause 8 (Eqs. (2)/(3), after ISO 9613-1),
+  and measurement accuracy from Annex A (Eqs. (A.1)-(A.5)).
+
+* **ISO 17497-2:2012** - directional *diffusion* coefficient in a free field.
+  From the set of reflected sound-pressure levels `L_i` on a semicircle or
+  hemisphere the autocorrelation diffusion coefficient `d_theta` is formed
+  for equal-area receivers (Clause 8.1, Formula (5)) or with per-receiver area
+  weights `N_i` (Formula (6)); the area weights follow from the solid-angle
+  factors of Clause 8.3 (Formula (8)). Finite-panel effects are removed by
+  normalising to the reference flat surface (Clause 8.2, Formula (7)), and the
+  random-incidence coefficient is the (weighted) average of the directional
+  coefficients over the source positions (Clause 8.4).
+
+Neither part of ISO 17497 contains a numeric worked example; the two methods
+are distinct measurements and the helpers are named per part so they are
+never mixed.
+
+## absorption_coefficient_uncertainty
+
+```python
+absorption_coefficient_uncertainty(
+    volume: float,
+    area: float,
+    *,
+    c: ArrayLike,
+    T_a: ArrayLike,
+    u_a: ArrayLike,
+    T_b: ArrayLike,
+    u_b: ArrayLike,
+) -> Real
+```
+
+Uncertainty of a Sabine absorption coefficient (ISO 17497-1, Eqs. (A.3)/(A.4)).
+
+`u_alpha = (55,3 V) / (c S) * sqrt((u_b / T_b^2)^2 + (u_a / T_a^2)^2)`.
+
+With situations `(T1, T2)` this is `u(alpha_s)` (Eq. (A.3)); with
+`(T3, T4)` it is `u(alpha_spec)` (Eq. (A.4)). The unsubscripted `c` of
+the standard is taken as a single (mean) speed of sound.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `volume` | Reverberation-room volume `V`, in cubic metres. |
+| `area` | Test-sample area `S`, in square metres. |
+| `c` | Speed of sound `c`, in m/s. |
+| `T_a` | Reverberation time of the first situation, in seconds. |
+| `u_a` | Standard uncertainty of `T_a` (Eq. (A.1)), in seconds. |
+| `T_b` | Reverberation time of the second situation, in seconds. |
+| `u_b` | Standard uncertainty of `T_b` (Eq. (A.1)), in seconds. |
+
+**Returns:** Combined standard uncertainty of the absorption coefficient (per band).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for non-positive `V`, `S`, `c` or `T`. |
+
+## air_attenuation_coefficient
+
+```python
+air_attenuation_coefficient(
+    pressure_attenuation_db_per_m: ArrayLike,
+) -> Real
+```
+
+Energy attenuation coefficient `m` (ISO 17497-1:2004, Clause 8, Eq. (3)).
+
+`m = alpha / (10 * lg(e)) approx. alpha / 4,343` (1/m), where `alpha` is
+the sound-*pressure* attenuation coefficient in dB/m obtained from
+ISO 9613-1 using the measured temperature and relative humidity.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `pressure_attenuation_db_per_m` | Pressure attenuation coefficient `alpha` from ISO 9613-1, in decibels per metre (scalar or per band). |
+
+**Returns:** Energy (power) attenuation coefficient `m`, in reciprocal metres.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if any value is negative or non-finite. |
+
+## area_factors
+
+```python
+area_factors(
+    elevations: ArrayLike,
+    *,
+    delta_theta: float,
+    delta_phi: float | None = None,
+) -> Real
+```
+
+Per-receiver area weights `N_i` (ISO 17497-2, Clause 8.3, Formula (8)).
+
+For a hemispherical measurement the solid-angle area sampled by a receiver
+at elevation `theta` (with angular spacings `delta_theta`, `delta_phi`)
+is:
+
+```text
+A_i = (4 pi / delta_phi) * sin^2(delta_theta / 4)   for theta = 0 deg
+A_i = 2 sin(theta) sin(delta_theta / 2)             for theta != 0, 90 deg
+A_i = sin(delta_theta / 2)                          for |theta| = 90 deg
+```
+
+and `N_i = A_i / A_min` (Formula (8)), with `A_min` the smallest `A_i`.
+All angles are handled internally in **radians**; the `theta = 0` form in
+particular requires `delta_phi` in radians to be dimensionally consistent
+with the `4 pi` factor.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `elevations` | Receiver elevation angles `theta` from the reference normal, in **degrees** (1-D), over the measurement domain `0 <= theta <= 90` (Figure 7). Formula (8) assumes a single receiver at `theta = 0` (the zenith); duplicate zenith entries would each take the full zenith area. |
+| `delta_theta` | Elevation spacing between adjacent receivers, in degrees (typically 5). |
+| `delta_phi` | Azimuth spacing between adjacent receivers, in degrees; defaults to `delta_theta`. Required (implicitly) for the `theta = 0` receiver. |
+
+**Returns:** Per-receiver area weights `N_i` (dimensionless, min value 1).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a non-1-D input or non-positive spacings. |
+
+## BASE_PLATE_BANDS
+
+*Constant* (`tuple`).
+
+```python
+BASE_PLATE_BANDS = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000)
+```
+
+## BASE_PLATE_MAX_SCATTERING
+
+*Constant* (`dict`).
+
+```python
+BASE_PLATE_MAX_SCATTERING = {100: 0.05, 125: 0.05, 160: 0.05, 200: 0.05, 250: 0.05, 315: 0.05, 400: 0.05, 500: 0.05, 630: 0.1, 800: 0.1, 1000: 0.1, 1250: 0.15, 1600: 0.15, 2000: 0.15, 2500: 0.2, 3150: 0.2, 4000: 0.2, 5000: 0.25}
+```
+
+## base_plate_scattering
+
+```python
+base_plate_scattering(
+    volume: float,
+    area: float,
+    *,
+    c1: ArrayLike,
+    T1: ArrayLike,
+    c3: ArrayLike,
+    T3: ArrayLike,
+    m1: ArrayLike = 0.0,
+    m3: ArrayLike = 0.0,
+) -> Real
+```
+
+Scattering coefficient of the base plate alone (ISO 17497-1, Eq. (6)).
+
+`s_base = 55,3 * (V / S) * (1 / (c3 T3) - 1 / (c1 T1)) - (4 V / S) * (m3 - m1)`.
+
+Ideally `T1 == T3`; a slightly non-symmetrical base plate shortens `T3`
+and this quality metric captures the resulting spurious scattering, which
+must not exceed the Table 1 limits (Clause 6.2). See
+[`check_base_plate_scattering`](/phonometry/reference/api/materials/scattering-diffusion/#check_base_plate_scattering).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `volume` | Reverberation-room volume `V`, in cubic metres. |
+| `area` | Test-sample area `S`, in square metres. |
+| `c1` | Speed of sound during `T1`, in m/s. |
+| `T1` | Reverberation time with the static base plate, in seconds. |
+| `c3` | Speed of sound during `T3`, in m/s. |
+| `T3` | Reverberation time with the rotating base plate, in seconds. |
+| `m1` | Energy attenuation coefficient during `T1`, in 1/m; defaults to 0. |
+| `m3` | Energy attenuation coefficient during `T3`, in 1/m; defaults to 0. |
+
+**Returns:** Base-plate scattering coefficient `s_base` (per band).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for non-positive `V`, `S`, `c` or `T`. |
+
+## check_base_plate_scattering
+
+```python
+check_base_plate_scattering(
+    scattering: Mapping[Any, float] | Sequence[float] | ArrayLike,
+) -> tuple[int, ...]
+```
+
+Verify base-plate scattering against Table 1 (ISO 17497-1, Clause 6.2).
+
+Every band whose measured base-plate scattering coefficient exceeds the
+[`BASE_PLATE_MAX_SCATTERING`](/phonometry/reference/api/materials/scattering-diffusion/#base_plate_max_scattering) limit is collected and a single
+[`ScatteringDiffusionWarning`](/phonometry/reference/api/materials/scattering-diffusion/#scatteringdiffusionwarning) is issued when any band is over the
+limit.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `scattering` | Measured base-plate scattering coefficients, either a mapping keyed by one-third-octave centre frequency (Hz) or a sequence of 18 values ordered as [`BASE_PLATE_BANDS`](/phonometry/reference/api/materials/scattering-diffusion/#base_plate_bands). |
+
+**Returns:** Tuple of the centre frequencies (Hz) that exceed the limit, in ascending order (empty if the base plate is compliant).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a mapping missing a band or a sequence of the wrong length. |
+
+## DiffusionResult
+
+```python
+DiffusionResult(angles: Real, levels: Real, coefficient: float)
+```
+
+A measured polar response and its diffusion coefficient (ISO 17497-2).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `angles` | Receiver angles of the polar response, in degrees. |
+| `levels` | Reflected sound-pressure level at each angle, in decibels. |
+| `coefficient` | Autocorrelation diffusion coefficient `d` (Formula (5)). |
+
+### DiffusionResult.plot()
+
+```python
+DiffusionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the polar response with the diffusion coefficient annotated.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+polar `Axes` and never calls `plt.show`.
+
+## directional_diffusion
+
+```python
+directional_diffusion(
+    angles: ArrayLike,
+    levels: ArrayLike,
+    *,
+    weights: ArrayLike | None = None,
+) -> DiffusionResult
+```
+
+Diffusion coefficient of a polar response (ISO 17497-2, Formula (5)/(6)).
+
+Convenience wrapper over [`directional_diffusion_coefficient`](/phonometry/reference/api/materials/scattering-diffusion/#directional_diffusion_coefficient) that
+keeps the receiver angles alongside the levels and returns a plottable
+[`DiffusionResult`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionresult).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `angles` | Receiver angles of the polar response, in degrees (1-D). |
+| `levels` | Reflected sound-pressure level at each angle, in decibels. |
+| `weights` | Optional area weights `N_i` (Formula (8)); `None` uses the equal-area Formula (5). |
+
+**Returns:** A [`DiffusionResult`](/phonometry/reference/api/materials/scattering-diffusion/#diffusionresult) with `.plot()`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if `angles` and `levels` differ in length or are shorter than two receivers. |
+
+## directional_diffusion_coefficient
+
+```python
+directional_diffusion_coefficient(
+    levels: ArrayLike,
+    *,
+    area_weights: ArrayLike | None = None,
+) -> float
+```
+
+Directional diffusion coefficient `d_theta` (ISO 17497-2, Formulas (5)/(6)).
+
+For a fixed source position and one-third-octave band, from the `n`
+reflected sound-pressure levels `L_i` (dB). With equal-area receivers
+(`area_weights is None`, Formula (5)):
+
+```text
+d_theta = ((sum p_i)^2 - sum p_i^2) / ((n - 1) * sum p_i^2)
+```
+
+where `p_i = 10^(L_i / 10)`. When each receiver samples a different area
+(Formula (6)) the per-receiver weights `N_i` (from [`area_factors`](/phonometry/reference/api/materials/scattering-diffusion/#area_factors))
+enter:
+
+```text
+d_theta = ((sum p_i N_i)^2 - sum N_i p_i^2)
+          / ((sum N_i - 1) * sum N_i p_i^2)
+```
+
+which reduces to Formula (5) for uniform weights. The coefficient is 0 when
+only one receiver has non-zero scattered energy and 1 when all receivers
+are equal.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | The `n >= 2` reflected sound-pressure levels `L_i`, in decibels (a level of `-inf` denotes a receiver with zero energy). |
+| `area_weights` | Optional per-receiver area weights `N_i` (Formula (8)); `None` selects the equal-area Formula (5). |
+
+**Returns:** Directional diffusion coefficient `d_theta` (a scalar).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for fewer than two receivers, a non-1-D input, a length mismatch, or non-positive total weight. |
+
+## normalized_diffusion_coefficient
+
+```python
+normalized_diffusion_coefficient(
+    d_theta: ArrayLike,
+    d_theta_reference: ArrayLike,
+) -> Real
+```
+
+Normalised directional diffusion coefficient (ISO 17497-2, Formula (7)).
+
+`d_theta_n = (d_theta - d_theta_r) / (1 - d_theta_r)`, removing the
+finite-panel diffusion of the reference flat surface `d_theta_r` (same
+projected footprint as the test surface). It maps `d_theta = d_theta_r`
+to 0 and `d_theta = 1` to 1.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `d_theta` | Directional diffusion coefficient of the test surface. |
+| `d_theta_reference` | Directional diffusion coefficient of the reference flat surface `d_theta_r`. |
+
+**Returns:** Normalised directional diffusion coefficient `d_theta_n`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if any reference coefficient equals 1 (undefined ratio). |
+
+## random_incidence_absorption
+
+```python
+random_incidence_absorption(
+    volume: float,
+    area: float,
+    *,
+    c1: ArrayLike,
+    T1: ArrayLike,
+    c2: ArrayLike,
+    T2: ArrayLike,
+    m1: ArrayLike = 0.0,
+    m2: ArrayLike = 0.0,
+) -> Real
+```
+
+Random-incidence absorption coefficient `alpha_s` (ISO 17497-1, Eq. (1)).
+
+`alpha_s = 55,3 * (V / S) * (1 / (c2 T2) - 1 / (c1 T1)) - (4 V / S) * (m2 - m1)`.
+
+Situation 1 is the empty room with the (static) base plate present;
+situation 2 adds the test sample, still without turntable rotation
+(Table 2, rows T1 and T2).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `volume` | Reverberation-room volume `V`, in cubic metres. |
+| `area` | Test-sample area `S`, in square metres. |
+| `c1` | Speed of sound during `T1`, in m/s (see [`speed_of_sound`](/phonometry/reference/api/materials/scattering-diffusion/#speed_of_sound)). |
+| `T1` | Reverberation time without sample (base plate only), in seconds. |
+| `c2` | Speed of sound during `T2`, in m/s. |
+| `T2` | Reverberation time with the test sample, in seconds. |
+| `m1` | Energy attenuation coefficient during `T1`, in 1/m (see [`air_attenuation_coefficient`](/phonometry/reference/api/materials/scattering-diffusion/#air_attenuation_coefficient)); defaults to 0. |
+| `m2` | Energy attenuation coefficient during `T2`, in 1/m; defaults to 0. |
+
+**Returns:** Random-incidence absorption coefficient `alpha_s` (per band).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for non-positive `V`, `S`, `c` or `T`. |
+
+## random_incidence_diffusion
+
+```python
+random_incidence_diffusion(
+    directional_coefficients: ArrayLike,
+    *,
+    weights: ArrayLike | None = None,
+) -> float
+```
+
+Random-incidence diffusion coefficient `d` (ISO 17497-2, Clause 8.4).
+
+The (normalised or non-normalised) directional coefficients are averaged
+over the source positions. Hemispherical measurements use **equal**
+weightings (`weights is None`); two-dimensional (single-plane)
+measurements use the source weighting of Clause 8.4 - weight 1 for the
+0 deg source and weight 3 for each of the four +/-30 deg, +/-60 deg sources
+(see [`TWO_DIMENSIONAL_SOURCE_WEIGHTS`](/phonometry/reference/api/materials/scattering-diffusion/#two_dimensional_source_weights)).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `directional_coefficients` | Directional diffusion coefficients `d_theta` (or `d_theta_n`), one per source position (1-D). |
+| `weights` | Optional source-position weights; `None` averages with equal weight. |
+
+**Returns:** Random-incidence diffusion coefficient `d` (a scalar).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an empty or non-1-D input, a length mismatch, or non-positive total weight. |
+
+## reverberation_time_uncertainty
+
+```python
+reverberation_time_uncertainty(times: ArrayLike) -> Real
+```
+
+Standard uncertainty of a reverberation time (ISO 17497-1, Eq. (A.1)).
+
+`u = sqrt( sum_i (T_i - Tbar)^2 / (N (N - 1)) )` with `Tbar` the mean of
+the `N` spatially-averaged measurements (Eq. (A.2)); this is the standard
+error of the mean.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `times` | The `N >= 2` reverberation-time measurements, in seconds. |
+
+**Returns:** Standard uncertainty `u` of the mean reverberation time (0-d).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if fewer than two measurements are supplied. |
+
+## scattering_coefficient
+
+```python
+scattering_coefficient(
+    alpha_spec: ArrayLike,
+    alpha_s: ArrayLike,
+    *,
+    truncate_negative: bool = True,
+) -> Real
+```
+
+Random-incidence scattering coefficient `s` (ISO 17497-1, Eq. (5)).
+
+`s = 1 - (1 - alpha_spec) / (1 - alpha_s)
+= (alpha_spec - alpha_s) / (1 - alpha_s)`.
+
+Following the presentation rule of Clause 8.3, negative results are
+truncated to 0 while values greater than 1 (which can occur through edge
+effects, Clause 6.3.2) are **kept** and reported. Rounding to 0,01 for a
+results table is left to the caller.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `alpha_spec` | Specular absorption coefficient `alpha_spec` (Eq. (4)). |
+| `alpha_s` | Random-incidence absorption coefficient `alpha_s` (Eq. (1)). |
+| `truncate_negative` | If `True` (default), clip negative `s` to 0 per Clause 8.3; values above 1 are never clipped. |
+
+**Returns:** Scattering coefficient `s` (per band).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if any `alpha_s` equals 1 (undefined ratio). |
+
+## scattering_coefficient_spectrum
+
+```python
+scattering_coefficient_spectrum(
+    frequencies: ArrayLike,
+    specular_absorption: ArrayLike,
+    random_absorption: ArrayLike,
+    *,
+    truncate_negative: bool = True,
+) -> ScatteringResult
+```
+
+Scattering-coefficient spectrum `s(f)` (ISO 17497-1, Eq. (5)).
+
+Convenience wrapper over [`scattering_coefficient`](/phonometry/reference/api/materials/scattering-diffusion/#scattering_coefficient) that pairs the
+per-band specular `alpha_spec` (Eq. (4)) and random-incidence `alpha_s`
+(Eq. (1)) absorptions with their band centres and returns a plottable
+[`ScatteringResult`](/phonometry/reference/api/materials/scattering-diffusion/#scatteringresult).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | One-third-octave band centres, in hertz (1-D). |
+| `specular_absorption` | Specular absorption `alpha_spec` per band. |
+| `random_absorption` | Random-incidence absorption `alpha_s` per band. |
+| `truncate_negative` | Clip negative `s` to 0 (Clause 8.3 default). |
+
+**Returns:** A [`ScatteringResult`](/phonometry/reference/api/materials/scattering-diffusion/#scatteringresult) with `.plot()`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if the three inputs differ in length, are empty, or any `alpha_s` equals 1. |
+
+## scattering_coefficient_uncertainty
+
+```python
+scattering_coefficient_uncertainty(
+    alpha_spec: ArrayLike,
+    alpha_s: ArrayLike,
+    u_alpha_spec: ArrayLike,
+    u_alpha_s: ArrayLike,
+) -> ScatteringUncertainty
+```
+
+Uncertainty of the scattering coefficient (ISO 17497-1, Eq. (A.5)).
+
+`u_s = |(alpha_spec - 1) / (1 - alpha_s)|
+* sqrt((u_alpha_spec / (alpha_spec - 1))^2 + (u_alpha_s / (1 - alpha_s))^2)`,
+
+with the expanded uncertainty `U = 2 u_s` (95 % confidence).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `alpha_spec` | Specular absorption coefficient `alpha_spec` (Eq. (4)). |
+| `alpha_s` | Random-incidence absorption coefficient `alpha_s` (Eq. (1)). |
+| `u_alpha_spec` | Standard uncertainty of `alpha_spec` (Eq. (A.4)). |
+| `u_alpha_s` | Standard uncertainty of `alpha_s` (Eq. (A.3)). |
+
+**Returns:** A [`ScatteringUncertainty`](/phonometry/reference/api/materials/scattering-diffusion/#scatteringuncertainty) with `u_s` and `U = 2 u_s`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if any `alpha_s` equals 1 or any `alpha_spec` equals 1. |
+
+## ScatteringDiffusionWarning
+
+Advisory for out-of-range scattering/diffusion measurement conditions.
+
+## ScatteringResult
+
+```python
+ScatteringResult(
+    frequencies: Real,
+    scattering: Real,
+    random_incidence: Real,
+    specular: Real,
+)
+```
+
+A random-incidence scattering-coefficient spectrum (ISO 17497-1).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | One-third-octave band centre frequencies, in hertz. |
+| `scattering` | Scattering coefficient `s` per band (Eq. (5)). |
+| `random_incidence` | Random-incidence absorption `alpha_s` (Eq. (1)). |
+| `specular` | Specular absorption `alpha_spec` (Eq. (4)). |
+
+### ScatteringResult.plot()
+
+```python
+ScatteringResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the scattering coefficient `s` versus frequency.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes` and never calls `plt.show`.
+
+## ScatteringUncertainty
+
+```python
+ScatteringUncertainty(u_scattering: Real, expanded: Real)
+```
+
+Uncertainty of the scattering coefficient (ISO 17497-1, Annex A).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `u_scattering` | Combined standard uncertainty `u_s` of the scattering coefficient (Eq. (A.5)). |
+| `expanded` | Expanded uncertainty `U = 2 u_s` at 95 % confidence (Annex A). |
+
+## specular_absorption_coefficient
+
+```python
+specular_absorption_coefficient(
+    volume: float,
+    area: float,
+    *,
+    c3: ArrayLike,
+    T3: ArrayLike,
+    c4: ArrayLike,
+    T4: ArrayLike,
+    m3: ArrayLike = 0.0,
+    m4: ArrayLike = 0.0,
+) -> Real
+```
+
+Specular absorption coefficient `alpha_spec` (ISO 17497-1, Eq. (4)).
+
+`alpha_spec = 55,3 * (V / S) * (1 / (c4 T4) - 1 / (c3 T3)) - (4 V / S) * (m4 - m3)`.
+
+Situation 3 is the rotating base plate without the sample; situation 4 is
+the sample on the rotating turntable (Table 2, rows T3 and T4). The
+apparent (specular) absorption includes the energy lost to scattering.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `volume` | Reverberation-room volume `V`, in cubic metres. |
+| `area` | Test-sample area `S`, in square metres. |
+| `c3` | Speed of sound during `T3`, in m/s. |
+| `T3` | Reverberation time, rotating base plate without sample, in seconds. |
+| `c4` | Speed of sound during `T4`, in m/s. |
+| `T4` | Reverberation time, sample on the rotating turntable, in seconds. |
+| `m3` | Energy attenuation coefficient during `T3`, in 1/m; defaults to 0. |
+| `m4` | Energy attenuation coefficient during `T4`, in 1/m; defaults to 0. |
+
+**Returns:** Specular absorption coefficient `alpha_spec` (per band).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for non-positive `V`, `S`, `c` or `T`. |
+
+## speed_of_sound
+
+```python
+speed_of_sound(temperature: ArrayLike) -> Real
+```
+
+Speed of sound in air (ISO 17497-1:2004, Clause 8, Eq. (2)).
+
+`c = 343,2 * sqrt((273,15 + t) / 293,15)` (m/s).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `temperature` | Air temperature `t`, in **degrees Celsius** (scalar or per band). |
+
+**Returns:** Speed of sound `c`, in metres per second.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if any temperature is at or below -273,15 degC. |
+
+## TWO_DIMENSIONAL_SOURCE_WEIGHTS
+
+*Constant* (`tuple`).
+
+```python
+TWO_DIMENSIONAL_SOURCE_WEIGHTS = (1, 3, 3, 3, 3)
+```

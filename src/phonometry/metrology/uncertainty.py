@@ -426,7 +426,7 @@ def monte_carlo(
         float per trial) so :meth:`MonteCarloResult.plot` can draw the
         output-distribution histogram.
     :return: A :class:`MonteCarloResult`.
-    :raises ValueError: for no inputs, non-positive trials or bad coverage.
+    :raises ValueError: for no inputs, fewer than 2 trials or bad coverage.
     """
     if len(quantities) == 0:
         raise ValueError("at least one input quantity is required.")

@@ -93,8 +93,8 @@ class ZwickerLoudness:
 
     ``loudness`` is the total loudness N in sone (the stationary value, or
     the maximum of the time-varying loudness); ``loudness_level`` is the
-    loudness level LN in phon obtained from ``loudness`` with the sone-to-
-    phon mapping of the reference implementation.  ``specific`` holds the
+    loudness level LN in phon obtained from ``loudness`` with the
+    sone-to-phon mapping of the reference implementation.  ``specific`` holds the
     specific loudness N' in sone/Bark at 0.1-Bark steps (240 values; for
     the time-varying method it is the pattern at the instant of maximum
     loudness).  ``n5``/``n10`` are the percentile loudness values N5/N10

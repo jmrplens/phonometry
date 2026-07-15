@@ -1,0 +1,332 @@
+---
+title: "building.facade_prediction"
+description: "Public API of phonometry.building.facade_prediction (auto-generated)."
+sidebar:
+  label: "facade_prediction"
+---
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+Façade sound insulation and outdoor radiation prediction (EN 12354-3/-4:2000).
+
+Two companion prediction models for the building envelope, both built on the
+same energy summation of element transmission factors `τ = 10^(-R/10)`,
+area-weighted by `Sᵢ/S` (small elements / air paths enter through their
+element-normalized level difference `Dn,e` with the reference area
+`A₀ = 10 m²`):
+
+**EN 12354-3 — outdoor → indoor (façade sound insulation).** The apparent
+sound reduction index of a façade for diffuse incidence (Formula 10):
+
+```text
+R' = -10 lg( Σ τe,i )         τe,i = (Sᵢ/S)·10^(-Rᵢ/10)   (Formula 15)
+                              τe,i = (A₀/S)·10^(-Dn,e,i/10) (Formula 14)
+```
+
+from which the loudspeaker- and traffic-referenced indices `R45 = R' + 1`
+(Formula 11) and `Rtr,s = R'` (Formula 12), and the primary output, the
+standardized level difference at 2 m (Formula 13):
+
+```text
+D2m,nT = R' + ΔLfs + 10 lg( V / (6·T0·S) )      T0 = 0,5 s
+```
+
+with the façade-shape term `ΔLfs` (Annex C; 0 dB for a flat reflecting
+façade).
+
+**EN 12354-4 — indoor → outdoor (sound radiated to the outside).** The sound
+power level radiated by a segment (Formulas 2-3):
+
+```text
+R' = -10 lg( Σ (Sᵢ/S)·10^(-Rᵢ/10) + Σ (A₀/S)·10^(-Dn,e,i/10) )
+LW = Lp,in + Cd - R' + 10 lg( S / S0 )          S0 = 1 m²
+```
+
+with the inside-field diffusivity term `Cd` (Annex B; -6 dB ideal diffuse,
+-5 dB average industrial). An opening is modelled here as an element whose "R"
+is the silencer insertion loss `D` (a bare opening is `D = 0`), combined in
+the *same* energy sum as the structural elements over the segment area `S` --
+a practical extension for a mixed wall-plus-opening segment. This is NOT the
+standard's Formula (4), which treats a segment made up *only* of openings with a
+different area normalization (`S` = the opening area) and sums its `LW` with
+the envelope segments only at the final energetic stage. The exterior level
+follows from the simplified Annex E attenuation `Atot` of a finite radiating
+side and `Lp = LW - Atot`.
+
+Single-number ratings reuse EN ISO 717-1 via [`phonometry.weighted_rating`](/phonometry/reference/api/building/insulation/#weighted_rating)
+(exact for `R'w + Ctr`, a good approximation for `R'w` — Part 3 NOTE 7).
+
+Clause/formula citations refer to EN 12354-3:2000 or EN 12354-4:2000.
+
+## facade_shape_level_difference
+
+```python
+facade_shape_level_difference(
+    shape: str,
+    *,
+    line_of_sight: float = 0.0,
+    absorption: float = 0.3,
+) -> float
+```
+
+Façade-shape level difference `ΔLfs` (EN 12354-3:2000 Annex C).
+
+Looks up Figure C.2 for the level difference caused by the exterior shape
+of the façade (gallery, balcony or terrace), as a function of the height
+of the line of sight from the source on the façade plane and the weighted
+sound absorption coefficient `αw` (EN ISO 11654) of the underside of the
+balcony/roof above. The value feeds `delta_l_fs` of
+[`facade_sound_reduction`](/phonometry/reference/api/building/facade-prediction/#facade_sound_reduction) (Formula 13). Intermediate `αw` values
+are interpolated linearly between the tabulated 0,3 / 0,6 / 0,9 columns,
+as the annex allows; outside that range the edge column applies. The
+2017 edition tabulates the same values (Tabelle C.1).
+
+Shapes follow the Figure C.2 numbering: `"plane_facade"` (1, always
+0 dB), `"gallery_2"` to `"gallery_5"` (2-5), `"balcony_6"` to
+`"balcony_8"` (6-8) and `"terrace_open"` / `"terrace_closed"` (9,
+open or closed fence).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `shape` | Façade shape key (see above). |
+| `line_of_sight` | Height of the line of sight from the source at the façade plane, in m (bins: below 1,5 m; 1,5 m to 2,5 m; above 2,5 m). |
+| `absorption` | Weighted absorption coefficient `αw` of the underside above the façade (default 0,3 — reflecting). |
+
+**Returns:** `ΔLfs`, in dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For an unknown shape, a negative height/absorption, or a shape/height combination the figure marks "does not apply". |
+
+## facade_sound_reduction
+
+```python
+facade_sound_reduction(
+    elements: Sequence[FacadeElement],
+    *,
+    area: float,
+    volume: float,
+    delta_l_fs: float = 0.0,
+    bands: str | None = None,
+    frequencies: Sequence[float] | None = None,
+) -> FacadePredictionResult
+```
+
+Predict façade airborne sound insulation `D2m,nT` (EN 12354-3:2000).
+
+Energetically combines the element transmission factors (Formula 10) into the
+apparent sound reduction index `R'`, then derives the loudspeaker/traffic
+indices (Formulas 11-12) and the standardized level difference (Formula 13).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `elements` | Façade elements (see [`FacadeElement`](/phonometry/reference/api/building/facade-prediction/#facadeelement)); per-band arrays must share a common length (5 octave or 16 third-octave bands to get single-number ratings). |
+| `area` | Total façade area `S` seen from inside, in m². |
+| `volume` | Receiving-room volume `V`, in m³ (Formula 13). |
+| `delta_l_fs` | Façade-shape term `ΔLfs` in dB (Annex C; 0 for a flat reflecting façade). |
+| `bands` | `"octave"`, `"third-octave"` or `None` (auto) for the single number ratings, passed to [`weighted_rating`](/phonometry/reference/api/building/insulation/#weighted_rating). |
+| `frequencies` | Optional band centre frequencies (Hz), stored on the result for plotting; must match the element band count. |
+
+**Returns:** A [`FacadePredictionResult`](/phonometry/reference/api/building/facade-prediction/#facadepredictionresult).
+
+## FacadeElement
+
+```python
+FacadeElement(
+    name: str,
+    area: float | None = None,
+    r: float | Sequence[float] | np.ndarray | None = None,
+    dn_e: float | Sequence[float] | np.ndarray | None = None,
+    insertion_loss: float | Sequence[float] | np.ndarray | None = None,
+)
+```
+
+One façade element as a transmission path (EN 12354-3/-4).
+
+Provide exactly one of `r` (an area element, Formula 15 / Part 4 Formula 3),
+`dn_e` (a small element or air path, Formula 14) or `insertion_loss` (an
+opening in Part 4, modelled as an element whose reduction is the silencer's
+insertion loss `D` and combined in the same energy sum -- a practical
+extension, not the standard's separate segment-of-openings Formula 4). Per-band
+values may be scalars or equal-length arrays.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | Label used in results and plots. |
+| `area` | Element area `Sᵢ` in m² (required for `r` / `insertion_loss`; ignored for `dn_e` small elements, which use `A₀` instead). |
+| `r` | Sound reduction index `Rᵢ` in dB. |
+| `dn_e` | Element-normalized level difference `Dn,e,i` in dB. |
+| `insertion_loss` | Opening silencer insertion loss `Dᵢ` in dB. |
+
+### FacadeElement.tau()
+
+```python
+FacadeElement.tau(total_area: float, n_bands: int) -> np.ndarray
+```
+
+Transmission factor `τ` of this element for the whole façade area.
+
+## FacadePredictionResult
+
+```python
+FacadePredictionResult(
+    r_prime: np.ndarray,
+    r_45: np.ndarray,
+    r_tr_s: np.ndarray,
+    d_2m_nt: np.ndarray,
+    element_r: dict[str, np.ndarray],
+    r_tr_s_w: int | None = None,
+    d_2m_nt_w: int | None = None,
+    c_tr: int | None = None,
+    frequencies: np.ndarray | None = None,
+)
+```
+
+Predicted façade airborne insulation (EN 12354-3:2000).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `r_prime` | Apparent sound reduction index `R'` per band, in dB (Formula 10). |
+| `r_45` | `R45 = R' + 1` (loudspeaker method, Formula 11), in dB. |
+| `r_tr_s` | `Rtr,s = R'` (traffic, Formula 12), in dB. |
+| `d_2m_nt` | Standardized level difference `D2m,nT` per band, in dB (Formula 13). |
+| `element_r` | Per-element partial index `Rp = -10 lg τ` per band, in dB. |
+| `r_tr_s_w` | Single-number `Rtr,s,w` (ISO 717-1); `None` if the bands are not the ISO 717-1 octave/third-octave set. |
+| `d_2m_nt_w` | Single-number `D2m,nT,w` (ISO 717-1); `None` as above. |
+| `c_tr` | Spectrum adaptation term `Ctr` of `R'` (ISO 717-1). |
+| `frequencies` | Band centre frequencies (Hz) for plotting; `None` labels the axis by band index. |
+
+### FacadePredictionResult.plot()
+
+```python
+FacadePredictionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the per-element partial indices and the façade `R'` / `D2m,nT`.
+
+## outdoor_attenuation
+
+```python
+outdoor_attenuation(width: float, height: float, distance: float) -> float
+```
+
+Simplified attenuation `Atot` of a finite radiating side (EN 12354-4 Annex E).
+
+Reception point in front of the centre of a rectangular side `S = width ·
+height` at perpendicular `distance` d. Uses the finite-side Formula (E.2a)
+up to the largest side dimension and the point-source Formula (E.2b) beyond
+it, following the Annex E Note 3 switching rule. The two branches do not
+join continuously at the switch distance: for a square 10 m x 10 m side
+the step is about -0,7 dB (about -0,3 dB for a 60 m x 10 m side), an
+artefact of the standard's own simplification. The `+6 dB` for radiation
+into the quarter-space over hard ground is built into the formula.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `width` | Side width `L`, in m. |
+| `height` | Side height `H`, in m. |
+| `distance` | Perpendicular distance `d` to the reception point, in m. |
+
+**Returns:** `Atot` in dB (subtract from `LW` to get the exterior `Lp`).
+
+## outdoor_level
+
+```python
+outdoor_level(
+    l_w: float | Sequence[float],
+    attenuation: float | Sequence[float],
+) -> float
+```
+
+Exterior level from one or more radiating sides (EN 12354-4 Formula E.1).
+
+`Lp = 10 lg( Σ 10^(LW,k/10) ) - Atot` for sides sharing a reception point,
+or the per-side `LW - Atot` energetically summed. Pass matching sequences
+of side power levels and their attenuations, or scalars for a single side; a
+scalar broadcasts against an array (e.g. several sides, one common `Atot`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `l_w` | Radiated power level(s) `LW` (dB) — scalar or per side. |
+| `attenuation` | Attenuation(s) `Atot` (dB) — scalar or per side. |
+
+**Returns:** Exterior sound pressure level `Lp` in dB.
+
+## radiated_sound_power
+
+```python
+radiated_sound_power(
+    elements: Sequence[FacadeElement],
+    *,
+    lp_in: float | Sequence[float] | np.ndarray,
+    area: float,
+    c_d: float = -6.0,
+    r_prime_cap: float | None = None,
+    octave_bands: Sequence[int] | None = None,
+) -> RadiatedPowerResult
+```
+
+Predict the sound power radiated outside by a segment (EN 12354-4:2000).
+
+`R'` combines the element transmission factors (Formula 3); the radiated
+power level is `LW = Lp,in + Cd - R' + 10 lg(S/S0)` (Formula 2). Openings
+may be included as [`FacadeElement`](/phonometry/reference/api/building/facade-prediction/#facadeelement) entries with an `insertion_loss`
+(0 for a bare opening); see the module docstring for how this differs from
+the standard's separate segment-of-openings Formula (4).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `elements` | Segment elements (see [`FacadeElement`](/phonometry/reference/api/building/facade-prediction/#facadeelement)). |
+| `lp_in` | Inside sound pressure level `Lp,in` per band, in dB. |
+| `area` | Segment area `S`, in m². |
+| `c_d` | Inside-field diffusivity term `Cd` in dB (Annex B: -6 ideal diffuse, -5 average industrial building). |
+| `r_prime_cap` | Optional practical maximum on `R'` per band, in dB. This cap is **not** part of Formula (2)/(3): it appears only as a footnote of the Annex G worked example ("R' limited to 40 dB" for field situations with unavoidable leaks). Pass `40.0` to reproduce Annex G; the default `None` computes the bare formulas. |
+| `octave_bands` | Optional octave-band centre frequencies (Hz) matching the per-band data; enables the A-weighted single number. |
+
+**Returns:** A [`RadiatedPowerResult`](/phonometry/reference/api/building/facade-prediction/#radiatedpowerresult).
+
+## RadiatedPowerResult
+
+```python
+RadiatedPowerResult(
+    l_w: np.ndarray,
+    r_prime: np.ndarray,
+    l_w_dba: float | None = None,
+    frequencies: np.ndarray | None = None,
+)
+```
+
+Predicted sound power radiated to the outside by a segment (EN 12354-4).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `l_w` | Radiated sound power level `LW` per band, in dB re 1 pW (Formula 2). |
+| `r_prime` | Apparent sound reduction index `R'` per band, in dB (Formula 3). |
+| `l_w_dba` | A-weighted `LW` in dB(A), if the bands are known octave bands; else `None`. |
+| `frequencies` | Band centre frequencies (Hz) for plotting; `None` labels the axis by band index. |
+
+### RadiatedPowerResult.plot()
+
+```python
+RadiatedPowerResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the radiated sound power level `LW` per band.

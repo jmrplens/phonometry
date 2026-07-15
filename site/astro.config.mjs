@@ -6,6 +6,7 @@ import starlightLinksValidator from 'starlight-links-validator';
 import mermaid from 'astro-mermaid';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { apiSidebar } from './src/generated/api-sidebar.mjs';
 
 // Converts deprecated HTML align attributes (emitted by markdown table
 // alignment) to CSS text-align, for WCAG2AA compliance (pa11y).
@@ -419,7 +420,7 @@ export default defineConfig({
           label: 'Reference',
           translations: { es: 'Referencia' },
           items: [
-            'reference/api',
+            apiSidebar,
             'reference/theory',
             'reference/conformance',
           ],

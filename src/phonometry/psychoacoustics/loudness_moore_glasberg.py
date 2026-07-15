@@ -789,8 +789,9 @@ def loudness_moore_glasberg_from_spectrum(
         ``"free"`` (frontal free field, default), ``"diffuse"`` (diffuse
         field) or ``"eardrum"`` (levels already specified at the tympanic
         membrane, e.g. a flat earphone).
-    :param presentation: ``"binaural"`` (equivalently ``"diotic"``: the same
-        sound at both ears, default) or ``"monaural"`` (one ear only).
+    :param presentation: ``"binaural"`` (default; ``"diotic"`` is an
+        equivalent alias: the same sound at both ears) or ``"monaural"``
+        (one ear only).
     :return: A :class:`MooreGlasbergLoudness`.
 
     A 1 kHz tone at 40 dB SPL in a free field presented binaurally yields
@@ -844,7 +845,8 @@ def loudness_moore_glasberg_from_third_octave(
 
     :param band_levels: 29 band levels in dB SPL (re 20 uPa), 25 Hz..16 kHz.
     :param field: ``"free"`` (default), ``"diffuse"`` or ``"eardrum"``.
-    :param presentation: ``"binaural"``/``"diotic"`` (default) or ``"monaural"``.
+    :param presentation: ``"binaural"`` (default; alias ``"diotic"``) or
+        ``"monaural"``.
     :return: A :class:`MooreGlasbergLoudness`.
     """
     _validate_conditions(field, presentation)
@@ -921,7 +923,8 @@ def loudness_moore_glasberg(
     :param x: Single-channel calibrated pressure signal in pascals.
     :param fs: Sampling rate in Hz (positive).
     :param field: ``"free"`` (default), ``"diffuse"`` or ``"eardrum"``.
-    :param presentation: ``"binaural"``/``"diotic"`` (default) or ``"monaural"``.
+    :param presentation: ``"binaural"`` (default; alias ``"diotic"``) or
+        ``"monaural"``.
     :return: A :class:`MooreGlasbergLoudness`.
     """
     _validate_conditions(field, presentation)

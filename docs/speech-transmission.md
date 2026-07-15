@@ -134,8 +134,8 @@ Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
   per-position STI.
 - [Speech Intelligibility Index](speech-intelligibility.md) — the
   audibility-based ANSI S3.5 index that complements the STI.
-- [Psychoacoustics](psychoacoustics.md) — loudness, sharpness, tonality and
-  roughness of the received sound.
+- [Loudness](loudness.md) and [Sound Quality Metrics](sound-quality.md) — loudness,
+  sharpness, tonality and roughness of the received sound.
 - [Theory](theory.md) — the modulation-transfer derivation and the m ↔ STI
   mapping.
 

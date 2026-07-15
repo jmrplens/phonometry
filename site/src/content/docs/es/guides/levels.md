@@ -356,7 +356,7 @@ continúan en
 los veredictos de prominencia tonal de ECMA-418-1 en
 [Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/), y las
 curvas isofónicas de ISO 226 viven con las métricas de percepción en
-[Psicoacústica](/phonometry/es/guides/psychoacoustics/).
+[Sonoridad](/phonometry/es/guides/loudness/).
 
 ---
 

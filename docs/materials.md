@@ -351,7 +351,7 @@ A rated absorption coefficient means little without its uncertainty. ISO
 reverberation-room measurement (ISO 354) and its ratings (ISO 11654, EN 1793-1),
 estimated from inter-laboratory tests to ISO 5725. It is the sound-absorption
 companion of the sound-insulation uncertainty of ISO 12999-1
-([Building acoustics](building-acoustics.md)).
+([Field Insulation Measurement and Ratings](insulation-field.md)).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/absorption_uncertainty.svg" alt="ISO 12999-2 sound absorption coefficient uncertainty: the measured alpha_s spectrum over one-third-octave bands from 63 Hz to 5000 Hz with a shaded plus-or-minus U band at coverage factor k = 2, reproducing the standard's worked Table 4 example" width="80%"></picture>
 

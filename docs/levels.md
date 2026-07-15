@@ -350,7 +350,7 @@ ISO 9612 occupational strategies continue in
 [Occupational Noise Exposure](occupational-exposure.md), the ECMA-418-1
 tonal-prominence verdicts in [Prominent Discrete Tones](tone-prominence.md),
 and the ISO 226 equal-loudness contours live with the perception metrics in
-[Psychoacoustics](psychoacoustics.md).
+[Loudness](loudness.md).
 
 ---
 

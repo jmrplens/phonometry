@@ -207,7 +207,8 @@ the first argument to `speech_intelligibility_index`.
 
 - [Speech Transmission Index](/phonometry/guides/speech-transmission/) — the STI/STIPA
   transmission index that the SII complements.
-- [Psychoacoustics](/phonometry/guides/psychoacoustics/) — loudness, sharpness and the
+- [Loudness](/phonometry/guides/loudness/) and
+  [Sound Quality Metrics](/phonometry/guides/sound-quality/) — loudness, sharpness and the
   perception metrics of what the listener hears.
 - [Filter Banks](/phonometry/guides/filter-banks/) — the one-third-octave bands the SII is
   evaluated on.

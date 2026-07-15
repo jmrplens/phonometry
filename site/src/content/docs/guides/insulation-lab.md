@@ -366,3 +366,4 @@ and the modal-overlap validity checks that feed the EN 12354 prediction.
   the flanking model that consumes the laboratory $R$, $L_n$ and $K_{ij}$.
 - [Sound Power](/phonometry/guides/sound-power/) — the `LW` methods that share the
   absorption-area machinery of the receiving room.
+- API reference: [`building.lab_insulation`](/phonometry/reference/api/building/lab-insulation/), [`building.intensity_insulation`](/phonometry/reference/api/building/intensity-insulation/) and [`building.flanking_transmission`](/phonometry/reference/api/building/flanking-transmission/).

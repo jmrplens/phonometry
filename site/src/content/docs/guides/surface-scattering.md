@@ -411,3 +411,7 @@ method), and ISO 9613-1:1993 — only the pure-tone attenuation coefficient
 α consumed by the ISO 17497-1 Clause 8 air-attenuation relations (Eqs. (2)/(3)); the
 full atmospheric-absorption model is covered in
 [Outdoor Sound Propagation](/phonometry/guides/outdoor-propagation/).
+
+## See also
+
+- API reference: [`materials.scattering_diffusion`](/phonometry/reference/api/materials/scattering-diffusion/) and [`materials.road_absorption`](/phonometry/reference/api/materials/road-absorption/).

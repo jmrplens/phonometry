@@ -119,3 +119,7 @@ loss* — the HTLAN combination (clause 6.1, Formula 1), the median NIPTS
 (clause 6.3.1, Formulae 2-3, Table 1) and its statistical distribution
 (clause 6.3.2, Formulae 4-7, Tables 2-3), validated against the worked examples
 of Annex D. The age component (database A) is ISO 7029:2017.
+
+## See also
+
+- API reference: [`hearing.noise_induced_hearing_loss`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/).

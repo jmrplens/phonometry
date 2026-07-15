@@ -551,3 +551,4 @@ ruido de equipos de servicio.
   fraccionaria IEC 61260 usados para los espectros de aislamiento.
 - [Teoría](/phonometry/es/reference/theory/) — la derivación de la curva de referencia tras
   los índices ponderados de un solo número.
+- Referencia de la API: [`building.insulation`](/phonometry/es/reference/api/building/insulation/), [`building.survey_insulation`](/phonometry/es/reference/api/building/survey-insulation/) y [`building.building_uncertainty`](/phonometry/es/reference/api/building/building-uncertainty/).

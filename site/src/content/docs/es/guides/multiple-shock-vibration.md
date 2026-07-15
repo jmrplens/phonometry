@@ -154,3 +154,7 @@ vibration containing multiple shocks* — la función de transferencia
 asiento-columna (cláusula 5.2, Fórmula 1), la dosis de aceleración y diaria
 (cláusula 5.3, Fórmulas 3-5) y la evaluación de efectos sobre la salud del
 Anexo C (Fórmulas C.1, C.3-C.5, Tablas C.1/C.2).
+
+## Véase también
+
+- Referencia de la API: [`vibration.multiple_shock_vibration`](/phonometry/es/reference/api/vibration/multiple-shock-vibration/).

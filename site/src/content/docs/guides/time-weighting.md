@@ -206,3 +206,7 @@ Part 1: Specifications* — the exponential time-weighting detector (clause 3.8)
 with the F and S time constants (clause 5.7), and the 4 kHz toneburst reference
 responses of Table 4 (class 1 acceptance limits) used to verify the ballistics
 in CI.
+
+## See also
+
+- API reference: [`metrology.parametric_filters`](/phonometry/reference/api/filters/parametric-filters/).

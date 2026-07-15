@@ -141,6 +141,7 @@ Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
   roughness of the received sound.
 - [Theory](/phonometry/reference/theory/) — the modulation-transfer derivation and the m ↔ STI
   mapping.
+- API reference: [`hearing.sti`](/phonometry/reference/api/speech/sti/).
 
 ---
 

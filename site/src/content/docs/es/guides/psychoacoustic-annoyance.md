@@ -233,3 +233,7 @@ Las cuatro sensaciones reutilizan la sonoridad ISO 532-1, la nitidez DIN 45692 y
 la aspereza ECMA-418-2 de la biblioteca (véase
 [Sonoridad](/phonometry/es/guides/loudness/) y
 [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/)).
+
+## Véase también
+
+- Referencia de la API: [`psychoacoustics.psychoacoustic_annoyance`](/phonometry/es/reference/api/psychoacoustics/psychoacoustic-annoyance/) y [`psychoacoustics.fluctuation_strength`](/phonometry/es/reference/api/psychoacoustics/fluctuation-strength/).

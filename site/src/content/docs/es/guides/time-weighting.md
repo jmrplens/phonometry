@@ -213,3 +213,7 @@ Part 1: Specifications* — el detector exponencial de ponderación temporal
 (cláusula 3.8) con las constantes de tiempo F y S (cláusula 5.7), y las
 respuestas de referencia a ráfagas de tono de 4 kHz de la Tabla 4 (límites de
 aceptación de clase 1) usadas para verificar la respuesta temporal en CI.
+
+## Véase también
+
+- Referencia de la API: [`metrology.parametric_filters`](/phonometry/es/reference/api/filters/parametric-filters/).

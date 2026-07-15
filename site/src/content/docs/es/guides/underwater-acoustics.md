@@ -159,3 +159,7 @@ driving*: la exposición sonora por golpe (Fórmulas 3–4), de pico y acumulada
 (Fórmulas 8–9). Todas las magnitudes se verifican contra oráculos analíticos
 exactos. El modelado general de propagación submarina (rayos, modos normales,
 ecuación parabólica) queda fuera del alcance de esta página.
+
+## Véase también
+
+- Referencia de la API: [`underwater.acoustics`](/phonometry/es/reference/api/underwater/acoustics/), [`underwater.pile_driving_noise`](/phonometry/es/reference/api/underwater/pile-driving-noise/) y [`underwater.ship_radiated_noise`](/phonometry/es/reference/api/underwater/ship-radiated-noise/).

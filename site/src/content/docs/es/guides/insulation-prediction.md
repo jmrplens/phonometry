@@ -344,3 +344,4 @@ Anexo G).
   el miembro de absorción de la misma familia EN 12354.
 - [Rigidez dinámica de materiales resilientes (EN 29052-1)](/phonometry/es/guides/dynamic-stiffness/):
   la entrada s' del término de suelo flotante de EN 12354-2.
+- Referencia de la API: [`building.building_prediction`](/phonometry/es/reference/api/building/building-prediction/) y [`building.facade_prediction`](/phonometry/es/reference/api/building/facade-prediction/).

@@ -169,3 +169,7 @@ forma cerrada de la norma: el nivel de una década de rigidez, la relación de
 inercia del método indirecto, la identidad de la Tabla A.2 `k = jω·Z`, el límite
 de validez `|T| = 0,1 ↔ ΔL₁,₂ = 20 dB` con su cota de exactitud de 1 dB (12 %),
 el cociente de fuerzas de la Ec. (6) `1/1,1` y el criterio de linealidad del 7.6.
+
+## Véase también
+
+- Referencia de la API: [`vibration.transfer_stiffness`](/phonometry/es/reference/api/vibration/transfer-stiffness/) y [`vibration.mechanical_mobility`](/phonometry/es/reference/api/vibration/mechanical-mobility/).

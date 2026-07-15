@@ -154,3 +154,7 @@ from percussive pile driving*: the single-strike (Formulae 3–4), peak and
 cumulative (Formulae 8–9) sound exposure. All quantities are verified against
 exact analytic oracles. General underwater propagation modelling (ray, normal
 mode, parabolic equation) is out of scope here.
+
+## See also
+
+- API reference: [`underwater.acoustics`](/phonometry/reference/api/underwater/acoustics/), [`underwater.pile_driving_noise`](/phonometry/reference/api/underwater/pile-driving-noise/) and [`underwater.ship_radiated_noise`](/phonometry/reference/api/underwater/ship-radiated-noise/).

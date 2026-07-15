@@ -23,6 +23,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 import api_taxonomy  # noqa: E402
+import check_api_reference as car  # noqa: E402
 import generate_api_docs as gad  # noqa: E402
 
 
@@ -235,3 +236,52 @@ def test_sidebar_fragment_lists_every_page(generated: pathlib.Path) -> None:
     assert "{ slug: 'reference/api' }" in sidebar
     for page in pages:
         assert f"'reference/api/{page.section.key}/{page.slug}'" in sidebar
+
+
+# ---------------------------------------------------------------------------
+# Curated quick-table coverage gate (scripts/check_api_reference.py)
+# ---------------------------------------------------------------------------
+
+_SAMPLE_TABLE = """\
+# API Reference
+
+Some prose with `inline_code` that must not count.
+
+| Name | Type | Description | Usage |
+| :--- | :--- | :--- | :--- |
+| `leq` | `function` | **Equivalent level.**<br>Uses `laeq` internally | `leq(x)` |
+| `reverberation_index` / `estimate_reverberation_index` | `function` | ISO 10052 | `k = reverberation_index(t)` |
+| `OctaveFilterBank.spectrogram` | `method` | Band levels over time | `bank.spectrogram(x)` |
+| `.plot()` | `method` | Canonical figure | `res.plot()` |
+  | `indented_name` | `function` | Indented rows still count | `indented_name()` |
+| `piped_name` \\| alias | `function` | Escaped pipe stays in the cell | `piped_name()` |
+"""
+
+
+def test_table_names_extracts_first_column_only() -> None:
+    """Every backticked name in a first cell counts; other cells do not."""
+    names = car.table_names(_SAMPLE_TABLE)
+    assert names == {
+        "leq",
+        "reverberation_index",
+        "estimate_reverberation_index",
+        "OctaveFilterBank.spectrogram",
+        ".plot()",
+        "indented_name",
+        "piped_name",
+    }
+    # Backticks outside tables and in later columns are ignored.
+    assert "inline_code" not in names
+    assert "laeq" not in names
+
+
+def test_missing_names_orders_by_all_and_allows_extras() -> None:
+    missing = car.missing_names(_SAMPLE_TABLE, ["laeq", "leq", "sel"])
+    assert missing == ["laeq", "sel"]
+
+
+def test_quick_table_covers_public_api() -> None:
+    """The committed docs/api-reference.md never misses an __all__ name."""
+    path = pathlib.Path(__file__).resolve().parent.parent / "docs" / "api-reference.md"
+    markdown = path.read_text(encoding="utf-8")
+    assert car.missing_names(markdown, list(phonometry.__all__)) == []

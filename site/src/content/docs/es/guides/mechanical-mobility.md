@@ -162,3 +162,7 @@ la Tabla 1 / 3.1.2): el máximo de movilidad en el punto de excitación
 de la Tabla 1 `impedancia·movilidad = 1`, los valores de la calibración con
 masa rígida (`|A| = 0,100` 1/kg para 10 kg; `|Y| = 1,59155e-4` m/(N·s) a
 100 Hz) y el ejemplo del Anexo A (γ² = 0,8, n = 75 → ε = 4,08 %).
+
+## Véase también
+
+- Referencia de la API: [`vibration.mechanical_mobility`](/phonometry/es/reference/api/vibration/mechanical-mobility/).

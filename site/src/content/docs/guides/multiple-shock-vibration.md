@@ -151,3 +151,7 @@ vibration containing multiple shocks* — the seat-to-spine transfer function
 (clause 5.2, Formula 1), the acceleration and daily dose (clause 5.3,
 Formulae 3-5) and the Annex C assessment of adverse health effects (Formulae
 C.1, C.3-C.5, Tables C.1/C.2).
+
+## See also
+
+- API reference: [`vibration.multiple_shock_vibration`](/phonometry/reference/api/vibration/multiple-shock-vibration/).

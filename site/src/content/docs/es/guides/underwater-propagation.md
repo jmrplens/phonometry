@@ -174,3 +174,7 @@ ph.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1500.0],
 
 Los tres asumen una columna de agua independiente de la distancia con superficie
 de presión-liberada.
+
+## Véase también
+
+- Referencia de la API: [`underwater.propagation`](/phonometry/es/reference/api/underwater/propagation/), [`underwater.numerical_propagation`](/phonometry/es/reference/api/underwater/numerical-propagation/) y [`underwater.sound_speed`](/phonometry/es/reference/api/underwater/sound-speed/).

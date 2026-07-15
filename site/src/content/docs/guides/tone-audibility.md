@@ -218,3 +218,7 @@ the detection/combination logic are confirmed against the parent standard
 the Annex E combustion-engine worked example (Tables E.1/E.2/E.3): `LS` and `LT`
 from the spectrum, tone detection and the `FG` combined level, the per-tone
 audibility, the masking index and the mean audibility of the five spectra.
+
+## See also
+
+- API reference: [`psychoacoustics.tone_audibility`](/phonometry/reference/api/psychoacoustics/tone-audibility/).

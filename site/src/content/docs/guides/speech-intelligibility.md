@@ -214,6 +214,7 @@ the first argument to `speech_intelligibility_index`.
   evaluated on.
 - [Levels](/phonometry/guides/levels/) — the spectrum and band levels behind the equivalent
   spectrum-level inputs.
+- API reference: [`hearing.sii`](/phonometry/reference/api/speech/sii/).
 
 ---
 

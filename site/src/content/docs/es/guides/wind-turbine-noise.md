@@ -88,3 +88,7 @@ ph.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
 banda crítica Fórmula 30, nivel de enmascaramiento Fórmula 31,
 tonalidad/audibilidad Fórmulas 32–34). El flujo completo de medición queda fuera
 del alcance aquí.
+
+## Véase también
+
+- Referencia de la API: [`environmental.wind_turbine_noise`](/phonometry/es/reference/api/aeroacoustics/wind-turbine-noise/).

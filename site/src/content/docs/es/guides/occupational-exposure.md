@@ -145,6 +145,7 @@ otras estrategias no llevan desglose por tarea).
   maquinaria GUM tras las incertidumbres combinadas y expandidas.
 - [Teoría](/phonometry/es/reference/theory/) — la derivación de las fórmulas de
   las estrategias y del presupuesto del anexo C.
+- Referencia de la API: [`hearing.occupational_exposure`](/phonometry/es/reference/api/hearing/occupational-exposure/).
 
 ---
 

@@ -110,3 +110,7 @@ en torno a la mediana (cláusula 4.3, Tablas 2–5) y su aplicación (cláusula 
 ISO 389-7:2006, *Reference zero for the calibration of audiometric equipment —
 Reference threshold of hearing under free-field and diffuse-field listening
 conditions* (Tabla 1).
+
+## Véase también
+
+- Referencia de la API: [`hearing.threshold`](/phonometry/es/reference/api/hearing/threshold/).

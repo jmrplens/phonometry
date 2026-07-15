@@ -100,6 +100,31 @@ jobs:
           exit 1
         fi
 
+  # Coverage gate for the curated quick table in docs/api-reference.md: every
+  # phonometry.__all__ name must have a table row (extra rows such as methods
+  # or namespace entries are fine). See scripts/check_api_reference.py.
+  api-reference-table:
+    name: Curated API quick table covers __all__
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install runtime dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+    - name: Check docs/api-reference.md coverage
+      run: python scripts/check_api_reference.py
+
   # The committed documentation figures (.github/images) must match a fresh
   # `make graphs` run. The rendering + compute stack is pinned in
   # requirements-figures.txt so SVG *structure* (elements, text, colours) and

@@ -122,3 +122,7 @@ impulsos marcados. El método es un complemento a la medida de ruido ambiental d
 adjustment of LAeq* — la prominencia prevista (cláusula 7, Fórmula 1), el ajuste
 al LAeq (cláusula 8, Fórmula 2) y el nivel de evaluación (cláusula 8, Nota 1),
 con el arranque definido en las cláusulas 4.5-4.7.
+
+## Véase también
+
+- Referencia de la API: [`environmental.impulse_prominence`](/phonometry/es/reference/api/environment/impulse-prominence/).

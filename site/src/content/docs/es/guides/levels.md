@@ -372,3 +372,7 @@ measurement and assessment of environmental noise — Part 1: Basic quantities
 and assessment procedures* — Lden (3.6.4), Ldn (3.6.5) y el nivel de
 evaluación compuesto de jornada completa del apartado 6.5 (Fórmulas 5-6,
 ajustes de la Tabla A.1).
+
+## Véase también
+
+- Referencia de la API: [`metrology.levels`](/phonometry/es/reference/api/levels/levels/), [`environmental.measurement`](/phonometry/es/reference/api/environment/measurement/) y [`environmental.rating`](/phonometry/es/reference/api/environment/rating/).

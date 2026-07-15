@@ -135,3 +135,7 @@ que la norma remite a referencias externas) no forman parte de este módulo.
 curvas NC y el método de tangencia (Tabla 1), y las curvas RC Mark II (Anexo D,
 Tabla D.1), la calificación por media de frecuencias medias (cláusula D.4) y la
 etiqueta espectral neutro/retumbo/siseo (cláusula D.3).
+
+## Véase también
+
+- Referencia de la API: [`room.room_noise`](/phonometry/es/reference/api/rooms/room-noise/).

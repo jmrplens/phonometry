@@ -178,3 +178,7 @@ Welch–Satterthwaite effective degrees of freedom (Annex G.4). ISO/IEC
 Guide 98-3-1:2008, *Supplement 1 — Propagation of distributions using a Monte
 Carlo method* — the numerical propagation and the probabilistically symmetric
 coverage interval (clause 7).
+
+## See also
+
+- API reference: [`metrology.uncertainty`](/phonometry/reference/api/metrology/uncertainty/).

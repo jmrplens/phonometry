@@ -495,6 +495,7 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
   source/receiving-room levels.
 - [Theory](/phonometry/reference/theory/) — Schroeder integration, regression windows and the
   reference-curve derivation.
+- API reference: [`room.room_acoustics`](/phonometry/reference/api/rooms/room-acoustics/), [`room.room_ir`](/phonometry/reference/api/rooms/room-ir/) and [`room.open_plan`](/phonometry/reference/api/rooms/open-plan/).
 
 ---
 

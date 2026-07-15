@@ -285,3 +285,7 @@ at 1 kHz), the class 1 tolerances the `high_accuracy` design keeps up to
 `verify_weighting_class`. ISO 7196:1995, *Acoustics — Frequency-weighting characteristic for
 infrasound measurements* — the G-weighting pole/zero definition (Table 1),
 verified against every Table 2 nominal response value (0.25 Hz to 315 Hz).
+
+## See also
+
+- API reference: [`metrology.parametric_filters`](/phonometry/reference/api/filters/parametric-filters/) and [`metrology.compliance`](/phonometry/reference/api/filters/compliance/).

@@ -107,3 +107,7 @@ correction (Table 2), the radiation factor (Formula 4/8) and the sound power
 level (Formulae 12/15). Conformance is anchored on the standard's own worked
 calibration example, the exact round-trip between the radiation factor and
 `L_W = 10 lg(P/P₀)`, and the fixed impedance term.
+
+## See also
+
+- API reference: [`emission.vibration_sound_power`](/phonometry/reference/api/power/vibration-sound-power/).

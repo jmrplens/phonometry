@@ -161,3 +161,7 @@ ancho de banda utilizable (cláusula 7.3, Tabla 3). ISO 9614-1:1993,
 intensity — Part 1: Measurement at discrete points* — el índice
 presión-intensidad, los indicadores de campo F2, F3 y F4 del Anexo A y el
 criterio de capacidad dinámica (Anexo B).
+
+## Véase también
+
+- Referencia de la API: [`emission.intensity`](/phonometry/es/reference/api/power/intensity/).

@@ -276,3 +276,7 @@ ISO 2631-1:1997 (whole-body evaluation); ISO 2631-2:2003 (buildings, `Wm`);
 ISO 2631-4:2001 (rail ride comfort, `Wb`); ISO 5349-1:2001 and ISO 5349-2:2001
 (hand-transmitted vibration); Directive 2002/44/EC (exposure action and limit
 values).
+
+## See also
+
+- API reference: [`vibration.human_vibration`](/phonometry/reference/api/vibration/human-vibration/).

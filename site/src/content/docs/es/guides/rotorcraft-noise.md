@@ -71,3 +71,7 @@ efecto de suelo de Chien-Soroka (impedancia de Delany-Bazley, resistividad de
 flujo CNOSSOS). La integración sobre la trayectoria (SEL/LAmax/EPNL), los
 contornos en malla de tierra y el apantallamiento del terreno son un desarrollo
 posterior aparte.
+
+## Véase también
+
+- Referencia de la API: [`aircraft.rotorcraft_noise`](/phonometry/es/reference/api/aeroacoustics/rotorcraft-noise/).

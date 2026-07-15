@@ -376,3 +376,4 @@ solapamiento modal que alimentan la predicción EN 12354.
   el modelo de flancos que consume los $R$, $L_n$ y $K_{ij}$ de laboratorio.
 - [Potencia sonora](/phonometry/es/guides/sound-power/) — los métodos de `LW` que comparten
   la maquinaria del área de absorción de la sala receptora.
+- Referencia de la API: [`building.lab_insulation`](/phonometry/es/reference/api/building/lab-insulation/), [`building.intensity_insulation`](/phonometry/es/reference/api/building/intensity-insulation/) y [`building.flanking_transmission`](/phonometry/es/reference/api/building/flanking-transmission/).

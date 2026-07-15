@@ -133,3 +133,7 @@ defers to external references) are not part of this module.
 NC curves and the tangency method (Table 1), and the RC Mark II curves
 (Annex D, Table D.1), the mid-frequency-average rating (clause D.4) and the
 neutral/rumble/hiss spectral tag (clause D.3).
+
+## See also
+
+- API reference: [`room.room_noise`](/phonometry/reference/api/rooms/room-noise/).

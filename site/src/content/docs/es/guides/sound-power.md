@@ -674,6 +674,7 @@ plt.show()
   tras `LWA`.
 - [Teoría](/phonometry/es/reference/theory/) — las derivaciones de Waterhouse, K1/K2 y
   C1/C2.
+- Referencia de la API: [`emission.sound_power`](/phonometry/es/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](/phonometry/es/reference/api/power/sound-power-reverberation/) y [`emission.sound_power_intensity`](/phonometry/es/reference/api/power/sound-power-intensity/).
 
 ---
 

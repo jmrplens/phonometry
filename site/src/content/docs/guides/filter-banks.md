@@ -346,3 +346,7 @@ the stricter class 0 mask offered by `edition="1995"`, and the band-edge
 convention on which every bank places its −3 dB
 points. ISO 266 — the preferred-frequency series behind the nominal band
 labels reported by `nominal_frequencies`.
+
+## See also
+
+- API reference: [`phonometry`](/phonometry/reference/api/filters/phonometry/), [`metrology.core`](/phonometry/reference/api/filters/core/) and [`metrology.parametric_filters`](/phonometry/reference/api/filters/parametric-filters/).

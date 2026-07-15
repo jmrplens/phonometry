@@ -237,3 +237,7 @@ estimators and the ordinary coherence `γ²`. All quantities are verified agains
 exact analytic oracles (synthetic signals with known harmonic/intermodulation
 amplitudes, a clipped-sine Fourier oracle, a full DIM test-signal synthesis,
 and a known LTI path).
+
+## See also
+
+- API reference: [`electroacoustics.distortion`](/phonometry/reference/api/electroacoustics/distortion/) and [`electroacoustics.frequency_response`](/phonometry/reference/api/electroacoustics/frequency-response/).

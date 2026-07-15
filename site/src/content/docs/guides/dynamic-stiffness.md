@@ -109,3 +109,7 @@ relations (Formulae 2-4), the enclosed-gas term (Formula 7, clause 8.2 NOTE
 `s'a = 111/d` MN/m³) and the airflow-resistivity regimes (Formulae 5-6).
 Conformance is anchored on the standard's own numeric NOTE plus hand-computed
 closed-form values of the resonance relations.
+
+## See also
+
+- API reference: [`materials.dynamic_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/).

@@ -111,3 +111,7 @@ la rigidez dinámica por unidad de área (Fórmula 1), las relaciones de resonan
 `s'a = 111/d` MN/m³) y los regímenes por resistividad al flujo (Fórmulas 5-6). La
 conformidad se ancla en la NOTA numérica de la propia norma más valores en forma
 cerrada calculados a mano de las relaciones de resonancia.
+
+## Véase también
+
+- Referencia de la API: [`materials.dynamic_stiffness`](/phonometry/es/reference/api/materials/dynamic-stiffness/).

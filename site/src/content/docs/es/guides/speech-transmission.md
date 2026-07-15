@@ -148,6 +148,7 @@ Ambas devuelven `STIResult`: `sti`, `mti` (7 bandas), `mtf` (7×14 o 7×2),
   tonalidad y aspereza del sonido recibido.
 - [Teoría](/phonometry/es/reference/theory/) — la derivación de la transferencia
   de modulación y la correspondencia m ↔ STI.
+- Referencia de la API: [`hearing.sti`](/phonometry/es/reference/api/speech/sti/).
 
 ---
 

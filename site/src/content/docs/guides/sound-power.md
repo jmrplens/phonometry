@@ -660,6 +660,7 @@ plt.show()
   that consume a source `LW`.
 - [Levels](/phonometry/guides/levels/) — energy averaging and the A-weighting behind `LWA`.
 - [Theory](/phonometry/reference/theory/) — the Waterhouse, K1/K2 and C1/C2 derivations.
+- API reference: [`emission.sound_power`](/phonometry/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](/phonometry/reference/api/power/sound-power-reverberation/) and [`emission.sound_power_intensity`](/phonometry/reference/api/power/sound-power-intensity/).
 
 ---
 

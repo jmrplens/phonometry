@@ -159,3 +159,7 @@ suite is anchored on a **real worked example** — Everest's Fig. 7-22 Example 1
 whose six printed Sabine reverberation times the SI implementation reproduces to
 ≤ 0.02 s — reinforced by hand-computed closed-form values and the model
 identities.
+
+## See also
+
+- API reference: [`room.reverberation_prediction`](/phonometry/reference/api/rooms/reverberation-prediction/) and [`environmental.air_absorption`](/phonometry/reference/api/environment/air-absorption/).

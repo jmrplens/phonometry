@@ -421,3 +421,7 @@ método puntual), e ISO 9613-1:1993 — solo el coeficiente de atenuación de
 tono puro α que consumen las relaciones de atenuación del aire del apartado 8 de
 ISO 17497-1 (Ecs. (2)/(3)); el modelo completo de absorción atmosférica se
 cubre en [Propagación en exteriores](/phonometry/es/guides/outdoor-propagation/).
+
+## Véase también
+
+- Referencia de la API: [`materials.scattering_diffusion`](/phonometry/es/reference/api/materials/scattering-diffusion/) y [`materials.road_absorption`](/phonometry/es/reference/api/materials/road-absorption/).

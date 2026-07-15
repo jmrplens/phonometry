@@ -64,11 +64,19 @@ los **grados de libertad efectivos** dados por la fórmula de Welch–Satterthwa
 $\nu_\text{ef}$ hasta unos 16, de modo que $k = 2{,}11$ en lugar del 1,96 de
 gran muestra. Las entradas correlacionadas se tratan pasando una matriz de
 correlación; una suma totalmente correlacionada se suma entonces linealmente en
-vez de en cuadratura. Como la GUM define Welch–Satterthwaite solo para
-entradas *independientes*, un presupuesto correlacionado recurre a
-$\nu_\text{ef} = \infty$ (GUM 6.3.3): `expanded()` usa entonces el factor de
-cobertura de la distribución normal, y un aviso informa de que los grados de
-libertad finitos de las entradas no se propagaron. Esta cadena reproduce de
+vez de en cuadratura. La correlación es el error silencioso clásico de un
+balance: dos correcciones trazables al *mismo* calibrador, o dos canales que
+comparten un instrumento, no se promedian como lo harían términos
+independientes, y combinarlas en cuadratura como si no estuvieran
+correlacionadas suele subestimar $u_c$ (con sensibilidades de signo opuesto el
+sesgo puede apuntar al revés). Como la GUM define Welch–Satterthwaite solo
+para entradas *independientes*, un presupuesto correlacionado con grados de
+libertad finitos en sus entradas no tiene grados de libertad efectivos en
+absoluto: `effective_dof` es NaN, se emite un aviso y `expanded()` exige un
+`coverage_factor_override` explícito (p. ej. $k = 2$) en lugar de inventarse
+uno. Solo cuando todas las entradas son de Tipo B con grados de libertad
+infinitos un presupuesto correlacionado conserva $\nu_\text{ef} = \infty$ y
+usa el factor de cobertura de la distribución normal. Esta cadena reproduce de
 principio a fin los ejemplos resueltos de la propia GUM: el presupuesto del
 calibre del anexo H.1 ($u_c = 31{,}7$ nm, $U_{99} = 92$ nm frente a los 32/93
 impresos) y la medida correlacionada de resistencia del anexo H.2
@@ -112,6 +120,24 @@ Ambos métodos se validan frente a los ejemplos resueltos de las propias Guías:
 modelo aditivo de cuatro entradas unidad da $u_c = 2{,}0$ (Suplemento 1,
 cláusula 9.2), y cuatro entradas rectangulares dan un intervalo de Monte Carlo de
 $[-3{,}88,\, 3{,}88]$ (Suplemento 1, cláusula 9.2.3).
+
+¿Cuándo compensa el coste extra del método de Monte Carlo? Siempre que falle
+alguna de las dos simplificaciones de la GUM: el modelo se sustituye por su
+desarrollo de primer orden, y la distribución de salida por una gaussiana (o
+una $t$). Ambas se cumplen bien en el modelo aditivo de niveles de arriba, y
+por eso los dos métodos coinciden con tres cifras. Dejan de cumplirse cuando
+el modelo es fuertemente no lineal en el rango de las incertidumbres de
+entrada (conversiones energía-nivel con entradas anchas, productos y
+cocientes con incertidumbres relativas grandes), cuando una sola entrada no
+gaussiana domina el balance (un término rectangular grande hace la salida
+casi rectangular, y un intervalo gaussiano $\pm\,2u_c$ la sobrecubre), o
+cuando la salida queda cerca de un límite físico (un coeficiente de absorción
+cerca de 0 o 1, una corrección de nivel que no puede cruzar el cero), donde
+el intervalo de cobertura verdadero es asimétrico y ninguna afirmación
+$Y \pm U$ puede representarlo. En esos regímenes el intervalo de Monte Carlo
+es la referencia: el propio Suplemento 1 (cláusula 8) considera el marco de
+la GUM validado precisamente cuando coincide con el resultado de Monte Carlo,
+y superado por este cuando no coincide.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_es.svg" alt="Dos paneles para el ejemplo del nivel ponderado A. Izquierda: el balance de incertidumbre de la GUM, un diagrama de barras horizontales de la contribución de cada entrada a la incertidumbre combinada con una línea discontinua en uc de 0,407 dB. Derecha: el histograma de salida de Monte Carlo superpuesto con la gaussiana de la GUM y el intervalo de cobertura del 95 por ciento sombreado; el título indica Y igual a 74,00 dB, U igual a 0,86 dB, k igual a 2,11" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_es_dark.svg" alt="Dos paneles para el ejemplo del nivel ponderado A. Izquierda: el balance de incertidumbre de la GUM, un diagrama de barras horizontales de la contribución de cada entrada a la incertidumbre combinada con una línea discontinua en uc de 0,407 dB. Derecha: el histograma de salida de Monte Carlo superpuesto con la gaussiana de la GUM y el intervalo de cobertura del 95 por ciento sombreado; el título indica Y igual a 74,00 dB, U igual a 0,86 dB, k igual a 2,11" style="width:96%">
 
@@ -172,6 +198,32 @@ muestras de salida (`samples`), y su `.plot()` dibuja el histograma de salida
 con el intervalo de cobertura marcado (el panel derecho de arriba). La incertidumbre de acústica de la edificación de
 ISO 12999-1 — que combina términos de reproducibilidad para una magnitud de
 número único — es un balance aparte, específico de ese dominio.
+
+## Referencias
+
+- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
+  data — Guide to the expression of uncertainty in measurement* (JCGM
+  100:2008, la GUM). BIPM.
+  [doi:10.59161/JCGM100-2008E](https://doi.org/10.59161/JCGM100-2008E),
+  [PDF gratuito](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf).
+  La ley de propagación, las evaluaciones de Tipo B y los ejemplos resueltos
+  del Anexo H que la sección 1 implementa y reproduce.
+- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
+  data — Supplement 1 to the "Guide to the expression of uncertainty in
+  measurement" — Propagation of distributions using a Monte Carlo method*
+  (JCGM 101:2008). BIPM.
+  [doi:10.59161/JCGM101-2008](https://doi.org/10.59161/JCGM101-2008),
+  [PDF gratuito](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf).
+  La propagación de Monte Carlo de la sección 2, su intervalo de cobertura
+  simétrico en probabilidad y la validación del marco de la GUM frente al
+  resultado de Monte Carlo de la cláusula 8.
+- International Organization for Standardization. (2020). *Acoustics —
+  Determination and application of measurement uncertainties in building
+  acoustics — Part 1: Sound insulation* (ISO 12999-1:2020).
+  [Catálogo de iso.org](https://www.iso.org/standard/73930.html).
+  El balance de reproducibilidad específico de la acústica de la edificación
+  para magnitudes de número único, mencionado arriba como complemento aparte
+  de la maquinaria general de la GUM.
 
 ---
 

@@ -218,9 +218,9 @@ Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absolu
 `fluctuation_strength_am_noise` (§3.1) para ese estímulo.
 :::
 
-## Normas
+---
 
-Fastl y Zwicker (2006), *Psychoacoustics: Facts and Models* (Springer): la
+**Normas.** Fastl y Zwicker (2006), *Psychoacoustics: Facts and Models* (Springer): la
 molestia psicoacústica `PA = N5·(1 + √(wS² + wFR²))` con la ponderación de nitidez
 `wS` y la ponderación de aspereza/fluctuación `wFR` (Ecs 16.2–16.4; origen
 Widmann 1992), y la forma cerrada para la intensidad de fluctuación del ruido de

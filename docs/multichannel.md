@@ -83,3 +83,13 @@ Additional performance notes:
   [Theory](theory-signal-analysis.md)).
 - **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
   numba is installed (`pip install phonometry[perf]`).
+
+---
+
+**Standards.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+fractional-octave-band filters — Part 1: Specifications*, and IEC 61672-1:2013,
+*Electroacoustics — Sound level meters — Part 1: Specifications* —
+multichannel support adds no normative content of its own: each channel is
+filtered, weighted and time-integrated exactly as the single-channel standards
+prescribe (see [Filter Banks](filter-banks.md) and [Levels](levels.md)); the
+vectorization only batches the computation across the channel axis.

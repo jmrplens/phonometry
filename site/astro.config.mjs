@@ -435,6 +435,7 @@ export default defineConfig({
               ],
             },
             'reference/conformance',
+            'reference/bibliography',
           ],
         },
       ],

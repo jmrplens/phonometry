@@ -77,6 +77,11 @@ _FIELD_RE = re.compile(
 )
 #: Any line that looks like a reST field (to detect unsupported field names).
 _FIELD_LIKE_RE = re.compile(r"^:(\w+)(\s+[^:`]*)?:(\s|$)")
+#: A supported field starting mid-line inside another field's description
+#: (roles like ``:func:`` are excluded by the field-name alternation).
+_MIDLINE_FIELD_RE = re.compile(
+    r"(?<=\s):(" + "|".join(_FIELD_NAMES) + r")(\s+[^:`]*)?:(\s|$)"
+)
 ROLE_RE = re.compile(
     r":(?:class|func|meth|mod|attr|data|obj|exc|ref|term):"
     r"`(~?)([^`<]+?)(?:\s*<([^>]+)>)?`"
@@ -130,6 +135,15 @@ def parse_docstring(doc: str) -> ParsedDoc:
             return
         name, arg = field
         text = " ".join(part.strip() for part in body if part.strip())
+        jammed = _MIDLINE_FIELD_RE.search(text)
+        if jammed:
+            # A field started mid-line (e.g. two ``:param:`` entries jammed
+            # on one line) would otherwise be published inside the previous
+            # field's description; fail loudly instead.
+            parsed.issues.append(
+                f"field {jammed.group(1)!r} starts mid-line inside the"
+                f" description of {name!r}"
+            )
         if name == "param":
             parsed.params.append((arg, text))
         elif name == "type":
@@ -575,7 +589,13 @@ def _format_parameter(parameter: inspect.Parameter) -> str:
     if annotated:
         text = f"{text}: {_format_annotation(parameter.annotation)}"
     if parameter.default is not inspect.Parameter.empty:
-        default = _HEX_ADDR_RE.sub("...", repr(parameter.default))
+        if type(parameter.default).__module__ not in ("builtins", "types"):
+            # Third-party reprs (numpy arrays) are not pinned, so a repr here
+            # would make the drift gate hostage to dependency upgrades; the
+            # parameter description documents the effective default.
+            default = "..."
+        else:
+            default = _HEX_ADDR_RE.sub("...", repr(parameter.default))
         text = f"{text} = {default}" if annotated else f"{text}={default}"
     return text
 

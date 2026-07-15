@@ -70,7 +70,7 @@ ExposureResult(
     u3: float | None = None,
     n_samples: int | None = None,
     sampling_advisory: bool = False,
-    tasks: Tuple[TaskContribution, ...] = <factory>,
+    tasks: Tuple[TaskContribution, ...] = ...,
 )
 ```
 

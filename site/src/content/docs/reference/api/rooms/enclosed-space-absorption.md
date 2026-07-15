@@ -62,7 +62,7 @@ enclosed_space_reverberation(
     objects: ArrayLike = (),
     object_fraction: float = 0.0,
     air_condition: str | None = None,
-    frequencies: ArrayLike = array([ 125.,  250.,  500., 1000., 2000., 4000., 8000.]),
+    frequencies: ArrayLike = ...,
     speed_of_sound: float = 345.6,
 ) -> ReverberationResult
 ```

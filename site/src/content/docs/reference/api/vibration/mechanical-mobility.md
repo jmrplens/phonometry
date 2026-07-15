@@ -311,7 +311,8 @@ Accelerance of a viscously damped SDOF resonator: `A = -omega**2 H`.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz. |
-| `mass` | Mass `m`, in kg. :param stiffness: Stiffness `k`, N/m. |
+| `mass` | Mass `m`, in kg. |
+| `stiffness` | Stiffness `k`, N/m. |
 | `damping` | Viscous damping `c`, N.s/m. |
 
 **Returns:** The complex accelerance `A`, in 1/kg.
@@ -334,7 +335,8 @@ Mobility of a viscously damped SDOF resonator: `Y = j omega H`.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz. |
-| `mass` | Mass `m`, in kg. :param stiffness: Stiffness `k`, N/m. |
+| `mass` | Mass `m`, in kg. |
+| `stiffness` | Stiffness `k`, N/m. |
 | `damping` | Viscous damping `c`, N.s/m. |
 
 **Returns:** The complex mobility `Y`, in m/(N.s).
@@ -357,7 +359,8 @@ SDOF driving-point mobility bundled as a [`MobilityResult`](/phonometry/referenc
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequencies `f`, in hertz (array). |
-| `mass` | Mass `m`, in kg. :param stiffness: Stiffness `k`, N/m. |
+| `mass` | Mass `m`, in kg. |
+| `stiffness` | Stiffness `k`, N/m. |
 | `damping` | Viscous damping `c`, N.s/m. |
 
 **Returns:** The [`MobilityResult`](/phonometry/reference/api/vibration/mechanical-mobility/#mobilityresult) (driving point).

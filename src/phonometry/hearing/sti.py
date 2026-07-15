@@ -70,7 +70,7 @@ _STIPA_MOD_INDEX = 0.55  # Annex B: m = 0.55 per component, unchanged in Ed.5
 #: recommends 15 s to 25 s). Below this the recovered modulation depths are
 #: biased low - and hence the STI too - because the slow modulation
 #: components are averaged over too few periods: on an ideal loopback the
-#: recovered STI is ~0.944 at 5 s, ~0.991 at 15 s and ~0.998 at 18 s.
+#: recovered STI is ~0.956 at 5 s, ~0.994 at 15 s and ~0.998 at 18 s.
 _STIPA_MIN_SECONDS = 15.0
 
 # Ed.5 male speech test-signal spectrum, clause A.6.1, in dB relative to
@@ -336,7 +336,7 @@ def sti_from_impulse_response(
 
     bank = _octave_bank(fs)
     _, _, bands = bank.filter(
-        ir_proc, sigbands=True, detrend=False, calculate_level=False
+        ir_proc, sigbands=True, detrend=False, calculate_level=False, zero_phase=True
     )
     p_bands = np.asarray(bands) ** 2  # h_k^2(t), shape (7, n)
     denom = p_bands.sum(axis=1)
@@ -353,9 +353,17 @@ def sti_from_impulse_response(
 
 def _intensity_envelopes(x: np.ndarray, fs: int) -> np.ndarray:
     """Octave-band intensity envelopes I_k(t) = x_k^2(t) low-passed at
-    ~100 Hz (Ed.4 A.5.2 = Ed.5), shape (7, n)."""
+    ~100 Hz (Ed.4 A.5.2 = Ed.5), shape (7, n).
+
+    Zero-phase band filtering: forward-backward filtering has no phase
+    distortion (the A.3.1.2 edge-carrier bias criterion, < 0,01 STI over
+    TI 0,1-0,9) and doubles the effective skirt attenuation to >= 41 dB
+    at the adjacent octave (the C.4.2 filter-slope criterion, m >= 0,5,
+    steeper than IEC 61260-1 class 1). Single-pass filtering fails both
+    verification criteria of IEC 60268-16:2020.
+    """
     bank = _octave_bank(fs)
-    _, _, bands = bank.filter(x, sigbands=True, calculate_level=False)
+    _, _, bands = bank.filter(x, sigbands=True, calculate_level=False, zero_phase=True)
     sos = signal.butter(4, _ENVELOPE_LPF_HZ, btype="lowpass", fs=fs, output="sos")
     env = np.empty((_NUM_BANDS, x.shape[-1]))
     for k, band in enumerate(bands):
@@ -370,6 +378,7 @@ def _stipa_modulation_depths(env: np.ndarray, fs: int) -> np.ndarray:
     n = env.shape[-1]
     duration = n / fs
     mdr = np.empty((_NUM_BANDS, 2))
+    empty_bands: list[int] = []
     for k in range(_NUM_BANDS):
         for j, fm in enumerate((float(_STIPA_F1[k]), float(_STIPA_F2[k]))):
             periods = int(np.floor(duration * fm))
@@ -383,14 +392,27 @@ def _stipa_modulation_depths(env: np.ndarray, fs: int) -> np.ndarray:
             seg = env[k, :n_use]
             total = float(np.sum(seg))
             if total <= 0.0:
-                raise ValueError(
-                    "An octave band of the signal has no energy; STIPA needs "
-                    "all seven carriers of the test signal."
-                )
+                # A band without energy has an undefined modulation depth.
+                # Report m = 0 (TI = 0, the worst-case reading of a real
+                # STIPA meter on a dead band) and warn: the IEC 60268-16
+                # C.4.2 filter-slope verification signals legitimately
+                # carry energy in only two of the seven bands.
+                if k not in empty_bands:
+                    empty_bands.append(k)
+                mdr[k, j] = 0.0
+                continue
             t = np.arange(n_use) / fs
             s = float(np.dot(seg, np.sin(2.0 * np.pi * fm * t)))
             c = float(np.dot(seg, np.cos(2.0 * np.pi * fm * t)))
             mdr[k, j] = 2.0 * float(np.hypot(s, c)) / total
+    if empty_bands:
+        warnings.warn(
+            f"No energy in octave band(s) {empty_bands} (125 Hz - 8 kHz, "
+            "index 0-6): modulation depths set to 0 (TI = 0) there. A full "
+            "STIPA measurement needs all seven carriers of the test signal.",
+            STIWarning,
+            stacklevel=4,
+        )
     return mdr
 
 
@@ -422,7 +444,7 @@ def stipa(
     the recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s),
     because the slow modulation components are then averaged over too few
     periods and the recovered modulation depths - and hence the STI - are
-    biased low (an ideal loopback gives STI ~0.944 at 5 s vs ~0.998 at 18 s).
+    biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
 
     :param x: Recorded STIPA signal (1D), 15 s to 25 s recommended.
     :param fs: Sample rate in Hz (>= 22,5 kHz).

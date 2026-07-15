@@ -13,7 +13,8 @@ Full documentation for phonometry. Also available as a website:
 - [Integrated & Statistical Levels](levels.md) — Leq, LAeq, L10/L50/L90, LCpeak/SEL, noise dose (IEC 61252), Lden and rating levels (ISO 1996-1), octave spectrogram
 - [Frequency Weighting](weighting.md) — A, C, Z curves
 - [Time Weighting](time-weighting.md) — Fast, Slow, Impulse ballistics
-- [Psychoacoustics](psychoacoustics.md) — Zwicker, Moore-Glasberg and Sottek loudness, sharpness, equal-loudness contours (ISO 226), tonality and roughness
+- [Loudness](loudness.md) — Zwicker (ISO 532-1), Moore-Glasberg (ISO 532-2/3) and Sottek (ECMA-418-2) loudness in sones, plus the equal-loudness contours (ISO 226)
+- [Sound Quality Metrics](sound-quality.md) — sharpness (DIN 45692) and the ECMA-418-2 Sottek Hearing Model tonality and roughness
 - [Prominent discrete tones](tone-prominence.md) — the ECMA-418-1 tone-to-noise and prominence ratios that decide whether a discrete tone is prominent and justify tonal rating adjustments
 - [Tonal audibility of tones in noise](tone-audibility.md) — the ISO/PAS 20065 engineering method for the audibility ΔL of a tone above the masking threshold: the critical band about the tone, the critical-band masking level, the masking index, and the decisive and mean audibility
 - [Psychoacoustic annoyance & fluctuation strength](psychoacoustic-annoyance.md) — the Fastl & Zwicker annoyance PA = N5·(1 + √(wS² + wFR²)) from loudness, sharpness, roughness and fluctuation strength (Eqs 16.2–16.4), the closed form for AM broadband noise (Eq. 10.2) and the Osses 2016 fluctuation-strength signal model
@@ -42,7 +43,9 @@ Full documentation for phonometry. Also available as a website:
 - [Room-noise criteria](room-noise.md) — the ANSI/ASA S12.2-2019 room-noise ratings: the NC tangency method (Table 1) and the RC Mark II rating with its rumble/hiss/neutral spectral tag (Annex D)
 - [Acoustic Materials](materials.md) — sound-absorption rating α_w and classes (ISO 11654), airflow resistance static and alternating methods (ISO 9053-1/-2), and impedance-tube measurement of absorption, surface impedance and transmission loss (ISO 10534-1/-2, ASTM E2611)
 - [Surface Scattering, Diffusion and In-situ Absorption](surface-scattering.md) — random-incidence scattering (ISO 17497-1), free-field diffusion coefficient (ISO 17497-2), and in-situ road-surface absorption by the extended-surface subtraction technique (ISO 13472-1) and the spot method (ISO 13472-2)
-- [Building Acoustics](building-acoustics.md) — field airborne/impact/façade insulation and weighted ratings (ISO 16283-1/2/3, ISO 717-1/2), laboratory characterisation (ISO 10140), flanking-transmission prediction (EN 12354-1/2), measurement uncertainty (ISO 12999-1)
+- [Field Insulation Measurement and Ratings](insulation-field.md) — field airborne/impact/façade insulation and weighted ratings (ISO 16283-1/2/3, ISO 717-1/2), measurement uncertainty (ISO 12999-1) and the ISO 10052 survey method
+- [Laboratory Insulation Measurement](insulation-lab.md) — laboratory characterisation (ISO 10140), sound insulation by intensity (ISO 15186), floor-covering impact improvement (ISO 16251-1) and laboratory flanking transmission (ISO 10848)
+- [Predicting Sound Insulation (EN 12354)](insulation-prediction.md) — flanking-transmission prediction (EN 12354-1/2), façade insulation and outdoor radiation (EN 12354-3/4)
 - [Outdoor Sound Propagation](outdoor-propagation.md) — atmospheric absorption α(f) (ISO 9613-1) and the ISO 9613-2 general method: divergence, atmospheric absorption, ground effect and barrier screening
 - [Impulsive-sound prominence](impulse-prominence.md) — the NT ACOU 112:2002 predicted prominence of impulsive sounds (onset rate and level difference) and the graduated adjustment KI added to LAeq
 - [Human Vibration](human-vibration.md) — whole-body and hand-arm frequency weightings (ISO 8041-1), weighted r.m.s. acceleration, running r.m.s./MTVV/VDV and crest factor (ISO 2631-1), vibration in buildings (ISO 2631-2), vibration total value and daily exposure A(8) (ISO 5349-1/-2), and the exposure action/limit values of Directive 2002/44/EC

@@ -59,7 +59,7 @@ El oído analiza el sonido en **bandas críticas**: regiones de frecuencia dentr
 4. **Sonoridad núcleo** — cada una de las 20 bandas críticas se transforma con los niveles de umbral en silencio $L_{TQ}$ de la Tabla A.6 (tras la adaptación de ancho de banda DCB de la Tabla A.7):
 
    $$
-   N_c = 0{,}0635 \cdot 10^{0{,}025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0{,}25} - 1 \right] \ \text{sonos/Bark}, \qquad s = 0{,}25
+   N_c = \max\left(0,\ 0{,}0635 \cdot 10^{0{,}025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0{,}25} - 1 \right]\right) \ \text{sonos/Bark}, \qquad s = 0{,}25
    $$
 
    (la forma que da el programa de referencia a la transformación de sonoridad de Zwicker; las bandas por debajo del umbral aportan cero).

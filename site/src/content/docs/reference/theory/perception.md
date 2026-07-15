@@ -59,7 +59,7 @@ The ear analyzes sound in **critical bands**: frequency regions within which ene
 4. **Core loudness** — each of the 20 critical bands is transformed with the threshold-in-quiet levels $L_{TQ}$ of Table A.6 (after the bandwidth adaptation DCB of Table A.7):
 
    $$
-   N_c = 0.0635 \cdot 10^{0.025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0.25} - 1 \right] \ \text{sone/Bark}, \qquad s = 0.25
+   N_c = \max\left(0,\ 0.0635 \cdot 10^{0.025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0.25} - 1 \right]\right) \ \text{sone/Bark}, \qquad s = 0.25
    $$
 
    (the reference program's form of Zwicker's loudness transformation; bands below threshold contribute zero).

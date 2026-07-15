@@ -345,8 +345,10 @@ def _band_acf(rect: np.ndarray, s_b: int, energy: np.ndarray | None = None) -> n
     # sum_{n'=0..s_b-m-1} p^2(n') = total - sum_{n'>=s_b-m}; the lag loop is
     # written as elementwise column arithmetic (bit-identical to a per-lag
     # loop): m = 0 keeps the full energy, m >= 1 subtracts csum[:, s_b - m].
+    if m_max == 0:
+        return out
     total = csum[:, 0]
-    left = np.empty((rect.shape[0], m_max))
+    left = np.empty((rect.shape[0], m_max), dtype=csum.dtype)
     left[:, 0] = total
     left[:, 1:] = total[:, None] - csum[:, s_b - m_max + 1 : s_b][:, ::-1]
     right = csum[:, :m_max]
@@ -418,8 +420,8 @@ def _average_bands_full(
             out.append(native)
             continue
         # Sequential accumulation; bit-identical to np.mean over a stacked
-        # axis for <= 8 terms (below numpy's pairwise-summation block) while
-        # avoiding the stacked copy.
+        # axis-0 (numpy reduces a non-contiguous axis sequentially, so
+        # pairwise summation never applies) while avoiding the stacked copy.
         acc = _scaled_acf_at(p_bands, band - reach, block_size, n_new, cache).copy()
         for off in range(-reach + 1, reach + 1):
             acc += _scaled_acf_at(p_bands, band + off, block_size, n_new, cache)

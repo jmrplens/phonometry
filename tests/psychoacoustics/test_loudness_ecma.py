@@ -211,7 +211,7 @@ def _short_band_signals() -> tuple[list, int]:
 
 def test_band_acf_matches_reference_loop_bitwise() -> None:
     # The vectorized lag normalization must be bit-identical to the per-lag
-    # reference loop for every block size (1024 and 8192 cover the extremes).
+    # reference loop for all four block sizes (8192/4096/2048/1024).
     from phonometry.psychoacoustics.loudness_ecma import (
         _band_acf,
         _S_B,
@@ -219,7 +219,7 @@ def test_band_acf_matches_reference_loop_bitwise() -> None:
     )
 
     p_bands, n_new = _short_band_signals()
-    for band in (0, 20, 30, 52):
+    for band in (0, 10, 20, 30, 52):
         s_b = int(_S_B[band])
         seg = _segment_bs(p_bands[band], s_b, n_new)
         rect = np.where(seg > 0.0, seg, 0.0)

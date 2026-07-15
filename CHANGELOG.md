@@ -229,8 +229,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - ECMA-418-2 chain: the per-lag Python loop of the unbiased ACF
   normalization (Formulae 27-29) is now column-vectorised, the Clause 6.2.3
-  neighbour-band averaging accumulates without the stacked copy, the block
-  RMS reuses the ACF energy array, and the roughness Clause 7.1.7 pchip
+  neighbour-band averaging accumulates without the stacked copy, the ACF
+  normalization reuses the block-RMS energy array, and the roughness
+  Clause 7.1.7 pchip
   interpolation runs all 53 bands in one call. Outputs are bit-identical
   (guarded by bitwise equivalence tests against retained reference loops and
   the golden baseline); on the 0.5 s bench signal `loudness_ecma` drops from

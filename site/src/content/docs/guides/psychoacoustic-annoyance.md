@@ -213,9 +213,9 @@ level (it spreads the modulated energy across bands) — quote the closed form
 `fluctuation_strength_am_noise` (§3.1) for that stimulus.
 :::
 
-## Standards
+---
 
-Fastl & Zwicker (2006), *Psychoacoustics: Facts and Models* (Springer):
+**Standards.** Fastl & Zwicker (2006), *Psychoacoustics: Facts and Models* (Springer):
 psychoacoustic annoyance `PA = N5·(1 + √(wS² + wFR²))` with the sharpness weighting
 `wS` and roughness/fluctuation weighting `wFR` (Eqs 16.2–16.4; origin
 Widmann 1992), and the closed form for the fluctuation strength of

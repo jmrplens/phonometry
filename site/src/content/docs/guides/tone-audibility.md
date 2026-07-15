@@ -200,9 +200,9 @@ evaluated at the Annex E tones the threshold (`≈ 24 Hz` at 137.3 Hz) keeps the
 combined, consistent with that example's FG grouping.
 :::
 
-## Standards
+---
 
-ISO/PAS 20065:2016, *Acoustics — Objective method for assessing the audibility
+**Standards.** ISO/PAS 20065:2016, *Acoustics — Objective method for assessing the audibility
 of tones in noise — Engineering method*: the critical bandwidth `Δfc`
 (Formula 2) and its corner frequencies (Formulae 3–5), the critical-band level
 `LG` (Formula 12), the masking index `av` (Formula 13), the audibility

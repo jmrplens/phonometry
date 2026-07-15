@@ -210,9 +210,9 @@ y se verifican contra el programa de referencia del Anexo J de
 137,3 Hz) los mantiene combinados, coherente con la agrupación FG de ese ejemplo.
 :::
 
-## Normas
+---
 
-ISO/PAS 20065:2016, *Acoustics — Objective method for assessing the audibility
+**Normas.** ISO/PAS 20065:2016, *Acoustics — Objective method for assessing the audibility
 of tones in noise — Engineering method*: el ancho de banda crítico `Δfc`
 (Fórmula 2) y sus frecuencias de esquina (Fórmulas 3–5), el nivel de banda
 crítica `LG` (Fórmula 12), el índice de enmascaramiento `av` (Fórmula 13), la

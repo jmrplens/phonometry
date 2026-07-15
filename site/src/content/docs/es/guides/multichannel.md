@@ -84,6 +84,17 @@ Notas adicionales de rendimiento:
 - **numba opcional**: el kernel del modo `impulse` de la ponderación temporal se
   compila JIT cuando numba está instalado (`pip install phonometry[perf]`).
 
+---
+
+**Normas.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+fractional-octave-band filters — Part 1: Specifications*, e IEC 61672-1:2013,
+*Electroacoustics — Sound level meters — Part 1: Specifications* — el soporte
+multicanal no añade contenido normativo propio: cada canal se filtra, pondera
+e integra en el tiempo exactamente como prescriben las normas monocanal
+(consulta [Bancos de filtros](/phonometry/es/guides/filter-banks/) y
+[Niveles](/phonometry/es/guides/levels/)); la vectorización solo agrupa el
+cálculo a lo largo del eje de canales.
+
 ## Véase también
 
 - Referencia de la API: [`phonometry`](/phonometry/es/reference/api/filters/phonometry/) y [`metrology.core`](/phonometry/es/reference/api/filters/core/).

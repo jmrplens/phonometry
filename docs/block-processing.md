@@ -104,3 +104,15 @@ for x in audio_stream(block):            # your capture callback
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
 | `high_accuracy` (weighting) | resolves to `False` by default — the legacy bilinear design, see [Frequency Weighting](weighting.md); explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
+
+---
+
+**Standards.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+fractional-octave-band filters — Part 1: Specifications*, and IEC 61672-1:2013,
+*Electroacoustics — Sound level meters — Part 1: Specifications* — block
+processing adds no normative content of its own: the streamed filters are the
+same designs those standards govern (see [Filter Banks](filter-banks.md),
+[Frequency Weighting](weighting.md) and [Time Weighting](time-weighting.md)),
+and carrying the internal filter state across blocks is exactly what makes the
+concatenated output identical to a single full-signal pass, so every class and
+tolerance claim of the underlying pages holds unchanged in streaming use.

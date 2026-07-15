@@ -110,3 +110,7 @@ extraña (Tabla 2), el factor de radiación (Fórmula 4/8) y el nivel de potenci
 sonora (Fórmulas 12/15). La conformidad se ancla en el ejemplo de calibración de
 la propia norma, el round-trip exacto entre el factor de radiación y
 `L_W = 10 lg(P/P₀)`, y el término fijo de impedancia.
+
+## Véase también
+
+- Referencia de la API: [`emission.vibration_sound_power`](/phonometry/es/reference/api/power/vibration-sound-power/).

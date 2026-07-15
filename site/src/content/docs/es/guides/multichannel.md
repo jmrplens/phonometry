@@ -83,3 +83,7 @@ Notas adicionales de rendimiento:
   [Teoría](/phonometry/es/reference/theory/)).
 - **numba opcional**: el kernel del modo `impulse` de la ponderación temporal se
   compila JIT cuando numba está instalado (`pip install phonometry[perf]`).
+
+## Véase también
+
+- Referencia de la API: [`phonometry`](/phonometry/es/reference/api/filters/phonometry/) y [`metrology.core`](/phonometry/es/reference/api/filters/core/).

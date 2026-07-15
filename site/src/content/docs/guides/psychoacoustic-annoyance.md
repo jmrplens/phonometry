@@ -227,3 +227,7 @@ paper's Table 1 literature trends and the open SQAT reference oracle. The four
 sensations reuse the library's ISO 532-1 loudness, DIN 45692 sharpness and
 ECMA-418-2 roughness (see [Loudness](/phonometry/guides/loudness/) and
 [Sound Quality Metrics](/phonometry/guides/sound-quality/)).
+
+## See also
+
+- API reference: [`psychoacoustics.psychoacoustic_annoyance`](/phonometry/reference/api/psychoacoustics/psychoacoustic-annoyance/) and [`psychoacoustics.fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/).

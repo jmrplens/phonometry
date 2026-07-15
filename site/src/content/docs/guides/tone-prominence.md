@@ -68,6 +68,7 @@ Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
 - [Impulsive-sound prominence](/phonometry/guides/impulse-prominence/) — the NT ACOU 112
   counterpart for impulsive (rather than tonal) character.
 - [Theory](/phonometry/reference/theory/) — the critical-band model and criteria derivation.
+- API reference: [`psychoacoustics.tonality`](/phonometry/reference/api/psychoacoustics/tonality/).
 
 ---
 

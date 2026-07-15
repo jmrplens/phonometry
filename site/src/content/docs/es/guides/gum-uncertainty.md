@@ -183,3 +183,7 @@ Anexo G) y los grados de libertad efectivos de Welch–Satterthwaite (Anexo G.4)
 ISO/IEC Guía 98-3-1:2008, *Supplement 1 — Propagation of distributions using a
 Monte Carlo method* — la propagación numérica y el intervalo de cobertura
 simétrico en probabilidad (cláusula 7).
+
+## Véase también
+
+- Referencia de la API: [`metrology.uncertainty`](/phonometry/es/reference/api/metrology/uncertainty/).

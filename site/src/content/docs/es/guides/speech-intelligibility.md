@@ -221,6 +221,7 @@ espectro de voz, incluido como primer argumento de
   sobre las que se evalúa el SII.
 - [Niveles](/phonometry/es/guides/levels/) — los niveles espectrales y de banda tras las
   entradas de nivel espectral equivalente.
+- Referencia de la API: [`hearing.sii`](/phonometry/es/reference/api/speech/sii/).
 
 ---
 

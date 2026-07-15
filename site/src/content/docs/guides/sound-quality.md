@@ -175,3 +175,7 @@ Aures variants, Table A.2 targets). ECMA-418-2:2025, *Psychoacoustic metrics
 for ITT equipment — Part 2 (methods for describing human perception based on
 the Sottek Hearing Model)* — the Sottek Hearing Model tonality (tu_HMS) and
 roughness (asper).
+
+## See also
+
+- API reference: [`psychoacoustics.sharpness`](/phonometry/reference/api/psychoacoustics/sharpness/), [`psychoacoustics.tonality_ecma`](/phonometry/reference/api/psychoacoustics/tonality-ecma/) and [`psychoacoustics.roughness_ecma`](/phonometry/reference/api/psychoacoustics/roughness-ecma/).

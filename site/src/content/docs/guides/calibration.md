@@ -172,3 +172,7 @@ calibrator level and class assumptions behind `sensitivity()` (the 94 dB
 principal level and the Table 1 class tolerances) and the short-term
 level-fluctuation stability check of the reference recording (5.3.3, Table 2
 class 1 limits per nominal frequency).
+
+## See also
+
+- API reference: [`metrology.calibration`](/phonometry/reference/api/levels/calibration/) and [`phonometry`](/phonometry/reference/api/filters/phonometry/).

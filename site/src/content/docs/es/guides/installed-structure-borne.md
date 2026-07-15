@@ -120,3 +120,7 @@ y la cisterna de I.3 (Tablas I.8/I.9: conversión de la fuente, los cuatro
 caminos de transmisión, el total de la Fórmula 17 y su cierre a 29 dB(A)),
 dentro del redondeo de ±0,15 dB de los intermedios impresos con un decimal.
 `D_sa` y `R_ij,ref` son entradas (de medición / EN 12354-1 / Anexos D y F).
+
+## Véase también
+
+- Referencia de la API: [`building.installed_structure_borne`](/phonometry/es/reference/api/building/installed-structure-borne/).

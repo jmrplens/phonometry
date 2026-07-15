@@ -84,3 +84,7 @@ ph.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
 **Standards.** IEC 61400-11:2012+A1:2018 (apparent sound power Formula 26,
 critical bandwidth Formula 30, masking level Formula 31, tonality/audibility
 Formulae 32–34). The full measurement pipeline is out of scope here.
+
+## See also
+
+- API reference: [`environmental.wind_turbine_noise`](/phonometry/reference/api/aeroacoustics/wind-turbine-noise/).

@@ -157,3 +157,7 @@ the static receptance `H(0) = 1/k`, the exact Table-1 reciprocity
 `impedance·mobility = 1`, the rigid-mass calibration values (`|A| = 0.100` 1/kg
 for 10 kg; `|Y| = 1.59155e-4` m/(N·s) at 100 Hz) and the Annex A example
 (γ² = 0.8, n = 75 → ε = 4.08 %).
+
+## See also
+
+- API reference: [`vibration.mechanical_mobility`](/phonometry/reference/api/vibration/mechanical-mobility/).

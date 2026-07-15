@@ -166,3 +166,7 @@ definitions: the level of a decade of stiffness, the indirect inertia relation,
 the Table-A.2 identity `k = jω·Z`, the `|T| = 0.1 ↔ ΔL₁,₂ = 20 dB` validity
 limit and its 1 dB (12 %) accuracy bound, the Eq. (6) force ratio `1/1.1`, and
 the 7.6 linearity criterion.
+
+## See also
+
+- API reference: [`vibration.transfer_stiffness`](/phonometry/reference/api/vibration/transfer-stiffness/) and [`vibration.mechanical_mobility`](/phonometry/reference/api/vibration/mechanical-mobility/).

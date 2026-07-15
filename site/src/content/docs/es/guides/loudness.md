@@ -379,3 +379,4 @@ sonoridad del modelo de Sottek (sone_HMS).
 - [Molestia psicoacústica e intensidad de fluctuación](/phonometry/es/guides/psychoacoustic-annoyance/):
   el modelo de Zwicker y Fastl que consume la sonoridad percentil N5.
 - [Teoría](/phonometry/es/reference/theory/): las ecuaciones tras los modelos de sonoridad.
+- Referencia de la API: [`psychoacoustics.loudness_zwicker`](/phonometry/es/reference/api/psychoacoustics/loudness-zwicker/), [`psychoacoustics.loudness_moore_glasberg`](/phonometry/es/reference/api/psychoacoustics/loudness-moore-glasberg/) y [`psychoacoustics.loudness_contours`](/phonometry/es/reference/api/psychoacoustics/loudness-contours/).

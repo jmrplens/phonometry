@@ -118,3 +118,7 @@ standard's own Annex I worked examples: the whirlpool bath of I.2
 Formula 17 total and its 29 dB(A) closure), within the ±0.15 dB rounding of
 the printed one-decimal intermediates. `D_sa` and `R_ij,ref` are inputs (from
 measurement / EN 12354-1 / Annexes D and F).
+
+## See also
+
+- API reference: [`building.installed_structure_borne`](/phonometry/reference/api/building/installed-structure-borne/).

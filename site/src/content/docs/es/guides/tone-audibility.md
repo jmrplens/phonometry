@@ -230,3 +230,7 @@ ancla en el ejemplo resuelto del motor de combustión del Anexo E (Tablas
 E.1/E.2/E.3): `LS` y `LT` desde el espectro, la detección de tonos y el nivel
 combinado `FG`, la audibilidad por tono, el índice de enmascaramiento y la
 audibilidad media de los cinco espectros.
+
+## Véase también
+
+- Referencia de la API: [`psychoacoustics.tone_audibility`](/phonometry/es/reference/api/psychoacoustics/tone-audibility/).

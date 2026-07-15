@@ -431,3 +431,7 @@ micrófonos); ISO 12999-2:2020 (incertidumbre de medida de la absorción sonora)
 Toda ecuación se deriva del texto de la norma y se valida frente a
 los ejemplos resueltos de las propias normas (ISO 11654 Anexo A, ISO 9053-2
 Anexo A.3, ISO 12999-2 Tablas 4/5) e identidades en forma cerrada.
+
+## Véase también
+
+- Referencia de la API: [`materials.impedance_tube`](/phonometry/es/reference/api/materials/impedance-tube/), [`materials.airflow_resistance`](/phonometry/es/reference/api/materials/airflow-resistance/) y [`materials.absorption_uncertainty`](/phonometry/es/reference/api/materials/absorption-uncertainty/).

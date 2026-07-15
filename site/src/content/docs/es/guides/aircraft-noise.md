@@ -205,3 +205,7 @@ segmentos (ajuste de impedancia, duración, instalación del motor, atenuación
 lateral, fracción de ruido, directividad de inicio de rodaje, suma) hasta los
 contornos en malla de tierra, validado contra el workbook de referencia de la
 Doc 29 5ª ed. Vol 3 Parte 1.
+
+## Véase también
+
+- Referencia de la API: [`aircraft.aircraft_noise`](/phonometry/es/reference/api/aeroacoustics/aircraft-noise/), [`aircraft.airport_noise`](/phonometry/es/reference/api/aeroacoustics/airport-noise/) y [`aircraft.atmospheric_absorption`](/phonometry/es/reference/api/aeroacoustics/atmospheric-absorption/).

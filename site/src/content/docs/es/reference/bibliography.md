@@ -48,6 +48,25 @@ que las guías incorporan sus secciones de Referencias.
   Tratamiento gratuito y complementario del diseño y análisis de filtros
   digitales, el paso natural tras las guías de bancos de filtros.
 
+## Vibración en humanos
+
+- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
+  ISBN 978-0-12-303041-2.
+  [Página del editor](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
+  La monografía de referencia sobre vibración de cuerpo completo y transmitida
+  a la mano: la biodinámica, la incomodidad y la evidencia de efectos sobre
+  la salud que sustentan las ponderaciones, las medidas de dosis y la
+  orientación exposición-respuesta de las guías de vibración.
+  Citado por [Vibración en humanos](/phonometry/es/guides/human-vibration/) y
+  [Vibración con choques múltiples](/phonometry/es/guides/multiple-shock-vibration/).
+- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
+  ISBN 978-0-415-28239-0.
+  [Página del editor](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
+  Un manual moderno y compacto sobre las cadenas de evaluación de ISO 2631-1 e
+  ISO 5349, de la percepción y el confort a los límites de exposición
+  laborales.
+  Citado por [Vibración en humanos](/phonometry/es/guides/human-vibration/).
+
 ## Metrología
 
 - Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
@@ -66,4 +85,12 @@ que las guías incorporan sus secciones de Referencias.
   [PDF gratuito](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf).
   La propagación de distribuciones mediante Monte Carlo implementada por el
   motor de incertidumbre de Monte Carlo.
+  Citado por [Incertidumbre de medida](/phonometry/es/guides/gum-uncertainty/).
+- International Organization for Standardization. (2020). *Acoustics —
+  Determination and application of measurement uncertainties in building
+  acoustics — Part 1: Sound insulation* (ISO 12999-1:2020).
+  [Catálogo de iso.org](https://www.iso.org/standard/73930.html).
+  El balance de reproducibilidad específico de la acústica de la edificación
+  para magnitudes de número único, complemento de la maquinaria general de la
+  GUM.
   Citado por [Incertidumbre de medida](/phonometry/es/guides/gum-uncertainty/).

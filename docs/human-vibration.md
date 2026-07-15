@@ -79,6 +79,35 @@ To weight a time signal, `apply_weighting` applies the exact complex response in
 the frequency domain (so magnitude *and* phase match the standard), which the
 time-domain dose metrics below then consume.
 
+### Which weighting on which axis
+
+The weighting is selected by posture, measurement point and axis, not by
+application alone. ISO 2631-1 (Tables 1 and 2, clauses 7.2.3 and 8.2.2) maps
+them as follows; the multiplying factors $k$ return in the vibration total
+value of section 3:
+
+| Posture, measurement point | Axis | Weighting | $k$ health | $k$ comfort |
+| :--- | :--- | :--- | :--- | :--- |
+| Seated, seat surface | x, y | `Wd` | 1.4 | 1.0 |
+| Seated, seat surface | z | `Wk` | 1.0 | 1.0 |
+| Seated, seat surface (rotation) | rx / ry / rz | `We` | — | 0.63 / 0.40 / 0.20 m/rad |
+| Seated, backrest | x | `Wc` | (0.8)¹ | 0.8 |
+| Seated, backrest | y / z | `Wd` | — | 0.5 / 0.4 |
+| Seated, feet | x / y / z | `Wk` | — | 0.25 / 0.25 / 0.4 |
+| Standing, floor | x, y | `Wd` | — | 1.0 |
+| Standing, floor | z | `Wk` | — | 1.0 |
+| Recumbent, under the pelvis | horizontal | `Wd` | — | 1.0 |
+| Recumbent, under the pelvis | vertical | `Wk` | — | 1.0 |
+| Recumbent, under the head | vertical | `Wj` | — | 1.0 |
+| Motion sickness (clause 9) | vertical | `Wf` | — | — |
+
+¹ The health assessment of clause 7 is defined on the seat surface; the
+backrest x measurement with `Wc`, $k = 0.8$ is encouraged but excluded
+from the Annex B severity assessment (7.2.3). The remaining weightings live in the companion parts:
+`Wm` for building occupants on all axes (ISO 2631-2), `Wb` for vertical rail
+ride comfort (ISO 2631-4), and `Wh` for hand-transmitted vibration on all
+three hand axes with every $k = 1$ (ISO 5349-1).
+
 ## 2. Weighted acceleration and dose measures (ISO 2631-1)
 
 The basic evaluation is the **weighted r.m.s. acceleration**. From a
@@ -188,6 +217,23 @@ a_v = ph.vibration_total_value([0.35, 0.28, 0.62], k=[1.4, 1.4, 1.0])
 print(round(a_v, 3))     # 0.882  m/s^2
 ```
 
+**Health or comfort? Two different readings of the same measurement.** The
+*health* assessment of clause 7 stays per axis: each axis-weighted r.m.s.
+(with $k$ = 1.4 / 1.4 / 1.0 seated) is judged by the *highest* single axis
+value against the Annex B health guidance caution zone, a band based mainly on
+4 h to 8 h exposures below which health effects are not clearly documented,
+inside which caution is indicated and above which risks are likely; Directive
+2002/44/EC turns that guidance into the enforceable `A(8)` action and limit
+values used below. The *comfort* assessment of clause 8 instead combines all
+axes (and, where relevant, backrest, feet and rotation) into the vibration
+total value $a_v$ with its own $k$ set and reads it on the Annex C scale for
+public transport, whose deliberately overlapping bands run from "not
+uncomfortable" below 0.315 m/s² to "extremely uncomfortable" above 2 m/s²; the
+standard defines no comfort limit, since acceptable magnitudes depend on trip
+duration and what the passengers are trying to do. For orientation, the median
+perception threshold of a `Wk`-weighted vibration is about 0.015 m/s² peak
+(Annex C).
+
 The **daily exposure** normalises the total value to a reference 8-hour day
 ($T_0 = 28\,800$ s). For a single operation $A(8) = a_v\,\sqrt{T/T_0}$; several
 operations combine through their partial exposures $A_i(8) = a_{vi}\,\sqrt{T_i/T_0}$
@@ -267,6 +313,20 @@ The standards deliberately define no safe limit — `A(8)` and the directive's
 action and limit values are the basis for any exposure criterion. For whole-body
 exposure, `energy_equivalent_acceleration` gives the ISO 2631-1 Eq. (B.3)
 energy-equivalent magnitude across periods of different magnitude and duration.
+
+## References
+
+- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
+  ISBN 978-0-12-303041-2.
+  [Publisher page](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
+  The standard monograph on whole-body and hand-transmitted vibration:
+  the biodynamics, discomfort and health-effect evidence behind the
+  weightings, dose measures and exposure-response guidance on this page.
+- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
+  ISBN 978-0-415-28239-0.
+  [Publisher page](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
+  A compact modern textbook on the ISO 2631-1 and ISO 5349 evaluation chains,
+  from perception and comfort to the occupational exposure limits.
 
 ---
 

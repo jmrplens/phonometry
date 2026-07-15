@@ -282,8 +282,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   construction and doubles the effective skirt attenuation to ~63 dB one
   octave out; all 49 certified bench signals now pass (worst slope-test
   m = 0,937, worst edge-carrier bias -0,0029). STI values on ordinary
-  signals shift by well under 0,001 (the sti_vs_t60 figures are
-  regenerated accordingly).
+  signals of the recommended >= 15 s duration shift by at most ~0,003
+  (larger only below the minimum-duration warning threshold; the
+  sti_vs_t60 figures are regenerated accordingly).
 - `stipa` no longer raises when an octave band of the recording carries no
   energy: dead bands read m = 0 (TI = 0, the worst-case reading of a real
   meter) under an `STIWarning`, so component-level verification signals

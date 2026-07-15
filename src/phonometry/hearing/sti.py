@@ -306,6 +306,10 @@ def sti_from_impulse_response(
        about T60 = 4 s, reaching ~+0.012 STI only in very reverberant rooms
        (T60 ~ 8 s, STI ~ 0.19). It is a property of the finite IR, not of the
        (exact) Schroeder integration, and does not depend on IR truncation.
+       At very short reverberation times (T60 < 0.25 s) the zero-phase
+       analysis bank smears h^2 slightly, biasing individual low-band
+       high-modulation-frequency MTF cells by up to ~0.02-0.04 while the
+       STI itself stays within ~0.001.
 
     :param ir: Impulse response (1D).
     :param fs: Sample rate in Hz (>= 22,5 kHz so the 8 kHz band fits).
@@ -411,7 +415,7 @@ def _stipa_modulation_depths(env: np.ndarray, fs: int) -> np.ndarray:
             "index 0-6): modulation depths set to 0 (TI = 0) there. A full "
             "STIPA measurement needs all seven carriers of the test signal.",
             STIWarning,
-            stacklevel=4,
+            stacklevel=3,
         )
     return mdr
 

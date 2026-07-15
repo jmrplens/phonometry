@@ -75,8 +75,13 @@ def _load(path: pathlib.Path) -> np.ndarray:
     assert fs == FS, f"{path.name}: expected 48 kHz, got {fs}"
     assert x.ndim == 1, f"{path.name}: expected mono"
     if x.dtype == np.int16:
-        return x.astype(np.float64) / 32768.0
-    return np.asarray(x, dtype=np.float64)
+        y = x.astype(np.float64) / 32768.0
+    else:
+        y = np.asarray(x, dtype=np.float64)
+    # Every bench signal carries at least an unmodulated carrier; a silent
+    # file (corrupt download) must fail loudly, not read as m = 0.
+    assert float(np.sqrt(np.mean(y**2))) > 1e-3, f"{path.name}: silent file"
+    return y
 
 
 def _stipa_quiet(x: np.ndarray) -> STIResult:

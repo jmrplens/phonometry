@@ -1,0 +1,236 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+End-to-end STIPA verification against the IEC 60268-16:2020 (rev 5)
+certified test bench signals from stipa.info (Embedded Acoustics BV).
+
+The 49 WAV oracles (48 kHz mono, free-of-charge verification licence) are
+third-party data and are not committed; the whole module skips cleanly
+when ``plan/stipa-verification/`` is absent (CI) and runs locally where
+the signals are kept. Expected values come from the accompanying signal
+description (Jan Verhave, Embedded Acoustics, v1.0 June 2020) and from
+the filenames; only the WAVs, filenames and that description were used
+(the bundled reference .m sources were consulted solely to resolve the
+envelope convention of C.3.2: the signals encode a STIPA channel of
+MTF = m, i.e. envelope index 0,55 m, so an analyzer normalizing by 0,55
+must read back m itself).
+
+Suites:
+
+- Annex C.3.2 - direct-method modulation depth: sine-carrier STIPA
+  signals at m = 0,0 .. 1,0; the analyzer must recover m per band and the
+  published m <-> STI staircase.
+- Annex C.3.3 - indirect-method modulation depth: exponentially decayed
+  sine carriers (RT60 = 0,125 .. 8 s) against the closed-form Schroeder
+  MTF m(F) = 1/sqrt(1 + (2 pi F T/13,8)^2).
+- Annex C.4.2 - filter-bank slope: modulated carrier plus an unmodulated
+  adjacent-octave tone 41 dB louder; normative criterion m >= 0,5 in the
+  observed band (needs > 41 dB effective slope, steeper than class 1).
+- Annex A.2.2 - weighting/redundancy factors: modulated octave-band
+  pairs; STI = alpha_k + alpha_{k+1} - beta_k.
+- Annex A.3.1.2 - filter-bank phase distortion: two sine carriers per
+  band at the half-octave edges fc*2^(+/-1/4); normative criterion
+  |STI bias| < 0,01 over TI = 0,1 .. 0,9.
+
+Measured worst-case deviations with this implementation (zero-phase
+analysis bank), on which the tolerances are based:
+C.3.2 |dSTI| 0,0031 / per-m 0,004; C.3.3 |dSTI| 0,0002 / per-m 0,018;
+C.4.2 min m 0,937; A.2.2 |dSTI| 0,0002 vs the exact alpha/beta identity;
+A.3.1.2 worst bias -0,0029.
+"""
+
+import os
+import pathlib
+import warnings
+
+import numpy as np
+import pytest
+from scipy.io import wavfile
+
+from phonometry import STIResult, sti_from_impulse_response, stipa
+from phonometry.hearing.sti import _MOD_FREQS, _NUM_BANDS, _sti_from_mtf
+
+FS = 48000
+_BANDS = (125, 250, 500, 1000, 2000, 4000, 8000)
+
+# Local-only oracle data: the stipa.info verification WAVs live under
+# plan/ (gitignored). STIPA_VERIFICATION_DATA overrides the location.
+DATA = pathlib.Path(
+    os.environ.get(
+        "STIPA_VERIFICATION_DATA",
+        str(pathlib.Path(__file__).parents[2] / "plan" / "stipa-verification"),
+    )
+)
+_DATA_PRESENT = (DATA / "Annex C.3.2").is_dir()
+
+pytestmark = pytest.mark.skipif(
+    not _DATA_PRESENT,
+    reason="stipa.info certified verification WAVs absent (local-only oracle; "
+    "download from stipa.info into plan/stipa-verification/)",
+)
+
+
+def _load(path: pathlib.Path) -> np.ndarray:
+    """Read a verification WAV as float64 in [-1, 1) at 48 kHz mono."""
+    fs, x = wavfile.read(path)
+    assert fs == FS, f"{path.name}: expected 48 kHz, got {fs}"
+    assert x.ndim == 1, f"{path.name}: expected mono"
+    if x.dtype == np.int16:
+        return x.astype(np.float64) / 32768.0
+    return np.asarray(x, dtype=np.float64)
+
+
+def _stipa_quiet(x: np.ndarray) -> STIResult:
+    """stipa() with the expected verification-bench warnings silenced
+    (dead bands and junk m > 1,3 in the two-band C.4.2 signals)."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        return stipa(x, FS)
+
+
+# ---------------------------------------------------------------------------
+# Annex C.3.2 - direct-method modulation depth (sine carriers, m = 0 .. 1)
+# ---------------------------------------------------------------------------
+
+# m <-> STI staircase from the signal description (Table with related m,
+# SNR and STI values); m and TI = (10 lg(m/(1-m)) + 15)/30 in 0,1 steps.
+_C32_EXPECTED = {
+    0.0: 0.00, 0.1: 0.18, 0.2: 0.30, 0.3: 0.38, 0.4: 0.44, 0.5: 0.50,
+    0.6: 0.56, 0.7: 0.62, 0.8: 0.70, 0.9: 0.82, 1.0: 1.00,
+}
+
+
+@pytest.mark.parametrize("m", sorted(_C32_EXPECTED))
+def test_c32_direct_method_modulation_depth(m: float) -> None:
+    x = _load(DATA / "Annex C.3.2" / f"STIPA-sinecarrier-M={m:g}.wav")
+    res = stipa(x, FS)
+    # Published staircase (worst measured |dSTI| = 0,0031 -> tol 0,01).
+    assert res.sti == pytest.approx(_C32_EXPECTED[m], abs=0.01)
+    # MTF extraction: every band/modulation-frequency cell must read back
+    # the encoded m (worst measured deviation 0,004 -> tol 0,01). At
+    # m = 1,0 the cells are clipped to at most 1.
+    assert res.mtf.shape == (7, 2)
+    np.testing.assert_allclose(res.mtf, m, atol=0.01)
+
+
+# ---------------------------------------------------------------------------
+# Annex C.3.3 - indirect-method modulation depth (exponential decays)
+# ---------------------------------------------------------------------------
+
+_C33_RT60 = (0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0)
+
+
+def _schroeder_m(rt60: float) -> np.ndarray:
+    """Closed-form MTF of an exponential intensity decay of 60 dB in RT60:
+    I(t) ~ e^(-a t), a = 6 ln(10)/RT60, m(F) = 1/sqrt(1 + (2 pi F/a)^2)."""
+    a = 6.0 * np.log(10.0) / rt60
+    return np.asarray(1.0 / np.sqrt(1.0 + (2.0 * np.pi * _MOD_FREQS / a) ** 2))
+
+
+@pytest.mark.parametrize("rt60", _C33_RT60)
+def test_c33_indirect_method_exponential_decay(rt60: float) -> None:
+    x = _load(DATA / "Annex C.3.3" / f"STIPA-expdecay-RT60={rt60:g}.wav")
+    res = sti_from_impulse_response(x, FS)
+    m_expected = _schroeder_m(rt60)
+    # Per-band, per-modulation-frequency MTF against the closed form
+    # (worst measured deviation 0,018 at RT60 = 0,125 s -> tol 0,03).
+    np.testing.assert_allclose(
+        res.mtf, np.tile(m_expected, (_NUM_BANDS, 1)), atol=0.03
+    )
+    # STI derived from the closed-form MTF through the standard TI chain
+    # (worst measured |dSTI| = 0,0002 -> tol 0,005).
+    sti_expected = _sti_from_mtf(np.tile(m_expected, (_NUM_BANDS, 1))).sti
+    assert res.sti == pytest.approx(sti_expected, abs=0.005)
+
+
+# ---------------------------------------------------------------------------
+# Annex C.4.2 - filter-bank slope (m >= 0,5 with a +41 dB adjacent tone)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("slope", ["lowslope", "highslope"])
+@pytest.mark.parametrize("band", _BANDS)
+def test_c42_filter_slope(slope: str, band: int) -> None:
+    x = _load(DATA / "Annex C.4.2" / f"Filtertest_{slope} {band}.wav")
+    res = _stipa_quiet(x)
+    k = _BANDS.index(band)
+    m_observed = res.mtf[k]
+    # Normative pass criterion of the bench: m >= 0,5 in the observed
+    # band (an unmodulated tone one octave away, 41 dB louder, must not
+    # leak enough to halve the modulation depth).
+    assert np.all(m_observed >= 0.5), f"m = {m_observed} in the {band} Hz band"
+    # Regression lock well above the criterion: the zero-phase bank
+    # achieves m >= 0,937 on all 14 signals.
+    assert np.all(m_observed >= 0.85)
+
+
+# ---------------------------------------------------------------------------
+# Annex A.2.2 - weighting and redundancy factors (octave-band pairs)
+# ---------------------------------------------------------------------------
+
+# Exact Ed.5 Table A.1 identity alpha_k + alpha_{k+1} - beta_k; the
+# filename STI values are these rounded to two decimals.
+_A22_EXPECTED = {
+    (125, 250): 0.127,
+    (250, 500): 0.279,
+    (500, 1000): 0.398,
+    (1000, 2000): 0.531,
+    (2000, 4000): 0.486,
+    (4000, 8000): 0.302,
+}
+
+
+@pytest.mark.parametrize("pair", sorted(_A22_EXPECTED))
+def test_a22_weighting_factor_pairs(pair: tuple[int, int]) -> None:
+    lo, hi = pair
+    name = f"STIPA-sine-pair[{lo}+{hi}]STI={round(_A22_EXPECTED[pair], 2):g}.wav"
+    res = stipa(_load(DATA / "Annex A.2.2 - weight factor test" / name), FS)
+    # Worst measured deviation vs the exact identity: 0,0002 (the visible
+    # 0,004 vs the filename is its 2-decimal rounding) -> tol 0,005.
+    assert res.sti == pytest.approx(_A22_EXPECTED[pair], abs=0.005)
+
+
+# ---------------------------------------------------------------------------
+# Annex A.3.1.2 - filter-bank phase distortion (half-octave edge carriers)
+# ---------------------------------------------------------------------------
+
+# TI -> encoded m from the filenames (m = 1/(1 + 10^(-SNR/10)),
+# SNR = 30 TI - 15; endpoints clipped to 0 and 1 by the bench).
+_A312_FILES = {
+    0.0: "STIPA-sine-edge-carriers-TI=0[m=0].wav",
+    0.1: "STIPA-sine-edge-carriers-TI=0.1[m=0.059351].wav",
+    0.2: "STIPA-sine-edge-carriers-TI=0.2[m=0.11182].wav",
+    0.3: "STIPA-sine-edge-carriers-TI=0.3[m=0.20076].wav",
+    0.4: "STIPA-sine-edge-carriers-TI=0.4[m=0.33386].wav",
+    0.5: "STIPA-sine-edge-carriers-TI=0.5[m=0.5].wav",
+    0.6: "STIPA-sine-edge-carriers-TI=0.6[m=0.66614].wav",
+    0.7: "STIPA-sine-edge-carriers-TI=0.7[m=0.79924].wav",
+    0.8: "STIPA-sine-edge-carriers-TI=0.8[m=0.88818].wav",
+    0.9: "STIPA-sine-edge-carriers-TI=0.9[m=0.94065].wav",
+    1.0: "STIPA-sine-edge-carriers-TI=1[m=1].wav",
+}
+
+
+@pytest.mark.parametrize("ti", sorted(_A312_FILES))
+def test_a312_filter_bank_phase(ti: float) -> None:
+    res = stipa(_load(DATA / "Annex A.3.1.2 - filter bank phase test" / _A312_FILES[ti]), FS)
+    # Normative criterion: |STI bias| < 0,01 over TI = 0,1 .. 0,9; the
+    # endpoints (clipped m) hold trivially and are asserted at the same
+    # tolerance. Worst measured bias with the zero-phase bank: -0,0029.
+    assert res.sti == pytest.approx(ti, abs=0.01)
+
+
+# ---------------------------------------------------------------------------
+# Inventory guard: all 49 oracles must be seen when the data is present
+# ---------------------------------------------------------------------------
+
+def test_certified_bench_inventory() -> None:
+    """Guard against a silent partial download: 11 + 7 + 14 + 6 + 11."""
+    counts = {
+        "Annex C.3.2": 11,
+        "Annex C.3.3": 7,
+        "Annex C.4.2": 14,
+        "Annex A.2.2 - weight factor test": 6,
+        "Annex A.3.1.2 - filter bank phase test": 11,
+    }
+    for sub, n in counts.items():
+        found = len(list((DATA / sub).glob("*.wav")))
+        assert found == n, f"{sub}: expected {n} WAVs, found {found}"

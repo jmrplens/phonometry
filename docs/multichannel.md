@@ -80,6 +80,6 @@ Additional performance notes:
   control over the design lifetime.
 - **Multirate decimation**: low-frequency bands are filtered at a decimated
   rate, which is both faster and numerically more stable (see
-  [Theory](theory.md)).
+  [Theory](theory-signal-analysis.md)).
 - **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
   numba is installed (`pip install phonometry[perf]`).

@@ -163,7 +163,7 @@ R(l50)), `specific_roughness` (R′(z), 53 bands), `bark`, `centre_frequencies`,
 
 See [Prominent Discrete Tones](tone-prominence.md) for the ECMA-418-1 TNR/PR
 prominence verdicts, [Speech Transmission Index](speech-transmission.md) for
-STI/STIPA, and [Theory](theory.md) for the underlying math.
+STI/STIPA, and [Theory](theory-perception.md) for the underlying math.
 
 ---
 

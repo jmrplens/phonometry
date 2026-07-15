@@ -73,6 +73,8 @@ jobs:
       contents: read
     steps:
     - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
     - name: Set up Python 3.13
       uses: actions/setup-python@v6
       with:

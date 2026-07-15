@@ -160,16 +160,18 @@ def test_generation_is_deterministic(
 ) -> None:
     gad.generate(tmp_path / "api", tmp_path / "api-sidebar.mjs")
     first = {
-        p.relative_to(generated): p.read_bytes()
+        p.relative_to(generated): p.read_text(encoding="utf-8")
         for p in sorted(generated.rglob("*"))
         if p.is_file()
     }
     second = {
-        p.relative_to(tmp_path): p.read_bytes()
+        p.relative_to(tmp_path): p.read_text(encoding="utf-8")
         for p in sorted(tmp_path.rglob("*"))
         if p.is_file()
     }
-    assert first == second
+    assert second.keys() == first.keys(), "generated file sets differ"
+    for relpath in first:
+        assert second[relpath] == first[relpath], f"{relpath} is not deterministic"
 
 
 def test_every_public_name_on_exactly_one_page(
@@ -221,7 +223,7 @@ def test_xref_anchors_point_to_emitted_headings(
     for page in pages:
         text = (generated / "api" / page.relpath).read_text(encoding="utf-8")
         for member in page.members:
-            assert f"{page.url}#{member.anchor}" == xref[member.name]
+            assert xref[member.name] == f"{page.url}#{member.anchor}"
             heading = f"## {member.name}"
             plain = f"## {member.name.replace('_', chr(92) + '_')}"
             assert heading in text or plain in text, (page.module, member.name)

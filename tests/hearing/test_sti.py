@@ -23,6 +23,7 @@ import pytest
 
 from phonometry import STIResult, sti_from_impulse_response, stipa, stipa_signal
 from phonometry.hearing.sti import (
+    STIWarning,
     _ALPHA_MALE,
     _BETA_MALE,
     _MOD_FREQS,
@@ -342,7 +343,7 @@ def test_invalid_inputs_raise():
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
             stipa(stipa_signal(FS, seconds=18.0, seed=3)[: FS // 2], FS)
-    with pytest.warns(UserWarning, match="No energy in octave band"):
+    with pytest.warns(STIWarning, match="No energy in octave band"):
         # A pure tone leaves other octave bands empty: those bands read
         # m = 0 (TI = 0) with a warning rather than a hard error, so the
         # IEC 60268-16 C.4.2 verification signals (energy in only two

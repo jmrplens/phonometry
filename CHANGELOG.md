@@ -229,9 +229,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   end-to-end oracle over `stipa` / `sti_from_impulse_response` (49 WAVs
   across Annexes C.3.2 modulation-depth staircase, C.3.3 exponential decays,
   C.4.2 filter slope, A.2.2 weighting factors and A.3.1.2 phase distortion;
-  the suite skips cleanly when the local data is absent), plus six synthetic
-  conformance checks that re-derive the same constructions in CI: the C.3.2
-  staircase at m = 0,2/0,5/0,8 (±0,01 STI), the C.3.3 RT60 = 1 s decay
+  the suite skips cleanly when the local data is absent), plus seven synthetic
+  conformance checks that re-derive the same constructions in CI (one of them
+  replacing the previous C.3.2 m = 0,5 check, so the total grows by six): the
+  C.3.2 staircase at m = 0,2/0,5/0,8 (±0,01 STI), the C.3.3 RT60 = 1 s decay
   against the closed-form Schroeder MTF (±0,005), the C.4.2 slope criterion
   (m ≥ 0,5 under a +41 dB unmodulated adjacent-octave tone) and the
   A.2.2/A.3.1.2 audio-path checks (257 checks total).

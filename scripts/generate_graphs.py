@@ -6380,8 +6380,15 @@ def generate_all(img_dir: str) -> None:
 # Deterministic FuncAnimation clips of the level-vs-time phenomena the library
 # already computes. Each is rendered to WebM (site <video>) in all four
 # language x theme variants, and to an animated GIF for the English GitHub
-# docs (both themes). Kept out of generate_all()/`make graphs` so ordinary
-# PNG regeneration stays fast; produced by `make animations`.
+# docs (both themes). Every WebM also gets a JPEG poster frame (the held
+# verdict state near the end of the clip) so the site can embed the video
+# with ``preload="none"`` and still show a meaningful still while nothing is
+# fetched. Posters are ``.jpg`` on purpose: `make graphs` clears only
+# ``*.svg``/``*.png`` and scripts/check_figures.py regenerates/compares only
+# those, so the posters ride with the WebM/GIF outside the figure pipeline.
+# Kept out of generate_all()/`make graphs` so ordinary PNG regeneration stays
+# fast; produced by `make animations` (or `make posters` to re-extract the
+# stills from the committed WebMs without re-rendering).
 # ===========================================================================
 
 _ANIM_FPS = 20
@@ -6613,18 +6620,56 @@ def _draw_resistor(ax: Any, x0: float, x1: float, y: float) -> None:
     ax.plot(xs, ys, color=COLOR_FG, lw=1.4)
 
 
+def _extract_poster(webm: str) -> str:
+    """Extract the deferred-loading poster still from a rendered WebM.
+
+    The frame is grabbed half a second before the end of the clip, i.e.
+    inside the closing hold, so the poster shows the settled verdict state.
+    The output sits next to the WebM as ``<stem>_poster.jpg``; JPEG keeps it
+    outside the SVG/PNG figure pipeline (`make graphs` deletion glob and the
+    scripts/check_figures.py regeneration compare).
+    """
+    import subprocess
+
+    poster = webm.removesuffix(".webm") + "_poster.jpg"
+    subprocess.run(
+        ["ffmpeg", "-y", "-loglevel", "error", "-sseof", "-0.5", "-i", webm,
+         "-frames:v", "1", "-q:v", "3", "-update", "1", poster],
+        check=True)
+    return poster
+
+
+def generate_posters(output_dir: str) -> None:
+    """Re-extract every animation poster from the already-rendered WebMs.
+
+    Used by ``--posters`` (`make posters`) to refresh the stills without the
+    slow re-encode of the clips themselves.
+    """
+    import glob
+
+    webms = sorted(glob.glob(os.path.join(output_dir, "anim_*.webm")))
+    if not webms:
+        raise RuntimeError(f"no anim_*.webm files found in {output_dir}; "
+                           "run `make animations` first")
+    for webm in webms:
+        poster = _extract_poster(webm)
+        print(f"  {os.path.basename(webm)} -> {os.path.basename(poster)}")
+
+
 def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
                     make_gif: bool = True, *, fps: int | None = None,
                     gif_fps: int | None = None) -> None:
-    """Write *anim* to WebM (always) and, for English, an animated GIF.
+    """Write *anim* to WebM (always), its poster JPEG and, for English, a GIF.
 
     The GIF is derived from the just-written WebM with an ffmpeg palette pass
     so the GitHub docs get a compact, self-contained loop; the site embeds the
-    WebM directly. ``fps`` overrides the shared WebM rate and ``gif_fps`` the
-    GIF sampling rate (long clips drop GIF frames to stay within GitHub-friendly
-    file sizes). ``savefig.bbox`` is forced to ``standard`` so every frame
-    keeps the same canvas size (a ``tight`` box would jitter and break the
-    encoder).
+    WebM directly. Every WebM variant also gets a ``_poster.jpg`` still (see
+    :func:`_extract_poster`) so the site ``<video>`` embeds can defer loading
+    (``preload="none"``) behind a meaningful frame. ``fps`` overrides the
+    shared WebM rate and ``gif_fps`` the GIF sampling rate (long clips drop
+    GIF frames to stay within GitHub-friendly file sizes). ``savefig.bbox``
+    is forced to ``standard`` so every frame keeps the same canvas size (a
+    ``tight`` box would jitter and break the encoder).
     """
     import subprocess
 
@@ -6639,6 +6684,7 @@ def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
     with plt.rc_context({"savefig.bbox": "standard"}):
         anim.save(webm, writer=writer, dpi=_ANIM_DPI,
                   savefig_kwargs={"facecolor": fig.get_facecolor()})
+    _extract_poster(webm)
     made_gif = False
     if make_gif and _LANG == "en":
         gif = _anim_path(output_dir, stem, "gif")
@@ -6658,7 +6704,8 @@ def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
         made_gif = True
     plt.close(fig)
     theme = "dark" if _FILENAME_SUFFIX else "light"
-    print(f"  {stem} [{_LANG} {theme}] -> webm" + (" + gif" if made_gif else ""))
+    print(f"  {stem} [{_LANG} {theme}] -> webm + poster"
+          + (" + gif" if made_gif else ""))
 
 
 def animate_time_weighting_ballistics(output_dir: str) -> None:
@@ -7549,6 +7596,11 @@ def main(argv: list[str] | None = None) -> None:
         "kept out of the default figure run)",
     )
     parser.add_argument(
+        "--posters", action="store_true",
+        help="re-extract only the animation poster stills from the "
+        "already-rendered WebM files (no clip re-encoding)",
+    )
+    parser.add_argument(
         "--all", dest="do_all", action="store_true",
         help="render both the figures and the animations",
     )
@@ -7567,8 +7619,12 @@ def main(argv: list[str] | None = None) -> None:
     img_dir = ".github/images"
     os.makedirs(img_dir, exist_ok=True)
 
-    do_figs = not args.animations or args.do_all
+    do_figs = not (args.animations or args.posters) or args.do_all
     do_anim = args.animations or args.do_all
+
+    if args.posters and not do_anim:
+        print("--- Re-extracting animation posters ---")
+        generate_posters(img_dir)
     jobs = args.jobs if args.jobs is not None else _default_jobs()
     if jobs < 1:
         parser.error("--jobs must be >= 1")

@@ -76,7 +76,7 @@ room responds as a set of discrete modes, not as a reverberant mixture. The
 (2,1) mode and then between two modes; the standing-wave pattern that
 builds up on resonance is what Sabine and Eyring cannot see.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes.gif" alt="Animation: a 2D FDTD simulation of a 5 by 3.5 metre room driven at the 84 Hz (2,1) mode and at an off-mode frequency; on resonance a standing-wave pattern with fixed nodal lines builds up in the RMS pressure map, off resonance no pattern grows" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes.gif" alt="Animation: a 2D FDTD simulation of a 5 by 3.5 metre room driven at the 84 Hz (2,1) mode and at an off-mode frequency; on resonance a standing-wave pattern with fixed nodal lines builds up in the RMS pressure map, off resonance no pattern grows" width="640" height="360" loading="lazy"></picture>
 
 ## 2. Fitzroy and Arau-Puchades (anisotropic rooms)
 

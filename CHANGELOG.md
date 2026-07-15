@@ -259,8 +259,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `anim_schroeder` fills the tail energy of the squared impulse response
   while the decay curve and T20/T30 fits emerge on a companion axis. A
   shared scaffold (schematic axes, mic symbols, meter gauges, pipeline
-  boxes, updatable arrows) backs all clips; filenames, the WebM/GIF variant
-  pipeline and the page embeds are unchanged.
+  boxes, updatable arrows) backs all clips; filenames and the WebM/GIF
+  variant pipeline are unchanged. Every animation embed now loads deferred
+  with its space pre-reserved: `_save_animation` exports a poster still per
+  WebM variant (`anim_<name>[_es][_dark]_poster.jpg`, a frame inside the
+  closing hold; JPEG so the posters stay outside the SVG/PNG `make graphs` /
+  `check_figures.py` pipeline, refreshable via `make posters` /
+  `--posters`), the site `<video>` embeds use `preload="none"` plus the
+  poster and explicit `width`/`height` (no `autoplay`), and the GitHub-docs
+  GIF embeds carry `loading="lazy"` with their intrinsic size, so no clip
+  fetches eagerly and none shifts the layout while loading. Future clips
+  inherit the convention automatically.
 - `scripts/generate_graphs.py` renders the documentation figures on a
   process pool: each (figure, language, theme) combination is an independent
   task (spawned workers, language/theme applied per task), except the five

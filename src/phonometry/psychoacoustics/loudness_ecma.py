@@ -350,7 +350,8 @@ def _band_acf(rect: np.ndarray, s_b: int, energy: np.ndarray | None = None) -> n
     total = csum[:, 0]
     left = np.empty((rect.shape[0], m_max), dtype=csum.dtype)
     left[:, 0] = total
-    left[:, 1:] = total[:, None] - csum[:, s_b - m_max + 1 : s_b][:, ::-1]
+    left[:, 1:] = total[:, None]
+    left[:, 1:] -= csum[:, s_b - m_max + 1 : s_b][:, ::-1]
     right = csum[:, :m_max]
     denom = np.sqrt(left * right + _EPS)
     out[:, :m_max] = unscaled[:, :m_max] / denom

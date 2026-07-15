@@ -361,7 +361,7 @@ export default defineConfig({
           items: [
             {
               label: 'Structure-borne sources',
-              translations: { es: 'Fuentes estructurales' },
+              translations: { es: 'Fuentes de ruido estructural' },
               items: [
                 'guides/mechanical-mobility',
                 'guides/transfer-stiffness',
@@ -389,7 +389,7 @@ export default defineConfig({
             },
             {
               label: 'Aircraft and wind energy',
-              translations: { es: 'Aeronaves y eólica' },
+              translations: { es: 'Aeronaves y energía eólica' },
               items: ['guides/aircraft-noise', 'guides/rotorcraft-noise', 'guides/wind-turbine-noise'],
             },
           ],

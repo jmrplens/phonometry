@@ -227,6 +227,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- `scripts/generate_graphs.py` renders the documentation figures on a
+  process pool: each (figure, language, theme) combination is an independent
+  task (spawned workers, language/theme applied per task), except the five
+  psychoacoustic figures whose `lru_cache`-memoised ECMA-418-2 / ISO 532
+  analyses render their four variants grouped in one worker so the cache
+  reuse of the sequential run is preserved. Output is byte-identical to the
+  sequential run (all 624 committed assets hash-equal on the same machine);
+  the full four-variant regeneration drops from 196 s to 53 s on a 12-core
+  dev box. New CLI flags: `--jobs N` (default: cores minus two, capped at 8;
+  `--jobs 1` keeps the old in-process sequential path) and `--figure NAME`
+  (repeatable single-figure filter); `--animations` / `--all` are unchanged
+  and the clips still render sequentially.
 - ECMA-418-2 chain: the per-lag Python loop of the unbiased ACF
   normalization (Formulae 27-29) is now column-vectorised, the Clause 6.2.3
   neighbour-band averaging accumulates without the stacked copy, the ACF

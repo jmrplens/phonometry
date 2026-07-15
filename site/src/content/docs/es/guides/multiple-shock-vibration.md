@@ -13,6 +13,21 @@ evaluación de efectos sobre la salud del **Anexo C**. (El modelo de elementos
 finitos de los Anexos A / E lo distribuye ISO como software aparte y queda fuera
 de alcance aquí.)
 
+La frontera con el método básico es explícita. ISO 2631-1 declara su
+evaluación eficaz normalmente suficiente hasta un factor de cresta de 9, y
+ofrece el eficaz móvil/MTVV y el VDV más allá; ISO 2631-5 es el método
+adicional para el régimen posterior, cuando el registro contiene choques
+repetidos. Su cláusula 4 divide después ese régimen en dos: las condiciones
+*severas*, con posible caída libre o pérdida de contacto con el asiento y un
+eje z dominante (vehículos militares todoterreno, embarcaciones rápidas),
+usan el modelo de la cláusula 5 implementado aquí, mientras que las
+condiciones *menos severas*, en las que el ocupante permanece sentado en todo
+momento (tractores, maquinaria forestal y de movimiento de tierras sobre
+terreno irregular), corresponden al modelo de elementos finitos del Anexo A.
+En caso de duda, la delimitación es cuantitativa: cuando la aceleración de
+pico vertical limitada en banda supera 9,81 m/s² (1 g, el umbral de caída
+libre), se aplican la cláusula 5 y el Anexo C.
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_es.svg" alt="Flujo desde la aceleración vertical del asiento az(t) hasta la respuesta espinal, la dosis de aceleración Dz y la dosis diaria Dzd, la tensión compresiva Sd, la variable de tensión R acumulada con la edad, y la probabilidad de lesión lumbar de Weibull" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso2631_5_es_dark.svg" alt="Flujo desde la aceleración vertical del asiento az(t) hasta la respuesta espinal, la dosis de aceleración Dz y la dosis diaria Dzd, la tensión compresiva Sd, la variable de tensión R acumulada con la edad, y la probabilidad de lesión lumbar de Weibull" style="width:86%">
 
 ## 1. Respuesta espinal (cláusula 5.2)
@@ -145,6 +160,15 @@ picos de respuesta, y su `.plot()` dibuja la curva de probabilidad de lesión co
 los umbrales de riesgo del 10/50/90 % de la Tabla C.2. Complementa las métricas
 eficaz, eficaz móvil/MTVV y VDV de
 [Vibración en humanos](/phonometry/es/guides/human-vibration/) (ISO 2631-1).
+
+## Referencias
+
+- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
+  ISBN 978-0-12-303041-2.
+  [Página del editor](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
+  Contexto sobre la exposición a choques de cuerpo completo, la biodinámica
+  espinal y los efectos lumbares sobre la salud que cuantifica el modelo de
+  dosis de ISO 2631-5.
 
 ---
 

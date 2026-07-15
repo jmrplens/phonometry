@@ -217,8 +217,6 @@ A daily exposure built from several operations, with its assessment.
 | `partials` | Partial exposure `A_i(8)` per operation, in m/s2. |
 | `assessment` | The [`ExposureAssessment`](/phonometry/reference/api/vibration/human-vibration/#exposureassessment) of `a8`. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### DailyVibrationExposure.plot()
 
 ```python
@@ -316,8 +314,6 @@ A daily exposure assessed against the Directive 2002/44/EC values.
 | `exceeds_action` | Whether `value` reaches or exceeds the EAV. |
 | `exceeds_limit` | Whether `value` reaches or exceeds the ELV. |
 | `zone` | `"below action"`, `"action"` (EAV\<=value\<ELV) or `"limit"` (value>=ELV). |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ## frequency_weighting
 
@@ -697,8 +693,6 @@ A weighted one-third-octave acceleration spectrum and its `a_w`.
 | `weighted` | Weighted band contribution `W_i*a_i`, in m/s2. |
 | `overall` | Overall weighted r.m.s. acceleration `a_w`, in m/s2. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### WeightedSpectrum.plot()
 
 ```python
@@ -761,8 +755,6 @@ A frequency-weighting magnitude response (ISO 8041-1, Formula (5)).
 | `response` | Complex weighting `H(j*2*pi*f)` per frequency. |
 | `magnitude` | Weighting factor `\|H\|` per frequency. |
 | `magnitude_db` | `20*log10(\|H\|)` per frequency, in decibels. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### WeightingResponse.plot()
 

@@ -82,8 +82,6 @@ Bottom reflection loss versus grazing angle (fluid-fluid Rayleigh model).
 | `reflection_coefficient` | Complex reflection coefficient per angle. |
 | `critical_angle` | The critical grazing angle, in degrees, or `None` if the sediment is not faster than the water. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### BottomLossResult.plot()
 
 ```python

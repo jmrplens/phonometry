@@ -115,8 +115,6 @@ Normal-mode solution of a range-independent waveguide.
 | `receiver_depth` | Receiver depth of the transmission-loss slice, in m. |
 | `source_depth` | Source depth, in metres. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### NormalModeResult.plot()
 
 ```python
@@ -199,8 +197,6 @@ Parabolic-equation transmission-loss field.
 | `transmission_loss` | Transmission-loss field `TL(z, r)`, in dB, shape `(n_depths, n_ranges)`. |
 | `source_depth` | Source depth, in metres. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ParabolicEquationResult.plot()
 
 ```python
@@ -271,8 +267,6 @@ Ray-tracing solution through a sound-speed profile.
 | `depths` | Per-ray depths, in metres, shape `(n_rays, n_steps)`. |
 | `source_depth` | Source depth, in metres. |
 | `water_depth` | Water-column depth, in metres. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### RayTraceResult.plot()
 

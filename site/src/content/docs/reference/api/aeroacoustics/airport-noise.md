@@ -164,8 +164,6 @@ Single-event noise level of an aircraft movement at a receiver.
 | `segment_levels` | Per-segment contribution, in dB. |
 | `observer` | Receiver position `(x, y, z)`, in metres. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### FlyoverResult.plot()
 
 ```python
@@ -334,8 +332,6 @@ Single-event noise level over a ground grid (ECAC Doc 29).
 | `level` | Event level over the grid `(len(y), len(x))`, in dB. |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### NoiseContourResult.plot()
 
 ```python
@@ -435,8 +431,6 @@ NPD event level over a distance sweep at one power (ECAC Doc 29).
 | `power` | The engine power setting queried. |
 | `table_distances` | The tabulated slant distances, in metres. |
 | `table_levels` | The tabulated levels at the queried power, in dB. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### NpdLevelResult.plot()
 

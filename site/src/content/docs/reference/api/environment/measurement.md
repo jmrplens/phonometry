@@ -205,8 +205,6 @@ Energy-mean level and its uncertainty from repeats (Formulae (17)–(20)).
 | `approximate_uncertainty` | The Note 2 substitute (Formula (20)), `√(Σ(Li − Lk)²/(N − 1))`, in dB — valid only when the spread of the `Li` is small; it grossly inflates for spread levels. |
 | `n` | Number of measurements. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ## residual_correction_uncertainty
 
 ```python
@@ -296,8 +294,6 @@ Residual-noise-corrected level (ISO 1996-2:2017 Clause 10.4).
 | `reportable_upper_bound` | The *measured* level `L'`, in dB. When the margin is 3 dB or less, §10.4 permits reporting the measured level as an upper bound of the specific sound level; this field carries that reportable value. |
 | `margin` | `L' − Lres`, in dB (measured minus residual). |
 | `reliable` | `True` when the residual is more than 3 dB below the measured level; `False` when no correction is allowed and only the uncorrected `L'` may be reported, as an upper bound. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ## tonal_adjustment
 
@@ -447,8 +443,6 @@ Tonal-audibility assessment of a tone in noise (ISO 1996-2 Annex C).
 | `critical_bandwidth` | Critical bandwidth, in Hz (Table C.1). |
 | `audibility` | Tonal audibility `ΔLta`, in dB (Formula (C.3)). |
 | `adjustment` | Tonal adjustment `Kt`, in dB (Formulae (C.4)–(C.6)). |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### TonalAssessmentResult.plot()
 

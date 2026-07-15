@@ -96,8 +96,6 @@ Predicted ship source-level spectrum.
 | `speed_knots` | Speed used, in knots (`None` if the model ignores it). |
 | `length_m` | Length used, in metres (`None` if the model ignores it). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ShipTrafficSpectrum.plot()
 
 ```python

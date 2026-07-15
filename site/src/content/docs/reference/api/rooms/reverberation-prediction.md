@@ -246,8 +246,6 @@ Predicted reverberation time of a rectangular room by five models.
 | `volume` | Room volume `V`, m3. |
 | `surface_area` | Total boundary area `S`, m2. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ReverberationModelResult.models
 
 *property*

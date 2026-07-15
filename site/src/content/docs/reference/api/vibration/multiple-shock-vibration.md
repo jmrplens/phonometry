@@ -267,8 +267,6 @@ Multiple-shock health assessment (ISO 2631-5:2018, Clause 5 + Annex C).
 | `peaks` | The positive response peaks `Az,i` used for the dose, m/s2. |
 | `risk_thresholds` | The `R` values for 10 %, 50 % and 90 % risk of injury for this sex (Table C.2). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### MultipleShockResult.plot()
 
 ```python

@@ -147,8 +147,6 @@ grade. `achieved_grade` is the per-band class `'engineering'`/
 A-weighted total over determinable bands (`NaN` without `frequencies`
 and more than one band).
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### SoundPowerIntensityResult.plot()
 
 ```python

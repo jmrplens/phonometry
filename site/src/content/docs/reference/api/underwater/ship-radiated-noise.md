@@ -145,8 +145,6 @@ Equivalent monopole source level of a ship (ISO 17208-2).
 | `source_depth` | Nominal source depth `d_s = 0.7·D`, in m. |
 | `sound_speed` | Speed of sound used, in m/s. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ShipSourceLevelResult.plot()
 
 ```python

@@ -56,8 +56,6 @@ One-third-octave-band atmospheric attenuation over a path (SAE ARP 5534).
 | `relative_humidity` | Relative humidity, in percent. |
 | `pressure` | Ambient atmospheric pressure, in kPa. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### AircraftBandAttenuation.plot()
 
 ```python

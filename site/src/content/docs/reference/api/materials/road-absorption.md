@@ -422,8 +422,6 @@ An in-situ one-third-octave absorption spectrum (ISO 13472-1).
 | `frequencies` | One-third-octave band centre frequencies, in hertz. |
 | `absorption` | Sound-absorption coefficient `alpha` per band (a band with no contributing narrow-band samples is `nan`). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### InsituAbsorptionResult.plot()
 
 ```python

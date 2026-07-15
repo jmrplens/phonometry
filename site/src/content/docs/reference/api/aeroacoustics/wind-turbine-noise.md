@@ -185,8 +185,6 @@ Tonal audibility of a narrowband spectrum (IEC 61400-11).
 | `frequencies` | The narrowband line frequencies, in Hz. |
 | `levels` | The narrowband line levels, in dB. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### WindTurbineTonalityResult.plot()
 
 ```python

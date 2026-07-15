@@ -731,8 +731,12 @@ def _build_page(
                 if issubclass(obj, BaseException)
                 else _try_signature(name, obj, issues, omit_return=True)
             )
+            # Raw __doc__ (not inspect.getdoc): generated __init__ methods
+            # have none, and getdoc would inherit object.__init__'s
+            # "Initialize self" placeholder.
             init = vars(obj).get("__init__")
-            init_doc = (inspect.getdoc(init) or "") if init is not None else ""
+            init_raw = getattr(init, "__doc__", None) if init is not None else None
+            init_doc = inspect.cleandoc(init_raw) if init_raw else ""
             members.append(
                 MemberDoc(
                     name=name,

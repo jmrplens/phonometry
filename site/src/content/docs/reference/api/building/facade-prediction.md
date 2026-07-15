@@ -166,8 +166,6 @@ values may be scalars or equal-length arrays.
 | `dn_e` | Element-normalized level difference `Dn,e,i` in dB. |
 | `insertion_loss` | Opening silencer insertion loss `Dᵢ` in dB. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### FacadeElement.tau()
 
 ```python
@@ -207,8 +205,6 @@ Predicted façade airborne insulation (EN 12354-3:2000).
 | `d_2m_nt_w` | Single-number `D2m,nT,w` (ISO 717-1); `None` as above. |
 | `c_tr` | Spectrum adaptation term `Ctr` of `R'` (ISO 717-1). |
 | `frequencies` | Band centre frequencies (Hz) for plotting; `None` labels the axis by band index. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### FacadePredictionResult.plot()
 
@@ -326,8 +322,6 @@ Predicted sound power radiated to the outside by a segment (EN 12354-4).
 | `r_prime` | Apparent sound reduction index `R'` per band, in dB (Formula 3). |
 | `l_w_dba` | A-weighted `LW` in dB(A), if the bands are known octave bands; else `None`. |
 | `frequencies` | Band centre frequencies (Hz) for plotting; `None` labels the axis by band index. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### RadiatedPowerResult.plot()
 

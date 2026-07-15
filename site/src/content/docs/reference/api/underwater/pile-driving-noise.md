@@ -124,8 +124,6 @@ Per-strike pile-driving metrics (ISO 18406).
 | `pressure` | The strike pressure waveform, in Pa. |
 | `fs` | Sample rate, in Hz. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### PileStrikeResult.plot()
 
 ```python

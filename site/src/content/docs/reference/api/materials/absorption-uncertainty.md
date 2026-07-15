@@ -95,8 +95,6 @@ arrays are empty and the uncertainty arrays hold a single element.
 | `coverage_factor` | Coverage factor `k` (Table 3). |
 | `expanded_uncertainty` | Exact `U = k·u` (Formula (10)), one per band. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### AbsorptionUncertaintyResult.lower
 
 *property*

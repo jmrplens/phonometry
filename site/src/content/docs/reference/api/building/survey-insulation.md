@@ -313,8 +313,6 @@ Per-band airborne sound insulation, survey method (ISO 10052).
 | `rating` | Weighted standardized level difference `DnT,w` with `C` / `Ctr` (ISO 717-1), or `None` off the 5/16-band count. |
 | `r_prime_rating` | Weighted apparent sound reduction index `R'w`, or `None` when `r_prime` is unavailable or off the band count. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### SurveyAirborneResult.plot()
 
 ```python
@@ -350,8 +348,6 @@ Per-band façade sound insulation, survey method (ISO 10052).
 | `d_2m_n` | Normalized façade level difference `D2m,n` (Clause 3.15), or `None` when the receiving-room volume was not supplied. |
 | `rating` | Weighted standardized façade level difference `D2m,nT,w` (ISO 717-1), or `None` off the 5/16-band count. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### SurveyFacadeResult.plot()
 
 ```python
@@ -382,8 +378,6 @@ Per-band impact sound insulation, survey method (ISO 10052).
 | `l_n` | Normalized impact level `L'n` (Clause 3.9), or `None` when the receiving-room volume was not supplied. |
 | `rating` | Weighted standardized impact level `L'nT,w` with `CI` (ISO 717-2), or `None` off the 5/16-band count. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### SurveyImpactResult.plot()
 
 ```python
@@ -411,5 +405,3 @@ Service-equipment sound pressure level, survey method (ISO 10052).
 | `l_xy` | Service-equipment level `LXY` (Clause 3.16), the energy average of the three measurement positions, in dB. |
 | `l_xy_nt` | Standardized level `LXY,nT = LXY - k` (Clause 3.17). |
 | `l_xy_n` | Normalized level `LXY,n` (Clause 3.18), or `None` when the receiving-room volume was not supplied. |
-
-Initialize self.  See help(type(self)) for accurate signature.

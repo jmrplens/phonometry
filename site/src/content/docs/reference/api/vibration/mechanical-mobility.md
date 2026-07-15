@@ -136,8 +136,6 @@ A measured or modelled mobility FRF over frequency.
 | `mobility` | Complex mobility `Y` per frequency, in m/(N.s). |
 | `driving_point` | `True` if response and force are co-located (i = j). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### MobilityResult.magnitude
 
 *property*
@@ -294,8 +292,6 @@ Operational rigid-mass calibration check (ISO 7626-2:2015, 7.5.2).
 | `mass` | Mass `m` of the calibration block, in kg. |
 | `quantity` | FRF kind checked (`"accelerance"` or `"mobility"`). |
 | `tolerance` | Relative tolerance applied (the standard's is 0.05). |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ## sdof_accelerance
 

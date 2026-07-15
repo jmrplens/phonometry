@@ -83,8 +83,6 @@ computed only when `frequencies` are supplied (`NaN` for several bands
 without them; equal to `LW` for a single band). `method` is `'direct'`
 or `'comparison'`.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ReverberationSoundPowerResult.plot()
 
 ```python

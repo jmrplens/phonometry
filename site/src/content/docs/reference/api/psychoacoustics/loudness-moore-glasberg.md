@@ -164,8 +164,6 @@ pattern is that of a single ear before binaural inhibition; the total
 `loudness` already includes the binaural summation.  `field` and
 `presentation` echo the listening conditions.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### MooreGlasbergLoudness.plot()
 
 ```python

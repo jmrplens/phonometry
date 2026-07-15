@@ -262,8 +262,6 @@ A measured polar response and its diffusion coefficient (ISO 17497-2).
 | `levels` | Reflected sound-pressure level at each angle, in decibels. |
 | `coefficient` | Autocorrelation diffusion coefficient `d` (Formula (5)). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### DiffusionResult.plot()
 
 ```python
@@ -627,8 +625,6 @@ A random-incidence scattering-coefficient spectrum (ISO 17497-1).
 | `random_incidence` | Random-incidence absorption `alpha_s` (Eq. (1)). |
 | `specular` | Specular absorption `alpha_spec` (Eq. (4)). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ScatteringResult.plot()
 
 ```python
@@ -654,8 +650,6 @@ Uncertainty of the scattering coefficient (ISO 17497-1, Annex A).
 | :--- | :--- |
 | `u_scattering` | Combined standard uncertainty `u_s` of the scattering coefficient (Eq. (A.5)). |
 | `expanded` | Expanded uncertainty `U = 2 u_s` at 95 % confidence (Annex A). |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ## specular_absorption_coefficient
 

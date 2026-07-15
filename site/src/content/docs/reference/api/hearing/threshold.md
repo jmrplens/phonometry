@@ -96,8 +96,6 @@ All arrays are in dB and aligned with `AUDIOMETRIC_FREQUENCIES`.
 | `spread_lower` | Lower half-Gaussian standard deviation `sl`. |
 | `threshold` | Threshold deviation at `fractile` (clause 4.4). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### AgeThresholdResult.plot()
 
 ```python

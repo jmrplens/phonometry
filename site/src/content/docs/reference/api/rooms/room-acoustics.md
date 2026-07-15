@@ -94,8 +94,6 @@ For backward compatibility with the previous `(time, level)` tuple
 return of [`decay_curve`](/phonometry/reference/api/rooms/room-acoustics/#decay_curve), the dataclass is iterable and unpacks as
 `time, level = decay_curve(...)`.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### DecayCurve.plot()
 
 ```python
@@ -195,8 +193,6 @@ within the 5 % JND (ISO 3382-2:2008, Table A.1); they are False when the
 value could not be evaluated. `curvature` is
 C = 100*(T30/T20 - 1) in percent (ISO 3382-2:2008, B.3); values
 above 10 % indicate an unreliable, non-straight decay.
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### RoomAcousticsResult.plot()
 

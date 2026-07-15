@@ -51,8 +51,6 @@ Result of a Speech Intelligibility Index computation (ANSI S3.5-1997).
 | `disturbance` | Equivalent disturbance spectrum level `Di` (clause 5.6). |
 | `masking` | Equivalent masking spectrum level `Zi` (clause 5.4). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### SIIResult.plot()
 
 ```python

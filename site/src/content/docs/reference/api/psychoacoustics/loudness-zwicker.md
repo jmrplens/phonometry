@@ -123,8 +123,6 @@ loudness).  `n5`/`n10` are the percentile loudness values N5/N10
 and `time`/`loudness_vs_time` the 500 Hz loudness-vs-time trace
 (clause 6.5); these four are `None` for stationary results.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ZwickerLoudness.plot()
 
 ```python

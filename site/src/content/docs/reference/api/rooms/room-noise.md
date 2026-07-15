@@ -74,8 +74,6 @@ Result of a Noise Criteria (NC) rating (ANSI/ASA S12.2-2019, tangency).
 | `frequencies` | Octave-band centre frequencies evaluated, in hertz. |
 | `levels` | Measured octave-band sound pressure levels, in dB. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### NCResult.plot()
 
 ```python
@@ -163,8 +161,6 @@ Result of a Room Criteria Mark II rating (ANSI/ASA S12.2-2019, Annex D).
 | `reference_curve` | The RC Mark II curve used for classification, in dB. |
 | `frequencies` | Octave-band centre frequencies evaluated, in hertz. |
 | `levels` | Measured octave-band sound pressure levels, in dB. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### RCResult.label
 

@@ -195,8 +195,6 @@ Absorption area and reverberation time of an enclosed space (Clause 4).
 | `volume` | Volume of the empty enclosed space, m3. |
 | `object_fraction` | Object fraction `psi` (0-1). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ReverberationResult.plot()
 
 ```python

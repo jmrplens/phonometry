@@ -176,8 +176,6 @@ speech octave-band levels used for the level-dependent corrections
 (None when they were skipped) and `rating` is the Annex F
 qualification letter (`A+` .. `U`).
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### STIResult.plot()
 
 ```python

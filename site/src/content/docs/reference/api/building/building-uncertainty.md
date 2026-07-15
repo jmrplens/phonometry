@@ -102,8 +102,6 @@ One-third-octave-band standard uncertainties (ISO 12999-1 Tables 2/4/6/D.1).
 | `uncertainties` | Standard uncertainty `u` per band, in dB. |
 | `upper_limit` | `True` for the `σR95` upper limit (Annex D Table D.1). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### BandUncertainty.plot()
 
 ```python
@@ -451,8 +449,6 @@ A best estimate with its ISO 12999-1 expanded uncertainty (Clause 8).
 | `expanded_uncertainty` | `U = k·u`, in dB. |
 | `confidence` | Confidence level as a fraction (e.g. `0.95`). |
 | `one_sided` | `True` for a one-sided interval (conformity checks). |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### UncertainValue.lower
 

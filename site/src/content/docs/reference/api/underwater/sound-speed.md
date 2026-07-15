@@ -152,8 +152,6 @@ Sound-speed profile `c(z)` over a column of water.
 | `gradient` | Vertical sound-speed gradient `dc/dz`, in (m/s)/m. |
 | `model` | The equation used. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### SoundSpeedProfile.plot()
 
 ```python

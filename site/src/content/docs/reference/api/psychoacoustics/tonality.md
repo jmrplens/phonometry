@@ -108,5 +108,3 @@ prominence limit at `frequency` and `prominent` the verdict.
 audibility requirements (aural examination per clauses 11.8/12.8 and
 the clause 8/9 lower-threshold-of-hearing screen, which needs
 calibrated absolute levels) are the caller's responsibility.
-
-Initialize self.  See help(type(self)) for accurate signature.

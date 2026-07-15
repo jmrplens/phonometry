@@ -99,8 +99,6 @@ All arrays are in dB and aligned with `NIPTS_FREQUENCIES`.
 | `nipts` | Noise component `N` (NIPTS at `fractile`). |
 | `threshold` | Combined HTLAN `H' = H + N - H*N/120`. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### HtlanResult.plot()
 
 ```python
@@ -181,8 +179,6 @@ All arrays are in dB and aligned with `NIPTS_FREQUENCIES`.
 | `value` | NIPTS at `fractile` (Formula 4/5), clamped at zero. |
 | `spread_upper` | Upper half-Gaussian spread `du` (Formula 6). |
 | `spread_lower` | Lower half-Gaussian spread `dl` (Formula 7). |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### NiptsResult.plot()
 

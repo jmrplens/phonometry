@@ -73,8 +73,6 @@ with `bark` the critical-band-rate scale z (0,5..26,5 Bark_HMS) and
 `loudness_vs_time` hold the time-dependent loudness N(l) at 187,5 Hz
 (Formula 116).  `field` records the assumed sound field.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### EcmaLoudness.plot()
 
 ```python

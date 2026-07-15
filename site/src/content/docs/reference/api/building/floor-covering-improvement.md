@@ -127,8 +127,6 @@ Impact-sound improvement of a floor covering (ISO 16251-1).
 | `delta_lw` | Weighted improvement `ΔLw` (ISO 717-2), in dB, or `None` when the spectrum does not contain the 16 one-third-octave rating bands 100-3150 Hz. A wider clause 6.3 spectrum (e.g. the 18 bands 100-5000 Hz, optionally extended down to 50 Hz) is rated on its 100-3150 Hz sub-range. |
 | `ci_delta` | Spectrum adaptation term `CI,Δ` (ISO 717-2:2020 Formula (A.4); required in the ISO 16251-1 Clause 8 e) statement of results), in dB, or `None` when `delta_lw` is `None`. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### FloorCoveringImprovementResult.octave_bands()
 
 ```python

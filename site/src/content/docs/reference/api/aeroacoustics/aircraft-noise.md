@@ -135,8 +135,6 @@ Effective Perceived Noise Level of an aircraft flyover (ICAO Annex 16).
 | `epnl` | Effective perceived noise level, in EPNdB. |
 | `band_limits` | The 0-based 10 dB-down record indices `(kF, kL)`. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### EPNLResult.plot()
 
 ```python

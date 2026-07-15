@@ -227,8 +227,6 @@ Harmonic analysis of a signal (IEC 60268-3 / AES17).
 | `thd_plus_noise` | THD+N ratio (AES17). |
 | `sinad_db` | SINAD, in dB. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### HarmonicDistortionResult.plot()
 
 ```python
@@ -330,8 +328,6 @@ Modulation (intermodulation) distortion (IEC 60268-3 14.12.7).
 | `d2` | Second-order modulation distortion `d_m,2` (14.12.7.2 g): the *arithmetic* sum of the sideband amplitudes at `f2 ± f1` relative to the output amplitude at `f2`. |
 | `d3` | Third-order modulation distortion `d_m,3` (14.12.7.2 h): the arithmetic sum of the sidebands at `f2 ± 2·f1` relative to the output amplitude at `f2`. |
 | `smpte` | Combined-RMS convention of SMPTE-type analyzers (not an IEC 60268-3 quantity): `√(Σ aₛ²) / a_f2` over all four sidebands. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ## sinad
 

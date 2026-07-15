@@ -131,8 +131,6 @@ time); the standard itself reports only the peak long-term loudness
 (clause 9), the percentiles are provided as a convenience.  `field` and
 `presentation` echo the listening conditions.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### MooreGlasbergTimeVaryingLoudness.plot()
 
 ```python

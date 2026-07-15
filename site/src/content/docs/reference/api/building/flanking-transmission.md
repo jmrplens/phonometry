@@ -213,8 +213,6 @@ Normalized flanking impact level `Ln,f` (Formula (5)).
 | `l_n_f` | `Ln,f = L2 + 10 lg(A/A0)` per band, in dB. |
 | `rating` | Single-number `Ln,f,w` with `CI` (ISO 717-2), or `None` when the band count is neither 16 nor 5. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### FlankingImpactLevelResult.plot()
 
 ```python
@@ -243,8 +241,6 @@ Normalized flanking level difference `Dn,f` (airborne, Formula (4)).
 | :--- | :--- |
 | `d_n_f` | `Dn,f = L1 − L2 − 10 lg(A/A0)` per band, in dB. |
 | `rating` | Single-number `Dn,f,w` with `C`/`Ctr` (ISO 717-1), or `None` when the band count is neither 16 nor 5. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### FlankingLevelDifferenceResult.plot()
 
@@ -602,8 +598,6 @@ Per-band vibration reduction index `Kij` (ISO 10848-1:2006).
 | `k_ij` | Vibration reduction index `Kij` per band, in dB (Formula (13) or the simplified Formula (14)). |
 | `single_number` | Arithmetic-mean single-number `K̄ij` over 200 Hz to 1250 Hz (one-third octave) or 125 Hz to 1000 Hz (octave) per Annex A, in dB, or `None` when the frequencies do not cover the corresponding band set. Bands bracketed for poor modal overlap (ISO 10848-4:2010 Clause 9) are excluded from the mean. |
 | `bracketed` | Per-band boolean flags, `True` where the modal overlap factor is below 0,25 so the band is bracketed and excluded from the single-number rating (ISO 10848-4:2010 Clause 9), or `None` when no modal overlap was supplied. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### VibrationReductionResult.octave_bands()
 

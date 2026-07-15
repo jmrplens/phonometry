@@ -111,8 +111,6 @@ Prominence of a set of candidate impulses (NT ACOU 112:2002).
 | `prominence` | The governing prominence: the highest `P` among the qualifying impulses (clause 7), or the highest overall (informational) when none qualifies. |
 | `adjustment` | The LAeq adjustment `KI`, in dB, of the governing qualifying impulse (Formula 2); 0 dB when no event qualifies. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ImpulseProminenceResult.plot()
 
 ```python

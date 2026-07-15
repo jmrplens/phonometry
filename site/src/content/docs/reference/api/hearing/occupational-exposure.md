@@ -86,8 +86,6 @@ Daily noise exposure level and its expanded uncertainty (ISO 9612:2009).
 | `strategy` | `"task"`, `"job"` or `"full_day"`. |
 | `upper_limit` | `LEX,8h + U` — the value 95 % of readings fall below. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ExposureResult.plot()
 
 ```python
@@ -250,8 +248,6 @@ One task of a task-based measurement (ISO 9612:2009 Clause 9).
 | `label` | Optional human-readable task name. |
 | `instrument` | Optional per-task instrument class overriding the call default (selects `u2` from Table C.5). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ## task_based_exposure
 
 ```python
@@ -304,8 +300,6 @@ TaskContribution(
 ```
 
 Per-task results and uncertainty terms of a task-based determination.
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### TaskContribution.variance_contribution
 

@@ -169,8 +169,6 @@ Transmission loss versus range (closed-form).
 | `law` | The spreading law used. |
 | `model` | The absorption model used. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### TransmissionLossResult.plot()
 
 ```python

@@ -384,8 +384,6 @@ plate-independent source quantities with
 | `mass_per_area` | Plate mass per unit area `m`, in kg/m^2. |
 | `area` | Plate area `S`, in m^2. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### StructureBornePowerResult.plot()
 
 ```python

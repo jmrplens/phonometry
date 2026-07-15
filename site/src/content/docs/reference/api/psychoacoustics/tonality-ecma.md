@@ -58,8 +58,6 @@ hold the time-dependent tonality T(l) at 187.5 Hz (Formula 61) and
 `tonal_frequency_vs_time` its frequency f_ton(l) (Formula 62). `field`
 records the assumed sound field.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### EcmaTonality.plot()
 
 ```python

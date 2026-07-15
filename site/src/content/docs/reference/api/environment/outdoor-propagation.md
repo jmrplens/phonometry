@@ -119,8 +119,6 @@ match to the `Dz` formula of Eq. (14).
 | `lateral` | When `True` the diffraction is around a vertical edge (Eq. (13)): `Abar = Dz` (the ground term is not cancelled) and `Kmet = 1`. Default `False` selects top-edge diffraction (Eq. (12)). |
 | `line_of_sight_clear` | When `True` the line of sight between source and receiver passes *above* the top edge: ISO 9613-2:1996 (text after Eq. (16)) then gives the path difference `z` a negative sign, and Eq. (14) is still evaluated (with `Kmet = 1`, Eq. (18)), so `Dz` falls continuously from `10 lg 3 = 4.8 dB` at grazing to 0 for deeper geometries. The edge distances stay the unsigned geometric lengths; only the sign convention of `z` changes. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### Barrier.is_double
 
 *property*
@@ -445,8 +443,6 @@ contributions separately.
 | `a_bar` | Screening `Abar` (Eq. (12)/(13)), in dB, per band (>= 0). |
 | `a_total` | Total attenuation `A` (Eq. (4)), in dB, per band. |
 | `d_omega` | Solid-angle directivity index `DOmega` (Eq. (11)), in dB; non-zero only for the alternative ground method of 7.3.2. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### OutdoorAttenuation.plot()
 

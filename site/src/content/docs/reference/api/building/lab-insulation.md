@@ -208,8 +208,6 @@ Per-band laboratory airborne sound insulation (ISO 10140-2:2010).
 | `absorption` | Equivalent sound absorption area `A = 0,16 V / T` per band, in m² (ISO 10140-4:2010, Formula (5)). |
 | `rating` | Single-number weighted rating `Rw` with `C` / `Ctr` (ISO 717-1), or `None` when the number of bands is neither 16 (one-third octave) nor 5 (octave) and no rating can be formed. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### LabAirborneInsulationResult.plot()
 
 ```python
@@ -246,8 +244,6 @@ Per-band laboratory impact sound insulation (ISO 10140-3:2010).
 | `l_n` | Normalized impact sound pressure level `Ln = Li + 10 lg(A/A0)` per band, in dB (Clause 3.2, Formula (1)). |
 | `absorption` | Equivalent sound absorption area `A = 0,16 V / T` per band, in m² (ISO 10140-4:2010, Formula (5)). |
 | `rating` | Single-number weighted rating `Ln,w` with `CI` (ISO 717-2), or `None` when the number of bands is neither 16 (one-third octave) nor 5 (octave) and no rating can be formed. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### LabImpactInsulationResult.plot()
 

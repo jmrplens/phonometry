@@ -199,8 +199,6 @@ lookup.
 | `levels` | Band levels, in dB, shape `(A, P, F)`. |
 | `distance` | Reference distance, in metres (default 60). The standard NORAH database uses 60 m; when the data uses another polar distance (e.g. 70 m hover rings), pass this value as `reference_distance` to [`spherical_spreading_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#spherical_spreading_adjustment) and [`atmospheric_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#atmospheric_adjustment) so the propagation chain honours it. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### RotorcraftHemisphere.plot()
 
 ```python

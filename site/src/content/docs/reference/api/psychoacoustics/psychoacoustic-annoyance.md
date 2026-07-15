@@ -144,8 +144,6 @@ Psychoacoustic annoyance and its contributing terms (Fastl & Zwicker).
 | `w_s` | Sharpness term `wS` (Equation 16.3). |
 | `w_fr` | Fluctuation/roughness term `wFR` (Equation 16.4). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### PsychoacousticAnnoyanceResult.plot()
 
 ```python

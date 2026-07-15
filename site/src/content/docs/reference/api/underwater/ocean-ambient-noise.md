@@ -56,8 +56,6 @@ Composite ambient-noise spectrum (Wenz framework).
 | `shipping` | Caller-supplied shipping component, or `None`. |
 | `wind_speed_knots` | The wind speed used, in knots. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### AmbientNoiseResult.plot()
 
 ```python

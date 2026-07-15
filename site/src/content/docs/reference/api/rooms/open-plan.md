@@ -88,8 +88,6 @@ Single-number open-plan-office quantities (ISO 3382-3:2012, Cl. 4).
 | `rd` | Distraction distance in m, where the linear STI-vs-distance regression crosses 0,50 (Clause 3.6, 6.3). `nan` when the fitted STI does not decrease with distance or the crossing is non-positive. |
 | `rp` | Privacy distance in m, where the same regression crosses 0,20 (Clause 3.7, 6.3), possibly extrapolated beyond the measured range. `nan` under the same condition as `rd`. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### OpenPlanResult.plot()
 
 ```python

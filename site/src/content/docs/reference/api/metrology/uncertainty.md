@@ -133,8 +133,6 @@ Result of the Monte Carlo method (Guide 98-3-1, Supplement 1).
 | `trials` | Number of Monte Carlo trials. |
 | `samples` | The raw model-output sample (one value per trial), kept only when [`monte_carlo`](/phonometry/reference/api/metrology/uncertainty/#monte_carlo) is called with `keep_samples=True` (it feeds the output-distribution histogram of `plot`). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### MonteCarloResult.plot()
 
 ```python
@@ -170,8 +168,6 @@ An input quantity of a measurement model (GUM clause 4).
 | `distribution` | PDF used by the Monte Carlo method: `"gaussian"`, `"rectangular"`, `"triangular"` or `"u-shaped"`. |
 | `dof` | Degrees of freedom of `uncertainty` (`inf` for Type B). |
 | `name` | Optional label used in the uncertainty budget and its plot. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ## rectangular
 
@@ -228,8 +224,6 @@ Result of the GUM law of propagation of uncertainty (Guide 98-3).
 | `contributions` | Per-input contributions `\|ci\| u(xi)` to `uc(y)`. |
 | `effective_dof` | Welch-Satterthwaite effective degrees of freedom (Annex G.4, defined for independent inputs). For a correlated budget with finite input dof it is `NaN` (undefined: the GUM has no correlated form and `expanded()` then needs an explicit factor); with all-infinite input dof it is `inf` (normal-distribution coverage factor), since the GUM defines no correlated Welch-Satterthwaite form. |
 | `names` | Input labels aligned with the arrays above. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### UncertaintyResult.expanded()
 

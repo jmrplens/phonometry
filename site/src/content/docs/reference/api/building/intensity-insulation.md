@@ -256,8 +256,6 @@ Per-band intensity element normalized level difference (ISO 15186-1).
 | `d_i_n_e` | Intensity element normalized level difference `DI,n,e = Lp1 - 6 - (LIn + 10 lg(Sm/A0) + 10 lg N)` per band, in dB (Clause 3.9, Formula (8)). |
 | `rating` | Single-number weighted rating `DI,n,e,w` with `C` / `Ctr` (ISO 717-1), or `None` when the band count is neither 16 (one-third octave) nor 5 (octave). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### IntensityElementNormalizedResult.plot()
 
 ```python
@@ -295,8 +293,6 @@ Per-band intensity sound reduction index (ISO 15186-1:2000).
 | `r_i_modified` | Modified index `RI,M = RI + Kc` per band, in dB (Clause 3.10, Formula (9)), or `None` when no adaptation term was supplied. |
 | `rating` | Single-number weighted rating `RI,w` with `C` / `Ctr` (ISO 717-1), or `None` when the band count is neither 16 (one-third octave) nor 5 (octave). |
 | `rating_modified` | Weighted rating `RI,M,w` of the modified index, or `None` when unavailable. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### IntensityReductionResult.plot()
 

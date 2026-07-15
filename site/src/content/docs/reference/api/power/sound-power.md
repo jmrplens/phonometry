@@ -207,8 +207,6 @@ air-absorption correction (scalar, or per band when the attenuation
 coefficient `a(f)` is supplied per band). All three are added to
 `Lp_bar + 10*lg(S/S0)` to obtain `LW`.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ## precision_background_correction
 
 ```python
@@ -396,8 +394,6 @@ adequacy `Ld >= F_pIn(signed)` (Eq. C.2); `criterion_3`
 of criteria 1-4 (the initial determination is final), `None` unless both
 criterion 1 and criterion 2 are evaluable.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ## PrecisionFieldIndicators
 
 ```python
@@ -418,8 +414,6 @@ magnitude of the segment intensities) and `f_pi_signed` the signed one
 (= F3, Eq. B.6, using the algebraic mean); by construction
 `f_pi_signed >= f_pi_unsigned`. `fs` is the field-non-uniformity
 indicator (= F4, Eq. B.8).
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ## PrecisionIntensityResult
 
@@ -445,8 +439,6 @@ where `P <= 0` (`not_applicable_band` True, clause 9.2).
 `sound_power_level_normalized` is `LW0` normalized to 23 deg C /
 101 325 Pa (Eq. 10). `sound_power_level_a` is the A-weighted total over
 applicable bands (`NaN` without `frequencies` and more than one band).
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### PrecisionIntensityResult.plot()
 
@@ -497,8 +489,6 @@ per-band `VIr` sample standard deviation about the arithmetic mean
 k*sqrt(sigma_R0^2 + sigma_omc^2)` (Eq. 24/25) and `uncertainty_bands` the
 per-band value (`NaN` without `frequencies`). `sound_power_level_a` is
 the A-weighted total `LWA` (Eq. C.1).
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### PrecisionSoundPowerResult.plot()
 
@@ -707,8 +697,6 @@ microphone position and frequency band, shape `(NM, NB)` (Eq. 7,
 evaluated per band per clause 8.6). `uncertainty` is the expanded
 uncertainty
 `U = 2*sqrt(sigma_R0^2 + sigma_omc^2)` (95 %, ISO 3744 clause 9.5).
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### SoundPowerResult.plot()
 

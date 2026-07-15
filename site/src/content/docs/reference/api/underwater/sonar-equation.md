@@ -134,8 +134,6 @@ Sonar-equation solution.
 | `target_strength` | Target strength `TS`, in dB (`None` for passive). |
 | `reverberation_limited` | Whether the active case is reverberation-limited. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### SonarEquationResult.plot()
 
 ```python

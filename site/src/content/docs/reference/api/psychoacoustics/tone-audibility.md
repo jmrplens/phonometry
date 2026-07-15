@@ -720,8 +720,6 @@ Audibility of the tones of a narrow-band spectrum (ISO/PAS 20065).
 | `extended_uncertainties` | Extended uncertainties `U` of the audibilities, in dB (Clause 6, 90 % bilateral coverage), or `None` when the per-line levels needed to compute them were not available ([`assess_tones`](/phonometry/reference/api/psychoacoustics/tone-audibility/#assess_tones) from bare levels). Clause 6: **shall** be taken into consideration when fewer than 12 spectra have been averaged. |
 | `group_sizes` | Number of tones behind each entry, or `None` when the Step 3 combination was not performed ([`assess_tones`](/phonometry/reference/api/psychoacoustics/tone-audibility/#assess_tones) from bare levels). `1` marks an individual tone; `N >= 2` marks a combined "FG" entry whose tone level energy-sums `N` tones sharing a critical band (Clause 5.3.8 Step 3, Formula (17)), rated at the most audible member's frequency. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ToneAudibilityResult.audible
 
 *property*

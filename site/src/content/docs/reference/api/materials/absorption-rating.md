@@ -98,8 +98,6 @@ Weighted sound absorption rating (ISO 11654:1997).
 | `measured` | Practical absorption coefficients `alpha_p` used for the rating (snapped to the 0,05 grid of Clause 4.1). |
 | `shifted_reference` | Reference curve of Figure 1 after the final shift. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### AbsorptionRatingResult.plot()
 
 ```python

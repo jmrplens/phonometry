@@ -167,8 +167,6 @@ Per-band field airborne sound insulation (ISO 16283-1:2014).
 | `dnt` | Standardized level difference `DnT` per band, in dB (Clause 3.13, Formula (2)). |
 | `r_prime` | Apparent sound reduction index `R'` per band, in dB (Clause 3.14, Formula (4)), or `None` when the partition area and receiving-room volume were not supplied. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### AirborneInsulationResult.plot()
 
 ```python
@@ -233,8 +231,6 @@ Values are integers unless computed with `one_decimal=True`.
 | `ci_50_2500` | Enlarged-range term `CI,50-2500`, in dB, or `None` when the supplied bands do not cover 50-2500 Hz. |
 | `core` | The integer-mode [`ImpactRatingResult`](/phonometry/reference/api/building/insulation/#impactratingresult) of the core bands (independent of `one_decimal`). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ## ExtendedWeightedRatingResult
 
 ```python
@@ -274,8 +270,6 @@ frequency range.
 | `ctr_50_5000` | `Ctr,50-5000`, in dB, or `None`. |
 | `ctr_100_5000` | `Ctr,100-5000`, in dB, or `None`. |
 | `core` | The integer-mode [`WeightedRatingResult`](/phonometry/reference/api/building/insulation/#weightedratingresult) of the core bands (independent of `one_decimal`), for plotting and the unfavourable-deviation sum. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ## facade_insulation
 
@@ -364,8 +358,6 @@ Per-band field façade sound insulation (ISO 16283-3).
 | `d_2m_n` | Normalized level difference `D2m,n = D2m - 10 lg(A/A0)` per band, in dB (Clause 3.16), or `None` when the receiving-room volume was not supplied. |
 | `r_prime` | Apparent sound reduction index `R'45°` (loudspeaker, Clause 3.12) or `R'tr,s` (road traffic, Clause 3.13) per band, in dB, or `None` unless a surface level together with the element area and receiving-room volume were supplied. |
 | `frequencies` | Band centre frequencies, in Hz, or `None`. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### FacadeInsulationResult.plot()
 
@@ -470,8 +462,6 @@ Per-band field impact sound insulation (ISO 16283-2).
 | `l_n_t` | Standardized impact sound pressure level `L'nT = Li - 10 lg(T/T0)` per band, in dB (Clause 3.13, Formula (1)). |
 | `l_n` | Normalized impact sound pressure level `L'n = Li + 10 lg(A/A0)` per band, in dB (Clause 3.14, Formula (2)), or `None` when the receiving-room volume was not supplied. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ImpactInsulationResult.plot()
 
 ```python
@@ -508,8 +498,6 @@ Single-number weighted impact rating and CI (ISO 717-2).
 | `band_centers` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
 | `measured` | The measured impact levels used for the rating (after the one-decimal reduction of Clause 4.3.1), in dB. Defaults to `None`. |
 | `shifted_reference` | Table 3 impact reference curve after the final shift, in dB. Defaults to `None`. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### ImpactRatingResult.plot()
 
@@ -739,8 +727,6 @@ Single-number weighted rating and adaptation terms (ISO 717-1).
 | `band_centers` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
 | `measured` | The measured band quantities used for the rating (after the one-decimal reduction of Clause 4.4), in dB. Defaults to `None`. |
 | `shifted_reference` | Table 3 reference curve after the final shift, in dB. Defaults to `None`. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### WeightedRatingResult.plot()
 

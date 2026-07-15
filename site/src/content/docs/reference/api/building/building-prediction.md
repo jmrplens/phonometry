@@ -75,8 +75,6 @@ Predicted apparent airborne insulation (EN 12354-1:2000, Formula 26).
 | `paths` | Per-path contributions in input order (direct path first, then the flanking paths as supplied), each with its share of the energy. |
 | `dominant` | The path carrying the most energy (`PathContribution`). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### AirbornePredictionResult.plot()
 
 ```python
@@ -269,8 +267,6 @@ One flanking transmission path (Ff, Df or Fd) of the simplified model.
 | `kind` | Path type, one of `"Ff"`, `"Df"`, `"Fd"`. |
 | `r_ij_w` | Weighted flanking sound reduction index `Rij,w` of the path, in dB (EN 12354-1 Formula 28a). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ## impact_flanking_correction
 
 ```python
@@ -323,8 +319,6 @@ Predicted apparent impact insulation (EN 12354-2:2000, Formula 21).
 | `ln_w_eq` | Bare-floor equivalent weighted level `Ln,w,eq`, in dB. |
 | `delta_l_w` | Weighted covering improvement `ΔLw`, in dB. |
 | `k_correction` | Flanking correction `K`, in dB (Table 1). |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### ImpactPredictionResult.plot()
 
@@ -457,8 +451,6 @@ A transmission path with its share of the total transmitted energy.
 | `kind` | `"Dd"`, `"Ff"`, `"Df"` or `"Fd"`. |
 | `r_w` | Weighted sound reduction index of the path, in dB. |
 | `fraction` | Fraction of the total transmitted sound energy carried by this path (0 to 1); the dominant path has the largest fraction. |
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ## predicted_airborne_insulation
 

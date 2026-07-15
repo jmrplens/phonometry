@@ -292,8 +292,6 @@ Sound power radiated by surface vibration (ISO/TS 7849).
 | `radiation_factor` | Radiation factor `epsilon` per band. |
 | `area` | Radiating surface area `S`, in m^2. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### VibrationSoundPowerResult.plot()
 
 ```python

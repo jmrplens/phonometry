@@ -229,8 +229,6 @@ reflection factor `r` at the sample surface (Eq. (17)),
 and `absorption` the normal-incidence coefficient `alpha = 1 - |r|^2`
 (Eq. (18)).
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ImpedanceTubeResult.plot()
 
 ```python
@@ -633,8 +631,6 @@ Acoustic transfer matrix `[[T11, T12], [T21, T22]]` (ASTM E2611-19).
 Relates the pressure and normal particle velocity across a specimen,
 `[p; u]_{x=0} = T [p; u]_{x=d}` (Eq. (16)). Each entry is complex and
 may be scalar or a per-frequency array of matching shape.
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### TransferMatrix.absorption_hard_backed()
 

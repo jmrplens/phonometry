@@ -79,8 +79,6 @@ time-dependent roughness R(l50) at 50 Hz (Formula 111);
 R'(l50, z) (Formula 109) of shape `(n_times, 53)`. `field` records the
 assumed sound field.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### EcmaRoughness.plot()
 
 ```python

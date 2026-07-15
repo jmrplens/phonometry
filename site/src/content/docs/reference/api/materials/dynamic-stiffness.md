@@ -111,8 +111,6 @@ Dynamic stiffness of a resilient layer and the floating-floor resonance.
 | `floor_mass_per_area` | Supported-floor mass per unit area `m'`, kg/m2. |
 | `natural_frequency` | Installed-floor natural frequency `f0`, in hertz. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### DynamicStiffnessResult.plot()
 
 ```python

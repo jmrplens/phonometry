@@ -277,8 +277,6 @@ reference 0.5 mm/s by default). `linear_coefficient` (`a`) and
 airflow resistance (Pa*s/m). `pressure_drop` is the fitted `dp` at
 `evaluation_velocity` (Pa).
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### StaticAirflowResult.plot()
 
 ```python

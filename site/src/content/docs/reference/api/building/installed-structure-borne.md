@@ -260,8 +260,6 @@ Installed structure-borne sound prediction (EN 12354-5).
 | `total_level` | Combined normalised SPL `L_n,s` per band, in dB. |
 | `installed_power_level` | Installed power level `L_Ws,inst` per band, dB. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### InstalledSourceResult.overall_level
 
 *property*

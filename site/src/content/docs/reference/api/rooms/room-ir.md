@@ -100,8 +100,6 @@ the result can be passed straight to array consumers such as
 [`phonometry.sti_from_impulse_response`](/phonometry/reference/api/speech/sti/#sti_from_impulse_response). Indexing, `len(result)`
 and the `size`/`ndim`/`shape`/`dtype` attributes forward to `ir`.
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### ImpulseResponseResult.dtype
 
 *property*

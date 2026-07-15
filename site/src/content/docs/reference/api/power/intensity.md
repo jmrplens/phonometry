@@ -127,8 +127,6 @@ satisfy `Ld > f2` (criterion 1, equation (B.1)); the number of
 positions N must satisfy `N > C * f4**2` (criterion 2, equation
 (B.2)).
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ## IntensityResult
 
 ```python
@@ -162,8 +160,6 @@ factor `(k*dr)/sin(k*dr)` compensating the finite-difference
 underestimation at each band centre (IEC 61043:1994, 7.3); it is NaN
 at and beyond the first null `k*dr >= pi`. `max_valid_frequency`
 is the usable-bandwidth bound `0,1*c/spacing` (bias \< ~0,3 dB).
-
-Initialize self.  See help(type(self)) for accurate signature.
 
 ### IntensityResult.plot()
 

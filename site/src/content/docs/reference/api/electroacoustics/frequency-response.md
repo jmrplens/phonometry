@@ -88,8 +88,6 @@ Estimated frequency response of an input/output path (Bendat & Piersol).
 | `coherence` | Ordinary coherence `γ²(f)` ∈ [0, 1]. |
 | `estimator` | Estimator used (`'H1'` or `'H2'`). |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### FrequencyResponseResult.plot()
 
 ```python

@@ -171,8 +171,6 @@ Fluctuation strength of a signal (Osses 2016 model).
 | `bark_axis` | Centre critical-band rate `z_i` of each filter, in Bark, shape `(47,)`. |
 | `time_dependent` | Fluctuation strength per analysis frame, in vacil. |
 
-Initialize self.  See help(type(self)) for accurate signature.
-
 ### FluctuationStrengthResult.plot()
 
 ```python

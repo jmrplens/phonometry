@@ -808,7 +808,7 @@ _ES_EXACT = {
     "first notch above 8 kHz": "primer nulo por encima de 8 kHz",
     # --- FDTD animation labels (third batch) ---
     "Barrier diffraction into the shadow zone (2D FDTD)":
-        "Difracción de una barrera hacia la zona de sombra (FDTD 2D)",
+        "Difracción en una barrera hacia la zona de sombra (FDTD 2D)",
     "barrier": "barrera",
     "shadow zone": "zona de sombra",
     "rigid ground": "suelo rígido",
@@ -7684,7 +7684,10 @@ def _barrier_fields(
     on the two sides and the sky. Each frequency also gets a barrier-free
     reference run over the same ground, so the receiver annotation is a
     true insertion loss (patch-averaged around the receiver to keep the
-    ground-interference lobes out of the number). Returns the
+    ground-interference lobes out of the number). After the captured clip
+    both runs keep stepping, uncaptured, into genuine steady state and the
+    insertion loss is an exact RMS over the final two full periods of that
+    extended window (see the settle comment below). Returns the
     instantaneous-pressure frames, RMS maps in dB re each run's own
     maximum, the frame times and the per-frequency insertion losses.
     """
@@ -7717,18 +7720,29 @@ def _barrier_fields(
             sim.add_source(fdtd2d.CWSource(ix=100, iy=25, frequency=f,
                                            ramp_cycles=2.0))
             if rho_map is not None:
-                ps, rs, times, rms = _fdtd_cw_capture(sim, f, every,
-                                                      n_frames)
+                ps, rs, times, _ = _fdtd_cw_capture(sim, f, every, n_frames)
                 p_all.append(ps)
                 db_all.append(_rms_to_db(rs))
             else:
-                # Barrier-free reference: same running-RMS tail, no frames.
-                beta = float(np.exp(-sim.dt * f / 2.0))
-                ms = np.zeros_like(sim.p)
+                # Barrier-free reference: same steps, no frames captured.
                 for _ in range(every * n_frames):
                     sim.step()
-                    ms = beta * ms + (1.0 - beta) * sim.p**2
-                rms = np.sqrt(ms)
+            # The clip ends at 53.4 ms, but at 100 Hz the field behind the
+            # barrier has not settled by then: after the 20 ms source ramp
+            # the diffracted and ground-bounced paths over the edge keep
+            # building the receiver level for several more periods. Step
+            # both runs on, uncaptured, to ~113 ms -- where the measured
+            # insertion loss sits within 0.05 dB of its value 30 ms later
+            # -- and measure an exact RMS over the last two full periods,
+            # so neither run's transient biases the published number.
+            period = int(round(1.0 / (f * sim.dt)))
+            settle = int(round(0.113 / sim.dt)) - sim.n
+            acc = np.zeros_like(sim.p)
+            for i in range(settle):
+                sim.step()
+                if i >= settle - 2 * period:
+                    acc += sim.p**2
+            rms = np.sqrt(acc / (2 * period))
             rms_patch.append(float(np.sqrt(np.mean(rms[patch] ** 2))))
         ils.append(20.0 * float(np.log10(rms_patch[1] / rms_patch[0])))
     return np.stack(p_all), np.stack(db_all), times, tuple(ils)
@@ -7736,7 +7750,7 @@ def _barrier_fields(
 
 def animate_fdtd_barrier(output_dir: str) -> None:
     """A point source behind a thin rigid barrier on reflecting ground
-    (2D FDTD), at 125 Hz and 500 Hz side by side: the long wavelength
+    (2D FDTD), at 100 Hz and 500 Hz side by side: the long wavelength
     diffracts around the edge and fills the shadow zone, the short one is
     cast into a deep, clean shadow -- why barriers fail at low frequency."""
     from matplotlib import patheffects

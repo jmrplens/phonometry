@@ -143,7 +143,8 @@ Ambas devuelven `STIResult`: `sti`, `mti` (7 bandas), `mtf` (7×14 o 7×2),
   diáfanas (ISO 3382-3) construidas sobre el STI por posición.
 - [Índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/) —
   el índice basado en audibilidad de ANSI S3.5 que complementa al STI.
-- [Psicoacústica](/phonometry/es/guides/psychoacoustics/) — sonoridad, sharpness,
+- [Sonoridad](/phonometry/es/guides/loudness/) y
+  [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/) — sonoridad, sharpness,
   tonalidad y aspereza del sonido recibido.
 - [Teoría](/phonometry/es/reference/theory/) — la derivación de la transferencia
   de modulación y la correspondencia m ↔ STI.

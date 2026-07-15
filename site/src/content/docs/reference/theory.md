@@ -264,7 +264,7 @@ The three parameters come from Table 1 (p. 4), tabulated at the 29 preferred thi
 
 The standard specifies **no interpolation** between the tabulated frequencies. Formula (1) is specified for **20 phon to 90 phon** between 20 Hz and 4 kHz, and only up to **80 phon between 5 kHz and 12.5 kHz** — above 80 phon the contour therefore stops at 4 kHz. Values outside these limits from Formula (2) are extrapolations the standard labels as informative only.
 
-See the [Psychoacoustics guide](/phonometry/guides/psychoacoustics/) for usage.
+See the [Loudness guide](/phonometry/guides/loudness/) for usage.
 
 ## Tone prominence: TNR and PR (ECMA-418-1)
 
@@ -391,7 +391,7 @@ $$
 
 below 1 sone the reference program uses $L_N = 40 (N + 0.0005)^{0.35}$, floored at 3 phon.
 
-See the [Psychoacoustics guide](/phonometry/guides/psychoacoustics/) for usage.
+See the [Loudness guide](/phonometry/guides/loudness/) for usage.
 
 ## Advanced loudness models & sound quality
 
@@ -468,7 +468,7 @@ $$
 
 evaluated on the same 240-bin, 0.1-Bark grid. The constant $k$ is not hard-coded but derived from the calibration requirement (clause 6): a critical-band-wide narrowband noise 920–1080 Hz at 60 dB SPL scores exactly 1 acum — the derived $k = 0.108$ lands inside the normative window $0.105 \le k < 0.115$ (clause 5.2). The informative Annex B weightings are provided under the same 1-acum anchor: von Bismarck (knee at 15 Bark, $0.2\ e^{0.308(z-15)} + 0.8$) and Aures (loudness-dependent, $g(z) = 0.078\ (e^{0.171 z}/z)\ N/\ln(0.05 N + 1)$). The Table A.2 narrow-band targets are reproduced within the clause 6 tolerance (5 % or 0.05 acum): 0.38 acum at 250 Hz, 1.00 at 1 kHz, 1.78 at 2.5 kHz, 2.82 at 4 kHz.
 
-See the [Psychoacoustics guide](/phonometry/guides/psychoacoustics/) for usage.
+See the [Sound Quality Metrics guide](/phonometry/guides/sound-quality/) for usage.
 
 ## Modulation transfer and STI (IEC 60268-16)
 
@@ -784,7 +784,7 @@ Uncorrelated components combine in quadrature $u_c = \sqrt{\sum u_i^2}$
 energy-weighted quadrature sum of the band uncertainties (Formula B.2).
 
 See the [Room Acoustics](/phonometry/guides/room-acoustics/) and
-[Building Acoustics](/phonometry/guides/building-acoustics/) guides for usage.
+[Field Insulation Measurement and Ratings](/phonometry/guides/insulation-field/) guides for usage.
 
 ## Outdoor propagation and occupational exposure (ISO 9613-1/2, ISO 9612)
 

@@ -7,7 +7,7 @@ room and its **reverberation time** from the absorption of its surfaces and
 objects — the design counterpart of the measured reverberation time. It is the
 absorption member of the EN 12354 building-acoustics family (the airborne and
 impact insulation members live in
-[Building Acoustics](building-acoustics.md)).
+[Predicting Sound Insulation (EN 12354)](insulation-prediction.md)).
 phonometry implements the normative Clause 4 model. (The informative Annex D
 method for irregular spaces is out of scope.)
 

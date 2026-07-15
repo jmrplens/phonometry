@@ -8,7 +8,7 @@ una sala y su **tiempo de reverberación** a partir de la absorción de sus
 superficies y objetos — la contraparte de diseño del tiempo de reverberación
 medido. Es el miembro de absorción de la familia de acústica de la edificación
 EN 12354 (los miembros de aislamiento aéreo y de impacto están en
-[Acústica de la edificación](/phonometry/es/guides/building-acoustics/)).
+[Predicción del aislamiento acústico (EN 12354)](/phonometry/es/guides/insulation-prediction/)).
 phonometry implementa el modelo normativo de la cláusula 4. (El método
 informativo del Anexo D para recintos irregulares queda fuera de alcance.)
 

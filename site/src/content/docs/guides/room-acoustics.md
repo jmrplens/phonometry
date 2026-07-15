@@ -12,7 +12,7 @@ parameters (ISO 3382-1/2), spatial speech metrics for open-plan offices
 (ISO 3382-3) and, closing the loop, the sound absorption of a material in a
 reverberation room (ISO 354). For sound insulation *between* spaces — the same
 IR measured either side of a partition — see the companion
-[Building Acoustics & Sound Insulation guide](/phonometry/guides/building-acoustics/).
+[Field Insulation Measurement and Ratings guide](/phonometry/guides/insulation-field/).
 
 ## 1. Impulse-response acquisition (ISO 18233)
 
@@ -478,13 +478,16 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
 
 ## See also
 
-- [Building Acoustics & Sound Insulation](/phonometry/guides/building-acoustics/) — field,
+- [Field](/phonometry/guides/insulation-field/),
+  [laboratory](/phonometry/guides/insulation-lab/) and
+  [predicted](/phonometry/guides/insulation-prediction/) sound insulation — field,
   laboratory and predicted sound insulation between spaces, and its measurement uncertainty.
 - [Sound Power](/phonometry/guides/sound-power/) — the `LW` methods that consume the
   ISO 354 absorption area (the ISO 3744 `K2` and the ISO 3741 absorption term).
 - [Speech Transmission Index](/phonometry/guides/speech-transmission/) — the STI/STIPA
   measurement that feeds the open-plan `sti_values`.
-- [Psychoacoustics](/phonometry/guides/psychoacoustics/) — loudness, sharpness and the other
+- [Loudness](/phonometry/guides/loudness/) and
+  [Sound Quality Metrics](/phonometry/guides/sound-quality/) — loudness, sharpness and the other
   perception metrics of what the room delivers.
 - [Filter Banks](/phonometry/guides/filter-banks/) — the IEC 61260 fractional-octave filters
   used for band decay curves and insulation spectra.

@@ -43,6 +43,11 @@ PAGES = [
     ("multichannel.md", "guides/multichannel"),
     ("api-reference.md", "reference/api"),
     ("theory.md", "reference/theory"),
+    ("theory-signal-analysis.md", "reference/theory/signal-analysis"),
+    ("theory-perception.md", "reference/theory/perception"),
+    ("theory-rooms-buildings.md", "reference/theory/rooms-buildings"),
+    ("theory-environment-transport.md", "reference/theory/environment-transport"),
+    ("theory-vibration.md", "reference/theory/vibration"),
     ("why-phonometry.md", "reference/why-phonometry"),
 ]
 

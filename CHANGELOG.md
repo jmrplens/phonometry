@@ -272,6 +272,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- G-weighting (ISO 7196) digital design is now sample-rate aware: at the low
+  sample rates common for infrasound recordings, 315 Hz approaches Nyquist
+  and the un-prewarped bilinear design warped the upper response; the design
+  now oversamples toward 48 kHz so the response at 315 Hz stays within a few
+  hundredths of a dB of the 48 kHz design at any rate (at 48 kHz and above
+  the design is unchanged).
 - STI analysis filter bank is now zero-phase (forward-backward filtering):
   the single-pass bank failed two normative verification criteria of
   IEC 60268-16:2020 on the certified test bench - the C.4.2 filter-slope

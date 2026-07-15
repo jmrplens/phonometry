@@ -421,7 +421,19 @@ export default defineConfig({
           translations: { es: 'Referencia' },
           items: [
             apiSidebar,
-            'reference/theory',
+            {
+              label: 'Theory',
+              translations: { es: 'Teoría' },
+              collapsed: true,
+              items: [
+                'reference/theory',
+                'reference/theory/signal-analysis',
+                'reference/theory/perception',
+                'reference/theory/rooms-buildings',
+                'reference/theory/environment-transport',
+                'reference/theory/vibration',
+              ],
+            },
             'reference/conformance',
           ],
         },

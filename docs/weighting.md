@@ -59,7 +59,7 @@ C is a band-pass with double poles at $f_1$ and $f_4$ (2 zeros at the origin);
 A adds the $f_2$ and $f_3$ poles (4 zeros), which is why it keeps falling
 through the low-mids. Both are normalized to exactly 0 dB at 1 kHz. Z is the
 absence of weighting. The full pole/zero derivation is in the
-[Theory](theory.md) page.
+[Theory](theory-signal-analysis.md) page.
 
 ## 2. Basic usage
 
@@ -233,7 +233,7 @@ for block in blocks:
 ```
 
 See [Block Processing](block-processing.md) for the streaming workflow and
-[Theory](theory.md) for the analytic curve definitions.
+[Theory](theory-signal-analysis.md) for the analytic curve definitions.
 
 ## 7. Verifying the IEC 61672-1 class
 

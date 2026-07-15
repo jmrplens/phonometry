@@ -655,7 +655,7 @@ plt.show()
   and equivalent absorption area (ISO 354) that feed `K2` and the ISO 3741
   absorption area; impact and airborne insulation.
 - [Levels](levels.md) — energy averaging and the A-weighting behind `LWA`.
-- [Theory](theory.md) — the Waterhouse, K1/K2 and C1/C2 derivations.
+- [Theory](theory-environment-transport.md) — the Waterhouse, K1/K2 and C1/C2 derivations.
 - API reference: [`emission.sound_power`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-reverberation/) and [`emission.sound_power_intensity`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity/).
 
 ---

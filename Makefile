@@ -67,6 +67,13 @@ graphs:
 animations:
 	$(PYTHON) scripts/generate_graphs.py --animations
 
+# Re-extract only the deferred-loading poster stills (anim_*_poster.jpg) from
+# the committed animation WebMs, without the slow clip re-encode. Posters are
+# JPEG so they stay outside the SVG/PNG figure pipeline (`graphs` deletion and
+# the check_figures.py staleness compare).
+posters:
+	$(PYTHON) scripts/generate_graphs.py --posters
+
 # Regenerate the fallback social-preview card (site/public/og-image.png).
 # Kept out of `graphs`/CI so the committed designed asset is not clobbered on
 # every build; run manually to refresh it deterministically when needed.
@@ -106,5 +113,5 @@ coverage:
 
 check: lint security test
 
-.PHONY: install lint format security snyk sonar graphs animations og llms \
-	api-docs conformance install-hooks test coverage check
+.PHONY: install lint format security snyk sonar graphs animations posters og \
+	llms api-docs conformance install-hooks test coverage check

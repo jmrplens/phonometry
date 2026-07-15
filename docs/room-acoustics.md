@@ -232,7 +232,7 @@ with $te = 50$ ms → C50 (speech) and $te = 80$ ms → C80 (music), plus the
 **just-noticeable difference** (ISO 3382-1 Table A.1: EDT 5 %, C80 1 dB,
 D50 0.05, Ts 10 ms) that sets how precisely it is worth reporting.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder.gif" alt="Animation: the Schroeder decay curve emerging as the squared impulse response is integrated backward from its tail, ending with the T20 and T30 regression lines" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder.gif" alt="Animation: the tail energy of the squared impulse response fills from the end while the backward integral advances toward t = 0, and the Schroeder decay curve emerges on a companion axis ending with the T20 and T30 regression lines" width="640" height="360" loading="lazy"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.png" alt="Squared impulse response with its Schroeder backward-integrated decay curve, and the EDT, T20 and T30 regression windows marked" width="80%"></picture>
 
@@ -295,6 +295,17 @@ plt.show()
 For this single-slope decay EDT, T20 and T30 all return ≈ 1.0 s, and the
 energy parameters match their closed forms (C80 = 3.05 dB, D50 = 0.499,
 Ts = 72 ms). A real room has a steeper early slope, so EDT < T30.
+
+Below the **Schroeder frequency** $f_s \approx 2000\sqrt{T/V}$ these
+decay statistics stop telling the whole story: the field is ruled by
+discrete **room modes**. The simulation below drives the same rigid
+5 m by 3.5 m room at its (2,1) mode and then between two modes; on
+resonance a standing-wave pattern with fixed nodal lines grows until it
+dominates the RMS pressure map, off resonance the room still responds,
+but the forced field stays weak and never organises into that (2,1)
+nodal pattern.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes.gif" alt="Animation: a 2D FDTD simulation of a 5 by 3.5 metre room driven at the 84 Hz (2,1) mode and at an off-mode frequency; on resonance a standing-wave pattern with fixed nodal lines grows to dominate the RMS pressure map, off resonance the forced response stays weak and disorganised" width="640" height="360" loading="lazy"></picture>
 
 ### `room_parameters()` parameters
 

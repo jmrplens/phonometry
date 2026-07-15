@@ -70,6 +70,15 @@ surfaces = [(40.0, 0.3), (40.0, 0.3), (24.0, 0.3),
 print(round(ph.eyring_reverberation_time(120.0, surfaces, air_attenuation=m), 3))
 ```
 
+Every statistical model also assumes a **diffuse field**, and low
+frequencies break that assumption first: below the Schroeder frequency the
+room responds as a set of discrete modes, not as a reverberant mixture. The
+2D FDTD simulation below drives a rigid 5 m by 3.5 m room exactly on its
+(2,1) mode and then between two modes; the standing-wave pattern that
+builds up on resonance is what Sabine and Eyring cannot see.
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a 5 by 3.5 metre room driven at the 84 Hz (2,1) mode and at an off-mode frequency; on resonance a standing-wave pattern with fixed nodal lines grows to dominate the RMS pressure map, off resonance the forced response stays weak and disorganised" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a 5 by 3.5 metre room driven at the 84 Hz (2,1) mode and at an off-mode frequency; on resonance a standing-wave pattern with fixed nodal lines grows to dominate the RMS pressure map, off resonance the forced response stays weak and disorganised" style="width:88%"></video>
+
 ## 2. Fitzroy and Arau-Puchades (anisotropic rooms)
 
 When the absorption is concentrated on one axis — a carpeted floor and an

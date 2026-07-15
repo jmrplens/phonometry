@@ -27,6 +27,7 @@
     "http://localhost:4321/phonometry/guides/insulation-field/",
     "http://localhost:4321/phonometry/guides/loudness/",
     "http://localhost:4321/phonometry/es/reference/api/levels/levels/",
-    "http://localhost:4321/phonometry/es/guides/insulation-field/"
+    "http://localhost:4321/phonometry/es/guides/insulation-field/",
+    "http://localhost:4321/phonometry/es/guides/loudness/"
   ]
 }

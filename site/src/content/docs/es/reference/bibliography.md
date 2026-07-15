@@ -33,6 +33,7 @@ que las guías incorporan sus secciones de Referencias.
   [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
   Campos sonoros, radiación y transductores electroacústicos; sustenta el
   material de electroacústica y potencia sonora.
+  Citado por [Electroacústica](/phonometry/es/guides/electroacoustics/).
 
 ## Procesado de señal
 
@@ -47,6 +48,23 @@ que las guías incorporan sus secciones de Referencias.
   [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
   Tratamiento gratuito y complementario del diseño y análisis de filtros
   digitales, el paso natural tras las guías de bancos de filtros.
+
+## Habla
+
+- Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in
+  room acoustics and its use for estimating speech intelligibility in
+  auditoria. *The Journal of the Acoustical Society of America*, 77(3),
+  1069-1077. [doi:10.1121/1.392224](https://doi.org/10.1121/1.392224).
+  El marco de transferencia de modulación sobre el que se construye el índice
+  de transmisión del habla.
+  Citado por [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/).
+- French, N. R., & Steinberg, J. C. (1947). Factors governing the
+  intelligibility of speech sounds. *The Journal of the Acoustical Society of
+  America*, 19(1), 90-119.
+  [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
+  Los experimentos por bandas de articulación tras la función de importancia
+  de banda del índice de inteligibilidad del habla.
+  Citado por [Índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/).
 
 ## Vibración en humanos
 

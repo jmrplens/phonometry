@@ -1,6 +1,6 @@
 ---
 title: "Electroacoustics: distortion and frequency response"
-description: "IEC 60268-3 distortion — total and nth-order harmonic distortion, THD+N and SINAD through the AES17 measurement bandwidth, the per-order modulation and difference-frequency intermodulation, dynamic intermodulation (DIM) and the ITU-R 468 weighted THD — plus the Bendat & Piersol H1/H2 frequency-response estimators and ordinary coherence."
+description: "IEC 60268-3 distortion — total and nth-order harmonic distortion, THD+N and SINAD through the AES17 measurement bandwidth, the per-order modulation and difference-frequency intermodulation, dynamic intermodulation (DIM) and the ITU-R 468 weighted THD — plus the Bendat & Piersol H1/H2 frequency-response estimators and ordinary coherence, and the IEC 60268-4/-5 sensitivity conventions (dB re 1 V/Pa, the 1 W / 1 m free-field normalization)."
 ---
 
 Two staples of audio-equipment characterisation, from a captured signal: how much
@@ -11,7 +11,9 @@ through the AES17 measurement bandwidth, the per-order modulation and
 difference-frequency intermodulation, dynamic intermodulation (DIM) and the
 ITU-R 468 weighted THD — and the Bendat & Piersol frequency-response estimators
 `H1`/`H2` with the ordinary coherence `γ²`. Every quantity has an exact analytic
-oracle, so the numbers are verifiable rather than tuned.
+oracle, so the numbers are verifiable rather than tuned. A closing section
+covers the sensitivity conventions of IEC 60268-4 (microphones) and
+IEC 60268-5 (loudspeakers), where most cross-datasheet comparisons go wrong.
 
 ## 1. Harmonic distortion (IEC 60268-3 14.12.2–5)
 
@@ -220,6 +222,53 @@ plt.show()
 
 </details>
 
+## 5. Sensitivity conventions (IEC 60268-4 / IEC 60268-5)
+
+Distortion and response figures only compare across devices when the
+*sensitivity* conventions behind them match, and two conventions trip people
+constantly: the microphone reference level and the loudspeaker
+power-and-distance normalization.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_loudspeaker_freefield.svg" alt="Free-field loudspeaker sensitivity measurement per IEC 60268-5: a loudspeaker on a stand in an anechoic room, driven by an amplifier at 2.83 V, with a measurement microphone at the reference distance r = 1 m on the reference axis, and the governing relations: characteristic sensitivity as Lp at 1 m for 1 W into the rated impedance, the Up = sqrt(R times 1 W) drive voltage, the inverse-distance referral Lp(1 m) = Lp(r) + 20 lg(r / 1 m), and the IEC 60268-4 microphone sensitivity in mV/Pa or dB re 1 V/Pa" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_loudspeaker_freefield_dark.svg" alt="Free-field loudspeaker sensitivity measurement per IEC 60268-5: a loudspeaker on a stand in an anechoic room, driven by an amplifier at 2.83 V, with a measurement microphone at the reference distance r = 1 m on the reference axis, and the governing relations: characteristic sensitivity as Lp at 1 m for 1 W into the rated impedance, the Up = sqrt(R times 1 W) drive voltage, the inverse-distance referral Lp(1 m) = Lp(r) + 20 lg(r / 1 m), and the IEC 60268-4 microphone sensitivity in mV/Pa or dB re 1 V/Pa" style="width:92%">
+
+**Microphones (IEC 60268-4 clause 11).** The sensitivity `M` is the output
+voltage per unit sound pressure, quoted in mV/Pa; the sensitivity *level* is
+`LM = 20 lg(M / 1 V/Pa)` dB, which is negative for every real microphone (a
+50 mV/Pa studio condenser sits at −26 dB re 1 V/Pa). The classic pitfall is
+the reference: −26 dB re 1 V/Pa and +34 dB re 1 mV/Pa are the *same*
+microphone, 60 dB apart on paper, so a sensitivity level without its reference
+is meaningless. The standard also distinguishes free-field, diffuse-field and
+pressure sensitivity; for the same capsule they diverge at high frequency,
+so the stated type matters as much as the number.
+
+**Loudspeakers (IEC 60268-5 clause 20.3).** The characteristic sensitivity is
+the sound pressure produced at 1 m on the reference axis, in the free field,
+referred to an input of 1 W into the rated impedance; expressed as a level re
+20 µPa (clause 20.4) it is the familiar "dB @ 1 W/1 m". Two normalizations
+hide in that sentence:
+
+- *The electrical one.* The test voltage is `Up = √(R · 1 W)`, numerically
+  `√R`: 2.83 V into a rated 8 Ω. A datasheet quoting "dB @ 2.83 V/1 m" for a
+  4 Ω loudspeaker is feeding it 2 W, which flatters the figure by 3 dB
+  against a true 1 W/1 m rating; check the rated impedance before comparing.
+- *The geometric one.* 1 m is a **reference** distance, not necessarily the
+  measurement distance. The standard has you measure in the far field (at
+  0.5 m or an integer number of metres, clause 7.1) and refer the result back
+  with the inverse-distance law, `Lp(1 m) = Lp(r) + 20 lg(r / 1 m)`. That
+  scaling only holds where the level actually falls 6 dB per doubling of
+  distance, hence the free field of the diagram; at 1 m from a large
+  multi-way cabinet the near field may not have ended yet, and the quoted
+  "1 m" figure is then a referred quantity, not what a microphone placed at
+  1 m would read.
+
+## References
+
+- Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
+  transducers*. Academic Press. ISBN 978-0-12-391421-7.
+  [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
+  The transducer physics behind section 5: loudspeaker radiation, on-axis
+  pressure and the near-field to far-field transition.
+
 ---
 
 **Standards.** IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*
@@ -233,7 +282,12 @@ THD+N ratio via the standard notch filter and the standard measurement
 bandwidth; SINAD is derived from it. ITU-R BS.468-4: the weighting-network
 nominal response. Bendat & Piersol (2010), *Random Data: Analysis and
 Measurement Procedures* (4th ed., Wiley): the `H1` and `H2` frequency-response
-estimators and the ordinary coherence `γ²`. All quantities are verified against
+estimators and the ordinary coherence `γ²`. IEC 60268-4:2018, *Sound system
+equipment – Part 4: Microphones* (clause 11: sensitivity and sensitivity
+level) and IEC 60268-5:2003, *Sound system equipment – Part 5: Loudspeakers*
+(clauses 7.1, 20.3 and 20.4: measurement distance, characteristic sensitivity
+and its level): the sensitivity conventions of section 5, cited for context
+rather than implemented as code. All quantities are verified against
 exact analytic oracles (synthetic signals with known harmonic/intermodulation
 amplitudes, a clipped-sine Fourier oracle, a full DIM test-signal synthesis,
 and a known LTI path).

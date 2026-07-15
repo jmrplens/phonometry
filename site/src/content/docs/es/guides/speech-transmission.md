@@ -36,6 +36,21 @@ m(F) = \frac{1}{\sqrt{1 + \left(2\pi F\ \frac{T_{60}}{13{,}8}\right)^2}}
 \cdot \frac{1}{1 + 10^{-\mathrm{SNR}/10}}
 $$
 
+La *profundidad* de modulación es lo que merece la pena medir porque la
+inteligibilidad viaja en la profundidad de los valles de la envolvente, no en
+la sonoridad de los picos. Quien habla alterna ráfagas de energía (vocales)
+con casi silencios (oclusiones, arranques de fricativas) al ritmo de las
+sílabas, y quien escucha segmenta el habla oyendo esos valles. Una cola
+reverberante rellena los valles por detrás, porque la energía tardía se
+esparce en los huecos; el ruido estacionario eleva su suelo. En ambos casos la
+profundidad de modulación recibida se encoge, y con ella el contraste entre
+sonidos del habla, aunque el nivel medio apenas cambie. El método completo
+sondea m(F) en 14 frecuencias de modulación (de 0,63 Hz a 12,5 Hz en pasos de
+tercio de octava) en cada una de las 7 bandas de octava de 125 Hz a 8 kHz,
+convierte cada m en una relación señal-ruido efectiva acotada a ±15 dB y
+combina los resultados, ponderados por banda, en el índice: el STI es una SNR
+efectiva de la *envolvente*, llevada a [0, 1].
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_es.svg" alt="STI frente al tiempo de reverberación con las bandas de calificación del Anexo F de IEC 60268-16 sombreadas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_es_dark.svg" alt="STI frente al tiempo de reverberación con las bandas de calificación del Anexo F de IEC 60268-16 sombreadas" style="width:80%">
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_es.svg" alt="Cadena de medición del STI: señal de la fuente STIPA a través de la sala hasta el micrófono y el análisis de la MTF" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_es_dark.svg" alt="Cadena de medición del STI: señal de la fuente STIPA a través de la sala hasta el micrófono y el análisis de la MTF" style="width:92%">
@@ -122,6 +137,37 @@ funciones dependientes del nivel desactivadas, como prescribe el banco. Los 49
 WAV certificados permanecen en local (datos de terceros, no versionados); CI
 reconstruye las mismas señales de forma sintética en la serie de conformidad.
 
+### ¿Directo o indirecto? Cómo elegir
+
+Cada vía tiene modos de fallo que la norma hace explícitos:
+
+- **Canales no lineales o variantes en el tiempo.** El método indirecto asume
+  un canal lineal e invariante en el tiempo: una respuesta al impulso no puede
+  representar el recorte, los compresores, el control automático de ganancia
+  ni un vocoder. Para un sistema de sonido con procesado no lineal en la
+  cadena, mide en directo: la señal STIPA al menos atraviesa la cadena real, y
+  la señal del STI completo es la opción fiable cuando la distorsión es severa
+  (IEC 60268-16, apartado 6.3 y Tabla 3).
+- **Efectos dependientes del nivel.** El STI no es invariante con el nivel: el
+  enmascaramiento auditivo y el umbral de recepción actúan sobre los niveles
+  de banda *absolutos* en el oyente. Reproduce la señal de ensayo al nivel de
+  operación del sistema (la práctica del Anexo J de la norma la fija 3 dB por
+  encima del L_Aeq del habla continua en la posición) y pasa `level=` y
+  `ambient=` para que el análisis los incluya; una respuesta al impulso medida
+  a nivel alto y reescalada después pierde estos efectos por completo.
+- **Ruido de fondo impulsivo y fluctuante.** Una herramienta que cae o un
+  murmullo durante una medición directa corrompe las profundidades de
+  modulación medidas (apartado 7.13). El remedio de la norma es la vía
+  indirecta: promedia la respuesta al impulso con MLS o barridos para obtener
+  una MTF sin ruido y añade después la degradación por ruido mediante `snr=` o
+  `level=`/`ambient=`. Una comprobación rápida es ejecutar el analizador con
+  la fuente apagada; el STI residual debería quedar por debajo de 0,20.
+- **Dispersión estadística.** La señal STIPA es ruido pseudoaleatorio, así que
+  mediciones directas repetidas se dispersan hasta alrededor de 0,03 STI
+  incluso en condiciones estacionarias (y más en ruido fluctuante); repite y
+  compara en lugar de fiarte de una sola pasada, y respeta la duración mínima
+  que señala el `UserWarning` de arriba.
+
 ### Parámetros de `sti_from_impulse_response()` / `stipa()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
@@ -149,6 +195,15 @@ Ambas devuelven `STIResult`: `sti`, `mti` (7 bandas), `mtf` (7×14 o 7×2),
 - [Teoría](/phonometry/es/reference/theory/perception/) — la derivación de la transferencia
   de modulación y la correspondencia m ↔ STI.
 - Referencia de la API: [`hearing.sti`](/phonometry/es/reference/api/speech/sti/).
+
+## Referencias
+
+- Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in
+  room acoustics and its use for estimating speech intelligibility in
+  auditoria. *The Journal of the Acoustical Society of America*, 77(3),
+  1069-1077. [doi:10.1121/1.392224](https://doi.org/10.1121/1.392224).
+  El marco de transferencia de modulación de la sección 1 y la correspondencia
+  m ↔ STI sobre la que se construye el índice.
 
 ---
 

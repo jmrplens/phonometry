@@ -12,6 +12,7 @@ for _threads_var in (
 ):
     os.environ.setdefault(_threads_var, "1")
 
+from collections.abc import Callable  # noqa: E402
 from functools import lru_cache  # noqa: E402
 from typing import Any, Literal  # noqa: E402
 
@@ -6189,181 +6190,161 @@ def generate_uncertainty(output_dir: str) -> None:
     plt.close()
 
 
-def generate_all(img_dir: str) -> None:
-    """Generate every documentation figure for the currently active theme."""
-    generate_filter_type_comparison(img_dir)
-    generate_filter_responses(img_dir)
-    generate_signal_responses(img_dir)
-    generate_multichannel_response(img_dir)
-    generate_decomposition_plot(img_dir)
-
-    generate_weighting_responses(img_dir)
-    generate_g_weighting_response(img_dir)
-    generate_equal_loudness_contours(img_dir)
-    generate_time_weighting_plot(img_dir)
-    generate_crossover_plot(img_dir)
-
+# Every documentation figure, in the order the sequential generator has always
+# produced them. This registry is the single source of truth for both the
+# sequential path (``generate_all``) and the parallel runner (``--jobs``),
+# and for the ``--figure`` name filter.
+_FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
+    generate_filter_type_comparison,
+    generate_filter_responses,
+    generate_signal_responses,
+    generate_multichannel_response,
+    generate_decomposition_plot,
+    generate_weighting_responses,
+    generate_g_weighting_response,
+    generate_equal_loudness_contours,
+    generate_time_weighting_plot,
+    generate_crossover_plot,
     # Feature documentation plots (levels, spectrogram, zero-phase, weighting accuracy)
-    generate_spectrogram_example(img_dir)
-    generate_ln_levels_example(img_dir)
-    generate_zero_phase_comparison(img_dir)
-    generate_weighting_accuracy_hf(img_dir)
-
+    generate_spectrogram_example,
+    generate_ln_levels_example,
+    generate_zero_phase_comparison,
+    generate_weighting_accuracy_hf,
     # Docs-enrichment plots (group delay, IEC toneburst, block continuity, class mask)
-    generate_group_delay_comparison(img_dir)
-    generate_tone_burst_iec(img_dir)
-    generate_block_processing_continuity(img_dir)
-    generate_class_mask_overlay(img_dir)
-    generate_filter_class0_mask(img_dir)
-    generate_weighting_class_mask(img_dir)
-    generate_calibration_stability(img_dir)
-    generate_sel_concept(img_dir)
-    generate_lden_profile(img_dir)
-    generate_tonality_spectrum(img_dir)
-
+    generate_group_delay_comparison,
+    generate_tone_burst_iec,
+    generate_block_processing_continuity,
+    generate_class_mask_overlay,
+    generate_filter_class0_mask,
+    generate_weighting_class_mask,
+    generate_calibration_stability,
+    generate_sel_concept,
+    generate_lden_profile,
+    generate_tonality_spectrum,
     # Psychoacoustics / intensity plots (loudness, STI, p-p intensity)
-    generate_loudness_pattern(img_dir)
-    generate_sti_curve(img_dir)
-    generate_intensity_demo(img_dir)
-
+    generate_loudness_pattern,
+    generate_sti_curve,
+    generate_intensity_demo,
     # Room / building acoustics plots (ISO 18233 excitations + IR, Schroeder
     # decay, ISO 717-1/-2 ratings)
-    generate_excitation_signals(img_dir)
-    generate_impulse_response(img_dir)
-    generate_schroeder_decay(img_dir)
-    generate_insulation_rating(img_dir)
-    generate_impact_rating(img_dir)
-
+    generate_excitation_signals,
+    generate_impulse_response,
+    generate_schroeder_decay,
+    generate_insulation_rating,
+    generate_impact_rating,
     # Building-acoustics prediction / uncertainty (EN 12354-1, ISO 12999-1)
-    generate_prediction_flanking_demo(img_dir)
-    generate_facade_prediction(img_dir)
-    generate_intensity_insulation(img_dir)
-    generate_survey_insulation(img_dir)
-    generate_floor_covering_improvement(img_dir)
-    generate_flanking_transmission(img_dir)
-    generate_reverberation_models(img_dir)
-    generate_dynamic_stiffness(img_dir)
-    generate_mechanical_mobility(img_dir)
-    generate_transfer_stiffness(img_dir)
-    generate_vibration_sound_power(img_dir)
-    generate_structure_borne_power(img_dir)
-    generate_installed_structure_borne(img_dir)
-    generate_tone_audibility(img_dir)
-    generate_absorption_uncertainty(img_dir)
-    generate_insulation_uncertainty_demo(img_dir)
-
+    generate_prediction_flanking_demo,
+    generate_facade_prediction,
+    generate_intensity_insulation,
+    generate_survey_insulation,
+    generate_floor_covering_improvement,
+    generate_flanking_transmission,
+    generate_reverberation_models,
+    generate_dynamic_stiffness,
+    generate_mechanical_mobility,
+    generate_transfer_stiffness,
+    generate_vibration_sound_power,
+    generate_structure_borne_power,
+    generate_installed_structure_borne,
+    generate_tone_audibility,
+    generate_absorption_uncertainty,
+    generate_insulation_uncertainty_demo,
     # Outdoor propagation & occupational exposure (ISO 9613-1/2, ISO 9612)
-    generate_air_absorption_alpha(img_dir)
-    generate_outdoor_attenuation_breakdown(img_dir)
-    generate_exposure_uncertainty(img_dir)
-
+    generate_air_absorption_alpha,
+    generate_outdoor_attenuation_breakdown,
+    generate_exposure_uncertainty,
     # Materials: absorption rating, airflow resistance, impedance tube
     # (ISO 11654, ISO 9053-1/-2, ISO 10534-1/-2, ASTM E2611)
-    generate_absorption_rating(img_dir)
-    generate_airflow_resistance(img_dir)
-    generate_impedance_tube(img_dir)
-
+    generate_absorption_rating,
+    generate_airflow_resistance,
+    generate_impedance_tube,
     # Scattering/diffusion, in-situ road absorption, precision sound power
     # (ISO 17497-1/-2, ISO 13472-1, ISO 3745 / ISO 9614-3)
-    generate_scattering_coefficient(img_dir)
-    generate_diffusion_polar(img_dir)
-    generate_insitu_absorption(img_dir)
-    generate_precision_anechoic_power(img_dir)
-    generate_intensity_scan_power(img_dir)
-
+    generate_scattering_coefficient,
+    generate_diffusion_polar,
+    generate_insitu_absorption,
+    generate_precision_anechoic_power,
+    generate_intensity_scan_power,
     # Sound power result spectra for the three most-used routes
     # (ISO 3744 enveloping surface, ISO 3741 reverberation room,
     # ISO 9614-2 intensity scanning)
-    generate_sound_power_pressure_result(img_dir)
-    generate_sound_power_reverberation_result(img_dir)
-    generate_sound_power_intensity_result(img_dir)
-
+    generate_sound_power_pressure_result,
+    generate_sound_power_reverberation_result,
+    generate_sound_power_intensity_result,
     # Human vibration (ISO 8041-1, ISO 2631-1/-2/-4, ISO 5349-1/-2,
     # Directive 2002/44/EC): frequency weighting, weighted a_w, daily A(8)
-    generate_vibration_weighting(img_dir)
-    generate_weighted_acceleration(img_dir)
-    generate_daily_vibration_exposure(img_dir)
-
+    generate_vibration_weighting,
+    generate_weighted_acceleration,
+    generate_daily_vibration_exposure,
     # Speech intelligibility (ANSI S3.5-1997): band audibility and the SII.
-    generate_speech_intelligibility(img_dir)
-    generate_sii_vocal_efforts(img_dir)
-    generate_impulse_prominence(img_dir)
-
+    generate_speech_intelligibility,
+    generate_sii_vocal_efforts,
+    generate_impulse_prominence,
     # Room-noise criteria (ANSI S12.2-2019): NC tangency and RC Mark II.
-    generate_room_noise_criteria(img_dir)
-
+    generate_room_noise_criteria,
     # Hearing threshold (ISO 7029 age-related, ISO 389-7 reference).
-    generate_hearing_threshold(img_dir)
-
+    generate_hearing_threshold,
     # Noise-induced hearing loss (ISO 1999 NIPTS and HTLAN).
-    generate_noise_induced_hearing_loss(img_dir)
-
+    generate_noise_induced_hearing_loss,
     # Multiple-shock whole-body vibration (ISO 2631-5 Clause 5 + Annex C).
-    generate_tonal_audibility(img_dir)
-    generate_multiple_shock(img_dir)
-
+    generate_tonal_audibility,
+    generate_multiple_shock,
     # Sound absorption in enclosed spaces (EN 12354-6 Clause 4).
-    generate_enclosed_space_absorption(img_dir)
-
+    generate_enclosed_space_absorption,
     # Measurement uncertainty (GUM Guide 98-3 + Supplement 1 Monte Carlo).
-    generate_uncertainty(img_dir)
-
+    generate_uncertainty,
     # Psychoacoustics / open-plan plots (sharpness weighting, spatial decay)
-    generate_sharpness_weighting(img_dir)
-    generate_open_plan_decay(img_dir)
-
-    # Advanced psychoacoustics (plan-17 block A): ECMA-418-2 Sottek model and
-    # Moore-Glasberg ISO 532-2/-3 loudness (models, specific loudness, sound
-    # quality metrics, time-varying loudness).
-    generate_loudness_models_comparison(img_dir)
-    generate_sottek_specific_loudness(img_dir)
-    generate_tonality_roughness_demo(img_dir)
-    generate_moore_glasberg_time_loudness(img_dir)
-
+    generate_sharpness_weighting,
+    generate_open_plan_decay,
+    # Advanced psychoacoustics: ECMA-418-2 Sottek model and Moore-Glasberg
+    # ISO 532-2/-3 loudness (models, specific loudness, sound quality
+    # metrics, time-varying loudness).
+    generate_loudness_models_comparison,
+    generate_sottek_specific_loudness,
+    generate_tonality_roughness_demo,
+    generate_moore_glasberg_time_loudness,
     # Fluctuation strength (Fastl & Zwicker Eq. 10.2 + Osses 2016 signal model)
     # and psychoacoustic annoyance (Fastl & Zwicker Eqs 16.2-16.4).
-    generate_fluctuation_strength(img_dir)
-    generate_psychoacoustic_annoyance(img_dir)
-
-    # Electroacoustics (plan-18): distortion metrics (IEC 60268-3) and
+    generate_fluctuation_strength,
+    generate_psychoacoustic_annoyance,
+    # Electroacoustics: distortion metrics (IEC 60268-3) and
     # frequency-response / coherence estimators (Bendat & Piersol).
-    generate_distortion(img_dir)
-    generate_frequency_response(img_dir)
-
-    # Underwater acoustics (plan-19A): ship radiated noise / monopole source
+    generate_distortion,
+    generate_frequency_response,
+    # Underwater acoustics: ship radiated noise / monopole source
     # level (ISO 17208) and pile-driving sound exposure (ISO 18406).
-    generate_ship_source_level(img_dir)
-    generate_pile_driving(img_dir)
+    generate_ship_source_level,
+    generate_pile_driving,
+    # Aircraft noise: ICAO Annex 16 Effective Perceived Noise Level.
+    generate_epnl,
+    # Wind-turbine noise: IEC 61400-11 tonal audibility.
+    generate_wind_turbine_tonality,
+    # Underwater propagation: transmission loss, sound-speed profile and the
+    # sonar equation.
+    generate_underwater_transmission_loss,
+    generate_underwater_sound_speed,
+    generate_sonar_equation,
+    # Underwater propagation: seabed reflection, ambient noise (Wenz) and
+    # ship-traffic source level (JOMOPANS-ECHO).
+    generate_seabed_reflection,
+    generate_ocean_ambient_noise,
+    generate_ship_traffic_noise,
+    # Underwater propagation: numerical solvers (modes/rays/PE).
+    generate_numerical_propagation,
+    # Aircraft atmospheric absorption: SAE ARP 5534 band method.
+    generate_aircraft_atmospheric_absorption,
+    # Airport noise: ECAC Doc 29 noise-power-distance curves.
+    generate_airport_noise,
+    generate_airport_contour,
+    generate_airport_sor,
+    generate_rotorcraft_ground_effect,
+)
 
-    # Aircraft noise (plan-19B): ICAO Annex 16 Effective Perceived Noise Level.
-    generate_epnl(img_dir)
 
-    # Wind-turbine noise (plan-19B2): IEC 61400-11 tonal audibility.
-    generate_wind_turbine_tonality(img_dir)
-
-    # Underwater propagation (plan-22 P1): transmission loss, sound-speed
-    # profile and the sonar equation.
-    generate_underwater_transmission_loss(img_dir)
-    generate_underwater_sound_speed(img_dir)
-    generate_sonar_equation(img_dir)
-
-    # Underwater propagation (plan-22 P1 PR-2): seabed reflection, ambient
-    # noise (Wenz) and ship-traffic source level (JOMOPANS-ECHO).
-    generate_seabed_reflection(img_dir)
-    generate_ocean_ambient_noise(img_dir)
-    generate_ship_traffic_noise(img_dir)
-
-    # Underwater propagation (plan-22 P2): numerical solvers (modes/rays/PE).
-    generate_numerical_propagation(img_dir)
-
-    # Aircraft atmospheric absorption (plan-23 A): SAE ARP 5534 band method.
-    generate_aircraft_atmospheric_absorption(img_dir)
-
-    # Airport noise (plan-23 B1): ECAC Doc 29 noise-power-distance curves.
-    generate_airport_noise(img_dir)
-    generate_airport_contour(img_dir)
-    generate_airport_sor(img_dir)
-    generate_rotorcraft_ground_effect(img_dir)
+def generate_all(img_dir: str) -> None:
+    """Generate every documentation figure for the currently active theme."""
+    for func in _FIGURE_FUNCS:
+        func(img_dir)
 
 
 # ===========================================================================
@@ -6752,28 +6733,220 @@ def generate_animations(output_dir: str) -> None:
     animate_schroeder(output_dir)
 
 
-if __name__ == "__main__":
+# ===========================================================================
+# Command line / parallel figure generation
+# ---------------------------------------------------------------------------
+# Every asset is produced four times: light/dark theme x English/Spanish
+# ("_dark" / "_es" / "_es_dark" suffixes) so both site languages follow the
+# user's mode. The figures are independent (each renders from its own seeded
+# data into its own per-variant files), so the (figure, language, theme)
+# tasks are distributed over a process pool. Language and theme are applied
+# inside the worker before each figure runs, exactly as the sequential loop
+# did, so the output bytes are identical either way.
+# ===========================================================================
+
+_VARIANTS: tuple[tuple[str, bool], ...] = (
+    ("en", False),
+    ("en", True),
+    ("es", False),
+    ("es", True),
+)
+
+# Figures whose expensive signal analysis is memoised with ``lru_cache``
+# across the four language/theme variants (the ECMA-418-2 / ISO 532
+# psychoacoustic computations). The caches live per process, so these render
+# all four variants as ONE task in a single worker -- four separate tasks
+# would recompute the same analysis in four workers (~150 s of duplicated
+# CPU). Every other figure is cheap to recompute and parallelises per
+# variant.
+_GROUPED_FIGURES = frozenset(
+    {
+        "loudness_models_comparison",
+        "sottek_specific_loudness",
+        "tonality_roughness_demo",
+        "moore_glasberg_time_loudness",
+        "fluctuation_strength",
+    }
+)
+
+# Approximate task cost in seconds (measured sequentially on a 12-core dev
+# box; for the grouped figures the value is the whole four-variant task).
+# Used only to submit the heaviest tasks to the pool first so none of them
+# lands at the tail and stretches the run; unlisted figures are treated as
+# fast and staleness is harmless.
+_FIGURE_WEIGHTS: dict[str, float] = {
+    "loudness_models_comparison": 25.5,
+    "tonality_roughness_demo": 19.7,
+    "sottek_specific_loudness": 4.1,
+    "filter_responses": 2.8,
+    "moore_glasberg_time_loudness": 2.6,
+    "numerical_propagation": 2.5,
+    "fluctuation_strength": 2.2,
+    "weighting_responses": 1.7,
+    "sti_curve": 1.7,
+    "schroeder_decay": 1.3,
+    "excitation_signals": 1.2,
+    "crossover_plot": 1.1,
+}
+
+
+def _run_figure_task(
+    func_name: str, variants: tuple[tuple[str, bool], ...], img_dir: str
+) -> str:
+    """Render one figure in the given language/theme variants (worker entry).
+
+    The prologue applies each variant's language and theme to this worker's
+    module globals, exactly like the sequential loop does before calling the
+    generator; the epilogue closes every figure so a task cannot leak pyplot
+    state (or figure memory) into the next task that reuses the process.
+    """
+    func: Callable[[str], None] = getattr(sys.modules[__name__], func_name)
+    try:
+        for lang, dark in variants:
+            set_lang(lang)
+            set_theme(dark)
+            func(img_dir)
+    finally:
+        plt.close("all")
+    return func_name
+
+
+def _default_jobs() -> int:
+    """Default worker count: the available cores minus two, capped at 8.
+
+    Two cores are left free so the machine (or the CI runner's other duties)
+    stays responsive, and the cap bounds peak memory: every worker holds one
+    figure's data arrays plus a matplotlib canvas (~a few hundred MB for the
+    heaviest compute figures).
+    """
+    cpus = os.process_cpu_count() or 2
+    return max(1, min(cpus - 2, 8))
+
+
+def _generate_figures_parallel(
+    img_dir: str, funcs: list[Callable[[str], None]], jobs: int
+) -> None:
+    """Render ``funcs`` in all four variants on a ``jobs``-wide process pool.
+
+    Workers are spawned (not forked) so each starts from a pristine
+    interpreter: a fresh import of this module pins the numerical thread
+    pools and leaves no inherited pyplot/rcParams state, keeping every task
+    bit-reproducible regardless of scheduling order.
+    """
+    import multiprocessing as mp
+    from concurrent.futures import FIRST_EXCEPTION, ProcessPoolExecutor, wait
+
+    tasks: list[tuple[str, tuple[tuple[str, bool], ...]]] = []
+    for func in funcs:
+        if func.__name__.removeprefix("generate_") in _GROUPED_FIGURES:
+            tasks.append((func.__name__, _VARIANTS))
+        else:
+            tasks.extend((func.__name__, (variant,)) for variant in _VARIANTS)
+    # Heaviest tasks first: they hit idle workers immediately instead of
+    # serialising the tail of the run.
+    tasks.sort(
+        key=lambda t: -_FIGURE_WEIGHTS.get(t[0].removeprefix("generate_"), 0.0)
+    )
+
+    ctx = mp.get_context("spawn")
+    with ProcessPoolExecutor(max_workers=jobs, mp_context=ctx) as pool:
+        futures = {
+            pool.submit(_run_figure_task, name, variants, img_dir): (name, variants)
+            for name, variants in tasks
+        }
+        _done, not_done = wait(futures, return_when=FIRST_EXCEPTION)
+        for future in not_done:
+            future.cancel()
+    # The pool has drained here (the `with` block shut it down), so every
+    # non-cancelled future is settled; scanning them all also aggregates
+    # failures from tasks that were still running when wait() returned on
+    # the first exception.
+    failures: list[str] = []
+    for future, (name, variants) in futures.items():
+        if not future.cancelled() and (exc := future.exception()) is not None:
+            labels = ", ".join(
+                f"{lang} {'dark' if dark else 'light'}" for lang, dark in variants
+            )
+            failures.append(f"{name} [{labels}]: {exc!r}")
+    if failures:
+        raise RuntimeError("figure generation failed:\n  " + "\n  ".join(sorted(failures)))
+
+
+def _select_figures(names: list[str] | None) -> list[Callable[[str], None]]:
+    """Resolve ``--figure`` names (with or without the ``generate_`` prefix)."""
+    if not names:
+        return list(_FIGURE_FUNCS)
+    by_name = {f.__name__.removeprefix("generate_"): f for f in _FIGURE_FUNCS}
+    selected = []
+    for raw in names:
+        name = raw.removeprefix("generate_")
+        if name not in by_name:
+            available = ", ".join(sorted(by_name))
+            raise SystemExit(f"unknown figure {raw!r}; available: {available}")
+        selected.append(by_name[name])
+    return selected
+
+
+def main(argv: list[str] | None = None) -> None:
+    """CLI entry point: figures by default, clips behind ``--animations``."""
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Regenerate the documentation figures (and animations) "
+        "in all four language x theme variants."
+    )
+    parser.add_argument(
+        "--animations", action="store_true",
+        help="render only the Tier-1 animation clips (slow ffmpeg encoding, "
+        "kept out of the default figure run)",
+    )
+    parser.add_argument(
+        "--all", dest="do_all", action="store_true",
+        help="render both the figures and the animations",
+    )
+    parser.add_argument(
+        "--jobs", type=int, default=None, metavar="N",
+        help="worker processes for the figures (default: cores minus two, "
+        "capped at 8; 1 renders sequentially in-process)",
+    )
+    parser.add_argument(
+        "--figure", action="append", default=None, metavar="NAME",
+        help="render only this figure (repeatable; the generate_ prefix is "
+        "optional, e.g. --figure loudness_models_comparison)",
+    )
+    args = parser.parse_args(argv)
+
     img_dir = ".github/images"
     os.makedirs(img_dir, exist_ok=True)
 
-    # `--animations` renders only the Tier-1 clips (slow ffmpeg encoding, kept
-    # out of the default PNG run); `--all` does both. Every asset is produced
-    # four times: light/dark theme x English/Spanish ("_dark" / "_es" /
-    # "_es_dark" suffixes) so both site languages follow the user's mode.
-    only_anim = "--animations" in sys.argv
-    do_figs = not only_anim or "--all" in sys.argv
-    do_anim = only_anim or "--all" in sys.argv
+    do_figs = not args.animations or args.do_all
+    do_anim = args.animations or args.do_all
+    jobs = args.jobs if args.jobs is not None else _default_jobs()
+    if jobs < 1:
+        parser.error("--jobs must be >= 1")
 
-    for lang in ("en", "es"):
-        set_lang(lang)
-        for dark in (False, True):
+    if do_figs:
+        funcs = _select_figures(args.figure)
+        if jobs == 1:
+            for lang, dark in _VARIANTS:
+                set_lang(lang)
+                set_theme(dark)
+                print(f"--- Generating {lang} {'dark' if dark else 'light'} theme figures ---")
+                for func in funcs:
+                    func(img_dir)
+        else:
+            print(f"--- Generating figures ({len(funcs)} x 4 variants, {jobs} jobs) ---")
+            _generate_figures_parallel(img_dir, funcs, jobs)
+
+    if do_anim:
+        for lang, dark in _VARIANTS:
+            set_lang(lang)
             set_theme(dark)
-            mode = f"{lang} {'dark' if dark else 'light'}"
-            if do_figs:
-                print(f"--- Generating {mode} theme figures ---")
-                generate_all(img_dir)
-            if do_anim:
-                print(f"--- Generating {mode} animations ---")
-                generate_animations(img_dir)
+            print(f"--- Generating {lang} {'dark' if dark else 'light'} animations ---")
+            generate_animations(img_dir)
 
     print("Graphics generated successfully.")
+
+
+if __name__ == "__main__":
+    main()

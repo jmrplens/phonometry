@@ -8876,6 +8876,8 @@ def main(argv: list[str] | None = None) -> None:
     do_figs = not (args.animations or args.posters) or args.do_all
     do_anim = args.animations or args.do_all
 
+    if args.anim and not do_anim:
+        parser.error("--anim requires --animations (or --all)")
     if args.posters and not do_anim:
         print("--- Re-extracting animation posters ---")
         generate_posters(img_dir)

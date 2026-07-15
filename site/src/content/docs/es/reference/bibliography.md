@@ -20,13 +20,14 @@ que las guías incorporan sus secciones de Referencias.
   *Fundamentals of acoustics* (4.ª ed.). Wiley. ISBN 978-0-471-84789-2.
   [Página del editor](https://www.wiley.com/en-us/Fundamentals+of+Acoustics%2C+4th+Edition-p-9780471847892).
   El primer curso clásico de acústica: ondas planas y esféricas, impedancia
-  acústica y las definiciones de nivel que asumen todas las guías.
+  acústica y las definiciones de nivel sobre las que se apoyan todas las
+  guías.
 - Rossing, T. D. (Ed.). (2014). *Springer handbook of acoustics* (2.ª ed.).
   Springer. ISBN 978-1-4939-0754-0.
   [doi:10.1007/978-1-4939-0755-7](https://doi.org/10.1007/978-1-4939-0755-7).
   Un panorama en un solo volumen de todos los dominios que toca esta
   biblioteca, desde la acústica de salas hasta la psicoacústica y el sonido
-  submarino; la referencia transversal de primer recurso.
+  submarino; la referencia transversal de consulta obligada.
 - Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
   transducers*. Academic Press. ISBN 978-0-12-391421-7.
   [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
@@ -39,13 +40,13 @@ que las guías incorporan sus secciones de Referencias.
   (3.ª ed.). Pearson. ISBN 978-0-13-198842-2.
   [Ficha en Open Library](https://openlibrary.org/isbn/9780131988422).
   La teoría de filtros digitales tras las cascadas SOS, la transformada
-  bilineal y la diezma multitasa que usan los bancos de filtros.
+  bilineal y el diezmado multitasa que usan los bancos de filtros.
 - Smith, J. O. *Introduction to digital filters with audio applications*
   (libro en línea). Center for Computer Research in Music and Acoustics
   (CCRMA), Universidad de Stanford.
   [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
   Tratamiento gratuito y complementario del diseño y análisis de filtros
-  digitales, un buen paso siguiente tras las guías de bancos de filtros.
+  digitales, el paso natural tras las guías de bancos de filtros.
 
 ## Metrología
 
@@ -54,7 +55,7 @@ que las guías incorporan sus secciones de Referencias.
   100:2008, la GUM). BIPM.
   [doi:10.59161/JCGM100-2008E](https://doi.org/10.59161/JCGM100-2008E),
   [PDF gratuito](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf).
-  La ley de propagación de la incertidumbre que implementa el módulo de
+  La ley de propagación de la incertidumbre implementada por el módulo de
   incertidumbre.
   Citado por [Incertidumbre de medida](/phonometry/es/guides/gum-uncertainty/).
 - Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
@@ -63,6 +64,6 @@ que las guías incorporan sus secciones de Referencias.
   (JCGM 101:2008). BIPM.
   [doi:10.59161/JCGM101-2008](https://doi.org/10.59161/JCGM101-2008),
   [PDF gratuito](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf).
-  La propagación de distribuciones por Monte Carlo que implementa el motor de
-  incertidumbre por Monte Carlo.
+  La propagación de distribuciones mediante Monte Carlo implementada por el
+  motor de incertidumbre de Monte Carlo.
   Citado por [Incertidumbre de medida](/phonometry/es/guides/gum-uncertainty/).

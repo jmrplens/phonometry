@@ -32,6 +32,20 @@ m(F) = \frac{1}{\sqrt{1 + \left(2\pi F\,\frac{T_{60}}{13.8}\right)^2}}
 \cdot \frac{1}{1 + 10^{-\mathrm{SNR}/10}}
 $$
 
+Modulation *depth* is the thing worth measuring because intelligibility rides
+on the depth of the envelope valleys, not on the loudness of the peaks. A
+talker alternates energy bursts (vowels) with near-silences (stop gaps,
+fricative onsets) at syllable rate, and a listener segments speech by hearing
+those dips. A reverberant tail fills the dips from behind, since late energy
+smears into the gaps; steady noise raises their floor. In both cases the
+received modulation depth shrinks, and with it the contrast between speech
+sounds, even when the average level barely changes. The full method probes
+m(F) at 14 modulation frequencies (0.63 Hz to 12.5 Hz in one-third-octave
+steps) in each of the 7 octave bands from 125 Hz to 8 kHz, converts each m to
+an effective signal-to-noise ratio clipped to ±15 dB, and combines the
+results, band-weighted, into the index: the STI is an effective SNR of the
+*envelope*, mapped onto [0, 1].
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60.svg" alt="STI versus reverberation time with the IEC 60268-16 Annex F rating bands shaded" width="80%"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" width="92%"></picture>
@@ -113,6 +127,37 @@ level-dependent features disabled, as the bench prescribes. The 49 certified
 WAVs stay local (third-party data, not committed); CI re-derives the same
 signal constructions synthetically in the conformance suite.
 
+### Direct or indirect: choosing between them
+
+Each route has failure modes the standard is explicit about:
+
+- **Non-linear or time-variant channels.** The indirect method assumes a
+  linear, time-invariant channel: an impulse response cannot represent
+  clipping, compressors, automatic gain control or a vocoder. For a sound
+  system with non-linear processing in the chain, measure directly: the STIPA
+  signal at least travels through the real chain, and the FULL STI signal is
+  the reliable choice where the distortion is severe (IEC 60268-16 clause 6.3
+  and Table 3).
+- **Level-dependent effects.** The STI is not level-invariant: auditory
+  masking and the reception threshold act on the *absolute* band levels at the
+  listener. Play the test signal at the system's operating level (the
+  standard's Annex J practice sets it 3 dB above the L_Aeq of continuous
+  speech at the position) and pass `level=` and `ambient=` so the analysis
+  includes them; an impulse response measured loud and rescaled afterwards
+  misses these effects entirely.
+- **Impulsive and fluctuating background noise.** A dropped tool or babble
+  during a direct measurement corrupts the measured modulation depths
+  (clause 7.13). The standard's remedy is the indirect route: average the
+  impulse response with MLS or sweeps for a noise-free MTF, then add the noise
+  degradation back via `snr=` or `level=`/`ambient=`. A quick sanity check is
+  to run the analyzer with the source off; the residual STI should stay below
+  0.20.
+- **Statistical spread.** The STIPA signal is pseudo-random noise, so repeated
+  direct measurements scatter by up to about 0.03 STI even in steady
+  conditions (and more in fluctuating noise); repeat and compare rather than
+  trusting a single run, and respect the minimum duration flagged by the
+  `UserWarning` above.
+
 ### `sti_from_impulse_response()` / `stipa()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
@@ -139,6 +184,15 @@ Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
 - [Theory](theory-perception.md) — the modulation-transfer derivation and the m ↔ STI
   mapping.
 - API reference: [`hearing.sti`](https://jmrplens.github.io/phonometry/reference/api/speech/sti/).
+
+## References
+
+- Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in
+  room acoustics and its use for estimating speech intelligibility in
+  auditoria. *The Journal of the Acoustical Society of America*, 77(3),
+  1069-1077. [doi:10.1121/1.392224](https://doi.org/10.1121/1.392224).
+  The modulation-transfer framework of section 1 and the m ↔ STI mapping the
+  index is built on.
 
 ---
 

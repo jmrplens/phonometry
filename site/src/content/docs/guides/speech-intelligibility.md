@@ -43,6 +43,21 @@ With no noise and a normal hearing threshold the standard speech spectrum is
 almost fully audible, so the index is close to one; the small deficit is the
 listener's own **self-speech masking**.
 
+The importance function is where the perceptual knowledge of the standard
+lives. It descends from the articulation experiments behind French and
+Steinberg's articulation index: listeners scored nonsense syllables heard
+through filters that removed one part of the spectrum at a time, and the drop
+in score measures how much intelligibility each band carries. The outcome is
+strikingly unequal, and unrelated to where the speech *energy* sits: the five
+bands from 1250 Hz to 3150 Hz carry about 43 % of intelligibility (the place
+and manner cues of consonants live there), while the five lowest bands, 160 Hz
+to 400 Hz, carry about 11 % even though they hold nearly half of the speech
+power.
+`Ii` from Table 3 is the average-speech compromise; the standard's Annex B
+tabulates alternative importance functions for specific test materials
+(nonsense syllables, monosyllabic word lists, short passages), which shift
+weight according to how much redundancy the material offers.
+
 ## 2. Masking and the band-audibility function
 
 The procedure (ANSI S3.5-1997 clause 5) turns the inputs into a per-band
@@ -203,6 +218,29 @@ plt.show()
 The vocal-effort names work anywhere a speech spectrum is expected, including as
 the first argument to `speech_intelligibility_index`.
 
+## 5. SII or STI?
+
+The two speech metrics answer different questions from different measurements,
+and each is blind to what the other captures:
+
+| | SII (ANSI S3.5) | STI (IEC 60268-16) |
+| :--- | :--- | :--- |
+| Question answered | Is enough of the speech spectrum *audible* at the listener's ear? | How much of the speech *envelope* does the transmission channel preserve? |
+| Inputs | Speech, noise and hearing-threshold spectra (18 one-third-octave equivalent spectrum levels) | An impulse response (indirect) or a STIPA recording through the channel (direct) |
+| Band machinery | Band-importance weighting `Ii` applied to the band audibility `Ai` | Modulation transfer function m(F) per octave band, converted to an effective SNR |
+| Captures | Steady noise, upward spread of masking, hearing loss, vocal effort, level distortion | Reverberation, echoes, noise and (measured directly) non-linear processing |
+| Blind to | Reverberation and any time-domain smearing: a fully audible but hopelessly reverberant channel still scores high | Individual hearing status: hearing-impaired listeners need specific corrections |
+| Typical use | Audiology, hearing aids and protectors, noise-control targets at a listener position | PA systems, intercoms and rooms: rating a transmission channel end to end |
+
+The same space can pass one and fail the other. A quiet, highly reverberant
+atrium is an SII near 1 with a poor STI; a dry office flooded by ventilation
+noise can rate an acceptable STI from its impulse response while the SII (and
+the noise-aware STI, via `snr=` or `level=`) reveals that little of the speech
+spectrum clears the noise. When both mechanisms are in play, compute both; the
+inputs are cheap once the room and the noise have been measured. See the
+[Speech Transmission Index guide](/phonometry/guides/speech-transmission/) for
+the STI side.
+
 ## See also
 
 - [Speech Transmission Index](/phonometry/guides/speech-transmission/) — the STI/STIPA
@@ -215,6 +253,15 @@ the first argument to `speech_intelligibility_index`.
 - [Levels](/phonometry/guides/levels/) — the spectrum and band levels behind the equivalent
   spectrum-level inputs.
 - API reference: [`hearing.sii`](/phonometry/reference/api/speech/sii/).
+
+## References
+
+- French, N. R., & Steinberg, J. C. (1947). Factors governing the
+  intelligibility of speech sounds. *The Journal of the Acoustical Society of
+  America*, 19(1), 90-119.
+  [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
+  The articulation-band experiments that the band-importance function of
+  section 1 descends from.
 
 ---
 

@@ -705,6 +705,21 @@ _ES: dict[str, str] = {
         "Sonoridad total  N = ∫ N′(z) dz  [sone]",
     "loudness level  LN = 40 + 10·log₂ N  [phon]":
         "nivel de sonoridad  LN = 40 + 10·log₂ N  [phon]",
+    # Loudspeaker free-field sensitivity (IEC 60268-5)
+    "Loudspeaker free-field sensitivity measurement (IEC 60268-5)":
+        "Sensibilidad de altavoz en campo libre (IEC 60268-5)",
+    "Reference axis": "Eje de referencia",
+    "Measurement microphone": "Micrófono de medición",
+    "Amplifier": "Amplificador",
+    "2.83 V (8 Ω)": "2,83 V (8 Ω)",
+    "Characteristic sensitivity: Lp at 1 m for 1 W into the rated impedance":
+        "Sensibilidad característica: Lp a 1 m para 1 W en la impedancia nominal",
+    "Up = √(R · 1 W): 2.83 V is 1 W into 8 Ω but 2 W into 4 Ω (+3 dB)":
+        "Up = √(R · 1 W): 2,83 V es 1 W en 8 Ω pero 2 W en 4 Ω (+3 dB)",
+    "Lp(1 m) = Lp(r) + 20 lg(r / 1 m)   (far field, inverse-distance law)":
+        "Lp(1 m) = Lp(r) + 20 lg(r / 1 m)   (campo lejano, ley 1/r)",
+    "Microphone (IEC 60268-4): M in mV/Pa, or LM = 20 lg(M / 1 V/Pa) dB":
+        "Micrófono (IEC 60268-4): M en mV/Pa, o LM = 20 lg(M / 1 V/Pa) dB",
 }
 
 
@@ -3041,6 +3056,75 @@ def _d_zwicker(s: SVG, th: Theme) -> None:
            "middle")
 
 
+def _d_loudspeaker_freefield(s: SVG, th: Theme) -> None:
+    """IEC 60268-5 loudspeaker sensitivity on the reference axis (free field)."""
+    x0, y0, x1, gy = 60.0, 70.0, 840.0, 470.0
+    s.rect(x0, y0, x1 - x0, gy - y0, th.bg, th.fg, sw=3)
+
+    # Anechoic wedges on all four boundaries (full free field: no floor).
+    for wx in range(int(x0) + 4, int(x1) - 36, 40):
+        s.path(f"M {wx} {y0} L {wx + 40} {y0} L {wx + 20} {y0 + 28} Z",
+               fill=th.panel, stroke=th.muted, sw=1.0)
+        s.path(f"M {wx} {gy} L {wx + 40} {gy} L {wx + 20} {gy - 28} Z",
+               fill=th.panel, stroke=th.muted, sw=1.0)
+    for wy in range(int(y0) + 30, int(gy) - 64, 40):
+        s.path(f"M {x0} {wy} L {x0} {wy + 40} L {x0 + 28} {wy + 20} Z",
+               fill=th.panel, stroke=th.muted, sw=1.0)
+        s.path(f"M {x1} {wy} L {x1} {wy + 40} L {x1 - 28} {wy + 20} Z",
+               fill=th.panel, stroke=th.muted, sw=1.0)
+    s.text(210, 122, "Anechoic wedges", 15, th.muted, anchor="start")
+
+    # Loudspeaker cabinet on a stand, reference point on the front baffle.
+    ax_y, fx = 275.0, 250.0
+    s.line(219, ax_y + 70, 219, 462, th.fg, 2.2)
+    s.line(199, 462, 239, 462, th.fg, 2.2)
+    s.rect(fx - 62, ax_y - 70, 62, 140, th.panel, th.primary, rx=6, sw=2)
+    s.circle(fx - 18, ax_y, 14, th.primary)
+    s.circle(fx - 18, ax_y, 5.5, th.bg)
+    s.text(219, ax_y - 84, "Loudspeaker", 18, th.fg, bold=True)
+    for r in (26, 44, 62):
+        s.path(f"M {fx + r * 0.34:.1f} {ax_y - r * 0.94:.1f} "
+               f"A {r} {r} 0 0 1 {fx + r * 0.34:.1f} {ax_y + r * 0.94:.1f}",
+               stroke=th.accent, sw=1.5)
+
+    # Reference axis through the reference point, out to the right.
+    s.circle(fx, ax_y, 3.4, th.fg)
+    s.line(fx, ax_y, 782, ax_y, th.muted, 1.4, dash="7,5")
+    s.arrow(760, ax_y, 792, ax_y, th.muted, 1.4)
+    s.text(724, ax_y + 24, "Reference axis", 15, th.muted)
+
+    # Measurement microphone on axis, capsule facing the loudspeaker.
+    mx = 620.0
+    s.line(mx + 23, ax_y + 6, mx + 23, 462, th.fg, 2.2)
+    s.line(mx + 7, 462, mx + 39, 462, th.fg, 2.2)
+    s.rect(mx, ax_y - 6, 46, 12, th.primary, rx=4)
+    s.rect(mx - 12, ax_y - 4, 12, 8, th.fg, rx=2.5)
+    s.text(mx + 24, ax_y - 24, "Measurement microphone", 17, th.fg, bold=True)
+
+    # Reference distance, drafting style, between baffle and capsule tip.
+    s.dim(fx, ax_y, mx - 12, ax_y, "r = 1 m", offset=92)
+
+    # Drive: amplifier delivering 1 W into the rated impedance.
+    s.rect(85, 383, 140, 54, th.panel, th.primary, rx=8, sw=2)
+    s.text(155, 405, "Amplifier", 17, th.fg, bold=True)
+    s.text(155, 427, "2.83 V (8 Ω)", 15, th.secondary, mono=True)
+    s.line(155, 383, 155, 345, th.fg, 1.6)
+    s.line(155, 345, fx - 62, 345, th.fg, 1.6)
+
+    # Governing relations.
+    for y, txt, col, bold in (
+        (508, "Characteristic sensitivity: Lp at 1 m for 1 W into the rated impedance",
+         th.fg, True),
+        (534, "Up = √(R · 1 W): 2.83 V is 1 W into 8 Ω but 2 W into 4 Ω (+3 dB)",
+         th.secondary, True),
+        (559, "Lp(1 m) = Lp(r) + 20 lg(r / 1 m)   (far field, inverse-distance law)",
+         th.primary, True),
+        (583, "Microphone (IEC 60268-4): M in mV/Pa, or LM = 20 lg(M / 1 V/Pa) dB",
+         th.muted, False),
+    ):
+        s.text(450, y, txt, 19 if bold else 18, col, bold=bold)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -3138,6 +3222,9 @@ DIAGRAMS = {
     "diagram_zwicker": (
         _d_zwicker,
         "Zwicker loudness model chain (ISO 532-1)", 490),
+    "diagram_loudspeaker_freefield": (
+        _d_loudspeaker_freefield,
+        "Loudspeaker free-field sensitivity measurement (IEC 60268-5)", 600),
 }
 
 

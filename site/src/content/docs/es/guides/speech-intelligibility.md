@@ -45,6 +45,22 @@ Sin ruido y con un umbral de audición normal, el espectro de habla estándar es
 totalmente audible, por lo que el índice se acerca a uno; el pequeño déficit es
 la propia **automáscara del habla** del oyente.
 
+La función de importancia es donde vive el conocimiento perceptivo de la
+norma. Desciende de los experimentos de articulación tras el índice de
+articulación de French y Steinberg: los oyentes puntuaban sílabas sin sentido
+oídas a través de filtros que eliminaban una parte del espectro cada vez, y la
+caída de acierto mide cuánta inteligibilidad transporta cada banda. El
+resultado es llamativamente desigual, y ajeno a dónde está la *energía* del
+habla: las cinco bandas de 1250 Hz a 3150 Hz transportan en torno al 43 % de
+la inteligibilidad (ahí viven las pistas de punto y modo de articulación de
+las consonantes), mientras que las cinco bandas más bajas, de 160 Hz a 400 Hz,
+transportan en torno al 11 % aunque contienen casi la mitad de la potencia
+del habla. El `Ii` de la Tabla 3 es el compromiso para habla promedio; el
+Anexo B de la norma tabula funciones de importancia alternativas para
+materiales de ensayo concretos (sílabas sin sentido, listas de palabras
+monosílabas, pasajes cortos), que desplazan el peso según la redundancia del
+material.
+
 ## 2. Enmascaramiento y la función de audibilidad de banda
 
 El procedimiento (ANSI S3.5-1997, cláusula 5) convierte las entradas en una
@@ -210,6 +226,30 @@ Los nombres de esfuerzo vocal funcionan en cualquier sitio donde se espere un
 espectro de voz, incluido como primer argumento de
 `speech_intelligibility_index`.
 
+## 5. ¿SII o STI?
+
+Las dos métricas del habla responden preguntas distintas a partir de
+mediciones distintas, y cada una es ciega a lo que la otra captura:
+
+| | SII (ANSI S3.5) | STI (IEC 60268-16) |
+| :--- | :--- | :--- |
+| Pregunta que responde | ¿Es *audible* suficiente espectro del habla en el oído de quien escucha? | ¿Cuánta de la *envolvente* del habla conserva el canal de transmisión? |
+| Entradas | Espectros de habla, ruido y umbral de audición (18 niveles espectrales equivalentes de tercio de octava) | Una respuesta al impulso (indirecto) o una grabación STIPA a través del canal (directo) |
+| Maquinaria de bandas | Ponderación por importancia de banda `Ii` aplicada a la audibilidad de banda `Ai` | Función de transferencia de modulación m(F) por banda de octava, convertida en una SNR efectiva |
+| Captura | Ruido estacionario, propagación ascendente del enmascaramiento, pérdida auditiva, esfuerzo vocal, distorsión de nivel | Reverberación, ecos, ruido y (medido en directo) procesado no lineal |
+| Ciega a | La reverberación y cualquier emborronamiento temporal: un canal totalmente audible pero irremediablemente reverberante sigue puntuando alto | El estado auditivo individual: los oyentes con pérdida auditiva requieren correcciones específicas |
+| Uso típico | Audiología, audífonos y protectores, objetivos de control de ruido en una posición de escucha | Sistemas de megafonía, interfonos y salas: calificar un canal de transmisión de extremo a extremo |
+
+El mismo espacio puede aprobar una y suspender la otra. Un atrio silencioso y
+muy reverberante es un SII cercano a 1 con un STI pobre; una oficina seca
+inundada de ruido de ventilación puede dar un STI aceptable desde su respuesta
+al impulso mientras el SII (y el STI consciente del ruido, vía `snr=` o
+`level=`) revela que poco del espectro del habla supera el ruido. Cuando ambos
+mecanismos están en juego, calcula ambos; las entradas son baratas una vez
+medidas la sala y el ruido. Consulta la
+[guía del índice de transmisión del habla](/phonometry/es/guides/speech-transmission/)
+para el lado del STI.
+
 ## Véase también
 
 - [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) — el
@@ -222,6 +262,15 @@ espectro de voz, incluido como primer argumento de
 - [Niveles](/phonometry/es/guides/levels/) — los niveles espectrales y de banda tras las
   entradas de nivel espectral equivalente.
 - Referencia de la API: [`hearing.sii`](/phonometry/es/reference/api/speech/sii/).
+
+## Referencias
+
+- French, N. R., & Steinberg, J. C. (1947). Factors governing the
+  intelligibility of speech sounds. *The Journal of the Acoustical Society of
+  America*, 19(1), 90-119.
+  [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
+  Los experimentos por bandas de articulación de los que desciende la función
+  de importancia de banda de la sección 1.
 
 ---
 

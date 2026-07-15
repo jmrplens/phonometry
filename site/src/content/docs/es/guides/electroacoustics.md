@@ -1,6 +1,6 @@
 ---
 title: "Electroacústica: distorsión y respuesta en frecuencia"
-description: "Distorsión IEC 60268-3 — distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por frecuencia diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468 — más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria."
+description: "Distorsión IEC 60268-3 — distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por frecuencia diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468 — más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria, y las convenciones de sensibilidad de IEC 60268-4/-5 (dB re 1 V/Pa, la normalización de campo libre a 1 W / 1 m)."
 ---
 
 Dos pilares de la caracterización de equipos de audio, a partir de una señal
@@ -12,7 +12,10 @@ medición AES17, la intermodulación por órdenes de modulación y por frecuenci
 diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468 — y
 los estimadores de respuesta en frecuencia `H1`/`H2` de Bendat y
 Piersol con la coherencia ordinaria `γ²`. Toda magnitud tiene un oráculo
-analítico exacto, así que los valores son verificables y no ajustados.
+analítico exacto, así que los valores son verificables y no ajustados. Una
+sección final cubre las convenciones de sensibilidad de IEC 60268-4
+(micrófonos) e IEC 60268-5 (altavoces), donde fallan la mayoría de las
+comparaciones entre hojas de datos.
 
 ## 1. Distorsión armónica (IEC 60268-3 14.12.2–5)
 
@@ -225,6 +228,55 @@ plt.show()
 
 </details>
 
+## 5. Convenciones de sensibilidad (IEC 60268-4 / IEC 60268-5)
+
+Las cifras de distorsión y de respuesta solo son comparables entre
+dispositivos cuando coinciden las convenciones de *sensibilidad* que hay
+detrás, y dos convenciones hacen tropezar constantemente: el nivel de
+referencia del micrófono y la normalización de potencia y distancia del
+altavoz.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_loudspeaker_freefield_es.svg" alt="Medición de la sensibilidad de un altavoz en campo libre según IEC 60268-5: un altavoz sobre un soporte en una sala anecoica, alimentado por un amplificador a 2,83 V, con un micrófono de medición a la distancia de referencia r = 1 m sobre el eje de referencia, y las relaciones que gobiernan: la sensibilidad característica como Lp a 1 m para 1 W en la impedancia nominal, la tensión de excitación Up = raíz de (R por 1 W), la referencia por distancia inversa Lp(1 m) = Lp(r) + 20 lg(r / 1 m), y la sensibilidad de micrófono de IEC 60268-4 en mV/Pa o dB re 1 V/Pa" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_loudspeaker_freefield_es_dark.svg" alt="Medición de la sensibilidad de un altavoz en campo libre según IEC 60268-5: un altavoz sobre un soporte en una sala anecoica, alimentado por un amplificador a 2,83 V, con un micrófono de medición a la distancia de referencia r = 1 m sobre el eje de referencia, y las relaciones que gobiernan: la sensibilidad característica como Lp a 1 m para 1 W en la impedancia nominal, la tensión de excitación Up = raíz de (R por 1 W), la referencia por distancia inversa Lp(1 m) = Lp(r) + 20 lg(r / 1 m), y la sensibilidad de micrófono de IEC 60268-4 en mV/Pa o dB re 1 V/Pa" style="width:92%">
+
+**Micrófonos (IEC 60268-4, cláusula 11).** La sensibilidad `M` es la tensión
+de salida por unidad de presión acústica, expresada en mV/Pa; el *nivel* de
+sensibilidad es `LM = 20 lg(M / 1 V/Pa)` dB, negativo para todo micrófono real
+(un condensador de estudio de 50 mV/Pa queda en −26 dB re 1 V/Pa). El tropiezo
+clásico es la referencia: −26 dB re 1 V/Pa y +34 dB re 1 mV/Pa son el *mismo*
+micrófono, a 60 dB de distancia sobre el papel, así que un nivel de
+sensibilidad sin su referencia no significa nada. La norma también distingue
+sensibilidad de campo libre, de campo difuso y de presión; para la misma
+cápsula divergen en alta frecuencia, de modo que el tipo declarado importa
+tanto como el número.
+
+**Altavoces (IEC 60268-5, cláusula 20.3).** La sensibilidad característica es
+la presión acústica producida a 1 m sobre el eje de referencia, en campo
+libre, referida a una entrada de 1 W en la impedancia nominal; expresada como
+nivel re 20 µPa (cláusula 20.4) es el familiar «dB @ 1 W/1 m». En esa frase se
+esconden dos normalizaciones:
+
+- *La eléctrica.* La tensión de ensayo es `Up = √(R · 1 W)`, numéricamente
+  `√R`: 2,83 V en una impedancia nominal de 8 Ω. Una hoja de datos que anuncia
+  «dB @ 2,83 V/1 m» para un altavoz de 4 Ω le está entregando 2 W, lo que
+  infla la cifra en 3 dB frente a una calificación verdadera de 1 W/1 m;
+  comprueba la impedancia nominal antes de comparar.
+- *La geométrica.* 1 m es una distancia de **referencia**, no necesariamente
+  la de medición. La norma manda medir en campo lejano (a 0,5 m o a un número
+  entero de metros, cláusula 7.1) y referir el resultado con la ley de la
+  distancia inversa, `Lp(1 m) = Lp(r) + 20 lg(r / 1 m)`. Ese escalado solo
+  vale donde el nivel cae de verdad 6 dB por duplicación de distancia, de ahí
+  el campo libre del diagrama; a 1 m de una caja multivía grande puede que el
+  campo cercano aún no haya terminado, y la cifra «a 1 m» es entonces una
+  magnitud referida, no lo que leería un micrófono colocado a 1 m.
+
+## Referencias
+
+- Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
+  transducers*. Academic Press. ISBN 978-0-12-391421-7.
+  [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
+  La física de transductores tras la sección 5: radiación del altavoz, presión
+  en el eje y la transición de campo cercano a campo lejano.
+
 ---
 
 **Normas.** IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*
@@ -238,7 +290,13 @@ AES17-2015, *Measurement of digital audio equipment* (cláusulas 5.2.5, 5.2.8 y
 banda de medición normalizado; el SINAD se deriva de ella. ITU-R BS.468-4: la
 respuesta nominal de la red de ponderación. Bendat y Piersol (2010), *Random
 Data: Analysis and Measurement Procedures* (4ª ed., Wiley): los estimadores de
-respuesta en frecuencia `H1` y `H2` y la coherencia ordinaria `γ²`. Todas las
+respuesta en frecuencia `H1` y `H2` y la coherencia ordinaria `γ²`.
+IEC 60268-4:2018, *Sound system equipment – Part 4: Microphones* (cláusula 11:
+sensibilidad y nivel de sensibilidad) e IEC 60268-5:2003, *Sound system
+equipment – Part 5: Loudspeakers* (cláusulas 7.1, 20.3 y 20.4: distancia de
+medición, sensibilidad característica y su nivel): las convenciones de
+sensibilidad de la sección 5, citadas como contexto y no implementadas como
+código. Todas las
 magnitudes se verifican contra oráculos analíticos exactos (señales sintéticas
 con amplitudes armónicas/de intermodulación conocidas, un oráculo de Fourier de
 seno recortado, una síntesis completa de la señal de ensayo DIM y un camino LTI

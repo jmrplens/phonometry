@@ -1,6 +1,8 @@
-// Astro emits its redirect stub pages with a lowercase `<!doctype html>`,
-// which fails the html-validate doctype-style rule the rest of the site
-// follows. Uppercase it in place after every build.
+// Astro emits redirect stub pages with a lowercase `<!doctype html>`, which
+// fails the html-validate doctype-style rule the rest of the site follows.
+// This scans every built page but only rewrites files whose first bytes are
+// exactly the lowercase form (in practice, just the redirect stubs), so it is
+// idempotent and cannot touch regular pages. Runs after every build.
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 

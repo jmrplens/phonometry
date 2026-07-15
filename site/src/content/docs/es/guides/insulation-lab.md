@@ -241,6 +241,11 @@ delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
 print(weighted_impact_improvement(delta_l))    # p. ej. 19 dB
 
 # A partir de los niveles de aceleración medidos (desnudo/cubierto) y un fondo:
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150]
+bare_levels = [72, 73, 74, 74, 75, 75, 76, 76, 77, 77, 78, 78, 79, 79, 80, 80]
+covered_levels = [b - d for b, d in zip(bare_levels, delta_l)]
+bg = [40.0] * 16
 res = impact_improvement(bare_levels, covered_levels, freqs, background=bg)
 res.improvement       # delta-L por banda
 res.delta_lw          # número único ponderado (valorado sobre el subrango 100-3150 Hz)

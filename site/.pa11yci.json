@@ -19,6 +19,8 @@
     "http://localhost:4321/phonometry/guides/calibration/",
     "http://localhost:4321/phonometry/reference/api/",
     "http://localhost:4321/phonometry/reference/theory/",
+    "http://localhost:4321/phonometry/reference/theory/rooms-buildings/",
+    "http://localhost:4321/phonometry/es/reference/theory/rooms-buildings/",
     "http://localhost:4321/phonometry/es/",
     "http://localhost:4321/phonometry/es/getting-started/",
     "http://localhost:4321/phonometry/es/guides/filter-banks/",

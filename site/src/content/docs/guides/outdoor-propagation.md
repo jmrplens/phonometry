@@ -323,7 +323,7 @@ stacked per-band breakdown with the total overlaid (the figure above).
 | `line_of_sight_clear` | bool | — | `False` | `True` ⇒ the sight line passes above the top edge: the path difference takes a negative sign and Kmet = 1 (text after Eq. (16)) |
 
 The method's stated accuracy is $\pm 1$ to $\pm 3$ dB for broadband noise up to
-1000 m (Table 5). See the [Theory](/phonometry/reference/theory/) page for the full derivation, the
+1000 m (Table 5). See the [Theory](/phonometry/reference/theory/environment-transport/) page for the full derivation, the
 [Room Acoustics guide](/phonometry/guides/room-acoustics/) for how $\alpha$ feeds
 ISO 354, and the [Occupational Noise Exposure guide](/phonometry/guides/occupational-exposure/) for the ISO 9612 occupational
 exposure that consumes A-weighted levels.

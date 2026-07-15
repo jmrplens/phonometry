@@ -509,7 +509,7 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
   aislamiento.
 - [Niveles](/phonometry/es/guides/levels/) — el promediado en energía y las métricas de
   nivel tras los niveles de las salas emisora/receptora.
-- [Teoría](/phonometry/es/reference/theory/) — la integración de Schroeder, las ventanas de
+- [Teoría](/phonometry/es/reference/theory/rooms-buildings/) — la integración de Schroeder, las ventanas de
   regresión y la derivación de la curva de referencia.
 - Referencia de la API: [`room.room_acoustics`](/phonometry/es/reference/api/rooms/room-acoustics/), [`room.room_ir`](/phonometry/es/reference/api/rooms/room-ir/) y [`room.open_plan`](/phonometry/es/reference/api/rooms/open-plan/).
 

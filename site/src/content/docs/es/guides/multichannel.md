@@ -80,7 +80,7 @@ Notas adicionales de rendimiento:
   explícito sobre el ciclo de vida del diseño.
 - **Diezmado multitasa**: las bandas graves se filtran a una frecuencia diezmada,
   lo que es a la vez más rápido y numéricamente más estable (consulta
-  [Teoría](/phonometry/es/reference/theory/)).
+  [Teoría](/phonometry/es/reference/theory/signal-analysis/)).
 - **numba opcional**: el kernel del modo `impulse` de la ponderación temporal se
   compila JIT cuando numba está instalado (`pip install phonometry[perf]`).
 

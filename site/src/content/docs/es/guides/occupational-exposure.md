@@ -114,7 +114,7 @@ incertidumbre —el anexo C no da método para ellos (Tabla C.5, Nota 1)—, as�
 la incertidumbre de pico queda fuera del alcance. Los tres ejemplos resueltos de
 los anexos D/E/F anteriores se reproducen con la precisión impresa de la norma
 (el redondeo final del anexo E se explica más arriba), y la teoría se deriva
-en la página de [Teoría](/phonometry/es/reference/theory/).
+en la página de [Teoría](/phonometry/es/reference/theory/environment-transport/).
 
 ### Parámetros de `task_based_exposure()` / `job_based_exposure()` / `full_day_exposure()`
 
@@ -143,7 +143,7 @@ otras estrategias no llevan desglose por tarea).
   lado.
 - [Incertidumbre de medición](/phonometry/es/guides/gum-uncertainty/) — la
   maquinaria GUM tras las incertidumbres combinadas y expandidas.
-- [Teoría](/phonometry/es/reference/theory/) — la derivación de las fórmulas de
+- [Teoría](/phonometry/es/reference/theory/environment-transport/) — la derivación de las fórmulas de
   las estrategias y del presupuesto del anexo C.
 - Referencia de la API: [`hearing.occupational_exposure`](/phonometry/es/reference/api/hearing/occupational-exposure/).
 

@@ -34,6 +34,29 @@ Field2D = NDArray[np.float64]
 _SIDES = ("left", "right", "top", "bottom")
 
 
+def _positive_finite(name: str, value: float) -> float:
+    """Validate that *value* is a strictly positive finite scalar."""
+    out = float(value)
+    if not np.isfinite(out) or out <= 0.0:
+        raise ValueError(f"{name} must be positive and finite")
+    return out
+
+
+def _finite(name: str, value: float) -> float:
+    """Validate that *value* is a finite scalar."""
+    out = float(value)
+    if not np.isfinite(out):
+        raise ValueError(f"{name} must be finite")
+    return out
+
+
+def _positive_map(name: str, field: Field2D) -> None:
+    """Validate that every cell of *field* is strictly positive and finite."""
+    if not np.all(np.isfinite(field)) or bool(np.any(field <= 0.0)):
+        raise ValueError(f"{name} must be strictly positive and finite "
+                         "everywhere")
+
+
 @dataclass(frozen=True)
 class GaussianPulse:
     """A soft Gaussian pressure pulse injected at one cell.
@@ -47,6 +70,12 @@ class GaussianPulse:
     width: float
     t0: float | None = None
     amplitude: float = 1.0
+
+    def __post_init__(self) -> None:
+        _positive_finite("width", self.width)
+        _finite("amplitude", self.amplitude)
+        if self.t0 is not None:
+            _finite("t0", self.t0)
 
     def value(self, t: float) -> float:
         """Source waveform at time ``t`` (seconds)."""
@@ -67,6 +96,12 @@ class CWSource:
     frequency: float
     amplitude: float = 1.0
     ramp_cycles: float = 3.0
+
+    def __post_init__(self) -> None:
+        _positive_finite("frequency", self.frequency)
+        _finite("amplitude", self.amplitude)
+        if not np.isfinite(self.ramp_cycles) or self.ramp_cycles < 0.0:
+            raise ValueError("ramp_cycles must be non-negative and finite")
 
     def value(self, t: float) -> float:
         """Source waveform at time ``t`` (seconds)."""
@@ -119,8 +154,9 @@ class FDTD2D:
     sponge_width:
         Thickness of the absorbing layer in cells (0 = all-rigid box).
     sponge_sides:
-        Which sides absorb: an iterable drawn from ``{"left", "right",
-        "top", "bottom"}`` (default: all four when ``sponge_width > 0``).
+        Which sides absorb: a single side name or an iterable drawn from
+        ``{"left", "right", "top", "bottom"}`` (default: all four when
+        ``sponge_width > 0``).
         ``left``/``right`` are the low/high column edges and ``top``/
         ``bottom`` the low/high row edges (the default ``imshow`` origin).
     sponge_reflection:
@@ -142,7 +178,7 @@ class FDTD2D:
         rho: float | Field2D = 1.2,
         cfl: float = 0.6,
         sponge_width: int = 0,
-        sponge_sides: Iterable[str] | None = None,
+        sponge_sides: str | Iterable[str] | None = None,
         sponge_reflection: float = 1e-4,
         damping: float = 0.0,
         shape: tuple[int, int] | None = None,
@@ -155,6 +191,7 @@ class FDTD2D:
             c_map = np.asarray(c, dtype=np.float64)
         if c_map.ndim != 2:
             raise ValueError("c must be a 2D (ny, nx) map")
+        _positive_map("c", c_map)
         if not 0.5 <= cfl <= 0.7:
             raise ValueError("cfl must stay in the deterministic 0.5-0.7 window")
         ny, nx = c_map.shape
@@ -162,8 +199,19 @@ class FDTD2D:
                    if np.isscalar(rho) else np.asarray(rho, dtype=np.float64))
         if rho_map.shape != (ny, nx):
             raise ValueError("rho map must match the shape of c")
+        _positive_map("rho", rho_map)
+        if sponge_width < 0:
+            raise ValueError("sponge_width must be non-negative")
+        if sponge_width >= min(nx, ny):
+            raise ValueError("sponge_width must be narrower than the "
+                             "smallest grid side")
+        if not 0.0 < sponge_reflection < 1.0:
+            raise ValueError("sponge_reflection must lie strictly between "
+                             "0 and 1")
+        if not np.isfinite(damping) or damping < 0.0:
+            raise ValueError("damping must be non-negative and finite")
 
-        self.dx = float(dx)
+        self.dx = _positive_finite("dx", dx)
         self.c = c_map
         self.rho = rho_map
         c_max = float(c_map.max())
@@ -179,7 +227,13 @@ class FDTD2D:
         self._sources: list[Source] = []
         self.n = 0                                # completed steps
 
-        sides = tuple(sponge_sides) if sponge_sides is not None else _SIDES
+        if sponge_sides is None:
+            sides: tuple[str, ...] = _SIDES
+        elif isinstance(sponge_sides, str):
+            # A bare string would iterate per character; treat it as one side.
+            sides = (sponge_sides,)
+        else:
+            sides = tuple(sponge_sides)
         unknown = set(sides) - set(_SIDES)
         if unknown:
             raise ValueError(f"unknown sponge sides: {sorted(unknown)}")
@@ -256,6 +310,12 @@ class FDTD2D:
         ``record_every`` an empty array is returned and only the final state
         is kept (read it from ``self.p``).
         """
+        if steps < 0:
+            raise ValueError("steps must be non-negative")
+        if record_every is not None and record_every < 1:
+            raise ValueError("record_every must be >= 1")
+        if decimate < 1:
+            raise ValueError("decimate must be >= 1")
         frames: list[Field2D] = []
         if record_every is not None:
             frames.append(self.p[::decimate, ::decimate].copy())

@@ -6869,7 +6869,9 @@ def animate_time_weighting_ballistics(output_dir: str) -> None:
         arts: list[Any] = [strip_cur, cap_fill, cap_level, charge_arrow,
                            charge_txt]
         for gauge, val in zip(gauges, (fast[i], slow[i], imp[i]), strict=True):
-            arts += _set_gauge(gauge, float(val) / 2.0, T(f"{val:.2f}"))
+            # Normalize onto the dial's 0..1.2 scale so the needle position
+            # matches the endpoint labels and the numeric readout.
+            arts += _set_gauge(gauge, float(val) / 1.2, T(f"{val:.2f}"))
         m = t <= tc
         l_f.set_data(t[m], fast[m])
         l_s.set_data(t[m], slow[m])
@@ -7321,7 +7323,9 @@ def _room_mode_fields(
 
 def animate_fdtd_room_modes(output_dir: str) -> None:
     """On-mode vs off-mode CW drive in a rigid 5 x 3.5 m room (2D FDTD):
-    the standing-wave pattern only builds up when the drive hits a mode."""
+    on resonance the (2,1) standing-wave pattern grows until it dominates
+    the field; off resonance the forced response stays weak and never
+    organises into that nodal structure."""
     from matplotlib import patheffects
 
     T = _translate_str

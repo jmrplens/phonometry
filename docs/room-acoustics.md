@@ -300,10 +300,12 @@ Below the **Schroeder frequency** $f_s \approx 2000\sqrt{T/V}$ these
 decay statistics stop telling the whole story: the field is ruled by
 discrete **room modes**. The simulation below drives the same rigid
 5 m by 3.5 m room at its (2,1) mode and then between two modes; on
-resonance a standing-wave pattern with fixed nodal lines builds up in the
-RMS pressure map, off resonance the energy never organises into a pattern.
+resonance a standing-wave pattern with fixed nodal lines grows until it
+dominates the RMS pressure map, off resonance the room still responds,
+but the forced field stays weak and never organises into that (2,1)
+nodal pattern.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes.gif" alt="Animation: a 2D FDTD simulation of a 5 by 3.5 metre room driven at the 84 Hz (2,1) mode and at an off-mode frequency; on resonance a standing-wave pattern with fixed nodal lines builds up in the RMS pressure map, off resonance no pattern grows" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes.gif" alt="Animation: a 2D FDTD simulation of a 5 by 3.5 metre room driven at the 84 Hz (2,1) mode and at an off-mode frequency; on resonance a standing-wave pattern with fixed nodal lines grows to dominate the RMS pressure map, off resonance the forced response stays weak and disorganised" width="640" height="360" loading="lazy"></picture>
 
 ### `room_parameters()` parameters
 

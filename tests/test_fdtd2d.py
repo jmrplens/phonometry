@@ -89,14 +89,100 @@ def test_heterogeneous_speed_refracts_faster() -> None:
     assert reach_right > 1.5 * reach_left
 
 
-def test_invalid_arguments_are_rejected() -> None:
+def test_scalar_c_requires_shape() -> None:
     with pytest.raises(ValueError, match="shape is required"):
         fdtd2d.FDTD2D(343.0, 0.05)
-    with pytest.raises(ValueError, match="cfl"):
-        fdtd2d.FDTD2D(343.0, 0.05, shape=(10, 10), cfl=0.9)
-    with pytest.raises(ValueError, match="sponge sides"):
-        fdtd2d.FDTD2D(343.0, 0.05, shape=(10, 10), sponge_width=4,
-                      sponge_sides=("north",))
+
+
+def test_source_outside_the_grid_is_rejected() -> None:
     sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(10, 10))
+    pulse = fdtd2d.GaussianPulse(ix=99, iy=0, width=1e-4)
     with pytest.raises(ValueError, match="outside the grid"):
-        sim.add_source(fdtd2d.GaussianPulse(ix=99, iy=0, width=1e-4))
+        sim.add_source(pulse)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        ({"cfl": 0.9}, "cfl"),
+        ({"c": 0.0}, "c must be strictly positive"),
+        ({"c": np.full((10, 10), np.nan)}, "c must be strictly positive"),
+        ({"rho": -1.2}, "rho must be strictly positive"),
+        ({"rho": np.full((10, 10), np.inf)}, "rho must be strictly positive"),
+        ({"dx": 0.0}, "dx must be positive"),
+        ({"dx": np.nan}, "dx must be positive"),
+        ({"damping": -1.0}, "damping must be non-negative"),
+        ({"damping": np.inf}, "damping must be non-negative"),
+        ({"sponge_width": -1}, "sponge_width must be non-negative"),
+        ({"sponge_width": 10}, "sponge_width must be narrower"),
+        ({"sponge_width": 4, "sponge_reflection": 0.0}, "sponge_reflection"),
+        ({"sponge_width": 4, "sponge_reflection": 1.0}, "sponge_reflection"),
+        ({"sponge_width": 4, "sponge_sides": ("north",)}, "sponge sides"),
+        ({"sponge_width": 4, "sponge_sides": "north"}, "sponge sides"),
+    ],
+)
+def test_constructor_rejects_invalid_arguments(
+    kwargs: dict[str, object], match: str,
+) -> None:
+    full: dict[str, object] = {"c": 343.0, "dx": 0.05, "shape": (10, 10),
+                               **kwargs}
+    c = full.pop("c")
+    dx = full.pop("dx")
+    with pytest.raises(ValueError, match=match):
+        fdtd2d.FDTD2D(c, dx, **full)  # type: ignore[arg-type]
+
+
+def test_sponge_sides_accepts_a_bare_string() -> None:
+    # A single side name must mean that side, not its individual characters.
+    sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(20, 20), sponge_width=5,
+                        sponge_sides="left")
+    assert float(sim._decay_p[10, 0]) < 1.0     # left edge absorbs
+    assert float(sim._decay_p[10, -1]) == 1.0   # right edge stays rigid
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        ({"width": 0.0}, "width must be positive"),
+        ({"width": np.inf}, "width must be positive"),
+        ({"width": 1e-4, "amplitude": np.nan}, "amplitude must be finite"),
+        ({"width": 1e-4, "t0": np.inf}, "t0 must be finite"),
+    ],
+)
+def test_gaussian_pulse_rejects_invalid_parameters(
+    kwargs: dict[str, float], match: str,
+) -> None:
+    with pytest.raises(ValueError, match=match):
+        fdtd2d.GaussianPulse(ix=0, iy=0, **kwargs)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        ({"frequency": 0.0}, "frequency must be positive"),
+        ({"frequency": np.nan}, "frequency must be positive"),
+        ({"frequency": 100.0, "ramp_cycles": -1.0}, "ramp_cycles"),
+        ({"frequency": 100.0, "amplitude": np.inf}, "amplitude must be finite"),
+    ],
+)
+def test_cw_source_rejects_invalid_parameters(
+    kwargs: dict[str, float], match: str,
+) -> None:
+    with pytest.raises(ValueError, match=match):
+        fdtd2d.CWSource(ix=0, iy=0, **kwargs)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        ({"steps": -1}, "steps must be non-negative"),
+        ({"steps": 1, "record_every": 0}, "record_every"),
+        ({"steps": 1, "record_every": 1, "decimate": 0}, "decimate"),
+    ],
+)
+def test_run_rejects_invalid_recording_controls(
+    kwargs: dict[str, int], match: str,
+) -> None:
+    sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(10, 10))
+    with pytest.raises(ValueError, match=match):
+        sim.run(**kwargs)

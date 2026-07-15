@@ -16,7 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   tests, backing the physics-based documentation animations.
 - `anim_fdtd_room_modes`: a 2D FDTD documentation clip driving a rigid
   5 m × 3,5 m room on its (2,1) mode and between modes, showing the
-  standing-wave pattern and the RMS mode map building up only on resonance;
+  standing-wave pattern and the RMS mode map growing to dominance on
+  resonance while the off-mode response stays weak and disorganised;
   embedded in the room-acoustics and reverberation-prediction guides
   (EN + ES).
 - Clause 5.3.8 Step 3 inside `analyze_spectrum` (DIN 45681 / ISO PAS 20065):

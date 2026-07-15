@@ -243,7 +243,7 @@ tiene una **diferencia apenas perceptible** (ISO 3382-1 Tabla A.1: EDT 5 %,
 C80 1 dB, D50 0,05, Ts 10 ms) que fija con qué precisión merece la pena
 informarlo.
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_es.webm" autoplay loop muted controls playsinline title="Animación: la curva de caída de Schroeder emergiendo al integrar la respuesta al impulso al cuadrado hacia atrás desde su cola, terminando con las rectas de regresión T20 y T30" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_es_dark.webm" autoplay loop muted controls playsinline title="Animación: la curva de caída de Schroeder emergiendo al integrar la respuesta al impulso al cuadrado hacia atrás desde su cola, terminando con las rectas de regresión T20 y T30" style="width:88%"></video>
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_es.webm" autoplay loop muted controls playsinline title="Animación: la energía de la cola de la respuesta al impulso al cuadrado se rellena desde el final mientras la integral hacia atrás avanza hacia t = 0, y la curva de caída de Schroeder emerge en un eje inferior que termina con las rectas de regresión T20 y T30" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_es_dark.webm" autoplay loop muted controls playsinline title="Animación: la energía de la cola de la respuesta al impulso al cuadrado se rellena desde el final mientras la integral hacia atrás avanza hacia t = 0, y la curva de caída de Schroeder emerge en un eje inferior que termina con las rectas de regresión T20 y T30" style="width:88%"></video>
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_es.png" alt="Respuesta al impulso al cuadrado con su curva de decaimiento integrada hacia atrás de Schroeder, y las ventanas de regresión EDT, T20 y T30 marcadas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_es_dark.png" alt="Respuesta al impulso al cuadrado con su curva de decaimiento integrada hacia atrás de Schroeder, y las ventanas de regresión EDT, T20 y T30 marcadas" style="width:80%">
 
@@ -307,6 +307,16 @@ Para este decaimiento de pendiente única, EDT, T20 y T30 devuelven todos
 ≈ 1,0 s, y los parámetros de energía coinciden con sus formas cerradas
 (C80 = 3,05 dB, D50 = 0,499, Ts = 72 ms). Una sala real tiene una pendiente
 inicial más pronunciada, así que EDT < T30.
+
+Por debajo de la **frecuencia de Schroeder** $f_s \approx 2000\sqrt{T/V}$
+estas estadísticas de caída dejan de contar toda la historia: el campo lo
+gobiernan **modos propios** discretos. La simulación siguiente excita la
+misma sala rígida de 5 m por 3,5 m en su modo (2,1) y después entre dos
+modos; en resonancia se forma un patrón de onda estacionaria con líneas
+nodales fijas en el mapa de presión RMS, fuera de resonancia la energía
+nunca se organiza en un patrón.
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_es.webm" autoplay loop muted controls playsinline title="Animación: simulación FDTD 2D de una sala de 5 por 3,5 metros excitada en el modo (2,1) de 84 Hz y en una frecuencia fuera de modo; en resonancia se forma un patrón de onda estacionaria con líneas nodales fijas en el mapa de presión RMS, fuera de resonancia no crece ningún patrón" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_es_dark.webm" autoplay loop muted controls playsinline title="Animación: simulación FDTD 2D de una sala de 5 por 3,5 metros excitada en el modo (2,1) de 84 Hz y en una frecuencia fuera de modo; en resonancia se forma un patrón de onda estacionaria con líneas nodales fijas en el mapa de presión RMS, fuera de resonancia no crece ningún patrón" style="width:88%"></video>
 
 ### Parámetros de `room_parameters()`
 

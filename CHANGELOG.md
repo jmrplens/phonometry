@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `scripts/fdtd2d.py`: a small deterministic 2D acoustic FDTD engine
+  (staggered-grid pressure-velocity leapfrog, heterogeneous c/rho maps,
+  rigid walls, sponge absorbing layers, Gaussian-pulse and CW sources,
+  frame subsampling for animation rendering) with physics and determinism
+  tests, backing the physics-based documentation animations.
+- `anim_fdtd_room_modes`: a 2D FDTD documentation clip driving a rigid
+  5 m × 3,5 m room on its (2,1) mode and between modes, showing the
+  standing-wave pattern and the RMS mode map building up only on resonance;
+  embedded in the room-acoustics and reverberation-prediction guides
+  (EN + ES).
 - Clause 5.3.8 Step 3 inside `analyze_spectrum` (DIN 45681 / ISO PAS 20065):
   audible tones sharing a critical band are energy-summed (Formula (17),
   shared lines counted once) into a combined FG entry rated at the most
@@ -239,6 +249,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The four Tier-1 documentation animations are redesigned as mechanism
+  infographics instead of line-plot reveals: `anim_time_weighting` shows the
+  tone burst driving the IEC 61672-1 RC detector (square-law rectifier,
+  capacitor charging/draining, F/S/I meter needles), `anim_onset_detection`
+  scans L_AF with a magnifier and lights the NT ACOU 112 OR/LD/P/KI decision
+  chain, `anim_instantaneous_intensity` animates a two-microphone p-p probe
+  with p/u phasors and a flipping intensity arrow (active vs reactive), and
+  `anim_schroeder` fills the tail energy of the squared impulse response
+  while the decay curve and T20/T30 fits emerge on a companion axis. A
+  shared scaffold (schematic axes, mic symbols, meter gauges, pipeline
+  boxes, updatable arrows) backs all clips; filenames, the WebM/GIF variant
+  pipeline and the page embeds are unchanged.
 - `scripts/generate_graphs.py` renders the documentation figures on a
   process pool: each (figure, language, theme) combination is an independent
   task (spawned workers, language/theme applied per task), except the five

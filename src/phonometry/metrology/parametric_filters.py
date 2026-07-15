@@ -103,10 +103,15 @@ class WeightingFilter:
             # Normalize to 0 dB at 10 Hz.
             w = 2 * np.pi * 10.0
             k = 1.0 / np.abs(np.prod(1j * w - z) / np.prod(1j * w - p))
-            # G acts on 0.25 Hz - 315 Hz: the bilinear design is already
-            # exact there, so the high-accuracy oversampling used for A/C
-            # (whose action extends to 16 kHz) is unnecessary.
-            self._oversample = 1
+            # G acts on 0.25 Hz - 315 Hz, far below Nyquist at audio rates:
+            # the bilinear warping (no prewarping) is negligible there
+            # (~0.014% at 315 Hz for fs = 48 kHz, under 0.01 dB), so the
+            # high-accuracy oversampling used for A/C (whose action extends
+            # to 16 kHz) is unnecessary. At the low sample rates common for
+            # infrasound recordings, however, 315 Hz approaches Nyquist and
+            # the warping grows quadratically; oversample the design toward
+            # 48 kHz so the response stays within ~0.05 dB regardless of fs.
+            self._oversample = min(8, max(1, math.ceil(48000 / fs)))
         elif self.curve == "A":
             f2 = 107.65265
             f3 = 737.86223

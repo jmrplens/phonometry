@@ -88,3 +88,20 @@ def test_g_multichannel_and_stateful() -> None:
 def test_invalid_curve_message_mentions_g() -> None:
     with pytest.raises(ValueError, match="G"):
         WeightingFilter(FS, "Q")
+
+
+def test_g_weighting_consistent_at_low_sample_rates() -> None:
+    """The G response must not depend on fs: at low rates (infrasound
+    recorders) 315 Hz approaches Nyquist and the un-prewarped bilinear
+    design would otherwise warp; the fs-aware oversampling keeps every
+    rate within a few hundredths of a dB of the 48 kHz design."""
+    def gain_at(fs: int, freq: float) -> float:
+        t = np.arange(int(fs * 8)) / fs
+        x = np.sin(2 * np.pi * freq * t)
+        y = WeightingFilter(fs, "G").filter(x)
+        s = slice(int(fs * 2), int(fs * 7))
+        return float(20 * np.log10(np.std(y[s]) / np.std(x[s])))
+
+    reference = gain_at(48000, 315.0)
+    for fs in (2000, 4000, 8000):
+        assert gain_at(fs, 315.0) == pytest.approx(reference, abs=0.05)

@@ -543,6 +543,6 @@ and façade quantities, and service-equipment noise.
   source/receiving-room levels.
 - [Filter Banks](/phonometry/guides/filter-banks/) — the IEC 61260 fractional-octave filters
   used for the insulation spectra.
-- [Theory](/phonometry/reference/theory/) — the reference-curve derivation behind the
+- [Theory](/phonometry/reference/theory/rooms-buildings/) — the reference-curve derivation behind the
   weighted single-number ratings.
 - API reference: [`building.insulation`](/phonometry/reference/api/building/insulation/), [`building.survey_insulation`](/phonometry/reference/api/building/survey-insulation/) and [`building.building_uncertainty`](/phonometry/reference/api/building/building-uncertainty/).

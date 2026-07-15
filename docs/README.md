@@ -56,7 +56,12 @@ Full documentation for phonometry. Also available as a website:
 
 - [API Reference](api-reference.md) — curated quick table of every public function and class
 - [Generated API reference](https://jmrplens.github.io/phonometry/reference/api/) — one page per public module, generated from the source docstrings (`make api-docs`). English only; the Spanish site serves it via locale fallback
-- [Theory](theory.md) — standards, math and design decisions
+- [Theory](theory.md) — standards, math and design decisions, split by domain with an anchor map for old deep links
+  - [Signal analysis](theory-signal-analysis.md) — filter banks, weightings, time integration, level and exposure metrics, sound intensity, GUM uncertainty
+  - [Perception and hearing](theory-perception.md) — equal-loudness contours, loudness models, sound quality, tone prominence, STI/SII, hearing statistics
+  - [Rooms and buildings](theory-rooms-buildings.md) — room acoustics, noise criteria, insulation and ratings, flanking, scattering, materials
+  - [Environment and transport](theory-environment-transport.md) — environmental descriptors, impulsive adjustment, outdoor propagation, occupational exposure, sound power
+  - [Vibration](theory-vibration.md) — human vibration weightings and metrics, multiple-shock spinal model
 - [Why phonometry](why-phonometry.md) — IEC compliance vs other libraries
 - [Conformance report](CONFORMANCE.md) — auto-generated numerical validation: every check pins a standard clause's expected value against the library's computed value, regenerated in CI
 - [Standards errata](ERRATA.md) — defects found in the published standards themselves during implementation: misprints, examples contradicting their own normative text, ambiguous wording, each with evidence and the library's disposition

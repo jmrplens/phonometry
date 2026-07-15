@@ -144,7 +144,7 @@ print(ld, ld > fi.f2)                                      # 8.0 True (criterion
 | `limits` | list, optional | Hz | default library band range | Band analysis limits |
 | `bias_correct` | bool | — | default `False` | Apply the per-bin $(k\Delta r)/\sin(k\Delta r)$ correction (IEC 61043 §7.3) before summing, so band/broadband totals stop under-reading as $f \to$ `max_valid_frequency`; bins past the first null are left uncorrected. The per-band `bias_correction` factor is reported either way |
 
-See [Theory](/phonometry/reference/theory/) for the derivations and [Calibration](/phonometry/guides/calibration/)
+See [Theory](/phonometry/reference/theory/signal-analysis/) for the derivations and [Calibration](/phonometry/guides/calibration/)
 for absolute scaling of the two channels.
 
 ---

@@ -336,7 +336,7 @@ desglose apilado por bandas con el total superpuesto (la figura anterior).
 | `line_of_sight_clear` | bool | — | `False` | `True` ⇒ la línea de visión pasa por encima del borde superior: la diferencia de camino toma signo negativo y Kmet = 1 (texto tras la Ec. (16)) |
 
 La exactitud declarada del método es de $\pm 1$ a $\pm 3$ dB para ruido de banda
-ancha hasta 1000 m (Tabla 5). Consulta la página de [Teoría](/phonometry/es/reference/theory/)
+ancha hasta 1000 m (Tabla 5). Consulta la página de [Teoría](/phonometry/es/reference/theory/environment-transport/)
 para la derivación completa, la [guía de Acústica de salas](/phonometry/es/guides/room-acoustics/)
 para cómo $\alpha$ alimenta la ISO 354, y la
 [guía de exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/)

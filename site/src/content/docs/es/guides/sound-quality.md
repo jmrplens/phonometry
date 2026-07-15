@@ -169,7 +169,7 @@ R(l50)), `specific_roughness` (R′(z), 53 bandas), `bark`, `centre_frequencies`
 Consulta [Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/)
 para los veredictos TNR/PR de ECMA-418-1, el
 [índice de transmisión del habla](/phonometry/es/guides/speech-transmission/)
-para el STI/STIPA, y [Teoría](/phonometry/es/reference/theory/) para la
+para el STI/STIPA, y [Teoría](/phonometry/es/reference/theory/perception/) para la
 matemática subyacente.
 
 ---

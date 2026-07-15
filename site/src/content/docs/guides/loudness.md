@@ -370,5 +370,5 @@ Sottek Hearing Model)* — the Sottek Hearing Model loudness (sone_HMS).
   tonality and roughness, the other half of the sound-quality story.
 - [Psychoacoustic annoyance and fluctuation strength](/phonometry/guides/psychoacoustic-annoyance/):
   the Zwicker and Fastl model that consumes the percentile loudness N5.
-- [Theory](/phonometry/reference/theory/): the equations behind the loudness models.
+- [Theory](/phonometry/reference/theory/perception/): the equations behind the loudness models.
 - API reference: [`psychoacoustics.loudness_zwicker`](/phonometry/reference/api/psychoacoustics/loudness-zwicker/), [`psychoacoustics.loudness_moore_glasberg`](/phonometry/reference/api/psychoacoustics/loudness-moore-glasberg/) and [`psychoacoustics.loudness_contours`](/phonometry/reference/api/psychoacoustics/loudness-contours/).

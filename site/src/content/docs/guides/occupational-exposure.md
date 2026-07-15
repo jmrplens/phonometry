@@ -105,7 +105,7 @@ levels $L_{p,Cpeak}$ are reported **without** an uncertainty — Annex C gives n
 method for them (Table C.5, Note 1), so peak-uncertainty is out of scope. The
 three Annex D/E/F worked examples above are reproduced to the standard's printed
 precision (Annex E's final rounding is disclosed above), and the theory is
-derived on the [Theory](/phonometry/reference/theory/) page.
+derived on the [Theory](/phonometry/reference/theory/environment-transport/) page.
 
 ### `task_based_exposure()` / `job_based_exposure()` / `full_day_exposure()` parameters
 
@@ -133,7 +133,7 @@ carry no per-task breakdown).
   (IEC 61252) and the LCpeak these strategies report alongside.
 - [Measurement uncertainty](/phonometry/guides/gum-uncertainty/) — the GUM machinery behind
   combined and expanded uncertainties.
-- [Theory](/phonometry/reference/theory/) — the derivation of the strategy formulas and the
+- [Theory](/phonometry/reference/theory/environment-transport/) — the derivation of the strategy formulas and the
   Annex C budget.
 - API reference: [`hearing.occupational_exposure`](/phonometry/reference/api/hearing/occupational-exposure/).
 

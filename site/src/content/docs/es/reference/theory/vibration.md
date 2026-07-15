@@ -1,0 +1,73 @@
+---
+title: "Vibración"
+description: "Ponderaciones de vibración en humanos, métricas de cuerpo entero y mano-brazo y el modelo espinal de choques múltiples detrás de phonometry."
+---
+
+Esta página reúne la teoría de la vibración en humanos: las ponderaciones frecuenciales de ISO 8041-1, las métricas de cuerpo entero y mano-brazo de ISO 2631-1 e ISO 5349, los valores de acción y límite de la Directiva 2002/44/CE, y el modelo espinal de choques múltiples de ISO 2631-5. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).
+
+## Vibración en humanos (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directiva 2002/44/CE)
+
+La respuesta humana a la vibración depende de la frecuencia, el eje y la parte
+del cuerpo, así que la aceleración se filtra con las ponderaciones
+frecuenciales de ISO 8041-1:2017 antes de cualquier métrica. Cada ponderación
+es la cascada analógica $H(s) = H_h(s) H_l(s) H_t(s) H_s(s)$ (Fórmula 5):
+etapas Butterworth de dos polos de limitación de banda paso-alto y paso-bajo
+(Fórmulas 1/2), una transición aceleración–velocidad (Fórmula 3, que porta la
+única ganancia no unitaria, $K = 1{,}024$ para Wb) y un escalón ascendente
+(Fórmula 4), con las frecuencias de esquina y los factores Q de la Tabla 3;
+una esquina en infinito colapsa su etapa a la unidad (NOTAs de la Tabla 3). Wk
+(cuerpo completo vertical) y Wd (horizontal) de ISO 2631-1, Wm (edificios,
+ISO 2631-2), Wb (ferrocarril, ISO 2631-4), Wc/We/Wj (respaldo, rotacional,
+cabeza) y Wh (mano-brazo, ISO 5349-1) más Wf (mareo) están implementadas desde
+la cascada exacta — el filtro se aplica como la respuesta compleja exacta vía
+FFT (magnitud *y* fase), no como una aproximación digital deformada por la
+bilineal — y las tablas de objetivos de diseño del Anexo B de ISO 8041-1
+(B.1–B.9) se reproducen al 0,1 %.
+
+Las métricas ponderadas siguen ISO 2631-1:1997: rms móvil con integración
+lineal o exponencial (Ecs. 2/3), el **MTVV** como su máximo (Ec. 4), el
+**VDV** de cuarta potencia $= (\int a_w^4\, dt)^{1/4}$ en m/s^1,75 (Ec. 5), el
+factor de cresta con el método básico considerado adecuado hasta 9
+(cláusula 6.2) y el valor total de vibración
+$a_v = \sqrt{\sum_j k_j^2 a_{wj}^2}$ (Ec. 10). La exposición mano-brazo sigue
+ISO 5349-1:2001: $a_{hv}$ (Ec. 1, todos los $k = 1$), exposición diaria
+$A(8) = a_{hv} \sqrt{T/T_0}$ con $T_0 = 8$ h (Ec. 2), exposiciones parciales
+combinadas en cuadratura (ISO 5349-2:2001, Ecs. 1–3), y el modelo de riesgo
+vascular del Anexo C, $D_y = 31{,}8\ A(8)^{-1{,}06}$, para los años hasta una
+prevalencia del 10 % de dedo blanco. Los valores de acción y límite de la
+Directiva 2002/44/CE están incorporados: mano-brazo $A(8)$ 2,5/5,0 m/s²,
+cuerpo completo $A(8)$ 0,5/1,15 m/s² o VDV 9,1/21,0 m/s^1,75 (Artículo 3).
+Los ejemplos resueltos de ISO 5349-2 se reproducen (E.2.1: 7,4 m/s² durante
+2,5 h → $A(8) = 4{,}1$ m/s²; E.3 forestal, tres herramientas → 3,6 m/s²),
+igual que las filas de duración de exposición de la Tabla C.1 de ISO 5349-1.
+
+### Choques múltiples (ISO 2631-5)
+
+Los choques repetidos dañan la columna lumbar por la compresión de pico y no
+por la energía media, así que ISO 2631-5:2018 sustituye la ponderación Wk por
+la función de transferencia asiento-columna de la cláusula 5.2 (Fórmula 1: un
+cero complejo y seis pares de polos complejos, unidad en continua, resonancia
+cerca de 5 Hz — $|H| \approx 1{,}54$ a 5 Hz) y acumula los picos positivos de la
+respuesta espinal con una dosis de sexta potencia (Palmgren-Miner)
+(cláusula 5.3, Fórmulas 3/4):
+
+$$
+D_z = 1{,}07 \left( \sum_i A_{z,i}^6 \right)^{1/6}, \qquad
+D_{zd} = D_z\ (t_d / t_m)^{1/6}.
+$$
+
+El Anexo C convierte la dosis diaria en una tensión compresiva
+$S_d = m_z D_{zd}$ ($m_z = 0{,}029/0{,}025$ MPa por m/s² para el hombre de
+82 kg / la mujer de 64 kg), sigue la resistencia última decreciente con la
+edad $S_u = 6{,}75 - S_{age}(b + i)$ y forma la variable de tensión acumulada
+$R$ (Fórmulas C.3/C.4), llevada a una probabilidad de lesión por la ley de
+Weibull de la Tabla C.1, $\Pi = 1 - e^{-(R/\alpha)^\beta}$. El filtro espinal
+se evalúa analíticamente en el dominio de la frecuencia y se valida frente a
+la tabulación del filtro digital a 256 Hz del Anexo D dentro de la tolerancia
+de la cláusula 5.2; el ejemplo resuelto del Anexo C (cinco choques de 40 m/s²
+al día durante 20 años) se reproduce: $D_{zd} = 55{,}97$ m/s², $R = 1{,}22$,
+$\Pi = 0{,}37$. El modelo espinal de elementos finitos del Anexo A
+(distribuido por ISO como software aparte) queda fuera de alcance.
+
+Consulta la [guía de vibración en humanos](/phonometry/es/guides/human-vibration/) y la
+[guía de vibración con choques múltiples](/phonometry/es/guides/multiple-shock-vibration/) para su uso.

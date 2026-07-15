@@ -60,7 +60,7 @@ C is a band-pass with double poles at $f_1$ and $f_4$ (2 zeros at the origin);
 A adds the $f_2$ and $f_3$ poles (4 zeros), which is why it keeps falling
 through the low-mids. Both are normalized to exactly 0 dB at 1 kHz. Z is the
 absence of weighting. The full pole/zero derivation is in the
-[Theory](/phonometry/reference/theory/) page.
+[Theory](/phonometry/reference/theory/signal-analysis/) page.
 
 ## 2. Basic usage
 
@@ -234,7 +234,7 @@ for block in blocks:
 ```
 
 See [Block Processing](/phonometry/guides/block-processing/) for the streaming workflow and
-[Theory](/phonometry/reference/theory/) for the analytic curve definitions.
+[Theory](/phonometry/reference/theory/signal-analysis/) for the analytic curve definitions.
 
 ## 7. Verifying the IEC 61672-1 class
 

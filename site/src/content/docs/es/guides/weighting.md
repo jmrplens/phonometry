@@ -60,7 +60,7 @@ C es un paso-banda con polos dobles en $f_1$ y $f_4$ (2 ceros en el origen);
 A añade los polos $f_2$ y $f_3$ (4 ceros), y por eso sigue cayendo en los
 medios-graves. Ambas se normalizan a exactamente 0 dB en 1 kHz. Z es la
 ausencia de ponderación. La derivación completa de polos y ceros está en la
-página de [Teoría](/phonometry/es/reference/theory/).
+página de [Teoría](/phonometry/es/reference/theory/signal-analysis/).
 
 ## 2. Uso básico
 
@@ -235,7 +235,7 @@ for block in blocks:
 ```
 
 Consulta [Procesado por bloques](/phonometry/es/guides/block-processing/) para
-el flujo en streaming y [Teoría](/phonometry/es/reference/theory/) para las
+el flujo en streaming y [Teoría](/phonometry/es/reference/theory/signal-analysis/) para las
 definiciones analíticas de las curvas.
 
 ## 7. Verificación de la clase IEC 61672-1

@@ -6871,8 +6871,12 @@ def _generate_figures_parallel(
     # failures from tasks that were still running when wait() returned on
     # the first exception.
     failures: list[str] = []
+    cancelled = 0
     for future, (name, variants) in futures.items():
-        if not future.cancelled() and (exc := future.exception()) is not None:
+        if future.cancelled():
+            cancelled += 1
+            continue
+        if (exc := future.exception()) is not None:
             labels = ", ".join(
                 f"{lang} {'dark' if dark else 'light'}" for lang, dark in variants
             )
@@ -6884,7 +6888,12 @@ def _generate_figures_parallel(
                 detail += f"\n{exc.__cause__}"
             failures.append(f"{name} [{labels}]: {detail}")
     if failures:
-        raise RuntimeError("figure generation failed:\n  " + "\n  ".join(sorted(failures)))
+        skipped = (
+            f"\n  ({cancelled} queued tasks cancelled, not attempted)" if cancelled else ""
+        )
+        raise RuntimeError(
+            "figure generation failed:\n  " + "\n  ".join(sorted(failures)) + skipped
+        )
 
 
 def _select_figures(names: list[str] | None) -> list[Callable[[str], None]]:

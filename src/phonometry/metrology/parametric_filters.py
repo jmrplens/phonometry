@@ -103,9 +103,11 @@ class WeightingFilter:
             # Normalize to 0 dB at 10 Hz.
             w = 2 * np.pi * 10.0
             k = 1.0 / np.abs(np.prod(1j * w - z) / np.prod(1j * w - p))
-            # G acts on 0.25 Hz - 315 Hz: the bilinear design is already
-            # exact there, so the high-accuracy oversampling used for A/C
-            # (whose action extends to 16 kHz) is unnecessary.
+            # G acts on 0.25 Hz - 315 Hz, far below Nyquist at audio rates:
+            # the bilinear warping (no prewarping) is negligible there
+            # (~0.014% at 315 Hz for fs = 48 kHz, under 0.01 dB), so the
+            # high-accuracy oversampling used for A/C (whose action extends
+            # to 16 kHz) is unnecessary.
             self._oversample = 1
         elif self.curve == "A":
             f2 = 107.65265

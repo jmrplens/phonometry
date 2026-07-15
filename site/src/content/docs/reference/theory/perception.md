@@ -58,17 +58,17 @@ The ear analyzes sound in **critical bands**: frequency regions within which ene
 3. **a0 transmission** — the outer/middle-ear transfer correction of Table A.4 (plus the diffuse-field difference of Table A.5 when `field='diffuse'`) yields the critical-band levels $L_E$.
 4. **Core loudness** — each of the 20 critical bands is transformed with the threshold-in-quiet levels $L_{TQ}$ of Table A.6 (after the bandwidth adaptation DCB of Table A.7):
 
-$$
-N_c = 0.0635 \cdot 10^{0.025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0.25} - 1 \right] \ \text{sone/Bark}, \qquad s = 0.25
-$$
+   $$
+   N_c = 0.0635 \cdot 10^{0.025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0.25} - 1 \right] \ \text{sone/Bark}, \qquad s = 0.25
+   $$
 
-(the reference program's form of Zwicker's loudness transformation; bands below threshold contribute zero).
+   (the reference program's form of Zwicker's loudness transformation; bands below threshold contribute zero).
 
 5. **Slopes** — level-dependent upper masking slopes (steepness per specific-loudness range and critical band, Tables A.8/A.9) attach decaying flanks toward higher $z$; the total loudness is the area under the pattern:
 
-$$
-N = \int_0^{24} N'(z)\ dz \ \ \text{sone}
-$$
+   $$
+   N = \int_0^{24} N'(z)\ dz \ \ \text{sone}
+   $$
 
 For time-varying sounds a nonlinear temporal decay (time constants 5/15/75 ms, clause 6.3) and the duration-dependent weighting of the total loudness (3.5 ms and 70 ms low-passes weighted 0.47/0.53, clause 6.4) precede the 500 Hz loudness-vs-time output and the percentile values N5/N10 (clause 6.5).
 

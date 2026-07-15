@@ -24,7 +24,7 @@ $$
 **Bordes de banda:**
 
 $$
-f_1 = f_m \cdot G^{-1/2b}, \quad f_2 = f_m \cdot G^{1/2b}
+f_1 = f_m \cdot G^{-1/(2b)}, \quad f_2 = f_m \cdot G^{1/(2b)}
 $$
 
 ## Resolución frecuencial vs separación de bins FFT
@@ -245,7 +245,7 @@ $$
 
 Los cuatro ceros frente a ocho polos dan forma a la respuesta característica: una subida de aproximadamente **+12 dB/octava entre 1 Hz y 20 Hz**, con caídas de aproximadamente **24 dB/octava** por debajo de 1 Hz y por encima de 20 Hz. Los infrasonidos necesitan su propia curva porque, cerca del umbral de audición, la sonoridad percibida de los tonos de muy baja frecuencia crece con el nivel de presión sonora mucho más abruptamente que a frecuencias medias — un pequeño incremento en dB sobre el umbral produce un gran salto de sonoridad —, de modo que la curva A (anclada en 1 kHz) distorsiona por completo la molestia infrasónica.
 
-Como G actúa sobre 0,25 Hz – 315 Hz, la transformación bilineal simple ya es exacta en ese rango, y no se aplica el sobremuestreo interno usado en los diseños A/C (cuya acción se extiende hasta 16 kHz).
+Como G actúa sobre 0,25 Hz – 315 Hz, muy por debajo de la frecuencia de Nyquist a tasas de audio, la deformación en frecuencia de la transformación bilineal simple (aplicada sin precompensación) es despreciable en ese rango: en torno al 0,014 % a 315 Hz con $f_s = 48$ kHz, menos de 0,01 dB en la respuesta. Por eso no se aplica el sobremuestreo interno usado en los diseños A/C (cuya acción se extiende hasta 16 kHz).
 
 Consulta la [guía de ponderación frecuencial](/phonometry/es/guides/weighting/) para su uso.
 

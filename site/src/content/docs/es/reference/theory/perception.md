@@ -58,17 +58,17 @@ El oído analiza el sonido en **bandas críticas**: regiones de frecuencia dentr
 3. **Transmisión a0** — la corrección de transferencia del oído externo/medio de la Tabla A.4 (más la diferencia de campo difuso de la Tabla A.5 con `field='diffuse'`) produce los niveles de banda crítica $L_E$.
 4. **Sonoridad núcleo** — cada una de las 20 bandas críticas se transforma con los niveles de umbral en silencio $L_{TQ}$ de la Tabla A.6 (tras la adaptación de ancho de banda DCB de la Tabla A.7):
 
-$$
-N_c = 0{,}0635 \cdot 10^{0{,}025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0{,}25} - 1 \right] \ \text{sonos/Bark}, \qquad s = 0{,}25
-$$
+   $$
+   N_c = 0{,}0635 \cdot 10^{0{,}025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0{,}25} - 1 \right] \ \text{sonos/Bark}, \qquad s = 0{,}25
+   $$
 
-(la forma que da el programa de referencia a la transformación de sonoridad de Zwicker; las bandas por debajo del umbral aportan cero).
+   (la forma que da el programa de referencia a la transformación de sonoridad de Zwicker; las bandas por debajo del umbral aportan cero).
 
 5. **Pendientes** — las pendientes superiores de enmascaramiento dependientes del nivel (inclinación por rango de sonoridad específica y banda crítica, Tablas A.8/A.9) añaden flancos decrecientes hacia $z$ mayores; la sonoridad total es el área bajo el patrón:
 
-$$
-N = \int_0^{24} N'(z)\ dz \ \ \text{sonos}
-$$
+   $$
+   N = \int_0^{24} N'(z)\ dz \ \ \text{sonos}
+   $$
 
 Para sonidos variables en el tiempo, un decaimiento temporal no lineal (constantes de tiempo 5/15/75 ms, cláusula 6.3) y la ponderación dependiente de la duración de la sonoridad total (paso-bajos de 3,5 ms y 70 ms ponderados 0,47/0,53, cláusula 6.4) preceden a la salida de sonoridad frente al tiempo a 500 Hz y a los percentiles N5/N10 (cláusula 6.5).
 
@@ -195,7 +195,7 @@ Consulta la [guía del índice de transmisión del habla](/phonometry/es/guides/
 
 ## Índice de inteligibilidad del habla (ANSI S3.5)
 
-Mientras el STI caracteriza un canal de transmisión, el SII (ANSI S3.5-1997) predice la inteligibilidad a partir de lo que el oyente puede oír realmente: 18 bandas de tercio de octava de 160 Hz a 8 kHz, cada una con su importancia de banda $I_i$ (Tabla 3, $\sum I_i = 1$, con máximo cerca de 2 kHz). Todas las entradas son niveles espectrales equivalentes (cláusulas 3.11/3.55). El habla se enmascara a sí misma hacia arriba: el espectro de enmascaramiento de cada banda $Z_i$ (cláusula 5.4) acumula las bandas inferiores con pendientes $C_i = -80 + 0{,}6\,(B_i + 10 \lg f_i - 6{,}353)$ dB, y la perturbación es la suma energética del enmascaramiento y del suelo auditivo, $D_i = 10 \lg(10^{0{,}1 Z_i} + 10^{0{,}1 X'_i})$ con $X'_i = X_i + T'_i$ el espectro de ruido interno de referencia más el desplazamiento del umbral de audición del oyente (cláusulas 5.5/5.6). La audibilidad de banda recorta el margen habla-perturbación al intervalo $[0, 1]$ (cláusula 5.8), un factor de distorsión de nivel descuenta la presentación excesivamente alta (cláusula 5.7), y el índice suma (cláusula 6):
+Mientras el STI caracteriza un canal de transmisión, el SII (ANSI S3.5-1997) predice la inteligibilidad a partir de lo que el oyente puede oír realmente: 18 bandas de tercio de octava de 160 Hz a 8 kHz, cada una con su importancia de banda $I_i$ (Tabla 3, $\sum I_i = 1$, con máximo cerca de 2 kHz). Todas las entradas son niveles espectrales equivalentes (cláusulas 3.11/3.55). El habla se enmascara a sí misma hacia arriba: el espectro de enmascaramiento de cada banda $Z_i$ (cláusula 5.4) acumula las bandas inferiores con pendientes $C_i = -80 + 0{,}6\,(B_i + 10 \lg f_i - 6{,}353)$ dB, y la perturbación es el **mayor** entre el enmascaramiento y el suelo auditivo, $D_i = \max(Z_i, X'_i)$ (cláusula 5.6), con $X'_i = X_i + T'_i$ el espectro de ruido interno de referencia más el desplazamiento del umbral de audición del oyente (cláusulas 5.5/5.6). La audibilidad de banda recorta el margen habla-perturbación al intervalo $[0, 1]$ (cláusula 5.8), un factor de distorsión de nivel descuenta la presentación excesivamente alta (cláusula 5.7), y el índice suma (cláusula 6):
 
 $$
 A_i = \operatorname{clip}\Big( \frac{E'_i - D_i + 15}{30},\ 0,\ 1 \Big), \qquad

@@ -224,7 +224,11 @@ def rest_roles_to_links(
         tilde, name, explicit = match.group(1), match.group(2), match.group(3)
         # Role targets wrapped across source lines contain interior whitespace.
         target_name = re.sub(r"\s+", "", explicit or name)
-        display = re.sub(r"\s+", "", name)
+        if explicit:
+            # ":role:`display <target>`" form: keep the display wording.
+            display = re.sub(r"\s+", " ", name).strip()
+        else:
+            display = re.sub(r"\s+", "", name)
         if tilde:
             display = display.rsplit(".", 1)[-1]
         url = lookup(target_name)
@@ -352,10 +356,20 @@ def render_prose(text: str, xref: dict[str, str], stats: RoleStats) -> str:
     return re.sub(r"\n{3,}", "\n\n", text).strip("\n")
 
 
-def render_cell(text: str, xref: dict[str, str], stats: RoleStats) -> str:
-    """Inline reST -> Markdown for a table cell (single line, pipes escaped)."""
+def render_inline(text: str, xref: dict[str, str], stats: RoleStats) -> str:
+    """Inline reST -> Markdown collapsed to a single line (no pipe escaping)."""
     rendered = _inline_markdown(text, xref, stats)
-    return rendered.replace("\n", " ").replace("|", "\\|").strip()
+    return rendered.replace("\n", " ").strip()
+
+
+def render_cell(text: str, xref: dict[str, str], stats: RoleStats) -> str:
+    """Inline reST -> Markdown for a table cell (single line, pipes escaped).
+
+    The ``|`` escape is GFM table syntax: it is decoded back to a literal
+    pipe only inside a table row, so it must never be applied to prose
+    outside a table (a code span there would show the backslash literally).
+    """
+    return render_inline(text, xref, stats).replace("|", "\\|")
 
 
 # --------------------------------------------------------------------------
@@ -880,9 +894,9 @@ def _render_docbody(
     out.extend(_field_table("Attributes", ("Name", "Description"), ivars))
 
     if parsed.returns:
-        returns = render_cell(parsed.returns, xref, stats)
+        returns = render_inline(parsed.returns, xref, stats)
         if parsed.rtype:
-            rtype = render_cell(parsed.rtype, xref, stats)
+            rtype = render_inline(parsed.rtype, xref, stats)
             returns = f"{returns} (*{rtype}*)" if returns else f"*{rtype}*"
         out.extend([f"**Returns:** {returns}", ""])
 
@@ -1037,11 +1051,16 @@ def render_index(
             ]
         )
         for page in by_section[section.key]:
-            summary = next(
-                (line for line in page.intro.splitlines() if line.strip()), ""
+            # First sentence of the first paragraph (an opening sentence may
+            # wrap across several physical source lines).
+            paragraph = (
+                page.intro.strip().split("\n\n", 1)[0].replace("\n", " ")
             )
-            # First sentence only: module docstrings open with a one-liner.
-            summary = summary.split(". ", 1)[0].rstrip(".") + "." if summary else ""
+            summary = (
+                paragraph.split(". ", 1)[0].rstrip(".") + "."
+                if paragraph
+                else ""
+            )
             cell = render_cell(summary, xref, stats)
             out.append(f"| [`{page.title}`]({page.url}) | {cell} |")
         out.append("")

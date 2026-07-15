@@ -133,7 +133,7 @@ unsigned area sum.
 | `l_in` | Per-subarea intensity levels as a `(subareas, bands)` array (one row per subarea), in dB (magnitude of the intensity). |
 | `measurement_area` | Subarea areas `Smi`, in m² (one per row). Negative values mark reverse-flow subareas per Clause 6.4.6; zero is invalid. |
 
-**Returns:** A tuple `(LIn, Sm)` with the combined level per band, in dB, and the total measured area `Sm = sum \|Smi\|`, in m².
+**Returns:** A tuple `(LIn, Sm)` with the combined level per band, in dB, and the total measured area `Sm = sum |Smi|`, in m².
 
 **Raises**
 

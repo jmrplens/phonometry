@@ -506,7 +506,7 @@ Reflection magnitude from the standing-wave ratio (ISO 10534-1, Eq. (14)).
 | :--- | :--- |
 | `swr` | Standing-wave ratio `s` (>= 1). |
 
-**Returns:** Reflection magnitude `\|r\|` in `[0, 1]`.
+**Returns:** Reflection magnitude `|r|` in `[0, 1]`.
 
 ## surface_impedance
 

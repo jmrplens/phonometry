@@ -62,7 +62,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 
 | Module | Summary |
 | :--- | :--- |
-| [`hearing.threshold`](/phonometry/reference/api/hearing/threshold/) | Age-related hearing threshold (ISO 7029:2017) and audiometric reference zero. |
+| [`hearing.threshold`](/phonometry/reference/api/hearing/threshold/) | Age-related hearing threshold (ISO 7029:2017) and audiometric reference zero (ISO 389-7:2006). |
 | [`hearing.noise_induced_hearing_loss`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/) | Estimation of noise-induced hearing loss (ISO 1999:2013). |
 | [`hearing.occupational_exposure`](/phonometry/reference/api/hearing/occupational-exposure/) | Occupational noise exposure — measurement strategies and uncertainty (ISO 9612:2009). |
 
@@ -70,7 +70,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 
 | Module | Summary |
 | :--- | :--- |
-| [`room.room_acoustics`](/phonometry/reference/api/rooms/room-acoustics/) | Room acoustic parameters from impulse responses per ISO 3382-1:2009. |
+| [`room.room_acoustics`](/phonometry/reference/api/rooms/room-acoustics/) | Room acoustic parameters from impulse responses per ISO 3382-1:2009 (performance spaces) and ISO 3382-2:2008 (ordinary rooms). |
 | [`room.room_ir`](/phonometry/reference/api/rooms/room-ir/) | Impulse-response acquisition per BS EN ISO 18233:2006. |
 | [`room.room_noise`](/phonometry/reference/api/rooms/room-noise/) | Room-noise rating curves per ANSI/ASA S12.2-2019. |
 | [`room.open_plan`](/phonometry/reference/api/rooms/open-plan/) | Open-plan-office spatial metrics per ISO 3382-3:2012. |
@@ -81,9 +81,9 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 
 | Module | Summary |
 | :--- | :--- |
-| [`building.insulation`](/phonometry/reference/api/building/insulation/) | Field airborne sound insulation (ISO 16283-1:2014) and impact sound. |
+| [`building.insulation`](/phonometry/reference/api/building/insulation/) | Field airborne sound insulation (ISO 16283-1:2014) and impact sound insulation (ISO 16283-2), with single-number weighted ratings and spectrum adaptation terms (ISO 717-1 airborne, ISO 717-2 impact). |
 | [`building.lab_insulation`](/phonometry/reference/api/building/lab-insulation/) | Laboratory sound insulation of building elements (ISO 10140). |
-| [`building.survey_insulation`](/phonometry/reference/api/building/survey-insulation/) | Field survey method for sound insulation and service-equipment noise. |
+| [`building.survey_insulation`](/phonometry/reference/api/building/survey-insulation/) | Field survey method for sound insulation and service-equipment noise (ISO 10052:2021). |
 | [`building.intensity_insulation`](/phonometry/reference/api/building/intensity-insulation/) | Sound insulation measured with sound intensity (ISO 15186). |
 | [`building.flanking_transmission`](/phonometry/reference/api/building/flanking-transmission/) | Laboratory measurement of flanking sound transmission (ISO 10848:2006/2010). |
 | [`building.facade_prediction`](/phonometry/reference/api/building/facade-prediction/) | Façade sound insulation and outdoor radiation prediction (EN 12354-3/-4:2000). |
@@ -154,10 +154,10 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 
 | Module | Summary |
 | :--- | :--- |
-| [`emission.sound_power`](/phonometry/reference/api/power/sound-power/) | Sound power level of a noise source from sound pressure measurements over an. |
-| [`emission.sound_power_intensity`](/phonometry/reference/api/power/sound-power-intensity/) | Sound power level of a noise source by sound-intensity **scanning**:. |
-| [`emission.sound_power_reverberation`](/phonometry/reference/api/power/sound-power-reverberation/) | Sound power level of a noise source measured in a reverberation test room:. |
-| [`emission.intensity`](/phonometry/reference/api/power/intensity/) | Two-microphone (p-p) sound intensity per IEC 61043:1994 and the. |
+| [`emission.sound_power`](/phonometry/reference/api/power/sound-power/) | Sound power level of a noise source from sound pressure measurements over an enveloping measurement surface: ISO 3744:2010 (engineering, accuracy grade 2) and ISO 3746:2010 (survey, accuracy grade 3). |
+| [`emission.sound_power_intensity`](/phonometry/reference/api/power/sound-power-intensity/) | Sound power level of a noise source by sound-intensity **scanning**: ISO 9614-2:1996 (engineering, grade 2; survey/control, grade 3). |
+| [`emission.sound_power_reverberation`](/phonometry/reference/api/power/sound-power-reverberation/) | Sound power level of a noise source measured in a reverberation test room: ISO 3741:2010 (precision method, accuracy grade 1). |
+| [`emission.intensity`](/phonometry/reference/api/power/intensity/) | Two-microphone (p-p) sound intensity per IEC 61043:1994 and the ISO 9614-1:1993 field indicators. |
 | [`emission.vibration_sound_power`](/phonometry/reference/api/power/vibration-sound-power/) | Airborne sound power from surface vibration (ISO/TS 7849-1/-2:2009). |
 
 ## Electroacoustics

@@ -283,7 +283,7 @@ references makes the constant `(1e-9/1e-6)**2 = 1e-6`.
 | `free_velocity_level` | Equivalent free velocity level `L_vf,eq` (per band), in dB re 1e-9 m/s (Formula 10 or 18). |
 | `blocked_force_level` | Equivalent blocked force level `L_Fb,eq` (per band), in dB re 1e-6 N (Formula 15). |
 
-**Returns:** The source mobility magnitude `\|Y_S,eq\|`, in m/(N.s).
+**Returns:** The source mobility magnitude `|Y_S,eq|`, in m/(N.s).
 
 ## spatial_mean_velocity_level
 

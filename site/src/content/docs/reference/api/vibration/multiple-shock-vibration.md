@@ -1,0 +1,374 @@
+---
+title: "vibration.multiple_shock_vibration"
+description: "Public API of phonometry.vibration.multiple_shock_vibration (auto-generated)."
+sidebar:
+  label: "multiple_shock_vibration"
+---
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+Whole-body vibration containing multiple shocks (ISO 2631-5:2018).
+
+Implements the normative Clause 5 spinal-response model and the Annex C
+assessment of adverse health effects for the vertical (`z`) axis.
+
+A seat-to-spine transfer function `H(w)` (clause 5.2, Formula 1) maps the
+measured seat acceleration `az(t)` to the spinal response acceleration
+`Az(t) = F^-1[H(w) * F[az(t)]]` (Formula 2). The standard assumes a
+*conditioned* input: `H` has unity transmissibility at 0 Hz, so any DC
+offset in the record (e.g. the gravity component of a non-AC-coupled
+accelerometer) passes straight into `Az(t)` and corrupts the response
+peaks — remove the mean (high-pass) before processing. The acceleration
+dose is
+`Dz = 1.07 * (sum_i Az,i**6)**(1/6)` over the positive response peaks
+(Formula 3), scaled to a daily dose `Dzd = Dz * (td/tm)**(1/6)` (Formula 4/5).
+
+Annex C turns the daily dose into an injury risk: the daily compressive stress
+`Sd = mz * Dzd` (Formula C.1), the age-cumulated stress variable
+`R = [sum_i (Sd * N**(1/6) / (Su,i - Sstat))**6]**(1/6)` (Formulae C.3/C.4)
+and the Weibull probability of lumbar injury `P = 1 - exp(-(R/alpha)**beta)`
+(Formula C.5, Table C.1).
+
+The Annex A / Annex E model (intervertebral compressive forces via a
+finite-element model distributed by ISO) is not reproducible from the standard
+text and is out of scope.
+
+## acceleration_dose
+
+```python
+acceleration_dose(acceleration: ArrayLike, fs: float) -> float
+```
+
+Acceleration dose `Dz` from a seat acceleration time history.
+
+Filters the acceleration through the seat-to-spine transfer function
+(Formula 2), takes the positive response peaks and combines them by
+Formula 3. The input must be conditioned (DC-removed); see
+[`spinal_response`](/phonometry/reference/api/vibration/multiple-shock-vibration/#spinal_response).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `acceleration` | Measured, conditioned (zero-mean) vertical seat acceleration `az(t)`, m/s2. |
+| `fs` | Sampling frequency, in hertz. |
+
+**Returns:** The acceleration dose `Dz`, m/s2.
+
+## compression_dose
+
+```python
+compression_dose(daily_dose_value: float, *, mz: float = 0.029) -> float
+```
+
+Daily compressive stress `Sd` (Annex C, Formula C.1).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `daily_dose_value` | The daily acceleration dose `Dzd`, m/s2. |
+| `mz` | Stress conversion `mz` (MPa per m/s2); default the 82 kg male value `MZ_MALE`. See `MZ_FEMALE`. |
+
+**Returns:** The daily compressive stress `Sd = mz * Dzd`, MPa.
+
+## daily_dose
+
+```python
+daily_dose(
+    dose: float,
+    exposure_time: float,
+    measurement_time: float,
+) -> float
+```
+
+Daily acceleration dose `Dzd` (clause 5.3, Formula 4).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `dose` | The measured acceleration dose `Dz`, m/s2. |
+| `exposure_time` | Daily exposure period `td` (any time unit). |
+| `measurement_time` | Period `tm` over which `Dz` was measured (same unit as `exposure_time`). |
+
+**Returns:** The daily dose `Dzd = Dz * (td/tm)**(1/6)`, m/s2.
+
+## daily_dose_multi
+
+```python
+daily_dose_multi(
+    doses: ArrayLike,
+    exposure_times: ArrayLike,
+    measurement_times: ArrayLike,
+) -> float
+```
+
+Daily dose from several exposure conditions (clause 5.3, Formula 5).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `doses` | Acceleration dose `Dz,j` of each condition, m/s2. |
+| `exposure_times` | Daily exposure duration `td,j` of each condition. |
+| `measurement_times` | Measurement duration `tm,j` of each condition. |
+
+**Returns:** The combined daily dose `Dzd = [sum_j Dz,j**6 * (td,j/tm,j)]**(1/6)`, m/s2.
+
+## dose_from_peaks
+
+```python
+dose_from_peaks(peaks: ArrayLike) -> float
+```
+
+Acceleration dose `Dz` from response peaks (clause 5.3, Formula 3).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `peaks` | The positive response peaks `Az,i`, m/s2. |
+
+**Returns:** The acceleration dose `Dz = 1.07 * (sum Az,i**6)**(1/6)`, m/s2.
+
+## injury_probability
+
+```python
+injury_probability(
+    risk: ArrayLike,
+    *,
+    sex: Literal['male', 'female'] = 'male',
+) -> np.ndarray | float
+```
+
+Probability of lumbar injury `P(R)` (Annex C, Formula C.5).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `risk` | The stress variable `R` (see [`injury_risk`](/phonometry/reference/api/vibration/multiple-shock-vibration/#injury_risk)); scalar or array-like. |
+| `sex` | `"male"` or `"female"` (sets the Weibull coefficients). |
+
+**Returns:** The injury probability `P = 1 - exp(-(R/alpha)**beta)` in 0-1; a float for a scalar input, otherwise an array. Negative `R` gives 0.
+
+## injury_risk
+
+```python
+injury_risk(
+    daily_compression: float,
+    *,
+    start_age: float,
+    years: int,
+    days_per_year: float,
+    sex: Literal['male', 'female'] = 'male',
+    mz: float | None = None,
+) -> float
+```
+
+Cumulative injury stress variable `R` (Annex C, Formula C.3).
+
+Accumulates the daily compressive stress over the exposure years, each year
+weighted by the reducing ultimate strength of the ageing spine.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `daily_compression` | The daily compressive stress `Sd`, MPa. |
+| `start_age` | Age `b` at which the exposure started, in years. |
+| `years` | Number of exposure years `n`. |
+| `days_per_year` | Number of exposure days per year `N`. |
+| `sex` | `"male"` or `"female"`. |
+| `mz` | Stress conversion for the static stress `Sstat = mz*9.81`; defaults to the sex-specific value. |
+
+**Returns:** The stress variable `R`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | if `years` is not positive or the spine strength is exhausted (`Su - Sstat <= 0`) within the exposure period. |
+
+## multiple_shock_assessment
+
+```python
+multiple_shock_assessment(
+    acceleration: ArrayLike,
+    fs: float,
+    *,
+    start_age: float,
+    years: int,
+    days_per_year: float,
+    exposure_time: float | None = None,
+    measurement_time: float | None = None,
+    sex: Literal['male', 'female'] = 'male',
+    mz: float | None = None,
+) -> MultipleShockResult
+```
+
+Full multiple-shock assessment from a seat acceleration time history.
+
+Chains the Clause 5 dose and the Annex C risk: spinal response (Formula 2),
+acceleration dose (Formula 3), daily dose (Formula 4), compressive stress
+(C.1), stress variable `R` (C.3) and injury probability (C.5). The input
+must be conditioned (DC-removed); see [`spinal_response`](/phonometry/reference/api/vibration/multiple-shock-vibration/#spinal_response).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `acceleration` | Measured, conditioned (zero-mean) vertical seat acceleration `az(t)`, m/s2. |
+| `fs` | Sampling frequency, in hertz. |
+| `start_age` | Age `b` at which the exposure started, in years. |
+| `years` | Number of exposure years `n`. |
+| `days_per_year` | Number of exposure days per year `N`. |
+| `exposure_time` | Daily exposure period `td`; when given with `measurement_time` the dose is scaled to a daily dose (Formula 4), otherwise the measured dose is taken as the daily dose. |
+| `measurement_time` | Period `tm` over which the record was measured. |
+| `sex` | `"male"` or `"female"`. |
+| `mz` | Stress conversion `mz` (MPa per m/s2); defaults to the sex-specific value. |
+
+**Returns:** The [`MultipleShockResult`](/phonometry/reference/api/vibration/multiple-shock-vibration/#multipleshockresult).
+
+## MultipleShockResult
+
+```python
+MultipleShockResult(
+    sex: Literal['male', 'female'],
+    acceleration_dose: float,
+    daily_dose: float,
+    compression_dose: float,
+    risk: float,
+    probability: float,
+    start_age: float,
+    years: int,
+    days_per_year: float,
+    peaks: np.ndarray,
+    risk_thresholds: tuple[float, float, float],
+)
+```
+
+Multiple-shock health assessment (ISO 2631-5:2018, Clause 5 + Annex C).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `sex` | `"male"` or `"female"`. |
+| `acceleration_dose` | The acceleration dose `Dz`, m/s2. |
+| `daily_dose` | The daily acceleration dose `Dzd`, m/s2. |
+| `compression_dose` | The daily compressive stress `Sd`, MPa. |
+| `risk` | The cumulative stress variable `R`. |
+| `probability` | The probability of lumbar injury `P(R)` in 0-1. |
+| `start_age` | Age at which the exposure started, in years. |
+| `years` | Number of exposure years. |
+| `days_per_year` | Number of exposure days per year. |
+| `peaks` | The positive response peaks `Az,i` used for the dose, m/s2. |
+| `risk_thresholds` | The `R` values for 10 %, 50 % and 90 % risk of injury for this sex (Table C.2). |
+
+### MultipleShockResult.plot()
+
+```python
+MultipleShockResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the injury-probability curve with this assessment's `R`.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+## response_peaks
+
+```python
+response_peaks(response: ArrayLike) -> np.ndarray
+```
+
+Positive response peaks `Az,i` (clause 5.3).
+
+A peak is the maximum value of the response between two consecutive zero
+crossings; only positive peaks are counted.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `response` | The spinal response acceleration `Az(t)`. |
+
+**Returns:** The positive peak values, in the order they occur.
+
+## seat_to_spine_transfer
+
+```python
+seat_to_spine_transfer(frequencies: ArrayLike) -> np.ndarray
+```
+
+Seat-to-spine transfer function `H(w)` (clause 5.2, Formula 1).
+
+A single complex zero and six complex poles map the seat acceleration to
+the vertical spinal response; the transmissibility is unity at 0 Hz.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | Frequencies at which to evaluate `H`, in hertz. |
+
+**Returns:** The complex frequency response, aligned with `frequencies`.
+
+## spinal_response
+
+```python
+spinal_response(acceleration: ArrayLike, fs: float) -> np.ndarray
+```
+
+Vertical spinal response `Az(t)` (clause 5.2, Formula 2).
+
+Applies the seat-to-spine transfer function to the measured conditioned
+seat acceleration in the frequency domain and returns the time-domain
+response by the inverse transform.
+
+The input must be **conditioned (DC-removed)**: the transfer function is
+unity at 0 Hz by design (clause 5.2), so a DC offset — e.g. the 1 g
+gravity component of a DC-coupled accelerometer — is passed unattenuated
+and produces a spurious constant shift in `Az(t)` that corrupts the
+positive response peaks of the dose. Subtract the mean (or high-pass) of
+`az(t)` before calling.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `acceleration` | Measured, conditioned (zero-mean) vertical seat acceleration `az(t)`, m/s2. |
+| `fs` | Sampling frequency, in hertz. |
+
+**Returns:** The spinal response acceleration `Az(t)`, m/s2, same length.
+
+## static_stress
+
+```python
+static_stress(mz: float = 0.029) -> float
+```
+
+Static compressive stress `Sstat = mz * 9.81` (Annex C), MPa.
+
+## ultimate_strength
+
+```python
+ultimate_strength(
+    age: ArrayLike,
+    *,
+    sex: Literal['male', 'female'] = 'male',
+) -> np.ndarray
+```
+
+Ultimate lumbar strength `Su` at an age (Annex C, Formula C.4).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `age` | Age `b + i`, in years. |
+| `sex` | `"male"` or `"female"` (sets the age slope `Sage`). |
+
+**Returns:** The ultimate strength `Su = 6.75 - Sage*(b+i)`, MPa.

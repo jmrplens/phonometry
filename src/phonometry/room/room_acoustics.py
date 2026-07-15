@@ -335,8 +335,8 @@ class DecayCurve:
 
     ``time`` holds the sample times in seconds from the direct sound and
     ``level`` the decay levels in dB (0 dB at time zero), up to the noise
-    truncation point (ISO 3382-1:2009, 5.3.3). ``band`` is the octave/third-
-    octave band centre in Hz, or ``None`` for a broadband decay.
+    truncation point (ISO 3382-1:2009, 5.3.3). ``band`` is the
+    octave/third-octave band centre in Hz, or ``None`` for a broadband decay.
 
     For backward compatibility with the previous ``(time, level)`` tuple
     return of :func:`decay_curve`, the dataclass is iterable and unpacks as

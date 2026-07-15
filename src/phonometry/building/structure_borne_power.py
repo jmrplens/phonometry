@@ -9,9 +9,9 @@ mounted on a plate of known mass per unit area ``m`` and area ``S`` whose
 structural loss factor ``eta`` is known, and the spatial-average vibratory
 velocity level of the plate is measured.
 
-The power a resonant plate dissipates equals ``P = omega * eta * (m S) *
-<v**2>``, so the power **injected into that reception plate** is, in
-one-third-octave bands (Formula 14)::
+The power a resonant plate dissipates equals
+``P = omega * eta * (m S) * <v**2>``, so the power **injected into that
+reception plate** is, in one-third-octave bands (Formula 14)::
 
     L_Ws = 10 lg(2 pi f eta m S / (f0 m0 S0)) + L_v - 60   [dB re 1 pW]
 

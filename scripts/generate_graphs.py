@@ -6385,8 +6385,16 @@ def generate_all(img_dir: str) -> None:
 # ===========================================================================
 
 _ANIM_FPS = 20
-_ANIM_SECONDS = 6
+_ANIM_SECONDS = 12
 _ANIM_FRAMES = _ANIM_FPS * _ANIM_SECONDS
+# Closing hold appended to each schematic timeline: the settled verdict frame
+# stays on screen ~2 s so it can be read before the loop restarts.
+_ANIM_HOLD = 2 * _ANIM_FPS
+# The FDTD room-modes clip runs on its own frame budget: 18 s at the shared
+# 20 fps samples the 0.35 s simulation every ~0.96 ms, i.e. >= 12 frames per
+# period of the 84.3 Hz on-mode drive, so the wavefronts read as continuous
+# motion. On the shared timeline (~4 frames per period) the clip strobes.
+_FDTD_ANIM_FRAMES = 18 * _ANIM_FPS
 _ANIM_FIGSIZE = (8.0, 4.5)   # inches at _ANIM_DPI -> 800 x 450 px
 _ANIM_DPI = 100
 # The GitHub-docs GIF is a compact fallback for the smooth site WebM: a lower
@@ -6449,19 +6457,24 @@ def _schematic_axes(ax: Any, xlim: tuple[float, float],
 
 
 def _render_clip(fig: Any, update: Callable[[int], tuple[Any, ...]],
-                 output_dir: str, stem: str) -> None:
+                 output_dir: str, stem: str, *, frames: int | None = None,
+                 fps: int | None = None, gif_fps: int | None = None) -> None:
     """Shared clip tail: drive *update* through FuncAnimation and encode.
 
     Static artists (tick labels included) get the same Spanish pass as the
     figures; per-frame labels are translated by ``_translate_str`` inside
-    each clip's update function.
+    each clip's update function. ``frames``/``fps`` override the shared
+    timeline for clips that need their own budget (the FDTD room modes);
+    ``gif_fps`` is forwarded to the GitHub-GIF palette pass.
     """
     from matplotlib.animation import FuncAnimation
 
     _translate_figure(fig)
-    anim = FuncAnimation(fig, update, frames=_ANIM_FRAMES,
-                         interval=1000 / _ANIM_FPS, blit=False)
-    _save_animation(anim, fig, output_dir, stem)
+    n_frames = _ANIM_FRAMES if frames is None else frames
+    rate = _ANIM_FPS if fps is None else fps
+    anim = FuncAnimation(fig, update, frames=n_frames,
+                         interval=1000 / rate, blit=False)
+    _save_animation(anim, fig, output_dir, stem, fps=rate, gif_fps=gif_fps)
 
 
 # --- shared schematic vocabulary (mics, gauges, flow boxes, arrows) --------
@@ -6601,12 +6614,15 @@ def _draw_resistor(ax: Any, x0: float, x1: float, y: float) -> None:
 
 
 def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
-                    make_gif: bool = True) -> None:
+                    make_gif: bool = True, *, fps: int | None = None,
+                    gif_fps: int | None = None) -> None:
     """Write *anim* to WebM (always) and, for English, an animated GIF.
 
     The GIF is derived from the just-written WebM with an ffmpeg palette pass
     so the GitHub docs get a compact, self-contained loop; the site embeds the
-    WebM directly. ``savefig.bbox`` is forced to ``standard`` so every frame
+    WebM directly. ``fps`` overrides the shared WebM rate and ``gif_fps`` the
+    GIF sampling rate (long clips drop GIF frames to stay within GitHub-friendly
+    file sizes). ``savefig.bbox`` is forced to ``standard`` so every frame
     keeps the same canvas size (a ``tight`` box would jitter and break the
     encoder).
     """
@@ -6616,7 +6632,7 @@ def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
 
     webm = _anim_path(output_dir, stem, "webm")
     writer = FFMpegWriter(
-        fps=_ANIM_FPS, codec="libvpx-vp9",
+        fps=_ANIM_FPS if fps is None else fps, codec="libvpx-vp9",
         extra_args=["-b:v", "0", "-crf", "40", "-pix_fmt", "yuv420p",
                     "-an", "-loglevel", "error"],
     )
@@ -6627,7 +6643,8 @@ def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
     if make_gif and _LANG == "en":
         gif = _anim_path(output_dir, stem, "gif")
         palette = os.path.join(output_dir, f".{stem}{_FILENAME_SUFFIX}_pal.png")
-        vf = f"fps={_GIF_FPS},scale={_GIF_SCALE}:-1:flags=lanczos"
+        vf = (f"fps={_GIF_FPS if gif_fps is None else gif_fps},"
+              f"scale={_GIF_SCALE}:-1:flags=lanczos")
         subprocess.run(
             ["ffmpeg", "-y", "-loglevel", "error", "-i", webm, "-vf",
              f"{vf},palettegen=max_colors={_GIF_COLORS}:stats_mode=diff",
@@ -6779,9 +6796,11 @@ def animate_time_weighting_ballistics(output_dir: str) -> None:
     ax_t.legend(loc="upper right", fontsize=7.5)
 
     tmin, tmax = 0.5, 4.0
+    # Sweep the burst-and-decay, then hold the settled three-trace comparison.
+    sweep = _ANIM_FRAMES - _ANIM_HOLD
 
     def update(k: int) -> tuple[Any, ...]:
-        tc = tmin + (tmax - tmin) * k / (_ANIM_FRAMES - 1)
+        tc = tmin + (tmax - tmin) * min(k, sweep - 1) / (sweep - 1)
         i = max(0, min(t.size - 1, int(round(tc * fs))))
         xc = 0.6 + 8.8 * tc / 4.0
         strip_cur.set_data([xc, xc], [7.4, 9.0])
@@ -6882,8 +6901,10 @@ def animate_onset_detection(output_dir: str) -> None:
               f"P = {prom:.1f}", f"KI = {ki:.1f} dB")
 
     # Nonuniform sweep: slow motion while the magnifier crosses the onset.
-    knots_k = (0.0, 0.22 * (_ANIM_FRAMES - 1), 0.52 * (_ANIM_FRAMES - 1),
-               float(_ANIM_FRAMES - 1))
+    # The sweep ends _ANIM_HOLD frames early; np.interp clamps past the last
+    # knot, so the lit OR -> LD -> P -> KI chain and the verdict hold ~2 s.
+    end_k = float(_ANIM_FRAMES - 1 - _ANIM_HOLD)
+    knots_k = (0.0, 0.22 * end_k, 0.52 * end_k, end_k)
     knots_t = (0.62, 0.985, 1.19, 3.0)
 
     def update(k: int) -> tuple[Any, ...]:
@@ -7009,8 +7030,12 @@ def animate_instantaneous_intensity(output_dir: str) -> None:
                        "iline": iline, "mline": mline, "txt": txt,
                        "fill": None})
 
+    # Six carrier periods sweep by, then the settled averages (net flow vs
+    # zero) hold so the active/reactive contrast can be read.
+    sweep = _ANIM_FRAMES - _ANIM_HOLD
+
     def update(k: int) -> tuple[Any, ...]:
-        tc = 3.0 * k / (_ANIM_FRAMES - 1)
+        tc = 3.0 * min(k, sweep - 1) / (sweep - 1)
         idx = max(1, int(np.searchsorted(t, tc)))
         # Average over whole periods once one is complete, so the reactive
         # mean pins to exactly zero instead of hovering near it.
@@ -7162,7 +7187,9 @@ def animate_schroeder(output_dir: str) -> None:
     ax_d.set_ylabel(T("Level [dB]"), fontsize=9)
     ax_d.legend(loc="upper right", fontsize=8.5)
 
-    reveal = int(_ANIM_FRAMES * 0.8)   # sweep for 80% of frames, then annotate
+    # Sweep for 80% of the frames; the T20/T30 fits and readouts then hold
+    # for the remaining ~2.4 s so the verdict can be read.
+    reveal = int(_ANIM_FRAMES * 0.8)
 
     def update(k: int) -> tuple[Any, ...]:
         xf = sweep_max * (1.0 - k / (reveal - 1)) if k < reveal else 0.0
@@ -7198,12 +7225,15 @@ def animate_schroeder(output_dir: str) -> None:
 
 
 @lru_cache(maxsize=1)
-def _room_mode_fields() -> tuple[Any, Any, Any, float, float]:
+def _room_mode_fields(
+        n_frames: int = _FDTD_ANIM_FRAMES) -> tuple[Any, Any, Any, float, float]:
     """Run the two FDTD room simulations once per process (all variants).
 
     Returns instantaneous-pressure frames, running-RMS frames (both float32,
     stacked ``(2, n_frames, ny, nx)``), the frame times, and the on-mode and
-    off-mode drive frequencies.
+    off-mode drive frequencies. ``n_frames`` caps the captured frames and sets
+    the capture stride over the fixed 0.35 s of physical time, so it controls
+    how densely each acoustic period is sampled.
     """
     import fdtd2d
 
@@ -7221,7 +7251,7 @@ def _room_mode_fields() -> tuple[Any, Any, Any, float, float]:
         sim.add_source(fdtd2d.CWSource(ix=25, iy=25, frequency=f,
                                        ramp_cycles=2.0))
         steps = int(round(duration / sim.dt))
-        every = max(1, steps // _ANIM_FRAMES)
+        every = max(1, steps // n_frames)
         # Running mean square with a two-period time constant: the pattern
         # (the mode map) builds up as the resonance settles.
         beta = float(np.exp(-sim.dt * f / 2.0))
@@ -7232,7 +7262,7 @@ def _room_mode_fields() -> tuple[Any, Any, Any, float, float]:
         for i in range(steps):
             sim.step()
             ms = beta * ms + (1.0 - beta) * sim.p**2
-            if (i + 1) % every == 0 and len(ps) < _ANIM_FRAMES:
+            if (i + 1) % every == 0 and len(ps) < n_frames:
                 ps.append(sim.p[::2, ::2].astype(np.float32))
                 rs.append(np.sqrt(ms[::2, ::2]).astype(np.float32))
                 ts.append(sim.time)
@@ -7304,7 +7334,11 @@ def animate_fdtd_room_modes(output_dir: str) -> None:
         t_txt.set_text(f"t = {times[k] * 1000.0:3.0f} ms")
         return (*ims, t_txt)
 
-    _render_clip(fig, update, output_dir, "anim_fdtd_room_modes")
+    # Own frame budget (see _FDTD_ANIM_FRAMES): enough frames per acoustic
+    # period for fluid wavefronts. The GitHub GIF samples this long clip at a
+    # reduced rate so the palette-quantized file stays well under 4 MB.
+    _render_clip(fig, update, output_dir, "anim_fdtd_room_modes",
+                 frames=int(p_all.shape[1]), gif_fps=8)
 
 
 def generate_animations(output_dir: str) -> None:

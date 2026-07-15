@@ -27,30 +27,18 @@ building. The chain closes the structural-vibroacoustics series:
 2. Only part of that power is actually injected into the supporting element; the
    loss is the **coupling term** `D_C` (clause 4.4.3), always positive, set by
    the source mobility `Y_s` and the receiver mobility `Y_i` (Formula 19b):
-
-```text
-D_C,i = 10 lg( |Y_s + Y_i|**2 / (|Y_s| Re{Y_i}) )
-```
-
-   which reduces to `10 lg(|Y_s|/Re{Y_i})` for a force source (high source
-   mobility, Formula 19c) and to `-10 lg(|Y_s| Re{Z_i})` for a velocity source
-   (low source mobility, Formula 19d). An elastic support adds its transfer
+   `D_C,i = 10 lg( |Y_s + Y_i|**2 / (|Y_s| Re{Y_i}) )`, which reduces to
+   `10 lg(|Y_s|/Re{Y_i})` for a force source (high source mobility,
+   Formula 19c) and to `-10 lg(|Y_s| Re{Z_i})` for a velocity source (low
+   source mobility, Formula 19d). An elastic support adds its transfer
    mobility `Y_k` inside the modulus (Formula 19e).
-3. The **installed** power level is then (Formula 18b):
-
-```text
-L_Ws,inst,i = L_Ws,c - D_C,i
-```
-
+3. The **installed** power level is then `L_Ws,inst,i = L_Ws,c - D_C,i`
+   (Formula 18b).
 4. The normalised sound pressure level in the receiving room for one path (i->j)
    follows from the installed power, the structure-to-airborne adjustment term
    `D_sa` (clause 4.4.4), the flanking sound reduction index `R_ij,ref` and
    the element area (Formula 18a):
-
-```text
-L_n,s,ij = L_Ws,inst,i - D_sa,i - R_ij,ref - 10 lg(S_i/S0) - 10 lg(A0/4)
-```
-
+   `L_n,s,ij = L_Ws,inst,i - D_sa,i - R_ij,ref - 10 lg(S_i/S0) - 10 lg(A0/4)`
    with `S0 = A0 = 10 m2`; the paths combine energetically (Formula 17).
 
 The source and receiver mobilities/impedances are those of

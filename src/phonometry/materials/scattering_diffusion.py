@@ -246,8 +246,7 @@ def random_incidence_absorption(
 ) -> Real:
     """Random-incidence absorption coefficient ``alpha_s`` (ISO 17497-1, Eq. (1)).
 
-    ``alpha_s = 55,3 * (V / S) * (1 / (c2 T2) - 1 / (c1 T1))
-    - (4 V / S) * (m2 - m1)``.
+    ``alpha_s = 55,3 * (V / S) * (1 / (c2 T2) - 1 / (c1 T1)) - (4 V / S) * (m2 - m1)``.
 
     Situation 1 is the empty room with the (static) base plate present;
     situation 2 adds the test sample, still without turntable rotation
@@ -281,8 +280,7 @@ def specular_absorption_coefficient(
 ) -> Real:
     """Specular absorption coefficient ``alpha_spec`` (ISO 17497-1, Eq. (4)).
 
-    ``alpha_spec = 55,3 * (V / S) * (1 / (c4 T4) - 1 / (c3 T3))
-    - (4 V / S) * (m4 - m3)``.
+    ``alpha_spec = 55,3 * (V / S) * (1 / (c4 T4) - 1 / (c3 T3)) - (4 V / S) * (m4 - m3)``.
 
     Situation 3 is the rotating base plate without the sample; situation 4 is
     the sample on the rotating turntable (Table 2, rows T3 and T4). The
@@ -471,8 +469,7 @@ def base_plate_scattering(
 ) -> Real:
     """Scattering coefficient of the base plate alone (ISO 17497-1, Eq. (6)).
 
-    ``s_base = 55,3 * (V / S) * (1 / (c3 T3) - 1 / (c1 T1))
-    - (4 V / S) * (m3 - m1)``.
+    ``s_base = 55,3 * (V / S) * (1 / (c3 T3) - 1 / (c1 T1)) - (4 V / S) * (m3 - m1)``.
 
     Ideally ``T1 == T3``; a slightly non-symmetrical base plate shortens ``T3``
     and this quality metric captures the resulting spurious scattering, which

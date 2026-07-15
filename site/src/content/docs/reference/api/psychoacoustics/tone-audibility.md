@@ -230,8 +230,12 @@ Extended uncertainty `U` of one tone's audibility (Clause 6).
 Gaussian propagation through Formula (14) with a uniform narrow-band
 level uncertainty (Formulae (22)-(27) and (29)):
 
-`sigma^2 = [sum(w_T^2)/sum(w_T)^2 + sum(w_S^2)/sum(w_S)^2] * sigma_L^2
-+ (4.34 * df/dfc)^2` with `w = 10^(0.1 L)` over the `K`
+```text
+sigma^2 = [sum(w_T^2)/sum(w_T)^2 + sum(w_S^2)/sum(w_S)^2] * sigma_L^2
+          + (4.34 * df/dfc)^2
+```
+
+with `w = 10^(0.1 L)` over the `K`
 tone-containing lines and the `M` noise lines of the final Formula (6)
 iteration. For an FG group (several tones combined in one critical band,
 Formula (17)) pass the `N` summated *tone levels* as

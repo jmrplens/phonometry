@@ -92,6 +92,7 @@ included in the reported EPNL.
 | `pnlt` | The tone-corrected perceived noise levels `PNLT(k)`, in PNdB. |
 | `dt` | Per-record duration, in s (scalar broadcast or per record). |
 | `reference_time` | Normalising time `T0`, in s (default 10). |
+| `tone_corrections` | Optional tone corrections `C(k)`, in dB, one per `pnlt` record; enables the bandsharing adjustment `ΔB` described above. Default `None` (no adjustment). |
 
 **Returns:** `(epnl, pnltm, kF, kL)` -- EPNL in EPNdB, the peak PNLTM, and the 0-based 10 dB-down record indices (inclusive).
 

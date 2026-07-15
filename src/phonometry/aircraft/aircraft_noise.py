@@ -322,6 +322,9 @@ def epnl_from_pnlt(
     :param pnlt: The tone-corrected perceived noise levels ``PNLT(k)``, in PNdB.
     :param dt: Per-record duration, in s (scalar broadcast or per record).
     :param reference_time: Normalising time ``T0``, in s (default 10).
+    :param tone_corrections: Optional tone corrections ``C(k)``, in dB, one per
+        ``pnlt`` record; enables the bandsharing adjustment ``ΔB`` described
+        above. Default ``None`` (no adjustment).
     :return: ``(epnl, pnltm, kF, kL)`` -- EPNL in EPNdB, the peak PNLTM, and the
         0-based 10 dB-down record indices (inclusive).
     :raises ValueError: If the inputs are invalid.

@@ -14,8 +14,7 @@ fluid sediment half-space (`ρ2`, `c2`) reflects with the Rayleigh pressure
 reflection coefficient (Medwin & Clay, Eq. 2.6.11a). Using the grazing angle
 `φ` (measured from the interface), the angle of incidence from the normal is
 `θ1 = 90° − φ`, Snell's law gives `sinθ2 = (c2/c1)·cosφ` and
-
-    `R = (ρ2·c2·sinφ − ρ1·c1·cosθ2) / (ρ2·c2·sinφ + ρ1·c1·cosθ2)`.
+`R = (ρ2·c2·sinφ − ρ1·c1·cosθ2) / (ρ2·c2·sinφ + ρ1·c1·cosθ2)`.
 
 * [`critical_angle`](/phonometry/reference/api/underwater/seabed-reflection/#critical_angle) -- the critical grazing angle `φc = arccos(c1/c2)`
   (only when `c2 > c1`); below it the wave is totally reflected (`|R| = 1`).

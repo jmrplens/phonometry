@@ -296,7 +296,7 @@ ground_attenuation_alternative(distance: float, mean_height: float) -> float
 
 Ground attenuation by the alternative A-weighted method (7.3.2, Eq. (10)).
 
-Valid only when only the A-weighted receiver level is of interest, the sound
+Valid only when the A-weighted receiver level alone is of interest, the sound
 propagates over porous or mostly-porous ground and is not a pure tone
 (ISO 9613-2:1996, 7.3.2):
 

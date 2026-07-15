@@ -105,7 +105,7 @@ probabilistically symmetric one (not the 5.3.4 shortest interval).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for no inputs, non-positive trials or bad coverage. |
+| ValueError | for no inputs, fewer than 2 trials or bad coverage. |
 
 ## MonteCarloResult
 

@@ -67,8 +67,9 @@ The 1995 edition's Table 1 prints a dedicated minimum (+2.3/+2.0/
 +1.6 dB) *at* that single frequency, which this convention relaxes to
 the pass-band minimum; the discrepancy has measure zero -- any
 continuous response violating the edge row is caught at `edge + eps`
-by the interpolated stop-band mask. The 2014 edition defines only
-`G^(1/2) -+ eps` rows, which the masks match exactly.
+by the interpolated stop-band mask. The 2014 edition defines only the
+`G^(1/2) - eps` and `G^(1/2) + eps` rows, which the masks match
+exactly.
 :::
 
 ## verify_aircraft_noise_system

@@ -656,7 +656,7 @@ gives a slightly different `W_i`.
 | Name | Description |
 | :--- | :--- |
 | `band_accelerations` | r.m.s. acceleration `a_i` per band, in m/s2. |
-| `frequencies` | Band centre frequencies, in hertz (true one-third- octave centres `10^(n/10)` for table-conformant band values). |
+| `frequencies` | Band centre frequencies, in hertz (true one-third-octave centres `10^(n/10)` for table-conformant band values). |
 | `weighting` | Weighting name (one of [`WEIGHTING_NAMES`](/phonometry/reference/api/vibration/human-vibration/#weighting_names)). |
 
 **Returns:** A [`WeightedSpectrum`](/phonometry/reference/api/vibration/human-vibration/#weightedspectrum) with `.plot()`.

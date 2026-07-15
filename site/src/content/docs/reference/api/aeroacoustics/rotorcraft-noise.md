@@ -82,7 +82,7 @@ advisory warning propagates, since `α` is large and extrapolated.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-third-octave-band centre frequencies, in Hz. |
-| `distance` | Slant distance `r`, in metres (`>= rh`; below `rh` the adjustment is a small positive value, i.e. less absorption than the reference path). |
+| `distance` | Slant distance `r`, in metres (`> 0`; below `rh` the adjustment is a small positive value, i.e. less absorption than the reference path). |
 | `temperature` | Air temperature, in °C (default 25 °C, ICAO reference). |
 | `relative_humidity` | Relative humidity, in % (default 70 %). |
 | `pressure` | Ambient pressure, in kPa (default 101.325). |

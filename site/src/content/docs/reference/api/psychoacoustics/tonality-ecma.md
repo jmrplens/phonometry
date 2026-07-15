@@ -14,14 +14,15 @@ Clean-room implementation of the tonality signal chain of ECMA-418-2:2025
 tonal/noise decomposition with the full Clause 6.2.3 band averaging
 (Clause 6.2.2-6.2.7, [`loudness_ecma._tonal_noise_split`](/phonometry/reference/api/psychoacoustics/loudness-ecma/#loudness_ecma)) are reused
 from [`.loudness_ecma`](/phonometry/reference/api/psychoacoustics/loudness-ecma/#loudness_ecma) -- loudness and tonality therefore report the
-same underlying N'_tonal(l, z) for the same signal; this module adds
+same underlying `N'_tonal(l, z)` for the same signal; this module adds
 
 * the tonality output stages (Clause 6.2.8-6.2.11): the overall-SNR gate
-  q(l) (Formulae 49-50), the time-dependent specific tonality
-  T'(l, z) = c_T * q(l) * N'_tonal(l, z) (Formula 51), the average specific
-  tonality T'(z) and its frequency f_ton,z(z) (Formulae 53-55), the
-  time-dependent tonality T(l) with its frequency f_ton(l) (Formulae 61-62)
-  and the representative single value T (Formulae 63-64).
+  `q(l)` (Formulae 49-50), the time-dependent specific tonality
+  `T'(l, z) = c_T * q(l) * N'_tonal(l, z)` (Formula 51), the average
+  specific tonality `T'(z)` and its frequency `f_ton,z(z)` (Formulae
+  53-55), the time-dependent tonality `T(l)` with its frequency
+  `f_ton(l)` (Formulae 61-62) and the representative single value `T`
+  (Formulae 63-64).
 
 The calibration factor `c_T` of Formula (51) is fixed by the standard so
 that a 1 kHz sinusoid at 40 dB SPL yields 1 tu_HMS.

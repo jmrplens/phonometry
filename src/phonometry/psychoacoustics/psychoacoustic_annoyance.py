@@ -6,11 +6,12 @@ Psychoacoustic annoyance combines four hearing sensations -- loudness,
 sharpness, fluctuation strength and roughness -- into a single figure that
 tracks annoyance ratings from listening experiments. The model is due to
 Widmann (1992) and is given in Fastl & Zwicker, *Psychoacoustics: Facts and
-Models* (Equations 16.2-16.4):
+Models* (Equations 16.2-16.4)::
 
     PA = N5 * (1 + sqrt(wS**2 + wFR**2))
 
-with the percentile loudness ``N5`` in sone and the two loudness-weighted terms
+with the percentile loudness ``N5`` in sone and the two loudness-weighted
+terms::
 
     wS  = (S - 1.75) * 0.25 * lg(N5 + 10)          for S > 1.75 acum, else 0
     wFR = (2.18 / N5**0.4) * (0.4 * F + 0.6 * R)

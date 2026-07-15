@@ -72,7 +72,7 @@ calibrated so that `x` is the instantaneous sound pressure in pascals.
 | `x` | Single-channel calibrated pressure signal in pascals. |
 | `fs` | Sampling rate in Hz (positive). |
 | `field` | `"free"` (default), `"diffuse"` or `"eardrum"`. |
-| `presentation` | `"binaural"`/`"diotic"` (default) or `"monaural"`. |
+| `presentation` | `"binaural"` (default; alias `"diotic"`) or `"monaural"`. |
 
 **Returns:** A [`MooreGlasbergLoudness`](/phonometry/reference/api/psychoacoustics/loudness-moore-glasberg/#mooreglasbergloudness).
 
@@ -101,7 +101,7 @@ closely spaced components of clause 5.3.
 | :--- | :--- |
 | `components` | Sequence of `(frequency_Hz, level_dB)` pairs (or an `(n, 2)` array).  An empty spectrum yields zero loudness. |
 | `field` | Listening condition setting the outer-ear transfer: `"free"` (frontal free field, default), `"diffuse"` (diffuse field) or `"eardrum"` (levels already specified at the tympanic membrane, e.g. a flat earphone). |
-| `presentation` | `"binaural"` (equivalently `"diotic"`: the same sound at both ears, default) or `"monaural"` (one ear only). |
+| `presentation` | `"binaural"` (default; `"diotic"` is an equivalent alias: the same sound at both ears) or `"monaural"` (one ear only). |
 
 **Returns:** A [`MooreGlasbergLoudness`](/phonometry/reference/api/psychoacoustics/loudness-moore-glasberg/#mooreglasbergloudness).
 
@@ -133,7 +133,7 @@ sinusoidal components and the exact method is applied.
 | :--- | :--- |
 | `band_levels` | 29 band levels in dB SPL (re 20 uPa), 25 Hz..16 kHz. |
 | `field` | `"free"` (default), `"diffuse"` or `"eardrum"`. |
-| `presentation` | `"binaural"`/`"diotic"` (default) or `"monaural"`. |
+| `presentation` | `"binaural"` (default; alias `"diotic"`) or `"monaural"`. |
 
 **Returns:** A [`MooreGlasbergLoudness`](/phonometry/reference/api/psychoacoustics/loudness-moore-glasberg/#mooreglasbergloudness).
 

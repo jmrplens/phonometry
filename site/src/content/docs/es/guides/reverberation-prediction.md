@@ -71,6 +71,16 @@ surfaces = [(40.0, 0.3), (40.0, 0.3), (24.0, 0.3),
 print(round(ph.eyring_reverberation_time(120.0, surfaces, air_attenuation=m), 3))
 ```
 
+Todos los modelos estadísticos suponen además un **campo difuso**, y las
+bajas frecuencias son las primeras en romper esa suposición: por debajo de
+la frecuencia de Schroeder la sala responde como un conjunto de modos
+discretos, no como una mezcla reverberante. La simulación FDTD 2D siguiente
+excita una sala rígida de 5 m por 3,5 m exactamente en su modo (2,1) y
+después entre dos modos; el patrón de onda estacionaria que se forma en
+resonancia es lo que Sabine y Eyring no pueden ver.
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_es_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de una sala de 5 por 3,5 metros excitada en el modo (2,1) de 84 Hz y en una frecuencia fuera de modo; en resonancia un patrón de onda estacionaria con líneas nodales fijas crece hasta dominar el mapa de presión RMS, fuera de resonancia la respuesta forzada se mantiene débil y desorganizada" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_es_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de una sala de 5 por 3,5 metros excitada en el modo (2,1) de 84 Hz y en una frecuencia fuera de modo; en resonancia un patrón de onda estacionaria con líneas nodales fijas crece hasta dominar el mapa de presión RMS, fuera de resonancia la respuesta forzada se mantiene débil y desorganizada" style="width:88%"></video>
+
 ## 2. Fitzroy y Arau-Puchades (salas anisótropas)
 
 Cuando la absorción se concentra en un eje — un suelo enmoquetado y un techo

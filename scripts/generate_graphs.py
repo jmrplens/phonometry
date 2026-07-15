@@ -670,7 +670,7 @@ _ES_EXACT = {
     "Reflection factor magnitude |r|": "Módulo del factor de reflexión |r|",
     "ISO 10534-1 Standing-Wave-Ratio Method":
         "Método de la razón de onda estacionaria (ISO 10534-1)",
-    # --- Tanda 11: Tier-1 animation labels ---
+    # --- Tier-1 animation labels ---
     "tone burst": "ráfaga de tono",
     "Fast (125 ms)": "Rápida (125 ms)",
     "Slow (1000 ms)": "Lenta (1000 ms)",
@@ -679,27 +679,50 @@ _ES_EXACT = {
         "Balística de la ponderación temporal (IEC 61672-1)",
     "Mean-square response (normalized)":
         "Respuesta cuadrática media (normalizada)",
-    "L_AF history": "Historia de L_AF",
+    "RC exponential detector": "Detector exponencial RC",
+    "input x(t)": "entrada x(t)",
+    "square-law rectifier": "rectificador cuadrático",
+    "stored charge (Fast shown)": "carga almacenada (se muestra Fast)",
+    "charging": "cargando",
+    "draining": "descargando",
+    "τ = RC sets attack and decay": "τ = RC fija el ataque y la caída",
     "onset (> 10 dB/s)": "inicio (> 10 dB/s)",
     "Impulse onset detection (NT ACOU 112)":
         "Detección del inicio de impulso (NT ACOU 112)",
     "A-weighted level L_AF [dB]": "Nivel ponderado A L_AF [dB]",
-    "listening…": "escuchando…",
+    "L_AF (A-weighted, Fast)": "L_AF (ponderado A, Fast)",
+    "detector: onset when dL/dt > 10 dB/s":
+        "detector: inicio cuando dL/dt > 10 dB/s",
+    "onset rate": "tasa de inicio",
+    "level difference": "diferencia de nivel",
+    "prominence": "prominencia",
+    "adjustment": "ajuste",
+    "add KI to the rating level": "sumar KI al nivel de evaluación",
     "pressure p": "presión p",
     "velocity u": "velocidad u",
     "intensity p·u": "intensidad p·u",
-    "Progressive wave — net power flows":
-        "Onda progresiva — fluye potencia neta",
-    "Standing wave — energy sloshes":
-        "Onda estacionaria — la energía va y viene",
     "amplitude (normalized)": "amplitud (normalizada)",
-    "Instantaneous sound intensity p·u":
-        "Intensidad sonora instantánea p·u",
+    "Two-microphone p-p probe: instantaneous intensity p·u":
+        "Sonda p-p de dos micrófonos: intensidad instantánea p·u",
+    "Progressive wave — active": "Onda progresiva — activa",
+    "Standing wave — reactive": "Onda estacionaria — reactiva",
+    "p and u in phase": "p y u en fase",
+    "p and u 90° apart": "p y u desfasados 90°",
+    "spacer Δr": "separador Δr",
     "T20 fit": "ajuste T20",
     "T30 fit": "ajuste T30",
     "Schroeder backward integration (ISO 3382)":
         "Integración inversa de Schroeder (ISO 3382)",
-    "integrating from the tail →": "integrando desde la cola →",
+    "← integrate from the tail": "← integrar desde la cola",
+    "squared impulse response p²": "respuesta al impulso al cuadrado p²",
+    "tail energy": "energía de la cola",
+    "Room modes in a rigid 5 m × 3.5 m room (2D FDTD)":
+        "Modos propios en una sala rígida de 5 m × 3,5 m (FDTD 2D)",
+    "instantaneous p(x, y)": "p(x, y) instantánea",
+    "RMS pressure (mode map)": "presión RMS (mapa modal)",
+    "nodal lines (2,1)": "líneas nodales (2,1)",
+    "source": "fuente",
+    "same colour scale": "misma escala de color",
 }
 
 _ES_PATTERNS = [
@@ -820,6 +843,10 @@ _ES_PATTERNS = [
     (r"^Reference RC-(.+)$", r"Referencia RC-\1"),
     (r"^(\d+) yr$", r"\1 años"),
     (r"^10-90 % band \((\d+) yr\)$", r"banda 10-90 % (\1 años)"),
+    # Tier-1 animation dynamic labels
+    (r"^remaining energy: (.+) %$", r"energía restante: \1 %"),
+    (r"^On the \(2,1\) mode: (.+) Hz$", r"En el modo (2,1): \1 Hz"),
+    (r"^Off mode: (.+) Hz$", r"Fuera de modo: \1 Hz"),
 ]
 
 
@@ -6353,13 +6380,28 @@ def generate_all(img_dir: str) -> None:
 # Deterministic FuncAnimation clips of the level-vs-time phenomena the library
 # already computes. Each is rendered to WebM (site <video>) in all four
 # language x theme variants, and to an animated GIF for the English GitHub
-# docs (both themes). Kept out of generate_all()/`make graphs` so ordinary
-# PNG regeneration stays fast; produced by `make animations`.
+# docs (both themes). Every WebM also gets a JPEG poster frame (the held
+# verdict state near the end of the clip) so the site can embed the video
+# with ``preload="none"`` and still show a meaningful still while nothing is
+# fetched. Posters are ``.jpg`` on purpose: `make graphs` clears only
+# ``*.svg``/``*.png`` and scripts/check_figures.py regenerates/compares only
+# those, so the posters ride with the WebM/GIF outside the figure pipeline.
+# Kept out of generate_all()/`make graphs` so ordinary PNG regeneration stays
+# fast; produced by `make animations` (or `make posters` to re-extract the
+# stills from the committed WebMs without re-rendering).
 # ===========================================================================
 
 _ANIM_FPS = 20
-_ANIM_SECONDS = 6
+_ANIM_SECONDS = 12
 _ANIM_FRAMES = _ANIM_FPS * _ANIM_SECONDS
+# Closing hold appended to each schematic timeline: the settled verdict frame
+# stays on screen ~2 s so it can be read before the loop restarts.
+_ANIM_HOLD = 2 * _ANIM_FPS
+# The FDTD room-modes clip runs on its own frame budget: 18 s at the shared
+# 20 fps samples the 0.35 s simulation every ~0.96 ms, i.e. >= 12 frames per
+# period of the 84.3 Hz on-mode drive, so the wavefronts read as continuous
+# motion. On the shared timeline (~4 frames per period) the clip strobes.
+_FDTD_ANIM_FRAMES = 18 * _ANIM_FPS
 _ANIM_FIGSIZE = (8.0, 4.5)   # inches at _ANIM_DPI -> 800 x 450 px
 _ANIM_DPI = 100
 # The GitHub-docs GIF is a compact fallback for the smooth site WebM: a lower
@@ -6400,22 +6442,234 @@ def _anim_path(output_dir: str, stem: str, ext: str) -> str:
     return os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}.{ext}")
 
 
-def _new_anim_fig() -> tuple[Any, Any]:
+def _anim_figure() -> Any:
     """A fixed-size themed figure for a clip (constant canvas across frames)."""
-    fig, ax = plt.subplots(figsize=_ANIM_FIGSIZE, dpi=_ANIM_DPI, layout="constrained")
+    return plt.figure(figsize=_ANIM_FIGSIZE, dpi=_ANIM_DPI, layout="constrained")
+
+
+def _grid_axes(ax: Any) -> None:
+    """Apply the standard documentation grid to a data axes."""
     ax.grid(True, color=COLOR_GRID, linestyle="--", alpha=0.5)
-    return fig, ax
+
+
+def _schematic_axes(ax: Any, xlim: tuple[float, float],
+                    ylim: tuple[float, float], *, equal: bool = False) -> None:
+    """Turn *ax* into a bare drawing canvas (no ticks, frame or grid)."""
+    ax.set_xlim(*xlim)
+    ax.set_ylim(*ylim)
+    if equal:
+        ax.set_aspect("equal")
+    ax.grid(False)
+    ax.axis("off")
+
+
+def _render_clip(fig: Any, update: Callable[[int], tuple[Any, ...]],
+                 output_dir: str, stem: str, *, frames: int | None = None,
+                 fps: int | None = None, gif_fps: int | None = None) -> None:
+    """Shared clip tail: drive *update* through FuncAnimation and encode.
+
+    Static artists (tick labels included) get the same Spanish pass as the
+    figures; per-frame labels are translated by ``_translate_str`` inside
+    each clip's update function. ``frames``/``fps`` override the shared
+    timeline for clips that need their own budget (the FDTD room modes);
+    ``gif_fps`` is forwarded to the GitHub-GIF palette pass.
+    """
+    from matplotlib.animation import FuncAnimation
+
+    _translate_figure(fig)
+    n_frames = _ANIM_FRAMES if frames is None else frames
+    rate = _ANIM_FPS if fps is None else fps
+    anim = FuncAnimation(fig, update, frames=n_frames,
+                         interval=1000 / rate, blit=False)
+    _save_animation(anim, fig, output_dir, stem, fps=rate, gif_fps=gif_fps)
+
+
+# --- shared schematic vocabulary (mics, gauges, flow boxes, arrows) --------
+
+
+def _draw_mic(ax: Any, x: float, y: float, *, direction: int = 1,
+              size: float = 1.0, label: str = "") -> None:
+    """A measurement-microphone symbol: rounded body plus capsule head.
+
+    ``direction = +1`` points the capsule toward +x, ``-1`` toward -x. Draw
+    on an equal-aspect schematic axes so the capsule stays round.
+    """
+    from matplotlib.patches import Circle, FancyBboxPatch
+
+    body_w, body_h = 1.1 * size, 0.42 * size
+    head_r = 0.26 * size
+    ax.add_patch(FancyBboxPatch(
+        (x - body_w / 2, y - body_h / 2), body_w, body_h,
+        boxstyle="round,pad=0.03", facecolor=COLOR_GRID,
+        edgecolor=COLOR_FG, lw=1.2))
+    hx = x + direction * (body_w / 2 + head_r * 0.85)
+    ax.add_patch(Circle((hx, y), head_r, facecolor="none",
+                        edgecolor=COLOR_FG, lw=1.2))
+    for frac in (-0.45, 0.0, 0.45):
+        half = head_r * float(np.sqrt(1.0 - frac * frac)) * 0.9
+        ax.plot([hx - half, hx + half], [y + frac * head_r] * 2,
+                color=COLOR_FG, lw=0.6)
+    if label:
+        ax.text(x, y + body_h * 1.7, label, ha="center", va="bottom",
+                color=COLOR_FG, fontsize=11)
+
+
+def _make_gauge(ax: Any, cx: float, cy: float, r: float, label: str,
+                color: str, lo: str = "", hi: str = "") -> dict[str, Any]:
+    """A semicircular meter dial; move the needle with :func:`_set_gauge`.
+
+    ``lo``/``hi`` are optional scale-endpoint labels (left and right end of
+    the arc), so a reader can anchor the needle position to numbers.
+    """
+    from matplotlib.patches import Arc
+
+    ax.add_patch(Arc((cx, cy), 2 * r, 2 * r, theta1=0.0, theta2=180.0,
+                     edgecolor=COLOR_FG, lw=1.4))
+    for frac in np.linspace(0.0, 1.0, 5):
+        a = np.pi * (1.0 - float(frac))
+        ax.plot([cx + 0.86 * r * np.cos(a), cx + r * np.cos(a)],
+                [cy + 0.86 * r * np.sin(a), cy + r * np.sin(a)],
+                color=COLOR_FG, lw=0.8)
+    if lo:
+        ax.text(cx - 1.12 * r, cy - 0.02 * r, lo, ha="center", va="top",
+                color=COLOR_FG, fontsize=7)
+    if hi:
+        ax.text(cx + 1.12 * r, cy - 0.02 * r, hi, ha="center", va="top",
+                color=COLOR_FG, fontsize=7)
+    (needle,) = ax.plot([cx, cx - 0.78 * r], [cy, cy], color=color, lw=2.4,
+                        solid_capstyle="round")
+    ax.plot([cx], [cy], marker="o", ms=4.5, color=color)
+    ax.text(cx, cy - 0.30 * r, label, ha="center", va="top", color=color,
+            fontsize=11, fontweight="bold")
+    value = ax.text(cx, cy - 0.72 * r, "", ha="center", va="top",
+                    color=COLOR_FG, fontsize=9, family="monospace")
+    return {"needle": needle, "value": value, "cx": cx, "cy": cy, "r": r}
+
+
+def _set_gauge(gauge: dict[str, Any], frac: float, text: str) -> tuple[Any, Any]:
+    """Point the needle at ``frac`` in [0, 1] (left to right) + set readout."""
+    a = np.pi * (1.0 - float(np.clip(frac, 0.0, 1.0)))
+    cx, cy, r = gauge["cx"], gauge["cy"], gauge["r"]
+    gauge["needle"].set_data([cx, cx + 0.78 * r * np.cos(a)],
+                             [cy, cy + 0.78 * r * np.sin(a)])
+    gauge["value"].set_text(text)
+    return gauge["needle"], gauge["value"]
+
+
+def _flow_box(ax: Any, cx: float, cy: float, w: float, h: float,
+              title: str) -> dict[str, Any]:
+    """A processing-pipeline box, dimmed until :func:`_light_box` lights it."""
+    from matplotlib.patches import FancyBboxPatch
+
+    from matplotlib.colors import to_rgba
+
+    box = FancyBboxPatch((cx - w / 2, cy - h / 2), w, h,
+                         boxstyle="round,pad=0.05,rounding_size=0.12",
+                         facecolor="none",
+                         edgecolor=to_rgba(COLOR_FG, 0.35), lw=1.6)
+    ax.add_patch(box)
+    title_t = ax.text(cx, cy + 0.22 * h, title, ha="center", va="center",
+                      color=COLOR_FG, alpha=0.55, fontsize=9)
+    value_t = ax.text(cx, cy - 0.22 * h, "", ha="center", va="center",
+                      color=COLOR_FG, fontsize=9, fontweight="bold",
+                      family="monospace")
+    return {"box": box, "title": title_t, "value": value_t}
+
+
+def _light_box(box: dict[str, Any], value: str, color: str,
+               fill: bool = False) -> None:
+    """Light a pipeline box up: colored edge, full-strength title, a value."""
+    from matplotlib.colors import to_rgba
+
+    box["box"].set_edgecolor(color)
+    box["box"].set_linewidth(2.2)
+    box["box"].set_facecolor(to_rgba(color, 0.15) if fill else "none")
+    box["title"].set_alpha(1.0)
+    box["value"].set_text(value)
+    box["value"].set_color(color)
+
+
+def _dim_box(box: dict[str, Any]) -> None:
+    """Return a pipeline box to its dimmed, not-yet-evaluated state."""
+    from matplotlib.colors import to_rgba
+
+    box["box"].set_edgecolor(to_rgba(COLOR_FG, 0.35))
+    box["box"].set_linewidth(1.6)
+    box["box"].set_facecolor("none")
+    box["title"].set_alpha(0.55)
+    box["value"].set_text("")
+
+
+def _make_arrow(ax: Any, color: str, scale: float = 14.0) -> Any:
+    """An updatable arrow patch; reposition it with ``set_positions``."""
+    from matplotlib.patches import FancyArrowPatch
+
+    arrow = FancyArrowPatch((0.0, 0.0), (0.0, 0.0), arrowstyle="-|>",
+                            mutation_scale=scale, color=color, lw=2.0,
+                            shrinkA=0.0, shrinkB=0.0)
+    ax.add_patch(arrow)
+    return arrow
+
+
+def _draw_resistor(ax: Any, x0: float, x1: float, y: float) -> None:
+    """A zigzag resistor symbol on a horizontal wire from *x0* to *x1*."""
+    n = 6
+    xs = np.linspace(x0, x1, 2 * n + 1)
+    ys = np.full(xs.size, y)
+    ys[1:-1] = y + 0.22 * np.where(np.arange(1, 2 * n) % 2 == 1, 1.0, -1.0)
+    ax.plot(xs, ys, color=COLOR_FG, lw=1.4)
+
+
+def _extract_poster(webm: str) -> str:
+    """Extract the deferred-loading poster still from a rendered WebM.
+
+    The frame is grabbed half a second before the end of the clip, i.e.
+    inside the closing hold, so the poster shows the settled verdict state.
+    The output sits next to the WebM as ``<stem>_poster.jpg``; JPEG keeps it
+    outside the SVG/PNG figure pipeline (`make graphs` deletion glob and the
+    scripts/check_figures.py regeneration compare).
+    """
+    import subprocess
+
+    poster = webm.removesuffix(".webm") + "_poster.jpg"
+    subprocess.run(
+        ["ffmpeg", "-y", "-loglevel", "error", "-sseof", "-0.5", "-i", webm,
+         "-frames:v", "1", "-q:v", "3", "-update", "1", poster],
+        check=True)
+    return poster
+
+
+def generate_posters(output_dir: str) -> None:
+    """Re-extract every animation poster from the already-rendered WebMs.
+
+    Used by ``--posters`` (`make posters`) to refresh the stills without the
+    slow re-encode of the clips themselves.
+    """
+    import glob
+
+    webms = sorted(glob.glob(os.path.join(output_dir, "anim_*.webm")))
+    if not webms:
+        raise RuntimeError(f"no anim_*.webm files found in {output_dir}; "
+                           "run `make animations` first")
+    for webm in webms:
+        poster = _extract_poster(webm)
+        print(f"  {os.path.basename(webm)} -> {os.path.basename(poster)}")
 
 
 def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
-                    make_gif: bool = True) -> None:
-    """Write *anim* to WebM (always) and, for English, an animated GIF.
+                    make_gif: bool = True, *, fps: int | None = None,
+                    gif_fps: int | None = None) -> None:
+    """Write *anim* to WebM (always), its poster JPEG and, for English, a GIF.
 
     The GIF is derived from the just-written WebM with an ffmpeg palette pass
     so the GitHub docs get a compact, self-contained loop; the site embeds the
-    WebM directly. ``savefig.bbox`` is forced to ``standard`` so every frame
-    keeps the same canvas size (a ``tight`` box would jitter and break the
-    encoder).
+    WebM directly. Every WebM variant also gets a ``_poster.jpg`` still (see
+    :func:`_extract_poster`) so the site ``<video>`` embeds can defer loading
+    (``preload="none"``) behind a meaningful frame. ``fps`` overrides the
+    shared WebM rate and ``gif_fps`` the GIF sampling rate (long clips drop
+    GIF frames to stay within GitHub-friendly file sizes). ``savefig.bbox``
+    is forced to ``standard`` so every frame keeps the same canvas size (a
+    ``tight`` box would jitter and break the encoder).
     """
     import subprocess
 
@@ -6423,18 +6677,20 @@ def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
 
     webm = _anim_path(output_dir, stem, "webm")
     writer = FFMpegWriter(
-        fps=_ANIM_FPS, codec="libvpx-vp9",
+        fps=_ANIM_FPS if fps is None else fps, codec="libvpx-vp9",
         extra_args=["-b:v", "0", "-crf", "40", "-pix_fmt", "yuv420p",
                     "-an", "-loglevel", "error"],
     )
     with plt.rc_context({"savefig.bbox": "standard"}):
         anim.save(webm, writer=writer, dpi=_ANIM_DPI,
                   savefig_kwargs={"facecolor": fig.get_facecolor()})
+    _extract_poster(webm)
     made_gif = False
     if make_gif and _LANG == "en":
         gif = _anim_path(output_dir, stem, "gif")
         palette = os.path.join(output_dir, f".{stem}{_FILENAME_SUFFIX}_pal.png")
-        vf = f"fps={_GIF_FPS},scale={_GIF_SCALE}:-1:flags=lanczos"
+        vf = (f"fps={_GIF_FPS if gif_fps is None else gif_fps},"
+              f"scale={_GIF_SCALE}:-1:flags=lanczos")
         subprocess.run(
             ["ffmpeg", "-y", "-loglevel", "error", "-i", webm, "-vf",
              f"{vf},palettegen=max_colors={_GIF_COLORS}:stats_mode=diff",
@@ -6448,12 +6704,14 @@ def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
         made_gif = True
     plt.close(fig)
     theme = "dark" if _FILENAME_SUFFIX else "light"
-    print(f"  {stem} [{_LANG} {theme}] -> webm" + (" + gif" if made_gif else ""))
+    print(f"  {stem} [{_LANG} {theme}] -> webm + poster"
+          + (" + gif" if made_gif else ""))
 
 
 def animate_time_weighting_ballistics(output_dir: str) -> None:
-    """F/S/I exponential detectors chasing a tone burst (IEC 61672-1)."""
-    from matplotlib.animation import FuncAnimation
+    """A tone burst through the IEC 61672-1 RC detector: the capacitor fills
+    and drains while the F/S/I meter needles follow their own ballistics."""
+    from matplotlib.patches import FancyBboxPatch, Rectangle
 
     from phonometry import time_weighting
 
@@ -6467,50 +6725,168 @@ def animate_time_weighting_ballistics(output_dir: str) -> None:
     x = np.zeros_like(t)
     on = (t >= 1.0) & (t < 2.5)
     x[on] = np.sin(2 * np.pi * 250 * t[on])
-    ref = 0.5  # mean square of a unit-amplitude tone
-    fast = time_weighting(x, fs, mode="fast") / ref
-    slow = time_weighting(x, fs, mode="slow") / ref
-    imp = time_weighting(x, fs, mode="impulse") / ref
+    # Each detector is normalized to its own steady reading of the burst, so
+    # the clip compares pure ballistics: a real meter shows the same level on
+    # F, S and I for a steady tone (the asymmetric Impulse kernel otherwise
+    # rides the carrier ripple toward its peaks and would sit ~2.6 dB high).
+    i_ss = int(2.45 * fs)   # inside the burst, all detectors settled
+    fast = time_weighting(x, fs, mode="fast")
+    slow = time_weighting(x, fs, mode="slow")
+    imp = time_weighting(x, fs, mode="impulse")
+    fast /= fast[i_ss]
+    slow /= 0.5             # Slow has not settled by 2.45 s; use the tone MS
+    imp /= imp[i_ss]
+    # Slope of the Fast output for the charging/draining indicator, smoothed
+    # over 50 ms so the residual 500 Hz detector ripple cannot flip its sign.
+    kernel = np.ones(400) / 400.0
+    dfast = np.gradient(np.convolve(fast, kernel, mode="same"), t)
+    col_imp = "#7e57c2"
 
-    fig, ax = _new_anim_fig()
-    ax.set_xlim(0.6, 4.0)
-    ax.set_ylim(0, 1.2)
-    ax.axvspan(1.0, 2.5, color=COLOR_GRID, alpha=0.4, lw=0)
-    ax.text(1.75, 1.14, T("tone burst"), ha="center", va="top", color=COLOR_FG,
-            fontsize=9, alpha=0.8)
-    (l_f,) = ax.plot([], [], color=COLOR_PRIMARY, lw=2.2, label=T("Fast (125 ms)"))
-    (l_s,) = ax.plot([], [], color=COLOR_SECONDARY, lw=2.2, label=T("Slow (1000 ms)"))
-    (l_i,) = ax.plot([], [], color="#7e57c2", lw=1.8, ls="-.",
-                     label=T("Impulse (35 ms / 1.5 s)"))
-    cursor = ax.axvline(0.6, color=COLOR_FG, lw=1.0, alpha=0.45)
-    readout = ax.text(0.985, 0.96, "", transform=ax.transAxes, ha="right",
-                      va="top", family="monospace", fontsize=11, color=COLOR_FG)
-    ax.set_title(T("Time-weighting ballistics (IEC 61672-1)"), fontweight="bold")
-    ax.set_xlabel(T("Time [s]"))
-    ax.set_ylabel(T("Mean-square response (normalized)"))
-    ax.legend(loc="upper left", fontsize=9)
+    fig = _anim_figure()
+    fig.suptitle(T("Time-weighting ballistics (IEC 61672-1)"),
+                 fontweight="bold")
+    gs = fig.add_gridspec(2, 2, width_ratios=[1.0, 1.35],
+                          height_ratios=[1.0, 1.15])
+    ax_s = fig.add_subplot(gs[:, 0])
+    _schematic_axes(ax_s, (0.0, 10.0), (0.0, 10.0))
+    ax_g = fig.add_subplot(gs[0, 1])
+    _schematic_axes(ax_g, (0.0, 3.4), (-0.55, 0.68), equal=True)
+    ax_t = fig.add_subplot(gs[1, 1])
+    _grid_axes(ax_t)
 
-    tmin, tmax = 0.6, 4.0
+    # --- schematic: input strip feeding the square-law + RC detector ------
+    ax_s.text(5.0, 10.0, T("RC exponential detector"), ha="center", va="top",
+              color=COLOR_FG, fontsize=11, fontweight="bold")
+    # Display carrier slowed to ~4 Hz so the burst reads as a waveform, not
+    # a filled block (the detectors run on the real 250 Hz burst).
+    x_vis = np.where(on, np.sin(2 * np.pi * 4.0 * t), 0.0)
+    ax_s.plot(0.6 + 8.8 * t[::4] / 4.0, 8.2 + 0.7 * x_vis[::4],
+              color=COLOR_PRIMARY, lw=1.0, alpha=0.9)
+    ax_s.text(9.4, 9.05, T("input x(t)"), ha="right", va="bottom",
+              color=COLOR_FG, fontsize=9)
+    (strip_cur,) = ax_s.plot([0.6, 0.6], [7.4, 9.0], color=COLOR_FG,
+                             lw=1.2, alpha=0.7)
+    ax_s.annotate("", xy=(0.6, 6.0), xytext=(0.6, 7.3),
+                  arrowprops={"arrowstyle": "-|>", "color": COLOR_FG, "lw": 1.2})
+    wire = {"color": COLOR_FG, "lw": 1.4}
+    ax_s.plot([0.6, 1.3], [5.6, 5.6], **wire)
+    ax_s.add_patch(FancyBboxPatch((1.3, 5.0), 1.4, 1.2,
+                                  boxstyle="round,pad=0.04",
+                                  facecolor="none", edgecolor=COLOR_FG, lw=1.4))
+    ax_s.text(2.0, 5.6, "$x^2$", ha="center", va="center", color=COLOR_FG,
+              fontsize=13)
+    ax_s.text(2.0, 4.55, T("square-law rectifier"), ha="center", va="top",
+              color=COLOR_FG, fontsize=8.5)
+    ax_s.plot([2.7, 3.2], [5.6, 5.6], **wire)
+    _draw_resistor(ax_s, 3.2, 5.0, 5.6)
+    ax_s.text(4.1, 6.1, "R", ha="center", va="bottom", color=COLOR_FG,
+              fontsize=11)
+    ax_s.plot([5.0, 8.1], [5.6, 5.6], **wire)
+    ax_s.plot([6.3], [5.6], marker="o", ms=4, color=COLOR_FG)
+    ax_s.annotate("", xy=(9.0, 5.6), xytext=(8.1, 5.6),
+                  arrowprops={"arrowstyle": "-|>", "color": COLOR_FG, "lw": 1.4})
+    ax_s.text(8.55, 6.0, r"$10\,\log_{10}$", ha="center", va="bottom",
+              color=COLOR_FG, fontsize=9)
+    ax_s.text(9.15, 5.6, "dB", ha="left", va="center", color=COLOR_FG,
+              fontsize=10)
+    # capacitor drawn as a tank so its state of charge is visible
+    ax_s.plot([6.3, 6.3], [5.6, 4.7], **wire)
+    ax_s.plot([5.6, 7.0], [4.7, 4.7], color=COLOR_FG, lw=2.2)
+    ax_s.plot([5.6, 7.0], [3.2, 3.2], color=COLOR_FG, lw=2.2)
+    ax_s.text(7.2, 3.95, "C", ha="left", va="center", color=COLOR_FG,
+              fontsize=11)
+    # tank walls, animated fill and a liquid-level line so partial charge
+    # reads as partial even in a still frame
+    for xw in (5.6, 7.0):
+        ax_s.plot([xw, xw], [3.2, 4.7], color=COLOR_GRID, lw=1.0, ls=":")
+    cap_fill = Rectangle((5.62, 3.24), 1.36, 0.0, facecolor=COLOR_PRIMARY,
+                         alpha=0.8 if _FILENAME_SUFFIX else 0.55,
+                         edgecolor="none")
+    ax_s.add_patch(cap_fill)
+    (cap_level,) = ax_s.plot([5.62, 6.98], [3.24, 3.24], color=COLOR_PRIMARY,
+                             lw=2.0)
+    ax_s.plot([6.3, 6.3], [3.2, 2.62], **wire)
+    for gw, gy in ((0.7, 2.62), (0.44, 2.48), (0.18, 2.34)):
+        ax_s.plot([6.3 - gw / 2, 6.3 + gw / 2], [gy, gy], color=COLOR_FG,
+                  lw=1.4)
+    ax_s.text(6.3, 2.05, T("stored charge (Fast shown)"), ha="center",
+              va="top", color=COLOR_FG, fontsize=8.5)
+    charge_arrow = _make_arrow(ax_s, COLOR_TERTIARY, scale=12.0)
+    charge_txt = ax_s.text(4.95, 3.9, "", ha="right", va="center",
+                           color=COLOR_FG, fontsize=8.5)
+    ax_s.text(5.0, 1.3, T("τ = RC sets attack and decay"), ha="center",
+              va="center", color=COLOR_FG, fontsize=9)
+    ax_s.text(5.0, 0.6, "F 125 ms · S 1000 ms · I 35/1500 ms", ha="center",
+              va="center", color=COLOR_FG, fontsize=8.5, alpha=0.85)
+
+    # --- meter gauges + response traces -----------------------------------
+    # One shared 0..1.2 scale, spelled out on the first dial only (the
+    # endpoint labels of adjacent dials would otherwise collide).
+    gauges = [_make_gauge(ax_g, 0.6, 0.0, 0.5, "F", COLOR_PRIMARY,
+                          lo="0", hi="1.2"),
+              _make_gauge(ax_g, 1.7, 0.0, 0.5, "S", COLOR_SECONDARY),
+              _make_gauge(ax_g, 2.8, 0.0, 0.5, "I", col_imp)]
+    ax_t.set_xlim(0.5, 4.0)
+    ax_t.set_ylim(0, 1.25)
+    ax_t.axvspan(1.0, 2.5, color=COLOR_GRID, alpha=0.4, lw=0)
+    ax_t.text(1.75, 1.19, T("tone burst"), ha="center", va="top",
+              color=COLOR_FG, fontsize=8.5, alpha=0.8)
+    (l_f,) = ax_t.plot([], [], color=COLOR_PRIMARY, lw=2.0,
+                       label=T("Fast (125 ms)"))
+    (l_s,) = ax_t.plot([], [], color=COLOR_SECONDARY, lw=2.0,
+                       label=T("Slow (1000 ms)"))
+    (l_i,) = ax_t.plot([], [], color=col_imp, lw=1.7, ls="-.",
+                       label=T("Impulse (35 ms / 1.5 s)"))
+    cursor = ax_t.axvline(0.5, color=COLOR_FG, lw=1.0, alpha=0.45)
+    ax_t.set_xlabel(T("Time [s]"))
+    ax_t.set_ylabel(T("Mean-square response (normalized)"), fontsize=8)
+    ax_t.legend(loc="upper right", fontsize=7.5)
+
+    tmin, tmax = 0.5, 4.0
+    # Sweep the burst-and-decay, then hold the settled three-trace comparison.
+    sweep = _ANIM_FRAMES - _ANIM_HOLD
 
     def update(k: int) -> tuple[Any, ...]:
-        tc = tmin + (tmax - tmin) * k / (_ANIM_FRAMES - 1)
+        tc = tmin + (tmax - tmin) * min(k, sweep - 1) / (sweep - 1)
+        i = max(0, min(t.size - 1, int(round(tc * fs))))
+        xc = 0.6 + 8.8 * tc / 4.0
+        strip_cur.set_data([xc, xc], [7.4, 9.0])
+        level = 3.24 + 1.42 * min(float(fast[i]), 1.02)
+        cap_fill.set_height(level - 3.24)
+        cap_level.set_data([5.62, 6.98], [level, level])
+        slope = float(dfast[i])
+        if abs(slope) > 0.05:
+            charging = slope > 0
+            charge_arrow.set_visible(True)
+            y0, y1 = (4.55, 3.35) if charging else (3.35, 4.55)
+            charge_arrow.set_positions((5.2, y0), (5.2, y1))
+            charge_arrow.set_color(COLOR_TERTIARY if charging
+                                   else COLOR_SECONDARY)
+            charge_txt.set_text(T("charging") if charging else T("draining"))
+        else:
+            charge_arrow.set_visible(False)
+            charge_txt.set_text("")
+        arts: list[Any] = [strip_cur, cap_fill, cap_level, charge_arrow,
+                           charge_txt]
+        for gauge, val in zip(gauges, (fast[i], slow[i], imp[i]), strict=True):
+            # Normalize onto the dial's 0..1.2 scale so the needle position
+            # matches the endpoint labels and the numeric readout.
+            arts += _set_gauge(gauge, float(val) / 1.2, T(f"{val:.2f}"))
         m = t <= tc
         l_f.set_data(t[m], fast[m])
         l_s.set_data(t[m], slow[m])
         l_i.set_data(t[m], imp[m])
         cursor.set_xdata([tc, tc])
-        i = max(0, min(len(t) - 1, int(round(tc * fs))))
-        readout.set_text(T(f"F {fast[i]:.2f}\nS {slow[i]:.2f}\nI {imp[i]:.2f}"))
-        return l_f, l_s, l_i, cursor, readout
+        arts += [l_f, l_s, l_i, cursor]
+        return tuple(arts)
 
-    anim = FuncAnimation(fig, update, frames=_ANIM_FRAMES,
-                         interval=1000 / _ANIM_FPS, blit=False)
-    _save_animation(anim, fig, output_dir, "anim_time_weighting")
+    _render_clip(fig, update, output_dir, "anim_time_weighting")
 
 
 def animate_onset_detection(output_dir: str) -> None:
-    """An impulse onset drawn on L_AF, with OR/LD/P/KI live (NT ACOU 112)."""
-    from matplotlib.animation import FuncAnimation
+    """The NT ACOU 112 detector scanning L_AF with a magnifier; the
+    OR -> LD -> P -> KI decision chain lights up once the onset is found."""
+    from matplotlib.patches import Ellipse
 
     from phonometry import impulse_adjustment, predicted_prominence
 
@@ -6518,116 +6894,246 @@ def animate_onset_detection(output_dir: str) -> None:
     fs = 500
     t = np.linspace(0, 3.0, int(fs * 3.0), endpoint=False)
     ls, le = 55.0, 85.0    # start and end level of the onset, dB
-    t0, rise = 1.0, 0.05   # onset at 1.0 s, lasting 50 ms
+    t0, rise = 1.0, 0.15   # onset at 1.0 s, lasting 150 ms
     laf = np.full_like(t, ls)
     ramp = (t >= t0) & (t < t0 + rise)
     laf[ramp] = ls + (le - ls) * 0.5 * (1 - np.cos(np.pi * (t[ramp] - t0) / rise))
     after = t >= t0 + rise
     laf[after] = ls + (le - ls) * np.exp(-(t[after] - t0 - rise) / 0.6)
-    onset_rate = (le - ls) / rise      # 600 dB/s
+    grad = np.gradient(laf, t)
+    onset_rate = (le - ls) / rise      # 200 dB/s
     level_diff = le - ls               # 30 dB
     prom = float(predicted_prominence(onset_rate, level_diff))
     ki = float(impulse_adjustment(prom))
-    is_onset = np.gradient(laf, t) > 10.0   # clauses 4.5-4.7
+    is_onset = grad > 10.0             # clauses 4.5-4.7
 
-    fig, ax = _new_anim_fig()
-    ax.set_xlim(0.6, 3.0)
-    ax.set_ylim(45, 95)
-    (base,) = ax.plot([], [], color=COLOR_PRIMARY, lw=2.0, label=T("L_AF history"))
-    (hot,) = ax.plot([], [], color=COLOR_SECONDARY, lw=3.6,
-                     label=T("onset (> 10 dB/s)"))
-    cursor = ax.axvline(0.6, color=COLOR_FG, lw=1.0, alpha=0.45)
-    ann = ax.text(0.985, 0.06, "", transform=ax.transAxes, ha="right",
-                  va="bottom", family="monospace", fontsize=11, color=COLOR_FG)
+    fig = _anim_figure()
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.6, 0.9])
+    ax = fig.add_subplot(gs[0])
+    _grid_axes(ax)
+    ax.set_xlim(0.55, 3.0)
+    ax.set_ylim(42, 100)
+    ax.plot(t, laf, color=COLOR_PRIMARY, lw=1.8,
+            label=T("L_AF (A-weighted, Fast)"))
+    (hot,) = ax.plot([], [], color=COLOR_SECONDARY, lw=4.0,
+                     solid_capstyle="round", label=T("onset (> 10 dB/s)"))
+    rx, ry = 0.13, 6.5
+    lens = Ellipse((0.7, ls), width=2 * rx, height=2 * ry, facecolor="none",
+                   edgecolor=COLOR_FG, lw=2.2, zorder=5)
+    ax.add_patch(lens)
+    (handle,) = ax.plot([], [], color=COLOR_FG, lw=3.2,
+                        solid_capstyle="round", zorder=5)
+    (tangent,) = ax.plot([], [], color=COLOR_FG, lw=1.6, ls="--", zorder=6)
+    lens_txt = ax.text(0.7, ls, "", ha="center", va="bottom", color=COLOR_FG,
+                       fontsize=9, zorder=6)
+    ax.text(0.02, 0.05, T("detector: onset when dL/dt > 10 dB/s"),
+            transform=ax.transAxes, ha="left", va="bottom", color=COLOR_FG,
+            fontsize=9)
     ax.set_title(T("Impulse onset detection (NT ACOU 112)"), fontweight="bold")
     ax.set_xlabel(T("Time [s]"))
-    ax.set_ylabel(T("A-weighted level L_AF [dB]"))
-    ax.legend(loc="upper right", fontsize=9)
-    tmin, tmax = 0.6, 3.0
+    ax.set_ylabel(T("A-weighted level L_AF [dB]"), fontsize=9)
+    ax.legend(loc="upper right", fontsize=8)
+
+    ax_b = fig.add_subplot(gs[1])
+    _schematic_axes(ax_b, (0.0, 10.0), (0.0, 2.3))
+    titles = [T("onset rate"), T("level difference"), T("prominence"),
+              T("adjustment")]
+    boxes = [_flow_box(ax_b, cx, 1.35, 1.95, 1.35, title)
+             for cx, title in zip((1.5, 3.9, 6.3, 8.7), titles, strict=True)]
+    for xa in (2.5, 4.9, 7.3):
+        ax_b.annotate("", xy=(xa + 0.42, 1.35), xytext=(xa, 1.35),
+                      arrowprops={"arrowstyle": "-|>", "color": COLOR_GRID,
+                                  "lw": 1.6})
+    verdict = ax_b.text(5.0, 0.28, "", ha="center", va="center",
+                        color=COLOR_SECONDARY, fontsize=10, fontweight="bold")
+    values = (f"OR = {onset_rate:.0f} dB/s", f"LD = {level_diff:.0f} dB",
+              f"P = {prom:.1f}", f"KI = {ki:.1f} dB")
+
+    # Nonuniform sweep: slow motion while the magnifier crosses the onset.
+    # The sweep ends _ANIM_HOLD frames early; np.interp clamps past the last
+    # knot, so the lit OR -> LD -> P -> KI chain and the verdict hold ~2 s.
+    end_k = float(_ANIM_FRAMES - 1 - _ANIM_HOLD)
+    knots_k = (0.0, 0.22 * end_k, 0.52 * end_k, end_k)
+    knots_t = (0.62, 0.985, 1.19, 3.0)
 
     def update(k: int) -> tuple[Any, ...]:
-        tc = tmin + (tmax - tmin) * k / (_ANIM_FRAMES - 1)
-        m = t <= tc
-        base.set_data(t[m], laf[m])
-        oh = m & is_onset
-        hot.set_data(t[oh], laf[oh])
-        cursor.set_xdata([tc, tc])
-        if tc >= t0 + rise:
-            ann.set_text(T(f"OR {onset_rate:.0f} dB/s\nLD {level_diff:.0f} dB\n"
-                           f"P {prom:.1f}\nKI {ki:.1f} dB"))
-        else:
-            ann.set_text(T("listening…"))
-        return base, hot, cursor, ann
+        tc = float(np.interp(k, knots_k, knots_t))
+        i = max(0, min(t.size - 1, int(round(tc * fs))))
+        y0, g = float(laf[i]), float(grad[i])
+        detecting = g > 10.0
+        color = COLOR_SECONDARY if detecting else COLOR_FG
+        lens.set_center((tc, y0))
+        lens.set_edgecolor(color)
+        dxl = rx * 0.72
+        if abs(g) * dxl > ry * 0.72:
+            dxl = ry * 0.72 / abs(g)
+        tangent.set_data([tc - dxl, tc + dxl], [y0 - g * dxl, y0 + g * dxl])
+        tangent.set_color(color)
+        handle.set_data([tc + rx * 0.75, tc + rx * 1.9],
+                        [y0 - ry * 0.75, y0 - ry * 1.9])
+        lens_txt.set_position((tc, y0 + ry * 1.35))
+        lens_txt.set_text(T(f"dL/dt = {g:.0f} dB/s"))
+        lens_txt.set_color(color)
+        hot_m = (t <= tc) & is_onset
+        hot.set_data(t[hot_m], laf[hot_m])
+        arts: list[Any] = [lens, handle, tangent, lens_txt, hot]
+        for j, (box, val) in enumerate(zip(boxes, values, strict=True)):
+            if tc >= 1.3 + 0.4 * j:
+                _light_box(box, T(val),
+                           COLOR_SECONDARY if j == 3 else COLOR_PRIMARY,
+                           fill=j == 3)
+            else:
+                _dim_box(box)
+            arts += [box["box"], box["title"], box["value"]]
+        verdict.set_text(T("add KI to the rating level") if tc >= 2.6 else "")
+        arts.append(verdict)
+        return tuple(arts)
 
-    anim = FuncAnimation(fig, update, frames=_ANIM_FRAMES,
-                         interval=1000 / _ANIM_FPS, blit=False)
-    _save_animation(anim, fig, output_dir, "anim_onset_detection")
+    _render_clip(fig, update, output_dir, "anim_onset_detection")
 
 
 def animate_instantaneous_intensity(output_dir: str) -> None:
-    """Instantaneous p·u: a progressive wave flows, a standing wave sloshes."""
-    from matplotlib.animation import FuncAnimation
+    """A p-p probe with p/u phasors: the instantaneous intensity arrow flips
+    while its running average settles to net flow (active) or zero (reactive)."""
+    from matplotlib.patches import Circle
 
     T = _translate_str
     t = np.linspace(0, 3.0, 600)
     w = 2 * np.pi * 2.0
     # Progressive: p and u in phase -> p·u >= 0, non-zero mean (net flow).
     # Standing (at a point): p and u 90 deg out of phase -> p·u averages zero.
-    panels_data = [
-        ("Progressive wave — net power flows",
-         np.sin(w * t), np.sin(w * t)),
-        ("Standing wave — energy sloshes",
-         np.cos(w * t), np.sin(w * t)),
+    cases = [
+        (T("Progressive wave — active"), 0.0, T("p and u in phase")),
+        (T("Standing wave — reactive"), np.pi / 2, T("p and u 90° apart")),
     ]
-    fig, axes = plt.subplots(1, 2, figsize=_ANIM_FIGSIZE, dpi=_ANIM_DPI,
-                             layout="constrained", sharey=True)
-    panels = []
-    for ax, (title, p, u) in zip(axes, panels_data, strict=True):
-        ax.grid(True, color=COLOR_GRID, linestyle="--", alpha=0.5)
-        ax.set_xlim(0, 3.0)
-        ax.set_ylim(-1.15, 1.15)
-        ax.plot(t, p, color=COLOR_PRIMARY, alpha=0.35, lw=1.2, label=T("pressure p"))
-        ax.plot(t, u, color=COLOR_TERTIARY, alpha=0.35, lw=1.2,
-                label=T("velocity u"))
-        (iline,) = ax.plot([], [], color=COLOR_SECONDARY, lw=2.0,
-                           label=T("intensity p·u"))
-        mline = ax.axhline(0.0, color=COLOR_FG, ls="--", lw=1.0, alpha=0.65)
-        cursor = ax.axvline(0.0, color=COLOR_FG, lw=1.0, alpha=0.4)
-        txt = ax.text(0.5, 0.02, "", transform=ax.transAxes, ha="center",
-                      va="bottom", family="monospace", fontsize=10, color=COLOR_FG)
-        ax.set_title(T(title), fontweight="bold", fontsize=11)
-        ax.set_xlabel(T("Time [s]"))
-        ax.legend(loc="upper right", fontsize=8)
-        panels.append({"ax": ax, "I": p * u, "iline": iline, "mline": mline,
-                       "cursor": cursor, "txt": txt, "fill": None})
-    axes[0].set_ylabel(T("amplitude (normalized)"))
-    fig.suptitle(T("Instantaneous sound intensity p·u"), fontweight="bold")
+    fig = _anim_figure()
+    fig.suptitle(T("Two-microphone p-p probe: instantaneous intensity p·u"),
+                 fontweight="bold")
+    gs = fig.add_gridspec(2, 2, height_ratios=[1.15, 1.0])
+    dial_c, dial_r = (1.55, 3.05), 1.25
+    i_axis_y, i_scale = 1.05, 2.35
+    panels: list[dict[str, Any]] = []
+    for col, (title, phi, caption) in enumerate(cases):
+        ax_s = fig.add_subplot(gs[0, col])
+        _schematic_axes(ax_s, (0.0, 10.0), (0.0, 4.9), equal=True)
+        ax_s.set_title(title, fontsize=10.5, fontweight="bold")
+        ax_s.add_patch(Circle(dial_c, dial_r, facecolor="none",
+                              edgecolor=COLOR_GRID, lw=1.2))
+        p_ph = _make_arrow(ax_s, COLOR_PRIMARY, scale=11.0)
+        u_ph = _make_arrow(ax_s, COLOR_TERTIARY, scale=11.0)
+        ax_s.text(dial_c[0] - dial_r - 0.15, dial_c[1] + dial_r - 0.15, "p",
+                  color=COLOR_PRIMARY, fontsize=11, ha="right", va="center",
+                  fontweight="bold")
+        ax_s.text(dial_c[0] - dial_r - 0.15, dial_c[1] - dial_r + 0.15, "u",
+                  color=COLOR_TERTIARY, fontsize=11, ha="right", va="center",
+                  fontweight="bold")
+        ax_s.text(dial_c[0], 1.45, caption, ha="center", va="top",
+                  color=COLOR_FG, fontsize=8.5)
+        _draw_mic(ax_s, 4.6, 3.4, direction=1, size=1.05, label="$p_1$")
+        _draw_mic(ax_s, 7.4, 3.4, direction=-1, size=1.05, label="$p_2$")
+        ax_s.annotate("", xy=(6.85, 2.6), xytext=(5.15, 2.6),
+                      arrowprops={"arrowstyle": "<->", "color": COLOR_FG,
+                                  "lw": 1.0})
+        ax_s.text(6.0, 2.38, T("spacer Δr"), ha="center", va="top",
+                  color=COLOR_FG, fontsize=8.5)
+        ax_s.plot([3.4, 8.6], [i_axis_y, i_axis_y], color=COLOR_GRID,
+                  lw=1.0, ls="--")
+        ax_s.plot([6.0, 6.0], [i_axis_y - 0.15, i_axis_y + 0.15],
+                  color=COLOR_FG, lw=1.0, alpha=0.7)
+        ax_s.text(6.0, i_axis_y + 0.22, "0", ha="center", va="bottom",
+                  color=COLOR_FG, fontsize=8, alpha=0.8)
+        ax_s.text(3.15, i_axis_y, "−", ha="right", va="center",
+                  color=COLOR_FG, fontsize=10, alpha=0.8)
+        ax_s.text(8.85, i_axis_y, "+", ha="left", va="center",
+                  color=COLOR_FG, fontsize=10, alpha=0.8)
+        ax_s.text(3.4, 1.55, T("I(t) = p·u"), ha="left", va="bottom",
+                  color=COLOR_SECONDARY, fontsize=9)
+        i_arrow = _make_arrow(ax_s, COLOR_SECONDARY, scale=16.0)
+        (mean_marker,) = ax_s.plot([], [], marker="^", ms=7, color=COLOR_FG)
+        mean_lab = ax_s.text(6.0, 0.42, "⟨I⟩", ha="center", va="top",
+                             color=COLOR_FG, fontsize=8.5)
+
+        ax_tr = fig.add_subplot(gs[1, col])
+        _grid_axes(ax_tr)
+        ax_tr.set_xlim(0, 3.0)
+        ax_tr.set_ylim(-1.15, 1.15)
+        p_sig = np.cos(w * t)
+        u_sig = np.cos(w * t - phi)
+        ax_tr.plot(t, p_sig, color=COLOR_PRIMARY, alpha=0.55, lw=1.1,
+                   label=T("pressure p"))
+        ax_tr.plot(t, u_sig, color=COLOR_TERTIARY, alpha=0.55, lw=1.1,
+                   label=T("velocity u"))
+        (iline,) = ax_tr.plot([], [], color=COLOR_SECONDARY, lw=2.0,
+                              label=T("intensity p·u"))
+        mline = ax_tr.axhline(0.0, color=COLOR_FG, ls="--", lw=1.1, alpha=0.7)
+        txt = ax_tr.text(0.5, 0.02, "", transform=ax_tr.transAxes,
+                         ha="center", va="bottom", family="monospace",
+                         fontsize=10, color=COLOR_FG)
+        ax_tr.set_xlabel(T("Time [s]"))
+        if col == 0:
+            ax_tr.set_ylabel(T("amplitude (normalized)"), fontsize=9)
+        ax_tr.legend(loc="upper right", fontsize=7.5)
+        panels.append({"ax": ax_tr, "phi": phi, "I": p_sig * u_sig,
+                       "p_ph": p_ph, "u_ph": u_ph, "i_arrow": i_arrow,
+                       "mean_marker": mean_marker, "mean_lab": mean_lab,
+                       "iline": iline, "mline": mline, "txt": txt,
+                       "fill": None})
+
+    # Six carrier periods sweep by, then the settled averages (net flow vs
+    # zero) hold so the active/reactive contrast can be read.
+    sweep = _ANIM_FRAMES - _ANIM_HOLD
 
     def update(k: int) -> tuple[Any, ...]:
-        tc = 3.0 * k / (_ANIM_FRAMES - 1)
+        tc = 3.0 * min(k, sweep - 1) / (sweep - 1)
+        idx = max(1, int(np.searchsorted(t, tc)))
+        # Average over whole periods once one is complete, so the reactive
+        # mean pins to exactly zero instead of hovering near it.
+        n_per = np.floor(tc * 2.0)
+        idx_mean = idx if n_per < 1 else max(1, int(np.searchsorted(
+            t, float(n_per) / 2.0)))
+        ph = w * tc
+        cx, cy = dial_c
         arts: list[Any] = []
         for pn in panels:
-            idx = max(1, int(np.searchsorted(t, tc)))
+            pv = float(np.cos(ph))
+            uv = float(np.cos(ph - pn["phi"]))
+            pn["p_ph"].set_positions(
+                (cx, cy), (cx + 1.05 * dial_r * np.cos(ph),
+                           cy + 1.05 * dial_r * np.sin(ph)))
+            pn["u_ph"].set_positions(
+                (cx, cy), (cx + 0.88 * dial_r * np.cos(ph - pn["phi"]),
+                           cy + 0.88 * dial_r * np.sin(ph - pn["phi"])))
+            ival = pv * uv
+            tip = 6.0 + i_scale * ival
+            if abs(tip - 6.0) < 1e-3:
+                tip = 6.0 + 1e-3
+            pn["i_arrow"].set_positions((6.0, i_axis_y), (tip, i_axis_y))
+            mean = float(np.mean(pn["I"][:idx_mean]))
+            if abs(mean) < 5e-3:
+                mean = 0.0     # avoid a distracting "-0.00" readout
+            xm = 6.0 + i_scale * mean
+            pn["mean_marker"].set_data([xm], [i_axis_y - 0.22])
+            pn["mean_lab"].set_position((xm, i_axis_y - 0.5))
             pn["iline"].set_data(t[:idx], pn["I"][:idx])
             if pn["fill"] is not None:
                 pn["fill"].remove()
             pn["fill"] = pn["ax"].fill_between(t[:idx], 0.0, pn["I"][:idx],
-                                               color=COLOR_SECONDARY, alpha=0.22)
-            mean = float(np.mean(pn["I"][:idx]))
+                                               color=COLOR_SECONDARY,
+                                               alpha=0.22)
             pn["mline"].set_ydata([mean, mean])
-            pn["cursor"].set_xdata([tc, tc])
             pn["txt"].set_text(T(f"⟨p·u⟩ = {mean:+.2f}"))
-            arts += [pn["iline"], pn["fill"], pn["mline"], pn["cursor"], pn["txt"]]
+            arts += [pn["p_ph"], pn["u_ph"], pn["i_arrow"],
+                     pn["mean_marker"], pn["mean_lab"],
+                     pn["iline"], pn["fill"], pn["mline"], pn["txt"]]
         return tuple(arts)
 
-    anim = FuncAnimation(fig, update, frames=_ANIM_FRAMES,
-                         interval=1000 / _ANIM_FPS, blit=False)
-    _save_animation(anim, fig, output_dir, "anim_instantaneous_intensity")
+    _render_clip(fig, update, output_dir, "anim_instantaneous_intensity")
 
 
 def animate_schroeder(output_dir: str) -> None:
-    """Backward integration of p²(t) revealing the decay curve (ISO 3382)."""
-    from matplotlib.animation import FuncAnimation
+    """Backward integration of p²(t): the tail energy fills up on one axis
+    while the decay curve and its T20/T30 fits emerge on a companion axis."""
+    from matplotlib.patches import Patch
 
     from phonometry import decay_curve, room_parameters
     from phonometry.room.room_acoustics import _T20_RANGE, _T30_RANGE, _onset_index
@@ -6670,52 +7176,220 @@ def animate_schroeder(output_dir: str) -> None:
                      (-intercept / slope, (-60.0 - intercept) / slope)))
     tmax = float(time.max())
     xmax = max([tmax, *(f[3][1] for f in fits)]) * 1.03
+    # Tail-energy fraction E(t)/E(0) on the onset-trimmed squared IR, and a
+    # display-decimated copy of the raw level for the mechanism panel.
+    cum = np.cumsum(p2[::-1])[::-1]
+    e_frac = cum / cum[0]
+    ds = slice(None, None, 8)
 
-    fig, ax = _new_anim_fig()
-    ax.set_xlim(0, xmax)
-    ax.set_ylim(-65, 3)
-    ax.plot(t_raw, raw_db, color="gray", alpha=0.25, lw=0.6,
-            label=T("Raw squared IR level"))
-    (curve,) = ax.plot([], [], color=COLOR_PRIMARY, lw=2.4,
-                       label=T("Schroeder decay curve"))
+    fig = _anim_figure()
+    fig.suptitle(T("Schroeder backward integration (ISO 3382)"),
+                 fontweight="bold")
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.0, 1.3])
+    ax_e = fig.add_subplot(gs[0])
+    _grid_axes(ax_e)
+    ax_e.set_xlim(0, xmax)
+    ax_e.set_ylim(-65, 3)
+    ax_e.tick_params(labelbottom=False)
+    sweep_max = float(t_raw[-1])   # start the front at the very end of p²
+    fill_alpha = 0.5 if _FILENAME_SUFFIX else 0.35
+    ax_e.plot(t_raw[ds], raw_db[ds], color="gray", alpha=0.4, lw=0.6)
+    e_fill = {"art": None}
+    front_e = ax_e.axvline(sweep_max, color=COLOR_FG, lw=1.3, alpha=0.55)
+    front_txt = ax_e.text(sweep_max, -8.0, T("← integrate from the tail"),
+                          ha="left", va="top", color=COLOR_FG, fontsize=9)
+    e_txt = ax_e.text(0.02, 0.06, "", transform=ax_e.transAxes, ha="left",
+                      va="bottom", family="monospace", fontsize=10,
+                      color=COLOR_FG)
+    ax_e.set_ylabel(T("Level [dB]"), fontsize=9)
+    ax_e.legend(handles=[
+        Patch(facecolor="gray", alpha=0.4,
+              label=T("squared impulse response p²")),
+        Patch(facecolor=COLOR_SECONDARY, alpha=fill_alpha,
+              label=T("tail energy") + r"  $E(t)=\int_t^{\infty}p^2\,d\tau$"),
+    ], loc="upper right", fontsize=8.5)
+
+    ax_d = fig.add_subplot(gs[1], sharex=ax_e)
+    _grid_axes(ax_d)
+    ax_d.set_ylim(-65, 3)
+    (curve,) = ax_d.plot([], [], color=COLOR_PRIMARY, lw=2.4,
+                         label=T("Schroeder decay curve"))
+    # The fit lines only exist in the closing frames, so they are announced
+    # by the color-matched T20/T30 readouts instead of a premature legend.
     fit_lines = []
-    for color, style, key, span in fits:
-        (fl,) = ax.plot([], [], color=color, ls=style, lw=1.7, label=T(key))
+    for color, style, _key, span in fits:
+        (fl,) = ax_d.plot([], [], color=color, ls=style, lw=1.7)
         fit_lines.append((fl, span))
-    front = ax.axvline(tmax, color=COLOR_FG, lw=1.3, alpha=0.55)
-    fill = {"art": None}
-    ann = ax.text(0.035, 0.06, "", transform=ax.transAxes, ha="left", va="bottom",
-                  family="monospace", fontsize=11, color=COLOR_FG)
-    ax.set_title(T("Schroeder backward integration (ISO 3382)"), fontweight="bold")
-    ax.set_xlabel(T("Time [s]"))
-    ax.set_ylabel(T("Level [dB]"))
-    ax.legend(loc="upper right", fontsize=9)
+    front_d = ax_d.axvline(sweep_max, color=COLOR_FG, lw=1.3, alpha=0.55)
+    ax_d.text(0.02, 0.08, r"$L(t) = 10\,\log_{10}\,E(t)\,/\,E(0)$",
+              transform=ax_d.transAxes, ha="left", va="bottom",
+              color=COLOR_FG, fontsize=10)
+    ann_fits = [
+        ax_d.text(0.56, 0.16, "", transform=ax_d.transAxes, ha="left",
+                  va="bottom", family="monospace", fontsize=11,
+                  color=COLOR_SECONDARY),
+        ax_d.text(0.56, 0.05, "", transform=ax_d.transAxes, ha="left",
+                  va="bottom", family="monospace", fontsize=11,
+                  color=COLOR_TERTIARY),
+    ]
+    ax_d.set_xlabel(T("Time [s]"))
+    ax_d.set_ylabel(T("Level [dB]"), fontsize=9)
+    ax_d.legend(loc="upper right", fontsize=8.5)
 
-    reveal = int(_ANIM_FRAMES * 0.8)   # sweep for 80% of frames, then annotate
+    # Sweep for 80% of the frames; the T20/T30 fits and readouts then hold
+    # for the remaining ~2.4 s so the verdict can be read.
+    reveal = int(_ANIM_FRAMES * 0.8)
 
     def update(k: int) -> tuple[Any, ...]:
-        xf = tmax * (1.0 - k / (reveal - 1)) if k < reveal else 0.0
+        xf = sweep_max * (1.0 - k / (reveal - 1)) if k < reveal else 0.0
         m = time >= xf
         curve.set_data(time[m], level[m])
-        front.set_xdata([xf, xf])
-        if fill["art"] is not None:
-            fill["art"].remove()
-        mr = t_raw >= xf
-        fill["art"] = ax.fill_between(t_raw[mr], -65, raw_db[mr],
-                                      color=COLOR_SECONDARY, alpha=0.12)
-        arts: list[Any] = [curve, front, fill["art"], ann]
+        front_e.set_xdata([xf, xf])
+        front_d.set_xdata([xf, xf])
+        if e_fill["art"] is not None:
+            e_fill["art"].remove()
+        mr = t_raw[ds] >= xf
+        e_fill["art"] = ax_e.fill_between(t_raw[ds][mr], -65.0, raw_db[ds][mr],
+                                          color=COLOR_SECONDARY,
+                                          alpha=fill_alpha, lw=0)
+        idx = min(int(np.searchsorted(t_raw, xf)), e_frac.size - 1)
+        e_txt.set_text(T(f"remaining energy: {100.0 * e_frac[idx]:.1f} %"))
+        front_txt.set_position((min(xf, xmax * 0.72) + 0.012 * xmax, -8.0))
+        front_txt.set_visible(k < reveal)
+        arts: list[Any] = [curve, front_e, front_d, e_fill["art"], e_txt,
+                           front_txt, *ann_fits]
         if k >= reveal:
-            for fl, (t_lo, t_hi) in fit_lines:
+            for (fl, (t_lo, t_hi)), ann, name, val in zip(
+                    fit_lines, ann_fits, ("T20", "T30"), (t20, t30),
+                    strict=False):
                 fl.set_data([t_lo, t_hi], [0.0, -60.0])
+                ann.set_text(T(f"{name} = {val:.2f} s"))
                 arts.append(fl)
-            ann.set_text(T(f"T20 = {t20:.2f} s\nT30 = {t30:.2f} s"))
         else:
-            ann.set_text(T("integrating from the tail →"))
+            for ann in ann_fits:
+                ann.set_text("")
         return tuple(arts)
 
-    anim = FuncAnimation(fig, update, frames=_ANIM_FRAMES,
-                         interval=1000 / _ANIM_FPS, blit=False)
-    _save_animation(anim, fig, output_dir, "anim_schroeder")
+    _render_clip(fig, update, output_dir, "anim_schroeder")
+
+
+@lru_cache(maxsize=1)
+def _room_mode_fields(
+        n_frames: int = _FDTD_ANIM_FRAMES) -> tuple[Any, Any, Any, float, float]:
+    """Run the two FDTD room simulations once per process (all variants).
+
+    Returns instantaneous-pressure frames, running-RMS frames (both float32,
+    stacked ``(2, n_frames, ny, nx)``), the frame times, and the on-mode and
+    off-mode drive frequencies. ``n_frames`` caps the captured frames and sets
+    the capture stride over the fixed 0.35 s of physical time, so it controls
+    how densely each acoustic period is sampled.
+    """
+    import fdtd2d
+
+    lx, ly, c0 = 5.0, 3.5, 343.0
+    dx = 0.01                                    # 500 x 350 cells
+    ny, nx = int(round(ly / dx)), int(round(lx / dx))
+    f_mode = 0.5 * c0 * float(np.hypot(2 / lx, 1 / ly))   # (2,1) ~ 84.3 Hz
+    f_next = 0.5 * c0 * (2 / ly)                          # (0,2) = 98 Hz
+    f_off = 0.5 * (f_mode + f_next)              # between resonances
+    duration, t60 = 0.35, 0.7
+    p_all, r_all = [], []
+    times = np.zeros(0)
+    for f in (f_mode, f_off):
+        sim = fdtd2d.FDTD2D(c0, dx, shape=(ny, nx), damping=6.9077 / t60)
+        sim.add_source(fdtd2d.CWSource(ix=25, iy=25, frequency=f,
+                                       ramp_cycles=2.0))
+        steps = int(round(duration / sim.dt))
+        every = max(1, steps // n_frames)
+        # Running mean square with a two-period time constant: the pattern
+        # (the mode map) builds up as the resonance settles.
+        beta = float(np.exp(-sim.dt * f / 2.0))
+        ms = np.zeros_like(sim.p)
+        ps: list[Any] = []
+        rs: list[Any] = []
+        ts: list[float] = []
+        for i in range(steps):
+            sim.step()
+            ms = beta * ms + (1.0 - beta) * sim.p**2
+            if (i + 1) % every == 0 and len(ps) < n_frames:
+                ps.append(sim.p[::2, ::2].astype(np.float32))
+                rs.append(np.sqrt(ms[::2, ::2]).astype(np.float32))
+                ts.append(sim.time)
+        p_all.append(np.stack(ps))
+        r_all.append(np.stack(rs))
+        times = np.asarray(ts)
+    return np.stack(p_all), np.stack(r_all), times, f_mode, f_off
+
+
+def animate_fdtd_room_modes(output_dir: str) -> None:
+    """On-mode vs off-mode CW drive in a rigid 5 x 3.5 m room (2D FDTD):
+    on resonance the (2,1) standing-wave pattern grows until it dominates
+    the field; off resonance the forced response stays weak and never
+    organises into that nodal structure."""
+    from matplotlib import patheffects
+
+    T = _translate_str
+    outline = [patheffects.withStroke(linewidth=2.0, foreground="white")]
+    p_all, r_all, times, f_mode, f_off = _room_mode_fields()
+    half = p_all.shape[1] // 2
+    vmax_p = float(np.quantile(np.abs(p_all[0][half:]), 0.995))
+    vmax_r = float(np.quantile(r_all[0][-1], 0.999))
+
+    fig = _anim_figure()
+    fig.suptitle(T("Room modes in a rigid 5 m × 3.5 m room (2D FDTD)"),
+                 fontweight="bold")
+    gs = fig.add_gridspec(2, 2)
+    titles = [T(f"On the (2,1) mode: {f_mode:.1f} Hz"),
+              T(f"Off mode: {f_off:.1f} Hz")]
+    ims: list[Any] = []
+    for col in range(2):
+        ax_p = fig.add_subplot(gs[0, col])
+        ax_p.grid(False)
+        im_p = ax_p.imshow(p_all[col][0], origin="lower",
+                           extent=(0.0, 5.0, 0.0, 3.5), cmap="RdBu_r",
+                           vmin=-vmax_p, vmax=vmax_p, interpolation="bilinear")
+        ax_p.set_title(titles[col], fontsize=10, fontweight="bold")
+        ax_p.plot([0.25], [0.25], marker="o", ms=5, color=COLOR_TERTIARY,
+                  markeredgecolor="white", markeredgewidth=0.8)
+        ax_p.text(0.45, 0.22, T("source"), ha="left", va="center",
+                  color="black", fontsize=7.5, path_effects=outline)
+        ax_p.tick_params(labelsize=7, labelbottom=False)
+        ax_r = fig.add_subplot(gs[1, col])
+        ax_r.grid(False)
+        im_r = ax_r.imshow(r_all[col][0], origin="lower",
+                           extent=(0.0, 5.0, 0.0, 3.5), cmap="magma",
+                           vmin=0.0, vmax=vmax_r, interpolation="bilinear")
+        ax_r.tick_params(labelsize=7)
+        ax_r.set_xlabel("x [m]", fontsize=8)
+        if col == 0:
+            ax_p.set_ylabel(T("instantaneous p(x, y)"), fontsize=9)
+            ax_r.set_ylabel(T("RMS pressure (mode map)"), fontsize=9)
+            for xn in (1.25, 3.75):
+                ax_r.axvline(xn, color="white", ls="--", lw=1.0, alpha=0.75)
+            ax_r.axhline(1.75, color="white", ls="--", lw=1.0, alpha=0.75)
+            ax_r.text(0.12, 3.3, T("nodal lines (2,1)"), color="white",
+                      fontsize=8, ha="left", va="top")
+        else:
+            ax_p.tick_params(labelleft=False)
+            ax_r.tick_params(labelleft=False)
+            ax_r.text(0.12, 3.3, T("same colour scale"), color="white",
+                      fontsize=8, ha="left", va="top")
+        ims += [im_p, im_r]
+    t_txt = fig.text(0.985, 0.955, "", ha="right", va="top",
+                     family="monospace", fontsize=10, color=COLOR_FG)
+
+    def update(k: int) -> tuple[Any, ...]:
+        for col in range(2):
+            ims[2 * col].set_data(p_all[col][k])
+            ims[2 * col + 1].set_data(r_all[col][k])
+        t_txt.set_text(f"t = {times[k] * 1000.0:3.0f} ms")
+        return (*ims, t_txt)
+
+    # Own frame budget (see _FDTD_ANIM_FRAMES): enough frames per acoustic
+    # period for fluid wavefronts. The GitHub GIF samples this long clip at a
+    # reduced rate so the palette-quantized file stays well under 4 MB.
+    _render_clip(fig, update, output_dir, "anim_fdtd_room_modes",
+                 frames=int(p_all.shape[1]), gif_fps=8)
 
 
 def generate_animations(output_dir: str) -> None:
@@ -6731,6 +7405,7 @@ def generate_animations(output_dir: str) -> None:
     animate_onset_detection(output_dir)
     animate_instantaneous_intensity(output_dir)
     animate_schroeder(output_dir)
+    animate_fdtd_room_modes(output_dir)
 
 
 # ===========================================================================
@@ -6925,6 +7600,11 @@ def main(argv: list[str] | None = None) -> None:
         "kept out of the default figure run)",
     )
     parser.add_argument(
+        "--posters", action="store_true",
+        help="re-extract only the animation poster stills from the "
+        "already-rendered WebM files (no clip re-encoding)",
+    )
+    parser.add_argument(
         "--all", dest="do_all", action="store_true",
         help="render both the figures and the animations",
     )
@@ -6943,8 +7623,12 @@ def main(argv: list[str] | None = None) -> None:
     img_dir = ".github/images"
     os.makedirs(img_dir, exist_ok=True)
 
-    do_figs = not args.animations or args.do_all
+    do_figs = not (args.animations or args.posters) or args.do_all
     do_anim = args.animations or args.do_all
+
+    if args.posters and not do_anim:
+        print("--- Re-extracting animation posters ---")
+        generate_posters(img_dir)
     jobs = args.jobs if args.jobs is not None else _default_jobs()
     if jobs < 1:
         parser.error("--jobs must be >= 1")

@@ -13,10 +13,6 @@ Convenience wrappers defined at the package top level (`phonometry/__init__.py`)
 
 *Constant* (`str`).
 
-```python
-__version__ = '3.0.0'
-```
-
 ## octave_filter
 
 ```python

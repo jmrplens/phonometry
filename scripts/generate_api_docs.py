@@ -806,7 +806,9 @@ def _build_page(
                     signature=None,
                     doc=attribute_docs.get(name, ""),
                     type_name=_type_name(obj),
-                    value_repr=_constant_repr(obj),
+                    # __version__ changes every release; embedding its value
+                    # would make the drift gate fail on each version bump.
+                    value_repr="" if name == "__version__" else _constant_repr(obj),
                 )
             )
     title = "phonometry" if top_level else relative

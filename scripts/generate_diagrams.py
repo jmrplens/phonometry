@@ -762,7 +762,7 @@ _ES: dict[str, str] = {
         "la resonancia se lee del pico de la respuesta",
     "s′t = 4π² m′t fr²   (Formula 4)": "s′t = 4π² m′t fr²   (Fórmula 4)",
     "then f₀ = (1/2π)·√(s′/m′) for the installed floating floor   (Formula 2)":
-        "después f₀ = (1/2π)·√(s′/m′) para el suelo flotante instalado   "
+        "luego f₀ = (1/2π)·√(s′/m′) para el suelo flotante instalado   "
         "(Fórmula 2)",
     # Mechanical-mobility rig (ISO 7626)
     "Mechanical-mobility measurement on a beam (ISO 7626)":
@@ -831,7 +831,7 @@ _ES: dict[str, str] = {
     "coupling at the contacts (19b)": "acoplamiento en los contactos (19b)",
     "installed power (18b)": "potencia instalada (18b)",
     "per transmission path (18a)": "por vía de transmisión (18a)",
-    "energetic sum (17)": "suma energética (17)",
+    "energetic sum L_n,s (17)": "suma energética L_n,s (17)",
     "each path i → j: excited element i, radiating element j in the receiving room":
         "cada vía i → j: elemento excitado i, elemento radiante j en el "
         "recinto receptor",
@@ -3689,7 +3689,7 @@ def _d_installed_paths(s: SVG, th: Theme) -> None:
         ("− D_C", "coupling at the contacts (19b)", th.secondary),
         ("L_Ws,inst", "installed power (18b)", th.fg),
         ("− D_sa − R_ij,ref", "per transmission path (18a)", th.primary),
-        ("L_n,s = Σ L_n,s,ij", "energetic sum (17)", th.accent),
+        ("10 lg Σ 10^(L_n,s,ij/10)", "energetic sum L_n,s (17)", th.accent),
     ]
     y = 164.0
     for k, (term, caption, col) in enumerate(steps):

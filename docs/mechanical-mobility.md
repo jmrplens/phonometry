@@ -57,7 +57,10 @@ than by how it responds. Reading a driving-point mobility plot is a
 structural diagnosis in itself: below a resonance the magnitude climbs
 proportionally to frequency along a **stiffness line** (`|Y| ≈ ω/k`), above
 it the magnitude falls along a **mass line** (`|Y| ≈ 1/(ωm)`), and the height
-of the peak between them measures the damping.
+of the peak between them reflects the damping: it equals `1/c` for the
+isolated viscously damped resonator of the next section, while on real
+structures with overlapping modes damping is instead estimated by modal
+fitting or from the half-power bandwidth.
 
 ## 2. The SDOF reference resonator (closed form)
 
@@ -90,14 +93,19 @@ print(round(complex(ph.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="ISO 7626 mobility measurement: a free-free beam on soft suspension driven by an exciter through an impedance head at the driving point, an accelerometer at a transfer point, and an impact hammer as the alternative excitation" width="92%"></picture>
 
-In the ISO 7626-2 arrangement the structure hangs on a suspension soft enough
-that its rigid-body modes fall well below the first elastic resonance, an
+In the usual ISO 7626-2 arrangement the structure hangs on a suspension soft
+enough that its rigid-body modes fall well below the first elastic resonance
+(the standard admits freely suspended or grounded structures; clause 5 asks
+for a support representative of the intended application), an
 exciter drives one point through an **impedance head** (a transducer stack
 measuring force and acceleration at the same point, which is what gives the
 attached-exciter setup its driving-point FRF), and accelerometers pick up
 the response
-elsewhere for the transfer FRFs. ISO 7626-5 covers the impact-hammer
-alternative, which trades the exciter's controlled spectrum for speed.
+elsewhere for the transfer FRFs. ISO 7626-5 covers the alternative of impact
+excitation with an exciter that is not attached to the structure, in
+practice usually an instrumented hammer: it trades the attached exciter's
+controlled spectrum for speed, with an excitation spectrum set by the
+impactor mass and tip stiffness.
 
 Processing measured random-excitation records per ISO 7626-2, 8.1.3 — the H1
 estimator `Ĥ = G(response, force)/G(force, force)` — and the ordinary coherence

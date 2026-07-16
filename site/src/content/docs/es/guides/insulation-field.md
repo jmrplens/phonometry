@@ -58,9 +58,11 @@ Los dos términos recalifican la misma curva medida frente a los dos espectros
 de fuente del Anexo A de ISO 717-1: $C$ frente a ruido rosa ponderado A,
 representativo de las actividades domésticas (habla, música, radio,
 televisión), y $C_{tr}$ frente a tráfico rodado urbano ponderado A, cuya
-energía se concentra en baja frecuencia. Están definidos de modo que
-$R_w + C$ y $R_w + C_{tr}$ son las diferencias de nivel ponderadas A que el
-elemento consigue frente a esas fuentes. Para leerlos:
+energía se concentra en baja frecuencia. Están definidos de modo que el
+índice más el término ($R_w + C$ para un índice de laboratorio, $R'_w + C$ o
+$D_{nT,w} + C$ para las magnitudes de campo de esta guía, e igual con
+$C_{tr}$) es la diferencia de nivel ponderada A conseguida frente a esa
+fuente. Para leerlos:
 
 * $C$ se mantiene pequeño en la mayoría de construcciones (0 a −2 dB es lo
   típico): el espectro rosa se parece a la ponderación ya implícita en la
@@ -70,9 +72,11 @@ elemento consigue frente a esas fuentes. Para leerlos:
   $C_{tr}$ de −5 a −10 dB, mientras que una pared monolítica pesada con el
   mismo $R_w$ pierde mucho menos: dos construcciones con la misma
   calificación pueden diferir de forma audible frente al tráfico.
-* Diseña con el descriptor que corresponda al ruido: $R_w + C_{tr}$ para una
-  fachada a una calle con tráfico, $R_w + C$ (o $R_w$ a secas, donde la
-  reglamentación lo diga) entre viviendas.
+* Diseña con el descriptor que corresponda al ruido, sobre la magnitud de
+  campo que el requisito califica: $R'_w + C_{tr}$ para una fachada a una
+  calle con tráfico, $D_{nT,w} + C$ (o el índice a secas, donde la
+  reglamentación lo diga) entre viviendas, los dos requisitos de ejemplo de
+  ISO 717-1, 5.3.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es.svg" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es_dark.svg" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" style="width:80%">
 

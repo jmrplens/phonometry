@@ -52,8 +52,8 @@ fuerza bloqueada por unidad de desplazamiento de entrada es una propiedad del
 elemento solo, y predice la fuerza que el elemento entrega a cualquier
 receptor mucho más rígido que el propio elemento, que es exactamente la
 situación para la que se diseña un aislador de vibración. Por eso ISO 10846
-intercala el aislador entre una masa de entrada excitada y una salida o bien
-bloqueada rígidamente o bien una masa conocida:
+intercala el aislador entre una masa de entrada excitada y una salida que
+está o bien bloqueada rígidamente o bien cargada con una masa conocida:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig_es.svg" alt="Bancos de rigidez de transferencia ISO 10846: el aislador bajo ensayo entre una masa de excitación y o bien una salida bloqueada con un transductor de fuerza, el método directo, o bien una masa de bloqueo sobre apoyos resilientes, el método indirecto" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig_es_dark.svg" alt="Bancos de rigidez de transferencia ISO 10846: el aislador bajo ensayo entre una masa de excitación y o bien una salida bloqueada con un transductor de fuerza, el método directo, o bien una masa de bloqueo sobre apoyos resilientes, el método indirecto" style="width:92%">
 
@@ -89,9 +89,11 @@ El `TransferStiffnessResult` transporta el `k₂₁` complejo y expone `.level`,
 `.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")` y `.plot()`.
 
 Los dos métodos se reparten el eje de frecuencia. El método directo funciona
-desde frecuencias arbitrariamente bajas hasta donde se cuelan las resonancias
-propias del banco (típicamente unos pocos cientos de hercios para elementos
-grandes); el método indirecto solo es válido bastante por encima de la
+desde 1 Hz, el límite inferior del alcance de ISO 10846-2 (en la práctica el
+suelo lo fijan el banco y su instrumentación), hasta donde se cuelan las
+resonancias propias del banco (típicamente unos pocos cientos de hercios
+para elementos grandes); el método indirecto solo es válido bastante por
+encima de la
 resonancia masa de bloqueo/resorte, donde la transmisibilidad es pequeña, y
 extiende la caracterización hasta el rango de kilohercios. Un conjunto de
 datos completo de un aislador suele ser el empalme de ambos.

@@ -55,8 +55,10 @@ The two terms re-rate the same measured curve against the two source spectra
 of ISO 717-1 Annex A: $C$ against A-weighted pink noise, representative of
 living activities (speech, music, radio, television), and $C_{tr}$ against
 A-weighted urban road traffic, whose energy sits at low frequency. They are
-defined so that $R_w + C$ and $R_w + C_{tr}$ are the A-weighted level
-differences the element achieves against those sources. Reading them:
+defined so that the rating plus the term ($R_w + C$ for a laboratory index,
+$R'_w + C$ or $D_{nT,w} + C$ for the field quantities of this guide, and
+likewise with $C_{tr}$) is the A-weighted level difference achieved against
+that source. Reading them:
 
 * $C$ stays small for most constructions (0 to −2 dB is typical): the pink
   spectrum is close to the weighting already implicit in the reference
@@ -65,9 +67,10 @@ differences the element achieves against those sources. Reading them:
   with its mass-air-mass resonance near 100 Hz can carry a $C_{tr}$ of −5 to
   −10 dB, while a heavy monolithic wall with the same $R_w$ loses far less:
   two constructions with equal ratings can differ audibly against traffic.
-* Design with the descriptor that matches the noise: $R_w + C_{tr}$ for a
-  façade on a busy road, $R_w + C$ (or plain $R_w$, where the regulation
-  says so) between dwellings.
+* Design with the descriptor that matches the noise, carried by the field
+  quantity the requirement rates: $R'_w + C_{tr}$ for a façade on a busy
+  road, $D_{nT,w} + C$ (or the plain rating, where the regulation says so)
+  between dwellings, the two example requirements of ISO 717-1, 5.3.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating.svg" alt="Measured one-third-octave sound reduction index with the shifted ISO 717-1 reference curve and the resulting weighted rating at 500 Hz" width="80%"></picture>
 

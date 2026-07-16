@@ -58,7 +58,11 @@ se describe por lo que impone y no por cómo responde. Leer una movilidad de
 punto de excitación es en sí un diagnóstico estructural: por debajo de una
 resonancia la magnitud sube proporcional a la frecuencia por una **línea de
 rigidez** (`|Y| ≈ ω/k`), por encima cae por una **línea de masa**
-(`|Y| ≈ 1/(ωm)`), y la altura del pico entre ambas mide el amortiguamiento.
+(`|Y| ≈ 1/(ωm)`), y la altura del pico entre ambas refleja el
+amortiguamiento: vale `1/c` para el resonador aislado con amortiguamiento
+viscoso de la siguiente sección, mientras que en estructuras reales con
+modos solapados el amortiguamiento se estima con ajuste modal o con el
+ancho de banda de media potencia.
 
 ## 2. El resonador SDOF de referencia (forma cerrada)
 
@@ -91,15 +95,21 @@ print(round(complex(ph.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_es.svg" alt="Medición de movilidad ISO 7626: una viga libre-libre en suspensión blanda excitada por un excitador a través de una cabeza de impedancia en el punto de excitación, un acelerómetro en un punto de transferencia y un martillo de impacto como excitación alternativa" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_es_dark.svg" alt="Medición de movilidad ISO 7626: una viga libre-libre en suspensión blanda excitada por un excitador a través de una cabeza de impedancia en el punto de excitación, un acelerómetro en un punto de transferencia y un martillo de impacto como excitación alternativa" style="width:92%">
 
-En la disposición de ISO 7626-2 la estructura cuelga de una suspensión lo
-bastante blanda para que sus modos de sólido rígido queden muy por debajo de
-la primera resonancia elástica, un excitador ataca un punto a través de una
+En la disposición habitual de ISO 7626-2 la estructura cuelga de una
+suspensión lo bastante blanda para que sus modos de sólido rígido queden muy
+por debajo de la primera resonancia elástica (la norma admite estructuras
+suspendidas libremente o ancladas; la cláusula 5 pide un apoyo
+representativo de la aplicación prevista), un excitador ataca un punto a
+través de una
 **cabeza de impedancia** (una pila de transductores que mide fuerza y
 aceleración en el mismo punto, lo que da al montaje con excitador acoplado su
 FRF de punto de excitación) y acelerómetros recogen la respuesta en otros
 puntos para las FRF
-de transferencia. ISO 7626-5 cubre la alternativa con martillo de impacto,
-que cambia el espectro controlado del excitador por rapidez.
+de transferencia. ISO 7626-5 cubre la alternativa de excitación por impacto
+con un excitador no unido a la estructura, en la práctica casi siempre un
+martillo instrumentado: cambia el espectro controlado del excitador acoplado
+por rapidez, con un espectro de excitación fijado por la masa del impactador
+y la rigidez de la punta.
 
 El procesado de registros medidos con excitación aleatoria según la
 ISO 7626-2, 8.1.3 (el estimador H1,

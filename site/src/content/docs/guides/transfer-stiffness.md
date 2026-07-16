@@ -51,7 +51,8 @@ force per unit input displacement is a property of the element alone, and it
 predicts the force the element delivers to any receiver that is much stiffer
 than the element itself, which is exactly the situation a vibration isolator
 is designed for. ISO 10846 therefore sandwiches the isolator between a driven
-input mass and an output that is either rigidly blocked or a known mass:
+input mass and an output that is either rigidly blocked or loaded with a
+known mass:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig.svg" alt="ISO 10846 transfer-stiffness rigs: the isolator under test between a driven excitation mass and either a blocked output with a force transducer, the direct method, or a resiliently supported blocking mass, the indirect method" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig_dark.svg" alt="ISO 10846 transfer-stiffness rigs: the isolator under test between a driven excitation mass and either a blocked output with a force transducer, the direct method, or a resiliently supported blocking mass, the indirect method" style="width:92%">
 
@@ -87,8 +88,9 @@ The `TransferStiffnessResult` carries the complex `k₂₁` and exposes `.level`
 `.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")` and `.plot()`.
 
 The two methods split the frequency axis between them. The direct method
-works from arbitrarily low frequencies up to where the test rig's own
-resonances intrude (typically a few hundred hertz for large elements); the
+works from 1 Hz, the lower bound of the ISO 10846-2 scope (in practice the
+floor is set by the rig and its instrumentation), up to where the test rig's
+own resonances intrude (typically a few hundred hertz for large elements); the
 indirect method only becomes valid well above the blocking-mass/spring
 resonance, where the transmissibility is small, and extends the
 characterisation into the kilohertz range. A full isolator dataset is

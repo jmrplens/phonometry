@@ -47,60 +47,70 @@ function toModel(entry: SidebarGroup): GroupModel {
 
 <ul class:list={{ 'top-level': !nested }}>
 	{
-		sublist.map((entry) => (
-			<li>
-				{entry.type === 'link' ? (
-					<a
-						href={entry.href}
-						aria-current={entry.isCurrent ? 'page' : undefined}
-						class:list={[{ large: !nested }, entry.attrs.class]}
-						{...entry.attrs}
-					>
-						<span>{entry.label}</span>
-						{entry.badge && (
-							<Badge
-								variant={entry.badge.variant}
-								class={entry.badge.class}
-								text={entry.badge.text}
-							/>
-						)}
-					</a>
-				) : (
-					[toModel(entry)].map(({ group, landing, children }) => (
-						<>
-							{landing ? (
-								<a
-									class="group-label"
-									href={landing.href}
-									aria-current={landing.isCurrent ? 'page' : undefined}
-								>
-									<span class="large">{group.label}</span>
-									{group.badge && (
-										<Badge
-											variant={group.badge.variant}
-											class={group.badge.class}
-											text={group.badge.text}
-										/>
-									)}
-								</a>
-							) : (
-								<span class="group-label">
-									<span class="large">{group.label}</span>
-									{group.badge && (
-										<Badge
-											variant={group.badge.variant}
-											class={group.badge.class}
-											text={group.badge.text}
-										/>
-									)}
-								</span>
+		sublist.map((entry) => {
+			if (entry.type === 'link') {
+				return (
+					<li>
+						<a
+							href={entry.href}
+							aria-current={entry.isCurrent ? 'page' : undefined}
+							class:list={[{ large: !nested }, entry.attrs.class]}
+							{...entry.attrs}
+						>
+							<span>{entry.label}</span>
+							{entry.badge && (
+								<Badge
+									variant={entry.badge.variant}
+									class={entry.badge.class}
+									text={entry.badge.text}
+								/>
 							)}
-							<Astro.self sublist={children} nested />
-						</>
-					))
-				)}
-			</li>
-		))
+						</a>
+					</li>
+				);
+			}
+			const { group, landing, children } = toModel(entry);
+			// Forward any custom link attributes from the consumed landing entry,
+			// except the internal `data-group-link` marker itself.
+			const {
+				'data-group-link': _marker,
+				class: landingClass,
+				...landingAttrs
+			} = landing?.attrs ?? {};
+			return (
+				<li>
+					{landing ? (
+						<a
+							class:list={['group-label', landingClass]}
+							href={landing.href}
+							aria-current={landing.isCurrent ? 'page' : undefined}
+							{...landingAttrs}
+						>
+							<span class="large">{group.label}</span>
+							{group.badge && (
+								<Badge
+									variant={group.badge.variant}
+									class={group.badge.class}
+									text={group.badge.text}
+								/>
+							)}
+						</a>
+					) : (
+						<span class="group-label">
+							<span class="large">{group.label}</span>
+							{group.badge && (
+								<Badge
+									variant={group.badge.variant}
+									class={group.badge.class}
+									text={group.badge.text}
+								/>
+							)}
+						</span>
+					)}
+					<Astro.self sublist={children} nested />
+				</li>
+			);
+		})
 	}
 </ul>
 

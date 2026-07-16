@@ -1,0 +1,55 @@
+---
+title: "Aeronaves y energía eólica"
+description: "Fuentes de transporte y energía con métricas de ruido fijadas internacionalmente: el EPNL del Anexo 16 de la ICAO y la maquinaria de aeropuertos de ECAC Doc 29, el método del hemisferio para rotorcraft de ECAC Doc 32, y la emisión y audibilidad tonal de aerogeneradores de IEC 61400-11."
+---
+
+Las aeronaves y los aerogeneradores son fuentes de ruido lo bastante
+importantes como para tener métricas propias negociadas internacionalmente,
+cada una fijada hasta el último decimal por un marco de certificación o de
+ensayo de tipo. Las tres páginas de esta sección implementan esos marcos, y
+comparten una misma anatomía: un **descriptor de fuente** rigurosamente
+normalizado, más **ajustes de propagación** normalizados que colocan la
+fuente en un receptor.
+
+[Ruido de aeronaves: nivel efectivo de ruido percibido](/phonometry/es/guides/aircraft-noise/)
+cubre la certificación de ala fija. El **EPNL** del Anexo 16 de la ICAO
+condensa una historia temporal en tercios de octava de un sobrevuelo en un
+único valor en EPNdB a través de la molestia percibida, una corrección tonal
+y una corrección de duración; la página añade el verificador de sistemas de medida IEC 61265, la
+absorción atmosférica SAE ARP 5534 usada en la cadena de certificación, y la
+interpolación ruido-potencia-distancia de ECAC Doc 29 que convierte niveles
+certificados en entradas para contornos de aeropuerto.
+
+[Ruido de rotorcraft: el método del hemisferio](/phonometry/es/guides/rotorcraft-noise/)
+cubre los helicópteros, cuya fuerte directividad derrota a un nivel de fuente
+de un solo número. ECAC Doc 32 describe en cambio la fuente como un
+**hemisferio de ruido** (niveles de banda sobre una malla de ángulos de
+emisión a una distancia de referencia de 60 m) y propaga cada rayo con
+divergencia esférica, absorción atmosférica y el efecto de suelo de
+Chien-Soroka.
+
+[Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/guides/wind-turbine-noise/)
+cubre el ensayo de tipo de IEC 61400-11: el **nivel de potencia sonora
+aparente** que refiere la inmisión medida a una fuente puntual equivalente en
+el centro del rotor, y la cadena de audibilidad tonal que decide si un tono
+de paso de pala, multiplicadora o generador es audible sobre su ruido
+enmascarante.
+
+La física compartida conecta hacia fuera: la absorción atmosférica viene del
+mismo modelo ISO 9613-1 que
+[Propagación del sonido en exteriores](/phonometry/es/guides/outdoor-propagation/),
+y el ensayo de tonalidad de aerogeneradores es primo de los métodos de
+audibilidad tonal de
+[Psicoacústica](/phonometry/es/guides/sections/psychoacoustics/).
+
+## Páginas de esta sección
+
+- [Ruido de aeronaves: nivel efectivo de ruido percibido](/phonometry/es/guides/aircraft-noise/):
+  la cadena EPNL del Anexo 16 de la ICAO, el verificador IEC 61265, la absorción
+  SAE ARP 5534 y la interpolación NPD de ECAC Doc 29.
+- [Ruido de rotorcraft: el método del hemisferio](/phonometry/es/guides/rotorcraft-noise/):
+  el modelo de fuente de hemisferio de ruido de ECAC Doc 32 y sus ajustes de
+  propagación.
+- [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/guides/wind-turbine-noise/):
+  el nivel de potencia sonora aparente de IEC 61400-11 y la cadena de
+  audibilidad tonal.

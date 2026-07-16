@@ -195,7 +195,7 @@ absorción equivalente de la sala. El área de la superficie es la forma cerrada
 de la geometría: una semiesfera $S = 2 \pi r^2$ sobre un plano reflectante
 (dividida entre dos y entre cuatro para dos y tres planos), una caja de un plano
 $S = 4(ab + bc + ca)$ con $a = 0{,}5\ l_1 + d$, $b = 0{,}5\ l_2 + d$,
-$c = l_3 + d$. ISO 3746 (control) comparte las matemáticas con criterios más
+$c = l_3 + d$. ISO 3746 (inspección) comparte las matemáticas con criterios más
 laxos. La incertidumbre expandida es $U = 2 \sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}$.
 
 ### Grado de precisión en salas anecoicas (ISO 3745)

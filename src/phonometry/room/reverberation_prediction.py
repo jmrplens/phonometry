@@ -35,6 +35,13 @@ coefficient ``m`` (in neper per metre) as the additive term ``4 m V``; obtain a
 physical ``m`` from temperature and humidity with
 :func:`phonometry.air_absorption.air_attenuation_m`.
 
+Each model enforces its own mathematical domain on the absorption
+coefficients. Sabine's linear sum is finite for any non-negative coefficient,
+so it accepts measured ISO 354 values at or above 1 (up to a unit-error guard
+at 2). The logarithmic models are stricter exactly where the maths requires
+it: Millington-Sette needs *every* coefficient below 1, while Eyring, Fitzroy
+and Arau-Puchades need each *mean* entering ``ln(1 - alpha)`` below 1.
+
 The Fitzroy and Arau-Puchades models require a rectangular (shoebox) room and
 take the room ``dimensions`` together with the mean absorption of each of the
 three wall pairs. All five reduce to Eyring for a uniform absorption
@@ -77,6 +84,15 @@ DEFAULT_SPEED_OF_SOUND = 343.0
 #: no finite Eyring reverberation time.
 _MAX_MEAN_ABSORPTION = 1.0
 
+#: Sanity ceiling for any individual absorption coefficient. Measured ISO 354
+#: reverberation-room coefficients legitimately exceed 1 (edge diffraction
+#: makes 1.05 to 1.20 routine for thick porous absorbers), so Sabine accepts
+#: them as supplied; a value above this bound is almost certainly a unit error
+#: (a percentage passed where a fraction is expected) and is rejected by the
+#: shared surface validator. The axial models (Fitzroy, Arau-Puchades) never
+#: reach it: their stricter below-1 wall-pair-mean check fires first.
+_MAX_ABSORPTION = 2.0
+
 
 Surface = tuple[float, ArrayLike]
 
@@ -106,16 +122,23 @@ def _broadcast_or_raise(
 
 def _accumulate_surfaces(
     surfaces: Sequence[Surface],
-) -> tuple[float, NDArray[np.float64], NDArray[np.float64]]:
-    """Total area ``S``, total absorption area ``A`` and Millington sum.
+) -> tuple[float, NDArray[np.float64], list[tuple[float, NDArray[np.float64]]]]:
+    """Total area ``S``, total absorption area ``A`` and the validated surfaces.
 
-    Returns ``(S, A, M)`` where ``A = sum_i S_i alpha_i`` and
-    ``M = -sum_i S_i ln(1 - alpha_i)``; ``A`` and ``M`` are per-band arrays
-    (0-d for scalar coefficients).
+    Returns ``(S, A, pairs)`` where ``A = sum_i S_i alpha_i`` is a per-band
+    array (0-d for scalar coefficients) and ``pairs`` is the list of validated
+    ``(area, alpha)`` items for model-specific processing.
+
+    Validation here is the domain shared by *all* models: coefficients must be
+    finite, non-negative and at most :data:`_MAX_ABSORPTION` (the unit-error
+    guard). The stricter logarithmic domains are enforced where the maths
+    requires them: per surface in :func:`_millington_absorption`, on the mean
+    in :func:`_eyring_absorption`.
 
     :raises ValueError: for an empty surface list, a negative area, a
-        coefficient outside ``[0, 1)`` (``1`` gives a divergent Millington sum),
-        or per-band coefficients whose band counts do not broadcast together.
+        non-finite or negative coefficient, a coefficient above
+        :data:`_MAX_ABSORPTION`, or per-band coefficients whose band counts do
+        not broadcast together.
     """
     if not surfaces:
         raise ValueError("at least one surface is required.")
@@ -124,8 +147,16 @@ def _accumulate_surfaces(
     for area, alpha in surfaces:
         areas.append(require_non_negative(area, "surface area"))
         alpha_arr = np.asarray(alpha, dtype=np.float64)
-        if np.any(alpha_arr < 0.0) or np.any(alpha_arr >= 1.0):
-            raise ValueError("absorption coefficients must be in the range [0, 1).")
+        if not np.all(np.isfinite(alpha_arr)):
+            raise ValueError("absorption coefficients must be finite.")
+        if np.any(alpha_arr < 0.0):
+            raise ValueError("absorption coefficients must be non-negative.")
+        if np.any(alpha_arr > _MAX_ABSORPTION):
+            raise ValueError(
+                f"absorption coefficients above {_MAX_ABSORPTION} look like a "
+                "unit error (a percentage passed instead of a fraction); "
+                "measured ISO 354 coefficients do not exceed about 1.2."
+            )
         alphas.append(alpha_arr)
     shape = _broadcast_or_raise(
         [a.shape for a in alphas], "surface absorption coefficients"
@@ -134,18 +165,16 @@ def _accumulate_surfaces(
     if total_area <= 0.0:
         raise ValueError("the total surface area must be positive.")
     absorption_area = np.zeros(shape, dtype=np.float64)
-    millington = np.zeros(shape, dtype=np.float64)
     for area, alpha_arr in zip(areas, alphas):
         absorption_area = absorption_area + area * alpha_arr
-        millington = millington - area * np.log1p(-alpha_arr)
-    return total_area, absorption_area, millington
+    return total_area, absorption_area, list(zip(areas, alphas))
 
 
 def _air_term(air_attenuation: ArrayLike, volume: float) -> NDArray[np.float64]:
-    """Air absorption area ``4 m V`` (m2), validated non-negative."""
+    """Air absorption area ``4 m V`` (m2), validated finite and non-negative."""
     m = np.asarray(air_attenuation, dtype=np.float64)
-    if np.any(m < 0.0):
-        raise ValueError("'air_attenuation' must be non-negative.")
+    if not np.all(np.isfinite(m)) or np.any(m < 0.0):
+        raise ValueError("'air_attenuation' must be finite and non-negative.")
     return np.asarray(4.0 * m * volume, dtype=np.float64)
 
 
@@ -160,12 +189,36 @@ def _add_air(
     return np.asarray(absorption_term + air, dtype=np.float64)
 
 
+def _millington_absorption(
+    pairs: Sequence[tuple[float, NDArray[np.float64]]],
+) -> NDArray[np.float64]:
+    """Millington equivalent absorption ``-sum_i S_i ln(1 - alpha_i)`` (per band).
+
+    :raises ValueError: for any coefficient at or above 1; the per-surface
+        ``ln(1 - alpha_i)`` diverges there, so Millington-Sette (alone among
+        the five models) requires every individual coefficient below 1.
+    """
+    total = np.asarray(0.0, dtype=np.float64)
+    for area, alpha_arr in pairs:
+        if np.any(alpha_arr >= 1.0):
+            raise ValueError(
+                "Millington-Sette requires every absorption coefficient below "
+                "1: its per-surface ln(1 - alpha) diverges at alpha = 1. For "
+                "measured ISO 354 coefficients at or above 1 use Sabine, or "
+                "Eyring if the mean absorption stays below 1."
+            )
+        total = total - area * np.log1p(-alpha_arr)
+    return np.asarray(total, dtype=np.float64)
+
+
 def _eyring_absorption(total_area: float, mean_absorption: NDArray[np.float64]) -> NDArray[np.float64]:
     """Eyring equivalent absorption ``-S ln(1 - alpha_bar)`` (per band)."""
     if np.any(mean_absorption >= _MAX_MEAN_ABSORPTION):
         raise ValueError(
-            "the mean absorption coefficient must be below 1; a fully absorbing "
-            "room has no finite Eyring reverberation time."
+            "the mean absorption coefficient must be below 1 for the "
+            "Eyring-family models: ln(1 - mean) diverges at a mean of 1. "
+            "Individual coefficients at or above 1 are accepted as long as "
+            "the mean stays below 1; Sabine does not constrain the mean."
         )
     return np.asarray(-total_area * np.log1p(-mean_absorption), dtype=np.float64)
 
@@ -209,9 +262,16 @@ def sabine_reverberation_time(
 ) -> np.ndarray | float:
     """Sabine reverberation time ``T = k V / (A + 4 m V)``.
 
+    ``A = sum_i S_i alpha_i`` is finite for any non-negative coefficient, so
+    unlike the logarithmic models Sabine accepts coefficients at or above 1:
+    measured ISO 354 reverberation-room values of 1.05 to 1.20 (the edge
+    effect) and the exact 1.0 that the ISO 11654 practical rating caps at are
+    legitimate inputs. Coefficients above 2 are rejected as a probable unit
+    error (a percentage passed instead of a fraction).
+
     :param volume: Room volume ``V``, m3.
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs; each
-        coefficient a scalar or a per-band array.
+        coefficient a scalar or a per-band array in ``[0, 2]``.
     :param air_attenuation: Air power-attenuation coefficient ``m``, in neper
         per metre (scalar or per-band); see
         :func:`phonometry.air_absorption.air_attenuation_m`. Default ``0``
@@ -240,6 +300,10 @@ def eyring_reverberation_time(
     ``T = k V / (-S ln(1 - alpha_bar) + 4 m V)`` with the total surface ``S``
     and its area-weighted mean absorption ``alpha_bar``.
 
+    The formula constrains only the *mean*: ``ln(1 - alpha_bar)`` requires
+    ``alpha_bar < 1``, while individual coefficients at or above 1 (a measured
+    ISO 354 outcome) are accepted as long as the mean stays below 1.
+
     :param volume: Room volume ``V``, m3.
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs.
     :param air_attenuation: Air power-attenuation coefficient ``m`` (1/m).
@@ -266,6 +330,9 @@ def millington_sette_reverberation_time(
     ``T = k V / (-sum_i S_i ln(1 - alpha_i) + 4 m V)``: the Eyring absorption
     term summed surface by surface rather than through a single mean. A surface
     approaching total absorption (``alpha_i -> 1``) drives ``T`` to zero.
+    Because the logarithm applies per surface, *every* coefficient must be
+    strictly below 1; measured ISO 354 coefficients at or above 1 are outside
+    this model's domain (use Sabine, or Eyring while the mean stays below 1).
 
     :param volume: Room volume ``V``, m3.
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs.
@@ -275,8 +342,8 @@ def millington_sette_reverberation_time(
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
-    _, _, millington = _accumulate_surfaces(surfaces)
-    absorption = _add_air(millington, air_attenuation, volume)
+    _, _, pairs = _accumulate_surfaces(surfaces)
+    absorption = _add_air(_millington_absorption(pairs), air_attenuation, volume)
     return _reverberation_time(volume, absorption, speed_of_sound)
 
 
@@ -323,8 +390,17 @@ def _axial_eyring_times(
     means: list[NDArray[np.float64]] = []
     for alpha in absorptions:
         mean = np.asarray(alpha, dtype=np.float64)
-        if np.any(mean < 0.0) or np.any(mean >= 1.0):
-            raise ValueError("absorption coefficients must be in the range [0, 1).")
+        if not np.all(np.isfinite(mean)):
+            raise ValueError("absorption coefficients must be finite.")
+        if np.any(mean < 0.0):
+            raise ValueError("absorption coefficients must be non-negative.")
+        if np.any(mean >= 1.0):
+            raise ValueError(
+                "each wall-pair mean absorption must be below 1: the axial "
+                "Eyring term ln(1 - alpha_i) diverges at alpha_i = 1. The "
+                "inputs of the Fitzroy and Arau-Puchades models are "
+                "themselves the means entering the logarithm."
+            )
         means.append(mean)
     # The three axial times are combined (arithmetic/geometric mean), so their
     # band counts -- and the shared air term -- must broadcast together.
@@ -351,7 +427,8 @@ def fitzroy_reverberation_time(
     ``T = sum_i (S_i / S) T_i`` with ``T_i`` the Eyring time of the wall pair
     perpendicular to axis ``i`` (Fitzroy, *J. Acoust. Soc. Am.* 31 (1959) 893).
     Equivalent to ``T = k V / S**2 * sum_i S_i / (-ln(1 - alpha_i))`` without
-    air. Reduces to Eyring for a uniform absorption distribution.
+    air. Reduces to Eyring for a uniform absorption distribution. Each input
+    is itself a mean entering ``ln(1 - alpha_i)``, so each must be below 1.
 
     :param dimensions: Room lengths ``(Lx, Ly, Lz)``, m.
     :param absorptions: Mean absorption ``(alpha_x, alpha_y, alpha_z)`` of the
@@ -381,7 +458,8 @@ def arau_puchades_reverberation_time(
     pair perpendicular to axis ``i`` (Arau-Puchades, *Acustica* 65 (1988) 163,
     Formula 18). Preferred by its author over Fitzroy for rooms with an
     anisotropic absorption distribution. Reduces to Eyring for a uniform
-    distribution.
+    distribution. Each input is itself a mean entering ``ln(1 - alpha_i)``,
+    so each must be below 1.
 
     :param dimensions: Room lengths ``(Lx, Ly, Lz)``, m.
     :param absorptions: Mean absorption ``(alpha_x, alpha_y, alpha_z)`` of the
@@ -462,7 +540,9 @@ def reverberation_time_models(
     from ``dimensions`` and the three wall-pair mean absorptions, then evaluates
     :func:`sabine_reverberation_time`, :func:`eyring_reverberation_time`,
     :func:`millington_sette_reverberation_time`, :func:`fitzroy_reverberation_time`
-    and :func:`arau_puchades_reverberation_time` on a common footing.
+    and :func:`arau_puchades_reverberation_time` on a common footing. Because
+    the bundle evaluates the logarithmic models too, the inputs must satisfy
+    the strictest of the five domains: every absorption below 1.
 
     :param dimensions: Room lengths ``(Lx, Ly, Lz)``, m.
     :param absorptions: Mean absorption ``(alpha_x, alpha_y, alpha_z)`` of the

@@ -361,6 +361,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Reverberation-time prediction no longer rejects absorption coefficients
+  at or above 1 for every model with a blanket `[0, 1)` validator; each
+  model now enforces its own mathematical domain. Sabine accepts measured
+  ISO 354 coefficients at or above 1 (its linear absorption area stays
+  finite), including the exact 1.0 of the ISO 11654 practical-coefficient
+  cap, up to a unit-error guard at 2 that catches percentages passed
+  where fractions are expected. Eyring accepts individual coefficients at
+  or above 1 as long as the mean absorption entering `ln(1 - mean)` stays
+  below 1, and Millington-Sette keeps the strict per-surface requirement
+  (every coefficient below 1) that its per-surface logarithm demands;
+  Fitzroy and Arau-Puchades keep requiring each wall-pair mean below 1,
+  since their inputs enter the axial logarithm directly. NaN inputs, which
+  the old range comparisons silently let through both as coefficients and
+  as `air_attenuation`, are now rejected with explicit finiteness checks.
 - Documentation site rendering on phones: wide parameter tables (4+
   columns with a long-text notes column) no longer crush every column to a
   few characters per line with enormously tall cells; on narrow screens

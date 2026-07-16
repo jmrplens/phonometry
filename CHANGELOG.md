@@ -361,6 +361,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Documentation site rendering on phones: wide parameter tables (4+
+  columns with a long-text notes column) no longer crush every column to a
+  few characters per line with enormously tall cells; on narrow screens
+  their cells keep a readable minimum width (16rem for the trailing notes
+  column) and the table scrolls horizontally inside Starlight's scroll
+  container instead (new `site/src/styles/theme-tables.css`, desktop
+  rendering unchanged); these wide tables also get `tabindex="0"` and a
+  visible focus outline so the scroll container stays keyboard-reachable
+  on Safari/WebKit, which unlike Chrome and Firefox does not focus
+  scrollable regions by default. Figure widths on phones now cover the whole
+  authored tier inventory with a generic selector: every
+  `<img style="width:NN%">` and video spans the full reading column on
+  screens up to 50rem, where tiers such as 60/70/72/75/78/82/86/90/94/96%
+  previously kept wasted side margins and left axis labels illegible.
 - G-weighting (ISO 7196) digital design is now sample-rate aware: at the low
   sample rates common for infrasound recordings, 315 Hz approaches Nyquist
   and the un-prewarped bilinear design warped the upper response; the design

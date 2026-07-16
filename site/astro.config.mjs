@@ -9,10 +9,34 @@ import rehypeKatex from 'rehype-katex';
 import { apiSidebar } from './src/generated/api-sidebar.mjs';
 
 // Converts deprecated HTML align attributes (emitted by markdown table
-// alignment) to CSS text-align, for WCAG2AA compliance (pa11y).
+// alignment) to CSS text-align, for WCAG2AA compliance (pa11y), and makes
+// wide tables keyboard-scrollable: Starlight renders markdown tables as
+// scrollable blocks (display:block + overflow:auto) and theme-tables.css
+// gives 4+ column tables readable minimum cell widths on phones, so they
+// scroll horizontally there. Chrome (127+) and Firefox focus scrollable
+// regions without focusable children by default, but Safari/WebKit does
+// not, so the scroll container needs an explicit tabindex for WCAG 2.1.1
+// (theme-tables.css adds the matching :focus-visible outline).
 function rehypeTableAlign() {
+  const firstRow = (node) => {
+    if (node.type === 'element' && node.tagName === 'tr') return node;
+    for (const child of node.children ?? []) {
+      const found = firstRow(child);
+      if (found) return found;
+    }
+    return null;
+  };
   return (tree) => {
     (function visit(node) {
+      if (node.type === 'element' && node.tagName === 'table') {
+        const row = firstRow(node);
+        const cells = (row?.children ?? []).filter(
+          (c) => c.type === 'element' && (c.tagName === 'th' || c.tagName === 'td'),
+        ).length;
+        if (cells >= 4) {
+          node.properties = { ...node.properties, tabIndex: 0 };
+        }
+      }
       if (
         node.type === 'element' &&
         (node.tagName === 'td' || node.tagName === 'th') &&
@@ -217,6 +241,7 @@ export default defineConfig({
       customCss: [
         './src/styles/katex.css',
         './src/styles/theme-images.css',
+        './src/styles/theme-tables.css',
         './src/styles/splash-menu.css',
       ],
       social: [

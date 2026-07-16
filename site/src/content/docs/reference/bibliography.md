@@ -60,7 +60,8 @@ list grows as guides gain their References sections.
   [IEC webstore](https://webstore.iec.ch/en/publication/5063).
   The base-10 band edges and the class acceptance masks of the fractional
   octave banks.
-  Cited by [Filter Banks](/phonometry/guides/filter-banks/).
+  Cited by [Filter Banks](/phonometry/guides/filter-banks/) and
+  [Multichannel and Performance](/phonometry/guides/multichannel/).
 - International Electrotechnical Commission. (2013). *Electroacoustics —
   Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
   [IEC webstore](https://webstore.iec.ch/en/publication/5708).
@@ -68,8 +69,9 @@ list grows as guides gain their References sections.
   metrics of the sound level meter, with the tolerance tables used for
   verification.
   Cited by [Integrated and Statistical Levels](/phonometry/guides/levels/),
-  [Frequency Weighting (A, C, G, Z)](/phonometry/guides/weighting/) and
-  [Time Weighting and Integration](/phonometry/guides/time-weighting/).
+  [Frequency Weighting (A, C, G, Z)](/phonometry/guides/weighting/),
+  [Time Weighting and Integration](/phonometry/guides/time-weighting/) and
+  [Multichannel and Performance](/phonometry/guides/multichannel/).
 - International Electrotechnical Commission. (2013). *Electroacoustics —
   Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
   [IEC webstore](https://webstore.iec.ch/en/publication/5710).
@@ -513,19 +515,23 @@ list grows as guides gain their References sections.
   82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
   The original equal-loudness measurements whose 40-phon contour became the
   A-weighting curve.
-  Cited by [Frequency Weighting (A, C, G, Z)](/phonometry/guides/weighting/).
+  Cited by [Frequency Weighting (A, C, G, Z)](/phonometry/guides/weighting/)
+  and [Loudness](/phonometry/guides/loudness/).
 - International Organization for Standardization. (2023). *Acoustics —
   Normal equal-loudness-level contours* (ISO 226:2023).
   [iso.org catalogue](https://www.iso.org/standard/83117.html).
   The modern equal-loudness contours, successors of the Fletcher-Munson
   curves.
-  Cited by [Frequency Weighting (A, C, G, Z)](/phonometry/guides/weighting/).
+  Cited by [Frequency Weighting (A, C, G, Z)](/phonometry/guides/weighting/)
+  and [Loudness](/phonometry/guides/loudness/).
 - Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
   (3rd ed.). Springer.
   [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
   The psychoacoustic-annoyance model and the closed-form fluctuation strength
   for amplitude-modulated broadband noise.
-  Cited by [Psychoacoustic annoyance](/phonometry/guides/psychoacoustic-annoyance/).
+  Cited by [Psychoacoustic annoyance](/phonometry/guides/psychoacoustic-annoyance/),
+  [Loudness](/phonometry/guides/loudness/) and
+  [Sound Quality Metrics](/phonometry/guides/sound-quality/).
 - Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016). Modelling the
   sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*,
   28, 050005. [doi:10.1121/2.0000410](https://doi.org/10.1121/2.0000410).

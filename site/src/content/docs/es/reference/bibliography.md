@@ -62,7 +62,8 @@ que las guías incorporan sus secciones de Referencias.
   [Catálogo IEC](https://webstore.iec.ch/en/publication/5063).
   Los bordes de banda en base 10 y las máscaras de aceptación de clase de
   los bancos de octava fraccionaria.
-  Citado por [Bancos de filtros](/phonometry/es/guides/filter-banks/).
+  Citado por [Bancos de filtros](/phonometry/es/guides/filter-banks/) y
+  [Multicanal y rendimiento](/phonometry/es/guides/multichannel/).
 - International Electrotechnical Commission. (2013). *Electroacoustics —
   Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
   [Catálogo IEC](https://webstore.iec.ch/en/publication/5708).
@@ -70,8 +71,9 @@ que las guías incorporan sus secciones de Referencias.
   métricas de nivel del sonómetro, con las tablas de tolerancias usadas en
   la verificación.
   Citado por [Niveles integrados y estadísticos](/phonometry/es/guides/levels/),
-  [Ponderación frecuencial (A, C, G, Z)](/phonometry/es/guides/weighting/) y
-  [Ponderación temporal](/phonometry/es/guides/time-weighting/).
+  [Ponderación frecuencial (A, C, G, Z)](/phonometry/es/guides/weighting/),
+  [Ponderación temporal](/phonometry/es/guides/time-weighting/) y
+  [Multicanal y rendimiento](/phonometry/es/guides/multichannel/).
 - International Electrotechnical Commission. (2013). *Electroacoustics —
   Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
   [Catálogo IEC](https://webstore.iec.ch/en/publication/5710).
@@ -533,19 +535,23 @@ que las guías incorporan sus secciones de Referencias.
   82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
   Las mediciones originales de igual sonoridad cuya isófona de 40 fonios se
   convirtió en la curva de ponderación A.
-  Citado por [Ponderación frecuencial (A, C, G, Z)](/phonometry/es/guides/weighting/).
+  Citado por [Ponderación frecuencial (A, C, G, Z)](/phonometry/es/guides/weighting/)
+  y [Sonoridad](/phonometry/es/guides/loudness/).
 - International Organization for Standardization. (2023). *Acoustics —
   Normal equal-loudness-level contours* (ISO 226:2023).
   [Catálogo iso.org](https://www.iso.org/standard/83117.html).
   Las líneas isofónicas modernas, sucesoras de las curvas de Fletcher y
   Munson.
-  Citado por [Ponderación frecuencial (A, C, G, Z)](/phonometry/es/guides/weighting/).
+  Citado por [Ponderación frecuencial (A, C, G, Z)](/phonometry/es/guides/weighting/)
+  y [Sonoridad](/phonometry/es/guides/loudness/).
 - Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
   (3.ª ed.). Springer.
   [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
   El modelo de molestia psicoacústica y la forma cerrada de la intensidad de
   fluctuación para ruido de banda ancha modulado en amplitud.
-  Citado por [Molestia psicoacústica](/phonometry/es/guides/psychoacoustic-annoyance/).
+  Citado por [Molestia psicoacústica](/phonometry/es/guides/psychoacoustic-annoyance/),
+  [Sonoridad](/phonometry/es/guides/loudness/) y
+  [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/).
 - Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016). Modelling the
   sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*,
   28, 050005. [doi:10.1121/2.0000410](https://doi.org/10.1121/2.0000410).

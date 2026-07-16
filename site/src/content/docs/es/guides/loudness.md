@@ -357,6 +357,24 @@ Devuelve un `EcmaLoudness`: `loudness` (N, sone_HMS), `specific_loudness`
 (N′(z), 53 bandas), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
 (N(l) a 187,5 Hz), `field`.
 
+## Referencias
+
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3.ª ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  La psicoacústica de bandas críticas y enmascaramiento tras el modelo de
+  Zwicker y la sensación de sonoridad que los modelos más nuevos refinan.
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  Las mediciones originales de igual sonoridad tras el concepto de nivel de
+  sonoridad de la sección de tonos puros.
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [Catálogo iso.org](https://www.iso.org/standard/83117.html).
+  El modelo de isófonas y los parámetros de la Tabla 1 tras los niveles de
+  sonoridad de tonos puros.
+
 ## Normas
 
 ISO 532-1:2017, *Acoustics — Methods for calculating

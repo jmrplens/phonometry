@@ -165,6 +165,15 @@ See [Prominent Discrete Tones](tone-prominence.md) for the ECMA-418-1 TNR/PR
 prominence verdicts, [Speech Transmission Index](speech-transmission.md) for
 STI/STIPA, and [Theory](theory-perception.md) for the underlying math.
 
+## References
+
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3rd ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  The psychoacoustics of the sensations quantified on this page: the
+  high-frequency emphasis behind sharpness and the fast-modulation percept
+  behind roughness.
+
 ## Standards
 
 DIN 45692:2009, *Messtechnische Simulation der Hörempfindung

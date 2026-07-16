@@ -771,7 +771,7 @@ _ES: dict[str, str] = {
     "Structure under test (free-free beam)":
         "Estructura bajo ensayo (viga libre-libre)",
     "Impedance head": "Cabeza de impedancia",
-    "F and a at the drive point": "F y a en el punto de excitación",
+    "F and a at the drive point": "F y a en el mismo punto",
     "driving point:  Yii = vi / Fi": "punto de excitación:  Yii = vi / Fi",
     "transfer:  Yji = vj / Fi": "transferencia:  Yji = vj / Fi",
     "Y(f) = v/F  [m/(N·s)] · attached exciter (Part 2) · impact hammer (Part 5)":
@@ -3490,13 +3490,14 @@ def _d_mobility_rig(s: SVG, th: Theme) -> None:
     s.text(60, 380, "Impedance head", 16, th.fg, anchor="start", bold=True)
     s.text(60, 402, "F and a at the drive point", 14, th.muted,
            anchor="start")
-    s.line(dx - 16, beam_bot + 8, 150, 372, th.muted, 1.1, dash="3,3")
+    s.line(dx - 16, beam_bot + 8, 154, 362, th.muted, 1.1, dash="3,3")
     s.arrow(dx + 18, 396, dx + 18, 340, th.secondary, 2.2)
     s.text(dx + 28, 372, "Fi", 16, th.secondary, anchor="start", mono=True)
     s.arrow(dx, beam_top - 4, dx, beam_top - 46, th.accent, 2.2)
     s.text(dx - 14, beam_top - 34, "vi", 16, th.accent, anchor="end",
            mono=True)
-    s.text(302, 222, "driving point:  Yii = vi / Fi", 16, th.fg, mono=True)
+    s.text(210, 218, "driving point:  Yii = vi / Fi", 16, th.fg,
+           anchor="start", mono=True)
 
     # Transfer point: accelerometer further along the beam.
     tx = 430.0
@@ -3533,7 +3534,7 @@ def _d_transfer_stiffness_rig(s: SVG, th: Theme) -> None:
         s.text(cx, 78, head, 22, th.fg, bold=True)
         _exciter(s, cx, 158.0, stinger=18.0)
         # Driven input mass with its input displacement u1.
-        s.rect(cx - 70, 158, 140, 44, th.panel, th.fg, rx=6, sw=2.2)
+        s.rect(cx - 80, 158, 160, 44, th.panel, th.fg, rx=6, sw=2.2)
         s.text(cx, 186, "excitation mass", 16, th.fg)
         _motion_arrows(s, cx - 96, 180, 24, th.secondary)
         s.text(cx - 110, 186, "u₁", 18, th.secondary, anchor="end", mono=True)
@@ -3564,7 +3565,7 @@ def _d_transfer_stiffness_rig(s: SVG, th: Theme) -> None:
     s.ground(430, cx - 115, cx + 115)
     s.text(cx + 70, 408, "soft support", 14, th.muted, anchor="start")
     s.text(cx, 470, "measure T = u₂ / u₁  (small)", 16, th.fg, mono=True)
-    s.text(cx, 500, "k₂,₁ = −(2πf)²·(m₂ + m_f)·T", 20, th.primary, bold=True,
+    s.text(cx, 500, "k₂,₁ = −(2πf)²·(m₂+mf)·T", 20, th.primary, bold=True,
            mono=True)
 
     # Validity footer (Part 3 clause 6, Part 1 Eq. 7).
@@ -3616,7 +3617,7 @@ def _d_reception_plate(s: SVG, th: Theme) -> None:
     s.text(735, 238, "η = 2.2 / (f·Ts)   (Formula 13)", 15, th.fg, mono=True)
     s.text(735, 270, "L_Ws = 10 lg(2πf·η·m·S / f₀m₀S₀)", 14, th.fg, mono=True)
     s.text(735, 296, "+ Lv − 60   (Formula 14)", 14, th.fg, mono=True)
-    s.text(735, 366, "→ source quantities (Formulae 15–19):", 16, th.fg,
+    s.text(735, 366, "→ source quantities (Formulae 15–19):", 15, th.fg,
            bold=True)
     s.text(735, 394, "equivalent blocked force L_Fb,eq ,", 15, th.muted)
     s.text(735, 418, "L_Wsn consumed by EN 12354-5", 15, th.muted)

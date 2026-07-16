@@ -19,6 +19,17 @@ installed-equipment prediction consumes.
 
 ## 1. The reception-plate relations
 
+Why a plate at all? Characterising the source by its contact forces directly
+would mean instrumenting every fixing point in up to six components each
+(three forces, three moments), on a machine that must keep running normally.
+The reception plate sidesteps the whole contact problem: let the source run
+on a resonant plate whose dissipation is known, wait for the steady state,
+and then the power the plate dissipates equals the power the source injects,
+over all contacts and components at once. One spatial average of the plate
+velocity replaces the entire force-measurement problem.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate.svg" alt="EN 15657 reception plate: the source machine standing on a resiliently supported plate, accelerometers averaging the plate velocity, and the plate power balance converting the velocity level into the injected structure-borne power level" width="92%"></picture>
+
 The power a resonant plate dissipates is `P = ω·η·(m·S)·⟨v²⟩`, so the injected
 power level in one-third-octave bands is (Formula 14)
 
@@ -132,6 +143,22 @@ plt.xlabel("Frequency [Hz]"); plt.ylabel("$L_{Ws}$ [dB re 1 pW]"); plt.show()
 ```
 
 </details>
+
+## References
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3rd ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  The plate power balance and the source-receiver mobility framework behind
+  the reception-plate method and its Formula 15-19 source quantities.
+- International Organization for Standardization. (1996). *Acoustics —
+  Characterization of sources of structure-borne sound with respect to sound
+  radiation from connected structures — Measurement of velocity at the
+  contact points of machinery when resiliently mounted* (ISO 9611:1996).
+  [iso.org catalogue](https://www.iso.org/standard/17424.html).
+  The free-velocity source characterization that complements the
+  reception-plate quantities.
 
 ---
 

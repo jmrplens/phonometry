@@ -48,6 +48,18 @@ print(round(abs(ph.convert_frf(Y, 80.0, "mobility", "impedance")), 1))     # 500
 print(f"{abs(ph.convert_frf(Y, 80.0, 'mobility', 'accelerance')):.3f}")    # 1.005  1/kg
 ```
 
+La elección entre las tres FRF de movimiento es de conveniencia, no de
+física: llevan la misma información y `convert_frf` pasa de una a otra de
+forma exacta. La acelerancia es lo que entrega directamente una medición con
+acelerómetros; la movilidad es la moneda natural de las normas de potencia
+estructural (la potencia es fuerza por velocidad, de modo que
+`P = ½·Re{Y}·|F|²` en un contacto); las recíprocas aparecen cuando una fuente
+se describe por lo que impone y no por cómo responde. Leer una movilidad de
+punto de excitación es en sí un diagnóstico estructural: por debajo de una
+resonancia la magnitud sube proporcional a la frecuencia por una **línea de
+rigidez** (`|Y| ≈ ω/k`), por encima cae por una **línea de masa**
+(`|Y| ≈ 1/(ωm)`), y la altura del pico entre ambas mide el amortiguamiento.
+
 ## 2. El resonador SDOF de referencia (forma cerrada)
 
 La referencia canónica en forma cerrada, expresada en la taxonomía de FRF de la
@@ -76,6 +88,17 @@ print(round(complex(ph.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1
 ```
 
 ## 3. FRF medidas y sus criterios de aceptación (ISO 7626-2)
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_es.svg" alt="Medición de movilidad ISO 7626: una viga libre-libre en suspensión blanda excitada por un excitador a través de una cabeza de impedancia en el punto de excitación, un acelerómetro en un punto de transferencia y un martillo de impacto como excitación alternativa" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_es_dark.svg" alt="Medición de movilidad ISO 7626: una viga libre-libre en suspensión blanda excitada por un excitador a través de una cabeza de impedancia en el punto de excitación, un acelerómetro en un punto de transferencia y un martillo de impacto como excitación alternativa" style="width:92%">
+
+En la disposición de ISO 7626-2 la estructura cuelga de una suspensión lo
+bastante blanda para que sus modos de sólido rígido queden muy por debajo de
+la primera resonancia elástica, un excitador ataca un punto a través de una
+**cabeza de impedancia** (una pila de transductores que mide fuerza y
+aceleración en el mismo punto, lo que hace posible una FRF de punto de
+excitación) y acelerómetros recogen la respuesta en otros puntos para las FRF
+de transferencia. ISO 7626-5 cubre la alternativa con martillo de impacto,
+que cambia el espectro controlado del excitador por rapidez.
 
 El procesado de registros medidos con excitación aleatoria según la
 ISO 7626-2, 8.1.3 (el estimador H1,
@@ -144,6 +167,31 @@ plt.legend(); plt.show()
 ```
 
 </details>
+
+## Referencias
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  La monografía de referencia sobre vibración estructural: movilidades de
+  punto y de transferencia de vigas y placas, y el flujo de potencia
+  `P = ½·Re{Y}·|F|²` que hace de la movilidad la magnitud de trabajo de esta
+  página.
+- International Organization for Standardization. (2011). *Mechanical
+  vibration and shock — Experimental determination of mechanical mobility —
+  Part 1: Basic terms and definitions, and transducer specifications*
+  (ISO 7626-1:2011).
+  [Catálogo iso.org](https://www.iso.org/standard/50426.html).
+  La familia de FRF de la Tabla 1 y las distinciones libre/bloqueada
+  implementadas aquí.
+- International Organization for Standardization. (2015). *Mechanical
+  vibration and shock — Experimental determination of mechanical mobility —
+  Part 2: Measurements using single-point translation excitation with an
+  attached vibration exciter* (ISO 7626-2:2015).
+  [Catálogo iso.org](https://www.iso.org/standard/62483.html).
+  El lado de medición: el procesado H1, la calibración con masa rígida y el
+  criterio de error aleatorio.
 
 ---
 

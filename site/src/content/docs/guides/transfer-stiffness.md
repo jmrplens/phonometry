@@ -43,6 +43,18 @@ print(round(float(ph.loss_factor(k)), 3))                # 0.05
 
 ## 2. Direct and indirect determination
 
+Why a *blocked* force rather than, say, the isolator's transmissibility?
+Because a transmissibility is a property of a whole assembly: it changes with
+whatever masses and stiffnesses the isolator happens to connect, so data
+measured on one rig would not transfer to another installation. The blocked
+force per unit input displacement is a property of the element alone, and it
+predicts the force the element delivers to any receiver that is much stiffer
+than the element itself, which is exactly the situation a vibration isolator
+is designed for. ISO 10846 therefore sandwiches the isolator between a driven
+input mass and an output that is either rigidly blocked or a known mass:
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig.svg" alt="ISO 10846 transfer-stiffness rigs: the isolator under test between a driven excitation mass and either a blocked output with a force transducer, the direct method, or a resiliently supported blocking mass, the indirect method" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig_dark.svg" alt="ISO 10846 transfer-stiffness rigs: the isolator under test between a driven excitation mass and either a blocked output with a force transducer, the direct method, or a resiliently supported blocking mass, the indirect method" style="width:92%">
+
 The **direct method** (ISO 10846-2) measures the blocked output force and the
 input displacement, `k₂₁ = F₂,b/u₁`. The **indirect method** (ISO 10846-3) loads
 the output with a compact blocking mass `m₂` and measures the vibration
@@ -73,6 +85,14 @@ print(round(float(res.level[-1]), 1))      # ~126  dB re 1 N/m (high-f)
 
 The `TransferStiffnessResult` carries the complex `k₂₁` and exposes `.level`,
 `.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")` and `.plot()`.
+
+The two methods split the frequency axis between them. The direct method
+works from arbitrarily low frequencies up to where the test rig's own
+resonances intrude (typically a few hundred hertz for large elements); the
+indirect method only becomes valid well above the blocking-mass/spring
+resonance, where the transmissibility is small, and extends the
+characterisation into the kilohertz range. A full isolator dataset is
+usually the two spliced together.
 
 ## 3. Validity of the indirect method
 
@@ -149,6 +169,22 @@ plt.xlabel("Frequency [Hz]"); plt.ylabel("$L_k$ [dB re 1 N/m]"); plt.show()
 ```
 
 </details>
+
+## References
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3rd ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  Vibration isolation theory: why an isolator's performance depends on the
+  source and receiver mobilities, the physics behind the blocked-force
+  characterisation.
+- International Organization for Standardization. (2008). *Acoustics and
+  vibration — Laboratory measurement of vibro-acoustic transfer properties of
+  resilient elements — Part 1: Principles and guidelines* (ISO 10846-1:2008).
+  [iso.org catalogue](https://www.iso.org/standard/38936.html).
+  The principles part of the series: the blocking-force idealisation and the
+  FRF relations this page implements.
 
 ---
 

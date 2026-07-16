@@ -77,6 +77,36 @@ media energética `mean_velocity_level` (Fórmula 10) o su forma ponderada por �
 (Fórmula 11), y la corrección `extraneous_velocity_correction` elimina la
 vibración extraña según la Tabla 2.
 
+## 3. Cuándo se rompe la hipótesis del factor de radiación
+
+Todo el método descansa en una sustitución: reemplazar la medición acústica
+por `ε`. El valor `ε = 1` de la Parte 1 es un auténtico *límite superior*,
+pero solo en el régimen en el que una superficie vibrante radia como un
+pistón, por encima de la **frecuencia crítica (de coincidencia)** de las
+partes tipo placa, donde las ondas de flexión viajan más rápido que el
+sonido. Por debajo de la coincidencia, zonas adyacentes de la placa se mueven
+en contrafase y su radiación se cancela en gran medida: `ε` cae muy por
+debajo de uno y baja deprisa al bajar la frecuencia, de modo que el método de
+inspección puede sobrestimar las bandas graves de una carcasa grande y
+delgada en 10 dB o más. La misma cancelación hace que las fuentes pequeñas
+radien mal (el cortocircuito acústico alrededor de un panel sin bafle). Otras
+dos hipótesis son fáciles de violar en campo:
+
+* **La vibración medida debe ser la de la propia máquina.** La vibración que
+  entra desde la maquinaria vecina infla `⟨v²⟩`; la Tabla 2 prescribe la
+  comprobación con la fuente parada y `extraneous_velocity_correction` la
+  aplica.
+* **La superficie debe ser el radiador dominante.** El sonido aéreo de
+  aberturas, tomas o fuentes internas que esquiva la carcasa medida es
+  invisible para una inspección de velocidad; el método caracteriza solo la
+  parte estructural.
+
+La Parte 2 existe exactamente para el primer problema: sustituye el `ε = 1`
+fijo por un `εⱼ` banda a banda determinado a partir de una medición de
+referencia de la potencia radiada (intensidad ISO 9614), tras lo cual la
+inspección de velocidad puede repetirse a bajo coste en máquinas nominalmente
+idénticas.
+
 <details>
 <summary>Mostrar el código de esta figura</summary>
 
@@ -97,6 +127,28 @@ plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_W$ [dB re 1 pW]"); plt.show()
 ```
 
 </details>
+
+## Referencias
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  El tratamiento de la eficiencia de radiación tras la sección 3: la
+  coincidencia, la cancelación por debajo de la frecuencia crítica y la
+  radiación de placas finitas.
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of airborne sound power levels emitted by machinery using
+  vibration measurement — Part 1: Survey method using a fixed radiation
+  factor* (ISO/TS 7849-1:2009).
+  [Catálogo iso.org](https://www.iso.org/standard/40537.html).
+  El método de límite superior con `ε = 1`.
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of airborne sound power levels emitted by machinery using
+  vibration measurement — Part 2: Engineering method including determination
+  of the adequate radiation factor* (ISO/TS 7849-2:2009).
+  [Catálogo iso.org](https://www.iso.org/standard/40538.html).
+  El método de ingeniería con un factor de radiación medido por bandas.
 
 ---
 

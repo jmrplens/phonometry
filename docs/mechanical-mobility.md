@@ -47,6 +47,18 @@ print(round(abs(ph.convert_frf(Y, 80.0, "mobility", "impedance")), 1))     # 500
 print(f"{abs(ph.convert_frf(Y, 80.0, 'mobility', 'accelerance')):.3f}")    # 1.005  1/kg
 ```
 
+The choice between the three motion FRFs is one of convenience, not physics:
+they carry the same information and `convert_frf` moves between them exactly.
+Accelerance is what an accelerometer-based measurement delivers directly;
+mobility is the natural currency of the structure-borne power standards
+(power is force times velocity, so `P = ½·Re{Y}·|F|²` at a contact); the
+reciprocals appear whenever a source is described by what it imposes rather
+than by how it responds. Reading a driving-point mobility plot is a
+structural diagnosis in itself: below a resonance the magnitude climbs
+proportionally to frequency along a **stiffness line** (`|Y| ≈ ω/k`), above
+it the magnitude falls along a **mass line** (`|Y| ≈ 1/(ωm)`), and the height
+of the peak between them measures the damping.
+
 ## 2. The SDOF reference resonator (closed form)
 
 The canonical closed-form reference — expressed in the Table 1 / 3.1.2 FRF
@@ -75,6 +87,16 @@ print(round(complex(ph.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1
 ```
 
 ## 3. Measured FRFs and their acceptance criteria (ISO 7626-2)
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="ISO 7626 mobility measurement: a free-free beam on soft suspension driven by an exciter through an impedance head at the driving point, an accelerometer at a transfer point, and an impact hammer as the alternative excitation" width="92%"></picture>
+
+In the ISO 7626-2 arrangement the structure hangs on a suspension soft enough
+that its rigid-body modes fall well below the first elastic resonance, an
+exciter drives one point through an **impedance head** (a transducer stack
+measuring force and acceleration at the same point, which is what makes a
+driving-point FRF possible), and accelerometers pick up the response
+elsewhere for the transfer FRFs. ISO 7626-5 covers the impact-hammer
+alternative, which trades the exciter's controlled spectrum for speed.
 
 Processing measured random-excitation records per ISO 7626-2, 8.1.3 — the H1
 estimator `Ĥ = G(response, force)/G(force, force)` — and the ordinary coherence
@@ -141,6 +163,29 @@ plt.legend(); plt.show()
 ```
 
 </details>
+
+## References
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3rd ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  The standard monograph on structural vibration: point and transfer
+  mobilities of beams and plates, and the power flow `P = ½·Re{Y}·|F|²` that
+  makes mobility the working quantity of this page.
+- International Organization for Standardization. (2011). *Mechanical
+  vibration and shock — Experimental determination of mechanical mobility —
+  Part 1: Basic terms and definitions, and transducer specifications*
+  (ISO 7626-1:2011).
+  [iso.org catalogue](https://www.iso.org/standard/50426.html).
+  The Table 1 FRF family and the free/blocked distinctions implemented here.
+- International Organization for Standardization. (2015). *Mechanical
+  vibration and shock — Experimental determination of mechanical mobility —
+  Part 2: Measurements using single-point translation excitation with an
+  attached vibration exciter* (ISO 7626-2:2015).
+  [iso.org catalogue](https://www.iso.org/standard/62483.html).
+  The measurement side: H1 processing, rigid-mass calibration and the
+  random-error criterion.
 
 ---
 

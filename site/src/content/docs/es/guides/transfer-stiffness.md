@@ -44,6 +44,19 @@ print(round(float(ph.loss_factor(k)), 3))                # 0.05
 
 ## 2. Determinación directa e indirecta
 
+¿Por qué una fuerza *bloqueada* y no, por ejemplo, la transmisibilidad del
+aislador? Porque una transmisibilidad es una propiedad del conjunto completo:
+cambia con las masas y rigideces que el aislador conecte en cada caso, así
+que unos datos medidos en un banco no se trasladarían a otra instalación. La
+fuerza bloqueada por unidad de desplazamiento de entrada es una propiedad del
+elemento solo, y predice la fuerza que el elemento entrega a cualquier
+receptor mucho más rígido que el propio elemento, que es exactamente la
+situación para la que se diseña un aislador de vibración. Por eso ISO 10846
+intercala el aislador entre una masa de entrada excitada y una salida o bien
+bloqueada rígidamente o bien una masa conocida:
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig_es.svg" alt="Bancos de rigidez de transferencia ISO 10846: el aislador bajo ensayo entre una masa de excitación y o bien una salida bloqueada con un transductor de fuerza, el método directo, o bien una masa de bloqueo sobre apoyos resilientes, el método indirecto" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig_es_dark.svg" alt="Bancos de rigidez de transferencia ISO 10846: el aislador bajo ensayo entre una masa de excitación y o bien una salida bloqueada con un transductor de fuerza, el método directo, o bien una masa de bloqueo sobre apoyos resilientes, el método indirecto" style="width:92%">
+
 El **método directo** (ISO 10846-2) mide la fuerza de salida bloqueada y el
 desplazamiento de entrada, `k₂₁ = F₂,b/u₁`. El **método indirecto** (ISO 10846-3)
 carga la salida con una masa de bloqueo compacta `m₂` y mide la transmisibilidad
@@ -74,6 +87,14 @@ print(round(float(res.level[-1]), 1))      # ~126  dB re 1 N/m (alta f)
 
 El `TransferStiffnessResult` transporta el `k₂₁` complejo y expone `.level`,
 `.loss_factor`, `.magnitude`, `.to("impedance"/"apparent_mass")` y `.plot()`.
+
+Los dos métodos se reparten el eje de frecuencia. El método directo funciona
+desde frecuencias arbitrariamente bajas hasta donde se cuelan las resonancias
+propias del banco (típicamente unos pocos cientos de hercios para elementos
+grandes); el método indirecto solo es válido bastante por encima de la
+resonancia masa de bloqueo/resorte, donde la transmisibilidad es pequeña, y
+extiende la caracterización hasta el rango de kilohercios. Un conjunto de
+datos completo de un aislador suele ser el empalme de ambos.
 
 ## 3. Validez del método indirecto
 
@@ -152,6 +173,22 @@ plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_k$ [dB re 1 N/m]"); plt.show()
 ```
 
 </details>
+
+## Referencias
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  Teoría del aislamiento de vibraciones: por qué el comportamiento de un
+  aislador depende de las movilidades de fuente y receptor, la física tras la
+  caracterización por fuerza bloqueada.
+- International Organization for Standardization. (2008). *Acoustics and
+  vibration — Laboratory measurement of vibro-acoustic transfer properties of
+  resilient elements — Part 1: Principles and guidelines* (ISO 10846-1:2008).
+  [Catálogo iso.org](https://www.iso.org/standard/38936.html).
+  La parte de principios de la serie: la idealización de fuerza de bloqueo y
+  las relaciones FRF que implementa esta página.
 
 ---
 

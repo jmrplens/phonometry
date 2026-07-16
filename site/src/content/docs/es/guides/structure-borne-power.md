@@ -21,6 +21,18 @@ equipos instalados de EN 12354-5.
 
 ## 1. Las relaciones de la placa receptora
 
+¿Por qué una placa? Caracterizar la fuente directamente por sus fuerzas de
+contacto supondría instrumentar cada punto de fijación en hasta seis
+componentes cada uno (tres fuerzas, tres momentos), en una máquina que debe
+seguir funcionando con normalidad. La placa receptora esquiva el problema de
+contacto completo: deja la fuente funcionando sobre una placa resonante cuya
+disipación se conoce, espera al régimen estacionario, y entonces la potencia
+que la placa disipa es igual a la potencia que la fuente inyecta, sumada
+sobre todos los contactos y componentes a la vez. Un promedio espacial de la
+velocidad de la placa sustituye todo el problema de medir fuerzas.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate_es.svg" alt="Placa receptora EN 15657: la máquina fuente sobre una placa con apoyos resilientes, acelerómetros que promedian la velocidad de la placa y el balance de potencia de la placa que convierte el nivel de velocidad en el nivel de potencia estructural inyectada" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate_es_dark.svg" alt="Placa receptora EN 15657: la máquina fuente sobre una placa con apoyos resilientes, acelerómetros que promedian la velocidad de la placa y el balance de potencia de la placa que convierte el nivel de velocidad en el nivel de potencia estructural inyectada" style="width:92%">
+
 La potencia que disipa una placa resonante es `P = ω·η·(m·S)·⟨v²⟩`, de modo que
 el nivel de potencia inyectada en bandas de tercio de octava es (Fórmula 14)
 
@@ -138,6 +150,23 @@ plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_{Ws}$ [dB re 1 pW]"); plt.show()
 ```
 
 </details>
+
+## Referencias
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  El balance de potencia de la placa y el marco de movilidades
+  fuente-receptor tras el método de placa receptora y sus magnitudes de
+  fuente de las Fórmulas 15-19.
+- International Organization for Standardization. (1996). *Acoustics —
+  Characterization of sources of structure-borne sound with respect to sound
+  radiation from connected structures — Measurement of velocity at the
+  contact points of machinery when resiliently mounted* (ISO 9611:1996).
+  [Catálogo iso.org](https://www.iso.org/standard/17424.html).
+  La caracterización de fuente por velocidad libre que complementa las
+  magnitudes de la placa receptora.
 
 ---
 

@@ -202,7 +202,6 @@ En este modo:
 import numpy as np
 from phonometry import metrology
 
-# 1. Graba la señal de tu calibrador de 94 dB (1 kHz, 1 Pa RMS = 94 dB SPL)
 fs = 48000
 # recording: la captura de micrófono que quieres calibrar, misma cadena de entrada (Pa tras calibrar).
 #   Sintetizada aquí; en una medición real es tu señal grabada.
@@ -225,7 +224,6 @@ como BK:
 import numpy as np
 from phonometry import metrology
 
-# 1. Graba la señal de tu calibrador de 94 dB (1 kHz, 1 Pa RMS = 94 dB SPL)
 fs = 48000
 # recording: la captura de micrófono que quieres calibrar, misma cadena de entrada (Pa tras calibrar).
 #   Sintetizada aquí; en una medición real es tu señal grabada.

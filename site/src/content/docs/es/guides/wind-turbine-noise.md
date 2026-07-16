@@ -18,12 +18,68 @@ potencia sonora aparente es `L_WA,i = L_p,i − 6 + 10·lg(4π R1²/S0)` por ban
 (`S0 = 1 m²`), sumado energéticamente sobre las bandas. Los `−6 dB` dan cuenta de
 la duplicación de presión en la placa del suelo.
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400_es.svg" alt="Alzado de un aerogenerador de eje horizontal con altura de buje H y diámetro de rotor D, un micrófono tumbado sobre una placa plana en el suelo a sotavento a la distancia horizontal R0 = H + D/2 del eje de la torre, la distancia oblicua R1 del centro del rotor al micrófono con el ángulo de inclinación de la placa phi entre 25 y 40 grados, y un mástil meteorológico que mide velocidad y dirección del viento; un recuadro en planta muestra el patrón de la Figura 3 con la posición de referencia a sotavento y tres posiciones opcionales a más y menos 60 grados y a barlovento, y las anotaciones dan R1 igual a la raíz cuadrada de H al cuadrado más R0 al cuadrado y la fórmula de potencia sonora aparente LWA,i = Lp,i menos 6 más 10 lg(4 pi R1 al cuadrado entre S0)" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400_es_dark.svg" alt="Alzado de un aerogenerador de eje horizontal con altura de buje H y diámetro de rotor D, un micrófono tumbado sobre una placa plana en el suelo a sotavento a la distancia horizontal R0 = H + D/2 del eje de la torre, la distancia oblicua R1 del centro del rotor al micrófono con el ángulo de inclinación de la placa phi entre 25 y 40 grados, y un mástil meteorológico que mide velocidad y dirección del viento; un recuadro en planta muestra el patrón de la Figura 3 con la posición de referencia a sotavento y tres posiciones opcionales a más y menos 60 grados y a barlovento, y las anotaciones dan R1 igual a la raíz cuadrada de H al cuadrado más R0 al cuadrado y la fórmula de potencia sonora aparente LWA,i = Lp,i menos 6 más 10 lg(4 pi R1 al cuadrado entre S0)" style="width:94%">
+
 ```python
 import phonometry as ph
 
 r1 = ph.slant_distance(hub_height=80.0, rotor_diameter=100.0)
 lwa = ph.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 ```
+
+### Por qué "aparente"
+
+$L_{WA}$ se escribe como un nivel de potencia sonora, pero no lo es en el
+sentido de la ISO 3744 de muestrear el campo de presión sobre una
+superficie envolvente. La norma reduce toda la máquina a una fuente puntual
+equivalente en el centro del rotor y pregunta qué potencia necesitaría esa
+fuente, radiando esféricamente, para reproducir el nivel medido en una única
+posición sobre placa a sotavento: por definición es la potencia "que produce
+la misma emisión sonora en la dirección de sotavento que el aerogenerador".
+Todo lo que un rotor de 150 m hace y una fuente puntual no, la directividad
+vertical y lateral y el silbido al paso de pala, queda englobado en el valor
+y evaluado en una sola dirección; las posiciones opcionales 2 a 4
+del patrón en planta existen precisamente para documentar cómo varía la
+emisión alrededor de la máquina. Las potencias aparentes de aerogeneradores
+distintos son comparables porque la geometría escala con la máquina
+($R_0 = H + D/2$, de modo que todo rotor se ve bajo un ángulo parecido), que
+es el objetivo de la definición, pero un $L_{WA}$ introducido en una
+predicción ISO 9613-2 arrastra consigo su sesgo de sotavento. La placa en el
+suelo, a su vez, es la razón de los 6 dB restados: una cápsula tumbada sobre
+una placa dura recibe una reflexión perfectamente coherente (duplicación de
+presión, $+6$ dB) en lugar del patrón de interferencia dependiente de la
+altura que muestrearía un micrófono en trípode (véase
+[la fuente imagen tras el efecto del suelo](/phonometry/es/guides/outdoor-propagation/)).
+
+### Clases de viento y condiciones estandarizadas
+
+La emisión de ruido de un aerogenerador crece con la velocidad del viento
+hacia la potencia nominal, así que un número único no significaría nada sin
+su punto de operación: la IEC 61400-11 reporta $L_{WA}$ *en función de la
+velocidad del viento*. Sonido y viento se registran en promedios
+sincronizados de 10 s, y cada periodo se clasifica en una **clase de
+velocidad de viento de 0,5 m/s de ancho centrada en velocidades enteras y
+semienteras a altura de buje**, con al menos 10 periodos de ruido total y 10
+de fondo (turbina parada) por clase. La propia velocidad a altura de buje
+preferiblemente no es una lectura de anemómetro: se deriva de la potencia
+eléctrica medida a través de la curva de potencia de la turbina (apartado
+8.2.1), el sustituto más repetible del viento que el rotor ve de verdad, con
+el anemómetro de góndola y el mástil meteorológico como alternativas. El
+rango medido debe cubrir al menos de 0,8 a 1,3 veces la velocidad de viento
+al 85 % de la potencia máxima (aproximadamente de 6 a 10 m/s a 10 m de
+altura para una máquina grande). Dentro de cada clase los espectros se
+promedian, se interpolan al centro de la clase y se corrigen por fondo; un
+margen total-menos-fondo de 3 dB o menos anula la clase, y entre 3 y 6 dB
+la marca con un asterisco. Por comparabilidad con condiciones de licencia y
+ediciones anteriores, la Fórmula (29) también convierte cada resultado a la
+velocidad de viento a 10 m de altura sobre una **longitud de rugosidad de
+referencia** $z_{0ref} = 0{,}05$ m (un perfil de viento logarítmico), dando
+$L_{WA,10m}$ a velocidades enteras a 10 m sea cual sea el terreno real del
+emplazamiento. La biblioteca implementa las magnitudes en forma cerrada de
+esta cadena (distancia oblicua, potencia aparente por banda, audibilidad
+tonal); la clasificación en clases, el promediado y la maquinaria de
+incertidumbre operan sobre campañas de medida completas y quedan fuera de
+alcance.
 
 ## Audibilidad tonal
 
@@ -81,6 +137,29 @@ ph.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
 ```
 
 </details>
+
+## Referencias
+
+- International Electrotechnical Commission. (2018). *Wind turbines —
+  Part 11: Acoustic noise measurement techniques* (IEC 61400-11:2012+AMD1:2018
+  CSV). [Tienda IEC](https://webstore.iec.ch/en/publication/63367).
+  La edición implementada: la geometría de medida, la clasificación por
+  velocidades de viento y la cadena de audibilidad tonal.
+- International Electrotechnical Commission. (2005). *Wind turbines —
+  Part 14: Declaration of apparent sound power level and tonality values*
+  (IEC TS 61400-14:2005).
+  [Tienda IEC](https://webstore.iec.ch/en/publication/5432).
+  Cómo un fabricante convierte las medidas IEC 61400-11 de un lote de
+  aerogeneradores en valores declarados con su incertidumbre, el número que
+  recibe realmente una autoridad de planificación.
+- International Organization for Standardization. (2017). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 2:
+  Determination of sound pressure levels* (ISO 1996-2:2017).
+  [Catálogo iso.org](https://www.iso.org/standard/59766.html).
+  El criterio de audibilidad tonal que reutiliza el método IEC procede del
+  anexo C de su edición de 2007 (la edición de 2017 lleva los métodos
+  tonales en los anexos J y K), y su `tonal_adjustment` consume la
+  audibilidad media.
 
 ---
 

@@ -109,22 +109,6 @@ population's *percentage beyond fence* depends on the fractile spread, not just
 the median, so it must be read from the distribution, never from the median
 threshold alone.
 
-**Three quantities, kept distinct.** It is worth being precise about what each
-symbol means, because they are easy to conflate:
-
-- **NIPTS** ($N$) is the *noise-induced permanent threshold shift* — the extra
-  loss the noise causes, and nothing else. It is what an ideal hearing-
-  conservation programme would prevent. On its own it is not an audiogram.
-- **HTLA** ($H$) is the *age* threshold alone (the ISO 7029 component of the
-  [hearing-threshold](/phonometry/guides/hearing-threshold/) guide), the loss
-  the same person would have with no occupational noise.
-- **HTLAN** ($H'$) is the *total* threshold — age **and** noise combined by
-  Formula (1). This is what an audiometer measures, and the only one of the
-  three you can compare against a real audiogram.
-
-The non-linear combination $H' = H + N - HN/120$ is why you cannot simply read
-N
-
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss.svg" alt="Two panels. Left: the median NIPTS at 95 dB for 10, 20, 30 and 40 years on an inverted audiogram axis with the 10 to 90 percent band around the 40-year curve, deepening toward 4 kHz. Right: for a 60-year-old man exposed 30 years at 95 dB, the age (HTLA), noise (NIPTS) and combined HTLAN curves, the HTLAN lying below the simple sum" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss_dark.svg" alt="Two panels. Left: the median NIPTS at 95 dB for 10, 20, 30 and 40 years on an inverted audiogram axis with the 10 to 90 percent band around the 40-year curve, deepening toward 4 kHz. Right: for a 60-year-old man exposed 30 years at 95 dB, the age (HTLA), noise (NIPTS) and combined HTLAN curves, the HTLAN lying below the simple sum" style="width:96%">
 
 <details>

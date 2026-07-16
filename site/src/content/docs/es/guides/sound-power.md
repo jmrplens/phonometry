@@ -41,6 +41,61 @@ turno.
 
 <video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: la misma fuente en una cámara anecoica y en una cámara reverberante produce presiones de micrófono distintas, y las fórmulas de campo libre y campo difuso convergen al mismo nivel de potencia sonora L_W" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: la misma fuente en una cámara anecoica y en una cámara reverberante produce presiones de micrófono distintas, y las fórmulas de campo libre y campo difuso convergen al mismo nivel de potencia sonora L_W" style="width:88%"></video>
 
+### Una ruta de decisión
+
+La tabla se condensa en una breve secuencia de preguntas (ISO 3740 dedica su
+Tabla 3 y su Anexo D exactamente a esta decisión). Recórrelas en orden; la
+primera coincidencia nombra la norma.
+
+1. **¿Para qué es el número?** Una declaración de ficha técnica o una
+   comprobación frente a un límite piden normalmente grado de ingeniería
+   (grado 2, el grado preferido para las declaraciones de ruido); una fuente
+   de referencia, una clasificación de productos o un litigio piden precisión
+   (grado 1); un primer reconocimiento de una nave ruidosa tolera el grado de
+   control (grado 3). El grado 1 solo existe en una sala de laboratorio
+   cualificada (ISO 3741, ISO 3745) o mediante los métodos de intensidad de
+   precisión (ISO 9614-1 en puntos discretos, ISO 9614-3 por barrido).
+2. **¿Puede la fuente viajar al laboratorio?** ISO 3741 quiere la fuente
+   pequeña frente a la sala (volumen no mayor de aproximadamente el 2 % del
+   volumen de la sala) y su ruido estacionario; ISO 3745 la quiere dentro de
+   una sala anecoica o semianecoica cualificada con una dimensión
+   característica menor que la mitad del radio de medición, y es la vía que
+   además proporciona la directividad. Una máquina anclada a su bancada
+   descarta ambas y deja los métodos in situ.
+3. **¿Cómo de silencioso y de seco es el emplazamiento?** ISO 3744 necesita
+   el fondo al menos 6 dB por debajo de la fuente (preferiblemente más de
+   15 dB) y `K2 ≤ 4 dB`. Si solo se alcanza un margen de 3 dB o `K2 ≤ 7 dB`, los
+   mismos micrófonos y fórmulas pasan sin más a ISO 3746 en grado de
+   control.
+4. **¿Es el fondo el problema?** Cuando las máquinas vecinas no se pueden
+   apagar, o el margen es directamente negativo, los métodos de presión
+   quedan descartados. El barrido de intensidad (ISO 9614-2, o ISO 9614-3
+   para el grado 1) tolera ruido extraño estacionario incluso unos 10 dB
+   *por encima* de la fuente, porque solo cuenta el flujo neto de energía a
+   través de la superficie; los indicadores de campo por banda deciden
+   después el grado realmente alcanzado.
+
+### Qué significan los grados de precisión
+
+El grado es una afirmación sobre la **reproducibilidad**: `σR0` es la
+desviación típica que verías si laboratorios distintos midieran la misma
+fuente, cada uno siguiendo la norma correctamente. Los valores ponderados A
+típicos son `σR0 ≈ 0.5 dB` para el grado 1 (ISO 3741), `1.5 dB` para el
+grado 2 (ISO 3744, ISO 9614-2) y `3 dB` o más para el grado 3 (aún mayores
+cuando `K2` es grande o el espectro es tonal). Los valores
+por banda son mayores en los extremos del espectro. El campo `uncertainty`
+de los resultados de los métodos de presión (superficie envolvente y sala
+anecoica) es la incertidumbre expandida `U = 2·σtot` (95 % de
+cobertura), donde `σtot = √(σR0² + σomc²)` incorpora además la inestabilidad
+de operación/montaje `σomc` que tú estimas y pasas; el grado solo acota la
+parte del presupuesto que corresponde al método.
+
+En la práctica: un `LWA` de grado 2 de 92,4 dB lleva `U ≈ 3 dB`, así que dos
+resultados de grado 2 separados 2 dB son estadísticamente indistinguibles, y
+contrastar esa misma fuente con un límite de 93 dB es cara o cruz. Elige el
+grado por la decisión que el número debe sostener, no por la instalación que
+esté libre.
+
 ## 1. Superficie envolvente, presión sonora (ISO 3744 / ISO 3746)
 
 Coloca la fuente sobre un plano reflectante e imagina una **superficie de
@@ -154,6 +209,41 @@ o `absorption_area`, o `mean_absorption_coefficient` + `room_surface`) habilita
 cae por debajo del criterio del grado o `K2` supera el límite de validez, un
 `SoundPowerWarning` avisa de que los niveles son cotas superiores —la
 determinación se devuelve igualmente.
+
+### Trampas de K1 y K2
+
+Ambas correcciones restan energía al nivel superficial, así que sobreestimar
+cualquiera de las dos subestima la emisión. Por eso las normas las acotan, y
+por eso la mayoría de las disputas sobre un resultado de superficie
+envolvente se remontan a uno de estos hábitos:
+
+- **K1 tiene un precipicio, no una pendiente.** Con 15 dB de margen la
+  corrección es un despreciable 0,14 dB; en el criterio de ingeniería de
+  6 dB ya es 1,26 dB, el mayor valor que acepta el grado. Por debajo del
+  criterio la norma no deja correr la fórmula: `K1` se acota y el resultado
+  se declara cota superior. Nunca extrapoles la resta a un margen menor;
+  aumenta el margen (emplazamiento más silencioso, superficie más cercana) o
+  pásate al método de intensidad.
+- **K1 supone un fondo estacionario.** La lectura con la fuente apagada debe
+  tomarse en las mismas posiciones y con la sala en el mismo estado, y la
+  energía de fondo debe ser la misma durante ambas lecturas. Un sistema de
+  ventilación que cicla o un vehículo que pasa durante cualquiera de las dos
+  invalida la pareja; la resta energética supone además fuente y fondo
+  incoherentes, lo que vale para el ruido ajeno pero no para las reflexiones
+  de la propia fuente.
+- **K2 elimina la acumulación media de la sala, no las reflexiones
+  discretas.** Una pared cercana, un carro u otra máquina justo fuera de la
+  superficie añaden una contribución especular concentrada en unos pocos
+  micrófonos. Ese desequilibrio aflora en el índice de directividad aparente
+  `DIi*`, y ninguna corrección promedio de sala puede eliminarlo: desplaza
+  la superficie, retira el reflector o trátalo con absorción.
+- **K2 vale lo que valga `A`.** Con `A` de Sabine (`0.16·V/T`), los errores
+  en el tiempo de reverberación o en el volumen se propagan directamente. En
+  el límite de validez `K2 = 4 dB` cerca del 60 % de la energía medida es
+  sala, no fuente, y un error del 20 % en `A` aún mueve `LW` unos 0,5 dB.
+  Prefiere un `T60` medido a un coeficiente de absorción estimado, y mantén
+  la distancia de medición lo bastante pequeña para que `K2` quede
+  holgadamente por debajo del límite.
 
 ### Parámetros de `sound_power_pressure()`
 
@@ -679,6 +769,45 @@ plt.show()
 - [Teoría](/phonometry/es/reference/theory/environment-transport/) — las derivaciones de Waterhouse, K1/K2 y
   C1/C2.
 - Referencia de la API: [`emission.sound_power`](/phonometry/es/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](/phonometry/es/reference/api/power/sound-power-reverberation/) y [`emission.sound_power_intensity`](/phonometry/es/reference/api/power/sound-power-intensity/).
+
+## Referencias
+
+- Fahy, F. J. (1995). *Sound intensity* (2.ª ed.). E&FN Spon.
+  ISBN 978-0-419-19810-9.
+  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
+  La monografía sobre el flujo de energía sonora: por qué la intensidad
+  separa la energía que sale de la fuente de la energía estacionaria que
+  solo pasa, detrás de los métodos de barrido de las secciones 3 y 5.
+- Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
+  transducers*. Academic Press. ISBN 978-0-12-391421-7.
+  [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
+  Radiación y campos sonoros: las relaciones entre presión y potencia en
+  campo libre y campo difuso sobre las que descansan los métodos de
+  superficie envolvente y de sala reverberante.
+- International Organization for Standardization. (2019). *Acoustics —
+  Determination of sound power levels of noise sources — Guidelines for the
+  use of basic standards* (ISO 3740:2019).
+  [Catálogo iso.org](https://www.iso.org/standard/45107.html).
+  La guía de selección detrás de "Elegir un método": grados, entornos y
+  criterios de tamaño de fuente y de ruido de fondo para toda la familia.
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for reverberation test
+  rooms* (ISO 3741:2010).
+  [Catálogo iso.org](https://www.iso.org/standard/52053.html).
+  El método en sala reverberante de la sección 2.
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Engineering methods for an essentially free
+  field over a reflecting plane* (ISO 3744:2010).
+  [Catálogo iso.org](https://www.iso.org/standard/52055.html).
+  El método de superficie envolvente de la sección 1.
+- International Organization for Standardization. (2012). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for anechoic rooms and
+  hemi-anechoic rooms* (ISO 3745:2012).
+  [Catálogo iso.org](https://www.iso.org/standard/45362.html).
+  El método de precisión en sala anecoica de la sección 4.
 
 ---
 

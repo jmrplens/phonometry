@@ -23,7 +23,7 @@ reflejada.
 ## 1. Coeficiente de dispersión de incidencia aleatoria (ISO 17497-1)
 
 El coeficiente de dispersión $s$ es la fracción de energía reflejada que **no**
-abandona la superficie en la dirección especular. ISO 17497-1 lo mide en una sala
+abandona la superficie en la dirección especular. ISO 17497-1 lo mide en una cámara
 reverberante a partir de cuatro situaciones de tiempo de reverberación: con la
 muestra de ensayo montada sobre una plataforma giratoria y mantenida
 **inmóvil**, y con la plataforma **en rotación** (que promedia y elimina la

@@ -22,7 +22,12 @@ if TYPE_CHECKING:
     from ..aircraft.aircraft_noise import EPNLResult
     from ..aircraft.atmospheric_absorption import AircraftBandAttenuation
     from ..aircraft.airport_noise import FlyoverResult, NoiseContourResult, NpdLevelResult
-    from ..aircraft.rotorcraft_noise import RotorcraftHemisphere
+    from ..aircraft.rotorcraft_noise import (
+        FlightPathKinematics,
+        RotorcraftEventResult,
+        RotorcraftHemisphere,
+        RotorcraftNoiseContourResult,
+    )
 
 def plot_epnl(result: "EPNLResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
     """PNL and PNLT time histories with PNLTM and the 10 dB-down window.
@@ -186,5 +191,107 @@ def plot_noise_contour(result: "NoiseContourResult", ax: Axes | None = None, **k
     ax.set_xlabel("x [km]")
     ax.set_ylabel("y [km]")
     ax.set_title("Aircraft noise contour (ECAC Doc 29)")
+    ax.set_aspect("equal", adjustable="box")
+    return ax
+
+
+def plot_flight_path_kinematics(
+    result: "FlightPathKinematics", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """Speed and angle profiles of a rotorcraft track (ECAC Doc 32).
+
+    The ground speed and airspeed share the left axis; the path and bank
+    angles share a right-hand axis.
+
+    :param result: A
+        :class:`~phonometry.aircraft.rotorcraft_noise.FlightPathKinematics`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the speed ``plot`` calls.
+    :return: The (left) axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    t = np.asarray(result.times, dtype=np.float64)
+    ax.plot(t, result.airspeed, **{"color": _C_PRIMARY, "lw": 1.8,
+            "label": "Airspeed $V_A$", **kwargs})
+    ax.plot(t, result.ground_speed, **{"color": _C_SECONDARY, "lw": 1.4,
+            "ls": "--", "label": "Ground speed $V_g$", **kwargs})
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Speed [m/s]")
+    ax2 = ax.twinx()
+    ax2.plot(t, result.path_angle, color=_C_TERTIARY, lw=1.4,
+             label="Path angle $\\gamma$")
+    ax2.plot(t, result.bank_angle, color=_C_MUTED, lw=1.4, ls=":",
+             label="Bank angle $\\Phi$")
+    ax2.set_ylabel("Angle [°]")
+    lines = [*ax.get_lines(), *ax2.get_lines()]
+    ax.legend(lines, [str(ln.get_label()) for ln in lines],
+              loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.set_title("Rotorcraft flight-path kinematics (ECAC Doc 32)")
+    ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_rotorcraft_event(
+    result: "RotorcraftEventResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """A-weighted level time history of a rotorcraft event (ECAC Doc 32).
+
+    Draws ``L_A(t)`` at recorded time, marks ``LASmax``, shades the 10 dB-down
+    window and annotates the integrated metrics.
+
+    :param result: A
+        :class:`~phonometry.aircraft.rotorcraft_noise.RotorcraftEventResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    t = np.asarray(result.times, dtype=np.float64)
+    la = np.asarray(result.a_levels, dtype=np.float64)
+    label = f"$L_A(t)$  (SEL {result.sel:.1f} dB(A)"
+    if np.isfinite(result.epnl):
+        label += f", EPNL {result.epnl:.1f} EPNdB"
+    label += ")"
+    ax.plot(t, la, **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    k = int(np.argmax(la))
+    ax.plot(t[k], la[k], "o", color=_C_SECONDARY, ms=5,
+            label=f"$L_{{ASmax}}$ = {result.la_max:.1f} dB(A)")
+    window = la >= result.la_max - 10.0
+    if np.any(window):
+        idx = np.nonzero(window)[0]
+        ax.axvspan(t[idx[0]], t[idx[-1]], color=_C_PRIMARY, alpha=0.08,
+                   label="10 dB-down window")
+    ax.set_xlabel("Recorded time [s]")
+    ax.set_ylabel("A-weighted level [dB(A)]")
+    ax.set_title("Rotorcraft flyover time history (ECAC Doc 32)")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_rotorcraft_noise_contour(
+    result: "RotorcraftNoiseContourResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """Filled rotorcraft single-event noise contours over the ground plane.
+
+    :param result: A
+        :class:`~phonometry.aircraft.rotorcraft_noise.RotorcraftNoiseContourResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to ``contourf``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    x = np.asarray(result.x, dtype=np.float64) / 1000.0
+    y = np.asarray(result.y, dtype=np.float64) / 1000.0
+    lvl = np.asarray(result.level, dtype=np.float64)
+    finite = lvl[np.isfinite(lvl)]
+    top = float(np.ceil(np.max(finite) / 5.0) * 5.0) if finite.size else 100.0
+    levels = np.arange(top - 30.0, top + 0.1, 5.0)
+    masked = np.ma.masked_invalid(lvl)
+    cf = ax.contourf(x, y, masked,
+                     **{"levels": levels, "cmap": "viridis", "extend": "both", **kwargs})
+    ax.contour(x, y, masked, levels=levels, colors="k", linewidths=0.4, alpha=0.5)
+    metric = "SEL" if result.metric == "exposure" else "$L_{ASmax}$"
+    ax.figure.colorbar(cf, ax=ax, label=f"{metric} [dB(A)]")
+    ax.set_xlabel("x [km]")
+    ax.set_ylabel("y [km]")
+    ax.set_title("Rotorcraft noise contour (ECAC Doc 32)")
     ax.set_aspect("equal", adjustable="box")
     return ax

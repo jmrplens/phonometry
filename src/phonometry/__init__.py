@@ -328,10 +328,18 @@ from .aircraft.airport_noise import (
     start_of_roll_directivity,
 )
 from .aircraft.rotorcraft_noise import (
+    FlightPathKinematics,
+    RotorcraftEventResult,
     RotorcraftHemisphere,
+    RotorcraftNoiseContourResult,
     atmospheric_adjustment,
+    flight_condition_weights,
+    flight_path_kinematics,
     ground_effect_adjustment,
     hemisphere_source_level,
+    interpolated_source_level,
+    rotorcraft_event_level,
+    rotorcraft_noise_contour,
     spherical_spreading_adjustment,
 )
 from .underwater.ship_radiated_noise import (
@@ -875,6 +883,14 @@ __all__ = [
     "spherical_spreading_adjustment",
     "atmospheric_adjustment",
     "ground_effect_adjustment",
+    "flight_condition_weights",
+    "interpolated_source_level",
+    "flight_path_kinematics",
+    "FlightPathKinematics",
+    "rotorcraft_event_level",
+    "RotorcraftEventResult",
+    "rotorcraft_noise_contour",
+    "RotorcraftNoiseContourResult",
     "radiated_noise_level",
     "hydrophone_depths",
     "source_level_uncertainty",

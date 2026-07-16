@@ -39,7 +39,7 @@ total.*
 
 ```python
 import numpy as np
-from phonometry import loudness_zwicker, loudness_zwicker_from_spectrum
+from phonometry import psychoacoustics
 
 # Una grabación cruda y su calibración para que la guía funcione por sí sola
 fs = 48000
@@ -48,16 +48,16 @@ sens = 1.0                                                # calibration_factor a
 levels_28 = np.full(28, 60.0)                             # 28 niveles de tercio de octava (dB)
 
 # Desde una grabación sin calibrar: calibration_factor convierte unidades digitales en Pa
-res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
+res = psychoacoustics.loudness_zwicker(x, fs, field="free", calibration_factor=sens)
 print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")   # 13.1 sone (77 phon)
 
 # Señales variables en el tiempo: la sonoridad percentil N5 es el
 # estándar para informes
-res = loudness_zwicker(x, fs)          # stationary=False (por defecto)
+res = psychoacoustics.loudness_zwicker(x, fs)          # stationary=False (por defecto)
 print(f"{res.n5:.1f} {res.n10:.1f} {res.loudness:.1f}")   # 13.1 13.1 13.1 — N5, N10, Nmax
 
 # Desde 28 niveles de tercio de octava (25 Hz .. 12.5 kHz)
-res = loudness_zwicker_from_spectrum(levels_28, field="diffuse")
+res = psychoacoustics.loudness_zwicker_from_spectrum(levels_28, field="diffuse")
 
 res.plot()   # N'(z) sobre la escala Bark — el patrón de sonoridad específica (requiere matplotlib)
 ```
@@ -67,6 +67,12 @@ res.plot()   # N'(z) sobre la escala Bark — el patrón de sonoridad específic
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+levels_28 = np.full(28, 60.0)                             # 28 niveles de tercio de octava (dB)
+# Desde 28 niveles de tercio de octava (25 Hz .. 12.5 kHz)
+res = psychoacoustics.loudness_zwicker_from_spectrum(levels_28, field="diffuse")
 
 # En una línea — el patrón de sonoridad específica N'(z) desde el resultado:
 res.plot()
@@ -74,8 +80,8 @@ plt.show()
 
 # O reproduce la figura a mano — dos patrones con el mismo nivel de banda (60 dB),
 # la energía repartida entre muchas bandas críticas frente a la banda de 1 kHz:
-narrow = loudness_zwicker_from_spectrum(np.r_[np.full(16, -60.0), 60.0, np.full(11, -60.0)])
-broad = loudness_zwicker_from_spectrum(np.full(28, 60.0))
+narrow = psychoacoustics.loudness_zwicker_from_spectrum(np.r_[np.full(16, -60.0), 60.0, np.full(11, -60.0)])
+broad = psychoacoustics.loudness_zwicker_from_spectrum(np.full(28, 60.0))
 z = np.arange(1, narrow.specific.size + 1) * 0.1          # eje Bark
 fig, ax = plt.subplots()
 for r, color, label in [
@@ -124,10 +130,10 @@ frecuencias preferentes de tercio de octava de la Tabla 1,
 `hearing_threshold()` devuelve la columna del umbral de audición:
 
 ```python
-from phonometry import equal_loudness_contour, loudness_level
+from phonometry import psychoacoustics
 
-freqs, spl = equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonios
-phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonios
+freqs, spl = psychoacoustics.equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonios
+phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonios
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.svg" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es_dark.svg" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%">
@@ -234,14 +240,11 @@ modela la suma binaural explícitamente.
 
 ```python
 import numpy as np
-from phonometry import (
-    loudness_moore_glasberg,
-    loudness_moore_glasberg_from_spectrum,
-)
+from phonometry import psychoacoustics
 
 # El ancla definitoria: una componente sinusoidal de 1 kHz a 40 dB SPL,
 # campo libre, binaural -> 1 sono / 40 fonios por construcción del sono.
-res = loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="free")
+res = psychoacoustics.loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="free")
 print(f"N = {res.loudness:.3f} sone  ({res.loudness_level:.1f} phon)")   # 1.000 sono (40.0 fonios)
 
 # Desde una grabación calibrada: se forma el espectro de líneas de banda
@@ -249,7 +252,7 @@ print(f"N = {res.loudness:.3f} sone  ({res.loudness_level:.1f} phon)")   # 1.000
 # método exacto de componentes sinusoidales (ISO 532-2 apartados 5.2/5.4).
 fs = 48000
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
-res = loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
+res = psychoacoustics.loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
 
 res.plot()   # sonoridad específica N'(i) sobre la escala del número ERB (Cam)
 ```
@@ -259,6 +262,15 @@ res.plot()   # sonoridad específica N'(i) sobre la escala del número ERB (Cam)
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+# Desde una grabación calibrada: se forma el espectro de líneas de banda
+# estrecha (FFT, normalización que preserva la potencia) y se alimenta al
+# método exacto de componentes sinusoidales (ISO 532-2 apartados 5.2/5.4).
+fs = 48000
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+res = psychoacoustics.loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
 
 # En una línea — el patrón de sonoridad específica N'(i) directo del resultado:
 res.plot()
@@ -301,13 +313,13 @@ unos 5 s.
 
 ```python
 import numpy as np
-from phonometry import loudness_moore_glasberg_time
+from phonometry import psychoacoustics
 
 fs = 32000
 t = np.arange(int(1.3 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
-res = loudness_moore_glasberg_time(x, fs, field="free")
+res = psychoacoustics.loudness_moore_glasberg_time(x, fs, field="free")
 print(f"N_max = {res.n_max:.3f} sone  ({res.loudness_level_max:.0f} phon)")   # 1.000 sono (40 fonios)
 print(f"sonoridad de largo plazo superada el 5% del tiempo: {res.percentiles[5.0]:.3f} sone")   # 0.999 sone
 
@@ -321,6 +333,13 @@ res.plot()   # sonoridad de corto plazo S'(t) y de largo plazo S''(t) frente al 
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 32000
+t = np.arange(int(1.3 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+res = psychoacoustics.loudness_moore_glasberg_time(x, fs, field="free")
 
 # El resultado lleva ambas trazas sobre un eje temporal de 1 ms:
 res.plot()
@@ -365,13 +384,13 @@ del residuo está documentado en el docstring del módulo).
 
 ```python
 import numpy as np
-from phonometry import loudness_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
-res = loudness_ecma(x, fs, field="free")
+res = psychoacoustics.loudness_ecma(x, fs, field="free")
 print(f"N = {res.loudness:.3f} sone_HMS")   # 0.984 sone_HMS
 print(res.specific_loudness.shape)          # (53,) sonoridad específica media N'(z)
 
@@ -385,6 +404,13 @@ res.plot()   # sonoridad específica media N'(z) + N(l) dependiente del tiempo a
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(int(1.2 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+res = psychoacoustics.loudness_ecma(x, fs, field="free")
 
 # El resultado lleva la sonoridad específica media sobre las 53 bandas Bark_HMS:
 res.plot()

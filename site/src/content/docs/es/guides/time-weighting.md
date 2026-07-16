@@ -40,7 +40,7 @@ grabación.
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from phonometry import time_weighting
+from phonometry import metrology
 
 fs = 48000
 t = np.arange(int(fs * 4)) / fs
@@ -51,7 +51,7 @@ burst[fs:int(1.5 * fs)] = 0.2 * rng.standard_normal(int(0.5 * fs))
 p0 = 2e-5
 plt.figure()
 for mode in ('fast', 'slow', 'impulse'):
-    envelope = time_weighting(burst, fs, mode=mode)
+    envelope = metrology.time_weighting(burst, fs, mode=mode)
     plt.plot(t, 10 * np.log10(np.maximum(envelope, 1e-12) / p0**2), label=mode)
 plt.xlabel('Tiempo [s]')
 plt.ylabel('Nivel [dB SPL]')
@@ -68,14 +68,14 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import time_weighting
+from phonometry import metrology
 
 # recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
 fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Calcular la envolvente de energía (valor cuadrático medio)
-energy_envelope = time_weighting(recording, fs, mode='fast')
+energy_envelope = metrology.time_weighting(recording, fs, mode='fast')
 # dB SPL respecto a 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 
@@ -148,19 +148,19 @@ de 1 s a 1 ms en F y de 1 s a 2 ms en S, con límites de aceptación de clase 1:
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from phonometry import time_weighting
+from phonometry import metrology
 
 fs = 48000
 t = np.arange(int(fs * 2)) / fs
 tone = np.sin(2 * np.pi * 4000 * t)
 
 # Referencia Fast en régimen permanente del tono continuo
-reference = time_weighting(tone, fs, mode='fast')[int(1.5 * fs):].mean()
+reference = metrology.time_weighting(tone, fs, mode='fast')[int(1.5 * fs):].mean()
 
 # Ráfaga de 200 ms del mismo tono (objetivo de la Tabla 4 de IEC 61672-1: -1.0 dB)
 burst = np.zeros_like(t)
 burst[int(0.5 * fs):int(0.7 * fs)] = tone[int(0.5 * fs):int(0.7 * fs)]
-envelope = time_weighting(burst, fs, mode='fast')
+envelope = metrology.time_weighting(burst, fs, mode='fast')
 env_db = 10 * np.log10(np.maximum(envelope / reference, 1e-6))
 
 plt.figure()
@@ -183,8 +183,14 @@ comienza con una señal estacionaria ya presente, puedes partir de la energía d
 la primera muestra:
 
 ```python
-# Usa `recording` y `fs` del snippet anterior.
-energy_envelope = time_weighting(recording, fs, mode='fast', initial_state='first')
+import numpy as np
+from phonometry import metrology
+
+# recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+energy_envelope = metrology.time_weighting(recording, fs, mode='fast', initial_state='first')
 ```
 
 ## 6. Procesado por bloques
@@ -193,12 +199,14 @@ Para procesar por bloques, pasa el último valor de salida del bloque anterior
 como `initial_state` del siguiente en lugar de reiniciar en cada bloque:
 
 ```python
+from phonometry import metrology
+
 state = None
 
 # audio_blocks: fotogramas consecutivos de tu grabación calibrada (Pa),
 #   transmitidos desde tu tarjeta de sonido o leídos de un WAV por bloques.
 for block in audio_blocks:
-    energy_envelope = time_weighting(block, fs, mode='fast', initial_state=state)
+    energy_envelope = metrology.time_weighting(block, fs, mode='fast', initial_state=state)
     state = energy_envelope[-1]
 ```
 
@@ -211,9 +219,9 @@ forma `(n_channels, n_samples)`.
 O deja que la clase `TimeWeighting` lleve el estado por ti:
 
 ```python
-from phonometry import TimeWeighting
+from phonometry import metrology
 
-tw = TimeWeighting(fs, mode='fast')
+tw = metrology.TimeWeighting(fs, mode='fast')
 # audio_blocks: fotogramas consecutivos de tu grabación calibrada (Pa),
 #   transmitidos desde tu tarjeta de sonido o leídos de un WAV por bloques.
 for block in audio_blocks:

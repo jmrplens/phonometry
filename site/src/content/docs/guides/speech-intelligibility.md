@@ -31,12 +31,12 @@ proportion to its **band-importance function** $I_i$ (ANSI S3.5-1997 Table 3,
 average speech material), which sums to one across the 18 bands.
 
 ```python
-import phonometry as ph
+from phonometry import hearing
 
 # The standard normal-effort speech spectrum (Table 3) in quiet, normal hearing.
-result = ph.speech_intelligibility_index("normal")
+result = hearing.speech_intelligibility_index("normal")
 print(round(result.sii, 3))          # 0.996  (nearly everything audible)
-print(round(ph.sii.BAND_IMPORTANCE.sum(), 6))   # 1.0
+print(round(hearing.sii.BAND_IMPORTANCE.sum(), 6))   # 1.0
 ```
 
 With no noise and a normal hearing threshold the standard speech spectrum is
@@ -95,14 +95,14 @@ $$
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import hearing
 
-speech = ph.standard_speech_spectrum("normal")
+speech = hearing.standard_speech_spectrum("normal")
 # A descending broadband masking noise (an office/ventilation-like spectrum).
 noise = np.array([38.0, 37.0, 36.0, 34.0, 32.0, 30.0, 28.0, 26.0, 24.0,
                   22.0, 20.0, 18.0, 16.0, 14.0, 12.0, 10.0, 8.0, 6.0])
 
-result = ph.speech_intelligibility_index(speech, noise)
+result = hearing.speech_intelligibility_index(speech, noise)
 print(round(result.sii, 2))                # 0.46
 print(result.band_audibility.round(2))     # per-band Ai
 ```
@@ -115,12 +115,12 @@ print(result.band_audibility.round(2))     # per-band Ai
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import hearing
 
-speech = ph.standard_speech_spectrum("normal")
+speech = hearing.standard_speech_spectrum("normal")
 noise = np.array([38.0, 37.0, 36.0, 34.0, 32.0, 30.0, 28.0, 26.0, 24.0,
                   22.0, 20.0, 18.0, 16.0, 14.0, 12.0, 10.0, 8.0, 6.0])
-result = ph.speech_intelligibility_index(speech, noise)
+result = hearing.speech_intelligibility_index(speech, noise)
 
 # One line:
 result.plot()
@@ -159,16 +159,16 @@ the index.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import hearing
 
 # The same broadband noise, four vocal efforts.
 noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
                   32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
-for effort in ph.sii.VOCAL_EFFORTS:
-    print(effort, round(ph.speech_intelligibility_index(effort, noise).sii, 2))
+for effort in hearing.sii.VOCAL_EFFORTS:
+    print(effort, round(hearing.speech_intelligibility_index(effort, noise).sii, 2))
 # normal 0.12 | raised 0.36 | loud 0.59 | shout 0.79
 
-print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
+print(hearing.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.svg" alt="Left: the four ANSI S3.5-1997 standard speech spectra (normal, raised, loud, shout) over 160 Hz to 8000 Hz, each higher effort lifting the whole spectrum. Right: the resulting SII in a fixed broadband noise, rising from 0.12 (normal) to 0.79 (shout)" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.svg" alt="Left: the four ANSI S3.5-1997 standard speech spectra (normal, raised, loud, shout) over 160 Hz to 8000 Hz, each higher effort lifting the whole spectrum. Right: the resulting SII in a fixed broadband noise, rising from 0.12 (normal) to 0.79 (shout)" style="width:96%">
@@ -180,19 +180,19 @@ print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
-import phonometry as ph
+from phonometry import hearing
 
 # The four ANSI S3.5-1997 Table 3 spectra and the fixed broadband noise above.
 noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
                   32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
-efforts = ph.sii.VOCAL_EFFORTS         # ("normal", "raised", "loud", "shout")
-freqs = ph.sii.BAND_CENTERS            # the 18 one-third-octave band centres
+efforts = hearing.sii.VOCAL_EFFORTS         # ("normal", "raised", "loud", "shout")
+freqs = hearing.sii.BAND_CENTERS            # the 18 one-third-octave band centres
 
 fig, (ax_s, ax_i) = plt.subplots(1, 2, figsize=(12, 5))
 
 # Left: each higher vocal effort lifts the whole speech spectrum.
 for effort in efforts:
-    ax_s.plot(freqs, ph.standard_speech_spectrum(effort), "o-",
+    ax_s.plot(freqs, hearing.standard_speech_spectrum(effort), "o-",
               label=effort.capitalize())
 ax_s.set_xscale("log")
 ax_s.set_xticks(list(freqs))
@@ -203,7 +203,7 @@ ax_s.set_ylabel("Speech spectrum level [dB SPL]")
 ax_s.legend()
 
 # Right: the SII each spectrum reaches in the fixed noise.
-sii = [ph.speech_intelligibility_index(e, noise).sii for e in efforts]
+sii = [hearing.speech_intelligibility_index(e, noise).sii for e in efforts]
 pos = np.arange(len(efforts))
 ax_i.bar(pos, sii)
 ax_i.set_xticks(pos)

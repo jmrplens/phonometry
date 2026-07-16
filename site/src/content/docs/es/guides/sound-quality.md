@@ -57,15 +57,15 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import sharpness_din
+from phonometry import psychoacoustics
 
 # Una grabación y su calibración para que la guía funcione por sí sola
 fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # cualquier grabación (unidades digitales)
 sens = 1.0                                                # calibration_factor a pascales
 
-s = sharpness_din(x, fs, calibration_factor=sens)      # acum
-s_aures = sharpness_din(x, fs, method="aures")          # variante del Anexo B
+s = psychoacoustics.sharpness_din(x, fs, calibration_factor=sens)      # acum
+s_aures = psychoacoustics.sharpness_din(x, fs, method="aures")          # variante del Anexo B
 ```
 
 CI verifica los valores objetivo de la Tabla A.2 (desde 0,38 acum a 250 Hz
@@ -84,13 +84,13 @@ T se da en **tu_HMS**, calibrado de modo que un tono de 1 kHz/40 dB sea
 
 ```python
 import numpy as np
-from phonometry import tonality_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
-res = tonality_ecma(x, fs, field="free")
+res = psychoacoustics.tonality_ecma(x, fs, field="free")
 peak = int(np.argmax(res.specific_tonality))
 print(f"T = {res.tonality:.3f} tu_HMS")                    # 1.000 tu_HMS
 print(f"f_ton = {res.tonal_frequencies[peak]:.0f} Hz")     # 999 Hz
@@ -128,14 +128,14 @@ limpia devuelve 0,9999 asper con la constante de calibración tabulada c_R
 
 ```python
 import numpy as np
-from phonometry import roughness_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
 x = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
 x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # nivel global de 60 dB SPL
 
-res = roughness_ecma(x, fs, field="free")
+res = psychoacoustics.roughness_ecma(x, fs, field="free")
 print(f"R = {res.roughness:.4f} asper")   # 0.9999 asper (referencia: 1 asper)
 
 res.plot()   # aspereza R(l50) dependiente del tiempo + mapa de calor de aspereza específica
@@ -149,7 +149,7 @@ res.plot()   # aspereza R(l50) dependiente del tiempo + mapa de calor de asperez
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import tonality_ecma, roughness_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
@@ -162,8 +162,8 @@ rough = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
 rough *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(rough**2))
 
 scores = {
-    "Tono puro": (tonality_ecma(tone, fs).tonality, roughness_ecma(tone, fs).roughness),
-    "Tono AM 70 Hz": (tonality_ecma(rough, fs).tonality, roughness_ecma(rough, fs).roughness),
+    "Tono puro": (psychoacoustics.tonality_ecma(tone, fs).tonality, psychoacoustics.roughness_ecma(tone, fs).roughness),
+    "Tono AM 70 Hz": (psychoacoustics.tonality_ecma(rough, fs).tonality, psychoacoustics.roughness_ecma(rough, fs).roughness),
 }
 labels = list(scores)
 tonal = [scores[k][0] for k in labels]

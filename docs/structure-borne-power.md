@@ -81,14 +81,14 @@ $$
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import building
 
 bands = np.array([100.0, 200.0, 400.0, 800.0])
 lv_i = np.array([88.0, 90.0, 87.0, 89.0, 86.0, 90.0])   # six plate positions @ 200 Hz
-print(round(ph.spatial_mean_velocity_level(lv_i), 2))    # 88.6 dB re 1 nm/s
+print(round(building.spatial_mean_velocity_level(lv_i), 2))    # 88.6 dB re 1 nm/s
 
 # Power level injected into the reception plate (loss factor from Ts):
-res = ph.reception_plate_power(
+res = building.reception_plate_power(
     velocity_level=np.array([90.0, 87.0, 82.0, 77.0]),
     frequency=bands, mass_per_area=600.0, area=2.0, reverberation_time=0.8,
 )
@@ -133,18 +133,18 @@ and, from the high-mobility plate, the **equivalent free velocity level**
 `L_Wsn` to the actual receiving element.
 
 ```python
-import phonometry as ph
+from phonometry import building
 
 # EN 12354-5 Annex I.3 (flushing cistern, wall contact, 63 Hz): measured on a
 # plate of Y = 5.34e-6 m/(N·s); the wall's characteristic mobility is 24.1e-6.
-lfb = ph.equivalent_blocked_force_level(61.7, 5.34e-6)      # Formula (15)
-lwsn = ph.characteristic_reception_plate_power(lfb)         # Formula (17)
-inst = ph.installed_power_from_reception_plate(lwsn, 24.1e-6)  # Annex I
+lfb = building.equivalent_blocked_force_level(61.7, 5.34e-6)      # Formula (15)
+lwsn = building.characteristic_reception_plate_power(lfb)         # Formula (17)
+inst = building.installed_power_from_reception_plate(lwsn, 24.1e-6)  # Annex I
 print(round(float(lwsn), 1), round(float(inst), 1))         # 61.4 68.2  (Table I.8)
 
 # Free velocity (Formula 18) + blocked force close the source mobility (19):
-lvf = ph.equivalent_free_velocity_level(70.0, 1.0e-2)
-print(float(ph.source_mobility_from_levels(lvf, lfb)))      # |Y_S,eq| in m/(N·s)
+lvf = building.equivalent_free_velocity_level(70.0, 1.0e-2)
+print(float(building.source_mobility_from_levels(lvf, lfb)))      # |Y_S,eq| in m/(N·s)
 ```
 
 The direct source-side counterpart is the ISO 9611 free velocity level (re

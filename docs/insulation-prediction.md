@@ -55,15 +55,14 @@ empirical in the mass ratio $M = \log_{10}(m'_{\perp,i}/m'_i)$).
 
 ```python
 import numpy as np
-from phonometry import (junction_vibration_reduction, flanking_element,
-                        predicted_airborne_insulation)
+from phonometry import building
 
 # EN 12354-1 Annex H.3: a separating wall Rs,w = 57 dB, area Ss = 11.5 m², with
 # four flanking elements. The simplified model reads each junction's Kij at
 # 500 Hz from the mass ratio m'perp / m' (Annex E) — here the floor's rigid
 # cross-junction (the mass ratio is itself rounded, hence 12.5 vs Annex 12.4):
-print(round(junction_vibration_reduction("rigid_cross", "through", 1.61), 1))  # 12.5  KFf
-print(round(junction_vibration_reduction("rigid_cross", "corner",  1.61), 1))  #  8.9  KFd = KDf
+print(round(building.junction_vibration_reduction("rigid_cross", "through", 1.61), 1))  # 12.5  KFf
+print(round(building.junction_vibration_reduction("rigid_cross", "corner",  1.61), 1))  #  8.9  KFd = KDf
 
 # Build each element's three flanking paths (Ff, Df, Fd) from the Annex H
 # tabulated Kij, then combine the direct path Dd energetically (Formula 26).
@@ -75,11 +74,11 @@ elements = [   # (name, Rw, KFf, KFd = KDf, coupling length lf)
 ]
 paths = []
 for name, rw, k_ff, k_fd, lf in elements:
-    paths += flanking_element(label=name, r_flanking=rw, r_separating=57,
+    paths += building.flanking_element(label=name, r_flanking=rw, r_separating=57,
                               k_ff=k_ff, k_fd=k_fd, k_df=k_fd,
                               separating_area=11.5, coupling_length=lf)
 
-res = predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
+res = building.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
 print(round(res.r_prime_w, 1))                          # 52.2  ->  R'w = 52 dB
 print(res.dominant.label, round(res.dominant.fraction, 2))   # Dd 0.33 (direct dominates)
 ```
@@ -89,8 +88,23 @@ print(res.dominant.label, round(res.dominant.fraction, 2))   # Dd 0.33 (direct d
 
 ```python
 import matplotlib.pyplot as plt
+from phonometry import building
 
-# Uses `paths` and `res` from the snippet above.
+# Build each element's three flanking paths (Ff, Df, Fd) from the Annex H
+# tabulated Kij, then combine the direct path Dd energetically (Formula 26).
+elements = [   # (name, Rw, KFf, KFd = KDf, coupling length lf)
+    ("floor",    49, 12.4,  8.9, 4.50),
+    ("ceiling",  46, 14.4,  9.2, 4.50),
+    ("facade",   42, 12.6,  6.7, 2.55),
+    ("int-wall", 33, 33.5, 15.7, 2.55),
+]
+paths = []
+for name, rw, k_ff, k_fd, lf in elements:
+    paths += building.flanking_element(label=name, r_flanking=rw, r_separating=57,
+                              k_ff=k_ff, k_fd=k_fd, k_df=k_fd,
+                              separating_area=11.5, coupling_length=lf)
+res = building.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
+
 # Per-path sound reduction index and each path's share of the transmitted
 # energy for the Annex H.3 result computed above.
 labels = [p.label for p in res.paths]
@@ -126,12 +140,12 @@ automatically per path; or compute the floor yourself with
 minimum:
 
 ```python
-from phonometry import junction_min_vibration_reduction
+from phonometry import building
 # Kij,min = 10 lg[lf·l0·(1/Si + 1/Sj)]; large elements give a low (here negative)
 # floor, so a realistic tabulated Kij is rarely clamped; but small, light
 # elements can push it above the tabulated value (e.g. lf = 4 m, S = 1.5 m²
 # gives 7.3 dB, over the 5 dB lightweight floor).
-print(round(junction_min_vibration_reduction(coupling_length=4.5,
+print(round(building.junction_min_vibration_reduction(coupling_length=4.5,
                                              s_i=11.5, s_j=11.5), 1))     # -1.1
 ```
 
@@ -141,19 +155,18 @@ $L_{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Annex B), the covering improvement
 $\Delta L_w$ (ISO 717-2) and the flanking correction $K$ from Table 1.
 
 ```python
-from phonometry import (equivalent_impact_level, impact_flanking_correction,
-                        predicted_impact_insulation, standardized_impact_level)
+from phonometry import building
 
 # EN 12354-2 Annex E.3: a 0.14 m concrete floor (m' = 322 kg/m²) with a floating
 # floor (ΔLw = 33 dB), rooms one above the other, mean flanking mass 145 kg/m².
-ln_eq = equivalent_impact_level(322.0)                   # 164 - 35 lg(m')
-k = impact_flanking_correction(322.0, 145.0)             # Table 1 (sep 322, flk 145)
-imp = predicted_impact_insulation(ln_w_eq=ln_eq, delta_l_w=33.0, k_correction=k)
+ln_eq = building.equivalent_impact_level(322.0)                   # 164 - 35 lg(m')
+k = building.impact_flanking_correction(322.0, 145.0)             # Table 1 (sep 322, flk 145)
+imp = building.predicted_impact_insulation(ln_w_eq=ln_eq, delta_l_w=33.0, k_correction=k)
 print(round(ln_eq, 1), k, round(imp.l_prime_n_w, 1))     # 76.2 2 45.2  ->  L'n,w = 45 dB
 
 # Exact Formula (3): L'nT,w = L'n,w - 10 lg(0.032 V). Annex E.3's own rounding
 # of the factor to 10 lg(V/30) sits 0.18 dB below; both give L'nT,w = 43 dB.
-print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.2  L'nT,w
+print(round(building.standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.2  L'nT,w
 ```
 
 The airborne counterpart of that closure is Formula (5b),
@@ -235,18 +248,18 @@ absorption $\alpha_w$). Single-number ratings reuse EN ISO 717-1
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction.svg" alt="Per-element partial sound reduction indices and the resulting façade apparent reduction R' and standardized level difference D2m,nT for the EN 12354-3 Annex F worked example, the air inlet limiting the low bands" width="80%"></picture>
 
 ```python
-from phonometry import FacadeElement, facade_sound_reduction
+from phonometry import building
 
 # EN 12354-3 Annex F: an 11.3 m² façade (V = 50 m³, flat so ΔLfs = 0) of a double
 # wall, a window, a small skylight and an acoustically-treated air inlet (a Dn,e
 # element).
 elements = [
-    FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
-    FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
-    FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
-    FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
+    building.FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
+    building.FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
 ]
-fac = facade_sound_reduction(elements, area=11.3, volume=50.0,
+fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
                              frequencies=[125, 250, 500, 1000, 2000], bands="octave")
 print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (Rtr,s,w / Ctr / D2m,nT,w)
 ```
@@ -259,24 +272,23 @@ loss (a bare opening is 0 dB). The exterior level follows from the simplified
 Annex E attenuation $A_{tot}$ of a finite radiating side, $L_p = L_W - A_{tot}$.
 
 ```python
-from phonometry import (FacadeElement, radiated_sound_power,
-                        outdoor_attenuation, outdoor_level)
+from phonometry import building
 
 # EN 12354-4 Annex G, side 1: a 10×20 m concrete wall segment with a 6×4 m
 # industrial door, inside level Lp,in, Cd = -5 dB. The 40 dB cap on R' is an
 # Annex G example footnote (field leaks), not part of Formula (2)/(3): pass it
 # explicitly to reproduce Annex G; by default no cap is applied.
 bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
-seg = radiated_sound_power(
-    [FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
-     FacadeElement("door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
+seg = building.radiated_sound_power(
+    [building.FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
+     building.FacadeElement("door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
     lp_in=[70, 74, 76, 72, 70, 67, 62, 57], area=200.0, c_d=-5.0,
     r_prime_cap=40.0, octave_bands=bands)
 print(round(seg.l_w[0], 1), round(seg.l_w[1], 1))     # 59.8 61.2  (LW at 63/125 Hz)
 
 # Exterior level 5 m in front of the centre of the 60×10 m side (LWA = 62.9 dB(A)).
-a_tot = outdoor_attenuation(width=60.0, height=10.0, distance=5.0)
-print(round(a_tot, 1), round(outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
+a_tot = building.outdoor_attenuation(width=60.0, height=10.0, distance=5.0)
+print(round(a_tot, 1), round(building.outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
 ```
 
 > **Worked-example note.** The 2000 worked examples carry small internal rounding
@@ -292,8 +304,20 @@ print(round(a_tot, 1), round(outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from phonometry import building
 
-# Uses `fac` (the Part 3 result) and its band centres from the snippet above.
+# EN 12354-3 Annex F: an 11.3 m² façade (V = 50 m³, flat so ΔLfs = 0) of a double
+# wall, a window, a small skylight and an acoustically-treated air inlet (a Dn,e
+# element).
+elements = [
+    building.FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
+    building.FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
+]
+fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
+                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+
 x = np.arange(5)
 fig, ax = plt.subplots(figsize=(9, 5.5))
 for name, rp in fac.element_r.items():

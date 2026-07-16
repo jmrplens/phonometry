@@ -68,12 +68,12 @@ movilidad de transferencia `Y_k` dentro del módulo (Fórmula 19e). El nivel de
 potencia **instalada** es entonces (Fórmula 18b) `L_Ws,inst = L_Ws,c − D_C`.
 
 ```python
-import phonometry as ph
+from phonometry import building
 
 # Una fuente casi de fuerza (Y_s >> Y_i) sobre un forjado de hormigón:
-dc = ph.coupling_term(2e-4 + 1e-4j, 3e-5 + 1e-5j)
+dc = building.coupling_term(2e-4 + 1e-4j, 3e-5 + 1e-5j)
 print(round(float(dc), 2))                                          # ~8.5 dB
-print(round(float(ph.installed_structure_borne_power_level(82.0, dc)), 1))  # L_Ws instalada
+print(round(float(building.installed_structure_borne_power_level(82.0, dc)), 1))  # L_Ws instalada
 ```
 
 ## 2. Transmisión al recinto receptor
@@ -104,10 +104,10 @@ con `S₀ = A₀ = 10 m²`, y los caminos se combinan energéticamente (Fórmula
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import building
 
 bands = np.array([250.0, 500.0, 1000.0])
-res = ph.installed_source_prediction(
+res = building.installed_source_prediction(
     characteristic_power_level=np.array([80.0, 82.0, 78.0]),
     coupling_term=np.array([9.0, 10.0, 11.0]),
     paths=[

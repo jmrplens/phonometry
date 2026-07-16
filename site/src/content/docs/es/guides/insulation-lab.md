@@ -62,15 +62,14 @@ por encima.
 
 ```python
 import numpy as np
-from phonometry import (lab_airborne_insulation, lab_impact_insulation,
-                        background_correction)
+from phonometry import building
 
 # Niveles emisor/receptor y T de la sala receptora en las 16 bandas de tercio
 # de octava; S es el área libre de la abertura de ensayo, V el volumen de la sala receptora.
 l1 = np.full(16, 80.0)
 l2 = np.full(16, 40.0)
 t2 = np.full(16, 0.5)
-lab = lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+lab = building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
 print(round(float(lab.r[0]), 1))              # 38.0  R = L1 - L2 + 10 lg(S/A)
 print(round(float(lab.absorption[0]), 1))     # 16.0  A = 0.16 V / T (m^2)
 print(lab.rating.rating, lab.rating.c, lab.rating.ctr)   # 38 0 0  ->  Rw(C;Ctr)
@@ -78,12 +77,12 @@ print(lab.rating.rating, lab.rating.c, lab.rating.ctr)   # 38 0 0  ->  Rw(C;Ctr)
 # Impactos: el nivel de la máquina de impactos Li normalizado a A0 = 10 m^2 da Ln
 li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
-imp = lab_impact_insulation(li, t2, volume=50.0)
+imp = building.lab_impact_insulation(li, t2, volume=50.0)
 print(round(float(imp.l_n[0]), 1))            # 64.1  Ln = Li + 10 lg(A/A0)
 print(imp.rating.rating, imp.rating.ci)       # 81 -11  ->  Ln,w(CI)
 
 # Corrección por ruido de fondo: márgenes 6 / 1 / 20 dB -> saturado / saturado / sin cambio
-corrected = background_correction([30.0, 33.0, 50.0], [24.0, 32.0, 30.0])
+corrected = building.background_correction([30.0, 33.0, 50.0], [24.0, 32.0, 30.0])
 print(np.round(corrected, 1))                 # [28.7 31.7 50.0]  (saturación de 1.3 dB dos veces)
 
 lab.rating.plot()   # R medido frente a la referencia ISO 717-1 desplazada (requiere matplotlib)
@@ -141,8 +140,7 @@ $10\lg(S_m/A_0) + 10\lg N$ ($A_0 = 10\ \text{m}^2$, $N$ unidades de elemento).
 
 ```python
 import numpy as np
-from phonometry import (intensity_sound_reduction, adaptation_term_kc,
-                        surface_pressure_intensity_indicator)
+from phonometry import building
 
 # Nivel de sala emisora Lp1 y nivel medio de intensidad normal LIn sobre la
 # superficie de medición (Sm), para un espécimen de área S; 16 bandas 1/3 octava.
@@ -150,15 +148,15 @@ lp1 = np.full(16, 85.0)
 l_in = np.full(16, 40.0)
 freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
          1000, 1250, 1600, 2000, 2500, 3150]   # centros nominales 1/3 octava
-kc = adaptation_term_kc(freqs)                  # Anexo B (B.2)
-res = intensity_sound_reduction(lp1, l_in, measurement_area=12.0, area=10.0, kc=kc)
+kc = building.adaptation_term_kc(freqs)                  # Anexo B (B.2)
+res = building.intensity_sound_reduction(lp1, l_in, measurement_area=12.0, area=10.0, kc=kc)
 print(round(float(res.r_i[0]), 2))          # 38.21  RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)]
 print(round(float(res.r_i_modified[0]), 2)) # 40.29  RI,M = RI + Kc
 print(res.rating.rating)                     # 38  ->  RI,w (motor ISO 717-1)
 
 # Cualifica la superficie de medición: FpI = Lp - LIn debe quedar < 10 dB (< 6 dB
 # si el lado receptor es absorbente); el índice residual de la sonda > FpI+10.
-fpi = surface_pressure_intensity_indicator(np.full(16, 46.0), l_in)
+fpi = building.surface_pressure_intensity_indicator(np.full(16, 46.0), l_in)
 print(round(float(fpi[0]), 1))               # 6.0
 
 res.plot()   # RI medido vs curva de referencia ISO 717-1 desplazada (necesita matplotlib)
@@ -265,14 +263,14 @@ como `ci_delta` en el resultado y de forma independiente como
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import impact_improvement
+from phonometry import building
 
 freqs = [100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
 bare = np.full(16, 78.0)                       # nivel de aceleración de la placa desnuda
 covering = bare - np.array([0, 0, 1, 2, 4, 7, 11, 15,
                             18, 21, 23, 25, 27, 28, 29, 30])
-res = impact_improvement(bare, covering, freqs)
+res = building.impact_improvement(bare, covering, freqs)
 print(res.delta_lw)   # mejora ponderada delta-Lw (ISO 717-2)
 res.plot()
 plt.show()
@@ -281,11 +279,11 @@ plt.show()
 </details>
 
 ```python
-from phonometry import impact_improvement, weighted_impact_improvement
+from phonometry import building
 
 # delta-Lw directo de un espectro de mejora (16 bandas de tercio de octava):
 delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
-print(weighted_impact_improvement(delta_l))    # p. ej. 19 dB
+print(building.weighted_impact_improvement(delta_l))    # p. ej. 19 dB
 
 # A partir de los niveles de aceleración medidos (desnudo/cubierto) y un fondo:
 freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
@@ -293,7 +291,7 @@ freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
 bare_levels = [72, 73, 74, 74, 75, 75, 76, 76, 77, 77, 78, 78, 79, 79, 80, 80]
 covered_levels = [b - d for b, d in zip(bare_levels, delta_l)]
 bg = [40.0] * 16
-res = impact_improvement(bare_levels, covered_levels, freqs, background=bg)
+res = building.impact_improvement(bare_levels, covered_levels, freqs, background=bg)
 res.improvement       # delta-L por banda
 res.delta_lw          # número único ponderado (valorado sobre el subrango 100-3150 Hz)
 res.ci_delta          # término de adaptación espectral CI,delta (Fórmula (A.4))
@@ -348,14 +346,14 @@ $f_\text{ref}$, $\eta$).
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import vibration_reduction_index
+from phonometry import building
 
 freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
          800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 # Diferencia de nivel de velocidad promediada en dirección de una unión en T (dB):
 dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
                9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
-res = vibration_reduction_index(
+res = building.vibration_reduction_index(
     dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
     structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
 )
@@ -368,10 +366,7 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import (
-    direction_averaged_level_difference, vibration_reduction_index,
-    normalized_flanking_level_difference, modal_overlap_factor,
-)
+from phonometry import building
 
 freqs = [200, 250, 315, 400, 500, 630, 800, 1000, 1250]
 lij, s_i, s_j = 4.0, 12.0, 10.0     # longitud de unión (m), áreas de elemento (m^2)
@@ -380,8 +375,8 @@ dv_ij = [5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7, 9.2, 9.8]    # elemento i excitado (
 dv_ji = [6.4, 6.8, 7.3, 7.8, 8.4, 8.9, 9.5, 10.0, 10.6]  # elemento j excitado (dB)
 
 # Kij desde ambas direcciones de excitación (simétrico por el promedio direccional):
-dbar = direction_averaged_level_difference(dv_ij, dv_ji)
-res = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+dbar = building.direction_averaged_level_difference(dv_ij, dv_ji)
+res = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
                                 structural_reverberation_time_i=ts,
                                 structural_reverberation_time_j=ts)
 res.k_ij           # Kij por banda (Fórmula (13))
@@ -389,11 +384,11 @@ res.single_number  # Kij medio entre 200 y 1250 Hz, o None sin ese conjunto de b
 res.octave_bands() # Kij en octavas (su número único promedia 125-1000 Hz)
 
 # Descriptor global aéreo de flanco y una comprobación de validez de la Parte 4:
-dnf = normalized_flanking_level_difference(np.full(9, 75.0), np.full(9, 42.0),
+dnf = building.normalized_flanking_level_difference(np.full(9, 75.0), np.full(9, 42.0),
                                            absorption_area=np.full(9, 12.0))
-m = modal_overlap_factor(s_i, critical_frequency=85.0,
+m = building.modal_overlap_factor(s_i, critical_frequency=85.0,
                          structural_reverberation_time=ts)
-res_m = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+res_m = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
                                   modal_overlap=m)   # bandas con M < 0.25 acotadas
 res_m.bracketed    # marcas por banda; las bandas acotadas salen del número único
 ```

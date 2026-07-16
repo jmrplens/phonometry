@@ -64,27 +64,27 @@ niveles.
 ```python
 import numpy as np
 from scipy.signal import fftconvolve
-from phonometry import sweep_signal, impulse_response, mls_signal, mls_impulse_response
+from phonometry import room
 
 fs = 48000
 # Un barrido de 3 s, 20 Hz - 20 kHz es una buena excitación de sala de banda ancha
 # sweep: excitación que reproduces por el altavoz
-sweep = sweep_signal(fs, 20.0, 20000.0, 3.0)
+sweep = room.sweep_signal(fs, 20.0, 20000.0, 3.0)
 
 # Deconvoluciona la respuesta grabada para recuperar la respuesta al impulso
 system = np.zeros(fs); system[100] = 1.0; system[2000] = 0.4   # directo + reflexión
 # recorded: captura de micrófono del barrido reproducido (aquí simulada por convolución con una sala sintética)
 recorded = fftconvolve(sweep, system)
-ir = impulse_response(recorded, sweep, fs, method="spectral")
+ir = room.impulse_response(recorded, sweep, fs, method="spectral")
 print(int(np.argmax(np.abs(ir))))                    # 100: sonido directo recuperado
 
 # Variante de filtro inverso de Farina (necesita la banda del barrido)
-ir_f = impulse_response(recorded, sweep, fs, method="farina", f_range=(20.0, 20000.0))
+ir_f = room.impulse_response(recorded, sweep, fs, method="farina", f_range=(20.0, 20000.0))
 
 # MLS periódica: excita con >= 2 periodos, promedia, correlaciona
-mls = mls_signal(16)                                 # longitud 2**16 - 1 = 65535
+mls = room.mls_signal(16)                                 # longitud 2**16 - 1 = 65535
 rec = fftconvolve(np.tile(mls, 2), system)[: 2 * mls.size]
-ir_m = mls_impulse_response(rec, mls)
+ir_m = room.mls_impulse_response(rec, mls)
 print(int(np.argmax(np.abs(ir_m))))                  # 100
 ```
 
@@ -106,11 +106,12 @@ casi constante de la derecha.
 <summary>Ver el código de esta figura</summary>
 
 ```python
-from phonometry import sweep_signal, mls_signal, plot_excitation
+from phonometry import room
+from phonometry import plot_excitation
 
 fs = 48000
-sweep = sweep_signal(fs, 50.0, 20000.0, 1.0)   # excitación ESS
-mls = mls_signal(12).astype(float)             # longitud 2**12 - 1
+sweep = room.sweep_signal(fs, 50.0, 20000.0, 1.0)   # excitación ESS
+mls = room.mls_signal(12).astype(float)             # longitud 2**12 - 1
 
 # Una línea: forma de onda + espectrograma (barrido), secuencia + espectro (MLS)
 plot_excitation(sweep, fs, kind="sweep")
@@ -148,14 +149,14 @@ reverberación del §2.
 ```python
 import numpy as np
 from scipy.signal import fftconvolve
-from phonometry import sweep_signal, impulse_response
+from phonometry import room
 
 fs = 48000
-sweep = sweep_signal(fs, 20.0, 20000.0, 1.5)
+sweep = room.sweep_signal(fs, 20.0, 20000.0, 1.5)
 # Una sala sintética: sonido directo + dos reflexiones + cola difusa que decae
 system = np.zeros(int(0.7 * fs))
 system[80], system[1400], system[3100] = 1.0, 0.5, 0.32
-ir = impulse_response(fftconvolve(sweep, system), sweep, fs, length=system.size)
+ir = room.impulse_response(fftconvolve(sweep, system), sweep, fs, length=system.size)
 
 # Una línea: forma de onda + log-magnitud / decaimiento de Schroeder
 ir.plot()
@@ -289,7 +290,7 @@ cada una se extrapola a un decaimiento de 60 dB.*
 
 ```python
 import numpy as np
-from phonometry import decay_curve, room_parameters
+from phonometry import room
 
 fs = 48000
 # Decaimiento de pendiente única con T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
@@ -297,21 +298,21 @@ t = np.arange(fs) / fs
 # ir: respuesta al impulso de sala medida; aquí la sustituye un decaimiento sintético de pendiente única.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
-time, level = decay_curve(ir, fs)                    # curva de Schroeder (0 dB en t = 0)
+time, level = room.decay_curve(ir, fs)                    # curva de Schroeder (0 dB en t = 0)
 
-res = room_parameters(ir, fs, limits=None)           # banda única de banda ancha
+res = room.room_parameters(ir, fs, limits=None)           # banda única de banda ancha
 print(round(float(res.t30[0]), 2))                   # 1.0  s
 print(round(float(res.c80[0]), 2))                   # 3.05 dB
 print(round(float(res.d50[0]), 3))                   # 0.499
 print(round(float(res.ts[0]) * 1000, 0))             # 72 ms
 
 # Bandas de octava 125 Hz - 4 kHz (por defecto en ISO 3382-1); usa fraction=3 para tercios
-octaves = room_parameters(ir, fs)
+octaves = room.room_parameters(ir, fs)
 print(octaves.frequency)                             # ~[126, 251, 501, 1000, 1995, 3981]
 print(octaves.t30_valid)                             # indicadores de rango dinámico por banda
 
 octaves.plot()               # barras EDT/T20/T30 + C50/C80 por banda (requiere matplotlib)
-decay_curve(ir, fs).plot()   # curva de Schroeder con los ajustes EDT/T20/T30
+room.decay_curve(ir, fs).plot()   # curva de Schroeder con los ajustes EDT/T20/T30
 ```
 
 <details>
@@ -319,9 +320,18 @@ decay_curve(ir, fs).plot()   # curva de Schroeder con los ajustes EDT/T20/T30
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+fs = 48000
+# Decaimiento de pendiente única con T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
+t = np.arange(fs) / fs
+# ir: respuesta al impulso de sala medida; aquí la sustituye un decaimiento sintético de pendiente única.
+ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
+time, level = room.decay_curve(ir, fs)                    # curva de Schroeder (0 dB en t = 0)
 
 # En una línea — la curva de Schroeder con los ajustes rectos EDT/T20/T30:
-decay = decay_curve(ir, fs)          # un DecayCurve (se sigue desempaquetando como time, level)
+decay = room.decay_curve(ir, fs)          # un DecayCurve (se sigue desempaquetando como time, level)
 decay.plot()
 plt.show()
 
@@ -449,13 +459,13 @@ molesta más allá de 10 m.
 
 ```python
 import numpy as np
-from phonometry import open_plan_metrics
+from phonometry import room
 
 r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])       # distancias al hablante (m)
 lp = 65.0 - 7.0 * np.log2(r)                          # nivel de habla ponderado A (dB)
 sti = 0.70 - 0.03 * r                                 # STI por posición
 
-m = open_plan_metrics(r, lp, sti)
+m = room.open_plan_metrics(r, lp, sti)
 print(round(m.d2s, 1), round(m.lp_as_4m, 1))         # 7.0 dB, 51.0 dB
 print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 ```
@@ -465,6 +475,13 @@ print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])       # distancias al hablante (m)
+lp = 65.0 - 7.0 * np.log2(r)                          # nivel de habla ponderado A (dB)
+sti = 0.70 - 0.03 * r                                 # STI por posición
+m = room.open_plan_metrics(r, lp, sti)
 
 # En una línea: la regresión D2,S reconstruida con los campos del resultado,
 # con los cruces rD / rP marcados (la figura superior añade además los puntos
@@ -475,6 +492,13 @@ plt.show()
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])       # distancias al hablante (m)
+lp = 65.0 - 7.0 * np.log2(r)                          # nivel de habla ponderado A (dB)
+sti = 0.70 - 0.03 * r                                 # STI por posición
+m = room.open_plan_metrics(r, lp, sti)
 
 # Decaimiento espacial: Lp,A,S medido frente a la distancia en eje logarítmico,
 # la regresión D2,S reconstruida con los campos del resultado, y el STI con los
@@ -548,17 +572,17 @@ satura (ISO 354 Cláusula 3.7).
 
 ```python
 import numpy as np
-from phonometry import absorption_area, absorption_coefficient
+from phonometry import materials
 
 # Tiempos de reverberación en tercios de octava de una sala de 200 m^3, vacía (T1)
 # y con una muestra absorbente de 10.8 m^2 instalada (T2).
 t1 = np.array([5.0, 4.0, 3.0])
 t2 = np.array([3.0, 2.5, 2.0])
 
-a_empty = absorption_area(t1, volume=200.0, temperature=20.0)
+a_empty = materials.absorption_area(t1, volume=200.0, temperature=20.0)
 print(np.round(a_empty, 2))                    # [ 6.45  8.06 10.75] m^2
 
-alpha = absorption_coefficient(t1, t2, volume=200.0, sample_area=10.8,
+alpha = materials.absorption_coefficient(t1, t2, volume=200.0, sample_area=10.8,
                                temperature1=20.0)
 print(np.round(alpha, 3))                      # [0.398 0.448 0.498]
 ```

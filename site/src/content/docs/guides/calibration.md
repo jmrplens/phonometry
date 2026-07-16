@@ -44,7 +44,7 @@ calculate the sensitivity of your measurement chain using a reference tone
 
 ```python
 import numpy as np
-from phonometry import octave_filter, sensitivity
+from phonometry import metrology
 
 # 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
 fs = 48000
@@ -55,11 +55,11 @@ calibrator_recording = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs
 #   Synthesized here; in a real measurement this is your recorded signal.
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
-# 2. Calculate sensitivity factor
-calibration_factor = sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
+# 2. Calculate the sensitivity factor
+calibration_factor = metrology.sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
 
 # 3. Apply calibration to your measurements
-spl, freq = octave_filter(recording, fs, calibration_factor=calibration_factor)
+spl, freq = metrology.octave_filter(recording, fs, calibration_factor=calibration_factor)
 # Now 'spl' values are in real-world dB SPL!
 ```
 
@@ -109,7 +109,7 @@ wind, handling noise:
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import time_weighting
+from phonometry import metrology
 
 fs = 48000
 t = np.arange(int(fs * 6.0)) / fs
@@ -121,7 +121,7 @@ plt.figure(figsize=(9, 5))
 skip = fs                     # discard the F-integrator attack (~8 tau)
 for x, label in ((stable, "Stable tone (good coupling)"),
                  (unstable, "3% AM tone (loose coupling)")):
-    env = time_weighting(x, fs, mode="fast")[skip:]
+    env = metrology.time_weighting(x, fs, mode="fast")[skip:]
     level = 10 * np.log10(np.maximum(env, np.finfo(float).eps))
     plt.plot(t[skip:], level - level.mean(), label=label)
 for lim in (0.07, -0.07):
@@ -195,8 +195,17 @@ In this mode:
 * Useful for analyzing headroom, digital mastering, or normalized signals.
 
 ```python
+import numpy as np
+from phonometry import metrology
+
+# 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
+fs = 48000
+# recording: the mic capture you want to calibrate, same input chain (Pa after calibration).
+#   Synthesized here; in a real measurement this is your recorded signal.
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Assume 'recording' is normalized between -1.0 and 1.0
-spl_dbfs, freq = octave_filter(recording, fs, dbfs=True)
+spl_dbfs, freq = metrology.octave_filter(recording, fs, dbfs=True)
 # Results will be negative (e.g., -20 dBFS)
 ```
 
@@ -210,8 +219,17 @@ like BK:
   (Peak-holding).
 
 ```python
+import numpy as np
+from phonometry import metrology
+
+# 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
+fs = 48000
+# recording: the mic capture you want to calibrate, same input chain (Pa after calibration).
+#   Synthesized here; in a real measurement this is your recorded signal.
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Measure peak-holding levels for impact analysis
-spl_peak, freq = octave_filter(recording, fs, mode='peak')
+spl_peak, freq = metrology.octave_filter(recording, fs, mode='peak')
 ```
 
 :::note

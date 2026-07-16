@@ -20,10 +20,10 @@ neighbouring bins (Eq. 13), so partially-measured cells stay continuous with
 their measured corners.
 
 ```python
-import phonometry as ph
+from phonometry import aircraft
 
-h = ph.RotorcraftHemisphere(frequencies=freqs, azimuth=phi, polar=theta, levels=levels)
-lv = ph.hemisphere_source_level(h, 0.0, 90.0)   # source level per band at 60 m
+h = aircraft.RotorcraftHemisphere(frequencies=freqs, azimuth=phi, polar=theta, levels=levels)
+lv = aircraft.hemisphere_source_level(h, 0.0, 90.0)   # source level per band at 60 m
 h.plot()                                          # fore-aft directivity
 ```
 
@@ -69,14 +69,14 @@ CNOSSOS flow-resistivity classes `"A"`-`"H"`).
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import aircraft
 
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz-10 kHz thirds
 r = 500.0
 received = (lv
-            + ph.spherical_spreading_adjustment(r)
-            + ph.atmospheric_adjustment(freqs, r)
-            + ph.ground_effect_adjustment(freqs, 150.0, 1.5, 500.0, flow_resistivity="D"))
+            + aircraft.spherical_spreading_adjustment(r)
+            + aircraft.atmospheric_adjustment(freqs, r)
+            + aircraft.ground_effect_adjustment(freqs, 150.0, 1.5, 500.0, flow_resistivity="D"))
 ```
 
 The standard database is recorded at 60 m, the default. If a hemisphere uses a

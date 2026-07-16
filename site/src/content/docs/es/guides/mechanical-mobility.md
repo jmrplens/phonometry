@@ -23,17 +23,17 @@ transmisión de ruido estructural: ISO 9611, ISO 10846, EN 15657 y EN 12354-5.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 m, k, c = 2.0, 8000.0, 5.0
 f = np.logspace(np.log10(0.5), np.log10(200.0), 500)
 w = 2.0 * np.pi * f
-h = ph.sdof_receptance(f, m, k, c)
+h = vibration.sdof_receptance(f, m, k, c)
 for label, frf in (("receptancia |H|", np.abs(h)),
                    ("movilidad |Y|", np.abs(1j * w * h)),
                    ("acelerancia |A|", np.abs(-(w**2) * h))):
     plt.loglog(f, frf / frf.max(), label=label)
-plt.axvline(ph.resonance_frequency(m, k), ls="--", color="0.6")
+plt.axvline(vibration.resonance_frequency(m, k), ls="--", color="0.6")
 plt.xlabel("Frecuencia [Hz]"); plt.ylabel("Magnitud normalizada")
 plt.legend(); plt.show()
 ```
@@ -63,12 +63,12 @@ sistemas de varias coordenadas (la Tabla 1 llama además "masa efectiva" a
 `F/a`, la magnitud aquí denominada masa aparente).
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
 # Una movilidad de 2e-3 m/(N.s) a 80 Hz, expresada como las demás FRF:
 Y = 2e-3
-print(round(abs(ph.convert_frf(Y, 80.0, "mobility", "impedance")), 1))     # 500.0  N.s/m
-print(f"{abs(ph.convert_frf(Y, 80.0, 'mobility', 'accelerance')):.3f}")    # 1.005  1/kg
+print(round(abs(vibration.convert_frf(Y, 80.0, "mobility", "impedance")), 1))     # 500.0  N.s/m
+print(f"{abs(vibration.convert_frf(Y, 80.0, 'mobility', 'accelerance')):.3f}")    # 1.005  1/kg
 ```
 
 La elección entre las tres FRF de movimiento es de conveniencia, no de
@@ -104,14 +104,14 @@ que la receptancia estática (`ω → 0`) es la flexibilidad `1/k`:
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 m, k, c = 2.0, 8000.0, 5.0
-f0 = ph.resonance_frequency(m, k)             # 10.07 Hz
+f0 = vibration.resonance_frequency(m, k)             # 10.07 Hz
 
-y0 = complex(ph.sdof_mobility(f0, m, k, c))
+y0 = complex(vibration.sdof_mobility(f0, m, k, c))
 print(round(y0.real, 4), round(y0.imag, 6))   # 0.2 0.0   -> |Y(f0)| = 1/c
-print(round(complex(ph.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1/k
+print(round(complex(vibration.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1/k
 ```
 
 ## 3. FRF medidas y sus criterios de aceptación (ISO 7626-2)
@@ -152,15 +152,15 @@ defecto). Sobre ellos se ofrecen dos criterios de aceptación de la ISO 7626-2:
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 # Un bloque de calibración de 10 kg: |A| debe ser 1/m = 0,100 1/kg en toda frecuencia.
 f = np.array([20.0, 100.0, 500.0])
-res = ph.rigid_mass_calibration_check([0.100, 0.102, 0.097], f, mass=10.0)
+res = vibration.rigid_mass_calibration_check([0.100, 0.102, 0.097], f, mass=10.0)
 print(res.passed, res.within_tolerance.tolist())   # True [True, True, True]
 
 # El ejemplo del Anexo A: coherencia 0,8 necesita unos 75 promedios para < 5 %.
-print(round(float(ph.random_error_percent(0.8, 75)), 2))   # 4.08  %
+print(round(float(vibration.random_error_percent(0.8, 75)), 2))   # 4.08  %
 ```
 
 ## 4. El objeto `MobilityResult`
@@ -171,10 +171,10 @@ expone `.magnitude`, `.phase`, `.to(target)` (cualquier tipo de la Tabla 1) y un
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 f = np.logspace(np.log10(0.5), np.log10(200.0), 400)
-res = ph.sdof_mobility_result(f, mass=2.0, stiffness=8000.0, damping=5.0)
+res = vibration.sdof_mobility_result(f, mass=2.0, stiffness=8000.0, damping=5.0)
 z = res.to("impedance")                        # impedancia = 1/Y por frecuencia
 print(res.frequencies[int(np.argmax(res.magnitude))].round(1))   # ~10.1 Hz
 ```

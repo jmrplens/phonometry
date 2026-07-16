@@ -36,17 +36,17 @@ partir de una semianchura $a$ se construyen con `rectangular` ($a/\sqrt{3}$),
 `triangular` ($a/\sqrt{6}$) y `u_shaped` ($a/\sqrt{2}$) (GUM, cláusula 4.3).
 
 ```python
-import phonometry as ph
+from phonometry import metrology
 
 # Nivel ponderado A: una lectura más correcciones de calibración, de
 # instrumento y de posición de media cero. El modelo es su suma.
 quantities = [
-    ph.Quantity(74.0, 0.0, name="Reading"),
-    ph.rectangular(0.0, 0.20, name="Calibration"),
-    ph.rectangular(0.0, 0.30, name="Instrument"),
-    ph.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.rectangular(0.0, 0.20, name="Calibration"),
+    metrology.rectangular(0.0, 0.30, name="Instrument"),
+    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
-result = ph.combine_uncertainty(lambda a, b, c, d: a + b + c + d, quantities)
+result = metrology.combine_uncertainty(lambda a, b, c, d: a + b + c + d, quantities)
 
 print(round(result.value, 2))                 # 74.0
 print(round(result.combined_uncertainty, 3))  # 0.407 dB
@@ -98,15 +98,15 @@ adaptativo de 7.9, mínimo 2 ensayos) y el intervalo es el simétrico, no el
 intervalo más corto de 5.3.4.
 
 ```python
-import phonometry as ph
+from phonometry import metrology
 
 quantities = [
-    ph.Quantity(74.0, 0.0, name="Reading"),
-    ph.rectangular(0.0, 0.20, name="Calibration"),
-    ph.rectangular(0.0, 0.30, name="Instrument"),
-    ph.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.rectangular(0.0, 0.20, name="Calibration"),
+    metrology.rectangular(0.0, 0.30, name="Instrument"),
+    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
-mc = ph.monte_carlo(lambda a, b, c, d: a + b + c + d, quantities,
+mc = metrology.monte_carlo(lambda a, b, c, d: a + b + c + d, quantities,
                     trials=1_000_000, coverage=0.95, seed=1)
 
 print(round(mc.value, 2))                 # 74.0
@@ -147,17 +147,17 @@ y superado por este cuando no coincide.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import metrology
 
 quantities = [
-    ph.Quantity(74.0, 0.0, name="Reading"),
-    ph.rectangular(0.0, 0.20, name="Calibration"),
-    ph.rectangular(0.0, 0.30, name="Instrument"),
-    ph.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.rectangular(0.0, 0.20, name="Calibration"),
+    metrology.rectangular(0.0, 0.30, name="Instrument"),
+    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
 model = lambda a, b, c, d: a + b + c + d
-result = ph.combine_uncertainty(model, quantities)
-mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
+result = metrology.combine_uncertainty(model, quantities)
+mc = metrology.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
 k, U = result.expanded(0.95)
 

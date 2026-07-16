@@ -16,13 +16,13 @@ Minimal usage (all functions treat time as the LAST axis; 2D input is (channels,
 
 ```python
 import numpy as np
-from phonometry import octave_filter, laeq, ln_levels
+from phonometry import metrology
 
 fs = 48000
 x = np.random.randn(fs)              # 1 s of signal (pressure units)
-spl, freq = octave_filter(x, fs, fraction=3)   # 1/3-octave band levels
-la = laeq(x, fs)                              # A-weighted Leq
-stats = ln_levels(x, fs, n=(10, 50, 90))      # statistical levels
+spl, freq = metrology.octave_filter(x, fs, fraction=3)   # 1/3-octave bands
+la = metrology.laeq(x, fs)                               # A-weighted Leq
+stats = metrology.ln_levels(x, fs, n=(10, 50, 90))       # statistical levels
 ```
 
 If you are an AI assistant setting this up for a user: install from PyPI (no system dependencies), remember integer audio (e.g. wavfile.read int16) is handled automatically, use `calibration_factor` from `sensitivity()` for real dB SPL, and prefer `OctaveFilterBank` over repeated `octave_filter()` calls in tight loops (although designs are cached either way).
@@ -125,7 +125,7 @@ Analyze a signal and get the Sound Pressure Level (SPL) per frequency band.
 
 ```python
 import numpy as np
-from phonometry import octave_filter
+from phonometry import metrology
 
 fs = 48000
 t = np.linspace(0, 1, fs, endpoint=False)
@@ -133,7 +133,7 @@ t = np.linspace(0, 1, fs, endpoint=False)
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # Apply 1/3 octave filter bank
-spl, freq = octave_filter(signal, fs=fs, fraction=3)
+spl, freq = metrology.octave_filter(signal, fs=fs, fraction=3)
 
 print(f"Bands: {freq}")
 # Bands: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bands)
@@ -151,8 +151,16 @@ print(f"SPL [dB]: {spl}")
 ```python
 import matplotlib.pyplot as plt
 import scipy.signal
+import numpy as np
+from phonometry import metrology
 
-# Uses `signal`, `fs`, `spl` and `freq` from the snippet above.
+fs = 48000
+t = np.linspace(0, 1, fs, endpoint=False)
+# Composite signal: 100Hz + 1000Hz
+signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
+# Apply 1/3 octave filter bank
+spl, freq = metrology.octave_filter(signal, fs=fs, fraction=3)
+
 # Gray background: the raw-signal PSD (Welch), shifted to sit just below the
 # band SPLs so both spectral shapes share one axis.
 f_psd, psd = scipy.signal.welch(signal, fs, nperseg=8192)
@@ -175,7 +183,7 @@ plt.show()
 
 ```python
 from scipy.io import wavfile
-from phonometry import octave_filter
+from phonometry import metrology
 
 # Load standard WAV file
 fs, signal = wavfile.read("measurement.wav")
@@ -183,7 +191,7 @@ fs, signal = wavfile.read("measurement.wav")
 # Analyze
 # Note: To obtain real-world SPL values, you must calibrate the input.
 # See the Calibration guide.
-spl, freq = octave_filter(signal, fs=fs, fraction=3)
+spl, freq = metrology.octave_filter(signal, fs=fs, fraction=3)
 ```
 
 Integer audio (e.g. int16 WAV data) is converted to float64 internally, so it is
@@ -294,13 +302,13 @@ The following plot compares the architectures focusing on the -3 dB crossover po
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import sosfreqz
-from phonometry import OctaveFilterBank
+from phonometry import metrology
 
 fs = 48000
 fig, ax = plt.subplots(figsize=(9, 5))
 for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
     # limits picks out the single 1 kHz octave band
-    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
+    bank = metrology.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
                             filter_type=ftype)
     idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
     fsd = fs / bank.factor[idx]           # rate the band actually runs at
@@ -362,6 +370,24 @@ Full spectral view of the filter banks for Octave (1/1) and 1/3-Octave fractions
 | **Elliptic** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6.svg" alt="Elliptic octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.svg" alt="Elliptic one-third-octave filter bank frequency response" width="100%"></picture> |
 | **Bessel** | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6.svg" alt="Bessel octave-band filter bank frequency response" width="100%"></picture> | <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6.svg" alt="Bessel one-third-octave filter bank frequency response" width="100%"></picture> |
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# One figure per architecture and fraction: the whole response gallery
+fs = 48000
+for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
+    for fraction in (1, 3):
+        # show=True draws the bank's frequency response
+        metrology.OctaveFilterBank(fs=fs, fraction=fraction, order=6,
+                                   limits=[12, 20000], filter_type=ftype,
+                                   show=True)
+```
+
+</details>
+
 ## 5. Filter Usage and Examples
 
 ### 1. Butterworth (`butter`)
@@ -372,17 +398,30 @@ frequency bands.
 
 ```python
 import numpy as np
-from phonometry import octave_filter
+from phonometry import metrology
 
 # A calibrated signal in Pa so the guide runs standalone
 fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Default standard measurement
-spl, freq = octave_filter(x, fs, filter_type='butter')
+spl, freq = metrology.octave_filter(x, fs, filter_type='butter')
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6.svg" alt="Butterworth one-third-octave filter bank frequency response" width="60%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# Draw this bank's response (1/3 octave, order 6, Butterworth)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='butter', show=True)
+```
+
+</details>
 
 ### 2. Chebyshev I (`cheby1`)
 
@@ -391,12 +430,31 @@ expense of ripples in the passband. Useful when high selectivity is needed near
 the cut-off frequencies.
 
 ```python
-# Uses `x` and `fs` from the snippet above.
+import numpy as np
+from phonometry import metrology
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Selectivity with 0.1 dB passband ripple
-spl, freq = octave_filter(x, fs, filter_type='cheby1', ripple=0.1)
+spl, freq = metrology.octave_filter(x, fs, filter_type='cheby1', ripple=0.1)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6.svg" alt="Chebyshev I one-third-octave filter bank frequency response" width="60%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# Draw this bank's response (1/3 octave, order 6, Chebyshev I)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='cheby1', ripple=0.1, show=True)
+```
+
+</details>
 
 ### 3. Chebyshev II (`cheby2`)
 
@@ -406,12 +464,31 @@ signal in the passband. The stopband edges are placed automatically so that the
 −3 dB points land on the band edges (`attenuation` must be > 3.01 dB).
 
 ```python
-# Uses `x` and `fs` from the snippet above.
+import numpy as np
+from phonometry import metrology
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Flat passband, class-1 default 72 dB stopband attenuation
-spl, freq = octave_filter(x, fs, filter_type='cheby2')
+spl, freq = metrology.octave_filter(x, fs, filter_type='cheby2')
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6.svg" alt="Chebyshev II one-third-octave filter bank frequency response" width="60%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# Draw this bank's response (1/3 octave, order 6, Chebyshev II)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='cheby2', show=True)
+```
+
+</details>
 
 ### 4. Elliptic (`ellip`)
 
@@ -419,12 +496,31 @@ Elliptic (Cauer) filters have the **shortest transition width** (steepest
 roll-off) for a given order. They feature ripples in both the passband and stopband.
 
 ```python
-# Uses `x` and `fs` from the snippet above.
+import numpy as np
+from phonometry import metrology
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Maximum selectivity for extreme band isolation
-spl, freq = octave_filter(x, fs, filter_type='ellip', ripple=0.1)
+spl, freq = metrology.octave_filter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.svg" alt="Elliptic one-third-octave filter bank frequency response" width="60%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# Draw this bank's response (1/3 octave, order 6, Elliptic)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='ellip', ripple=0.1, show=True)
+```
+
+</details>
 
 ### 5. Bessel (`bessel`)
 
@@ -433,12 +529,31 @@ delay. They preserve the shape of filtered waveforms (transients) better than
 any other type, but have the slowest roll-off.
 
 ```python
-# Uses `x` and `fs` from the snippet above.
+import numpy as np
+from phonometry import metrology
+
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Best for pulse analysis and transient preservation
-spl, freq = octave_filter(x, fs, filter_type='bessel')
+spl, freq = metrology.octave_filter(x, fs, filter_type='bessel')
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6.svg" alt="Bessel one-third-octave filter bank frequency response" width="60%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# Draw this bank's response (1/3 octave, order 6, Bessel)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='bessel', show=True)
+```
+
+</details>
 
 ### 6. Linkwitz-Riley (`linkwitz_riley`)
 
@@ -448,12 +563,16 @@ that, when summed, result in a perfectly flat magnitude response and zero phase
 difference between bands at the crossover.
 
 ```python
-from phonometry import linkwitz_riley
+import numpy as np
+from phonometry import metrology
 
-# Uses `x` and `fs` from the snippet above.
+# A calibrated signal in Pa so the guide runs standalone
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 signal = x
 # Split signal into Low and High bands at 1000 Hz
-low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
+low, high = metrology.linkwitz_riley(signal, fs, freq=1000, order=4)
 # Reconstruction: low + high == signal (flat response)
 ```
 
@@ -466,13 +585,13 @@ low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import freqz
-from phonometry import linkwitz_riley
+from phonometry import metrology
 
 # Measure both branches: split a unit impulse and take the spectra.
 fs = 48000
 impulse = np.zeros(fs)
 impulse[0] = 1.0
-low, high = linkwitz_riley(impulse, fs, freq=1000, order=4)
+low, high = metrology.linkwitz_riley(impulse, fs, freq=1000, order=4)
 
 w, h_lp = freqz(low, worN=8192, fs=fs)
 _, h_hp = freqz(high, worN=8192, fs=fs)
@@ -499,10 +618,10 @@ mapping and log-frequency interpolation from the standard) and reports the
 performance class per band with its margin in dB:
 
 ```python
-from phonometry import OctaveFilterBank, verify_filter_class
+from phonometry import metrology
 
-bank = OctaveFilterBank(fs=48000, fraction=3, order=6)
-result = verify_filter_class(bank)
+bank = metrology.OctaveFilterBank(fs=48000, fraction=3, order=6)
+result = metrology.verify_filter_class(bank)
 print(result["overall_class"])          # 1
 print(result["bands"][0])
 # {'freq': 12.589254117941678, 'class': 1, 'margin_class1_db': 0.39999999999997266, 'margin_class2_db': 0.5999999999999727}
@@ -526,10 +645,10 @@ than the purple mask inside it.*
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import sosfreqz
-from phonometry import OctaveFilterBank, class_limits
+from phonometry import metrology
 
 fs = 48000
-bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+bank = metrology.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
 idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
 fm, fsd = bank.freq[idx], fs / bank.factor[idx]
 w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
@@ -537,7 +656,7 @@ att = -20 * np.log10(np.abs(h) + 1e-12)
 delta_a = att - np.interp(fm, w, att)     # relative attenuation
 
 grid = np.logspace(np.log10(0.05), np.log10(8), 2000)
-lo1, hi1 = class_limits(1.0, 1, grid)     # class 1 min/max attenuation
+lo1, hi1 = metrology.class_limits(1.0, 1, grid)     # class 1 min/max attenuation
 
 fig, ax = plt.subplots(figsize=(9, 5.5))
 ax.fill_between(grid, -10, lo1, alpha=0.15, color="tab:red",
@@ -572,7 +691,12 @@ it. Its class 1/2 masks differ slightly from the 2014 edition, so it lives behin
 an `edition` switch rather than being mixed into the 2014 mask:
 
 ```python
-result = verify_filter_class(bank, edition="1995")   # classes 0, 1, 2
+from phonometry import metrology
+
+fs = 48000
+bank = metrology.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+
+result = metrology.verify_filter_class(bank, edition="1995")   # classes 0, 1, 2
 print(result["overall_class"])          # 0  (the default Butterworth clears it)
 print(result["bands"][0]["margin_class0_db"])
 ```
@@ -590,10 +714,10 @@ inside class 0 across the whole pass-band.*
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import sosfreqz
-from phonometry import OctaveFilterBank, class_limits
+from phonometry import metrology
 
 fs = 48000
-bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+bank = metrology.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
 idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
 fm, fsd = bank.freq[idx], fs / bank.factor[idx]
 w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
@@ -607,7 +731,7 @@ pb = (w / fm >= g ** -0.5) & (w / fm <= g ** 0.5)
 
 fig, ax = plt.subplots(figsize=(9, 5.5))
 for cls in (2, 1, 0):                      # nested corridors, class 0 tightest
-    lo, hi = class_limits(1.0, cls, grid, edition="1995")
+    lo, hi = metrology.class_limits(1.0, cls, grid, edition="1995")
     ax.plot(grid, hi, label=f"Class {cls} corridor")
     ax.plot(grid, lo, color=ax.lines[-1].get_color())
 ax.plot(w[pb] / fm, delta_a[pb], "k", lw=2, label="Butterworth order 6")
@@ -677,7 +801,7 @@ band. This allows for advanced analysis or comparing how different architectures
 
 ```python
 import numpy as np
-from phonometry import octave_filter
+from phonometry import metrology
 
 # 1. Generate a signal (Sum of 250Hz and 1000Hz)
 fs = 48000
@@ -685,8 +809,8 @@ t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
 y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # 2. Compare architectures (Butterworth vs Chebyshev II)
-spl_b, freq, xb_butter = octave_filter(y, fs=fs, fraction=1, sigbands=True, filter_type='butter')
-spl_c2, _, xb_cheby2 = octave_filter(y, fs=fs, fraction=1, sigbands=True, filter_type='cheby2')
+spl_b, freq, xb_butter = metrology.octave_filter(y, fs=fs, fraction=1, sigbands=True, filter_type='butter')
+spl_c2, _, xb_cheby2 = metrology.octave_filter(y, fs=fs, fraction=1, sigbands=True, filter_type='cheby2')
 
 # 'xb_butter' and 'xb_cheby2' contain the time-domain signals per band
 ```
@@ -703,14 +827,14 @@ differences in stability and transient decay.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import OctaveFilterBank
+from phonometry import metrology
 
 fs = 48000
 t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
 y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 
-bank_b = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0])
-bank_c = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0],
+bank_b = metrology.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0])
+bank_c = metrology.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0],
                           filter_type="cheby2")
 _, freq, xb_butter = bank_b.filter(y, sigbands=True)
 _, _, xb_cheby2 = bank_c.filter(y, sigbands=True)
@@ -754,13 +878,13 @@ their steep roll-off with strong delay peaks at the band edges.
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import group_delay
-from phonometry import OctaveFilterBank
+from phonometry import metrology
 
 fs = 48000
 w = np.logspace(np.log10(500), np.log10(2000), 1024)
 fig, ax = plt.subplots(figsize=(9, 5))
 for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
-    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
+    bank = metrology.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
                             filter_type=ftype)
     idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
     fsd = fs / bank.factor[idx]
@@ -788,10 +912,14 @@ reserve zero-phase for when the temporal envelope matters (e.g. reverberation
 decay). The option is incompatible with stateful (block) processing.
 
 ```python
-from phonometry import OctaveFilterBank
+import numpy as np
+from phonometry import metrology
 
-# Uses `y` from the snippet above.
-bank = OctaveFilterBank(fs=48000, fraction=3)
+fs = 48000
+t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
+y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
+
+bank = metrology.OctaveFilterBank(fs=48000, fraction=3)
 spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
 ```
 
@@ -806,7 +934,7 @@ filtering keeps it aligned with the input.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import OctaveFilterBank
+from phonometry import metrology
 
 fs = 48000
 t = np.linspace(0, 0.15, int(fs * 0.15), endpoint=False)
@@ -814,7 +942,7 @@ x = np.zeros_like(t)                      # 250 Hz tone burst mid-frame
 start, end = int(0.05 * fs), int(0.10 * fs)
 x[start:end] = np.sin(2 * np.pi * 250 * t[start:end]) * np.hanning(end - start)
 
-bank = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
+bank = metrology.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
 _, _, fwd = bank.filter(x, sigbands=True, calculate_level=False)
 _, _, zp = bank.filter(x, sigbands=True, calculate_level=False,
                        zero_phase=True)
@@ -883,7 +1011,7 @@ are specified by **IEC 61672-1:2013**; the infrasound G curve is specified by
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import weighting_filter
+from phonometry import metrology
 
 # Measure each curve's response: weight a centered unit impulse and take
 # its spectrum (1 s buffer -> 1 Hz frequency resolution).
@@ -894,7 +1022,7 @@ freqs = np.fft.rfftfreq(fs, 1 / fs)
 
 fig, ax = plt.subplots(figsize=(9, 5))
 for curve in ("A", "C", "Z"):
-    spectrum = np.fft.rfft(weighting_filter(impulse, fs, curve=curve))
+    spectrum = np.fft.rfft(metrology.weighting_filter(impulse, fs, curve=curve))
     ax.semilogx(freqs[1:], 20 * np.log10(np.abs(spectrum[1:]) + np.finfo(float).eps),
                 label=curve)
 ax.set(xlim=(10, 20000), ylim=(-80, 10),
@@ -967,7 +1095,7 @@ $L_{Ceq} - L_{Aeq}$ is a one-number indicator of low-frequency content:
 
 ```python
 import numpy as np
-from phonometry import leq, weighting_filter
+from phonometry import metrology
 
 # A 50 Hz rumble under a light broadband hiss: quiet in A, loud in C.
 fs = 48000
@@ -975,8 +1103,8 @@ t = np.arange(10 * fs) / fs
 rng = np.random.default_rng(1)
 x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 
-la = leq(weighting_filter(x, fs, curve="A"))
-lc = leq(weighting_filter(x, fs, curve="C"))
+la = metrology.leq(metrology.weighting_filter(x, fs, curve="A"))
+lc = metrology.leq(metrology.weighting_filter(x, fs, curve="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
 # LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
 # C - A above 20 dB: the A-weighted number alone would hide the rumble.
@@ -986,17 +1114,17 @@ print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
 
 ```python
 import numpy as np
-from phonometry import weighting_filter
+from phonometry import metrology
 
 # recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Apply A-weighting to the raw recording
-weighted_signal = weighting_filter(recording, fs, curve='A')
+weighted_signal = metrology.weighting_filter(recording, fs, curve='A')
 
 # Apply C-weighting for peak analysis
-c_weighted_signal = weighting_filter(recording, fs, curve='C')
+c_weighted_signal = metrology.weighting_filter(recording, fs, curve='C')
 ```
 
 ## 3. Infrasound: G-weighting (ISO 7196)
@@ -1008,10 +1136,14 @@ perception in that band) and falls off at 24 dB/octave outside it. Use it for
 sources with significant energy below 20 Hz (wind turbines, HVAC, blasting):
 
 ```python
-from phonometry import weighting_filter
+import numpy as np
+from phonometry import metrology
 
-# Uses `recording` and `fs` from the snippet above.
-g_weighted = weighting_filter(recording, fs, curve='G')
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+g_weighted = metrology.weighting_filter(recording, fs, curve='G')
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response.svg" alt="G-weighting frequency response from 0.1 Hz to 1 kHz with the ISO 7196 Table 2 nominal values overlaid" width="80%"></picture>
@@ -1022,7 +1154,7 @@ g_weighted = weighting_filter(recording, fs, curve='G')
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import weighting_filter
+from phonometry import metrology
 
 # Measure the G response: weight a centered unit impulse and take its
 # spectrum. A long buffer gives the resolution the infrasound range
@@ -1031,7 +1163,7 @@ fs = 4000
 impulse = np.zeros(20 * fs)
 impulse[impulse.size // 2] = 1.0
 freqs = np.fft.rfftfreq(impulse.size, 1 / fs)
-spectrum = np.fft.rfft(weighting_filter(impulse, fs, curve="G"))
+spectrum = np.fft.rfft(metrology.weighting_filter(impulse, fs, curve="G"))
 
 fig, ax = plt.subplots(figsize=(9, 5))
 ax.semilogx(freqs[1:],
@@ -1068,10 +1200,14 @@ L<sub>pG</sub> (or L<sub>Geq</sub> for the equivalent level over time).
 If you weight many signals with the same parameters, design the filter once:
 
 ```python
-from phonometry import WeightingFilter
+import numpy as np
+from phonometry import metrology
 
-# Uses `recording` and `fs` from the snippet above.
-wf = WeightingFilter(fs, "A")
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+wf = metrology.WeightingFilter(fs, "A")
 signals = [recording]                # your batch of recordings
 for recording in signals:
     weighted = wf.filter(recording)
@@ -1100,7 +1236,7 @@ the oversampled design (blue) stays close to the analytic curve.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import weighting_filter
+from phonometry import metrology
 
 # Measured response of both designs at fs = 48 kHz: weight a centered
 # unit impulse and take its spectrum...
@@ -1121,7 +1257,7 @@ fig, ax = plt.subplots(figsize=(9, 5))
 ax.semilogx(freqs, analytic, "k--", label="Analytic (IEC 61672-1)")
 for high_accuracy, label in ((False, "Plain bilinear"),
                              (True, "Oversampled (default)")):
-    weighted = weighting_filter(impulse, fs, curve="A",
+    weighted = metrology.weighting_filter(impulse, fs, curve="A",
                                 high_accuracy=high_accuracy)
     response = 20 * np.log10(np.abs(np.fft.rfft(weighted))
                              + np.finfo(float).eps)[1:]
@@ -1143,14 +1279,18 @@ plt.show()
   `high_accuracy=True` together with `stateful=True` raises a `ValueError`.
 
 ```python
-from phonometry import WeightingFilter, weighting_filter
+import numpy as np
+from phonometry import metrology
 
-# Uses `recording` and `fs` from the snippet above.
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Explicit legacy behavior
-y = weighting_filter(recording, fs, curve="A", high_accuracy=False)
+y = metrology.weighting_filter(recording, fs, curve="A", high_accuracy=False)
 
 # Stateful block processing (legacy design, state carried between blocks)
-wf = WeightingFilter(fs, "A", stateful=True)
+wf = metrology.WeightingFilter(fs, "A", stateful=True)
 blocks = [recording]                 # your sequence of recording blocks
 for block in blocks:
     weighted = wf.filter(block)
@@ -1176,9 +1316,9 @@ flagged `range_limited` (it then attests the checked frequencies only, not
 full 10 Hz-20 kHz conformance):
 
 ```python
-from phonometry import WeightingFilter, verify_weighting_class
+from phonometry import metrology
 
-result = verify_weighting_class(WeightingFilter(48000, "A"))
+result = metrology.verify_weighting_class(metrology.WeightingFilter(48000, "A"))
 print(result["overall_class"])          # 1
 print(result["range_limited"])          # False
 print(result["between_nominals"])       # {'worst_freq': ..., 'margin_class1_db': ...}
@@ -1204,10 +1344,10 @@ limit applies.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import WeightingFilter, verify_weighting_class, weighting_class_limits
+from phonometry import metrology
 
-freqs, lower1, upper1 = weighting_class_limits(1)
-_, lower2, upper2 = weighting_class_limits(2)
+freqs, lower1, upper1 = metrology.weighting_class_limits(1)
+_, lower2, upper2 = metrology.weighting_class_limits(2)
 lo1, lo2 = np.clip(lower1, -7, 7), np.clip(lower2, -7, 7)
 
 fig, ax = plt.subplots(figsize=(10, 6.5))
@@ -1219,7 +1359,7 @@ ax.plot(freqs, upper2, ":", drawstyle="steps-mid", label="Class 2 upper/lower li
 ax.plot(freqs, lo2, ":", drawstyle="steps-mid", color="C2")
 
 for curve, marker in (("A", "o"), ("C", "s")):
-    bands = verify_weighting_class(WeightingFilter(48000, curve))["bands"]
+    bands = metrology.verify_weighting_class(metrology.WeightingFilter(48000, curve))["bands"]
     f = [b["freq"] for b in bands]
     dev = [b["deviation_db"] for b in bands]
     ax.plot(f, dev, marker=marker, label=f"{curve} weighting deviation (48 kHz)")
@@ -1304,7 +1444,7 @@ that is why level analyses discard the first instants of a recording.
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from phonometry import time_weighting
+from phonometry import metrology
 
 fs = 48000
 t = np.arange(int(fs * 4)) / fs
@@ -1315,7 +1455,7 @@ burst[fs:int(1.5 * fs)] = 0.2 * rng.standard_normal(int(0.5 * fs))
 p0 = 2e-5
 plt.figure()
 for mode in ('fast', 'slow', 'impulse'):
-    envelope = time_weighting(burst, fs, mode=mode)
+    envelope = metrology.time_weighting(burst, fs, mode=mode)
     plt.plot(t, 10 * np.log10(np.maximum(envelope, 1e-12) / p0**2), label=mode)
 plt.xlabel('Time [s]')
 plt.ylabel('Level [dB SPL]')
@@ -1332,14 +1472,14 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import time_weighting
+from phonometry import metrology
 
 # recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Calculate energy envelope (Mean Square)
-energy_envelope = time_weighting(recording, fs, mode='fast')
+energy_envelope = metrology.time_weighting(recording, fs, mode='fast')
 # dB SPL relative to 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 
@@ -1406,19 +1546,19 @@ and 1 s down to 2 ms for S, at class 1 acceptance limits:
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from phonometry import time_weighting
+from phonometry import metrology
 
 fs = 48000
 t = np.arange(int(fs * 2)) / fs
 tone = np.sin(2 * np.pi * 4000 * t)
 
 # Steady-state Fast reference of the continuous tone
-reference = time_weighting(tone, fs, mode='fast')[int(1.5 * fs):].mean()
+reference = metrology.time_weighting(tone, fs, mode='fast')[int(1.5 * fs):].mean()
 
 # 200 ms burst of the same tone (IEC 61672-1 Table 4 target: -1.0 dB)
 burst = np.zeros_like(t)
 burst[int(0.5 * fs):int(0.7 * fs)] = tone[int(0.5 * fs):int(0.7 * fs)]
-envelope = time_weighting(burst, fs, mode='fast')
+envelope = metrology.time_weighting(burst, fs, mode='fast')
 env_db = 10 * np.log10(np.maximum(envelope / reference, 1e-6))
 
 plt.figure()
@@ -1440,8 +1580,14 @@ requests the same zero state explicitly. If the recorded segment begins after a
 steady signal is already present, you can start from the first sample energy instead:
 
 ```python
-# Uses `recording` and `fs` from the snippet above.
-energy_envelope = time_weighting(recording, fs, mode='fast', initial_state='first')
+import numpy as np
+from phonometry import metrology
+
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+energy_envelope = metrology.time_weighting(recording, fs, mode='fast', initial_state='first')
 ```
 
 ## 6. Block processing
@@ -1450,12 +1596,14 @@ For block processing, pass the last output value from the previous block as the
 next block's `initial_state` instead of resetting each block:
 
 ```python
+from phonometry import metrology
+
 state = None
 
 # audio_blocks: consecutive frames of your calibrated recording (Pa),
 #   streamed from your sound card or read from a WAV in blocks.
 for block in audio_blocks:
-    energy_envelope = time_weighting(block, fs, mode='fast', initial_state=state)
+    energy_envelope = metrology.time_weighting(block, fs, mode='fast', initial_state=state)
     state = energy_envelope[-1]
 ```
 
@@ -1467,9 +1615,9 @@ such as `(n_channels,)` for input shaped `(n_channels, n_samples)`.
 Or let the `TimeWeighting` class carry the state for you:
 
 ```python
-from phonometry import TimeWeighting
+from phonometry import metrology
 
-tw = TimeWeighting(fs, mode='fast')
+tw = metrology.TimeWeighting(fs, mode='fast')
 # audio_blocks: consecutive frames of your calibrated recording (Pa),
 #   streamed from your sound card or read from a WAV in blocks.
 for block in audio_blocks:
@@ -1530,7 +1678,7 @@ time-weighted level distribution.
 
 ```python
 import numpy as np
-from phonometry import leq, laeq
+from phonometry import metrology
 
 # recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
@@ -1538,10 +1686,10 @@ recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # Equivalent continuous level of the whole recording
-level = leq(recording, calibration_factor=sensitivity)
+level = metrology.leq(recording, calibration_factor=sensitivity)
 
 # A-weighted Leq (the standard environmental noise metric)
-la = laeq(recording, fs, calibration_factor=sensitivity)
+la = metrology.laeq(recording, fs, calibration_factor=sensitivity)
 ```
 
 Both accept 1D signals (returning a scalar) or 2D `[channels, samples]` arrays
@@ -1584,7 +1732,7 @@ uncertainty section below); everywhere else, energy.
 
 ```python
 import numpy as np
-from phonometry import ln_levels
+from phonometry import metrology
 
 # A steady tone gives L10 = L50 = L90; percentiles only tell a story for a
 # *fluctuating* level. Synthesize 3 s alternating between a quiet and a
@@ -1596,7 +1744,7 @@ quiet = 0.02 * rng.standard_normal(segment)        # background
 loud = 0.06 * rng.standard_normal(segment)         # ~10 dB louder events
 varying = np.tile(np.concatenate([quiet, loud]), 3)
 
-stats = ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
+stats = metrology.ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 # LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
@@ -1604,6 +1752,41 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ln_levels_example.svg" alt="Fast level history of fluctuating noise with the L10, L50 and L90 statistical levels marked" width="80%"></picture>
 
 *L10 tracks the event peaks, L50 the median level and L90 the background.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import metrology
+
+# The fluctuating signal of the ln_levels example: 0.5 s of background
+# alternating with 0.5 s of ~10 dB louder events, repeated 3 times
+fs = 48000
+rng = np.random.default_rng(0)
+segment = fs // 2
+quiet = 0.02 * rng.standard_normal(segment)
+loud = 0.06 * rng.standard_normal(segment)
+varying = np.tile(np.concatenate([quiet, loud]), 3)
+
+# Fast mean-square envelope -> level vs time, plus the percentile levels
+envelope = metrology.time_weighting(varying, fs, mode="fast")
+level_t = 10 * np.log10(np.maximum(envelope, 1e-12) / (2e-5) ** 2)
+stats = metrology.ln_levels(varying, fs, n=(10, 50, 90))
+t = np.arange(varying.size) / fs
+
+fig, ax = plt.subplots()
+ax.plot(t, level_t, linewidth=0.8, label="Fast level Lp(t)")
+for i, (n_value, style) in enumerate([(10, "--"), (50, "-"), (90, "-.")], 1):
+    ax.axhline(float(stats[n_value]), color=f"C{i}", linestyle=style,
+               label=f"L{n_value} = {stats[n_value]:.1f} dB")
+ax.set(xlabel="Time [s]", ylabel="Level [dB]")
+ax.legend(loc="lower right")
+plt.show()
+```
+
+</details>
 
 Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` applies A/C weighting first, and
@@ -1661,23 +1844,27 @@ does below.
 ## Peak, event and occupational metrics
 
 ```python
-from phonometry import lc_peak, sel, sound_exposure, lex_8h
+import numpy as np
+from phonometry import metrology
 
-# Uses `recording`, `fs` and `sensitivity` from the Leq snippet above.
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
-peak = lc_peak(recording, fs, calibration_factor=sensitivity)
+peak = metrology.lc_peak(recording, fs, calibration_factor=sensitivity)
 
 # A single noise event and a work-shift sample (slices of a real recording)
 event = recording
 shift_sample = recording
 
 # Sound exposure level: single-event level normalized to 1 s (LAE)
-lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
+lae = metrology.sel(event, fs, weighting="A", calibration_factor=sensitivity)
 
 # Daily noise dose (IEC 61252): exposure in Pa²·h and LEX,8h / LEP,d
-E = sound_exposure(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
-lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+E = metrology.sound_exposure(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+lex = metrology.lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
 ```
 
 `lc_peak` is verified against the one-cycle/half-cycle reference responses of
@@ -1706,6 +1893,40 @@ events sum as $+10\log_{10}N$. This is the building block of airport and
 railway noise models.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept.svg" alt="A vehicle pass-by level history with its Leq over the whole event and the equal-energy one-second SEL block" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import metrology
+
+# A vehicle pass-by: noise under a gaussian energy envelope (dBFS analysis)
+fs = 48000
+t = np.arange(int(8.0 * fs)) / fs
+rng = np.random.default_rng(11)
+x = 0.3 * np.exp(-0.5 * ((t - 4.0) / 1.1) ** 2) * rng.standard_normal(t.size)
+
+level = 10 * np.log10(np.maximum(metrology.time_weighting(x, fs, mode="fast"), 1e-12))
+l_sel = float(metrology.sel(x, fs, dbfs=True))
+l_eq = float(metrology.leq(x, dbfs=True))
+print(f"Leq = {l_eq:.1f} dBFS, SEL = {l_sel:.1f} dBFS")
+# Leq = -16.6 dBFS, SEL = -7.6 dBFS -> the 1 s block carries the event energy
+
+fig, ax = plt.subplots()
+ax.plot(t, level, linewidth=1.0, label="Fast level of the event")
+ax.hlines(l_eq, 0, 8, color="C2", linestyle="--",
+          label=f"Leq over the whole event = {l_eq:.1f} dBFS")
+ax.fill_between([3.5, 4.5], -55, l_sel, color="C1", alpha=0.25)
+ax.hlines(l_sel, 3.5, 4.5, color="C1", linewidth=2,
+          label=f"SEL = {l_sel:.1f} dBFS: same energy in 1 s")
+ax.set(xlabel="Time [s]", ylabel="Level [dBFS]", ylim=(-55, l_sel + 6))
+ax.legend(loc="lower left")
+plt.show()
+```
+
+</details>
 
 ### Noise dose: sound exposure and LEX,8h
 
@@ -1748,15 +1969,53 @@ and `composite_rating_level()` the general whole-day composite of clause 6.5
 +6 dB prominent tones):
 
 ```python
-from phonometry import lden, composite_rating_level
+from phonometry import environmental
 
-l = lden(63.2, 58.1, 51.4)                      # from LAeq per period
-r = composite_rating_level([(63.2, 12, 0.0),    # day
+l = environmental.lden(63.2, 58.1, 51.4)                      # from LAeq per period
+r = environmental.composite_rating_level([(63.2, 12, 0.0),    # day
                             (58.1, 4, 5.0),     # evening (+5)
-                            (51.4, 8, 10.0)])   # night  (+10) == lden
+                            (51.4, 8, 10.0)])   # night  (+10) == environmental.lden
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.svg" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import environmental
+
+# Synthetic hourly LAeq of an urban road (dB), hours 00 to 23
+laeq_h = np.array([48, 46, 45, 45, 46, 50, 56, 64, 66, 65, 63, 63,
+                   64, 63, 63, 64, 65, 66, 65, 64, 63, 62, 61, 50], dtype=float)
+
+def period_leq(idx):
+    return 10 * np.log10(np.mean(10 ** (laeq_h[idx] / 10)))  # energy mean
+
+ld = period_leq(np.arange(7, 19))                # day 07-19
+le = period_leq(np.arange(19, 23))               # evening 19-23
+ln_ = period_leq(np.r_[23, np.arange(0, 7)])     # night 23-07
+l_den = environmental.lden(ld, le, ln_)
+print(f"Lden = {l_den:.1f} dB")   # Lden = 64.3 dB
+
+fig, ax = plt.subplots()
+ax.axvspan(19, 23, color="C1", alpha=0.15)                                # evening
+ax.axvspan(23, 24, color="C0", alpha=0.15); ax.axvspan(0, 7, color="C0", alpha=0.15)
+ax.step(np.arange(25), np.r_[laeq_h, laeq_h[-1]], where="post",
+        color="0.3", label="Hourly LAeq")
+ax.hlines(ld, 7, 19, color="C2", linestyle="--", label="Lday (+0 dB)")
+ax.hlines(le + 5, 19, 23, color="C1", linestyle="--", label="Levening + 5 dB")
+ax.hlines([ln_ + 10, ln_ + 10], [23, 0], [24, 7], color="C0",
+          linestyle="--", label="Lnight + 10 dB")
+ax.hlines(l_den, 0, 24, color="C3", linewidth=2, label=f"Lden = {l_den:.1f} dB")
+ax.set(xlabel="Hour of day", ylabel="Level [dB]", xlim=(0, 24))
+ax.legend(loc="upper left", fontsize=8, ncol=2)
+plt.show()
+```
+
+</details>
 
 ### `lden()` / `ldn()` / `composite_rating_level()` parameters
 
@@ -1818,10 +2077,10 @@ spread beyond 3 dB, where the substitute grossly inflates.
 
 ```python
 import matplotlib.pyplot as plt
-from phonometry import assess_tonal_audibility
+from phonometry import environmental
 
 # ISO 1996-2:2007 Annex C.5, Example 2 (two tones near 400 Hz):
-res = assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
+res = environmental.assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
                               centre_frequency=430.0)
 print(res.audibility, res.adjustment)   # ΔLta ≈ 11.1 dB -> Kt = 6 dB
 res.plot()
@@ -1830,21 +2089,18 @@ plt.show()
 </details>
 
 ```python
-from phonometry import (
-    assess_tonal_audibility, residual_sound_correction,
-    combined_standard_uncertainty, environmental_expanded_uncertainty,
-)
+from phonometry import environmental
 
 # Tonal adjustment for a prominent tone:
-kt = assess_tonal_audibility(54.1, 45.2, 430.0).adjustment      # 6 dB
+kt = environmental.assess_tonal_audibility(54.1, 45.2, 430.0).adjustment      # 6 dB
 
 # Subtract residual (background) noise from a measured level:
-corr = residual_sound_correction(measured_level=58.0, residual_level=50.0)
+corr = environmental.residual_sound_correction(measured_level=58.0, residual_level=50.0)
 corr.corrected_level, corr.reliable
 
 # Combine an uncertainty budget and expand to 95 %:
-u = combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38])  # 2.18 dB (G.2)
-environmental_expanded_uncertainty(u)                            # 4.36 dB (k = 2)
+u = environmental.combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38])  # 2.18 dB (G.2)
+environmental.expanded_uncertainty(u)                            # 4.36 dB (k = 2)
 ```
 
 ## Octave Spectrogram (levels over time)
@@ -1853,10 +2109,14 @@ Short-time fractional-octave analysis: one level per band per window,
 time-aligned across bands.
 
 ```python
-from phonometry import OctaveFilterBank
+import numpy as np
+from phonometry import metrology
 
-# Uses `recording` from the Leq snippet above.
-bank = OctaveFilterBank(fs=48000, fraction=3)
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+bank = metrology.OctaveFilterBank(fs=48000, fraction=3)
 levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
 ```
@@ -1865,6 +2125,36 @@ levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5
 
 *A logarithmic sweep plus two tone bursts, resolved in time and in standardized
 1/3-octave bands.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import chirp
+from phonometry import metrology
+
+# Log sweep 80 Hz -> 8 kHz plus two tone bursts, in a little noise
+fs = 48000
+t = np.arange(int(4.0 * fs)) / fs
+x = 0.5 * chirp(t, f0=80, t1=4.0, f1=8000, method="logarithmic")
+x[int(1.0 * fs):int(1.3 * fs)] += np.sin(2 * np.pi * 4000 * t[: int(0.3 * fs)])
+x[int(2.5 * fs):int(2.8 * fs)] += np.sin(2 * np.pi * 250 * t[: int(0.3 * fs)])
+x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
+
+bank = metrology.OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[50.0, 12000.0])
+levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.5)
+
+fig, ax = plt.subplots()
+mesh = ax.pcolormesh(times, freq, levels, shading="auto")
+ax.set_yscale("log")
+ax.set(xlabel="Time [s]", ylabel="Frequency [Hz]")
+fig.colorbar(mesh, label="Level [dB]")
+plt.show()
+```
+
+</details>
 
 - Multichannel input `(channels, samples)` returns `(channels, bands, frames)`.
 - `times` holds each window's center in seconds.
@@ -1886,8 +2176,19 @@ levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import chirp
+from phonometry import metrology
 
-# Uses `levels`, `freq` and `times` from the spectrogram snippet above.
+# Log sweep 80 Hz -> 8 kHz plus two tone bursts, in a little noise
+fs = 48000
+t = np.arange(int(4.0 * fs)) / fs
+x = 0.5 * chirp(t, f0=80, t1=4.0, f1=8000, method="logarithmic")
+x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
+
+bank = metrology.OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[50.0, 12000.0])
+levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.5)
+
 fig, ax = plt.subplots()
 mesh = ax.pcolormesh(times, freq, levels, shading="auto")
 ax.set_yscale("log")
@@ -1993,9 +2294,19 @@ check is wanted.
 
 ```python
 import matplotlib.pyplot as plt
+from phonometry import hearing
 
-# One line, with the Annex D `res` computed below: task contribution bars
-# plus the LEX,8h and LEX,8h + U lines.
+# The ISO 9612 Annex D welder's day of the next section.
+tasks = [
+    hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
+    hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
+         duration_range=(4.0, 6.0), label="welding"),
+    hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
+         duration_range=(1.0, 2.0), label="cutting/grinding"),
+]
+res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
+
+# One line: task contribution bars plus the LEX,8h and LEX,8h + U lines.
 res.plot()
 plt.show()
 ```
@@ -2004,20 +2315,18 @@ plt.show()
 
 
 ```python
-from phonometry.occupational_exposure import (
-    Task, task_based_exposure, job_based_exposure, full_day_exposure,
-)
+from phonometry import hearing
 
 # ISO 9612 Annex D — a welder's day split into three tasks. Each task level is
 # the energy average of its Lp,A,eqT samples; durations carry a measured range.
 tasks = [
-    Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
-    Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
+    hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
+    hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
          duration_range=(4.0, 6.0), label="welding"),
-    Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
+    hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
          duration_range=(1.0, 2.0), label="cutting/grinding"),
 ]
-res = task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
+res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
 print(f"LEX,8h = {res.lex_8h:.1f} dB   U = {res.expanded_uncertainty:.1f} dB")
 # LEX,8h = 84.3 dB   U = 2.7 dB
 print(f"one-sided 95 % upper limit LEX,8h + U = {res.upper_limit:.1f} dB")   # 87.0 dB
@@ -2029,8 +2338,8 @@ for t in res.tasks:
 
 # The same shift measured job-based (Annex E) and full-day (Annex F): both use
 # the Eq C.9 / Table C.4 sampling budget with k = 1.65 (one-sided 95 %).
-job = job_based_exposure([88.1, 86.1, 89.7, 86.5, 91.1, 86.7], effective_duration_hours=7.5)
-full = full_day_exposure([88.0, 91.9, 87.6, 90.4, 89.0, 88.4], effective_duration_hours=9.25)
+job = hearing.job_based_exposure([88.1, 86.1, 89.7, 86.5, 91.1, 86.7], effective_duration_hours=7.5)
+full = hearing.full_day_exposure([88.0, 91.9, 87.6, 90.4, 89.0, 88.4], effective_duration_hours=9.25)
 print(f"job      LEX,8h = {job.lex_8h:.1f} dB   U = {job.expanded_uncertainty:.1f} dB")
 # job      LEX,8h = 88.2 dB   U = 3.8 dB
 print(f"full-day LEX,8h = {full.lex_8h:.1f} dB   U = {full.expanded_uncertainty:.1f} dB")
@@ -2164,14 +2473,14 @@ structured verdict against the frequency-dependent prominence criteria.
 
 ```python
 import numpy as np
-from phonometry import tone_to_noise_ratio, prominence_ratio
+from phonometry import psychoacoustics
 
 fs = 48000
 rng = np.random.default_rng(0)
 t = np.arange(fs) / fs
 x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # 1 kHz tone in noise
-tnr = tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
-pr = prominence_ratio(x, fs, tone_freq=1000.0)
+tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
+pr = psychoacoustics.prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 ```
 
@@ -2206,14 +2515,14 @@ rescaled to a 100 Hz bandwidth, Formula 24).
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import welch
-from phonometry import tone_to_noise_ratio
+from phonometry import psychoacoustics
 
 fs = 48000
 rng = np.random.default_rng(21)
 t = np.arange(30 * fs) / fs
 x = (np.sqrt(2) * 0.1 * np.sin(2 * np.pi * 1000 * t)
      + 0.05 * rng.standard_normal(t.size))
-res = tone_to_noise_ratio(x, fs)
+res = psychoacoustics.tone_to_noise_ratio(x, fs)
 
 # Averaged 1 Hz Hann spectrum (the clause 11.1 front end) and the
 # critical band about the detected tone (edges approximated as +/- dfc/2):
@@ -2345,7 +2654,7 @@ band (blue). The area under N'(z) is the total loudness.*
 
 ```python
 import numpy as np
-from phonometry import loudness_zwicker, loudness_zwicker_from_spectrum
+from phonometry import psychoacoustics
 
 # A raw recording plus its calibration so the guide runs standalone
 fs = 48000
@@ -2354,15 +2663,15 @@ sens = 1.0                                                # calibration_factor t
 levels_28 = np.full(28, 60.0)                             # 28 one-third-octave band levels (dB)
 
 # From a raw recording: calibration_factor scales digital units to Pa
-res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
+res = psychoacoustics.loudness_zwicker(x, fs, field="free", calibration_factor=sens)
 print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")   # 13.1 sone (77 phon)
 
 # Time-varying signals: percentile loudness N5 is the reporting standard
-res = loudness_zwicker(x, fs)          # stationary=False (default)
+res = psychoacoustics.loudness_zwicker(x, fs)          # stationary=False (default)
 print(f"{res.n5:.1f} {res.n10:.1f} {res.loudness:.1f}")   # 13.1 13.1 13.1 — N5, N10, Nmax
 
 # From 28 one-third-octave band levels (25 Hz .. 12.5 kHz)
-res = loudness_zwicker_from_spectrum(levels_28, field="diffuse")
+res = psychoacoustics.loudness_zwicker_from_spectrum(levels_28, field="diffuse")
 
 res.plot()   # N'(z) over the Bark scale — the specific-loudness pattern (needs matplotlib)
 ```
@@ -2372,6 +2681,12 @@ res.plot()   # N'(z) over the Bark scale — the specific-loudness pattern (need
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+levels_28 = np.full(28, 60.0)                             # 28 one-third-octave band levels (dB)
+# From 28 one-third-octave band levels (25 Hz .. 12.5 kHz)
+res = psychoacoustics.loudness_zwicker_from_spectrum(levels_28, field="diffuse")
 
 # One line — the specific-loudness pattern N'(z) straight from the result:
 res.plot()
@@ -2379,8 +2694,8 @@ plt.show()
 
 # Or reproduce the figure by hand — two patterns of equal band level (60 dB),
 # energy spread over many critical bands vs concentrated in the 1 kHz band:
-narrow = loudness_zwicker_from_spectrum(np.r_[np.full(16, -60.0), 60.0, np.full(11, -60.0)])
-broad = loudness_zwicker_from_spectrum(np.full(28, 60.0))
+narrow = psychoacoustics.loudness_zwicker_from_spectrum(np.r_[np.full(16, -60.0), 60.0, np.full(11, -60.0)])
+broad = psychoacoustics.loudness_zwicker_from_spectrum(np.full(28, 60.0))
 z = np.arange(1, narrow.specific.size + 1) * 0.1          # Bark axis
 fig, ax = plt.subplots()
 for r, color, label in [
@@ -2427,13 +2742,36 @@ is the exact inverse (Formula 2), and `hearing_threshold()` returns the
 threshold-of-hearing column:
 
 ```python
-from phonometry import equal_loudness_contour, loudness_level
+from phonometry import psychoacoustics
 
-freqs, spl = equal_loudness_contour(40.0)   # the classic 40-phon contour
-phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
+freqs, spl = psychoacoustics.equal_loudness_contour(40.0)   # the classic 40-phon contour
+phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import psychoacoustics
+
+# ISO 226:2023 Formula (1) at the 29 preferred frequencies of Table 1
+fig, ax = plt.subplots()
+for phon in [20, 40, 60, 80, 90]:
+    freqs, spl = psychoacoustics.equal_loudness_contour(float(phon))
+    ax.semilogx(freqs, spl, color="C0")
+    ax.annotate(f"{phon} phon", xy=(1000, phon + 1), fontsize=9)
+ft, tf = psychoacoustics.hearing_threshold()
+ax.semilogx(ft, tf, "--", color="C1", label="Hearing threshold $T_f$")
+ax.set(xlabel="Frequency [Hz]", ylabel="Sound pressure level [dB re 20 µPa]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Validity per clause 4.1: 20-90 phon (80 phon above 4 kHz); the implementation
 is verified against the Annex B tables in CI. Note this is the loudness of
@@ -2469,6 +2807,39 @@ Zwicker doubles the sone value every +10 phon, while the Sottek model grows
 more slowly (about 1.65× per 10 dB), an intrinsic difference between the
 auditory summations, not a calibration error.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+# 1 kHz tone, 20..80 dB SPL: all three models pass through 1 sone at 40 dB
+fs = 48000
+t = np.arange(fs) / fs
+levels = np.arange(20.0, 81.0, 10.0)
+zw, mg, ec = [], [], []
+for spl in levels:
+    x = np.sqrt(2) * 2e-5 * 10 ** (spl / 20) * np.sin(2 * np.pi * 1000 * t)
+    zw.append(psychoacoustics.loudness_zwicker(x, fs, stationary=True).loudness)
+    mg.append(
+        psychoacoustics.loudness_moore_glasberg_from_spectrum([(1000.0, float(spl))]).loudness
+    )
+    ec.append(psychoacoustics.loudness_ecma(x, fs).loudness)
+
+fig, ax = plt.subplots()
+ax.plot(levels, zw, "o-", label="Zwicker (ISO 532-1)")
+ax.plot(levels, mg, "s--", label="Moore-Glasberg (ISO 532-2)")
+ax.plot(levels, ec, "^-.", label="Sottek (ECMA-418-2)")
+ax.plot(40.0, 1.0, "o", color="k", markerfacecolor="none", markersize=10)   # the shared anchor
+ax.set(xlabel="Sound pressure level [dB SPL]", ylabel="Total loudness N [sone]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ### Moore-Glasberg loudness (ISO 532-2)
 
 Where Zwicker uses fixed critical bands on the Bark scale, Moore-Glasberg builds
@@ -2481,14 +2852,11 @@ models binaural summation explicitly.
 
 ```python
 import numpy as np
-from phonometry import (
-    loudness_moore_glasberg,
-    loudness_moore_glasberg_from_spectrum,
-)
+from phonometry import psychoacoustics
 
 # The definitional anchor: one 1 kHz sinusoidal component at 40 dB SPL,
 # free field, binaural -> 1 sone / 40 phon by construction of the sone.
-res = loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="free")
+res = psychoacoustics.loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="free")
 print(f"N = {res.loudness:.3f} sone  ({res.loudness_level:.1f} phon)")   # 1.000 sone (40.0 phon)
 
 # From a calibrated recording: the narrowband (FFT) line spectrum is formed
@@ -2496,7 +2864,7 @@ print(f"N = {res.loudness:.3f} sone  ({res.loudness_level:.1f} phon)")   # 1.000
 # method (ISO 532-2 clauses 5.2/5.4).
 fs = 48000
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
-res = loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
+res = psychoacoustics.loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
 
 res.plot()   # specific loudness N'(i) over the ERB-number (Cam) scale
 ```
@@ -2506,6 +2874,15 @@ res.plot()   # specific loudness N'(i) over the ERB-number (Cam) scale
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+# From a calibrated recording: the narrowband (FFT) line spectrum is formed
+# (power-preserving normalization) and fed to the exact sinusoidal-component
+# method (ISO 532-2 clauses 5.2/5.4).
+fs = 48000
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+res = psychoacoustics.loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
 
 # One line — the specific-loudness pattern N'(i) straight from the result:
 res.plot()
@@ -2547,13 +2924,13 @@ predicts the loudness of sounds up to about 5 s.
 
 ```python
 import numpy as np
-from phonometry import loudness_moore_glasberg_time
+from phonometry import psychoacoustics
 
 fs = 32000
 t = np.arange(int(1.3 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
-res = loudness_moore_glasberg_time(x, fs, field="free")
+res = psychoacoustics.loudness_moore_glasberg_time(x, fs, field="free")
 print(f"N_max = {res.n_max:.3f} sone  ({res.loudness_level_max:.0f} phon)")   # 1.000 sone (40 phon)
 print(f"long-term loudness exceeded 5% of the time: {res.percentiles[5.0]:.3f} sone")   # 0.999 sone
 
@@ -2567,6 +2944,13 @@ res.plot()   # short-term S'(t) and long-term S''(t) loudness vs time
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 32000
+t = np.arange(int(1.3 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+res = psychoacoustics.loudness_moore_glasberg_time(x, fs, field="free")
 
 # The result carries both traces on a 1 ms time axis:
 res.plot()
@@ -2611,13 +2995,13 @@ documented in the module docstring).
 
 ```python
 import numpy as np
-from phonometry import loudness_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
-res = loudness_ecma(x, fs, field="free")
+res = psychoacoustics.loudness_ecma(x, fs, field="free")
 print(f"N = {res.loudness:.3f} sone_HMS")   # 0.984 sone_HMS
 print(res.specific_loudness.shape)          # (53,) average specific loudness N'(z)
 
@@ -2631,6 +3015,13 @@ res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(int(1.2 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+res = psychoacoustics.loudness_ecma(x, fs, field="free")
 
 # The result carries the average specific loudness over the 53 Bark_HMS bands:
 res.plot()
@@ -2733,17 +3124,44 @@ $k = 0.108$ sits inside the normative window 0.105–0.115).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" width="80%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# DIN 45692 sharpness weighting g(z): Eq. (1) plus the informative Annex B variants
+z = np.arange(1, 241) * 0.1                     # Bark bins, 0.1 .. 24.0
+g_din = np.where(z > 15.8, 0.15 * np.exp(0.42 * (z - 15.8)) + 0.85, 1.0)
+g_bis = np.where(z > 15.0, 0.2 * np.exp(0.308 * (z - 15.0)) + 0.8, 1.0)
+n = 4.0                                         # Aures depends on the total loudness (sone)
+g_aures = 0.078 * np.exp(0.171 * z) / z * (n / np.log(n * 0.05 + 1.0))
+
+fig, ax = plt.subplots()
+ax.semilogy(z, g_din, label="DIN 45692 g(z)")
+ax.semilogy(z, g_bis, "--", label="von Bismarck (Annex B)")
+ax.semilogy(z, g_aures, "-.", label="Aures (Annex B, N = 4 sone)")
+ax.axvline(15.8, linestyle=":", color="0.5")    # DIN knee: g rises beyond 15.8 Bark
+ax.set(xlabel="Critical-band rate z [Bark]", ylabel="Weighting g(z)")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
-from phonometry import sharpness_din
+from phonometry import psychoacoustics
 
 # A raw recording plus its calibration so the guide runs standalone
 fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # any recording (digital units)
 sens = 1.0                                                # calibration_factor to pascals
 
-s = sharpness_din(x, fs, calibration_factor=sens)      # acum
-s_aures = sharpness_din(x, fs, method="aures")          # Annex B variant
+s = psychoacoustics.sharpness_din(x, fs, calibration_factor=sens)      # acum
+s_aures = psychoacoustics.sharpness_din(x, fs, method="aures")          # Annex B variant
 ```
 
 CI verifies the Table A.2 target values (0.38 acum at 250 Hz up to
@@ -2760,13 +3178,13 @@ tone is ≈ 1 tu_HMS; the result also tracks the tonal frequency f_ton per band.
 
 ```python
 import numpy as np
-from phonometry import tonality_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
-res = tonality_ecma(x, fs, field="free")
+res = psychoacoustics.tonality_ecma(x, fs, field="free")
 peak = int(np.argmax(res.specific_tonality))
 print(f"T = {res.tonality:.3f} tu_HMS")                    # 1.000 tu_HMS
 print(f"f_ton = {res.tonal_frequencies[peak]:.0f} Hz")     # 999 Hz
@@ -2803,14 +3221,14 @@ c_R (Formula 104) used **without** reverse-fitting to the target.
 
 ```python
 import numpy as np
-from phonometry import roughness_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
 x = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
 x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # overall 60 dB SPL
 
-res = roughness_ecma(x, fs, field="free")
+res = psychoacoustics.roughness_ecma(x, fs, field="free")
 print(f"R = {res.roughness:.4f} asper")   # 0.9999 asper (reference: 1 asper)
 
 res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
@@ -2824,7 +3242,7 @@ res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import tonality_ecma, roughness_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
@@ -2837,8 +3255,8 @@ rough = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
 rough *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(rough**2))
 
 scores = {
-    "Pure tone": (tonality_ecma(tone, fs).tonality, roughness_ecma(tone, fs).roughness),
-    "70 Hz AM tone": (tonality_ecma(rough, fs).tonality, roughness_ecma(rough, fs).roughness),
+    "Pure tone": (psychoacoustics.tonality_ecma(tone, fs).tonality, psychoacoustics.roughness_ecma(tone, fs).roughness),
+    "70 Hz AM tone": (psychoacoustics.tonality_ecma(rough, fs).tonality, psychoacoustics.roughness_ecma(rough, fs).roughness),
 }
 labels = list(scores)
 tonal = [scores[k][0] for k in labels]
@@ -2943,41 +3361,18 @@ results, band-weighted, into the index: the STI is an effective SNR of the
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60.svg" alt="STI versus reverberation time with the IEC 60268-16 Annex F rating bands shaded" width="80%"></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" width="92%"></picture>
-
-## 2. Indirect and direct (STIPA) measurement
-
-```python
-import numpy as np
-from phonometry import sti_from_impulse_response, stipa, stipa_signal
-
-fs = 48000
-# A measured room impulse response (synthesized decay so the example runs)
-ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
-
-# Indirect method: from a measured room impulse response
-res = sti_from_impulse_response(ir, fs, snr=25.0)
-print(f"STI = {res.sti:.2f}  ({res.rating})")   # e.g. 0.62 (D)
-
-# Direct STIPA measurement: play stipa_signal() in the room, record it
-test = stipa_signal(fs, seconds=18.0, level_db=80.0)
-recording = test                       # in practice, the microphone signal after playback
-res = stipa(recording, fs)
-res.plot()   # per-band modulation transfer index (MTI) bars, STI + rating in the title
-```
-
 <details>
 <summary>Show the code for this figure</summary>
 
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from phonometry import sti_from_impulse_response
+from phonometry import hearing
 
 fs = 48000
 
-# STI vs reverberation time: sweep sti_from_impulse_response over synthetic
-# exponential decays (white noise x exp(-6.9077 t / T60)) at a T60 grid —
+# STI vs reverberation time: sweep hearing.sti_from_impulse_response over synthetic
+# exponential decays (white noise x exp(-6.9077 t / T60)) at a T60 grid,
 # exactly the physics behind the curve above:
 rng = np.random.default_rng(0)
 t60_grid = np.array([0.3, 0.5, 0.8, 1.2, 1.6, 2.0, 2.5, 3.0, 4.0, 5.0])
@@ -2985,7 +3380,7 @@ sti_values = []
 for t60 in t60_grid:
     t = np.arange(int(2 * t60 * fs)) / fs
     ir = rng.standard_normal(t.size) * np.exp(-6.9077 * t / t60)
-    sti_values.append(sti_from_impulse_response(ir, fs).sti)
+    sti_values.append(hearing.sti_from_impulse_response(ir, fs).sti)
 
 fig, ax = plt.subplots()
 ax.semilogx(t60_grid, sti_values, "o-")
@@ -2997,6 +3392,29 @@ plt.show()
 ```
 
 </details>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain.svg" alt="STI measurement chain: STIPA source signal through the room to the microphone and the MTF analysis" width="92%"></picture>
+
+## 2. Indirect and direct (STIPA) measurement
+
+```python
+import numpy as np
+from phonometry import hearing
+
+fs = 48000
+# A measured room impulse response (synthesized decay so the example runs)
+ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
+
+# Indirect method: from a measured room impulse response
+res = hearing.sti_from_impulse_response(ir, fs, snr=25.0)
+print(f"STI = {res.sti:.2f}  ({res.rating})")   # e.g. 0.62 (D)
+
+# Direct STIPA measurement: play hearing.stipa_signal() in the room, record it
+test = hearing.stipa_signal(fs, seconds=18.0, level_db=80.0)
+recording = test                       # in practice, the microphone signal after playback
+res = hearing.stipa(recording, fs)
+res.plot()   # per-band modulation transfer index (MTI) bars, STI + rating in the title
+```
 
 `stipa` emits a `UserWarning` when the recording is shorter than the
 recommended 15 s (IEC 60268-16 STIPA practice, 15 s to 25 s): below that the
@@ -3132,12 +3550,12 @@ proportion to its **band-importance function** `Ii` (ANSI S3.5-1997 Table 3,
 average speech material), which sums to one across the 18 bands.
 
 ```python
-import phonometry as ph
+from phonometry import hearing
 
 # The standard normal-effort speech spectrum (Table 3) in quiet, normal hearing.
-result = ph.speech_intelligibility_index("normal")
+result = hearing.speech_intelligibility_index("normal")
 print(round(result.sii, 3))          # 0.996  (nearly everything audible)
-print(round(ph.sii.BAND_IMPORTANCE.sum(), 6))   # 1.0
+print(round(hearing.sii.BAND_IMPORTANCE.sum(), 6))   # 1.0
 ```
 
 With no noise and a normal hearing threshold the standard speech spectrum is
@@ -3196,14 +3614,14 @@ $$
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import hearing
 
-speech = ph.standard_speech_spectrum("normal")
+speech = hearing.standard_speech_spectrum("normal")
 # A descending broadband masking noise (an office/ventilation-like spectrum).
 noise = np.array([38.0, 37.0, 36.0, 34.0, 32.0, 30.0, 28.0, 26.0, 24.0,
                   22.0, 20.0, 18.0, 16.0, 14.0, 12.0, 10.0, 8.0, 6.0])
 
-result = ph.speech_intelligibility_index(speech, noise)
+result = hearing.speech_intelligibility_index(speech, noise)
 print(round(result.sii, 2))                # 0.46
 print(result.band_audibility.round(2))     # per-band Ai
 ```
@@ -3216,12 +3634,12 @@ print(result.band_audibility.round(2))     # per-band Ai
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import hearing
 
-speech = ph.standard_speech_spectrum("normal")
+speech = hearing.standard_speech_spectrum("normal")
 noise = np.array([38.0, 37.0, 36.0, 34.0, 32.0, 30.0, 28.0, 26.0, 24.0,
                   22.0, 20.0, 18.0, 16.0, 14.0, 12.0, 10.0, 8.0, 6.0])
-result = ph.speech_intelligibility_index(speech, noise)
+result = hearing.speech_intelligibility_index(speech, noise)
 
 # One line:
 result.plot()
@@ -3260,16 +3678,16 @@ the index.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import hearing
 
 # The same broadband noise, four vocal efforts.
 noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
                   32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
-for effort in ph.sii.VOCAL_EFFORTS:
-    print(effort, round(ph.speech_intelligibility_index(effort, noise).sii, 2))
+for effort in hearing.sii.VOCAL_EFFORTS:
+    print(effort, round(hearing.speech_intelligibility_index(effort, noise).sii, 2))
 # normal 0.12 | raised 0.36 | loud 0.59 | shout 0.79
 
-print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
+print(hearing.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.svg" alt="Two panels. Left: the four ANSI S3.5-1997 standard speech spectra — normal, raised, loud and shout — over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum. Right: the resulting Speech Intelligibility Index in a fixed broadband noise, rising from 0.12 (normal) through 0.36 and 0.59 to 0.79 (shout)" width="96%"></picture>
@@ -3281,19 +3699,19 @@ print(ph.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
-import phonometry as ph
+from phonometry import hearing
 
 # The four ANSI S3.5-1997 Table 3 spectra and the fixed broadband noise above.
 noise = np.array([48.0, 47.0, 46.0, 44.0, 42.0, 40.0, 38.0, 36.0, 34.0,
                   32.0, 30.0, 28.0, 26.0, 24.0, 22.0, 20.0, 18.0, 16.0])
-efforts = ph.sii.VOCAL_EFFORTS         # ("normal", "raised", "loud", "shout")
-freqs = ph.sii.BAND_CENTERS            # the 18 one-third-octave band centres
+efforts = hearing.sii.VOCAL_EFFORTS         # ("normal", "raised", "loud", "shout")
+freqs = hearing.sii.BAND_CENTERS            # the 18 one-third-octave band centres
 
 fig, (ax_s, ax_i) = plt.subplots(1, 2, figsize=(12, 5))
 
 # Left: each higher vocal effort lifts the whole speech spectrum.
 for effort in efforts:
-    ax_s.plot(freqs, ph.standard_speech_spectrum(effort), "o-",
+    ax_s.plot(freqs, hearing.standard_speech_spectrum(effort), "o-",
               label=effort.capitalize())
 ax_s.set_xscale("log")
 ax_s.set_xticks(list(freqs))
@@ -3304,7 +3722,7 @@ ax_s.set_ylabel("Speech spectrum level [dB SPL]")
 ax_s.legend()
 
 # Right: the SII each spectrum reaches in the fixed noise.
-sii = [ph.speech_intelligibility_index(e, noise).sii for e in efforts]
+sii = [hearing.speech_intelligibility_index(e, noise).sii for e in efforts]
 pos = np.arange(len(efforts))
 ax_i.bar(pos, sii)
 ax_i.set_xticks(pos)
@@ -3394,7 +3812,7 @@ $$
 
 ```python
 import numpy as np
-from phonometry import sound_intensity
+from phonometry import emission
 
 fs = 48000
 rng = np.random.default_rng(0)
@@ -3404,7 +3822,7 @@ rng = np.random.default_rng(0)
 p1 = 0.02 * rng.standard_normal(fs)
 p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 delayed one sample
 
-res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
+res = emission.sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
 print(res.total_intensity_level, res.total_direction)      # LI [dB], ±1
 print(res.frequency, res.intensity_level)                  # per band
@@ -3428,6 +3846,18 @@ intensity measurement.*
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+fs = 48000
+rng = np.random.default_rng(0)
+# The two probe-microphone pressures in Pa, p1 closest to the source.
+#   In a real measurement these are your two calibrated probe recordings;
+#   synthesized here (p2 = p1 delayed one sample) so the guide runs.
+p1 = 0.02 * rng.standard_normal(fs)
+p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 delayed one sample
+res = emission.sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
+                      limits=[100, 2500])
 
 # res is the IntensityResult computed in the example above.
 # One line — Lp vs LI per band with the pressure-intensity index on a twin axis:
@@ -3483,15 +3913,15 @@ the dynamic-capability criterion they are available directly:
 
 ```python
 import numpy as np
-from phonometry import field_indicators, dynamic_capability_index
+from phonometry import emission
 
 # Per-position measurements over the ISO 9614-1 measurement surface
 pressure_levels = np.array([74.1, 73.8, 74.5, 73.2])       # Lp per position (dB)
 normal_intensity = np.array([1.2e-5, 1.0e-5, 1.4e-5, 0.9e-5])  # signed In per position (W/m²)
 
-fi = field_indicators(pressure_levels, normal_intensity)
+fi = emission.field_indicators(pressure_levels, normal_intensity)
 print(round(fi.f2, 2), round(fi.f3, 2), round(fi.f4, 3))   # 3.41 3.41 0.197
-ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
+ld = emission.dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
 print(ld, ld > fi.f2)                                      # 8.0 True (criterion 1)
 ```
 
@@ -3680,27 +4110,27 @@ hardware favours a two-level signal.
 ```python
 import numpy as np
 from scipy.signal import fftconvolve
-from phonometry import sweep_signal, impulse_response, mls_signal, mls_impulse_response
+from phonometry import room
 
 fs = 48000
 # A 3 s, 20 Hz - 20 kHz sweep is a good broadband room excitation
 # sweep: excitation you play through the loudspeaker
-sweep = sweep_signal(fs, 20.0, 20000.0, 3.0)
+sweep = room.sweep_signal(fs, 20.0, 20000.0, 3.0)
 
 # Deconvolve the recorded response back to the impulse response
 system = np.zeros(fs); system[100] = 1.0; system[2000] = 0.4   # direct + reflection
 # recorded: mic capture of the played sweep (here simulated by convolution with a synthetic room)
 recorded = fftconvolve(sweep, system)
-ir = impulse_response(recorded, sweep, fs, method="spectral")
+ir = room.impulse_response(recorded, sweep, fs, method="spectral")
 print(int(np.argmax(np.abs(ir))))                    # 100: direct sound recovered
 
 # Farina inverse-filter variant (needs the sweep band)
-ir_f = impulse_response(recorded, sweep, fs, method="farina", f_range=(20.0, 20000.0))
+ir_f = room.impulse_response(recorded, sweep, fs, method="farina", f_range=(20.0, 20000.0))
 
 # Periodic MLS: excite with >= 2 periods, average, cross-correlate
-mls = mls_signal(16)                                 # length 2**16 - 1 = 65535
+mls = room.mls_signal(16)                                 # length 2**16 - 1 = 65535
 rec = fftconvolve(np.tile(mls, 2), system)[: 2 * mls.size]
-ir_m = mls_impulse_response(rec, mls)
+ir_m = room.mls_impulse_response(rec, mls)
 print(int(np.argmax(np.abs(ir_m))))                  # 100
 ```
 
@@ -3720,11 +4150,12 @@ sequence — visible as the near-constant magnitude on the right.
 <summary>Show the code for this figure</summary>
 
 ```python
-from phonometry import sweep_signal, mls_signal, plot_excitation
+from phonometry import room
+from phonometry import plot_excitation
 
 fs = 48000
-sweep = sweep_signal(fs, 50.0, 20000.0, 1.0)   # ESS excitation
-mls = mls_signal(12).astype(float)             # length 2**12 - 1
+sweep = room.sweep_signal(fs, 50.0, 20000.0, 1.0)   # ESS excitation
+mls = room.mls_signal(12).astype(float)             # length 2**12 - 1
 
 # One-liner: waveform + spectrogram (sweep), sequence + flat spectrum (MLS)
 plot_excitation(sweep, fs, kind="sweep")
@@ -3763,14 +4194,14 @@ whose slope becomes the reverberation time in §2.
 ```python
 import numpy as np
 from scipy.signal import fftconvolve
-from phonometry import sweep_signal, impulse_response
+from phonometry import room
 
 fs = 48000
-sweep = sweep_signal(fs, 20.0, 20000.0, 1.5)
+sweep = room.sweep_signal(fs, 20.0, 20000.0, 1.5)
 # A synthetic room: direct sound + two reflections + a decaying diffuse tail
 system = np.zeros(int(0.7 * fs))
 system[80], system[1400], system[3100] = 1.0, 0.5, 0.32
-ir = impulse_response(fftconvolve(sweep, system), sweep, fs, length=system.size)
+ir = room.impulse_response(fftconvolve(sweep, system), sweep, fs, length=system.size)
 
 # One-liner: waveform + log-magnitude / Schroeder decay
 ir.plot()
@@ -3901,7 +4332,7 @@ extrapolated to a 60 dB decay.*
 
 ```python
 import numpy as np
-from phonometry import decay_curve, room_parameters
+from phonometry import room
 
 fs = 48000
 # Single-slope decay with T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
@@ -3909,21 +4340,21 @@ t = np.arange(fs) / fs
 # ir: measured room impulse response; a synthetic single-slope decay stands in here.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
-time, level = decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
+time, level = room.decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
 
-res = room_parameters(ir, fs, limits=None)           # broadband single band
+res = room.room_parameters(ir, fs, limits=None)           # broadband single band
 print(round(float(res.t30[0]), 2))                   # 1.0  s
 print(round(float(res.c80[0]), 2))                   # 3.05 dB
 print(round(float(res.d50[0]), 3))                   # 0.499
 print(round(float(res.ts[0]) * 1000, 0))             # 72 ms
 
 # Octave bands 125 Hz - 4 kHz (ISO 3382-1 default); use fraction=3 for thirds
-octaves = room_parameters(ir, fs)
+octaves = room.room_parameters(ir, fs)
 print(octaves.frequency)                             # ~[126, 251, 501, 1000, 1995, 3981]
 print(octaves.t30_valid)                             # per-band dynamic-range flags
 
 octaves.plot()               # per-band EDT/T20/T30 + C50/C80 bars (needs matplotlib)
-decay_curve(ir, fs).plot()   # Schroeder decay with EDT/T20/T30 fit overlays
+room.decay_curve(ir, fs).plot()   # Schroeder decay with EDT/T20/T30 fit overlays
 ```
 
 <details>
@@ -3931,9 +4362,18 @@ decay_curve(ir, fs).plot()   # Schroeder decay with EDT/T20/T30 fit overlays
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+fs = 48000
+# Single-slope decay with T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
+t = np.arange(fs) / fs
+# ir: measured room impulse response; a synthetic single-slope decay stands in here.
+ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
+time, level = room.decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
 
 # One line — Schroeder decay with the EDT/T20/T30 straight-line fits:
-decay = decay_curve(ir, fs)          # a DecayCurve (still unpacks as time, level)
+decay = room.decay_curve(ir, fs)          # a DecayCurve (still unpacks as time, level)
 decay.plot()
 plt.show()
 
@@ -4055,13 +4495,13 @@ below ~5 m; poor ones leave speech distracting past 10 m.
 
 ```python
 import numpy as np
-from phonometry import open_plan_metrics
+from phonometry import room
 
 r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])       # distances from the talker (m)
 lp = 65.0 - 7.0 * np.log2(r)                          # A-weighted speech level (dB)
 sti = 0.70 - 0.03 * r                                 # STI per position
 
-m = open_plan_metrics(r, lp, sti)
+m = room.open_plan_metrics(r, lp, sti)
 print(round(m.d2s, 1), round(m.lp_as_4m, 1))         # 7.0 dB, 51.0 dB
 print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 ```
@@ -4071,6 +4511,13 @@ print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])       # distances from the talker (m)
+lp = 65.0 - 7.0 * np.log2(r)                          # A-weighted speech level (dB)
+sti = 0.70 - 0.03 * r                                 # STI per position
+m = room.open_plan_metrics(r, lp, sti)
 
 # One line: the D2,S regression rebuilt from the result fields, with the
 # rD / rP crossings marked (the figure above adds the measured points and
@@ -4081,6 +4528,13 @@ plt.show()
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])       # distances from the talker (m)
+lp = 65.0 - 7.0 * np.log2(r)                          # A-weighted speech level (dB)
+sti = 0.70 - 0.03 * r                                 # STI per position
+m = room.open_plan_metrics(r, lp, sti)
 
 # Spatial decay: measured Lp,A,S vs distance on a log axis, the D2,S
 # regression rebuilt from the result fields, and STI with the rD / rP
@@ -4153,17 +4607,17 @@ $\alpha_s$ may exceed 1.0 and is never clamped (ISO 354 Clause 3.7).
 
 ```python
 import numpy as np
-from phonometry import absorption_area, absorption_coefficient
+from phonometry import materials
 
 # Third-octave reverberation times of a 200 m^3 room, empty (T1) and with a
 # 10.8 m^2 absorber sample installed (T2).
 t1 = np.array([5.0, 4.0, 3.0])
 t2 = np.array([3.0, 2.5, 2.0])
 
-a_empty = absorption_area(t1, volume=200.0, temperature=20.0)
+a_empty = materials.absorption_area(t1, volume=200.0, temperature=20.0)
 print(np.round(a_empty, 2))                    # [ 6.45  8.06 10.75] m^2
 
-alpha = absorption_coefficient(t1, t2, volume=200.0, sample_area=10.8,
+alpha = materials.absorption_coefficient(t1, t2, volume=200.0, sample_area=10.8,
                                temperature1=20.0)
 print(np.round(alpha, 3))                      # [0.398 0.448 0.498]
 ```
@@ -4344,23 +4798,23 @@ that source. Reading them:
 
 ```python
 import numpy as np
-from phonometry import airborne_insulation, weighted_rating, energy_average_level
+from phonometry import building
 
 # Energy-average several microphone positions in one room (dB)
-print(round(float(energy_average_level([60.0, 66.0])), 1))   # 64.0
+print(round(float(building.energy_average_level([60.0, 66.0])), 1))   # 64.0
 
 # Field insulation per band; area S and volume V add R'
 l1 = np.full(16, 80.0)                                # source-room levels
 l2 = np.full(16, 40.0)                                # receiving-room levels
 t2 = np.full(16, 0.5)                                 # receiving-room T (s)
-ins = airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+ins = building.airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
 print(round(float(ins.dnt[0]), 1))                   # 40.0  (= D since T = T0)
 print(round(float(ins.r_prime[0]), 1))               # 38.0
 
 # Single-number rating from a measured 16-band R spectrum (ISO 717-1 Annex C)
 R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
      28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
-w = weighted_rating(R)
+w = building.weighted_rating(R)
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
 
 w.plot()   # measured R' vs shifted ISO 717-1 reference, deviations shaded (needs matplotlib)
@@ -4371,6 +4825,12 @@ w.plot()   # measured R' vs shifted ISO 717-1 reference, deviations shaded (need
 
 ```python
 import matplotlib.pyplot as plt
+from phonometry import building
+
+# Single-number rating from a measured 16-band R spectrum (ISO 717-1 Annex C)
+R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+w = building.weighted_rating(R)
 
 # One line — measured curve vs the shifted ISO 717-1 reference, deviations shaded:
 w.plot()
@@ -4436,16 +4896,20 @@ prescribes "for the expression of uncertainty" and ISO 12999-1 Annex B
 requires when stating the uncertainty of a single-number value.
 
 ```python
-from phonometry import weighted_rating_extended
+from phonometry import building
+
+# Single-number rating from a measured 16-band R spectrum (ISO 717-1 Annex C)
+R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
 
 freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 r_ext = [18.7, 19.2, 20.0, *R, 26.8, 29.2]     # ISO 717-1 Annex C, Table C.2
-ext = weighted_rating_extended(r_ext, freqs)
+ext = building.weighted_rating_extended(r_ext, freqs)
 print(ext.rating, ext.c, ext.ctr, ext.c_50_5000, ext.ctr_50_5000)
 # 30 -2 -3 -2 -4   ->  Rw(C;Ctr;C50-5000;Ctr,50-5000) = 30(-2;-3;-2;-4)
 
-one_dp = weighted_rating_extended(r_ext, freqs, one_decimal=True)
+one_dp = building.weighted_rating_extended(r_ext, freqs, one_decimal=True)
 print(one_dp.rating)   # 30.0, the 0.1 dB-step rating for uncertainty statements
 ```
 
@@ -4490,7 +4954,7 @@ $L_{n,r,0,w} = 77.6$ dB and $C_{I,r,0} = -10.3$ dB of A.2.2).
 
 ```python
 import numpy as np
-from phonometry import impact_insulation, weighted_impact_rating
+from phonometry import building
 
 # 16 one-third-octave impact levels Li (100 Hz - 3150 Hz), dB, from the
 # ISO 717-2 Annex C worked example, and the receiving-room T per band.
@@ -4498,17 +4962,17 @@ li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
 t2 = np.full(16, 0.5)
 
-imp = impact_insulation(li, t2, volume=50.0)
+imp = building.impact_insulation(li, t2, volume=50.0)
 print(round(float(imp.l_n_t[0]), 1))          # 62.1  (= Li since T = T0)
 print(round(float(imp.l_n[0]), 1))            # 64.1  normalized to A0 = 10 m^2
 
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
-res_imp = weighted_impact_rating(imp.l_n_t)
+res_imp = building.weighted_impact_rating(imp.l_n_t)
 print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
 
 # Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
-print(weighted_impact_rating(octave).rating)  # 54
+print(building.weighted_impact_rating(octave).rating)  # 54
 
 res_imp.plot()   # measured L'nT vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
 ```
@@ -4518,6 +4982,17 @@ res_imp.plot()   # measured L'nT vs shifted ISO 717-2 reference, measured-above 
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# 16 one-third-octave impact levels Li (100 Hz - 3150 Hz), dB, from the
+# ISO 717-2 Annex C worked example, and the receiving-room T per band.
+li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+t2 = np.full(16, 0.5)
+imp = building.impact_insulation(li, t2, volume=50.0)
+# Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
+res_imp = building.weighted_impact_rating(imp.l_n_t)
 
 # One line — measured L'nT vs the shifted ISO 717-2 reference (measured-above shaded):
 res_imp.plot()
@@ -4596,7 +5071,7 @@ The façade quantity is airborne, so its single-number rating uses the
 
 ```python
 import numpy as np
-from phonometry import facade_insulation, weighted_rating
+from phonometry import building
 
 # Outdoor level 2 m in front of the façade, receiving-room level and T per
 # one-third-octave band; surface_level is the microphone on the test element.
@@ -4604,7 +5079,7 @@ l1_2m = np.full(16, 75.0)                              # L1,2m outdoors
 l2 = np.full(16, 33.0)                                 # receiving-room L2
 t2 = np.full(16, 0.5)                                  # receiving-room T (s)
 
-fac = facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
+fac = building.facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
                         surface_level=np.full(16, 78.0), method="loudspeaker")
 print(round(float(fac.d_2m[0]), 1))                    # 42.0  D2m = L1,2m - L2
 print(round(float(fac.d_2m_nt[0]), 1))                 # 42.0  (= D2m since T = T0)
@@ -4612,12 +5087,12 @@ print(round(float(fac.d_2m_n[0]), 1))                  # 40.0  normalized to A0 
 print(round(float(fac.r_prime[0]), 1))                 # 42.1  R'45deg (loudspeaker, -1.5 dB)
 
 # The road-traffic element method carries the -3 dB all-angle correction instead
-tr = facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
+tr = building.facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
                        surface_level=np.full(16, 78.0), method="road_traffic")
 print(round(float(tr.r_prime[0]), 1))                  # 40.6  R'tr,s (traffic, -3 dB)
 
 # The façade quantity is airborne: rate D2m,nT with the ISO 717-1 engine
-print(weighted_rating(fac.d_2m_nt).rating)             # 42  Dls,2m,nT,w
+print(building.weighted_rating(fac.d_2m_nt).rating)             # 42  Dls,2m,nT,w
 
 fac.plot()   # per-band D2m,nT with D2m, D2m,n and R' overlaid (needs matplotlib)
 ```
@@ -4670,23 +5145,22 @@ conformity* with a requirement (Formulae 4/5).
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo.svg" alt="A weighted rating reported with its two-sided 95 % expanded uncertainty in situations A, B and C, the reproducibility uncertainty widest and the repeatability uncertainty narrowest" width="80%"></picture>
 
 ```python
-from phonometry import (band_uncertainty, single_number_uncertainty,
-                        uncertain_value, satisfies_lower_requirement)
+from phonometry import building
 
 # Situation B (same building, different teams) -> the in-situ standard deviation.
-print(single_number_uncertainty("r_w", "B"))       # 0.9  dB  (Table 3)
-u = band_uncertainty("airborne", "B")              # per-band u (Table 2)
+print(building.single_number_uncertainty("r_w", "B"))       # 0.9  dB  (Table 3)
+u = building.band_uncertainty("airborne", "B")              # per-band u (Table 2)
 print(len(u.frequencies), u.uncertainties[10])     # 21 1.1  (the 500 Hz band)
 
 # Report R'w = 52 dB with a two-sided 95 % interval (k = 1.96, Table 8):
-uv = uncertain_value(52.0, "rprime_w", "B")        # aliases resolve to r_w
+uv = building.uncertain_value(52.0, "rprime_w", "B")        # aliases resolve to r_w
 print(uv.coverage_factor, round(uv.expanded_uncertainty, 1))    # 1.96 1.8
 print(round(uv.lower, 1), round(uv.upper, 1))      # 50.2 53.8  ->  52 ± 1.8 dB
 
 # Declaring conformity uses the ONE-sided factor (k = 1.65): does R'w provably
 # clear a 50 dB requirement?
-uc = uncertain_value(52.0, "rprime_w", "B", one_sided=True)
-print(satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
+uc = building.uncertain_value(52.0, "rprime_w", "B", one_sided=True)
+print(building.satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
 ```
 
 Impact quantities offer situations B/C only (Table 4, no 500 Hz band in the 2020
@@ -4700,11 +5174,11 @@ independent measurements with `reduce_by_independent_measurements` ($u/\sqrt{m}$
 
 ```python
 import matplotlib.pyplot as plt
-from phonometry import uncertain_value
+from phonometry import building
 
 # The same R'w = 52 dB reported in each situation with its two-sided 95 % U.
 situations = ["A", "B", "C"]
-vals = [uncertain_value(52.0, "r_w", s) for s in situations]
+vals = [building.uncertain_value(52.0, "r_w", s) for s in situations]
 
 fig, ax = plt.subplots(figsize=(7, 4))
 ax.errorbar(situations, [v.value for v in vals],
@@ -4764,25 +5238,24 @@ energy average of three A- or C-weighted positions.
 
 ```python
 import numpy as np
-from phonometry import (reverberation_index, estimate_reverberation_index,
-                        survey_airborne_insulation, survey_service_equipment_level)
+from phonometry import building
 
 # Octave-band levels (125-2000 Hz) and the measured receiving-room T.
 l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
 l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
-k = reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
-res = survey_airborne_insulation(l1, l2, k, volume=50.0, area=12.0)
+k = building.reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
+res = building.survey_airborne_insulation(l1, l2, k, volume=50.0, area=12.0)
 print(np.round(res.d_nt, 1))          # [34.5 39.8 45.  50.5 54. ]  DnT = D + k
 print(res.rating.rating, res.rating.c)        # 49 -1  ->  DnT,w (C)
 print(res.r_prime_rating.rating)               # 48  ->  R'w
 
 # No reverberation time measured? Estimate k from Table 4 (heavy walls, hard
 # floor, 35-60 m3 -> class "g").
-k_est = estimate_reverberation_index(50.0, "g")
+k_est = building.estimate_reverberation_index(50.0, "g")
 print(k_est)                                   # [4.5 5.  5.5 5.5 5.5]
 
 # Service-equipment noise: energy average of three A-weighted positions.
-se = survey_service_equipment_level([35.0, 30.0, 32.0], 3.0, volume=50.0)
+se = building.survey_service_equipment_level([35.0, 30.0, 32.0], 3.0, volume=50.0)
 print(round(float(se.l_xy), 1), round(float(se.l_xy_nt), 1))   # 32.8 29.8
 
 res.plot()   # DnT vs shifted ISO 717-1 reference (needs matplotlib)
@@ -4794,6 +5267,35 @@ res.plot()   # DnT vs shifted ISO 717-1 reference (needs matplotlib)
 into the standardized `DnT` — up where the room is live (`T > T0`), down where
 it is dead. The automatic rating is formed only for exactly 5 octave (or 16
 one-third-octave) values.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# Octave-band levels (125-2000 Hz) and the measured receiving-room T.
+bands = [125, 250, 500, 1000, 2000]
+l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
+l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
+k = building.reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
+res = building.survey_airborne_insulation(l1, l2, k, volume=50.0)
+
+x = np.arange(len(bands))
+fig, ax = plt.subplots()
+ax.fill_between(x, res.d, res.d_nt, alpha=0.2, label="k = 10 lg(T/T0)")
+ax.plot(x, res.d, "--o", label="D (level difference)")
+ax.plot(x, res.d_nt, "-s", label="DnT (standardized)")
+ax.set_xticks(x, [str(b) for b in bands])
+ax.set(xlabel="Frequency [Hz]", ylabel="Level difference [dB]",
+       title=f"ISO 10052 survey method: DnT,w = {res.rating.rating} dB")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ### `survey_airborne_insulation()` and friends — parameters
 
@@ -4930,15 +5432,14 @@ measurement*) at or below 6 dB, and no correction at or above 15 dB.
 
 ```python
 import numpy as np
-from phonometry import (lab_airborne_insulation, lab_impact_insulation,
-                        background_correction)
+from phonometry import building
 
 # Source/receiving levels and receiving-room T over the 16 one-third-octave
 # bands; S is the free test-opening area, V the receiving-room volume.
 l1 = np.full(16, 80.0)
 l2 = np.full(16, 40.0)
 t2 = np.full(16, 0.5)
-lab = lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+lab = building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
 print(round(float(lab.r[0]), 1))              # 38.0  R = L1 - L2 + 10 lg(S/A)
 print(round(float(lab.absorption[0]), 1))     # 16.0  A = 0.16 V / T (m^2)
 print(lab.rating.rating, lab.rating.c, lab.rating.ctr)   # 38 0 0  ->  Rw(C;Ctr)
@@ -4946,12 +5447,12 @@ print(lab.rating.rating, lab.rating.c, lab.rating.ctr)   # 38 0 0  ->  Rw(C;Ctr)
 # Impact: the tapping-machine level Li normalized to A0 = 10 m^2 gives Ln
 li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
-imp = lab_impact_insulation(li, t2, volume=50.0)
+imp = building.lab_impact_insulation(li, t2, volume=50.0)
 print(round(float(imp.l_n[0]), 1))            # 64.1  Ln = Li + 10 lg(A/A0)
 print(imp.rating.rating, imp.rating.ci)       # 81 -11  ->  Ln,w(CI)
 
 # Background correction: margins 6 / 1 / 20 dB -> capped / capped / unchanged
-corrected = background_correction([30.0, 33.0, 50.0], [24.0, 32.0, 30.0])
+corrected = building.background_correction([30.0, 33.0, 50.0], [24.0, 32.0, 30.0])
 print(np.round(corrected, 1))                 # [28.7 31.7 50.0]  (1.3 dB cap twice)
 
 lab.rating.plot()   # measured R vs shifted ISO 717-1 reference (needs matplotlib)
@@ -5006,8 +5507,7 @@ with $10\lg(S_m/A_0) + 10\lg N$ ($A_0 = 10\ \text{m}^2$, $N$ element units).
 
 ```python
 import numpy as np
-from phonometry import (intensity_sound_reduction, adaptation_term_kc,
-                        surface_pressure_intensity_indicator)
+from phonometry import building
 
 # Source-room level Lp1 and the average normal intensity level LIn over the
 # measurement surface (Sm), for a specimen of area S; 16 one-third-octave bands.
@@ -5015,15 +5515,15 @@ lp1 = np.full(16, 85.0)
 l_in = np.full(16, 40.0)
 freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
          1000, 1250, 1600, 2000, 2500, 3150]   # nominal 1/3-octave centres
-kc = adaptation_term_kc(freqs)                  # Annex B (B.2)
-res = intensity_sound_reduction(lp1, l_in, measurement_area=12.0, area=10.0, kc=kc)
+kc = building.adaptation_term_kc(freqs)                  # Annex B (B.2)
+res = building.intensity_sound_reduction(lp1, l_in, measurement_area=12.0, area=10.0, kc=kc)
 print(round(float(res.r_i[0]), 2))          # 38.21  RI = Lp1 - 6 - [LIn + 10 lg(Sm/S)]
 print(round(float(res.r_i_modified[0]), 2)) # 40.29  RI,M = RI + Kc
 print(res.rating.rating)                     # 38  ->  RI,w (ISO 717-1 engine)
 
 # Qualify the measurement surface: FpI = Lp - LIn must stay < 10 dB (< 6 dB when
 # the receiving side is absorbing); the probe's residual index must exceed FpI+10.
-fpi = surface_pressure_intensity_indicator(np.full(16, 46.0), l_in)
+fpi = building.surface_pressure_intensity_indicator(np.full(16, 46.0), l_in)
 print(round(float(fpi[0]), 1))               # 6.0
 
 res.plot()   # measured RI vs shifted ISO 717-1 reference (needs matplotlib)
@@ -5039,6 +5539,39 @@ otherwise). Subareas scanned separately are combined first with
 `combine_subareas` (Formulas (11)-(12)); a subarea whose net energy flows back
 towards the specimen enters with a negative area, applying the minus-sign rule
 of Clause 6.4.6 while $S_m$ keeps the unsigned area sum.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# A light wall: source-room SPL Lp1 = 85 dB and the measured normal intensity
+# level LIn over the Sm = 12 m2 surface, 16 one-third-octave bands.
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150]
+l_in = np.array([57.8, 61.9, 60.5, 55.6, 55.8, 55.5, 53.4, 51.6,
+                 50.2, 47.7, 46.4, 45.7, 44.8, 45.2, 47.2, 52.7])
+kc = building.adaptation_term_kc(freqs)           # Annex B adaptation term
+res = building.intensity_sound_reduction(np.full(16, 85.0), l_in,
+                                         measurement_area=12.0, area=10.0,
+                                         kc=kc)
+
+x = np.arange(len(freqs))
+fig, ax = plt.subplots()
+ax.fill_between(x, res.r_i, res.r_i_modified, alpha=0.2, label="Kc adaptation")
+ax.plot(x, res.r_i, "-o", label="RI (intensity)")
+ax.plot(x, res.r_i_modified, "--s", label="RI,M = RI + Kc")
+ax.set_xticks(x, [str(f) for f in freqs], rotation=45)
+ax.set(xlabel="Frequency [Hz]", ylabel="Sound reduction index [dB]",
+       title=f"RI,w = {res.rating.rating} dB, RI,M,w = {res.rating_modified.rating} dB")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
 
@@ -5096,14 +5629,14 @@ $C_{I,\Delta} = C_{I,r,0} - C_{I,r}$ (ISO 717-2:2020 Formula (A.4)), exposed as
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import impact_improvement
+from phonometry import building
 
 freqs = [100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150]
 bare = np.full(16, 78.0)                       # bare-plate acceleration level
 covering = bare - np.array([0, 0, 1, 2, 4, 7, 11, 15,
                             18, 21, 23, 25, 27, 28, 29, 30])
-res = impact_improvement(bare, covering, freqs)
+res = building.impact_improvement(bare, covering, freqs)
 print(res.delta_lw)   # weighted improvement delta-Lw (ISO 717-2)
 res.plot()
 plt.show()
@@ -5112,11 +5645,11 @@ plt.show()
 </details>
 
 ```python
-from phonometry import impact_improvement, weighted_impact_improvement
+from phonometry import building
 
 # delta-Lw straight from an improvement spectrum (16 one-third-octave bands):
 delta_l = [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
-print(weighted_impact_improvement(delta_l))    # e.g. 19 dB
+print(building.weighted_impact_improvement(delta_l))    # e.g. 19 dB
 
 # From the measured bare/covered acceleration levels, with a background trace:
 freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
@@ -5124,7 +5657,7 @@ freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
 bare_levels = [72, 73, 74, 74, 75, 75, 76, 76, 77, 77, 78, 78, 79, 79, 80, 80]
 covered_levels = [b - d for b, d in zip(bare_levels, delta_l)]
 bg = [40.0] * 16
-res = impact_improvement(bare_levels, covered_levels, freqs, background=bg)
+res = building.impact_improvement(bare_levels, covered_levels, freqs, background=bg)
 res.improvement       # delta-L per band
 res.delta_lw          # weighted single number (rated on the 100-3150 Hz sub-range)
 res.ci_delta          # spectrum adaptation term CI,delta (Formula (A.4))
@@ -5176,14 +5709,14 @@ worked numeric example, conformance is anchored on closed-form identities
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import vibration_reduction_index
+from phonometry import building
 
 freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630,
          800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 # Direction-averaged velocity level difference of a rigid T-junction (dB):
 dv = np.array([4.5, 4.8, 5.2, 5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7,
                9.2, 9.8, 10.3, 10.9, 11.4, 11.9, 12.3, 12.7])
-res = vibration_reduction_index(
+res = building.vibration_reduction_index(
     dv, junction_length=4.0, area_i=12.0, area_j=10.0, frequency=freqs,
     structural_reverberation_time_i=0.35, structural_reverberation_time_j=0.40,
 )
@@ -5196,10 +5729,7 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import (
-    direction_averaged_level_difference, vibration_reduction_index,
-    normalized_flanking_level_difference, modal_overlap_factor,
-)
+from phonometry import building
 
 freqs = [200, 250, 315, 400, 500, 630, 800, 1000, 1250]
 lij, s_i, s_j = 4.0, 12.0, 10.0     # junction length (m), element areas (m^2)
@@ -5208,8 +5738,8 @@ dv_ij = [5.6, 6.0, 6.5, 7.0, 7.6, 8.1, 8.7, 9.2, 9.8]    # element i excited (dB
 dv_ji = [6.4, 6.8, 7.3, 7.8, 8.4, 8.9, 9.5, 10.0, 10.6]  # element j excited (dB)
 
 # Kij from both excitation directions (symmetric via the direction average):
-dbar = direction_averaged_level_difference(dv_ij, dv_ji)
-res = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+dbar = building.direction_averaged_level_difference(dv_ij, dv_ji)
+res = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
                                 structural_reverberation_time_i=ts,
                                 structural_reverberation_time_j=ts)
 res.k_ij           # Kij per band (Formula (13))
@@ -5217,11 +5747,11 @@ res.single_number  # mean Kij over 200-1250 Hz, or None without the band set
 res.octave_bands() # Kij in octave bands (its single number averages 125-1000 Hz)
 
 # Overall airborne flanking descriptor and a Part-4 modal-overlap validity check:
-dnf = normalized_flanking_level_difference(np.full(9, 75.0), np.full(9, 42.0),
+dnf = building.normalized_flanking_level_difference(np.full(9, 75.0), np.full(9, 42.0),
                                            absorption_area=np.full(9, 12.0))
-m = modal_overlap_factor(s_i, critical_frequency=85.0,
+m = building.modal_overlap_factor(s_i, critical_frequency=85.0,
                          structural_reverberation_time=ts)
-res_m = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
+res_m = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
                                   modal_overlap=m)   # M < 0.25 bands bracketed
 res_m.bracketed    # per-band flags; bracketed bands leave the single number
 ```
@@ -5324,15 +5854,14 @@ empirical in the mass ratio $M = \log_{10}(m'_{\perp,i}/m'_i)$).
 
 ```python
 import numpy as np
-from phonometry import (junction_vibration_reduction, flanking_element,
-                        predicted_airborne_insulation)
+from phonometry import building
 
 # EN 12354-1 Annex H.3: a separating wall Rs,w = 57 dB, area Ss = 11.5 m², with
 # four flanking elements. The simplified model reads each junction's Kij at
 # 500 Hz from the mass ratio m'perp / m' (Annex E) — here the floor's rigid
 # cross-junction (the mass ratio is itself rounded, hence 12.5 vs Annex 12.4):
-print(round(junction_vibration_reduction("rigid_cross", "through", 1.61), 1))  # 12.5  KFf
-print(round(junction_vibration_reduction("rigid_cross", "corner",  1.61), 1))  #  8.9  KFd = KDf
+print(round(building.junction_vibration_reduction("rigid_cross", "through", 1.61), 1))  # 12.5  KFf
+print(round(building.junction_vibration_reduction("rigid_cross", "corner",  1.61), 1))  #  8.9  KFd = KDf
 
 # Build each element's three flanking paths (Ff, Df, Fd) from the Annex H
 # tabulated Kij, then combine the direct path Dd energetically (Formula 26).
@@ -5344,11 +5873,11 @@ elements = [   # (name, Rw, KFf, KFd = KDf, coupling length lf)
 ]
 paths = []
 for name, rw, k_ff, k_fd, lf in elements:
-    paths += flanking_element(label=name, r_flanking=rw, r_separating=57,
+    paths += building.flanking_element(label=name, r_flanking=rw, r_separating=57,
                               k_ff=k_ff, k_fd=k_fd, k_df=k_fd,
                               separating_area=11.5, coupling_length=lf)
 
-res = predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
+res = building.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
 print(round(res.r_prime_w, 1))                          # 52.2  ->  R'w = 52 dB
 print(res.dominant.label, round(res.dominant.fraction, 2))   # Dd 0.33 (direct dominates)
 ```
@@ -5358,8 +5887,23 @@ print(res.dominant.label, round(res.dominant.fraction, 2))   # Dd 0.33 (direct d
 
 ```python
 import matplotlib.pyplot as plt
+from phonometry import building
 
-# Uses `paths` and `res` from the snippet above.
+# Build each element's three flanking paths (Ff, Df, Fd) from the Annex H
+# tabulated Kij, then combine the direct path Dd energetically (Formula 26).
+elements = [   # (name, Rw, KFf, KFd = KDf, coupling length lf)
+    ("floor",    49, 12.4,  8.9, 4.50),
+    ("ceiling",  46, 14.4,  9.2, 4.50),
+    ("facade",   42, 12.6,  6.7, 2.55),
+    ("int-wall", 33, 33.5, 15.7, 2.55),
+]
+paths = []
+for name, rw, k_ff, k_fd, lf in elements:
+    paths += building.flanking_element(label=name, r_flanking=rw, r_separating=57,
+                              k_ff=k_ff, k_fd=k_fd, k_df=k_fd,
+                              separating_area=11.5, coupling_length=lf)
+res = building.predicted_airborne_insulation(r_direct=57.0, flanking_paths=paths)
+
 # Per-path sound reduction index and each path's share of the transmitted
 # energy for the Annex H.3 result computed above.
 labels = [p.label for p in res.paths]
@@ -5395,12 +5939,12 @@ automatically per path; or compute the floor yourself with
 minimum:
 
 ```python
-from phonometry import junction_min_vibration_reduction
+from phonometry import building
 # Kij,min = 10 lg[lf·l0·(1/Si + 1/Sj)]; large elements give a low (here negative)
 # floor, so a realistic tabulated Kij is rarely clamped; but small, light
 # elements can push it above the tabulated value (e.g. lf = 4 m, S = 1.5 m²
 # gives 7.3 dB, over the 5 dB lightweight floor).
-print(round(junction_min_vibration_reduction(coupling_length=4.5,
+print(round(building.junction_min_vibration_reduction(coupling_length=4.5,
                                              s_i=11.5, s_j=11.5), 1))     # -1.1
 ```
 
@@ -5410,19 +5954,18 @@ $L_{n,w,eq} = 164 - 35 \log_{10}(m'/m'_0)$ (Annex B), the covering improvement
 $\Delta L_w$ (ISO 717-2) and the flanking correction $K$ from Table 1.
 
 ```python
-from phonometry import (equivalent_impact_level, impact_flanking_correction,
-                        predicted_impact_insulation, standardized_impact_level)
+from phonometry import building
 
 # EN 12354-2 Annex E.3: a 0.14 m concrete floor (m' = 322 kg/m²) with a floating
 # floor (ΔLw = 33 dB), rooms one above the other, mean flanking mass 145 kg/m².
-ln_eq = equivalent_impact_level(322.0)                   # 164 - 35 lg(m')
-k = impact_flanking_correction(322.0, 145.0)             # Table 1 (sep 322, flk 145)
-imp = predicted_impact_insulation(ln_w_eq=ln_eq, delta_l_w=33.0, k_correction=k)
+ln_eq = building.equivalent_impact_level(322.0)                   # 164 - 35 lg(m')
+k = building.impact_flanking_correction(322.0, 145.0)             # Table 1 (sep 322, flk 145)
+imp = building.predicted_impact_insulation(ln_w_eq=ln_eq, delta_l_w=33.0, k_correction=k)
 print(round(ln_eq, 1), k, round(imp.l_prime_n_w, 1))     # 76.2 2 45.2  ->  L'n,w = 45 dB
 
 # Exact Formula (3): L'nT,w = L'n,w - 10 lg(0.032 V). Annex E.3's own rounding
 # of the factor to 10 lg(V/30) sits 0.18 dB below; both give L'nT,w = 43 dB.
-print(round(standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.2  L'nT,w
+print(round(building.standardized_impact_level(imp.l_prime_n_w, 50.0), 1))   # 43.2  L'nT,w
 ```
 
 The airborne counterpart of that closure is Formula (5b),
@@ -5504,18 +6047,18 @@ absorption $\alpha_w$). Single-number ratings reuse EN ISO 717-1
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction.svg" alt="Per-element partial sound reduction indices and the resulting façade apparent reduction R' and standardized level difference D2m,nT for the EN 12354-3 Annex F worked example, the air inlet limiting the low bands" width="80%"></picture>
 
 ```python
-from phonometry import FacadeElement, facade_sound_reduction
+from phonometry import building
 
 # EN 12354-3 Annex F: an 11.3 m² façade (V = 50 m³, flat so ΔLfs = 0) of a double
 # wall, a window, a small skylight and an acoustically-treated air inlet (a Dn,e
 # element).
 elements = [
-    FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
-    FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
-    FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
-    FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
+    building.FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
+    building.FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
 ]
-fac = facade_sound_reduction(elements, area=11.3, volume=50.0,
+fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
                              frequencies=[125, 250, 500, 1000, 2000], bands="octave")
 print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (Rtr,s,w / Ctr / D2m,nT,w)
 ```
@@ -5528,24 +6071,23 @@ loss (a bare opening is 0 dB). The exterior level follows from the simplified
 Annex E attenuation $A_{tot}$ of a finite radiating side, $L_p = L_W - A_{tot}$.
 
 ```python
-from phonometry import (FacadeElement, radiated_sound_power,
-                        outdoor_attenuation, outdoor_level)
+from phonometry import building
 
 # EN 12354-4 Annex G, side 1: a 10×20 m concrete wall segment with a 6×4 m
 # industrial door, inside level Lp,in, Cd = -5 dB. The 40 dB cap on R' is an
 # Annex G example footnote (field leaks), not part of Formula (2)/(3): pass it
 # explicitly to reproduce Annex G; by default no cap is applied.
 bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
-seg = radiated_sound_power(
-    [FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
-     FacadeElement("door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
+seg = building.radiated_sound_power(
+    [building.FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
+     building.FacadeElement("door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
     lp_in=[70, 74, 76, 72, 70, 67, 62, 57], area=200.0, c_d=-5.0,
     r_prime_cap=40.0, octave_bands=bands)
 print(round(seg.l_w[0], 1), round(seg.l_w[1], 1))     # 59.8 61.2  (LW at 63/125 Hz)
 
 # Exterior level 5 m in front of the centre of the 60×10 m side (LWA = 62.9 dB(A)).
-a_tot = outdoor_attenuation(width=60.0, height=10.0, distance=5.0)
-print(round(a_tot, 1), round(outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
+a_tot = building.outdoor_attenuation(width=60.0, height=10.0, distance=5.0)
+print(round(a_tot, 1), round(building.outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
 ```
 
 > **Worked-example note.** The 2000 worked examples carry small internal rounding
@@ -5561,8 +6103,20 @@ print(round(a_tot, 1), round(outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
+from phonometry import building
 
-# Uses `fac` (the Part 3 result) and its band centres from the snippet above.
+# EN 12354-3 Annex F: an 11.3 m² façade (V = 50 m³, flat so ΔLfs = 0) of a double
+# wall, a window, a small skylight and an acoustically-treated air inlet (a Dn,e
+# element).
+elements = [
+    building.FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octave 125-2000
+    building.FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # small element
+]
+fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
+                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+
 x = np.arange(5)
 fig, ax = plt.subplots(figsize=(9, 5.5))
 for name, rp in fac.element_r.items():
@@ -5681,12 +6235,12 @@ curves overtake it below ~200 Hz — the relaxation signature.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import air_attenuation
+from phonometry import environmental
 
 freqs = np.geomspace(50.0, 10000.0, 400)
 fig, ax = plt.subplots()
 for temp, rh in [(20.0, 50.0), (20.0, 10.0), (0.0, 70.0), (30.0, 80.0)]:
-    ax.loglog(freqs, air_attenuation(freqs, temp, rh) * 1000.0,
+    ax.loglog(freqs, environmental.air_attenuation(freqs, temp, rh) * 1000.0,
               label=f"{temp:g} °C, {rh:g} % RH")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Attenuation coefficient alpha [dB/km]")
@@ -5698,21 +6252,21 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import air_attenuation, air_attenuation_m
+from phonometry import environmental
 
 bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]   # octave-band centres [Hz]
 
 # Pure-tone attenuation coefficient alpha [dB/m] at 20 °C, 50 % RH, one atmosphere
-alpha = air_attenuation(bands, temperature=20.0, relative_humidity=50.0)
+alpha = environmental.air_attenuation(bands, temperature=20.0, relative_humidity=50.0)
 print(np.round(alpha * 1000.0, 2))          # in dB/km, as Table 1 tabulates
 # [  0.12   0.44   1.31   2.73   4.66   9.89  29.67 105.29]
 
 # Reproduce an ISO 9613-1 Table 1 cell exactly (10 °C, 70 %, 1 kHz)
-cell = air_attenuation(1000.0, 10.0, 70.0, exact_midband=True) * 1000.0
+cell = environmental.air_attenuation(1000.0, 10.0, 70.0, exact_midband=True) * 1000.0
 print(round(float(cell), 2))                # 3.66  (dB/km, Table 1)
 
 # Feed real conditions into the ISO 354 power attenuation coefficient m [1/m]
-m = air_attenuation_m([1000.0, 4000.0], temperature=20.0, relative_humidity=50.0)
+m = environmental.air_attenuation_m([1000.0, 4000.0], temperature=20.0, relative_humidity=50.0)
 print(np.round(m, 5))                        # [0.00107 0.00683]
 ```
 
@@ -5814,11 +6368,11 @@ mid bands.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import Barrier, outdoor_propagation_attenuation
+from phonometry import environmental
 
 bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
-barrier = Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
-att = outdoor_propagation_attenuation(
+barrier = environmental.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
+att = environmental.outdoor_propagation_attenuation(
     200.0, 1.5, 1.5, bands, ground_source=1.0, ground_middle=1.0,
     ground_receiver=1.0, barrier=barrier, temperature=15.0,
     relative_humidity=70.0,
@@ -5855,17 +6409,15 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import (
-    Barrier, outdoor_propagation_attenuation, predicted_receiver_level,
-)
+from phonometry import environmental
 
 bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]   # octave-band centres [Hz]
 
 # A point source and receiver 1.5 m high, 200 m apart over porous ground
 # (G = 1), screened midway by a barrier that raises the path over its top edge
 # (dss = dsr ~ 101 m). Geometry feeds the pathlength-difference equations.
-barrier = Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
-att = outdoor_propagation_attenuation(
+barrier = environmental.Barrier(source_to_edge=101.0, edge_to_receiver=101.0)
+att = environmental.outdoor_propagation_attenuation(
     200.0, source_height=1.5, receiver_height=1.5, frequencies=bands,
     ground_source=1.0, ground_middle=1.0, ground_receiver=1.0,
     barrier=barrier, temperature=15.0, relative_humidity=70.0,
@@ -5877,7 +6429,7 @@ print(np.round(att.a_total, 1))   # [66.2 68.3 71.  73.9 77.1 78.8 82.3 96. ]
 
 # Predicted receiver level from an octave-band sound power Lw = 95 dB
 lw = np.full(len(bands), 95.0)
-lp = predicted_receiver_level(
+lp = environmental.predicted_receiver_level(
     lw, 200.0, 1.5, 1.5, bands, 1.0, 1.0, 1.0,
     barrier=barrier, temperature=15.0, relative_humidity=70.0,
 )
@@ -5903,16 +6455,14 @@ general per-region method of 7.3.1); combine them by hand when the alternative
 method is appropriate.
 
 ```python
-from phonometry import (
-    ground_attenuation_alternative, directivity_omega, meteorological_correction,
-)
+from phonometry import environmental
 
 # Alternative ground term (mean path height hm = 2 m, d = 200 m)
-print(round(ground_attenuation_alternative(200.0, 2.0), 2))          # 4.43 dB
+print(round(environmental.ground_attenuation_alternative(200.0, 2.0), 2))          # 4.43 dB
 # Its companion solid-angle index (add to Dc when using Eq. (10))
-print(round(directivity_omega(1.5, 1.5, 200.0), 2))                  # 3.01 dB
+print(round(environmental.directivity_omega(1.5, 1.5, 200.0), 2))                  # 3.01 dB
 # Long-term meteorological correction (C0 = 2 dB) to subtract from LAT(DW)
-print(round(meteorological_correction(200.0, 1.5, 1.5, 2.0), 2))     # 1.7 dB
+print(round(environmental.meteorological_correction(200.0, 1.5, 1.5, 2.0), 2))     # 1.7 dB
 ```
 
 ### The image source behind the ground effect
@@ -6191,6 +6741,43 @@ of the page walks each in turn.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods.svg" alt="The three sound power routes side by side: an enveloping pressure surface over a reflecting plane (ISO 3744/3746), a source in a reverberation room sampled by microphones (ISO 3741) and an intensity probe scanning a surface around the source (ISO 9614-2)" width="92%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+# One steady source (octave-band LW below) determined by three routes.
+freqs = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+lw_true = np.array([85.0, 88.0, 90.0, 89.0, 86.0, 82.0])
+
+# ISO 3744: SPL at 10 positions on a hemisphere, r = 2 m (10 lg(S/S0) = 14 dB).
+pres = emission.sound_power_pressure(np.tile(lw_true - 14.0, (10, 1)),
+                                     "hemisphere", radius=2.0,
+                                     frequencies=freqs)
+# ISO 9614-2: uniform normal intensity scanned over six 0.5 m2 segments.
+i_n = np.tile(10.0 ** (lw_true / 10.0) * 1e-12 / 3.0, (6, 1))
+inten = emission.sound_power_intensity(i_n, np.full(6, 0.5),
+                                       frequencies=freqs, band_type="octave")
+# ISO 3741: comparison against a reference source of known LW = 84 dB per band.
+comp = emission.sound_power_comparison(lw_true - 20.0, np.full(6, 64.0),
+                                       np.full(6, 84.0), frequencies=freqs)
+
+fig, ax = plt.subplots()
+for res, style, ms, label in ((pres, "-o", 11, "pressure (ISO 3744)"),
+                              (inten, "--s", 8, "intensity (ISO 9614-2)"),
+                              (comp, ":^", 5, "reference source (ISO 3741)")):
+    ax.semilogx(freqs, res.sound_power_level, style, markersize=ms,
+                label=f"{label}: LWA = {res.sound_power_level_a:.1f} dB")
+ax.set(xlabel="Frequency [Hz]", ylabel="Sound power level LW [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.gif" alt="Animation: the same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W" width="640" height="360" loading="lazy"></picture>
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.webm)
@@ -6289,7 +6876,7 @@ validity up to `K2 ≤ 7 dB` instead of 4 dB.
 
 ```python
 import numpy as np
-from phonometry import sound_power_pressure, measurement_positions
+from phonometry import emission
 
 # Octave-band SPL (dB) at the 10 hemisphere positions of ISO 3744 (Annex B),
 # with the source running, plus the background spectrum with it switched off.
@@ -6300,10 +6887,10 @@ levels = base + rng.normal(0.0, 0.5, size=(10, 8))     # (positions, bands)
 background = np.full((10, 8), 55.0)
 
 # ISO 3744 Annex B microphone coordinates on a radius-1.5 m hemisphere.
-mic_xyz = measurement_positions("hemisphere", radius=1.5, reflecting_planes=1)
+mic_xyz = emission.measurement_positions("hemisphere", radius=1.5, reflecting_planes=1)
 print(mic_xyz.shape)                                    # (10, 3)
 
-res = sound_power_pressure(
+res = emission.sound_power_pressure(
     levels, "hemisphere", radius=1.5, reflecting_planes=1,
     background_levels=background, frequencies=freqs,
     reverberation_time=0.6, volume=300.0,          # room data -> K2
@@ -6330,6 +6917,20 @@ the single-number `LWA` in the title.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import emission
+
+# Octave-band SPL (dB) at the 10 hemisphere positions of ISO 3744 (Annex B),
+# with the source running, plus the background spectrum with it switched off.
+freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000])
+base = np.array([70.0, 74.0, 78.0, 80.0, 79.0, 76.0, 72.0, 66.0])
+rng = np.random.default_rng(0)
+levels = base + rng.normal(0.0, 0.5, size=(10, 8))     # (positions, bands)
+background = np.full((10, 8), 55.0)
+res = emission.sound_power_pressure(
+    levels, "hemisphere", radius=1.5, reflecting_planes=1,
+    background_levels=background, frequencies=freqs,
+    reverberation_time=0.6, volume=300.0,          # room data -> K2
+)
 
 # res is the SoundPowerResult computed above. One line:
 res.plot()
@@ -6454,7 +7055,7 @@ not be characterised: `LW = LW(RSS) + (Lp(ST) − Lp(RSS) + C2)`.
 
 ```python
 import numpy as np
-from phonometry import sound_power_reverberation, sound_power_comparison
+from phonometry import emission
 
 # One-third-octave mean room SPL (dB), 100 Hz - 10 kHz, and the room's T60.
 freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
@@ -6463,7 +7064,7 @@ freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
 lp = np.linspace(80.0, 70.0, freqs.size)
 t60 = np.full(freqs.size, 2.0)
 
-rev = sound_power_reverberation(
+rev = emission.sound_power_reverberation(
     lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
     temperature=20.0, static_pressure=101.0,
 )
@@ -6476,7 +7077,7 @@ print(round(rev.sound_power_level_a, 1))                # LWA = 92.1 dB
 # Comparison method: a reference source of known LW measured at the same spots.
 lw_rss = np.full(freqs.size, 85.0)
 lp_rss = np.linspace(78.0, 69.0, freqs.size)
-cmp = sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature=20.0)
+cmp = emission.sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature=20.0)
 print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 
 rev.plot()   # reverberation-room LW spectrum, LWA in the title (needs matplotlib)
@@ -6494,6 +7095,18 @@ A-weighted energy sum across the 21 bands gives the `LWA` in the title.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import emission
+
+# One-third-octave mean room SPL (dB), 100 Hz - 10 kHz, and the room's T60.
+freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
+                  1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000],
+                 dtype=float)
+lp = np.linspace(80.0, 70.0, freqs.size)
+t60 = np.full(freqs.size, 2.0)
+rev = emission.sound_power_reverberation(
+    lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
+    temperature=20.0, static_pressure=101.0,
+)
 
 # rev is the ReverberationSoundPowerResult computed above. One line:
 rev.plot()
@@ -6598,7 +7211,7 @@ when criteria 1, 2 and 3 hold, **survey** when 1 and 3 hold, else `none`.
 
 ```python
 import numpy as np
-from phonometry import sound_power_intensity
+from phonometry import emission
 
 # 6 surface segments x 6 octave bands: signed normal intensity (W/m^2) from two
 # repeated sweeps, the segment areas, and the per-segment surface SPL (dB).
@@ -6609,7 +7222,7 @@ scan1 = np.abs(rng.normal(1e-4, 2e-5, size=(6, 6)))     # (segments, bands)
 scan2 = scan1 * (1.0 + rng.normal(0.0, 0.02, size=(6, 6)))
 pressure = np.full((6, 6), 80.0)
 
-res = sound_power_intensity(
+res = emission.sound_power_intensity(
     scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
     pressure_residual_index=12.0, frequencies=freqs,
     band_type="octave", grade="engineering",
@@ -6636,6 +7249,21 @@ engineering grade, so all six bars stand, and the A-weighted total of
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import emission
+
+# 6 surface segments x 6 octave bands: signed normal intensity (W/m^2) from two
+# repeated sweeps, the segment areas, and the per-segment surface SPL (dB).
+freqs = np.array([125, 250, 500, 1000, 2000, 4000], dtype=float)
+areas = np.full(6, 0.5)                                 # 0.5 m^2 per segment
+rng = np.random.default_rng(0)
+scan1 = np.abs(rng.normal(1e-4, 2e-5, size=(6, 6)))     # (segments, bands)
+scan2 = scan1 * (1.0 + rng.normal(0.0, 0.02, size=(6, 6)))
+pressure = np.full((6, 6), 80.0)
+res = emission.sound_power_intensity(
+    scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
+    pressure_residual_index=12.0, frequencies=freqs,
+    band_type="octave", grade="engineering",
+)
 
 # res is the SoundPowerIntensityResult computed above. One line:
 res.plot()
@@ -6712,16 +7340,16 @@ broadband).
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 # The 40 standardized hemisphere positions (unit vectors scaled by the radius).
-pos = ph.precision_positions("hemisphere", radius=1.0, count=40)
+pos = emission.precision_positions("hemisphere", radius=1.0, count=40)
 print(pos.shape)                      # (40, 3)
 
 # Octave/third-octave band SPL (dB) at each of the 40 positions; here a uniform
 # 74 dB in one band. The result carries S = 2*pi*r^2 and LW with C1+C2+C3.
 levels = np.full((40, 1), 74.0)
-res = ph.sound_power_anechoic(levels, "hemisphere", radius=1.0)
+res = emission.sound_power_anechoic(levels, "hemisphere", radius=1.0)
 print(round(res.surface_area, 3))                 # 6.283  (2*pi*1^2)
 print(np.round(res.sound_power_level, 2))         # [81.85]
 ```
@@ -6733,21 +7361,21 @@ temperature and static pressure.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 # K1 for a 6 dB signal-to-background difference in a <=200 Hz edge band: the
 # floor is 1.26 dB (Eq. 11). Source and background levels are [positions, bands].
-k1 = ph.precision_background_correction(
+k1 = emission.precision_background_correction(
     np.array([[56.0]]), np.array([[50.0]]), np.array([200.0]))
 print(round(float(k1[0, 0]), 4))      # 1.2563
 
 # Meteorological corrections at the 23 C, 101.325 kPa reference (Eq. 16):
-mc = ph.meteorological_corrections(23.0, 101.325)
+mc = emission.meteorological_corrections(23.0, 101.325)
 print(round(mc.c1, 4), round(mc.c2, 4))   # -0.1282 0.0
 
 # Expanded uncertainty (Clause 10.5 EXAMPLE): sigma_R0 = 0.5, sigma_omc = 2.0,
 # k = 2 -> U = 4.1 dB.
-print(round(ph.precision_uncertainty(0.5, 2.0, 2.0), 3))   # 4.123
+print(round(emission.precision_uncertainty(0.5, 2.0, 2.0), 3))   # 4.123
 ```
 
 Over several bands `sound_power_anechoic` returns a plottable
@@ -6755,7 +7383,7 @@ Over several bands `sound_power_anechoic` returns a plottable
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 # A mid-frequency-peaked machine measured over the 40-position hemisphere array
 # (Annex E). levels_positions is the (40, NB) surface pressure spectrum: a base
@@ -6765,7 +7393,7 @@ base = 70.0 + 8.0 * np.exp(-(np.log2(freqs / 1000.0) ** 2) / 2.0)
 rng = np.random.default_rng(7)
 levels = base[None, :] + rng.normal(0.0, 1.0, (40, freqs.size))
 
-result = ph.sound_power_anechoic(levels, "hemisphere", radius=1.0, frequencies=freqs)
+result = emission.sound_power_anechoic(levels, "hemisphere", radius=1.0, frequencies=freqs)
 print(round(result.sound_power_level_a, 1))   # 89.3
 result.plot()   # LW spectrum, LWA in the title (needs matplotlib)
 ```
@@ -6782,6 +7410,16 @@ bands gives the single-number `LWA` in the title.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import emission
+
+# A mid-frequency-peaked machine measured over the 40-position hemisphere array
+# (Annex E). levels_positions is the (40, NB) surface pressure spectrum: a base
+# spectrum peaked near 1 kHz plus a small per-position spatial spread.
+freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], float)
+base = 70.0 + 8.0 * np.exp(-(np.log2(freqs / 1000.0) ** 2) / 2.0)
+rng = np.random.default_rng(7)
+levels = base[None, :] + rng.normal(0.0, 1.0, (40, freqs.size))
+result = emission.sound_power_anechoic(levels, "hemisphere", radius=1.0, frequencies=freqs)
 
 # result is the PrecisionSoundPowerResult computed above. One line:
 result.plot()
@@ -6821,14 +7459,14 @@ five acceptance criteria.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 # A fully enclosing surface with a uniform normal intensity In = W/S recovers
 # the source power exactly: LW = 10*lg(W/P0). Here W = 100 uW -> 80 dB.
 areas = np.array([0.5, 1.0, 0.25, 2.0])
 w = 1.0e-4
 i_n = np.full(areas.shape, w / float(areas.sum()))
-res = ph.sound_power_intensity_precision(i_n, areas)
+res = emission.sound_power_intensity_precision(i_n, areas)
 print(round(float(res.sound_power[0]), 6))          # 0.0001
 print(round(float(res.sound_power_level[0]), 2))    # 80.0
 ```
@@ -6838,7 +7476,7 @@ power is non-positive) and flags those bands `not_applicable`:
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 # Four partial surfaces scanned over five one-third-octave bands. Each cell of
 # partial_intensity is the signed normal intensity In_i (W/m^2); areas are the
@@ -6850,7 +7488,7 @@ base_intensity = np.array([2.0e-6, 8.0e-6, 2.0e-5, 1.0e-5, 3.0e-6])
 partial_intensity = base_intensity[None, :] * np.array([1.0, 1.1, 0.9, 1.05])[:, None]
 partial_intensity[:, 0] = [2.0e-6, -3.0e-6, -4.0e-6, -1.0e-6]   # net-negative band
 
-result = ph.sound_power_intensity_precision(partial_intensity, areas, frequencies=freqs)
+result = emission.sound_power_intensity_precision(partial_intensity, areas, frequencies=freqs)
 print(result.not_applicable_band.tolist())   # [True, False, False, False, False]
 print(round(result.sound_power_level_a, 1))   # 80.6
 result.plot()   # LW spectrum; the not-applicable band is hatched (needs matplotlib)
@@ -6868,6 +7506,18 @@ determinate bands and the A-weighted total stand.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import emission
+
+# Four partial surfaces scanned over five one-third-octave bands. Each cell of
+# partial_intensity is the signed normal intensity In_i (W/m^2); areas are the
+# partial-surface areas Si. The 250 Hz band has net-negative power (a locally
+# reactive field), so ISO 9614-3 flags it not-applicable (clause 9.2) -> NaN.
+freqs = np.array([250, 500, 1000, 2000, 4000], float)
+areas = np.array([0.5, 1.0, 0.75, 0.5])
+base_intensity = np.array([2.0e-6, 8.0e-6, 2.0e-5, 1.0e-5, 3.0e-6])
+partial_intensity = base_intensity[None, :] * np.array([1.0, 1.1, 0.9, 1.05])[:, None]
+partial_intensity[:, 0] = [2.0e-6, -3.0e-6, -4.0e-6, -1.0e-6]   # net-negative band
+result = emission.sound_power_intensity_precision(partial_intensity, areas, frequencies=freqs)
 
 # result is the PrecisionIntensityResult computed above. One line:
 result.plot()
@@ -7017,7 +7667,7 @@ calculate the sensitivity of your measurement chain using a reference tone
 
 ```python
 import numpy as np
-from phonometry import octave_filter, sensitivity
+from phonometry import metrology
 
 # 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
 fs = 48000
@@ -7028,11 +7678,11 @@ calibrator_recording = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs
 #   Synthesized here; in a real measurement this is your recorded signal.
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
-# 2. Calculate sensitivity factor
-calibration_factor = sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
+# 2. Calculate the sensitivity factor
+calibration_factor = metrology.sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
 
 # 3. Apply calibration to your measurements
-spl, freq = octave_filter(recording, fs, calibration_factor=calibration_factor)
+spl, freq = metrology.octave_filter(recording, fs, calibration_factor=calibration_factor)
 # Now 'spl' values are in real-world dB SPL!
 ```
 
@@ -7082,7 +7732,7 @@ wind, handling noise:
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import time_weighting
+from phonometry import metrology
 
 fs = 48000
 t = np.arange(int(fs * 6.0)) / fs
@@ -7094,7 +7744,7 @@ plt.figure(figsize=(9, 5))
 skip = fs                     # discard the F-integrator attack (~8 tau)
 for x, label in ((stable, "Stable tone (good coupling)"),
                  (unstable, "3% AM tone (loose coupling)")):
-    env = time_weighting(x, fs, mode="fast")[skip:]
+    env = metrology.time_weighting(x, fs, mode="fast")[skip:]
     level = 10 * np.log10(np.maximum(env, np.finfo(float).eps))
     plt.plot(t[skip:], level - level.mean(), label=label)
 for lim in (0.07, -0.07):
@@ -7168,8 +7818,17 @@ In this mode:
 * Useful for analyzing headroom, digital mastering, or normalized signals.
 
 ```python
+import numpy as np
+from phonometry import metrology
+
+# 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
+fs = 48000
+# recording: the mic capture you want to calibrate, same input chain (Pa after calibration).
+#   Synthesized here; in a real measurement this is your recorded signal.
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Assume 'recording' is normalized between -1.0 and 1.0
-spl_dbfs, freq = octave_filter(recording, fs, dbfs=True)
+spl_dbfs, freq = metrology.octave_filter(recording, fs, dbfs=True)
 # Results will be negative (e.g., -20 dBFS)
 ```
 
@@ -7183,8 +7842,17 @@ like BK:
   (Peak-holding).
 
 ```python
+import numpy as np
+from phonometry import metrology
+
+# 1. Record your 94 dB calibrator signal (1 kHz, 1 Pa RMS = 94 dB SPL)
+fs = 48000
+# recording: the mic capture you want to calibrate, same input chain (Pa after calibration).
+#   Synthesized here; in a real measurement this is your recorded signal.
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Measure peak-holding levels for impact analysis
-spl_peak, freq = octave_filter(recording, fs, mode='peak')
+spl_peak, freq = metrology.octave_filter(recording, fs, mode='peak')
 ```
 
 > [!NOTE]
@@ -7246,6 +7914,43 @@ single full-signal pass.
 result exactly; without state, every block boundary restarts the filter
 transient.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import metrology
+
+# 1 kHz octave band: four stateful blocks vs one continuous pass
+fs, block = 8000, 1000
+rng = np.random.default_rng(42)
+x = rng.standard_normal(4 * block)
+t = np.arange(x.size) / fs
+
+bank = metrology.OctaveFilterBank(fs, fraction=1, limits=[900, 1100],
+                                  stateful=True, resample=False)
+streamed = np.concatenate([
+    bank.filter(x[i * block:(i + 1) * block], sigbands=True,
+                detrend=False, calculate_level=False)[2][0]
+    for i in range(4)
+])
+offline = metrology.OctaveFilterBank(fs, fraction=1, limits=[900, 1100],
+                                     resample=False).filter(
+    x, sigbands=True, detrend=False, calculate_level=False)[2][0]
+print(np.max(np.abs(streamed - offline)))     # 0.0 (bit-exact)
+
+fig, ax = plt.subplots(figsize=(9, 4.5))
+ax.plot(t, offline, linewidth=2.5, alpha=0.35, label="Continuous (whole signal)")
+ax.plot(t, streamed, label="Stateful blocks (state carried)")
+ax.axvline(block / fs, color="gray", linestyle=":", label="Block boundary")
+ax.set(xlim=(0.11, 0.17), xlabel="Time [s]", ylabel="Amplitude")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 Create a stateful filter bank with `stateful=True`. The internal state is
 zero-initialized by default but may be initialized for step-response
 steady-state (like `scipy.signal.sosfilt_zi`) with `steady_ic=True`. The
@@ -7260,11 +7965,11 @@ well — `scipy.io.wavfile` plus manual slicing, or a live capture callback.
 
 ```python
 import soundfile as sf
-from phonometry import OctaveFilterBank, WeightingFilter
+from phonometry import metrology
 
 fs = 48000
-octave_filter = OctaveFilterBank(fs, 1, stateful=True, resample=False)
-afilter = WeightingFilter(fs, "A", stateful=True)
+octave_filter = metrology.OctaveFilterBank(fs, 1, stateful=True, resample=False)
+afilter = metrology.WeightingFilter(fs, "A", stateful=True)
 
 for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
 
@@ -7283,9 +7988,9 @@ for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
 Use the `TimeWeighting` class (state carried automatically):
 
 ```python
-from phonometry import TimeWeighting
+from phonometry import metrology
 
-tw = TimeWeighting(fs, mode="fast")
+tw = metrology.TimeWeighting(fs, mode="fast")
 # audio_blocks: successive frames of your microphone recording (Pa),
 #   e.g. from sf.blocks("measurement.wav", ...) as in the block above.
 for block in audio_blocks:
@@ -7349,11 +8054,11 @@ with all state carried across calls:
 
 ```python
 import numpy as np
-from phonometry import TimeWeighting, WeightingFilter
+from phonometry import metrology
 
 fs, block = 48000, 4800  # 100 ms blocks
-aw = WeightingFilter(fs, "A", stateful=True)
-env = TimeWeighting(fs, mode="fast")  # the class is inherently stateful
+aw = metrology.WeightingFilter(fs, "A", stateful=True)
+env = metrology.TimeWeighting(fs, mode="fast")  # the class is inherently stateful
 
 for x in audio_stream(block):            # your capture callback
     y = env.process(aw.filter(x))
@@ -7410,6 +8115,39 @@ performance gains over iterative loops.
 *Simultaneous analysis of a Stereo signal: Left Channel (Pink Noise) vs Right
 Channel (Log Sine Sweep).*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import chirp
+from phonometry import metrology
+
+# Stereo test signal: pink noise left, logarithmic sine sweep right
+fs, duration = 48000, 5
+t = np.linspace(0, duration, fs * duration, endpoint=False)
+rng = np.random.default_rng(42)
+spec = np.fft.rfft(rng.standard_normal(t.size))
+spec[1:] /= np.sqrt(np.arange(1, spec.size))   # 1/f shaping: pink noise
+left = np.fft.irfft(spec, t.size)
+right = chirp(t, f0=50, t1=duration, f1=10000, method="logarithmic")
+
+x = np.stack([left, right])                    # (2, n_samples)
+spl, freq = metrology.octave_filter(x, fs, fraction=3, limits=[20, 20000])
+
+fig, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
+for ax, levels, name in zip(axes, spl, ["Left: pink noise", "Right: log sweep"]):
+    ax.semilogx(freq, levels, marker="o", label=name)
+    ax.set_ylabel("Level [dB]")
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend()
+axes[-1].set_xlabel("Frequency [Hz]")
+plt.show()
+```
+
+</details>
+
 The convention is consistent across the whole library: time is always the
 **last axis**. This applies to `octave_filter`, `OctaveFilterBank`,
 `weighting_filter`, `time_weighting`, `leq`, `laeq`, `ln_levels` and
@@ -7417,7 +8155,7 @@ The convention is consistent across the whole library: time is always the
 
 ```python
 import numpy as np
-from phonometry import octave_filter
+from phonometry import metrology
 
 # Two calibrated channels in Pa so the guide runs standalone
 fs = 48000
@@ -7426,7 +8164,7 @@ left = 0.2 * np.sin(2 * np.pi * 1000 * t)
 right = 0.1 * np.sin(2 * np.pi * 500 * t)
 
 stereo = np.stack([left, right])          # (2, n_samples)
-spl, freq = octave_filter(stereo, fs, fraction=3)
+spl, freq = metrology.octave_filter(stereo, fs, fraction=3)
 # spl has shape (2, n_bands): one row per channel
 ```
 
@@ -7475,9 +8213,17 @@ processing. It uses NumPy vectorization to handle multichannel audio arrays
 maximum throughput.
 
 ```python
-from phonometry import OctaveFilterBank
+import numpy as np
+from phonometry import metrology
 
-bank = OctaveFilterBank(fs=48000, fraction=3, filter_type='butter')
+# Two calibrated channels in Pa so the guide runs standalone
+fs = 48000
+t = np.arange(fs) / fs
+left = 0.2 * np.sin(2 * np.pi * 1000 * t)
+right = 0.1 * np.sin(2 * np.pi * 500 * t)
+stereo = np.stack([left, right])          # (2, n_samples)
+
+bank = metrology.OctaveFilterBank(fs=48000, fraction=3, filter_type='butter')
 
 # Access computed properties
 # bank.freq (center), bank.freq_d (lower), bank.freq_u (upper), bank.sos (coefficients)
@@ -7531,7 +8277,8 @@ vectorization only batches the computation across the channel axis.
 
 # API Reference
 
-All core functionality can be imported directly from the `phonometry` package.
+All core functionality lives in twelve domain subpackages; every public name
+is also re-exported by the top-level `phonometry` package.
 
 > **Note.** This page is the curated quick table for the GitHub/PyPI audience:
 > one row per public name, kept complete by a CI gate
@@ -7541,15 +8288,13 @@ All core functionality can be imported directly from the `phonometry` package.
 
 ## Namespaces
 
-Since 3.2 the library is organized into twelve domain subpackages. The flat
-top-level API remains the primary, fully supported surface (every name below
-imports from `phonometry` unchanged), and each domain can also be used as a
-namespace:
+The library is organized into twelve domain subpackages, and importing the
+domain namespace is the primary form used throughout the documentation:
 
 ```python
-from phonometry import aircraft as air
+from phonometry import aircraft
 
-contour = air.noise_contour(path, powers, distances, sel, lmax, x=gx, y=gy)
+contour = aircraft.noise_contour(path, powers, distances, sel, lmax, x=gx, y=gy)
 ```
 
 | Subpackage | Scope |
@@ -7567,8 +8312,10 @@ contour = air.noise_contour(path, powers, distances, sel, lmax, x=gx, y=gy)
 | `phonometry.underwater` | ISO 18405/17208/18406 levels, propagation, sound speed, sonar equation, seabed, ambient and ship-traffic noise, numerical solvers |
 | `phonometry.electroacoustics` | Distortion (IEC 60268-3 / AES17), transfer function and coherence |
 
-The pre-3.2 flat module paths (for example `phonometry.insulation`) keep
-importing for one deprecation cycle and warn on use; they are removed in 4.0.
+Every name in the table below is also re-exported at the top level, so
+`from phonometry import <name>` works for every row. The pre-3.2 flat module
+paths (for example `phonometry.insulation`) keep importing for one deprecation
+cycle and warn on use; they are removed in 4.0.
 
 | Name | Type | Description (Inputs) | Usage Snippet (Outputs) |
 | :--- | :--- | :--- | :--- |
@@ -7623,13 +8370,13 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `masking_index` | `function` | **Masking index av = −2−lg[1+(f/502)²·⁵] (Formula 13).**<br>• `frequency` f [Hz] | `masking_index(137.3)  # -2.02 dB` |
 | `audibility_from_levels` | `function` | **ΔL = LT − LG − av (Formula 14).**<br>• `tone_level` LT, `critical_band_level` LG, `masking_index` av [dB] | `audibility_from_levels(67.96, 64.98, -2.02)  # 5.0 dB` |
 | `energy_sum_level` | `function` | **Energy sum of lines with window correction (Formulae 7/8).**<br>• `line_levels` Li [dB]; a single line (K = 1) takes its level unchanged (Formula 7, no correction)<br>• `effective_bandwidth_factor` Δfe/Δf (Default: 1.5, Hanning; K > 1 only) | `energy_sum_level([80, 80])  # 81.25 dB` |
-| `mean_narrowband_level` | `function` | **Masking-noise level LS from a critical-band spectrum (Formula 6, iterative Annex D).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `ph.mean_narrowband_level(levels, freqs, 137.3)  # 49.22 dB` |
-| `tone_level` | `function` | **Tone level LT from the tonal lines about a peak (Formulae (7)/(8): single lines take (7), without the Hanning bandwidth correction).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz], `mean_narrowband_level` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `ph.tone_level(levels, freqs, 137.3, ls)  # 67.96 dB` |
+| `mean_narrowband_level` | `function` | **Masking-noise level LS from a critical-band spectrum (Formula 6, iterative Annex D).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `mean_narrowband_level(levels, freqs, 137.3)  # 49.22 dB` |
+| `tone_level` | `function` | **Tone level LT from the tonal lines about a peak (Formulae (7)/(8): single lines take (7), without the Hanning bandwidth correction).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz], `mean_narrowband_level` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `tone_level(levels, freqs, 137.3, ls)  # 67.96 dB` |
 | `audibility_uncertainty` / `mean_audibility_uncertainty` | `function` | **Extended uncertainty U of the audibility (ISO/PAS 20065 Clause 5.4/6, 90 % bilateral).**<br>• per tone: `audibility_uncertainty(tone_line_levels, noise_line_levels, tone_frequency, line_spacing)`<br>• mean: U of the energy-averaged audibility over the per-spectrum (ΔL, U) pairs<br>Mandatory when fewer than 12 spectra are averaged (Clause 6) | `u = audibility_uncertainty(lt_lines, ls_lines, 137.3, 2.7)`<br><br>• U [dB] |
-| `analyze_spectrum` | `function` | **Detect & rate the audible tones of a spectrum (Clause 5.3.8 + distinctness 5.3.4), incl. Step 3 same-band FG combination (Formula 17).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `line_spacing` Δf [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `res = ph.analyze_spectrum(levels, freqs, 2.7)`<br><br>• `ToneAudibilityResult` of detected tones + FG entries (`group_sizes`) |
-| `combined_tone_level` | `function` | **Multi-tone FG combined level (Formula 17).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequencies` [Hz], `mean_narrowband_levels` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `ph.combined_tone_level(lv, f, [118.4,137.3,158.8], ls)  # 72.15 dB` |
-| `two_tone_separation_frequency` | `function` | **Two-tone separation threshold fD = 21·10^(1.2·\|lg(fT/212)\|^1.8) Hz (Formula 19).**<br>• `tone_frequency` fT [Hz] (more prominent tone) | `ph.two_tone_separation_frequency(212.0)  # 21.0 Hz` |
-| `resolve_tones_separately` | `function` | **Rate two tones <1000 Hz separately vs combined (Formulae 18/19).**<br>• `tone1_frequency`, `tone2_frequency` [Hz]<br>• `audibility1`, `audibility2` ΔL [dB] | `ph.resolve_tones_separately(200., 260., 3., 2.)  # True` |
+| `analyze_spectrum` | `function` | **Detect & rate the audible tones of a spectrum (Clause 5.3.8 + distinctness 5.3.4), incl. Step 3 same-band FG combination (Formula 17).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `line_spacing` Δf [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `res = analyze_spectrum(levels, freqs, 2.7)`<br><br>• `ToneAudibilityResult` of detected tones + FG entries (`group_sizes`) |
+| `combined_tone_level` | `function` | **Multi-tone FG combined level (Formula 17).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequencies` [Hz], `mean_narrowband_levels` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `combined_tone_level(lv, f, [118.4,137.3,158.8], ls)  # 72.15 dB` |
+| `two_tone_separation_frequency` | `function` | **Two-tone separation threshold fD = 21·10^(1.2·\|lg(fT/212)\|^1.8) Hz (Formula 19).**<br>• `tone_frequency` fT [Hz] (more prominent tone) | `two_tone_separation_frequency(212.0)  # 21.0 Hz` |
+| `resolve_tones_separately` | `function` | **Rate two tones <1000 Hz separately vs combined (Formulae 18/19).**<br>• `tone1_frequency`, `tone2_frequency` [Hz]<br>• `audibility1`, `audibility2` ΔL [dB] | `resolve_tones_separately(200., 260., 3., 2.)  # True` |
 | `mean_audibility` | `function` | **Energy-mean mean audibility over spectra (Formula 20).**<br>• `decisive_audibilities` ΔLj [dB]; no-tone spectra use −10 dB | `mean_audibility([9.18, 6.04, 7.46])  # dB` |
 | `ToneAudibilityResult` | `dataclass` | **Tonal audibility of a spectrum's tones (ISO/PAS 20065).**<br>• `audibilities` ΔL, `critical_band_levels` LG, `masking_indices` av [dB]<br>• `critical_bandwidths` Δfc, `lower_corners`/`upper_corners` [Hz]<br>• `audible`: ΔL > 0 mask<br>• `extended_uncertainties`: Clause 5.4 U per tone [dB]<br>• `group_sizes`: 1 = single tone, N ≥ 2 = Step 3 FG entry (None from `assess_tones`)<br>• `decisive_audibility` / `decisive_frequency`<br>• `.plot()`: per-tone ΔL vs frequency | `res.decisive_audibility, res.audible` |
 | `HANNING_BANDWIDTH_FACTOR` | `float` | **Hanning effective-bandwidth factor Δfe/Δf (ISO/PAS 20065 Annex A).**<br>1.5 | `HANNING_BANDWIDTH_FACTOR  # 1.5` |
@@ -8245,72 +8992,6 @@ The theory reference explains the standards, the mathematics and the design deci
 
 - [Human vibration (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directive 2002/44/EC)](https://jmrplens.github.io/phonometry/reference/theory/vibration/#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec)
 
-## Anchor map
-
-This page used to host every section. Deep links into the old single page can be re-found here: each old anchor maps to the page that now hosts the section.
-
-| Old anchor | Section | New page |
-| :--- | :--- | :--- |
-| `#octave-band-frequencies-ansi-s111--iec-61260` | Octave Band Frequencies (ANSI S1.11 / IEC 61260) | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#octave-band-frequencies-ansi-s111--iec-61260) |
-| `#frequency-resolution-vs-fft-bin-spacing` | Frequency Resolution vs FFT Bin Spacing | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#frequency-resolution-vs-fft-bin-spacing) |
-| `#magnitude-responses-hjw` | Magnitude Responses \|H(jw)\| | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#magnitude-responses-hjw) |
-| `#band-edge-placement` | Band-edge placement | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#band-edge-placement) |
-| `#filter-bank-design--numerical-stability` | Filter Bank Design & Numerical Stability | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#filter-bank-design--numerical-stability) |
-| `#weighting-curves-iec-61672-1` | Weighting Curves (IEC 61672-1) | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#weighting-curves-iec-61672-1) |
-| `#time-integration` | Time Integration | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#time-integration) |
-| `#g-weighting-iso-7196` | G-weighting (ISO 7196) | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#g-weighting-iso-7196) |
-| `#equal-loudness-contours-iso-2262023` | Equal-loudness contours (ISO 226:2023) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#equal-loudness-contours-iso-2262023) |
-| `#tone-prominence-tnr-and-pr-ecma-418-1` | Tone prominence: TNR and PR (ECMA-418-1) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#tone-prominence-tnr-and-pr-ecma-418-1) |
-| `#event-and-dose-metrics` | Event and dose metrics | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#event-and-dose-metrics) |
-| `#environmental-descriptors-iso-1996-1` | Environmental descriptors (ISO 1996-1) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#environmental-descriptors-iso-1996-1) |
-| `#impulsive-sound-prominence-nt-acou-112` | Impulsive-sound prominence (NT ACOU 112) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#impulsive-sound-prominence-nt-acou-112) |
-| `#zwicker-loudness-iso-532-1` | Zwicker loudness (ISO 532-1) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#zwicker-loudness-iso-532-1) |
-| `#advanced-loudness-models--sound-quality` | Advanced loudness models & sound quality | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#advanced-loudness-models--sound-quality) |
-| `#moore-glasberg-loudness-iso-532-22017-iso-532-32023` | Moore-Glasberg loudness (ISO 532-2:2017, ISO 532-3:2023) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#moore-glasberg-loudness-iso-532-22017-iso-532-32023) |
-| `#sottek-hearing-model-ecma-418-22025` | Sottek Hearing Model (ECMA-418-2:2025) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#sottek-hearing-model-ecma-418-22025) |
-| `#tonality--autocorrelation-of-the-band-signal-ecma-418-2` | Tonality — autocorrelation of the band signal (ECMA-418-2) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#tonality--autocorrelation-of-the-band-signal-ecma-418-2) |
-| `#roughness--envelope-modulation-ecma-418-2` | Roughness — envelope modulation (ECMA-418-2) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#roughness--envelope-modulation-ecma-418-2) |
-| `#sharpness-din-45692` | Sharpness (DIN 45692) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#sharpness-din-45692) |
-| `#modulation-transfer-and-sti-iec-60268-16` | Modulation transfer and STI (IEC 60268-16) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#modulation-transfer-and-sti-iec-60268-16) |
-| `#speech-intelligibility-index-ansi-s35` | Speech Intelligibility Index (ANSI S3.5) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#speech-intelligibility-index-ansi-s35) |
-| `#hearing-thresholds-and-presbycusis-iso-389-7-iso-7029` | Hearing thresholds and presbycusis (ISO 389-7, ISO 7029) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#hearing-thresholds-and-presbycusis-iso-389-7-iso-7029) |
-| `#noise-induced-hearing-loss-iso-1999` | Noise-induced hearing loss (ISO 1999) | [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/#noise-induced-hearing-loss-iso-1999) |
-| `#sound-intensity-iec-61043` | Sound intensity (IEC 61043) | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043) |
-| `#room-noise-criteria-ansi-s122` | Room noise criteria (ANSI S12.2) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#room-noise-criteria-ansi-s122) |
-| `#room-and-building-acoustics-iso-18233-iso-3382-iso-16283-iso-10140-en-12354-iso-12999-iso-717-iso-354` | Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#room-and-building-acoustics-iso-18233-iso-3382-iso-16283-iso-10140-en-12354-iso-12999-iso-717-iso-354) |
-| `#deterministic-excitation-impulse-response-iso-18233` | Deterministic-excitation impulse response (ISO 18233) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#deterministic-excitation-impulse-response-iso-18233) |
-| `#schroeder-backward-integration-iso-3382-1-533` | Schroeder backward integration (ISO 3382-1, 5.3.3) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#schroeder-backward-integration-iso-3382-1-533) |
-| `#regression-windows-and-validity-iso-3382-2-clause-6-annex-bc` | Regression windows and validity (ISO 3382-2, Clause 6, Annex B/C) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#regression-windows-and-validity-iso-3382-2-clause-6-annex-bc) |
-| `#clarity-definition-and-centre-time-iso-3382-1-annex-a` | Clarity, definition and centre time (ISO 3382-1, Annex A) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#clarity-definition-and-centre-time-iso-3382-1-annex-a) |
-| `#open-plan-spatial-decay-iso-3382-3-clause-6` | Open-plan spatial decay (ISO 3382-3, Clause 6) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#open-plan-spatial-decay-iso-3382-3-clause-6) |
-| `#field-insulation-and-weighted-rating-iso-16283-1-iso-717-1` | Field insulation and weighted rating (ISO 16283-1, ISO 717-1) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#field-insulation-and-weighted-rating-iso-16283-1-iso-717-1) |
-| `#impact-insulation-and-absorption-iso-16283-2-iso-717-2-iso-354` | Impact insulation and absorption (ISO 16283-2, ISO 717-2, ISO 354) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#impact-insulation-and-absorption-iso-16283-2-iso-717-2-iso-354) |
-| `#laboratory-vs-field-normalization-iso-10140-iso-16283` | Laboratory vs field normalization (ISO 10140, ISO 16283) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#laboratory-vs-field-normalization-iso-10140-iso-16283) |
-| `#flanking-transmission-prediction-en-12354-12` | Flanking transmission prediction (EN 12354-1/2) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#flanking-transmission-prediction-en-12354-12) |
-| `#absorption-in-enclosed-spaces-en-12354-6` | Absorption in enclosed spaces (EN 12354-6) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#absorption-in-enclosed-spaces-en-12354-6) |
-| `#measurement-uncertainty-iso-12999-1` | Measurement uncertainty (ISO 12999-1) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#measurement-uncertainty-iso-12999-1) |
-| `#outdoor-propagation-and-occupational-exposure-iso-9613-12-iso-9612` | Outdoor propagation and occupational exposure (ISO 9613-1/2, ISO 9612) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-and-occupational-exposure-iso-9613-12-iso-9612) |
-| `#atmospheric-absorption-iso-9613-1` | Atmospheric absorption (ISO 9613-1) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#atmospheric-absorption-iso-9613-1) |
-| `#outdoor-propagation-general-method-iso-9613-2` | Outdoor propagation, general method (ISO 9613-2) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-general-method-iso-9613-2) |
-| `#occupational-noise-exposure-and-uncertainty-iso-9612` | Occupational noise exposure and uncertainty (ISO 9612) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#occupational-noise-exposure-and-uncertainty-iso-9612) |
-| `#sound-power-determination-iso-374437453746-iso-3741-iso-9614-23` | Sound power determination (ISO 3744/3745/3746, ISO 3741, ISO 9614-2/3) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-23) |
-| `#enveloping-surface-pressure-iso-37443746` | Enveloping-surface pressure (ISO 3744/3746) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#enveloping-surface-pressure-iso-37443746) |
-| `#precision-grade-in-anechoic-rooms-iso-3745` | Precision grade in anechoic rooms (ISO 3745) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#precision-grade-in-anechoic-rooms-iso-3745) |
-| `#reverberation-room-iso-3741` | Reverberation room (ISO 3741) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#reverberation-room-iso-3741) |
-| `#intensity-scanning-iso-9614-2` | Intensity scanning (ISO 9614-2) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#intensity-scanning-iso-9614-2) |
-| `#precision-intensity-scanning-iso-9614-3` | Precision intensity scanning (ISO 9614-3) | [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#precision-intensity-scanning-iso-9614-3) |
-| `#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2` | Surface scattering and diffusion (ISO 17497-1, ISO 17497-2) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#surface-scattering-and-diffusion-iso-17497-1-iso-17497-2) |
-| `#random-incidence-scattering-coefficient-iso-17497-1` | Random-incidence scattering coefficient (ISO 17497-1) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#random-incidence-scattering-coefficient-iso-17497-1) |
-| `#directional-diffusion-coefficient-iso-17497-2` | Directional diffusion coefficient (ISO 17497-2) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#directional-diffusion-coefficient-iso-17497-2) |
-| `#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2` | In-situ road surface absorption (ISO 13472-1, ISO 13472-2) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2) |
-| `#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611` | Acoustic material characterisation (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611) |
-| `#weighted-sound-absorption-iso-11654` | Weighted sound absorption (ISO 11654) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#weighted-sound-absorption-iso-11654) |
-| `#airflow-resistance-iso-9053-12` | Airflow resistance (ISO 9053-1/2) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#airflow-resistance-iso-9053-12) |
-| `#impedance-tube-iso-10534-1-iso-10534-2-astm-e2611` | Impedance tube (ISO 10534-1, ISO 10534-2, ASTM E2611) | [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#impedance-tube-iso-10534-1-iso-10534-2-astm-e2611) |
-| `#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec` | Human vibration (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directive 2002/44/EC) | [Vibration](https://jmrplens.github.io/phonometry/reference/theory/vibration/#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec) |
-| `#multiple-shocks-iso-2631-5` | Multiple shocks (ISO 2631-5) | [Vibration](https://jmrplens.github.io/phonometry/reference/theory/vibration/#multiple-shocks-iso-2631-5) |
-| `#measurement-uncertainty-isoiec-guide-98-3--gum-and-supplement-1` | Measurement uncertainty (ISO/IEC Guide 98-3 — GUM and Supplement 1) | [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3--gum-and-supplement-1) |
-
 ---
 
 
@@ -8364,9 +9045,9 @@ band around 1 kHz is approximately:
 You can inspect the exact bands with:
 
 ```python
-from phonometry import nominal_frequencies
+from phonometry import metrology
 
-fc, fl, fu, labels = nominal_frequencies(fraction=3, limits=[12, 20000])
+fc, fl, fu, labels = metrology.nominal_frequencies(fraction=3, limits=[12, 20000])
 for label, center, lower, upper in zip(labels, fc, fl, fu):
     print(label, center, lower, upper, upper - lower)
 ```
@@ -8377,7 +9058,7 @@ original signal and use the phonometry band edges as masks:
 ```python
 import numpy as np
 from scipy import signal
-from phonometry import octave_filter, nominal_frequencies
+from phonometry import metrology
 
 fs = 100_000
 # any 1D pressure signal in Pa (synthesized here so the example runs)
@@ -8385,7 +9066,7 @@ pressure_signal_pa = 0.02 * np.random.default_rng(0).standard_normal(fs)
 x = pressure_signal_pa
 
 # Standardized third-octave levels from phonometry.
-levels, centers = octave_filter(
+levels, centers = metrology.octave_filter(
     x,
     fs=fs,
     fraction=3,
@@ -8393,7 +9074,7 @@ levels, centers = octave_filter(
 )
 
 # Same standardized band definitions, including lower/upper edges.
-fc, fl, fu, labels = nominal_frequencies(fraction=3, limits=[12, 20_000])
+fc, fl, fu, labels = metrology.nominal_frequencies(fraction=3, limits=[12, 20_000])
 
 # Narrowband Welch estimate on the original signal.
 nperseg = min(2**15, len(x))
@@ -10056,6 +10737,37 @@ how the burst aligns with the block boundaries.
 
 *Measured Fast envelopes (blue) matching the Table 4 reference values
 (dashed) within 0.1 dB for 200/50/10 ms bursts.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import metrology
+
+# 4 kHz tone bursts vs the IEC 61672-1 Table 4 reference maxima (FAST)
+fs = 48000
+t = np.arange(2 * fs) / fs
+steady = np.sin(2 * np.pi * 4000 * t)
+ref = metrology.time_weighting(steady, fs, mode="fast")[int(1.5 * fs):].mean()
+
+fig, axes = plt.subplots(1, 3, figsize=(12, 4), sharey=True)
+for ax, (duration, target) in zip(axes, [(0.2, -1.0), (0.05, -4.8), (0.01, -11.1)]):
+    burst = np.zeros_like(t)
+    start, n = int(0.5 * fs), round(duration * fs)
+    burst[start:start + n] = steady[start:start + n]
+    env = metrology.time_weighting(burst, fs, mode="fast")
+    ax.plot(t, 10 * np.log10(np.maximum(env / ref, 1e-6)), label="FAST envelope")
+    ax.axhline(target, linestyle="--", label=f"IEC target {target} dB")
+    ax.set(xlim=(0.4, 1.4), ylim=(-30, 3), xlabel="Time [s]",
+           title=f"{duration * 1000:g} ms burst")
+    ax.legend()
+axes[0].set_ylabel("Level re steady state [dB]")
+plt.show()
+```
+
+</details>
 
 ## What this means in practice
 

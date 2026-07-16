@@ -68,14 +68,14 @@ T_{\text{Mil}} = \frac{k V}{-\sum_i S_i\ln(1-\alpha_i)}.
 $$
 
 ```python
-import phonometry as ph
+from phonometry import room
 
 # A shoebox 8 x 5 x 3 m (V = 120 m3, S = 158 m2), uniform alpha = 0.2.
 surfaces = [(40.0, 0.2), (40.0, 0.2), (24.0, 0.2),
             (24.0, 0.2), (15.0, 0.2), (15.0, 0.2)]
-print(round(ph.sabine_reverberation_time(120.0, surfaces), 3))            # 0.612 s
-print(round(ph.eyring_reverberation_time(120.0, surfaces), 3))            # 0.548 s
-print(round(ph.millington_sette_reverberation_time(120.0, surfaces), 3))  # 0.548 s
+print(round(room.sabine_reverberation_time(120.0, surfaces), 3))            # 0.612 s
+print(round(room.eyring_reverberation_time(120.0, surfaces), 3))            # 0.548 s
+print(round(room.millington_sette_reverberation_time(120.0, surfaces), 3))  # 0.548 s
 ```
 
 For a **uniform** distribution Eyring and Millington-Sette coincide, and both
@@ -86,12 +86,12 @@ metre, from the ISO 9613-1
 [atmospheric absorption](/phonometry/guides/outdoor-propagation/)):
 
 ```python
-import phonometry as ph
+from phonometry import environmental, room
 
-m = ph.air_attenuation_m(2000.0, temperature=20.0, relative_humidity=50.0)
+m = environmental.air_attenuation_m(2000.0, temperature=20.0, relative_humidity=50.0)
 surfaces = [(40.0, 0.3), (40.0, 0.3), (24.0, 0.3),
             (24.0, 0.3), (15.0, 0.3), (15.0, 0.3)]
-print(round(ph.eyring_reverberation_time(120.0, surfaces, air_attenuation=m), 3))
+print(round(room.eyring_reverberation_time(120.0, surfaces, air_attenuation=m), 3))
 ```
 
 Every statistical model also assumes a **diffuse field**, and low
@@ -118,13 +118,13 @@ T_{\text{Arau}} = \prod_i T_i^{\,S_i/S} \quad(\text{geometric}).
 $$
 
 ```python
-import phonometry as ph
+from phonometry import room
 
 # 8 x 5 x 3 m room, absorptive x-wall pair (alpha 0.5), hard elsewhere (0.1).
 dims = (8.0, 5.0, 3.0)
 absorption = (0.5, 0.1, 0.1)   # mean alpha of the (x, y, z) wall pairs
-print(round(ph.arau_puchades_reverberation_time(dims, absorption), 3))  # 0.812 s
-print(round(ph.fitzroy_reverberation_time(dims, absorption), 3))        # 0.974 s
+print(round(room.arau_puchades_reverberation_time(dims, absorption), 3))  # 0.812 s
+print(round(room.fitzroy_reverberation_time(dims, absorption), 3))        # 0.974 s
 ```
 
 By the arithmetic-geometric-mean inequality the Arau-Puchades time never exceeds
@@ -140,10 +140,10 @@ evaluates all five models on a common footing and returns a
 `ReverberationModelResult` whose `.plot()` draws the figure above.
 
 ```python
-import phonometry as ph
+from phonometry import room
 
 # 10 x 7 x 3.5 m room, absorptive floor/ceiling against harder walls.
-res = ph.reverberation_time_models(
+res = room.reverberation_time_models(
     (10.0, 7.0, 3.5),
     (
         [0.06, 0.07, 0.08, 0.09, 0.10, 0.10],   # x-pair: hard end walls
@@ -162,10 +162,10 @@ print(res.fitzroy.round(2))        # [1.02 0.79 0.66 0.57 0.51 0.51]
 
 ```python
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import environmental, room
 
-m = ph.air_attenuation_m([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0], 20.0, 50.0)
-ph.reverberation_time_models(
+m = environmental.air_attenuation_m([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0], 20.0, 50.0)
+room.reverberation_time_models(
     (10.0, 7.0, 3.5),
     (
         [0.06, 0.07, 0.08, 0.09, 0.10, 0.10],

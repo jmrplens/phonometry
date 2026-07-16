@@ -105,13 +105,13 @@ en el punto de cruce a −3 dB.
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import sosfreqz
-from phonometry import OctaveFilterBank
+from phonometry import metrology
 
 fs = 48000
 fig, ax = plt.subplots(figsize=(9, 5))
 for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
     # limits selecciona únicamente la banda de octava de 1 kHz
-    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
+    bank = metrology.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
                             filter_type=ftype)
     idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
     fsd = fs / bank.factor[idx]           # frecuencia real de la banda
@@ -201,14 +201,14 @@ de las bandas de frecuencia.
 
 ```python
 import numpy as np
-from phonometry import octave_filter
+from phonometry import metrology
 
 # Una señal calibrada en Pa para que la guía funcione por sí sola
 fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Medición estándar por defecto
-spl, freq = octave_filter(x, fs, filter_type='butter')
+spl, freq = metrology.octave_filter(x, fs, filter_type='butter')
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco Butterworth de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco Butterworth de tercio de octava" style="width:60%">
@@ -233,9 +233,15 @@ cambio de rizado en la banda de paso. Útiles cuando se necesita alta selectivid
 cerca de las frecuencias de corte.
 
 ```python
-# Usa `x` y `fs` del snippet anterior.
+import numpy as np
+from phonometry import metrology
+
+# Una señal calibrada en Pa para que la guía funcione por sí sola
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Selectividad con 0.1 dB de rizado en la banda de paso
-spl, freq = octave_filter(x, fs, filter_type='cheby1', ripple=0.1)
+spl, freq = metrology.octave_filter(x, fs, filter_type='cheby1', ripple=0.1)
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco Chebyshev I de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco Chebyshev I de tercio de octava" style="width:60%">
@@ -262,9 +268,15 @@ automáticamente para que los puntos de −3 dB caigan en los bordes de banda
 (`attenuation` debe ser > 3,01 dB).
 
 ```python
-# Usa `x` y `fs` del snippet anterior.
+import numpy as np
+from phonometry import metrology
+
+# Una señal calibrada en Pa para que la guía funcione por sí sola
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Banda de paso plana, 72 dB de atenuación por defecto (clase 1)
-spl, freq = octave_filter(x, fs, filter_type='cheby2')
+spl, freq = metrology.octave_filter(x, fs, filter_type='cheby2')
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco Chebyshev II de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco Chebyshev II de tercio de octava" style="width:60%">
@@ -289,9 +301,15 @@ abrupta) para un orden dado. Presentan rizado tanto en la banda de paso como en
 la atenuada.
 
 ```python
-# Usa `x` y `fs` del snippet anterior.
+import numpy as np
+from phonometry import metrology
+
+# Una señal calibrada en Pa para que la guía funcione por sí sola
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Máxima selectividad para aislamiento extremo entre bandas
-spl, freq = octave_filter(x, fs, filter_type='ellip', ripple=0.1)
+spl, freq = metrology.octave_filter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:60%">
@@ -316,9 +334,15 @@ retardo de grupo mínimo. Preservan la forma de las ondas filtradas (transitorio
 mejor que ningún otro tipo, pero tienen la caída más lenta.
 
 ```python
-# Usa `x` y `fs` del snippet anterior.
+import numpy as np
+from phonometry import metrology
+
+# Una señal calibrada en Pa para que la guía funcione por sí sola
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Ideal para análisis de pulsos y preservación de transitorios
-spl, freq = octave_filter(x, fs, filter_type='bessel')
+spl, freq = metrology.octave_filter(x, fs, filter_type='bessel')
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:60%">
@@ -344,12 +368,16 @@ una señal en bandas que, al sumarse, producen una respuesta en magnitud
 perfectamente plana y sin diferencia de fase entre bandas en el cruce.
 
 ```python
-from phonometry import linkwitz_riley
+import numpy as np
+from phonometry import metrology
 
-# Usa `x` y `fs` del snippet anterior.
+# Una señal calibrada en Pa para que la guía funcione por sí sola
+fs = 48000
+x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 signal = x
 # Dividir la señal en bandas grave y aguda a 1000 Hz
-low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
+low, high = metrology.linkwitz_riley(signal, fs, freq=1000, order=4)
 # Reconstrucción: low + high == signal (respuesta plana)
 ```
 
@@ -362,13 +390,13 @@ low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import freqz
-from phonometry import linkwitz_riley
+from phonometry import metrology
 
 # Medimos ambas ramas: dividimos un impulso unitario y tomamos los espectros.
 fs = 48000
 impulse = np.zeros(fs)
 impulse[0] = 1.0
-low, high = linkwitz_riley(impulse, fs, freq=1000, order=4)
+low, high = metrology.linkwitz_riley(impulse, fs, freq=1000, order=4)
 
 w, h_lp = freqz(low, worN=8192, fs=fs)
 _, h_hp = freqz(high, worN=8192, fs=fs)
@@ -395,10 +423,10 @@ fraccionales y la interpolación logarítmica de la norma) e informa de la clase
 por banda con su margen en dB:
 
 ```python
-from phonometry import OctaveFilterBank, verify_filter_class
+from phonometry import metrology
 
-bank = OctaveFilterBank(fs=48000, fraction=3, order=6)
-result = verify_filter_class(bank)
+bank = metrology.OctaveFilterBank(fs=48000, fraction=3, order=6)
+result = metrology.verify_filter_class(bank)
 print(result["overall_class"])          # 1
 print(result["bands"][0])
 # {'freq': 12.589254117941678, 'class': 1, 'margin_class1_db': 0.39999999999997266, 'margin_class2_db': 0.5999999999999727}
@@ -422,10 +450,10 @@ que la morada dentro de ella.*
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import sosfreqz
-from phonometry import OctaveFilterBank, class_limits
+from phonometry import metrology
 
 fs = 48000
-bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+bank = metrology.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
 idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
 fm, fsd = bank.freq[idx], fs / bank.factor[idx]
 w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
@@ -433,7 +461,7 @@ att = -20 * np.log10(np.abs(h) + 1e-12)
 delta_a = att - np.interp(fm, w, att)     # atenuación relativa
 
 grid = np.logspace(np.log10(0.05), np.log10(8), 2000)
-lo1, hi1 = class_limits(1.0, 1, grid)     # atenuación mín/máx de clase 1
+lo1, hi1 = metrology.class_limits(1.0, 1, grid)     # atenuación mín/máx de clase 1
 
 fig, ax = plt.subplots(figsize=(9, 5.5))
 ax.fill_between(grid, -10, lo1, alpha=0.15, color="tab:red",
@@ -470,7 +498,12 @@ ligeramente de la edición de 2014, así que vive tras un conmutador `edition` e
 lugar de mezclarse con la máscara de 2014:
 
 ```python
-result = verify_filter_class(bank, edition="1995")   # clases 0, 1, 2
+from phonometry import metrology
+
+fs = 48000
+bank = metrology.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+
+result = metrology.verify_filter_class(bank, edition="1995")   # clases 0, 1, 2
 print(result["overall_class"])          # 0  (el Butterworth por defecto la supera)
 print(result["bands"][0]["margin_class0_db"])
 ```
@@ -488,10 +521,10 @@ Butterworth de orden 6 serpentea dentro de la clase 0 en toda la banda de paso.*
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import sosfreqz
-from phonometry import OctaveFilterBank, class_limits
+from phonometry import metrology
 
 fs = 48000
-bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+bank = metrology.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
 idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
 fm, fsd = bank.freq[idx], fs / bank.factor[idx]
 w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
@@ -505,7 +538,7 @@ pb = (w / fm >= g ** -0.5) & (w / fm <= g ** 0.5)
 
 fig, ax = plt.subplots(figsize=(9, 5.5))
 for cls in (2, 1, 0):            # corredores anidados, clase 0 el más estrecho
-    lo, hi = class_limits(1.0, cls, grid, edition="1995")
+    lo, hi = metrology.class_limits(1.0, cls, grid, edition="1995")
     ax.plot(grid, hi, label=f"Corredor de clase {cls}")
     ax.plot(grid, lo, color=ax.lines[-1].get_color())
 ax.plot(w[pb] / fm, delta_a[pb], "k", lw=2, label="Butterworth de orden 6")
@@ -579,7 +612,7 @@ arquitecturas (p. ej. Butterworth vs Chebyshev) a la fase y al transitorio.
 
 ```python
 import numpy as np
-from phonometry import octave_filter
+from phonometry import metrology
 
 # 1. Generar una señal (suma de 250 Hz y 1000 Hz)
 fs = 48000
@@ -587,8 +620,8 @@ t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
 y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # 2. Comparar arquitecturas (Butterworth vs Chebyshev II)
-spl_b, freq, xb_butter = octave_filter(y, fs=fs, fraction=1, sigbands=True, filter_type='butter')
-spl_c2, _, xb_cheby2 = octave_filter(y, fs=fs, fraction=1, sigbands=True, filter_type='cheby2')
+spl_b, freq, xb_butter = metrology.octave_filter(y, fs=fs, fraction=1, sigbands=True, filter_type='butter')
+spl_c2, _, xb_cheby2 = metrology.octave_filter(y, fs=fs, fraction=1, sigbands=True, filter_type='cheby2')
 
 # 'xb_butter' y 'xb_cheby2' contienen las señales por banda en el dominio del tiempo
 ```
@@ -605,14 +638,14 @@ impulso**, destacando las diferencias de estabilidad y decaimiento transitorio.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import OctaveFilterBank
+from phonometry import metrology
 
 fs = 48000
 t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
 y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 
-bank_b = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0])
-bank_c = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0],
+bank_b = metrology.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0])
+bank_c = metrology.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0],
                           filter_type="cheby2")
 _, freq, xb_butter = bank_b.filter(y, sigbands=True)
 _, _, xb_cheby2 = bank_c.filter(y, sigbands=True)
@@ -658,13 +691,13 @@ los bordes de banda.
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import group_delay
-from phonometry import OctaveFilterBank
+from phonometry import metrology
 
 fs = 48000
 w = np.logspace(np.log10(500), np.log10(2000), 1024)
 fig, ax = plt.subplots(figsize=(9, 5))
 for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
-    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
+    bank = metrology.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
                             filter_type=ftype)
     idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
     fsd = fs / bank.factor[idx]
@@ -695,10 +728,14 @@ solo paso, y reserva la fase cero para cuando importa la envolvente temporal
 procesado por bloques (stateful).
 
 ```python
-from phonometry import OctaveFilterBank
+import numpy as np
+from phonometry import metrology
 
-# Usa `y` del snippet anterior.
-bank = OctaveFilterBank(fs=48000, fraction=3)
+fs = 48000
+t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
+y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
+
+bank = metrology.OctaveFilterBank(fs=48000, fraction=3)
 spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
 ```
 
@@ -713,7 +750,7 @@ filtrado de fase cero la mantiene alineada con la entrada.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import OctaveFilterBank
+from phonometry import metrology
 
 fs = 48000
 t = np.linspace(0, 0.15, int(fs * 0.15), endpoint=False)
@@ -721,7 +758,7 @@ x = np.zeros_like(t)                      # ráfaga de 250 Hz a mitad de trama
 start, end = int(0.05 * fs), int(0.10 * fs)
 x[start:end] = np.sin(2 * np.pi * 250 * t[start:end]) * np.hanning(end - start)
 
-bank = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
+bank = metrology.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
 _, _, fwd = bank.filter(x, sigbands=True, calculate_level=False)
 _, _, zp = bank.filter(x, sigbands=True, calculate_level=False,
                        zero_phase=True)

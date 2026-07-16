@@ -15,7 +15,7 @@ infrasonido, en **ISO 7196:1995**.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import weighting_filter
+from phonometry import metrology
 
 # Medimos la respuesta de cada curva: ponderamos un impulso unitario
 # centrado y tomamos su espectro (búfer de 1 s -> resolución de 1 Hz).
@@ -26,7 +26,7 @@ freqs = np.fft.rfftfreq(fs, 1 / fs)
 
 fig, ax = plt.subplots(figsize=(9, 5))
 for curve in ("A", "C", "Z"):
-    spectrum = np.fft.rfft(weighting_filter(impulse, fs, curve=curve))
+    spectrum = np.fft.rfft(metrology.weighting_filter(impulse, fs, curve=curve))
     ax.semilogx(freqs[1:], 20 * np.log10(np.abs(spectrum[1:]) + np.finfo(float).eps),
                 label=curve)
 ax.set(xlim=(10, 20000), ylim=(-80, 10),
@@ -102,7 +102,7 @@ baja frecuencia:
 
 ```python
 import numpy as np
-from phonometry import leq, weighting_filter
+from phonometry import metrology
 
 # Un retumbo de 50 Hz bajo un siseo ligero: débil en A, fuerte en C.
 fs = 48000
@@ -110,8 +110,8 @@ t = np.arange(10 * fs) / fs
 rng = np.random.default_rng(1)
 x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 
-la = leq(weighting_filter(x, fs, curve="A"))
-lc = leq(weighting_filter(x, fs, curve="C"))
+la = metrology.leq(metrology.weighting_filter(x, fs, curve="A"))
+lc = metrology.leq(metrology.weighting_filter(x, fs, curve="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
 # LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
 # C - A por encima de 20 dB: el número ponderado A ocultaría el retumbo.
@@ -121,17 +121,17 @@ print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
 
 ```python
 import numpy as np
-from phonometry import weighting_filter
+from phonometry import metrology
 
 # recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
 fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Aplicar ponderación A a la señal cruda
-weighted_signal = weighting_filter(recording, fs, curve='A')
+weighted_signal = metrology.weighting_filter(recording, fs, curve='A')
 
 # Aplicar ponderación C para análisis de picos
-c_weighted_signal = weighting_filter(recording, fs, curve='C')
+c_weighted_signal = metrology.weighting_filter(recording, fs, curve='C')
 ```
 
 ## 3. Infrasonido: ponderación G (ISO 7196)
@@ -144,10 +144,14 @@ polos y ceros con ganancia de 0 dB en 10 Hz, sube a 12 dB/octava entre 1 Hz y
 debajo de 20 Hz (aerogeneradores, climatización, voladuras):
 
 ```python
-from phonometry import weighting_filter
+import numpy as np
+from phonometry import metrology
 
-# Usa `recording` y `fs` del snippet anterior.
-g_weighted = weighting_filter(recording, fs, curve='G')
+# recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+g_weighted = metrology.weighting_filter(recording, fs, curve='G')
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_es.svg" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/g_weighting_response_es_dark.svg" alt="Respuesta en frecuencia de la ponderación G de 0,1 Hz a 1 kHz con los valores nominales de la Tabla 2 de ISO 7196 superpuestos" style="width:80%">
@@ -158,7 +162,7 @@ g_weighted = weighting_filter(recording, fs, curve='G')
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import weighting_filter
+from phonometry import metrology
 
 # Medimos la respuesta G: ponderamos un impulso unitario centrado y
 # tomamos su espectro. Un búfer largo da la resolución que necesita el
@@ -167,7 +171,7 @@ fs = 4000
 impulse = np.zeros(20 * fs)
 impulse[impulse.size // 2] = 1.0
 freqs = np.fft.rfftfreq(impulse.size, 1 / fs)
-spectrum = np.fft.rfft(weighting_filter(impulse, fs, curve="G"))
+spectrum = np.fft.rfft(metrology.weighting_filter(impulse, fs, curve="G"))
 
 fig, ax = plt.subplots(figsize=(9, 5))
 ax.semilogx(freqs[1:],
@@ -204,10 +208,14 @@ expresan como L<sub>pG</sub> (o L<sub>Geq</sub> para el nivel equivalente).
 Si ponderas muchas señales con los mismos parámetros, diseña el filtro una sola vez:
 
 ```python
-from phonometry import WeightingFilter
+import numpy as np
+from phonometry import metrology
 
-# Usa `recording` y `fs` del snippet anterior.
-wf = WeightingFilter(fs, "A")
+# recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+wf = metrology.WeightingFilter(fs, "A")
 signals = [recording]                # tu lote de grabaciones
 for recording in signals:
     weighted = wf.filter(recording)
@@ -236,7 +244,7 @@ de clase 1 hasta 16 kHz (error ≈ −0,5 dB a 12,5 kHz para fs = 48 kHz).
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import weighting_filter
+from phonometry import metrology
 
 # Respuesta medida de ambos diseños a fs = 48 kHz: ponderamos un impulso
 # unitario centrado y tomamos su espectro...
@@ -257,7 +265,7 @@ fig, ax = plt.subplots(figsize=(9, 5))
 ax.semilogx(freqs, analytic, "k--", label="Analítica (IEC 61672-1)")
 for high_accuracy, label in ((False, "Bilineal simple"),
                              (True, "Sobremuestreado (por defecto)")):
-    weighted = weighting_filter(impulse, fs, curve="A",
+    weighted = metrology.weighting_filter(impulse, fs, curve="A",
                                 high_accuracy=high_accuracy)
     response = 20 * np.log10(np.abs(np.fft.rfft(weighted))
                              + np.finfo(float).eps)[1:]
@@ -279,14 +287,18 @@ plt.show()
   `high_accuracy=True` junto con `stateful=True` lanza un `ValueError`.
 
 ```python
-from phonometry import WeightingFilter, weighting_filter
+import numpy as np
+from phonometry import metrology
 
-# Usa `recording` y `fs` del snippet anterior.
+# recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
 # Comportamiento clásico explícito
-y = weighting_filter(recording, fs, curve="A", high_accuracy=False)
+y = metrology.weighting_filter(recording, fs, curve="A", high_accuracy=False)
 
 # Procesado por bloques con estado (diseño clásico, estado entre bloques)
-wf = WeightingFilter(fs, "A", stateful=True)
+wf = metrology.WeightingFilter(fs, "A", stateful=True)
 blocks = [recording]                 # tu secuencia de bloques de señal
 for block in blocks:
     weighted = wf.filter(block)
@@ -314,9 +326,9 @@ por encima de Nyquist, el veredicto se marca `range_limited` (atestigua solo
 las frecuencias comprobadas, no la conformidad completa de 10 Hz a 20 kHz):
 
 ```python
-from phonometry import WeightingFilter, verify_weighting_class
+from phonometry import metrology
 
-result = verify_weighting_class(WeightingFilter(48000, "A"))
+result = metrology.verify_weighting_class(metrology.WeightingFilter(48000, "A"))
 print(result["overall_class"])          # 1
 print(result["range_limited"])          # False
 print(result["between_nominals"])       # {'worst_freq': ..., 'margin_class1_db': ...}
@@ -343,10 +355,10 @@ en los extremos de banda donde solo se aplica un límite unilateral.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import WeightingFilter, verify_weighting_class, weighting_class_limits
+from phonometry import metrology
 
-freqs, lower1, upper1 = weighting_class_limits(1)
-_, lower2, upper2 = weighting_class_limits(2)
+freqs, lower1, upper1 = metrology.weighting_class_limits(1)
+_, lower2, upper2 = metrology.weighting_class_limits(2)
 lo1, lo2 = np.clip(lower1, -7, 7), np.clip(lower2, -7, 7)
 
 fig, ax = plt.subplots(figsize=(10, 6.5))
@@ -358,7 +370,7 @@ ax.plot(freqs, upper2, ":", drawstyle="steps-mid", label="Límite superior/infer
 ax.plot(freqs, lo2, ":", drawstyle="steps-mid", color="C2")
 
 for curve, marker in (("A", "o"), ("C", "s")):
-    bands = verify_weighting_class(WeightingFilter(48000, curve))["bands"]
+    bands = metrology.verify_weighting_class(metrology.WeightingFilter(48000, curve))["bands"]
     f = [b["freq"] for b in bands]
     dev = [b["deviation_db"] for b in bands]
     ax.plot(f, dev, marker=marker, label=f"Desviación de la ponderación {curve} (48 kHz)")

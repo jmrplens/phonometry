@@ -73,11 +73,11 @@ well — `scipy.io.wavfile` plus manual slicing, or a live capture callback.
 
 ```python
 import soundfile as sf
-from phonometry import OctaveFilterBank, WeightingFilter
+from phonometry import metrology
 
 fs = 48000
-octave_filter = OctaveFilterBank(fs, 1, stateful=True, resample=False)
-afilter = WeightingFilter(fs, "A", stateful=True)
+octave_filter = metrology.OctaveFilterBank(fs, 1, stateful=True, resample=False)
+afilter = metrology.WeightingFilter(fs, "A", stateful=True)
 
 for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
 
@@ -96,9 +96,9 @@ for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
 Use the `TimeWeighting` class (state carried automatically):
 
 ```python
-from phonometry import TimeWeighting
+from phonometry import metrology
 
-tw = TimeWeighting(fs, mode="fast")
+tw = metrology.TimeWeighting(fs, mode="fast")
 # audio_blocks: successive frames of your microphone recording (Pa),
 #   e.g. from sf.blocks("measurement.wav", ...) as in the block above.
 for block in audio_blocks:
@@ -162,11 +162,11 @@ with all state carried across calls:
 
 ```python
 import numpy as np
-from phonometry import TimeWeighting, WeightingFilter
+from phonometry import metrology
 
 fs, block = 48000, 4800  # 100 ms blocks
-aw = WeightingFilter(fs, "A", stateful=True)
-env = TimeWeighting(fs, mode="fast")  # the class is inherently stateful
+aw = metrology.WeightingFilter(fs, "A", stateful=True)
+env = metrology.TimeWeighting(fs, mode="fast")  # the class is inherently stateful
 
 for x in audio_stream(block):            # your capture callback
     y = env.process(aw.filter(x))

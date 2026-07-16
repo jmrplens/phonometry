@@ -57,9 +57,19 @@ check is wanted.
 
 ```python
 import matplotlib.pyplot as plt
+from phonometry import hearing
 
-# One line, with the Annex D `res` computed below: task contribution bars
-# plus the LEX,8h and LEX,8h + U lines.
+# The ISO 9612 Annex D welder's day of the next section.
+tasks = [
+    hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
+    hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
+         duration_range=(4.0, 6.0), label="welding"),
+    hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
+         duration_range=(1.0, 2.0), label="cutting/grinding"),
+]
+res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
+
+# One line: task contribution bars plus the LEX,8h and LEX,8h + U lines.
 res.plot()
 plt.show()
 ```
@@ -68,20 +78,18 @@ plt.show()
 
 
 ```python
-from phonometry.occupational_exposure import (
-    Task, task_based_exposure, job_based_exposure, full_day_exposure,
-)
+from phonometry import hearing
 
 # ISO 9612 Annex D — a welder's day split into three tasks. Each task level is
 # the energy average of its Lp,A,eqT samples; durations carry a measured range.
 tasks = [
-    Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
-    Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
+    hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
+    hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
          duration_range=(4.0, 6.0), label="welding"),
-    Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
+    hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
          duration_range=(1.0, 2.0), label="cutting/grinding"),
 ]
-res = task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
+res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
 print(f"LEX,8h = {res.lex_8h:.1f} dB   U = {res.expanded_uncertainty:.1f} dB")
 # LEX,8h = 84.3 dB   U = 2.7 dB
 print(f"one-sided 95 % upper limit LEX,8h + U = {res.upper_limit:.1f} dB")   # 87.0 dB
@@ -93,8 +101,8 @@ for t in res.tasks:
 
 # The same shift measured job-based (Annex E) and full-day (Annex F): both use
 # the Eq C.9 / Table C.4 sampling budget with k = 1.65 (one-sided 95 %).
-job = job_based_exposure([88.1, 86.1, 89.7, 86.5, 91.1, 86.7], effective_duration_hours=7.5)
-full = full_day_exposure([88.0, 91.9, 87.6, 90.4, 89.0, 88.4], effective_duration_hours=9.25)
+job = hearing.job_based_exposure([88.1, 86.1, 89.7, 86.5, 91.1, 86.7], effective_duration_hours=7.5)
+full = hearing.full_day_exposure([88.0, 91.9, 87.6, 90.4, 89.0, 88.4], effective_duration_hours=9.25)
 print(f"job      LEX,8h = {job.lex_8h:.1f} dB   U = {job.expanded_uncertainty:.1f} dB")
 # job      LEX,8h = 88.2 dB   U = 3.8 dB
 print(f"full-day LEX,8h = {full.lex_8h:.1f} dB   U = {full.expanded_uncertainty:.1f} dB")

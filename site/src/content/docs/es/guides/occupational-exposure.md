@@ -64,9 +64,20 @@ descripción o se quiera una comprobación independiente de todo el turno.
 
 ```python
 import matplotlib.pyplot as plt
+from phonometry import hearing
 
-# En una línea, con el `res` del anexo D calculado más abajo: barras de
-# contribución por tarea más las líneas de LEX,8h y LEX,8h + U.
+# La jornada del soldador del anexo D de la ISO 9612 de la siguiente sección.
+tasks = [
+    hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
+    hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
+         duration_range=(4.0, 6.0), label="welding"),
+    hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
+         duration_range=(1.0, 2.0), label="cutting/grinding"),
+]
+res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
+
+# En una línea: barras de contribución por tarea más las líneas de
+# LEX,8h y LEX,8h + U.
 res.plot()
 plt.show()
 ```
@@ -75,21 +86,19 @@ plt.show()
 
 
 ```python
-from phonometry.occupational_exposure import (
-    Task, task_based_exposure, job_based_exposure, full_day_exposure,
-)
+from phonometry import hearing
 
 # ISO 9612 anexo D — la jornada de un soldador dividida en tres tareas. El nivel
 # de cada tarea es el promedio en energía de sus muestras Lp,A,eqT; las
 # duraciones llevan un rango medido.
 tasks = [
-    Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
-    Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
+    hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
+    hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
          duration_range=(4.0, 6.0), label="welding"),
-    Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
+    hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
          duration_range=(1.0, 2.0), label="cutting/grinding"),
 ]
-res = task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
+res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
 print(f"LEX,8h = {res.lex_8h:.1f} dB   U = {res.expanded_uncertainty:.1f} dB")
 # LEX,8h = 84.3 dB   U = 2.7 dB
 print(f"límite superior unilateral 95 % LEX,8h + U = {res.upper_limit:.1f} dB")   # 87.0 dB
@@ -102,8 +111,8 @@ for t in res.tasks:
 # La misma jornada medida basada en la función (anexo E) y de jornada completa
 # (anexo F): ambas usan el presupuesto de muestreo Ec C.9 / Tabla C.4 con
 # k = 1.65 (unilateral 95 %).
-job = job_based_exposure([88.1, 86.1, 89.7, 86.5, 91.1, 86.7], effective_duration_hours=7.5)
-full = full_day_exposure([88.0, 91.9, 87.6, 90.4, 89.0, 88.4], effective_duration_hours=9.25)
+job = hearing.job_based_exposure([88.1, 86.1, 89.7, 86.5, 91.1, 86.7], effective_duration_hours=7.5)
+full = hearing.full_day_exposure([88.0, 91.9, 87.6, 90.4, 89.0, 88.4], effective_duration_hours=9.25)
 print(f"función          LEX,8h = {job.lex_8h:.1f} dB   U = {job.expanded_uncertainty:.1f} dB")
 # función          LEX,8h = 88.2 dB   U = 3.8 dB
 print(f"jornada completa LEX,8h = {full.lex_8h:.1f} dB   U = {full.expanded_uncertainty:.1f} dB")

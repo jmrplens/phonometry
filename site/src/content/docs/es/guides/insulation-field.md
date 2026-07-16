@@ -82,23 +82,23 @@ fuente. Para leerlos:
 
 ```python
 import numpy as np
-from phonometry import airborne_insulation, weighted_rating, energy_average_level
+from phonometry import building
 
 # Promedia en energía varias posiciones de micrófono en una sala (dB)
-print(round(float(energy_average_level([60.0, 66.0])), 1))   # 64.0
+print(round(float(building.energy_average_level([60.0, 66.0])), 1))   # 64.0
 
 # Aislamiento en campo por banda; la superficie S y el volumen V añaden R'
 l1 = np.full(16, 80.0)                                # niveles de la sala emisora
 l2 = np.full(16, 40.0)                                # niveles de la sala receptora
 t2 = np.full(16, 0.5)                                 # T de la sala receptora (s)
-ins = airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+ins = building.airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
 print(round(float(ins.dnt[0]), 1))                   # 40.0  (= D ya que T = T0)
 print(round(float(ins.r_prime[0]), 1))               # 38.0
 
 # Índice de un solo número desde un espectro R medido de 16 bandas (ISO 717-1 Anexo C)
 R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
      28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
-w = weighted_rating(R)
+w = building.weighted_rating(R)
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
 
 w.plot()   # R' medido frente a la referencia ISO 717-1 desplazada, desviaciones sombreadas (requiere matplotlib)
@@ -109,6 +109,12 @@ w.plot()   # R' medido frente a la referencia ISO 717-1 desplazada, desviaciones
 
 ```python
 import matplotlib.pyplot as plt
+from phonometry import building
+
+# Índice de un solo número desde un espectro R medido de 16 bandas (ISO 717-1 Anexo C)
+R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+w = building.weighted_rating(R)
 
 # En una línea — la curva medida frente a la referencia ISO 717-1 desplazada:
 w.plot()
@@ -175,16 +181,20 @@ todas las reducciones conservan un decimal: la variante que ISO 717 prescribe
 al declarar la incertidumbre de un valor único.
 
 ```python
-from phonometry import weighted_rating_extended
+from phonometry import building
+
+# Índice de un solo número desde un espectro R medido de 16 bandas (ISO 717-1 Anexo C)
+R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
 
 freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 r_ext = [18.7, 19.2, 20.0, *R, 26.8, 29.2]     # ISO 717-1 Anexo C, Tabla C.2
-ext = weighted_rating_extended(r_ext, freqs)
+ext = building.weighted_rating_extended(r_ext, freqs)
 print(ext.rating, ext.c, ext.ctr, ext.c_50_5000, ext.ctr_50_5000)
 # 30 -2 -3 -2 -4   ->  Rw(C;Ctr;C50-5000;Ctr,50-5000) = 30(-2;-3;-2;-4)
 
-one_dp = weighted_rating_extended(r_ext, freqs, one_decimal=True)
+one_dp = building.weighted_rating_extended(r_ext, freqs, one_decimal=True)
 print(one_dp.rating)   # 30.0, el índice en pasos de 0,1 dB para incertidumbres
 ```
 
@@ -229,7 +239,7 @@ valores impresos $L_{n,r,0,w} = 77,6$ dB y $C_{I,r,0} = -10,3$ dB de A.2.2).
 
 ```python
 import numpy as np
-from phonometry import impact_insulation, weighted_impact_rating
+from phonometry import building
 
 # 16 niveles de impactos Li en tercios de octava (100 Hz - 3150 Hz), dB, del
 # ejemplo resuelto del Anexo C de ISO 717-2, y el T de la sala receptora por banda.
@@ -237,17 +247,17 @@ li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
 t2 = np.full(16, 0.5)
 
-imp = impact_insulation(li, t2, volume=50.0)
+imp = building.impact_insulation(li, t2, volume=50.0)
 print(round(float(imp.l_n_t[0]), 1))          # 62.1  (= Li ya que T = T0)
 print(round(float(imp.l_n[0]), 1))            # 64.1  normalizado a A0 = 10 m^2
 
 # Índice de impactos ponderado + término de adaptación espectral CI (ISO 717-2)
-res_imp = weighted_impact_rating(imp.l_n_t)
+res_imp = building.weighted_impact_rating(imp.l_n_t)
 print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
 
 # Los datos en banda de octava llevan la reducción extra de -5 dB (Cláusula 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
-print(weighted_impact_rating(octave).rating)  # 54
+print(building.weighted_impact_rating(octave).rating)  # 54
 
 res_imp.plot()   # L'nT medido frente a la referencia ISO 717-2 desplazada, exceso sombreado (requiere matplotlib)
 ```
@@ -257,6 +267,17 @@ res_imp.plot()   # L'nT medido frente a la referencia ISO 717-2 desplazada, exce
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# 16 niveles de impactos Li en tercios de octava (100 Hz - 3150 Hz), dB, del
+# ejemplo resuelto del Anexo C de ISO 717-2, y el T de la sala receptora por banda.
+li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+t2 = np.full(16, 0.5)
+imp = building.impact_insulation(li, t2, volume=50.0)
+# Índice de impactos ponderado + término de adaptación espectral CI (ISO 717-2)
+res_imp = building.weighted_impact_rating(imp.l_n_t)
 
 # En una línea — L'nT medido frente a la referencia ISO 717-2 desplazada (exceso sombreado):
 res_imp.plot()
@@ -336,7 +357,7 @@ la curva de referencia de **ISO 717-1** a través de `weighted_rating` sin cambi
 
 ```python
 import numpy as np
-from phonometry import facade_insulation, weighted_rating
+from phonometry import building
 
 # Nivel exterior 2 m frente a la fachada, nivel de la sala receptora y T por
 # banda de tercio de octava; surface_level es el micrófono sobre el elemento de ensayo.
@@ -344,7 +365,7 @@ l1_2m = np.full(16, 75.0)                              # L1,2m en el exterior
 l2 = np.full(16, 33.0)                                 # L2 de la sala receptora
 t2 = np.full(16, 0.5)                                  # T de la sala receptora (s)
 
-fac = facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
+fac = building.facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
                         surface_level=np.full(16, 78.0), method="loudspeaker")
 print(round(float(fac.d_2m[0]), 1))                    # 42.0  D2m = L1,2m - L2
 print(round(float(fac.d_2m_nt[0]), 1))                 # 42.0  (= D2m ya que T = T0)
@@ -352,12 +373,12 @@ print(round(float(fac.d_2m_n[0]), 1))                  # 40.0  normalizado a A0 
 print(round(float(fac.r_prime[0]), 1))                 # 42.1  R'45deg (altavoz, -1.5 dB)
 
 # El método del elemento por tráfico rodado lleva en su lugar la corrección de -3 dB para todos los ángulos
-tr = facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
+tr = building.facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
                        surface_level=np.full(16, 78.0), method="road_traffic")
 print(round(float(tr.r_prime[0]), 1))                  # 40.6  R'tr,s (tráfico, -3 dB)
 
 # La magnitud de fachada es a ruido aéreo: valora D2m,nT con el motor de ISO 717-1
-print(weighted_rating(fac.d_2m_nt).rating)             # 42  Dls,2m,nT,w
+print(building.weighted_rating(fac.d_2m_nt).rating)             # 42  Dls,2m,nT,w
 
 fac.plot()   # D2m,nT por banda con D2m, D2m,n y R' superpuestos (requiere matplotlib)
 ```
@@ -410,23 +431,22 @@ conformidad* con un requisito (Fórmulas 4/5).
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es.svg" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es_dark.svg" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" style="width:80%">
 
 ```python
-from phonometry import (band_uncertainty, single_number_uncertainty,
-                        uncertain_value, satisfies_lower_requirement)
+from phonometry import building
 
 # Situación B (mismo edificio, equipos distintos) -> la desviación típica in situ.
-print(single_number_uncertainty("r_w", "B"))       # 0.9  dB  (Tabla 3)
-u = band_uncertainty("airborne", "B")              # u por banda (Tabla 2)
+print(building.single_number_uncertainty("r_w", "B"))       # 0.9  dB  (Tabla 3)
+u = building.band_uncertainty("airborne", "B")              # u por banda (Tabla 2)
 print(len(u.frequencies), u.uncertainties[10])     # 21 1.1  (la banda de 500 Hz)
 
 # Informa R'w = 52 dB con un intervalo bilateral al 95 % (k = 1.96, Tabla 8):
-uv = uncertain_value(52.0, "rprime_w", "B")        # los alias resuelven a r_w
+uv = building.uncertain_value(52.0, "rprime_w", "B")        # los alias resuelven a r_w
 print(uv.coverage_factor, round(uv.expanded_uncertainty, 1))    # 1.96 1.8
 print(round(uv.lower, 1), round(uv.upper, 1))      # 50.2 53.8  ->  52 ± 1.8 dB
 
 # Declarar conformidad usa el factor UNILATERAL (k = 1.65): ¿supera R'w de forma
 # demostrable un requisito de 50 dB?
-uc = uncertain_value(52.0, "rprime_w", "B", one_sided=True)
-print(satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
+uc = building.uncertain_value(52.0, "rprime_w", "B", one_sided=True)
+print(building.satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
 ```
 
 Las magnitudes a impactos ofrecen solo las situaciones B/C (Tabla 4, sin banda de
@@ -441,11 +461,11 @@ son insensibles a mayúsculas y con alias (`rprime_w`/`dnt_w`→`r_w`,
 
 ```python
 import matplotlib.pyplot as plt
-from phonometry import uncertain_value
+from phonometry import building
 
 # El mismo R'w = 52 dB informado en cada situación con su U bilateral al 95 %.
 situations = ["A", "B", "C"]
-vals = [uncertain_value(52.0, "r_w", s) for s in situations]
+vals = [building.uncertain_value(52.0, "r_w", s) for s in situations]
 
 fig, ax = plt.subplots(figsize=(7, 4))
 ax.errorbar(situations, [v.value for v in vals],
@@ -505,25 +525,24 @@ media energética de tres posiciones ponderadas A o C.
 
 ```python
 import numpy as np
-from phonometry import (reverberation_index, estimate_reverberation_index,
-                        survey_airborne_insulation, survey_service_equipment_level)
+from phonometry import building
 
 # Niveles por banda de octava (125-2000 Hz) y el T medido de la sala receptora.
 l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
 l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
-k = reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
-res = survey_airborne_insulation(l1, l2, k, volume=50.0, area=12.0)
+k = building.reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
+res = building.survey_airborne_insulation(l1, l2, k, volume=50.0, area=12.0)
 print(np.round(res.d_nt, 1))          # [34.5 39.8 45.  50.5 54. ]  DnT = D + k
 print(res.rating.rating, res.rating.c)        # 49 -1  ->  DnT,w (C)
 print(res.r_prime_rating.rating)               # 48  ->  R'w
 
 # ¿Sin T medido? Estima k con la Tabla 4 (paredes pesadas, suelo duro,
 # 35-60 m³ -> clase "g").
-k_est = estimate_reverberation_index(50.0, "g")
+k_est = building.estimate_reverberation_index(50.0, "g")
 print(k_est)                                   # [4.5 5.  5.5 5.5 5.5]
 
 # Ruido de equipos de servicio: media energética de tres posiciones (dB(A)).
-se = survey_service_equipment_level([35.0, 30.0, 32.0], 3.0, volume=50.0)
+se = building.survey_service_equipment_level([35.0, 30.0, 32.0], 3.0, volume=50.0)
 print(round(float(se.l_xy), 1), round(float(se.l_xy_nt), 1))   # 32.8 29.8
 
 res.plot()   # DnT vs curva de referencia ISO 717-1 desplazada (necesita matplotlib)

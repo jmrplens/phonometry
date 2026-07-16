@@ -22,6 +22,43 @@ single full-signal pass.
 result exactly; without state, every block boundary restarts the filter
 transient.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import metrology
+
+# 1 kHz octave band: four stateful blocks vs one continuous pass
+fs, block = 8000, 1000
+rng = np.random.default_rng(42)
+x = rng.standard_normal(4 * block)
+t = np.arange(x.size) / fs
+
+bank = metrology.OctaveFilterBank(fs, fraction=1, limits=[900, 1100],
+                                  stateful=True, resample=False)
+streamed = np.concatenate([
+    bank.filter(x[i * block:(i + 1) * block], sigbands=True,
+                detrend=False, calculate_level=False)[2][0]
+    for i in range(4)
+])
+offline = metrology.OctaveFilterBank(fs, fraction=1, limits=[900, 1100],
+                                     resample=False).filter(
+    x, sigbands=True, detrend=False, calculate_level=False)[2][0]
+print(np.max(np.abs(streamed - offline)))     # 0.0 (bit-exact)
+
+fig, ax = plt.subplots(figsize=(9, 4.5))
+ax.plot(t, offline, linewidth=2.5, alpha=0.35, label="Continuous (whole signal)")
+ax.plot(t, streamed, label="Stateful blocks (state carried)")
+ax.axvline(block / fs, color="gray", linestyle=":", label="Block boundary")
+ax.set(xlim=(0.11, 0.17), xlabel="Time [s]", ylabel="Amplitude")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 Create a stateful filter bank with `stateful=True`. The internal state is
 zero-initialized by default but may be initialized for step-response
 steady-state (like `scipy.signal.sosfilt_zi`) with `steady_ic=True`. The

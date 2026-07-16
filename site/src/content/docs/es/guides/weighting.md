@@ -337,6 +337,40 @@ desviación cero, holgadamente dentro del corredor de clase 1 (sombreado); los
 límites más amplios de clase 2 se muestran punteados. El corredor se ensancha
 en los extremos de banda donde solo se aplica un límite unilateral.*
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import WeightingFilter, verify_weighting_class, weighting_class_limits
+
+freqs, lower1, upper1 = weighting_class_limits(1)
+_, lower2, upper2 = weighting_class_limits(2)
+lo1, lo2 = np.clip(lower1, -7, 7), np.clip(lower2, -7, 7)
+
+fig, ax = plt.subplots(figsize=(10, 6.5))
+ax.fill_between(freqs, lo1, upper1, step="mid", alpha=0.10,
+                label="Región de aceptación de clase 1")
+ax.plot(freqs, upper1, drawstyle="steps-mid", label="Límite superior/inferior de clase 1")
+ax.plot(freqs, lo1, drawstyle="steps-mid", color="C1")
+ax.plot(freqs, upper2, ":", drawstyle="steps-mid", label="Límite superior/inferior de clase 2")
+ax.plot(freqs, lo2, ":", drawstyle="steps-mid", color="C2")
+
+for curve, marker in (("A", "o"), ("C", "s")):
+    bands = verify_weighting_class(WeightingFilter(48000, curve))["bands"]
+    f = [b["freq"] for b in bands]
+    dev = [b["deviation_db"] for b in bands]
+    ax.plot(f, dev, marker=marker, label=f"Desviación de la ponderación {curve} (48 kHz)")
+
+ax.set(xscale="log", xlim=(10, 20000), ylim=(-7, 7),
+       xlabel="Frecuencia [Hz]", ylabel="Desviación respecto al objetivo de diseño [dB]")
+ax.legend(fontsize=8, ncol=2)
+plt.show()
+```
+
+</details>
+
 ## Referencias
 
 - Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement

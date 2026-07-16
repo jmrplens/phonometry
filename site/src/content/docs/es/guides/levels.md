@@ -97,6 +97,41 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 
 *L10 sigue los picos de los eventos, L50 el nivel mediano y L90 el fondo.*
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import metrology
+
+# La señal fluctuante del ejemplo de ln_levels: 0.5 s de fondo alternando
+# con 0.5 s de eventos ~10 dB más fuertes, repetido 3 veces
+fs = 48000
+rng = np.random.default_rng(0)
+segment = fs // 2
+quiet = 0.02 * rng.standard_normal(segment)
+loud = 0.06 * rng.standard_normal(segment)
+varying = np.tile(np.concatenate([quiet, loud]), 3)
+
+# Envolvente cuadrática media Fast -> nivel frente al tiempo, y los percentiles
+envelope = metrology.time_weighting(varying, fs, mode="fast")
+level_t = 10 * np.log10(np.maximum(envelope, 1e-12) / (2e-5) ** 2)
+stats = metrology.ln_levels(varying, fs, n=(10, 50, 90))
+t = np.arange(varying.size) / fs
+
+fig, ax = plt.subplots()
+ax.plot(t, level_t, linewidth=0.8, label="Nivel Fast Lp(t)")
+for i, (n_value, style) in enumerate([(10, "--"), (50, "-"), (90, "-.")], 1):
+    ax.axhline(float(stats[n_value]), color=f"C{i}", linestyle=style,
+               label=f"L{n_value} = {stats[n_value]:.1f} dB")
+ax.set(xlabel="Tiempo [s]", ylabel="Nivel [dB]")
+ax.legend(loc="lower right")
+plt.show()
+```
+
+</details>
+
 Opciones: `mode` selecciona la ponderación temporal de la envolvente (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` aplica antes la ponderación A/C, y
 `calibration_factor`/`dbfs` se comportan como en `leq`. El transitorio de ataque
@@ -201,6 +236,40 @@ bloque básico de los modelos de ruido aeroportuario y ferroviario.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_es.svg" alt="Historia del nivel del paso de un vehículo con su Leq sobre el evento completo y el bloque SEL de un segundo con la misma energía" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_es_dark.svg" alt="Historia del nivel del paso de un vehículo con su Leq sobre el evento completo y el bloque SEL de un segundo con la misma energía" style="width:80%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import metrology
+
+# El paso de un vehículo: ruido bajo una envolvente de energía gaussiana (análisis en dBFS)
+fs = 48000
+t = np.arange(int(8.0 * fs)) / fs
+rng = np.random.default_rng(11)
+x = 0.3 * np.exp(-0.5 * ((t - 4.0) / 1.1) ** 2) * rng.standard_normal(t.size)
+
+level = 10 * np.log10(np.maximum(metrology.time_weighting(x, fs, mode="fast"), 1e-12))
+l_sel = float(metrology.sel(x, fs, dbfs=True))
+l_eq = float(metrology.leq(x, dbfs=True))
+print(f"Leq = {l_eq:.1f} dBFS, SEL = {l_sel:.1f} dBFS")
+# Leq = -16.6 dBFS, SEL = -7.6 dBFS -> el bloque de 1 s lleva la energía del evento
+
+fig, ax = plt.subplots()
+ax.plot(t, level, linewidth=1.0, label="Nivel Fast del evento")
+ax.hlines(l_eq, 0, 8, color="C2", linestyle="--",
+          label=f"Leq sobre el evento completo = {l_eq:.1f} dBFS")
+ax.fill_between([3.5, 4.5], -55, l_sel, color="C1", alpha=0.25)
+ax.hlines(l_sel, 3.5, 4.5, color="C1", linewidth=2,
+          label=f"SEL = {l_sel:.1f} dBFS: la misma energía en 1 s")
+ax.set(xlabel="Tiempo [s]", ylabel="Nivel [dBFS]", ylim=(-55, l_sel + 6))
+ax.legend(loc="lower left")
+plt.show()
+```
+
+</details>
+
 ### Dosis de ruido: exposición sonora y LEX,8h
 
 Las normativas laborales limitan la *dosis* diaria, no el nivel. IEC 61252 la
@@ -252,6 +321,44 @@ r = composite_rating_level([(63.2, 12, 0.0),    # día
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es.svg" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es_dark.svg" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" style="width:80%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import environmental
+
+# LAeq horario sintético de una vía urbana (dB), horas 00 a 23
+laeq_h = np.array([48, 46, 45, 45, 46, 50, 56, 64, 66, 65, 63, 63,
+                   64, 63, 63, 64, 65, 66, 65, 64, 63, 62, 61, 50], dtype=float)
+
+def period_leq(idx):
+    return 10 * np.log10(np.mean(10 ** (laeq_h[idx] / 10)))  # media energética
+
+ld = period_leq(np.arange(7, 19))                # día 07-19
+le = period_leq(np.arange(19, 23))               # tarde 19-23
+ln_ = period_leq(np.r_[23, np.arange(0, 7)])     # noche 23-07
+l_den = environmental.lden(ld, le, ln_)
+print(f"Lden = {l_den:.1f} dB")   # Lden = 64.3 dB
+
+fig, ax = plt.subplots()
+ax.axvspan(19, 23, color="C1", alpha=0.15)                                # tarde
+ax.axvspan(23, 24, color="C0", alpha=0.15); ax.axvspan(0, 7, color="C0", alpha=0.15)
+ax.step(np.arange(25), np.r_[laeq_h, laeq_h[-1]], where="post",
+        color="0.3", label="LAeq horario")
+ax.hlines(ld, 7, 19, color="C2", linestyle="--", label="Ldía (+0 dB)")
+ax.hlines(le + 5, 19, 23, color="C1", linestyle="--", label="Ltarde + 5 dB")
+ax.hlines([ln_ + 10, ln_ + 10], [23, 0], [24, 7], color="C0",
+          linestyle="--", label="Lnoche + 10 dB")
+ax.hlines(l_den, 0, 24, color="C3", linewidth=2, label=f"Lden = {l_den:.1f} dB")
+ax.set(xlabel="Hora del día", ylabel="Nivel [dB]", xlim=(0, 24))
+ax.legend(loc="upper left", fontsize=8, ncol=2)
+plt.show()
+```
+
+</details>
 
 ### Parámetros de `lden()` / `ldn()` / `composite_rating_level()`
 
@@ -358,6 +465,36 @@ levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5
 
 *Un barrido logarítmico y dos ráfagas de tono, resueltos en el tiempo y en
 bandas normalizadas de tercio de octava.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import chirp
+from phonometry import metrology
+
+# Barrido logarítmico de 80 Hz -> 8 kHz más dos ráfagas de tono, con algo de ruido
+fs = 48000
+t = np.arange(int(4.0 * fs)) / fs
+x = 0.5 * chirp(t, f0=80, t1=4.0, f1=8000, method="logarithmic")
+x[int(1.0 * fs):int(1.3 * fs)] += np.sin(2 * np.pi * 4000 * t[: int(0.3 * fs)])
+x[int(2.5 * fs):int(2.8 * fs)] += np.sin(2 * np.pi * 250 * t[: int(0.3 * fs)])
+x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
+
+bank = metrology.OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[50.0, 12000.0])
+levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.5)
+
+fig, ax = plt.subplots()
+mesh = ax.pcolormesh(times, freq, levels, shading="auto")
+ax.set_yscale("log")
+ax.set(xlabel="Tiempo [s]", ylabel="Frecuencia [Hz]")
+fig.colorbar(mesh, label="Nivel [dB]")
+plt.show()
+```
+
+</details>
 
 - Una entrada multicanal `(channels, samples)` devuelve `(channels, bands, frames)`.
 - `times` contiene el centro de cada ventana en segundos.

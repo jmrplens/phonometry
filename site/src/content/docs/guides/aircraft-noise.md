@@ -103,6 +103,32 @@ print(report["passed"], report["checks"])
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption.svg" alt="Aircraft atmospheric absorption versus frequency for two path lengths; the SAE-Method band attenuation stays below the pure-tone mid-band value at high absorption" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/aircraft_atmospheric_absorption_dark.svg" alt="Aircraft atmospheric absorption versus frequency for two path lengths; the SAE-Method band attenuation stays below the pure-tone mid-band value at high absorption" style="width:82%">
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import aircraft
+
+freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz-10 kHz thirds
+fig, ax = plt.subplots()
+# solid: SAE band attenuation, dashed: pure-tone mid-band
+for s in (1000.0, 7620.0):
+    att = aircraft.sae_band_attenuation(freqs, s, temperature=25.0, relative_humidity=70.0)
+    line, = ax.semilogx(att.frequency, att.band_attenuation, marker="o",
+                        markersize=3, label=f"SAE band ({s:.0f} m)")
+    ax.semilogx(att.frequency, att.midband_attenuation, "--", alpha=0.6,
+                color=line.get_color())
+ax.set(xlabel="Frequency [Hz]", ylabel="Attenuation [dB]",
+       title="Aircraft atmospheric absorption at 25 °C, 70% RH")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 Correcting a measured flyover to reference atmospheric conditions needs the
 one-third-octave-band attenuation over the path. The pure-tone coefficient is
 the ISO 9613-1 one (identical, per ARP 5534 §3.1) provided by `air_attenuation`;
@@ -126,6 +152,34 @@ Valid roughly 6–32 °C, 20–95 % RH (14 CFR Part 36 window), to 7620 m, recip
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise.svg" alt="Noise-power-distance curves for two engine power settings, the event level falling log-linearly with slant distance between the tabulated nodes" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise_dark.svg" alt="Noise-power-distance curves for two engine power settings, the event level falling log-linearly with slant distance between the tabulated nodes" style="width:82%">
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import aircraft
+
+# A schematic NPD table: SEL vs slant distance for two thrust settings.
+powers = [12000.0, 20000.0]
+distances = [200.0, 400.0, 630.0, 1000.0, 2000.0, 4000.0, 6300.0, 10000.0]
+levels = [[98.5, 92.0, 88.2, 83.6, 76.8, 69.4, 63.9, 56.8],
+          [107.2, 100.9, 97.2, 92.7, 86.0, 78.5, 72.9, 65.6]]
+
+fig, ax = plt.subplots()
+for p in (20000.0, 12000.0):
+    curve = aircraft.npd_curve(powers, distances, levels, power=p)
+    line, = ax.semilogx(curve.distance, curve.level, label=f"P = {p:.0f} N")
+    ax.semilogx(curve.table_distances, curve.table_levels, "o", markersize=4,
+                color=line.get_color())
+ax.set(xlabel="Slant distance [m]", ylabel="Event level [dB]",
+       title="Noise-power-distance curves (ECAC Doc 29)")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 The ECAC Doc 29 airport-noise method describes an aircraft with **noise-power-
 distance (NPD)** tables. `npd_level` reads the event level (`LAmax`/`SEL`) for an
 arbitrary power and distance, interpolating linearly in power (Eq. 4-3) and
@@ -147,6 +201,37 @@ This is the NPD engine underneath the method.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour.png" alt="Single-event SEL contour of a departure: an elongated footprint along the flight track, loudest near the ground roll" style="width:90%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_contour_dark.png" alt="Single-event SEL contour of a departure: an elongated footprint along the flight track, loudest near the ground roll" style="width:90%">
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import aircraft
+
+# NPD tables (SEL and LAmax) for one aircraft, two power settings.
+powers = [8000.0, 12000.0]
+distances = [60.0, 120.0, 240.0, 480.0, 960.0, 1920.0, 3840.0, 7680.0]
+sel = [[98.0, 92.0, 86.0, 80.0, 74.0, 68.0, 62.0, 56.0],
+       [104.0, 98.0, 92.0, 86.0, 80.0, 74.0, 68.0, 62.0]]
+lmax = [[94.0, 88.0, 82.0, 76.0, 70.0, 64.0, 58.0, 52.0],
+        [100.0, 94.0, 88.0, 82.0, 76.0, 70.0, 64.0, 58.0]]
+
+# Departure: ground roll along +x, then a steady climb.
+xs = np.linspace(0.0, 18000.0, 40)
+z = np.clip((xs - 1500.0) * 0.11, 0.0, 2500.0)
+power = np.where(xs < 3000.0, 12000.0, 10000.0)
+path = np.column_stack([xs, np.zeros_like(xs), z, power, np.full_like(xs, 82.3)])
+
+contour = aircraft.noise_contour(path, powers, distances, sel, lmax,
+                                 x=np.linspace(-2500.0, 20000.0, 56),
+                                 y=np.linspace(-6000.0, 6000.0, 44))
+contour.plot()   # single-event SEL footprint (needs matplotlib)
+plt.show()
+```
+
+</details>
+
 The full single-event calculation breaks a flight path into segments and
 corrects the NPD baseline per segment (§4.3-4.5): `impedance_adjustment` (T, p),
 `lateral_attenuation` (β,ℓ), `engine_installation_correction` (φ, mounting),
@@ -167,6 +252,31 @@ noise: strongest near an azimuth ψ ≈ 120° from the nose, falling off abeam
 (ψ = 90°) and directly behind (ψ = 180°).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft, both showing a lobe near 120° from the nose" style="width:75%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_sor_dark.svg" alt="Polar diagram of the start-of-roll directivity ΔSOR over the rearward semicircle for turbofan-jet and turboprop aircraft, both showing a lobe near 120° from the nose" style="width:75%">
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import phonometry as ph
+
+az = np.linspace(90.0, 270.0, 361)              # rearward semicircle
+psi = np.where(az <= 180.0, az, 360.0 - az)     # ΔSOR is left/right symmetric
+jet = [ph.start_of_roll_directivity(p, 300.0, "jet") for p in psi]
+prop = [ph.start_of_roll_directivity(p, 300.0, "turboprop") for p in psi]
+
+ax = plt.subplot(projection="polar")
+ax.set_theta_zero_location("N")                 # nose up, azimuth clockwise
+ax.set_theta_direction(-1)
+ax.plot(np.radians(az), jet, label="Turbofan jet")
+ax.plot(np.radians(az), prop, label="Turboprop")
+ax.set_rlim(-16.0, 0.0)                         # radial axis: dB re abeam
+ax.legend(loc="lower center")
+plt.show()
+```
+
+</details>
 
 ```python
 import numpy as np

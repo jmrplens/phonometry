@@ -16,6 +16,35 @@ a partir de una grabación.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance.svg" alt="Molestia psicoacústica PA frente a la sonoridad percentil N5 para tres perfiles de sensación: una base neutra donde PA es igual a N5, un sonido agudo y un sonido áspero y fluctuante ambos elevados sobre la base, con el ejemplo resuelto PA = 30,82 marcado" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance_dark.svg" alt="Molestia psicoacústica PA frente a la sonoridad percentil N5 para tres perfiles de sensación: una base neutra donde PA es igual a N5, un sonido agudo y un sonido áspero y fluctuante ambos elevados sobre la base, con el ejemplo resuelto PA = 30,82 marcado" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import phonometry as ph
+
+n5 = np.linspace(4.0, 60.0, 200)
+profiles = [
+    ("Base neutra: S = 1.75 acum, F = R = 0", 1.75, 0.0, 0.0),
+    ("Sonido agudo: S = 3.5 acum", 3.5, 0.0, 0.0),
+    ("Áspero + fluctuante: F = 1.2 vacil, R = 0.7 asper", 2.0, 1.2, 0.7),
+]
+fig, ax = plt.subplots()
+for label, s, f, r in profiles:
+    pa = [ph.psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5]
+    ax.plot(n5, pa, label=label)
+
+ex = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)
+ax.plot([30.0], [ex.annoyance], "o", label=f"Ejemplo resuelto (PA = {ex.annoyance:.2f})")
+ax.set_xlabel("Sonoridad percentil N5 [sonios]")
+ax.set_ylabel("Molestia psicoacústica PA")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 1. Las cuatro sensaciones
 
 La molestia psicoacústica se apoya en cuatro sensaciones auditivas, cada una con
@@ -62,35 +91,6 @@ La figura de arriba barre `PA` frente a `N5` para tres perfiles: una base neutra
 sonido áspero y fluctuante — ambos elevados sobre la base — con el ejemplo
 resuelto marcado.
 
-<details>
-<summary>Ver el código de esta figura</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-n5 = np.linspace(4.0, 60.0, 200)
-profiles = [
-    ("Baseline: S = 1.75 acum, F = R = 0", 1.75, 0.0, 0.0),
-    ("Sharp: S = 3.5 acum", 3.5, 0.0, 0.0),
-    ("Rough + fluctuating: F = 1.2 vacil, R = 0.7 asper", 2.0, 1.2, 0.7),
-]
-fig, ax = plt.subplots()
-for label, s, f, r in profiles:
-    pa = [ph.psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5]
-    ax.plot(n5, pa, label=label)
-
-ex = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)
-ax.plot([30.0], [ex.annoyance], "o", label=f"Worked example (PA = {ex.annoyance:.2f})")
-ax.set_xlabel("Percentile loudness N5 [sone]")
-ax.set_ylabel("Psychoacoustic annoyance PA")
-ax.legend()
-plt.show()
-```
-
-</details>
-
 ### 2.1 A partir de una señal (estimación de ingeniería)
 
 `psychoacoustic_annoyance_from_signal` es una utilidad que deriva las cuatro
@@ -127,30 +127,8 @@ amplitud al 100 % a 4 Hz, produce `1 vacil`.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength.svg" alt="Intensidad de fluctuación frente a la frecuencia de modulación en un eje logarítmico: la curva de forma cerrada para ruido de banda ancha AM y el barrido del modelo de señal para tono AM muestran ambos una característica de paso de banda con máximo a 4 Hz" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength_dark.svg" alt="Intensidad de fluctuación frente a la frecuencia de modulación en un eje logarítmico: la curva de forma cerrada para ruido de banda ancha AM y el barrido del modelo de señal para tono AM muestran ambos una característica de paso de banda con máximo a 4 Hz" style="width:82%">
 
-### 3.1 Forma cerrada para ruido de banda ancha AM (Ec. 10.2)
-
-Para ruido de banda ancha modulado sinusoidalmente en amplitud, Fastl y Zwicker
-dan una forma cerrada (Ec. 10.2) en función del factor de modulación `m`, el
-nivel `L` y la frecuencia de modulación `fmod`:
-
-$$
-F = \frac{5{,}8\,(1{,}25\,m - 0{,}25)\,[0{,}05\,(L/\mathrm{dB}) - 1]}
-{(f_{mod}/5\,\mathrm{Hz})^2 + (4\,\mathrm{Hz}/f_{mod}) + 1{,}5}\ \ \mathrm{vacil}.
-$$
-
-El denominador es el paso de banda a `4 Hz`: alcanza su mínimo cerca de
-`fmod ≈ 3,7 Hz` y crece a ambos lados. El resultado se limita a `0` (la sensación
-desaparece por debajo de ~20 dB o `m < 0,2`). Esta forma exacta es el valor a
-citar para el ruido de banda ancha AM.
-
-```python
-import phonometry as ph
-
-print(round(ph.fluctuation_strength_am_noise(60.0, 1.0, 4.0), 4))   # 3.6943 vacil
-```
-
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -173,12 +151,12 @@ for fm in fm_tone:
     f_tone.append(ph.fluctuation_strength(am, float(fs)).fluctuation_strength)
 
 fig, ax = plt.subplots()
-ax.semilogx(fmod, f_bbn, label="AM broadband noise (closed form)")
+ax.semilogx(fmod, f_bbn, label="Ruido de banda ancha AM (forma cerrada)")
 ax2 = ax.twinx()
-ax2.plot(fm_tone, f_tone, "s--", color="tab:green", label="AM tone (signal model)")
+ax2.plot(fm_tone, f_tone, "s--", color="tab:green", label="Tono AM (modelo de señal)")
 ax.axvline(4.0, ls="--", color="0.4")
-ax.set_xlabel("Modulation frequency f_mod [Hz]")
-ax.set_ylabel("Fluctuation strength F [vacil]")
+ax.set_xlabel("Frecuencia de modulación f_mod [Hz]")
+ax.set_ylabel("Intensidad de fluctuación F [vacil]")
 h1, l1 = ax.get_legend_handles_labels()
 h2, l2 = ax2.get_legend_handles_labels()
 ax.legend(h1 + h2, l1 + l2, loc="upper right")
@@ -186,6 +164,28 @@ plt.show()
 ```
 
 </details>
+
+### 3.1 Forma cerrada para ruido de banda ancha AM (Ec. 10.2)
+
+Para ruido de banda ancha modulado sinusoidalmente en amplitud, Fastl y Zwicker
+dan una forma cerrada (Ec. 10.2) en función del factor de modulación `m`, el
+nivel `L` y la frecuencia de modulación `fmod`:
+
+$$
+F = \frac{5{,}8\,(1{,}25\,m - 0{,}25)\,[0{,}05\,(L/\mathrm{dB}) - 1]}
+{(f_{mod}/5\,\mathrm{Hz})^2 + (4\,\mathrm{Hz}/f_{mod}) + 1{,}5}\ \ \mathrm{vacil}.
+$$
+
+El denominador es el paso de banda a `4 Hz`: alcanza su mínimo cerca de
+`fmod ≈ 3,7 Hz` y crece a ambos lados. El resultado se limita a `0` (la sensación
+desaparece por debajo de ~20 dB o `m < 0,2`). Esta forma exacta es el valor a
+citar para el ruido de banda ancha AM.
+
+```python
+import phonometry as ph
+
+print(round(ph.fluctuation_strength_am_noise(60.0, 1.0, 4.0), 4))   # 3.6943 vacil
+```
 
 ### 3.2 El modelo de señal de Osses 2016
 

@@ -139,6 +139,21 @@ res.plot()
 
 </details>
 
+## References
+
+- Urick, R. J. (1983). *Principles of underwater sound* (3rd ed.).
+  McGraw-Hill; reprinted 1996 by Peninsula Publishing.
+  ISBN 978-0-932146-62-5.
+  [Open Library record](https://openlibrary.org/books/OL9317725M).
+  The classic treatment of underwater sound levels and of ship radiated
+  noise behind the reference conventions of sections 1-2.
+- Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
+  Springer.
+  [doi:10.1007/978-3-540-87662-5](https://doi.org/10.1007/978-3-540-87662-5).
+  The systematic treatment of underwater acoustical quantities in the line
+  that ISO 18405 standardised; supports the reference levels and the source
+  level of sections 1-2.
+
 ## Standards
 
 ISO 18405:2017, *Underwater acoustics — Terminology*: the 1 µPa

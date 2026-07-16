@@ -202,6 +202,58 @@ del rodaje de despegue, la velocidad media Ec. 4-13b en segmentos de pista y el
 suelo recomendado de 30 m en las consultas NPD. Siete eventos de receptor del
 workbook de referencia se reproducen end-to-end en la suite de tests.
 
+## Referencias
+
+- International Civil Aviation Organization. (2017). *Annex 16 to the
+  Convention on International Civil Aviation: Environmental protection —
+  Volume I: Aircraft noise* (8.ª ed.).
+  [Tienda ICAO](https://store.icao.int/en/annex-16-environmental-protection-volume-i-aircraft-noise).
+  El procedimiento normativo EPNL del Apéndice 2 implementado en las
+  secciones de molestia percibida, corrección tonal y EPNL.
+- International Civil Aviation Organization. (2018). *Environmental technical
+  manual — Volume I: Procedures for the noise certification of aircraft*
+  (Doc 9501, 3.ª ed.).
+  [Tienda ICAO](https://store.icao.int/en/environmental-technical-manual-volume-1-procedures-for-the-noise-certification-of-aircraft-doc-9501-1).
+  Los ejemplos trabajados (corrección tonal de la Tabla 3-7, EPNL por el
+  método integrado de la Tabla 4-4) usados como oráculos numéricos.
+- International Electrotechnical Commission. (1995). *Electroacoustics —
+  Instruments for measurement of aircraft noise — Performance requirements for
+  systems to measure one-third-octave-band sound pressure levels in noise
+  certification of transport-category aeroplanes* (IEC 61265:1995; revisada
+  después como [IEC 61265:2018](https://webstore.iec.ch/en/publication/32635),
+  la edición de 1995 es la implementada).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/5076).
+  Las tolerancias del sistema de medida que comprueba el verificador.
+- SAE International. (2013). *Application of pure-tone atmospheric absorption
+  losses to one-third octave-band data* (SAE ARP 5534, reafirmada en 2021).
+  [sae.org](https://www.sae.org/standards/content/arp5534/).
+  La atenuación de banda por el método SAE de la sección de absorción
+  atmosférica.
+- SAE International. (2012). *Standard values of atmospheric absorption as a
+  function of temperature and humidity* (SAE ARP 866B, estabilizada en 2012).
+  [sae.org](https://www.sae.org/standards/content/arp866b/).
+  La práctica SAE de absorción atmosférica predecesora, origen del método
+  aproximado limitado a 50 dB con el que se contrasta el método SAE.
+- SAE International. (2006). *Method for predicting lateral attenuation of
+  airplane noise* (SAE AIR 5662).
+  [sae.org](https://www.sae.org/standards/content/air5662/).
+  El modelo de atenuación lateral sobre suelo blando que la Doc 29 §4.5.4
+  adopta en la sección de contornos de evento único.
+- European Civil Aviation Conference. (2016). *Report on standard method of
+  computing noise contours around civil airports* (ECAC.CEAC Doc 29, 4.ª ed.),
+  Volumen 2: Guía técnica.
+  [Página de documentos de ECAC](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements),
+  [PDF gratuito](https://www.ecac-ceac.org/images/documents/ECAC-Doc_29_4th_edition_Dec_2016_Volume_2.pdf).
+  La interpolación NPD y la cadena de evento único por segmentos de las
+  secciones de ruido de aeropuerto.
+- European Civil Aviation Conference. (2026). *Report on standard method of
+  computing noise contours around civil airports* (ECAC.CEAC Doc 29, 5.ª ed.),
+  Volumen 3: Casos de referencia y marco de verificación.
+  [Página de documentos de ECAC](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements),
+  [PDF gratuito](https://www.ecac-ceac.org/images/documents/ECAC-CEAC-DOC_29_5th_Edition-REPORT_ON_STANDARD_METHOD_OF_COMPUTING_NOISE_CONTOURS_AROUND_CIVIL_AIRPORTS-Volume_3-REFERENCE_CASES_AND_VERIFICATION_FRAMEWORK.pdf).
+  El workbook de referencia contra el que se valida la cadena de evento
+  único.
+
 ## Normas
 
 ICAO Anexo 16 Vol. I Apéndice 2 (procedimiento EPNL), ICAO Doc 9501

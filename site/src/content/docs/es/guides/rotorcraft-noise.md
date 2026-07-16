@@ -62,10 +62,44 @@ hemisferios de referencia de los once tipos de helicóptero, y de extremo a
 extremo contra los historiales de evento único del prototipo NORAH2 (0.1 dB(A)
 sobre suelo duro, 0.5 dB sobre suelo blando).
 
+## Referencias
+
+- European Civil Aviation Conference. (2026). *Report on standard method of
+  computing rotorcraft noise contours* (ECAC.CEAC Doc 32, 1.ª ed.).
+  [Página de documentos de ECAC](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements),
+  [PDF gratuito](https://www.ecac-ceac.org/images/documents/ECAC-CEAC-DOC_32-REPORT_ON_STANDARD_METHOD_OF_COMPUTING_ROTORCRAFT_NOISE_CONTOURS.pdf).
+  El método estándar de contornos de rotorcraft cuyo modelo de fuente por
+  hemisferio y ajustes de propagación implementa esta página.
+- Olsen, H., Tuinstra, M., & van Oosten, N. (2024). *Rotorcraft noise
+  modelling guidance* (Research Project NOISE SC01, entregable D1.5d,
+  contrato EASA.2020.FC.06). European Union Aviation Safety Agency.
+  [Página del proyecto en EASA](https://www.easa.europa.eu/en/research-projects/environmental-research-rotorcraft-noise),
+  [PDF gratuito](https://www.easa.europa.eu/en/downloads/132005/en).
+  La guía a nivel de ecuación (Ec. 13-35) tras la implementación, con los
+  valores de atenuación de la Tabla 4 y los hemisferios de referencia usados
+  como oráculos.
+- Chien, C. F., & Soroka, W. W. (1975). Sound propagation along an impedance
+  plane. *Journal of Sound and Vibration*, 43(1), 9-20.
+  [doi:10.1016/0022-460X(75)90200-X](https://doi.org/10.1016/0022-460X(75)90200-X).
+  La solución de interferencia de dos rayos sobre un plano de impedancia tras
+  el ajuste de efecto de suelo.
+- Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
+  absorbent materials. *Applied Acoustics*, 3(2), 105-116.
+  [doi:10.1016/0003-682X(70)90031-9](https://doi.org/10.1016/0003-682X(70)90031-9).
+  El modelo de impedancia de un parámetro (resistividad de flujo) que evalúa
+  el efecto de suelo.
+- Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
+  assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Oficina de
+  Publicaciones de la Unión Europea.
+  [doi:10.2788/31776](https://doi.org/10.2788/31776),
+  [repositorio del JRC](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
+  Las clases de suelo por resistividad de flujo `"A"`-`"H"` que acepta
+  `ground_effect_adjustment`.
+
 ## Normas
 
 ECAC Doc 32, 1ª ed. (contornos de ruido de rotorcraft); guía de
-modelado NORAH2 (EASA.2020.FC.06 SC03.D1.5d) §A.3-A.4: el hemisferio de ruido, el
+modelado NORAH2 (EASA.2020.FC.06 SC01.D1.5d) §A.3-A.4: el hemisferio de ruido, el
 ensanchamiento esférico, la atenuación atmosférica (ISO 9613-1, Tabla 4) y el
 efecto de suelo de Chien-Soroka (impedancia de Delany-Bazley, resistividad de
 flujo CNOSSOS). La integración sobre la trayectoria (SEL/LAmax/EPNL), los

@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Four new physics-based 2D FDTD documentation animations (WebM + poster
+  for the site, GIF for the GitHub docs, EN + ES, light + dark), each
+  simulated with `scripts/fdtd2d.py` and annotated on canvas:
+  `anim_fdtd_barrier` (a thin rigid screen on reflecting ground driven at
+  100 Hz vs 500 Hz side by side, with the measured insertion loss at a
+  shadow-zone receiver, embedded in the outdoor-propagation guide),
+  `anim_fdtd_ground_effect` (a 400 Hz source over a rigid plane forming
+  the direct + image-source interference lobes, with the level on an 8 m
+  arc converging to the two-path model and its predicted nulls, embedded
+  in the outdoor-propagation and aircraft-noise guides),
+  `anim_fdtd_ducting` (a low-frequency pulse trapped by a SOFAR-like
+  sound-speed channel vs a near-surface source that leaks to depth, with
+  the c(z) profile inset, embedded in the underwater-propagation guide)
+  and `anim_fdtd_diffusion` (a plane wavefront onto a flat panel vs an
+  N = 7 quadratic-residue Schroeder diffuser, with the scattered field
+  and the ISO 17497-2 arc diffusion coefficients, embedded in the
+  surface-scattering guide).
 - Seven new mechanism animations (WebM + poster for the site, GIF for the
   GitHub docs, EN + ES, light + dark): the ISO 10534-2 standing wave in the
   impedance tube (rigid vs porous termination), the EN 12354-1 flanking

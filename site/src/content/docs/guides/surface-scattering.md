@@ -162,6 +162,13 @@ Formula (6) area-weights each energy by $N_i$ from Formula (8) — and those are
 factors are evaluated in **radians**, which is why a 5° spacing at the zenith
 produces a weight near 1.57, not 51.9.
 
+The animation below runs that goniometer experiment numerically: the same
+plane wavefront hits a flat rigid panel and a Schroeder diffuser (an N = 7
+quadratic-residue profile), and the scattered energy on the receiver arc turns
+a collimated specular beam (d = 0.32) into a wide fan (d = 0.63).
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side; the flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side; the flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63" style="width:88%"></video>
+
 ```python
 import phonometry as ph
 

@@ -205,6 +205,13 @@ baseline level (§4.3-4.5):
   ground-roll segments; behind them the reduced (q = 0) noise fraction and `ΔSOR`
   are applied (Eq. 4-9).
 
+The mechanism behind these ground corrections is two-path interference: the
+direct wave and its ground reflection. Below, a 400 Hz source 1.5 m above a
+rigid plane forms the lobe pattern, with the image source ghosted below the
+ground and a receiver sitting in an interference dip.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect.gif" alt="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" width="640" height="360" loading="lazy"></picture>
+
 `ΔSOR` is what makes the departure footprint bulge rearward behind the runway:
 jet-exhaust noise radiates a lobed pattern in the rear arc, strongest at an
 azimuth `ψ ≈ 120°` from the nose and falling away both abeam (`ψ = 90°`) and

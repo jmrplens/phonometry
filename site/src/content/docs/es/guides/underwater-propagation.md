@@ -52,6 +52,14 @@ profile = ph.sound_speed_profile(depths, temps, 35.0, model="unesco")
 profile.plot()   # velocidad del sonido frente a profundidad
 ```
 
+El mínimo de $c(z)$ actúa como una guía de ondas (el canal SOFAR): los frentes
+de onda que se apartan del eje se refractan de vuelta hacia él, mientras que
+el sonido generado fuera del canal se fuga hacia el fondo, como muestra la
+simulación siguiente con un gradiente exagerado a propósito. Este atrapamiento
+es la razón de que el sonido de baja frecuencia pueda cruzar océanos enteros.
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting_es_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de un pulso de baja frecuencia en un canal sonoro submarino tipo SOFAR con el perfil de velocidad del sonido dibujado junto al campo; lanzados en el eje del canal los frentes de onda se refractan de vuelta hacia el mínimo de velocidad y quedan atrapados, lanzada cerca de la superficie la energía cruza el canal y se fuga hacia el fondo" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting_es_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de un pulso de baja frecuencia en un canal sonoro submarino tipo SOFAR con el perfil de velocidad del sonido dibujado junto al campo; lanzados en el eje del canal los frentes de onda se refractan de vuelta hacia el mínimo de velocidad y quedan atrapados, lanzada cerca de la superficie la energía cruza el canal y se fuga hacia el fondo" style="width:88%"></video>
+
 ## Ecuación del sonar
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_es.svg" alt="Ecuación del sonar pasivo: el exceso de señal cae con la pérdida por transmisión y cruza el cero, el límite de detección, en la figura de mérito" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_es_dark.svg" alt="Ecuación del sonar pasivo: el exceso de señal cae con la pérdida por transmisión y cruza el cero, el límite de detección, en la figura de mérito" style="width:82%">

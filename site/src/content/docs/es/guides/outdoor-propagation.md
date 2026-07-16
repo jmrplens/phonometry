@@ -296,6 +296,14 @@ print(round(directivity_omega(1.5, 1.5, 200.0), 2))                  # 3.01 dB
 print(round(meteorological_correction(200.0, 1.5, 1.5, 2.0), 2))     # 1.7 dB
 ```
 
+Un $A_{gr}$ negativo (una ganancia neta) es pura interferencia: la onda
+reflejada en el suelo se suma a la directa. Abajo, una fuente de 400 Hz a
+1,5 m sobre suelo rígido construye el patrón de lóbulos de esa interferencia,
+y el nivel muestreado sobre un arco converge al modelo de fuente imagen de dos
+caminos, con sus mínimos incluidos.
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de una fuente puntual de 400 Hz a 1,5 metros sobre suelo rígido; los frentes de onda directo y reflejado en el suelo interfieren y se forma un patrón de lóbulos, la fuente imagen fantasma bajo el suelo explica la geometría y el nivel sobre un arco de 8 metros converge al modelo de fuente imagen de dos caminos con sus mínimos previstos" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_es_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de una fuente puntual de 400 Hz a 1,5 metros sobre suelo rígido; los frentes de onda directo y reflejado en el suelo interfieren y se forma un patrón de lóbulos, la fuente imagen fantasma bajo el suelo explica la geometría y el nivel sobre un arco de 8 metros converge al modelo de fuente imagen de dos caminos con sus mínimos previstos" style="width:88%"></video>
+
 ### `Barrier` y el término de apantallamiento
 
 La clase `Barrier` describe la geometría de difracción directamente, que es el
@@ -306,6 +314,14 @@ Ec. (15) y el límite de 25 dB. `ground_reflections_by_image=True` cambia $C_2$ 
 20 a 40 (reflexiones tratadas por fuentes imagen) y `lateral=True` selecciona la
 difracción por borde vertical (Ec. (13), $K_{met}=1$, se conserva el término del
 suelo).
+
+La simulación siguiente muestra por qué $D_z$ crece con la frecuencia: frente a
+la misma pantalla de 2,5 m, un frente de onda de 100 Hz (λ ≈ 3,4 m) se difracta
+sobre el borde y rellena la zona de sombra, mientras que a 500 Hz la sombra es
+profunda y nítida. Una barrera solo funciona cuando la longitud de onda es
+corta frente a la diferencia de camino.
+
+<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_es_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de una fuente puntual tras una barrera rígida delgada de 2,5 metros sobre suelo reflectante, a 100 Hz y 500 Hz lado a lado; la longitud de onda larga se difracta sobre el borde y rellena la zona de sombra con una pérdida por inserción de unos 8 dB, mientras que la corta produce una sombra profunda y limpia de unos 17 dB" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_es_dark_poster.jpg" width="800" height="450" loop muted controls playsinline title="Animación: simulación FDTD 2D de una fuente puntual tras una barrera rígida delgada de 2,5 metros sobre suelo reflectante, a 100 Hz y 500 Hz lado a lado; la longitud de onda larga se difracta sobre el borde y rellena la zona de sombra con una pérdida por inserción de unos 8 dB, mientras que la corta produce una sombra profunda y limpia de unos 17 dB" style="width:88%"></video>
 
 ### Parámetros de `outdoor_propagation_attenuation()`
 

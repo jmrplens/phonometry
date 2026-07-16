@@ -80,15 +80,14 @@ vibración extraña según la Tabla 2.
 ## 3. Cuándo se rompe la hipótesis del factor de radiación
 
 Todo el método descansa en una sustitución: reemplazar la medición acústica
-por `ε`. El valor `ε = 1` de la Parte 1 es un auténtico *límite superior*,
-pero solo en el régimen en el que una superficie vibrante radia como un
-pistón, por encima de la **frecuencia crítica (de coincidencia)** de las
-partes tipo placa, donde las ondas de flexión viajan más rápido que el
-sonido. Por debajo de la coincidencia, zonas adyacentes de la placa se mueven
-en contrafase y su radiación se cancela en gran medida: `ε` cae muy por
-debajo de uno y baja deprisa al bajar la frecuencia, de modo que el método de
-inspección puede sobrestimar las bandas graves de una carcasa grande y
-delgada en 10 dB o más. La misma cancelación hace que las fuentes pequeñas
+por `ε`. El valor `ε = 1` de la Parte 1 solo se acerca al factor de
+radiación real por encima de la **frecuencia crítica (de coincidencia)** de
+las partes tipo placa, donde las ondas de flexión viajan más rápido que el
+sonido y la superficie radia como un pistón. Por debajo de la coincidencia,
+zonas adyacentes de la placa se mueven en contrafase y su radiación se
+cancela en gran medida: `ε` cae muy por debajo de uno y baja deprisa al bajar
+la frecuencia, de modo que el método de control puede sobrestimar las bandas
+graves de una carcasa grande y delgada en 10 dB o más. La misma cancelación hace que las fuentes pequeñas
 radien mal (el cortocircuito acústico alrededor de un panel sin bafle). Otras
 dos hipótesis son fáciles de violar en campo:
 
@@ -98,13 +97,13 @@ dos hipótesis son fáciles de violar en campo:
   aplica.
 * **La superficie debe ser el radiador dominante.** El sonido aéreo de
   aberturas, tomas o fuentes internas que esquiva la carcasa medida es
-  invisible para una inspección de velocidad; el método caracteriza solo la
+  invisible para una medición de velocidad; el método caracteriza solo la
   parte estructural.
 
-La Parte 2 existe exactamente para el primer problema: sustituye el `ε = 1`
-fijo por un `εⱼ` banda a banda determinado a partir de una medición de
+La Parte 2 existe exactamente para el problema del factor de radiación:
+sustituye el `ε = 1` fijo por un `εⱼ` banda a banda determinado a partir de una medición de
 referencia de la potencia radiada (intensidad ISO 9614), tras lo cual la
-inspección de velocidad puede repetirse a bajo coste en máquinas nominalmente
+medición de velocidad puede repetirse a bajo coste en máquinas nominalmente
 idénticas.
 
 <details>

@@ -96,10 +96,10 @@ list grows as guides gain their References sections.
   mobilities, power flow, vibration isolation, radiation efficiency and
   transmission across junctions.
   Cited by [Mechanical mobility and the FRF family](/phonometry/guides/mechanical-mobility/),
-  [Dynamic transfer stiffness of resilient elements](/phonometry/guides/transfer-stiffness/),
+  [Transfer stiffness of resilient elements](/phonometry/guides/transfer-stiffness/),
   [Sound power from surface vibration](/phonometry/guides/vibration-sound-power/),
-  [Structure-borne sound power of building equipment](/phonometry/guides/structure-borne-power/)
-  and [Installed structure-borne sound from equipment](/phonometry/guides/installed-structure-borne/).
+  [Structure-borne sound power of equipment](/phonometry/guides/structure-borne-power/)
+  and [Installed structure-borne sound](/phonometry/guides/installed-structure-borne/).
 - International Organization for Standardization. (2011). *Mechanical
   vibration and shock — Experimental determination of mechanical mobility —
   Part 1: Basic terms and definitions, and transducer specifications*
@@ -119,7 +119,7 @@ list grows as guides gain their References sections.
   resilient elements — Part 1: Principles and guidelines* (ISO 10846-1:2008).
   [iso.org catalogue](https://www.iso.org/standard/38936.html).
   The blocking-force idealisation behind the dynamic transfer stiffness.
-  Cited by [Dynamic transfer stiffness of resilient elements](/phonometry/guides/transfer-stiffness/).
+  Cited by [Transfer stiffness of resilient elements](/phonometry/guides/transfer-stiffness/).
 - International Organization for Standardization. (2009). *Acoustics —
   Determination of airborne sound power levels emitted by machinery using
   vibration measurement — Part 1: Survey method using a fixed radiation
@@ -140,7 +140,7 @@ list grows as guides gain their References sections.
   contact points of machinery when resiliently mounted* (ISO 9611:1996).
   [iso.org catalogue](https://www.iso.org/standard/17424.html).
   The free-velocity characterization of resiliently mounted sources.
-  Cited by [Structure-borne sound power of building equipment](/phonometry/guides/structure-borne-power/).
+  Cited by [Structure-borne sound power of equipment](/phonometry/guides/structure-borne-power/).
 
 ## Speech
 

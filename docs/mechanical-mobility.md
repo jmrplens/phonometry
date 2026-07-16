@@ -93,8 +93,9 @@ print(round(complex(ph.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1
 In the ISO 7626-2 arrangement the structure hangs on a suspension soft enough
 that its rigid-body modes fall well below the first elastic resonance, an
 exciter drives one point through an **impedance head** (a transducer stack
-measuring force and acceleration at the same point, which is what makes a
-driving-point FRF possible), and accelerometers pick up the response
+measuring force and acceleration at the same point, which is what gives the
+attached-exciter setup its driving-point FRF), and accelerometers pick up
+the response
 elsewhere for the transfer FRFs. ISO 7626-5 covers the impact-hammer
 alternative, which trades the exciter's controlled spectrum for speed.
 

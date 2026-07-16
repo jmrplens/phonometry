@@ -125,8 +125,8 @@ de la Fórmula 4 se degrada. De la precarga se derivan tres trampas prácticas:
   son visiblemente no lineales con la carga estática: la lana mineral se
   rigidiza al comprimirse, algunas espumas se ablandan. La placa de carga de
   200 kg/m² fija el punto de trabajo, así que la `s'` tabulada describe en
-  rigor suelos próximos a esa masa superficial. Diseñar una recrecida mucho
-  más pesada con la misma `s'` extrapola más allá de la medición.
+  rigor suelos próximos a esa masa superficial. Diseñar un recrecido mucho
+  más pesado con la misma `s'` extrapola más allá de la medición.
 * **Excitar poco.** La rigidez tangente se define para deformaciones
   dinámicas pequeñas; excitar fuerte la placa lleva la capa a su rango no
   lineal y desplaza la resonancia aparente hacia abajo. Mantén la excitación

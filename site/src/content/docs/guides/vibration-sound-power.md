@@ -77,10 +77,10 @@ vibration per Table 2.
 ## 3. When the radiation-factor assumption breaks
 
 The whole method stands on one substitution: replacing the acoustic
-measurement by `ε`. The Part 1 value `ε = 1` is a genuine *upper limit*, but
-only in the regime where a vibrating surface radiates like a piston, above
-the **critical (coincidence) frequency** of plate-like parts, where bending
-waves travel faster than sound. Below coincidence, adjacent zones of the
+measurement by `ε`. The Part 1 value `ε = 1` is close to the true radiation
+factor only above the **critical (coincidence) frequency** of plate-like
+parts, where bending waves travel faster than sound and the surface radiates
+like a piston. Below coincidence, adjacent zones of the
 plate move in antiphase and their radiation largely cancels: `ε` drops far
 below one and falls quickly with decreasing frequency, so the survey method
 can overstate the low-frequency bands of a large thin casing by 10 dB and
@@ -96,7 +96,8 @@ to violate in the field:
   invisible to a velocity survey; the method characterises the
   structure-borne part only.
 
-Part 2 exists exactly for the first problem: it replaces the fixed `ε = 1`
+Part 2 exists exactly for the radiation-factor problem: it replaces the
+fixed `ε = 1`
 with a band-by-band `εⱼ` determined from one reference measurement of the
 radiated power (ISO 9614 intensity), after which the velocity survey can be
 repeated cheaply on nominally identical machines.

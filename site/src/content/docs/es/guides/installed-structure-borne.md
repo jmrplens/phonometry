@@ -52,7 +52,7 @@ print(round(float(ph.installed_structure_borne_power_level(82.0, dc)), 1))  # L_
 Las partes 1 y 2 de EN 12354 tratan recintos excitados por vía aérea y por la
 máquina de impactos normalizada; la parte 5 cubre las fuentes que sacuden el
 edificio *directamente*: bombas, ventiladores, ascensores, bañeras de
-hidromasaje, cisternas y las conducciones que las atan a paredes y forjados.
+hidromasaje, cisternas y las conducciones que las anclan a paredes y forjados.
 Una vez que la potencia instalada está en la estructura, varios elementos
 radian al recinto receptor: el propio elemento excitado y cada elemento al
 que la vibración llega a través de las uniones. Cada par elemento

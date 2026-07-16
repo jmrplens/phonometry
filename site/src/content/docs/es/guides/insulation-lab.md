@@ -46,10 +46,10 @@ laboratorio, $R'_w$ uno de campo. Las diferencias de nivel estandarizada y
 normalizada $D_{nT}$ y $D_n$ no llevan prima porque describen la pareja de
 salas y no un elemento, así que no hay contraparte sin flancos que marcar. En
 una construcción bien ejecutada $R'_w$ queda unos pocos dB por debajo del
-$R_w$ de laboratorio de la misma partición; un hueco mucho mayor dice que
-dominan los flancos, y el
+$R_w$ de laboratorio de la misma partición; una diferencia mucho mayor dice
+que dominan los flancos, y el
 [modelo EN 12354](/phonometry/es/guides/insulation-prediction/) dice qué vía
-los lleva.
+domina.
 
 Los índices de un solo número reutilizan los mismísimos motores de ISO 717-1/2
 (`weighted_rating`, `weighted_impact_rating`): un espectro $R$ se valora a $R_w$

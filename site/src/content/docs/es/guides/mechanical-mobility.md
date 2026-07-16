@@ -95,8 +95,9 @@ En la disposición de ISO 7626-2 la estructura cuelga de una suspensión lo
 bastante blanda para que sus modos de sólido rígido queden muy por debajo de
 la primera resonancia elástica, un excitador ataca un punto a través de una
 **cabeza de impedancia** (una pila de transductores que mide fuerza y
-aceleración en el mismo punto, lo que hace posible una FRF de punto de
-excitación) y acelerómetros recogen la respuesta en otros puntos para las FRF
+aceleración en el mismo punto, lo que da al montaje con excitador acoplado su
+FRF de punto de excitación) y acelerómetros recogen la respuesta en otros
+puntos para las FRF
 de transferencia. ISO 7626-5 cubre la alternativa con martillo de impacto,
 que cambia el espectro controlado del excitador por rapidez.
 

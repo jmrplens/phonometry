@@ -4,7 +4,7 @@ description: "Caracterización de absorbentes y particiones en laboratorio: la v
 ---
 
 Caracterizar un absorbente o una partición es un ejercicio de laboratorio con
-tres instrumentos distintos detrás. La **sala reverberante** entrega un espectro
+tres instrumentos distintos detrás. La **cámara reverberante** entrega un espectro
 de coeficientes de absorción sonora que ISO 11654 condensa en un único número
 valorado $\alpha_w$ con una clase por letra. El **banco de flujo** —estacionario
 u oscilante— mide cuánto cuesta empujar aire a través de una muestra porosa, la
@@ -17,7 +17,7 @@ de una muestra pequeña, y —con cuatro micrófonos— su pérdida por transmis
 ## 1. Valoración de la absorción sonora (ISO 11654)
 
 ISO 354 mide el coeficiente de absorción sonora $\alpha_s$ de un material en
-bandas de tercio de octava en una sala reverberante. ISO 11654:1997 convierte
+bandas de tercio de octava en una cámara reverberante. ISO 11654:1997 convierte
 ese espectro en una valoración de número único comparable entre productos.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso11654_es.svg" alt="Flujo de valoración ISO 11654: el alpha_s medido pasa a alpha_p práctico por banda de octava, la curva de referencia se desplaza hasta el mejor ajuste, alpha_w se lee a 500 Hz con indicadores de forma, dando la clase de absorción A a E" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso11654_es_dark.svg" alt="Flujo de valoración ISO 11654: el alpha_s medido pasa a alpha_p práctico por banda de octava, la curva de referencia se desplaza hasta el mejor ajuste, alpha_w se lee a 500 Hz con indicadores de forma, dando la clase de absorción A a E" style="width:82%">
@@ -228,6 +228,42 @@ que la biblioteca mantiene sus ayudantes separados y nunca los mezcla.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube_es.svg" alt="Tubo de impedancia de dos micrófonos de ISO 10534-2: un altavoz radiando una onda plana por el tubo, dos micrófonos enrasados en la pared a la separación s y a la distancia x1 de la cara de la probeta, la probeta de ensayo contra un respaldo rígido, y las ondas incidente y reflejada" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube_es_dark.svg" alt="Tubo de impedancia de dos micrófonos de ISO 10534-2: un altavoz radiando una onda plana por el tubo, dos micrófonos enrasados en la pared a la separación s y a la distancia x1 de la cara de la probeta, la probeta de ensayo contra un respaldo rígido, y las ondas incidente y reflejada" style="width:92%">
 
+**Rango de frecuencia de trabajo (ISO 10534-2, cláusula 4).** Todo lo que
+informa el tubo supone que el campo interior es una única onda plana, y la
+geometría fija los dos extremos de la banda útil. Por encima del corte del
+primer modo transversal el campo deja de ser plano: un tubo circular de
+diámetro $d$ exige $f\,d < 0{,}58\,c_0$ (Ec. (2); $f\,d < 0{,}50\,c_0$ para un
+tubo rectangular, Ec. (3)). La separación de micrófonos $s$ debe además
+mantenerse lejos de la singularidad de media longitud de onda del método de la
+función de transferencia, $f\,s < 0{,}45\,c_0$ (Ec. (4)). En el extremo bajo
+aparece el problema opuesto: una separación mucho menor que la longitud de
+onda apenas deja diferencia de fase entre micrófonos que medir, así que la
+pauta de la cláusula 4.2 mantiene la separación por encima del 5 % de la
+longitud de onda:
+
+$$
+\frac{c_0}{20\,s} \;<\; f \;<\;
+\min\!\left(0{,}58\,\frac{c_0}{d},\ 0{,}45\,\frac{c_0}{s}\right).
+$$
+
+Ningún tubo cubre por sí solo el rango de la acústica de edificios. Un tubo de
+100 mm con separación de 100 mm trabaja aproximadamente de 170 Hz a 1,5 kHz;
+llegar a las bandas de 5 kHz exige un tubo pequeño (29 mm) con separación
+corta, que a su vez no ve las bandas bajas. Los laboratorios emparejan por eso
+un tubo grande y uno pequeño (o un tubo con dos separaciones) y empalman los
+espectros; ambos deben coincidir en las bandas de solape, y una discrepancia
+ahí apunta al corte o al montaje de la muestra, no a la física.
+
+```python
+from phonometry import plane_wave_frequency_range
+
+# Un tubo de 100 mm con separación de 100 mm y uno de 29 mm con 20 mm.
+f_l, f_u = plane_wave_frequency_range(0.100, 343.2, diameter=0.100)
+print(round(f_l, 1), round(f_u, 1))     # 171.6 1544.4
+f_l, f_u = plane_wave_frequency_range(0.020, 343.2, diameter=0.029)
+print(round(f_l, 1), round(f_u, 1))     # 858.0 6864.0
+```
+
 **Método de la razón de onda estacionaria (ISO 10534-1).** Una sonda recorre la
 onda estacionaria y lee la diferencia de nivel $\Delta L = L_\text{max} -
 L_\text{min}$ entre un máximo de presión y el mínimo adyacente. La razón de onda
@@ -356,6 +392,100 @@ micrófonos `(H1, H2, H3, H4)` medidas en cada carga; sus métodos
 `absorption_hard_backed`, `characteristic_impedance_material`,
 `material_wavenumber`) leen entonces las magnitudes de ASTM E2611.
 
+**Errores de montaje.** La mayoría de los malos datos de tubo se fabrican en
+el portamuestras, mucho antes del procesado de señal. Los fallos recurrentes:
+
+- **Holguras perimetrales.** Una probeta cortada ligeramente pequeña deja una
+  lámina de aire junto a la pared del tubo. El sonido se cortocircuita
+  alrededor y por detrás de la muestra, y la propia holgura resuena, de modo
+  que la absorción medida gana una joroba espuria de baja a media frecuencia.
+  Corte con ajuste deslizante ceñido y selle el borde (una película fina de
+  vaselina es el remedio clásico) sin cargar la cara frontal.
+- **Compresión.** Una probeta cortada grande y embutida a la fuerza es más
+  densa que el producto que debe representar: la resistividad al flujo sube,
+  un esqueleto flexible se rigidiza, y la curva de absorción se desplaza y se
+  aplana. El resultado es repetible y erróneo.
+- **Cavidad trasera oculta.** Si la probeta no asienta a ras del respaldo
+  rígido, la capa de aire involuntaria actúa como cavidad de cuarto de
+  longitud de onda y desplaza el pico de absorción hacia abajo en frecuencia,
+  favoreciendo al material. Las cámaras de aire traseras son montajes
+  perfectamente legítimos, pero solo cuando son deliberadas, dimensionadas y
+  declaradas con el resultado.
+- **Cara no plana.** Una cara frontal abombada, inclinada o desgarrada
+  dispersa hacia modos transversales por debajo del corte nominal y rompe la
+  hipótesis de incidencia normal sobre la que descansan las ecuaciones. Corte
+  con herramienta afilada; no rasgue los materiales fibrosos a medida.
+- **Una probeta no es el material.** Los productos porosos son inhomogéneos a
+  la escala de una muestra de tubo. Mida varios cortes y promedie; la
+  dispersión entre probetas es varianza del producto que merece declararse,
+  no ruido de medida que esconder.
+
+## ¿Tubo o cámara reverberante?
+
+El tubo y la cámara reverberante entregan ambos un número llamado "coeficiente
+de absorción", y los dos se confunden de forma rutinaria. Son magnitudes
+físicas distintas, medidas bajo campos sonoros distintos, y no coinciden, a
+veces ni de lejos.
+
+El tubo mide un coeficiente a **incidencia normal**: una onda plana, un
+ángulo, una probeta de unos centímetros y un factor de reflexión complejo que
+conserva módulo y fase. ISO 354 mide el coeficiente de **incidencia
+aleatoria** $\alpha_s$: un campo difuso que golpea una muestra de 10 a 12 m²
+desde todas las direcciones a la vez, recuperado del cambio del tiempo de
+caída de la cámara mediante la fórmula de Sabine, un promedio de energía sin
+fase alguna. Como el campo difuso encuentra más caminos hacia el interior del
+absorbente que la única onda a incidencia normal (las ondas oblicuas recorren
+más camino dentro de la capa), $\alpha_s$ suele salir más alto. Para una
+superficie de reacción local ambos se conectan mediante el promedio angular
+de Paris, que define el coeficiente de absorción estadístico
+
+$$
+\alpha_{st} = \int_0^{\pi/2} \alpha(\theta)\,\sin 2\theta\,\mathrm{d}\theta,
+$$
+
+una integral que pondera sobre todo los ángulos oblicuos; evaluarla exige el
+$\alpha(\theta)$ dependiente del ángulo a partir de la impedancia superficial
+medida, no solo el propio coeficiente a incidencia normal.
+
+**Por qué los valores de ISO 354 superan 1.** Un cociente de energía absorbida
+sobre incidente no puede superar la unidad y, sin embargo, los informes de
+cámara reverberante con $\alpha_s = 1{,}05$ a $1{,}20$ para absorbentes
+porosos gruesos son rutinarios y correctos según el método. La fórmula de
+Sabine convierte el cambio del tiempo de caída en un área de absorción
+equivalente $A$, y $\alpha_s = A/S$ divide por el área *geométrica* de la
+muestra $S$. La difracción en los bordes de la muestra permite a la probeta
+drenar energía de un campo sonoro más ancho que su huella (el efecto de
+borde), de modo que el área equivalente puede superar la geométrica. Esos
+valores no son errores, pero tampoco son portables: dependen del tamaño y del
+perímetro de la muestra, que es exactamente la razón por la que ISO 354 fija
+ambos. La valoración de ISO 11654 simplemente trunca: los coeficientes
+prácticos por encima de $1{,}00$ se fijan en $1{,}00$ (sección 1). Las
+entradas de predicción no reciben ese recorte silencioso en esta biblioteca:
+los
+[estimadores del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/)
+rechazan coeficientes fuera de $[0, 1)$ (los logaritmos de Eyring y
+Millington divergen en uno), de modo que los valores de ISO 354 iguales o
+superiores a uno deben devolverse por debajo de uno antes de la llamada,
+mientras que el presupuesto de área de absorción equivalente de
+[EN 12354-6](/phonometry/es/guides/enclosed-space-absorption/) acepta los
+coeficientes tal cual se suministran.
+
+**Cuál usar.** Responden a preguntas distintas. El valor de cámara
+reverberante es el que alimenta la predicción en campo difuso: las
+estimaciones de reverberación de Sabine, las áreas de absorción equivalentes
+de [EN 12354-6](/phonometry/es/guides/enclosed-space-absorption/) y la
+valoración $\alpha_w$ con su clase, todas las cuales esperan incidencia
+aleatoria sobre una muestra finita y montada (los tipos de montaje del Anexo B
+de ISO 354 existen porque el montaje es parte del resultado). El valor de tubo
+es la herramienta de laboratorio y desarrollo: necesita solo unos centímetros
+cuadrados de material, resuelve módulo *y* fase, y su impedancia superficial
+fija los parámetros de los modelos de material poroso de la tradición de
+Allard y Atalla, con la resistividad al flujo de la sección 2 como primera
+entrada; el modelo ajustado predice después la capa a cualquier ángulo,
+espesor o respaldo. Lo que el número del tubo *no* es, es un sustituto directo
+de $\alpha_s$: alimentar coeficientes a incidencia normal en un presupuesto de
+Sabine o de EN 12354-6 subestima sistemáticamente la absorción instalada.
+
 ## 4. Incertidumbre de medida de la absorción (ISO 12999-2)
 
 Un coeficiente de absorción valorado significa poco sin su incertidumbre. La
@@ -422,6 +552,49 @@ print(float(r.reported_expanded_uncertainty[0]))             # 0.08  (U, k=2)
 print(float(weighted_coefficient_uncertainty(0.70).reported_expanded_uncertainty[0]))  # 0.07
 print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[0]))   # 1.6
 ```
+
+## Referencias
+
+- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
+  Modelling sound absorbing materials* (2.ª ed.). Wiley.
+  ISBN 978-0-470-74661-5.
+  [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
+  La teoría del material poroso tras las magnitudes medidas: la resistividad
+  al flujo como entrada de modelo, y la impedancia superficial y la absorción
+  que recupera el tubo.
+- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
+  Theory, design and application* (3.ª ed.). CRC Press.
+  ISBN 978-1-4987-4099-9.
+  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
+  La medida y el diseño de absorbentes en la práctica: los métodos de tubo y
+  de cámara lado a lado, los montajes y la discusión del efecto de borde tras
+  la sección de tubo o cámara reverberante.
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [Catálogo iso.org](https://www.iso.org/standard/34545.html).
+  El método de cámara reverberante que produce los espectros de $\alpha_s$
+  valorados por ISO 11654, incluidos los montajes de probeta del Anexo B.
+- International Organization for Standardization. (1998). *Acoustics —
+  Determination of sound absorption coefficient and impedance in impedance
+  tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adoptada en
+  Europa como EN ISO 10534-2:2001, la edición implementada aquí; revisada
+  después como [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
+  [Catálogo iso.org](https://www.iso.org/standard/22851.html).
+  El método de la función de transferencia con dos micrófonos y sus límites
+  de rango de onda plana.
+- ASTM International. (2019). *Standard test method for normal incidence
+  determination of porous material acoustical properties based on the
+  transfer matrix method* (ASTM E2611-19, la edición implementada aquí;
+  revisada después como [ASTM E2611-24](https://store.astm.org/e2611-24.html)).
+  [Tienda ASTM](https://store.astm.org/e2611-19.html).
+  El método de matriz de transferencia con cuatro micrófonos tras los
+  ayudantes de pérdida por transmisión.
+- International Organization for Standardization. (2018). *Acoustics —
+  Determination of airflow resistance — Part 1: Static airflow method*
+  (ISO 9053-1:2018).
+  [Catálogo iso.org](https://www.iso.org/standard/69869.html).
+  El método estático de la sección 2, con la regresión por el origen y la
+  velocidad de referencia de 0,5 mm/s.
 
 ---
 

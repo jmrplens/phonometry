@@ -57,8 +57,8 @@ For a **uniform** distribution Eyring and Millington-Sette coincide, and both
 fall below Sabine — Sabine's over-estimate at high absorption is the reason
 Eyring exists. As $\alpha \to 0$, $-S\ln(1-\bar\alpha) \to \sum_i S_i\alpha_i$
 and Eyring reduces to Sabine. Air absorption enters every model through the
-power-attenuation coefficient $m$ (in neper per metre, from
-[atmospheric absorption](room-acoustics.md)):
+power-attenuation coefficient $m$ (in neper per metre, from the ISO 9613-1
+[atmospheric absorption](outdoor-propagation.md)):
 
 ```python
 import phonometry as ph
@@ -157,21 +157,115 @@ plt.show()
 
 </details>
 
+## 4. Choosing a model, and when every model fails
+
+The five formulae are not rivals on a single axis of accuracy; each has a
+domain of validity:
+
+- **Sabine** is the tool for live rooms with low, reasonably even
+  absorption (mean $\bar\alpha$ up to roughly 0.2): classrooms, halls,
+  reverberation chambers. It is also the convention wired into measurement
+  practice, because the ISO 354 absorption coefficient is *defined* through
+  Sabine's formula, so feeding reverberation-room data back into Sabine is
+  self-consistent even where the formula is strained. Its structural defect
+  shows at high absorption: with $\alpha = 1$ on every surface (an opening
+  in every direction) it still predicts a finite reverberation time.
+- **Eyring** is the choice for evenly treated rooms with substantial
+  absorption: studios, treated offices, listening rooms. It reaches
+  $T = 0$ for total absorption, and its correction over Sabine grows with
+  $\bar\alpha$ (about 10 % shorter at $\bar\alpha = 0.2$, 30 % at 0.5).
+- **Millington-Sette** handles a mix of very absorptive and hard surfaces
+  better than a single mean, but it is meant for measured, sub-unity
+  coefficients: a single surface with $\alpha_i = 1$ drives the whole
+  prediction to zero. Reverberation-room coefficients above 1.0 (a
+  documented ISO 354 outcome, see the absorption section of
+  [Room Acoustics](room-acoustics.md)) must be capped below 1 before any of
+  the logarithmic models can even be evaluated.
+- **Fitzroy** and **Arau-Puchades** target shoebox rooms whose absorption
+  is concentrated on one axis, the typical office or dwelling with a soft
+  floor and ceiling between hard walls. Arau's geometric mean tempers
+  Fitzroy's known over-prediction when one wall pair is very reflective.
+
+**When every formula fails.** All five inherit the same assumption: a
+diffuse field, with sound arriving equally from all directions at every
+point, that stays diffuse while it decays. The common breakages:
+
+- **Below the Schroeder frequency** the band holds a handful of discrete
+  modes (the animation in §1) and a statistical reverberation time is not
+  defined at all; each mode decays at its own rate set by the wall
+  impedances it actually touches.
+- **Coupled volumes** (a hall with an open stage house, two rooms through a
+  doorway) produce double-slope decays; no single $T$ exists, and the
+  measured T20 and T30 disagree (the curvature diagnostic of
+  [Room Acoustics](room-acoustics.md)).
+- **Disproportionate rooms** (corridors, low flat halls) with the
+  absorption on one surface pair keep a grazing sound field parallel to the
+  hard surfaces that the absorber barely touches; the measured time can be
+  up to twice any statistical prediction, the practical experience recorded
+  in EN 12354-6 (see
+  [Sound absorption in enclosed spaces](enclosed-space-absorption.md)).
+- **Focusing geometries** (domes, curved rear walls) concentrate late
+  energy instead of mixing it, producing position-dependent decays no
+  single-number formula can represent.
+
+Scattering objects restore the mixing the models assume: a furnished room
+follows the statistical prediction distinctly better than the same room
+bare, beyond what the furniture's own absorption area accounts for. In
+practice, quote a *band* of predictions (Sabine and Eyring, or Fitzroy and
+Arau-Puchades for axial cases) rather than a single value; where the models
+spread, the room is telling you its field is not diffuse.
+
+## References
+
+- Sabine, W. C. (1922). *Collected papers on acoustics*. Harvard University
+  Press. [Free scan at the Internet Archive](https://archive.org/details/collectedpaperso00sabi).
+  The original reverberation experiments and the $T = 0.161\,V/A$ law of §1.
+- Eyring, C. F. (1930). Reverberation time in "dead" rooms. *The Journal of
+  the Acoustical Society of America*, 1(2A), 217-241.
+  [doi:10.1121/1.1915175](https://doi.org/10.1121/1.1915175).
+  The mean-free-path derivation behind the $-S\ln(1-\bar\alpha)$ term of §1.
+- Millington, G. (1932). A modified formula for reverberation. *The Journal
+  of the Acoustical Society of America*, 4(1), 69-82.
+  [doi:10.1121/1.1915588](https://doi.org/10.1121/1.1915588).
+  The per-surface logarithmic absorption term of §1.
+- Fitzroy, D. (1959). Reverberation formula which seems to be more accurate
+  with nonuniform distribution of absorption. *The Journal of the
+  Acoustical Society of America*, 31(7), 893-897.
+  [doi:10.1121/1.1907814](https://doi.org/10.1121/1.1907814).
+  The axial split into three wall-pair decays of §2.
+- Arau-Puchades, H. (1988). An improved reverberation formula. *Acustica*,
+  65(4), 163-180.
+  [Publisher record at Ingenta](https://www.ingentaconnect.com/content/dav/aaua/1988/00000065/00000004/art00003).
+  The geometric-mean combination of §2 (its Formula 18).
+- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
+  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
+  The diffuse-field theory, its limits and the modern assessment of the
+  classical formulae behind §4.
+- Everest, F. A. (2001). *Master handbook of acoustics* (4th ed.).
+  McGraw-Hill. ISBN 978-0-07-136097-5.
+  [Open Library record](https://openlibrary.org/isbn/9780071360975).
+  The Fig. 7-22 worked example the conformance suite reproduces.
+- Carrión Isbert, A. (1998). *Diseño acústico de espacios arquitectónicos*.
+  Edicions UPC. ISBN 978-84-8301-252-9.
+  [Open Library record](https://openlibrary.org/books/OL23159935M).
+  A Spanish-language textbook treatment of the reverberation models and
+  their use in room design.
+
 ---
 
-**References.** W. C. Sabine, *Collected Papers on Acoustics* (1922); C. F.
-Eyring, "Reverberation time in 'dead' rooms", *J. Acoust. Soc. Am.* **1** (1930)
-217; G. Millington, "A modified formula for reverberation", *J. Acoust. Soc.
-Am.* **4** (1932) 69; D. Fitzroy, "Reverberation formula which seems to be more
-accurate with nonuniform distribution of absorption", *J. Acoust. Soc. Am.*
-**31** (1959) 893; H. Arau-Puchades, "An improved reverberation formula",
-*Acustica* **65** (1988) 163 (Formula 18). Textbook treatments: A. Carrión
-Isbert, *Diseño acústico de espacios arquitectónicos* (1998); F. A. Everest &
-K. C. Pohlmann, *Master Handbook of Acoustics*, 4th ed. Air absorption follows
-ISO 9613-1:1993 (see [Room Acoustics](room-acoustics.md)). The conformance suite
-is anchored on a **real worked example** — Everest's Fig. 7-22 Example 1
-(an untreated 23.3 × 16 × 10 ft room), whose six printed Sabine reverberation
-times the SI implementation reproduces to ≤ 0.02 s — reinforced by hand-computed
-closed-form values and the model identities (every model collapses to Eyring for
-uniform absorption; Eyring collapses to Sabine as $\alpha \to 0$), which
-transitively carry that real-data anchor to the whole family.
+**Standards.** The classical reverberation formulae predate the normative
+world; they enter it through EN 12354-6:2003, whose Clause 4 model is a
+Sabine calculation with object and air terms (see
+[Sound absorption in enclosed spaces](enclosed-space-absorption.md)), and
+through ISO 354:2003, which defines the measured absorption coefficient via
+Sabine's formula. Air absorption follows ISO 9613-1:1993, *Acoustics —
+Attenuation of sound during propagation outdoors — Part 1: Calculation of
+the absorption of sound by the atmosphere* (see
+[Outdoor propagation](outdoor-propagation.md)). The conformance suite is
+anchored on a real worked example, Everest's Fig. 7-22 Example 1 (an
+untreated 23.3 × 16 × 10 ft room), whose six printed Sabine reverberation
+times the SI implementation reproduces to ≤ 0.02 s, reinforced by
+hand-computed closed-form values and the model identities (every model
+collapses to Eyring for uniform absorption; Eyring collapses to Sabine as
+$\alpha \to 0$), which transitively carry that real-data anchor to the
+whole family.

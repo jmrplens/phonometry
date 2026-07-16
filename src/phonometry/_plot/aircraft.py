@@ -24,9 +24,11 @@ if TYPE_CHECKING:
     from ..aircraft.airport_noise import FlyoverResult, NoiseContourResult, NpdLevelResult
     from ..aircraft.rotorcraft_noise import (
         FlightPathKinematics,
+        MeanGroundPlaneResult,
         RotorcraftEventResult,
         RotorcraftHemisphere,
         RotorcraftNoiseContourResult,
+        TerrainScreeningResult,
     )
 
 def plot_epnl(result: "EPNLResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
@@ -294,4 +296,72 @@ def plot_rotorcraft_noise_contour(
     ax.set_ylabel("y [km]")
     ax.set_title("Rotorcraft noise contour (ECAC Doc 32)")
     ax.set_aspect("equal", adjustable="box")
+    return ax
+
+
+def plot_mean_ground_plane(
+    result: "MeanGroundPlaneResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """Terrain section with its fitted mean ground plane (ECAC Doc 32 guidance).
+
+    :param result: A
+        :class:`~phonometry.aircraft.rotorcraft_noise.MeanGroundPlaneResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the terrain ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    d = np.asarray(result.distances, dtype=np.float64)
+    z = np.asarray(result.heights, dtype=np.float64)
+    ax.plot(d, z, **{"color": _C_PRIMARY, "lw": 1.8, "label": "Terrain profile",
+            **kwargs})
+    ax.fill_between(d, z, z.min() - 0.05 * np.ptp(z) - 0.5, color=_C_PRIMARY,
+                    alpha=0.08)
+    ax.plot(d, result.height(d), color=_C_SECONDARY, lw=1.6, ls="--",
+            label=f"Mean ground plane (a = {result.slope:.3f})")
+    ax.set_xlabel("Section distance [m]")
+    ax.set_ylabel("Height [m]")
+    ax.set_title("Mean ground plane (NORAH2 guidance Eq. 36-40)")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    return ax
+
+
+def plot_terrain_screening(
+    result: "TerrainScreeningResult", ax: Axes | None = None, **kwargs: Any) -> Axes:
+    """Terrain screening section: profile, line of sight and diffracted path.
+
+    :param result: A
+        :class:`~phonometry.aircraft.rotorcraft_noise.TerrainScreeningResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the terrain ``plot``.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    d = np.asarray(result.distances, dtype=np.float64)
+    z = np.asarray(result.heights, dtype=np.float64)
+    src, rcv = result.source, result.receiver
+    ax.plot(d, z, **{"color": _C_MUTED, "lw": 1.8, "label": "Terrain profile",
+            **kwargs})
+    floor = min(z.min(), src[1], rcv[1]) - 0.05 * max(np.ptp(z), 1.0) - 0.5
+    ax.fill_between(d, z, floor, color=_C_MUTED, alpha=0.12)
+    ax.plot([src[0], rcv[0]], [src[1], rcv[1]], color=_C_REFERENCE, lw=1.2,
+            ls=":", label="Line of sight")
+    if result.screened and result.diffraction_points.size:
+        pts = np.vstack([[src[0], src[1]], result.diffraction_points,
+                         [rcv[0], rcv[1]]])
+        ax.plot(pts[:, 0], pts[:, 1], color=_C_PRIMARY, lw=1.8,
+                label=f"Diffracted path (δ = {result.path_difference:.2f} m)")
+        ax.plot(result.diffraction_points[:, 0], result.diffraction_points[:, 1],
+                "v", color=_C_SECONDARY, ms=6, label="Diffraction edges")
+    ax.plot(*src, "o", color=_C_PRIMARY, ms=7)
+    ax.annotate("S", src, textcoords="offset points", xytext=(0, 8),
+                ha="center", fontsize=10)
+    ax.plot(*rcv, "s", color=_C_SECONDARY, ms=6)
+    ax.annotate("R", rcv, textcoords="offset points", xytext=(0, 8),
+                ha="center", fontsize=10)
+    ax.set_xlabel("Section distance [m]")
+    ax.set_ylabel("Height [m]")
+    ax.set_title("Terrain screening (ECAC Doc 32 / NORAH2 guidance)")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     return ax

@@ -168,13 +168,41 @@ plt.xlabel("Time [s]"); plt.ylabel("Level re peak [dB]")
 reported room parameter is the spatial average over several. ISO 3382-1
 (performance spaces) asks for at least two source positions and microphones
 spaced $\geq 2$ m apart, $\geq 1$ m from any surface, at $1.2$ m
-(seated-ear) height, avoiding symmetric placements; ISO 3382-2 fixes the
-minimum number of source, microphone and source–microphone combinations per
-accuracy grade (survey / engineering / precision).
+(seated-ear) height; ISO 3382-2 fixes the minimum number of source,
+microphone and source–microphone combinations per accuracy grade
+(survey / engineering / precision) and asks for microphone positions that
+avoid symmetric placements.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement.svg" alt="Room-acoustics measurement setup: a top-view room plan with two loudspeaker source positions and six microphone positions with the ISO 3382-1 spacing rules, and the ISO 3382-2 table of minimum positions for the survey, engineering and precision grades" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_dark.svg" alt="Room-acoustics measurement setup: a top-view room plan with two loudspeaker source positions and six microphone positions with the ISO 3382-1 spacing rules, and the ISO 3382-2 table of minimum positions for the survey, engineering and precision grades" style="width:94%">
 
 <video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: as the microphone height changes, the delay between the direct sound and the floor reflection shifts and the comb filter in the frequency response moves with it, which is why measurement position matters near reflecting surfaces" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: as the microphone height changes, the delay between the direct sound and the floor reflection shifts and the comb filter in the frequency response moves with it, which is why measurement position matters near reflecting surfaces" style="width:88%"></video>
+
+**Averaging across positions.** The reported per-band parameter is the
+arithmetic mean over all source-microphone combinations, and the spread
+across positions is part of the answer, not noise: quote it alongside the
+mean whenever it exceeds the parameter's JND (§2), because a room can meet a
+target on average while individual seats sit far outside it. Four placement
+mistakes bias the mean itself:
+
+- **Correlated positions.** Microphones closer than 2 m to each other
+  sample nearly the same sound field twice, so the average looks more
+  stable than it is. The 1 m minimum from any surface likewise avoids the
+  pressure build-up near a boundary (and the comb filter of the animation
+  above) that colours everything a too-close microphone records.
+- **Symmetric placements.** In a geometrically symmetric room, mirror-image
+  positions receive mirror-image reflection patterns; averaging them adds
+  no new information. This is why ISO 3382-2 asks for positions that do not
+  sit on symmetry lines.
+- **Too close to the source.** Inside the direct field EDT collapses and
+  C80 saturates upward no matter what the room does. ISO 3382-2 therefore
+  keeps every microphone at least $d_{min} = 2\sqrt{V/(c\,\hat T)}$ from
+  the source, with $\hat T$ an estimate of the expected reverberation time
+  (about 2.2 m for a 200 m³ classroom with an expected 0.5 s).
+- **Low-frequency luck.** Below the Schroeder frequency (§2) each band
+  holds only a handful of room modes, and a microphone on a node of one of
+  them sees a different decay than a microphone on an antinode. The spread
+  of the 63-125 Hz bands across positions is structurally larger; the cure
+  is more positions, not a longer excitation.
 
 ### `sweep_signal()` / `inverse_filter()` parameters
 
@@ -300,6 +328,49 @@ plt.show()
 For this single-slope decay EDT, T20 and T30 all return ≈ 1.0 s, and the
 energy parameters match their closed forms (C80 = 3.05 dB, D50 = 0.499,
 Ts = 72 ms). A real room has a steeper early slope, so EDT < T30.
+
+**Reading EDT, T20 and T30 against each other.** The three times
+extrapolate the same 60 dB decay from different windows, so their
+disagreement carries information:
+
+- **T20 ≈ T30** (curvature below 10 %): the decay is close to a single
+  straight slope over both evaluation windows, which is consistent with
+  (though not proof of) a diffuse field, and either time can stand for
+  "the" reverberation time of the band.
+- **T30 > T20** (curvature above 10 %): the decay sags, with late energy
+  decaying more slowly than early energy. The usual causes are coupled
+  volumes (an open door to a corridor or stairwell, a deep balcony or a
+  stage house feeding energy back) and strongly uneven absorption that
+  leaves one room axis reverberant. No single number describes such a
+  decay: report both windows together with the curvature, and treat the
+  [statistical predictions](/phonometry/guides/reverberation-prediction/)
+  with suspicion, because their diffuse-field assumption has visibly
+  failed.
+- **EDT far from T20/T30**: EDT is fitted where the direct sound and the
+  first reflections still dominate, so it varies from seat to seat while
+  T30 barely moves. EDT below T30 means the position receives strong early
+  energy (close to the source, under a reflector): the room sounds drier
+  there than its T30 suggests, because perceived reverberance follows EDT.
+  EDT above T30 at one seat points to an echo or a focusing surface
+  concentrating late energy there.
+
+**How much decay the noise floor allows.** A fit window is only as good as
+the decay range underneath it. The **impulse-to-noise ratio** (INR) is the
+level distance between the peak of the band-filtered IR and its noise
+floor; the fit window plus a safety margin must fit inside it, which is the
+ISO 3382 requirement of at least 35 dB of usable decay range for T20 and
+45 dB for T30. An undersized range biases the fitted time upward, toward
+the flat tail the noise floor imposes on the decay curve, and the bias
+grows quietly before the fit visibly fails (Hak, Wenmaekers, & van
+Luxemburg, 2012). `room_parameters` reports the per-band `dynamic_range`
+and tightens the acceptance limits to 46 dB (T20) and 54 dB (T30) before
+flagging a value valid, so the residual truncation-and-compensation bias of
+a flagged-valid time stays inside the 5 % JND. When a band fails its flag,
+the order of remedies is: use T20 instead of T30 (its window needs 10 dB
+less range under the ISO minima, 8 dB under the tightened flags); raise the
+INR at acquisition, since doubling the sweep length or
+the number of synchronous averages buys 3 dB each time; and only then fall
+back to EDT, never to a fit stretched into the noise.
 
 Below the **Schroeder frequency** $f_s \approx 2000\sqrt{T/V}$ these
 decay statistics stop telling the whole story: the field is ruled by
@@ -511,6 +582,51 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
 - [Theory](/phonometry/reference/theory/rooms-buildings/) — Schroeder integration, regression windows and the
   reference-curve derivation.
 - API reference: [`room.room_acoustics`](/phonometry/reference/api/rooms/room-acoustics/), [`room.room_ir`](/phonometry/reference/api/rooms/room-ir/) and [`room.open_plan`](/phonometry/reference/api/rooms/open-plan/).
+
+## References
+
+- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
+  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
+  The reference monograph behind this page: the statistical theory of
+  decaying sound fields, the Schroeder frequency and the perceptual room
+  parameters of §2.
+- Schroeder, M. R. (1965). New method of measuring reverberation time.
+  *The Journal of the Acoustical Society of America*, 37(3), 409-412.
+  [doi:10.1121/1.1909343](https://doi.org/10.1121/1.1909343).
+  The backward-integration method that turns the squared impulse response
+  into the smooth decay curve of §2.
+- Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).
+  Measuring room impulse responses: Impact of the decay range on derived
+  room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
+  907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
+  The INR analysis behind the dynamic-range discussion and the tightened
+  validity flags of §2.
+- International Organization for Standardization. (2009). *Acoustics —
+  Measurement of room acoustic parameters — Part 1: Performance spaces*
+  (ISO 3382-1:2009).
+  [iso.org catalogue](https://www.iso.org/standard/40979.html).
+  The parameter definitions, position requirements and just-noticeable
+  differences of §2.
+- International Organization for Standardization. (2008). *Acoustics —
+  Measurement of room acoustic parameters — Part 2: Reverberation time in
+  ordinary rooms* (ISO 3382-2:2008).
+  [iso.org catalogue](https://www.iso.org/standard/36201.html).
+  The accuracy grades, position counts and the minimum source distance of
+  the position-averaging discussion in §1.
+- International Organization for Standardization. (2012). *Acoustics —
+  Measurement of room acoustic parameters — Part 3: Open plan offices*
+  (ISO 3382-3:2012).
+  [iso.org catalogue](https://www.iso.org/standard/46520.html).
+  The open-plan speech-privacy quantities of §3.
+- International Organization for Standardization. (2006). *Acoustics —
+  Application of new measurement methods in building and room acoustics*
+  (ISO 18233:2006).
+  [iso.org catalogue](https://www.iso.org/standard/40408.html).
+  The swept-sine and MLS acquisition of §1.
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [iso.org catalogue](https://www.iso.org/standard/34545.html).
+  The reverberation-room absorption measurement of §4.
 
 ---
 

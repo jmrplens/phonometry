@@ -129,12 +129,83 @@ ruido de baja frecuencia fluctuante (RNC, que necesita una serie temporal en
 lugar de un único espectro) y el índice numérico de evaluación de calidad (QAI,
 que la norma remite a referencias externas) no forman parte de este módulo.
 
+## 3. Elegir un criterio: NC, RC Mark II o NR
+
+Las dos calificaciones responden a preguntas distintas, y existe una
+tercera familia que este módulo deliberadamente no implementa:
+
+- **NC** responde a *"¿cumple la sala su límite, y qué banda lo rompe?"*.
+  Es la calificación de conformidad de la práctica norteamericana
+  (especificaciones, códigos, fichas de equipos), y el método de tangencia
+  lo gobierna por completo la única banda determinante. Ese es también su
+  punto ciego: dos salas NC-40 pueden sonar completamente distintas, una
+  retumbante y otra siseante, porque la tangencia no dice nada del
+  equilibrio espectral. Usa NC cuando una especificación lo cite, e informa
+  siempre de la banda determinante junto a la calificación, porque nombra
+  la octava que cualquier corrección debe atacar primero.
+- **RC Mark II** responde a *"¿cómo suena la sala, y qué hay que
+  corregir?"*. Su calificación sigue la interferencia con el habla a través
+  de la media de frecuencias medias, y su pendiente de referencia de
+  −5 dB por octava es el espectro que los ocupantes describen como neutro,
+  un fondo de ventilación anodino que no es ni retumbante ni agudo. La
+  etiqueta espectral señala después el rango de frecuencias problemático.
+  Recurre a RC Mark II en la fase de diseño del sistema de climatización, o
+  para diagnosticar una instalación que no cumple su límite NC.
+- **NR (Noise Rating)**, la familia de curvas de Kosten y van Os (1962),
+  es la contraparte europea de NC: la misma lógica de
+  tangencia sobre una familia de curvas algo distinta (más permisiva en
+  baja frecuencia, más estricta en alta), habitual en especificaciones
+  europeas e internacionales de equipos y edificación. phonometry no
+  implementa NR; cuando una especificación cite NR, califica contra las
+  propias curvas NR en lugar de sustituirlas por NC, porque las dos
+  familias divergen varios decibelios lejos de las frecuencias medias.
+
+**Leer la etiqueta.** La etiqueta de RC Mark II es una pista de reparación,
+no solo un rótulo. Una etiqueta de retumbo (`R`, más de 5 dB sobre la
+referencia a 500 Hz o por debajo) apunta a la planta de climatización: un
+ventilador sobredimensionado o estrangulado, retumbo de conductos o
+vibración estructural rerradiada por las paredes, y es la energía de baja
+frecuencia la que hace vibrar la construcción ligera y fatiga a los
+ocupantes. Una etiqueta de siseo (`H`, más de 3 dB por encima a 1000 Hz o
+más) apunta al extremo terminal: velocidades de paso excesivas en difusores
+y rejillas o una compuerta estrangulada cerca de la salida, y es el rango
+que enmascara el habla. Una etiqueta neutra (`N`) significa que el nivel
+aún puede estar mal, pero el carácter es correcto: reduce todo el espectro
+en lugar de remodelarlo.
+
+## Referencias
+
+- Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise
+  Control*, 3(1), 19-27.
+  [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
+  El artículo que introdujo las curvas NC y el razonamiento de
+  interferencia con el habla que hay detrás.
+- Kosten, C. W., & van Os, G. J. (1962). Community reaction criteria for
+  external noises. In *The Control of Noise* (National Physical Laboratory
+  Symposium No. 12, pp. 373-387). Her Majesty's Stationery Office.
+  [Ficha en Open Library](https://openlibrary.org/books/OL58781133M).
+  El artículo que introdujo la familia de curvas NR con la que el texto
+  contrasta NC.
+- Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
+  noise of heating, ventilating, and air-conditioning (HVAC) systems in
+  buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
+  [doi:10.3397/1.2828446](https://doi.org/10.3397/1.2828446).
+  El procedimiento RC refinado, con su razonamiento de espectro neutro y
+  las regiones de retumbo y siseo, que el Anexo D de ANSI/ASA S12.2
+  codifica.
+- Acoustical Society of America. (2019). *Criteria for evaluating room
+  noise* (ANSI/ASA S12.2-2019).
+  [Tienda ANSI](https://webstore.ansi.org/standards/asa/ansiasas122019).
+  Las curvas NC normativas y el método de tangencia, más el procedimiento
+  RC Mark II de su Anexo D informativo, que implementa este módulo.
+
 ---
 
 **Normas.** ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — las
-curvas NC y el método de tangencia (Tabla 1), y las curvas RC Mark II (Anexo D,
-Tabla D.1), la calificación por media de frecuencias medias (cláusula D.4) y la
-etiqueta espectral neutro/retumbo/siseo (cláusula D.3).
+curvas NC normativas y el método de tangencia (Tabla 1), y, del Anexo D
+informativo, las curvas RC Mark II (Tabla D.1), la calificación por media de
+frecuencias medias (cláusula D.4) y la etiqueta espectral neutro/retumbo/siseo
+(cláusula D.3).
 
 ## Véase también
 

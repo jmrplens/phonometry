@@ -36,6 +36,16 @@ $$
 s'_t = 4\pi^2\,m'_t\,f_r^2 .
 $$
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dynamic_stiffness_rig_es.svg" alt="Banco de resonancia ISO 9052-1: un excitador vertical y un acelerómetro sobre la placa de carga encima de la probeta resiliente de 200 mm por 200 mm, leído como un sistema masa-resorte cuyo pico de respuesta da la frecuencia de resonancia y la rigidez dinámica aparente" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dynamic_stiffness_rig_es_dark.svg" alt="Banco de resonancia ISO 9052-1: un excitador vertical y un acelerómetro sobre la placa de carga encima de la probeta resiliente de 200 mm por 200 mm, leído como un sistema masa-resorte cuyo pico de respuesta da la frecuencia de resonancia y la rigidez dinámica aparente" style="width:92%">
+
+En la disposición de ensayo la probeta queda entre la base rígida y una placa
+de carga cuya masa total por unidad de área, placa más carga añadida, es de
+200 kg/m² (8 kg sobre la probeta de 0,04 m²). Esa carga reproduce la precarga
+estática de un suelo flotante típico, unos 2 kPa. Un excitador vertical mueve
+la placa, un acelerómetro recoge su respuesta y la resonancia vertical
+fundamental $f_r$ del sistema placa-probeta se lee del pico de la respuesta;
+la Fórmula 4 la convierte en $s'_t$.
+
 ```python
 import phonometry as ph
 
@@ -101,6 +111,49 @@ plt.legend(); plt.show()
 El `DynamicStiffnessResult` contiene las rigideces aparente, del gas encerrado e
 instalada, la resonancia del ensayo y la frecuencia natural del suelo instalado,
 y su `.plot()` dibuja la curva de diseño `f₀(s')`.
+
+## 3. Qué asume el método de resonancia, y dónde muerde
+
+La evaluación trata el banco como un sistema de un grado de libertad: la
+placa de carga se mueve como un pistón rígido sobre un resorte sin masa. Eso
+se cumple mientras la probeta sea ligera frente a la placa y su primera
+resonancia interna quede bastante por encima de $f_r$; una capa pesada o muy
+gruesa empieza a comportarse como un sistema distribuido y la lectura simple
+de la Fórmula 4 se degrada. De la precarga se derivan tres trampas prácticas:
+
+* **`s'` es una rigidez *a la precarga normalizada*.** Las capas resilientes
+  son visiblemente no lineales con la carga estática: la lana mineral se
+  rigidiza al comprimirse, algunas espumas se ablandan. La placa de carga de
+  200 kg/m² fija el punto de trabajo, así que la `s'` tabulada describe en
+  rigor suelos próximos a esa masa superficial. Diseñar un recrecido mucho
+  más pesado con la misma `s'` extrapola más allá de la medición.
+* **Excitar poco.** La rigidez tangente se define para deformaciones
+  dinámicas pequeñas; excitar fuerte la placa lleva la capa a su rango no
+  lineal y desplaza la resonancia aparente hacia abajo. Mantén la excitación
+  en el nivel más bajo que dé un pico limpio.
+* **Cuidar el contacto.** La norma asienta la placa de carga sobre una capa
+  fina de unión (una pasta de yeso) para que toda el área de la probeta
+  soporte la carga. Un contacto seco e irregular concentra la fuerza,
+  rigidiza la respuesta localmente y sesga $f_r$ hacia arriba.
+
+La frecuencia natural que importa al final no es la $f_r$ del banco sino la
+$f_0$ del suelo instalado según la Fórmula 2: el suelo flotante solo mejora
+el aislamiento bastante por encima de $f_0$, y por eso una `s'` baja (una
+capa blanda bajo una losa pesada) es el objetivo de diseño.
+
+## Referencias
+
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  El diseño de suelos flotantes y el papel de la rigidez dinámica de la capa
+  resiliente en la mejora a ruido de impactos.
+- International Organization for Standardization. (1989). *Acoustics —
+  Determination of dynamic stiffness — Part 1: Materials used under floating
+  floors in dwellings* (ISO 9052-1:1989).
+  [Catálogo iso.org](https://www.iso.org/standard/16620.html).
+  El original internacional de EN 29052-1, el método que implementa esta
+  página.
 
 ---
 

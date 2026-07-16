@@ -32,9 +32,20 @@ $$
 
 | | Field (ISO 16283) | Laboratory (ISO 10140) |
 | :--- | :--- | :--- |
-| Airborne | $R'$ apparent (with flanking) | $R$ direct (flanking suppressed) |
-| Impact | $L'_n$ apparent | $L_n$ direct |
+| Airborne element index | $R'$ apparent (with flanking) | $R$ direct (flanking suppressed) |
+| Airborne room pair | $D_{nT}$, $D_n$ (no prime: room quantities) | — |
+| Impact | $L'_n$, $L'_{nT}$ apparent | $L_n$ direct |
+| Single number | $R'_w$, $D_{nT,w}$, $L'_{n,w}$, $L'_{nT,w}$ | $R_w$, $L_{n,w}$ |
 | Absorption area | measured in the room | property of the facility |
+
+The apostrophe is the flanking marker of building acoustics, and it travels
+with the quantity into its single number: $R_w$ rates a laboratory spectrum,
+$R'_w$ a field one. The standardized and normalized level differences
+$D_{nT}$ and $D_n$ carry no prime because they describe the room pair rather
+than an element, so there is no flanking-free counterpart to mark. In a
+well-built construction $R'_w$ lands a few dB below the laboratory $R_w$ of
+the same partition; a much larger gap says flanking dominates, and the
+[EN 12354 model](insulation-prediction.md) tells you which path carries it.
 
 The single-number ratings reuse the very same ISO 717-1/2 engines
 (`weighted_rating`, `weighted_impact_rating`) — an $R$ spectrum rates to $R_w$
@@ -341,6 +352,19 @@ res_m = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
                                   modal_overlap=m)   # M < 0.25 bands bracketed
 res_m.bracketed    # per-band flags; bracketed bands leave the single number
 ```
+
+## References
+
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  The reference monograph for laboratory sound-insulation measurement,
+  flanking transmission and the vibration reduction index.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  The transmission theory of single and double constructions that laboratory
+  indices quantify.
 
 ---
 

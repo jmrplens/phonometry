@@ -48,6 +48,17 @@ print(round(float(ph.installed_structure_borne_power_level(82.0, dc)), 1))  # in
 
 ## 2. Transmission to the receiving room
 
+EN 12354 parts 1 and 2 handle rooms excited through the air and by the
+standard tapping machine; part 5 covers the sources that shake the building
+*directly*: pumps, fans, lifts, whirlpool baths, cisterns and the pipework
+that ties them into walls and floors. Once the installed power is in the
+structure, several elements radiate into the receiving room: the excited
+element itself and every element the vibration reaches across the junctions.
+Each excited-element/radiating-element pair `i→j` is a transmission path with
+its own adjustment term and flanking index:
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_installed_paths.svg" alt="EN 12354-5 installation paths: a pump on resilient mounts injects structure-borne power into the floor slab, the excited floor radiates into the receiving room below, a second path travels along the slab into the flanking wall, and the prediction cascade runs from the characteristic power to the normalised sound pressure level" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_installed_paths_dark.svg" alt="EN 12354-5 installation paths: a pump on resilient mounts injects structure-borne power into the floor slab, the excited floor radiates into the receiving room below, a second path travels along the slab into the flanking wall, and the prediction cascade runs from the characteristic power to the normalised sound pressure level" style="width:92%">
+
 Each transmission path `i→j` gives a normalised sound pressure level from the
 installed power, the structure-to-airborne adjustment term `D_sa`, the flanking
 sound reduction index `R_ij,ref` (EN 12354-1) and the element area (Formula 18a):
@@ -102,6 +113,15 @@ res.plot(); plt.show()
 ```
 
 </details>
+
+## References
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3rd ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  The source-receiver mobility coupling and the structure-borne transmission
+  across junctions behind the coupling term and the path model.
 
 ---
 

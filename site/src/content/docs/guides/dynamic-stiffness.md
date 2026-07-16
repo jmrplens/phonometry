@@ -34,6 +34,16 @@ $$
 s'_t = 4\pi^2\,m'_t\,f_r^2 .
 $$
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dynamic_stiffness_rig.svg" alt="ISO 9052-1 resonance rig: a vertical exciter and an accelerometer on the load plate over the 200 mm by 200 mm resilient specimen, read as a mass-spring system whose response peak gives the resonant frequency and the apparent dynamic stiffness" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dynamic_stiffness_rig_dark.svg" alt="ISO 9052-1 resonance rig: a vertical exciter and an accelerometer on the load plate over the 200 mm by 200 mm resilient specimen, read as a mass-spring system whose response peak gives the resonant frequency and the apparent dynamic stiffness" style="width:92%">
+
+In the test arrangement the specimen lies between the rigid foundation and a
+load plate whose total mass per unit area, plate plus added load, is
+200 kg/m² (8 kg on the 0.04 m² specimen). That load reproduces the static
+preload of a typical floating floor, about 2 kPa. A vertical exciter drives
+the plate, an accelerometer picks up its response, and the fundamental
+vertical resonance $f_r$ of the plate-on-specimen system is read from the
+response peak; Formula 4 turns it into $s'_t$.
+
 ```python
 import phonometry as ph
 
@@ -99,6 +109,48 @@ plt.legend(); plt.show()
 The `DynamicStiffnessResult` carries the apparent, enclosed-gas and installed
 stiffnesses, the test resonance and the installed-floor natural frequency, and
 its `.plot()` draws the `f₀(s')` design curve.
+
+## 3. What the resonance method assumes, and where it bites
+
+The evaluation treats the rig as a single-degree-of-freedom system: the load
+plate moves as a rigid piston on a massless spring. That holds while the
+specimen is light against the plate and its first internal resonance sits
+well above $f_r$; a heavy or very thick layer starts to act as a distributed
+system and the simple Formula 4 reading degrades. Three practical pitfalls
+follow from the preload:
+
+* **`s'` is a stiffness *at the standard preload*.** Resilient layers are
+  visibly non-linear in static load: mineral wool stiffens as it compresses,
+  some foams soften. The 200 kg/m² load plate fixes the operating point, so
+  the tabulated `s'` strictly describes floors near that surface mass.
+  Designing a much heavier screed with the same `s'` extrapolates beyond the
+  measurement.
+* **Drive small.** The tangent stiffness is defined for small dynamic
+  strains; driving the plate hard pushes the layer into its non-linear range
+  and shifts the apparent resonance downward. Keep the excitation at the
+  lowest level that gives a clean peak.
+* **Respect the contact.** The standard seats the load plate on a thin
+  bonding layer (a plaster paste) so the full specimen area carries the
+  load. A dry, uneven contact concentrates the force, stiffens the response
+  locally and biases $f_r$ upward.
+
+The natural frequency that matters in the end is not the rig's $f_r$ but the
+installed floor's $f_0$ from Formula 2: the floating floor only improves
+insulation well above $f_0$, which is why a low `s'` (a soft layer under a
+heavy slab) is the design goal.
+
+## References
+
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  Floating-floor design and the role of the resilient layer's dynamic
+  stiffness in the impact-sound improvement.
+- International Organization for Standardization. (1989). *Acoustics —
+  Determination of dynamic stiffness — Part 1: Materials used under floating
+  floors in dwellings* (ISO 9052-1:1989).
+  [iso.org catalogue](https://www.iso.org/standard/16620.html).
+  The international original of EN 29052-1, the method this page implements.
 
 ---
 

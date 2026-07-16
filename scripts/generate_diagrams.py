@@ -748,6 +748,93 @@ _ES: dict[str, str] = {
     "day 1": "día 1",
     "choose by work pattern (Table B.1)  →  LEX,8h + Annex C uncertainty":
         "según el patrón de trabajo (Tabla B.1)  →  LEX,8h + U del Anexo C",
+    # Dynamic-stiffness resonance rig (ISO 9052-1)
+    "Dynamic-stiffness resonance rig (ISO 9052-1)":
+        "Banco de resonancia de rigidez dinámica (ISO 9052-1)",
+    "Resonance rig": "Banco de resonancia",
+    "Rigid foundation": "Base rígida",
+    "Load plate": "Placa de carga",
+    "Resilient specimen": "Probeta resiliente",
+    "Exciter": "Excitador",
+    "Accelerometer": "Acelerómetro",
+    "Mass-spring model": "Modelo masa-resorte",
+    "resonance read from the response peak":
+        "la resonancia se lee del pico de la respuesta",
+    "s′t = 4π² m′t fr²   (Formula 4)": "s′t = 4π² m′t fr²   (Fórmula 4)",
+    "then f₀ = (1/2π)·√(s′/m′) for the installed floating floor   (Formula 2)":
+        "luego f₀ = (1/2π)·√(s′/m′) para el suelo flotante instalado   "
+        "(Fórmula 2)",
+    # Mechanical-mobility rig (ISO 7626)
+    "Mechanical-mobility measurement on a beam (ISO 7626)":
+        "Medición de movilidad mecánica sobre una viga (ISO 7626)",
+    "soft elastic suspension": "suspensión elástica blanda",
+    "Structure under test (free-free beam)":
+        "Estructura bajo ensayo (viga libre-libre)",
+    "Impedance head": "Cabeza de impedancia",
+    "F and a at the drive point": "F y a en el mismo punto",
+    "driving point:  Yii = vi / Fi": "punto de excitación:  Yii = vi / Fi",
+    "transfer:  Yji = vj / Fi": "transferencia:  Yji = vj / Fi",
+    "Y(f) = v/F  [m/(N·s)] · attached exciter (Part 2) · impact hammer (Part 5)":
+        "Y(f) = v/F  [m/(N·s)] · excitador acoplado (Parte 2) · martillo de "
+        "impacto (Parte 5)",
+    "same measurement, three FRFs: x/F receptance · v/F mobility · a/F accelerance":
+        "una misma medición, tres FRF: x/F receptancia · v/F movilidad · "
+        "a/F acelerancia",
+    # Dynamic transfer stiffness (ISO 10846)
+    "Dynamic transfer stiffness: direct and indirect methods (ISO 10846)":
+        "Rigidez de transferencia: métodos directo e indirecto (ISO 10846)",
+    "Direct method (Part 2)": "Método directo (Parte 2)",
+    "Indirect method (Part 3)": "Método indirecto (Parte 3)",
+    "excitation mass": "masa de excitación",
+    "isolator under test": "aislador bajo ensayo",
+    "force transducer": "transductor de fuerza",
+    "blocking mass m₂": "masa de bloqueo m₂",
+    "soft support": "apoyo blando",
+    "output blocked:  u₂ ≈ 0 → measure F₂,b":
+        "salida bloqueada:  u₂ ≈ 0 → se mide F₂,b",
+    "measure T = u₂ / u₁  (small)": "se mide T = u₂ / u₁  (pequeña)",
+    "valid where ΔL₁,₂ = La₁ − La₂ ≥ 20 dB, i.e. |T| ≤ 0.1   (Part 3, Inequality 2)":
+        "válido donde ΔL₁,₂ = La₁ − La₂ ≥ 20 dB, es decir |T| ≤ 0,1   "
+        "(Parte 3, Desigualdad 2)",
+    "the blocking force approximates the force delivered to a stiff receiver (Part 1, Eq. 7)":
+        "la fuerza de bloqueo aproxima la fuerza entregada a un receptor "
+        "rígido (Parte 1, Ec. 7)",
+    # Reception plate (EN 15657)
+    "Reception-plate measurement of structure-borne power (EN 15657)":
+        "Medición en placa receptora de la potencia estructural (EN 15657)",
+    "Source under test (pump, fan, boiler …)":
+        "Fuente bajo ensayo (bomba, ventilador, caldera …)",
+    "Reception plate  (m, S, η)": "Placa receptora  (m, S, η)",
+    "velocity positions → Lv": "posiciones de velocidad → Lv",
+    "injected structure-borne power": "potencia estructural inyectada",
+    "resilient supports": "apoyos resilientes",
+    "Plate power balance": "Balance de potencia de la placa",
+    "η = 2.2 / (f·Ts)   (Formula 13)": "η = 2,2 / (f·Ts)   (Fórmula 13)",
+    "+ Lv − 60   (Formula 14)": "+ Lv − 60   (Fórmula 14)",
+    "→ source quantities (Formulae 15–19):":
+        "→ magnitudes de fuente (Fórmulas 15–19):",
+    "equivalent blocked force L_Fb,eq ,": "fuerza bloqueada equivalente L_Fb,eq ,",
+    "L_Wsn consumed by EN 12354-5": "L_Wsn que consume EN 12354-5",
+    "spatial average:  Lv = 10 lg[(1/N)·Σ 10^(Lv,i/10)]   (Formula 12)":
+        "promedio espacial:  Lv = 10 lg[(1/N)·Σ 10^(Lv,i/10)]   (Fórmula 12)",
+    # Installed structure-borne sound (EN 12354-5)
+    "Installed structure-borne sound paths (EN 12354-5)":
+        "Vías del sonido estructural de equipos instalados (EN 12354-5)",
+    "Service equipment (pump)": "Equipo de servicio (bomba)",
+    "coupling D_C   (Formula 19b)": "acoplamiento D_C   (Fórmula 19b)",
+    "path along the slab into the wall  (i → j)":
+        "vía por el forjado hacia la pared  (i → j)",
+    "excited floor radiates (path i = j)":
+        "el forjado excitado radia (vía i = j)",
+    "Prediction cascade": "Cascada de predicción",
+    "characteristic power (EN 15657)": "potencia característica (EN 15657)",
+    "coupling at the contacts (19b)": "acoplamiento en los contactos (19b)",
+    "installed power (18b)": "potencia instalada (18b)",
+    "per transmission path (18a)": "por vía de transmisión (18a)",
+    "energetic sum L_n,s (17)": "suma energética L_n,s (17)",
+    "each path i → j: excited element i, radiating element j in the receiving room":
+        "cada vía i → j: elemento excitado i, elemento radiante j en el "
+        "recinto receptor",
 }
 
 
@@ -3247,6 +3334,377 @@ def _d_dosimeter(s: SVG, th: Theme) -> None:
            17, th.fg)
 
 
+# ---------------------------------------------------------------------------
+# Shared structure-borne rig parts (ISO 9052-1 / ISO 7626 / ISO 10846 /
+# EN 15657 / EN 12354-5 diagrams)
+# ---------------------------------------------------------------------------
+
+def _spring_v(s: SVG, x: float, y1: float, y2: float, color: str,
+              coils: int = 4, width: float = 13.0, sw: float = 2.2) -> None:
+    """Vertical zig-zag spring between (x, y1) and (x, y2), straight leads."""
+    lead = min(10.0, (y2 - y1) * 0.12)
+    n = 2 * coils
+    step = (y2 - y1 - 2 * lead) / n
+    d = [f"M {x:.1f} {y1:.1f}", f"L {x:.1f} {y1 + lead:.1f}"]
+    for k in range(1, n):
+        dx = width if k % 2 else -width
+        d.append(f"L {x + dx:.1f} {y1 + lead + k * step:.1f}")
+    d.append(f"L {x:.1f} {y2 - lead:.1f}")
+    d.append(f"L {x:.1f} {y2:.1f}")
+    s.path(" ".join(d), stroke=color, sw=sw)
+
+
+def _accel(s: SVG, x: float, y: float, size: float = 14.0) -> None:
+    """Accelerometer block standing on the surface point (x, y)."""
+    th = s.th
+    s.rect(x - size / 2, y - size, size, size, th.secondary, th.fg, rx=2.5,
+           sw=1.3)
+    s.line(x, y - size, x, y - size - 8, th.fg, 1.3)
+
+
+def _exciter(s: SVG, x: float, y: float, stinger: float = 22.0,
+             w: float = 74.0, h: float = 48.0, up: bool = False) -> None:
+    """Electrodynamic exciter body with a stinger driving the point (x, y).
+
+    ``up=False`` hangs the body above the drive point (stinger down);
+    ``up=True`` stands it below the drive point (stinger up).
+    """
+    th = s.th
+    sgn = 1.0 if up else -1.0
+    s.line(x, y, x, y + sgn * stinger, th.fg, 2.2)
+    top = y + stinger if up else y - stinger - h
+    s.rect(x - w / 2, top, w, h, th.panel, th.primary, rx=9, sw=2)
+
+
+def _motion_arrows(s: SVG, x: float, cy: float, half: float, color: str,
+                   sw: float = 2.0) -> None:
+    """Up-down double arrow marking a vibratory motion at x, centred on cy."""
+    s.arrow(x, cy, x, cy - half, color, sw)
+    s.arrow(x, cy, x, cy + half, color, sw)
+
+
+# ---------------------------------------------------------------------------
+# Dynamic-stiffness resonance rig (ISO 9052-1 / EN 29052-1)
+# ---------------------------------------------------------------------------
+
+def _d_dynamic_stiffness_rig(s: SVG, th: Theme) -> None:
+    """ISO 9052-1 rig: exciter and accelerometer on the load plate over the
+    resilient specimen, read as a mass-spring resonance."""
+    # ===== Left: rig cross-section =====
+    s.text(240, 74, "Resonance rig", 22, th.fg, bold=True)
+    gy = 466.0
+    s.ground(gy, 50, 430)
+    s.text(56, gy + 34, "Rigid foundation", 17, th.muted, anchor="start")
+
+    x0, x1 = 150.0, 330.0
+    spec_top, plate_h = 400.0, 26.0
+    plate_top = spec_top - plate_h
+    # Resilient specimen (soft diagonal hatching).
+    s.rect(x0, spec_top, x1 - x0, gy - spec_top, th.panel, th.accent, sw=2)
+    for hx in range(int(x0) + 14, int(x1) + 1, 22):
+        s.line(hx, spec_top, hx - 12, gy, th.accent, 0.9)
+    # Load plate on top of the specimen.
+    s.rect(x0 - 12, plate_top, x1 - x0 + 24, plate_h, th.panel, th.primary,
+           rx=3, sw=2.2)
+    s.text(x1 + 26, plate_top + 19, "Load plate", 18, th.fg, anchor="start",
+           bold=True)
+    s.text(x1 + 26, plate_top + 43, "m′t = 200 kg/m²", 15, th.muted,
+           anchor="start")
+    s.text(x1 + 26, spec_top + 40, "Resilient specimen", 17, th.fg,
+           anchor="start")
+    s.text(x1 + 26, spec_top + 62, "200 mm × 200 mm", 15, th.muted,
+           anchor="start")
+    s.dim(x0, spec_top, x0, gy, "d", offset=-30, size=18)
+    # Exciter, drive force and accelerometer on the plate.
+    _exciter(s, 205.0, plate_top)
+    s.text(205, plate_top - 100, "Exciter", 18, th.fg, bold=True)
+    _motion_arrows(s, 256.0, plate_top - 36, 24.0, th.secondary)
+    s.text(268, plate_top - 30, "F(t)", 16, th.secondary, anchor="start",
+           mono=True)
+    _accel(s, 300.0, plate_top)
+    s.text(x1 + 26, plate_top - 14, "Accelerometer", 16, th.fg, anchor="start")
+    s.line(309, plate_top - 8, x1 + 20, plate_top - 18, th.muted, 1.1,
+           dash="3,3")
+
+    # ===== Right: the mass-spring reading =====
+    s.text(680, 74, "Mass-spring model", 22, th.fg, bold=True)
+    mx = 680.0
+    s.rect(mx - 60, 120, 120, 62, th.panel, th.primary, rx=8, sw=2.2)
+    s.text(mx, 158, "m′t", 22, th.fg, mono=True, bold=True)
+    _spring_v(s, mx, 182, 288, th.accent, coils=4)
+    s.text(mx + 26, 240, "s′t", 20, th.accent, anchor="start", mono=True,
+           bold=True)
+    s.ground(288, mx - 70, mx + 70)
+    _motion_arrows(s, mx - 92, 151, 26, th.secondary)
+
+    # Response curve with the resonance read at its peak.
+    ax0, ax1, base = 540.0, 850.0, 420.0
+    s.line(ax0, base, ax1, base, th.muted, 1.4)
+    s.line(ax0, base, ax0, 330.0, th.muted, 1.4)
+    pk = 660.0
+    s.path(f"M {ax0 + 6} {base - 12} C {pk - 60} {base - 16} {pk - 34} 336 "
+           f"{pk} 334 C {pk + 34} 336 {pk + 70} {base - 8} {ax1 - 6} {base - 4}",
+           stroke=th.primary, sw=2.4)
+    s.line(pk, base, pk, 336, th.muted, 1.2, dash="4,3")
+    s.text(pk, base + 22, "fr", 18, th.secondary, mono=True, bold=True)
+    s.text((ax0 + ax1) / 2, base + 48, "resonance read from the response peak",
+           15, th.muted, italic=True)
+
+    # Headline relations.
+    s.text(450, 524, "s′t = 4π² m′t fr²   (Formula 4)", 21, th.primary,
+           bold=True, mono=True)
+    s.text(450, 550,
+           "then f₀ = (1/2π)·√(s′/m′) for the installed floating floor   (Formula 2)",
+           16, th.muted, mono=True)
+
+
+# ---------------------------------------------------------------------------
+# Mechanical-mobility rig (ISO 7626)
+# ---------------------------------------------------------------------------
+
+def _d_mobility_rig(s: SVG, th: Theme) -> None:
+    """ISO 7626 rig: free-free beam, exciter + impedance head at the driving
+    point, accelerometer at a transfer point, impact-hammer variant."""
+    cy_top, beam_top, beam_h = 116.0, 286.0, 26.0
+    beam_bot = beam_top + beam_h
+    # Ceiling with soft suspension.
+    s.line(150, cy_top, 730, cy_top, th.fg, 2.2)
+    for hx in range(162, 730, 26):
+        s.line(hx, cy_top, hx - 9, cy_top - 9, th.muted, 1.1)
+    for sx in (168.0, 712.0):
+        _spring_v(s, sx, cy_top, beam_top, th.muted, coils=3, width=8.0,
+                  sw=1.6)
+    s.text(196, 142, "soft elastic suspension", 15, th.muted, anchor="start")
+
+    # Beam under test.
+    s.rect(150, beam_top, 580, beam_h, th.panel, th.fg, sw=2.2)
+    s.text(470, beam_bot + 32, "Structure under test (free-free beam)", 19,
+           th.fg, bold=True)
+
+    # Driving point: exciter below the beam through an impedance head.
+    dx = 248.0
+    s.rect(dx - 14, beam_bot, 28, 16, th.secondary, th.fg, rx=3, sw=1.6)
+    s.line(dx, beam_bot + 16, dx, 412, th.fg, 2.2)
+    s.rect(dx - 37, 412, 74, 48, th.panel, th.primary, rx=9, sw=2)
+    s.text(dx, 486, "Exciter", 18, th.fg, bold=True)
+    s.text(60, 380, "Impedance head", 16, th.fg, anchor="start", bold=True)
+    s.text(60, 402, "F and a at the drive point", 14, th.muted,
+           anchor="start")
+    s.line(dx - 16, beam_bot + 8, 154, 362, th.muted, 1.1, dash="3,3")
+    s.arrow(dx + 18, 396, dx + 18, 340, th.secondary, 2.2)
+    s.text(dx + 28, 372, "Fi", 16, th.secondary, anchor="start", mono=True)
+    s.arrow(dx, beam_top - 4, dx, beam_top - 46, th.accent, 2.2)
+    s.text(dx - 14, beam_top - 34, "vi", 16, th.accent, anchor="end",
+           mono=True)
+    s.text(210, 218, "driving point:  Yii = vi / Fi", 16, th.fg,
+           anchor="start", mono=True)
+
+    # Transfer point: accelerometer further along the beam.
+    tx = 430.0
+    _accel(s, tx, beam_top)
+    s.arrow(tx, beam_top - 28, tx, beam_top - 56, th.accent, 2.2)
+    s.text(tx + 12, beam_top - 40, "vj", 16, th.accent, anchor="start",
+           mono=True)
+    s.text(tx + 60, 192, "transfer:  Yji = vj / Fi", 16, th.fg, mono=True)
+
+    # Impact-hammer variant striking the beam.
+    hx2 = 600.0
+    s.line(hx2 + 60, 172, hx2 + 6, 244, th.fg, 2.4)
+    s.rect(hx2 - 16, 238, 32, 20, th.panel, th.fg, rx=4, sw=2)
+    s.arrow(hx2, 262, hx2, beam_top - 6, th.secondary, 1.8)
+
+    # FRF family footer.
+    s.text(450, 520,
+           "Y(f) = v/F  [m/(N·s)] · attached exciter (Part 2) · impact hammer (Part 5)",
+           17, th.fg, mono=True)
+    s.text(450, 546,
+           "same measurement, three FRFs: x/F receptance · v/F mobility · a/F accelerance",
+           15, th.muted)
+
+
+# ---------------------------------------------------------------------------
+# Dynamic transfer stiffness of resilient elements (ISO 10846)
+# ---------------------------------------------------------------------------
+
+def _d_transfer_stiffness_rig(s: SVG, th: Theme) -> None:
+    """ISO 10846: isolator between the driven input mass and a blocked output
+    (direct, force transducer) or a blocking mass (indirect)."""
+    for cx, head in ((250.0, "Direct method (Part 2)"),
+                     (650.0, "Indirect method (Part 3)")):
+        s.text(cx, 78, head, 22, th.fg, bold=True)
+        _exciter(s, cx, 158.0, stinger=18.0)
+        # Driven input mass with its input displacement u1.
+        s.rect(cx - 80, 158, 160, 44, th.panel, th.fg, rx=6, sw=2.2)
+        s.text(cx, 186, "excitation mass", 16, th.fg)
+        _motion_arrows(s, cx - 96, 180, 24, th.secondary)
+        s.text(cx - 110, 186, "u₁", 18, th.secondary, anchor="end", mono=True)
+        # Isolator under test.
+        _spring_v(s, cx, 202, 310, th.accent, coils=4)
+        s.text(cx + 28, 260, "isolator under test", 16, th.accent,
+               anchor="start")
+
+    # ===== Direct output: blocked, force transducer on a rigid foundation ===
+    cx = 250.0
+    s.rect(cx - 30, 310, 60, 18, th.secondary, th.fg, rx=3, sw=1.6)
+    s.text(cx + 40, 322, "force transducer", 15, th.secondary, anchor="start")
+    s.rect(cx - 105, 328, 210, 26, th.panel, th.fg, sw=2)
+    s.ground(354, cx - 125, cx + 125)
+    s.text(cx, 388, "Rigid foundation", 15, th.muted)
+    s.text(cx, 470, "output blocked:  u₂ ≈ 0 → measure F₂,b", 16, th.fg,
+           mono=True)
+    s.text(cx, 500, "k₂,₁ = F₂,b / u₁", 20, th.primary, bold=True, mono=True)
+
+    # ===== Indirect output: blocking mass on soft supports ==================
+    cx = 650.0
+    s.rect(cx - 85, 310, 170, 60, th.panel, th.fg, rx=6, sw=2.4)
+    s.text(cx, 346, "blocking mass m₂", 17, th.fg)
+    _accel(s, cx + 55, 310)
+    s.text(cx + 72, 296, "a₂", 15, th.secondary, anchor="start", mono=True)
+    for sx in (cx - 50.0, cx + 50.0):
+        _spring_v(s, sx, 370, 430, th.muted, coils=3, width=8.0, sw=1.6)
+    s.ground(430, cx - 115, cx + 115)
+    s.text(cx + 70, 408, "soft support", 14, th.muted, anchor="start")
+    s.text(cx, 470, "measure T = u₂ / u₁  (small)", 16, th.fg, mono=True)
+    s.text(cx, 500, "k₂,₁ = −(2πf)²·(m₂+mf)·T", 20, th.primary, bold=True,
+           mono=True)
+
+    # Validity footer (Part 3 clause 6, Part 1 Eq. 7).
+    s.text(450, 556,
+           "valid where ΔL₁,₂ = La₁ − La₂ ≥ 20 dB, i.e. |T| ≤ 0.1   (Part 3, Inequality 2)",
+           17, th.muted)
+    s.text(450, 582,
+           "the blocking force approximates the force delivered to a stiff receiver (Part 1, Eq. 7)",
+           15, th.muted, italic=True)
+
+
+# ---------------------------------------------------------------------------
+# Reception plate (EN 15657)
+# ---------------------------------------------------------------------------
+
+def _d_reception_plate(s: SVG, th: Theme) -> None:
+    """EN 15657 reception plate: source machine on a resiliently supported
+    plate, averaged plate velocity, plate power balance."""
+    # ===== Source machine standing on the plate =====
+    mx = 260.0
+    s.text(mx, 150, "Source under test (pump, fan, boiler …)", 20, th.fg,
+           bold=True)
+    s.rect(mx - 75, 218, 150, 70, th.panel, th.fg, rx=8, sw=2.2)
+    s.rect(mx - 48, 190, 58, 28, th.panel, th.muted, rx=6, sw=1.8)
+    s.circle(mx + 40, 240, 12, th.bg, th.muted, 1.8)
+    for fx in (mx - 52.0, mx + 52.0):
+        s.rect(fx - 8, 288, 16, 14, th.fg, rx=2)
+        s.arrow(fx, 306, fx, 326, th.secondary, 2.4)
+    s.text(310, 356, "injected structure-borne power", 15, th.secondary,
+           italic=True)
+
+    # ===== Reception plate on resilient supports =====
+    s.rect(100, 302, 460, 32, th.panel, th.primary, rx=3, sw=2.4)
+    s.text(455, 324, "Reception plate  (m, S, η)", 16, th.fg, bold=True)
+    for ax_ in (140.0, 190.0, 400.0, 500.0):
+        _accel(s, ax_, 302)
+    s.text(560, 272, "velocity positions → Lv", 16, th.secondary,
+           anchor="end")
+    for sx in (150.0, 510.0):
+        _spring_v(s, sx, 334, 430, th.accent, coils=3)
+    s.ground(430, 80, 580)
+    s.text(330, 404, "resilient supports", 14, th.muted)
+
+    # ===== Right column: the power balance and the source quantities =====
+    s.text(735, 150, "Plate power balance", 20, th.fg, bold=True)
+    s.rect(590, 172, 292, 148, "none", th.muted, rx=10, dash="6,5")
+    s.text(735, 206, "P = ω·η·(m·S)·⟨v²⟩", 19, th.primary, bold=True,
+           mono=True)
+    s.text(735, 238, "η = 2.2 / (f·Ts)   (Formula 13)", 15, th.fg, mono=True)
+    s.text(735, 270, "L_Ws = 10 lg(2πf·η·m·S / f₀m₀S₀)", 14, th.fg, mono=True)
+    s.text(735, 296, "+ Lv − 60   (Formula 14)", 14, th.fg, mono=True)
+    s.text(735, 366, "→ source quantities (Formulae 15–19):", 15, th.fg,
+           bold=True)
+    s.text(735, 394, "equivalent blocked force L_Fb,eq ,", 15, th.muted)
+    s.text(735, 418, "L_Wsn consumed by EN 12354-5", 15, th.muted)
+
+    # Footer: the spatial velocity average.
+    s.text(450, 516,
+           "spatial average:  Lv = 10 lg[(1/N)·Σ 10^(Lv,i/10)]   (Formula 12)",
+           17, th.fg, mono=True)
+
+
+# ---------------------------------------------------------------------------
+# Installed structure-borne sound paths (EN 12354-5)
+# ---------------------------------------------------------------------------
+
+def _d_installed_paths(s: SVG, th: Theme) -> None:
+    """EN 12354-5: service equipment on a floor slab, structure-borne paths
+    into the receiving room below, and the prediction cascade."""
+    bx0, bx1 = 80.0, 590.0
+    top, slab_top, slab_bot, bot = 92.0, 296.0, 324.0, 528.0
+
+    # Rooms, continuous floor slab and flanking wall (drawn over the slab).
+    s.rect(bx0, top, bx1 - bx0, slab_top - top, th.panel, th.fg, sw=2.5)
+    s.rect(bx0, slab_bot, bx1 - bx0, bot - slab_bot, th.panel, th.fg, sw=2.5)
+    s.rect(bx0, slab_top, bx1 - bx0 + 26, slab_bot - slab_top, th.panel,
+           th.fg, sw=2)
+    for hx in range(int(bx0) + 16, int(bx1) + 26, 34):
+        s.line(hx, slab_top, hx - 12, slab_bot, th.muted, 0.9)
+    s.rect(bx1, top, 26, bot - top, th.panel, th.fg, sw=2)
+    s.text(bx0 + 16, top + 32, "Source room", 21, th.fg, bold=True,
+           anchor="start")
+    s.text(bx0 + 16, bot - 18, "Receiving room", 21, th.fg, bold=True,
+           anchor="start")
+
+    # Service equipment on resilient mounts on the slab.
+    mx = 210.0
+    s.rect(mx - 55, 238, 110, 42, th.panel, th.fg, rx=7, sw=2.2)
+    s.rect(mx - 34, 216, 40, 22, th.panel, th.muted, rx=5, sw=1.6)
+    for fx in (mx - 36.0, mx + 36.0):
+        _spring_v(s, fx, 280, slab_top, th.accent, coils=2, width=6.0, sw=1.6)
+    s.text(mx, 200, "Service equipment (pump)", 19, th.fg, bold=True)
+    s.text(mx + 78, 268, "coupling D_C   (Formula 19b)", 15, th.secondary,
+           anchor="start")
+
+    # Path i = j: the excited slab radiates into the room below.
+    s.arrow(mx, slab_bot + 2, mx, slab_bot + 40, th.secondary, 2.4)
+    for r in (40, 66, 92):
+        s.path(f"M {mx - r * 0.72:.1f} {slab_bot + 42 + r * 0.5:.1f} "
+               f"A {r} {r} 0 0 0 {mx + r * 0.72:.1f} {slab_bot + 42 + r * 0.5:.1f}",
+               stroke=th.accent, sw=1.6)
+    s.text(mx, 484, "excited floor radiates (path i = j)", 15, th.secondary,
+           italic=True)
+
+    # Path i -> j: along the slab, through the junction, down the wall.
+    s.line(mx + 40, 310, 596, 310, th.primary, 2.6)
+    s.line(603, 310, 603, 420, th.primary, 2.6)
+    s.arrow(603, 420, 574, 420, th.primary, 2.6)
+    s.circle(603, 310, 5, th.bg, th.fg, 2)
+    for r in (30, 52):
+        s.path(f"M {588 - r * 0.5:.1f} {420 - r * 0.72:.1f} "
+               f"A {r} {r} 0 0 0 {588 - r * 0.5:.1f} {420 + r * 0.72:.1f}",
+               stroke=th.accent, sw=1.6)
+    s.text(584, 288, "path along the slab into the wall  (i → j)", 15,
+           th.primary, anchor="end")
+
+    # ===== Right column: the prediction cascade =====
+    s.text(760, 120, "Prediction cascade", 20, th.fg, bold=True)
+    steps = [
+        ("L_Ws,c", "characteristic power (EN 15657)", th.fg),
+        ("− D_C", "coupling at the contacts (19b)", th.secondary),
+        ("L_Ws,inst", "installed power (18b)", th.fg),
+        ("− D_sa − R_ij,ref", "per transmission path (18a)", th.primary),
+        ("10 lg Σ 10^(L_n,s,ij/10)", "energetic sum L_n,s (17)", th.accent),
+    ]
+    y = 164.0
+    for k, (term, caption, col) in enumerate(steps):
+        s.text(760, y, term, 19, col, bold=True, mono=True)
+        s.text(760, y + 22, caption, 14, th.muted)
+        if k < len(steps) - 1:
+            s.arrow(760, y + 34, 760, y + 56, th.muted, 1.6)
+        y += 84
+
+    # Footer: what a path is.
+    s.text(335, 574,
+           "each path i → j: excited element i, radiating element j in the receiving room",
+           16, th.muted)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -3350,6 +3808,21 @@ DIAGRAMS = {
     "diagram_dosimeter_iso9612": (
         _d_dosimeter,
         "Occupational noise exposure measurement (ISO 9612)", 640),
+    "diagram_dynamic_stiffness_rig": (
+        _d_dynamic_stiffness_rig,
+        "Dynamic-stiffness resonance rig (ISO 9052-1)", 560),
+    "diagram_mobility_rig": (
+        _d_mobility_rig,
+        "Mechanical-mobility measurement on a beam (ISO 7626)", 560),
+    "diagram_transfer_stiffness_rig": (
+        _d_transfer_stiffness_rig,
+        "Dynamic transfer stiffness: direct and indirect methods (ISO 10846)", 600),
+    "diagram_reception_plate": (
+        _d_reception_plate,
+        "Reception-plate measurement of structure-borne power (EN 15657)", 560),
+    "diagram_installed_paths": (
+        _d_installed_paths,
+        "Installed structure-borne sound paths (EN 12354-5)", 620),
 }
 
 

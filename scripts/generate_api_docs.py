@@ -736,10 +736,10 @@ _LEGACY_MODULE_ALIASES = {
 
 
 _TOP_LEVEL_INTRO = (
-    "Convenience wrappers defined at the package top level "
-    "(`phonometry/__init__.py`). Every public name in the library can be "
-    "imported directly from `phonometry`; this page documents the objects "
-    "that live at the top level itself."
+    "Package-level names defined in `phonometry/__init__.py` itself. "
+    "Every public name in the library can also be imported directly from "
+    "`phonometry`; this page documents the few objects that live at the "
+    "top level."
 )
 
 
@@ -1043,12 +1043,18 @@ def render_index(
         "",
         BANNER,
         "",
-        "The complete public API, one page per module. Every documented name "
-        "can be imported directly from the top-level package:",
+        "The complete public API, one page per module. Import the domain "
+        "subpackage and call through it:",
         "",
         "```python",
-        "from phonometry import octave_filter, leq, sonar_equation",
+        "from phonometry import metrology, underwater",
+        "",
+        "spl, freq = metrology.octave_filter(x, fs)",
+        "snr = underwater.passive_sonar_equation(185.0, 60.0, 50.0)",
         "```",
+        "",
+        "Every documented name can also be imported directly from the "
+        "top-level package (`from phonometry import leq`).",
         "",
         ":::note",
         "The API reference is generated from the English source docstrings "

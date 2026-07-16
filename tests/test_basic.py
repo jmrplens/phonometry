@@ -83,7 +83,7 @@ def test_octave_filter_reuses_cached_bank(monkeypatch) -> None:
     """Repeated octave_filter calls with identical params must not redesign the bank."""
     from phonometry.metrology.core import OctaveFilterBank
 
-    phonometry._cached_filter_bank.cache_clear()
+    phonometry.metrology.core._cached_filter_bank.cache_clear()
     calls = {"n": 0}
     original_init = OctaveFilterBank.__init__
 
@@ -100,12 +100,12 @@ def test_octave_filter_reuses_cached_bank(monkeypatch) -> None:
 
     phonometry.octave_filter(x, 48000, fraction=1)  # different params -> new bank
     assert calls["n"] == 2
-    phonometry._cached_filter_bank.cache_clear()
+    phonometry.metrology.core._cached_filter_bank.cache_clear()
 
 
 def test_octave_filter_cached_results_identical() -> None:
     """The cached bank must return bit-identical results across calls."""
-    phonometry._cached_filter_bank.cache_clear()
+    phonometry.metrology.core._cached_filter_bank.cache_clear()
     x = np.random.default_rng(1).standard_normal(4800)
     spl1, f1 = phonometry.octave_filter(x, 48000, fraction=3)
     spl2, f2 = phonometry.octave_filter(x, 48000, fraction=3)
@@ -115,10 +115,10 @@ def test_octave_filter_cached_results_identical() -> None:
 
 def test_octave_filter_freq_list_is_mutation_safe() -> None:
     """Mutating the returned freq list must not corrupt the cached bank."""
-    phonometry._cached_filter_bank.cache_clear()
+    phonometry.metrology.core._cached_filter_bank.cache_clear()
     x = np.random.default_rng(2).standard_normal(4800)
     _, freq1 = phonometry.octave_filter(x, 48000, fraction=1)
     freq1[0] = -999.0  # caller mutates the returned list
     _, freq2 = phonometry.octave_filter(x, 48000, fraction=1)
     assert freq2[0] != -999.0
-    phonometry._cached_filter_bank.cache_clear()
+    phonometry.metrology.core._cached_filter_bank.cache_clear()

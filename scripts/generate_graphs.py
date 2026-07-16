@@ -1145,6 +1145,37 @@ _PNG_FIGURES = frozenset(
 )
 
 
+def _optimize_png(path: str) -> None:
+    """Losslessly shrink a rendered PNG in place, deterministically.
+
+    ``oxipng`` (via the pinned ``pyoxipng`` wheel) recompresses the pixels
+    without changing a single one, so the optimized file decodes to the exact
+    same image the raster figures are rendered as. The result is a pure
+    function of the input bytes and the fixed options below -- the same input
+    always yields the same output -- so an unchanged figure produces no diff
+    and ``make graphs`` is byte-reproducible across runs and machines.
+
+    Because the transform is lossless, an optimized committed PNG and a freshly
+    regenerated one (optimized or not) decode to identical pixels, so the
+    tolerance compare in ``scripts/check_figures.py`` passes either way: CI does
+    not have to run the optimizer for the staleness check to succeed (it does,
+    via ``requirements-figures.txt``, which makes the bytes identical too).
+    """
+    import oxipng
+
+    oxipng.optimize(
+        path,
+        level=6,
+        # Deterministic output regardless of how many worker threads oxipng
+        # uses: the filter/deflate search is exhaustive at this level, so the
+        # chosen encoding is fixed by the input, not by scheduling. No
+        # ``optimize_alpha``: it may rewrite the RGB of fully-transparent
+        # pixels, which would break the pixel-identity guarantee above if a
+        # figure ever gained a transparent region.
+        strip=oxipng.StripChunks.safe(),
+    )
+
+
 def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
     """Translate, theme-suffix and save the current figure.
 
@@ -1167,10 +1198,16 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
         plt.rcParams["svg.fonttype"] = "none"
         kwargs.setdefault("metadata", {"Date": None})
     else:
+        # Render the raster figures at 300 dpi so they stay crisp on
+        # high-density displays and when zoomed in the docs. Individual call
+        # sites may still override this.
+        kwargs.setdefault("dpi", 300)
         # Drop matplotlib's version-stamped Software chunk (and any date) so the
         # committed PNGs match a fresh render on any matplotlib build in CI.
         kwargs.setdefault("metadata", {"Software": None, "Date": None})
     plt.savefig(path, **kwargs)
+    if ext == "png":
+        _optimize_png(path)
 
 
 

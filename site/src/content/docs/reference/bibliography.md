@@ -436,8 +436,10 @@ list grows as guides gain their References sections.
   Office of the European Union.
   [doi:10.2788/31776](https://doi.org/10.2788/31776),
   [JRC repository](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
-  The common EU noise-mapping framework, contrasted with ISO 9613-2.
-  Cited by [Outdoor Sound Propagation](/phonometry/guides/outdoor-propagation/).
+  The common EU noise-mapping framework, contrasted with ISO 9613-2; its
+  flow-resistivity ground classes are reused by the rotorcraft ground effect.
+  Cited by [Outdoor Sound Propagation](/phonometry/guides/outdoor-propagation/)
+  and [Rotorcraft noise](/phonometry/guides/rotorcraft-noise/).
 - International Organization for Standardization. (1993). *Acoustics —
   Attenuation of sound during propagation outdoors — Part 1: Calculation of
   the absorption of sound by the atmosphere* (ISO 9613-1:1993).
@@ -491,6 +493,200 @@ list grows as guides gain their References sections.
   [IEC webstore](https://webstore.iec.ch/en/publication/5432).
   Declared values and their uncertainty for a batch of turbines.
   Cited by [Wind-turbine noise](/phonometry/guides/wind-turbine-noise/).
+
+## Aircraft noise
+
+- International Civil Aviation Organization. (2017). *Annex 16 to the
+  Convention on International Civil Aviation: Environmental protection —
+  Volume I: Aircraft noise* (8th ed.).
+  [ICAO store](https://store.icao.int/en/annex-16-environmental-protection-volume-i-aircraft-noise).
+  The aircraft noise-certification standard whose Appendix 2 defines the
+  EPNL procedure.
+  Cited by [Aircraft noise](/phonometry/guides/aircraft-noise/).
+- International Civil Aviation Organization. (2018). *Environmental technical
+  manual — Volume I: Procedures for the noise certification of aircraft*
+  (Doc 9501, 3rd ed.).
+  [ICAO store](https://store.icao.int/en/environmental-technical-manual-volume-1-procedures-for-the-noise-certification-of-aircraft-doc-9501-1).
+  The certification guidance whose worked examples (tone correction,
+  integrated-method EPNL) serve as numeric oracles.
+  Cited by [Aircraft noise](/phonometry/guides/aircraft-noise/).
+- International Electrotechnical Commission. (1995). *Electroacoustics —
+  Instruments for measurement of aircraft noise — Performance requirements for
+  systems to measure one-third-octave-band sound pressure levels in noise
+  certification of transport-category aeroplanes* (IEC 61265:1995; since
+  revised as [IEC 61265:2018](https://webstore.iec.ch/en/publication/32635),
+  the 1995 edition is the implemented one).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5076).
+  The aircraft-noise measurement-system performance tolerances.
+  Cited by [Aircraft noise](/phonometry/guides/aircraft-noise/).
+- SAE International. (2013). *Application of pure-tone atmospheric absorption
+  losses to one-third octave-band data* (SAE ARP 5534, reaffirmed 2021).
+  [sae.org](https://www.sae.org/standards/content/arp5534/).
+  The SAE-Method one-third-octave-band atmospheric absorption for aircraft
+  flyover spectra.
+  Cited by [Aircraft noise](/phonometry/guides/aircraft-noise/).
+- SAE International. (2012). *Standard values of atmospheric absorption as a
+  function of temperature and humidity* (SAE ARP 866B, stabilized 2012).
+  [sae.org](https://www.sae.org/standards/content/arp866b/).
+  The predecessor SAE atmospheric-absorption practice, source of the older
+  50 dB-limited Approximate Method.
+  Cited by [Aircraft noise](/phonometry/guides/aircraft-noise/).
+- SAE International. (2006). *Method for predicting lateral attenuation of
+  airplane noise* (SAE AIR 5662).
+  [sae.org](https://www.sae.org/standards/content/air5662/).
+  The soft-ground lateral-attenuation model adopted by ECAC Doc 29.
+  Cited by [Aircraft noise](/phonometry/guides/aircraft-noise/).
+- European Civil Aviation Conference. (2016). *Report on standard method of
+  computing noise contours around civil airports* (ECAC.CEAC Doc 29, 4th ed.),
+  Volume 2: Technical guide.
+  [ECAC documents page](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements),
+  [free PDF](https://www.ecac-ceac.org/images/documents/ECAC-Doc_29_4th_edition_Dec_2016_Volume_2.pdf).
+  The European airport noise-contour method: NPD interpolation and the
+  single-event segment calculation.
+  Cited by [Aircraft noise](/phonometry/guides/aircraft-noise/).
+- European Civil Aviation Conference. (2026). *Report on standard method of
+  computing noise contours around civil airports* (ECAC.CEAC Doc 29, 5th ed.),
+  Volume 3: Reference cases and verification framework.
+  [ECAC documents page](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements),
+  [free PDF](https://www.ecac-ceac.org/images/documents/ECAC-CEAC-DOC_29_5th_Edition-REPORT_ON_STANDARD_METHOD_OF_COMPUTING_NOISE_CONTOURS_AROUND_CIVIL_AIRPORTS-Volume_3-REFERENCE_CASES_AND_VERIFICATION_FRAMEWORK.pdf).
+  The reference cases and workbook used to validate the single-event chain.
+  Cited by [Aircraft noise](/phonometry/guides/aircraft-noise/).
+- European Civil Aviation Conference. (2026). *Report on standard method of
+  computing rotorcraft noise contours* (ECAC.CEAC Doc 32, 1st ed.).
+  [ECAC documents page](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements),
+  [free PDF](https://www.ecac-ceac.org/images/documents/ECAC-CEAC-DOC_32-REPORT_ON_STANDARD_METHOD_OF_COMPUTING_ROTORCRAFT_NOISE_CONTOURS.pdf).
+  The standard rotorcraft contour method built on the noise hemisphere.
+  Cited by [Rotorcraft noise](/phonometry/guides/rotorcraft-noise/).
+- Olsen, H., Tuinstra, M., & van Oosten, N. (2024). *Rotorcraft noise
+  modelling guidance* (Research Project NOISE SC01, deliverable D1.5d,
+  contract EASA.2020.FC.06). European Union Aviation Safety Agency.
+  [EASA project page](https://www.easa.europa.eu/en/research-projects/environmental-research-rotorcraft-noise),
+  [free PDF](https://www.easa.europa.eu/en/downloads/132005/en).
+  The NORAH2 equation-level modelling guidance, whose tables and reference
+  hemispheres serve as oracles.
+  Cited by [Rotorcraft noise](/phonometry/guides/rotorcraft-noise/).
+- Chien, C. F., & Soroka, W. W. (1975). Sound propagation along an impedance
+  plane. *Journal of Sound and Vibration*, 43(1), 9-20.
+  [doi:10.1016/0022-460X(75)90200-X](https://doi.org/10.1016/0022-460X(75)90200-X).
+  The two-ray interference solution over an impedance plane behind the
+  rotorcraft ground effect.
+  Cited by [Rotorcraft noise](/phonometry/guides/rotorcraft-noise/).
+- Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
+  absorbent materials. *Applied Acoustics*, 3(2), 105-116.
+  [doi:10.1016/0003-682X(70)90031-9](https://doi.org/10.1016/0003-682X(70)90031-9).
+  The one-parameter flow-resistivity ground-impedance model.
+  Cited by [Rotorcraft noise](/phonometry/guides/rotorcraft-noise/).
+
+## Underwater sound
+
+- Urick, R. J. (1983). *Principles of underwater sound* (3rd ed.).
+  McGraw-Hill; reprinted 1996 by Peninsula Publishing.
+  ISBN 978-0-932146-62-5.
+  [Open Library record](https://openlibrary.org/books/OL9317725M).
+  The classic monograph on underwater sound: level conventions, ship
+  radiated noise and the sonar-equation framework.
+  Cited by [Underwater acoustics](/phonometry/guides/underwater-acoustics/) and
+  [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
+  Springer.
+  [doi:10.1007/978-3-540-87662-5](https://doi.org/10.1007/978-3-540-87662-5).
+  The systematic treatment of underwater acoustical quantities in the line
+  that ISO 18405 standardised.
+  Cited by [Underwater acoustics](/phonometry/guides/underwater-acoustics/).
+- Medwin, H., & Clay, C. S. (1998). *Fundamentals of acoustical oceanography*.
+  Academic Press. ISBN 978-0-12-487570-8.
+  [Publisher page](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8).
+  Ocean acoustics from first principles; the fluid-fluid Rayleigh
+  reflection coefficient of the seabed model.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Jensen, F. B., Kuperman, W. A., Porter, M. B., & Schmidt, H. (2011).
+  *Computational ocean acoustics* (2nd ed.). Springer.
+  [doi:10.1007/978-1-4419-8678-8](https://doi.org/10.1007/978-1-4419-8678-8).
+  The reference monograph on numerical propagation: normal modes, ray
+  tracing and the parabolic equation.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Francois, R. E., & Garrison, G. R. (1982). Sound absorption based on ocean
+  measurements: Part I: Pure water and magnesium sulfate contributions.
+  *The Journal of the Acoustical Society of America*, 72(3), 896-907.
+  [doi:10.1121/1.388170](https://doi.org/10.1121/1.388170).
+  The pure-water and magnesium-sulfate halves of the reference seawater
+  absorption model.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Francois, R. E., & Garrison, G. R. (1982). Sound absorption based on ocean
+  measurements. Part II: Boric acid contribution and equation for total
+  absorption. *The Journal of the Acoustical Society of America*, 72(6),
+  1879-1890.
+  [doi:10.1121/1.388673](https://doi.org/10.1121/1.388673).
+  The boric-acid term and the complete total-absorption equation.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Ainslie, M. A., & McColm, J. G. (1998). A simplified formula for viscous and
+  chemical absorption in sea water. *The Journal of the Acoustical Society of
+  America*, 103(3), 1671-1672.
+  [doi:10.1121/1.421258](https://doi.org/10.1121/1.421258).
+  The legible simplified seawater absorption formula.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Thorp, W. H. (1967). Analytic description of the low-frequency attenuation
+  coefficient. *The Journal of the Acoustical Society of America*, 42(1), 270.
+  [doi:10.1121/1.1910566](https://doi.org/10.1121/1.1910566).
+  The frequency-only low-frequency absorption formula.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Chen, C.-T., & Millero, F. J. (1977). Speed of sound in seawater at high
+  pressures. *The Journal of the Acoustical Society of America*, 62(5),
+  1129-1135.
+  [doi:10.1121/1.381646](https://doi.org/10.1121/1.381646).
+  The UNESCO international-standard sound-speed equation.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Wong, G. S. K., & Zhu, S. (1995). Speed of sound in seawater as a function
+  of salinity, temperature, and pressure. *The Journal of the Acoustical
+  Society of America*, 97(3), 1732-1736.
+  [doi:10.1121/1.413048](https://doi.org/10.1121/1.413048).
+  The ITS-90 recast of the UNESCO sound-speed coefficients, the implemented
+  form.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Del Grosso, V. A. (1974). New equation for the speed of sound in natural
+  waters (with comparisons to other equations). *The Journal of the
+  Acoustical Society of America*, 56(4), 1084-1091.
+  [doi:10.1121/1.1903388](https://doi.org/10.1121/1.1903388).
+  The alternative pressure-based sound-speed equation.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Mackenzie, K. V. (1981). Nine-term equation for sound speed in the oceans.
+  *The Journal of the Acoustical Society of America*, 70(3), 807-812.
+  [doi:10.1121/1.386920](https://doi.org/10.1121/1.386920).
+  The depth-based nine-term sound-speed equation.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Leroy, C. C., & Parthiot, F. (1998). Depth-pressure relationships in the
+  oceans and seas. *The Journal of the Acoustical Society of America*, 103(3),
+  1346-1352.
+  [doi:10.1121/1.421275](https://doi.org/10.1121/1.421275).
+  The depth-to-pressure conversion used by the sound-speed equations.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Wenz, G. M. (1962). Acoustic ambient noise in the ocean: Spectra and
+  sources. *The Journal of the Acoustical Society of America*, 34(12),
+  1936-1956.
+  [doi:10.1121/1.1909155](https://doi.org/10.1121/1.1909155).
+  The classic ambient-noise survey behind the wind and thermal spectrum
+  components.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Carey, W. M., & Evans, R. B. (2011). *Ocean ambient noise: Measurement and
+  theory*. Springer.
+  [doi:10.1007/978-1-4419-7832-5](https://doi.org/10.1007/978-1-4419-7832-5).
+  The modern treatment of ocean ambient noise: the wind "rule of fives" and
+  the Mellen thermal-noise derivation.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- MacGillivray, A., & de Jong, C. (2021). A reference spectrum model for
+  estimating source levels of marine shipping based on automated
+  identification system data. *Journal of Marine Science and Engineering*,
+  9(4), 369.
+  [doi:10.3390/jmse9040369](https://doi.org/10.3390/jmse9040369).
+  The open-access JOMOPANS-ECHO ship source-level model and its reference
+  calculator.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
+- Wales, S. C., & Heitmeyer, R. M. (2002). An ensemble source spectra model
+  for merchant ship-radiated noise. *The Journal of the Acoustical Society of
+  America*, 111(3), 1211-1231.
+  [doi:10.1121/1.1427355](https://doi.org/10.1121/1.1427355).
+  The ensemble merchant-ship source-spectrum model.
+  Cited by [Underwater sound propagation](/phonometry/guides/underwater-propagation/).
 
 ## Speech
 

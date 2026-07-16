@@ -119,6 +119,73 @@ reverberación medido en
 (ISO 3382) y de la absorción en cámara reverberante de
 [Materiales acústicos](/phonometry/es/guides/materials/) (ISO 354).
 
+## 3. De dónde salen los datos de entrada
+
+**Coeficientes de superficie.** La norma espera que los $\alpha_{s,i}$
+procedan de mediciones de laboratorio según EN ISO 354, el método de cámara
+reverberante de
+[Materiales acústicos](/phonometry/es/guides/materials/); se admiten
+valores teóricos, empíricos o de campo siempre que se declare la fuente de
+los datos. ISO 354 entrega datos en tercios de octava, y un cálculo en
+bandas de octava toma como entrada la media aritmética de los tres tercios.
+Un coeficiente de cámara reverberante puede superar 1,0 (la difracción de
+borde dispersa hacia la muestra más energía de la que intercepta su área
+plana); entra en la Fórmula 1 tal como se midió, sin recorte, porque la
+misma convención de campo difuso que lo produjo es la que supone el modelo.
+
+**Mobiliario y ocupantes.** Los objetos contribuyen por tres vías: un área
+de absorción equivalente medida $A_{obj}$ cuando existe (personas y
+asientos tienen valores tabulados en el Anexo C informativo), la estimación
+de la Fórmula 4 $V_{obj}^{2/3}$ para objetos duros, irregulares y sin
+medir (mobiliario, maquinaria), y los *conjuntos* de objetos valorados como
+una superficie absorbente $\alpha_s S_k$ cuando muchos objetos similares
+cubren una zona (un público sentado, una estantería de almacén). Los objetos
+también desplazan aire: su volumen sumado entra en la fracción de objetos
+$\psi$ que acorta $T$ en la Fórmula 5 más allá de lo que haría su absorción
+sola.
+
+**Aire.** El término de aire $A_{air} = 4mV(1-\psi)$ usa el coeficiente de
+atenuación de potencia $m$ de la Tabla 1 de la norma, resuelto por las
+cadenas `air_condition` (clase de temperatura y humedad relativa, derivada
+de ISO 9613-1); solo importa por encima de 1 kHz y crece con el volumen.
+Los seis perfiles integrados, de `"10C_30-50"` a `"20C_70-90"` (la
+cláusula 4.3 recomienda `"20C_50-70"` cuando no se especifican
+condiciones), cubren solo las bandas de octava estándar de 125 Hz a 8 kHz
+y no pueden combinarse con un eje de frecuencias propio;
+`air_condition=None` (el valor por defecto) omite el término de aire, y
+para otras frecuencias o condiciones, calcula $m$ según ISO 9613-1 y
+encadena `air_absorption_area` con `equivalent_absorption_area`.
+
+**Límites de validez (cláusula 4.6).** El modelo supone una sala corriente
+y razonablemente difusa: ninguna dimensión más de 5 veces otra, pares de
+superficies opuestas cuyos coeficientes difieran en menos de un factor 3
+(salvo que haya objetos difusores) y una fracción de objetos por debajo de
+0,2. Fuera de esos límites el campo no es difuso y el modelo yerra por el
+lado optimista: la propia cláusula de precisión de la norma registra
+tiempos de reverberación medidos de hasta el doble de la predicción en
+salas de baja difusividad. Las alternativas clásicas para esos casos viven
+en
+[Predicción del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/).
+
+## Referencias
+
+- European Committee for Standardization. (2003). *Building acoustics —
+  Estimation of acoustic performance of buildings from the performance of
+  elements — Part 6: Sound absorption in enclosed spaces*
+  (EN 12354-6:2003).
+  [Ficha en BSI Knowledge (BS EN 12354-6:2003)](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sound-absorption-in-enclosed-spaces).
+  El modelo de la cláusula 4, sus reglas de datos de entrada y sus límites
+  de validez.
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [Catálogo iso.org](https://www.iso.org/standard/34545.html).
+  La medición de laboratorio de la que salen los coeficientes de
+  superficies y conjuntos.
+- Kuttruff, H. (2016). *Room acoustics* (6.ª ed.). CRC Press.
+  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
+  La teoría estadística de la reverberación que las fórmulas de la norma
+  especializan.
+
 ---
 
 **Normas.** EN 12354-6:2003, *Building acoustics — Estimation of acoustic

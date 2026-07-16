@@ -6,9 +6,11 @@ description: "La cadena desde una máquina vibrante hasta el ruido oído varias 
 Una máquina fijada a un edificio radia sonido dos veces: directamente desde
 su propia superficie vibrante, e indirectamente inyectando **potencia
 estructural** en la estructura, que la transporta y la vuelve a radiar en
-salas lejanas. Las cinco páginas de esta sección caracterizan ese segundo
-camino, el más escurridizo, de extremo a extremo: describir la vibración,
-caracterizar los aisladores, cuantificar la potencia y predecir el nivel que
+salas lejanas. Las cinco páginas de esta sección cubren ambos caminos: una
+estima la radiación directa desde la propia vibración superficial, y las
+otras cuatro caracterizan de extremo a extremo ese segundo camino
+estructural, el más escurridizo, desde describir la vibración y caracterizar
+los aisladores hasta cuantificar la potencia y predecir el nivel que
 finalmente oye un oyente.
 
 Primero el lenguaje.

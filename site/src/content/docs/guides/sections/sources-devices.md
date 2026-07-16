@@ -8,9 +8,10 @@ descriptor, and this section is where those descriptors are measured. Its
 common thread is **emission**: numbers that belong to the device rather than
 to the room or the distance it is heard at.
 
-The central quantity is the **sound power level**: the total acoustic energy
-per second a source radiates, the figure that goes on a datasheet, feeds a
-room or outdoor prediction and is checked against noise-emission limits.
+The central quantity is the **sound power**: the total acoustic energy per
+second a source radiates. Expressed in decibels as the sound power level, it
+is the figure that goes on a datasheet, feeds a room or outdoor prediction
+and is checked against noise-emission limits.
 [Sound Power](/phonometry/guides/sound-power/) covers the five standardised
 routes to it, from the enveloping pressure surface of ISO 3744/3746 to the
 reverberation room of ISO 3741, the on-site intensity scanning of ISO 9614-2

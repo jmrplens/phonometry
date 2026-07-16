@@ -13,10 +13,11 @@ source-path split of the rest of the library.
 The **source** half, in
 [Underwater acoustics: radiated noise and pile driving](/phonometry/guides/underwater-acoustics/),
 sets up the ISO 18405 terminology (SPL, SEL and peak levels and their
-references) and applies it to the two regulated source types: the ship
-radiated noise level and equivalent monopole source level of ISO 17208, with
-the Lloyd's-mirror surface correction, and the single-strike, peak and
-cumulative sound exposure of percussive pile driving per ISO 18406.
+references) and applies it to two regulated measurement cases: ships, with
+the radiated noise level of ISO 17208-1 and the equivalent monopole source
+level of ISO 17208-2 via the Lloyd's-mirror surface correction, and
+percussive pile driving, with the single-strike, peak and cumulative sound
+exposure of ISO 18406.
 
 The **path** half, in
 [Underwater sound propagation](/phonometry/guides/underwater-propagation/),

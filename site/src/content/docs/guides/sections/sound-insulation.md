@@ -3,14 +3,16 @@ title: "Sound insulation"
 description: "Airborne and impact sound insulation across its full life cycle: laboratory characterisation (ISO 10140 and companions), in-situ prediction (EN 12354), field verification with single-number ratings (ISO 16283, ISO 717), and the dynamic stiffness that feeds floating-floor design."
 ---
 
-Sound insulation has a life cycle, and the four pages of this section each own
-one stage of it. An element (a wall build-up, a floating floor, a window) is
-first characterised **in the laboratory**, where suppressed flanking isolates
-its direct transmission. That laboratory data feeds a **prediction** of how a
-whole building will perform, flanking paths included. The finished building is
-then **verified in the field**, where the measured values carry the
-single-number ratings that regulations quote. Each stage answers a different
-question, and each has its own standards family.
+Sound insulation has a life cycle with three stages, and a page of this
+section owns each of them. An element (a wall build-up, a floating floor, a
+window) is first characterised **in the laboratory**, where suppressed
+flanking isolates its direct transmission. That laboratory data feeds a
+**prediction** of how a whole building will perform, flanking paths included.
+The finished building is then **verified in the field**, where the measured
+values carry the single-number ratings that regulations quote. Each stage
+answers a different question, and each has its own standards family. A fourth
+page, on dynamic stiffness, is not a stage of its own but the supporting
+material measurement that the prediction stage consumes.
 
 [Laboratory Insulation Measurement](/phonometry/guides/insulation-lab/) covers
 the first stage: the ISO 10140 sound reduction index and normalized impact

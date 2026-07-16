@@ -13,19 +13,19 @@ mitades que reflejan la división fuente-camino del resto de la biblioteca.
 La mitad de **fuente**, en
 [Acústica submarina: ruido radiado e hincado de pilotes](/phonometry/es/guides/underwater-acoustics/),
 establece la terminología de ISO 18405 (niveles SPL, SEL y de pico y sus
-referencias) y la aplica a los dos tipos de fuente regulados: el nivel de
-ruido radiado por buques y el nivel de fuente monopolar equivalente de
-ISO 17208, con la corrección de superficie del espejo de Lloyd, y la
-exposición sonora de un golpe, de pico y acumulada del hincado percusivo de
-pilotes según ISO 18406.
+referencias) y la aplica a dos casos de medición regulados: los buques, con
+el nivel de ruido radiado de ISO 17208-1 y el nivel de fuente monopolar
+equivalente de ISO 17208-2 mediante la corrección de superficie del espejo
+de Lloyd, y el hincado percusivo de pilotes, con la exposición sonora de un
+golpe, de pico y acumulada de ISO 18406.
 
 La mitad de **camino**, en
 [Propagación submarina del sonido](/phonometry/es/guides/underwater-propagation/),
 predice lo que el mar hace con ese sonido. Se construye por capas, de las
 formas cerradas a la numérica completa: divergencia geométrica más absorción
 volumétrica (Francois-Garrison, Ainslie-McColm o Thorp), la velocidad del
-sonido en agua de mar por tres formulaciones, la ecuación del sonar pasiva y
-activa, la pérdida por reflexión en el lecho marino de Rayleigh, el espectro
+sonido en agua de mar por tres formulaciones, las ecuaciones de sonar pasivo
+y activo, la pérdida por reflexión en el lecho marino de Rayleigh, el espectro
 de ruido ambiente de Wenz con el tráfico marítimo JOMOPANS-ECHO, y los
 solvers numéricos de modos normales, trazado de rayos y ecuación parabólica
 para problemas dependientes de la distancia.

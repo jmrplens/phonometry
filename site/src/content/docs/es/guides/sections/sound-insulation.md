@@ -3,15 +3,17 @@ title: "Aislamiento acústico"
 description: "El aislamiento a ruido aéreo y de impacto en todo su ciclo de vida: caracterización en laboratorio (ISO 10140 y compañeras), predicción in situ (EN 12354), verificación en campo con índices globales (ISO 16283, ISO 717), y la rigidez dinámica que alimenta el diseño de suelos flotantes."
 ---
 
-El aislamiento acústico tiene un ciclo de vida, y cada una de las cuatro
-páginas de esta sección posee una etapa. Un elemento (una solución de muro,
+El aislamiento acústico tiene un ciclo de vida con tres etapas, y una página
+de esta sección posee cada una de ellas. Un elemento (una solución de muro,
 un suelo flotante, una ventana) se caracteriza primero **en el laboratorio**,
 donde los flancos suprimidos aíslan su transmisión directa. Esos datos de
 laboratorio alimentan una **predicción** de cómo se comportará el edificio
 completo, caminos de flancos incluidos. El edificio terminado se **verifica
 en campo**, donde los valores medidos llevan los índices globales que citan
 las regulaciones. Cada etapa responde a una pregunta distinta y tiene su
-propia familia de normas.
+propia familia de normas. Una cuarta página, la de rigidez dinámica, no es
+una etapa en sí, sino la medición de material de apoyo que consume la etapa
+de predicción.
 
 [Medición del aislamiento en laboratorio](/phonometry/es/guides/insulation-lab/)
 cubre la primera etapa: el índice de reducción sonora y el nivel de impacto
@@ -31,7 +33,7 @@ de medición vive en esta sección.
 cubre la tercera: aislamiento aéreo, de impacto y de fachada en campo según
 ISO 16283-1/2/3, los índices globales ponderados y términos de adaptación
 espectral de ISO 717-1/2, la incertidumbre de ISO 12999-1 que cualifica un
-índice, y el método rápido de inspección ISO 10052.
+índice, y el método rápido de control ISO 10052.
 
 Dos secciones vecinas completan el cuadro: las magnitudes del lado de la sala
 (tiempo de reverberación, absorción) viven en
@@ -44,7 +46,7 @@ emparentada EN 12354-5, vive en
 
 - [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/):
   medición ISO 16283-1/2/3, índices ISO 717-1/2, incertidumbre ISO 12999-1 y
-  el método de inspección ISO 10052.
+  el método de control ISO 10052.
 - [Medición del aislamiento en laboratorio](/phonometry/es/guides/insulation-lab/):
   caracterización ISO 10140, aislamiento por intensidad ISO 15186,
   revestimientos de suelo ISO 16251-1 y flancos ISO 10848.

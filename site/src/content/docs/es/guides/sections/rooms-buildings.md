@@ -60,7 +60,7 @@ laboratorio y predicho a partir de datos de elemento.
 
 - [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/):
   medición en campo ISO 16283-1/2/3, índices ponderados ISO 717-1/2,
-  incertidumbre ISO 12999-1 y el método de inspección ISO 10052.
+  incertidumbre ISO 12999-1 y el método de control ISO 10052.
 - [Medición del aislamiento en laboratorio](/phonometry/es/guides/insulation-lab/):
   caracterización en laboratorio ISO 10140, aislamiento por intensidad
   (ISO 15186), mejora de revestimientos de suelo (ISO 16251-1) y flancos

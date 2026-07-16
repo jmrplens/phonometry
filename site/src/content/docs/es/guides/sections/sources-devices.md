@@ -8,10 +8,11 @@ fuente, y esta sección es donde esos descriptores se miden. Su hilo conductor
 es la **emisión**: números que pertenecen al dispositivo y no a la sala ni a
 la distancia desde la que se escucha.
 
-La magnitud central es el **nivel de potencia sonora**: la energía acústica
-total por segundo que radia una fuente, la cifra que va en una hoja de datos,
-alimenta una predicción de sala o de exteriores y se compara con los límites
-de emisión de ruido. [Potencia sonora](/phonometry/es/guides/sound-power/)
+La magnitud central es la **potencia sonora**: la energía acústica total por
+segundo que radia una fuente. Expresada en decibelios como el nivel de
+potencia sonora, es la cifra que va en una hoja de datos, alimenta una
+predicción de sala o de exteriores y se compara con los límites de emisión
+de ruido. [Potencia sonora](/phonometry/es/guides/sound-power/)
 cubre las cinco rutas normalizadas para obtenerla, desde la superficie
 envolvente de presión de ISO 3744/3746 hasta la cámara reverberante de
 ISO 3741, el barrido de intensidad in situ de ISO 9614-2 y los grados de

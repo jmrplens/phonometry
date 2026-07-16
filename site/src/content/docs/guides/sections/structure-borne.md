@@ -6,9 +6,11 @@ description: "The chain from a vibrating machine to the noise heard rooms away: 
 A machine fixed to a building radiates sound twice: directly from its own
 vibrating surface, and indirectly by injecting **structure-borne power** into
 the structure, which carries it away and re-radiates it in distant rooms. The
-five pages of this section characterise that second, sneakier path end to
-end: describe the vibration, characterise the isolators, quantify the power,
-and predict the level a listener finally hears.
+five pages of this section cover both paths: one estimates the direct
+radiation from the surface vibration itself, and the other four characterise
+the second, sneakier structure-borne path end to end, from describing the
+vibration and characterising the isolators to quantifying the power and
+predicting the level a listener finally hears.
 
 The language comes first.
 [Mechanical mobility and the FRF family (ISO 7626-1)](/phonometry/guides/mechanical-mobility/)

@@ -33,6 +33,15 @@ $$
 Las posiciones se promedian en energía con
 $L = 10 \log_{10}\left( \frac{1}{n} \sum_i 10^{L_i/10} \right)$.
 
+La prima de $R'$ es una convención, no un adorno: las magnitudes con prima
+($R'$, $L'_n$, $L'_{nT}$) se miden **en el edificio** e incluyen todas las
+vías de flancos, mientras que las $R$ y $L_n$ sin prima son propiedades de
+laboratorio del elemento solo, medidas con los flancos suprimidos. El mapa
+completo laboratorio-campo vive en
+[Medición del aislamiento en laboratorio](/phonometry/es/guides/insulation-lab/);
+la predicción que tiende el puente entre ambos es
+[EN 12354](/phonometry/es/guides/insulation-prediction/).
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_setup_es.svg" alt="Montaje de aislamiento a ruido aéreo en campo: un altavoz en la sala emisora, micrófonos promediados en energía en las salas emisora y receptora a través del cerramiento común" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_setup_es_dark.svg" alt="Montaje de aislamiento a ruido aéreo en campo: un altavoz en la sala emisora, micrófonos promediados en energía en las salas emisora y receptora a través del cerramiento común" style="width:92%">
 
 El espectro por bandas se reduce a un número mediante el **método de la curva
@@ -44,6 +53,26 @@ grande posible pero no mayor que 32,0 dB (16 bandas de tercio de octava) o
 referencia desplazada leída a 500 Hz. Los **términos de adaptación
 espectral** $C$ (ruido rosa) y $C_{tr}$ (tráfico urbano) añaden la
 penalización en baja frecuencia de una fuente real.
+
+Los dos términos recalifican la misma curva medida frente a los dos espectros
+de fuente del Anexo A de ISO 717-1: $C$ frente a ruido rosa ponderado A,
+representativo de las actividades domésticas (habla, música, radio,
+televisión), y $C_{tr}$ frente a tráfico rodado urbano ponderado A, cuya
+energía se concentra en baja frecuencia. Están definidos de modo que
+$R_w + C$ y $R_w + C_{tr}$ son las diferencias de nivel ponderadas A que el
+elemento consigue frente a esas fuentes. Para leerlos:
+
+* $C$ se mantiene pequeño en la mayoría de construcciones (0 a −2 dB es lo
+  típico): el espectro rosa se parece a la ponderación ya implícita en la
+  curva de referencia.
+* $C_{tr}$ castiga el aislamiento débil en baja frecuencia. Una doble hoja
+  ligera con su resonancia masa-aire-masa cerca de 100 Hz puede llevar un
+  $C_{tr}$ de −5 a −10 dB, mientras que una pared monolítica pesada con el
+  mismo $R_w$ pierde mucho menos: dos construcciones con la misma
+  calificación pueden diferir de forma audible frente al tráfico.
+* Diseña con el descriptor que corresponda al ruido: $R_w + C_{tr}$ para una
+  fachada a una calle con tráfico, $R_w + C$ (o $R_w$ a secas, donde la
+  reglamentación lo diga) entre viviendas.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es.svg" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es_dark.svg" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" style="width:80%">
 
@@ -521,6 +550,31 @@ exactamente 5 valores de octava (o 16 de tercio de octava).*
 `survey_facade_insulation()` un `SurveyFacadeResult`;
 `survey_service_equipment_level()` un `SurveyServiceEquipmentResult` (`l_xy`,
 `l_xy_nt`, `l_xy_n`).
+
+## Referencias
+
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  El tratamiento exhaustivo del aislamiento a ruido aéreo y de impactos: las
+  cadenas de medición, la estadística de salas tras las magnitudes de campo y
+  la interpretación de los índices globales.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  Un manual compacto que acompaña la física de transmisión sonora tras estas
+  mediciones.
+- International Organization for Standardization. (2020). *Acoustics —
+  Rating of sound insulation in buildings and of building elements — Part 1:
+  Airborne sound insulation* (ISO 717-1:2020).
+  [Catálogo iso.org](https://www.iso.org/standard/77435.html).
+  La calificación por curva de referencia y los términos de adaptación
+  espectral interpretados arriba.
+- International Organization for Standardization. (2014). *Acoustics — Field
+  measurement of sound insulation in buildings and of building elements —
+  Part 1: Airborne sound insulation* (ISO 16283-1:2014).
+  [Catálogo iso.org](https://www.iso.org/standard/55997.html).
+  El método aéreo de campo que implementa esta página.
 
 ---
 

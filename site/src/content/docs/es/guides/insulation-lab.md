@@ -34,9 +34,22 @@ $$
 
 | | Campo (ISO 16283) | Laboratorio (ISO 10140) |
 | :--- | :--- | :--- |
-| Ruido aéreo | $R'$ aparente (con flancos) | $R$ directo (flancos suprimidos) |
-| Impactos | $L'_n$ aparente | $L_n$ directo |
+| Índice aéreo de elemento | $R'$ aparente (con flancos) | $R$ directo (flancos suprimidos) |
+| Aéreo de pareja de salas | $D_{nT}$, $D_n$ (sin prima: magnitudes de sala) | — |
+| Impactos | $L'_n$, $L'_{nT}$ aparentes | $L_n$ directo |
+| Índice global | $R'_w$, $D_{nT,w}$, $L'_{n,w}$, $L'_{nT,w}$ | $R_w$, $L_{n,w}$ |
 | Área de absorción | medida en la sala | propiedad de la instalación |
+
+El apóstrofo es el marcador de flancos de la acústica de edificios, y viaja
+con la magnitud hasta su índice global: $R_w$ califica un espectro de
+laboratorio, $R'_w$ uno de campo. Las diferencias de nivel estandarizada y
+normalizada $D_{nT}$ y $D_n$ no llevan prima porque describen la pareja de
+salas y no un elemento, así que no hay contraparte sin flancos que marcar. En
+una construcción bien ejecutada $R'_w$ queda unos pocos dB por debajo del
+$R_w$ de laboratorio de la misma partición; un hueco mucho mayor dice que
+dominan los flancos, y el
+[modelo EN 12354](/phonometry/es/guides/insulation-prediction/) dice qué vía
+los lleva.
 
 Los índices de un solo número reutilizan los mismísimos motores de ISO 717-1/2
 (`weighted_rating`, `weighted_impact_rating`): un espectro $R$ se valora a $R_w$
@@ -351,6 +364,20 @@ res_m = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
                                   modal_overlap=m)   # bandas con M < 0.25 acotadas
 res_m.bracketed    # marcas por banda; las bandas acotadas salen del número único
 ```
+
+## Referencias
+
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  La monografía de referencia para la medición del aislamiento en
+  laboratorio, la transmisión por flancos y el índice de reducción de
+  vibraciones.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  La teoría de transmisión de construcciones simples y dobles que cuantifican
+  los índices de laboratorio.
 
 ---
 

@@ -33,6 +33,15 @@ $$
 Positions are energy-averaged with
 $L = 10 \log_{10}\left( \frac{1}{n} \sum_i 10^{L_i/10} \right)$.
 
+The prime on $R'$ is a convention, not decoration: primed quantities ($R'$,
+$L'_n$, $L'_{nT}$) are measured **in the building** and include every
+flanking path, while the unprimed $R$ and $L_n$ are laboratory properties of
+the element alone, measured with flanking suppressed. The full lab-to-field
+map lives in
+[Laboratory Insulation Measurement](/phonometry/guides/insulation-lab/); the
+prediction that bridges the two is
+[EN 12354](/phonometry/guides/insulation-prediction/).
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_setup.svg" alt="Field airborne insulation setup: a loudspeaker in the source room, microphones energy-averaged in source and receiving rooms across the common partition" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_setup_dark.svg" alt="Field airborne insulation setup: a loudspeaker in the source room, microphones energy-averaged in source and receiving rooms across the common partition" style="width:92%">
 
 The band spectrum is collapsed to one number by the **reference-curve
@@ -43,6 +52,24 @@ but not more than 32.0 dB (16 one-third-octave bands) or 10.0 dB (5 octave
 bands). The rating (`Rw`, `R'w`, `DnT,w` …) is the shifted reference read at
 500 Hz. The **spectrum adaptation terms** $C$ (pink noise) and $C_{tr}$
 (urban traffic) add the low-frequency penalty of a real source.
+
+The two terms re-rate the same measured curve against the two source spectra
+of ISO 717-1 Annex A: $C$ against A-weighted pink noise, representative of
+living activities (speech, music, radio, television), and $C_{tr}$ against
+A-weighted urban road traffic, whose energy sits at low frequency. They are
+defined so that $R_w + C$ and $R_w + C_{tr}$ are the A-weighted level
+differences the element achieves against those sources. Reading them:
+
+* $C$ stays small for most constructions (0 to −2 dB is typical): the pink
+  spectrum is close to the weighting already implicit in the reference
+  curve.
+* $C_{tr}$ punishes weak low-frequency insulation. A lightweight double leaf
+  with its mass-air-mass resonance near 100 Hz can carry a $C_{tr}$ of −5 to
+  −10 dB, while a heavy monolithic wall with the same $R_w$ loses far less:
+  two constructions with equal ratings can differ audibly against traffic.
+* Design with the descriptor that matches the noise: $R_w + C_{tr}$ for a
+  façade on a busy road, $R_w + C$ (or plain $R_w$, where the regulation
+  says so) between dwellings.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating.svg" alt="Measured one-third-octave sound reduction index with the shifted ISO 717-1 reference curve and the resulting weighted rating at 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_dark.svg" alt="Measured one-third-octave sound reduction index with the shifted ISO 717-1 reference curve and the resulting weighted rating at 500 Hz" style="width:80%">
 
@@ -517,6 +544,31 @@ one-third-octave) values.*
 `survey_facade_insulation()` a `SurveyFacadeResult`;
 `survey_service_equipment_level()` a `SurveyServiceEquipmentResult` (`l_xy`,
 `l_xy_nt`, `l_xy_n`).
+
+## References
+
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  The comprehensive treatment of airborne and impact sound insulation:
+  the measurement chains, the statistics of rooms behind the field
+  quantities and the interpretation of the single-number ratings.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  A compact textbook companion for the sound-transmission physics behind
+  these measurements.
+- International Organization for Standardization. (2020). *Acoustics —
+  Rating of sound insulation in buildings and of building elements — Part 1:
+  Airborne sound insulation* (ISO 717-1:2020).
+  [iso.org catalogue](https://www.iso.org/standard/77435.html).
+  The reference-curve rating and the spectrum adaptation terms interpreted
+  above.
+- International Organization for Standardization. (2014). *Acoustics — Field
+  measurement of sound insulation in buildings and of building elements —
+  Part 1: Airborne sound insulation* (ISO 16283-1:2014).
+  [iso.org catalogue](https://www.iso.org/standard/55997.html).
+  The field airborne method this page implements.
 
 ---
 

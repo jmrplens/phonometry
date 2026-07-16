@@ -160,6 +160,15 @@ it closes the Annex H.3 example (`standardized_level_difference(52.2, 50.0,
 11.5)` gives 53.6 dB, the printed $V/(3S)$ chain 53.8 dB, both rounding to
 $D_{nT,w} = 54$ dB).
 
+The three insulation guides close a loop: the
+[laboratory](insulation-lab.md) measures $R$ and $K_{ij}$ element by element
+and junction by junction, this model assembles them into a predicted $R'_w$,
+and the [field measurement](insulation-field.md) checks the built result.
+When the measured value lands well below the prediction, look for a
+construction defect on the dominant path the model reports: a rigid bridge
+across a resilient junction, a missing lining, a leak around the separating
+element.
+
 ### `junction_vibration_reduction()` / `flanking_element()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
@@ -319,6 +328,14 @@ fig.tight_layout(); plt.show()
 `r_tr_s`, `d_2m_nt`, `element_r`, and the `r_tr_s_w` / `d_2m_nt_w` / `c_tr` single
 numbers); `radiated_sound_power()` a `RadiatedPowerResult` (`l_w`, `r_prime`,
 `l_w_dba`). Both expose `.plot()`.
+
+## References
+
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  The full treatment of flanking transmission and the EN 12354 prediction
+  framework, from the vibration reduction index to its statistical basis.
 
 ---
 

@@ -214,8 +214,9 @@ def _eyring_absorption(total_area: float, mean_absorption: NDArray[np.float64]) 
         raise ValueError(
             "the mean absorption coefficient must be below 1 for the "
             "Eyring-family models: ln(1 - mean) diverges at a mean of 1. "
-            "Individual coefficients at or above 1 are accepted as long as "
-            "the mean stays below 1; Sabine does not constrain the mean."
+            "Individual coefficients at or above 1 are accepted (up to the "
+            "shared unit-error ceiling of 2) as long as the mean stays "
+            "below 1; Sabine does not constrain the mean."
         )
     return np.asarray(-total_area * np.log1p(-mean_absorption), dtype=np.float64)
 
@@ -299,7 +300,8 @@ def eyring_reverberation_time(
 
     The formula constrains only the *mean*: ``ln(1 - alpha_bar)`` requires
     ``alpha_bar < 1``, while individual coefficients at or above 1 (a measured
-    ISO 354 outcome) are accepted as long as the mean stays below 1.
+    ISO 354 outcome) are accepted as long as the mean stays below 1 and each
+    coefficient stays within the shared unit-error ceiling of 2.
 
     :param volume: Room volume ``V``, m3.
     :param surfaces: Sequence of ``(area, absorption_coefficient)`` pairs.

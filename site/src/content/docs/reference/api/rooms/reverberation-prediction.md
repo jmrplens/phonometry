@@ -107,7 +107,8 @@ and its area-weighted mean absorption `alpha_bar`.
 
 The formula constrains only the *mean*: `ln(1 - alpha_bar)` requires
 `alpha_bar < 1`, while individual coefficients at or above 1 (a measured
-ISO 354 outcome) are accepted as long as the mean stays below 1.
+ISO 354 outcome) are accepted as long as the mean stays below 1 and each
+coefficient stays within the shared unit-error ceiling of 2.
 
 **Parameters**
 

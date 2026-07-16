@@ -112,7 +112,7 @@ install-hooks:
 # total CPU on this suite. (PYTHONHASHSEED is deliberately left unset here so
 # the tests still exercise randomised hash/set ordering.)
 TEST_ENV = OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
-	NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
+	NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 NUMBA_NUM_THREADS=1
 
 # -n auto fans the suite out across all CPU cores via pytest-xdist (workers are
 # separate processes; pytest-cov combines their coverage data automatically).

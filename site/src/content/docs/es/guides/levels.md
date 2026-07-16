@@ -21,7 +21,7 @@ nivel con ponderación temporal.
 
 ```python
 import numpy as np
-from phonometry import leq, laeq
+from phonometry import metrology
 
 # recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
 fs = 48000
@@ -29,10 +29,10 @@ recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 sensitivity = 1.0                                    # calibration_factor (ver Calibración)
 
 # Nivel continuo equivalente de toda la grabación
-level = leq(recording, calibration_factor=sensitivity)
+level = metrology.leq(recording, calibration_factor=sensitivity)
 
 # Leq ponderado A (la métrica estándar de ruido ambiental)
-la = laeq(recording, fs, calibration_factor=sensitivity)
+la = metrology.laeq(recording, fs, calibration_factor=sensitivity)
 ```
 
 Ambas aceptan señales 1D (devuelven un escalar) o arrays 2D
@@ -76,7 +76,7 @@ eventos), **L50** la mediana y **L90** el nivel de fondo.
 
 ```python
 import numpy as np
-from phonometry import ln_levels
+from phonometry import metrology
 
 # Un tono constante da L10 = L50 = L90; los percentiles solo cuentan algo con un
 # nivel *fluctuante*. Sintetizamos 3 s alternando entre medio segundo tranquilo
@@ -88,7 +88,7 @@ quiet = 0.02 * rng.standard_normal(segment)        # fondo
 loud = 0.06 * rng.standard_normal(segment)         # eventos ~10 dB más fuertes
 varying = np.tile(np.concatenate([quiet, loud]), 3)
 
-stats = ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
+stats = metrology.ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 # LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (eventos) > L50 (mediana) > L90 (fondo)
 ```
@@ -189,23 +189,27 @@ lo que hace `composite_rating_level` más abajo.
 ## Métricas de pico, evento y ocupacionales
 
 ```python
-from phonometry import lc_peak, sel, sound_exposure, lex_8h
+import numpy as np
+from phonometry import metrology
 
-# Usa `recording`, `fs` y `sensitivity` del snippet de Leq anterior.
+# recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+sensitivity = 1.0                                    # calibration_factor (ver Calibración)
 
 # Pico ponderado C (IEC 61672-1 §5.13): los límites de acción laborales usan esto
-peak = lc_peak(recording, fs, calibration_factor=sensitivity)
+peak = metrology.lc_peak(recording, fs, calibration_factor=sensitivity)
 
 # Un único evento de ruido y una muestra de jornada (fragmentos de una grabación real)
 event = recording
 shift_sample = recording
 
 # Nivel de exposición sonora: nivel del evento normalizado a 1 s (LAE)
-lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
+lae = metrology.sel(event, fs, weighting="A", calibration_factor=sensitivity)
 
 # Dosis diaria de ruido (IEC 61252): exposición en Pa²·h y LEX,8h / LEP,d
-E = sound_exposure(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
-lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+E = metrology.sound_exposure(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+lex = metrology.lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
 ```
 
 `lc_peak` está verificado contra las respuestas de referencia de ciclo
@@ -312,12 +316,12 @@ carácter (Tabla A.1: p. ej. +5 dB impulsivo regular, +12 dB altamente
 impulsivo, +3 a +6 dB tonos prominentes):
 
 ```python
-from phonometry import lden, composite_rating_level
+from phonometry import environmental
 
-l = lden(63.2, 58.1, 51.4)                      # desde LAeq por periodo
-r = composite_rating_level([(63.2, 12, 0.0),    # día
+l = environmental.lden(63.2, 58.1, 51.4)                      # desde LAeq por periodo
+r = environmental.composite_rating_level([(63.2, 12, 0.0),    # día
                             (58.1, 4, 5.0),     # tarde (+5)
-                            (51.4, 8, 10.0)])   # noche (+10) == lden
+                            (51.4, 8, 10.0)])   # noche (+10) == environmental.lden
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es.svg" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_es_dark.svg" alt="Perfil LAeq urbano sintético de 24 horas con las bandas de día, tarde y noche, los niveles por periodo ponderados con +5 y +10 dB y el Lden resultante" style="width:80%">
@@ -424,10 +428,10 @@ groseramente.
 
 ```python
 import matplotlib.pyplot as plt
-from phonometry import assess_tonal_audibility
+from phonometry import environmental
 
 # ISO 1996-2:2007 Anexo C.5, Ejemplo 2 (dos tonos cerca de 400 Hz):
-res = assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
+res = environmental.assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
                               centre_frequency=430.0)
 print(res.audibility, res.adjustment)   # ΔLta ≈ 11,1 dB -> Kt = 6 dB
 res.plot()
@@ -436,15 +440,12 @@ plt.show()
 </details>
 
 ```python
-from phonometry import (
-    assess_tonal_audibility, residual_sound_correction,
-    combined_standard_uncertainty, environmental_expanded_uncertainty,
-)
+from phonometry import environmental
 
-kt = assess_tonal_audibility(54.1, 45.2, 430.0).adjustment      # 6 dB
-corr = residual_sound_correction(measured_level=58.0, residual_level=50.0)
-u = combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38])  # 2,18 dB (G.2)
-environmental_expanded_uncertainty(u)                            # 4,36 dB (k = 2)
+kt = environmental.assess_tonal_audibility(54.1, 45.2, 430.0).adjustment      # 6 dB
+corr = environmental.residual_sound_correction(measured_level=58.0, residual_level=50.0)
+u = environmental.combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38])  # 2,18 dB (G.2)
+environmental.expanded_uncertainty(u)                            # 4,36 dB (k = 2)
 ```
 
 ## Espectrograma de octavas (niveles vs tiempo)
@@ -453,10 +454,14 @@ Análisis de octava fraccional en tiempo corto: un nivel por banda y ventana,
 alineado en el tiempo entre bandas.
 
 ```python
-from phonometry import OctaveFilterBank
+import numpy as np
+from phonometry import metrology
 
-# Usa `recording` del snippet de Leq anterior.
-bank = OctaveFilterBank(fs=48000, fraction=3)
+# recording: una captura de micrófono calibrada (Pa) — grabada con tu cadena de medición. Sintetizada aquí para que la guía funcione por sí sola.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+bank = metrology.OctaveFilterBank(fs=48000, fraction=3)
 levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bandas, ventanas) — listo para pcolormesh(times, freq, levels)
 ```
@@ -516,8 +521,19 @@ plt.show()
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import chirp
+from phonometry import metrology
 
-# Usa `levels`, `freq` y `times` del snippet del espectrograma anterior.
+# Barrido logarítmico de 80 Hz -> 8 kHz más dos ráfagas de tono, con algo de ruido
+fs = 48000
+t = np.arange(int(4.0 * fs)) / fs
+x = 0.5 * chirp(t, f0=80, t1=4.0, f1=8000, method="logarithmic")
+x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
+
+bank = metrology.OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[50.0, 12000.0])
+levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.5)
+
 fig, ax = plt.subplots()
 mesh = ax.pcolormesh(times, freq, levels, shading="auto")
 ax.set_yscale("log")

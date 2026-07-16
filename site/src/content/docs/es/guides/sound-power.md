@@ -175,7 +175,7 @@ validez hasta `K2 ≤ 7 dB` en lugar de 4 dB.
 
 ```python
 import numpy as np
-from phonometry import sound_power_pressure, measurement_positions
+from phonometry import emission
 
 # SPL en banda de octava (dB) en las 10 posiciones de la semiesfera de ISO 3744
 # (Anexo B), con la fuente en marcha, más el espectro de fondo con ella apagada.
@@ -186,10 +186,10 @@ levels = base + rng.normal(0.0, 0.5, size=(10, 8))     # (posiciones, bandas)
 background = np.full((10, 8), 55.0)
 
 # Coordenadas de micrófono del Anexo B de ISO 3744 en una semiesfera de radio 1.5 m.
-mic_xyz = measurement_positions("hemisphere", radius=1.5, reflecting_planes=1)
+mic_xyz = emission.measurement_positions("hemisphere", radius=1.5, reflecting_planes=1)
 print(mic_xyz.shape)                                    # (10, 3)
 
-res = sound_power_pressure(
+res = emission.sound_power_pressure(
     levels, "hemisphere", radius=1.5, reflecting_planes=1,
     background_levels=background, frequencies=freqs,
     reverberation_time=0.6, volume=300.0,          # datos de sala -> K2
@@ -216,6 +216,20 @@ número único `LWA` del título.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import emission
+
+# SPL en banda de octava (dB) en las 10 posiciones de la semiesfera de ISO 3744
+# (Anexo B), con la fuente en marcha, más el espectro de fondo con ella apagada.
+freqs = np.array([63, 125, 250, 500, 1000, 2000, 4000, 8000])
+base = np.array([70.0, 74.0, 78.0, 80.0, 79.0, 76.0, 72.0, 66.0])
+rng = np.random.default_rng(0)
+levels = base + rng.normal(0.0, 0.5, size=(10, 8))     # (posiciones, bandas)
+background = np.full((10, 8), 55.0)
+res = emission.sound_power_pressure(
+    levels, "hemisphere", radius=1.5, reflecting_planes=1,
+    background_levels=background, frequencies=freqs,
+    reverberation_time=0.6, volume=300.0,          # datos de sala -> K2
+)
 
 # res es el SoundPowerResult calculado arriba. Una línea:
 res.plot()
@@ -344,7 +358,7 @@ modo que la sala no necesita caracterizarse:
 
 ```python
 import numpy as np
-from phonometry import sound_power_reverberation, sound_power_comparison
+from phonometry import emission
 
 # SPL medio de sala en tercios de octava (dB), 100 Hz - 10 kHz, y el T60 de la sala.
 freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
@@ -353,7 +367,7 @@ freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
 lp = np.linspace(80.0, 70.0, freqs.size)
 t60 = np.full(freqs.size, 2.0)
 
-rev = sound_power_reverberation(
+rev = emission.sound_power_reverberation(
     lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
     temperature=20.0, static_pressure=101.0,
 )
@@ -366,7 +380,7 @@ print(round(rev.sound_power_level_a, 1))                # LWA = 92.1 dB
 # Método de comparación: una fuente de referencia de LW conocido medida en los mismos puntos.
 lw_rss = np.full(freqs.size, 85.0)
 lp_rss = np.linspace(78.0, 69.0, freqs.size)
-cmp = sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature=20.0)
+cmp = emission.sound_power_comparison(lp, lp_rss, lw_rss, frequencies=freqs, temperature=20.0)
 print(round(float(cmp.sound_power_level[0]), 1), cmp.method)   # 86.9 comparison
 
 rev.plot()   # espectro LW de la sala reverberante; LWA en el título (requiere matplotlib)
@@ -385,6 +399,18 @@ título.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import emission
+
+# SPL medio de sala en tercios de octava (dB), 100 Hz - 10 kHz, y el T60 de la sala.
+freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
+                  1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000],
+                 dtype=float)
+lp = np.linspace(80.0, 70.0, freqs.size)
+t60 = np.full(freqs.size, 2.0)
+rev = emission.sound_power_reverberation(
+    lp, t60, volume=200.0, surface_area=220.0, frequencies=freqs,
+    temperature=20.0, static_pressure=101.0,
+)
 
 # rev es el ReverberationSoundPowerResult calculado arriba. Una línea:
 rev.plot()
@@ -490,7 +516,7 @@ cuando se cumplen 1 y 3, y en caso contrario `none`.
 
 ```python
 import numpy as np
-from phonometry import sound_power_intensity
+from phonometry import emission
 
 # 6 segmentos de superficie x 6 bandas de octava: intensidad normal con signo (W/m^2)
 # de dos barridos repetidos, las áreas de los segmentos y el SPL superficial por segmento (dB).
@@ -501,7 +527,7 @@ scan1 = np.abs(rng.normal(1e-4, 2e-5, size=(6, 6)))     # (segmentos, bandas)
 scan2 = scan1 * (1.0 + rng.normal(0.0, 0.02, size=(6, 6)))
 pressure = np.full((6, 6), 80.0)
 
-res = sound_power_intensity(
+res = emission.sound_power_intensity(
     scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
     pressure_residual_index=12.0, frequencies=freqs,
     band_type="octave", grade="engineering",
@@ -528,6 +554,21 @@ barras se sostienen, y el total ponderado A de 90,9 dB(A) encabeza el título.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import emission
+
+# 6 segmentos de superficie x 6 bandas de octava: intensidad normal con signo (W/m^2)
+# de dos barridos repetidos, las áreas de los segmentos y el SPL superficial por segmento (dB).
+freqs = np.array([125, 250, 500, 1000, 2000, 4000], dtype=float)
+areas = np.full(6, 0.5)                                 # 0.5 m^2 por segmento
+rng = np.random.default_rng(0)
+scan1 = np.abs(rng.normal(1e-4, 2e-5, size=(6, 6)))     # (segmentos, bandas)
+scan2 = scan1 * (1.0 + rng.normal(0.0, 0.02, size=(6, 6)))
+pressure = np.full((6, 6), 80.0)
+res = emission.sound_power_intensity(
+    scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
+    pressure_residual_index=12.0, frequencies=freqs,
+    band_type="octave", grade="engineering",
+)
 
 # res es el SoundPowerIntensityResult calculado arriba. Una línea:
 res.plot()
@@ -606,16 +647,16 @@ conjuntos normalizados de vectores unitarios de las Tablas D.1 (esfera), E.1
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 # Las 40 posiciones normalizadas de la semiesfera (vectores unitarios escalados por el radio).
-pos = ph.precision_positions("hemisphere", radius=1.0, count=40)
+pos = emission.precision_positions("hemisphere", radius=1.0, count=40)
 print(pos.shape)                      # (40, 3)
 
 # SPL en banda de octava/tercio (dB) en cada una de las 40 posiciones; aquí un
 # valor uniforme de 74 dB en una banda. El resultado lleva S = 2*pi*r^2 y LW con C1+C2+C3.
 levels = np.full((40, 1), 74.0)
-res = ph.sound_power_anechoic(levels, "hemisphere", radius=1.0)
+res = emission.sound_power_anechoic(levels, "hemisphere", radius=1.0)
 print(round(res.surface_area, 3))                 # 6.283  (2*pi*1^2)
 print(np.round(res.sound_power_level, 2))         # [81.85]
 ```
@@ -627,21 +668,21 @@ la temperatura y la presión estática medidas.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 # K1 para una diferencia señal-fondo de 6 dB en una banda de borde <=200 Hz: el
 # límite es 1.26 dB (Ec. 11). Los niveles de fuente y fondo son [posiciones, bandas].
-k1 = ph.precision_background_correction(
+k1 = emission.precision_background_correction(
     np.array([[56.0]]), np.array([[50.0]]), np.array([200.0]))
 print(round(float(k1[0, 0]), 4))      # 1.2563
 
 # Correcciones meteorológicas en la referencia de 23 C, 101.325 kPa (Ec. 16):
-mc = ph.meteorological_corrections(23.0, 101.325)
+mc = emission.meteorological_corrections(23.0, 101.325)
 print(round(mc.c1, 4), round(mc.c2, 4))   # -0.1282 0.0
 
 # Incertidumbre expandida (EJEMPLO de la Cláusula 10.5): sigma_R0 = 0.5, sigma_omc = 2.0,
 # k = 2 -> U = 4.1 dB.
-print(round(ph.precision_uncertainty(0.5, 2.0, 2.0), 3))   # 4.123
+print(round(emission.precision_uncertainty(0.5, 2.0, 2.0), 3))   # 4.123
 ```
 
 Sobre varias bandas `sound_power_anechoic` devuelve un `PrecisionSoundPowerResult`
@@ -649,7 +690,7 @@ representable que lleva el `LW` por banda y el total ponderado A:
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 # Una máquina con pico en frecuencias medias medida sobre el conjunto hemisférico de
 # 40 posiciones (Anexo E). levels_positions es el espectro de presión superficial
@@ -659,7 +700,7 @@ base = 70.0 + 8.0 * np.exp(-(np.log2(freqs / 1000.0) ** 2) / 2.0)
 rng = np.random.default_rng(7)
 levels = base[None, :] + rng.normal(0.0, 1.0, (40, freqs.size))
 
-result = ph.sound_power_anechoic(levels, "hemisphere", radius=1.0, frequencies=freqs)
+result = emission.sound_power_anechoic(levels, "hemisphere", radius=1.0, frequencies=freqs)
 print(round(result.sound_power_level_a, 1))   # 89.3
 result.plot()   # espectro LW, LWA en el título (requiere matplotlib)
 ```
@@ -676,6 +717,16 @@ A entre bandas da el número único `LWA` del título.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import emission
+
+# Una máquina con pico en frecuencias medias medida sobre el conjunto hemisférico de
+# 40 posiciones (Anexo E). levels_positions es el espectro de presión superficial
+# (40, NB): un espectro base con pico cerca de 1 kHz más una pequeña dispersión espacial por posición.
+freqs = np.array([125, 250, 500, 1000, 2000, 4000, 8000], float)
+base = 70.0 + 8.0 * np.exp(-(np.log2(freqs / 1000.0) ** 2) / 2.0)
+rng = np.random.default_rng(7)
+levels = base[None, :] + rng.normal(0.0, 1.0, (40, freqs.size))
+result = emission.sound_power_anechoic(levels, "hemisphere", radius=1.0, frequencies=freqs)
 
 # result es el PrecisionSoundPowerResult calculado arriba. Una línea:
 result.plot()
@@ -716,14 +767,14 @@ gobiernan los cinco criterios de aceptación.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 # Una superficie totalmente envolvente con una intensidad normal uniforme In = W/S
 # recupera exactamente la potencia de la fuente: LW = 10*lg(W/P0). Aquí W = 100 uW -> 80 dB.
 areas = np.array([0.5, 1.0, 0.25, 2.0])
 w = 1.0e-4
 i_n = np.full(areas.shape, w / float(areas.sum()))
-res = ph.sound_power_intensity_precision(i_n, areas)
+res = emission.sound_power_intensity_precision(i_n, areas)
 print(round(float(res.sound_power[0]), 6))          # 0.0001
 print(round(float(res.sound_power_level[0]), 2))    # 80.0
 ```
@@ -733,7 +784,7 @@ potencia neta es no positiva) y marca esas bandas como `not_applicable`:
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 # Cuatro superficies parciales barridas sobre cinco bandas de tercio de octava. Cada
 # celda de partial_intensity es la intensidad normal con signo In_i (W/m^2); areas son
@@ -745,7 +796,7 @@ base_intensity = np.array([2.0e-6, 8.0e-6, 2.0e-5, 1.0e-5, 3.0e-6])
 partial_intensity = base_intensity[None, :] * np.array([1.0, 1.1, 0.9, 1.05])[:, None]
 partial_intensity[:, 0] = [2.0e-6, -3.0e-6, -4.0e-6, -1.0e-6]   # banda de potencia neta negativa
 
-result = ph.sound_power_intensity_precision(partial_intensity, areas, frequencies=freqs)
+result = emission.sound_power_intensity_precision(partial_intensity, areas, frequencies=freqs)
 print(result.not_applicable_band.tolist())   # [True, False, False, False, False]
 print(round(result.sound_power_level_a, 1))   # 80.6
 result.plot()   # espectro LW; la banda no aplicable con trama (requiere matplotlib)
@@ -763,6 +814,18 @@ cuatro bandas determinadas y el total ponderado A se mantienen.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import emission
+
+# Cuatro superficies parciales barridas sobre cinco bandas de tercio de octava. Cada
+# celda de partial_intensity es la intensidad normal con signo In_i (W/m^2); areas son
+# las áreas de las superficies parciales Si. La banda de 250 Hz tiene potencia neta
+# negativa (un campo localmente reactivo), así que ISO 9614-3 la marca no aplicable (cláusula 9.2) -> NaN.
+freqs = np.array([250, 500, 1000, 2000, 4000], float)
+areas = np.array([0.5, 1.0, 0.75, 0.5])
+base_intensity = np.array([2.0e-6, 8.0e-6, 2.0e-5, 1.0e-5, 3.0e-6])
+partial_intensity = base_intensity[None, :] * np.array([1.0, 1.1, 0.9, 1.05])[:, None]
+partial_intensity[:, 0] = [2.0e-6, -3.0e-6, -4.0e-6, -1.0e-6]   # banda de potencia neta negativa
+result = emission.sound_power_intensity_precision(partial_intensity, areas, frequencies=freqs)
 
 # result es el PrecisionIntensityResult calculado arriba. Una línea:
 result.plot()

@@ -11,7 +11,7 @@ from .compliance import (
     verify_weighting_class,
     weighting_class_limits,
 )
-from .core import FilterBankWarning, OctaveFilterBank
+from .core import FilterBankWarning, OctaveFilterBank, octave_filter, octavefilter
 from .frequencies import (
     getansifrequencies,
     nominal_frequencies,
@@ -62,6 +62,8 @@ __all__ = [
     "nominal_frequencies",
     "normalized_frequencies",
     "normalizedfreq",
+    "octave_filter",
+    "octavefilter",
     "rectangular",
     "sel",
     "sensitivity",

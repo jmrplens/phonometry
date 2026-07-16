@@ -56,11 +56,11 @@ results, band-weighted, into the index: the STI is an effective SNR of the
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from phonometry import sti_from_impulse_response
+from phonometry import hearing
 
 fs = 48000
 
-# STI vs reverberation time: sweep sti_from_impulse_response over synthetic
+# STI vs reverberation time: sweep hearing.sti_from_impulse_response over synthetic
 # exponential decays (white noise x exp(-6.9077 t / T60)) at a T60 grid,
 # exactly the physics behind the curve above:
 rng = np.random.default_rng(0)
@@ -69,7 +69,7 @@ sti_values = []
 for t60 in t60_grid:
     t = np.arange(int(2 * t60 * fs)) / fs
     ir = rng.standard_normal(t.size) * np.exp(-6.9077 * t / t60)
-    sti_values.append(sti_from_impulse_response(ir, fs).sti)
+    sti_values.append(hearing.sti_from_impulse_response(ir, fs).sti)
 
 fig, ax = plt.subplots()
 ax.semilogx(t60_grid, sti_values, "o-")
@@ -88,20 +88,20 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import sti_from_impulse_response, stipa, stipa_signal
+from phonometry import hearing
 
 fs = 48000
 # A measured room impulse response (synthesized decay so the example runs)
 ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
 
 # Indirect method: from a measured room impulse response
-res = sti_from_impulse_response(ir, fs, snr=25.0)
+res = hearing.sti_from_impulse_response(ir, fs, snr=25.0)
 print(f"STI = {res.sti:.2f}  ({res.rating})")   # e.g. 0.62 (D)
 
-# Direct STIPA measurement: play stipa_signal() in the room, record it
-test = stipa_signal(fs, seconds=18.0, level_db=80.0)
+# Direct STIPA measurement: play hearing.stipa_signal() in the room, record it
+test = hearing.stipa_signal(fs, seconds=18.0, level_db=80.0)
 recording = test                       # in practice, the microphone signal after playback
-res = stipa(recording, fs)
+res = hearing.stipa(recording, fs)
 res.plot()   # per-band modulation transfer index (MTI) bars, STI + rating in the title
 ```
 

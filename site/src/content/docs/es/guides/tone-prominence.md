@@ -16,14 +16,14 @@ la frecuencia.
 
 ```python
 import numpy as np
-from phonometry import tone_to_noise_ratio, prominence_ratio
+from phonometry import psychoacoustics
 
 fs = 48000
 rng = np.random.default_rng(0)
 t = np.arange(fs) / fs
 x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # tono de 1 kHz en ruido
-tnr = tone_to_noise_ratio(x, fs)            # pico más alto, o tone_freq=...
-pr = prominence_ratio(x, fs, tone_freq=1000.0)
+tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # pico más alto, o tone_freq=...
+pr = psychoacoustics.prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 ```
 
@@ -59,14 +59,14 @@ de 100 Hz, Fórmula 24).
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import welch
-from phonometry import tone_to_noise_ratio
+from phonometry import psychoacoustics
 
 fs = 48000
 rng = np.random.default_rng(21)
 t = np.arange(30 * fs) / fs
 x = (np.sqrt(2) * 0.1 * np.sin(2 * np.pi * 1000 * t)
      + 0.05 * rng.standard_normal(t.size))
-res = tone_to_noise_ratio(x, fs)
+res = psychoacoustics.tone_to_noise_ratio(x, fs)
 
 # Espectro Hann promediado a 1 Hz (el front-end del apartado 11.1) y la banda
 # crítica en torno al tono detectado (bordes aproximados como +/- dfc/2):

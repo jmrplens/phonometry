@@ -1,0 +1,51 @@
+/* Fully-expanded sidebar hierarchy.
+
+   Every sidebar group ships uncollapsed (no `collapsed: true` in
+   astro.config.mjs or the generated api-sidebar.mjs), so the whole map of
+   the docs — about 150 entries — is visible at once, including on the
+   mobile drawer. Starlight styles every group label with the same `.large`
+   token regardless of depth, which reads as a wall of equally-heavy rows
+   once nothing is folded. These rules restore the visual hierarchy:
+
+   - top-level groups (Start, Core signal analysis, ..., Reference) become
+     small uppercase "eyebrow" headers with a hairline separator above each
+     group, the pattern large Starlight sites (e.g. the Astro docs) use for
+     long navigation lists;
+   - nested group labels (the domain subgroups and the API sections) step
+     down to the small text size, keeping their 600 weight;
+   - links two levels deep and beyond tighten up (13px, reduced padding and
+     line-height) so the API reference's ~100 module entries stay compact.
+
+   Only Starlight custom properties are used for color, so light and dark
+   themes are both covered, and nothing here touches focus styles or the
+   summary/caret toggles, which stay keyboard-operable. */
+
+/* Top-level group labels: uppercase eyebrow headers. */
+#starlight__sidebar .top-level > li > details > summary .group-label > .large {
+  font-size: var(--sl-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--sl-color-gray-1);
+}
+
+/* A hairline plus breathing room between the top-level groups. */
+#starlight__sidebar .top-level > li + li {
+  margin-top: 1rem;
+  border-top: 1px solid var(--sl-color-hairline-light);
+  padding-top: 0.75rem;
+}
+
+/* Nested group labels (domain subgroups, API sections, Theory): one step
+   smaller than Starlight's default so they sit between the eyebrow headers
+   and the links. */
+#starlight__sidebar ul ul .group-label > .large {
+  font-size: var(--sl-text-sm);
+  color: var(--sl-color-white);
+}
+
+/* Deep links (inside a nested group): compact rows for the long lists. */
+#starlight__sidebar ul ul ul a {
+  font-size: var(--sl-text-xs);
+  padding-block: 0.22em;
+  line-height: 1.35;
+}

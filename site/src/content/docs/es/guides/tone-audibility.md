@@ -52,10 +52,10 @@ Con una posición geométrica de las frecuencias de esquina en torno al tono
 `f₁ = −Δfc/2 + √(Δfc² + 4·fT²)/2` y `f₂ = f₁ + Δfc`.
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
-print(round(ph.critical_bandwidth_engineering(137.3), 2))   # 101.36 Hz
-f1, f2 = ph.critical_band_corners(137.3)
+print(round(psychoacoustics.critical_bandwidth_engineering(137.3), 2))   # 101.36 Hz
+f1, f2 = psychoacoustics.critical_band_corners(137.3)
 print(round(f1, 2), round(f2, 2))                            # 95.67 197.04
 ```
 
@@ -84,12 +84,12 @@ sola línea (`K = 1`) toma su nivel sin cambios (Fórmula (7), sin corrección d
 ancho de banda).
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
 # ISO/PAS 20065 Anexo E, tono a 137,3 Hz (Δf = 2,7 Hz):
 #   LS = 49,22 dB (Fórmula 6), LT = 67,96 dB (Fórmula 8).
-print(round(ph.tone_audibility(67.96, 49.22, 137.3, 2.7), 2))   # 5.01 dB
-print(round(ph.masking_index(137.3), 2))                        # -2.02 dB
+print(round(psychoacoustics.tone_audibility(67.96, 49.22, 137.3, 2.7), 2))   # 5.01 dB
+print(round(psychoacoustics.masking_index(137.3), 2))                        # -2.02 dB
 ```
 
 ## 3. Audibilidad decisiva y media
@@ -114,17 +114,17 @@ ruidosos (más audibles), lo cual es deliberado — a un tono claramente audible
 parte del tiempo no lo disculpan los intervalos en los que desaparece.
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
 # Espectro 1 del motor de combustión (Anexo E): nueve tonos (fT, LT, LS), Δf = 2,7 Hz.
 fT = [118.4, 137.3, 158.8, 314.9, 433.4, 592.2, 629.8, 643.3, 1582.7]
 LT = [64.56, 67.96, 68.63, 68.50, 73.17, 78.31, 75.00, 79.75, 71.07]
 LS = [48.91, 49.22, 50.50, 52.85, 58.29, 59.53, 59.71, 61.98, 54.16]
-res = ph.assess_tones(fT, LT, LS, 2.7)
+res = psychoacoustics.assess_tones(fT, LT, LS, 2.7)
 print(round(res.decisive_audibility, 2), res.decisive_frequency)  # 5.01 137.3
 
 # Audibilidad media de los cinco espectros medidos (valores decisivos, Tabla E.3):
-print(round(ph.mean_audibility([9.18, 6.04, 7.46, 2.67, 7.17]), 2))  # 6.98 dB
+print(round(psychoacoustics.mean_audibility([9.18, 6.04, 7.46, 2.67, 7.17]), 2))  # 6.98 dB
 ```
 
 ### 3.1 Incertidumbre extendida de la audibilidad
@@ -164,7 +164,7 @@ ancho de banda de Hanning de −1,76 dB; el nivel del tono solo cuando el tramo
 abarca más de una línea (Fórmulas (7)/(8)).
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
 # Anexo E Tabla E.1: las 38 líneas de la banda crítica de 137,3 Hz (Δf = 2,7 Hz).
 freqs = [96.9, 99.6, 102.3, 105.0, 107.7, 110.4, 113.0, 115.7, 118.4, 121.1,
@@ -176,10 +176,10 @@ levels = [49.40, 50.68, 50.09, 53.37, 44.47, 50.91, 51.41, 59.40, 64.54, 57.57,
           52.58, 53.15, 67.04, 67.27, 57.40, 57.17, 52.56, 51.39, 52.49, 47.68,
           51.26, 49.03, 61.42, 59.52, 48.43, 50.84, 48.20, 55.95]
 
-ls = ph.mean_narrowband_level(levels, freqs, 137.3)
-lt = ph.tone_level(levels, freqs, 137.3, ls)
+ls = psychoacoustics.mean_narrowband_level(levels, freqs, 137.3)
+lt = psychoacoustics.tone_level(levels, freqs, 137.3, ls)
 print(round(ls, 2), round(lt, 2))                         # 49.22 67.96
-print(round(ph.tone_audibility(lt, ls, 137.3, 2.7), 2))   # 5.01 dB
+print(round(psychoacoustics.tone_audibility(lt, ls, 137.3, 2.7), 2))   # 5.01 dB
 ```
 
 ## 5. Detección sobre el espectro completo
@@ -199,10 +199,20 @@ dos tonos por debajo de 1000 Hz de §5.1 los mantenga separados. El
 entradas.
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
+
+# Anexo E Tabla E.1: las 38 líneas de la banda crítica de 137,3 Hz (Δf = 2,7 Hz).
+freqs = [96.9, 99.6, 102.3, 105.0, 107.7, 110.4, 113.0, 115.7, 118.4, 121.1,
+         123.8, 126.5, 129.2, 131.9, 134.6, 137.3, 140.0, 142.7, 145.3, 148.0,
+         150.7, 153.4, 156.1, 158.8, 161.5, 164.2, 166.9, 169.6, 172.3, 175.0,
+         177.6, 180.3, 183.0, 185.7, 188.4, 191.1, 193.8, 196.5]
+levels = [49.40, 50.68, 50.09, 53.37, 44.47, 50.91, 51.41, 59.40, 64.54, 57.57,
+          51.02, 50.76, 59.93, 62.94, 58.49, 65.87, 62.66, 50.25, 51.32, 52.30,
+          52.58, 53.15, 67.04, 67.27, 57.40, 57.17, 52.56, 51.39, 52.49, 47.68,
+          51.26, 49.03, 61.42, 59.52, 48.43, 50.84, 48.20, 55.95]
 
 # El mismo espectro de la Tabla E.1 de arriba.
-res = ph.analyze_spectrum(levels, freqs, 2.7)
+res = psychoacoustics.analyze_spectrum(levels, freqs, 2.7)
 singles = res.group_sizes == 1
 print([round(f, 1) for f in res.tone_frequencies[singles]])  # [118.4, 137.3, 158.8]
 
@@ -211,7 +221,7 @@ fg = res.group_sizes > 1
 print(int(res.group_sizes[fg][0]), round(float(res.tone_levels[fg][0]), 2))  # 3 72.15
 
 # La misma combinación de la Fórmula 17, llamada directamente (LS de la Tabla E.2):
-lt_fg = ph.combined_tone_level(levels, freqs, [118.4, 137.3, 158.8],
+lt_fg = psychoacoustics.combined_tone_level(levels, freqs, [118.4, 137.3, 158.8],
                                [48.91, 49.22, 50.50])
 print(round(lt_fg, 2))                                # 72.15
 ```
@@ -241,11 +251,11 @@ alcanza su mínimo de `21 Hz` en `fT = 212 Hz` y crece a ambos lados.
 decisión.
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
-ph.two_tone_separation_frequency(212.0)             # 21,0 Hz (mínimo)
-ph.resolve_tones_separately(200.0, 260.0, 3.0, 2.0) # True  → evaluar por separado
-ph.resolve_tones_separately(118.4, 137.3, 4.0, 5.0) # False → combinar (Δf < fD)
+psychoacoustics.two_tone_separation_frequency(212.0)             # 21,0 Hz (mínimo)
+psychoacoustics.resolve_tones_separately(200.0, 260.0, 3.0, 2.0) # True  → evaluar por separado
+psychoacoustics.resolve_tones_separately(118.4, 137.3, 4.0, 5.0) # False → combinar (Δf < fD)
 ```
 
 :::note

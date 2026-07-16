@@ -88,7 +88,7 @@ Or browse the Markdown docs on GitHub:
 
 ```python
 import numpy as np
-from phonometry import octave_filter
+from phonometry import metrology
 
 fs = 48000
 t = np.linspace(0, 1, fs, endpoint=False)
@@ -96,14 +96,15 @@ t = np.linspace(0, 1, fs, endpoint=False)
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # Apply 1/3 octave filter bank
-spl, freq = octave_filter(signal, fs=fs, fraction=3)
+spl, freq = metrology.octave_filter(signal, fs=fs, fraction=3)
 
 print(f"Bands: {freq}")
 print(f"SPL [dB]: {spl}")
 ```
 
-Since 3.2 the library also exposes twelve domain namespaces (the flat API
-above remains the primary surface):
+The library is organized into twelve domain namespaces; every public name is
+also re-exported at the top level, so `from phonometry import octave_filter`
+keeps working:
 
 ```python
 from phonometry import building, underwater

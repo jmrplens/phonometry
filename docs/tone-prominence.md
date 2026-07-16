@@ -14,14 +14,14 @@ structured verdict against the frequency-dependent prominence criteria.
 
 ```python
 import numpy as np
-from phonometry import tone_to_noise_ratio, prominence_ratio
+from phonometry import psychoacoustics
 
 fs = 48000
 rng = np.random.default_rng(0)
 t = np.arange(fs) / fs
 x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # 1 kHz tone in noise
-tnr = tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
-pr = prominence_ratio(x, fs, tone_freq=1000.0)
+tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # highest peak, or tone_freq=...
+pr = psychoacoustics.prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 ```
 
@@ -56,14 +56,14 @@ rescaled to a 100 Hz bandwidth, Formula 24).
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import welch
-from phonometry import tone_to_noise_ratio
+from phonometry import psychoacoustics
 
 fs = 48000
 rng = np.random.default_rng(21)
 t = np.arange(30 * fs) / fs
 x = (np.sqrt(2) * 0.1 * np.sin(2 * np.pi * 1000 * t)
      + 0.05 * rng.standard_normal(t.size))
-res = tone_to_noise_ratio(x, fs)
+res = psychoacoustics.tone_to_noise_ratio(x, fs)
 
 # Averaged 1 Hz Hann spectrum (the clause 11.1 front end) and the
 # critical band about the detected tone (edges approximated as +/- dfc/2):

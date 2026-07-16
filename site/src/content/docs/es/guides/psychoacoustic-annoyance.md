@@ -22,7 +22,7 @@ a partir de una grabación.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import psychoacoustics
 
 n5 = np.linspace(4.0, 60.0, 200)
 profiles = [
@@ -32,10 +32,10 @@ profiles = [
 ]
 fig, ax = plt.subplots()
 for label, s, f, r in profiles:
-    pa = [ph.psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5]
+    pa = [psychoacoustics.psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5]
     ax.plot(n5, pa, label=label)
 
-ex = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)
+ex = psychoacoustics.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)
 ax.plot([30.0], [ex.annoyance], "o", label=f"Ejemplo resuelto (PA = {ex.annoyance:.2f})")
 ax.set_xlabel("Sonoridad percentil N5 [sonios]")
 ax.set_ylabel("Molestia psicoacústica PA")
@@ -79,9 +79,9 @@ magnitudes directamente y devuelve la molestia junto con las dos ponderaciones
 intermedias:
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
-res = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)   # N5, S, F, R
+res = psychoacoustics.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)   # N5, S, F, R
 print(round(res.annoyance, 4))   # 37.0478
 print(round(res.w_s, 4), round(res.w_fr, 4))   # 0.1001 0.2125
 ```
@@ -100,9 +100,9 @@ sonoridad Zwicker variable en el tiempo de la ISO 532-1, `S` de la nitidez DIN
 intensidad de fluctuación.
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
-res = ph.psychoacoustic_annoyance_from_signal(x, fs, field="free")
+res = psychoacoustics.psychoacoustic_annoyance_from_signal(x, fs, field="free")
 print(res.annoyance, res.n5, res.sharpness, res.roughness, res.fluctuation_strength)
 ```
 
@@ -133,11 +133,11 @@ amplitud al 100 % a 4 Hz, produce `1 vacil`.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import psychoacoustics
 
 # Forma cerrada exacta (Ec. 10.2), ruido de banda ancha AM a 60 dB, modulación 100 %:
 fmod = np.logspace(np.log10(0.5), np.log10(32.0), 240)
-f_bbn = [ph.fluctuation_strength_am_noise(60.0, 1.0, fm) for fm in fmod]
+f_bbn = [psychoacoustics.fluctuation_strength_am_noise(60.0, 1.0, fm) for fm in fmod]
 
 # Modelo de señal de Osses 2016 sobre un tono AM de 1 kHz / 70 dB en el mismo barrido:
 fs = 48000
@@ -148,7 +148,7 @@ f_tone = []
 for fm in fm_tone:
     am = (1.0 + np.sin(2 * np.pi * fm * t)) * carrier
     am = am / np.sqrt(np.mean(am ** 2)) * 2e-5 * 10 ** (70 / 20)
-    f_tone.append(ph.fluctuation_strength(am, float(fs)).fluctuation_strength)
+    f_tone.append(psychoacoustics.fluctuation_strength(am, float(fs)).fluctuation_strength)
 
 fig, ax = plt.subplots()
 ax.semilogx(fmod, f_bbn, label="Ruido de banda ancha AM (forma cerrada)")
@@ -182,9 +182,9 @@ desaparece por debajo de ~20 dB o `m < 0,2`). Esta forma exacta es el valor a
 citar para el ruido de banda ancha AM.
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
-print(round(ph.fluctuation_strength_am_noise(60.0, 1.0, 4.0), 4))   # 3.6943 vacil
+print(round(psychoacoustics.fluctuation_strength_am_noise(60.0, 1.0, 4.0), 4))   # 3.6943 vacil
 ```
 
 ### 3.2 El modelo de señal de Osses 2016
@@ -196,9 +196,9 @@ la `F` global (vacil) junto con la intensidad de fluctuación específica sobre 
 eje de Bark y la traza dependiente del tiempo.
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
-res = ph.fluctuation_strength(x, fs)
+res = psychoacoustics.fluctuation_strength(x, fs)
 print(res.fluctuation_strength)   # vacil
 res.plot()   # intensidad de fluctuación específica F′(z) sobre el eje de Bark (requiere matplotlib)
 ```

@@ -39,7 +39,7 @@ def test_filterbank_reuse_performance() -> None:
     # measure the redesign cost this test is about.
     start_func = time.time()
     for _ in range(num_iterations):
-        phonometry._cached_filter_bank.cache_clear()
+        phonometry.metrology.core._cached_filter_bank.cache_clear()
         octave_filter(x, fs)
     time_func = time.time() - start_func
     

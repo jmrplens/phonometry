@@ -20,10 +20,10 @@ bilineal en el dominio de energía sobre los cuatro bins vecinos (Ec. 13), de mo
 celdas parcialmente medidas se mantienen continuas con sus esquinas medidas.
 
 ```python
-import phonometry as ph
+from phonometry import aircraft
 
-h = ph.RotorcraftHemisphere(frequencies=freqs, azimuth=phi, polar=theta, levels=levels)
-lv = ph.hemisphere_source_level(h, 0.0, 90.0)   # nivel de fuente por banda a 60 m
+h = aircraft.RotorcraftHemisphere(frequencies=freqs, azimuth=phi, polar=theta, levels=levels)
+lv = aircraft.hemisphere_source_level(h, 0.0, 90.0)   # nivel de fuente por banda a 60 m
 h.plot()                                          # directividad proa-popa
 ```
 
@@ -69,14 +69,14 @@ de Delany-Bazley y las clases de resistividad de flujo CNOSSOS `"A"`-`"H"`).
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import aircraft
 
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # tercios 50 Hz-10 kHz
 r = 500.0
 recibido = (lv
-            + ph.spherical_spreading_adjustment(r)
-            + ph.atmospheric_adjustment(freqs, r)
-            + ph.ground_effect_adjustment(freqs, 150.0, 1.5, 500.0, flow_resistivity="D"))
+            + aircraft.spherical_spreading_adjustment(r)
+            + aircraft.atmospheric_adjustment(freqs, r)
+            + aircraft.ground_effect_adjustment(freqs, 150.0, 1.5, 500.0, flow_resistivity="D"))
 ```
 
 La base de datos estándar está registrada a 60 m, el valor por defecto. Si un

@@ -61,10 +61,10 @@ the rating is $0.60(\text{M})$, class C.*
 
 ```python
 import matplotlib.pyplot as plt
-from phonometry import weighted_absorption
+from phonometry import materials
 
 # ISO 11654 Annex A.2 practical coefficients at 250/500/1000/2000/4000 Hz
-result = weighted_absorption([0.35, 1.00, 0.65, 0.60, 0.55])
+result = materials.weighted_absorption([0.35, 1.00, 0.65, 0.60, 0.55])
 result.plot()   # practical curve vs shifted reference, deviations shaded
 plt.show()
 ```
@@ -72,19 +72,19 @@ plt.show()
 </details>
 
 ```python
-from phonometry import weighted_absorption, absorption_class
+from phonometry import materials
 
 # ISO 11654 Annex A.2 practical coefficients at 250/500/1000/2000/4000 Hz
 alpha_p = [0.35, 1.00, 0.65, 0.60, 0.55]
 
-result = weighted_absorption(alpha_p)
+result = materials.weighted_absorption(alpha_p)
 print(result.rating_label)          # 0.60(M)
 print(result.alpha_w)               # 0.6
 print(result.absorption_class)      # C
 print(round(result.unfavourable_sum, 2))  # 0.05
 
 # A bare alpha_w also maps straight to its class (Table B.1)
-print(absorption_class(0.85))       # B
+print(materials.absorption_class(0.85))       # B
 ```
 
 `weighted_absorption` accepts the five octave-band $\alpha_p$ values (as a
@@ -131,12 +131,12 @@ specific airflow resistance is the fit read at 0.5 mm/s.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import static_airflow_resistance
+from phonometry import materials
 
 area = np.pi * 0.05**2                      # 100 mm diameter cell [m^2]
 u = np.array([0.5, 1, 2, 4, 8, 12]) * 1e-3  # linear velocity [m/s]
 dp = 1.6e4 * u + 4.0e5 * u**2               # measured pressure drop [Pa]
-r = static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
 
 u_fit = np.linspace(0.0, 13e-3, 200)
 dp_fit = r.linear_coefficient * u_fit + r.quadratic_coefficient * u_fit**2
@@ -156,13 +156,13 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import static_airflow_resistance
+from phonometry import materials
 
 area = np.pi * 0.05**2            # 100 mm diameter cell [m^2]
 u = np.array([0.5, 1, 2, 4, 8, 12]) * 1e-3      # linear velocity [m/s]
 dp = 1.6e4 * u + 4.0e5 * u**2                    # measured pressure drop [Pa]
 
-r = static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
 print(round(r.specific_resistance))   # 16200   R_s [Pa*s/m]
 print(round(r.resistivity))           # 324000  sigma [Pa*s/m^2]
 print(round(r.linear_coefficient))    # 16000   a = R_s at u -> 0
@@ -194,13 +194,13 @@ boundary-layer thickness. For the Annex A.3 example cavity this gives
 $\kappa' = 1.370$, about 2 % below the adiabatic 1.4008.
 
 ```python
-from phonometry import effective_kappa, alternating_airflow_resistance
+from phonometry import materials
 
 # Annex A.3 cavity: closed cylinder 100 mm x 100 mm, piston at 2 Hz
-kp = effective_kappa(cavity_surface=0.0471, cavity_volume=7.854e-4, frequency=2.0)
+kp = materials.effective_kappa(cavity_surface=0.0471, cavity_volume=7.854e-4, frequency=2.0)
 print(round(kp, 3))               # 1.37   effective ratio of specific heats
 
-R = alternating_airflow_resistance(
+R = materials.alternating_airflow_resistance(
     level_specimen=74.0, level_termination=90.0,
     piston_stroke_specimen=14e-3, piston_stroke_termination=1.4e-3,
     frequency=2.0, cavity_volume=7.854e-4, kappa_prime=kp,
@@ -247,12 +247,12 @@ bands, and a mismatch there points at the sample cut or mounting, not at the
 physics.
 
 ```python
-from phonometry import plane_wave_frequency_range
+from phonometry import materials
 
 # A 100 mm tube with 100 mm spacing, and a 29 mm tube with 20 mm spacing.
-f_l, f_u = plane_wave_frequency_range(0.100, 343.2, diameter=0.100)
+f_l, f_u = materials.plane_wave_frequency_range(0.100, 343.2, diameter=0.100)
 print(round(f_l, 1), round(f_u, 1))     # 171.6 1544.4
-f_l, f_u = plane_wave_frequency_range(0.020, 343.2, diameter=0.029)
+f_l, f_u = materials.plane_wave_frequency_range(0.020, 343.2, diameter=0.029)
 print(round(f_l, 1), round(f_u, 1))     # 858.0 6864.0
 ```
 
@@ -277,17 +277,14 @@ $$
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import (
-    standing_wave_absorption, standing_wave_ratio_from_level,
-    standing_wave_reflection_magnitude,
-)
+from phonometry import materials
 
 level_diff = np.linspace(0.5, 40.0, 300)    # L_max - L_min [dB]
-swr = standing_wave_ratio_from_level(level_diff)
+swr = materials.standing_wave_ratio_from_level(level_diff)
 fig, ax = plt.subplots()
-ax.plot(level_diff, standing_wave_absorption(swr),
+ax.plot(level_diff, materials.standing_wave_absorption(swr),
         label="Absorption coefficient alpha")
-ax.plot(level_diff, standing_wave_reflection_magnitude(swr), "--",
+ax.plot(level_diff, materials.standing_wave_reflection_magnitude(swr), "--",
         label="Reflection factor magnitude |r|")
 ax.set_xlabel("Standing-wave level difference L_max - L_min [dB]")
 ax.set_ylabel("alpha, |r|")
@@ -298,11 +295,11 @@ plt.show()
 </details>
 
 ```python
-from phonometry import standing_wave_absorption, standing_wave_ratio_from_level
+from phonometry import materials
 
-s = float(standing_wave_ratio_from_level(9.542))   # level difference [dB] -> SWR
+s = float(materials.standing_wave_ratio_from_level(9.542))   # level difference [dB] -> SWR
 print(round(s, 2))                                  # 3.0
-print(round(float(standing_wave_absorption(s)), 2)) # 0.75
+print(round(float(materials.standing_wave_absorption(s)), 2)) # 0.75
 ```
 
 **Transfer-function method (ISO 10534-2).** Two fixed microphones measure the
@@ -323,14 +320,11 @@ the distance from the sample to the farther microphone.
 
 ```python
 import numpy as np
-from phonometry import (
-    tube_wavenumber, reflection_factor,
-    absorption_from_reflection, normalized_surface_impedance,
-)
+from phonometry import materials
 
 f = np.array([500.0, 1000.0, 1800.0])
 x1, spacing, c0 = 0.12, 0.03, 343.2
-k0 = tube_wavenumber(f, c0)
+k0 = materials.tube_wavenumber(f, c0)
 
 # A measured transfer function H12 (here synthesised from r = 0.3 - 0.4j)
 target = 0.3 - 0.4j
@@ -338,9 +332,9 @@ x2 = x1 - spacing
 h12 = (np.exp(1j*k0*x2) + target*np.exp(-1j*k0*x2)) / \
       (np.exp(1j*k0*x1) + target*np.exp(-1j*k0*x1))
 
-r = reflection_factor(h12, spacing=spacing, x1=x1, wavenumber=k0)
-print(np.round(absorption_from_reflection(r), 3))     # [0.75 0.75 0.75]
-print(np.round(normalized_surface_impedance(r), 2))   # Z / rho c0
+r = materials.reflection_factor(h12, spacing=spacing, x1=x1, wavenumber=k0)
+print(np.round(materials.absorption_from_reflection(r), 3))     # [0.75 0.75 0.75]
+print(np.round(materials.normalized_surface_impedance(r), 2))   # Z / rho c0
 # [1.15-1.23j 1.15-1.23j 1.15-1.23j]
 ```
 
@@ -365,13 +359,13 @@ $$
 
 ```python
 import numpy as np
-from phonometry import air_layer_transfer_matrix
+from phonometry import materials
 
 # An air layer is a known transfer matrix; TL = 0 dB (nothing is lost)
 f = np.array([500.0, 1000.0, 2000.0])
 k0 = 2*np.pi*f / 343.2
 rho_c = 1.186 * 343.2
-tm = air_layer_transfer_matrix(thickness=0.05, wavenumber=k0,
+tm = materials.air_layer_transfer_matrix(thickness=0.05, wavenumber=k0,
                                characteristic_impedance=rho_c)
 print(np.round(tm.transmission_loss(rho_c), 6))   # [0. 0. 0.]
 ```
@@ -509,34 +503,30 @@ the equivalent area and `DLα,NRD`.
 
 ```python
 import matplotlib.pyplot as plt
-from phonometry import sound_absorption_coefficient_uncertainty
+from phonometry import materials
 
 # ISO 12999-2 Table 4 worked example: alpha_s per one-third-octave band.
 freqs = [63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 alpha_s = [0.33, 0.35, 0.39, 0.38, 0.37, 0.36, 0.36, 0.36, 0.43, 0.49,
            0.58, 0.63, 0.68, 0.71, 0.73, 0.75, 0.77, 0.79, 0.81, 0.81]
-result = sound_absorption_coefficient_uncertainty(alpha_s, freqs, confidence=0.95)
+result = materials.sound_absorption_coefficient_uncertainty(alpha_s, freqs, confidence=0.95)
 result.plot()   # alpha_s with the +/-U (k = 2) reproducibility ribbon
 plt.show()
 ```
 </details>
 
 ```python
-from phonometry import (
-    sound_absorption_coefficient_uncertainty,
-    weighted_coefficient_uncertainty,
-    single_number_rating_uncertainty,
-)
+from phonometry import materials
 
 # Reproducibility uncertainty of alpha_s at 1000 Hz (Table 1: m=0.040, n=0.015).
-r = sound_absorption_coefficient_uncertainty([0.68], [1000], confidence=0.95)
+r = materials.sound_absorption_coefficient_uncertainty([0.68], [1000], confidence=0.95)
 print(round(float(r.standard_uncertainty[0]), 4))            # 0.0422 (sigma_R)
 print(float(r.reported_expanded_uncertainty[0]))             # 0.08  (U, k=2)
 
 # Single-number ratings (Clause 7 worked examples).
-print(float(weighted_coefficient_uncertainty(0.70).reported_expanded_uncertainty[0]))  # 0.07
-print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[0]))   # 1.6
+print(float(materials.weighted_coefficient_uncertainty(0.70).reported_expanded_uncertainty[0]))  # 0.07
+print(float(materials.single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[0]))   # 1.6
 ```
 
 ## References

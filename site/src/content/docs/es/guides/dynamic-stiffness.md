@@ -22,11 +22,11 @@ reacción local y excluye expresamente los suelos flotantes.)
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import materials
 
 s = np.logspace(np.log10(2.0), np.log10(100.0), 300)   # MN/m3
 for m in (40.0, 120.0):
-    plt.semilogx(s, ph.natural_frequency(s * 1e6, m), label=f"m' = {m:g} kg/m²")
+    plt.semilogx(s, materials.natural_frequency(s * 1e6, m), label=f"m' = {m:g} kg/m²")
 plt.xlabel("Rigidez dinámica s' [MN/m³]"); plt.ylabel("Frecuencia natural f₀ [Hz]")
 plt.legend(); plt.show()
 ```
@@ -64,15 +64,15 @@ fundamental $f_r$ del sistema placa-probeta se lee del pico de la respuesta;
 la Fórmula 4 la convierte en $s'_t$.
 
 ```python
-import phonometry as ph
+from phonometry import materials
 
 # Placa de carga normalizada de 8 kg sobre la probeta de 0,04 m2 -> m't = 200 kg/m2;
 # la resonancia fundamental se mide en 25 Hz.
-s_t = ph.apparent_dynamic_stiffness(resonant_frequency=25.0, total_mass_per_area=200.0)
+s_t = materials.apparent_dynamic_stiffness(resonant_frequency=25.0, total_mass_per_area=200.0)
 print(round(s_t / 1e6, 3))                              # 4.935  MN/m3
 
 # Instalada sobre una losa flotante de 120 kg/m2 con s' = 10 MN/m3:
-print(round(ph.natural_frequency(10e6, 120.0), 1))      # 45.9  Hz
+print(round(materials.natural_frequency(10e6, 120.0), 1))      # 45.9  Hz
 ```
 
 ## 2. El término del gas encerrado y la resistividad al flujo
@@ -84,9 +84,9 @@ resuelta de la norma (`p₀ = 0,1 MPa`, `ε = 0,9`) es `s'a = 111/d` MN/m³ con 
 en milímetros:
 
 ```python
-import phonometry as ph
+from phonometry import materials
 
-print(round(ph.enclosed_gas_stiffness(thickness=0.020, porosity=0.9) / 1e6, 2))
+print(round(materials.enclosed_gas_stiffness(thickness=0.020, porosity=0.9) / 1e6, 2))
 # 5.56  MN/m3   (los 111/20 = 5.55 MN/m3 de la NOTA)
 ```
 
@@ -97,9 +97,9 @@ solo resuelve `s' = s't` cuando el término del gas es despreciable.
 `floating_floor_resonance` encadena toda la determinación:
 
 ```python
-import phonometry as ph
+from phonometry import materials
 
-res = ph.floating_floor_resonance(
+res = materials.floating_floor_resonance(
     resonant_frequency=25.0, total_mass_per_area=200.0,
     floor_mass_per_area=120.0,
     airflow_resistivity=50.0, thickness=0.020, porosity=0.9,

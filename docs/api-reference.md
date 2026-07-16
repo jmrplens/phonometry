@@ -2,7 +2,8 @@
 
 # API Reference
 
-All core functionality can be imported directly from the `phonometry` package.
+All core functionality lives in twelve domain subpackages; every public name
+is also re-exported by the top-level `phonometry` package.
 
 > **Note.** This page is the curated quick table for the GitHub/PyPI audience:
 > one row per public name, kept complete by a CI gate
@@ -12,15 +13,13 @@ All core functionality can be imported directly from the `phonometry` package.
 
 ## Namespaces
 
-Since 3.2 the library is organized into twelve domain subpackages. The flat
-top-level API remains the primary, fully supported surface (every name below
-imports from `phonometry` unchanged), and each domain can also be used as a
-namespace:
+The library is organized into twelve domain subpackages, and importing the
+domain namespace is the primary form used throughout the documentation:
 
 ```python
-from phonometry import aircraft as air
+from phonometry import aircraft
 
-contour = air.noise_contour(path, powers, distances, sel, lmax, x=gx, y=gy)
+contour = aircraft.noise_contour(path, powers, distances, sel, lmax, x=gx, y=gy)
 ```
 
 | Subpackage | Scope |
@@ -38,8 +37,10 @@ contour = air.noise_contour(path, powers, distances, sel, lmax, x=gx, y=gy)
 | `phonometry.underwater` | ISO 18405/17208/18406 levels, propagation, sound speed, sonar equation, seabed, ambient and ship-traffic noise, numerical solvers |
 | `phonometry.electroacoustics` | Distortion (IEC 60268-3 / AES17), transfer function and coherence |
 
-The pre-3.2 flat module paths (for example `phonometry.insulation`) keep
-importing for one deprecation cycle and warn on use; they are removed in 4.0.
+Every name in the table below is also re-exported at the top level, so
+`from phonometry import <name>` works for every row. The pre-3.2 flat module
+paths (for example `phonometry.insulation`) keep importing for one deprecation
+cycle and warn on use; they are removed in 4.0.
 
 | Name | Type | Description (Inputs) | Usage Snippet (Outputs) |
 | :--- | :--- | :--- | :--- |
@@ -94,13 +95,13 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `masking_index` | `function` | **Masking index av = −2−lg[1+(f/502)²·⁵] (Formula 13).**<br>• `frequency` f [Hz] | `masking_index(137.3)  # -2.02 dB` |
 | `audibility_from_levels` | `function` | **ΔL = LT − LG − av (Formula 14).**<br>• `tone_level` LT, `critical_band_level` LG, `masking_index` av [dB] | `audibility_from_levels(67.96, 64.98, -2.02)  # 5.0 dB` |
 | `energy_sum_level` | `function` | **Energy sum of lines with window correction (Formulae 7/8).**<br>• `line_levels` Li [dB]; a single line (K = 1) takes its level unchanged (Formula 7, no correction)<br>• `effective_bandwidth_factor` Δfe/Δf (Default: 1.5, Hanning; K > 1 only) | `energy_sum_level([80, 80])  # 81.25 dB` |
-| `mean_narrowband_level` | `function` | **Masking-noise level LS from a critical-band spectrum (Formula 6, iterative Annex D).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `ph.mean_narrowband_level(levels, freqs, 137.3)  # 49.22 dB` |
-| `tone_level` | `function` | **Tone level LT from the tonal lines about a peak (Formulae (7)/(8): single lines take (7), without the Hanning bandwidth correction).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz], `mean_narrowband_level` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `ph.tone_level(levels, freqs, 137.3, ls)  # 67.96 dB` |
+| `mean_narrowband_level` | `function` | **Masking-noise level LS from a critical-band spectrum (Formula 6, iterative Annex D).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `mean_narrowband_level(levels, freqs, 137.3)  # 49.22 dB` |
+| `tone_level` | `function` | **Tone level LT from the tonal lines about a peak (Formulae (7)/(8): single lines take (7), without the Hanning bandwidth correction).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequency` fT [Hz], `mean_narrowband_level` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `tone_level(levels, freqs, 137.3, ls)  # 67.96 dB` |
 | `audibility_uncertainty` / `mean_audibility_uncertainty` | `function` | **Extended uncertainty U of the audibility (ISO/PAS 20065 Clause 5.4/6, 90 % bilateral).**<br>• per tone: `audibility_uncertainty(tone_line_levels, noise_line_levels, tone_frequency, line_spacing)`<br>• mean: U of the energy-averaged audibility over the per-spectrum (ΔL, U) pairs<br>Mandatory when fewer than 12 spectra are averaged (Clause 6) | `u = audibility_uncertainty(lt_lines, ls_lines, 137.3, 2.7)`<br><br>• U [dB] |
-| `analyze_spectrum` | `function` | **Detect & rate the audible tones of a spectrum (Clause 5.3.8 + distinctness 5.3.4), incl. Step 3 same-band FG combination (Formula 17).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `line_spacing` Δf [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `res = ph.analyze_spectrum(levels, freqs, 2.7)`<br><br>• `ToneAudibilityResult` of detected tones + FG entries (`group_sizes`) |
-| `combined_tone_level` | `function` | **Multi-tone FG combined level (Formula 17).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequencies` [Hz], `mean_narrowband_levels` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `ph.combined_tone_level(lv, f, [118.4,137.3,158.8], ls)  # 72.15 dB` |
-| `two_tone_separation_frequency` | `function` | **Two-tone separation threshold fD = 21·10^(1.2·\|lg(fT/212)\|^1.8) Hz (Formula 19).**<br>• `tone_frequency` fT [Hz] (more prominent tone) | `ph.two_tone_separation_frequency(212.0)  # 21.0 Hz` |
-| `resolve_tones_separately` | `function` | **Rate two tones <1000 Hz separately vs combined (Formulae 18/19).**<br>• `tone1_frequency`, `tone2_frequency` [Hz]<br>• `audibility1`, `audibility2` ΔL [dB] | `ph.resolve_tones_separately(200., 260., 3., 2.)  # True` |
+| `analyze_spectrum` | `function` | **Detect & rate the audible tones of a spectrum (Clause 5.3.8 + distinctness 5.3.4), incl. Step 3 same-band FG combination (Formula 17).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `line_spacing` Δf [Hz]<br>• `effective_bandwidth_factor` (Default: 1.5) | `res = analyze_spectrum(levels, freqs, 2.7)`<br><br>• `ToneAudibilityResult` of detected tones + FG entries (`group_sizes`) |
+| `combined_tone_level` | `function` | **Multi-tone FG combined level (Formula 17).**<br>• `levels` Li [dB], `frequencies` [Hz]<br>• `tone_frequencies` [Hz], `mean_narrowband_levels` LS [dB]<br>• `effective_bandwidth_factor` (Default: 1.5) | `combined_tone_level(lv, f, [118.4,137.3,158.8], ls)  # 72.15 dB` |
+| `two_tone_separation_frequency` | `function` | **Two-tone separation threshold fD = 21·10^(1.2·\|lg(fT/212)\|^1.8) Hz (Formula 19).**<br>• `tone_frequency` fT [Hz] (more prominent tone) | `two_tone_separation_frequency(212.0)  # 21.0 Hz` |
+| `resolve_tones_separately` | `function` | **Rate two tones <1000 Hz separately vs combined (Formulae 18/19).**<br>• `tone1_frequency`, `tone2_frequency` [Hz]<br>• `audibility1`, `audibility2` ΔL [dB] | `resolve_tones_separately(200., 260., 3., 2.)  # True` |
 | `mean_audibility` | `function` | **Energy-mean mean audibility over spectra (Formula 20).**<br>• `decisive_audibilities` ΔLj [dB]; no-tone spectra use −10 dB | `mean_audibility([9.18, 6.04, 7.46])  # dB` |
 | `ToneAudibilityResult` | `dataclass` | **Tonal audibility of a spectrum's tones (ISO/PAS 20065).**<br>• `audibilities` ΔL, `critical_band_levels` LG, `masking_indices` av [dB]<br>• `critical_bandwidths` Δfc, `lower_corners`/`upper_corners` [Hz]<br>• `audible`: ΔL > 0 mask<br>• `extended_uncertainties`: Clause 5.4 U per tone [dB]<br>• `group_sizes`: 1 = single tone, N ≥ 2 = Step 3 FG entry (None from `assess_tones`)<br>• `decisive_audibility` / `decisive_frequency`<br>• `.plot()`: per-tone ΔL vs frequency | `res.decisive_audibility, res.audible` |
 | `HANNING_BANDWIDTH_FACTOR` | `float` | **Hanning effective-bandwidth factor Δfe/Δf (ISO/PAS 20065 Annex A).**<br>1.5 | `HANNING_BANDWIDTH_FACTOR  # 1.5` |

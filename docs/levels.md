@@ -19,7 +19,7 @@ time-weighted level distribution.
 
 ```python
 import numpy as np
-from phonometry import leq, laeq
+from phonometry import metrology
 
 # recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
@@ -27,10 +27,10 @@ recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # Equivalent continuous level of the whole recording
-level = leq(recording, calibration_factor=sensitivity)
+level = metrology.leq(recording, calibration_factor=sensitivity)
 
 # A-weighted Leq (the standard environmental noise metric)
-la = laeq(recording, fs, calibration_factor=sensitivity)
+la = metrology.laeq(recording, fs, calibration_factor=sensitivity)
 ```
 
 Both accept 1D signals (returning a scalar) or 2D `[channels, samples]` arrays
@@ -73,7 +73,7 @@ uncertainty section below); everywhere else, energy.
 
 ```python
 import numpy as np
-from phonometry import ln_levels
+from phonometry import metrology
 
 # A steady tone gives L10 = L50 = L90; percentiles only tell a story for a
 # *fluctuating* level. Synthesize 3 s alternating between a quiet and a
@@ -85,7 +85,7 @@ quiet = 0.02 * rng.standard_normal(segment)        # background
 loud = 0.06 * rng.standard_normal(segment)         # ~10 dB louder events
 varying = np.tile(np.concatenate([quiet, loud]), 3)
 
-stats = ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
+stats = metrology.ln_levels(varying, fs, n=(10, 50, 90), weighting="A")
 print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 # LA10=66.6  LA50=65.2  LA90=58.5 dB  -> L10 (events) > L50 (median) > L90 (background)
 ```
@@ -185,23 +185,27 @@ does below.
 ## Peak, event and occupational metrics
 
 ```python
-from phonometry import lc_peak, sel, sound_exposure, lex_8h
+import numpy as np
+from phonometry import metrology
 
-# Uses `recording`, `fs` and `sensitivity` from the Leq snippet above.
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+sensitivity = 1.0                                    # calibration_factor (see Calibration)
 
 # C-weighted peak (IEC 61672-1 §5.13) - occupational action limits use this
-peak = lc_peak(recording, fs, calibration_factor=sensitivity)
+peak = metrology.lc_peak(recording, fs, calibration_factor=sensitivity)
 
 # A single noise event and a work-shift sample (slices of a real recording)
 event = recording
 shift_sample = recording
 
 # Sound exposure level: single-event level normalized to 1 s (LAE)
-lae = sel(event, fs, weighting="A", calibration_factor=sensitivity)
+lae = metrology.sel(event, fs, weighting="A", calibration_factor=sensitivity)
 
 # Daily noise dose (IEC 61252): exposure in Pa²·h and LEX,8h / LEP,d
-E = sound_exposure(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
-lex = lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+E = metrology.sound_exposure(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
+lex = metrology.lex_8h(shift_sample, fs, duration_hours=8, calibration_factor=sensitivity)
 ```
 
 `lc_peak` is verified against the one-cycle/half-cycle reference responses of
@@ -306,12 +310,12 @@ and `composite_rating_level()` the general whole-day composite of clause 6.5
 +6 dB prominent tones):
 
 ```python
-from phonometry import lden, composite_rating_level
+from phonometry import environmental
 
-l = lden(63.2, 58.1, 51.4)                      # from LAeq per period
-r = composite_rating_level([(63.2, 12, 0.0),    # day
+l = environmental.lden(63.2, 58.1, 51.4)                      # from LAeq per period
+r = environmental.composite_rating_level([(63.2, 12, 0.0),    # day
                             (58.1, 4, 5.0),     # evening (+5)
-                            (51.4, 8, 10.0)])   # night  (+10) == lden
+                            (51.4, 8, 10.0)])   # night  (+10) == environmental.lden
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.svg" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" width="80%"></picture>
@@ -414,10 +418,10 @@ spread beyond 3 dB, where the substitute grossly inflates.
 
 ```python
 import matplotlib.pyplot as plt
-from phonometry import assess_tonal_audibility
+from phonometry import environmental
 
 # ISO 1996-2:2007 Annex C.5, Example 2 (two tones near 400 Hz):
-res = assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
+res = environmental.assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
                               centre_frequency=430.0)
 print(res.audibility, res.adjustment)   # ΔLta ≈ 11.1 dB -> Kt = 6 dB
 res.plot()
@@ -426,21 +430,18 @@ plt.show()
 </details>
 
 ```python
-from phonometry import (
-    assess_tonal_audibility, residual_sound_correction,
-    combined_standard_uncertainty, environmental_expanded_uncertainty,
-)
+from phonometry import environmental
 
 # Tonal adjustment for a prominent tone:
-kt = assess_tonal_audibility(54.1, 45.2, 430.0).adjustment      # 6 dB
+kt = environmental.assess_tonal_audibility(54.1, 45.2, 430.0).adjustment      # 6 dB
 
 # Subtract residual (background) noise from a measured level:
-corr = residual_sound_correction(measured_level=58.0, residual_level=50.0)
+corr = environmental.residual_sound_correction(measured_level=58.0, residual_level=50.0)
 corr.corrected_level, corr.reliable
 
 # Combine an uncertainty budget and expand to 95 %:
-u = combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38])  # 2.18 dB (G.2)
-environmental_expanded_uncertainty(u)                            # 4.36 dB (k = 2)
+u = environmental.combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38])  # 2.18 dB (G.2)
+environmental.expanded_uncertainty(u)                            # 4.36 dB (k = 2)
 ```
 
 ## Octave Spectrogram (levels over time)
@@ -449,10 +450,14 @@ Short-time fractional-octave analysis: one level per band per window,
 time-aligned across bands.
 
 ```python
-from phonometry import OctaveFilterBank
+import numpy as np
+from phonometry import metrology
 
-# Uses `recording` from the Leq snippet above.
-bank = OctaveFilterBank(fs=48000, fraction=3)
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+bank = metrology.OctaveFilterBank(fs=48000, fraction=3)
 levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
 # levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
 ```
@@ -512,8 +517,19 @@ plt.show()
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import chirp
+from phonometry import metrology
 
-# Uses `levels`, `freq` and `times` from the spectrogram snippet above.
+# Log sweep 80 Hz -> 8 kHz plus two tone bursts, in a little noise
+fs = 48000
+t = np.arange(int(4.0 * fs)) / fs
+x = 0.5 * chirp(t, f0=80, t1=4.0, f1=8000, method="logarithmic")
+x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
+
+bank = metrology.OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[50.0, 12000.0])
+levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.5)
+
 fig, ax = plt.subplots()
 mesh = ax.pcolormesh(times, freq, levels, shading="auto")
 ax.set_yscale("log")

@@ -36,18 +36,20 @@ spectral leakage.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion.svg" alt="Magnitude spectrum of a 1 kHz single-tone test in dB relative to the fundamental, with the first five harmonics marked above a broadband noise floor, annotated with THD (F), THD (R), THD+N and SINAD" width="82%"></picture>
 
 ```python
-import phonometry as ph
+from phonometry import electroacoustics
 
-thd_f = ph.thd(signal, fs, 1000.0, kind="F")          # relative to fundamental
-thd_r = ph.thd(signal, fs, 1000.0, kind="R")          # relative to total RMS
-d2 = ph.harmonic_distortion(signal, fs, 1000.0, 2)    # 2nd-order harmonic
+thd_f = electroacoustics.thd(signal, fs, 1000.0, kind="F")          # relative to fundamental
+thd_r = electroacoustics.thd(signal, fs, 1000.0, kind="R")          # relative to total RMS
+d2 = electroacoustics.harmonic_distortion(signal, fs, 1000.0, 2)    # 2nd-order harmonic
 ```
 
 `harmonic_analysis` bundles the fundamental, the harmonic amplitudes and the THD
 (both conventions), THD+N and SINAD into one plottable result:
 
 ```python
-res = ph.harmonic_analysis(signal, fs, 1000.0)
+from phonometry import electroacoustics
+
+res = electroacoustics.harmonic_analysis(signal, fs, 1000.0)
 print(res.thd_f, res.thd_r, res.thd_plus_noise, res.sinad_db)
 res.plot()   # annotated harmonic spectrum (needs matplotlib)
 ```
@@ -58,7 +60,7 @@ res.plot()   # annotated harmonic spectrum (needs matplotlib)
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import electroacoustics
 
 fs = 48000
 n = fs                     # 1 s -> 1 Hz bins; harmonics land on bins
@@ -68,7 +70,7 @@ amps = {1: 1.0, 2: 0.02, 3: 0.012, 4: 0.006, 5: 0.003}
 sig = sum(a * np.sin(2 * np.pi * k * f0 * t) for k, a in amps.items())
 sig = sig + np.random.default_rng(2026).standard_normal(n) * 1.2e-2
 
-res = ph.harmonic_analysis(sig, fs, f0, n_harmonics=len(amps))
+res = electroacoustics.harmonic_analysis(sig, fs, f0, n_harmonics=len(amps))
 res.plot()
 plt.show()
 ```
@@ -95,12 +97,12 @@ The band edge is configurable, and `bandwidth=None` disables the chain and
 measures the full Nyquist band.
 
 ```python
-import phonometry as ph
+from phonometry import electroacoustics
 
-ratio = ph.thd_plus_noise(signal, fs, 1000.0)          # ratio (0..)
-db = ph.thd_plus_noise(signal, fs, 1000.0, as_db=True)  # 20·lg(ratio) dB
-sinad_db = ph.sinad(signal, fs, 1000.0)                 # = -db
-wide = ph.thd_plus_noise(signal, fs, 1000.0, bandwidth=None)  # full Nyquist
+ratio = electroacoustics.thd_plus_noise(signal, fs, 1000.0)          # ratio (0..)
+db = electroacoustics.thd_plus_noise(signal, fs, 1000.0, as_db=True)  # 20·lg(ratio) dB
+sinad_db = electroacoustics.sinad(signal, fs, 1000.0)                 # = -db
+wide = electroacoustics.thd_plus_noise(signal, fs, 1000.0, bandwidth=None)  # full Nyquist
 ```
 
 Because THD+N counts the in-band noise floor, it is at or above the
@@ -120,11 +122,11 @@ Per the clause, the weighted measurement is valid for fundamental frequencies
 between 31.5 Hz and 400 Hz:
 
 ```python
-import phonometry as ph
+from phonometry import electroacoustics
 
-print(ph.weighted_thd(signal, fs, 100.0))                  # ITU-R 468 network
-print(ph.weighted_thd(signal, fs, 100.0, weighting="A"))   # A-weighted variant
-print(ph.itu_r_468_weighting([6300.0]))                    # [+12.2] dB
+print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # ITU-R 468 network
+print(electroacoustics.weighted_thd(signal, fs, 100.0, weighting="A"))   # A-weighted variant
+print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.2] dB
 ```
 
 ## 3. Intermodulation distortion (IEC 60268-3 14.12.7–10)
@@ -156,13 +158,13 @@ each with its own per-order definition:
   editorial defect, see [ERRATA](ERRATA.md)).
 
 ```python
-import phonometry as ph
+from phonometry import electroacoustics
 
-md = ph.modulation_distortion(signal, fs, 60.0, 7000.0)
+md = electroacoustics.modulation_distortion(signal, fs, 60.0, 7000.0)
 print(md.d2, md.d3, md.smpte)                                       # 14.12.7
-dfd2 = ph.difference_frequency_distortion(signal, fs, 13e3, 14e3, order=2)
-tdfd = ph.total_difference_frequency_distortion(signal, fs)         # 8/11.95 kHz
-dim = ph.dynamic_intermodulation_distortion(signal, fs)             # DIM (15k/3.15k)
+dfd2 = electroacoustics.difference_frequency_distortion(signal, fs, 13e3, 14e3, order=2)
+tdfd = electroacoustics.total_difference_frequency_distortion(signal, fs)         # 8/11.95 kHz
+dim = electroacoustics.dynamic_intermodulation_distortion(signal, fs)             # DIM (15k/3.15k)
 ```
 
 ## 4. Frequency response and coherence (Bendat & Piersol)
@@ -185,13 +187,13 @@ output noise biases `H2` upward and pulls the coherence down to `SNR/(1+SNR)`.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/frequency_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/frequency_response.svg" alt="Bode magnitude of an estimated H1 frequency response tracking the true response of a band-pass system, with the ordinary coherence below dropping towards the band edges where the output signal is weak relative to noise" width="82%"></picture>
 
 ```python
-import phonometry as ph
+from phonometry import electroacoustics
 
-res = ph.transfer_function(x, y, fs, estimator="H1")
+res = electroacoustics.transfer_function(x, y, fs, estimator="H1")
 print(res.magnitude_db, res.phase, res.coherence)
 res.plot()   # Bode magnitude/phase + coherence (needs matplotlib)
 
-freqs, gamma2 = ph.coherence(x, y, fs)
+freqs, gamma2 = electroacoustics.coherence(x, y, fs)
 ```
 
 Coherence needs averaging over several Welch segments to be meaningful — a single
@@ -204,7 +206,7 @@ segment gives `γ² ≡ 1` by construction.
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal as sp
-import phonometry as ph
+from phonometry import electroacoustics
 
 fs = 48000
 n = 400000
@@ -214,7 +216,7 @@ b, a = sp.butter(2, [400.0, 4000.0], btype="band", fs=fs)   # device under test
 y = sp.lfilter(b, a, x)
 y = y + rng.standard_normal(n) * np.sqrt(np.mean(y ** 2)) * 0.05   # output noise
 
-res = ph.transfer_function(x, y, fs, estimator="H1")
+res = electroacoustics.transfer_function(x, y, fs, estimator="H1")
 res.plot()
 plt.show()
 ```

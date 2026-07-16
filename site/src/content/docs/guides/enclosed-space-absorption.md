@@ -31,13 +31,13 @@ For hard, irregular objects whose absorption is not measured, an empirical
 estimate from the volume is used (Formula 4): `Aobj = Vobj**(2/3)`.
 
 ```python
-import phonometry as ph
+from phonometry import room
 
 # EN 12354-6 Annex E, bare room (29.75 m3), 1000 Hz octave band.
 surfaces = [(12.39, 0.05), (12.39, 0.02), (10.90, 0.04),
             (10.90, 0.04), (6.55, 0.04), (6.55, 0.04)]
-print(round(ph.equivalent_absorption_area(surfaces), 2))  # 2.26  m2
-print(round(float(ph.hard_object_absorption(0.65)), 3))   # 0.75  m2
+print(round(room.equivalent_absorption_area(surfaces), 2))  # 2.26  m2
+print(round(float(room.hard_object_absorption(0.65)), 3))   # 0.75  m2
 ```
 
 Air absorption uses the power attenuation coefficient `m` (Formula 2):
@@ -57,19 +57,19 @@ where the speed of sound `c0 = 345.6 m/s` makes the factor `55.3/c0` the
 familiar `0.16`.
 
 ```python
-import phonometry as ph
+from phonometry import room
 
 surfaces = [(12.39, 0.05), (12.39, 0.02), (10.90, 0.04),
             (10.90, 0.04), (6.55, 0.04), (6.55, 0.04)]
-a = ph.equivalent_absorption_area(surfaces)
-print(round(ph.reverberation_time(a, 29.75), 1))          # 2.1  s
+a = room.equivalent_absorption_area(surfaces)
+print(round(room.reverberation_time(a, 29.75), 1))          # 2.1  s
 
 # Annex E case 2: add furniture (hard objects) to the same room.
 volumes = [0.15, 0.60, 0.05, 0.05, 0.65, 0.65]
-aobj = ph.hard_object_absorption(volumes)
-psi = ph.object_fraction(volumes, 29.75)                  # 0.072
-a2 = ph.equivalent_absorption_area(surfaces, objects=aobj)
-print(round(a2, 2), round(ph.reverberation_time(a2, 29.75, object_fraction=psi), 1))
+aobj = room.hard_object_absorption(volumes)
+psi = room.object_fraction(volumes, 29.75)                  # 0.072
+a2 = room.equivalent_absorption_area(surfaces, objects=aobj)
+print(round(a2, 2), round(room.reverberation_time(a2, 29.75, object_fraction=psi), 1))
 # 5.03 0.9
 ```
 
@@ -77,12 +77,12 @@ Per octave band, one call takes the surfaces (with per-band absorption
 coefficients) and the air condition and returns the whole spectrum:
 
 ```python
-import phonometry as ph
+from phonometry import room
 
 # Per-band absorption coefficients (125 Hz to 8 kHz) for each surface.
 plaster = [0.02, 0.03, 0.03, 0.04, 0.05, 0.05, 0.05]
 tile = [0.15, 0.35, 0.65, 0.85, 0.90, 0.90, 0.85]
-result = ph.enclosed_space_reverberation(
+result = room.enclosed_space_reverberation(
     [(54.0, plaster), (20.0, plaster), (20.0, tile)],
     volume=60.0, air_condition="20C_50-70",
 )
@@ -97,13 +97,13 @@ print(result.reverberation_time.round(2))
 
 ```python
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import room
 
 plaster = [0.02, 0.03, 0.03, 0.04, 0.05, 0.05, 0.05]
 tile = [0.15, 0.35, 0.65, 0.85, 0.90, 0.90, 0.85]
 walls_floor = [(54.0, plaster), (20.0, plaster)]
 for ceiling in (plaster, tile):
-    ph.enclosed_space_reverberation(
+    room.enclosed_space_reverberation(
         [*walls_floor, (20.0, ceiling)], 60.0, air_condition="20C_50-70",
     ).plot()
 plt.show()

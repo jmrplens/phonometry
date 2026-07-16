@@ -63,12 +63,12 @@ L_k = 10\lg\frac{|k_{2,1}|^2}{k_0^2} = 20\lg\frac{|k_{2,1}|}{k_0}, \qquad
 $$
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
 # A resilient mount with |k2,1| = 1 MN/m and a 5 % loss factor:
 k = 1e6 * (1.0 + 0.05j)
-print(round(float(ph.transfer_stiffness_level(k)), 2))   # 120.00  dB re 1 N/m
-print(round(float(ph.loss_factor(k)), 3))                # 0.05
+print(round(float(vibration.transfer_stiffness_level(k)), 2))   # 120.00  dB re 1 N/m
+print(round(float(vibration.loss_factor(k)), 3))                # 0.05
 ```
 
 ## 2. Direct and indirect determination
@@ -101,16 +101,16 @@ the mass/spring resonance, where `T` is small.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 # Indirect method: a 10 kg blocking mass, transmissibility 0.01 at 500 Hz.
-k = ph.transfer_stiffness_indirect(500.0, 0.01, blocking_mass=10.0)
+k = vibration.transfer_stiffness_indirect(500.0, 0.01, blocking_mass=10.0)
 print(f"{abs(complex(k)):.3e}")            # 9.870e+05  N/m
 
 # Bundle a swept measurement into a result carrying its level and loss factor:
 f = np.logspace(1.5, 3.3, 200)
-t = ph.base_transmissibility(f, mass=8.0, stiffness=1e6, damping=120.0)
-res = ph.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
+t = vibration.base_transmissibility(f, mass=8.0, stiffness=1e6, damping=120.0)
+res = vibration.indirect_transfer_stiffness_result(f, t, blocking_mass=8.0)
 print(round(float(res.level[-1]), 1))      # ~126  dB re 1 N/m (high-f)
 ```
 
@@ -151,16 +151,16 @@ stiffness `k_t`, the delivered force is `F₂/F₂,b = 1/(1 + k₂,₂/k_t)` —
 
 ```python
 import warnings
-import phonometry as ph
+from phonometry import vibration
 
 # |T| = 0.5 violates Inequality (2): the indirect result is flagged.
 with warnings.catch_warnings(record=True) as caught:
     warnings.simplefilter("always")
-    ph.transfer_stiffness_indirect(50.0, 0.5, blocking_mass=10.0)
+    vibration.transfer_stiffness_indirect(50.0, 0.5, blocking_mass=10.0)
 print(caught[0].category.__name__)                     # PhonometryWarning
 
 # Blocking-force approximation at the 10 % limit (ISO 10846-1, Eq. 6):
-print(round(abs(complex(ph.blocking_force_ratio(1e5, 1e6))), 4))   # 0.9091
+print(round(abs(complex(vibration.blocking_force_ratio(1e5, 1e6))), 4))   # 0.9091
 ```
 
 ## 4. Relation to the FRF family
@@ -172,11 +172,11 @@ relates to the mechanical impedance `Z` and effective mass `m_eff` by
 [mechanical-mobility](mechanical-mobility.md) `convert_frf` pivot:
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
 k = 1e6 + 5e4j                                  # N/m, at 250 Hz
-Z = ph.convert_frf(k, 250.0, "dynamic_stiffness", "impedance")
-print(abs(complex(ph.convert_frf(Z, 250.0, "impedance", "dynamic_stiffness"))))  # 1.0012e6
+Z = vibration.convert_frf(k, 250.0, "dynamic_stiffness", "impedance")
+print(abs(complex(vibration.convert_frf(Z, 250.0, "impedance", "dynamic_stiffness"))))  # 1.0012e6
 ```
 
 ## References

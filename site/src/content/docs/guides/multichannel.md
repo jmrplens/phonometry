@@ -22,7 +22,7 @@ Channel (Log Sine Sweep).*
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import chirp
-from phonometry import octave_filter
+from phonometry import metrology
 
 # Stereo test signal: pink noise left, logarithmic sine sweep right
 fs, duration = 48000, 5
@@ -34,7 +34,7 @@ left = np.fft.irfft(spec, t.size)
 right = chirp(t, f0=50, t1=duration, f1=10000, method="logarithmic")
 
 x = np.stack([left, right])                    # (2, n_samples)
-spl, freq = octave_filter(x, fs, fraction=3, limits=[20, 20000])
+spl, freq = metrology.octave_filter(x, fs, fraction=3, limits=[20, 20000])
 
 fig, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
 for ax, levels, name in zip(axes, spl, ["Left: pink noise", "Right: log sweep"]):
@@ -55,7 +55,7 @@ The convention is consistent across the whole library: time is always the
 
 ```python
 import numpy as np
-from phonometry import octave_filter
+from phonometry import metrology
 
 # Two calibrated channels in Pa so the guide runs standalone
 fs = 48000
@@ -64,7 +64,7 @@ left = 0.2 * np.sin(2 * np.pi * 1000 * t)
 right = 0.1 * np.sin(2 * np.pi * 500 * t)
 
 stereo = np.stack([left, right])          # (2, n_samples)
-spl, freq = octave_filter(stereo, fs, fraction=3)
+spl, freq = metrology.octave_filter(stereo, fs, fraction=3)
 # spl has shape (2, n_bands): one row per channel
 ```
 
@@ -113,9 +113,17 @@ processing. It uses NumPy vectorization to handle multichannel audio arrays
 maximum throughput.
 
 ```python
-from phonometry import OctaveFilterBank
+import numpy as np
+from phonometry import metrology
 
-bank = OctaveFilterBank(fs=48000, fraction=3, filter_type='butter')
+# Two calibrated channels in Pa so the guide runs standalone
+fs = 48000
+t = np.arange(fs) / fs
+left = 0.2 * np.sin(2 * np.pi * 1000 * t)
+right = 0.1 * np.sin(2 * np.pi * 500 * t)
+stereo = np.stack([left, right])          # (2, n_samples)
+
+bank = metrology.OctaveFilterBank(fs=48000, fraction=3, filter_type='butter')
 
 # Access computed properties
 # bank.freq (center), bank.freq_d (lower), bank.freq_u (upper), bank.sos (coefficients)

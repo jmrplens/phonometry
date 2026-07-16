@@ -37,7 +37,7 @@ that is why level analyses discard the first instants of a recording.
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from phonometry import time_weighting
+from phonometry import metrology
 
 fs = 48000
 t = np.arange(int(fs * 4)) / fs
@@ -48,7 +48,7 @@ burst[fs:int(1.5 * fs)] = 0.2 * rng.standard_normal(int(0.5 * fs))
 p0 = 2e-5
 plt.figure()
 for mode in ('fast', 'slow', 'impulse'):
-    envelope = time_weighting(burst, fs, mode=mode)
+    envelope = metrology.time_weighting(burst, fs, mode=mode)
     plt.plot(t, 10 * np.log10(np.maximum(envelope, 1e-12) / p0**2), label=mode)
 plt.xlabel('Time [s]')
 plt.ylabel('Level [dB SPL]')
@@ -65,14 +65,14 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import time_weighting
+from phonometry import metrology
 
 # recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
 fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Calculate energy envelope (Mean Square)
-energy_envelope = time_weighting(recording, fs, mode='fast')
+energy_envelope = metrology.time_weighting(recording, fs, mode='fast')
 # dB SPL relative to 20 μPa
 spl_t = 10 * np.log10(energy_envelope / (2e-5)**2)
 
@@ -139,19 +139,19 @@ and 1 s down to 2 ms for S, at class 1 acceptance limits:
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from phonometry import time_weighting
+from phonometry import metrology
 
 fs = 48000
 t = np.arange(int(fs * 2)) / fs
 tone = np.sin(2 * np.pi * 4000 * t)
 
 # Steady-state Fast reference of the continuous tone
-reference = time_weighting(tone, fs, mode='fast')[int(1.5 * fs):].mean()
+reference = metrology.time_weighting(tone, fs, mode='fast')[int(1.5 * fs):].mean()
 
 # 200 ms burst of the same tone (IEC 61672-1 Table 4 target: -1.0 dB)
 burst = np.zeros_like(t)
 burst[int(0.5 * fs):int(0.7 * fs)] = tone[int(0.5 * fs):int(0.7 * fs)]
-envelope = time_weighting(burst, fs, mode='fast')
+envelope = metrology.time_weighting(burst, fs, mode='fast')
 env_db = 10 * np.log10(np.maximum(envelope / reference, 1e-6))
 
 plt.figure()
@@ -173,8 +173,14 @@ requests the same zero state explicitly. If the recorded segment begins after a
 steady signal is already present, you can start from the first sample energy instead:
 
 ```python
-# Uses `recording` and `fs` from the snippet above.
-energy_envelope = time_weighting(recording, fs, mode='fast', initial_state='first')
+import numpy as np
+from phonometry import metrology
+
+# recording: a calibrated microphone capture (Pa) — recorded through your measurement chain. Synthesized here so the guide runs standalone.
+fs = 48000
+recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+
+energy_envelope = metrology.time_weighting(recording, fs, mode='fast', initial_state='first')
 ```
 
 ## 6. Block processing
@@ -183,12 +189,14 @@ For block processing, pass the last output value from the previous block as the
 next block's `initial_state` instead of resetting each block:
 
 ```python
+from phonometry import metrology
+
 state = None
 
 # audio_blocks: consecutive frames of your calibrated recording (Pa),
 #   streamed from your sound card or read from a WAV in blocks.
 for block in audio_blocks:
-    energy_envelope = time_weighting(block, fs, mode='fast', initial_state=state)
+    energy_envelope = metrology.time_weighting(block, fs, mode='fast', initial_state=state)
     state = energy_envelope[-1]
 ```
 
@@ -200,9 +208,9 @@ such as `(n_channels,)` for input shaped `(n_channels, n_samples)`.
 Or let the `TimeWeighting` class carry the state for you:
 
 ```python
-from phonometry import TimeWeighting
+from phonometry import metrology
 
-tw = TimeWeighting(fs, mode='fast')
+tw = metrology.TimeWeighting(fs, mode='fast')
 # audio_blocks: consecutive frames of your calibrated recording (Pa),
 #   streamed from your sound card or read from a WAV in blocks.
 for block in audio_blocks:

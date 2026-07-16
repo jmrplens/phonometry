@@ -5,11 +5,16 @@ description: "Every public function, class and constant in phonometry, generated
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-The complete public API, one page per module. Every documented name can be imported directly from the top-level package:
+The complete public API, one page per module. Import the domain subpackage and call through it:
 
 ```python
-from phonometry import octave_filter, leq, sonar_equation
+from phonometry import metrology, underwater
+
+spl, freq = metrology.octave_filter(x, fs)
+snr = underwater.passive_sonar_equation(185.0, 60.0, 50.0)
 ```
+
+Every documented name can also be imported directly from the top-level package (`from phonometry import leq`).
 
 :::note
 The API reference is generated from the English source docstrings and is published in English only.
@@ -21,7 +26,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 
 | Module | Summary |
 | :--- | :--- |
-| [`phonometry`](/phonometry/reference/api/filters/phonometry/) | Convenience wrappers defined at the package top level (`phonometry/__init__.py`). |
+| [`phonometry`](/phonometry/reference/api/filters/phonometry/) | Package-level names defined in `phonometry/__init__.py` itself. |
 | [`metrology.core`](/phonometry/reference/api/filters/core/) | Core processing logic and FilterBank class for phonometry. |
 | [`metrology.parametric_filters`](/phonometry/reference/api/filters/parametric-filters/) | Weighting filters (A, C, G, Z) and time weighting utilities for audio analysis. |
 | [`metrology.frequencies`](/phonometry/reference/api/filters/frequencies/) | Frequency calculation logic according to ANSI/IEC standards. |

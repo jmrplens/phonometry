@@ -25,12 +25,12 @@ pressure doubling.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400.svg" alt="Side view of a horizontal-axis wind turbine with hub height H and rotor diameter D, a microphone lying on a flat ground board downwind at the horizontal distance R0 = H + D/2 from the tower centreline, the slant distance R1 from the rotor centre to the microphone with the board inclination angle phi between 25 and 40 degrees, and a met mast measuring wind speed and direction; a plan-view inset shows the Figure 3 pattern with the reference position downwind and three optional positions at plus and minus 60 degrees and upwind, and the annotations give R1 equals the square root of H squared plus R0 squared and the apparent sound power formula LWA,i = Lp,i minus 6 plus 10 lg(4 pi R1 squared over S0)" width="94%"></picture>
 
 ```python
-import phonometry as ph
+from phonometry import environmental
 
 # Background-corrected A-weighted one-third-octave band levels L_p,i (dB).
 band_levels = [55.0, 58.0, 60.0, 57.0, 54.0]
-r1 = ph.slant_distance(hub_height=80.0, rotor_diameter=100.0)
-lwa = ph.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
+r1 = environmental.slant_distance(hub_height=80.0, rotor_diameter=100.0)
+lwa = environmental.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 ```
 
 ### Why "apparent"
@@ -114,7 +114,7 @@ reported when `ΔL_a ≥ −3 dB`; a tone is audible when `ΔL_a > 0`.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import environmental
 
 # A uniformly-spaced narrowband spectrum (2 Hz resolution): a flat 30 dB floor
 # with a discrete 60 dB tone at 500 Hz.
@@ -122,7 +122,7 @@ frequencies = np.arange(440.0, 562.0, 2.0)
 levels = np.full(frequencies.size, 30.0)
 levels[np.argmin(np.abs(frequencies - 500.0))] = 60.0
 
-res = ph.wind_turbine_tonality(levels, frequencies)
+res = environmental.wind_turbine_tonality(levels, frequencies)
 print(res.tone_frequency, res.tonality, res.tonal_audibility, res.is_audible)
 res.plot()   # spectrum + critical band + masking level (needs matplotlib)
 ```
@@ -146,13 +146,13 @@ and the Zwicker critical band from the spectrum. For a rating adjustment
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import environmental
 
 df = 2.0
 freqs = np.arange(50.0, 400.0 + df, df)
 levels = 42.0 - 6.0 * np.log10(freqs / 100.0)
 levels[int(np.argmin(np.abs(freqs - 200.0)))] += 22.0   # blade-passing-style tone
-ph.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
+environmental.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
 ```
 
 </details>

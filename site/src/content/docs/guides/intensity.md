@@ -32,7 +32,7 @@ $$
 
 ```python
 import numpy as np
-from phonometry import sound_intensity
+from phonometry import emission
 
 fs = 48000
 rng = np.random.default_rng(0)
@@ -42,7 +42,7 @@ rng = np.random.default_rng(0)
 p1 = 0.02 * rng.standard_normal(fs)
 p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 delayed one sample
 
-res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
+res = emission.sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
 print(res.total_intensity_level, res.total_direction)      # LI [dB], ±1
 print(res.frequency, res.intensity_level)                  # per band
@@ -64,6 +64,18 @@ intensity measurement.*
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+fs = 48000
+rng = np.random.default_rng(0)
+# The two probe-microphone pressures in Pa, p1 closest to the source.
+#   In a real measurement these are your two calibrated probe recordings;
+#   synthesized here (p2 = p1 delayed one sample) so the guide runs.
+p1 = 0.02 * rng.standard_normal(fs)
+p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 delayed one sample
+res = emission.sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
+                      limits=[100, 2500])
 
 # res is the IntensityResult computed in the example above.
 # One line — Lp vs LI per band with the pressure-intensity index on a twin axis:
@@ -119,15 +131,15 @@ the dynamic-capability criterion they are available directly:
 
 ```python
 import numpy as np
-from phonometry import field_indicators, dynamic_capability_index
+from phonometry import emission
 
 # Per-position measurements over the ISO 9614-1 measurement surface
 pressure_levels = np.array([74.1, 73.8, 74.5, 73.2])       # Lp per position (dB)
 normal_intensity = np.array([1.2e-5, 1.0e-5, 1.4e-5, 0.9e-5])  # signed In per position (W/m²)
 
-fi = field_indicators(pressure_levels, normal_intensity)
+fi = emission.field_indicators(pressure_levels, normal_intensity)
 print(round(fi.f2, 2), round(fi.f3, 2), round(fi.f4, 3))   # 3.41 3.41 0.197
-ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
+ld = emission.dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
 print(ld, ld > fi.f2)                                      # 8.0 True (criterion 1)
 ```
 

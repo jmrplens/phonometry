@@ -50,16 +50,16 @@ simplification) or **Thorp** (1967, frequency-only).
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 # Absorption coefficient at 10 kHz, 10 °C, 35 ppt, 100 m, pH 8 (dB/km).
 # seawater_absorption accepts scalar or array frequencies and returns an array.
-alpha = ph.seawater_absorption(10e3, temperature=10.0, salinity=35.0,
+alpha = underwater.seawater_absorption(10e3, temperature=10.0, salinity=35.0,
                                depth=100.0, model="francois-garrison")[0]
 print(f"α = {alpha:.3f} dB/km")
 
 ranges = np.linspace(10.0, 20_000.0, 400)
-tl = ph.transmission_loss(ranges, 10e3, law="practical", transition_range=1000.0,
+tl = underwater.transmission_loss(ranges, 10e3, law="practical", transition_range=1000.0,
                           temperature=10.0, salinity=35.0, depth=100.0)
 print(tl.absorption_coefficient, tl.tl[-1])
 tl.plot()   # TL vs range with the spreading/absorption split (needs matplotlib)
@@ -105,14 +105,14 @@ within ~1 m/s in their common domain; Mackenzie's canonical check value is
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
-c = ph.sea_water_sound_speed(25.0, 35.0, 1000.0, model="mackenzie")  # 1550.744
+c = underwater.sea_water_sound_speed(25.0, 35.0, 1000.0, model="mackenzie")  # 1550.744
 
 # A profile: warm mixed layer, thermocline, isothermal deep layer.
 depths = np.linspace(0.0, 3000.0, 121)
 temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
-profile = ph.sound_speed_profile(depths, temps, 35.0, model="unesco")
+profile = underwater.sound_speed_profile(depths, temps, 35.0, model="unesco")
 profile.plot()   # sound speed vs depth (needs matplotlib)
 ```
 
@@ -168,17 +168,17 @@ or reverberation-limited with $RL$ in place of $NL - DI$.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 tl = np.linspace(40.0, 120.0, 400)
-se = ph.passive_sonar_equation(source_level=140.0, transmission_loss=tl,
+se = underwater.passive_sonar_equation(source_level=140.0, transmission_loss=tl,
                                noise_level=60.0, directivity_index=15.0,
                                detection_threshold=8.0)
 print(se.figure_of_merit)   # max allowable one-way TL at SE = 0
 se.plot()   # signal excess vs transmission loss (needs matplotlib)
 
 # Active, monostatic (two-way loss, target strength):
-ph.active_sonar_equation(220.0, 70.0, target_strength=15.0, noise_level=60.0,
+underwater.active_sonar_equation(220.0, 70.0, target_strength=15.0, noise_level=60.0,
                          directivity_index=20.0, detection_threshold=10.0)
 ```
 
@@ -220,10 +220,10 @@ $BL = -20 \lg |R|$.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 phi = np.linspace(0.0, 90.0, 361)   # grazing angle from the interface, degrees
-bl = ph.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,  # water
+bl = underwater.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,  # water
                                rho2=1900.0, c2=1650.0)         # sand
 print(bl.critical_angle)            # 24.6° for this sand/water pair
 bl.plot()                           # bottom loss vs grazing angle (needs matplotlib)
@@ -274,15 +274,15 @@ by the traffic model in §6.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 freqs = np.logspace(2, 5.5, 300)
-noise = ph.ocean_ambient_noise(freqs, wind_speed_knots=15.0)
+noise = underwater.ocean_ambient_noise(freqs, wind_speed_knots=15.0)
 noise.plot()   # composite spectrum with wind/thermal components (needs matplotlib)
 
 # Individual components are available directly:
-ph.wind_noise_spectrum(1000.0, 5.0)      # 51.02 dB (rule-of-fives anchor re 1 µPa)
-ph.thermal_noise_spectrum(5e4)           # molecular thermal-noise limit
+underwater.wind_noise_spectrum(1000.0, 5.0)      # 51.02 dB (rule-of-fives anchor re 1 µPa)
+underwater.thermal_noise_spectrum(5e4)           # molecular thermal-noise limit
 ```
 
 The wind component is strictly valid over roughly 500 Hz–5 kHz; the wide example
@@ -331,16 +331,16 @@ validated against 1862 measurements, the default), **RANDI 3.1** and
 the decidecade-band source level.
 
 ```python
-import phonometry as ph
+from phonometry import underwater
 
 # A container ship at 18 knots, 300 m long (JOMOPANS-ECHO default):
-ship = ph.ship_source_spectrum(18.0, 300.0, vessel_class="containership")
+ship = underwater.ship_source_spectrum(18.0, 300.0, vessel_class="containership")
 ship.plot()                     # source spectral density vs frequency
 
-print(ph.VESSEL_CLASSES)        # the 13 JOMOPANS-ECHO vessel classes
+print(underwater.VESSEL_CLASSES)        # the 13 JOMOPANS-ECHO vessel classes
 
 # Feed the predicted spectrum into the ambient noise as the shipping term:
-noise = ph.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
+noise = underwater.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
                                shipping=ship.source_psd)
 ```
 
@@ -398,22 +398,22 @@ computed numerically. Three solvers are provided (Jensen et al.,
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 # A Munk deep-water profile.
 z = np.linspace(0.0, 5000.0, 60)
 eta = 2.0 * (z - 1300.0) / 1300.0
 c = 1500.0 * (1.0 + 0.00737 * (eta - 1.0 + np.exp(-eta)))
 
-rays = ph.ray_trace(z, c, source_depth=1000.0,
+rays = underwater.ray_trace(z, c, source_depth=1000.0,
                     launch_angles_deg=np.linspace(-12.0, 12.0, 21), max_range=100e3)
 rays.plot()   # ray paths / convergence zones (needs matplotlib)
 
 # Shallow isovelocity waveguide: modes and PE.
-modes = ph.normal_modes(50.0, [0.0, 200.0], [1500.0, 1500.0],
+modes = underwater.normal_modes(50.0, [0.0, 200.0], [1500.0, 1500.0],
                         source_depth=50.0, receiver_depth=100.0)
 print(modes.wavenumbers.size, "propagating modes")
-field = ph.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1500.0],
+field = underwater.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1500.0],
                               source_depth=50.0, max_range=20e3)
 field.plot()  # TL field over range x depth (needs matplotlib)
 ```

@@ -54,7 +54,7 @@ Analiza una señal y obtén el nivel de presión sonora (SPL) por banda de frecu
 
 ```python
 import numpy as np
-from phonometry import octave_filter
+from phonometry import metrology
 
 fs = 48000
 t = np.linspace(0, 1, fs, endpoint=False)
@@ -62,7 +62,7 @@ t = np.linspace(0, 1, fs, endpoint=False)
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # Aplicar el banco de filtros de 1/3 de octava
-spl, freq = octave_filter(signal, fs=fs, fraction=3)
+spl, freq = metrology.octave_filter(signal, fs=fs, fraction=3)
 
 print(f"Bandas: {freq}")
 # Bandas: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bandas)
@@ -80,8 +80,16 @@ print(f"SPL [dB]: {spl}")
 ```python
 import matplotlib.pyplot as plt
 import scipy.signal
+import numpy as np
+from phonometry import metrology
 
-# Usa `signal`, `fs`, `spl` y `freq` del snippet anterior.
+fs = 48000
+t = np.linspace(0, 1, fs, endpoint=False)
+# Señal compuesta: 100 Hz + 1000 Hz
+signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
+# Aplicar el banco de filtros de 1/3 de octava
+spl, freq = metrology.octave_filter(signal, fs=fs, fraction=3)
+
 # Fondo gris: la PSD de la señal cruda (Welch), desplazada justo por debajo
 # de los SPL de banda para comparar ambas formas espectrales en un mismo eje.
 f_psd, psd = scipy.signal.welch(signal, fs, nperseg=8192)
@@ -104,7 +112,7 @@ plt.show()
 
 ```python
 from scipy.io import wavfile
-from phonometry import octave_filter
+from phonometry import metrology
 
 # Cargar un archivo WAV estándar
 fs, signal = wavfile.read("measurement.wav")
@@ -112,7 +120,7 @@ fs, signal = wavfile.read("measurement.wav")
 # Analizar
 # Nota: para obtener valores SPL reales debes calibrar la entrada.
 # Consulta la guía de calibración.
-spl, freq = octave_filter(signal, fs=fs, fraction=3)
+spl, freq = metrology.octave_filter(signal, fs=fs, fraction=3)
 ```
 
 El audio entero (por ejemplo, datos int16 de un WAV) se convierte internamente a

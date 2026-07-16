@@ -21,7 +21,7 @@ convenience that derives all four sensations from a recording.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import psychoacoustics
 
 n5 = np.linspace(4.0, 60.0, 200)
 profiles = [
@@ -31,10 +31,10 @@ profiles = [
 ]
 fig, ax = plt.subplots()
 for label, s, f, r in profiles:
-    pa = [ph.psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5]
+    pa = [psychoacoustics.psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5]
     ax.plot(n5, pa, label=label)
 
-ex = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)
+ex = psychoacoustics.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)
 ax.plot([30.0], [ex.annoyance], "o", label=f"Worked example (PA = {ex.annoyance:.2f})")
 ax.set_xlabel("Percentile loudness N5 [sone]")
 ax.set_ylabel("Psychoacoustic annoyance PA")
@@ -77,9 +77,9 @@ threshold); `wFR` weights roughness more heavily than fluctuation strength
 returns the annoyance together with the two intermediate weightings:
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
-res = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)   # N5, S, F, R
+res = psychoacoustics.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)   # N5, S, F, R
 print(round(res.annoyance, 4))   # 37.0478
 print(round(res.w_s, 4), round(res.w_fr, 4))   # 0.1001 0.2125
 ```
@@ -98,9 +98,9 @@ the ECMA-418-2 Sottek roughness and `F` from the fluctuation-strength signal
 model.
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
-res = ph.psychoacoustic_annoyance_from_signal(x, fs, field="free")
+res = psychoacoustics.psychoacoustic_annoyance_from_signal(x, fs, field="free")
 print(res.annoyance, res.n5, res.sharpness, res.roughness, res.fluctuation_strength)
 ```
 
@@ -129,11 +129,11 @@ rather than the ~70 Hz roughness peak. By definition, a 1 kHz tone at 60 dB,
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import psychoacoustics
 
 # Exact closed form (Eq. 10.2), AM broadband noise at 60 dB, 100 % modulation:
 fmod = np.logspace(np.log10(0.5), np.log10(32.0), 240)
-f_bbn = [ph.fluctuation_strength_am_noise(60.0, 1.0, fm) for fm in fmod]
+f_bbn = [psychoacoustics.fluctuation_strength_am_noise(60.0, 1.0, fm) for fm in fmod]
 
 # Osses 2016 signal model on a 1 kHz / 70 dB AM tone over the same sweep:
 fs = 48000
@@ -144,7 +144,7 @@ f_tone = []
 for fm in fm_tone:
     am = (1.0 + np.sin(2 * np.pi * fm * t)) * carrier
     am = am / np.sqrt(np.mean(am ** 2)) * 2e-5 * 10 ** (70 / 20)
-    f_tone.append(ph.fluctuation_strength(am, float(fs)).fluctuation_strength)
+    f_tone.append(psychoacoustics.fluctuation_strength(am, float(fs)).fluctuation_strength)
 
 fig, ax = plt.subplots()
 ax.semilogx(fmod, f_bbn, label="AM broadband noise (closed form)")
@@ -178,9 +178,9 @@ rises on either side. The result is clamped at `0` (the sensation vanishes below
 noise.
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
-print(round(ph.fluctuation_strength_am_noise(60.0, 1.0, 4.0), 4))   # 3.6943 vacil
+print(round(psychoacoustics.fluctuation_strength_am_noise(60.0, 1.0, 4.0), 4))   # 3.6943 vacil
 ```
 
 ### 3.2 The Osses 2016 signal model
@@ -192,9 +192,9 @@ plus the specific fluctuation strength over the Bark axis and the time-dependent
 trace.
 
 ```python
-import phonometry as ph
+from phonometry import psychoacoustics
 
-res = ph.fluctuation_strength(x, fs)
+res = psychoacoustics.fluctuation_strength(x, fs)
 print(res.fluctuation_strength)   # vacil
 res.plot()   # specific fluctuation strength F′(z) over the Bark axis (needs matplotlib)
 ```

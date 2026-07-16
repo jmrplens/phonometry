@@ -21,10 +21,12 @@ la duplicación de presión en la placa del suelo.
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400_es.svg" alt="Alzado de un aerogenerador de eje horizontal con altura de buje H y diámetro de rotor D, un micrófono tumbado sobre una placa plana en el suelo a sotavento a la distancia horizontal R0 = H + D/2 del eje de la torre, la distancia oblicua R1 del centro del rotor al micrófono con el ángulo de inclinación de la placa phi entre 25 y 40 grados, y un mástil meteorológico que mide velocidad y dirección del viento; un recuadro en planta muestra el patrón de la Figura 3 con la posición de referencia a sotavento y tres posiciones opcionales a más y menos 60 grados y a barlovento, y las anotaciones dan R1 igual a la raíz cuadrada de H al cuadrado más R0 al cuadrado y la fórmula de potencia sonora aparente LWA,i = Lp,i menos 6 más 10 lg(4 pi R1 al cuadrado entre S0)" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400_es_dark.svg" alt="Alzado de un aerogenerador de eje horizontal con altura de buje H y diámetro de rotor D, un micrófono tumbado sobre una placa plana en el suelo a sotavento a la distancia horizontal R0 = H + D/2 del eje de la torre, la distancia oblicua R1 del centro del rotor al micrófono con el ángulo de inclinación de la placa phi entre 25 y 40 grados, y un mástil meteorológico que mide velocidad y dirección del viento; un recuadro en planta muestra el patrón de la Figura 3 con la posición de referencia a sotavento y tres posiciones opcionales a más y menos 60 grados y a barlovento, y las anotaciones dan R1 igual a la raíz cuadrada de H al cuadrado más R0 al cuadrado y la fórmula de potencia sonora aparente LWA,i = Lp,i menos 6 más 10 lg(4 pi R1 al cuadrado entre S0)" style="width:94%">
 
 ```python
-import phonometry as ph
+from phonometry import environmental
 
-r1 = ph.slant_distance(hub_height=80.0, rotor_diameter=100.0)
-lwa = ph.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
+# Niveles de banda de tercio de octava ponderados A y corregidos de fondo L_p,i (dB).
+band_levels = [55.0, 58.0, 60.0, 57.0, 54.0]
+r1 = environmental.slant_distance(hub_height=80.0, rotor_diameter=100.0)
+lwa = environmental.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 ```
 
 ### Por qué "aparente"
@@ -100,9 +102,16 @@ de enmascaramiento `L_pn` sigue la Fórmula 31, la tonalidad es
 cuando `ΔL_a > 0`.
 
 ```python
-import phonometry as ph
+import numpy as np
+from phonometry import environmental
 
-res = ph.wind_turbine_tonality(levels, frequencies)   # espectro de banda estrecha
+# Un espectro de banda estrecha uniformemente espaciado (resolución de 2 Hz):
+# un suelo plano de 30 dB con un tono discreto de 60 dB en 500 Hz.
+frequencies = np.arange(440.0, 562.0, 2.0)
+levels = np.full(frequencies.size, 30.0)
+levels[np.argmin(np.abs(frequencies - 500.0))] = 60.0
+
+res = environmental.wind_turbine_tonality(levels, frequencies)
 print(res.tone_frequency, res.tonality, res.tonal_audibility, res.is_audible)
 res.plot()   # espectro + banda crítica + nivel de enmascaramiento (requiere matplotlib)
 ```
@@ -127,13 +136,13 @@ banda crítica de Zwicker a partir del espectro. Para un ajuste de valoración
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import environmental
 
 df = 2.0
 freqs = np.arange(50.0, 400.0 + df, df)
 levels = 42.0 - 6.0 * np.log10(freqs / 100.0)
 levels[int(np.argmin(np.abs(freqs - 200.0)))] += 22.0   # tono estilo paso de pala
-ph.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
+environmental.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
 ```
 
 </details>

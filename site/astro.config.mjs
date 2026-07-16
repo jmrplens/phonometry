@@ -243,6 +243,7 @@ export default defineConfig({
         './src/styles/theme-images.css',
         './src/styles/theme-tables.css',
         './src/styles/splash-menu.css',
+        './src/styles/sidebar.css',
       ],
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/jmrplens/phonometry' },
@@ -328,7 +329,6 @@ export default defineConfig({
         {
           label: 'Hearing and perception',
           translations: { es: 'Audición y percepción' },
-          collapsed: true,
           items: [
             {
               label: 'Psychoacoustics',
@@ -360,7 +360,6 @@ export default defineConfig({
         {
           label: 'Rooms and buildings',
           translations: { es: 'Salas y edificación' },
-          collapsed: true,
           items: [
             {
               label: 'Room acoustics',
@@ -392,7 +391,6 @@ export default defineConfig({
         {
           label: 'Vibration and structure-borne sound',
           translations: { es: 'Vibración y ruido estructural' },
-          collapsed: true,
           items: [
             {
               label: 'Structure-borne sources',
@@ -415,7 +413,6 @@ export default defineConfig({
         {
           label: 'Environment and transport',
           translations: { es: 'Medio ambiente y transporte' },
-          collapsed: true,
           items: [
             {
               label: 'Outdoor sound',
@@ -432,13 +429,11 @@ export default defineConfig({
         {
           label: 'Underwater acoustics',
           translations: { es: 'Acústica submarina' },
-          collapsed: true,
           items: ['guides/underwater-acoustics', 'guides/underwater-propagation'],
         },
         {
           label: 'Sources and devices',
           translations: { es: 'Fuentes y dispositivos' },
-          collapsed: true,
           items: ['guides/intensity', 'guides/sound-power', 'guides/electroacoustics'],
         },
         {
@@ -449,7 +444,6 @@ export default defineConfig({
             {
               label: 'Theory',
               translations: { es: 'Teoría' },
-              collapsed: true,
               items: [
                 'reference/theory',
                 'reference/theory/signal-analysis',

@@ -33,15 +33,15 @@ dispersiones $d_u$ (peor que la mediana) y $d_l$ (mejor) se dan en las Fórmulas
 recortado a cero (cláusula 6.3.2).
 
 ```python
-import phonometry as ph
+from phonometry import hearing
 
 # NIPTS mediano tras 20 años a un nivel normalizado a 8 h de 90 dB(A).
-r = ph.nipts(90.0, 20.0, fractile=0.5)
+r = hearing.nipts(90.0, 20.0, fractile=0.5)
 print(r.frequencies.astype(int))  # [ 500 1000 2000 3000 4000 6000]
 print(r.median.round(1))          # [ 0.   0.1  4.1 10.2 12.9  8.5]
 
 # El décimo más susceptible de la población (percentil 90):
-print(ph.nipts(90.0, 20.0, fractile=0.9).value.round(1))
+print(hearing.nipts(90.0, 20.0, fractile=0.9).value.round(1))
 # [ 0.   0.1  7.7 16.2 17.8 13.6]
 ```
 
@@ -65,10 +65,10 @@ donde $H$ es el umbral por edad (HTLA, de ISO 7029 al mismo fractil) y $N$ el
 NIPTS. `htlan` evalúa ambas componentes y su combinación.
 
 ```python
-import phonometry as ph
+from phonometry import hearing
 
 # Un hombre de 60 años, 30 años a 95 dB(A), mediana.
-h = ph.htlan(60, "male", 95.0, 30.0, fractile=0.5)
+h = hearing.htlan(60, "male", 95.0, 30.0, fractile=0.5)
 print(h.htla.round(1))       # [ 6.   7.8 12.5 16.6 20.2 25.9]  solo edad
 print(h.nipts.round(1))      # [ 0.5  3.  11.8 21.6 24.8 17.6]  solo ruido
 print(h.threshold.round(1))  # [ 6.5 10.7 23.  35.2 40.8 39.8]  edad + ruido
@@ -124,20 +124,20 @@ solitario.
 
 ```python
 import matplotlib.pyplot as plt
-import phonometry as ph
-from phonometry.noise_induced_hearing_loss import NIPTS_FREQUENCIES as f
+from phonometry import hearing
+from phonometry.hearing.noise_induced_hearing_loss import NIPTS_FREQUENCIES as f
 
 # En una línea, el espectro NIPTS con su banda de fractiles:
-ph.nipts(95.0, 40.0, 0.9).plot()
+hearing.nipts(95.0, 40.0, 0.9).plot()
 plt.show()
 
 # A mano, ambos paneles:
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 for yr in (10, 20, 30, 40):
-    ax1.plot(f, ph.nipts(95.0, yr, 0.5).median, "o-", label=f"{yr} yr")
+    ax1.plot(f, hearing.nipts(95.0, yr, 0.5).median, "o-", label=f"{yr} yr")
 ax1.set_xscale("log"); ax1.invert_yaxis(); ax1.legend()
 
-h = ph.htlan(60, "male", 95.0, 30.0, 0.5)
+h = hearing.htlan(60, "male", 95.0, 30.0, 0.5)
 ax2.plot(f, h.htla, "o-", label="Age (HTLA)")
 ax2.plot(f, h.nipts, "^-", label="Noise (NIPTS)")
 ax2.plot(f, h.threshold, "s--", label="Age + noise (HTLAN)")

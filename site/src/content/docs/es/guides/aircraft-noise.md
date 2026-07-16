@@ -21,10 +21,10 @@ trozos de la Tabla A2-3, y se combinan en la molestia total
 `PNL = 40 + (10/lg2)·lg N`.
 
 ```python
-import phonometry as ph
+from phonometry import aircraft
 
-noys = ph.perceived_noisiness(spl)      # noys por banda (spl = 24 niveles, dB)
-pnl = ph.perceived_noise_level(spl)      # PNdB
+noys = aircraft.perceived_noisiness(spl)      # noys por banda (spl = 24 niveles, dB)
+pnl = aircraft.perceived_noise_level(spl)      # PNdB
 ```
 
 ## Corrección tonal
@@ -38,7 +38,9 @@ máximo sobre las bandas. La implementación reproduce exactamente el ejemplo de
 turbofán de la Tabla 3-7 del ETM Vol. I (`C = 2,0 dB` en 2500 Hz).
 
 ```python
-c = ph.tone_correction(spl)              # dB; se suma al PNL para dar PNLT
+from phonometry import aircraft
+
+c = aircraft.tone_correction(spl)              # dB; se suma al PNL para dar PNLT
 ```
 
 ## EPNL
@@ -51,10 +53,10 @@ la corrección por duración `D`.
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/epnl_es.svg" alt="Historia temporal del nivel de ruido percibido de un sobrevuelo de aeronave: PNL y el PNLT corregido por tonos en función del tiempo, con el máximo PNLTM marcado y la ventana de integración de 10 dB por debajo sombreada, anotada con el EPNL resultante y la corrección por duración" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/epnl_es_dark.svg" alt="Historia temporal del nivel de ruido percibido de un sobrevuelo de aeronave: PNL y el PNLT corregido por tonos en función del tiempo, con el máximo PNLTM marcado y la ventana de integración de 10 dB por debajo sombreada, anotada con el EPNL resultante y la corrección por duración" style="width:82%">
 
 ```python
-import phonometry as ph
+from phonometry import aircraft
 
 # spectra: un array (K, 24) de niveles de tercio de octava muestreado cada dt s
-res = ph.effective_perceived_noise_level(spectra, dt=0.5)
+res = aircraft.effective_perceived_noise_level(spectra, dt=0.5)
 print(res.epnl, res.pnltm, res.duration_correction, res.band_limits)
 res.plot()   # historia temporal PNL/PNLT (requiere matplotlib)
 ```
@@ -70,15 +72,15 @@ ETM Vol. I se reproduce como `EPNL = 92,6 EPNdB`.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import aircraft
 
 k, dt = 41, 0.5
 idx = np.arange(k)
-shape = 15.0 * np.exp(-((np.log10(ph.NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5)
+shape = 15.0 * np.exp(-((np.log10(aircraft.NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5)
 gain = 30.0 * np.exp(-((idx - 20.0) ** 2) / (2 * 5.0**2)) - 5.0
 spectra = (55.0 + shape)[None, :] + gain[:, None]
 spectra[:, 17] += 12.0 * np.exp(-((idx - 20.0) ** 2) / (2 * 6.0**2))  # tono de ventilador 2500 Hz
-ph.effective_perceived_noise_level(spectra, dt).plot()
+aircraft.effective_perceived_noise_level(spectra, dt).plot()
 ```
 
 </details>
@@ -92,9 +94,9 @@ linealidad y resolución. El filtrado de tercio de octava lo cubre la
 verificación de clase 2 de filtros IEC 61260 de la librería.
 
 ```python
-import phonometry as ph
+from phonometry import metrology
 
-report = ph.verify_aircraft_noise_system(
+report = metrology.verify_aircraft_noise_system(
     directional={4000.0: {30: 0.4, 60: 0.9, 90: 1.9, 120: 2.4, 150: 2.4}},
     frequency_response={1000.0: 1.2},
 )
@@ -141,10 +143,10 @@ mucho más allá del límite de 50 dB del método aproximado.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import aircraft
 
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # tercios 50 Hz–10 kHz
-att = ph.sae_band_attenuation(freqs, path_length=7620.0,
+att = aircraft.sae_band_attenuation(freqs, path_length=7620.0,
                               temperature=25.0, relative_humidity=70.0)
 att.plot()   # banda frente a tono puro medio de banda (requiere matplotlib)
 ```
@@ -190,13 +192,13 @@ linealmente en potencia (Ec. 4-3) y log-linealmente en distancia oblicua
 (Ec. 4-4).
 
 ```python
-import phonometry as ph
+from phonometry import aircraft
 
 powers = [12000.0, 20000.0]
 distances = [200.0, 400.0, 1000.0, 2000.0, 6300.0, 10000.0]
 levels = [[98.5, 92.0, 83.6, 76.8, 63.9, 56.8],
           [107.2, 100.9, 92.7, 86.0, 72.9, 65.6]]
-ph.npd_curve(powers, distances, levels, power=20000.0).plot()
+aircraft.npd_curve(powers, distances, levels, power=20000.0).plot()
 ```
 
 Es el motor NPD que sustenta el método.
@@ -265,12 +267,12 @@ través (ψ = 90°) y directamente detrás (ψ = 180°).
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import aircraft
 
 az = np.linspace(90.0, 270.0, 361)              # semicírculo trasero
 psi = np.where(az <= 180.0, az, 360.0 - az)     # ΔSOR es simétrico izquierda/derecha
-jet = [ph.start_of_roll_directivity(p, 300.0, "jet") for p in psi]
-prop = [ph.start_of_roll_directivity(p, 300.0, "turboprop") for p in psi]
+jet = [aircraft.start_of_roll_directivity(p, 300.0, "jet") for p in psi]
+prop = [aircraft.start_of_roll_directivity(p, 300.0, "turboprop") for p in psi]
 
 ax = plt.subplot(projection="polar")
 ax.set_theta_zero_location("N")                 # morro arriba, acimut horario
@@ -286,7 +288,7 @@ plt.show()
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import aircraft
 
 powers = [8000.0, 12000.0]; distances = [60.0, 240.0, 960.0, 3840.0]
 sel = [[98.0, 86.0, 74.0, 62.0], [104.0, 92.0, 80.0, 68.0]]
@@ -294,7 +296,7 @@ lmax = [[94.0, 82.0, 70.0, 58.0], [100.0, 88.0, 76.0, 64.0]]
 xs = np.linspace(0.0, 18000.0, 40)
 path = np.column_stack([xs, np.zeros_like(xs), np.clip((xs-1500)*0.11, 0, 2500),
                         np.where(xs < 3000, 12000.0, 10000.0), np.full_like(xs, 82.3)])
-ph.noise_contour(path, powers, distances, sel, lmax,
+aircraft.noise_contour(path, powers, distances, sel, lmax,
                  x=np.linspace(-2500, 20000, 60), y=np.linspace(-6000, 6000, 48)).plot()
 ```
 

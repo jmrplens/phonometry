@@ -34,10 +34,10 @@ fijar la prominencia determinante ni un `KI` (el ajuste es 0 dB cuando ningún
 evento cualifica).
 
 ```python
-import phonometry as ph
+from phonometry import environmental
 
 # Tres impulsos candidatos: (tasa de crecimiento dB/s, diferencia de nivel dB).
-result = ph.impulse_prominence([1200.0, 300.0, 60.0], [32.0, 18.0, 11.0])
+result = environmental.impulse_prominence([1200.0, 300.0, 60.0], [32.0, 18.0, 11.0])
 print(result.per_impulse.round(2))  # [12.25  9.94  7.42]
 print(round(result.prominence, 2))  # 12.25  (el impulso determinante)
 print(round(result.adjustment, 2))  # 13.05  dB
@@ -46,10 +46,10 @@ print(round(result.adjustment, 2))  # 13.05  dB
 Un solo impulso se evalúa directamente con `predicted_prominence`:
 
 ```python
-import phonometry as ph
+from phonometry import environmental
 
 # P = 3*lg(1000) + 2*lg(30) = 9 + 2.95 = 11.95.
-print(round(ph.predicted_prominence(1000.0, 30.0), 4))  # 11.9542
+print(round(environmental.predicted_prominence(1000.0, 30.0), 4))  # 11.9542
 ```
 
 ## 2. Ajuste al LAeq (cláusula 8)
@@ -62,10 +62,10 @@ K_I = 1{,}8\,(P - 5)\ \text{dB} \quad (P > 5), \qquad K_I = 0 \quad (P \le 5).
 $$
 
 ```python
-import phonometry as ph
+from phonometry import environmental
 
-print(float(ph.impulse_adjustment(10.0)))  # 9.0 dB
-print(float(ph.impulse_adjustment(5.0)))   # 0.0 dB (en el umbral)
+print(float(environmental.impulse_adjustment(10.0)))  # 9.0 dB
+print(float(environmental.impulse_adjustment(5.0)))   # 0.0 dB (en el umbral)
 ```
 
 El ajuste se aplica al `LAeq,30min` del evento con la prominencia más alta. El
@@ -78,10 +78,10 @@ L_{Ar,T} = 10\,\lg\!\left(\frac{1}{T}\sum_N \Delta t_N\,
 $$
 
 ```python
-import phonometry as ph
+from phonometry import environmental
 
 # Dos periodos de 30 min: uno impulsivo (KI = 7.6 dB), otro tranquilo.
-print(round(ph.rating_level([72.0, 66.0], [7.6, 0.0], [30.0, 30.0], 60.0), 2))
+print(round(environmental.rating_level([72.0, 66.0], [7.6, 0.0], [30.0, 30.0], 60.0), 2))
 # 76.78 dB
 ```
 
@@ -95,16 +95,16 @@ print(round(ph.rating_level([72.0, 66.0], [7.6, 0.0], [30.0, 30.0], 60.0), 2))
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import environmental
 
 # Una línea para la curva de ajuste con los impulsos marcados:
-ph.impulse_prominence([1200.0, 300.0, 60.0], [32.0, 18.0, 11.0]).plot()
+environmental.impulse_prominence([1200.0, 300.0, 60.0], [32.0, 18.0, 11.0]).plot()
 plt.show()
 
 # A mano, el panel izquierdo — P frente a la tasa de crecimiento para tres LD:
 orate = np.logspace(1, 4, 200)
 for ld in (5.0, 15.0, 30.0):
-    plt.plot(orate, ph.predicted_prominence(orate, np.full_like(orate, ld)),
+    plt.plot(orate, environmental.predicted_prominence(orate, np.full_like(orate, ld)),
              label=f"LD = {ld:g} dB")
 plt.xscale("log"); plt.legend(); plt.show()
 ```

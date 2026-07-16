@@ -36,7 +36,7 @@ band (blue). The area under N'(z) is the total loudness.*
 
 ```python
 import numpy as np
-from phonometry import loudness_zwicker, loudness_zwicker_from_spectrum
+from phonometry import psychoacoustics
 
 # A raw recording plus its calibration so the guide runs standalone
 fs = 48000
@@ -45,15 +45,15 @@ sens = 1.0                                                # calibration_factor t
 levels_28 = np.full(28, 60.0)                             # 28 one-third-octave band levels (dB)
 
 # From a raw recording: calibration_factor scales digital units to Pa
-res = loudness_zwicker(x, fs, field="free", calibration_factor=sens)
+res = psychoacoustics.loudness_zwicker(x, fs, field="free", calibration_factor=sens)
 print(f"N = {res.loudness:.1f} sone  ({res.loudness_level:.0f} phon)")   # 13.1 sone (77 phon)
 
 # Time-varying signals: percentile loudness N5 is the reporting standard
-res = loudness_zwicker(x, fs)          # stationary=False (default)
+res = psychoacoustics.loudness_zwicker(x, fs)          # stationary=False (default)
 print(f"{res.n5:.1f} {res.n10:.1f} {res.loudness:.1f}")   # 13.1 13.1 13.1 — N5, N10, Nmax
 
 # From 28 one-third-octave band levels (25 Hz .. 12.5 kHz)
-res = loudness_zwicker_from_spectrum(levels_28, field="diffuse")
+res = psychoacoustics.loudness_zwicker_from_spectrum(levels_28, field="diffuse")
 
 res.plot()   # N'(z) over the Bark scale — the specific-loudness pattern (needs matplotlib)
 ```
@@ -63,6 +63,12 @@ res.plot()   # N'(z) over the Bark scale — the specific-loudness pattern (need
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+levels_28 = np.full(28, 60.0)                             # 28 one-third-octave band levels (dB)
+# From 28 one-third-octave band levels (25 Hz .. 12.5 kHz)
+res = psychoacoustics.loudness_zwicker_from_spectrum(levels_28, field="diffuse")
 
 # One line — the specific-loudness pattern N'(z) straight from the result:
 res.plot()
@@ -70,8 +76,8 @@ plt.show()
 
 # Or reproduce the figure by hand — two patterns of equal band level (60 dB),
 # energy spread over many critical bands vs concentrated in the 1 kHz band:
-narrow = loudness_zwicker_from_spectrum(np.r_[np.full(16, -60.0), 60.0, np.full(11, -60.0)])
-broad = loudness_zwicker_from_spectrum(np.full(28, 60.0))
+narrow = psychoacoustics.loudness_zwicker_from_spectrum(np.r_[np.full(16, -60.0), 60.0, np.full(11, -60.0)])
+broad = psychoacoustics.loudness_zwicker_from_spectrum(np.full(28, 60.0))
 z = np.arange(1, narrow.specific.size + 1) * 0.1          # Bark axis
 fig, ax = plt.subplots()
 for r, color, label in [
@@ -118,10 +124,10 @@ is the exact inverse (Formula 2), and `hearing_threshold()` returns the
 threshold-of-hearing column:
 
 ```python
-from phonometry import equal_loudness_contour, loudness_level
+from phonometry import psychoacoustics
 
-freqs, spl = equal_loudness_contour(40.0)   # the classic 40-phon contour
-phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
+freqs, spl = psychoacoustics.equal_loudness_contour(40.0)   # the classic 40-phon contour
+phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%">
@@ -228,14 +234,11 @@ models binaural summation explicitly.
 
 ```python
 import numpy as np
-from phonometry import (
-    loudness_moore_glasberg,
-    loudness_moore_glasberg_from_spectrum,
-)
+from phonometry import psychoacoustics
 
 # The definitional anchor: one 1 kHz sinusoidal component at 40 dB SPL,
 # free field, binaural -> 1 sone / 40 phon by construction of the sone.
-res = loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="free")
+res = psychoacoustics.loudness_moore_glasberg_from_spectrum([(1000.0, 40.0)], field="free")
 print(f"N = {res.loudness:.3f} sone  ({res.loudness_level:.1f} phon)")   # 1.000 sone (40.0 phon)
 
 # From a calibrated recording: the narrowband (FFT) line spectrum is formed
@@ -243,7 +246,7 @@ print(f"N = {res.loudness:.3f} sone  ({res.loudness_level:.1f} phon)")   # 1.000
 # method (ISO 532-2 clauses 5.2/5.4).
 fs = 48000
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
-res = loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
+res = psychoacoustics.loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
 
 res.plot()   # specific loudness N'(i) over the ERB-number (Cam) scale
 ```
@@ -253,6 +256,15 @@ res.plot()   # specific loudness N'(i) over the ERB-number (Cam) scale
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+# From a calibrated recording: the narrowband (FFT) line spectrum is formed
+# (power-preserving normalization) and fed to the exact sinusoidal-component
+# method (ISO 532-2 clauses 5.2/5.4).
+fs = 48000
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
+res = psychoacoustics.loudness_moore_glasberg(x, fs, field="free", presentation="binaural")
 
 # One line — the specific-loudness pattern N'(i) straight from the result:
 res.plot()
@@ -294,13 +306,13 @@ predicts the loudness of sounds up to about 5 s.
 
 ```python
 import numpy as np
-from phonometry import loudness_moore_glasberg_time
+from phonometry import psychoacoustics
 
 fs = 32000
 t = np.arange(int(1.3 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
-res = loudness_moore_glasberg_time(x, fs, field="free")
+res = psychoacoustics.loudness_moore_glasberg_time(x, fs, field="free")
 print(f"N_max = {res.n_max:.3f} sone  ({res.loudness_level_max:.0f} phon)")   # 1.000 sone (40 phon)
 print(f"long-term loudness exceeded 5% of the time: {res.percentiles[5.0]:.3f} sone")   # 0.999 sone
 
@@ -314,6 +326,13 @@ res.plot()   # short-term S'(t) and long-term S''(t) loudness vs time
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 32000
+t = np.arange(int(1.3 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+res = psychoacoustics.loudness_moore_glasberg_time(x, fs, field="free")
 
 # The result carries both traces on a 1 ms time axis:
 res.plot()
@@ -358,13 +377,13 @@ documented in the module docstring).
 
 ```python
 import numpy as np
-from phonometry import loudness_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
-res = loudness_ecma(x, fs, field="free")
+res = psychoacoustics.loudness_ecma(x, fs, field="free")
 print(f"N = {res.loudness:.3f} sone_HMS")   # 0.984 sone_HMS
 print(res.specific_loudness.shape)          # (53,) average specific loudness N'(z)
 
@@ -378,6 +397,13 @@ res.plot()   # average specific loudness N'(z) + time-dependent N(l) at 187.5 Hz
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(int(1.2 * fs)) / fs
+x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
+res = psychoacoustics.loudness_ecma(x, fs, field="free")
 
 # The result carries the average specific loudness over the 53 Bark_HMS bands:
 res.plot()

@@ -44,11 +44,11 @@ accelerometer — passes straight into `Az(t)` and corrupts the positive respons
 peaks of the dose. Subtract the mean (or high-pass) before processing.
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
 # The transmissibility peaks near the ~5 Hz spinal resonance.
-print(round(abs(ph.seat_to_spine_transfer([2.0])[0]), 2))  # 1.06
-print(round(abs(ph.seat_to_spine_transfer([5.0])[0]), 2))  # 1.54
+print(round(abs(vibration.seat_to_spine_transfer([2.0])[0]), 2))  # 1.06
+print(round(abs(vibration.seat_to_spine_transfer([5.0])[0]), 2))  # 1.54
 ```
 
 ## 2. Acceleration dose (clause 5.3)
@@ -65,10 +65,10 @@ A daily dose scales the measured dose to the daily exposure time `td` over the
 measurement time `tm` (Formula 4): `Dzd = Dz * (td/tm)**(1/6)`.
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
 # Five 40 m/s2 response peaks in a day (the Annex C worked example).
-print(round(ph.dose_from_peaks([40.0] * 5), 2))  # 55.97  m/s2
+print(round(vibration.dose_from_peaks([40.0] * 5), 2))  # 55.97  m/s2
 ```
 
 ## 3. Injury risk (Annex C)
@@ -91,29 +91,29 @@ $$
 $$
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
 # Annex C worked example: 5 x 40 m/s2/day, 82 kg male, age 20 for 20 years,
 # 120 days/year.
-dz = ph.dose_from_peaks([40.0] * 5)
-sd = ph.compression_dose(dz)                     # 1.62 MPa
-r = ph.injury_risk(sd, start_age=20, years=20, days_per_year=120)
+dz = vibration.dose_from_peaks([40.0] * 5)
+sd = vibration.compression_dose(dz)                     # 1.62 MPa
+r = vibration.injury_risk(sd, start_age=20, years=20, days_per_year=120)
 print(round(r, 2))                               # 1.22
-print(round(100 * ph.injury_probability(r)))     # 37  % risk of injury
+print(round(100 * vibration.injury_probability(r)))     # 37  % risk of injury
 ```
 
 From a measured time history the whole chain is one call:
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 # A synthetic 10 s seat record at 256 Hz with five 60 m/s2 shocks (stand-in
 # for a measured az(t)).
 fs = 256.0
 az = np.zeros(2560)
 az[256::512] = 60.0
-result = ph.multiple_shock_assessment(
+result = vibration.multiple_shock_assessment(
     az, fs, start_age=20, years=20, days_per_year=120, sex="male",
 )
 print(round(result.acceleration_dose, 2))  # 20.94  m/s2
@@ -129,11 +129,11 @@ print(round(result.probability, 2))        # 0.03
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import vibration
 
 # Left: the seat-to-spine transfer function magnitude.
 f = np.logspace(np.log10(0.5), np.log10(80.0), 400)
-plt.plot(f, np.abs(ph.seat_to_spine_transfer(f)))
+plt.plot(f, np.abs(vibration.seat_to_spine_transfer(f)))
 plt.xscale("log"); plt.show()
 
 # Right: the injury-probability curve with this assessment's R marked
@@ -141,7 +141,7 @@ plt.xscale("log"); plt.show()
 fs = 256.0
 az = np.zeros(2560)
 az[256::512] = 60.0
-ph.multiple_shock_assessment(
+vibration.multiple_shock_assessment(
     az, fs, start_age=20, years=20, days_per_year=120,
 ).plot()
 plt.show()

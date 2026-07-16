@@ -33,7 +33,7 @@ $$
 
 ```python
 import numpy as np
-from phonometry import sound_intensity
+from phonometry import emission
 
 fs = 48000
 rng = np.random.default_rng(0)
@@ -43,7 +43,7 @@ rng = np.random.default_rng(0)
 p1 = 0.02 * rng.standard_normal(fs)
 p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 retardada una muestra
 
-res = sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
+res = emission.sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
                       limits=[100, 2500])
 print(res.total_intensity_level, res.total_direction)      # LI [dB], ±1
 print(res.frequency, res.intensity_level)                  # por banda
@@ -65,6 +65,18 @@ medición de intensidad.*
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+fs = 48000
+rng = np.random.default_rng(0)
+# Las presiones de los dos micrófonos de la sonda en Pa, p1 el más cercano a la fuente.
+#   En una medición real son tus dos grabaciones de sonda calibradas;
+#   sintetizadas aquí (p2 = p1 retardada una muestra) para que la guía funcione.
+p1 = 0.02 * rng.standard_normal(fs)
+p2 = np.concatenate(([0.0], p1[:-1]))   # p2 = p1 retardada una muestra
+res = emission.sound_intensity(p1, p2, fs, spacing=0.012, fraction=3,
+                      limits=[100, 2500])
 
 # res es el IntensityResult calculado en el ejemplo anterior.
 # En una línea — Lp frente a LI por banda, con el índice presión-intensidad en un eje gemelo:
@@ -121,15 +133,15 @@ capacidad dinámica están disponibles directamente:
 
 ```python
 import numpy as np
-from phonometry import field_indicators, dynamic_capability_index
+from phonometry import emission
 
 # Mediciones por posición sobre la superficie de medición de ISO 9614-1
 pressure_levels = np.array([74.1, 73.8, 74.5, 73.2])       # Lp por posición (dB)
 normal_intensity = np.array([1.2e-5, 1.0e-5, 1.4e-5, 0.9e-5])  # In con signo por posición (W/m²)
 
-fi = field_indicators(pressure_levels, normal_intensity)
+fi = emission.field_indicators(pressure_levels, normal_intensity)
 print(round(fi.f2, 2), round(fi.f3, 2), round(fi.f4, 3))   # 3.41 3.41 0.197
-ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
+ld = emission.dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
 print(ld, ld > fi.f2)                                      # 8.0 True (criterio 1)
 ```
 

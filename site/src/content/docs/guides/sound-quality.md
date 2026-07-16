@@ -56,15 +56,15 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import sharpness_din
+from phonometry import psychoacoustics
 
 # A raw recording plus its calibration so the guide runs standalone
 fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)   # any recording (digital units)
 sens = 1.0                                                # calibration_factor to pascals
 
-s = sharpness_din(x, fs, calibration_factor=sens)      # acum
-s_aures = sharpness_din(x, fs, method="aures")          # Annex B variant
+s = psychoacoustics.sharpness_din(x, fs, calibration_factor=sens)      # acum
+s_aures = psychoacoustics.sharpness_din(x, fs, method="aures")          # Annex B variant
 ```
 
 CI verifies the Table A.2 target values (0.38 acum at 250 Hz up to
@@ -81,13 +81,13 @@ tone is ≈ 1 tu_HMS; the result also tracks the tonal frequency f_ton per band.
 
 ```python
 import numpy as np
-from phonometry import tonality_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(1.2 * fs)) / fs
 x = np.sqrt(2) * 2e-5 * 10 ** (40 / 20) * np.sin(2 * np.pi * 1000 * t)
 
-res = tonality_ecma(x, fs, field="free")
+res = psychoacoustics.tonality_ecma(x, fs, field="free")
 peak = int(np.argmax(res.specific_tonality))
 print(f"T = {res.tonality:.3f} tu_HMS")                    # 1.000 tu_HMS
 print(f"f_ton = {res.tonal_frequencies[peak]:.0f} Hz")     # 999 Hz
@@ -124,14 +124,14 @@ c_R (Formula 104) used **without** reverse-fitting to the target.
 
 ```python
 import numpy as np
-from phonometry import roughness_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
 x = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
 x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # overall 60 dB SPL
 
-res = roughness_ecma(x, fs, field="free")
+res = psychoacoustics.roughness_ecma(x, fs, field="free")
 print(f"R = {res.roughness:.4f} asper")   # 0.9999 asper (reference: 1 asper)
 
 res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
@@ -145,7 +145,7 @@ res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-from phonometry import tonality_ecma, roughness_ecma
+from phonometry import psychoacoustics
 
 fs = 48000
 t = np.arange(int(2.0 * fs)) / fs
@@ -158,8 +158,8 @@ rough = (1.0 + np.cos(2 * np.pi * 70 * t)) * np.sin(2 * np.pi * 1000 * t)
 rough *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(rough**2))
 
 scores = {
-    "Pure tone": (tonality_ecma(tone, fs).tonality, roughness_ecma(tone, fs).roughness),
-    "70 Hz AM tone": (tonality_ecma(rough, fs).tonality, roughness_ecma(rough, fs).roughness),
+    "Pure tone": (psychoacoustics.tonality_ecma(tone, fs).tonality, psychoacoustics.roughness_ecma(tone, fs).roughness),
+    "70 Hz AM tone": (psychoacoustics.tonality_ecma(rough, fs).tonality, psychoacoustics.roughness_ecma(rough, fs).roughness),
 }
 labels = list(scores)
 tonal = [scores[k][0] for k in labels]

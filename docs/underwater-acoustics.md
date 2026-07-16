@@ -26,11 +26,11 @@ squared pressure over the record (Formulae 3–4); the peak level is the
 zero-to-peak value.
 
 ```python
-import phonometry as ph
+from phonometry import underwater
 
-spl = ph.sound_pressure_level(pressure)        # dB re 1 µPa
-sel = ph.sound_exposure_level(pressure, fs)     # dB re 1 µPa²·s
-pk = ph.peak_sound_pressure_level(pressure)     # dB re 1 µPa
+spl = underwater.sound_pressure_level(pressure)        # dB re 1 µPa
+sel = underwater.sound_exposure_level(pressure, fs)     # dB re 1 µPa²·s
+pk = underwater.peak_sound_pressure_level(pressure)     # dB re 1 µPa
 ```
 
 To re-reference a level between the underwater (1 µPa) and airborne (20 µPa)
@@ -65,10 +65,10 @@ broadside* value and must be quoted with its source depth.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_source_level_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_source_level.svg" alt="Ship radiated noise level and equivalent monopole source level versus frequency, with the Lloyd's-mirror surface correction on a twin axis showing its low-frequency divergence and its approach to −3 dB at high frequency" width="82%"></picture>
 
 ```python
-import phonometry as ph
+from phonometry import underwater
 
-lrn = ph.radiated_noise_level(2e-6, 100.0)   # p_rms = 2 µPa, r = 100 m
-res = ph.monopole_source_level(lrn, 200.0, draught=6.0)
+lrn = underwater.radiated_noise_level(2e-6, 100.0)   # p_rms = 2 µPa, r = 100 m
+res = underwater.monopole_source_level(lrn, 200.0, draught=6.0)
 print(res.source_level, res.surface_correction, res.source_depth)
 res.plot()   # RNL, Ls and ΔL vs frequency (needs matplotlib)
 ```
@@ -82,13 +82,13 @@ expanded uncertainty (5 dB ≤100 Hz, 3 dB 125 Hz–16 kHz, 4 dB >16 kHz).
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 freqs = np.array([20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315,
                   400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150,
                   4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000.0])
 rnl = 175.0 - 12.0 * np.log10(freqs / 20.0)
-res = ph.monopole_source_level(rnl, freqs, draught=6.0)
+res = underwater.monopole_source_level(rnl, freqs, draught=6.0)
 res.plot()
 ```
 
@@ -108,11 +108,11 @@ $$
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pile_driving_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pile_driving.svg" alt="A percussive pile-driving strike pressure waveform with its peak marked, and below it the cumulative sound exposure level growing as SEL_ss plus ten times the logarithm of the number of strikes" width="82%"></picture>
 
 ```python
-import phonometry as ph
+from phonometry import underwater
 
-sel_ss = ph.single_strike_sel(strike_pressure, fs)   # dB re 1 µPa²·s
-sel_cum = ph.cumulative_sel_identical(sel_ss, 2000)   # 2000 strikes
-res = ph.pile_strike_metrics(strike_pressure, fs)
+sel_ss = underwater.single_strike_sel(strike_pressure, fs)   # dB re 1 µPa²·s
+sel_cum = underwater.cumulative_sel_identical(sel_ss, 2000)   # 2000 strikes
+res = underwater.pile_strike_metrics(strike_pressure, fs)
 print(res.single_strike_sel, res.peak_spl, res.pulse_duration)
 res.plot()   # waveform + cumulative energy (needs matplotlib)
 ```
@@ -126,13 +126,13 @@ level, the SPL/Leq and the 90 %-energy pulse duration for one recorded strike;
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 fs = 48000
 t = np.arange(int(0.3 * fs)) / fs
 envelope = np.where(t < 0.01, t / 0.01, np.exp(-(t - 0.01) / 0.04))
 pressure = 8000.0 * envelope * np.sin(2 * np.pi * 180.0 * t)
-res = ph.pile_strike_metrics(pressure, fs)
+res = underwater.pile_strike_metrics(pressure, fs)
 res.plot()
 ```
 

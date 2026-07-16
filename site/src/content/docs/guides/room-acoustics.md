@@ -60,27 +60,27 @@ hardware favours a two-level signal.
 ```python
 import numpy as np
 from scipy.signal import fftconvolve
-from phonometry import sweep_signal, impulse_response, mls_signal, mls_impulse_response
+from phonometry import room
 
 fs = 48000
 # A 3 s, 20 Hz - 20 kHz sweep is a good broadband room excitation
 # sweep: excitation you play through the loudspeaker
-sweep = sweep_signal(fs, 20.0, 20000.0, 3.0)
+sweep = room.sweep_signal(fs, 20.0, 20000.0, 3.0)
 
 # Deconvolve the recorded response back to the impulse response
 system = np.zeros(fs); system[100] = 1.0; system[2000] = 0.4   # direct + reflection
 # recorded: mic capture of the played sweep (here simulated by convolution with a synthetic room)
 recorded = fftconvolve(sweep, system)
-ir = impulse_response(recorded, sweep, fs, method="spectral")
+ir = room.impulse_response(recorded, sweep, fs, method="spectral")
 print(int(np.argmax(np.abs(ir))))                    # 100: direct sound recovered
 
 # Farina inverse-filter variant (needs the sweep band)
-ir_f = impulse_response(recorded, sweep, fs, method="farina", f_range=(20.0, 20000.0))
+ir_f = room.impulse_response(recorded, sweep, fs, method="farina", f_range=(20.0, 20000.0))
 
 # Periodic MLS: excite with >= 2 periods, average, cross-correlate
-mls = mls_signal(16)                                 # length 2**16 - 1 = 65535
+mls = room.mls_signal(16)                                 # length 2**16 - 1 = 65535
 rec = fftconvolve(np.tile(mls, 2), system)[: 2 * mls.size]
-ir_m = mls_impulse_response(rec, mls)
+ir_m = room.mls_impulse_response(rec, mls)
 print(int(np.argmax(np.abs(ir_m))))                  # 100
 ```
 
@@ -100,11 +100,12 @@ sequence — visible as the near-constant magnitude on the right.
 <summary>Show the code for this figure</summary>
 
 ```python
-from phonometry import sweep_signal, mls_signal, plot_excitation
+from phonometry import room
+from phonometry import plot_excitation
 
 fs = 48000
-sweep = sweep_signal(fs, 50.0, 20000.0, 1.0)   # ESS excitation
-mls = mls_signal(12).astype(float)             # length 2**12 - 1
+sweep = room.sweep_signal(fs, 50.0, 20000.0, 1.0)   # ESS excitation
+mls = room.mls_signal(12).astype(float)             # length 2**12 - 1
 
 # One-liner: waveform + spectrogram (sweep), sequence + flat spectrum (MLS)
 plot_excitation(sweep, fs, kind="sweep")
@@ -141,14 +142,14 @@ whose slope becomes the reverberation time in §2.
 ```python
 import numpy as np
 from scipy.signal import fftconvolve
-from phonometry import sweep_signal, impulse_response
+from phonometry import room
 
 fs = 48000
-sweep = sweep_signal(fs, 20.0, 20000.0, 1.5)
+sweep = room.sweep_signal(fs, 20.0, 20000.0, 1.5)
 # A synthetic room: direct sound + two reflections + a decaying diffuse tail
 system = np.zeros(int(0.7 * fs))
 system[80], system[1400], system[3100] = 1.0, 0.5, 0.32
-ir = impulse_response(fftconvolve(sweep, system), sweep, fs, length=system.size)
+ir = room.impulse_response(fftconvolve(sweep, system), sweep, fs, length=system.size)
 
 # One-liner: waveform + log-magnitude / Schroeder decay
 ir.plot()
@@ -275,7 +276,7 @@ extrapolated to a 60 dB decay.*
 
 ```python
 import numpy as np
-from phonometry import decay_curve, room_parameters
+from phonometry import room
 
 fs = 48000
 # Single-slope decay with T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
@@ -283,21 +284,21 @@ t = np.arange(fs) / fs
 # ir: measured room impulse response; a synthetic single-slope decay stands in here.
 ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
 
-time, level = decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
+time, level = room.decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
 
-res = room_parameters(ir, fs, limits=None)           # broadband single band
+res = room.room_parameters(ir, fs, limits=None)           # broadband single band
 print(round(float(res.t30[0]), 2))                   # 1.0  s
 print(round(float(res.c80[0]), 2))                   # 3.05 dB
 print(round(float(res.d50[0]), 3))                   # 0.499
 print(round(float(res.ts[0]) * 1000, 0))             # 72 ms
 
 # Octave bands 125 Hz - 4 kHz (ISO 3382-1 default); use fraction=3 for thirds
-octaves = room_parameters(ir, fs)
+octaves = room.room_parameters(ir, fs)
 print(octaves.frequency)                             # ~[126, 251, 501, 1000, 1995, 3981]
 print(octaves.t30_valid)                             # per-band dynamic-range flags
 
 octaves.plot()               # per-band EDT/T20/T30 + C50/C80 bars (needs matplotlib)
-decay_curve(ir, fs).plot()   # Schroeder decay with EDT/T20/T30 fit overlays
+room.decay_curve(ir, fs).plot()   # Schroeder decay with EDT/T20/T30 fit overlays
 ```
 
 <details>
@@ -305,9 +306,18 @@ decay_curve(ir, fs).plot()   # Schroeder decay with EDT/T20/T30 fit overlays
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+fs = 48000
+# Single-slope decay with T = 1 s: p^2 = exp(-13.8155 t)  (60/ln(10)/13.8155 = 1)
+t = np.arange(fs) / fs
+# ir: measured room impulse response; a synthetic single-slope decay stands in here.
+ir = np.concatenate([np.zeros(10), np.exp(-13.8155 * t / 2.0)])
+time, level = room.decay_curve(ir, fs)                    # Schroeder curve (0 dB at t = 0)
 
 # One line — Schroeder decay with the EDT/T20/T30 straight-line fits:
-decay = decay_curve(ir, fs)          # a DecayCurve (still unpacks as time, level)
+decay = room.decay_curve(ir, fs)          # a DecayCurve (still unpacks as time, level)
 decay.plot()
 plt.show()
 
@@ -428,13 +438,13 @@ below ~5 m; poor ones leave speech distracting past 10 m.
 
 ```python
 import numpy as np
-from phonometry import open_plan_metrics
+from phonometry import room
 
 r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])       # distances from the talker (m)
 lp = 65.0 - 7.0 * np.log2(r)                          # A-weighted speech level (dB)
 sti = 0.70 - 0.03 * r                                 # STI per position
 
-m = open_plan_metrics(r, lp, sti)
+m = room.open_plan_metrics(r, lp, sti)
 print(round(m.d2s, 1), round(m.lp_as_4m, 1))         # 7.0 dB, 51.0 dB
 print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 ```
@@ -444,6 +454,13 @@ print(round(m.rd, 1), round(m.rp, 1))                # 6.7 m, 16.7 m
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])       # distances from the talker (m)
+lp = 65.0 - 7.0 * np.log2(r)                          # A-weighted speech level (dB)
+sti = 0.70 - 0.03 * r                                 # STI per position
+m = room.open_plan_metrics(r, lp, sti)
 
 # One line: the D2,S regression rebuilt from the result fields, with the
 # rD / rP crossings marked (the figure above adds the measured points and
@@ -454,6 +471,13 @@ plt.show()
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import room
+
+r = np.array([2.0, 4.0, 6.0, 8.0, 12.0, 16.0])       # distances from the talker (m)
+lp = 65.0 - 7.0 * np.log2(r)                          # A-weighted speech level (dB)
+sti = 0.70 - 0.03 * r                                 # STI per position
+m = room.open_plan_metrics(r, lp, sti)
 
 # Spatial decay: measured Lp,A,S vs distance on a log axis, the D2,S
 # regression rebuilt from the result fields, and STI with the rD / rP
@@ -526,17 +550,17 @@ $\alpha_s$ may exceed 1.0 and is never clamped (ISO 354 Clause 3.7).
 
 ```python
 import numpy as np
-from phonometry import absorption_area, absorption_coefficient
+from phonometry import materials
 
 # Third-octave reverberation times of a 200 m^3 room, empty (T1) and with a
 # 10.8 m^2 absorber sample installed (T2).
 t1 = np.array([5.0, 4.0, 3.0])
 t2 = np.array([3.0, 2.5, 2.0])
 
-a_empty = absorption_area(t1, volume=200.0, temperature=20.0)
+a_empty = materials.absorption_area(t1, volume=200.0, temperature=20.0)
 print(np.round(a_empty, 2))                    # [ 6.45  8.06 10.75] m^2
 
-alpha = absorption_coefficient(t1, t2, volume=200.0, sample_area=10.8,
+alpha = materials.absorption_coefficient(t1, t2, volume=200.0, sample_area=10.8,
                                temperature1=20.0)
 print(np.round(alpha, 3))                      # [0.398 0.448 0.498]
 ```

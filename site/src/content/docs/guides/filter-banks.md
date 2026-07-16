@@ -440,7 +440,7 @@ grades:
   practical consequence: measuring bands far below a dominant tone, the
   reading floors out at the leakage skirt about 70 dB down, and a steeper
   architecture (or higher order) is the only way to push that floor lower.
-- **For the budget**, the class is the filter's contribution to the
+- **For the uncertainty budget**, the class is the filter's contribution to the
   measurement uncertainty: a class 1 bank adds up to a few tenths of a dB to
   a band level, comparable to a class 1 sound level meter's other tolerance
   terms, which is why instrument-grade chains specify the class of every

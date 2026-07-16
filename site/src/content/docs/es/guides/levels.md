@@ -113,8 +113,8 @@ que las normativas siempre indican la ponderación temporal.
 
 ### Leer Leq frente a los percentiles
 
-$L_{eq}$ y la familia $L_N$ responden preguntas distintas sobre la misma
-historia de nivel. $L_{eq}$ es una media energética, así que los momentos más
+$L_{eq}$ y la familia $L_N$ responden preguntas distintas sobre el mismo
+historial de niveles. $L_{eq}$ es una media energética, así que los momentos más
 ruidosos la dominan: un solo segundo a 100 dB eleva el $L_{eq}$ de una hora
 por lo demás estable a 60 dB hasta unos 66 dB, mientras que $L_{90}$,
 $L_{50}$ e incluso $L_{10}$ apenas se mueven (un evento de un segundo ocupa
@@ -128,7 +128,7 @@ robustos frente a eventos raros por construcción. En la práctica:
   intermitente, que es como lo usa el Anexo I de ISO 1996-2.
 - **$L_{10}$** sigue los picos de los eventos; la separación
   $L_{10} - L_{90}$ es un indicador rápido de intermitencia.
-- **$L_{eq} - L_{50}$** mide lo "picuda" que es la historia: en ruido
+- **$L_{eq} - L_{50}$** mide lo "picudo" que es el historial: en ruido
   estacionario casi coinciden, y cuanto más fluctúa el nivel más sube
   $L_{eq}$ por encima de la mediana (para una distribución gaussiana de
   niveles con desviación típica $\sigma$ dB,

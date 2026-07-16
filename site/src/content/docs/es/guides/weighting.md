@@ -339,8 +339,8 @@ en los extremos de banda donde solo se aplica un límite unilateral.*
 - Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
   and calculation. *The Journal of the Acoustical Society of America*, 5(2),
   82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
-  Las mediciones originales de igual sonoridad cuya isófona de 40 fonios
-  invierte la curva A (sección 1).
+  Las mediciones originales de igual sonoridad; la curva A invierte su
+  isófona de 40 fonios (sección 1).
 - International Organization for Standardization. (2023). *Acoustics —
   Normal equal-loudness-level contours* (ISO 226:2023).
   [Catálogo iso.org](https://www.iso.org/standard/83117.html).

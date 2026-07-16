@@ -457,7 +457,7 @@ calificaciones abstractas:
   por debajo de un tono dominante, la lectura toca fondo en la falda de fuga
   unos 70 dB por debajo, y una arquitectura más abrupta (o mayor orden) es la
   única forma de empujar ese suelo más abajo.
-- **Para el presupuesto**, la clase es la contribución del filtro a la
+- **Para el presupuesto de incertidumbre**, la clase es la contribución del filtro a la
   incertidumbre de la medición: un banco de clase 1 añade hasta unas décimas
   de dB a un nivel de banda, comparable a los demás términos de tolerancia de
   un sonómetro de clase 1, y por eso las cadenas con calidad de instrumento

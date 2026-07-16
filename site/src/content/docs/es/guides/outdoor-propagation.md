@@ -296,6 +296,33 @@ print(round(directivity_omega(1.5, 1.5, 200.0), 2))                  # 3.01 dB
 print(round(meteorological_correction(200.0, 1.5, 1.5, 2.0), 2))     # 1.7 dB
 ```
 
+### La fuente imagen tras el efecto del suelo
+
+Cada entrada de la Tabla 3 es un ajuste de ingeniería a una única imagen
+física: el receptor oye dos copias de la fuente, el rayo directo $r_1$ y una
+reflexión que llega exactamente como si la radiara una **fuente imagen**
+reflejada bajo el plano del suelo. Las dos copias interfieren según la
+diferencia de camino $\delta = r_2 - r_1$ (aproximadamente $2 h_s h_r / d$
+para un recorrido rasante en campo lejano): en fase suman hasta $+6$ dB; con
+$\delta = \lambda/2$ sobre un plano rígido se cancelan en un mínimo abrupto.
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection_es.svg" alt="Una fuente puntual a altura hs y un micrófono receptor a altura hr sobre un plano de suelo rayado; un rayo directo r1 los conecta y un rayo reflejado rebota en el punto especular con ángulos rasantes iguales; la reflexión se despliega como un rayo recto discontinuo r2 desde una fuente imagen fantasma reflejada bajo el suelo, y las anotaciones dan la diferencia de camino delta = r2 menos r1, la fase de interferencia 2 pi delta entre lambda más la fase de la reflexión, la ganancia en fase de hasta +6 dB y el mínimo profundo a media longitud de onda sobre suelo duro" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection_es_dark.svg" alt="Una fuente puntual a altura hs y un micrófono receptor a altura hr sobre un plano de suelo rayado; un rayo directo r1 los conecta y un rayo reflejado rebota en el punto especular con ángulos rasantes iguales; la reflexión se despliega como un rayo recto discontinuo r2 desde una fuente imagen fantasma reflejada bajo el suelo, y las anotaciones dan la diferencia de camino delta = r2 menos r1, la fase de interferencia 2 pi delta entre lambda más la fase de la reflexión, la ganancia en fase de hasta +6 dB y el mínimo profundo a media longitud de onda sobre suelo duro" style="width:92%">
+
+Sobre suelo acústicamente duro ($G = 0$) el coeficiente de reflexión se
+mantiene próximo a $+1$ en todas las octavas, la suma a longitudes de onda
+largas es totalmente constructiva y el método general devuelve, como debe,
+$A_{gr} = -3$ dB en cada banda. El suelo poroso vuelve el coeficiente de
+reflexión complejo y dependiente del ángulo (para una fuente puntual en
+incidencia casi rasante, el coeficiente de onda esférica de la solución de
+Chien-Soroka, con un término de onda de suelo que ninguna imagen de onda plana
+captura): parte de la reflexión invierte su fase y el mínimo destructivo cae
+en las octavas de 250 a 1000 Hz. Ese mínimo es precisamente lo que
+parametrizan las funciones $a'$ a $d'$ de altura y distancia de la Tabla 3,
+con $G$ mezclando los comportamientos duro y poroso. La misma geometría de dos
+rayos reaparece en la atenuación lateral aeronáutica y en cualquier modelo
+exterior basado en rayos; Salomons y Attenborough & Van Renterghem desarrollan
+la teoría completa que el ajuste de ingeniería comprime.
+
 Un $A_{gr}$ negativo (una ganancia neta) es pura interferencia: la onda
 reflejada en el suelo se suma a la directa. Abajo, una fuente de 400 Hz a
 1,5 m sobre suelo rígido construye el patrón de lóbulos de esa interferencia,
@@ -351,13 +378,152 @@ desglose apilado por bandas con el total superpuesto (la figura anterior).
 | `lateral` | bool | — | `False` | `True` ⇒ difracción por borde vertical (Ec. (13)) |
 | `line_of_sight_clear` | bool | — | `False` | `True` ⇒ la línea de visión pasa por encima del borde superior: la diferencia de camino toma signo negativo y Kmet = 1 (texto tras la Ec. (16)) |
 
-La exactitud declarada del método es de $\pm 1$ a $\pm 3$ dB para ruido de banda
-ancha hasta 1000 m (Tabla 5). Consulta la página de [Teoría](/phonometry/es/reference/theory/environment-transport/)
+## 3. Alcance, hipótesis y errores habituales
+
+### Qué significan las "condiciones favorables a la propagación"
+
+La ISO 9613-2 no predice el nivel con la meteorología del momento. Todas sus
+ecuaciones suponen condiciones **favorables a la propagación** (apartado 5):
+viento soplando de la fuente al receptor (dentro de unos 45° de la línea que
+los une, a entre 1 y 5 m/s medidos de 3 a 11 m sobre el suelo), o la inversión
+térmica moderada junto al suelo de una noche despejada y en calma, que curva
+los rayos sonoros hacia abajo de la misma manera. La refracción descendente
+cierra las zonas de sombra acústica que formarían las atmósferas neutras o con
+viento en contra, de modo que el $L_{fT}(DW)$ predicho está cerca del nivel
+más alto que la geometría puede producir: a lo largo de un año el nivel real
+suele ser menor y rara vez es apreciablemente mayor. La elección es
+deliberada. Las quejas llegan en las noches tranquilas en las que una planta
+lejana se oye con claridad, no en las tardes ventosas en las que desaparece, y
+un método que predice el caso audible protege la evaluación. El promedio a
+largo plazo se recupera restando $C_{met}$ (Ec. (21)/(22)), cuyo $C_0$
+codifica con qué frecuencia el viento favorece de verdad el camino (unos
+$+3$ dB cuando la mitad del tiempo es favorable; valores por encima de 2 dB ya
+son excepcionales, Notas 20/22). La exactitud declarada de $\pm 1$ a $\pm 3$ dB
+(Tabla 5) vale en condiciones favorables, para fuentes de banda ancha y hasta
+1000 m; más allá la norma no declara exactitud alguna.
+
+### Errores habituales con barreras, más allá de la animación
+
+El término de apantallamiento es el más fácil de sobrevalorar; cuatro detalles
+deciden si una barrera real entrega su $D_z$ calculado:
+
+* **Los topes son físicos, no editoriales.** $D_z$ se limita a 20 dB en
+  difracción simple y 25 dB en difracción doble por alta que sea la pared,
+  porque la turbulencia atmosférica dispersa sonido hacia la zona de sombra y
+  fija un techo que la altura extra no puede recomprar. Una pérdida por
+  inserción por encima de unos 20 dB es territorio de encapsulamientos, no de
+  pantallas. La propia Ec. (14) es una curva de ingeniería suavizada en la
+  tradición del ábaco de pantallas de Maekawa, un ajuste empírico sobre tres
+  décadas del número de Fresnel $N = 2z/\lambda$.
+* **$K_{met}$ erosiona en silencio las barreras lejanas.** El factor
+  meteorológico (Ec. (18)) descuenta el apantallamiento porque los mismos
+  rayos curvados hacia abajo que hacen favorables las condiciones también
+  pasan por encima del borde superior. A menos de 100 m de distancia
+  fuente-receptor $K_{met} \approx 1$ (Nota 17), pero en un camino largo con
+  poca diferencia de recorrido puede quitar varios decibelios a una barrera
+  que parecía generosa en el alzado.
+* **La difracción doble es una bonificación modesta.** Un obstáculo grueso
+  (dos bordes separados $e$) eleva $C_3$ de 1 hacia 3 (Ec. (15)), que vale
+  como mucho unos $10 \lg 3 \approx 4{,}8$ dB extra más el tope superior de
+  25 dB. Un edificio modelado como doble borde solo gana esa bonificación si
+  ambos bordes son realmente continuos y la cubierta entre ellos está
+  cerrada.
+* **El efecto del suelo se gasta, no se conserva.** Para una barrera de borde
+  superior la norma pliega el efecto del suelo del camino apantallado dentro
+  de la difracción: $A_{bar} = D_z - A_{gr}$ (Ec. (12), Nota 13). Sobre suelo
+  poroso que ya aportaba de 5 a 10 dB de $A_{gr}$ en las bandas medias, la
+  ganancia *neta* de construir la barrera es proporcionalmente menor que su
+  $D_z$ nominal; los dos efectos no se apilan.
+
+Además, un obstáculo tiene que calificar como barrera (apartado 7.4):
+densidad superficial de al menos 10 kg/m², superficie cerrada sin huecos
+grandes y una extensión horizontal normal al camino mayor que la longitud de
+onda. Una valla de lamas o un contenedor corto apantallan bastante menos de lo
+que promete la Ec. (14).
+
+### ¿ISO 9613-2 o CNOSSOS-EU?
+
+Dos marcos dominan la predicción del ruido exterior en Europa, y responden a
+preguntas distintas:
+
+* **ISO 9613-2** es un método general de *atenuación* de ingeniería: dada la
+  potencia sonora por octavas de cualquier fuente que puedas descomponer en
+  fuentes puntuales, devuelve el nivel en el receptor en condiciones
+  favorables. La emisión queda fuera de su alcance; la potencia sonora viene
+  de la medición (la familia ISO 3740) o del fabricante del equipo. Es el
+  caballo de batalla de las predicciones de plantas industriales y de impacto
+  ambiental evaluadas con la ISO 1996-2.
+* **CNOSSOS-EU** (métodos comunes de evaluación del ruido en Europa) es el
+  marco común obligatorio para los mapas estratégicos de ruido de la
+  Directiva 2002/49/CE sobre ruido ambiental, adoptado como su anexo II por la
+  [Directiva (UE) 2015/996 de la Comisión](https://eur-lex.europa.eu/eli/dir/2015/996/oj/eng).
+  Agrupa modelos de *emisión* para fuentes viarias, ferroviarias e
+  industriales (y delega las aeronaves en el Doc 29 de la CEAC) con su propia
+  parte de propagación derivada del método francés NMPB 2008, produciendo los
+  indicadores $L_{den}$/$L_{night}$ que la Directiva exige.
+
+Las partes de propagación discrepan por diseño, no por accidente. CNOSSOS-EU
+evalúa cada camino dos veces, una con atmósfera homogénea y otra en
+condiciones favorables (refracción descendente), y las combina a largo plazo
+con la probabilidad local de condiciones favorables por dirección de camino;
+la ISO 9613-2 calcula solo el caso favorable y resta un $C_{met}$ escalar. El
+efecto del suelo en CNOSSOS-EU se construye con un factor de suelo promediado
+sobre un plano medio ajustado, con expresiones que cambian entre las dos
+atmósferas, mientras que la ISO 9613-2 usa la Tabla 3 fija de tres regiones.
+La difracción también sigue una formulación distinta que acopla el efecto del
+suelo a cada lado del borde. Ejecuta ambos sobre la misma geometría y los
+resultados por octavas pueden diferir varios decibelios, cada uno
+internamente consistente. La regla práctica: los mapas estratégicos END y
+todo lo que deba ser comparable entre Estados miembros usan CNOSSOS-EU; un
+permiso de planta, una predicción de conformidad frente a una potencia sonora
+medida o el trabajo bajo normativas que citan la ISO 9613 usan este módulo.
+(ISO publicó una revisión de la ISO 9613-2 en 2024; esta biblioteca implementa
+la edición de 1996, la que la mayoría de reglamentos nacionales y la
+literatura de validación siguen citando.)
+
+Consulta la página de [Teoría](/phonometry/es/reference/theory/environment-transport/)
 para la derivación completa, la [guía de Acústica de salas](/phonometry/es/guides/room-acoustics/)
 para cómo $\alpha$ alimenta la ISO 354, y la
 [guía de exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/)
 para la exposición ocupacional (ISO 9612) que consume niveles
 ponderados A.
+
+## Referencias
+
+- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
+  Academic Publishers. ISBN 978-1-4020-0390-5.
+  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
+  La teoría ondulatoria (ecuación parabólica, fast field program, refracción
+  y turbulencia) que cuantifica lo que aproximan la hipótesis de condiciones
+  favorables y el factor $K_{met}$.
+- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
+  (2.ª ed.). CRC Press.
+  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
+  Los modelos de impedancia del suelo, el coeficiente de reflexión de onda
+  esférica tras el mínimo del suelo de la sección 2 y los efectos
+  meteorológicos sobre las barreras.
+- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
+  157-173.
+  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
+  El ábaco de atenuación de pantallas frente al número de Fresnel del que
+  desciende el término de difracción de la Ec. (14).
+- Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
+  assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Oficina de
+  Publicaciones de la Unión Europea.
+  [doi:10.2788/31776](https://doi.org/10.2788/31776),
+  [repositorio del JRC](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
+  El marco común de la UE contrastado con la ISO 9613-2 en la sección 3.
+- International Organization for Standardization. (1993). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 1: Calculation of
+  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
+  [Catálogo iso.org](https://www.iso.org/standard/17426.html).
+  El coeficiente de atenuación de tono puro implementado en la sección 1.
+- International Organization for Standardization. (1996). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 2: General method
+  of calculation* (ISO 9613-2:1996; en 2024 se publicó una edición revisada,
+  este módulo implementa el método de 1996).
+  [Catálogo iso.org](https://www.iso.org/standard/20649.html).
+  La cadena de atenuación implementada en la sección 2.
 
 ---
 

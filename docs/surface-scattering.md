@@ -259,11 +259,11 @@ A pair of counterexamples keeps them apart. A curved or tilted element that
 *redirects* the reflection concentrates nearly all the reflected energy into
 one strong lobe away from the specular direction: almost everything is
 non-specular, so $s$ is high, yet the beam is as collimated as a mirror's, so
-$d$ stays low. Conversely, a lightly textured surface may scatter only a small
-fraction of the energy while spreading that little bit perfectly evenly: $d$
-of the scattered field looks respectable while $s$ stays near zero. High $s$
-does not mean uniform; decent $d$ does not mean much energy was scattered at
-all.
+$d$ stays low. Conversely, a small flat panel measured at low frequency sends
+nearly all the reflected energy toward the specular direction, so $s$ stays
+near zero, yet edge diffraction spreads that reflection so broadly over the
+receiver arc that the measured $d$ comes out surprisingly high. High $s$ does
+not mean uniform; decent $d$ does not mean much energy was scattered at all.
 
 **Which one for design.** The two numbers serve different consumers:
 
@@ -461,8 +461,9 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
   Theory, design and application* (3rd ed.). CRC Press.
   ISBN 978-1-4987-4099-9.
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
-  The monograph on diffuser theory and design by the authors behind both
-  ISO 17497 methods: the scattering-versus-diffusion distinction, the
+  The reference monograph on diffuser theory and design, by the authors
+  behind the ISO 17497-2 diffusion-coefficient method: the
+  scattering-versus-diffusion distinction, the
   measurement rigs and the design guidance this page condenses.
 - International Organization for Standardization. (2004). *Acoustics —
   Sound-scattering properties of surfaces — Part 1: Measurement of the

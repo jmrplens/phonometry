@@ -425,13 +425,15 @@ time through Sabine's formula, an energy average with no phase left in it.
 Because the diffuse field finds more ways into an absorber than the single
 normal-incidence wave (oblique waves travel a longer path inside the layer),
 $\alpha_s$ usually comes out higher. For a locally reacting surface the two
-are linked by Paris' angular average,
+are linked by Paris' angular average, which defines the statistical
+absorption coefficient
 
 $$
 \alpha_{st} = \int_0^{\pi/2} \alpha(\theta)\,\sin 2\theta\,\mathrm{d}\theta,
 $$
 
-which weights the oblique angles most heavily; evaluating it needs the
+an integral that weights the oblique angles most heavily; evaluating it
+needs the
 angle-dependent $\alpha(\theta)$ from the measured surface impedance, not just
 the normal-incidence coefficient itself.
 
@@ -554,7 +556,7 @@ print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[
 - International Organization for Standardization. (1998). *Acoustics —
   Determination of sound absorption coefficient and impedance in impedance
   tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adopted in
-  Europe as BS EN ISO 10534-2:2001, the edition implemented here; since
+  Europe as EN ISO 10534-2:2001, the edition implemented here; since
   revised as [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
   [iso.org catalogue](https://www.iso.org/standard/22851.html).
   The two-microphone transfer-function method and its plane-wave

@@ -148,7 +148,7 @@ it; the list grows as guides gain their References sections.
   ISBN 978-1-4987-4099-9.
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
   The monograph on absorber and diffuser measurement and design, by the
-  authors behind the ISO 17497 methods.
+  authors behind the ISO 17497-2 diffusion-coefficient method.
   Cited by [Acoustic Materials](materials.md) and
   [Surface Scattering, Diffusion and In-situ Absorption](surface-scattering.md).
 - International Organization for Standardization. (2003). *Acoustics —
@@ -159,7 +159,7 @@ it; the list grows as guides gain their References sections.
 - International Organization for Standardization. (1998). *Acoustics —
   Determination of sound absorption coefficient and impedance in impedance
   tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adopted in
-  Europe as BS EN ISO 10534-2:2001; since revised as
+  Europe as EN ISO 10534-2:2001; since revised as
   [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
   [iso.org catalogue](https://www.iso.org/standard/22851.html).
   The two-microphone transfer-function method and its plane-wave limits.

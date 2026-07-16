@@ -265,11 +265,12 @@ Un par de contraejemplos los mantiene separados. Un elemento curvo o inclinado
 que *redirige* la reflexión concentra casi toda la energía reflejada en un
 lóbulo intenso alejado de la dirección especular: casi todo es no especular,
 así que $s$ es alto, pero el haz queda tan colimado como el de un espejo, así
-que $d$ se mantiene bajo. A la inversa, una superficie con textura ligera
-puede dispersar solo una fracción pequeña de la energía repartiendo ese poco
-de manera perfectamente uniforme: el $d$ del campo dispersado parece
-respetable mientras $s$ se queda cerca de cero. Un $s$ alto no significa
-uniforme; un $d$ decente no significa que se dispersara mucha energía.
+que $d$ se mantiene bajo. A la inversa, un panel plano pequeño medido a baja
+frecuencia envía casi toda la energía reflejada hacia la dirección especular,
+así que $s$ se queda cerca de cero, y sin embargo la difracción de borde
+reparte esa reflexión tan ampliamente sobre el arco de receptores que el $d$
+medido sale sorprendentemente alto. Un $s$ alto no significa uniforme; un $d$
+decente no significa que se dispersara mucha energía.
 
 **Cuál usar en diseño.** Los dos números sirven a consumidores distintos:
 
@@ -278,8 +279,8 @@ uniforme; un $d$ decente no significa que se dispersara mucha energía.
   energía continúa especularmente y cuánta se redistribuye; el $s$ de
   incidencia aleatoria por banda de cada superficie es precisamente ese
   reparto, que es lo que ISO 17497-1 se redactó para suministrar. Equivocarlo
-  aparece como predicciones erróneas de tiempo de reverberación y claridad en
-  salas poco mezcladoras.
+  se traduce en predicciones erróneas de tiempo de reverberación y claridad
+  en salas no mezcladoras.
 - **El coeficiente de difusión califica difusores.** Cuando la tarea es
   deshacer un eco, un flutter o una reflexión focalizada, lo que importa es
   que la energía reflejada se reparta en ángulo, y $d$ mide exactamente eso.
@@ -473,8 +474,9 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metros)
   Theory, design and application* (3.ª ed.). CRC Press.
   ISBN 978-1-4987-4099-9.
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
-  La monografía sobre teoría y diseño de difusores, de los autores tras los
-  dos métodos ISO 17497: la distinción dispersión-difusión, los montajes de
+  La monografía de referencia sobre teoría y diseño de difusores, de los
+  autores tras el método del coeficiente de difusión de ISO 17497-2: la
+  distinción dispersión-difusión, los montajes de
   medida y la guía de diseño que esta página condensa.
 - International Organization for Standardization. (2004). *Acoustics —
   Sound-scattering properties of surfaces — Part 1: Measurement of the

@@ -420,9 +420,9 @@ el portamuestras, mucho antes del procesado de señal. Los fallos recurrentes:
   dispersión entre probetas es varianza del producto que merece declararse,
   no ruido de medida que esconder.
 
-## ¿Tubo o cámara reverberante?
+## ¿Tubo o sala reverberante?
 
-El tubo y la cámara reverberante entregan ambos un número llamado "coeficiente
+El tubo y la sala reverberante entregan ambos un número llamado "coeficiente
 de absorción", y los dos se confunden de forma rutinaria. Son magnitudes
 físicas distintas, medidas bajo campos sonoros distintos, y no coinciden, a
 veces ni de lejos.
@@ -436,20 +436,20 @@ caída de la sala mediante la fórmula de Sabine, un promedio de energía sin
 fase alguna. Como el campo difuso encuentra más caminos hacia el interior del
 absorbente que la única onda a incidencia normal (las ondas oblicuas recorren
 más camino dentro de la capa), $\alpha_s$ suele salir más alto. Para una
-superficie de reacción local ambos se conectan mediante el promedio angular de
-Paris,
+superficie de reacción local ambos se conectan mediante el promedio angular
+de Paris, que define el coeficiente de absorción estadístico
 
 $$
 \alpha_{st} = \int_0^{\pi/2} \alpha(\theta)\,\sin 2\theta\,\mathrm{d}\theta,
 $$
 
-que pondera sobre todo los ángulos oblicuos; evaluarlo exige el
+una integral que pondera sobre todo los ángulos oblicuos; evaluarla exige el
 $\alpha(\theta)$ dependiente del ángulo a partir de la impedancia superficial
 medida, no solo el propio coeficiente a incidencia normal.
 
 **Por qué los valores de ISO 354 superan 1.** Un cociente de energía absorbida
 sobre incidente no puede superar la unidad y, sin embargo, los informes de
-cámara reverberante con $\alpha_s = 1{,}05$ a $1{,}20$ para absorbentes
+sala reverberante con $\alpha_s = 1{,}05$ a $1{,}20$ para absorbentes
 porosos gruesos son rutinarios y correctos según el método. La fórmula de
 Sabine convierte el cambio del tiempo de caída en un área de absorción
 equivalente $A$, y $\alpha_s = A/S$ divide por el área *geométrica* de la
@@ -462,7 +462,7 @@ ambos. La valoración de ISO 11654 simplemente trunca: los coeficientes
 prácticos por encima de $1{,}00$ se fijan en $1{,}00$ (sección 1), y el
 software de predicción recorta a uno antes de sumar áreas de absorción.
 
-**Cuál usar.** Responden a preguntas distintas. El valor de cámara
+**Cuál usar.** Responden a preguntas distintas. El valor de sala
 reverberante es el que alimenta la predicción en campo difuso: las
 estimaciones de reverberación de Sabine, las áreas de absorción equivalentes
 de [EN 12354-6](/phonometry/es/guides/enclosed-space-absorption/) y la
@@ -476,7 +476,7 @@ Allard y Atalla, con la resistividad al flujo de la sección 2 como primera
 entrada; el modelo ajustado predice después la capa a cualquier ángulo,
 espesor o respaldo. Lo que el número del tubo *no* es, es un sustituto directo
 de $\alpha_s$: alimentar coeficientes a incidencia normal en un presupuesto de
-Sabine o de EN 12354-6 infrapredice sistemáticamente la absorción instalada.
+Sabine o de EN 12354-6 subestima sistemáticamente la absorción instalada.
 
 ## 4. Incertidumbre de medida de la absorción (ISO 12999-2)
 
@@ -560,16 +560,16 @@ print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
   La medida y el diseño de absorbentes en la práctica: los métodos de tubo y
   de sala lado a lado, los montajes y la discusión del efecto de borde tras
-  la sección de tubo o cámara reverberante.
+  la sección de tubo o sala reverberante.
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [Catálogo iso.org](https://www.iso.org/standard/34545.html).
-  El método de cámara reverberante que produce los espectros de $\alpha_s$
+  El método de sala reverberante que produce los espectros de $\alpha_s$
   valorados por ISO 11654, incluidos los montajes de probeta del Anexo B.
 - International Organization for Standardization. (1998). *Acoustics —
   Determination of sound absorption coefficient and impedance in impedance
   tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adoptada en
-  Europa como BS EN ISO 10534-2:2001, la edición implementada aquí; revisada
+  Europa como EN ISO 10534-2:2001, la edición implementada aquí; revisada
   después como [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
   [Catálogo iso.org](https://www.iso.org/standard/22851.html).
   El método de la función de transferencia con dos micrófonos y sus límites

@@ -151,18 +151,18 @@ que las guías incorporan sus secciones de Referencias.
   ISBN 978-1-4987-4099-9.
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
   La monografía sobre medida y diseño de absorbentes y difusores, de los
-  autores tras los métodos ISO 17497.
+  autores tras el método del coeficiente de difusión de ISO 17497-2.
   Citado por [Materiales acústicos](/phonometry/es/guides/materials/) y
   [Dispersión superficial, difusión y absorción in situ](/phonometry/es/guides/surface-scattering/).
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [Catálogo iso.org](https://www.iso.org/standard/34545.html).
-  El método de absorción en cámara reverberante y sus montajes de probeta.
+  El método de absorción en sala reverberante y sus montajes de probeta.
   Citado por [Materiales acústicos](/phonometry/es/guides/materials/).
 - International Organization for Standardization. (1998). *Acoustics —
   Determination of sound absorption coefficient and impedance in impedance
   tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adoptada en
-  Europa como BS EN ISO 10534-2:2001; revisada después como
+  Europa como EN ISO 10534-2:2001; revisada después como
   [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
   [Catálogo iso.org](https://www.iso.org/standard/22851.html).
   El método de la función de transferencia con dos micrófonos y sus límites

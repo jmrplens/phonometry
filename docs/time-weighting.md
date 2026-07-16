@@ -89,6 +89,30 @@ y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{otherwise}\end{cases}
 $$
 
+### Choosing F, S or I
+
+- **Fast** is the default of nearly every modern method: percentile levels,
+  impulsive-event detection, community noise, the general "level vs time"
+  plot. Its 125 ms constant is of the same order as the ear's own loudness
+  integration time, so an LAF trace roughly tracks what a listener notices.
+- **Slow** suits quasi-stationary sources and any procedure that needs a
+  steady readout: it averages away the flicker of a fluctuating source at
+  the price of missing short events (a 100 ms burst peaks about 7.5 dB lower
+  on S than on F). Some legacy methods prescribe it outright, most famously
+  aircraft-certification levels, which are built from Slow-weighted samples.
+- **Impulse** is legacy, and deprecated for rating. It was a 1960s attempt
+  to make a meter needle track the perceived loudness of impacts; it does
+  not (the 35 ms attack still misses very short impulses, and the 1.5 s hold
+  exaggerates duration). It entered the international standards with
+  IEC 60651 and was dropped from the requirements of its successor
+  IEC 61672-1, whose first edition (2002) explains why: I-weighted levels
+  are not suitable for rating impulsive sounds. It survives in meters only
+  for continuity with older national requirements. Modern practice rates
+  impulsiveness with
+  $L_{Aeq}$ plus an adjustment (ISO 1996-1 Table A.1, or the onset analysis
+  of [Impulsive-sound prominence](impulse-prominence.md)) and assesses
+  hearing-damage risk with $L_{Cpeak}$, never with I-weighted levels.
+
 ## 3. `time_weighting()` / `TimeWeighting` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
@@ -199,6 +223,14 @@ Without numba a pure-Python fallback produces identical results, just slower.
 See [Integrated & Statistical Levels](levels.md) for Leq/LN metrics built on
 these envelopes, and [Why phonometry](why-phonometry.md) for the IEC
 61672-1 tone-burst verification.
+
+## References
+
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
+  The exponential-detector definition, the F and S time constants and the
+  Table 4 toneburst responses the ballistics are verified against in CI.
 
 ---
 

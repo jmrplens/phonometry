@@ -51,6 +51,27 @@ applied to all channels in a single SciPy call, so 8 channels cost far less
 than 8 separate runs. Convention: **channels first**, like most DSP code
 (`soundfile` returns `(n, ch)`: transpose with `x.T`).
 
+## Per-channel semantics
+
+Multichannel processing is strictly per channel: nothing is ever mixed,
+summed or averaged across the channel axis. Three consequences worth
+spelling out:
+
+- **Combining channels is your decision.** Levels come back one per
+  channel. If you need an array-average level (for instance the
+  position-averaged levels of the room-acoustics standards), combine
+  energies yourself: `10 * np.log10(np.mean(10 ** (spl / 10), axis=0))`,
+  never the arithmetic mean of the dB values (see
+  [Levels](/phonometry/guides/levels/) for why).
+- **One `calibration_factor` means one sensitivity.** The scalar factor
+  multiplies every channel, which is correct only if all channels share the
+  same sensitivity. For an array of microphones with individual
+  calibrations, scale the rows first, `x * factors[:, None]`, and leave
+  `calibration_factor` at 1.
+- **Stateful classes keep one state per channel.** In block processing the
+  state array matches the channel count and a change of channel count
+  resets it; see [Block Processing](/phonometry/guides/block-processing/).
+
 ## Performance: Vectorization and caching
 
 The `OctaveFilterBank` class is highly optimized for real-time and batch

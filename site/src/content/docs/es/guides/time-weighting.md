@@ -91,6 +91,36 @@ y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0{,}035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1{,}5)} & \text{en otro caso}\end{cases}
 $$
 
+### Elegir F, S o I
+
+- **Fast** es el valor por defecto de casi todos los métodos modernos:
+  niveles percentiles, detección de eventos impulsivos, ruido comunitario,
+  la gráfica general de "nivel frente a tiempo". Su constante de 125 ms es
+  del mismo orden que el tiempo de integración de sonoridad del propio oído,
+  así que una traza LAF sigue a grandes rasgos lo que un oyente percibe.
+- **Slow** conviene a fuentes cuasi estacionarias y a cualquier
+  procedimiento que necesite una lectura estable: promedia el parpadeo de
+  una fuente fluctuante al precio de perder los eventos cortos (una ráfaga
+  de 100 ms alcanza un pico unos 7,5 dB más bajo en S que en F). Algunos
+  métodos heredados la prescriben directamente, el más famoso, los niveles de
+  certificación de aeronaves, construidos sobre muestras con ponderación
+  Slow.
+- **Impulse** es herencia histórica, y está desaconsejada para calificar.
+  Fue un intento de los años 60 de que la aguja del medidor siguiera la
+  sonoridad percibida de los impactos; no lo consigue (el ataque de 35 ms
+  sigue perdiendo los impulsos muy cortos y la retención de 1,5 s exagera la
+  duración). Entró en las normas internacionales con IEC 60651 y quedó fuera
+  de los requisitos de su sucesora IEC 61672-1, cuya primera edición (2002)
+  explica el porqué: los niveles ponderados I no son adecuados para
+  calificar sonidos impulsivos. Sobrevive en los medidores solo por
+  continuidad con requisitos nacionales antiguos. La práctica moderna
+  califica la impulsividad
+  con $L_{Aeq}$ más un ajuste (Tabla A.1 de ISO 1996-1, o el análisis de
+  ataques de
+  [Prominencia de sonidos impulsivos](/phonometry/es/guides/impulse-prominence/))
+  y evalúa el riesgo de daño auditivo con $L_{Cpeak}$, nunca con niveles
+  ponderados I.
+
 ## 3. Parámetros de `time_weighting()` / `TimeWeighting`
 
 | Parámetro | Tipo | Unidades | Rango / por defecto | Notas |
@@ -205,6 +235,15 @@ Consulta [Niveles integrados y estadísticos](/phonometry/es/guides/levels/)
 para las métricas Leq/LN construidas sobre estas envolventes, y
 [Por qué phonometry](/phonometry/es/reference/why-phonometry/) para la
 verificación con ráfagas de tono de IEC 61672-1.
+
+## Referencias
+
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/5708).
+  La definición del detector exponencial, las constantes de tiempo F y S y
+  las respuestas a ráfagas de la Tabla 4 contra las que se verifica la
+  balística en CI.
 
 ---
 

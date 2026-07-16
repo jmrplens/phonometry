@@ -61,6 +61,58 @@ through the low-mids. Both are normalized to exactly 0 dB at 1 kHz. Z is the
 absence of weighting. The full pole/zero derivation is in the
 [Theory](theory-signal-analysis.md) page.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting.svg" alt="Equal-loudness contours per ISO 226 on the left, with the 40-phon contour highlighted; on the right the A-weighting curve overlaid on the inverted 40-phon contour, showing that A is the flipped contour frozen into a realizable filter" width="92%"></picture>
+
+### A short history: A, B, C and Z
+
+The chain runs from Fletcher and Munson's 1933 equal-loudness measurements
+to the first American sound level meter standard (1936), which gave meters
+switchable responses so the reading could approximate loudness at different
+levels: **A** from the 40-phon contour for quiet sounds, **B** from the
+~70-phon contour for moderate ones, and a flat response for loud ones (the
+**C** curve proper, mirroring the flatter ~100-phon contour, arrived with
+the 1944 revision). Switching curves by level died in practice (readings jumped at the
+switch points, and field measurements became incomparable), but A survived
+alone: decades of hearing-damage and community-annoyance data had been
+collected with it, and it correlates with both about as well as far more
+elaborate metrics. IEC 61672-1 (first edition 2002) finished the cleanup:
+B was dropped, A and C were kept with tightened tolerances, and **Z** was
+introduced to replace the vaguely specified "linear" of older meters, which
+varied by manufacturer.
+
+### When C − A matters
+
+Because A discards bass and C keeps it, the difference
+$L_{Ceq} - L_{Aeq}$ is a one-number indicator of low-frequency content:
+
+- **Below about 10 dB**: an ordinary broadband spectrum; the A-weighted
+  level rates it fairly.
+- **Around 15 to 20 dB or more**: the energy is concentrated at low
+  frequencies (HVAC rumble, compressors, music bass through a wall). The
+  A-weighted level then understates the problem; look at the octave
+  spectrum, and below 20 Hz switch to the G curve.
+- **Hearing-protector selection**: the HML method of ISO 4869-2 keys on
+  exactly this C-minus-A difference to decide how much low-frequency
+  attenuation a protector must provide (the simpler SNR method sidesteps it
+  by working from the C-weighted level directly).
+
+```python
+import numpy as np
+from phonometry import leq, weighting_filter
+
+# A 50 Hz rumble under a light broadband hiss: quiet in A, loud in C.
+fs = 48000
+t = np.arange(10 * fs) / fs
+rng = np.random.default_rng(1)
+x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
+
+la = leq(weighting_filter(x, fs, curve="A"))
+lc = leq(weighting_filter(x, fs, curve="C"))
+print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
+# LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
+# C - A above 20 dB: the A-weighted number alone would hide the rumble.
+```
+
 ## 2. Basic usage
 
 ```python
@@ -307,6 +359,24 @@ plt.show()
 ```
 
 </details>
+
+## References
+
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  The original equal-loudness measurements whose 40-phon contour the A-curve
+  inverts (section 1).
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [iso.org catalogue](https://www.iso.org/standard/83117.html).
+  The modern successors of the Fletcher-Munson curves, drawn in the diagram
+  of section 1.
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
+  The normative A/C/Z definitions, the analytic Annex E curves and the
+  Table 3 acceptance limits verified in section 7.
 
 ---
 

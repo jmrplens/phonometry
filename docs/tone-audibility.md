@@ -75,6 +75,18 @@ audibility** is their energy mean (Formula 20); a spectrum in which no tone is
 found contributes `ΔLj = −10 dB` (Formula 21). `assess_tones` applies the whole
 chain to a spectrum's tones and reports the decisive tone.
 
+**How the decisive band is selected.** The method does not scan a fixed set of
+bands: each detected *tone* defines its own critical band (§1), the audibility
+is evaluated tone by tone, and — after Step 3 has merged audible same-band
+tones into `FG` groups rated at their most audible member (§5) — the decisive
+audibility is simply the largest `ΔL` left standing (Step 4). The "decisive
+band" is therefore the critical band centred on whichever tone or group wins,
+and it is free to move from spectrum to spectrum as the source runs through
+its operating states; the energy mean of Formula 20 then lets the loudest
+(most audible) spectra dominate the reported value, which is deliberate — a
+tone that is clearly audible part of the time is not excused by intervals in
+which it disappears.
+
 ```python
 import phonometry as ph
 
@@ -99,6 +111,20 @@ from the spectrum lines, and `mean_audibility_uncertainty` propagates it to
 the energy-averaged audibility of a spectrum set. The Annex E example
 reproduces the printed Table E.2 column (for the 137.3 Hz tone,
 `U = 2.80 dB` against the printed 2,79).
+
+**How to read `U`.** A 90 % *bilateral* interval leaves 5 % in each tail, so
+`ΔL − U` is a one-sided 95 % statement: when the whole interval `ΔL ± U` sits
+above `0 dB` the tone is audible with at least 95 % confidence, and when the
+interval straddles zero the verdict is not statistically secured — the remedy
+is more spectra, since `U` shrinks with the number averaged (which is exactly
+why clause 6 makes reporting it mandatory below 12 spectra). The same logic
+guards the downstream penalty: **ISO 1996-2:2017 Annex J** converts the mean
+audibility into the tonal adjustment `Kt` in 1 dB steps (Table J.1: `Kt = 0`
+for `ΔL ≤ 0`, up to `Kt = 6 dB` for `ΔL > 12 dB`, or the coarser
+0/3/6 dB ladder of its note), so an uncertainty that spans a table boundary
+propagates straight into a 1–3 dB question mark on the rating level. Quoting
+`ΔL ± U` alongside `Kt` shows whether the adjustment is robust or hinges on
+one borderline spectrum.
 
 ## 4. From the narrow-band spectrum
 
@@ -215,6 +241,22 @@ plt.tight_layout(); plt.show()
 ```
 
 </details>
+
+## References
+
+- International Organization for Standardization. (2016). *Acoustics —
+  Objective method for assessing the audibility of tones in noise —
+  Engineering method* (ISO/PAS 20065:2016).
+  [iso.org catalogue](https://www.iso.org/standard/66941.html).
+  The implemented engineering method: every formula on this page, from the
+  critical band to the mean audibility and its uncertainty.
+- International Organization for Standardization. (2017). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 2:
+  Determination of sound pressure levels* (ISO 1996-2:2017).
+  [iso.org catalogue](https://www.iso.org/standard/59766.html).
+  The environmental-noise standard this method serves: its Annex J adopts the
+  engineering method and maps the mean audibility to the tonal adjustment
+  `Kt` (Table J.1) discussed in §3.1.
 
 ---
 

@@ -62,6 +62,92 @@ it; the list grows as guides gain their References sections.
   Speech Intelligibility Index.
   Cited by [Speech Intelligibility Index](speech-intelligibility.md).
 
+## Psychoacoustics
+
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3rd ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  The psychoacoustic-annoyance model and the closed-form fluctuation strength
+  for amplitude-modulated broadband noise.
+  Cited by [Psychoacoustic annoyance](psychoacoustic-annoyance.md).
+- Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016). Modelling the
+  sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*,
+  28, 050005. [doi:10.1121/2.0000410](https://doi.org/10.1121/2.0000410).
+  The fluctuation-strength signal model and its Table 1 literature values.
+  Cited by [Psychoacoustic annoyance](psychoacoustic-annoyance.md).
+- Felix Greco, G., Merino-Martínez, R., Osses, A., & Lotinga, M. J. B. (2025).
+  *SQAT: a sound quality analysis toolbox for MATLAB* (open-source software).
+  [github.com/ggrecow/SQAT](https://github.com/ggrecow/SQAT),
+  [doi:10.5281/zenodo.7934709](https://doi.org/10.5281/zenodo.7934709).
+  The open MATLAB reference used as the numeric oracle for the
+  fluctuation-strength cross-checks.
+  Cited by [Psychoacoustic annoyance](psychoacoustic-annoyance.md).
+- Ecma International. (2024). *ECMA-418-1: Psychoacoustic metrics for ITT
+  equipment — Part 1: Prominent discrete tones* (3rd ed.).
+  [Free PDF](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf).
+  The freely downloadable tone-to-noise ratio and prominence ratio methods.
+  Cited by [Prominent Discrete Tones](tone-prominence.md).
+- Ecma International. (2025). *ECMA-74: Measurement of airborne noise emitted
+  by information technology and telecommunications equipment* (22nd ed.).
+  [Free PDF](https://ecma-international.org/wp-content/uploads/ECMA-74_22nd_edition_december_2025.pdf).
+  The freely downloadable parent emission standard whose Annex D delegates
+  tone assessment to ECMA-418-1.
+  Cited by [Prominent Discrete Tones](tone-prominence.md).
+- International Organization for Standardization. (2016). *Acoustics —
+  Objective method for assessing the audibility of tones in noise —
+  Engineering method* (ISO/PAS 20065:2016).
+  [iso.org catalogue](https://www.iso.org/standard/66941.html).
+  The engineering method for the objective audibility of tones.
+  Cited by [Objective audibility of tones](tone-audibility.md).
+
+## Hearing and hearing conservation
+
+- International Organization for Standardization. (2017). *Acoustics —
+  Statistical distribution of hearing thresholds related to age and gender*
+  (ISO 7029:2017). [iso.org catalogue](https://www.iso.org/standard/42916.html).
+  The age model of the hearing threshold and its population spread.
+  Cited by [Hearing threshold](hearing-threshold.md).
+- International Organization for Standardization. (2005). *Acoustics —
+  Reference zero for the calibration of audiometric equipment — Part 7:
+  Reference threshold of hearing under free-field and diffuse-field listening
+  conditions* (ISO 389-7:2005).
+  [iso.org catalogue](https://www.iso.org/standard/38976.html).
+  The audiometric zero as a sound pressure level.
+  Cited by [Hearing threshold](hearing-threshold.md).
+- International Organization for Standardization. (2013). *Acoustics —
+  Estimation of noise-induced hearing loss* (ISO 1999:2013).
+  [iso.org catalogue](https://www.iso.org/standard/45103.html).
+  The NIPTS model, its distribution and the HTLAN combination.
+  Cited by [Noise-induced hearing loss](noise-induced-hearing-loss.md).
+- Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to
+  steady-state broad-band noise. *The Journal of the Acoustical Society of
+  America*, 56(5), 1585–1593.
+  [doi:10.1121/1.1903482](https://doi.org/10.1121/1.1903482).
+  A field study of the noise exposure-response relations later codified in
+  ISO 1999.
+  Cited by [Noise-induced hearing loss](noise-induced-hearing-loss.md).
+- National Institute for Occupational Safety and Health. (1998). *Criteria for
+  a recommended standard: Occupational noise exposure — Revised criteria 1998*
+  (DHHS/NIOSH Publication No. 98-126).
+  [doi:10.26616/NIOSHPUB98126](https://doi.org/10.26616/NIOSHPUB98126),
+  [free PDF](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf).
+  The freely available criteria document behind the 85 dB(A) recommended
+  exposure limit and the hearing-conservation and fence discussion.
+  Cited by [Noise-induced hearing loss](noise-induced-hearing-loss.md) and
+  [Occupational noise exposure](occupational-exposure.md).
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of occupational noise exposure — Engineering method*
+  (ISO 9612:2009). [iso.org catalogue](https://www.iso.org/standard/41718.html).
+  The three measurement strategies and the Annex C uncertainty budget.
+  Cited by [Occupational noise exposure](occupational-exposure.md).
+- European Parliament and Council. (2003). *Directive 2003/10/EC on the
+  minimum health and safety requirements regarding the exposure of workers to
+  the risks arising from physical agents (noise)*. Official Journal of the
+  European Union.
+  [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng).
+  The EU exposure action and limit values for occupational noise.
+  Cited by [Occupational noise exposure](occupational-exposure.md).
+
 ## Human vibration
 
 - Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.

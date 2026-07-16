@@ -12,6 +12,8 @@ to attach the normative uncertainty every occupational-hygiene report needs. The
 `occupational_exposure` module adds the three **measurement strategies** and the
 **Annex C** uncertainty budget on top of the energy-average machinery.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612.svg" alt="Left: a worker wearing a personal sound exposure meter (IEC 61252), its microphone mounted about 0.04 m above the shoulder and at least 0.1 m from the entrance of the most-exposed ear canal, per ISO 9612 Clause 12.3. Right: the three measurement strategies drawn as timelines over an eight-hour working day — task-based (the day split into labelled tasks, at least three samples plus a duration each), job-based (five or more random samples spread over the homogeneous exposure group) and full-day (the whole shift measured at least three times) — all feeding the LEX,8h and its Annex C uncertainty, chosen by work pattern from Table B.1" width="94%"></picture>
+
 ## 1. The three measurement strategies (Clauses 9-11)
 
 The *task-based* strategy (Clause 9) splits the nominal day into tasks, takes
@@ -26,6 +28,27 @@ so a loud but short task contributes little. The *job-based* (Clause 10) and
 random samples over a homogeneous exposure group and normalise the effective-day
 duration. The daily level is the same either way; the strategies differ in how
 the **uncertainty** is built.
+
+**Choosing a strategy.** ISO 9612 Table B.1 picks the strategy from the *work
+pattern*, not from convenience, and the trade-off is coverage against effort.
+The **task-based** strategy is the recommended default when the day
+decomposes into a small number of well-defined tasks: because it measures each
+task separately, it explains *where* the dose comes from (the per-task
+breakdown above) and lets a short, loud task be sampled properly without
+dragging out the whole survey — but it needs a reliable work analysis, and its
+uncertainty grows if the task durations are themselves uncertain. The
+**job-based** strategy suits a mobile worker with an unpredictable pattern or
+a homogeneous group doing "the same job": random samples across the group
+average over the variability instead of resolving it, which is robust when the
+day cannot be cleanly cut into tasks but blind to which activity dominates.
+The **full-day** strategy — a worn dosimeter capturing the entire shift,
+repeated on several days — needs the least analysis and captures everything
+including the unexpected, at the cost of the most wearer-days and the weakest
+diagnostic value (one number per day, no breakdown, and false contributions
+like knocks on the microphone are hard to spot). As a rule: resolve the dose
+with task-based when you can, fall back to job-based for irregular work, and
+use full-day when the pattern defies description or an independent whole-shift
+check is wanted.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.svg" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" width="80%"></picture>
 
@@ -96,6 +119,23 @@ $88.2$ dB where Annex E reports $88.1$: the standard rounds the effective-day
 level to $88.4$ before the duration normalisation; the library keeps it
 unrounded.)
 
+**What dominates the budget.** Annex C combines four sources in quadrature
+(Table C.1): the **sampling** uncertainty ($u_{1a}$/$u_1$), the **duration**
+uncertainty ($u_{1b}$, task-based only), the **instrument** ($u_2$, Table C.5)
+and the **microphone position** ($u_3$, Clause C.6). The last two are small
+and roughly fixed — $u_2 = 0.7$ dB for a class 1 sound level meter, 1.5 dB for
+a class 2 meter or a personal exposimeter, and $u_3 = 1.0$ dB by default — so
+in practice the **sampling term almost always dominates**: it scales with the
+scatter of the measured levels, which in a real workplace easily reaches
+several decibels and, entered in quadrature, swamps the sub-decibel
+instrument and position terms. The practical consequence: a quadrature
+budget is set by its largest term, so tightening the instrument grade buys
+little once sampling scatter is large; the productive
+move is *more samples* (the standard error falls as $1/\sqrt{I}$ or $1/\sqrt{N}$),
+which is exactly what the Clause 9.3 / 10.4 advisories nudge you toward.
+Because peak $L_{p,Cpeak}$ carries no Annex C sampling model (Table C.5,
+Note 1), it is reported without an uncertainty, not with a zero one.
+
 When a task's samples span **3 dB or more** (Clause 9.3), or the job contribution
 $c_1 u_1$ exceeds 3.5 dB (Clause 10.4), or too few workers are covered
 (Table 1 cumulative-duration), the result sets `sampling_advisory=True` and, with
@@ -135,6 +175,30 @@ carry no per-task breakdown).
 - [Theory](theory-environment-transport.md) — the derivation of the strategy formulas and the
   Annex C budget.
 - API reference: [`hearing.occupational_exposure`](https://jmrplens.github.io/phonometry/reference/api/hearing/occupational-exposure/).
+
+## References
+
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of occupational noise exposure — Engineering method*
+  (ISO 9612:2009). [iso.org catalogue](https://www.iso.org/standard/41718.html).
+  The implemented method: the three strategies, the microphone placement of
+  Clause 12.3, the Annex C uncertainty budget and the Annex D/E/F worked
+  examples.
+- European Parliament and Council. (2003). *Directive 2003/10/EC on the
+  minimum health and safety requirements regarding the exposure of workers to
+  the risks arising from physical agents (noise)*. Official Journal of the
+  European Union.
+  [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng).
+  The EU exposure action values (80/85 dB) and limit value (87 dB) that the
+  `LEX,8h` and its upper limit are assessed against.
+- National Institute for Occupational Safety and Health. (1998). *Criteria for
+  a recommended standard: Occupational noise exposure — Revised criteria 1998*
+  (DHHS/NIOSH Publication No. 98-126).
+  [doi:10.26616/NIOSHPUB98126](https://doi.org/10.26616/NIOSHPUB98126),
+  [free PDF](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf).
+  The freely available criteria document behind the 85 dB(A) recommended
+  exposure limit and the hearing-conservation rationale for measuring the
+  daily dose.
 
 ---
 

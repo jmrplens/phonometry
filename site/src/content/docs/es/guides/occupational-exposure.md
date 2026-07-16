@@ -16,6 +16,8 @@ normativa que necesita todo informe de higiene laboral. El módulo
 presupuesto de incertidumbre del **anexo C** sobre la maquinaria del promediado
 en energía.
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612_es.svg" alt="Izquierda: un trabajador con un exposímetro sonoro personal (IEC 61252), con el micrófono montado unos 0,04 m por encima del hombro y a al menos 0,1 m de la entrada del canal auditivo del oído más expuesto, según el apartado 12.3 de la ISO 9612. Derecha: las tres estrategias de medición dibujadas como líneas de tiempo sobre una jornada de ocho horas — basada en tareas (la jornada dividida en tareas etiquetadas, al menos tres muestras y una duración por tarea), basada en la función (cinco o más muestras aleatorias repartidas sobre el grupo de exposición homogéneo) y jornada completa (todo el turno medido al menos tres veces) — que desembocan todas en el LEX,8h y su incertidumbre del anexo C, eligiendo por patrón de trabajo según la Tabla B.1" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612_es_dark.svg" alt="Izquierda: un trabajador con un exposímetro sonoro personal (IEC 61252), con el micrófono montado unos 0,04 m por encima del hombro y a al menos 0,1 m de la entrada del canal auditivo del oído más expuesto, según el apartado 12.3 de la ISO 9612. Derecha: las tres estrategias de medición dibujadas como líneas de tiempo sobre una jornada de ocho horas — basada en tareas (la jornada dividida en tareas etiquetadas, al menos tres muestras y una duración por tarea), basada en la función (cinco o más muestras aleatorias repartidas sobre el grupo de exposición homogéneo) y jornada completa (todo el turno medido al menos tres veces) — que desembocan todas en el LEX,8h y su incertidumbre del anexo C, eligiendo por patrón de trabajo según la Tabla B.1" style="width:94%">
+
 ## 1. Las tres estrategias de medición (apartados 9-11)
 
 La estrategia *basada en tareas* (apartado 9) divide la jornada nominal en
@@ -32,6 +34,28 @@ en cambio $N \ge 5$ (o tres jornadas completas) muestras aleatorias sobre un gru
 de exposición homogéneo y normalizan la duración efectiva de la jornada. El nivel
 diario es el mismo en ambos casos; las estrategias difieren en cómo se construye
 la **incertidumbre**.
+
+**Elegir estrategia.** La Tabla B.1 de la ISO 9612 elige la estrategia según el
+*patrón de trabajo*, no por conveniencia, y el compromiso es cobertura frente a
+esfuerzo. La estrategia **basada en tareas** es el valor por defecto
+recomendado cuando la jornada se descompone en un número pequeño de tareas bien
+definidas: como mide cada tarea por separado, explica *de dónde* sale la dosis
+(el desglose por tarea de más arriba) y permite muestrear bien una tarea corta
+y ruidosa sin alargar toda la campaña — pero necesita un análisis del trabajo
+fiable, y su incertidumbre crece si las duraciones de las tareas son a su vez
+inciertas. La estrategia **basada en la función** conviene al trabajador móvil
+con patrón impredecible o a un grupo homogéneo que hace «el mismo trabajo»: las
+muestras aleatorias sobre el grupo promedian la variabilidad en lugar de
+resolverla, lo que resulta robusto cuando la jornada no puede cortarse
+limpiamente en tareas, pero ciego a qué actividad domina. La estrategia de
+**jornada completa** — un dosímetro portado que captura todo el turno, repetido
+varios días — exige el mínimo análisis y lo captura todo, incluido lo
+inesperado, a costa del mayor número de días de porte y del menor valor
+diagnóstico (un número por día, sin desglose, y las contribuciones falsas, como
+golpes al micrófono, son difíciles de detectar). Como regla: resuelve la dosis
+con la estrategia por tareas cuando puedas, recurre a la basada en la función
+para trabajo irregular y usa la jornada completa cuando el patrón desafíe toda
+descripción o se quiera una comprobación independiente de todo el turno.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_es.svg" alt="Exposición por tareas del anexo D de la ISO 9612: las tres contribuciones de tarea a LEX,8h como barras, la línea del LEX,8h diario sumado en energía y la banda del límite superior unilateral al 95 % LEX,8h + U por encima" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_es_dark.svg" alt="Exposición por tareas del anexo D de la ISO 9612: las tres contribuciones de tarea a LEX,8h como barras, la línea del LEX,8h diario sumado en energía y la banda del límite superior unilateral al 95 % LEX,8h + U por encima" style="width:80%">
 
@@ -105,6 +129,25 @@ muestras. (El $L_{EX,8h}$ por función impreso es $88{,}2$ dB donde el anexo E
 declara $88{,}1$: el estándar redondea el nivel de jornada efectiva a $88{,}4$ antes
 de la normalización de la duración; la biblioteca lo mantiene sin redondear.)
 
+**Qué domina el presupuesto.** El anexo C combina cuatro fuentes en cuadratura
+(Tabla C.1): la incertidumbre de **muestreo** ($u_{1a}$/$u_1$), la de
+**duración** ($u_{1b}$, solo por tareas), la del **instrumento** ($u_2$,
+Tabla C.5) y la de la **posición del micrófono** ($u_3$, apartado C.6). Las dos
+últimas son pequeñas y aproximadamente fijas — $u_2 = 0{,}7$ dB para un
+sonómetro de clase 1, 1,5 dB para uno de clase 2 o un exposímetro personal, y
+$u_3 = 1{,}0$ dB por defecto —, así que en la práctica **casi siempre domina el
+término de muestreo**: escala con la dispersión de los niveles medidos, que en
+un puesto real alcanza con facilidad varios decibelios y, entrando en
+cuadratura, arrasa con los términos subdecibélicos de instrumento y posición.
+La consecuencia práctica: un presupuesto en cuadratura
+lo fija su término mayor, así que subir de clase de instrumento
+aporta poco una vez que la dispersión de muestreo es grande; la jugada
+productiva son *más muestras* (el error típico cae como $1/\sqrt{I}$ o
+$1/\sqrt{N}$), que es exactamente hacia donde empujan los avisos de los
+apartados 9.3 / 10.4. Como el pico $L_{p,Cpeak}$ no tiene modelo de muestreo en
+el anexo C (Tabla C.5, Nota 1), se declara sin incertidumbre, no con una
+incertidumbre nula.
+
 Cuando las muestras de una tarea abarcan **3 dB o más** (apartado 9.3), o la
 contribución por función $c_1 u_1$ supera 3,5 dB (apartado 10.4), o se cubren
 demasiado pocos trabajadores (duración acumulada de la Tabla 1), el resultado fija
@@ -146,6 +189,30 @@ otras estrategias no llevan desglose por tarea).
 - [Teoría](/phonometry/es/reference/theory/environment-transport/) — la derivación de las fórmulas de
   las estrategias y del presupuesto del anexo C.
 - Referencia de la API: [`hearing.occupational_exposure`](/phonometry/es/reference/api/hearing/occupational-exposure/).
+
+## Referencias
+
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of occupational noise exposure — Engineering method*
+  (ISO 9612:2009). [Catálogo iso.org](https://www.iso.org/standard/41718.html).
+  El método implementado: las tres estrategias, la colocación del micrófono del
+  apartado 12.3, el presupuesto de incertidumbre del anexo C y los ejemplos
+  resueltos de los anexos D/E/F.
+- European Parliament and Council. (2003). *Directive 2003/10/EC on the
+  minimum health and safety requirements regarding the exposure of workers to
+  the risks arising from physical agents (noise)*. Diario Oficial de la Unión
+  Europea.
+  [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng).
+  Los valores de exposición que dan lugar a una acción (80/85 dB) y el valor
+  límite (87 dB) frente a los que se evalúan el `LEX,8h` y su límite superior.
+- National Institute for Occupational Safety and Health. (1998). *Criteria for
+  a recommended standard: Occupational noise exposure — Revised criteria 1998*
+  (DHHS/NIOSH Publication No. 98-126).
+  [doi:10.26616/NIOSHPUB98126](https://doi.org/10.26616/NIOSHPUB98126),
+  [PDF gratuito](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf).
+  El documento de criterios de libre acceso tras el límite de exposición
+  recomendado de 85 dB(A) y la justificación de conservación auditiva para
+  medir la dosis diaria.
 
 ---
 

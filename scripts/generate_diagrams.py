@@ -720,6 +720,34 @@ _ES: dict[str, str] = {
         "Lp(1 m) = Lp(r) + 20 lg(r / 1 m)   (campo lejano, ley 1/r)",
     "Microphone (IEC 60268-4): M in mV/Pa, or LM = 20 lg(M / 1 V/Pa) dB":
         "Micrófono (IEC 60268-4): M en mV/Pa, o LM = 20 lg(M / 1 V/Pa) dB",
+    # Occupational noise exposure (ISO 9612)
+    "Occupational noise exposure measurement (ISO 9612)":
+        "Medición de la exposición al ruido en el trabajo (ISO 9612)",
+    "Worn instrument (Clause 12.3)": "Instrumento portado (apartado 12.3)",
+    "≈ 0.04 m": "≈ 0,04 m",
+    "above the shoulder": "sobre el hombro",
+    "≥ 0.1 m from the ear canal,": "≥ 0,1 m del canal auditivo,",
+    "most-exposed side": "lado del oído más expuesto",
+    "Personal sound exposure meter": "Exposímetro sonoro personal",
+    "(IEC 61252)": "(IEC 61252)",
+    "Measurement strategies (Clauses 9–11)":
+        "Estrategias de medición (apartados 9–11)",
+    "Working day": "Jornada laboral",
+    "Task-based (Clause 9)": "Basada en tareas (apartado 9)",
+    "split the day into tasks — ≥ 3 samples (│) per task, plus each duration":
+        "dividir la jornada en tareas — ≥ 3 muestras (│) y la duración por tarea",
+    "Job-based (Clause 10)": "Basada en la función (apartado 10)",
+    "N ≥ 5 random samples over the homogeneous exposure group":
+        "N ≥ 5 muestras aleatorias sobre el grupo de exposición homogéneo",
+    "Full-day (Clause 11)": "Jornada completa (apartado 11)",
+    "the whole shift, at least 3 times (5 if the days differ by > 3 dB)":
+        "toda la jornada, al menos 3 veces (5 si los días difieren en > 3 dB)",
+    "Task 1": "Tarea 1",
+    "Task 2": "Tarea 2",
+    "Task 3": "Tarea 3",
+    "day 1": "día 1",
+    "choose by work pattern (Table B.1)  →  LEX,8h + Annex C uncertainty":
+        "según el patrón de trabajo (Tabla B.1)  →  LEX,8h + U del Anexo C",
 }
 
 
@@ -3125,6 +3153,100 @@ def _d_loudspeaker_freefield(s: SVG, th: Theme) -> None:
         s.text(450, y, txt, 19 if bold else 18, col, bold=bold)
 
 
+def _d_dosimeter(s: SVG, th: Theme) -> None:
+    """ISO 9612 occupational exposure: worn-dosimeter microphone position
+    (Clause 12.3) and the three measurement strategies (Clauses 9-11)."""
+    # --- Left: worker with a shoulder-mounted personal exposimeter ---------
+    s.text(195, 84, "Worn instrument (Clause 12.3)", 21, th.fg, bold=True)
+    gy = 560.0
+    s.ground(gy, 40, 330)
+    px = 150.0
+    s.person(px, gy, 300)
+    head_y = gy - 300 + 30.0            # head-circle centre
+    sh_y = gy - 300 * 0.75              # shoulder joint (arm attachment)
+
+    # Microphone capsule ~0.04 m above the shoulder, on the most-exposed side.
+    mx = px + 46.0
+    cap_y = sh_y - 30.0
+    s.line(px + 6, sh_y - 6, mx + 12, sh_y + 6, th.muted, 2.4)  # shoulder slope
+    s.rect(mx - 5, cap_y, 10, 14, th.fg, rx=3)                  # capsule
+    s.line(mx, cap_y + 14, mx, sh_y, th.primary, 2.2)           # stub mount
+    # Cable from the capsule mount to the body-worn meter.
+    s.path(f"M {mx:.0f} {sh_y:.0f} C {mx + 26:.0f} {sh_y + 56:.0f} "
+           f"{px + 40:.0f} {gy - 130:.0f} {px + 26:.0f} {gy - 116:.0f}",
+           stroke=th.muted, sw=1.6)
+    s.rect(px + 12, gy - 118, 30, 44, th.panel, th.primary, rx=5, sw=2)
+    s.circle(px + 27, gy - 104, 3.5, th.primary)
+    s.text(185, gy + 44, "Personal sound exposure meter", 19, th.fg)
+    s.text(185, gy + 68, "(IEC 61252)", 17, th.muted)
+
+    # Dimension: capsule height above the shoulder.
+    s.dim(mx + 44, sh_y, mx + 44, cap_y, "≈ 0.04 m", offset=0, size=18,
+          label_side="right")
+    s.line(mx + 5, cap_y, mx + 44, cap_y, th.muted, 0.9, dash="3,3")
+    s.line(mx + 12, sh_y + 2, mx + 44, sh_y, th.muted, 0.9, dash="3,3")
+    s.text(mx + 53, sh_y + 22, "above the shoulder", 15, th.muted, "start")
+    # Distance to the ear-canal entrance.
+    s.line(px + 24, head_y + 8, mx - 4, cap_y + 4, th.secondary, 1.4,
+           dash="5,4")
+    s.text(px, head_y - 82, "≥ 0.1 m from the ear canal,", 17,
+           th.secondary)
+    s.text(px, head_y - 62, "most-exposed side", 17, th.secondary)
+
+    # --- Right: the three sampling strategies as day timelines -------------
+    s.text(620, 84, "Measurement strategies (Clauses 9–11)", 22, th.fg,
+           bold=True)
+    x0, x1 = 390.0, 850.0
+    bw = x1 - x0
+    ax_y = 132.0
+    s.line(x0, ax_y, x1, ax_y, th.muted, 1.4)
+    for hh in range(0, 9, 2):
+        tx = x0 + bw * hh / 8.0
+        s.line(tx, ax_y - 4, tx, ax_y + 4, th.muted, 1.4)
+        s.text(tx, ax_y + 22, f"{hh} h", 15, th.muted, mono=True)
+    s.text(620, ax_y - 12, "Working day", 17, th.muted)
+
+    def strip(y: float, title: str, caption: str) -> None:
+        s.text(x0, y - 10, title, 19, th.fg, "start", bold=True)
+        s.text(x0, y + 68, caption, 16, th.muted, "start", italic=True)
+
+    # Strategy 1: task-based — the day split into tasks, >= 3 samples each.
+    y1 = 190.0
+    strip(y1, "Task-based (Clause 9)",
+          "split the day into tasks — ≥ 3 samples (│) per task, plus each duration")
+    edges = [0.0, 0.1875, 0.8125, 1.0]      # the Annex D welder: 1.5 h / 5 h / 1.5 h
+    cols = [th.accent, th.primary, th.secondary]
+    for k in range(3):
+        xa, xb = x0 + bw * edges[k], x0 + bw * edges[k + 1]
+        s.rect(xa, y1, xb - xa, 44, th.panel, cols[k], rx=6, sw=2)
+        s.text((xa + xb) / 2, y1 + 27, f"Task {k + 1}", 17, th.fg)
+        for frac in (0.25, 0.5, 0.75):
+            sx = xa + (xb - xa) * frac
+            s.line(sx, y1 + 34, sx, y1 + 42, cols[k], 2.2)
+
+    # Strategy 2: job-based — random samples over the homogeneous group.
+    y2 = 300.0
+    strip(y2, "Job-based (Clause 10)",
+          "N ≥ 5 random samples over the homogeneous exposure group")
+    s.rect(x0, y2, bw, 44, "none", th.muted, rx=6, sw=1.6, dash="5,4")
+    for frac in (0.05, 0.24, 0.46, 0.65, 0.86):
+        s.rect(x0 + bw * frac, y2 + 6, bw * 0.06, 32, th.panel, th.primary,
+               rx=4, sw=2)
+
+    # Strategy 3: full-day — the whole shift, repeated on several days.
+    y3 = 410.0
+    strip(y3, "Full-day (Clause 11)",
+          "the whole shift, at least 3 times (5 if the days differ by > 3 dB)")
+    s.rect(x0, y3, bw, 24, th.panel, th.primary, rx=6, sw=2)
+    s.text(x0 + bw / 2, y3 + 17, "day 1", 14, th.fg)
+    s.rect(x0 + 8, y3 + 30, bw - 16, 7, th.panel, th.primary, rx=3, sw=1.2)
+    s.rect(x0 + 16, y3 + 43, bw - 32, 7, th.panel, th.primary, rx=3, sw=1.2)
+
+    # All three land in the same deliverable.
+    s.text(620, 520, "choose by work pattern (Table B.1)  →  LEX,8h + Annex C uncertainty",
+           17, th.fg)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -3225,6 +3347,9 @@ DIAGRAMS = {
     "diagram_loudspeaker_freefield": (
         _d_loudspeaker_freefield,
         "Loudspeaker free-field sensitivity measurement (IEC 60268-5)", 600),
+    "diagram_dosimeter_iso9612": (
+        _d_dosimeter,
+        "Occupational noise exposure measurement (ISO 9612)", 640),
 }
 
 

@@ -237,6 +237,8 @@ export default defineConfig({
         Footer: './src/components/Footer.astro',
         // Default header plus a mobile-visible language selector.
         Header: './src/components/Header.astro',
+        // Linked group labels + non-collapsible sidebar.
+        Sidebar: './src/components/Sidebar.astro',
       },
       customCss: [
         './src/styles/katex.css',
@@ -296,6 +298,11 @@ export default defineConfig({
         // JSON-LD structured data
         { tag: 'script', attrs: { type: 'application/ld+json' }, content: jsonLd },
       ],
+      // Overview-first convention: when a group's first item is a link with
+      // `attrs: { 'data-group-link': true }`, the custom Sidebar override
+      // consumes it and renders the group label itself as a link to that page
+      // instead of a separate Overview row. Groups are never collapsible, so
+      // `collapsed` has no effect.
       sidebar: [
         {
           label: 'Start',
@@ -309,12 +316,12 @@ export default defineConfig({
           label: 'Core signal analysis',
           translations: { es: 'Análisis de señal' },
           items: [
-            { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/core-signal-analysis' },
+            { slug: 'guides/sections/core-signal-analysis', attrs: { 'data-group-link': true } },
             {
               label: 'Octave filtering',
               translations: { es: 'Filtrado en octavas' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/octave-filtering' },
+                { slug: 'guides/sections/octave-filtering', attrs: { 'data-group-link': true } },
                 'guides/filter-banks',
                 'guides/block-processing',
                 'guides/multichannel',
@@ -324,7 +331,7 @@ export default defineConfig({
               label: 'Levels and weighting',
               translations: { es: 'Niveles y ponderación' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/levels-weighting' },
+                { slug: 'guides/sections/levels-weighting', attrs: { 'data-group-link': true } },
                 'guides/weighting',
                 'guides/time-weighting',
                 'guides/levels',
@@ -334,7 +341,7 @@ export default defineConfig({
               label: 'Calibration and uncertainty',
               translations: { es: 'Calibración e incertidumbre' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/calibration-uncertainty' },
+                { slug: 'guides/sections/calibration-uncertainty', attrs: { 'data-group-link': true } },
                 'guides/calibration',
                 'guides/gum-uncertainty',
               ],
@@ -345,12 +352,12 @@ export default defineConfig({
           label: 'Hearing and perception',
           translations: { es: 'Audición y percepción' },
           items: [
-            { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/hearing-perception' },
+            { slug: 'guides/sections/hearing-perception', attrs: { 'data-group-link': true } },
             {
               label: 'Psychoacoustics',
               translations: { es: 'Psicoacústica' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/psychoacoustics' },
+                { slug: 'guides/sections/psychoacoustics', attrs: { 'data-group-link': true } },
                 'guides/loudness',
                 'guides/sound-quality',
                 'guides/tone-prominence',
@@ -362,7 +369,7 @@ export default defineConfig({
               label: 'Speech',
               translations: { es: 'Habla' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/speech' },
+                { slug: 'guides/sections/speech', attrs: { 'data-group-link': true } },
                 'guides/speech-transmission',
                 'guides/speech-intelligibility',
               ],
@@ -371,7 +378,7 @@ export default defineConfig({
               label: 'Hearing and exposure',
               translations: { es: 'Audición y exposición' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/hearing-exposure' },
+                { slug: 'guides/sections/hearing-exposure', attrs: { 'data-group-link': true } },
                 'guides/hearing-threshold',
                 'guides/noise-induced-hearing-loss',
                 'guides/occupational-exposure',
@@ -383,12 +390,12 @@ export default defineConfig({
           label: 'Rooms and buildings',
           translations: { es: 'Salas y edificación' },
           items: [
-            { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/rooms-buildings' },
+            { slug: 'guides/sections/rooms-buildings', attrs: { 'data-group-link': true } },
             {
               label: 'Room acoustics',
               translations: { es: 'Acústica de salas' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/room-acoustics' },
+                { slug: 'guides/sections/room-acoustics', attrs: { 'data-group-link': true } },
                 'guides/room-acoustics',
                 'guides/room-noise',
                 'guides/reverberation-prediction',
@@ -399,7 +406,7 @@ export default defineConfig({
               label: 'Sound insulation',
               translations: { es: 'Aislamiento acústico' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/sound-insulation' },
+                { slug: 'guides/sections/sound-insulation', attrs: { 'data-group-link': true } },
                 'guides/insulation-field',
                 'guides/insulation-lab',
                 'guides/insulation-prediction',
@@ -410,7 +417,7 @@ export default defineConfig({
               label: 'Materials and surfaces',
               translations: { es: 'Materiales y superficies' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/materials-surfaces' },
+                { slug: 'guides/sections/materials-surfaces', attrs: { 'data-group-link': true } },
                 'guides/materials',
                 'guides/surface-scattering',
               ],
@@ -421,12 +428,12 @@ export default defineConfig({
           label: 'Vibration and structure-borne sound',
           translations: { es: 'Vibración y ruido estructural' },
           items: [
-            { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/vibration' },
+            { slug: 'guides/sections/vibration', attrs: { 'data-group-link': true } },
             {
               label: 'Structure-borne sources',
               translations: { es: 'Fuentes de ruido estructural' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/structure-borne' },
+                { slug: 'guides/sections/structure-borne', attrs: { 'data-group-link': true } },
                 'guides/mechanical-mobility',
                 'guides/transfer-stiffness',
                 'guides/vibration-sound-power',
@@ -438,7 +445,7 @@ export default defineConfig({
               label: 'Human vibration',
               translations: { es: 'Vibración en humanos' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/human-vibration' },
+                { slug: 'guides/sections/human-vibration', attrs: { 'data-group-link': true } },
                 'guides/human-vibration',
                 'guides/multiple-shock-vibration',
               ],
@@ -449,12 +456,12 @@ export default defineConfig({
           label: 'Environment and transport',
           translations: { es: 'Medio ambiente y transporte' },
           items: [
-            { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/environment-transport' },
+            { slug: 'guides/sections/environment-transport', attrs: { 'data-group-link': true } },
             {
               label: 'Outdoor sound',
               translations: { es: 'Sonido en exteriores' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/outdoor-sound' },
+                { slug: 'guides/sections/outdoor-sound', attrs: { 'data-group-link': true } },
                 'guides/outdoor-propagation',
                 'guides/impulse-prominence',
               ],
@@ -463,7 +470,7 @@ export default defineConfig({
               label: 'Aircraft and wind energy',
               translations: { es: 'Aeronaves y energía eólica' },
               items: [
-                { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/aircraft-wind' },
+                { slug: 'guides/sections/aircraft-wind', attrs: { 'data-group-link': true } },
                 'guides/aircraft-noise',
                 'guides/rotorcraft-noise',
                 'guides/wind-turbine-noise',
@@ -475,7 +482,7 @@ export default defineConfig({
           label: 'Underwater acoustics',
           translations: { es: 'Acústica submarina' },
           items: [
-            { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/underwater' },
+            { slug: 'guides/sections/underwater', attrs: { 'data-group-link': true } },
             'guides/underwater-acoustics',
             'guides/underwater-propagation',
           ],
@@ -484,7 +491,7 @@ export default defineConfig({
           label: 'Sources and devices',
           translations: { es: 'Fuentes y dispositivos' },
           items: [
-            { label: 'Overview', translations: { es: 'Visión general' }, slug: 'guides/sections/sources-devices' },
+            { slug: 'guides/sections/sources-devices', attrs: { 'data-group-link': true } },
             'guides/intensity',
             'guides/sound-power',
             'guides/electroacoustics',
@@ -499,7 +506,7 @@ export default defineConfig({
               label: 'Theory',
               translations: { es: 'Teoría' },
               items: [
-                'reference/theory',
+                { slug: 'reference/theory', attrs: { 'data-group-link': true } },
                 'reference/theory/signal-analysis',
                 'reference/theory/perception',
                 'reference/theory/rooms-buildings',

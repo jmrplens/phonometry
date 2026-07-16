@@ -1108,7 +1108,7 @@ def render_sidebar(pages: list[ModuleDoc]) -> str:
         "  label: 'API reference',",
         "  translations: { es: 'Referencia de la API' },",
         "  items: [",
-        "    { slug: 'reference/api' },",
+        "    { slug: 'reference/api', attrs: { 'data-group-link': true } },",
     ]
     by_section: dict[str, list[ModuleDoc]] = {}
     for page in pages:

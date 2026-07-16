@@ -279,6 +279,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The documentation animations now render at 300 DPI (2400x1350, from
+  800x450) for crisp playback on high-density displays, keeping the same
+  8x4.5 figure so no layout re-tuning is needed. The VP9 WebM encode gains
+  screen-content tuning and row multithreading (`-tune-content screen
+  -row-mt 1 -deadline good -cpu-used 4`), which roughly halves the encode
+  time at the same file size; the GitHub GIF fallback stays at 640 px. All
+  16 clips (four language x theme variants each) now render on a spawned
+  process pool, one grouped task per clip so each FDTD field is simulated
+  once and reused across its variants; `make animations` and the `--jobs`
+  flag drive it, while `--anim NAME` keeps the single-clip re-render
+  sequential. The site `<video>` embeds and posters follow the new intrinsic
+  size. A handful of on-canvas readability fixes ride along: Spanish decimal
+  commas in the FDTD time readouts, repositioned time and caption labels so
+  they clear tick labels and legends, a legible dark pill behind the ducting
+  channel-axis label, a mathtext `L_W` subscript in the two-rooms readout,
+  and the onset magnifier kept fully inside its panel.
 - The four Tier-1 documentation animations are redesigned as mechanism
   infographics instead of line-plot reveals: `anim_time_weighting` shows the
   tone burst driving the IEC 61672-1 RC detector (square-law rectifier,

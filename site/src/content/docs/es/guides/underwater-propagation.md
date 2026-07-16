@@ -20,8 +20,8 @@ TL = \text{ensanchamiento} + \alpha R .
 $$
 
 El ensanchamiento geométrico es $20 \lg R$ (esférico), $10 \lg R$ (cilíndrico)
-o esférico hasta una distancia de transición y cilíndrico después
-(`"practical"`). El coeficiente de absorción de volumen $\alpha$ (dB/km)
+o esférico hasta una distancia de transición $R_0$ y cilíndrico más allá
+de esta (`"practical"`). El coeficiente de absorción de volumen $\alpha$ (dB/km)
 procede de **Francois–Garrison** (1982, por
 defecto y de referencia), **Ainslie–McColm** (1998) o **Thorp** (1967, solo
 frecuencia); los dos primeros coinciden en ~10 % entre 100 Hz y 1 MHz.
@@ -82,7 +82,7 @@ $$
 SE = SL - 2\,TL + TS - (NL - DI) - DT \ \ \text{(activa, monostática)},
 $$
 
-o limitada por reverberación con $RL$.
+o limitada por reverberación con $RL$ en lugar de $NL - DI$.
 
 ```python
 import numpy as np
@@ -105,7 +105,7 @@ convención de fuente, dB re 1 µPa²/Hz **a 1 m**.
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_es.svg" alt="Pérdida por reflexión en el fondo frente al ángulo rasante para un fondo arenoso rápido: pérdida nula por debajo del ángulo rasante crítico, creciendo bruscamente por encima" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_es_dark.svg" alt="Pérdida por reflexión en el fondo frente al ángulo rasante para un fondo arenoso rápido: pérdida nula por debajo del ángulo rasante crítico, creciendo bruscamente por encima" style="width:82%">
 
 Una onda plana que incide en el fondo se refleja con el **coeficiente de
-reflexión de Rayleigh** fluido–fluido. Para un fondo más rápido ($c_2 > c_1$)
+reflexión de Rayleigh** fluido–fluido (Medwin & Clay). Para un fondo más rápido ($c_2 > c_1$)
 existe un **ángulo rasante crítico** $\varphi_c = \arccos(c_1/c_2)$, por
 debajo del cual la onda se refleja totalmente ($|R| = 1$, pérdida nula). La
 pérdida es $BL = -20 \lg |R|$.

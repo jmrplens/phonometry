@@ -57,6 +57,18 @@ _ES_EXACT = {
     "Rotorcraft Flyover Time History (ECAC Doc 32)":
         "Historia temporal de sobrevuelo de rotorcraft (ECAC Doc 32)",
     "Recorded time [s]": "Tiempo registrado [s]",
+    "Rotorcraft Terrain Screening (ECAC Doc 32 / NORAH2)":
+        "Apantallamiento por terreno de rotorcraft (ECAC Doc 32 / NORAH2)",
+    "Terrain profile": "Perfil del terreno",
+    "Line of sight": "Línea de visión",
+    "Diffraction edges": "Aristas de difracción",
+    "Terrain screening (ECAC Doc 32 / NORAH2 guidance)":
+        "Apantallamiento por terreno (ECAC Doc 32 / guía NORAH2)",
+    "Section distance [m]": "Distancia en la sección [m]",
+    "Height [m]": "Altura [m]",
+    "Flat ground (no hill)": "Suelo plano (sin colina)",
+    "Screened by the hill (Eq. 45-47)": "Apantallado por la colina (Ec. 45-47)",
+    "Ground and screening adjustment [dB]": "Ajuste de suelo y apantallamiento [dB]",
     "A-weighted sound pressure level [dB(A)]":
         "Nivel de presión sonora ponderado A [dB(A)]",
     "Received level $L_A(t)$": "Nivel recibido $L_A(t)$",
@@ -876,6 +888,10 @@ _ES_PATTERNS = [
      "sobrevuelo nivelado, 60 kt, 150 m, 120 m lateral, hierba"),
     (r"^\$L_\{ASmax\}\$ = (\d+)\.(\d+) dB\(A\)$",
      r"$L_{ASmax}$ = \1,\2 dB(A)"),
+    (r"^Diffracted path \(δ = (\d+)\.(\d+) m\)$",
+     r"Camino difractado (δ = \1,\2 m)"),
+    (r"^Diffracted path \(δ = (\d+),(\d+) m\)$",
+     r"Camino difractado (δ = \1,\2 m)"),
     (r"^(\d+) yr$", r"\1 años"),
     (r"^total \(limit\) (.+) dB$", r"total (límite) \1 dB"),
     (r"^total \(eng\.\) (.+) dB$", r"total (ing.) \1 dB"),
@@ -4199,6 +4215,44 @@ def generate_rotorcraft_flyover_event(output_dir: str) -> None:
     plt.close()
 
 
+
+def generate_rotorcraft_terrain_screening(output_dir: str) -> None:
+    """ECAC Doc 32 / NORAH2 terrain screening: section geometry and adjustment."""
+    print("Generating rotorcraft_terrain_screening...")
+    from phonometry import ground_effect_adjustment, terrain_screening_adjustment
+
+    freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz-10 kHz thirds
+    d = np.array([0.0, 150.0, 260.0, 300.0, 340.0, 420.0, 600.0])
+    z = np.array([0.0, 4.0, 48.0, 62.0, 40.0, 8.0, 2.0])
+    src = (0.0, 90.0)                                       # helicopter
+    rcv = (600.0, 2.0 + 1.2)                                # microphone at 1.2 m
+    res = terrain_screening_adjustment(freqs, src, rcv, d, z, flow_resistivity="D")
+    flat = ground_effect_adjustment(freqs, src[1], 1.2, rcv[0], flow_resistivity="D")
+
+    fig, (ax, ax2) = plt.subplots(2, 1, figsize=(10, 8),
+                                  gridspec_kw={"height_ratios": [1.1, 1.0]})
+    res.plot(ax=ax)   # the user-facing section geometry
+    ax.set_title("Rotorcraft Terrain Screening (ECAC Doc 32 / NORAH2)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.6)
+    ax.set_axisbelow(True)
+
+    ax2.axhline(0.0, color=COLOR_FG, lw=1.0, alpha=0.5)
+    ax2.plot(freqs, flat, color=COLOR_TERTIARY, lw=1.6, ls="--", marker="s", ms=3,
+             label="Flat ground (no hill)")
+    ax2.plot(freqs, res.adjustment, color=COLOR_PRIMARY, lw=2.0, marker="o",
+             ms=3, label="Screened by the hill (Eq. 45-47)")
+    ax2.set_xscale("log")
+    ax2.set_xlabel("One-third-octave-band centre frequency [Hz]")
+    ax2.set_ylabel("Ground and screening adjustment [dB]")
+    ax2.grid(color=COLOR_GRID, linestyle="--", alpha=0.6, which="both")
+    ax2.set_axisbelow(True)
+    ax2.legend(loc="lower left", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "rotorcraft_terrain_screening.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -6620,6 +6674,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_airport_sor,
     generate_rotorcraft_ground_effect,
     generate_rotorcraft_flyover_event,
+    generate_rotorcraft_terrain_screening,
 )
 
 

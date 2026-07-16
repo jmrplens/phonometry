@@ -236,3 +236,60 @@ $$
 Los ejemplos resueltos del Anexo D (Tablas D.1–D.4; p. ej. 100 dB / 40 años a 3 kHz: 29/38/60 dB en los fractiles 0,10/0,50/0,90) se reproducen exactamente con el redondeo a enteros de la norma, y el valor a mano de la Fórmula 2 a 4 kHz / 20 años / 90 dB es $N_{50} = 12{,}94$ dB.
 
 Consulta la [guía de pérdida auditiva inducida por ruido](/phonometry/es/guides/noise-induced-hearing-loss/) para su uso.
+
+## Referencias
+
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  Las mediciones originales de igual sonoridad tras el concepto de isófona
+  de la primera sección.
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3.ª ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  La psicoacústica de bandas críticas, enmascaramiento y sonoridad que
+  subyace al modelo de Zwicker y a las sensaciones de agudeza y aspereza.
+- Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in
+  room acoustics and its use for estimating speech intelligibility in
+  auditoria. *The Journal of the Acoustical Society of America*, 77(3),
+  1069-1077. [doi:10.1121/1.392224](https://doi.org/10.1121/1.392224).
+  El marco de transferencia de modulación de la sección del STI.
+- French, N. R., & Steinberg, J. C. (1947). Factors governing the
+  intelligibility of speech sounds. *The Journal of the Acoustical Society of
+  America*, 19(1), 90-119.
+  [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
+  Los experimentos por bandas de articulación tras la función de importancia
+  de banda del SII.
+- Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to
+  steady-state broad-band noise. *The Journal of the Acoustical Society of
+  America*, 56(5), 1585–1593.
+  [doi:10.1121/1.1903482](https://doi.org/10.1121/1.1903482).
+  Un estudio de campo de las relaciones exposición-respuesta codificadas
+  después en la ISO 1999.
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [Catálogo iso.org](https://www.iso.org/standard/83117.html).
+  El modelo de isófonas de las Fórmulas (1)/(2) y los parámetros de la
+  Tabla 1 de la sección de igual sonoridad.
+- Ecma International. (2024). *ECMA-418-1: Psychoacoustic metrics for ITT
+  equipment — Part 1: Prominent discrete tones* (3.ª ed.).
+  [PDF gratuito](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf).
+  El modelo de banda crítica y los procedimientos TNR y PR de la sección de
+  prominencia tonal.
+- International Organization for Standardization. (2005). *Acoustics —
+  Reference zero for the calibration of audiometric equipment — Part 7:
+  Reference threshold of hearing under free-field and diffuse-field listening
+  conditions* (ISO 389-7:2005).
+  [Catálogo iso.org](https://www.iso.org/standard/38976.html).
+  Los umbrales de referencia de campo libre y campo difuso de la Tabla 1 de
+  la sección de umbral de audición.
+- International Organization for Standardization. (2017). *Acoustics —
+  Statistical distribution of hearing thresholds related to age and gender*
+  (ISO 7029:2017). [Catálogo iso.org](https://www.iso.org/standard/42916.html).
+  El desplazamiento mediano dependiente de la edad y las dispersiones por
+  fractiles del modelo de presbiacusia.
+- International Organization for Standardization. (2013). *Acoustics —
+  Estimation of noise-induced hearing loss* (ISO 1999:2013).
+  [Catálogo iso.org](https://www.iso.org/standard/45103.html).
+  El modelo de NIPTS, sus fractiles y la suma comprimida HTLAN de la sección
+  de pérdida auditiva.

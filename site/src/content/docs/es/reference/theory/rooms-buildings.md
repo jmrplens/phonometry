@@ -397,3 +397,147 @@ recorridos de ida y vuelta sintéticos que recuperan una $r$ conocida y la
 recuperación con dos cargas de una muestra recíproca asimétrica.
 
 Consulta la [guía de materiales](/phonometry/es/guides/materials/) para su uso.
+
+## Referencias
+
+- Kuttruff, H. (2016). *Room acoustics* (6.ª ed.). CRC Press.
+  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
+  La teoría estadística del decaimiento tras la integración hacia atrás y
+  las relaciones de Sabine usadas a lo largo de esta página.
+- Schroeder, M. R. (1965). New method of measuring reverberation time.
+  *The Journal of the Acoustical Society of America*, 37(3), 409-412.
+  [doi:10.1121/1.1909343](https://doi.org/10.1121/1.1909343).
+  El método de integración hacia atrás de la sección de curvas de
+  decaimiento.
+- Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).
+  Measuring room impulse responses: Impact of the decay range on derived
+  room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
+  907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
+  El análisis de la INR sobre el rango de decaimiento tras los umbrales de
+  validez endurecidos de T20/T30.
+- Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise
+  Control*, 3(1), 19-27.
+  [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
+  Las curvas NC originales calificadas por el método de tangencia de la
+  sección de ruido de salas.
+- Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
+  noise of heating, ventilating, and air-conditioning (HVAC) systems in
+  buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
+  [doi:10.3397/1.2828446](https://doi.org/10.3397/1.2828446).
+  El contorno RC Mark II y la etiqueta de calidad espectral codificados por
+  el Anexo D de ANSI/ASA S12.2.
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  Las cadenas de medición, la transmisión por flancos y el marco de
+  predicción EN 12354 de las secciones de aislamiento.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  La transmisión del sonido en edificios, de las construcciones simples y
+  dobles a los suelos flotantes.
+- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
+  Theory, design and application* (3.ª ed.). CRC Press.
+  ISBN 978-1-4987-4099-9.
+  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
+  La medida y el diseño de absorbentes y difusores, de los autores tras el
+  método del coeficiente de difusión de ISO 17497-2.
+- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
+  Modelling sound absorbing materials* (2.ª ed.). Wiley.
+  ISBN 978-0-470-74661-5.
+  [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
+  La teoría del material poroso que enlaza las magnitudes de resistencia al
+  flujo y de tubo de impedancia de la sección de caracterización.
+- Acoustical Society of America. (2019). *Criteria for evaluating room
+  noise* (ANSI/ASA S12.2-2019).
+  [Tienda ANSI](https://webstore.ansi.org/standards/asa/ansiasas122019).
+  El método de tangencia NC normativo y la calificación RC Mark II del
+  Anexo D con su etiqueta espectral.
+- International Organization for Standardization. (2006). *Acoustics —
+  Application of new measurement methods in building and room acoustics*
+  (ISO 18233:2006).
+  [Catálogo iso.org](https://www.iso.org/standard/40408.html).
+  La deconvolución por barrido sinusoidal y MLS de la sección de excitación
+  determinista.
+- International Organization for Standardization. (2009). *Acoustics —
+  Measurement of room acoustic parameters — Part 1: Performance spaces*
+  (ISO 3382-1:2009).
+  [Catálogo iso.org](https://www.iso.org/standard/40979.html).
+  La integración hacia atrás, las definiciones de parámetros y la familia
+  de claridad del Anexo A.
+- International Organization for Standardization. (2008). *Acoustics —
+  Measurement of room acoustic parameters — Part 2: Reverberation time in
+  ordinary rooms* (ISO 3382-2:2008).
+  [Catálogo iso.org](https://www.iso.org/standard/36201.html).
+  Las ventanas de regresión, las reglas de rango dinámico y la comprobación
+  de curvatura de la sección de validez.
+- International Organization for Standardization. (2012). *Acoustics —
+  Measurement of room acoustic parameters — Part 3: Open plan offices*
+  (ISO 3382-3:2012).
+  [Catálogo iso.org](https://www.iso.org/standard/46520.html).
+  El decaimiento espacial en oficinas diáfanas y las distancias de
+  distracción y privacidad.
+- International Organization for Standardization. (2014). *Acoustics — Field
+  measurement of sound insulation in buildings and of building elements —
+  Part 1: Airborne sound insulation* (ISO 16283-1:2014).
+  [Catálogo iso.org](https://www.iso.org/standard/55997.html).
+  Las diferencias de nivel en campo y las normalizaciones de las secciones
+  de aislamiento.
+- International Organization for Standardization. (2020). *Acoustics —
+  Rating of sound insulation in buildings and of building elements — Part 1:
+  Airborne sound insulation* (ISO 717-1:2020).
+  [Catálogo iso.org](https://www.iso.org/standard/77435.html).
+  El desplazamiento de la curva de referencia y los términos de adaptación
+  espectral C y Ctr.
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [Catálogo iso.org](https://www.iso.org/standard/34545.html).
+  La medición de absorción en cámara reverberante y su término de absorción
+  del aire.
+- European Committee for Standardization. (2003). *Building acoustics —
+  Estimation of acoustic performance of buildings from the performance of
+  elements — Part 6: Sound absorption in enclosed spaces*
+  (EN 12354-6:2003).
+  [Ficha en BSI Knowledge (BS EN 12354-6:2003)](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sound-absorption-in-enclosed-spaces).
+  El modelo de absorción del apartado 4 y los casos resueltos del Anexo E
+  de la sección de recintos.
+- International Organization for Standardization. (2020). *Acoustics —
+  Determination and application of measurement uncertainties in building
+  acoustics — Part 1: Sound insulation* (ISO 12999-1:2020).
+  [Catálogo de iso.org](https://www.iso.org/standard/73930.html).
+  Las situaciones de medición, las incertidumbres tabuladas y los factores
+  de cobertura de la sección de incertidumbre.
+- International Organization for Standardization. (2004). *Acoustics —
+  Sound-scattering properties of surfaces — Part 1: Measurement of the
+  random-incidence scattering coefficient in a reverberation room*
+  (ISO 17497-1:2004+A1:2014, la edición implementada aquí).
+  [Catálogo iso.org](https://www.iso.org/standard/31397.html).
+  El método del coeficiente de dispersión con mesa giratoria y su cadena de
+  incertidumbre del Anexo A.
+- International Organization for Standardization. (2012). *Acoustics —
+  Sound-scattering properties of surfaces — Part 2: Measurement of the
+  directional diffusion coefficient in a free field* (ISO 17497-2:2012).
+  [Catálogo iso.org](https://www.iso.org/standard/55293.html).
+  El coeficiente de difusión direccional en campo libre y su ponderación
+  por áreas de ángulo sólido.
+- International Organization for Standardization. (1998). *Acoustics —
+  Determination of sound absorption coefficient and impedance in impedance
+  tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adoptada en
+  Europa como EN ISO 10534-2:2001; revisada después como
+  [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
+  [Catálogo iso.org](https://www.iso.org/standard/22851.html).
+  El método de la función de transferencia con dos micrófonos de la sección
+  de tubo de impedancia.
+- ASTM International. (2019). *Standard test method for normal incidence
+  determination of porous material acoustical properties based on the
+  transfer matrix method* (ASTM E2611-19, la edición implementada aquí;
+  revisada después como [ASTM E2611-24](https://store.astm.org/e2611-24.html)).
+  [Tienda ASTM](https://store.astm.org/e2611-19.html).
+  La descomposición por matriz de transferencia con cuatro micrófonos y su
+  pérdida por transmisión.
+- International Organization for Standardization. (2018). *Acoustics —
+  Determination of airflow resistance — Part 1: Static airflow method*
+  (ISO 9053-1:2018).
+  [Catálogo iso.org](https://www.iso.org/standard/69869.html).
+  El método estático de resistencia al flujo de aire y su velocidad de
+  referencia.

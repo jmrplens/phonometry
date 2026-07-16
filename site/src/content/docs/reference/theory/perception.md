@@ -236,3 +236,59 @@ $$
 The Annex D worked examples (Tables D.1–D.4; e.g. 100 dB / 40 yr at 3 kHz: 29/38/60 dB at the 0.10/0.50/0.90 fractiles) are reproduced exactly at the standard's integer rounding, and the Formula 2 hand value at 4 kHz / 20 yr / 90 dB is $N_{50} = 12.94$ dB.
 
 See the [Noise-Induced Hearing Loss guide](/phonometry/guides/noise-induced-hearing-loss/) for usage.
+
+## References
+
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  The original equal-loudness measurements behind the contour concept of the
+  first section.
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3rd ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  The critical-band, masking and loudness psychoacoustics underneath the
+  Zwicker model and the sharpness and roughness sensations.
+- Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in
+  room acoustics and its use for estimating speech intelligibility in
+  auditoria. *The Journal of the Acoustical Society of America*, 77(3),
+  1069-1077. [doi:10.1121/1.392224](https://doi.org/10.1121/1.392224).
+  The modulation-transfer framework of the STI section.
+- French, N. R., & Steinberg, J. C. (1947). Factors governing the
+  intelligibility of speech sounds. *The Journal of the Acoustical Society of
+  America*, 19(1), 90-119.
+  [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
+  The articulation-band experiments behind the SII band-importance function.
+- Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to
+  steady-state broad-band noise. *The Journal of the Acoustical Society of
+  America*, 56(5), 1585–1593.
+  [doi:10.1121/1.1903482](https://doi.org/10.1121/1.1903482).
+  A field study of the exposure-response relations later codified in
+  ISO 1999.
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [iso.org catalogue](https://www.iso.org/standard/83117.html).
+  The Formula (1)/(2) contour model and the Table 1 parameters of the
+  equal-loudness section.
+- Ecma International. (2024). *ECMA-418-1: Psychoacoustic metrics for ITT
+  equipment — Part 1: Prominent discrete tones* (3rd ed.).
+  [Free PDF](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf).
+  The critical-band model and the TNR and PR procedures of the
+  tone-prominence section.
+- International Organization for Standardization. (2005). *Acoustics —
+  Reference zero for the calibration of audiometric equipment — Part 7:
+  Reference threshold of hearing under free-field and diffuse-field listening
+  conditions* (ISO 389-7:2005).
+  [iso.org catalogue](https://www.iso.org/standard/38976.html).
+  The Table 1 free-field and diffuse-field reference thresholds of the
+  hearing-threshold section.
+- International Organization for Standardization. (2017). *Acoustics —
+  Statistical distribution of hearing thresholds related to age and gender*
+  (ISO 7029:2017). [iso.org catalogue](https://www.iso.org/standard/42916.html).
+  The age-dependent median shift and fractile spreads of the presbycusis
+  model.
+- International Organization for Standardization. (2013). *Acoustics —
+  Estimation of noise-induced hearing loss* (ISO 1999:2013).
+  [iso.org catalogue](https://www.iso.org/standard/45103.html).
+  The NIPTS model, its fractiles and the HTLAN compressed sum of the
+  hearing-loss section.

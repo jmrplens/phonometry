@@ -358,6 +358,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   identical (guarded by the golden baseline and a scalar-equivalence test)
   and ~45x faster on small grids, several hundred times on production-size
   grids (30 000 points in ~0.2 s).
+- The test suite now runs in parallel: `make test`, `make coverage` and the CI
+  test job invoke `pytest -n auto` (pytest-xdist, added to the dev
+  requirements) so the 3241 tests fan out across every CPU core. Each worker
+  pins its numerical thread pools to a single thread
+  (`OMP_NUM_THREADS=1` and the MKL/OpenBLAS/NumExpr/Accelerate equivalents) so
+  the per-core workers do not oversubscribe the machine with nested BLAS
+  pools. On a 12-core host the full suite drops from 508 s to 138 s wall-clock
+  (about 3.7x); pytest-cov combines the per-worker coverage so the Codecov
+  upload is unchanged (identical 96% line coverage, same 13914 statements).
+  Two supporting test changes: the Annex C.1 Moore-Glasberg time-varying
+  loudness checks share one memoised result per distinct tone (the phon and
+  sone suites analysed the same signals independently), and the ECMA-418-2
+  roughness peak/depth checks reuse the module calibration result instead of
+  recomputing it - no oracle, tolerance or covered line changes. The pink-noise
+  flatness test no longer writes a throwaway debug PNG to a fixed path (it
+  raced under parallel workers and left an untracked file); its numerical
+  assertion is untouched.
 
 ### Fixed
 

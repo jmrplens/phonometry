@@ -21,6 +21,35 @@ con la movilidad de la fuente en su lugar da `L_Ws,c` (Anexo I.3, Tabla I.8).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne_es.svg" alt="La cascada de EN 12354-5 por banda de octava: potencia característica, potencia instalada tras el término de acoplamiento, niveles de presión sonora por camino y su total energético" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne_es_dark.svg" alt="La cascada de EN 12354-5 por banda de octava: potencia característica, potencia instalada tras el término de acoplamiento, niveles de presión sonora por camino y su total energético" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# Potencia característica EN 15657 y movilidades puntuales ilustrativas.
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+lws_c = np.array([78.0, 82.0, 84.0, 81.0, 77.0, 72.0, 66.0])
+ys = (2e-4 + 1e-4j) * (bands / 250.0)        # movilidad de la fuente
+yi = (3e-5 + 1e-5j) * np.ones_like(bands)    # movilidad del receptor
+dc = np.array([float(building.coupling_term(a, b)) for a, b in zip(ys, yi)])
+
+# Dos vías de transmisión: el forjado excitado y una pared de flanco.
+paths = [
+    {"adjustment_term": 6.0, "element_area": 12.0,
+     "flanking_reduction_index": np.linspace(44.0, 62.0, 7)},
+    {"adjustment_term": 7.0, "element_area": 9.0,
+     "flanking_reduction_index": np.linspace(46.0, 64.0, 7)},
+]
+res = building.installed_source_prediction(lws_c, dc, paths, frequencies=bands)
+res.plot()   # potencia característica e instalada, niveles por vía y el total
+plt.show()
+```
+
+</details>
+
 ## 1. Acoplamiento y potencia instalada
 
 Solo parte de la potencia característica se inyecta en el elemento soporte; la
@@ -96,26 +125,6 @@ print(round(res.overall_level, 1))       # nivel sumado en bandas [dB]
 El `InstalledSourceResult` transporta los niveles por camino, el total por banda,
 el nivel de potencia instalada y `.overall_level`, y su `.plot()` dibuja toda la
 cascada.
-
-<details>
-<summary>Mostrar el código de esta figura</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
-lws_c = np.array([78.0, 82.0, 84.0, 81.0, 77.0, 72.0, 66.0])
-ys = (2e-4 + 1e-4j) * (bands / 250.0); yi = (3e-5 + 1e-5j) * np.ones_like(bands)
-dc = np.array([float(ph.coupling_term(a, b)) for a, b in zip(ys, yi)])
-paths = [{"adjustment_term": 6.0,
-          "flanking_reduction_index": np.linspace(44, 62, 7), "element_area": 12.0}]
-res = ph.installed_source_prediction(lws_c, dc, paths, frequencies=bands)
-res.plot(); plt.show()
-```
-
-</details>
 
 ## Referencias
 

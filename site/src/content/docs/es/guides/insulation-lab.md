@@ -176,6 +176,39 @@ subárea cuya energía neta fluye de vuelta hacia el espécimen se introduce con
 área negativa, aplicando la regla del signo menos de la Cláusula 6.4.6
 mientras $S_m$ conserva la suma de áreas sin signo.*
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# Una pared ligera: SPL de la sala emisora Lp1 = 85 dB y el nivel de intensidad
+# normal medido LIn sobre la superficie Sm = 12 m2, 16 bandas de tercio de octava.
+freqs = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800,
+         1000, 1250, 1600, 2000, 2500, 3150]
+l_in = np.array([57.8, 61.9, 60.5, 55.6, 55.8, 55.5, 53.4, 51.6,
+                 50.2, 47.7, 46.4, 45.7, 44.8, 45.2, 47.2, 52.7])
+kc = building.adaptation_term_kc(freqs)           # término de adaptación del Anexo B
+res = building.intensity_sound_reduction(np.full(16, 85.0), l_in,
+                                         measurement_area=12.0, area=10.0,
+                                         kc=kc)
+
+x = np.arange(len(freqs))
+fig, ax = plt.subplots()
+ax.fill_between(x, res.r_i, res.r_i_modified, alpha=0.2, label="Adaptación Kc")
+ax.plot(x, res.r_i, "-o", label="RI (intensidad)")
+ax.plot(x, res.r_i_modified, "--s", label="RI,M = RI + Kc")
+ax.set_xticks(x, [str(f) for f in freqs], rotation=45)
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Índice de reducción sonora [dB]",
+       title=f"RI,w = {res.rating.rating} dB, RI,M,w = {res.rating_modified.rating} dB")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ### Parámetros de `intensity_sound_reduction()` / `adaptation_term_kc()`
 
 | Parámetro | Tipo | Unidades | Rango / def. | Notas |
@@ -227,7 +260,7 @@ como `ci_delta` en el resultado y de forma independiente como
 `impact_improvement_adaptation_term()`.
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt

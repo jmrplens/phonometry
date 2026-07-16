@@ -30,6 +30,34 @@ en edificación (ISO 9611, EN 15657, EN 12354-5).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power_es.svg" alt="Nivel de potencia sonora radiada por banda de octava, comparando el límite superior de la ISO/TS 7849-1 (factor de radiación igual a uno) con el valor de ingeniería de la ISO/TS 7849-2 (factor de radiación medido)" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power_es_dark.svg" alt="Nivel de potencia sonora radiada por banda de octava, comparando el límite superior de la ISO/TS 7849-1 (factor de radiación igual a uno) con el valor de ingeniería de la ISO/TS 7849-2 (factor de radiación medido)" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+# Niveles de velocidad superficial y un factor de radiación medido por banda.
+bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+lv = np.array([78.0, 82.0, 85.0, 83.0, 79.0, 74.0])
+eps = np.array([0.20, 0.45, 0.75, 0.95, 1.00, 1.00])
+
+lw_max = emission.radiated_sound_power_level(lv, 1.6)  # Parte 1, eps = 1
+lw_eng = emission.radiated_sound_power_level(lv, 1.6, radiation_factor=eps)  # Parte 2
+
+x = np.arange(bands.size)
+fig, ax = plt.subplots()
+ax.bar(x - 0.2, lw_max, width=0.4, label="límite superior Parte 1 ($\\varepsilon$ = 1)")
+ax.bar(x + 0.2, lw_eng, width=0.4, label="ingeniería Parte 2 ($\\varepsilon$ medido)")
+ax.set_xticks(x, [f"{b:g}" for b in bands])
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Nivel de potencia sonora $L_W$ [dB re 1 pW]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 1. Las dos partes
 
 Las dos partes difieren solo en el factor de radiación. La **Parte 1** (*survey
@@ -106,27 +134,6 @@ sustituye el `ε = 1` fijo por un `εⱼ` banda a banda determinado a partir de 
 referencia de la potencia radiada (intensidad ISO 9614), tras lo cual la
 medición de velocidad puede repetirse a bajo coste en máquinas nominalmente
 idénticas.
-
-<details>
-<summary>Mostrar el código de esta figura</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
-lv = np.array([78.0, 82.0, 85.0, 83.0, 79.0, 74.0])
-eps = np.array([0.20, 0.45, 0.75, 0.95, 1.00, 1.00])
-x = np.arange(bands.size)
-plt.bar(x - 0.2, ph.radiated_sound_power_level(lv, 1.6), width=0.4, label="Parte 1 (ε=1)")
-plt.bar(x + 0.2, ph.radiated_sound_power_level(lv, 1.6, radiation_factor=eps),
-        width=0.4, label="Parte 2 (ε medido)")
-plt.xticks(x, [f"{b:g}" for b in bands]); plt.legend()
-plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_W$ [dB re 1 pW]"); plt.show()
-```
-
-</details>
 
 ## Referencias
 

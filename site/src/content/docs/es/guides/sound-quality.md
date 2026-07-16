@@ -28,6 +28,33 @@ la $k = 0{,}108$ derivada queda dentro de la ventana normativa 0,105–0,115).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es.svg" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es_dark.svg" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Ponderación de nitidez g(z) de DIN 45692: Ec. (1) más las variantes informativas del Anexo B
+z = np.arange(1, 241) * 0.1                     # bins de Bark, 0.1 .. 24.0
+g_din = np.where(z > 15.8, 0.15 * np.exp(0.42 * (z - 15.8)) + 0.85, 1.0)
+g_bis = np.where(z > 15.0, 0.2 * np.exp(0.308 * (z - 15.0)) + 0.8, 1.0)
+n = 4.0                                         # Aures depende de la sonoridad total (sonos)
+g_aures = 0.078 * np.exp(0.171 * z) / z * (n / np.log(n * 0.05 + 1.0))
+
+fig, ax = plt.subplots()
+ax.semilogy(z, g_din, label="DIN 45692 g(z)")
+ax.semilogy(z, g_bis, "--", label="von Bismarck (Anexo B)")
+ax.semilogy(z, g_aures, "-.", label="Aures (Anexo B, N = 4 sonos)")
+ax.axvline(15.8, linestyle=":", color="0.5")    # codo DIN: g crece a partir de 15.8 Bark
+ax.set(xlabel="Razón de banda crítica z [Bark]", ylabel="Ponderación g(z)")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
 from phonometry import sharpness_din
@@ -117,7 +144,7 @@ res.plot()   # aspereza R(l50) dependiente del tiempo + mapa de calor de asperez
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es.svg" alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es_dark.svg" alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad" style="width:80%">
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt

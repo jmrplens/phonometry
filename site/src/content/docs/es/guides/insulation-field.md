@@ -105,7 +105,7 @@ w.plot()   # R' medido frente a la referencia ISO 717-1 desplazada, desviaciones
 ```
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -253,7 +253,7 @@ res_imp.plot()   # L'nT medido frente a la referencia ISO 717-2 desplazada, exce
 ```
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -437,7 +437,7 @@ son insensibles a mayúsculas y con alias (`rprime_w`/`dnt_w`→`r_w`,
 `reduce_by_independent_measurements` ($u/\sqrt{m}$).
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -535,6 +535,35 @@ res.plot()   # DnT vs curva de referencia ISO 717-1 desplazada (necesita matplot
 bruta `D` hacia la estandarizada `DnT` — hacia arriba donde la sala es viva
 (`T > T0`), hacia abajo donde es apagada. El índice automático solo se forma con
 exactamente 5 valores de octava (o 16 de tercio de octava).*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# Niveles por bandas de octava (125-2000 Hz) y el T medido de la sala receptora.
+bands = [125, 250, 500, 1000, 2000]
+l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
+l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
+k = building.reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
+res = building.survey_airborne_insulation(l1, l2, k, volume=50.0)
+
+x = np.arange(len(bands))
+fig, ax = plt.subplots()
+ax.fill_between(x, res.d, res.d_nt, alpha=0.2, label="k = 10 lg(T/T0)")
+ax.plot(x, res.d, "--o", label="D (diferencia de niveles)")
+ax.plot(x, res.d_nt, "-s", label="DnT (estandarizada)")
+ax.set_xticks(x, [str(b) for b in bands])
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Diferencia de niveles [dB]",
+       title=f"Método de control ISO 10052: DnT,w = {res.rating.rating} dB")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ### Parámetros de `survey_airborne_insulation()` y afines
 

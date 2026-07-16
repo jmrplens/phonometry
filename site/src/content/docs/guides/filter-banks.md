@@ -162,6 +162,24 @@ Full spectral view of the filter banks for Octave (1/1) and 1/3-Octave fractions
 | **Elliptic** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6.svg" alt="Elliptic octave-band filter bank frequency response" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6_dark.svg" alt="Elliptic octave-band filter bank frequency response" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.svg" alt="Elliptic one-third-octave filter bank frequency response" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.svg" alt="Elliptic one-third-octave filter bank frequency response" style="width:100%"> |
 | **Bessel** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6.svg" alt="Bessel octave-band filter bank frequency response" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6_dark.svg" alt="Bessel octave-band filter bank frequency response" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6.svg" alt="Bessel one-third-octave filter bank frequency response" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_dark.svg" alt="Bessel one-third-octave filter bank frequency response" style="width:100%"> |
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# One figure per architecture and fraction: the whole response gallery
+fs = 48000
+for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
+    for fraction in (1, 3):
+        # show=True draws the bank's frequency response
+        metrology.OctaveFilterBank(fs=fs, fraction=fraction, order=6,
+                                   limits=[12, 20000], filter_type=ftype,
+                                   show=True)
+```
+
+</details>
+
 ## 5. Filter Usage and Examples
 
 ### 1. Butterworth (`butter`)
@@ -184,6 +202,19 @@ spl, freq = octave_filter(x, fs, filter_type='butter')
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6.svg" alt="Butterworth one-third-octave filter bank frequency response" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_dark.svg" alt="Butterworth one-third-octave filter bank frequency response" style="width:60%">
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# Draw this bank's response (1/3 octave, order 6, Butterworth)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='butter', show=True)
+```
+
+</details>
+
 ### 2. Chebyshev I (`cheby1`)
 
 Chebyshev Type I filters provide a **steeper roll-off** than Butterworth at the
@@ -197,6 +228,19 @@ spl, freq = octave_filter(x, fs, filter_type='cheby1', ripple=0.1)
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6.svg" alt="Chebyshev I one-third-octave filter bank frequency response" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_dark.svg" alt="Chebyshev I one-third-octave filter bank frequency response" style="width:60%">
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# Draw this bank's response (1/3 octave, order 6, Chebyshev I)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='cheby1', ripple=0.1, show=True)
+```
+
+</details>
 
 ### 3. Chebyshev II (`cheby2`)
 
@@ -213,6 +257,19 @@ spl, freq = octave_filter(x, fs, filter_type='cheby2')
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6.svg" alt="Chebyshev II one-third-octave filter bank frequency response" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_dark.svg" alt="Chebyshev II one-third-octave filter bank frequency response" style="width:60%">
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# Draw this bank's response (1/3 octave, order 6, Chebyshev II)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='cheby2', show=True)
+```
+
+</details>
+
 ### 4. Elliptic (`ellip`)
 
 Elliptic (Cauer) filters have the **shortest transition width** (steepest
@@ -225,6 +282,19 @@ spl, freq = octave_filter(x, fs, filter_type='ellip', ripple=0.1)
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.svg" alt="Elliptic one-third-octave filter bank frequency response" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_dark.svg" alt="Elliptic one-third-octave filter bank frequency response" style="width:60%">
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# Draw this bank's response (1/3 octave, order 6, Elliptic)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='ellip', ripple=0.1, show=True)
+```
+
+</details>
 
 ### 5. Bessel (`bessel`)
 
@@ -239,6 +309,19 @@ spl, freq = octave_filter(x, fs, filter_type='bessel')
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6.svg" alt="Bessel one-third-octave filter bank frequency response" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_dark.svg" alt="Bessel one-third-octave filter bank frequency response" style="width:60%">
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+from phonometry import metrology
+
+# Draw this bank's response (1/3 octave, order 6, Bessel)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='bessel', show=True)
+```
+
+</details>
 
 ### 6. Linkwitz-Riley (`linkwitz_riley`)
 

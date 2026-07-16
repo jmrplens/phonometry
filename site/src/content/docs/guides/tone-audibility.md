@@ -15,6 +15,27 @@ audibility `ΔL` it produces feeds the ISO 1996-2 tonal adjustment `Kt`.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility.svg" alt="Per-tone audibility ΔL of the nine tones of the ISO/PAS 20065 Annex E combustion-engine spectrum, with the decisive tone at 137.3 Hz highlighted and the ΔL = 0 dB threshold marked" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility_dark.svg" alt="Per-tone audibility ΔL of the nine tones of the ISO/PAS 20065 Annex E combustion-engine spectrum, with the decisive tone at 137.3 Hz highlighted and the ΔL = 0 dB threshold marked" style="width:82%">
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import psychoacoustics
+
+# ISO/PAS 20065 Annex E combustion-engine spectrum 1: nine tones (fT, LT, LS)
+# from a narrow-band spectrum with line spacing 2.7 Hz
+fT = [118.4, 137.3, 158.8, 314.9, 433.4, 592.2, 629.8, 643.3, 1582.7]
+LT = [64.56, 67.96, 68.63, 68.50, 73.17, 78.31, 75.00, 79.75, 71.07]
+LS = [48.91, 49.22, 50.50, 52.85, 58.29, 59.53, 59.71, 61.98, 54.16]
+
+res = psychoacoustics.assess_tones(fT, LT, LS, 2.7)
+print(round(res.decisive_audibility, 2), res.decisive_frequency)  # 5.01 137.3
+res.plot()   # per-tone audibility bars, decisive tone highlighted
+plt.show()
+```
+
+</details>
+
 ## 1. The critical band about the tone
 
 Each tone of frequency `fT` is evaluated inside a critical band whose width is

@@ -63,7 +63,7 @@ res.plot()   # N'(z) sobre la escala Bark — el patrón de sonoridad específic
 ```
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -132,6 +132,29 @@ phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonios
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es.svg" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_es_dark.svg" alt="Curvas isofónicas normales de ISO 226:2023 de 20 a 90 fonios con la curva del umbral de audición" style="width:80%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import psychoacoustics
+
+# Fórmula (1) de ISO 226:2023 en las 29 frecuencias preferentes de la Tabla 1
+fig, ax = plt.subplots()
+for phon in [20, 40, 60, 80, 90]:
+    freqs, spl = psychoacoustics.equal_loudness_contour(float(phon))
+    ax.semilogx(freqs, spl, color="C0")
+    ax.annotate(f"{phon} fonios", xy=(1000, phon + 1), fontsize=9)
+ft, tf = psychoacoustics.hearing_threshold()
+ax.semilogx(ft, tf, "--", color="C1", label="Umbral de audición $T_f$")
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Nivel de presión sonora [dB re 20 µPa]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 Validez según el apartado 4.1: 20–90 fonios (80 fonios por encima de 4 kHz); la
 implementación se verifica en CI contra las tablas del Anexo B. Ojo: esto es la
 sonoridad de *tonos puros* — la sonoridad de señales arbitrarias en sonos es lo
@@ -164,6 +187,39 @@ modelos difieren en sus filtros auditivos y en su suma de sonoridad.
 nivel: Zwicker duplica el valor en sonos cada +10 fonios, mientras que el modelo
 de Sottek crece más lentamente (alrededor de 1,65× por cada 10 dB), una
 diferencia intrínseca entre las sumas auditivas, no un error de calibración.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+# Tono de 1 kHz, 20..80 dB SPL: los tres modelos pasan por 1 sono a 40 dB
+fs = 48000
+t = np.arange(fs) / fs
+levels = np.arange(20.0, 81.0, 10.0)
+zw, mg, ec = [], [], []
+for spl in levels:
+    x = np.sqrt(2) * 2e-5 * 10 ** (spl / 20) * np.sin(2 * np.pi * 1000 * t)
+    zw.append(psychoacoustics.loudness_zwicker(x, fs, stationary=True).loudness)
+    mg.append(
+        psychoacoustics.loudness_moore_glasberg_from_spectrum([(1000.0, float(spl))]).loudness
+    )
+    ec.append(psychoacoustics.loudness_ecma(x, fs).loudness)
+
+fig, ax = plt.subplots()
+ax.plot(levels, zw, "o-", label="Zwicker (ISO 532-1)")
+ax.plot(levels, mg, "s--", label="Moore-Glasberg (ISO 532-2)")
+ax.plot(levels, ec, "^-.", label="Sottek (ECMA-418-2)")
+ax.plot(40.0, 1.0, "o", color="k", markerfacecolor="none", markersize=10)   # el ancla compartida
+ax.set(xlabel="Nivel de presión sonora [dB SPL]", ylabel="Sonoridad total N [sonos]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ### Sonoridad de Moore-Glasberg (ISO 532-2)
 
@@ -199,7 +255,7 @@ res.plot()   # sonoridad específica N'(i) sobre la escala del número ERB (Cam)
 ```
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -261,7 +317,7 @@ res.plot()   # sonoridad de corto plazo S'(t) y de largo plazo S''(t) frente al 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es.svg" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/moore_glasberg_time_loudness_es_dark.svg" alt="Trazas de sonoridad de corto plazo y de largo plazo de Moore-Glasberg para un pulso de tono, mostrando el ataque rápido de la sonoridad de corto plazo y la relajación más lenta de la de largo plazo" style="width:80%">
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -325,7 +381,7 @@ res.plot()   # sonoridad específica media N'(z) + N(l) dependiente del tiempo a
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es.svg" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sottek_specific_loudness_es_dark.svg" alt="Sonoridad específica media N'(z) del modelo de Sottek sobre las 53 bandas Bark_HMS para un tono de 1 kHz, con máximo en la banda crítica del tono" style="width:80%">
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt

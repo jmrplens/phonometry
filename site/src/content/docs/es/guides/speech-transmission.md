@@ -53,6 +53,38 @@ efectiva de la *envolvente*, llevada a [0, 1].
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_es.svg" alt="STI frente al tiempo de reverberación con las bandas de calificación del Anexo F de IEC 60268-16 sombreadas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_es_dark.svg" alt="STI frente al tiempo de reverberación con las bandas de calificación del Anexo F de IEC 60268-16 sombreadas" style="width:80%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import sti_from_impulse_response
+
+fs = 48000
+
+# STI frente al tiempo de reverberación: barre sti_from_impulse_response sobre
+# decaimientos exponenciales sintéticos (ruido blanco x exp(-6.9077 t / T60))
+# en una rejilla de T60, exactamente la física de la curva de arriba:
+rng = np.random.default_rng(0)
+t60_grid = np.array([0.3, 0.5, 0.8, 1.2, 1.6, 2.0, 2.5, 3.0, 4.0, 5.0])
+sti_values = []
+for t60 in t60_grid:
+    t = np.arange(int(2 * t60 * fs)) / fs
+    ir = rng.standard_normal(t.size) * np.exp(-6.9077 * t / t60)
+    sti_values.append(sti_from_impulse_response(ir, fs).sti)
+
+fig, ax = plt.subplots()
+ax.semilogx(t60_grid, sti_values, "o-")
+ax.set_xlabel("Tiempo de reverberación T60 [s]")
+ax.set_ylabel("STI")
+ax.set_ylim(0.0, 1.0)
+ax.grid(True, which="both", alpha=0.3)
+plt.show()
+```
+
+</details>
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_es.svg" alt="Cadena de medición del STI: señal de la fuente STIPA a través de la sala hasta el micrófono y el análisis de la MTF" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_chain_es_dark.svg" alt="Cadena de medición del STI: señal de la fuente STIPA a través de la sala hasta el micrófono y el análisis de la MTF" style="width:92%">
 
 ## 2. Medición indirecta y directa (STIPA)
@@ -75,38 +107,6 @@ recording = test                       # en la práctica, la señal del micrófo
 res = stipa(recording, fs)
 res.plot()   # barras del índice de transferencia de modulación (MTI) por banda; STI y valoración en el título
 ```
-
-<details>
-<summary>Ver el código de esta figura</summary>
-
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from phonometry import sti_from_impulse_response
-
-fs = 48000
-
-# STI frente al tiempo de reverberación: barre sti_from_impulse_response sobre
-# decaimientos exponenciales sintéticos (ruido blanco x exp(-6.9077 t / T60))
-# en una rejilla de T60 — exactamente la física de la curva de arriba:
-rng = np.random.default_rng(0)
-t60_grid = np.array([0.3, 0.5, 0.8, 1.2, 1.6, 2.0, 2.5, 3.0, 4.0, 5.0])
-sti_values = []
-for t60 in t60_grid:
-    t = np.arange(int(2 * t60 * fs)) / fs
-    ir = rng.standard_normal(t.size) * np.exp(-6.9077 * t / t60)
-    sti_values.append(sti_from_impulse_response(ir, fs).sti)
-
-fig, ax = plt.subplots()
-ax.semilogx(t60_grid, sti_values, "o-")
-ax.set_xlabel("Tiempo de reverberación T60 [s]")
-ax.set_ylabel("STI")
-ax.set_ylim(0.0, 1.0)
-ax.grid(True, which="both", alpha=0.3)
-plt.show()
-```
-
-</details>
 
 `stipa` emite un `UserWarning` cuando la grabación es más corta que los 15 s
 recomendados (práctica STIPA de IEC 60268-16, de 15 s a 25 s): por debajo de eso

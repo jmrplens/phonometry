@@ -39,6 +39,43 @@ turno.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_es.svg" alt="Las tres vías de potencia sonora en paralelo: una superficie envolvente de presión sobre un plano reflectante (ISO 3744/3746), una fuente en una sala reverberante muestreada por micrófonos (ISO 3741) y una sonda de intensidad barriendo una superficie alrededor de la fuente (ISO 9614-2)" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_es_dark.svg" alt="Las tres vías de potencia sonora en paralelo: una superficie envolvente de presión sobre un plano reflectante (ISO 3744/3746), una fuente en una sala reverberante muestreada por micrófonos (ISO 3741) y una sonda de intensidad barriendo una superficie alrededor de la fuente (ISO 9614-2)" style="width:92%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+# Una fuente estacionaria (LW por bandas de octava abajo) por tres vías.
+freqs = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+lw_true = np.array([85.0, 88.0, 90.0, 89.0, 86.0, 82.0])
+
+# ISO 3744: SPL en 10 posiciones de una semiesfera, r = 2 m (10 lg(S/S0) = 14 dB).
+pres = emission.sound_power_pressure(np.tile(lw_true - 14.0, (10, 1)),
+                                     "hemisphere", radius=2.0,
+                                     frequencies=freqs)
+# ISO 9614-2: intensidad normal uniforme barrida sobre seis segmentos de 0.5 m2.
+i_n = np.tile(10.0 ** (lw_true / 10.0) * 1e-12 / 3.0, (6, 1))
+inten = emission.sound_power_intensity(i_n, np.full(6, 0.5),
+                                       frequencies=freqs, band_type="octave")
+# ISO 3741: comparación con una fuente de referencia de LW = 84 dB conocido por banda.
+comp = emission.sound_power_comparison(lw_true - 20.0, np.full(6, 64.0),
+                                       np.full(6, 84.0), frequencies=freqs)
+
+fig, ax = plt.subplots()
+for res, style, ms, label in ((pres, "-o", 11, "presión (ISO 3744)"),
+                              (inten, "--s", 8, "intensidad (ISO 9614-2)"),
+                              (comp, ":^", 5, "fuente de referencia (ISO 3741)")):
+    ax.semilogx(freqs, res.sound_power_level, style, markersize=ms,
+                label=f"{label}: LWA = {res.sound_power_level_a:.1f} dB")
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Nivel de potencia sonora LW [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 <video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: la misma fuente en una cámara anecoica y en una cámara reverberante produce presiones de micrófono distintas, y las fórmulas de campo libre y campo difuso convergen al mismo nivel de potencia sonora L_W" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: la misma fuente en una cámara anecoica y en una cámara reverberante produce presiones de micrófono distintas, y las fórmulas de campo libre y campo difuso convergen al mismo nivel de potencia sonora L_W" style="width:88%"></video>
 
 ### Una ruta de decisión
@@ -174,7 +211,7 @@ correcciones de fondo (`K1`) y ambiental (`K2`) más el término de superficie
 número único `LWA` del título.*
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -343,7 +380,7 @@ de octava, y la suma energética ponderada A entre las 21 bandas da el `LWA` del
 título.*
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -486,7 +523,7 @@ criterios de indicadores de campo en grado de ingeniería, así que las seis
 barras se sostienen, y el total ponderado A de 90,9 dB(A) encabeza el título.*
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -634,7 +671,7 @@ de área, ruido de fondo y meteorológica dan `LW(f)`, y la suma energética pon
 A entre bandas da el número único `LWA` del título.*
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt
@@ -721,7 +758,7 @@ ISO 9614-3 la declara no aplicable —la figura la trama y la agrisa mientras la
 cuatro bandas determinadas y el total ponderado A se mantienen.*
 
 <details>
-<summary>Ver el código de esta figura</summary>
+<summary>Mostrar el código de esta figura</summary>
 
 ```python
 import matplotlib.pyplot as plt

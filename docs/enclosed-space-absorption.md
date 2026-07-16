@@ -117,6 +117,60 @@ reverberation time in [Room Acoustics](room-acoustics.md)
 (ISO 3382) and of the reverberation-room absorption of
 [Acoustic Materials](materials.md) (ISO 354).
 
+## 3. Where the input data comes from
+
+**Surface coefficients.** The standard expects the $\alpha_{s,i}$ to come
+from laboratory measurements to EN ISO 354, the reverberation-room method
+of [Acoustic Materials](materials.md); theoretical, empirical or field
+values are admitted as long as the data source is stated. ISO 354 delivers
+one-third-octave data, and an octave-band calculation takes the arithmetic
+mean of the three thirds as its input. A reverberation-room coefficient can
+exceed 1.0 (edge diffraction scatters more energy into the sample than its
+flat area intercepts); it enters Formula 1 as measured, without clamping,
+because the same diffuse-field convention that produced it is the one the
+model assumes.
+
+**Furniture and occupants.** Objects contribute through three routes:
+a measured equivalent absorption area $A_{obj}$ when one exists (persons
+and seating have tabulated values in the informative Annex C), the
+Formula 4 estimate $V_{obj}^{2/3}$ for hard, irregular, unmeasured objects
+(furniture, machinery), and object *arrays* rated as an absorbing surface
+$\alpha_s S_k$ when many similar objects cover a zone (an audience, a
+storage rack). Objects also displace air: their summed volume enters the
+object fraction $\psi$ that shortens $T$ in Formula 5 beyond what their
+absorption alone would.
+
+**Air.** The air term $A_{air} = 4mV(1-\psi)$ uses the power attenuation
+coefficient $m$ from the standard's Table 1, resolved by the
+`air_condition` strings (temperature and relative-humidity class, derived
+from ISO 9613-1); it only matters above 1 kHz and grows with the volume.
+
+**Validity limits (clause 4.6).** The model assumes an ordinary,
+reasonably diffuse room: no dimension more than 5 times another, opposite
+surface pairs whose coefficients differ by less than a factor of 3 (unless
+scattering objects are present) and an object fraction below 0.2. Outside
+those limits the field is not diffuse and the model errs on the optimistic
+side: the standard's own accuracy clause records measured reverberation
+times up to twice the prediction in low-diffusivity rooms. The classical
+alternatives for those cases live in
+[Reverberation-time prediction](reverberation-prediction.md).
+
+## References
+
+- European Committee for Standardization. (2003). *Building acoustics —
+  Estimation of acoustic performance of buildings from the performance of
+  elements — Part 6: Sound absorption in enclosed spaces*
+  (EN 12354-6:2003).
+  [BSI Knowledge record (BS EN 12354-6:2003)](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sound-absorption-in-enclosed-spaces).
+  The Clause 4 model, its input-data rules and its validity limits.
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [iso.org catalogue](https://www.iso.org/standard/34545.html).
+  The laboratory measurement the surface and array coefficients come from.
+- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
+  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
+  The statistical reverberation theory the standard's formulae specialise.
+
 ---
 
 **Standards.** EN 12354-6:2003, *Building acoustics — Estimation of acoustic

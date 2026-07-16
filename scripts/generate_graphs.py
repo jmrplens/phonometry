@@ -1161,7 +1161,16 @@ def _optimize_png(path: str) -> None:
     not have to run the optimizer for the staleness check to succeed (it does,
     via ``requirements-figures.txt``, which makes the bytes identical too).
     """
-    import oxipng
+    try:
+        import oxipng
+    except ImportError:
+        # The tolerance compare passes against unoptimized output (lossless),
+        # so a missing optimizer degrades to larger-but-identical pixels
+        # rather than a crash; regenerating for a COMMIT does need the pinned
+        # tool or the byte diff will churn.
+        print(f"[save_figure] pyoxipng not installed; {os.path.basename(path)} "
+              "saved unoptimized")
+        return
 
     oxipng.optimize(
         path,
@@ -1204,7 +1213,10 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
         kwargs.setdefault("dpi", 300)
         # Drop matplotlib's version-stamped Software chunk (and any date) so the
         # committed PNGs match a fresh render on any matplotlib build in CI.
-        kwargs.setdefault("metadata", {"Software": None, "Date": None})
+        # Merge instead of setdefault: a caller-supplied metadata dict must not
+        # silently reintroduce the version-dependent chunks.
+        kwargs["metadata"] = {"Software": None, "Date": None,
+                              **kwargs.get("metadata", {})}
     plt.savefig(path, **kwargs)
     if ext == "png":
         _optimize_png(path)

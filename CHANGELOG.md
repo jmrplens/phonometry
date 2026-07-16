@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Rotorcraft single-event method (ECAC Doc 32 §4.3/§5-6, NORAH2 guidance
+  §A.3-A.5) completing the hemisphere chain:
+  `flight_condition_weights`/`interpolated_source_level` (the distance-scaled
+  Delaunay interpolation across a hemisphere database, Eq. 3-10, with nearest
+  neighbour outside the envelope and optional database lookup triangulations),
+  `flight_path_kinematics` (ground speed, airspeed, heading, curvature, bank
+  and path angle by central differences, Eq. 16-21), `rotorcraft_event_level`
+  (the received one-third-octave time history at recorded time and its
+  `LASmax`, full-history and 10 dB-down `SEL` and ICAO Annex 16 `EPNL`, with
+  per-point overrides for radar-track workflows, bank-tilted emission frames
+  and per-point class-substitution level offsets) and `rotorcraft_noise_contour`
+  (vectorised single-event `SEL`/`LASmax` ground grids), each result frozen
+  with `.plot()`. `RotorcraftHemisphere.mirrored()` handles mirrored-rotor
+  class substitutions (Eq. 2). Validated end to end against the NORAH2
+  reference implementation's ARP verification cases (emission angles 0.01°,
+  hard-ground step levels 0.08 dB(A) out to 18 km, `LASmax` 0.03 dB, `SEL`
+  0.05-0.4 dB, `PNLTM` 0.1 dB, 187-microphone contour grid 0.7 dB worst case) and against
+  hand-checked interpolation, kinematics and Lorentzian-flyover closed forms;
+  four new conformance checks. Two guidance defects recorded in the errata
+  registry (Eq. 21 path angle; §A.3.1 triangulation plane).
+
 - Four new physics-based 2D FDTD documentation animations (WebM + poster
   for the site, GIF for the GitHub docs, EN + ES, light + dark), each
   simulated with `scripts/fdtd2d.py` and annotated on canvas:

@@ -127,6 +127,64 @@ low-frequency noise (RNC, which needs a time series rather than a single
 spectrum) and the numeric quality-assessment index (QAI, which the standard
 defers to external references) are not part of this module.
 
+## 3. Choosing a criterion: NC, RC Mark II or NR
+
+The two ratings answer different questions, and a third family exists that
+this module deliberately does not implement:
+
+- **NC** answers *"does the room meet its limit, and which band breaks
+  it?"*. It is the compliance rating of North-American practice
+  (specifications, codes, equipment schedules), and the tangency method is
+  driven entirely by the single governing band. That is also its blind
+  spot: two NC-40 rooms can sound completely different, one rumbly and one
+  hissy, because tangency says nothing about spectral balance. Use NC when
+  a specification cites it, and always report the governing band with the
+  rating, since it names the octave any fix must attack first.
+- **RC Mark II** answers *"how does the room sound, and what should be
+  fixed?"*. Its rating tracks speech interference through the
+  mid-frequency average, and its reference slope of −5 dB per octave is
+  the spectrum occupants describe as neutral, a bland ventilation
+  background that is neither boomy nor sharp. The spectral tag then points
+  at the offending frequency range. Reach for RC Mark II at HVAC design
+  time, or to diagnose an installation that fails its NC limit.
+- **NR (Noise Rating)** is the European counterpart of NC: the same
+  tangency logic over a slightly different curve family (more permissive
+  at low frequency, stricter at high), common in European and
+  international equipment and building specifications. phonometry does not
+  implement NR; when a specification cites NR, rate against the NR curves
+  themselves rather than substituting NC, because the two families diverge
+  by several decibels away from the mid frequencies.
+
+**Reading the tag.** The RC Mark II tag is a repair hint, not just a label.
+A rumble tag (`R`, more than 5 dB over the reference at or below 500 Hz)
+points at the air-handling plant: an oversized or starved fan, duct
+rumble, or structure-borne vibration re-radiated by walls, and it is the
+low-frequency energy that rattles lightweight construction and fatigues
+occupants. A hiss tag (`H`, more than 3 dB over at or above 1000 Hz)
+points at the terminal end: diffuser and grille face velocities or a
+throttled damper close to the outlet, and it is the range that masks
+speech. A neutral tag (`N`) means the level can still be wrong, but the
+character is right: reduce the whole spectrum rather than reshape it.
+
+## References
+
+- Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise
+  Control*, 3(1), 19-27.
+  [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
+  The paper that introduced the NC curves and the speech-interference
+  reasoning behind them.
+- Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
+  noise of heating, ventilating, and air-conditioning (HVAC) systems in
+  buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
+  [doi:10.3397/1.2828446](https://doi.org/10.3397/1.2828446).
+  The refined RC procedure, with its neutral-spectrum rationale and the
+  rumble/hiss regions, that ANSI/ASA S12.2 Annex D codifies.
+- Acoustical Society of America. (2019). *Criteria for evaluating room
+  noise* (ANSI/ASA S12.2-2019).
+  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansiasas122019).
+  The normative NC curves, tangency method and RC Mark II procedure this
+  module implements.
+
 ---
 
 **Standards.** ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — the

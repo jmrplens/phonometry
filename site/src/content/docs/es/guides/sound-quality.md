@@ -172,9 +172,9 @@ para los veredictos TNR/PR de ECMA-418-1, el
 para el STI/STIPA, y [Teoría](/phonometry/es/reference/theory/perception/) para la
 matemática subyacente.
 
----
+## Normas
 
-**Normas.** DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
+DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
 Schärfe* — sharpness en acum (ponderación del apartado 6, variantes von
 Bismarck y Aures del Anexo B, objetivos de la Tabla A.2). ECMA-418-2:2025,
 *Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing

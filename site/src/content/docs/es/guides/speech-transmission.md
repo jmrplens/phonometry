@@ -205,9 +205,9 @@ Ambas devuelven `STIResult`: `sti`, `mti` (7 bandas), `mtf` (7×14 o 7×2),
   El marco de transferencia de modulación de la sección 1 y la correspondencia
   m ↔ STI sobre la que se construye el índice.
 
----
+## Normas
 
-**Normas.** IEC 60268-16:2020 (Edición 5), *Sound system equipment — Part 16:
+IEC 60268-16:2020 (Edición 5), *Sound system equipment — Part 16:
 Objective rating of speech intelligibility by speech transmission index* — la
 función de transferencia de modulación y la correspondencia m ↔ STI, la señal
 de ensayo STIPA y el método directo, el método indirecto desde la respuesta al

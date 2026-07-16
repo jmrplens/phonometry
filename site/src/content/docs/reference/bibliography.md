@@ -3,11 +3,11 @@ title: "Bibliography"
 description: "The books and papers behind the guides, grouped by domain: every entry with a verified DOI or official publisher link and a note on what it supports."
 ---
 
-Every guide on this site closes with two citation blocks: a **References**
+Every guide on this site closes with two citation sections: a **References**
 section listing the books and papers that support the physics on the page
 (APA style, one bullet per source, each with a DOI or an official publisher
-link, and half a sentence on what the entry supports), followed by a final
-**Standards.** paragraph naming the normative documents the page implements,
+link, and half a sentence on what the entry supports), followed by a
+**Standards** section naming the normative documents the page implements,
 clause by clause. This page collects the References entries of all guides in
 one place, grouped by domain: a curated reading list, and the single source of
 truth for link checking. Each entry lists the guide pages that cite it; the

@@ -2,12 +2,12 @@
 
 # Bibliography
 
-Every guide in this documentation closes with two citation blocks: a
+Every guide in this documentation closes with two citation sections: a
 `## References` section listing the books and papers that support the physics
 on the page (APA style, one bullet per source, each with a DOI or an official
 publisher link, and half a sentence on what the entry supports), followed by a
-final **Standards.** paragraph naming the normative documents the page
-implements, clause by clause. This page collects the References entries of all
+`## Standards` section naming the normative documents the page implements,
+clause by clause. This page collects the References entries of all
 guides in one place, grouped by domain: a curated reading list, and the single
 source of truth for link checking. Each entry lists the guide pages that cite
 it; the list grows as guides gain their References sections.

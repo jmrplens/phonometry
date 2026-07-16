@@ -492,9 +492,9 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metros)
   El coeficiente de autocorrelación del goniómetro que hay tras la sección 2
   de esta página, su ponderación por área y el $d_n$ normalizado.
 
----
+## Normas
 
-**Normas.** ISO 17497-1:2004+A1:2014 (coeficiente de
+ISO 17497-1:2004+A1:2014 (coeficiente de
 dispersión), ISO 17497-2:2012 (coeficiente de difusión), ISO 13472-1:2002
 (absorción in situ, superficie extensa), ISO 13472-2:2010 (absorción in situ,
 método puntual), e ISO 9613-1:1993 — solo el coeficiente de atenuación de

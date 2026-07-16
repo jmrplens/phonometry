@@ -652,9 +652,9 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
   [Catálogo iso.org](https://www.iso.org/standard/34545.html).
   La medición de absorción en cámara reverberante del §4.
 
----
+## Normas
 
-**Normas.** ISO 18233:2006 (aplicación de nuevos métodos de medición — la
+ISO 18233:2006 (aplicación de nuevos métodos de medición — la
 adquisición de respuestas al impulso por barrido y MLS); ISO 3382-1:2009 e
 ISO 3382-2:2008 (tiempo de reverberación y parámetros de sala desde el
 decaimiento de Schroeder); ISO 3382-3:2012 (métricas de habla en oficinas

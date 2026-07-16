@@ -219,9 +219,9 @@ rating — is a separate, domain-specific budget.
   single-number ratings, mentioned above as a separate companion to the
   general GUM machinery.
 
----
+## Standards
 
-**Standards.** ISO/IEC Guide 98-3:2008, *Uncertainty of measurement — Part 3:
+ISO/IEC Guide 98-3:2008, *Uncertainty of measurement — Part 3:
 Guide to the expression of uncertainty in measurement (GUM:1995)* — the law of
 propagation of uncertainty (clause 5), Type B evaluation (clause 4.3), the
 expanded uncertainty and coverage factor (clause 6, Annex G) and the

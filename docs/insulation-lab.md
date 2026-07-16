@@ -366,9 +366,9 @@ res_m.bracketed    # per-band flags; bracketed bands leave the single number
   The transmission theory of single and double constructions that laboratory
   indices quantify.
 
----
+## Standards
 
-**Standards.** ISO 10140-2:2010, ISO 10140-3:2010 and ISO 10140-4:2010 — the
+ISO 10140-2:2010, ISO 10140-3:2010 and ISO 10140-4:2010 — the
 laboratory R and Ln with the background-noise correction; ISO 15186-1:2000 and
 ISO 15186-2:2003 — the sound-intensity sound reduction index $R_I$, its
 $K_c$-modified form and the element normalized level difference (laboratory

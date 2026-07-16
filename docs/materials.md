@@ -580,9 +580,9 @@ print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[
   The static method of section 2, with the through-origin regression and the
   0.5 mm/s reference velocity.
 
----
+## Standards
 
-**Standards.** ISO 11654:1997 (weighted sound-absorption rating); ISO 9053-1:2018
+ISO 11654:1997 (weighted sound-absorption rating); ISO 9053-1:2018
 (static airflow resistance); ISO 9053-2:2020 (alternating airflow resistance);
 BS EN ISO 10534-1:2001 and BS EN ISO 10534-2:2001 (impedance tube); ASTM E2611-19
 (four-microphone transmission loss); ISO 12999-2:2020 (sound-absorption

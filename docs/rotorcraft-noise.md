@@ -80,9 +80,9 @@ hemispheres of all eleven rotorcraft types, and end to end against the NORAH2
 prototype: single-hemisphere emissions of its reference single-event histories
 are reproduced to 0.1 dB(A) over hard ground (0.5 dB over soft ground).
 
----
+## Standards
 
-**Standards.** ECAC Doc 32, 1st ed., *Report on Standard Method of Computing
+ECAC Doc 32, 1st ed., *Report on Standard Method of Computing
 Rotorcraft Noise Contours*; NORAH2 rotorcraft-noise modelling guidance
 (EASA.2020.FC.06 SC03.D1.5d), §A.3-A.4 — the noise hemisphere (§A.3.2), spherical
 spreading (Eq. 24), atmospheric attenuation (Eq. 26/27, ISO 9613-1 coefficient,

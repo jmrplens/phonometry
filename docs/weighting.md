@@ -378,9 +378,9 @@ plt.show()
   The normative A/C/Z definitions, the analytic Annex E curves and the
   Table 3 acceptance limits verified in section 7.
 
----
+## Standards
 
-**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — the A, C and Z frequency-weighting curves (the
 Annex E analytic definition from four corner frequencies, normalized to 0 dB
 at 1 kHz), the class 1 tolerances the `high_accuracy` design keeps up to

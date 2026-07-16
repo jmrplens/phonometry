@@ -152,9 +152,9 @@ heavy slab) is the design goal.
   [iso.org catalogue](https://www.iso.org/standard/16620.html).
   The international original of EN 29052-1, the method this page implements.
 
----
+## Standards
 
-**Standards.** EN 29052-1:1992 (= ISO 9052-1:1989), *Acoustics — Determination
+EN 29052-1:1992 (= ISO 9052-1:1989), *Acoustics — Determination
 of dynamic stiffness — Part 1: Materials used under floating floors in
 dwellings*: the dynamic stiffness per unit area (Formula 1), the resonance
 relations (Formulae 2-4), the enclosed-gas term (Formula 7, clause 8.2 NOTE

@@ -160,9 +160,9 @@ for x in audio_stream(block):            # tu callback de captura
   Las estructuras de filtro en forma directa y la recursión de estado tras
   la ecuación del estado transportado de arriba.
 
----
+## Normas
 
-**Normas.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+IEC 61260-1:2014, *Electroacoustics — Octave-band and
 fractional-octave-band filters — Part 1: Specifications*, e IEC 61672-1:2013,
 *Electroacoustics — Sound level meters — Part 1: Specifications* — el
 procesado por bloques no añade contenido normativo propio: los filtros en

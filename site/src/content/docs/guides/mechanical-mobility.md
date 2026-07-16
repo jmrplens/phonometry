@@ -195,9 +195,9 @@ plt.legend(); plt.show()
   The measurement side: H1 processing, rigid-mass calibration and the
   random-error criterion.
 
----
+## Standards
 
-**Standards.** ISO 7626-1:2011, *Mechanical vibration and shock — Experimental
+ISO 7626-1:2011, *Mechanical vibration and shock — Experimental
 determination of mechanical mobility — Part 1: Basic terms and definitions, and
 transducer specifications* — the FRF family and its reciprocals (Table 1, the
 3.1.2 mobility and 3.1.4 free-quantity definitions) and the driving-point /

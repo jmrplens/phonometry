@@ -269,9 +269,9 @@ hide in that sentence:
   The transducer physics behind section 5: loudspeaker radiation, on-axis
   pressure and the near-field to far-field transition.
 
----
+## Standards
 
-**Standards.** IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*
+IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*
 (clauses 14.12.2–14.12.11): total harmonic distortion `THD_F`/`THD_R` (the
 14.12.3.2 formula defines the R form), nth-order harmonic distortion `dₙ`, the
 per-order modulation (`d_m,n`) and difference-frequency (`d_d,n`)

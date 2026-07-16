@@ -527,9 +527,9 @@ ponderados A.
   [Catálogo iso.org](https://www.iso.org/standard/20649.html).
   La cadena de atenuación implementada en la sección 2.
 
----
+## Normas
 
-**Normas.** ISO 9613-1:1993, *Acoustics — Attenuation of sound during
+ISO 9613-1:1993, *Acoustics — Attenuation of sound during
 propagation outdoors — Part 1: Calculation of the absorption of sound by the
 atmosphere* — el coeficiente de atenuación de tono puro $\alpha$ (Ec. (5)) con
 las frecuencias de relajación del oxígeno y el nitrógeno (Ec. (3)/(4)), la

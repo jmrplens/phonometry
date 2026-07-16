@@ -357,9 +357,9 @@ Devuelve un `EcmaLoudness`: `loudness` (N, sone_HMS), `specific_loudness`
 (N′(z), 53 bandas), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
 (N(l) a 187,5 Hz), `field`.
 
----
+## Normas
 
-**Normas.** ISO 532-1:2017, *Acoustics — Methods for calculating
+ISO 532-1:2017, *Acoustics — Methods for calculating
 loudness — Part 1: Zwicker method* — sonoridad estacionaria y variable en el
 tiempo en sonos a partir del programa de referencia normativo del Anexo A.4,
 con la sonoridad percentil N5/N10, validada frente al conjunto del Anexo B.

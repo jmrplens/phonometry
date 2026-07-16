@@ -352,9 +352,9 @@ en los extremos de banda donde solo se aplica un límite unilateral.*
   Las definiciones normativas de A/C/Z, las curvas analíticas del Anexo E y
   los límites de aceptación de la Tabla 3 verificados en la sección 7.
 
----
+## Normas
 
-**Normas.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — las curvas de ponderación frecuencial A, C y Z (la
 definición analítica del Anexo E a partir de cuatro frecuencias de esquina,
 normalizadas a 0 dB en 1 kHz), las tolerancias de clase 1 que el diseño

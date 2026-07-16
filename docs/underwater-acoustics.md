@@ -138,9 +138,9 @@ res.plot()
 
 </details>
 
----
+## Standards
 
-**Standards.** ISO 18405:2017, *Underwater acoustics — Terminology*: the 1 µPa
+ISO 18405:2017, *Underwater acoustics — Terminology*: the 1 µPa
 sound-pressure and 1 µPa²·s sound-exposure references and the definitions of
 sound pressure level, sound exposure level and peak sound pressure level.
 ISO 17208-1:2016 and ISO 17208-2:2019, *Underwater acoustics — Quantities and

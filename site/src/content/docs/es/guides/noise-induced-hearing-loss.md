@@ -176,9 +176,9 @@ sola es el tema de la guía de
   exposición-respuesta y las cuestiones de *fence* y conservación auditiva
   tratadas arriba.
 
----
+## Normas
 
-**Normas.** ISO 1999:2013, *Acoustics — Estimation of noise-induced hearing
+ISO 1999:2013, *Acoustics — Estimation of noise-induced hearing
 loss* — la combinación HTLAN (cláusula 6.1, Fórmula 1), el NIPTS mediano
 (cláusula 6.3.1, Fórmulas 2-3, Tabla 1) y su distribución estadística
 (cláusula 6.3.2, Fórmulas 4-7, Tablas 2-3), validado frente a los ejemplos

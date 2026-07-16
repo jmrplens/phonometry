@@ -3,12 +3,12 @@ title: "Bibliografía"
 description: "Los libros y artículos que sustentan las guías, agrupados por dominio: cada entrada con un DOI verificado o un enlace oficial del editor y una nota sobre qué sustenta."
 ---
 
-Cada guía de este sitio se cierra con dos bloques de citas: una sección
+Cada guía de este sitio se cierra con dos secciones de citas: una sección
 **Referencias** que lista los libros y artículos que sustentan la física de la
 página (estilo APA, un punto por fuente, cada uno con un DOI o un enlace
 oficial del editor, y media frase sobre qué sustenta la entrada), seguida de
-un párrafo final **Normas.** que nombra los documentos normativos que la
-página implementa, apartado por apartado. Esta página reúne las entradas de
+una sección **Normas** que nombra los documentos normativos que la página
+implementa, apartado por apartado. Esta página reúne las entradas de
 Referencias de todas las guías en un solo lugar, agrupadas por dominio: una
 lista de lectura curada y la fuente única de verdad para la comprobación de
 enlaces. Cada entrada lista las guías que la citan; la lista crece a medida

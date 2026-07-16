@@ -792,9 +792,9 @@ plt.show()
   [iso.org catalogue](https://www.iso.org/standard/45362.html).
   The precision anechoic-room method of section 4.
 
----
+## Standards
 
-**Standards.** ISO 3744:2010, *Acoustics — Determination of sound power levels
+ISO 3744:2010, *Acoustics — Determination of sound power levels
 and sound energy levels of noise sources using sound pressure — Engineering
 methods for an essentially free field over a reflecting plane* — the
 enveloping-surface method: hemisphere and box surface areas, the `K1`/`K2`

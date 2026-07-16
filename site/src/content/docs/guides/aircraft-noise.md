@@ -194,9 +194,9 @@ geometry behind takeoff roll, the Eq. 4-13b average runway-segment speed and
 the recommended 30 m floor on NPD lookups. Seven branch-covering receptor
 events of the reference workbook are reproduced end-to-end in the test suite.
 
----
+## Standards
 
-**Standards.** ICAO Annex 16 Vol. I Appendix 2 (EPNL procedure), ICAO Doc 9501
+ICAO Annex 16 Vol. I Appendix 2 (EPNL procedure), ICAO Doc 9501
 ETM Vol. I (worked-example oracles), IEC 61265:1995 (measurement-system
 tolerances), SAE ARP 5534:2021 (SAE-Method band absorption; pure-tone coefficient
 from ISO 9613-1), ECAC Doc 29 4th ed. Vol 2 §4.2 (NPD event-level

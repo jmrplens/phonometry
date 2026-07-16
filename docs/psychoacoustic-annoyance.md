@@ -228,9 +228,9 @@ res.plot()   # specific fluctuation strength F′(z) over the Bark axis (needs m
   The open MATLAB reference used as the numeric oracle for the
   fluctuation-strength cross-checks on this page.
 
----
+## Standards
 
-**Standards.** Fastl & Zwicker (2007, 3rd ed.), *Psychoacoustics: Facts and Models*
+Fastl & Zwicker (2007, 3rd ed.), *Psychoacoustics: Facts and Models*
 (Springer): psychoacoustic annoyance `PA = N5·(1 + √(wS² + wFR²))` with the
 sharpness weighting `wS` and roughness/fluctuation weighting `wFR`
 (Eqs 16.2–16.4; origin Widmann 1992), and the closed form for the fluctuation

@@ -167,9 +167,9 @@ ECMA-418-1 TNR/PR prominence verdicts,
 [Speech Transmission Index](/phonometry/guides/speech-transmission/) for
 STI/STIPA, and [Theory](/phonometry/reference/theory/perception/) for the underlying math.
 
----
+## Standards
 
-**Standards.** DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
+DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
 Schärfe* — sharpness in acum (clause 6 weighting, Annex B von Bismarck and
 Aures variants, Table A.2 targets). ECMA-418-2:2025, *Psychoacoustic metrics
 for ITT equipment — Part 2 (methods for describing human perception based on

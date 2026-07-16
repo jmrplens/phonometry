@@ -143,9 +143,9 @@ res.plot()
 
 </details>
 
----
+## Normas
 
-**Normas.** ISO 18405:2017, *Underwater acoustics — Terminology*: las
+ISO 18405:2017, *Underwater acoustics — Terminology*: las
 referencias de 1 µPa (presión) y 1 µPa²·s (exposición) y las definiciones de
 nivel de presión sonora, nivel de exposición sonora y nivel de pico.
 ISO 17208-1:2016 e ISO 17208-2:2019, *Underwater acoustics — Quantities and

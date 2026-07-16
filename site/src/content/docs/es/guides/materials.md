@@ -596,9 +596,9 @@ print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[
   El método estático de la sección 2, con la regresión por el origen y la
   velocidad de referencia de 0,5 mm/s.
 
----
+## Normas
 
-**Normas.** ISO 11654:1997 (valoración ponderada de absorción sonora);
+ISO 11654:1997 (valoración ponderada de absorción sonora);
 ISO 9053-1:2018 (resistencia estática al flujo de aire); ISO 9053-2:2020
 (resistencia alterna al flujo de aire); BS EN ISO 10534-1:2001 y BS EN ISO 10534-2:2001
 (tubo de impedancia); ASTM E2611-19 (pérdida por transmisión de cuatro

@@ -192,9 +192,9 @@ character is right: reduce the whole spectrum rather than reshape it.
   The normative NC curves and tangency method, plus the RC Mark II
   procedure of its informative Annex D, that this module implements.
 
----
+## Standards
 
-**Standards.** ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — the
+ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — the
 normative NC curves and tangency method (Table 1), and, from the informative
 Annex D, the RC Mark II curves (Table D.1), the mid-frequency-average rating
 (clause D.4) and the neutral/rumble/hiss spectral tag (clause D.3).

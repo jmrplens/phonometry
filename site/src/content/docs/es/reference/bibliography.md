@@ -632,7 +632,7 @@ que las guías incorporan sus secciones de Referencias.
   measurements: Part I: Pure water and magnesium sulfate contributions.
   *The Journal of the Acoustical Society of America*, 72(3), 896-907.
   [doi:10.1121/1.388170](https://doi.org/10.1121/1.388170).
-  Las mitades de agua pura y sulfato de magnesio del modelo de referencia de
+  Las componentes de agua pura y sulfato de magnesio del modelo de referencia de
   absorción en agua de mar.
   Citado por [Propagación submarina del sonido](/phonometry/es/guides/underwater-propagation/).
 - Francois, R. E., & Garrison, G. R. (1982). Sound absorption based on ocean
@@ -651,7 +651,7 @@ que las guías incorporan sus secciones de Referencias.
 - Thorp, W. H. (1967). Analytic description of the low-frequency attenuation
   coefficient. *The Journal of the Acoustical Society of America*, 42(1), 270.
   [doi:10.1121/1.1910566](https://doi.org/10.1121/1.1910566).
-  La fórmula de absorción de baja frecuencia solo en frecuencia.
+  La fórmula de absorción de baja frecuencia dependiente solo de la frecuencia.
   Citado por [Propagación submarina del sonido](/phonometry/es/guides/underwater-propagation/).
 - Chen, C.-T., & Millero, F. J. (1977). Speed of sound in seawater at high
   pressures. *The Journal of the Acoustical Society of America*, 62(5),

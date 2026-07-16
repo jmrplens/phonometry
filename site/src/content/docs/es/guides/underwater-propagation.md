@@ -204,7 +204,7 @@ de presión-liberada.
   measurements: Part I: Pure water and magnesium sulfate contributions.
   *The Journal of the Acoustical Society of America*, 72(3), 896-907.
   [doi:10.1121/1.388170](https://doi.org/10.1121/1.388170).
-  Las mitades de agua pura y sulfato de magnesio del modelo de absorción por
+  Las componentes de agua pura y sulfato de magnesio del modelo de absorción por
   defecto de la sección de pérdida por transmisión.
 - Francois, R. E., & Garrison, G. R. (1982). Sound absorption based on ocean
   measurements. Part II: Boric acid contribution and equation for total
@@ -221,7 +221,7 @@ de presión-liberada.
 - Thorp, W. H. (1967). Analytic description of the low-frequency attenuation
   coefficient. *The Journal of the Acoustical Society of America*, 42(1), 270.
   [doi:10.1121/1.1910566](https://doi.org/10.1121/1.1910566).
-  La fórmula de absorción de baja frecuencia solo en frecuencia (`"thorp"`).
+  La fórmula de absorción de baja frecuencia dependiente solo de la frecuencia (`"thorp"`).
 - Chen, C.-T., & Millero, F. J. (1977). Speed of sound in seawater at high
   pressures. *The Journal of the Acoustical Society of America*, 62(5),
   1129-1135.
@@ -263,7 +263,7 @@ de presión-liberada.
   sources. *The Journal of the Acoustical Society of America*, 34(12),
   1936-1956.
   [doi:10.1121/1.1909155](https://doi.org/10.1121/1.1909155).
-  El estudio de ruido ambiental tras las componentes de viento y térmica de
+  El estudio de ruido ambiental tras las componentes eólica y térmica de
   la sección de ruido ambiental oceánico.
 - Carey, W. M., & Evans, R. B. (2011). *Ocean ambient noise: Measurement and
   theory*. Springer.

@@ -55,16 +55,16 @@ direction, so $\alpha_{spec} = \alpha_s$ and $s = 0$; a strong diffuser sends
 energy everywhere, raising $\alpha_{spec}$ towards 1 and $s$ towards 1.
 
 ```python
-import phonometry as ph
+from phonometry import materials
 
 # Four reverberation-time situations reduced to two absorption coefficients.
 # alpha_s from the stationary pair (Eq. 1); alpha_spec from the rotating pair
 # (Eq. 4). V = 200 m^3, S = 10 m^2, c = 343.2 m/s throughout.
-alpha_s = ph.random_incidence_absorption(200.0, 10.0, c1=343.2, T1=8.0,
+alpha_s = materials.random_incidence_absorption(200.0, 10.0, c1=343.2, T1=8.0,
                                          c2=343.2, T2=6.0)
-alpha_spec = ph.specular_absorption_coefficient(200.0, 10.0, c3=343.2, T3=7.5,
+alpha_spec = materials.specular_absorption_coefficient(200.0, 10.0, c3=343.2, T3=7.5,
                                                 c4=343.2, T4=5.0)
-s = ph.scattering_coefficient(alpha_spec, alpha_s)   # Eq. (5)
+s = materials.scattering_coefficient(alpha_spec, alpha_s)   # Eq. (5)
 print(round(float(alpha_s), 4))     # 0.1343
 print(round(float(alpha_spec), 4))  # 0.2148
 print(round(float(s), 4))           # 0.0931
@@ -76,7 +76,7 @@ returns a plottable `ScatteringResult`:
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import materials
 
 # A 13-band measurement (250-4000 Hz): the random-incidence absorption alpha_s
 # (stationary sample) and the specular absorption alpha_spec (rotating
@@ -86,7 +86,7 @@ freqs = np.array([250, 315, 400, 500, 630, 800, 1000,
 alpha_s = np.full_like(freqs, 0.10)
 alpha_spec = 0.11 + 0.75 * (np.log10(freqs / 250) / np.log10(4000 / 250))
 
-result = ph.scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
+result = materials.scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
 print(np.round(result.scattering[[0, 6, 12]], 3))   # [0.011 0.428 0.844]
 result.plot()   # s(f) on a log-frequency axis, 0 to 1 (needs matplotlib)
 ```
@@ -103,6 +103,17 @@ the specular direction ($s \to 1$).*
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import materials
+
+# A 13-band measurement (250-4000 Hz): the random-incidence absorption alpha_s
+# (stationary sample) and the specular absorption alpha_spec (rotating
+# turntable). A diffuser scatters more with frequency, so s(f) rises.
+freqs = np.array([250, 315, 400, 500, 630, 800, 1000,
+                  1250, 1600, 2000, 2500, 3150, 4000], float)
+alpha_s = np.full_like(freqs, 0.10)
+alpha_spec = 0.11 + 0.75 * (np.log10(freqs / 250) / np.log10(4000 / 250))
+result = materials.scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
 
 # result is the ScatteringResult computed above. One line:
 result.plot()
@@ -126,17 +137,15 @@ base-plate scattering coefficient per one-third-octave band; the library exposes
 those limits and a checker.
 
 ```python
-from phonometry import (
-    BASE_PLATE_BANDS, BASE_PLATE_MAX_SCATTERING, check_base_plate_scattering,
-)
+from phonometry import materials
 
 # The normative per-band ceilings (Table 1): 0.05 up to 500 Hz, rising to 0.25.
-# BASE_PLATE_BANDS is the band tuple; BASE_PLATE_MAX_SCATTERING maps band -> ceiling.
-print(BASE_PLATE_BANDS[0], BASE_PLATE_MAX_SCATTERING[100])   # 100 0.05
+# materials.BASE_PLATE_BANDS is the band tuple; materials.BASE_PLATE_MAX_SCATTERING maps band -> ceiling.
+print(materials.BASE_PLATE_BANDS[0], materials.BASE_PLATE_MAX_SCATTERING[100])   # 100 0.05
 
 # A base plate whose measured scattering stays under the ceiling passes silently;
 # an over-limit band raises a ScatteringDiffusionWarning listing the offenders.
-check_base_plate_scattering([0.02] * len(BASE_PLATE_BANDS))
+materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS))
 ```
 
 ## 2. Diffusion coefficient (ISO 17497-2)
@@ -170,23 +179,22 @@ a collimated specular beam (d = 0.32) into a wide fan (d = 0.63).
 <video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side; the flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_diffusion_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animation: a 2D FDTD simulation of a plane wavefront hitting a flat rigid panel and a Schroeder quadratic-residue diffuser side by side; the flat panel throws a collimated specular beam back while the diffuser's phase-step wells spread the same energy into a wide fan, and the scattered field on a receiver arc yields diffusion coefficients of 0.32 versus 0.63" style="width:88%"></video>
 
 ```python
-import phonometry as ph
+from phonometry import materials
 
 # Polar response of a diffuser (levels in dB at equally spaced receivers).
 levels = [70.0, 74.0, 68.0, 72.0]
-d = ph.directional_diffusion_coefficient(levels)   # Formula (5)
+d = materials.directional_diffusion_coefficient(levels)   # Formula (5)
 print(round(float(d), 4))            # 0.7367
 
 # Normalise against a flat reference surface to isolate the diffuser's effect
 # (Formula (7)): d_n = (d - d_ref) / (1 - d_ref).
-d_n = ph.normalized_diffusion_coefficient(d, 0.10)
+d_n = materials.normalized_diffusion_coefficient(d, 0.10)
 print(round(float(d_n), 4))          # 0.7075
 
 # Random-incidence value: average the band coefficients over source positions,
 # with the standard's 2-D weighting (0 deg -> 1, +/-30/+/-60 deg -> 3).
-from phonometry import TWO_DIMENSIONAL_SOURCE_WEIGHTS
-d_random = ph.random_incidence_diffusion(
-    [0.5, 0.2, 0.2, 0.2, 0.2], weights=TWO_DIMENSIONAL_SOURCE_WEIGHTS)
+d_random = materials.random_incidence_diffusion(
+    [0.5, 0.2, 0.2, 0.2, 0.2], weights=materials.TWO_DIMENSIONAL_SOURCE_WEIGHTS)
 print(round(float(d_random), 4))     # 0.2231
 ```
 
@@ -195,7 +203,7 @@ goniometer sweep and returns a plottable `DiffusionResult`:
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import materials
 
 # A goniometer sweep of a diffusing surface: reflected levels L_i at 37
 # receivers from -90 to 90 deg (5 deg spacing). The energy is spread almost
@@ -204,7 +212,7 @@ angles = np.arange(-90.0, 90.5, 5.0)
 rng = np.random.default_rng(3)
 levels = 70.0 + 2.0 * np.sin(np.radians(angles) * 3.0) + rng.normal(0.0, 1.0, angles.size)
 
-result = ph.directional_diffusion(angles, levels)
+result = materials.directional_diffusion(angles, levels)
 print(round(result.coefficient, 2))   # 0.82
 result.plot()   # polar reflected response, d in the title (needs matplotlib)
 ```
@@ -222,6 +230,15 @@ spike and drive $d$ towards zero.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from phonometry import materials
+
+# A goniometer sweep of a diffusing surface: reflected levels L_i at 37
+# receivers from -90 to 90 deg (5 deg spacing). The energy is spread almost
+# uniformly over angle, so the Formula (5) coefficient d is high.
+angles = np.arange(-90.0, 90.5, 5.0)
+rng = np.random.default_rng(3)
+levels = 70.0 + 2.0 * np.sin(np.radians(angles) * 3.0) + rng.normal(0.0, 1.0, angles.size)
+result = materials.directional_diffusion(angles, levels)
 
 # result is the DiffusionResult computed above. One line:
 result.plot()
@@ -315,7 +332,7 @@ $$
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import materials
 
 # A band-limited incident impulse response and a synthetic road reflection
 # hr = Kr * r0 * delayed(hi): a reflection of magnitude r0 = 0.4, delayed by the
@@ -325,13 +342,13 @@ t = np.arange(n) / fs
 hi = np.zeros(n)
 hi[:64] = np.hanning(64) * np.cos(2.0 * np.pi * 1500.0 * t[:64])
 
-kr = ph.geometric_spreading_factor()          # (ds - dm)/(ds + dm) = 2/3
+kr = materials.geometric_spreading_factor()          # (ds - dm)/(ds + dm) = 2/3
 hr = kr * 0.4 * np.roll(hi, 96)
 
 # Narrow-band absorption, then reduced to one-third octaves over 250-4000 Hz.
-alpha = ph.insitu_absorption_coefficient(hi, hr)   # 1 - (1/Kr^2)|Hr/Hi|^2
+alpha = materials.insitu_absorption_coefficient(hi, hr)   # 1 - (1/Kr^2)|Hr/Hi|^2
 freq = np.fft.rfftfreq(n, 1.0 / fs)
-centres, band = ph.one_third_octave_absorption(freq, alpha)
+centres, band = materials.one_third_octave_absorption(freq, alpha)
 print(round(kr, 4))                # 0.6667
 print(round(float(band[2]), 3))    # 0.84  (alpha = 1 - 0.4^2 = 0.84)
 ```
@@ -342,10 +359,10 @@ Blackman-Harris trailing edge — the exact durations are reported per measureme
 not fixed, so they are configurable here.
 
 ```python
-from phonometry import adrienne_window
+from phonometry import materials
 
 # Default: 0.5 ms leading edge, 5 ms flat top, 5 ms Blackman-Harris trailing.
-w = adrienne_window(48000.0)
+w = materials.adrienne_window(48000.0)
 print(w.shape[0])          # 504 samples at 48 kHz
 print(round(float(w.max()), 3))   # 1.0  (flat top and edges meet at unity)
 ```
@@ -357,7 +374,7 @@ and on to one-third-octave bands — and returns a plottable
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import materials
 from scipy.signal import firwin, lfilter
 
 # A synthetic-but-realistic measurement. hi is a unit incident impulse; the road
@@ -366,7 +383,7 @@ from scipy.signal import firwin, lfilter
 # surface reflects less as frequency rises) and the reflected-path delay
 # shift = round(2 dm / c * fs).
 fs, n = 48000.0, 8192
-kr = ph.geometric_spreading_factor()           # (ds - dm)/(ds + dm) = 2/3
+kr = materials.geometric_spreading_factor()           # (ds - dm)/(ds + dm) = 2/3
 hi = np.zeros(n)
 hi[0] = 1.0
 taps = firwin(41, 1200.0, fs=fs)
@@ -374,7 +391,7 @@ taps = taps / taps.sum()
 shift = int(round(2.0 * 0.25 / 340.0 * fs))     # reflected-path delay 2 dm / c
 hr = kr * 0.85 * np.roll(lfilter(taps, 1.0, hi), shift)
 
-result = ph.insitu_absorption_spectrum(hi, hr, fs)
+result = materials.insitu_absorption_spectrum(hi, hr, fs)
 print(result.frequencies[[0, -1]].astype(int))     # [ 250 4000]
 print(np.round(result.absorption[[0, 6, 12]], 2))  # [0.31 0.65 1.  ]
 result.plot()   # alpha(f) bar chart over 250-4000 Hz (needs matplotlib)
@@ -392,6 +409,23 @@ dictates through $\alpha = 1 - (1/K_r^2)\,|H_r/H_i|^2$.*
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.signal import firwin, lfilter
+from phonometry import materials
+
+# A synthetic-but-realistic measurement. hi is a unit incident impulse; the road
+# reflection hr = Kr * r0 * roll(hi, shift) uses the geometrical-spreading
+# factor Kr, a mildly frequency-dependent r0 (a gentle low-pass, so a porous
+# surface reflects less as frequency rises) and the reflected-path delay
+# shift = round(2 dm / c * fs).
+fs, n = 48000.0, 8192
+kr = materials.geometric_spreading_factor()           # (ds - dm)/(ds + dm) = 2/3
+hi = np.zeros(n)
+hi[0] = 1.0
+taps = firwin(41, 1200.0, fs=fs)
+taps = taps / taps.sum()
+shift = int(round(2.0 * 0.25 / 340.0 * fs))     # reflected-path delay 2 dm / c
+hr = kr * 0.85 * np.roll(lfilter(taps, 1.0, hi), shift)
+result = materials.insitu_absorption_spectrum(hi, hr, fs)
 
 # result is the InsituAbsorptionResult computed above. One line:
 result.plot()
@@ -420,8 +454,8 @@ example ($d_s = 1.25$ m, $d_m = 0.25$ m, $c = 340$ m/s, 5 ms flat window) gives
 about 1.34 m.
 
 ```python
-import phonometry as ph
-print(round(ph.max_sampled_area_radius(5.0e-3), 3))   # 1.343  (metres)
+from phonometry import materials
+print(round(materials.max_sampled_area_radius(5.0e-3), 3))   # 1.343  (metres)
 ```
 
 ## 4. In-situ road absorption — spot method (ISO 13472-2)
@@ -445,11 +479,11 @@ $0.05\,c_0/f_{min}$ and $0.45\,c_0/f_{max}$. The reported range is the
 one-third-octave bands 250–1600 Hz.
 
 ```python
-import phonometry as ph
+from phonometry import materials
 
 # Upper usable frequency of a 100 mm tube and the valid spacing window.
-print(round(ph.spot_tube_upper_frequency(0.100, 343.0), 1))      # 1989.4 Hz
-s_min, s_max = ph.spot_microphone_spacing_bounds(
+print(round(materials.spot_tube_upper_frequency(0.100, 343.0), 1))      # 1989.4 Hz
+s_min, s_max = materials.spot_microphone_spacing_bounds(
     343.0, f_min=220.0, f_max=1800.0)
 print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
 ```

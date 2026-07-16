@@ -9,8 +9,9 @@ order on the index page and in the sidebar.
 
 Modules are keyed by their full dotted name (``phonometry.<subpackage>.<mod>``)
 so the mapping is unambiguous after the subpackage modularization. The bare
-``"phonometry"`` entry is the package top level: the convenience wrappers
-(:func:`octave_filter` and friends) defined in ``phonometry/__init__.py``.
+``"phonometry"`` entry is the package top level: the handful of names that
+live in ``phonometry/__init__.py`` itself (``__version__`` and
+:class:`PhonometryWarning`).
 
 Consistency is enforced at import time (fails loudly):
 
@@ -260,8 +261,6 @@ _SECTION_SUBPACKAGES: dict[str, tuple[str, ...]] = {
 #: one public module. Maps public name -> full module key in the taxonomy.
 OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # Defined in phonometry/__init__.py (reported as module "phonometry").
-    "octave_filter": "phonometry",
-    "octavefilter": "phonometry",
     "__version__": "phonometry",
     # Defined in phonometry._internal.warnings, exported at the top level.
     "PhonometryWarning": "phonometry",

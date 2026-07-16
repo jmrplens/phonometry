@@ -39,10 +39,10 @@ superficie del asiento); `Wd` es la ponderación horizontal y `Wh` la de
 mano-brazo.
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
 # La respuesta de ponderación global a cualquier frecuencia (ISO 8041-1, fórmula (5)).
-resp = ph.frequency_weighting("Wk", [1.0, 6.3096, 20.0])
+resp = vibration.frequency_weighting("Wk", [1.0, 6.3096, 20.0])
 print(resp.magnitude.round(3))      # [0.482 1.054 0.636]  (factores)
 print(resp.magnitude_db.round(2))   # [-6.33  0.46 -3.93]  (dB)
 ```
@@ -59,9 +59,9 @@ de −6 dB por debajo de 2 Hz, alcanza +0,46 dB cerca de 6,3 Hz y decae por enci
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import vibration
 
-result = ph.frequency_weighting("Wk", np.geomspace(0.4, 100.0, 240))
+result = vibration.frequency_weighting("Wk", np.geomspace(0.4, 100.0, 240))
 
 # En una línea:
 result.plot()
@@ -132,13 +132,13 @@ verdaderos al comparar con los factores tabulados.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 # Un espectro vertical de asiento medido (eficaz por tercio de octava, m/s^2).
 freqs = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0])
 accel = np.array([0.20, 0.45, 0.42, 0.25, 0.12, 0.05, 0.02])
 
-result = ph.weighted_acceleration(accel, freqs, "Wk")
+result = vibration.weighted_acceleration(accel, freqs, "Wk")
 print(round(result.overall, 3))          # 0.555  m/s^2 (a_w)
 print(result.weighted.round(3))          # W_i * a_i por banda
 ```
@@ -151,13 +151,13 @@ print(result.weighted.round(3))          # W_i * a_i por banda
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import vibration
 
 freqs = np.array([1.0, 1.25, 1.6, 2.0, 2.5, 3.15, 4.0, 5.0, 6.3, 8.0, 10.0,
                   12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 63.0, 80.0])
 accel = np.array([0.18, 0.24, 0.33, 0.46, 0.52, 0.55, 0.48, 0.39, 0.31, 0.26,
                   0.21, 0.17, 0.13, 0.10, 0.078, 0.060, 0.045, 0.028, 0.020])
-result = ph.weighted_acceleration(accel, freqs, "Wk")
+result = vibration.weighted_acceleration(accel, freqs, "Wk")
 
 # En una línea:
 result.plot()
@@ -192,15 +192,15 @@ de 9 indica que el método básico es inadecuado.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 fs = 1000.0
 raw = np.random.default_rng(0).standard_normal(int(60 * fs))   # registro de 60 s
-a_w = ph.apply_weighting(raw, fs, "Wk")                        # señal ponderada
+a_w = vibration.apply_weighting(raw, fs, "Wk")                        # señal ponderada
 
-print(round(ph.vibration_dose_value(a_w, fs), 3))   # 0.744  VDV [m/s^1.75]
-print(round(ph.mtvv(a_w, fs), 3))                   # 0.265  MTVV [m/s^2]
-print(round(ph.crest_factor(a_w), 2))               # 3.74   factor de cresta
+print(round(vibration.vibration_dose_value(a_w, fs), 3))   # 0.744  VDV [m/s^1.75]
+print(round(vibration.mtvv(a_w, fs), 3))                   # 0.265  MTVV [m/s^2]
+print(round(vibration.crest_factor(a_w), 2))               # 3.74   factor de cresta
 ```
 
 ## 3. Valor total de vibración y exposición diaria `A(8)`
@@ -214,10 +214,10 @@ a_v = \sqrt{\sum_j k_j^2\,a_{wj}^2}.
 $$
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
 # Salud, sentado: k = 1.4 / 1.4 / 1.0 (ISO 2631-1, 7.2.3).
-a_v = ph.vibration_total_value([0.35, 0.28, 0.62], k=[1.4, 1.4, 1.0])
+a_v = vibration.vibration_total_value([0.35, 0.28, 0.62], k=[1.4, 1.4, 1.0])
 print(round(a_v, 3))     # 0.882  m/s^2
 ```
 
@@ -252,10 +252,10 @@ mano-brazo `A(8) = 2.5` y valor límite `5` m/s²; acción de cuerpo completo `0
 y límite `1.15` m/s² (o un VDV de `9.1` / `21` m/s¹·⁷⁵):
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
 # ISO 5349-2 Anexo E.3: las tres tareas con motosierra de un trabajador forestal.
-result = ph.daily_vibration_exposure(
+result = vibration.daily_vibration_exposure(
     total_values=[4.6, 6.0, 3.6],                 # a_hv por tarea, m/s^2
     durations_s=[2 * 3600, 1 * 3600, 2 * 3600],   # tiempo de exposición por tarea
     kind="hav",
@@ -274,9 +274,9 @@ print(result.assessment.zone)             # 'action'  (2.5 <= A(8) < 5.0)
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import vibration
 
-result = ph.daily_vibration_exposure(
+result = vibration.daily_vibration_exposure(
     [4.6, 6.0, 3.6], [2 * 3600, 1 * 3600, 2 * 3600], kind="hav",
     labels=["desbrozadora", "tala", "descortezado"],
 )
@@ -311,9 +311,9 @@ blanco por vibración en el 10 % de un grupo expuesto, $D_y = 31{,}8\,A(8)^{-1{,
 (ec. (C.1)):
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
-print(round(ph.hav_vwf_lifetime_years(7.0), 1))   # 4.0 años (Tabla C.1)
+print(round(vibration.hav_vwf_lifetime_years(7.0), 1))   # 4.0 años (Tabla C.1)
 ```
 
 Las normas no definen deliberadamente ningún límite seguro — `A(8)` y los valores

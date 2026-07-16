@@ -22,11 +22,11 @@ explicitly excludes floating floors.)
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import materials
 
 s = np.logspace(np.log10(2.0), np.log10(100.0), 300)   # MN/m3
 for m in (40.0, 120.0):
-    plt.semilogx(s, ph.natural_frequency(s * 1e6, m), label=f"m' = {m:g} kg/m²")
+    plt.semilogx(s, materials.natural_frequency(s * 1e6, m), label=f"m' = {m:g} kg/m²")
 plt.xlabel("Dynamic stiffness s' [MN/m³]"); plt.ylabel("Natural frequency f₀ [Hz]")
 plt.legend(); plt.show()
 ```
@@ -62,15 +62,15 @@ vertical resonance $f_r$ of the plate-on-specimen system is read from the
 response peak; Formula 4 turns it into $s'_t$.
 
 ```python
-import phonometry as ph
+from phonometry import materials
 
 # Standard 8 kg load plate on the 0.04 m2 specimen -> m't = 200 kg/m2;
 # the fundamental resonance is measured at 25 Hz.
-s_t = ph.apparent_dynamic_stiffness(resonant_frequency=25.0, total_mass_per_area=200.0)
+s_t = materials.apparent_dynamic_stiffness(resonant_frequency=25.0, total_mass_per_area=200.0)
 print(round(s_t / 1e6, 3))                              # 4.935  MN/m3
 
 # Installed on a 120 kg/m2 floating screed with s' = 10 MN/m3:
-print(round(ph.natural_frequency(10e6, 120.0), 1))      # 45.9  Hz
+print(round(materials.natural_frequency(10e6, 120.0), 1))      # 45.9  Hz
 ```
 
 ## 2. The enclosed-gas term and airflow resistivity
@@ -82,9 +82,9 @@ standard's worked NOTE (`p₀ = 0.1 MPa`, `ε = 0.9`) is `s'a = 111/d` MN/m³ fo
 `d` in millimetres:
 
 ```python
-import phonometry as ph
+from phonometry import materials
 
-print(round(ph.enclosed_gas_stiffness(thickness=0.020, porosity=0.9) / 1e6, 2))
+print(round(materials.enclosed_gas_stiffness(thickness=0.020, porosity=0.9) / 1e6, 2))
 # 5.56  MN/m3   (the NOTE's 111/20 = 5.55 MN/m3)
 ```
 
@@ -95,9 +95,9 @@ method only resolves `s' = s't` when the gas term is negligible.
 `floating_floor_resonance` chains the whole determination:
 
 ```python
-import phonometry as ph
+from phonometry import materials
 
-res = ph.floating_floor_resonance(
+res = materials.floating_floor_resonance(
     resonant_frequency=25.0, total_mass_per_area=200.0,
     floor_mass_per_area=120.0,
     airflow_resistivity=50.0, thickness=0.020, porosity=0.9,

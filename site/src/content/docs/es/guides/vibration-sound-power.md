@@ -68,18 +68,18 @@ por banda `εⱼ` determinado (según ISO 9614) como `εⱼ = Pⱼ/(Z_{c,n}·⟨
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import emission
 
 bands = np.array([250.0, 500.0, 1000.0, 2000.0])
 lv = np.array([82.0, 85.0, 83.0, 79.0])          # nivel de velocidad por banda [dB]
 
 # Límite superior de la Parte 1 (epsilon = 1):
-upper = ph.sound_power_from_vibration(lv, area=1.6, frequencies=bands)
+upper = emission.sound_power_from_vibration(lv, area=1.6, frequencies=bands)
 print(round(upper.total_level, 1))               # p. ej. 89.4  dB re 1 pW
 
 # Valor de ingeniería de la Parte 2 con un factor de radiación medido:
 eps = np.array([0.45, 0.75, 0.95, 1.00])
-eng = ph.sound_power_from_vibration(lv, area=1.6, radiation_factor=eps, frequencies=bands)
+eng = emission.sound_power_from_vibration(lv, area=1.6, radiation_factor=eps, frequencies=bands)
 print(np.round(eng.sound_power_level, 1))        # L_W por banda
 ```
 
@@ -91,13 +91,13 @@ calibración sinusoidal se convierte como `L_v = 20·lg(â/(2πf·v₀·√2))`
 independiente:
 
 ```python
-import phonometry as ph
+from phonometry import emission
 
 # El EJEMPLO de calibración de la norma: 9,81 m/s^2 a 100 Hz.
-print(round(float(ph.velocity_level_from_acceleration(9.81, 100.0)), 1))   # 106.9 dB
+print(round(float(emission.velocity_level_from_acceleration(9.81, 100.0)), 1))   # 106.9 dB
 
 # Factor de radiación desde una potencia medida (ISO 9614): eps = P / (Zc <v^2> S).
-eps = ph.radiation_factor(3.0e-4, area=2.0, mean_square_velocity=(1e-3)**2)
+eps = emission.radiation_factor(3.0e-4, area=2.0, mean_square_velocity=(1e-3)**2)
 print(round(float(eps), 3))                                                # 0.365
 ```
 

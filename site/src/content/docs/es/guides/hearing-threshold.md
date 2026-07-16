@@ -31,15 +31,15 @@ cuantil normal estándar $z(Q)$ (cláusula 4.4): $\Delta H_Q = \Delta H_{md} +
 z(Q)\,s$, usando $s_u$ cuando $z \ge 0$ y $s_l$ en caso contrario.
 
 ```python
-import phonometry as ph
+from phonometry import hearing
 
 # Desviación mediana del umbral de un hombre de 65 años, todas las frecuencias audiométricas.
-result = ph.age_threshold(65, "male", fractile=0.5)
+result = hearing.age_threshold(65, "male", fractile=0.5)
 print(result.median.round(1))     # [ 6.6  7.6  8.  9.  10.4 13.4 16.3 21.6 26.2 33.7 39.5]
 print(result.median[8].round(1))  # 26.2 dB a 4000 Hz
 
 # El decil que peor oye (percentil 90) a 4000 Hz:
-print(ph.age_threshold(65, "male", fractile=0.9).threshold[8].round(1))  # 50.3
+print(hearing.age_threshold(65, "male", fractile=0.9).threshold[8].round(1))  # 50.3
 ```
 
 La pérdida es mayor en las altas frecuencias y crece con la edad — el
@@ -79,11 +79,11 @@ referencia para escucha de **campo libre** (incidencia frontal) y **campo
 difuso**.
 
 ```python
-import phonometry as ph
+from phonometry import hearing
 
-print(ph.reference_threshold("free-field"))
+print(hearing.reference_threshold("free-field"))
 # [22.1 11.4  4.4  2.4  2.4  2.4 -1.3 -5.8 -5.4  4.3 12.6]
-print(ph.reference_threshold("diffuse-field")[4])   # 0.8 dB a 1000 Hz
+print(hearing.reference_threshold("diffuse-field")[4])   # 0.8 dB a 1000 Hz
 ```
 
 Ambos campos coinciden en baja frecuencia y divergen por encima de 1 kHz
@@ -98,22 +98,22 @@ bajo) en torno a 3–4 kHz.
 
 ```python
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import hearing
 from phonometry.hearing import AUDIOMETRIC_FREQUENCIES as f
 
 # En una línea, la distribución por edad:
-ph.age_threshold(70, "male", 0.5).plot()
+hearing.age_threshold(70, "male", 0.5).plot()
 plt.show()
 
 # A mano, ambos paneles:
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 for age in (20, 40, 60, 80):
-    r = ph.age_threshold(age, "male", 0.5)
+    r = hearing.age_threshold(age, "male", 0.5)
     ax1.plot(f, r.median, "o-", label=f"{age} yr")
 ax1.set_xscale("log"); ax1.invert_yaxis(); ax1.legend()
 
-ax2.plot(f, ph.reference_threshold("free-field"), "o-", label="Free-field")
-ax2.plot(f, ph.reference_threshold("diffuse-field"), "s--", label="Diffuse-field")
+ax2.plot(f, hearing.reference_threshold("free-field"), "o-", label="Free-field")
+ax2.plot(f, hearing.reference_threshold("diffuse-field"), "s--", label="Diffuse-field")
 ax2.set_xscale("log"); ax2.legend()
 plt.show()
 ```

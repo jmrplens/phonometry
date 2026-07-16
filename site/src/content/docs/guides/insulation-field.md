@@ -78,23 +78,23 @@ that source. Reading them:
 
 ```python
 import numpy as np
-from phonometry import airborne_insulation, weighted_rating, energy_average_level
+from phonometry import building
 
 # Energy-average several microphone positions in one room (dB)
-print(round(float(energy_average_level([60.0, 66.0])), 1))   # 64.0
+print(round(float(building.energy_average_level([60.0, 66.0])), 1))   # 64.0
 
 # Field insulation per band; area S and volume V add R'
 l1 = np.full(16, 80.0)                                # source-room levels
 l2 = np.full(16, 40.0)                                # receiving-room levels
 t2 = np.full(16, 0.5)                                 # receiving-room T (s)
-ins = airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
+ins = building.airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
 print(round(float(ins.dnt[0]), 1))                   # 40.0  (= D since T = T0)
 print(round(float(ins.r_prime[0]), 1))               # 38.0
 
 # Single-number rating from a measured 16-band R spectrum (ISO 717-1 Annex C)
 R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
      28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
-w = weighted_rating(R)
+w = building.weighted_rating(R)
 print(w.rating, w.c, w.ctr)                          # 30 -2 -3  ->  Rw(C;Ctr) = 30(-2;-3)
 
 w.plot()   # measured R' vs shifted ISO 717-1 reference, deviations shaded (needs matplotlib)
@@ -105,6 +105,12 @@ w.plot()   # measured R' vs shifted ISO 717-1 reference, deviations shaded (need
 
 ```python
 import matplotlib.pyplot as plt
+from phonometry import building
+
+# Single-number rating from a measured 16-band R spectrum (ISO 717-1 Annex C)
+R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
+w = building.weighted_rating(R)
 
 # One line — measured curve vs the shifted ISO 717-1 reference, deviations shaded:
 w.plot()
@@ -170,16 +176,20 @@ prescribes "for the expression of uncertainty" and ISO 12999-1 Annex B
 requires when stating the uncertainty of a single-number value.
 
 ```python
-from phonometry import weighted_rating_extended
+from phonometry import building
+
+# Single-number rating from a measured 16-band R spectrum (ISO 717-1 Annex C)
+R = [20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6,
+     28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5]
 
 freqs = [50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500,
          630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000]
 r_ext = [18.7, 19.2, 20.0, *R, 26.8, 29.2]     # ISO 717-1 Annex C, Table C.2
-ext = weighted_rating_extended(r_ext, freqs)
+ext = building.weighted_rating_extended(r_ext, freqs)
 print(ext.rating, ext.c, ext.ctr, ext.c_50_5000, ext.ctr_50_5000)
 # 30 -2 -3 -2 -4   ->  Rw(C;Ctr;C50-5000;Ctr,50-5000) = 30(-2;-3;-2;-4)
 
-one_dp = weighted_rating_extended(r_ext, freqs, one_decimal=True)
+one_dp = building.weighted_rating_extended(r_ext, freqs, one_decimal=True)
 print(one_dp.rating)   # 30.0, the 0.1 dB-step rating for uncertainty statements
 ```
 
@@ -224,7 +234,7 @@ $L_{n,r,0,w} = 77.6$ dB and $C_{I,r,0} = -10.3$ dB of A.2.2).
 
 ```python
 import numpy as np
-from phonometry import impact_insulation, weighted_impact_rating
+from phonometry import building
 
 # 16 one-third-octave impact levels Li (100 Hz - 3150 Hz), dB, from the
 # ISO 717-2 Annex C worked example, and the receiving-room T per band.
@@ -232,17 +242,17 @@ li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
 t2 = np.full(16, 0.5)
 
-imp = impact_insulation(li, t2, volume=50.0)
+imp = building.impact_insulation(li, t2, volume=50.0)
 print(round(float(imp.l_n_t[0]), 1))          # 62.1  (= Li since T = T0)
 print(round(float(imp.l_n[0]), 1))            # 64.1  normalized to A0 = 10 m^2
 
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
-res_imp = weighted_impact_rating(imp.l_n_t)
+res_imp = building.weighted_impact_rating(imp.l_n_t)
 print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
 
 # Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
-print(weighted_impact_rating(octave).rating)  # 54
+print(building.weighted_impact_rating(octave).rating)  # 54
 
 res_imp.plot()   # measured L'nT vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
 ```
@@ -252,6 +262,17 @@ res_imp.plot()   # measured L'nT vs shifted ISO 717-2 reference, measured-above 
 
 ```python
 import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# 16 one-third-octave impact levels Li (100 Hz - 3150 Hz), dB, from the
+# ISO 717-2 Annex C worked example, and the receiving-room T per band.
+li = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+t2 = np.full(16, 0.5)
+imp = building.impact_insulation(li, t2, volume=50.0)
+# Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
+res_imp = building.weighted_impact_rating(imp.l_n_t)
 
 # One line — measured L'nT vs the shifted ISO 717-2 reference (measured-above shaded):
 res_imp.plot()
@@ -330,7 +351,7 @@ The façade quantity is airborne, so its single-number rating uses the
 
 ```python
 import numpy as np
-from phonometry import facade_insulation, weighted_rating
+from phonometry import building
 
 # Outdoor level 2 m in front of the façade, receiving-room level and T per
 # one-third-octave band; surface_level is the microphone on the test element.
@@ -338,7 +359,7 @@ l1_2m = np.full(16, 75.0)                              # L1,2m outdoors
 l2 = np.full(16, 33.0)                                 # receiving-room L2
 t2 = np.full(16, 0.5)                                  # receiving-room T (s)
 
-fac = facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
+fac = building.facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
                         surface_level=np.full(16, 78.0), method="loudspeaker")
 print(round(float(fac.d_2m[0]), 1))                    # 42.0  D2m = L1,2m - L2
 print(round(float(fac.d_2m_nt[0]), 1))                 # 42.0  (= D2m since T = T0)
@@ -346,12 +367,12 @@ print(round(float(fac.d_2m_n[0]), 1))                  # 40.0  normalized to A0 
 print(round(float(fac.r_prime[0]), 1))                 # 42.1  R'45deg (loudspeaker, -1.5 dB)
 
 # The road-traffic element method carries the -3 dB all-angle correction instead
-tr = facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
+tr = building.facade_insulation(l1_2m, l2, t2, volume=50.0, area=11.5,
                        surface_level=np.full(16, 78.0), method="road_traffic")
 print(round(float(tr.r_prime[0]), 1))                  # 40.6  R'tr,s (traffic, -3 dB)
 
 # The façade quantity is airborne: rate D2m,nT with the ISO 717-1 engine
-print(weighted_rating(fac.d_2m_nt).rating)             # 42  Dls,2m,nT,w
+print(building.weighted_rating(fac.d_2m_nt).rating)             # 42  Dls,2m,nT,w
 
 fac.plot()   # per-band D2m,nT with D2m, D2m,n and R' overlaid (needs matplotlib)
 ```
@@ -404,23 +425,22 @@ conformity* with a requirement (Formulae 4/5).
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo.svg" alt="A weighted rating reported with its two-sided 95 % expanded uncertainty in situations A, B and C, the reproducibility uncertainty widest and the repeatability uncertainty narrowest" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_dark.svg" alt="A weighted rating reported with its two-sided 95 % expanded uncertainty in situations A, B and C, the reproducibility uncertainty widest and the repeatability uncertainty narrowest" style="width:80%">
 
 ```python
-from phonometry import (band_uncertainty, single_number_uncertainty,
-                        uncertain_value, satisfies_lower_requirement)
+from phonometry import building
 
 # Situation B (same building, different teams) -> the in-situ standard deviation.
-print(single_number_uncertainty("r_w", "B"))       # 0.9  dB  (Table 3)
-u = band_uncertainty("airborne", "B")              # per-band u (Table 2)
+print(building.single_number_uncertainty("r_w", "B"))       # 0.9  dB  (Table 3)
+u = building.band_uncertainty("airborne", "B")              # per-band u (Table 2)
 print(len(u.frequencies), u.uncertainties[10])     # 21 1.1  (the 500 Hz band)
 
 # Report R'w = 52 dB with a two-sided 95 % interval (k = 1.96, Table 8):
-uv = uncertain_value(52.0, "rprime_w", "B")        # aliases resolve to r_w
+uv = building.uncertain_value(52.0, "rprime_w", "B")        # aliases resolve to r_w
 print(uv.coverage_factor, round(uv.expanded_uncertainty, 1))    # 1.96 1.8
 print(round(uv.lower, 1), round(uv.upper, 1))      # 50.2 53.8  ->  52 ± 1.8 dB
 
 # Declaring conformity uses the ONE-sided factor (k = 1.65): does R'w provably
 # clear a 50 dB requirement?
-uc = uncertain_value(52.0, "rprime_w", "B", one_sided=True)
-print(satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
+uc = building.uncertain_value(52.0, "rprime_w", "B", one_sided=True)
+print(building.satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
 ```
 
 Impact quantities offer situations B/C only (Table 4, no 500 Hz band in the 2020
@@ -434,11 +454,11 @@ independent measurements with `reduce_by_independent_measurements` ($u/\sqrt{m}$
 
 ```python
 import matplotlib.pyplot as plt
-from phonometry import uncertain_value
+from phonometry import building
 
 # The same R'w = 52 dB reported in each situation with its two-sided 95 % U.
 situations = ["A", "B", "C"]
-vals = [uncertain_value(52.0, "r_w", s) for s in situations]
+vals = [building.uncertain_value(52.0, "r_w", s) for s in situations]
 
 fig, ax = plt.subplots(figsize=(7, 4))
 ax.errorbar(situations, [v.value for v in vals],
@@ -498,25 +518,24 @@ energy average of three A- or C-weighted positions.
 
 ```python
 import numpy as np
-from phonometry import (reverberation_index, estimate_reverberation_index,
-                        survey_airborne_insulation, survey_service_equipment_level)
+from phonometry import building
 
 # Octave-band levels (125-2000 Hz) and the measured receiving-room T.
 l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
 l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
-k = reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
-res = survey_airborne_insulation(l1, l2, k, volume=50.0, area=12.0)
+k = building.reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
+res = building.survey_airborne_insulation(l1, l2, k, volume=50.0, area=12.0)
 print(np.round(res.d_nt, 1))          # [34.5 39.8 45.  50.5 54. ]  DnT = D + k
 print(res.rating.rating, res.rating.c)        # 49 -1  ->  DnT,w (C)
 print(res.r_prime_rating.rating)               # 48  ->  R'w
 
 # No reverberation time measured? Estimate k from Table 4 (heavy walls, hard
 # floor, 35-60 m3 -> class "g").
-k_est = estimate_reverberation_index(50.0, "g")
+k_est = building.estimate_reverberation_index(50.0, "g")
 print(k_est)                                   # [4.5 5.  5.5 5.5 5.5]
 
 # Service-equipment noise: energy average of three A-weighted positions.
-se = survey_service_equipment_level([35.0, 30.0, 32.0], 3.0, volume=50.0)
+se = building.survey_service_equipment_level([35.0, 30.0, 32.0], 3.0, volume=50.0)
 print(round(float(se.l_xy), 1), round(float(se.l_xy_nt), 1))   # 32.8 29.8
 
 res.plot()   # DnT vs shifted ISO 717-1 reference (needs matplotlib)

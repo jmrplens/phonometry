@@ -59,11 +59,11 @@ efectiva de la *envolvente*, llevada a [0, 1].
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-from phonometry import sti_from_impulse_response
+from phonometry import hearing
 
 fs = 48000
 
-# STI frente al tiempo de reverberación: barre sti_from_impulse_response sobre
+# STI frente al tiempo de reverberación: barre hearing.sti_from_impulse_response sobre
 # decaimientos exponenciales sintéticos (ruido blanco x exp(-6.9077 t / T60))
 # en una rejilla de T60, exactamente la física de la curva de arriba:
 rng = np.random.default_rng(0)
@@ -72,7 +72,7 @@ sti_values = []
 for t60 in t60_grid:
     t = np.arange(int(2 * t60 * fs)) / fs
     ir = rng.standard_normal(t.size) * np.exp(-6.9077 * t / t60)
-    sti_values.append(sti_from_impulse_response(ir, fs).sti)
+    sti_values.append(hearing.sti_from_impulse_response(ir, fs).sti)
 
 fig, ax = plt.subplots()
 ax.semilogx(t60_grid, sti_values, "o-")
@@ -91,20 +91,20 @@ plt.show()
 
 ```python
 import numpy as np
-from phonometry import sti_from_impulse_response, stipa, stipa_signal
+from phonometry import hearing
 
 fs = 48000
 # Una respuesta al impulso medida en la sala (decaimiento sintetizado para que el ejemplo funcione)
 ir = np.random.default_rng(0).standard_normal(fs) * np.exp(-6.9 * np.arange(fs) / fs / 0.5)
 
 # Método indirecto: desde una respuesta al impulso medida en la sala
-res = sti_from_impulse_response(ir, fs, snr=25.0)
+res = hearing.sti_from_impulse_response(ir, fs, snr=25.0)
 print(f"STI = {res.sti:.2f}  ({res.rating})")   # p. ej. 0.62 (D)
 
-# Medición STIPA directa: reproduce stipa_signal() en la sala y grábala
-test = stipa_signal(fs, seconds=18.0, level_db=80.0)
+# Medición STIPA directa: reproduce hearing.stipa_signal() en la sala y grábala
+test = hearing.stipa_signal(fs, seconds=18.0, level_db=80.0)
 recording = test                       # en la práctica, la señal del micrófono tras la reproducción
-res = stipa(recording, fs)
+res = hearing.stipa(recording, fs)
 res.plot()   # barras del índice de transferencia de modulación (MTI) por banda; STI y valoración en el título
 ```
 

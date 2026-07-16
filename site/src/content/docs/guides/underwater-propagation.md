@@ -47,10 +47,10 @@ across 100 Hz–1 MHz.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 ranges = np.linspace(10.0, 20_000.0, 400)
-tl = ph.transmission_loss(ranges, 10e3, law="practical", transition_range=1000.0,
+tl = underwater.transmission_loss(ranges, 10e3, law="practical", transition_range=1000.0,
                           temperature=10.0, salinity=35.0, depth=100.0)
 print(tl.absorption_coefficient, tl.tl[-1])
 tl.plot()   # TL vs range with the spreading/absorption split (needs matplotlib)
@@ -86,12 +86,12 @@ equation (default, in the Wong & Zhu 1995 ITS-90 form), **Del Grosso** (1974) or
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
-c = ph.sea_water_sound_speed(25.0, 35.0, 1000.0, model="mackenzie")  # 1550.744
+c = underwater.sea_water_sound_speed(25.0, 35.0, 1000.0, model="mackenzie")  # 1550.744
 depths = np.linspace(0.0, 3000.0, 121)
 temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
-profile = ph.sound_speed_profile(depths, temps, 35.0, model="unesco")
+profile = underwater.sound_speed_profile(depths, temps, 35.0, model="unesco")
 profile.plot()   # sound speed vs depth (needs matplotlib)
 ```
 
@@ -142,10 +142,10 @@ or reverberation-limited with $RL$ in place of $NL - DI$.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 tl = np.linspace(40.0, 120.0, 400)
-se = ph.passive_sonar_equation(source_level=140.0, transmission_loss=tl,
+se = underwater.passive_sonar_equation(source_level=140.0, transmission_loss=tl,
                                noise_level=60.0, directivity_index=15.0,
                                detection_threshold=8.0)
 print(se.figure_of_merit)
@@ -187,10 +187,10 @@ $BL = -20 \lg |R|$.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 phi = np.linspace(0.0, 90.0, 361)   # grazing angle from the interface, degrees
-bl = ph.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,   # water
+bl = underwater.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,   # water
                                rho2=1900.0, c2=1650.0)          # sand
 print(bl.critical_angle)            # 24.6°
 bl.plot()   # bottom loss vs grazing angle (needs matplotlib)
@@ -233,10 +233,10 @@ beyond ~5 kHz only as an extrapolation to show the thermal crossover. A
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 freqs = np.logspace(2, 5.5, 300)
-noise = ph.ocean_ambient_noise(freqs, wind_speed_knots=15.0)
+noise = underwater.ocean_ambient_noise(freqs, wind_speed_knots=15.0)
 noise.plot()   # composite spectrum with wind/thermal components (needs matplotlib)
 ```
 
@@ -274,14 +274,14 @@ When no measured spectrum is available, a ship's source level can be
 **RANDI 3.1** or **Wales & Heitmeyer** (2002).
 
 ```python
-import phonometry as ph
+from phonometry import underwater
 
-ship = ph.ship_source_spectrum(18.0, 300.0, vessel_class="containership")
+ship = underwater.ship_source_spectrum(18.0, 300.0, vessel_class="containership")
 ship.plot()                     # source spectral density vs frequency
-print(ph.VESSEL_CLASSES)        # the 13 JOMOPANS-ECHO vessel classes
+print(underwater.VESSEL_CLASSES)        # the 13 JOMOPANS-ECHO vessel classes
 
 # Feed the prediction into the ambient noise as the shipping term:
-noise = ph.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
+noise = underwater.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
                                shipping=ship.source_psd)
 ```
 
@@ -326,17 +326,17 @@ three solvers (Jensen et al., *Computational Ocean Acoustics*):
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import underwater
 
 z = np.linspace(0.0, 5000.0, 60)
 eta = 2.0 * (z - 1300.0) / 1300.0
 c = 1500.0 * (1.0 + 0.00737 * (eta - 1.0 + np.exp(-eta)))   # Munk profile
-ph.ray_trace(z, c, source_depth=1000.0,
+underwater.ray_trace(z, c, source_depth=1000.0,
              launch_angles_deg=np.linspace(-12, 12, 21), max_range=100e3).plot()
 
-modes = ph.normal_modes(50.0, [0.0, 200.0], [1500.0, 1500.0],
+modes = underwater.normal_modes(50.0, [0.0, 200.0], [1500.0, 1500.0],
                         source_depth=50.0, receiver_depth=100.0)
-ph.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1500.0],
+underwater.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1500.0],
                       source_depth=50.0, max_range=20e3).plot()
 ```
 

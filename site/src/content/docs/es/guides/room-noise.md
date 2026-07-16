@@ -26,12 +26,12 @@ contra las curvas — se reporta como **banda determinante**.
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import room
 
 # SPL en bandas de octava, 16 Hz - 8000 Hz (una sala dominada por la ventilación).
 spl = np.array([62.0, 62.0, 59.0, 57.0, 52.0, 42.0, 35.0, 29.0, 24.0, 19.0])
 
-nc = ph.noise_criterion(spl)
+nc = room.noise_criterion(spl)
 print(round(nc.rating, 1))        # 42.5
 print(nc.governing_frequency)     # 250.0  (la banda tangente)
 ```
@@ -39,7 +39,7 @@ print(nc.governing_frequency)     # 250.0  (la banda tangente)
 Como la calificación interpola entre las curvas tabuladas es un número continuo:
 una calificación NC de $42{,}5$ queda a medio camino entre NC-40 y NC-45. Puede
 suministrarse un subconjunto de las bandas de octava junto con sus frecuencias
-centrales (`ph.noise_criterion(levels, frequencies)`), lo que resulta cómodo
+centrales (`room.noise_criterion(levels, frequencies)`), lo que resulta cómodo
 cuando solo se midieron las bandas de interferencia con el habla.
 
 ## 2. Room Criteria Mark II — calificación y etiqueta espectral
@@ -64,11 +64,11 @@ se desvía el espectro de la curva RC de referencia (cláusula D.3): **retumbo**
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import room
 
 spl = np.array([62.0, 62.0, 59.0, 57.0, 52.0, 42.0, 35.0, 29.0, 24.0, 19.0])
 
-rc = ph.room_criterion(spl)
+rc = room.room_criterion(spl)
 print(rc.label)             # RC-35(R)   -  una sala retumbante
 print(round(rc.lmf, 1))     # 35.3
 print(rc.classification)    # R
@@ -86,18 +86,18 @@ como $R$ (retumbo) — el "zumbido" subjetivo de una climatizadora sobredimensio
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
-import phonometry as ph
+from phonometry import room
 
 spl = np.array([62.0, 62.0, 59.0, 57.0, 52.0, 42.0, 35.0, 29.0, 24.0, 19.0])
 
 # En una línea cada uno:
-ph.noise_criterion(spl).plot()
-ph.room_criterion(spl).plot()
+room.noise_criterion(spl).plot()
+room.room_criterion(spl).plot()
 plt.show()
 
 # A mano, reproduciendo lo que dibujan NCResult.plot() / RCResult.plot():
-from phonometry.room_noise import NC_CURVES, NC_INDICES, OCTAVE_BANDS
-nc, rc = ph.noise_criterion(spl), ph.room_criterion(spl)
+from phonometry.room.room_noise import NC_CURVES, NC_INDICES, OCTAVE_BANDS
+nc, rc = room.noise_criterion(spl), room.room_criterion(spl)
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
 for row, idx in zip(NC_CURVES, NC_INDICES):

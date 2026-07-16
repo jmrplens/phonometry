@@ -23,17 +23,17 @@ ISO 9611, ISO 10846, EN 15657 and EN 12354-5.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 m, k, c = 2.0, 8000.0, 5.0
 f = np.logspace(np.log10(0.5), np.log10(200.0), 500)
 w = 2.0 * np.pi * f
-h = ph.sdof_receptance(f, m, k, c)
+h = vibration.sdof_receptance(f, m, k, c)
 for label, frf in (("receptance |H|", np.abs(h)),
                    ("mobility |Y|", np.abs(1j * w * h)),
                    ("accelerance |A|", np.abs(-(w**2) * h))):
     plt.loglog(f, frf / frf.max(), label=label)
-plt.axvline(ph.resonance_frequency(m, k), ls="--", color="0.6")
+plt.axvline(vibration.resonance_frequency(m, k), ls="--", color="0.6")
 plt.xlabel("Frequency [Hz]"); plt.ylabel("Normalized magnitude")
 plt.legend(); plt.show()
 ```
@@ -61,12 +61,12 @@ element-wise for multi-coordinate systems (Table 1 also names `F/a` the
 "effective mass", the quantity called apparent mass here).
 
 ```python
-import phonometry as ph
+from phonometry import vibration
 
 # A mobility of 2e-3 m/(N.s) at 80 Hz, expressed as the other FRFs:
 Y = 2e-3
-print(round(abs(ph.convert_frf(Y, 80.0, "mobility", "impedance")), 1))     # 500.0  N.s/m
-print(f"{abs(ph.convert_frf(Y, 80.0, 'mobility', 'accelerance')):.3f}")    # 1.005  1/kg
+print(round(abs(vibration.convert_frf(Y, 80.0, "mobility", "impedance")), 1))     # 500.0  N.s/m
+print(f"{abs(vibration.convert_frf(Y, 80.0, 'mobility', 'accelerance')):.3f}")    # 1.005  1/kg
 ```
 
 The choice between the three motion FRFs is one of convenience, not physics:
@@ -101,14 +101,14 @@ At the resonance `ω0` the driving-point mobility is **purely real** and equal t
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 m, k, c = 2.0, 8000.0, 5.0
-f0 = ph.resonance_frequency(m, k)             # 10.07 Hz
+f0 = vibration.resonance_frequency(m, k)             # 10.07 Hz
 
-y0 = complex(ph.sdof_mobility(f0, m, k, c))
+y0 = complex(vibration.sdof_mobility(f0, m, k, c))
 print(round(y0.real, 4), round(y0.imag, 6))   # 0.2 0.0   -> |Y(f0)| = 1/c
-print(round(complex(ph.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1/k
+print(round(complex(vibration.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000125 = 1/k
 ```
 
 ## 3. Measured FRFs and their acceptance criteria (ISO 7626-2)
@@ -145,15 +145,15 @@ top of them, two ISO 7626-2 acceptance criteria are provided:
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 # A 10 kg calibration block: |A| must be 1/m = 0.100 1/kg at every frequency.
 f = np.array([20.0, 100.0, 500.0])
-res = ph.rigid_mass_calibration_check([0.100, 0.102, 0.097], f, mass=10.0)
+res = vibration.rigid_mass_calibration_check([0.100, 0.102, 0.097], f, mass=10.0)
 print(res.passed, res.within_tolerance.tolist())   # True [True, True, True]
 
 # The Annex A example: coherence 0.8 needs about 75 averages for < 5 %.
-print(round(float(ph.random_error_percent(0.8, 75)), 2))   # 4.08  %
+print(round(float(vibration.random_error_percent(0.8, 75)), 2))   # 4.08  %
 ```
 
 ## 4. The `MobilityResult` bundle
@@ -164,10 +164,10 @@ which exposes `.magnitude`, `.phase`, `.to(target)` (any Table-1 kind) and a
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import vibration
 
 f = np.logspace(np.log10(0.5), np.log10(200.0), 400)
-res = ph.sdof_mobility_result(f, mass=2.0, stiffness=8000.0, damping=5.0)
+res = vibration.sdof_mobility_result(f, mass=2.0, stiffness=8000.0, damping=5.0)
 z = res.to("impedance")                        # impedance = 1/Y per frequency
 print(res.frequencies[int(np.argmax(res.magnitude))].round(1))   # ~10.1 Hz
 ```

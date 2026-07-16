@@ -67,12 +67,12 @@ mobility `Y_k` inside the modulus (Formula 19e). The **installed** power level i
 then (Formula 18b) `L_Ws,inst = L_Ws,c − D_C`.
 
 ```python
-import phonometry as ph
+from phonometry import building
 
 # A near-force source (Y_s >> Y_i) on a concrete floor:
-dc = ph.coupling_term(2e-4 + 1e-4j, 3e-5 + 1e-5j)
+dc = building.coupling_term(2e-4 + 1e-4j, 3e-5 + 1e-5j)
 print(round(float(dc), 2))                                          # ~8.5 dB
-print(round(float(ph.installed_structure_borne_power_level(82.0, dc)), 1))  # installed L_Ws
+print(round(float(building.installed_structure_borne_power_level(82.0, dc)), 1))  # installed L_Ws
 ```
 
 ## 2. Transmission to the receiving room
@@ -101,10 +101,10 @@ with `S₀ = A₀ = 10 m²`, and the paths combine energetically (Formula 17):
 
 ```python
 import numpy as np
-import phonometry as ph
+from phonometry import building
 
 bands = np.array([250.0, 500.0, 1000.0])
-res = ph.installed_source_prediction(
+res = building.installed_source_prediction(
     characteristic_power_level=np.array([80.0, 82.0, 78.0]),
     coupling_term=np.array([9.0, 10.0, 11.0]),
     paths=[

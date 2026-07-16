@@ -53,6 +53,19 @@ def test_octavefilter_warns_and_delegates() -> None:
     assert freq == canonical_freq
 
 
+def test_metrology_octavefilter_warns_and_delegates() -> None:
+    """The alias exported by phonometry.metrology keeps the top-level behavior."""
+    from phonometry import metrology
+
+    assert metrology.octave_filter is ph.octave_filter
+    assert metrology.octavefilter is ph.octavefilter
+    canonical_spl, canonical_freq = metrology.octave_filter(SIGNAL, 48000)
+    with pytest.warns(DeprecationWarning, match=r"octave_filter\(\)"):
+        spl, freq = metrology.octavefilter(SIGNAL, 48000)
+    np.testing.assert_allclose(spl, canonical_spl)
+    assert freq == canonical_freq
+
+
 def test_getansifrequencies_warns_and_delegates() -> None:
     canonical = ph.nominal_frequencies(3, [100, 5000])
     with pytest.warns(DeprecationWarning, match=r"nominal_frequencies\(\)"):

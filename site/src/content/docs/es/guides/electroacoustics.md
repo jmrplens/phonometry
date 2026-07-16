@@ -39,18 +39,20 @@ fuga espectral.
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion_es.svg" alt="Espectro de magnitud de un ensayo con tono único de 1 kHz en dB respecto al fundamental, con los cinco primeros armónicos marcados sobre un suelo de ruido de banda ancha, anotado con THD (F), THD (R), THD+N y SINAD" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion_es_dark.svg" alt="Espectro de magnitud de un ensayo con tono único de 1 kHz en dB respecto al fundamental, con los cinco primeros armónicos marcados sobre un suelo de ruido de banda ancha, anotado con THD (F), THD (R), THD+N y SINAD" style="width:82%">
 
 ```python
-import phonometry as ph
+from phonometry import electroacoustics
 
-thd_f = ph.thd(signal, fs, 1000.0, kind="F")          # respecto al fundamental
-thd_r = ph.thd(signal, fs, 1000.0, kind="R")          # respecto al RMS total
-d2 = ph.harmonic_distortion(signal, fs, 1000.0, 2)    # armónico de 2º orden
+thd_f = electroacoustics.thd(signal, fs, 1000.0, kind="F")          # respecto al fundamental
+thd_r = electroacoustics.thd(signal, fs, 1000.0, kind="R")          # respecto al RMS total
+d2 = electroacoustics.harmonic_distortion(signal, fs, 1000.0, 2)    # armónico de 2º orden
 ```
 
 `harmonic_analysis` agrupa el fundamental, las amplitudes armónicas y la THD
 (ambas convenciones), THD+N y SINAD en un único resultado representable:
 
 ```python
-res = ph.harmonic_analysis(signal, fs, 1000.0)
+from phonometry import electroacoustics
+
+res = electroacoustics.harmonic_analysis(signal, fs, 1000.0)
 print(res.thd_f, res.thd_r, res.thd_plus_noise, res.sinad_db)
 res.plot()   # espectro armónico anotado (necesita matplotlib)
 ```
@@ -61,7 +63,7 @@ res.plot()   # espectro armónico anotado (necesita matplotlib)
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import electroacoustics
 
 fs = 48000
 n = fs                     # 1 s -> líneas de 1 Hz; los armónicos caen en líneas
@@ -71,7 +73,7 @@ amps = {1: 1.0, 2: 0.02, 3: 0.012, 4: 0.006, 5: 0.003}
 sig = sum(a * np.sin(2 * np.pi * k * f0 * t) for k, a in amps.items())
 sig = sig + np.random.default_rng(2026).standard_normal(n) * 1.2e-2
 
-res = ph.harmonic_analysis(sig, fs, f0, n_harmonics=len(amps))
+res = electroacoustics.harmonic_analysis(sig, fs, f0, n_harmonics=len(amps))
 res.plot()
 plt.show()
 ```
@@ -98,12 +100,12 @@ muestreo altas no cuentan como "ruido". El borde de banda es configurable, y
 `bandwidth=None` desactiva la cadena y mide toda la banda de Nyquist.
 
 ```python
-import phonometry as ph
+from phonometry import electroacoustics
 
-ratio = ph.thd_plus_noise(signal, fs, 1000.0)          # razón (0..)
-db = ph.thd_plus_noise(signal, fs, 1000.0, as_db=True)  # 20·lg(razón) dB
-sinad_db = ph.sinad(signal, fs, 1000.0)                 # = -db
-wide = ph.thd_plus_noise(signal, fs, 1000.0, bandwidth=None)  # Nyquist completa
+ratio = electroacoustics.thd_plus_noise(signal, fs, 1000.0)          # razón (0..)
+db = electroacoustics.thd_plus_noise(signal, fs, 1000.0, as_db=True)  # 20·lg(razón) dB
+sinad_db = electroacoustics.sinad(signal, fs, 1000.0)                 # = -db
+wide = electroacoustics.thd_plus_noise(signal, fs, 1000.0, bandwidth=None)  # Nyquist completa
 ```
 
 Como la THD+N incluye el suelo de ruido en banda, es igual o mayor que la THD de
@@ -123,11 +125,11 @@ de +12,2 dB cerca de 6,3 kHz (expuesta como `itu_r_468_weighting`); `'A'` y
 ponderada solo es válida para frecuencias fundamentales entre 31,5 Hz y 400 Hz:
 
 ```python
-import phonometry as ph
+from phonometry import electroacoustics
 
-print(ph.weighted_thd(signal, fs, 100.0))                  # red ITU-R 468
-print(ph.weighted_thd(signal, fs, 100.0, weighting="A"))   # variante ponderada A
-print(ph.itu_r_468_weighting([6300.0]))                    # [+12.2] dB
+print(electroacoustics.weighted_thd(signal, fs, 100.0))                  # red ITU-R 468
+print(electroacoustics.weighted_thd(signal, fs, 100.0, weighting="A"))   # variante ponderada A
+print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.2] dB
 ```
 
 ## 3. Distorsión por intermodulación (IEC 60268-3 14.12.7–10)
@@ -161,13 +163,13 @@ con su definición por órdenes:
   [fe de erratas](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.md)).
 
 ```python
-import phonometry as ph
+from phonometry import electroacoustics
 
-md = ph.modulation_distortion(signal, fs, 60.0, 7000.0)
+md = electroacoustics.modulation_distortion(signal, fs, 60.0, 7000.0)
 print(md.d2, md.d3, md.smpte)                                       # 14.12.7
-dfd2 = ph.difference_frequency_distortion(signal, fs, 13e3, 14e3, order=2)
-tdfd = ph.total_difference_frequency_distortion(signal, fs)         # 8/11,95 kHz
-dim = ph.dynamic_intermodulation_distortion(signal, fs)             # DIM (15k/3,15k)
+dfd2 = electroacoustics.difference_frequency_distortion(signal, fs, 13e3, 14e3, order=2)
+tdfd = electroacoustics.total_difference_frequency_distortion(signal, fs)         # 8/11,95 kHz
+dim = electroacoustics.dynamic_intermodulation_distortion(signal, fs)             # DIM (15k/3,15k)
 ```
 
 ## 4. Respuesta en frecuencia y coherencia (Bendat y Piersol)
@@ -192,13 +194,13 @@ hasta `SNR/(1+SNR)`.
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/frequency_response_es.svg" alt="Magnitud de Bode de una respuesta en frecuencia estimada con H1 que sigue la respuesta verdadera de un sistema paso banda, con la coherencia ordinaria debajo cayendo hacia los bordes de banda donde la señal de salida es débil frente al ruido" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/frequency_response_es_dark.svg" alt="Magnitud de Bode de una respuesta en frecuencia estimada con H1 que sigue la respuesta verdadera de un sistema paso banda, con la coherencia ordinaria debajo cayendo hacia los bordes de banda donde la señal de salida es débil frente al ruido" style="width:82%">
 
 ```python
-import phonometry as ph
+from phonometry import electroacoustics
 
-res = ph.transfer_function(x, y, fs, estimator="H1")
+res = electroacoustics.transfer_function(x, y, fs, estimator="H1")
 print(res.magnitude_db, res.phase, res.coherence)
 res.plot()   # magnitud/fase de Bode + coherencia (necesita matplotlib)
 
-freqs, gamma2 = ph.coherence(x, y, fs)
+freqs, gamma2 = electroacoustics.coherence(x, y, fs)
 ```
 
 La coherencia necesita promediarse sobre varios segmentos de Welch para ser
@@ -211,7 +213,7 @@ significativa — un único segmento da `γ² ≡ 1` por construcción.
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal as sp
-import phonometry as ph
+from phonometry import electroacoustics
 
 fs = 48000
 n = 400000
@@ -221,7 +223,7 @@ b, a = sp.butter(2, [400.0, 4000.0], btype="band", fs=fs)   # dispositivo bajo e
 y = sp.lfilter(b, a, x)
 y = y + rng.standard_normal(n) * np.sqrt(np.mean(y ** 2)) * 0.05   # ruido de salida
 
-res = ph.transfer_function(x, y, fs, estimator="H1")
+res = electroacoustics.transfer_function(x, y, fs, estimator="H1")
 res.plot()
 plt.show()
 ```

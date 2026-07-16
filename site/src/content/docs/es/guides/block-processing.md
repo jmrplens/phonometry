@@ -74,11 +74,11 @@ una dependencia opcional (`pip install soundfile`). Sirve cualquier fuente de bl
 
 ```python
 import soundfile as sf
-from phonometry import OctaveFilterBank, WeightingFilter
+from phonometry import metrology
 
 fs = 48000
-octave_filter = OctaveFilterBank(fs, 1, stateful=True, resample=False)
-afilter = WeightingFilter(fs, "A", stateful=True)
+octave_filter = metrology.OctaveFilterBank(fs, 1, stateful=True, resample=False)
+afilter = metrology.WeightingFilter(fs, "A", stateful=True)
 
 for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
 
@@ -97,9 +97,9 @@ for block in sf.blocks("measurement.wav", blocksize=256, overlap=0):
 Usa la clase `TimeWeighting` (el estado se lleva automáticamente):
 
 ```python
-from phonometry import TimeWeighting
+from phonometry import metrology
 
-tw = TimeWeighting(fs, mode="fast")
+tw = metrology.TimeWeighting(fs, mode="fast")
 # audio_blocks: fotogramas sucesivos de tu grabación de micrófono (Pa),
 #   p. ej. de sf.blocks("measurement.wav", ...) como en el bloque anterior.
 for block in audio_blocks:
@@ -167,11 +167,11 @@ bloque a bloque con todo el estado conservado entre llamadas:
 
 ```python
 import numpy as np
-from phonometry import TimeWeighting, WeightingFilter
+from phonometry import metrology
 
 fs, block = 48000, 4800  # bloques de 100 ms
-aw = WeightingFilter(fs, "A", stateful=True)
-env = TimeWeighting(fs, mode="fast")  # la clase es inherentemente stateful
+aw = metrology.WeightingFilter(fs, "A", stateful=True)
+env = metrology.TimeWeighting(fs, mode="fast")  # la clase es inherentemente stateful
 
 for x in audio_stream(block):            # tu callback de captura
     y = env.process(aw.filter(x))

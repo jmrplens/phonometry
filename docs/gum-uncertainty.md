@@ -34,17 +34,17 @@ Type B evaluations from a half-width $a$ are built by `rectangular`
 (GUM clause 4.3).
 
 ```python
-import phonometry as ph
+from phonometry import metrology
 
 # A-weighted level: a reading plus zero-mean calibration, instrument and
 # positional corrections. The model is their sum.
 quantities = [
-    ph.Quantity(74.0, 0.0, name="Reading"),
-    ph.rectangular(0.0, 0.20, name="Calibration"),
-    ph.rectangular(0.0, 0.30, name="Instrument"),
-    ph.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.rectangular(0.0, 0.20, name="Calibration"),
+    metrology.rectangular(0.0, 0.30, name="Instrument"),
+    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
-result = ph.combine_uncertainty(lambda a, b, c, d: a + b + c + d, quantities)
+result = metrology.combine_uncertainty(lambda a, b, c, d: a + b + c + d, quantities)
 
 print(round(result.value, 2))                 # 74.0
 print(round(result.combined_uncertainty, 3))  # 0.407 dB
@@ -93,15 +93,15 @@ adaptive 7.9 procedure, at least 2 trials) and the interval is the symmetric
 one, not the 5.3.4 shortest interval.
 
 ```python
-import phonometry as ph
+from phonometry import metrology
 
 quantities = [
-    ph.Quantity(74.0, 0.0, name="Reading"),
-    ph.rectangular(0.0, 0.20, name="Calibration"),
-    ph.rectangular(0.0, 0.30, name="Instrument"),
-    ph.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.rectangular(0.0, 0.20, name="Calibration"),
+    metrology.rectangular(0.0, 0.30, name="Instrument"),
+    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
-mc = ph.monte_carlo(lambda a, b, c, d: a + b + c + d, quantities,
+mc = metrology.monte_carlo(lambda a, b, c, d: a + b + c + d, quantities,
                     trials=1_000_000, coverage=0.95, seed=1)
 
 print(round(mc.value, 2))                 # 74.0
@@ -141,17 +141,17 @@ not.
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
-import phonometry as ph
+from phonometry import metrology
 
 quantities = [
-    ph.Quantity(74.0, 0.0, name="Reading"),
-    ph.rectangular(0.0, 0.20, name="Calibration"),
-    ph.rectangular(0.0, 0.30, name="Instrument"),
-    ph.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
+    metrology.Quantity(74.0, 0.0, name="Reading"),
+    metrology.rectangular(0.0, 0.20, name="Calibration"),
+    metrology.rectangular(0.0, 0.30, name="Instrument"),
+    metrology.Quantity(0.0, 0.35, dof=9, name="Position (Type A)"),
 ]
 model = lambda a, b, c, d: a + b + c + d
-result = ph.combine_uncertainty(model, quantities)
-mc = ph.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
+result = metrology.combine_uncertainty(model, quantities)
+mc = metrology.monte_carlo(model, quantities, trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
 k, U = result.expanded(0.95)
 

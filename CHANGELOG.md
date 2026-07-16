@@ -300,6 +300,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The multiple-shock whole-body vibration module (ISO 2631-5:2018) now
+  documents its axis scope: the spinal-response model is vertical-axis only by
+  design (clause 4a neglects the horizontal contributions to spinal
+  compression), and horizontal whole-body exposure should be assessed with the
+  ISO 2631-1 weighted r.m.s. and VDV metrics already in the vibration domain.
+  Docstrings and the guide (EN + ES) gain the clarification; no behaviour
+  change.
 - Dependency refresh across the toolchains: the development tools move to
   ruff >=0.15.21, mypy >=2.3.0 and types-setuptools >=83.0.0.20260716; the
   docs site moves to Astro 7.0.9 and html-validate 11.5.6; the docs deploy

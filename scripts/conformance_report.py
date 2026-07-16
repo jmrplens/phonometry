@@ -4357,6 +4357,90 @@ def _chk_doc32_chain() -> Outcome:
     return numeric(55.87, got, 0.1, unit="dB(A)", places=3)
 
 
+def _uniform_hemisphere(level: float, bands: "list[float] | None" = None) -> Any:
+    """A synthetic hemisphere with one uniform level on the standard 10° grid."""
+    freqs = np.asarray(bands if bands is not None else [50.0], dtype=np.float64)
+    az = np.arange(-90.0, 91.0, 10.0)
+    po = np.arange(0.0, 181.0, 10.0)
+    return ph.RotorcraftHemisphere(
+        freqs, az, po, np.full((az.size, po.size, freqs.size), level))
+
+
+@register(
+    _ROTORCRAFT,
+    "ECAC Doc 32 flight-condition interpolation (NORAH2 Eq. 8)",
+    "Distance-scaled triangle blend of three uniform hemispheres, hand-checked, dB",
+)
+def _chk_doc32_flight_condition() -> Outcome:
+    # Conditions (V, gamma) = (50, 0), (70, 0), (60, 10); query (60, 2.5).
+    # Normalised (Eq. 3-6, Ffc = 2, spans 20 kt / 10 deg): points (2.5, 0),
+    # (3.5, 0), (3.0, 2), query (3.0, 0.5) -> deltas sqrt(0.5), sqrt(0.5), 1.5
+    # (Eq. 7) -> weights 0.404629, 0.404629, 0.190743 (Eq. 8). Uniform levels
+    # 100 / 90 / 95 dB blend to 10*lg(sum w*10^(L/10)) = 97.0367 dB by hand.
+    hems = [_uniform_hemisphere(100.0), _uniform_hemisphere(90.0),
+            _uniform_hemisphere(95.0)]
+    got = float(ph.interpolated_source_level(
+        hems, [50.0, 70.0, 60.0], [0.0, 0.0, 10.0], 60.0, 2.5, 0.0, 90.0)[0])
+    return numeric(97.0367, got, 1e-3, unit="dB", places=4)
+
+
+@register(
+    _ROTORCRAFT,
+    "ECAC Doc 32 flight-path kinematics (Eq. 17)",
+    "Airspeed of a straight climbing track, 40 m/s ground speed at a 5° path angle, m/s",
+)
+def _chk_doc32_kinematics() -> Outcome:
+    # Constant-velocity track: Vg = 40 m/s at heading 30 deg, path angle 5 deg
+    # -> VA = 40/cos(5 deg) = 40.152786 m/s (Eq. 16/17), by hand.
+    t = np.arange(0.0, 10.5, 0.5)
+    vg, gamma = 40.0, np.radians(5.0)
+    heading = np.radians(30.0)
+    pos = np.column_stack([vg * np.sin(heading) * t, vg * np.cos(heading) * t,
+                           100.0 + vg * np.tan(gamma) * t])
+    kin = ph.flight_path_kinematics(t, pos)
+    return numeric(40.152786, float(kin.airspeed[10]), 1e-4, unit="m/s", places=5)
+
+
+@register(
+    _ROTORCRAFT,
+    "ECAC Doc 32 retarded time (Eq. 22)",
+    "Recorded-time delay at 100 m slant distance, r/c with c = 346.1 m/s, s",
+)
+def _chk_doc32_retarded_time() -> Outcome:
+    # Level flyover directly over the receiver: at the closest-approach step the
+    # slant distance is 101.2 - (0 + 1.2) = 100.0 m and t_r - t_e = 100/346.1
+    # = 0.288934 s, by hand.
+    t = np.arange(0.0, 20.5, 0.5)
+    pos = np.column_stack([np.zeros_like(t), 50.0 * (t - 10.0),
+                           np.full_like(t, 101.2)])
+    res = ph.rotorcraft_event_level(
+        [_uniform_hemisphere(100.0)], [50.0], [0.0], t, pos, (0.0, 0.0),
+        receiver_height=1.2, flow_resistivity="H")
+    k = int(np.argmin(res.distance))
+    return numeric(0.288934, float(res.times[k] - res.emission_times[k]), 1e-5,
+                   unit="s", places=6)
+
+
+@register(
+    _ROTORCRAFT,
+    "ECAC Doc 32 single event (Eq. 27)",
+    "SEL − LASmax of a constant-speed level flyover, 10·lg(π·d/V) closed form, dB",
+)
+def _chk_doc32_event_sel() -> Outcome:
+    # Single 31.5 Hz band over class-H ground with a 0.1 m receiver: dLg stays
+    # within 0.03 dB of the +6 dB pressure doubling along the whole path, so the
+    # exposure integral is the Lorentzian closed form SEL - LASmax =
+    # 10·lg(pi*d/V) = 7.982 dB for d = 100 m and V = 50 m/s (truncation and
+    # absorption stay below 0.1 dB with the track spanning +-6 km).
+    t = np.arange(0.0, 240.1, 0.5)
+    pos = np.column_stack([np.zeros_like(t), 50.0 * (t - 120.0),
+                           np.full_like(t, 100.1)])
+    res = ph.rotorcraft_event_level(
+        [_uniform_hemisphere(100.0, [31.5])], [50.0], [0.0], t, pos, (0.0, 0.0),
+        receiver_height=0.1, flow_resistivity="H")
+    return numeric(7.982, res.sel - res.la_max, 0.1, unit="dB", places=3)
+
+
 @register(
     _AIRCRAFT,
     "SAE ARP 5534 pure-tone coefficient (ISO 9613-1)",

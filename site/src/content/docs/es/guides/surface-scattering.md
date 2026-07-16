@@ -1,11 +1,11 @@
 ---
 title: "Dispersión superficial, difusión y absorción in situ"
-description: "Cómo devuelve una superficie el sonido incidente: el coeficiente de dispersión (scattering) de incidencia aleatoria en sala reverberante (ISO 17497-1), el coeficiente de difusión por autocorrelación de un goniómetro en campo libre (ISO 17497-2) y la absorción in situ de pavimentos por la técnica de sustracción (ISO 13472-1) y el método de tubo puntual (ISO 13472-2)."
+description: "Cómo devuelve una superficie el sonido incidente: el coeficiente de dispersión (scattering) de incidencia aleatoria en cámara reverberante (ISO 17497-1), el coeficiente de difusión por autocorrelación de un goniómetro en campo libre (ISO 17497-2) y la absorción in situ de pavimentos por la técnica de sustracción (ISO 13472-1) y el método de tubo puntual (ISO 13472-2)."
 ---
 
 Cómo devuelve una superficie el sonido incidente —cuánto dispersa fuera de la
 dirección especular, con qué uniformidad reparte lo que dispersa y cuánto
-absorbe— se mide con una familia de métodos dedicados. La **sala reverberante**
+absorbe— se mide con una familia de métodos dedicados. La **cámara reverberante**
 proporciona el *coeficiente de dispersión* de incidencia aleatoria de una
 superficie comparando las caídas con la muestra inmóvil y en rotación
 (ISO 17497-1). Un **goniómetro en campo libre** mide la respuesta polar del
@@ -30,7 +30,7 @@ muestra de ensayo montada sobre una plataforma giratoria y mantenida
 reflexión especular coherente en fase), cada una con y sin una placa base
 reflectante.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_es.svg" alt="Montaje de dispersión de incidencia aleatoria de ISO 17497-1: una sala reverberante con la muestra de ensayo sobre una plataforma giratoria, un brazo de altavoz giratorio y un micrófono, midiendo el tiempo de reverberación con la muestra inmóvil (que da la absorción de incidencia aleatoria) y en rotación (que da la absorción especular), a partir de los cuales se deriva el coeficiente de dispersión" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_es_dark.svg" alt="Montaje de dispersión de incidencia aleatoria de ISO 17497-1: una sala reverberante con la muestra de ensayo sobre una plataforma giratoria, un brazo de altavoz giratorio y un micrófono, midiendo el tiempo de reverberación con la muestra inmóvil (que da la absorción de incidencia aleatoria) y en rotación (que da la absorción especular), a partir de los cuales se deriva el coeficiente de dispersión" style="width:92%">
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_es.svg" alt="Montaje de dispersión de incidencia aleatoria de ISO 17497-1: una cámara reverberante con la muestra de ensayo sobre una plataforma giratoria, un brazo de altavoz giratorio y un micrófono, midiendo el tiempo de reverberación con la muestra inmóvil (que da la absorción de incidencia aleatoria) y en rotación (que da la absorción especular), a partir de los cuales se deriva el coeficiente de dispersión" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_scattering_reverb_es_dark.svg" alt="Montaje de dispersión de incidencia aleatoria de ISO 17497-1: una cámara reverberante con la muestra de ensayo sobre una plataforma giratoria, un brazo de altavoz giratorio y un micrófono, midiendo el tiempo de reverberación con la muestra inmóvil (que da la absorción de incidencia aleatoria) y en rotación (que da la absorción especular), a partir de los cuales se deriva el coeficiente de dispersión" style="width:92%">
 
 **Absorción a partir del tiempo de reverberación (cláusula 6).** Cada situación se
 convierte en un coeficiente de absorción de Sabine con el propio término de
@@ -299,7 +299,7 @@ sonido") no es ninguno de los dos.
 
 ## 3. Absorción in situ de pavimentos — técnica de sustracción (ISO 13472-1)
 
-En campo no hay sala reverberante. ISO 13472-1 mide la absorción sonora de un
+En campo no hay cámara reverberante. ISO 13472-1 mide la absorción sonora de un
 pavimento (o de cualquier superficie plana extensa) *in situ* disparando un
 impulso desde un altavoz a la altura $d_s$ hacia la superficie y registrando la
 respuesta al impulso en un micrófono a la altura $d_m$. Las componentes

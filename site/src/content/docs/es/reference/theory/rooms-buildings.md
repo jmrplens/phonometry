@@ -83,7 +83,7 @@ octavas $54$, $0$), mediante la misma búsqueda de desplazamiento monótono que
 ISO 717-1 ejecutada sobre las curvas negadas.
 
 La absorción sonora (ISO 354) mide el área de absorción equivalente a partir de
-la relación de Sabine aplicada a una sala reverberante vacía y con la muestra:
+la relación de Sabine aplicada a una cámara reverberante vacía y con la muestra:
 $A = 55{,}3\ V/(c\ T) - 4 V m$ (el término $4 V m$ es la absorción del aire, $m$ el
 coeficiente de atenuación en potencia en 1/m), de modo que el área de la muestra
 es $A_T = A_2 - A_1$ y su coeficiente $\alpha_s = A_T/S$. Con la velocidad del
@@ -223,7 +223,7 @@ Consulta las guías de [acústica de salas](/phonometry/es/guides/room-acoustics
 
 Una superficie rugosa reparte la energía reflejada en una parte especular y
 otra dispersa; el coeficiente de dispersión $s$ es la fracción de energía no
-especular. ISO 17497-1:2004+A1:2014 lo mide en una sala reverberante con la
+especular. ISO 17497-1:2004+A1:2014 lo mide en una cámara reverberante con la
 muestra sobre una mesa giratoria: cuatro tiempos de reverberación — con la
 mesa parada y girando, cada uno sin y con la muestra (Tabla 2) — dan la
 absorción a incidencia aleatoria $\alpha_s$ (cláusula 8.1.1, Fórmula 1) y la

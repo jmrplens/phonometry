@@ -279,6 +279,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Dependency refresh across the toolchains: the development tools move to
+  ruff >=0.15.21, mypy >=2.3.0 and types-setuptools >=83.0.0.20260716; the
+  docs site moves to Astro 7.0.9 and html-validate 11.5.6; the docs deploy
+  workflow moves to actions/setup-node v7. The pinned figure-rendering stack
+  (`requirements-figures.txt`) was already at the current releases, so the
+  committed figures are unchanged (verified with a full regeneration), and
+  the runtime floors (numpy/scipy, optional matplotlib/numba) stay put since
+  no newer APIs are required.
 - The raster documentation figures (the seven `_PNG_FIGURES`: spectrogram,
   excitation signals, Schroeder decay, calibration stability, impulse
   response, numerical propagation and airport contour, across the EN/ES x

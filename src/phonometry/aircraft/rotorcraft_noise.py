@@ -955,13 +955,13 @@ def _event_histories(
     scaling_factor: float,
     triangles: "NDArray[np.int_] | list[list[int]] | None",
     band_integrated: bool,
-    keep_spectra: bool,
-) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64] | None]":
+) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
     """Received time histories: ``(t_rec, L_A)`` shape ``(K, G)`` and spectra.
 
     One vectorised pass per emission step over all receivers (Eq. 1/22/23).
-    When ``keep_spectra`` is true the unweighted receiver band levels of the
-    single receiver are returned as well, shape ``(K, F)``.
+    The unweighted band levels of the first receiver come back as well, shape
+    ``(K, F)`` (the single-receiver event needs them for the perceived-noise
+    metrics; the cost is negligible next to the ``(K, G)`` histories).
     """
     from .atmospheric_absorption import _sae_band
 
@@ -971,7 +971,7 @@ def _event_histories(
     n_g = receivers.shape[0]
     trec = np.empty((n_k, n_g), dtype=np.float64)
     la = np.empty((n_k, n_g), dtype=np.float64)
-    spectra = np.empty((n_k, freqs.size), dtype=np.float64) if keep_spectra else None
+    spectra = np.empty((n_k, freqs.size), dtype=np.float64)
     ref_band = _sae_band(alpha * rref)   # only used when band_integrated
     weight_cache: dict[tuple[float, float], list[tuple[int, float]]] = {}
 
@@ -1002,8 +1002,7 @@ def _event_histories(
         with np.errstate(divide="ignore", invalid="ignore"):
             la[k] = 10.0 * np.log10(np.nansum(10.0 ** ((spl + aw[None, :]) / 10.0), axis=1))
         trec[k] = times[k] + dist / _C
-        if spectra is not None:
-            spectra[k] = spl[0]
+        spectra[k] = spl[0]
     return trec, la, spectra
 
 
@@ -1195,16 +1194,15 @@ def rotorcraft_event_level(
     method = require_choice(atmospheric_method, "atmospheric_method", ("iso9613", "sae"))
     spd, gam, hdg, bank = _resolved_track_state(
         t, p, airspeed, path_angle, heading, bank_angle)
-    offsets = _per_point(level_offset, t.size, "level_offset")
-    assert offsets is not None
+    off = _per_point(level_offset, t.size, "level_offset")
+    offsets = off if off is not None else np.zeros(t.size)
     alpha = _absorption_coefficient(freqs, temperature, relative_humidity, pressure)
     receivers = np.array([[rx[0], rx[1], ground_elevation + hr]])
     trec, la, spectra = _event_histories(
         hemispheres, np.atleast_1d(np.asarray(airspeeds, dtype=np.float64)),
         np.atleast_1d(np.asarray(path_angles, dtype=np.float64)), t, p, receivers,
         spd, gam, hdg, bank, float(ground_elevation), hr, sigma, alpha, rref,
-        offsets, scaling_factor, triangles, method == "sae", True)
-    assert spectra is not None
+        offsets, scaling_factor, triangles, method == "sae")
     phi, theta, dist = _track_emission_geometry(p, receivers[0], hdg, bank)
     la_max, sel, sel_10db, pnlt, pnltm, epnl = _event_metrics(
         freqs, trec[:, 0], la[:, 0], spectra)
@@ -1307,8 +1305,8 @@ def rotorcraft_noise_contour(
     method = require_choice(atmospheric_method, "atmospheric_method", ("iso9613", "sae"))
     spd, gam, hdg, bank = _resolved_track_state(
         t, p, airspeed, path_angle, heading, bank_angle)
-    offsets = _per_point(level_offset, t.size, "level_offset")
-    assert offsets is not None
+    off = _per_point(level_offset, t.size, "level_offset")
+    offsets = off if off is not None else np.zeros(t.size)
     alpha = _absorption_coefficient(
         np.asarray(hemispheres[0].frequencies, dtype=np.float64),
         temperature, relative_humidity, pressure)
@@ -1319,7 +1317,7 @@ def rotorcraft_noise_contour(
         hemispheres, np.atleast_1d(np.asarray(airspeeds, dtype=np.float64)),
         np.atleast_1d(np.asarray(path_angles, dtype=np.float64)), t, p, receivers,
         spd, gam, hdg, bank, float(ground_elevation), hr, sigma, alpha, rref,
-        offsets, scaling_factor, triangles, method == "sae", False)
+        offsets, scaling_factor, triangles, method == "sae")
     if key == "exposure":
         level = _exposure_level(la, trec)
     else:

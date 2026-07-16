@@ -213,9 +213,29 @@ level (it spreads the modulated energy across bands) — quote the closed form
 `fluctuation_strength_am_noise` (§3.1) for that stimulus.
 :::
 
+## References
+
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3rd ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  The source of the psychoacoustic-annoyance model of section 2
+  (Eqs 16.2–16.4, chapter 16) and of the closed-form fluctuation strength for
+  AM broadband noise of §3.1 (Eq. 10.2, chapter 10).
+- Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016). Modelling the
+  sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*,
+  28, 050005. [doi:10.1121/2.0000410](https://doi.org/10.1121/2.0000410).
+  The fluctuation-strength signal model implemented in §3.2, including the
+  Table 1 literature values used as its cross-check.
+- Felix Greco, G., Merino-Martínez, R., Osses, A., & Lotinga, M. J. B.
+  (2025). *SQAT: a sound quality analysis toolbox for MATLAB* (open-source
+  software). [github.com/ggrecow/SQAT](https://github.com/ggrecow/SQAT),
+  [doi:10.5281/zenodo.7934709](https://doi.org/10.5281/zenodo.7934709).
+  The open MATLAB reference used as the numeric oracle for the
+  fluctuation-strength cross-checks on this page.
+
 ---
 
-**Standards.** Fastl & Zwicker (2006), *Psychoacoustics: Facts and Models* (Springer):
+**Standards.** Fastl & Zwicker (2007, 3rd ed.), *Psychoacoustics: Facts and Models* (Springer):
 psychoacoustic annoyance `PA = N5·(1 + √(wS² + wFR²))` with the sharpness weighting
 `wS` and roughness/fluctuation weighting `wFR` (Eqs 16.2–16.4; origin
 Widmann 1992), and the closed form for the fluctuation strength of

@@ -40,7 +40,7 @@
  *   - Mobile (<=50rem, column tracks the viewport): every sized figure
  *     spans the full reading column. Even the smallest authored tier
  *     (60%, detailed filter-response plots) only becomes legible on a
- *     phone at 100%, and the generic `[style*="width:"]` selector covers
+ *     phone at 100%, and the generic `[style^="width:"]` prefix selector covers
  *     the whole tier inventory (60-96%) so new tiers cannot fall through.
  *   - Desktop (>50rem, column capped at 720px so never full-screen):
  *     gentle boost of detailed plots 80% -> 92% (matches wide diagrams).
@@ -49,8 +49,8 @@
 /* Phones & small tablets (column tracks the viewport): reclaim the
    wasted side margins so every figure fills the reading column. */
 @media (max-width: 50rem) {
-  .sl-markdown-content img[style*="width:"],
-  .sl-markdown-content video[style*="width:"] { width: 100% !important; }
+  .sl-markdown-content img[style^="width:"],
+  .sl-markdown-content video[style^="width:"] { width: 100% !important; }
 }
 
 /* Desktop / wide reading column (capped at 720px, so never full-screen):

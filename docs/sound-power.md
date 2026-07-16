@@ -38,6 +38,8 @@ of the page walks each in turn.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.gif" alt="Animation: the same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W" width="640" height="360" loading="lazy"></picture>
 
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.webm)
+
 ## 1. Enveloping surface, sound pressure (ISO 3744 / ISO 3746)
 
 Place the source on a reflecting plane and imagine a **measurement surface**
@@ -329,6 +331,8 @@ L_W = 10 \log_{10}\frac{P}{P_0},\quad P_0 = 1\ \text{pW} .
 $$
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power.gif" alt="Animation: a p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power.webm)
 
 A band in which `P < 0` (net inflow, from a stronger source outside the
 surface) is **not determinable** and reported as `NaN`. Two normative field

@@ -290,6 +290,8 @@ converges to the two-path image-source model, dips included.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect.gif" alt="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" width="640" height="360" loading="lazy"></picture>
 
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect.webm)
+
 ### `Barrier` and the screening term
 
 The `Barrier` dataclass describes the diffraction geometry directly, which is
@@ -306,6 +308,8 @@ the shadow zone, while at 500 Hz the shadow is deep and sharp. A barrier only
 works when the wavelength is short next to the path difference.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier.gif" alt="Animation: a 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side; the long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier.webm)
 
 ### `outdoor_propagation_attenuation()` parameters
 

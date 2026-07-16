@@ -212,6 +212,8 @@ ground and a receiver sitting in an interference dip.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect.gif" alt="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" width="640" height="360" loading="lazy"></picture>
 
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect.webm)
+
 `ΔSOR` is what makes the departure footprint bulge rearward behind the runway:
 jet-exhaust noise radiates a lobed pattern in the rear arc, strongest at an
 azimuth `ψ ≈ 120°` from the nose and falling away both abeam (`ψ = 90°`) and

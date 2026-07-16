@@ -722,7 +722,7 @@ _ES_EXACT = {
     "RMS pressure (mode map)": "presión RMS (mapa modal)",
     "nodal lines (2,1)": "líneas nodales (2,1)",
     "source": "fuente",
-    "same colour scale": "misma escala de color",
+    "same color scale": "misma escala de color",
     # --- Tier-1 animation labels (second batch) ---
     "Standing wave in the impedance tube (ISO 10534-2)":
         "Onda estacionaria en el tubo de impedancia (ISO 10534-2)",
@@ -6542,14 +6542,37 @@ _ANIM_HOLD = 2 * _ANIM_FPS
 # period of the 84.3 Hz on-mode drive, so the wavefronts read as continuous
 # motion. On the shared timeline (~4 frames per period) the clip strobes.
 _FDTD_ANIM_FRAMES = 18 * _ANIM_FPS
-_ANIM_FIGSIZE = (8.0, 4.5)   # inches at _ANIM_DPI -> 800 x 450 px
-_ANIM_DPI = 100
+_ANIM_FIGSIZE = (8.0, 4.5)   # inches at _ANIM_DPI -> 2400 x 1350 px
+_ANIM_DPI = 300
 # The GitHub-docs GIF is a compact fallback for the smooth site WebM: a lower
 # frame rate, smaller frame and capped palette keep even the detail-dense
 # clips (the p·u oscillations) near half a megabyte.
 _GIF_FPS = 12
 _GIF_SCALE = 640
 _GIF_COLORS = 64
+
+# VP9 encoding for the site WebM. Beyond the constant-quality base
+# (``-crf 40 -b:v 0``) the screen-content tuning, row multithreading and the
+# ``good`` deadline cut the encode time roughly in half at the same file size
+# (the flat schematic / field content compresses identically). ``-cpu-used``
+# trades encode speed for compression effort; on this content the size and
+# quality are essentially flat from 2 through 4, so the run uses the faster
+# setting. ``-threads`` is capped so eight parallel Python workers do not
+# oversubscribe the box. Animations are not byte-compared (unlike the
+# SVG/PNG figures), so the mild run-to-run variance these knobs introduce is
+# harmless.
+_ANIM_CPU_USED = 4
+_ANIM_ENCODE_THREADS = 3
+
+
+def _vp9_extra_args() -> list[str]:
+    """ffmpeg args for the tuned constant-quality VP9 WebM encode."""
+    return [
+        "-b:v", "0", "-crf", "40",
+        "-tune-content", "screen", "-row-mt", "1", "-deadline", "good",
+        "-cpu-used", str(_ANIM_CPU_USED), "-threads", str(_ANIM_ENCODE_THREADS),
+        "-pix_fmt", "yuv420p", "-an", "-loglevel", "error",
+    ]
 
 
 def _translate_str(s: str) -> str:
@@ -6911,8 +6934,7 @@ def _save_animation(anim: Any, fig: Any, output_dir: str, stem: str,
     webm = _anim_path(output_dir, stem, "webm")
     writer = FFMpegWriter(
         fps=_ANIM_FPS if fps is None else fps, codec="libvpx-vp9",
-        extra_args=["-b:v", "0", "-crf", "40", "-pix_fmt", "yuv420p",
-                    "-an", "-loglevel", "error"],
+        extra_args=_vp9_extra_args(),
     )
     with plt.rc_context({"savefig.bbox": "standard"}):
         anim.save(webm, writer=writer, dpi=_ANIM_DPI,
@@ -7191,20 +7213,26 @@ def animate_onset_detection(output_dir: str) -> None:
 
     def update(k: int) -> tuple[Any, ...]:
         tc = float(np.interp(k, knots_k, knots_t))
-        i = max(0, min(t.size - 1, int(round(tc * fs))))
+        # Park the magnifier just short of the right edge so its lens and
+        # handle stay fully inside the panel during the closing hold (tc
+        # reaches 3.0 s, the xlim). The decision chain below still keys off
+        # the true tc, so only the glyph position is clamped.
+        tc_view = min(max(tc, 0.55 + rx), 3.0 - rx * 1.9)
+        i = max(0, min(t.size - 1, int(round(tc_view * fs))))
         y0, g = float(laf[i]), float(grad[i])
         detecting = g > 10.0
         color = COLOR_SECONDARY if detecting else COLOR_FG
-        lens.set_center((tc, y0))
+        lens.set_center((tc_view, y0))
         lens.set_edgecolor(color)
         dxl = rx * 0.72
         if abs(g) * dxl > ry * 0.72:
             dxl = ry * 0.72 / abs(g)
-        tangent.set_data([tc - dxl, tc + dxl], [y0 - g * dxl, y0 + g * dxl])
+        tangent.set_data([tc_view - dxl, tc_view + dxl],
+                         [y0 - g * dxl, y0 + g * dxl])
         tangent.set_color(color)
-        handle.set_data([tc + rx * 0.75, tc + rx * 1.9],
+        handle.set_data([tc_view + rx * 0.75, tc_view + rx * 1.9],
                         [y0 - ry * 0.75, y0 - ry * 1.9])
-        lens_txt.set_position((tc, y0 + ry * 1.35))
+        lens_txt.set_position((tc_view, y0 + ry * 1.35))
         lens_txt.set_text(T(f"dL/dt = {g:.0f} dB/s"))
         lens_txt.set_color(color)
         hot_m = (t <= tc) & is_onset
@@ -7260,8 +7288,10 @@ def animate_instantaneous_intensity(output_dir: str) -> None:
         ax_s.text(dial_c[0] - dial_r - 0.15, dial_c[1] - dial_r + 0.15, "u",
                   color=COLOR_TERTIARY, fontsize=11, ha="right", va="center",
                   fontweight="bold")
-        ax_s.text(dial_c[0], 1.45, caption, ha="center", va="top",
-                  color=COLOR_FG, fontsize=8.5)
+        # Tucked up under the phasor dial so it clears the intensity
+        # number-line below (the longer Spanish caption otherwise crowds it).
+        ax_s.text(dial_c[0], 1.72, caption, ha="center", va="top",
+                  color=COLOR_FG, fontsize=8.0)
         _draw_mic(ax_s, 4.6, 3.4, direction=1, size=1.05, label="$p_1$")
         _draw_mic(ax_s, 7.4, 3.4, direction=-1, size=1.05, label="$p_2$")
         ax_s.annotate("", xy=(6.85, 2.6), xytext=(5.15, 2.6),
@@ -7429,7 +7459,8 @@ def animate_schroeder(output_dir: str) -> None:
     ax_e.plot(t_raw[ds], raw_db[ds], color="gray", alpha=0.4, lw=0.6)
     e_fill = {"art": None}
     front_e = ax_e.axvline(sweep_max, color=COLOR_FG, lw=1.3, alpha=0.55)
-    front_txt = ax_e.text(sweep_max, -8.0, T("← integrate from the tail"),
+    # Sits well below the upper-right legend (a higher anchor ran under it).
+    front_txt = ax_e.text(sweep_max, -22.0, T("← integrate from the tail"),
                           ha="left", va="top", color=COLOR_FG, fontsize=9)
     e_txt = ax_e.text(0.02, 0.06, "", transform=ax_e.transAxes, ha="left",
                       va="bottom", family="monospace", fontsize=10,
@@ -7487,7 +7518,7 @@ def animate_schroeder(output_dir: str) -> None:
                                           alpha=fill_alpha, lw=0)
         idx = min(int(np.searchsorted(t_raw, xf)), e_frac.size - 1)
         e_txt.set_text(T(f"remaining energy: {100.0 * e_frac[idx]:.1f} %"))
-        front_txt.set_position((min(xf, xmax * 0.72) + 0.012 * xmax, -8.0))
+        front_txt.set_position((min(xf, xmax * 0.72) + 0.012 * xmax, -22.0))
         front_txt.set_visible(k < reveal)
         arts: list[Any] = [curve, front_e, front_d, e_fill["art"], e_txt,
                            front_txt, *ann_fits]
@@ -7605,7 +7636,7 @@ def animate_fdtd_room_modes(output_dir: str) -> None:
         else:
             ax_p.tick_params(labelleft=False)
             ax_r.tick_params(labelleft=False)
-            ax_r.text(0.12, 3.3, T("same colour scale"), color="white",
+            ax_r.text(0.12, 3.3, T("same color scale"), color="white",
                       fontsize=8, ha="left", va="top")
         ims += [im_p, im_r]
     t_txt = fig.text(0.985, 0.955, "", ha="right", va="top",
@@ -7615,7 +7646,7 @@ def animate_fdtd_room_modes(output_dir: str) -> None:
         for col in range(2):
             ims[2 * col].set_data(p_all[col][k])
             ims[2 * col + 1].set_data(r_all[col][k])
-        t_txt.set_text(f"t = {times[k] * 1000.0:3.0f} ms")
+        t_txt.set_text(T(f"t = {times[k] * 1000.0:3.0f} ms"))
         return (*ims, t_txt)
 
     # Own frame budget (see _FDTD_ANIM_FRAMES): enough frames per acoustic
@@ -7830,7 +7861,10 @@ def animate_fdtd_barrier(output_dir: str) -> None:
             ax_r.text(0.3, 5.45, T("each panel on its own dB scale"),
                       color="white", fontsize=7, ha="left", va="top")
         ims += [im_p, im_r]
-    t_txt = fig.text(0.985, 0.02, "", ha="right", va="bottom",
+    # Top-left margin: the field panels run their x-axis (ticks + "x [m]")
+    # to the very bottom-right corner, so a bottom readout collides with the
+    # tick labels; the top-left stays clear of the centred column titles.
+    t_txt = fig.text(0.012, 0.985, "", ha="left", va="top",
                      family="monospace", fontsize=10, color=COLOR_FG)
 
     def update(k: int) -> tuple[Any, ...]:
@@ -7843,7 +7877,7 @@ def animate_fdtd_barrier(output_dir: str) -> None:
             il_txts[col].set_text(
                 T(f"insertion loss {ils[col]:.0f} dB")
                 if times[k] >= 0.032 else "")
-        t_txt.set_text(f"t = {times[k] * 1000.0:4.1f} ms")
+        t_txt.set_text(T(f"t = {times[k] * 1000.0:4.1f} ms"))
         return (*ims, *il_txts, t_txt)
 
     _render_clip(fig, update, output_dir, "anim_fdtd_barrier",
@@ -8022,9 +8056,12 @@ def animate_fdtd_ground_effect(output_dir: str) -> None:
               markeredgewidth=0.8)
     ax_l.legend(fontsize=7, loc="center right")
     # The strip above 0 dB is data-free, so the closing caption fits there.
+    # The longer Spanish verdict spans the whole panel at 7.5 pt, so it drops
+    # a step to keep a margin on both sides.
     verdict_txt = ax_l.text(0.5, 0.975, "", transform=ax_l.transAxes,
                             ha="center", va="top", color=COLOR_FG,
-                            fontsize=7.5, fontweight="bold")
+                            fontsize=7.5 if _LANG == "en" else 6.5,
+                            fontweight="bold")
     # Bottom-left corner: the arc panel's wide x-label owns bottom-right.
     t_txt = fig.text(0.015, 0.02, "", ha="left", va="bottom",
                      family="monospace", fontsize=10, color=COLOR_FG)
@@ -8037,7 +8074,7 @@ def animate_fdtd_ground_effect(output_dir: str) -> None:
         verdict_txt.set_text(
             T("dips land exactly on the predicted nulls")
             if k >= reveal else "")
-        t_txt.set_text(f"t = {times[k] * 1000.0:4.1f} ms")
+        t_txt.set_text(T(f"t = {times[k] * 1000.0:4.1f} ms"))
         return (im_p, im_r, l_sim, verdict_txt, t_txt)
 
     _render_clip(fig, update, output_dir, "anim_fdtd_ground_effect",
@@ -8183,9 +8220,13 @@ def animate_fdtd_ducting(output_dir: str) -> None:
         ax_f.text(240.0, depth - 25.0, T("source"), ha="left", va="bottom",
                   color="black", fontsize=7.5, path_effects=outline,
                   zorder=4)
+        # A translucent dark pill keeps this label legible once the bright
+        # magma energy overlay fades in over the channel axis (a plain white
+        # stroke washes out against the near-white high-energy region).
         ax_f.text(2360.0, 425.0, T("channel axis (c minimum)"), ha="right",
-                  va="top", color="black", fontsize=7,
-                  path_effects=outline, zorder=4)
+                  va="top", color="white", fontsize=7, zorder=4,
+                  bbox={"boxstyle": "round,pad=0.2", "facecolor": "black",
+                        "alpha": 0.45, "edgecolor": "none"})
         v_txt = ax_f.text(60.0, 770.0, "", ha="left", va="bottom",
                           color="black", fontsize=8, path_effects=outline,
                           zorder=4)
@@ -8197,7 +8238,11 @@ def animate_fdtd_ducting(output_dir: str) -> None:
         ims.append(im)
         ims_e.append(im_e)
         v_txts.append(v_txt)
-    t_txt = fig.text(0.985, 0.02, "", ha="right", va="bottom",
+    # Right margin, below the suptitle: the lower field panel carries the
+    # "Range [m]" x-axis to the bottom-right corner, so a bottom readout
+    # collides with its tick labels; this spot clears both the tick labels
+    # and the (long) centred suptitle.
+    t_txt = fig.text(0.988, 0.90, "", ha="right", va="top",
                      family="monospace", fontsize=10, color=COLOR_FG)
     reveal = int(0.83 * p_all.shape[1])    # ~15 s: pulse has crossed
     captions_on = int(0.38 * p_all.shape[1])   # first refocus is visible
@@ -8208,7 +8253,7 @@ def animate_fdtd_ducting(output_dir: str) -> None:
             ims[row].set_data(p_all[row][k])
             ims_e[row].set_alpha(alpha)
             v_txts[row].set_text(verdicts[row] if k >= captions_on else "")
-        t_txt.set_text(f"t = {times[k]:5.2f} s")
+        t_txt.set_text(T(f"t = {times[k]:5.2f} s"))
         return (*ims, *ims_e, *v_txts, t_txt)
 
     _render_clip(fig, update, output_dir, "anim_fdtd_ducting",
@@ -8442,7 +8487,7 @@ def animate_fdtd_diffusion(output_dir: str) -> None:
             d_txts[col].set_text(
                 T(f"diffusion coefficient d = {d_coef[col]:.2f}")
                 if k >= reveal else "")
-        t_txt.set_text(f"t = {times[k] * 1000.0:4.1f} ms")
+        t_txt.set_text(T(f"t = {times[k] * 1000.0:4.1f} ms"))
         return (*ims, *d_txts, t_txt)
 
     _render_clip(fig, update, output_dir, "anim_fdtd_diffusion",
@@ -8663,11 +8708,13 @@ def animate_flanking_paths(output_dir: str) -> None:
         pn["pts_a"] = pts
     junc_txt = ax.text(junction[0] + 0.3, junction[1] - 0.55, "",
                        ha="left", va="top", color=COLOR_FG, fontsize=8.5)
-    # Path legend column: lights up as each pulse arrives
+    # Path legend column: lights up as each pulse arrives. The longer Spanish
+    # descriptions start a little further left so they clear the right wall.
     labels = []
+    lab_x = 10.15 if _LANG == "en" else 9.6
     for j, pn in enumerate(paths):
         yt = 5.6 - 0.55 * j
-        lab = ax.text(10.15, yt, f"{pn['key']} — {pn['desc']}", ha="left",
+        lab = ax.text(lab_x, yt, f"{pn['key']} — {pn['desc']}", ha="left",
                       va="center", color=pn["color"], fontsize=8.5,
                       fontweight="bold", alpha=0.35)
         labels.append(lab)
@@ -9319,9 +9366,12 @@ def animate_power_two_rooms(output_dir: str) -> None:
         else:
             lp_a.set_text("")
             lp_r.set_text("")
+        # Mathtext subscript for the sound-power symbol; localise the decimal
+        # comma by hand because ``$`` disables the ``_translate_str`` comma pass.
+        lw_val = f"{lw_true:.1f}" if _LANG == "en" else f"{lw_true:.1f}".replace(".", ",")
         for box, on in ((box_a, tc >= t_form), (box_r, tc >= t_form + 0.6)):
             if on:
-                _light_box(box, T(f"L_W = {lw_true:.1f} dB"), COLOR_PRIMARY)
+                _light_box(box, f"$L_W$ = {lw_val} dB", COLOR_PRIMARY)
             else:
                 _dim_box(box)
             arts += [box["box"], box["title"], box["value"]]
@@ -9698,6 +9748,103 @@ def _generate_figures_parallel(
         )
 
 
+# Approximate per-clip render cost (all four variants, the FDTD simulation
+# amortised once per clip through the ``lru_cache``). Used only to submit the
+# heaviest clips to the pool first so a long-pole FDTD clip does not land at
+# the tail; the exact values are irrelevant to correctness. The five FDTD
+# field clips dominate (a full 2D simulation plus four WebM encodes each);
+# the schematics are cheap and unlisted clips are treated as light.
+_ANIM_WEIGHTS: dict[str, float] = {
+    "anim_fdtd_room_modes": 520.0,
+    "anim_fdtd_barrier": 320.0,
+    "anim_fdtd_ground_effect": 300.0,
+    "anim_fdtd_ducting": 280.0,
+    "anim_fdtd_diffusion": 260.0,
+    "anim_standing_wave_tube": 130.0,
+    "anim_sweep_deconvolution": 90.0,
+    "anim_power_two_rooms": 80.0,
+    "anim_specific_loudness": 80.0,
+    "anim_comb_filtering": 70.0,
+    "anim_flanking_paths": 70.0,
+    "anim_instantaneous_intensity": 65.0,
+    "anim_intensity_scan_power": 60.0,
+    "anim_onset_detection": 55.0,
+    "anim_time_weighting": 55.0,
+    "anim_schroeder": 55.0,
+}
+
+# A clip rename must not silently drop its scheduling weight; fail fast.
+if not _ANIM_WEIGHTS.keys() <= _ANIMATIONS.keys():
+    _unknown_anim = sorted(_ANIM_WEIGHTS.keys() - _ANIMATIONS.keys())
+    raise RuntimeError(f"animation names not in _ANIMATIONS: {_unknown_anim}")
+
+
+def _run_anim_task(clip: str, img_dir: str) -> str:
+    """Render one clip in all four language/theme variants (worker entry).
+
+    All four variants render in the SAME worker so a clip's expensive FDTD
+    simulation -- memoised with ``lru_cache`` -- is computed once and reused
+    across the variants, exactly as the sequential loop's per-process cache
+    did. Splitting the variants across workers would recompute the field
+    four times. Each variant applies its language/theme to this worker's
+    module globals before rendering, and the epilogue closes every figure so
+    pyplot state cannot leak into the next clip that reuses the process.
+    """
+    func = _ANIMATIONS[clip]
+    try:
+        for lang, dark in _VARIANTS:
+            set_lang(lang)
+            set_theme(dark)
+            func(img_dir)
+    finally:
+        plt.close("all")
+    return clip
+
+
+def _generate_animations_parallel(
+    img_dir: str, clips: list[str], jobs: int
+) -> None:
+    """Render ``clips`` (all four variants each) on a ``jobs``-wide pool.
+
+    Mirrors :func:`_generate_figures_parallel`: spawned workers each import a
+    pristine module (numerical thread pools pinned to one thread), one grouped
+    task per clip, heaviest clips submitted first so the long-pole FDTD field
+    clips are not left to serialise at the tail of the run.
+    """
+    import multiprocessing as mp
+    from concurrent.futures import FIRST_EXCEPTION, ProcessPoolExecutor, wait
+
+    tasks = sorted(clips, key=lambda c: -_ANIM_WEIGHTS.get(c, 0.0))
+    ctx = mp.get_context("spawn")
+    with ProcessPoolExecutor(max_workers=jobs, mp_context=ctx) as pool:
+        futures = {
+            pool.submit(_run_anim_task, clip, img_dir): clip for clip in tasks
+        }
+        _done, not_done = wait(futures, return_when=FIRST_EXCEPTION)
+        for future in not_done:
+            future.cancel()
+    failures: list[str] = []
+    cancelled = 0
+    for future, clip in futures.items():
+        if future.cancelled():
+            cancelled += 1
+            continue
+        if (exc := future.exception()) is not None:
+            detail = f"{exc!r}"
+            if exc.__cause__ is not None:
+                detail += f"\n{exc.__cause__}"
+            failures.append(f"{clip}: {detail}")
+    if failures:
+        skipped = (
+            f"\n  ({cancelled} queued clips cancelled, not attempted)"
+            if cancelled else ""
+        )
+        raise RuntimeError(
+            "animation generation failed:\n  "
+            + "\n  ".join(sorted(failures)) + skipped
+        )
+
+
 def _select_figures(names: list[str] | None) -> list[Callable[[str], None]]:
     """Resolve ``--figure`` names (with or without the ``generate_`` prefix)."""
     if not names:
@@ -9781,11 +9928,26 @@ def main(argv: list[str] | None = None) -> None:
             _generate_figures_parallel(img_dir, funcs, jobs)
 
     if do_anim:
-        for lang, dark in _VARIANTS:
-            set_lang(lang)
-            set_theme(dark)
-            print(f"--- Generating {lang} {'dark' if dark else 'light'} animations ---")
-            generate_animations(img_dir, args.anim)
+        if args.anim or jobs == 1:
+            # A single-clip re-render (``--anim``) and an explicit ``--jobs 1``
+            # stay sequential: the subset is small and in-process rendering
+            # keeps the FDTD ``lru_cache`` warm across the four variants.
+            for lang, dark in _VARIANTS:
+                set_lang(lang)
+                set_theme(dark)
+                print(f"--- Generating {lang} {'dark' if dark else 'light'} animations ---")
+                generate_animations(img_dir, args.anim)
+        else:
+            import shutil
+            if shutil.which("ffmpeg") is None:
+                raise RuntimeError(
+                    "ffmpeg was not found on PATH; it is required to encode "
+                    "the animation WebM/GIF outputs. Install ffmpeg and retry."
+                )
+            clips = list(_ANIMATIONS)
+            print(f"--- Generating animations ({len(clips)} clips "
+                  f"x 4 variants, {jobs} jobs) ---")
+            _generate_animations_parallel(img_dir, clips, jobs)
 
     print("Graphics generated successfully.")
 

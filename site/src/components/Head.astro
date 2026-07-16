@@ -60,6 +60,7 @@ function titleCase(seg: string) {
 }
 const SECTION_LABELS: Record<string, { en: string; es: string }> = {
   guides: { en: 'Guides', es: 'Guías' },
+  sections: { en: 'Sections', es: 'Secciones' },
   reference: { en: 'Reference', es: 'Referencia' },
 };
 const segments = rel.split('/').filter(Boolean).filter((s) => s !== 'es');

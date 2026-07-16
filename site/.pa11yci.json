@@ -41,6 +41,10 @@
     "http://localhost:4321/phonometry/es/guides/loudness/",
     "http://localhost:4321/phonometry/es/reference/theory/",
     "http://localhost:4321/phonometry/reference/bibliography/",
-    "http://localhost:4321/phonometry/es/reference/bibliography/"
+    "http://localhost:4321/phonometry/es/reference/bibliography/",
+    "http://localhost:4321/phonometry/guides/sections/rooms-buildings/",
+    "http://localhost:4321/phonometry/guides/sections/room-acoustics/",
+    "http://localhost:4321/phonometry/es/guides/sections/rooms-buildings/",
+    "http://localhost:4321/phonometry/es/guides/sections/room-acoustics/"
   ]
 }

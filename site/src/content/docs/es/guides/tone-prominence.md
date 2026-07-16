@@ -30,13 +30,12 @@ print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 Los métodos se apoyan en la **banda crítica** — el ancho de banda de análisis
 del oído, $\Delta f_c = 25 + 75\ [1 + 1{,}4(f/1000)^2]^{0{,}69}$ Hz (162 Hz a
 1 kHz): a un tono solo lo enmascara el ruido que hay *dentro* de su banda
-crítica, así que ambos ratios comparan el tono exactamente con ese ruido, no
-con todo el espectro. Los dos ratios llevan esa idea a la práctica de forma
-distinta. La relación tono-ruido separa las líneas espectrales de la banda
-crítica en tono y ruido y resta sus niveles (apartado 11, Fórmulas 9–11),
-mientras que la relación de prominencia compara la banda *completa* centrada
-en el tono con la media de sus dos bandas críticas contiguas (apartado 12,
-Fórmula 23):
+crítica, así que ambos métodos se centran en esa banda y no en todo el
+espectro, pero la usan de forma distinta. La relación tono-ruido trabaja
+dentro de la banda, separando sus líneas espectrales en tono y ruido y
+restando sus niveles (apartado 11, Fórmulas 9–11); la relación de prominencia,
+en cambio, compara la banda *completa* centrada en el tono con la media de sus
+dos bandas críticas contiguas (apartado 12, Fórmula 23):
 
 $$
 \mathrm{TNR} = L_t - L_n, \qquad
@@ -76,17 +75,19 @@ dfc = 25 + 75 * (1 + 1.4 * (res.frequency / 1000) ** 2) ** 0.69
 sel = (f > 700) & (f < 1400)
 plt.plot(f[sel], 10 * np.log10(p[sel]))
 plt.axvspan(res.frequency - dfc / 2, res.frequency + dfc / 2, alpha=0.15)
-plt.title(f"TNR = {res.ratio_db:.1f} dB (criterion {res.criterion_db:.1f} dB)")
-plt.xlabel("Frequency [Hz]"); plt.ylabel("Bin power [dB]")
+plt.title(f"TNR = {res.ratio_db:.1f} dB (criterio {res.criterion_db:.1f} dB)")
+plt.xlabel("Frecuencia [Hz]"); plt.ylabel("Potencia por bin [dB]")
 plt.show()
 ```
 
 </details>
 
-Un TNR por encima de $8 + 8{,}33\log_{10}(1000/f_t)$ dB (8 dB de 1 kHz hacia
-arriba) clasifica el tono como *prominente*; el criterio del PR es
-$9 + 10\log_{10}(1000/f_t)$ dB. Las frecuencias bajas reciben umbrales más
-altos porque unas bandas relativamente más anchas enmascaran más.
+Un TNR igual o superior a $8 + 8{,}33\log_{10}(1000/f_t)$ dB por debajo de
+1 kHz (8 dB constantes para $f_t \ge 1$ kHz) clasifica el tono como
+*prominente*; el criterio del PR es $9 + 10\log_{10}(1000/f_t)$ dB por debajo
+de 1 kHz y 9 dB a partir de ahí, aplicado igualmente con $\ge$. Las
+frecuencias bajas reciben umbrales más altos porque unas bandas relativamente
+más anchas enmascaran más.
 
 **Cuando los dos ratios discrepan.** Cerca de los criterios los veredictos
 pueden diferir, porque cada ratio es frágil en una situación distinta. El TNR

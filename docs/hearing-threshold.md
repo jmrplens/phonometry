@@ -51,9 +51,10 @@ free from signs or symptoms of ear disease and wax obstruction, and — the
 demanding part — with **no history of undue noise exposure**, ototoxic drugs
 or familial hearing loss. The model therefore isolates *pure ageing*: it is
 the baseline that other standards subtract from. A real, unscreened workforce
-hears worse than these curves at every age, which is why ISO 1999 lets a
-study substitute its own unscreened reference ("database B") when the goal is
-comparison with an actual population rather than isolating the noise effect.
+tends to have higher thresholds on average — not necessarily at every age or
+frequency — which is why ISO 1999 supplies an unscreened population as an
+alternate reference (its "database B") for studies whose goal is comparison
+with an actual population rather than isolating the noise effect.
 
 **Reading the percentiles.** A fractile is a population statement, not a
 prediction for a person: `fractile=0.9` returns the threshold that 90 % of

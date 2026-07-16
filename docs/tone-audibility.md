@@ -246,10 +246,12 @@ plt.tight_layout(); plt.show()
 
 - International Organization for Standardization. (2016). *Acoustics —
   Objective method for assessing the audibility of tones in noise —
-  Engineering method* (ISO/PAS 20065:2016).
+  Engineering method* (ISO/PAS 20065:2016; withdrawn, superseded by
+  [ISO/TS 20065:2022](https://www.iso.org/standard/81518.html)).
   [iso.org catalogue](https://www.iso.org/standard/66941.html).
   The implemented engineering method: every formula on this page, from the
-  critical band to the mean audibility and its uncertainty.
+  critical band to the mean audibility and its uncertainty, follows the 2016
+  PAS edition.
 - International Organization for Standardization. (2017). *Acoustics —
   Description, measurement and assessment of environmental noise — Part 2:
   Determination of sound pressure levels* (ISO 1996-2:2017).

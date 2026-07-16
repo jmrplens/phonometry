@@ -91,9 +91,11 @@ symbol means, because they are easy to conflate:
 The non-linear combination $H' = H + N - HN/120$ is why you cannot simply read
 NIPTS off a measured audiogram by subtracting an age table: near-total losses
 would otherwise exceed the ~120 dB physiological ceiling, so the standard
-compresses the sum. The compression is negligible while $H + N$ stays below
-about 40 dB and grows steadily above it, which is exactly the regime of a
-long, loud exposure.
+compresses the sum. Because the correction $HN/120$ scales with the *product*
+of the two components, it can already shave a few dB while $H + N$ is below
+40 dB; 40 dB is only a rough marker for where the effect becomes noticeable,
+not a hard boundary, and the correction grows steadily in the regime of a
+long, loud exposure where both terms are large.
 
 **Fence caveats.** ISO 1999 gives thresholds and their distribution; it does
 *not* define a "hearing handicap" or a compensable fence. A **fence** is a

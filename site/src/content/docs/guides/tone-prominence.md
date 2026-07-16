@@ -28,13 +28,13 @@ print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 
 The methods hinge on the **critical band** — the ear's analysis bandwidth,
 $\Delta f_c = 25 + 75\ [1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz at 1 kHz): a
-tone is masked only by the noise *inside* its critical band, so both ratios
-compare the tone against exactly that noise, not the whole spectrum. The two
-ratios put that idea to work differently. The tone-to-noise ratio separates
-the spectral lines of the critical band into tone and noise and subtracts
-their levels (clause 11, Formulae 9–11), while the prominence ratio compares
-the *whole* band centred on the tone with the mean of its two contiguous
-critical bands (clause 12, Formula 23):
+tone is masked only by the noise *inside* its critical band, so both methods
+focus on that band rather than the whole spectrum, but they use it
+differently. The tone-to-noise ratio works within the band, separating its
+spectral lines into tone and noise and subtracting their levels (clause 11,
+Formulae 9–11); the prominence ratio instead compares the *whole* band centred
+on the tone with the mean of its two contiguous critical bands (clause 12,
+Formula 23):
 
 $$
 \mathrm{TNR} = L_t - L_n, \qquad
@@ -80,9 +80,11 @@ plt.show()
 
 </details>
 
-A TNR above $8 + 8.33\log_{10}(1000/f_t)$ dB (8 dB from 1 kHz up) classifies
-the tone as *prominent*; the PR criterion is $9 + 10\log_{10}(1000/f_t)$ dB.
-Low frequencies get higher thresholds because wider relative bands mask more.
+A TNR at or above $8 + 8.33\log_{10}(1000/f_t)$ dB below 1 kHz (a flat 8 dB for
+$f_t \ge 1$ kHz) classifies the tone as *prominent*; the PR criterion is
+$9 + 10\log_{10}(1000/f_t)$ dB below 1 kHz and 9 dB from there up, likewise
+applied with $\ge$. Low frequencies get higher thresholds because wider
+relative bands mask more.
 
 **When the two ratios disagree.** Near the criteria the verdicts can differ,
 because each ratio is fragile in a different situation. TNR has to *split*

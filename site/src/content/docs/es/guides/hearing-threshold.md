@@ -53,15 +53,16 @@ de salud, libres de signos o síntomas de enfermedad del oído y de obstrucción
 por cerumen, y — la parte exigente — **sin historial de exposición indebida al
 ruido**, fármacos ototóxicos ni pérdida auditiva familiar. El modelo aísla por
 tanto el *envejecimiento puro*: es la línea de base que otras normas restan.
-Una plantilla real, sin cribar, oye peor que estas curvas a cualquier edad, y
-por eso la ISO 1999 permite que un estudio sustituya su propia referencia sin
-cribar («base de datos B») cuando el objetivo es compararse con una población
-real en lugar de aislar el efecto del ruido.
+Una plantilla real, sin cribar, tiende a tener umbrales más altos en promedio
+— no necesariamente a cada edad o frecuencia —, y por eso la ISO 1999 aporta
+una población sin cribar como referencia alternativa (su «base de datos B»)
+para los estudios cuyo objetivo es compararse con una población real en lugar
+de aislar el efecto del ruido.
 
 **Cómo leer los percentiles.** Un fractil es un enunciado poblacional, no una
 predicción para una persona: `fractile=0.9` devuelve el umbral que el 90 % de
-las personas otológicamente normales de esa edad y sexo *mejoran* (solo lo
-supera el décimo que peor oye), y `fractile=0.5` la mediana — mitad por
+las personas otológicamente normales de esa edad y sexo *oyen mejor que* (solo
+lo supera el décimo que peor oye), y `fractile=0.5` la mediana — mitad por
 encima, mitad por debajo. La dispersión es deliberadamente asimétrica (dos
 semi-gaussianas, $s_u > s_l$): el envejecimiento arrastra a una minoría muy
 abajo mientras la mitad que mejor oye se mantiene agrupada cerca de la

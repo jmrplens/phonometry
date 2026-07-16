@@ -95,9 +95,12 @@ significa cada símbolo, porque es fácil confundirlos:
 La combinación no lineal $H' = H + N - HN/120$ es la razón de que no se pueda
 leer el NIPTS de un audiograma medido restando una tabla de edad sin más: las
 pérdidas casi totales superarían de otro modo el techo fisiológico de
-~120 dB, así que la norma comprime la suma. La compresión es despreciable
-mientras $H + N$ queda por debajo de unos 40 dB y crece de forma sostenida por
-encima, que es exactamente el régimen de una exposición larga y ruidosa.
+~120 dB, así que la norma comprime la suma. Como la corrección $HN/120$ escala
+con el *producto* de las dos componentes, ya puede restar algunos dB mientras
+$H + N$ está por debajo de 40 dB; 40 dB es solo un marcador aproximado de dónde
+el efecto se vuelve apreciable, no una frontera estricta, y la corrección crece
+de forma sostenida en el régimen de una exposición larga y ruidosa donde ambos
+términos son grandes.
 
 **Cautelas con el umbral de compensación (*fence*).** La ISO 1999 da umbrales
 y su distribución; *no* define una «discapacidad auditiva» ni un umbral

@@ -95,9 +95,11 @@ it; the list grows as guides gain their References sections.
   Cited by [Prominent Discrete Tones](tone-prominence.md).
 - International Organization for Standardization. (2016). *Acoustics —
   Objective method for assessing the audibility of tones in noise —
-  Engineering method* (ISO/PAS 20065:2016).
+  Engineering method* (ISO/PAS 20065:2016; withdrawn, superseded by
+  [ISO/TS 20065:2022](https://www.iso.org/standard/81518.html)).
   [iso.org catalogue](https://www.iso.org/standard/66941.html).
-  The engineering method for the objective audibility of tones.
+  The engineering method for the objective audibility of tones; the
+  implementation follows the 2016 PAS edition.
   Cited by [Objective audibility of tones](tone-audibility.md).
 
 ## Hearing and hearing conservation

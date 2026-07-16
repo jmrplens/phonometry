@@ -198,6 +198,97 @@ ph.parabolic_equation(50.0, [0.0, 200.0], [1500.0, 1500.0],
 Los tres asumen una columna de agua independiente de la distancia con superficie
 de presión-liberada.
 
+## Referencias
+
+- Francois, R. E., & Garrison, G. R. (1982). Sound absorption based on ocean
+  measurements: Part I: Pure water and magnesium sulfate contributions.
+  *The Journal of the Acoustical Society of America*, 72(3), 896-907.
+  [doi:10.1121/1.388170](https://doi.org/10.1121/1.388170).
+  Las componentes de agua pura y sulfato de magnesio del modelo de absorción por
+  defecto de la sección de pérdida por transmisión.
+- Francois, R. E., & Garrison, G. R. (1982). Sound absorption based on ocean
+  measurements. Part II: Boric acid contribution and equation for total
+  absorption. *The Journal of the Acoustical Society of America*, 72(6),
+  1879-1890.
+  [doi:10.1121/1.388673](https://doi.org/10.1121/1.388673).
+  El término de ácido bórico y la ecuación completa de absorción total de
+  Francois-Garrison, el modelo por defecto implementado.
+- Ainslie, M. A., & McColm, J. G. (1998). A simplified formula for viscous and
+  chemical absorption in sea water. *The Journal of the Acoustical Society of
+  America*, 103(3), 1671-1672.
+  [doi:10.1121/1.421258](https://doi.org/10.1121/1.421258).
+  El modelo de absorción simplificado y legible (`"ainslie-mccolm"`).
+- Thorp, W. H. (1967). Analytic description of the low-frequency attenuation
+  coefficient. *The Journal of the Acoustical Society of America*, 42(1), 270.
+  [doi:10.1121/1.1910566](https://doi.org/10.1121/1.1910566).
+  La fórmula de absorción de baja frecuencia dependiente solo de la frecuencia (`"thorp"`).
+- Chen, C.-T., & Millero, F. J. (1977). Speed of sound in seawater at high
+  pressures. *The Journal of the Acoustical Society of America*, 62(5),
+  1129-1135.
+  [doi:10.1121/1.381646](https://doi.org/10.1121/1.381646).
+  La ecuación de velocidad del sonido UNESCO, el estándar internacional.
+- Wong, G. S. K., & Zhu, S. (1995). Speed of sound in seawater as a function
+  of salinity, temperature, and pressure. *The Journal of the Acoustical
+  Society of America*, 97(3), 1732-1736.
+  [doi:10.1121/1.413048](https://doi.org/10.1121/1.413048).
+  La reformulación ITS-90 de los coeficientes UNESCO, la forma implementada.
+- Del Grosso, V. A. (1974). New equation for the speed of sound in natural
+  waters (with comparisons to other equations). *The Journal of the
+  Acoustical Society of America*, 56(4), 1084-1091.
+  [doi:10.1121/1.1903388](https://doi.org/10.1121/1.1903388).
+  La ecuación alternativa de velocidad del sonido basada en presión
+  (`"del-grosso"`).
+- Mackenzie, K. V. (1981). Nine-term equation for sound speed in the oceans.
+  *The Journal of the Acoustical Society of America*, 70(3), 807-812.
+  [doi:10.1121/1.386920](https://doi.org/10.1121/1.386920).
+  La ecuación de nueve términos basada en profundidad y su valor de
+  comprobación de 1550.744 m/s.
+- Leroy, C. C., & Parthiot, F. (1998). Depth-pressure relationships in the
+  oceans and seas. *The Journal of the Acoustical Society of America*, 103(3),
+  1346-1352.
+  [doi:10.1121/1.421275](https://doi.org/10.1121/1.421275).
+  La conversión de profundidad a presión que alimenta las ecuaciones UNESCO
+  y Del Grosso.
+- Urick, R. J. (1983). *Principles of underwater sound* (3.ª ed.).
+  McGraw-Hill; reimpreso en 1996 por Peninsula Publishing.
+  ISBN 978-0-932146-62-5.
+  [Ficha en Open Library](https://openlibrary.org/books/OL9317725M).
+  El marco de la ecuación del sonar (exceso de señal, figura de mérito).
+- Medwin, H., & Clay, C. S. (1998). *Fundamentals of acoustical oceanography*.
+  Academic Press. ISBN 978-0-12-487570-8.
+  [Página del editor](https://shop.elsevier.com/books/fundamentals-of-acoustical-oceanography/medwin/978-0-12-487570-8).
+  El coeficiente de reflexión de Rayleigh fluido-fluido y el ángulo rasante
+  crítico de la sección de reflexión en el fondo.
+- Wenz, G. M. (1962). Acoustic ambient noise in the ocean: Spectra and
+  sources. *The Journal of the Acoustical Society of America*, 34(12),
+  1936-1956.
+  [doi:10.1121/1.1909155](https://doi.org/10.1121/1.1909155).
+  El estudio de ruido ambiental tras las componentes eólica y térmica de
+  la sección de ruido ambiental oceánico.
+- Carey, W. M., & Evans, R. B. (2011). *Ocean ambient noise: Measurement and
+  theory*. Springer.
+  [doi:10.1007/978-1-4419-7832-5](https://doi.org/10.1007/978-1-4419-7832-5).
+  El anclaje de la "regla de los cincos" del viento y la derivación del ruido
+  térmico de Mellen.
+- MacGillivray, A., & de Jong, C. (2021). A reference spectrum model for
+  estimating source levels of marine shipping based on automated
+  identification system data. *Journal of Marine Science and Engineering*,
+  9(4), 369.
+  [doi:10.3390/jmse9040369](https://doi.org/10.3390/jmse9040369).
+  El modelo de nivel de fuente de buques JOMOPANS-ECHO (acceso abierto); su
+  calculadora del archivo S1 es el oráculo de validación.
+- Wales, S. C., & Heitmeyer, R. M. (2002). An ensemble source spectra model
+  for merchant ship-radiated noise. *The Journal of the Acoustical Society of
+  America*, 111(3), 1211-1231.
+  [doi:10.1121/1.1427355](https://doi.org/10.1121/1.1427355).
+  El modelo de espectro de conjunto de buques mercantes de la sección de
+  tráfico marítimo.
+- Jensen, F. B., Kuperman, W. A., Porter, M. B., & Schmidt, H. (2011).
+  *Computational ocean acoustics* (2.ª ed.). Springer.
+  [doi:10.1007/978-1-4419-8678-8](https://doi.org/10.1007/978-1-4419-8678-8).
+  Los solvers de modos normales, trazado de rayos y ecuación parabólica
+  split-step Fourier de la sección de solvers numéricos.
+
 ## Véase también
 
 - Referencia de la API: [`underwater.propagation`](/phonometry/es/reference/api/underwater/propagation/), [`underwater.numerical_propagation`](/phonometry/es/reference/api/underwater/numerical-propagation/) y [`underwater.sound_speed`](/phonometry/es/reference/api/underwater/sound-speed/).

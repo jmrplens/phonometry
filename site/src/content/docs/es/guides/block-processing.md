@@ -79,6 +79,50 @@ el estado se reserva de forma perezosa en la primera llamada para ajustarse al
 número de canales, y se realoja si este cambia (p. ej. pasar de estéreo a mono
 reinicia el estado).
 
+## Qué es el estado que se transporta
+
+Todos los filtros de la biblioteca se ejecutan como una cascada de secciones
+de segundo orden en forma directa II transpuesta. Para una sección con
+coeficientes $(b_0, b_1, b_2, a_1, a_2)$:
+
+$$
+y[n] = b_0\,x[n] + z_1[n-1], \qquad
+z_1[n] = b_1\,x[n] - a_1\,y[n] + z_2[n-1], \qquad
+z_2[n] = b_2\,x[n] - a_2\,y[n]
+$$
+
+El par $(z_1, z_2)$ por sección es *toda* la memoria del pasado que tiene el
+filtro. `stateful=True` guarda esos valores cuando termina un bloque y los
+restaura cuando empieza el siguiente, de modo que la recursión no puede saber
+dónde acabó un búfer y empezó el siguiente: la salida concatenada es igual a
+la de una sola pasada exactamente, no de forma aproximada. El detector
+`TimeWeighting` transporta aún menos, solo su último valor de envolvente
+$y[n-1]$, que es el mismo valor que la API funcional devuelve como
+`initial_state` (ver
+[Ponderación temporal](/phonometry/es/guides/time-weighting/#6-procesado-por-bloques)).
+
+### Trampas del streaming
+
+- **El preprocesado por bloque crea costuras.** Cualquier cosa calculada a
+  partir de un solo bloque que debería ser global, como el detrending
+  (restar la media del propio bloque) o la normalización, da a cada bloque
+  una operación ligeramente distinta: las salidas ya no se concatenan en el
+  resultado continuo. Por eso `detrend` debe ser `False` en modo con estado.
+- **No toda métrica admite streaming.** Las métricas de energía se acumulan
+  limpiamente (un Leq acumulado es una suma de energía acumulada), pero los
+  estadísticos de rango no: el L90 de una grabación no es ninguna
+  combinación de los L90 por bloque. Transmite la *envolvente* y calcula los
+  percentiles una vez, sobre el resultado conjunto.
+- **El primer bloque sigue llevando el transitorio de arranque.** El estado
+  empieza en reposo, así que el filtro se asienta durante los primeros
+  instantes igual que en una sola pasada. Usa `steady_ic=True` para arrancar
+  en el estado estacionario de la respuesta al escalón, o descarta el tiempo
+  de asentamiento una vez (no una por bloque).
+- **Un flujo por objeto.** Una instancia con estado guarda la memoria de una
+  señal; pasarle dos flujos intercalados corrompe ambos. Crea un objeto de
+  filtro por flujo: el coste de diseño se paga una vez al construir, no por
+  bloque.
+
 ## Patrón de sonómetro en tiempo real
 
 El bucle de streaming canónico — ponderar, obtener la envolvente e informar
@@ -107,6 +151,14 @@ for x in audio_stream(block):            # tu callback de captura
 | `zero_phase` | no soportado | El filtrado bidireccional necesita la señal completa |
 | `high_accuracy` (ponderación) | por defecto se resuelve a `False` — el diseño bilineal clásico, consulta [Ponderación frecuencial](/phonometry/es/guides/weighting/); pasar `True` explícito lanza `ValueError` | El remuestreo polifásico interno es incompatible con bloques |
 | `steady_ic` | opcional | Arranca los filtros en el régimen permanente de la respuesta al escalón |
+
+## Referencias
+
+- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
+  (3.ª ed.). Pearson. ISBN 978-0-13-198842-2.
+  [Ficha en Open Library](https://openlibrary.org/isbn/9780131988422).
+  Las estructuras de filtro en forma directa y la recursión de estado tras
+  la ecuación del estado transportado de arriba.
 
 ---
 

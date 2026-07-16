@@ -46,6 +46,19 @@ decibelios directamente subestima cualquier ruido fluctuante. $L_{eq}$ es el
 nivel del sonido *estacionario* que transporta la misma energía que el real,
 fluctuante, y por eso las normativas se redactan en términos de él.
 
+La misma regla gobierna cualquier combinación de niveles: niveles de periodo
+en un valor de día completo, posiciones de micrófono en un promedio de sala,
+mediciones repetidas en una media. Combina energías,
+`10 * np.log10(np.mean(10 ** (L / 10)))`, nunca los valores en dB. El error
+de la media aritmética es unilateral (siempre lee de menos) y crece con la
+dispersión, así que no se cancela con muchas mediciones: con valores
+repartidos en 10 dB ya cuesta un par de decibelios. Las pocas fórmulas
+normativas que sí promedian decibelios directamente son aproximaciones
+deliberadas y lo declaran (ISO 1996-2 ofrece una como sustituto de la
+incertidumbre por mediciones repetidas y avisa de que se infla cuando los
+niveles se dispersan más de 3 dB, ver la sección de incertidumbre más abajo);
+en todo lo demás, energía.
+
 ### Parámetros de `leq()` / `laeq()`
 
 | Parámetro | Tipo / forma | Unidades | Rango / valor por defecto | Notas |
@@ -97,6 +110,35 @@ envolvente superado el 10 % del tiempo. Eso hace que la *elección de la
 ponderación temporal forme parte de la métrica*: un $L_{10}$ con envolvente
 Slow es sistemáticamente más bajo que con una Fast en ruido impulsivo, por lo
 que las normativas siempre indican la ponderación temporal.
+
+### Leer Leq frente a los percentiles
+
+$L_{eq}$ y la familia $L_N$ responden preguntas distintas sobre el mismo
+historial de niveles. $L_{eq}$ es una media energética, así que los momentos más
+ruidosos la dominan: un solo segundo a 100 dB eleva el $L_{eq}$ de una hora
+por lo demás estable a 60 dB hasta unos 66 dB, mientras que $L_{90}$,
+$L_{50}$ e incluso $L_{10}$ apenas se mueven (un evento de un segundo ocupa
+mucho menos del 10 % de la hora). Los percentiles son estadísticos de rango,
+robustos frente a eventos raros por construcción. En la práctica:
+
+- **$L_{eq}$ (y $L_{Aeq}$)** es la métrica de dosis: las normativas, la
+  exposición y los modelos de molestia se escriben con ella precisamente
+  *porque* se niega a ignorar los eventos ruidosos raros.
+- **$L_{90}$** estima el nivel residual (de fondo) bajo una fuente
+  intermitente, que es como lo usa el Anexo I de ISO 1996-2.
+- **$L_{10}$** sigue los picos de los eventos; la separación
+  $L_{10} - L_{90}$ es un indicador rápido de intermitencia.
+- **$L_{eq} - L_{50}$** mide lo "picudo" que es el historial: en ruido
+  estacionario casi coinciden, y cuanto más fluctúa el nivel más sube
+  $L_{eq}$ por encima de la mediana (para una distribución gaussiana de
+  niveles con desviación típica $\sigma$ dB,
+  $L_{eq} \approx L_{50} + 0{,}115\,\sigma^2$).
+
+Una precaución: los percentiles no se combinan. Dos horas con $L_{90}$
+conocidos no dan el $L_{90}$ de las dos horas con ninguna fórmula;
+recalcúlalo sobre la envolvente conjunta. Los valores de $L_{eq}$, en cambio,
+se combinan exactamente promediando energías ponderadas por el tiempo, que es
+lo que hace `composite_rating_level` más abajo.
 
 ### Parámetros de `ln_levels()`
 
@@ -357,6 +399,20 @@ los veredictos de prominencia tonal de ECMA-418-1 en
 [Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/), y las
 curvas isofónicas de ISO 226 viven con las métricas de percepción en
 [Sonoridad](/phonometry/es/guides/loudness/).
+
+## Referencias
+
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/5708).
+  Las balísticas de envolvente tras los niveles percentiles, el pico
+  ponderado C y las referencias de ráfagas del SEL contra las que se
+  verifica la implementación.
+- Kinsler, L. E., Frey, A. R., Coppens, A. B., & Sanders, J. V. (2000).
+  *Fundamentals of acoustics* (4.ª ed.). Wiley. ISBN 978-0-471-84789-2.
+  [Página del editor](https://www.wiley.com/en-us/Fundamentals+of+Acoustics%2C+4th+Edition-p-9780471847892).
+  Las definiciones de presión sonora, energía y nivel que sostienen Leq, SEL
+  y las medidas de dosis.
 
 ---
 

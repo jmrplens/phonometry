@@ -102,6 +102,37 @@ wind, handling noise:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" width="80%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import time_weighting
+
+fs = 48000
+t = np.arange(int(fs * 6.0)) / fs
+stable = 0.5 * np.sin(2 * np.pi * 1000 * t)
+# 3 % amplitude modulation at 2 Hz: ~0.14 dB of wobble, clearly over
+unstable = stable * (1 + 0.03 * np.sin(2 * np.pi * 2.0 * t))
+
+plt.figure(figsize=(9, 5))
+skip = fs                     # discard the F-integrator attack (~8 tau)
+for x, label in ((stable, "Stable tone (good coupling)"),
+                 (unstable, "3% AM tone (loose coupling)")):
+    env = time_weighting(x, fs, mode="fast")[skip:]
+    level = 10 * np.log10(np.maximum(env, np.finfo(float).eps))
+    plt.plot(t[skip:], level - level.mean(), label=label)
+for lim in (0.07, -0.07):
+    plt.axhline(lim, linestyle="--", color="gray")
+plt.xlabel("Time [s]")
+plt.ylabel("F-weighted level re mean [dB]")
+plt.legend()
+plt.show()
+```
+
+</details>
+
 ### `sensitivity()` parameters
 
 | Parameter | Type / shape | Units | Range / default | Notes |
@@ -118,6 +149,37 @@ wind, handling noise:
 Returns the sensitivity factor (float) to pass as `calibration_factor=` to
 `octave_filter`, `leq`, `laeq`, `ln_levels`, `lc_peak`, `sel` and the dose
 functions.
+
+## Field checks, laboratory verification and drift
+
+Calibration lives at three time scales:
+
+- **Every session: the field check.** Couple the calibrator and derive the
+  sensitivity before each measurement series, and check it again at the end.
+  Normative methods make the second check mandatory and use the pre/post
+  difference as a validity gate (a common criterion invalidates the series
+  when the two differ by more than 0.5 dB). Whatever the threshold, the
+  difference is your drift bound for everything captured in between; carry
+  it into the uncertainty budget rather than assuming zero.
+- **Periodically: laboratory verification.** A field check only compares the
+  chain against the calibrator; it cannot see an error the calibrator and
+  meter share, and it says nothing about the response away from 1 kHz.
+  IEC 61672-3 defines the periodic tests for the meter (weightings,
+  level linearity and ballistics spot-checked against the class limits),
+  and IEC 60942 the corresponding tests for the calibrator itself; typical
+  laboratory intervals are one to two years.
+- **Between checks: drift.** Microphone sensitivity moves with temperature,
+  humidity and capsule aging; electronics with battery voltage. A healthy
+  class 1 chain drifts a few hundredths of a dB over a session, which is
+  why a pre/post difference of half a decibel signals damage rather than
+  weather. The largest "drift" of all is a touched gain knob: the factor S
+  is valid only while the chain stays exactly as calibrated.
+
+One more class subtlety: tolerances chain. A class 1 measurement requires a
+class 1 (or LS) calibrator *and* a class 1 meter; calibrating a class 1
+chain with a class 2 calibrator silently downgrades every derived level to
+class 2 accuracy, because the calibrator's wider level tolerance enters S
+directly.
 
 ## Digital Analysis (dBFS)
 
@@ -162,6 +224,19 @@ spl_peak, freq = octave_filter(recording, fs, mode='peak')
 Integer signals (e.g. int16 from `scipy.io.wavfile.read`) are converted to
 float64 internally before any squaring, so calibration and level results are
 identical whether you pass the raw integer array or a float conversion.
+
+## References
+
+- International Electrotechnical Commission. (2017). *Electroacoustics —
+  Sound calibrators* (IEC 60942:2017).
+  [IEC webstore](https://webstore.iec.ch/en/publication/30045).
+  The calibrator classes, level tolerances and the short-term stability
+  criterion `sensitivity()` applies to the reference recording.
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5710).
+  The laboratory verification procedure behind the periodic checks
+  recommended above.
 
 ---
 

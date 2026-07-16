@@ -105,6 +105,37 @@ viento, ruido de manipulación:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_es.png" alt="Nivel con ponderación F de un tono de calibración estable frente a otro con AM del 3 % contra el límite de ±0,07 dB de clase 1 de IEC 60942" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_es_dark.png" alt="Nivel con ponderación F de un tono de calibración estable frente a otro con AM del 3 % contra el límite de ±0,07 dB de clase 1 de IEC 60942" style="width:80%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import time_weighting
+
+fs = 48000
+t = np.arange(int(fs * 6.0)) / fs
+stable = 0.5 * np.sin(2 * np.pi * 1000 * t)
+# Modulación de amplitud del 3 % a 2 Hz: ~0,14 dB de oscilación, fuera de límite
+unstable = stable * (1 + 0.03 * np.sin(2 * np.pi * 2.0 * t))
+
+plt.figure(figsize=(9, 5))
+skip = fs                # descartamos el ataque del integrador F (~8 tau)
+for x, label in ((stable, "Tono estable (buen acoplamiento)"),
+                 (unstable, "Tono con AM del 3% (acoplamiento flojo)")):
+    env = time_weighting(x, fs, mode="fast")[skip:]
+    level = 10 * np.log10(np.maximum(env, np.finfo(float).eps))
+    plt.plot(t[skip:], level - level.mean(), label=label)
+for lim in (0.07, -0.07):
+    plt.axhline(lim, linestyle="--", color="gray")
+plt.xlabel("Tiempo [s]")
+plt.ylabel("Nivel F respecto a la media [dB]")
+plt.legend()
+plt.show()
+```
+
+</details>
+
 ### Parámetros de `sensitivity()`
 
 | Parámetro | Tipo / forma | Unidades | Rango / defecto | Notas |
@@ -121,6 +152,39 @@ viento, ruido de manipulación:
 Devuelve el factor de sensibilidad (float) para pasarlo como
 `calibration_factor=` a `octave_filter`, `leq`, `laeq`, `ln_levels`, `lc_peak`,
 `sel` y las funciones de dosis.
+
+## Comprobaciones de campo, verificación de laboratorio y deriva
+
+La calibración vive en tres escalas de tiempo:
+
+- **En cada sesión: la comprobación de campo.** Acopla el calibrador y deriva
+  la sensibilidad antes de cada serie de mediciones, y compruébala de nuevo
+  al terminar. Los métodos normativos hacen obligatoria la segunda
+  comprobación y usan la diferencia antes/después como criterio de validez
+  (uno habitual invalida la serie cuando ambas difieren en más de 0,5 dB).
+  Sea cual sea el umbral, esa diferencia es tu cota de deriva para todo lo
+  capturado entre medias; llévala al presupuesto de incertidumbre en lugar
+  de suponerla cero.
+- **Periódicamente: verificación de laboratorio.** Una comprobación de campo
+  solo compara la cadena con el calibrador; no puede ver un error que
+  calibrador y medidor compartan, y no dice nada de la respuesta lejos de
+  1 kHz. IEC 61672-3 define los ensayos periódicos del sonómetro
+  (ponderaciones, linealidad de nivel y balística contrastadas con los
+  límites de clase) e IEC 60942 los ensayos correspondientes del propio
+  calibrador; los intervalos de laboratorio típicos son de uno a dos años.
+- **Entre comprobaciones: la deriva.** La sensibilidad del micrófono se
+  mueve con la temperatura, la humedad y el envejecimiento de la cápsula; la
+  electrónica, con la tensión de la batería. Una cadena de clase 1 sana
+  deriva unas centésimas de dB en una sesión, y por eso una diferencia
+  antes/después de medio decibelio señala un daño y no el clima. La mayor
+  "deriva" de todas es un mando de ganancia tocado: el factor S solo vale
+  mientras la cadena permanece exactamente como se calibró.
+
+Una sutileza más sobre clases: las tolerancias se encadenan. Una medición de
+clase 1 exige un calibrador de clase 1 (o LS) *y* un sonómetro de clase 1;
+calibrar una cadena de clase 1 con un calibrador de clase 2 degrada en
+silencio todos los niveles derivados a exactitud de clase 2, porque la
+tolerancia de nivel más ancha del calibrador entra directamente en S.
 
 ## Análisis digital (dBFS)
 
@@ -167,6 +231,20 @@ Las señales enteras (p. ej. int16 de `scipy.io.wavfile.read`) se convierten
 internamente a float64 antes de cualquier elevación al cuadrado, así que la
 calibración y los niveles son idénticos tanto si pasas el array entero crudo
 como una conversión a float.
+
+## Referencias
+
+- International Electrotechnical Commission. (2017). *Electroacoustics —
+  Sound calibrators* (IEC 60942:2017).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/30045).
+  Las clases de calibrador, las tolerancias de nivel y el criterio de
+  estabilidad a corto plazo que `sensitivity()` aplica a la grabación de
+  referencia.
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/5710).
+  El procedimiento de verificación de laboratorio tras las comprobaciones
+  periódicas recomendadas arriba.
 
 ---
 

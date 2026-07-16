@@ -77,6 +77,47 @@ All stateful classes handle multichannel input `(channels, samples)`: the state
 is allocated lazily on the first call to match the channel count, and reallocated
 if the channel count changes (e.g. switching from stereo to mono resets the state).
 
+## What the carried state is
+
+Every filter in the library runs as a cascade of second-order sections in
+transposed direct form II. For one section with coefficients
+$(b_0, b_1, b_2, a_1, a_2)$:
+
+$$
+y[n] = b_0\,x[n] + z_1[n-1], \qquad
+z_1[n] = b_1\,x[n] - a_1\,y[n] + z_2[n-1], \qquad
+z_2[n] = b_2\,x[n] - a_2\,y[n]
+$$
+
+The pair $(z_1, z_2)$ per section is the filter's *entire* memory of the
+past. `stateful=True` stores these values when a block ends and restores
+them when the next begins, so the recursion cannot tell where one buffer
+stopped and the next started: the concatenated output equals the
+single-pass output exactly, not approximately. The `TimeWeighting` detector
+carries even less, just its last envelope value $y[n-1]$, which is the same
+value the functional API hands back as `initial_state` (see
+[Time Weighting](/phonometry/guides/time-weighting/#6-block-processing)).
+
+### Streaming pitfalls
+
+- **Per-block preprocessing creates seams.** Anything computed from a single
+  block that should be global, like detrending (removing the block's own
+  mean) or normalization, gives each block a slightly different operation:
+  the outputs no longer concatenate into the continuous result. This is why
+  `detrend` must be `False` in stateful mode.
+- **Not every metric streams.** Energy metrics accumulate cleanly (a
+  running Leq is a running energy sum), but rank statistics do not: the L90
+  of a recording is not any combination of per-block L90 values. Stream the
+  *envelope* and compute percentiles once, on the pooled result.
+- **The first block still carries the onset transient.** State starts at
+  rest, so the filter settles during the first instants exactly as in a
+  single pass. Use `steady_ic=True` to start in step-response steady state,
+  or discard the settling time once (not once per block).
+- **One stream per object.** A stateful instance holds the memory of one
+  signal; feeding two interleaved streams through it corrupts both. Create
+  one filter object per stream: the design cost is paid once at
+  construction, not per block.
+
 ## Real-time level meter pattern
 
 The canonical streaming loop — weight, envelope and report block by block
@@ -105,6 +146,14 @@ for x in audio_stream(block):            # your capture callback
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
 | `high_accuracy` (weighting) | resolves to `False` by default — the legacy bilinear design, see [Frequency Weighting](/phonometry/guides/weighting/); explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
+
+## References
+
+- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
+  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
+  [Open Library record](https://openlibrary.org/isbn/9780131988422).
+  The direct-form filter structures and state recursion behind the carried
+  state equation above.
 
 ---
 

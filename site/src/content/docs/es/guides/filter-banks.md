@@ -28,6 +28,28 @@ exactamente en $f_1$ y $f_2$ en todas las arquitecturas — para Chebyshev II,
 Elíptico y Bessel eso exige pre-deformar (pre-warping) el mapeo analítico de los
 bordes de banda en lugar de confiar en la parametrización por defecto de SciPy.
 
+### Polos, ceros y estabilidad
+
+Un paso-banda digital es una constelación de polos y ceros en el plano z: los
+ceros en DC y Nyquist, o cerca de ellos, sujetan la respuesta lejos de la
+banda (hasta el suelo de la banda atenuada, en los diseños equirizados), y
+los polos se agrupan justo dentro del círculo unidad en los ángulos
+$\omega = 2\pi f / f_s$ que abarca la banda de paso. De ahí salen dos
+intuiciones. Primera, la selectividad es proximidad: cuanto más cerca del
+círculo unidad están los polos, más abrupta es la banda y más tiempo resuena
+el filtro (los picos de retardo de grupo de la sección 7 son esa resonancia,
+medida). Segunda, la estabilidad es un margen, no una propiedad de la
+arquitectura: un filtro IIR es estable solo mientras todos sus polos
+permanecen estrictamente dentro del círculo unidad, y una banda estrecha a
+una frecuencia de muestreo alta los empuja hacia fuera (radio del polo
+$\approx 1 - \pi B / f_s$ para un ancho de banda $B$) y los aprieta entre
+sí, hasta que los coeficientes en doble precisión ya no pueden representar
+sus posiciones con exactitud. Las secciones de segundo orden (SOS) desactivan
+la mitad del problema: cada par de polos conserva sus propios coeficientes,
+de modo que los errores de redondeo quedan localizados en lugar de acumularse
+en un único polinomio de orden alto. La otra mitad, la minúscula razón
+$B / f_s$ en sí, es lo que arregla el diezmado.
+
 ### Diezmado multitasa
 
 Una banda de tercio de octava de 25 Hz a 48 kHz abarca unos 5,8 Hz — el
@@ -37,6 +59,37 @@ frecuencia diezmada:
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es.svg" alt="Diezmado multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un paso-bajo antialiasing y diezmado, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_es_dark.svg" alt="Diezmado multitasa: las bandas altas se filtran a la frecuencia de entrada y las bajas tras un paso-bajo antialiasing y diezmado, para que las secciones SOS se mantengan numéricamente sanas" style="width:92%">
 
+Diezmar por $M$ reescala el problema: el mismo ancho de banda de 5,8 Hz se
+vuelve $M$ veces mayor respecto al nuevo Nyquist, el radio de los polos se
+separa del círculo unidad y los coeficientes SOS regresan a un rango bien
+condicionado. El precio es una contabilidad que el banco paga internamente:
+antes de cada etapa de diezmado debe ejecutarse un paso-bajo antialiasing,
+porque una componente por encima del nuevo Nyquist que se pliegue hacia abajo
+cae *dentro* de las bandas bajas que se están midiendo, y ningún filtro
+posterior puede eliminarla.
+
+### Trampas de aliasing
+
+El banco protege sus propias etapas de diezmado, pero solo puede analizar lo
+que la cadena de captura le entrega:
+
+- **Plegado en el ADC.** La energía por encima de $f_s/2$ que llega al
+  conversor sin un filtro antialiasing analógico se pliega dentro del rango
+  de análisis y es indistinguible del sonido real dentro de banda. Las
+  tarjetas de sonido lo filtran internamente; las cadenas de instrumentación
+  a medida pueden no hacerlo.
+- **Remuestreo barato.** Convertir una grabación de 44,1 kHz a 48 kHz con un
+  remuestreador de baja calidad deja imágenes que sesgan las bandas más
+  altas. Usa un remuestreador polifásico (`scipy.signal.resample_poly`) o,
+  más sencillo, analiza a la frecuencia nativa: todas las funciones de
+  phonometry aceptan `fs` directamente.
+- **Bandas cerca de Nyquist.** Una banda cuyo borde superior se acerca a
+  $f_s/2$ no puede realizar su respuesta de diseño: la transformada bilineal
+  comprime allí el eje de frecuencias (el mismo efecto que los filtros de
+  ponderación contrarrestan con `high_accuracy`). Mantén el borde de la banda
+  superior holgadamente por debajo de Nyquist o sube `fs`, y deja que
+  `verify_filter_class` informe del margen restante.
+
 ## 2. Comparación de filtros y zoom
 
 Usamos secciones de segundo orden (SOS) en todos los filtros para garantizar la
@@ -44,6 +97,35 @@ estabilidad numérica. La siguiente gráfica compara las arquitecturas centránd
 en el punto de cruce a −3 dB.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_es.svg" alt="Comparación de la respuesta en magnitud de las cinco arquitecturas para la banda de octava de 1 kHz, con zoom en el cruce a -3 dB" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_es_dark.svg" alt="Comparación de la respuesta en magnitud de las cinco arquitecturas para la banda de octava de 1 kHz, con zoom en el cruce a -3 dB" style="width:80%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import sosfreqz
+from phonometry import OctaveFilterBank
+
+fs = 48000
+fig, ax = plt.subplots(figsize=(9, 5))
+for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
+    # limits selecciona únicamente la banda de octava de 1 kHz
+    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
+                            filter_type=ftype)
+    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    fsd = fs / bank.factor[idx]           # frecuencia real de la banda
+    w, h = sosfreqz(bank.sos[idx], worN=16384, fs=fsd)
+    ax.semilogx(w, 20 * np.log10(np.abs(h) + 1e-9), label=ftype)
+ax.axhline(-3, color="gray", linestyle=":", label="-3 dB")
+ax.set(xlim=(100, 8000), ylim=(-80, 5),
+       xlabel="Frecuencia [Hz]", ylabel="Magnitud [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 | Tipo | Nombre | Ejemplo de uso | Ideal para |
 | :--- | :--- | :--- | :--- |
@@ -190,6 +272,38 @@ low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4_es.svg" alt="Crossover Linkwitz-Riley de 4.º orden: paso-bajo, paso-alto y su suma plana" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4_es_dark.svg" alt="Crossover Linkwitz-Riley de 4.º orden: paso-bajo, paso-alto y su suma plana" style="width:60%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import freqz
+from phonometry import linkwitz_riley
+
+# Medimos ambas ramas: dividimos un impulso unitario y tomamos los espectros.
+fs = 48000
+impulse = np.zeros(fs)
+impulse[0] = 1.0
+low, high = linkwitz_riley(impulse, fs, freq=1000, order=4)
+
+w, h_lp = freqz(low, worN=8192, fs=fs)
+_, h_hp = freqz(high, worN=8192, fs=fs)
+
+fig, ax = plt.subplots(figsize=(9, 5))
+ax.semilogx(w, 20 * np.log10(np.abs(h_lp) + 1e-9), label="Paso-bajo (LR4)")
+ax.semilogx(w, 20 * np.log10(np.abs(h_hp) + 1e-9), label="Paso-alto (LR4)")
+ax.semilogx(w, 20 * np.log10(np.abs(h_lp + h_hp) + 1e-9), "--",
+            label="Suma (plana)")
+ax.set(xlim=(20, 20000), ylim=(-60, 5),
+       xlabel="Frecuencia [Hz]", ylabel="Magnitud [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 6. Verificar la clase IEC 61260-1
 
 `verify_filter_class` comprueba cada banda de un banco contra los límites de
@@ -217,6 +331,42 @@ los mismos límites que usan el verificador y la figura de abajo.
 *La respuesta del Butterworth de orden 6 (azul) serpentea entre las regiones
 prohibidas: debe atenuar al menos la máscara roja fuera de la banda y no más
 que la morada dentro de ella.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import sosfreqz
+from phonometry import OctaveFilterBank, class_limits
+
+fs = 48000
+bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+fm, fsd = bank.freq[idx], fs / bank.factor[idx]
+w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
+att = -20 * np.log10(np.abs(h) + 1e-12)
+delta_a = att - np.interp(fm, w, att)     # atenuación relativa
+
+grid = np.logspace(np.log10(0.05), np.log10(8), 2000)
+lo1, hi1 = class_limits(1.0, 1, grid)     # atenuación mín/máx de clase 1
+
+fig, ax = plt.subplots(figsize=(9, 5.5))
+ax.fill_between(grid, -10, lo1, alpha=0.15, color="tab:red",
+                label="Prohibido: atenuación insuficiente")
+finite = np.isfinite(hi1)
+ax.fill_between(grid[finite], hi1[finite], 90, alpha=0.15, color="tab:purple",
+                label="Prohibido: atenuación excesiva")
+ax.plot(w / fm, delta_a, label="Butterworth de orden 6")
+ax.set(xscale="log", xlim=(0.08, 8), ylim=(-6, 90),
+       xlabel="Frecuencia normalizada f / fm",
+       ylabel="Atenuación relativa [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 Con parámetros por defecto (orden 6), **Butterworth cumple clase 1**, y también
 lo hace **Chebyshev II**: su valor por defecto de `attenuation` es ahora `72` dB,
@@ -247,6 +397,71 @@ print(result["bands"][0]["margin_class0_db"])
 *El corredor de clase 0 (±0,15 dB en el centro de banda) es el más estrecho; la
 clase 1 (±0,3 dB) y la clase 2 (±0,5 dB) son progresivamente más anchas. El
 Butterworth de orden 6 serpentea dentro de la clase 0 en toda la banda de paso.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import sosfreqz
+from phonometry import OctaveFilterBank, class_limits
+
+fs = 48000
+bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+fm, fsd = bank.freq[idx], fs / bank.factor[idx]
+w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
+att = -20 * np.log10(np.abs(h) + 1e-12)
+delta_a = att - np.interp(fm, w, att)
+
+# Solo banda de paso: fuera de los bordes el límite máximo es +inf.
+g = 10 ** (3 / 10)
+grid = np.linspace(g ** -0.5, g ** 0.5, 1500)
+pb = (w / fm >= g ** -0.5) & (w / fm <= g ** 0.5)
+
+fig, ax = plt.subplots(figsize=(9, 5.5))
+for cls in (2, 1, 0):            # corredores anidados, clase 0 el más estrecho
+    lo, hi = class_limits(1.0, cls, grid, edition="1995")
+    ax.plot(grid, hi, label=f"Corredor de clase {cls}")
+    ax.plot(grid, lo, color=ax.lines[-1].get_color())
+ax.plot(w[pb] / fm, delta_a[pb], "k", lw=2, label="Butterworth de orden 6")
+ax.set(xscale="log", xlim=(g ** -0.5, g ** 0.5), ylim=(-0.7, 6),
+       xlabel="Frecuencia normalizada f / fm",
+       ylabel="Atenuación relativa [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+### Qué significa físicamente una clase
+
+Las máscaras son cotas de error en el peor caso de una *medición*, no
+calificaciones abstractas:
+
+- **En la banda de paso** el corredor acota cuánto puede desviarse la lectura
+  del contenido dentro de banda: un banco de clase 1 lee un tono de centro de
+  banda a ±0,4 dB de su nivel verdadero y uno de clase 2 a ±0,6 dB (Tabla 1
+  de 2014; las máscaras de 1995, más estrictas, permitían ±0,3 dB para la
+  clase 1 y ±0,15 dB para la clase 0). Hacia los bordes el corredor se
+  ensancha, lo que es la admisión honesta de que un tono situado exactamente
+  en un borde es genuinamente ambiguo entre dos bandas (ambas lo leen unos
+  3 dB por debajo).
+- **En la banda atenuada** la máscara de atenuación mínima acota la fuga del
+  resto del espectro: lejos de la banda, la clase 1 exige al menos 70 dB de
+  atenuación relativa (la razón por la que el valor por defecto de `cheby2`
+  es 72 dB). En términos de energía, un tono fuera de banda tiene que ser
+  unos 70 dB más fuerte que el contenido propio de la banda para duplicar su
+  lectura de energía (+3 dB). La consecuencia práctica: al medir bandas muy
+  por debajo de un tono dominante, la lectura toca fondo en la falda de fuga
+  unos 70 dB por debajo, y una arquitectura más abrupta (o mayor orden) es la
+  única forma de empujar ese suelo más abajo.
+- **Para el presupuesto de incertidumbre**, la clase es la contribución del filtro a la
+  incertidumbre de la medición: un banco de clase 1 añade hasta unas décimas
+  de dB a un nivel de banda, comparable a los demás términos de tolerancia de
+  un sonómetro de clase 1, y por eso las cadenas con calidad de instrumento
+  especifican la clase de cada etapa en lugar de una única cifra global.
 
 **¿Qué arquitectura alcanza qué clase?** El **valor por defecto de la biblioteca
 — Butterworth de orden 6 — cumple clase 0** en las configuraciones que verifica
@@ -301,6 +516,38 @@ spl_c2, _, xb_cheby2 = octave_filter(y, fs=fs, fraction=1, sigbands=True, filter
 **Chebyshev II** (rojo, discontinua). El panel inferior muestra la **respuesta al
 impulso**, destacando las diferencias de estabilidad y decaimiento transitorio.*
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import OctaveFilterBank
+
+fs = 48000
+t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
+y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
+
+bank_b = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0])
+bank_c = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0],
+                          filter_type="cheby2")
+_, freq, xb_butter = bank_b.filter(y, sigbands=True)
+_, _, xb_cheby2 = bank_c.filter(y, sigbands=True)
+
+fig, axes = plt.subplots(len(freq), 1, figsize=(9, 2 * len(freq)), sharex=True)
+for ax, fc, xb, xc in zip(axes, freq, xb_butter, xb_cheby2):
+    ax.plot(t, xb, label="Butterworth")
+    ax.plot(t, xc, "--", label="Chebyshev II")
+    ax.set_title(f"Banda de {fc:.0f} Hz")
+    ax.set_xlim(0, 0.04)
+axes[0].legend()
+axes[-1].set_xlabel("Tiempo [s]")
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
 :::note
 **¿Por qué las señales parecen desplazadas en el tiempo?**
 Los filtros IIR digitales (como Butterworth o Chebyshev) tienen **respuestas de
@@ -320,6 +567,36 @@ Chebyshev I y el Elíptico pagan su caída abrupta con fuertes picos de retardo 
 los bordes de banda.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison_es.svg" alt="Retardo de grupo de la banda de 1 kHz para las cinco arquitecturas: Bessel casi plano, Chebyshev y elíptico con picos en los bordes" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison_es_dark.svg" alt="Retardo de grupo de la banda de 1 kHz para las cinco arquitecturas: Bessel casi plano, Chebyshev y elíptico con picos en los bordes" style="width:80%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import group_delay
+from phonometry import OctaveFilterBank
+
+fs = 48000
+w = np.logspace(np.log10(500), np.log10(2000), 1024)
+fig, ax = plt.subplots(figsize=(9, 5))
+for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
+    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
+                            filter_type=ftype)
+    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    fsd = fs / bank.factor[idx]
+    # Retardo de grupo de una cascada SOS = suma del de sus secciones
+    gd = sum(group_delay((sec[:3], sec[3:]), w=w, fs=fsd)[1]
+             for sec in bank.sos[idx])
+    ax.semilogx(w, gd / fsd * 1000, label=ftype)
+ax.set(xlim=(500, 2000), xlabel="Frecuencia [Hz]",
+       ylabel="Retardo de grupo [ms]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ## 8. Filtrado de fase cero
 
@@ -346,6 +623,56 @@ spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
 
 *El filtrado causal retrasa la ráfaga según el retardo de grupo del filtro; el
 filtrado de fase cero la mantiene alineada con la entrada.*
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import OctaveFilterBank
+
+fs = 48000
+t = np.linspace(0, 0.15, int(fs * 0.15), endpoint=False)
+x = np.zeros_like(t)                      # ráfaga de 250 Hz a mitad de trama
+start, end = int(0.05 * fs), int(0.10 * fs)
+x[start:end] = np.sin(2 * np.pi * 250 * t[start:end]) * np.hanning(end - start)
+
+bank = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
+_, _, fwd = bank.filter(x, sigbands=True, calculate_level=False)
+_, _, zp = bank.filter(x, sigbands=True, calculate_level=False,
+                       zero_phase=True)
+
+fig, ax = plt.subplots(figsize=(9, 4.5))
+ax.plot(t, x, color="gray", alpha=0.5, label="Ráfaga de entrada (250 Hz)")
+ax.plot(t, fwd[0], label="Causal (retardo de grupo)")
+ax.plot(t, zp[0], "--", label="zero_phase=True (alineado)")
+ax.set(xlabel="Tiempo [s]", ylabel="Amplitud")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+## Referencias
+
+- International Electrotechnical Commission. (2014). *Electroacoustics —
+  Octave-band and fractional-octave-band filters — Part 1: Specifications*
+  (IEC 61260-1:2014).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/5063).
+  Las matemáticas de bordes de banda de la sección 1 y las máscaras de
+  aceptación de clase verificadas en la sección 6.
+- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
+  (3.ª ed.). Pearson. ISBN 978-0-13-198842-2.
+  [Ficha en Open Library](https://openlibrary.org/isbn/9780131988422).
+  La teoría de polos y ceros, estabilidad y multitasa condensada en la
+  sección 1: cascadas SOS, transformada bilineal y diezmado.
+- Smith, J. O. *Introduction to digital filters with audio applications*
+  (libro en línea). Center for Computer Research in Music and Acoustics
+  (CCRMA), Universidad de Stanford.
+  [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
+  Tratamiento gratuito y complementario del diseño y análisis de filtros
+  digitales, de la geometría de polos y ceros a la estabilidad.
 
 ---
 

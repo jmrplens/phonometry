@@ -579,6 +579,24 @@ _ES: dict[str, str] = {
         "Valoración de la absorción sonora en índice único (ISO 11654)",
     "Zwicker loudness model chain (ISO 532-1)":
         "Cadena del modelo de sonoridad de Zwicker (ISO 532-1)",
+    # equal-loudness -> A-weighting
+    "Why A-weighting: an equal-loudness contour, inverted (ISO 226)":
+        "Por qué la ponderación A: una isófona invertida (ISO 226)",
+    "Equal-loudness contours (ISO 226)": "Líneas isofónicas (ISO 226)",
+    "Frequency [Hz]": "Frecuencia [Hz]",
+    "40 phon": "40 fonios",
+    "invert": "invertir",
+    "0 dB at 1 kHz": "0 dB en 1 kHz",
+    "A-weighting (IEC 61672-1)": "Ponderación A (IEC 61672-1)",
+    "inverted 40-phon contour": "isófona de 40 fonios invertida",
+    "A is the 40-phon contour flipped into a realizable filter: quiet sounds, "
+    "where the ear discards bass hardest.":
+        "A es la isófona de 40 fonios convertida en un filtro realizable: "
+        "niveles bajos, donde el oído descarta más los graves.",
+    "The match is deliberately loose (a 1930s convention, not a loudness "
+    "model); C mirrors the flatter ~100-phon contour.":
+        "Coincidencia laxa a propósito (convención de los años 30, no un "
+        "modelo de sonoridad); C sigue la isófona plana de ~100 fonios.",
     # time-weighting
     "a first-order low-pass on the squared signal → the mean-square envelope":
         "un paso bajo de primer orden sobre la señal al cuadrado → la "
@@ -893,9 +911,10 @@ class SVG:
                  f'fill="{fill}" text-anchor="{anchor}"{w}{i}>{s}</text>')
 
     def path(self, d: str, fill: str = "none", stroke: str = "none",
-             sw: float = 1.5) -> None:
+             sw: float = 1.5, dash: str = "") -> None:
+        dd = f' stroke-dasharray="{dash}"' if dash else ""
         self.add(f'<path d="{d}" fill="{fill}" stroke="{stroke}" '
-                 f'stroke-width="{sw}" stroke-linejoin="round"/>')
+                 f'stroke-width="{sw}" stroke-linejoin="round"{dd}/>')
 
     # -- technical helpers -------------------------------------------------
     def arrow(self, x1: float, y1: float, x2: float, y2: float, stroke: str,
@@ -3171,6 +3190,149 @@ def _d_zwicker(s: SVG, th: Theme) -> None:
            "middle")
 
 
+# ISO 226:2023 Table 1 (p. 4): frequency Hz -> (alpha_f, L_U dB, T_f dB), the
+# same parameters the library's ``equal_loudness_contour`` implements.
+_ISO226_TABLE1: tuple[tuple[float, float, float, float], ...] = (
+    (20.0, 0.635, -31.5, 78.1), (25.0, 0.602, -27.2, 68.7),
+    (31.5, 0.569, -23.1, 59.5), (40.0, 0.537, -19.3, 51.1),
+    (50.0, 0.509, -16.1, 44.0), (63.0, 0.482, -13.1, 37.5),
+    (80.0, 0.456, -10.4, 31.5), (100.0, 0.433, -8.2, 26.5),
+    (125.0, 0.412, -6.3, 22.1), (160.0, 0.391, -4.6, 17.9),
+    (200.0, 0.373, -3.2, 14.4), (250.0, 0.357, -2.1, 11.4),
+    (315.0, 0.343, -1.2, 8.6), (400.0, 0.330, -0.5, 6.2),
+    (500.0, 0.320, 0.0, 4.4), (630.0, 0.311, 0.4, 3.0),
+    (800.0, 0.303, 0.5, 2.2), (1000.0, 0.300, 0.0, 2.4),
+    (1250.0, 0.295, -2.7, 3.5), (1600.0, 0.292, -4.2, 1.7),
+    (2000.0, 0.290, -1.2, -1.3), (2500.0, 0.290, 1.4, -4.2),
+    (3150.0, 0.289, 2.3, -6.0), (4000.0, 0.289, 1.0, -5.4),
+    (5000.0, 0.289, -2.3, -1.5), (6300.0, 0.293, -7.2, 6.0),
+    (8000.0, 0.303, -11.2, 12.6), (10000.0, 0.323, -10.9, 13.9),
+    (12500.0, 0.354, -3.5, 12.3),
+)
+
+
+def _iso226_spl(alpha_f: float, l_u: float, t_f: float, phon: float) -> float:
+    """ISO 226:2023 Formula (1): SPL of a pure tone at loudness level ``phon``."""
+    import math
+    term = (4.0e-10) ** (0.3 - alpha_f) * (10 ** (0.03 * phon) - 10 ** 0.072) \
+        + 10 ** (alpha_f * (t_f + l_u) / 10)
+    return 10 / alpha_f * math.log10(term) - l_u
+
+
+def _a_weight_db(f: float) -> float:
+    """IEC 61672-1 Annex E analytic A-weighting, normalized to 0 dB at 1 kHz."""
+    import math
+
+    def gain(x: float) -> float:
+        f1, f2, f3, f4 = 20.599, 107.653, 737.862, 12194.217
+        return (f4 ** 2 * x ** 4) / ((x ** 2 + f1 ** 2)
+                                     * math.sqrt((x ** 2 + f2 ** 2) * (x ** 2 + f3 ** 2))
+                                     * (x ** 2 + f4 ** 2))
+
+    return 20 * math.log10(gain(f) / gain(1000.0))
+
+
+def _d_equal_loudness_weighting(s: SVG, th: Theme) -> None:
+    """Equal-loudness contours (ISO 226) inverted into the A-curve (IEC 61672-1)."""
+    import math
+
+    f_lo, f_hi = 20.0, 12500.0
+
+    def make_fx(px0: float, px1: float) -> Callable[[float], float]:
+        span = math.log10(f_hi) - math.log10(f_lo)
+
+        def fx(f: float) -> float:
+            return px0 + (math.log10(f) - math.log10(f_lo)) / span * (px1 - px0)
+
+        return fx
+
+    def axes(bx0: float, by0: float, bx1: float, by1: float,
+             fx: Callable[[float], float]) -> None:
+        s.rect(bx0, by0, bx1 - bx0, by1 - by0, "none", th.muted, sw=1.2)
+        for f, lab in ((20.0, "20"), (100.0, "100"), (1000.0, "1k"), (10000.0, "10k")):
+            x = fx(f)
+            s.line(x, by1, x, by1 + 5, th.muted, 1.2)
+            s.text(x, by1 + 21, lab, 13, th.muted, "middle")
+        s.text((bx0 + bx1) / 2, by1 + 42, "Frequency [Hz]", 14, th.fg, "middle")
+
+    # --- Left panel: the equal-loudness contours ----------------------------
+    lx0, lx1, ly0, ly1 = 70.0, 390.0, 110.0, 430.0
+    l_fx = make_fx(lx0, lx1)
+
+    def l_fy(db: float) -> float:  # 0 dB at the bottom, 120 dB at the top
+        return ly1 - db / 120.0 * (ly1 - ly0)
+
+    s.text((lx0 + lx1) / 2, 92, "Equal-loudness contours (ISO 226)", 17, th.fg,
+           "middle", bold=True)
+    axes(lx0, ly0, lx1, ly1, l_fx)
+    for db in (0, 40, 80, 120):
+        y = l_fy(db)
+        s.line(lx0 - 5, y, lx0, y, th.muted, 1.2)
+        s.text(lx0 - 9, y + 5, str(db), 13, th.muted, "end")
+    s.text(lx0 - 20, ly0 - 12, "dB SPL", 12, th.muted, "middle")
+
+    for phon in (20, 40, 60, 80):
+        main = phon == 40
+        color = th.primary if main else th.muted
+        pts = [(l_fx(f), l_fy(_iso226_spl(a, lu, tf, phon)))
+               for f, a, lu, tf in _ISO226_TABLE1]
+        d = "M " + " L ".join(f"{px:.1f} {py:.1f}" for px, py in pts)
+        s.path(d, stroke=color, sw=2.8 if main else 1.5)
+        # Label each contour above its 160 Hz point, where the curves spread.
+        yl = l_fy(_iso226_spl(0.391, -4.6, 17.9, phon)) - 10
+        if main:
+            s.text(l_fx(160.0), yl, "40 phon", 14, th.primary, "middle", bold=True)
+        else:
+            s.text(l_fx(160.0), yl, str(phon), 12, th.muted, "middle")
+
+    # --- Middle: the inversion step ------------------------------------------
+    s.text(462, 226, "invert", 16, th.fg, "middle", bold=True)
+    s.text(462, 248, "0 dB at 1 kHz", 13, th.muted, "middle")
+    s.arrow(400, 272, 546, 272, th.fg, 2.2)
+
+    # --- Right panel: inverted contour vs the A-curve ------------------------
+    rx0, rx1 = 558.0, 872.0
+    r_fx = make_fx(rx0, rx1)
+
+    def r_fy(db: float) -> float:  # +10 dB at the top, -70 dB at the bottom
+        return ly0 + (10.0 - db) / 80.0 * (ly1 - ly0)
+
+    s.text((rx0 + rx1) / 2, 92, "A-weighting (IEC 61672-1)", 17, th.fg,
+           "middle", bold=True)
+    axes(rx0, ly0, rx1, ly1, r_fx)
+    for db in (0, -20, -40, -60):
+        y = r_fy(db)
+        s.line(rx0 - 5, y, rx0, y, th.muted, 1.2)
+        s.text(rx0 - 9, y + 5, str(db), 13, th.muted, "end")
+    s.text(rx0 - 20, ly0 - 12, "dB", 12, th.muted, "middle")
+    s.line(rx0, r_fy(0.0), rx1, r_fy(0.0), th.muted, 0.9, dash="3,4")
+
+    # Inverted 40-phon contour, relative to its 1 kHz value (dashed reference).
+    inv = [(r_fx(f), r_fy(-(_iso226_spl(a, lu, tf, 40.0) - 40.0)))
+           for f, a, lu, tf in _ISO226_TABLE1]
+    s.path("M " + " L ".join(f"{px:.1f} {py:.1f}" for px, py in inv),
+           stroke=th.secondary, sw=2.0, dash="6,5")
+    # The A-curve itself, sampled densely on the log axis.
+    n = 60
+    aw = [(r_fx(f), r_fy(_a_weight_db(f)))
+          for f in (f_lo * (f_hi / f_lo) ** (i / (n - 1)) for i in range(n))]
+    s.path("M " + " L ".join(f"{px:.1f} {py:.1f}" for px, py in aw),
+           stroke=th.primary, sw=2.8)
+
+    # Legend, bottom right of the panel (the curves live top left).
+    s.line(636, 386, 668, 386, th.primary, 2.8)
+    s.text(676, 391, "A-weighting (IEC 61672-1)", 13, th.fg, "start")
+    s.line(636, 408, 668, 408, th.secondary, 2.0, dash="6,5")
+    s.text(676, 413, "inverted 40-phon contour", 13, th.fg, "start")
+
+    # --- Footer ---------------------------------------------------------------
+    s.text(450, 507, "A is the 40-phon contour flipped into a realizable filter: "
+           "quiet sounds, where the ear discards bass hardest.", 14, th.fg, "middle")
+    s.text(450, 529, "The match is deliberately loose (a 1930s convention, not a "
+           "loudness model); C mirrors the flatter ~100-phon contour.", 13,
+           th.muted, "middle")
+
+
 def _d_loudspeaker_freefield(s: SVG, th: Theme) -> None:
     """IEC 60268-5 loudspeaker sensitivity on the reference axis (free field)."""
     x0, y0, x1, gy = 60.0, 70.0, 840.0, 470.0
@@ -3802,6 +3964,10 @@ DIAGRAMS = {
     "diagram_zwicker": (
         _d_zwicker,
         "Zwicker loudness model chain (ISO 532-1)", 490),
+    "diagram_equal_loudness_weighting": (
+        _d_equal_loudness_weighting,
+        "Why A-weighting: an equal-loudness contour, inverted (ISO 226)",
+        560),
     "diagram_loudspeaker_freefield": (
         _d_loudspeaker_freefield,
         "Loudspeaker free-field sensitivity measurement (IEC 60268-5)", 600),

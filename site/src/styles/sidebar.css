@@ -1,11 +1,15 @@
 /* Fully-expanded sidebar hierarchy.
 
-   Every sidebar group ships uncollapsed (no `collapsed: true` in
-   astro.config.mjs or the generated api-sidebar.mjs), so the whole map of
-   the docs — about 150 entries — is visible at once, including on the
-   mobile drawer. Starlight styles every group label with the same `.large`
-   token regardless of depth, which reads as a wall of equally-heavy rows
-   once nothing is folded. These rules restore the visual hierarchy:
+   The custom Sidebar override (src/components/Sidebar.astro plus
+   SidebarSublist.astro) renders every group permanently expanded, with no
+   <details>/<summary> toggles or carets, so the whole map of the docs --
+   about 150 entries -- is visible at once, including on the mobile drawer.
+   Group labels whose group carries a landing page (the Overview-first
+   convention in astro.config.mjs) are links and can carry
+   `aria-current="page"`; the rest are static headings. Starlight styles
+   every group label with the same `.large` token regardless of depth, which
+   reads as a wall of equally-heavy rows once nothing is folded. These rules
+   restore the visual hierarchy:
 
    - top-level groups (Start, Core signal analysis, ..., Reference) become
      small uppercase "eyebrow" headers with a hairline separator above each
@@ -17,14 +21,17 @@
      line-height) so the API reference's ~100 module entries stay compact.
 
    Only Starlight custom properties are used for color, so light and dark
-   themes are both covered, and nothing here touches focus styles or the
-   summary/caret toggles, which stay keyboard-operable. */
+   themes are both covered. Color rules guard on
+   `:not([aria-current='page'])` so the accent pill on an active label link
+   keeps its inverted text, and nothing here touches focus styles. */
 
 /* Top-level group labels: uppercase eyebrow headers. */
-#starlight__sidebar .top-level > li > details > summary .group-label > .large {
+#starlight__sidebar .top-level > li > .group-label > .large {
   font-size: var(--sl-text-xs);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+#starlight__sidebar .top-level > li > .group-label:not([aria-current='page']) > .large {
   color: var(--sl-color-gray-1);
 }
 
@@ -40,7 +47,17 @@
    and the links. */
 #starlight__sidebar ul ul .group-label > .large {
   font-size: var(--sl-text-sm);
+}
+#starlight__sidebar ul ul .group-label:not([aria-current='page']) > .large {
   color: var(--sl-color-white);
+}
+
+/* Linked group labels: hover/focus feedback. The color rules above are
+   unlayered, so they beat the component's layered `a:hover .large` rule;
+   restore the same accent highlight here for label links only (static
+   heading labels are <span>s and keep their fixed color). */
+#starlight__sidebar a.group-label:not([aria-current='page']):is(:hover, :focus) > .large {
+  color: var(--sl-color-accent-high);
 }
 
 /* Deep links (inside a nested group): compact rows for the long lists. */

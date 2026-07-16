@@ -4,7 +4,7 @@ export const apiSidebar = {
   label: 'API reference',
   translations: { es: 'Referencia de la API' },
   items: [
-    { slug: 'reference/api' },
+    { slug: 'reference/api', attrs: { 'data-group-link': true } },
     {
       label: 'Filters and frequencies',
       translations: { es: 'Filtros y frecuencias' },

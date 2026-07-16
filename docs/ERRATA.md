@@ -287,7 +287,7 @@ to the issuing body, with date and reference).
   in [`distortion.py`](../src/phonometry/electroacoustics/distortion.py).
 - **Status:** unreported.
 
-## NORAH2 rotorcraft guidance SC03.D1.5d (EASA.2020.FC.06) — Eq. (27)
+## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06) — Eq. (27)
 
 - **Location:** section A.4.2, Eq. (27) (atmospheric absorption coefficient).
 - **The print:** the coefficient 6,6928·10⁻⁶ is paired with the relaxation

@@ -17,7 +17,7 @@ receiver adds the propagation adjustment `ΔLp = ΔLs + ΔLa + ΔLg (+ ΔLd)`
 (spherical spreading, atmospheric absorption, ground effect and — later — shielding).
 
 This module provides the source and propagation primitives (clean-room, from the
-NORAH2 guidance SC03.D1.5d, the basis of ECAC Doc 32):
+NORAH2 guidance SC01.D1.5d, the basis of ECAC Doc 32):
 
 * [`hemisphere_source_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#hemisphere_source_level) -- the interpolated source level `L(fc, φ, θ)`
   from a [`RotorcraftHemisphere`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafthemisphere), bilinear over the 10° grid (Eq. 13) with
@@ -31,7 +31,7 @@ NORAH2 guidance SC03.D1.5d, the basis of ECAC Doc 32):
   and the CNOSSOS flow-resistivity classes.
 
 Source (clean-room): ECAC Doc 32, 1st ed.; NORAH2 rotorcraft-noise modelling
-guidance (EASA.2020.FC.06 SC03.D1.5d), §A.3-A.4. The atmospheric term is validated
+guidance (EASA.2020.FC.06 SC01.D1.5d), §A.3-A.4. The atmospheric term is validated
 against the guidance Table 4 (one-third-octave attenuation per km at ICAO
 reference conditions).
 

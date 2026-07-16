@@ -17,12 +17,63 @@ rotor centre is `R1 = √(H² + R0²)` and the apparent sound power level is
 `L_WA,i = L_p,i − 6 + 10·lg(4π R1²/S0)` per band (`S0 = 1 m²`), energy-summed
 over bands. The `−6 dB` accounts for the ground-board pressure doubling.
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400.svg" alt="Side view of a horizontal-axis wind turbine with hub height H and rotor diameter D, a microphone lying on a flat ground board downwind at the horizontal distance R0 = H + D/2 from the tower centreline, the slant distance R1 from the rotor centre to the microphone with the board inclination angle phi between 25 and 40 degrees, and a met mast measuring wind speed and direction; a plan-view inset shows the Figure 3 pattern with the reference position downwind and three optional positions at plus and minus 60 degrees and upwind, and the annotations give R1 equals the square root of H squared plus R0 squared and the apparent sound power formula LWA,i = Lp,i minus 6 plus 10 lg(4 pi R1 squared over S0)" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_wind_turbine_iec61400_dark.svg" alt="Side view of a horizontal-axis wind turbine with hub height H and rotor diameter D, a microphone lying on a flat ground board downwind at the horizontal distance R0 = H + D/2 from the tower centreline, the slant distance R1 from the rotor centre to the microphone with the board inclination angle phi between 25 and 40 degrees, and a met mast measuring wind speed and direction; a plan-view inset shows the Figure 3 pattern with the reference position downwind and three optional positions at plus and minus 60 degrees and upwind, and the annotations give R1 equals the square root of H squared plus R0 squared and the apparent sound power formula LWA,i = Lp,i minus 6 plus 10 lg(4 pi R1 squared over S0)" style="width:94%">
+
 ```python
 import phonometry as ph
 
 r1 = ph.slant_distance(hub_height=80.0, rotor_diameter=100.0)
 lwa = ph.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 ```
+
+### Why "apparent"
+
+$L_{WA}$ is written like a sound power level, but it is not one in the
+ISO 3744 sense of integrating intensity over an enveloping surface. The
+standard collapses the whole machine into an equivalent point source at the
+rotor centre and asks what power that source would need, radiating
+spherically, to reproduce the measured level at one downwind ground-board
+position: by definition it is the power "giving the same sound emission in
+the downwind direction as the wind turbine". Everything a 150 m rotor does
+that a point source does not, the vertical and lateral directivity and the
+blade-passing swish, is folded into the number and evaluated in a
+single direction; the optional positions 2 to 4 of the plan-view pattern
+exist precisely to document how the emission varies around the machine.
+Apparent sound powers of different turbines are comparable because the
+geometry scales with the machine ($R_0 = H + D/2$, so every rotor is seen
+under a similar angle), which is the point of the definition, but an
+$L_{WA}$ fed into an ISO 9613-2 prediction carries its built-in downwind
+bias with it. The ground board, in turn, is why the formula subtracts 6 dB:
+a capsule lying on a hard plate receives a perfectly coherent reflection
+(pressure doubling, $+6$ dB) instead of the uncontrolled height-dependent
+interference pattern a tripod microphone would sample (see
+[the image source behind the ground effect](/phonometry/guides/outdoor-propagation/)).
+
+### Wind-speed bins and standardized conditions
+
+A turbine's noise emission rises with wind speed toward rated power, so a
+single number would be meaningless without its operating point: IEC 61400-11
+reports $L_{WA}$ *as a function of wind speed*. Sound and wind are logged in
+synchronized 10 s averages, and every period is sorted into a wind-speed
+**bin 0.5 m/s wide centred on integer and half-integer hub-height wind
+speeds**, with at least 10 periods of total noise and 10 of background
+(turbine parked) per bin. The hub-height wind speed itself is preferably not
+an anemometer reading at all: it is derived from the measured electric power
+through the turbine's power curve (Clause 8.2.1), the most repeatable proxy
+for the wind the rotor actually sees, with the nacelle anemometer and a met
+mast as fallbacks. The measured range must at least cover 0.8 to 1.3 times
+the wind speed at 85 % of maximum power (roughly 6 to 10 m/s at 10 m height
+for a large machine). Within each bin the spectra are averaged, interpolated
+to the bin centre and background-corrected; a total-minus-background margin
+below 3 dB voids the bin, between 3 and 6 dB flags it with an asterisk. For
+comparability with consent conditions and older editions, Formula (29) also
+maps each result to the wind speed at 10 m height over a **reference
+roughness length** $z_{0ref} = 0.05$ m (a logarithmic wind profile), giving
+$L_{WA,10m}$ at integer 10 m wind speeds regardless of the site's actual
+terrain. The library implements the closed-form quantities of this pipeline
+(slant distance, per-band apparent power, tonal audibility); the binning,
+averaging and uncertainty machinery operates on whole measurement campaigns
+and stays out of scope.
 
 ## Tonal audibility
 
@@ -78,6 +129,27 @@ ph.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
 ```
 
 </details>
+
+## References
+
+- International Electrotechnical Commission. (2018). *Wind turbines —
+  Part 11: Acoustic noise measurement techniques* (IEC 61400-11:2012+AMD1:2018
+  CSV). [IEC webstore](https://webstore.iec.ch/en/publication/63367).
+  The implemented edition: the measurement geometry, the wind-speed binning
+  and the tonal-audibility chain.
+- International Electrotechnical Commission. (2005). *Wind turbines —
+  Part 14: Declaration of apparent sound power level and tonality values*
+  (IEC TS 61400-14:2005).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5432).
+  How a manufacturer turns IEC 61400-11 measurements of a batch of turbines
+  into declared values with a stated uncertainty, the number a planning
+  authority actually receives.
+- International Organization for Standardization. (2017). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 2:
+  Determination of sound pressure levels* (ISO 1996-2:2017).
+  [iso.org catalogue](https://www.iso.org/standard/59766.html).
+  Its Annex C tonal-audibility criterion is the one the IEC method reuses,
+  and its `tonal_adjustment` consumes the mean audibility.
 
 ---
 

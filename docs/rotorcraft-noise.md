@@ -80,11 +80,44 @@ hemispheres of all eleven rotorcraft types, and end to end against the NORAH2
 prototype: single-hemisphere emissions of its reference single-event histories
 are reproduced to 0.1 dB(A) over hard ground (0.5 dB over soft ground).
 
+## References
+
+- European Civil Aviation Conference. (2026). *Report on standard method of
+  computing rotorcraft noise contours* (ECAC.CEAC Doc 32, 1st ed.).
+  [ECAC documents page](https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements),
+  [free PDF](https://www.ecac-ceac.org/images/documents/ECAC-CEAC-DOC_32-REPORT_ON_STANDARD_METHOD_OF_COMPUTING_ROTORCRAFT_NOISE_CONTOURS.pdf).
+  The standard rotorcraft contour method whose hemisphere source model and
+  propagation adjustments this page implements.
+- Olsen, H., Tuinstra, M., & van Oosten, N. (2024). *Rotorcraft noise
+  modelling guidance* (Research Project NOISE SC01, deliverable D1.5d,
+  contract EASA.2020.FC.06). European Union Aviation Safety Agency.
+  [EASA project page](https://www.easa.europa.eu/en/research-projects/environmental-research-rotorcraft-noise),
+  [free PDF](https://www.easa.europa.eu/en/downloads/132005/en).
+  The equation-level guidance (Eq. 13-35) behind the implementation, with the
+  Table 4 attenuation values and the reference hemispheres used as oracles.
+- Chien, C. F., & Soroka, W. W. (1975). Sound propagation along an impedance
+  plane. *Journal of Sound and Vibration*, 43(1), 9-20.
+  [doi:10.1016/0022-460X(75)90200-X](https://doi.org/10.1016/0022-460X(75)90200-X).
+  The two-ray interference solution over an impedance plane behind the
+  section 2 ground-effect adjustment.
+- Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
+  absorbent materials. *Applied Acoustics*, 3(2), 105-116.
+  [doi:10.1016/0003-682X(70)90031-9](https://doi.org/10.1016/0003-682X(70)90031-9).
+  The one-parameter flow-resistivity impedance model the ground effect
+  evaluates.
+- Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
+  assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Publications
+  Office of the European Union.
+  [doi:10.2788/31776](https://doi.org/10.2788/31776),
+  [JRC repository](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
+  The flow-resistivity ground classes `"A"`-`"H"` accepted by
+  `ground_effect_adjustment`.
+
 ## Standards
 
 ECAC Doc 32, 1st ed., *Report on Standard Method of Computing
 Rotorcraft Noise Contours*; NORAH2 rotorcraft-noise modelling guidance
-(EASA.2020.FC.06 SC03.D1.5d), §A.3-A.4 — the noise hemisphere (§A.3.2), spherical
+(EASA.2020.FC.06 SC01.D1.5d), §A.3-A.4 — the noise hemisphere (§A.3.2), spherical
 spreading (Eq. 24), atmospheric attenuation (Eq. 26/27, ISO 9613-1 coefficient,
 Table 4) and ground effect (Chien-Soroka, Eq. 28-35, Delany-Bazley impedance,
 CNOSSOS flow resistivity). Flight-path integration (SEL/LAmax/EPNL), ground-grid

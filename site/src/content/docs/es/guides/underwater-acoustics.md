@@ -143,6 +143,22 @@ res.plot()
 
 </details>
 
+## Referencias
+
+- Urick, R. J. (1983). *Principles of underwater sound* (3.ª ed.).
+  McGraw-Hill; reimpreso en 1996 por Peninsula Publishing.
+  ISBN 978-0-932146-62-5.
+  [Ficha en Open Library](https://openlibrary.org/books/OL9317725M).
+  El tratamiento clásico de los niveles de sonido submarino y del ruido
+  radiado por buques tras las convenciones de referencia de las
+  secciones 1-2.
+- Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
+  Springer.
+  [doi:10.1007/978-3-540-87662-5](https://doi.org/10.1007/978-3-540-87662-5).
+  El tratamiento sistemático de las magnitudes acústicas submarinas en la
+  línea que la ISO 18405 normalizó; sustenta los niveles de referencia y el
+  nivel de fuente de las secciones 1-2.
+
 ## Normas
 
 ISO 18405:2017, *Underwater acoustics — Terminology*: las

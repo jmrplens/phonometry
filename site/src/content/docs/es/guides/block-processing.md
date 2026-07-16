@@ -194,7 +194,7 @@ for x in audio_stream(block):            # tu callback de captura
 - Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
   (3.ª ed.). Pearson. ISBN 978-0-13-198842-2.
   [Ficha en Open Library](https://openlibrary.org/isbn/9780131988422).
-  Las estructuras de filtro en forma directa y la recursión de estado tras
+  Las estructuras de filtro en forma directa y la recursión de estado que sustentan
   la ecuación del estado transportado de arriba.
 
 ## Normas

@@ -289,7 +289,7 @@ Consulta la [guía de potencia sonora](/phonometry/es/guides/sound-power/) para 
 - Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
   Academic Publishers. ISBN 978-1-4020-0390-5.
   [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
-  La teoría ondulatoria de la propagación en exteriores tras las
+  La teoría ondulatoria de la propagación en exteriores que sustenta las
   aproximaciones de ingeniería de la sección de ISO 9613-2.
 - Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
   (2.ª ed.). CRC Press.
@@ -304,7 +304,7 @@ Consulta la [guía de potencia sonora](/phonometry/es/guides/sound-power/) para 
 - Fahy, F. J. (1995). *Sound intensity* (2.ª ed.). E&FN Spon.
   ISBN 978-0-419-19810-9.
   [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
-  La física de la intensidad tras los métodos de barrido: la intensidad
+  La física de la intensidad que sustenta los métodos de barrido: la intensidad
   activa y el presupuesto de error p-p.
 - International Organization for Standardization. (2016). *Acoustics —
   Description, measurement and assessment of environmental noise — Part 1:

@@ -626,7 +626,7 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
   fraccionaria IEC 61260 usados para las curvas de decaimiento por banda y los espectros de
   aislamiento.
 - [Niveles](/phonometry/es/guides/levels/) — el promediado en energía y las métricas de
-  nivel tras los niveles de las salas emisora/receptora.
+  nivel que sustentan los niveles de las salas emisora/receptora.
 - [Teoría](/phonometry/es/reference/theory/rooms-buildings/) — la integración de Schroeder, las ventanas de
   regresión y la derivación de la curva de referencia.
 - Referencia de la API: [`room.room_acoustics`](/phonometry/es/reference/api/rooms/room-acoustics/), [`room.room_ir`](/phonometry/es/reference/api/rooms/room-ir/) y [`room.open_plan`](/phonometry/es/reference/api/rooms/open-plan/).
@@ -635,7 +635,7 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
 
 - Kuttruff, H. (2016). *Room acoustics* (6.ª ed.). CRC Press.
   [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
-  La monografía de referencia tras esta página: la teoría estadística de
+  La monografía de referencia que sustenta esta página: la teoría estadística de
   los campos sonoros en decaimiento, la frecuencia de Schroeder y los
   parámetros perceptivos de sala del §2.
 - Schroeder, M. R. (1965). New method of measuring reverberation time.
@@ -647,7 +647,7 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
   Measuring room impulse responses: Impact of the decay range on derived
   room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
   907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
-  El análisis de la INR tras la discusión del rango dinámico y los
+  El análisis de la INR que sustenta la discusión del rango dinámico y los
   indicadores de validez endurecidos del §2.
 - International Organization for Standardization. (2009). *Acoustics —
   Measurement of room acoustic parameters — Part 1: Performance spaces*

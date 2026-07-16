@@ -494,7 +494,7 @@ La clase de prestaciones más estricta, la **clase 0**, la definió la edición
 anterior **IEC 61260:1995** y su gemela estadounidense **ANSI S1.11-2004**
 (ambas retiradas/sustituidas pero aún referenciadas para instrumentos de
 laboratorio); IEC 61260-1:2014 la eliminó. Sus máscaras de clase 1/2 difieren
-ligeramente de la edición de 2014, así que vive tras un conmutador `edition` en
+ligeramente de la edición de 2014, así que se selecciona con un conmutador `edition` en
 lugar de mezclarse con la máscara de 2014:
 
 ```python

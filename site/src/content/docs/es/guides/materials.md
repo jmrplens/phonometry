@@ -551,7 +551,7 @@ print(float(materials.single_number_rating_uncertainty(8.1).reported_expanded_un
   Modelling sound absorbing materials* (2.ª ed.). Wiley.
   ISBN 978-0-470-74661-5.
   [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
-  La teoría del material poroso tras las magnitudes medidas: la resistividad
+  La teoría del material poroso que sustenta las magnitudes medidas: la resistividad
   al flujo como entrada de modelo, y la impedancia superficial y la absorción
   que recupera el tubo.
 - Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
@@ -559,7 +559,7 @@ print(float(materials.single_number_rating_uncertainty(8.1).reported_expanded_un
   ISBN 978-1-4987-4099-9.
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
   La medida y el diseño de absorbentes en la práctica: los métodos de tubo y
-  de cámara lado a lado, los montajes y la discusión del efecto de borde tras
+  de cámara lado a lado, los montajes y la discusión del efecto de borde que sustenta
   la sección de tubo o cámara reverberante.
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
@@ -579,7 +579,7 @@ print(float(materials.single_number_rating_uncertainty(8.1).reported_expanded_un
   transfer matrix method* (ASTM E2611-19, la edición implementada aquí;
   revisada después como [ASTM E2611-24](https://store.astm.org/e2611-24.html)).
   [Tienda ASTM](https://store.astm.org/e2611-19.html).
-  El método de matriz de transferencia con cuatro micrófonos tras los
+  El método de matriz de transferencia con cuatro micrófonos que sustenta los
   ayudantes de pérdida por transmisión.
 - International Organization for Standardization. (2018). *Acoustics —
   Determination of airflow resistance — Part 1: Static airflow method*

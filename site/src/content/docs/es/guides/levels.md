@@ -558,7 +558,7 @@ curvas isofónicas de ISO 226 viven con las métricas de percepción en
 - International Electrotechnical Commission. (2013). *Electroacoustics —
   Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
   [Catálogo IEC](https://webstore.iec.ch/en/publication/5708).
-  Las balísticas de envolvente tras los niveles percentiles, el pico
+  Las balísticas de envolvente que sustentan los niveles percentiles, el pico
   ponderado C y las referencias de ráfagas del SEL contra las que se
   verifica la implementación.
 - Kinsler, L. E., Frey, A. R., Coppens, A. B., & Sanders, J. V. (2000).

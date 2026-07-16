@@ -402,7 +402,7 @@ Consulta la [guía de materiales](/phonometry/es/guides/materials/) para su uso.
 
 - Kuttruff, H. (2016). *Room acoustics* (6.ª ed.). CRC Press.
   [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
-  La teoría estadística del decaimiento tras la integración hacia atrás y
+  La teoría estadística del decaimiento que sustenta la integración hacia atrás y
   las relaciones de Sabine usadas a lo largo de esta página.
 - Schroeder, M. R. (1965). New method of measuring reverberation time.
   *The Journal of the Acoustical Society of America*, 37(3), 409-412.
@@ -413,7 +413,7 @@ Consulta la [guía de materiales](/phonometry/es/guides/materials/) para su uso.
   Measuring room impulse responses: Impact of the decay range on derived
   room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
   907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
-  El análisis de la INR sobre el rango de decaimiento tras los umbrales de
+  El análisis de la INR sobre el rango de decaimiento que sustenta los umbrales de
   validez endurecidos de T20/T30.
 - Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise
   Control*, 3(1), 19-27.
@@ -440,7 +440,7 @@ Consulta la [guía de materiales](/phonometry/es/guides/materials/) para su uso.
   Theory, design and application* (3.ª ed.). CRC Press.
   ISBN 978-1-4987-4099-9.
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
-  La medida y el diseño de absorbentes y difusores, de los autores tras el
+  La medida y el diseño de absorbentes y difusores, de los autores del
   método del coeficiente de difusión de ISO 17497-2.
 - Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
   Modelling sound absorbing materials* (2.ª ed.). Wiley.

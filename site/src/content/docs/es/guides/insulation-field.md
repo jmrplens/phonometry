@@ -609,12 +609,12 @@ plt.show()
   ISBN 978-0-7506-6526-1.
   [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
   El tratamiento exhaustivo del aislamiento a ruido aéreo y de impactos: las
-  cadenas de medición, la estadística de salas tras las magnitudes de campo y
+  cadenas de medición, la estadística de salas que sustenta las magnitudes de campo y
   la interpretación de los índices globales.
 - Vigran, T. E. (2008). *Building acoustics*. CRC Press.
   ISBN 978-0-415-42853-8.
   [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
-  Un manual compacto que acompaña la física de transmisión sonora tras estas
+  Un manual compacto que acompaña la física de transmisión sonora que sustenta estas
   mediciones.
 - International Organization for Standardization. (2020). *Acoustics —
   Rating of sound insulation in buildings and of building elements — Part 1:
@@ -652,9 +652,9 @@ ruido de equipos de servicio.
 - [Acústica de salas](/phonometry/es/guides/room-acoustics/) — la respuesta al impulso,
   los parámetros de sala y la absorción sonora sobre los que se apoya la cadena de aislamiento de esta guía.
 - [Niveles](/phonometry/es/guides/levels/) — el promediado en energía y las métricas de
-  nivel tras los niveles de las salas emisora/receptora.
+  nivel que sustentan los niveles de las salas emisora/receptora.
 - [Bancos de filtros](/phonometry/es/guides/filter-banks/) — los filtros de octava
   fraccionaria IEC 61260 usados para los espectros de aislamiento.
-- [Teoría](/phonometry/es/reference/theory/rooms-buildings/) — la derivación de la curva de referencia tras
+- [Teoría](/phonometry/es/reference/theory/rooms-buildings/) — la derivación de la curva de referencia que sustenta
   los índices ponderados de un solo número.
 - Referencia de la API: [`building.insulation`](/phonometry/es/reference/api/building/insulation/), [`building.survey_insulation`](/phonometry/es/reference/api/building/survey-insulation/) y [`building.building_uncertainty`](/phonometry/es/reference/api/building/building-uncertainty/).

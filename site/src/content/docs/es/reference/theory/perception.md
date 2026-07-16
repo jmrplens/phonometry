@@ -242,7 +242,7 @@ Consulta la [guía de pérdida auditiva inducida por ruido](/phonometry/es/guide
 - Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
   and calculation. *The Journal of the Acoustical Society of America*, 5(2),
   82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
-  Las mediciones originales de igual sonoridad tras el concepto de isófona
+  Las mediciones originales de igual sonoridad que sustentan el concepto de isófona
   de la primera sección.
 - Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
   (3.ª ed.). Springer.
@@ -258,7 +258,7 @@ Consulta la [guía de pérdida auditiva inducida por ruido](/phonometry/es/guide
   intelligibility of speech sounds. *The Journal of the Acoustical Society of
   America*, 19(1), 90-119.
   [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
-  Los experimentos por bandas de articulación tras la función de importancia
+  Los experimentos por bandas de articulación que sustentan la función de importancia
   de banda del SII.
 - Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to
   steady-state broad-band noise. *The Journal of the Acoustical Society of

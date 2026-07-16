@@ -22,7 +22,7 @@ jobs:
           persist-credentials: false
           # Full history: add-sitemap-lastmod.mjs stamps per-file git dates.
           fetch-depth: 0
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
       - name: Enable latest pnpm via corepack

@@ -1,7 +1,7 @@
-ruff>=0.15.20
-mypy>=2.1.0
+ruff>=0.15.21
+mypy>=2.3.0
 bandit>=1.9.4
-types-setuptools>=82.0.0.20260518
+types-setuptools>=83.0.0.20260716
 pytest>=9.1.1
 pytest-cov>=7.1.0
 pytest-xdist>=3.6.1  # parallel test execution (`pytest -n auto`); coverage is combined across workers by pytest-cov

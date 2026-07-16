@@ -31,7 +31,8 @@ list grows as guides gain their References sections.
   [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
   Sound fields, radiation and electroacoustic transducers; supports the
   electroacoustics and sound-power material.
-  Cited by [Electroacoustics](/phonometry/guides/electroacoustics/).
+  Cited by [Electroacoustics](/phonometry/guides/electroacoustics/) and
+  [Sound Power](/phonometry/guides/sound-power/).
 
 ## Signal processing
 
@@ -46,6 +47,59 @@ list grows as guides gain their References sections.
   [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
   Free companion treatment of digital-filter design and analysis, a good next
   step after the filter-bank guides.
+
+## Sound power and intensity
+
+- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
+  ISBN 978-0-419-19810-9.
+  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
+  The monograph on sound energy flux: active and reactive intensity, the
+  p-p estimator and its phase-mismatch error budget.
+  Cited by [Sound Power](/phonometry/guides/sound-power/) and
+  [Sound Intensity (p-p)](/phonometry/guides/intensity/).
+- International Organization for Standardization. (2019). *Acoustics —
+  Determination of sound power levels of noise sources — Guidelines for the
+  use of basic standards* (ISO 3740:2019).
+  [iso.org catalogue](https://www.iso.org/standard/45107.html).
+  The selection guide for the sound-power family: grades, environments,
+  source-size and background criteria.
+  Cited by [Sound Power](/phonometry/guides/sound-power/).
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for reverberation test
+  rooms* (ISO 3741:2010).
+  [iso.org catalogue](https://www.iso.org/standard/52053.html).
+  The precision reverberation-room method.
+  Cited by [Sound Power](/phonometry/guides/sound-power/).
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Engineering methods for an essentially free
+  field over a reflecting plane* (ISO 3744:2010).
+  [iso.org catalogue](https://www.iso.org/standard/52055.html).
+  The enveloping-surface engineering method.
+  Cited by [Sound Power](/phonometry/guides/sound-power/).
+- International Organization for Standardization. (2012). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for anechoic rooms and
+  hemi-anechoic rooms* (ISO 3745:2012).
+  [iso.org catalogue](https://www.iso.org/standard/45362.html).
+  The precision anechoic-room method.
+  Cited by [Sound Power](/phonometry/guides/sound-power/).
+- International Organization for Standardization. (1993). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
+  [iso.org catalogue](https://www.iso.org/standard/17427.html).
+  The field indicators and the dynamic-capability criterion of intensity
+  measurement.
+  Cited by [Sound Intensity (p-p)](/phonometry/guides/intensity/).
+- International Electrotechnical Commission. (1993). *Electroacoustics —
+  Instruments for the measurement of sound intensity — Measurements with
+  pairs of pressure sensing microphones* (IEC 61043:1993; adopted in Europe
+  as EN 61043:1994).
+  [IEC webstore](https://webstore.iec.ch/en/publication/4353).
+  The p-p instrument standard: the cross-spectral estimator and the
+  residual pressure-intensity index.
+  Cited by [Sound Intensity (p-p)](/phonometry/guides/intensity/).
 
 ## Building acoustics
 

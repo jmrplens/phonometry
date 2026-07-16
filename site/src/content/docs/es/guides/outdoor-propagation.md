@@ -415,7 +415,7 @@ deciden si una barrera real entrega su $D_z$ calculado:
   pantallas. La propia Ec. (14) es una curva de ingeniería suavizada en la
   tradición del ábaco de pantallas de Maekawa, un ajuste empírico sobre tres
   décadas del número de Fresnel $N = 2z/\lambda$.
-* **$K_{met}$ erosiona en silencio las barreras lejanas.** El factor
+* **$K_{met}$ merma en silencio las barreras lejanas.** El factor
   meteorológico (Ec. (18)) descuenta el apantallamiento porque los mismos
   rayos curvados hacia abajo que hacen favorables las condiciones también
   pasan por encima del borde superior. A menos de 100 m de distancia
@@ -435,7 +435,8 @@ deciden si una barrera real entrega su $D_z$ calculado:
   ganancia *neta* de construir la barrera es proporcionalmente menor que su
   $D_z$ nominal; los dos efectos no se apilan.
 
-Además, un obstáculo tiene que calificar como barrera (apartado 7.4):
+Además, un obstáculo tiene que cumplir los requisitos para considerarse
+barrera (apartado 7.4):
 densidad superficial de al menos 10 kg/m², superficie cerrada sin huecos
 grandes y una extensión horizontal normal al camino mayor que la longitud de
 onda. Una valla de lamas o un contenedor corto apantallan bastante menos de lo
@@ -450,9 +451,9 @@ preguntas distintas:
   potencia sonora por octavas de cualquier fuente que puedas descomponer en
   fuentes puntuales, devuelve el nivel en el receptor en condiciones
   favorables. La emisión queda fuera de su alcance; la potencia sonora viene
-  de la medición (la familia ISO 3740) o del fabricante del equipo. Es el
-  caballo de batalla de las predicciones de plantas industriales y de impacto
-  ambiental evaluadas con la ISO 1996-2.
+  de la medición (la familia ISO 3740) o del fabricante del equipo. Es la
+  herramienta principal de las predicciones de plantas industriales y de
+  impacto ambiental evaluadas con la ISO 1996-2.
 * **CNOSSOS-EU** (métodos comunes de evaluación del ruido en Europa) es el
   marco común obligatorio para los mapas estratégicos de ruido de la
   Directiva 2002/49/CE sobre ruido ambiental, adoptado como su anexo II por la
@@ -474,9 +475,10 @@ La difracción también sigue una formulación distinta que acopla el efecto del
 suelo a cada lado del borde. Ejecuta ambos sobre la misma geometría y los
 resultados por octavas pueden diferir varios decibelios, cada uno
 internamente consistente. La regla práctica: los mapas estratégicos END y
-todo lo que deba ser comparable entre Estados miembros usan CNOSSOS-EU; un
-permiso de planta, una predicción de conformidad frente a una potencia sonora
-medida o el trabajo bajo normativas que citan la ISO 9613 usan este módulo.
+todo lo que deba ser comparable entre Estados miembros usan CNOSSOS-EU; la
+autorización de una instalación, una predicción de conformidad frente a una
+potencia sonora medida o el trabajo bajo normativas que citan la ISO 9613
+usan este módulo.
 (ISO publicó una revisión de la ISO 9613-2 en 2024; esta biblioteca implementa
 la edición de 1996, la que la mayoría de reglamentos nacionales y la
 literatura de validación siguen citando.)

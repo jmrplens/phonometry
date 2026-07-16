@@ -134,8 +134,8 @@ Two practical caveats when applying it. The onset is read from the
 A-weighted, time-weighting-F level history, and the 125 ms time constant of
 weighting F itself limits how fast a recorded level can rise: very short
 impulses arrive already smoothed, so the level history must be logged at the
-meter's full output rate (not in coarse intervals) or the onset rate, and
-with it $P$, is underestimated. And the method rates the *prominence* of the
+meter's full output rate (not in coarse intervals); otherwise the onset rate,
+and with it $P$, is underestimated. And the method rates the *prominence* of the
 impulses, not their energy: $K_I$ rides on top of the measured `LAeq` in the
 rating level, it never replaces it.
 

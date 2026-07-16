@@ -31,14 +31,14 @@ lwa = ph.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 
 $L_{WA}$ se escribe como un nivel de potencia sonora, pero no lo es en el
 sentido de la ISO 3744 de muestrear el campo de presión sobre una
-superficie envolvente. La norma colapsa toda la máquina en una fuente puntual
+superficie envolvente. La norma reduce toda la máquina a una fuente puntual
 equivalente en el centro del rotor y pregunta qué potencia necesitaría esa
 fuente, radiando esféricamente, para reproducir el nivel medido en una única
 posición sobre placa a sotavento: por definición es la potencia "que produce
 la misma emisión sonora en la dirección de sotavento que el aerogenerador".
 Todo lo que un rotor de 150 m hace y una fuente puntual no, la directividad
-vertical y lateral y el silbido al paso de pala, queda plegado dentro
-del número y evaluado en una sola dirección; las posiciones opcionales 2 a 4
+vertical y lateral y el silbido al paso de pala, queda englobado en el valor
+y evaluado en una sola dirección; las posiciones opcionales 2 a 4
 del patrón en planta existen precisamente para documentar cómo varía la
 emisión alrededor de la máquina. Las potencias aparentes de aerogeneradores
 distintos son comparables porque la geometría escala con la máquina

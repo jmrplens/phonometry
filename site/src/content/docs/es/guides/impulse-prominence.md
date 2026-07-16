@@ -136,7 +136,8 @@ nivel ponderada A con ponderación temporal F, y la propia constante de tiempo
 de 125 ms de la ponderación F limita la velocidad a la que puede subir un
 nivel registrado: los impulsos muy cortos llegan ya suavizados, así que la
 historia de nivel debe registrarse a la cadencia máxima del sonómetro (no en
-intervalos gruesos) o la tasa de crecimiento, y con ella $P$, se subestima. Y
+intervalos gruesos); de lo contrario, la tasa de crecimiento, y con ella $P$,
+se subestima. Y
 el método evalúa la *prominencia* de los impulsos, no su energía: $K_I$ se
 añade sobre el `LAeq` medido en el nivel de evaluación, nunca lo sustituye.
 

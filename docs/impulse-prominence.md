@@ -116,6 +116,48 @@ The `ImpulseProminenceResult` carries the `per_impulse` prominences, the governi
 with the impulses marked. The method is a supplement to the environmental-noise
 measurement of ISO 1996-2.
 
+## 3. Where the method sits among the standards
+
+Rating standards traditionally handle impulsiveness by category, not by
+measurement. ISO 1996-1:2016 (Table A.1) adds a fixed 5 dB when the source is
+*regular impulsive* and 12 dB when it is *highly impulsive*, and leaves the
+choice of category to the assessor's judgement. NT ACOU 112 replaces that
+judgement with a measurement: the onset rate and level difference of the
+actual impulses produce a graduated $K_I$ that runs from 0 dB for barely
+perceptible onsets to about 18 dB for the most sudden, loud ones, crossing
+the two conventional figures on the way. The approach proved durable: the
+same onset-based prominence was later carried into ISO/PAS 1996-3:2022, which
+uses it to decide *objectively* whether a source counts as regular or highly
+impulsive in the ISO 1996-1 rating.
+
+Two practical caveats when applying it. The onset is read from the
+A-weighted, time-weighting-F level history, and the 125 ms time constant of
+weighting F itself limits how fast a recorded level can rise: very short
+impulses arrive already smoothed, so the level history must be logged at the
+meter's full output rate (not in coarse intervals) or the onset rate, and
+with it $P$, is underestimated. And the method rates the *prominence* of the
+impulses, not their energy: $K_I$ rides on top of the measured `LAeq` in the
+rating level, it never replaces it.
+
+## References
+
+- Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for
+  adjustment of LAeq* (Nordtest Method NT ACOU 112).
+  [nordtest.info](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/).
+  The implemented method, freely downloadable from the Nordtest archive.
+- International Organization for Standardization. (2016). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 1:
+  Basic quantities and assessment procedures* (ISO 1996-1:2016).
+  [iso.org catalogue](https://www.iso.org/standard/59765.html).
+  The rating framework and the Table A.1 category adjustments (5 dB regular,
+  12 dB highly impulsive) that the measured prominence calibrates against.
+- International Organization for Standardization. (2022). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 3:
+  Objective method for the measurement of prominence of impulsive sounds and
+  for adjustment of LAeq* (ISO/PAS 1996-3:2022).
+  [iso.org catalogue](https://www.iso.org/standard/77035.html).
+  The ISO successor built on the NT ACOU 112 onset-rate prominence.
+
 ---
 
 **Standards.** NT ACOU 112:2002 (Nordtest), *Prominence of impulsive sounds and

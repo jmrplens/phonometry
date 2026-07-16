@@ -42,7 +42,7 @@ que las guías incorporan sus secciones de Referencias.
 - Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
   (3.ª ed.). Pearson. ISBN 978-0-13-198842-2.
   [Ficha en Open Library](https://openlibrary.org/isbn/9780131988422).
-  La teoría de filtros digitales tras las cascadas SOS, la transformada
+  La teoría de filtros digitales que sustenta las cascadas SOS, la transformada
   bilineal y el diezmado multitasa que usan los bancos de filtros.
   Citado por [Bancos de filtros](/phonometry/es/guides/filter-banks/) y
   [Procesado por bloques](/phonometry/es/guides/block-processing/).
@@ -249,7 +249,7 @@ que las guías incorporan sus secciones de Referencias.
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [Catálogo iso.org](https://www.iso.org/standard/34545.html).
-  La medición de absorción en cámara reverberante tras los datos de
+  La medición de absorción en cámara reverberante que sustenta los datos de
   superficie.
   Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/) y
   [Absorción sonora en recintos](/phonometry/es/guides/enclosed-space-absorption/).
@@ -281,7 +281,7 @@ que las guías incorporan sus secciones de Referencias.
   ISBN 978-1-4987-4099-9.
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
   La monografía sobre medida y diseño de absorbentes y difusores, de los
-  autores tras el método del coeficiente de difusión de ISO 17497-2.
+  autores del método del coeficiente de difusión de ISO 17497-2.
   Citado por [Materiales acústicos](/phonometry/es/guides/materials/) y
   [Dispersión superficial, difusión y absorción in situ](/phonometry/es/guides/surface-scattering/).
 - International Organization for Standardization. (2003). *Acoustics —
@@ -399,7 +399,7 @@ que las guías incorporan sus secciones de Referencias.
   vibration — Laboratory measurement of vibro-acoustic transfer properties of
   resilient elements — Part 1: Principles and guidelines* (ISO 10846-1:2008).
   [Catálogo iso.org](https://www.iso.org/standard/38936.html).
-  La idealización de fuerza de bloqueo tras la rigidez dinámica de
+  La idealización de fuerza de bloqueo que sustenta la rigidez dinámica de
   transferencia.
   Citado por [Rigidez dinámica de transferencia](/phonometry/es/guides/transfer-stiffness/).
 - International Organization for Standardization. (2009). *Acoustics —
@@ -432,14 +432,14 @@ que las guías incorporan sus secciones de Referencias.
   Academic Publishers. ISBN 978-1-4020-0390-5.
   [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
   La teoría ondulatoria del sonido en exteriores (ecuación parabólica, fast
-  field program, refracción, turbulencia) tras las aproximaciones de
+  field program, refracción, turbulencia) que sustenta las aproximaciones de
   ingeniería de la ISO 9613-2.
   Citado por [Propagación del sonido en exteriores](/phonometry/es/guides/outdoor-propagation/).
 - Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
   (2.ª ed.). CRC Press.
   [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
   Los modelos de impedancia del suelo, el coeficiente de reflexión de onda
-  esférica tras el mínimo del suelo y los efectos meteorológicos sobre las
+  esférica que explica el mínimo del suelo y los efectos meteorológicos sobre las
   barreras.
   Citado por [Propagación del sonido en exteriores](/phonometry/es/guides/outdoor-propagation/).
 - Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
@@ -591,7 +591,7 @@ que las guías incorporan sus secciones de Referencias.
 - Chien, C. F., & Soroka, W. W. (1975). Sound propagation along an impedance
   plane. *Journal of Sound and Vibration*, 43(1), 9-20.
   [doi:10.1016/0022-460X(75)90200-X](https://doi.org/10.1016/0022-460X(75)90200-X).
-  La solución de interferencia de dos rayos sobre un plano de impedancia tras
+  La solución de interferencia de dos rayos sobre un plano de impedancia que sustenta
   el efecto de suelo de rotorcraft.
   Citado por [Ruido de rotorcraft](/phonometry/es/guides/rotorcraft-noise/).
 - Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
@@ -687,7 +687,7 @@ que las guías incorporan sus secciones de Referencias.
   sources. *The Journal of the Acoustical Society of America*, 34(12),
   1936-1956.
   [doi:10.1121/1.1909155](https://doi.org/10.1121/1.1909155).
-  El estudio clásico del ruido ambiental tras las componentes espectrales de
+  El estudio clásico del ruido ambiental que sustenta las componentes espectrales de
   viento y térmica.
   Citado por [Propagación submarina del sonido](/phonometry/es/guides/underwater-propagation/).
 - Carey, W. M., & Evans, R. B. (2011). *Ocean ambient noise: Measurement and
@@ -724,7 +724,7 @@ que las guías incorporan sus secciones de Referencias.
   intelligibility of speech sounds. *The Journal of the Acoustical Society of
   America*, 19(1), 90-119.
   [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
-  Los experimentos por bandas de articulación tras la función de importancia
+  Los experimentos por bandas de articulación que sustentan la función de importancia
   de banda del índice de inteligibilidad del habla.
   Citado por [Índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/).
 
@@ -815,7 +815,7 @@ que las guías incorporan sus secciones de Referencias.
   (DHHS/NIOSH Publication No. 98-126).
   [doi:10.26616/NIOSHPUB98126](https://doi.org/10.26616/NIOSHPUB98126),
   [PDF gratuito](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf).
-  El documento de criterios de libre acceso tras el límite de exposición
+  El documento de criterios de libre acceso que sustenta el límite de exposición
   recomendado de 85 dB(A) y la discusión de conservación auditiva y umbral.
   Citado por [Pérdida auditiva inducida por ruido](/phonometry/es/guides/noise-induced-hearing-loss/) y
   [Exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/).

@@ -185,7 +185,7 @@ otras estrategias no llevan desglose por tarea).
   `sound_exposure` (IEC 61252) y el LCpeak que estas estrategias declaran al
   lado.
 - [Incertidumbre de medición](/phonometry/es/guides/gum-uncertainty/) — la
-  maquinaria GUM tras las incertidumbres combinadas y expandidas.
+  maquinaria GUM que sustenta las incertidumbres combinadas y expandidas.
 - [Teoría](/phonometry/es/reference/theory/environment-transport/) — la derivación de las fórmulas de
   las estrategias y del presupuesto del anexo C.
 - Referencia de la API: [`hearing.occupational_exposure`](/phonometry/es/reference/api/hearing/occupational-exposure/).
@@ -210,7 +210,7 @@ otras estrategias no llevan desglose por tarea).
   (DHHS/NIOSH Publication No. 98-126).
   [doi:10.26616/NIOSHPUB98126](https://doi.org/10.26616/NIOSHPUB98126),
   [PDF gratuito](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf).
-  El documento de criterios de libre acceso tras el límite de exposición
+  El documento de criterios de libre acceso que sustenta el límite de exposición
   recomendado de 85 dB(A) y la justificación de conservación auditiva para
   medir la dosis diaria.
 

@@ -296,7 +296,7 @@ print(round(directivity_omega(1.5, 1.5, 200.0), 2))                  # 3.01 dB
 print(round(meteorological_correction(200.0, 1.5, 1.5, 2.0), 2))     # 1.7 dB
 ```
 
-### La fuente imagen tras el efecto del suelo
+### La fuente imagen que explica el efecto del suelo
 
 Cada entrada de la Tabla 3 es un ajuste de ingeniería a una única imagen
 física: el receptor oye dos copias de la fuente, el rayo directo $r_1$ y una
@@ -502,7 +502,7 @@ ponderados A.
   (2.ª ed.). CRC Press.
   [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
   Los modelos de impedancia del suelo, el coeficiente de reflexión de onda
-  esférica tras el mínimo del suelo de la sección 2 y los efectos
+  esférica que explica el mínimo del suelo de la sección 2 y los efectos
   meteorológicos sobre las barreras.
 - Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
   157-173.
@@ -542,7 +542,7 @@ geométrica (Ec. (7)), la absorción atmosférica (Ec. (8)), el efecto del suelo
 apantallamiento por barreras (Ecs. (12)–(17)) y la corrección meteorológica
 (Ec. (21)/(22)). ISO 354:2003, *Acoustics — Measurement of sound absorption in
 a reverberation room* — solo la conversión $m = \alpha/(10 \lg e)$ del apartado
-8.1.2.1 tras `air_attenuation_m`; el método en cámara reverberante se trata en la
+8.1.2.1 en que se basa `air_attenuation_m`; el método en cámara reverberante se trata en la
 [guía de Acústica de salas](/phonometry/es/guides/room-acoustics/).
 
 ## Véase también

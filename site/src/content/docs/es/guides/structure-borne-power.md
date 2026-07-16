@@ -165,7 +165,7 @@ montada elásticamente; su media por posiciones de la ecuación (9) es
   (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
   [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
   El balance de potencia de la placa y el marco de movilidades
-  fuente-receptor tras el método de placa receptora y sus magnitudes de
+  fuente-receptor que sustentan el método de placa receptora y sus magnitudes de
   fuente de las Fórmulas 15-19.
 - International Organization for Standardization. (1996). *Acoustics —
   Characterization of sources of structure-borne sound with respect to sound

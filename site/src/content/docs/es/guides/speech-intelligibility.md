@@ -46,7 +46,7 @@ totalmente audible, por lo que el índice se acerca a uno; el pequeño déficit 
 la propia **automáscara del habla** del oyente.
 
 La función de importancia es donde vive el conocimiento perceptivo de la
-norma. Desciende de los experimentos de articulación tras el índice de
+norma. Desciende de los experimentos de articulación que sustentan el índice de
 articulación de French y Steinberg: los oyentes puntuaban sílabas sin sentido
 oídas a través de filtros que eliminaban una parte del espectro cada vez, y la
 caída de acierto mide cuánta inteligibilidad transporta cada banda. El
@@ -259,7 +259,7 @@ para el lado del STI.
   sharpness y las métricas de percepción de lo que oye quien escucha.
 - [Bancos de filtros](/phonometry/es/guides/filter-banks/) — las bandas de tercio de octava
   sobre las que se evalúa el SII.
-- [Niveles](/phonometry/es/guides/levels/) — los niveles espectrales y de banda tras las
+- [Niveles](/phonometry/es/guides/levels/) — los niveles espectrales y de banda que sustentan las
   entradas de nivel espectral equivalente.
 - Referencia de la API: [`hearing.sii`](/phonometry/es/reference/api/speech/sii/).
 

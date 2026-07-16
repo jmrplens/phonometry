@@ -135,6 +135,78 @@ print(ld, ld > fi.f2)                                      # 8.0 True (criterio 
 
 <video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: una sonda p-p recorre el barrido en serpentina sobre la cara superior de la caja de medición mientras aparecen detrás las flechas de intensidad normal, y las potencias parciales de las cinco caras se acumulan en el nivel de potencia sonora L_W" style="width:88%"></video>
 
+### El margen sobre el índice residual
+
+Los dos canales de cualquier sonda y analizador reales nunca están
+perfectamente emparejados en fase. Alimenta ambos canales con la *misma*
+señal (el ensayo de intensidad residual de IEC 61043): la intensidad
+verdadera es exactamente cero y, aun así, el desajuste indica una pequeña
+intensidad falsa. La distancia entre el nivel de presión y ese nivel de
+intensidad falsa es el **índice presión-intensidad residual** `δpI0`, el
+suelo de error de fase del instrumento expresado como índice; IEC 61043
+clasifica sondas y procesadores (clase 1 / clase 2) sobre todo por él.
+
+En campo, el índice medido `δpI = Lp − LI` dice cuánto sobresale el nivel
+de presión respecto al del flujo neto, y el error sistemático de la
+estimación de intensidad está acotado por el margen entre ambos índices:
+
+$$
+\varepsilon = 10 \log_{10}\!\left( 1 \pm 10^{(\delta_{pI} - \delta_{pI0})/10} \right)
+$$
+
+Un margen de 10 dB mantiene el sesgo dentro de unos 0,5 dB y uno de 7 dB
+dentro de aproximadamente 1 dB; son precisamente los factores de sesgo `K`
+de ISO 9614, y la **capacidad dinámica** `Ld = δpI0 − K` es el mayor índice
+de campo que el instrumento puede permitirse a un grado dado. Léelo como un
+presupuesto: cada decibelio que sube el `δpI` del campo gasta un decibelio
+de margen, y cuando `δpI` alcanza `δpI0` la lectura es puro error de fase,
+de cualquier signo. Por eso el índice presión-intensidad, y no la calidad de
+los micrófonos, es el que acota la exactitud alcanzable de toda medida de
+intensidad.
+
+### Campos reactivos cerca de la fuente
+
+Cerca de una fuente el campo se vuelve **reactivo**: la presión y la
+velocidad de partícula tienden a la cuadratura, así que una presión grande
+transporta poco flujo neto. Para una fuente pequeña la componente en
+cuadratura crece como `1/(kr)`; a 100 Hz y 0,25 m de la fuente ya es
+aproximadamente el doble de la activa, y `δpI` sube igual que en la onda
+estacionaria de la figura anterior. Lo mismo ocurre entre una máquina y una
+superficie reflectante dura, y en salas reverberantes donde el campo difuso
+eleva la presión sin transportar energía hacia fuera. Por eso ISO 9614-1
+mantiene la superficie de medida a más de 0,5 m de la fuente en promedio, y
+por eso, cuando un barrido no cumple el criterio de capacidad dinámica,
+alejar la superficie o añadir absorción a la sala suele bajar `F2` por
+debajo de `Ld` con menos coste que un hardware mejor.
+
+### Elegir el separador
+
+El separador fija los dos extremos de la banda utilizable, en sentidos
+opuestos:
+
+- **El extremo alto es geometría.** La diferencia finita subestima el
+  gradiente en `sin(kΔr)/(kΔr)`, así que el techo escala como `1/Δr`:
+  `max_valid_frequency ≈ 0.1·c/Δr` mantiene el sesgo dentro de unos 0,3 dB,
+  lo que da aproximadamente 5,7 kHz con un separador de 6 mm, 2,9 kHz con
+  12 mm y 690 Hz con 50 mm (`bias_correct=True` deshace el sesgo conocido
+  algo más allá).
+- **El extremo bajo es fase.** Una onda progresiva pone solo
+  `360·f·Δr/c` grados de fase verdadera a lo largo del separador, 0,8° a
+  63 Hz con 12 mm, mientras el desajuste entre canales permanece fijo. Bajar
+  la frecuencia encoge la señal, no el error, así que el margen sobre `δpI0`
+  se derrumba en baja frecuencia. Un separador mayor recupera ese margen:
+  los requisitos de índice residual de IEC 61043 escalan como
+  `10·lg(Δr/25 mm)`, de modo que doblar el separador vale 3 dB de margen en
+  baja frecuencia.
+
+Ningún separador cubre por sí solo todo el rango de audio: 6 mm sirve para
+el trabajo en alta frecuencia, 50 mm para la baja frecuencia y el habitual
+de 12 mm cubre la banda media. El trabajo de banda ancha se mide dos
+veces con dos separadores y se combinan los resultados por banda; sea cual
+sea el separador montado, verifica `δpI0` con ese separador puesto, porque
+el índice pertenece a la cadena sonda-separador-analizador, no a los
+micrófonos solos.
+
 ### Parámetros de `sound_intensity()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
@@ -152,13 +224,35 @@ Consulta [Teoría](/phonometry/es/reference/theory/signal-analysis/) para las de
 [Calibración](/phonometry/es/guides/calibration/) para el escalado absoluto de
 los dos canales.
 
+## Referencias
+
+- Fahy, F. J. (1995). *Sound intensity* (2.ª ed.). E&FN Spon.
+  ISBN 978-0-419-19810-9.
+  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
+  La monografía sobre la materia: intensidad activa y reactiva, el estimador
+  p-p y el presupuesto de error por desfase que hay detrás de esta página.
+- International Electrotechnical Commission. (1993). *Electroacoustics —
+  Instruments for the measurement of sound intensity — Measurements with
+  pairs of pressure sensing microphones* (IEC 61043:1993; adoptada en Europa
+  como EN 61043:1994).
+  [Tienda IEC](https://webstore.iec.ch/en/publication/4353).
+  La norma de instrumentación: el estimador por espectro cruzado, el ensayo
+  de intensidad residual detrás de `δpI0` y los requisitos de clase 1 /
+  clase 2.
+- International Organization for Standardization. (1993). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
+  [Catálogo iso.org](https://www.iso.org/standard/17427.html).
+  Los indicadores de campo F2 a F4, el criterio de capacidad dinámica y la
+  regla de los 0,5 m de distancia de la superficie.
+
 ---
 
-**Normas.** IEC 61043:1994, *Electroacoustics — Instruments for the
-measurement of sound intensity — Measurements with pairs of pressure sensing
-microphones* — el estimador de intensidad por espectro cruzado con dos
-micrófonos, la corrección del sesgo por diferencias finitas y el límite de
-ancho de banda utilizable (cláusula 7.3, Tabla 3). ISO 9614-1:1993,
+**Normas.** IEC 61043:1993 (EN 61043:1994), *Electroacoustics —
+Instruments for the measurement of sound intensity — Measurements with pairs
+of pressure sensing microphones* — el estimador de intensidad por espectro
+cruzado con dos micrófonos, la corrección del sesgo por diferencias finitas
+y el límite de ancho de banda utilizable (cláusula 7.3, Tabla 3). ISO 9614-1:1993,
 *Acoustics — Determination of sound power levels of noise sources using sound
 intensity — Part 1: Measurement at discrete points* — el índice
 presión-intensidad, los indicadores de campo F2, F3 y F4 del Anexo A y el

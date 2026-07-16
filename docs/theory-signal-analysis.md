@@ -338,3 +338,61 @@ narrower than $\pm 1.96\,u$), and the GUM Annex H.1 end-gauge example gives
 $k = t_{0.99}(\nu_{\mathrm{eff}} = 16) = 2.92$ and $U_{99} = 93$ nm.
 
 See the [GUM Uncertainty guide](gum-uncertainty.md) for usage.
+
+## References
+
+- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
+  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
+  [Open Library record](https://openlibrary.org/isbn/9780131988422).
+  The digital-filter theory behind the SOS cascades, the bilinear transform
+  and the multirate decimation of the filter-bank design section.
+- Smith, J. O. *Introduction to digital filters with audio applications*
+  (online book). Center for Computer Research in Music and Acoustics (CCRMA),
+  Stanford University.
+  [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
+  Free companion treatment of the classical filter prototypes and their
+  magnitude responses.
+- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
+  ISBN 978-0-419-19810-9.
+  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
+  The physics of the p-p estimator: active intensity, the finite-difference
+  bias and the phase-mismatch error budget.
+- International Electrotechnical Commission. (2014). *Electroacoustics —
+  Octave-band and fractional-octave-band filters — Part 1: Specifications*
+  (IEC 61260-1:2014).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
+  The base-10 mid-band and band-edge definitions of the octave-band section
+  and the class masks the banks are verified against.
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
+  The A/C/Z weighting curves, the exponential time integration and the SEL
+  and LCpeak definitions of the event-metric section.
+- International Electrotechnical Commission. (1993). *Electroacoustics —
+  Instruments for the measurement of sound intensity — Measurements with
+  pairs of pressure sensing microphones* (IEC 61043:1993; adopted in Europe
+  as EN 61043:1994).
+  [IEC webstore](https://webstore.iec.ch/en/publication/4353).
+  The p-p instrument standard: the cross-spectral estimator and the
+  pressure-residual intensity index behind the dynamic capability.
+- International Organization for Standardization. (1993). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
+  [iso.org catalogue](https://www.iso.org/standard/17427.html).
+  The surface indicators F2–F4 that generalize the pressure-intensity index
+  over a measurement surface.
+- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
+  data — Guide to the expression of uncertainty in measurement* (JCGM
+  100:2008, the GUM). BIPM.
+  [doi:10.59161/JCGM100-2008E](https://doi.org/10.59161/JCGM100-2008E),
+  [free PDF](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf).
+  The law of propagation of uncertainty and the Welch–Satterthwaite expanded
+  uncertainty of the GUM section.
+- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
+  data — Supplement 1 to the "Guide to the expression of uncertainty in
+  measurement" — Propagation of distributions using a Monte Carlo method*
+  (JCGM 101:2008). BIPM.
+  [doi:10.59161/JCGM101-2008](https://doi.org/10.59161/JCGM101-2008),
+  [free PDF](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf).
+  The Monte Carlo propagation of distributions and its coverage-interval
+  construction.

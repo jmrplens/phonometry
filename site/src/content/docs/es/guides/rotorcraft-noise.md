@@ -62,9 +62,9 @@ hemisferios de referencia de los once tipos de helicóptero, y de extremo a
 extremo contra los historiales de evento único del prototipo NORAH2 (0.1 dB(A)
 sobre suelo duro, 0.5 dB sobre suelo blando).
 
----
+## Normas
 
-**Normas.** ECAC Doc 32, 1ª ed. (contornos de ruido de rotorcraft); guía de
+ECAC Doc 32, 1ª ed. (contornos de ruido de rotorcraft); guía de
 modelado NORAH2 (EASA.2020.FC.06 SC03.D1.5d) §A.3-A.4: el hemisferio de ruido, el
 ensanchamiento esférico, la atenuación atmosférica (ISO 9613-1, Tabla 4) y el
 efecto de suelo de Chien-Soroka (impedancia de Delany-Bazley, resistividad de

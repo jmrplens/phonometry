@@ -238,9 +238,9 @@ Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absolu
   La referencia abierta en MATLAB usada como oráculo numérico de las
   comprobaciones de intensidad de fluctuación de esta página.
 
----
+## Normas
 
-**Normas.** Fastl y Zwicker (2007, 3.ª ed.), *Psychoacoustics: Facts and Models* (Springer): la
+Fastl y Zwicker (2007, 3.ª ed.), *Psychoacoustics: Facts and Models* (Springer): la
 molestia psicoacústica `PA = N5·(1 + √(wS² + wFR²))` con la ponderación de nitidez
 `wS` y la ponderación de aspereza/fluctuación `wFR` (Ecs 16.2–16.4; origen
 Widmann 1992), y la forma cerrada para la intensidad de fluctuación del ruido de

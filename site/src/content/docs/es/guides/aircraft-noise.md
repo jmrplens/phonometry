@@ -202,9 +202,9 @@ del rodaje de despegue, la velocidad media Ec. 4-13b en segmentos de pista y el
 suelo recomendado de 30 m en las consultas NPD. Siete eventos de receptor del
 workbook de referencia se reproducen end-to-end en la suite de tests.
 
----
+## Normas
 
-**Normas.** ICAO Anexo 16 Vol. I Apéndice 2 (procedimiento EPNL), ICAO Doc 9501
+ICAO Anexo 16 Vol. I Apéndice 2 (procedimiento EPNL), ICAO Doc 9501
 ETM Vol. I (oráculos de ejemplo trabajado), IEC 61265:1995 (tolerancias del
 sistema de medida), SAE ARP 5534:2021 (absorción de banda por el método SAE;
 coeficiente de tono puro de ISO 9613-1), ECAC Doc 29 4ª ed. Vol 2 §4.2

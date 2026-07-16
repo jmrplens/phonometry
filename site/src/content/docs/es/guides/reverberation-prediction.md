@@ -274,9 +274,9 @@ campo no es difuso.
   Un tratamiento en español de los modelos de reverberación y su uso en el
   diseño de salas.
 
----
+## Normas
 
-**Normas.** Las fórmulas clásicas de reverberación son anteriores al mundo
+Las fórmulas clásicas de reverberación son anteriores al mundo
 normativo; entran en él a través de EN 12354-6:2003, cuyo modelo de la
 cláusula 4 es un cálculo de Sabine con términos de objetos y de aire (ver
 [Absorción sonora en recintos](/phonometry/es/guides/enclosed-space-absorption/)),

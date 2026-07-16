@@ -231,9 +231,9 @@ these envelopes, and [Why phonometry](/phonometry/reference/why-phonometry/) for
   The exponential-detector definition, the F and S time constants and the
   Table 4 toneburst responses the ballistics are verified against in CI.
 
----
+## Standards
 
-**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — the exponential time-weighting detector (clause 3.8)
 with the F and S time constants (clause 5.7), and the 4 kHz toneburst reference
 responses of Table 4 (class 1 acceptance limits) used to verify the ballistics

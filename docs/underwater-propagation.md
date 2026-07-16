@@ -16,10 +16,15 @@ the underwater reference levels (ISO 18405/17208/18406) in
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_transmission_loss.svg" alt="Underwater transmission loss versus range at 10 kHz: the total loss with the geometrical-spreading and volume-absorption contributions drawn separately, loss increasing downward" width="82%">
 </picture>
 
-The transmission loss is `TL = spreading + α·R`. Geometrical spreading is
-`20·lg R` (spherical), `10·lg R` (cylindrical) or spherical up to a transition
-range `R0` and cylindrical beyond it (`"practical"`). The volume absorption
-coefficient `α` (dB/km) comes from one of three models: **Francois–Garrison**
+The transmission loss is
+
+$$
+TL = \text{spreading} + \alpha R .
+$$
+
+Geometrical spreading is $20 \lg R$ (spherical), $10 \lg R$ (cylindrical) or
+spherical up to a transition range $R_0$ and cylindrical beyond it
+(`"practical"`). The volume absorption coefficient $\alpha$ (dB/km) comes from one of three models: **Francois–Garrison**
 (1982, the default and reference), **Ainslie–McColm** (1998, a legible
 simplification) or **Thorp** (1967, frequency-only).
 
@@ -91,11 +96,18 @@ can cross entire oceans.
 </picture>
 
 The sonar equation combines the performance terms into the **signal excess**
-`SE` (detection when `SE ≥ 0`) and the **figure of merit** (the maximum
-allowable transmission loss at `SE = 0`). Passive:
-`SE = SL − TL − (NL − DI) − DT`. Active (monostatic):
-`SE = SL − 2·TL + TS − (NL − DI) − DT`, or reverberation-limited with `RL` in
-place of `NL − DI`.
+$SE$ (detection when $SE \ge 0$) and the **figure of merit** (the maximum
+allowable transmission loss at $SE = 0$):
+
+$$
+SE = SL - TL - (NL - DI) - DT \ \ \text{(passive)},
+$$
+
+$$
+SE = SL - 2\,TL + TS - (NL - DI) - DT \ \ \text{(active, monostatic)},
+$$
+
+or reverberation-limited with $RL$ in place of $NL - DI$.
 
 ```python
 import numpy as np
@@ -125,9 +137,10 @@ the source convention, dB re 1 µPa²/Hz **at 1 m**.
 </picture>
 
 A plane wave striking the seabed reflects with the fluid–fluid **Rayleigh
-reflection coefficient** (Medwin & Clay). For a faster bottom (`c2 > c1`) there
-is a **critical grazing angle** `φc = arccos(c1/c2)`, below which the wave is
-totally reflected (`|R| = 1`, zero loss). The bottom loss is `BL = −20·lg|R|`.
+reflection coefficient** (Medwin & Clay). For a faster bottom ($c_2 > c_1$) there
+is a **critical grazing angle** $\varphi_c = \arccos(c_1/c_2)$, below which
+the wave is totally reflected ($|R| = 1$, zero loss). The bottom loss is
+$BL = -20 \lg |R|$.
 
 ```python
 import numpy as np
@@ -155,8 +168,8 @@ sediment attenuation is out of scope.
 
 The ambient-noise spectrum level (dB re 1 µPa²/Hz) is the energy sum of the two
 physically grounded Wenz components: **wind / sea-surface** noise via the "rule
-of fives" (`51.02 − (5/3)·10·(lg f_kHz − lg(U/5))`: the historical "25 dB (5 × 5)" anchor at 1 kHz for 5 knots is re 20 µPa, i.e. `25 + 20·lg(20) ≈ 51.02` dB re 1 µPa) and
-**Mellen thermal** noise (`4π·k·T·ρ·f²/c`, dominant above ~50 kHz). A
+of fives" ($51.02 - (5/3)\,10\,(\lg f_{\text{kHz}} - \lg(U/5))$: the historical "25 dB (5 × 5)" anchor at 1 kHz for 5 knots is re 20 µPa, i.e. $25 + 20 \lg 20 \approx 51.02$ dB re 1 µPa) and
+**Mellen thermal** noise ($4 \pi k T \rho f^2 / c$, dominant above ~50 kHz). A
 **shipping** spectrum may be supplied by the caller — for example one predicted
 by the traffic model in §6.
 

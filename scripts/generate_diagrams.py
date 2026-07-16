@@ -452,8 +452,8 @@ _ES: dict[str, str] = {
         "R por L_p,s − L_p,t   (κ′ según Anexo A)",
     # d15 - ISO 17497-1 random-incidence scattering (reverberation room)
     "Random-incidence scattering in a reverberation room (ISO 17497-1)":
-        "Dispersión a incidencia aleatoria en sala reverberante (ISO 17497-1)",
-    "Reverberation room": "Sala reverberante",
+        "Dispersión a incidencia aleatoria en cámara reverberante (ISO 17497-1)",
+    "Reverberation room": "Cámara reverberante",
     "Turntable (test sample)": "Plataforma giratoria (probeta)",
     "Rotating boom source": "Fuente en brazo giratorio",
     "stationary → α_s": "estática → α_s",
@@ -679,7 +679,7 @@ _ES: dict[str, str] = {
     # ISO 11654
     "Measured  αs  at one-third octaves, 200 Hz to 5000 Hz":
         "αs medido en tercios de octava, 200 Hz a 5000 Hz",
-    "from a reverberation room (ISO 354)": "en sala reverberante (ISO 354)",
+    "from a reverberation room (ISO 354)": "en cámara reverberante (ISO 354)",
     "Practical  αp  per octave band, 250 Hz to 4000 Hz  (Clause 4.1)":
         "αp práctico por banda de octava, 250 Hz a 4000 Hz  (Cláusula 4.1)",
     "mean of the three one-third octaves, rounded to 0.05":

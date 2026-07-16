@@ -674,9 +674,9 @@ plt.show()
   Tratamiento gratuito y complementario del diseño y análisis de filtros
   digitales, de la geometría de polos y ceros a la estabilidad.
 
----
+## Normas
 
-**Normas.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+IEC 61260-1:2014, *Electroacoustics — Octave-band and
 fractional-octave-band filters — Part 1: Specifications* — las frecuencias
 centrales y los bordes de banda en base 10 del §1 (5.2-5.5), las etiquetas
 nominales de banda y los límites de aceptación de clase 1 / clase 2 de la

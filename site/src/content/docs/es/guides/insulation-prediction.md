@@ -347,9 +347,9 @@ fig.tight_layout(); plt.show()
   predicción EN 12354, del índice de reducción de vibraciones a su base
   estadística.
 
----
+## Normas
 
-**Normas.** EN 12354-1:2000 y EN 12354-2:2000 — las predicciones simplificadas
+EN 12354-1:2000 y EN 12354-2:2000 — las predicciones simplificadas
 de transmisión por flancos (uniones del Anexo E, ejemplos resueltos H.3 y
 E.3); EN 12354-3:2000 y EN 12354-4:2000 — las predicciones de aislamiento de
 fachada y de radiación al exterior (ejemplos resueltos del Anexo F y del

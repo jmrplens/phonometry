@@ -8,12 +8,12 @@ sidebar:
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
 Age-related hearing threshold (ISO 7029:2017) and audiometric reference zero
-(ISO 389-7:2006).
+(ISO 389-7:2005).
 
 Implements the statistical distribution of the hearing threshold of an
 otologically normal population as a function of age and sex (ISO 7029:2017),
 and the reference threshold of hearing under free-field and diffuse-field
-listening (ISO 389-7:2006, Table 1), over the audiometric frequencies from
+listening (ISO 389-7:2005, Table 1), over the audiometric frequencies from
 125 Hz to 8000 Hz.
 
 ISO 7029 gives the median threshold deviation from the value at age 18 as
@@ -116,7 +116,7 @@ reference_threshold(
 ) -> np.ndarray
 ```
 
-Reference threshold of hearing (ISO 389-7:2006, Table 1).
+Reference threshold of hearing (ISO 389-7:2005, Table 1).
 
 The sound pressure level, in dB, that corresponds to the audiometric zero
 (0 dB HL) under the given listening condition, at the audiometric

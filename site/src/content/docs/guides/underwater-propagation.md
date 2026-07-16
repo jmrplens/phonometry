@@ -12,9 +12,15 @@ equation**, **seabed reflection loss** and the **ocean ambient-noise** spectrum.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_transmission_loss.svg" alt="Underwater transmission loss versus range at 10 kHz with the geometrical-spreading and volume-absorption contributions drawn separately, loss increasing downward" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_transmission_loss_dark.svg" alt="Underwater transmission loss versus range at 10 kHz with the geometrical-spreading and volume-absorption contributions drawn separately, loss increasing downward" style="width:82%">
 
-The transmission loss is `TL = spreading + α·R`. Geometrical spreading is
-`20·lg R` (spherical), `10·lg R` (cylindrical) or spherical up to a transition
-range then cylindrical (`"practical"`). The volume absorption `α` (dB/km) comes
+The transmission loss is
+
+$$
+TL = \text{spreading} + \alpha R .
+$$
+
+Geometrical spreading is $20 \lg R$ (spherical), $10 \lg R$ (cylindrical) or
+spherical up to a transition range $R_0$ and cylindrical beyond it (`"practical"`). The
+volume absorption $\alpha$ (dB/km) comes
 from **Francois–Garrison** (1982, default and reference), **Ainslie–McColm**
 (1998) or **Thorp** (1967, frequency-only); the first two agree to within ~10 %
 across 100 Hz–1 MHz.
@@ -63,10 +69,19 @@ can cross entire oceans.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation.svg" alt="The passive sonar equation: signal excess falling with transmission loss and crossing zero, the detection limit, at the figure of merit" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_dark.svg" alt="The passive sonar equation: signal excess falling with transmission loss and crossing zero, the detection limit, at the figure of merit" style="width:82%">
 
-The sonar equation gives the **signal excess** `SE` (detection when `SE ≥ 0`)
-and the **figure of merit** (the maximum allowable transmission loss at
-`SE = 0`). Passive: `SE = SL − TL − (NL − DI) − DT`. Active (monostatic):
-`SE = SL − 2·TL + TS − (NL − DI) − DT`, or reverberation-limited with `RL`.
+The sonar equation gives the **signal excess** $SE$ (detection when
+$SE \ge 0$) and the **figure of merit** (the maximum allowable transmission
+loss at $SE = 0$):
+
+$$
+SE = SL - TL - (NL - DI) - DT \ \ \text{(passive)},
+$$
+
+$$
+SE = SL - 2\,TL + TS - (NL - DI) - DT \ \ \text{(active, monostatic)},
+$$
+
+or reverberation-limited with $RL$ in place of $NL - DI$.
 
 ```python
 import numpy as np
@@ -89,9 +104,10 @@ Sonar, propagation and ambient levels are in dB re a plane wave of 1 µPa rms
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection.svg" alt="Bottom reflection loss versus grazing angle for a fast sandy seabed: zero loss below the critical grazing angle, rising sharply above it" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_dark.svg" alt="Bottom reflection loss versus grazing angle for a fast sandy seabed: zero loss below the critical grazing angle, rising sharply above it" style="width:82%">
 
 A plane wave striking the seabed reflects with the fluid–fluid **Rayleigh
-reflection coefficient**. For a faster bottom (`c2 > c1`) there is a **critical
-grazing angle** `φc = arccos(c1/c2)`, below which the wave is totally reflected
-(`|R| = 1`, zero loss). The bottom loss is `BL = −20·lg|R|`.
+reflection coefficient** (Medwin & Clay). For a faster bottom ($c_2 > c_1$) there is a **critical
+grazing angle** $\varphi_c = \arccos(c_1/c_2)$, below which the wave is
+totally reflected ($|R| = 1$, zero loss). The bottom loss is
+$BL = -20 \lg |R|$.
 
 ```python
 import numpy as np

@@ -147,9 +147,9 @@ Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
   measurement positions of section 2, with Annex D delegating the tone
   assessments to ECMA-418-1.
 
----
+## Standards
 
-**Standards.** ECMA-418-1:2024 (3rd edition), *Psychoacoustic metrics for ITT
+ECMA-418-1:2024 (3rd edition), *Psychoacoustic metrics for ITT
 equipment — Part 1: Prominent discrete tones* — the tone-to-noise ratio
 (clause 11), the prominence ratio (clause 12), the critical-band model and the
 frequency-dependent prominence criteria.

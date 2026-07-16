@@ -2,12 +2,12 @@
 
 # Bibliography
 
-Every guide in this documentation closes with two citation blocks: a
+Every guide in this documentation closes with two citation sections: a
 `## References` section listing the books and papers that support the physics
 on the page (APA style, one bullet per source, each with a DOI or an official
 publisher link, and half a sentence on what the entry supports), followed by a
-final **Standards.** paragraph naming the normative documents the page
-implements, clause by clause. This page collects the References entries of all
+`## Standards` section naming the normative documents the page implements,
+clause by clause. This page collects the References entries of all
 guides in one place, grouped by domain: a curated reading list, and the single
 source of truth for link checking. Each entry lists the guide pages that cite
 it; the list grows as guides gain their References sections.
@@ -59,7 +59,8 @@ it; the list grows as guides gain their References sections.
   [IEC webstore](https://webstore.iec.ch/en/publication/5063).
   The base-10 band edges and the class acceptance masks of the fractional
   octave banks.
-  Cited by [Filter Banks](filter-banks.md).
+  Cited by [Filter Banks](filter-banks.md) and
+  [Multichannel and Performance](multichannel.md).
 - International Electrotechnical Commission. (2013). *Electroacoustics —
   Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
   [IEC webstore](https://webstore.iec.ch/en/publication/5708).
@@ -67,8 +68,9 @@ it; the list grows as guides gain their References sections.
   metrics of the sound level meter, with the tolerance tables used for
   verification.
   Cited by [Integrated and Statistical Levels](levels.md),
-  [Frequency Weighting (A, C, G, Z)](weighting.md) and
-  [Time Weighting and Integration](time-weighting.md).
+  [Frequency Weighting (A, C, G, Z)](weighting.md),
+  [Time Weighting and Integration](time-weighting.md) and
+  [Multichannel and Performance](multichannel.md).
 - International Electrotechnical Commission. (2013). *Electroacoustics —
   Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
   [IEC webstore](https://webstore.iec.ch/en/publication/5710).
@@ -512,19 +514,22 @@ it; the list grows as guides gain their References sections.
   82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
   The original equal-loudness measurements whose 40-phon contour became the
   A-weighting curve.
-  Cited by [Frequency Weighting (A, C, G, Z)](weighting.md).
+  Cited by [Frequency Weighting (A, C, G, Z)](weighting.md) and
+  [Loudness](loudness.md).
 - International Organization for Standardization. (2023). *Acoustics —
   Normal equal-loudness-level contours* (ISO 226:2023).
   [iso.org catalogue](https://www.iso.org/standard/83117.html).
   The modern equal-loudness contours, successors of the Fletcher-Munson
   curves.
-  Cited by [Frequency Weighting (A, C, G, Z)](weighting.md).
+  Cited by [Frequency Weighting (A, C, G, Z)](weighting.md) and
+  [Loudness](loudness.md).
 - Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
   (3rd ed.). Springer.
   [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
   The psychoacoustic-annoyance model and the closed-form fluctuation strength
   for amplitude-modulated broadband noise.
-  Cited by [Psychoacoustic annoyance](psychoacoustic-annoyance.md).
+  Cited by [Psychoacoustic annoyance](psychoacoustic-annoyance.md),
+  [Loudness](loudness.md) and [Sound Quality Metrics](sound-quality.md).
 - Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016). Modelling the
   sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*,
   28, 050005. [doi:10.1121/2.0000410](https://doi.org/10.1121/2.0000410).

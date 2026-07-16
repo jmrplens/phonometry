@@ -123,3 +123,4 @@ safe to pass `wavfile.read` output directly.
 - [Filter Banks](/phonometry/guides/filter-banks/) — choose an architecture and inspect responses
 - [Calibration and dBFS](/phonometry/guides/calibration/) — get real-world SPL values
 - [API Reference](/phonometry/reference/api/) — every parameter of every function
+- [Bibliography](/phonometry/reference/bibliography/) — the books and papers behind every guide, each with a verified link

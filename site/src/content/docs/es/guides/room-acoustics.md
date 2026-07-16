@@ -529,7 +529,7 @@ posición puede medirse a su vez con las herramientas STIPA de la
 El área de absorción sonora equivalente `A` que gobierna `R'`, `L'n`, la
 corrección ambiental `K2` de ISO 3744 y el término de absorción de ISO 3741 se
 mide a su vez en una cámara reverberante
-(ISO 354). Mide el tiempo de reverberación de la sala **vacía** ($T_1$) y de
+(ISO 354). Mide el tiempo de reverberación de la cámara **vacía** ($T_1$) y de
 nuevo **con la muestra de ensayo instalada** ($T_2$); la absorción de la muestra
 es la diferencia de las dos áreas de Sabine, y dividiendo por el área cubierta
 se obtiene el coeficiente de absorción:
@@ -539,7 +539,7 @@ A = \frac{55{,}3\ V}{c\ T} - 4 V m, \qquad
 \alpha_s = \frac{A_2 - A_1}{S}, \qquad c = 331 + 0{,}6\ t ,
 $$
 
-con $c$ a partir de la temperatura del aire de la sala $t$ en °C (válida
+con $c$ a partir de la temperatura del aire de la cámara $t$ en °C (válida
 15–30 °C) y $m$ el coeficiente de atenuación en potencia del aire (por defecto
 0; convierte un $\alpha$ de ISO 9613-1 en dB/m con `attenuation_from_alpha`).
 Como los efectos de borde y difracción pueden dispersar más energía de la que
@@ -652,9 +652,9 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
   [Catálogo iso.org](https://www.iso.org/standard/34545.html).
   La medición de absorción en cámara reverberante del §4.
 
----
+## Normas
 
-**Normas.** ISO 18233:2006 (aplicación de nuevos métodos de medición — la
+ISO 18233:2006 (aplicación de nuevos métodos de medición — la
 adquisición de respuestas al impulso por barrido y MLS); ISO 3382-1:2009 e
 ISO 3382-2:2008 (tiempo de reverberación y parámetros de sala desde el
 decaimiento de Schroeder); ISO 3382-3:2012 (métricas de habla en oficinas

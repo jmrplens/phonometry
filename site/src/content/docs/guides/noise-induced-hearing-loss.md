@@ -168,9 +168,9 @@ alone is the subject of the
   A freely available criteria document reviewing the same exposure-response
   evidence and the fence and hearing-conservation issues discussed above.
 
----
+## Standards
 
-**Standards.** ISO 1999:2013, *Acoustics — Estimation of noise-induced hearing
+ISO 1999:2013, *Acoustics — Estimation of noise-induced hearing
 loss* — the HTLAN combination (clause 6.1, Formula 1), the median NIPTS
 (clause 6.3.1, Formulae 2-3, Table 1) and its statistical distribution
 (clause 6.3.2, Formulae 4-7, Tables 2-3), validated against the worked examples

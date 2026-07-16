@@ -13,10 +13,16 @@ la **pérdida por transmisión**, la **velocidad del sonido** en agua de mar, la
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_transmission_loss_es.svg" alt="Pérdida por transmisión submarina frente a la distancia a 10 kHz, con las contribuciones de ensanchamiento geométrico y absorción de volumen dibujadas por separado, la pérdida creciente hacia abajo" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_transmission_loss_es_dark.svg" alt="Pérdida por transmisión submarina frente a la distancia a 10 kHz, con las contribuciones de ensanchamiento geométrico y absorción de volumen dibujadas por separado, la pérdida creciente hacia abajo" style="width:82%">
 
-La pérdida por transmisión es `TL = ensanchamiento + α·R`. El ensanchamiento
-geométrico es `20·lg R` (esférico), `10·lg R` (cilíndrico) o esférico hasta una
-distancia de transición y cilíndrico después (`"practical"`). El coeficiente de
-absorción de volumen `α` (dB/km) procede de **Francois–Garrison** (1982, por
+La pérdida por transmisión es
+
+$$
+TL = \text{ensanchamiento} + \alpha R .
+$$
+
+El ensanchamiento geométrico es $20 \lg R$ (esférico), $10 \lg R$ (cilíndrico)
+o esférico hasta una distancia de transición $R_0$ y cilíndrico más allá
+de esta (`"practical"`). El coeficiente de absorción de volumen $\alpha$ (dB/km)
+procede de **Francois–Garrison** (1982, por
 defecto y de referencia), **Ainslie–McColm** (1998) o **Thorp** (1967, solo
 frecuencia); los dos primeros coinciden en ~10 % entre 100 Hz y 1 MHz.
 
@@ -64,10 +70,19 @@ es la razón de que el sonido de baja frecuencia pueda cruzar océanos enteros.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_es.svg" alt="Ecuación del sonar pasivo: el exceso de señal cae con la pérdida por transmisión y cruza el cero, el límite de detección, en la figura de mérito" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_es_dark.svg" alt="Ecuación del sonar pasivo: el exceso de señal cae con la pérdida por transmisión y cruza el cero, el límite de detección, en la figura de mérito" style="width:82%">
 
-La ecuación del sonar da el **exceso de señal** `SE` (detección cuando
-`SE ≥ 0`) y la **figura de mérito** (la máxima pérdida por transmisión admisible
-en `SE = 0`). Pasiva: `SE = SL − TL − (NL − DI) − DT`. Activa (monostática):
-`SE = SL − 2·TL + TS − (NL − DI) − DT`, o limitada por reverberación con `RL`.
+La ecuación del sonar da el **exceso de señal** $SE$ (detección cuando
+$SE \ge 0$) y la **figura de mérito** (la máxima pérdida por transmisión
+admisible en $SE = 0$):
+
+$$
+SE = SL - TL - (NL - DI) - DT \ \ \text{(pasiva)},
+$$
+
+$$
+SE = SL - 2\,TL + TS - (NL - DI) - DT \ \ \text{(activa, monostática)},
+$$
+
+o limitada por reverberación con $RL$ en lugar de $NL - DI$.
 
 ```python
 import numpy as np
@@ -90,10 +105,10 @@ convención de fuente, dB re 1 µPa²/Hz **a 1 m**.
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_es.svg" alt="Pérdida por reflexión en el fondo frente al ángulo rasante para un fondo arenoso rápido: pérdida nula por debajo del ángulo rasante crítico, creciendo bruscamente por encima" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_es_dark.svg" alt="Pérdida por reflexión en el fondo frente al ángulo rasante para un fondo arenoso rápido: pérdida nula por debajo del ángulo rasante crítico, creciendo bruscamente por encima" style="width:82%">
 
 Una onda plana que incide en el fondo se refleja con el **coeficiente de
-reflexión de Rayleigh** fluido–fluido. Para un fondo más rápido (`c2 > c1`)
-existe un **ángulo rasante crítico** `φc = arccos(c1/c2)`, por debajo del cual la
-onda se refleja totalmente (`|R| = 1`, pérdida nula). La pérdida es
-`BL = −20·lg|R|`.
+reflexión de Rayleigh** fluido–fluido (Medwin & Clay). Para un fondo más rápido ($c_2 > c_1$)
+existe un **ángulo rasante crítico** $\varphi_c = \arccos(c_1/c_2)$, por
+debajo del cual la onda se refleja totalmente ($|R| = 1$, pérdida nula). La
+pérdida es $BL = -20 \lg |R|$.
 
 ```python
 import numpy as np

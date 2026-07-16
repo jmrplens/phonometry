@@ -260,9 +260,9 @@ plt.tight_layout(); plt.show()
   engineering method and maps the mean audibility to the tonal adjustment
   `Kt` (Table J.1) discussed in §3.1.
 
----
+## Standards
 
-**Standards.** ISO/PAS 20065:2016, *Acoustics — Objective method for assessing
+ISO/PAS 20065:2016, *Acoustics — Objective method for assessing
 the audibility of tones in noise — Engineering method*: the critical bandwidth
 `Δfc` (Formula 2) and its corner frequencies (Formulae 3–5), the critical-band
 level `LG` (Formula 12), the masking index `av` (Formula 13), the audibility

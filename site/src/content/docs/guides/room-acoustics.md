@@ -628,9 +628,9 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
   [iso.org catalogue](https://www.iso.org/standard/34545.html).
   The reverberation-room absorption measurement of §4.
 
----
+## Standards
 
-**Standards.** ISO 18233:2006 (application of new measurement methods — the
+ISO 18233:2006 (application of new measurement methods — the
 swept-sine and MLS acquisition of impulse responses); ISO 3382-1:2009 and
 ISO 3382-2:2008 (reverberation time and room parameters from the Schroeder
 decay); ISO 3382-3:2012 (open-plan office speech metrics); ISO 354:2003

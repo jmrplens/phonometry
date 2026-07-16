@@ -240,9 +240,9 @@ identical whether you pass the raw integer array or a float conversion.
   The laboratory verification procedure behind the periodic checks
   recommended above.
 
----
+## Standards
 
-**Standards.** IEC 60942:2017, *Electroacoustics — Sound calibrators* — the
+IEC 60942:2017, *Electroacoustics — Sound calibrators* — the
 calibrator level and class assumptions behind `sensitivity()` (the 94 dB
 principal level and the Table 1 class tolerances) and the short-term
 level-fluctuation stability check of the reference recording (5.3.3, Table 2

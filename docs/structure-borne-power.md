@@ -160,9 +160,9 @@ plt.xlabel("Frequency [Hz]"); plt.ylabel("$L_{Ws}$ [dB re 1 pW]"); plt.show()
   The free-velocity source characterization that complements the
   reception-plate quantities.
 
----
+## Standards
 
-**Standards.** EN 15657:2018, *Acoustic properties of building elements and
+EN 15657:2018, *Acoustic properties of building elements and
 buildings — Laboratory measurement of structure-borne sound from building
 service equipment for all installation conditions*: the reception-plate method
 (clause 7), the spatial mean velocity level (Formula 12), the plate loss factor

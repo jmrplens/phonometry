@@ -414,9 +414,9 @@ curvas isofónicas de ISO 226 viven con las métricas de percepción en
   Las definiciones de presión sonora, energía y nivel que sostienen Leq, SEL
   y las medidas de dosis.
 
----
+## Normas
 
-**Normas.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — la ponderación temporal Fast/Slow/Impulse de la
 envolvente de `ln_levels`, el pico ponderado C del §5.13 (verificado contra
 las ráfagas de tono de la Tabla 5) y el nivel de exposición sonora verificado

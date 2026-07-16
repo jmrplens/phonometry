@@ -649,9 +649,9 @@ plt.show()
   A free companion treatment of digital-filter design and analysis, from
   pole-zero geometry to filter stability.
 
----
+## Standards
 
-**Standards.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+IEC 61260-1:2014, *Electroacoustics — Octave-band and
 fractional-octave-band filters — Part 1: Specifications* — the base-10 mid
 frequencies and band edges of §1 (5.2-5.5), the nominal band labels, and the
 Table 1 class 1 / class 2 acceptance limits (with the fractional-octave

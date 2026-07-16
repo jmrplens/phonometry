@@ -138,9 +138,9 @@ component — is the subject of the
   The audiometric zero of section 2 (Table 1), implemented here through its
   European adoption EN ISO 389-7:2006.
 
----
+## Standards
 
-**Standards.** ISO 7029:2017, *Statistical distribution of hearing thresholds
+ISO 7029:2017, *Statistical distribution of hearing thresholds
 related to age and gender* — the median (clause 4.2, Table 1), the spread
 around the median (clause 4.3, Tables 2–5) and its application (clause 4.4).
 ISO 389-7:2005, *Reference zero for the calibration of audiometric equipment —

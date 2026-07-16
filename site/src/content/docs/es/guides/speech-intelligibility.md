@@ -272,9 +272,9 @@ para el lado del STI.
   Los experimentos por bandas de articulación de los que desciende la función
   de importancia de banda de la sección 1.
 
----
+## Normas
 
-**Normas.** ANSI S3.5-1997 (R2017), *American National Standard Methods for the
+ANSI S3.5-1997 (R2017), *American National Standard Methods for the
 Calculation of the Speech Intelligibility Index* — el método por bandas de
 tercio de octava (18 bandas), la función de importancia de banda (Tabla 3), el
 nivel espectral del habla estándar y el ruido interno de referencia (Tabla 3), y

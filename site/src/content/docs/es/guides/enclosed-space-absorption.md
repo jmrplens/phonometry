@@ -186,9 +186,9 @@ en
   La teoría estadística de la reverberación que las fórmulas de la norma
   especializan.
 
----
+## Normas
 
-**Normas.** EN 12354-6:2003, *Building acoustics — Estimation of acoustic
+EN 12354-6:2003, *Building acoustics — Estimation of acoustic
 performance of buildings from the performance of elements — Part 6: Sound
 absorption in enclosed spaces* — el área de absorción equivalente total
 (cláusula 4.3, Fórmulas 1-4, Tabla 1) y el tiempo de reverberación (cláusula

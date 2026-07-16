@@ -170,9 +170,9 @@ eficaz, eficaz móvil/MTVV y VDV de
   espinal y los efectos lumbares sobre la salud que cuantifica el modelo de
   dosis de ISO 2631-5.
 
----
+## Normas
 
-**Normas.** ISO 2631-5:2018, *Mechanical vibration and shock — Evaluation of
+ISO 2631-5:2018, *Mechanical vibration and shock — Evaluation of
 human exposure to whole-body vibration — Part 5: Method for evaluation of
 vibration containing multiple shocks* — la función de transferencia
 asiento-columna (cláusula 5.2, Fórmula 1), la dosis de aceleración y diaria

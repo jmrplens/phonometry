@@ -201,9 +201,9 @@ carry no per-task breakdown).
   exposure limit and the hearing-conservation rationale for measuring the
   daily dose.
 
----
+## Standards
 
-**Standards.** ISO 9612:2009, *Acoustics — Determination of occupational noise
+ISO 9612:2009, *Acoustics — Determination of occupational noise
 exposure — Engineering method* — the task-based (Clause 9), job-based
 (Clause 10) and full-day (Clause 11) strategies, the Annex C uncertainty budget
 (Formulae C.6, C.9 and C.12, Tables C.4/C.5) and the one-sided coverage factor

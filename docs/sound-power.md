@@ -40,6 +40,59 @@ of the page walks each in turn.
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.webm)
 
+### A decision path
+
+The table compresses into a short sequence of questions (ISO 3740 dedicates
+its Table 3 and Annex D to exactly this decision). Work through them in
+order; the first match names the standard.
+
+1. **What is the number for?** A datasheet declaration or a limit check
+   normally asks for engineering grade (grade 2, the preferred grade for
+   noise declarations); a reference source, a product ranking or a dispute
+   calls for precision (grade 1); a first walk-through of a noisy plant
+   tolerates survey grade (grade 3). Grade 1 exists only in a qualified
+   laboratory room (ISO 3741, ISO 3745) or via the precision intensity
+   methods (ISO 9614-1 at discrete points, ISO 9614-3 by scanning).
+2. **Can the source travel to a laboratory?** ISO 3741 wants the source
+   small next to the room (volume no more than about 2 % of the room volume)
+   and its noise steady; ISO 3745 wants it inside a qualified anechoic or
+   hemi-anechoic room with a characteristic dimension below half the
+   measurement radius, and it is the route that also yields directivity. A
+   machine bolted to its foundation rules both out and leaves the in-situ
+   methods.
+3. **How quiet and how dry is the site?** ISO 3744 needs the background at
+   least 6 dB below the source (preferably more than 15 dB) and
+   `K2 ≤ 4 dB`. If only a
+   3 dB margin or `K2 ≤ 7 dB` can be met, the same microphones and formulae
+   degrade gracefully to ISO 3746 at survey grade.
+4. **Is the background the problem?** When neighbouring machines cannot be
+   switched off, or the margin is outright negative, the pressure methods
+   are out. Intensity scanning (ISO 9614-2, or ISO 9614-3 for grade 1)
+   tolerates steady extraneous noise even some 10 dB *above* the source,
+   because only the net energy flux through the surface counts; the
+   per-band field indicators then decide the grade actually achieved.
+
+### What the accuracy grades mean
+
+The grade is a claim about **reproducibility**: `σR0` is the standard
+deviation you would see if different laboratories measured the same source,
+each following the standard correctly. Typical A-weighted values are
+`σR0 ≈ 0.5 dB` for grade 1 (ISO 3741), `1.5 dB` for grade 2 (ISO 3744,
+ISO 9614-2) and `3 dB` or more for grade 3 (larger still when `K2` is
+large or the spectrum is tonal). Per-band values are larger at the
+spectrum edges. The `uncertainty` field of the pressure-method results
+(enveloping surface and anechoic) is the expanded uncertainty
+`U = 2·σtot` (95 % coverage), where
+`σtot = √(σR0² + σomc²)` also folds in the operating/mounting instability
+`σomc` that you estimate and pass in; the grade only bounds the method's
+share of the budget.
+
+In practice: a grade-2 `LWA` of 92.4 dB carries `U ≈ 3 dB`, so two grade-2
+results 2 dB apart are statistically indistinguishable, and checking that
+same source against a 93 dB limit is a coin flip. Choose the grade from the
+decision the number has to support, not from the facility that happens to
+be free.
+
 ## 1. Enveloping surface, sound pressure (ISO 3744 / ISO 3746)
 
 Place the source on a reflecting plane and imagine a **measurement surface**
@@ -151,6 +204,40 @@ data (`reverberation_time` + `volume`, or `absorption_area`, or
 field is treated as free (`K2 = 0`). If the background margin drops below the
 grade criterion or `K2` exceeds the validity limit, a `SoundPowerWarning`
 flags that the levels are upper bounds — the determination still returns.
+
+### K1 and K2 pitfalls
+
+Both corrections subtract energy from the surface level, so overestimating
+either one understates the emission. That is why the standards cap them, and
+why most disputes over an enveloping-surface result trace back to one of
+these habits:
+
+- **K1 has a cliff, not a slope.** At a 15 dB margin the correction is a
+  negligible 0.14 dB; at the 6 dB engineering criterion it is already
+  1.26 dB, the largest value the grade accepts. Below the criterion the
+  standard does not let the formula run on: `K1` is capped and the result is
+  reported as an upper bound. Never extrapolate the subtraction into a
+  smaller margin; raise the margin (quieter site, closer surface) or switch
+  to the intensity method.
+- **K1 assumes a stationary background.** The source-off reading must be
+  taken at the same positions with the room in the same state, and the
+  background energy must be the same during both readings. A ventilation
+  system that cycles or a vehicle passing during either reading invalidates
+  the pair; the energy subtraction also assumes source and background are
+  incoherent, which holds for unrelated noise but not for the source's own
+  reflections.
+- **K2 removes the average room build-up, not discrete reflections.** A
+  nearby wall, a trolley or another machine just outside the surface adds a
+  specular contribution concentrated at a few microphones. That imbalance
+  shows up in the apparent directivity index `DIi*`, and no room-average
+  correction can remove it: move the surface, remove the reflector or treat
+  it with absorption.
+- **K2 is only as good as `A`.** With `A` from Sabine (`0.16·V/T`), errors
+  in the reverberation time or the volume propagate directly. At the
+  `K2 = 4 dB` validity limit about 60 % of the measured energy is room, not
+  source, and a 20 % error in `A` still moves `LW` by about 0.5 dB. Prefer a
+  measured `T60` over a guessed absorption coefficient, and keep the
+  measurement distance small enough that `K2` stays well under the limit.
 
 ### `sound_power_pressure()` parameters
 
@@ -665,6 +752,45 @@ plt.show()
 - [Levels](levels.md) — energy averaging and the A-weighting behind `LWA`.
 - [Theory](theory-environment-transport.md) — the Waterhouse, K1/K2 and C1/C2 derivations.
 - API reference: [`emission.sound_power`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-reverberation/) and [`emission.sound_power_intensity`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity/).
+
+## References
+
+- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
+  ISBN 978-0-419-19810-9.
+  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
+  The monograph on sound energy flux: why intensity separates the energy
+  leaving the source from steady energy passing through, behind the
+  scanning methods of sections 3 and 5.
+- Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
+  transducers*. Academic Press. ISBN 978-0-12-391421-7.
+  [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
+  Radiation and sound fields: the free-field and diffuse-field relations
+  between pressure and power that the enveloping-surface and
+  reverberation-room methods rest on.
+- International Organization for Standardization. (2019). *Acoustics —
+  Determination of sound power levels of noise sources — Guidelines for the
+  use of basic standards* (ISO 3740:2019).
+  [iso.org catalogue](https://www.iso.org/standard/45107.html).
+  The selection guide behind "Choosing a method": grades, environments,
+  source-size and background criteria for the whole family.
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for reverberation test
+  rooms* (ISO 3741:2010).
+  [iso.org catalogue](https://www.iso.org/standard/52053.html).
+  The reverberation-room method of section 2.
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Engineering methods for an essentially free
+  field over a reflecting plane* (ISO 3744:2010).
+  [iso.org catalogue](https://www.iso.org/standard/52055.html).
+  The enveloping-surface method of section 1.
+- International Organization for Standardization. (2012). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for anechoic rooms and
+  hemi-anechoic rooms* (ISO 3745:2012).
+  [iso.org catalogue](https://www.iso.org/standard/45362.html).
+  The precision anechoic-room method of section 4.
 
 ---
 

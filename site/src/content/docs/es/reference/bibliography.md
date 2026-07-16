@@ -33,7 +33,8 @@ que las guías incorporan sus secciones de Referencias.
   [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
   Campos sonoros, radiación y transductores electroacústicos; sustenta el
   material de electroacústica y potencia sonora.
-  Citado por [Electroacústica](/phonometry/es/guides/electroacoustics/).
+  Citado por [Electroacústica](/phonometry/es/guides/electroacoustics/) y
+  [Potencia sonora](/phonometry/es/guides/sound-power/).
 
 ## Procesado de señal
 
@@ -48,6 +49,59 @@ que las guías incorporan sus secciones de Referencias.
   [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
   Tratamiento gratuito y complementario del diseño y análisis de filtros
   digitales, el paso natural tras las guías de bancos de filtros.
+
+## Potencia sonora e intensidad
+
+- Fahy, F. J. (1995). *Sound intensity* (2.ª ed.). E&FN Spon.
+  ISBN 978-0-419-19810-9.
+  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
+  La monografía sobre el flujo de energía sonora: intensidad activa y
+  reactiva, el estimador p-p y su presupuesto de error por desfase.
+  Citado por [Potencia sonora](/phonometry/es/guides/sound-power/) e
+  [Intensidad sonora (p-p)](/phonometry/es/guides/intensity/).
+- International Organization for Standardization. (2019). *Acoustics —
+  Determination of sound power levels of noise sources — Guidelines for the
+  use of basic standards* (ISO 3740:2019).
+  [Catálogo iso.org](https://www.iso.org/standard/45107.html).
+  La guía de selección de la familia de potencia sonora: grados, entornos y
+  criterios de tamaño de fuente y de ruido de fondo.
+  Citado por [Potencia sonora](/phonometry/es/guides/sound-power/).
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for reverberation test
+  rooms* (ISO 3741:2010).
+  [Catálogo iso.org](https://www.iso.org/standard/52053.html).
+  El método de precisión en sala reverberante.
+  Citado por [Potencia sonora](/phonometry/es/guides/sound-power/).
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Engineering methods for an essentially free
+  field over a reflecting plane* (ISO 3744:2010).
+  [Catálogo iso.org](https://www.iso.org/standard/52055.html).
+  El método de ingeniería por superficie envolvente.
+  Citado por [Potencia sonora](/phonometry/es/guides/sound-power/).
+- International Organization for Standardization. (2012). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for anechoic rooms and
+  hemi-anechoic rooms* (ISO 3745:2012).
+  [Catálogo iso.org](https://www.iso.org/standard/45362.html).
+  El método de precisión en sala anecoica.
+  Citado por [Potencia sonora](/phonometry/es/guides/sound-power/).
+- International Organization for Standardization. (1993). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
+  [Catálogo iso.org](https://www.iso.org/standard/17427.html).
+  Los indicadores de campo y el criterio de capacidad dinámica de la medida
+  de intensidad.
+  Citado por [Intensidad sonora (p-p)](/phonometry/es/guides/intensity/).
+- International Electrotechnical Commission. (1993). *Electroacoustics —
+  Instruments for the measurement of sound intensity — Measurements with
+  pairs of pressure sensing microphones* (IEC 61043:1993; adoptada en Europa
+  como EN 61043:1994).
+  [Tienda IEC](https://webstore.iec.ch/en/publication/4353).
+  La norma de instrumentación p-p: el estimador por espectro cruzado y el
+  índice presión-intensidad residual.
+  Citado por [Intensidad sonora (p-p)](/phonometry/es/guides/intensity/).
 
 ## Acústica de edificios
 

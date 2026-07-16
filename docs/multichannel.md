@@ -14,6 +14,39 @@ performance gains over iterative loops.
 *Simultaneous analysis of a Stereo signal: Left Channel (Pink Noise) vs Right
 Channel (Log Sine Sweep).*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import chirp
+from phonometry import octave_filter
+
+# Stereo test signal: pink noise left, logarithmic sine sweep right
+fs, duration = 48000, 5
+t = np.linspace(0, duration, fs * duration, endpoint=False)
+rng = np.random.default_rng(42)
+spec = np.fft.rfft(rng.standard_normal(t.size))
+spec[1:] /= np.sqrt(np.arange(1, spec.size))   # 1/f shaping: pink noise
+left = np.fft.irfft(spec, t.size)
+right = chirp(t, f0=50, t1=duration, f1=10000, method="logarithmic")
+
+x = np.stack([left, right])                    # (2, n_samples)
+spl, freq = octave_filter(x, fs, fraction=3, limits=[20, 20000])
+
+fig, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
+for ax, levels, name in zip(axes, spl, ["Left: pink noise", "Right: log sweep"]):
+    ax.semilogx(freq, levels, marker="o", label=name)
+    ax.set_ylabel("Level [dB]")
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend()
+axes[-1].set_xlabel("Frequency [Hz]")
+plt.show()
+```
+
+</details>
+
 The convention is consistent across the whole library: time is always the
 **last axis**. This applies to `octave_filter`, `OctaveFilterBank`,
 `weighting_filter`, `time_weighting`, `leq`, `laeq`, `ln_levels` and

@@ -19,6 +19,36 @@ equipos instalados de EN 12354-5.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_es.svg" alt="Nivel de potencia sonora estructural inyectada en placa receptora por banda de tercio de octava, determinado en una placa de baja movilidad y otra de alta movilidad" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_es_dark.svg" alt="Nivel de potencia sonora estructural inyectada en placa receptora por banda de tercio de octava, determinado en una placa de baja movilidad y otra de alta movilidad" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# La misma fuente tipo bomba medida sobre una placa receptora pesada y otra ligera.
+bands = np.array([50.0, 100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
+lv_low = np.array([88.0, 90.0, 87.0, 84.0, 80.0, 76.0, 71.0])
+
+low = building.reception_plate_power(lv_low, bands, mass_per_area=600.0,
+                                     area=2.0, reverberation_time=0.8)
+high = building.reception_plate_power(lv_low + 6.0, bands, mass_per_area=150.0,
+                                      area=2.0, reverberation_time=0.5)
+
+x = np.arange(bands.size)
+fig, ax = plt.subplots()
+ax.bar(x - 0.2, low.power_level, width=0.4, label="placa de baja movilidad")
+ax.bar(x + 0.2, high.power_level, width=0.4, label="placa de alta movilidad")
+ax.set_xticks(x, [f"{b:g}" for b in bands])
+ax.set(xlabel="Frecuencia [Hz]",
+       ylabel="Nivel de potencia estructural $L_{Ws}$ [dB re 1 pW]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 1. Las relaciones de la placa receptora
 
 ¿Por qué una placa? Caracterizar la fuente directamente por sus fuerzas de
@@ -127,29 +157,6 @@ El homólogo directo del lado de la fuente es el nivel de velocidad libre de
 ISO 9611 (re `v₀ = 5·10⁻⁸ m/s`) medido en los puntos de contacto de maquinaria
 montada elásticamente; su media por posiciones de la ecuación (9) es
 `mean_free_velocity_level()`.
-
-<details>
-<summary>Mostrar el código de esta figura</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-bands = np.array([50.0, 100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
-lv_low = np.array([88.0, 90.0, 87.0, 84.0, 80.0, 76.0, 71.0])
-low = ph.reception_plate_power(lv_low, bands, mass_per_area=600.0, area=2.0,
-                               reverberation_time=0.8)
-high = ph.reception_plate_power(lv_low + 6.0, bands, mass_per_area=150.0, area=2.0,
-                                reverberation_time=0.5)
-x = np.arange(bands.size)
-plt.bar(x - 0.2, low.power_level, width=0.4, label="placa de baja movilidad")
-plt.bar(x + 0.2, high.power_level, width=0.4, label="placa de alta movilidad")
-plt.xticks(x, [f"{b:g}" for b in bands]); plt.legend()
-plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_{Ws}$ [dB re 1 pW]"); plt.show()
-```
-
-</details>
 
 ## Referencias
 

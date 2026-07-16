@@ -22,6 +22,43 @@ bloques coinciden con una única pasada sobre la señal completa.
 con el resultado continuo; sin estado, cada frontera de bloque reinicia el
 transitorio del filtro.*
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import metrology
+
+# Banda de octava de 1 kHz: cuatro bloques con estado frente a una pasada continua
+fs, block = 8000, 1000
+rng = np.random.default_rng(42)
+x = rng.standard_normal(4 * block)
+t = np.arange(x.size) / fs
+
+bank = metrology.OctaveFilterBank(fs, fraction=1, limits=[900, 1100],
+                                  stateful=True, resample=False)
+streamed = np.concatenate([
+    bank.filter(x[i * block:(i + 1) * block], sigbands=True,
+                detrend=False, calculate_level=False)[2][0]
+    for i in range(4)
+])
+offline = metrology.OctaveFilterBank(fs, fraction=1, limits=[900, 1100],
+                                     resample=False).filter(
+    x, sigbands=True, detrend=False, calculate_level=False)[2][0]
+print(np.max(np.abs(streamed - offline)))     # 0.0 (exacto bit a bit)
+
+fig, ax = plt.subplots(figsize=(9, 4.5))
+ax.plot(t, offline, linewidth=2.5, alpha=0.35, label="Continuo (señal completa)")
+ax.plot(t, streamed, label="Bloques con estado (estado conservado)")
+ax.axvline(block / fs, color="gray", linestyle=":", label="Frontera de bloque")
+ax.set(xlim=(0.11, 0.17), xlabel="Tiempo [s]", ylabel="Amplitud")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 Crea un banco con estado usando `stateful=True`. El estado interno se inicializa
 a cero por defecto, pero puede inicializarse al régimen permanente de la
 respuesta al escalón (como `scipy.signal.sosfilt_zi`) con `steady_ic=True`.

@@ -36,6 +36,43 @@ of the page walks each in turn.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods.svg" alt="The three sound power routes side by side: an enveloping pressure surface over a reflecting plane (ISO 3744/3746), a source in a reverberation room sampled by microphones (ISO 3741) and an intensity probe scanning a surface around the source (ISO 9614-2)" width="92%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+# One steady source (octave-band LW below) determined by three routes.
+freqs = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+lw_true = np.array([85.0, 88.0, 90.0, 89.0, 86.0, 82.0])
+
+# ISO 3744: SPL at 10 positions on a hemisphere, r = 2 m (10 lg(S/S0) = 14 dB).
+pres = emission.sound_power_pressure(np.tile(lw_true - 14.0, (10, 1)),
+                                     "hemisphere", radius=2.0,
+                                     frequencies=freqs)
+# ISO 9614-2: uniform normal intensity scanned over six 0.5 m2 segments.
+i_n = np.tile(10.0 ** (lw_true / 10.0) * 1e-12 / 3.0, (6, 1))
+inten = emission.sound_power_intensity(i_n, np.full(6, 0.5),
+                                       frequencies=freqs, band_type="octave")
+# ISO 3741: comparison against a reference source of known LW = 84 dB per band.
+comp = emission.sound_power_comparison(lw_true - 20.0, np.full(6, 64.0),
+                                       np.full(6, 84.0), frequencies=freqs)
+
+fig, ax = plt.subplots()
+for res, style, ms, label in ((pres, "-o", 11, "pressure (ISO 3744)"),
+                              (inten, "--s", 8, "intensity (ISO 9614-2)"),
+                              (comp, ":^", 5, "reference source (ISO 3741)")):
+    ax.semilogx(freqs, res.sound_power_level, style, markersize=ms,
+                label=f"{label}: LWA = {res.sound_power_level_a:.1f} dB")
+ax.set(xlabel="Frequency [Hz]", ylabel="Sound power level LW [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.gif" alt="Animation: the same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W" width="640" height="360" loading="lazy"></picture>
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.webm)

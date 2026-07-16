@@ -95,6 +95,41 @@ print(f"LA10={stats[10]:.1f}  LA50={stats[50]:.1f}  LA90={stats[90]:.1f} dB")
 
 *L10 tracks the event peaks, L50 the median level and L90 the background.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import metrology
+
+# The fluctuating signal of the ln_levels example: 0.5 s of background
+# alternating with 0.5 s of ~10 dB louder events, repeated 3 times
+fs = 48000
+rng = np.random.default_rng(0)
+segment = fs // 2
+quiet = 0.02 * rng.standard_normal(segment)
+loud = 0.06 * rng.standard_normal(segment)
+varying = np.tile(np.concatenate([quiet, loud]), 3)
+
+# Fast mean-square envelope -> level vs time, plus the percentile levels
+envelope = metrology.time_weighting(varying, fs, mode="fast")
+level_t = 10 * np.log10(np.maximum(envelope, 1e-12) / (2e-5) ** 2)
+stats = metrology.ln_levels(varying, fs, n=(10, 50, 90))
+t = np.arange(varying.size) / fs
+
+fig, ax = plt.subplots()
+ax.plot(t, level_t, linewidth=0.8, label="Fast level Lp(t)")
+for i, (n_value, style) in enumerate([(10, "--"), (50, "-"), (90, "-.")], 1):
+    ax.axhline(float(stats[n_value]), color=f"C{i}", linestyle=style,
+               label=f"L{n_value} = {stats[n_value]:.1f} dB")
+ax.set(xlabel="Time [s]", ylabel="Level [dB]")
+ax.legend(loc="lower right")
+plt.show()
+```
+
+</details>
+
 Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` applies A/C weighting first, and
 `calibration_factor`/`dbfs` behave as in `leq`. The integrator attack transient
@@ -197,6 +232,40 @@ railway noise models.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept.svg" alt="A vehicle pass-by level history with its Leq over the whole event and the equal-energy one-second SEL block" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sel_concept_dark.svg" alt="A vehicle pass-by level history with its Leq over the whole event and the equal-energy one-second SEL block" style="width:80%">
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import metrology
+
+# A vehicle pass-by: noise under a gaussian energy envelope (dBFS analysis)
+fs = 48000
+t = np.arange(int(8.0 * fs)) / fs
+rng = np.random.default_rng(11)
+x = 0.3 * np.exp(-0.5 * ((t - 4.0) / 1.1) ** 2) * rng.standard_normal(t.size)
+
+level = 10 * np.log10(np.maximum(metrology.time_weighting(x, fs, mode="fast"), 1e-12))
+l_sel = float(metrology.sel(x, fs, dbfs=True))
+l_eq = float(metrology.leq(x, dbfs=True))
+print(f"Leq = {l_eq:.1f} dBFS, SEL = {l_sel:.1f} dBFS")
+# Leq = -16.6 dBFS, SEL = -7.6 dBFS -> the 1 s block carries the event energy
+
+fig, ax = plt.subplots()
+ax.plot(t, level, linewidth=1.0, label="Fast level of the event")
+ax.hlines(l_eq, 0, 8, color="C2", linestyle="--",
+          label=f"Leq over the whole event = {l_eq:.1f} dBFS")
+ax.fill_between([3.5, 4.5], -55, l_sel, color="C1", alpha=0.25)
+ax.hlines(l_sel, 3.5, 4.5, color="C1", linewidth=2,
+          label=f"SEL = {l_sel:.1f} dBFS: same energy in 1 s")
+ax.set(xlabel="Time [s]", ylabel="Level [dBFS]", ylim=(-55, l_sel + 6))
+ax.legend(loc="lower left")
+plt.show()
+```
+
+</details>
+
 ### Noise dose: sound exposure and LEX,8h
 
 Occupational regulations limit the daily *dose*, not the level. IEC 61252
@@ -247,6 +316,44 @@ r = composite_rating_level([(63.2, 12, 0.0),    # day
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile.svg" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/lden_profile_dark.svg" alt="Synthetic 24-hour urban LAeq profile with day, evening and night bands, the +5 and +10 dB weighted period levels and the resulting Lden" style="width:80%">
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import environmental
+
+# Synthetic hourly LAeq of an urban road (dB), hours 00 to 23
+laeq_h = np.array([48, 46, 45, 45, 46, 50, 56, 64, 66, 65, 63, 63,
+                   64, 63, 63, 64, 65, 66, 65, 64, 63, 62, 61, 50], dtype=float)
+
+def period_leq(idx):
+    return 10 * np.log10(np.mean(10 ** (laeq_h[idx] / 10)))  # energy mean
+
+ld = period_leq(np.arange(7, 19))                # day 07-19
+le = period_leq(np.arange(19, 23))               # evening 19-23
+ln_ = period_leq(np.r_[23, np.arange(0, 7)])     # night 23-07
+l_den = environmental.lden(ld, le, ln_)
+print(f"Lden = {l_den:.1f} dB")   # Lden = 64.3 dB
+
+fig, ax = plt.subplots()
+ax.axvspan(19, 23, color="C1", alpha=0.15)                                # evening
+ax.axvspan(23, 24, color="C0", alpha=0.15); ax.axvspan(0, 7, color="C0", alpha=0.15)
+ax.step(np.arange(25), np.r_[laeq_h, laeq_h[-1]], where="post",
+        color="0.3", label="Hourly LAeq")
+ax.hlines(ld, 7, 19, color="C2", linestyle="--", label="Lday (+0 dB)")
+ax.hlines(le + 5, 19, 23, color="C1", linestyle="--", label="Levening + 5 dB")
+ax.hlines([ln_ + 10, ln_ + 10], [23, 0], [24, 7], color="C0",
+          linestyle="--", label="Lnight + 10 dB")
+ax.hlines(l_den, 0, 24, color="C3", linewidth=2, label=f"Lden = {l_den:.1f} dB")
+ax.set(xlabel="Hour of day", ylabel="Level [dB]", xlim=(0, 24))
+ax.legend(loc="upper left", fontsize=8, ncol=2)
+plt.show()
+```
+
+</details>
 
 ### `lden()` / `ldn()` / `composite_rating_level()` parameters
 
@@ -349,6 +456,36 @@ levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5
 
 *A logarithmic sweep plus two tone bursts, resolved in time and in standardized
 1/3-octave bands.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import chirp
+from phonometry import metrology
+
+# Log sweep 80 Hz -> 8 kHz plus two tone bursts, in a little noise
+fs = 48000
+t = np.arange(int(4.0 * fs)) / fs
+x = 0.5 * chirp(t, f0=80, t1=4.0, f1=8000, method="logarithmic")
+x[int(1.0 * fs):int(1.3 * fs)] += np.sin(2 * np.pi * 4000 * t[: int(0.3 * fs)])
+x[int(2.5 * fs):int(2.8 * fs)] += np.sin(2 * np.pi * 250 * t[: int(0.3 * fs)])
+x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
+
+bank = metrology.OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[50.0, 12000.0])
+levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.5)
+
+fig, ax = plt.subplots()
+mesh = ax.pcolormesh(times, freq, levels, shading="auto")
+ax.set_yscale("log")
+ax.set(xlabel="Time [s]", ylabel="Frequency [Hz]")
+fig.colorbar(mesh, label="Level [dB]")
+plt.show()
+```
+
+</details>
 
 - Multichannel input `(channels, samples)` returns `(channels, bands, frames)`.
 - `times` holds each window's center in seconds.

@@ -19,6 +19,35 @@ with the source mobility instead it yields `L_Ws,c` (Annex I.3, Table I.8).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/installed_structure_borne.svg" alt="The EN 12354-5 cascade per octave band: the characteristic structure-borne power level, the installed power level after subtracting the coupling term, the per-path normalised sound pressure levels, and their energetic total" width="82%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# EN 15657 characteristic source power and illustrative point mobilities.
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+lws_c = np.array([78.0, 82.0, 84.0, 81.0, 77.0, 72.0, 66.0])
+ys = (2e-4 + 1e-4j) * (bands / 250.0)        # source mobility
+yi = (3e-5 + 1e-5j) * np.ones_like(bands)    # receiver mobility
+dc = np.array([float(building.coupling_term(a, b)) for a, b in zip(ys, yi)])
+
+# Two transmission paths: the excited floor and a flanking wall.
+paths = [
+    {"adjustment_term": 6.0, "element_area": 12.0,
+     "flanking_reduction_index": np.linspace(44.0, 62.0, 7)},
+    {"adjustment_term": 7.0, "element_area": 9.0,
+     "flanking_reduction_index": np.linspace(46.0, 64.0, 7)},
+]
+res = building.installed_source_prediction(lws_c, dc, paths, frequencies=bands)
+res.plot()   # characteristic and installed power, per-path levels and the total
+plt.show()
+```
+
+</details>
+
 ## 1. Coupling and installed power
 
 Only part of the characteristic power is injected into the supporting element;
@@ -92,26 +121,6 @@ print(round(res.overall_level, 1))       # band-summed level [dB]
 The `InstalledSourceResult` carries the per-path levels, the total per band, the
 installed power level and `.overall_level`, and its `.plot()` draws the whole
 cascade.
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
-lws_c = np.array([78.0, 82.0, 84.0, 81.0, 77.0, 72.0, 66.0])
-ys = (2e-4 + 1e-4j) * (bands / 250.0); yi = (3e-5 + 1e-5j) * np.ones_like(bands)
-dc = np.array([float(ph.coupling_term(a, b)) for a, b in zip(ys, yi)])
-paths = [{"adjustment_term": 6.0,
-          "flanking_reduction_index": np.linspace(44, 62, 7), "element_area": 12.0}]
-res = ph.installed_source_prediction(lws_c, dc, paths, frequencies=bands)
-res.plot(); plt.show()
-```
-
-</details>
 
 ## References
 

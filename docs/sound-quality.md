@@ -26,6 +26,33 @@ $k = 0.108$ sits inside the normative window 0.105–0.115).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" width="80%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# DIN 45692 sharpness weighting g(z): Eq. (1) plus the informative Annex B variants
+z = np.arange(1, 241) * 0.1                     # Bark bins, 0.1 .. 24.0
+g_din = np.where(z > 15.8, 0.15 * np.exp(0.42 * (z - 15.8)) + 0.85, 1.0)
+g_bis = np.where(z > 15.0, 0.2 * np.exp(0.308 * (z - 15.0)) + 0.8, 1.0)
+n = 4.0                                         # Aures depends on the total loudness (sone)
+g_aures = 0.078 * np.exp(0.171 * z) / z * (n / np.log(n * 0.05 + 1.0))
+
+fig, ax = plt.subplots()
+ax.semilogy(z, g_din, label="DIN 45692 g(z)")
+ax.semilogy(z, g_bis, "--", label="von Bismarck (Annex B)")
+ax.semilogy(z, g_aures, "-.", label="Aures (Annex B, N = 4 sone)")
+ax.axvline(15.8, linestyle=":", color="0.5")    # DIN knee: g rises beyond 15.8 Bark
+ax.set(xlabel="Critical-band rate z [Bark]", ylabel="Weighting g(z)")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
 from phonometry import sharpness_din

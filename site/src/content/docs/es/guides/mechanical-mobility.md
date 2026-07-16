@@ -17,6 +17,29 @@ transmisión de ruido estructural: ISO 9611, ISO 10846, EN 15657 y EN 12354-5.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_es.svg" alt="Magnitudes normalizadas de receptancia, movilidad y acelerancia de un resonador de un grado de libertad en un eje de frecuencia log-log, todas con máximo en la resonancia" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_es_dark.svg" alt="Magnitudes normalizadas de receptancia, movilidad y acelerancia de un resonador de un grado de libertad en un eje de frecuencia log-log, todas con máximo en la resonancia" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import phonometry as ph
+
+m, k, c = 2.0, 8000.0, 5.0
+f = np.logspace(np.log10(0.5), np.log10(200.0), 500)
+w = 2.0 * np.pi * f
+h = ph.sdof_receptance(f, m, k, c)
+for label, frf in (("receptancia |H|", np.abs(h)),
+                   ("movilidad |Y|", np.abs(1j * w * h)),
+                   ("acelerancia |A|", np.abs(-(w**2) * h))):
+    plt.loglog(f, frf / frf.max(), label=label)
+plt.axvline(ph.resonance_frequency(m, k), ls="--", color="0.6")
+plt.xlabel("Frecuencia [Hz]"); plt.ylabel("Magnitud normalizada")
+plt.legend(); plt.show()
+```
+
+</details>
+
 ## 1. La familia de funciones de respuesta en frecuencia (Tabla 1)
 
 Para un movimiento armónico `x·e^{jωt}` la velocidad es `jω·x` y la aceleración
@@ -155,29 +178,6 @@ res = ph.sdof_mobility_result(f, mass=2.0, stiffness=8000.0, damping=5.0)
 z = res.to("impedance")                        # impedancia = 1/Y por frecuencia
 print(res.frequencies[int(np.argmax(res.magnitude))].round(1))   # ~10.1 Hz
 ```
-
-<details>
-<summary>Mostrar el código de esta figura</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-m, k, c = 2.0, 8000.0, 5.0
-f = np.logspace(np.log10(0.5), np.log10(200.0), 500)
-w = 2.0 * np.pi * f
-h = ph.sdof_receptance(f, m, k, c)
-for label, frf in (("receptancia |H|", np.abs(h)),
-                   ("movilidad |Y|", np.abs(1j * w * h)),
-                   ("acelerancia |A|", np.abs(-(w**2) * h))):
-    plt.loglog(f, frf / frf.max(), label=label)
-plt.axvline(ph.resonance_frequency(m, k), ls="--", color="0.6")
-plt.xlabel("Frecuencia [Hz]"); plt.ylabel("Magnitud normalizada")
-plt.legend(); plt.show()
-```
-
-</details>
 
 ## Referencias
 

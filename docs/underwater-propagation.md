@@ -16,6 +16,26 @@ the underwater reference levels (ISO 18405/17208/18406) in
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_transmission_loss.svg" alt="Underwater transmission loss versus range at 10 kHz: the total loss with the geometrical-spreading and volume-absorption contributions drawn separately, loss increasing downward" width="82%">
 </picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# 10 kHz at 10 °C, 35 ppt, 100 m depth; practical spreading with R0 = 1000 m.
+ranges = np.linspace(10.0, 20_000.0, 400)
+tl = underwater.transmission_loss(ranges, 10e3, law="practical",
+                                  transition_range=1000.0, temperature=10.0,
+                                  salinity=35.0, depth=100.0)
+print(f"alpha = {tl.absorption_coefficient:.2f} dB/km")   # alpha = 0.95 dB/km
+tl.plot()   # total TL with the spreading and absorption contributions
+plt.show()
+```
+
+</details>
+
 The transmission loss is
 
 $$
@@ -57,6 +77,24 @@ tl.plot()   # TL vs range with the spreading/absorption split (needs matplotlib)
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_sound_speed.svg" alt="A sea-water sound-speed profile computed with the UNESCO equation: a warm mixed layer near the surface, a thermocline where the speed drops, a sound-channel axis at the minimum, and the speed rising again with pressure at depth" width="62%">
 </picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# A warm mixed layer, a thermocline down to 4 °C and an isothermal deep layer.
+depths = np.linspace(0.0, 3000.0, 121)
+temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
+profile = underwater.sound_speed_profile(depths, temps, 35.0, model="unesco")
+profile.plot()   # sound speed vs depth, minimum at the sound-channel axis
+plt.show()
+```
+
+</details>
+
 `sea_water_sound_speed(T, S, depth, model=…)` evaluates the sound speed with the
 **UNESCO / Chen–Millero** equation (default, the international standard, in the
 Wong & Zhu 1995 ITS-90 form), **Del Grosso** (1974) or **Mackenzie** (1981). The
@@ -94,6 +132,25 @@ can cross entire oceans.
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_dark.svg">
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation.svg" alt="The passive sonar equation: signal excess falling with transmission loss, crossing zero (the detection limit) at the figure of merit" width="82%">
 </picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+tl = np.linspace(40.0, 120.0, 400)
+se = underwater.passive_sonar_equation(source_level=140.0, transmission_loss=tl,
+                                       noise_level=60.0, directivity_index=15.0,
+                                       detection_threshold=8.0)
+print(f"figure of merit = {se.figure_of_merit:.1f} dB")  # figure of merit = 87.0 dB
+se.plot()   # signal excess vs transmission loss, zero crossing at the FOM
+plt.show()
+```
+
+</details>
 
 The sonar equation combines the performance terms into the **signal excess**
 $SE$ (detection when $SE \ge 0$) and the **figure of merit** (the maximum
@@ -136,6 +193,25 @@ the source convention, dB re 1 µPa²/Hz **at 1 m**.
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection.svg" alt="Bottom reflection loss versus grazing angle for a fast sandy seabed: zero loss below the critical grazing angle (total reflection) rising sharply above it" width="82%">
 </picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# Rayleigh fluid-fluid reflection: water over a fast sandy bottom.
+phi = np.linspace(0.0, 90.0, 361)
+bl = underwater.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,
+                                       rho2=1900.0, c2=1650.0)
+print(f"critical angle = {bl.critical_angle:.1f} deg")   # critical angle = 24.6 deg
+bl.plot()   # bottom loss vs grazing angle
+plt.show()
+```
+
+</details>
+
 A plane wave striking the seabed reflects with the fluid–fluid **Rayleigh
 reflection coefficient** (Medwin & Clay). For a faster bottom ($c_2 > c_1$) there
 is a **critical grazing angle** $\varphi_c = \arccos(c_1/c_2)$, below which
@@ -165,6 +241,29 @@ sediment attenuation is out of scope.
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise_dark.svg">
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise.svg" alt="Wenz ambient-noise spectrum levels for two wind speeds: wind-dominated at mid frequencies falling at 5 dB per octave and thermal noise rising above about 50 kHz" width="82%">
 </picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# Wenz ambient noise (wind rule of fives + Mellen thermal) at two wind speeds.
+freqs = np.logspace(2, 5.5, 300)
+fig, ax = plt.subplots()
+for u in (5.0, 20.0):
+    noise = underwater.ocean_ambient_noise(freqs, wind_speed_knots=u)
+    ax.semilogx(noise.frequency, noise.spectrum_level, label=f"Total ({u:.0f} kn)")
+ax.semilogx(freqs, underwater.thermal_noise_spectrum(freqs), ":", label="Thermal")
+ax.set(xlabel="Frequency [Hz]", ylabel="Spectrum level [dB re 1 µPa²/Hz]")
+ax.legend()
+ax.grid(True, which="both", alpha=0.3)
+plt.show()
+```
+
+</details>
 
 The ambient-noise spectrum level (dB re 1 µPa²/Hz) is the energy sum of the two
 physically grounded Wenz components: **wind / sea-surface** noise via the "rule
@@ -200,6 +299,30 @@ supplied through the `shipping` argument.
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise.svg" alt="JOMOPANS-ECHO predicted source-level spectra for a container ship, a cruise ship and a tug: cargo vessels show a low-frequency hump below 100 Hz" width="82%">
 </picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import underwater
+
+# JOMOPANS-ECHO source spectra for three vessel classes (speed, length).
+fig, ax = plt.subplots()
+for vessel_class, speed, length in (("containership", 18.0, 300.0),
+                                    ("cruise", 17.1, 250.0),
+                                    ("tug", 3.7, 30.0)):
+    s = underwater.ship_source_spectrum(speed, length, vessel_class=vessel_class)
+    ax.semilogx(s.frequency, s.source_psd,
+                label=f"{vessel_class} ({speed:.0f} kn, {length:.0f} m)")
+ax.set(xlabel="Frequency [Hz]",
+       ylabel="Source spectral density [dB re 1 µPa²/Hz at 1 m]")
+ax.legend()
+ax.grid(True, which="both", alpha=0.3)
+plt.show()
+```
+
+</details>
+
 When no measured spectrum is available, a ship's underwater source level can be
 **estimated** from its class, speed and length. Three semi-empirical models are
 available: **JOMOPANS-ECHO** (MacGillivray & de Jong 2021, per vessel class,
@@ -233,6 +356,29 @@ calculator (File S1) to better than 0.01 dB.
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_dark.png">
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation.png" alt="Three numerical solvers: a Munk sound-speed profile, ray paths forming convergence zones, and transmission loss versus range from the normal-mode and parabolic-equation solvers agreeing in trend" width="100%">
 </picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# A Munk deep-water sound-speed profile.
+z = np.linspace(0.0, 5000.0, 60)
+eta = 2.0 * (z - 1300.0) / 1300.0
+c = 1500.0 * (1.0 + 0.00737 * (eta - 1.0 + np.exp(-eta)))
+
+# Split-step Fourier PE at 50 Hz; a coarse grid keeps the run fast.
+field = underwater.parabolic_equation(50.0, z, c, source_depth=1000.0,
+                                      max_range=50_000.0, range_step=50.0,
+                                      n_depth_points=512)
+field.plot()   # TL(z, r) field showing the convergence zones
+plt.show()
+```
+
+</details>
 
 For range-independent (horizontally stratified) environments the field can be
 computed numerically. Three solvers are provided (Jensen et al.,

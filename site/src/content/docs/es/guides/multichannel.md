@@ -15,6 +15,39 @@ ganancias de rendimiento significativas frente a bucles iterativos.
 *Análisis simultáneo de una señal estéreo: canal izquierdo (ruido rosa) vs canal
 derecho (barrido senoidal logarítmico).*
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import chirp
+from phonometry import octave_filter
+
+# Señal estéreo de prueba: ruido rosa a la izquierda, barrido logarítmico a la derecha
+fs, duration = 48000, 5
+t = np.linspace(0, duration, fs * duration, endpoint=False)
+rng = np.random.default_rng(42)
+spec = np.fft.rfft(rng.standard_normal(t.size))
+spec[1:] /= np.sqrt(np.arange(1, spec.size))   # conformado 1/f: ruido rosa
+left = np.fft.irfft(spec, t.size)
+right = chirp(t, f0=50, t1=duration, f1=10000, method="logarithmic")
+
+x = np.stack([left, right])                    # (2, n_samples)
+spl, freq = octave_filter(x, fs, fraction=3, limits=[20, 20000])
+
+fig, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
+for ax, levels, name in zip(axes, spl, ["Izquierdo: ruido rosa", "Derecho: barrido logarítmico"]):
+    ax.semilogx(freq, levels, marker="o", label=name)
+    ax.set_ylabel("Nivel [dB]")
+    ax.grid(True, which="both", alpha=0.3)
+    ax.legend()
+axes[-1].set_xlabel("Frecuencia [Hz]")
+plt.show()
+```
+
+</details>
+
 La convención es consistente en toda la librería: el tiempo siempre es el
 **último eje**. Aplica a `octave_filter`, `OctaveFilterBank`, `weighting_filter`,
 `time_weighting`, `leq`, `laeq`, `ln_levels` y `spectrogram`.

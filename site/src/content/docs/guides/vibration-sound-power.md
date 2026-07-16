@@ -28,6 +28,34 @@ standards (ISO 9611, EN 15657, EN 12354-5).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power.svg" alt="Radiated sound power level per octave band, comparing the ISO/TS 7849-1 upper limit (radiation factor of one) with the ISO/TS 7849-2 engineering value (measured radiation factor)" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power_dark.svg" alt="Radiated sound power level per octave band, comparing the ISO/TS 7849-1 upper limit (radiation factor of one) with the ISO/TS 7849-2 engineering value (measured radiation factor)" style="width:82%">
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import emission
+
+# Surface velocity levels and a measured radiation factor per octave band.
+bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+lv = np.array([78.0, 82.0, 85.0, 83.0, 79.0, 74.0])
+eps = np.array([0.20, 0.45, 0.75, 0.95, 1.00, 1.00])
+
+lw_max = emission.radiated_sound_power_level(lv, 1.6)  # Part 1, eps = 1
+lw_eng = emission.radiated_sound_power_level(lv, 1.6, radiation_factor=eps)  # Part 2
+
+x = np.arange(bands.size)
+fig, ax = plt.subplots()
+ax.bar(x - 0.2, lw_max, width=0.4, label="Part 1 upper limit ($\\varepsilon$ = 1)")
+ax.bar(x + 0.2, lw_eng, width=0.4, label="Part 2 engineering ($\\varepsilon$ measured)")
+ax.set_xticks(x, [f"{b:g}" for b in bands])
+ax.set(xlabel="Frequency [Hz]", ylabel="Sound power level $L_W$ [dB re 1 pW]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 1. The two parts
 
 The two parts differ only in the radiation factor. **Part 1 (survey)** assumes
@@ -101,27 +129,6 @@ fixed `ε = 1`
 with a band-by-band `εⱼ` determined from one reference measurement of the
 radiated power (ISO 9614 intensity), after which the velocity survey can be
 repeated cheaply on nominally identical machines.
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
-lv = np.array([78.0, 82.0, 85.0, 83.0, 79.0, 74.0])
-eps = np.array([0.20, 0.45, 0.75, 0.95, 1.00, 1.00])
-x = np.arange(bands.size)
-plt.bar(x - 0.2, ph.radiated_sound_power_level(lv, 1.6), width=0.4, label="Part 1 (ε=1)")
-plt.bar(x + 0.2, ph.radiated_sound_power_level(lv, 1.6, radiation_factor=eps),
-        width=0.4, label="Part 2 (ε measured)")
-plt.xticks(x, [f"{b:g}" for b in bands]); plt.legend()
-plt.xlabel("Frequency [Hz]"); plt.ylabel("$L_W$ [dB re 1 pW]"); plt.show()
-```
-
-</details>
 
 ## References
 

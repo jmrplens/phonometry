@@ -18,6 +18,29 @@ ISO 9611, ISO 10846, EN 15657 and EN 12354-5.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility.svg" alt="Normalized receptance, mobility and accelerance magnitudes of a single-degree-of-freedom resonator on a log-log frequency axis, all peaking at the resonance where the mobility is stiffness-controlled below and mass-controlled above" width="82%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import phonometry as ph
+
+m, k, c = 2.0, 8000.0, 5.0
+f = np.logspace(np.log10(0.5), np.log10(200.0), 500)
+w = 2.0 * np.pi * f
+h = ph.sdof_receptance(f, m, k, c)
+for label, frf in (("receptance |H|", np.abs(h)),
+                   ("mobility |Y|", np.abs(1j * w * h)),
+                   ("accelerance |A|", np.abs(-(w**2) * h))):
+    plt.loglog(f, frf / frf.max(), label=label)
+plt.axvline(ph.resonance_frequency(m, k), ls="--", color="0.6")
+plt.xlabel("Frequency [Hz]"); plt.ylabel("Normalized magnitude")
+plt.legend(); plt.show()
+```
+
+</details>
+
 ## 1. The frequency-response-function family (Table 1)
 
 For a harmonic motion `x·e^{jωt}` the velocity is `jω·x` and the acceleration
@@ -149,29 +172,6 @@ res = ph.sdof_mobility_result(f, mass=2.0, stiffness=8000.0, damping=5.0)
 z = res.to("impedance")                        # impedance = 1/Y per frequency
 print(res.frequencies[int(np.argmax(res.magnitude))].round(1))   # ~10.1 Hz
 ```
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-m, k, c = 2.0, 8000.0, 5.0
-f = np.logspace(np.log10(0.5), np.log10(200.0), 500)
-w = 2.0 * np.pi * f
-h = ph.sdof_receptance(f, m, k, c)
-for label, frf in (("receptance |H|", np.abs(h)),
-                   ("mobility |Y|", np.abs(1j * w * h)),
-                   ("accelerance |A|", np.abs(-(w**2) * h))):
-    plt.loglog(f, frf / frf.max(), label=label)
-plt.axvline(ph.resonance_frequency(m, k), ls="--", color="0.6")
-plt.xlabel("Frequency [Hz]"); plt.ylabel("Normalized magnitude")
-plt.legend(); plt.show()
-```
-
-</details>
 
 ## References
 

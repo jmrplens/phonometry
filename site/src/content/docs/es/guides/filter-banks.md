@@ -173,6 +173,24 @@ Vista espectral completa de los bancos para octava (1/1) y tercio de octava (1/3
 | **Elíptico** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6_es.svg" alt="Respuesta en frecuencia del banco elíptico de banda de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_1_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco elíptico de banda de octava" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:100%"> |
 | **Bessel** | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6_es.svg" alt="Respuesta en frecuencia del banco Bessel de banda de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_1_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco Bessel de banda de octava" style="width:100%"> | <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:100%"> |
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+from phonometry import metrology
+
+# Una figura por arquitectura y fracción: la galería completa de respuestas
+fs = 48000
+for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
+    for fraction in (1, 3):
+        # show=True dibuja la respuesta en frecuencia del banco
+        metrology.OctaveFilterBank(fs=fs, fraction=fraction, order=6,
+                                   limits=[12, 20000], filter_type=ftype,
+                                   show=True)
+```
+
+</details>
+
 ## 5. Uso y ejemplos por tipo de filtro
 
 ### 1. Butterworth (`butter`)
@@ -195,6 +213,19 @@ spl, freq = octave_filter(x, fs, filter_type='butter')
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco Butterworth de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco Butterworth de tercio de octava" style="width:60%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+from phonometry import metrology
+
+# Dibuja la respuesta de este banco (1/3 de octava, orden 6, Butterworth)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='butter', show=True)
+```
+
+</details>
+
 ### 2. Chebyshev I (`cheby1`)
 
 Los filtros Chebyshev tipo I ofrecen una **caída más abrupta** que Butterworth a
@@ -208,6 +239,19 @@ spl, freq = octave_filter(x, fs, filter_type='cheby1', ripple=0.1)
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco Chebyshev I de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco Chebyshev I de tercio de octava" style="width:60%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+from phonometry import metrology
+
+# Dibuja la respuesta de este banco (1/3 de octava, orden 6, Chebyshev I)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='cheby1', ripple=0.1, show=True)
+```
+
+</details>
 
 ### 3. Chebyshev II (`cheby2`)
 
@@ -225,6 +269,19 @@ spl, freq = octave_filter(x, fs, filter_type='cheby2')
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco Chebyshev II de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco Chebyshev II de tercio de octava" style="width:60%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+from phonometry import metrology
+
+# Dibuja la respuesta de este banco (1/3 de octava, orden 6, Chebyshev II)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='cheby2', show=True)
+```
+
+</details>
+
 ### 4. Elíptico (`ellip`)
 
 Los filtros elípticos (Cauer) tienen la **transición más corta** (caída más
@@ -239,6 +296,19 @@ spl, freq = octave_filter(x, fs, filter_type='ellip', ripple=0.1)
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco elíptico de tercio de octava" style="width:60%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+from phonometry import metrology
+
+# Dibuja la respuesta de este banco (1/3 de octava, orden 6, elíptico)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='ellip', ripple=0.1, show=True)
+```
+
+</details>
+
 ### 5. Bessel (`bessel`)
 
 Los filtros Bessel están optimizados para una **respuesta de fase lineal** y un
@@ -252,6 +322,19 @@ spl, freq = octave_filter(x, fs, filter_type='bessel')
 ```
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_es.svg" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6_es_dark.svg" alt="Respuesta en frecuencia del banco Bessel de tercio de octava" style="width:60%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+from phonometry import metrology
+
+# Dibuja la respuesta de este banco (1/3 de octava, orden 6, Bessel)
+metrology.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
+                           filter_type='bessel', show=True)
+```
+
+</details>
 
 ### 6. Linkwitz-Riley (`linkwitz_riley`)
 

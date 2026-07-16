@@ -55,6 +55,35 @@ The hemisphere level at 60 m is carried to the receiver by three adjustments
   <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_ground_effect.svg" alt="Rotorcraft ground-effect adjustment versus one-third-octave frequency for hard (asphalt) and soft (grass) ground: low-frequency reinforcement, a deep destructive interference dip, and the incoherent +3 dB high-frequency region, the dip deeper over hard ground" width="82%">
 </picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import aircraft
+
+freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz-10 kHz thirds
+hs, hr, dp = 150.0, 1.5, 500.0                          # overflight geometry
+grass = aircraft.ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity="D")
+asphalt = aircraft.ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity="G")
+
+fig, ax = plt.subplots()
+ax.axhline(0.0, color="0.5", linewidth=1.0)
+ax.semilogx(freqs, asphalt, marker="o", markersize=3,
+            label="Hard (asphalt/concrete, class G)")
+ax.semilogx(freqs, grass, marker="s", markersize=3,
+            label="Soft (grass/pasture, class D)")
+ax.set(xlabel="One-third-octave-band centre frequency [Hz]",
+       ylabel="Ground-effect adjustment ΔLg [dB]",
+       title="Rotorcraft ground effect (ECAC Doc 32, Chien-Soroka)")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ```python
 import numpy as np
 import phonometry as ph

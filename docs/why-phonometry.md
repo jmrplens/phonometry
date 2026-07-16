@@ -71,6 +71,37 @@ how the burst aligns with the block boundaries.
 *Measured Fast envelopes (blue) matching the Table 4 reference values
 (dashed) within 0.1 dB for 200/50/10 ms bursts.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import metrology
+
+# 4 kHz tone bursts vs the IEC 61672-1 Table 4 reference maxima (FAST)
+fs = 48000
+t = np.arange(2 * fs) / fs
+steady = np.sin(2 * np.pi * 4000 * t)
+ref = metrology.time_weighting(steady, fs, mode="fast")[int(1.5 * fs):].mean()
+
+fig, axes = plt.subplots(1, 3, figsize=(12, 4), sharey=True)
+for ax, (duration, target) in zip(axes, [(0.2, -1.0), (0.05, -4.8), (0.01, -11.1)]):
+    burst = np.zeros_like(t)
+    start, n = int(0.5 * fs), round(duration * fs)
+    burst[start:start + n] = steady[start:start + n]
+    env = metrology.time_weighting(burst, fs, mode="fast")
+    ax.plot(t, 10 * np.log10(np.maximum(env / ref, 1e-6)), label="FAST envelope")
+    ax.axhline(target, linestyle="--", label=f"IEC target {target} dB")
+    ax.set(xlim=(0.4, 1.4), ylim=(-30, 3), xlabel="Time [s]",
+           title=f"{duration * 1000:g} ms burst")
+    ax.legend()
+axes[0].set_ylabel("Level re steady state [dB]")
+plt.show()
+```
+
+</details>
+
 ## What this means in practice
 
 - If you need **standard-compliant Fast/Slow/Impulse envelopes** (sound level

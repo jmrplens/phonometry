@@ -31,6 +31,35 @@ h.plot()                                          # directividad proa-popa
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_ground_effect_es.svg" alt="Ajuste por efecto de suelo de rotorcraft frente a la frecuencia de 1/3 de octava para suelo duro y blando, con refuerzo a baja frecuencia, un valle de interferencia profundo y la región incoherente de alta frecuencia" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_ground_effect_es_dark.svg" alt="Ajuste por efecto de suelo de rotorcraft frente a la frecuencia de 1/3 de octava para suelo duro y blando, con refuerzo a baja frecuencia, un valle de interferencia profundo y la región incoherente de alta frecuencia" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import aircraft
+
+freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # tercios 50 Hz-10 kHz
+hs, hr, dp = 150.0, 1.5, 500.0                          # geometría de sobrevuelo
+grass = aircraft.ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity="D")
+asphalt = aircraft.ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity="G")
+
+fig, ax = plt.subplots()
+ax.axhline(0.0, color="0.5", linewidth=1.0)
+ax.semilogx(freqs, asphalt, marker="o", markersize=3,
+            label="Duro (asfalto/hormigón, clase G)")
+ax.semilogx(freqs, grass, marker="s", markersize=3,
+            label="Blando (hierba/pasto, clase D)")
+ax.set(xlabel="Frecuencia central de banda de tercio de octava [Hz]",
+       ylabel="Ajuste por efecto de suelo ΔLg [dB]",
+       title="Efecto de suelo de rotorcraft (ECAC Doc 32, Chien-Soroka)")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 El nivel del hemisferio a 60 m se lleva al receptor con tres ajustes (§A.4):
 `spherical_spreading_adjustment` (`ΔLs = −20·log10(r/60)`, Ec. 24),
 `atmospheric_adjustment` (`ΔLa = −α(f)·(r − 60)` con el coeficiente de

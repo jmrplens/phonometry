@@ -17,6 +17,27 @@ media `ΔL` que produce alimenta el ajuste tonal `Kt` de ISO 1996-2.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility_es.svg" alt="Audibilidad ΔL por tono de los nueve tonos del espectro del motor de combustión del Anexo E de ISO/PAS 20065, con el tono decisivo a 137,3 Hz resaltado y el umbral ΔL = 0 dB marcado" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility_es_dark.svg" alt="Audibilidad ΔL por tono de los nueve tonos del espectro del motor de combustión del Anexo E de ISO/PAS 20065, con el tono decisivo a 137,3 Hz resaltado y el umbral ΔL = 0 dB marcado" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import psychoacoustics
+
+# Espectro 1 del motor de combustión (Anexo E de ISO/PAS 20065): nueve tonos
+# (fT, LT, LS) de un espectro de banda estrecha con separación de líneas de 2.7 Hz
+fT = [118.4, 137.3, 158.8, 314.9, 433.4, 592.2, 629.8, 643.3, 1582.7]
+LT = [64.56, 67.96, 68.63, 68.50, 73.17, 78.31, 75.00, 79.75, 71.07]
+LS = [48.91, 49.22, 50.50, 52.85, 58.29, 59.53, 59.71, 61.98, 54.16]
+
+res = psychoacoustics.assess_tones(fT, LT, LS, 2.7)
+print(round(res.decisive_audibility, 2), res.decisive_frequency)  # 5.01 137.3
+res.plot()   # barras de audibilidad por tono, con el tono decisivo resaltado
+plt.show()
+```
+
+</details>
+
 ## 1. La banda crítica en torno al tono
 
 Cada tono de frecuencia `fT` se evalúa dentro de una banda crítica cuyo ancho es

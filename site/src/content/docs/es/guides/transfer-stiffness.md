@@ -21,6 +21,37 @@ de predicción en edificación: ISO 9611, EN 15657 y EN 12354-5.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_stiffness_es.svg" alt="Nivel de rigidez dinámica de transferencia de un aislador Kelvin-Voigt: el nivel real y la estimación por el método indirecto, que diverge en la resonancia masa/resorte y converge por encima de ella" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_stiffness_es_dark.svg" alt="Nivel de rigidez dinámica de transferencia de un aislador Kelvin-Voigt: el nivel real y la estimación por el método indirecto, que diverge en la resonancia masa/resorte y converge por encima de ella" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import vibration
+
+# Aislador Kelvin-Voigt k + jwc cargado con una masa de bloqueo de 8 kg.
+k, c, m2 = 1.0e6, 120.0, 8.0
+f0 = np.sqrt(k / m2) / (2.0 * np.pi)
+f = np.logspace(np.log10(f0 / 5.0), np.log10(f0 * 40.0), 600)
+
+k_true = k + 1j * 2.0 * np.pi * f * c
+t = vibration.base_transmissibility(f, m2, k, c)
+k_indirect = vibration.transfer_stiffness_indirect(f, t, m2)  # avisa donde T no es pequeña
+
+fig, ax = plt.subplots()
+ax.semilogx(f, vibration.transfer_stiffness_level(k_true),
+            label="$L_k$ real de $k+j\\omega c$")
+ax.semilogx(f, vibration.transfer_stiffness_level(k_indirect), "--",
+            label="método indirecto $-(2\\pi f)^2 m_2 T$")
+ax.axvline(f0, color="0.6", linestyle=":", label="resonancia $f_0$")
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Nivel de rigidez de transferencia $L_k$ [dB re 1 N/m]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 1. El nivel de rigidez de transferencia y el factor de pérdidas
 
 Los resultados se expresan como un **nivel** re la rigidez de referencia
@@ -153,28 +184,6 @@ k = 1e6 + 5e4j                                  # N/m, a 250 Hz
 Z = ph.convert_frf(k, 250.0, "dynamic_stiffness", "impedance")
 print(abs(complex(ph.convert_frf(Z, 250.0, "impedance", "dynamic_stiffness"))))  # 1.0012e6
 ```
-
-<details>
-<summary>Mostrar el código de esta figura</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-k, c, m2 = 1e6, 120.0, 8.0
-f0 = np.sqrt(k / m2) / (2 * np.pi)
-f = np.logspace(np.log10(f0 / 5), np.log10(f0 * 40), 600)
-w = 2 * np.pi * f
-t = ph.base_transmissibility(f, m2, k, c)
-plt.semilogx(f, ph.transfer_stiffness_level(k + 1j * w * c), label="$L_k$ real")
-plt.semilogx(f, ph.transfer_stiffness_level(ph.transfer_stiffness_indirect(f, t, m2)),
-             "--", label="método indirecto")
-plt.axvline(f0, ls=":", color="0.6"); plt.legend()
-plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_k$ [dB re 1 N/m]"); plt.show()
-```
-
-</details>
 
 ## Referencias
 

@@ -16,6 +16,23 @@ reacción local y excluye expresamente los suelos flotantes.)
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness_es.svg" alt="Frecuencia natural del suelo flotante frente a la rigidez dinámica por unidad de área de la capa resiliente para un suelo flotante ligero y uno pesado, con un punto de diseño" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness_es_dark.svg" alt="Frecuencia natural del suelo flotante frente a la rigidez dinámica por unidad de área de la capa resiliente para un suelo flotante ligero y uno pesado, con un punto de diseño" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import phonometry as ph
+
+s = np.logspace(np.log10(2.0), np.log10(100.0), 300)   # MN/m3
+for m in (40.0, 120.0):
+    plt.semilogx(s, ph.natural_frequency(s * 1e6, m), label=f"m' = {m:g} kg/m²")
+plt.xlabel("Rigidez dinámica s' [MN/m³]"); plt.ylabel("Frecuencia natural f₀ [Hz]")
+plt.legend(); plt.show()
+```
+
+</details>
+
 ## 1. Rigidez dinámica y resonancia
 
 La rigidez dinámica por unidad de área es una fuerza dinámica por área dividida
@@ -90,23 +107,6 @@ res = ph.floating_floor_resonance(
 print(round(res.dynamic_stiffness / 1e6, 2), round(res.natural_frequency, 1))
 # 10.49 47.1
 ```
-
-<details>
-<summary>Mostrar el código de esta figura</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-s = np.logspace(np.log10(2.0), np.log10(100.0), 300)   # MN/m3
-for m in (40.0, 120.0):
-    plt.semilogx(s, ph.natural_frequency(s * 1e6, m), label=f"m' = {m:g} kg/m²")
-plt.xlabel("Rigidez dinámica s' [MN/m³]"); plt.ylabel("Frecuencia natural f₀ [Hz]")
-plt.legend(); plt.show()
-```
-
-</details>
 
 El `DynamicStiffnessResult` contiene las rigideces aparente, del gas encerrado e
 instalada, la resonancia del ensayo y la frecuencia natural del suelo instalado,

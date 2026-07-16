@@ -29,6 +29,29 @@ $c_0 = 343\ \mathrm{m/s}$) y el término de absorción del aire $4mV$.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/reverberation_models_es.svg" alt="Tiempo de reverberación por banda de octava para una sala con suelo y techo absorbentes pero paredes duras, calculado por cinco modelos" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/reverberation_models_es_dark.svg" alt="Tiempo de reverberación por banda de octava para una sala con suelo y techo absorbentes pero paredes duras, calculado por cinco modelos" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import environmental, room
+
+# Una sala de 10 x 7 x 3.5 m: paredes frontales duras, paredes laterales con
+# tratamiento ligero y un par suelo/techo muy absorbente (moqueta y techo acústico).
+bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+alpha_x = [0.06, 0.07, 0.08, 0.09, 0.10, 0.10]
+alpha_y = [0.12, 0.14, 0.16, 0.18, 0.20, 0.20]
+alpha_z = [0.30, 0.50, 0.65, 0.78, 0.82, 0.80]
+m = environmental.air_attenuation_m(bands, 20.0, 50.0)   # aire a 20 C / 50 % HR
+res = room.reverberation_time_models((10.0, 7.0, 3.5),
+                                     (alpha_x, alpha_y, alpha_z),
+                                     air_attenuation=m, frequencies=bands)
+res.plot()   # las cinco curvas de modelo por banda
+plt.show()
+```
+
+</details>
+
 ## 1. Sabine, Eyring y Millington-Sette
 
 Los tres modelos estadísticos toman el volumen de la sala y una lista de

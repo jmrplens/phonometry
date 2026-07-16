@@ -14,6 +14,35 @@ convenience that derives all four sensations from a recording.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance.svg" alt="Psychoacoustic annoyance PA against percentile loudness N5 for three sensation profiles: a neutral baseline where PA equals N5, a sharp sound and a rough-and-fluctuating sound both lifted above the baseline, with the worked example PA = 30.82 marked" width="82%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import phonometry as ph
+
+n5 = np.linspace(4.0, 60.0, 200)
+profiles = [
+    ("Baseline: S = 1.75 acum, F = R = 0", 1.75, 0.0, 0.0),
+    ("Sharp: S = 3.5 acum", 3.5, 0.0, 0.0),
+    ("Rough + fluctuating: F = 1.2 vacil, R = 0.7 asper", 2.0, 1.2, 0.7),
+]
+fig, ax = plt.subplots()
+for label, s, f, r in profiles:
+    pa = [ph.psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5]
+    ax.plot(n5, pa, label=label)
+
+ex = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)
+ax.plot([30.0], [ex.annoyance], "o", label=f"Worked example (PA = {ex.annoyance:.2f})")
+ax.set_xlabel("Percentile loudness N5 [sone]")
+ax.set_ylabel("Psychoacoustic annoyance PA")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 1. The four sensations
 
 Psychoacoustic annoyance rests on four hearing sensations, each with its own
@@ -59,35 +88,6 @@ The figure above sweeps `PA` against `N5` for three profiles: a neutral baseline
 rough-and-fluctuating sound — both lifted above the baseline — with the worked
 example marked.
 
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-n5 = np.linspace(4.0, 60.0, 200)
-profiles = [
-    ("Baseline: S = 1.75 acum, F = R = 0", 1.75, 0.0, 0.0),
-    ("Sharp: S = 3.5 acum", 3.5, 0.0, 0.0),
-    ("Rough + fluctuating: F = 1.2 vacil, R = 0.7 asper", 2.0, 1.2, 0.7),
-]
-fig, ax = plt.subplots()
-for label, s, f, r in profiles:
-    pa = [ph.psychoacoustic_annoyance(v, s, f, r).annoyance for v in n5]
-    ax.plot(n5, pa, label=label)
-
-ex = ph.psychoacoustic_annoyance(30.0, 2.0, 0.5, 0.3)
-ax.plot([30.0], [ex.annoyance], "o", label=f"Worked example (PA = {ex.annoyance:.2f})")
-ax.set_xlabel("Percentile loudness N5 [sone]")
-ax.set_ylabel("Psychoacoustic annoyance PA")
-ax.legend()
-plt.show()
-```
-
-</details>
-
 ### 2.1 From a signal (engineering estimate)
 
 `psychoacoustic_annoyance_from_signal` is a convenience that derives all four
@@ -119,28 +119,6 @@ rather than the ~70 Hz roughness peak. By definition, a 1 kHz tone at 60 dB,
 100 % amplitude-modulated at 4 Hz, produces `1 vacil`.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength.svg" alt="Fluctuation strength versus modulation frequency on a log axis: the closed-form AM broadband-noise curve and the AM-tone signal-model sweep both show a band-pass characteristic peaking at 4 Hz" width="82%"></picture>
-
-### 3.1 Closed form for AM broadband noise (Eq. 10.2)
-
-For sinusoidally amplitude-modulated broadband noise, Fastl & Zwicker give a
-closed form (Eq. 10.2) in modulation factor `m`, level `L` and modulation
-frequency `fmod`:
-
-$$
-F = \frac{5.8\,(1.25\,m - 0.25)\,[0.05\,(L/\mathrm{dB}) - 1]}
-{(f_{mod}/5\,\mathrm{Hz})^2 + (4\,\mathrm{Hz}/f_{mod}) + 1.5}\ \ \mathrm{vacil}.
-$$
-
-The denominator is the `4 Hz` band-pass: it bottoms out near `fmod ≈ 3.7 Hz` and
-rises on either side. The result is clamped at `0` (the sensation vanishes below
-~20 dB or `m < 0.2`). This exact form is the value to quote for AM broadband
-noise.
-
-```python
-import phonometry as ph
-
-print(round(ph.fluctuation_strength_am_noise(60.0, 1.0, 4.0), 4))   # 3.6943 vacil
-```
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -179,6 +157,28 @@ plt.show()
 ```
 
 </details>
+
+### 3.1 Closed form for AM broadband noise (Eq. 10.2)
+
+For sinusoidally amplitude-modulated broadband noise, Fastl & Zwicker give a
+closed form (Eq. 10.2) in modulation factor `m`, level `L` and modulation
+frequency `fmod`:
+
+$$
+F = \frac{5.8\,(1.25\,m - 0.25)\,[0.05\,(L/\mathrm{dB}) - 1]}
+{(f_{mod}/5\,\mathrm{Hz})^2 + (4\,\mathrm{Hz}/f_{mod}) + 1.5}\ \ \mathrm{vacil}.
+$$
+
+The denominator is the `4 Hz` band-pass: it bottoms out near `fmod ≈ 3.7 Hz` and
+rises on either side. The result is clamped at `0` (the sensation vanishes below
+~20 dB or `m < 0.2`). This exact form is the value to quote for AM broadband
+noise.
+
+```python
+import phonometry as ph
+
+print(round(ph.fluctuation_strength_am_noise(60.0, 1.0, 4.0), 4))   # 3.6943 vacil
+```
 
 ### 3.2 The Osses 2016 signal model
 

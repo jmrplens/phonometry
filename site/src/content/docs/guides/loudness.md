@@ -126,6 +126,29 @@ phon = loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/equal_loudness_contours_dark.svg" alt="ISO 226:2023 normal equal-loudness-level contours from 20 to 90 phon with the hearing threshold curve" style="width:80%">
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import psychoacoustics
+
+# ISO 226:2023 Formula (1) at the 29 preferred frequencies of Table 1
+fig, ax = plt.subplots()
+for phon in [20, 40, 60, 80, 90]:
+    freqs, spl = psychoacoustics.equal_loudness_contour(float(phon))
+    ax.semilogx(freqs, spl, color="C0")
+    ax.annotate(f"{phon} phon", xy=(1000, phon + 1), fontsize=9)
+ft, tf = psychoacoustics.hearing_threshold()
+ax.semilogx(ft, tf, "--", color="C1", label="Hearing threshold $T_f$")
+ax.set(xlabel="Frequency [Hz]", ylabel="Sound pressure level [dB re 20 µPa]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 Validity per clause 4.1: 20-90 phon (80 phon above 4 kHz); the implementation
 is verified against the Annex B tables in CI. Note this is the loudness of
 *pure tones* — the loudness of arbitrary signals in sones is what the ISO 532
@@ -159,6 +182,39 @@ auditory filters and their loudness summation.
 Zwicker doubles the sone value every +10 phon, while the Sottek model grows
 more slowly (about 1.65× per 10 dB), an intrinsic difference between the
 auditory summations, not a calibration error.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+# 1 kHz tone, 20..80 dB SPL: all three models pass through 1 sone at 40 dB
+fs = 48000
+t = np.arange(fs) / fs
+levels = np.arange(20.0, 81.0, 10.0)
+zw, mg, ec = [], [], []
+for spl in levels:
+    x = np.sqrt(2) * 2e-5 * 10 ** (spl / 20) * np.sin(2 * np.pi * 1000 * t)
+    zw.append(psychoacoustics.loudness_zwicker(x, fs, stationary=True).loudness)
+    mg.append(
+        psychoacoustics.loudness_moore_glasberg_from_spectrum([(1000.0, float(spl))]).loudness
+    )
+    ec.append(psychoacoustics.loudness_ecma(x, fs).loudness)
+
+fig, ax = plt.subplots()
+ax.plot(levels, zw, "o-", label="Zwicker (ISO 532-1)")
+ax.plot(levels, mg, "s--", label="Moore-Glasberg (ISO 532-2)")
+ax.plot(levels, ec, "^-.", label="Sottek (ECMA-418-2)")
+ax.plot(40.0, 1.0, "o", color="k", markerfacecolor="none", markersize=10)   # the shared anchor
+ax.set(xlabel="Sound pressure level [dB SPL]", ylabel="Total loudness N [sone]")
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ### Moore-Glasberg loudness (ISO 532-2)
 

@@ -527,6 +527,35 @@ into the standardized `DnT` — up where the room is live (`T > T0`), down where
 it is dead. The automatic rating is formed only for exactly 5 octave (or 16
 one-third-octave) values.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# Octave-band levels (125-2000 Hz) and the measured receiving-room T.
+bands = [125, 250, 500, 1000, 2000]
+l1 = np.array([88.0, 90.0, 92.0, 92.0, 90.0])
+l2 = np.array([55.0, 51.0, 47.0, 41.0, 35.0])
+k = building.reverberation_index([0.70, 0.60, 0.50, 0.45, 0.40])   # k = 10 lg(T/0.5)
+res = building.survey_airborne_insulation(l1, l2, k, volume=50.0)
+
+x = np.arange(len(bands))
+fig, ax = plt.subplots()
+ax.fill_between(x, res.d, res.d_nt, alpha=0.2, label="k = 10 lg(T/T0)")
+ax.plot(x, res.d, "--o", label="D (level difference)")
+ax.plot(x, res.d_nt, "-s", label="DnT (standardized)")
+ax.set_xticks(x, [str(b) for b in bands])
+ax.set(xlabel="Frequency [Hz]", ylabel="Level difference [dB]",
+       title=f"ISO 10052 survey method: DnT,w = {res.rating.rating} dB")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ### `survey_airborne_insulation()` and friends — parameters
 
 | Parameter | Type | Units | Range / default | Notes |

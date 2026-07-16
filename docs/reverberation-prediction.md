@@ -27,6 +27,29 @@ $c_0 = 343\ \mathrm{m/s}$) and the air-absorption term $4mV$.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/reverberation_models_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/reverberation_models.svg" alt="Reverberation time per octave band for a 10 by 7 by 3.5 metre room with an absorptive floor and ceiling but hard walls, computed by five models. Fitzroy gives the longest times, Sabine and Eyring the mid-range, Millington-Sette the shortest, and Arau-Puchades sits between Eyring and Sabine" width="82%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import environmental, room
+
+# A 10 x 7 x 3.5 m room: hard end walls, lightly treated side walls and a
+# very absorptive floor/ceiling pair (carpet plus an acoustic ceiling).
+bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+alpha_x = [0.06, 0.07, 0.08, 0.09, 0.10, 0.10]
+alpha_y = [0.12, 0.14, 0.16, 0.18, 0.20, 0.20]
+alpha_z = [0.30, 0.50, 0.65, 0.78, 0.82, 0.80]
+m = environmental.air_attenuation_m(bands, 20.0, 50.0)   # air at 20 C / 50 % RH
+res = room.reverberation_time_models((10.0, 7.0, 3.5),
+                                     (alpha_x, alpha_y, alpha_z),
+                                     air_attenuation=m, frequencies=bands)
+res.plot()   # the five model curves per band
+plt.show()
+```
+
+</details>
+
 ## 1. Sabine, Eyring and Millington-Sette
 
 The three statistical models take the room volume and a list of

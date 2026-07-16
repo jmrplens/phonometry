@@ -15,6 +15,23 @@ excludes floating floors.)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness.svg" alt="Floating-floor natural frequency as a function of the resilient layer's dynamic stiffness per unit area, for a light 40 kg/m² and a heavy 120 kg/m² floating floor, on a logarithmic stiffness axis, with a worked design point at 10 MN/m³ marked" width="82%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import phonometry as ph
+
+s = np.logspace(np.log10(2.0), np.log10(100.0), 300)   # MN/m3
+for m in (40.0, 120.0):
+    plt.semilogx(s, ph.natural_frequency(s * 1e6, m), label=f"m' = {m:g} kg/m²")
+plt.xlabel("Dynamic stiffness s' [MN/m³]"); plt.ylabel("Natural frequency f₀ [Hz]")
+plt.legend(); plt.show()
+```
+
+</details>
+
 ## 1. Dynamic stiffness and resonance
 
 The dynamic stiffness per unit area is a dynamic force per area divided by the
@@ -87,23 +104,6 @@ res = ph.floating_floor_resonance(
 print(round(res.dynamic_stiffness / 1e6, 2), round(res.natural_frequency, 1))
 # 10.49 47.1
 ```
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-s = np.logspace(np.log10(2.0), np.log10(100.0), 300)   # MN/m3
-for m in (40.0, 120.0):
-    plt.semilogx(s, ph.natural_frequency(s * 1e6, m), label=f"m' = {m:g} kg/m²")
-plt.xlabel("Dynamic stiffness s' [MN/m³]"); plt.ylabel("Natural frequency f₀ [Hz]")
-plt.legend(); plt.show()
-```
-
-</details>
 
 The `DynamicStiffnessResult` carries the apparent, enclosed-gas and installed
 stiffnesses, the test resonance and the installed-floor natural frequency, and

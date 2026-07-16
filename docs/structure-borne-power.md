@@ -17,6 +17,36 @@ installed-equipment prediction consumes.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power.svg" alt="Reception-plate structure-borne sound power level per one-third-octave band of a source determined on a low-mobility and a high-mobility reception plate, which agree within the method" width="82%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import building
+
+# The same pump-like source measured on a heavy and on a light reception plate.
+bands = np.array([50.0, 100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
+lv_low = np.array([88.0, 90.0, 87.0, 84.0, 80.0, 76.0, 71.0])
+
+low = building.reception_plate_power(lv_low, bands, mass_per_area=600.0,
+                                     area=2.0, reverberation_time=0.8)
+high = building.reception_plate_power(lv_low + 6.0, bands, mass_per_area=150.0,
+                                      area=2.0, reverberation_time=0.5)
+
+x = np.arange(bands.size)
+fig, ax = plt.subplots()
+ax.bar(x - 0.2, low.power_level, width=0.4, label="low-mobility plate")
+ax.bar(x + 0.2, high.power_level, width=0.4, label="high-mobility plate")
+ax.set_xticks(x, [f"{b:g}" for b in bands])
+ax.set(xlabel="Frequency [Hz]",
+       ylabel="Structure-borne power level $L_{Ws}$ [dB re 1 pW]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 1. The reception-plate relations
 
 Why a plate at all? Characterising the source by its contact forces directly
@@ -120,29 +150,6 @@ print(float(ph.source_mobility_from_levels(lvf, lfb)))      # |Y_S,eq| in m/(N·
 The direct source-side counterpart is the ISO 9611 free velocity level (re
 `v₀ = 5·10⁻⁸ m/s`) measured at the contact points of resiliently mounted
 machinery; its equation (9) position average is `mean_free_velocity_level()`.
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import phonometry as ph
-
-bands = np.array([50.0, 100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
-lv_low = np.array([88.0, 90.0, 87.0, 84.0, 80.0, 76.0, 71.0])
-low = ph.reception_plate_power(lv_low, bands, mass_per_area=600.0, area=2.0,
-                               reverberation_time=0.8)
-high = ph.reception_plate_power(lv_low + 6.0, bands, mass_per_area=150.0, area=2.0,
-                                reverberation_time=0.5)
-x = np.arange(bands.size)
-plt.bar(x - 0.2, low.power_level, width=0.4, label="low-mobility plate")
-plt.bar(x + 0.2, high.power_level, width=0.4, label="high-mobility plate")
-plt.xticks(x, [f"{b:g}" for b in bands]); plt.legend()
-plt.xlabel("Frequency [Hz]"); plt.ylabel("$L_{Ws}$ [dB re 1 pW]"); plt.show()
-```
-
-</details>
 
 ## References
 

@@ -13,6 +13,26 @@ la **pérdida por transmisión**, la **velocidad del sonido** en agua de mar, la
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_transmission_loss_es.svg" alt="Pérdida por transmisión submarina frente a la distancia a 10 kHz, con las contribuciones de ensanchamiento geométrico y absorción de volumen dibujadas por separado, la pérdida creciente hacia abajo" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_transmission_loss_es_dark.svg" alt="Pérdida por transmisión submarina frente a la distancia a 10 kHz, con las contribuciones de ensanchamiento geométrico y absorción de volumen dibujadas por separado, la pérdida creciente hacia abajo" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# 10 kHz a 10 °C, 35 ppt y 100 m de profundidad; ensanchamiento "practical" con R0 = 1000 m.
+ranges = np.linspace(10.0, 20_000.0, 400)
+tl = underwater.transmission_loss(ranges, 10e3, law="practical",
+                                  transition_range=1000.0, temperature=10.0,
+                                  salinity=35.0, depth=100.0)
+print(f"alpha = {tl.absorption_coefficient:.2f} dB/km")   # alpha = 0.95 dB/km
+tl.plot()   # TL total con las contribuciones de ensanchamiento y absorción
+plt.show()
+```
+
+</details>
+
 La pérdida por transmisión es
 
 $$
@@ -40,6 +60,24 @@ tl.plot()   # TL frente a distancia con la separación ensanchamiento/absorción
 ## Velocidad del sonido en agua de mar
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_sound_speed_es.svg" alt="Perfil de velocidad del sonido en agua de mar con la ecuación UNESCO: capa de mezcla cálida, termoclina, eje del canal sonoro en el mínimo y la velocidad creciendo con la presión en profundidad" style="width:60%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/underwater_sound_speed_es_dark.svg" alt="Perfil de velocidad del sonido en agua de mar con la ecuación UNESCO: capa de mezcla cálida, termoclina, eje del canal sonoro en el mínimo y la velocidad creciendo con la presión en profundidad" style="width:60%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# Capa de mezcla cálida, termoclina hasta 4 °C y capa profunda isoterma.
+depths = np.linspace(0.0, 3000.0, 121)
+temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
+profile = underwater.sound_speed_profile(depths, temps, 35.0, model="unesco")
+profile.plot()   # velocidad del sonido frente a profundidad, mínimo en el eje del canal
+plt.show()
+```
+
+</details>
 
 `sea_water_sound_speed(T, S, depth, model=…)` usa la ecuación **UNESCO /
 Chen–Millero** (por defecto, en la forma Wong & Zhu 1995 ITS-90), **Del Grosso**
@@ -69,6 +107,25 @@ es la razón de que el sonido de baja frecuencia pueda cruzar océanos enteros.
 ## Ecuación del sonar
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_es.svg" alt="Ecuación del sonar pasivo: el exceso de señal cae con la pérdida por transmisión y cruza el cero, el límite de detección, en la figura de mérito" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_equation_es_dark.svg" alt="Ecuación del sonar pasivo: el exceso de señal cae con la pérdida por transmisión y cruza el cero, el límite de detección, en la figura de mérito" style="width:82%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+tl = np.linspace(40.0, 120.0, 400)
+se = underwater.passive_sonar_equation(source_level=140.0, transmission_loss=tl,
+                                       noise_level=60.0, directivity_index=15.0,
+                                       detection_threshold=8.0)
+print(f"figura de mérito = {se.figure_of_merit:.1f} dB")  # figura de mérito = 87.0 dB
+se.plot()   # exceso de señal frente a pérdida por transmisión, cruce por cero en la FOM
+plt.show()
+```
+
+</details>
 
 La ecuación del sonar da el **exceso de señal** $SE$ (detección cuando
 $SE \ge 0$) y la **figura de mérito** (la máxima pérdida por transmisión
@@ -104,6 +161,25 @@ convención de fuente, dB re 1 µPa²/Hz **a 1 m**.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_es.svg" alt="Pérdida por reflexión en el fondo frente al ángulo rasante para un fondo arenoso rápido: pérdida nula por debajo del ángulo rasante crítico, creciendo bruscamente por encima" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seabed_reflection_es_dark.svg" alt="Pérdida por reflexión en el fondo frente al ángulo rasante para un fondo arenoso rápido: pérdida nula por debajo del ángulo rasante crítico, creciendo bruscamente por encima" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# Reflexión de Rayleigh fluido-fluido: agua sobre un fondo arenoso rápido.
+phi = np.linspace(0.0, 90.0, 361)
+bl = underwater.bottom_reflection_loss(phi, rho1=1000.0, c1=1500.0,
+                                       rho2=1900.0, c2=1650.0)
+print(f"ángulo crítico = {bl.critical_angle:.1f} deg")   # ángulo crítico = 24.6 deg
+bl.plot()   # pérdida en el fondo frente al ángulo rasante
+plt.show()
+```
+
+</details>
+
 Una onda plana que incide en el fondo se refleja con el **coeficiente de
 reflexión de Rayleigh** fluido–fluido (Medwin & Clay). Para un fondo más rápido ($c_2 > c_1$)
 existe un **ángulo rasante crítico** $\varphi_c = \arccos(c_1/c_2)$, por
@@ -124,6 +200,29 @@ bl.plot()   # pérdida por reflexión frente al ángulo rasante
 ## Ruido ambiental oceánico
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise_es.svg" alt="Niveles espectrales de ruido ambiental de Wenz para dos velocidades de viento, con el ruido de viento cayendo 5 dB por octava y el ruido térmico creciendo por encima de unos 50 kHz" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ocean_ambient_noise_es_dark.svg" alt="Niveles espectrales de ruido ambiental de Wenz para dos velocidades de viento, con el ruido de viento cayendo 5 dB por octava y el ruido térmico creciendo por encima de unos 50 kHz" style="width:82%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# Ruido ambiental de Wenz (regla de los cincos + térmico de Mellen) a dos vientos.
+freqs = np.logspace(2, 5.5, 300)
+fig, ax = plt.subplots()
+for u in (5.0, 20.0):
+    noise = underwater.ocean_ambient_noise(freqs, wind_speed_knots=u)
+    ax.semilogx(noise.frequency, noise.spectrum_level, label=f"Total ({u:.0f} kn)")
+ax.semilogx(freqs, underwater.thermal_noise_spectrum(freqs), ":", label="Térmico")
+ax.set(xlabel="Frecuencia [Hz]", ylabel="Nivel espectral [dB re 1 µPa²/Hz]")
+ax.legend()
+ax.grid(True, which="both", alpha=0.3)
+plt.show()
+```
+
+</details>
 
 El nivel espectral de ruido ambiental es la suma energética de las componentes
 físicas de Wenz: el ruido de **viento / superficie** por la "regla de los cincos"
@@ -146,6 +245,30 @@ noise.plot()   # espectro compuesto con las componentes viento/térmico
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise_es.svg" alt="Espectros de nivel de fuente predichos por JOMOPANS-ECHO para un portacontenedores, un crucero y un remolcador, con los buques de carga mostrando una joroba de baja frecuencia por debajo de 100 Hz" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_traffic_noise_es_dark.svg" alt="Espectros de nivel de fuente predichos por JOMOPANS-ECHO para un portacontenedores, un crucero y un remolcador, con los buques de carga mostrando una joroba de baja frecuencia por debajo de 100 Hz" style="width:82%">
 
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import underwater
+
+# Espectros de fuente JOMOPANS-ECHO para tres clases de buque (velocidad, eslora).
+fig, ax = plt.subplots()
+for vessel_class, speed, length in (("containership", 18.0, 300.0),
+                                    ("cruise", 17.1, 250.0),
+                                    ("tug", 3.7, 30.0)):
+    s = underwater.ship_source_spectrum(speed, length, vessel_class=vessel_class)
+    ax.semilogx(s.frequency, s.source_psd,
+                label=f"{vessel_class} ({speed:.0f} kn, {length:.0f} m)")
+ax.set(xlabel="Frecuencia [Hz]",
+       ylabel="Densidad espectral de fuente [dB re 1 µPa²/Hz a 1 m]")
+ax.legend()
+ax.grid(True, which="both", alpha=0.3)
+plt.show()
+```
+
+</details>
+
 Cuando no hay espectro medido, el nivel de fuente de un buque puede
 **estimarse** a partir de su clase, velocidad y eslora con **JOMOPANS-ECHO**
 (MacGillivray & de Jong 2021, por defecto, validado contra 1862 medidas),
@@ -166,6 +289,29 @@ noise = ph.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
 ## Solvers numéricos
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_es.png" alt="Un perfil de velocidad del sonido de Munk, trayectorias de rayos formando zonas de convergencia, y la pérdida por transmisión de modos normales frente a la ecuación parabólica coincidiendo en tendencia" style="width:100%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_es_dark.png" alt="Un perfil de velocidad del sonido de Munk, trayectorias de rayos formando zonas de convergencia, y la pérdida por transmisión de modos normales frente a la ecuación parabólica coincidiendo en tendencia" style="width:100%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import underwater
+
+# Un perfil de Munk de velocidad del sonido en aguas profundas.
+z = np.linspace(0.0, 5000.0, 60)
+eta = 2.0 * (z - 1300.0) / 1300.0
+c = 1500.0 * (1.0 + 0.00737 * (eta - 1.0 + np.exp(-eta)))
+
+# PE split-step de Fourier a 50 Hz; una malla gruesa mantiene el cálculo rápido.
+field = underwater.parabolic_equation(50.0, z, c, source_depth=1000.0,
+                                      max_range=50_000.0, range_step=50.0,
+                                      n_depth_points=512)
+field.plot()   # campo TL(z, r) mostrando las zonas de convergencia
+plt.show()
+```
+
+</details>
 
 Para entornos independientes de la distancia el campo puede calcularse
 numéricamente con tres solvers (Jensen et al., *Computational Ocean Acoustics*):

@@ -418,3 +418,390 @@ def test_propagation_chain_reproduces_prototype_la(
              + _a_weighting_db(_CHAIN_BANDS))
     la = float(10.0 * np.log10(np.sum(10.0 ** (level / 10.0))))
     assert la == pytest.approx(la_ref, abs=tol), label
+
+
+# --------------------------------------------------------------------------- #
+# Flight-condition interpolation (guidance Eq. 3-10)
+# --------------------------------------------------------------------------- #
+
+from phonometry.aircraft.rotorcraft_noise import (  # noqa: E402
+    flight_condition_weights,
+    flight_path_kinematics,
+    interpolated_source_level,
+    rotorcraft_event_level,
+    rotorcraft_noise_contour,
+)
+
+
+def _uniform_hemisphere(level: float, bands: "list[float] | None" = None,
+                        ) -> RotorcraftHemisphere:
+    freqs = np.asarray(bands if bands is not None else [50.0], dtype=np.float64)
+    az = np.arange(-90.0, 91.0, 10.0)
+    po = np.arange(0.0, 181.0, 10.0)
+    return RotorcraftHemisphere(
+        freqs, az, po, np.full((az.size, po.size, freqs.size), level))
+
+
+def test_fc_weights_single_hemisphere() -> None:
+    assert flight_condition_weights([55.0], [0.0], 80.0, -5.0) == [(0, 1.0)]
+
+
+def test_fc_weights_exact_condition_wins() -> None:
+    w = flight_condition_weights([50.0, 70.0, 60.0], [0.0, 0.0, 10.0], 70.0, 0.0)
+    assert w == [(1, 1.0)]
+
+
+def test_fc_weights_triangle_hand_checked() -> None:
+    # Normalised (Eq. 3-6, Ffc = 2, spans 20 kt / 10 deg): points (2.5, 0),
+    # (3.5, 0), (3.0, 2); query (3.0, 0.5) -> deltas sqrt(0.5), sqrt(0.5), 1.5
+    # -> weights (1/d)/sum(1/d) = 0.404629, 0.404629, 0.190743 (Eq. 7/8).
+    w = dict(flight_condition_weights([50.0, 70.0, 60.0], [0.0, 0.0, 10.0], 60.0, 2.5))
+    assert w[0] == pytest.approx(0.404629, abs=1e-6)
+    assert w[1] == pytest.approx(0.404629, abs=1e-6)
+    assert w[2] == pytest.approx(0.190743, abs=1e-6)
+    assert sum(w.values()) == pytest.approx(1.0)
+
+
+def test_fc_weights_outside_hull_nearest_neighbour() -> None:
+    # Beyond the measured envelope the nearest condition is adopted unblended
+    # (Eq. 9/10), the Doc 32 1st ed. behaviour.
+    w = flight_condition_weights([50.0, 70.0, 60.0], [0.0, 0.0, 10.0], 95.0, -10.0)
+    assert w == [(1, 1.0)]
+
+
+def test_fc_weights_collinear_conditions_fall_back_to_nearest() -> None:
+    # All-level-flight databases have no triangulation; nearest neighbour.
+    w = flight_condition_weights([50.0, 60.0, 70.0], [0.0, 0.0, 0.0], 56.0, 0.0)
+    assert w == [(1, 1.0)]
+
+
+def test_fc_weights_are_unit_invariant() -> None:
+    kts = [50.0, 70.0, 60.0]
+    ms = [v * 0.514444 for v in kts]
+    w1 = flight_condition_weights(kts, [0.0, 0.0, 10.0], 60.0, 2.5)
+    w2 = flight_condition_weights(ms, [0.0, 0.0, 10.0], 60.0 * 0.514444, 2.5)
+    for (i1, a), (i2, b) in zip(w1, w2):
+        assert i1 == i2
+        assert a == pytest.approx(b, abs=1e-12)
+
+
+def test_fc_weights_lookup_table_is_honoured() -> None:
+    # A square of conditions splits into two triangles either way; the lookup
+    # table decides which one blends the query (guidance step 4 admits a
+    # precomputed table, and the NORAH database ships one per type).
+    v = [50.0, 70.0, 50.0, 70.0]
+    g = [0.0, 0.0, 10.0, 10.0]
+    w = dict(flight_condition_weights(v, g, 66.0, 2.0, triangles=[[0, 1, 3]]))
+    assert set(w) == {0, 1, 3}
+    w2 = dict(flight_condition_weights(v, g, 66.0, 2.0, triangles=[[0, 2, 3]]))
+    assert set(w2) == {1}  # outside the only listed triangle: nearest
+
+
+def test_fc_weights_validation() -> None:
+    with pytest.raises(ValueError, match="equal, non-zero size"):
+        flight_condition_weights([50.0, 60.0], [0.0], 55.0, 0.0)
+    with pytest.raises(ValueError, match="finite"):
+        flight_condition_weights([50.0, 60.0], [0.0, 0.0], np.nan, 0.0)
+    with pytest.raises(ValueError, match="shape"):
+        flight_condition_weights([50.0, 60.0, 70.0], [0.0, 1.0, 2.0], 55.0, 0.0,
+                                 triangles=[[0, 1]])
+    with pytest.raises(ValueError, match="indices"):
+        flight_condition_weights([50.0, 60.0, 70.0], [0.0, 1.0, 2.0], 55.0, 0.0,
+                                 triangles=[[0, 1, 9]])
+
+
+def test_interpolated_source_level_hand_checked_blend() -> None:
+    # The conformance simplex: uniform 100/90/95 dB hemispheres blended with
+    # the Eq. 8 weights give 10*lg(sum w*10^(L/10)) = 97.0367 dB by hand.
+    hems = [_uniform_hemisphere(100.0), _uniform_hemisphere(90.0),
+            _uniform_hemisphere(95.0)]
+    got = interpolated_source_level(
+        hems, [50.0, 70.0, 60.0], [0.0, 0.0, 10.0], 60.0, 2.5, 0.0, 90.0)
+    assert got[0] == pytest.approx(97.0367, abs=1e-3)
+
+
+def test_interpolated_source_level_validates_band_grids() -> None:
+    hems = [_uniform_hemisphere(100.0), _uniform_hemisphere(90.0, [63.0])]
+    single = [_uniform_hemisphere(100.0)]
+    with pytest.raises(ValueError, match="band grid"):
+        interpolated_source_level(hems, [50.0, 70.0], [0.0, 0.0], 60.0, 0.0, 0.0, 90.0)
+    with pytest.raises(ValueError, match="equal length"):
+        interpolated_source_level(single, [50.0, 70.0], [0.0, 0.0], 60.0, 0.0, 0.0, 90.0)
+
+
+def test_hemisphere_mirrored_reverses_azimuth() -> None:
+    az = np.arange(-90.0, 91.0, 10.0)
+    po = np.arange(0.0, 181.0, 10.0)
+    lv = np.zeros((az.size, po.size, 1))
+    lv[:, :, 0] = 70.0 + 0.1 * az[:, None]        # port quieter than starboard
+    h = RotorcraftHemisphere(np.array([100.0]), az, po, lv)
+    m = h.mirrored()
+    assert np.allclose(hemisphere_source_level(m, 30.0, 90.0),
+                       hemisphere_source_level(h, -30.0, 90.0))
+    back = m.mirrored()
+    assert np.allclose(back.levels, h.levels)
+    assert np.allclose(back.azimuth, h.azimuth)
+
+
+# --------------------------------------------------------------------------- #
+# Flight-path kinematics (guidance Eq. 16-21 / Doc 32 Eq. 8-10)
+# --------------------------------------------------------------------------- #
+
+
+def test_kinematics_straight_climb_closed_form() -> None:
+    t = np.arange(0.0, 10.5, 0.5)
+    vg, gamma, heading = 40.0, np.radians(5.0), np.radians(30.0)
+    pos = np.column_stack([vg * np.sin(heading) * t, vg * np.cos(heading) * t,
+                           100.0 + vg * np.tan(gamma) * t])
+    kin = flight_path_kinematics(t, pos)
+    assert np.allclose(kin.ground_speed, 40.0)
+    assert np.allclose(kin.airspeed, 40.0 / np.cos(gamma))
+    assert np.allclose(kin.heading, 30.0)
+    assert np.allclose(kin.path_angle, 5.0)
+    assert np.allclose(kin.curvature, 0.0, atol=1e-12)
+    assert np.allclose(kin.bank_angle, 0.0, atol=1e-9)
+
+
+def test_kinematics_turn_bank_closed_form() -> None:
+    # Constant-speed level turn of radius R: K = 1/R and bank = atan(V^2/(gR))
+    # (Eq. 18/20). A starboard turn (heading increasing) banks starboard down.
+    radius, speed = 500.0, 40.0
+    t = np.arange(0.0, 30.1, 0.25)
+    ang = speed * t / radius
+    pos = np.column_stack([radius * np.sin(ang), radius * (1.0 - np.cos(ang)) * -1.0
+                           + radius, np.full_like(t, 300.0)])
+    # circle centred at (0, radius): heading starts at 0 and increases
+    kin = flight_path_kinematics(t, pos)
+    mid = slice(10, -10)
+    assert np.allclose(kin.ground_speed[mid], speed, rtol=1e-3)
+    assert np.allclose(kin.curvature[mid], 1.0 / radius, rtol=1e-2)
+    expected_bank = np.degrees(np.arctan(speed**2 / (9.80665 * radius)))
+    assert np.allclose(kin.bank_angle[mid], expected_bank, atol=0.2)
+    assert np.all(kin.bank_angle[mid] > 0.0)
+
+
+def test_kinematics_descent_negative_path_angle() -> None:
+    t = np.arange(0.0, 5.5, 0.5)
+    pos = np.column_stack([np.zeros_like(t), 30.0 * t, 300.0 - 30.0 * np.tan(np.radians(6.0)) * t])
+    kin = flight_path_kinematics(t, pos)
+    assert np.allclose(kin.path_angle, -6.0)
+
+
+def test_kinematics_hover_is_finite() -> None:
+    t = np.arange(0.0, 5.5, 0.5)
+    pos = np.column_stack([np.zeros_like(t), np.zeros_like(t), np.full_like(t, 20.0)])
+    kin = flight_path_kinematics(t, pos)
+    assert np.allclose(kin.ground_speed, 0.0)
+    assert np.all(np.isfinite(kin.curvature))
+    assert np.allclose(kin.bank_angle, 0.0)
+
+
+def test_kinematics_validation() -> None:
+    with pytest.raises(ValueError, match="strictly increasing"):
+        flight_path_kinematics([0.0, 0.0], [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    with pytest.raises(ValueError, match="shape"):
+        flight_path_kinematics([0.0, 1.0], [[0.0, 0.0], [1.0, 0.0]])
+    with pytest.raises(ValueError, match="at least two"):
+        flight_path_kinematics([0.0], [[0.0, 0.0, 0.0]])
+
+
+def test_kinematics_plot() -> None:
+    t = np.arange(0.0, 10.5, 0.5)
+    pos = np.column_stack([np.zeros_like(t), 40.0 * t, 100.0 + 2.0 * t])
+    assert flight_path_kinematics(t, pos).plot() is not None
+
+
+# --------------------------------------------------------------------------- #
+# Single event (Doc 32 §6.1)
+# --------------------------------------------------------------------------- #
+
+
+def _flyover(level: float = 100.0, bands: "list[float] | None" = None,
+             span: float = 6000.0, dt: float = 0.5, height: float = 100.1,
+             **kwargs: "float | str") -> "tuple":
+    """A constant-speed level flyover along y over the origin receiver."""
+    speed = 50.0
+    t = np.arange(0.0, 2.0 * span / speed + dt / 2.0, dt)
+    pos = np.column_stack([np.zeros_like(t), speed * t - span,
+                           np.full_like(t, height)])
+    hems = [_uniform_hemisphere(level, bands)]
+    res = rotorcraft_event_level(
+        hems, [speed], [0.0], t, pos, (0.0, 0.0),
+        receiver_height=float(kwargs.pop("receiver_height", 0.1)),
+        flow_resistivity=kwargs.pop("flow_resistivity", "H"),
+        **kwargs)  # type: ignore[arg-type]
+    return t, pos, res
+
+
+def test_event_geometry_overhead() -> None:
+    t, pos, res = _flyover(bands=[31.5])
+    k = int(np.argmin(res.distance))
+    assert res.distance[k] == pytest.approx(100.0, abs=1e-9)
+    assert res.polar[k] == pytest.approx(90.0, abs=1e-6)
+    assert abs(res.azimuth[k]) == pytest.approx(0.0, abs=1e-6)
+    # Retarded time (Eq. 22) with c = 346.1 m/s, at every step.
+    assert np.allclose(res.times, res.emission_times + res.distance / 346.1)
+    # Approaching rows look forward (theta < 90), receding rows rearward.
+    assert np.all(res.polar[:k] < 90.0)
+    assert np.all(res.polar[k + 1:] > 90.0)
+
+
+def test_event_bank_tilt_moves_azimuth() -> None:
+    # Rolling starboard-down by 25 deg swings the below-aircraft receiver to
+    # phi = +25 deg in the tilted hemisphere frame (guidance §A.3.4).
+    _, _, level_res = _flyover(bands=[31.5])
+    _, _, banked = _flyover(bands=[31.5], bank_angle=25.0)
+    k = int(np.argmin(level_res.distance))
+    assert level_res.azimuth[k] == pytest.approx(0.0, abs=1e-6)
+    assert banked.azimuth[k] == pytest.approx(25.0, abs=1e-6)
+
+
+def test_event_heading_override_mirrors_polar() -> None:
+    # Reversing the heading turns approach geometry into recession: the polar
+    # angles mirror about 90 deg (the frame is heading-only, no pitch tilt).
+    _, _, fwd = _flyover(bands=[31.5])
+    _, _, rev = _flyover(bands=[31.5], heading=180.0)
+    assert np.allclose(fwd.polar + rev.polar, 180.0, atol=1e-9)
+
+
+def test_event_lamax_assembles_the_propagation_chain() -> None:
+    # At the closest approach the received level is the source level plus
+    # dLs + dLa + dLg + A, each from the public primitives.
+    _, _, res = _flyover(bands=[31.5])
+    k = int(np.argmin(res.distance))
+    freqs = np.array([31.5])
+    expected = (100.0
+                + spherical_spreading_adjustment(100.0)
+                + atmospheric_adjustment(freqs, 100.0)[0]
+                + ground_effect_adjustment(freqs, 100.1, 0.1, 1e-6,
+                                           flow_resistivity="H")[0])
+    a31 = -39.525  # IEC 61672-1 analytic A-weighting at 31.5 Hz
+    assert res.a_levels[k] == pytest.approx(expected + a31, abs=2e-3)
+    assert res.la_max == pytest.approx(res.a_levels[k])
+    assert res.band_levels[k, 0] == pytest.approx(expected, abs=2e-3)
+
+
+def test_event_sel_matches_lorentzian_closed_form() -> None:
+    # Uniform source, constant dLg: SEL - LASmax = 10*lg(pi*d/V) = 7.982 dB.
+    _, _, res = _flyover(bands=[31.5])
+    assert res.sel - res.la_max == pytest.approx(7.982, abs=0.1)
+    assert res.sel_10db <= res.sel + 1e-9
+    # The 10 dB-down window spans r <= sqrt(10)*d, i.e. (2/pi)*atan(3) = 79.5 %
+    # of the Lorentzian exposure energy: about 1 dB below the full history.
+    assert res.sel - res.sel_10db == pytest.approx(1.0, abs=0.2)
+
+
+def test_event_level_offset_shifts_levels() -> None:
+    _, _, base = _flyover(bands=[31.5])
+    _, _, up = _flyover(bands=[31.5], level_offset=3.0)
+    assert np.allclose(up.a_levels, base.a_levels + 3.0)
+    assert up.sel == pytest.approx(base.sel + 3.0, abs=1e-9)
+    assert up.la_max == pytest.approx(base.la_max + 3.0, abs=1e-9)
+
+
+def test_event_epnl_undefined_off_noy_grid() -> None:
+    # A single 31.5 Hz band cannot address the 24 noy bands: EPNL undefined.
+    _, _, res = _flyover(bands=[31.5])
+    assert np.all(np.isnan(res.pnlt))
+    assert np.isnan(res.pnltm) and np.isnan(res.epnl)
+
+
+_NORAH_BANDS = [10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0,
+                100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0,
+                800.0, 1000.0, 1250.0, 1600.0, 2000.0, 2500.0, 3150.0, 4000.0,
+                5000.0, 6300.0, 8000.0, 10000.0]
+
+
+def test_event_epnl_on_the_standard_grid() -> None:
+    _, _, res = _flyover(level=90.0, bands=_NORAH_BANDS, span=2000.0)
+    assert np.isfinite(res.epnl)
+    assert np.isfinite(res.pnltm)
+    assert res.pnltm >= np.nanmax(res.pnlt) - 1e-9
+    k = int(np.argmin(res.distance))
+    assert np.isfinite(res.pnlt[k])
+
+
+def test_event_atmospheric_methods_agree_at_low_frequency() -> None:
+    _, _, iso = _flyover(bands=[31.5], span=2000.0)
+    _, _, sae = _flyover(bands=[31.5], span=2000.0, atmospheric_method="sae")
+    assert sae.la_max == pytest.approx(iso.la_max, abs=0.05)
+    assert sae.sel == pytest.approx(iso.sel, abs=0.05)
+
+
+def test_event_validation() -> None:
+    hems = [_uniform_hemisphere(100.0)]
+    t = np.array([0.0, 1.0])
+    pos = np.array([[0.0, -50.0, 100.0], [0.0, 50.0, 100.0]])
+    with pytest.raises(ValueError, match="receiver"):
+        rotorcraft_event_level(hems, [50.0], [0.0], t, pos, (0.0, 0.0, 0.0, 0.0))
+    with pytest.raises(ValueError, match="atmospheric_method"):
+        rotorcraft_event_level(hems, [50.0], [0.0], t, pos, (0.0, 0.0),
+                               atmospheric_method="exact")
+    with pytest.raises(ValueError, match="airspeed"):
+        rotorcraft_event_level(hems, [50.0], [0.0], t, pos, (0.0, 0.0),
+                               airspeed=[50.0, 50.0, 50.0])
+    with pytest.raises(ValueError, match="level_offset"):
+        rotorcraft_event_level(hems, [50.0], [0.0], t, pos, (0.0, 0.0),
+                               level_offset=[1.0, 2.0, 3.0])
+    with pytest.raises(ValueError, match="ground_elevation"):
+        rotorcraft_event_level(hems, [50.0], [0.0], t, pos, (0.0, 0.0),
+                               ground_elevation=np.nan)
+
+
+def test_event_plot() -> None:
+    _, _, res = _flyover(level=90.0, bands=_NORAH_BANDS, span=1000.0)
+    assert res.plot() is not None
+
+
+# --------------------------------------------------------------------------- #
+# Contour (Doc 32 §6.3)
+# --------------------------------------------------------------------------- #
+
+
+def _contour_inputs() -> "tuple":
+    speed = 50.0
+    t = np.arange(0.0, 40.5, 0.5)
+    pos = np.column_stack([np.zeros_like(t), speed * t - 1000.0,
+                           np.full_like(t, 150.0)])
+    hems = [_uniform_hemisphere(95.0, [125.0])]
+    return hems, [speed], [0.0], t, pos
+
+
+def test_contour_matches_per_point_events() -> None:
+    hems, spd, ang, t, pos = _contour_inputs()
+    x = np.array([-200.0, 0.0, 150.0])
+    y = np.array([-300.0, 100.0])
+    for metric, attr in (("exposure", "sel"), ("maximum", "la_max")):
+        res = rotorcraft_noise_contour(hems, spd, ang, t, pos, x=x, y=y,
+                                       metric=metric)
+        assert res.level.shape == (2, 3)
+        for i, yy in enumerate(y):
+            for j, xx in enumerate(x):
+                ev = rotorcraft_event_level(hems, spd, ang, t, pos, (xx, yy))
+                assert res.level[i, j] == pytest.approx(getattr(ev, attr),
+                                                        abs=1e-9), (metric, xx, yy)
+
+
+def test_contour_is_symmetric_across_the_track() -> None:
+    hems, spd, ang, t, pos = _contour_inputs()
+    x = np.array([-400.0, -100.0, 100.0, 400.0])
+    y = np.array([-200.0, 0.0, 200.0])
+    res = rotorcraft_noise_contour(hems, spd, ang, t, pos, x=x, y=y)
+    assert np.allclose(res.level[:, [0, 1]], res.level[:, [3, 2]], atol=1e-9)
+
+
+def test_contour_validation() -> None:
+    hems, spd, ang, t, pos = _contour_inputs()
+    with pytest.raises(ValueError, match="metric"):
+        rotorcraft_noise_contour(hems, spd, ang, t, pos, x=[0.0, 1.0],
+                                 y=[0.0, 1.0], metric="epnl")
+    with pytest.raises(ValueError, match="grid"):
+        rotorcraft_noise_contour(hems, spd, ang, t, pos, x=[0.0], y=[0.0, 1.0])
+
+
+def test_contour_plot() -> None:
+    hems, spd, ang, t, pos = _contour_inputs()
+    res = rotorcraft_noise_contour(hems, spd, ang, t, pos,
+                                   x=np.linspace(-500.0, 500.0, 5),
+                                   y=np.linspace(-500.0, 500.0, 5))
+    assert res.plot() is not None

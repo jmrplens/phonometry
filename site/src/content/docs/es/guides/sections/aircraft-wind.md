@@ -24,9 +24,11 @@ certificados en entradas para contornos de aeropuerto.
 cubre los helicópteros, cuya fuerte directividad derrota a un nivel de fuente
 de un solo número. ECAC Doc 32 describe en cambio la fuente como un
 **hemisferio de ruido** (niveles de banda sobre una malla de ángulos de
-emisión a una distancia de referencia de 60 m) y propaga cada rayo con
+emisión a una distancia de referencia de 60 m), propaga cada rayo con
 divergencia esférica, absorción atmosférica y el efecto de suelo de
-Chien-Soroka.
+Chien-Soroka, interpola entre las condiciones de vuelo medidas a lo largo de
+la trayectoria e integra el historial recibido en el SEL, LASmax y EPNL de
+evento único y sus contornos en malla de tierra.
 
 [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/guides/wind-turbine-noise/)
 cubre el ensayo de tipo de IEC 61400-11: el **nivel de potencia sonora
@@ -48,8 +50,8 @@ audibilidad tonal de
   la cadena EPNL del Anexo 16 de la ICAO, el verificador IEC 61265, la absorción
   SAE ARP 5534 y la interpolación NPD de ECAC Doc 29.
 - [Ruido de rotorcraft: el método del hemisferio](/phonometry/es/guides/rotorcraft-noise/):
-  el modelo de fuente de hemisferio de ruido de ECAC Doc 32 y sus ajustes de
-  propagación.
+  el modelo de fuente de hemisferio de ruido de ECAC Doc 32, sus ajustes de
+  propagación y las métricas y contornos de evento único.
 - [Ruido de aerogeneradores: potencia y audibilidad tonal](/phonometry/es/guides/wind-turbine-noise/):
   el nivel de potencia sonora aparente de IEC 61400-11 y la cadena de
   audibilidad tonal.

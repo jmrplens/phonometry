@@ -260,5 +260,8 @@ def test_plot_returns_axes() -> None:
     matplotlib.use("Agg")
     f = np.logspace(1, 3, 50)
     t = base_transmissibility(f, 5.0, 1e6, 200.0)
-    res = indirect_transfer_stiffness_result(f, t, blocking_mass=5.0)
+    # The synthetic curve exceeds |T| = 0.1 near resonance, so the
+    # ISO 10846-3 validity advisory is expected, as in the tests above.
+    with pytest.warns(PhonometryWarning, match="ISO 10846-3"):
+        res = indirect_transfer_stiffness_result(f, t, blocking_mass=5.0)
     assert res.plot() is not None

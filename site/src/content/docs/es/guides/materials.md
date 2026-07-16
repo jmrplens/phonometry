@@ -4,7 +4,7 @@ description: "Caracterización de absorbentes y particiones en laboratorio: la v
 ---
 
 Caracterizar un absorbente o una partición es un ejercicio de laboratorio con
-tres instrumentos distintos detrás. La **sala reverberante** entrega un espectro
+tres instrumentos distintos detrás. La **cámara reverberante** entrega un espectro
 de coeficientes de absorción sonora que ISO 11654 condensa en un único número
 valorado $\alpha_w$ con una clase por letra. El **banco de flujo** —estacionario
 u oscilante— mide cuánto cuesta empujar aire a través de una muestra porosa, la
@@ -17,7 +17,7 @@ de una muestra pequeña, y —con cuatro micrófonos— su pérdida por transmis
 ## 1. Valoración de la absorción sonora (ISO 11654)
 
 ISO 354 mide el coeficiente de absorción sonora $\alpha_s$ de un material en
-bandas de tercio de octava en una sala reverberante. ISO 11654:1997 convierte
+bandas de tercio de octava en una cámara reverberante. ISO 11654:1997 convierte
 ese espectro en una valoración de número único comparable entre productos.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso11654_es.svg" alt="Flujo de valoración ISO 11654: el alpha_s medido pasa a alpha_p práctico por banda de octava, la curva de referencia se desplaza hasta el mejor ajuste, alpha_w se lee a 500 Hz con indicadores de forma, dando la clase de absorción A a E" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso11654_es_dark.svg" alt="Flujo de valoración ISO 11654: el alpha_s medido pasa a alpha_p práctico por banda de octava, la curva de referencia se desplaza hasta el mejor ajuste, alpha_w se lee a 500 Hz con indicadores de forma, dando la clase de absorción A a E" style="width:82%">
@@ -229,7 +229,7 @@ que la biblioteca mantiene sus ayudantes separados y nunca los mezcla.
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube_es.svg" alt="Tubo de impedancia de dos micrófonos de ISO 10534-2: un altavoz radiando una onda plana por el tubo, dos micrófonos enrasados en la pared a la separación s y a la distancia x1 de la cara de la probeta, la probeta de ensayo contra un respaldo rígido, y las ondas incidente y reflejada" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube_es_dark.svg" alt="Tubo de impedancia de dos micrófonos de ISO 10534-2: un altavoz radiando una onda plana por el tubo, dos micrófonos enrasados en la pared a la separación s y a la distancia x1 de la cara de la probeta, la probeta de ensayo contra un respaldo rígido, y las ondas incidente y reflejada" style="width:92%">
 
 **Rango de frecuencia de trabajo (ISO 10534-2, cláusula 4).** Todo lo que
-informa el tubo asume que el campo interior es una única onda plana, y la
+informa el tubo supone que el campo interior es una única onda plana, y la
 geometría fija los dos extremos de la banda útil. Por encima del corte del
 primer modo transversal el campo deja de ser plano: un tubo circular de
 diámetro $d$ exige $f\,d < 0{,}58\,c_0$ (Ec. (2); $f\,d < 0{,}50\,c_0$ para un
@@ -420,9 +420,9 @@ el portamuestras, mucho antes del procesado de señal. Los fallos recurrentes:
   dispersión entre probetas es varianza del producto que merece declararse,
   no ruido de medida que esconder.
 
-## ¿Tubo o sala reverberante?
+## ¿Tubo o cámara reverberante?
 
-El tubo y la sala reverberante entregan ambos un número llamado "coeficiente
+El tubo y la cámara reverberante entregan ambos un número llamado "coeficiente
 de absorción", y los dos se confunden de forma rutinaria. Son magnitudes
 físicas distintas, medidas bajo campos sonoros distintos, y no coinciden, a
 veces ni de lejos.
@@ -432,7 +432,7 @@ El tubo mide un coeficiente a **incidencia normal**: una onda plana, un
 conserva módulo y fase. ISO 354 mide el coeficiente de **incidencia
 aleatoria** $\alpha_s$: un campo difuso que golpea una muestra de 10 a 12 m²
 desde todas las direcciones a la vez, recuperado del cambio del tiempo de
-caída de la sala mediante la fórmula de Sabine, un promedio de energía sin
+caída de la cámara mediante la fórmula de Sabine, un promedio de energía sin
 fase alguna. Como el campo difuso encuentra más caminos hacia el interior del
 absorbente que la única onda a incidencia normal (las ondas oblicuas recorren
 más camino dentro de la capa), $\alpha_s$ suele salir más alto. Para una
@@ -449,7 +449,7 @@ medida, no solo el propio coeficiente a incidencia normal.
 
 **Por qué los valores de ISO 354 superan 1.** Un cociente de energía absorbida
 sobre incidente no puede superar la unidad y, sin embargo, los informes de
-sala reverberante con $\alpha_s = 1{,}05$ a $1{,}20$ para absorbentes
+cámara reverberante con $\alpha_s = 1{,}05$ a $1{,}20$ para absorbentes
 porosos gruesos son rutinarios y correctos según el método. La fórmula de
 Sabine convierte el cambio del tiempo de caída en un área de absorción
 equivalente $A$, y $\alpha_s = A/S$ divide por el área *geométrica* de la
@@ -459,10 +459,18 @@ borde), de modo que el área equivalente puede superar la geométrica. Esos
 valores no son errores, pero tampoco son portables: dependen del tamaño y del
 perímetro de la muestra, que es exactamente la razón por la que ISO 354 fija
 ambos. La valoración de ISO 11654 simplemente trunca: los coeficientes
-prácticos por encima de $1{,}00$ se fijan en $1{,}00$ (sección 1), y el
-software de predicción recorta a uno antes de sumar áreas de absorción.
+prácticos por encima de $1{,}00$ se fijan en $1{,}00$ (sección 1). Las
+entradas de predicción no reciben ese recorte silencioso en esta biblioteca:
+los
+[estimadores del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/)
+rechazan coeficientes fuera de $[0, 1)$ (los logaritmos de Eyring y
+Millington divergen en uno), de modo que los valores de ISO 354 iguales o
+superiores a uno deben devolverse por debajo de uno antes de la llamada,
+mientras que el presupuesto de área de absorción equivalente de
+[EN 12354-6](/phonometry/es/guides/enclosed-space-absorption/) acepta los
+coeficientes tal cual se suministran.
 
-**Cuál usar.** Responden a preguntas distintas. El valor de sala
+**Cuál usar.** Responden a preguntas distintas. El valor de cámara
 reverberante es el que alimenta la predicción en campo difuso: las
 estimaciones de reverberación de Sabine, las áreas de absorción equivalentes
 de [EN 12354-6](/phonometry/es/guides/enclosed-space-absorption/) y la
@@ -559,12 +567,12 @@ print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[
   ISBN 978-1-4987-4099-9.
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
   La medida y el diseño de absorbentes en la práctica: los métodos de tubo y
-  de sala lado a lado, los montajes y la discusión del efecto de borde tras
-  la sección de tubo o sala reverberante.
+  de cámara lado a lado, los montajes y la discusión del efecto de borde tras
+  la sección de tubo o cámara reverberante.
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [Catálogo iso.org](https://www.iso.org/standard/34545.html).
-  El método de sala reverberante que produce los espectros de $\alpha_s$
+  El método de cámara reverberante que produce los espectros de $\alpha_s$
   valorados por ISO 11654, incluidos los montajes de probeta del Anexo B.
 - International Organization for Standardization. (1998). *Acoustics —
   Determination of sound absorption coefficient and impedance in impedance
@@ -576,7 +584,8 @@ print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[
   de rango de onda plana.
 - ASTM International. (2019). *Standard test method for normal incidence
   determination of porous material acoustical properties based on the
-  transfer matrix method* (ASTM E2611-19).
+  transfer matrix method* (ASTM E2611-19, la edición implementada aquí;
+  revisada después como [ASTM E2611-24](https://store.astm.org/e2611-24.html)).
   [Tienda ASTM](https://store.astm.org/e2611-19.html).
   El método de matriz de transferencia con cuatro micrófonos tras los
   ayudantes de pérdida por transmisión.

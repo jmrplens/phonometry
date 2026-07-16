@@ -157,7 +157,7 @@ que las guías incorporan sus secciones de Referencias.
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [Catálogo iso.org](https://www.iso.org/standard/34545.html).
-  El método de absorción en sala reverberante y sus montajes de probeta.
+  El método de absorción en cámara reverberante y sus montajes de probeta.
   Citado por [Materiales acústicos](/phonometry/es/guides/materials/).
 - International Organization for Standardization. (1998). *Acoustics —
   Determination of sound absorption coefficient and impedance in impedance
@@ -170,7 +170,8 @@ que las guías incorporan sus secciones de Referencias.
   Citado por [Materiales acústicos](/phonometry/es/guides/materials/).
 - ASTM International. (2019). *Standard test method for normal incidence
   determination of porous material acoustical properties based on the
-  transfer matrix method* (ASTM E2611-19).
+  transfer matrix method* (ASTM E2611-19, la edición implementada aquí;
+  revisada después como [ASTM E2611-24](https://store.astm.org/e2611-24.html)).
   [Tienda ASTM](https://store.astm.org/e2611-19.html).
   El método de pérdida por transmisión por matriz de transferencia con
   cuatro micrófonos.
@@ -185,7 +186,7 @@ que las guías incorporan sus secciones de Referencias.
 - International Organization for Standardization. (2004). *Acoustics —
   Sound-scattering properties of surfaces — Part 1: Measurement of the
   random-incidence scattering coefficient in a reverberation room*
-  (ISO 17497-1:2004).
+  (ISO 17497-1:2004+A1:2014, la edición implementada aquí).
   [Catálogo iso.org](https://www.iso.org/standard/31397.html).
   El método del coeficiente de dispersión con mesa giratoria.
   Citado por [Dispersión superficial, difusión y absorción in situ](/phonometry/es/guides/surface-scattering/).

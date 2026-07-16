@@ -445,10 +445,16 @@ $\alpha_s = A/S$ divides by the *geometric* sample area $S$. Diffraction at
 the sample edges lets the specimen drain energy from a sound field wider than
 its footprint (the edge effect), so the equivalent area can exceed the
 geometric one. Such values are not errors, but they are not portable either:
-they depend on the sample size and perimeter, which is exactly why ISO 354
+they depend on the sample size and perimeter, which is precisely why ISO 354
 fixes both. The ISO 11654 rating simply truncates: practical coefficients
-above $1.00$ are set to $1.00$ (section 1), and prediction software clips at
-one before summing absorption areas.
+above $1.00$ are set to $1.00$ (section 1). Prediction inputs get no such
+silent clipping in this library: the
+[reverberation-time estimators](/phonometry/guides/reverberation-prediction/)
+reject coefficients outside $[0, 1)$ (the Eyring and Millington logarithms
+diverge at one), so ISO 354 values at or above one must be brought back below
+one by the caller, while the equivalent-absorption-area budget of
+[EN 12354-6](/phonometry/guides/enclosed-space-absorption/) accepts the
+coefficients as supplied.
 
 **Which to use.** They answer different questions. The reverberation-room
 value is the one that feeds diffuse-field prediction: Sabine reverberation
@@ -563,7 +569,8 @@ print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[
   frequency-range limits.
 - ASTM International. (2019). *Standard test method for normal incidence
   determination of porous material acoustical properties based on the
-  transfer matrix method* (ASTM E2611-19).
+  transfer matrix method* (ASTM E2611-19, the edition implemented here;
+  since revised as [ASTM E2611-24](https://store.astm.org/e2611-24.html)).
   [ASTM store](https://store.astm.org/e2611-19.html).
   The four-microphone transfer-matrix method behind the transmission-loss
   helpers.

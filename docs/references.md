@@ -166,7 +166,8 @@ it; the list grows as guides gain their References sections.
   Cited by [Acoustic Materials](materials.md).
 - ASTM International. (2019). *Standard test method for normal incidence
   determination of porous material acoustical properties based on the
-  transfer matrix method* (ASTM E2611-19).
+  transfer matrix method* (ASTM E2611-19, the edition implemented here;
+  since revised as [ASTM E2611-24](https://store.astm.org/e2611-24.html)).
   [ASTM store](https://store.astm.org/e2611-19.html).
   The four-microphone transfer-matrix transmission-loss method.
   Cited by [Acoustic Materials](materials.md).
@@ -179,7 +180,7 @@ it; the list grows as guides gain their References sections.
 - International Organization for Standardization. (2004). *Acoustics —
   Sound-scattering properties of surfaces — Part 1: Measurement of the
   random-incidence scattering coefficient in a reverberation room*
-  (ISO 17497-1:2004).
+  (ISO 17497-1:2004+A1:2014, the edition implemented here).
   [iso.org catalogue](https://www.iso.org/standard/31397.html).
   The turntable scattering-coefficient method.
   Cited by [Surface Scattering, Diffusion and In-situ Absorption](surface-scattering.md).

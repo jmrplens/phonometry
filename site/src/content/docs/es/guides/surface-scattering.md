@@ -481,20 +481,20 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metros)
 - International Organization for Standardization. (2004). *Acoustics —
   Sound-scattering properties of surfaces — Part 1: Measurement of the
   random-incidence scattering coefficient in a reverberation room*
-  (ISO 17497-1:2004).
+  (ISO 17497-1:2004+A1:2014, la edición implementada aquí).
   [Catálogo iso.org](https://www.iso.org/standard/31397.html).
-  El método de mesa giratoria de la sección 1 y los límites de placa base de
-  la Tabla 1.
+  El método de mesa giratoria implementado en la sección 1 de esta página y
+  los límites de placa base de la Tabla 1 de la norma.
 - International Organization for Standardization. (2012). *Acoustics —
   Sound-scattering properties of surfaces — Part 2: Measurement of the
   directional diffusion coefficient in a free field* (ISO 17497-2:2012).
   [Catálogo iso.org](https://www.iso.org/standard/55293.html).
-  El coeficiente de autocorrelación del goniómetro de la sección 2, su
-  ponderación por área y el $d_n$ normalizado.
+  El coeficiente de autocorrelación del goniómetro que hay tras la sección 2
+  de esta página, su ponderación por área y el $d_n$ normalizado.
 
 ---
 
-**Normas.** ISO 17497-1:2004 (coeficiente de
+**Normas.** ISO 17497-1:2004+A1:2014 (coeficiente de
 dispersión), ISO 17497-2:2012 (coeficiente de difusión), ISO 13472-1:2002
 (absorción in situ, superficie extensa), ISO 13472-2:2010 (absorción in situ,
 método puntual), e ISO 9613-1:1993 — solo el coeficiente de atenuación de

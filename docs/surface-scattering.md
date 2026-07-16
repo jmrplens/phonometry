@@ -468,19 +468,20 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
 - International Organization for Standardization. (2004). *Acoustics —
   Sound-scattering properties of surfaces — Part 1: Measurement of the
   random-incidence scattering coefficient in a reverberation room*
-  (ISO 17497-1:2004).
+  (ISO 17497-1:2004+A1:2014, the edition implemented here).
   [iso.org catalogue](https://www.iso.org/standard/31397.html).
-  The turntable method of section 1 and the base-plate limits of Table 1.
+  The turntable method implemented in section 1 of this page and the
+  base-plate limits of the standard's Table 1.
 - International Organization for Standardization. (2012). *Acoustics —
   Sound-scattering properties of surfaces — Part 2: Measurement of the
   directional diffusion coefficient in a free field* (ISO 17497-2:2012).
   [iso.org catalogue](https://www.iso.org/standard/55293.html).
-  The goniometer autocorrelation coefficient of section 2, its area
-  weighting and the normalised $d_n$.
+  The goniometer autocorrelation coefficient behind section 2 of this page,
+  its area weighting and the normalised $d_n$.
 
 ---
 
-**Standards.** ISO 17497-1:2004 (scattering
+**Standards.** ISO 17497-1:2004+A1:2014 (scattering
 coefficient), ISO 17497-2:2012 (diffusion coefficient), ISO 13472-1:2002 (in-situ
 absorption, extended surface), ISO 13472-2:2010 (in-situ absorption, spot
 method), and ISO 9613-1:1993 — only the pure-tone attenuation coefficient

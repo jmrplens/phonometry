@@ -180,11 +180,16 @@ domain of validity:
   prediction to zero. Reverberation-room coefficients at or above 1.0 (a
   documented ISO 354 outcome, see the absorption section of
   [Room Acoustics](/phonometry/guides/room-acoustics/)) lie outside the
-  domain of the logarithmic models, whose $\ln(1-\alpha)$ is undefined
-  there, and phonometry rejects them for every formula in this module.
-  Bringing such a coefficient into $[0, 1)$ is a modelling decision the
-  formulas do not prescribe: whatever adjustment you choose (limiting just
-  below 1 is common), record it alongside the prediction.
+  domain of the logarithmic term, so phonometry enforces each formula's
+  own domain: Sabine accepts such coefficients as supplied (its linear
+  $A = \sum_i S_i\alpha_i$ stays finite); Eyring accepts them as long as
+  the mean entering $\ln(1-\bar\alpha)$ stays below 1 (Fitzroy and
+  Arau-Puchades take the wall-pair means themselves as inputs, so each
+  must already be below 1); Millington-Sette rejects any coefficient at
+  or above 1. To use Millington anyway, bringing such a
+  coefficient into $[0, 1)$ is a modelling decision the formula does not
+  prescribe: whatever adjustment you choose (limiting just below 1 is
+  common), record it alongside the prediction.
 - **Fitzroy** and **Arau-Puchades** target shoebox rooms whose absorption
   is concentrated on one axis, the typical office or dwelling with a soft
   floor and ceiling between hard walls. Arau's geometric mean tempers

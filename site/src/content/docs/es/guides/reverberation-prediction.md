@@ -186,10 +186,15 @@ su dominio de validez:
   iguales o superiores a 1,0 (un resultado documentado de ISO 354, ver la
   sección de absorción de
   [Acústica de salas](/phonometry/es/guides/room-acoustics/)) quedan fuera
-  del dominio de los modelos logarítmicos, cuyo $\ln(1-\alpha)$ no está
-  definido ahí, y phonometry los rechaza en todas las fórmulas de este
-  módulo. Llevar un coeficiente así a $[0, 1)$ es una decisión de modelado
-  que las fórmulas no prescriben: el ajuste que elijas (es habitual
+  del dominio del término logarítmico, así que phonometry aplica a cada
+  fórmula su propio dominio: Sabine acepta esos coeficientes tal cual (su
+  $A = \sum_i S_i\alpha_i$ lineal sigue siendo finita); Eyring los acepta
+  siempre que la media que entra en $\ln(1-\bar\alpha)$ quede por debajo
+  de 1 (Fitzroy y Arau-Puchades toman como entrada las propias medias de
+  cada par de paredes, así que cada una debe estar ya por debajo de 1);
+  Millington-Sette rechaza cualquier coeficiente igual o superior a 1. Para usar Millington de
+  todos modos, llevar un coeficiente así a $[0, 1)$ es una decisión de
+  modelado que la fórmula no prescribe: el ajuste que elijas (es habitual
   limitarlo justo por debajo de 1) debe registrarse junto a la predicción.
 - **Fitzroy** y **Arau-Puchades** apuntan a salas rectangulares con la
   absorción concentrada en un eje, la oficina o vivienda típica con suelo y

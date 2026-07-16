@@ -449,13 +449,15 @@ geometric one. Such values are not errors, but they are not portable either:
 they depend on the sample size and perimeter, which is precisely why ISO 354
 fixes both. The ISO 11654 rating simply truncates: practical coefficients
 above $1.00$ are set to $1.00$ (section 1). Prediction inputs get no such
-silent clipping in this library: the
-[reverberation-time estimators](reverberation-prediction.md) reject
-coefficients outside $[0, 1)$ (the Eyring and Millington logarithms diverge
-at one), so ISO 354 values at or above one must be brought back below one by
-the caller, while the equivalent-absorption-area budget of
-[EN 12354-6](enclosed-space-absorption.md) accepts the coefficients as
-supplied.
+silent clipping in this library: each
+[reverberation-time estimator](reverberation-prediction.md) enforces its own
+mathematical domain, so Sabine and Eyring accept ISO 354 values at or above
+one as supplied (Eyring as long as the mean absorption stays below one),
+while Millington-Sette rejects them (its per-surface logarithm diverges at
+one) and any adjustment below one is left to the caller. The
+equivalent-absorption-area budget of
+[EN 12354-6](enclosed-space-absorption.md) likewise accepts the coefficients
+as supplied.
 
 **Which to use.** They answer different questions. The reverberation-room
 value is the one that feeds diffuse-field prediction: Sabine reverberation

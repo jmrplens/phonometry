@@ -461,14 +461,16 @@ perímetro de la muestra, que es exactamente la razón por la que ISO 354 fija
 ambos. La valoración de ISO 11654 simplemente trunca: los coeficientes
 prácticos por encima de $1{,}00$ se fijan en $1{,}00$ (sección 1). Las
 entradas de predicción no reciben ese recorte silencioso en esta biblioteca:
-los
-[estimadores del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/)
-rechazan coeficientes fuera de $[0, 1)$ (los logaritmos de Eyring y
-Millington divergen en uno), de modo que los valores de ISO 354 iguales o
-superiores a uno deben devolverse por debajo de uno antes de la llamada,
-mientras que el presupuesto de área de absorción equivalente de
-[EN 12354-6](/phonometry/es/guides/enclosed-space-absorption/) acepta los
-coeficientes tal cual se suministran.
+cada
+[estimador del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/)
+aplica su propio dominio matemático, de modo que Sabine y Eyring aceptan los
+valores de ISO 354 iguales o superiores a uno tal cual (Eyring siempre que la
+absorción media quede por debajo de uno), mientras que Millington-Sette los
+rechaza (su logaritmo por superficie diverge en uno) y cualquier ajuste por
+debajo de uno queda en manos de quien llama. El presupuesto de área de
+absorción equivalente de
+[EN 12354-6](/phonometry/es/guides/enclosed-space-absorption/) también acepta
+los coeficientes tal cual se suministran.
 
 **Cuál usar.** Responden a preguntas distintas. El valor de cámara
 reverberante es el que alimenta la predicción en campo difuso: las

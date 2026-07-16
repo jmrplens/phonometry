@@ -220,11 +220,122 @@ def test_empty_surfaces_raise() -> None:
         sabine_reverberation_time(VOLUME, [])
 
 
-def test_absorption_out_of_range_raises() -> None:
-    with pytest.raises(ValueError, match=r"\[0, 1\)"):
-        sabine_reverberation_time(VOLUME, [(10.0, 1.0)])
-    with pytest.raises(ValueError, match=r"\[0, 1\)"):
-        eyring_reverberation_time(VOLUME, [(10.0, -0.1)])
+# The old blanket [0, 1) validator rejected alpha >= 1 for every model; that
+# was over-strict for Sabine (whose A = sum S_i alpha_i is finite there) and
+# for Eyring (which only needs the mean below 1). The tests below encode the
+# per-model domains that replaced it.
+@pytest.mark.parametrize(
+    "model",
+    [
+        sabine_reverberation_time,
+        eyring_reverberation_time,
+        millington_sette_reverberation_time,
+    ],
+)
+@pytest.mark.parametrize("bad", [-0.1, math.nan, math.inf])
+def test_negative_and_non_finite_alpha_rejected_by_surface_models(
+    model, bad: float
+) -> None:
+    """Negative and non-finite coefficients are rejected by every model."""
+    with pytest.raises(ValueError, match="absorption coefficients must be"):
+        model(VOLUME, [(10.0, bad)])
+
+
+@pytest.mark.parametrize(
+    "model",
+    [fitzroy_reverberation_time, arau_puchades_reverberation_time],
+)
+@pytest.mark.parametrize("bad", [-0.1, math.nan, math.inf])
+def test_negative_and_non_finite_alpha_rejected_by_axial_models(
+    model, bad: float
+) -> None:
+    with pytest.raises(ValueError, match="absorption coefficients must be"):
+        model(DIMS, (bad, 0.2, 0.2))
+
+
+@pytest.mark.parametrize(
+    "model",
+    [
+        sabine_reverberation_time,
+        eyring_reverberation_time,
+        millington_sette_reverberation_time,
+    ],
+)
+def test_alpha_above_unit_error_bound_rejected_by_surface_models(model) -> None:
+    """A coefficient above 2 is flagged as a probable percent-vs-fraction slip.
+
+    (The axial models reject 20.0 too, but through their stricter below-1
+    wall-pair-mean check, exercised in the axial rejection test below.)
+    """
+    with pytest.raises(ValueError, match="unit error"):
+        model(VOLUME, [(10.0, 20.0)])
+
+
+def test_sabine_accepts_the_documented_upper_bound() -> None:
+    """The bound is inclusive: alpha exactly 2.0 computes, 2.0 + eps raises."""
+    t = sabine_reverberation_time(VOLUME, [(SURFACE, 2.0)])
+    assert t == pytest.approx(_K * VOLUME / (SURFACE * 2.0), abs=1e-9)
+    with pytest.raises(ValueError, match="unit error"):
+        sabine_reverberation_time(VOLUME, [(SURFACE, 2.0000001)])
+
+
+def test_sabine_accepts_iso354_alphas_at_and_above_one() -> None:
+    """Sabine: A = S alpha stays finite for alpha in {0.2, 1.0, 1.15}.
+
+    Hand check per band: A = 158 alpha, T = k 120 / A, i.e. 0.611825 s,
+    0.122365 s and 0.106404 s. The exact 1.0 is the ISO 11654 practical-
+    coefficient cap; 1.15 is a routine measured ISO 354 value (edge effect).
+    """
+    alpha = np.array([0.2, 1.0, 1.15])
+    surfaces = [(area, alpha) for area, _ in UNIFORM_SURFACES]
+    t = sabine_reverberation_time(VOLUME, surfaces)
+    np.testing.assert_allclose(t, _K * VOLUME / (SURFACE * alpha), atol=1e-9)
+    np.testing.assert_allclose(t, [0.6118246547, 0.1223649309, 0.1064042878],
+                               atol=1e-6)
+
+
+def test_millington_rejects_any_alpha_at_or_above_one() -> None:
+    """The per-surface ln(1 - alpha) diverges at 1, so Millington rejects it."""
+    for alpha in (1.0, 1.15):
+        with pytest.raises(ValueError, match="Millington-Sette requires every"):
+            millington_sette_reverberation_time(
+                100.0, [(60.0, 0.3), (40.0, alpha)]
+            )
+
+
+def test_eyring_accepts_alpha_above_one_when_mean_stays_below_one() -> None:
+    """Eyring constrains only the mean: 10 m2 at 1.2 in a 158 m2 room is fine."""
+    surfaces = [(10.0, 1.2), (148.0, 0.1)]
+    mean = (10.0 * 1.2 + 148.0 * 0.1) / 158.0
+    t = eyring_reverberation_time(VOLUME, surfaces)
+    assert t == pytest.approx(_K * VOLUME / (-158.0 * math.log(1.0 - mean)),
+                              abs=1e-9)
+
+
+def test_eyring_rejects_mean_at_or_above_one() -> None:
+    """A mean of exactly 1 or above has no finite Eyring time."""
+    for high in (1.1, 1.2):  # means 1.0 and 1.05 with the 0.9 partner below
+        with pytest.raises(ValueError, match="mean absorption coefficient"):
+            eyring_reverberation_time(VOLUME, [(79.0, high), (79.0, 0.9)])
+
+
+def test_axial_models_reject_wall_pair_mean_at_or_above_one() -> None:
+    """Fitzroy/Arau inputs are the means entering ln(1 - alpha_i) directly."""
+    for model in (fitzroy_reverberation_time, arau_puchades_reverberation_time):
+        for bad in (1.0, 20.0):
+            with pytest.raises(ValueError, match="wall-pair mean absorption"):
+                model(DIMS, (bad, 0.2, 0.2))
+
+
+def test_models_bundle_inherits_the_strictest_domain() -> None:
+    """The bundle evaluates Millington too, so alpha >= 1 raises its error."""
+    with pytest.raises(ValueError, match="Millington-Sette requires every"):
+        reverberation_time_models(DIMS, (1.0, 0.2, 0.2))
+
+
+def test_mean_absorption_accepts_iso354_alphas_above_one() -> None:
+    """The mean of measured coefficients above 1 is meaningful: 0.21 here."""
+    assert mean_absorption([(10.0, 1.2), (90.0, 0.1)]) == pytest.approx(0.21)
 
 
 def test_perfectly_reflecting_room_raises() -> None:
@@ -240,6 +351,13 @@ def test_non_positive_volume_raises() -> None:
 def test_negative_air_attenuation_raises() -> None:
     with pytest.raises(ValueError, match="air_attenuation"):
         sabine_reverberation_time(VOLUME, UNIFORM_SURFACES, air_attenuation=-1.0)
+
+
+@pytest.mark.parametrize("bad", [math.nan, math.inf])
+def test_non_finite_air_attenuation_raises(bad: float) -> None:
+    """NaN used to slip through the old m < 0 comparison and return NaN."""
+    with pytest.raises(ValueError, match="air_attenuation"):
+        sabine_reverberation_time(VOLUME, UNIFORM_SURFACES, air_attenuation=bad)
 
 
 def test_bad_dimensions_raise() -> None:

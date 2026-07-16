@@ -42,6 +42,13 @@ coefficient `m` (in neper per metre) as the additive term `4 m V`; obtain a
 physical `m` from temperature and humidity with
 [`phonometry.air_absorption.air_attenuation_m`](/phonometry/reference/api/environment/air-absorption/#air_attenuation_m).
 
+Each model enforces its own mathematical domain on the absorption
+coefficients. Sabine's linear sum is finite for any non-negative coefficient,
+so it accepts measured ISO 354 values at or above 1 (up to a unit-error guard
+at 2). The logarithmic models are stricter exactly where the maths requires
+it: Millington-Sette needs *every* coefficient below 1, while Eyring, Fitzroy
+and Arau-Puchades need each *mean* entering `ln(1 - alpha)` below 1.
+
 The Fitzroy and Arau-Puchades models require a rectangular (shoebox) room and
 take the room `dimensions` together with the mean absorption of each of the
 three wall pairs. All five reduce to Eyring for a uniform absorption
@@ -67,7 +74,8 @@ Arau-Puchades reverberation time -- area-weighted geometric mean of axial times.
 pair perpendicular to axis `i` (Arau-Puchades, *Acustica* 65 (1988) 163,
 Formula 18). Preferred by its author over Fitzroy for rooms with an
 anisotropic absorption distribution. Reduces to Eyring for a uniform
-distribution.
+distribution. Each input is itself a mean entering `ln(1 - alpha_i)`,
+so each must be below 1.
 
 **Parameters**
 
@@ -97,6 +105,11 @@ Eyring (Norris-Eyring) reverberation time.
 `T = k V / (-S ln(1 - alpha_bar) + 4 m V)` with the total surface `S`
 and its area-weighted mean absorption `alpha_bar`.
 
+The formula constrains only the *mean*: `ln(1 - alpha_bar)` requires
+`alpha_bar < 1`, while individual coefficients at or above 1 (a measured
+ISO 354 outcome) are accepted as long as the mean stays below 1 and each
+coefficient stays within the shared unit-error ceiling of 2.
+
 **Parameters**
 
 | Name | Description |
@@ -125,7 +138,8 @@ Fitzroy reverberation time -- area-weighted arithmetic mean of axial times.
 `T = sum_i (S_i / S) T_i` with `T_i` the Eyring time of the wall pair
 perpendicular to axis `i` (Fitzroy, *J. Acoust. Soc. Am.* 31 (1959) 893).
 Equivalent to `T = k V / S**2 * sum_i S_i / (-ln(1 - alpha_i))` without
-air. Reduces to Eyring for a uniform absorption distribution.
+air. Reduces to Eyring for a uniform absorption distribution. Each input
+is itself a mean entering `ln(1 - alpha_i)`, so each must be below 1.
 
 **Parameters**
 
@@ -171,6 +185,9 @@ Millington-Sette reverberation time.
 `T = k V / (-sum_i S_i ln(1 - alpha_i) + 4 m V)`: the Eyring absorption
 term summed surface by surface rather than through a single mean. A surface
 approaching total absorption (`alpha_i -> 1`) drives `T` to zero.
+Because the logarithm applies per surface, *every* coefficient must be
+strictly below 1; measured ISO 354 coefficients at or above 1 are outside
+this model's domain (use Sabine, or Eyring while the mean stays below 1).
 
 **Parameters**
 
@@ -202,7 +219,9 @@ A convenience front-end that builds the six boundary surfaces of the room
 from `dimensions` and the three wall-pair mean absorptions, then evaluates
 [`sabine_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#sabine_reverberation_time), [`eyring_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#eyring_reverberation_time),
 [`millington_sette_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#millington_sette_reverberation_time), [`fitzroy_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#fitzroy_reverberation_time)
-and [`arau_puchades_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#arau_puchades_reverberation_time) on a common footing.
+and [`arau_puchades_reverberation_time`](/phonometry/reference/api/rooms/reverberation-prediction/#arau_puchades_reverberation_time) on a common footing. Because
+the bundle evaluates the logarithmic models too, the inputs must satisfy
+the strictest of the five domains: every absorption below 1.
 
 **Parameters**
 
@@ -277,12 +296,19 @@ sabine_reverberation_time(
 
 Sabine reverberation time `T = k V / (A + 4 m V)`.
 
+`A = sum_i S_i alpha_i` is finite for any non-negative coefficient, so
+unlike the logarithmic models Sabine accepts coefficients at or above 1:
+measured ISO 354 reverberation-room values of 1.05 to 1.20 (the edge
+effect) and the exact 1.0 that the ISO 11654 practical rating caps at are
+legitimate inputs. Coefficients above 2 are rejected as a probable unit
+error (a percentage passed instead of a fraction).
+
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `volume` | Room volume `V`, m3. |
-| `surfaces` | Sequence of `(area, absorption_coefficient)` pairs; each coefficient a scalar or a per-band array. |
+| `surfaces` | Sequence of `(area, absorption_coefficient)` pairs; each coefficient a scalar or a per-band array in `[0, 2]`. |
 | `air_attenuation` | Air power-attenuation coefficient `m`, in neper per metre (scalar or per-band); see [`phonometry.air_absorption.air_attenuation_m`](/phonometry/reference/api/environment/air-absorption/#air_attenuation_m). Default `0` (air absorption neglected). |
 | `speed_of_sound` | Speed of sound `c0`, m/s (default [`DEFAULT_SPEED_OF_SOUND`](/phonometry/reference/api/materials/road-absorption/#default_speed_of_sound), giving the factor `0.161`). |
 

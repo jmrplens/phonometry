@@ -221,6 +221,41 @@ their helpers separate and never mixes them.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impedance_tube.svg" alt="ISO 10534-2 two-microphone impedance tube: a loudspeaker radiating a plane wave down the tube, two microphones flush in the wall at spacing s and distance x1 from the specimen face, the test specimen against a rigid backing, and the incident and reflected waves" width="92%"></picture>
 
+**Working frequency range (ISO 10534-2, Clause 4).** Everything the tube
+reports assumes the field inside is a single plane wave, and the geometry sets
+both ends of the usable band. Above the cut-on of the first cross-sectional
+mode the field stops being planar: a circular tube of diameter $d$ needs
+$f\,d < 0.58\,c_0$ (Eq. (2); $f\,d < 0.50\,c_0$ for a rectangular tube,
+Eq. (3)). The microphone spacing $s$ must also stay clear of the
+half-wavelength singularity of the transfer-function method,
+$f\,s < 0.45\,c_0$ (Eq. (4)). At the low end the opposite problem appears: a
+spacing much shorter than the wavelength leaves almost no phase difference
+between the microphones to measure, so the Clause 4.2 guideline keeps the
+spacing above 5 % of the wavelength:
+
+$$
+\frac{c_0}{20\,s} \;<\; f \;<\;
+\min\!\left(0.58\,\frac{c_0}{d},\ 0.45\,\frac{c_0}{s}\right).
+$$
+
+No single tube covers the building-acoustics range. A 100 mm tube with a
+100 mm spacing works from roughly 170 Hz to 1.5 kHz; reaching the 5 kHz bands
+takes a small tube (29 mm) with a close spacing, which in turn cannot see the
+low bands. Laboratories therefore pair a large and a small tube (or one tube
+with two spacings) and splice the spectra; the two must agree in the overlap
+bands, and a mismatch there points at the sample cut or mounting, not at the
+physics.
+
+```python
+from phonometry import plane_wave_frequency_range
+
+# A 100 mm tube with 100 mm spacing, and a 29 mm tube with 20 mm spacing.
+f_l, f_u = plane_wave_frequency_range(0.100, 343.2, diameter=0.100)
+print(round(f_l, 1), round(f_u, 1))     # 171.6 1544.4
+f_l, f_u = plane_wave_frequency_range(0.020, 343.2, diameter=0.029)
+print(round(f_l, 1), round(f_u, 1))     # 858.0 6864.0
+```
+
 **Standing-wave-ratio method (ISO 10534-1).** A probe traverses the standing wave
 and reads the level difference $\Delta L = L_\text{max} - L_\text{min}$ between a
 pressure maximum and the adjacent minimum. The standing-wave ratio, reflection
@@ -348,6 +383,95 @@ print(np.round(tm.transmission_loss(rho_c), 6))   # [0. 0. 0.]
 `characteristic_impedance_material`, `material_wavenumber`) then read off the
 ASTM E2611 quantities.
 
+**Mounting pitfalls.** Most bad tube data are made at the sample holder, long
+before the signal processing. The recurring failures:
+
+- **Perimeter gaps.** A specimen cut slightly undersize leaves an air sliver
+  along the tube wall. Sound short-circuits around and behind the sample, and
+  the gap itself resonates, so the measured absorption grows a spurious
+  low-to-mid-frequency hump. Cut for a snug slide fit and seal the rim (a thin
+  film of petroleum jelly is the classic remedy) without loading the front
+  face.
+- **Compression.** A specimen cut oversize and forced in is denser than the
+  product it is supposed to represent: the flow resistivity rises, a limp
+  frame is stiffened, and the absorption curve shifts and flattens. The result
+  is repeatable and wrong.
+- **Hidden back cavity.** If the specimen does not sit flush on the rigid
+  backing, the unintended air layer acts as a quarter-wavelength cavity and
+  moves the absorption peak down in frequency, flattering the material.
+  Backing air gaps are perfectly legitimate mountings, but only when they are
+  deliberate, dimensioned and reported with the result.
+- **Face not plane.** A bulging, tilted or torn front face scatters into
+  cross-sectional modes below the nominal cut-on and breaks the
+  normal-incidence assumption the equations rest on. Cut with a sharp tool;
+  do not tear fibrous materials to size.
+- **One specimen is not the material.** Porous products are inhomogeneous at
+  the scale of a tube sample. Measure several cuts and average; a spread
+  between specimens is product variance worth reporting, not measurement noise
+  to hide.
+
+## Tube or reverberation room?
+
+The tube and the reverberation room both deliver a number called the
+"absorption coefficient", and the two are routinely confused. They are
+different physical quantities, measured under different sound fields, and they
+do not match, sometimes not even closely.
+
+The tube measures a **normal-incidence** coefficient: one plane wave, one
+angle, a specimen a few centimetres across, and a complex reflection factor
+that keeps magnitude and phase. ISO 354 measures the **random-incidence**
+coefficient $\alpha_s$: a diffuse field striking a sample of 10 m² to 12 m²
+from every direction at once, recovered from the change in the room's decay
+time through Sabine's formula, an energy average with no phase left in it.
+Because the diffuse field finds more ways into an absorber than the single
+normal-incidence wave (oblique waves travel a longer path inside the layer),
+$\alpha_s$ usually comes out higher. For a locally reacting surface the two
+are linked by Paris' angular average, which defines the statistical
+absorption coefficient
+
+$$
+\alpha_{st} = \int_0^{\pi/2} \alpha(\theta)\,\sin 2\theta\,\mathrm{d}\theta,
+$$
+
+an integral that weights the oblique angles most heavily; evaluating it
+needs the
+angle-dependent $\alpha(\theta)$ from the measured surface impedance, not just
+the normal-incidence coefficient itself.
+
+**Why ISO 354 values exceed 1.** A ratio of absorbed to incident energy cannot
+exceed one, yet reverberation-room reports of $\alpha_s = 1.05$ to $1.20$ for
+thick porous absorbers are routine and correct by the method. Sabine's formula
+converts the decay-time change into an equivalent absorption area $A$, and
+$\alpha_s = A/S$ divides by the *geometric* sample area $S$. Diffraction at
+the sample edges lets the specimen drain energy from a sound field wider than
+its footprint (the edge effect), so the equivalent area can exceed the
+geometric one. Such values are not errors, but they are not portable either:
+they depend on the sample size and perimeter, which is precisely why ISO 354
+fixes both. The ISO 11654 rating simply truncates: practical coefficients
+above $1.00$ are set to $1.00$ (section 1). Prediction inputs get no such
+silent clipping in this library: the
+[reverberation-time estimators](reverberation-prediction.md) reject
+coefficients outside $[0, 1)$ (the Eyring and Millington logarithms diverge
+at one), so ISO 354 values at or above one must be brought back below one by
+the caller, while the equivalent-absorption-area budget of
+[EN 12354-6](enclosed-space-absorption.md) accepts the coefficients as
+supplied.
+
+**Which to use.** They answer different questions. The reverberation-room
+value is the one that feeds diffuse-field prediction: Sabine reverberation
+estimates, the equivalent absorption areas of
+[EN 12354-6](enclosed-space-absorption.md) and the $\alpha_w$ rating and
+class, all of which expect random incidence over a mounted, finite sample
+(ISO 354's Annex B mounting types exist because the mounting is part of the
+result). The tube value is the laboratory and development tool: it needs only
+a few square centimetres of material, resolves magnitude *and* phase, and its
+surface impedance pins down the parameters of porous-material models in the
+Allard and Atalla tradition, with the airflow resistivity of section 2 as the
+first input; the fitted model then predicts the layer at any angle, thickness
+or backing. What the tube number is *not* is a drop-in substitute for
+$\alpha_s$: feeding normal-incidence coefficients into a Sabine or EN 12354-6
+budget systematically underpredicts the installed absorption.
+
 ## 4. Sound-absorption measurement uncertainty (ISO 12999-2)
 
 A rated absorption coefficient means little without its uncertainty. ISO
@@ -412,6 +536,49 @@ print(float(r.reported_expanded_uncertainty[0]))             # 0.08  (U, k=2)
 print(float(weighted_coefficient_uncertainty(0.70).reported_expanded_uncertainty[0]))  # 0.07
 print(float(single_number_rating_uncertainty(8.1).reported_expanded_uncertainty[0]))   # 1.6
 ```
+
+## References
+
+- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
+  Modelling sound absorbing materials* (2nd ed.). Wiley.
+  ISBN 978-0-470-74661-5.
+  [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
+  The porous-material theory behind the measured quantities: airflow
+  resistivity as a model input, and the surface impedance and absorption the
+  tube recovers.
+- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
+  Theory, design and application* (3rd ed.). CRC Press.
+  ISBN 978-1-4987-4099-9.
+  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
+  Absorber measurement and design in practice: the tube and room methods side
+  by side, mountings, and the edge-effect discussion behind the
+  tube-or-reverberation-room section.
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [iso.org catalogue](https://www.iso.org/standard/34545.html).
+  The reverberation-room method that produces the $\alpha_s$ spectra rated by
+  ISO 11654, including the Annex B specimen mountings.
+- International Organization for Standardization. (1998). *Acoustics —
+  Determination of sound absorption coefficient and impedance in impedance
+  tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adopted in
+  Europe as EN ISO 10534-2:2001, the edition implemented here; since
+  revised as [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
+  [iso.org catalogue](https://www.iso.org/standard/22851.html).
+  The two-microphone transfer-function method and its plane-wave
+  frequency-range limits.
+- ASTM International. (2019). *Standard test method for normal incidence
+  determination of porous material acoustical properties based on the
+  transfer matrix method* (ASTM E2611-19, the edition implemented here;
+  since revised as [ASTM E2611-24](https://store.astm.org/e2611-24.html)).
+  [ASTM store](https://store.astm.org/e2611-19.html).
+  The four-microphone transfer-matrix method behind the transmission-loss
+  helpers.
+- International Organization for Standardization. (2018). *Acoustics —
+  Determination of airflow resistance — Part 1: Static airflow method*
+  (ISO 9053-1:2018).
+  [iso.org catalogue](https://www.iso.org/standard/69869.html).
+  The static method of section 2, with the through-origin regression and the
+  0.5 mm/s reference velocity.
 
 ---
 

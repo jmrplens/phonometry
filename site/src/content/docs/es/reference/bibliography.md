@@ -22,6 +22,7 @@ que las guías incorporan sus secciones de Referencias.
   El primer curso clásico de acústica: ondas planas y esféricas, impedancia
   acústica y las definiciones de nivel sobre las que se apoyan todas las
   guías.
+  Citado por [Niveles integrados y estadísticos](/phonometry/es/guides/levels/).
 - Rossing, T. D. (Ed.). (2014). *Springer handbook of acoustics* (2.ª ed.).
   Springer. ISBN 978-1-4939-0754-0.
   [doi:10.1007/978-1-4939-0755-7](https://doi.org/10.1007/978-1-4939-0755-7).
@@ -42,12 +43,45 @@ que las guías incorporan sus secciones de Referencias.
   [Ficha en Open Library](https://openlibrary.org/isbn/9780131988422).
   La teoría de filtros digitales tras las cascadas SOS, la transformada
   bilineal y el diezmado multitasa que usan los bancos de filtros.
+  Citado por [Bancos de filtros](/phonometry/es/guides/filter-banks/) y
+  [Procesado por bloques](/phonometry/es/guides/block-processing/).
 - Smith, J. O. *Introduction to digital filters with audio applications*
   (libro en línea). Center for Computer Research in Music and Acoustics
   (CCRMA), Universidad de Stanford.
   [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
   Tratamiento gratuito y complementario del diseño y análisis de filtros
   digitales, el paso natural tras las guías de bancos de filtros.
+  Citado por [Bancos de filtros](/phonometry/es/guides/filter-banks/).
+
+## Instrumentación de medida
+
+- International Electrotechnical Commission. (2014). *Electroacoustics —
+  Octave-band and fractional-octave-band filters — Part 1: Specifications*
+  (IEC 61260-1:2014).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/5063).
+  Los bordes de banda en base 10 y las máscaras de aceptación de clase de
+  los bancos de octava fraccionaria.
+  Citado por [Bancos de filtros](/phonometry/es/guides/filter-banks/).
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/5708).
+  Las ponderaciones A/C/Z, las ponderaciones temporales exponenciales y las
+  métricas de nivel del sonómetro, con las tablas de tolerancias usadas en
+  la verificación.
+  Citado por [Niveles integrados y estadísticos](/phonometry/es/guides/levels/),
+  [Ponderación frecuencial (A, C, G, Z)](/phonometry/es/guides/weighting/) y
+  [Ponderación temporal](/phonometry/es/guides/time-weighting/).
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/5710).
+  La verificación periódica de laboratorio de un sonómetro.
+  Citado por [Calibración y dBFS](/phonometry/es/guides/calibration/).
+- International Electrotechnical Commission. (2017). *Electroacoustics —
+  Sound calibrators* (IEC 60942:2017).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/30045).
+  Las clases de calibrador, las tolerancias de nivel y el criterio de
+  estabilidad a corto plazo aplicado a las grabaciones de calibración.
+  Citado por [Calibración y dBFS](/phonometry/es/guides/calibration/).
 
 ## Acústica de edificios
 
@@ -167,6 +201,18 @@ que las guías incorporan sus secciones de Referencias.
 
 ## Psicoacústica
 
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  Las mediciones originales de igual sonoridad cuya isófona de 40 fonios se
+  convirtió en la curva de ponderación A.
+  Citado por [Ponderación frecuencial (A, C, G, Z)](/phonometry/es/guides/weighting/).
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [Catálogo iso.org](https://www.iso.org/standard/83117.html).
+  Las líneas isofónicas modernas, sucesoras de las curvas de Fletcher y
+  Munson.
+  Citado por [Ponderación frecuencial (A, C, G, Z)](/phonometry/es/guides/weighting/).
 - Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
   (3.ª ed.). Springer.
   [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).

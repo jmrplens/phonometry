@@ -19,6 +19,7 @@ it; the list grows as guides gain their References sections.
   [Publisher page](https://www.wiley.com/en-us/Fundamentals+of+Acoustics%2C+4th+Edition-p-9780471847892).
   The standard first course in acoustics: plane and spherical waves, acoustic
   impedance and the level definitions assumed throughout the guides.
+  Cited by [Integrated and Statistical Levels](levels.md).
 - Rossing, T. D. (Ed.). (2014). *Springer handbook of acoustics* (2nd ed.).
   Springer. ISBN 978-1-4939-0754-0.
   [doi:10.1007/978-1-4939-0755-7](https://doi.org/10.1007/978-1-4939-0755-7).
@@ -39,12 +40,45 @@ it; the list grows as guides gain their References sections.
   [Open Library record](https://openlibrary.org/isbn/9780131988422).
   The digital-filter theory behind the SOS cascades, the bilinear transform
   and the multirate decimation used by the filter banks.
+  Cited by [Filter Banks](filter-banks.md) and
+  [Block Processing](block-processing.md).
 - Smith, J. O. *Introduction to digital filters with audio applications*
   (online book). Center for Computer Research in Music and Acoustics (CCRMA),
   Stanford University.
   [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
   Free companion treatment of digital-filter design and analysis, a good next
   step after the filter-bank guides.
+  Cited by [Filter Banks](filter-banks.md).
+
+## Measurement instrumentation
+
+- International Electrotechnical Commission. (2014). *Electroacoustics —
+  Octave-band and fractional-octave-band filters — Part 1: Specifications*
+  (IEC 61260-1:2014).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
+  The base-10 band edges and the class acceptance masks of the fractional
+  octave banks.
+  Cited by [Filter Banks](filter-banks.md).
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
+  The A/C/Z weightings, the exponential time weightings and the level
+  metrics of the sound level meter, with the tolerance tables used for
+  verification.
+  Cited by [Integrated and Statistical Levels](levels.md),
+  [Frequency Weighting (A, C, G, Z)](weighting.md) and
+  [Time Weighting and Integration](time-weighting.md).
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5710).
+  The periodic laboratory verification of a sound level meter.
+  Cited by [Calibration and dBFS](calibration.md).
+- International Electrotechnical Commission. (2017). *Electroacoustics —
+  Sound calibrators* (IEC 60942:2017).
+  [IEC webstore](https://webstore.iec.ch/en/publication/30045).
+  The calibrator classes, level tolerances and the short-term stability
+  criterion applied to calibration recordings.
+  Cited by [Calibration and dBFS](calibration.md).
 
 ## Building acoustics
 
@@ -159,6 +193,18 @@ it; the list grows as guides gain their References sections.
 
 ## Psychoacoustics
 
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  The original equal-loudness measurements whose 40-phon contour became the
+  A-weighting curve.
+  Cited by [Frequency Weighting (A, C, G, Z)](weighting.md).
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [iso.org catalogue](https://www.iso.org/standard/83117.html).
+  The modern equal-loudness contours, successors of the Fletcher-Munson
+  curves.
+  Cited by [Frequency Weighting (A, C, G, Z)](weighting.md).
 - Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
   (3rd ed.). Springer.
   [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).

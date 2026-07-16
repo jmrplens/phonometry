@@ -79,11 +79,6 @@ _SABINE_NUMERATOR = 24.0 * log(10.0)
 DEFAULT_SPEED_OF_SOUND = 343.0
 
 #: Absorption-coefficient ceiling for the Eyring-family logarithm ``ln(1 -
-#: alpha)``; a mean absorption at or above this triggers a clear error rather
-#: than a silent ``-inf``/``nan``. A fully absorbing surface (``alpha = 1``) has
-#: no finite Eyring reverberation time.
-_MAX_MEAN_ABSORPTION = 1.0
-
 #: Sanity ceiling for any individual absorption coefficient. Measured ISO 354
 #: reverberation-room coefficients legitimately exceed 1 (edge diffraction
 #: makes 1.05 to 1.20 routine for thick porous absorbers), so Sabine accepts
@@ -213,7 +208,9 @@ def _millington_absorption(
 
 def _eyring_absorption(total_area: float, mean_absorption: NDArray[np.float64]) -> NDArray[np.float64]:
     """Eyring equivalent absorption ``-S ln(1 - alpha_bar)`` (per band)."""
-    if np.any(mean_absorption >= _MAX_MEAN_ABSORPTION):
+    # A mean of exactly 1 (fully absorbing on average) has no finite Eyring
+    # time: ln(1 - mean) diverges, so fail with a clear message instead.
+    if np.any(mean_absorption >= 1.0):
         raise ValueError(
             "the mean absorption coefficient must be below 1 for the "
             "Eyring-family models: ln(1 - mean) diverges at a mean of 1. "

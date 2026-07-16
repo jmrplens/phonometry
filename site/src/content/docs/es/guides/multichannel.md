@@ -51,6 +51,28 @@ canales cuestan mucho menos que 8 ejecuciones separadas. Convención: **canales
 primero**, como la mayoría del código DSP (`soundfile` devuelve `(n, ch)`:
 transpón con `x.T`).
 
+## Semántica por canal
+
+El procesado multicanal es estrictamente por canal: nunca se mezcla, suma ni
+promedia nada a través del eje de canales. Tres consecuencias que conviene
+explicitar:
+
+- **Combinar canales es decisión tuya.** Los niveles vuelven uno por canal.
+  Si necesitas un nivel promedio del array (por ejemplo los niveles
+  promediados por posición de las normas de acústica de salas), combina
+  energías tú mismo: `10 * np.log10(np.mean(10 ** (spl / 10), axis=0))`,
+  nunca la media aritmética de los valores en dB (ver
+  [Niveles](/phonometry/es/guides/levels/) para el porqué).
+- **Un `calibration_factor` significa una sensibilidad.** El factor escalar
+  multiplica todos los canales, lo que solo es correcto si todos comparten
+  la misma sensibilidad. Para un array de micrófonos con calibraciones
+  individuales, escala primero las filas, `x * factors[:, None]`, y deja
+  `calibration_factor` en 1.
+- **Las clases con estado guardan un estado por canal.** En el procesado por
+  bloques el array de estado se ajusta al número de canales y un cambio del
+  número de canales lo reinicia; ver
+  [Procesado por bloques](/phonometry/es/guides/block-processing/).
+
 ## Rendimiento: vectorización y caché
 
 La clase `OctaveFilterBank` está muy optimizada para procesado en tiempo real y

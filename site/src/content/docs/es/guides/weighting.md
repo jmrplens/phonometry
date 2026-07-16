@@ -62,6 +62,61 @@ medios-graves. Ambas se normalizan a exactamente 0 dB en 1 kHz. Z es la
 ausencia de ponderación. La derivación completa de polos y ceros está en la
 página de [Teoría](/phonometry/es/reference/theory/signal-analysis/).
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting_es.svg" alt="Líneas isofónicas según ISO 226 a la izquierda, con la isófona de 40 fonios resaltada; a la derecha la curva de ponderación A superpuesta a la isófona de 40 fonios invertida, mostrando que A es la isófona volteada congelada en un filtro realizable" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting_es_dark.svg" alt="Líneas isofónicas según ISO 226 a la izquierda, con la isófona de 40 fonios resaltada; a la derecha la curva de ponderación A superpuesta a la isófona de 40 fonios invertida, mostrando que A es la isófona volteada congelada en un filtro realizable" style="width:92%">
+
+### Una breve historia: A, B, C y Z
+
+La cadena va de las mediciones de igual sonoridad de Fletcher y Munson en
+1933 a la primera norma estadounidense de sonómetros (1936), que dio a los
+medidores respuestas conmutables para que la lectura aproximara la
+sonoridad a distintos niveles: **A** de la isófona de 40 fonios para sonidos
+débiles, **B** de la de ~70 fonios para los moderados y una respuesta plana
+para los fuertes (la curva **C** propiamente dicha, reflejo de la isófona
+más plana de ~100 fonios, llegó con la revisión de 1944). Conmutar curvas
+según el nivel murió en la práctica (las
+lecturas saltaban en los puntos de cambio y las mediciones de campo dejaban
+de ser comparables), pero A sobrevivió sola: décadas de datos de daño
+auditivo y de molestia comunitaria se habían recogido con ella, y
+correlaciona con ambos casi tan bien como métricas mucho más elaboradas.
+IEC 61672-1 (primera edición, 2002) remató la limpieza: B se eliminó, A y C
+se conservaron con tolerancias más estrictas y **Z** se introdujo para
+sustituir el "lineal" mal especificado de los sonómetros antiguos, que
+variaba según el fabricante.
+
+### Cuándo importa C − A
+
+Como A descarta los graves y C los conserva, la diferencia
+$L_{Ceq} - L_{Aeq}$ es un indicador de un solo número del contenido en
+baja frecuencia:
+
+- **Por debajo de unos 10 dB**: espectro de banda ancha ordinario; el nivel
+  ponderado A lo califica con justicia.
+- **En torno a 15 a 20 dB o más**: la energía se concentra en las bajas
+  frecuencias (retumbo de climatización, compresores, graves de música a
+  través de una pared). El nivel ponderado A entonces subestima el problema;
+  mira el espectro de octavas y, por debajo de 20 Hz, pasa a la curva G.
+- **La selección de protectores auditivos**: el método HML de ISO 4869-2 se
+  apoya exactamente en esta diferencia C menos A para decidir cuánta
+  atenuación en baja frecuencia debe aportar el protector (el método SNR,
+  más simple, la esquiva trabajando directamente con el nivel ponderado C).
+
+```python
+import numpy as np
+from phonometry import leq, weighting_filter
+
+# Un retumbo de 50 Hz bajo un siseo ligero: débil en A, fuerte en C.
+fs = 48000
+t = np.arange(10 * fs) / fs
+rng = np.random.default_rng(1)
+x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
+
+la = leq(weighting_filter(x, fs, curve="A"))
+lc = leq(weighting_filter(x, fs, curve="C"))
+print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
+# LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
+# C - A por encima de 20 dB: el número ponderado A ocultaría el retumbo.
+```
+
 ## 2. Uso básico
 
 ```python
@@ -278,6 +333,24 @@ al objetivo de diseño, por lo que son idénticos para A, C y Z.
 desviación cero, holgadamente dentro del corredor de clase 1 (sombreado); los
 límites más amplios de clase 2 se muestran punteados. El corredor se ensancha
 en los extremos de banda donde solo se aplica un límite unilateral.*
+
+## Referencias
+
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  Las mediciones originales de igual sonoridad cuya isófona de 40 fonios
+  invierte la curva A (sección 1).
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [Catálogo iso.org](https://www.iso.org/standard/83117.html).
+  Las sucesoras modernas de las curvas de Fletcher y Munson, dibujadas en el
+  diagrama de la sección 1.
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [Catálogo IEC](https://webstore.iec.ch/en/publication/5708).
+  Las definiciones normativas de A/C/Z, las curvas analíticas del Anexo E y
+  los límites de aceptación de la Tabla 3 verificados en la sección 7.
 
 ---
 

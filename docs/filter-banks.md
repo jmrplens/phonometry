@@ -24,6 +24,26 @@ repeat scaled by 10. phonometry designs each band as an SOS cascade whose
 Chebyshev II, Elliptic and Bessel that requires pre-warping the analytic
 band-edge mapping rather than trusting SciPy's default parametrization.
 
+### Poles, zeros and stability
+
+A digital band-pass filter is a constellation of poles and zeros in the
+z-plane: zeros at or near DC and Nyquist pin the response down far from the
+band (to the stopband floor, for equiripple designs), and the poles cluster
+just inside the unit circle at the angles
+$\omega = 2\pi f / f_s$ the passband spans. Two intuitions follow. First,
+selectivity is proximity: the closer the poles sit to the unit circle, the
+sharper the band and the longer the filter rings (the group-delay peaks of
+section 7 are that ringing, measured). Second, stability is a margin, not a
+property of the architecture: an IIR filter is stable only while every pole
+stays strictly inside the unit circle, and a narrow band at a high sample
+rate pushes the poles outward (pole radius $\approx 1 - \pi B / f_s$ for
+bandwidth $B$) and squeezes them together, until double-precision
+coefficients can no longer represent their positions accurately.
+Second-order sections (SOS) defuse half of the problem: each pole pair keeps
+its own coefficients, so rounding errors stay local instead of compounding
+through one high-order polynomial. The other half, the tiny $B / f_s$ ratio
+itself, is what decimation fixes.
+
 ### Multirate decimation
 
 A 25 Hz one-third-octave band at 48 kHz spans about 5.8 Hz — 0.024 %
@@ -32,12 +52,68 @@ avoids that by filtering low bands at a decimated rate:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate.svg" alt="Multirate decimation: high bands filtered at the input rate, low bands after anti-alias low-pass and decimation so the SOS sections stay numerically healthy" width="92%"></picture>
 
+Decimating by $M$ rescales the problem: the same 5.8 Hz bandwidth becomes
+$M$ times larger relative to the new Nyquist, the pole radius pulls away from
+the unit circle, and the SOS coefficients return to a well-conditioned range.
+The price is bookkeeping the bank pays internally: an anti-alias low-pass must
+run before every decimation stage, because a component above the new Nyquist
+that folds down lands *inside* the low bands being measured, and no later
+filter can remove it.
+
+### Aliasing pitfalls
+
+The bank protects its own decimation stages, but it can only analyze what the
+capture chain delivered:
+
+- **Fold-down at the ADC.** Energy above $f_s/2$ that reaches the converter
+  without an analog anti-alias filter folds into the analysis range and is
+  indistinguishable from real in-band sound. Sound cards filter this
+  internally; custom instrumentation chains may not.
+- **Cheap resampling.** Converting a 44.1 kHz recording to 48 kHz with a
+  low-quality resampler leaves images that bias the highest bands. Use a
+  polyphase resampler (`scipy.signal.resample_poly`) or, simpler, analyze at
+  the native rate: every phonometry function takes `fs` directly.
+- **Bands near Nyquist.** A band whose upper edge approaches $f_s/2$ cannot
+  realize its design response: the bilinear transform compresses the
+  frequency axis there (the same effect the weighting filters counter with
+  `high_accuracy`). Keep the top band edge comfortably below Nyquist or raise
+  `fs`, and let `verify_filter_class` report how much margin is left.
+
 ## 2. Filter Comparison and Zoom
 
 We use Second-Order Sections (SOS) for all filters to ensure numerical stability.
 The following plot compares the architectures focusing on the -3 dB crossover point.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison.svg" alt="Magnitude response comparison of the five filter architectures for the 1 kHz octave band, with a zoom at the -3 dB crossover" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import sosfreqz
+from phonometry import OctaveFilterBank
+
+fs = 48000
+fig, ax = plt.subplots(figsize=(9, 5))
+for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
+    # limits picks out the single 1 kHz octave band
+    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
+                            filter_type=ftype)
+    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    fsd = fs / bank.factor[idx]           # rate the band actually runs at
+    w, h = sosfreqz(bank.sos[idx], worN=16384, fs=fsd)
+    ax.semilogx(w, 20 * np.log10(np.abs(h) + 1e-9), label=ftype)
+ax.axhline(-3, color="gray", linestyle=":", label="-3 dB")
+ax.set(xlim=(100, 8000), ylim=(-80, 5),
+       xlabel="Frequency [Hz]", ylabel="Magnitude [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 | Type | Name | Usage Example | Best For |
 | :--- | :--- | :--- | :--- |
@@ -182,6 +258,38 @@ low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4.svg" alt="Linkwitz-Riley 4th-order crossover: low-pass, high-pass and their flat sum" width="60%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import freqz
+from phonometry import linkwitz_riley
+
+# Measure both branches: split a unit impulse and take the spectra.
+fs = 48000
+impulse = np.zeros(fs)
+impulse[0] = 1.0
+low, high = linkwitz_riley(impulse, fs, freq=1000, order=4)
+
+w, h_lp = freqz(low, worN=8192, fs=fs)
+_, h_hp = freqz(high, worN=8192, fs=fs)
+
+fig, ax = plt.subplots(figsize=(9, 5))
+ax.semilogx(w, 20 * np.log10(np.abs(h_lp) + 1e-9), label="Low-pass (LR4)")
+ax.semilogx(w, 20 * np.log10(np.abs(h_hp) + 1e-9), label="High-pass (LR4)")
+ax.semilogx(w, 20 * np.log10(np.abs(h_lp + h_hp) + 1e-9), "--",
+            label="Sum (flat)")
+ax.set(xlim=(20, 20000), ylim=(-60, 5),
+       xlabel="Frequency [Hz]", ylabel="Magnitude [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 6. Verifying the IEC 61260-1 class
 
 `verify_filter_class` checks every band of a bank against the acceptance
@@ -210,6 +318,42 @@ and the figure below use.
 regions: it must attenuate at least the red mask outside the band and no more
 than the purple mask inside it.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import sosfreqz
+from phonometry import OctaveFilterBank, class_limits
+
+fs = 48000
+bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+fm, fsd = bank.freq[idx], fs / bank.factor[idx]
+w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
+att = -20 * np.log10(np.abs(h) + 1e-12)
+delta_a = att - np.interp(fm, w, att)     # relative attenuation
+
+grid = np.logspace(np.log10(0.05), np.log10(8), 2000)
+lo1, hi1 = class_limits(1.0, 1, grid)     # class 1 min/max attenuation
+
+fig, ax = plt.subplots(figsize=(9, 5.5))
+ax.fill_between(grid, -10, lo1, alpha=0.15, color="tab:red",
+                label="Forbidden: too little attenuation")
+finite = np.isfinite(hi1)
+ax.fill_between(grid[finite], hi1[finite], 90, alpha=0.15, color="tab:purple",
+                label="Forbidden: too much attenuation")
+ax.plot(w / fm, delta_a, label="Butterworth order 6")
+ax.set(xscale="log", xlim=(0.08, 8), ylim=(-6, 90),
+       xlabel="Normalized frequency f / fm",
+       ylabel="Relative attenuation [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 With default parameters (order 6), **Butterworth meets class 1**, and so does
 **Chebyshev II**: its `attenuation` default is now `72` dB, clearing the 70 dB
 far-stopband class 1 limit (scipy pins the cheby2 equiripple floor at exactly
@@ -237,6 +381,69 @@ print(result["bands"][0]["margin_class0_db"])
 *The class 0 corridor (±0.15 dB at mid-band) is the tightest; class 1 (±0.3 dB)
 and class 2 (±0.5 dB) are progressively wider. The order-6 Butterworth threads
 inside class 0 across the whole pass-band.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import sosfreqz
+from phonometry import OctaveFilterBank, class_limits
+
+fs = 48000
+bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+fm, fsd = bank.freq[idx], fs / bank.factor[idx]
+w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
+att = -20 * np.log10(np.abs(h) + 1e-12)
+delta_a = att - np.interp(fm, w, att)
+
+# Pass-band only: outside the band edges the maximum limit is +inf.
+g = 10 ** (3 / 10)
+grid = np.linspace(g ** -0.5, g ** 0.5, 1500)
+pb = (w / fm >= g ** -0.5) & (w / fm <= g ** 0.5)
+
+fig, ax = plt.subplots(figsize=(9, 5.5))
+for cls in (2, 1, 0):                      # nested corridors, class 0 tightest
+    lo, hi = class_limits(1.0, cls, grid, edition="1995")
+    ax.plot(grid, hi, label=f"Class {cls} corridor")
+    ax.plot(grid, lo, color=ax.lines[-1].get_color())
+ax.plot(w[pb] / fm, delta_a[pb], "k", lw=2, label="Butterworth order 6")
+ax.set(xscale="log", xlim=(g ** -0.5, g ** 0.5), ylim=(-0.7, 6),
+       xlabel="Normalized frequency f / fm",
+       ylabel="Relative attenuation [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+### What a class means physically
+
+The masks are worst-case error bounds on a *measurement*, not abstract
+grades:
+
+- **In the passband** the corridor bounds how much the band can mis-read
+  in-band content: a class 1 bank reads a mid-band tone within ±0.4 dB of
+  its true level and a class 2 bank within ±0.6 dB (2014 Table 1; the
+  stricter 1995 masks allowed ±0.3 dB for class 1 and ±0.15 dB for
+  class 0). Toward the band edges the corridor widens, which is the honest
+  admission that a tone sitting exactly on an edge is genuinely ambiguous
+  between two bands (both read it about 3 dB down).
+- **In the stopband** the minimum-attenuation mask bounds leakage from the
+  rest of the spectrum: far from the band, class 1 demands at least 70 dB of
+  relative attenuation (the reason the `cheby2` default is 72 dB). In energy
+  terms, an out-of-band tone must be roughly 70 dB stronger than the band's
+  own content before it doubles the band's energy reading (+3 dB). The
+  practical consequence: measuring bands far below a dominant tone, the
+  reading floors out at the leakage skirt about 70 dB down, and a steeper
+  architecture (or higher order) is the only way to push that floor lower.
+- **For the budget**, the class is the filter's contribution to the
+  measurement uncertainty: a class 1 bank adds up to a few tenths of a dB to
+  a band level, comparable to a class 1 sound level meter's other tolerance
+  terms, which is why instrument-grade chains specify the class of every
+  stage rather than a single overall figure.
 
 **Which architecture reaches which class?** The library's **default — Butterworth
 order 6 — meets class 0** in the configurations the conformance suite verifies
@@ -289,6 +496,38 @@ spl_c2, _, xb_cheby2 = octave_filter(y, fs=fs, fraction=1, sigbands=True, filter
 red) responses. The bottom plot shows the **Impulse Response**, highlighting the
 differences in stability and transient decay.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import OctaveFilterBank
+
+fs = 48000
+t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
+y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
+
+bank_b = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0])
+bank_c = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0],
+                          filter_type="cheby2")
+_, freq, xb_butter = bank_b.filter(y, sigbands=True)
+_, _, xb_cheby2 = bank_c.filter(y, sigbands=True)
+
+fig, axes = plt.subplots(len(freq), 1, figsize=(9, 2 * len(freq)), sharex=True)
+for ax, fc, xb, xc in zip(axes, freq, xb_butter, xb_cheby2):
+    ax.plot(t, xb, label="Butterworth")
+    ax.plot(t, xc, "--", label="Chebyshev II")
+    ax.set_title(f"{fc:.0f} Hz band")
+    ax.set_xlim(0, 0.04)
+axes[0].legend()
+axes[-1].set_xlabel("Time [s]")
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
 > [!NOTE]
 > **Why do the signals look shifted in time?**
 > Digital IIR filters (like Butterworth or Chebyshev) have **non-linear phase
@@ -306,6 +545,35 @@ the passband (transient shapes survive), while Chebyshev I and Elliptic pay for
 their steep roll-off with strong delay peaks at the band edges.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison.svg" alt="Group delay of the 1 kHz octave band for the five architectures: Bessel nearly flat, Chebyshev and Elliptic peaking at the band edges" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import group_delay
+from phonometry import OctaveFilterBank
+
+fs = 48000
+w = np.logspace(np.log10(500), np.log10(2000), 1024)
+fig, ax = plt.subplots(figsize=(9, 5))
+for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
+    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
+                            filter_type=ftype)
+    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    fsd = fs / bank.factor[idx]
+    # Group delay of an SOS cascade = sum of the sections' group delays
+    gd = sum(group_delay((sec[:3], sec[3:]), w=w, fs=fsd)[1]
+             for sec in bank.sos[idx])
+    ax.semilogx(w, gd / fsd * 1000, label=ftype)
+ax.set(xlim=(500, 2000), xlabel="Frequency [Hz]", ylabel="Group delay [ms]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ## 8. Zero-phase filtering
 
@@ -330,6 +598,56 @@ spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
 
 *Causal filtering delays the burst by the filter's group delay; zero-phase
 filtering keeps it aligned with the input.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import OctaveFilterBank
+
+fs = 48000
+t = np.linspace(0, 0.15, int(fs * 0.15), endpoint=False)
+x = np.zeros_like(t)                      # 250 Hz tone burst mid-frame
+start, end = int(0.05 * fs), int(0.10 * fs)
+x[start:end] = np.sin(2 * np.pi * 250 * t[start:end]) * np.hanning(end - start)
+
+bank = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
+_, _, fwd = bank.filter(x, sigbands=True, calculate_level=False)
+_, _, zp = bank.filter(x, sigbands=True, calculate_level=False,
+                       zero_phase=True)
+
+fig, ax = plt.subplots(figsize=(9, 4.5))
+ax.plot(t, x, color="gray", alpha=0.5, label="Input burst (250 Hz)")
+ax.plot(t, fwd[0], label="Causal (group delay)")
+ax.plot(t, zp[0], "--", label="zero_phase=True (aligned)")
+ax.set(xlabel="Time [s]", ylabel="Amplitude")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+## References
+
+- International Electrotechnical Commission. (2014). *Electroacoustics —
+  Octave-band and fractional-octave-band filters — Part 1: Specifications*
+  (IEC 61260-1:2014).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
+  The band-edge mathematics of section 1 and the class acceptance masks
+  verified in section 6.
+- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
+  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
+  [Open Library record](https://openlibrary.org/isbn/9780131988422).
+  The pole-zero, stability and multirate theory condensed in section 1: SOS
+  cascades, the bilinear transform and decimation.
+- Smith, J. O. *Introduction to digital filters with audio applications*
+  (online book). Center for Computer Research in Music and Acoustics (CCRMA),
+  Stanford University.
+  [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
+  A free companion treatment of digital-filter design and analysis, from
+  pole-zero geometry to filter stability.
 
 ---
 

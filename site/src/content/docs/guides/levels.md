@@ -45,6 +45,18 @@ underestimates every fluctuating noise. $L_{eq}$ is the level of the *steady*
 sound carrying the same energy as the real, fluctuating one, which is why
 regulations are written in terms of it.
 
+The same rule governs every combination of levels: period levels into a
+whole-day value, microphone positions into a room average, repeated
+measurements into a mean. Combine energies,
+`10 * np.log10(np.mean(10 ** (L / 10)))`, never the dB values. The
+arithmetic-mean error is one-sided (it always under-reads) and grows with
+the spread, so it does not cancel out over many measurements: with values
+spread over 10 dB it already costs a couple of decibels. The few normative
+formulas that do average decibels directly are deliberate approximations and
+say so (ISO 1996-2 offers one as a substitute for repeated-measurement
+uncertainty and warns it inflates once levels spread beyond 3 dB, see the
+uncertainty section below); everywhere else, energy.
+
 ### `leq()` / `laeq()` parameters
 
 | Parameter | Type / shape | Units | Range / default | Notes |
@@ -95,6 +107,35 @@ envelope (Fast by default), and $L_{10}$ is the envelope value exceeded 10 %
 of the time. That makes the *ballistics choice part of the metric*: an
 $L_{10}$ from a Slow envelope is systematically lower than from a Fast one on
 impulsive noise, so regulations always name the time weighting.
+
+### Reading Leq against the percentiles
+
+$L_{eq}$ and the $L_N$ family answer different questions about the same
+level history. $L_{eq}$ is an energy mean, so the loudest moments dominate
+it: a single second at 100 dB lifts the $L_{eq}$ of an otherwise steady
+60 dB hour to about 66 dB, while $L_{90}$, $L_{50}$ and even $L_{10}$ barely
+move (a one-second event occupies far less than 10 % of the hour).
+Percentiles are rank statistics, robust against rare events by construction.
+In practice:
+
+- **$L_{eq}$ (and $L_{Aeq}$)** is the dose metric: regulations, exposure
+  and annoyance models are written in it precisely *because* it refuses to
+  ignore rare loud events.
+- **$L_{90}$** estimates the residual (background) level under an
+  intermittent source, which is how ISO 1996-2 Annex I uses it.
+- **$L_{10}$** tracks event peaks; the spread $L_{10} - L_{90}$ is a quick
+  intermittency indicator.
+- **$L_{eq} - L_{50}$** measures how "peaky" the history is: for steady
+  noise the two nearly coincide, and the more the level fluctuates the
+  further $L_{eq}$ climbs above the median (for a Gaussian level
+  distribution with standard deviation $\sigma$ dB,
+  $L_{eq} \approx L_{50} + 0.115\,\sigma^2$).
+
+One caution: percentiles do not combine. Two hours with known $L_{90}$
+values do not yield the two-hour $L_{90}$ by any formula; recompute it from
+the pooled envelope. $L_{eq}$ values, by contrast, combine exactly by
+time-weighted energy averaging, which is what `composite_rating_level`
+does below.
 
 ### `ln_levels()` parameters
 
@@ -346,6 +387,19 @@ ISO 9612 occupational strategies continue in
 tonal-prominence verdicts in [Prominent Discrete Tones](/phonometry/guides/tone-prominence/),
 and the ISO 226 equal-loudness contours live with the perception metrics in
 [Loudness](/phonometry/guides/loudness/).
+
+## References
+
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
+  The envelope ballistics behind the percentile levels, the C-weighted peak
+  and the SEL toneburst references the implementation is verified against.
+- Kinsler, L. E., Frey, A. R., Coppens, A. B., & Sanders, J. V. (2000).
+  *Fundamentals of acoustics* (4th ed.). Wiley. ISBN 978-0-471-84789-2.
+  [Publisher page](https://www.wiley.com/en-us/Fundamentals+of+Acoustics%2C+4th+Edition-p-9780471847892).
+  The sound-pressure, energy and level definitions underneath Leq, SEL and
+  the dose measures.
 
 ---
 

@@ -5,3 +5,4 @@ types-setuptools>=82.0.0.20260518
 pytest>=9.1.1
 pytest-cov>=7.1.0
 matplotlib>=3.10.9  # required by the result-object .plot() tests
+pyoxipng==9.1.1  # deterministic PNG optimizer; pinned so a local `make graphs` emits the same bytes as the figures CI stack

@@ -23,3 +23,8 @@ kiwisolver==1.5.0
 pyparsing==3.3.2
 cycler==0.12.1
 python-dateutil==2.9.0.post0
+# Lossless, deterministic PNG optimizer applied to the raster figures at save
+# time (scripts/generate_graphs.py:_optimize_png). The recompression is a pure
+# function of the input pixels, so `make graphs` stays byte-reproducible and CI
+# regenerates the exact committed bytes.
+pyoxipng==9.1.1

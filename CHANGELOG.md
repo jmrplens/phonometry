@@ -279,6 +279,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The raster documentation figures (the seven `_PNG_FIGURES`: spectrogram,
+  excitation signals, Schroeder decay, calibration stability, impulse
+  response, numerical propagation and airport contour, across the EN/ES x
+  light/dark variants) now render at 300 DPI instead of 150, doubling their
+  pixel dimensions so they stay crisp on high-density displays and when
+  zoomed. The docs embeds size them by percentage width, so no layout change
+  was needed. Each PNG is also losslessly recompressed at save time with a
+  deterministic `oxipng` pass (via the pinned `pyoxipng==9.1.1`), which
+  shrinks the files ~25-30% without changing a single pixel; because the
+  optimization is a pure function of the input, `make graphs` stays
+  byte-reproducible and `scripts/check_figures.py` still matches a fresh
+  regeneration.
 - The documentation animations now render at 300 DPI (2400x1350, from
   800x450) for crisp playback on high-density displays, keeping the same
   8x4.5 figure so no layout re-tuning is needed. The VP9 WebM encode gains

@@ -49,6 +49,105 @@ que las guías incorporan sus secciones de Referencias.
   Tratamiento gratuito y complementario del diseño y análisis de filtros
   digitales, el paso natural tras las guías de bancos de filtros.
 
+## Acústica de edificios
+
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  El tratamiento exhaustivo del aislamiento a ruido aéreo y de impactos: las
+  cadenas de medición, la transmisión por flancos y el marco de predicción
+  EN 12354.
+  Citado por [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/),
+  [Medición del aislamiento en laboratorio](/phonometry/es/guides/insulation-lab/) y
+  [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/guides/insulation-prediction/).
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  Un manual compacto sobre la transmisión del sonido en edificios, de las
+  construcciones simples y dobles a los suelos flotantes.
+  Citado por [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/),
+  [Medición del aislamiento en laboratorio](/phonometry/es/guides/insulation-lab/) y
+  [Rigidez dinámica de materiales resilientes](/phonometry/es/guides/dynamic-stiffness/).
+- International Organization for Standardization. (2020). *Acoustics —
+  Rating of sound insulation in buildings and of building elements — Part 1:
+  Airborne sound insulation* (ISO 717-1:2020).
+  [Catálogo iso.org](https://www.iso.org/standard/77435.html).
+  La calificación por curva de referencia y los términos de adaptación
+  espectral C y Ctr.
+  Citado por [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/).
+- International Organization for Standardization. (2014). *Acoustics — Field
+  measurement of sound insulation in buildings and of building elements —
+  Part 1: Airborne sound insulation* (ISO 16283-1:2014).
+  [Catálogo iso.org](https://www.iso.org/standard/55997.html).
+  El método de medición aérea en campo.
+  Citado por [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/).
+- International Organization for Standardization. (1989). *Acoustics —
+  Determination of dynamic stiffness — Part 1: Materials used under floating
+  floors in dwellings* (ISO 9052-1:1989).
+  [Catálogo iso.org](https://www.iso.org/standard/16620.html).
+  El método de resonancia para la rigidez dinámica por unidad de área,
+  idéntico a EN 29052-1.
+  Citado por [Rigidez dinámica de materiales resilientes](/phonometry/es/guides/dynamic-stiffness/).
+
+## Sonido estructural
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  La monografía de referencia sobre la vibración estructural y su radiación:
+  movilidades, flujo de potencia, aislamiento de vibraciones, eficiencia de
+  radiación y transmisión a través de uniones.
+  Citado por [Movilidad mecánica y la familia de FRF](/phonometry/es/guides/mechanical-mobility/),
+  [Rigidez dinámica de transferencia](/phonometry/es/guides/transfer-stiffness/),
+  [Potencia sonora desde vibración](/phonometry/es/guides/vibration-sound-power/),
+  [Potencia sonora estructural de equipos](/phonometry/es/guides/structure-borne-power/)
+  y [Ruido estructural instalado](/phonometry/es/guides/installed-structure-borne/).
+- International Organization for Standardization. (2011). *Mechanical
+  vibration and shock — Experimental determination of mechanical mobility —
+  Part 1: Basic terms and definitions, and transducer specifications*
+  (ISO 7626-1:2011).
+  [Catálogo iso.org](https://www.iso.org/standard/50426.html).
+  La familia de FRF y sus distinciones libre/bloqueada.
+  Citado por [Movilidad mecánica y la familia de FRF](/phonometry/es/guides/mechanical-mobility/).
+- International Organization for Standardization. (2015). *Mechanical
+  vibration and shock — Experimental determination of mechanical mobility —
+  Part 2: Measurements using single-point translation excitation with an
+  attached vibration exciter* (ISO 7626-2:2015).
+  [Catálogo iso.org](https://www.iso.org/standard/62483.html).
+  El método de medición con excitador acoplado y sus criterios de aceptación.
+  Citado por [Movilidad mecánica y la familia de FRF](/phonometry/es/guides/mechanical-mobility/).
+- International Organization for Standardization. (2008). *Acoustics and
+  vibration — Laboratory measurement of vibro-acoustic transfer properties of
+  resilient elements — Part 1: Principles and guidelines* (ISO 10846-1:2008).
+  [Catálogo iso.org](https://www.iso.org/standard/38936.html).
+  La idealización de fuerza de bloqueo tras la rigidez dinámica de
+  transferencia.
+  Citado por [Rigidez dinámica de transferencia](/phonometry/es/guides/transfer-stiffness/).
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of airborne sound power levels emitted by machinery using
+  vibration measurement — Part 1: Survey method using a fixed radiation
+  factor* (ISO/TS 7849-1:2009).
+  [Catálogo iso.org](https://www.iso.org/standard/40537.html).
+  La potencia sonora de límite superior desde la velocidad superficial con
+  ε = 1.
+  Citado por [Potencia sonora desde vibración](/phonometry/es/guides/vibration-sound-power/).
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of airborne sound power levels emitted by machinery using
+  vibration measurement — Part 2: Engineering method including determination
+  of the adequate radiation factor* (ISO/TS 7849-2:2009).
+  [Catálogo iso.org](https://www.iso.org/standard/40538.html).
+  El método de ingeniería con un factor de radiación medido por bandas.
+  Citado por [Potencia sonora desde vibración](/phonometry/es/guides/vibration-sound-power/).
+- International Organization for Standardization. (1996). *Acoustics —
+  Characterization of sources of structure-borne sound with respect to sound
+  radiation from connected structures — Measurement of velocity at the
+  contact points of machinery when resiliently mounted* (ISO 9611:1996).
+  [Catálogo iso.org](https://www.iso.org/standard/17424.html).
+  La caracterización por velocidad libre de fuentes montadas
+  resilientemente.
+  Citado por [Potencia sonora estructural de equipos](/phonometry/es/guides/structure-borne-power/).
+
 ## Habla
 
 - Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in

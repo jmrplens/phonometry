@@ -208,7 +208,7 @@ See the [Speech Intelligibility guide](speech-intelligibility.md) for usage.
 
 ## Hearing thresholds and presbycusis (ISO 389-7, ISO 7029)
 
-ISO 389-7:2006 Table 1 fixes the reference threshold of hearing of otologically normal young adults — the free-field and diffuse-field SPL corresponding to 0 dB HL at the 11 audiometric frequencies 125 Hz – 8 kHz (22.1 dB at 125 Hz for both fields, 2.4/0.8 dB free/diffuse at 1 kHz, diverging at high frequency to 12.6 vs 6.8 dB at 8 kHz). ISO 7029:2017 describes how that threshold shifts statistically with age: the median deviation from age 18 is (clause 4.2, Table 1)
+ISO 389-7:2005 Table 1 fixes the reference threshold of hearing of otologically normal young adults — the free-field and diffuse-field SPL corresponding to 0 dB HL at the 11 audiometric frequencies 125 Hz – 8 kHz (22.1 dB at 125 Hz for both fields, 2.4/0.8 dB free/diffuse at 1 kHz, diverging at high frequency to 12.6 vs 6.8 dB at 8 kHz). ISO 7029:2017 describes how that threshold shifts statistically with age: the median deviation from age 18 is (clause 4.2, Table 1)
 
 $$
 \Delta H_{md} = a\ (Y - 18)^b \ \text{dB},

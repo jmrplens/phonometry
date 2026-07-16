@@ -209,7 +209,7 @@ Consulta la [guía de inteligibilidad del habla](/phonometry/es/guides/speech-in
 
 ## Umbrales de audición y presbiacusia (ISO 389-7, ISO 7029)
 
-ISO 389-7:2006 Tabla 1 fija el umbral de audición de referencia de adultos jóvenes otológicamente normales — el SPL en campo libre y campo difuso que corresponde a 0 dB HL en las 11 frecuencias audiométricas de 125 Hz a 8 kHz (22,1 dB a 125 Hz en ambos campos, 2,4/0,8 dB libre/difuso a 1 kHz, divergiendo en alta frecuencia hasta 12,6 frente a 6,8 dB a 8 kHz). ISO 7029:2017 describe cómo se desplaza estadísticamente ese umbral con la edad: la desviación mediana respecto a los 18 años es (cláusula 4.2, Tabla 1)
+ISO 389-7:2005 Tabla 1 fija el umbral de audición de referencia de adultos jóvenes otológicamente normales — el SPL en campo libre y campo difuso que corresponde a 0 dB HL en las 11 frecuencias audiométricas de 125 Hz a 8 kHz (22,1 dB a 125 Hz en ambos campos, 2,4/0,8 dB libre/difuso a 1 kHz, divergiendo en alta frecuencia hasta 12,6 frente a 6,8 dB a 8 kHz). ISO 7029:2017 describe cómo se desplaza estadísticamente ese umbral con la edad: la desviación mediana respecto a los 18 años es (cláusula 4.2, Tabla 1)
 
 $$
 \Delta H_{md} = a\ (Y - 18)^b \ \text{dB},

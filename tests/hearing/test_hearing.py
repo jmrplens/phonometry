@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
-"""Tests for :mod:`phonometry.hearing.threshold` (ISO 7029:2017 and ISO 389-7:2006).
+"""Tests for :mod:`phonometry.hearing.threshold` (ISO 7029:2017 and ISO 389-7:2005).
 
 The age-related model is validated against the standard's own boundary
 behaviour (at age 18 the median deviation is zero and the spreads equal the
@@ -72,7 +72,7 @@ def test_male_median_exceeds_female_at_high_frequency() -> None:
 def test_reference_threshold_matches_iso389_7() -> None:
     free = h.reference_threshold("free-field")
     diffuse = h.reference_threshold("diffuse-field")
-    # ISO 389-7:2006 Table 1 (audiometric frequencies).
+    # ISO 389-7:2005 Table 1 (audiometric frequencies).
     assert free[4] == pytest.approx(ISO389_7_REF_FREE_1KHZ)  # 1000 Hz free-field
     assert free[10] == pytest.approx(12.6)  # 8000 Hz free-field
     assert diffuse[4] == pytest.approx(0.8)  # 1000 Hz diffuse-field

@@ -98,8 +98,8 @@ plt.show()
 Dos límites físicos acotan toda medición p-p, y el objeto de resultado incluye
 ambos:
 
-- **Alta frecuencia**: el gradiente por diferencias finitas subestima I en
-  $\sin(k\Delta r)/(k\Delta r)$ — verificado en CI contra la Tabla 3 de
+- **Alta frecuencia**: el gradiente por diferencias finitas subestima I en el
+  factor $\sin(k\Delta r)/(k\Delta r)$ — verificado en CI contra la Tabla 3 de
   IEC 61043. `IntensityResult.bias_correction` proporciona el factor y
   `max_valid_frequency` (≈ 0,1·c/Δr; 2,9 kHz para un separador de 12 mm) el
   techo práctico. Los separadores mayores alcanzan frecuencias más bajas; los
@@ -137,7 +137,7 @@ print(ld, ld > fi.f2)                                      # 8.0 True (criterio 
 
 ### El margen sobre el índice residual
 
-Los dos canales de cualquier sonda y analizador reales nunca están
+Los dos canales de cualquier sonda y analizador real nunca están
 perfectamente emparejados en fase. Alimenta ambos canales con la *misma*
 señal (el ensayo de intensidad residual de IEC 61043): la intensidad
 verdadera es exactamente cero y, aun así, el desajuste indica una pequeña
@@ -157,12 +157,12 @@ $$
 Un margen de 10 dB mantiene el sesgo dentro de unos 0,5 dB y uno de 7 dB
 dentro de aproximadamente 1 dB; son precisamente los factores de sesgo `K`
 de ISO 9614, y la **capacidad dinámica** `Ld = δpI0 − K` es el mayor índice
-de campo que el instrumento puede permitirse a un grado dado. Léelo como un
-presupuesto: cada decibelio que sube el `δpI` del campo gasta un decibelio
-de margen, y cuando `δpI` alcanza `δpI0` la lectura es puro error de fase,
-de cualquier signo. Por eso el índice presión-intensidad, y no la calidad de
-los micrófonos, es el que acota la exactitud alcanzable de toda medida de
-intensidad.
+de campo que el instrumento puede tolerar para un grado de precisión dado.
+Léelo como un presupuesto: cada decibelio que sube el `δpI` del campo consume
+un decibelio de margen, y cuando `δpI` alcanza `δpI0` la lectura es puro
+error de fase, de cualquier signo. Por eso el índice presión-intensidad, y
+no la calidad de los micrófonos, es el que acota la exactitud alcanzable de
+toda medida de intensidad.
 
 ### Campos reactivos cerca de la fuente
 
@@ -172,7 +172,7 @@ transporta poco flujo neto. Para una fuente pequeña la componente en
 cuadratura crece como `1/(kr)`; a 100 Hz y 0,25 m de la fuente ya es
 aproximadamente el doble de la activa, y `δpI` sube igual que en la onda
 estacionaria de la figura anterior. Lo mismo ocurre entre una máquina y una
-superficie reflectante dura, y en salas reverberantes donde el campo difuso
+superficie reflectante rígida, y en salas reverberantes donde el campo difuso
 eleva la presión sin transportar energía hacia fuera. Por eso ISO 9614-1
 mantiene la superficie de medida a más de 0,5 m de la fuente en promedio, y
 por eso, cuando un barrido no cumple el criterio de capacidad dinámica,
@@ -185,27 +185,27 @@ El separador fija los dos extremos de la banda utilizable, en sentidos
 opuestos:
 
 - **El extremo alto es geometría.** La diferencia finita subestima el
-  gradiente en `sin(kΔr)/(kΔr)`, así que el techo escala como `1/Δr`:
-  `max_valid_frequency ≈ 0.1·c/Δr` mantiene el sesgo dentro de unos 0,3 dB,
+  gradiente en el factor `sin(kΔr)/(kΔr)`, así que el techo escala como
+  `1/Δr`: `max_valid_frequency ≈ 0.1·c/Δr` mantiene el sesgo dentro de unos 0,3 dB,
   lo que da aproximadamente 5,7 kHz con un separador de 6 mm, 2,9 kHz con
   12 mm y 690 Hz con 50 mm (`bias_correct=True` deshace el sesgo conocido
   algo más allá).
-- **El extremo bajo es fase.** Una onda progresiva pone solo
+- **El extremo bajo es fase.** Una onda progresiva introduce solo
   `360·f·Δr/c` grados de fase verdadera a lo largo del separador, 0,8° a
   63 Hz con 12 mm, mientras el desajuste entre canales permanece fijo. Bajar
   la frecuencia encoge la señal, no el error, así que el margen sobre `δpI0`
-  se derrumba en baja frecuencia. Un separador mayor recupera ese margen:
+  se desploma en baja frecuencia. Un separador mayor recupera ese margen:
   los requisitos de índice residual de IEC 61043 escalan como
-  `10·lg(Δr/25 mm)`, de modo que doblar el separador vale 3 dB de margen en
+  `10·lg(Δr/25 mm)`, de modo que doblar el separador aporta 3 dB de margen en
   baja frecuencia.
 
-Ningún separador cubre por sí solo todo el rango de audio: 6 mm sirve para
-el trabajo en alta frecuencia, 50 mm para la baja frecuencia y el habitual
-de 12 mm cubre la banda media. El trabajo de banda ancha se mide dos
-veces con dos separadores y se combinan los resultados por banda; sea cual
-sea el separador montado, verifica `δpI0` con ese separador puesto, porque
-el índice pertenece a la cadena sonda-separador-analizador, no a los
-micrófonos solos.
+Ningún separador cubre por sí solo todo el rango de audio: el de 6 mm sirve
+para el trabajo en alta frecuencia, el de 50 mm para la baja frecuencia y el
+habitual de 12 mm cubre la banda media. Las mediciones de banda ancha se
+realizan dos veces con dos separadores y se combinan los resultados por
+banda; sea cual sea el separador montado, verifica `δpI0` con ese separador
+instalado, porque el índice pertenece a la cadena
+sonda-separador-analizador, no a los micrófonos por sí solos.
 
 ### Parámetros de `sound_intensity()`
 

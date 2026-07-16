@@ -24,7 +24,7 @@ prácticas distintos.
 
 | Método | Norma | Magnitud medida | Entorno | Grado de precisión | Cuándo usarlo |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| Superficie envolvente | **ISO 3744** (ingeniería) / **ISO 3746** (control) | Presión sonora sobre una semiesfera o caja | Campo esencialmente libre sobre uno o varios planos reflectantes | Grado 2 (`σR0 ≈ 1.5 dB`) / grado 3 (`≈ 3.0 dB`) | In situ o en una sala grande; sin instalación de ensayo especial disponible |
+| Superficie envolvente | **ISO 3744** (ingeniería) / **ISO 3746** (inspección) | Presión sonora sobre una semiesfera o caja | Campo esencialmente libre sobre uno o varios planos reflectantes | Grado 2 (`σR0 ≈ 1.5 dB`) / grado 3 (`≈ 3.0 dB`) | In situ o en una sala grande; sin instalación de ensayo especial disponible |
 | Sala reverberante | **ISO 3741** | Presión sonora en el campo difuso | Sala reverberante cualificada de paredes rígidas | Grado 1 (precisión) | Máxima precisión para fuentes estacionarias de banda ancha en laboratorio |
 | Barrido de intensidad | **ISO 9614-2** | Intensidad sonora normal barrida sobre una superficie | Casi cualquiera, tolerante al ruido extraño estacionario | Grado 2 / 3 (a partir de los indicadores de campo por banda) | In situ con ruido de fondo, o una máquina entre muchas |
 | Sala anecoica | **ISO 3745** | Presión sonora sobre un conjunto fijo de micrófonos | Sala anecoica o semianecoica cualificada | Grado 1 (precisión) | Emisión de grado de referencia en un laboratorio de campo libre |
@@ -52,7 +52,7 @@ primera coincidencia nombra la norma.
    (grado 2, el grado preferido para las declaraciones de ruido); una fuente
    de referencia, una clasificación de productos o un litigio piden precisión
    (grado 1); un primer reconocimiento de una nave ruidosa tolera el grado de
-   control (grado 3). El grado 1 solo existe en una sala de laboratorio
+   inspección (grado 3). El grado 1 solo existe en una sala de laboratorio
    cualificada (ISO 3741, ISO 3745) o mediante los métodos de intensidad de
    precisión (ISO 9614-1 en puntos discretos, ISO 9614-3 por barrido).
 2. **¿Puede la fuente viajar al laboratorio?** ISO 3741 quiere la fuente
@@ -66,7 +66,7 @@ primera coincidencia nombra la norma.
    el fondo al menos 6 dB por debajo de la fuente (preferiblemente más de
    15 dB) y `K2 ≤ 4 dB`. Si solo se alcanza un margen de 3 dB o `K2 ≤ 7 dB`, los
    mismos micrófonos y fórmulas pasan sin más a ISO 3746 en grado de
-   control.
+   inspección.
 4. **¿Es el fondo el problema?** Cuando las máquinas vecinas no se pueden
    apagar, o el margen es directamente negativo, los métodos de presión
    quedan descartados. El barrido de intensidad (ISO 9614-2, o ISO 9614-3
@@ -130,7 +130,7 @@ El área de la superficie es una forma cerrada de la geometría: una semiesfera
 es `S = 2πr²` sobre un plano reflectante (dividida entre dos y entre cuatro
 para dos y tres planos), y una caja de un plano es `S = 4(ab + bc + ca)` con
 `a = 0.5·l1 + d`, `b = 0.5·l2 + d`, `c = l3 + d` para la distancia de medición
-`d`. ISO 3746 (control) comparte todas las fórmulas pero es más burda: menos
+`d`. ISO 3746 (inspección) comparte todas las fórmulas pero es más burda: menos
 posiciones de micrófono, un criterio de fondo de 3 dB en lugar de 6 dB, y
 validez hasta `K2 ≤ 7 dB` en lugar de 4 dB.
 
@@ -218,19 +218,19 @@ por eso la mayoría de las disputas sobre un resultado de superficie
 envolvente se remontan a uno de estos hábitos:
 
 - **K1 tiene un precipicio, no una pendiente.** Con 15 dB de margen la
-  corrección es un despreciable 0,14 dB; en el criterio de ingeniería de
-  6 dB ya es 1,26 dB, el mayor valor que acepta el grado. Por debajo del
-  criterio la norma no deja correr la fórmula: `K1` se acota y el resultado
-  se declara cota superior. Nunca extrapoles la resta a un margen menor;
-  aumenta el margen (emplazamiento más silencioso, superficie más cercana) o
+  corrección es de tan solo 0,14 dB (despreciable); en el criterio de
+  ingeniería de 6 dB ya es 1,26 dB, el mayor valor que acepta el grado. Por
+  debajo del criterio la norma no permite aplicar la fórmula: `K1` se acota
+  y el resultado se declara cota superior. Nunca extrapoles la resta a un
+  margen menor; aumenta el margen (emplazamiento más silencioso, superficie más cercana) o
   pásate al método de intensidad.
 - **K1 supone un fondo estacionario.** La lectura con la fuente apagada debe
   tomarse en las mismas posiciones y con la sala en el mismo estado, y la
   energía de fondo debe ser la misma durante ambas lecturas. Un sistema de
   ventilación que cicla o un vehículo que pasa durante cualquiera de las dos
-  invalida la pareja; la resta energética supone además fuente y fondo
-  incoherentes, lo que vale para el ruido ajeno pero no para las reflexiones
-  de la propia fuente.
+  invalida la pareja; la resta energética supone además que la fuente y el
+  fondo son incoherentes, lo que vale para el ruido ajeno pero no para las
+  reflexiones de la propia fuente.
 - **K2 elimina la acumulación media de la sala, no las reflexiones
   discretas.** Una pared cercana, un carro u otra máquina justo fuera de la
   superficie añaden una contribución especular concentrada en unos pocos
@@ -239,8 +239,9 @@ envolvente se remontan a uno de estos hábitos:
   la superficie, retira el reflector o trátalo con absorción.
 - **K2 vale lo que valga `A`.** Con `A` de Sabine (`0.16·V/T`), los errores
   en el tiempo de reverberación o en el volumen se propagan directamente. En
-  el límite de validez `K2 = 4 dB` cerca del 60 % de la energía medida es
-  sala, no fuente, y un error del 20 % en `A` aún mueve `LW` unos 0,5 dB.
+  el límite de validez `K2 = 4 dB` cerca del 60 % de la energía medida
+  proviene de la sala, no de la fuente, y un error del 20 % en `A` aún
+  modifica `LW` en unos 0,5 dB.
   Prefiere un `T60` medido a un coeficiente de absorción estimado, y mantén
   la distancia de medición lo bastante pequeña para que `K2` quede
   holgadamente por debajo del límite.
@@ -445,7 +446,7 @@ residual de presión menos el factor de sesgo `K`, 10 dB para el grado 2 y 7 dB
 para el grado 3) debe superar `FpI` (criterio 1); `F+/- ≤ 3 dB` es el criterio
 2 (obligatorio para el grado 2); y los dos barridos repetidos deben coincidir
 dentro del límite `s` de la Tabla 2 por segmento (criterio 3). Una banda es de
-grado **ingeniería** cuando se cumplen los criterios 1, 2 y 3, de **control**
+grado **ingeniería** cuando se cumplen los criterios 1, 2 y 3, de **inspección**
 cuando se cumplen 1 y 3, y en caso contrario `none`.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_es.svg" alt="Una sonda de intensidad sonora p-p de dos micrófonos: dos micrófonos de presión separados por un separador, a partir de los cuales se estima el gradiente de presión y, por tanto, la intensidad normal" style="width:70%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe_es_dark.svg" alt="Una sonda de intensidad sonora p-p de dos micrófonos: dos micrófonos de presión separados por un separador, a partir de los cuales se estima el gradiente de presión y, por tanto, la intensidad normal" style="width:70%">

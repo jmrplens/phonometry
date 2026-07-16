@@ -4442,6 +4442,56 @@ def _chk_doc32_event_sel() -> Outcome:
 
 
 @register(
+    _ROTORCRAFT,
+    "NORAH2 guidance mean ground plane (Eq. 36-40)",
+    "Intercept of the plane fitted to a symmetric 20 m roofline, hand-checked, m",
+)
+def _chk_doc32_mean_plane() -> Outcome:
+    # Roof (0,0)-(100,20)-(200,0): by symmetry the continuous least-squares
+    # line is horizontal at the mean height, area/span = 2000/200 = 10 m.
+    res = ph.mean_ground_plane([0.0, 100.0, 200.0], [0.0, 20.0, 0.0])
+    return numeric(10.0, res.intercept, 1e-6, unit="m", places=4)
+
+
+@register(
+    _ROTORCRAFT,
+    "NORAH2 guidance mean flow resistivity (Eq. 41)",
+    "Log-average of equal 1e4 and 1e6 Pa·s/m2 halves, hand-checked, Pa·s/m2",
+)
+def _chk_doc32_mean_sigma() -> Outcome:
+    # Equal lengths: sigma_bar = 10^((log 1e4 + log 1e6)/2) = 1e5 by hand.
+    got = ph.mean_flow_resistivity([120.0, 120.0], [1.0e4, 1.0e6])
+    return numeric(1.0e5, got, 1e-3, unit="Pa·s/m²", places=1)
+
+
+@register(
+    _ROTORCRAFT,
+    "NORAH2 guidance diffraction at grazing (Eq. 42)",
+    "Pure diffraction with the edge on the line of sight, 10·lg 3, dB",
+)
+def _chk_doc32_diffraction_grazing() -> Outcome:
+    got = float(ph.diffraction_attenuation([1000.0], 0.0, edge_height=10.0)[0])
+    return numeric(4.7712, got, 1e-4, unit="dB", places=4)
+
+
+@register(
+    _ROTORCRAFT,
+    "NORAH2 guidance screening path difference (§A.4.5)",
+    "Rubber-band delta over a 40 m hill, hand-checked geometry, m",
+)
+def _chk_doc32_screening_delta() -> Outcome:
+    # Source (0, 20), receiver (400, 1.2), single edge at (200, 40):
+    # delta = SO + OR - SR = sqrt(200^2+20^2) + sqrt(200^2+38.8^2)
+    #         - sqrt(400^2+18.8^2) = 4.28480 m by hand.
+    res = ph.terrain_screening_adjustment(
+        [500.0], (0.0, 20.0), (400.0, 1.2),
+        [0.0, 190.0, 200.0, 210.0, 400.0], [0.0, 0.0, 40.0, 0.0, 0.0])
+    expected = (np.hypot(200.0, 20.0) + np.hypot(200.0, 38.8)
+                - np.hypot(400.0, 18.8))
+    return numeric(float(expected), res.path_difference, 1e-9, unit="m", places=5)
+
+
+@register(
     _AIRCRAFT,
     "SAE ARP 5534 pure-tone coefficient (ISO 9613-1)",
     "Mid-band α at 1 kHz, 25 °C, 70 % RH, 101.325 kPa, dB/m",

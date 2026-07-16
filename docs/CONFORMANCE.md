@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **261/261 conformance checks pass** across 32 domains and 143 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **265/265 conformance checks pass** across 32 domains and 147 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -531,7 +531,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Rotorcraft noise (ECAC Doc 32 / NORAH2)</b> — 100% (8/8)</summary>
+<summary>&#9989; <b>Rotorcraft noise (ECAC Doc 32 / NORAH2)</b> — 100% (12/12)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -543,6 +543,10 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ECAC Doc 32 flight-path kinematics (Eq. 17) | Airspeed of a straight climbing track, 40 m/s ground speed at a 5° path angle, m/s | 40.15279 m/s (+/-0.0001 m/s) | 40.15279 m/s | 0 m/s | &#9989; |
 | ECAC Doc 32 retarded time (Eq. 22) | Recorded-time delay at 100 m slant distance, r/c with c = 346.1 m/s, s | 0.288934 s (+/-0.00001 s) | 0.288934 s | 0 s | &#9989; |
 | ECAC Doc 32 single event (Eq. 27) | SEL − LASmax of a constant-speed level flyover, 10·lg(π·d/V) closed form, dB | 7.982 dB (+/-0.1 dB) | 7.942 dB | -0.04 dB | &#9989; |
+| NORAH2 guidance mean ground plane (Eq. 36-40) | Intercept of the plane fitted to a symmetric 20 m roofline, hand-checked, m | 10 m (+/-0 m) | 10 m | 0 m | &#9989; |
+| NORAH2 guidance mean flow resistivity (Eq. 41) | Log-average of equal 1e4 and 1e6 Pa·s/m2 halves, hand-checked, Pa·s/m2 | 100000 Pa·s/m² (+/-0 Pa·s/m²) | 100000 Pa·s/m² | 0 Pa·s/m² | &#9989; |
+| NORAH2 guidance diffraction at grazing (Eq. 42) | Pure diffraction with the edge on the line of sight, 10·lg 3, dB | 4.7712 dB (+/-0.0001 dB) | 4.7712 dB | 0 dB | &#9989; |
+| NORAH2 guidance screening path difference (§A.4.5) | Rubber-band delta over a 40 m hill, hand-checked geometry, m | 4.2848 m (+/-0 m) | 4.2848 m | 0 m | &#9989; |
 
 </details>
 

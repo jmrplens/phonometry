@@ -522,11 +522,11 @@ def test_interpolated_source_level_hand_checked_blend() -> None:
 
 def test_interpolated_source_level_validates_band_grids() -> None:
     hems = [_uniform_hemisphere(100.0), _uniform_hemisphere(90.0, [63.0])]
+    single = [_uniform_hemisphere(100.0)]
     with pytest.raises(ValueError, match="band grid"):
         interpolated_source_level(hems, [50.0, 70.0], [0.0, 0.0], 60.0, 0.0, 0.0, 90.0)
     with pytest.raises(ValueError, match="equal length"):
-        interpolated_source_level([_uniform_hemisphere(100.0)], [50.0, 70.0],
-                                  [0.0, 0.0], 60.0, 0.0, 0.0, 90.0)
+        interpolated_source_level(single, [50.0, 70.0], [0.0, 0.0], 60.0, 0.0, 0.0, 90.0)
 
 
 def test_hemisphere_mirrored_reverses_azimuth() -> None:

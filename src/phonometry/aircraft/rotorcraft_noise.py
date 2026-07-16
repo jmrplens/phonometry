@@ -154,19 +154,10 @@ def atmospheric_adjustment(
         for ``r >= rh``).
     :raises ValueError: If a distance is not strictly positive.
     """
-    import warnings
-
-    from ..environmental.air_absorption import AtmosphericAbsorptionWarning, air_attenuation
-
     f = require_positive_array(frequencies, "frequencies")
     r = require_positive(distance, "distance")
     rh = require_positive(reference_distance, "reference_distance")
-    with warnings.catch_warnings():
-        if f.max() <= 10000.0:
-            warnings.filterwarnings(
-                "ignore", message="One or more frequencies are outside",
-                category=AtmosphericAbsorptionWarning)
-        alpha = air_attenuation(f, temperature, relative_humidity, pressure, exact_midband=True)
+    alpha = _absorption_coefficient(f, temperature, relative_humidity, pressure)
     return np.asarray(-alpha * (r - rh), dtype=np.float64)
 
 
@@ -470,9 +461,11 @@ def flight_condition_weights(
 ) -> "list[tuple[int, float]]":
     """Hemisphere blending weights for a flight condition (Eq. 3-10).
 
-    The database flight conditions and the query are normalised by their spans,
-    ``V̄ = V/(V_max − V_min)`` and ``γ̄ = F_fc·γ/(γ_max − γ_min)`` with the
-    empirical flight-condition scaling factor ``F_fc = 2`` (Eq. 3-6). Inside the
+    The database flight conditions and the query are scaled by the database
+    spans, ``V̄ = V/(V_max − V_min)`` and ``γ̄ = F_fc·γ/(γ_max − γ_min)`` with
+    the empirical flight-condition scaling factor ``F_fc = 2``: the guidance's
+    normalisation (Eq. 3-6), which subtracts no minima -- a shared offset
+    cancels in the distances ``δ_j`` (Eq. 7) either way. Inside the
     convex hull of the database conditions the enveloping Delaunay triangle
     contributes with inverse-distance weights ``(1/δ_j)/Σ(1/δ_j)``,
     ``δ_j = √((γ̄−γ̄_j)² + (V̄−V̄_j)²)`` (Eq. 7/8); outside it (and whenever no
@@ -484,9 +477,9 @@ def flight_condition_weights(
     reference implementation operate, and it degrades to the Doc 32 behaviour
     outside the measured envelope.
 
-    The normalisation is span-based, so the weights do not depend on the units
-    of ``airspeeds`` or ``path_angles`` as long as the query uses the same
-    units as the database conditions.
+    The scaling is span-based, so the weights do not depend on the units of
+    ``airspeeds`` or ``path_angles`` as long as the query uses the same units
+    as the database conditions.
 
     :param airspeeds: Database hemisphere airspeeds ``V_j``, shape ``(J,)``.
     :param path_angles: Database hemisphere path angles ``γ_j``, in degrees,
@@ -547,31 +540,39 @@ def _enveloping_simplex(
 ) -> "NDArray[np.intp] | None":
     """The triangle of ``pts`` (given or Delaunay) enveloping ``q``, or ``None``."""
     if triangles is not None:
-        tri = np.asarray(triangles, dtype=np.intp)
-        if tri.ndim != 2 or tri.shape[1] != 3 or tri.size == 0:
-            raise ValueError("'triangles' must have shape (T, 3).")
-        if tri.min() < 0 or tri.max() >= n:
-            raise ValueError("'triangles' indices must address the database conditions.")
-        for row in tri:
-            p0, p1, p2 = pts[row]
-            m = np.column_stack([p1 - p0, p2 - p0])
-            try:
-                lam = np.linalg.solve(m, q - p0)
-            except np.linalg.LinAlgError:          # degenerate triangle
-                continue
-            if lam[0] >= -1e-9 and lam[1] >= -1e-9 and lam.sum() <= 1.0 + 1e-9:
-                return np.asarray(row, dtype=np.intp)
-        return None
+        return _simplex_from_table(pts, q, n, triangles)
     from scipy.spatial import Delaunay, QhullError
 
     try:
         dt = Delaunay(pts)
     except QhullError:                             # collinear/duplicate conditions
         return None
-    s = int(dt.find_simplex(q))
-    if s < 0:
+    simplex = int(dt.find_simplex(q))
+    if simplex < 0:
         return None
-    return np.asarray(dt.simplices[s], dtype=np.intp)
+    return np.asarray(dt.simplices[simplex], dtype=np.intp)
+
+
+def _simplex_from_table(
+    pts: "NDArray[np.float64]", q: "NDArray[np.float64]", n: int,
+    triangles: "NDArray[np.int_] | list[list[int]]",
+) -> "NDArray[np.intp] | None":
+    """The first triangle of a lookup table enveloping ``q``, or ``None``."""
+    tri = np.asarray(triangles, dtype=np.intp)
+    if tri.ndim != 2 or tri.shape[1] != 3 or tri.size == 0:
+        raise ValueError("'triangles' must have shape (T, 3).")
+    if tri.min() < 0 or tri.max() >= n:
+        raise ValueError("'triangles' indices must address the database conditions.")
+    for row in tri:
+        p0, p1, p2 = pts[row]
+        m = np.column_stack([p1 - p0, p2 - p0])
+        try:
+            lam = np.linalg.solve(m, q - p0)
+        except np.linalg.LinAlgError:              # degenerate triangle
+            continue
+        if lam[0] >= -1e-9 and lam[1] >= -1e-9 and lam.sum() <= 1.0 + 1e-9:
+            return np.asarray(row, dtype=np.intp)
+    return None
 
 
 def interpolated_source_level(
@@ -705,16 +706,7 @@ def flight_path_kinematics(
     :return: A :class:`FlightPathKinematics`.
     :raises ValueError: If the inputs are invalid.
     """
-    t = np.asarray(times, dtype=np.float64)
-    p = np.asarray(positions, dtype=np.float64)
-    if t.ndim != 1 or t.size < 2:
-        raise ValueError("'times' must be 1-D with at least two points.")
-    if p.shape != (t.size, 3):
-        raise ValueError("'positions' must have shape (N, 3) matching 'times'.")
-    if not (np.all(np.isfinite(t)) and np.all(np.isfinite(p))):
-        raise ValueError("'times' and 'positions' must be finite.")
-    if np.any(np.diff(t) <= 0.0):
-        raise ValueError("'times' must be strictly increasing.")
+    t, p = _validated_track(times, positions)
     g0 = require_positive(gravity, "gravity")
 
     vx = np.gradient(p[:, 0], t)
@@ -727,7 +719,9 @@ def flight_path_kinematics(
     dtheta_dt = np.gradient(np.unwrap(np.radians(heading)), t)
     with np.errstate(divide="ignore", invalid="ignore"):
         curvature = np.where(vg > 0.0, dtheta_dt / np.where(vg > 0.0, vg, 1.0), 0.0)
-    bank = np.degrees(np.arctan(curvature * vg**2 / g0))
+    # K·V_g² = (ΔΘ/Δt)·V_g (Eq. 20): the product form cannot overflow through
+    # the intermediate 1/V_g division when the ground speed is minute.
+    bank = np.degrees(np.arctan(dtheta_dt * vg / g0))
     path_angle = np.degrees(np.arctan2(vz, vg))
     return FlightPathKinematics(
         times=t, positions=p, ground_speed=vg, airspeed=va, heading=heading,
@@ -779,10 +773,11 @@ def _emission_angles(
     fwd = np.array([np.sin(h), np.cos(h), 0.0])
     right = np.array([np.cos(h), -np.sin(h), 0.0])
     down = np.array([0.0, 0.0, -1.0])
-    if bank_deg != 0.0:
-        b = np.radians(bank_deg)
-        right, down = (np.cos(b) * right + np.sin(b) * down,
-                       -np.sin(b) * right + np.cos(b) * down)
+    # Tilt about the forward axis; at zero bank cos = 1 and sin = 0 exactly,
+    # so the rotation is the identity and needs no special case.
+    b = np.radians(bank_deg)
+    right, down = (np.cos(b) * right + np.sin(b) * down,
+                   -np.sin(b) * right + np.cos(b) * down)
     d = receivers - position[None, :]
     dist = np.sqrt(np.sum(d**2, axis=1))
     safe = np.where(dist > 0.0, dist, 1.0)
@@ -918,8 +913,10 @@ def _absorption_coefficient(
 ) -> "NDArray[np.float64]":
     """ISO 9613-1 pure-tone ``α`` in dB/m at the exact band centres (Eq. 27).
 
-    The advisory out-of-range warning is suppressed for the sub-50 Hz bands of
-    the standard NORAH grid, exactly as in :func:`atmospheric_adjustment`.
+    The single suppression site for the advisory out-of-range warning of the
+    sub-50 Hz bands of the standard NORAH grid (``α`` is negligible there);
+    bands above 10 kHz keep the advisory, since ``α`` is large and
+    extrapolated. :func:`atmospheric_adjustment` and the event chain share it.
     """
     import warnings
 
@@ -935,26 +932,91 @@ def _absorption_coefficient(
     return np.asarray(alpha, dtype=np.float64)
 
 
-def _event_histories(
+@dataclass(frozen=True)
+class _EventSetup:
+    """The validated inputs of a single-event run.
+
+    Source database, track state, ground and atmosphere, grouped once by
+    :func:`_event_setup` so the per-receiver machinery passes one object
+    around instead of the Doc 32 parameter list.
+    """
+
+    hemispheres: "tuple[RotorcraftHemisphere, ...]"
+    airspeeds: "NDArray[np.float64]"
+    path_angles: "NDArray[np.float64]"
+    frequencies: "NDArray[np.float64]"
+    times: "NDArray[np.float64]"
+    positions: "NDArray[np.float64]"
+    speed: "NDArray[np.float64]"
+    gamma: "NDArray[np.float64]"
+    heading: "NDArray[np.float64]"
+    bank: "NDArray[np.float64]"
+    offsets: "NDArray[np.float64]"
+    ground_elevation: float
+    receiver_height: float
+    sigma: float
+    alpha: "NDArray[np.float64]"
+    rref: float
+    scaling_factor: float
+    triangles: "NDArray[np.int_] | list[list[int]] | None"
+    band_integrated: bool
+
+
+def _event_setup(
     hemispheres: "Sequence[RotorcraftHemisphere]",
-    airspeeds: "NDArray[np.float64]",
-    path_angles: "NDArray[np.float64]",
-    times: "NDArray[np.float64]",
-    positions: "NDArray[np.float64]",
-    receivers: "NDArray[np.float64]",
-    speed: "NDArray[np.float64]",
-    gamma: "NDArray[np.float64]",
-    heading: "NDArray[np.float64]",
-    bank: "NDArray[np.float64]",
-    ground_elevation: float,
+    airspeeds: "NDArray[np.float64] | list[float]",
+    path_angles: "NDArray[np.float64] | list[float]",
+    times: "NDArray[np.float64] | list[float]",
+    positions: "NDArray[np.float64] | list[list[float]]",
+    *,
     receiver_height: float,
-    sigma: float,
-    alpha: "NDArray[np.float64]",
-    rref: float,
-    level_offset: "NDArray[np.float64]",
+    ground_elevation: float,
+    airspeed: "float | NDArray[np.float64] | list[float] | None",
+    path_angle: "float | NDArray[np.float64] | list[float] | None",
+    heading: "float | NDArray[np.float64] | list[float] | None",
+    bank_angle: "float | NDArray[np.float64] | list[float] | None",
+    flow_resistivity: "float | str",
+    temperature: float,
+    relative_humidity: float,
+    pressure: float,
+    level_offset: "float | NDArray[np.float64] | list[float]",
     scaling_factor: float,
     triangles: "NDArray[np.int_] | list[list[int]] | None",
-    band_integrated: bool,
+    atmospheric_method: str,
+) -> _EventSetup:
+    """Validate the shared event/contour inputs into one :class:`_EventSetup`.
+
+    The keyword tail mirrors the public functions one for one (the Doc 32
+    single-event parameter set); both call it before adding their own
+    receiver or grid arguments.
+    """
+    freqs = _common_frequencies(hemispheres, airspeeds)
+    rref = _reference_distance(hemispheres)
+    t, p = _validated_track(times, positions)
+    hr = require_positive(receiver_height, "receiver_height")
+    if not np.isfinite(ground_elevation):
+        raise ValueError("'ground_elevation' must be finite.")
+    sigma = _resolve_flow_resistivity(flow_resistivity)
+    method = require_choice(atmospheric_method, "atmospheric_method", ("iso9613", "sae"))
+    spd, gam, hdg, bank = _resolved_track_state(
+        t, p, airspeed, path_angle, heading, bank_angle)
+    off = _per_point(level_offset, t.size, "level_offset")
+    offsets = off if off is not None else np.zeros(t.size)
+    alpha = _absorption_coefficient(freqs, temperature, relative_humidity, pressure)
+    return _EventSetup(
+        hemispheres=tuple(hemispheres),
+        airspeeds=np.atleast_1d(np.asarray(airspeeds, dtype=np.float64)),
+        path_angles=np.atleast_1d(np.asarray(path_angles, dtype=np.float64)),
+        frequencies=freqs, times=t, positions=p, speed=spd, gamma=gam,
+        heading=hdg, bank=bank, offsets=offsets,
+        ground_elevation=float(ground_elevation), receiver_height=hr,
+        sigma=sigma, alpha=alpha, rref=rref, scaling_factor=scaling_factor,
+        triangles=triangles, band_integrated=method == "sae")
+
+
+def _event_histories(
+    setup: _EventSetup,
+    receivers: "NDArray[np.float64]",
 ) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
     """Received time histories: ``(t_rec, L_A)`` shape ``(K, G)`` and spectra.
 
@@ -965,43 +1027,45 @@ def _event_histories(
     """
     from .atmospheric_absorption import _sae_band
 
-    freqs = np.asarray(hemispheres[0].frequencies, dtype=np.float64)
+    freqs = setup.frequencies
+    positions = setup.positions
     aw = _a_weighting_db(freqs)
-    n_k = times.size
+    n_k = setup.times.size
     n_g = receivers.shape[0]
     trec = np.empty((n_k, n_g), dtype=np.float64)
     la = np.empty((n_k, n_g), dtype=np.float64)
     spectra = np.empty((n_k, freqs.size), dtype=np.float64)
-    ref_band = _sae_band(alpha * rref)   # only used when band_integrated
+    ref_band = _sae_band(setup.alpha * setup.rref)   # only used when band_integrated
     weight_cache: dict[tuple[float, float], list[tuple[int, float]]] = {}
 
     for k in range(n_k):
-        key = (float(speed[k]), float(gamma[k]))
+        key = (float(setup.speed[k]), float(setup.gamma[k]))
         weights = weight_cache.get(key)
         if weights is None:
             weights = flight_condition_weights(
-                airspeeds, path_angles, key[0], key[1],
-                scaling_factor=scaling_factor, triangles=triangles)
+                setup.airspeeds, setup.path_angles, key[0], key[1],
+                scaling_factor=setup.scaling_factor, triangles=setup.triangles)
             weight_cache[key] = weights
-        phi, theta, dist = _emission_angles(positions[k], receivers, heading[k], bank[k])
+        phi, theta, dist = _emission_angles(
+            positions[k], receivers, setup.heading[k], setup.bank[k])
         dist = np.maximum(dist, 1e-6)
         energy = np.zeros((n_g, freqs.size), dtype=np.float64)
         for j, w in weights:
-            energy += w * 10.0 ** (_source_levels(hemispheres[j], phi, theta) / 10.0)
+            energy += w * 10.0 ** (_source_levels(setup.hemispheres[j], phi, theta) / 10.0)
         with np.errstate(divide="ignore", invalid="ignore"):
             src = 10.0 * np.log10(energy)
-        dls = -20.0 * np.log10(dist / rref)
-        if band_integrated:
-            dla = -(_sae_band(alpha[None, :] * dist[:, None]) - ref_band[None, :])
+        dls = -20.0 * np.log10(dist / setup.rref)
+        if setup.band_integrated:
+            dla = -(_sae_band(setup.alpha[None, :] * dist[:, None]) - ref_band[None, :])
         else:
-            dla = -alpha[None, :] * (dist[:, None] - rref)
-        hs = float(positions[k, 2]) - ground_elevation
+            dla = -setup.alpha[None, :] * (dist[:, None] - setup.rref)
+        hs = float(positions[k, 2]) - setup.ground_elevation
         dp = np.hypot(receivers[:, 0] - positions[k, 0], receivers[:, 1] - positions[k, 1])
-        dlg = _ground_effect(freqs, hs, receiver_height, dp, sigma)
-        spl = src + level_offset[k] + dls[:, None] + dla + dlg
+        dlg = _ground_effect(freqs, hs, setup.receiver_height, dp, setup.sigma)
+        spl = src + setup.offsets[k] + dls[:, None] + dla + dlg
         with np.errstate(divide="ignore", invalid="ignore"):
             la[k] = 10.0 * np.log10(np.nansum(10.0 ** ((spl + aw[None, :]) / 10.0), axis=1))
-        trec[k] = times[k] + dist / _C
+        trec[k] = setup.times[k] + dist / _C
         spectra[k] = spl[0]
     return trec, la, spectra
 
@@ -1181,36 +1245,30 @@ def rotorcraft_event_level(
     :return: A :class:`RotorcraftEventResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    freqs = _common_frequencies(hemispheres, airspeeds)
-    rref = _reference_distance(hemispheres)
-    t, p = _validated_track(times, positions)
+    setup = _event_setup(
+        hemispheres, airspeeds, path_angles, times, positions,
+        receiver_height=receiver_height, ground_elevation=ground_elevation,
+        airspeed=airspeed, path_angle=path_angle, heading=heading,
+        bank_angle=bank_angle, flow_resistivity=flow_resistivity,
+        temperature=temperature, relative_humidity=relative_humidity,
+        pressure=pressure, level_offset=level_offset,
+        scaling_factor=scaling_factor, triangles=triangles,
+        atmospheric_method=atmospheric_method)
     rx = np.asarray(receiver, dtype=np.float64).ravel()
     if rx.size != 2 or not np.all(np.isfinite(rx)):
         raise ValueError("'receiver' must be a finite (x, y) ground position.")
-    hr = require_positive(receiver_height, "receiver_height")
-    if not np.isfinite(ground_elevation):
-        raise ValueError("'ground_elevation' must be finite.")
-    sigma = _resolve_flow_resistivity(flow_resistivity)
-    method = require_choice(atmospheric_method, "atmospheric_method", ("iso9613", "sae"))
-    spd, gam, hdg, bank = _resolved_track_state(
-        t, p, airspeed, path_angle, heading, bank_angle)
-    off = _per_point(level_offset, t.size, "level_offset")
-    offsets = off if off is not None else np.zeros(t.size)
-    alpha = _absorption_coefficient(freqs, temperature, relative_humidity, pressure)
-    receivers = np.array([[rx[0], rx[1], ground_elevation + hr]])
-    trec, la, spectra = _event_histories(
-        hemispheres, np.atleast_1d(np.asarray(airspeeds, dtype=np.float64)),
-        np.atleast_1d(np.asarray(path_angles, dtype=np.float64)), t, p, receivers,
-        spd, gam, hdg, bank, float(ground_elevation), hr, sigma, alpha, rref,
-        offsets, scaling_factor, triangles, method == "sae")
-    phi, theta, dist = _track_emission_geometry(p, receivers[0], hdg, bank)
+    receivers = np.array(
+        [[rx[0], rx[1], setup.ground_elevation + setup.receiver_height]])
+    trec, la, spectra = _event_histories(setup, receivers)
+    phi, theta, dist = _track_emission_geometry(
+        setup.positions, receivers[0], setup.heading, setup.bank)
     la_max, sel, sel_10db, pnlt, pnltm, epnl = _event_metrics(
-        freqs, trec[:, 0], la[:, 0], spectra)
+        setup.frequencies, trec[:, 0], la[:, 0], spectra)
     return RotorcraftEventResult(
-        frequencies=freqs, emission_times=t, times=trec[:, 0], distance=dist,
-        azimuth=phi, polar=theta, band_levels=spectra, a_levels=la[:, 0],
-        la_max=la_max, sel=sel, sel_10db=sel_10db, pnlt=pnlt, pnltm=pnltm,
-        epnl=epnl)
+        frequencies=setup.frequencies, emission_times=setup.times,
+        times=trec[:, 0], distance=dist, azimuth=phi, polar=theta,
+        band_levels=spectra, a_levels=la[:, 0], la_max=la_max, sel=sel,
+        sel_10db=sel_10db, pnlt=pnlt, pnltm=pnltm, epnl=epnl)
 
 
 def _track_emission_geometry(
@@ -1290,34 +1348,25 @@ def rotorcraft_noise_contour(
     :return: A :class:`RotorcraftNoiseContourResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    _common_frequencies(hemispheres, airspeeds)   # validates the shared band grid
-    rref = _reference_distance(hemispheres)
-    t, p = _validated_track(times, positions)
+    setup = _event_setup(
+        hemispheres, airspeeds, path_angles, times, positions,
+        receiver_height=receiver_height, ground_elevation=ground_elevation,
+        airspeed=airspeed, path_angle=path_angle, heading=heading,
+        bank_angle=bank_angle, flow_resistivity=flow_resistivity,
+        temperature=temperature, relative_humidity=relative_humidity,
+        pressure=pressure, level_offset=level_offset,
+        scaling_factor=scaling_factor, triangles=triangles,
+        atmospheric_method=atmospheric_method)
     gx = np.asarray(x, dtype=np.float64).ravel()
     gy = np.asarray(y, dtype=np.float64).ravel()
     if gx.size < 2 or gy.size < 2 or not (np.all(np.isfinite(gx)) and np.all(np.isfinite(gy))):
         raise ValueError("'x' and 'y' must each be finite with at least two grid points.")
     key = require_choice(metric, "metric", ("exposure", "maximum"))
-    hr = require_positive(receiver_height, "receiver_height")
-    if not np.isfinite(ground_elevation):
-        raise ValueError("'ground_elevation' must be finite.")
-    sigma = _resolve_flow_resistivity(flow_resistivity)
-    method = require_choice(atmospheric_method, "atmospheric_method", ("iso9613", "sae"))
-    spd, gam, hdg, bank = _resolved_track_state(
-        t, p, airspeed, path_angle, heading, bank_angle)
-    off = _per_point(level_offset, t.size, "level_offset")
-    offsets = off if off is not None else np.zeros(t.size)
-    alpha = _absorption_coefficient(
-        np.asarray(hemispheres[0].frequencies, dtype=np.float64),
-        temperature, relative_humidity, pressure)
     xx, yy = np.meshgrid(gx, gy)
     receivers = np.column_stack([
-        xx.ravel(), yy.ravel(), np.full(xx.size, ground_elevation + hr)])
-    trec, la, _ = _event_histories(
-        hemispheres, np.atleast_1d(np.asarray(airspeeds, dtype=np.float64)),
-        np.atleast_1d(np.asarray(path_angles, dtype=np.float64)), t, p, receivers,
-        spd, gam, hdg, bank, float(ground_elevation), hr, sigma, alpha, rref,
-        offsets, scaling_factor, triangles, method == "sae")
+        xx.ravel(), yy.ravel(),
+        np.full(xx.size, setup.ground_elevation + setup.receiver_height)])
+    trec, la, _ = _event_histories(setup, receivers)
     if key == "exposure":
         level = _exposure_level(la, trec)
     else:

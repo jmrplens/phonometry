@@ -127,9 +127,11 @@ flight_condition_weights(
 
 Hemisphere blending weights for a flight condition (Eq. 3-10).
 
-The database flight conditions and the query are normalised by their spans,
-`V̄ = V/(V_max − V_min)` and `γ̄ = F_fc·γ/(γ_max − γ_min)` with the
-empirical flight-condition scaling factor `F_fc = 2` (Eq. 3-6). Inside the
+The database flight conditions and the query are scaled by the database
+spans, `V̄ = V/(V_max − V_min)` and `γ̄ = F_fc·γ/(γ_max − γ_min)` with
+the empirical flight-condition scaling factor `F_fc = 2`: the guidance's
+normalisation (Eq. 3-6), which subtracts no minima -- a shared offset
+cancels in the distances `δ_j` (Eq. 7) either way. Inside the
 convex hull of the database conditions the enveloping Delaunay triangle
 contributes with inverse-distance weights `(1/δ_j)/Σ(1/δ_j)`,
 `δ_j = √((γ̄−γ̄_j)² + (V̄−V̄_j)²)` (Eq. 7/8); outside it (and whenever no
@@ -141,9 +143,9 @@ interpolation of the NORAH2 guidance §A.3.1 on which the NORAH database and
 reference implementation operate, and it degrades to the Doc 32 behaviour
 outside the measured envelope.
 
-The normalisation is span-based, so the weights do not depend on the units
-of `airspeeds` or `path_angles` as long as the query uses the same
-units as the database conditions.
+The scaling is span-based, so the weights do not depend on the units of
+`airspeeds` or `path_angles` as long as the query uses the same units
+as the database conditions.
 
 **Parameters**
 

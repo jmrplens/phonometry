@@ -135,6 +135,120 @@ list grows as guides gain their References sections.
   residual pressure-intensity index.
   Cited by [Sound Intensity (p-p)](/phonometry/guides/intensity/).
 
+## Room acoustics
+
+- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
+  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
+  The reference monograph on sound fields in rooms: statistical decay
+  theory, the Schroeder frequency, absorption and the perceptual room
+  parameters.
+  Cited by [Room Acoustics](/phonometry/guides/room-acoustics/),
+  [Reverberation-time prediction](/phonometry/guides/reverberation-prediction/) and
+  [Sound absorption in enclosed spaces](/phonometry/guides/enclosed-space-absorption/).
+- Sabine, W. C. (1922). *Collected papers on acoustics*. Harvard University
+  Press.
+  [Free scan at the Internet Archive](https://archive.org/details/collectedpaperso00sabi).
+  The founding reverberation experiments and the Sabine law.
+  Cited by [Reverberation-time prediction](/phonometry/guides/reverberation-prediction/).
+- Eyring, C. F. (1930). Reverberation time in "dead" rooms. *The Journal of
+  the Acoustical Society of America*, 1(2A), 217-241.
+  [doi:10.1121/1.1915175](https://doi.org/10.1121/1.1915175).
+  The mean-free-path reverberation formula for strongly absorbing rooms.
+  Cited by [Reverberation-time prediction](/phonometry/guides/reverberation-prediction/).
+- Millington, G. (1932). A modified formula for reverberation. *The Journal
+  of the Acoustical Society of America*, 4(1), 69-82.
+  [doi:10.1121/1.1915588](https://doi.org/10.1121/1.1915588).
+  The per-surface logarithmic reverberation formula.
+  Cited by [Reverberation-time prediction](/phonometry/guides/reverberation-prediction/).
+- Fitzroy, D. (1959). Reverberation formula which seems to be more accurate
+  with nonuniform distribution of absorption. *The Journal of the
+  Acoustical Society of America*, 31(7), 893-897.
+  [doi:10.1121/1.1907814](https://doi.org/10.1121/1.1907814).
+  The axial reverberation formula for anisotropic absorption.
+  Cited by [Reverberation-time prediction](/phonometry/guides/reverberation-prediction/).
+- Arau-Puchades, H. (1988). An improved reverberation formula. *Acustica*,
+  65(4), 163-180.
+  [Publisher record at Ingenta](https://www.ingentaconnect.com/content/dav/aaua/1988/00000065/00000004/art00003).
+  The geometric-mean refinement of the axial reverberation formula.
+  Cited by [Reverberation-time prediction](/phonometry/guides/reverberation-prediction/).
+- Schroeder, M. R. (1965). New method of measuring reverberation time.
+  *The Journal of the Acoustical Society of America*, 37(3), 409-412.
+  [doi:10.1121/1.1909343](https://doi.org/10.1121/1.1909343).
+  The backward integration of the squared impulse response into a decay
+  curve.
+  Cited by [Room Acoustics](/phonometry/guides/room-acoustics/).
+- Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).
+  Measuring room impulse responses: Impact of the decay range on derived
+  room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
+  907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
+  The impulse-to-noise-ratio (INR) analysis of decay-range requirements.
+  Cited by [Room Acoustics](/phonometry/guides/room-acoustics/).
+- Everest, F. A. (2001). *Master handbook of acoustics* (4th ed.).
+  McGraw-Hill. ISBN 978-0-07-136097-5.
+  [Open Library record](https://openlibrary.org/isbn/9780071360975).
+  A practical room-acoustics handbook; its Fig. 7-22 worked example anchors
+  the reverberation-prediction conformance suite.
+  Cited by [Reverberation-time prediction](/phonometry/guides/reverberation-prediction/).
+- Carrión Isbert, A. (1998). *Diseño acústico de espacios arquitectónicos*.
+  Edicions UPC. ISBN 978-84-8301-252-9.
+  [Open Library record](https://openlibrary.org/books/OL23159935M).
+  A Spanish-language textbook on acoustic room design.
+  Cited by [Reverberation-time prediction](/phonometry/guides/reverberation-prediction/).
+- Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise
+  Control*, 3(1), 19-27.
+  [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
+  The original NC curves and their speech-interference rationale.
+  Cited by [Room-noise criteria](/phonometry/guides/room-noise/).
+- Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
+  noise of heating, ventilating, and air-conditioning (HVAC) systems in
+  buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
+  [doi:10.3397/1.2828446](https://doi.org/10.3397/1.2828446).
+  The RC Mark II procedure later codified by ANSI/ASA S12.2 Annex D.
+  Cited by [Room-noise criteria](/phonometry/guides/room-noise/).
+- International Organization for Standardization. (2009). *Acoustics —
+  Measurement of room acoustic parameters — Part 1: Performance spaces*
+  (ISO 3382-1:2009).
+  [iso.org catalogue](https://www.iso.org/standard/40979.html).
+  Room-parameter definitions, position requirements and just-noticeable
+  differences.
+  Cited by [Room Acoustics](/phonometry/guides/room-acoustics/).
+- International Organization for Standardization. (2008). *Acoustics —
+  Measurement of room acoustic parameters — Part 2: Reverberation time in
+  ordinary rooms* (ISO 3382-2:2008).
+  [iso.org catalogue](https://www.iso.org/standard/36201.html).
+  The accuracy grades and position counts of reverberation measurement.
+  Cited by [Room Acoustics](/phonometry/guides/room-acoustics/).
+- International Organization for Standardization. (2012). *Acoustics —
+  Measurement of room acoustic parameters — Part 3: Open plan offices*
+  (ISO 3382-3:2012).
+  [iso.org catalogue](https://www.iso.org/standard/46520.html).
+  The open-plan speech-privacy quantities.
+  Cited by [Room Acoustics](/phonometry/guides/room-acoustics/).
+- International Organization for Standardization. (2006). *Acoustics —
+  Application of new measurement methods in building and room acoustics*
+  (ISO 18233:2006).
+  [iso.org catalogue](https://www.iso.org/standard/40408.html).
+  The swept-sine and MLS acquisition of impulse responses.
+  Cited by [Room Acoustics](/phonometry/guides/room-acoustics/).
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [iso.org catalogue](https://www.iso.org/standard/34545.html).
+  The reverberation-room absorption measurement behind the surface data.
+  Cited by [Room Acoustics](/phonometry/guides/room-acoustics/) and
+  [Sound absorption in enclosed spaces](/phonometry/guides/enclosed-space-absorption/).
+- European Committee for Standardization. (2003). *Building acoustics —
+  Estimation of acoustic performance of buildings from the performance of
+  elements — Part 6: Sound absorption in enclosed spaces*
+  (EN 12354-6:2003).
+  [BSI Knowledge record (BS EN 12354-6:2003)](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sound-absorption-in-enclosed-spaces).
+  The absorption member of the EN 12354 prediction family.
+  Cited by [Sound absorption in enclosed spaces](/phonometry/guides/enclosed-space-absorption/).
+- Acoustical Society of America. (2019). *Criteria for evaluating room
+  noise* (ANSI/ASA S12.2-2019).
+  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansiasas122019).
+  The NC tangency method and the RC Mark II rating with its spectral tag.
+  Cited by [Room-noise criteria](/phonometry/guides/room-noise/).
+
 ## Building acoustics
 
 - Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.

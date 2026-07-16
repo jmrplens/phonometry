@@ -137,6 +137,128 @@ que las guías incorporan sus secciones de Referencias.
   índice presión-intensidad residual.
   Citado por [Intensidad sonora (p-p)](/phonometry/es/guides/intensity/).
 
+## Acústica de salas
+
+- Kuttruff, H. (2016). *Room acoustics* (6.ª ed.). CRC Press.
+  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
+  La monografía de referencia sobre el campo sonoro en salas: la teoría
+  estadística del decaimiento, la frecuencia de Schroeder, la absorción y
+  los parámetros perceptivos de sala.
+  Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/),
+  [Predicción del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/) y
+  [Absorción sonora en recintos](/phonometry/es/guides/enclosed-space-absorption/).
+- Sabine, W. C. (1922). *Collected papers on acoustics*. Harvard University
+  Press.
+  [Escaneo libre en Internet Archive](https://archive.org/details/collectedpaperso00sabi).
+  Los experimentos fundacionales de la reverberación y la ley de Sabine.
+  Citado por [Predicción del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/).
+- Eyring, C. F. (1930). Reverberation time in "dead" rooms. *The Journal of
+  the Acoustical Society of America*, 1(2A), 217-241.
+  [doi:10.1121/1.1915175](https://doi.org/10.1121/1.1915175).
+  La fórmula de reverberación por recorrido libre medio para salas muy
+  absorbentes.
+  Citado por [Predicción del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/).
+- Millington, G. (1932). A modified formula for reverberation. *The Journal
+  of the Acoustical Society of America*, 4(1), 69-82.
+  [doi:10.1121/1.1915588](https://doi.org/10.1121/1.1915588).
+  La fórmula de reverberación logarítmica por superficie.
+  Citado por [Predicción del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/).
+- Fitzroy, D. (1959). Reverberation formula which seems to be more accurate
+  with nonuniform distribution of absorption. *The Journal of the
+  Acoustical Society of America*, 31(7), 893-897.
+  [doi:10.1121/1.1907814](https://doi.org/10.1121/1.1907814).
+  La fórmula de reverberación axial para absorción anisótropa.
+  Citado por [Predicción del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/).
+- Arau-Puchades, H. (1988). An improved reverberation formula. *Acustica*,
+  65(4), 163-180.
+  [Ficha del editor en Ingenta](https://www.ingentaconnect.com/content/dav/aaua/1988/00000065/00000004/art00003).
+  El refinamiento por media geométrica de la fórmula de reverberación
+  axial.
+  Citado por [Predicción del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/).
+- Schroeder, M. R. (1965). New method of measuring reverberation time.
+  *The Journal of the Acoustical Society of America*, 37(3), 409-412.
+  [doi:10.1121/1.1909343](https://doi.org/10.1121/1.1909343).
+  La integración hacia atrás de la respuesta al impulso al cuadrado en una
+  curva de decaimiento.
+  Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/).
+- Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).
+  Measuring room impulse responses: Impact of the decay range on derived
+  room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
+  907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
+  El análisis de la relación impulso-ruido (INR) sobre los requisitos de
+  rango de decaimiento.
+  Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/).
+- Everest, F. A. (2001). *Master handbook of acoustics* (4.ª ed.).
+  McGraw-Hill. ISBN 978-0-07-136097-5.
+  [Ficha en Open Library](https://openlibrary.org/isbn/9780071360975).
+  Un manual práctico de acústica de salas; su ejemplo resuelto de la
+  Fig. 7-22 ancla la batería de conformidad de la predicción de
+  reverberación.
+  Citado por [Predicción del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/).
+- Carrión Isbert, A. (1998). *Diseño acústico de espacios arquitectónicos*.
+  Edicions UPC. ISBN 978-84-8301-252-9.
+  [Ficha en Open Library](https://openlibrary.org/books/OL23159935M).
+  Un manual en español sobre el diseño acústico de salas.
+  Citado por [Predicción del tiempo de reverberación](/phonometry/es/guides/reverberation-prediction/).
+- Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise
+  Control*, 3(1), 19-27.
+  [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
+  Las curvas NC originales y su razonamiento de interferencia con el habla.
+  Citado por [Criterios de ruido de salas](/phonometry/es/guides/room-noise/).
+- Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
+  noise of heating, ventilating, and air-conditioning (HVAC) systems in
+  buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
+  [doi:10.3397/1.2828446](https://doi.org/10.3397/1.2828446).
+  El procedimiento RC Mark II codificado después por el Anexo D de
+  ANSI/ASA S12.2.
+  Citado por [Criterios de ruido de salas](/phonometry/es/guides/room-noise/).
+- International Organization for Standardization. (2009). *Acoustics —
+  Measurement of room acoustic parameters — Part 1: Performance spaces*
+  (ISO 3382-1:2009).
+  [Catálogo iso.org](https://www.iso.org/standard/40979.html).
+  Las definiciones de parámetros de sala, los requisitos de posiciones y
+  las diferencias apenas perceptibles.
+  Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/).
+- International Organization for Standardization. (2008). *Acoustics —
+  Measurement of room acoustic parameters — Part 2: Reverberation time in
+  ordinary rooms* (ISO 3382-2:2008).
+  [Catálogo iso.org](https://www.iso.org/standard/36201.html).
+  Los grados de precisión y los recuentos de posiciones de la medición de
+  la reverberación.
+  Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/).
+- International Organization for Standardization. (2012). *Acoustics —
+  Measurement of room acoustic parameters — Part 3: Open plan offices*
+  (ISO 3382-3:2012).
+  [Catálogo iso.org](https://www.iso.org/standard/46520.html).
+  Las magnitudes de privacidad del habla en oficinas diáfanas.
+  Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/).
+- International Organization for Standardization. (2006). *Acoustics —
+  Application of new measurement methods in building and room acoustics*
+  (ISO 18233:2006).
+  [Catálogo iso.org](https://www.iso.org/standard/40408.html).
+  La adquisición de respuestas al impulso por barrido sinusoidal y MLS.
+  Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/).
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [Catálogo iso.org](https://www.iso.org/standard/34545.html).
+  La medición de absorción en sala reverberante tras los datos de
+  superficie.
+  Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/) y
+  [Absorción sonora en recintos](/phonometry/es/guides/enclosed-space-absorption/).
+- European Committee for Standardization. (2003). *Building acoustics —
+  Estimation of acoustic performance of buildings from the performance of
+  elements — Part 6: Sound absorption in enclosed spaces*
+  (EN 12354-6:2003).
+  [Ficha en BSI Knowledge (BS EN 12354-6:2003)](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sound-absorption-in-enclosed-spaces).
+  El miembro de absorción de la familia de predicción EN 12354.
+  Citado por [Absorción sonora en recintos](/phonometry/es/guides/enclosed-space-absorption/).
+- Acoustical Society of America. (2019). *Criteria for evaluating room
+  noise* (ANSI/ASA S12.2-2019).
+  [Tienda ANSI](https://webstore.ansi.org/standards/asa/ansiasas122019).
+  El método de tangencia NC y la calificación RC Mark II con su etiqueta
+  espectral.
+  Citado por [Criterios de ruido de salas](/phonometry/es/guides/room-noise/).
+
 ## Acústica de edificios
 
 - Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.

@@ -1,12 +1,12 @@
 ---
 title: "Hearing threshold (age and reference zero)"
-description: "The age-related hearing threshold distribution of ISO 7029:2017 (median, spread and population fractiles by age and sex) and the ISO 389-7:2006 free-field and diffuse-field reference threshold of hearing, over the audiometric frequencies from 125 Hz to 8000 Hz."
+description: "The age-related hearing threshold distribution of ISO 7029:2017 (median, spread and population fractiles by age and sex) and the ISO 389-7:2005 free-field and diffuse-field reference threshold of hearing, over the audiometric frequencies from 125 Hz to 8000 Hz."
 ---
 
 Two standards describe where the hearing threshold sits. **ISO 7029:2017**
 gives the **statistical distribution of the hearing threshold with age** for an
 otologically normal population — the slow, high-frequency-first loss known as
-presbycusis. **ISO 389-7:2006** fixes the **reference threshold of hearing**,
+presbycusis. **ISO 389-7:2005** fixes the **reference threshold of hearing**,
 the audiometric zero (0 dB HL) expressed as a sound pressure level under
 free-field and diffuse-field listening. Both are defined over the audiometric
 frequencies from 125 Hz to 8000 Hz.
@@ -46,10 +46,31 @@ downward-sloping presbycusis audiogram. Men and women follow different
 coefficients (the `sex` argument), and a subset of the audiometric frequencies
 can be requested with `frequencies=`.
 
+**Who counts as "otologically normal".** The ISO 7029 population is not the
+general population: it is people screened to be in a normal state of health,
+free from signs or symptoms of ear disease and wax obstruction, and — the
+demanding part — with **no history of undue noise exposure**, ototoxic drugs
+or familial hearing loss. The model therefore isolates *pure ageing*: it is
+the baseline that other standards subtract from. A real, unscreened workforce
+hears worse than these curves at every age, which is why ISO 1999 lets a
+study substitute its own unscreened reference ("database B") when the goal is
+comparison with an actual population rather than isolating the noise effect.
+
+**Reading the percentiles.** A fractile is a population statement, not a
+prediction for a person: `fractile=0.9` returns the threshold that 90 % of
+otologically normal people of that age and sex are *better* than (only the
+worst-hearing tenth exceeds it), and `fractile=0.5` the median — half above,
+half below. The spread is deliberately asymmetric (two half-Gaussians,
+$s_u > s_l$): ageing drags a minority far down while the better-hearing half
+stays bunched near the median, so the far percentiles on the bad side move
+much faster with age than the good side ever improves. An individual
+audiogram can sit anywhere in that fan; the model tells you how *surprising*
+it is, not what it should be.
+
 ## 2. Reference threshold of hearing (ISO 389-7)
 
 The audiometric zero is not a fixed sound pressure level: it depends on how the
-sound reaches the listener. ISO 389-7:2006 Table 1 gives the reference
+sound reaches the listener. ISO 389-7:2005 Table 1 gives the reference
 threshold for **free-field** (frontal incidence) and **diffuse-field**
 listening.
 
@@ -98,14 +119,30 @@ The `AgeThresholdResult` carries the `median`, the `spread_upper` and
 `spread_lower`, and the `threshold` at the requested fractile, and its
 `.plot()` draws the median with the 10–90 % band. The noise-induced permanent
 threshold shift of ISO 1999 — which adds a noise component on top of this age
-component — is a separate topic.
+component — is the subject of the
+[noise-induced hearing loss](/phonometry/guides/noise-induced-hearing-loss/) guide.
+
+## References
+
+- International Organization for Standardization. (2017). *Acoustics —
+  Statistical distribution of hearing thresholds related to age and gender*
+  (ISO 7029:2017). [iso.org catalogue](https://www.iso.org/standard/42916.html).
+  The age model of section 1: the median power law, the asymmetric spread and
+  the fractile machinery.
+- International Organization for Standardization. (2005). *Acoustics —
+  Reference zero for the calibration of audiometric equipment — Part 7:
+  Reference threshold of hearing under free-field and diffuse-field listening
+  conditions* (ISO 389-7:2005).
+  [iso.org catalogue](https://www.iso.org/standard/38976.html).
+  The audiometric zero of section 2 (Table 1), implemented here through its
+  European adoption EN ISO 389-7:2006.
 
 ---
 
 **Standards.** ISO 7029:2017, *Statistical distribution of hearing thresholds
 related to age and gender* — the median (clause 4.2, Table 1), the spread
 around the median (clause 4.3, Tables 2–5) and its application (clause 4.4).
-ISO 389-7:2006, *Reference zero for the calibration of audiometric equipment —
+ISO 389-7:2005, *Reference zero for the calibration of audiometric equipment —
 Reference threshold of hearing under free-field and diffuse-field listening
 conditions* (Table 1).
 

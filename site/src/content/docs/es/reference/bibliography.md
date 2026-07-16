@@ -66,6 +66,95 @@ que las guías incorporan sus secciones de Referencias.
   de banda del índice de inteligibilidad del habla.
   Citado por [Índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/).
 
+## Psicoacústica
+
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3.ª ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  El modelo de molestia psicoacústica y la forma cerrada de la intensidad de
+  fluctuación para ruido de banda ancha modulado en amplitud.
+  Citado por [Molestia psicoacústica](/phonometry/es/guides/psychoacoustic-annoyance/).
+- Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016). Modelling the
+  sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*,
+  28, 050005. [doi:10.1121/2.0000410](https://doi.org/10.1121/2.0000410).
+  El modelo de señal de la intensidad de fluctuación y sus valores de la
+  Tabla 1 de la literatura.
+  Citado por [Molestia psicoacústica](/phonometry/es/guides/psychoacoustic-annoyance/).
+- Felix Greco, G., Merino-Martínez, R., Osses, A., & Lotinga, M. J. B. (2025).
+  *SQAT: a sound quality analysis toolbox for MATLAB* (software de código
+  abierto). [github.com/ggrecow/SQAT](https://github.com/ggrecow/SQAT),
+  [doi:10.5281/zenodo.7934709](https://doi.org/10.5281/zenodo.7934709).
+  La referencia abierta en MATLAB usada como oráculo numérico de las
+  comprobaciones de la intensidad de fluctuación.
+  Citado por [Molestia psicoacústica](/phonometry/es/guides/psychoacoustic-annoyance/).
+- Ecma International. (2024). *ECMA-418-1: Psychoacoustic metrics for ITT
+  equipment — Part 1: Prominent discrete tones* (3.ª ed.).
+  [PDF gratuito](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf).
+  Los métodos de relación tono-ruido y relación de prominencia, de descarga
+  gratuita.
+  Citado por [Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/).
+- Ecma International. (2025). *ECMA-74: Measurement of airborne noise emitted
+  by information technology and telecommunications equipment* (22.ª ed.).
+  [PDF gratuito](https://ecma-international.org/wp-content/uploads/ECMA-74_22nd_edition_december_2025.pdf).
+  La norma de emisión matriz, de descarga gratuita, cuyo anexo D delega la
+  evaluación de tonos en ECMA-418-1.
+  Citado por [Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/).
+- International Organization for Standardization. (2016). *Acoustics —
+  Objective method for assessing the audibility of tones in noise —
+  Engineering method* (ISO/PAS 20065:2016).
+  [Catálogo iso.org](https://www.iso.org/standard/66941.html).
+  El método de ingeniería para la audibilidad objetiva de tonos.
+  Citado por [Audibilidad objetiva de tonos](/phonometry/es/guides/tone-audibility/).
+
+## Audición y conservación auditiva
+
+- International Organization for Standardization. (2017). *Acoustics —
+  Statistical distribution of hearing thresholds related to age and gender*
+  (ISO 7029:2017). [Catálogo iso.org](https://www.iso.org/standard/42916.html).
+  El modelo por edad del umbral de audición y su dispersión poblacional.
+  Citado por [Umbral de audición](/phonometry/es/guides/hearing-threshold/).
+- International Organization for Standardization. (2005). *Acoustics —
+  Reference zero for the calibration of audiometric equipment — Part 7:
+  Reference threshold of hearing under free-field and diffuse-field listening
+  conditions* (ISO 389-7:2005).
+  [Catálogo iso.org](https://www.iso.org/standard/38976.html).
+  El cero audiométrico como nivel de presión sonora.
+  Citado por [Umbral de audición](/phonometry/es/guides/hearing-threshold/).
+- International Organization for Standardization. (2013). *Acoustics —
+  Estimation of noise-induced hearing loss* (ISO 1999:2013).
+  [Catálogo iso.org](https://www.iso.org/standard/45103.html).
+  El modelo de NIPTS, su distribución y la combinación HTLAN.
+  Citado por [Pérdida auditiva inducida por ruido](/phonometry/es/guides/noise-induced-hearing-loss/).
+- Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to
+  steady-state broad-band noise. *The Journal of the Acoustical Society of
+  America*, 56(5), 1585–1593.
+  [doi:10.1121/1.1903482](https://doi.org/10.1121/1.1903482).
+  Un estudio de campo de las relaciones exposición-respuesta del ruido
+  codificadas después en la ISO 1999.
+  Citado por [Pérdida auditiva inducida por ruido](/phonometry/es/guides/noise-induced-hearing-loss/).
+- National Institute for Occupational Safety and Health. (1998). *Criteria for
+  a recommended standard: Occupational noise exposure — Revised criteria 1998*
+  (DHHS/NIOSH Publication No. 98-126).
+  [doi:10.26616/NIOSHPUB98126](https://doi.org/10.26616/NIOSHPUB98126),
+  [PDF gratuito](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf).
+  El documento de criterios de libre acceso tras el límite de exposición
+  recomendado de 85 dB(A) y la discusión de conservación auditiva y umbral.
+  Citado por [Pérdida auditiva inducida por ruido](/phonometry/es/guides/noise-induced-hearing-loss/) y
+  [Exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/).
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of occupational noise exposure — Engineering method*
+  (ISO 9612:2009). [Catálogo iso.org](https://www.iso.org/standard/41718.html).
+  Las tres estrategias de medición y el presupuesto de incertidumbre del
+  anexo C.
+  Citado por [Exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/).
+- European Parliament and Council. (2003). *Directive 2003/10/EC on the
+  minimum health and safety requirements regarding the exposure of workers to
+  the risks arising from physical agents (noise)*. Diario Oficial de la Unión
+  Europea. [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng).
+  Los valores de exposición que dan lugar a una acción y el valor límite de la
+  UE para el ruido laboral.
+  Citado por [Exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/).
+
 ## Vibración en humanos
 
 - Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.

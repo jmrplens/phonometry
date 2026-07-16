@@ -218,9 +218,29 @@ Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absolu
 `fluctuation_strength_am_noise` (§3.1) para ese estímulo.
 :::
 
+## Referencias
+
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3.ª ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  La fuente del modelo de molestia psicoacústica de la sección 2
+  (Ecs 16.2–16.4, capítulo 16) y de la forma cerrada de la intensidad de
+  fluctuación para ruido de banda ancha AM de §3.1 (Ec. 10.2, capítulo 10).
+- Osses Vecchi, A., García León, R., & Kohlrausch, A. (2016). Modelling the
+  sensation of fluctuation strength. *Proceedings of Meetings on Acoustics*,
+  28, 050005. [doi:10.1121/2.0000410](https://doi.org/10.1121/2.0000410).
+  El modelo de señal de la intensidad de fluctuación implementado en §3.2,
+  incluidos los valores de su Tabla 1 usados como contraste.
+- Felix Greco, G., Merino-Martínez, R., Osses, A., & Lotinga, M. J. B.
+  (2025). *SQAT: a sound quality analysis toolbox for MATLAB* (software de
+  código abierto). [github.com/ggrecow/SQAT](https://github.com/ggrecow/SQAT),
+  [doi:10.5281/zenodo.7934709](https://doi.org/10.5281/zenodo.7934709).
+  La referencia abierta en MATLAB usada como oráculo numérico de las
+  comprobaciones de intensidad de fluctuación de esta página.
+
 ---
 
-**Normas.** Fastl y Zwicker (2006), *Psychoacoustics: Facts and Models* (Springer): la
+**Normas.** Fastl y Zwicker (2007, 3.ª ed.), *Psychoacoustics: Facts and Models* (Springer): la
 molestia psicoacústica `PA = N5·(1 + √(wS² + wFR²))` con la ponderación de nitidez
 `wS` y la ponderación de aspereza/fluctuación `wFR` (Ecs 16.2–16.4; origen
 Widmann 1992), y la forma cerrada para la intensidad de fluctuación del ruido de

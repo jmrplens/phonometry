@@ -77,6 +77,43 @@ print(h.threshold.round(1))  # [ 6.5 10.7 23.  35.2 40.8 39.8]  edad + ruido
 A 4 kHz la componente de edad (20,2 dB) y la de ruido (24,8 dB) se combinan en
 40,8 dB en lugar de su suma de 45,0 dB: el término de compresión quita 4,2 dB.
 
+**Tres magnitudes, bien separadas.** Merece la pena ser preciso con lo que
+significa cada símbolo, porque es fácil confundirlos:
+
+- El **NIPTS** ($N$) es el *desplazamiento permanente del umbral inducido por
+  ruido* — la pérdida extra que causa el ruido, y nada más. Es lo que un
+  programa ideal de conservación auditiva evitaría. Por sí solo no es un
+  audiograma.
+- El **HTLA** ($H$) es el umbral por *edad* en solitario (la componente
+  ISO 7029 de la guía de
+  [umbral de audición](/phonometry/es/guides/hearing-threshold/)), la pérdida
+  que tendría la misma persona sin ruido laboral.
+- El **HTLAN** ($H'$) es el umbral *total* — edad **y** ruido combinados por la
+  Fórmula (1). Es lo que mide un audiómetro, y el único de los tres comparable
+  con un audiograma real.
+
+La combinación no lineal $H' = H + N - HN/120$ es la razón de que no se pueda
+leer el NIPTS de un audiograma medido restando una tabla de edad sin más: las
+pérdidas casi totales superarían de otro modo el techo fisiológico de
+~120 dB, así que la norma comprime la suma. La compresión es despreciable
+mientras $H + N$ queda por debajo de unos 40 dB y crece de forma sostenida por
+encima, que es exactamente el régimen de una exposición larga y ruidosa.
+
+**Cautelas con el umbral de compensación (*fence*).** La ISO 1999 da umbrales
+y su distribución; *no* define una «discapacidad auditiva» ni un umbral
+indemnizable. Un ***fence*** es una línea de política — habitualmente una media
+de 25 dB sobre unas frecuencias elegidas — por encima de la cual la audición se
+considera dañada, y vive en la reglamentación nacional, no en esta norma. De
+ahí siguen dos cautelas. Primera: las frecuencias del *fence* importan —
+promediar sobre 0,5/1/2 kHz (el clásico *fence* de habla) apenas ve la muesca
+de ruido de 3–6 kHz, así que infravalora el daño temprano por ruido que sí
+detectaría una media de 3/4/6 kHz. Segunda: el NIPTS y el HTLAN responden a
+preguntas de *fence* distintas — el NIPTS pregunta «cuánto añadió el ruido», el
+HTLAN «este oído, edad incluida, ¿supera la línea?» — y el *porcentaje de la
+población más allá del fence* depende de la dispersión de fractiles, no solo de
+la mediana, así que debe leerse de la distribución, nunca del umbral mediano en
+solitario.
+
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss_es.svg" alt="Dos paneles. Izquierda: el NIPTS mediano a 95 dB para 10, 20, 30 y 40 años en un eje de audiograma invertido con la banda del 10 al 90 por ciento en torno a la curva de 40 años, que se acentúa hacia 4 kHz. Derecha: para un hombre de 60 años expuesto 30 años a 95 dB, las curvas de edad (HTLA), ruido (NIPTS) y HTLAN combinada, que queda por debajo de la suma simple" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss_es_dark.svg" alt="Dos paneles. Izquierda: el NIPTS mediano a 95 dB para 10, 20, 30 y 40 años en un eje de audiograma invertido con la banda del 10 al 90 por ciento en torno a la curva de 40 años, que se acentúa hacia 4 kHz. Derecha: para un hombre de 60 años expuesto 30 años a 95 dB, las curvas de edad (HTLA), ruido (NIPTS) y HTLAN combinada, que queda por debajo de la suma simple" style="width:96%">
 
 <details>
@@ -112,6 +149,29 @@ el `value` en el fractil pedido; el `HtlanResult` lleva `htla`, `nipts` y el
 `threshold` combinado. Ambos exponen `.plot()`. La componente de edad por sí
 sola es el tema de la guía de
 [umbral de audición](/phonometry/es/guides/hearing-threshold/).
+
+## Referencias
+
+- International Organization for Standardization. (2013). *Acoustics —
+  Estimation of noise-induced hearing loss* (ISO 1999:2013).
+  [Catálogo iso.org](https://www.iso.org/standard/45103.html).
+  El modelo implementado: el NIPTS mediano, su distribución estadística y la
+  combinación HTLAN, con los ejemplos resueltos del Anexo D usados para
+  validarlo.
+- Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to
+  steady-state broad-band noise. *The Journal of the Acoustical Society of
+  America*, 56(5), 1585–1593.
+  [doi:10.1121/1.1903482](https://doi.org/10.1121/1.1903482).
+  Uno de los estudios de campo cuyos datos de exposición-respuesta sustentan
+  las relaciones de NIPTS codificadas después en la ISO 1999.
+- National Institute for Occupational Safety and Health. (1998). *Criteria for
+  a recommended standard: Occupational noise exposure — Revised criteria 1998*
+  (DHHS/NIOSH Publication No. 98-126).
+  [doi:10.26616/NIOSHPUB98126](https://doi.org/10.26616/NIOSHPUB98126),
+  [PDF gratuito](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf).
+  Un documento de criterios de libre acceso que repasa la misma evidencia de
+  exposición-respuesta y las cuestiones de *fence* y conservación auditiva
+  tratadas arriba.
 
 ---
 

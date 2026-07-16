@@ -80,6 +80,18 @@ espectro en el que no se encuentra ningún tono aporta `ΔLj = −10 dB`
 (Fórmula 21). `assess_tones` aplica toda la cadena a los tonos de un espectro e
 informa del tono decisivo.
 
+**Cómo se selecciona la banda decisiva.** El método no barre un conjunto fijo
+de bandas: cada *tono* detectado define su propia banda crítica (§1), la
+audibilidad se evalúa tono a tono y — después de que el Paso 3 haya fusionado
+los tonos audibles de una misma banda en grupos `FG` calificados por su miembro
+más audible (§5) — la audibilidad decisiva es simplemente la mayor `ΔL` que
+queda en pie (Paso 4). La «banda decisiva» es, por tanto, la banda crítica
+centrada en el tono o grupo que gana, y es libre de moverse de un espectro a
+otro conforme la fuente recorre sus estados de funcionamiento; la media
+energética de la Fórmula 20 deja después que dominen los espectros más
+ruidosos (más audibles), lo cual es deliberado — a un tono claramente audible
+parte del tiempo no lo disculpan los intervalos en los que desaparece.
+
 ```python
 import phonometry as ph
 
@@ -103,6 +115,21 @@ promediado menos de 12 espectros. `assess_tones` la calcula por tono
 directamente desde las líneas del espectro y `mean_audibility_uncertainty`
 la propaga a la audibilidad media energética de un conjunto de espectros
 (Anexo E: `U = 2.80 dB` para el tono de 137.3 Hz frente al 2,79 impreso).
+
+**Cómo leer `U`.** Un intervalo *bilateral* al 90 % deja un 5 % en cada cola,
+así que `ΔL − U` es un enunciado unilateral al 95 %: cuando todo el intervalo
+`ΔL ± U` queda por encima de `0 dB`, el tono es audible con al menos un 95 %
+de confianza, y cuando el intervalo cruza el cero el veredicto no está
+asegurado estadísticamente — el remedio son más espectros, porque `U` se
+reduce con el número promediado (que es exactamente la razón de que la
+cláusula 6 obligue a declararla por debajo de 12 espectros). La misma lógica
+protege la penalización aguas abajo: el **Anexo J de la ISO 1996-2:2017**
+convierte la audibilidad media en el ajuste tonal `Kt` en pasos de 1 dB
+(Tabla J.1: `Kt = 0` para `ΔL ≤ 0`, hasta `Kt = 6 dB` para `ΔL > 12 dB`, o la
+escalera más gruesa de 0/3/6 dB de su nota), de modo que una incertidumbre que
+cruza una frontera de la tabla se propaga directamente como una interrogación
+de 1–3 dB sobre el nivel de evaluación. Declarar `ΔL ± U` junto a `Kt` muestra
+si el ajuste es robusto o pende de un espectro al límite.
 
 ## 4. Desde el espectro de banda estrecha
 
@@ -209,6 +236,22 @@ y se verifican contra el programa de referencia del Anexo J de
 1.8)`). Como refuerzo, evaluado en los tonos del Anexo E el umbral (`≈ 24 Hz` en
 137,3 Hz) los mantiene combinados, coherente con la agrupación FG de ese ejemplo.
 :::
+
+## Referencias
+
+- International Organization for Standardization. (2016). *Acoustics —
+  Objective method for assessing the audibility of tones in noise —
+  Engineering method* (ISO/PAS 20065:2016).
+  [Catálogo iso.org](https://www.iso.org/standard/66941.html).
+  El método de ingeniería implementado: todas las fórmulas de esta página, de
+  la banda crítica a la audibilidad media y su incertidumbre.
+- International Organization for Standardization. (2017). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 2:
+  Determination of sound pressure levels* (ISO 1996-2:2017).
+  [Catálogo iso.org](https://www.iso.org/standard/59766.html).
+  La norma de ruido ambiental a la que sirve este método: su Anexo J adopta el
+  método de ingeniería y convierte la audibilidad media en el ajuste tonal
+  `Kt` (Tabla J.1) tratado en §3.1.
 
 ---
 

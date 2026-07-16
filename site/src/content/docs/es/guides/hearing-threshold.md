@@ -1,12 +1,12 @@
 ---
 title: "Umbral de audición (edad y cero de referencia)"
-description: "La distribución del umbral de audición por edad de ISO 7029:2017 (mediana, dispersión y fractiles poblacionales por edad y sexo) y el umbral de referencia de la audición en campo libre y campo difuso de ISO 389-7:2006, sobre las frecuencias audiométricas de 125 Hz a 8000 Hz."
+description: "La distribución del umbral de audición por edad de ISO 7029:2017 (mediana, dispersión y fractiles poblacionales por edad y sexo) y el umbral de referencia de la audición en campo libre y campo difuso de ISO 389-7:2005, sobre las frecuencias audiométricas de 125 Hz a 8000 Hz."
 ---
 
 Dos normas describen dónde se sitúa el umbral de audición. **ISO 7029:2017** da
 la **distribución estadística del umbral de audición con la edad** para una
 población otológicamente normal — la pérdida lenta y primero en altas
-frecuencias conocida como presbiacusia. **ISO 389-7:2006** fija el **umbral de
+frecuencias conocida como presbiacusia. **ISO 389-7:2005** fija el **umbral de
 referencia de la audición**, el cero audiométrico (0 dB HL) expresado como nivel
 de presión sonora en escucha de campo libre y campo difuso. Ambas se definen
 sobre las frecuencias audiométricas de 125 Hz a 8000 Hz.
@@ -47,10 +47,33 @@ audiograma descendente clásico de la presbiacusia. Hombres y mujeres siguen
 coeficientes distintos (el argumento `sex`), y puede pedirse un subconjunto de
 las frecuencias audiométricas con `frequencies=`.
 
+**Quién cuenta como «otológicamente normal».** La población de la ISO 7029 no
+es la población general: son personas cribadas para estar en un estado normal
+de salud, libres de signos o síntomas de enfermedad del oído y de obstrucción
+por cerumen, y — la parte exigente — **sin historial de exposición indebida al
+ruido**, fármacos ototóxicos ni pérdida auditiva familiar. El modelo aísla por
+tanto el *envejecimiento puro*: es la línea de base que otras normas restan.
+Una plantilla real, sin cribar, oye peor que estas curvas a cualquier edad, y
+por eso la ISO 1999 permite que un estudio sustituya su propia referencia sin
+cribar («base de datos B») cuando el objetivo es compararse con una población
+real en lugar de aislar el efecto del ruido.
+
+**Cómo leer los percentiles.** Un fractil es un enunciado poblacional, no una
+predicción para una persona: `fractile=0.9` devuelve el umbral que el 90 % de
+las personas otológicamente normales de esa edad y sexo *mejoran* (solo lo
+supera el décimo que peor oye), y `fractile=0.5` la mediana — mitad por
+encima, mitad por debajo. La dispersión es deliberadamente asimétrica (dos
+semi-gaussianas, $s_u > s_l$): el envejecimiento arrastra a una minoría muy
+abajo mientras la mitad que mejor oye se mantiene agrupada cerca de la
+mediana, así que los percentiles extremos del lado malo se mueven con la edad
+mucho más deprisa de lo que el lado bueno llega a mejorar. Un audiograma
+individual puede caer en cualquier punto de ese abanico; el modelo te dice
+cuán *sorprendente* es, no cuál debería ser.
+
 ## 2. Umbral de referencia de la audición (ISO 389-7)
 
 El cero audiométrico no es un nivel de presión sonora fijo: depende de cómo
-llega el sonido al oyente. La Tabla 1 de ISO 389-7:2006 da el umbral de
+llega el sonido al oyente. La Tabla 1 de ISO 389-7:2005 da el umbral de
 referencia para escucha de **campo libre** (incidencia frontal) y **campo
 difuso**.
 
@@ -100,14 +123,30 @@ El `AgeThresholdResult` lleva la `median`, las dispersiones `spread_upper` y
 `spread_lower`, y el `threshold` en el fractil pedido, y su `.plot()` dibuja la
 mediana con la banda del 10–90 %. El desplazamiento permanente del umbral
 inducido por ruido de ISO 1999 — que añade una componente de ruido sobre esta
-componente de edad — es un tema aparte.
+componente de edad — es el tema de la guía de
+[pérdida auditiva inducida por ruido](/phonometry/es/guides/noise-induced-hearing-loss/).
+
+## Referencias
+
+- International Organization for Standardization. (2017). *Acoustics —
+  Statistical distribution of hearing thresholds related to age and gender*
+  (ISO 7029:2017). [Catálogo iso.org](https://www.iso.org/standard/42916.html).
+  El modelo por edad de la sección 1: la ley de potencias de la mediana, la
+  dispersión asimétrica y la maquinaria de fractiles.
+- International Organization for Standardization. (2005). *Acoustics —
+  Reference zero for the calibration of audiometric equipment — Part 7:
+  Reference threshold of hearing under free-field and diffuse-field listening
+  conditions* (ISO 389-7:2005).
+  [Catálogo iso.org](https://www.iso.org/standard/38976.html).
+  El cero audiométrico de la sección 2 (Tabla 1), implementado aquí a través
+  de su adopción europea EN ISO 389-7:2006.
 
 ---
 
 **Normas.** ISO 7029:2017, *Statistical distribution of hearing thresholds
 related to age and gender* — la mediana (cláusula 4.2, Tabla 1), la dispersión
 en torno a la mediana (cláusula 4.3, Tablas 2–5) y su aplicación (cláusula 4.4).
-ISO 389-7:2006, *Reference zero for the calibration of audiometric equipment —
+ISO 389-7:2005, *Reference zero for the calibration of audiometric equipment —
 Reference threshold of hearing under free-field and diffuse-field listening
 conditions* (Tabla 1).
 

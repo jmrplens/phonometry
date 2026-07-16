@@ -134,7 +134,7 @@ plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_W$ [dB re 1 pW]"); plt.show()
   sound: Structural vibrations and sound radiation at audio frequencies*
   (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
   [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
-  El tratamiento de la eficiencia de radiación tras la sección 3: la
+  El tratamiento de la eficiencia de radiación que sustenta la sección 3: la
   coincidencia, la cancelación por debajo de la frecuencia crítica y la
   radiación de placas finitas.
 - International Organization for Standardization. (2009). *Acoustics —

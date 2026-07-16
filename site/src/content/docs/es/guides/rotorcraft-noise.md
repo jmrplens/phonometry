@@ -75,13 +75,13 @@ sobre suelo duro, 0.5 dB sobre suelo blando).
   contrato EASA.2020.FC.06). European Union Aviation Safety Agency.
   [Página del proyecto en EASA](https://www.easa.europa.eu/en/research-projects/environmental-research-rotorcraft-noise),
   [PDF gratuito](https://www.easa.europa.eu/en/downloads/132005/en).
-  La guía a nivel de ecuación (Ec. 13-35) tras la implementación, con los
+  La guía a nivel de ecuación (Ec. 13-35) que sustenta la implementación, con los
   valores de atenuación de la Tabla 4 y los hemisferios de referencia usados
   como oráculos.
 - Chien, C. F., & Soroka, W. W. (1975). Sound propagation along an impedance
   plane. *Journal of Sound and Vibration*, 43(1), 9-20.
   [doi:10.1016/0022-460X(75)90200-X](https://doi.org/10.1016/0022-460X(75)90200-X).
-  La solución de interferencia de dos rayos sobre un plano de impedancia tras
+  La solución de interferencia de dos rayos sobre un plano de impedancia que sustenta
   el ajuste de efecto de suelo.
 - Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
   absorbent materials. *Applied Acoustics*, 3(2), 105-116.

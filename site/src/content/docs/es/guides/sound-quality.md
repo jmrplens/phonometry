@@ -178,8 +178,8 @@ matemática subyacente.
   (3.ª ed.). Springer.
   [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
   La psicoacústica de las sensaciones que cuantifica esta página: el énfasis
-  en alta frecuencia tras la agudeza y la percepción de modulación rápida
-  tras la aspereza.
+  en alta frecuencia que sustenta la agudeza y la percepción de modulación rápida
+  que sustenta la aspereza.
 
 ## Normas
 

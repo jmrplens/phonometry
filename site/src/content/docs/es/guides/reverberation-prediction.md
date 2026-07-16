@@ -244,7 +244,7 @@ campo no es difuso.
 - Eyring, C. F. (1930). Reverberation time in "dead" rooms. *The Journal of
   the Acoustical Society of America*, 1(2A), 217-241.
   [doi:10.1121/1.1915175](https://doi.org/10.1121/1.1915175).
-  La derivación por recorrido libre medio tras el término
+  La derivación por recorrido libre medio que sustenta el término
   $-S\ln(1-\bar\alpha)$ del §1.
 - Millington, G. (1932). A modified formula for reverberation. *The Journal
   of the Acoustical Society of America*, 4(1), 69-82.
@@ -262,7 +262,7 @@ campo no es difuso.
 - Kuttruff, H. (2016). *Room acoustics* (6.ª ed.). CRC Press.
   [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
   La teoría del campo difuso, sus límites y la valoración moderna de las
-  fórmulas clásicas tras el §4.
+  fórmulas clásicas que sustentan el §4.
 - Everest, F. A. (2001). *Master handbook of acoustics* (4.ª ed.).
   McGraw-Hill. ISBN 978-0-07-136097-5.
   [Ficha en Open Library](https://openlibrary.org/isbn/9780071360975).

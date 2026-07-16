@@ -263,7 +263,7 @@ de presión-liberada.
   sources. *The Journal of the Acoustical Society of America*, 34(12),
   1936-1956.
   [doi:10.1121/1.1909155](https://doi.org/10.1121/1.1909155).
-  El estudio de ruido ambiental tras las componentes eólica y térmica de
+  El estudio de ruido ambiental que sustenta las componentes eólica y térmica de
   la sección de ruido ambiental oceánico.
 - Carey, W. M., & Evans, R. B. (2011). *Ocean ambient noise: Measurement and
   theory*. Springer.

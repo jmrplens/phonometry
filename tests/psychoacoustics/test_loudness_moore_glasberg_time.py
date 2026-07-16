@@ -43,14 +43,47 @@ def _tone(frequency: float, level_db: float, duration: float = 1.3) -> np.ndarra
     return np.sqrt(2.0) * p_rms * np.sin(2.0 * np.pi * frequency * t)
 
 
+@pytest.fixture(scope="module")
+def mg_tone():
+    """Memoised steady-tone loudness, shared across the Annex C.1 checks.
+
+    Several parametrised suites analyse the *same* (frequency, level, field,
+    presentation) 1.3 s tone but assert different columns of the one result
+    object: ``test_annex_c1_other_tones`` pins the phon value while
+    ``test_annex_c1_sone_values`` pins the sone value of the identical tone,
+    and the 1 kHz / 40 dB anchor is shared by three checks. Each analysis is a
+    full time-varying loudness chain (~2 s), so computing it once per distinct
+    input and reusing the (read-only) result object removes ~8 redundant
+    recomputations without touching any oracle or tolerance. The returned
+    ``MooreGlasbergTimeVaryingLoudness`` is never mutated by callers.
+    """
+    cache: dict[tuple, MooreGlasbergTimeVaryingLoudness] = {}
+
+    def get(
+        frequency: float,
+        level_db: float,
+        *,
+        field: str = "free",
+        presentation: str = "binaural",
+    ) -> MooreGlasbergTimeVaryingLoudness:
+        key = (frequency, level_db, field, presentation)
+        if key not in cache:
+            cache[key] = loudness_moore_glasberg_time(
+                _tone(frequency, level_db), FS, field=field, presentation=presentation
+            )
+        return cache[key]
+
+    return get
+
+
 # --------------------------------------------------------------------------
 # Definitional anchor (clause 7.3 / Annex C.1)
 # --------------------------------------------------------------------------
 
 
-def test_anchor_1khz_40db_is_one_sone() -> None:
+def test_anchor_1khz_40db_is_one_sone(mg_tone) -> None:
     """A 1 kHz tone at 40 dB SPL, binaural, free field -> 1.000 sone / 40 phon."""
-    res = loudness_moore_glasberg_time(_tone(1000.0, 40.0), FS)
+    res = mg_tone(1000.0, 40.0)
     assert res.n_max == pytest.approx(1.0, abs=0.02)
     assert res.loudness_level_max == pytest.approx(40.0, abs=0.3)
 
@@ -94,9 +127,9 @@ _C1_1KHZ = [
 
 
 @pytest.mark.parametrize("level_db, sone, phon", _C1_1KHZ)
-def test_annex_c1_1khz_tone(level_db: float, sone: float, phon: float) -> None:
+def test_annex_c1_1khz_tone(mg_tone, level_db: float, sone: float, phon: float) -> None:
     """1 kHz tone 10-80 dB reaches the Annex C.1 peak long-term loudness."""
-    res = loudness_moore_glasberg_time(_tone(1000.0, level_db), FS)
+    res = mg_tone(1000.0, level_db)
     # Loudness level (phon) is the linear-in-perception comparison; within the
     # standard's expanded uncertainty (2.8 phon, clause 8).
     assert res.loudness_level_max == pytest.approx(phon, abs=1.0)
@@ -122,12 +155,10 @@ _C1_OTHER = [
 
 @pytest.mark.parametrize("frequency, level_db, field, presentation, phon", _C1_OTHER)
 def test_annex_c1_other_tones(
-    frequency: float, level_db: float, field: str, presentation: str, phon: float
+    mg_tone, frequency: float, level_db: float, field: str, presentation: str, phon: float
 ) -> None:
     """3 kHz / 100 Hz / 4 kHz and monaural earphone tones match Annex C.1."""
-    res = loudness_moore_glasberg_time(
-        _tone(frequency, level_db), FS, field=field, presentation=presentation
-    )
+    res = mg_tone(frequency, level_db, field=field, presentation=presentation)
     assert res.loudness_level_max == pytest.approx(phon, abs=1.2)
 
 
@@ -147,16 +178,14 @@ _C1_SONE = [
 
 @pytest.mark.parametrize("frequency, field, presentation, level_db, sone", _C1_SONE)
 def test_annex_c1_sone_values(
-    frequency: float, field: str, presentation: str, level_db: float, sone: float
+    mg_tone, frequency: float, field: str, presentation: str, level_db: float, sone: float
 ) -> None:
     """Annex C.1.2/C.1.3 peak long-term loudness in sone.
 
     Values print to two decimals; the absolute floor covers their rounding
     half-width at the quiet end.
     """
-    res = loudness_moore_glasberg_time(
-        _tone(frequency, level_db), FS, field=field, presentation=presentation
-    )
+    res = mg_tone(frequency, level_db, field=field, presentation=presentation)
     assert res.n_max == pytest.approx(sone, rel=0.02, abs=0.005)
 
 

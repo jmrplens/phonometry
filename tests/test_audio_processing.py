@@ -5,7 +5,6 @@ Advanced audio processing tests including Pink Noise spectral analysis.
 
 from typing import cast
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from phonometry import octave_filter
@@ -59,24 +58,10 @@ def test_pink_noise_flatness() -> None:
     samples = int(fs * duration)
     x = generate_pink_noise(samples)
 
-    spl, freq = octave_filter(x, fs=fs, fraction=3, order=6, limits=[20, 20000])
-
-    mean_spl = np.mean(spl)
+    spl, _freq = octave_filter(x, fs=fs, fraction=3, order=6, limits=[20, 20000])
 
     # Check flatness in central bands (ignoring edges)
     valid_spl = np.array(spl)[2:-2]
     deviation = np.max(np.abs(valid_spl - np.mean(valid_spl)))
-
-    # Plot results for visual verification (optional in CI)
-    _, ax = plt.subplots(figsize=(10, 6))
-    ax.semilogx(freq, spl, "b-o", label="Measured SPL", markerfacecolor="white")
-    ax.axhline(float(mean_spl), color="r", linestyle="--", label="Mean SPL", alpha=0.7)
-    ax.set_title("Pink Noise 1/3 Octave Spectrum (Flatness Check)", fontweight="bold")
-    ax.set_xlabel("Frequency [Hz]")
-    ax.set_ylabel("Level [dB]")
-    ax.grid(True, which="both", alpha=0.3)
-    ax.legend()
-    plt.savefig("tests/pink_noise_test.png", dpi=150)
-    plt.close()
 
     assert deviation < 3.0, f"Spectrum deviation too high: {deviation:.2f} dB"

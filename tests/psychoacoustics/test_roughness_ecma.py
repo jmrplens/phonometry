@@ -95,18 +95,21 @@ def test_silence_is_zero() -> None:
     assert np.all(result.specific_roughness == 0.0)
 
 
-def test_peaks_near_70hz_modulation() -> None:
+def test_peaks_near_70hz_modulation(ref_calibration: EcmaRoughness) -> None:
     # Roughness is maximal around 70 Hz modulation and falls off toward slow
-    # (< 20 Hz) and fast (> 200 Hz) modulation (Clause 7 intro, Annex C).
-    r70 = roughness_ecma(_am_tone(1000.0, 70.0, 1.0, 60.0), FS).roughness
+    # (< 20 Hz) and fast (> 200 Hz) modulation (Clause 7 intro, Annex C). The
+    # 70 Hz reference is the module calibration signal, so reuse its result
+    # rather than recompute the same chain.
+    r70 = ref_calibration.roughness
     r10 = roughness_ecma(_am_tone(1000.0, 10.0, 1.0, 60.0), FS).roughness
     r300 = roughness_ecma(_am_tone(1000.0, 300.0, 1.0, 60.0), FS).roughness
     assert r70 > r10
     assert r70 > r300
 
 
-def test_grows_with_modulation_depth() -> None:
-    r_full = roughness_ecma(_am_tone(1000.0, 70.0, 1.0, 60.0), FS).roughness
+def test_grows_with_modulation_depth(ref_calibration: EcmaRoughness) -> None:
+    # The full-depth 70 Hz signal is the module calibration signal; reuse it.
+    r_full = ref_calibration.roughness
     r_half = roughness_ecma(_am_tone(1000.0, 70.0, 0.5, 60.0), FS).roughness
     assert r_full > r_half > 0.05
 

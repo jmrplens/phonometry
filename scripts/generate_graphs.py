@@ -806,6 +806,54 @@ _ES_EXACT = {
     "on the floor: copies merge — no comb in band":
         "en el suelo: las copias se funden — sin peine en banda",
     "first notch above 8 kHz": "primer nulo por encima de 8 kHz",
+    # --- FDTD animation labels (third batch) ---
+    "Barrier diffraction into the shadow zone (2D FDTD)":
+        "Difracción en una barrera hacia la zona de sombra (FDTD 2D)",
+    "barrier": "barrera",
+    "shadow zone": "zona de sombra",
+    "rigid ground": "suelo rígido",
+    "RMS level [dB re panel max]": "nivel RMS [dB re máx del panel]",
+    "diffraction fills the shadow": "la difracción rellena la sombra",
+    "deep, clean shadow": "sombra profunda y limpia",
+    "each panel on its own dB scale": "cada panel en su propia escala dB",
+    "Ground effect: direct + reflected interference (2D FDTD)":
+        "Efecto de suelo: interferencia directa + reflejada (FDTD 2D)",
+    "source (h = 1.5 m)": "fuente (h = 1,5 m)",
+    "image source (ghost)": "fuente imagen (fantasma)",
+    "receiver in a dip": "receptor en un mínimo",
+    "instantaneous pressure": "presión instantánea",
+    "RMS level: interference lobes": "nivel RMS: lóbulos de interferencia",
+    "Level on the 8 m arc": "Nivel en el arco de 8 m",
+    "elevation angle θ [°]": "ángulo de elevación θ [°]",
+    "level [dB re max]": "nivel [dB re máx]",
+    "image-source model": "modelo de fuente imagen",
+    "predicted nulls": "mínimos previstos",
+    "dips land exactly on the predicted nulls":
+        "los mínimos caen exactamente en los nulos previstos",
+    "FDTD": "FDTD",
+    "SOFAR channel: sound trapped by the c(z) minimum (2D FDTD)":
+        "Canal SOFAR: sonido atrapado por el mínimo de c(z) (FDTD 2D)",
+    "Source on the channel axis (depth 400 m)":
+        "Fuente en el eje del canal (400 m de profundidad)",
+    "Source near the surface (depth 150 m)":
+        "Fuente cerca de la superficie (150 m de profundidad)",
+    "channel axis (c minimum)": "eje del canal (mínimo de c)",
+    "trapped: wavefronts bend back to the axis":
+        "atrapado: los frentes de onda se curvan de vuelta al eje",
+    "leaks: energy escapes the channel":
+        "fuga: la energía escapa del canal",
+    "c(z) [m/s]": "c(z) [m/s]",
+    "Flat panel vs Schroeder diffuser (2D FDTD)":
+        "Panel plano frente a difusor de Schroeder (FDTD 2D)",
+    "Flat rigid panel": "Panel rígido plano",
+    "Schroeder diffuser (QRD, N = 7)": "Difusor de Schroeder (QRD, N = 7)",
+    "incident plane wavefront": "frente de onda plano incidente",
+    "sound field p": "campo sonoro p",
+    "scattered field (total − incident)":
+        "campo dispersado (total − incidente)",
+    "specular beam": "haz especular",
+    "scattered fan": "abanico dispersado",
+    "receiver arc": "arco de receptores",
 }
 
 _ES_PATTERNS = [
@@ -933,6 +981,12 @@ _ES_PATTERNS = [
     (r"^(.+) sone$", r"\1 sonios"),
     (r"^mean Lp = (.+) dB$", r"Lp medio = \1 dB"),
     (r"^first notch (.+) Hz$", r"primer nulo \1 Hz"),
+    # FDTD animation dynamic labels (third batch)
+    (r"^Low frequency: (.+)$", r"Baja frecuencia: \1"),
+    (r"^High frequency: (.+)$", r"Alta frecuencia: \1"),
+    (r"^insertion loss (.+) dB$", r"pérdida por inserción \1 dB"),
+    (r"^diffusion coefficient d = (.+)$", r"coeficiente de difusión d = \1"),
+    (r"^design frequency (.+) Hz$", r"frecuencia de diseño \1 Hz"),
 ]
 
 
@@ -7571,6 +7625,830 @@ def animate_fdtd_room_modes(output_dir: str) -> None:
                  frames=int(p_all.shape[1]), gif_fps=8)
 
 
+# ---------------------------------------------------------------------------
+# FDTD wave-field clips (barrier, ground effect, SOFAR duct, diffuser).
+# Every simulation runs once per process behind an lru_cache and its frames
+# are re-rendered for the four language x theme variants; each clip keeps
+# >= 12 captured frames per acoustic period of the highest significant
+# frequency it shows, so the wavefronts read as continuous motion.
+# ---------------------------------------------------------------------------
+
+
+def _fdtd_cw_capture(
+        sim: Any, frequency: float, every: int, n_frames: int,
+        decimate: int = 2) -> tuple[Any, Any, Any, Any]:
+    """Drive a CW simulation and capture instantaneous + running-RMS frames.
+
+    The running mean square uses a two-period time constant, so the RMS map
+    (the lobe/shadow pattern) builds up as the field settles. Returns the
+    float32 frame stacks (decimated), the frame times and the final
+    full-resolution RMS map for physics probes.
+    """
+    beta = float(np.exp(-sim.dt * frequency / 2.0))
+    ms = np.zeros_like(sim.p)
+    ps: list[Any] = []
+    rs: list[Any] = []
+    ts: list[float] = []
+    for _ in range(every * n_frames):
+        sim.step()
+        ms = beta * ms + (1.0 - beta) * sim.p**2
+        if sim.n % every == 0 and len(ps) < n_frames:
+            ps.append(sim.p[::decimate, ::decimate].astype(np.float32))
+            rs.append(np.sqrt(ms[::decimate, ::decimate]).astype(np.float32))
+            ts.append(sim.time)
+    return np.stack(ps), np.stack(rs), np.asarray(ts), np.sqrt(ms)
+
+
+def _rms_to_db(rms_frames: Any, *, floor: float = -40.0) -> Any:
+    """RMS frame stack -> dB re the final frame's maximum, clipped at floor."""
+    ref = float(rms_frames[-1].max())
+    with np.errstate(divide="ignore"):
+        db = 20.0 * np.log10(rms_frames / ref)
+    return np.clip(db, floor, 0.0).astype(np.float32)
+
+
+_BARRIER_FREQS = (100.0, 500.0)
+# Receiver low over the ground: there the ground bounce reinforces both
+# frequencies almost equally (tiny path difference), so the insertion-loss
+# contrast is pure diffraction instead of ground-interference lobes.
+_BARRIER_RECEIVER = (9.0, 0.5)
+
+
+@lru_cache(maxsize=1)
+def _barrier_fields(
+        n_frames: int = _FDTD_ANIM_FRAMES) -> tuple[Any, Any, Any, Any]:
+    """Two CW barrier-diffraction runs (low/high frequency), cached.
+
+    A 12 m x 7 m half-space over rigid ground with a thin rigid barrier
+    (5 000:1 density contrast) 2.5 m tall at x = 5.5 m; absorbing sponges
+    on the two sides and the sky. Each frequency also gets a barrier-free
+    reference run over the same ground, so the receiver annotation is a
+    true insertion loss (patch-averaged around the receiver to keep the
+    ground-interference lobes out of the number). After the captured clip
+    both runs keep stepping, uncaptured, into genuine steady state and the
+    insertion loss is an exact RMS over the final two full periods of that
+    extended window (see the settle comment below). Returns the
+    instantaneous-pressure frames, RMS maps in dB re each run's own
+    maximum, the frame times and the per-frequency insertion losses.
+    """
+    import fdtd2d
+
+    c0, dx = 343.0, 0.02
+    ny, nx = 350, 600                      # 7 m x 12 m
+    rho = np.full((ny, nx), 1.2)
+    bx = int(round(5.5 / dx))              # thin barrier: 3 cells = 6 cm
+    rho[:int(round(2.5 / dx)), bx:bx + 3] = 1.2e6
+    # 6 captured steps per frame: 13.5 frames per 500 Hz period, 53.4 ms.
+    every = 6
+    # Receiver patch: 0.6 m x 0.6 m around the shadow-zone receiver,
+    # energy-averaged so residual interference fringes average out.
+    rx, ry = _BARRIER_RECEIVER
+    patch = (slice(int((ry - 0.3) / dx), int((ry + 0.3) / dx) + 1),
+             slice(int((rx - 0.3) / dx), int((rx + 0.3) / dx) + 1))
+    p_all, db_all, ils = [], [], []
+    times = np.zeros(0)
+    for f in _BARRIER_FREQS:
+        # Row 0 is the ground (displayed at the bottom via origin="lower"),
+        # so the absorbing sides are left/right and the *high* rows ("bottom"
+        # in the imshow-origin naming of fdtd2d); the ground stays rigid.
+        rms_patch = []
+        for rho_map in (rho, None):
+            sim = fdtd2d.FDTD2D(c0, dx, shape=(ny, nx),
+                                rho=1.2 if rho_map is None else rho_map,
+                                sponge_width=40,
+                                sponge_sides=("left", "right", "bottom"))
+            sim.add_source(fdtd2d.CWSource(ix=100, iy=25, frequency=f,
+                                           ramp_cycles=2.0))
+            if rho_map is not None:
+                ps, rs, times, _ = _fdtd_cw_capture(sim, f, every, n_frames)
+                p_all.append(ps)
+                db_all.append(_rms_to_db(rs))
+            else:
+                # Barrier-free reference: same steps, no frames captured.
+                for _ in range(every * n_frames):
+                    sim.step()
+            # The clip ends at 53.4 ms, but at 100 Hz the field behind the
+            # barrier has not settled by then: after the 20 ms source ramp
+            # the diffracted and ground-bounced paths over the edge keep
+            # building the receiver level for several more periods. Step
+            # both runs on, uncaptured, to ~113 ms -- where the measured
+            # insertion loss sits within 0.05 dB of its value 30 ms later
+            # -- and measure an exact RMS over the last two full periods,
+            # so neither run's transient biases the published number.
+            period = int(round(1.0 / (f * sim.dt)))
+            settle = int(round(0.113 / sim.dt)) - sim.n
+            acc = np.zeros_like(sim.p)
+            for i in range(settle):
+                sim.step()
+                if i >= settle - 2 * period:
+                    acc += sim.p**2
+            rms = np.sqrt(acc / (2 * period))
+            rms_patch.append(float(np.sqrt(np.mean(rms[patch] ** 2))))
+        ils.append(20.0 * float(np.log10(rms_patch[1] / rms_patch[0])))
+    return np.stack(p_all), np.stack(db_all), times, tuple(ils)
+
+
+def animate_fdtd_barrier(output_dir: str) -> None:
+    """A point source behind a thin rigid barrier on reflecting ground
+    (2D FDTD), at 100 Hz and 500 Hz side by side: the long wavelength
+    diffracts around the edge and fills the shadow zone, the short one is
+    cast into a deep, clean shadow -- why barriers fail at low frequency."""
+    from matplotlib import patheffects
+    from matplotlib.patches import Rectangle
+
+    T = _translate_str
+    outline = [patheffects.withStroke(linewidth=2.0, foreground="white")]
+    p_all, db_all, times, ils = _barrier_fields()
+    half = p_all.shape[1] // 2
+    lam = tuple(343.0 / f for f in _BARRIER_FREQS)
+    rx, ry = _BARRIER_RECEIVER
+
+    fig = _anim_figure()
+    fig.suptitle(T("Barrier diffraction into the shadow zone (2D FDTD)"),
+                 fontweight="bold")
+    gs = fig.add_gridspec(2, 2)
+    titles = [
+        T(f"Low frequency: {_BARRIER_FREQS[0]:.0f} Hz "
+          f"(λ ≈ {lam[0]:.1f} m)"),
+        T(f"High frequency: {_BARRIER_FREQS[1]:.0f} Hz "
+          f"(λ ≈ {lam[1]:.2f} m)"),
+    ]
+    verdicts = [T("diffraction fills the shadow"), T("deep, clean shadow")]
+    ims: list[Any] = []
+    il_txts: list[Any] = []
+    for col in range(2):
+        vmax = float(np.quantile(np.abs(p_all[col][half:]), 0.995))
+        ax_p = fig.add_subplot(gs[0, col])
+        ax_r = fig.add_subplot(gs[1, col])
+        im_p = ax_p.imshow(p_all[col][0], origin="lower",
+                           extent=(0.0, 12.0, 0.0, 7.0), cmap="RdBu_r",
+                           vmin=-vmax, vmax=vmax, interpolation="bilinear")
+        im_r = ax_r.imshow(db_all[col][0], origin="lower",
+                           extent=(0.0, 12.0, 0.0, 7.0), cmap="magma",
+                           vmin=-40.0, vmax=0.0, interpolation="bilinear")
+        ax_p.set_title(titles[col], fontsize=10, fontweight="bold")
+        for ax in (ax_p, ax_r):
+            ax.grid(False)
+            ax.set_ylim(-0.5, 7.0)
+            ax.add_patch(Rectangle((0.0, -0.5), 12.0, 0.5,
+                                   facecolor=COLOR_GRID, edgecolor=COLOR_FG,
+                                   lw=0.8, hatch="///"))
+            # Theme-independent bar: mid-gray with a white edge stays
+            # visible on the near-white RdBu row and the black magma row.
+            ax.add_patch(Rectangle((5.44, 0.0), 0.18, 2.5,
+                                   facecolor="#707070", edgecolor="white",
+                                   lw=0.6))
+            ax.tick_params(labelsize=7)
+        ax_p.tick_params(labelbottom=False)
+        ax_r.set_xlabel("x [m]", fontsize=8)
+        ax_p.plot([2.0], [0.5], marker="o", ms=5, color=COLOR_TERTIARY,
+                  markeredgecolor="white", markeredgewidth=0.8)
+        ax_p.text(2.25, 0.55, T("source"), ha="left", va="center",
+                  color="black", fontsize=7.5, path_effects=outline)
+        ax_p.text(5.53, 2.7, T("barrier"), ha="center", va="bottom",
+                  color="black", fontsize=7.5, path_effects=outline)
+        ax_p.text(9.2, 1.1, T("shadow zone"), ha="center", va="center",
+                  color="black", fontsize=7.5, path_effects=outline)
+        ax_r.text(11.7, 6.4, verdicts[col], ha="right", va="top",
+                  color="white", fontsize=8)
+        ax_r.plot([rx], [ry], marker="o", ms=5, color="white",
+                  markeredgecolor="black", markeredgewidth=0.8)
+        il_txts.append(
+            ax_r.text(rx, ry + 0.45, "", ha="center", va="bottom",
+                      color="white", fontsize=7.5))
+        if col == 0:
+            ax_p.set_ylabel(T("instantaneous p(x, y)"), fontsize=9)
+            ax_r.set_ylabel(T("RMS level [dB re panel max]"), fontsize=8)
+            ax_p.text(0.25, -0.27, T("rigid ground"), ha="left",
+                      va="center", color=COLOR_FG, fontsize=6.5,
+                      bbox={"boxstyle": "round,pad=0.2",
+                            "facecolor": fig.get_facecolor(),
+                            "edgecolor": "none"})
+        else:
+            ax_p.tick_params(labelleft=False)
+            ax_r.tick_params(labelleft=False)
+            ax_r.text(0.3, 5.45, T("each panel on its own dB scale"),
+                      color="white", fontsize=7, ha="left", va="top")
+        ims += [im_p, im_r]
+    t_txt = fig.text(0.985, 0.02, "", ha="right", va="bottom",
+                     family="monospace", fontsize=10, color=COLOR_FG)
+
+    def update(k: int) -> tuple[Any, ...]:
+        for col in range(2):
+            ims[2 * col].set_data(p_all[col][k])
+            ims[2 * col + 1].set_data(db_all[col][k])
+            # The measured insertion loss appears once the field has
+            # actually reached and settled at the receiver, so the number
+            # never precedes its cause.
+            il_txts[col].set_text(
+                T(f"insertion loss {ils[col]:.0f} dB")
+                if times[k] >= 0.032 else "")
+        t_txt.set_text(f"t = {times[k] * 1000.0:4.1f} ms")
+        return (*ims, *il_txts, t_txt)
+
+    _render_clip(fig, update, output_dir, "anim_fdtd_barrier",
+                 frames=int(p_all.shape[1]), gif_fps=8)
+
+
+_GROUND_FREQ = 400.0
+_GROUND_H = 1.5
+_GROUND_ARC_R = 8.0
+
+
+@lru_cache(maxsize=1)
+def _ground_effect_fields(
+    n_frames: int = _FDTD_ANIM_FRAMES,
+) -> tuple[Any, Any, Any, Any, Any, Any, Any]:
+    """One CW run of a point source 1.5 m over rigid ground, cached.
+
+    Returns instantaneous frames, RMS maps in dB, frame times, the arc
+    angles [deg], the per-frame arc levels [dB re the final maximum], the
+    two-path image-source model levels on the same arc, and the predicted
+    null angles where the path difference is an odd multiple of lambda/2.
+    """
+    import fdtd2d
+
+    c0, dx = 343.0, 0.02
+    ny, nx = 400, 700                      # 8 m x 14 m
+    sim = fdtd2d.FDTD2D(c0, dx, shape=(ny, nx), sponge_width=40,
+                        sponge_sides=("left", "right", "bottom"))
+    sim.add_source(fdtd2d.CWSource(ix=80, iy=75, frequency=_GROUND_FREQ,
+                                   ramp_cycles=2.0))
+    # 8 steps per frame: 12.6 frames per 400 Hz period, 71.3 ms of settling.
+    every = 8
+    lam = c0 / _GROUND_FREQ
+    theta = np.arange(1.0, 62.5, 0.5)
+    rad = np.radians(theta)
+    arc_x = 1.6 + _GROUND_ARC_R * np.cos(rad)
+    arc_y = _GROUND_ARC_R * np.sin(rad)
+    ix_arc = np.round(arc_x / dx).astype(int)
+    iy_arc = np.round(arc_y / dx).astype(int)
+
+    beta = float(np.exp(-sim.dt * _GROUND_FREQ / 2.0))
+    ms = np.zeros_like(sim.p)
+    ps: list[Any] = []
+    rs: list[Any] = []
+    ts: list[float] = []
+    arc: list[Any] = []
+    for _ in range(every * n_frames):
+        sim.step()
+        ms = beta * ms + (1.0 - beta) * sim.p**2
+        if sim.n % every == 0 and len(ps) < n_frames:
+            ps.append(sim.p[::2, ::2].astype(np.float32))
+            rs.append(np.sqrt(ms[::2, ::2]).astype(np.float32))
+            ts.append(sim.time)
+            arc.append(np.sqrt(ms[iy_arc, ix_arc]))
+    arc_rms = np.stack(arc)
+    with np.errstate(divide="ignore"):
+        arc_db = 20.0 * np.log10(arc_rms / float(arc_rms[-1].max()))
+    arc_db = np.clip(arc_db, -45.0, None)
+
+    # Two-path image-source model on the same arc (2D line source: 1/sqrt(r)
+    # spreading), and the predicted nulls where r2 - r1 = (m + 1/2) lambda.
+    def paths(th: Any) -> tuple[Any, Any]:
+        x, y = (_GROUND_ARC_R * np.cos(np.radians(th)),
+                _GROUND_ARC_R * np.sin(np.radians(th)))
+        r1 = np.hypot(x, y - _GROUND_H)
+        r2 = np.hypot(x, y + _GROUND_H)
+        return r1, r2
+
+    r1, r2 = paths(theta)
+    k = 2.0 * np.pi / lam
+    h = (np.exp(1j * k * r1) / np.sqrt(r1)
+         + np.exp(1j * k * r2) / np.sqrt(r2))
+    model_db = 20.0 * np.log10(np.abs(h) / float(np.abs(h).max()))
+    th_fine = np.arange(0.5, 62.4, 0.02)
+    r1f, r2f = paths(th_fine)
+    delta = r2f - r1f
+    nulls: list[float] = []
+    for m in range(4):
+        target = (m + 0.5) * lam
+        cross = np.nonzero(np.diff(np.sign(delta - target)))[0]
+        nulls.extend(float(np.interp(target, delta[c:c + 2],
+                                     th_fine[c:c + 2])) for c in cross)
+    return (np.stack(ps), _rms_to_db(np.stack(rs)), np.asarray(ts),
+            theta, arc_db.astype(np.float32), model_db, tuple(sorted(nulls)))
+
+
+def animate_fdtd_ground_effect(output_dir: str) -> None:
+    """A 400 Hz point source 1.5 m above rigid ground (2D FDTD): the direct
+    and ground-reflected wavefronts interfere and the lobe pattern forms;
+    the ghosted image source below the ground explains the geometry, and the
+    level sampled on an 8 m arc converges to the two-path model with its
+    predicted nulls."""
+    from matplotlib import patheffects
+
+    T = _translate_str
+    outline = [patheffects.withStroke(linewidth=2.0, foreground="white")]
+    (p_frames, db_frames, times, theta, arc_db, model_db,
+     nulls) = _ground_effect_fields()
+    half = p_frames.shape[0] // 2
+    vmax = float(np.quantile(np.abs(p_frames[half:]), 0.995))
+
+    fig = _anim_figure()
+    fig.suptitle(T("Ground effect: direct + reflected interference "
+                   "(2D FDTD)"), fontweight="bold")
+    gs = fig.add_gridspec(2, 2, width_ratios=[1.5, 1.0])
+    ax_p = fig.add_subplot(gs[0, 0])
+    ax_r = fig.add_subplot(gs[1, 0])
+    ax_l = fig.add_subplot(gs[:, 1])
+
+    im_p = ax_p.imshow(p_frames[0], origin="lower",
+                       extent=(0.0, 14.0, 0.0, 8.0), cmap="RdBu_r",
+                       vmin=-vmax, vmax=vmax, interpolation="bilinear")
+    im_r = ax_r.imshow(db_frames[0], origin="lower",
+                       extent=(0.0, 14.0, 0.0, 8.0), cmap="magma",
+                       vmin=-40.0, vmax=0.0, interpolation="bilinear")
+    rad = np.radians(theta)
+    arc_x = 1.6 + _GROUND_ARC_R * np.cos(rad)
+    arc_y = _GROUND_ARC_R * np.sin(rad)
+    for ax in (ax_p, ax_r):
+        ax.grid(False)
+        ax.set_ylim(-1.9, 8.0)
+        ax.fill_between([0.0, 14.0], -1.9, 0.0, facecolor=COLOR_GRID,
+                        edgecolor=COLOR_FG, lw=0.8, hatch="///")
+        ax.tick_params(labelsize=7)
+    ax_p.tick_params(labelbottom=False)
+    ax_r.set_xlabel("x [m]", fontsize=8)
+    ax_p.set_ylabel(T("instantaneous pressure"), fontsize=9)
+    ax_r.set_ylabel(T("RMS level: interference lobes"), fontsize=8)
+    # Source, ghosted image source and the mirror geometry.
+    ax_p.plot([1.6], [_GROUND_H], marker="o", ms=5, color=COLOR_TERTIARY,
+              markeredgecolor="white", markeredgewidth=0.8)
+    ax_p.text(1.95, 1.65, T("source (h = 1.5 m)"), ha="left", va="center",
+              color="black", fontsize=7.5, path_effects=outline)
+    ax_p.plot([1.6], [-_GROUND_H], marker="o", ms=5, mfc="none",
+              color=COLOR_TERTIARY, alpha=0.85)
+    ax_p.plot([1.6, 1.6], [_GROUND_H, -_GROUND_H], ls=":",
+              color=COLOR_TERTIARY, lw=1.0, alpha=0.7)
+    hatch_box = {"boxstyle": "round,pad=0.2",
+                 "facecolor": fig.get_facecolor(), "edgecolor": "none"}
+    ax_p.text(1.95, -1.5, T("image source (ghost)"), ha="left",
+              va="center", color=COLOR_FG, fontsize=7.5, bbox=hatch_box)
+    ax_p.text(13.7, -0.95, T("rigid ground"), ha="right", va="center",
+              color=COLOR_FG, fontsize=6.5, bbox=hatch_box)
+    ax_p.text(0.3, 7.6, f"f = {_GROUND_FREQ:.0f} Hz", ha="left", va="top",
+              color="black", fontsize=8, path_effects=outline)
+    # Sampling arc and the receiver sitting in the first-order dip.
+    ax_r.plot(arc_x, arc_y, ls=":", color="white", lw=0.9, alpha=0.6)
+    th_dip = nulls[1]
+    dip_x = 1.6 + _GROUND_ARC_R * np.cos(np.radians(th_dip))
+    dip_y = _GROUND_ARC_R * np.sin(np.radians(th_dip))
+    ax_r.plot([dip_x], [dip_y], marker="o", ms=5, color="white",
+              markeredgecolor="black", markeredgewidth=0.8)
+    # Right-aligned to the left of the dot: the Spanish label is longer
+    # and would clip at the panel edge on the other side.
+    ax_r.text(dip_x - 0.35, dip_y + 0.42, T("receiver in a dip"),
+              ha="right", va="center", color="white", fontsize=7.5)
+    # Level vs elevation angle, converging to the image-source model.
+    _grid_axes(ax_l)
+    ax_l.set_title(T("Level on the 8 m arc"), fontsize=10,
+                   fontweight="bold")
+    ax_l.set_xlabel(T("elevation angle θ [°]"), fontsize=8)
+    ax_l.set_ylabel(T("level [dB re max]"), fontsize=8)
+    ax_l.set_xlim(0.0, 63.0)
+    ax_l.set_ylim(-34.0, 3.0)
+    ax_l.tick_params(labelsize=7)
+    for i, th in enumerate(n for n in nulls if n <= 62.0):
+        ax_l.axvline(th, color=COLOR_SECONDARY, ls=":", lw=1.2,
+                     label=T("predicted nulls") if i == 0 else None)
+    ax_l.plot(theta, model_db, ls="--", color=COLOR_FG, lw=1.3, alpha=0.75,
+              label=T("image-source model"))
+    (l_sim,) = ax_l.plot([], [], color=COLOR_PRIMARY, lw=2.0, label="FDTD")
+    # Same white-dot styling as the field receiver, so the two views of
+    # the receiver are visually the same object.
+    ax_l.plot([th_dip], [float(np.interp(th_dip, theta, model_db))],
+              marker="o", ms=5, color="white", markeredgecolor="black",
+              markeredgewidth=0.8)
+    ax_l.legend(fontsize=7, loc="center right")
+    # The strip above 0 dB is data-free, so the closing caption fits there.
+    verdict_txt = ax_l.text(0.5, 0.975, "", transform=ax_l.transAxes,
+                            ha="center", va="top", color=COLOR_FG,
+                            fontsize=7.5, fontweight="bold")
+    # Bottom-left corner: the arc panel's wide x-label owns bottom-right.
+    t_txt = fig.text(0.015, 0.02, "", ha="left", va="bottom",
+                     family="monospace", fontsize=10, color=COLOR_FG)
+    reveal = int(0.83 * p_frames.shape[0])
+
+    def update(k: int) -> tuple[Any, ...]:
+        im_p.set_data(p_frames[k])
+        im_r.set_data(db_frames[k])
+        l_sim.set_data(theta, arc_db[k])
+        verdict_txt.set_text(
+            T("dips land exactly on the predicted nulls")
+            if k >= reveal else "")
+        t_txt.set_text(f"t = {times[k] * 1000.0:4.1f} ms")
+        return (im_p, im_r, l_sim, verdict_txt, t_txt)
+
+    _render_clip(fig, update, output_dir, "anim_fdtd_ground_effect",
+                 frames=int(p_frames.shape[0]), gif_fps=8)
+
+
+_DUCT_AXIS = 400.0                       # channel-axis depth [m]
+_DUCT_SRC_DEPTHS = (400.0, 150.0)        # on the axis / near the surface
+
+
+def _duct_profile(z: Any) -> Any:
+    """Munk-style sound-speed profile with an exaggerated gradient.
+
+    The canonical SOFAR shape (Munk 1974): a minimum at the channel axis,
+    an exponential thermocline above and a near-linear pressure gradient
+    below, ``c = c1 (1 + eps (eta + exp(-eta) - 1))``. The perturbation is
+    scaled far beyond the real ocean's (eps = 0.35 vs ~0.0074, capped at
+    +250 m/s) so a ray cycle fits the 2.4 km of this domain instead of
+    tens of kilometres -- the mechanism is the point, not the scale.
+    """
+    c1, eps, b_scale = 1480.0, 0.35, 300.0
+    eta = 2.0 * (np.asarray(z, dtype=np.float64) - _DUCT_AXIS) / b_scale
+    c = c1 * (1.0 + eps * (eta + np.exp(-eta) - 1.0))
+    return np.minimum(c, c1 + 250.0)
+
+
+@lru_cache(maxsize=1)
+def _ducting_fields(
+    n_frames: int = _FDTD_ANIM_FRAMES,
+) -> tuple[Any, Any, Any, Any, Any, Any]:
+    """Two pulse runs in the SOFAR-like channel (on/off axis), cached.
+
+    A 2 400 m x 800 m ocean slice with the exaggerated Munk profile of
+    :func:`_duct_profile` and sponges on all four sides. Each source is a
+    zero-mean Gaussian doublet (two opposite-sign pulses 33 ms apart, peak
+    energy near 13 Hz). Returns the pressure frame stacks, the
+    time-integrated energy maps in dB (the closing verdict overlay), the
+    frame times, the depth grid, the c(z) profile and the full-resolution
+    energy maps for the trapping physics check.
+    """
+    import fdtd2d
+
+    dx = 2.0
+    ny, nx = 400, 1200                     # 800 m depth x 2400 m range
+    z = (np.arange(ny) + 0.5) * dx
+    c_prof = _duct_profile(z)
+    c_map = np.repeat(c_prof[:, np.newaxis], nx, axis=1)
+    every = 9                              # 4.4 ms/frame: 12 f/period @19 Hz
+    width, offset = 0.028, 0.033
+    p_all, e_all = [], []
+    times = np.zeros(0)
+    for depth in _DUCT_SRC_DEPTHS:
+        sim = fdtd2d.FDTD2D(c_map, dx, rho=1025.0, sponge_width=30)
+        iy = int(round(depth / dx))
+        sim.add_source(fdtd2d.GaussianPulse(ix=100, iy=iy, width=width))
+        sim.add_source(fdtd2d.GaussianPulse(ix=100, iy=iy, width=width,
+                                            t0=4.0 * width + offset,
+                                            amplitude=-1.0))
+        energy = np.zeros_like(sim.p)
+        ps: list[Any] = []
+        ts: list[float] = []
+        for _ in range(every * n_frames):
+            sim.step()
+            energy += sim.p**2
+            if sim.n % every == 0 and len(ps) < n_frames:
+                ps.append(sim.p[::2, ::2].astype(np.float32))
+                ts.append(sim.time)
+        p_all.append(np.stack(ps))
+        e_all.append(energy)
+        times = np.asarray(ts)
+    energy_maps = np.stack(e_all)
+    # Verdict overlay: the time-integrated p**2 map in dB (shared scale),
+    # i.e. everywhere the pulse has carried energy over the whole run. The
+    # reference comes from the far half of the domain so the near-source
+    # blast saturates instead of washing out the duct-band contrast.
+    ref = float(np.quantile(energy_maps[:, :, nx // 4:], 0.999))
+    with np.errstate(divide="ignore"):
+        e_db = 10.0 * np.log10(energy_maps[:, ::2, ::2] / ref)
+    e_db = np.clip(e_db, -20.0, 0.0).astype(np.float32)
+    return np.stack(p_all), e_db, times, z, c_prof, energy_maps
+
+
+def animate_fdtd_ducting(output_dir: str) -> None:
+    """A low-frequency pulse in a SOFAR-like underwater sound channel
+    (2D FDTD): launched on the channel axis the wavefronts refract back
+    toward the sound-speed minimum and stay trapped; launched near the
+    surface the energy crosses the channel and leaks away to depth. The
+    closing seconds crossfade to the time-integrated energy map, so the
+    verdict frame shows the whole path history."""
+    from matplotlib import patheffects
+
+    T = _translate_str
+    outline = [patheffects.withStroke(linewidth=2.0, foreground="white")]
+    p_all, e_db, times, z, c_prof, _ = _ducting_fields()
+    half = p_all.shape[1] // 2
+    vmax = float(np.quantile(np.abs(p_all[:, :half]), 0.999))
+
+    fig = _anim_figure()
+    fig.suptitle(T("SOFAR channel: sound trapped by the c(z) minimum "
+                   "(2D FDTD)"), fontweight="bold")
+    gs = fig.add_gridspec(2, 2, width_ratios=[0.22, 1.0])
+    titles = [T("Source on the channel axis (depth 400 m)"),
+              T("Source near the surface (depth 150 m)")]
+    verdicts = [T("trapped: wavefronts bend back to the axis"),
+                T("leaks: energy escapes the channel")]
+    extent = (0.0, 2400.0, 800.0, 0.0)
+    ims: list[Any] = []
+    ims_e: list[Any] = []
+    v_txts: list[Any] = []
+    for row, depth in enumerate(_DUCT_SRC_DEPTHS):
+        ax_c = fig.add_subplot(gs[row, 0])
+        _grid_axes(ax_c)
+        ax_c.plot(c_prof, z, color=COLOR_PRIMARY, lw=1.6)
+        ax_c.plot([float(np.interp(depth, z, c_prof))], [depth],
+                  marker="o", ms=5, color=COLOR_TERTIARY,
+                  markeredgecolor="white", markeredgewidth=0.8)
+        ax_c.axhline(_DUCT_AXIS, color=COLOR_FG, ls="--", lw=0.9, alpha=0.6)
+        ax_c.set_ylim(800.0, 0.0)
+        ax_c.set_xlim(1460.0, 1750.0)
+        ax_c.set_xticks([1480.0, 1730.0])
+        ax_c.set_ylabel(T("Depth [m]"), fontsize=8)
+        ax_c.tick_params(labelsize=6)
+        if row == 1:
+            ax_c.set_xlabel(T("c(z) [m/s]"), fontsize=7)
+
+        ax_f = fig.add_subplot(gs[row, 1])
+        ax_f.grid(False)
+        im = ax_f.imshow(p_all[row][0], origin="upper", extent=extent,
+                         cmap="RdBu_r", vmin=-vmax, vmax=vmax,
+                         aspect="auto", interpolation="bilinear")
+        # The verdict overlay: fades in over the last seconds (and the
+        # poster frame), replacing the instantaneous wavefronts with the
+        # time-integrated energy paths.
+        im_e = ax_f.imshow(e_db[row], origin="upper", extent=extent,
+                           cmap="magma", vmin=-20.0, vmax=0.0,
+                           aspect="auto", interpolation="bilinear",
+                           alpha=0.0, zorder=2.5)
+        ax_f.set_title(titles[row], fontsize=10, fontweight="bold")
+        ax_f.axhline(_DUCT_AXIS, color="#888888", ls="--", lw=0.9,
+                     alpha=0.8, zorder=3)
+        ax_f.plot([200.0], [depth], marker="o", ms=5, color=COLOR_TERTIARY,
+                  markeredgecolor="white", markeredgewidth=0.8, zorder=4)
+        ax_f.text(240.0, depth - 25.0, T("source"), ha="left", va="bottom",
+                  color="black", fontsize=7.5, path_effects=outline,
+                  zorder=4)
+        ax_f.text(2360.0, 425.0, T("channel axis (c minimum)"), ha="right",
+                  va="top", color="black", fontsize=7,
+                  path_effects=outline, zorder=4)
+        v_txt = ax_f.text(60.0, 770.0, "", ha="left", va="bottom",
+                          color="black", fontsize=8, path_effects=outline,
+                          zorder=4)
+        ax_f.tick_params(labelsize=7, labelleft=False)
+        if row == 0:
+            ax_f.tick_params(labelbottom=False)
+        else:
+            ax_f.set_xlabel(T("Range [m]"), fontsize=8)
+        ims.append(im)
+        ims_e.append(im_e)
+        v_txts.append(v_txt)
+    t_txt = fig.text(0.985, 0.02, "", ha="right", va="bottom",
+                     family="monospace", fontsize=10, color=COLOR_FG)
+    reveal = int(0.83 * p_all.shape[1])    # ~15 s: pulse has crossed
+    captions_on = int(0.38 * p_all.shape[1])   # first refocus is visible
+
+    def update(k: int) -> tuple[Any, ...]:
+        alpha = min(1.0, max(0.0, (k - reveal) / 12.0))
+        for row in range(2):
+            ims[row].set_data(p_all[row][k])
+            ims_e[row].set_alpha(alpha)
+            v_txts[row].set_text(verdicts[row] if k >= captions_on else "")
+        t_txt.set_text(f"t = {times[k]:5.2f} s")
+        return (*ims, *ims_e, *v_txts, t_txt)
+
+    _render_clip(fig, update, output_dir, "anim_fdtd_ducting",
+                 frames=int(p_all.shape[1]), gif_fps=8)
+
+
+_QRD_DESIGN_F = 343.0 / 0.56             # ~612 Hz: lambda0 = 0.56 m
+_QRD_SLAB = (2.085, 3.915, 0.55, 0.85)   # x0, x1, y0, y1 of the panel slab
+
+
+def _qrd_wells() -> list[tuple[float, float, float]]:
+    """The QRD well openings: (x0, x1, depth) per well, panel-relative.
+
+    An N = 7 quadratic-residue sequence (n^2 mod 7), well depths
+    ``s_n * lambda0 / (2 N)`` with the 0.56 m design wavelength, 12 cm
+    wells split by 1 cm rigid fins, two periods across the 1.83 m panel.
+    """
+    seq = (0, 1, 4, 2, 2, 4, 1)
+    unit = 0.56 / (2 * len(seq))          # = 4 cm per residue step
+    well_w, fin_w = 0.12, 0.01
+    wells = []
+    x = _QRD_SLAB[0]
+    for _ in range(2):
+        for s in seq:
+            wells.append((x + fin_w, x + fin_w + well_w, s * unit))
+            x += fin_w + well_w
+    return wells
+
+
+@lru_cache(maxsize=1)
+def _diffusion_fields(
+    n_frames: int = _FDTD_ANIM_FRAMES,
+) -> tuple[Any, Any, Any, Any, Any]:
+    """Plane-wave packet onto a flat panel vs a QRD, cached (three runs).
+
+    A 6 m x 4.4 m free-field box (sponges all around) with a floating
+    1.83 m panel: solid slab vs the same slab with quadratic-residue wells
+    (5 000:1 density contrast builds the rigid geometry). A downward
+    plane-wave packet (carrier at the 612 Hz design frequency) is injected
+    as an initial condition with matched leapfrog velocities, so a single
+    clean wavefront travels down. A third, panel-free reference run gives
+    the incident field, so ``scattered = total - incident`` exactly.
+
+    Returns the two total-field frame stacks, the scattered-field envelope
+    trails [dB] (a fading |total - incident| history, so the specular beam
+    and the diffuse fan persist into the verdict frame), frame times, the
+    arc angles [deg], and the scattered energy levels on the arc [dB] per
+    panel (flat, QRD) for the diffusion-coefficient check.
+    """
+    import fdtd2d
+
+    c0, dx = 343.0, 0.01
+    ny, nx = 440, 600                      # 4.4 m x 6.0 m
+    x0, x1, y0, y1 = _QRD_SLAB
+    rho_flat = np.full((ny, nx), 1.2)
+    rho_flat[int(round(y0 / dx)):int(round(y1 / dx)),
+             int(round(x0 / dx)):int(round(x1 / dx))] = 1.2e6
+    rho_qrd = rho_flat.copy()
+    for wx0, wx1, d in _qrd_wells():
+        if d > 0.0:
+            rho_qrd[int(round((y1 - d) / dx)):int(round(y1 / dx)),
+                    int(round(wx0 / dx)):int(round(wx1 / dx))] = 1.2
+    rho_ref = np.full((ny, nx), 1.2)
+
+    # Downgoing packet: carrier at the design wavelength under a Gaussian
+    # envelope (~10 % spectral amplitude beyond 1.15 kHz).
+    y_pkt, sig, lam0 = 3.2, 0.3, 0.56
+
+    def packet(y: Any) -> Any:
+        return (np.sin(2.0 * np.pi * (y - y_pkt) / lam0)
+                * np.exp(-(((y - y_pkt) / sig) ** 2)))
+
+    # Receiver arc over the panel, ISO 17497-2 goniometer style.
+    theta = np.arange(15.0, 165.5, 1.0)
+    rad = np.radians(theta)
+    ix_arc = np.round((3.0 + 2.2 * np.cos(rad)) / dx).astype(int)
+    iy_arc = np.round((y1 + 2.2 * np.sin(rad)) / dx).astype(int)
+
+    every = 5                  # 61.9 us/frame: 12 f/period up to 1.35 kHz
+    y_cell = (np.arange(ny) + 0.5) * dx
+    sims = []
+    for rho in (rho_flat, rho_qrd, rho_ref):
+        sim = fdtd2d.FDTD2D(c0, dx, rho=rho, shape=(ny, nx),
+                            sponge_width=40)
+        sim.p[:, :] = packet(y_cell)[:, np.newaxis]
+        # Leapfrog-consistent velocity a half step back for a purely
+        # downgoing wave: p = f(y + c t), vy = -p / (rho c) on the y-faces.
+        y_face = np.arange(1, ny) * dx
+        rho_face = 0.5 * (rho[1:, :] + rho[:-1, :])
+        sim.vy[:, :] = (-packet(y_face - 0.5 * c0 * sim.dt)[:, np.newaxis]
+                        / (rho_face * c0))
+        sims.append(sim)
+    # The three runs advance in lockstep so the scattered field
+    # (total - incident, exact by linearity) is available at every step
+    # for the arc energies and for the fading envelope trails (6 ms
+    # half-life). Below the panel face the difference is just the ghost
+    # of the unblocked incident wave, so the trail is masked there.
+    decay = float(2.0 ** (-sims[0].dt / 0.006))
+    face_row = int(round(y1 / dx))
+    trails = [np.zeros_like(sims[0].p) for _ in range(2)]
+    arc_e = np.zeros((2, theta.size))
+    tot_frames: list[list[Any]] = [[], []]
+    trail_frames: list[list[Any]] = [[], []]
+    ts: list[float] = []
+    for _ in range(every * n_frames):
+        for sim in sims:
+            sim.step()
+        for j in range(2):
+            scat = sims[j].p - sims[2].p
+            scat[:face_row, :] = 0.0
+            arc_e[j] += scat[iy_arc, ix_arc] ** 2
+            np.maximum(trails[j] * decay, np.abs(scat), out=trails[j])
+        if sims[0].n % every == 0 and len(ts) < n_frames:
+            for j in range(2):
+                tot_frames[j].append(
+                    sims[j].p[::2, ::2].astype(np.float32))
+                trail_frames[j].append(
+                    trails[j][::2, ::2].astype(np.float32))
+            ts.append(sims[0].time)
+    times = np.asarray(ts)
+    tot = np.stack([np.stack(f) for f in tot_frames])
+    trail = np.stack([np.stack(f) for f in trail_frames])
+    ref = float(trail[:, trail.shape[1] // 3:].max())
+    with np.errstate(divide="ignore"):
+        trail_db = 20.0 * np.log10(trail / ref)
+    trail_db = np.clip(trail_db, -30.0, 0.0).astype(np.float32)
+    # Arc levels floored 45 dB under each panel's own peak.
+    levels = []
+    for j in range(2):
+        with np.errstate(divide="ignore"):
+            lvl = 10.0 * np.log10(arc_e[j] / float(arc_e[j].max()))
+        levels.append(np.maximum(lvl, -45.0))
+    return tot, trail_db, times, theta, np.stack(levels)
+
+
+def animate_fdtd_diffusion(output_dir: str) -> None:
+    """A plane wavefront hitting a flat rigid panel vs a Schroeder QRD
+    (2D FDTD, ISO 17497-2 goniometer style): the flat panel throws a
+    collimated specular beam back, the diffuser's phase-step wells spray
+    the same energy into a wide fan; the scattered field (total minus
+    incident) and the arc diffusion coefficients make the contrast
+    quantitative."""
+    from matplotlib import patheffects
+    from matplotlib.patches import Polygon
+
+    from phonometry import directional_diffusion_coefficient
+
+    T = _translate_str
+    outline = [patheffects.withStroke(linewidth=2.0, foreground="white")]
+    tot_all, trail_db, times, theta, levels = _diffusion_fields()
+    d_coef = [directional_diffusion_coefficient(lv) for lv in levels]
+    x0, x1, y0, y1 = _QRD_SLAB
+    vmax = float(np.quantile(np.abs(tot_all[:, 0]), 0.999))
+
+    fig = _anim_figure()
+    fig.suptitle(T("Flat panel vs Schroeder diffuser (2D FDTD)"),
+                 fontweight="bold")
+    gs = fig.add_gridspec(2, 2)
+    titles = [T("Flat rigid panel"), T("Schroeder diffuser (QRD, N = 7)")]
+    beams = [T("specular beam"), T("scattered fan")]
+    # Panel cross-sections: the flat slab, and the staircase along the QRD
+    # surface (wells carved into the same slab).
+    flat_poly = [(x0, y0), (x0, y1), (x1, y1), (x1, y0)]
+    qrd_poly: list[tuple[float, float]] = [(x0, y0), (x0, y1)]
+    for wx0, wx1, d in _qrd_wells():
+        qrd_poly += [(wx0, y1), (wx0, y1 - d), (wx1, y1 - d), (wx1, y1)]
+    qrd_poly += [(x1, y1), (x1, y0)]
+    polys = [flat_poly, qrd_poly]
+    rad = np.radians(theta)
+    arc_x = 3.0 + 2.2 * np.cos(rad)
+    arc_y = y1 + 2.2 * np.sin(rad)
+
+    ims: list[Any] = []
+    d_txts: list[Any] = []
+    for col in range(2):
+        ax_t = fig.add_subplot(gs[0, col])
+        ax_s = fig.add_subplot(gs[1, col])
+        im_t = ax_t.imshow(tot_all[col][0], origin="lower",
+                           extent=(0.0, 6.0, 0.0, 4.4), cmap="RdBu_r",
+                           vmin=-vmax, vmax=vmax, interpolation="bilinear")
+        im_s = ax_s.imshow(trail_db[col][0], origin="lower",
+                           extent=(0.0, 6.0, 0.0, 4.4), cmap="magma",
+                           vmin=-30.0, vmax=0.0, interpolation="bilinear")
+        ax_t.set_title(titles[col], fontsize=10, fontweight="bold")
+        for ax in (ax_t, ax_s):
+            ax.grid(False)
+            ax.add_patch(Polygon(polys[col], closed=True,
+                                 facecolor=COLOR_GRID, edgecolor=COLOR_FG,
+                                 lw=1.0))
+            # Crop the absorbing sponge zones out of view, so the frame
+            # edge is physical field, not the boundary-layer artefacts.
+            ax.set_xlim(0.4, 5.6)
+            ax.set_ylim(0.0, 4.0)
+            ax.tick_params(labelsize=7)
+        ax_t.tick_params(labelbottom=False)
+        ax_s.set_xlabel("x [m]", fontsize=8)
+        ax_t.text(3.0, 3.6, T("incident plane wavefront"), ha="center",
+                  va="bottom", color="black", fontsize=7.5,
+                  path_effects=outline)
+        ax_t.annotate("", xy=(3.0, 3.1), xytext=(3.0, 3.55),
+                      arrowprops={"arrowstyle": "-|>", "color": "black",
+                                  "lw": 1.2})
+        ax_s.plot(arc_x, arc_y, ls=":", color="white", lw=0.9, alpha=0.65)
+        ax_s.text(3.0, 0.15, beams[col], ha="center", va="bottom",
+                  color="white", fontsize=7.5)
+        d_txt = ax_s.text(5.45, 3.82, "", ha="right", va="top",
+                          color="white", fontsize=8.5, fontweight="bold")
+        if col == 0:
+            ax_t.set_ylabel(T("sound field p"), fontsize=9)
+            ax_s.set_ylabel(T("scattered field (total − incident)"),
+                            fontsize=8)
+            ax_s.text(0.78, 2.05, T("receiver arc"), ha="left", va="bottom",
+                      color="white", fontsize=6.5, rotation=64.0)
+        else:
+            ax_t.tick_params(labelleft=False)
+            ax_s.tick_params(labelleft=False)
+            ax_t.text(3.0, 0.15, T(f"design frequency "
+                                   f"{_QRD_DESIGN_F:.0f} Hz"), ha="center",
+                      va="bottom", color="black", fontsize=6.5,
+                      path_effects=outline)
+        ims += [im_t, im_s]
+        d_txts.append(d_txt)
+    t_txt = fig.text(0.985, 0.02, "", ha="right", va="bottom",
+                     family="monospace", fontsize=10, color=COLOR_FG)
+    reveal = int(0.8 * tot_all.shape[1])   # arc energy has settled by here
+
+    def update(k: int) -> tuple[Any, ...]:
+        for col in range(2):
+            ims[2 * col].set_data(tot_all[col][k])
+            ims[2 * col + 1].set_data(trail_db[col][k])
+            d_txts[col].set_text(
+                T(f"diffusion coefficient d = {d_coef[col]:.2f}")
+                if k >= reveal else "")
+        t_txt.set_text(f"t = {times[k] * 1000.0:4.1f} ms")
+        return (*ims, *d_txts, t_txt)
+
+    _render_clip(fig, update, output_dir, "anim_fdtd_diffusion",
+                 frames=int(tot_all.shape[1]), gif_fps=8)
+
+
 def animate_standing_wave_tube(output_dir: str) -> None:
     """ISO 10534-2 impedance tube: the incident and reflected waves travel
     inside a drawn tube and their sum forms the standing-wave envelope; a
@@ -8615,6 +9493,10 @@ _ANIMATIONS: dict[str, Callable[[str], None]] = {
     "anim_instantaneous_intensity": animate_instantaneous_intensity,
     "anim_schroeder": animate_schroeder,
     "anim_fdtd_room_modes": animate_fdtd_room_modes,
+    "anim_fdtd_barrier": animate_fdtd_barrier,
+    "anim_fdtd_ground_effect": animate_fdtd_ground_effect,
+    "anim_fdtd_ducting": animate_fdtd_ducting,
+    "anim_fdtd_diffusion": animate_fdtd_diffusion,
     "anim_standing_wave_tube": animate_standing_wave_tube,
     "anim_flanking_paths": animate_flanking_paths,
     "anim_intensity_scan_power": animate_intensity_scan_power,

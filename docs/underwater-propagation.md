@@ -73,6 +73,14 @@ profile = ph.sound_speed_profile(depths, temps, 35.0, model="unesco")
 profile.plot()   # sound speed vs depth (needs matplotlib)
 ```
 
+The $c(z)$ minimum acts as a waveguide (the SOFAR channel): wavefronts that
+stray from the axis are refracted back toward it, while sound generated
+outside the channel leaks away to depth, as the simulation below shows with an
+intentionally exaggerated gradient. This trapping is why low-frequency sound
+can cross entire oceans.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting.gif" alt="Animation: a 2D FDTD simulation of a low-frequency pulse in a SOFAR-like underwater sound channel with the sound-speed profile drawn beside the field; launched on the channel axis the wavefronts refract back toward the sound-speed minimum and stay trapped, launched near the surface the energy crosses the channel and leaks away to depth" width="640" height="360" loading="lazy"></picture>
+
 ## 3. Sonar equation
 
 <picture>

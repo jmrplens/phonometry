@@ -5,6 +5,16 @@ Whole-body vibration containing multiple shocks (ISO 2631-5:2018).
 Implements the normative Clause 5 spinal-response model and the Annex C
 assessment of adverse health effects for the vertical (``z``) axis.
 
+The 2018 edition is vertical-axis only by design: clause 4 (delineation,
+item a) neglects the ``x`` and ``y`` contributions to spinal compression, the
+seat-to-spine transfer function of clause 5.2 is the vertical seat-to-lumbar
+response, and the Annex C stress conversion ``mz`` is the vertical one. The
+horizontal spinal model of the withdrawn 2004 edition is not reproduced.
+Assess horizontal whole-body exposure with the ISO 2631-1 metrics in this
+domain instead: the weighted r.m.s. acceleration
+(:func:`~phonometry.vibration.weighted_acceleration`) and the vibration dose
+value (:func:`~phonometry.vibration.vibration_dose_value`).
+
 A seat-to-spine transfer function ``H(w)`` (clause 5.2, Formula 1) maps the
 measured seat acceleration ``az(t)`` to the spinal response acceleration
 ``Az(t) = F^-1[H(w) * F[az(t)]]`` (Formula 2). The standard assumes a
@@ -399,6 +409,11 @@ def multiple_shock_assessment(
     acceleration dose (Formula 3), daily dose (Formula 4), compressive stress
     (C.1), stress variable ``R`` (C.3) and injury probability (C.5). The input
     must be conditioned (DC-removed); see :func:`spinal_response`.
+
+    The model is vertical-axis only (clause 4a of the 2018 edition); for
+    horizontal whole-body exposure use the ISO 2631-1 metrics in this domain
+    (:func:`~phonometry.vibration.weighted_acceleration`,
+    :func:`~phonometry.vibration.vibration_dose_value`).
 
     :param acceleration: Measured, conditioned (zero-mean) vertical seat
         acceleration ``az(t)``, m/s2.

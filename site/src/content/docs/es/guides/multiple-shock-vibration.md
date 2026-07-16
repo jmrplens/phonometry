@@ -157,8 +157,11 @@ plt.show()
 El `MultipleShockResult` lleva la dosis `Dz`, la dosis diaria `Dzd`, la tensión
 compresiva `Sd`, la variable de tensión `R`, la probabilidad de lesión y los
 picos de respuesta, y su `.plot()` dibuja la curva de probabilidad de lesión con
-los umbrales de riesgo del 10/50/90 % de la Tabla C.2. Complementa las métricas
-eficaz, eficaz móvil/MTVV y VDV de
+los umbrales de riesgo del 10/50/90 % de la Tabla C.2. El modelo es solo para el
+eje vertical: la cláusula 4 desprecia por diseño las contribuciones horizontales
+a la compresión espinal, y el modelo espinal horizontal de la edición de 2004,
+retirada, no se restablece, de modo que la exposición horizontal de cuerpo
+completo se evalúa con las métricas eficaz, eficaz móvil/MTVV y VDV de
 [Vibración en humanos](/phonometry/es/guides/human-vibration/) (ISO 2631-1).
 
 ## Referencias

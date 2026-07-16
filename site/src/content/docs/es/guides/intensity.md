@@ -246,9 +246,9 @@ los dos canales.
   Los indicadores de campo F2 a F4, el criterio de capacidad dinámica y la
   regla de los 0,5 m de distancia de la superficie.
 
----
+## Normas
 
-**Normas.** IEC 61043:1993 (EN 61043:1994), *Electroacoustics —
+IEC 61043:1993 (EN 61043:1994), *Electroacoustics —
 Instruments for the measurement of sound intensity — Measurements with pairs
 of pressure sensing microphones* — el estimador de intensidad por espectro
 cruzado con dos micrófonos, la corrección del sesgo por diferencias finitas

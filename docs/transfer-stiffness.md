@@ -186,9 +186,9 @@ plt.xlabel("Frequency [Hz]"); plt.ylabel("$L_k$ [dB re 1 N/m]"); plt.show()
   The principles part of the series: the blocking-force idealisation and the
   FRF relations this page implements.
 
----
+## Standards
 
-**Standards.** ISO 10846 (parts 1-5), *Acoustics and vibration — Laboratory
+ISO 10846 (parts 1-5), *Acoustics and vibration — Laboratory
 measurement of vibro-acoustic transfer properties of resilient elements*: the
 dynamic transfer stiffness `k₂₁ = F₂,b/u₁` and its FRF relations (Part 1,
 clause 5 and Annex A / Table A.2), the level `L_k` re 1 N/m and the loss factor

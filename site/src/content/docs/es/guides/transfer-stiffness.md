@@ -192,9 +192,9 @@ plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_k$ [dB re 1 N/m]"); plt.show()
   La parte de principios de la serie: la idealización de fuerza de bloqueo y
   las relaciones FRF que implementa esta página.
 
----
+## Normas
 
-**Normas.** ISO 10846 (partes 1-5), *Acoustics and vibration — Laboratory
+ISO 10846 (partes 1-5), *Acoustics and vibration — Laboratory
 measurement of vibro-acoustic transfer properties of resilient elements*: la
 rigidez dinámica de transferencia `k₂₁ = F₂,b/u₁` y sus relaciones FRF (Parte 1,
 cláusula 5 y Anexo A / Tabla A.2), el nivel `L_k` re 1 N/m y el factor de pérdidas

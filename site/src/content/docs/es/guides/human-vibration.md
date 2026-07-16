@@ -338,9 +338,9 @@ distinta magnitud y duración.
   ISO 5349, de la percepción y el confort a los límites de exposición
   laborales.
 
----
+## Normas
 
-**Normas.** ISO 8041-1:2017 (definiciones de ponderación y tolerancias);
+ISO 8041-1:2017 (definiciones de ponderación y tolerancias);
 ISO 2631-1:1997 (evaluación de cuerpo completo); ISO 2631-2:2003 (edificios,
 `Wm`); ISO 2631-4:2001 (confort de marcha ferroviaria, `Wb`); ISO 5349-1:2001 e
 ISO 5349-2:2001 (vibración transmitida a la mano); Directiva 2002/44/CE (valores

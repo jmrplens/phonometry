@@ -204,9 +204,9 @@ plt.legend(); plt.show()
   El lado de medición: el procesado H1, la calibración con masa rígida y el
   criterio de error aleatorio.
 
----
+## Normas
 
-**Normas.** ISO 7626-1:2011, *Mechanical vibration and shock — Experimental
+ISO 7626-1:2011, *Mechanical vibration and shock — Experimental
 determination of mechanical mobility — Part 1: Basic terms and definitions, and
 transducer specifications* — la familia de FRF y sus recíprocas (Tabla 1, con
 las definiciones de movilidad del 3.1.2 y de magnitud libre del 3.1.4) y la

@@ -149,9 +149,9 @@ plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_W$ [dB re 1 pW]"); plt.show()
   [Catálogo iso.org](https://www.iso.org/standard/40538.html).
   El método de ingeniería con un factor de radiación medido por bandas.
 
----
+## Normas
 
-**Normas.** ISO/TS 7849-1:2009 (*survey method using a fixed radiation factor*) e
+ISO/TS 7849-1:2009 (*survey method using a fixed radiation factor*) e
 ISO/TS 7849-2:2009 (*engineering method including determination of the adequate
 radiation factor*), *Acoustics — Determination of airborne sound power levels
 emitted by machinery using vibration measurement*: la potencia radiada

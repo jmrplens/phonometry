@@ -155,9 +155,9 @@ capa blanda bajo una losa pesada) es el objetivo de diseño.
   El original internacional de EN 29052-1, el método que implementa esta
   página.
 
----
+## Normas
 
-**Normas.** EN 29052-1:1992 (= ISO 9052-1:1989), *Acoustics — Determination of
+EN 29052-1:1992 (= ISO 9052-1:1989), *Acoustics — Determination of
 dynamic stiffness — Part 1: Materials used under floating floors in dwellings*:
 la rigidez dinámica por unidad de área (Fórmula 1), las relaciones de resonancia
 (Fórmulas 2-4), el término del gas encerrado (Fórmula 7, NOTA de la cláusula 8.2

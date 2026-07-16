@@ -573,9 +573,9 @@ one-third-octave) values.*
   [iso.org catalogue](https://www.iso.org/standard/55997.html).
   The field airborne method this page implements.
 
----
+## Standards
 
-**Standards.** ISO 16283-1:2014, ISO 16283-2 and ISO 16283-3:2016, *Acoustics —
+ISO 16283-1:2014, ISO 16283-2 and ISO 16283-3:2016, *Acoustics —
 Field measurement of sound insulation in buildings and of building elements* —
 the level differences, normalisations and element methods; ISO 717-1 and
 ISO 717-2 — the reference-curve single-number ratings and the spectrum

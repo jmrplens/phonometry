@@ -580,9 +580,9 @@ exactamente 5 valores de octava (o 16 de tercio de octava).*
   [Catálogo iso.org](https://www.iso.org/standard/55997.html).
   El método aéreo de campo que implementa esta página.
 
----
+## Normas
 
-**Normas.** ISO 16283-1:2014, ISO 16283-2 e ISO 16283-3:2016, *Acoustics —
+ISO 16283-1:2014, ISO 16283-2 e ISO 16283-3:2016, *Acoustics —
 Field measurement of sound insulation in buildings and of building elements* —
 las diferencias de nivel, normalizaciones y métodos de elemento; ISO 717-1 e
 ISO 717-2 — los índices de un solo número por curva de referencia y los

@@ -137,4 +137,6 @@ interno (consulta
 Si tu trabajo necesita números que puedas defender frente a la tabla de
 tolerancias de una norma — informes de medición, evaluaciones ambientales,
 contrastes con instrumentos — esa capa de verificación es la razón de ser de
-phonometry.
+phonometry. Las fuentes que la sustentan están reunidas en la
+[Bibliografía](/phonometry/es/reference/bibliography/), cada entrada con un
+DOI verificado o un enlace oficial del editor.

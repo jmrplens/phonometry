@@ -277,9 +277,9 @@ esconden dos normalizaciones:
   La física de transductores tras la sección 5: radiación del altavoz, presión
   en el eje y la transición de campo cercano a campo lejano.
 
----
+## Normas
 
-**Normas.** IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*
+IEC 60268-3:2013, *Sound system equipment – Part 3: Amplifiers*
 (cláusulas 14.12.2–14.12.11): distorsión armónica total `THD_F`/`THD_R` (la
 fórmula de 14.12.3.2 define la forma R), distorsión armónica de orden n `dₙ`,
 la intermodulación por órdenes de modulación (`d_m,n`) y por frecuencia

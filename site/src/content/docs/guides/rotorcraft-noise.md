@@ -60,9 +60,9 @@ ground effect, off-node bilinear lookups on the reference hemispheres of all
 eleven rotorcraft types, and end to end against the NORAH2 prototype's
 single-event histories (0.1 dB(A) over hard ground, 0.5 dB over soft ground).
 
----
+## Standards
 
-**Standards.** ECAC Doc 32, 1st ed. (rotorcraft noise contours); NORAH2 modelling
+ECAC Doc 32, 1st ed. (rotorcraft noise contours); NORAH2 modelling
 guidance (EASA.2020.FC.06 SC03.D1.5d) §A.3-A.4: the noise hemisphere, spherical
 spreading, atmospheric attenuation (ISO 9613-1, Table 4) and the Chien-Soroka
 ground effect (Delany-Bazley impedance, CNOSSOS flow resistivity). Flight-path

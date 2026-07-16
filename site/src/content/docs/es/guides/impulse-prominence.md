@@ -162,9 +162,9 @@ añade sobre el `LAeq` medido en el nivel de evaluación, nunca lo sustituye.
   El sucesor ISO construido sobre la prominencia por tasa de crecimiento de
   la NT ACOU 112.
 
----
+## Normas
 
-**Normas.** NT ACOU 112:2002 (Nordtest), *Prominence of impulsive sounds and for
+NT ACOU 112:2002 (Nordtest), *Prominence of impulsive sounds and for
 adjustment of LAeq* — la prominencia prevista (cláusula 7, Fórmula 1), el ajuste
 al LAeq (cláusula 8, Fórmula 2) y el nivel de evaluación (cláusula 8, Nota 1),
 con el arranque definido en las cláusulas 4.5-4.7.

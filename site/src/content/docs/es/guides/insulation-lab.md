@@ -379,9 +379,9 @@ res_m.bracketed    # marcas por banda; las bandas acotadas salen del número ún
   La teoría de transmisión de construcciones simples y dobles que cuantifican
   los índices de laboratorio.
 
----
+## Normas
 
-**Normas.** ISO 10140-2:2010, ISO 10140-3:2010 e ISO 10140-4:2010 — los R y Ln
+ISO 10140-2:2010, ISO 10140-3:2010 e ISO 10140-4:2010 — los R y Ln
 de laboratorio con la corrección de ruido de fondo; ISO 15186-1:2000 e
 ISO 15186-2:2003 — el índice de reducción sonora por intensidad $R_I$, su forma
 modificada por $K_c$ y la diferencia de niveles normalizada por elemento

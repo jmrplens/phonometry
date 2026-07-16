@@ -172,9 +172,18 @@ para los veredictos TNR/PR de ECMA-418-1, el
 para el STI/STIPA, y [Teoría](/phonometry/es/reference/theory/perception/) para la
 matemática subyacente.
 
----
+## Referencias
 
-**Normas.** DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3.ª ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  La psicoacústica de las sensaciones que cuantifica esta página: el énfasis
+  en alta frecuencia tras la agudeza y la percepción de modulación rápida
+  tras la aspereza.
+
+## Normas
+
+DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
 Schärfe* — sharpness en acum (ponderación del apartado 6, variantes von
 Bismarck y Aures del Anexo B, objetivos de la Tabla A.2). ECMA-418-2:2025,
 *Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing

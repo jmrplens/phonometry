@@ -225,9 +225,9 @@ número único — es un balance aparte, específico de ese dominio.
   para magnitudes de número único, mencionado arriba como complemento aparte
   de la maquinaria general de la GUM.
 
----
+## Normas
 
-**Normas.** ISO/IEC Guía 98-3:2008, *Uncertainty of measurement — Part 3: Guide
+ISO/IEC Guía 98-3:2008, *Uncertainty of measurement — Part 3: Guide
 to the expression of uncertainty in measurement (GUM:1995)* — la ley de
 propagación de la incertidumbre (cláusula 5), la evaluación de Tipo B
 (cláusula 4.3), la incertidumbre expandida y el factor de cobertura (cláusula 6,

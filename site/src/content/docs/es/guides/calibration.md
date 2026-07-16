@@ -246,9 +246,9 @@ como una conversión a float.
   El procedimiento de verificación de laboratorio tras las comprobaciones
   periódicas recomendadas arriba.
 
----
+## Normas
 
-**Normas.** IEC 60942:2017, *Electroacoustics — Sound calibrators* — los
+IEC 60942:2017, *Electroacoustics — Sound calibrators* — los
 supuestos de nivel y clase del calibrador en `sensitivity()` (el nivel
 principal de 94 dB y las tolerancias de clase de la Tabla 1) y la comprobación
 de estabilidad por fluctuación de nivel a corto plazo de la grabación de

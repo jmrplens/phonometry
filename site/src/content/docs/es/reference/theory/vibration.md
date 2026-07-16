@@ -71,3 +71,17 @@ $\Pi = 0{,}37$. El modelo espinal de elementos finitos del Anexo A
 
 Consulta la [guía de vibración en humanos](/phonometry/es/guides/human-vibration/) y la
 [guía de vibración con choques múltiples](/phonometry/es/guides/multiple-shock-vibration/) para su uso.
+
+## Referencias
+
+- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
+  ISBN 978-0-12-303041-2.
+  [Página del editor](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
+  La evidencia biodinámica y de efectos sobre la salud tras las ponderaciones
+  de ISO 8041-1, las medidas de dosis rms/MTVV/VDV y el razonamiento de
+  lesión espinal del modelo de choques múltiples.
+- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
+  ISBN 978-0-415-28239-0.
+  [Página del editor](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
+  Un recorrido moderno y compacto por las cadenas de evaluación de cuerpo
+  completo de ISO 2631-1 y mano-brazo de ISO 5349 resumidas en esta página.

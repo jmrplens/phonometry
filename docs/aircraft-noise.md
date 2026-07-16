@@ -278,9 +278,9 @@ geometry behind takeoff roll, the Eq. 4-13b average runway-segment speed and
 the recommended 30 m floor on NPD lookups. Seven branch-covering receptor
 events of the reference workbook are reproduced end-to-end in the test suite.
 
----
+## Standards
 
-**Standards.** ICAO Annex 16, *Environmental Protection*, Vol. I, *Aircraft
+ICAO Annex 16, *Environmental Protection*, Vol. I, *Aircraft
 Noise*, Appendix 2: the analytic EPNL procedure (perceived noisiness Table A2-3,
 tone correction Table A2-2, duration correction). ICAO Doc 9501, *Environmental
 Technical Manual*, Vol. I: the worked examples (Table 3-7 tone correction,

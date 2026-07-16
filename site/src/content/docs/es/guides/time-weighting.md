@@ -245,9 +245,9 @@ verificación con ráfagas de tono de IEC 61672-1.
   las respuestas a ráfagas de la Tabla 4 contra las que se verifica la
   balística en CI.
 
----
+## Normas
 
-**Normas.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — el detector exponencial de ponderación temporal
 (cláusula 3.8) con las constantes de tiempo F y S (cláusula 5.7), y las
 respuestas de referencia a ráfagas de tono de 4 kHz de la Tabla 4 (límites de

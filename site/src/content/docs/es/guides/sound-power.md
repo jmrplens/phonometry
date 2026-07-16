@@ -810,9 +810,9 @@ plt.show()
   [Catálogo iso.org](https://www.iso.org/standard/45362.html).
   El método de precisión en sala anecoica de la sección 4.
 
----
+## Normas
 
-**Normas.** ISO 3744:2010, *Acoustics — Determination of sound power levels
+ISO 3744:2010, *Acoustics — Determination of sound power levels
 and sound energy levels of noise sources using sound pressure — Engineering
 methods for an essentially free field over a reflecting plane* — el método de
 superficie envolvente: las áreas de la semiesfera y la caja, las correcciones

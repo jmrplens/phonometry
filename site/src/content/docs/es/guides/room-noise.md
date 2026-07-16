@@ -199,9 +199,9 @@ en lugar de remodelarlo.
   Las curvas NC normativas y el método de tangencia, más el procedimiento
   RC Mark II de su Anexo D informativo, que implementa este módulo.
 
----
+## Normas
 
-**Normas.** ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — las
+ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — las
 curvas NC normativas y el método de tangencia (Tabla 1), y, del Anexo D
 informativo, las curvas RC Mark II (Tabla D.1), la calificación por media de
 frecuencias medias (cláusula D.4) y la etiqueta espectral neutro/retumbo/siseo

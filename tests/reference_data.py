@@ -848,7 +848,7 @@ ANSIS12_2_RC31_63HZ = 51.0  # RC-31 curve, 63 Hz octave-band level (Table D.1)
 ANSIS12_2_RC35_LMF = 35.0  # RC-35 curve, mid-frequency average LMF (clause D.4)
 
 # ---------------------------------------------------------------------------
-# Hearing thresholds - ISO 7029:2017 (age) and ISO 389-7:2006 (reference).
+# Hearing thresholds - ISO 7029:2017 (age) and ISO 389-7:2005 (reference).
 # The median deviation follows a*(age-18)**b (Table 1); at 4 kHz for a 60-year
 # male it is 20.21 dB. The upper spread su is a degree-5 polynomial (Table 2);
 # at 1 kHz age 60 male it is 10.15 dB. The free-field reference threshold at

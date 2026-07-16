@@ -241,9 +241,9 @@ for absolute scaling of the two channels.
   The field indicators F2 to F4, the dynamic-capability criterion and the
   0.5 m surface-distance rule.
 
----
+## Standards
 
-**Standards.** IEC 61043:1993 (EN 61043:1994), *Electroacoustics —
+IEC 61043:1993 (EN 61043:1994), *Electroacoustics —
 Instruments for the measurement of sound intensity — Measurements with pairs
 of pressure sensing microphones* — the two-microphone cross-spectral
 intensity estimator, the finite-difference bias correction and the

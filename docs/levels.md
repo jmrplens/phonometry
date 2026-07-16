@@ -406,9 +406,9 @@ and the ISO 226 equal-loudness contours live with the perception metrics in
   The sound-pressure, energy and level definitions underneath Leq, SEL and
   the dose measures.
 
----
+## Standards
 
-**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — the Fast/Slow/Impulse envelope ballistics behind
 `ln_levels`, the C-weighted peak of §5.13 (verified against the Table 5 tone
 bursts) and the sound exposure level verified against the Table 4 LAE column.

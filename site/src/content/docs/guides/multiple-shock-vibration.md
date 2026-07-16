@@ -164,9 +164,9 @@ running-r.m.s./MTVV and VDV metrics of
   Background on whole-body shock exposure, spinal biodynamics and the
   lumbar health effects that the ISO 2631-5 dose model quantifies.
 
----
+## Standards
 
-**Standards.** ISO 2631-5:2018, *Mechanical vibration and shock — Evaluation of
+ISO 2631-5:2018, *Mechanical vibration and shock — Evaluation of
 human exposure to whole-body vibration — Part 5: Method for evaluation of
 vibration containing multiple shocks* — the seat-to-spine transfer function
 (clause 5.2, Formula 1), the acceleration and daily dose (clause 5.3,

@@ -350,9 +350,27 @@ Returns an `EcmaLoudness`: `loudness` (N, sone_HMS), `specific_loudness`
 (N′(z), 53 bands), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
 (N(l) at 187.5 Hz), `field`.
 
----
+## References
 
-**Standards.** ISO 532-1:2017, *Acoustics — Methods for calculating
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3rd ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  The critical-band and masking psychoacoustics behind the Zwicker model and
+  the loudness sensation the newer models refine.
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  The original equal-loudness measurements behind the loudness-level concept
+  of the pure-tone section.
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [iso.org catalogue](https://www.iso.org/standard/83117.html).
+  The contour model and Table 1 parameters behind the pure-tone loudness
+  levels.
+
+## Standards
+
+ISO 532-1:2017, *Acoustics — Methods for calculating
 loudness — Part 1: Zwicker method* — stationary and time-varying loudness in
 sones from the normative Annex A.4 reference program, with the N5/N10
 percentile loudness, validated against the Annex B set. ISO 532-2:2017,

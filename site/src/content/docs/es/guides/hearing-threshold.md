@@ -142,9 +142,9 @@ componente de edad — es el tema de la guía de
   El cero audiométrico de la sección 2 (Tabla 1), implementado aquí a través
   de su adopción europea EN ISO 389-7:2006.
 
----
+## Normas
 
-**Normas.** ISO 7029:2017, *Statistical distribution of hearing thresholds
+ISO 7029:2017, *Statistical distribution of hearing thresholds
 related to age and gender* — la mediana (cláusula 4.2, Tabla 1), la dispersión
 en torno a la mediana (cláusula 4.3, Tablas 2–5) y su aplicación (cláusula 4.4).
 ISO 389-7:2005, *Reference zero for the calibration of audiometric equipment —

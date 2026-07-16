@@ -126,9 +126,9 @@ res.plot(); plt.show()
   El acoplamiento de movilidades fuente-receptor y la transmisión estructural
   a través de uniones tras el término de acoplamiento y el modelo de vías.
 
----
+## Normas
 
-**Normas.** EN 12354-5:2009, *Building acoustics — Estimation of acoustic
+EN 12354-5:2009, *Building acoustics — Estimation of acoustic
 performance of buildings from the performance of elements — Part 5: Sound levels
 due to service equipment*: el término de acoplamiento (cláusula 4.4.3, Fórmulas
 19a-19e), el nivel de potencia estructural instalada (Fórmula 18b), el término de

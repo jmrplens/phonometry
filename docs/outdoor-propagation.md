@@ -501,9 +501,9 @@ exposure that consumes A-weighted levels.
   [iso.org catalogue](https://www.iso.org/standard/20649.html).
   The implemented attenuation chain of section 2.
 
----
+## Standards
 
-**Standards.** ISO 9613-1:1993, *Acoustics — Attenuation of sound during
+ISO 9613-1:1993, *Acoustics — Attenuation of sound during
 propagation outdoors — Part 1: Calculation of the absorption of sound by the
 atmosphere* — the pure-tone attenuation coefficient $\alpha$ (Eq. (5)) with the
 oxygen and nitrogen relaxation frequencies (Eq. (3)/(4)), the Annex B humidity

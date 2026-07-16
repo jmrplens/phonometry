@@ -247,9 +247,9 @@ inputs are cheap once the room and the noise have been measured. See the
   The articulation-band experiments that the band-importance function of
   section 1 descends from.
 
----
+## Standards
 
-**Standards.** ANSI S3.5-1997 (R2017), *American National Standard Methods for
+ANSI S3.5-1997 (R2017), *American National Standard Methods for
 the Calculation of the Speech Intelligibility Index* — the one-third-octave-band
 method (18 bands), band-importance function (Table 3), standard speech spectrum
 level and reference internal noise (Table 3), and the masking, disturbance and

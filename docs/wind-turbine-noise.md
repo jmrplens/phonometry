@@ -180,9 +180,9 @@ ph.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
   in Annexes J and K), and its `tonal_adjustment` consumes the mean
   audibility.
 
----
+## Standards
 
-**Standards.** IEC 61400-11:2012+A1:2018, *Wind turbines — Part 11: Acoustic
+IEC 61400-11:2012+A1:2018, *Wind turbines — Part 11: Acoustic
 noise measurement techniques*: the apparent sound power level (Formula 26), the
 critical bandwidth (Formula 30), the masking-noise level (Formula 31) and the
 tonality/audibility (Formulae 32–34). The tonal-audibility formula coincides

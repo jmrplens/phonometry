@@ -154,9 +154,9 @@ Ambos devuelven un `ToneAssessment(frequency, ratio_db, criterion_db, prominent)
   operador y observador de la sección 2, con el Anexo D delegando la evaluación
   de tonos en ECMA-418-1.
 
----
+## Normas
 
-**Normas.** ECMA-418-1:2024 (3.ª edición), *Psychoacoustic metrics for ITT
+ECMA-418-1:2024 (3.ª edición), *Psychoacoustic metrics for ITT
 equipment — Part 1: Prominent discrete tones* — la relación tono-ruido
 (apartado 11), la relación de prominencia (apartado 12), el modelo de banda
 crítica y los criterios de prominencia dependientes de la frecuencia.

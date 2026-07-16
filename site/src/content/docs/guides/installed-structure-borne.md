@@ -123,9 +123,9 @@ res.plot(); plt.show()
   The source-receiver mobility coupling and the structure-borne transmission
   across junctions behind the coupling term and the path model.
 
----
+## Standards
 
-**Standards.** EN 12354-5:2009, *Building acoustics — Estimation of acoustic
+EN 12354-5:2009, *Building acoustics — Estimation of acoustic
 performance of buildings from the performance of elements — Part 5: Sound levels
 due to service equipment*: the coupling term (clause 4.4.3, Formulae 19a-19e),
 the installed structure-borne power level (Formula 18b), the structure-to-

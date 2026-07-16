@@ -122,3 +122,4 @@ safe to pass `wavfile.read` output directly.
 - [Filter Banks](filter-banks.md) — choose an architecture and inspect responses
 - [Calibration and dBFS](calibration.md) — get real-world SPL values
 - [API Reference](api-reference.md) — every parameter of every function
+- [Bibliography](references.md) — the books and papers behind every guide, each with a verified link

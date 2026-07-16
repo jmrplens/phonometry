@@ -197,9 +197,9 @@ Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
   The modulation-transfer framework of section 1 and the m ↔ STI mapping the
   index is built on.
 
----
+## Standards
 
-**Standards.** IEC 60268-16:2020 (Edition 5), *Sound system equipment —
+IEC 60268-16:2020 (Edition 5), *Sound system equipment —
 Part 16: Objective rating of speech intelligibility by speech transmission
 index* — the modulation transfer function and the m ↔ STI mapping, the STIPA
 test signal and direct method, the indirect method from the impulse response,

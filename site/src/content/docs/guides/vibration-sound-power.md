@@ -145,9 +145,9 @@ plt.xlabel("Frequency [Hz]"); plt.ylabel("$L_W$ [dB re 1 pW]"); plt.show()
   [iso.org catalogue](https://www.iso.org/standard/40538.html).
   The engineering method with a measured band-wise radiation factor.
 
----
+## Standards
 
-**Standards.** ISO/TS 7849-1:2009 (*survey method using a fixed radiation
+ISO/TS 7849-1:2009 (*survey method using a fixed radiation
 factor*) and ISO/TS 7849-2:2009 (*engineering method including determination of
 the adequate radiation factor*), *Acoustics — Determination of airborne sound
 power levels emitted by machinery using vibration measurement*: the radiated

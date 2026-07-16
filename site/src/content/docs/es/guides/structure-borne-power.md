@@ -168,9 +168,9 @@ plt.xlabel("Frecuencia [Hz]"); plt.ylabel("$L_{Ws}$ [dB re 1 pW]"); plt.show()
   La caracterización de fuente por velocidad libre que complementa las
   magnitudes de la placa receptora.
 
----
+## Normas
 
-**Normas.** EN 15657:2018, *Acoustic properties of building elements and
+EN 15657:2018, *Acoustic properties of building elements and
 buildings — Laboratory measurement of structure-borne sound from building
 service equipment for all installation conditions*: el método de la placa
 receptora (cláusula 7), el nivel de velocidad medio espacial (Fórmula 12), el

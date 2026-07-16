@@ -177,9 +177,9 @@ alternatives for those cases live in
   [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
   The statistical reverberation theory the standard's formulae specialise.
 
----
+## Standards
 
-**Standards.** EN 12354-6:2003, *Building acoustics — Estimation of acoustic
+EN 12354-6:2003, *Building acoustics — Estimation of acoustic
 performance of buildings from the performance of elements — Part 6: Sound
 absorption in enclosed spaces* — the total equivalent absorption area
 (clause 4.3, Formulae 1-4, Table 1) and the reverberation time (clause 4.4,

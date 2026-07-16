@@ -67,3 +67,17 @@ separate software) is out of scope.
 
 See the [Human Vibration guide](/phonometry/guides/human-vibration/) and the
 [Multiple-Shock Vibration guide](/phonometry/guides/multiple-shock-vibration/) for usage.
+
+## References
+
+- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
+  ISBN 978-0-12-303041-2.
+  [Publisher page](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
+  The biodynamic and health-effect evidence behind the ISO 8041-1 weightings,
+  the rms/MTVV/VDV dose measures and the spinal-injury rationale of the
+  multiple-shock model.
+- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
+  ISBN 978-0-415-28239-0.
+  [Publisher page](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
+  A compact modern walkthrough of the ISO 2631-1 whole-body and ISO 5349
+  hand-arm evaluation chains summarised on this page.

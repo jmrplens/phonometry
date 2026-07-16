@@ -161,9 +161,9 @@ ph.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
   tonales en los anexos J y K), y su `tonal_adjustment` consume la
   audibilidad media.
 
----
+## Normas
 
-**Normas.** IEC 61400-11:2012+A1:2018 (potencia sonora aparente Fórmula 26,
+IEC 61400-11:2012+A1:2018 (potencia sonora aparente Fórmula 26,
 banda crítica Fórmula 30, nivel de enmascaramiento Fórmula 31,
 tonalidad/audibilidad Fórmulas 32–34). El flujo completo de medición queda fuera
 del alcance aquí.

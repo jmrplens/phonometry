@@ -154,9 +154,9 @@ for x in audio_stream(block):            # your capture callback
   The direct-form filter structures and state recursion behind the carried
   state equation above.
 
----
+## Standards
 
-**Standards.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+IEC 61260-1:2014, *Electroacoustics — Octave-band and
 fractional-octave-band filters — Part 1: Specifications*, and IEC 61672-1:2013,
 *Electroacoustics — Sound level meters — Part 1: Specifications* — block
 processing adds no normative content of its own: the streamed filters are the

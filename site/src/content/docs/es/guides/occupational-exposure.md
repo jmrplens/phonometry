@@ -214,9 +214,9 @@ otras estrategias no llevan desglose por tarea).
   recomendado de 85 dB(A) y la justificación de conservación auditiva para
   medir la dosis diaria.
 
----
+## Normas
 
-**Normas.** ISO 9612:2009, *Acoustics — Determination of occupational noise
+ISO 9612:2009, *Acoustics — Determination of occupational noise
 exposure — Engineering method* — las estrategias basadas en tareas (apartado 9),
 basadas en la función (apartado 10) y de jornada completa (apartado 11), el
 presupuesto de incertidumbre del anexo C (Ecuaciones C.6, C.9 y C.12, Tablas

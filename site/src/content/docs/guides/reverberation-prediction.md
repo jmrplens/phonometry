@@ -260,9 +260,9 @@ spread, the room is telling you its field is not diffuse.
   A Spanish-language textbook treatment of the reverberation models and
   their use in room design.
 
----
+## Standards
 
-**Standards.** The classical reverberation formulae predate the normative
+The classical reverberation formulae predate the normative
 world; they enter it through EN 12354-6:2003, whose Clause 4 model is a
 Sabine calculation with object and air terms (see
 [Sound absorption in enclosed spaces](/phonometry/guides/enclosed-space-absorption/)),

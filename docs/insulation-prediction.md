@@ -339,9 +339,9 @@ numbers); `radiated_sound_power()` a `RadiatedPowerResult` (`l_w`, `r_prime`,
   The full treatment of flanking transmission and the EN 12354 prediction
   framework, from the vibration reduction index to its statistical basis.
 
----
+## Standards
 
-**Standards.** EN 12354-1:2000 and EN 12354-2:2000 — the simplified
+EN 12354-1:2000 and EN 12354-2:2000 — the simplified
 flanking-transmission predictions (Annex E junctions, worked examples H.3 and
 E.3); EN 12354-3:2000 and EN 12354-4:2000 — the façade sound insulation and
 outdoor-radiation predictions (Annex F and Annex G worked examples).

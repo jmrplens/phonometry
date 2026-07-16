@@ -527,9 +527,9 @@ ponderados A.
   [Catálogo iso.org](https://www.iso.org/standard/20649.html).
   La cadena de atenuación implementada en la sección 2.
 
----
+## Normas
 
-**Normas.** ISO 9613-1:1993, *Acoustics — Attenuation of sound during
+ISO 9613-1:1993, *Acoustics — Attenuation of sound during
 propagation outdoors — Part 1: Calculation of the absorption of sound by the
 atmosphere* — el coeficiente de atenuación de tono puro $\alpha$ (Ec. (5)) con
 las frecuencias de relajación del oxígeno y el nitrógeno (Ec. (3)/(4)), la
@@ -542,7 +542,7 @@ geométrica (Ec. (7)), la absorción atmosférica (Ec. (8)), el efecto del suelo
 apantallamiento por barreras (Ecs. (12)–(17)) y la corrección meteorológica
 (Ec. (21)/(22)). ISO 354:2003, *Acoustics — Measurement of sound absorption in
 a reverberation room* — solo la conversión $m = \alpha/(10 \lg e)$ del apartado
-8.1.2.1 tras `air_attenuation_m`; el método en sala reverberante se trata en la
+8.1.2.1 tras `air_attenuation_m`; el método en cámara reverberante se trata en la
 [guía de Acústica de salas](/phonometry/es/guides/room-acoustics/).
 
 ## Véase también

@@ -194,6 +194,7 @@ safe to pass `wavfile.read` output directly.
 - [Filter Banks](https://jmrplens.github.io/phonometry/guides/filter-banks/) — choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/) — get real-world SPL values
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/) — every parameter of every function
+- [Bibliography](references.md) — the books and papers behind every guide, each with a verified link
 
 ---
 
@@ -224,6 +225,26 @@ repeat scaled by 10. phonometry designs each band as an SOS cascade whose
 Chebyshev II, Elliptic and Bessel that requires pre-warping the analytic
 band-edge mapping rather than trusting SciPy's default parametrization.
 
+### Poles, zeros and stability
+
+A digital band-pass filter is a constellation of poles and zeros in the
+z-plane: zeros at or near DC and Nyquist pin the response down far from the
+band (to the stopband floor, for equiripple designs), and the poles cluster
+just inside the unit circle at the angles
+$\omega = 2\pi f / f_s$ the passband spans. Two intuitions follow. First,
+selectivity is proximity: the closer the poles sit to the unit circle, the
+sharper the band and the longer the filter rings (the group-delay peaks of
+section 7 are that ringing, measured). Second, stability is a margin, not a
+property of the architecture: an IIR filter is stable only while every pole
+stays strictly inside the unit circle, and a narrow band at a high sample
+rate pushes the poles outward (pole radius $\approx 1 - \pi B / f_s$ for
+bandwidth $B$) and squeezes them together, until double-precision
+coefficients can no longer represent their positions accurately.
+Second-order sections (SOS) defuse half of the problem: each pole pair keeps
+its own coefficients, so rounding errors stay local instead of compounding
+through one high-order polynomial. The other half, the tiny $B / f_s$ ratio
+itself, is what decimation fixes.
+
 ### Multirate decimation
 
 A 25 Hz one-third-octave band at 48 kHz spans about 5.8 Hz — 0.024 %
@@ -232,12 +253,68 @@ avoids that by filtering low bands at a decimated rate:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate.svg" alt="Multirate decimation: high bands filtered at the input rate, low bands after anti-alias low-pass and decimation so the SOS sections stay numerically healthy" width="92%"></picture>
 
+Decimating by $M$ rescales the problem: the same 5.8 Hz bandwidth becomes
+$M$ times larger relative to the new Nyquist, the pole radius pulls away from
+the unit circle, and the SOS coefficients return to a well-conditioned range.
+The price is bookkeeping the bank pays internally: an anti-alias low-pass must
+run before every decimation stage, because a component above the new Nyquist
+that folds down lands *inside* the low bands being measured, and no later
+filter can remove it.
+
+### Aliasing pitfalls
+
+The bank protects its own decimation stages, but it can only analyze what the
+capture chain delivered:
+
+- **Fold-down at the ADC.** Energy above $f_s/2$ that reaches the converter
+  without an analog anti-alias filter folds into the analysis range and is
+  indistinguishable from real in-band sound. Sound cards filter this
+  internally; custom instrumentation chains may not.
+- **Cheap resampling.** Converting a 44.1 kHz recording to 48 kHz with a
+  low-quality resampler leaves images that bias the highest bands. Use a
+  polyphase resampler (`scipy.signal.resample_poly`) or, simpler, analyze at
+  the native rate: every phonometry function takes `fs` directly.
+- **Bands near Nyquist.** A band whose upper edge approaches $f_s/2$ cannot
+  realize its design response: the bilinear transform compresses the
+  frequency axis there (the same effect the weighting filters counter with
+  `high_accuracy`). Keep the top band edge comfortably below Nyquist or raise
+  `fs`, and let `verify_filter_class` report how much margin is left.
+
 ## 2. Filter Comparison and Zoom
 
 We use Second-Order Sections (SOS) for all filters to ensure numerical stability.
 The following plot compares the architectures focusing on the -3 dB crossover point.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_type_comparison.svg" alt="Magnitude response comparison of the five filter architectures for the 1 kHz octave band, with a zoom at the -3 dB crossover" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import sosfreqz
+from phonometry import OctaveFilterBank
+
+fs = 48000
+fig, ax = plt.subplots(figsize=(9, 5))
+for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
+    # limits picks out the single 1 kHz octave band
+    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
+                            filter_type=ftype)
+    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    fsd = fs / bank.factor[idx]           # rate the band actually runs at
+    w, h = sosfreqz(bank.sos[idx], worN=16384, fs=fsd)
+    ax.semilogx(w, 20 * np.log10(np.abs(h) + 1e-9), label=ftype)
+ax.axhline(-3, color="gray", linestyle=":", label="-3 dB")
+ax.set(xlim=(100, 8000), ylim=(-80, 5),
+       xlabel="Frequency [Hz]", ylabel="Magnitude [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 | Type | Name | Usage Example | Best For |
 | :--- | :--- | :--- | :--- |
@@ -382,6 +459,38 @@ low, high = linkwitz_riley(signal, fs, freq=1000, order=4)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/crossover_lr4.svg" alt="Linkwitz-Riley 4th-order crossover: low-pass, high-pass and their flat sum" width="60%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import freqz
+from phonometry import linkwitz_riley
+
+# Measure both branches: split a unit impulse and take the spectra.
+fs = 48000
+impulse = np.zeros(fs)
+impulse[0] = 1.0
+low, high = linkwitz_riley(impulse, fs, freq=1000, order=4)
+
+w, h_lp = freqz(low, worN=8192, fs=fs)
+_, h_hp = freqz(high, worN=8192, fs=fs)
+
+fig, ax = plt.subplots(figsize=(9, 5))
+ax.semilogx(w, 20 * np.log10(np.abs(h_lp) + 1e-9), label="Low-pass (LR4)")
+ax.semilogx(w, 20 * np.log10(np.abs(h_hp) + 1e-9), label="High-pass (LR4)")
+ax.semilogx(w, 20 * np.log10(np.abs(h_lp + h_hp) + 1e-9), "--",
+            label="Sum (flat)")
+ax.set(xlim=(20, 20000), ylim=(-60, 5),
+       xlabel="Frequency [Hz]", ylabel="Magnitude [dB]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
+
 ## 6. Verifying the IEC 61260-1 class
 
 `verify_filter_class` checks every band of a bank against the acceptance
@@ -410,6 +519,42 @@ and the figure below use.
 regions: it must attenuate at least the red mask outside the band and no more
 than the purple mask inside it.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import sosfreqz
+from phonometry import OctaveFilterBank, class_limits
+
+fs = 48000
+bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+fm, fsd = bank.freq[idx], fs / bank.factor[idx]
+w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
+att = -20 * np.log10(np.abs(h) + 1e-12)
+delta_a = att - np.interp(fm, w, att)     # relative attenuation
+
+grid = np.logspace(np.log10(0.05), np.log10(8), 2000)
+lo1, hi1 = class_limits(1.0, 1, grid)     # class 1 min/max attenuation
+
+fig, ax = plt.subplots(figsize=(9, 5.5))
+ax.fill_between(grid, -10, lo1, alpha=0.15, color="tab:red",
+                label="Forbidden: too little attenuation")
+finite = np.isfinite(hi1)
+ax.fill_between(grid[finite], hi1[finite], 90, alpha=0.15, color="tab:purple",
+                label="Forbidden: too much attenuation")
+ax.plot(w / fm, delta_a, label="Butterworth order 6")
+ax.set(xscale="log", xlim=(0.08, 8), ylim=(-6, 90),
+       xlabel="Normalized frequency f / fm",
+       ylabel="Relative attenuation [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
 With default parameters (order 6), **Butterworth meets class 1**, and so does
 **Chebyshev II**: its `attenuation` default is now `72` dB, clearing the 70 dB
 far-stopband class 1 limit (scipy pins the cheby2 equiripple floor at exactly
@@ -437,6 +582,69 @@ print(result["bands"][0]["margin_class0_db"])
 *The class 0 corridor (±0.15 dB at mid-band) is the tightest; class 1 (±0.3 dB)
 and class 2 (±0.5 dB) are progressively wider. The order-6 Butterworth threads
 inside class 0 across the whole pass-band.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import sosfreqz
+from phonometry import OctaveFilterBank, class_limits
+
+fs = 48000
+bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
+idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+fm, fsd = bank.freq[idx], fs / bank.factor[idx]
+w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
+att = -20 * np.log10(np.abs(h) + 1e-12)
+delta_a = att - np.interp(fm, w, att)
+
+# Pass-band only: outside the band edges the maximum limit is +inf.
+g = 10 ** (3 / 10)
+grid = np.linspace(g ** -0.5, g ** 0.5, 1500)
+pb = (w / fm >= g ** -0.5) & (w / fm <= g ** 0.5)
+
+fig, ax = plt.subplots(figsize=(9, 5.5))
+for cls in (2, 1, 0):                      # nested corridors, class 0 tightest
+    lo, hi = class_limits(1.0, cls, grid, edition="1995")
+    ax.plot(grid, hi, label=f"Class {cls} corridor")
+    ax.plot(grid, lo, color=ax.lines[-1].get_color())
+ax.plot(w[pb] / fm, delta_a[pb], "k", lw=2, label="Butterworth order 6")
+ax.set(xscale="log", xlim=(g ** -0.5, g ** 0.5), ylim=(-0.7, 6),
+       xlabel="Normalized frequency f / fm",
+       ylabel="Relative attenuation [dB]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+### What a class means physically
+
+The masks are worst-case error bounds on a *measurement*, not abstract
+grades:
+
+- **In the passband** the corridor bounds how much the band can mis-read
+  in-band content: a class 1 bank reads a mid-band tone within ±0.4 dB of
+  its true level and a class 2 bank within ±0.6 dB (2014 Table 1; the
+  stricter 1995 masks allowed ±0.3 dB for class 1 and ±0.15 dB for
+  class 0). Toward the band edges the corridor widens, which is the honest
+  admission that a tone sitting exactly on an edge is genuinely ambiguous
+  between two bands (both read it about 3 dB down).
+- **In the stopband** the minimum-attenuation mask bounds leakage from the
+  rest of the spectrum: far from the band, class 1 demands at least 70 dB of
+  relative attenuation (the reason the `cheby2` default is 72 dB). In energy
+  terms, an out-of-band tone must be roughly 70 dB stronger than the band's
+  own content before it doubles the band's energy reading (+3 dB). The
+  practical consequence: measuring bands far below a dominant tone, the
+  reading floors out at the leakage skirt about 70 dB down, and a steeper
+  architecture (or higher order) is the only way to push that floor lower.
+- **For the uncertainty budget**, the class is the filter's contribution to the
+  measurement uncertainty: a class 1 bank adds up to a few tenths of a dB to
+  a band level, comparable to a class 1 sound level meter's other tolerance
+  terms, which is why instrument-grade chains specify the class of every
+  stage rather than a single overall figure.
 
 **Which architecture reaches which class?** The library's **default — Butterworth
 order 6 — meets class 0** in the configurations the conformance suite verifies
@@ -489,6 +697,38 @@ spl_c2, _, xb_cheby2 = octave_filter(y, fs=fs, fraction=1, sigbands=True, filter
 red) responses. The bottom plot shows the **Impulse Response**, highlighting the
 differences in stability and transient decay.*
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import OctaveFilterBank
+
+fs = 48000
+t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
+y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
+
+bank_b = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0])
+bank_c = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0],
+                          filter_type="cheby2")
+_, freq, xb_butter = bank_b.filter(y, sigbands=True)
+_, _, xb_cheby2 = bank_c.filter(y, sigbands=True)
+
+fig, axes = plt.subplots(len(freq), 1, figsize=(9, 2 * len(freq)), sharex=True)
+for ax, fc, xb, xc in zip(axes, freq, xb_butter, xb_cheby2):
+    ax.plot(t, xb, label="Butterworth")
+    ax.plot(t, xc, "--", label="Chebyshev II")
+    ax.set_title(f"{fc:.0f} Hz band")
+    ax.set_xlim(0, 0.04)
+axes[0].legend()
+axes[-1].set_xlabel("Time [s]")
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
 > [!NOTE]
 > **Why do the signals look shifted in time?**
 > Digital IIR filters (like Butterworth or Chebyshev) have **non-linear phase
@@ -506,6 +746,35 @@ the passband (transient shapes survive), while Chebyshev I and Elliptic pay for
 their steep roll-off with strong delay peaks at the band edges.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/group_delay_comparison.svg" alt="Group delay of the 1 kHz octave band for the five architectures: Bessel nearly flat, Chebyshev and Elliptic peaking at the band edges" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import group_delay
+from phonometry import OctaveFilterBank
+
+fs = 48000
+w = np.logspace(np.log10(500), np.log10(2000), 1024)
+fig, ax = plt.subplots(figsize=(9, 5))
+for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
+    bank = OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
+                            filter_type=ftype)
+    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    fsd = fs / bank.factor[idx]
+    # Group delay of an SOS cascade = sum of the sections' group delays
+    gd = sum(group_delay((sec[:3], sec[3:]), w=w, fs=fsd)[1]
+             for sec in bank.sos[idx])
+    ax.semilogx(w, gd / fsd * 1000, label=ftype)
+ax.set(xlim=(500, 2000), xlabel="Frequency [Hz]", ylabel="Group delay [ms]")
+ax.grid(True, which="both", alpha=0.3)
+ax.legend()
+plt.show()
+```
+
+</details>
 
 ## 8. Zero-phase filtering
 
@@ -531,9 +800,59 @@ spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
 *Causal filtering delays the burst by the filter's group delay; zero-phase
 filtering keeps it aligned with the input.*
 
----
+<details>
+<summary>Show the code for this figure</summary>
 
-**Standards.** IEC 61260-1:2014, *Electroacoustics — Octave-band and
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import OctaveFilterBank
+
+fs = 48000
+t = np.linspace(0, 0.15, int(fs * 0.15), endpoint=False)
+x = np.zeros_like(t)                      # 250 Hz tone burst mid-frame
+start, end = int(0.05 * fs), int(0.10 * fs)
+x[start:end] = np.sin(2 * np.pi * 250 * t[start:end]) * np.hanning(end - start)
+
+bank = OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
+_, _, fwd = bank.filter(x, sigbands=True, calculate_level=False)
+_, _, zp = bank.filter(x, sigbands=True, calculate_level=False,
+                       zero_phase=True)
+
+fig, ax = plt.subplots(figsize=(9, 4.5))
+ax.plot(t, x, color="gray", alpha=0.5, label="Input burst (250 Hz)")
+ax.plot(t, fwd[0], label="Causal (group delay)")
+ax.plot(t, zp[0], "--", label="zero_phase=True (aligned)")
+ax.set(xlabel="Time [s]", ylabel="Amplitude")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+## References
+
+- International Electrotechnical Commission. (2014). *Electroacoustics —
+  Octave-band and fractional-octave-band filters — Part 1: Specifications*
+  (IEC 61260-1:2014).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
+  The band-edge mathematics of section 1 and the class acceptance masks
+  verified in section 6.
+- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
+  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
+  [Open Library record](https://openlibrary.org/isbn/9780131988422).
+  The pole-zero, stability and multirate theory condensed in section 1: SOS
+  cascades, the bilinear transform and decimation.
+- Smith, J. O. *Introduction to digital filters with audio applications*
+  (online book). Center for Computer Research in Music and Acoustics (CCRMA),
+  Stanford University.
+  [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
+  A free companion treatment of digital-filter design and analysis, from
+  pole-zero geometry to filter stability.
+
+## Standards
+
+IEC 61260-1:2014, *Electroacoustics — Octave-band and
 fractional-octave-band filters — Part 1: Specifications* — the base-10 mid
 frequencies and band edges of §1 (5.2-5.5), the nominal band labels, and the
 Table 1 class 1 / class 2 acceptance limits (with the fractional-octave
@@ -610,6 +929,58 @@ A adds the $f_2$ and $f_3$ poles (4 zeros), which is why it keeps falling
 through the low-mids. Both are normalized to exactly 0 dB at 1 kHz. Z is the
 absence of weighting. The full pole/zero derivation is in the
 [Theory](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/) page.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_equal_loudness_weighting.svg" alt="Equal-loudness contours per ISO 226 on the left, with the 40-phon contour highlighted; on the right the A-weighting curve overlaid on the inverted 40-phon contour, showing that A is the flipped contour frozen into a realizable filter" width="92%"></picture>
+
+### A short history: A, B, C and Z
+
+The chain runs from Fletcher and Munson's 1933 equal-loudness measurements
+to the first American sound level meter standard (1936), which gave meters
+switchable responses so the reading could approximate loudness at different
+levels: **A** from the 40-phon contour for quiet sounds, **B** from the
+~70-phon contour for moderate ones, and a flat response for loud ones (the
+**C** curve proper, mirroring the flatter ~100-phon contour, arrived with
+the 1944 revision). Switching curves by level died in practice (readings jumped at the
+switch points, and field measurements became incomparable), but A survived
+alone: decades of hearing-damage and community-annoyance data had been
+collected with it, and it correlates with both about as well as far more
+elaborate metrics. IEC 61672-1 (first edition 2002) finished the cleanup:
+B was dropped, A and C were kept with tightened tolerances, and **Z** was
+introduced to replace the vaguely specified "linear" of older meters, which
+varied by manufacturer.
+
+### When C − A matters
+
+Because A discards bass and C keeps it, the difference
+$L_{Ceq} - L_{Aeq}$ is a one-number indicator of low-frequency content:
+
+- **Below about 10 dB**: an ordinary broadband spectrum; the A-weighted
+  level rates it fairly.
+- **Around 15 to 20 dB or more**: the energy is concentrated at low
+  frequencies (HVAC rumble, compressors, music bass through a wall). The
+  A-weighted level then understates the problem; look at the octave
+  spectrum, and below 20 Hz switch to the G curve.
+- **Hearing-protector selection**: the HML method of ISO 4869-2 keys on
+  exactly this C-minus-A difference to decide how much low-frequency
+  attenuation a protector must provide (the simpler SNR method sidesteps it
+  by working from the C-weighted level directly).
+
+```python
+import numpy as np
+from phonometry import leq, weighting_filter
+
+# A 50 Hz rumble under a light broadband hiss: quiet in A, loud in C.
+fs = 48000
+t = np.arange(10 * fs) / fs
+rng = np.random.default_rng(1)
+x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
+
+la = leq(weighting_filter(x, fs, curve="A"))
+lc = leq(weighting_filter(x, fs, curve="C"))
+print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
+# LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
+# C - A above 20 dB: the A-weighted number alone would hide the rumble.
+```
 
 ## 2. Basic usage
 
@@ -688,7 +1059,7 @@ L<sub>pG</sub> (or L<sub>Geq</sub> for the equivalent level over time).
 | `x` | 1D or 2D array | any | non-empty | 2D is `[channels, samples]` |
 | `fs` | int | Hz | > 0 | |
 | `curve` | str | — | `'A'` (default), `'C'`, `'G'`, `'Z'` | `'G'` per ISO 7196 (infrasound); `'Z'` is a bypass |
-| `high_accuracy` | bool | — | default `True` (function); class default `None` resolves to `not stateful` | Internal oversampling (up to 8×, reaching ≥ 144 kHz at common audio rates, e.g. 96 kHz input ×2) keeps A/C in class 1 up to 16 kHz; silently ignored for G, whose 0.25–315 Hz range the plain design already renders exactly |
+| `high_accuracy` | bool | — | default `True` (function); class default `None` resolves to `not stateful` | Internal oversampling keeps A/C in class 1 up to 16 kHz; details in §6 |
 | `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
 | `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
 
@@ -713,7 +1084,8 @@ fs = 48 kHz the A-curve error at 12.5 kHz reaches −2.7 dB, outside the IEC
 61672-1 **class 1** tolerance (+2.0/−2.5 dB).
 
 By default (`high_accuracy=True`), phonometry designs and runs the weighting
-filter at an internally oversampled rate (≥ 144 kHz) and decimates back, keeping
+filter at an internally oversampled rate — up to 8×, reaching ≥ 144 kHz at
+common audio rates (a 96 kHz input runs ×2) — and decimates back, keeping
 the response within class 1 tolerances up to 16 kHz (error ≈ −0.5 dB at
 12.5 kHz for fs = 48 kHz).
 
@@ -764,6 +1136,8 @@ plt.show()
 </details>
 
 - `high_accuracy=False` restores the legacy plain-bilinear behavior.
+- For `'G'` the flag is silently ignored: its 0.25–315 Hz range is already
+  exact with the plain design.
 - **Stateful (block) processing** always uses the legacy design: the internal
   FIR resampling is incompatible with block continuity. Passing
   `high_accuracy=True` together with `stateful=True` raises a `ValueError`.
@@ -858,9 +1232,27 @@ plt.show()
 
 </details>
 
----
+## References
 
-**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  The original equal-loudness measurements whose 40-phon contour the A-curve
+  inverts (section 1).
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [iso.org catalogue](https://www.iso.org/standard/83117.html).
+  The modern successors of the Fletcher-Munson curves, drawn in the diagram
+  of section 1.
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
+  The normative A/C/Z definitions, the analytic Annex E curves and the
+  Table 3 acceptance limits verified in section 7.
+
+## Standards
+
+IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — the A, C and Z frequency-weighting curves (the
 Annex E analytic definition from four corner frequencies, normalized to 0 dB
 at 1 kHz), the class 1 tolerances the `high_accuracy` design keeps up to
@@ -900,7 +1292,9 @@ that is why level analyses discard the first instants of a recording.
 
 ## 2. The three time weightings
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting.gif" alt="Animation: the Fast, Slow and Impulse detectors chasing a tone burst — Fast rises and falls quickly, Slow lags, and Impulse rises fast but decays the slowest" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting.gif" alt="Animation: a tone burst driving the RC exponential detector, the capacitor charging and draining, while the Fast, Slow and Impulse meter needles follow their own ballistics" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_time_weighting.webm)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/time_weighting_analysis.svg" alt="Fast, Slow and Impulse time weighting responses to a noise burst" width="80%"></picture>
 
@@ -960,6 +1354,30 @@ $$
 y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
 \alpha = \begin{cases}1 - e^{-1/(f_s \cdot 0.035)} & x^2[n] > y[n-1]\\[2pt] 1 - e^{-1/(f_s \cdot 1.5)} & \text{otherwise}\end{cases}
 $$
+
+### Choosing F, S or I
+
+- **Fast** is the default of nearly every modern method: percentile levels,
+  impulsive-event detection, community noise, the general "level vs time"
+  plot. Its 125 ms constant is of the same order as the ear's own loudness
+  integration time, so an LAF trace roughly tracks what a listener notices.
+- **Slow** suits quasi-stationary sources and any procedure that needs a
+  steady readout: it averages away the flicker of a fluctuating source at
+  the price of missing short events (a 100 ms burst peaks about 7.5 dB lower
+  on S than on F). Some legacy methods prescribe it outright, most famously
+  aircraft-certification levels, which are built from Slow-weighted samples.
+- **Impulse** is legacy, and deprecated for rating. It was a 1960s attempt
+  to make a meter needle track the perceived loudness of impacts; it does
+  not (the 35 ms attack still misses very short impulses, and the 1.5 s hold
+  exaggerates duration). It entered the international standards with
+  IEC 60651 and was dropped from the requirements of its successor
+  IEC 61672-1, whose first edition (2002) explains why: I-weighted levels
+  are not suitable for rating impulsive sounds. It survives in meters only
+  for continuity with older national requirements. Modern practice rates
+  impulsiveness with
+  $L_{Aeq}$ plus an adjustment (ISO 1996-1 Table A.1, or the onset analysis
+  of [Impulsive-sound prominence](impulse-prominence.md)) and assesses
+  hearing-damage risk with $L_{Cpeak}$, never with I-weighted levels.
 
 ## 3. `time_weighting()` / `TimeWeighting` parameters
 
@@ -1072,9 +1490,17 @@ See [Integrated & Statistical Levels](https://jmrplens.github.io/phonometry/guid
 these envelopes, and [Why phonometry](https://jmrplens.github.io/phonometry/reference/why-phonometry/) for the IEC
 61672-1 tone-burst verification.
 
----
+## References
 
-**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
+  The exponential-detector definition, the F and S time constants and the
+  Table 4 toneburst responses the ballistics are verified against in CI.
+
+## Standards
+
+IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — the exponential time-weighting detector (clause 3.8)
 with the F and S time constants (clause 5.7), and the 4 kHz toneburst reference
 responses of Table 4 (class 1 acceptance limits) used to verify the ballistics
@@ -1129,6 +1555,18 @@ underestimates every fluctuating noise. $L_{eq}$ is the level of the *steady*
 sound carrying the same energy as the real, fluctuating one, which is why
 regulations are written in terms of it.
 
+The same rule governs every combination of levels: period levels into a
+whole-day value, microphone positions into a room average, repeated
+measurements into a mean. Combine energies,
+`10 * np.log10(np.mean(10 ** (L / 10)))`, never the dB values. The
+arithmetic-mean error is one-sided (it always under-reads) and grows with
+the spread, so it does not cancel out over many measurements: with values
+spread over 10 dB it already costs a couple of decibels. The few normative
+formulas that do average decibels directly are deliberate approximations and
+say so (ISO 1996-2 offers one as a substitute for repeated-measurement
+uncertainty and warns it inflates once levels spread beyond 3 dB, see the
+uncertainty section below); everywhere else, energy.
+
 ### `leq()` / `laeq()` parameters
 
 | Parameter | Type / shape | Units | Range / default | Notes |
@@ -1179,6 +1617,35 @@ envelope (Fast by default), and $L_{10}$ is the envelope value exceeded 10 %
 of the time. That makes the *ballistics choice part of the metric*: an
 $L_{10}$ from a Slow envelope is systematically lower than from a Fast one on
 impulsive noise, so regulations always name the time weighting.
+
+### Reading Leq against the percentiles
+
+$L_{eq}$ and the $L_N$ family answer different questions about the same
+level history. $L_{eq}$ is an energy mean, so the loudest moments dominate
+it: a single second at 100 dB lifts the $L_{eq}$ of an otherwise steady
+60 dB hour to about 66 dB, while $L_{90}$, $L_{50}$ and even $L_{10}$ barely
+move (a one-second event occupies far less than 10 % of the hour).
+Percentiles are rank statistics, robust against rare events by construction.
+In practice:
+
+- **$L_{eq}$ (and $L_{Aeq}$)** is the dose metric: regulations, exposure
+  and annoyance models are written in it precisely *because* it refuses to
+  ignore rare loud events.
+- **$L_{90}$** estimates the residual (background) level under an
+  intermittent source, which is how ISO 1996-2 Annex I uses it.
+- **$L_{10}$** tracks event peaks; the spread $L_{10} - L_{90}$ is a quick
+  intermittency indicator.
+- **$L_{eq} - L_{50}$** measures how "peaky" the history is: for steady
+  noise the two nearly coincide, and the more the level fluctuates the
+  further $L_{eq}$ climbs above the median (for a Gaussian level
+  distribution with standard deviation $\sigma$ dB,
+  $L_{eq} \approx L_{50} + 0.115\,\sigma^2$).
+
+One caution: percentiles do not combine. Two hours with known $L_{90}$
+values do not yield the two-hour $L_{90}$ by any formula; recompute it from
+the pooled envelope. $L_{eq}$ values, by contrast, combine exactly by
+time-weighted energy averaging, which is what `composite_rating_level`
+does below.
 
 ### `ln_levels()` parameters
 
@@ -1437,9 +1904,22 @@ tonal-prominence verdicts in [Prominent Discrete Tones](https://jmrplens.github.
 and the ISO 226 equal-loudness contours live with the perception metrics in
 [Loudness](https://jmrplens.github.io/phonometry/guides/loudness/).
 
----
+## References
 
-**Standards.** IEC 61672-1:2013, *Electroacoustics — Sound level meters —
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
+  The envelope ballistics behind the percentile levels, the C-weighted peak
+  and the SEL toneburst references the implementation is verified against.
+- Kinsler, L. E., Frey, A. R., Coppens, A. B., & Sanders, J. V. (2000).
+  *Fundamentals of acoustics* (4th ed.). Wiley. ISBN 978-0-471-84789-2.
+  [Publisher page](https://www.wiley.com/en-us/Fundamentals+of+Acoustics%2C+4th+Edition-p-9780471847892).
+  The sound-pressure, energy and level definitions underneath Leq, SEL and
+  the dose measures.
+
+## Standards
+
+IEC 61672-1:2013, *Electroacoustics — Sound level meters —
 Part 1: Specifications* — the Fast/Slow/Impulse envelope ballistics behind
 `ln_levels`, the C-weighted peak of §5.13 (verified against the Table 5 tone
 bursts) and the sound exposure level verified against the Table 4 LAE column.
@@ -1468,6 +1948,8 @@ to attach the normative uncertainty every occupational-hygiene report needs. The
 `occupational_exposure` module adds the three **measurement strategies** and the
 **Annex C** uncertainty budget on top of the energy-average machinery.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612.svg" alt="Left: a worker wearing a personal sound exposure meter (IEC 61252), its microphone mounted about 0.04 m above the shoulder and at least 0.1 m from the entrance of the most-exposed ear canal, per ISO 9612 Clause 12.3. Right: the three measurement strategies drawn as timelines over an eight-hour working day — task-based (the day split into labelled tasks, at least three samples plus a duration each), job-based (five or more random samples spread over the homogeneous exposure group) and full-day (the whole shift measured at least three times) — all feeding the LEX,8h and its Annex C uncertainty, chosen by work pattern from Table B.1" width="94%"></picture>
+
 ## 1. The three measurement strategies (Clauses 9-11)
 
 The *task-based* strategy (Clause 9) splits the nominal day into tasks, takes
@@ -1482,6 +1964,27 @@ so a loud but short task contributes little. The *job-based* (Clause 10) and
 random samples over a homogeneous exposure group and normalise the effective-day
 duration. The daily level is the same either way; the strategies differ in how
 the **uncertainty** is built.
+
+**Choosing a strategy.** ISO 9612 Table B.1 picks the strategy from the *work
+pattern*, not from convenience, and the trade-off is coverage against effort.
+The **task-based** strategy is the recommended default when the day
+decomposes into a small number of well-defined tasks: because it measures each
+task separately, it explains *where* the dose comes from (the per-task
+breakdown above) and lets a short, loud task be sampled properly without
+dragging out the whole survey — but it needs a reliable work analysis, and its
+uncertainty grows if the task durations are themselves uncertain. The
+**job-based** strategy suits a mobile worker with an unpredictable pattern or
+a homogeneous group doing "the same job": random samples across the group
+average over the variability instead of resolving it, which is robust when the
+day cannot be cleanly cut into tasks but blind to which activity dominates.
+The **full-day** strategy — a worn dosimeter capturing the entire shift,
+repeated on several days — needs the least analysis and captures everything
+including the unexpected, at the cost of the most wearer-days and the weakest
+diagnostic value (one number per day, no breakdown, and false contributions
+like knocks on the microphone are hard to spot). As a rule: resolve the dose
+with task-based when you can, fall back to job-based for irregular work, and
+use full-day when the pattern defies description or an independent whole-shift
+check is wanted.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.svg" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" width="80%"></picture>
 
@@ -1552,6 +2055,23 @@ $88.2$ dB where Annex E reports $88.1$: the standard rounds the effective-day
 level to $88.4$ before the duration normalisation; the library keeps it
 unrounded.)
 
+**What dominates the budget.** Annex C combines four sources in quadrature
+(Table C.1): the **sampling** uncertainty ($u_{1a}$/$u_1$), the **duration**
+uncertainty ($u_{1b}$, task-based only), the **instrument** ($u_2$, Table C.5)
+and the **microphone position** ($u_3$, Clause C.6). The last two are small
+and roughly fixed — $u_2 = 0.7$ dB for a class 1 sound level meter, 1.5 dB for
+a class 2 meter or a personal exposimeter, and $u_3 = 1.0$ dB by default — so
+in practice the **sampling term almost always dominates**: it scales with the
+scatter of the measured levels, which in a real workplace easily reaches
+several decibels and, entered in quadrature, swamps the sub-decibel
+instrument and position terms. The practical consequence: a quadrature
+budget is set by its largest term, so tightening the instrument grade buys
+little once sampling scatter is large; the productive
+move is *more samples* (the standard error falls as $1/\sqrt{I}$ or $1/\sqrt{N}$),
+which is exactly what the Clause 9.3 / 10.4 advisories nudge you toward.
+Because peak $L_{p,Cpeak}$ carries no Annex C sampling model (Table C.5,
+Note 1), it is reported without an uncertainty, not with a zero one.
+
 When a task's samples span **3 dB or more** (Clause 9.3), or the job contribution
 $c_1 u_1$ exceeds 3.5 dB (Clause 10.4), or too few workers are covered
 (Table 1 cumulative-duration), the result sets `sampling_advisory=True` and, with
@@ -1592,9 +2112,33 @@ carry no per-task breakdown).
   Annex C budget.
 - API reference: [`hearing.occupational_exposure`](https://jmrplens.github.io/phonometry/reference/api/hearing/occupational-exposure/).
 
----
+## References
 
-**Standards.** ISO 9612:2009, *Acoustics — Determination of occupational noise
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of occupational noise exposure — Engineering method*
+  (ISO 9612:2009). [iso.org catalogue](https://www.iso.org/standard/41718.html).
+  The implemented method: the three strategies, the microphone placement of
+  Clause 12.3, the Annex C uncertainty budget and the Annex D/E/F worked
+  examples.
+- European Parliament and Council. (2003). *Directive 2003/10/EC on the
+  minimum health and safety requirements regarding the exposure of workers to
+  the risks arising from physical agents (noise)*. Official Journal of the
+  European Union.
+  [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng).
+  The EU exposure action values (80/85 dB) and limit value (87 dB) that the
+  `LEX,8h` and its upper limit are assessed against.
+- National Institute for Occupational Safety and Health. (1998). *Criteria for
+  a recommended standard: Occupational noise exposure — Revised criteria 1998*
+  (DHHS/NIOSH Publication No. 98-126).
+  [doi:10.26616/NIOSHPUB98126](https://doi.org/10.26616/NIOSHPUB98126),
+  [free PDF](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf).
+  The freely available criteria document behind the 85 dB(A) recommended
+  exposure limit and the hearing-conservation rationale for measuring the
+  daily dose.
+
+## Standards
+
+ISO 9612:2009, *Acoustics — Determination of occupational noise
 exposure — Engineering method* — the task-based (Clause 9), job-based
 (Clause 10) and full-day (Clause 11) strategies, the Annex C uncertainty budget
 (Formulae C.6, C.9 and C.12, Tables C.4/C.5) and the one-sided coverage factor
@@ -1633,14 +2177,76 @@ print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 
 The methods hinge on the **critical band** — the ear's analysis bandwidth,
 $\Delta f_c = 25 + 75\ [1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz at 1 kHz): a
-tone is masked only by the noise *inside* its critical band, so both ratios
-compare the tone against exactly that noise, not the whole spectrum.
+tone is masked only by the noise *inside* its critical band, so both methods
+focus on that band rather than the whole spectrum, but they use it
+differently. The tone-to-noise ratio works within the band, separating its
+spectral lines into tone and noise and subtracting their levels (clause 11,
+Formulae 9–11); the prominence ratio instead compares the *whole* band centred
+on the tone with the mean of its two contiguous critical bands (clause 12,
+Formula 23):
+
+$$
+\mathrm{TNR} = L_t - L_n, \qquad
+\mathrm{PR} = 10\,\lg\!\frac{W_M}{\tfrac{1}{2}(W_L + W_U)}\ \text{dB},
+$$
+
+where $L_t$ is the tone level (the energy sum of the tonal lines above the
+band-edge baseline, Formula 9), $L_n$ the level of the masking noise that
+remains in the critical band, rescaled to the full critical bandwidth
+(Formulae 10–11), and $W_M$, $W_L$, $W_U$ the powers in the middle, lower and
+upper critical bands (below $f_t = 171.4$ Hz the truncated lower band is
+rescaled to a 100 Hz bandwidth, Formula 24).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum.svg" alt="Averaged spectrum of a tone in noise with the critical band shaded and the tone-to-noise ratio annotated against its prominence criterion" width="80%"></picture>
 
-A TNR above $8 + 8.33\log_{10}(1000/f_t)$ dB (8 dB from 1 kHz up) classifies
-the tone as *prominent*; the PR criterion is $9 + 10\log_{10}(1000/f_t)$ dB.
-Low frequencies get higher thresholds because wider relative bands mask more.
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import welch
+from phonometry import tone_to_noise_ratio
+
+fs = 48000
+rng = np.random.default_rng(21)
+t = np.arange(30 * fs) / fs
+x = (np.sqrt(2) * 0.1 * np.sin(2 * np.pi * 1000 * t)
+     + 0.05 * rng.standard_normal(t.size))
+res = tone_to_noise_ratio(x, fs)
+
+# Averaged 1 Hz Hann spectrum (the clause 11.1 front end) and the
+# critical band about the detected tone (edges approximated as +/- dfc/2):
+f, p = welch(x, fs, window="hann", nperseg=fs, scaling="spectrum")
+dfc = 25 + 75 * (1 + 1.4 * (res.frequency / 1000) ** 2) ** 0.69
+sel = (f > 700) & (f < 1400)
+plt.plot(f[sel], 10 * np.log10(p[sel]))
+plt.axvspan(res.frequency - dfc / 2, res.frequency + dfc / 2, alpha=0.15)
+plt.title(f"TNR = {res.ratio_db:.1f} dB (criterion {res.criterion_db:.1f} dB)")
+plt.xlabel("Frequency [Hz]"); plt.ylabel("Bin power [dB]")
+plt.show()
+```
+
+</details>
+
+A TNR at or above $8 + 8.33\log_{10}(1000/f_t)$ dB below 1 kHz (a flat 8 dB for
+$f_t \ge 1$ kHz) classifies the tone as *prominent*; the PR criterion is
+$9 + 10\log_{10}(1000/f_t)$ dB below 1 kHz and 9 dB from there up, likewise
+applied with $\ge$. Low frequencies get higher thresholds because wider
+relative bands mask more.
+
+**When the two ratios disagree.** Near the criteria the verdicts can differ,
+because each ratio is fragile in a different situation. TNR has to *split*
+the critical band into tonal and noise lines first, so it degrades when that
+separation is ambiguous — a tone riding a steep noise slope, or closely
+spaced components whose skirts overlap. PR needs no separation, which makes
+it the robust, automatable choice when **several tones share the critical
+band** (they all land in $W_M$); in exchange it reads low when a
+*neighbouring* band also carries a tone (the flanking bands are then not
+noise) and is biased on sharply sloping spectra, where the two flanking
+bands no longer estimate the masking at the tone. In practice: prefer TNR
+for a clean, isolated tone, prefer PR for multi-tone complexes sharing a
+band, and report both when they straddle their criteria.
 
 ## 2. Where to measure (ECMA-74) and practice
 
@@ -1675,9 +2281,24 @@ Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
 - [Theory](https://jmrplens.github.io/phonometry/reference/theory/perception/) — the critical-band model and criteria derivation.
 - API reference: [`psychoacoustics.tonality`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/tonality/).
 
----
+## References
 
-**Standards.** ECMA-418-1:2024 (3rd edition), *Psychoacoustic metrics for ITT
+- Ecma International. (2024). *ECMA-418-1: Psychoacoustic metrics for ITT
+  equipment — Part 1: Prominent discrete tones* (3rd ed.).
+  [Free PDF](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf).
+  The implemented standard, freely downloadable: the TNR (clause 11) and PR
+  (clause 12) methods, the critical-band model and the prominence criteria of
+  section 1.
+- Ecma International. (2025). *ECMA-74: Measurement of airborne noise emitted
+  by information technology and telecommunications equipment* (22nd ed.).
+  [Free PDF](https://ecma-international.org/wp-content/uploads/ECMA-74_22nd_edition_december_2025.pdf).
+  The parent emission standard, freely downloadable: the operator/bystander
+  measurement positions of section 2, with Annex D delegating the tone
+  assessments to ECMA-418-1.
+
+## Standards
+
+ECMA-418-1:2024 (3rd edition), *Psychoacoustic metrics for ITT
 equipment — Part 1: Prominent discrete tones* — the tone-to-noise ratio
 (clause 11), the prominence ratio (clause 12), the critical-band model and the
 frequency-dependent prominence criteria.
@@ -1711,6 +2332,10 @@ By definition a 1 kHz tone at 40 dB SPL is 1 sone, and every +10 phon
 doubles the sone value.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_zwicker.svg" alt="ISO 532-1 Zwicker loudness chain: 28 one-third-octave band levels, transmission and lower-critical-band grouping, core loudness of the 20 critical bands, specific loudness over Bark, integrated into total loudness N in sones and loudness level in phons" width="78%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_specific_loudness_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_specific_loudness.gif" alt="Animation: the specific-loudness pattern of a 1 kHz narrowband sound builds along the Bark axis as the band level steps from 45 to 85 dB, and the area under the pattern integrates to the total loudness in sones" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_specific_loudness.webm)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudness_pattern.svg" alt="Specific loudness patterns over the Bark scale for a 1 kHz narrowband sound and a broadband sound of equal band level" width="80%"></picture>
 
@@ -2034,9 +2659,27 @@ Returns an `EcmaLoudness`: `loudness` (N, sone_HMS), `specific_loudness`
 (N′(z), 53 bands), `bark`, `centre_frequencies`, `time`, `loudness_vs_time`
 (N(l) at 187.5 Hz), `field`.
 
----
+## References
 
-**Standards.** ISO 532-1:2017, *Acoustics — Methods for calculating
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3rd ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  The critical-band and masking psychoacoustics behind the Zwicker model and
+  the loudness sensation the newer models refine.
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  The original equal-loudness measurements behind the loudness-level concept
+  of the pure-tone section.
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [iso.org catalogue](https://www.iso.org/standard/83117.html).
+  The contour model and Table 1 parameters behind the pure-tone loudness
+  levels.
+
+## Standards
+
+ISO 532-1:2017, *Acoustics — Methods for calculating
 loudness — Part 1: Zwicker method* — stationary and time-varying loudness in
 sones from the normative Annex A.4 reference program, with the N5/N10
 percentile loudness, validated against the Annex B set. ISO 532-2:2017,
@@ -2229,9 +2872,18 @@ See [Prominent Discrete Tones](https://jmrplens.github.io/phonometry/guides/tone
 prominence verdicts, [Speech Transmission Index](https://jmrplens.github.io/phonometry/guides/speech-transmission/) for
 STI/STIPA, and [Theory](https://jmrplens.github.io/phonometry/reference/theory/perception/) for the underlying math.
 
----
+## References
 
-**Standards.** DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3rd ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  The psychoacoustics of the sensations quantified on this page: the
+  high-frequency emphasis behind sharpness and the fast-modulation percept
+  behind roughness.
+
+## Standards
+
+DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
 Schärfe* — sharpness in acum (clause 6 weighting, Annex B von Bismarck and
 Aures variants, Table A.2 targets). ECMA-418-2:2025, *Psychoacoustic metrics
 for ITT equipment — Part 2 (methods for describing human perception based on
@@ -2274,6 +2926,20 @@ $$
 m(F) = \frac{1}{\sqrt{1 + \left(2\pi F\,\frac{T_{60}}{13.8}\right)^2}}
 \cdot \frac{1}{1 + 10^{-\mathrm{SNR}/10}}
 $$
+
+Modulation *depth* is the thing worth measuring because intelligibility rides
+on the depth of the envelope valleys, not on the loudness of the peaks. A
+talker alternates energy bursts (vowels) with near-silences (stop gaps,
+fricative onsets) at syllable rate, and a listener segments speech by hearing
+those dips. A reverberant tail fills the dips from behind, since late energy
+smears into the gaps; steady noise raises their floor. In both cases the
+received modulation depth shrinks, and with it the contrast between speech
+sounds, even when the average level barely changes. The full method probes
+m(F) at 14 modulation frequencies (0.63 Hz to 12.5 Hz in one-third-octave
+steps) in each of the 7 octave bands from 125 Hz to 8 kHz, converts each m to
+an effective signal-to-noise ratio clipped to ±15 dB, and combines the
+results, band-weighted, into the index: the STI is an effective SNR of the
+*envelope*, mapped onto [0, 1].
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sti_vs_t60.svg" alt="STI versus reverberation time with the IEC 60268-16 Annex F rating bands shaded" width="80%"></picture>
 
@@ -2356,6 +3022,37 @@ level-dependent features disabled, as the bench prescribes. The 49 certified
 WAVs stay local (third-party data, not committed); CI re-derives the same
 signal constructions synthetically in the conformance suite.
 
+### Direct or indirect: choosing between them
+
+Each route has failure modes the standard is explicit about:
+
+- **Non-linear or time-variant channels.** The indirect method assumes a
+  linear, time-invariant channel: an impulse response cannot represent
+  clipping, compressors, automatic gain control or a vocoder. For a sound
+  system with non-linear processing in the chain, measure directly: the STIPA
+  signal at least travels through the real chain, and the FULL STI signal is
+  the reliable choice where the distortion is severe (IEC 60268-16 clause 6.3
+  and Table 3).
+- **Level-dependent effects.** The STI is not level-invariant: auditory
+  masking and the reception threshold act on the *absolute* band levels at the
+  listener. Play the test signal at the system's operating level (the
+  standard's Annex J practice sets it 3 dB above the L_Aeq of continuous
+  speech at the position) and pass `level=` and `ambient=` so the analysis
+  includes them; an impulse response measured loud and rescaled afterwards
+  misses these effects entirely.
+- **Impulsive and fluctuating background noise.** A dropped tool or babble
+  during a direct measurement corrupts the measured modulation depths
+  (clause 7.13). The standard's remedy is the indirect route: average the
+  impulse response with MLS or sweeps for a noise-free MTF, then add the noise
+  degradation back via `snr=` or `level=`/`ambient=`. A quick sanity check is
+  to run the analyzer with the source off; the residual STI should stay below
+  0.20.
+- **Statistical spread.** The STIPA signal is pseudo-random noise, so repeated
+  direct measurements scatter by up to about 0.03 STI even in steady
+  conditions (and more in fluctuating noise); repeat and compare rather than
+  trusting a single run, and respect the minimum duration flagged by the
+  `UserWarning` above.
+
 ### `sti_from_impulse_response()` / `stipa()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
@@ -2383,9 +3080,18 @@ Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
   mapping.
 - API reference: [`hearing.sti`](https://jmrplens.github.io/phonometry/reference/api/speech/sti/).
 
----
+## References
 
-**Standards.** IEC 60268-16:2020 (Edition 5), *Sound system equipment —
+- Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in
+  room acoustics and its use for estimating speech intelligibility in
+  auditoria. *The Journal of the Acoustical Society of America*, 77(3),
+  1069-1077. [doi:10.1121/1.392224](https://doi.org/10.1121/1.392224).
+  The modulation-transfer framework of section 1 and the m ↔ STI mapping the
+  index is built on.
+
+## Standards
+
+IEC 60268-16:2020 (Edition 5), *Sound system equipment —
 Part 16: Objective rating of speech intelligibility by speech transmission
 index* — the modulation transfer function and the m ↔ STI mapping, the STIPA
 test signal and direct method, the indirect method from the impulse response,
@@ -2437,6 +3143,21 @@ print(round(ph.sii.BAND_IMPORTANCE.sum(), 6))   # 1.0
 With no noise and a normal hearing threshold the standard speech spectrum is
 almost fully audible, so the index is close to one; the small deficit is the
 listener's own **self-speech masking**.
+
+The importance function is where the perceptual knowledge of the standard
+lives. It descends from the articulation experiments behind French and
+Steinberg's articulation index: listeners scored nonsense syllables heard
+through filters that removed one part of the spectrum at a time, and the drop
+in score measures how much intelligibility each band carries. The outcome is
+strikingly unequal, and unrelated to where the speech *energy* sits: the five
+bands from 1250 Hz to 3150 Hz carry about 43 % of intelligibility (the place
+and manner cues of consonants live there), while the five lowest bands, 160 Hz
+to 400 Hz, carry about 11 % even though they hold nearly half of the speech
+power.
+`Ii` from Table 3 is the average-speech compromise; the standard's Annex B
+tabulates alternative importance functions for specific test materials
+(nonsense syllables, monosyllabic word lists, short passages), which shift
+weight according to how much redundancy the material offers.
 
 ## 2. Masking and the band-audibility function
 
@@ -2598,9 +3319,40 @@ plt.show()
 The vocal-effort names work anywhere a speech spectrum is expected, including as
 the first argument to `speech_intelligibility_index`.
 
----
+## 5. SII or STI?
 
-**Standards.** ANSI S3.5-1997 (R2017), *American National Standard Methods for
+The two speech metrics answer different questions from different measurements,
+and each is blind to what the other captures:
+
+| | SII (ANSI S3.5) | STI (IEC 60268-16) |
+| :--- | :--- | :--- |
+| Question answered | Is enough of the speech spectrum *audible* at the listener's ear? | How much of the speech *envelope* does the transmission channel preserve? |
+| Inputs | Speech, noise and hearing-threshold spectra (18 one-third-octave equivalent spectrum levels) | An impulse response (indirect) or a STIPA recording through the channel (direct) |
+| Band machinery | Band-importance weighting `Ii` applied to the band audibility `Ai` | Modulation transfer function m(F) per octave band, converted to an effective SNR |
+| Captures | Steady noise, upward spread of masking, hearing loss, vocal effort, level distortion | Reverberation, echoes, noise and (measured directly) non-linear processing |
+| Blind to | Reverberation and any time-domain smearing: a fully audible but hopelessly reverberant channel still scores high | Individual hearing status: hearing-impaired listeners need specific corrections |
+| Typical use | Audiology, hearing aids and protectors, noise-control targets at a listener position | PA systems, intercoms and rooms: rating a transmission channel end to end |
+
+The same space can pass one and fail the other. A quiet, highly reverberant
+atrium is an SII near 1 with a poor STI; a dry office flooded by ventilation
+noise can rate an acceptable STI from its impulse response while the SII (and
+the noise-aware STI, via `snr=` or `level=`) reveals that little of the speech
+spectrum clears the noise. When both mechanisms are in play, compute both; the
+inputs are cheap once the room and the noise have been measured. See the
+[Speech Transmission Index guide](https://jmrplens.github.io/phonometry/guides/speech-transmission/) for the STI side.
+
+## References
+
+- French, N. R., & Steinberg, J. C. (1947). Factors governing the
+  intelligibility of speech sounds. *The Journal of the Acoustical Society of
+  America*, 19(1), 90-119.
+  [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
+  The articulation-band experiments that the band-importance function of
+  section 1 descends from.
+
+## Standards
+
+ANSI S3.5-1997 (R2017), *American National Standard Methods for
 the Calculation of the Speech Intelligibility Index* — the one-third-octave-band
 method (18 bands), band-importance function (Table 3), standard speech spectrum
 level and reference internal noise (Table 3), and the masking, disturbance and
@@ -2659,7 +3411,9 @@ print(res.frequency, res.intensity_level)                  # per band
 res.plot()   # Lp vs LI per band + the pressure-intensity index (needs matplotlib)
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity.gif" alt="Animation: instantaneous intensity p times u for a progressive wave (always positive, non-zero mean, net power flows) versus a standing wave (oscillating about a zero mean, energy just sloshes)" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity.gif" alt="Animation: a two-microphone p-p probe with rotating pressure and velocity phasors; the instantaneous intensity arrow flips while its running average settles to a net flow for the progressive wave and to zero for the standing wave" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_instantaneous_intensity.webm)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.svg" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%"></picture>
 
@@ -2741,6 +3495,77 @@ ld = dynamic_capability_index(18.0)   # δpI0 = 18 dB → Ld = δpI0 − K
 print(ld, ld > fi.f2)                                      # 8.0 True (criterion 1)
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power.gif" alt="Animation: a p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power.webm)
+
+### The margin over the residual index
+
+The two channels of any real probe and analyzer are never perfectly phase
+matched. Feed both channels the *same* signal (the residual-intensity test
+of IEC 61043): the true intensity is exactly zero, yet the mismatch reports
+a small false intensity. The gap between the pressure level and that false
+intensity level is the **residual pressure-intensity index** `δpI0`, the
+instrument's phase-error floor expressed as an index; IEC 61043 grades
+probes and processors (class 1 / class 2) chiefly by it.
+
+In the field, the measured index `δpI = Lp − LI` says how far the pressure
+level stands above the level of the net flow, and the systematic error of
+the intensity estimate is bounded by the margin between the two indices:
+
+$$
+\varepsilon = 10 \log_{10}\!\left( 1 \pm 10^{(\delta_{pI} - \delta_{pI0})/10} \right)
+$$
+
+A 10 dB margin keeps the bias within about 0.5 dB and a 7 dB margin within
+about 1 dB; these are precisely the bias factors `K` of ISO 9614, and the
+**dynamic capability** `Ld = δpI0 − K` is the largest field index the
+instrument can afford at a given grade. Read it as a budget: every decibel
+the field's `δpI` rises spends a decibel of margin, and when `δpI` reaches
+`δpI0` the reading is pure phase error, of either sign. This is why the
+pressure-intensity index, not the microphone quality, gates the achievable
+accuracy of every intensity measurement.
+
+### Reactive fields near sources
+
+Close to a source the field turns **reactive**: pressure and particle
+velocity drift toward quadrature, so a large pressure carries little net
+flow. For a small source the quadrature component grows as `1/(kr)`; at
+100 Hz and 0.25 m from the source it is already about twice the active one,
+and `δpI` climbs just as it does in the standing wave of the figure above.
+The same happens between a machine and a hard reflecting surface, and in
+reverberant rooms where the diffuse field raises pressure without
+transporting energy outward. This is why ISO 9614-1 keeps the measurement
+surface on average more than 0.5 m away from the source, and why, when a
+scan fails the dynamic-capability criterion, moving the surface outward or
+adding absorption to the room usually lowers `F2` below `Ld` more cheaply
+than better hardware.
+
+### Choosing the spacer
+
+The spacer sets both ends of the usable band, in opposite directions:
+
+- **The top end is geometry.** The finite difference underestimates the
+  gradient by `sin(kΔr)/(kΔr)`, so the ceiling scales as `1/Δr`:
+  `max_valid_frequency ≈ 0.1·c/Δr` keeps the bias within about 0.3 dB,
+  giving roughly 5.7 kHz for a 6 mm spacer, 2.9 kHz for 12 mm and 690 Hz
+  for 50 mm (`bias_correct=True` undoes the known bias somewhat beyond
+  that).
+- **The bottom end is phase.** A progressive wave puts only
+  `360·f·Δr/c` degrees of true phase across the spacer, 0.8° at 63 Hz over
+  12 mm, while the channel mismatch stays fixed. Lowering the frequency
+  shrinks the signal, not the error, so the margin over `δpI0` collapses at
+  low frequency. A larger spacer buys back that margin: the IEC 61043
+  residual-index requirements scale as `10·lg(Δr/25 mm)`, so doubling the
+  spacer is worth 3 dB of low-frequency margin.
+
+No single spacer covers the full audio range: 6 mm suits high-frequency
+work, 50 mm low-frequency work, and the common 12 mm covers the mid band.
+Wide-band surveys are measured twice with two spacers and the band results
+merged; whichever spacer is fitted, verify `δpI0` with that spacer in
+place, since the index belongs to the probe-spacer-analyzer chain, not to
+the microphones alone.
+
 ### `sound_intensity()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
@@ -2757,12 +3582,35 @@ print(ld, ld > fi.f2)                                      # 8.0 True (criterion
 See [Theory](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/) for the derivations and [Calibration](https://jmrplens.github.io/phonometry/guides/calibration/)
 for absolute scaling of the two channels.
 
----
+## References
 
-**Standards.** IEC 61043:1994, *Electroacoustics — Instruments for the
-measurement of sound intensity — Measurements with pairs of pressure sensing
-microphones* — the two-microphone cross-spectral intensity estimator, the
-finite-difference bias correction and the usable-bandwidth bound (clause 7.3,
+- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
+  ISBN 978-0-419-19810-9.
+  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
+  The monograph on the subject: active and reactive intensity, the p-p
+  estimator and the phase-mismatch error budget behind this page.
+- International Electrotechnical Commission. (1993). *Electroacoustics —
+  Instruments for the measurement of sound intensity — Measurements with
+  pairs of pressure sensing microphones* (IEC 61043:1993; adopted in Europe
+  as EN 61043:1994).
+  [IEC webstore](https://webstore.iec.ch/en/publication/4353).
+  The instrument standard: the cross-spectral estimator, the
+  residual-intensity test behind `δpI0` and the class 1 / class 2
+  requirements.
+- International Organization for Standardization. (1993). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
+  [iso.org catalogue](https://www.iso.org/standard/17427.html).
+  The field indicators F2 to F4, the dynamic-capability criterion and the
+  0.5 m surface-distance rule.
+
+## Standards
+
+IEC 61043:1993 (EN 61043:1994), *Electroacoustics —
+Instruments for the measurement of sound intensity — Measurements with pairs
+of pressure sensing microphones* — the two-microphone cross-spectral
+intensity estimator, the finite-difference bias correction and the
+usable-bandwidth bound (clause 7.3,
 Table 3). ISO 9614-1:1993, *Acoustics — Determination of sound power levels
 of noise sources using sound intensity — Part 1: Measurement at discrete
 points* — the pressure-intensity index, the Annex A field indicators F2, F3
@@ -2903,6 +3751,10 @@ diffuse tail. Its `.plot()` shows the waveform above and the log-magnitude
 envelope with the Schroeder energy-decay curve below — the straight decay
 whose slope becomes the reverberation time in §2.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution.gif" alt="Animation: the exponential sweep crosses the room while its spectrogram builds with delayed copies from the reflections, then the inverse filter collapses the whole recording into the impulse response" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution.webm)
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_response.png" alt="Recovered room impulse response: the normalized waveform with the direct sound and reflections labelled, and below it the log-magnitude envelope in dB with the Schroeder energy-decay curve" width="88%"></picture>
 
 <details>
@@ -2938,11 +3790,43 @@ plt.xlabel("Time [s]"); plt.ylabel("Level re peak [dB]")
 reported room parameter is the spatial average over several. ISO 3382-1
 (performance spaces) asks for at least two source positions and microphones
 spaced $\geq 2$ m apart, $\geq 1$ m from any surface, at $1.2$ m
-(seated-ear) height, avoiding symmetric placements; ISO 3382-2 fixes the
-minimum number of source, microphone and source–microphone combinations per
-accuracy grade (survey / engineering / precision).
+(seated-ear) height; ISO 3382-2 fixes the minimum number of source,
+microphone and source–microphone combinations per accuracy grade
+(survey / engineering / precision) and asks for microphone positions that
+avoid symmetric placements.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement.svg" alt="Room-acoustics measurement setup: a top-view room plan with two loudspeaker source positions and six microphone positions with the ISO 3382-1 spacing rules, and the ISO 3382-2 table of minimum positions for the survey, engineering and precision grades" width="94%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering.gif" alt="Animation: as the microphone height changes, the delay between the direct sound and the floor reflection shifts and the comb filter in the frequency response moves with it, which is why measurement position matters near reflecting surfaces" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering.webm)
+
+**Averaging across positions.** The reported per-band parameter is the
+arithmetic mean over all source-microphone combinations, and the spread
+across positions is part of the answer, not noise: quote it alongside the
+mean whenever it exceeds the parameter's JND (§2), because a room can meet a
+target on average while individual seats sit far outside it. Four placement
+mistakes bias the mean itself:
+
+- **Correlated positions.** Microphones closer than 2 m to each other
+  sample nearly the same sound field twice, so the average looks more
+  stable than it is. The 1 m minimum from any surface likewise avoids the
+  pressure build-up near a boundary (and the comb filter of the animation
+  above) that colours everything a too-close microphone records.
+- **Symmetric placements.** In a geometrically symmetric room, mirror-image
+  positions receive mirror-image reflection patterns; averaging them adds
+  no new information. This is why ISO 3382-2 asks for positions that do not
+  sit on symmetry lines.
+- **Too close to the source.** Inside the direct field EDT collapses and
+  C80 saturates upward no matter what the room does. ISO 3382-2 therefore
+  keeps every microphone at least $d_{min} = 2\sqrt{V/(c\,\hat T)}$ from
+  the source, with $\hat T$ an estimate of the expected reverberation time
+  (about 2.2 m for a 200 m³ classroom with an expected 0.5 s).
+- **Low-frequency luck.** Below the Schroeder frequency (§2) each band
+  holds only a handful of room modes, and a microphone on a node of one of
+  them sees a different decay than a microphone on an antinode. The spread
+  of the 63-125 Hz bands across positions is structurally larger; the cure
+  is more positions, not a longer excitation.
 
 ### `sweep_signal()` / `inverse_filter()` parameters
 
@@ -3005,7 +3889,9 @@ with $te = 50$ ms → C50 (speech) and $te = 80$ ms → C80 (music), plus the
 **just-noticeable difference** (ISO 3382-1 Table A.1: EDT 5 %, C80 1 dB,
 D50 0.05, Ts 10 ms) that sets how precisely it is worth reporting.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder.gif" alt="Animation: the Schroeder decay curve emerging as the squared impulse response is integrated backward from its tail, ending with the T20 and T30 regression lines" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder.gif" alt="Animation: the tail energy of the squared impulse response fills from the end while the backward integral advances toward t = 0, and the Schroeder decay curve emerges on a companion axis ending with the T20 and T30 regression lines" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_schroeder.webm)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/schroeder_decay.png" alt="Squared impulse response with its Schroeder backward-integrated decay curve, and the EDT, T20 and T30 regression windows marked" width="80%"></picture>
 
@@ -3068,6 +3954,61 @@ plt.show()
 For this single-slope decay EDT, T20 and T30 all return ≈ 1.0 s, and the
 energy parameters match their closed forms (C80 = 3.05 dB, D50 = 0.499,
 Ts = 72 ms). A real room has a steeper early slope, so EDT < T30.
+
+**Reading EDT, T20 and T30 against each other.** The three times
+extrapolate the same 60 dB decay from different windows, so their
+disagreement carries information:
+
+- **T20 ≈ T30** (curvature below 10 %): the decay is close to a single
+  straight slope over both evaluation windows, which is consistent with
+  (though not proof of) a diffuse field, and either time can stand for
+  "the" reverberation time of the band.
+- **T30 > T20** (curvature above 10 %): the decay sags, with late energy
+  decaying more slowly than early energy. The usual causes are coupled
+  volumes (an open door to a corridor or stairwell, a deep balcony or a
+  stage house feeding energy back) and strongly uneven absorption that
+  leaves one room axis reverberant. No single number describes such a
+  decay: report both windows together with the curvature, and treat the
+  [statistical predictions](reverberation-prediction.md) with suspicion,
+  because their diffuse-field assumption has visibly failed.
+- **EDT far from T20/T30**: EDT is fitted where the direct sound and the
+  first reflections still dominate, so it varies from seat to seat while
+  T30 barely moves. EDT below T30 means the position receives strong early
+  energy (close to the source, under a reflector): the room sounds drier
+  there than its T30 suggests, because perceived reverberance follows EDT.
+  EDT above T30 at one seat points to an echo or a focusing surface
+  concentrating late energy there.
+
+**How much decay the noise floor allows.** A fit window is only as good as
+the decay range underneath it. The **impulse-to-noise ratio** (INR) is the
+level distance between the peak of the band-filtered IR and its noise
+floor; the fit window plus a safety margin must fit inside it, which is the
+ISO 3382 requirement of at least 35 dB of usable decay range for T20 and
+45 dB for T30. An undersized range biases the fitted time upward, toward
+the flat tail the noise floor imposes on the decay curve, and the bias
+grows quietly before the fit visibly fails (Hak, Wenmaekers, & van
+Luxemburg, 2012). `room_parameters` reports the per-band `dynamic_range`
+and tightens the acceptance limits to 46 dB (T20) and 54 dB (T30) before
+flagging a value valid, so the residual truncation-and-compensation bias of
+a flagged-valid time stays inside the 5 % JND. When a band fails its flag,
+the order of remedies is: use T20 instead of T30 (its window needs 10 dB
+less range under the ISO minima, 8 dB under the tightened flags); raise the
+INR at acquisition, since doubling the sweep length or
+the number of synchronous averages buys 3 dB each time; and only then fall
+back to EDT, never to a fit stretched into the noise.
+
+Below the **Schroeder frequency** $f_s \approx 2000\sqrt{T/V}$ these
+decay statistics stop telling the whole story: the field is ruled by
+discrete **room modes**. The simulation below drives the same rigid
+5 m by 3.5 m room at its (2,1) mode and then between two modes; on
+resonance a standing-wave pattern with fixed nodal lines grows until it
+dominates the RMS pressure map, off resonance the room still responds,
+but the forced field stays weak and never organises into that (2,1)
+nodal pattern.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes.gif" alt="Animation: a 2D FDTD simulation of a 5 by 3.5 metre room driven at the 84 Hz (2,1) mode and at an off-mode frequency; on resonance a standing-wave pattern with fixed nodal lines grows to dominate the RMS pressure map, off resonance the forced response stays weak and disorganised" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_room_modes.webm)
 
 ### `room_parameters()` parameters
 
@@ -3267,9 +4208,54 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
   reference-curve derivation.
 - API reference: [`room.room_acoustics`](https://jmrplens.github.io/phonometry/reference/api/rooms/room-acoustics/), [`room.room_ir`](https://jmrplens.github.io/phonometry/reference/api/rooms/room-ir/) and [`room.open_plan`](https://jmrplens.github.io/phonometry/reference/api/rooms/open-plan/).
 
----
+## References
 
-**Standards.** ISO 18233:2006 (application of new measurement methods — the
+- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
+  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
+  The reference monograph behind this page: the statistical theory of
+  decaying sound fields, the Schroeder frequency and the perceptual room
+  parameters of §2.
+- Schroeder, M. R. (1965). New method of measuring reverberation time.
+  *The Journal of the Acoustical Society of America*, 37(3), 409-412.
+  [doi:10.1121/1.1909343](https://doi.org/10.1121/1.1909343).
+  The backward-integration method that turns the squared impulse response
+  into the smooth decay curve of §2.
+- Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).
+  Measuring room impulse responses: Impact of the decay range on derived
+  room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
+  907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
+  The INR analysis behind the dynamic-range discussion and the tightened
+  validity flags of §2.
+- International Organization for Standardization. (2009). *Acoustics —
+  Measurement of room acoustic parameters — Part 1: Performance spaces*
+  (ISO 3382-1:2009).
+  [iso.org catalogue](https://www.iso.org/standard/40979.html).
+  The parameter definitions, position requirements and just-noticeable
+  differences of §2.
+- International Organization for Standardization. (2008). *Acoustics —
+  Measurement of room acoustic parameters — Part 2: Reverberation time in
+  ordinary rooms* (ISO 3382-2:2008).
+  [iso.org catalogue](https://www.iso.org/standard/36201.html).
+  The accuracy grades, position counts and the minimum source distance of
+  the position-averaging discussion in §1.
+- International Organization for Standardization. (2012). *Acoustics —
+  Measurement of room acoustic parameters — Part 3: Open plan offices*
+  (ISO 3382-3:2012).
+  [iso.org catalogue](https://www.iso.org/standard/46520.html).
+  The open-plan speech-privacy quantities of §3.
+- International Organization for Standardization. (2006). *Acoustics —
+  Application of new measurement methods in building and room acoustics*
+  (ISO 18233:2006).
+  [iso.org catalogue](https://www.iso.org/standard/40408.html).
+  The swept-sine and MLS acquisition of §1.
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [iso.org catalogue](https://www.iso.org/standard/34545.html).
+  The reverberation-room absorption measurement of §4.
+
+## Standards
+
+ISO 18233:2006 (application of new measurement methods — the
 swept-sine and MLS acquisition of impulse responses); ISO 3382-1:2009 and
 ISO 3382-2:2008 (reverberation time and room parameters from the Schroeder
 decay); ISO 3382-3:2012 (open-plan office speech metrics); ISO 354:2003
@@ -3314,6 +4300,14 @@ $$
 Positions are energy-averaged with
 $L = 10 \log_{10}\left( \frac{1}{n} \sum_i 10^{L_i/10} \right)$.
 
+The prime on $R'$ is a convention, not decoration: primed quantities ($R'$,
+$L'_n$, $L'_{nT}$) are measured **in the building** and include every
+flanking path, while the unprimed $R$ and $L_n$ are laboratory properties of
+the element alone, measured with flanking suppressed. The full lab-to-field
+map lives in [Laboratory Insulation Measurement](https://jmrplens.github.io/phonometry/guides/insulation-lab/); the
+prediction that bridges the two is
+[EN 12354](https://jmrplens.github.io/phonometry/guides/insulation-prediction/).
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_setup_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_setup.svg" alt="Field airborne insulation setup: a loudspeaker in the source room, microphones energy-averaged in source and receiving rooms across the common partition" width="92%"></picture>
 
 The band spectrum is collapsed to one number by the **reference-curve
@@ -3324,6 +4318,27 @@ but not more than 32.0 dB (16 one-third-octave bands) or 10.0 dB (5 octave
 bands). The rating (`Rw`, `R'w`, `DnT,w` …) is the shifted reference read at
 500 Hz. The **spectrum adaptation terms** $C$ (pink noise) and $C_{tr}$
 (urban traffic) add the low-frequency penalty of a real source.
+
+The two terms re-rate the same measured curve against the two source spectra
+of ISO 717-1 Annex A: $C$ against A-weighted pink noise, representative of
+living activities (speech, music, radio, television), and $C_{tr}$ against
+A-weighted urban road traffic, whose energy sits at low frequency. They are
+defined so that the rating plus the term ($R_w + C$ for a laboratory index,
+$R'_w + C$ or $D_{nT,w} + C$ for the field quantities of this guide, and
+likewise with $C_{tr}$) is the A-weighted level difference achieved against
+that source. Reading them:
+
+* $C$ stays small for most constructions (0 to −2 dB is typical): the pink
+  spectrum is close to the weighting already implicit in the reference
+  curve.
+* $C_{tr}$ punishes weak low-frequency insulation. A lightweight double leaf
+  with its mass-air-mass resonance near 100 Hz can carry a $C_{tr}$ of −5 to
+  −10 dB, while a heavy monolithic wall with the same $R_w$ loses far less:
+  two constructions with equal ratings can differ audibly against traffic.
+* Design with the descriptor that matches the noise, carried by the field
+  quantity the requirement rates: $R'_w + C_{tr}$ for a façade on a busy
+  road, $D_{nT,w} + C$ (or the plain rating, where the regulation says so)
+  between dwellings, the two example requirements of ISO 717-1, 5.3.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating.svg" alt="Measured one-third-octave sound reduction index with the shifted ISO 717-1 reference curve and the resulting weighted rating at 500 Hz" width="80%"></picture>
 
@@ -3799,9 +4814,34 @@ one-third-octave) values.*
 `survey_service_equipment_level()` a `SurveyServiceEquipmentResult` (`l_xy`,
 `l_xy_nt`, `l_xy_n`).
 
----
+## References
 
-**Standards.** ISO 16283-1:2014, ISO 16283-2 and ISO 16283-3:2016, *Acoustics —
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  The comprehensive treatment of airborne and impact sound insulation:
+  the measurement chains, the statistics of rooms behind the field
+  quantities and the interpretation of the single-number ratings.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  A compact textbook companion for the sound-transmission physics behind
+  these measurements.
+- International Organization for Standardization. (2020). *Acoustics —
+  Rating of sound insulation in buildings and of building elements — Part 1:
+  Airborne sound insulation* (ISO 717-1:2020).
+  [iso.org catalogue](https://www.iso.org/standard/77435.html).
+  The reference-curve rating and the spectrum adaptation terms interpreted
+  above.
+- International Organization for Standardization. (2014). *Acoustics — Field
+  measurement of sound insulation in buildings and of building elements —
+  Part 1: Airborne sound insulation* (ISO 16283-1:2014).
+  [iso.org catalogue](https://www.iso.org/standard/55997.html).
+  The field airborne method this page implements.
+
+## Standards
+
+ISO 16283-1:2014, ISO 16283-2 and ISO 16283-3:2016, *Acoustics —
 Field measurement of sound insulation in buildings and of building elements* —
 the level differences, normalisations and element methods; ISO 717-1 and
 ISO 717-2 — the reference-curve single-number ratings and the spectrum
@@ -3865,9 +4905,20 @@ $$
 
 | | Field (ISO 16283) | Laboratory (ISO 10140) |
 | :--- | :--- | :--- |
-| Airborne | $R'$ apparent (with flanking) | $R$ direct (flanking suppressed) |
-| Impact | $L'_n$ apparent | $L_n$ direct |
+| Airborne element index | $R'$ apparent (with flanking) | $R$ direct (flanking suppressed) |
+| Airborne room pair | $D_{nT}$, $D_n$ (no prime: room quantities) | — |
+| Impact | $L'_n$, $L'_{nT}$ apparent | $L_n$ direct |
+| Single number | $R'_w$, $D_{nT,w}$, $L'_{n,w}$, $L'_{nT,w}$ | $R_w$, $L_{n,w}$ |
 | Absorption area | measured in the room | property of the facility |
+
+The apostrophe is the flanking marker of building acoustics, and it travels
+with the quantity into its single number: $R_w$ rates a laboratory spectrum,
+$R'_w$ a field one. The standardized and normalized level differences
+$D_{nT}$ and $D_n$ carry no prime because they describe the room pair rather
+than an element, so there is no flanking-free counterpart to mark. In a
+well-built construction $R'_w$ lands a few dB below the laboratory $R_w$ of
+the same partition; a much larger gap says flanking dominates, and the
+[EN 12354 model](https://jmrplens.github.io/phonometry/guides/insulation-prediction/) tells you which path carries it.
 
 The single-number ratings reuse the very same ISO 717-1/2 engines
 (`weighted_rating`, `weighted_impact_rating`) — an $R$ spectrum rates to $R_w$
@@ -4175,9 +5226,22 @@ res_m = vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
 res_m.bracketed    # per-band flags; bracketed bands leave the single number
 ```
 
----
+## References
 
-**Standards.** ISO 10140-2:2010, ISO 10140-3:2010 and ISO 10140-4:2010 — the
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  The reference monograph for laboratory sound-insulation measurement,
+  flanking transmission and the vibration reduction index.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  The transmission theory of single and double constructions that laboratory
+  indices quantify.
+
+## Standards
+
+ISO 10140-2:2010, ISO 10140-3:2010 and ISO 10140-4:2010 — the
 laboratory R and Ln with the background-noise correction; ISO 15186-1:2000 and
 ISO 15186-2:2003 — the sound-intensity sound reduction index $R_I$, its
 $K_c$-modified form and the element normalized level difference (laboratory
@@ -4228,6 +5292,10 @@ laboratory ratings of the elements plus the vibration transmission of their
 junctions.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths.svg" alt="The direct path Dd through the separating element and the three flanking paths Ff, Df and Fd across each junction between a flanking element and the separating element" width="92%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths.gif" alt="Animation: energy pulses leave the source room over the direct Dd path and the flanking Ff, Fd and Df paths, shrinking at each element and junction, and every path label lights up as its pulse re-radiates into the receiving room" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths.webm)
 
 Each junction between a flanking element and the separating element carries
 three paths — $Ff$ (flanking→flanking), $Df$ (direct→flanking) and $Fd$
@@ -4362,6 +5430,15 @@ $D_{nT} = R' + 10\lg(0.32\,V/S_s)$, exposed as `standardized_level_difference`;
 it closes the Annex H.3 example (`standardized_level_difference(52.2, 50.0,
 11.5)` gives 53.6 dB, the printed $V/(3S)$ chain 53.8 dB, both rounding to
 $D_{nT,w} = 54$ dB).
+
+The three insulation guides close a loop: the
+[laboratory](https://jmrplens.github.io/phonometry/guides/insulation-lab/) measures $R$ and $K_{ij}$ element by element
+and junction by junction, this model assembles them into a predicted $R'_w$,
+and the [field measurement](https://jmrplens.github.io/phonometry/guides/insulation-field/) checks the built result.
+When the measured value lands well below the prediction, look for a
+construction defect on the dominant path the model reports: a rigid bridge
+across a resilient junction, a missing lining, a leak around the separating
+element.
 
 ### `junction_vibration_reduction()` / `flanking_element()` parameters
 
@@ -4523,9 +5600,17 @@ fig.tight_layout(); plt.show()
 numbers); `radiated_sound_power()` a `RadiatedPowerResult` (`l_w`, `r_prime`,
 `l_w_dba`). Both expose `.plot()`.
 
----
+## References
 
-**Standards.** EN 12354-1:2000 and EN 12354-2:2000 — the simplified
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  The full treatment of flanking transmission and the EN 12354 prediction
+  framework, from the vibration reduction index to its statistical basis.
+
+## Standards
+
+EN 12354-1:2000 and EN 12354-2:2000 — the simplified
 flanking-transmission predictions (Annex E junctions, worked examples H.3 and
 E.3); EN 12354-3:2000 and EN 12354-4:2000 — the façade sound insulation and
 outdoor-radiation predictions (Annex F and Annex G worked examples).
@@ -4830,6 +5915,40 @@ print(round(directivity_omega(1.5, 1.5, 200.0), 2))                  # 3.01 dB
 print(round(meteorological_correction(200.0, 1.5, 1.5, 2.0), 2))     # 1.7 dB
 ```
 
+### The image source behind the ground effect
+
+Every entry of Table 3 is an engineering fit to one physical picture: the
+receiver hears two copies of the source, the direct ray $r_1$ and a reflection
+that arrives exactly as if it were radiated by an **image source** mirrored
+below the ground plane. The two copies interfere according to the path
+difference $\delta = r_2 - r_1$ (about $2 h_s h_r / d$ for a grazing far-field
+path): in phase they add up to $+6$ dB; at $\delta = \lambda/2$ over a rigid
+plane they cancel into a sharp dip.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection.svg" alt="A point source at height hs and a receiver microphone at height hr over a hatched ground plane; a straight direct ray r1 connects them and a reflected ray bounces at the specular point with equal grazing angles; the reflection is unfolded as a dashed straight ray r2 from a ghosted image source mirrored below the ground, and the annotations give the path difference delta = r2 minus r1, the interference phase 2 pi delta over lambda plus the reflection phase, the in-phase gain of up to +6 dB and the deep dip at half a wavelength over hard ground" width="92%"></picture>
+
+Over acoustically hard ground ($G = 0$) the reflection coefficient stays close
+to $+1$ in every octave, the long-wavelength sum is fully constructive, and the
+general method duly returns $A_{gr} = -3$ dB in each band. Porous ground turns
+the reflection coefficient complex and angle-dependent (for a point source
+near grazing incidence, the spherical-wave coefficient of the Chien-Soroka
+solution, with a ground-wave term no plane-wave picture captures): part of the
+reflection flips phase, and the destructive notch lands in the 250 to 1000 Hz
+octaves. That notch is precisely what the $a'$ to $d'$ height-and-distance
+functions of Table 3 parameterize, with $G$ blending the hard and porous
+behaviours. The same two-ray geometry carries over to aircraft lateral
+attenuation and to every ray-based outdoor model; Salomons and Attenborough &
+Van Renterghem develop the full theory that the engineering fit compresses.
+
+A negative $A_{gr}$ (a net gain) is plain interference: the ground-reflected
+wave adds to the direct one. Below, a 400 Hz source 1.5 m over rigid ground
+builds the lobe pattern of that interference, and the level sampled on an arc
+converges to the two-path image-source model, dips included.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect.gif" alt="Animation: a 2D FDTD simulation of a 400 Hz point source 1.5 metres above rigid ground; the direct and ground-reflected wavefronts interfere and a lobe pattern forms, the ghosted image source below the ground explains the geometry, and the level on an 8 metre arc converges to the two-path image-source model with its predicted nulls" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ground_effect.webm)
+
 ### `Barrier` and the screening term
 
 The `Barrier` dataclass describes the diffraction geometry directly, which is
@@ -4839,6 +5958,15 @@ double (thick-barrier) diffraction with the $C_3$ factor of Eq. (15) and the
 25 dB cap. `ground_reflections_by_image=True` switches $C_2$ from 20 to 40
 (reflections handled by image sources), and `lateral=True` selects vertical-edge
 diffraction (Eq. (13), $K_{met}=1$, ground term retained).
+
+The simulation below shows why $D_z$ grows with frequency: against the same
+2.5 m screen, a 100 Hz wavefront (λ ≈ 3.4 m) diffracts over the edge and fills
+the shadow zone, while at 500 Hz the shadow is deep and sharp. A barrier only
+works when the wavelength is short next to the path difference.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier.gif" alt="Animation: a 2D FDTD simulation of a point source behind a thin 2.5 metre rigid barrier on reflecting ground, at 100 Hz and 500 Hz side by side; the long wavelength diffracts over the edge and fills the shadow zone with an insertion loss near 8 dB, while the short wavelength is cast into a deep clean shadow of about 17 dB" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier.webm)
 
 ### `outdoor_propagation_attenuation()` parameters
 
@@ -4868,15 +5996,146 @@ stacked per-band breakdown with the total overlaid (the figure above).
 | `lateral` | bool | — | `False` | `True` ⇒ vertical-edge diffraction (Eq. (13)) |
 | `line_of_sight_clear` | bool | — | `False` | `True` ⇒ the sight line passes above the top edge: the path difference takes a negative sign and Kmet = 1 (text after Eq. (16)) |
 
-The method's stated accuracy is $\pm 1$ to $\pm 3$ dB for broadband noise up to
-1000 m (Table 5). See the [Theory](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/) page for the full derivation, the
+## 3. Scope, assumptions and pitfalls
+
+### What "favourable propagation conditions" means
+
+ISO 9613-2 does not predict the level under the weather of the moment. Every
+equation assumes conditions **favourable to propagation** (Clause 5): wind
+blowing from source to receiver (within about 45° of the connecting line, at
+roughly 1 to 5 m/s measured 3 to 11 m above ground), or the moderate
+ground-based temperature inversion of a clear, calm night, which curves sound
+rays downward the same way. Downward refraction closes the acoustic shadow
+zones that upwind or neutral atmospheres would form, so the predicted
+$L_{fT}(DW)$ is close to the highest level the geometry can deliver: over a
+year the actual level is usually lower and rarely meaningfully higher. The
+choice is deliberate. Complaints arrive on the still nights when a distant
+plant is clearly audible, not on the gusty afternoons when it vanishes, and a
+method that predicts the audible case protects the assessment. The long-term
+average is recovered by subtracting $C_{met}$ (Eq. (21)/(22)), whose $C_0$
+encodes how often the wind actually favours the path (about $+3$ dB when half
+the time is favourable, values above 2 dB already exceptional, Notes 20/22).
+The stated $\pm 1$ to $\pm 3$ dB accuracy (Table 5) holds under favourable
+conditions, for broadband sources, up to 1000 m; beyond that the standard
+makes no accuracy claim at all.
+
+### Barrier pitfalls beyond the animation
+
+The screening term is the easiest one to over-trust; four fine points decide
+whether a real barrier delivers its computed $D_z$:
+
+* **The caps are physical, not editorial.** $D_z$ is capped at 20 dB for
+  single and 25 dB for double diffraction no matter how tall the wall,
+  because atmospheric turbulence scatters sound into the shadow zone and sets
+  a ceiling that extra height cannot buy back. An insertion loss beyond
+  roughly 20 dB is enclosure territory, not screen territory. Eq. (14) itself
+  is a smoothed engineering curve in the tradition of Maekawa's screen chart,
+  an empirical fit over three decades of Fresnel number $N = 2z/\lambda$.
+* **$K_{met}$ quietly erodes distant barriers.** The meteorological factor
+  (Eq. (18)) discounts the screening because the same downward-curved rays
+  that make conditions favourable also pass over the top edge. Within 100 m
+  of source-receiver distance $K_{met} \approx 1$ (Note 17), but for a long
+  path with a small path difference it can strip several decibels off a
+  barrier that looks generous on the section drawing.
+* **Double diffraction is a modest bonus.** A thick obstacle (two edges
+  separated by $e$) raises $C_3$ from 1 toward 3 (Eq. (15)), worth at most
+  about $10 \lg 3 \approx 4.8$ dB extra plus the higher 25 dB cap. A building
+  modelled as a double edge only earns that bonus if both edges really are
+  continuous and the roof between them is closed.
+* **The ground effect is spent, not kept.** For a top-edge barrier the
+  standard folds the screened path's ground effect into the diffraction:
+  $A_{bar} = D_z - A_{gr}$ (Eq. (12), Note 13). Over porous ground that was
+  already providing 5 to 10 dB of $A_{gr}$ in the mid bands, the *net* gain
+  of building the barrier is correspondingly smaller than its nominal $D_z$;
+  the two effects do not stack.
+
+An obstacle must also qualify as a barrier at all (Clause 7.4): surface
+density at least 10 kg/m², a closed surface without large gaps, and a
+horizontal extent normal to the path larger than the wavelength. A slatted
+fence or a short container screens far less than Eq. (14) promises.
+
+### ISO 9613-2 or CNOSSOS-EU?
+
+Two frameworks dominate outdoor noise prediction in Europe, and they answer
+different questions:
+
+* **ISO 9613-2** is a general *engineering attenuation* method: given the
+  octave-band sound power of any source you can decompose into point sources,
+  it returns the favourable-condition receiver level. Source emission is out
+  of scope; the sound power comes from measurement (the ISO 3740 family) or
+  from the equipment supplier. It is the workhorse of industrial-plant and
+  environmental impact predictions assessed with ISO 1996-2.
+* **CNOSSOS-EU** (Common Noise Assessment Methods in Europe) is the mandatory
+  common framework for the strategic noise maps of the Environmental Noise
+  Directive 2002/49/EC, adopted as its Annex II by
+  [Commission Directive (EU) 2015/996](https://eur-lex.europa.eu/eli/dir/2015/996/oj/eng).
+  It bundles *emission* models for road, rail and industrial sources (and
+  delegates aircraft to ECAC Doc 29) with its own propagation part derived
+  from the French NMPB 2008 method, producing the $L_{den}$/$L_{night}$
+  indicators the Directive reports.
+
+The propagation parts disagree by design, not by accident. CNOSSOS-EU
+evaluates every path twice, once under a homogeneous atmosphere and once
+under favourable (downward-refracting) conditions, and combines the two
+long-term with the local occurrence probability of favourable conditions per
+path direction; ISO 9613-2 computes only the favourable case and subtracts a
+scalar $C_{met}$. The ground effect in CNOSSOS-EU is built from a
+path-averaged ground factor over a fitted mean plane, with expressions that
+change between the two atmospheres, where ISO 9613-2 uses the fixed
+three-region Table 3. Diffraction, too, follows a different formulation that
+couples the ground effect on each side of the edge. Run both on the same
+geometry and the octave-band results can differ by several decibels, each
+internally consistent. The practical rule: END strategic maps and anything
+that must be comparable across EU member states use CNOSSOS-EU; a plant
+permit, a compliance prediction against a measured sound power, or work
+under regulations that cite ISO 9613 use this module. (ISO published a
+revised ISO 9613-2 in 2024; this library implements the 1996 edition, the one
+most national regulations and the validation literature still reference.)
+
+See the [Theory](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/) page for the full derivation, the
 [Room Acoustics guide](https://jmrplens.github.io/phonometry/guides/room-acoustics/) for how $\alpha$ feeds
 ISO 354, and the [Occupational Noise Exposure guide](https://jmrplens.github.io/phonometry/guides/occupational-exposure/) for the ISO 9612 occupational
 exposure that consumes A-weighted levels.
 
----
+## References
 
-**Standards.** ISO 9613-1:1993, *Acoustics — Attenuation of sound during
+- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
+  Academic Publishers. ISBN 978-1-4020-0390-5.
+  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
+  The wave-based theory (parabolic equation, fast field program, refraction
+  and turbulence) that quantifies what the favourable-condition assumption
+  and the $K_{met}$ factor approximate.
+- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
+  (2nd ed.). CRC Press.
+  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
+  Ground impedance models, the spherical-wave reflection coefficient behind
+  the ground dip of section 2, and the meteorological effects on barriers.
+- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
+  157-173.
+  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
+  The screen-attenuation chart against Fresnel number that Eq. (14)'s
+  diffraction term descends from.
+- Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
+  assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Publications
+  Office of the European Union.
+  [doi:10.2788/31776](https://doi.org/10.2788/31776),
+  [JRC repository](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
+  The common EU framework contrasted with ISO 9613-2 in section 3.
+- International Organization for Standardization. (1993). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 1: Calculation of
+  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
+  [iso.org catalogue](https://www.iso.org/standard/17426.html).
+  The implemented pure-tone attenuation coefficient of section 1.
+- International Organization for Standardization. (1996). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 2: General method
+  of calculation* (ISO 9613-2:1996; a revised edition was published in 2024,
+  this module implements the 1996 method).
+  [iso.org catalogue](https://www.iso.org/standard/20649.html).
+  The implemented attenuation chain of section 2.
+
+## Standards
+
+ISO 9613-1:1993, *Acoustics — Attenuation of sound during
 propagation outdoors — Part 1: Calculation of the absorption of sound by the
 atmosphere* — the pure-tone attenuation coefficient $\alpha$ (Eq. (5)) with the
 oxygen and nitrogen relaxation frequencies (Eq. (3)/(4)), the Annex B humidity
@@ -4931,6 +6190,63 @@ the cost of a two-microphone probe and a per-band validity check. The rest
 of the page walks each in turn.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_power_methods.svg" alt="The three sound power routes side by side: an enveloping pressure surface over a reflecting plane (ISO 3744/3746), a source in a reverberation room sampled by microphones (ISO 3741) and an intensity probe scanning a surface around the source (ISO 9614-2)" width="92%"></picture>
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.gif" alt="Animation: the same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.webm)
+
+### A decision path
+
+The table compresses into a short sequence of questions (ISO 3740 dedicates
+its Table 3 and Annex D to exactly this decision). Work through them in
+order; the first match names the standard.
+
+1. **What is the number for?** A datasheet declaration or a limit check
+   normally asks for engineering grade (grade 2, the preferred grade for
+   noise declarations); a reference source, a product ranking or a dispute
+   calls for precision (grade 1); a first walk-through of a noisy plant
+   tolerates survey grade (grade 3). Grade 1 exists only in a qualified
+   laboratory room (ISO 3741, ISO 3745) or via the precision intensity
+   methods (ISO 9614-1 at discrete points, ISO 9614-3 by scanning).
+2. **Can the source travel to a laboratory?** ISO 3741 wants the source
+   small next to the room (volume no more than about 2 % of the room volume)
+   and its noise steady; ISO 3745 wants it inside a qualified anechoic or
+   hemi-anechoic room with a characteristic dimension below half the
+   measurement radius, and it is the route that also yields directivity. A
+   machine bolted to its foundation rules both out and leaves the in-situ
+   methods.
+3. **How quiet and how dry is the site?** ISO 3744 needs the background at
+   least 6 dB below the source (preferably more than 15 dB) and
+   `K2 ≤ 4 dB`. If only a
+   3 dB margin or `K2 ≤ 7 dB` can be met, the same microphones and formulae
+   degrade gracefully to ISO 3746 at survey grade.
+4. **Is the background the problem?** When neighbouring machines cannot be
+   switched off, or the margin is outright negative, the pressure methods
+   are out. Intensity scanning (ISO 9614-2, or ISO 9614-3 for grade 1)
+   tolerates steady extraneous noise even some 10 dB *above* the source,
+   because only the net energy flux through the surface counts; the
+   per-band field indicators then decide the grade actually achieved.
+
+### What the accuracy grades mean
+
+The grade is a claim about **reproducibility**: `σR0` is the standard
+deviation you would see if different laboratories measured the same source,
+each following the standard correctly. Typical A-weighted values are
+`σR0 ≈ 0.5 dB` for grade 1 (ISO 3741), `1.5 dB` for grade 2 (ISO 3744,
+ISO 9614-2) and `3 dB` or more for grade 3 (larger still when `K2` is
+large or the spectrum is tonal). Per-band values are larger at the
+spectrum edges. The `uncertainty` field of the pressure-method results
+(enveloping surface and anechoic) is the expanded uncertainty
+`U = 2·σtot` (95 % coverage), where
+`σtot = √(σR0² + σomc²)` also folds in the operating/mounting instability
+`σomc` that you estimate and pass in; the grade only bounds the method's
+share of the budget.
+
+In practice: a grade-2 `LWA` of 92.4 dB carries `U ≈ 3 dB`, so two grade-2
+results 2 dB apart are statistically indistinguishable, and checking that
+same source against a 93 dB limit is a coin flip. Choose the grade from the
+decision the number has to support, not from the facility that happens to
+be free.
 
 ## 1. Enveloping surface, sound pressure (ISO 3744 / ISO 3746)
 
@@ -5043,6 +6359,40 @@ data (`reverberation_time` + `volume`, or `absorption_area`, or
 field is treated as free (`K2 = 0`). If the background margin drops below the
 grade criterion or `K2` exceeds the validity limit, a `SoundPowerWarning`
 flags that the levels are upper bounds — the determination still returns.
+
+### K1 and K2 pitfalls
+
+Both corrections subtract energy from the surface level, so overestimating
+either one understates the emission. That is why the standards cap them, and
+why most disputes over an enveloping-surface result trace back to one of
+these habits:
+
+- **K1 has a cliff, not a slope.** At a 15 dB margin the correction is a
+  negligible 0.14 dB; at the 6 dB engineering criterion it is already
+  1.26 dB, the largest value the grade accepts. Below the criterion the
+  standard does not let the formula run on: `K1` is capped and the result is
+  reported as an upper bound. Never extrapolate the subtraction into a
+  smaller margin; raise the margin (quieter site, closer surface) or switch
+  to the intensity method.
+- **K1 assumes a stationary background.** The source-off reading must be
+  taken at the same positions with the room in the same state, and the
+  background energy must be the same during both readings. A ventilation
+  system that cycles or a vehicle passing during either reading invalidates
+  the pair; the energy subtraction also assumes source and background are
+  incoherent, which holds for unrelated noise but not for the source's own
+  reflections.
+- **K2 removes the average room build-up, not discrete reflections.** A
+  nearby wall, a trolley or another machine just outside the surface adds a
+  specular contribution concentrated at a few microphones. That imbalance
+  shows up in the apparent directivity index `DIi*`, and no room-average
+  correction can remove it: move the surface, remove the reflector or treat
+  it with absorption.
+- **K2 is only as good as `A`.** With `A` from Sabine (`0.16·V/T`), errors
+  in the reverberation time or the volume propagate directly. At the
+  `K2 = 4 dB` validity limit about 60 % of the measured energy is room, not
+  source, and a 20 % error in `A` still moves `LW` by about 0.5 dB. Prefer a
+  measured `T60` over a guessed absorption coefficient, and keep the
+  measurement distance small enough that `K2` stays well under the limit.
 
 ### `sound_power_pressure()` parameters
 
@@ -5221,6 +6571,10 @@ $$
 P_i = \langle I_{n,i} \rangle\ S_i, \qquad P = \sum_i P_i, \qquad
 L_W = 10 \log_{10}\frac{P}{P_0},\quad P_0 = 1\ \text{pW} .
 $$
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power.gif" alt="Animation: a p-p probe traces the serpentine scan over the top face of the measurement box while the normal-intensity arrows appear behind it, and the partial powers of the five faces accumulate into the sound power level L_W" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_intensity_scan_power.webm)
 
 A band in which `P < 0` (net inflow, from a stronger source outside the
 surface) is **not determinable** and reported as `NaN`. Two normative field
@@ -5554,9 +6908,48 @@ plt.show()
 - [Theory](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/) — the Waterhouse, K1/K2 and C1/C2 derivations.
 - API reference: [`emission.sound_power`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-reverberation/) and [`emission.sound_power_intensity`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity/).
 
----
+## References
 
-**Standards.** ISO 3744:2010, *Acoustics — Determination of sound power levels
+- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
+  ISBN 978-0-419-19810-9.
+  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
+  The monograph on sound energy flux: why intensity separates the energy
+  leaving the source from steady energy passing through, behind the
+  scanning methods of sections 3 and 5.
+- Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
+  transducers*. Academic Press. ISBN 978-0-12-391421-7.
+  [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
+  Radiation and sound fields: the free-field and diffuse-field relations
+  between pressure and power that the enveloping-surface and
+  reverberation-room methods rest on.
+- International Organization for Standardization. (2019). *Acoustics —
+  Determination of sound power levels of noise sources — Guidelines for the
+  use of basic standards* (ISO 3740:2019).
+  [iso.org catalogue](https://www.iso.org/standard/45107.html).
+  The selection guide behind "Choosing a method": grades, environments,
+  source-size and background criteria for the whole family.
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for reverberation test
+  rooms* (ISO 3741:2010).
+  [iso.org catalogue](https://www.iso.org/standard/52053.html).
+  The reverberation-room method of section 2.
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Engineering methods for an essentially free
+  field over a reflecting plane* (ISO 3744:2010).
+  [iso.org catalogue](https://www.iso.org/standard/52055.html).
+  The enveloping-surface method of section 1.
+- International Organization for Standardization. (2012). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for anechoic rooms and
+  hemi-anechoic rooms* (ISO 3745:2012).
+  [iso.org catalogue](https://www.iso.org/standard/45362.html).
+  The precision anechoic-room method of section 4.
+
+## Standards
+
+ISO 3744:2010, *Acoustics — Determination of sound power levels
 and sound energy levels of noise sources using sound pressure — Engineering
 methods for an essentially free field over a reflecting plane* — the
 enveloping-surface method: hemisphere and box surface areas, the `K1`/`K2`
@@ -5683,6 +7076,37 @@ wind, handling noise:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" width="80%"></picture>
 
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import time_weighting
+
+fs = 48000
+t = np.arange(int(fs * 6.0)) / fs
+stable = 0.5 * np.sin(2 * np.pi * 1000 * t)
+# 3 % amplitude modulation at 2 Hz: ~0.14 dB of wobble, clearly over
+unstable = stable * (1 + 0.03 * np.sin(2 * np.pi * 2.0 * t))
+
+plt.figure(figsize=(9, 5))
+skip = fs                     # discard the F-integrator attack (~8 tau)
+for x, label in ((stable, "Stable tone (good coupling)"),
+                 (unstable, "3% AM tone (loose coupling)")):
+    env = time_weighting(x, fs, mode="fast")[skip:]
+    level = 10 * np.log10(np.maximum(env, np.finfo(float).eps))
+    plt.plot(t[skip:], level - level.mean(), label=label)
+for lim in (0.07, -0.07):
+    plt.axhline(lim, linestyle="--", color="gray")
+plt.xlabel("Time [s]")
+plt.ylabel("F-weighted level re mean [dB]")
+plt.legend()
+plt.show()
+```
+
+</details>
+
 ### `sensitivity()` parameters
 
 | Parameter | Type / shape | Units | Range / default | Notes |
@@ -5699,6 +7123,37 @@ wind, handling noise:
 Returns the sensitivity factor (float) to pass as `calibration_factor=` to
 `octave_filter`, `leq`, `laeq`, `ln_levels`, `lc_peak`, `sel` and the dose
 functions.
+
+## Field checks, laboratory verification and drift
+
+Calibration lives at three time scales:
+
+- **Every session: the field check.** Couple the calibrator and derive the
+  sensitivity before each measurement series, and check it again at the end.
+  Normative methods make the second check mandatory and use the pre/post
+  difference as a validity gate (a common criterion invalidates the series
+  when the two differ by more than 0.5 dB). Whatever the threshold, the
+  difference is your drift bound for everything captured in between; carry
+  it into the uncertainty budget rather than assuming zero.
+- **Periodically: laboratory verification.** A field check only compares the
+  chain against the calibrator; it cannot see an error the calibrator and
+  meter share, and it says nothing about the response away from 1 kHz.
+  IEC 61672-3 defines the periodic tests for the meter (weightings,
+  level linearity and ballistics spot-checked against the class limits),
+  and IEC 60942 the corresponding tests for the calibrator itself; typical
+  laboratory intervals are one to two years.
+- **Between checks: drift.** Microphone sensitivity moves with temperature,
+  humidity and capsule aging; electronics with battery voltage. A healthy
+  class 1 chain drifts a few hundredths of a dB over a session, which is
+  why a pre/post difference of half a decibel signals damage rather than
+  weather. The largest "drift" of all is a touched gain knob: the factor S
+  is valid only while the chain stays exactly as calibrated.
+
+One more class subtlety: tolerances chain. A class 1 measurement requires a
+class 1 (or LS) calibrator *and* a class 1 meter; calibrating a class 1
+chain with a class 2 calibrator silently downgrades every derived level to
+class 2 accuracy, because the calibrator's wider level tolerance enters S
+directly.
 
 ## Digital Analysis (dBFS)
 
@@ -5744,9 +7199,22 @@ Integer signals (e.g. int16 from `scipy.io.wavfile.read`) are converted to
 float64 internally before any squaring, so calibration and level results are
 identical whether you pass the raw integer array or a float conversion.
 
----
+## References
 
-**Standards.** IEC 60942:2017, *Electroacoustics — Sound calibrators* — the
+- International Electrotechnical Commission. (2017). *Electroacoustics —
+  Sound calibrators* (IEC 60942:2017).
+  [IEC webstore](https://webstore.iec.ch/en/publication/30045).
+  The calibrator classes, level tolerances and the short-term stability
+  criterion `sensitivity()` applies to the reference recording.
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5710).
+  The laboratory verification procedure behind the periodic checks
+  recommended above.
+
+## Standards
+
+IEC 60942:2017, *Electroacoustics — Sound calibrators* — the
 calibrator level and class assumptions behind `sensitivity()` (the 94 dB
 principal level and the Table 1 class tolerances) and the short-term
 level-fluctuation stability check of the reference recording (5.3.3, Table 2
@@ -5833,6 +7301,47 @@ All stateful classes handle multichannel input `(channels, samples)`: the state
 is allocated lazily on the first call to match the channel count, and reallocated
 if the channel count changes (e.g. switching from stereo to mono resets the state).
 
+## What the carried state is
+
+Every filter in the library runs as a cascade of second-order sections in
+transposed direct form II. For one section with coefficients
+$(b_0, b_1, b_2, a_1, a_2)$:
+
+$$
+y[n] = b_0\,x[n] + z_1[n-1], \qquad
+z_1[n] = b_1\,x[n] - a_1\,y[n] + z_2[n-1], \qquad
+z_2[n] = b_2\,x[n] - a_2\,y[n]
+$$
+
+The pair $(z_1, z_2)$ per section is the filter's *entire* memory of the
+past. `stateful=True` stores these values when a block ends and restores
+them when the next begins, so the recursion cannot tell where one buffer
+stopped and the next started: the concatenated output equals the
+single-pass output exactly, not approximately. The `TimeWeighting` detector
+carries even less, just its last envelope value $y[n-1]$, which is the same
+value the functional API hands back as `initial_state` (see
+[Time Weighting](https://jmrplens.github.io/phonometry/guides/time-weighting/#6-block-processing)).
+
+### Streaming pitfalls
+
+- **Per-block preprocessing creates seams.** Anything computed from a single
+  block that should be global, like detrending (removing the block's own
+  mean) or normalization, gives each block a slightly different operation:
+  the outputs no longer concatenate into the continuous result. This is why
+  `detrend` must be `False` in stateful mode.
+- **Not every metric streams.** Energy metrics accumulate cleanly (a
+  running Leq is a running energy sum), but rank statistics do not: the L90
+  of a recording is not any combination of per-block L90 values. Stream the
+  *envelope* and compute percentiles once, on the pooled result.
+- **The first block still carries the onset transient.** State starts at
+  rest, so the filter settles during the first instants exactly as in a
+  single pass. Use `steady_ic=True` to start in step-response steady state,
+  or discard the settling time once (not once per block).
+- **One stream per object.** A stateful instance holds the memory of one
+  signal; feeding two interleaved streams through it corrupts both. Create
+  one filter object per stream: the design cost is paid once at
+  construction, not per block.
+
 ## Real-time level meter pattern
 
 The canonical streaming loop — weight, envelope and report block by block
@@ -5861,6 +7370,26 @@ for x in audio_stream(block):            # your capture callback
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
 | `high_accuracy` (weighting) | resolves to `False` by default — the legacy bilinear design, see [Frequency Weighting](https://jmrplens.github.io/phonometry/guides/weighting/); explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
+
+## References
+
+- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
+  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
+  [Open Library record](https://openlibrary.org/isbn/9780131988422).
+  The direct-form filter structures and state recursion behind the carried
+  state equation above.
+
+## Standards
+
+IEC 61260-1:2014, *Electroacoustics — Octave-band and
+fractional-octave-band filters — Part 1: Specifications*, and IEC 61672-1:2013,
+*Electroacoustics — Sound level meters — Part 1: Specifications* — block
+processing adds no normative content of its own: the streamed filters are the
+same designs those standards govern (see [Filter Banks](https://jmrplens.github.io/phonometry/guides/filter-banks/),
+[Frequency Weighting](https://jmrplens.github.io/phonometry/guides/weighting/) and [Time Weighting](https://jmrplens.github.io/phonometry/guides/time-weighting/)),
+and carrying the internal filter state across blocks is exactly what makes the
+concatenated output identical to a single full-signal pass, so every class and
+tolerance claim of the underlying pages holds unchanged in streaming use.
 
 ---
 
@@ -5917,6 +7446,27 @@ applied to all channels in a single SciPy call, so 8 channels cost far less
 than 8 separate runs. Convention: **channels first**, like most DSP code
 (`soundfile` returns `(n, ch)`: transpose with `x.T`).
 
+## Per-channel semantics
+
+Multichannel processing is strictly per channel: nothing is ever mixed,
+summed or averaged across the channel axis. Three consequences worth
+spelling out:
+
+- **Combining channels is your decision.** Levels come back one per
+  channel. If you need an array-average level (for instance the
+  position-averaged levels of the room-acoustics standards), combine
+  energies yourself: `10 * np.log10(np.mean(10 ** (spl / 10), axis=0))`,
+  never the arithmetic mean of the dB values (see
+  [Levels](https://jmrplens.github.io/phonometry/guides/levels/) for why).
+- **One `calibration_factor` means one sensitivity.** The scalar factor
+  multiplies every channel, which is correct only if all channels share the
+  same sensitivity. For an array of microphones with individual
+  calibrations, scale the rows first, `x * factors[:, None]`, and leave
+  `calibration_factor` at 1.
+- **Stateful classes keep one state per channel.** In block processing the
+  state array matches the channel count and a change of channel count
+  resets it; see [Block Processing](https://jmrplens.github.io/phonometry/guides/block-processing/).
+
 ## Performance: Vectorization and caching
 
 The `OctaveFilterBank` class is highly optimized for real-time and batch
@@ -5950,6 +7500,29 @@ Additional performance notes:
   [Theory](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/)).
 - **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
   numba is installed (`pip install phonometry[perf]`).
+
+## References
+
+- International Electrotechnical Commission. (2014). *Electroacoustics —
+  Octave-band and fractional-octave-band filters — Part 1: Specifications*
+  (IEC 61260-1:2014).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
+  The band definitions each channel is filtered with; the multichannel path
+  batches them unchanged.
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
+  The weighting and time-integration semantics applied per channel.
+
+## Standards
+
+IEC 61260-1:2014, *Electroacoustics — Octave-band and
+fractional-octave-band filters — Part 1: Specifications*, and IEC 61672-1:2013,
+*Electroacoustics — Sound level meters — Part 1: Specifications* —
+multichannel support adds no normative content of its own: each channel is
+filtered, weighted and time-integrated exactly as the single-channel standards
+prescribe (see [Filter Banks](https://jmrplens.github.io/phonometry/guides/filter-banks/) and [Levels](https://jmrplens.github.io/phonometry/guides/levels/)); the
+vectorization only batches the computation across the channel axis.
 
 ---
 
@@ -6353,7 +7926,7 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 | `NCResult` | `dataclass` | **NC rating result.**<br>• `rating`: NC value<br>• `governing_frequency`: band of the touch [Hz]<br>• `frequencies` [Hz], `levels` [dB]<br>• `.plot()` | `nc.rating, nc.governing_frequency` |
 | `RCResult` | `dataclass` | **RC Mark II result.**<br>• `rating`: LMF rounded [dB], int<br>• `lmf`: 500/1000/2000 Hz average [dB]<br>• `classification`: 'N'/'R'/'H'/'RH'<br>• `reference_curve` [dB], `frequencies` [Hz], `levels` [dB]<br>• `.plot()` | `rc.rating, rc.classification` |
 | `age_threshold` | `function` | **Age-related hearing threshold distribution (ISO 7029:2017).**<br>• `age`: years (≥ 18)<br>• `sex`: 'male'/'female' (Default: 'male')<br>• `fractile`: population fractile in (0, 1) (Default: 0.5)<br>• `frequencies`: subset of the 11 audiometric frequencies [Hz] (Default: None → 125–8000 Hz) | `at = age_threshold(60, 'male')`<br><br>• `AgeThresholdResult`; median at 4 kHz = 20.2 dB |
-| `reference_threshold` | `function` | **Reference threshold of hearing, 0 dB HL (ISO 389-7:2006 Table 1).**<br>• `field`: 'free-field' or 'diffuse-field' (Default: 'free-field')<br>• `frequencies`: optional subset [Hz] | `t = reference_threshold()`<br><br>• dB SPL per audiometric frequency (1 kHz → 2.4) |
+| `reference_threshold` | `function` | **Reference threshold of hearing, 0 dB HL (ISO 389-7:2005 Table 1).**<br>• `field`: 'free-field' or 'diffuse-field' (Default: 'free-field')<br>• `frequencies`: optional subset [Hz] | `t = reference_threshold()`<br><br>• dB SPL per audiometric frequency (1 kHz → 2.4) |
 | `AgeThresholdResult` | `dataclass` | **Age threshold distribution.**<br>• `age`, `sex`, `fractile`<br>• `frequencies` [Hz]<br>• `median`: deviation from age 18 [dB]<br>• `spread_upper` / `spread_lower`: half-Gaussian su/sl [dB]<br>• `threshold`: value at `fractile` [dB]<br>• `.plot()` | `at.median, at.threshold` |
 | `nipts` | `function` | **Noise-induced permanent threshold shift (ISO 1999:2013 §6.3).**<br>• `l_ex`: LEX,8h [dB]<br>• `years`: exposure duration (10–40 established; 1–10 extrapolated by Formula 3)<br>• `fractile`: (0, 1) (Default: 0.5)<br>• `frequencies`: subset [Hz] (Default: None → 500–6000 Hz) | `n = nipts(95.0, 20.0)`<br><br>• `NiptsResult`; N50 at 4 kHz = 23.0 dB |
 | `htlan` | `function` | **Threshold associated with age and noise, H′ = H + N − HN/120 (ISO 1999 Formula 1).**<br>• `age`: years (≥ 18), `sex`: 'male'/'female'<br>• `l_ex`: LEX,8h [dB], `years`<br>• `fractile`: (0, 1) applied to both components (Default: 0.5)<br>• `frequencies` | `h = htlan(60, 'male', 95.0, 20.0)`<br><br>• `HtlanResult`; H′ at 4 kHz = 39.3 dB |
@@ -6629,7 +8202,7 @@ importing for one deprecation cycle and warn on use; they are removed in 4.0.
 
 The theory reference explains the standards, the mathematics and the design decisions behind every phonometry module. It is split into five domain pages, listed below with the sections each one hosts. Theory for the underwater modules lives with its guides: [Underwater Acoustics](underwater-acoustics.md) and [Underwater Propagation](underwater-propagation.md).
 
-### [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/)
+## [Signal Analysis](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/)
 
 - [Octave Band Frequencies (ANSI S1.11 / IEC 61260)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#octave-band-frequencies-ansi-s111--iec-61260)
 - [Frequency Resolution vs FFT Bin Spacing](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#frequency-resolution-vs-fft-bin-spacing)
@@ -6642,7 +8215,7 @@ The theory reference explains the standards, the mathematics and the design deci
 - [Sound intensity (IEC 61043)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043)
 - [Measurement uncertainty (ISO/IEC Guide 98-3 — GUM and Supplement 1)](https://jmrplens.github.io/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3--gum-and-supplement-1)
 
-### [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/)
+## [Perception and Hearing](https://jmrplens.github.io/phonometry/reference/theory/perception/)
 
 - [Equal-loudness contours (ISO 226:2023)](https://jmrplens.github.io/phonometry/reference/theory/perception/#equal-loudness-contours-iso-2262023)
 - [Tone prominence: TNR and PR (ECMA-418-1)](https://jmrplens.github.io/phonometry/reference/theory/perception/#tone-prominence-tnr-and-pr-ecma-418-1)
@@ -6653,7 +8226,7 @@ The theory reference explains the standards, the mathematics and the design deci
 - [Hearing thresholds and presbycusis (ISO 389-7, ISO 7029)](https://jmrplens.github.io/phonometry/reference/theory/perception/#hearing-thresholds-and-presbycusis-iso-389-7-iso-7029)
 - [Noise-induced hearing loss (ISO 1999)](https://jmrplens.github.io/phonometry/reference/theory/perception/#noise-induced-hearing-loss-iso-1999)
 
-### [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/)
+## [Rooms and Buildings](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/)
 
 - [Room noise criteria (ANSI S12.2)](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#room-noise-criteria-ansi-s122)
 - [Room and building acoustics (ISO 18233, ISO 3382, ISO 16283, ISO 10140, EN 12354, ISO 12999, ISO 717, ISO 354)](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#room-and-building-acoustics-iso-18233-iso-3382-iso-16283-iso-10140-en-12354-iso-12999-iso-717-iso-354)
@@ -6661,14 +8234,14 @@ The theory reference explains the standards, the mathematics and the design deci
 - [In-situ road surface absorption (ISO 13472-1, ISO 13472-2)](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#in-situ-road-surface-absorption-iso-13472-1-iso-13472-2)
 - [Acoustic material characterisation (ISO 11654, ISO 9053-1/2, ISO 10534-1/2, ASTM E2611)](https://jmrplens.github.io/phonometry/reference/theory/rooms-buildings/#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611)
 
-### [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/)
+## [Environment and Transport](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/)
 
 - [Environmental descriptors (ISO 1996-1)](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#environmental-descriptors-iso-1996-1)
 - [Impulsive-sound prominence (NT ACOU 112)](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#impulsive-sound-prominence-nt-acou-112)
 - [Outdoor propagation and occupational exposure (ISO 9613-1/2, ISO 9612)](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#outdoor-propagation-and-occupational-exposure-iso-9613-12-iso-9612)
 - [Sound power determination (ISO 3744/3745/3746, ISO 3741, ISO 9614-2/3)](https://jmrplens.github.io/phonometry/reference/theory/environment-transport/#sound-power-determination-iso-374437453746-iso-3741-iso-9614-23)
 
-### [Vibration](https://jmrplens.github.io/phonometry/reference/theory/vibration/)
+## [Vibration](https://jmrplens.github.io/phonometry/reference/theory/vibration/)
 
 - [Human vibration (ISO 8041-1, ISO 2631-1/2, ISO 5349-1/2, Directive 2002/44/EC)](https://jmrplens.github.io/phonometry/reference/theory/vibration/#human-vibration-iso-8041-1-iso-2631-12-iso-5349-12-directive-200244ec)
 
@@ -6766,7 +8339,7 @@ $$
 **Band edges:**
 
 $$
-f_1 = f_m \cdot G^{-1/2b}, \quad f_2 = f_m \cdot G^{1/2b}
+f_1 = f_m \cdot G^{-1/(2b)}, \quad f_2 = f_m \cdot G^{1/(2b)}
 $$
 
 ## Frequency Resolution vs FFT Bin Spacing
@@ -6982,7 +8555,7 @@ $$
 
 The four zeros against eight poles shape the characteristic response: a rise of approximately **+12 dB/octave between 1 Hz and 20 Hz**, with roll-offs of approximately **24 dB/octave** below 1 Hz and above 20 Hz. Infrasound needs its own curve because near the hearing threshold the perceived loudness of very-low-frequency tones grows much more steeply with sound pressure level than at mid frequencies — a small dB increase above threshold produces a large loudness jump — so the A curve (anchored at 1 kHz) grossly misrepresents infrasonic annoyance.
 
-Since G acts on 0.25 Hz – 315 Hz, the plain bilinear transform is already exact there and the internal oversampling used for the A/C designs (whose action extends to 16 kHz) is not applied.
+Since G acts on 0.25 Hz – 315 Hz, far below the Nyquist frequency at audio rates, the frequency warping of the plain bilinear transform (applied without prewarping) is negligible there: about 0.014 % at 315 Hz for $f_s = 48$ kHz, under 0.01 dB on the response. The internal oversampling used for the A/C designs (whose action extends to 16 kHz) is therefore not applied.
 
 See the [Frequency Weighting guide](https://jmrplens.github.io/phonometry/guides/weighting/) for usage.
 
@@ -7082,6 +8655,64 @@ $k = t_{0.99}(\nu_{\mathrm{eff}} = 16) = 2.92$ and $U_{99} = 93$ nm.
 
 See the [GUM Uncertainty guide](gum-uncertainty.md) for usage.
 
+## References
+
+- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
+  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
+  [Open Library record](https://openlibrary.org/isbn/9780131988422).
+  The digital-filter theory behind the SOS cascades, the bilinear transform
+  and the multirate decimation of the filter-bank design section.
+- Smith, J. O. *Introduction to digital filters with audio applications*
+  (online book). Center for Computer Research in Music and Acoustics (CCRMA),
+  Stanford University.
+  [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
+  Free companion treatment of the classical filter prototypes and their
+  magnitude responses.
+- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
+  ISBN 978-0-419-19810-9.
+  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
+  The physics of the p-p estimator: active intensity, the finite-difference
+  bias and the phase-mismatch error budget.
+- International Electrotechnical Commission. (2014). *Electroacoustics —
+  Octave-band and fractional-octave-band filters — Part 1: Specifications*
+  (IEC 61260-1:2014).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
+  The base-10 mid-band and band-edge definitions of the octave-band section
+  and the class masks the banks are verified against.
+- International Electrotechnical Commission. (2013). *Electroacoustics —
+  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
+  The A/C/Z weighting curves, the exponential time integration and the SEL
+  and LCpeak definitions of the event-metric section.
+- International Electrotechnical Commission. (1993). *Electroacoustics —
+  Instruments for the measurement of sound intensity — Measurements with
+  pairs of pressure sensing microphones* (IEC 61043:1993; adopted in Europe
+  as EN 61043:1994).
+  [IEC webstore](https://webstore.iec.ch/en/publication/4353).
+  The p-p instrument standard: the cross-spectral estimator and the
+  pressure-residual intensity index behind the dynamic capability.
+- International Organization for Standardization. (1993). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
+  [iso.org catalogue](https://www.iso.org/standard/17427.html).
+  The surface indicators F2–F4 that generalize the pressure-intensity index
+  over a measurement surface.
+- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
+  data — Guide to the expression of uncertainty in measurement* (JCGM
+  100:2008, the GUM). BIPM.
+  [doi:10.59161/JCGM100-2008E](https://doi.org/10.59161/JCGM100-2008E),
+  [free PDF](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf).
+  The law of propagation of uncertainty and the Welch–Satterthwaite expanded
+  uncertainty of the GUM section.
+- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
+  data — Supplement 1 to the "Guide to the expression of uncertainty in
+  measurement" — Propagation of distributions using a Monte Carlo method*
+  (JCGM 101:2008). BIPM.
+  [doi:10.59161/JCGM101-2008](https://doi.org/10.59161/JCGM101-2008),
+  [free PDF](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf).
+  The Monte Carlo propagation of distributions and its coverage-interval
+  construction.
+
 ---
 
 
@@ -7144,17 +8775,17 @@ The ear analyzes sound in **critical bands**: frequency regions within which ene
 3. **a0 transmission** — the outer/middle-ear transfer correction of Table A.4 (plus the diffuse-field difference of Table A.5 when `field='diffuse'`) yields the critical-band levels $L_E$.
 4. **Core loudness** — each of the 20 critical bands is transformed with the threshold-in-quiet levels $L_{TQ}$ of Table A.6 (after the bandwidth adaptation DCB of Table A.7):
 
-$$
-N_c = 0.0635 \cdot 10^{0.025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0.25} - 1 \right] \ \text{sone/Bark}, \qquad s = 0.25
-$$
+   $$
+   N_c = \max\left(0,\ 0.0635 \cdot 10^{0.025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0.25} - 1 \right]\right) \ \text{sone/Bark}, \qquad s = 0.25
+   $$
 
-(the reference program's form of Zwicker's loudness transformation; bands below threshold contribute zero).
+   (the reference program's form of Zwicker's loudness transformation; bands below threshold contribute zero).
 
 5. **Slopes** — level-dependent upper masking slopes (steepness per specific-loudness range and critical band, Tables A.8/A.9) attach decaying flanks toward higher $z$; the total loudness is the area under the pattern:
 
-$$
-N = \int_0^{24} N'(z)\ dz \ \ \text{sone}
-$$
+   $$
+   N = \int_0^{24} N'(z)\ dz \ \ \text{sone}
+   $$
 
 For time-varying sounds a nonlinear temporal decay (time constants 5/15/75 ms, clause 6.3) and the duration-dependent weighting of the total loudness (3.5 ms and 70 ms low-passes weighted 0.47/0.53, clause 6.4) precede the 500 Hz loudness-vs-time output and the percentile values N5/N10 (clause 6.5).
 
@@ -7295,7 +8926,7 @@ See the [Speech Intelligibility guide](https://jmrplens.github.io/phonometry/gui
 
 ## Hearing thresholds and presbycusis (ISO 389-7, ISO 7029)
 
-ISO 389-7:2006 Table 1 fixes the reference threshold of hearing of otologically normal young adults — the free-field and diffuse-field SPL corresponding to 0 dB HL at the 11 audiometric frequencies 125 Hz – 8 kHz (22.1 dB at 125 Hz for both fields, 2.4/0.8 dB free/diffuse at 1 kHz, diverging at high frequency to 12.6 vs 6.8 dB at 8 kHz). ISO 7029:2017 describes how that threshold shifts statistically with age: the median deviation from age 18 is (clause 4.2, Table 1)
+ISO 389-7:2005 Table 1 fixes the reference threshold of hearing of otologically normal young adults — the free-field and diffuse-field SPL corresponding to 0 dB HL at the 11 audiometric frequencies 125 Hz – 8 kHz (22.1 dB at 125 Hz for both fields, 2.4/0.8 dB free/diffuse at 1 kHz, diverging at high frequency to 12.6 vs 6.8 dB at 8 kHz). ISO 7029:2017 describes how that threshold shifts statistically with age: the median deviation from age 18 is (clause 4.2, Table 1)
 
 $$
 \Delta H_{md} = a\ (Y - 18)^b \ \text{dB},
@@ -7322,6 +8953,62 @@ $$
 The Annex D worked examples (Tables D.1–D.4; e.g. 100 dB / 40 yr at 3 kHz: 29/38/60 dB at the 0.10/0.50/0.90 fractiles) are reproduced exactly at the standard's integer rounding, and the Formula 2 hand value at 4 kHz / 20 yr / 90 dB is $N_{50} = 12.94$ dB.
 
 See the [Noise-Induced Hearing Loss guide](noise-induced-hearing-loss.md) for usage.
+
+## References
+
+- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
+  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
+  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
+  The original equal-loudness measurements behind the contour concept of the
+  first section.
+- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
+  (3rd ed.). Springer.
+  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
+  The critical-band, masking and loudness psychoacoustics underneath the
+  Zwicker model and the sharpness and roughness sensations.
+- Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in
+  room acoustics and its use for estimating speech intelligibility in
+  auditoria. *The Journal of the Acoustical Society of America*, 77(3),
+  1069-1077. [doi:10.1121/1.392224](https://doi.org/10.1121/1.392224).
+  The modulation-transfer framework of the STI section.
+- French, N. R., & Steinberg, J. C. (1947). Factors governing the
+  intelligibility of speech sounds. *The Journal of the Acoustical Society of
+  America*, 19(1), 90-119.
+  [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
+  The articulation-band experiments behind the SII band-importance function.
+- Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to
+  steady-state broad-band noise. *The Journal of the Acoustical Society of
+  America*, 56(5), 1585–1593.
+  [doi:10.1121/1.1903482](https://doi.org/10.1121/1.1903482).
+  A field study of the exposure-response relations later codified in
+  ISO 1999.
+- International Organization for Standardization. (2023). *Acoustics —
+  Normal equal-loudness-level contours* (ISO 226:2023).
+  [iso.org catalogue](https://www.iso.org/standard/83117.html).
+  The Formula (1)/(2) contour model and the Table 1 parameters of the
+  equal-loudness section.
+- Ecma International. (2024). *ECMA-418-1: Psychoacoustic metrics for ITT
+  equipment — Part 1: Prominent discrete tones* (3rd ed.).
+  [Free PDF](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf).
+  The critical-band model and the TNR and PR procedures of the
+  tone-prominence section.
+- International Organization for Standardization. (2005). *Acoustics —
+  Reference zero for the calibration of audiometric equipment — Part 7:
+  Reference threshold of hearing under free-field and diffuse-field listening
+  conditions* (ISO 389-7:2005).
+  [iso.org catalogue](https://www.iso.org/standard/38976.html).
+  The Table 1 free-field and diffuse-field reference thresholds of the
+  hearing-threshold section.
+- International Organization for Standardization. (2017). *Acoustics —
+  Statistical distribution of hearing thresholds related to age and gender*
+  (ISO 7029:2017). [iso.org catalogue](https://www.iso.org/standard/42916.html).
+  The age-dependent median shift and fractile spreads of the presbycusis
+  model.
+- International Organization for Standardization. (2013). *Acoustics —
+  Estimation of noise-induced hearing loss* (ISO 1999:2013).
+  [iso.org catalogue](https://www.iso.org/standard/45103.html).
+  The NIPTS model, its fractiles and the HTLAN compressed sum of the
+  hearing-loss section.
 
 ---
 
@@ -7712,6 +9399,146 @@ two-load recovery of an asymmetric reciprocal specimen.
 
 See the [Materials guide](materials.md) for usage.
 
+## References
+
+- Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press.
+  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
+  The statistical decay theory behind backward integration and the Sabine
+  relations used throughout this page.
+- Schroeder, M. R. (1965). New method of measuring reverberation time.
+  *The Journal of the Acoustical Society of America*, 37(3), 409-412.
+  [doi:10.1121/1.1909343](https://doi.org/10.1121/1.1909343).
+  The backward-integration method of the decay-curve section.
+- Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).
+  Measuring room impulse responses: Impact of the decay range on derived
+  room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
+  907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
+  The INR decay-range analysis behind the tightened T20/T30 validity
+  thresholds.
+- Beranek, L. L. (1957). Revised criteria for noise in buildings. *Noise
+  Control*, 3(1), 19-27.
+  [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
+  The original NC curves rated by the tangency method of the room-noise
+  section.
+- Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
+  noise of heating, ventilating, and air-conditioning (HVAC) systems in
+  buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
+  [doi:10.3397/1.2828446](https://doi.org/10.3397/1.2828446).
+  The RC Mark II contour and spectral-quality tag codified by ANSI/ASA
+  S12.2 Annex D.
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  The measurement chains, flanking transmission and EN 12354 prediction
+  framework of the insulation sections.
+- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
+  ISBN 978-0-415-42853-8.
+  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
+  Sound transmission in buildings, from single and double constructions to
+  floating floors.
+- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
+  Theory, design and application* (3rd ed.). CRC Press.
+  ISBN 978-1-4987-4099-9.
+  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
+  Absorber and diffuser measurement and design, by the authors behind the
+  ISO 17497-2 diffusion-coefficient method.
+- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
+  Modelling sound absorbing materials* (2nd ed.). Wiley.
+  ISBN 978-0-470-74661-5.
+  [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
+  The porous-material theory linking the airflow-resistance and
+  impedance-tube quantities of the characterisation section.
+- Acoustical Society of America. (2019). *Criteria for evaluating room
+  noise* (ANSI/ASA S12.2-2019).
+  [ANSI webstore](https://webstore.ansi.org/standards/asa/ansiasas122019).
+  The normative NC tangency method and the Annex D RC Mark II rating with
+  its spectral tag.
+- International Organization for Standardization. (2006). *Acoustics —
+  Application of new measurement methods in building and room acoustics*
+  (ISO 18233:2006).
+  [iso.org catalogue](https://www.iso.org/standard/40408.html).
+  The swept-sine and MLS deconvolution of the deterministic-excitation
+  section.
+- International Organization for Standardization. (2009). *Acoustics —
+  Measurement of room acoustic parameters — Part 1: Performance spaces*
+  (ISO 3382-1:2009).
+  [iso.org catalogue](https://www.iso.org/standard/40979.html).
+  Backward integration, the parameter definitions and the Annex A clarity
+  family.
+- International Organization for Standardization. (2008). *Acoustics —
+  Measurement of room acoustic parameters — Part 2: Reverberation time in
+  ordinary rooms* (ISO 3382-2:2008).
+  [iso.org catalogue](https://www.iso.org/standard/36201.html).
+  The regression windows, dynamic-range rules and curvature check of the
+  validity section.
+- International Organization for Standardization. (2012). *Acoustics —
+  Measurement of room acoustic parameters — Part 3: Open plan offices*
+  (ISO 3382-3:2012).
+  [iso.org catalogue](https://www.iso.org/standard/46520.html).
+  The open-plan spatial decay and the distraction and privacy distances.
+- International Organization for Standardization. (2014). *Acoustics — Field
+  measurement of sound insulation in buildings and of building elements —
+  Part 1: Airborne sound insulation* (ISO 16283-1:2014).
+  [iso.org catalogue](https://www.iso.org/standard/55997.html).
+  The field level differences and normalizations of the insulation
+  sections.
+- International Organization for Standardization. (2020). *Acoustics —
+  Rating of sound insulation in buildings and of building elements — Part 1:
+  Airborne sound insulation* (ISO 717-1:2020).
+  [iso.org catalogue](https://www.iso.org/standard/77435.html).
+  The reference-curve shift and the spectrum adaptation terms C and Ctr.
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [iso.org catalogue](https://www.iso.org/standard/34545.html).
+  The reverberation-room absorption measurement and its air-absorption
+  term.
+- European Committee for Standardization. (2003). *Building acoustics —
+  Estimation of acoustic performance of buildings from the performance of
+  elements — Part 6: Sound absorption in enclosed spaces*
+  (EN 12354-6:2003).
+  [BSI Knowledge record (BS EN 12354-6:2003)](https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-of-buildings-from-the-performance-of-elements-sound-absorption-in-enclosed-spaces).
+  The Clause 4 absorption model and Annex E worked cases of the
+  enclosed-space section.
+- International Organization for Standardization. (2020). *Acoustics —
+  Determination and application of measurement uncertainties in building
+  acoustics — Part 1: Sound insulation* (ISO 12999-1:2020).
+  [iso.org catalogue](https://www.iso.org/standard/73930.html).
+  The measurement situations, tabulated uncertainties and coverage factors
+  of the uncertainty section.
+- International Organization for Standardization. (2004). *Acoustics —
+  Sound-scattering properties of surfaces — Part 1: Measurement of the
+  random-incidence scattering coefficient in a reverberation room*
+  (ISO 17497-1:2004+A1:2014, the edition implemented here).
+  [iso.org catalogue](https://www.iso.org/standard/31397.html).
+  The turntable scattering-coefficient method and its Annex A uncertainty
+  chain.
+- International Organization for Standardization. (2012). *Acoustics —
+  Sound-scattering properties of surfaces — Part 2: Measurement of the
+  directional diffusion coefficient in a free field* (ISO 17497-2:2012).
+  [iso.org catalogue](https://www.iso.org/standard/55293.html).
+  The free-field directional diffusion coefficient and its solid-angle area
+  weighting.
+- International Organization for Standardization. (1998). *Acoustics —
+  Determination of sound absorption coefficient and impedance in impedance
+  tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adopted in
+  Europe as EN ISO 10534-2:2001; since revised as
+  [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
+  [iso.org catalogue](https://www.iso.org/standard/22851.html).
+  The two-microphone transfer-function method of the impedance-tube
+  section.
+- ASTM International. (2019). *Standard test method for normal incidence
+  determination of porous material acoustical properties based on the
+  transfer matrix method* (ASTM E2611-19, the edition implemented here;
+  since revised as [ASTM E2611-24](https://store.astm.org/e2611-24.html)).
+  [ASTM store](https://store.astm.org/e2611-19.html).
+  The four-microphone transfer-matrix decomposition and its transmission
+  loss.
+- International Organization for Standardization. (2018). *Acoustics —
+  Determination of airflow resistance — Part 1: Static airflow method*
+  (ISO 9053-1:2018).
+  [iso.org catalogue](https://www.iso.org/standard/69869.html).
+  The static airflow-resistance method and its reference velocity.
+
 ---
 
 
@@ -7984,6 +9811,90 @@ uniform normal intensity recovers the power exactly (100 µW over 3.75 m² →
 
 See the [Sound Power guide](https://jmrplens.github.io/phonometry/guides/sound-power/) for usage.
 
+## References
+
+- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
+  Academic Publishers. ISBN 978-1-4020-0390-5.
+  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
+  The wave-based outdoor propagation theory behind the engineering
+  approximations of the ISO 9613-2 section.
+- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
+  (2nd ed.). CRC Press.
+  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
+  The ground impedance and meteorological effects underlying the
+  ground-effect and barrier terms.
+- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
+  157-173.
+  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
+  The screen-attenuation chart that the barrier insertion-loss formulas
+  descend from.
+- Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.
+  ISBN 978-0-419-19810-9.
+  [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
+  The intensity physics behind the scanning methods: active intensity and
+  the p-p error budget.
+- International Organization for Standardization. (2016). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 1:
+  Basic quantities and assessment procedures* (ISO 1996-1:2016).
+  [iso.org catalogue](https://www.iso.org/standard/59765.html).
+  The composite rating level and Table A.1 adjustments of the descriptors
+  section.
+- Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for
+  adjustment of LAeq* (Nordtest Method NT ACOU 112).
+  [nordtest.info](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/).
+  The onset-rate prominence and LAeq adjustment of the impulsive-sound
+  section.
+- International Organization for Standardization. (2022). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 3:
+  Objective method for the measurement of prominence of impulsive sounds and
+  for adjustment of LAeq* (ISO/PAS 1996-3:2022).
+  [iso.org catalogue](https://www.iso.org/standard/77035.html).
+  The ISO successor built on the NT ACOU 112 prominence.
+- International Organization for Standardization. (1993). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 1: Calculation of
+  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
+  [iso.org catalogue](https://www.iso.org/standard/17426.html).
+  The pure-tone attenuation coefficient and its relaxation physics.
+- International Organization for Standardization. (1996). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 2: General method
+  of calculation* (ISO 9613-2:1996; revised in 2024, the 1996 method is the
+  implemented one).
+  [iso.org catalogue](https://www.iso.org/standard/20649.html).
+  The attenuation chain (divergence, air, ground, barrier) of the
+  general-method section.
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of occupational noise exposure — Engineering method*
+  (ISO 9612:2009). [iso.org catalogue](https://www.iso.org/standard/41718.html).
+  The three measurement strategies and the Annex C uncertainty budget of
+  the occupational section.
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Engineering methods for an essentially free
+  field over a reflecting plane* (ISO 3744:2010).
+  [iso.org catalogue](https://www.iso.org/standard/52055.html).
+  The enveloping-surface method with its background and reverberant-field
+  corrections.
+- International Organization for Standardization. (2012). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for anechoic rooms and
+  hemi-anechoic rooms* (ISO 3745:2012).
+  [iso.org catalogue](https://www.iso.org/standard/45362.html).
+  The precision anechoic method with its meteorological corrections and
+  microphone arrays.
+- International Organization for Standardization. (2010). *Acoustics —
+  Determination of sound power levels and sound energy levels of noise
+  sources using sound pressure — Precision methods for reverberation test
+  rooms* (ISO 3741:2010).
+  [iso.org catalogue](https://www.iso.org/standard/52053.html).
+  The diffuse-field method with the Waterhouse correction and the
+  comparison method.
+- International Organization for Standardization. (1993). *Acoustics —
+  Determination of sound power levels of noise sources using sound
+  intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).
+  [iso.org catalogue](https://www.iso.org/standard/17427.html).
+  The field indicators and dynamic-capability criterion shared by the
+  intensity-scanning methods.
+
 ---
 
 
@@ -8055,6 +9966,20 @@ separate software) is out of scope.
 
 See the [Human Vibration guide](human-vibration.md) and the
 [Multiple-Shock Vibration guide](multiple-shock-vibration.md) for usage.
+
+## References
+
+- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
+  ISBN 978-0-12-303041-2.
+  [Publisher page](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
+  The biodynamic and health-effect evidence behind the ISO 8041-1 weightings,
+  the rms/MTVV/VDV dose measures and the spinal-injury rationale of the
+  multiple-shock model.
+- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
+  ISBN 978-0-415-28239-0.
+  [Publisher page](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
+  A compact modern walkthrough of the ISO 2631-1 whole-body and ISO 5349
+  hand-arm evaluation chains summarised on this page.
 
 ---
 
@@ -8189,6 +10114,8 @@ up to 16 kHz at common audio rates via internal oversampling (see
 
 If your work needs numbers you can defend against a standard's tolerance
 table — measurement reports, environmental assessments, instrument
-cross-checks — that verification layer is what phonometry is for.
+cross-checks — that verification layer is what phonometry is for. The
+sources behind it are collected in the [Bibliography](references.md),
+every entry with a verified DOI or official publisher link.
 
 ---

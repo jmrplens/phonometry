@@ -32,7 +32,8 @@ en edificación (ISO 9611, EN 15657, EN 12354-5).
 
 ## 1. Las dos partes
 
-Las dos partes difieren solo en el factor de radiación. La **Parte 1 (control)**
+Las dos partes difieren solo en el factor de radiación. La **Parte 1** (*survey
+method*, sin versión en español)
 asume `ε = 1` y da el *límite superior* `L_W,max`, necesitando solo el nivel de
 velocidad y el área. La **Parte 2 (ingeniería)** aplica un factor de radiación
 por banda `εⱼ` determinado (según ISO 9614) como `εⱼ = Pⱼ/(Z_{c,n}·⟨vⱼ²⟩·S)`.

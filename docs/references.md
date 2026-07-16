@@ -229,6 +229,88 @@ it; the list grows as guides gain their References sections.
   The free-velocity characterization of resiliently mounted sources.
   Cited by [Structure-borne sound power of building equipment](structure-borne-power.md).
 
+## Outdoor and environmental sound
+
+- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
+  Academic Publishers. ISBN 978-1-4020-0390-5.
+  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
+  The wave-based theory of outdoor sound (parabolic equation, fast field
+  program, refraction, turbulence) behind the engineering approximations of
+  ISO 9613-2.
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md).
+- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
+  (2nd ed.). CRC Press.
+  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
+  Ground impedance models, the spherical-wave reflection coefficient behind
+  the ground dip, and meteorological effects on barriers.
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md).
+- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
+  157-173.
+  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
+  The screen-attenuation chart against Fresnel number that barrier
+  engineering formulas descend from.
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md).
+- Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
+  assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Publications
+  Office of the European Union.
+  [doi:10.2788/31776](https://doi.org/10.2788/31776),
+  [JRC repository](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
+  The common EU noise-mapping framework, contrasted with ISO 9613-2.
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md).
+- International Organization for Standardization. (1993). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 1: Calculation of
+  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
+  [iso.org catalogue](https://www.iso.org/standard/17426.html).
+  The pure-tone atmospheric attenuation coefficient.
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md).
+- International Organization for Standardization. (1996). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 2: General method
+  of calculation* (ISO 9613-2:1996; revised in 2024, the 1996 method is the
+  implemented one).
+  [iso.org catalogue](https://www.iso.org/standard/20649.html).
+  The implemented outdoor attenuation chain.
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md).
+- International Organization for Standardization. (2016). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 1:
+  Basic quantities and assessment procedures* (ISO 1996-1:2016).
+  [iso.org catalogue](https://www.iso.org/standard/59765.html).
+  The environmental rating framework and its Table A.1 category adjustments.
+  Cited by [Impulsive-sound prominence](impulse-prominence.md).
+- International Organization for Standardization. (2017). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 2:
+  Determination of sound pressure levels* (ISO 1996-2:2017).
+  [iso.org catalogue](https://www.iso.org/standard/59766.html).
+  The environmental measurement standard: its Annex J adopts the engineering
+  method for tonal audibility and its Annex C criterion is reused by
+  IEC 61400-11.
+  Cited by [Objective audibility of tones](tone-audibility.md) and
+  [Wind-turbine noise](wind-turbine-noise.md).
+- Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for
+  adjustment of LAeq* (Nordtest Method NT ACOU 112).
+  [nordtest.info](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/).
+  The freely downloadable onset-rate prominence method.
+  Cited by [Impulsive-sound prominence](impulse-prominence.md).
+- International Organization for Standardization. (2022). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 3:
+  Objective method for the measurement of prominence of impulsive sounds and
+  for adjustment of LAeq* (ISO/PAS 1996-3:2022).
+  [iso.org catalogue](https://www.iso.org/standard/77035.html).
+  The ISO successor built on the NT ACOU 112 prominence.
+  Cited by [Impulsive-sound prominence](impulse-prominence.md).
+- International Electrotechnical Commission. (2018). *Wind turbines —
+  Part 11: Acoustic noise measurement techniques*
+  (IEC 61400-11:2012+AMD1:2018 CSV).
+  [IEC webstore](https://webstore.iec.ch/en/publication/63367).
+  The apparent sound power geometry, wind-speed binning and tonal
+  audibility of wind turbines.
+  Cited by [Wind-turbine noise](wind-turbine-noise.md).
+- International Electrotechnical Commission. (2005). *Wind turbines —
+  Part 14: Declaration of apparent sound power level and tonality values*
+  (IEC TS 61400-14:2005).
+  [IEC webstore](https://webstore.iec.ch/en/publication/5432).
+  Declared values and their uncertainty for a batch of turbines.
+  Cited by [Wind-turbine noise](wind-turbine-noise.md).
+
 ## Speech
 
 - Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in

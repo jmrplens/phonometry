@@ -116,6 +116,52 @@ determinante y su `adjustment`, y su `.plot()` dibuja la curva `KI(P)` con los
 impulsos marcados. El método es un complemento a la medida de ruido ambiental de
 [ISO 1996-2](/phonometry/es/guides/levels/).
 
+## 3. Dónde encaja el método entre las normas
+
+Las normas de evaluación tratan tradicionalmente la impulsividad por
+categorías, no por medición. La ISO 1996-1:2016 (Tabla A.1) suma 5 dB fijos
+cuando la fuente es *impulsiva regular* y 12 dB cuando es *altamente
+impulsiva*, y deja la elección de categoría al juicio del evaluador. La
+NT ACOU 112 sustituye ese juicio por una medida: la tasa de crecimiento y la
+diferencia de nivel de los impulsos reales producen un $K_I$ graduado que va
+de 0 dB para arranques apenas perceptibles a unos 18 dB para los más
+repentinos y ruidosos, cruzando por el camino las dos cifras convencionales.
+El enfoque resultó duradero: la misma prominencia basada en el arranque pasó
+después a la ISO/PAS 1996-3:2022, que la usa para decidir *objetivamente* si
+una fuente cuenta como impulsiva regular o altamente impulsiva en la
+evaluación de la ISO 1996-1.
+
+Dos advertencias prácticas al aplicarlo. El arranque se lee de la historia de
+nivel ponderada A con ponderación temporal F, y la propia constante de tiempo
+de 125 ms de la ponderación F limita la velocidad a la que puede subir un
+nivel registrado: los impulsos muy cortos llegan ya suavizados, así que la
+historia de nivel debe registrarse a la cadencia máxima del sonómetro (no en
+intervalos gruesos); de lo contrario, la tasa de crecimiento, y con ella $P$,
+se subestima. Y
+el método evalúa la *prominencia* de los impulsos, no su energía: $K_I$ se
+añade sobre el `LAeq` medido en el nivel de evaluación, nunca lo sustituye.
+
+## Referencias
+
+- Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for
+  adjustment of LAeq* (método Nordtest NT ACOU 112).
+  [nordtest.info](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/).
+  El método implementado, descargable gratis del archivo Nordtest.
+- International Organization for Standardization. (2016). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 1:
+  Basic quantities and assessment procedures* (ISO 1996-1:2016).
+  [Catálogo iso.org](https://www.iso.org/standard/59765.html).
+  El marco de evaluación y los ajustes por categoría de la Tabla A.1 (5 dB
+  regular, 12 dB altamente impulsiva) frente a los que se calibra la
+  prominencia medida.
+- International Organization for Standardization. (2022). *Acoustics —
+  Description, measurement and assessment of environmental noise — Part 3:
+  Objective method for the measurement of prominence of impulsive sounds and
+  for adjustment of LAeq* (ISO/PAS 1996-3:2022).
+  [Catálogo iso.org](https://www.iso.org/standard/77035.html).
+  El sucesor ISO construido sobre la prominencia por tasa de crecimiento de
+  la NT ACOU 112.
+
 ---
 
 **Normas.** NT ACOU 112:2002 (Nordtest), *Prominence of impulsive sounds and for

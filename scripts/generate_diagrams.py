@@ -853,6 +853,39 @@ _ES: dict[str, str] = {
     "each path i → j: excited element i, radiating element j in the receiving room":
         "cada vía i → j: elemento excitado i, elemento radiante j en el "
         "recinto receptor",
+    # Wind-turbine noise measurement geometry (IEC 61400-11)
+    "Wind-turbine noise measurement geometry (IEC 61400-11)":
+        "Geometría de medida del ruido de aerogenerador (IEC 61400-11)",
+    "Wind": "Viento",
+    "rotor centre": "centro del rotor",
+    "Microphone on a ground board": "Micrófono sobre placa en el suelo",
+    "Met mast": "Mástil meteorológico",
+    "wind speed + direction": "velocidad y dirección del viento",
+    "Plan view (Figure 3)": "Planta (Figura 3)",
+    "reference position 1 (downwind)": "referencia 1 (a sotavento)",
+    "optional positions 2–4": "posiciones opcionales 2–4",
+    "R1 = √(H² + R0²)   slant distance, rotor centre → microphone":
+        "R1 = √(H² + R0²)   distancia oblicua, centro del rotor → micrófono",
+    "LWA,i = Lp,i − 6 + 10 lg(4π R1² / S0)   (Formula 26, S0 = 1 m²)":
+        "LWA,i = Lp,i − 6 + 10 lg(4π R1² / S0)   (Fórmula 26, S0 = 1 m²)",
+    "the −6 dB removes the board's pressure doubling; board-to-R1 angle φ = 25°–40°":
+        "los −6 dB descuentan la duplicación de presión de la placa; "
+        "ángulo placa–R1 φ = 25°–40°",
+    # Ground reflection (image source)
+    "Ground reflection: direct ray, image source and path difference":
+        "Reflexión del suelo: rayo directo, fuente imagen y diferencia de camino",
+    "image source": "fuente imagen",
+    "direct ray  r1": "rayo directo  r1",
+    "reflected ray": "rayo reflejado",
+    "equal angles": "ángulos iguales",
+    "path difference  δ = r2 − r1": "diferencia de camino  δ = r2 − r1",
+    "phase difference  Δφ = 2π δ / λ  (+ arg Q)":
+        "diferencia de fase  Δφ = 2π δ / λ  (+ arg Q)",
+    "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2   (Q = ground reflection coefficient)":
+        "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2   (Q = coeficiente de reflexión del suelo)",
+    "in phase (δ ≈ nλ): up to +6 dB    ·    out of phase (δ ≈ λ/2 on hard ground): a deep dip":
+        "en fase (δ ≈ nλ): hasta +6 dB    ·    en oposición (δ ≈ λ/2 sobre "
+        "suelo duro): un mínimo profundo",
 }
 
 
@@ -3867,6 +3900,209 @@ def _d_installed_paths(s: SVG, th: Theme) -> None:
            16, th.muted)
 
 
+# ---------------------------------------------------------------------------
+# Wind-turbine noise measurement geometry (IEC 61400-11)
+# ---------------------------------------------------------------------------
+
+def _d_wind_turbine(s: SVG, th: Theme) -> None:
+    """IEC 61400-11 apparent-sound-power geometry: downwind ground-board
+    microphone at R0 = H + D/2, slant distance R1 to the rotor centre and
+    the Figure 3 plan-view position pattern."""
+    import math
+    gy = 470.0
+    s.ground(gy, 40.0, 668.0)
+
+    # Wind arrow on the upwind side.
+    s.arrow(52.0, 108.0, 148.0, 108.0, th.accent, 2.6)
+    s.text(100.0, 88.0, "Wind", 18, th.accent, bold=True)
+
+    # --- met mast: anemometer cups + wind vane -----------------------------
+    mmx = 108.0
+    s.line(mmx, gy, mmx, gy - 96.0, th.fg, 2.2)
+    s.line(mmx - 12, gy - 96.0, mmx + 12, gy - 96.0, th.fg, 1.8)
+    s.circle(mmx - 12, gy - 102.0, 4.5, th.panel, th.fg, 1.4)   # cup
+    s.circle(mmx + 12, gy - 102.0, 4.5, th.panel, th.fg, 1.4)   # cup
+    s.line(mmx, gy - 82.0, mmx + 20, gy - 82.0, th.fg, 1.6)     # vane arm
+    s.path(f"M {mmx + 20:.0f} {gy - 87:.0f} L {mmx + 34:.0f} {gy - 82:.0f} "
+           f"L {mmx + 20:.0f} {gy - 77:.0f} Z", fill=th.secondary)
+    s.text(mmx, gy - 118.0, "Met mast", 16, th.fg, bold=True)
+    s.text(mmx, gy + 30.0, "wind speed + direction", 14, th.muted)
+
+    # --- turbine: tower, nacelle and the rotor edge-on ----------------------
+    tx = 262.0                    # tower vertical centreline
+    hub_y = 168.0                 # rotor centre => H = 302 px
+    rr = 104.0                    # rotor radius (D = 208 px)
+    s.path(f"M {tx - 10:.0f} {gy:.0f} L {tx - 5:.0f} {hub_y + 12:.0f} "
+           f"L {tx + 5:.0f} {hub_y + 12:.0f} L {tx + 10:.0f} {gy:.0f} Z",
+           fill=th.panel, stroke=th.fg, sw=1.8)
+    s.rect(tx - 28, hub_y - 12, 56, 24, th.panel, th.fg, rx=6, sw=1.8)
+    rx_ = tx - 34.0               # rotor plane (upwind of the tower)
+    s.ellipse(rx_, hub_y, 9.0, rr, stroke=th.muted, sw=1.3, dash="6,5")
+    s.line(rx_, hub_y - 8, rx_ - 4, hub_y - rr + 4, th.fg, 3.2)   # blade up
+    s.line(rx_, hub_y + 8, rx_ + 3, hub_y + rr - 4, th.fg, 3.2)   # blade down
+    s.circle(rx_, hub_y, 6.5, th.fg)
+    s.text(tx + 36, hub_y - 26, "rotor centre", 15, th.fg, anchor="start")
+    s.line(rx_ + 8, hub_y - 6, tx + 33, hub_y - 21, th.muted, 0.9)
+
+    # Rotor diameter D across the swept ellipse.
+    dx_ = rx_ - 58.0
+    s.dim(dx_, hub_y - rr, dx_, hub_y + rr, "D", offset=0, label_side="left")
+    s.line(rx_ - 8, hub_y - rr, dx_, hub_y - rr, th.muted, 0.9, dash="3,3")
+    s.line(rx_ - 8, hub_y + rr, dx_, hub_y + rr, th.muted, 0.9, dash="3,3")
+
+    # Hub height H, downwind of the tower.
+    hx_ = tx + 56.0
+    s.dim(hx_, gy, hx_, hub_y, "H", offset=0, label_side="right")
+    s.line(tx + 10, gy, hx_, gy, th.muted, 0.9, dash="3,3")
+    s.line(tx + 28, hub_y, hx_, hub_y, th.muted, 0.9, dash="3,3")
+
+    # --- downwind microphone on a ground board ------------------------------
+    mx = 640.0
+    s.ellipse(mx, gy - 3.0, 36.0, 7.0, fill=th.panel, stroke=th.fg, sw=1.6)
+    s.rect(mx - 16, gy - 10.0, 20, 6, th.fg, rx=2.5)              # capsule flat
+    s.rect(mx + 4, gy - 11.0, 10, 8, th.primary, rx=2)            # body
+    s.text(mx - 84, gy - 42.0, "Microphone on a ground board", 16, th.fg,
+           bold=True, anchor="end")
+
+    # Slant distance R1 from the rotor centre to the microphone.
+    s.line(rx_, hub_y, mx - 12, gy - 8.0, th.primary, 2.2, dash="9,6")
+    s.text(430.0, 296.0, "R1", 19, th.primary, bold=True)
+    # Board-to-R1 inclination angle (25°..40°).
+    ang = math.atan2(gy - 8.0 - hub_y, mx - 12 - rx_)   # slope of R1
+    r_arc = 52.0
+    axp = mx - 12 - r_arc * math.cos(ang)
+    ayp = gy - 8.0 - r_arc * math.sin(ang)
+    s.path(f"M {mx - 12 - r_arc:.1f} {gy - 8:.1f} "
+           f"A {r_arc:.0f} {r_arc:.0f} 0 0 1 {axp:.1f} {ayp:.1f}",
+           stroke=th.muted, sw=1.3)
+    s.text(mx - 74, gy - 22.0, "φ", 17, th.muted)
+
+    # Horizontal reference distance R0.
+    s.dim(tx, gy, mx, gy, "R0 = H + D/2", offset=40)
+
+    # --- plan-view inset: the Figure 3 position pattern ---------------------
+    pcx, pcy, pr = 794.0, 218.0, 76.0
+    s.text(pcx, 104.0, "Plan view (Figure 3)", 17, th.fg, bold=True)
+    s.arrow(pcx - 60.0, 118.0, pcx - 60.0, 150.0, th.accent, 2.2)  # wind, from top
+    s.circle(pcx, pcy, pr, "none", th.muted, 1.2)
+    s.line(pcx - pr - 8, pcy, pcx + pr + 8, pcy, th.muted, 1.0, dash="4,4")
+    s.line(pcx, pcy - pr - 8, pcx, pcy + pr + 8, th.muted, 1.0, dash="4,4")
+    s.line(pcx - 16, pcy, pcx + 16, pcy, th.fg, 3.0)              # rotor, plan
+    s.circle(pcx, pcy, 4.0, th.fg)
+    # Reference position 1, downwind (diamond).
+    p1x, p1y = pcx, pcy + pr
+    s.path(f"M {p1x:.0f} {p1y - 7:.0f} L {p1x + 7:.0f} {p1y:.0f} "
+           f"L {p1x:.0f} {p1y + 7:.0f} L {p1x - 7:.0f} {p1y:.0f} Z",
+           fill=th.secondary)
+    s.text(p1x + 13, p1y + 5, "1", 15, th.secondary, anchor="start", bold=True)
+    # Optional positions 2 and 4 at ±60° from downwind, 3 upwind.
+    for lbl, adeg, lx, ly, anch in (
+        ("2", 150.0, -12.0, 4.0, "end"),
+        ("3", 270.0, 12.0, 4.0, "start"),
+        ("4", 30.0, 12.0, 4.0, "start"),
+    ):
+        pxx = pcx + pr * math.cos(math.radians(adeg))
+        pyy = pcy + pr * math.sin(math.radians(adeg))
+        s.circle(pxx, pyy, 5.5, th.bg, th.fg, 1.6)
+        s.text(pxx + lx, pyy + ly, lbl, 15, th.muted, anchor=anch)
+        s.line(pcx, pcy, pxx, pyy, th.muted, 0.9, dash="3,4")
+    s.line(pcx, pcy, p1x, p1y, th.muted, 0.9, dash="3,4")
+    s.text(pcx - 34, pcy + 52.0, "60°", 13, th.muted)
+    s.text(pcx + 34, pcy + 52.0, "60°", 13, th.muted)
+    s.text(pcx, pcy + pr + 30.0, "reference position 1 (downwind)", 14,
+           th.secondary)
+    s.text(pcx, pcy + pr + 50.0, "optional positions 2–4", 14, th.muted)
+
+    # --- governing relations -------------------------------------------------
+    s.text(450.0, 560.0,
+           "R1 = √(H² + R0²)   slant distance, rotor centre → microphone",
+           19, th.fg, bold=True)
+    s.text(450.0, 588.0,
+           "LWA,i = Lp,i − 6 + 10 lg(4π R1² / S0)   (Formula 26, S0 = 1 m²)",
+           19, th.primary, bold=True)
+    s.text(450.0, 614.0,
+           "the −6 dB removes the board's pressure doubling; board-to-R1 angle φ = 25°–40°",
+           16, th.muted)
+
+
+# ---------------------------------------------------------------------------
+# Ground reflection: direct ray, image source, path difference
+# ---------------------------------------------------------------------------
+
+def _d_ground_reflection(s: SVG, th: Theme) -> None:
+    """Two-path ground interference: source, receiver, direct ray, the
+    specular reflection unfolded through the image source, and the path
+    difference that sets the interference phase (ISO 9613-2 ground effect,
+    Chien-Soroka geometry)."""
+    gy = 372.0
+    sx, sy = 170.0, 232.0          # source (hs = 140 px)
+    rx, ry = 700.0, 282.0          # receiver capsule tip (hr = 90 px)
+    ix, iy = sx, gy + (gy - sy)    # image source, mirrored below the ground
+    # Specular point: equal angles, found by unfolding through the image.
+    bx = sx + (rx - sx) * (gy - sy) / ((gy - sy) + (gy - ry))
+
+    s.ground(gy, 60.0, 840.0)
+
+    # Source: point with radiating arcs.
+    for r in (22, 38, 54):
+        s.path(f"M {sx + r * 0.30:.1f} {sy - r * 0.95:.1f} "
+               f"A {r} {r} 0 0 1 {sx + r * 0.95:.1f} {sy - r * 0.30:.1f}",
+               stroke=th.muted, sw=1.3)
+    s.circle(sx, sy, 8.0, th.fg)
+    s.text(sx, sy - 66.0, "Source", 20, th.fg, bold=True)
+    s.text(sx - 14, sy + 24, "S", 15, th.fg, anchor="end", mono=True)
+    s.line(sx, sy + 8, sx, gy, th.fg, 2.0)
+
+    # Receiver: measurement microphone.
+    s.mic(rx, ry, gy, 1.0)
+    s.text(rx, ry - 18.0, "Receiver", 20, th.fg, bold=True)
+    s.text(rx - 18, ry + 10.0, "R", 15, th.fg, anchor="end", mono=True)
+
+    # Direct ray r1.
+    s.arrow(sx + 10, sy, rx - 8, ry - 2, th.primary, 2.6)
+    s.text(430.0, 236.0, "direct ray  r1", 17, th.primary, bold=True)
+
+    # Reflected ray via the specular point (equal angles).
+    s.line(sx + 6, sy + 7, bx, gy, th.accent, 2.6)
+    s.arrow(bx, gy, rx - 6, ry + 4, th.accent, 2.6)
+    s.text(330.0, gy - 34.0, "reflected ray", 17, th.accent, bold=True)
+    # Equal grazing angles at the bounce.
+    s.path(f"M {bx - 34:.1f} {gy:.1f} A 34 34 0 0 1 {bx - 26:.1f} {gy - 21:.1f}",
+           stroke=th.muted, sw=1.2)
+    s.path(f"M {bx + 34:.1f} {gy:.1f} A 34 34 0 0 0 {bx + 26:.1f} {gy - 21:.1f}",
+           stroke=th.muted, sw=1.2)
+    s.text(bx, gy - 40.0, "equal angles", 14, th.muted)
+
+    # Image source: ghosted mirror of the source below the ground.
+    s.circle(ix, iy, 8.0, "none", th.secondary, 1.8)
+    s.line(sx, gy, ix, iy - 8, th.secondary, 1.2, dash="4,4")
+    s.text(ix + 18, iy + 5, "image source", 16, th.secondary, anchor="start")
+    s.text(ix - 16, iy + 5, "S′", 15, th.secondary, anchor="end", mono=True)
+    # The unfolded path S' -> R is straight through the bounce point: r2.
+    s.line(ix, iy - 6, bx, gy, th.secondary, 1.6, dash="7,5")
+    s.line(bx, gy, rx - 6, ry + 4, th.secondary, 1.2, dash="2,6")
+    s.text(380.0, iy - 62.0, "r2 = |S′R|", 16, th.secondary, mono=True)
+
+    # Heights.
+    s.dim(sx - 46, gy, sx - 46, sy, "hs", offset=0, label_side="left")
+    s.line(sx - 46, gy, sx - 8, gy, th.muted, 0.9, dash="3,3")
+    s.line(sx - 46, sy, sx - 8, sy, th.muted, 0.9, dash="3,3")
+    s.dim(rx + 42, gy, rx + 42, ry, "hr", offset=0, label_side="right")
+    s.line(rx + 8, gy, rx + 42, gy, th.muted, 0.9, dash="3,3")
+    s.line(rx + 8, ry, rx + 42, ry, th.muted, 0.9, dash="3,3")
+
+    # Governing relations (top block, clear of the geometry).
+    s.text(560.0, 88.0, "path difference  δ = r2 − r1", 20, th.fg, bold=True)
+    s.text(560.0, 114.0, "phase difference  Δφ = 2π δ / λ  (+ arg Q)", 18,
+           th.fg)
+    s.text(560.0, 142.0,
+           "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2   (Q = ground reflection coefficient)",
+           16, th.muted)
+    s.text(560.0, 168.0,
+           "in phase (δ ≈ nλ): up to +6 dB    ·    out of phase (δ ≈ λ/2 on hard ground): a deep dip",
+           15, th.muted)
+
+
 DIAGRAMS = {
     "diagram_calibration_setup": (_d1, "Calibration chain — from calibrator to physical units", 560),
     "diagram_env_measurement": (_d2, "Environmental noise measurement positions (ISO 1996-2)", 560),
@@ -3989,6 +4225,12 @@ DIAGRAMS = {
     "diagram_installed_paths": (
         _d_installed_paths,
         "Installed structure-borne sound paths (EN 12354-5)", 620),
+    "diagram_wind_turbine_iec61400": (
+        _d_wind_turbine,
+        "Wind-turbine noise measurement geometry (IEC 61400-11)", 640),
+    "diagram_ground_reflection": (
+        _d_ground_reflection,
+        "Ground reflection: direct ray, image source and path difference", 560),
 }
 
 

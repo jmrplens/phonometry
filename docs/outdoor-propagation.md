@@ -283,6 +283,31 @@ print(round(directivity_omega(1.5, 1.5, 200.0), 2))                  # 3.01 dB
 print(round(meteorological_correction(200.0, 1.5, 1.5, 2.0), 2))     # 1.7 dB
 ```
 
+### The image source behind the ground effect
+
+Every entry of Table 3 is an engineering fit to one physical picture: the
+receiver hears two copies of the source, the direct ray $r_1$ and a reflection
+that arrives exactly as if it were radiated by an **image source** mirrored
+below the ground plane. The two copies interfere according to the path
+difference $\delta = r_2 - r_1$ (about $2 h_s h_r / d$ for a grazing far-field
+path): in phase they add up to $+6$ dB; at $\delta = \lambda/2$ over a rigid
+plane they cancel into a sharp dip.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_reflection.svg" alt="A point source at height hs and a receiver microphone at height hr over a hatched ground plane; a straight direct ray r1 connects them and a reflected ray bounces at the specular point with equal grazing angles; the reflection is unfolded as a dashed straight ray r2 from a ghosted image source mirrored below the ground, and the annotations give the path difference delta = r2 minus r1, the interference phase 2 pi delta over lambda plus the reflection phase, the in-phase gain of up to +6 dB and the deep dip at half a wavelength over hard ground" width="92%"></picture>
+
+Over acoustically hard ground ($G = 0$) the reflection coefficient stays close
+to $+1$ in every octave, the long-wavelength sum is fully constructive, and the
+general method duly returns $A_{gr} = -3$ dB in each band. Porous ground turns
+the reflection coefficient complex and angle-dependent (for a point source
+near grazing incidence, the spherical-wave coefficient of the Chien-Soroka
+solution, with a ground-wave term no plane-wave picture captures): part of the
+reflection flips phase, and the destructive notch lands in the 250 to 1000 Hz
+octaves. That notch is precisely what the $a'$ to $d'$ height-and-distance
+functions of Table 3 parameterize, with $G$ blending the hard and porous
+behaviours. The same two-ray geometry carries over to aircraft lateral
+attenuation and to every ray-based outdoor model; Salomons and Attenborough &
+Van Renterghem develop the full theory that the engineering fit compresses.
+
 A negative $A_{gr}$ (a net gain) is plain interference: the ground-reflected
 wave adds to the direct one. Below, a 400 Hz source 1.5 m over rigid ground
 builds the lobe pattern of that interference, and the level sampled on an arc
@@ -339,11 +364,142 @@ stacked per-band breakdown with the total overlaid (the figure above).
 | `lateral` | bool | — | `False` | `True` ⇒ vertical-edge diffraction (Eq. (13)) |
 | `line_of_sight_clear` | bool | — | `False` | `True` ⇒ the sight line passes above the top edge: the path difference takes a negative sign and Kmet = 1 (text after Eq. (16)) |
 
-The method's stated accuracy is $\pm 1$ to $\pm 3$ dB for broadband noise up to
-1000 m (Table 5). See the [Theory](theory-environment-transport.md) page for the full derivation, the
+## 3. Scope, assumptions and pitfalls
+
+### What "favourable propagation conditions" means
+
+ISO 9613-2 does not predict the level under the weather of the moment. Every
+equation assumes conditions **favourable to propagation** (Clause 5): wind
+blowing from source to receiver (within about 45° of the connecting line, at
+roughly 1 to 5 m/s measured 3 to 11 m above ground), or the moderate
+ground-based temperature inversion of a clear, calm night, which curves sound
+rays downward the same way. Downward refraction closes the acoustic shadow
+zones that upwind or neutral atmospheres would form, so the predicted
+$L_{fT}(DW)$ is close to the highest level the geometry can deliver: over a
+year the actual level is usually lower and rarely meaningfully higher. The
+choice is deliberate. Complaints arrive on the still nights when a distant
+plant is clearly audible, not on the gusty afternoons when it vanishes, and a
+method that predicts the audible case protects the assessment. The long-term
+average is recovered by subtracting $C_{met}$ (Eq. (21)/(22)), whose $C_0$
+encodes how often the wind actually favours the path (about $+3$ dB when half
+the time is favourable, values above 2 dB already exceptional, Notes 20/22).
+The stated $\pm 1$ to $\pm 3$ dB accuracy (Table 5) holds under favourable
+conditions, for broadband sources, up to 1000 m; beyond that the standard
+makes no accuracy claim at all.
+
+### Barrier pitfalls beyond the animation
+
+The screening term is the easiest one to over-trust; four fine points decide
+whether a real barrier delivers its computed $D_z$:
+
+* **The caps are physical, not editorial.** $D_z$ is capped at 20 dB for
+  single and 25 dB for double diffraction no matter how tall the wall,
+  because atmospheric turbulence scatters sound into the shadow zone and sets
+  a ceiling that extra height cannot buy back. An insertion loss beyond
+  roughly 20 dB is enclosure territory, not screen territory. Eq. (14) itself
+  is a smoothed engineering curve in the tradition of Maekawa's screen chart,
+  an empirical fit over three decades of Fresnel number $N = 2z/\lambda$.
+* **$K_{met}$ quietly erodes distant barriers.** The meteorological factor
+  (Eq. (18)) discounts the screening because the same downward-curved rays
+  that make conditions favourable also pass over the top edge. Within 100 m
+  of source-receiver distance $K_{met} \approx 1$ (Note 17), but for a long
+  path with a small path difference it can strip several decibels off a
+  barrier that looks generous on the section drawing.
+* **Double diffraction is a modest bonus.** A thick obstacle (two edges
+  separated by $e$) raises $C_3$ from 1 toward 3 (Eq. (15)), worth at most
+  about $10 \lg 3 \approx 4.8$ dB extra plus the higher 25 dB cap. A building
+  modelled as a double edge only earns that bonus if both edges really are
+  continuous and the roof between them is closed.
+* **The ground effect is spent, not kept.** For a top-edge barrier the
+  standard folds the screened path's ground effect into the diffraction:
+  $A_{bar} = D_z - A_{gr}$ (Eq. (12), Note 13). Over porous ground that was
+  already providing 5 to 10 dB of $A_{gr}$ in the mid bands, the *net* gain
+  of building the barrier is correspondingly smaller than its nominal $D_z$;
+  the two effects do not stack.
+
+An obstacle must also qualify as a barrier at all (Clause 7.4): surface
+density at least 10 kg/m², a closed surface without large gaps, and a
+horizontal extent normal to the path larger than the wavelength. A slatted
+fence or a short container screens far less than Eq. (14) promises.
+
+### ISO 9613-2 or CNOSSOS-EU?
+
+Two frameworks dominate outdoor noise prediction in Europe, and they answer
+different questions:
+
+* **ISO 9613-2** is a general *engineering attenuation* method: given the
+  octave-band sound power of any source you can decompose into point sources,
+  it returns the favourable-condition receiver level. Source emission is out
+  of scope; the sound power comes from measurement (the ISO 3740 family) or
+  from the equipment supplier. It is the workhorse of industrial-plant and
+  environmental impact predictions assessed with ISO 1996-2.
+* **CNOSSOS-EU** (Common Noise Assessment Methods in Europe) is the mandatory
+  common framework for the strategic noise maps of the Environmental Noise
+  Directive 2002/49/EC, adopted as its Annex II by
+  [Commission Directive (EU) 2015/996](https://eur-lex.europa.eu/eli/dir/2015/996/oj/eng).
+  It bundles *emission* models for road, rail and industrial sources (and
+  delegates aircraft to ECAC Doc 29) with its own propagation part derived
+  from the French NMPB 2008 method, producing the $L_{den}$/$L_{night}$
+  indicators the Directive reports.
+
+The propagation parts disagree by design, not by accident. CNOSSOS-EU
+evaluates every path twice, once under a homogeneous atmosphere and once
+under favourable (downward-refracting) conditions, and combines the two
+long-term with the local occurrence probability of favourable conditions per
+path direction; ISO 9613-2 computes only the favourable case and subtracts a
+scalar $C_{met}$. The ground effect in CNOSSOS-EU is built from a
+path-averaged ground factor over a fitted mean plane, with expressions that
+change between the two atmospheres, where ISO 9613-2 uses the fixed
+three-region Table 3. Diffraction, too, follows a different formulation that
+couples the ground effect on each side of the edge. Run both on the same
+geometry and the octave-band results can differ by several decibels, each
+internally consistent. The practical rule: END strategic maps and anything
+that must be comparable across EU member states use CNOSSOS-EU; a plant
+permit, a compliance prediction against a measured sound power, or work
+under regulations that cite ISO 9613 use this module. (ISO published a
+revised ISO 9613-2 in 2024; this library implements the 1996 edition, the one
+most national regulations and the validation literature still reference.)
+
+See the [Theory](theory-environment-transport.md) page for the full derivation, the
 [Room Acoustics guide](room-acoustics.md) for how $\alpha$ feeds
 ISO 354, and the [Occupational Noise Exposure guide](occupational-exposure.md) for the ISO 9612 occupational
 exposure that consumes A-weighted levels.
+
+## References
+
+- Salomons, E. M. (2001). *Computational atmospheric acoustics*. Kluwer
+  Academic Publishers. ISBN 978-1-4020-0390-5.
+  [doi:10.1007/978-94-010-0660-6](https://doi.org/10.1007/978-94-010-0660-6).
+  The wave-based theory (parabolic equation, fast field program, refraction
+  and turbulence) that quantifies what the favourable-condition assumption
+  and the $K_{met}$ factor approximate.
+- Attenborough, K., & Van Renterghem, T. (2021). *Predicting outdoor sound*
+  (2nd ed.). CRC Press.
+  [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
+  Ground impedance models, the spherical-wave reflection coefficient behind
+  the ground dip of section 2, and the meteorological effects on barriers.
+- Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
+  157-173.
+  [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).
+  The screen-attenuation chart against Fresnel number that Eq. (14)'s
+  diffraction term descends from.
+- Kephalopoulos, S., Paviotti, M., & Anfosso-Lédée, F. (2012). *Common noise
+  assessment methods in Europe (CNOSSOS-EU)* (EUR 25379 EN). Publications
+  Office of the European Union.
+  [doi:10.2788/31776](https://doi.org/10.2788/31776),
+  [JRC repository](https://publications.jrc.ec.europa.eu/repository/handle/JRC72550).
+  The common EU framework contrasted with ISO 9613-2 in section 3.
+- International Organization for Standardization. (1993). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 1: Calculation of
+  the absorption of sound by the atmosphere* (ISO 9613-1:1993).
+  [iso.org catalogue](https://www.iso.org/standard/17426.html).
+  The implemented pure-tone attenuation coefficient of section 1.
+- International Organization for Standardization. (1996). *Acoustics —
+  Attenuation of sound during propagation outdoors — Part 2: General method
+  of calculation* (ISO 9613-2:1996; a revised edition was published in 2024,
+  this module implements the 1996 method).
+  [iso.org catalogue](https://www.iso.org/standard/20649.html).
+  The implemented attenuation chain of section 2.
 
 ---
 

@@ -151,7 +151,10 @@ plt.show()
 The `MultipleShockResult` carries the dose ``Dz``, the daily dose ``Dzd``, the
 compressive stress ``Sd``, the stress variable ``R``, the injury probability and
 the response peaks, and its `.plot()` draws the injury-probability curve with the
-10/50/90 % risk thresholds of Table C.2. This complements the r.m.s.,
+10/50/90 % risk thresholds of Table C.2. The model is vertical-axis only:
+clause 4 neglects the horizontal contributions to spinal compression by design,
+and the horizontal spinal model of the withdrawn 2004 edition is not reinstated,
+so horizontal whole-body exposure is assessed instead with the r.m.s.,
 running-r.m.s./MTVV and VDV metrics of [Human Vibration](human-vibration.md)
 (ISO 2631-1).
 

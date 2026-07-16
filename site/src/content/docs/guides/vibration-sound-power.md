@@ -74,6 +74,34 @@ mean `mean_velocity_level` (Formula 10) or its area-weighted form (Formula 11),
 and the correction `extraneous_velocity_correction` removes extraneous
 vibration per Table 2.
 
+## 3. When the radiation-factor assumption breaks
+
+The whole method stands on one substitution: replacing the acoustic
+measurement by `ε`. The Part 1 value `ε = 1` is close to the true radiation
+factor only above the **critical (coincidence) frequency** of plate-like
+parts, where bending waves travel faster than sound and the surface radiates
+like a piston. Below coincidence, adjacent zones of the
+plate move in antiphase and their radiation largely cancels: `ε` drops far
+below one and falls quickly with decreasing frequency, so the survey method
+can overstate the low-frequency bands of a large thin casing by 10 dB and
+more. The same cancellation makes small sources radiate poorly (the acoustic
+short circuit around an unbaffled panel). Two further assumptions are easy
+to violate in the field:
+
+* **The measured vibration must be the machine's own.** Vibration fed in
+  from neighbouring machinery inflates `⟨v²⟩`; Table 2 prescribes the
+  source-off check and `extraneous_velocity_correction` applies it.
+* **The surface must be the dominant radiator.** Airborne sound from
+  openings, intakes or internal sources that bypasses the measured casing is
+  invisible to a velocity survey; the method characterises the
+  structure-borne part only.
+
+Part 2 exists exactly for the radiation-factor problem: it replaces the
+fixed `ε = 1`
+with a band-by-band `εⱼ` determined from one reference measurement of the
+radiated power (ISO 9614 intensity), after which the velocity survey can be
+repeated cheaply on nominally identical machines.
+
 <details>
 <summary>Show the code for this figure</summary>
 
@@ -94,6 +122,28 @@ plt.xlabel("Frequency [Hz]"); plt.ylabel("$L_W$ [dB re 1 pW]"); plt.show()
 ```
 
 </details>
+
+## References
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3rd ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  The radiation-efficiency treatment behind section 3: coincidence, the
+  cancellation below the critical frequency and the radiation of finite
+  plates.
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of airborne sound power levels emitted by machinery using
+  vibration measurement — Part 1: Survey method using a fixed radiation
+  factor* (ISO/TS 7849-1:2009).
+  [iso.org catalogue](https://www.iso.org/standard/40537.html).
+  The upper-limit method with `ε = 1`.
+- International Organization for Standardization. (2009). *Acoustics —
+  Determination of airborne sound power levels emitted by machinery using
+  vibration measurement — Part 2: Engineering method including determination
+  of the adequate radiation factor* (ISO/TS 7849-2:2009).
+  [iso.org catalogue](https://www.iso.org/standard/40538.html).
+  The engineering method with a measured band-wise radiation factor.
 
 ---
 

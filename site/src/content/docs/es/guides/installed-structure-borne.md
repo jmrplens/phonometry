@@ -49,6 +49,18 @@ print(round(float(ph.installed_structure_borne_power_level(82.0, dc)), 1))  # L_
 
 ## 2. Transmisión al recinto receptor
 
+Las partes 1 y 2 de EN 12354 tratan recintos excitados por vía aérea y por la
+máquina de impactos normalizada; la parte 5 cubre las fuentes que sacuden el
+edificio *directamente*: bombas, ventiladores, ascensores, bañeras de
+hidromasaje, cisternas y las conducciones que las anclan a paredes y forjados.
+Una vez que la potencia instalada está en la estructura, varios elementos
+radian al recinto receptor: el propio elemento excitado y cada elemento al
+que la vibración llega a través de las uniones. Cada par elemento
+excitado/elemento radiante `i→j` es una vía de transmisión con su propio
+término de ajuste y su índice de flancos:
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_installed_paths_es.svg" alt="Vías de instalación EN 12354-5: una bomba sobre apoyos resilientes inyecta potencia estructural en el forjado, el forjado excitado radia al recinto receptor de abajo, una segunda vía recorre el forjado hasta la pared de flanco, y la cascada de predicción va de la potencia característica al nivel de presión sonora normalizado" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_installed_paths_es_dark.svg" alt="Vías de instalación EN 12354-5: una bomba sobre apoyos resilientes inyecta potencia estructural en el forjado, el forjado excitado radia al recinto receptor de abajo, una segunda vía recorre el forjado hasta la pared de flanco, y la cascada de predicción va de la potencia característica al nivel de presión sonora normalizado" style="width:92%">
+
 Cada camino de transmisión `i→j` da un nivel de presión sonora normalizado a
 partir de la potencia instalada, el término de ajuste estructura-a-aéreo `D_sa`,
 el índice de reducción sonora de flancos `R_ij,ref` (EN 12354-1) y el área del
@@ -104,6 +116,15 @@ res.plot(); plt.show()
 ```
 
 </details>
+
+## Referencias
+
+- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
+  sound: Structural vibrations and sound radiation at audio frequencies*
+  (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
+  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
+  El acoplamiento de movilidades fuente-receptor y la transmisión estructural
+  a través de uniones tras el término de acoplamiento y el modelo de vías.
 
 ---
 

@@ -165,6 +165,16 @@ $D_{nT} = R' + 10\lg(0.32\,V/S_s)$, expuesta como
 (`standardized_level_difference(52.2, 50.0, 11.5)` da 53.6 dB, la cadena
 impresa con $V/(3S)$ 53.8 dB, y ambas redondean a $D_{nT,w} = 54$ dB).
 
+Las tres guías de aislamiento cierran un bucle: el
+[laboratorio](/phonometry/es/guides/insulation-lab/) mide $R$ y $K_{ij}$
+elemento a elemento y unión a unión, este modelo los ensambla en un $R'_w$
+predicho, y la
+[medición en campo](/phonometry/es/guides/insulation-field/) comprueba el
+resultado construido. Cuando el valor medido queda muy por debajo de la
+predicción, busca un defecto de ejecución en la vía dominante que informa el
+modelo: un puente rígido a través de una unión resiliente, un trasdosado
+ausente, una fuga alrededor del elemento separador.
+
 ### Parámetros de `junction_vibration_reduction()` / `flanking_element()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
@@ -327,6 +337,15 @@ fig.tight_layout(); plt.show()
 `r_tr_s`, `d_2m_nt`, `element_r`, y los números únicos `r_tr_s_w` / `d_2m_nt_w` /
 `c_tr`); `radiated_sound_power()` un `RadiatedPowerResult` (`l_w`, `r_prime`,
 `l_w_dba`). Ambos exponen `.plot()`.
+
+## Referencias
+
+- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
+  ISBN 978-0-7506-6526-1.
+  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
+  El tratamiento completo de la transmisión por flancos y del marco de
+  predicción EN 12354, del índice de reducción de vibraciones a su base
+  estadística.
 
 ---
 

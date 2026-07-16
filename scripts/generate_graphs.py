@@ -7217,7 +7217,7 @@ def animate_onset_detection(output_dir: str) -> None:
         # handle stay fully inside the panel during the closing hold (tc
         # reaches 3.0 s, the xlim). The decision chain below still keys off
         # the true tc, so only the glyph position is clamped.
-        tc_view = min(tc, 3.0 - rx * 1.9)
+        tc_view = min(max(tc, 0.55 + rx), 3.0 - rx * 1.9)
         i = max(0, min(t.size - 1, int(round(tc_view * fs))))
         y0, g = float(laf[i]), float(grad[i])
         detecting = g > 10.0

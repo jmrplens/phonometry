@@ -135,6 +135,62 @@ list grows as guides gain their References sections.
   residual pressure-intensity index.
   Cited by [Sound Intensity (p-p)](/phonometry/guides/intensity/).
 
+## Materials and surfaces
+
+- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
+  Modelling sound absorbing materials* (2nd ed.). Wiley.
+  ISBN 978-0-470-74661-5.
+  [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
+  The porous-material theory linking airflow resistivity, surface impedance
+  and absorption.
+  Cited by [Acoustic Materials](/phonometry/guides/materials/).
+- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
+  Theory, design and application* (3rd ed.). CRC Press.
+  ISBN 978-1-4987-4099-9.
+  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
+  The monograph on absorber and diffuser measurement and design, by the
+  authors behind the ISO 17497 methods.
+  Cited by [Acoustic Materials](/phonometry/guides/materials/) and
+  [Surface Scattering, Diffusion and In-situ Absorption](/phonometry/guides/surface-scattering/).
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [iso.org catalogue](https://www.iso.org/standard/34545.html).
+  The reverberation-room absorption method and its specimen mountings.
+  Cited by [Acoustic Materials](/phonometry/guides/materials/).
+- International Organization for Standardization. (1998). *Acoustics —
+  Determination of sound absorption coefficient and impedance in impedance
+  tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adopted in
+  Europe as BS EN ISO 10534-2:2001; since revised as
+  [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
+  [iso.org catalogue](https://www.iso.org/standard/22851.html).
+  The two-microphone transfer-function method and its plane-wave limits.
+  Cited by [Acoustic Materials](/phonometry/guides/materials/).
+- ASTM International. (2019). *Standard test method for normal incidence
+  determination of porous material acoustical properties based on the
+  transfer matrix method* (ASTM E2611-19).
+  [ASTM store](https://store.astm.org/e2611-19.html).
+  The four-microphone transfer-matrix transmission-loss method.
+  Cited by [Acoustic Materials](/phonometry/guides/materials/).
+- International Organization for Standardization. (2018). *Acoustics —
+  Determination of airflow resistance — Part 1: Static airflow method*
+  (ISO 9053-1:2018).
+  [iso.org catalogue](https://www.iso.org/standard/69869.html).
+  The static airflow-resistance method and its reference velocity.
+  Cited by [Acoustic Materials](/phonometry/guides/materials/).
+- International Organization for Standardization. (2004). *Acoustics —
+  Sound-scattering properties of surfaces — Part 1: Measurement of the
+  random-incidence scattering coefficient in a reverberation room*
+  (ISO 17497-1:2004).
+  [iso.org catalogue](https://www.iso.org/standard/31397.html).
+  The turntable scattering-coefficient method.
+  Cited by [Surface Scattering, Diffusion and In-situ Absorption](/phonometry/guides/surface-scattering/).
+- International Organization for Standardization. (2012). *Acoustics —
+  Sound-scattering properties of surfaces — Part 2: Measurement of the
+  directional diffusion coefficient in a free field* (ISO 17497-2:2012).
+  [iso.org catalogue](https://www.iso.org/standard/55293.html).
+  The goniometer diffusion-coefficient method.
+  Cited by [Surface Scattering, Diffusion and In-situ Absorption](/phonometry/guides/surface-scattering/).
+
 ## Building acoustics
 
 - Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.

@@ -137,6 +137,65 @@ que las guías incorporan sus secciones de Referencias.
   índice presión-intensidad residual.
   Citado por [Intensidad sonora (p-p)](/phonometry/es/guides/intensity/).
 
+## Materiales y superficies
+
+- Allard, J. F., & Atalla, N. (2009). *Propagation of sound in porous media:
+  Modelling sound absorbing materials* (2.ª ed.). Wiley.
+  ISBN 978-0-470-74661-5.
+  [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
+  La teoría del material poroso que enlaza resistividad al flujo, impedancia
+  superficial y absorción.
+  Citado por [Materiales acústicos](/phonometry/es/guides/materials/).
+- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
+  Theory, design and application* (3.ª ed.). CRC Press.
+  ISBN 978-1-4987-4099-9.
+  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
+  La monografía sobre medida y diseño de absorbentes y difusores, de los
+  autores tras los métodos ISO 17497.
+  Citado por [Materiales acústicos](/phonometry/es/guides/materials/) y
+  [Dispersión superficial, difusión y absorción in situ](/phonometry/es/guides/surface-scattering/).
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [Catálogo iso.org](https://www.iso.org/standard/34545.html).
+  El método de absorción en cámara reverberante y sus montajes de probeta.
+  Citado por [Materiales acústicos](/phonometry/es/guides/materials/).
+- International Organization for Standardization. (1998). *Acoustics —
+  Determination of sound absorption coefficient and impedance in impedance
+  tubes — Part 2: Transfer-function method* (ISO 10534-2:1998; adoptada en
+  Europa como BS EN ISO 10534-2:2001; revisada después como
+  [ISO 10534-2:2023](https://www.iso.org/standard/81294.html)).
+  [Catálogo iso.org](https://www.iso.org/standard/22851.html).
+  El método de la función de transferencia con dos micrófonos y sus límites
+  de onda plana.
+  Citado por [Materiales acústicos](/phonometry/es/guides/materials/).
+- ASTM International. (2019). *Standard test method for normal incidence
+  determination of porous material acoustical properties based on the
+  transfer matrix method* (ASTM E2611-19).
+  [Tienda ASTM](https://store.astm.org/e2611-19.html).
+  El método de pérdida por transmisión por matriz de transferencia con
+  cuatro micrófonos.
+  Citado por [Materiales acústicos](/phonometry/es/guides/materials/).
+- International Organization for Standardization. (2018). *Acoustics —
+  Determination of airflow resistance — Part 1: Static airflow method*
+  (ISO 9053-1:2018).
+  [Catálogo iso.org](https://www.iso.org/standard/69869.html).
+  El método estático de resistencia al flujo de aire y su velocidad de
+  referencia.
+  Citado por [Materiales acústicos](/phonometry/es/guides/materials/).
+- International Organization for Standardization. (2004). *Acoustics —
+  Sound-scattering properties of surfaces — Part 1: Measurement of the
+  random-incidence scattering coefficient in a reverberation room*
+  (ISO 17497-1:2004).
+  [Catálogo iso.org](https://www.iso.org/standard/31397.html).
+  El método del coeficiente de dispersión con mesa giratoria.
+  Citado por [Dispersión superficial, difusión y absorción in situ](/phonometry/es/guides/surface-scattering/).
+- International Organization for Standardization. (2012). *Acoustics —
+  Sound-scattering properties of surfaces — Part 2: Measurement of the
+  directional diffusion coefficient in a free field* (ISO 17497-2:2012).
+  [Catálogo iso.org](https://www.iso.org/standard/55293.html).
+  El método del coeficiente de difusión con goniómetro.
+  Citado por [Dispersión superficial, difusión y absorción in situ](/phonometry/es/guides/surface-scattering/).
+
 ## Acústica de edificios
 
 - Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.

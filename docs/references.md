@@ -198,6 +198,12 @@ it; the list grows as guides gain their References sections.
   [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
   The original NC curves and their speech-interference rationale.
   Cited by [Room-noise criteria](room-noise.md).
+- Kosten, C. W., & van Os, G. J. (1962). Community reaction criteria for
+  external noises. In *The Control of Noise* (National Physical Laboratory
+  Symposium No. 12, pp. 373-387). Her Majesty's Stationery Office.
+  [Open Library record](https://openlibrary.org/books/OL58781133M).
+  The NR curve family contrasted with NC.
+  Cited by [Room-noise criteria](room-noise.md).
 - Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
   noise of heating, ventilating, and air-conditioning (HVAC) systems in
   buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
@@ -245,7 +251,8 @@ it; the list grows as guides gain their References sections.
 - Acoustical Society of America. (2019). *Criteria for evaluating room
   noise* (ANSI/ASA S12.2-2019).
   [ANSI webstore](https://webstore.ansi.org/standards/asa/ansiasas122019).
-  The NC tangency method and the RC Mark II rating with its spectral tag.
+  The normative NC tangency method and the RC Mark II rating of its
+  informative Annex D, with its spectral tag.
   Cited by [Room-noise criteria](room-noise.md).
 
 ## Building acoustics

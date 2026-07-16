@@ -333,8 +333,9 @@ Ts = 72 ms). A real room has a steeper early slope, so EDT < T30.
 extrapolate the same 60 dB decay from different windows, so their
 disagreement carries information:
 
-- **T20 ≈ T30** (curvature below 10 %): the decay is a single straight
-  slope, the diffuse-field picture holds, and either time can stand for
+- **T20 ≈ T30** (curvature below 10 %): the decay is close to a single
+  straight slope over both evaluation windows, which is consistent with
+  (though not proof of) a diffuse field, and either time can stand for
   "the" reverberation time of the band.
 - **T30 > T20** (curvature above 10 %): the decay sags, with late energy
   decaying more slowly than early energy. The usual causes are coupled

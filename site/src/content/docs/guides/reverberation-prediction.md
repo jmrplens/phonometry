@@ -177,10 +177,14 @@ domain of validity:
 - **Millington-Sette** handles a mix of very absorptive and hard surfaces
   better than a single mean, but it is meant for measured, sub-unity
   coefficients: a single surface with $\alpha_i = 1$ drives the whole
-  prediction to zero. Reverberation-room coefficients above 1.0 (a
+  prediction to zero. Reverberation-room coefficients at or above 1.0 (a
   documented ISO 354 outcome, see the absorption section of
-  [Room Acoustics](/phonometry/guides/room-acoustics/)) must be capped
-  below 1 before any of the logarithmic models can even be evaluated.
+  [Room Acoustics](/phonometry/guides/room-acoustics/)) lie outside the
+  domain of the logarithmic models, whose $\ln(1-\alpha)$ is undefined
+  there, and phonometry rejects them for every formula in this module.
+  Bringing such a coefficient into $[0, 1)$ is a modelling decision the
+  formulas do not prescribe: whatever adjustment you choose (limiting just
+  below 1 is common), record it alongside the prediction.
 - **Fitzroy** and **Arau-Puchades** target shoebox rooms whose absorption
   is concentrated on one axis, the typical office or dwelling with a soft
   floor and ceiling between hard walls. Arau's geometric mean tempers

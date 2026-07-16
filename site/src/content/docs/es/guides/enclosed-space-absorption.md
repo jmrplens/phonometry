@@ -122,16 +122,16 @@ reverberación medido en
 ## 3. De dónde salen los datos de entrada
 
 **Coeficientes de superficie.** La norma espera que los $\alpha_{s,i}$
-procedan de mediciones de laboratorio según EN ISO 354, el método de sala
+procedan de mediciones de laboratorio según EN ISO 354, el método de cámara
 reverberante de
 [Materiales acústicos](/phonometry/es/guides/materials/); se admiten
 valores teóricos, empíricos o de campo siempre que se declare la fuente de
 los datos. ISO 354 entrega datos en tercios de octava, y un cálculo en
 bandas de octava toma como entrada la media aritmética de los tres tercios.
-Un coeficiente de sala reverberante puede superar 1,0 (la difracción de
+Un coeficiente de cámara reverberante puede superar 1,0 (la difracción de
 borde dispersa hacia la muestra más energía de la que intercepta su área
 plana); entra en la Fórmula 1 tal como se midió, sin recorte, porque la
-misma convención de campo difuso que lo produjo es la que asume el modelo.
+misma convención de campo difuso que lo produjo es la que supone el modelo.
 
 **Mobiliario y ocupantes.** Los objetos contribuyen por tres vías: un área
 de absorción equivalente medida $A_{obj}$ cuando existe (personas y
@@ -148,6 +148,13 @@ sola.
 atenuación de potencia $m$ de la Tabla 1 de la norma, resuelto por las
 cadenas `air_condition` (clase de temperatura y humedad relativa, derivada
 de ISO 9613-1); solo importa por encima de 1 kHz y crece con el volumen.
+Los seis perfiles integrados, de `"10C_30-50"` a `"20C_70-90"` (la
+cláusula 4.3 recomienda `"20C_50-70"` cuando no se especifican
+condiciones), cubren solo las bandas de octava estándar de 125 Hz a 8 kHz
+y no pueden combinarse con un eje de frecuencias propio;
+`air_condition=None` (el valor por defecto) omite el término de aire, y
+para otras frecuencias o condiciones, calcula $m$ según ISO 9613-1 y
+encadena `air_absorption_area` con `equivalent_absorption_area`.
 
 **Límites de validez (cláusula 4.6).** El modelo supone una sala corriente
 y razonablemente difusa: ninguna dimensión más de 5 veces otra, pares de

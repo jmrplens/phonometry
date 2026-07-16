@@ -1,6 +1,6 @@
 ---
 title: "Acústica de salas"
-description: "Adquisición de la respuesta al impulso (ISO 18233), parámetros de sala EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), métricas de habla en oficinas diáfanas (ISO 3382-3) y absorción sonora en sala reverberante (ISO 354)."
+description: "Adquisición de la respuesta al impulso (ISO 18233), parámetros de sala EDT/T20/T30/C50/C80/Ts (ISO 3382-1/2), métricas de habla en oficinas diáfanas (ISO 3382-3) y absorción sonora en cámara reverberante (ISO 354)."
 ---
 
 La acústica de salas parte de una única medición: la **respuesta al impulso**
@@ -10,7 +10,7 @@ sobre el campo sonoro dentro de un único recinto. Esta página sigue esa cadena
 en orden de medición: adquirir la RI (ISO 18233), convertirla en parámetros de
 sala (ISO 3382-1/2), métricas espaciales del habla para oficinas diáfanas
 (ISO 3382-3) y, cerrando el ciclo, la absorción sonora de un material en una
-sala reverberante (ISO 354). Para el aislamiento acústico *entre* recintos —la
+cámara reverberante (ISO 354). Para el aislamiento acústico *entre* recintos —la
 misma RI medida a ambos lados de un cerramiento— consulta la guía complementaria
 [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/).
 
@@ -348,8 +348,9 @@ inicial más pronunciada, así que EDT < T30.
 mismo decaimiento de 60 dB desde ventanas distintas, así que su desacuerdo
 lleva información:
 
-- **T20 ≈ T30** (curvatura por debajo del 10 %): el decaimiento es una
-  única pendiente recta, la imagen de campo difuso se sostiene y cualquiera
+- **T20 ≈ T30** (curvatura por debajo del 10 %): el decaimiento se acerca
+  a una única pendiente recta en ambas ventanas de evaluación, algo
+  compatible con un campo difuso (aunque no lo demuestra), y cualquiera
   de los dos tiempos puede representar "el" tiempo de reverberación de la
   banda.
 - **T30 > T20** (curvatura por encima del 10 %): el decaimiento se comba,
@@ -527,7 +528,7 @@ posición puede medirse a su vez con las herramientas STIPA de la
 
 El área de absorción sonora equivalente `A` que gobierna `R'`, `L'n`, la
 corrección ambiental `K2` de ISO 3744 y el término de absorción de ISO 3741 se
-mide a su vez en una sala reverberante
+mide a su vez en una cámara reverberante
 (ISO 354). Mide el tiempo de reverberación de la sala **vacía** ($T_1$) y de
 nuevo **con la muestra de ensayo instalada** ($T_2$); la absorción de la muestra
 es la diferencia de las dos áreas de Sabine, y dividiendo por el área cubierta
@@ -649,7 +650,7 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [Catálogo iso.org](https://www.iso.org/standard/34545.html).
-  La medición de absorción en sala reverberante del §4.
+  La medición de absorción en cámara reverberante del §4.
 
 ---
 

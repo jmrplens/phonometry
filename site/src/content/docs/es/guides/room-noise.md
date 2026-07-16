@@ -151,7 +151,8 @@ tercera familia que este módulo deliberadamente no implementa:
   etiqueta espectral señala después el rango de frecuencias problemático.
   Recurre a RC Mark II en la fase de diseño del sistema de climatización, o
   para diagnosticar una instalación que no cumple su límite NC.
-- **NR (Noise Rating)** es la contraparte europea de NC: la misma lógica de
+- **NR (Noise Rating)**, la familia de curvas de Kosten y van Os (1962),
+  es la contraparte europea de NC: la misma lógica de
   tangencia sobre una familia de curvas algo distinta (más permisiva en
   baja frecuencia, más estricta en alta), habitual en especificaciones
   europeas e internacionales de equipos y edificación. phonometry no
@@ -179,6 +180,12 @@ en lugar de remodelarlo.
   [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
   El artículo que introdujo las curvas NC y el razonamiento de
   interferencia con el habla que hay detrás.
+- Kosten, C. W., & van Os, G. J. (1962). Community reaction criteria for
+  external noises. In *The Control of Noise* (National Physical Laboratory
+  Symposium No. 12, pp. 373-387). Her Majesty's Stationery Office.
+  [Ficha en Open Library](https://openlibrary.org/books/OL58781133M).
+  El artículo que introdujo la familia de curvas NR con la que el texto
+  contrasta NC.
 - Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
   noise of heating, ventilating, and air-conditioning (HVAC) systems in
   buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
@@ -189,15 +196,16 @@ en lugar de remodelarlo.
 - Acoustical Society of America. (2019). *Criteria for evaluating room
   noise* (ANSI/ASA S12.2-2019).
   [Tienda ANSI](https://webstore.ansi.org/standards/asa/ansiasas122019).
-  Las curvas NC normativas, el método de tangencia y el procedimiento
-  RC Mark II que implementa este módulo.
+  Las curvas NC normativas y el método de tangencia, más el procedimiento
+  RC Mark II de su Anexo D informativo, que implementa este módulo.
 
 ---
 
 **Normas.** ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — las
-curvas NC y el método de tangencia (Tabla 1), y las curvas RC Mark II (Anexo D,
-Tabla D.1), la calificación por media de frecuencias medias (cláusula D.4) y la
-etiqueta espectral neutro/retumbo/siseo (cláusula D.3).
+curvas NC normativas y el método de tangencia (Tabla 1), y, del Anexo D
+informativo, las curvas RC Mark II (Tabla D.1), la calificación por media de
+frecuencias medias (cláusula D.4) y la etiqueta espectral neutro/retumbo/siseo
+(cláusula D.3).
 
 ## Véase también
 

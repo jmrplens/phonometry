@@ -167,11 +167,11 @@ su dominio de validez:
 
 - **Sabine** es la herramienta para salas vivas con absorción baja y
   razonablemente repartida ($\bar\alpha$ media hasta aproximadamente 0,2):
-  aulas, salas de actos, salas reverberantes. Es además la convención
+  aulas, salas de actos, cámaras reverberantes. Es además la convención
   integrada en la práctica de medida, porque el coeficiente de absorción de
   ISO 354 se *define* mediante la fórmula de Sabine, así que devolver datos
-  de sala reverberante a Sabine es autoconsistente incluso donde la fórmula
-  se tensa. Su defecto estructural aparece con absorción alta: con
+  de cámara reverberante a Sabine es autoconsistente incluso donde la
+  fórmula se tensa. Su defecto estructural aparece con absorción alta: con
   $\alpha = 1$ en todas las superficies (una abertura en todas las
   direcciones) sigue prediciendo un tiempo de reverberación finito.
 - **Eyring** es la elección para salas tratadas de forma uniforme con
@@ -182,11 +182,15 @@ su dominio de validez:
 - **Millington-Sette** maneja una mezcla de superficies muy absorbentes y
   duras mejor que una única media, pero está pensado para coeficientes
   medidos por debajo de la unidad: una sola superficie con $\alpha_i = 1$
-  lleva toda la predicción a cero. Los coeficientes de sala reverberante
-  por encima de 1,0 (un resultado documentado de ISO 354, ver la sección de
-  absorción de [Acústica de salas](/phonometry/es/guides/room-acoustics/))
-  deben acotarse por debajo de 1 antes de poder siquiera evaluar los
-  modelos logarítmicos.
+  lleva toda la predicción a cero. Los coeficientes de cámara reverberante
+  iguales o superiores a 1,0 (un resultado documentado de ISO 354, ver la
+  sección de absorción de
+  [Acústica de salas](/phonometry/es/guides/room-acoustics/)) quedan fuera
+  del dominio de los modelos logarítmicos, cuyo $\ln(1-\alpha)$ no está
+  definido ahí, y phonometry los rechaza en todas las fórmulas de este
+  módulo. Llevar un coeficiente así a $[0, 1)$ es una decisión de modelado
+  que las fórmulas no prescriben: el ajuste que elijas (es habitual
+  limitarlo justo por debajo de 1) debe registrarse junto a la predicción.
 - **Fitzroy** y **Arau-Puchades** apuntan a salas rectangulares con la
   absorción concentrada en un eje, la oficina o vivienda típica con suelo y
   techo blandos entre paredes duras. La media geométrica de Arau templa la

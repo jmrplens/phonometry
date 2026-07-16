@@ -144,6 +144,12 @@ absorption alone would.
 coefficient $m$ from the standard's Table 1, resolved by the
 `air_condition` strings (temperature and relative-humidity class, derived
 from ISO 9613-1); it only matters above 1 kHz and grows with the volume.
+The six built-in profiles, `"10C_30-50"` through `"20C_70-90"` (clause 4.3
+recommends `"20C_50-70"` when no conditions are specified), cover the
+standard 125 Hz to 8 kHz octave bands only and cannot be combined with a
+custom frequency axis; `air_condition=None` (the default) omits the air
+term, and for other frequencies or conditions compute $m$ per ISO 9613-1
+and chain `air_absorption_area` into `equivalent_absorption_area`.
 
 **Validity limits (clause 4.6).** The model assumes an ordinary,
 reasonably diffuse room: no dimension more than 5 times another, opposite

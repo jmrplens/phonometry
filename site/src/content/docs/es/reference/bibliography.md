@@ -205,6 +205,12 @@ que las guías incorporan sus secciones de Referencias.
   [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
   Las curvas NC originales y su razonamiento de interferencia con el habla.
   Citado por [Criterios de ruido de salas](/phonometry/es/guides/room-noise/).
+- Kosten, C. W., & van Os, G. J. (1962). Community reaction criteria for
+  external noises. In *The Control of Noise* (National Physical Laboratory
+  Symposium No. 12, pp. 373-387). Her Majesty's Stationery Office.
+  [Ficha en Open Library](https://openlibrary.org/books/OL58781133M).
+  La familia de curvas NR que se contrasta con NC.
+  Citado por [Criterios de ruido de salas](/phonometry/es/guides/room-noise/).
 - Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
   noise of heating, ventilating, and air-conditioning (HVAC) systems in
   buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
@@ -223,7 +229,7 @@ que las guías incorporan sus secciones de Referencias.
   Measurement of room acoustic parameters — Part 2: Reverberation time in
   ordinary rooms* (ISO 3382-2:2008).
   [Catálogo iso.org](https://www.iso.org/standard/36201.html).
-  Los grados de precisión y los recuentos de posiciones de la medición de
+  Los grados de exactitud y los recuentos de posiciones de la medición de
   la reverberación.
   Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/).
 - International Organization for Standardization. (2012). *Acoustics —
@@ -241,7 +247,7 @@ que las guías incorporan sus secciones de Referencias.
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [Catálogo iso.org](https://www.iso.org/standard/34545.html).
-  La medición de absorción en sala reverberante tras los datos de
+  La medición de absorción en cámara reverberante tras los datos de
   superficie.
   Citado por [Acústica de salas](/phonometry/es/guides/room-acoustics/) y
   [Absorción sonora en recintos](/phonometry/es/guides/enclosed-space-absorption/).
@@ -255,8 +261,8 @@ que las guías incorporan sus secciones de Referencias.
 - Acoustical Society of America. (2019). *Criteria for evaluating room
   noise* (ANSI/ASA S12.2-2019).
   [Tienda ANSI](https://webstore.ansi.org/standards/asa/ansiasas122019).
-  El método de tangencia NC y la calificación RC Mark II con su etiqueta
-  espectral.
+  El método de tangencia NC normativo y la calificación RC Mark II de su
+  Anexo D informativo, con su etiqueta espectral.
   Citado por [Criterios de ruido de salas](/phonometry/es/guides/room-noise/).
 
 ## Acústica de edificios

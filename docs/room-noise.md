@@ -146,8 +146,9 @@ this module deliberately does not implement:
   background that is neither boomy nor sharp. The spectral tag then points
   at the offending frequency range. Reach for RC Mark II at HVAC design
   time, or to diagnose an installation that fails its NC limit.
-- **NR (Noise Rating)** is the European counterpart of NC: the same
-  tangency logic over a slightly different curve family (more permissive
+- **NR (Noise Rating)**, the curve family of Kosten & van Os (1962), is
+  the European counterpart of NC: the same tangency logic over a
+  slightly different curve family (more permissive
   at low frequency, stricter at high), common in European and
   international equipment and building specifications. phonometry does not
   implement NR; when a specification cites NR, rate against the NR curves
@@ -172,6 +173,12 @@ character is right: reduce the whole spectrum rather than reshape it.
   [doi:10.1121/1.2369239](https://doi.org/10.1121/1.2369239).
   The paper that introduced the NC curves and the speech-interference
   reasoning behind them.
+- Kosten, C. W., & van Os, G. J. (1962). Community reaction criteria for
+  external noises. In *The Control of Noise* (National Physical Laboratory
+  Symposium No. 12, pp. 373-387). Her Majesty's Stationery Office.
+  [Open Library record](https://openlibrary.org/books/OL58781133M).
+  The paper that introduced the NR curve family the text contrasts
+  with NC.
 - Blazier, W. E. (1997). RC Mark II: A refined procedure for rating the
   noise of heating, ventilating, and air-conditioning (HVAC) systems in
   buildings. *Noise Control Engineering Journal*, 45(6), 243-250.
@@ -181,12 +188,12 @@ character is right: reduce the whole spectrum rather than reshape it.
 - Acoustical Society of America. (2019). *Criteria for evaluating room
   noise* (ANSI/ASA S12.2-2019).
   [ANSI webstore](https://webstore.ansi.org/standards/asa/ansiasas122019).
-  The normative NC curves, tangency method and RC Mark II procedure this
-  module implements.
+  The normative NC curves and tangency method, plus the RC Mark II
+  procedure of its informative Annex D, that this module implements.
 
 ---
 
 **Standards.** ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — the
-NC curves and the tangency method (Table 1), and the RC Mark II curves
-(Annex D, Table D.1), the mid-frequency-average rating (clause D.4) and the
-neutral/rumble/hiss spectral tag (clause D.3).
+normative NC curves and tangency method (Table 1), and, from the informative
+Annex D, the RC Mark II curves (Table D.1), the mid-frequency-average rating
+(clause D.4) and the neutral/rumble/hiss spectral tag (clause D.3).

@@ -1,0 +1,49 @@
+/* Responsive tables: readable columns plus horizontal swipe on phones.
+   Starlight already renders markdown tables as scrollable blocks
+   (`.sl-markdown-content table { display: block; overflow: auto }`), but
+   the browser's automatic table layout first wraps text columns down to
+   their min-content width. On a phone, a wide parameter table (4+ columns
+   with a long-text "Notes" column) therefore crushes every column to a
+   few characters per line and grows enormously tall cells before any
+   horizontal scrolling kicks in.
+
+   Fix (mobile only; desktop rendering is unchanged): give the cells of
+   wide tables a readable minimum width so the table overflows into
+   Starlight's scroll container instead of crushing. The
+   `:first-child:nth-last-child(n+4)` pair matches rows with 4 or more
+   cells, i.e. only genuinely wide tables; 2-3 column tables keep wrapping
+   naturally inside the reading column. The last column of a wide table is
+   by convention the long-text notes column, so it gets a wider floor
+   (16rem, about 40 characters per line). Keyboard reachability: Chrome
+   (127+) and Firefox focus scrollable regions without focusable children
+   by default, but Safari/WebKit does not, so the rehypeTableAlign
+   transform in astro.config.mjs stamps tabindex="0" on these 4+ column
+   tables; the focus outline below is its visible affordance. */
+.sl-markdown-content table:not(:where(.not-content *)):focus-visible {
+  outline: 2px solid var(--sl-color-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 50rem) {
+  .sl-markdown-content table:not(:where(.not-content *)) {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Header cells of wide tables stay on one line: headers are short and
+     define a sensible floor for their column. */
+  .sl-markdown-content table:not(:where(.not-content *)) tr > th:first-child:nth-last-child(n+4),
+  .sl-markdown-content table:not(:where(.not-content *)) tr > th:first-child:nth-last-child(n+4) ~ th {
+    white-space: nowrap;
+  }
+
+  /* Body cells of wide tables never shrink below a readable line. */
+  .sl-markdown-content table:not(:where(.not-content *)) tr > td:first-child:nth-last-child(n+4),
+  .sl-markdown-content table:not(:where(.not-content *)) tr > td:first-child:nth-last-child(n+4) ~ td {
+    min-width: 8rem;
+  }
+
+  /* The trailing notes column carries prose: give it a comfortable measure. */
+  .sl-markdown-content table:not(:where(.not-content *)) tr > td:first-child:nth-last-child(n+4) ~ td:last-child {
+    min-width: 16rem;
+  }
+}

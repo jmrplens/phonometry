@@ -22,6 +22,8 @@ over bands. The `−6 dB` accounts for the ground-board pressure doubling.
 ```python
 from phonometry import environmental
 
+# Background-corrected A-weighted one-third-octave band levels L_p,i (dB).
+band_levels = [55.0, 58.0, 60.0, 57.0, 54.0]
 r1 = environmental.slant_distance(hub_height=80.0, rotor_diameter=100.0)
 lwa = environmental.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 ```
@@ -94,9 +96,16 @@ tonality is `ΔL_tn = L_pt − L_pn`, and the tonal audibility is
 `ΔL_a ≥ −3 dB` and audible when `ΔL_a > 0`.
 
 ```python
+import numpy as np
 from phonometry import environmental
 
-res = environmental.wind_turbine_tonality(levels, frequencies)   # narrowband spectrum
+# A uniformly-spaced narrowband spectrum (2 Hz resolution): a flat 30 dB floor
+# with a discrete 60 dB tone at 500 Hz.
+frequencies = np.arange(440.0, 562.0, 2.0)
+levels = np.full(frequencies.size, 30.0)
+levels[np.argmin(np.abs(frequencies - 500.0))] = 60.0
+
+res = environmental.wind_turbine_tonality(levels, frequencies)
 print(res.tone_frequency, res.tonality, res.tonal_audibility, res.is_audible)
 res.plot()   # spectrum + critical band + masking level (needs matplotlib)
 ```

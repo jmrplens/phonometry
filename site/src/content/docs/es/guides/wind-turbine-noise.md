@@ -23,6 +23,8 @@ la duplicación de presión en la placa del suelo.
 ```python
 from phonometry import environmental
 
+# Niveles de banda de tercio de octava ponderados A y corregidos de fondo L_p,i (dB).
+band_levels = [55.0, 58.0, 60.0, 57.0, 54.0]
 r1 = environmental.slant_distance(hub_height=80.0, rotor_diameter=100.0)
 lwa = environmental.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 ```
@@ -100,9 +102,16 @@ de enmascaramiento `L_pn` sigue la Fórmula 31, la tonalidad es
 cuando `ΔL_a > 0`.
 
 ```python
+import numpy as np
 from phonometry import environmental
 
-res = environmental.wind_turbine_tonality(levels, frequencies)   # espectro de banda estrecha
+# Un espectro de banda estrecha uniformemente espaciado (resolución de 2 Hz):
+# un suelo plano de 30 dB con un tono discreto de 60 dB en 500 Hz.
+frequencies = np.arange(440.0, 562.0, 2.0)
+levels = np.full(frequencies.size, 30.0)
+levels[np.argmin(np.abs(frequencies - 500.0))] = 60.0
+
+res = environmental.wind_turbine_tonality(levels, frequencies)
 print(res.tone_frequency, res.tonality, res.tonal_audibility, res.is_audible)
 res.plot()   # espectro + banda crítica + nivel de enmascaramiento (requiere matplotlib)
 ```

@@ -249,6 +249,53 @@ plt.show()
 
 </details>
 
+## ¿Dispersión o difusión? Dos coeficientes, dos trabajos
+
+Los dos coeficientes anteriores se tratan de forma rutinaria como
+intercambiables, en fichas de producto y a veces en manuales de simulación. No
+lo son, y ninguno puede calcularse a partir del otro. El coeficiente de
+dispersión $s$ (ISO 17497-1) hace **contabilidad de energía**: qué fracción de
+la energía reflejada abandona la dirección especular. No dice nada sobre a
+dónde va esa energía. El coeficiente de difusión $d$ (ISO 17497-2) califica la
+**calidad espacial**: cuán uniformemente cubre la energía reflejada el arco de
+receptores, para una dirección de fuente cada vez. No dice nada sobre cómo se
+reparte la energía entre el lóbulo especular y el resto.
+
+Un par de contraejemplos los mantiene separados. Un elemento curvo o inclinado
+que *redirige* la reflexión concentra casi toda la energía reflejada en un
+lóbulo intenso alejado de la dirección especular: casi todo es no especular,
+así que $s$ es alto, pero el haz queda tan colimado como el de un espejo, así
+que $d$ se mantiene bajo. A la inversa, una superficie con textura ligera
+puede dispersar solo una fracción pequeña de la energía repartiendo ese poco
+de manera perfectamente uniforme: el $d$ del campo dispersado parece
+respetable mientras $s$ se queda cerca de cero. Un $s$ alto no significa
+uniforme; un $d$ decente no significa que se dispersara mucha energía.
+
+**Cuál usar en diseño.** Los dos números sirven a consumidores distintos:
+
+- **El coeficiente de dispersión alimenta la simulación de salas.** Los
+  motores de acústica geométrica deciden en cada reflexión de pared cuánta
+  energía continúa especularmente y cuánta se redistribuye; el $s$ de
+  incidencia aleatoria por banda de cada superficie es precisamente ese
+  reparto, que es lo que ISO 17497-1 se redactó para suministrar. Equivocarlo
+  aparece como predicciones erróneas de tiempo de reverberación y claridad en
+  salas poco mezcladoras.
+- **El coeficiente de difusión califica difusores.** Cuando la tarea es
+  deshacer un eco, un flutter o una reflexión focalizada, lo que importa es
+  que la energía reflejada se reparta en ángulo, y $d$ mide exactamente eso.
+  El $d_n$ normalizado (fórmula (7)) resta además la difracción de borde que
+  exhibe todo panel finito, de modo que productos de tamaños distintos puedan
+  compararse con justicia.
+
+Intercambiarlos falla en ambos sentidos: un coeficiente de difusión metido en
+la casilla de dispersión de un simulador sesga el reparto de energía, y un
+coeficiente de dispersión citado como prueba de "difusión" puede describir una
+superficie que simplemente redirige la reflexión problemática a otro sitio.
+Ambos coeficientes son funciones por banda de tercio de octava que en general
+crecen cuando el relieve de la superficie deja de ser pequeño frente a la
+longitud de onda; un número único ciego a la frecuencia ("dispersa el 90 % del
+sonido") no es ninguno de los dos.
+
 ## 3. Absorción in situ de pavimentos — técnica de sustracción (ISO 13472-1)
 
 En campo no hay sala reverberante. ISO 13472-1 mide la absorción sonora de un
@@ -419,6 +466,29 @@ s_min, s_max = ph.spot_microphone_spacing_bounds(
     343.0, f_min=220.0, f_max=1800.0)
 print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metros)
 ```
+
+## Referencias
+
+- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
+  Theory, design and application* (3.ª ed.). CRC Press.
+  ISBN 978-1-4987-4099-9.
+  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
+  La monografía sobre teoría y diseño de difusores, de los autores tras los
+  dos métodos ISO 17497: la distinción dispersión-difusión, los montajes de
+  medida y la guía de diseño que esta página condensa.
+- International Organization for Standardization. (2004). *Acoustics —
+  Sound-scattering properties of surfaces — Part 1: Measurement of the
+  random-incidence scattering coefficient in a reverberation room*
+  (ISO 17497-1:2004).
+  [Catálogo iso.org](https://www.iso.org/standard/31397.html).
+  El método de mesa giratoria de la sección 1 y los límites de placa base de
+  la Tabla 1.
+- International Organization for Standardization. (2012). *Acoustics —
+  Sound-scattering properties of surfaces — Part 2: Measurement of the
+  directional diffusion coefficient in a free field* (ISO 17497-2:2012).
+  [Catálogo iso.org](https://www.iso.org/standard/55293.html).
+  El coeficiente de autocorrelación del goniómetro de la sección 2, su
+  ponderación por área y el $d_n$ normalizado.
 
 ---
 

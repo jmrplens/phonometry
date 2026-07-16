@@ -242,6 +242,51 @@ plt.show()
 
 </details>
 
+## Scattering or diffusion? Two coefficients, two jobs
+
+The two coefficients above are routinely treated as interchangeable, in
+product data sheets and occasionally in simulation manuals. They are not, and
+neither can be computed from the other. The scattering coefficient $s$
+(ISO 17497-1) does **energy bookkeeping**: what fraction of the reflected
+energy leaves the specular direction. It says nothing about where that energy
+goes. The diffusion coefficient $d$ (ISO 17497-2) grades **spatial quality**:
+how evenly the reflected energy covers the receiver arc, one source direction
+at a time. It says nothing about how the energy divides between the specular
+lobe and the rest.
+
+A pair of counterexamples keeps them apart. A curved or tilted element that
+*redirects* the reflection concentrates nearly all the reflected energy into
+one strong lobe away from the specular direction: almost everything is
+non-specular, so $s$ is high, yet the beam is as collimated as a mirror's, so
+$d$ stays low. Conversely, a lightly textured surface may scatter only a small
+fraction of the energy while spreading that little bit perfectly evenly: $d$
+of the scattered field looks respectable while $s$ stays near zero. High $s$
+does not mean uniform; decent $d$ does not mean much energy was scattered at
+all.
+
+**Which one for design.** The two numbers serve different consumers:
+
+- **The scattering coefficient feeds room-acoustics simulation.**
+  Geometrical-acoustics engines decide at every wall reflection how much
+  energy continues specularly and how much is redistributed; the per-band
+  random-incidence $s$ of each surface is precisely that split, which is what
+  ISO 17497-1 was written to supply. Getting it wrong shows up as the wrong
+  reverberation-time and clarity predictions in non-mixing rooms.
+- **The diffusion coefficient qualifies diffusers.** When the task is to break
+  up an echo, a flutter or a focusing reflection, what matters is that the
+  reflected energy is spread over angle, and $d$ measures exactly that. The
+  normalised $d_n$ (Formula (7)) additionally subtracts the edge diffraction
+  that every finite panel exhibits, so products of different sizes can be
+  compared fairly.
+
+Swapping them fails in both directions: a diffusion coefficient dropped into a
+simulator's scattering slot biases the energy split, and a scattering
+coefficient quoted as proof of "diffusion" may describe a surface that merely
+redirects the problem reflection somewhere else. Both coefficients are
+one-third-octave-band functions that generally rise once the surface relief is
+no longer small against the wavelength; a frequency-blind single number
+("scatters 90 % of the sound") is neither of them.
+
 ## 3. In-situ road absorption — subtraction technique (ISO 13472-1)
 
 Out in the field there is no reverberation room. ISO 13472-1 measures the sound
@@ -408,6 +453,28 @@ s_min, s_max = ph.spot_microphone_spacing_bounds(
     343.0, f_min=220.0, f_max=1800.0)
 print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
 ```
+
+## References
+
+- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
+  Theory, design and application* (3rd ed.). CRC Press.
+  ISBN 978-1-4987-4099-9.
+  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
+  The monograph on diffuser theory and design by the authors behind both
+  ISO 17497 methods: the scattering-versus-diffusion distinction, the
+  measurement rigs and the design guidance this page condenses.
+- International Organization for Standardization. (2004). *Acoustics —
+  Sound-scattering properties of surfaces — Part 1: Measurement of the
+  random-incidence scattering coefficient in a reverberation room*
+  (ISO 17497-1:2004).
+  [iso.org catalogue](https://www.iso.org/standard/31397.html).
+  The turntable method of section 1 and the base-plate limits of Table 1.
+- International Organization for Standardization. (2012). *Acoustics —
+  Sound-scattering properties of surfaces — Part 2: Measurement of the
+  directional diffusion coefficient in a free field* (ISO 17497-2:2012).
+  [iso.org catalogue](https://www.iso.org/standard/55293.html).
+  The goniometer autocorrelation coefficient of section 2, its area
+  weighting and the normalised $d_n$.
 
 ---
 

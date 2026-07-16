@@ -66,7 +66,12 @@ def test_stateful_steady_ic_initialization():
     # Verify zi is properly initialized after processing a block.
     rng = np.random.default_rng(42)
     test_signal = rng.standard_normal(1024)
-    bank.filter(test_signal)
+    # steady_ic implies detrending, whose block-processing advisory is
+    # expected here: assert it rather than leak it to the run summary.
+    from phonometry.metrology.core import FilterBankWarning
+
+    with pytest.warns(FilterBankWarning, match="Detrending"):
+        bank.filter(test_signal)
 
     # Check that zi is a list of numpy arrays with the expected shape
     for idx, zi in enumerate(bank.zi):

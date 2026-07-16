@@ -303,6 +303,50 @@ to the issuing body, with date and reference).
   carries a defensive note so the misprint is not transcribed as a "fix".
 - **Status:** unreported.
 
+## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06) — Eq. (21)
+
+- **Location:** section A.3.3, Eq. (21) (flight path angle).
+- **The print:** γ = acos(ΔZ/ΔS).
+- **The problem:** the arccosine of the climb-to-path ratio returns the
+  complement of the path angle (90° in level flight, where γ must be 0°) and
+  contradicts the guidance's own use of γ as the climb/descent angle
+  throughout section A.3. ECAC Doc 32, 1st ed., Eq. (10) prints the correct
+  form, γ = atan(ΔZ/ΔS) with the horizontal ΔS of its Eq. (8).
+- **Evidence:** evaluation in level flight; cross-check against Doc 32
+  Eq. (10) and against the NORAH2 prototype input files, whose ``Vang``
+  columns are climb/descent angles (0° in level segments).
+- **Library behaviour:** ``flight_path_kinematics`` implements the Doc 32
+  ``atan`` form; the result docstring carries the defensive note.
+- **Status:** unreported.
+
+## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06) — §A.3.1 triangulation
+
+- **Location:** section A.3.1, steps 2 to 4 (flight-condition interpolation),
+  against the triangulation lookup tables shipped with the NORAH2 database
+  (``*_triangulation.int``).
+- **The print:** steps 2 and 3 normalise the database conditions (spans, with
+  F_fc = 2 on the path angle) and step 4 computes "the Delaunay triangulation
+  for the database flight conditions γ̄_j and V̄_j", i.e. of the normalised
+  points, offering a lookup table as an equivalent.
+- **The problem:** the lookup tables shipped with the database (which the
+  guidance says are part of the hemisphere data and should not be edited) are
+  the Delaunay triangulation of the raw (V, γ) conditions, not of the
+  normalised ones: for the R22 set, 14 of the 27 shipped triangles differ
+  from the Delaunay triangulation of the normalised conditions. A Delaunay
+  triangulation is not invariant under the anisotropic normalisation, so the
+  two prescriptions select different enveloping triangles for part of the
+  envelope. The distance weights of Eq. (7)/(8) do use the normalised
+  coordinates in the prototype (verified against its blended outputs).
+- **Evidence:** recomputation of both triangulations for the R22 database;
+  bin-for-bin reproduction of the prototype's per-step hemisphere selection
+  with the shipped tables, and of its blended levels with normalised-space
+  weights, to 0,05 dB.
+- **Library behaviour:** ``flight_condition_weights`` follows the printed
+  method (Delaunay of the normalised conditions) by default and accepts the
+  database lookup table via ``triangles``, which reproduces the reference
+  implementation exactly.
+- **Status:** unreported.
+
 ## RANDI 3.1 Physics Description (NRL, Breeding et al.) — Table 2
 
 - **Location:** Table 2 (representative ship source levels).

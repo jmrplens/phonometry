@@ -343,14 +343,18 @@ def test_invalid_inputs_raise():
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
             stipa(stipa_signal(FS, seconds=18.0, seed=3)[: FS // 2], FS)
-    with pytest.warns(STIWarning, match="No energy in octave band"):
+    with pytest.warns(STIWarning) as tone_warnings:
         # A pure tone leaves other octave bands empty: those bands read
         # m = 0 (TI = 0) with a warning rather than a hard error, so the
         # IEC 60268-16 C.4.2 verification signals (energy in only two
-        # bands) remain measurable. The 4 s clip also triggers the
-        # (correct) sub-15 s STIPA warning; both are UserWarnings.
+        # bands) remain measurable. The 4 s clip also (correctly) raises
+        # the sub-15 s STIPA and the m > 1.3 advisories; recording the
+        # whole STIWarning family keeps them out of the run summary (a
+        # leaked warning is re-materialised on the pytest-xdist controller
+        # by importing its module, which races the phonometry import).
         t = np.arange(4 * FS) / FS
         res_tone = stipa(np.sin(2 * np.pi * 1000.0 * t), FS)
+    assert any("No energy in octave band" in str(w.message) for w in tone_warnings)
     # The 1 kHz band carries the tone (unmodulated: m ~ 0); at least one
     # dead band integrates to non-positive envelope energy and is pinned
     # to exactly m = 0 instead of raising.

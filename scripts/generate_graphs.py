@@ -54,6 +54,12 @@ _ES_EXACT = {
         "eje radial: ΔSOR [dB] relativo al través  ·  dSOR = 300 m",
     "Rotorcraft Ground Effect (ECAC Doc 32, Chien-Soroka)":
         "Efecto de suelo de rotorcraft (ECAC Doc 32, Chien-Soroka)",
+    "Rotorcraft Flyover Time History (ECAC Doc 32)":
+        "Historia temporal de sobrevuelo de rotorcraft (ECAC Doc 32)",
+    "Recorded time [s]": "Tiempo registrado [s]",
+    "A-weighted sound pressure level [dB(A)]":
+        "Nivel de presión sonora ponderado A [dB(A)]",
+    "Received level $L_A(t)$": "Nivel recibido $L_A(t)$",
     "One-third-octave-band centre frequency [Hz]":
         "Frecuencia central de banda de 1/3 de octava [Hz]",
     "Ground-effect adjustment ΔLg [dB]": "Ajuste por efecto de suelo ΔLg [dB]",
@@ -864,6 +870,12 @@ _ES_PATTERNS = [
     (r"^SAE band \((\d+) m\)$", r"banda SAE (\1 m)"),
     (r"^source (\d+) m, receiver (.+) m, offset (\d+) m$",
      r"fuente \1 m, receptor \2 m, offset \3 m"),
+    (r"^SEL (\d+)\.(\d+) dB\(A\)  ·  EPNL (\d+)\.(\d+) EPNdB\n"
+     r"level flyover, 60 kt, 150 m, 120 m sideline, grass$",
+     "SEL \\1,\\2 dB(A)  ·  EPNL \\3,\\4 EPNdB\n"
+     "sobrevuelo nivelado, 60 kt, 150 m, 120 m lateral, hierba"),
+    (r"^\$L_\{ASmax\}\$ = (\d+)\.(\d+) dB\(A\)$",
+     r"$L_{ASmax}$ = \1,\2 dB(A)"),
     (r"^(\d+) yr$", r"\1 años"),
     (r"^total \(limit\) (.+) dB$", r"total (límite) \1 dB"),
     (r"^total \(eng\.\) (.+) dB$", r"total (ing.) \1 dB"),
@@ -4134,6 +4146,59 @@ def generate_rotorcraft_ground_effect(output_dir: str) -> None:
     plt.close()
 
 
+
+def generate_rotorcraft_flyover_event(output_dir: str) -> None:
+    """ECAC Doc 32 single-event LA(t) time history of a level flyover."""
+    print("Generating rotorcraft_flyover_event...")
+    from phonometry import RotorcraftHemisphere, rotorcraft_event_level
+
+    # Synthetic helicopter-like hemisphere on the standard 31-band 10 deg grid:
+    # low-frequency dominated spectrum with a mild forward-lobed directivity.
+    freqs = 1000.0 * 10.0 ** (np.arange(-20, 11) / 10.0)     # 10 Hz-10 kHz
+    az = np.arange(-90.0, 91.0, 10.0)
+    po = np.arange(0.0, 181.0, 10.0)
+    spectrum = (88.0 - 12.0 * np.log10(freqs / 100.0) ** 2)  # broad LF hump
+    direct = -0.045 * np.abs(po - 80.0)                      # forward lobe
+    levels = spectrum[None, None, :] + direct[None, :, None] \
+        - 0.02 * np.abs(az)[:, None, None]
+    hemisphere = RotorcraftHemisphere(freqs, az, po, levels)
+
+    speed = 30.87                                            # 60 kt, in m/s
+    t = np.arange(0.0, 130.01, 0.5)
+    track = np.column_stack([np.zeros_like(t), speed * (t - 65.0),
+                             np.full_like(t, 150.0)])
+    event = rotorcraft_event_level(
+        [hemisphere], [speed], [0.0], t, track, (120.0, 0.0),
+        flow_resistivity="D")
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(event.times, event.a_levels, color=COLOR_PRIMARY, lw=2.0,
+            label="Received level $L_A(t)$")
+    k = int(np.argmax(event.a_levels))
+    ax.plot(event.times[k], event.la_max, "o", color=COLOR_SECONDARY, ms=7,
+            label=f"$L_{{ASmax}}$ = {event.la_max:.1f} dB(A)")
+    window = event.a_levels >= event.la_max - 10.0
+    idx = np.nonzero(window)[0]
+    ax.axvspan(event.times[idx[0]], event.times[idx[-1]], color=COLOR_PRIMARY,
+               alpha=0.10, label="10 dB-down window")
+    ax.axhline(event.la_max - 10.0, color=COLOR_FG, lw=1.0, ls="--", alpha=0.5)
+    ax.set_xlabel("Recorded time [s]")
+    ax.set_ylabel("A-weighted sound pressure level [dB(A)]")
+    ax.set_title("Rotorcraft Flyover Time History (ECAC Doc 32)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.6)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    ax.text(0.02, 0.05,
+            f"SEL {event.sel:.1f} dB(A)  ·  EPNL {event.epnl:.1f} EPNdB\n"
+            "level flyover, 60 kt, 150 m, 120 m sideline, grass",
+            transform=ax.transAxes, ha="left", va="bottom", fontsize=9,
+            bbox={"boxstyle": "round", "facecolor": COLOR_GRID, "alpha": 0.6})
+    plt.tight_layout()
+    save_figure(output_dir, "rotorcraft_flyover_event.svg")
+    plt.close()
+
+
 @lru_cache(maxsize=None)
 def _time_loudness_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """ISO 532-3 STL(t)/LTL(t) for a 1 kHz / 60 dB burst (on 200-400 ms)."""
@@ -6554,6 +6619,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_airport_contour,
     generate_airport_sor,
     generate_rotorcraft_ground_effect,
+    generate_rotorcraft_flyover_event,
 )
 
 

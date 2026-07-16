@@ -1,6 +1,6 @@
 ---
 title: "Ruido de rotorcraft: el método del hemisferio"
-description: "El modelo de fuente por hemisferio de ruido de helicópteros de ECAC Doc 32 / NORAH2 y sus ajustes de propagación: ensanchamiento esférico, absorción atmosférica (ISO 9613-1 / Tabla 4) y el efecto de suelo de Chien-Soroka sobre suelo de impedancia CNOSSOS."
+description: "El método del hemisferio de ECAC Doc 32 / NORAH2: el modelo de fuente por hemisferio, sus ajustes de propagación, la interpolación entre condiciones de vuelo y la cinemática de trayectoria, y el evento único SEL, LASmax y EPNL con contornos en malla de tierra."
 ---
 
 El ruido de los helicópteros es muy directivo, así que el método de **ECAC
@@ -84,12 +84,154 @@ hemisferio usa otra distancia polar (`h.distance`, p. ej. anillos de hover a
 70 m), pásala a los dos ajustes dependientes de la distancia como
 `reference_distance=h.distance`.
 
+## Condiciones de vuelo: interpolar entre hemisferios
+
+Una base de datos registra un hemisferio por condición de vuelo (velocidad
+aerodinámica `V`, ángulo de trayectoria `γ`). Las condiciones reales rara vez
+coinciden con una medida, así que la guía NORAH2 interpola (Ec. 3-10): ambos
+ejes se normalizan por sus rangos en la base de datos (con el factor empírico
+`Ffc = 2` sobre el ángulo de trayectoria), una triangulación de Delaunay cubre
+las condiciones normalizadas, y una consulta dentro de la envolvente convexa
+mezcla su triángulo envolvente con pesos inversos a la distancia en el dominio
+de energía. Fuera de la envolvente se adopta la condición más cercana sin
+mezclar, que es también el comportamiento que ECAC Doc 32, 1.ª ed. prescribe
+para toda su envolvente (aún no define interpolación).
+
+```python
+from phonometry import aircraft
+
+speeds = [50.0, 70.0, 60.0]                # un hemisferio por condición
+angles = [0.0, 0.0, 10.0]                  # ángulos de trayectoria, grados
+weights = aircraft.flight_condition_weights(speeds, angles, 60.0, 2.5)
+lv = aircraft.interpolated_source_level(
+    [h_50_nivel, h_70_nivel, h_60_ascenso], speeds, angles,
+    60.0, 2.5, 0.0, 90.0)                  # nivel mezclado por banda
+```
+
+La velocidad aerodinámica, no la de suelo, selecciona el hemisferio; los pesos
+son invariantes a las unidades mientras la consulta use las de la base de
+datos. Puede pasarse una tabla de triangulación de la base de datos como
+`triangles` (la base NORAH incluye una por tipo; las tablas incluidas
+triangulan el plano `(V, γ)` sin normalizar, así que pasarlas reproduce la
+implementación de referencia bin a bin). Los miembros de clase con rotor
+especular sustituyen `h.mirrored()` (Ec. 2, `φ → −φ`) y los desplazamientos por
+nivel de certificación entran como `level_offset`.
+
+## Cinemática de la trayectoria
+
+`flight_path_kinematics` deriva de una trayectoria con marcas de tiempo, por
+diferencias finitas centradas, todo lo que necesita el evento (Ec. 16-21 /
+Doc 32 Ec. 8-10): velocidad respecto al suelo, velocidad aerodinámica (sin
+viento), rumbo, curvatura, ángulo de alabeo `Φ = atan(K·Vg²/g)` y ángulo de
+trayectoria `γ = atan(ΔZ/ΔS)`. La guía recomienda suavizar las trazas radar
+(p. ej. remuestreo con splines a cadencia de 0.5 s) antes de derivar.
+
+```python
+kin = aircraft.flight_path_kinematics(times, positions)   # posiciones (N, 3), m
+kin.airspeed, kin.path_angle          # seleccionan el hemisferio por punto
+kin.bank_angle                        # inclina el hemisferio en virajes
+kin.plot()                            # perfiles de velocidad y ángulos
+```
+
+## El evento único: SEL, LASmax y EPNL
+
+`rotorcraft_event_level` ejecuta toda la cadena para un sobrevuelo en un
+receptor: por punto de trayectoria la condición de vuelo selecciona (o mezcla)
+los hemisferios, los ángulos de emisión direccionan el nivel de fuente (el
+marco se orienta con el rumbo y se inclina con el alabeo en virajes; la actitud
+de cabeceo está implícita en los hemisferios), y el historial recibido en
+tercios de octava se expresa en tiempo registrado `tr = te + r/c` (Ec. 22,
+`c = 346.1 m/s`) y se integra: `LASmax`, `SEL` sobre el historial completo y
+sobre la ventana de certificación de 10 dB de caída (Doc 32 Ec. 27), y `EPNL`
+según ICAO Anexo 16 (Doc 32 Ec. 28).
+
+```python
+res = aircraft.rotorcraft_event_level(
+    hemispheres, speeds, angles,      # la base de datos
+    times, positions,                 # la trayectoria (m, z hacia arriba)
+    receiver=(120.0, 0.0),            # posición en tierra del micrófono
+    flow_resistivity="D")             # emplazamiento de hierba
+res.la_max, res.sel, res.epnl         # LASmax, SEL, EPNL
+res.plot()                            # el historial temporal LA(t)
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_flyover_event_es.svg" alt="Nivel ponderado A frente al tiempo registrado para un sobrevuelo nivelado de rotorcraft: subida suave hasta LASmax sobre la ventana de 10 dB de caída y descenso más lento, anotado con el SEL y el EPNL del evento" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_flyover_event_es_dark.svg" alt="Nivel ponderado A frente al tiempo registrado para un sobrevuelo nivelado de rotorcraft: subida suave hasta LASmax sobre la ventana de 10 dB de caída y descenso más lento, anotado con el SEL y el EPNL del evento" style="width:82%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import aircraft
+
+# Hemisferio sintético tipo helicóptero en la malla estándar de 31 bandas y 10°.
+freqs = 1000.0 * 10.0 ** (np.arange(-20, 11) / 10.0)   # tercios 10 Hz-10 kHz
+az = np.arange(-90.0, 91.0, 10.0)
+po = np.arange(0.0, 181.0, 10.0)
+spectrum = 88.0 - 12.0 * np.log10(freqs / 100.0) ** 2   # joroba en baja-media
+levels = (spectrum[None, None, :] - 0.045 * np.abs(po - 80.0)[None, :, None]
+          - 0.02 * np.abs(az)[:, None, None])
+h = aircraft.RotorcraftHemisphere(freqs, az, po, levels)
+
+speed = 30.87                                           # 60 kt, en m/s
+t = np.arange(0.0, 130.01, 0.5)
+track = np.column_stack([np.zeros_like(t), speed * (t - 65.0),
+                         np.full_like(t, 150.0)])
+event = aircraft.rotorcraft_event_level(
+    [h], [speed], [0.0], t, track, (120.0, 0.0), flow_resistivity="D")
+event.plot()
+plt.show()
+```
+
+</details>
+
+Los flujos con trazas radar pueden pasar directamente los valores suavizados por
+punto de `airspeed`, `path_angle`, `heading` y `bank_angle` en lugar de
+derivarlos de las posiciones; cuando se derivan, la trayectoria está en metros
+y segundos, así que la base de datos de velocidades debe estar entonces en m/s.
+
+## Contornos en malla de tierra
+
+`rotorcraft_noise_contour` evalúa el mismo evento sobre una malla completa en
+una pasada vectorizada por paso de emisión y reduce el historial de cada
+receptor a la huella `SEL` (`metric="exposure"`) o `LASmax`
+(`metric="maximum"`):
+
+```python
+import numpy as np
+from phonometry import aircraft
+
+res = aircraft.rotorcraft_noise_contour(
+    hemispheres, speeds, angles, times, positions,
+    x=np.linspace(-2000.0, 2000.0, 81),
+    y=np.linspace(-3000.0, 3000.0, 121),
+    metric="exposure", flow_resistivity="D")
+res.plot()                            # contornos SEL rellenos
+```
+
+Se aplica una clase de suelo por ejecución; el suelo heterogéneo y el terreno
+pertenecen a la extensión de topografía.
+
+## Validación
+
 Validado contra la Tabla 4 de la guía NORAH2 (las 31 bandas), el ensanchamiento
 inverso al cuadrado de forma cerrada, los límites analíticos de suelo rígido y
 rasante del efecto de suelo, consultas bilineales fuera de nodo sobre los
-hemisferios de referencia de los once tipos de helicóptero, y de extremo a
-extremo contra los historiales de evento único del prototipo NORAH2 (0.1 dB(A)
-sobre suelo duro, 0.5 dB sobre suelo blando).
+hemisferios de referencia de los once tipos de helicóptero, símplices de
+interpolación comprobados a mano, cinemática de forma cerrada y la integral
+lorentziana `SEL − LASmax` del sobrevuelo, y de extremo a extremo contra los
+casos ARP de verificación del prototipo NORAH2: ángulos de emisión a 0.01°,
+tiempos retardados a 0.02 s, cada nivel por paso de los eventos sobre suelo
+duro a 0.08 dB(A) hasta 18 km, `LASmax` a 0.03 dB, `SEL` a 0.05 dB sobre suelo
+duro (0.4 dB sobre suelo blando), la malla de contorno de 187 micrófonos a
+0.7 dB en el peor caso, `PNLTM` a 0.1 dB y `EPNL` a aproximadamente 1.3 dB (la
+política de noys del prototipo por debajo del suelo de la tabla difiere de la
+ley publicada del Anexo 16). Queda una divergencia documentada: a gran distancia sobre suelo
+blando el prototipo amortigua la interferencia coherente de dos rayos de la
+Ec. 30 de la guía hacia la suma incoherente (hasta 4.9 dB en pasos individuales
+de bajo nivel más allá de 7 km); ni Doc 32 ni la guía contienen tal término, y
+esta implementación sigue las ecuaciones publicadas.
 
 ## Referencias
 
@@ -128,12 +270,14 @@ sobre suelo duro, 0.5 dB sobre suelo blando).
 ## Normas
 
 ECAC Doc 32, 1ª ed. (contornos de ruido de rotorcraft); guía de
-modelado NORAH2 (EASA.2020.FC.06 SC01.D1.5d) §A.3-A.4: el hemisferio de ruido, el
-ensanchamiento esférico, la atenuación atmosférica (ISO 9613-1, Tabla 4) y el
+modelado NORAH2 (EASA.2020.FC.06 SC01.D1.5d) §A.3-A.5: el hemisferio de ruido, el
+ensanchamiento esférico, la atenuación atmosférica (ISO 9613-1, Tabla 4), el
 efecto de suelo de Chien-Soroka (impedancia de Delany-Bazley, resistividad de
-flujo CNOSSOS). La integración sobre la trayectoria (SEL/LAmax/EPNL), los
-contornos en malla de tierra y el apantallamiento del terreno son un desarrollo
-posterior aparte.
+flujo CNOSSOS), la interpolación entre condiciones de vuelo (Ec. 3-10), la
+cinemática de la trayectoria (Ec. 16-21 / Doc 32 Ec. 8-10), el tiempo
+registrado (Ec. 22) y las métricas de evento único SEL/LASmax y EPNL (Doc 32
+Ec. 27/28, ICAO Anexo 16 Ap. 2). El apantallamiento del terreno y la topografía
+son un desarrollo posterior aparte.
 
 ## Véase también
 

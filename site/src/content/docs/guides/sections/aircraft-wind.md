@@ -22,9 +22,11 @@ contour inputs.
 [Rotorcraft noise: the hemisphere method](/phonometry/guides/rotorcraft-noise/)
 covers helicopters, whose strong directivity defeats a single-number source
 level. ECAC Doc 32 instead describes the source as a **noise hemisphere**
-(band levels on a grid of emission angles at a 60 m reference distance) and
+(band levels on a grid of emission angles at a 60 m reference distance),
 propagates each ray with spherical spreading, atmospheric absorption and the
-Chien-Soroka ground effect.
+Chien-Soroka ground effect, interpolates between the measured flight
+conditions along the track, and integrates the received history into the
+single-event SEL, LASmax and EPNL and their ground-grid contours.
 
 [Wind-turbine noise: sound power and tonal audibility](/phonometry/guides/wind-turbine-noise/)
 covers IEC 61400-11 type testing: the **apparent sound power level** that
@@ -44,7 +46,7 @@ wind-turbine tonality test is a cousin of the tonal-audibility methods in
   the ICAO Annex 16 EPNL chain, IEC 61265 verifier, SAE ARP 5534 absorption
   and ECAC Doc 29 NPD interpolation.
 - [Rotorcraft noise: the hemisphere method](/phonometry/guides/rotorcraft-noise/):
-  the ECAC Doc 32 noise-hemisphere source model and its propagation
-  adjustments.
+  the ECAC Doc 32 noise-hemisphere source model, its propagation adjustments
+  and the single-event metrics and contours.
 - [Wind-turbine noise: sound power and tonal audibility](/phonometry/guides/wind-turbine-noise/):
   the IEC 61400-11 apparent sound power level and tonal-audibility chain.

@@ -29,7 +29,8 @@ lwa = ph.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 ### Why "apparent"
 
 $L_{WA}$ is written like a sound power level, but it is not one in the
-ISO 3744 sense of integrating intensity over an enveloping surface. The
+ISO 3744 sense of sampling the pressure field over an enveloping
+surface. The
 standard collapses the whole machine into an equivalent point source at the
 rotor centre and asks what power that source would need, radiating
 spherically, to reproduce the measured level at one downwind ground-board
@@ -65,7 +66,7 @@ mast as fallbacks. The measured range must at least cover 0.8 to 1.3 times
 the wind speed at 85 % of maximum power (roughly 6 to 10 m/s at 10 m height
 for a large machine). Within each bin the spectra are averaged, interpolated
 to the bin centre and background-corrected; a total-minus-background margin
-below 3 dB voids the bin, between 3 and 6 dB flags it with an asterisk. For
+of 3 dB or less voids the bin, between 3 and 6 dB flags it with an asterisk. For
 comparability with consent conditions and older editions, Formula (29) also
 maps each result to the wind speed at 10 m height over a **reference
 roughness length** $z_{0ref} = 0.05$ m (a logarithmic wind profile), giving
@@ -148,8 +149,10 @@ ph.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
   Description, measurement and assessment of environmental noise — Part 2:
   Determination of sound pressure levels* (ISO 1996-2:2017).
   [iso.org catalogue](https://www.iso.org/standard/59766.html).
-  Its Annex C tonal-audibility criterion is the one the IEC method reuses,
-  and its `tonal_adjustment` consumes the mean audibility.
+  The tonal-audibility criterion the IEC method reuses comes from the
+  Annex C of its 2007 edition (the 2017 edition carries the tonal methods
+  in Annexes J and K), and its `tonal_adjustment` consumes the mean
+  audibility.
 
 ---
 

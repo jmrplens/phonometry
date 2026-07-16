@@ -291,14 +291,14 @@ que las guías incorporan sus secciones de Referencias.
   Determination of sound pressure levels* (ISO 1996-2:2017).
   [Catálogo iso.org](https://www.iso.org/standard/59766.html).
   La norma de medición ambiental: su anexo J adopta el método de ingeniería
-  para la audibilidad tonal y su criterio del anexo C lo reutiliza la
-  IEC 61400-11.
+  para la audibilidad tonal, y el criterio de audibilidad que reutiliza la
+  IEC 61400-11 procede del anexo C de su edición de 2007.
   Citado por [Audibilidad objetiva de tonos](/phonometry/es/guides/tone-audibility/) y
   [Ruido de aerogeneradores](/phonometry/es/guides/wind-turbine-noise/).
 - Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for
   adjustment of LAeq* (método Nordtest NT ACOU 112).
   [nordtest.info](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/).
-  El método de prominencia por tasa de arranque, descargable gratis.
+  El método de prominencia por tasa de crecimiento, descargable gratis.
   Citado por [Prominencia de sonidos impulsivos](/phonometry/es/guides/impulse-prominence/).
 - International Organization for Standardization. (2022). *Acoustics —
   Description, measurement and assessment of environmental noise — Part 3:

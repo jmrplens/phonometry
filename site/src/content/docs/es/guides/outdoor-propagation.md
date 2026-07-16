@@ -410,7 +410,7 @@ deciden si una barrera real entrega su $D_z$ calculado:
 * **Los topes son físicos, no editoriales.** $D_z$ se limita a 20 dB en
   difracción simple y 25 dB en difracción doble por alta que sea la pared,
   porque la turbulencia atmosférica dispersa sonido hacia la zona de sombra y
-  fija un techo que la altura extra no puede recomprar. Una pérdida por
+  fija un techo que la altura extra no puede compensar. Una pérdida por
   inserción por encima de unos 20 dB es territorio de encapsulamientos, no de
   pantallas. La propia Ec. (14) es una curva de ingeniería suavizada en la
   tradición del ábaco de pantallas de Maekawa, un ajuste empírico sobre tres

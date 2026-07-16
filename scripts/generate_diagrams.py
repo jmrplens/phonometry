@@ -881,8 +881,8 @@ _ES: dict[str, str] = {
     "path difference  δ = r2 − r1": "diferencia de camino  δ = r2 − r1",
     "phase difference  Δφ = 2π δ / λ  (+ arg Q)":
         "diferencia de fase  Δφ = 2π δ / λ  (+ arg Q)",
-    "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2      Q = ground reflection coefficient":
-        "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2      Q = coeficiente de reflexión del suelo",
+    "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2   (Q = ground reflection coefficient)":
+        "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2   (Q = coeficiente de reflexión del suelo)",
     "in phase (δ ≈ nλ): up to +6 dB    ·    out of phase (δ ≈ λ/2 on hard ground): a deep dip":
         "en fase (δ ≈ nλ): hasta +6 dB    ·    en oposición (δ ≈ λ/2 sobre "
         "suelo duro): un mínimo profundo",
@@ -3961,7 +3961,7 @@ def _d_wind_turbine(s: SVG, th: Theme) -> None:
     s.ellipse(mx, gy - 3.0, 36.0, 7.0, fill=th.panel, stroke=th.fg, sw=1.6)
     s.rect(mx - 16, gy - 10.0, 20, 6, th.fg, rx=2.5)              # capsule flat
     s.rect(mx + 4, gy - 11.0, 10, 8, th.primary, rx=2)            # body
-    s.text(mx + 30, gy - 44.0, "Microphone on a ground board", 16, th.fg,
+    s.text(mx - 84, gy - 42.0, "Microphone on a ground board", 16, th.fg,
            bold=True, anchor="end")
 
     # Slant distance R1 from the rotor centre to the microphone.
@@ -4096,7 +4096,7 @@ def _d_ground_reflection(s: SVG, th: Theme) -> None:
     s.text(560.0, 114.0, "phase difference  Δφ = 2π δ / λ  (+ arg Q)", 18,
            th.fg)
     s.text(560.0, 142.0,
-           "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2      Q = ground reflection coefficient",
+           "p ∝ e^(jkr1)/r1 + Q · e^(jkr2)/r2   (Q = ground reflection coefficient)",
            16, th.muted)
     s.text(560.0, 168.0,
            "in phase (δ ≈ nλ): up to +6 dB    ·    out of phase (δ ≈ λ/2 on hard ground): a deep dip",

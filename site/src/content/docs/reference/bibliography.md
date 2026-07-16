@@ -282,8 +282,8 @@ list grows as guides gain their References sections.
   Determination of sound pressure levels* (ISO 1996-2:2017).
   [iso.org catalogue](https://www.iso.org/standard/59766.html).
   The environmental measurement standard: its Annex J adopts the engineering
-  method for tonal audibility and its Annex C criterion is reused by
-  IEC 61400-11.
+  method for tonal audibility, and the audibility criterion IEC 61400-11
+  reuses comes from the Annex C of its 2007 edition.
   Cited by [Objective audibility of tones](/phonometry/guides/tone-audibility/) and
   [Wind-turbine noise](/phonometry/guides/wind-turbine-noise/).
 - Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for

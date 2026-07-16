@@ -30,8 +30,8 @@ lwa = ph.apparent_sound_power_level(band_levels, r1)   # dB re 1 pW
 ### Por qué "aparente"
 
 $L_{WA}$ se escribe como un nivel de potencia sonora, pero no lo es en el
-sentido de la ISO 3744 de integrar la intensidad sobre una superficie
-envolvente. La norma colapsa toda la máquina en una fuente puntual
+sentido de la ISO 3744 de muestrear el campo de presión sobre una
+superficie envolvente. La norma colapsa toda la máquina en una fuente puntual
 equivalente en el centro del rotor y pregunta qué potencia necesitaría esa
 fuente, radiando esféricamente, para reproducir el nivel medido en una única
 posición sobre placa a sotavento: por definición es la potencia "que produce
@@ -69,7 +69,7 @@ rango medido debe cubrir al menos de 0,8 a 1,3 veces la velocidad de viento
 al 85 % de la potencia máxima (aproximadamente de 6 a 10 m/s a 10 m de
 altura para una máquina grande). Dentro de cada clase los espectros se
 promedian, se interpolan al centro de la clase y se corrigen por fondo; un
-margen total-menos-fondo por debajo de 3 dB anula la clase, y entre 3 y 6 dB
+margen total-menos-fondo de 3 dB o menos anula la clase, y entre 3 y 6 dB
 la marca con un asterisco. Por comparabilidad con condiciones de licencia y
 ediciones anteriores, la Fórmula (29) también convierte cada resultado a la
 velocidad de viento a 10 m de altura sobre una **longitud de rugosidad de
@@ -156,8 +156,10 @@ ph.wind_turbine_tonality(levels, freqs, tone_frequency=200.0).plot()
   Description, measurement and assessment of environmental noise — Part 2:
   Determination of sound pressure levels* (ISO 1996-2:2017).
   [Catálogo iso.org](https://www.iso.org/standard/59766.html).
-  Su criterio de audibilidad tonal del anexo C es el que reutiliza el método
-  IEC, y su `tonal_adjustment` consume la audibilidad media.
+  El criterio de audibilidad tonal que reutiliza el método IEC procede del
+  anexo C de su edición de 2007 (la edición de 2017 lleva los métodos
+  tonales en los anexos J y K), y su `tonal_adjustment` consume la
+  audibilidad media.
 
 ---
 

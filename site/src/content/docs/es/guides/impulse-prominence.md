@@ -158,8 +158,8 @@ añade sobre el `LAeq` medido en el nivel de evaluación, nunca lo sustituye.
   Objective method for the measurement of prominence of impulsive sounds and
   for adjustment of LAeq* (ISO/PAS 1996-3:2022).
   [Catálogo iso.org](https://www.iso.org/standard/77035.html).
-  El sucesor ISO construido sobre la prominencia por tasa de arranque de la
-  NT ACOU 112.
+  El sucesor ISO construido sobre la prominencia por tasa de crecimiento de
+  la NT ACOU 112.
 
 ---
 

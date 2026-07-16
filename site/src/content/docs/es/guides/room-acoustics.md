@@ -175,14 +175,46 @@ plt.xlabel("Tiempo [s]"); plt.ylabel("Nivel re pico [dB]")
 de sala se obtiene promediando sobre varios. ISO 3382-1 (espacios para
 interpretación) pide al menos dos posiciones de fuente y micrófonos separados
 $\geq 2$ m entre sí, $\geq 1$ m de cualquier superficie, a $1{,}2$ m
-(altura de oído sentado), evitando colocaciones simétricas; ISO 3382-2 fija el
-número mínimo de posiciones de fuente, de micrófono y de combinaciones
-fuente–micrófono según el grado de exactitud (control / ingeniería /
-precisión).
+(altura de oído sentado); ISO 3382-2 fija el número mínimo de posiciones de
+fuente, de micrófono y de combinaciones fuente–micrófono según el grado de
+exactitud (control / ingeniería / precisión) y pide posiciones de micrófono
+que eviten las colocaciones simétricas.
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_es.svg" alt="Configuración de medición de acústica de salas: una planta de la sala en vista superior con dos posiciones de fuente (altavoz) y seis posiciones de micrófono con las reglas de separación de ISO 3382-1, y la tabla de ISO 3382-2 con el número mínimo de posiciones para los grados de control, ingeniería y precisión" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_es_dark.svg" alt="Configuración de medición de acústica de salas: una planta de la sala en vista superior con dos posiciones de fuente (altavoz) y seis posiciones de micrófono con las reglas de separación de ISO 3382-1, y la tabla de ISO 3382-2 con el número mínimo de posiciones para los grados de control, ingeniería y precisión" style="width:94%">
 
 <video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: al cambiar la altura del micrófono varía el retardo entre el sonido directo y la reflexión del suelo y el filtro en peine de la respuesta en frecuencia se mueve con él; por eso importa la posición de medición cerca de superficies reflectantes" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_comb_filtering_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: al cambiar la altura del micrófono varía el retardo entre el sonido directo y la reflexión del suelo y el filtro en peine de la respuesta en frecuencia se mueve con él; por eso importa la posición de medición cerca de superficies reflectantes" style="width:88%"></video>
+
+**Promediar entre posiciones.** El parámetro por banda que se informa es la
+media aritmética sobre todas las combinaciones fuente-micrófono, y la
+dispersión entre posiciones es parte de la respuesta, no ruido: indícala
+junto a la media siempre que supere la diferencia apenas perceptible (DAP)
+del parámetro (§2), porque una
+sala puede cumplir un objetivo en promedio mientras butacas concretas
+quedan muy fuera de él. Cuatro errores de colocación sesgan la propia
+media:
+
+- **Posiciones correlacionadas.** Micrófonos a menos de 2 m entre sí muestrean
+  casi el mismo campo sonoro dos veces, así que el promedio parece más
+  estable de lo que es. El mínimo de 1 m a cualquier superficie evita, a
+  su vez, el refuerzo de presión junto a un contorno (y el filtro en peine
+  de la animación anterior) que colorea todo lo que graba un micrófono
+  demasiado cercano.
+- **Colocaciones simétricas.** En una sala geométricamente simétrica, las
+  posiciones especulares reciben patrones de reflexión especulares;
+  promediarlas no añade información nueva. Por eso la ISO 3382-2 pide
+  posiciones que no caigan sobre líneas de simetría.
+- **Demasiado cerca de la fuente.** Dentro del campo directo el EDT se
+  desploma y el C80 se satura hacia arriba haga lo que haga la sala. La
+  ISO 3382-2 mantiene por ello cada micrófono al menos a
+  $d_{min} = 2\sqrt{V/(c\,\hat T)}$ de la fuente, con $\hat T$ una
+  estimación del tiempo de reverberación esperado (unos 2,2 m para un aula
+  de 200 m³ con 0,5 s esperados).
+- **La lotería de baja frecuencia.** Por debajo de la frecuencia de
+  Schroeder (§2) cada banda contiene solo un puñado de modos propios, y un
+  micrófono sobre un nodo de uno de ellos ve un decaimiento distinto que
+  otro sobre un antinodo. La dispersión de las bandas de 63-125 Hz entre
+  posiciones es estructuralmente mayor; el remedio son más posiciones, no
+  una excitación más larga.
 
 ### Parámetros de `sweep_signal()` / `inverse_filter()`
 
@@ -311,6 +343,52 @@ Para este decaimiento de pendiente única, EDT, T20 y T30 devuelven todos
 ≈ 1,0 s, y los parámetros de energía coinciden con sus formas cerradas
 (C80 = 3,05 dB, D50 = 0,499, Ts = 72 ms). Una sala real tiene una pendiente
 inicial más pronunciada, así que EDT < T30.
+
+**Leer EDT, T20 y T30 unos contra otros.** Los tres tiempos extrapolan el
+mismo decaimiento de 60 dB desde ventanas distintas, así que su desacuerdo
+lleva información:
+
+- **T20 ≈ T30** (curvatura por debajo del 10 %): el decaimiento es una
+  única pendiente recta, la imagen de campo difuso se sostiene y cualquiera
+  de los dos tiempos puede representar "el" tiempo de reverberación de la
+  banda.
+- **T30 > T20** (curvatura por encima del 10 %): el decaimiento se comba,
+  con la energía tardía decayendo más despacio que la temprana. Las causas
+  habituales son volúmenes acoplados (una puerta abierta a un pasillo o a
+  una escalera, un anfiteatro profundo o una caja escénica devolviendo
+  energía) y una absorción muy desigual que deja reverberante un eje de la
+  sala. Ningún número único describe ese decaimiento: informa de ambas
+  ventanas junto con la curvatura, y trata con recelo las
+  [predicciones estadísticas](/phonometry/es/guides/reverberation-prediction/),
+  porque su hipótesis de campo difuso ha fallado a la vista.
+- **EDT lejos de T20/T30**: el EDT se ajusta donde aún dominan el sonido
+  directo y las primeras reflexiones, así que varía de butaca en butaca
+  mientras el T30 apenas se mueve. Un EDT por debajo del T30 dice que la
+  posición recibe mucha energía temprana (cerca de la fuente, bajo un
+  reflector): la sala suena allí más seca de lo que sugiere su T30, porque
+  la reverberación percibida sigue al EDT. Un EDT por encima del T30 en
+  una butaca apunta a un eco o a una superficie focalizante que concentra
+  allí energía tardía.
+
+**Cuánto decaimiento permite el suelo de ruido.** Una ventana de ajuste
+vale lo que el rango de decaimiento que tiene debajo. La **relación
+impulso-ruido** (INR) es la distancia de nivel entre el pico de la RI
+filtrada en banda y su suelo de ruido; la ventana de ajuste más un margen
+de seguridad debe caber dentro de ella, que es el requisito ISO 3382 de al
+menos 35 dB de rango útil de decaimiento para T20 y 45 dB para T30. Un
+rango escaso sesga el tiempo ajustado hacia arriba, hacia la cola plana que
+el suelo de ruido impone a la curva de decaimiento, y el sesgo crece en
+silencio antes de que el ajuste falle a la vista (Hak, Wenmaekers y van
+Luxemburg, 2012). `room_parameters` informa del `dynamic_range` por banda y
+endurece los límites de aceptación a 46 dB (T20) y 54 dB (T30) antes de
+marcar un valor como válido, de modo que el sesgo residual de truncado y
+compensación de un tiempo marcado válido quede dentro de la DAP del 5 %.
+Cuando una banda no supera su indicador, el orden de remedios es: usa T20
+en lugar de T30 (su ventana necesita 10 dB menos de rango según los mínimos
+ISO, 8 dB con los límites endurecidos); sube la INR en la
+adquisición, porque duplicar la longitud del barrido o el número de
+promedios síncronos gana 3 dB cada vez; y solo entonces recurre al EDT,
+nunca a un ajuste estirado dentro del ruido.
 
 Por debajo de la **frecuencia de Schroeder** $f_s \approx 2000\sqrt{T/V}$
 estas estadísticas de caída dejan de contar toda la historia: el campo lo
@@ -527,6 +605,51 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
 - [Teoría](/phonometry/es/reference/theory/rooms-buildings/) — la integración de Schroeder, las ventanas de
   regresión y la derivación de la curva de referencia.
 - Referencia de la API: [`room.room_acoustics`](/phonometry/es/reference/api/rooms/room-acoustics/), [`room.room_ir`](/phonometry/es/reference/api/rooms/room-ir/) y [`room.open_plan`](/phonometry/es/reference/api/rooms/open-plan/).
+
+## Referencias
+
+- Kuttruff, H. (2016). *Room acoustics* (6.ª ed.). CRC Press.
+  [doi:10.1201/9781315372150](https://doi.org/10.1201/9781315372150).
+  La monografía de referencia tras esta página: la teoría estadística de
+  los campos sonoros en decaimiento, la frecuencia de Schroeder y los
+  parámetros perceptivos de sala del §2.
+- Schroeder, M. R. (1965). New method of measuring reverberation time.
+  *The Journal of the Acoustical Society of America*, 37(3), 409-412.
+  [doi:10.1121/1.1909343](https://doi.org/10.1121/1.1909343).
+  El método de integración hacia atrás que convierte la respuesta al
+  impulso al cuadrado en la curva suave de decaimiento del §2.
+- Hak, C. C. J. M., Wenmaekers, R. H. C., & van Luxemburg, L. C. J. (2012).
+  Measuring room impulse responses: Impact of the decay range on derived
+  room acoustic parameters. *Acta Acustica united with Acustica*, 98(6),
+  907-915. [doi:10.3813/aaa.918574](https://doi.org/10.3813/aaa.918574).
+  El análisis de la INR tras la discusión del rango dinámico y los
+  indicadores de validez endurecidos del §2.
+- International Organization for Standardization. (2009). *Acoustics —
+  Measurement of room acoustic parameters — Part 1: Performance spaces*
+  (ISO 3382-1:2009).
+  [Catálogo iso.org](https://www.iso.org/standard/40979.html).
+  Las definiciones de parámetros, los requisitos de posiciones y las
+  diferencias apenas perceptibles del §2.
+- International Organization for Standardization. (2008). *Acoustics —
+  Measurement of room acoustic parameters — Part 2: Reverberation time in
+  ordinary rooms* (ISO 3382-2:2008).
+  [Catálogo iso.org](https://www.iso.org/standard/36201.html).
+  Los grados de precisión, los recuentos de posiciones y la distancia
+  mínima a la fuente de la discusión sobre promediado del §1.
+- International Organization for Standardization. (2012). *Acoustics —
+  Measurement of room acoustic parameters — Part 3: Open plan offices*
+  (ISO 3382-3:2012).
+  [Catálogo iso.org](https://www.iso.org/standard/46520.html).
+  Las magnitudes de privacidad del habla en oficinas diáfanas del §3.
+- International Organization for Standardization. (2006). *Acoustics —
+  Application of new measurement methods in building and room acoustics*
+  (ISO 18233:2006).
+  [Catálogo iso.org](https://www.iso.org/standard/40408.html).
+  La adquisición por barrido sinusoidal y MLS del §1.
+- International Organization for Standardization. (2003). *Acoustics —
+  Measurement of sound absorption in a reverberation room* (ISO 354:2003).
+  [Catálogo iso.org](https://www.iso.org/standard/34545.html).
+  La medición de absorción en sala reverberante del §4.
 
 ---
 

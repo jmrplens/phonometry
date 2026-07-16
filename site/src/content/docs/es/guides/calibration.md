@@ -243,7 +243,7 @@ como una conversión a float.
 - International Electrotechnical Commission. (2013). *Electroacoustics —
   Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
   [Catálogo IEC](https://webstore.iec.ch/en/publication/5710).
-  El procedimiento de verificación de laboratorio tras las comprobaciones
+  El procedimiento de verificación de laboratorio que sustenta las comprobaciones
   periódicas recomendadas arriba.
 
 ## Normas

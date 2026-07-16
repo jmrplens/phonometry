@@ -192,7 +192,7 @@ print(abs(complex(ph.convert_frf(Z, 250.0, "impedance", "dynamic_stiffness")))) 
   (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
   [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
   Teoría del aislamiento de vibraciones: por qué el comportamiento de un
-  aislador depende de las movilidades de fuente y receptor, la física tras la
+  aislador depende de las movilidades de fuente y receptor, la física que sustenta la
   caracterización por fuerza bloqueada.
 - International Organization for Standardization. (2008). *Acoustics and
   vibration — Laboratory measurement of vibro-acoustic transfer properties of

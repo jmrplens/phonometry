@@ -475,7 +475,7 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metros)
   ISBN 978-1-4987-4099-9.
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
   La monografía de referencia sobre teoría y diseño de difusores, de los
-  autores tras el método del coeficiente de difusión de ISO 17497-2: la
+  autores del método del coeficiente de difusión de ISO 17497-2: la
   distinción dispersión-difusión, los montajes de
   medida y la guía de diseño que esta página condensa.
 - International Organization for Standardization. (2004). *Acoustics —
@@ -489,7 +489,7 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metros)
   Sound-scattering properties of surfaces — Part 2: Measurement of the
   directional diffusion coefficient in a free field* (ISO 17497-2:2012).
   [Catálogo iso.org](https://www.iso.org/standard/55293.html).
-  El coeficiente de autocorrelación del goniómetro que hay tras la sección 2
+  El coeficiente de autocorrelación del goniómetro que sustenta la sección 2
   de esta página, su ponderación por área y el $d_n$ normalizado.
 
 ## Normas

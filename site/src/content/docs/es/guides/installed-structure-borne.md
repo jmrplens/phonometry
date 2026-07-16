@@ -133,7 +133,7 @@ cascada.
   (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
   [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
   El acoplamiento de movilidades fuente-receptor y la transmisión estructural
-  a través de uniones tras el término de acoplamiento y el modelo de vías.
+  a través de uniones que sustentan el término de acoplamiento y el modelo de vías.
 
 ## Normas
 

@@ -150,7 +150,7 @@ res.plot()
   ISBN 978-0-932146-62-5.
   [Ficha en Open Library](https://openlibrary.org/books/OL9317725M).
   El tratamiento clásico de los niveles de sonido submarino y del ruido
-  radiado por buques tras las convenciones de referencia de las
+  radiado por buques que sustenta las convenciones de referencia de las
   secciones 1-2.
 - Ainslie, M. A. (2010). *Principles of sonar performance modelling*.
   Springer.

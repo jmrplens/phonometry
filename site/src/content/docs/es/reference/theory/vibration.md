@@ -77,7 +77,7 @@ Consulta la [guía de vibración en humanos](/phonometry/es/guides/human-vibrati
 - Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
   ISBN 978-0-12-303041-2.
   [Página del editor](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
-  La evidencia biodinámica y de efectos sobre la salud tras las ponderaciones
+  La evidencia biodinámica y de efectos sobre la salud que sustenta las ponderaciones
   de ISO 8041-1, las medidas de dosis rms/MTVV/VDV y el razonamiento de
   lesión espinal del modelo de choques múltiples.
 - Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.

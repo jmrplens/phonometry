@@ -8,7 +8,7 @@ Un sistema de megafonía, un interfono, un aula reverberante — cada uno es un
 y cada uno degrada el habla a su manera. El **índice de transmisión del habla**
 (STI) de IEC 60268-16 califica ese canal con un único número en [0, 1] midiendo
 cuánta de la *envolvente* del habla sobrevive al trayecto. Esta página cubre la
-física de transferencia de modulación tras el índice, el método indirecto desde
+física de transferencia de modulación en la que se basa el índice, el método indirecto desde
 una respuesta al impulso medida en la sala y la medición STIPA directa con su
 señal de ensayo normalizada.
 

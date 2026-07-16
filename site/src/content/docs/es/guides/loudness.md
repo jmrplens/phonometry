@@ -418,17 +418,17 @@ Devuelve un `EcmaLoudness`: `loudness` (N, sone_HMS), `specific_loudness`
 - Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
   (3.ª ed.). Springer.
   [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
-  La psicoacústica de bandas críticas y enmascaramiento tras el modelo de
+  La psicoacústica de bandas críticas y enmascaramiento que sustenta el modelo de
   Zwicker y la sensación de sonoridad que los modelos más nuevos refinan.
 - Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
   and calculation. *The Journal of the Acoustical Society of America*, 5(2),
   82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
-  Las mediciones originales de igual sonoridad tras el concepto de nivel de
+  Las mediciones originales de igual sonoridad que sustentan el concepto de nivel de
   sonoridad de la sección de tonos puros.
 - International Organization for Standardization. (2023). *Acoustics —
   Normal equal-loudness-level contours* (ISO 226:2023).
   [Catálogo iso.org](https://www.iso.org/standard/83117.html).
-  El modelo de isófonas y los parámetros de la Tabla 1 tras los niveles de
+  El modelo de isófonas y los parámetros de la Tabla 1 que sustentan los niveles de
   sonoridad de tonos puros.
 
 ## Normas
@@ -454,5 +454,5 @@ sonoridad del modelo de Sottek (sone_HMS).
   tonalidad y aspereza, la otra mitad de la calidad sonora.
 - [Molestia psicoacústica e intensidad de fluctuación](/phonometry/es/guides/psychoacoustic-annoyance/):
   el modelo de Zwicker y Fastl que consume la sonoridad percentil N5.
-- [Teoría](/phonometry/es/reference/theory/perception/): las ecuaciones tras los modelos de sonoridad.
+- [Teoría](/phonometry/es/reference/theory/perception/): las ecuaciones que sustentan los modelos de sonoridad.
 - Referencia de la API: [`psychoacoustics.loudness_zwicker`](/phonometry/es/reference/api/psychoacoustics/loudness-zwicker/), [`psychoacoustics.loudness_moore_glasberg`](/phonometry/es/reference/api/psychoacoustics/loudness-moore-glasberg/) y [`psychoacoustics.loudness_contours`](/phonometry/es/reference/api/psychoacoustics/loudness-contours/).

@@ -352,7 +352,7 @@ Consulta la [guía de incertidumbre de medida](/phonometry/es/guides/gum-uncerta
 - Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
   (3.ª ed.). Pearson. ISBN 978-0-13-198842-2.
   [Ficha en Open Library](https://openlibrary.org/isbn/9780131988422).
-  La teoría de filtros digitales tras las cascadas SOS, la transformada
+  La teoría de filtros digitales que sustenta las cascadas SOS, la transformada
   bilineal y el diezmado multitasa de la sección de diseño del banco de
   filtros.
 - Smith, J. O. *Introduction to digital filters with audio applications*
@@ -384,7 +384,7 @@ Consulta la [guía de incertidumbre de medida](/phonometry/es/guides/gum-uncerta
   como EN 61043:1994).
   [Tienda IEC](https://webstore.iec.ch/en/publication/4353).
   La norma de instrumentación p-p: el estimador por espectro cruzado y el
-  índice presión-intensidad residual tras la capacidad dinámica.
+  índice presión-intensidad residual que sustentan la capacidad dinámica.
 - International Organization for Standardization. (1993). *Acoustics —
   Determination of sound power levels of noise sources using sound
   intensity — Part 1: Measurement at discrete points* (ISO 9614-1:1993).

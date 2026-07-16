@@ -245,7 +245,7 @@ de los segmentos de rodaje de despegue, `start_of_roll_directivity` (ΔSOR).
 sobre una malla en tierra (marca los segmentos de rodaje con una máscara
 `ground_roll`).
 
-El mecanismo tras estas correcciones de suelo es la interferencia de dos
+El mecanismo que explica estas correcciones de suelo es la interferencia de dos
 caminos: la onda directa y su reflexión en el suelo. Abajo, una fuente de
 400 Hz a 1,5 m sobre un plano rígido forma el patrón de lóbulos, con la fuente
 imagen dibujada como fantasma bajo el suelo y un receptor situado en un mínimo

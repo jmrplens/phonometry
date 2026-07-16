@@ -123,4 +123,4 @@ float64, así que es seguro pasar directamente la salida de `wavfile.read`.
 - [Bancos de filtros](/phonometry/es/guides/filter-banks/) — elige una arquitectura e inspecciona sus respuestas
 - [Calibración y dBFS](/phonometry/es/guides/calibration/) — obtén valores SPL reales
 - [Referencia de la API](/phonometry/es/reference/api/) — todos los parámetros de cada función
-- [Bibliografía](/phonometry/es/reference/bibliography/) — los libros y artículos tras cada guía, cada uno con un enlace verificado
+- [Bibliografía](/phonometry/es/reference/bibliography/) — los libros y artículos que sustentan cada guía, cada uno con un enlace verificado

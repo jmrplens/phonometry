@@ -274,7 +274,7 @@ esconden dos normalizaciones:
 - Beranek, L. L., & Mellow, T. J. (2012). *Acoustics: Sound fields and
   transducers*. Academic Press. ISBN 978-0-12-391421-7.
   [doi:10.1016/C2011-0-05897-0](https://doi.org/10.1016/C2011-0-05897-0).
-  La física de transductores tras la sección 5: radiación del altavoz, presión
+  La física de transductores que sustenta la sección 5: radiación del altavoz, presión
   en el eje y la transición de campo cercano a campo lejano.
 
 ## Normas

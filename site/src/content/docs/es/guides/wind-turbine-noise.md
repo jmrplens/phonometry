@@ -49,7 +49,7 @@ suelo, a su vez, es la razón de los 6 dB restados: una cápsula tumbada sobre
 una placa dura recibe una reflexión perfectamente coherente (duplicación de
 presión, $+6$ dB) en lugar del patrón de interferencia dependiente de la
 altura que muestrearía un micrófono en trípode (véase
-[la fuente imagen tras el efecto del suelo](/phonometry/es/guides/outdoor-propagation/)).
+[la fuente imagen que explica el efecto del suelo](/phonometry/es/guides/outdoor-propagation/)).
 
 ### Clases de viento y condiciones estandarizadas
 

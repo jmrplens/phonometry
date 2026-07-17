@@ -569,6 +569,36 @@ def test_program_loudness_validation() -> None:
         integrated_loudness(poisoned, FS)
 
 
+def test_update_rate_and_weight_validation() -> None:
+    tone = _stereo(_sine(-23.0, 1.0))
+    with pytest.raises(ValueError, match="10 Hz"):
+        program_loudness(tone, FS, momentary_step=0.2)
+    with pytest.raises(ValueError, match="10 Hz"):
+        program_loudness(tone, FS, short_term_step=0.5)
+    with pytest.raises(ValueError, match="finite"):
+        program_loudness(tone, FS, weights=[1.0, np.nan])
+    with pytest.raises(ValueError, match="finite"):
+        channel_weight(np.nan)
+    with pytest.raises(ValueError, match="finite"):
+        channel_weight(30.0, np.inf)
+
+
+def test_chunked_inter_sample_peak_matches_direct(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Long programmes are scanned in bounded chunks; the margin far exceeds
+    # the interpolator's FIR support, so the piecewise maximum must equal the
+    # whole-signal computation exactly.
+    from phonometry._internal import peaks
+
+    rng = np.random.default_rng(1770)
+    x = np.vstack([rng.standard_normal(20_000), rng.standard_normal(20_000)])
+    direct = true_peak_level(x, FS)
+    monkeypatch.setattr(peaks, "_CHUNK_SAMPLES", 4096)
+    chunked = true_peak_level(x, FS)
+    np.testing.assert_array_equal(direct, chunked)
+
+
 def test_plot_smoke() -> None:
     import matplotlib
 

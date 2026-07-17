@@ -1,6 +1,6 @@
 ---
 title: "Fuentes y dispositivos"
-description: "Caracterizar lo que emite el sonido: determinación de la potencia sonora por métodos de presión, cámara reverberante e intensidad (series ISO 3740 e ISO 9614), intensidad sonora con dos micrófonos (IEC 61043), las métricas de distorsión y respuesta en frecuencia de equipos de audio de IEC 60268, y la sonoridad de programa y pico verdadero de UIT-R BS.1770 / EBU R 128."
+description: "Caracterizar lo que emite el sonido: determinación de la potencia sonora por métodos de presión, cámara reverberante e intensidad (series ISO 3740 e ISO 9614), intensidad sonora con dos micrófonos (IEC 61043), las métricas de distorsión y respuesta en frecuencia de equipos de audio de IEC 60268, y la sonoridad de programa y pico verdadero de UIT-R BS.1770-5 / EBU R 128."
 ---
 
 Toda predicción del resto de esta documentación parte de un descriptor de

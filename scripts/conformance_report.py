@@ -4831,16 +4831,28 @@ def _ebu_true_peak_case(index: int) -> tuple[float, float]:
     return expected, float(ph.true_peak_level(x, _EBU_FS))
 
 
+def _true_peak_outcome(expected: float, computed: float) -> Outcome:
+    """Tech 3341 true-peak verdict with its asymmetric +0.2/-0.4 dB window."""
+    delta = computed - expected
+    passed = -ref.EBU_TECH3341_TP_TOL_DOWN <= delta <= ref.EBU_TECH3341_TP_TOL_UP
+    return Outcome(
+        expected=(
+            f"{_fmt(expected, 'dBTP', 2)} "
+            f"(+{ref.EBU_TECH3341_TP_TOL_UP:g}/-{ref.EBU_TECH3341_TP_TOL_DOWN:g} dB)"
+        ),
+        computed=_fmt(computed, "dBTP", 2),
+        delta=_fmt(delta, "dBTP", _DELTA_PLACES),
+        passed=passed,
+    )
+
+
 @register(
     _PROGRAM_LOUDNESS,
     "EBU Tech 3341:2023 Table 1 case 15",
     "True-peak level of the fs/4 sine at 0.5 FFS, dBTP",
 )
 def _chk_tech3341_case15() -> Outcome:
-    expected, computed = _ebu_true_peak_case(0)
-    return numeric(
-        expected, computed, ref.EBU_TECH3341_TP_TOL_UP, unit="dBTP", places=2
-    )
+    return _true_peak_outcome(*_ebu_true_peak_case(0))
 
 
 @register(
@@ -4849,10 +4861,7 @@ def _chk_tech3341_case15() -> Outcome:
     "True-peak level of the fs/4 sine at 1.41 FFS, dBTP",
 )
 def _chk_tech3341_case19() -> Outcome:
-    expected, computed = _ebu_true_peak_case(4)
-    return numeric(
-        expected, computed, ref.EBU_TECH3341_TP_TOL_UP, unit="dBTP", places=2
-    )
+    return _true_peak_outcome(*_ebu_true_peak_case(4))
 
 
 @register(

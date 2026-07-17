@@ -1,6 +1,6 @@
 ---
 title: "Sources and devices"
-description: "Characterising what emits the sound: sound power determination by pressure, reverberation-room and intensity methods (ISO 3740 and ISO 9614 series), two-microphone sound intensity (IEC 61043), the IEC 60268 distortion and frequency-response metrics of audio equipment, and the ITU-R BS.1770 / EBU R 128 programme loudness and true peak."
+description: "Characterising what emits the sound: sound power determination by pressure, reverberation-room and intensity methods (ISO 3740 and ISO 9614 series), two-microphone sound intensity (IEC 61043), the IEC 60268 distortion and frequency-response metrics of audio equipment, and the ITU-R BS.1770-5 / EBU R 128 programme loudness and true peak."
 ---
 
 Every prediction elsewhere in this documentation starts from a source

@@ -34,7 +34,8 @@ _NPZ = (
     / "broadcast"
     / "ebu_programme_block_loudness.npz"
 )
-_SERIES = np.load(_NPZ)
+with np.load(_NPZ) as _f:
+    _SERIES = {key: _f[key] for key in _f.files}
 
 
 @pytest.mark.parametrize(

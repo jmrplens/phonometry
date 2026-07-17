@@ -216,6 +216,7 @@ jobs:
         unzip -q ebu-set.zip -d ebu-loudness-test-set
         rm ebu-set.zip
         test -f "ebu-loudness-test-set/seq-3341-7_seq-3342-5-24bit.wav" \
+          -a -f "ebu-loudness-test-set/seq-3341-2011-8_seq-3342-6-24bit-v02.wav" \
           || { rm -rf ebu-loudness-test-set; exit 1; }
     - name: Run tests
       # -n auto fans the suite out across the runner's cores via pytest-xdist;

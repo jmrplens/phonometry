@@ -590,8 +590,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | EBU Tech 3341:2023 Table 1 case 1 | Integrated loudness of the -23 dBFS stereo sine, LUFS | -23 LUFS (+/-0.1 LUFS) | -22.99 LUFS | 0.007 LUFS | &#9989; |
 | EBU Tech 3341:2023 Table 1 case 5 | Gated integrated loudness of the -26/-20/-26 dBFS steps, LUFS | -23 LUFS (+/-0.1 LUFS) | -22.98 LUFS | 0.021 LUFS | &#9989; |
 | EBU Tech 3341:2023 Table 1 case 6 | Integrated loudness of the 5.0-channel sine (Table 3 weights), LUFS | -23 LUFS (+/-0.1 LUFS) | -23.02 LUFS | -0.016 LUFS | &#9989; |
-| EBU Tech 3341:2023 Table 1 case 15 | True-peak level of the fs/4 sine at 0.5 FFS, dBTP | -6 dBTP (+/-0.2 dBTP) | -6.02 dBTP | -0.015 dBTP | &#9989; |
-| EBU Tech 3341:2023 Table 1 case 19 | True-peak level of the fs/4 sine at 1.41 FFS, dBTP | 3 dBTP (+/-0.2 dBTP) | 3 dBTP | 0.001 dBTP | &#9989; |
+| EBU Tech 3341:2023 Table 1 case 15 | True-peak level of the fs/4 sine at 0.5 FFS, dBTP | -6 dBTP (+0.2/-0.4 dB) | -6.02 dBTP | -0.015 dBTP | &#9989; |
+| EBU Tech 3341:2023 Table 1 case 19 | True-peak level of the fs/4 sine at 1.41 FFS, dBTP | 3 dBTP (+0.2/-0.4 dB) | 3 dBTP | 0.001 dBTP | &#9989; |
 | EBU Tech 3342:2023 Table 1 case 1 | Loudness range of the -20/-30 dBFS tone steps, LU | 10 LU (+/-1 LU) | 10 LU | 0 LU | &#9989; |
 | EBU Tech 3342:2023 Table 1 case 3 | Loudness range of the -40/-20 dBFS tone steps, LU | 20 LU (+/-1 LU) | 20 LU | 0 LU | &#9989; |
 

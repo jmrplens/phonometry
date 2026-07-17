@@ -238,6 +238,8 @@ def channel_weight(
     """
     theta = np.abs(np.asarray(azimuth, dtype=np.float64))
     phi = np.abs(np.asarray(elevation, dtype=np.float64))
+    if not (np.all(np.isfinite(theta)) and np.all(np.isfinite(phi))):
+        raise ValueError("azimuth and elevation must be finite.")
     if np.any(theta > 360.0) or np.any(phi > 90.0):
         raise ValueError(
             "azimuth must be within +/-360 deg and elevation within +/-90 deg."
@@ -266,6 +268,8 @@ def _resolve_weights(n_channels: int, weights: ArrayLike | None) -> np.ndarray:
             f"weights must be a 1D sequence with one entry per channel "
             f"({n_channels}); got shape {w.shape}."
         )
+    if not np.all(np.isfinite(w)):
+        raise ValueError("channel weights must be finite.")
     if np.any(w < 0.0):
         raise ValueError("channel weights must be non-negative.")
     return w
@@ -594,6 +598,12 @@ def program_loudness(
     fs = require_positive(float(fs), "fs")
     momentary_step = require_positive(float(momentary_step), "momentary_step")
     short_term_step = require_positive(float(short_term_step), "short_term_step")
+    if momentary_step > 0.1 or short_term_step > 0.1:
+        raise ValueError(
+            "momentary_step and short_term_step must be <= 0.1 s: EBU Tech "
+            "3341 requires a meter update rate of at least 10 Hz, and Tech "
+            "3342 needs it for the LRA input."
+        )
 
     csum = _power_cumsum(k_weighting(x_proc, fs))
     n_block, block_step = _block_geometry(fs)

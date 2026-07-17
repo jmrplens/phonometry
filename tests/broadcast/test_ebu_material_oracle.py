@@ -35,7 +35,7 @@ _NLR = "seq-3341-7_seq-3342-5-24bit.wav"
 _WLR = "seq-3341-2011-8_seq-3342-6-24bit-v02.wav"
 
 pytestmark = pytest.mark.skipif(
-    not (DATA / _NLR).is_file(),
+    not ((DATA / _NLR).is_file() and (DATA / _WLR).is_file()),
     reason="EBU loudness test set absent (local-only oracle; download the "
     "free set from tech.ebu.ch into plan/dsp-sources/ebu-loudness-test-set/ "
     "or point EBU_LOUDNESS_TEST_SET at it)",

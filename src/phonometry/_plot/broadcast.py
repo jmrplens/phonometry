@@ -57,10 +57,10 @@ def plot_program_loudness(
     if result.short_term.size:
         kwargs.setdefault("color", _C_PRIMARY)
         kwargs.setdefault("linewidth", 2.0)
+        kwargs.setdefault("label", "Short-term (3 s)")
         ax.plot(
             result.short_term_time,
             result.short_term,
-            label="Short-term (3 s)",
             **kwargs,
         )
     if math.isfinite(result.integrated):

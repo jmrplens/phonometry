@@ -336,7 +336,7 @@ resolution-bias error at a resonance peak see
 | `x` | Signal, 1-D. |
 | `fs` | Sample rate, in Hz. |
 | `window` | Segment taper (any scipy window name; default Hann, the B&P Section 11.5.2 recommendation for side-lobe suppression). |
-| `nperseg` | Welch segment length; `None` picks a length targeting a resolution of at most 4 Hz. |
+| `nperseg` | Welch segment length; `None` picks a length giving a bin spacing of at most 4 Hz (the resolution bandwidth `Be` further depends on the taper; see [`SpectralDensityResult.resolution_bandwidth`](/phonometry/reference/api/spectra/spectra/#spectraldensityresult)). |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5, which with a Hann taper retrieves most of the stability lost to tapering, B&P Section 11.5.2.2). |
 | `scaling` | `'density'` (units²/Hz) or `'spectrum'` (units² per segment bandwidth). |
 | `confidence` | Confidence level for the chi-square interval. |
@@ -410,13 +410,13 @@ Welch autospectral density with its statistical error (B&P Ch. 8).
 | :--- | :--- |
 | `frequencies` | One-sided frequency axis, in Hz. |
 | `psd` | Autospectral density `Ĝxx(f)` (units²/Hz for `'density'` scaling, units² for `'spectrum'`). |
-| `ci_lower` | Lower chi-square confidence bound on `Gxx` (Eq. 8.163). |
+| `ci_lower` | Lower chi-square confidence bound on `Gxx` (Eq. 8.163; the DC bin, and the Nyquist bin for an even segment length, use `n = nd` degrees of freedom - a wider interval - because those bins carry a single real Fourier component). |
 | `ci_upper` | Upper chi-square confidence bound on `Gxx`. |
 | `confidence` | Confidence level of the interval (e.g. `0.95`). |
-| `random_error` | Normalized random error `ε[Ĝxx] = 1/√nd` (Eq. 8.158). |
+| `random_error` | Normalized random error `ε[Ĝxx] = 1/√nd` (Eq. 8.158) of the interior bins (`√(2/nd)` at DC/Nyquist). |
 | `n_segments` | Raw number of (possibly overlapped) segments averaged. |
 | `n_averages` | Effective number of independent averages `nd` (equals `n_segments` without overlap; smaller with overlap). |
-| `degrees_of_freedom` | Chi-square degrees of freedom `n = 2·nd` (Eq. 8.162). |
+| `degrees_of_freedom` | Chi-square degrees of freedom `n = 2·nd` of the interior bins (Eq. 8.162; `nd` at DC/Nyquist). |
 | `resolution_bandwidth` | Effective noise bandwidth `Bₑ` of the tapered segment, in Hz (drives the bias error of Eq. 8.139). |
 | `window` | Taper name. |
 | `nperseg` | Segment length, in samples. |

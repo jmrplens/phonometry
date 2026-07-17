@@ -90,8 +90,8 @@ def noise_signal(
 
     rng = np.random.default_rng(seed)
     x = rng.standard_normal(n)
-    alpha = _COLOR_EXPONENTS[color]
-    if alpha != 0.0:
+    if color != "white":
+        alpha = _COLOR_EXPONENTS[color]
         spectrum = np.fft.rfft(x)
         freqs = np.fft.rfftfreq(n, d=1.0 / fs_v)
         gain = np.zeros_like(freqs)
@@ -102,6 +102,6 @@ def noise_signal(
         x = np.fft.irfft(spectrum * gain, n)
     x = x - float(np.mean(x))
     scale = float(np.sqrt(np.mean(x * x)))
-    if scale == 0.0:  # pragma: no cover - white Gaussian is never all-zero
+    if scale <= 0.0:  # pragma: no cover - white Gaussian is never all-zero
         raise ValueError("Degenerate all-zero record; use another seed.")
     return np.asarray(x * (rms_v / scale), dtype=np.float64)

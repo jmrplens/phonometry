@@ -43,7 +43,10 @@ como del número **efectivo** de promedios independientes (`n_averages`),
 calculado con la fórmula de correlación de ventana de Welch (1967) que
 Bendat y Piersol citan en la sección 11.5.2.2: para Hann con solape del 50 %,
 aproximadamente 0,95 del número bruto. El error aleatorio y el intervalo de
-confianza usan el valor efectivo.
+confianza usan el valor efectivo. En DC, y en Nyquist con longitud de
+segmento par, el espectro unilateral tiene una sola componente de Fourier
+real, así que esos bins llevan la mitad de grados de libertad y un intervalo
+proporcionalmente más ancho.
 
 ```python
 from phonometry import power_spectral_density
@@ -131,8 +134,9 @@ $$
 
 Ambos se reducen cuando la coherencia se acerca a uno: un par fuertemente
 coherente necesita muchos menos promedios para la misma confianza. La fase
-se devuelve desenrollada, así que la pendiente de `phase` frente a la
-frecuencia mide directamente un retardo de propagación (`τ = -pendiente/2π`).
+se devuelve desenrollada, así que su pendiente frente a la frecuencia es el
+retardo de grupo `τ_g = -dφ/(2π·df)`; para un camino de retardo puro la fase
+es lineal y esa pendiente lee directamente el retardo de propagación.
 
 ```python
 from phonometry import cross_spectral_density
@@ -211,9 +215,10 @@ smooth_mag = fractional_octave_smoothing(freqs, np.abs(response), 6.0,
 smooth_db = fractional_octave_smoothing(freqs, levels, 3.0, domain="db")  # curva en dB
 ```
 
-Una sola línea espectral de potencia `P` en un bin de anchura `Δf` se suaviza
-al nivel en forma cerrada `P·Δf / (f₀·(2^{1/2n} - 2^{-1/2n}))` sobre una
-anchura de núcleo: el oráculo fijado en los tests.
+Una sola línea espectral con ordenada de PSD `P` (unidades²/Hz) en un bin de
+anchura `Δf` se suaviza al nivel en forma cerrada
+`P·Δf / (f₀·(2^{1/2n} - 2^{-1/2n}))` sobre una anchura de núcleo: el oráculo
+fijado en los tests.
 
 ## 5. Generadores de ruido de colores
 
@@ -223,8 +228,9 @@ de la frecuencia con la respuesta en magnitud exacta `(f/f_ref)^{α/2}` bin a
 bin (un filtro de fase cero aplicado de forma circular), así que una
 pendiente medida solo se desvía de la ley de potencias por el error
 aleatorio de la estimación espectral, no como las aproximaciones rosas por
-tramos o de pocos polos cuya pendiente ondula fracciones de dB. El registro tiene media cero y se reescala exactamente al
-RMS pedido, y la misma semilla reproduce el mismo registro bit a bit.
+tramos o de pocos polos cuya pendiente ondula fracciones de dB. El registro
+tiene media cero y se reescala exactamente al RMS pedido, y la misma semilla
+reproduce el mismo registro bit a bit.
 
 | color | α | pendiente de la PSD |
 |---|---|---|

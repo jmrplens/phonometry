@@ -28,6 +28,9 @@ from .common import (
     _new_axes_column,
 )
 
+#: Shared frequency-axis label of the spectral renderers.
+_FREQ_LABEL = "Frequency [Hz]"
+
 def plot_uncertainty_budget(
     result: "UncertaintyResult", ax: Axes | None = None, **kwargs: Any
 ) -> Axes:
@@ -136,7 +139,7 @@ def plot_spectral_density(
     )
     kwargs.setdefault("label", "$\\hat{G}_{xx}(f)$")
     ax.semilogx(freqs[pos], _db10(np.asarray(result.psd)[pos]), color=color, **kwargs)
-    ax.set_xlabel("Frequency [Hz]")
+    ax.set_xlabel(_FREQ_LABEL)
     ax.set_ylabel(_psd_ylabel(result.scaling))
     ax.set_title(
         "Welch spectral density — "
@@ -178,7 +181,7 @@ def plot_cross_spectral_density(
 
     if ax is not None:
         _magnitude(ax)
-        ax.set_xlabel("Frequency [Hz]")
+        ax.set_xlabel(_FREQ_LABEL)
         return ax
 
     axes = _new_axes_column(3, sharex=True, figsize=(8.0, 7.0))
@@ -205,7 +208,7 @@ def plot_cross_spectral_density(
     axes[2].semilogx(freqs[pos], result.coherence[pos], color=_C_MUTED)
     axes[2].set_ylabel("$\\gamma^2_{xy}$")
     axes[2].set_ylim(0.0, 1.05)
-    axes[2].set_xlabel("Frequency [Hz]")
+    axes[2].set_xlabel(_FREQ_LABEL)
     axes[2].grid(True, which="both", alpha=0.3)
     return axes
 
@@ -255,7 +258,7 @@ def plot_coherent_output_spectrum(
 
     if ax is not None:
         _spectra_panel(ax)
-        ax.set_xlabel("Frequency [Hz]")
+        ax.set_xlabel(_FREQ_LABEL)
         return ax
 
     axes = _new_axes_column(2, sharex=True, figsize=(8.0, 5.6))
@@ -264,6 +267,6 @@ def plot_coherent_output_spectrum(
     axes[1].semilogx(freqs[pos], result.snr_db[pos], color=_C_SECONDARY)
     axes[1].axhline(0.0, color=_C_MUTED, ls=":", lw=1.0)
     axes[1].set_ylabel("Spectral SNR [dB]")
-    axes[1].set_xlabel("Frequency [Hz]")
+    axes[1].set_xlabel(_FREQ_LABEL)
     axes[1].grid(True, which="both", alpha=0.3)
     return axes

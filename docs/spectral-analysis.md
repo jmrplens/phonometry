@@ -40,6 +40,9 @@ number of independent averages (`n_averages`), computed with the
 window-correlation formula of Welch (1967) that Bendat & Piersol reference in
 Section 11.5.2.2 — for a Hann taper at 50 % overlap roughly 0.95 of the raw
 count. The random error and the confidence interval use the effective value.
+At DC — and at Nyquist for an even segment length — the one-sided spectrum
+has a single real Fourier component, so those bins carry half the degrees of
+freedom and a correspondingly wider interval.
 
 ```python
 from phonometry import power_spectral_density
@@ -124,9 +127,10 @@ $$
 $$
 
 Both shrink as the coherence approaches one: a strongly coherent pair needs
-far fewer averages for the same confidence. The phase is unwrapped, so the
-slope of `phase` against frequency measures a propagation delay directly
-(`τ = -slope/2π`).
+far fewer averages for the same confidence. The phase is unwrapped, so its
+slope against frequency is the group delay `τ_g = -dφ/(2π·df)`; for a pure
+delay path the phase is linear and that slope reads the propagation delay
+directly.
 
 ```python
 from phonometry import cross_spectral_density
@@ -203,9 +207,9 @@ smooth_mag = fractional_octave_smoothing(freqs, np.abs(response), 6.0,
 smooth_db = fractional_octave_smoothing(freqs, levels, 3.0, domain="db")  # dB curve
 ```
 
-A single spectral line of power `P` in a bin of width `Δf` smooths to the
-closed-form level `P·Δf / (f₀·(2^{1/2n} - 2^{-1/2n}))` over one kernel width —
-the oracle pinned in the tests.
+A single spectral line with PSD ordinate `P` (units²/Hz) in a bin of width
+`Δf` smooths to the closed-form level `P·Δf / (f₀·(2^{1/2n} - 2^{-1/2n}))`
+over one kernel width — the oracle pinned in the tests.
 
 ## 5. Colored-noise generators
 
@@ -214,8 +218,9 @@ exactly in expectation: seeded white noise is shaped in the frequency domain
 by the exact magnitude response `(f/f_ref)^{α/2}` bin by bin (a zero-phase
 filter applied circularly), so a measured slope deviates from the power law
 only by the random error of the spectral estimate — not the piecewise or
-few-pole pink approximations whose slope ripples by fractions of a dB. The record is zero-mean and rescaled to the requested RMS
-exactly, and the same seed reproduces the same record bit for bit.
+few-pole pink approximations whose slope ripples by fractions of a dB. The
+record is zero-mean and rescaled to the requested RMS exactly, and the same
+seed reproduces the same record bit for bit.
 
 | color | α | PSD slope |
 |---|---|---|

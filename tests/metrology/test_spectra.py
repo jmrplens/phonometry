@@ -140,6 +140,21 @@ def test_chi_square_interval_covers_true_psd_at_stated_confidence() -> None:
     assert hits / total == pytest.approx(0.95, abs=0.025)
 
 
+def test_dc_and_nyquist_bins_get_wider_single_component_intervals() -> None:
+    """DC/Nyquist carry one real Fourier component: n = nd, not 2·nd."""
+    res = ph.power_spectral_density(_white(8), FS, nperseg=1024)
+    ratio = res.ci_upper / res.ci_lower
+    interior = float(ratio[1])
+    assert np.allclose(ratio[1:-1], interior, rtol=1e-9)
+    assert float(ratio[0]) > 1.05 * interior
+    assert float(ratio[-1]) > 1.05 * interior  # even nperseg -> Nyquist bin
+    # Odd segment length: the last bin is not Nyquist and stays interior.
+    odd = ph.power_spectral_density(_white(8), FS, nperseg=1023)
+    odd_ratio = odd.ci_upper / odd.ci_lower
+    assert float(odd_ratio[-1]) == pytest.approx(float(odd_ratio[1]), rel=1e-9)
+    assert float(odd_ratio[0]) > 1.05 * float(odd_ratio[1])
+
+
 def test_confidence_interval_widens_at_higher_confidence() -> None:
     x = _white(7)
     r90 = ph.power_spectral_density(x, FS, nperseg=1024, confidence=0.90)
@@ -421,12 +436,14 @@ def test_smoothing_rejects_invalid_inputs(kwargs: dict, match: str) -> None:
 
 def test_psd_rejects_invalid_inputs() -> None:
     x = _white(12)
+    two_dimensional = np.stack([x, x])
+    non_finite = np.full(4096, np.nan)
     with pytest.raises(ValueError, match="one-dimensional"):
-        ph.power_spectral_density(np.stack([x, x]), FS)
+        ph.power_spectral_density(two_dimensional, FS)
     with pytest.raises(ValueError, match="too short"):
         ph.power_spectral_density(x[:16], FS)
     with pytest.raises(ValueError, match="finite"):
-        ph.power_spectral_density(np.full(4096, np.nan), FS)
+        ph.power_spectral_density(non_finite, FS)
     with pytest.raises(ValueError, match="'fs'"):
         ph.power_spectral_density(x, 0.0)
     with pytest.raises(ValueError, match="nperseg"):

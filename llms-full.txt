@@ -8022,6 +8022,9 @@ number of independent averages (`n_averages`), computed with the
 window-correlation formula of Welch (1967) that Bendat & Piersol reference in
 Section 11.5.2.2 — for a Hann taper at 50 % overlap roughly 0.95 of the raw
 count. The random error and the confidence interval use the effective value.
+At DC — and at Nyquist for an even segment length — the one-sided spectrum
+has a single real Fourier component, so those bins carry half the degrees of
+freedom and a correspondingly wider interval.
 
 ```python
 from phonometry import power_spectral_density
@@ -8106,9 +8109,10 @@ $$
 $$
 
 Both shrink as the coherence approaches one: a strongly coherent pair needs
-far fewer averages for the same confidence. The phase is unwrapped, so the
-slope of `phase` against frequency measures a propagation delay directly
-(`τ = -slope/2π`).
+far fewer averages for the same confidence. The phase is unwrapped, so its
+slope against frequency is the group delay `τ_g = -dφ/(2π·df)`; for a pure
+delay path the phase is linear and that slope reads the propagation delay
+directly.
 
 ```python
 from phonometry import cross_spectral_density
@@ -8185,9 +8189,9 @@ smooth_mag = fractional_octave_smoothing(freqs, np.abs(response), 6.0,
 smooth_db = fractional_octave_smoothing(freqs, levels, 3.0, domain="db")  # dB curve
 ```
 
-A single spectral line of power `P` in a bin of width `Δf` smooths to the
-closed-form level `P·Δf / (f₀·(2^{1/2n} - 2^{-1/2n}))` over one kernel width —
-the oracle pinned in the tests.
+A single spectral line with PSD ordinate `P` (units²/Hz) in a bin of width
+`Δf` smooths to the closed-form level `P·Δf / (f₀·(2^{1/2n} - 2^{-1/2n}))`
+over one kernel width — the oracle pinned in the tests.
 
 ## 5. Colored-noise generators
 
@@ -8196,8 +8200,9 @@ exactly in expectation: seeded white noise is shaped in the frequency domain
 by the exact magnitude response `(f/f_ref)^{α/2}` bin by bin (a zero-phase
 filter applied circularly), so a measured slope deviates from the power law
 only by the random error of the spectral estimate — not the piecewise or
-few-pole pink approximations whose slope ripples by fractions of a dB. The record is zero-mean and rescaled to the requested RMS
-exactly, and the same seed reproduces the same record bit for bit.
+few-pole pink approximations whose slope ripples by fractions of a dB. The
+record is zero-mean and rescaled to the requested RMS exactly, and the same
+seed reproduces the same record bit for bit.
 
 | color | α | PSD slope |
 |---|---|---|
@@ -9138,7 +9143,7 @@ cycle and warn on use; they are removed in 4.0.
 | `UncertaintyResult` | `dataclass` | **GUM propagation result.**<br>• `value`: y = f(x1…xN)<br>• `combined_uncertainty`: uc(y)<br>• `sensitivities`: ci = ∂f/∂xi<br>• `contributions`: \|ci\|·u(xi)<br>• `effective_dof`: Welch–Satterthwaite<br>• `names`<br>• `.plot()`: uncertainty budget | `u.combined_uncertainty, u.contributions` |
 | `MonteCarloResult` | `dataclass` | **Monte Carlo result.**<br>• `value`: sample mean<br>• `standard_uncertainty`: sample std<br>• `interval`: (low, high) coverage interval (§7.7)<br>• `coverage`, `trials` | `mc.value, mc.interval` |
 | `UncertaintyWarning` | `warning class` | **GUM propagation advisory.**<br>Emitted when a propagation falls back outside its nominal assumptions | `warnings.simplefilter('error', UncertaintyWarning)` |
-| `power_spectral_density` | `function` | **Welch PSD with statistical error analysis (Bendat & Piersol Ch. 8).**<br>• `x`, `fs`<br>• `window` (Default: 'hann'), `nperseg` (Default: ≈4 Hz resolution), `overlap` (Default: 0.5)<br>• `scaling`: 'density' [units²/Hz] / 'spectrum' [units²]<br>• `confidence`: chi-square CI level (Default: 0.95) | `res = power_spectral_density(x, fs)`<br><br>• `SpectralDensityResult` (psd, CI, nd, ε) |
+| `power_spectral_density` | `function` | **Welch PSD with statistical error analysis (Bendat & Piersol Ch. 8).**<br>• `x`, `fs`<br>• `window` (Default: 'hann'), `nperseg` (Default: bin spacing of at most 4 Hz; the resolution bandwidth Be also depends on the taper ENBW), `overlap` (Default: 0.5)<br>• `scaling`: 'density' [units²/Hz] / 'spectrum' [units²]<br>• `confidence`: chi-square CI level (Default: 0.95) | `res = power_spectral_density(x, fs)`<br><br>• `SpectralDensityResult` (psd, CI, nd, ε) |
 | `cross_spectral_density` | `function` | **Welch cross-spectral density with magnitude/phase errors (Eqs. 9.33/9.52).**<br>• `x`, `y`, `fs`<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = cross_spectral_density(x, y, fs)`<br><br>• `CrossSpectralDensityResult` |
 | `coherent_output_spectrum` | `function` | **Gvv = γ²·Gyy, noise remainder and spectral SNR (Eqs. 9.55–9.56, 9.73).**<br>• `x` (input), `y` (output), `fs`<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = coherent_output_spectrum(x, y, fs)`<br><br>• `CoherentOutputSpectrumResult` |
 | `fractional_octave_smoothing` | `function` | **Constant-power 1/n-octave smoothing of a spectrum.**<br>• `frequencies`, `values`<br>• `fraction`: the n of 1/n octave (Default: 3)<br>• `domain`: 'power'/'amplitude'/'db' (Default: 'power') | `s = fractional_octave_smoothing(f, psd, 3.0)`<br><br>• smoothed array, same domain; flat spectra unchanged |

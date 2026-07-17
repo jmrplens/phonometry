@@ -114,7 +114,7 @@ def _validate_welch_params(
 
 
 def _default_nperseg(n: int, fs: float) -> int:
-    """Segment length targeting a resolution of at most 4 Hz (min 32 samples)."""
+    """Segment length for a bin spacing of at most 4 Hz (min 32 samples)."""
     nperseg = int(min(n, 2 ** int(np.ceil(np.log2(fs / 4.0)))))
     return max(nperseg, _MIN_SAMPLES)
 
@@ -241,17 +241,43 @@ def _segment_statistics(
     return k, float(nd), benbw
 
 
-def _chi2_interval(
-    gxx: "NDArray[np.float64]", nd: float, confidence: float
-) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
-    """Chi-square confidence interval for the autospectrum (Eq. 8.163)."""
+def _chi2_bounds(dof: float, confidence: float) -> tuple[float, float]:
+    """Interval factors ``n/χ²ₙ;α/2`` and ``n/χ²ₙ;1-α/2`` (Eq. 8.163).
+
+    B&P's ``χ²_{n;α}`` is the value exceeded with probability ``α`` (isf).
+    """
     from scipy import stats as sp_stats
 
     alpha = 1.0 - confidence
-    dof = 2.0 * nd
-    # B&P's chi²_{n;α} is the value exceeded with probability α (isf).
-    lower = dof * gxx / float(sp_stats.chi2.isf(alpha / 2.0, dof))
-    upper = dof * gxx / float(sp_stats.chi2.isf(1.0 - alpha / 2.0, dof))
+    return (
+        dof / float(sp_stats.chi2.isf(alpha / 2.0, dof)),
+        dof / float(sp_stats.chi2.isf(1.0 - alpha / 2.0, dof)),
+    )
+
+
+def _chi2_interval(
+    gxx: "NDArray[np.float64]",
+    nd: float,
+    confidence: float,
+    nyquist_bin: bool,
+) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+    """Chi-square confidence interval for the autospectrum (Eq. 8.163).
+
+    Interior bins average two squared Gaussian components per segment
+    (``n = 2·nd``, Eq. 8.162); the DC bin - and the Nyquist bin when the
+    segment length is even - has a single real Fourier component, so its
+    estimate carries only ``n = nd`` degrees of freedom and a wider
+    interval.
+    """
+    low_i, up_i = _chi2_bounds(2.0 * nd, confidence)
+    lower = low_i * gxx
+    upper = up_i * gxx
+    low_e, up_e = _chi2_bounds(nd, confidence)
+    lower[0] = low_e * gxx[0]
+    upper[0] = up_e * gxx[0]
+    if nyquist_bin:
+        lower[-1] = low_e * gxx[-1]
+        upper[-1] = up_e * gxx[-1]
     return lower, upper
 
 
@@ -293,16 +319,19 @@ class SpectralDensityResult:
     :ivar frequencies: One-sided frequency axis, in Hz.
     :ivar psd: Autospectral density ``Ĝxx(f)`` (units²/Hz for ``'density'``
         scaling, units² for ``'spectrum'``).
-    :ivar ci_lower: Lower chi-square confidence bound on ``Gxx`` (Eq. 8.163).
+    :ivar ci_lower: Lower chi-square confidence bound on ``Gxx`` (Eq. 8.163;
+        the DC bin, and the Nyquist bin for an even segment length, use
+        ``n = nd`` degrees of freedom - a wider interval - because those
+        bins carry a single real Fourier component).
     :ivar ci_upper: Upper chi-square confidence bound on ``Gxx``.
     :ivar confidence: Confidence level of the interval (e.g. ``0.95``).
     :ivar random_error: Normalized random error ``ε[Ĝxx] = 1/√nd``
-        (Eq. 8.158).
+        (Eq. 8.158) of the interior bins (``√(2/nd)`` at DC/Nyquist).
     :ivar n_segments: Raw number of (possibly overlapped) segments averaged.
     :ivar n_averages: Effective number of independent averages ``nd``
         (equals ``n_segments`` without overlap; smaller with overlap).
-    :ivar degrees_of_freedom: Chi-square degrees of freedom ``n = 2·nd``
-        (Eq. 8.162).
+    :ivar degrees_of_freedom: Chi-square degrees of freedom ``n = 2·nd`` of
+        the interior bins (Eq. 8.162; ``nd`` at DC/Nyquist).
     :ivar resolution_bandwidth: Effective noise bandwidth ``Bₑ`` of the
         tapered segment, in Hz (drives the bias error of Eq. 8.139).
     :ivar window: Taper name.
@@ -358,8 +387,9 @@ def power_spectral_density(
     :param fs: Sample rate, in Hz.
     :param window: Segment taper (any scipy window name; default Hann,
         the B&P Section 11.5.2 recommendation for side-lobe suppression).
-    :param nperseg: Welch segment length; ``None`` picks a length targeting
-        a resolution of at most 4 Hz.
+    :param nperseg: Welch segment length; ``None`` picks a length giving a
+        bin spacing of at most 4 Hz (the resolution bandwidth ``Be`` further
+        depends on the taper; see :attr:`SpectralDensityResult.resolution_bandwidth`).
     :param overlap: Segment overlap fraction in [0, 1) (default 0.5, which
         with a Hann taper retrieves most of the stability lost to tapering,
         B&P Section 11.5.2.2).
@@ -378,7 +408,9 @@ def power_spectral_density(
 
     freqs, gxx = _welch_autospectrum(xa, fs_v, seg, nov, window, scaling_v)
     k, nd, benbw = _segment_statistics(xa.size, seg, nov, window, fs_v)
-    lower, upper = _chi2_interval(gxx, nd, conf)
+    # An even segment length puts the one-sided spectrum's last bin exactly
+    # at Nyquist, where (like DC) only one real Fourier component exists.
+    lower, upper = _chi2_interval(gxx, nd, conf, nyquist_bin=seg % 2 == 0)
     return SpectralDensityResult(
         frequencies=freqs,
         psd=gxx,
@@ -700,6 +732,75 @@ def coherent_output_spectrum(
 # ---------------------------------------------------------------------------
 
 
+def _smoothing_validate(
+    f: "NDArray[np.float64]", v: "NDArray[np.float64]"
+) -> None:
+    """Validate the frequency axis / spectrum pair of the smoother."""
+    if f.ndim != 1 or v.ndim != 1:
+        raise ValueError("'frequencies' and 'values' must be one-dimensional.")
+    if f.size != v.size:
+        raise ValueError("'frequencies' and 'values' must have the same length.")
+    if f.size < 2:
+        raise ValueError("At least two frequency points are required.")
+    if not np.all(np.isfinite(f)) or not np.all(np.isfinite(v)):
+        raise ValueError("'frequencies' and 'values' must be finite.")
+    if np.any(np.diff(f) <= 0.0):
+        raise ValueError("'frequencies' must be strictly increasing.")
+
+
+def _smoothing_to_power(
+    v: "NDArray[np.float64]", domain: str
+) -> "NDArray[np.float64]":
+    """Map the input spectrum onto power-like values per ``domain``."""
+    if domain not in ("power", "amplitude", "db"):
+        raise ValueError("'domain' must be 'power', 'amplitude' or 'db'.")
+    if domain == "db":
+        return np.asarray(10.0 ** (v / 10.0), dtype=np.float64)
+    if np.any(v < 0.0):
+        raise ValueError(f"'values' must be non-negative in the {domain} domain.")
+    return v.copy() if domain == "power" else v * v
+
+
+def _smoothing_from_power(
+    power: "NDArray[np.float64]", domain: str
+) -> "NDArray[np.float64]":
+    """Map smoothed power back to the input ``domain``."""
+    if domain == "power":
+        return power
+    if domain == "amplitude":
+        return np.asarray(np.sqrt(power), dtype=np.float64)
+    with np.errstate(divide="ignore"):
+        out_db = 10.0 * np.log10(power)
+    return np.asarray(out_db, dtype=np.float64)
+
+
+def _smoothing_window_average(
+    fp: "NDArray[np.float64]", pp: "NDArray[np.float64]", fraction: float
+) -> "NDArray[np.float64]":
+    """Average piecewise-constant power over the 1/n-octave windows.
+
+    Bins are bounded by arithmetic midpoints; the running integral makes
+    the window average exact (and a flat spectrum exactly invariant). The
+    window is clipped at the ends of the axis.
+    """
+    edges = np.empty(fp.size + 1, dtype=np.float64)
+    edges[1:-1] = 0.5 * (fp[:-1] + fp[1:])
+    edges[0] = max(fp[0] - 0.5 * (fp[1] - fp[0]), 0.0)
+    edges[-1] = fp[-1] + 0.5 * (fp[-1] - fp[-2])
+    cumulative = np.concatenate(([0.0], np.cumsum(pp * np.diff(edges))))
+    half = 2.0 ** (1.0 / (2.0 * fraction))
+    f_low = np.clip(fp / half, edges[0], edges[-1])
+    f_high = np.clip(fp * half, edges[0], edges[-1])
+    integral = np.interp(f_high, edges, cumulative) - np.interp(
+        f_low, edges, cumulative
+    )
+    width = f_high - f_low
+    return np.asarray(
+        np.divide(integral, width, out=pp.copy(), where=width > 0.0),
+        dtype=np.float64,
+    )
+
+
 def fractional_octave_smoothing(
     frequencies: "NDArray[np.float64] | list[float]",
     values: "NDArray[np.float64] | list[float]",
@@ -736,64 +837,13 @@ def fractional_octave_smoothing(
     """
     f = np.asarray(frequencies, dtype=np.float64)
     v = np.asarray(values, dtype=np.float64)
-    if f.ndim != 1 or v.ndim != 1:
-        raise ValueError("'frequencies' and 'values' must be one-dimensional.")
-    if f.size != v.size:
-        raise ValueError("'frequencies' and 'values' must have the same length.")
-    if f.size < 2:
-        raise ValueError("At least two frequency points are required.")
-    if not np.all(np.isfinite(f)) or not np.all(np.isfinite(v)):
-        raise ValueError("'frequencies' and 'values' must be finite.")
-    if np.any(np.diff(f) <= 0.0):
-        raise ValueError("'frequencies' must be strictly increasing.")
+    _smoothing_validate(f, v)
     frac = _positive(fraction, "fraction")
-    if domain not in ("power", "amplitude", "db"):
-        raise ValueError("'domain' must be 'power', 'amplitude' or 'db'.")
-
-    if domain == "power":
-        if np.any(v < 0.0):
-            raise ValueError("'values' must be non-negative in the power domain.")
-        power = v.copy()
-    elif domain == "amplitude":
-        if np.any(v < 0.0):
-            raise ValueError(
-                "'values' must be non-negative in the amplitude domain."
-            )
-        power = v * v
-    else:
-        power = np.asarray(10.0 ** (v / 10.0), dtype=np.float64)
+    power = _smoothing_to_power(v, domain)
 
     pos = f > 0.0
     fp = f[pos]
-    pp = power[pos]
     out_power = power.copy()
     if fp.size >= 2:
-        # Piecewise-constant power on bins bounded by arithmetic midpoints;
-        # the running integral makes the window average exact (and a flat
-        # spectrum exactly invariant).
-        edges = np.empty(fp.size + 1, dtype=np.float64)
-        edges[1:-1] = 0.5 * (fp[:-1] + fp[1:])
-        edges[0] = max(fp[0] - 0.5 * (fp[1] - fp[0]), 0.0)
-        edges[-1] = fp[-1] + 0.5 * (fp[-1] - fp[-2])
-        cumulative = np.concatenate(
-            ([0.0], np.cumsum(pp * np.diff(edges)))
-        )
-        half = 2.0 ** (1.0 / (2.0 * frac))
-        f_low = np.clip(fp / half, edges[0], edges[-1])
-        f_high = np.clip(fp * half, edges[0], edges[-1])
-        integral = np.interp(f_high, edges, cumulative) - np.interp(
-            f_low, edges, cumulative
-        )
-        width = f_high - f_low
-        smoothed = np.divide(
-            integral, width, out=pp.copy(), where=width > 0.0
-        )
-        out_power[pos] = smoothed
-
-    if domain == "power":
-        return out_power
-    if domain == "amplitude":
-        return np.asarray(np.sqrt(out_power), dtype=np.float64)
-    with np.errstate(divide="ignore"):
-        out_db = 10.0 * np.log10(out_power)
-    return np.asarray(out_db, dtype=np.float64)
+        out_power[pos] = _smoothing_window_average(fp, power[pos], frac)
+    return _smoothing_from_power(out_power, domain)

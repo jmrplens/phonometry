@@ -27,6 +27,11 @@ if TYPE_CHECKING:
     from ..materials.airflow_resistance import StaticAirflowResult
     from ..materials.dynamic_stiffness import DynamicStiffnessResult
     from ..materials.impedance_tube import ImpedanceTubeResult
+    from ..materials.porous_absorber import (
+        LayeredAbsorberResult,
+        PorousMediumResult,
+        DiffuseFieldAbsorptionResult,
+    )
     from ..materials.road_absorption import InsituAbsorptionResult
     from ..materials.scattering_diffusion import DiffusionResult, ScatteringResult
 
@@ -287,4 +292,123 @@ def plot_absorption_uncertainty(
     )
     ax.grid(True, which="both", alpha=0.3)
     ax.legend()
+    return ax
+
+
+def _absorption_spectrum_axes(
+    ax: "Axes | None",
+    freqs: np.ndarray,
+    alpha: np.ndarray,
+    *,
+    title: str,
+    label: str,
+    **kwargs: Any,
+) -> Axes:
+    """Shared alpha(f) spectrum renderer for the absorber predictions."""
+    ax = ax if ax is not None else _new_axes()
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("label", label)
+    ax.semilogx(freqs, alpha, **kwargs)
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel(r"Absorption coefficient $\alpha$")
+    ax.set_ylim(0.0, 1.05)
+    ax.set_title(title)
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_porous_medium(
+    result: "PorousMediumResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Normalised characteristic values of a porous medium vs frequency.
+
+    Draws the real part and negative imaginary part of the normalised
+    characteristic impedance ``Zc / (rho c)`` and wavenumber ``k / k0`` on a
+    log-log grid, the classical presentation of the empirical porous models
+    (Mechel 2e Sect. G.11; Cox & D'Antonio 3e Figs. 6.19-6.20).
+
+    :param result: A :class:`~phonometry.materials.porous_absorber.PorousMediumResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``Re(Zc)`` ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequency, dtype=np.float64)
+    zn = np.asarray(result.normalized_impedance, dtype=np.complex128)
+    kn = np.asarray(result.normalized_wavenumber, dtype=np.complex128)
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("label", r"Re$(Z_c)/\rho c$")
+    ax.loglog(freqs, zn.real, **kwargs)
+    ax.loglog(freqs, -zn.imag, ls="--", color=_C_PRIMARY_LIGHT,
+              label=r"$-$Im$(Z_c)/\rho c$")
+    ax.loglog(freqs, kn.real, color=_C_REFERENCE, label=r"Re$(k)/k_0$")
+    ax.loglog(freqs, -kn.imag, ls="--", color=_C_MUTED, label=r"$-$Im$(k)/k_0$")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Normalised characteristic value")
+    ax.set_title(
+        f"Porous medium ({result.model}), "
+        f"$\\sigma$ = {result.flow_resistivity:g} Pa s/m$^2$"
+    )
+    ax.legend(loc="best", fontsize="small")
+    ax.grid(True, which="both", alpha=0.3)
+    return ax
+
+
+def plot_layered_absorber(
+    result: "LayeredAbsorberResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Oblique-incidence absorption spectrum with |R| overlaid.
+
+    Draws the predicted ``alpha(f)`` of the layer stack as the primary curve
+    and the reflection-factor magnitude ``|R|(f)`` as a muted companion.
+
+    :param result: A :class:`~phonometry.materials.porous_absorber.LayeredAbsorberResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the absorption-curve ``plot`` call.
+    :return: The axes.
+    """
+    angle_deg = np.degrees(result.angle)
+    ax = _absorption_spectrum_axes(
+        ax,
+        np.asarray(result.frequency, dtype=np.float64),
+        np.asarray(result.absorption, dtype=np.float64),
+        title=(
+            "Layered absorber prediction "
+            f"($\\theta$ = {angle_deg:.0f}°)"
+        ),
+        label=r"Absorption $\alpha(\theta)$",
+        **kwargs,
+    )
+    ax.semilogx(
+        np.asarray(result.frequency, dtype=np.float64),
+        np.abs(np.asarray(result.reflection, dtype=np.complex128)),
+        ls="--", color=_C_MUTED, label="Reflection factor $|R|$",
+    )
+    ax.legend(loc="best", fontsize="small")
+    return ax
+
+
+def plot_diffuse_field_absorption(
+    result: "DiffuseFieldAbsorptionResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Random-incidence (Paris-integral) absorption spectrum.
+
+    :param result: A :class:`~phonometry.materials.porous_absorber.DiffuseFieldAbsorptionResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the absorption-curve ``plot`` call.
+    :return: The axes.
+    """
+    limit_deg = np.degrees(result.angle_limit)
+    ax = _absorption_spectrum_axes(
+        ax,
+        np.asarray(result.frequency, dtype=np.float64),
+        np.asarray(result.absorption, dtype=np.float64),
+        title=(
+            "Random-incidence absorption "
+            f"(Paris integral to {limit_deg:.0f}°)"
+        ),
+        label=r"Absorption $\alpha_{dif}$",
+        **kwargs,
+    )
+    ax.legend(loc="best", fontsize="small")
     return ax

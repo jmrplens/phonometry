@@ -8671,6 +8671,7 @@ contour = aircraft.noise_contour(path, powers, distances, sel, lmax, x=gx, y=gy)
 | `phonometry.underwater` | ISO 18405/17208/18406 levels, propagation, sound speed, sonar equation, seabed, ambient and ship-traffic noise, numerical solvers |
 | `phonometry.electroacoustics` | Distortion (IEC 60268-3 / AES17), transfer function and coherence |
 | `phonometry.broadcast` | Programme loudness and true peak (ITU-R BS.1770-5, EBU R 128 with Tech 3341/3342) |
+| `phonometry.simulation` | 2D acoustic FDTD wave simulation (staggered grid, sources, probes, impedance boundaries, obstacles) |
 
 Every name in the table below is also re-exported at the top level, so
 `from phonometry import <name>` works for every row. The pre-3.2 flat module
@@ -9326,6 +9327,12 @@ cycle and warn on use; they are removed in 4.0.
 | `WBV_ELV_A8` | `float` | **Whole-body A(8) limit value [m/s²].**<br>1.15 | `WBV_ELV_A8  # 1.15` |
 | `WBV_EAV_VDV` | `float` | **Whole-body VDV action value [m/s^1.75].**<br>9.1 | `WBV_EAV_VDV  # 9.1` |
 | `WBV_ELV_VDV` | `float` | **Whole-body VDV limit value [m/s^1.75].**<br>21.0 | `WBV_ELV_VDV  # 21.0` |
+| `fdtd_simulation` | `function` | **2D acoustic FDTD wave simulation (staggered grid, leapfrog).**<br>• `c`: sound-speed map [m/s], `(ny, nx)` array or scalar with `shape`<br>• `dx`: grid spacing [m] / `duration` [s]<br>• `sources`: `GaussianPulse` \| `CWSource` \| `SignalSource` list<br>• `probes`: `(ix, iy)` pressure-probe cells<br>• `boundaries`: `"rigid"` \| `"absorbing"` \| per-side mapping (name or real impedance [Pa·s/m])<br>• `obstacle_mask`: boolean `(ny, nx)` rigid-cell map / `rho` / `cfl` / `damping` / `absorbing_layer_cells` / `snapshot_every` | `res = fdtd_simulation(343, 0.01, 0.02, shape=(200, 300), sources=[GaussianPulse(ix=60, iy=100, width=3e-4)], probes=[(200, 100)])`<br><br>• `FDTDResult` |
+| `FDTDResult` | `dataclass` | **FDTD simulation result.**<br>• `times` [s] / `pressures` [Pa] per probe / `probes` / `probe_positions` [m]<br>• `dx` / `dt` / `shape` / `size` [m] / `sources` / `snapshots` / `snapshot_times` / `obstacle_mask`<br>• `.plot()`: probe histories; `.plot(kind="snapshot")`: pressure field | `res.pressures, res.times`<br>`res.plot()` |
+| `FDTD2D` | `class` | **FDTD stepping engine (frame-by-frame access).**<br>• `c` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `sponge_width` / `sponge_sides` / `sponge_reflection` / `damping`<br>• `edge_impedance`: per-side real impedance [Pa·s/m] / `obstacle_mask` | `sim = FDTD2D(343, 0.01, shape=(200, 300))`<br>`sim.add_source(src); sim.step(); sim.run(400, record_every=10)`<br>• `sim.p` / `sim.vx` / `sim.vy` / `sim.dt` / `sim.time` / `sim.energy()` |
+| `GaussianPulse` | `dataclass` | **Gaussian pulse source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `width` [s] / `t0` [s] (Default: `4*width`) / `amplitude` [Pa] | `GaussianPulse(ix=60, iy=100, width=3e-4)` |
+| `CWSource` | `dataclass` | **Continuous sine source with raised-cosine onset for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `frequency` [Hz] / `amplitude` [Pa] / `ramp_cycles` | `CWSource(ix=25, iy=25, frequency=170)` |
+| `SignalSource` | `dataclass` | **Arbitrary sampled waveform source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `samples` [Pa] / `sample_rate` [Hz] / `amplitude`<br>Linearly interpolated onto the simulation time steps | `SignalSource(ix=60, iy=100, samples=sig, sample_rate=48000)` |
 | `PhonometryWarning` | `warning class` | **Base class for all phonometry warnings.**<br>Catch or silence every library advisory at once | `warnings.simplefilter('error', PhonometryWarning)` |
 | `FilterBankWarning` | `warning class` | **Fractional-octave filter-bank advisory.**<br>Emitted for filter-bank processing pitfalls | `warnings.simplefilter('error', FilterBankWarning)` |
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |

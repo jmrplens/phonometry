@@ -192,3 +192,9 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | :--- | :--- |
 | [`metrology.spectra`](/phonometry/reference/api/spectra/spectra/) | Calibrated spectral-density estimation with statistical error analysis. |
 | [`metrology.signals`](/phonometry/reference/api/spectra/signals/) | Deterministic colored-noise test signals. |
+
+## Wave simulation
+
+| Module | Summary |
+| :--- | :--- |
+| [`simulation.fdtd`](/phonometry/reference/api/simulation/fdtd/) | 2D acoustic finite-difference time-domain (FDTD) simulation. |

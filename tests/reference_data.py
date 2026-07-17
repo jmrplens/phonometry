@@ -207,7 +207,7 @@ ECMA418_2_ROUGHNESS_C_R = 0.0180685
 # 100 % AM at 4 Hz, with "a sound pressure level of 60 dB" -- the OVERALL RMS
 # level, same convention as roughness -> 1.0 vacil_HMS. With the tabulated
 # c_F = 0.003840572 (not reverse-fit) the chain reproduces this anchor to
-# 0.9931 vacil for a 5 s signal (0.9957 at 8 s, converged 0.9958 by 12 s).
+# 0.9931 vacil_HMS for a 5 s signal (0.9957 at 8 s, converged 0.9958 by 12 s).
 # A fluctuation strength is prominent when the single value F exceeds
 # 0.2 vacil_HMS (Clause 9.2).
 ECMA418_2_FLUCTUATION_1KHZ_4HZ_60DB_VACIL = 1.0

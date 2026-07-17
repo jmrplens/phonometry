@@ -27,7 +27,7 @@ Acoustic measurement toolkit for Python: fractional octave-band filter banks, fr
 - ⏱️ Fast/Slow/Impulse time ballistics, `Leq`, `LAeq` and `L10/L50/L90` statistical levels
 - 🗺️ Octave spectrogram (band levels over time) and zero-phase offline filtering
 - 🧠 Loudness in sones three ways: Zwicker (ISO 532-1 Annex B validated), Moore-Glasberg stationary & time-varying (ISO 532-2/3) and Sottek Hearing Model (ECMA-418-2); DIN 45692 sharpness, ISO 226:2023 contours
-- 🎻 Sound-quality metrics: ECMA-418-2 tonality (tu_HMS), roughness (asper) and fluctuation strength (vacil)
+- 🎻 Sound-quality metrics: ECMA-418-2 tonality (tu_HMS), roughness (asper) and fluctuation strength (vacil_HMS)
 - 🗣️ Speech Transmission Index: STI and STIPA per IEC 60268-16 Ed. 5, with signal generator
 - 🎯 Tone prominence (TNR/PR, ECMA-418-1), environmental Lden/Ldn (ISO 1996-1), IEC 61252 noise dose
 - ↗️ Two-microphone sound intensity (IEC 61043) with ISO 9614-1 field indicators

@@ -194,7 +194,7 @@ Fluctuation strength is the slow, wobbling sensation of amplitude or
 frequency modulation below about 20 Hz — a siren, beating tones, speech at
 syllable rate. It is the slow counterpart of roughness: the same hearing
 model splits envelope modulation into a slow band-pass peaking near 4 Hz
-(fluctuation strength, in **vacil**) and a fast one peaking near 70 Hz
+(fluctuation strength, in **vacil_HMS**) and a fast one peaking near 70 Hz
 (roughness). ECMA-418-2 Clause 9 analyses each band's envelope with
 High-resolution Spectral Analysis (HSA) — a least-squares fit of
 window-kernel spectral line pairs that resolves modulation rates far below
@@ -202,10 +202,11 @@ the DFT bin width — using envelope-dependent analysis windows that skip
 quieter periods, then weights the dominant harmonic complex and scales it
 with an HSA-based specific loudness. The reference sound (1 kHz carrier,
 100 % amplitude-modulated at 4 Hz, overall level 60 dB SPL) is defined as
-1 vacil — this clean-room implementation converges to 0.9958 vacil with the
-tabulated calibration constant c_F (Formula 163) used **without**
-reverse-fitting to the target (the 8 s example below prints 0.9957). A signal whose single value F exceeds
-0.2 vacil has a *prominent* fluctuation strength (Clause 9.2).
+1 vacil_HMS — this clean-room implementation converges to 0.9958 vacil_HMS
+by 12 s with the tabulated calibration constant c_F (Formula 163) used
+**without** reverse-fitting to the target (the 8 s example below prints
+0.9957). A signal whose single value F exceeds 0.2 vacil_HMS has a
+*prominent* fluctuation strength (Clause 9.2).
 
 ```python
 import numpy as np
@@ -217,7 +218,7 @@ x = (1.0 + np.cos(2 * np.pi * 4 * t)) * np.sin(2 * np.pi * 1000 * t)
 x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # overall 60 dB SPL
 
 res = psychoacoustics.fluctuation_strength_ecma(x, fs, field="free")
-print(f"F = {res.fluctuation_strength:.4f} vacil")   # 0.9957 vacil (reference: 1 vacil)
+print(f"F = {res.fluctuation_strength:.4f} vacil_HMS")   # 0.9957 vacil_HMS (reference: 1 vacil_HMS)
 
 res.plot()   # time-dependent F(l50) + specific-fluctuation-strength heatmap
 ```
@@ -248,9 +249,9 @@ f_vals = [psychoacoustics.fluctuation_strength_ecma(am_tone(fm), fs).fluctuation
 r_vals = [psychoacoustics.roughness_ecma(am_tone(fm), fs).roughness for fm in fm_fast]
 
 fig, ax = plt.subplots()
-ax.semilogx(fm_slow, f_vals, "o-", label="Fluctuation strength F [vacil]")
+ax.semilogx(fm_slow, f_vals, "o-", label="Fluctuation strength F [vacil_HMS]")
 ax.semilogx(fm_fast, r_vals, "s-", label="Roughness R [asper]")
-ax.set(xlabel="Modulation frequency [Hz]", ylabel="F [vacil] / R [asper]")
+ax.set(xlabel="Modulation frequency [Hz]", ylabel="F [vacil_HMS] / R [asper]")
 ax.legend()
 plt.show()
 ```
@@ -265,7 +266,7 @@ plt.show()
 | `fs` | float | Hz | > 0 | Resampled to 48 kHz internally if needed |
 | `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter |
 
-Returns an `EcmaFluctuationStrength`: `fluctuation_strength` (F, vacil, the
+Returns an `EcmaFluctuationStrength`: `fluctuation_strength` (F, vacil_HMS, the
 90th percentile of F(l50)), `specific_fluctuation_strength` (F′(z), 53
 bands), `bark`, `centre_frequencies`, `time`, `fluctuation_strength_vs_time`
 (F(l50)), `specific_fluctuation_strength_vs_time` ((n_times, 53) array),

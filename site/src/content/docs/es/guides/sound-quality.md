@@ -1,6 +1,6 @@
 ---
 title: "Métricas de calidad sonora"
-description: "Sharpness en acum (DIN 45692) y la tonalidad (tu_HMS), la aspereza (asper) y la intensidad de fluctuación (vacil) del modelo de Sottek de ECMA-418-2."
+description: "Sharpness en acum (DIN 45692) y la tonalidad (tu_HMS), la aspereza (asper) y la intensidad de fluctuación (vacil_HMS) del modelo de Sottek de ECMA-418-2."
 ---
 
 Dos sonidos igual de sonoros pueden diferir aún en cuán *afilados*, cuán
@@ -201,7 +201,7 @@ modulación de amplitud o de frecuencia por debajo de unos 20 Hz — una
 sirena, tonos batientes, el habla al ritmo silábico. Es la contraparte lenta
 de la aspereza: el mismo modelo auditivo separa la modulación de la
 envolvente en un paso de banda lento con máximo cerca de 4 Hz (intensidad de
-fluctuación, en **vacil**) y otro rápido con máximo cerca de 70 Hz
+fluctuación, en **vacil_HMS**) y otro rápido con máximo cerca de 70 Hz
 (aspereza). La cláusula 9 de ECMA-418-2 analiza la envolvente de cada banda
 con análisis espectral de alta resolución (HSA) — un ajuste por mínimos
 cuadrados de pares de líneas espectrales del núcleo de la ventana que
@@ -210,11 +210,11 @@ ventanas de análisis dependientes de la envolvente que omiten los periodos
 más silenciosos, y después pondera el complejo armónico dominante y lo
 escala con una sonoridad específica basada en el HSA. El sonido de
 referencia (portadora de 1 kHz, modulada en amplitud al 100 % a 4 Hz, nivel
-global de 60 dB SPL) se define como 1 vacil — esta implementación de sala
-limpia converge a 0,9958 vacil con la constante de calibración tabulada c_F
-(fórmula 163) usada **sin** reajustarla al objetivo (el ejemplo de 8 s de
-abajo imprime 0,9957). Una señal cuyo valor
-único F supera 0,2 vacil tiene una intensidad de fluctuación *prominente*
+global de 60 dB SPL) se define como 1 vacil_HMS — esta implementación de
+sala limpia converge a 0,9958 vacil_HMS a los 12 s con la constante de
+calibración tabulada c_F (fórmula 163) usada **sin** reajustarla al objetivo
+(el ejemplo de 8 s de abajo imprime 0,9957). Una señal cuyo valor único F
+supera 0,2 vacil_HMS tiene una intensidad de fluctuación *prominente*
 (cláusula 9.2).
 
 ```python
@@ -227,7 +227,7 @@ x = (1.0 + np.cos(2 * np.pi * 4 * t)) * np.sin(2 * np.pi * 1000 * t)
 x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # 60 dB SPL globales
 
 res = psychoacoustics.fluctuation_strength_ecma(x, fs, field="free")
-print(f"F = {res.fluctuation_strength:.4f} vacil")   # 0,9957 vacil (referencia: 1 vacil)
+print(f"F = {res.fluctuation_strength:.4f} vacil_HMS")   # 0,9957 vacil_HMS (referencia: 1 vacil_HMS)
 
 res.plot()   # F(l50) temporal + mapa de calor de la específica
 ```
@@ -258,9 +258,9 @@ f_vals = [psychoacoustics.fluctuation_strength_ecma(am_tone(fm), fs).fluctuation
 r_vals = [psychoacoustics.roughness_ecma(am_tone(fm), fs).roughness for fm in fm_fast]
 
 fig, ax = plt.subplots()
-ax.semilogx(fm_slow, f_vals, "o-", label="Intensidad de fluctuación F [vacil]")
+ax.semilogx(fm_slow, f_vals, "o-", label="Intensidad de fluctuación F [vacil_HMS]")
 ax.semilogx(fm_fast, r_vals, "s-", label="Aspereza R [asper]")
-ax.set(xlabel="Frecuencia de modulación [Hz]", ylabel="F [vacil] / R [asper]")
+ax.set(xlabel="Frecuencia de modulación [Hz]", ylabel="F [vacil_HMS] / R [asper]")
 ax.legend()
 plt.show()
 ```
@@ -275,7 +275,7 @@ plt.show()
 | `fs` | float | Hz | > 0 | Se remuestrea a 48 kHz internamente si es necesario |
 | `field` | str | — | `'free'` (por defecto) / `'diffuse'` | Filtro del oído externo/medio |
 
-Devuelve un `EcmaFluctuationStrength`: `fluctuation_strength` (F, vacil, el
+Devuelve un `EcmaFluctuationStrength`: `fluctuation_strength` (F, vacil_HMS, el
 percentil 90 de F(l50)), `specific_fluctuation_strength` (F′(z), 53 bandas),
 `bark`, `centre_frequencies`, `time`, `fluctuation_strength_vs_time`
 (F(l50)), `specific_fluctuation_strength_vs_time` (array de (n_times, 53)),

@@ -53,7 +53,7 @@ def _tone(fc: float, level_db: float, seconds: float = 2.5) -> np.ndarray:
 
 @pytest.fixture(scope="module")
 def ref_calibration() -> EcmaFluctuationStrength:
-    """The 1 kHz / 4 Hz / m=1 / overall 60 dB calibration signal (1 vacil)."""
+    """The 1 kHz / 4 Hz / m=1 / overall 60 dB calibration signal (1 vacil_HMS)."""
     return fluctuation_strength_ecma(_am_tone(1000.0, 4.0, 1.0, 60.0, 5.0), FS)
 
 
@@ -70,8 +70,8 @@ def test_calibration_1khz_4hz_is_one_vacil(
     A 1 kHz carrier, 100 % amplitude-modulated at 4 Hz, with an overall
     sound pressure level of 60 dB SPL is defined as 1 vacil_HMS; footnote 47
     allows c_F to be adjusted by at most +/-0.25 %. With the tabulated
-    c_F = 0.003840572 (not reverse-fit) this chain computes 0.9931 vacil for
-    the 5 s fixture signal (0.9957 at 8 s, converged 0.9958 by 12 s).
+    c_F = 0.003840572 (not reverse-fit) this chain computes 0.9931 vacil_HMS
+    for the 5 s fixture signal (0.9957 at 8 s, converged 0.9958 by 12 s).
     """
     assert ref_calibration.fluctuation_strength == pytest.approx(1.0, abs=0.01)
 
@@ -289,18 +289,36 @@ def test_result_structure(ref_calibration: EcmaFluctuationStrength) -> None:
 
 
 def test_invalid_field_raises() -> None:
+    sig = _tone(1000.0, 60.0, 1.0)
     with pytest.raises(ValueError):
-        fluctuation_strength_ecma(_tone(1000.0, 60.0, 1.0), FS, field="bogus")
+        fluctuation_strength_ecma(sig, FS, field="bogus")
 
 
 def test_empty_signal_raises() -> None:
+    empty = np.array([])
     with pytest.raises(ValueError):
-        fluctuation_strength_ecma(np.array([]), FS)
+        fluctuation_strength_ecma(empty, FS)
 
 
-def test_invalid_fs_raises() -> None:
+@pytest.mark.parametrize("bad_fs", [0.0, -48000.0, float("nan"), float("inf")])
+def test_invalid_fs_raises(bad_fs: float) -> None:
+    sig = _tone(1000.0, 60.0, 1.0)
     with pytest.raises(ValueError):
-        fluctuation_strength_ecma(_tone(1000.0, 60.0, 1.0), 0.0)
+        fluctuation_strength_ecma(sig, bad_fs)
+
+
+def test_non_finite_signal_raises() -> None:
+    sig = _tone(1000.0, 60.0, 1.0)
+    sig[100] = np.nan
+    with pytest.raises(ValueError):
+        fluctuation_strength_ecma(sig, FS)
+
+
+def test_resample_length_clamps_to_one_sample() -> None:
+    # 4 samples at 10 MHz resample to round(4 * 48000 / 1e7) = 0 samples
+    # without the clamp; the clamped 1-sample signal must process cleanly.
+    res = fluctuation_strength_ecma(np.zeros(4), 1.0e7)
+    assert res.fluctuation_strength == 0.0
 
 
 def test_deterministic(ref_calibration: EcmaFluctuationStrength) -> None:
@@ -325,3 +343,15 @@ def test_plot_smoke(ref_calibration: EcmaFluctuationStrength) -> None:
     assert axes.shape == (2,)
     single = ref_calibration.plot(ax=axes[0])
     assert single is axes[0]
+
+
+def test_plot_accepts_matplotlib_color_alias(
+    ref_calibration: EcmaFluctuationStrength,
+) -> None:
+    # ``c=`` is matplotlib's alias for ``color=``; the renderer must not
+    # inject the canonical name alongside it (that raises a TypeError).
+    import matplotlib
+
+    matplotlib.use("Agg")
+    axes = ref_calibration.plot(c="#123456")
+    assert axes[0].lines[0].get_color() == "#123456"

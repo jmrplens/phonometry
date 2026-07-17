@@ -44,8 +44,8 @@ separately.
 The calibration constant ``c_F`` of Formula (163) is the standard's tabulated
 value (not reverse-fit), and the chain reproduces the Clause 9 reference
 point: a 1 kHz carrier 100 %-amplitude-modulated at 4 Hz with an overall
-sound pressure level of 60 dB SPL converges to 0.9958 vacil against the
-defined 1 vacil as the 90th percentile settles (0.9931 for a 5 s signal,
+sound pressure level of 60 dB SPL converges to 0.9958 vacil_HMS against the
+defined 1 vacil_HMS as the 90th percentile settles (0.9931 for a 5 s signal,
 0.9957 at 8 s, 0.9958 by 12 s). Footnote 47 allows a +/-0.25 % adjustment
 of c_F, which is not used. The level convention follows Clause 7/9 as
 established for the roughness metric: the stated 60 dB is the overall RMS
@@ -109,7 +109,7 @@ from .loudness_ecma import (
     _fade_in,
     _specific_basis_loudness,
 )
-from .._internal.validation import require_1d_signal
+from .._internal.validation import require_1d_signal, require_positive
 from .._internal.utils import _typesignal
 
 # --------------------------------------------------------------------------
@@ -345,10 +345,17 @@ def _analysis_window(env: np.ndarray) -> Tuple[int, int] | None:
     seg = smoothed[n_zb + _REG_MARGIN : n2 - _REG_MARGIN + 1]
     if seg.size < 2:  # pragma: no cover - implied by the length checks
         return None
-    grid = np.arange(seg.size, dtype=np.float64)
-    slope, intercept = np.polyfit(grid, seg, 1)
-    resid = seg - (slope * grid + intercept)
+    # Closed-form least-squares line fit over the uniform grid 0..n-1
+    # (equivalent to a first-order polyfit, without the general-purpose
+    # Vandermonde/lstsq overhead in this per-block, per-band hot path).
+    n = seg.size
+    grid = np.arange(n, dtype=np.float64)
+    x_mean = 0.5 * (n - 1)
     mean = float(np.mean(seg))
+    dx = grid - x_mean
+    slope = float(np.dot(dx, seg)) / (n * (n * n - 1.0) / 12.0)
+    intercept = mean - slope * x_mean
+    resid = seg - (slope * grid + intercept)
     if mean <= 0.0 or float(np.std(resid)) / mean < _REG_MIN_RSD:
         return None
     return n_zb, n_ze
@@ -845,10 +852,12 @@ def fluctuation_strength_ecma(
         (Clause 9.1.14), the average specific fluctuation strength F'(z)
         (Clause 9.1.12) and the time-dependent fluctuation strength F(l50)
         (Formula 169).
+    :raises ValueError: for an empty, multichannel or non-finite signal, a
+        non-finite or non-positive ``fs``, or an unknown ``field``.
 
     A 1 kHz carrier 100 %-amplitude-modulated at 4 Hz with an overall level
     of 60 dB SPL yields 1 vacil_HMS (Clause 9 calibration; reproduced to
-    0.9958 vacil with the tabulated c_F of Formula (163) once the 90th
+    0.9958 vacil_HMS with the tabulated c_F of Formula (163) once the 90th
     percentile settles, by a 12 s signal).
     """
     if field not in ("free", "diffuse"):
@@ -856,11 +865,11 @@ def fluctuation_strength_ecma(
     x = require_1d_signal(_typesignal(signal_in))
     if x.size == 0:
         raise ValueError("signal must not be empty")
-    fs = float(fs)
-    if fs <= 0.0:
-        raise ValueError("fs must be positive")
+    if not np.all(np.isfinite(x)):
+        raise ValueError("'signal' must be finite.")
+    fs = require_positive(float(fs), "fs")
     if fs != _FS:
-        x = signal.resample(x, int(round(x.size * _FS / fs)))
+        x = signal.resample(x, max(1, int(round(x.size * _FS / fs))))
 
     envelopes, block_times = _front_end(x, field)
     a_lz = _amplitudes(envelopes)

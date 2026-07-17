@@ -286,9 +286,10 @@ def _plot_hms_time_and_heatmap(
     else:
         ax_time = cast("Axes", ax)
 
-    kwargs.setdefault("color", color)
-    ax_time.plot(time, vs_time, **kwargs)
-    ax_time.fill_between(time, vs_time, color=kwargs["color"], alpha=0.25)
+    if "c" not in kwargs:  # matplotlib alias; injecting "color" too would raise
+        kwargs.setdefault("color", color)
+    (line,) = ax_time.plot(time, vs_time, **kwargs)
+    ax_time.fill_between(time, vs_time, color=line.get_color(), alpha=0.25)
     ax_time.set_xlabel("Time [s]")
     ax_time.set_ylabel(ylabel)
     ax_time.set_ylim(bottom=0.0)
@@ -368,12 +369,12 @@ def plot_ecma_fluctuation_strength(
         np.asarray(result.bark, dtype=np.float64),
         ax,
         "#17becf",
-        "Fluctuation strength F [vacil]",
+        "Fluctuation strength F [vacil_HMS]",
         (
             "ECMA-418-2 fluctuation strength "
-            f"F = {result.fluctuation_strength:.2f} vacil"
+            f"F = {result.fluctuation_strength:.2f} vacil_HMS"
         ),
-        "F' [vacil/Bark_HMS]",
+        "F' [vacil_HMS/Bark_HMS]",
         kwargs,
     )
 

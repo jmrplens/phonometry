@@ -329,7 +329,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The frozen `EcmaFluctuationStrength` result exposes `.plot()` (F(l50)
   trace plus specific-fluctuation-strength heatmap). Reproduces the Clause 9
   calibration signal (1 kHz, 100 % AM at 4 Hz, overall 60 dB SPL) to
-  0,9958 vacil converged with the tabulated `c_F` (no reverse fitting), pinned in CI
+  0.9958 vacil_HMS converged with the tabulated `c_F` (no reverse fitting), pinned in CI
   together with closed-form HSA recovery anchors and the standard's
   qualitative band-pass behaviours; `docs/ERRATA.md` records four confirmed
   Clause 9 print defects (the Formula (127) kernel phase, the Formula (144)

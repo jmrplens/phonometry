@@ -51,8 +51,8 @@ separately.
 The calibration constant `c_F` of Formula (163) is the standard's tabulated
 value (not reverse-fit), and the chain reproduces the Clause 9 reference
 point: a 1 kHz carrier 100 %-amplitude-modulated at 4 Hz with an overall
-sound pressure level of 60 dB SPL converges to 0.9958 vacil against the
-defined 1 vacil as the 90th percentile settles (0.9931 for a 5 s signal,
+sound pressure level of 60 dB SPL converges to 0.9958 vacil_HMS against the
+defined 1 vacil_HMS as the 90th percentile settles (0.9931 for a 5 s signal,
 0.9957 at 8 s, 0.9958 by 12 s). Footnote 47 allows a +/-0.25 % adjustment
 of c_F, which is not used. The level convention follows Clause 7/9 as
 established for the roughness metric: the stated 60 dB is the overall RMS
@@ -157,7 +157,13 @@ Psychoacoustic fluctuation strength per ECMA-418-2:2025 (Clause 9).
 
 **Returns:** An [`EcmaFluctuationStrength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/#ecmafluctuationstrength) with the single value F (Clause 9.1.14), the average specific fluctuation strength F'(z) (Clause 9.1.12) and the time-dependent fluctuation strength F(l50) (Formula 169).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an empty, multichannel or non-finite signal, a non-finite or non-positive `fs`, or an unknown `field`. |
+
 A 1 kHz carrier 100 %-amplitude-modulated at 4 Hz with an overall level
 of 60 dB SPL yields 1 vacil_HMS (Clause 9 calibration; reproduced to
-0.9958 vacil with the tabulated c_F of Formula (163) once the 90th
+0.9958 vacil_HMS with the tabulated c_F of Formula (163) once the 90th
 percentile settles, by a 12 s signal).

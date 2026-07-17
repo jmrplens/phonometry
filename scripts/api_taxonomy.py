@@ -251,6 +251,15 @@ _SECTION_LIST: tuple[Section, ...] = (
         label_es="Simulación de ondas",
         modules=("phonometry.simulation.fdtd",),
     ),
+    Section(
+        key="correlation",
+        label_en="Correlation & envelope",
+        label_es="Correlación y envolvente",
+        modules=(
+            "phonometry.metrology.correlation",
+            "phonometry.metrology.envelope",
+        ),
+    ),
 )
 
 #: Sections in display order, keyed by section key.
@@ -279,6 +288,7 @@ _SECTION_SUBPACKAGES: dict[str, tuple[str, ...]] = {
     "metrology": ("metrology",),
     "spectra": ("metrology",),
     "simulation": ("simulation",),
+    "correlation": ("metrology",),
 }
 
 #: Public names whose home module cannot be derived from ``__module__``:

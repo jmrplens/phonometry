@@ -1,0 +1,261 @@
+---
+title: "Correlación, retardo y envolvente"
+description: "Autocorrelación y correlación cruzada con las normalizaciones y errores aleatorios de Bendat y Piersol, estimación del retardo por el correlador directo, la pendiente de fase del espectro cruzado y la correlación cruzada generalizada de Knapp y Carter (Roth, SCOT, PHAT, máxima verosimilitud), retardo submuestral y alineación de respuestas al impulso, y la envolvente de Hilbert con fase y frecuencia instantáneas."
+---
+
+Donde los [estimadores espectrales calibrados](/phonometry/es/guides/spectral-analysis/)
+describen una señal en frecuencia, esta página cubre sus equivalentes en el
+dominio del tiempo dentro de `phonometry.metrology`: estimaciones de
+**autocorrelación y correlación cruzada** con las tres normalizaciones
+estándar y sus errores aleatorios de Bendat y Piersol; **estimación del
+retardo** (TDE) por el correlador directo, la pendiente de fase del espectro
+cruzado y la **correlación cruzada generalizada** (GCC) de Knapp y Carter con
+las ponderaciones Roth, SCOT, PHAT y de máxima verosimilitud; **localización
+submuestral del pico** para retardos y alineación de respuestas al impulso; y
+la **envolvente de Hilbert** con fase y frecuencia instantáneas. Los
+estimadores GCC corren sobre el mismo núcleo de Welch que las densidades
+espectrales, así que ambas vistas de un par de señales son mutuamente
+consistentes bin a bin.
+
+## 1. Estimaciones de correlación
+
+`correlation` calcula la auto- o la correlación cruzada vía FFT con relleno
+de ceros para que el producto circular nunca se enrolle (Bendat y Piersol,
+sección 11.4.2), con el convenio de signos del modelo de retardo del libro:
+para `y(t) = α·x(t-τ0) + n(t)` la estimación alcanza su pico en `τ = +τ0`
+(ecuación 5.21). Hay tres normalizaciones disponibles:
+
+- `'biased'`: las sumas por retardo divididas por `N`; se atenúa hacia los
+  extremos del registro y queda acotada por `[Rxx(0)·Ryy(0)]^1/2`;
+- `'unbiased'`: divididas por `N-|r|` (ecuación 11.96), una estimación
+  insesgada de `Rxy(τ)` cuya varianza crece hacia los extremos;
+- `'coefficient'`: la función coeficiente de correlación
+  `ρxy(τ) = Cxy(τ)/(σx·σy)` en [-1, 1] sobre los registros sin media
+  (ecuación 5.16).
+
+```python
+import numpy as np
+from phonometry import correlation
+
+res = correlation(x, y, fs, normalization="coefficient", max_lag=0.05)
+peak = np.argmax(res.values)
+print(res.lags[peak], res.values[peak])   # retardo y su coeficiente
+res.plot()
+```
+
+El resultado siempre lleva la función coeficiente junto a la normalización
+solicitada, porque el coeficiente es lo que necesitan las fórmulas de error.
+Para datos gaussianos limitados en banda de ancho `B` observados durante `T`
+segundos (ecuaciones 8.109/8.112, válidas para `T ≥ 10·|τ|` y `BT ≥ 5`):
+
+$$
+\varepsilon\!\left[\hat{R}_{xy}(\tau)\right] =
+\frac{\left[1 + \rho^{-2}_{xy}(\tau)\right]^{1/2}}{\sqrt{2BT}},
+\qquad
+\varepsilon\!\left[\hat{R}_{xx}(0)\right] = \frac{1}{\sqrt{BT}} .
+$$
+
+`res.random_error(signal_bandwidth)` la evalúa por retardo con el
+coeficiente medido, y la función independiente `correlation_random_error`
+acepta un coeficiente explícito: con `ρ = S/√((S+M)(S+N)) = 1/11`,
+`B = 100` Hz y `T = 5` s reproduce el `ε ≈ 0,35` del ejemplo 8.5 del libro,
+uno de los anclajes fijados de conformidad. Dos formas cerradas anclan el
+propio estimador en los tests: la autocorrelación de un seno,
+`(A²/2)·cos(2πf0τ)`, y la autocorrelación `sin(2πBτ)/(2πBτ)` del ruido
+blanco limitado en banda (ecuación 8.120).
+
+## 2. Estimación del retardo
+
+`time_delay` estima el retardo de `y` respecto a `x` en el modelo de dos
+sensores `y(t) = α·x(t-τ0) + n(t)` (B&P, sección 5.1.4) por tres vías:
+
+- **`'direct'`**: el pico de la función coeficiente de correlación sobre el
+  registro completo;
+- **`'phase'`**: la pendiente por mínimos cuadrados, ponderada por `|Gxy|`,
+  de la fase del espectro cruzado (ecuación 5.101b): un retardo puro tiene
+  fase exactamente lineal, así que este estimador resuelve retardos
+  fraccionarios a mejor de 1e-3 muestras sin ninguna interpolación de pico,
+  siempre que la fase desenrollada no sea ambigua (retardos limpios y
+  moderados);
+- **`'gcc'`**: la correlación cruzada generalizada de Knapp y Carter (1976):
+  el espectro cruzado promediado por Welch se pondera con `ψ(f)` antes de la
+  transformada inversa, afilando el pico que la autocorrelación de la propia
+  señal ensancharía (su ecuación 9).
+
+Las ponderaciones de la Tabla I de Knapp y Carter, con las condiciones que
+el artículo asocia a cada una:
+
+| `weighting` | `ψ(f)` | Comportamiento y condiciones |
+|---|---|---|
+| `'none'` | 1 | El correlador simple: la delta en el retardo queda convolucionada con la autocorrelación de la señal; pico ancho con señales coloreadas. |
+| `'roth'` | `1/Gxx` | Suprime las bandas donde el *primer* sensor es ruidoso; aun así ensancha salvo que ese ruido sea espectralmente similar a la señal. |
+| `'scot'` | `1/√(Gxx·Gyy)` | Preblanquea ambos canales simétricamente; coincide con Roth cuando los sensores son iguales. |
+| `'phat'` | `1/|Gxy|` | Idealmente una delta en el retardo para ruidos incorrelacionados (su ecuación 23), pero la ponderación ignora la relación señal-ruido, así que las bandas sin señal aportan fase aleatoria de magnitud unidad. Necesita potencia de señal en toda la banda de análisis. |
+| `'ml'` | `γ²/(|Gxy|·(1-γ²))` | El procesador de máxima verosimilitud de Hannan-Thomson: un PHAT atenuado por la varianza de fase que cada banda realmente soporta. Alcanza la cota de Cramér-Rao; la opción segura cuando la señal no llena la banda. |
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay_es.svg" alt="Correlación cruzada normalizada de un par de señales coloreadas de dos sensores frente al retardo en milisegundos: el correlador directo muestra un pico ancho alrededor del retardo verdadero de 20 muestras mientras que la curva GCC-PHAT colapsa en una espiga afilada exactamente sobre la línea discontinua del retardo verdadero" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay_es_dark.svg" alt="Correlación cruzada normalizada de un par de señales coloreadas de dos sensores frente al retardo en milisegundos: el correlador directo muestra un pico ancho alrededor del retardo verdadero de 20 muestras mientras que la curva GCC-PHAT colapsa en una espiga afilada exactamente sobre la línea discontinua del retardo verdadero" style="width:82%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import signal as sp_signal
+from phonometry import noise_signal, time_delay
+
+fs = 8192.0
+delay = 20  # muestras
+b, a = sp_signal.butter(2, 800.0 / (fs / 2.0))   # señal común coloreada
+s = sp_signal.lfilter(b, a, noise_signal(fs, 4.0, color="white", seed=10))
+x = s + noise_signal(fs, 4.0, color="white", rms=0.02, seed=11)
+y = np.roll(s, delay) + noise_signal(fs, 4.0, color="white", rms=0.02, seed=12)
+
+direct = time_delay(x, y, fs, method="direct", max_delay=0.01)
+phat = time_delay(x, y, fs, method="gcc", weighting="phat",
+                  nperseg=2048, max_delay=0.01)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(1e3 * direct.lags,
+        direct.correlation / np.max(np.abs(direct.correlation)),
+        label="Correlación cruzada directa")
+ax.plot(1e3 * phat.lags, phat.correlation, label="GCC-PHAT")
+ax.axvline(1e3 * delay / fs, ls="--", color="k", label="Retardo verdadero")
+ax.set_xlabel("Retardo [ms]")
+ax.set_ylabel("Correlación normalizada")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+Los métodos de pico de correlación refinan el pico muestral con
+interpolación parabólica de tres puntos, opcionalmente tras un
+**sobremuestreo local limitado en banda** (`upsample=16` remuestrea una
+ventana alrededor del pico dieciséis veces antes de la parábola). La
+precisión submuestral presupone que el pico está sobremuestreado, es decir,
+que las señales están limitadas en banda por debajo de Nyquist; en un par
+limitado a 0,4·fs los tests fijan el error alcanzable en ≲0,1 muestras con
+la parábola sola y ≲2e-3 muestras con `upsample=16`. Para la GCC el retardo
+debe caber en medio segmento de Welch; aumenta `nperseg` para retardos
+largos.
+
+Con `signal_bandwidth` dado, el resultado también lleva la **incertidumbre
+de localización del pico** de la ecuación 8.129 de B&P y su intervalo ±2σ
+(ecuación 8.130):
+
+$$
+\sigma(\hat{\tau}_0) \approx
+\left(\tfrac{3}{4}\right)^{1/4}
+\frac{\sqrt{\varepsilon[\hat{R}_{xy}(\tau_0)]}}{\pi B} .
+$$
+
+```python
+from phonometry import time_delay
+
+res = time_delay(x, y, fs, method="gcc", weighting="ml",
+                 nperseg=2048, upsample=16, signal_bandwidth=1000.0)
+print(res.delay, res.delay_samples)     # segundos y muestras fraccionarias
+print(res.delay_std, res.delay_interval)  # sigma de la ec. 8.129, +/-2 sigma
+res.plot()                              # correlación con el retardo marcado
+```
+
+La fórmula modela el pico de la función de correlación continua, así que
+trata el intervalo como una cota conservadora de orden de magnitud: el
+Monte Carlo con semilla de la batería de tests observa la dispersión real
+*por debajo* de la predicción.
+
+## 3. Retardo y alineación de respuestas al impulso
+
+La correlación cruzada de una respuesta al impulso con un impulso unidad
+ideal es la propia RI, así que la localización submuestral del pico de su
+magnitud es su tiempo de llegada. `impulse_response_delay` aplica
+exactamente el mismo refinamiento que el pico de la TDE (sobremuestreo
+local limitado en banda, ×8 por defecto, más la parábola), y con una RI de
+`reference` mide el retardo entre el par a partir de su correlación cruzada
+sobre el registro completo (los transitorios de un solo disparo no son
+registros estacionarios, así que se usa el correlador directo en lugar de
+la GCC promediada por Welch):
+
+```python
+from phonometry import align_impulse_responses, impulse_response_delay
+
+t_arrival = impulse_response_delay(ir, fs)              # segundos desde t = 0
+dt = impulse_response_delay(ir_b, fs, reference=ir_a)   # retardo del par
+
+res = align_impulse_responses(ir_b, ir_a, fs)  # elimina el retardo estimado
+res.plot()                       # superposición referencia frente a alineada
+```
+
+`align_impulse_responses` elimina el retardo estimado con un desplazamiento
+fraccionario exacto limitado en banda (una rampa de fase en el dominio de la
+frecuencia sobre un registro con relleno de ceros, así que nada se enrolla):
+la herramienta para promediar conjuntos de RI o comparar mediciones tomadas
+a distancias ligeramente distintas. Los tests sintéticos de retardo
+fraccionario documentan la precisión alcanzable sobre un pulso suave
+limitado en banda: en torno a 1e-2 muestras con la parábola sola, 1e-3 con
+el `upsample=8` por defecto y por debajo de 1e-5 a ×32.
+
+## 4. Envolvente de Hilbert y frecuencia instantánea
+
+`envelope` construye la señal analítica `z(t) = x(t) + j·x̃(t)` mediante la
+construcción de espectro unilateral que recomiendan Bendat y Piersol
+(ecuación 13.25) y devuelve las tres magnitudes del capítulo 13 sobre un
+mismo eje temporal:
+
+$$
+A(t) = \left[x^2(t) + \tilde{x}^2(t)\right]^{1/2}, \qquad
+\theta(t) = \arctan\frac{\tilde{x}(t)}{x(t)}, \qquad
+f(t) = \frac{1}{2\pi}\frac{d\theta}{dt} .
+$$
+
+Para una portadora modulada en amplitud `u(t)·cos(2πf0t)` la envolvente
+recupera `u(t)` exactamente (ecuación 13.27): la batería de conformidad
+fija la envolvente AM recuperada y el par `cos → sin` de la Tabla 13.1 al
+nivel de 1e-9, y la frecuencia instantánea de un barrido sigue su rampa.
+
+```python
+from phonometry import envelope
+
+res = envelope(x, fs)
+print(res.envelope, res.instantaneous_frequency)
+res.plot()               # señal + envolvente, frecuencia instantánea
+
+slow = envelope(x, fs, decimation_factor=32)   # con antialias, fs/32
+```
+
+La envolvente de una señal limitada en banda es a su vez de baja frecuencia,
+así que el resultado ofrece **decimación** opcional: un filtro antialias FIR
+de fase cero por defecto, o submuestreo simple con `antialias=False`,
+exactamente el convenio que la cadena de sonoridad/aspereza ECMA-418-2 de
+`phonometry.psychoacoustics` aplica internamente tras su paso de banda
+auditivo (fórmulas 65/119 de la norma), apropiado cuando la entrada ya es de
+banda estrecha.
+
+## Relación con los estimadores espectrales
+
+`time_delay` (métodos GCC y de fase) corre sobre el mismo núcleo de Welch
+(ventana, política de solape, calibración sin eliminación de tendencia,
+valores por defecto de segmento) que
+[`cross_spectral_density`](/phonometry/es/guides/spectral-analysis/) y los
+[estimadores de respuesta en frecuencia](/phonometry/es/guides/electroacoustics/)
+H1/H2, así que una GCC, una coherencia y un espectro cruzado calculados con
+la misma longitud de segmento coinciden bin a bin; el estimador `'phase'` es
+literalmente la pendiente de la fase del `CrossSpectralDensityResult`,
+ponderada como prescribe la ecuación 5.101b.
+
+## Referencias
+
+- Bendat, J. S., y Piersol, A. G. (2010). *Random Data: Analysis and
+  Measurement Procedures* (4.ª ed.). Wiley. ISBN 978-0-470-24877-5.
+  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
+  Secciones 5.1.4 y 5.2.6-5.2.7 (retardo por correlación y espectro
+  cruzado), 8.4 (errores aleatorios de las estimaciones de correlación y de
+  la localización del pico), 11.4 (cómputo FFT con relleno de ceros) y
+  capítulo 13 (transformadas de Hilbert, envolvente y fase instantánea).
+- Knapp, C. H., y Carter, G. C. (1976). The generalized correlation method
+  for estimation of time delay. *IEEE Transactions on Acoustics, Speech,
+  and Signal Processing*, 24(4), 320-327.
+  [doi:10.1109/TASSP.1976.1162830](https://doi.org/10.1109/TASSP.1976.1162830).
+  El marco GCC, las ponderaciones de la Tabla I con sus condiciones y el
+  procesador de máxima verosimilitud (Hannan-Thomson).

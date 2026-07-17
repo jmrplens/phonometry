@@ -202,6 +202,11 @@ def test_render_markdown_is_well_formed() -> None:
     assert "## Numerical conformance report" in markdown
     assert "Numerical validation - filters &amp; weightings" in markdown
     assert f"{passed}/{total} conformance checks pass" in markdown
+    # Compact by default: after the headline everything lives in collapsible
+    # sections (the showcase plus one per domain), each collapsed when green.
+    assert markdown.count("<details>") == len(cr._domains()) + 1
+    assert markdown.count("<details open>") == 0
+    assert markdown.count("</details>") == len(cr._domains()) + 1
     # One table header per domain plus the two numerical-validation tables.
     assert markdown.count("|:---") >= len(cr._domains())
     # The redesigned filters table labels non-compliant architectures as

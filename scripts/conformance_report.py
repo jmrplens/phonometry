@@ -11,10 +11,13 @@ A maintainable registry of numerical conformance checks. Each entry pins one
 * the tolerance.
 
 Running the harness emits Markdown for a GitHub PR comment: a headline
-summary, a "Numerical validation - filters & weightings" section (per
-filter architecture IEC 61260-1 class margins and A/C/G weighting worst-case
-deviation vs the analytic/normative curve), and one conformance table per
-domain (Standard | Quantity | Expected | Computed | Delta | Status).
+summary followed only by collapsible sections, so the comment stays compact
+by default. First a "Numerical validation - filters & weightings" showcase
+(per filter architecture IEC 61260-1 class margins and A/C/G weighting
+worst-case deviation vs the analytic/normative curve), then one conformance
+table per domain (Standard | Quantity | Expected | Computed | Delta |
+Status). Every section stays collapsed while all of its rows pass and opens
+automatically when any row fails.
 
 Expected values are pulled from a single source of truth wherever the tests
 already encode them: the shared ``tests/reference_data`` tables and the
@@ -4663,9 +4666,19 @@ def _filter_verdict(arch: str, fc: FilterClass) -> str:
     return f"By design ({reason})" if reason else "not compliant"
 
 
-def _numerical_validation_section() -> str:
+def _numerical_validation_section(filters_ok: bool) -> str:
+    # Collapsed like the per-domain groups so the report stays compact by
+    # default; it springs open whenever the filters/weightings domain has a
+    # failing row, exactly like those groups do.
+    emoji = "&#9989;" if filters_ok else "&#10060;"
+    opened = "" if filters_ok else " open"
     lines: list[str] = []
-    lines.append("### Numerical validation - filters &amp; weightings")
+    lines.append(f"<details{opened}>")
+    lines.append(
+        f"<summary>{emoji} <b>Numerical validation - filters &amp; "
+        "weightings</b> — class showcase (IEC 61260-1 · IEC 61672-1 · "
+        "ISO 7196)</summary>"
+    )
     lines.append("")
     lines.append(
         "**IEC 61260-1:2014 class per filter architecture** (order 6, "
@@ -4725,6 +4738,8 @@ def _numerical_validation_section() -> str:
             f"| {wd.bind_freq:.0f} Hz | {_snap(wd.bind_dev):+.3f} dB | {band} "
             f"| {wd.min_headroom:+.3f} dB |"
         )
+    lines.append("")
+    lines.append("</details>")
     return "\n".join(lines)
 
 
@@ -4750,7 +4765,14 @@ def render_markdown() -> tuple[str, int, int]:
         summary += " - filters class 1 - weightings within IEC 61672-1 class 1"
     out.append(f"{headline_emoji} {summary}.")
     out.append("")
-    out.append(_numerical_validation_section())
+    out.append(
+        "<sub>Each row pins a standard clause to its expected normative value "
+        "and the value the library computes. Every section below is "
+        "collapsible and stays collapsed while all of its rows pass; a "
+        "section with any failing row opens automatically.</sub>"
+    )
+    out.append("")
+    out.append(_numerical_validation_section(filters_ok))
     out.append("")
 
     for domain in _domains():

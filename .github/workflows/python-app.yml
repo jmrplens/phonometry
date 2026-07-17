@@ -208,7 +208,9 @@ jobs:
         # The EBU site rejects the default curl agent; a sentinel file is
         # checked (and the directory dropped on failure) so a bad download
         # is never cached and the oracle tests skip instead of failing.
-        curl -sfL --retry 3 -A "Mozilla/5.0" -o ebu-set.zip \
+        curl -sfL --retry 3 --retry-all-errors \
+          -A "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0" \
+          -o ebu-set.zip \
           "https://tech.ebu.ch/files/live/sites/tech/files/shared/testmaterial/ebu-loudness-test-setv04.zip"
         mkdir -p ebu-loudness-test-set
         unzip -q ebu-set.zip -d ebu-loudness-test-set

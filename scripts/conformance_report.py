@@ -4747,6 +4747,189 @@ def _chk_wt_tonal_audibility() -> Outcome:
     return numeric(16.38, res.tonal_audibility, 6e-2, unit="dB", places=2)
 
 
+_POROUS = "Porous & multilayer absorbers (Mechel / Bies / Cox & D'Antonio)"
+
+# Shared porous-domain constants: the digitization point X = rho f / sigma
+# = 0.1 with sigma = 20 kPa s/m2 and the Bies 5e Appendix D air state.
+_PA_SIGMA = 20000.0
+_PA_RHO0 = 1.205
+_PA_C0 = 343.0
+
+
+@register(
+    _POROUS,
+    "Bies 5e App. D Table D.1 / Mechel 2e G.11 (2)",
+    "Delany-Bazley normalised Zc at X = 0.1, real part",
+)
+def _chk_porous_db_real() -> Outcome:
+    f = np.array([0.1 * _PA_SIGMA / _PA_RHO0])
+    res = ph.delany_bazley(
+        f, _PA_SIGMA, speed_of_sound=_PA_C0, air_density=_PA_RHO0
+    )
+    return numeric(
+        ref.POROUS_DB_ZC_EXPECTED.real,
+        float(res.normalized_impedance[0].real), 1e-9,
+    )
+
+
+@register(
+    _POROUS,
+    "Bies 5e App. D Table D.1 / Mechel 2e G.11 (2)",
+    "Delany-Bazley normalised Zc at X = 0.1, imaginary part",
+)
+def _chk_porous_db_imag() -> Outcome:
+    f = np.array([0.1 * _PA_SIGMA / _PA_RHO0])
+    res = ph.delany_bazley(
+        f, _PA_SIGMA, speed_of_sound=_PA_C0, air_density=_PA_RHO0
+    )
+    return numeric(
+        ref.POROUS_DB_ZC_EXPECTED.imag,
+        float(res.normalized_impedance[0].imag), 1e-9,
+    )
+
+
+@register(
+    _POROUS,
+    "Miki 1990 Eqs. (30)-(34)",
+    "Miki normalised wavenumber at f/sigma = 0.1, real part",
+)
+def _chk_porous_miki() -> Outcome:
+    f = np.array([0.1 * _PA_SIGMA])
+    res = ph.miki(f, _PA_SIGMA, speed_of_sound=_PA_C0, air_density=_PA_RHO0)
+    return numeric(
+        ref.POROUS_MIKI_K_EXPECTED.real,
+        float(res.normalized_wavenumber[0].real), 1e-9,
+    )
+
+
+@register(
+    _POROUS,
+    "Johnson et al. 1987 / Cox & D'Antonio 3e Eq. (6.19)",
+    "JCA static viscous limit j w rho_e -> sigma, Pa s/m2",
+)
+def _chk_porous_jca_dc() -> Outcome:
+    f = np.array([1e-3])
+    res = ph.johnson_champoux_allard(
+        f, _PA_SIGMA, porosity=0.95, tortuosity=1.3,
+        viscous_length=6e-5, thermal_length=1.2e-4, air_density=_PA_RHO0,
+    )
+    value = float((1j * 2.0 * math.pi * f * res.effective_density)[0].real)
+    return numeric(_PA_SIGMA, value, 1e-4, rel=True, unit="Pa s/m2", places=1)
+
+
+@register(
+    _POROUS,
+    "Mechel 2e Sect. D.3 Eq. (1)",
+    "Hard-backed layer: TMM vs -j Zc cot(kd), max rel deviation",
+)
+def _chk_porous_rigid_backed() -> Outcome:
+    f = np.linspace(200.0, 4000.0, 200)
+    med = ph.delany_bazley(f, _PA_SIGMA, air_density=_PA_RHO0)
+    res = ph.layered_absorber(
+        f, [ph.PorousLayer(0.05, med)],
+        speed_of_sound=_PA_C0, air_density=_PA_RHO0,
+    )
+    zs_ref = -1j * med.characteristic_impedance / np.tan(med.wavenumber * 0.05)
+    dev = float(np.max(np.abs(res.surface_impedance - zs_ref) / np.abs(zs_ref)))
+    return numeric(0.0, dev, 1e-10, places=4)
+
+
+@register(
+    _POROUS,
+    "Lossless-layer limit (Mechel 2e Sect. D.3-D.4)",
+    "Air cavity over a rigid wall at lambda/4: alpha",
+)
+def _chk_porous_air_cavity() -> Outcome:
+    d = 0.1
+    f = np.array([_PA_C0 / (4.0 * d)])
+    res = ph.layered_absorber(
+        f, [ph.AirLayer(d)], speed_of_sound=_PA_C0, air_density=_PA_RHO0
+    )
+    return numeric(0.0, float(res.absorption[0]), 1e-12, places=4)
+
+
+@register(
+    _POROUS,
+    "Mechel 2e Sect. D.5",
+    "Maximum statistical absorption of a locally reacting plane",
+)
+def _chk_porous_statistical_max() -> Outcome:
+    z = np.linspace(1.0, 3.0, 2001).astype(complex)
+    value = float(np.max(ph.statistical_absorption(z)))
+    return numeric(ref.POROUS_STATISTICAL_ALPHA_MAX, value, 1e-3, places=3)
+
+
+@register(
+    _POROUS,
+    "Cox & D'Antonio 3e Eq. (7.9)",
+    "Membrane resonance 60/sqrt(m d), m = 5 kg/m2, d = 5 cm, Hz",
+)
+def _chk_porous_membrane_resonance() -> Outcome:
+    value = ph.membrane_resonance_frequency(
+        surface_density=5.0, cavity_depth=0.05,
+        speed_of_sound=_PA_C0, air_density=_PA_RHO0,
+    )
+    return numeric(60.0 / math.sqrt(5.0 * 0.05), value, 0.02, rel=True,
+                   unit="Hz", places=2)
+
+
+@register(
+    _POROUS,
+    "Maa 1998 Fig. 5 / Cox & D'Antonio 3e Fig. 7.28",
+    "Microperforated panel (d=t=0.2 mm, b=2.5 mm, D=6 cm): peak alpha",
+)
+def _chk_porous_mpp_peak() -> Outcome:
+    eps = (math.pi / 4.0) * (ref.MAA_FIG5_DIAMETER / ref.MAA_FIG5_SEPARATION) ** 2
+    f = np.linspace(100.0, 4000.0, 2000)
+    res = ph.layered_absorber(
+        f,
+        [
+            ph.MicroperforatedPlateLayer(
+                ref.MAA_FIG5_THICKNESS, ref.MAA_FIG5_DIAMETER / 2.0, eps
+            ),
+            ph.AirLayer(ref.MAA_FIG5_CAVITY),
+        ],
+        speed_of_sound=_PA_C0, air_density=_PA_RHO0,
+    )
+    return numeric(0.95, float(np.max(res.absorption)), 0.05, places=3)
+
+
+@register(
+    _POROUS,
+    "Maa 1998 Eqs. (5a)/(10)",
+    "MPP peak absorption vs 4r/(1+r)^2 with Maa's printed resistance",
+)
+def _chk_porous_maa_peak_closed_form() -> Outcome:
+    # Independent expected value: the relative resistance r comes from
+    # Maa's printed wide-range approximation Eq. (5a) (with the surface
+    # end correction), not from the library's exact Bessel kernel; the
+    # peak absorption must then satisfy Eq. (10), alpha0 = 4r/(1+r)^2,
+    # within the paper's stated ~6 % accuracy of the approximation.
+    eta = 1.84e-5
+    d = ref.MAA_FIG5_DIAMETER
+    t = ref.MAA_FIG5_THICKNESS
+    eps = (math.pi / 4.0) * (d / ref.MAA_FIG5_SEPARATION) ** 2
+    f = np.linspace(400.0, 1200.0, 4000)
+    res = ph.layered_absorber(
+        f,
+        [
+            ph.MicroperforatedPlateLayer(t, d / 2.0, eps),
+            ph.AirLayer(ref.MAA_FIG5_CAVITY),
+        ],
+        speed_of_sound=_PA_C0, air_density=_PA_RHO0,
+    )
+    i = int(np.argmax(res.absorption))
+    omega = 2.0 * math.pi * float(f[i])
+    k_perf = d * math.sqrt(omega * _PA_RHO0 / (4.0 * eta))
+    k_r = math.sqrt(1.0 + k_perf**2 / 32.0) + (
+        math.sqrt(2.0) / 32.0
+    ) * k_perf * (d / t)
+    r_rel = 32.0 * eta * t * k_r / (eps * _PA_RHO0 * _PA_C0 * d**2)
+    expected = 4.0 * r_rel / (1.0 + r_rel) ** 2
+    return numeric(expected, float(res.absorption[i]), 0.02, places=3,
+                   expected_label=f"4r/(1+r)^2 = {expected:.3f}")
+
+
 # ===========================================================================
 # Program loudness (ITU-R BS.1770-5 / EBU R 128)
 # ===========================================================================

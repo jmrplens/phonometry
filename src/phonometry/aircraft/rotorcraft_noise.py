@@ -46,6 +46,7 @@ times, hemisphere selection, per-step levels and event metrics).
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
@@ -224,20 +225,25 @@ def _resolve_flow_resistivity(flow_resistivity: "float | str") -> float:
 
 
 def _ground_effect(
-    frequencies: "NDArray[np.float64]", source_height: float, receiver_height: float,
-    horizontal_distances: "NDArray[np.float64]", sigma: float,
+    frequencies: "NDArray[np.float64]",
+    source_height: "float | NDArray[np.float64]",
+    receiver_height: float,
+    horizontal_distances: "NDArray[np.float64]",
+    sigma: "float | NDArray[np.float64]",
 ) -> "NDArray[np.float64]":
-    """``ΔLg`` (Eq. 28-35) for one source height over many receivers, shape ``(G, F)``.
+    """``ΔLg`` (Eq. 28-35) for one emission over many receivers, shape ``(G, F)``.
 
     The validated core of :func:`ground_effect_adjustment`, broadcast over a
-    vector of horizontal distances (grid receivers). Heights below 0.1 m clamp
-    to 0.1 m (guidance §A.4.4); a zero horizontal distance (receiver directly
-    below the source) is admitted, the two-ray geometry stays finite there.
+    vector of horizontal distances (grid receivers); the source height above
+    the local ground and the flow resistivity may vary per receiver as well
+    (scalars broadcast). Heights below 0.1 m clamp to 0.1 m (guidance §A.4.4);
+    a zero horizontal distance (receiver directly below the source) is
+    admitted, the two-ray geometry stays finite there.
     """
     from scipy.special import wofz
 
     f = frequencies[None, :]
-    hs = max(source_height, 0.1)
+    hs = np.maximum(np.atleast_1d(np.asarray(source_height, dtype=np.float64)), 0.1)[:, None]
     hr = max(receiver_height, 0.1)
     dp = horizontal_distances[:, None]
 
@@ -247,7 +253,8 @@ def _ground_effect(
     cos_xi = (hs + hr) / r2                       # incidence angle from the normal
     k = 2.0 * np.pi * f / _C
 
-    zs = _delany_bazley_impedance(np.asarray(frequencies), sigma)[None, :]
+    sig = np.atleast_1d(np.asarray(sigma, dtype=np.float64))[:, None]
+    zs = _delany_bazley_impedance_grid(np.asarray(frequencies), sig)
     rp = (zs * cos_xi - 1.0) / (zs * cos_xi + 1.0)
     d_num = (1.0 + 1j) / 2.0 * np.sqrt(k * r2) * (1.0 / zs + cos_xi)
     f_loss = 1.0 + 1j * d_num * np.sqrt(np.pi) * wofz(d_num)   # F(d) = 1 + i·d·√π·w(d)
@@ -261,6 +268,16 @@ def _ground_effect(
     ratio = r1 / r2
     arg = 1.0 + ratio**2 * q_mag**2 + 2.0 * ratio * q_mag * inter
     return np.asarray(10.0 * np.log10(np.maximum(arg, 1e-15)), dtype=np.float64)
+
+
+def _delany_bazley_impedance_grid(
+    frequencies: "NDArray[np.float64]", sigma_column: "NDArray[np.float64]",
+) -> "NDArray[np.complex128]":
+    """``Zs`` (Eq. 35) broadcast over a ``(G, 1)`` flow-resistivity column."""
+    ratio = frequencies[None, :] / sigma_column
+    real = 1.0 + 0.0511 * ratio ** (-0.754)
+    imag = 0.0768 * ratio ** (-0.732)
+    return np.asarray(real + 1j * imag, dtype=np.complex128)
 
 
 @dataclass(frozen=True)
@@ -443,6 +460,471 @@ def _fill_grid(
         flat[~filled, b] = 10.0 * np.log10(
             (nearest * e).sum(axis=1) / nearest.sum(axis=1))
     return flat.reshape(n_az, n_po, n_f)
+
+
+# --------------------------------------------------------------------------- #
+# Topography and screening (guidance §A.4.4-A.4.5, Eq. 36-47)
+# --------------------------------------------------------------------------- #
+
+
+@dataclass(frozen=True)
+class MeanGroundPlaneResult:
+    """A mean ground plane fitted to a terrain section (guidance Eq. 36-40).
+
+    ECAC Doc 32, 1st ed., assumes flat terrain; its guidance (§A.4.4)
+    represents a varying vertical section by the least-squares line
+    ``z = a·d + b`` through the terrain polyline, evaluated in closed form
+    from the per-segment integrals (Eq. 37-40). Equivalent source and
+    receiver heights are then measured orthogonally to this plane and
+    substituted into the flat-ground equations.
+
+    :ivar slope: The fitted slope ``a`` (Eq. 37).
+    :ivar intercept: The fitted intercept ``b``, in metres (Eq. 38).
+    :ivar distances: The section distances ``d``, in metres, shape ``(M,)``.
+    :ivar heights: The terrain heights ``z(d)``, in metres, shape ``(M,)``.
+    """
+
+    slope: float
+    intercept: float
+    distances: "NDArray[np.float64]"
+    heights: "NDArray[np.float64]"
+
+    def height(self, distance: "float | NDArray[np.float64]") -> "NDArray[np.float64]":
+        """The plane height ``a·d + b`` at ``distance``, in metres."""
+        return np.asarray(self.slope * np.asarray(distance, dtype=np.float64)
+                          + self.intercept, dtype=np.float64)
+
+    def equivalent_height(self, distance: float, height: float) -> float:
+        """The orthogonal (equivalent) height of a point above the plane.
+
+        Positive above the plane; the guidance substitutes these equivalent
+        heights, floored at 0.1 m for source and receiver, into the
+        flat-ground equations (§A.4.4).
+        """
+        return float((height - self.slope * distance - self.intercept)
+                     / math.hypot(1.0, self.slope))
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the terrain section and the fitted mean ground plane."""
+        from .._plot.aircraft import plot_mean_ground_plane
+
+        return plot_mean_ground_plane(self, ax=ax, **kwargs)
+
+
+def mean_ground_plane(
+    distances: "NDArray[np.float64] | list[float]",
+    heights: "NDArray[np.float64] | list[float]",
+) -> MeanGroundPlaneResult:
+    """The mean ground plane of a terrain section (guidance Eq. 36-40).
+
+    Fits ``z = a·d + b`` to the polyline of straight segments that form the
+    terrain profile by continuous least squares (the residual is integrated
+    along ``d``, not summed over the vertices), using the closed forms of
+    Eq. 37/38 with the segment integrals ``A`` and ``B`` of Eq. 39/40.
+
+    :param distances: Section distances ``d``, in metres, strictly
+        increasing, shape ``(M,)`` with ``M ≥ 2`` (arbitrary spacing).
+    :param heights: Terrain heights ``z(d)``, in metres, shape ``(M,)``.
+    :return: A :class:`MeanGroundPlaneResult`.
+    :raises ValueError: If the inputs are invalid.
+    """
+    d, z = _validated_section(distances, heights)
+    a, b = _mean_plane_coefficients(d, z)
+    return MeanGroundPlaneResult(slope=a, intercept=b, distances=d, heights=z)
+
+
+def _validated_section(
+    distances: "NDArray[np.float64] | list[float]",
+    heights: "NDArray[np.float64] | list[float]",
+) -> "tuple[NDArray[np.float64], NDArray[np.float64]]":
+    """The validated ``(d, z)`` arrays of a terrain section."""
+    d = np.atleast_1d(np.asarray(distances, dtype=np.float64))
+    z = np.atleast_1d(np.asarray(heights, dtype=np.float64))
+    if d.ndim != 1 or d.shape != z.shape or d.size < 2:
+        raise ValueError("'distances' and 'heights' must be 1-D of equal size >= 2.")
+    if not (np.all(np.isfinite(d)) and np.all(np.isfinite(z))):
+        raise ValueError("'distances' and 'heights' must be finite.")
+    if np.any(np.diff(d) <= 0.0):
+        raise ValueError("'distances' must be strictly increasing.")
+    return d, z
+
+
+def _mean_plane_coefficients(
+    d: "NDArray[np.float64]", z: "NDArray[np.float64]",
+) -> "tuple[float, float]":
+    """The Eq. 37/38 closed-form least-squares line through a polyline."""
+    ak = np.diff(z) / np.diff(d)
+    bk = z[:-1] - ak * d[:-1]
+    big_a = (2.0 / 3.0) * np.sum(ak * np.diff(d**3)) + np.sum(bk * np.diff(d**2))
+    big_b = np.sum(ak * np.diff(d**2)) + 2.0 * np.sum(bk * np.diff(d))
+    span = float(d[-1] - d[0])
+    a = 3.0 * (2.0 * big_a - big_b * (d[-1] + d[0])) / span**3
+    b = (2.0 * float(d[-1]**3 - d[0]**3) / span**4 * big_b
+         - 3.0 * (d[-1] + d[0]) / span**3 * big_a)
+    return float(a), float(b)
+
+
+def mean_flow_resistivity(
+    lengths: "NDArray[np.float64] | list[float]",
+    resistivities: "NDArray[np.float64] | list[float]",
+) -> float:
+    """Logarithmic mean flow resistivity along a path (guidance Eq. 41).
+
+    When the ground type changes along a terrain profile, the guidance
+    averages the flow resistivity by the logarithm, weighted by the length of
+    each ground segment: ``σ̄ = 10^(Σ dᵢ·log10(σᵢ) / Σ dᵢ)``.
+
+    :param lengths: Segment lengths ``dᵢ``, in metres (``> 0``), shape ``(n,)``.
+    :param resistivities: Segment flow resistivities ``σᵢ``, in Pa·s/m²
+        (``> 0``), shape ``(n,)``.
+    :return: The mean flow resistivity ``σ̄``, in Pa·s/m².
+    :raises ValueError: If the inputs are invalid.
+    """
+    d = require_positive_array(lengths, "lengths")
+    sig = require_positive_array(resistivities, "resistivities")
+    if d.shape != sig.shape:
+        raise ValueError("'lengths' and 'resistivities' must have equal shape.")
+    return float(10.0 ** (np.sum(d * np.log10(sig)) / np.sum(d)))
+
+
+def diffraction_attenuation(
+    frequencies: "NDArray[np.float64] | list[float]",
+    path_difference: float,
+    *,
+    edge_height: float,
+    edge_span: float = 0.0,
+    capped: bool = True,
+) -> "NDArray[np.float64]":
+    """Pure diffraction attenuation ``ΔLd`` per band (guidance Eq. 42-44).
+
+    ``ΔLd = 10·Ch·log10(3 + (40/λ)·C″·δ)`` where the argument is at least 1
+    (below it the attenuation is 0), ``Ch = min(fm·h0/250, 1)`` (Eq. 43) and
+    ``C″`` accounts for multiple diffraction (Eq. 44: 1 for a single edge or
+    an edge span ``e ≤ 0.3 m``, ``(1 + (5λ/e)²)/(1/3 + (5λ/e)²)`` otherwise).
+    A negative path difference (edge below the line of sight) still yields a
+    small attenuation down to ``(40/λ)·C″·δ = −2``; for bands with
+    ``δ < −λ/20`` the screening chain evaluates the clear-path ground effect
+    instead of the diffraction (§A.4.5). At grazing incidence
+    (``δ = 0``) the attenuation is the classical ``10·log10(3) ≈ 4.8 dB``.
+
+    The attenuation is returned positive (a loss); in the Doc 32 Eq. 23
+    chain, whose adjustments are added to the level, it enters with a minus
+    sign. The wavelength uses the Doc 32 reference speed of sound
+    ``c = 346.1 m/s``.
+
+    :param frequencies: One-third-octave-band centre frequencies, in Hz.
+    :param path_difference: Path difference ``δ`` between the diffracted and
+        the direct path, in metres (negative when the edge lies below the
+        line of sight).
+    :param edge_height: Edge height ``h0`` above the mean ground plane(s), in
+        metres (the greatest of the two side values for a terrain edge;
+        ``≥ 0``).
+    :param edge_span: Distance ``e`` between the first and last diffraction
+        edges, in metres (default 0: single diffraction).
+    :param capped: Apply the 25 dB upper bound of §A.4.5 (default). The
+        image-path terms inside the ground-diffraction weighting (Eq. 46/47)
+        are evaluated unbounded.
+    :return: The attenuation ``ΔLd`` per band, in dB (``≥ 0``).
+    :raises ValueError: If the inputs are invalid.
+    """
+    f = require_positive_array(frequencies, "frequencies")
+    if not np.isfinite(path_difference):
+        raise ValueError("'path_difference' must be finite.")
+    h0 = require_non_negative(edge_height, "edge_height")
+    e = require_non_negative(edge_span, "edge_span")
+    lam = _C / f
+    c2 = np.ones_like(f)
+    if e > 0.3:
+        c2 = (1.0 + (5.0 * lam / e) ** 2) / (1.0 / 3.0 + (5.0 * lam / e) ** 2)
+    arg = 3.0 + 40.0 / lam * c2 * path_difference
+    ch = np.minimum(f * h0 / 250.0, 1.0)
+    ld = np.where(arg >= 1.0, 10.0 * ch * np.log10(np.maximum(arg, 1.0)), 0.0)
+    if capped:
+        ld = np.minimum(ld, 25.0)
+    return np.asarray(ld, dtype=np.float64)
+
+
+@dataclass(frozen=True)
+class TerrainScreeningResult:
+    """Ground and screening over a terrain section (guidance §A.4.4-A.4.5).
+
+    :ivar frequencies: Band centre frequencies, in Hz, shape ``(F,)``.
+    :ivar adjustment: The combined ground-and-screening adjustment per band,
+        in dB, added to the received level in the Doc 32 Eq. 23 chain (it
+        replaces the flat-ground ``ΔLg``): the mean-ground-plane ground
+        effect when the line of sight is clear, ``−(ΔLd + ΔLg)`` of Eq. 45
+        when terrain blocks it.
+    :ivar screened: Whether terrain blocks the line of sight (any profile
+        point strictly above it).
+    :ivar path_difference: The rubber-band path difference ``δ``, in metres
+        (``NaN`` when unscreened).
+    :ivar diffraction_points: The diffracting edges ``(d, z)`` on the convex
+        propagation path, shape ``(n, 2)`` (empty when unscreened).
+    :ivar source: The source ``(d, z)``, in metres.
+    :ivar receiver: The receiver ``(d, z)``, in metres.
+    :ivar distances: The section distances, in metres, shape ``(M,)``.
+    :ivar heights: The section terrain heights, in metres, shape ``(M,)``.
+    """
+
+    frequencies: "NDArray[np.float64]"
+    adjustment: "NDArray[np.float64]"
+    screened: bool
+    path_difference: float
+    diffraction_points: "NDArray[np.float64]"
+    source: "tuple[float, float]"
+    receiver: "tuple[float, float]"
+    distances: "NDArray[np.float64]"
+    heights: "NDArray[np.float64]"
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the section geometry: terrain, line of sight and sound path."""
+        from .._plot.aircraft import plot_terrain_screening
+
+        return plot_terrain_screening(self, ax=ax, **kwargs)
+
+
+def terrain_screening_adjustment(
+    frequencies: "NDArray[np.float64] | list[float]",
+    source: "tuple[float, float]",
+    receiver: "tuple[float, float]",
+    distances: "NDArray[np.float64] | list[float]",
+    heights: "NDArray[np.float64] | list[float]",
+    *,
+    flow_resistivity: "float | str | NDArray[np.float64] | list[float]" = "G",
+) -> TerrainScreeningResult:
+    """Ground effect and terrain screening over a vertical section (§A.4.4-A.4.5).
+
+    The terrain profile between the source and the receiver decides the
+    propagation regime:
+
+    * **Line of sight clear** (no profile point strictly above it): the
+      section's mean ground plane (Eq. 36-40) supplies equivalent orthogonal
+      heights (floored at 0.1 m) and the flat-ground two-ray model of
+      §A.4.3 evaluates on the plane, with the log-mean flow resistivity
+      (Eq. 41) when it varies along the path. Terrain points below the line
+      of sight are never treated as diffracting obstacles (the guidance's
+      topography rule, which avoids accidental screening in flat terrain).
+    * **Blocked**: the sound follows the shortest convex path over the
+      terrain (the guidance's rubber band); its vertices are the diffraction
+      edges. The attenuation combines the pure diffraction of the path
+      difference ``δ`` (Eq. 42-44, capped at 25 dB) with the source-side and
+      receiver-side ground effects weighted by their image-path diffractions
+      (Eq. 45-47), each side using its own mean ground plane, equivalent
+      heights and log-mean flow resistivity. The ground effect is not
+      evaluated separately in this regime; bands with ``δ < −λ/20`` fall
+      back to the clear-path evaluation (with terrain-only obstacles
+      ``δ > 0``, so the rule engages for constructed screens below the line
+      of sight rather than for terrain).
+
+    ECAC Doc 32, 1st ed., defines no screening or topography (its Eq. 12
+    propagation chain ends at the flat-ground ``ΔLg``); this implements the
+    NORAH2 guidance sections A.4.4/A.4.5 and its noise-path appendices,
+    whose diffraction equations follow CNOSSOS-EU.
+
+    :param frequencies: One-third-octave-band centre frequencies, in Hz.
+    :param source: Source ``(d, z)`` in the section, in metres.
+    :param receiver: Receiver ``(d, z)`` in the section, in metres (the
+        microphone point, i.e. ground plus microphone height).
+    :param distances: Terrain section distances ``d``, in metres, strictly
+        increasing, covering ``[source d, receiver d]``.
+    :param heights: Terrain heights ``z(d)``, in metres.
+    :param flow_resistivity: Ground flow resistivity: a value in Pa·s/m², a
+        CNOSSOS class letter, or one value per profile segment (shape
+        ``(M−1,)``) averaged per sub-path by Eq. 41.
+    :return: A :class:`TerrainScreeningResult`.
+    :raises ValueError: If the inputs are invalid.
+    """
+    f = require_positive_array(frequencies, "frequencies")
+    d, z = _validated_section(distances, heights)
+    src = (float(source[0]), float(source[1]))
+    rcv = (float(receiver[0]), float(receiver[1]))
+    if not (np.isfinite(src[0]) and np.isfinite(src[1])
+            and np.isfinite(rcv[0]) and np.isfinite(rcv[1])):
+        raise ValueError("'source' and 'receiver' must be finite (d, z) points.")
+    if src[0] >= rcv[0]:
+        raise ValueError("'source' must lie at a smaller section distance than 'receiver'.")
+    if d[0] > src[0] + 1e-9 or d[-1] < rcv[0] - 1e-9:
+        raise ValueError("The terrain section must cover [source d, receiver d].")
+    sigma_seg = _segment_resistivities(flow_resistivity, d.size - 1)
+    d, z, sigma_seg = _cropped_section(d, z, sigma_seg, src[0], rcv[0])
+    adjustment, screened, delta, points = _screening_core(f, src, rcv, d, z, sigma_seg)
+    return TerrainScreeningResult(
+        frequencies=f, adjustment=adjustment, screened=screened,
+        path_difference=delta, diffraction_points=points, source=src,
+        receiver=rcv, distances=d, heights=z)
+
+
+def _segment_resistivities(
+    flow_resistivity: "float | str | NDArray[np.float64] | list[float]",
+    n_segments: int,
+) -> "NDArray[np.float64]":
+    """Per-segment ``σ`` from a scalar, class letter or per-segment array."""
+    if isinstance(flow_resistivity, str):
+        return np.full(n_segments, _resolve_flow_resistivity(flow_resistivity))
+    if np.isscalar(flow_resistivity):
+        return np.full(n_segments, _resolve_flow_resistivity(float(flow_resistivity)))  # type: ignore[arg-type]
+    arr = require_positive_array(flow_resistivity, "flow_resistivity")
+    if arr.shape != (n_segments,):
+        raise ValueError("Per-segment 'flow_resistivity' must have one value per "
+                         "profile segment.")
+    return arr
+
+
+def _cropped_section(
+    d: "NDArray[np.float64]", z: "NDArray[np.float64]",
+    sigma_seg: "NDArray[np.float64]", d_lo: float, d_hi: float,
+) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]":
+    """The section restricted to ``[d_lo, d_hi]`` with interpolated ends."""
+    keep = (d > d_lo) & (d < d_hi)
+    dd = np.concatenate([[d_lo], d[keep], [d_hi]])
+    zz = np.interp(dd, d, z)
+    seg_mid = 0.5 * (dd[:-1] + dd[1:])
+    idx = np.clip(np.searchsorted(d, seg_mid) - 1, 0, sigma_seg.size - 1)
+    return dd, zz, sigma_seg[idx]
+
+
+def _upper_hull(points: "NDArray[np.float64]") -> "NDArray[np.float64]":
+    """The upper convex hull of ``(d, z)`` points sorted by ``d``."""
+    hull: list[np.ndarray] = []
+    for pt in points:
+        while len(hull) >= 2:
+            u, v = hull[-2], hull[-1]
+            if (v[0] - u[0]) * (pt[1] - u[1]) - (v[1] - u[1]) * (pt[0] - u[0]) >= 0.0:
+                hull.pop()
+            else:
+                break
+        hull.append(pt)
+    return np.asarray(hull)
+
+
+def _side_ground(
+    f: "NDArray[np.float64]",
+    d: "NDArray[np.float64]", z: "NDArray[np.float64]",
+    sigma_seg: "NDArray[np.float64]",
+    p_lo: "tuple[float, float]", p_hi: "tuple[float, float]",
+    clamp_lo: bool, clamp_hi: bool,
+) -> "tuple[NDArray[np.float64], float, float, float]":
+    """Mean-plane ground effect between two points of the section.
+
+    Returns the flat-ground adjustment ``ΔLg`` (Eq. 28-35) evaluated with
+    the equivalent orthogonal heights over the sub-profile's mean ground
+    plane and its Eq. 41 mean resistivity, together with the two equivalent
+    heights and the plane's slope (the image-point construction needs it).
+    ``clamp_lo``/``clamp_hi`` apply the 0.1 m floor of §A.4.4 to the heights
+    handed onward (real sources and receivers; diffraction edges pass
+    unfloored so ``h0`` and the images use their true elevation); inside the
+    two-ray core itself every height is floored at 0.1 m regardless.
+    """
+    dd, zz, seg = _cropped_section(d, z, sigma_seg, p_lo[0], p_hi[0])
+    a, b = _mean_plane_coefficients(dd, zz)
+    scale = math.hypot(1.0, a)
+    h_lo = (p_lo[1] - a * p_lo[0] - b) / scale
+    h_hi = (p_hi[1] - a * p_hi[0] - b) / scale
+    if clamp_lo:
+        h_lo = max(h_lo, 0.1)
+    if clamp_hi:
+        h_hi = max(h_hi, 0.1)
+    # Separation of the feet of the orthogonal projections, along the plane.
+    s_lo = (p_lo[0] + a * (p_lo[1] - b)) / scale
+    s_hi = (p_hi[0] + a * (p_hi[1] - b)) / scale
+    lengths = np.hypot(np.diff(dd), np.diff(zz))
+    sigma = mean_flow_resistivity(lengths, seg)
+    dlg = _ground_effect(f, h_lo, h_hi, np.asarray([abs(s_hi - s_lo)]), sigma)[0]
+    return np.asarray(dlg, dtype=np.float64), h_lo, h_hi, a
+
+
+def _screening_core(
+    f: "NDArray[np.float64]",
+    src: "tuple[float, float]", rcv: "tuple[float, float]",
+    d: "NDArray[np.float64]", z: "NDArray[np.float64]",
+    sigma_seg: "NDArray[np.float64]",
+) -> "tuple[NDArray[np.float64], bool, float, NDArray[np.float64]]":
+    """The combined ground-and-screening adjustment of a section (Eq. 45-47)."""
+    interior = slice(1, -1) if d.size > 2 else slice(0, 0)
+    los = src[1] + (rcv[1] - src[1]) * (d - src[0]) / (rcv[0] - src[0])
+    above = np.zeros(d.size, dtype=bool)
+    above[interior] = z[interior] > los[interior]
+
+    # Clear line of sight: mean-ground-plane ground effect over the full path.
+    clear, _, _, _ = _side_ground(f, d, z, sigma_seg, src, rcv, True, True)
+    if not np.any(above):
+        return clear, False, float("nan"), np.empty((0, 2))
+
+    # Blocked: rubber band over the terrain (the shortest convex path).
+    pts = np.vstack([[src[0], src[1]], np.column_stack([d[above], z[above]]),
+                     [rcv[0], rcv[1]]])
+    hull = _upper_hull(pts)
+    edges = hull[1:-1]
+    if edges.shape[0] == 0:   # numerically grazing: treat as clear
+        return clear, False, float("nan"), np.empty((0, 2))
+    seg_len = np.hypot(np.diff(hull[:, 0]), np.diff(hull[:, 1]))
+    direct = math.hypot(rcv[0] - src[0], rcv[1] - src[1])
+    delta = float(np.sum(seg_len) - direct)
+    # e: the distance between the first and last diffraction edges, measured
+    # along the intermediate edges (equal to the chord for one or two edges).
+    span = float(np.sum(np.hypot(np.diff(edges[:, 0]), np.diff(edges[:, 1]))))
+
+    o_first = (float(edges[0, 0]), float(edges[0, 1]))
+    o_last = (float(edges[-1, 0]), float(edges[-1, 1]))
+    ag_s, zs, zo_s, a_s = _side_ground(f, d, z, sigma_seg, src, o_first, True, False)
+    ag_r, zo_r, zr, a_r = _side_ground(f, d, z, sigma_seg, o_last, rcv, False, True)
+    h0 = max(max(zo_s, 0.0), max(zo_r, 0.0))
+
+    delta_img_s = _image_path_difference(hull, _mirrored_point(src, zs, a_s),
+                                         side="source")
+    delta_img_r = _image_path_difference(hull, _mirrored_point(rcv, zr, a_r),
+                                         side="receiver")
+    ld = diffraction_attenuation(f, delta, edge_height=h0, edge_span=span)
+    ld_free = diffraction_attenuation(f, delta, edge_height=h0, edge_span=span,
+                                      capped=False)
+    ld_s = diffraction_attenuation(f, delta_img_s, edge_height=h0,
+                                   edge_span=span, capped=False)
+    ld_r = diffraction_attenuation(f, delta_img_r, edge_height=h0,
+                                   edge_span=span, capped=False)
+    # Eq. 46/47: the side ground attenuations, weighted by their image-path
+    # diffractions (A = −ΔLg maps the Eq. 23 adjustments onto attenuations).
+    lg_s = -20.0 * np.log10(
+        1.0 + (10.0 ** (ag_s / 20.0) - 1.0) * 10.0 ** (-(ld_s - ld_free) / 20.0))
+    lg_r = -20.0 * np.log10(
+        1.0 + (10.0 ** (ag_r / 20.0) - 1.0) * 10.0 ** (-(ld_r - ld_free) / 20.0))
+    total = ld + lg_s + lg_r                       # Eq. 45, an attenuation
+    # Per-band trigger (§A.4.5): bands with δ < −λ/20 keep the clear path.
+    screened_band = delta >= -(_C / f) / 20.0
+    adjustment = np.where(screened_band, -total, clear)
+    return np.asarray(adjustment, dtype=np.float64), True, delta, edges
+
+
+def _mirrored_point(
+    point: "tuple[float, float]", equivalent_height: float, slope: float,
+) -> "tuple[float, float]":
+    """The orthogonal mirror image of a point across a side mean plane.
+
+    The image sits at twice the (orthogonal) equivalent height along the
+    plane's downward normal, ``p − 2·h·n̂`` with ``n̂ = (−a, 1)/√(1+a²)``
+    (guidance Figure 8: S′/R′ are the images in relation to the side mean
+    ground planes).
+    """
+    h = max(equivalent_height, 0.0)
+    scale = math.hypot(1.0, slope)
+    return (point[0] + 2.0 * h * slope / scale, point[1] - 2.0 * h / scale)
+
+
+def _image_path_difference(
+    hull: "NDArray[np.float64]", image: "tuple[float, float]", side: str,
+) -> float:
+    """The rubber-band path difference from an image point (Eq. 46/47).
+
+    The diffracted path follows the same edges with the source (or receiver)
+    replaced by its mirror image across the side mean plane.
+    """
+    pts = hull.copy()
+    if side == "source":
+        pts[0] = image
+    else:
+        pts[-1] = image
+    seg_len = np.hypot(np.diff(pts[:, 0]), np.diff(pts[:, 1]))
+    direct = math.hypot(pts[-1, 0] - pts[0, 0], pts[-1, 1] - pts[0, 1])
+    return float(np.sum(seg_len) - direct)
 
 
 # --------------------------------------------------------------------------- #
@@ -952,14 +1434,16 @@ class _EventSetup:
     heading: "NDArray[np.float64]"
     bank: "NDArray[np.float64]"
     offsets: "NDArray[np.float64]"
-    ground_elevation: float
+    ground_elevation: "float | NDArray[np.float64]"
     receiver_height: float
-    sigma: float
+    sigma: "float | NDArray[np.float64]"
     alpha: "NDArray[np.float64]"
     rref: float
     scaling_factor: float
     triangles: "NDArray[np.int_] | list[list[int]] | None"
     band_integrated: bool
+    terrain: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None"
+    terrain_resolution: float
 
 
 def _event_setup(
@@ -970,12 +1454,12 @@ def _event_setup(
     positions: "NDArray[np.float64] | list[list[float]]",
     *,
     receiver_height: float,
-    ground_elevation: float,
+    ground_elevation: "float | NDArray[np.float64] | list[float] | list[list[float]]",
     airspeed: "float | NDArray[np.float64] | list[float] | None",
     path_angle: "float | NDArray[np.float64] | list[float] | None",
     heading: "float | NDArray[np.float64] | list[float] | None",
     bank_angle: "float | NDArray[np.float64] | list[float] | None",
-    flow_resistivity: "float | str",
+    flow_resistivity: "float | str | NDArray[np.float64] | list[float] | list[list[float]]",
     temperature: float,
     relative_humidity: float,
     pressure: float,
@@ -983,20 +1467,27 @@ def _event_setup(
     scaling_factor: float,
     triangles: "NDArray[np.int_] | list[list[int]] | None",
     atmospheric_method: str,
+    terrain: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None",
+    terrain_resolution: "float | None",
 ) -> _EventSetup:
     """Validate the shared event/contour inputs into one :class:`_EventSetup`.
 
     The keyword tail mirrors the public functions one for one (the Doc 32
     single-event parameter set); both call it before adding their own
-    receiver or grid arguments.
+    receiver or grid arguments. Per-receiver ``ground_elevation`` and
+    ``flow_resistivity`` arrays are validated here and shaped against the
+    receiver grid by the caller.
     """
     freqs = _common_frequencies(hemispheres, airspeeds)
     rref = _reference_distance(hemispheres)
     t, p = _validated_track(times, positions)
     hr = require_positive(receiver_height, "receiver_height")
-    if not np.isfinite(ground_elevation):
-        raise ValueError("'ground_elevation' must be finite.")
-    sigma = _resolve_flow_resistivity(flow_resistivity)
+    dem = _validated_terrain(terrain)
+    if dem is not None:
+        _require_dem_coverage(dem, p[:, 0], p[:, 1], "track")
+    spacing = _section_spacing(dem, terrain_resolution)
+    sigma = _setup_resistivity(flow_resistivity, dem)
+    ground = _setup_ground_elevation(ground_elevation, dem)
     method = require_choice(atmospheric_method, "atmospheric_method", ("iso9613", "sae"))
     spd, gam, hdg, bank = _resolved_track_state(
         t, p, airspeed, path_angle, heading, bank_angle)
@@ -1009,9 +1500,113 @@ def _event_setup(
         path_angles=np.atleast_1d(np.asarray(path_angles, dtype=np.float64)),
         frequencies=freqs, times=t, positions=p, speed=spd, gamma=gam,
         heading=hdg, bank=bank, offsets=offsets,
-        ground_elevation=float(ground_elevation), receiver_height=hr,
+        ground_elevation=ground, receiver_height=hr,
         sigma=sigma, alpha=alpha, rref=rref, scaling_factor=scaling_factor,
-        triangles=triangles, band_integrated=method == "sae")
+        triangles=triangles, band_integrated=method == "sae",
+        terrain=dem, terrain_resolution=spacing)
+
+
+def _section_spacing(
+    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None",
+    terrain_resolution: "float | None",
+) -> float:
+    """The section sampling step: the given resolution or the model's cell size."""
+    if dem is None:
+        return 0.0
+    if terrain_resolution is not None:
+        return require_positive(terrain_resolution, "terrain_resolution")
+    return float(min(np.min(np.diff(dem[0])), np.min(np.diff(dem[1]))))
+
+
+def _setup_resistivity(
+    flow_resistivity: "float | str | NDArray[np.float64] | list[float] | list[list[float]]",
+    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None",
+) -> "float | NDArray[np.float64]":
+    """The scalar (or per-receiver) flow resistivity of an event run."""
+    if isinstance(flow_resistivity, (str, float, int)):
+        return _resolve_flow_resistivity(
+            flow_resistivity if isinstance(flow_resistivity, str)
+            else float(flow_resistivity))
+    if dem is not None:
+        raise ValueError("With 'terrain', 'flow_resistivity' must be a single "
+                         "value or class (per-path maps are not supported).")
+    return require_positive_array(
+        np.asarray(flow_resistivity, dtype=np.float64).ravel(), "flow_resistivity")
+
+
+def _setup_ground_elevation(
+    ground_elevation: "float | NDArray[np.float64] | list[float] | list[list[float]]",
+    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None",
+) -> "float | NDArray[np.float64]":
+    """The scalar (or per-receiver) ground elevation of an event run."""
+    if np.isscalar(ground_elevation):
+        if not np.isfinite(ground_elevation):
+            raise ValueError("'ground_elevation' must be finite.")
+        return float(ground_elevation)  # type: ignore[arg-type]
+    arr = np.asarray(ground_elevation, dtype=np.float64).ravel()
+    if not np.all(np.isfinite(arr)):
+        raise ValueError("'ground_elevation' must be finite.")
+    if dem is not None:
+        raise ValueError("With 'terrain', 'ground_elevation' comes from the "
+                         "elevation model and must be left scalar.")
+    return arr
+
+
+def _require_dem_coverage(
+    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]",
+    x: "NDArray[np.float64]", y: "NDArray[np.float64]", what: str,
+) -> None:
+    """Reject points outside the elevation model's horizontal extent.
+
+    Every vertical section joins a track point to a receiver, so covering
+    both keeps all sampled points inside the model; silently clamping to the
+    edge would fabricate terrain instead.
+    """
+    tx, ty, _ = dem
+    if (np.min(x) < tx[0] or np.max(x) > tx[-1]
+            or np.min(y) < ty[0] or np.max(y) > ty[-1]):
+        raise ValueError(f"'terrain' must cover the whole {what} (x in "
+                         f"[{tx[0]:g}, {tx[-1]:g}], y in [{ty[0]:g}, {ty[-1]:g}]).")
+
+
+def _validated_terrain(
+    terrain: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None",
+) -> "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None":
+    """The validated ``(x, y, z)`` digital elevation model, or ``None``."""
+    if terrain is None:
+        return None
+    if len(terrain) != 3:
+        raise ValueError("'terrain' must be an (x, y, z) elevation model.")
+    tx = np.asarray(terrain[0], dtype=np.float64).ravel()
+    ty = np.asarray(terrain[1], dtype=np.float64).ravel()
+    tz = np.asarray(terrain[2], dtype=np.float64)
+    if tx.size < 2 or ty.size < 2 or np.any(np.diff(tx) <= 0) or np.any(np.diff(ty) <= 0):
+        raise ValueError("'terrain' x and y must be strictly increasing with >= 2 points.")
+    if tz.shape != (ty.size, tx.size) or not np.all(np.isfinite(tz)):
+        raise ValueError("'terrain' z must be finite with shape (len(y), len(x)).")
+    if not (np.all(np.isfinite(tx)) and np.all(np.isfinite(ty))):
+        raise ValueError("'terrain' coordinates must be finite.")
+    return tx, ty, tz
+
+
+def _dem_height(
+    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]",
+    x: "NDArray[np.float64]", y: "NDArray[np.float64]",
+) -> "NDArray[np.float64]":
+    """Bilinear elevation lookup.
+
+    Coverage is validated upstream (:func:`_require_dem_coverage`); the edge
+    clamp only guards floating-point round-off exactly on the boundary.
+    """
+    tx, ty, tz = dem
+    cx = np.clip(np.searchsorted(tx, x) - 1, 0, tx.size - 2)
+    cy = np.clip(np.searchsorted(ty, y) - 1, 0, ty.size - 2)
+    wx = np.clip((x - tx[cx]) / (tx[cx + 1] - tx[cx]), 0.0, 1.0)
+    wy = np.clip((y - ty[cy]) / (ty[cy + 1] - ty[cy]), 0.0, 1.0)
+    return np.asarray(
+        (1 - wy) * (1 - wx) * tz[cy, cx] + (1 - wy) * wx * tz[cy, cx + 1]
+        + wy * (1 - wx) * tz[cy + 1, cx] + wy * wx * tz[cy + 1, cx + 1],
+        dtype=np.float64)
 
 
 def _event_histories(
@@ -1059,15 +1654,64 @@ def _event_histories(
             dla = -(_sae_band(setup.alpha[None, :] * dist[:, None]) - ref_band[None, :])
         else:
             dla = -setup.alpha[None, :] * (dist[:, None] - setup.rref)
-        hs = float(positions[k, 2]) - setup.ground_elevation
         dp = np.hypot(receivers[:, 0] - positions[k, 0], receivers[:, 1] - positions[k, 1])
-        dlg = _ground_effect(freqs, hs, setup.receiver_height, dp, setup.sigma)
+        if setup.terrain is not None:
+            dlg = _terrain_adjustments(setup, setup.terrain, positions[k], receivers, dp)
+        else:
+            hs = float(positions[k, 2]) - setup.ground_elevation
+            dlg = _ground_effect(freqs, hs, setup.receiver_height, dp, setup.sigma)
         spl = src + setup.offsets[k] + dls[:, None] + dla + dlg
         with np.errstate(divide="ignore", invalid="ignore"):
             la[k] = 10.0 * np.log10(np.nansum(10.0 ** ((spl + aw[None, :]) / 10.0), axis=1))
         trec[k] = setup.times[k] + dist / _C
         spectra[k] = spl[0]
     return trec, la, spectra
+
+
+#: Upper bound on samples per vertical section (a 200 km path at the 10 m
+#: default resolution; guards degenerate terrain_resolution requests).
+_MAX_SECTION_SAMPLES = 20001
+
+
+def _terrain_adjustments(
+    setup: _EventSetup,
+    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]",
+    position: "NDArray[np.float64]",
+    receivers: "NDArray[np.float64]",
+    dp: "NDArray[np.float64]",
+) -> "NDArray[np.float64]":
+    """Ground-and-screening adjustments over the elevation model, ``(G, F)``.
+
+    For every receiver the vertical section from the emission point to the
+    microphone is sampled from the elevation model at the configured
+    resolution and evaluated by the §A.4.4/A.4.5 machinery (mean ground
+    plane, equivalent heights, rubber-band diffraction). This is a per-pair
+    scalar path: with an elevation model the cost grows with track points
+    times receivers.
+    """
+    freqs = setup.frequencies
+    sigma = float(np.atleast_1d(np.asarray(setup.sigma, dtype=np.float64))[0])
+    out = np.empty((receivers.shape[0], freqs.size), dtype=np.float64)
+    sx, sy, sz = float(position[0]), float(position[1]), float(position[2])
+    for i in range(receivers.shape[0]):
+        span = float(dp[i])
+        n = min(max(2, int(math.ceil(span / setup.terrain_resolution)) + 1),
+                _MAX_SECTION_SAMPLES)
+        t = np.linspace(0.0, 1.0, n)
+        px = sx + (receivers[i, 0] - sx) * t
+        py = sy + (receivers[i, 1] - sy) * t
+        pz = _dem_height(dem, px, py)
+        d = span * t
+        if span <= 1e-6:                      # receiver under the source
+            hs = sz - float(pz[0])
+            out[i] = _ground_effect(freqs, hs, setup.receiver_height,
+                                    np.asarray([0.0]), sigma)[0]
+            continue
+        sigma_seg = np.full(n - 1, sigma)
+        adj, _, _, _ = _screening_core(
+            freqs, (0.0, sz), (span, float(receivers[i, 2])), d, pz, sigma_seg)
+        out[i] = adj
+    return out
 
 
 def _exposure_level(
@@ -1189,6 +1833,8 @@ def rotorcraft_event_level(
     scaling_factor: float = 2.0,
     triangles: "NDArray[np.int_] | list[list[int]] | None" = None,
     atmospheric_method: str = "iso9613",
+    terrain: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None" = None,
+    terrain_resolution: "float | None" = None,
 ) -> RotorcraftEventResult:
     """Rotorcraft single-event level at a receiver (Doc 32 §6.1 / guidance §A.5.1).
 
@@ -1242,6 +1888,18 @@ def rotorcraft_event_level(
         (the guidance text), or ``"sae"`` for the SAE ARP 5534 band-integrated
         mapping used by the NORAH2 reference implementation (they agree to
         ~0.05 dB below 3.15 kHz).
+    :param terrain: Optional digital elevation model ``(x, y, z)`` on the
+        track frame (``x`` and ``y`` strictly increasing, ``z`` of shape
+        ``(len(y), len(x))``, all in metres on the track datum). When given,
+        every emission-receiver pair is evaluated over its sampled vertical
+        section (guidance §A.4.4/A.4.5): mean-ground-plane ground effect with
+        equivalent heights, and rubber-band diffraction where terrain blocks
+        the line of sight; ``ground_elevation`` is then taken from the model.
+        The model must cover the whole track and the receiver (fabricating
+        terrain beyond its edges is refused).
+    :param terrain_resolution: Section sampling step along the path, in
+        metres (default: the elevation model's cell size; sections are capped
+        at 20000 sampling intervals).
     :return: A :class:`RotorcraftEventResult`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -1253,12 +1911,20 @@ def rotorcraft_event_level(
         temperature=temperature, relative_humidity=relative_humidity,
         pressure=pressure, level_offset=level_offset,
         scaling_factor=scaling_factor, triangles=triangles,
-        atmospheric_method=atmospheric_method)
+        atmospheric_method=atmospheric_method, terrain=terrain,
+        terrain_resolution=terrain_resolution)
     rx = np.asarray(receiver, dtype=np.float64).ravel()
     if rx.size != 2 or not np.all(np.isfinite(rx)):
         raise ValueError("'receiver' must be a finite (x, y) ground position.")
-    receivers = np.array(
-        [[rx[0], rx[1], setup.ground_elevation + setup.receiver_height]])
+    if not (np.isscalar(setup.sigma) and np.isscalar(setup.ground_elevation)):
+        raise ValueError("A single receiver takes scalar 'flow_resistivity' and "
+                         "'ground_elevation'; arrays are for the contour grid.")
+    if setup.terrain is not None:
+        _require_dem_coverage(setup.terrain, rx[:1], rx[1:2], "receiver")
+        local = float(_dem_height(setup.terrain, rx[:1], rx[1:2])[0])
+    else:
+        local = float(np.atleast_1d(setup.ground_elevation)[0])
+    receivers = np.array([[rx[0], rx[1], local + setup.receiver_height]])
     trec, la, spectra = _event_histories(setup, receivers)
     phi, theta, dist = _track_emission_geometry(
         setup.positions, receivers[0], setup.heading, setup.bank)
@@ -1298,12 +1964,12 @@ def rotorcraft_noise_contour(
     y: "NDArray[np.float64] | list[float]",
     metric: str = "exposure",
     receiver_height: float = 1.2,
-    ground_elevation: float = 0.0,
+    ground_elevation: "float | NDArray[np.float64] | list[list[float]]" = 0.0,
     airspeed: "float | NDArray[np.float64] | list[float] | None" = None,
     path_angle: "float | NDArray[np.float64] | list[float] | None" = None,
     heading: "float | NDArray[np.float64] | list[float] | None" = None,
     bank_angle: "float | NDArray[np.float64] | list[float] | None" = None,
-    flow_resistivity: "float | str" = "G",
+    flow_resistivity: "float | str | NDArray[np.float64] | list[list[float]]" = "G",
     temperature: float = 25.0,
     relative_humidity: float = 70.0,
     pressure: float = 101.325,
@@ -1311,6 +1977,8 @@ def rotorcraft_noise_contour(
     scaling_factor: float = 2.0,
     triangles: "NDArray[np.int_] | list[list[int]] | None" = None,
     atmospheric_method: str = "iso9613",
+    terrain: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None" = None,
+    terrain_resolution: "float | None" = None,
 ) -> RotorcraftNoiseContourResult:
     """Rotorcraft single-event level over a ground grid (Doc 32 §6.3).
 
@@ -1328,14 +1996,18 @@ def rotorcraft_noise_contour(
     :param y: Grid y coordinates, in metres (at least 2).
     :param metric: ``"exposure"`` (SEL) or ``"maximum"`` (LASmax).
     :param receiver_height: Microphone height above local ground, in metres.
-    :param ground_elevation: Ground elevation, in metres on the track datum.
+    :param ground_elevation: Ground elevation, in metres on the track datum:
+        a scalar, or one value per grid point (shape ``(len(y), len(x))``)
+        for receivers on uneven sites without a full elevation model.
     :param airspeed: Per-point airspeed override (see
         :func:`rotorcraft_event_level`).
     :param path_angle: Per-point path-angle override, in degrees.
     :param heading: Per-point heading override, in degrees.
     :param bank_angle: Per-point bank-angle override, in degrees.
-    :param flow_resistivity: Ground flow resistivity ``σ`` in Pa·s/m², or a
-        CNOSSOS class letter.
+    :param flow_resistivity: Ground flow resistivity ``σ`` in Pa·s/m², a
+        CNOSSOS class letter, or one value per grid point (shape
+        ``(len(y), len(x))``) for heterogeneous ground across the receivers
+        (each receiver's two-ray model uses its local value).
     :param temperature: Air temperature, in °C.
     :param relative_humidity: Relative humidity, in %.
     :param pressure: Ambient pressure, in kPa.
@@ -1345,6 +2017,14 @@ def rotorcraft_noise_contour(
     :param triangles: Optional precomputed flight-condition triangulation.
     :param atmospheric_method: ``"iso9613"`` or ``"sae"`` (see
         :func:`rotorcraft_event_level`).
+    :param terrain: Optional digital elevation model ``(x, y, z)`` (see
+        :func:`rotorcraft_event_level`); it must cover the whole track and
+        grid. Every emission-receiver pair then samples its own vertical
+        section, so the cost grows with track points times grid points; keep
+        contour grids modest with terrain.
+    :param terrain_resolution: Section sampling step, in metres (default: the
+        elevation model's cell size; sections are capped at 20000 sampling
+        intervals).
     :return: A :class:`RotorcraftNoiseContourResult`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -1356,16 +2036,32 @@ def rotorcraft_noise_contour(
         temperature=temperature, relative_humidity=relative_humidity,
         pressure=pressure, level_offset=level_offset,
         scaling_factor=scaling_factor, triangles=triangles,
-        atmospheric_method=atmospheric_method)
+        atmospheric_method=atmospheric_method, terrain=terrain,
+        terrain_resolution=terrain_resolution)
     gx = np.asarray(x, dtype=np.float64).ravel()
     gy = np.asarray(y, dtype=np.float64).ravel()
     if gx.size < 2 or gy.size < 2 or not (np.all(np.isfinite(gx)) and np.all(np.isfinite(gy))):
         raise ValueError("'x' and 'y' must each be finite with at least two grid points.")
     key = require_choice(metric, "metric", ("exposure", "maximum"))
     xx, yy = np.meshgrid(gx, gy)
+    n_g = xx.size
+    for name, value in (("flow_resistivity", flow_resistivity),
+                        ("ground_elevation", ground_elevation)):
+        if np.isscalar(value) or isinstance(value, str):
+            continue
+        shape = np.asarray(value).shape
+        if shape not in ((n_g,), (gy.size, gx.size)):
+            raise ValueError(f"A per-receiver '{name}' must carry one value per grid "
+                             "point, shape (len(y), len(x)).")
+    if setup.terrain is not None:
+        _require_dem_coverage(setup.terrain, gx, gy, "receiver grid")
+        local = _dem_height(setup.terrain, xx.ravel(), yy.ravel())
+    elif np.isscalar(setup.ground_elevation):
+        local = np.full(n_g, float(np.atleast_1d(setup.ground_elevation)[0]))
+    else:
+        local = np.asarray(setup.ground_elevation, dtype=np.float64)
     receivers = np.column_stack([
-        xx.ravel(), yy.ravel(),
-        np.full(xx.size, setup.ground_elevation + setup.receiver_height)])
+        xx.ravel(), yy.ravel(), local + setup.receiver_height])
     trec, la, _ = _event_histories(setup, receivers)
     if key == "exposure":
         level = _exposure_level(la, trec)

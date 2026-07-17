@@ -347,6 +347,37 @@ to the issuing body, with date and reference).
   implementation exactly.
 - **Status:** unreported.
 
+## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06) — Eq. (46)
+
+- **Location:** section A.4.5, Eq. (46) (source-side ground effect weighted
+  by diffraction).
+- **The print:** the weighting exponent reads (ΔL_g,s′ − ΔL_d,s)/20.
+- **The problem:** no term ΔL_g,s′ exists; the prose directly below the
+  equation defines ΔL_d,s′ as "the attenuation due to the diffraction between
+  the image source S′ and R", the receiver-side companion Eq. (47) prints the
+  parallel term correctly as ΔL_d,r′, and the CNOSSOS-EU method the section
+  is based on writes Δ_ground(S,O) with Δ_dif(S′,R) in that position. The
+  subscript g is a misprint for d.
+- **Evidence:** internal consistency of the section (its own prose and
+  Eq. (47)) and the CNOSSOS-EU source of the equations.
+- **Library behaviour:** implements the image-source diffraction term
+  ΔL_d,s′ as defined by the prose.
+- **Status:** unreported.
+
+## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06) — §A.4.5 cross-references
+
+- **Location:** section A.4.5, the definitions under Eq. (46) and Eq. (47).
+- **The print:** ΔL_d,s′, ΔL_d,s and ΔL_d,r′ are said to be "calculated as
+  per eq. 44" (four occurrences: two under Eq. (46) and two under Eq. (47)).
+- **The problem:** Eq. (44) is the multiple-diffraction coefficient C″; the
+  attenuation due to diffraction is Eq. (42). The three cross-references point
+  at the auxiliary coefficient instead of the formula they describe.
+- **Evidence:** the terms are attenuations in dB, which only Eq. (42)
+  produces; Eq. (44) is a dimensionless coefficient consumed by Eq. (42).
+- **Library behaviour:** evaluates the image-path and direct diffraction
+  terms with Eq. (42), using Eq. (44) for C″ inside it.
+- **Status:** unreported.
+
 ## RANDI 3.1 Physics Description (NRL, Breeding et al.) — Table 2
 
 - **Location:** Table 2 (representative ship source levels).

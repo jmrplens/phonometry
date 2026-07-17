@@ -178,8 +178,9 @@ it; the list grows as guides gain their References sections.
   theory, the Schroeder frequency, absorption and the perceptual room
   parameters.
   Cited by [Room Acoustics](room-acoustics.md),
-  [Reverberation-time prediction](reverberation-prediction.md) and
-  [Sound absorption in enclosed spaces](enclosed-space-absorption.md).
+  [Reverberation-time prediction](reverberation-prediction.md),
+  [Sound absorption in enclosed spaces](enclosed-space-absorption.md) and
+  [2D FDTD wave simulation](fdtd-simulation.md).
 - Sabine, W. C. (1922). *Collected papers on acoustics*. Harvard University
   Press.
   [Free scan at the Internet Archive](https://archive.org/details/collectedpaperso00sabi).
@@ -496,6 +497,10 @@ it; the list grows as guides gain their References sections.
   the ground dip, and meteorological effects on barriers.
   Cited by [Outdoor Sound Propagation](outdoor-propagation.md) and
   [Porous and Multilayer Absorbers](porous-absorbers.md).
+  the ground dip, meteorological effects on barriers, and the chapter 4
+  pressure-velocity FDTD reference model.
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md) and
+  [2D FDTD wave simulation](fdtd-simulation.md).
 - Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
   157-173.
   [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).

@@ -193,5 +193,12 @@ export const apiSidebar = {
         'reference/api/spectra/signals',
       ],
     },
+    {
+      label: 'Wave simulation',
+      translations: { es: 'Simulación de ondas' },
+      items: [
+        'reference/api/simulation/fdtd',
+      ],
+    },
   ],
 };

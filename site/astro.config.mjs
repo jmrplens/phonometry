@@ -501,6 +501,14 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Wave simulation',
+          translations: { es: 'Simulación de ondas' },
+          items: [
+            { slug: 'guides/sections/simulation', attrs: { 'data-group-link': true } },
+            'guides/fdtd-simulation',
+          ],
+        },
+        {
           label: 'Reference',
           translations: { es: 'Referencia' },
           items: [

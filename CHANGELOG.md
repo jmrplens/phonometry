@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- 2D FDTD wave simulation as a public API (new `phonometry.simulation`
+  domain, promoting the engine behind the documentation animations):
+  `fdtd_simulation` (deterministic staggered-grid pressure-velocity leapfrog
+  solver per Attenborough & Van Renterghem 2021 chapter 4, Eqs. 4.11-4.14,
+  returning a frozen `FDTDResult` with per-probe pressure histories, optional
+  field snapshots and `.plot()` for probe traces and field frames), the
+  stepping engine `FDTD2D` (now with rasterised rigid `obstacle_mask`
+  geometry and per-side locally reacting real-impedance boundaries,
+  Eqs. 4.32-4.35, alongside the existing sponge layers), and the sources
+  `GaussianPulse`, `CWSource` and the new arbitrary-waveform `SignalSource`.
+  Validated against analytic oracles: rigid-box and 1D-tube
+  eigenfrequencies, free-field arrival delay and cylindrical `1/sqrt(r)`
+  decay, the rigid-wall image echo, the normal-incidence impedance
+  reflection coefficient `(Z - rho c)/(Z + rho c)`, the scheme's discrete
+  dispersion relation and second-order convergence under grid refinement;
+  two new conformance checks. The figure/animation scripts now import the
+  library engine (bit-identical fields, committed clips unchanged).
 - Porous-material models and multilayer absorber prediction
   (`phonometry.materials.porous_absorber`): the Delany-Bazley one-parameter
   power law (with the Bies Table D.1 presets for polyester and foams and

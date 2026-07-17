@@ -203,11 +203,15 @@ at every probe each time step and, optionally, full-field snapshots.
 
 The grid covers `(nx * dx, ny * dx)` metres; a cell index `(ix, iy)`
 maps to the physical cell centre `((ix + 0.5) * dx, (iy + 0.5) * dx)`.
-Resolve at least 10 cells per shortest wavelength (`dx <= c / (10 f)`),
-the usual rule for this lowest-order scheme: the worst-case (on-axis)
-numerical dispersion error, `(k dx)^2 / 24` from the discrete
-counterpart of Eq. 4.15, is then about 1.6 % (about 1.4 % at the
-default `cfl`) and finer grids reduce it quadratically. The
+Resolve at least 10 cells per shortest wavelength using the smallest
+sound speed of the domain (`dx <= c_min / (10 f)`), the usual rule for
+this lowest-order scheme: the worst-case (on-axis) numerical dispersion
+error magnitude, `(k dx)^2 / 24` from the discrete counterpart of
+Eq. 4.15 (the modelled frequency under-reads, so the signed error is
+negative), is then about 1.6 % (about 1.4 % at the default `cfl`;
+in a heterogeneous domain the slower cells run at a lower local Courant
+number and sit nearer the 1.6 % bound) and finer grids reduce it
+quadratically. The
 simulation is 2D, so a point source is
 physically a line source with cylindrical `1/sqrt(r)` amplitude
 spreading rather than the 3D spherical `1/r`.

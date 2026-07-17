@@ -186,15 +186,19 @@ $$
     \sin\!\left(\frac{k\,\Delta x}{2}\right),
 $$
 
-with a leading-order relative frequency error of
-``(1 - S^2) (k dx)^2 / 24`` along the grid axes, where ``S = c dt / dx``;
+with a leading-order relative frequency error of magnitude
+``(1 - S^2) (k dx)^2 / 24`` along the grid axes (the modelled frequency
+under-reads, so the signed error is negative), where ``S = c dt / dx``;
 the error is largest exactly on-axis and vanishes along the cell diagonal
 at the Courant limit ``CN = 1``. The practical rule is to resolve **at
-least 10 cells per shortest wavelength**, ``dx <= c / (10 f_max)``: at
-exactly 10 cells the small-Courant bound ``(k dx)^2 / 24`` evaluates to
-about 1.6 %, reduced by the ``1 - S^2`` factor to about 1.4 % at the
-default ``cfl = 0.6``, and every finer-resolved or off-axis component is
-more accurate. With ``dx = 1`` cm the 10-cell point in air sits at roughly
+least 10 cells per shortest wavelength**, ``dx <= c_min / (10 f_max)``
+with the smallest sound speed of the domain: at exactly 10 cells the
+small-Courant bound ``(k dx)^2 / 24`` evaluates to about 1.6 %, reduced
+by the ``1 - S^2`` factor to about 1.4 % at the default ``cfl = 0.6``
+(in a heterogeneous domain the time step follows the fastest cells, so
+slower regions run at a lower local Courant number and sit nearer the
+1.6 % bound), and every finer-resolved or off-axis component is more
+accurate. With ``dx = 1`` cm the 10-cell point in air sits at roughly
 3.4 kHz, and halving ``dx`` quarters the error (the scheme is second
 order, and the validation suite measures that observed order under grid
 refinement). The tests pin the

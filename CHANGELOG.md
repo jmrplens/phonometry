@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Porous-material models and multilayer absorber prediction
+  (`phonometry.materials.porous_absorber`): the Delany-Bazley one-parameter
+  power law (with the Bies Table D.1 presets for polyester and foams and
+  the published 0.01 < X < 1 fit-range warning), Miki's positive-real
+  revision and the five-parameter Johnson-Champoux-Allard model, each
+  returning a frozen `PorousMediumResult` (characteristic impedance,
+  wavenumber, effective density/bulk modulus, `.plot()`); a declarative
+  transfer-matrix multilayer solver (`layered_absorber`) over porous, air,
+  perforated-plate, microperforated-plate (Maa's exact Bessel impedance
+  with the Eq. 5 end corrections) and limp-membrane layers at any incidence
+  angle with rigid/free/impedance terminations, evaluated through a
+  numerically robust admittance recursion and exposing the reciprocal chain
+  matrix; the random-incidence Paris integral
+  (`diffuse_field_absorption`) and the locally reacting closed form
+  (`statistical_absorption`, maximum 0.951); and the closed-form
+  Helmholtz/membrane resonance helpers. Anchored digit-exact on the printed
+  coefficient tables (Bies 5e Table D.1 / Mechel 2e G.11; Miki 1990
+  Eqs. 30-34), on the Johnson et al. 1987 asymptotic limits, on the
+  hard-backed-layer and lossless-cavity closed forms, on Maa 1998 (the
+  Eq. 4 approximation, Eq. 9/23 absorption identities, Eq. 11 resonance,
+  Table I and the Fig. 5 design example) and cross-checked against the
+  ASTM E2611 `TransferMatrix` machinery; ten new conformance checks. Three
+  source misprints recorded in the errata registry (Maa 1998 Eq. 5b;
+  Attenborough & Van Renterghem 2021 Table 5.1 and Eq. 5.13).
+
 - Programme loudness and true peak (ITU-R BS.1770-5, EBU R 128 with Tech
   3341/3342), a new `phonometry.broadcast` domain: `program_loudness` (the
   full EBU Mode measurement set as a frozen `ProgramLoudnessResult` with

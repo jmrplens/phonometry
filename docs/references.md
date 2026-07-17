@@ -299,15 +299,51 @@ it; the list grows as guides gain their References sections.
   [doi:10.1002/9780470747339](https://doi.org/10.1002/9780470747339).
   The porous-material theory linking airflow resistivity, surface impedance
   and absorption.
-  Cited by [Acoustic Materials](materials.md).
+  Cited by [Acoustic Materials](materials.md) and
+  [Porous and Multilayer Absorbers](porous-absorbers.md).
 - Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
   Theory, design and application* (3rd ed.). CRC Press.
   ISBN 978-1-4987-4099-9.
   [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
   The monograph on absorber and diffuser measurement and design, by the
   authors behind the ISO 17497-2 diffusion-coefficient method.
-  Cited by [Acoustic Materials](materials.md) and
+  Cited by [Acoustic Materials](materials.md),
+  [Porous and Multilayer Absorbers](porous-absorbers.md) and
   [Surface Scattering, Diffusion and In-situ Absorption](surface-scattering.md).
+- Mechel, F. P. (Ed.). (2008). *Formulas of acoustics* (2nd ed.). Springer.
+  ISBN 978-3-540-76832-6.
+  [doi:10.1007/978-3-540-76833-3](https://doi.org/10.1007/978-3-540-76833-3).
+  The formula compendium: layer reflection, multilayer schemes, diffuse-field
+  absorption integrals and the empirical porous-material relations.
+  Cited by [Porous and Multilayer Absorbers](porous-absorbers.md).
+- Bies, D. A., Hansen, C. H., & Howard, C. Q. (2018). *Engineering noise
+  control* (5th ed.). CRC Press. ISBN 978-1-4987-2405-0.
+  [doi:10.1201/9781351228152](https://doi.org/10.1201/9781351228152).
+  The engineering-noise-control reference; its Appendix D collects the
+  porous-material coefficient sets and layered-construction recursions.
+  Cited by [Porous and Multilayer Absorbers](porous-absorbers.md).
+- Delany, M. E., & Bazley, E. N. (1970). Acoustical properties of fibrous
+  absorbent materials. *Applied Acoustics*, 3(2), 105-116.
+  [doi:10.1016/0003-682X(70)90031-9](https://doi.org/10.1016/0003-682X(70)90031-9).
+  The original one-parameter empirical model for fibrous absorbers.
+  Cited by [Porous and Multilayer Absorbers](porous-absorbers.md).
+- Miki, Y. (1990). Acoustical properties of porous materials - Modifications
+  of Delany-Bazley models. *Journal of the Acoustical Society of Japan (E)*,
+  11(1), 19-24. [doi:10.1250/ast.11.19](https://doi.org/10.1250/ast.11.19).
+  The positive-real refit of the Delany-Bazley regression.
+  Cited by [Porous and Multilayer Absorbers](porous-absorbers.md).
+- Johnson, D. L., Koplik, J., & Dashen, R. (1987). Theory of dynamic
+  permeability and tortuosity in fluid-saturated porous media. *Journal of
+  Fluid Mechanics*, 176, 379-402.
+  [doi:10.1017/S0022112087000727](https://doi.org/10.1017/S0022112087000727).
+  The dynamic-tortuosity theory behind the Johnson-Champoux-Allard model.
+  Cited by [Porous and Multilayer Absorbers](porous-absorbers.md).
+- Maa, D.-Y. (1998). Potential of microperforated panel absorber. *Journal
+  of the Acoustical Society of America*, 104(5), 2861-2866.
+  [doi:10.1121/1.423870](https://doi.org/10.1121/1.423870).
+  The exact microperforated-panel impedance, its end corrections and the
+  design formulas.
+  Cited by [Porous and Multilayer Absorbers](porous-absorbers.md).
 - International Organization for Standardization. (2003). *Acoustics —
   Measurement of sound absorption in a reverberation room* (ISO 354:2003).
   [iso.org catalogue](https://www.iso.org/standard/34545.html).
@@ -357,8 +393,9 @@ it; the list grows as guides gain their References sections.
   measurement chains, flanking transmission and the EN 12354 prediction
   framework.
   Cited by [Field Insulation Measurement and Ratings](insulation-field.md),
-  [Laboratory Insulation Measurement](insulation-lab.md) and
-  [Predicting Sound Insulation (EN 12354)](insulation-prediction.md).
+  [Laboratory Insulation Measurement](insulation-lab.md),
+  [Predicting Sound Insulation (EN 12354)](insulation-prediction.md) and
+  [Porous and Multilayer Absorbers](porous-absorbers.md).
 - Vigran, T. E. (2008). *Building acoustics*. CRC Press.
   ISBN 978-0-415-42853-8.
   [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
@@ -457,7 +494,8 @@ it; the list grows as guides gain their References sections.
   [doi:10.1201/9780429470806](https://doi.org/10.1201/9780429470806).
   Ground impedance models, the spherical-wave reflection coefficient behind
   the ground dip, and meteorological effects on barriers.
-  Cited by [Outdoor Sound Propagation](outdoor-propagation.md).
+  Cited by [Outdoor Sound Propagation](outdoor-propagation.md) and
+  [Porous and Multilayer Absorbers](porous-absorbers.md).
 - Maekawa, Z. (1968). Noise reduction by screens. *Applied Acoustics*, 1(3),
   157-173.
   [doi:10.1016/0003-682X(68)90020-0](https://doi.org/10.1016/0003-682X(68)90020-0).

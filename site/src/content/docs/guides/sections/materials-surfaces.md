@@ -1,6 +1,6 @@
 ---
 title: "Materials and surfaces"
-description: "Characterising acoustic materials and surfaces: absorption ratings (ISO 11654), airflow resistance (ISO 9053), impedance-tube measurement (ISO 10534, ASTM E2611), scattering and diffusion coefficients (ISO 17497) and in-situ road-surface absorption (ISO 13472)."
+description: "Characterising acoustic materials and surfaces: absorption ratings (ISO 11654), airflow resistance (ISO 9053), impedance-tube measurement (ISO 10534, ASTM E2611), porous and multilayer absorber prediction (Delany-Bazley, Miki, JCA, Maa), scattering and diffusion coefficients (ISO 17497) and in-situ road-surface absorption (ISO 13472)."
 ---
 
 Every room prediction and many an insulation model end up consuming a
@@ -19,6 +19,14 @@ models. The **impedance tube** recovers, at normal incidence, the complex
 surface impedance, reflection factor and absorption coefficient of a small
 sample (ISO 10534-1/-2) and, with four microphones, its transmission loss
 (ASTM E2611).
+
+[Porous and Multilayer Absorbers](/phonometry/guides/porous-absorbers/) turns
+the measured flow resistivity into *predictions*: the Delany-Bazley, Miki and
+Johnson-Champoux-Allard equivalent-fluid models give a porous material's
+characteristic impedance and wavenumber, and a transfer-matrix stack of
+porous, air, perforated, microperforated (Maa) and membrane layers predicts
+the absorption of a whole construction — at any incidence angle and in a
+diffuse field — before anything is built.
 
 [Surface Scattering, Diffusion and In-situ Absorption](/phonometry/guides/surface-scattering/)
 moves from samples to *surfaces*, asking not how much energy a surface
@@ -43,6 +51,10 @@ section.
 - [Acoustic Materials](/phonometry/guides/materials/): the ISO 11654 weighted
   absorption rating and class, ISO 9053-1/-2 airflow resistance, and
   impedance-tube absorption, impedance and transmission loss.
+- [Porous and Multilayer Absorbers](/phonometry/guides/porous-absorbers/):
+  the Delany-Bazley, Miki and JCA porous models, the transfer-matrix
+  multilayer solver with perforated, microperforated and membrane layers,
+  and the random-incidence Paris integral.
 - [Surface Scattering, Diffusion and In-situ Absorption](/phonometry/guides/surface-scattering/):
   ISO 17497-1/2 scattering and diffusion coefficients, and ISO 13472-1/-2
   in-situ road-surface absorption.

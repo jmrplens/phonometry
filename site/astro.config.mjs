@@ -420,6 +420,7 @@ export default defineConfig({
               items: [
                 { slug: 'guides/sections/materials-surfaces', attrs: { 'data-group-link': true } },
                 'guides/materials',
+                'guides/porous-absorbers',
                 'guides/surface-scattering',
               ],
             },

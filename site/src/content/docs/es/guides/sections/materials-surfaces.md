@@ -1,6 +1,6 @@
 ---
 title: "Materiales y superficies"
-description: "Caracterizar materiales y superficies acústicas: índices de absorción (ISO 11654), resistencia al flujo de aire (ISO 9053), medición en tubo de impedancia (ISO 10534, ASTM E2611), coeficientes de dispersión y difusión (ISO 17497) y absorción in situ de pavimentos (ISO 13472)."
+description: "Caracterizar materiales y superficies acústicas: índices de absorción (ISO 11654), resistencia al flujo de aire (ISO 9053), medición en tubo de impedancia (ISO 10534, ASTM E2611), predicción de absorbentes porosos y multicapa (Delany-Bazley, Miki, JCA, Maa), coeficientes de dispersión y difusión (ISO 17497) y absorción in situ de pavimentos (ISO 13472)."
 ---
 
 Toda predicción de sala y más de un modelo de aislamiento acaban consumiendo
@@ -20,6 +20,15 @@ mayoría de los modelos de material. El **tubo de impedancia** recupera, en
 incidencia normal, la impedancia superficial compleja, el factor de reflexión
 y el coeficiente de absorción de una muestra pequeña (ISO 10534-1/-2) y, con
 cuatro micrófonos, su pérdida de transmisión (ASTM E2611).
+
+[Absorbentes porosos y multicapa](/phonometry/es/guides/porous-absorbers/)
+convierte la resistividad al flujo medida en *predicciones*: los modelos de
+fluido equivalente de Delany-Bazley, Miki y Johnson-Champoux-Allard dan la
+impedancia característica y el número de onda de un material poroso, y una
+pila de capas por matrices de transferencia — porosas, de aire, perforadas,
+microperforadas (Maa) y de membrana — predice la absorción de una
+construcción completa, a cualquier ángulo de incidencia y en campo difuso,
+antes de construir nada.
 
 [Dispersión superficial, difusión y absorción in situ](/phonometry/es/guides/surface-scattering/)
 pasa de las muestras a las *superficies*, y no pregunta cuánta energía
@@ -47,6 +56,11 @@ sección de
   ponderado de absorción de ISO 11654 y su clase, la resistencia al flujo de
   aire ISO 9053-1/-2, y la absorción, impedancia y pérdida de transmisión en
   tubo de impedancia.
+- [Absorbentes porosos y multicapa](/phonometry/es/guides/porous-absorbers/):
+  los modelos porosos de Delany-Bazley, Miki y JCA, el solucionador
+  multicapa por matrices de transferencia con capas perforadas,
+  microperforadas y de membrana, y la integral de Paris de incidencia
+  aleatoria.
 - [Dispersión superficial, difusión y absorción in situ](/phonometry/es/guides/surface-scattering/):
   los coeficientes de dispersión y difusión de ISO 17497-1/2, y la absorción
   in situ de pavimentos de ISO 13472-1/-2.

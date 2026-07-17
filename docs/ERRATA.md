@@ -511,6 +511,68 @@ to the issuing body, with date and reference).
 
 ---
 
+## Maa (1998), "Potential of microperforated panel absorber", JASA 104(5) — Eq. (5b)
+
+- **Location:** Eq. (5b), the mass-reactance coefficient of the microperforated
+  panel, printed as k_m = 1 + [1 + k²/2]^(−1/2) + 0,85 d/t.
+- **The print:** the first bracket term reads (1 + k²/2)^(−1/2).
+- **The problem:** the same paper's Eq. (4) — from which (5b) is factored —
+  prints the term as (3² + k²/2)^(−1/2), and only that form reproduces the
+  Crandall low-k limit Z1 → (4/3)·jωρ0t of the paper's own Eq. (3a): at
+  k → 0 the printed (5b) gives an internal mass factor of 2 instead of 4/3.
+  The paper's own Fig. 1 confirms it: with 0,85·d/t = 0,85 the plotted k_m
+  starts near 2,2 (= 4/3 + 0,85) at k = 0,1, not at 2,85.
+- **Evidence:** recomputation of both bracket variants against Eq. (4),
+  Eq. (3a) and the Fig. 1 curve; the exact Bessel solution of Eq. (2) agrees
+  with Eq. (4) within Maa's stated ~6 % only with the 3² form (the 1 form
+  errs by >30 % at low k).
+- **Library behaviour:** implements the exact Eq. (2) (no approximation), so
+  the misprint does not enter the code; the regression test
+  ``test_maa_exact_vs_wide_range_approximation`` pins the exact solution to
+  the corrected Eq. (4) form.
+- **Status:** unreported (journal paper; the correct form appears in Maa's
+  earlier 1975/1987 papers and in secondary literature).
+
+## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021) — Table 5.1
+
+- **Location:** Table 5.1, "Coefficient and exponent values in the Delany and
+  Bazley, Miki and modified Miki models", row "Miki [6,7]", coefficient r.
+- **The print:** r = 0,0109.
+- **The problem:** the original source (Miki 1990, J. Acoust. Soc. Jpn (E)
+  11(1), Eq. (34)) prints beta(f) = (ω/c0)[1 + 0,109·(f/σ)^(−0,618)]; the
+  table drops a digit. With 0,0109 the real part of the Miki wavenumber at
+  f/σ = 0,01 is 1,19 instead of 2,89 — inconsistent with the same table's
+  Delany-Bazley row (2,79 via ρ0 = 1,2) and with the "modified Miki" row
+  the book itself derives from it.
+- **Evidence:** digit check against the original Miki (1990) paper (Eqs.
+  (30)–(34)) and cross-computation of both variants at the fit-range edge.
+- **Library behaviour:** implements Miki's original 0,109; the digitization
+  point f/σ = 0,1 is pinned in ``tests/reference_data.py`` and in the
+  conformance check "Miki 1990 Eqs. (30)-(34)".
+- **Status:** unreported (textbook rather than a standard).
+
+## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021) — Eq. (5.13)
+
+- **Location:** Eq. (5.13), the Johnson-Champoux-Allard bulk complex density,
+  with G(Λ) = sqrt(1 − 4iTηρ0ω/(R_S²Λ²Ω²)).
+- **The print:** the tortuosity T appears to the first power inside G(Λ).
+- **The problem:** Johnson et al. (1987) and the standard JCA formulation
+  (Cox & D'Antonio 3e Eq. (6.19); Allard & Atalla) carry T² = α∞² there. The
+  first-power print breaks the high-frequency asymptote that defines the
+  viscous characteristic length: with T² the density tends to
+  (Tρ0/Ω)(1 + (1 − j)δ_v/Λ) with δ_v = sqrt(2η/ρ0ω), while the printed form
+  tends to a δ_v/(Λ·sqrt(T)) correction — for T = 2 an error of 29 % in the
+  boundary-layer term for the same Λ.
+- **Evidence:** asymptotic expansion of both variants against the Johnson
+  et al. definition of Λ and against Cox & D'Antonio Eq. (6.19); the
+  library's high-frequency JCA test pins the T² behaviour.
+- **Library behaviour:** implements the standard T² form (Cox & D'Antonio
+  Eq. (6.19)); the asymptote is pinned in
+  ``test_high_frequency_density_asymptote``.
+- **Status:** unreported (textbook rather than a standard).
+
+---
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

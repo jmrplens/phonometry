@@ -229,6 +229,15 @@ _SECTION_LIST: tuple[Section, ...] = (
         label_es="Incertidumbre",
         modules=("phonometry.metrology.uncertainty",),
     ),
+    Section(
+        key="spectra",
+        label_en="Spectral analysis",
+        label_es="Análisis espectral",
+        modules=(
+            "phonometry.metrology.spectra",
+            "phonometry.metrology.signals",
+        ),
+    ),
 )
 
 #: Sections in display order, keyed by section key.
@@ -254,6 +263,7 @@ _SECTION_SUBPACKAGES: dict[str, tuple[str, ...]] = {
     "power": ("emission",),
     "electroacoustics": ("electroacoustics",),
     "metrology": ("metrology",),
+    "spectra": ("metrology",),
 }
 
 #: Public names whose home module cannot be derived from ``__module__``:

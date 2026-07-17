@@ -529,7 +529,7 @@ L 661.776837 34.74318
      </g>
     </g>
     <g id="text_19">
-     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="14.798438" y="215.096953" transform="rotate(-90 14.798438 215.096953)">F [vacil] / R [asper]</text>
+     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #ffffff" x="14.798438" y="215.096953" transform="rotate(-90 14.798438 215.096953)">F [vacil_HMS] / R [asper]</text>
     </g>
    </g>
    <g id="line2d_71">
@@ -632,16 +632,16 @@ L 661.776837 28.798125
 " style="fill: none; stroke: #ffffff; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
    </g>
    <g id="patch_7">
-    <path d="M 365.862273 84.638548 
-Q 335.087678 91.125962 305.297675 97.40582 
+    <path d="M 374.965973 84.591382 
+Q 339.642444 91.127072 305.308351 97.479692 
 " style="fill: none; stroke: #ffffff; stroke-width: 0.9; stroke-linecap: round"/>
-    <path d="M 309.624197 98.537726 
-L 305.297675 97.40582 
-L 308.799113 94.623747 
+    <path d="M 309.605464 98.71857 
+L 305.308351 97.479692 
+L 308.877722 94.785328 
 " style="fill: none; stroke: #ffffff; stroke-width: 0.9; stroke-linecap: round"/>
    </g>
    <g id="text_20">
-    <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="347.177274" y="79.823829" transform="rotate(-0 347.177274 79.823829)">F = 0,99 vacil @ 6 Hz</text>
+    <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ffffff" x="347.177274" y="79.823829" transform="rotate(-0 347.177274 79.823829)">F = 0,99 vacil_HMS @ 6 Hz</text>
    </g>
    <g id="patch_8">
     <path d="M 600.380143 82.479361 

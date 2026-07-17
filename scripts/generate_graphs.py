@@ -3336,7 +3336,7 @@ def generate_hms_modulation_bandpass(output_dir: str) -> None:
 
     i_f = int(np.argmax(f_vals))
     i_r = int(np.argmax(r_vals))
-    ax.annotate(f"F = {f_vals[i_f]:.2f} vacil @ {fm_fs[i_f]:.0f} Hz",
+    ax.annotate(f"F = {f_vals[i_f]:.2f} vacil_HMS @ {fm_fs[i_f]:.0f} Hz",
                 xy=(float(fm_fs[i_f]), float(f_vals[i_f])),
                 xytext=(float(fm_fs[i_f]) * 1.6, float(f_vals[i_f]) * 1.06),
                 fontsize=10, color=COLOR_FG,
@@ -3348,7 +3348,7 @@ def generate_hms_modulation_bandpass(output_dir: str) -> None:
                 arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_FG})
 
     ax.set_xlabel("Modulation frequency f_mod [Hz]")
-    ax.set_ylabel("F [vacil] / R [asper]")
+    ax.set_ylabel("F [vacil_HMS] / R [asper]")
     ax.set_title("Slow vs Fast Modulation Perception (ECMA-418-2 Sottek Hearing Model)",
                  fontweight="bold", pad=12)
     top = max(float(np.max(f_vals)), float(np.max(r_vals)))

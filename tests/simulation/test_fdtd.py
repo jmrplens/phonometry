@@ -270,6 +270,8 @@ def test_signal_source_is_zero_outside_its_span() -> None:
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
+        ({"samples": np.zeros((2, 3)), "sample_rate": 8000.0},
+         "samples must be a 1D array"),
         ({"samples": np.zeros(0), "sample_rate": 8000.0},
          "samples must not be empty"),
         ({"samples": np.array([np.nan]), "sample_rate": 8000.0},
@@ -326,21 +328,22 @@ def test_obstacle_casts_a_shadow_and_stays_silent_inside() -> None:
 def test_obstacle_mask_validation() -> None:
     mask = np.zeros((10, 10), dtype=bool)
     mask[5, 5] = True
+    float_mask = mask.astype(float)
+    full_mask = np.ones((10, 10), dtype=bool)
+    masked_source = GaussianPulse(ix=5, iy=5, width=1e-4)
+    open_source = GaussianPulse(ix=1, iy=1, width=1e-4)
     with pytest.raises(ValueError, match="match the grid shape"):
         FDTD2D(C0, 0.05, shape=(10, 12), obstacle_mask=mask)
     with pytest.raises(ValueError, match="boolean"):
-        FDTD2D(C0, 0.05, shape=(10, 10),
-               obstacle_mask=mask.astype(float))
+        FDTD2D(C0, 0.05, shape=(10, 10), obstacle_mask=float_mask)
     with pytest.raises(ValueError, match="open cells"):
-        FDTD2D(C0, 0.05, shape=(10, 10),
-               obstacle_mask=np.ones((10, 10), dtype=bool))
+        FDTD2D(C0, 0.05, shape=(10, 10), obstacle_mask=full_mask)
     sim = FDTD2D(C0, 0.05, shape=(10, 10), obstacle_mask=mask)
     with pytest.raises(ValueError, match="inside an obstacle"):
-        sim.add_source(GaussianPulse(ix=5, iy=5, width=1e-4))
+        sim.add_source(masked_source)
     with pytest.raises(ValueError, match="inside an obstacle"):
         fdtd_simulation(C0, 0.05, 1e-3, shape=(10, 10), obstacle_mask=mask,
-                        sources=[GaussianPulse(ix=1, iy=1, width=1e-4)],
-                        probes=[(5, 5)])
+                        sources=[open_source], probes=[(5, 5)])
 
 
 # --- Boundary specification and CFL stability ------------------------------
@@ -357,10 +360,10 @@ def test_obstacle_mask_validation() -> None:
 def test_boundary_spec_rejects_unknown_values(
     boundaries: object, match: str,
 ) -> None:
+    sources = [GaussianPulse(ix=5, iy=5, width=1e-4)]
     with pytest.raises(ValueError, match=match):
         fdtd_simulation(C0, 0.05, 1e-3, shape=(30, 30),
-                        sources=[GaussianPulse(ix=5, iy=5, width=1e-4)],
-                        boundaries=boundaries)
+                        sources=sources, boundaries=boundaries)
 
 
 @pytest.mark.parametrize(
@@ -445,9 +448,10 @@ def test_damping_through_the_public_api() -> None:
 def test_unstable_or_invalid_cfl_is_rejected(cfl: float) -> None:
     # dt = cfl * dx / (c sqrt(2)); cfl is the Courant number CN of
     # Eq. (4.13) and the explicit scheme requires CN <= 1 (Eq. 4.14).
+    sources = [GaussianPulse(ix=5, iy=5, width=1e-4)]
     with pytest.raises(ValueError, match="cfl"):
         fdtd_simulation(C0, 0.05, 1e-3, shape=(20, 20), cfl=cfl,
-                        sources=[GaussianPulse(ix=5, iy=5, width=1e-4)])
+                        sources=sources)
 
 
 def test_stable_cfl_values_are_accepted() -> None:
@@ -504,9 +508,14 @@ def test_two_runs_are_bit_identical() -> None:
         ({"duration": 0.0}, "duration must be positive"),
         ({"duration": 1e-9}, "at least one time step"),
         ({"snapshot_every": 0}, "snapshot_every"),
+        ({"snapshot_every": 2.5}, "snapshot_every must be an integer"),
         ({"probes": [(99, 0)]}, "outside the grid"),
+        ({"probes": [(2.5, 3)]}, "probe ix must be an integer"),
+        ({"probes": [(2, 3.5)]}, "probe iy must be an integer"),
         ({"boundaries": "absorbing", "absorbing_layer_cells": 0},
          "absorbing_layer_cells"),
+        ({"boundaries": "absorbing", "absorbing_layer_cells": 2.5},
+         "absorbing_layer_cells must be an integer"),
     ],
 )
 def test_simulation_rejects_invalid_arguments(
@@ -521,6 +530,25 @@ def test_simulation_rejects_invalid_arguments(
     with pytest.raises(ValueError, match=match):
         fdtd_simulation(C0, 0.05, duration,
                         shape=(30, 30), **full)
+
+
+def test_non_integral_counts_and_coordinates_are_rejected() -> None:
+    # Fractional cell counts or indices raise instead of being truncated
+    # (a float probe would silently record a different cell) or crashing
+    # later inside numpy indexing, slicing or range().
+    with pytest.raises(ValueError, match="sponge_width must be an integer"):
+        FDTD2D(C0, 0.05, shape=(20, 20), sponge_width=2.5)  # type: ignore[arg-type]
+    sim = FDTD2D(C0, 0.05, shape=(20, 20))
+    float_source = GaussianPulse(ix=2.5, iy=3, width=1e-4)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="source ix must be an integer"):
+        sim.add_source(float_source)
+    with pytest.raises(ValueError, match="steps must be an integer"):
+        sim.run(1.5)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="record_every must be an integer"):
+        sim.run(10, record_every=1.5)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="decimate must be an integer"):
+        sim.run(10, decimate=1.5)  # type: ignore[arg-type]
+    assert sim.n == 0                  # nothing ran on the rejected calls
 
 
 # --- Plotting ---------------------------------------------------------------

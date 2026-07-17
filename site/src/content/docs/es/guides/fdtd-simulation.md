@@ -197,12 +197,18 @@ $$
     \sin\!\left(\frac{k\,\Delta x}{2}\right),
 $$
 
-con un error relativo de frecuencia del orden de ``(k dx)^2 / 24``. La regla
-práctica es resolver **al menos 10 celdas por longitud de onda más corta**,
-``dx <= c / (10 f_max)``, lo que mantiene el error por debajo de
-aproximadamente el 1 %; con ``dx = 1`` cm el aire es preciso hasta unos
-3,4 kHz, y reducir ``dx`` a la mitad divide el error entre cuatro (el esquema
-es de segundo orden, y la batería de validación mide ese orden observado bajo
+con un error relativo de frecuencia a primer orden de
+``(1 - S^2) (k dx)^2 / 24`` sobre los ejes de la malla, con
+``S = c dt / dx``; el error es máximo exactamente sobre un eje y se anula a
+lo largo de la diagonal de las celdas en el límite de Courant ``CN = 1``.
+La regla práctica es resolver **al menos 10 celdas por longitud de onda más
+corta**, ``dx <= c / (10 f_max)``: con exactamente 10 celdas la cota de
+Courant pequeño ``(k dx)^2 / 24`` da alrededor del 1,6 %, que el factor
+``1 - S^2`` reduce a en torno al 1,4 % con el ``cfl = 0.6`` por defecto, y
+toda componente mejor resuelta o fuera de eje es más precisa. Con
+``dx = 1`` cm el punto de 10 celdas en aire queda hacia los 3,4 kHz, y
+reducir ``dx`` a la mitad divide el error entre cuatro (el esquema es de
+segundo orden, y la batería de validación mide ese orden observado bajo
 refinamiento de malla). Los tests anclan el solucionador a oráculos
 analíticos: autofrecuencias de caja y de conducto, tiempos de llegada en
 campo libre y caída cilíndrica, el eco de la fuente imagen de una pared

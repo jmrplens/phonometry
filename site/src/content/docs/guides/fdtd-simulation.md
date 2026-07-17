@@ -186,12 +186,18 @@ $$
     \sin\!\left(\frac{k\,\Delta x}{2}\right),
 $$
 
-with a relative frequency error of order ``(k dx)^2 / 24``. The practical
-rule is to resolve **at least 10 cells per shortest wavelength**,
-``dx <= c / (10 f_max)``, which keeps the error below about 1 %; with
-``dx = 1`` cm air is accurate to roughly 3.4 kHz, and halving ``dx``
-quarters the error (the scheme is second order, and the validation suite
-measures that observed order under grid refinement). The tests pin the
+with a leading-order relative frequency error of
+``(1 - S^2) (k dx)^2 / 24`` along the grid axes, where ``S = c dt / dx``;
+the error is largest exactly on-axis and vanishes along the cell diagonal
+at the Courant limit ``CN = 1``. The practical rule is to resolve **at
+least 10 cells per shortest wavelength**, ``dx <= c / (10 f_max)``: at
+exactly 10 cells the small-Courant bound ``(k dx)^2 / 24`` evaluates to
+about 1.6 %, reduced by the ``1 - S^2`` factor to about 1.4 % at the
+default ``cfl = 0.6``, and every finer-resolved or off-axis component is
+more accurate. With ``dx = 1`` cm the 10-cell point in air sits at roughly
+3.4 kHz, and halving ``dx`` quarters the error (the scheme is second
+order, and the validation suite measures that observed order under grid
+refinement). The tests pin the
 solver to analytic oracles: box and duct eigenfrequencies, free-field
 arrival times and cylindrical decay, the rigid-wall image echo, the
 impedance reflection coefficient above and the dispersion relation itself.

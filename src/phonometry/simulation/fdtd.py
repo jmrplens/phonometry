@@ -73,6 +73,13 @@ def _finite(name: str, value: float) -> float:
     return out
 
 
+def _integer(name: str, value: int) -> int:
+    """Validate that *value* is an integral scalar (bool is rejected)."""
+    if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
+        raise ValueError(f"{name} must be an integer")
+    return int(value)
+
+
 def _positive_map(name: str, field: Field2D) -> None:
     """Validate that every cell of *field* is strictly positive and finite."""
     if not np.all(np.isfinite(field)) or bool(np.any(field <= 0.0)):
@@ -177,7 +184,9 @@ class SignalSource:
     def __post_init__(self) -> None:
         _positive_finite("sample_rate", self.sample_rate)
         _finite("amplitude", self.amplitude)
-        arr = np.array(self.samples, dtype=np.float64).ravel()
+        arr = np.array(self.samples, dtype=np.float64)
+        if arr.ndim != 1:
+            raise ValueError("samples must be a 1D array")
         if arr.size == 0:
             raise ValueError("samples must not be empty")
         if not np.all(np.isfinite(arr)):
@@ -218,6 +227,64 @@ def _sponge_profile(n: int, width: int, sides: tuple[bool, bool],
     if sides[1]:
         sigma[n - width:] = np.maximum(sigma[n - width:], ramp[::-1])
     return sigma
+
+
+def _resolve_c_map(c: float | Field2D,
+                   shape: tuple[int, int] | None) -> Field2D:
+    """Broadcast/validate the sound-speed spec into a positive 2D map."""
+    if np.isscalar(c):
+        if shape is None:
+            raise ValueError("shape is required when c is a scalar")
+        c_map = np.full(shape, float(np.real(c)), dtype=np.float64)
+    else:
+        c_map = np.asarray(c, dtype=np.float64)
+    if c_map.ndim != 2:
+        raise ValueError("c must be a 2D (ny, nx) map")
+    _positive_map("c", c_map)
+    return c_map
+
+
+def _resolve_rho_map(rho: float | Field2D, ny: int, nx: int) -> Field2D:
+    """Broadcast/validate the density spec into a positive ``(ny, nx)`` map."""
+    rho_map = (np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
+               if np.isscalar(rho) else np.asarray(rho, dtype=np.float64))
+    if rho_map.shape != (ny, nx):
+        raise ValueError("rho map must match the shape of c")
+    _positive_map("rho", rho_map)
+    return rho_map
+
+
+def _resolve_sponge_sides(
+    sponge_sides: str | Iterable[str] | None,
+) -> tuple[str, ...]:
+    """Normalise the sponge-side spec into a validated tuple of side names."""
+    if sponge_sides is None:
+        sides: tuple[str, ...] = _SIDES
+    elif isinstance(sponge_sides, str):
+        # A bare string would iterate per character; treat it as one side.
+        sides = (sponge_sides,)
+    else:
+        sides = tuple(sponge_sides)
+    unknown = set(sides) - set(_SIDES)
+    if unknown:
+        raise ValueError(f"unknown sponge sides: {sorted(unknown)}")
+    return sides
+
+
+def _edge_impedance_profile(side: str, value: float | NDArray[np.float64],
+                            n_edge: int) -> Field2D:
+    """Broadcast/validate one side's impedance into a positive 1D profile."""
+    z = np.asarray(value, dtype=np.float64)
+    if z.ndim == 0:
+        z = np.full(n_edge, float(z), dtype=np.float64)
+    if z.shape != (n_edge,):
+        raise ValueError(
+            f"impedance for side {side!r} must be a scalar or a 1D "
+            f"array of length {n_edge}")
+    if not np.all(np.isfinite(z)) or bool(np.any(z <= 0.0)):
+        raise ValueError(f"impedance for side {side!r} must be "
+                         "strictly positive and finite")
+    return z
 
 
 class _ImpedanceEdge:
@@ -328,24 +395,13 @@ class FDTD2D:
         | None = None,
         obstacle_mask: NDArray[np.bool_] | None = None,
     ) -> None:
-        if np.isscalar(c):
-            if shape is None:
-                raise ValueError("shape is required when c is a scalar")
-            c_map = np.full(shape, float(np.real(c)), dtype=np.float64)
-        else:
-            c_map = np.asarray(c, dtype=np.float64)
-        if c_map.ndim != 2:
-            raise ValueError("c must be a 2D (ny, nx) map")
-        _positive_map("c", c_map)
+        c_map = _resolve_c_map(c, shape)
         if not np.isfinite(cfl) or not 0.0 < cfl < 1.0:
             raise ValueError("cfl must lie in (0, 1): the leapfrog scheme "
                              "is unstable beyond the Courant bound CN = 1")
         ny, nx = c_map.shape
-        rho_map = (np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
-                   if np.isscalar(rho) else np.asarray(rho, dtype=np.float64))
-        if rho_map.shape != (ny, nx):
-            raise ValueError("rho map must match the shape of c")
-        _positive_map("rho", rho_map)
+        rho_map = _resolve_rho_map(rho, ny, nx)
+        sponge_width = _integer("sponge_width", sponge_width)
         if sponge_width < 0:
             raise ValueError("sponge_width must be non-negative")
         if sponge_width >= min(nx, ny):
@@ -370,19 +426,22 @@ class FDTD2D:
         self.p: Field2D = np.zeros((ny, nx), dtype=np.float64)
         self.vx: Field2D = np.zeros((ny, nx - 1), dtype=np.float64)
         self.vy: Field2D = np.zeros((ny - 1, nx), dtype=np.float64)
+        self._div: Field2D = np.zeros((ny, nx), dtype=np.float64)
         self._sources: list[Source] = []
         self.n = 0                                # completed steps
 
-        if sponge_sides is None:
-            sides: tuple[str, ...] = _SIDES
-        elif isinstance(sponge_sides, str):
-            # A bare string would iterate per character; treat it as one side.
-            sides = (sponge_sides,)
-        else:
-            sides = tuple(sponge_sides)
-        unknown = set(sides) - set(_SIDES)
-        if unknown:
-            raise ValueError(f"unknown sponge sides: {sorted(unknown)}")
+        sides = _resolve_sponge_sides(sponge_sides)
+        self._init_decay(sides, sponge_width, sponge_reflection, damping,
+                         c_max)
+        self._edges = self._build_edges(edge_impedance, sponge_width, sides,
+                                        ny, nx)
+        self._init_obstacle(obstacle_mask, ny, nx)
+
+    def _init_decay(self, sides: tuple[str, ...], sponge_width: int,
+                    sponge_reflection: float, damping: float,
+                    c_max: float) -> None:
+        """Precompute the sponge/damping decay factors of every field."""
+        ny, nx = self.p.shape
         sigma_max = 0.0
         if sponge_width > 0:
             # Quadratic-profile PML-style rate for a target reflection R:
@@ -400,27 +459,29 @@ class FDTD2D:
         self._decay_vy: Field2D = np.exp(
             -(0.5 * (sigma[1:, :] + sigma[:-1, :])) * self.dt)
 
-        self._edges = self._build_edges(edge_impedance, sponge_width, sides,
-                                        ny, nx)
+    def _init_obstacle(self, obstacle_mask: NDArray[np.bool_] | None,
+                       ny: int, nx: int) -> None:
+        """Validate the obstacle mask into closed-face velocity factors."""
         self._obstacle: NDArray[np.bool_] | None = None
         self._vx_open: Field2D | None = None
         self._vy_open: Field2D | None = None
-        if obstacle_mask is not None:
-            mask = np.asarray(obstacle_mask)
-            if mask.shape != (ny, nx):
-                raise ValueError("obstacle_mask must match the grid shape")
-            if mask.dtype != np.bool_:
-                raise ValueError("obstacle_mask must be a boolean array")
-            if bool(mask.all()):
-                raise ValueError("obstacle_mask must leave open cells")
-            if bool(mask.any()):
-                self._obstacle = mask.copy()
-                # A face between two cells is open only when both are open
-                # (rigid obstacle boundary: zero normal velocity, Eq. 4.32).
-                self._vx_open = (
-                    ~(mask[:, 1:] | mask[:, :-1])).astype(np.float64)
-                self._vy_open = (
-                    ~(mask[1:, :] | mask[:-1, :])).astype(np.float64)
+        if obstacle_mask is None:
+            return
+        mask = np.asarray(obstacle_mask)
+        if mask.shape != (ny, nx):
+            raise ValueError("obstacle_mask must match the grid shape")
+        if mask.dtype != np.bool_:
+            raise ValueError("obstacle_mask must be a boolean array")
+        if bool(mask.all()):
+            raise ValueError("obstacle_mask must leave open cells")
+        if bool(mask.any()):
+            self._obstacle = mask.copy()
+            # A face between two cells is open only when both are open
+            # (rigid obstacle boundary: zero normal velocity, Eq. 4.32).
+            self._vx_open = (
+                ~(mask[:, 1:] | mask[:, :-1])).astype(np.float64)
+            self._vy_open = (
+                ~(mask[1:, :] | mask[:-1, :])).astype(np.float64)
 
     def _build_edges(
         self,
@@ -447,16 +508,7 @@ class FDTD2D:
                 raise ValueError(f"side {side!r} cannot be both absorbing "
                                  "and an impedance boundary")
             n_edge = ny if side in ("left", "right") else nx
-            z = np.asarray(edge_impedance[side], dtype=np.float64)
-            if z.ndim == 0:
-                z = np.full(n_edge, float(z), dtype=np.float64)
-            if z.shape != (n_edge,):
-                raise ValueError(
-                    f"impedance for side {side!r} must be a scalar or a 1D "
-                    f"array of length {n_edge}")
-            if not np.all(np.isfinite(z)) or bool(np.any(z <= 0.0)):
-                raise ValueError(f"impedance for side {side!r} must be "
-                                 "strictly positive and finite")
+            z = _edge_impedance_profile(side, edge_impedance[side], n_edge)
             edges.append(_ImpedanceEdge(side, z, rho_edges[side],
                                         self.dt, self.dx))
         return edges
@@ -469,10 +521,11 @@ class FDTD2D:
     def add_source(self, source: Source) -> None:
         """Register a soft pressure source (additive injection at one cell)."""
         ny, nx = self.p.shape
-        if not (0 <= source.ix < nx and 0 <= source.iy < ny):
+        ix = _integer("source ix", source.ix)
+        iy = _integer("source iy", source.iy)
+        if not (0 <= ix < nx and 0 <= iy < ny):
             raise ValueError("source position lies outside the grid")
-        if self._obstacle is not None and self._obstacle[source.iy,
-                                                         source.ix]:
+        if self._obstacle is not None and self._obstacle[iy, ix]:
             raise ValueError("source position lies inside an obstacle")
         self._sources.append(source)
 
@@ -490,8 +543,9 @@ class FDTD2D:
         self.vy *= self._decay_vy
         for edge in self._edges:
             edge.update(self.p)
-        # Pressure step from the velocity divergence.
-        div = np.zeros_like(self.p)
+        # Pressure step from the velocity divergence (reused buffer).
+        div = self._div
+        div.fill(0.0)
         div[:, :-1] += self.vx
         div[:, 1:] -= self.vx
         div[:-1, :] += self.vy
@@ -527,10 +581,14 @@ class FDTD2D:
         ``record_every`` an empty array is returned and only the final state
         is kept (read it from ``self.p``).
         """
+        steps = _integer("steps", steps)
         if steps < 0:
             raise ValueError("steps must be non-negative")
-        if record_every is not None and record_every < 1:
-            raise ValueError("record_every must be >= 1")
+        if record_every is not None:
+            record_every = _integer("record_every", record_every)
+            if record_every < 1:
+                raise ValueError("record_every must be >= 1")
+        decimate = _integer("decimate", decimate)
         if decimate < 1:
             raise ValueError("decimate must be >= 1")
         frames: list[Field2D] = []
@@ -612,9 +670,9 @@ def _parse_boundaries(
 ) -> tuple[tuple[str, ...],
            dict[str, float | NDArray[np.float64]]]:
     """Split the boundary spec into sponge sides and impedance sides."""
+    spec: dict[str, str | float | NDArray[np.float64]]
     if isinstance(boundaries, str):
-        spec: dict[str, str | float | NDArray[np.float64]] = {
-            side: boundaries for side in _SIDES}
+        spec = dict.fromkeys(_SIDES, boundaries)
     else:
         unknown = set(boundaries) - set(_SIDES)
         if unknown:
@@ -634,6 +692,48 @@ def _parse_boundaries(
         else:
             impedance[side] = value
     return tuple(absorbing), impedance
+
+
+def _probe_indices(probes: Sequence[tuple[int, int]],
+                   shape: tuple[int, int],
+                   obstacle: NDArray[np.bool_] | None) -> NDArray[np.int_]:
+    """Validate the probe cells into an ``(n_probes, 2)`` index array."""
+    ny, nx = shape
+    probe_ix = np.zeros((len(probes), 2), dtype=np.int_)
+    for k, (ix, iy) in enumerate(probes):
+        ix = _integer("probe ix", ix)
+        iy = _integer("probe iy", iy)
+        if not (0 <= ix < nx and 0 <= iy < ny):
+            raise ValueError(f"probe ({ix}, {iy}) lies outside the grid")
+        if obstacle is not None and obstacle[iy, ix]:
+            raise ValueError(f"probe ({ix}, {iy}) lies inside an obstacle")
+        probe_ix[k] = (ix, iy)
+    return probe_ix
+
+
+def _record_run(
+    sim: FDTD2D,
+    steps: int,
+    probe_ix: NDArray[np.int_],
+    snapshot_every: int | None,
+) -> tuple[NDArray[np.float64], list[Field2D], list[int]]:
+    """Step the engine, recording probe histories and field snapshots."""
+    pressures = np.zeros((probe_ix.shape[0], steps + 1), dtype=np.float64)
+    frames: list[Field2D] = []
+    frame_steps: list[int] = []
+    if snapshot_every is not None:
+        frames.append(sim.p.copy())
+        frame_steps.append(0)
+    rows = probe_ix[:, 1]
+    cols = probe_ix[:, 0]
+    for i in range(steps):
+        sim.step()
+        if probe_ix.shape[0]:
+            pressures[:, i + 1] = sim.p[rows, cols]
+        if snapshot_every is not None and (i + 1) % snapshot_every == 0:
+            frames.append(sim.p.copy())
+            frame_steps.append(i + 1)
+    return pressures, frames, frame_steps
 
 
 def fdtd_simulation(
@@ -662,9 +762,12 @@ def fdtd_simulation(
 
     The grid covers ``(nx * dx, ny * dx)`` metres; a cell index ``(ix, iy)``
     maps to the physical cell centre ``((ix + 0.5) * dx, (iy + 0.5) * dx)``.
-    Resolve at least 10 cells per shortest wavelength (``dx <= c / (10 f)``)
-    to keep the numerical dispersion error below about 1 % (the discrete
-    counterpart of Eq. 4.15); the simulation is 2D, so a point source is
+    Resolve at least 10 cells per shortest wavelength (``dx <= c / (10 f)``),
+    the usual rule for this lowest-order scheme: the worst-case (on-axis)
+    numerical dispersion error, ``(k dx)^2 / 24`` from the discrete
+    counterpart of Eq. 4.15, is then about 1.6 % (about 1.4 % at the
+    default ``cfl``) and finer grids reduce it quadratically. The
+    simulation is 2D, so a point source is
     physically a line source with cylindrical ``1/sqrt(r)`` amplitude
     spreading rather than the 3D spherical ``1/r``.
 
@@ -696,11 +799,16 @@ def fdtd_simulation(
     if len(sources) == 0:
         raise ValueError("at least one source is required")
     duration = _positive_finite("duration", duration)
-    if snapshot_every is not None and snapshot_every < 1:
-        raise ValueError("snapshot_every must be >= 1")
+    if snapshot_every is not None:
+        snapshot_every = _integer("snapshot_every", snapshot_every)
+        if snapshot_every < 1:
+            raise ValueError("snapshot_every must be >= 1")
     absorbing_sides, edge_impedance = _parse_boundaries(boundaries)
-    if absorbing_sides and absorbing_layer_cells < 1:
-        raise ValueError("absorbing_layer_cells must be >= 1")
+    if absorbing_sides:
+        absorbing_layer_cells = _integer("absorbing_layer_cells",
+                                         absorbing_layer_cells)
+        if absorbing_layer_cells < 1:
+            raise ValueError("absorbing_layer_cells must be >= 1")
 
     sim = FDTD2D(
         c, dx,
@@ -717,34 +825,15 @@ def fdtd_simulation(
         sim.add_source(source)
 
     ny, nx = sim.p.shape
-    probe_ix = np.zeros((len(probes), 2), dtype=np.int_)
-    for k, (ix, iy) in enumerate(probes):
-        if not (0 <= ix < nx and 0 <= iy < ny):
-            raise ValueError(f"probe ({ix}, {iy}) lies outside the grid")
-        if sim._obstacle is not None and sim._obstacle[iy, ix]:
-            raise ValueError(f"probe ({ix}, {iy}) lies inside an obstacle")
-        probe_ix[k] = (ix, iy)
+    probe_ix = _probe_indices(probes, (ny, nx), sim._obstacle)
 
     steps = int(round(duration / sim.dt))
     if steps < 1:
         raise ValueError("duration must cover at least one time step "
                          f"(dt = {sim.dt:.3e} s)")
     times = np.arange(steps + 1, dtype=np.float64) * sim.dt
-    pressures = np.zeros((len(probes), steps + 1), dtype=np.float64)
-    frames: list[Field2D] = []
-    frame_steps: list[int] = []
-    if snapshot_every is not None:
-        frames.append(sim.p.copy())
-        frame_steps.append(0)
-    rows = probe_ix[:, 1]
-    cols = probe_ix[:, 0]
-    for i in range(steps):
-        sim.step()
-        if len(probes):
-            pressures[:, i + 1] = sim.p[rows, cols]
-        if snapshot_every is not None and (i + 1) % snapshot_every == 0:
-            frames.append(sim.p.copy())
-            frame_steps.append(i + 1)
+    pressures, frames, frame_steps = _record_run(sim, steps, probe_ix,
+                                                 snapshot_every)
 
     positions = (probe_ix.astype(np.float64) + 0.5) * sim.dx
     return FDTDResult(

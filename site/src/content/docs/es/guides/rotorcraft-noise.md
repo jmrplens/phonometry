@@ -1,6 +1,6 @@
 ---
 title: "Ruido de rotorcraft: el método del hemisferio"
-description: "El método del hemisferio de ECAC Doc 32 / NORAH2: el modelo de fuente por hemisferio, sus ajustes de propagación, la interpolación entre condiciones de vuelo y la cinemática de trayectoria, y el evento único SEL, LASmax y EPNL con contornos en malla de tierra."
+description: "El método del hemisferio de ECAC Doc 32 / NORAH2: el modelo de fuente por hemisferio, sus ajustes de propagación, la interpolación entre condiciones de vuelo y la cinemática de trayectoria, el evento único SEL, LASmax y EPNL con contornos en malla de tierra, y la maquinaria de terreno y apantallamiento del plano medio del suelo."
 ---
 
 El ruido de los helicópteros es muy directivo, así que el método de **ECAC
@@ -210,8 +210,99 @@ res = aircraft.rotorcraft_noise_contour(
 res.plot()                            # contornos SEL rellenos
 ```
 
-Se aplica una clase de suelo por ejecución; el suelo heterogéneo y el terreno
-pertenecen a la extensión de topografía.
+El suelo puede variar entre receptores sin un modelo de elevación completo:
+`flow_resistivity` y `ground_elevation` aceptan un valor por punto de malla
+(forma `(len(y), len(x))`), y el modelo de dos rayos de cada receptor usa
+entonces sus valores locales.
+
+## Terreno: el plano medio del suelo y el apantallamiento
+
+Doc 32, 1.ª ed., supone terreno plano; su guía añade la maquinaria para
+emplazamientos reales. Una sección vertical variable se representa por su
+**plano medio del suelo** (Ec. 36-40), la recta de mínimos cuadrados a través
+de la polilínea del terreno calculada en forma cerrada; la fuente y el
+receptor entran en las ecuaciones de suelo plano con sus **alturas
+equivalentes**, medidas ortogonalmente a ese plano y con suelo mínimo de
+0.1 m. El suelo que cambia de tipo a lo largo del camino promedia su
+resistividad de flujo por el logaritmo, ponderada por la longitud de cada
+segmento (Ec. 41).
+
+Cuando el terreno bloquea la línea de visión, el sonido sigue el camino
+convexo más corto sobre él (la banda elástica de la guía) y cada vértice
+tocado es una **arista de difracción**. La atenuación combina la difracción
+pura de la diferencia de camino `δ` (Ec. 42-44,
+`10·Ch·log10(3 + (40/λ)·C″·δ)`, con tope de 25 dB) con los efectos de suelo
+del lado fuente y del lado receptor, cada uno sobre su propio plano medio y
+ponderado por la difracción de su camino imagen (Ec. 45-47, el esquema
+CNOSSOS-EU que adopta la guía). El efecto de suelo no se evalúa por separado
+en ese régimen.
+
+`mean_ground_plane`, `mean_flow_resistivity` y `diffraction_attenuation`
+exponen las piezas; `terrain_screening_adjustment` ejecuta la sección
+completa:
+
+```python
+import numpy as np
+from phonometry import aircraft
+
+d = [0.0, 150.0, 260.0, 300.0, 340.0, 420.0, 600.0]     # distancias de sección
+z = [0.0, 4.0, 48.0, 62.0, 40.0, 8.0, 2.0]              # alturas del terreno
+freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)
+res = aircraft.terrain_screening_adjustment(
+    freqs, source=(0.0, 90.0), receiver=(600.0, 3.2), distances=d, heights=z,
+    flow_resistivity="D")
+res.screened, res.path_difference      # True, la delta de la banda elástica
+res.adjustment                         # por banda, sustituye al ΔLg plano
+res.plot()                             # la geometría de la sección
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_terrain_screening_es.svg" alt="Sección de apantallamiento por terreno con una fuente de helicóptero, una colina que bloquea la línea de visión al micrófono y el camino difractado sobre su cresta, sobre el ajuste por banda de suelo y apantallamiento comparado con el peine de suelo plano" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_terrain_screening_es_dark.svg" alt="Sección de apantallamiento por terreno con una fuente de helicóptero, una colina que bloquea la línea de visión al micrófono y el camino difractado sobre su cresta, sobre el ajuste por banda de suelo y apantallamiento comparado con el peine de suelo plano" style="width:82%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import aircraft
+
+freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # tercios 50 Hz-10 kHz
+d = np.array([0.0, 150.0, 260.0, 300.0, 340.0, 420.0, 600.0])
+z = np.array([0.0, 4.0, 48.0, 62.0, 40.0, 8.0, 2.0])
+res = aircraft.terrain_screening_adjustment(
+    freqs, (0.0, 90.0), (600.0, 3.2), d, z, flow_resistivity="D")
+flat = aircraft.ground_effect_adjustment(freqs, 90.0, 1.2, 600.0,
+                                         flow_resistivity="D")
+
+fig, (ax, ax2) = plt.subplots(2, 1, figsize=(9, 7))
+res.plot(ax=ax)
+ax2.axhline(0.0, color="0.5", linewidth=1.0)
+ax2.semilogx(freqs, flat, ls="--", marker="s", markersize=3,
+             label="Suelo plano (sin colina)")
+ax2.semilogx(freqs, res.adjustment, marker="o", markersize=3,
+             label="Apantallado por la colina (Ec. 45-47)")
+ax2.set(xlabel="Frecuencia central de banda de tercio de octava [Hz]",
+        ylabel="Ajuste de suelo y apantallamiento [dB]")
+ax2.grid(True, which="both", alpha=0.3)
+ax2.legend()
+plt.show()
+```
+
+</details>
+
+El evento y el contorno funcionan sobre emplazamientos reales pasando un
+modelo digital de elevaciones: `terrain=(x, y, z)` en el marco de la
+trayectoria. Cada par emisión-receptor muestrea entonces su propia sección
+vertical con paso `terrain_resolution` (por defecto, el tamaño de celda del
+modelo) y la evalúa con la maquinaria anterior; el suelo del receptor sale
+del modelo. El coste crece con puntos de trayectoria por puntos de malla, así
+que con terreno conviene mantener mallas de contorno moderadas.
+
+```python
+res = aircraft.rotorcraft_event_level(
+    hemispheres, speeds, angles, times, positions, receiver=(1200.0, 300.0),
+    terrain=(tx, ty, tz), flow_resistivity="D")
+```
 
 ## Validación
 
@@ -232,6 +323,22 @@ blando el prototipo amortigua la interferencia coherente de dos rayos de la
 Ec. 30 de la guía hacia la suma incoherente (hasta 4.9 dB en pasos individuales
 de bajo nivel más allá de 7 km); ni Doc 32 ni la guía contienen tal término, y
 esta implementación sigue las ecuaciones publicadas.
+
+La maquinaria de terreno está anclada en forma cerrada: el plano medio del
+suelo es exacto en perfiles lineales y simétricos, una sección plana
+reproduce el modelo de suelo plano a precisión de máquina y un plano
+inclinado su rotación analítica, la resistividad media logarítmica recupera
+la media geométrica, la difracción rasante da el clásico `10·log10(3)`, y
+una colina comprobada a mano fija la diferencia de camino de la banda
+elástica. El tratamiento del suelo por receptor valida de extremo a extremo
+contra el Case 3 ARP del prototipo (187 micrófonos, cada uno sobre su propia
+elevación: cada nivel por paso a 0.08 dB(A), `SEL`/`LASmax` a 0.05 dB, la
+malla de contorno a 0.15 dB) y la malla de suelo mixto del Case 2 se
+reproduce en una sola llamada con resistividad por receptor. La versión
+pública del prototipo no incluye un caso de apantallamiento reconstruible
+(el marco de su modelo de terreno no pudo fijarse a las salidas publicadas),
+así que la cadena de difracción se ancla en las formas cerradas y en su
+filiación CNOSSOS-EU.
 
 ## Referencias
 
@@ -275,9 +382,12 @@ ensanchamiento esférico, la atenuación atmosférica (ISO 9613-1, Tabla 4), el
 efecto de suelo de Chien-Soroka (impedancia de Delany-Bazley, resistividad de
 flujo CNOSSOS), la interpolación entre condiciones de vuelo (Ec. 3-10), la
 cinemática de la trayectoria (Ec. 16-21 / Doc 32 Ec. 8-10), el tiempo
-registrado (Ec. 22) y las métricas de evento único SEL/LASmax y EPNL (Doc 32
-Ec. 27/28, ICAO Anexo 16 Ap. 2). El apantallamiento del terreno y la topografía
-son un desarrollo posterior aparte.
+registrado (Ec. 22), las métricas de evento único SEL/LASmax y EPNL (Doc 32
+Ec. 27/28, ICAO Anexo 16 Ap. 2), el plano medio del suelo y las alturas
+equivalentes (Ec. 36-40), la resistividad de flujo media logarítmica (Ec. 41)
+y la cadena de apantallamiento por terreno (Ec. 42-47 con los apéndices de
+caminos de ruido de la guía; filiación CNOSSOS-EU). El tratamiento de fuente
+en hover, ralentí y rodaje (guía §A.3.5) queda fuera de la implementación.
 
 ## Véase también
 

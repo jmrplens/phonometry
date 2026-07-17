@@ -111,6 +111,54 @@ advisory warning propagates, since `α` is large and extrapolated.
 | :--- | :--- |
 | ValueError | If a distance is not strictly positive. |
 
+## diffraction_attenuation
+
+```python
+diffraction_attenuation(
+    frequencies: NDArray[np.float64] | list[float],
+    path_difference: float,
+    *,
+    edge_height: float,
+    edge_span: float = 0.0,
+    capped: bool = True,
+) -> NDArray[np.float64]
+```
+
+Pure diffraction attenuation `ΔLd` per band (guidance Eq. 42-44).
+
+`ΔLd = 10·Ch·log10(3 + (40/λ)·C″·δ)` where the argument is at least 1
+(below it the attenuation is 0), `Ch = min(fm·h0/250, 1)` (Eq. 43) and
+`C″` accounts for multiple diffraction (Eq. 44: 1 for a single edge or
+an edge span `e ≤ 0.3 m`, `(1 + (5λ/e)²)/(1/3 + (5λ/e)²)` otherwise).
+A negative path difference (edge below the line of sight) still yields a
+small attenuation down to `(40/λ)·C″·δ = −2`; for bands with
+`δ < −λ/20` the screening chain evaluates the clear-path ground effect
+instead of the diffraction (§A.4.5). At grazing incidence
+(`δ = 0`) the attenuation is the classical `10·log10(3) ≈ 4.8 dB`.
+
+The attenuation is returned positive (a loss); in the Doc 32 Eq. 23
+chain, whose adjustments are added to the level, it enters with a minus
+sign. The wavelength uses the Doc 32 reference speed of sound
+`c = 346.1 m/s`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | One-third-octave-band centre frequencies, in Hz. |
+| `path_difference` | Path difference `δ` between the diffracted and the direct path, in metres (negative when the edge lies below the line of sight). |
+| `edge_height` | Edge height `h0` above the mean ground plane(s), in metres (the greatest of the two side values for a terrain edge; `≥ 0`). |
+| `edge_span` | Distance `e` between the first and last diffraction edges, in metres (default 0: single diffraction). |
+| `capped` | Apply the 25 dB upper bound of §A.4.5 (default). The image-path terms inside the ground-diffraction weighting (Eq. 46/47) are evaluated unbounded. |
+
+**Returns:** The attenuation `ΔLd` per band, in dB (`≥ 0`).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the inputs are invalid. |
+
 ## flight_condition_weights
 
 ```python
@@ -368,6 +416,129 @@ by [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcra
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
 
+## mean_flow_resistivity
+
+```python
+mean_flow_resistivity(
+    lengths: NDArray[np.float64] | list[float],
+    resistivities: NDArray[np.float64] | list[float],
+) -> float
+```
+
+Logarithmic mean flow resistivity along a path (guidance Eq. 41).
+
+When the ground type changes along a terrain profile, the guidance
+averages the flow resistivity by the logarithm, weighted by the length of
+each ground segment: `σ̄ = 10^(Σ dᵢ·log10(σᵢ) / Σ dᵢ)`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `lengths` | Segment lengths `dᵢ`, in metres (`> 0`), shape `(n,)`. |
+| `resistivities` | Segment flow resistivities `σᵢ`, in Pa·s/m² (`> 0`), shape `(n,)`. |
+
+**Returns:** The mean flow resistivity `σ̄`, in Pa·s/m².
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the inputs are invalid. |
+
+## mean_ground_plane
+
+```python
+mean_ground_plane(
+    distances: NDArray[np.float64] | list[float],
+    heights: NDArray[np.float64] | list[float],
+) -> MeanGroundPlaneResult
+```
+
+The mean ground plane of a terrain section (guidance Eq. 36-40).
+
+Fits `z = a·d + b` to the polyline of straight segments that form the
+terrain profile by continuous least squares (the residual is integrated
+along `d`, not summed over the vertices), using the closed forms of
+Eq. 37/38 with the segment integrals `A` and `B` of Eq. 39/40.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `distances` | Section distances `d`, in metres, strictly increasing, shape `(M,)` with `M ≥ 2` (arbitrary spacing). |
+| `heights` | Terrain heights `z(d)`, in metres, shape `(M,)`. |
+
+**Returns:** A [`MeanGroundPlaneResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#meangroundplaneresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the inputs are invalid. |
+
+## MeanGroundPlaneResult
+
+```python
+MeanGroundPlaneResult(
+    slope: float,
+    intercept: float,
+    distances: NDArray[np.float64],
+    heights: NDArray[np.float64],
+)
+```
+
+A mean ground plane fitted to a terrain section (guidance Eq. 36-40).
+
+ECAC Doc 32, 1st ed., assumes flat terrain; its guidance (§A.4.4)
+represents a varying vertical section by the least-squares line
+`z = a·d + b` through the terrain polyline, evaluated in closed form
+from the per-segment integrals (Eq. 37-40). Equivalent source and
+receiver heights are then measured orthogonally to this plane and
+substituted into the flat-ground equations.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `slope` | The fitted slope `a` (Eq. 37). |
+| `intercept` | The fitted intercept `b`, in metres (Eq. 38). |
+| `distances` | The section distances `d`, in metres, shape `(M,)`. |
+| `heights` | The terrain heights `z(d)`, in metres, shape `(M,)`. |
+
+### MeanGroundPlaneResult.equivalent_height()
+
+```python
+MeanGroundPlaneResult.equivalent_height(
+    distance: float,
+    height: float,
+) -> float
+```
+
+The orthogonal (equivalent) height of a point above the plane.
+
+Positive above the plane; the guidance substitutes these equivalent
+heights, floored at 0.1 m for source and receiver, into the
+flat-ground equations (§A.4.4).
+
+### MeanGroundPlaneResult.height()
+
+```python
+MeanGroundPlaneResult.height(
+    distance: float | NDArray[np.float64],
+) -> NDArray[np.float64]
+```
+
+The plane height `a·d + b` at `distance`, in metres.
+
+### MeanGroundPlaneResult.plot()
+
+```python
+MeanGroundPlaneResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the terrain section and the fitted mean ground plane.
+
 ## rotorcraft_event_level
 
 ```python
@@ -393,6 +564,8 @@ rotorcraft_event_level(
     scaling_factor: float = 2.0,
     triangles: NDArray[np.int_] | list[list[int]] | None = None,
     atmospheric_method: str = 'iso9613',
+    terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None = None,
+    terrain_resolution: float | None = None,
 ) -> RotorcraftEventResult
 ```
 
@@ -438,6 +611,8 @@ oriented by the heading and tilted by the bank angle in turns (guidance
 | `scaling_factor` | Flight-condition scaling factor `F_fc` (default 2). |
 | `triangles` | Optional precomputed flight-condition triangulation (see [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights)). |
 | `atmospheric_method` | `"iso9613"` for the pure-tone Eq. 26/27 term (the guidance text), or `"sae"` for the SAE ARP 5534 band-integrated mapping used by the NORAH2 reference implementation (they agree to ~0.05 dB below 3.15 kHz). |
+| `terrain` | Optional digital elevation model `(x, y, z)` on the track frame (`x` and `y` strictly increasing, `z` of shape `(len(y), len(x))`, all in metres on the track datum). When given, every emission-receiver pair is evaluated over its sampled vertical section (guidance §A.4.4/A.4.5): mean-ground-plane ground effect with equivalent heights, and rubber-band diffraction where terrain blocks the line of sight; `ground_elevation` is then taken from the model. The model must cover the whole track and the receiver (fabricating terrain beyond its edges is refused). |
+| `terrain_resolution` | Section sampling step along the path, in metres (default: the elevation model's cell size; sections are capped at 20000 sampling intervals). |
 
 **Returns:** A [`RotorcraftEventResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafteventresult).
 
@@ -461,12 +636,12 @@ rotorcraft_noise_contour(
     y: NDArray[np.float64] | list[float],
     metric: str = 'exposure',
     receiver_height: float = 1.2,
-    ground_elevation: float = 0.0,
+    ground_elevation: float | NDArray[np.float64] | list[list[float]] = 0.0,
     airspeed: float | NDArray[np.float64] | list[float] | None = None,
     path_angle: float | NDArray[np.float64] | list[float] | None = None,
     heading: float | NDArray[np.float64] | list[float] | None = None,
     bank_angle: float | NDArray[np.float64] | list[float] | None = None,
-    flow_resistivity: float | str = 'G',
+    flow_resistivity: float | str | NDArray[np.float64] | list[list[float]] = 'G',
     temperature: float = 25.0,
     relative_humidity: float = 70.0,
     pressure: float = 101.325,
@@ -474,6 +649,8 @@ rotorcraft_noise_contour(
     scaling_factor: float = 2.0,
     triangles: NDArray[np.int_] | list[list[int]] | None = None,
     atmospheric_method: str = 'iso9613',
+    terrain: tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | Sequence[NDArray[np.float64]] | None = None,
+    terrain_resolution: float | None = None,
 ) -> RotorcraftNoiseContourResult
 ```
 
@@ -497,12 +674,12 @@ received histories to the exposure (`SEL`, Doc 32 Eq. 27) or maximum
 | `y` | Grid y coordinates, in metres (at least 2). |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LASmax). |
 | `receiver_height` | Microphone height above local ground, in metres. |
-| `ground_elevation` | Ground elevation, in metres on the track datum. |
+| `ground_elevation` | Ground elevation, in metres on the track datum: a scalar, or one value per grid point (shape `(len(y), len(x))`) for receivers on uneven sites without a full elevation model. |
 | `airspeed` | Per-point airspeed override (see [`rotorcraft_event_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level)). |
 | `path_angle` | Per-point path-angle override, in degrees. |
 | `heading` | Per-point heading override, in degrees. |
 | `bank_angle` | Per-point bank-angle override, in degrees. |
-| `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², or a CNOSSOS class letter. |
+| `flow_resistivity` | Ground flow resistivity `σ` in Pa·s/m², a CNOSSOS class letter, or one value per grid point (shape `(len(y), len(x))`) for heterogeneous ground across the receivers (each receiver's two-ray model uses its local value). |
 | `temperature` | Air temperature, in °C. |
 | `relative_humidity` | Relative humidity, in %. |
 | `pressure` | Ambient pressure, in kPa. |
@@ -510,6 +687,8 @@ received histories to the exposure (`SEL`, Doc 32 Eq. 27) or maximum
 | `scaling_factor` | Flight-condition scaling factor `F_fc` (default 2). |
 | `triangles` | Optional precomputed flight-condition triangulation. |
 | `atmospheric_method` | `"iso9613"` or `"sae"` (see [`rotorcraft_event_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level)). |
+| `terrain` | Optional digital elevation model `(x, y, z)` (see [`rotorcraft_event_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level)); it must cover the whole track and grid. Every emission-receiver pair then samples its own vertical section, so the cost grows with track points times grid points; keep contour grids modest with terrain. |
+| `terrain_resolution` | Section sampling step, in metres (default: the elevation model's cell size; sections are capped at 20000 sampling intervals). |
 
 **Returns:** A [`RotorcraftNoiseContourResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftnoisecontourresult).
 
@@ -684,3 +863,105 @@ adjustment is `ΔLs = −20·log10(r/rh)`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a distance is not strictly positive. |
+
+## terrain_screening_adjustment
+
+```python
+terrain_screening_adjustment(
+    frequencies: NDArray[np.float64] | list[float],
+    source: tuple[float, float],
+    receiver: tuple[float, float],
+    distances: NDArray[np.float64] | list[float],
+    heights: NDArray[np.float64] | list[float],
+    *,
+    flow_resistivity: float | str | NDArray[np.float64] | list[float] = 'G',
+) -> TerrainScreeningResult
+```
+
+Ground effect and terrain screening over a vertical section (§A.4.4-A.4.5).
+
+The terrain profile between the source and the receiver decides the
+propagation regime:
+
+* **Line of sight clear** (no profile point strictly above it): the
+  section's mean ground plane (Eq. 36-40) supplies equivalent orthogonal
+  heights (floored at 0.1 m) and the flat-ground two-ray model of
+  §A.4.3 evaluates on the plane, with the log-mean flow resistivity
+  (Eq. 41) when it varies along the path. Terrain points below the line
+  of sight are never treated as diffracting obstacles (the guidance's
+  topography rule, which avoids accidental screening in flat terrain).
+* **Blocked**: the sound follows the shortest convex path over the
+  terrain (the guidance's rubber band); its vertices are the diffraction
+  edges. The attenuation combines the pure diffraction of the path
+  difference `δ` (Eq. 42-44, capped at 25 dB) with the source-side and
+  receiver-side ground effects weighted by their image-path diffractions
+  (Eq. 45-47), each side using its own mean ground plane, equivalent
+  heights and log-mean flow resistivity. The ground effect is not
+  evaluated separately in this regime; bands with `δ < −λ/20` fall
+  back to the clear-path evaluation (with terrain-only obstacles
+  `δ > 0`, so the rule engages for constructed screens below the line
+  of sight rather than for terrain).
+
+ECAC Doc 32, 1st ed., defines no screening or topography (its Eq. 12
+propagation chain ends at the flat-ground `ΔLg`); this implements the
+NORAH2 guidance sections A.4.4/A.4.5 and its noise-path appendices,
+whose diffraction equations follow CNOSSOS-EU.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | One-third-octave-band centre frequencies, in Hz. |
+| `source` | Source `(d, z)` in the section, in metres. |
+| `receiver` | Receiver `(d, z)` in the section, in metres (the microphone point, i.e. ground plus microphone height). |
+| `distances` | Terrain section distances `d`, in metres, strictly increasing, covering `[source d, receiver d]`. |
+| `heights` | Terrain heights `z(d)`, in metres. |
+| `flow_resistivity` | Ground flow resistivity: a value in Pa·s/m², a CNOSSOS class letter, or one value per profile segment (shape `(M−1,)`) averaged per sub-path by Eq. 41. |
+
+**Returns:** A [`TerrainScreeningResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#terrainscreeningresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If the inputs are invalid. |
+
+## TerrainScreeningResult
+
+```python
+TerrainScreeningResult(
+    frequencies: NDArray[np.float64],
+    adjustment: NDArray[np.float64],
+    screened: bool,
+    path_difference: float,
+    diffraction_points: NDArray[np.float64],
+    source: tuple[float, float],
+    receiver: tuple[float, float],
+    distances: NDArray[np.float64],
+    heights: NDArray[np.float64],
+)
+```
+
+Ground and screening over a terrain section (guidance §A.4.4-A.4.5).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | Band centre frequencies, in Hz, shape `(F,)`. |
+| `adjustment` | The combined ground-and-screening adjustment per band, in dB, added to the received level in the Doc 32 Eq. 23 chain (it replaces the flat-ground `ΔLg`): the mean-ground-plane ground effect when the line of sight is clear, `−(ΔLd + ΔLg)` of Eq. 45 when terrain blocks it. |
+| `screened` | Whether terrain blocks the line of sight (any profile point strictly above it). |
+| `path_difference` | The rubber-band path difference `δ`, in metres (`NaN` when unscreened). |
+| `diffraction_points` | The diffracting edges `(d, z)` on the convex propagation path, shape `(n, 2)` (empty when unscreened). |
+| `source` | The source `(d, z)`, in metres. |
+| `receiver` | The receiver `(d, z)`, in metres. |
+| `distances` | The section distances, in metres, shape `(M,)`. |
+| `heights` | The section terrain heights, in metres, shape `(M,)`. |
+
+### TerrainScreeningResult.plot()
+
+```python
+TerrainScreeningResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+```
+
+Plot the section geometry: terrain, line of sight and sound path.

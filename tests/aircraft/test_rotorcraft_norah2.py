@@ -80,6 +80,8 @@ _PREFIXES = (
     "NORAH2_V2.0.74_public/ARP/Case2/SE/R22_H1_APP_STD1_NE",
     "NORAH2_V2.0.74_public/ARP/Case2/SE/A600_H1_APP_STD1_NE",
     "NORAH2_V2.0.74_public/ARP/Case2/SE/A600_APP_RT1",
+    "NORAH2_V2.0.74_public/ARP/Case3/SE/CH7_H1_APP_STD1_NE",
+    "NORAH2_V2.0.74_public/ARP/Case3/SE/A600_H1_APP_STD2_NE",
     "NORAH2_V2.0.74_public/ARP/Case4/SE/R22_H1_APP_STD2_NE",
 )
 
@@ -395,3 +397,96 @@ def test_reference_hemisphere_node_lookup(norah_root: pathlib.Path,
     node = levels[9, 9, k]   # phi = 0, theta = 90
     assert np.isfinite(node)
     assert hemisphere_source_level(h, 0.0, 90.0)[k] == pytest.approx(node)
+
+
+def test_case3_elevated_receiver_events(norah_root: pathlib.Path, r22_set: dict) -> None:
+    # Case 3 places every microphone on its own ground elevation (an explicit
+    # per-receiver ZMIC ramp) over sigma = 1e5 ground, with the track
+    # pre-truncated to 2 km of the grid: an end-to-end oracle for the
+    # receiver-side ground handling at every step.
+    for name, epnl_tol in (("CH7_H1_APP_STD1_NE", 1.0), ("A600_H1_APP_STD2_NE", 1.8)):
+        case = norah_root / "ARP" / "Case3" / "SE" / name
+        header, rows, res = _run_event(case, r22_set)
+        _assert_geometry(rows, res)
+        assert np.max(np.abs(res.a_levels - rows[:, 9])) < 0.12
+        assert res.la_max == pytest.approx(header["LAMAX"], abs=0.05)
+        assert res.sel == pytest.approx(header["SELA"], abs=0.05)
+        assert res.pnltm == pytest.approx(header["PNLTM"], abs=0.05)
+        assert res.epnl == pytest.approx(header["EPNL"], abs=epnl_tol)
+
+
+def test_case3_contour_with_elevation_grid(norah_root: pathlib.Path,
+                                           r22_set: dict) -> None:
+    # One contour call with the per-receiver ground-elevation array of the
+    # Case 3 grid file reproduces every microphone of the .onl.
+    case = norah_root / "ARP" / "Case3" / "SE" / "CH7_H1_APP_STD1_NE"
+    mics = _parse_onl(case.with_suffix(".onl"))
+    inp = _parse_inp(case.with_suffix(".inp"))
+    xs, ys = np.unique(mics[:, 0]), np.unique(mics[:, 1])
+    ground = np.full((ys.size, xs.size), np.nan)
+    ref_sel = np.full_like(ground, np.nan)
+    ref_max = np.full_like(ground, np.nan)
+    for mic in mics:
+        i = int(np.nonzero(ys == mic[1])[0][0])
+        j = int(np.nonzero(xs == mic[0])[0][0])
+        ground[i, j] = mic[2]
+        ref_sel[i, j] = mic[9]
+        ref_max[i, j] = mic[8]
+    assert np.all(np.isfinite(ground))
+    assert np.unique(mics[:, 4]).tolist() == [1.0e5]
+    kwargs = dict(
+        x=xs, y=ys, receiver_height=1.2, ground_elevation=ground,
+        airspeed=inp["speed"], path_angle=inp["vang"], heading=inp["heading"],
+        bank_angle=inp["roll"], level_offset=inp["ddb"],
+        triangles=r22_set["triangles"], atmospheric_method="sae",
+        flow_resistivity=1.0e5)
+    sel = rotorcraft_noise_contour(
+        r22_set["hemispheres"], r22_set["airspeeds"], r22_set["path_angles"],
+        inp["times"], inp["positions"], metric="exposure", **kwargs)
+    lam = rotorcraft_noise_contour(
+        r22_set["hemispheres"], r22_set["airspeeds"], r22_set["path_angles"],
+        inp["times"], inp["positions"], metric="maximum", **kwargs)
+    assert np.nanmax(np.abs(sel.level - ref_sel)) < 0.15
+    assert np.nanmax(np.abs(lam.level - ref_max)) < 0.4
+    assert np.nanpercentile(np.abs(sel.level - ref_sel), 50) < 0.05
+    assert np.nanpercentile(np.abs(lam.level - ref_max), 50) < 0.05
+
+
+def test_case2_contour_single_call_with_sigma_map(norah_root: pathlib.Path,
+                                                  r22_set: dict) -> None:
+    # The Case 2 grid mixes two ground classes across its microphones; one
+    # contour call with the per-receiver flow-resistivity array reproduces
+    # the whole .onl (the per-class scalar runs of the PR-2-era test remain
+    # as the reference for each subset).
+    case = norah_root / "ARP" / "Case2" / "SE" / "R22_H1_DEP_STD1_NE"
+    mics = _parse_onl(case.with_suffix(".onl"))
+    inp = _parse_inp(case.with_suffix(".inp"))
+    xs, ys = np.unique(mics[:, 0]), np.unique(mics[:, 1])
+    sigma = np.full((ys.size, xs.size), np.nan)
+    ref_sel = np.full_like(sigma, np.nan)
+    ref_max = np.full_like(sigma, np.nan)
+    for mic in mics:
+        i = int(np.nonzero(ys == mic[1])[0][0])
+        j = int(np.nonzero(xs == mic[0])[0][0])
+        sigma[i, j] = mic[4]
+        ref_sel[i, j] = mic[9]
+        ref_max[i, j] = mic[8]
+    assert np.all(np.isfinite(sigma))
+    assert sorted(np.unique(sigma).tolist()) == [2.0e5, 8.0e5]
+    kwargs = dict(
+        x=xs, y=ys, receiver_height=1.2, ground_elevation=float(mics[0, 2]),
+        airspeed=inp["speed"], path_angle=inp["vang"], heading=inp["heading"],
+        bank_angle=inp["roll"], level_offset=inp["ddb"],
+        triangles=r22_set["triangles"], atmospheric_method="sae",
+        flow_resistivity=sigma)
+    sel = rotorcraft_noise_contour(
+        r22_set["hemispheres"], r22_set["airspeeds"], r22_set["path_angles"],
+        inp["times"], inp["positions"], metric="exposure", **kwargs)
+    lam = rotorcraft_noise_contour(
+        r22_set["hemispheres"], r22_set["airspeeds"], r22_set["path_angles"],
+        inp["times"], inp["positions"], metric="maximum", **kwargs)
+    # Tolerances follow the per-class PR-2 measurements (the soft class
+    # carries the documented far-tail interference divergence into SEL).
+    assert np.nanmax(np.abs(sel.level - ref_sel)) < 0.7
+    assert np.nanmax(np.abs(lam.level - ref_max)) < 0.7
+    assert np.nanpercentile(np.abs(sel.level - ref_sel), 50) < 0.3

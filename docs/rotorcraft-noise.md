@@ -234,8 +234,97 @@ res = aircraft.rotorcraft_noise_contour(
 res.plot()                                # filled SEL contours
 ```
 
-One ground class applies per run; heterogeneous ground and terrain belong to
-the topography extension.
+The ground may vary across the receivers without a full elevation model:
+`flow_resistivity` and `ground_elevation` accept one value per grid point
+(shape `(len(y), len(x))`), and each receiver's two-ray model then uses its
+local values.
+
+## 7. Terrain: the mean ground plane and screening
+
+Doc 32, 1st ed., assumes flat terrain; its guidance adds the machinery for
+real sites. A varying vertical section is represented by its **mean ground
+plane** (Eq. 36-40), the least-squares line through the terrain polyline
+computed in closed form; source and receiver enter the flat-ground equations
+with their **equivalent heights**, measured orthogonally to that plane and
+floored at 0.1 m. Ground that changes type along the path averages its flow
+resistivity by the logarithm, weighted by segment length (Eq. 41).
+
+When terrain blocks the line of sight, the sound follows the shortest convex
+path over it (the guidance's rubber band) and every touched vertex is a
+**diffraction edge**. The attenuation combines the pure diffraction of the
+path difference `δ` (Eq. 42-44, `10·Ch·log10(3 + (40/λ)·C″·δ)`, capped at
+25 dB) with the source-side and receiver-side ground effects, each over its
+own mean ground plane and weighted by its image-path diffraction (Eq. 45-47,
+the CNOSSOS-EU scheme the guidance adopts). The ground effect is not
+evaluated separately in that regime.
+
+`mean_ground_plane`, `mean_flow_resistivity` and `diffraction_attenuation`
+expose the pieces; `terrain_screening_adjustment` runs the whole section:
+
+```python
+import numpy as np
+from phonometry import aircraft
+
+d = [0.0, 150.0, 260.0, 300.0, 340.0, 420.0, 600.0]     # section distances
+z = [0.0, 4.0, 48.0, 62.0, 40.0, 8.0, 2.0]              # terrain heights
+freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)
+res = aircraft.terrain_screening_adjustment(
+    freqs, source=(0.0, 90.0), receiver=(600.0, 3.2), distances=d, heights=z,
+    flow_resistivity="D")
+res.screened, res.path_difference      # True, the rubber-band delta
+res.adjustment                         # per band, replaces the flat-ground ΔLg
+res.plot()                             # the section geometry
+```
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_terrain_screening_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rotorcraft_terrain_screening.svg" alt="Terrain screening section with a helicopter source, a hill blocking the line of sight to the microphone and the diffracted path over its crest, above the per-band ground-and-screening adjustment compared with the flat-ground comb" width="82%">
+</picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import aircraft
+
+freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # 50 Hz-10 kHz thirds
+d = np.array([0.0, 150.0, 260.0, 300.0, 340.0, 420.0, 600.0])
+z = np.array([0.0, 4.0, 48.0, 62.0, 40.0, 8.0, 2.0])
+res = aircraft.terrain_screening_adjustment(
+    freqs, (0.0, 90.0), (600.0, 3.2), d, z, flow_resistivity="D")
+flat = aircraft.ground_effect_adjustment(freqs, 90.0, 1.2, 600.0,
+                                         flow_resistivity="D")
+
+fig, (ax, ax2) = plt.subplots(2, 1, figsize=(9, 7))
+res.plot(ax=ax)
+ax2.axhline(0.0, color="0.5", linewidth=1.0)
+ax2.semilogx(freqs, flat, ls="--", marker="s", markersize=3,
+             label="Flat ground (no hill)")
+ax2.semilogx(freqs, res.adjustment, marker="o", markersize=3,
+             label="Screened by the hill (Eq. 45-47)")
+ax2.set(xlabel="One-third-octave-band centre frequency [Hz]",
+        ylabel="Ground and screening adjustment [dB]")
+ax2.grid(True, which="both", alpha=0.3)
+ax2.legend()
+plt.show()
+```
+
+</details>
+
+The event and contour run over real sites by passing a digital elevation
+model: `terrain=(x, y, z)` on the track frame. Every emission-receiver pair
+then samples its own vertical section at `terrain_resolution` (default: the
+model's cell size) and evaluates it with the machinery above; the receiver
+ground comes from the model. The cost grows with track points times grid
+points, so keep contour grids modest with terrain.
+
+```python
+res = aircraft.rotorcraft_event_level(
+    hemispheres, speeds, angles, times, positions, receiver=(1200.0, 300.0),
+    terrain=(tx, ty, tz), flow_resistivity="D")
+```
 
 ## Validation
 
@@ -256,6 +345,20 @@ coherent two-ray interference of guidance Eq. 30 towards the incoherent sum
 (up to 4.9 dB on individual low-level steps beyond 7 km); neither Doc 32 nor
 the guidance contains such a term, and this implementation follows the
 published equations.
+
+The terrain machinery is anchored in closed form: the mean ground plane is
+exact on linear and symmetric profiles, a flat section reproduces the
+flat-ground model to machine precision and an inclined plane its analytic
+rotation, the log-mean resistivity recovers the geometric mean, the grazing
+diffraction gives the classical `10·log10(3)`, and a hand-checked hill fixes
+the rubber-band path difference. Per-receiver ground handling validates end
+to end against the prototype's ARP Case 3 (187 microphones, each on its own
+ground elevation: every step level to 0.08 dB(A), `SEL`/`LASmax` to 0.05 dB,
+the contour grid to 0.15 dB) and the mixed-ground Case 2 grid reproduces in
+a single per-receiver-resistivity call. The prototype's public release does
+not include a reconstructible screening case (the frame of its terrain model
+could not be pinned to the published outputs), so the diffraction chain
+itself rests on the closed-form anchors and its CNOSSOS-EU lineage.
 
 ## References
 
@@ -298,7 +401,10 @@ Rotorcraft Noise Contours*; NORAH2 rotorcraft-noise modelling guidance
 spreading (Eq. 24), atmospheric attenuation (Eq. 26/27, ISO 9613-1 coefficient,
 Table 4), ground effect (Chien-Soroka, Eq. 28-35, Delany-Bazley impedance,
 CNOSSOS flow resistivity), flight-condition interpolation (Eq. 3-10),
-flight-path kinematics (Eq. 16-21 / Doc 32 Eq. 8-10), recorded time (Eq. 22)
-and the single-event metrics `SEL`/`LASmax` and `EPNL` (Doc 32 Eq. 27/28,
-ICAO Annex 16 App. 2). Terrain shielding and topography are a separate later
-development.
+flight-path kinematics (Eq. 16-21 / Doc 32 Eq. 8-10), recorded time (Eq. 22),
+the single-event metrics `SEL`/`LASmax` and `EPNL` (Doc 32 Eq. 27/28, ICAO
+Annex 16 App. 2), the mean ground plane and equivalent heights (Eq. 36-40),
+the log-mean flow resistivity (Eq. 41) and the terrain screening chain
+(Eq. 42-47 with the guidance's noise-path appendices; CNOSSOS-EU lineage).
+Hover, idle and taxi source handling (guidance §A.3.5) remains outside the
+implementation.

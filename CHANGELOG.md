@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Rotorcraft terrain and screening (NORAH2 guidance §A.4.4-A.4.5, completing
+  the ECAC Doc 32 domain): `mean_ground_plane` (the closed-form continuous
+  least-squares plane of a terrain section, Eq. 36-40, with orthogonal
+  equivalent heights), `mean_flow_resistivity` (the log-mean of Eq. 41),
+  `diffraction_attenuation` (Eq. 42-44 with the multiple-edge coefficient and
+  the 25 dB bound) and `terrain_screening_adjustment` (the full vertical
+  section: mean-plane ground effect on clear paths, rubber-band diffraction
+  combined with side ground effects per Eq. 45-47 when terrain blocks the
+  line of sight), plus digital-elevation-model support in
+  `rotorcraft_event_level`/`rotorcraft_noise_contour` (`terrain`,
+  `terrain_resolution`) and per-receiver `flow_resistivity`/`ground_elevation`
+  arrays on the contour grid. Anchored on closed-form oracles (flat and
+  inclined sections reproduce the flat-ground model exactly, hand-checked
+  rubber-band geometry, classical grazing 10·lg 3) and end to end on the
+  NORAH2 ARP Case 3 per-receiver elevations (187 microphones, SEL/LASmax to
+  0.05 dB) and the mixed-ground Case 2 grid in a single call; four new
+  conformance checks. Two further guidance defects recorded in the errata
+  registry (the Eq. 46 subscript and the §A.4.5 cross-references).
+
 - Rotorcraft single-event method (ECAC Doc 32 §4.3/§5-6, NORAH2 guidance
   §A.3-A.5) completing the hemisphere chain:
   `flight_condition_weights`/`interpolated_source_level` (the distance-scaled

@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Programme loudness and true peak (ITU-R BS.1770-5, EBU R 128 with Tech
+  3341/3342), a new `phonometry.broadcast` domain: `program_loudness` (the
+  full EBU Mode measurement set as a frozen `ProgramLoudnessResult` with
+  `.plot()`: integrated loudness with the two-stage -70 LKFS / -10 LU gate,
+  ungated momentary and short-term series with their maxima, the Tech 3342
+  loudness range with its cascaded -20 LU gate and 10th-95th percentile
+  spread, and per-channel true peaks), `integrated_loudness`,
+  `loudness_range`, `true_peak_level` (Annex 2 oversampling to 192 kHz,
+  sharing the inter-sample-peak machinery of `lc_peak`), `k_weighting` /
+  `k_weighting_coefficients` (the Annex 1 biquads, verbatim at 48 kHz and
+  redesigned through the analog prototype elsewhere, response within
+  0.016 dB) and `channel_weight` (the Annex 3 position-dependent weights,
+  Table 4). Validated against every synthesizable EBU Tech 3341 minimum
+  requirements signal (cases 1-6 and 9-23) and Tech 3342 LRA signal (cases
+  1-4) at their official tolerances, the 997 Hz / -3.01 LKFS anchor and the
+  Annex 2 under-read bound; eight new conformance checks and a new
+  programme-loudness guide (EN/ES) with a metering figure.
+
 - Calibrated spectral analysis (Bendat & Piersol, Random Data 4e):
   `power_spectral_density` and `cross_spectral_density` (Welch estimators
   that report the effective number of independent averages under overlap,

@@ -496,6 +496,7 @@ export default defineConfig({
             'guides/intensity',
             'guides/sound-power',
             'guides/electroacoustics',
+            'guides/program-loudness',
           ],
         },
         {

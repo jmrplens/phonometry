@@ -26,6 +26,13 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from ..metrology.spectra import (
+    _default_nperseg,
+    _noverlap_samples,
+    _positive,
+    _welch_pair,
+)
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
@@ -34,13 +41,6 @@ if TYPE_CHECKING:
 _DEFAULT_OVERLAP = 0.5
 #: Minimum samples for a spectral estimate.
 _MIN_SAMPLES = 32
-
-
-def _positive(value: float, name: str) -> float:
-    scalar = float(value)
-    if not np.isfinite(scalar) or scalar <= 0.0:
-        raise ValueError(f"'{name}' must be a positive, finite number.")
-    return scalar
 
 
 def _validate_pair(
@@ -61,11 +61,6 @@ def _validate_pair(
     return xa, ya
 
 
-def _default_nperseg(n: int, fs: float) -> int:
-    nperseg = int(min(n, 2 ** int(np.ceil(np.log2(fs / 4.0)))))
-    return max(nperseg, _MIN_SAMPLES)
-
-
 def _spectra(
     x: "NDArray[np.float64]",
     y: "NDArray[np.float64]",
@@ -78,20 +73,14 @@ def _spectra(
     "NDArray[np.float64]",
     "NDArray[np.float64]",
 ]:
-    """Return ``(freqs, Gxy, Gxx, Gyy)`` from Welch-averaged Hann segments."""
-    from scipy import signal as sp_signal
+    """Return ``(freqs, Gxy, Gxx, Gyy)`` from Welch-averaged Hann segments.
 
-    noverlap = min(int(round(overlap * nperseg)), nperseg - 1)
-    kw = dict(fs=fs, window="hann", nperseg=nperseg, noverlap=noverlap, detrend=False)
-    freqs, gxy = sp_signal.csd(x, y, **kw)
-    _, gxx = sp_signal.welch(x, **kw)
-    _, gyy = sp_signal.welch(y, **kw)
-    return (
-        np.asarray(freqs, dtype=np.float64),
-        np.asarray(gxy, dtype=np.complex128),
-        np.asarray(gxx, dtype=np.float64),
-        np.asarray(gyy, dtype=np.float64),
-    )
+    Thin adapter over the shared Welch core in
+    :mod:`phonometry.metrology.spectra` (same taper, overlap policy and
+    detrend-off calibration; bit-identical to the previous local
+    implementation).
+    """
+    return _welch_pair(x, y, fs, nperseg, _noverlap_samples(nperseg, overlap))
 
 
 @dataclass(frozen=True)

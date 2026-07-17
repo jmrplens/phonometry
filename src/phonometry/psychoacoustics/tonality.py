@@ -21,10 +21,10 @@ from dataclasses import dataclass
 from typing import List, Tuple
 
 import numpy as np
-from scipy import signal
 
 from .._internal.warnings import PhonometryWarning
 from .._internal.utils import _typesignal
+from ..metrology.spectra import _welch_autospectrum
 
 
 class TonalityWarning(PhonometryWarning):
@@ -155,10 +155,7 @@ def _averaged_spectrum(
             f"Signal too short for the requested {resolution_hz} Hz "
             f"resolution: need at least {nperseg} samples, got {x.shape[-1]}."
         )
-    freqs, psd = signal.welch(
-        x, fs, window="hann", nperseg=nperseg, noverlap=nperseg // 2,
-        detrend=False,
-    )
+    freqs, psd = _welch_autospectrum(x, float(fs), nperseg, nperseg // 2)
     df = float(freqs[1] - freqs[0])
     return freqs, psd * df, df
 

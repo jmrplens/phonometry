@@ -605,6 +605,7 @@ _ES_EXACT = {
         "Golpe de hincado de pilotes por percusión (ISO 18406)",
     "Time [ms]": "Tiempo [ms]",
     "Pressure [Pa]": "Presión [Pa]",
+    "FDTD probe pressure": "Presión en las sondas FDTD",
     "Number of strikes N": "Número de golpes N",
     "Cumulative SEL [dB re 1 µPa²·s]": "SEL acumulado [dB re 1 µPa²·s]",
     "ICAO Aircraft Flyover — Effective Perceived Noise Level (Annex 16)":
@@ -1061,6 +1062,10 @@ _ES_PATTERNS = [
     (r"^insertion loss (.+) dB$", r"pérdida por inserción \1 dB"),
     (r"^diffusion coefficient d = (.+)$", r"coeficiente de difusión d = \1"),
     (r"^design frequency (.+) Hz$", r"frecuencia de diseño \1 Hz"),
+    # 2D FDTD wave simulation (public API concept figure)
+    (r"^FDTD pressure field at t = (.+) ms$",
+     r"Campo de presión FDTD en t = \1 ms"),
+    (r"^probe \((.+)\) m$", r"sonda (\1) m"),
 ]
 
 
@@ -1215,6 +1220,7 @@ _PNG_FIGURES = frozenset(
         "impulse_response",
         "numerical_propagation",
         "airport_contour",
+        "fdtd_simulation",
     }
 )
 
@@ -6864,6 +6870,38 @@ def generate_uncertainty(output_dir: str) -> None:
     plt.close()
 
 
+def generate_fdtd_simulation(output_dir: str) -> None:
+    """2D FDTD simulation: diffraction snapshot and the probe histories."""
+    print("Generating fdtd_simulation.png...")
+    from phonometry import GaussianPulse, fdtd_simulation
+
+    # A 3.0 x 2.0 m free field (absorbing edges) with a thin rigid barrier:
+    # probe A sees the direct pulse plus the barrier reflection, probe B sits
+    # in the shadow and only receives the wave diffracted around the edge.
+    dx = 0.01
+    mask = np.zeros((200, 300), dtype=bool)
+    mask[60:, 150:154] = True
+    res = fdtd_simulation(
+        343.0, dx, 9.0e-3, shape=(200, 300),
+        sources=[GaussianPulse(ix=60, iy=100, width=3.0e-4)],
+        probes=[(100, 100), (240, 100)],
+        obstacle_mask=mask,
+        boundaries="absorbing", absorbing_layer_cells=30,
+        snapshot_every=75,
+    )
+
+    fig, (ax_f, ax_p) = plt.subplots(
+        1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
+    res.plot(kind="snapshot", frame=7, ax=ax_f)
+    res.plot(ax=ax_p)
+    ax_p.set_title("FDTD probe pressure", fontweight="bold", pad=10)
+    ax_f.set_title(ax_f.get_title(), fontweight="bold", pad=10)
+
+    plt.tight_layout()
+    save_figure(output_dir, "fdtd_simulation.png")
+    plt.close()
+
+
 # Every documentation figure, in the order the sequential generator has always
 # produced them. This registry is the single source of truth for both the
 # sequential path (``generate_all``) and the parallel runner (``--jobs``),
@@ -7025,6 +7063,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_rotorcraft_ground_effect,
     generate_rotorcraft_flyover_event,
     generate_rotorcraft_terrain_screening,
+    # 2D FDTD wave simulation (public API concept figure).
+    generate_fdtd_simulation,
 )
 
 

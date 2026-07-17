@@ -3812,6 +3812,125 @@ def _chk_coherence_unity() -> Outcome:
 
 
 # ===========================================================================
+# Calibrated spectral analysis (Bendat & Piersol, Random Data 4e)
+# ===========================================================================
+_SPECTRA = "Calibrated spectral analysis (Bendat & Piersol)"
+
+
+def _spectra_fs() -> float:
+    return 8192.0
+
+
+def _spectra_white(seed: int, rms: float = 1.0) -> np.ndarray:
+    return ph.noise_signal(_spectra_fs(), 4.0, color="white", rms=rms, seed=seed)
+
+
+@register(
+    _SPECTRA,
+    "Bendat & Piersol, Random Data 4e Eq. (5.67)",
+    "White-noise autospectral density = sigma^2/(fs/2)",
+)
+def _chk_psd_white_level() -> Outcome:
+    fs = _spectra_fs()
+    res = ph.power_spectral_density(_spectra_white(1, rms=2.0), fs, nperseg=1024)
+    band = (res.frequencies > 200.0) & (res.frequencies < 3800.0)
+    expected = 4.0 / (fs / 2.0)
+    return numeric(
+        expected, float(np.mean(res.psd[band])), 0.03, rel=True, places=6
+    )
+
+
+@register(
+    _SPECTRA,
+    "Bendat & Piersol, Random Data 4e Eq. (8.158)",
+    "PSD random error = 1/sqrt(nd) (Monte Carlo, 100 seeded records)",
+)
+def _chk_psd_random_error() -> Outcome:
+    fs = _spectra_fs()
+    estimates = []
+    nd = 0.0
+    for seed in range(100):
+        res = ph.power_spectral_density(
+            _spectra_white(100 + seed), fs, nperseg=1024, overlap=0.0
+        )
+        estimates.append(res.psd[50:200])
+        nd = res.n_averages
+    stack = np.asarray(estimates)
+    empirical = float(np.mean(np.std(stack, axis=0) / np.mean(stack, axis=0)))
+    return numeric(1.0 / math.sqrt(nd), empirical, 0.06, rel=True, places=4)
+
+
+@register(
+    _SPECTRA,
+    "Bendat & Piersol, Random Data 4e Eq. (8.163)",
+    "95% chi-square confidence interval coverage (Monte Carlo)",
+)
+def _chk_psd_ci_coverage() -> Outcome:
+    fs = _spectra_fs()
+    true_psd = 1.0 / (fs / 2.0)
+    hits, total = 0, 0
+    for seed in range(150):
+        res = ph.power_spectral_density(_spectra_white(300 + seed), fs, nperseg=1024)
+        for b in (60, 120, 240):
+            hits += int(res.ci_lower[b] <= true_psd <= res.ci_upper[b])
+            total += 1
+    return numeric(0.95, hits / total, 0.025, places=4)
+
+
+@register(
+    _SPECTRA,
+    "Bendat & Piersol, Random Data 4e Eqs. (9.55)/(6.39)",
+    "Coherent output spectrum of a known-SNR path: gamma^2 = SNR/(1+SNR)",
+)
+def _chk_coherent_output_snr() -> Outcome:
+    fs = _spectra_fs()
+    x = _spectra_white(11)
+    noise = ph.noise_signal(fs, 4.0, color="white", rms=0.5, seed=12)
+    res = ph.coherent_output_spectrum(x, 0.8 * x + noise, fs, nperseg=1024)
+    snr = 0.64 / 0.25
+    band = slice(50, 400)
+    return numeric(
+        snr / (1.0 + snr),
+        float(np.median(res.coherence[band])),
+        0.03,
+        places=4,
+    )
+
+
+@register(
+    _SPECTRA,
+    "Closed-form power-law slope (10*lg(2) dB/octave per unit exponent)",
+    "Pink-noise PSD slope over 20 Hz - 20 kHz, dB/octave",
+)
+def _chk_pink_noise_slope() -> Outcome:
+    fs = 48000.0
+    x = ph.noise_signal(fs, 40.0, color="pink", seed=3)
+    res = ph.power_spectral_density(x, fs, nperseg=8192)
+    band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
+    slope = float(
+        np.polyfit(
+            np.log2(res.frequencies[band]), 10.0 * np.log10(res.psd[band]), 1
+        )[0]
+    )
+    return numeric(-10.0 * math.log10(2.0), slope, 0.05, unit="dB/oct", places=4)
+
+
+@register(
+    _SPECTRA,
+    "Constant-power 1/n-octave kernel (closed form)",
+    "1/3-octave smoothed line level = P*df/(f0*(2^(1/6)-2^(-1/6)))",
+)
+def _chk_smoothing_line_level() -> Outcome:
+    f = np.arange(1.0, 4001.0)
+    power = np.zeros_like(f)
+    i0 = 999  # 1000 Hz
+    power[i0] = 5.0
+    out = ph.fractional_octave_smoothing(f, power, 3.0)
+    width = 1000.0 * (2.0 ** (1.0 / 6.0) - 2.0 ** (-1.0 / 6.0))
+    return numeric(5.0 / width, float(out[i0]), 1e-9, rel=True, places=6)
+
+
+# ===========================================================================
 # Underwater acoustics (ISO 18405 / 17208 / 18406)
 # ===========================================================================
 _UNDERWATER = "Underwater acoustics (ISO 18405/17208/18406)"

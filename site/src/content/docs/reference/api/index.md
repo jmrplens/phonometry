@@ -54,6 +54,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`psychoacoustics.tonality_ecma`](/phonometry/reference/api/psychoacoustics/tonality-ecma/) | Psychoacoustic tonality per ECMA-418-2:2025 (4th ed., Sottek Hearing Model). |
 | [`psychoacoustics.tone_audibility`](/phonometry/reference/api/psychoacoustics/tone-audibility/) | Objective audibility of tones in noise -- engineering method (ISO/PAS 20065:2016). |
 | [`psychoacoustics.fluctuation_strength`](/phonometry/reference/api/psychoacoustics/fluctuation-strength/) | Fluctuation strength after Fastl & Zwicker / Osses et al. |
+| [`psychoacoustics.fluctuation_strength_ecma`](/phonometry/reference/api/psychoacoustics/fluctuation-strength-ecma/) | Psychoacoustic fluctuation strength per ECMA-418-2:2025 (4th ed., Clause 9). |
 | [`psychoacoustics.psychoacoustic_annoyance`](/phonometry/reference/api/psychoacoustics/psychoacoustic-annoyance/) | Psychoacoustic annoyance (PA) after Fastl & Zwicker. |
 
 ## Speech

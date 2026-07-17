@@ -203,6 +203,16 @@ ECMA418_2_PROMINENT_ROUGHNESS_ASPER = 0.2
 # applied, the chain reproduces this anchor to 0.9999 asper.
 ECMA418_2_ROUGHNESS_1KHZ_70HZ_60DB_ASPER = 1.0
 ECMA418_2_ROUGHNESS_C_R = 0.0180685
+# Fluctuation strength: Clause 9 defines the reference as a 1 kHz carrier,
+# 100 % AM at 4 Hz, with "a sound pressure level of 60 dB" -- the OVERALL RMS
+# level, same convention as roughness -> 1.0 vacil_HMS. With the tabulated
+# c_F = 0.003840572 (not reverse-fit) the chain reproduces this anchor to
+# 0.9931 vacil_HMS for a 5 s signal (0.9957 at 8 s, converged 0.9958 by 12 s).
+# A fluctuation strength is prominent when the single value F exceeds
+# 0.2 vacil_HMS (Clause 9.2).
+ECMA418_2_FLUCTUATION_1KHZ_4HZ_60DB_VACIL = 1.0
+ECMA418_2_FLUCTUATION_C_F = 0.003840572
+ECMA418_2_PROMINENT_FLUCTUATION_VACIL = 0.2
 # ISO 532-2:2017 (Moore-Glasberg, stationary). Clause 3.17 / Annex B.1: the
 # sone is defined so a 1 kHz / 40 dB SPL tone (binaural, free field) is
 # 1.000 sone / 40 phon, following from the tabulated C = 0.0617 sone/Cam.

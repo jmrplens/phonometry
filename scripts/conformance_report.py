@@ -792,6 +792,26 @@ def _chk_mg_time_loudness() -> Outcome:
     )
 
 
+@register(
+    "Psychoacoustics",
+    "ECMA-418-2:2025 Clause 9",
+    "HMS fluctuation strength of a 1 kHz / 4 Hz / m=1 / overall 60 dB tone (c_F=0.003840572)",
+)
+def _chk_ecma_fluctuation_strength() -> Outcome:
+    # Clause 9 calibration: the reference signal at an overall sound pressure
+    # level of 60 dB SPL is 1 vacil_HMS (computed: 0.9931 for this 5 s signal
+    # with the tabulated c_F; 0.9958 converged for longer signals).
+    sig = _am_tone(1000.0, 4.0, 1.0, 60.0, 5.0)
+    computed = float(ph.fluctuation_strength_ecma(sig, _FS).fluctuation_strength)
+    return numeric(
+        ref.ECMA418_2_FLUCTUATION_1KHZ_4HZ_60DB_VACIL,
+        computed,
+        0.01,
+        unit="vacil_HMS",
+        places=4,
+    )
+
+
 # ===========================================================================
 # Domain 4 - Speech transmission (IEC 60268-16)
 # ===========================================================================

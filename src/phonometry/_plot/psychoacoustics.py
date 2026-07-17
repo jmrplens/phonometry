@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from ..psychoacoustics.tonality_ecma import EcmaTonality
     from ..psychoacoustics.roughness_ecma import EcmaRoughness
     from ..psychoacoustics.fluctuation_strength import FluctuationStrengthResult
+    from ..psychoacoustics.fluctuation_strength_ecma import EcmaFluctuationStrength
     from ..psychoacoustics.psychoacoustic_annoyance import PsychoacousticAnnoyanceResult
 
 def plot_zwicker_loudness(
@@ -259,6 +260,55 @@ def plot_ecma_tonality(
     ax_time.legend(loc="best", fontsize="small")
     return axes
 
+def _plot_hms_time_and_heatmap(
+    time: np.ndarray,
+    vs_time: np.ndarray,
+    spec_vs_time: np.ndarray,
+    bark: np.ndarray,
+    ax: Axes | None,
+    color: str,
+    ylabel: str,
+    title: str,
+    heat_label: str,
+    kwargs: dict[str, Any],
+) -> Axes | np.ndarray:
+    """Shared renderer for the HMS time-trace + specific-value heatmaps.
+
+    Used by the ECMA-418-2 roughness and fluctuation-strength results: when
+    ``ax`` is ``None`` a two-panel figure (time trace + heatmap over the
+    critical-band-rate scale) is drawn and an array of two axes is returned;
+    otherwise only the time trace is drawn on ``ax`` and it is returned.
+    """
+    two_panel = ax is None
+    if two_panel:
+        axes = _new_axes_column(2, figsize=(7.0, 6.0))
+        ax_time = cast("Axes", axes[0])
+    else:
+        ax_time = cast("Axes", ax)
+
+    if "c" not in kwargs:  # matplotlib alias; injecting "color" too would raise
+        kwargs.setdefault("color", color)
+    (line,) = ax_time.plot(time, vs_time, **kwargs)
+    ax_time.fill_between(time, vs_time, color=line.get_color(), alpha=0.25)
+    ax_time.set_xlabel("Time [s]")
+    ax_time.set_ylabel(ylabel)
+    ax_time.set_ylim(bottom=0.0)
+    ax_time.set_title(title)
+    ax_time.grid(True, alpha=0.3)
+
+    if not two_panel:
+        return ax_time
+
+    ax_heat = cast("Axes", axes[1])
+    if time.size >= 2 and spec_vs_time.size:
+        mesh = ax_heat.pcolormesh(
+            time, bark, spec_vs_time.T, cmap="magma", shading="auto"
+        )
+        ax_heat.figure.colorbar(mesh, ax=ax_heat, label=heat_label)
+    ax_heat.set_xlabel("Time [s]")
+    ax_heat.set_ylabel("Critical-band rate z [Bark_HMS]")
+    return axes
+
 def plot_ecma_roughness(
     result: EcmaRoughness, ax: Axes | None = None, **kwargs: Any
 ) -> Axes | np.ndarray:
@@ -274,40 +324,59 @@ def plot_ecma_roughness(
     :param kwargs: Forwarded to the roughness-vs-time line ``plot`` call.
     :return: The axes, or an array of two axes.
     """
-    time = np.asarray(result.time, dtype=np.float64)
-    rvt = np.asarray(result.roughness_vs_time, dtype=np.float64)
-    two_panel = ax is None
-
-    if two_panel:
-        axes = _new_axes_column(2, figsize=(7.0, 6.0))
-        ax_time = cast("Axes", axes[0])
-    else:
-        ax_time = cast("Axes", ax)
-
     # Roughness's per-metric identity color is brown across the documentation
     # figures (tonality is red); kept literal on purpose, see the module
     # color-constant note.
-    kwargs.setdefault("color", "#8c564b")
-    ax_time.plot(time, rvt, **kwargs)
-    ax_time.fill_between(time, rvt, color=kwargs["color"], alpha=0.25)
-    ax_time.set_xlabel("Time [s]")
-    ax_time.set_ylabel("Roughness R [asper]")
-    ax_time.set_ylim(bottom=0.0)
-    ax_time.set_title(f"ECMA-418-2 roughness R = {result.roughness:.2f} asper")
-    ax_time.grid(True, alpha=0.3)
+    return _plot_hms_time_and_heatmap(
+        np.asarray(result.time, dtype=np.float64),
+        np.asarray(result.roughness_vs_time, dtype=np.float64),
+        np.asarray(result.specific_roughness_vs_time, dtype=np.float64),
+        np.asarray(result.bark, dtype=np.float64),
+        ax,
+        "#8c564b",
+        "Roughness R [asper]",
+        f"ECMA-418-2 roughness R = {result.roughness:.2f} asper",
+        "R' [asper/Bark_HMS]",
+        kwargs,
+    )
 
-    if not two_panel:
-        return ax_time
+def plot_ecma_fluctuation_strength(
+    result: EcmaFluctuationStrength, ax: Axes | None = None, **kwargs: Any
+) -> Axes | np.ndarray:
+    """Time-dependent fluctuation strength F(l50) and a specific heatmap.
 
-    ax_heat = cast("Axes", axes[1])
-    bark = np.asarray(result.bark, dtype=np.float64)
-    spec = np.asarray(result.specific_roughness_vs_time, dtype=np.float64)
-    if time.size >= 2 and spec.size:
-        mesh = ax_heat.pcolormesh(time, bark, spec.T, cmap="magma", shading="auto")
-        ax_heat.figure.colorbar(mesh, ax=ax_heat, label="R' [asper/Bark_HMS]")
-    ax_heat.set_xlabel("Time [s]")
-    ax_heat.set_ylabel("Critical-band rate z [Bark_HMS]")
-    return axes
+    When ``ax`` is ``None`` a two-panel figure is drawn (fluctuation strength
+    vs time and a specific-fluctuation-strength F'(l50, z) heatmap over the
+    critical-band-rate scale) and an array of two axes is returned; when
+    ``ax`` is supplied only the time-dependent fluctuation strength is drawn
+    on it and that single axes is returned.
+
+    :param result: An :class:`~phonometry.fluctuation_strength_ecma.
+        EcmaFluctuationStrength`.
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the time-trace line ``plot`` call.
+    :return: The axes, or an array of two axes.
+    """
+    # Fluctuation strength's per-metric identity color is teal across the
+    # documentation figures (roughness is brown, tonality red); kept literal
+    # on purpose, see the module color-constant note.
+    return _plot_hms_time_and_heatmap(
+        np.asarray(result.time, dtype=np.float64),
+        np.asarray(result.fluctuation_strength_vs_time, dtype=np.float64),
+        np.asarray(
+            result.specific_fluctuation_strength_vs_time, dtype=np.float64
+        ),
+        np.asarray(result.bark, dtype=np.float64),
+        ax,
+        "#17becf",
+        "Fluctuation strength F [vacil_HMS]",
+        (
+            "ECMA-418-2 fluctuation strength "
+            f"F = {result.fluctuation_strength:.2f} vacil_HMS"
+        ),
+        "F' [vacil_HMS/Bark_HMS]",
+        kwargs,
+    )
 
 def plot_fluctuation_strength(
     result: "FluctuationStrengthResult", ax: Axes | None = None, **kwargs: Any

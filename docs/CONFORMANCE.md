@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **265/265 conformance checks pass** across 32 domains and 147 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **266/266 conformance checks pass** across 32 domains and 147 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 ### Numerical validation - filters &amp; weightings
 
@@ -83,7 +83,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Psychoacoustics</b> — 100% (11/11)</summary>
+<summary>&#9989; <b>Psychoacoustics</b> — 100% (12/12)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -98,6 +98,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ECMA-418-2:2025 Clause 7 | HMS roughness of a 1 kHz / 70 Hz / m=1 / overall 60 dB tone (c_R=0.0180685) | 1 asper (+/-0.01 asper) | 0.9999 asper | 0 asper | &#9989; |
 | ISO 532-2:2017 Clause 3.17 / Annex B.1 | Moore-Glasberg loudness of a 1 kHz / 40 dB tone (C=0.0617) | 1 sone (+/-0.01 sone) | 1.0001 sone | 0 sone | &#9989; |
 | ISO 532-3:2023 Annex C.1 | Moore-Glasberg-Schlittenlacher peak LTL, steady 1 kHz / 40 dB | 1 sone (+/-0.02 sone) | 0.9996 sone | 0 sone | &#9989; |
+| ECMA-418-2:2025 Clause 9 | HMS fluctuation strength of a 1 kHz / 4 Hz / m=1 / overall 60 dB tone (c_F=0.003840572) | 1 vacil_HMS (+/-0.01 vacil_HMS) | 0.9931 vacil_HMS | -0.007 vacil_HMS | &#9989; |
 
 </details>
 

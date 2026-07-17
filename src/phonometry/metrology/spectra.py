@@ -1,0 +1,799 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Calibrated spectral-density estimation with statistical error analysis.
+
+Welch-averaged auto- and cross-spectral density estimators that report,
+alongside the spectrum itself, the statistical quality of the estimate,
+following Bendat & Piersol, *Random Data: Analysis and Measurement
+Procedures* (4th ed., 2010):
+
+* the **number of averages**: the raw segment count and the effective number
+  of independent averages ``nd`` once the correlation between overlapped,
+  tapered segments is accounted for (Section 11.5.2.2 and its Ref. 11,
+  Welch 1967);
+* the **normalized random error** of the autospectrum estimate,
+  ``ε[Ĝxx] = 1/√nd`` (Eq. 8.158), and of the cross-spectrum magnitude and
+  phase, ``ε[|Ĝxy|] = 1/(|γxy|·√nd)`` (Eq. 9.33) and
+  ``s.d.[θ̂xy] = (1-γ²xy)^½ / (|γxy|·√(2·nd))`` (Eq. 9.52);
+* **chi-square confidence intervals** for the autospectrum: the sampling
+  distribution is ``n·Ĝxx/Gxx ~ χ²ₙ`` with ``n = 2·nd`` degrees of freedom
+  (Eq. 8.162), giving the interval
+  ``n·Ĝxx/χ²ₙ;α/2 ≤ Gxx ≤ n·Ĝxx/χ²ₙ;1-α/2`` (Eq. 8.163);
+* the **first-order resolution-bias error**: ``b[Ĝxx] ≈ (Bₑ²/24)·G″xx``
+  (Eq. 8.139), which for a resonance peak of half-power bandwidth ``Br``
+  becomes ``εb ≈ -(Bₑ/Br)²/3`` (Eq. 8.141) - exposed here as
+  :func:`resolution_bias_error`;
+* the **coherent output spectrum** ``Gvv = γ²xy·Gyy`` and the noise output
+  spectrum ``Gnn = (1-γ²xy)·Gyy`` of the single-input/single-output model
+  (Eqs. 9.55-9.56), with the spectral signal-to-noise ratio
+  ``γ²/(1-γ²)`` and the random error
+  ``ε[Ĝvv] = (2-γ²xy)^½ / (|γxy|·√nd)`` (Eq. 9.73).
+
+The same Welch core (Hann taper and 50% overlap by default, ``detrend``
+off so absolute calibration is preserved) also backs the H1/H2 frequency
+response and coherence estimators of
+:mod:`phonometry.electroacoustics.frequency_response` and the p-p intensity
+probe of :mod:`phonometry.emission.intensity`.
+
+A **fractional-octave smoothing** utility completes the module: a
+constant-power rectangular kernel of 1/n-octave width in log-frequency
+(the constant-percentage resolution bandwidth that Bendat & Piersol,
+Section 8.5.3, recommend for resonant-response spectra), applicable to
+power spectra, magnitude responses and dB curves. A flat spectrum is left
+exactly unchanged.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Literal
+
+import numpy as np
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from numpy.typing import NDArray
+
+__all__ = [
+    "CoherentOutputSpectrumResult",
+    "CrossSpectralDensityResult",
+    "SpectralDensityResult",
+    "coherent_output_spectrum",
+    "cross_spectral_density",
+    "fractional_octave_smoothing",
+    "power_spectral_density",
+    "resolution_bias_error",
+]
+
+#: Default overlap fraction between Welch segments.
+_DEFAULT_OVERLAP = 0.5
+#: Minimum samples for a spectral estimate.
+_MIN_SAMPLES = 32
+
+
+# ---------------------------------------------------------------------------
+# Shared Welch core (also used by electroacoustics.frequency_response and
+# emission.intensity so every spectral density in the library is computed
+# by exactly one code path).
+# ---------------------------------------------------------------------------
+
+
+def _positive(value: float, name: str) -> float:
+    scalar = float(value)
+    if not np.isfinite(scalar) or scalar <= 0.0:
+        raise ValueError(f"'{name}' must be a positive, finite number.")
+    return scalar
+
+
+def _validate_signal(
+    x: "NDArray[np.float64] | list[float]", name: str
+) -> "NDArray[np.float64]":
+    xa = np.asarray(x, dtype=np.float64)
+    if xa.ndim != 1:
+        raise ValueError(f"'{name}' must be one-dimensional.")
+    if xa.size < _MIN_SAMPLES:
+        raise ValueError(
+            f"Signal too short for a spectral estimate: {xa.size} samples."
+        )
+    if not np.all(np.isfinite(xa)):
+        raise ValueError(f"'{name}' must be finite.")
+    return xa
+
+
+def _validate_welch_params(
+    n: int, fs: float, nperseg: int | None, overlap: float
+) -> tuple[int, float]:
+    if not 0.0 <= float(overlap) < 1.0:
+        raise ValueError("'overlap' must be in [0, 1).")
+    seg = _default_nperseg(n, fs) if nperseg is None else int(nperseg)
+    if seg < _MIN_SAMPLES or seg > n:
+        raise ValueError(
+            f"'nperseg' must be between {_MIN_SAMPLES} and the signal length."
+        )
+    return seg, float(overlap)
+
+
+def _default_nperseg(n: int, fs: float) -> int:
+    """Segment length targeting about 4 Hz resolution (min 32 samples)."""
+    nperseg = int(min(n, 2 ** int(np.ceil(np.log2(fs / 4.0)))))
+    return max(nperseg, _MIN_SAMPLES)
+
+
+def _noverlap_samples(nperseg: int, overlap: float) -> int:
+    """Overlap fraction -> samples, capped one short of the segment."""
+    return min(int(round(overlap * nperseg)), nperseg - 1)
+
+
+def _welch_autospectrum(
+    x: "NDArray[np.float64]",
+    fs: float,
+    nperseg: int,
+    noverlap: int,
+    window: str = "hann",
+    scaling: str = "density",
+) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+    """One-sided Welch autospectrum ``(freqs, Gxx)``, no detrending."""
+    from scipy import signal as sp_signal
+
+    freqs, gxx = sp_signal.welch(
+        x,
+        fs=fs,
+        window=window,
+        nperseg=nperseg,
+        noverlap=noverlap,
+        detrend=False,
+        scaling=scaling,
+    )
+    return (
+        np.asarray(freqs, dtype=np.float64),
+        np.asarray(gxx, dtype=np.float64),
+    )
+
+
+def _welch_cross_spectrum(
+    x: "NDArray[np.float64]",
+    y: "NDArray[np.float64]",
+    fs: float,
+    nperseg: int,
+    noverlap: int,
+    window: str = "hann",
+    scaling: str = "density",
+) -> tuple["NDArray[np.float64]", "NDArray[np.complex128]"]:
+    """One-sided Welch cross-spectrum ``(freqs, Gxy)``, no detrending."""
+    from scipy import signal as sp_signal
+
+    freqs, gxy = sp_signal.csd(
+        x,
+        y,
+        fs=fs,
+        window=window,
+        nperseg=nperseg,
+        noverlap=noverlap,
+        detrend=False,
+        scaling=scaling,
+    )
+    return (
+        np.asarray(freqs, dtype=np.float64),
+        np.asarray(gxy, dtype=np.complex128),
+    )
+
+
+def _welch_pair(
+    x: "NDArray[np.float64]",
+    y: "NDArray[np.float64]",
+    fs: float,
+    nperseg: int,
+    noverlap: int,
+    window: str = "hann",
+    scaling: str = "density",
+) -> tuple[
+    "NDArray[np.float64]",
+    "NDArray[np.complex128]",
+    "NDArray[np.float64]",
+    "NDArray[np.float64]",
+]:
+    """One-sided ``(freqs, Gxy, Gxx, Gyy)`` from Welch-averaged segments."""
+    freqs, gxy = _welch_cross_spectrum(x, y, fs, nperseg, noverlap, window, scaling)
+    _, gxx = _welch_autospectrum(x, fs, nperseg, noverlap, window, scaling)
+    _, gyy = _welch_autospectrum(y, fs, nperseg, noverlap, window, scaling)
+    return freqs, gxy, gxx, gyy
+
+
+def _segment_statistics(
+    n: int, nperseg: int, noverlap: int, window: str, fs: float
+) -> tuple[int, float, float]:
+    """Averaging statistics of the Welch estimate.
+
+    Returns ``(n_segments, n_averages, resolution_bandwidth)``:
+
+    * ``n_segments`` - raw number of (possibly overlapped) segments averaged;
+    * ``n_averages`` - effective number of *independent* averages ``nd``.
+      Bendat & Piersol's error formulas assume ``nd`` distinct records
+      (Section 9.1.1); with overlapped, tapered segments (Section 11.5.2.2)
+      the variance reduction follows their Ref. 11 (Welch 1967, Eq. 12):
+      ``Var ∝ (1/k)·[1 + 2·Σⱼ (1-j/k)·ρ²(j·D)]`` where ``ρ(s)`` is the
+      normalized correlation of the taper with itself shifted by the hop
+      ``D``, so ``nd = k / (1 + 2·Σⱼ (1-j/k)·ρ²(j·D))``. Without overlap
+      this reduces to ``nd = k`` exactly.
+    * ``resolution_bandwidth`` - the effective noise bandwidth of the
+      tapered segment, ``Bₑ = fs·Σw² / (Σw)²``, the tapered-window analog
+      of Bendat & Piersol's ``Bₑ ≈ 1/T`` (Eq. 8.160).
+    """
+    from scipy import signal as sp_signal
+
+    step = nperseg - noverlap
+    k = (n - noverlap) // step
+    w = np.asarray(sp_signal.get_window(window, nperseg), dtype=np.float64)
+    wsum2 = float(np.sum(w * w))
+    benbw = fs * wsum2 / float(np.sum(w)) ** 2
+
+    if noverlap == 0 or k == 1:
+        return k, float(k), benbw
+
+    # Normalized taper correlation at multiples of the hop.
+    max_shift = (nperseg - 1) // step
+    corr = 0.0
+    for j in range(1, min(k, max_shift + 1)):
+        shift = j * step
+        rho = float(np.dot(w[: nperseg - shift], w[shift:])) / wsum2
+        corr += (1.0 - j / k) * rho * rho
+    nd = k / (1.0 + 2.0 * corr)
+    return k, float(nd), benbw
+
+
+def _chi2_interval(
+    gxx: "NDArray[np.float64]", nd: float, confidence: float
+) -> tuple["NDArray[np.float64]", "NDArray[np.float64]"]:
+    """Chi-square confidence interval for the autospectrum (Eq. 8.163)."""
+    from scipy import stats as sp_stats
+
+    alpha = 1.0 - confidence
+    dof = 2.0 * nd
+    # B&P's chi²_{n;α} is the value exceeded with probability α (isf).
+    lower = dof * gxx / float(sp_stats.chi2.isf(alpha / 2.0, dof))
+    upper = dof * gxx / float(sp_stats.chi2.isf(1.0 - alpha / 2.0, dof))
+    return lower, upper
+
+
+def _coherence_from_spectra(
+    gxy: "NDArray[np.complex128]",
+    gxx: "NDArray[np.float64]",
+    gyy: "NDArray[np.float64]",
+) -> "NDArray[np.float64]":
+    """Ordinary coherence ``γ² = |Gxy|²/(Gxx·Gyy)`` clipped to [0, 1]."""
+    denom = gxx * gyy
+    coh = np.divide(
+        np.abs(gxy) ** 2, denom, out=np.zeros_like(gxx), where=denom > 0.0
+    )
+    return np.asarray(np.clip(coh, 0.0, 1.0), dtype=np.float64)
+
+
+def _validate_confidence(confidence: float) -> float:
+    conf = float(confidence)
+    if not 0.0 < conf < 1.0:
+        raise ValueError("'confidence' must be in (0, 1).")
+    return conf
+
+
+def _validate_scaling(scaling: str) -> str:
+    if scaling not in ("density", "spectrum"):
+        raise ValueError("'scaling' must be 'density' or 'spectrum'.")
+    return scaling
+
+
+# ---------------------------------------------------------------------------
+# Autospectral density (Bendat & Piersol Sections 5.2, 8.5.4)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class SpectralDensityResult:
+    """Welch autospectral density with its statistical error (B&P Ch. 8).
+
+    :ivar frequencies: One-sided frequency axis, in Hz.
+    :ivar psd: Autospectral density ``Ĝxx(f)`` (units²/Hz for ``'density'``
+        scaling, units² for ``'spectrum'``).
+    :ivar ci_lower: Lower chi-square confidence bound on ``Gxx`` (Eq. 8.163).
+    :ivar ci_upper: Upper chi-square confidence bound on ``Gxx``.
+    :ivar confidence: Confidence level of the interval (e.g. ``0.95``).
+    :ivar random_error: Normalized random error ``ε[Ĝxx] = 1/√nd``
+        (Eq. 8.158).
+    :ivar n_segments: Raw number of (possibly overlapped) segments averaged.
+    :ivar n_averages: Effective number of independent averages ``nd``
+        (equals ``n_segments`` without overlap; smaller with overlap).
+    :ivar degrees_of_freedom: Chi-square degrees of freedom ``n = 2·nd``
+        (Eq. 8.162).
+    :ivar resolution_bandwidth: Effective noise bandwidth ``Bₑ`` of the
+        tapered segment, in Hz (drives the bias error of Eq. 8.139).
+    :ivar window: Taper name.
+    :ivar nperseg: Segment length, in samples.
+    :ivar overlap: Segment overlap fraction.
+    :ivar scaling: ``'density'`` or ``'spectrum'``.
+    """
+
+    frequencies: "NDArray[np.float64]"
+    psd: "NDArray[np.float64]"
+    ci_lower: "NDArray[np.float64]"
+    ci_upper: "NDArray[np.float64]"
+    confidence: float
+    random_error: float
+    n_segments: int
+    n_averages: float
+    degrees_of_freedom: float
+    resolution_bandwidth: float
+    window: str
+    nperseg: int
+    overlap: float
+    scaling: str
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the spectral density in dB with its confidence band."""
+        from .._plot.metrology import plot_spectral_density
+
+        return plot_spectral_density(self, ax=ax, **kwargs)
+
+
+def power_spectral_density(
+    x: "NDArray[np.float64] | list[float]",
+    fs: float,
+    *,
+    window: str = "hann",
+    nperseg: int | None = None,
+    overlap: float = _DEFAULT_OVERLAP,
+    scaling: Literal["density", "spectrum"] = "density",
+    confidence: float = 0.95,
+) -> SpectralDensityResult:
+    """Calibrated autospectral density with chi-square confidence interval.
+
+    Welch's method (Bendat & Piersol Section 11.5.2: tapered, overlapped
+    segment averaging, no detrending so absolute calibration is preserved).
+    Alongside ``Ĝxx(f)`` the result reports the effective number of
+    independent averages ``nd``, the normalized random error
+    ``ε = 1/√nd`` (Eq. 8.158) and the chi-square confidence interval with
+    ``2·nd`` degrees of freedom (Eq. 8.163). For the first-order
+    resolution-bias error at a resonance peak see
+    :func:`resolution_bias_error`.
+
+    :param x: Signal, 1-D.
+    :param fs: Sample rate, in Hz.
+    :param window: Segment taper (any scipy window name; default Hann,
+        the B&P Section 11.5.2 recommendation for side-lobe suppression).
+    :param nperseg: Welch segment length; ``None`` picks a length targeting
+        about 4 Hz resolution.
+    :param overlap: Segment overlap fraction in [0, 1) (default 0.5, which
+        with a Hann taper retrieves most of the stability lost to tapering,
+        B&P Section 11.5.2.2).
+    :param scaling: ``'density'`` (units²/Hz) or ``'spectrum'`` (units² per
+        segment bandwidth).
+    :param confidence: Confidence level for the chi-square interval.
+    :return: A :class:`SpectralDensityResult`.
+    :raises ValueError: If the inputs or parameters are invalid.
+    """
+    xa = _validate_signal(x, "x")
+    fs_v = _positive(fs, "fs")
+    scaling_v = _validate_scaling(scaling)
+    conf = _validate_confidence(confidence)
+    seg, ovl = _validate_welch_params(xa.size, fs_v, nperseg, overlap)
+    nov = _noverlap_samples(seg, ovl)
+
+    freqs, gxx = _welch_autospectrum(xa, fs_v, seg, nov, window, scaling_v)
+    k, nd, benbw = _segment_statistics(xa.size, seg, nov, window, fs_v)
+    lower, upper = _chi2_interval(gxx, nd, conf)
+    return SpectralDensityResult(
+        frequencies=freqs,
+        psd=gxx,
+        ci_lower=lower,
+        ci_upper=upper,
+        confidence=conf,
+        random_error=1.0 / float(np.sqrt(nd)),
+        n_segments=k,
+        n_averages=nd,
+        degrees_of_freedom=2.0 * nd,
+        resolution_bandwidth=benbw,
+        window=window,
+        nperseg=seg,
+        overlap=ovl,
+        scaling=scaling_v,
+    )
+
+
+def resolution_bias_error(
+    resolution_bandwidth: float, half_power_bandwidth: float
+) -> float:
+    """First-order resolution-bias error at a resonance peak (Eq. 8.141).
+
+    ``εb[Ĝxx(fr)] ≈ -(Bₑ/Br)²/3`` for a resonance of half-power bandwidth
+    ``Br`` analysed with resolution bandwidth ``Bₑ``: peaks are
+    underestimated (and valleys overestimated) by frequency smoothing, in
+    the direction of reduced dynamic range (B&P Section 8.5.1). The
+    approximation assumes ``Bₑ < Br``.
+
+    :param resolution_bandwidth: Analysis resolution bandwidth ``Bₑ``, Hz
+        (:attr:`SpectralDensityResult.resolution_bandwidth`).
+    :param half_power_bandwidth: Half-power (-3 dB) bandwidth ``Br`` of the
+        spectral peak, in Hz.
+    :return: Normalized bias error (dimensionless, negative at a peak).
+    :raises ValueError: If either bandwidth is not positive.
+    """
+    be = _positive(resolution_bandwidth, "resolution_bandwidth")
+    br = _positive(half_power_bandwidth, "half_power_bandwidth")
+    return -((be / br) ** 2) / 3.0
+
+
+# ---------------------------------------------------------------------------
+# Cross-spectral density (Bendat & Piersol Section 9.1)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class CrossSpectralDensityResult:
+    """Welch cross-spectral density with its statistical error (B&P Ch. 9).
+
+    The error formulas replace the unknown true coherence with the computed
+    estimate, as Bendat & Piersol recommend for measured data (Section 9.2).
+
+    :ivar frequencies: One-sided frequency axis, in Hz.
+    :ivar csd: Complex cross-spectral density ``Ĝxy(f)``.
+    :ivar magnitude: ``|Ĝxy(f)|``.
+    :ivar phase: Cross-spectrum phase ``θ̂xy(f)``, in radians (unwrapped).
+    :ivar coherence: Ordinary coherence ``γ̂²xy(f)`` ∈ [0, 1].
+    :ivar magnitude_random_error: Normalized random error of ``|Ĝxy|``,
+        ``ε = 1/(|γxy|·√nd)`` (Eq. 9.33).
+    :ivar phase_std: Standard deviation of the phase estimate, in radians,
+        ``s.d. = (1-γ²xy)^½/(|γxy|·√(2·nd))`` (Eq. 9.52).
+    :ivar n_segments: Raw number of segments averaged.
+    :ivar n_averages: Effective number of independent averages ``nd``.
+    :ivar resolution_bandwidth: Effective noise bandwidth ``Bₑ``, in Hz.
+    :ivar window: Taper name.
+    :ivar nperseg: Segment length, in samples.
+    :ivar overlap: Segment overlap fraction.
+    :ivar scaling: ``'density'`` or ``'spectrum'``.
+    """
+
+    frequencies: "NDArray[np.float64]"
+    csd: "NDArray[np.complex128]"
+    magnitude: "NDArray[np.float64]"
+    phase: "NDArray[np.float64]"
+    coherence: "NDArray[np.float64]"
+    magnitude_random_error: "NDArray[np.float64]"
+    phase_std: "NDArray[np.float64]"
+    n_segments: int
+    n_averages: float
+    resolution_bandwidth: float
+    window: str
+    nperseg: int
+    overlap: float
+    scaling: str
+
+    def plot(
+        self, ax: "Axes | None" = None, **kwargs: Any
+    ) -> "Axes | NDArray[Any]":
+        """Plot the magnitude, phase (with ±σ band) and coherence."""
+        from .._plot.metrology import plot_cross_spectral_density
+
+        return plot_cross_spectral_density(self, ax=ax, **kwargs)
+
+
+def cross_spectral_density(
+    x: "NDArray[np.float64] | list[float]",
+    y: "NDArray[np.float64] | list[float]",
+    fs: float,
+    *,
+    window: str = "hann",
+    nperseg: int | None = None,
+    overlap: float = _DEFAULT_OVERLAP,
+    scaling: Literal["density", "spectrum"] = "density",
+) -> CrossSpectralDensityResult:
+    """Calibrated cross-spectral density with statistical error analysis.
+
+    Welch's method on both channels; alongside ``Ĝxy(f)`` the result
+    reports the ordinary coherence and the Bendat & Piersol random errors:
+    ``ε[|Ĝxy|] = 1/(|γxy|·√nd)`` (Eq. 9.33) for the magnitude and
+    ``s.d.[θ̂xy] = (1-γ²xy)^½/(|γxy|·√(2·nd))`` (Eq. 9.52) for the phase,
+    with the measured coherence in place of the unknown true value.
+
+    :param x: First signal, 1-D.
+    :param y: Second signal, 1-D, same length as ``x``.
+    :param fs: Sample rate, in Hz.
+    :param window: Segment taper (default Hann).
+    :param nperseg: Welch segment length; ``None`` picks a default.
+    :param overlap: Segment overlap fraction in [0, 1) (default 0.5).
+    :param scaling: ``'density'`` or ``'spectrum'``.
+    :return: A :class:`CrossSpectralDensityResult`.
+    :raises ValueError: If the inputs or parameters are invalid.
+    """
+    xa = _validate_signal(x, "x")
+    ya = _validate_signal(y, "y")
+    if xa.size != ya.size:
+        raise ValueError("'x' and 'y' must have the same length.")
+    fs_v = _positive(fs, "fs")
+    scaling_v = _validate_scaling(scaling)
+    seg, ovl = _validate_welch_params(xa.size, fs_v, nperseg, overlap)
+    nov = _noverlap_samples(seg, ovl)
+
+    freqs, gxy, gxx, gyy = _welch_pair(xa, ya, fs_v, seg, nov, window, scaling_v)
+    k, nd, benbw = _segment_statistics(xa.size, seg, nov, window, fs_v)
+    coh = _coherence_from_spectra(gxy, gxx, gyy)
+    gamma = np.sqrt(coh)
+    sqrt_nd = float(np.sqrt(nd))
+    mag_err = np.divide(
+        1.0, gamma * sqrt_nd, out=np.full_like(gamma, np.inf), where=gamma > 0.0
+    )
+    phase_std = np.divide(
+        np.sqrt(1.0 - coh),
+        gamma * float(np.sqrt(2.0 * nd)),
+        out=np.full_like(gamma, np.inf),
+        where=gamma > 0.0,
+    )
+    return CrossSpectralDensityResult(
+        frequencies=freqs,
+        csd=gxy,
+        magnitude=np.abs(gxy),
+        phase=np.unwrap(np.angle(gxy)),
+        coherence=coh,
+        magnitude_random_error=mag_err,
+        phase_std=phase_std,
+        n_segments=k,
+        n_averages=nd,
+        resolution_bandwidth=benbw,
+        window=window,
+        nperseg=seg,
+        overlap=ovl,
+        scaling=scaling_v,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Coherent output spectrum (Bendat & Piersol Section 9.2.2)
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class CoherentOutputSpectrumResult:
+    """Coherent output spectrum of a single-input/single-output model.
+
+    The measured output autospectrum splits into the part linearly explained
+    by the input, ``Gvv = γ²xy·Gyy`` (Eq. 9.55), and the uncorrelated noise
+    remainder ``Gnn = (1-γ²xy)·Gyy`` (Eq. 9.56), with ``Gyy = Gvv + Gnn``
+    (Eq. 9.57). Their ratio is the spectral signal-to-noise ratio.
+
+    :ivar frequencies: One-sided frequency axis, in Hz.
+    :ivar output_psd: Measured output autospectrum ``Ĝyy(f)``.
+    :ivar coherent_psd: Coherent output spectrum ``Ĝvv = γ̂²xy·Ĝyy``.
+    :ivar noise_psd: Noise output spectrum ``Ĝnn = (1-γ̂²xy)·Ĝyy``.
+    :ivar coherence: Ordinary coherence ``γ̂²xy(f)`` ∈ [0, 1].
+    :ivar snr: Spectral signal-to-noise ratio ``γ̂²/(1-γ̂²)`` (∞ at
+        ``γ̂² = 1``).
+    :ivar snr_db: ``10·lg`` of :attr:`snr`, in dB.
+    :ivar random_error: Normalized random error of ``Ĝvv``,
+        ``ε = (2-γ²xy)^½/(|γxy|·√nd)`` (Eq. 9.73), with the measured
+        coherence in place of the true value.
+    :ivar snr_random_error: Normalized random error of the SNR,
+        ``ε = √2/(|γxy|·√nd)``, first-order propagation of the coherence
+        random error of Eq. 9.82 through ``γ²/(1-γ²)``.
+    :ivar coherence_bias: First-order bias of the coherence estimate,
+        ``b[γ̂²] ≈ (1-γ²)²/nd`` (Eq. 9.75).
+    :ivar n_segments: Raw number of segments averaged.
+    :ivar n_averages: Effective number of independent averages ``nd``.
+    :ivar resolution_bandwidth: Effective noise bandwidth ``Bₑ``, in Hz.
+    :ivar window: Taper name.
+    :ivar nperseg: Segment length, in samples.
+    :ivar overlap: Segment overlap fraction.
+    :ivar scaling: ``'density'`` or ``'spectrum'``.
+    """
+
+    frequencies: "NDArray[np.float64]"
+    output_psd: "NDArray[np.float64]"
+    coherent_psd: "NDArray[np.float64]"
+    noise_psd: "NDArray[np.float64]"
+    coherence: "NDArray[np.float64]"
+    snr: "NDArray[np.float64]"
+    snr_db: "NDArray[np.float64]"
+    random_error: "NDArray[np.float64]"
+    snr_random_error: "NDArray[np.float64]"
+    coherence_bias: "NDArray[np.float64]"
+    n_segments: int
+    n_averages: float
+    resolution_bandwidth: float
+    window: str
+    nperseg: int
+    overlap: float
+    scaling: str
+
+    def plot(
+        self, ax: "Axes | None" = None, **kwargs: Any
+    ) -> "Axes | NDArray[Any]":
+        """Plot the output/coherent/noise spectra and the spectral SNR."""
+        from .._plot.metrology import plot_coherent_output_spectrum
+
+        return plot_coherent_output_spectrum(self, ax=ax, **kwargs)
+
+
+def coherent_output_spectrum(
+    x: "NDArray[np.float64] | list[float]",
+    y: "NDArray[np.float64] | list[float]",
+    fs: float,
+    *,
+    window: str = "hann",
+    nperseg: int | None = None,
+    overlap: float = _DEFAULT_OVERLAP,
+    scaling: Literal["density", "spectrum"] = "density",
+) -> CoherentOutputSpectrumResult:
+    """Coherent output spectrum and spectral SNR (Bendat & Piersol 9.2.2).
+
+    Splits the measured output autospectrum ``Gyy`` into the coherent part
+    ``Gvv = γ²xy·Gyy`` linearly explained by the input ``x`` and the noise
+    remainder ``Gnn = (1-γ²xy)·Gyy``, and reports the spectral
+    signal-to-noise ratio ``γ²/(1-γ²)`` together with the Bendat & Piersol
+    random errors (Eqs. 9.73 and 9.82). For additive uncorrelated output
+    noise of known level the coherence satisfies
+    ``γ² = SNR/(1+SNR)``, which is the closed-form oracle used to verify
+    the implementation.
+
+    :param x: Input (reference) signal, 1-D.
+    :param y: Output (response) signal, 1-D, same length as ``x``.
+    :param fs: Sample rate, in Hz.
+    :param window: Segment taper (default Hann).
+    :param nperseg: Welch segment length; ``None`` picks a default.
+    :param overlap: Segment overlap fraction in [0, 1) (default 0.5).
+    :param scaling: ``'density'`` or ``'spectrum'``.
+    :return: A :class:`CoherentOutputSpectrumResult`.
+    :raises ValueError: If the inputs or parameters are invalid.
+    """
+    xa = _validate_signal(x, "x")
+    ya = _validate_signal(y, "y")
+    if xa.size != ya.size:
+        raise ValueError("'x' and 'y' must have the same length.")
+    fs_v = _positive(fs, "fs")
+    scaling_v = _validate_scaling(scaling)
+    seg, ovl = _validate_welch_params(xa.size, fs_v, nperseg, overlap)
+    nov = _noverlap_samples(seg, ovl)
+
+    freqs, gxy, gxx, gyy = _welch_pair(xa, ya, fs_v, seg, nov, window, scaling_v)
+    k, nd, benbw = _segment_statistics(xa.size, seg, nov, window, fs_v)
+    coh = _coherence_from_spectra(gxy, gxx, gyy)
+    gvv = coh * gyy
+    gnn = (1.0 - coh) * gyy
+    one_minus = 1.0 - coh
+    snr = np.divide(
+        coh, one_minus, out=np.full_like(coh, np.inf), where=one_minus > 0.0
+    )
+    with np.errstate(divide="ignore"):
+        snr_db = 10.0 * np.log10(snr)
+    gamma = np.sqrt(coh)
+    sqrt_nd = float(np.sqrt(nd))
+    cop_err = np.divide(
+        np.sqrt(2.0 - coh),
+        gamma * sqrt_nd,
+        out=np.full_like(gamma, np.inf),
+        where=gamma > 0.0,
+    )
+    snr_err = np.divide(
+        float(np.sqrt(2.0)),
+        gamma * sqrt_nd,
+        out=np.full_like(gamma, np.inf),
+        where=gamma > 0.0,
+    )
+    return CoherentOutputSpectrumResult(
+        frequencies=freqs,
+        output_psd=gyy,
+        coherent_psd=gvv,
+        noise_psd=gnn,
+        coherence=coh,
+        snr=snr,
+        snr_db=snr_db,
+        random_error=cop_err,
+        snr_random_error=snr_err,
+        coherence_bias=one_minus**2 / nd,
+        n_segments=k,
+        n_averages=nd,
+        resolution_bandwidth=benbw,
+        window=window,
+        nperseg=seg,
+        overlap=ovl,
+        scaling=scaling_v,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Fractional-octave smoothing (constant-percentage bandwidth, B&P 8.5.3)
+# ---------------------------------------------------------------------------
+
+
+def fractional_octave_smoothing(
+    frequencies: "NDArray[np.float64] | list[float]",
+    values: "NDArray[np.float64] | list[float]",
+    fraction: float = 3.0,
+    *,
+    domain: Literal["power", "amplitude", "db"] = "power",
+) -> "NDArray[np.float64]":
+    """Smooth a spectrum with a constant-power 1/n-octave kernel.
+
+    Each output point is the power average of the input over a rectangular
+    window of 1/``fraction`` octave centred (geometrically) on its
+    frequency: ``[f·2^(-1/2n), f·2^(+1/2n)]``. This is the
+    constant-percentage resolution bandwidth that Bendat & Piersol
+    (Section 8.5.3) recommend for spectra of resonant systems, and the de
+    facto standard presentation of loudspeaker and room responses. The
+    average is computed on power regardless of ``domain`` (amplitudes are
+    squared first, dB levels converted), so smoothing conserves band power
+    rather than amplitude; a flat spectrum is left exactly unchanged.
+
+    The window is clipped at the ends of the frequency axis, and points at
+    non-positive frequencies (where a log-frequency window is undefined)
+    are copied unchanged.
+
+    :param frequencies: Frequency axis, 1-D, strictly increasing.
+    :param values: Spectrum sampled on ``frequencies``: power-like values
+        (``'power'``), magnitudes (``'amplitude'``) or levels in dB
+        (``'db'``).
+    :param fraction: The ``n`` of the 1/n-octave width (default 3, one-third
+        octave).
+    :param domain: How ``values`` map to power (see above). The output is
+        returned in the same domain.
+    :return: Smoothed spectrum, same shape and domain as ``values``.
+    :raises ValueError: If the inputs or parameters are invalid.
+    """
+    f = np.asarray(frequencies, dtype=np.float64)
+    v = np.asarray(values, dtype=np.float64)
+    if f.ndim != 1 or v.ndim != 1:
+        raise ValueError("'frequencies' and 'values' must be one-dimensional.")
+    if f.size != v.size:
+        raise ValueError("'frequencies' and 'values' must have the same length.")
+    if f.size < 2:
+        raise ValueError("At least two frequency points are required.")
+    if not np.all(np.isfinite(f)) or not np.all(np.isfinite(v)):
+        raise ValueError("'frequencies' and 'values' must be finite.")
+    if np.any(np.diff(f) <= 0.0):
+        raise ValueError("'frequencies' must be strictly increasing.")
+    frac = _positive(fraction, "fraction")
+    if domain not in ("power", "amplitude", "db"):
+        raise ValueError("'domain' must be 'power', 'amplitude' or 'db'.")
+
+    if domain == "power":
+        if np.any(v < 0.0):
+            raise ValueError("'values' must be non-negative in the power domain.")
+        power = v.copy()
+    elif domain == "amplitude":
+        if np.any(v < 0.0):
+            raise ValueError(
+                "'values' must be non-negative in the amplitude domain."
+            )
+        power = v * v
+    else:
+        power = np.asarray(10.0 ** (v / 10.0), dtype=np.float64)
+
+    pos = f > 0.0
+    fp = f[pos]
+    pp = power[pos]
+    out_power = power.copy()
+    if fp.size >= 2:
+        # Piecewise-constant power on bins bounded by arithmetic midpoints;
+        # the running integral makes the window average exact (and a flat
+        # spectrum exactly invariant).
+        edges = np.empty(fp.size + 1, dtype=np.float64)
+        edges[1:-1] = 0.5 * (fp[:-1] + fp[1:])
+        edges[0] = max(fp[0] - 0.5 * (fp[1] - fp[0]), 0.0)
+        edges[-1] = fp[-1] + 0.5 * (fp[-1] - fp[-2])
+        cumulative = np.concatenate(
+            ([0.0], np.cumsum(pp * np.diff(edges)))
+        )
+        half = 2.0 ** (1.0 / (2.0 * frac))
+        f_low = np.clip(fp / half, edges[0], edges[-1])
+        f_high = np.clip(fp * half, edges[0], edges[-1])
+        integral = np.interp(f_high, edges, cumulative) - np.interp(
+            f_low, edges, cumulative
+        )
+        width = f_high - f_low
+        smoothed = np.divide(
+            integral, width, out=pp.copy(), where=width > 0.0
+        )
+        out_power[pos] = smoothed
+
+    if domain == "power":
+        return out_power
+    if domain == "amplitude":
+        return np.asarray(np.sqrt(out_power), dtype=np.float64)
+    with np.errstate(divide="ignore"):
+        out_db = 10.0 * np.log10(out_power)
+    return np.asarray(out_db, dtype=np.float64)

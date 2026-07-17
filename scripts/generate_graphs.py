@@ -890,12 +890,23 @@ _ES_EXACT = {
     "specular beam": "haz especular",
     "scattered fan": "abanico dispersado",
     "receiver arc": "arco de receptores",
+    "Programme Loudness Metering (EBU R 128)":
+        "Medición de sonoridad de programa (EBU R 128)",
+    "Loudness [LUFS]": "Sonoridad [LUFS]",
+    "Momentary M (400 ms)": "Momentánea M (400 ms)",
+    "Short-term S (3 s)": "Corto plazo S (3 s)",
+    "ambience": "ambiente",
+    "dialogue": "diálogo",
+    "music": "música",
+    "fade-out": "fundido",
 }
 
 _ES_PATTERNS = [
     # psd_confidence_smoothing annotation (mathtext + baked-in numbers).
     (r"^\$n_d\$ = (\d+) averages, \$\\varepsilon_r\$ = (\d+)\.(\d+) %$",
      r"$n_d$ = \1 promedios, $\\varepsilon_r$ = \2,\3 %"),
+    (r"^Integrated I = (.+) LUFS$", "Integrada I = \\1 LUFS"),
+    (r"^LRA = (.+) LU \(P10-P95\)$", "LRA = \\1 LU (P10-P95)"),
     (r"^f = 10 kHz, α = (.+) dB/km\npractical spreading \(R₀ = 1000 m\)$",
      "f = 10 kHz, α = \\1 dB/km\\nensanchamiento práctico (R₀ = 1000 m)"),
     (r"^SL = 140, NL = 60, DI = 15, DT = 8 dB\nfigure of merit = (.+) dB$",
@@ -3693,6 +3704,84 @@ def generate_psd_confidence_smoothing(output_dir: str) -> None:
             color=COLOR_FG)
     plt.tight_layout()
     save_figure(output_dir, "psd_confidence_smoothing.svg")
+def generate_program_loudness(output_dir: str) -> None:
+    """EBU R 128 metering of a synthetic programme: M, S, I and LRA."""
+    print("Generating program_loudness...")
+    from scipy import signal as sp_signal
+
+    from phonometry import program_loudness
+
+    fs = 48000
+    rng = np.random.default_rng(1770)
+    # A one-minute synthetic programme: quiet ambience, two dialogue
+    # passages around the -23 LUFS target, a louder music sting and a
+    # fade-out. Pink-ish noise stands in for programme material.
+    sections = [("ambience", -38.0, 8.0), ("dialogue", -23.0, 16.0),
+                ("music", -17.0, 12.0), ("dialogue", -25.0, 16.0),
+                ("fade-out", -45.0, 8.0)]
+    sos = sp_signal.butter(2, 2000.0, fs=fs, output="sos")
+    chunks = []
+    for _, level, duration in sections:
+        n = int(duration * fs)
+        noise = sp_signal.sosfilt(sos, rng.standard_normal(n))
+        noise /= np.sqrt(np.mean(noise**2))
+        # Slow, aperiodic amplitude modulation so the momentary trace
+        # breathes like real programme material.
+        t = np.arange(n) / fs
+        wobble = 1.0 + 0.22 * np.sin(2.0 * np.pi * 0.9 * t) \
+            + 0.14 * np.sin(2.0 * np.pi * 2.83 * t + 1.0)
+        chunks.append(10.0 ** (level / 20.0) * noise * wobble)
+    x = np.concatenate(chunks)
+    # Loudness-normalise the programme to the R 128 target of -23.0 LUFS,
+    # exactly what a broadcast workflow does before delivery.
+    raw = program_loudness(np.vstack([x, x]), fs)
+    x *= 10.0 ** ((-23.0 - raw.integrated) / 20.0)
+    res = program_loudness(np.vstack([x, x]), fs)
+
+    fig, ax = plt.subplots(figsize=(11.5, 5.8))
+    ax.axhspan(res.lra_low, res.lra_high, color=COLOR_TERTIARY, alpha=0.12,
+               label=f"LRA = {res.loudness_range:.1f} LU (P10-P95)")
+    ax.plot(res.momentary_time, res.momentary, color="#9e9e9e",
+            linewidth=0.8, label="Momentary M (400 ms)")
+    ax.plot(res.short_term_time, res.short_term, color=COLOR_PRIMARY,
+            linewidth=2.2, label="Short-term S (3 s)")
+    ax.axhline(res.integrated, color=COLOR_SECONDARY, linestyle="--",
+               linewidth=1.8, label=f"Integrated I = {res.integrated:.1f} LUFS")
+
+    # Label the programme sections along the top.
+    t0 = 0.0
+    for name, _, duration in sections:
+        ax.text(t0 + duration / 2.0, -11.0, name, ha="center", va="top",
+                fontsize=8.5, color=COLOR_FG, alpha=0.75, style="italic")
+        t0 += duration
+        if t0 < 60.0:
+            ax.axvline(t0, color=COLOR_GRID, linewidth=0.8)
+
+    panel = "#f0f2f5" if COLOR_FG == "black" else "#1c2128"
+    info = [
+        f"I     = {res.integrated:6.1f} LUFS",
+        f"LRA   = {res.loudness_range:6.1f} LU",
+        f"max M = {res.max_momentary:6.1f} LUFS",
+        f"max S = {res.max_short_term:6.1f} LUFS",
+        f"TPmax = {res.true_peak:6.1f} dBTP",
+    ]
+    ax.text(0.985, 0.03, "\n".join(info), transform=ax.transAxes,
+            va="bottom", ha="right", fontsize=8.5, color=COLOR_FG,
+            family="monospace",
+            bbox={"boxstyle": "round,pad=0.5", "facecolor": panel,
+                  "edgecolor": COLOR_GRID})
+
+    ax.set_xlim(0.0, 60.0)
+    ax.set_ylim(-58.0, -10.0)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Loudness [LUFS]")
+    ax.set_title("Programme Loudness Metering (EBU R 128)",
+                 fontweight="bold", pad=12)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "program_loudness.svg")
     plt.close()
 
 
@@ -6802,6 +6891,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Calibrated spectral analysis: PSD with chi-square confidence interval
     # and 1/3-octave smoothing on exact-slope pink noise (Bendat & Piersol).
     generate_psd_confidence_smoothing,
+    # Broadcast: programme loudness and true peak (ITU-R BS.1770-5 /
+    # EBU R 128 with Tech 3341/3342).
+    generate_program_loudness,
     # Underwater acoustics: ship radiated noise / monopole source
     # level (ISO 17208) and pile-driving sound exposure (ISO 18406).
     generate_ship_source_level,

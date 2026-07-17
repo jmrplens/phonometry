@@ -253,7 +253,10 @@ usan material de programa auténtico distribuido por la EBU y no son
 sintetizables; se ejecutan contra el conjunto oficial de pruebas de sonoridad
 de la EBU (descargado de la propia EBU, cuya licencia cubre solo pruebas
 técnicas, así que el audio nunca se incorpora al repositorio) y los cuatro
-pasan dentro de tolerancia. El medidor independiente
+pasan dentro de tolerancia; las series de sonoridad por bloques medidas de
+esos ficheros se incorporan como datos simples, de modo que las etapas de
+gating y LRA de estos casos se ejecutan también en todas partes sin el
+audio. El medidor independiente
 [pyloudnorm](https://github.com/csteinmetz1/pyloudnorm) es un contraste útil
 con grabaciones reales; no se usó como fuente de esta implementación.
 

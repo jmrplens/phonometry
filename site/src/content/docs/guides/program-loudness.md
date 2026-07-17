@@ -246,7 +246,9 @@ of Annex 2 Attachment 1. Cases 7-8 and the LRA cases 5-6 use authentic
 programme material distributed by the EBU and are not synthesizable; they
 run against the official EBU loudness test set (fetched from the EBU, whose
 licence covers technical testing only, so the audio is never committed) and
-all four pass within tolerance. The
+all four pass within tolerance; the per-block loudness series measured from
+them are committed as plain data, so the gating and LRA stages of these
+cases also run everywhere without the audio. The
 independent [pyloudnorm](https://github.com/csteinmetz1/pyloudnorm) meter is
 a useful cross-check for real recordings; it was not used as a source for
 this implementation.

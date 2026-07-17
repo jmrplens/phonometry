@@ -818,6 +818,14 @@ from .hearing.occupational_exposure import (
     table_c4_contribution,
     task_based_exposure,
 )
+from .simulation.fdtd import (
+    CWSource,
+    FDTD2D,
+    FDTDResult,
+    GaussianPulse,
+    SignalSource,
+    fdtd_simulation,
+)
 from ._version import __version__
 
 # Public methods
@@ -1513,6 +1521,13 @@ __all__ = [
     "OccupationalExposureWarning",
     "COVERAGE_FACTOR",
     "INSTRUMENT_U2",
+    # 2D FDTD wave simulation
+    "fdtd_simulation",
+    "FDTDResult",
+    "FDTD2D",
+    "GaussianPulse",
+    "CWSource",
+    "SignalSource",
 ]
 
 

@@ -1,10 +1,13 @@
 #  Copyright (c) 2026. Jose M. Requena-Plens
-"""Basic physics and determinism tests for the scripts/fdtd2d.py helper.
+"""Basic physics and determinism tests for the ``fdtd2d`` engine shim.
 
-The engine renders the committed FDTD documentation animations, so what
-matters here is that (a) the physics is not obviously wrong (a rigid box
+``scripts/fdtd2d.py`` re-exports :mod:`phonometry.simulation.fdtd`, and the
+engine renders the committed FDTD documentation animations, so what
+matters here is that (a) the shim import path used by the animation
+scripts keeps working, (b) the physics is not obviously wrong (a rigid box
 conserves energy, a sponge absorbs it, a centred pulse stays symmetric),
-and (b) the output is bit-reproducible run to run.
+and (c) the output is bit-reproducible run to run. The analytic-oracle
+validation of the solver lives in ``tests/simulation/test_fdtd.py``.
 """
 
 from __future__ import annotations
@@ -104,7 +107,7 @@ def test_source_outside_the_grid_is_rejected() -> None:
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-        ({"cfl": 0.9}, "cfl"),
+        ({"cfl": 1.2}, "cfl"),
         ({"c": 0.0}, "c must be strictly positive"),
         ({"c": np.full((10, 10), np.nan)}, "c must be strictly positive"),
         ({"rho": -1.2}, "rho must be strictly positive"),

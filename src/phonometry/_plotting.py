@@ -28,6 +28,8 @@ from ._plot.aircraft import plot_epnl as plot_epnl
 from ._plot.room import plot_excitation as plot_excitation
 from ._plot.building import plot_facade_insulation as plot_facade_insulation
 from ._plot.building import plot_facade_prediction as plot_facade_prediction
+from ._plot.simulation import plot_fdtd_probes as plot_fdtd_probes
+from ._plot.simulation import plot_fdtd_snapshot as plot_fdtd_snapshot
 from ._plot.building import plot_floor_covering_improvement as plot_floor_covering_improvement
 from ._plot.psychoacoustics import plot_fluctuation_strength as plot_fluctuation_strength
 from ._plot.aircraft import plot_flyover as plot_flyover

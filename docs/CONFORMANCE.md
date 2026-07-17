@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **292/292 conformance checks pass** across 36 domains and 167 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **299/299 conformance checks pass** across 37 domains and 174 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -476,6 +476,21 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bendat & Piersol, Random Data 4e Eqs. (9.55)/(6.39) | Coherent output spectrum of a known-SNR path: gamma^2 = SNR/(1+SNR) | 0.7191 (+/-0.03) | 0.7255 | 0.006 | &#9989; |
 | Closed-form power-law slope (10*lg(2) dB/octave per unit exponent) | Pink-noise PSD slope over 20 Hz - 20 kHz, dB/octave | -3.0103 dB/oct (+/-0.05 dB/oct) | -3.0116 dB/oct | -0.001 dB/oct | &#9989; |
 | Constant-power 1/n-octave kernel (closed form) | 1/3-octave smoothed line level = P*df/(f0*(2^(1/6)-2^(-1/6))) | 0.021592 (+/-1e-07%) | 0.021592 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Correlation, time delay and envelope (B&amp;P / Knapp &amp; Carter)</b> — 100% (7/7)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Bendat & Piersol, Random Data 4e Eq. (5.21) | Cross-correlation peak of a 16-sample pure delay, samples | 16 (+/-0.001) | 16 | 0 | &#9989; |
+| Knapp & Carter 1976, Table I (PHAT) + sub-sample interpolation | GCC-PHAT estimate of an exact 12.25-sample fractional delay, samples | 12.25 (+/-0.005) | 12.2483 | -0.002 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eq. (5.101) | Cross-spectrum phase-slope estimate of the same fractional delay | 12.25 (+/-0.001) | 12.2498 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eq. (8.120) | BLWN autocorrelation coefficient at 3 samples vs sin(2piBt)/(2piBt) | -0.1559 (+/-0.02) | -0.1666 | -0.011 | &#9989; |
+| Bendat & Piersol, Random Data 4e Example 8.5 | Random error of the correlation peak: B=100 Hz, T=5 s, M/S=N/S=10 | 0.35 (+/-0.001) | 0.3493 | -0.001 | &#9989; |
+| Bendat & Piersol, Random Data 4e Table 13.1 | Hilbert transform of cos recovers sin: max interior error | 0 (+/-0) | 0 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eq. (13.27) | Envelope of an AM waveform recovers 1 + m*cos(2pi*fm*t) exactly | 0 (+/-0) | 0 | 0 | &#9989; |
 
 </details>
 

@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **290/290 conformance checks pass** across 35 domains and 165 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **292/292 conformance checks pass** across 36 domains and 167 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -612,6 +612,16 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | EBU Tech 3341:2023 Table 1 case 19 | True-peak level of the fs/4 sine at 1.41 FFS, dBTP | 3 dBTP (+0.2/-0.4 dB) | 3 dBTP | 0.001 dBTP | &#9989; |
 | EBU Tech 3342:2023 Table 1 case 1 | Loudness range of the -20/-30 dBFS tone steps, LU | 10 LU (+/-1 LU) | 10 LU | 0 LU | &#9989; |
 | EBU Tech 3342:2023 Table 1 case 3 | Loudness range of the -40/-20 dBFS tone steps, LU | 20 LU (+/-1 LU) | 20 LU | 0 LU | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>2D FDTD wave simulation (Attenborough &amp; Van Renterghem 2021, Ch. 4)</b> — 100% (2/2)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Rigid rectangular box eigenfrequency | Mode (1,1) of a 1.0 x 0.7 m rigid box, f = (c/2)*sqrt(1/lx^2 + 1/ly^2), Hz | 299.06 Hz (+/-1.5 Hz) | 298.91 Hz | -0.153 Hz | &#9989; |
+| Free-field pulse arrival delay | Probe-to-probe delay of a pulse over 0.6 m of air, (r2 - r1)/c, ms | 1.749 ms (+/-0.05 ms) | 1.756 ms | 0.007 ms | &#9989; |
 
 </details>
 

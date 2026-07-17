@@ -5073,6 +5073,47 @@ def _chk_tech3342_case3() -> Outcome:
     return numeric(
         expected, res.loudness_range, ref.EBU_TECH3342_TOL_LU, unit="LU", places=2
     )
+_FDTD = "2D FDTD wave simulation (Attenborough & Van Renterghem 2021, Ch. 4)"
+
+
+@register(
+    _FDTD,
+    "Rigid rectangular box eigenfrequency",
+    "Mode (1,1) of a 1.0 x 0.7 m rigid box, f = (c/2)*sqrt(1/lx^2 + 1/ly^2), Hz",
+)
+def _chk_fdtd_box_mode() -> Outcome:
+    lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
+    nx, ny = round(lx / dx), round(ly / dx)
+    res = ph.fdtd_simulation(
+        c, dx, 0.35, shape=(ny, nx),
+        sources=[ph.GaussianPulse(ix=7, iy=5, width=2.0e-4)],
+        probes=[(nx - 4, ny - 3)])
+    expected = 0.5 * c * math.hypot(1.0 / lx, 1.0 / ly)
+    pressure = res.pressures[0]
+    spec = np.abs(np.fft.rfft(pressure * np.hanning(pressure.size),
+                              n=8 * pressure.size))
+    freqs = np.fft.rfftfreq(8 * pressure.size, res.dt)
+    sel = (freqs > 0.93 * expected) & (freqs < 1.07 * expected)
+    measured = float(freqs[sel][np.argmax(spec[sel])])
+    return numeric(expected, measured, 1.5, unit="Hz", places=2)
+
+
+@register(
+    _FDTD,
+    "Free-field pulse arrival delay",
+    "Probe-to-probe delay of a pulse over 0.6 m of air, (r2 - r1)/c, ms",
+)
+def _chk_fdtd_pulse_delay() -> Outcome:
+    c, dx = 343.0, 0.01
+    res = ph.fdtd_simulation(
+        c, dx, 6.5e-3, shape=(200, 300),
+        sources=[ph.GaussianPulse(ix=40, iy=100, width=1.5e-4)],
+        probes=[(100, 100), (160, 100)],
+        boundaries="absorbing", absorbing_layer_cells=30)
+    t1 = res.times[int(np.argmax(res.pressures[0]))]
+    t2 = res.times[int(np.argmax(res.pressures[1]))]
+    expected = (160 - 100) * dx / c * 1e3
+    return numeric(expected, (t2 - t1) * 1e3, 0.05, unit="ms", places=3)
 
 
 # ===========================================================================

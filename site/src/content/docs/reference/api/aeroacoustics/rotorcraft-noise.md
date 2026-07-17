@@ -131,8 +131,9 @@ Pure diffraction attenuation `ΔLd` per band (guidance Eq. 42-44).
 `C″` accounts for multiple diffraction (Eq. 44: 1 for a single edge or
 an edge span `e ≤ 0.3 m`, `(1 + (5λ/e)²)/(1/3 + (5λ/e)²)` otherwise).
 A negative path difference (edge below the line of sight) still yields a
-small attenuation down to `(40/λ)·C″·δ = −2`; the screening chain skips
-bands with `δ < −λ/20` entirely (§A.4.5). At grazing incidence
+small attenuation down to `(40/λ)·C″·δ = −2`; for bands with
+`δ < −λ/20` the screening chain evaluates the clear-path ground effect
+instead of the diffraction (§A.4.5). At grazing incidence
 (`δ = 0`) the attenuation is the classical `10·log10(3) ≈ 4.8 dB`.
 
 The attenuation is returned positive (a loss); in the Doc 32 Eq. 23
@@ -610,8 +611,8 @@ oriented by the heading and tilted by the bank angle in turns (guidance
 | `scaling_factor` | Flight-condition scaling factor `F_fc` (default 2). |
 | `triangles` | Optional precomputed flight-condition triangulation (see [`flight_condition_weights`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#flight_condition_weights)). |
 | `atmospheric_method` | `"iso9613"` for the pure-tone Eq. 26/27 term (the guidance text), or `"sae"` for the SAE ARP 5534 band-integrated mapping used by the NORAH2 reference implementation (they agree to ~0.05 dB below 3.15 kHz). |
-| `terrain` | Optional digital elevation model `(x, y, z)` on the track frame (`x` and `y` strictly increasing, `z` of shape `(len(y), len(x))`, all in metres on the track datum). When given, every emission-receiver pair is evaluated over its sampled vertical section (guidance §A.4.4/A.4.5): mean-ground-plane ground effect with equivalent heights, and rubber-band diffraction where terrain blocks the line of sight; `ground_elevation` is then taken from the model. |
-| `terrain_resolution` | Section sampling step along the path, in metres (default: the elevation model's cell size). |
+| `terrain` | Optional digital elevation model `(x, y, z)` on the track frame (`x` and `y` strictly increasing, `z` of shape `(len(y), len(x))`, all in metres on the track datum). When given, every emission-receiver pair is evaluated over its sampled vertical section (guidance §A.4.4/A.4.5): mean-ground-plane ground effect with equivalent heights, and rubber-band diffraction where terrain blocks the line of sight; `ground_elevation` is then taken from the model. The model must cover the whole track and the receiver (fabricating terrain beyond its edges is refused). |
+| `terrain_resolution` | Section sampling step along the path, in metres (default: the elevation model's cell size; sections are capped at 20000 sampling intervals). |
 
 **Returns:** A [`RotorcraftEventResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcrafteventresult).
 
@@ -635,12 +636,12 @@ rotorcraft_noise_contour(
     y: NDArray[np.float64] | list[float],
     metric: str = 'exposure',
     receiver_height: float = 1.2,
-    ground_elevation: float = 0.0,
+    ground_elevation: float | NDArray[np.float64] | list[list[float]] = 0.0,
     airspeed: float | NDArray[np.float64] | list[float] | None = None,
     path_angle: float | NDArray[np.float64] | list[float] | None = None,
     heading: float | NDArray[np.float64] | list[float] | None = None,
     bank_angle: float | NDArray[np.float64] | list[float] | None = None,
-    flow_resistivity: float | str = 'G',
+    flow_resistivity: float | str | NDArray[np.float64] | list[list[float]] = 'G',
     temperature: float = 25.0,
     relative_humidity: float = 70.0,
     pressure: float = 101.325,
@@ -686,8 +687,8 @@ received histories to the exposure (`SEL`, Doc 32 Eq. 27) or maximum
 | `scaling_factor` | Flight-condition scaling factor `F_fc` (default 2). |
 | `triangles` | Optional precomputed flight-condition triangulation. |
 | `atmospheric_method` | `"iso9613"` or `"sae"` (see [`rotorcraft_event_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level)). |
-| `terrain` | Optional digital elevation model `(x, y, z)` (see [`rotorcraft_event_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level)). Every emission-receiver pair then samples its own vertical section, so the cost grows with track points times grid points; keep contour grids modest with terrain. |
-| `terrain_resolution` | Section sampling step, in metres (default: the elevation model's cell size). |
+| `terrain` | Optional digital elevation model `(x, y, z)` (see [`rotorcraft_event_level`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraft_event_level)); it must cover the whole track and grid. Every emission-receiver pair then samples its own vertical section, so the cost grows with track points times grid points; keep contour grids modest with terrain. |
+| `terrain_resolution` | Section sampling step, in metres (default: the elevation model's cell size; sections are capped at 20000 sampling intervals). |
 
 **Returns:** A [`RotorcraftNoiseContourResult`](/phonometry/reference/api/aeroacoustics/rotorcraft-noise/#rotorcraftnoisecontourresult).
 

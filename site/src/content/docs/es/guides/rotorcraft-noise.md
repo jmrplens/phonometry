@@ -217,7 +217,7 @@ entonces sus valores locales.
 
 ## Terreno: el plano medio del suelo y el apantallamiento
 
-Doc 32, 1.ª ed., asume terreno plano; su guía añade la maquinaria para
+Doc 32, 1.ª ed., supone terreno plano; su guía añade la maquinaria para
 emplazamientos reales. Una sección vertical variable se representa por su
 **plano medio del suelo** (Ec. 36-40), la recta de mínimos cuadrados a través
 de la polilínea del terreno calculada en forma cerrada; la fuente y el

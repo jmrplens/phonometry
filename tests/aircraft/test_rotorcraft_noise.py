@@ -1061,28 +1061,50 @@ def test_event_terrain_sets_receiver_elevation() -> None:
 
 def test_event_and_contour_array_argument_validation() -> None:
     hems, spd, ang, t, pos, dem = _terrain_case(np.zeros((41, 41)))
+    sigma_four = np.full(4, 2.0e5)
+    sigma_three = np.full(3, 2.0e5)
+    sigma_one = np.full(1, 2.0e5)
+    zeros_three = np.zeros(3)
+    zeros_four = np.zeros(4)
+    incomplete_dem = (dem[0], dem[1])
+    reversed_dem = (dem[0][::-1], dem[1], dem[2])
     with pytest.raises(ValueError, match="scalar"):
         rotorcraft_event_level(hems, spd, ang, t, pos, (0.0, 0.0),
-                               flow_resistivity=np.full(4, 2e5))
+                               flow_resistivity=sigma_four)
     with pytest.raises(ValueError, match="one value per grid"):
         rotorcraft_noise_contour(hems, spd, ang, t, pos, x=[0.0, 100.0],
-                                 y=[0.0, 100.0], flow_resistivity=np.full(3, 2e5))
+                                 y=[0.0, 100.0], flow_resistivity=sigma_three)
     with pytest.raises(ValueError, match="one value per grid"):
         rotorcraft_noise_contour(hems, spd, ang, t, pos, x=[0.0, 100.0],
-                                 y=[0.0, 100.0], ground_elevation=np.zeros(3))
+                                 y=[0.0, 100.0], ground_elevation=zeros_three)
     with pytest.raises(ValueError, match="elevation model"):
         rotorcraft_event_level(hems, spd, ang, t, pos, (0.0, 0.0),
-                               terrain=(dem[0], dem[1]))
+                               terrain=incomplete_dem)
     with pytest.raises(ValueError, match="strictly increasing"):
         rotorcraft_event_level(hems, spd, ang, t, pos, (0.0, 0.0),
-                               terrain=(dem[0][::-1], dem[1], dem[2]))
+                               terrain=reversed_dem)
     with pytest.raises(ValueError, match="per-path maps"):
         rotorcraft_event_level(hems, spd, ang, t, pos, (0.0, 0.0),
-                               terrain=dem, flow_resistivity=np.full(1, 2e5))
+                               terrain=dem, flow_resistivity=sigma_one)
     with pytest.raises(ValueError, match="left scalar"):
         rotorcraft_noise_contour(hems, spd, ang, t, pos, x=[0.0, 100.0],
                                  y=[0.0, 100.0], terrain=dem,
-                                 ground_elevation=np.zeros(4))
+                                 ground_elevation=zeros_four)
+
+
+def test_terrain_must_cover_track_and_receivers() -> None:
+    # Points beyond the elevation model would otherwise use fabricated edge
+    # elevations; both the track and the receivers must be covered.
+    hems, spd, ang, t, pos, dem = _terrain_case(np.zeros((41, 41)))
+    small = (np.linspace(-500.0, 500.0, 11), np.linspace(-500.0, 500.0, 11),
+             np.zeros((11, 11)))   # track spans y = -1000..1025: not covered
+    with pytest.raises(ValueError, match="cover the whole track"):
+        rotorcraft_event_level(hems, spd, ang, t, pos, (0.0, 0.0), terrain=small)
+    with pytest.raises(ValueError, match="cover the whole receiver"):
+        rotorcraft_event_level(hems, spd, ang, t, pos, (2500.0, 0.0), terrain=dem)
+    with pytest.raises(ValueError, match="cover the whole receiver grid"):
+        rotorcraft_noise_contour(hems, spd, ang, t, pos, x=[-100.0, 2500.0],
+                                 y=[0.0, 100.0], terrain=dem)
 
 
 def test_contour_mixed_sigma_matches_stitched_scalar_runs() -> None:

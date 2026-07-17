@@ -602,8 +602,9 @@ def diffraction_attenuation(
     ``C″`` accounts for multiple diffraction (Eq. 44: 1 for a single edge or
     an edge span ``e ≤ 0.3 m``, ``(1 + (5λ/e)²)/(1/3 + (5λ/e)²)`` otherwise).
     A negative path difference (edge below the line of sight) still yields a
-    small attenuation down to ``(40/λ)·C″·δ = −2``; the screening chain skips
-    bands with ``δ < −λ/20`` entirely (§A.4.5). At grazing incidence
+    small attenuation down to ``(40/λ)·C″·δ = −2``; for bands with
+    ``δ < −λ/20`` the screening chain evaluates the clear-path ground effect
+    instead of the diffraction (§A.4.5). At grazing incidence
     (``δ = 0``) the attenuation is the classical ``10·log10(3) ≈ 4.8 dB``.
 
     The attenuation is returned positive (a loss); in the Doc 32 Eq. 23
@@ -1453,12 +1454,12 @@ def _event_setup(
     positions: "NDArray[np.float64] | list[list[float]]",
     *,
     receiver_height: float,
-    ground_elevation: "float | NDArray[np.float64] | list[float]",
+    ground_elevation: "float | NDArray[np.float64] | list[float] | list[list[float]]",
     airspeed: "float | NDArray[np.float64] | list[float] | None",
     path_angle: "float | NDArray[np.float64] | list[float] | None",
     heading: "float | NDArray[np.float64] | list[float] | None",
     bank_angle: "float | NDArray[np.float64] | list[float] | None",
-    flow_resistivity: "float | str | NDArray[np.float64] | list[float]",
+    flow_resistivity: "float | str | NDArray[np.float64] | list[float] | list[list[float]]",
     temperature: float,
     relative_humidity: float,
     pressure: float,
@@ -1482,34 +1483,11 @@ def _event_setup(
     t, p = _validated_track(times, positions)
     hr = require_positive(receiver_height, "receiver_height")
     dem = _validated_terrain(terrain)
-    if dem is not None and terrain_resolution is not None:
-        spacing = require_positive(terrain_resolution, "terrain_resolution")
-    elif dem is not None:
-        spacing = float(min(np.min(np.diff(dem[0])), np.min(np.diff(dem[1]))))
-    else:
-        spacing = 0.0
-    if isinstance(flow_resistivity, (str, float, int)):
-        sigma: "float | NDArray[np.float64]" = _resolve_flow_resistivity(
-            flow_resistivity if isinstance(flow_resistivity, str) else float(flow_resistivity))
-    else:
-        if dem is not None:
-            raise ValueError("With 'terrain', 'flow_resistivity' must be a single "
-                             "value or class (per-path maps are not supported).")
-        sigma = require_positive_array(
-            np.asarray(flow_resistivity, dtype=np.float64).ravel(), "flow_resistivity")
-    ground: "float | NDArray[np.float64]"
-    if np.isscalar(ground_elevation):
-        if not np.isfinite(ground_elevation):
-            raise ValueError("'ground_elevation' must be finite.")
-        ground = float(ground_elevation)  # type: ignore[arg-type]
-    else:
-        arr = np.asarray(ground_elevation, dtype=np.float64).ravel()
-        if not np.all(np.isfinite(arr)):
-            raise ValueError("'ground_elevation' must be finite.")
-        if dem is not None:
-            raise ValueError("With 'terrain', 'ground_elevation' comes from the "
-                             "elevation model and must be left scalar.")
-        ground = arr
+    if dem is not None:
+        _require_dem_coverage(dem, p[:, 0], p[:, 1], "track")
+    spacing = _section_spacing(dem, terrain_resolution)
+    sigma = _setup_resistivity(flow_resistivity, dem)
+    ground = _setup_ground_elevation(ground_elevation, dem)
     method = require_choice(atmospheric_method, "atmospheric_method", ("iso9613", "sae"))
     spd, gam, hdg, bank = _resolved_track_state(
         t, p, airspeed, path_angle, heading, bank_angle)
@@ -1526,6 +1504,69 @@ def _event_setup(
         sigma=sigma, alpha=alpha, rref=rref, scaling_factor=scaling_factor,
         triangles=triangles, band_integrated=method == "sae",
         terrain=dem, terrain_resolution=spacing)
+
+
+def _section_spacing(
+    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None",
+    terrain_resolution: "float | None",
+) -> float:
+    """The section sampling step: the given resolution or the model's cell size."""
+    if dem is None:
+        return 0.0
+    if terrain_resolution is not None:
+        return require_positive(terrain_resolution, "terrain_resolution")
+    return float(min(np.min(np.diff(dem[0])), np.min(np.diff(dem[1]))))
+
+
+def _setup_resistivity(
+    flow_resistivity: "float | str | NDArray[np.float64] | list[float] | list[list[float]]",
+    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None",
+) -> "float | NDArray[np.float64]":
+    """The scalar (or per-receiver) flow resistivity of an event run."""
+    if isinstance(flow_resistivity, (str, float, int)):
+        return _resolve_flow_resistivity(
+            flow_resistivity if isinstance(flow_resistivity, str)
+            else float(flow_resistivity))
+    if dem is not None:
+        raise ValueError("With 'terrain', 'flow_resistivity' must be a single "
+                         "value or class (per-path maps are not supported).")
+    return require_positive_array(
+        np.asarray(flow_resistivity, dtype=np.float64).ravel(), "flow_resistivity")
+
+
+def _setup_ground_elevation(
+    ground_elevation: "float | NDArray[np.float64] | list[float] | list[list[float]]",
+    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]] | None",
+) -> "float | NDArray[np.float64]":
+    """The scalar (or per-receiver) ground elevation of an event run."""
+    if np.isscalar(ground_elevation):
+        if not np.isfinite(ground_elevation):
+            raise ValueError("'ground_elevation' must be finite.")
+        return float(ground_elevation)  # type: ignore[arg-type]
+    arr = np.asarray(ground_elevation, dtype=np.float64).ravel()
+    if not np.all(np.isfinite(arr)):
+        raise ValueError("'ground_elevation' must be finite.")
+    if dem is not None:
+        raise ValueError("With 'terrain', 'ground_elevation' comes from the "
+                         "elevation model and must be left scalar.")
+    return arr
+
+
+def _require_dem_coverage(
+    dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]",
+    x: "NDArray[np.float64]", y: "NDArray[np.float64]", what: str,
+) -> None:
+    """Reject points outside the elevation model's horizontal extent.
+
+    Every vertical section joins a track point to a receiver, so covering
+    both keeps all sampled points inside the model; silently clamping to the
+    edge would fabricate terrain instead.
+    """
+    tx, ty, _ = dem
+    if (np.min(x) < tx[0] or np.max(x) > tx[-1]
+            or np.min(y) < ty[0] or np.max(y) > ty[-1]):
+        raise ValueError(f"'terrain' must cover the whole {what} (x in "
+                         f"[{tx[0]:g}, {tx[-1]:g}], y in [{ty[0]:g}, {ty[-1]:g}]).")
 
 
 def _validated_terrain(
@@ -1552,7 +1593,11 @@ def _dem_height(
     dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]",
     x: "NDArray[np.float64]", y: "NDArray[np.float64]",
 ) -> "NDArray[np.float64]":
-    """Bilinear elevation lookup, clamped to the model's edges."""
+    """Bilinear elevation lookup.
+
+    Coverage is validated upstream (:func:`_require_dem_coverage`); the edge
+    clamp only guards floating-point round-off exactly on the boundary.
+    """
     tx, ty, tz = dem
     cx = np.clip(np.searchsorted(tx, x) - 1, 0, tx.size - 2)
     cy = np.clip(np.searchsorted(ty, y) - 1, 0, ty.size - 2)
@@ -1623,6 +1668,11 @@ def _event_histories(
     return trec, la, spectra
 
 
+#: Upper bound on samples per vertical section (a 200 km path at the 10 m
+#: default resolution; guards degenerate terrain_resolution requests).
+_MAX_SECTION_SAMPLES = 20001
+
+
 def _terrain_adjustments(
     setup: _EventSetup,
     dem: "tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]",
@@ -1645,7 +1695,8 @@ def _terrain_adjustments(
     sx, sy, sz = float(position[0]), float(position[1]), float(position[2])
     for i in range(receivers.shape[0]):
         span = float(dp[i])
-        n = max(2, int(math.ceil(span / setup.terrain_resolution)) + 1)
+        n = min(max(2, int(math.ceil(span / setup.terrain_resolution)) + 1),
+                _MAX_SECTION_SAMPLES)
         t = np.linspace(0.0, 1.0, n)
         px = sx + (receivers[i, 0] - sx) * t
         py = sy + (receivers[i, 1] - sy) * t
@@ -1844,8 +1895,11 @@ def rotorcraft_event_level(
         section (guidance §A.4.4/A.4.5): mean-ground-plane ground effect with
         equivalent heights, and rubber-band diffraction where terrain blocks
         the line of sight; ``ground_elevation`` is then taken from the model.
+        The model must cover the whole track and the receiver (fabricating
+        terrain beyond its edges is refused).
     :param terrain_resolution: Section sampling step along the path, in
-        metres (default: the elevation model's cell size).
+        metres (default: the elevation model's cell size; sections are capped
+        at 20000 sampling intervals).
     :return: A :class:`RotorcraftEventResult`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -1866,6 +1920,7 @@ def rotorcraft_event_level(
         raise ValueError("A single receiver takes scalar 'flow_resistivity' and "
                          "'ground_elevation'; arrays are for the contour grid.")
     if setup.terrain is not None:
+        _require_dem_coverage(setup.terrain, rx[:1], rx[1:2], "receiver")
         local = float(_dem_height(setup.terrain, rx[:1], rx[1:2])[0])
     else:
         local = float(np.atleast_1d(setup.ground_elevation)[0])
@@ -1909,12 +1964,12 @@ def rotorcraft_noise_contour(
     y: "NDArray[np.float64] | list[float]",
     metric: str = "exposure",
     receiver_height: float = 1.2,
-    ground_elevation: float = 0.0,
+    ground_elevation: "float | NDArray[np.float64] | list[list[float]]" = 0.0,
     airspeed: "float | NDArray[np.float64] | list[float] | None" = None,
     path_angle: "float | NDArray[np.float64] | list[float] | None" = None,
     heading: "float | NDArray[np.float64] | list[float] | None" = None,
     bank_angle: "float | NDArray[np.float64] | list[float] | None" = None,
-    flow_resistivity: "float | str" = "G",
+    flow_resistivity: "float | str | NDArray[np.float64] | list[list[float]]" = "G",
     temperature: float = 25.0,
     relative_humidity: float = 70.0,
     pressure: float = 101.325,
@@ -1963,11 +2018,13 @@ def rotorcraft_noise_contour(
     :param atmospheric_method: ``"iso9613"`` or ``"sae"`` (see
         :func:`rotorcraft_event_level`).
     :param terrain: Optional digital elevation model ``(x, y, z)`` (see
-        :func:`rotorcraft_event_level`). Every emission-receiver pair then
-        samples its own vertical section, so the cost grows with track points
-        times grid points; keep contour grids modest with terrain.
+        :func:`rotorcraft_event_level`); it must cover the whole track and
+        grid. Every emission-receiver pair then samples its own vertical
+        section, so the cost grows with track points times grid points; keep
+        contour grids modest with terrain.
     :param terrain_resolution: Section sampling step, in metres (default: the
-        elevation model's cell size).
+        elevation model's cell size; sections are capped at 20000 sampling
+        intervals).
     :return: A :class:`RotorcraftNoiseContourResult`.
     :raises ValueError: If the inputs are invalid.
     """
@@ -1997,6 +2054,7 @@ def rotorcraft_noise_contour(
             raise ValueError(f"A per-receiver '{name}' must carry one value per grid "
                              "point, shape (len(y), len(x)).")
     if setup.terrain is not None:
+        _require_dem_coverage(setup.terrain, gx, gy, "receiver grid")
         local = _dem_height(setup.terrain, xx.ravel(), yy.ravel())
     elif np.isscalar(setup.ground_elevation):
         local = np.full(n_g, float(np.atleast_1d(setup.ground_elevation)[0]))

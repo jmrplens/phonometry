@@ -4783,7 +4783,7 @@ def _chk_bs1770_anchor() -> Outcome:
     "Integrated loudness of the -23 dBFS stereo sine, LUFS",
 )
 def _chk_tech3341_case1() -> Outcome:
-    case, segments, expected = ref.EBU_TECH3341_INTEGRATED_CASES[0]
+    _, segments, expected = ref.EBU_TECH3341_INTEGRATED_CASES[0]
     computed = ph.integrated_loudness(_ebu_stereo_steps(segments), _EBU_FS)
     return numeric(expected, computed, ref.EBU_TECH3341_TOL_LU, unit="LUFS", places=2)
 
@@ -4794,7 +4794,7 @@ def _chk_tech3341_case1() -> Outcome:
     "Gated integrated loudness of the -26/-20/-26 dBFS steps, LUFS",
 )
 def _chk_tech3341_case5() -> Outcome:
-    case, segments, expected = ref.EBU_TECH3341_INTEGRATED_CASES[4]
+    _, segments, expected = ref.EBU_TECH3341_INTEGRATED_CASES[4]
     computed = ph.integrated_loudness(_ebu_stereo_steps(segments), _EBU_FS)
     return numeric(expected, computed, ref.EBU_TECH3341_TOL_LU, unit="LUFS", places=2)
 
@@ -4861,7 +4861,7 @@ def _chk_tech3341_case19() -> Outcome:
     "Loudness range of the -20/-30 dBFS tone steps, LU",
 )
 def _chk_tech3342_case1() -> Outcome:
-    case, levels, expected = ref.EBU_TECH3342_LRA_CASES[0]
+    _, levels, expected = ref.EBU_TECH3342_LRA_CASES[0]
     x = _ebu_stereo_steps(tuple((lvl, 20.0) for lvl in levels))
     res = ph.program_loudness(x, _EBU_FS)
     return numeric(
@@ -4875,7 +4875,7 @@ def _chk_tech3342_case1() -> Outcome:
     "Loudness range of the -40/-20 dBFS tone steps, LU",
 )
 def _chk_tech3342_case3() -> Outcome:
-    case, levels, expected = ref.EBU_TECH3342_LRA_CASES[2]
+    _, levels, expected = ref.EBU_TECH3342_LRA_CASES[2]
     x = _ebu_stereo_steps(tuple((lvl, 20.0) for lvl in levels))
     res = ph.program_loudness(x, _EBU_FS)
     return numeric(

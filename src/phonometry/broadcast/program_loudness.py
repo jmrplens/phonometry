@@ -163,18 +163,23 @@ def k_weighting_coefficients(
     At 48 kHz the tabulated values are returned verbatim; at any other rate
     the biquads are re-derived through their analog prototypes so the
     frequency response matches the 48 kHz specification, as the
-    Recommendation requires.
+    Recommendation requires. At 32 kHz and above the redesigned response
+    stays within 0.02 dB of the specification across the audio band; at
+    16 kHz the bilinear warping near Nyquist grows to about 0.13 dB while
+    the 997 Hz anchor still holds within 0.03 LU. Below 16 kHz the warping
+    would break the +/-0.1 LU metering tolerance, so such rates are
+    rejected.
 
-    :param fs: Sample rate, Hz (at least 8 kHz, so both filter corners stay
-        well below the Nyquist frequency).
+    :param fs: Sample rate, Hz (16 kHz or higher).
     :return: ``(stage1, stage2)``, each a ``(b, a)`` coefficient pair: the
         spherical-head shelving filter and the RLB high-pass filter.
     """
     fs = require_positive(float(fs), "fs")
-    if fs < 8000.0:
+    if fs < 16000.0:
         raise ValueError(
-            "the K-weighting redesign requires fs >= 8000 Hz so the shelving "
-            f"response is preserved below Nyquist; got fs={fs:g}."
+            "the K-weighting redesign requires fs >= 16000 Hz; below that "
+            "the bilinear warping no longer preserves the specified response "
+            f"within the metering tolerance; got fs={fs:g}."
         )
     if fs == _TABLE_RATE:
         return (
@@ -393,15 +398,21 @@ def true_peak_level(
         units (1.0 = 0 dBFS).
     :param fs: Sample rate, Hz.
     :param oversample: Integer oversampling factor >= 1, or ``None`` (the
-        default) for the smallest factor that reaches 192 kHz, with the
-        Annex 2 minimum of 4 below 96 kHz.
+        default) for the smallest factor whose oversampled rate reaches
+        192 kHz (4 at 48 kHz, 2 at 96 kHz, 1 at 192 kHz and above, matching
+        the Annex 2 guidance that higher input rates need proportionately
+        less oversampling).
     :return: The true-peak level in dBTP: a float for 1D input, an array of
         shape ``(channels,)`` for 2D input.
     """
     fs = require_positive(float(fs), "fs")
     if oversample is None:
         oversample = max(1, ceil(_TRUE_PEAK_RATE / fs))
-    if not isinstance(oversample, (int, np.integer)) or oversample < 1:
+    if (
+        isinstance(oversample, bool)
+        or not isinstance(oversample, (int, np.integer))
+        or oversample < 1
+    ):
         raise ValueError("oversample must be an integer >= 1.")
     x_proc = _typesignal(x)
     if x_proc.shape[-1] == 0:
@@ -441,14 +452,28 @@ def integrated_loudness(
     :return: The programme loudness, LUFS (``-inf`` when the signal is
         shorter than one gating block or entirely below the absolute gate).
     """
-    x_proc = np.atleast_2d(_typesignal(x))
-    if x_proc.shape[-1] == 0:
-        raise ValueError("Input signal 'x' cannot be empty.")
-    w = _resolve_weights(x_proc.shape[0], weights)
+    x_proc, w = _prepare_signal(x, weights)
     csum = _power_cumsum(k_weighting(x_proc, fs))
     n_block, step = _block_geometry(fs)
     block_loudness, _ = _windowed_loudness(csum, w, n_block, step)
     return _integrated_from_blocks(block_loudness)[0]
+
+
+def _prepare_signal(
+    x: List[float] | np.ndarray, weights: ArrayLike | None
+) -> tuple[np.ndarray, np.ndarray]:
+    """Coerce to 2D float64, reject empty/non-finite input, resolve weights.
+
+    A NaN or infinity anywhere in the signal would poison every gating
+    block, empty the gate and silently read as digital silence (-inf), so
+    non-finite input is rejected up front.
+    """
+    x_proc = np.atleast_2d(_typesignal(x))
+    if x_proc.shape[-1] == 0:
+        raise ValueError("Input signal 'x' cannot be empty.")
+    if not np.all(np.isfinite(x_proc)):
+        raise ValueError("Input signal 'x' must be finite (no NaN/inf samples).")
+    return x_proc, _resolve_weights(x_proc.shape[0], weights)
 
 
 def _power_cumsum(y: np.ndarray) -> np.ndarray:
@@ -563,13 +588,10 @@ def program_loudness(
         smallest factor reaching 192 kHz (4 at 48 kHz).
     :return: The frozen :class:`ProgramLoudnessResult`.
     """
-    x_proc = np.atleast_2d(_typesignal(x))
-    if x_proc.shape[-1] == 0:
-        raise ValueError("Input signal 'x' cannot be empty.")
+    x_proc, w = _prepare_signal(x, weights)
     fs = require_positive(float(fs), "fs")
     momentary_step = require_positive(float(momentary_step), "momentary_step")
     short_term_step = require_positive(float(short_term_step), "short_term_step")
-    w = _resolve_weights(x_proc.shape[0], weights)
 
     csum = _power_cumsum(k_weighting(x_proc, fs))
     n_block, block_step = _block_geometry(fs)
@@ -587,7 +609,7 @@ def program_loudness(
     s_step = max(1, int(round(short_term_step * fs)))
     short_term, s_ends = _windowed_loudness(csum, w, n_short, s_step)
 
-    lra = loudness_range(short_term) if short_term.size else 0.0
+    lra = loudness_range(short_term)
     lra_low, lra_high = _lra_edges(short_term)
 
     tp_channels = np.atleast_1d(

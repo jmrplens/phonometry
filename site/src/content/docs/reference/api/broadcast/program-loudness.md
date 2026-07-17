@@ -142,13 +142,18 @@ K-weighting biquad coefficients (BS.1770-5 Annex 1, Tables 1-2).
 At 48 kHz the tabulated values are returned verbatim; at any other rate
 the biquads are re-derived through their analog prototypes so the
 frequency response matches the 48 kHz specification, as the
-Recommendation requires.
+Recommendation requires. At 32 kHz and above the redesigned response
+stays within 0.02 dB of the specification across the audio band; at
+16 kHz the bilinear warping near Nyquist grows to about 0.13 dB while
+the 997 Hz anchor still holds within 0.03 LU. Below 16 kHz the warping
+would break the +/-0.1 LU metering tolerance, so such rates are
+rejected.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `fs` | Sample rate, Hz (at least 8 kHz, so both filter corners stay well below the Nyquist frequency). |
+| `fs` | Sample rate, Hz (16 kHz or higher). |
 
 **Returns:** `(stage1, stage2)`, each a `(b, a)` coefficient pair: the spherical-head shelving filter and the RLB high-pass filter.
 
@@ -301,6 +306,6 @@ and inter-sample peaks above full scale give positive values.
 | :--- | :--- |
 | `x` | Input signal (1D or 2D `[channels, samples]`), full-scale units (1.0 = 0 dBFS). |
 | `fs` | Sample rate, Hz. |
-| `oversample` | Integer oversampling factor >= 1, or `None` (the default) for the smallest factor that reaches 192 kHz, with the Annex 2 minimum of 4 below 96 kHz. |
+| `oversample` | Integer oversampling factor >= 1, or `None` (the default) for the smallest factor whose oversampled rate reaches 192 kHz (4 at 48 kHz, 2 at 96 kHz, 1 at 192 kHz and above, matching the Annex 2 guidance that higher input rates need proportionately less oversampling). |
 
 **Returns:** The true-peak level in dBTP: a float for 1D input, an array of shape `(channels,)` for 2D input.

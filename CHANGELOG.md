@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   sharing the inter-sample-peak machinery of `lc_peak`), `k_weighting` /
   `k_weighting_coefficients` (the Annex 1 biquads, verbatim at 48 kHz and
   redesigned through the analog prototype elsewhere, response within
-  0.016 dB) and `channel_weight` (the Annex 3 position-dependent weights,
+  0.02 dB at 32 kHz and above) and `channel_weight` (the Annex 3 position-dependent weights,
   Table 4). Validated against every synthesizable EBU Tech 3341 minimum
   requirements signal (cases 1-6 and 9-23) and Tech 3342 LRA signal (cases
   1-4) at their official tolerances, the 997 Hz / -3.01 LKFS anchor and the

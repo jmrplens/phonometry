@@ -46,14 +46,17 @@ print(round(broadcast.integrated_loudness(x, fs), 2))   # -3.01  LKFS
 Los coeficientes de los biquads están tabulados a 48 kHz (Tablas 1-2) y a
 esa frecuencia se devuelven literalmente; cualquier otra frecuencia los
 rederiva a través del prototipo analógico para que la respuesta coincida con
-la especificación (desviación máxima en torno a 0,016 dB):
+la especificación (dentro de 0,02 dB a 32 kHz y por encima; las frecuencias
+por debajo de 16 kHz se rechazan):
 
 ```python
+import numpy as np
 from phonometry import broadcast
 
 (b1, a1), (b2, a2) = broadcast.k_weighting_coefficients(48000)
 print(b1)   # [ 1.53512486 -2.69169619  1.19839281]  (Tabla 1, literal)
-y = broadcast.k_weighting(x, fs)              # la propia señal filtrada
+y = broadcast.k_weighting(np.random.default_rng(0).standard_normal(48000),
+                          48000)              # la propia señal filtrada
 ```
 
 ## 2. Las puertas y la sonoridad de programa
@@ -84,9 +87,10 @@ print(round(res.relative_threshold, 1))    # -39.0  LUFS
 
 Una media sin puertas sobre los mismos 40 s quedaría cerca de −29 LUFS: las
 puertas son lo que hace que los programas de gran rango de sonoridad casen
-en antena. EBU R 128 normaliza este valor integrado a **−23,0 LUFS**
-(±0,5 LU en general, ±1,0 LU cuando las restricciones del directo lo
-exigen).
+en antena. EBU R 128 normaliza este valor integrado a **−23,0 LUFS**; cuando
+el objetivo no es alcanzable en la práctica (programas en directo, por
+ejemplo) se permite una tolerancia de ±1,0 LU, y los flujos de control de
+calidad admiten ±0,2 LU por error de medida.
 
 ## 3. Modo EBU: momentánea, corto plazo, integrada
 

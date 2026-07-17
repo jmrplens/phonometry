@@ -137,8 +137,11 @@ def test_k_weighting_shape() -> None:
 
 
 def test_k_weighting_rejects_low_rate_and_empty() -> None:
-    with pytest.raises(ValueError, match="fs >= 8000"):
-        k_weighting_coefficients(4000.0)
+    # Below 16 kHz the bilinear warping breaks the +/-0.1 LU tolerance (the
+    # 997 Hz anchor drifts to about -2.89 LKFS at 8 kHz), so such rates raise.
+    for fs in (4000.0, 8000.0):
+        with pytest.raises(ValueError, match="fs >= 16000"):
+            k_weighting_coefficients(fs)
     with pytest.raises(ValueError, match="empty"):
         k_weighting(np.empty(0), FS)
 
@@ -354,6 +357,8 @@ def test_true_peak_defaults_and_validation() -> None:
     assert true_peak_level(x, FS) == true_peak_level(x, FS, oversample=4)
     with pytest.raises(ValueError, match="oversample"):
         true_peak_level(x, FS, oversample=0)
+    with pytest.raises(ValueError, match="oversample"):
+        true_peak_level(x, FS, oversample=True)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="empty"):
         true_peak_level(np.empty(0), FS)
     # Silence: -inf dBTP, no runtime warnings leak.
@@ -551,6 +556,13 @@ def test_program_loudness_validation() -> None:
         program_loudness(_stereo(_sine(-23.0, 1.0)), FS, momentary_step=0.0)
     with pytest.raises(ValueError, match="short_term_step"):
         program_loudness(_stereo(_sine(-23.0, 1.0)), FS, short_term_step=-1.0)
+    # A NaN-poisoned programme must not silently measure as digital silence.
+    poisoned = _stereo(_sine(-23.0, 1.0))
+    poisoned[0, 100] = np.nan
+    with pytest.raises(ValueError, match="finite"):
+        program_loudness(poisoned, FS)
+    with pytest.raises(ValueError, match="finite"):
+        integrated_loudness(poisoned, FS)
 
 
 def test_plot_smoke() -> None:

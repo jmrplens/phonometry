@@ -42,15 +42,17 @@ print(round(broadcast.integrated_loudness(x, fs), 2))   # -3.01  LKFS
 
 The biquad coefficients are tabulated at 48 kHz (Tables 1-2) and returned
 verbatim at that rate; any other rate re-derives them through the analog
-prototype so the response matches the specification (worst deviation about
-0.016 dB):
+prototype so the response matches the specification (within 0.02 dB at
+32 kHz and above; rates below 16 kHz are rejected):
 
 ```python
+import numpy as np
 from phonometry import broadcast
 
 (b1, a1), (b2, a2) = broadcast.k_weighting_coefficients(48000)
 print(b1)   # [ 1.53512486 -2.69169619  1.19839281]  (Table 1, verbatim)
-y = broadcast.k_weighting(x, fs)              # the filtered signal itself
+y = broadcast.k_weighting(np.random.default_rng(0).standard_normal(48000),
+                          48000)              # the filtered signal itself
 ```
 
 ## 2. Gating and the programme loudness
@@ -81,8 +83,10 @@ print(round(res.relative_threshold, 1))    # -39.0  LUFS
 
 An ungated mean over the same 40 s would sit near −29 LUFS: the gating is
 what makes wide-loudness-range programmes match on air. EBU R 128 normalises
-this integrated value to **−23.0 LUFS** (±0.5 LU in general, ±1.0 LU where
-live constraints demand it).
+this integrated value to **−23.0 LUFS**; where the target is not practically
+achievable (live programmes, for example) a tolerance of ±1.0 LU is
+permitted, and quality-control workflows allow ±0.2 LU for measurement
+error.
 
 ## 3. EBU Mode: momentary, short-term, integrated
 

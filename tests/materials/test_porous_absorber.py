@@ -137,12 +137,13 @@ class TestDelanyBazley:
         )
 
     def test_rejects_bad_inputs(self) -> None:
+        f = np.array([100.0])
         with pytest.raises(ValueError, match="preset"):
-            delany_bazley(np.array([100.0]), 10000.0, coefficients="nope")
+            delany_bazley(f, 10000.0, coefficients="nope")
         with pytest.raises(ValueError, match="8 values"):
-            delany_bazley(np.array([100.0]), 10000.0, coefficients=(1.0, 2.0))
+            delany_bazley(f, 10000.0, coefficients=(1.0, 2.0))
         with pytest.raises(ValueError):
-            delany_bazley(np.array([100.0]), -1.0)
+            delany_bazley(f, -1.0)
 
 
 # ---------------------------------------------------------------------------
@@ -472,15 +473,17 @@ class TestLayeredAbsorber:
     def test_rejects_bad_inputs(self) -> None:
         f = _grid(100.0, 200.0, 5)
         med = miki(f, 20000.0)
+        layers = [PorousLayer(0.05, med)]
         with pytest.raises(ValueError, match="at least one layer"):
             layered_absorber(f, [])
         with pytest.raises(ValueError, match="angle"):
-            layered_absorber(f, [PorousLayer(0.05, med)], angle=np.pi / 2.0)
+            layered_absorber(f, layers, angle=np.pi / 2.0)
         with pytest.raises(ValueError, match="termination"):
-            layered_absorber(f, [PorousLayer(0.05, med)], termination="soft")
+            layered_absorber(f, layers, termination="soft")
         other = miki(_grid(100.0, 200.0, 7), 20000.0)
+        mismatched = [PorousLayer(0.05, other)]
         with pytest.raises(ValueError, match="frequency vector"):
-            layered_absorber(f, [PorousLayer(0.05, other)])
+            layered_absorber(f, mismatched)
 
 
 # ---------------------------------------------------------------------------
@@ -667,17 +670,16 @@ class TestResonantSheets:
         """Angles within ~1e-6 of pi/2 would drive an air layer's kx to
         exactly zero (inf * 0 = nan); they are rejected up front."""
         f = np.array([1000.0])
+        layers = [AirLayer(0.05)]
         with pytest.raises(ValueError, match="angle"):
-            layered_absorber(
-                f, [AirLayer(0.05)], angle=np.pi / 2.0 - 1e-9
-            )
+            layered_absorber(f, layers, angle=np.pi / 2.0 - 1e-9)
 
     def test_termination_array_length_mismatch_rejected(self) -> None:
         f = np.array([500.0, 1000.0])
+        layers = [AirLayer(0.05)]
+        termination = np.array([800.0 + 0j] * 3)
         with pytest.raises(ValueError, match="termination"):
-            layered_absorber(
-                f, [AirLayer(0.05)], termination=np.array([800.0 + 0j] * 3)
-            )
+            layered_absorber(f, layers, termination=termination)
 
     def test_perforated_plate_open_area_one_is_nearly_transparent(self) -> None:
         """eps -> 1: only the small visco-thermal terms remain."""
@@ -696,6 +698,9 @@ class TestRandomIncidence:
         """Mechel D.5 Eq. (10) == direct quadrature of Eq. (9), any limit."""
         rng = np.random.default_rng(7)
         z = rng.uniform(0.3, 5.0, 20) + 1j * rng.uniform(-4.0, 4.0, 20)
+        # Include exactly real impedances so the g2 = 0 limit branch is
+        # verified against the reference quadrature too.
+        z = np.append(z, [0.7 + 0.0j, 2.0 + 0.0j, 5.0 + 0.0j])
         for lim in (np.pi / 2.0, np.radians(78.0)):
             closed = statistical_absorption(z, angle_limit=lim)
             theta = np.linspace(0.0, lim, 20001)
@@ -723,6 +728,23 @@ class TestRandomIncidence:
         for g2 in (1e-9, 1e-12, 1e-15, -1e-12):
             near = statistical_absorption(np.array([2.0 + 1j * g2]))
             np.testing.assert_allclose(exact, near, atol=1e-9)
+
+    def test_statistical_absorption_real_impedance_closed_form(self) -> None:
+        """Exactly real z against the classical g2 = 0 closed form.
+
+        Integrating ``alpha(theta) = 4 xi cos(theta) / (1 + xi cos(theta))^2``
+        over the Paris weight gives, for real ``z = xi``,
+        ``alpha_dif = (8/xi)(1 + 1/(1 + xi)) - (16/xi^2) ln(1 + xi)``
+        (the printed g2 = 0 special case of Mechel D.5 Eq. (10); also
+        Kuttruff, *Room Acoustics*). Pins the exact-zero-imaginary-part
+        branch independently of the complex formula.
+        """
+        xi = np.array([0.7, 1.0, 2.0, 5.0])
+        expected = (8.0 / xi) * (1.0 + 1.0 / (1.0 + xi)) - (
+            16.0 / xi**2
+        ) * np.log(1.0 + xi)
+        alpha = statistical_absorption(xi.astype(complex))
+        np.testing.assert_allclose(alpha, expected, rtol=1e-13)
 
     def test_published_maximum(self) -> None:
         """Mechel D.5: max alpha_dif over locally reacting planes = 0.951."""
@@ -755,13 +777,11 @@ class TestRandomIncidence:
     def test_rejects_bad_inputs(self) -> None:
         f = np.array([500.0])
         med = miki(f, 15000.0)
+        layers = [PorousLayer(0.05, med)]
         with pytest.raises(ValueError, match="angle_limit"):
-            diffuse_field_absorption(
-                f, [PorousLayer(0.05, med)], angle_limit=2.0
-            )
+            diffuse_field_absorption(f, layers, angle_limit=2.0)
         with pytest.raises(ValueError, match="quadrature_points"):
-            diffuse_field_absorption(
-                f, [PorousLayer(0.05, med)], quadrature_points=1
-            )
+            diffuse_field_absorption(f, layers, quadrature_points=1)
+        negative_real = np.array([-1.0 + 0.5j])
         with pytest.raises(ValueError, match="real part"):
-            statistical_absorption(np.array([-1.0 + 0.5j]))
+            statistical_absorption(negative_real)

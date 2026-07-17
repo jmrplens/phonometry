@@ -92,6 +92,9 @@ _HEAT_CAPACITY_RATIO = 1.4
 #: Default atmospheric pressure, in Pa.
 _ATMOSPHERIC_PRESSURE = 101325.0
 
+#: Shared validation message for fractional open areas.
+_OPEN_AREA_MESSAGE = "'open_area' must not exceed 1."
+
 #: Delany-Bazley power-law coefficient presets ``(C1..C8)`` from Bies 5e
 #: Appendix D, Table D.1: ``Zc = rho c (1 + C1 X^-C2 - j C3 X^-C4)`` and
 #: ``k = (w/c)(1 + C5 X^-C6 - j C7 X^-C8)`` with ``X = rho f / sigma``.
@@ -450,7 +453,7 @@ def perforation_end_correction(open_area: float) -> float:
     """
     eps = require_positive(open_area, "open_area")
     if eps > 1.0:
-        raise ValueError("'open_area' must not exceed 1.")
+        raise ValueError(_OPEN_AREA_MESSAGE)
     return float(0.85 * (1.0 - 1.47 * eps**0.5 + 0.47 * eps**1.5))
 
 
@@ -495,7 +498,7 @@ def perforated_plate_impedance(
     a = require_positive(hole_radius, "hole_radius")
     eps = require_positive(open_area, "open_area")
     if eps > 1.0:
-        raise ValueError("'open_area' must not exceed 1.")
+        raise ValueError(_OPEN_AREA_MESSAGE)
     rho0 = require_positive(air_density, "air_density")
     eta = require_positive(viscosity, "viscosity")
     delta = (
@@ -552,7 +555,7 @@ def microperforated_plate_impedance(
     a = require_positive(hole_radius, "hole_radius")
     eps = require_positive(open_area, "open_area")
     if eps > 1.0:
-        raise ValueError("'open_area' must not exceed 1.")
+        raise ValueError(_OPEN_AREA_MESSAGE)
     delta = require_non_negative(end_correction, "end_correction")
     rho0 = require_positive(air_density, "air_density")
     eta = require_positive(viscosity, "viscosity")
@@ -620,7 +623,7 @@ def helmholtz_resonance_frequency(
     a = require_positive(hole_radius, "hole_radius")
     eps = require_positive(open_area, "open_area")
     if eps > 1.0:
-        raise ValueError("'open_area' must not exceed 1.")
+        raise ValueError(_OPEN_AREA_MESSAGE)
     c0 = require_positive(speed_of_sound, "speed_of_sound")
     delta = (
         perforation_end_correction(eps)
@@ -838,6 +841,137 @@ def _fluid_layer_terms(
     )
 
 
+def _porous_layer_term(
+    layer: PorousLayer, f: Real, k0_sin2: Real
+) -> tuple[Complex, Complex] | None:
+    """``(Zx, kx d)`` of a porous layer, or ``None`` when zero-thickness."""
+    d = require_non_negative(layer.thickness, "PorousLayer.thickness")
+    if d <= 0.0:
+        return None
+    medium = layer.medium
+    if not np.array_equal(np.asarray(medium.frequency), f):
+        raise ValueError(
+            "PorousLayer.medium was evaluated on a different frequency "
+            "vector; rebuild the medium on the solver grid."
+        )
+    return _fluid_layer_terms(
+        np.asarray(medium.characteristic_impedance, dtype=np.complex128),
+        np.asarray(medium.wavenumber, dtype=np.complex128),
+        d,
+        k0_sin2,
+    )
+
+
+def _layer_terms(
+    layers: list[Layer] | tuple[Layer, ...],
+    f: Real,
+    *,
+    k0: Real,
+    k0_sin2: Real,
+    rc: float,
+    rho0: float,
+    viscosity: float,
+) -> list[tuple[str, Complex, Complex]]:
+    """Evaluate each layer once: fluid layers as ``(Zx, kx d)``, sheets as z.
+
+    Zero-thickness fluid layers contribute the identity matrix and are
+    skipped (``require_non_negative`` guarantees ``d >= 0``, so the strict
+    ``d > 0`` test keeps exactly the non-degenerate layers).
+    """
+    terms: list[tuple[str, Complex, Complex]] = []
+    for layer in layers:
+        if isinstance(layer, AirLayer):
+            d = require_non_negative(layer.thickness, "AirLayer.thickness")
+            if d > 0.0:
+                zc = np.full(f.shape, rc, dtype=np.complex128)
+                k = np.asarray(k0, dtype=np.complex128)
+                terms.append(("fluid", *_fluid_layer_terms(zc, k, d, k0_sin2)))
+        elif isinstance(layer, PorousLayer):
+            term = _porous_layer_term(layer, f, k0_sin2)
+            if term is not None:
+                terms.append(("fluid", *term))
+        else:
+            z = _sheet_impedance(
+                layer,
+                f,
+                air_density=rho0,
+                viscosity=viscosity,
+            )
+            terms.append(("sheet", z, z))
+    return terms
+
+
+def _termination_admittance(
+    termination: str | complex | ArrayLike,
+    f: Real,
+    *,
+    cos_t: float,
+    rc: float,
+) -> Complex:
+    """Admittance ``G = u/p`` at the termination face of the stack."""
+    if isinstance(termination, str):
+        if termination == "rigid":
+            return np.zeros_like(f, dtype=np.complex128)
+        if termination == "free":
+            return np.full(f.shape, cos_t / rc, dtype=np.complex128)
+        raise ValueError(
+            "'termination' must be 'rigid', 'free' or a complex impedance."
+        )
+    zl_arr = np.asarray(termination, dtype=np.complex128)
+    if zl_arr.ndim > 0 and zl_arr.shape != f.shape:
+        raise ValueError(
+            "'termination' impedance array must be scalar or match the "
+            f"frequency vector length ({f.size}), got {zl_arr.size}."
+        )
+    if not np.all(np.abs(zl_arr) > 0.0):
+        raise ValueError("'termination' impedance must be non-zero.")
+    return np.asarray(np.ones_like(f) / zl_arr, dtype=np.complex128)
+
+
+def _surface_admittance(
+    terms: list[tuple[str, Complex, Complex]], g: Complex
+) -> Complex:
+    """Back-to-front admittance recursion from the termination admittance.
+
+    Stable: ``tan`` saturates where the chain-matrix entries would overflow.
+    """
+    for kind, a, b in reversed(terms):
+        if kind == "fluid":
+            zx, kxd = a, b
+            t = np.tan(kxd)
+            g = (g + 1j * t / zx) / (1.0 + 1j * zx * t * g)
+        else:
+            g = g / (1.0 + a * g)
+    return g
+
+
+def _chain_matrix(terms: list[tuple[str, Complex, Complex]], f: Real) -> Complex:
+    """Raw front-to-back chain-matrix product of the evaluated layers.
+
+    Informational; may overflow for extremely attenuating layers while the
+    admittance recursion stays finite.
+    """
+    ones = np.ones_like(f, dtype=np.complex128)
+    zeros = np.zeros_like(f, dtype=np.complex128)
+    t11, t12, t21, t22 = ones, zeros, zeros, ones
+    with np.errstate(over="ignore", invalid="ignore"):
+        for kind, a, b in terms:
+            if kind == "fluid":
+                zx, kxd = a, b
+                cos_l, sin_l = np.cos(kxd), np.sin(kxd)
+                m = (cos_l, 1j * zx * sin_l, 1j * sin_l / zx, cos_l)
+            else:
+                m = (ones, a, zeros, ones)
+            m11, m12, m21, m22 = m
+            t11, t12, t21, t22 = (
+                t11 * m11 + t12 * m21,
+                t11 * m12 + t12 * m22,
+                t21 * m11 + t22 * m21,
+                t21 * m12 + t22 * m22,
+            )
+    return np.asarray([[t11, t12], [t21, t22]], dtype=np.complex128)
+
+
 def layered_absorber(
     frequency: ArrayLike,
     layers: list[Layer] | tuple[Layer, ...],
@@ -895,101 +1029,24 @@ def layered_absorber(
 
     k0 = 2.0 * np.pi * f / c0
     k0_sin2 = np.asarray((k0 * np.sin(theta)) ** 2, dtype=np.float64)
-    cos_t = np.cos(theta)
+    cos_t = float(np.cos(theta))
     rc = rho0 * c0
 
-    # Evaluate each layer once: fluid layers as (Zx, kx d), sheets as z.
-    fluids_or_sheets: list[tuple[str, Complex, Complex]] = []
-    for layer in layers:
-        if isinstance(layer, AirLayer):
-            d = require_non_negative(layer.thickness, "AirLayer.thickness")
-            if d == 0.0:
-                continue
-            zc = np.full(f.shape, rc, dtype=np.complex128)
-            k = np.asarray(k0, dtype=np.complex128)
-            zx, kxd = _fluid_layer_terms(zc, k, d, k0_sin2)
-            fluids_or_sheets.append(("fluid", zx, kxd))
-        elif isinstance(layer, PorousLayer):
-            d = require_non_negative(layer.thickness, "PorousLayer.thickness")
-            if d == 0.0:
-                continue
-            medium = layer.medium
-            if not np.array_equal(np.asarray(medium.frequency), f):
-                raise ValueError(
-                    "PorousLayer.medium was evaluated on a different frequency "
-                    "vector; rebuild the medium on the solver grid."
-                )
-            zx, kxd = _fluid_layer_terms(
-                np.asarray(medium.characteristic_impedance, dtype=np.complex128),
-                np.asarray(medium.wavenumber, dtype=np.complex128),
-                d,
-                k0_sin2,
-            )
-            fluids_or_sheets.append(("fluid", zx, kxd))
-        else:
-            z = _sheet_impedance(
-                layer,
-                f,
-                air_density=rho0,
-                viscosity=viscosity,
-            )
-            fluids_or_sheets.append(("sheet", z, z))
+    terms = _layer_terms(
+        layers, f, k0=k0, k0_sin2=k0_sin2, rc=rc, rho0=rho0, viscosity=viscosity
+    )
+    g = _surface_admittance(
+        terms, _termination_admittance(termination, f, cos_t=cos_t, rc=rc)
+    )
 
-    # Back-to-front admittance recursion (stable: tan saturates where the
-    # chain-matrix entries would overflow). G = u/p at the running face.
-    if isinstance(termination, str):
-        if termination == "rigid":
-            g = np.zeros_like(f, dtype=np.complex128)
-        elif termination == "free":
-            g = np.full(f.shape, cos_t / rc, dtype=np.complex128)
-        else:
-            raise ValueError(
-                "'termination' must be 'rigid', 'free' or a complex impedance."
-            )
-    else:
-        zl_arr = np.asarray(termination, dtype=np.complex128)
-        if zl_arr.ndim > 0 and zl_arr.shape != f.shape:
-            raise ValueError(
-                "'termination' impedance array must be scalar or match the "
-                f"frequency vector length ({f.size}), got {zl_arr.size}."
-            )
-        if np.any(zl_arr == 0.0):
-            raise ValueError("'termination' impedance must be non-zero.")
-        g = np.asarray(np.ones_like(f) / zl_arr, dtype=np.complex128)
-    for kind, a, b in reversed(fluids_or_sheets):
-        if kind == "fluid":
-            zx, kxd = a, b
-            t = np.tan(kxd)
-            g = (g + 1j * t / zx) / (1.0 + 1j * zx * t * g)
-        else:
-            g = g / (1.0 + a * g)
-
+    # G = 0 (lossless stack over a rigid wall) maps to an infinite surface
+    # impedance; everywhere else Zs = 1/G with a safe denominator.
+    nonzero = np.abs(g) > 0.0
     with np.errstate(divide="ignore", invalid="ignore"):
-        zs = np.where(g == 0.0, np.inf + 0j, 1.0 / np.where(g == 0.0, 1.0, g))
+        zs = np.where(nonzero, 1.0 / np.where(nonzero, g, 1.0), np.inf + 0j)
     r = (cos_t - rc * g) / (cos_t + rc * g)
     alpha = 1.0 - np.abs(r) ** 2
-
-    # Raw chain matrix, front to back (informational; may overflow for
-    # extremely attenuating layers while the recursion above stays finite).
-    ones = np.ones_like(f, dtype=np.complex128)
-    zeros = np.zeros_like(f, dtype=np.complex128)
-    t11, t12, t21, t22 = ones, zeros, zeros, ones
-    with np.errstate(over="ignore", invalid="ignore"):
-        for kind, a, b in fluids_or_sheets:
-            if kind == "fluid":
-                zx, kxd = a, b
-                cos_l, sin_l = np.cos(kxd), np.sin(kxd)
-                m = (cos_l, 1j * zx * sin_l, 1j * sin_l / zx, cos_l)
-            else:
-                m = (ones, a, zeros, ones)
-            m11, m12, m21, m22 = m
-            t11, t12, t21, t22 = (
-                t11 * m11 + t12 * m21,
-                t11 * m12 + t12 * m22,
-                t21 * m11 + t22 * m21,
-                t21 * m12 + t22 * m22,
-            )
-    tm = np.asarray([[t11, t12], [t21, t22]], dtype=np.complex128)
+    tm = _chain_matrix(terms, f)
     return LayeredAbsorberResult(
         frequency=f,
         angle=theta,
@@ -1108,15 +1165,22 @@ def statistical_absorption(
     # a = 1 + g1 > 0 and b = g1 + cosT > 0 the identity
     # arctan(a/g2) - arctan(b/g2) = arctan(g2 (a - b) / (g2^2 + a b))
     # (valid because (a/g2)(b/g2) > 0) evaluates the same quantity
-    # stably for every g2; the exact g2 = 0 limit of the whole term is
-    # g1^2 (1 - cos T) / ((g1 + cos T)(1 + g1)).
+    # stably for every non-zero g2. Expanding arctan(x/g2) about
+    # g2 = 0 (arctan(x/g2) = sgn(g2) pi/2 - g2/x + O(g2^3)) gives the
+    # exact limit of the whole term,
+    # g1^2 (1 - cos T) / ((g1 + cos T)(1 + g1)), with an O(g2^2)
+    # truncation error - far below double precision at the switch
+    # threshold, while the direct form is stable for every larger |g2|.
     a = 1.0 + g1
     b = g1 + cos_t
-    with np.errstate(divide="ignore", invalid="ignore"):
-        atan_term = (g1**2 - g2**2) / g2 * np.arctan(
-            g2 * (a - b) / (g2**2 + a * b)
-        )
-    real_limit = g1**2 * (1.0 - cos_t) / (b * a)
-    atan_term = np.where(g2 == 0.0, real_limit, atan_term)
+    near_real = np.abs(g2) < 1e-30
+    g2_safe = np.where(near_real, 1.0, g2)
+    atan_term = np.where(
+        near_real,
+        g1**2 * (1.0 - cos_t) / (b * a),
+        (g1**2 - g2_safe**2)
+        / g2_safe
+        * np.arctan(g2_safe * (a - b) / (g2_safe**2 + a * b)),
+    )
     alpha = 8.0 * g1 / sin2_t * (1.0 - cos_t + atan_term + g1 * log_term)
     return np.asarray(alpha, dtype=np.float64)

@@ -35,6 +35,8 @@ if TYPE_CHECKING:
     from ..materials.road_absorption import InsituAbsorptionResult
     from ..materials.scattering_diffusion import DiffusionResult, ScatteringResult
 
+_FREQ_LABEL = "Frequency [Hz]"
+
 def plot_weighted_absorption(
     result: "AbsorptionRatingResult", ax: Axes | None = None, **kwargs: Any
 ) -> Axes:
@@ -202,7 +204,7 @@ def plot_impedance_tube(
     ax.plot(freqs, alpha, **kwargs)
     ax.plot(freqs, np.abs(np.asarray(result.reflection, dtype=np.complex128)),
             ls="--", color=_C_MUTED, label="Reflection factor $|r|$")
-    ax.set_xlabel("Frequency [Hz]")
+    ax.set_xlabel(_FREQ_LABEL)
     ax.set_ylabel("Coefficient")
     ax.set_ylim(0.0, 1.05)
     ax.set_title("ISO 10534-2 normal-incidence absorption")
@@ -309,7 +311,7 @@ def _absorption_spectrum_axes(
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("label", label)
     ax.semilogx(freqs, alpha, **kwargs)
-    ax.set_xlabel("Frequency [Hz]")
+    ax.set_xlabel(_FREQ_LABEL)
     ax.set_ylabel(r"Absorption coefficient $\alpha$")
     ax.set_ylim(0.0, 1.05)
     ax.set_title(title)
@@ -343,7 +345,7 @@ def plot_porous_medium(
               label=r"$-$Im$(Z_c)/\rho c$")
     ax.loglog(freqs, kn.real, color=_C_REFERENCE, label=r"Re$(k)/k_0$")
     ax.loglog(freqs, -kn.imag, ls="--", color=_C_MUTED, label=r"$-$Im$(k)/k_0$")
-    ax.set_xlabel("Frequency [Hz]")
+    ax.set_xlabel(_FREQ_LABEL)
     ax.set_ylabel("Normalised characteristic value")
     ax.set_title(
         f"Porous medium ({result.model}), "

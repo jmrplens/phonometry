@@ -171,6 +171,13 @@ export const apiSidebar = {
       ],
     },
     {
+      label: 'Program loudness',
+      translations: { es: 'Sonoridad de programa' },
+      items: [
+        'reference/api/broadcast/program-loudness',
+      ],
+    },
+    {
       label: 'Uncertainty',
       translations: { es: 'Incertidumbre' },
       items: [

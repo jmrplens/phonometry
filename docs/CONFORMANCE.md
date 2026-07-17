@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **272/272 conformance checks pass** across 33 domains and 153 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **280/280 conformance checks pass** across 34 domains and 156 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -578,6 +578,22 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61400-11:2012 Formula 30 | Critical bandwidth about a 500 Hz tone, Hz | 117.255 Hz (+/-0 Hz) | 117.255 Hz | 0 Hz | &#9989; |
 | IEC 61400-11:2012 Formula 26 | Apparent sound power level of a single band, dB re 1 pW | 148.5139 dB (+/-0.0001 dB) | 148.5139 dB | 0 dB | &#9989; |
 | IEC 61400-11:2012 Formulae 31-34 | Tonal audibility of a synthetic clean tone, dB | 16.38 dB (+/-0.06 dB) | 16.38 dB | -0.001 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Program loudness (ITU-R BS.1770 / EBU R 128)</b> — 100% (8/8)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| ITU-R BS.1770-5 Annex 1 | 997 Hz sine at 0 dB FS on the left channel, LKFS | -3.01 LKFS (+/-0.01 LKFS) | -3.01 LKFS | 0 LKFS | &#9989; |
+| EBU Tech 3341:2023 Table 1 case 1 | Integrated loudness of the -23 dBFS stereo sine, LUFS | -23 LUFS (+/-0.1 LUFS) | -22.99 LUFS | 0.007 LUFS | &#9989; |
+| EBU Tech 3341:2023 Table 1 case 5 | Gated integrated loudness of the -26/-20/-26 dBFS steps, LUFS | -23 LUFS (+/-0.1 LUFS) | -22.98 LUFS | 0.021 LUFS | &#9989; |
+| EBU Tech 3341:2023 Table 1 case 6 | Integrated loudness of the 5.0-channel sine (Table 3 weights), LUFS | -23 LUFS (+/-0.1 LUFS) | -23.02 LUFS | -0.016 LUFS | &#9989; |
+| EBU Tech 3341:2023 Table 1 case 15 | True-peak level of the fs/4 sine at 0.5 FFS, dBTP | -6 dBTP (+0.2/-0.4 dB) | -6.02 dBTP | -0.015 dBTP | &#9989; |
+| EBU Tech 3341:2023 Table 1 case 19 | True-peak level of the fs/4 sine at 1.41 FFS, dBTP | 3 dBTP (+0.2/-0.4 dB) | 3 dBTP | 0.001 dBTP | &#9989; |
+| EBU Tech 3342:2023 Table 1 case 1 | Loudness range of the -20/-30 dBFS tone steps, LU | 10 LU (+/-1 LU) | 10 LU | 0 LU | &#9989; |
+| EBU Tech 3342:2023 Table 1 case 3 | Loudness range of the -40/-20 dBFS tone steps, LU | 20 LU (+/-1 LU) | 20 LU | 0 LU | &#9989; |
 
 </details>
 

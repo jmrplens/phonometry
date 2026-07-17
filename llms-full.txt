@@ -8636,7 +8636,7 @@ vectorization only batches the computation across the channel axis.
 
 # API Reference
 
-All core functionality lives in twelve domain subpackages; every public name
+All core functionality lives in thirteen domain subpackages; every public name
 is also re-exported by the top-level `phonometry` package.
 
 > **Note.** This page is the curated quick table for the GitHub/PyPI audience:
@@ -8647,7 +8647,7 @@ is also re-exported by the top-level `phonometry` package.
 
 ## Namespaces
 
-The library is organized into twelve domain subpackages, and importing the
+The library is organized into thirteen domain subpackages, and importing the
 domain namespace is the primary form used throughout the documentation:
 
 ```python
@@ -8670,6 +8670,7 @@ contour = aircraft.noise_contour(path, powers, distances, sel, lmax, x=gx, y=gy)
 | `phonometry.aircraft` | EPNL (ICAO Annex 16), SAE ARP 5534 absorption, airport contours (ECAC Doc 29), rotorcraft (ECAC Doc 32) |
 | `phonometry.underwater` | ISO 18405/17208/18406 levels, propagation, sound speed, sonar equation, seabed, ambient and ship-traffic noise, numerical solvers |
 | `phonometry.electroacoustics` | Distortion (IEC 60268-3 / AES17), transfer function and coherence |
+| `phonometry.broadcast` | Programme loudness and true peak (ITU-R BS.1770-5, EBU R 128 with Tech 3341/3342) |
 
 Every name in the table below is also re-exported at the top level, so
 `from phonometry import <name>` works for every row. The pre-3.2 flat module
@@ -8951,6 +8952,15 @@ cycle and warn on use; they are removed in 4.0.
 | `transfer_function` | `function` | **Frequency-response estimate H1/H2 (Bendat & Piersol).**<br>• `x` (input), `y` (output), `fs` [Hz]<br>• `estimator`: 'H1' or 'H2' (Default: 'H1')<br>• `nperseg` (Default: None), `overlap` (Default: 0.5) | `res = transfer_function(x, y, fs)`<br><br>• `FrequencyResponseResult` |
 | `coherence` | `function` | **Ordinary coherence γ² (Bendat & Piersol).**<br>• `x`, `y`, `fs` [Hz]<br>• `nperseg` (Default: None), `overlap` (Default: 0.5)<br>= \|Gxy\|²/(Gxx·Gyy) ∈ [0, 1] | `f, g = coherence(x, y, fs)` |
 | `FrequencyResponseResult` | `dataclass` | **Frequency-response result.**<br>• `frequencies` [Hz]<br>• `response`: complex H(f)<br>• `magnitude_db` / `phase` [rad]<br>• `coherence`: γ²(f)<br>• `estimator`<br>• `.plot()`: Bode + coherence | `res.magnitude_db, res.coherence` |
+| `program_loudness` | `function` | **EBU R 128 measurement set of a programme (BS.1770-5 + Tech 3341/3342).**<br>• `x`: signal (1D mono or 2D [channels, samples], 1.0 = 0 dBFS)<br>• `fs` [Hz]<br>• `weights`: per-channel Gi (Default: Table 3 by channel count)<br>• `momentary_step` [s] (Default: 0.01), `short_term_step` [s] (Default: 0.1)<br>• `oversample`: true-peak factor (Default: None → reaches 192 kHz) | `res = program_loudness(x, fs)`<br><br>• `ProgramLoudnessResult` |
+| `integrated_loudness` | `function` | **Programme (integrated) loudness with the two-stage gate (BS.1770-5 Annex 1).**<br>• `x`, `fs` [Hz]<br>• `weights` (Default: Table 3 by channel count)<br>Absolute gate −70 LKFS, relative −10 LU | `integrated_loudness(x, fs)  # LUFS` |
+| `loudness_range` | `function` | **Loudness range LRA (EBU Tech 3342).**<br>• `short_term_loudness`: S readings [LUFS] at ≥ 10 Hz<br>Cascaded gate (−70 LUFS abs, −20 LU rel), 10th-95th percentile spread | `loudness_range(res.short_term)  # LU` |
+| `true_peak_level` | `function` | **True-peak level (BS.1770-5 Annex 2).**<br>• `x` (1.0 = 0 dBFS), `fs` [Hz]<br>• `oversample`: factor ≥ 1 (Default: None → smallest reaching 192 kHz, 4 at 48 kHz) | `true_peak_level(x, fs)  # dBTP`<br>Scalar for 1D, per-channel array for 2D |
+| `k_weighting` | `function` | **Apply the two-stage K-weighting pre-filter (BS.1770-5 Annex 1).**<br>• `x`, `fs` [Hz]<br>Spherical-head shelf + RLB high-pass | `y = k_weighting(x, fs)` |
+| `k_weighting_coefficients` | `function` | **K-weighting biquads (Tables 1-2).**<br>• `fs` [Hz] (≥ 16 kHz)<br>Verbatim tables at 48 kHz; analog-prototype redesign elsewhere | `(b1, a1), (b2, a2) = k_weighting_coefficients(fs)` |
+| `channel_weight` | `function` | **Position-dependent channel weight Gi (BS.1770-5 Annex 3, Table 4).**<br>• `azimuth` [deg], `elevation` [deg] (Default: 0)<br>1.41 for mid-layer side positions, 1.0 elsewhere | `channel_weight(110, 0)  # 1.41` |
+| `DEFAULT_CHANNEL_WEIGHTS` | `dict` | **Table 3 weights by channel count.**<br>1/2/5/6 channels; 5.1 order L, R, C, LFE, Ls, Rs with the LFE at 0.0 (excluded) | `DEFAULT_CHANNEL_WEIGHTS[6]` |
+| `ProgramLoudnessResult` | `dataclass` | **EBU Mode measurement result.**<br>• `integrated` [LUFS], `loudness_range` [LU], `true_peak` [dBTP]<br>• `momentary` / `short_term` series with `momentary_time` / `short_term_time` [s]<br>• `max_momentary` / `max_short_term` [LUFS]<br>• `relative_threshold`, `lra_low` / `lra_high` [LUFS]<br>• `true_peak_per_channel` [dBTP], `channel_weights`, `fs`<br>• `.plot()`: M/S over time with I and LRA annotated | `res.integrated, res.loudness_range` |
 | `sound_pressure_level` | `function` | **Underwater SPL (ISO 18405), dB re 1 µPa.**<br>• `pressure`: signal (1D) [Pa]<br>• `reference`: p₀ (Default: 1e-6) | `sound_pressure_level(p)` |
 | `sound_exposure_level` | `function` | **Underwater SEL (ISO 18405/18406), dB re 1 µPa²·s.**<br>• `pressure` (1D) [Pa]<br>• `fs` [Hz]<br>• `reference`: E₀ (Default: 1e-12) | `sound_exposure_level(p, fs)` |
 | `peak_sound_pressure_level` | `function` | **Zero-to-peak level (ISO 18406), dB re 1 µPa.**<br>• `pressure` (1D) [Pa]<br>• `reference` (Default: 1e-6) | `peak_sound_pressure_level(p)` |
@@ -9298,7 +9308,7 @@ cycle and warn on use; they are removed in 4.0.
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `octavefilter` / `getansifrequencies` / `normalizedfreq` / `calculate_sensitivity` / `coverage_factor` / `expanded_uncertainty` | `function` | **Deprecated aliases (warn on use; removal in 4.0).**<br>New names: `octave_filter`, `nominal_frequencies`, `normalized_frequencies`, `sensitivity`, `insulation_coverage_factor`, `insulation_expanded_uncertainty` | `octave_filter(x, fs)  # not octavefilter` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '3.2.0'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `STIResult`, `SIIResult`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `ReverberationSoundPowerResult`, `SoundPowerIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `STIResult`, `SIIResult`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NiptsResult`, `HtlanResult`, `ImpulseProminenceResult`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `FacadeInsulationResult`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `SoundPowerResult`, `ReverberationSoundPowerResult`, `SoundPowerIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `InsituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 

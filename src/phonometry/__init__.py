@@ -272,6 +272,17 @@ from .electroacoustics.frequency_response import (
     coherence,
     transfer_function,
 )
+from .broadcast.program_loudness import (
+    DEFAULT_CHANNEL_WEIGHTS,
+    ProgramLoudnessResult,
+    channel_weight,
+    integrated_loudness,
+    k_weighting,
+    k_weighting_coefficients,
+    loudness_range,
+    program_loudness,
+    true_peak_level,
+)
 from .underwater.acoustics import (
     UNDERWATER_REFERENCE_EXPOSURE,
     UNDERWATER_REFERENCE_PRESSURE,
@@ -851,6 +862,15 @@ __all__ = [
     "transfer_function",
     "coherence",
     "FrequencyResponseResult",
+    "program_loudness",
+    "integrated_loudness",
+    "loudness_range",
+    "true_peak_level",
+    "k_weighting",
+    "k_weighting_coefficients",
+    "channel_weight",
+    "DEFAULT_CHANNEL_WEIGHTS",
+    "ProgramLoudnessResult",
     "UNDERWATER_REFERENCE_PRESSURE",
     "UNDERWATER_REFERENCE_EXPOSURE",
     "sound_pressure_level",

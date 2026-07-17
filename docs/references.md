@@ -83,6 +83,40 @@ it; the list grows as guides gain their References sections.
   criterion applied to calibration recordings.
   Cited by [Calibration and dBFS](calibration.md).
 
+## Broadcast programme loudness
+
+- International Telecommunication Union. (2023). *Algorithms to measure
+  audio programme loudness and true-peak audio level* (Recommendation
+  ITU-R BS.1770-5).
+  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770).
+  The K-weighting, channel weights, gating and true-peak algorithms.
+  Cited by [Programme loudness & true peak](program-loudness.md).
+- European Broadcasting Union. (2023). *Loudness normalisation and permitted
+  maximum level of audio signals* (EBU R 128).
+  [tech.ebu.ch/publications/r128](https://tech.ebu.ch/publications/r128).
+  The −23.0 LUFS target, the −1 dBTP ceiling and the normalisation practice.
+  Cited by [Programme loudness & true peak](program-loudness.md).
+- European Broadcasting Union. (2023). *Loudness metering: 'EBU Mode'
+  metering to supplement loudness normalisation* (EBU Tech 3341).
+  [tech.ebu.ch/publications/tech3341](https://tech.ebu.ch/publications/tech3341).
+  The M/S/I time scales and the minimum-requirements test signals.
+  Cited by [Programme loudness & true peak](program-loudness.md).
+- European Broadcasting Union. (2023). *Loudness range: A measure to
+  supplement loudness normalisation* (EBU Tech 3342).
+  [tech.ebu.ch/publications/tech3342](https://tech.ebu.ch/publications/tech3342).
+  The LRA algorithm, its reference implementation and its test signals.
+  Cited by [Programme loudness & true peak](program-loudness.md).
+- European Broadcasting Union. (2023). *Guidelines for production of
+  programmes in accordance with EBU R 128* (EBU Tech 3343).
+  [tech.ebu.ch/publications/tech3343](https://tech.ebu.ch/publications/tech3343).
+  The production practice behind the loudness normalisation numbers.
+  Cited by [Programme loudness & true peak](program-loudness.md).
+- Steinmetz, C. J., & Reiss, J. D. (2021). *pyloudnorm: A simple yet
+  flexible loudness meter in Python*. 150th AES Convention.
+  [github.com/csteinmetz1/pyloudnorm](https://github.com/csteinmetz1/pyloudnorm).
+  An independent BS.1770 implementation, useful as a cross-check.
+  Cited by [Programme loudness & true peak](program-loudness.md).
+
 ## Sound power and intensity
 
 - Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.

@@ -336,7 +336,7 @@ resolution-bias error at a resonance peak see
 | `x` | Signal, 1-D. |
 | `fs` | Sample rate, in Hz. |
 | `window` | Segment taper (any scipy window name; default Hann, the B&P Section 11.5.2 recommendation for side-lobe suppression). |
-| `nperseg` | Welch segment length; `None` picks a length targeting about 4 Hz resolution. |
+| `nperseg` | Welch segment length; `None` picks a length targeting a resolution of at most 4 Hz. |
 | `overlap` | Segment overlap fraction in [0, 1) (default 0.5, which with a Hann taper retrieves most of the stability lost to tapering, B&P Section 11.5.2.2). |
 | `scaling` | `'density'` (units²/Hz) or `'spectrum'` (units² per segment bandwidth). |
 | `confidence` | Confidence level for the chi-square interval. |

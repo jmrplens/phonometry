@@ -26,7 +26,11 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+# Shared Welch-core defaults and helpers (single source of truth for the
+# segment policy across the spectral estimators).
 from ..metrology.spectra import (
+    _DEFAULT_OVERLAP,
+    _MIN_SAMPLES,
     _default_nperseg,
     _noverlap_samples,
     _positive,
@@ -36,11 +40,6 @@ from ..metrology.spectra import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
-
-#: Default overlap fraction between Welch segments.
-_DEFAULT_OVERLAP = 0.5
-#: Minimum samples for a spectral estimate.
-_MIN_SAMPLES = 32
 
 
 def _validate_pair(

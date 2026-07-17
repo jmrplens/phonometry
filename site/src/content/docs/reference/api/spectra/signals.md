@@ -19,8 +19,10 @@ octave (`10·lg 2 = 3.0103` dB).
 The colors are synthesized by filtering seeded white Gaussian noise in the
 frequency domain: the DFT of the white record is multiplied by the exact
 magnitude response `|H(f)| = (f/f_ref)^(α/2)` bin by bin (a zero-phase
-FIR filter applied circularly), so the slope holds to machine precision on
-the analysis grid at every frequency above DC - not the piecewise or
+FIR filter applied circularly), so the *expected* spectrum follows the
+power law exactly at every synthesis bin above DC and a measured slope
+deviates only by the random error of the spectral estimate (thousandths of
+a dB per octave over a three-decade regression) - not the piecewise or
 few-pole approximations whose pink slope ripples by fractions of a dB. The
 DC bin is zeroed for the colored variants (a power law has no finite DC
 value) and the record is rescaled to the requested RMS exactly.

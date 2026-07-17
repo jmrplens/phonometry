@@ -185,7 +185,9 @@ def plot_cross_spectral_density(
     _magnitude(axes[0])
     axes[0].set_title("Cross-spectral density (Bendat & Piersol)")
     phase = np.degrees(result.phase[pos])
-    sigma = np.degrees(result.phase_std[pos])
+    # Cap the drawn band at +/-180 deg: at near-zero coherence the Eq. 9.52
+    # s.d. diverges and a literal band would blow the panel's autoscale.
+    sigma = np.minimum(np.degrees(result.phase_std[pos]), 180.0)
     finite = np.isfinite(sigma)
     axes[1].fill_between(
         freqs[pos][finite],

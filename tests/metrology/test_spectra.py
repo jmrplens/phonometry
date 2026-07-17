@@ -305,7 +305,9 @@ def test_noiseless_path_has_unit_coherence_and_tiny_bias() -> None:
     assert float(np.min(res.coherence[band])) > 0.999
     # Eq. 9.75: b[γ̂²] ≈ (1-γ²)²/nd -> essentially zero here.
     assert float(np.max(res.coherence_bias[band])) < 1e-4
-    assert np.all(np.isinf(res.snr[res.coherence == 1.0]))
+    saturated = res.coherence == 1.0
+    assert np.any(saturated), "expected bins with exactly unit coherence"
+    assert np.all(np.isinf(res.snr[saturated]))
 
 
 def test_snr_error_is_sqrt2_over_gamma_sqrt_nd() -> None:

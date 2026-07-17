@@ -8114,7 +8114,7 @@ slope of `phase` against frequency measures a propagation delay directly
 from phonometry import cross_spectral_density
 
 res = cross_spectral_density(x, y, fs)
-print(res.magnitude_random_error[k], res.phase_std[k])  # per-bin errors
+print(res.magnitude_random_error[100], res.phase_std[100])  # bin 100 errors
 res.plot()   # magnitude, phase with ±sigma band, coherence
 ```
 
@@ -8180,8 +8180,9 @@ rather than amplitude, and a flat spectrum passes through exactly unchanged.
 from phonometry import fractional_octave_smoothing
 
 smooth_psd = fractional_octave_smoothing(res.frequencies, res.psd, 3.0)
-smooth_mag = fractional_octave_smoothing(freqs, np.abs(H), 6.0, domain="amplitude")
-smooth_db = fractional_octave_smoothing(freqs, level_db, 3.0, domain="db")
+smooth_mag = fractional_octave_smoothing(freqs, np.abs(response), 6.0,
+                                         domain="amplitude")  # an FRF |H|
+smooth_db = fractional_octave_smoothing(freqs, levels, 3.0, domain="db")  # dB curve
 ```
 
 A single spectral line of power `P` in a bin of width `Δf` smooths to the
@@ -8191,11 +8192,11 @@ the oracle pinned in the tests.
 ## 5. Colored-noise generators
 
 `noise_signal` produces Gaussian noise whose PSD follows `Gxx(f) ∝ f^α`
-exactly: seeded white noise is shaped in the frequency domain by the exact
-magnitude response `(f/f_ref)^{α/2}` bin by bin (a zero-phase filter applied
-circularly), so the slope holds to machine precision on the analysis grid —
-not the piecewise or few-pole pink approximations whose slope ripples by
-fractions of a dB. The record is zero-mean and rescaled to the requested RMS
+exactly in expectation: seeded white noise is shaped in the frequency domain
+by the exact magnitude response `(f/f_ref)^{α/2}` bin by bin (a zero-phase
+filter applied circularly), so a measured slope deviates from the power law
+only by the random error of the spectral estimate — not the piecewise or
+few-pole pink approximations whose slope ripples by fractions of a dB. The record is zero-mean and rescaled to the requested RMS
 exactly, and the same seed reproduces the same record bit for bit.
 
 | color | α | PSD slope |

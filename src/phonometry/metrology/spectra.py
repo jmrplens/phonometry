@@ -114,7 +114,7 @@ def _validate_welch_params(
 
 
 def _default_nperseg(n: int, fs: float) -> int:
-    """Segment length targeting about 4 Hz resolution (min 32 samples)."""
+    """Segment length targeting a resolution of at most 4 Hz (min 32 samples)."""
     nperseg = int(min(n, 2 ** int(np.ceil(np.log2(fs / 4.0)))))
     return max(nperseg, _MIN_SAMPLES)
 
@@ -359,7 +359,7 @@ def power_spectral_density(
     :param window: Segment taper (any scipy window name; default Hann,
         the B&P Section 11.5.2 recommendation for side-lobe suppression).
     :param nperseg: Welch segment length; ``None`` picks a length targeting
-        about 4 Hz resolution.
+        a resolution of at most 4 Hz.
     :param overlap: Segment overlap fraction in [0, 1) (default 0.5, which
         with a Hann taper retrieves most of the stability lost to tapering,
         B&P Section 11.5.2.2).

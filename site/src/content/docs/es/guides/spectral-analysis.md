@@ -37,7 +37,7 @@ $$
 \frac{n\,\hat{G}_{xx}}{\chi^2_{n;\,1-\alpha/2}}, \quad n = 2 n_d .
 $$
 
-Con segmentos solapados y con ventana los promedios están correlados, así
+Con segmentos solapados y con ventana los promedios están correlacionados, así
 que el resultado informa tanto del número bruto de segmentos (`n_segments`)
 como del número **efectivo** de promedios independientes (`n_averages`),
 calculado con la fórmula de correlación de ventana de Welch (1967) que
@@ -138,7 +138,7 @@ frecuencia mide directamente un retardo de propagación (`τ = -pendiente/2π`).
 from phonometry import cross_spectral_density
 
 res = cross_spectral_density(x, y, fs)
-print(res.magnitude_random_error[k], res.phase_std[k])  # errores por bin
+print(res.magnitude_random_error[100], res.phase_std[100])  # errores del bin 100
 res.plot()   # magnitud, fase con banda ±sigma, coherencia
 ```
 
@@ -146,7 +146,7 @@ res.plot()   # magnitud, fase con banda ±sigma, coherencia
 
 En el modelo de una entrada y una salida, el autoespectro medido de la
 salida se separa exactamente en la parte explicada linealmente por la
-entrada y el resto no correlado (ecs. 9.55–9.57):
+entrada y el resto no correlacionado (ecs. 9.55–9.57):
 
 $$
 G_{vv} = \gamma^2_{xy}\,G_{yy}, \qquad
@@ -165,7 +165,7 @@ $$
 \varepsilon_r[\widehat{\mathrm{SNR}}] = \frac{\sqrt{2}}{|\gamma_{xy}|\sqrt{n_d}} .
 $$
 
-Para ruido aditivo no correlado en la salida con nivel conocido, la
+Para ruido aditivo no correlacionado en la salida con nivel conocido, la
 coherencia tiene la forma cerrada `γ² = SNR/(1+SNR)`, lo que hace toda la
 cadena verificable con una señal sintética:
 
@@ -206,8 +206,9 @@ sin cambios.
 from phonometry import fractional_octave_smoothing
 
 smooth_psd = fractional_octave_smoothing(res.frequencies, res.psd, 3.0)
-smooth_mag = fractional_octave_smoothing(freqs, np.abs(H), 6.0, domain="amplitude")
-smooth_db = fractional_octave_smoothing(freqs, level_db, 3.0, domain="db")
+smooth_mag = fractional_octave_smoothing(freqs, np.abs(response), 6.0,
+                                         domain="amplitude")  # una FRF |H|
+smooth_db = fractional_octave_smoothing(freqs, levels, 3.0, domain="db")  # curva en dB
 ```
 
 Una sola línea espectral de potencia `P` en un bin de anchura `Δf` se suaviza
@@ -217,12 +218,12 @@ anchura de núcleo: el oráculo fijado en los tests.
 ## 5. Generadores de ruido de colores
 
 `noise_signal` produce ruido gaussiano cuya PSD sigue `Gxx(f) ∝ f^α` de
-forma exacta: ruido blanco con semilla se moldea en el dominio de la
-frecuencia con la respuesta en magnitud exacta `(f/f_ref)^{α/2}` bin a bin
-(un filtro de fase cero aplicado de forma circular), así que la pendiente se
-cumple con precisión de máquina en la rejilla de análisis, no como las
-aproximaciones rosas por tramos o de pocos polos cuya pendiente ondula
-fracciones de dB. El registro tiene media cero y se reescala exactamente al
+forma exacta en esperanza: ruido blanco con semilla se moldea en el dominio
+de la frecuencia con la respuesta en magnitud exacta `(f/f_ref)^{α/2}` bin a
+bin (un filtro de fase cero aplicado de forma circular), así que una
+pendiente medida solo se desvía de la ley de potencias por el error
+aleatorio de la estimación espectral, no como las aproximaciones rosas por
+tramos o de pocos polos cuya pendiente ondula fracciones de dB. El registro tiene media cero y se reescala exactamente al
 RMS pedido, y la misma semilla reproduce el mismo registro bit a bit.
 
 | color | α | pendiente de la PSD |

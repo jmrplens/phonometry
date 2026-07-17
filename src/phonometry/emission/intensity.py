@@ -248,8 +248,8 @@ def sound_intensity(
         raise ValueError(f"Signals too short for a spectral estimate: {x1.size} samples.")
 
     # Hann-windowed Welch/CSD averaging through the shared spectral core
-    # (50% overlap, detrend off); segment length targets a spectral
-    # resolution of about 3 Hz so that low-frequency bands are resolved.
+    # (50% overlap, detrend off); the shared default segment length targets
+    # a resolution of at most 4 Hz so low-frequency bands are resolved.
     nperseg = _default_nperseg(x1.size, float(fs))
     f, g12 = _welch_cross_spectrum(x1, x2, float(fs), nperseg, nperseg // 2)
     _, spp = _welch_autospectrum(

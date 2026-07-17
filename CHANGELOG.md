@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Calibrated spectral analysis (Bendat & Piersol, Random Data 4e):
+  `power_spectral_density` and `cross_spectral_density` (Welch estimators
+  that report the effective number of independent averages under overlap,
+  the normalized random errors of Eqs. 8.158/9.33/9.52 and the chi-square
+  confidence interval of Eq. 8.163), `coherent_output_spectrum` (the
+  Gvv = γ²·Gyy / Gnn split with the spectral SNR and the Eq. 9.73 random
+  error), `resolution_bias_error` (the Eq. 8.141 first-order peak bias),
+  `fractional_octave_smoothing` (constant-power 1/n-octave kernel, exact
+  flat-spectrum invariance) and `noise_signal` (seeded white/pink/red/blue/
+  violet noise with an exact power-law PSD slope), each estimator returning
+  a frozen result with `.plot()`. The random errors and interval coverage
+  are pinned by seeded Monte Carlo against the closed forms, and the
+  slopes/levels by exact oracles; six new conformance checks.
+
+- The `transfer_function`/`coherence` estimators, the p-p `sound_intensity`
+  probe and the ECMA-418-1 tonality spectrum now compute their spectra
+  through the shared Welch core in `phonometry.metrology.spectra`
+  (bit-identical outputs, verified array-for-array against the previous
+  implementations).
+
 - Rotorcraft terrain and screening (NORAH2 guidance §A.4.4-A.4.5, completing
   the ECAC Doc 32 domain): `mean_ground_plane` (the closed-form continuous
   least-squares plane of a terrain section, Eq. 36-40, with orthogonal

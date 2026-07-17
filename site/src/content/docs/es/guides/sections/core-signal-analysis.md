@@ -70,3 +70,8 @@ Qué significan los números y cuánto fiarse de ellos.
 - [Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/guides/gum-uncertainty/):
   la ley de propagación de la incertidumbre y el método de Monte Carlo de
   ISO/IEC Guide 98-3, con incertidumbre expandida e intervalos de cobertura.
+- [Análisis espectral calibrado](/phonometry/es/guides/spectral-analysis/):
+  los estimadores de Welch de Bendat y Piersol con su calidad estadística:
+  PSD y densidad espectral cruzada con intervalos de confianza chi-cuadrado,
+  el espectro de salida coherente con la SNR espectral, suavizado en 1/n de
+  octava y generadores de ruido de colores con pendiente exacta.

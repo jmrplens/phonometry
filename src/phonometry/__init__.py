@@ -205,6 +205,17 @@ from .metrology.uncertainty import (
     triangular,
     u_shaped,
 )
+from .metrology.signals import noise_signal
+from .metrology.spectra import (
+    CoherentOutputSpectrumResult,
+    CrossSpectralDensityResult,
+    SpectralDensityResult,
+    coherent_output_spectrum,
+    cross_spectral_density,
+    fractional_octave_smoothing,
+    power_spectral_density,
+    resolution_bias_error,
+)
 from .room.room_noise import (
     NCResult,
     RCResult,
@@ -1065,6 +1076,15 @@ __all__ = [
     "UncertaintyResult",
     "UncertaintyWarning",
     "MonteCarloResult",
+    "power_spectral_density",
+    "cross_spectral_density",
+    "coherent_output_spectrum",
+    "fractional_octave_smoothing",
+    "resolution_bias_error",
+    "noise_signal",
+    "SpectralDensityResult",
+    "CrossSpectralDensityResult",
+    "CoherentOutputSpectrumResult",
     "sweep_signal",
     "inverse_filter",
     "impulse_response",

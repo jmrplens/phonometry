@@ -177,5 +177,13 @@ export const apiSidebar = {
         'reference/api/metrology/uncertainty',
       ],
     },
+    {
+      label: 'Spectral analysis',
+      translations: { es: 'Análisis espectral' },
+      items: [
+        'reference/api/spectra/spectra',
+        'reference/api/spectra/signals',
+      ],
+    },
   ],
 };

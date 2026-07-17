@@ -39,6 +39,7 @@ PAGES = [
     ("outdoor-propagation.md", "guides/outdoor-propagation"),
     ("sound-power.md", "guides/sound-power"),
     ("calibration.md", "guides/calibration"),
+    ("spectral-analysis.md", "guides/spectral-analysis"),
     ("block-processing.md", "guides/block-processing"),
     ("multichannel.md", "guides/multichannel"),
     ("api-reference.md", "reference/api"),

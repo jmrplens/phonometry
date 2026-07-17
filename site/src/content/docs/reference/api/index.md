@@ -178,3 +178,10 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | Module | Summary |
 | :--- | :--- |
 | [`metrology.uncertainty`](/phonometry/reference/api/metrology/uncertainty/) | Measurement uncertainty by the GUM and its Monte Carlo supplement. |
+
+## Spectral analysis
+
+| Module | Summary |
+| :--- | :--- |
+| [`metrology.spectra`](/phonometry/reference/api/spectra/spectra/) | Calibrated spectral-density estimation with statistical error analysis. |
+| [`metrology.signals`](/phonometry/reference/api/spectra/signals/) | Deterministic colored-noise test signals. |

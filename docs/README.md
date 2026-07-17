@@ -51,6 +51,7 @@ Full documentation for phonometry. Also available as a website:
 - [Human Vibration](human-vibration.md) — whole-body and hand-arm frequency weightings (ISO 8041-1), weighted r.m.s. acceleration, running r.m.s./MTVV/VDV and crest factor (ISO 2631-1), vibration in buildings (ISO 2631-2), vibration total value and daily exposure A(8) (ISO 5349-1/-2), and the exposure action/limit values of Directive 2002/44/EC
 - [Multiple-shock whole-body vibration](multiple-shock-vibration.md) — the ISO 2631-5:2018 spinal-response model: the seat-to-spine transfer function, the acceleration and daily dose from the response peaks (Clause 5), and the compressive stress, stress variable R and Weibull probability of lumbar injury (Annex C)
 - [Measurement uncertainty](gum-uncertainty.md) — the GUM law of propagation of uncertainty and the Monte Carlo method (ISO/IEC Guide 98-3:2008 and Supplement 1): combined and expanded uncertainty, Welch–Satterthwaite effective degrees of freedom, and probabilistically symmetric coverage intervals
+- [Calibrated spectral analysis](spectral-analysis.md) — the Bendat & Piersol Welch estimators with their statistical quality: PSD and cross-spectral density with the effective number of averages, normalized random errors and chi-square confidence intervals, the coherent output spectrum with the spectral SNR, constant-power 1/n-octave smoothing, and colored-noise generators with an exact power-law slope
 
 ## Reference
 

@@ -570,6 +570,15 @@ _ES_EXACT = {
         "Respuesta en frecuencia y coherencia (Bendat y Piersol)",
     "True |H|": "|H| verdadero",
     "Estimated |H| (H1)": "|H| estimado (H1)",
+    # Calibrated spectral analysis (Bendat & Piersol PSD/CSD core)
+    "Calibrated Spectral Density of Pink Noise (Bendat & Piersol)":
+        "Densidad espectral calibrada de ruido rosa (Bendat y Piersol)",
+    "95 % chi-square confidence interval":
+        "Intervalo de confianza chi-cuadrado del 95 %",
+    "Welch PSD estimate": "Estimación de la PSD de Welch",
+    "1/3-octave smoothed": "Suavizado en 1/3 de octava",
+    "Exact -3.01 dB/octave power law":
+        "Ley de potencias exacta de -3,01 dB/octava",
     # Underwater acoustics (ISO 17208 ship radiated noise; ISO 18406 pile driving)
     "Ship Equivalent Monopole Source Level (ISO 17208-2)":
         "Nivel de fuente monopolar equivalente de buque (ISO 17208-2)",
@@ -884,6 +893,9 @@ _ES_EXACT = {
 }
 
 _ES_PATTERNS = [
+    # psd_confidence_smoothing annotation (mathtext + baked-in numbers).
+    (r"^\$n_d\$ = (\d+) averages, \$\\varepsilon_r\$ = (\d+)\.(\d+) %$",
+     r"$n_d$ = \1 promedios, $\\varepsilon_r$ = \2,\3 %"),
     (r"^f = 10 kHz, α = (.+) dB/km\npractical spreading \(R₀ = 1000 m\)$",
      "f = 10 kHz, α = \\1 dB/km\\nensanchamiento práctico (R₀ = 1000 m)"),
     (r"^SL = 140, NL = 60, DI = 15, DT = 8 dB\nfigure of merit = (.+) dB$",
@@ -3631,6 +3643,56 @@ def generate_frequency_response(output_dir: str) -> None:
     ax_coh.set_axisbelow(True)
     plt.tight_layout()
     save_figure(output_dir, "frequency_response.svg")
+    plt.close()
+
+
+def generate_psd_confidence_smoothing(output_dir: str) -> None:
+    """Calibrated PSD of pink noise: chi-square CI plus 1/3-oct smoothing."""
+    print("Generating psd_confidence_smoothing...")
+    from phonometry import (
+        fractional_octave_smoothing,
+        noise_signal,
+        power_spectral_density,
+    )
+
+    fs = 48000.0
+    x = noise_signal(fs, 20.0, color="pink", seed=11)
+    res = power_spectral_density(x, fs, nperseg=4096)
+    band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
+    freqs = res.frequencies[band]
+    smooth = fractional_octave_smoothing(res.frequencies, res.psd, 3.0)[band]
+    # The exact -3.01 dB/oct power law through the level at 1 kHz.
+    i0 = int(np.argmin(np.abs(freqs - 1000.0)))
+    ref_db = 10.0 * np.log10(smooth[i0]) - 10.0 * np.log10(freqs / freqs[i0])
+
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.fill_between(
+        freqs,
+        10.0 * np.log10(res.ci_lower[band]),
+        10.0 * np.log10(res.ci_upper[band]),
+        color=COLOR_PRIMARY, alpha=0.28, lw=0.0,
+        label="95 % chi-square confidence interval")
+    ax.semilogx(freqs, 10.0 * np.log10(res.psd[band]), color=COLOR_PRIMARY,
+                linewidth=1.0, alpha=0.85, label="Welch PSD estimate")
+    ax.semilogx(freqs, 10.0 * np.log10(smooth), color=COLOR_SECONDARY,
+                linewidth=2.2, label="1/3-octave smoothed")
+    ax.semilogx(freqs, ref_db, color=COLOR_FG, linestyle="--", linewidth=1.4,
+                alpha=0.7, label="Exact -3.01 dB/octave power law")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("PSD [dB re 1/Hz]")
+    ax.set_title("Calibrated Spectral Density of Pink Noise (Bendat & Piersol)",
+                 fontweight="bold", pad=12)
+    ax.set_xlim(20.0, 20000.0)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", fontsize=9)
+    ax.text(0.985, 0.965,
+            f"$n_d$ = {res.n_averages:.0f} averages, "
+            f"$\\varepsilon_r$ = {100.0 * res.random_error:.1f} %",
+            transform=ax.transAxes, va="top", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "psd_confidence_smoothing.svg")
     plt.close()
 
 
@@ -6737,6 +6799,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # frequency-response / coherence estimators (Bendat & Piersol).
     generate_distortion,
     generate_frequency_response,
+    # Calibrated spectral analysis: PSD with chi-square confidence interval
+    # and 1/3-octave smoothing on exact-slope pink noise (Bendat & Piersol).
+    generate_psd_confidence_smoothing,
     # Underwater acoustics: ship radiated noise / monopole source
     # level (ISO 17208) and pile-driving sound exposure (ISO 18406).
     generate_ship_source_level,

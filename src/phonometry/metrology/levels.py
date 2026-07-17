@@ -8,8 +8,8 @@ from __future__ import annotations
 from typing import Dict, List, Sequence
 
 import numpy as np
-from scipy import signal
 
+from .._internal.peaks import inter_sample_peak
 from .._internal.types import as_float_or_array
 from .parametric_filters import time_weighting, weighting_filter
 from .._internal.utils import _typesignal
@@ -163,11 +163,7 @@ def lc_peak(
     x_proc = _typesignal(x)
     _validate_level_input(x_proc, calibration_factor)
     weighted = weighting_filter(x_proc, fs, "C")
-    if oversample > 1 and weighted.shape[-1] > 0:
-        # Recover inter-sample peaks: the on-grid maximum misses the true
-        # continuous peak between samples for sustained HF tones.
-        weighted = signal.resample_poly(weighted, oversample, 1, axis=-1)
-    peak = np.max(np.abs(weighted), axis=-1)
+    peak = inter_sample_peak(weighted, int(oversample))
     out = _level_db(np.asarray(peak) ** 2, calibration_factor, dbfs)
     return as_float_or_array(out)
 

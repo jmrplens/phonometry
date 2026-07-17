@@ -224,6 +224,12 @@ _SECTION_LIST: tuple[Section, ...] = (
         ),
     ),
     Section(
+        key="broadcast",
+        label_en="Program loudness",
+        label_es="Sonoridad de programa",
+        modules=("phonometry.broadcast.program_loudness",),
+    ),
+    Section(
         key="metrology",
         label_en="Uncertainty",
         label_es="Incertidumbre",
@@ -262,6 +268,7 @@ _SECTION_SUBPACKAGES: dict[str, tuple[str, ...]] = {
     "underwater": ("underwater",),
     "power": ("emission",),
     "electroacoustics": ("electroacoustics",),
+    "broadcast": ("broadcast",),
     "metrology": ("metrology",),
     "spectra": ("metrology",),
 }

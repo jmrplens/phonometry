@@ -173,6 +173,12 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`electroacoustics.distortion`](/phonometry/reference/api/electroacoustics/distortion/) | Distortion metrics for electroacoustic equipment (IEC 60268-3 / AES17). |
 | [`electroacoustics.frequency_response`](/phonometry/reference/api/electroacoustics/frequency-response/) | Frequency-response and coherence estimators (Bendat & Piersol). |
 
+## Program loudness
+
+| Module | Summary |
+| :--- | :--- |
+| [`broadcast.program_loudness`](/phonometry/reference/api/broadcast/program-loudness/) | Programme loudness and true-peak level (ITU-R BS.1770-5, EBU R 128). |
+
 ## Uncertainty
 
 | Module | Summary |

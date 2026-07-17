@@ -14,7 +14,7 @@ Full documentation for phonometry. Also available as a website:
 - [Frequency Weighting](weighting.md) — A, C, Z curves
 - [Time Weighting](time-weighting.md) — Fast, Slow, Impulse ballistics
 - [Loudness](loudness.md) — Zwicker (ISO 532-1), Moore-Glasberg (ISO 532-2/3) and Sottek (ECMA-418-2) loudness in sones, plus the equal-loudness contours (ISO 226)
-- [Sound Quality Metrics](sound-quality.md) — sharpness (DIN 45692) and the ECMA-418-2 Sottek Hearing Model tonality and roughness
+- [Sound Quality Metrics](sound-quality.md) — sharpness (DIN 45692) and the ECMA-418-2 Sottek Hearing Model tonality, roughness and fluctuation strength
 - [Prominent discrete tones](tone-prominence.md) — the ECMA-418-1 tone-to-noise and prominence ratios that decide whether a discrete tone is prominent and justify tonal rating adjustments
 - [Tonal audibility of tones in noise](tone-audibility.md) — the ISO/PAS 20065 engineering method for the audibility ΔL of a tone above the masking threshold: the critical band about the tone, the critical-band masking level, the masking index, and the decisive and mean audibility
 - [Psychoacoustic annoyance & fluctuation strength](psychoacoustic-annoyance.md) — the Fastl & Zwicker annoyance PA = N5·(1 + √(wS² + wFR²)) from loudness, sharpness, roughness and fluctuation strength (Eqs 16.2–16.4), the closed form for AM broadband noise (Eq. 10.2) and the Osses 2016 fluctuation-strength signal model

@@ -232,6 +232,10 @@ from .psychoacoustics.fluctuation_strength import (
     fluctuation_strength,
     fluctuation_strength_am_noise,
 )
+from .psychoacoustics.fluctuation_strength_ecma import (
+    EcmaFluctuationStrength,
+    fluctuation_strength_ecma,
+)
 from .psychoacoustics.psychoacoustic_annoyance import (
     PsychoacousticAnnoyanceResult,
     psychoacoustic_annoyance,
@@ -815,6 +819,8 @@ __all__ = [
     "fluctuation_strength",
     "fluctuation_strength_am_noise",
     "FluctuationStrengthResult",
+    "fluctuation_strength_ecma",
+    "EcmaFluctuationStrength",
     "psychoacoustic_annoyance",
     "psychoacoustic_annoyance_from_signal",
     "PsychoacousticAnnoyanceResult",

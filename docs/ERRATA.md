@@ -221,6 +221,87 @@ to the issuing body, with date and reference).
   note in [`roughness_ecma.py`](../src/phonometry/psychoacoustics/roughness_ecma.py).
 - **Status:** unreported.
 
+## ECMA-418-2:2025 (4th edition) — clause 9.1.4, Formula (127) (HSA kernel phase)
+
+- **Location:** clause 9.1.4, Formula (127), the spectral kernel of the
+  envelope analysis window used by the High-resolution Spectral Analysis.
+- **The print:** the kernel's phase factor is
+  exp(−j·2π·f_n(k)·(s̃_b − n_ze + n_zb − 1)).
+- **The problem:** the kernel is, by construction, the DFT of the
+  rectangular analysis window of Formula (120) modulated to the candidate
+  rate — that is the model Formula (124) fits to the measured DFT spectrum.
+  That DFT has the phase exp(−j·π·f_n·(s̃_b − n_ze + n_zb − 1)); the
+  printed factor doubles it (and is also inconsistent with the π arguments
+  of the printed sine terms of the same formula). With the printed phase
+  the fitted model cannot reproduce the spectrum of a noiseless windowed
+  sinusoid, contradicting the clause's own statement that the HSA achieves
+  "theoretically infinite resolution for signals without noise".
+- **Evidence:** independent derivation of the window DFT plus numerical
+  recomputation: with π the least-squares fit recovers the constant part,
+  amplitudes and phases of synthetic noiseless envelopes to machine
+  precision and the Formula (135) residual vanishes; with the printed 2π
+  the kernel deviates from the window DFT by amounts of the order of the
+  kernel itself and the residual stays of the order of the signal energy.
+- **Library behaviour:** implements the π reading, pinned by a regression
+  test on the exact recovery of synthetic line pairs.
+- **Status:** unreported.
+
+## ECMA-418-2:2025 (4th edition) — clause 9.1.5, Formula (144) (bin offset)
+
+- **Location:** clause 9.1.5, Formula (144), the modulation rate of a local
+  maximum of the envelope power spectrum.
+- **The print:** the rate is the three-bin amplitude-weighted centroid of
+  the peak position **minus one**, scaled by Δf.
+- **The problem:** clause 9.1.4 (below Formula (122)) defines the spectral
+  index k as mapping to the modulation rate k·r̃_s/s̃_b with k starting at
+  0. A symmetric local maximum at bin k has centroid k, and the printed
+  formula then assigns it the rate (k − 1)·Δf — one full bin (0,73 Hz) low,
+  which at fluctuation-strength rates is fatal (a true 1,46 Hz modulation
+  would be reported as 0,73 Hz). The offset is only consistent with
+  1-based spectral-line positions, contradicting the standard's own
+  definition of k.
+- **Evidence:** cross-check of Formula (144) against the k-to-rate mapping
+  stated below Formula (122).
+- **Library behaviour:** uses the centroid directly (no offset) with the
+  0-based k of Formula (122).
+- **Status:** unreported.
+
+## ECMA-418-2:2025 (4th edition) — clause 9.1.7 (units of the fine-tuning constants)
+
+- **Location:** clause 9.1.7, Formulae (149)-(152), the damped Newton fine
+  tuning of the dominant modulation rate.
+- **The print:** differential step Δx = 10⁻⁵, damped-step cap 2·10⁻⁴, stop
+  tolerance 10⁻⁷ and an iteration limit of 40, with the starting point
+  x₀ = f̃_c,imax (a rate in Hz) and the failure check
+  |f_c,1,opt − f̃_c,imax| > 1,25·Δf.
+- **The problem:** the constants carry no units. Read in Hz, the damped
+  step is capped at 5·10⁻⁵ Hz per iteration (2·10⁻³ Hz over all 40
+  iterations), so the tuning cannot move appreciably and the 1,25·Δf
+  (≈ 0,92 Hz) failure check is unreachable — the whole clause would be
+  inert. Read as normalized modulation rates f/r̃_s (the variable in which
+  the Formula (127) kernel frequencies are expressed), the same constants
+  give a 0,075 Hz damped per-iteration cap (≈ 2,9 Hz over the 39
+  iterations), a 1,5·10⁻⁴ Hz stop tolerance and a reachable failure check,
+  all consistent with the clause's purpose.
+- **Evidence:** dimensional analysis of the printed constants against the
+  0,7324 Hz spectral resolution and the failure threshold.
+- **Library behaviour:** applies the constants as normalized modulation
+  rates.
+- **Status:** unreported.
+
+## ECMA-418-2:2025 (4th edition) — clause 9 introduction (broken cross-reference)
+
+- **Location:** clause 9, third paragraph of the introduction, on the
+  HSA-based loudness prediction.
+- **The print:** "loudness scaling is improved by using HSA-based loudness
+  prediction (see Clause 0)".
+- **The problem:** "Clause 0" does not exist; the HSA-based loudness
+  scaling is described in clause 9.1.10 (an unresolved field reference).
+- **Evidence:** the clause listing of the standard itself.
+- **Library behaviour:** none required (the intended target is
+  unambiguous).
+- **Status:** unreported.
+
 ## ISO/PAS 20065:2016 — clause 5.3.4 (edge steepness of a distinct tone)
 
 - **Location:** clause 5.3.4, Formulae (10)/(11), the minimum edge steepness

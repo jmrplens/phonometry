@@ -34,8 +34,8 @@ construidas sobre ella.
   (ISO 532-1), Moore-Glasberg (ISO 532-2/3) y Sottek (ECMA-418-2) en sonios,
   más las curvas isofónicas de ISO 226:2023.
 - [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/): agudeza
-  (DIN 45692) y la tonalidad y aspereza del modelo auditivo de Sottek
-  (ECMA-418-2).
+  (DIN 45692) y la tonalidad, aspereza e intensidad de fluctuación del
+  modelo auditivo de Sottek (ECMA-418-2).
 - [Tonos discretos prominentes (ECMA-418-1)](/phonometry/es/guides/tone-prominence/):
   las razones tono-ruido y de prominencia que deciden si un tono discreto es
   prominente.

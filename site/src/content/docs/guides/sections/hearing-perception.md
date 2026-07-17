@@ -32,7 +32,8 @@ The perceptual sensations of sound: loudness and the metrics layered on it.
   Moore-Glasberg (ISO 532-2/3) and Sottek (ECMA-418-2) loudness in sones,
   plus the ISO 226:2023 equal-loudness contours.
 - [Sound Quality Metrics](/phonometry/guides/sound-quality/): sharpness
-  (DIN 45692) and the ECMA-418-2 Sottek Hearing Model tonality and roughness.
+  (DIN 45692) and the ECMA-418-2 Sottek Hearing Model tonality, roughness
+  and fluctuation strength.
 - [Prominent Discrete Tones (ECMA-418-1)](/phonometry/guides/tone-prominence/):
   the tone-to-noise and prominence ratios that decide whether a discrete tone
   is prominent.

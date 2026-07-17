@@ -123,7 +123,10 @@ fluctuación *lenta* de la sonoridad. Como la aspereza, es una sensación de pas
 de banda de la frecuencia de modulación, pero su máximo se sitúa aproximadamente
 un orden de magnitud más abajo — en `fmod ≈ 4 Hz` en lugar del máximo de la
 aspereza en ~70 Hz. Por definición, un tono de 1 kHz a 60 dB, modulado en
-amplitud al 100 % a 4 Hz, produce `1 vacil`.
+amplitud al 100 % a 4 Hz, produce `1 vacil`. Esta página cubre los modelos de
+Fastl y Zwicker; la intensidad de fluctuación normativa del modelo de Sottek
+(cláusula 9 de ECMA-418-2) está en
+[Métricas de calidad sonora](/phonometry/es/guides/sound-quality/).
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength.svg" alt="Intensidad de fluctuación frente a la frecuencia de modulación en un eje logarítmico: la curva de forma cerrada para ruido de banda ancha AM y el barrido del modelo de señal para tono AM muestran ambos una característica de paso de banda con máximo a 4 Hz" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength_dark.svg" alt="Intensidad de fluctuación frente a la frecuencia de modulación en un eje logarítmico: la curva de forma cerrada para ruido de banda ancha AM y el barrido del modelo de señal para tono AM muestran ambos una característica de paso de banda con máximo a 4 Hz" style="width:82%">
 

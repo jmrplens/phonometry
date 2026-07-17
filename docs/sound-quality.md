@@ -2,12 +2,12 @@
 
 # Sound Quality Metrics
 
-Two sounds of equal loudness can still differ in how *sharp*, how *tonal* or
-how *rough* they are. This page covers the sound-quality metrics that
-complement loudness: sharpness (DIN 45692) and the ECMA-418-2 tonality and
-roughness of the Sottek Hearing Model. Loudness itself, including the
-ECMA-418-2 loudness that shares the same auditory front-end, lives in
-[Loudness](loudness.md).
+Two sounds of equal loudness can still differ in how *sharp*, how *tonal*,
+how *rough* or how strongly *fluctuating* they are. This page covers the
+sound-quality metrics that complement loudness: sharpness (DIN 45692) and the
+ECMA-418-2 tonality, roughness and fluctuation strength of the Sottek Hearing
+Model. Loudness itself, including the ECMA-418-2 loudness that shares the
+same auditory front-end, lives in [Loudness](loudness.md).
 
 ## Sharpness in acum (DIN 45692)
 
@@ -188,6 +188,95 @@ R(l50)), `specific_roughness` (R′(z), 53 bands), `bark`, `centre_frequencies`,
 `time`, `roughness_vs_time` (R(l50)), `specific_roughness_vs_time`
 ((n_times, 53) array), `field`.
 
+## Fluctuation strength (ECMA-418-2) — new capability
+
+Fluctuation strength is the slow, wobbling sensation of amplitude or
+frequency modulation below about 20 Hz — a siren, beating tones, speech at
+syllable rate. It is the slow counterpart of roughness: the same hearing
+model splits envelope modulation into a slow band-pass peaking near 4 Hz
+(fluctuation strength, in **vacil_HMS**) and a fast one peaking near 70 Hz
+(roughness). ECMA-418-2 Clause 9 analyses each band's envelope with
+High-resolution Spectral Analysis (HSA) — a least-squares fit of
+window-kernel spectral line pairs that resolves modulation rates far below
+the DFT bin width — using envelope-dependent analysis windows that skip
+quieter periods, then weights the dominant harmonic complex and scales it
+with an HSA-based specific loudness. The reference sound (1 kHz carrier,
+100 % amplitude-modulated at 4 Hz, overall level 60 dB SPL) is defined as
+1 vacil_HMS — this clean-room implementation converges to 0.9958 vacil_HMS
+by 12 s with the tabulated calibration constant c_F (Formula 163) used
+**without** reverse-fitting to the target (the 8 s example below prints
+0.9957). A signal whose single value F exceeds 0.2 vacil_HMS has a
+*prominent* fluctuation strength (Clause 9.2).
+
+```python
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(int(8.0 * fs)) / fs
+x = (1.0 + np.cos(2 * np.pi * 4 * t)) * np.sin(2 * np.pi * 1000 * t)
+x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # overall 60 dB SPL
+
+res = psychoacoustics.fluctuation_strength_ecma(x, fs, field="free")
+print(f"F = {res.fluctuation_strength:.4f} vacil_HMS")   # 0.9957 vacil_HMS (reference: 1 vacil_HMS)
+
+res.plot()   # time-dependent F(l50) + specific-fluctuation-strength heatmap
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hms_modulation_bandpass_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hms_modulation_bandpass.svg" alt="ECMA-418-2 slow vs fast modulation perception: fluctuation strength forms a band-pass over modulation frequency peaking near 4 to 6 Hz while roughness of the same 1 kHz amplitude-modulated tones peaks near 70 Hz" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(int(3.0 * fs)) / fs
+carrier = np.sin(2 * np.pi * 1000 * t)
+
+def am_tone(fmod):
+    # 100 % AM at an overall level of 60 dB SPL (the Clause 7/9 convention)
+    x = (1.0 + np.sin(2 * np.pi * fmod * t)) * carrier
+    return x * 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))
+
+fm_slow = [0.5, 1, 2, 4, 8, 16, 32]
+fm_fast = [20, 40, 70, 100, 150, 200]
+f_vals = [psychoacoustics.fluctuation_strength_ecma(am_tone(fm), fs).fluctuation_strength
+          for fm in fm_slow]
+r_vals = [psychoacoustics.roughness_ecma(am_tone(fm), fs).roughness for fm in fm_fast]
+
+fig, ax = plt.subplots()
+ax.semilogx(fm_slow, f_vals, "o-", label="Fluctuation strength F [vacil_HMS]")
+ax.semilogx(fm_fast, r_vals, "s-", label="Roughness R [asper]")
+ax.set(xlabel="Modulation frequency [Hz]", ylabel="F [vacil_HMS] / R [asper]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+### `fluctuation_strength_ecma()` parameters
+
+| Parameter | Type | Units | Range / default | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| `signal_in` | 1D array | Pa | non-empty | Calibrated pressure signal |
+| `fs` | float | Hz | > 0 | Resampled to 48 kHz internally if needed |
+| `field` | str | — | `'free'` (default) / `'diffuse'` | Outer/middle-ear filter |
+
+Returns an `EcmaFluctuationStrength`: `fluctuation_strength` (F, vacil_HMS, the
+90th percentile of F(l50)), `specific_fluctuation_strength` (F′(z), 53
+bands), `bark`, `centre_frequencies`, `time`, `fluctuation_strength_vs_time`
+(F(l50)), `specific_fluctuation_strength_vs_time` ((n_times, 53) array),
+`field`.
+
+The Fastl & Zwicker fluctuation-strength models (closed form for AM
+broadband noise and the Osses 2016 signal model) live in
+[Psychoacoustic Annoyance](psychoacoustic-annoyance.md); this Clause 9
+metric is the normative Sottek-model counterpart.
+
 See [Prominent Discrete Tones](tone-prominence.md) for the ECMA-418-1 TNR/PR
 prominence verdicts, [Speech Transmission Index](speech-transmission.md) for
 STI/STIPA, and [Theory](theory-perception.md) for the underlying math.
@@ -207,5 +296,6 @@ DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
 Schärfe* — sharpness in acum (clause 6 weighting, Annex B von Bismarck and
 Aures variants, Table A.2 targets). ECMA-418-2:2025, *Psychoacoustic metrics
 for ITT equipment — Part 2 (methods for describing human perception based on
-the Sottek Hearing Model)* — the Sottek Hearing Model tonality (tu_HMS) and
-roughness (asper).
+the Sottek Hearing Model)* — the Sottek Hearing Model tonality (tu_HMS,
+clause 6), roughness (asper, clause 7) and fluctuation strength (vacil_HMS,
+clause 9, the HSA-based envelope analysis).

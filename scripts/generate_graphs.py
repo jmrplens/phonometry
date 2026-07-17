@@ -529,6 +529,15 @@ _ES_EXACT = {
     "1 kHz carrier, 100 % AM": "Portadora de 1 kHz, AM del 100 %",
     "Sound Quality Metrics (ECMA-418-2 Sottek Hearing Model)":
         "Métricas de calidad sonora (modelo auditivo de Sottek, ECMA-418-2)",
+    "Slow vs Fast Modulation Perception (ECMA-418-2 Sottek Hearing Model)":
+        "Percepción de modulación lenta vs rápida (modelo auditivo de "
+        "Sottek, ECMA-418-2)",
+    "Fluctuation strength F (Clause 9, slow modulation)":
+        "Intensidad de fluctuación F (cláusula 9, modulación lenta)",
+    "Roughness R (Clause 7, fast modulation)":
+        "Aspereza R (cláusula 7, modulación rápida)",
+    "1 kHz carrier, 100 % AM, overall 60 dB SPL":
+        "Portadora de 1 kHz, AM del 100 %, 60 dB SPL globales",
     "Time-Varying Loudness (ISO 532-3)":
         "Sonoridad variable en el tiempo (ISO 532-3)",
     "Loudness [sone]": "Sonoridad [sonios]",
@@ -3276,6 +3285,85 @@ def generate_tonality_roughness_demo(output_dir: str) -> None:
                  fontweight="bold", fontsize=13)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
     save_figure(output_dir, "tonality_roughness_demo.png")
+    plt.close()
+
+
+@lru_cache(maxsize=None)
+def _fs_ecma_sweep_data() -> tuple[np.ndarray, np.ndarray]:
+    """ECMA-418-2 Clause 9 F of a 1 kHz / 60 dB / 100 %-AM tone vs f_mod.
+
+    Cached (language/theme independent): the Sottek fluctuation-strength
+    chain is run once for the modulation-frequency sweep. The overall level
+    convention (60 dB SPL of the modulated signal) matches the Clause 9
+    calibration.
+    """
+    from phonometry.psychoacoustics import fluctuation_strength_ecma
+
+    dur = 3.0
+    t = np.arange(int(dur * _FS_PSY)) / _FS_PSY
+    carrier = np.sin(2.0 * np.pi * 1000.0 * t)
+    fmods = np.array([0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 12.0, 16.0,
+                      24.0, 32.0])
+    f_vals = []
+    for fm in fmods:
+        am = (1.0 + np.sin(2.0 * np.pi * fm * t)) * carrier
+        am = am / np.sqrt(np.mean(am ** 2)) * _P_REF * 10.0 ** (60.0 / 20.0)
+        f_vals.append(
+            fluctuation_strength_ecma(am, float(_FS_PSY)).fluctuation_strength
+        )
+    return fmods, np.array(f_vals)
+
+
+def generate_hms_modulation_bandpass(output_dir: str) -> None:
+    """Complementary modulation band-passes of the Sottek Hearing Model.
+
+    Fluctuation strength (ECMA-418-2 Clause 9, maximum near 4 Hz) and
+    roughness (Clause 7, maximum near 70 Hz) computed for the same
+    1 kHz / 100 % AM / 60 dB signal family over the modulation rate.
+    """
+    print("Generating hms_modulation_bandpass...")
+    fm_fs, f_vals = _fs_ecma_sweep_data()
+    fm_r, r_vals = _roughness_sweep_data()
+
+    fig, ax = plt.subplots(figsize=(10, 6.2))
+    # Per-metric identity colors (teal = fluctuation strength, brown =
+    # roughness), matching the result .plot() renderers; legible on both
+    # themes, kept literal on purpose.
+    ax.semilogx(fm_fs, f_vals, "o-", color="#17becf", linewidth=2.2,
+                markersize=6, label="Fluctuation strength F (Clause 9, slow modulation)")
+    ax.semilogx(fm_r, r_vals, "s-", color="#8c564b", linewidth=2.2,
+                markersize=6, label="Roughness R (Clause 7, fast modulation)")
+
+    i_f = int(np.argmax(f_vals))
+    i_r = int(np.argmax(r_vals))
+    ax.annotate(f"F = {f_vals[i_f]:.2f} vacil_HMS @ {fm_fs[i_f]:.0f} Hz",
+                xy=(float(fm_fs[i_f]), float(f_vals[i_f])),
+                xytext=(float(fm_fs[i_f]) * 1.6, float(f_vals[i_f]) * 1.06),
+                fontsize=10, color=COLOR_FG,
+                arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_FG})
+    ax.annotate(f"R = {r_vals[i_r]:.2f} asper @ {fm_r[i_r]:.0f} Hz",
+                xy=(float(fm_r[i_r]), float(r_vals[i_r])),
+                xytext=(float(fm_r[i_r]) * 1.5, float(r_vals[i_r]) * 1.06),
+                fontsize=10, color=COLOR_FG,
+                arrowprops={"arrowstyle": "->", "lw": 0.9, "color": COLOR_FG})
+
+    ax.set_xlabel("Modulation frequency f_mod [Hz]")
+    ax.set_ylabel("F [vacil_HMS] / R [asper]")
+    ax.set_title("Slow vs Fast Modulation Perception (ECMA-418-2 Sottek Hearing Model)",
+                 fontweight="bold", pad=12)
+    top = max(float(np.max(f_vals)), float(np.max(r_vals)))
+    ax.set_ylim(0.0, top * 1.22)
+    ax.set_xlim(0.4, 260.0)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.set_xticks([0.5, 1, 2, 4, 8, 16, 32, 70, 140, 250])
+    ax.set_xticklabels(["0.5", "1", "2", "4", "8", "16", "32", "70", "140", "250"])
+    ax.legend(loc="upper left", fontsize=9)
+    ax.text(0.985, 0.03, "1 kHz carrier, 100 % AM, overall 60 dB SPL",
+            transform=ax.transAxes, va="bottom", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "hms_modulation_bandpass.svg")
     plt.close()
 
 
@@ -6637,6 +6725,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_loudness_models_comparison,
     generate_sottek_specific_loudness,
     generate_tonality_roughness_demo,
+    # ECMA-418-2 fluctuation strength (Clause 9) vs roughness (Clause 7):
+    # the complementary slow/fast modulation band-passes.
+    generate_hms_modulation_bandpass,
     generate_moore_glasberg_time_loudness,
     # Fluctuation strength (Fastl & Zwicker Eq. 10.2 + Osses 2016 signal model)
     # and psychoacoustic annoyance (Fastl & Zwicker Eqs 16.2-16.4).

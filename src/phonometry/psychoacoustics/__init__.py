@@ -8,6 +8,10 @@ from .fluctuation_strength import (
     fluctuation_strength,
     fluctuation_strength_am_noise,
 )
+from .fluctuation_strength_ecma import (
+    EcmaFluctuationStrength,
+    fluctuation_strength_ecma,
+)
 from .loudness_contours import (
     equal_loudness_contour,
     hearing_threshold,
@@ -67,6 +71,7 @@ from .tone_audibility import (
 )
 
 __all__ = [
+    "EcmaFluctuationStrength",
     "EcmaLoudness",
     "EcmaRoughness",
     "EcmaTonality",
@@ -92,6 +97,7 @@ __all__ = [
     "equal_loudness_contour",
     "fluctuation_strength",
     "fluctuation_strength_am_noise",
+    "fluctuation_strength_ecma",
     "hearing_threshold",
     "loudness_ecma",
     "loudness_level",

@@ -116,7 +116,9 @@ print(res.annoyance, res.n5, res.sharpness, res.roughness, res.fluctuation_stren
 fluctuation. Like roughness it is a band-pass sensation of the modulation
 frequency, but it peaks about an order of magnitude lower — at `fmod ≈ 4 Hz`
 rather than the ~70 Hz roughness peak. By definition, a 1 kHz tone at 60 dB,
-100 % amplitude-modulated at 4 Hz, produces `1 vacil`.
+100 % amplitude-modulated at 4 Hz, produces `1 vacil`. This page covers the
+Fastl & Zwicker models; the normative Sottek-model fluctuation strength of
+ECMA-418-2 Clause 9 lives in [Sound Quality Metrics](sound-quality.md).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fluctuation_strength.svg" alt="Fluctuation strength versus modulation frequency on a log axis: the closed-form AM broadband-noise curve and the AM-tone signal-model sweep both show a band-pass characteristic peaking at 4 Hz" width="82%"></picture>
 

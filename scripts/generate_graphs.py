@@ -593,6 +593,18 @@ _ES_EXACT = {
     "1/3-octave smoothed": "Suavizado en 1/3 de octava",
     "Exact -3.01 dB/octave power law":
         "Ley de potencias exacta de -3,01 dB/octava",
+    # Correlation and time-delay estimation (B&P / Knapp & Carter GCC)
+    "Time-Delay Estimation: GCC-PHAT vs Direct Correlation (Knapp & Carter)":
+        "Estimación del retardo: GCC-PHAT frente a correlación directa "
+        "(Knapp y Carter)",
+    "Direct cross-correlation": "Correlación cruzada directa",
+    "True delay (20 samples)": "Retardo verdadero (20 muestras)",
+    "Lag [ms]": "Retardo [ms]",
+    "Normalized correlation": "Correlación normalizada",
+    "colored signal: the plain correlator smears the peak,\n"
+    "PHAT prewhitens the cross-spectrum and restores it":
+        "señal coloreada: el correlador simple ensancha el pico,\n"
+        "PHAT preblanquea el espectro cruzado y lo recupera",
     # Underwater acoustics (ISO 17208 ship radiated noise; ISO 18406 pile driving)
     "Ship Equivalent Monopole Source Level (ISO 17208-2)":
         "Nivel de fuente monopolar equivalente de buque (ISO 17208-2)",
@@ -3802,6 +3814,55 @@ def generate_program_loudness(output_dir: str) -> None:
     ax.legend(loc="lower left", fontsize=9)
     plt.tight_layout()
     save_figure(output_dir, "program_loudness.svg")
+    plt.close()
+
+
+def generate_gcc_phat_delay(output_dir: str) -> None:
+    """GCC-PHAT vs direct correlation for TDE on a colored signal pair."""
+    print("Generating gcc_phat_delay...")
+    from scipy import signal as sp_signal
+
+    from phonometry import noise_signal, time_delay
+
+    fs = 8192.0
+    delay = 20  # samples -> 2.44 ms
+    # Colored common signal: a Butterworth roll-off keeps some power in
+    # every band (the Knapp & Carter condition for a usable PHAT phase).
+    b, a = sp_signal.butter(2, 800.0 / (fs / 2.0))
+    s = sp_signal.lfilter(b, a, noise_signal(fs, 4.0, color="white", seed=10))
+    noise_x = noise_signal(fs, 4.0, color="white", rms=0.02, seed=11)
+    noise_y = noise_signal(fs, 4.0, color="white", rms=0.02, seed=12)
+    x = s + noise_x
+    y = np.roll(s, delay) + noise_y
+
+    direct = time_delay(x, y, fs, method="direct", max_delay=0.01)
+    phat = time_delay(x, y, fs, method="gcc", weighting="phat",
+                      nperseg=2048, max_delay=0.01)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(1e3 * direct.lags,
+            direct.correlation / np.max(np.abs(direct.correlation)),
+            color=COLOR_PRIMARY, linewidth=1.6,
+            label="Direct cross-correlation")
+    ax.plot(1e3 * phat.lags, phat.correlation, color=COLOR_SECONDARY,
+            linewidth=1.6, label="GCC-PHAT")
+    ax.axvline(1e3 * delay / fs, color=COLOR_FG, linestyle="--",
+               linewidth=1.4, alpha=0.7, label="True delay (20 samples)")
+    ax.set_xlabel("Lag [ms]")
+    ax.set_ylabel("Normalized correlation")
+    ax.set_title("Time-Delay Estimation: GCC-PHAT vs Direct Correlation "
+                 "(Knapp & Carter)", fontweight="bold", pad=12)
+    ax.set_xlim(-10.0, 10.0)
+    ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+    ax.text(0.985, 0.965,
+            "colored signal: the plain correlator smears the peak,\n"
+            "PHAT prewhitens the cross-spectrum and restores it",
+            transform=ax.transAxes, va="top", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "gcc_phat_delay.svg")
     plt.close()
 
 
@@ -7034,6 +7095,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Broadcast: programme loudness and true peak (ITU-R BS.1770-5 /
     # EBU R 128 with Tech 3341/3342).
     generate_program_loudness,
+    # Correlation / time-delay estimation: GCC-PHAT vs the direct
+    # correlator on a colored signal pair (Knapp & Carter 1976).
+    generate_gcc_phat_delay,
     # Underwater acoustics: ship radiated noise / monopole source
     # level (ISO 17208) and pile-driving sound exposure (ISO 18406).
     generate_ship_source_level,

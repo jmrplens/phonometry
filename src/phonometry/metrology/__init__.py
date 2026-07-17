@@ -12,6 +12,17 @@ from .compliance import (
     weighting_class_limits,
 )
 from .core import FilterBankWarning, OctaveFilterBank, octave_filter, octavefilter
+from .correlation import (
+    AlignedImpulseResponseResult,
+    CorrelationResult,
+    TimeDelayResult,
+    align_impulse_responses,
+    correlation,
+    correlation_random_error,
+    impulse_response_delay,
+    time_delay,
+)
+from .envelope import EnvelopeResult, envelope
 from .frequencies import (
     getansifrequencies,
     nominal_frequencies,
@@ -50,25 +61,34 @@ from .uncertainty import (
 )
 
 __all__ = [
+    "AlignedImpulseResponseResult",
     "CalibrationWarning",
     "CoherentOutputSpectrumResult",
+    "CorrelationResult",
     "CrossSpectralDensityResult",
+    "EnvelopeResult",
     "FilterBankWarning",
     "MonteCarloResult",
     "OctaveFilterBank",
     "Quantity",
     "SpectralDensityResult",
+    "TimeDelayResult",
     "TimeWeighting",
     "UncertaintyResult",
     "UncertaintyWarning",
     "WeightingFilter",
+    "align_impulse_responses",
     "calculate_sensitivity",
     "class_limits",
     "coherent_output_spectrum",
     "combine_uncertainty",
+    "correlation",
+    "correlation_random_error",
     "cross_spectral_density",
+    "envelope",
     "fractional_octave_smoothing",
     "getansifrequencies",
+    "impulse_response_delay",
     "laeq",
     "lc_peak",
     "leq",
@@ -88,6 +108,7 @@ __all__ = [
     "sel",
     "sensitivity",
     "sound_exposure",
+    "time_delay",
     "time_weighting",
     "triangular",
     "u_shaped",

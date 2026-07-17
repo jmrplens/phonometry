@@ -142,8 +142,9 @@ def test_k_weighting_rejects_low_rate_and_empty() -> None:
     for fs in (4000.0, 8000.0):
         with pytest.raises(ValueError, match="fs >= 16000"):
             k_weighting_coefficients(fs)
+    empty = np.empty(0)
     with pytest.raises(ValueError, match="empty"):
-        k_weighting(np.empty(0), FS)
+        k_weighting(empty, FS)
 
 
 # ---------------------------------------------------------------------------
@@ -359,8 +360,9 @@ def test_true_peak_defaults_and_validation() -> None:
         true_peak_level(x, FS, oversample=0)
     with pytest.raises(ValueError, match="oversample"):
         true_peak_level(x, FS, oversample=True)  # type: ignore[arg-type]
+    empty = np.empty(0)
     with pytest.raises(ValueError, match="empty"):
-        true_peak_level(np.empty(0), FS)
+        true_peak_level(empty, FS)
     # Silence: -inf dBTP, no runtime warnings leak.
     assert true_peak_level(np.zeros(1000), FS) == float("-inf")
 
@@ -550,12 +552,14 @@ def test_other_sample_rates_agree_with_48k() -> None:
 
 
 def test_program_loudness_validation() -> None:
+    empty = np.empty((2, 0))
+    tone = _stereo(_sine(-23.0, 1.0))
     with pytest.raises(ValueError, match="empty"):
-        program_loudness(np.empty((2, 0)), FS)
+        program_loudness(empty, FS)
     with pytest.raises(ValueError, match="momentary_step"):
-        program_loudness(_stereo(_sine(-23.0, 1.0)), FS, momentary_step=0.0)
+        program_loudness(tone, FS, momentary_step=0.0)
     with pytest.raises(ValueError, match="short_term_step"):
-        program_loudness(_stereo(_sine(-23.0, 1.0)), FS, short_term_step=-1.0)
+        program_loudness(tone, FS, short_term_step=-1.0)
     # A NaN-poisoned programme must not silently measure as digital silence.
     poisoned = _stereo(_sine(-23.0, 1.0))
     poisoned[0, 100] = np.nan

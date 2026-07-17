@@ -56,6 +56,8 @@ from .._internal.types import as_float_or_array
 from .._internal.utils import _typesignal
 from .._internal.validation import require_positive
 
+_EMPTY_SIGNAL = "Input signal 'x' cannot be empty."
+
 # ---------------------------------------------------------------------------
 # Normative constants (ITU-R BS.1770-5 Annex 1, EBU Tech 3341/3342).
 # ---------------------------------------------------------------------------
@@ -205,7 +207,7 @@ def k_weighting(x: List[float] | np.ndarray, fs: float) -> np.ndarray:
     """
     x_proc = _typesignal(x)
     if x_proc.shape[-1] == 0:
-        raise ValueError("Input signal 'x' cannot be empty.")
+        raise ValueError(_EMPTY_SIGNAL)
     (b1, a1), (b2, a2) = k_weighting_coefficients(fs)
     return np.asarray(
         signal.lfilter(b2, a2, signal.lfilter(b1, a1, x_proc, axis=-1), axis=-1)
@@ -416,7 +418,7 @@ def true_peak_level(
         raise ValueError("oversample must be an integer >= 1.")
     x_proc = _typesignal(x)
     if x_proc.shape[-1] == 0:
-        raise ValueError("Input signal 'x' cannot be empty.")
+        raise ValueError(_EMPTY_SIGNAL)
     peak = inter_sample_peak(x_proc, int(oversample))
     with np.errstate(divide="ignore"):
         out = 20.0 * np.log10(peak)
@@ -470,7 +472,7 @@ def _prepare_signal(
     """
     x_proc = np.atleast_2d(_typesignal(x))
     if x_proc.shape[-1] == 0:
-        raise ValueError("Input signal 'x' cannot be empty.")
+        raise ValueError(_EMPTY_SIGNAL)
     if not np.all(np.isfinite(x_proc)):
         raise ValueError("Input signal 'x' must be finite (no NaN/inf samples).")
     return x_proc, _resolve_weights(x_proc.shape[0], weights)

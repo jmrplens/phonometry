@@ -241,7 +241,10 @@ Every synthesizable "minimum requirements" signal of EBU Tech 3341 (cases
 official tolerance (±0.1 LU for loudness, +0.2/−0.4 dB for true peak, ±1 LU
 for LRA), alongside the 997 Hz anchor and the closed-form under-read bound
 of Annex 2 Attachment 1. Cases 7-8 and the LRA cases 5-6 use authentic
-programme material distributed by the EBU and are not synthesizable. The
+programme material distributed by the EBU and are not synthesizable; they
+run against the official EBU loudness test set (fetched from the EBU, whose
+licence covers technical testing only, so the audio is never committed) and
+all four pass within tolerance. The
 independent [pyloudnorm](https://github.com/csteinmetz1/pyloudnorm) meter is
 a useful cross-check for real recordings; it was not used as a source for
 this implementation.

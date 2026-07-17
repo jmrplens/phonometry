@@ -187,6 +187,29 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
         pip install -e .
+    # The authentic-programme loudness oracle (EBU Tech 3341 cases 7-8 and
+    # Tech 3342 cases 5-6) needs the official EBU loudness test set. Its
+    # licence only covers technical testing, so the audio is never committed:
+    # one matrix cell fetches it from the EBU (cached between runs) and the
+    # tests skip gracefully anywhere the set is absent.
+    - name: Cache the EBU loudness test set
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+      id: ebu-cache
+      uses: actions/cache@v5
+      with:
+        path: ebu-loudness-test-set
+        key: ebu-loudness-test-set-v04
+    - name: Download the EBU loudness test set
+      if: >-
+        matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13' &&
+        steps.ebu-cache.outputs.cache-hit != 'true'
+      continue-on-error: true
+      run: |
+        mkdir -p ebu-loudness-test-set
+        curl -sfL --retry 3 -o ebu-set.zip \
+          "https://tech.ebu.ch/files/live/sites/tech/files/shared/testmaterial/ebu-loudness-test-setv04.zip"
+        unzip -q ebu-set.zip -d ebu-loudness-test-set
+        rm ebu-set.zip
     - name: Run tests
       # -n auto fans the suite out across the runner's cores via pytest-xdist;
       # pytest-cov combines the per-worker coverage into a single coverage.xml.
@@ -198,6 +221,7 @@ jobs:
         OPENBLAS_NUM_THREADS: "1"
         NUMEXPR_NUM_THREADS: "1"
         VECLIB_MAXIMUM_THREADS: "1"
+        EBU_LOUDNESS_TEST_SET: ${{ github.workspace }}/ebu-loudness-test-set
       run: |
         pytest -n auto --junitxml=test-results-${{ matrix.os }}-${{ matrix.python-version }}.xml --cov=src --cov-report=xml
     - name: Upload Test Results

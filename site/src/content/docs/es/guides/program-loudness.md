@@ -250,7 +250,10 @@ tolerancia oficial (±0,1 LU en sonoridad, +0,2/−0,4 dB en pico verdadero,
 ±1 LU en LRA), junto con el ancla de 997 Hz y la cota de infravaloración en
 forma cerrada del Anexo 2, Adjunto 1. Los casos 7-8 y los casos 5-6 del LRA
 usan material de programa auténtico distribuido por la EBU y no son
-sintetizables. El medidor independiente
+sintetizables; se ejecutan contra el conjunto oficial de pruebas de sonoridad
+de la EBU (descargado de la propia EBU, cuya licencia cubre solo pruebas
+técnicas, así que el audio nunca se incorpora al repositorio) y los cuatro
+pasan dentro de tolerancia. El medidor independiente
 [pyloudnorm](https://github.com/csteinmetz1/pyloudnorm) es un contraste útil
 con grabaciones reales; no se usó como fuente de esta implementación.
 

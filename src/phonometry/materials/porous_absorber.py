@@ -1,0 +1,1186 @@
+#  Copyright (c) 2026. Jose M. Requena-Plens
+"""
+Porous-material models and multilayer absorber prediction.
+
+Three complementary building blocks, all in the ``e^{+j w t}`` time
+convention with the forward wave carried by ``e^{-j k x}`` (so a passive
+medium has ``Im(k) < 0``):
+
+* **Equivalent-fluid models** for the characteristic impedance ``Zc`` and the
+  complex wavenumber ``k`` of a rigid-frame porous material:
+
+  - the one-parameter **Delany-Bazley** power law in the absorber variable
+    ``X = rho0 f / sigma`` (Mechel, *Formulas of Acoustics* 2e, Sect. G.11
+    Eqs. (1)-(2); Bies, Hansen & Howard, *Engineering Noise Control* 5e,
+    Appendix D Eqs. (D.22)-(D.23) and Table D.1; Hopkins, *Sound Insulation*,
+    Eqs. (1.171)-(1.174)), stated valid for ``0.01 < X < 1.0`` and porosity
+    close to one. Table D.1 also provides coefficient sets fitted to
+    polyester (Garai & Pompoli 2005) and to foams (Dunn & Davern 1986,
+    Wu 1988), exposed here as presets.
+  - the **Miki** modification, regressed on the same Delany-Bazley data under
+    a positive-real (passivity) constraint so the model stays well behaved
+    below the fit range (Miki 1990, *J. Acoust. Soc. Jpn (E)* 11(1),
+    Eqs. (30)-(34), in the variable ``f / sigma``).
+  - the five-parameter **Johnson-Champoux-Allard (JCA)** semi-phenomenological
+    model with flow resistivity, porosity, tortuosity and the viscous/thermal
+    characteristic lengths (Cox & D'Antonio, *Acoustic Absorbers and
+    Diffusers* 3e, Eqs. (6.19)-(6.25); Attenborough & Van Renterghem,
+    *Predicting Outdoor Sound* 2e, Eqs. (5.13)-(5.14)). The returned
+    equivalent-fluid density and bulk modulus are the surface-normalised
+    quantities (they absorb the porosity), so ``Zc = sqrt(rho_e K_e)`` and
+    ``k = w sqrt(rho_e / K_e)`` hold for every model.
+
+* **Transfer-matrix multilayer prediction**: each fluid layer contributes
+  ``[[cos(kx d), j Zx sin(kx d)], [j sin(kx d)/Zx, cos(kx d)]]`` with the
+  in-depth wavenumber ``kx = sqrt(k^2 - k0^2 sin^2 theta)`` from Snell's law
+  and ``Zx = Zc k / kx`` (Cox & D'Antonio Eqs. (2.29)-(2.32); Bies
+  Eq. (D.83); equivalent to the layer-recursion of Bies Eq. (D.95) and
+  Mechel Sect. D.4). Thin resonant sheets (perforated plate, microperforated
+  plate, limp membrane) enter as series transfer impedances
+  ``[[1, z],[0, 1]]``. The stack is closed by a rigid wall, by free air or
+  by an arbitrary termination impedance, giving the surface impedance, the
+  oblique reflection factor and ``alpha(theta)``.
+
+* **Resonant sheets and random incidence**: the perforated-plate impedance
+  uses the end-corrected air-plug mass and the visco-thermal surface
+  resistance (Cox & D'Antonio Eqs. (7.6)/(7.12)/(7.21), end-correction
+  variants of Table 7.1); the microperforated plate follows Maa's exact
+  short-tube impedance (Maa 1998, *J. Acoust. Soc. Am.* 104(5), Eq. (2),
+  with the Eq. (5) end corrections; reproduced as Cox & D'Antonio
+  Eqs. (7.33)-(7.35) and built on the same Bessel kernel as Mechel
+  Sect. G.3); the membrane is the limp surface
+  mass ``j w m`` (Cox & D'Antonio Eq. (7.14); Bies Eq. (D.96)). The
+  random-incidence (Paris) integral follows Mechel Sect. D.5 Eqs. (9)-(10),
+  with the closed form for locally reacting surfaces implemented in
+  :func:`statistical_absorption` (its maximum over passive impedances is the
+  published 0.951).
+"""
+
+from __future__ import annotations
+
+import warnings
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Mapping
+
+import numpy as np
+from numpy.typing import ArrayLike, NDArray
+from scipy import special
+
+from .._internal.types import Real
+from .._internal.validation import (
+    require_non_negative,
+    require_positive,
+    require_positive_array,
+)
+from .._internal.warnings import PhonometryWarning
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+
+Complex = NDArray[np.complex128]
+
+#: Default speed of sound in air, in m/s (20 degC).
+_SPEED_OF_SOUND = 343.0
+#: Default air density, in kg/m3 (Bies 5e Appendix D: 1,205 at 20 degC).
+_AIR_DENSITY = 1.205
+#: Default dynamic viscosity of air, in Pa s (Cox & D'Antonio Eq. (7.13)).
+_AIR_VISCOSITY = 1.84e-5
+#: Default Prandtl number of air at 20 degC (``eta c_p / kappa``).
+_PRANDTL_NUMBER = 0.71
+#: Default ratio of specific heats of air.
+_HEAT_CAPACITY_RATIO = 1.4
+#: Default atmospheric pressure, in Pa.
+_ATMOSPHERIC_PRESSURE = 101325.0
+
+#: Shared validation message for fractional open areas.
+_OPEN_AREA_MESSAGE = "'open_area' must not exceed 1."
+
+#: Delany-Bazley power-law coefficient presets ``(C1..C8)`` from Bies 5e
+#: Appendix D, Table D.1: ``Zc = rho c (1 + C1 X^-C2 - j C3 X^-C4)`` and
+#: ``k = (w/c)(1 + C5 X^-C6 - j C7 X^-C8)`` with ``X = rho f / sigma``.
+DELANY_BAZLEY_COEFFICIENTS: Mapping[str, tuple[float, ...]] = {
+    # Rockwool / fibreglass (Delany & Bazley 1970).
+    "delany_bazley": (0.0571, 0.754, 0.087, 0.732, 0.0978, 0.700, 0.189, 0.595),
+    # Polyester (Garai & Pompoli 2005).
+    "garai_pompoli": (0.078, 0.623, 0.074, 0.660, 0.159, 0.571, 0.121, 0.530),
+    # Polyurethane foam of low flow resistivity (Dunn & Davern 1986).
+    "dunn_davern": (0.114, 0.369, 0.0985, 0.758, 0.168, 0.715, 0.136, 0.491),
+    # Porous plastic foams of medium flow resistivity (Wu 1988).
+    "wu": (0.212, 0.455, 0.105, 0.607, 0.163, 0.592, 0.188, 0.544),
+}
+
+#: Stated validity range of the Delany-Bazley regression in ``X = rho f/sigma``
+#: (Hopkins Eq. (1.174); Cox & D'Antonio Sect. 6.5.1).
+DELANY_BAZLEY_VALIDITY = (0.01, 1.0)
+#: Fit range of the Miki regression in ``f/sigma`` (Miki 1990, Sect. 4.1: the
+#: Delany-Bazley data below ``f/sigma = 0.01`` are extrapolation).
+MIKI_VALIDITY = (0.01, 1.0)
+
+__all__ = [
+    "AirLayer",
+    "DELANY_BAZLEY_COEFFICIENTS",
+    "DELANY_BAZLEY_VALIDITY",
+    "DiffuseFieldAbsorptionResult",
+    "LayeredAbsorberResult",
+    "MIKI_VALIDITY",
+    "MembraneLayer",
+    "MicroperforatedPlateLayer",
+    "PerforatedPlateLayer",
+    "PorousAbsorberWarning",
+    "PorousLayer",
+    "PorousMediumResult",
+    "delany_bazley",
+    "diffuse_field_absorption",
+    "helmholtz_resonance_frequency",
+    "johnson_champoux_allard",
+    "layered_absorber",
+    "membrane_impedance",
+    "membrane_resonance_frequency",
+    "microperforated_plate_impedance",
+    "miki",
+    "perforated_plate_impedance",
+    "perforation_end_correction",
+    "statistical_absorption",
+]
+
+
+class PorousAbsorberWarning(PhonometryWarning):
+    """Advisory for porous-model use outside the published fit range."""
+
+
+# ---------------------------------------------------------------------------
+# Equivalent-fluid models of porous materials
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class PorousMediumResult:
+    """Equivalent-fluid characterisation of a porous material.
+
+    All arrays share the shape of ``frequency``. ``characteristic_impedance``
+    is the complex characteristic impedance ``Zc`` in Pa s/m as seen from the
+    material surface, ``wavenumber`` the complex wavenumber ``k`` in rad/m
+    (``Im(k) < 0`` for the ``e^{+j w t}`` convention),
+    ``effective_density = Zc k / w`` and ``bulk_modulus = Zc w / k`` the
+    surface-normalised equivalent-fluid density and bulk modulus, so that
+    ``Zc = sqrt(rho_e K_e)`` and ``k = w sqrt(rho_e / K_e)`` for every model.
+    """
+
+    frequency: Real
+    characteristic_impedance: Complex
+    wavenumber: Complex
+    effective_density: Complex
+    bulk_modulus: Complex
+    model: str
+    flow_resistivity: float
+    speed_of_sound: float
+    air_density: float
+
+    @property
+    def normalized_impedance(self) -> Complex:
+        """Characteristic impedance normalised by ``rho c`` of air."""
+        rc = self.air_density * self.speed_of_sound
+        return np.asarray(self.characteristic_impedance / rc, dtype=np.complex128)
+
+    @property
+    def normalized_wavenumber(self) -> Complex:
+        """Wavenumber normalised by the free-air wavenumber ``k0 = w / c``."""
+        k0 = 2.0 * np.pi * self.frequency / self.speed_of_sound
+        return np.asarray(self.wavenumber / k0, dtype=np.complex128)
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the normalised ``Zc`` and ``k`` components against frequency.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from .._plot.materials import plot_porous_medium
+
+        return plot_porous_medium(self, ax=ax, **kwargs)
+
+
+def _medium_from_zc_k(
+    f: Real,
+    zc: Complex,
+    k: Complex,
+    *,
+    model: str,
+    flow_resistivity: float,
+    speed_of_sound: float,
+    air_density: float,
+) -> PorousMediumResult:
+    """Package ``(Zc, k)`` into a :class:`PorousMediumResult`."""
+    omega = 2.0 * np.pi * f
+    return PorousMediumResult(
+        frequency=f,
+        characteristic_impedance=zc,
+        wavenumber=k,
+        effective_density=np.asarray(zc * k / omega, dtype=np.complex128),
+        bulk_modulus=np.asarray(zc * omega / k, dtype=np.complex128),
+        model=model,
+        flow_resistivity=flow_resistivity,
+        speed_of_sound=speed_of_sound,
+        air_density=air_density,
+    )
+
+
+def _warn_fit_range(
+    x: Real, limits: tuple[float, float], variable: str, model: str
+) -> None:
+    """Warn once when *x* leaves the published fit range of *model*."""
+    lo, hi = limits
+    if bool(np.any(x < lo)) or bool(np.any(x > hi)):
+        warnings.warn(
+            f"{model}: {variable} outside the published fit range "
+            f"[{lo:g}, {hi:g}]; the regression is an extrapolation there.",
+            PorousAbsorberWarning,
+            stacklevel=3,
+        )
+
+
+def delany_bazley(
+    frequency: ArrayLike,
+    flow_resistivity: float,
+    *,
+    coefficients: str | tuple[float, ...] = "delany_bazley",
+    speed_of_sound: float = _SPEED_OF_SOUND,
+    air_density: float = _AIR_DENSITY,
+) -> PorousMediumResult:
+    """Delany-Bazley one-parameter porous model (power laws in ``X``).
+
+    ``Zc = rho c (1 + C1 X^-C2 - j C3 X^-C4)`` and
+    ``k = (w/c)(1 + C5 X^-C6 - j C7 X^-C8)`` with ``X = rho f / sigma``
+    (Mechel 2e Sect. G.11 Eqs. (1)-(2); Bies 5e Eqs. (D.22)-(D.23) with the
+    Table D.1 coefficients; Hopkins Eqs. (1.171)-(1.173)). A
+    :class:`PorousAbsorberWarning` is raised when any ``X`` leaves the stated
+    ``0.01 < X < 1.0`` validity range (Hopkins Eq. (1.174)); the values are
+    still returned.
+
+    :param frequency: Frequency vector ``f``, in hertz.
+    :param flow_resistivity: Airflow resistivity ``sigma``, in Pa s/m2.
+    :param coefficients: Preset name from :data:`DELANY_BAZLEY_COEFFICIENTS`
+        (``"delany_bazley"`` rockwool/fibreglass default, ``"garai_pompoli"``
+        polyester, ``"dunn_davern"`` / ``"wu"`` foams) or an explicit
+        ``(C1..C8)`` tuple.
+    :param speed_of_sound: Speed of sound ``c`` in air, in m/s.
+    :param air_density: Air density ``rho``, in kg/m3.
+    :return: A :class:`PorousMediumResult`.
+    """
+    f = require_positive_array(frequency, "frequency")
+    sigma = require_positive(flow_resistivity, "flow_resistivity")
+    c0 = require_positive(speed_of_sound, "speed_of_sound")
+    rho0 = require_positive(air_density, "air_density")
+    if isinstance(coefficients, str):
+        try:
+            coeffs = DELANY_BAZLEY_COEFFICIENTS[coefficients]
+        except KeyError:
+            options = ", ".join(sorted(DELANY_BAZLEY_COEFFICIENTS))
+            raise ValueError(
+                f"unknown coefficient preset {coefficients!r}; "
+                f"options: {options}."
+            ) from None
+        model = f"delany_bazley[{coefficients}]"
+    else:
+        coeffs = tuple(float(v) for v in coefficients)
+        model = "delany_bazley[custom]"
+    if len(coeffs) != 8:
+        raise ValueError("'coefficients' must provide exactly 8 values C1..C8.")
+    c1, c2, c3, c4, c5, c6, c7, c8 = coeffs
+    x = np.asarray(rho0 * f / sigma, dtype=np.float64)
+    _warn_fit_range(x, DELANY_BAZLEY_VALIDITY, "X = rho f / sigma", "Delany-Bazley")
+    zc = rho0 * c0 * (1.0 + c1 * x**-c2 - 1j * c3 * x**-c4)
+    k = (2.0 * np.pi * f / c0) * (1.0 + c5 * x**-c6 - 1j * c7 * x**-c8)
+    return _medium_from_zc_k(
+        f,
+        np.asarray(zc, dtype=np.complex128),
+        np.asarray(k, dtype=np.complex128),
+        model=model,
+        flow_resistivity=sigma,
+        speed_of_sound=c0,
+        air_density=rho0,
+    )
+
+
+def miki(
+    frequency: ArrayLike,
+    flow_resistivity: float,
+    *,
+    speed_of_sound: float = _SPEED_OF_SOUND,
+    air_density: float = _AIR_DENSITY,
+) -> PorousMediumResult:
+    """Miki (1990) positive-real modification of the Delany-Bazley model.
+
+    In the variable ``Y = f / sigma`` (Miki 1990, Eqs. (30)-(34)):
+    ``Zc = rho c (1 + 0.070 Y^-0.632 - j 0.107 Y^-0.632)`` and, from the
+    propagation constant ``gamma = alpha + j beta`` via ``k = beta - j alpha``,
+    ``k = (w/c)(1 + 0.109 Y^-0.618 - j 0.160 Y^-0.618)``. The regression was
+    constrained to be positive real, so the surface impedance of a
+    hard-backed layer keeps a non-negative real part even below the
+    Delany-Bazley range; a :class:`PorousAbsorberWarning` still flags
+    ``Y`` outside the fit range ``0.01 < f/sigma < 1.0`` (paper Sect. 4.1).
+
+    :param frequency: Frequency vector ``f``, in hertz.
+    :param flow_resistivity: Airflow resistivity ``sigma``, in Pa s/m2.
+    :param speed_of_sound: Speed of sound ``c`` in air, in m/s.
+    :param air_density: Air density ``rho``, in kg/m3.
+    :return: A :class:`PorousMediumResult`.
+    """
+    f = require_positive_array(frequency, "frequency")
+    sigma = require_positive(flow_resistivity, "flow_resistivity")
+    c0 = require_positive(speed_of_sound, "speed_of_sound")
+    rho0 = require_positive(air_density, "air_density")
+    y = np.asarray(f / sigma, dtype=np.float64)
+    _warn_fit_range(y, MIKI_VALIDITY, "f / sigma", "Miki")
+    zc = rho0 * c0 * (1.0 + 0.070 * y**-0.632 - 1j * 0.107 * y**-0.632)
+    k = (2.0 * np.pi * f / c0) * (1.0 + 0.109 * y**-0.618 - 1j * 0.160 * y**-0.618)
+    return _medium_from_zc_k(
+        f,
+        np.asarray(zc, dtype=np.complex128),
+        np.asarray(k, dtype=np.complex128),
+        model="miki",
+        flow_resistivity=sigma,
+        speed_of_sound=c0,
+        air_density=rho0,
+    )
+
+
+def johnson_champoux_allard(
+    frequency: ArrayLike,
+    flow_resistivity: float,
+    *,
+    porosity: float,
+    tortuosity: float,
+    viscous_length: float,
+    thermal_length: float,
+    speed_of_sound: float = _SPEED_OF_SOUND,
+    air_density: float = _AIR_DENSITY,
+    viscosity: float = _AIR_VISCOSITY,
+    prandtl_number: float = _PRANDTL_NUMBER,
+    heat_capacity_ratio: float = _HEAT_CAPACITY_RATIO,
+    atmospheric_pressure: float = _ATMOSPHERIC_PRESSURE,
+) -> PorousMediumResult:
+    """Johnson-Champoux-Allard five-parameter rigid-frame model.
+
+    Effective density (Cox & D'Antonio 3e, Eq. (6.19)):
+
+    ``rho_e = (T rho / phi) [1 + (sigma phi / (j w rho T))
+    sqrt(1 + 4 j T^2 eta rho w / (sigma^2 L^2 phi^2))]``
+
+    and effective bulk modulus (Eq. (6.20)):
+
+    ``K_e = (gamma P0 / phi) / (gamma - (gamma - 1) [1 +
+    (8 eta / (j L'^2 Pr w rho)) sqrt(1 + j rho w Pr L'^2 / (16 eta))]^-1)``
+
+    with tortuosity ``T``, porosity ``phi``, viscous/thermal characteristic
+    lengths ``L`` / ``L'``; then ``Zc = sqrt(K_e rho_e)`` and
+    ``k = w sqrt(rho_e / K_e)`` (Eqs. (6.24)-(6.25)). Both quantities are
+    surface-normalised (the ``1/phi`` factors are included). The model has
+    the exact limits ``j w rho_e -> sigma`` as ``w -> 0`` and
+    ``rho_e -> (T rho / phi)(1 + (1 - j) delta_v / L)`` as ``w -> inf``
+    (Johnson et al. 1987), pinned in the tests.
+
+    :param frequency: Frequency vector ``f``, in hertz.
+    :param flow_resistivity: Airflow resistivity ``sigma``, in Pa s/m2.
+    :param porosity: Open porosity ``phi`` (0 < phi <= 1).
+    :param tortuosity: High-frequency tortuosity ``T = alpha_inf`` (>= 1).
+    :param viscous_length: Viscous characteristic length ``L``, in metres.
+    :param thermal_length: Thermal characteristic length ``L'``, in metres
+        (physically ``L' >= L``).
+    :param speed_of_sound: Speed of sound ``c`` in air, in m/s.
+    :param air_density: Air density ``rho``, in kg/m3.
+    :param viscosity: Dynamic viscosity ``eta`` of air, in Pa s.
+    :param prandtl_number: Prandtl number ``Pr`` of air.
+    :param heat_capacity_ratio: Ratio of specific heats ``gamma``.
+    :param atmospheric_pressure: Static pressure ``P0``, in Pa.
+    :return: A :class:`PorousMediumResult`.
+    """
+    f = require_positive_array(frequency, "frequency")
+    sigma = require_positive(flow_resistivity, "flow_resistivity")
+    phi = require_positive(porosity, "porosity")
+    if phi > 1.0:
+        raise ValueError("'porosity' must not exceed 1.")
+    t_inf = require_positive(tortuosity, "tortuosity")
+    if t_inf < 1.0:
+        raise ValueError("'tortuosity' must be >= 1.")
+    lam_v = require_positive(viscous_length, "viscous_length")
+    lam_t = require_positive(thermal_length, "thermal_length")
+    c0 = require_positive(speed_of_sound, "speed_of_sound")
+    rho0 = require_positive(air_density, "air_density")
+    eta = require_positive(viscosity, "viscosity")
+    pr = require_positive(prandtl_number, "prandtl_number")
+    gamma = require_positive(heat_capacity_ratio, "heat_capacity_ratio")
+    p0 = require_positive(atmospheric_pressure, "atmospheric_pressure")
+
+    omega = 2.0 * np.pi * f
+    # Effective density, Cox & D'Antonio Eq. (6.19).
+    g_v = np.sqrt(
+        1.0
+        + 4.0j * t_inf**2 * eta * rho0 * omega / (sigma**2 * lam_v**2 * phi**2)
+    )
+    rho_e = (t_inf * rho0 / phi) * (
+        1.0 + sigma * phi / (1j * omega * rho0 * t_inf) * g_v
+    )
+    # Effective bulk modulus, Cox & D'Antonio Eq. (6.20).
+    g_t = np.sqrt(1.0 + 1j * rho0 * omega * pr * lam_t**2 / (16.0 * eta))
+    inner = 1.0 + 8.0 * eta / (1j * lam_t**2 * pr * omega * rho0) * g_t
+    k_e = (gamma * p0 / phi) / (gamma - (gamma - 1.0) / inner)
+    zc = np.sqrt(k_e * rho_e)
+    k = omega * np.sqrt(rho_e / k_e)
+    return PorousMediumResult(
+        frequency=f,
+        characteristic_impedance=np.asarray(zc, dtype=np.complex128),
+        wavenumber=np.asarray(k, dtype=np.complex128),
+        effective_density=np.asarray(rho_e, dtype=np.complex128),
+        bulk_modulus=np.asarray(k_e, dtype=np.complex128),
+        model="johnson_champoux_allard",
+        flow_resistivity=sigma,
+        speed_of_sound=c0,
+        air_density=rho0,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Resonant sheet impedances
+# ---------------------------------------------------------------------------
+def perforation_end_correction(open_area: float) -> float:
+    """End-correction factor ``delta`` of a circular perforation.
+
+    ``delta = 0.85 (1 - 1.47 eps^1/2 + 0.47 eps^3/2)`` - the Fok-function
+    interaction correction for circular holes (Cox & D'Antonio 3e, Table 7.1,
+    Nesterov row; no open-area limit). Each orifice end adds ``delta a`` of
+    air-plug length, and ``delta -> 0.85`` for an isolated hole.
+
+    :param open_area: Fractional open area ``eps`` of the sheet (0..1).
+    :return: End-correction factor ``delta`` (dimensionless, per end).
+    """
+    eps = require_positive(open_area, "open_area")
+    if eps > 1.0:
+        raise ValueError(_OPEN_AREA_MESSAGE)
+    return float(0.85 * (1.0 - 1.47 * eps**0.5 + 0.47 * eps**1.5))
+
+
+def perforated_plate_impedance(
+    frequency: ArrayLike,
+    *,
+    thickness: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float | None = None,
+    air_density: float = _AIR_DENSITY,
+    viscosity: float = _AIR_VISCOSITY,
+) -> Complex:
+    """Transfer impedance of a rigid perforated plate with circular holes.
+
+    Acoustic mass with both end corrections and the boundary-layer term
+    (Cox & D'Antonio 3e, Eq. (7.6)):
+
+    ``m = (rho/eps)[t + 2 delta a + sqrt(8 nu / w)(1 + t/(2a))]``
+
+    and visco-thermal surface resistance (Eq. (7.12)):
+
+    ``r = (rho/eps) sqrt(8 nu w) (1 + t/(2a))``,
+
+    giving ``z = r + j w m`` (the series impedance added on top of the
+    backing, Eq. (7.21)). Assumes hole radii well above the boundary-layer
+    thickness; use :func:`microperforated_plate_impedance` for submillimetre
+    holes.
+
+    :param frequency: Frequency vector ``f``, in hertz.
+    :param thickness: Plate thickness ``t``, in metres.
+    :param hole_radius: Hole radius ``a``, in metres.
+    :param open_area: Fractional open area ``eps`` (0..1).
+    :param end_correction: End-correction factor ``delta`` per end; default
+        :func:`perforation_end_correction` of ``eps``.
+    :param air_density: Air density ``rho``, in kg/m3.
+    :param viscosity: Dynamic viscosity ``eta`` of air, in Pa s.
+    :return: Complex transfer impedance ``z``, in Pa s/m.
+    """
+    f = require_positive_array(frequency, "frequency")
+    t = require_positive(thickness, "thickness")
+    a = require_positive(hole_radius, "hole_radius")
+    eps = require_positive(open_area, "open_area")
+    if eps > 1.0:
+        raise ValueError(_OPEN_AREA_MESSAGE)
+    rho0 = require_positive(air_density, "air_density")
+    eta = require_positive(viscosity, "viscosity")
+    delta = (
+        perforation_end_correction(eps)
+        if end_correction is None
+        else require_non_negative(end_correction, "end_correction")
+    )
+    omega = 2.0 * np.pi * f
+    nu = eta / rho0
+    edge = 1.0 + t / (2.0 * a)
+    mass = (rho0 / eps) * (t + 2.0 * delta * a + np.sqrt(8.0 * nu / omega) * edge)
+    resistance = (rho0 / eps) * np.sqrt(8.0 * nu * omega) * edge
+    return np.asarray(resistance + 1j * omega * mass, dtype=np.complex128)
+
+
+def microperforated_plate_impedance(
+    frequency: ArrayLike,
+    *,
+    thickness: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float = 0.85,
+    air_density: float = _AIR_DENSITY,
+    viscosity: float = _AIR_VISCOSITY,
+) -> Complex:
+    """Transfer impedance of a microperforated plate (Maa's exact model).
+
+    The specific impedance of one submillimetre hole is the exact short-tube
+    result (Maa 1998, Eq. (2); reproduced as Cox & D'Antonio 3e Eq. (7.33)
+    and the same Bessel kernel as Mechel 2e Sect. G.3):
+
+    ``z1 = j w rho t [1 - (2 / (x sqrt(-j))) J1(x sqrt(-j)) / J0(x sqrt(-j))]^-1``
+
+    with the perforate constant ``x = a sqrt(rho w / eta)``. Dividing by the
+    open area and adding Maa's Eq. (5) end corrections - the Rayleigh/Ingard
+    surface resistance ``sqrt(2 w rho eta) / (2 eps)`` and the piston
+    end-correction reactance ``j w rho (2 delta a) / eps`` (``0.85 d`` total
+    for the default ``delta = 0.85`` per end) - gives the sheet transfer
+    impedance (Cox & D'Antonio Eq. (7.35)).
+
+    :param frequency: Frequency vector ``f``, in hertz.
+    :param thickness: Plate thickness ``t``, in metres.
+    :param hole_radius: Hole radius ``a``, in metres (submillimetre for a
+        genuine microperforated design).
+    :param open_area: Fractional open area ``eps`` (0..1).
+    :param end_correction: End-correction factor ``delta`` per end
+        (default 0.85, the isolated-orifice value used by Maa).
+    :param air_density: Air density ``rho``, in kg/m3.
+    :param viscosity: Dynamic viscosity ``eta`` of air, in Pa s.
+    :return: Complex transfer impedance ``z``, in Pa s/m.
+    """
+    f = require_positive_array(frequency, "frequency")
+    t = require_positive(thickness, "thickness")
+    a = require_positive(hole_radius, "hole_radius")
+    eps = require_positive(open_area, "open_area")
+    if eps > 1.0:
+        raise ValueError(_OPEN_AREA_MESSAGE)
+    delta = require_non_negative(end_correction, "end_correction")
+    rho0 = require_positive(air_density, "air_density")
+    eta = require_positive(viscosity, "viscosity")
+    omega = 2.0 * np.pi * f
+    arg = a * np.sqrt(rho0 * omega / eta) * np.sqrt(-1j)
+    bessel_ratio = special.jv(1, arg) / special.jv(0, arg)
+    z_hole = 1j * omega * rho0 * t / (1.0 - 2.0 * bessel_ratio / arg)
+    z = (
+        z_hole / eps
+        + np.sqrt(2.0 * omega * rho0 * eta) / (2.0 * eps)
+        + 1j * omega * rho0 * 2.0 * delta * a / eps
+    )
+    return np.asarray(z, dtype=np.complex128)
+
+
+def membrane_impedance(
+    frequency: ArrayLike,
+    *,
+    surface_density: float,
+    resistance: float = 0.0,
+) -> Complex:
+    """Transfer impedance of a limp impervious membrane.
+
+    ``z = r + j w m`` - the surface-mass reactance (Cox & D'Antonio 3e,
+    Eq. (7.14); Bies 5e Eq. (D.96)) plus an optional empirical resistance
+    for the internal/fixing losses.
+
+    :param frequency: Frequency vector ``f``, in hertz.
+    :param surface_density: Mass per unit area ``m``, in kg/m2.
+    :param resistance: Series flow resistance ``r``, in Pa s/m (default 0).
+    :return: Complex transfer impedance ``z``, in Pa s/m.
+    """
+    f = require_positive_array(frequency, "frequency")
+    m = require_positive(surface_density, "surface_density")
+    r = require_non_negative(resistance, "resistance")
+    return np.asarray(r + 1j * 2.0 * np.pi * f * m, dtype=np.complex128)
+
+
+def helmholtz_resonance_frequency(
+    *,
+    cavity_depth: float,
+    plate_thickness: float,
+    hole_radius: float,
+    open_area: float,
+    end_correction: float | None = None,
+    speed_of_sound: float = _SPEED_OF_SOUND,
+) -> float:
+    """Resonance of a perforated sheet over a shallow cavity (closed form).
+
+    ``f0 = (c / 2 pi) sqrt(eps / (t' d))`` with the end-corrected plug length
+    ``t' = t + 2 delta a`` (Cox & D'Antonio 3e, Eqs. (7.4)/(7.6), valid for
+    ``k d << 1``).
+
+    :param cavity_depth: Cavity depth ``d``, in metres.
+    :param plate_thickness: Plate thickness ``t``, in metres.
+    :param hole_radius: Hole radius ``a``, in metres.
+    :param open_area: Fractional open area ``eps`` (0..1).
+    :param end_correction: End-correction factor ``delta`` per end; default
+        :func:`perforation_end_correction` of ``eps``.
+    :param speed_of_sound: Speed of sound ``c`` in air, in m/s.
+    :return: Resonance frequency ``f0``, in hertz.
+    """
+    d = require_positive(cavity_depth, "cavity_depth")
+    t = require_positive(plate_thickness, "plate_thickness")
+    a = require_positive(hole_radius, "hole_radius")
+    eps = require_positive(open_area, "open_area")
+    if eps > 1.0:
+        raise ValueError(_OPEN_AREA_MESSAGE)
+    c0 = require_positive(speed_of_sound, "speed_of_sound")
+    delta = (
+        perforation_end_correction(eps)
+        if end_correction is None
+        else require_non_negative(end_correction, "end_correction")
+    )
+    t_eff = t + 2.0 * delta * a
+    return float(c0 / (2.0 * np.pi) * np.sqrt(eps / (t_eff * d)))
+
+
+def membrane_resonance_frequency(
+    *,
+    surface_density: float,
+    cavity_depth: float,
+    isothermal: bool = False,
+    speed_of_sound: float = _SPEED_OF_SOUND,
+    air_density: float = _AIR_DENSITY,
+) -> float:
+    """Mass-spring resonance of a membrane over a shallow cavity.
+
+    ``f0 = (1 / 2 pi) sqrt(rho c^2 / (m d))`` for an adiabatic air spring -
+    numerically the classical ``f0 = 60 / sqrt(m d)`` (Cox & D'Antonio 3e,
+    Eq. (7.9)). With ``isothermal=True`` the spring stiffness drops by
+    ``gamma``, giving ``~50 / sqrt(m d)`` (Eq. (7.10)), the porous-filled
+    cavity case below about 500 Hz.
+
+    :param surface_density: Membrane mass per unit area ``m``, in kg/m2.
+    :param cavity_depth: Cavity depth ``d``, in metres.
+    :param isothermal: Use the isothermal air-spring stiffness.
+    :param speed_of_sound: Speed of sound ``c`` in air, in m/s.
+    :param air_density: Air density ``rho``, in kg/m3.
+    :return: Resonance frequency ``f0``, in hertz.
+    """
+    m = require_positive(surface_density, "surface_density")
+    d = require_positive(cavity_depth, "cavity_depth")
+    c0 = require_positive(speed_of_sound, "speed_of_sound")
+    rho0 = require_positive(air_density, "air_density")
+    stiffness = rho0 * c0**2 / d
+    if isothermal:
+        stiffness /= _HEAT_CAPACITY_RATIO
+    return float(np.sqrt(stiffness / m) / (2.0 * np.pi))
+
+
+# ---------------------------------------------------------------------------
+# Declarative layers and the transfer-matrix solver
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class AirLayer:
+    """A plain air gap of ``thickness`` metres inside the stack."""
+
+    thickness: float
+
+
+@dataclass(frozen=True)
+class PorousLayer:
+    """A porous layer of ``thickness`` metres described by *medium*.
+
+    ``medium`` is a :class:`PorousMediumResult` (from :func:`delany_bazley`,
+    :func:`miki`, :func:`johnson_champoux_allard`, or built directly from
+    measured ``Zc``/``k`` data) evaluated on the same frequency vector that
+    is passed to :func:`layered_absorber`.
+    """
+
+    thickness: float
+    medium: PorousMediumResult
+
+
+@dataclass(frozen=True)
+class PerforatedPlateLayer:
+    """A rigid perforated plate (see :func:`perforated_plate_impedance`)."""
+
+    thickness: float
+    hole_radius: float
+    open_area: float
+    end_correction: float | None = None
+
+
+@dataclass(frozen=True)
+class MicroperforatedPlateLayer:
+    """A microperforated plate (see :func:`microperforated_plate_impedance`)."""
+
+    thickness: float
+    hole_radius: float
+    open_area: float
+    end_correction: float = 0.85
+
+
+@dataclass(frozen=True)
+class MembraneLayer:
+    """A limp impervious membrane (see :func:`membrane_impedance`)."""
+
+    surface_density: float
+    resistance: float = 0.0
+
+
+Layer = (
+    AirLayer
+    | PorousLayer
+    | PerforatedPlateLayer
+    | MicroperforatedPlateLayer
+    | MembraneLayer
+)
+
+
+@dataclass(frozen=True)
+class LayeredAbsorberResult:
+    """Oblique-incidence prediction of a layered absorber.
+
+    All arrays share the shape of ``frequency``. ``surface_impedance`` is the
+    specific impedance ``Zs = p / u_n`` at the front face (may be ``inf``
+    for a lossless-sheet stack over a rigid wall), ``reflection`` the complex
+    plane-wave reflection factor ``R(theta)``, ``absorption`` the coefficient
+    ``alpha(theta) = 1 - |R|^2`` and ``transfer_matrix`` the total chain
+    matrix with shape ``(2, 2, len(frequency))`` (unimodular: every layer is
+    reciprocal).
+    """
+
+    frequency: Real
+    angle: float
+    surface_impedance: Complex
+    normalized_impedance: Complex
+    reflection: Complex
+    absorption: Real
+    transfer_matrix: Complex
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the absorption spectrum ``alpha(f)`` with ``|R|`` overlaid.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from .._plot.materials import plot_layered_absorber
+
+        return plot_layered_absorber(self, ax=ax, **kwargs)
+
+
+@dataclass(frozen=True)
+class DiffuseFieldAbsorptionResult:
+    """Random-incidence (Paris-integral) absorption of a layered absorber.
+
+    ``absorption`` is ``alpha_dif(f)`` from Mechel 2e Sect. D.5 Eq. (9):
+    the plane-wave ``alpha(theta)`` weighted by ``cos(theta) sin(theta)`` and
+    normalised by ``sin^2(theta_limit)``.
+    """
+
+    frequency: Real
+    absorption: Real
+    angle_limit: float
+
+    def plot(self, ax: "Axes | None" = None, **kwargs: Any) -> "Axes":
+        """Plot the random-incidence absorption spectrum ``alpha_dif(f)``.
+
+        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        :class:`~matplotlib.axes.Axes`.
+        """
+        from .._plot.materials import plot_diffuse_field_absorption
+
+        return plot_diffuse_field_absorption(self, ax=ax, **kwargs)
+
+
+def _sheet_impedance(
+    layer: Layer,
+    f: Real,
+    *,
+    air_density: float,
+    viscosity: float,
+) -> Complex:
+    """Series transfer impedance of a sheet layer on the grid *f*."""
+    if isinstance(layer, PerforatedPlateLayer):
+        return perforated_plate_impedance(
+            f,
+            thickness=layer.thickness,
+            hole_radius=layer.hole_radius,
+            open_area=layer.open_area,
+            end_correction=layer.end_correction,
+            air_density=air_density,
+            viscosity=viscosity,
+        )
+    if isinstance(layer, MicroperforatedPlateLayer):
+        return microperforated_plate_impedance(
+            f,
+            thickness=layer.thickness,
+            hole_radius=layer.hole_radius,
+            open_area=layer.open_area,
+            end_correction=layer.end_correction,
+            air_density=air_density,
+            viscosity=viscosity,
+        )
+    if isinstance(layer, MembraneLayer):
+        return membrane_impedance(
+            f,
+            surface_density=layer.surface_density,
+            resistance=layer.resistance,
+        )
+    raise TypeError(f"not a sheet layer: {layer!r}")  # pragma: no cover
+
+
+def _fluid_layer_terms(
+    zc: Complex, k: Complex, thickness: float, k0_sin2: Real
+) -> tuple[Complex, Complex]:
+    """In-depth impedance ``Zx`` and phase ``kx d`` of an oblique fluid layer.
+
+    ``kx = sqrt(k^2 - k0^2 sin^2 theta)`` (Snell's law, Cox & D'Antonio 3e
+    Eq. (2.30)) and the in-depth wave impedance ``Zx = zc k / kx``; the
+    layer chain matrix (Eq. (2.29)) is built from ``cos``/``sin`` of
+    ``kx d`` with these two terms.
+    """
+    kx = np.sqrt(k * k - k0_sin2)
+    # Passive decay: keep the branch with non-positive imaginary part.
+    kx = np.where(kx.imag > 0.0, -kx, kx)
+    zx = zc * k / kx
+    return (
+        np.asarray(zx, dtype=np.complex128),
+        np.asarray(kx * thickness, dtype=np.complex128),
+    )
+
+
+def _porous_layer_term(
+    layer: PorousLayer, f: Real, k0_sin2: Real
+) -> tuple[Complex, Complex] | None:
+    """``(Zx, kx d)`` of a porous layer, or ``None`` when zero-thickness."""
+    d = require_non_negative(layer.thickness, "PorousLayer.thickness")
+    if d <= 0.0:
+        return None
+    medium = layer.medium
+    if not np.array_equal(np.asarray(medium.frequency), f):
+        raise ValueError(
+            "PorousLayer.medium was evaluated on a different frequency "
+            "vector; rebuild the medium on the solver grid."
+        )
+    return _fluid_layer_terms(
+        np.asarray(medium.characteristic_impedance, dtype=np.complex128),
+        np.asarray(medium.wavenumber, dtype=np.complex128),
+        d,
+        k0_sin2,
+    )
+
+
+def _layer_terms(
+    layers: list[Layer] | tuple[Layer, ...],
+    f: Real,
+    *,
+    k0: Real,
+    k0_sin2: Real,
+    rc: float,
+    rho0: float,
+    viscosity: float,
+) -> list[tuple[str, Complex, Complex]]:
+    """Evaluate each layer once: fluid layers as ``(Zx, kx d)``, sheets as z.
+
+    Zero-thickness fluid layers contribute the identity matrix and are
+    skipped (``require_non_negative`` guarantees ``d >= 0``, so the strict
+    ``d > 0`` test keeps exactly the non-degenerate layers).
+    """
+    terms: list[tuple[str, Complex, Complex]] = []
+    for layer in layers:
+        if isinstance(layer, AirLayer):
+            d = require_non_negative(layer.thickness, "AirLayer.thickness")
+            if d > 0.0:
+                zc = np.full(f.shape, rc, dtype=np.complex128)
+                k = np.asarray(k0, dtype=np.complex128)
+                terms.append(("fluid", *_fluid_layer_terms(zc, k, d, k0_sin2)))
+        elif isinstance(layer, PorousLayer):
+            term = _porous_layer_term(layer, f, k0_sin2)
+            if term is not None:
+                terms.append(("fluid", *term))
+        else:
+            z = _sheet_impedance(
+                layer,
+                f,
+                air_density=rho0,
+                viscosity=viscosity,
+            )
+            terms.append(("sheet", z, z))
+    return terms
+
+
+def _termination_admittance(
+    termination: str | complex | ArrayLike,
+    f: Real,
+    *,
+    cos_t: float,
+    rc: float,
+) -> Complex:
+    """Admittance ``G = u/p`` at the termination face of the stack."""
+    if isinstance(termination, str):
+        if termination == "rigid":
+            return np.zeros_like(f, dtype=np.complex128)
+        if termination == "free":
+            return np.full(f.shape, cos_t / rc, dtype=np.complex128)
+        raise ValueError(
+            "'termination' must be 'rigid', 'free' or a complex impedance."
+        )
+    zl_arr = np.asarray(termination, dtype=np.complex128)
+    if zl_arr.ndim > 0 and zl_arr.shape != f.shape:
+        raise ValueError(
+            "'termination' impedance array must be scalar or match the "
+            f"frequency vector length ({f.size}), got {zl_arr.size}."
+        )
+    if not np.all(np.abs(zl_arr) > 0.0):
+        raise ValueError("'termination' impedance must be non-zero.")
+    return np.asarray(np.ones_like(f) / zl_arr, dtype=np.complex128)
+
+
+def _surface_admittance(
+    terms: list[tuple[str, Complex, Complex]], g: Complex
+) -> Complex:
+    """Back-to-front admittance recursion from the termination admittance.
+
+    Stable: ``tan`` saturates where the chain-matrix entries would overflow.
+    """
+    for kind, a, b in reversed(terms):
+        if kind == "fluid":
+            zx, kxd = a, b
+            t = np.tan(kxd)
+            g = (g + 1j * t / zx) / (1.0 + 1j * zx * t * g)
+        else:
+            g = g / (1.0 + a * g)
+    return g
+
+
+def _chain_matrix(terms: list[tuple[str, Complex, Complex]], f: Real) -> Complex:
+    """Raw front-to-back chain-matrix product of the evaluated layers.
+
+    Informational; may overflow for extremely attenuating layers while the
+    admittance recursion stays finite.
+    """
+    ones = np.ones_like(f, dtype=np.complex128)
+    zeros = np.zeros_like(f, dtype=np.complex128)
+    t11, t12, t21, t22 = ones, zeros, zeros, ones
+    with np.errstate(over="ignore", invalid="ignore"):
+        for kind, a, b in terms:
+            if kind == "fluid":
+                zx, kxd = a, b
+                cos_l, sin_l = np.cos(kxd), np.sin(kxd)
+                m = (cos_l, 1j * zx * sin_l, 1j * sin_l / zx, cos_l)
+            else:
+                m = (ones, a, zeros, ones)
+            m11, m12, m21, m22 = m
+            t11, t12, t21, t22 = (
+                t11 * m11 + t12 * m21,
+                t11 * m12 + t12 * m22,
+                t21 * m11 + t22 * m21,
+                t21 * m12 + t22 * m22,
+            )
+    return np.asarray([[t11, t12], [t21, t22]], dtype=np.complex128)
+
+
+def layered_absorber(
+    frequency: ArrayLike,
+    layers: list[Layer] | tuple[Layer, ...],
+    *,
+    angle: float = 0.0,
+    termination: str | complex | ArrayLike = "rigid",
+    speed_of_sound: float = _SPEED_OF_SOUND,
+    air_density: float = _AIR_DENSITY,
+    viscosity: float = _AIR_VISCOSITY,
+) -> LayeredAbsorberResult:
+    """Transfer-matrix prediction of a layered absorber at one angle.
+
+    The *layers* list is ordered from the sound-incidence side towards the
+    *termination*. Fluid layers (:class:`AirLayer`, :class:`PorousLayer`)
+    contribute the oblique chain matrix of Cox & D'Antonio 3e Eq. (2.29)
+    (equivalently the impedance recursion of Bies 5e Eq. (D.95) and the
+    scheme of Mechel 2e Sect. D.4); sheet layers (:class:`PerforatedPlateLayer`,
+    :class:`MicroperforatedPlateLayer`, :class:`MembraneLayer`) enter as
+    locally reacting series impedances. The chain is closed by a rigid wall
+    (``termination="rigid"``), by radiation into free air behind
+    (``termination="free"``, ``Z_L = rho c / cos(theta)``) or by an arbitrary
+    complex impedance. The reflection factor is
+    ``R = (Zs cos(theta) - rho c) / (Zs cos(theta) + rho c)`` and
+    ``alpha = 1 - |R|^2`` (Mechel 2e Sect. D.3 Eq. (2)).
+
+    ``Zs``, ``R`` and ``alpha`` are evaluated with the numerically robust
+    admittance recursion (algebraically identical to the chain product but
+    immune to the ``e^{|Im(kx)| d}`` overflow of the raw matrix entries for
+    extremely attenuating layers); the raw chain matrix is still returned in
+    ``transfer_matrix`` and may overflow in such extreme cases.
+
+    :param frequency: Frequency vector ``f``, in hertz.
+    :param layers: Layer stack from the incidence side to the termination.
+    :param angle: Polar angle of incidence ``theta``, in radians
+        (``0 <= theta < pi/2 - 1e-6``; grazing incidence is excluded).
+    :param termination: ``"rigid"`` (default), ``"free"``, or a non-zero
+        complex impedance (scalar or per-frequency array), in Pa s/m.
+    :param speed_of_sound: Speed of sound ``c`` in air, in m/s.
+    :param air_density: Air density ``rho``, in kg/m3.
+    :param viscosity: Dynamic viscosity of air, in Pa s (sheet layers).
+    :return: A :class:`LayeredAbsorberResult`.
+    """
+    f = require_positive_array(frequency, "frequency")
+    if not layers:
+        raise ValueError("'layers' must contain at least one layer.")
+    theta = float(angle)
+    # The last ~3e-8 rad below pi/2 round sin(theta)**2 to 1.0, driving the
+    # in-depth wavenumber of an air layer to exactly zero (inf * 0 = nan in
+    # the recursion); reject effectively grazing input with a clear error.
+    if not 0.0 <= theta < np.pi / 2.0 - 1e-6:
+        raise ValueError("'angle' must satisfy 0 <= angle < pi/2 - 1e-6.")
+    c0 = require_positive(speed_of_sound, "speed_of_sound")
+    rho0 = require_positive(air_density, "air_density")
+    require_positive(viscosity, "viscosity")
+
+    k0 = 2.0 * np.pi * f / c0
+    k0_sin2 = np.asarray((k0 * np.sin(theta)) ** 2, dtype=np.float64)
+    cos_t = float(np.cos(theta))
+    rc = rho0 * c0
+
+    terms = _layer_terms(
+        layers, f, k0=k0, k0_sin2=k0_sin2, rc=rc, rho0=rho0, viscosity=viscosity
+    )
+    g = _surface_admittance(
+        terms, _termination_admittance(termination, f, cos_t=cos_t, rc=rc)
+    )
+
+    # G = 0 (lossless stack over a rigid wall) maps to an infinite surface
+    # impedance; everywhere else Zs = 1/G with a safe denominator.
+    nonzero = np.abs(g) > 0.0
+    with np.errstate(divide="ignore", invalid="ignore"):
+        zs = np.where(nonzero, 1.0 / np.where(nonzero, g, 1.0), np.inf + 0j)
+    r = (cos_t - rc * g) / (cos_t + rc * g)
+    alpha = 1.0 - np.abs(r) ** 2
+    tm = _chain_matrix(terms, f)
+    return LayeredAbsorberResult(
+        frequency=f,
+        angle=theta,
+        surface_impedance=np.asarray(zs, dtype=np.complex128),
+        normalized_impedance=np.asarray(zs / rc, dtype=np.complex128),
+        reflection=np.asarray(r, dtype=np.complex128),
+        absorption=np.asarray(alpha, dtype=np.float64),
+        transfer_matrix=tm,
+    )
+
+
+def diffuse_field_absorption(
+    frequency: ArrayLike,
+    layers: list[Layer] | tuple[Layer, ...],
+    *,
+    angle_limit: float = np.pi / 2.0,
+    quadrature_points: int = 64,
+    termination: str | complex | ArrayLike = "rigid",
+    speed_of_sound: float = _SPEED_OF_SOUND,
+    air_density: float = _AIR_DENSITY,
+    viscosity: float = _AIR_VISCOSITY,
+) -> DiffuseFieldAbsorptionResult:
+    """Random-incidence absorption by the Paris integral (Mechel Sect. D.5).
+
+    ``alpha_dif = (2 / sin^2 theta_lim) * int_0^theta_lim alpha(theta)
+    cos(theta) sin(theta) d(theta)`` (Mechel 2e Sect. D.5 Eq. (9)), evaluated
+    with fixed-order Gauss-Legendre quadrature over the bulk-reacting
+    ``alpha(theta)`` of :func:`layered_absorber` (Sect. D.6 notes the bulk
+    integral generally must be evaluated numerically). Some references
+    truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
+    ``angle_limit`` accordingly.
+
+    :param frequency: Frequency vector ``f``, in hertz.
+    :param layers: Layer stack, as in :func:`layered_absorber`.
+    :param angle_limit: Upper integration angle ``theta_lim``, in radians
+        (0 < theta_lim <= pi/2; default pi/2).
+    :param quadrature_points: Gauss-Legendre order (default 64).
+    :param termination: As in :func:`layered_absorber`.
+    :param speed_of_sound: Speed of sound ``c`` in air, in m/s.
+    :param air_density: Air density ``rho``, in kg/m3.
+    :param viscosity: Dynamic viscosity of air, in Pa s.
+    :return: A :class:`DiffuseFieldAbsorptionResult`.
+    """
+    f = require_positive_array(frequency, "frequency")
+    lim = float(angle_limit)
+    if not 0.0 < lim <= np.pi / 2.0:
+        raise ValueError("'angle_limit' must satisfy 0 < angle_limit <= pi/2.")
+    n = int(quadrature_points)
+    if n < 2:
+        raise ValueError("'quadrature_points' must be at least 2.")
+    nodes, weights = np.polynomial.legendre.leggauss(n)
+    theta = 0.5 * lim * (nodes + 1.0)
+    w = 0.5 * lim * weights
+    total = np.zeros_like(f, dtype=np.float64)
+    for th, wt in zip(theta, w):
+        res = layered_absorber(
+            f,
+            layers,
+            angle=float(th),
+            termination=termination,
+            speed_of_sound=speed_of_sound,
+            air_density=air_density,
+            viscosity=viscosity,
+        )
+        total += wt * res.absorption * np.cos(th) * np.sin(th)
+    alpha_dif = 2.0 * total / np.sin(lim) ** 2
+    return DiffuseFieldAbsorptionResult(
+        frequency=f,
+        absorption=np.asarray(alpha_dif, dtype=np.float64),
+        angle_limit=lim,
+    )
+
+
+def statistical_absorption(
+    normalized_impedance: ArrayLike,
+    *,
+    angle_limit: float = np.pi / 2.0,
+) -> Real:
+    """Closed-form Paris integral for a locally reacting plane.
+
+    With the normalised surface admittance ``Z0 G = g1 + j g2 = 1/z``
+    (Mechel 2e Sect. D.5 Eq. (10)):
+
+    ``alpha_dif = (8 g1 / sin^2 T) [1 - cos T
+    + ((g1^2 - g2^2)/g2)(arctan((1 + g1)/g2) - arctan((g1 + cos T)/g2))
+    + g1 ln((g1^2 + g2^2 + 2 g1 cos T + cos^2 T)/(1 + g1^2 + g2^2 + 2 g1))]``
+
+    reducing for ``T = pi/2`` to Eq. (4) and, for real admittance, to the
+    printed ``g2 = 0`` special case. The maximum over passive impedances is
+    0.951 (the published bound for locally reacting absorbers, Sect. D.5).
+
+    :param normalized_impedance: Normalised surface impedance
+        ``z = Zs / (rho c)`` (complex scalar or array), with ``Re(z) > 0``.
+    :param angle_limit: Upper integration angle ``theta_lim``, in radians
+        (0 < theta_lim <= pi/2; default pi/2).
+    :return: Statistical absorption coefficient ``alpha_dif``.
+    """
+    z = np.asarray(normalized_impedance, dtype=np.complex128)
+    if np.any(z.real <= 0.0):
+        raise ValueError("'normalized_impedance' must have a positive real part.")
+    lim = float(angle_limit)
+    if not 0.0 < lim <= np.pi / 2.0:
+        raise ValueError("'angle_limit' must satisfy 0 < angle_limit <= pi/2.")
+    g = 1.0 / z
+    g1 = g.real
+    g2 = g.imag
+    cos_t = np.cos(lim)
+    sin2_t = np.sin(lim) ** 2
+    log_term = np.log(
+        (g1**2 + g2**2 + 2.0 * g1 * cos_t + cos_t**2)
+        / (1.0 + g1**2 + g2**2 + 2.0 * g1)
+    )
+    # Mechel prints (g1^2 - g2^2)/g2 * [arctan((1+g1)/g2) -
+    # arctan((g1+cosT)/g2)], which cancels catastrophically as g2 -> 0
+    # (a difference of two values near +-pi/2 amplified by 1/g2). With
+    # a = 1 + g1 > 0 and b = g1 + cosT > 0 the identity
+    # arctan(a/g2) - arctan(b/g2) = arctan(g2 (a - b) / (g2^2 + a b))
+    # (valid because (a/g2)(b/g2) > 0) evaluates the same quantity
+    # stably for every non-zero g2. Expanding arctan(x/g2) about
+    # g2 = 0 (arctan(x/g2) = sgn(g2) pi/2 - g2/x + O(g2^3)) gives the
+    # exact limit of the whole term,
+    # g1^2 (1 - cos T) / ((g1 + cos T)(1 + g1)), with an O(g2^2)
+    # truncation error - far below double precision at the switch
+    # threshold, while the direct form is stable for every larger |g2|.
+    a = 1.0 + g1
+    b = g1 + cos_t
+    near_real = np.abs(g2) < 1e-30
+    g2_safe = np.where(near_real, 1.0, g2)
+    atan_term = np.where(
+        near_real,
+        g1**2 * (1.0 - cos_t) / (b * a),
+        (g1**2 - g2_safe**2)
+        / g2_safe
+        * np.arctan(g2_safe * (a - b) / (g2_safe**2 + a * b)),
+    )
+    alpha = 8.0 * g1 / sin2_t * (1.0 - cos_t + atan_term + g1 * log_term)
+    return np.asarray(alpha, dtype=np.float64)

@@ -146,6 +146,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.materials.airflow_resistance",
             "phonometry.materials.dynamic_stiffness",
             "phonometry.materials.impedance_tube",
+            "phonometry.materials.porous_absorber",
             "phonometry.materials.scattering_diffusion",
             "phonometry.materials.road_absorption",
         ),

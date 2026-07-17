@@ -109,6 +109,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`materials.airflow_resistance`](/phonometry/reference/api/materials/airflow-resistance/) | Airflow resistance of porous materials: ISO 9053-1 and ISO 9053-2. |
 | [`materials.dynamic_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/) | Dynamic stiffness of resilient materials under floating floors (EN 29052-1:1992). |
 | [`materials.impedance_tube`](/phonometry/reference/api/materials/impedance-tube/) | Impedance-tube material characterisation. |
+| [`materials.porous_absorber`](/phonometry/reference/api/materials/porous-absorber/) | Porous-material models and multilayer absorber prediction. |
 | [`materials.scattering_diffusion`](/phonometry/reference/api/materials/scattering-diffusion/) | Random-incidence scattering and directional diffusion coefficients. |
 | [`materials.road_absorption`](/phonometry/reference/api/materials/road-absorption/) | In-situ sound absorption of road surfaces (ISO 13472-1 / ISO 13472-2). |
 

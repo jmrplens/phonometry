@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **280/280 conformance checks pass** across 34 domains and 156 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **290/290 conformance checks pass** across 35 domains and 165 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -578,6 +578,24 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 61400-11:2012 Formula 30 | Critical bandwidth about a 500 Hz tone, Hz | 117.255 Hz (+/-0 Hz) | 117.255 Hz | 0 Hz | &#9989; |
 | IEC 61400-11:2012 Formula 26 | Apparent sound power level of a single band, dB re 1 pW | 148.5139 dB (+/-0.0001 dB) | 148.5139 dB | 0 dB | &#9989; |
 | IEC 61400-11:2012 Formulae 31-34 | Tonal audibility of a synthetic clean tone, dB | 16.38 dB (+/-0.06 dB) | 16.38 dB | -0.001 dB | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Porous &amp; multilayer absorbers (Mechel / Bies / Cox &amp; D'Antonio)</b> — 100% (10/10)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Bies 5e App. D Table D.1 / Mechel 2e G.11 (2) | Delany-Bazley normalised Zc at X = 0.1, real part | 1.3241 (+/-0) | 1.3241 | 0 | &#9989; |
+| Bies 5e App. D Table D.1 / Mechel 2e G.11 (2) | Delany-Bazley normalised Zc at X = 0.1, imaginary part | -0.4694 (+/-0) | -0.4694 | 0 | &#9989; |
+| Miki 1990 Eqs. (30)-(34) | Miki normalised wavenumber at f/sigma = 0.1, real part | 1.4523 (+/-0) | 1.4523 | 0 | &#9989; |
+| Johnson et al. 1987 / Cox & D'Antonio 3e Eq. (6.19) | JCA static viscous limit j w rho_e -> sigma, Pa s/m2 | 20000 Pa s/m2 (+/-0.01%) | 20000 Pa s/m2 | 0 Pa s/m2 | &#9989; |
+| Mechel 2e Sect. D.3 Eq. (1) | Hard-backed layer: TMM vs -j Zc cot(kd), max rel deviation | 0 (+/-0) | 0 | 0 | &#9989; |
+| Lossless-layer limit (Mechel 2e Sect. D.3-D.4) | Air cavity over a rigid wall at lambda/4: alpha | 0 (+/-0) | 0 | 0 | &#9989; |
+| Mechel 2e Sect. D.5 | Maximum statistical absorption of a locally reacting plane | 0.951 (+/-0.001) | 0.951 | 0 | &#9989; |
+| Cox & D'Antonio 3e Eq. (7.9) | Membrane resonance 60/sqrt(m d), m = 5 kg/m2, d = 5 cm, Hz | 120 Hz (+/-2%) | 119.85 Hz | -0.15 Hz | &#9989; |
+| Maa 1998 Fig. 5 / Cox & D'Antonio 3e Fig. 7.28 | Microperforated panel (d=t=0.2 mm, b=2.5 mm, D=6 cm): peak alpha | 0.95 (+/-0.05) | 0.956 | 0.006 | &#9989; |
+| Maa 1998 Eqs. (5a)/(10) | MPP peak absorption vs 4r/(1+r)^2 with Maa's printed resistance | 4r/(1+r)^2 = 0.949 | 0.956 | 0.007 | &#9989; |
 
 </details>
 

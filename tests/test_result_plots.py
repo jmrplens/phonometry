@@ -118,6 +118,25 @@ def _outdoor() -> ph.OutdoorAttenuation:
     )
 
 
+def _porous_medium() -> ph.PorousMediumResult:
+    f = np.linspace(400.0, 4000.0, 40)
+    return ph.miki(f, 20000.0)
+
+
+def _layered_absorber() -> ph.LayeredAbsorberResult:
+    f = np.linspace(400.0, 4000.0, 40)
+    med = ph.miki(f, 20000.0)
+    return ph.layered_absorber(f, [ph.PorousLayer(0.05, med)])
+
+
+def _diffuse_absorption() -> ph.DiffuseFieldAbsorptionResult:
+    f = np.linspace(400.0, 4000.0, 8)
+    med = ph.miki(f, 20000.0)
+    return ph.diffuse_field_absorption(
+        f, [ph.PorousLayer(0.05, med)], quadrature_points=16
+    )
+
+
 def _impedance_tube() -> ph.ImpedanceTubeResult:
     f = np.linspace(200.0, 1600.0, 60)
     r_true = 0.6 * np.exp(-f / 1200.0) * np.exp(0.8j)
@@ -436,6 +455,9 @@ _KWARG_PLOT_CASES = [
     ("open_plan", _open_plan, "line"),
     ("outdoor", _outdoor, "line"),
     ("impedance_tube", _impedance_tube, "line"),
+    ("porous_medium", _porous_medium, "line"),
+    ("layered_absorber", _layered_absorber, "line"),
+    ("diffuse_absorption", _diffuse_absorption, "line"),
     ("monte_carlo", _monte_carlo, "bar"),
     ("exposure", _exposure, "bar"),
     ("static_airflow", _static_airflow, "line"),
@@ -731,6 +753,28 @@ def test_impedance_tube_plot_alpha_and_reflection() -> None:
     plt.close("all")
 
 
+def test_layered_absorber_plot_alpha_and_reflection() -> None:
+    res = _layered_absorber()
+    ax = res.plot()
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), res.absorption)
+    np.testing.assert_allclose(ax.lines[1].get_ydata(), np.abs(res.reflection))
+    assert ax.get_ylim() == (0.0, 1.05)
+    plt.close("all")
+
+
+def test_porous_medium_plot_normalized_components() -> None:
+    res = _porous_medium()
+    ax = res.plot()
+    np.testing.assert_allclose(
+        ax.lines[0].get_ydata(), res.normalized_impedance.real
+    )
+    np.testing.assert_allclose(
+        ax.lines[1].get_ydata(), -res.normalized_impedance.imag
+    )
+    assert len(ax.lines) == 4
+    plt.close("all")
+
+
 # --------------------------------------------------------------------------
 # Monte Carlo output distribution (GUM Supplement 1)
 # --------------------------------------------------------------------------
@@ -878,6 +922,9 @@ def test_single_axes_plots_accept_external_ax() -> None:
         _open_plan(),
         _outdoor(),
         _impedance_tube(),
+        _porous_medium(),
+        _layered_absorber(),
+        _diffuse_absorption(),
         _monte_carlo(),
         _exposure(),
         _static_airflow(),

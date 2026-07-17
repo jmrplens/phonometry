@@ -329,6 +329,20 @@ _ES_EXACT = {
     "In-situ road-surface absorption (ISO 13472-1)":
         "Absorción in situ de pavimentos (ISO 13472-1)",
     "Absorption coefficient alpha": "Coeficiente de absorción alpha",
+    "Porous layer 50 mm (sigma = 20 kPa s/m2)":
+        "Capa porosa de 50 mm (sigma = 20 kPa s/m2)",
+    "Microperforated panel + 48 mm cavity":
+        "Panel microperforado + cámara de 48 mm",
+    "Perforated panel 6 mm + porous 25 mm + air":
+        "Panel perforado 6 mm + poroso 25 mm + aire",
+    "Membrane 2 kg/m2 + air + porous 38 mm":
+        "Membrana 2 kg/m2 + aire + poroso 38 mm",
+    "Helmholtz closed form": "Forma cerrada de Helmholtz",
+    "Membrane closed form": "Forma cerrada de membrana",
+    "Multilayer Absorber Prediction (Transfer-Matrix Method)":
+        "Predicción de absorbentes multicapa (método de matrices de transferencia)",
+    "Normal incidence, rigid backing, 50 mm total depth":
+        "Incidencia normal, respaldo rígido, 50 mm de profundidad total",
     # Human vibration (ISO 8041-1 / ISO 2631 / ISO 5349 / 2002/44/EC)
     "Whole-body vertical weighting Wk (ISO 8041-1)":
         "Ponderación vertical de cuerpo entero Wk (ISO 8041-1)",
@@ -5753,6 +5767,92 @@ def generate_impedance_tube(output_dir: str) -> None:
     plt.close()
 
 
+def generate_porous_absorber_designs(output_dir: str) -> None:
+    """Multilayer absorber packages predicted by the transfer-matrix method.
+
+    Normal-incidence absorption of four 50-mm-deep constructions built from
+    the same porous model (Miki) and the resonant sheet layers: a plain
+    porous layer, a Maa microperforated panel over a cavity, a perforated
+    panel over porous + air, and a limp membrane over a porous-filled
+    cavity. One concept: the same 2x2 layer matrices predict broadband and
+    resonant absorbers alike.
+    """
+    print("Generating porous_absorber_designs...")
+    import warnings as _warnings
+
+    from phonometry import (
+        AirLayer,
+        MembraneLayer,
+        MicroperforatedPlateLayer,
+        PerforatedPlateLayer,
+        PorousAbsorberWarning,
+        PorousLayer,
+        helmholtz_resonance_frequency,
+        layered_absorber,
+        membrane_resonance_frequency,
+        miki,
+    )
+
+    from phonometry.materials.porous_absorber import Layer
+
+    f = np.logspace(np.log10(50.0), np.log10(5000.0), 500)
+    with _warnings.catch_warnings():
+        # The 50 Hz decade end sits below the published Miki fit range on
+        # purpose (the figure shows the bass behaviour of the resonators).
+        _warnings.simplefilter("ignore", PorousAbsorberWarning)
+        med = miki(f, 20000.0)
+        med_light = miki(f, 10000.0)
+        cases: list[tuple[str, list[Layer], str, str]] = [
+            ("Porous layer 50 mm (sigma = 20 kPa s/m2)",
+             [PorousLayer(0.05, med)], COLOR_PRIMARY, "-"),
+            ("Microperforated panel + 48 mm cavity",
+             [MicroperforatedPlateLayer(0.5e-3, 0.15e-3, 0.008),
+              AirLayer(0.048)], COLOR_SECONDARY, "-"),
+            ("Perforated panel 6 mm + porous 25 mm + air",
+             [PerforatedPlateLayer(0.006, 0.0025, 0.05),
+              PorousLayer(0.025, med), AirLayer(0.019)], COLOR_TERTIARY, "-"),
+            ("Membrane 2 kg/m2 + air + porous 38 mm",
+             [MembraneLayer(2.0), AirLayer(0.01),
+              PorousLayer(0.038, med_light)], "#9467bd", "-"),
+        ]
+        fig, ax = plt.subplots(figsize=(10, 6.2))
+        for label, layers, color, ls in cases:
+            res = layered_absorber(f, layers)
+            ax.semilogx(f, res.absorption, ls, color=color, linewidth=2.2,
+                        label=label)
+    # Closed-form resonance anchors of the two classical designs.
+    f_helm = helmholtz_resonance_frequency(
+        cavity_depth=0.044, plate_thickness=0.006, hole_radius=0.0025,
+        open_area=0.05,
+    )
+    f_mem = membrane_resonance_frequency(surface_density=2.0, cavity_depth=0.048)
+    for f0, color, label in (
+        (f_helm, COLOR_TERTIARY, "Helmholtz closed form"),
+        (f_mem, "#9467bd", "Membrane closed form"),
+    ):
+        ax.axvline(f0, color=color, linestyle=":", linewidth=1.1, alpha=0.8)
+        ax.text(f0 * 1.04, 0.44, label, rotation=90, va="bottom",
+                ha="left", fontsize=8.5, color=color)
+
+    ax.set_xlabel("Frequency [Hz]")
+    ax.set_ylabel("Sound absorption coefficient alpha")
+    ax.set_ylim(0.0, 1.08)
+    ax.set_xlim(50.0, 5000.0)
+    ax.set_title("Multilayer Absorber Prediction (Transfer-Matrix Method)",
+                 fontweight="bold", pad=12)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.set_xticks([63, 125, 250, 500, 1000, 2000, 4000])
+    ax.set_xticklabels(["63", "125", "250", "500", "1k", "2k", "4k"])
+    ax.legend(loc="upper left", fontsize=9)
+    ax.text(0.985, 0.03, "Normal incidence, rigid backing, 50 mm total depth",
+            transform=ax.transAxes, va="bottom", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "porous_absorber_designs.svg")
+    plt.close()
+
+
 def generate_scattering_coefficient(output_dir: str) -> None:
     """ISO 17497-1: scattering coefficient s(f) from a per-band measurement."""
     print("Generating scattering_coefficient.png...")
@@ -6832,6 +6932,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_absorption_rating,
     generate_airflow_resistance,
     generate_impedance_tube,
+    # Porous materials & multilayer absorbers (Mechel / Bies / Cox & D'Antonio)
+    generate_porous_absorber_designs,
     # Scattering/diffusion, in-situ road absorption, precision sound power
     # (ISO 17497-1/-2, ISO 13472-1, ISO 3745 / ISO 9614-3)
     generate_scattering_coefficient,

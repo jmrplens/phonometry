@@ -15,7 +15,7 @@
 
 ## Numerical conformance report
 
-&#9989; **266/266 conformance checks pass** across 32 domains and 147 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+&#9989; **272/272 conformance checks pass** across 33 domains and 153 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
@@ -462,6 +462,20 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | IEC 60268-3:2013 (14.12.9) | DIM of the 15 kHz / 3.15 kHz signal (Table 2, 9 products) | 0.168819 (+/-0.0001) | 0.168819 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e | H1 recovers a known first-order IIR gain at 1 kHz | 0.8954 (+/-2%) | 0.8954 | 0 | &#9989; |
 | Bendat & Piersol, Random Data 4e | Ordinary coherence = 1 for a noiseless LTI path | 1 (+/-0.001) | 1 | 0 | &#9989; |
+
+</details>
+
+<details>
+<summary>&#9989; <b>Calibrated spectral analysis (Bendat &amp; Piersol)</b> — 100% (6/6)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
+|:---|:---|:---|:---|:---|:---:|
+| Bendat & Piersol, Random Data 4e Eq. (5.67) | White-noise autospectral density = sigma^2/(fs/2) | 0.000977 (+/-3%) | 0.000982 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eq. (8.158) | PSD random error = 1/sqrt(nd) (Monte Carlo, 100 seeded records) | 0.1768 (+/-6%) | 0.1764 | 0 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eq. (8.163) | 95% chi-square confidence interval coverage (Monte Carlo) | 0.95 (+/-0.025) | 0.94 | -0.01 | &#9989; |
+| Bendat & Piersol, Random Data 4e Eqs. (9.55)/(6.39) | Coherent output spectrum of a known-SNR path: gamma^2 = SNR/(1+SNR) | 0.7191 (+/-0.03) | 0.7255 | 0.006 | &#9989; |
+| Closed-form power-law slope (10*lg(2) dB/octave per unit exponent) | Pink-noise PSD slope over 20 Hz - 20 kHz, dB/octave | -3.0103 dB/oct (+/-0.05 dB/oct) | -3.0116 dB/oct | -0.001 dB/oct | &#9989; |
+| Constant-power 1/n-octave kernel (closed form) | 1/3-octave smoothed line level = P*df/(f0*(2^(1/6)-2^(-1/6))) | 0.021592 (+/-1e-07%) | 0.021592 | 0 | &#9989; |
 
 </details>
 

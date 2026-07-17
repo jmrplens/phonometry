@@ -45,10 +45,14 @@ import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-from scipy import signal
 
 from .._internal.levels_math import energy_mean
 from ..metrology.frequencies import _genfreqs
+from ..metrology.spectra import (
+    _default_nperseg,
+    _welch_autospectrum,
+    _welch_cross_spectrum,
+)
 from .._internal.utils import _typesignal
 
 #: Reference sound intensity, in watts per square metre (ISO 9614-1, A.2.3).
@@ -243,13 +247,13 @@ def sound_intensity(
     if x1.size < 32:
         raise ValueError(f"Signals too short for a spectral estimate: {x1.size} samples.")
 
-    # Hann-windowed Welch/CSD averaging; segment length targets a spectral
-    # resolution of about 3 Hz so that low-frequency bands are resolved.
-    nperseg = int(min(x1.size, 2 ** int(np.ceil(np.log2(fs / 4.0)))))
-    nperseg = max(nperseg, 32)
-    f, g12 = signal.csd(x1, x2, fs, window="hann", nperseg=nperseg, detrend=False)
-    _, spp = signal.welch(
-        (x1 + x2) / 2.0, fs, window="hann", nperseg=nperseg, detrend=False
+    # Hann-windowed Welch/CSD averaging through the shared spectral core
+    # (50% overlap, detrend off); the shared default segment length targets
+    # a resolution of at most 4 Hz so low-frequency bands are resolved.
+    nperseg = _default_nperseg(x1.size, float(fs))
+    f, g12 = _welch_cross_spectrum(x1, x2, float(fs), nperseg, nperseg // 2)
+    _, spp = _welch_autospectrum(
+        (x1 + x2) / 2.0, float(fs), nperseg, nperseg // 2
     )
     df = float(f[1] - f[0])
     pos = f > 0

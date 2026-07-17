@@ -30,7 +30,15 @@ que siguen siendo honestos cuando el modelo es no lineal o las entradas
 distan de ser gaussianas. La página muestra ambas sobre los mismos modelos,
 incluyendo dónde divergen y por qué.
 
-Las dos páginas se encuentran en la práctica: un presupuesto de incertidumbre
+La misma disciplina se extiende al dominio de la frecuencia.
+[Análisis espectral calibrado](/phonometry/es/guides/spectral-analysis/)
+aplica el análisis de error de Bendat y Piersol a las estimaciones
+espectrales de Welch: cada PSD lleva su número efectivo de promedios, su
+error aleatorio normalizado y un intervalo de confianza chi-cuadrado, y el
+espectro de salida coherente separa una salida medida en señal y ruido con
+una SNR espectral.
+
+Las páginas se encuentran en la práctica: un presupuesto de incertidumbre
 de una medición acústica casi siempre contiene un término de calibración, y
 varias normas implementadas en otras partes de la biblioteca (ISO 9612,
 ISO 12999-1) traen presupuestos de incertidumbre que son especializaciones de
@@ -44,3 +52,7 @@ la maquinaria GUM descrita aquí.
 - [Incertidumbre de medida (GUM y Monte Carlo)](/phonometry/es/guides/gum-uncertainty/):
   la ley de propagación de la incertidumbre y el método de Monte Carlo,
   incertidumbre expandida e intervalos de cobertura.
+- [Análisis espectral calibrado](/phonometry/es/guides/spectral-analysis/):
+  PSD/CSD de Welch con intervalos de confianza chi-cuadrado, el espectro de
+  salida coherente y la SNR espectral, suavizado en 1/n de octava y
+  generadores de ruido de colores con pendiente exacta.

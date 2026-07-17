@@ -17,7 +17,10 @@
 
 &#9989; **266/266 conformance checks pass** across 32 domains and 147 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
-### Numerical validation - filters &amp; weightings
+<sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
+
+<details>
+<summary>&#9989; <b>Numerical validation - filters &amp; weightings</b> — class showcase (IEC 61260-1 · IEC 61672-1 · ISO 7196)</summary>
 
 **IEC 61260-1:2014 class per filter architecture** (order 6, one-third-octave, 100 Hz-10 kHz, fs = 48 kHz). For each architecture the table shows, at its *binding* band, the measured relative attenuation and the class-1 limit it must clear, so the number and the range it must sit in are both visible. A positive margin means the acceptance limits are met with that much room.
 
@@ -39,6 +42,8 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | A | 96 kHz | -0.482 dB @ 19953 Hz | 1000 Hz | +0.000 dB | [-0.70, +0.70] dB | +0.700 dB |
 | C | 48 kHz | -0.900 dB @ 19953 Hz | 1000 Hz | +0.000 dB | [-0.70, +0.70] dB | +0.700 dB |
 | G | 48 kHz | +0.047 dB @ 1 Hz | 1 Hz | +0.047 dB | [-1.00, +1.00] dB | +0.953 dB |
+
+</details>
 
 <details>
 <summary>&#9989; <b>Filters &amp; weightings</b> — 100% (7/7)</summary>

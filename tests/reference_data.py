@@ -1673,3 +1673,41 @@ EBU_TECH3342_LRA_CASES: list[tuple[int, tuple[float, ...], float]] = [
     (3, (-40.0, -20.0), 20.0),
     (4, (-50.0, -35.0, -20.0, -35.0, -50.0), 15.0),
 ]
+
+# Porous materials & multilayer absorbers - published anchors.
+#
+# Delany-Bazley power law (Bies 5e Appendix D Table D.1 first row = Mechel 2e
+# Sect. G.11 Eqs. (1)-(2) = Hopkins Eqs. (1.171)-(1.172)), evaluated by hand
+# at the digitization point X = rho f / sigma = 0.1 (mid fit range):
+#   Zc/(rho c) = 1 + 0.0571*0.1^-0.754 - j 0.087*0.1^-0.732
+#   k/k0       = 1 + 0.0978*0.1^-0.700 - j 0.189*0.1^-0.595
+# Miki (1990) Eqs. (30)-(34) evaluated by hand at f/sigma = 0.1:
+#   Zc/(rho c) = 1 + 0.070*0.1^-0.632 - j 0.107*0.1^-0.632
+#   k/k0       = 1 + 0.109*0.1^-0.618 - j 0.160*0.1^-0.618
+# Mechel 2e Sect. D.5: the maximum possible statistical absorption
+# coefficient of a locally reacting plane is the published 0.951.
+# ---------------------------------------------------------------------------
+POROUS_DB_X_POINT = 0.1
+POROUS_DB_ZC_EXPECTED = 1.3240679696882804 - 0.46937424158816093j
+POROUS_DB_K_EXPECTED = 1.4901611144874722 - 0.7438096426114194j
+POROUS_MIKI_Y_POINT = 0.1
+POROUS_MIKI_ZC_EXPECTED = 1.2999839642782076 - 0.4585469168252603j
+POROUS_MIKI_K_EXPECTED = 1.4522999064714557 - 0.6639264682149806j
+POROUS_STATISTICAL_ALPHA_MAX = 0.951
+
+# ---------------------------------------------------------------------------
+# Maa (1998), "Potential of microperforated panel absorber", JASA 104(5).
+# Table I (printed): maximum absorption alpha0 = 4r/(1+r)^2 (Eq. (10)) and
+# absorption-band frequency interval B = f2/f1 = pi/arccot(1+r) - 1
+# (Eq. (21)) for r = 1..5 at k = 0.
+# Fig. 5 design example (also Cox & D'Antonio 3e Fig. 7.28): d = t = 0.2 mm,
+# hole separation b = 2.5 mm on a square lattice (sigma = (pi/4)(d/b)^2,
+# Eq. (25)), cavity D = 6 cm; theory vs standing-wave-tube measurement.
+# ---------------------------------------------------------------------------
+MAA_TABLE_I_R = (1.0, 2.0, 3.0, 4.0, 5.0)
+MAA_TABLE_I_ALPHA0 = (1.0, 0.89, 0.75, 0.64, 0.56)
+MAA_TABLE_I_BANDWIDTH = (5.78, 8.76, 11.82, 14.91, 18.02)
+MAA_FIG5_DIAMETER = 0.2e-3
+MAA_FIG5_THICKNESS = 0.2e-3
+MAA_FIG5_SEPARATION = 2.5e-3
+MAA_FIG5_CAVITY = 0.06

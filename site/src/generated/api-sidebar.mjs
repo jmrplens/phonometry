@@ -39,6 +39,7 @@ export const apiSidebar = {
         'reference/api/psychoacoustics/tonality-ecma',
         'reference/api/psychoacoustics/tone-audibility',
         'reference/api/psychoacoustics/fluctuation-strength',
+        'reference/api/psychoacoustics/fluctuation-strength-ecma',
         'reference/api/psychoacoustics/psychoacoustic-annoyance',
       ],
     },

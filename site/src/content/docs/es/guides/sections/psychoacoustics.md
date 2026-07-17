@@ -1,6 +1,6 @@
 ---
 title: "Psicoacústica"
-description: "Las métricas perceptivas del sonido: modelos de sonoridad (ISO 532, ECMA-418-2), agudeza, tonalidad y aspereza, los dos métodos de evaluación tonal (prominencia ECMA-418-1 y audibilidad ISO/PAS 20065), y la molestia psicoacústica de Fastl y Zwicker."
+description: "Las métricas perceptivas del sonido: modelos de sonoridad (ISO 532, ECMA-418-2), agudeza, tonalidad, aspereza e intensidad de fluctuación, los dos métodos de evaluación tonal (prominencia ECMA-418-1 y audibilidad ISO/PAS 20065), y la molestia psicoacústica de Fastl y Zwicker."
 ---
 
 La psicoacústica sustituye la pregunta "¿cuántos decibelios?" por "¿qué
@@ -9,8 +9,8 @@ perceptiva en sonios, calculada por modelos auditivos que tienen en cuenta el
 filtrado, el enmascaramiento y la compresión del oído. Sobre la sonoridad se
 asientan las sensaciones de **calidad sonora** que distinguen dos sonidos
 igual de fuertes: la agudeza (énfasis en altas frecuencias), la tonalidad
-(tonos discretos audibles) y la aspereza (modulación rápida). Y sobre ellas,
-una métrica combinada de **molestia** que las pesa en un único escalar.
+(tonos discretos audibles), la aspereza (modulación rápida) y la intensidad
+de fluctuación (modulación lenta). Y sobre ellas, una métrica combinada de **molestia** que las pesa en un único escalar.
 
 [Sonoridad](/phonometry/es/guides/loudness/) es la página fundacional. Cubre
 las tres familias de modelos que phonometry incluye (Zwicker según ISO 532-1,
@@ -18,8 +18,8 @@ Moore-Glasberg según ISO 532-2/3 y el modelo auditivo de Sottek de
 ECMA-418-2) junto con las curvas isofónicas de ISO 226:2023 que anclan la
 escala perceptiva para tonos puros.
 [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/) añade la
-agudeza según DIN 45692 y la tonalidad y aspereza de ECMA-418-2, que
-comparten el frontal auditivo de Sottek.
+agudeza según DIN 45692 y la tonalidad, la aspereza y la intensidad de
+fluctuación de ECMA-418-2, que comparten el frontal auditivo de Sottek.
 
 Los tonos en ruido reciben dos páginas dedicadas porque se les hacen dos
 preguntas distintas.
@@ -44,7 +44,8 @@ todo lo que definen las demás páginas.
   Moore-Glasberg y Sottek en sonios, más las curvas isofónicas de
   ISO 226:2023.
 - [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/): agudeza
-  (DIN 45692) y tonalidad y aspereza de ECMA-418-2.
+  (DIN 45692) y tonalidad, aspereza e intensidad de fluctuación de
+  ECMA-418-2.
 - [Tonos discretos prominentes (ECMA-418-1)](/phonometry/es/guides/tone-prominence/):
   razones tono-ruido y de prominencia con veredictos de prominencia.
 - [Audibilidad objetiva de tonos en ruido (ISO/PAS 20065)](/phonometry/es/guides/tone-audibility/):

@@ -1,13 +1,14 @@
 ---
 title: "Métricas de calidad sonora"
-description: "Sharpness en acum (DIN 45692) y la tonalidad (tu_HMS) y la aspereza (asper) del modelo de Sottek de ECMA-418-2."
+description: "Sharpness en acum (DIN 45692) y la tonalidad (tu_HMS), la aspereza (asper) y la intensidad de fluctuación (vacil) del modelo de Sottek de ECMA-418-2."
 ---
 
 Dos sonidos igual de sonoros pueden diferir aún en cuán *afilados*, cuán
-*tonales* o cuán *ásperos* son. Esta página cubre las métricas de calidad
-sonora que complementan a la sonoridad: el sharpness (DIN 45692) y la
-tonalidad y la aspereza de ECMA-418-2 del modelo de Sottek. La sonoridad,
-incluida la de ECMA-418-2 que comparte el mismo front-end auditivo, está en
+*tonales*, cuán *ásperos* o cuán *fluctuantes* son. Esta página cubre las
+métricas de calidad sonora que complementan a la sonoridad: el sharpness
+(DIN 45692) y la tonalidad, la aspereza y la intensidad de fluctuación de
+ECMA-418-2 del modelo de Sottek. La sonoridad, incluida la de ECMA-418-2 que
+comparte el mismo front-end auditivo, está en
 [Sonoridad](/phonometry/es/guides/loudness/).
 
 ## Sharpness en acum (DIN 45692)
@@ -193,6 +194,99 @@ R(l50)), `specific_roughness` (R′(z), 53 bandas), `bark`, `centre_frequencies`
 `time`, `roughness_vs_time` (R(l50)), `specific_roughness_vs_time`
 (array de (n_times, 53)), `field`.
 
+## Intensidad de fluctuación (ECMA-418-2) — nueva capacidad
+
+La intensidad de fluctuación es la sensación lenta y ondulante de la
+modulación de amplitud o de frecuencia por debajo de unos 20 Hz — una
+sirena, tonos batientes, el habla al ritmo silábico. Es la contraparte lenta
+de la aspereza: el mismo modelo auditivo separa la modulación de la
+envolvente en un paso de banda lento con máximo cerca de 4 Hz (intensidad de
+fluctuación, en **vacil**) y otro rápido con máximo cerca de 70 Hz
+(aspereza). La cláusula 9 de ECMA-418-2 analiza la envolvente de cada banda
+con análisis espectral de alta resolución (HSA) — un ajuste por mínimos
+cuadrados de pares de líneas espectrales del núcleo de la ventana que
+resuelve tasas de modulación muy por debajo del ancho de bin de la DFT — con
+ventanas de análisis dependientes de la envolvente que omiten los periodos
+más silenciosos, y después pondera el complejo armónico dominante y lo
+escala con una sonoridad específica basada en el HSA. El sonido de
+referencia (portadora de 1 kHz, modulada en amplitud al 100 % a 4 Hz, nivel
+global de 60 dB SPL) se define como 1 vacil — esta implementación de sala
+limpia converge a 0,9958 vacil con la constante de calibración tabulada c_F
+(fórmula 163) usada **sin** reajustarla al objetivo (el ejemplo de 8 s de
+abajo imprime 0,9957). Una señal cuyo valor
+único F supera 0,2 vacil tiene una intensidad de fluctuación *prominente*
+(cláusula 9.2).
+
+```python
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(int(8.0 * fs)) / fs
+x = (1.0 + np.cos(2 * np.pi * 4 * t)) * np.sin(2 * np.pi * 1000 * t)
+x *= 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))   # 60 dB SPL globales
+
+res = psychoacoustics.fluctuation_strength_ecma(x, fs, field="free")
+print(f"F = {res.fluctuation_strength:.4f} vacil")   # 0,9957 vacil (referencia: 1 vacil)
+
+res.plot()   # F(l50) temporal + mapa de calor de la específica
+```
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hms_modulation_bandpass_es.svg" alt="Percepción de modulación lenta vs rápida de ECMA-418-2: la intensidad de fluctuación forma un paso de banda sobre la frecuencia de modulación con máximo cerca de 4 a 6 Hz mientras que la aspereza de los mismos tonos de 1 kHz modulados en amplitud tiene su máximo cerca de 70 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hms_modulation_bandpass_es_dark.svg" alt="Percepción de modulación lenta vs rápida de ECMA-418-2: la intensidad de fluctuación forma un paso de banda sobre la frecuencia de modulación con máximo cerca de 4 a 6 Hz mientras que la aspereza de los mismos tonos de 1 kHz modulados en amplitud tiene su máximo cerca de 70 Hz" style="width:80%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from phonometry import psychoacoustics
+
+fs = 48000
+t = np.arange(int(3.0 * fs)) / fs
+carrier = np.sin(2 * np.pi * 1000 * t)
+
+def am_tone(fmod):
+    # AM del 100 % a un nivel global de 60 dB SPL (convención de las cláusulas 7/9)
+    x = (1.0 + np.sin(2 * np.pi * fmod * t)) * carrier
+    return x * 2e-5 * 10 ** (60 / 20) / np.sqrt(np.mean(x**2))
+
+fm_slow = [0.5, 1, 2, 4, 8, 16, 32]
+fm_fast = [20, 40, 70, 100, 150, 200]
+f_vals = [psychoacoustics.fluctuation_strength_ecma(am_tone(fm), fs).fluctuation_strength
+          for fm in fm_slow]
+r_vals = [psychoacoustics.roughness_ecma(am_tone(fm), fs).roughness for fm in fm_fast]
+
+fig, ax = plt.subplots()
+ax.semilogx(fm_slow, f_vals, "o-", label="Intensidad de fluctuación F [vacil]")
+ax.semilogx(fm_fast, r_vals, "s-", label="Aspereza R [asper]")
+ax.set(xlabel="Frecuencia de modulación [Hz]", ylabel="F [vacil] / R [asper]")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+### Parámetros de `fluctuation_strength_ecma()`
+
+| Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
+| :--- | :--- | :--- | :--- | :--- |
+| `signal_in` | array 1D | Pa | no vacío | Señal de presión calibrada |
+| `fs` | float | Hz | > 0 | Se remuestrea a 48 kHz internamente si es necesario |
+| `field` | str | — | `'free'` (por defecto) / `'diffuse'` | Filtro del oído externo/medio |
+
+Devuelve un `EcmaFluctuationStrength`: `fluctuation_strength` (F, vacil, el
+percentil 90 de F(l50)), `specific_fluctuation_strength` (F′(z), 53 bandas),
+`bark`, `centre_frequencies`, `time`, `fluctuation_strength_vs_time`
+(F(l50)), `specific_fluctuation_strength_vs_time` (array de (n_times, 53)),
+`field`.
+
+Los modelos de intensidad de fluctuación de Fastl y Zwicker (forma cerrada
+para ruido de banda ancha AM y el modelo de señal de Osses 2016) están en
+[Molestia psicoacústica](/phonometry/es/guides/psychoacoustic-annoyance/);
+esta métrica de la cláusula 9 es la contraparte normativa del modelo de
+Sottek.
+
 Consulta [Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/)
 para los veredictos TNR/PR de ECMA-418-1, el
 [índice de transmisión del habla](/phonometry/es/guides/speech-transmission/)
@@ -214,9 +308,11 @@ DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
 Schärfe* — sharpness en acum (ponderación del apartado 6, variantes von
 Bismarck y Aures del Anexo B, objetivos de la Tabla A.2). ECMA-418-2:2025,
 *Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing
-human perception based on the Sottek Hearing Model)* — la tonalidad (tu_HMS) y
-la aspereza (asper) del modelo de Sottek.
+human perception based on the Sottek Hearing Model)* — la tonalidad (tu_HMS,
+cláusula 6), la aspereza (asper, cláusula 7) y la intensidad de fluctuación
+(vacil_HMS, cláusula 9, el análisis de envolvente basado en HSA) del modelo
+de Sottek.
 
 ## Véase también
 
-- Referencia de la API: [`psychoacoustics.sharpness`](/phonometry/es/reference/api/psychoacoustics/sharpness/), [`psychoacoustics.tonality_ecma`](/phonometry/es/reference/api/psychoacoustics/tonality-ecma/) y [`psychoacoustics.roughness_ecma`](/phonometry/es/reference/api/psychoacoustics/roughness-ecma/).
+- Referencia de la API: [`psychoacoustics.sharpness`](/phonometry/es/reference/api/psychoacoustics/sharpness/), [`psychoacoustics.tonality_ecma`](/phonometry/es/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics.roughness_ecma`](/phonometry/es/reference/api/psychoacoustics/roughness-ecma/) y [`psychoacoustics.fluctuation_strength_ecma`](/phonometry/es/reference/api/psychoacoustics/fluctuation-strength-ecma/).

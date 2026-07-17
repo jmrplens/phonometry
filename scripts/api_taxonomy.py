@@ -81,6 +81,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.psychoacoustics.tonality_ecma",
             "phonometry.psychoacoustics.tone_audibility",
             "phonometry.psychoacoustics.fluctuation_strength",
+            "phonometry.psychoacoustics.fluctuation_strength_ecma",
             "phonometry.psychoacoustics.psychoacoustic_annoyance",
         ),
     ),

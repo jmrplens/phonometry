@@ -316,6 +316,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   against the closed-form Schroeder MTF (±0,005), the C.4.2 slope criterion
   (m ≥ 0,5 under a +41 dB unmodulated adjacent-octave tone) and the
   A.2.2/A.3.1.2 audio-path checks (257 checks total).
+- `fluctuation_strength_ecma`: the normative psychoacoustic fluctuation
+  strength of ECMA-418-2:2025 Clause 9 (Sottek Hearing Model, vacil_HMS),
+  completing the standard's metric set next to `loudness_ecma`,
+  `tonality_ecma` and `roughness_ecma`. Implements the High-resolution
+  Spectral Analysis of the critical-band envelopes (least-squares
+  window-kernel line-pair fits, Formulae 121-142), the envelope-dependent
+  analysis windows with quieter-period detection (Clause 9.1.3), the
+  band-pass modulation-rate weighting, damped-Newton rate fine tuning and
+  harmonic-complex analysis (Clauses 9.1.5-9.1.9) and the HSA-based loudness
+  scaling (Clause 9.1.10), reusing the shared Clause 5 auditory front-end.
+  The frozen `EcmaFluctuationStrength` result exposes `.plot()` (F(l50)
+  trace plus specific-fluctuation-strength heatmap). Reproduces the Clause 9
+  calibration signal (1 kHz, 100 % AM at 4 Hz, overall 60 dB SPL) to
+  0,9958 vacil converged with the tabulated `c_F` (no reverse fitting), pinned in CI
+  together with closed-form HSA recovery anchors and the standard's
+  qualitative band-pass behaviours; `docs/ERRATA.md` records four confirmed
+  Clause 9 print defects (the Formula (127) kernel phase, the Formula (144)
+  bin offset, the unit-less Newton constants of Clause 9.1.7 and a broken
+  cross-reference).
 
 ### Changed
 

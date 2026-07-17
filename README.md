@@ -27,7 +27,7 @@ Acoustic measurement toolkit for Python: fractional octave-band filter banks, fr
 - ⏱️ Fast/Slow/Impulse time ballistics, `Leq`, `LAeq` and `L10/L50/L90` statistical levels
 - 🗺️ Octave spectrogram (band levels over time) and zero-phase offline filtering
 - 🧠 Loudness in sones three ways: Zwicker (ISO 532-1 Annex B validated), Moore-Glasberg stationary & time-varying (ISO 532-2/3) and Sottek Hearing Model (ECMA-418-2); DIN 45692 sharpness, ISO 226:2023 contours
-- 🎻 Sound-quality metrics: ECMA-418-2 tonality (tu_HMS) and roughness (asper)
+- 🎻 Sound-quality metrics: ECMA-418-2 tonality (tu_HMS), roughness (asper) and fluctuation strength (vacil)
 - 🗣️ Speech Transmission Index: STI and STIPA per IEC 60268-16 Ed. 5, with signal generator
 - 🎯 Tone prominence (TNR/PR, ECMA-418-1), environmental Lden/Ldn (ISO 1996-1), IEC 61252 noise dose
 - ↗️ Two-microphone sound intensity (IEC 61043) with ISO 9614-1 field indicators
@@ -61,7 +61,7 @@ Or browse the Markdown docs on GitHub:
 | [Occupational Exposure](https://github.com/jmrplens/phonometry/blob/main/docs/occupational-exposure.md) | ISO 9612 task-based, job-based and full-day strategies with the Annex C uncertainty budget (LEX,8h + U) |
 | [Tone Prominence](https://github.com/jmrplens/phonometry/blob/main/docs/tone-prominence.md) | ECMA-418-1 tone-to-noise ratio and prominence ratio with frequency-dependent prominence criteria |
 | [Loudness](https://github.com/jmrplens/phonometry/blob/main/docs/loudness.md) | Zwicker (ISO 532-1), Moore-Glasberg (ISO 532-2/3) and Sottek (ECMA-418-2) loudness in sones, plus the equal-loudness contours (ISO 226) |
-| [Sound Quality Metrics](https://github.com/jmrplens/phonometry/blob/main/docs/sound-quality.md) | Sharpness (DIN 45692) and the ECMA-418-2 Sottek Hearing Model tonality & roughness |
+| [Sound Quality Metrics](https://github.com/jmrplens/phonometry/blob/main/docs/sound-quality.md) | Sharpness (DIN 45692) and the ECMA-418-2 Sottek Hearing Model tonality, roughness & fluctuation strength |
 | [Speech Transmission](https://github.com/jmrplens/phonometry/blob/main/docs/speech-transmission.md) | STI/STIPA (IEC 60268-16): modulation transfer function, indirect method from impulse responses and direct STIPA measurement |
 | [Speech Intelligibility Index](https://github.com/jmrplens/phonometry/blob/main/docs/speech-intelligibility.md) | SII (ANSI S3.5-1997): band importance, masking and audibility, the index in noise and hearing loss, standard vocal-effort spectra |
 | [Electroacoustics](https://github.com/jmrplens/phonometry/blob/main/docs/electroacoustics.md) | Distortion (IEC 60268-3): THD, nth-order harmonic, THD+N & SINAD (AES17), SMPTE & CCIF intermodulation, DIM and weighted THD; frequency response & coherence (Bendat & Piersol H1/H2) |

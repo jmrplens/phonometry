@@ -1,6 +1,25 @@
 ---
 title: "Calibrated spectral analysis"
 description: "The Bendat & Piersol Welch estimators with their statistical quality: power and cross-spectral density with the effective number of averages, normalized random errors and chi-square confidence intervals, the coherent output spectrum with the spectral signal-to-noise ratio, constant-power fractional-octave smoothing, and colored-noise generators with an exact power-law slope."
+references:
+  - type: book
+    authors: ["Bendat, J. S.", "Piersol, A. G."]
+    year: 2010
+    title: "Random data: Analysis and measurement procedures"
+    edition: "4th ed."
+    publisher: "Wiley"
+    doi: "10.1002/9781118032428"
+    note: "Sections 5.2 and 8.5 (autospectra and their random/bias errors, chi-square intervals), 9.1-9.2 (cross-spectra, coherent output spectrum and their errors) and 11.5 (Welch processing, tapering and overlap). ISBN 978-0-470-24877-5."
+  - type: article
+    authors: ["Welch, P. D."]
+    year: 1967
+    title: "The use of fast Fourier transform for the estimation of power spectra: A method based on time averaging over short, modified periodograms"
+    journal: "IEEE Transactions on Audio and Electroacoustics"
+    volume: 15
+    issue: 2
+    pages: "70-73"
+    doi: "10.1109/TAU.1967.1161901"
+    note: "The overlapped-segment variance formula behind the effective number of averages (Bendat & Piersol Section 11.5.2.2, Ref. 11)."
 ---
 
 A spectrum without its uncertainty is half a measurement. This page covers the
@@ -251,18 +270,3 @@ The [frequency-response estimators](/phonometry/guides/electroacoustics/)
 all share one Welch core (same taper, overlap policy and detrend-off
 calibration), so a PSD, a coherence and an H1 computed with the same segment
 length are mutually consistent bin by bin.
-
-## References
-
-- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
-  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Sections 5.2 and 8.5 (autospectra and their random/bias errors,
-  chi-square intervals), 9.1–9.2 (cross-spectra, coherent output spectrum
-  and their errors) and 11.5 (Welch processing, tapering and overlap).
-- Welch, P. D. (1967). The use of fast Fourier transform for the estimation
-  of power spectra: A method based on time averaging over short, modified
-  periodograms. *IEEE Transactions on Audio and Electroacoustics*, 15(2),
-  70–73. [doi:10.1109/TAU.1967.1161901](https://doi.org/10.1109/TAU.1967.1161901).
-  The overlapped-segment variance formula behind the effective number of
-  averages (Bendat & Piersol Section 11.5.2.2, Ref. 11).

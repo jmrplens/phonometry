@@ -1,6 +1,21 @@
 ---
 title: "Multichannel and Performance"
 description: "Vectorized multichannel analysis and performance notes."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2014
+    title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications"
+    designation: "IEC 61260-1:2014"
+    url: "https://webstore.iec.ch/en/publication/5063"
+    note: "The band definitions each channel is filtered with; the multichannel path batches them unchanged. Multichannel support adds no normative content of its own: each channel is filtered exactly as the single-channel standard prescribes, and the vectorization only batches the computation across the channel axis."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    url: "https://webstore.iec.ch/en/publication/5708"
+    note: "The weighting and time-integration semantics applied per channel, exactly as the single-channel standard prescribes."
 ---
 
 ## Multichannel Support
@@ -146,30 +161,6 @@ Additional performance notes:
   [Theory](/phonometry/reference/theory/signal-analysis/)).
 - **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
   numba is installed (`pip install phonometry[perf]`).
-
-## References
-
-- International Electrotechnical Commission. (2014). *Electroacoustics —
-  Octave-band and fractional-octave-band filters — Part 1: Specifications*
-  (IEC 61260-1:2014).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
-  The band definitions each channel is filtered with; the multichannel path
-  batches them unchanged.
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
-  The weighting and time-integration semantics applied per channel.
-
-## Standards
-
-IEC 61260-1:2014, *Electroacoustics — Octave-band and
-fractional-octave-band filters — Part 1: Specifications*, and IEC 61672-1:2013,
-*Electroacoustics — Sound level meters — Part 1: Specifications* —
-multichannel support adds no normative content of its own: each channel is
-filtered, weighted and time-integrated exactly as the single-channel standards
-prescribe (see [Filter Banks](/phonometry/guides/filter-banks/) and
-[Levels](/phonometry/guides/levels/)); the vectorization only batches the
-computation across the channel axis.
 
 ## See also
 

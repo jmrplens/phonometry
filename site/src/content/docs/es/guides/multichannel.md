@@ -1,6 +1,21 @@
 ---
 title: "Multicanal y rendimiento"
 description: "Análisis multicanal vectorizado y notas de rendimiento."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2014
+    title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications"
+    designation: "IEC 61260-1:2014"
+    url: "https://webstore.iec.ch/en/publication/5063"
+    note: "Las definiciones de banda con las que se filtra cada canal; la ruta multicanal las procesa por lotes sin cambios. El soporte multicanal no añade contenido normativo propio: cada canal se filtra exactamente como prescribe la norma monocanal, y la vectorización solo agrupa el cálculo a lo largo del eje de canales."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    url: "https://webstore.iec.ch/en/publication/5708"
+    note: "La semántica de ponderación e integración temporal aplicada por canal, exactamente como prescribe la norma monocanal."
 ---
 
 ## Soporte multicanal
@@ -146,30 +161,6 @@ Notas adicionales de rendimiento:
   [Teoría](/phonometry/es/reference/theory/signal-analysis/)).
 - **numba opcional**: el kernel del modo `impulse` de la ponderación temporal se
   compila JIT cuando numba está instalado (`pip install phonometry[perf]`).
-
-## Referencias
-
-- International Electrotechnical Commission. (2014). *Electroacoustics —
-  Octave-band and fractional-octave-band filters — Part 1: Specifications*
-  (IEC 61260-1:2014).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/5063).
-  Las definiciones de banda con las que se filtra cada canal; la ruta
-  multicanal las procesa por lotes sin cambios.
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/5708).
-  La semántica de ponderación e integración temporal aplicada por canal.
-
-## Normas
-
-IEC 61260-1:2014, *Electroacoustics — Octave-band and
-fractional-octave-band filters — Part 1: Specifications*, e IEC 61672-1:2013,
-*Electroacoustics — Sound level meters — Part 1: Specifications* — el soporte
-multicanal no añade contenido normativo propio: cada canal se filtra, pondera
-e integra en el tiempo exactamente como prescriben las normas monocanal
-(consulta [Bancos de filtros](/phonometry/es/guides/filter-banks/) y
-[Niveles](/phonometry/es/guides/levels/)); la vectorización solo agrupa el
-cálculo a lo largo del eje de canales.
 
 ## Véase también
 

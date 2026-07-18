@@ -1,6 +1,25 @@
 ---
 title: "Análisis espectral calibrado"
 description: "Los estimadores de Welch de Bendat y Piersol con su calidad estadística: densidad espectral de potencia y cruzada con el número efectivo de promedios, errores aleatorios normalizados e intervalos de confianza chi-cuadrado, el espectro de salida coherente con la relación señal-ruido espectral, suavizado en fracciones de octava con núcleo de potencia constante, y generadores de ruido de colores con pendiente exacta en ley de potencias."
+references:
+  - type: book
+    authors: ["Bendat, J. S.", "Piersol, A. G."]
+    year: 2010
+    title: "Random data: Analysis and measurement procedures"
+    edition: "4.ª ed."
+    publisher: "Wiley"
+    doi: "10.1002/9781118032428"
+    note: "Secciones 5.2 y 8.5 (autoespectros y sus errores aleatorios y de sesgo, intervalos chi-cuadrado), 9.1-9.2 (espectros cruzados, espectro de salida coherente y sus errores) y 11.5 (procesado de Welch, ventanas y solape). ISBN 978-0-470-24877-5."
+  - type: article
+    authors: ["Welch, P. D."]
+    year: 1967
+    title: "The use of fast Fourier transform for the estimation of power spectra: A method based on time averaging over short, modified periodograms"
+    journal: "IEEE Transactions on Audio and Electroacoustics"
+    volume: 15
+    issue: 2
+    pages: "70-73"
+    doi: "10.1109/TAU.1967.1161901"
+    note: "La fórmula de varianza con segmentos solapados tras el número efectivo de promedios (Bendat y Piersol, sección 11.5.2.2, ref. 11)."
 ---
 
 Un espectro sin su incertidumbre es media medición. Esta página cubre los
@@ -261,18 +280,3 @@ estos estimadores comparten un único núcleo de Welch (misma ventana, misma
 política de solape y calibración sin eliminación de tendencia), así que una
 PSD, una coherencia y una H1 calculadas con la misma longitud de segmento
 son mutuamente consistentes bin a bin.
-
-## Referencias
-
-- Bendat, J. S., y Piersol, A. G. (2010). *Random Data: Analysis and
-  Measurement Procedures* (4.ª ed.). Wiley. ISBN 978-0-470-24877-5.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Secciones 5.2 y 8.5 (autoespectros y sus errores aleatorios y de sesgo,
-  intervalos chi-cuadrado), 9.1–9.2 (espectros cruzados, espectro de salida
-  coherente y sus errores) y 11.5 (procesado de Welch, ventanas y solape).
-- Welch, P. D. (1967). The use of fast Fourier transform for the estimation
-  of power spectra: A method based on time averaging over short, modified
-  periodograms. *IEEE Transactions on Audio and Electroacoustics*, 15(2),
-  70–73. [doi:10.1109/TAU.1967.1161901](https://doi.org/10.1109/TAU.1967.1161901).
-  La fórmula de varianza con segmentos solapados tras el número efectivo de
-  promedios (Bendat y Piersol, sección 11.5.2.2, ref. 11).

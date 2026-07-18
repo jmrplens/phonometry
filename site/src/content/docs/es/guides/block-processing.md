@@ -1,6 +1,29 @@
 ---
 title: "Procesado por bloques"
 description: "Flujos de streaming con estado de filtro conservado entre bloques."
+references:
+  - type: book
+    authors: ["Oppenheim, A. V.", "Schafer, R. W."]
+    year: 2010
+    title: "Discrete-time signal processing"
+    edition: "3.ª ed."
+    publisher: "Pearson"
+    url: "https://openlibrary.org/isbn/9780131988422"
+    note: "Las estructuras de filtro en forma directa y la recursión de estado que sustentan la ecuación del estado transportado (ISBN 978-0-13-198842-2)."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2014
+    title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications"
+    designation: "IEC 61260-1:2014"
+    url: "https://webstore.iec.ch/en/publication/5063"
+    note: "El procesado por bloques no añade contenido normativo propio: los filtros de octava y de octava fraccional en streaming son los mismos diseños que rige esta norma, y conservar el estado interno del filtro entre bloques es exactamente lo que hace que la salida concatenada sea idéntica a una pasada única, por lo que toda afirmación de clase y tolerancia de la página de bancos de filtros se mantiene sin cambios en uso streaming."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    url: "https://webstore.iec.ch/en/publication/5708"
+    note: "Las ponderaciones frecuenciales y temporales en streaming son los mismos diseños que rige esta norma; el estado transportado mantiene válidas en streaming las afirmaciones de clase y tolerancia de las páginas de ponderación frecuencial y temporal."
 ---
 
 Algunas mediciones nunca caben en memoria: una grabación ambiental de una hora,
@@ -9,12 +32,12 @@ capturando, o un registrador embebido que solo ve un búfer cada vez. En todos
 esos casos la señal tiene que procesarse bloque a bloque — y los filtros deben
 comportarse exactamente como si hubieran visto la señal completa de una vez.
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_es.svg" alt="Dos carriles que comparan el procesado por bloques conservando el estado del filtro entre bloques, con una envolvente continua, frente a reiniciarlo en cada bloque, donde la envolvente arranca desde cero en cada unión" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_es_dark.svg" alt="Dos carriles que comparan el procesado por bloques conservando el estado del filtro entre bloques, con una envolvente continua, frente a reiniciarlo en cada bloque, donde la envolvente arranca desde cero en cada unión" style="width:86%">
+
 Las clases `OctaveFilterBank`, `WeightingFilter` (para ponderación A, C o Z) y
 `TimeWeighting` admiten procesado por bloques (streaming): el estado interno del
 filtro se conserva entre llamadas, de modo que las salidas concatenadas por
 bloques coinciden con una única pasada sobre la señal completa.
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_es.svg" alt="Dos carriles que comparan el procesado por bloques conservando el estado del filtro entre bloques, con una envolvente continua, frente a reiniciarlo en cada bloque, donde la envolvente arranca desde cero en cada unión" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_es_dark.svg" alt="Dos carriles que comparan el procesado por bloques conservando el estado del filtro entre bloques, con una envolvente continua, frente a reiniciarlo en cada bloque, donde la envolvente arranca desde cero en cada unión" style="width:86%">
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_es.svg" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_es_dark.svg" alt="Procesado por bloques con estado igual al resultado continuo frente a bloques independientes que reinician el transitorio" style="width:80%">
 
@@ -188,29 +211,6 @@ for x in audio_stream(block):            # tu callback de captura
 | `zero_phase` | no soportado | El filtrado bidireccional necesita la señal completa |
 | `high_accuracy` (ponderación) | por defecto se resuelve a `False` — el diseño bilineal clásico, consulta [Ponderación frecuencial](/phonometry/es/guides/weighting/); pasar `True` explícito lanza `ValueError` | El remuestreo polifásico interno es incompatible con bloques |
 | `steady_ic` | opcional | Arranca los filtros en el régimen permanente de la respuesta al escalón |
-
-## Referencias
-
-- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
-  (3.ª ed.). Pearson. ISBN 978-0-13-198842-2.
-  [Ficha en Open Library](https://openlibrary.org/isbn/9780131988422).
-  Las estructuras de filtro en forma directa y la recursión de estado que sustentan
-  la ecuación del estado transportado de arriba.
-
-## Normas
-
-IEC 61260-1:2014, *Electroacoustics — Octave-band and
-fractional-octave-band filters — Part 1: Specifications*, e IEC 61672-1:2013,
-*Electroacoustics — Sound level meters — Part 1: Specifications* — el
-procesado por bloques no añade contenido normativo propio: los filtros en
-streaming son los mismos diseños que rigen esas normas (consulta
-[Bancos de filtros](/phonometry/es/guides/filter-banks/),
-[Ponderación frecuencial](/phonometry/es/guides/weighting/) y
-[Ponderación temporal](/phonometry/es/guides/time-weighting/)), y conservar el
-estado interno del filtro entre bloques es exactamente lo que hace que la
-salida concatenada sea idéntica a una pasada única sobre la señal completa,
-por lo que toda afirmación de clase y tolerancia de las páginas subyacentes se
-mantiene sin cambios en uso streaming.
 
 ## Véase también
 

@@ -1,6 +1,29 @@
 ---
 title: "Block Processing"
 description: "Stateful streaming workflows with carried filter state."
+references:
+  - type: book
+    authors: ["Oppenheim, A. V.", "Schafer, R. W."]
+    year: 2010
+    title: "Discrete-time signal processing"
+    edition: "3rd ed."
+    publisher: "Pearson"
+    url: "https://openlibrary.org/isbn/9780131988422"
+    note: "The direct-form filter structures and state recursion behind the carried state equation (ISBN 978-0-13-198842-2)."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2014
+    title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications"
+    designation: "IEC 61260-1:2014"
+    url: "https://webstore.iec.ch/en/publication/5063"
+    note: "Block processing adds no normative content of its own: the streamed octave and fractional-octave filters are the same designs this standard governs, and carrying the internal filter state across blocks is exactly what makes the concatenated output identical to a single full-signal pass, so every class and tolerance claim of the Filter Banks page holds unchanged in streaming use."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    url: "https://webstore.iec.ch/en/publication/5708"
+    note: "The streamed frequency and time weightings are the same designs this standard governs; the carried state keeps the class and tolerance claims of the Frequency Weighting and Time Weighting pages valid in streaming use."
 ---
 
 Some measurements never fit in memory: an hour-long environmental recording,
@@ -9,12 +32,12 @@ capturing, or an embedded logger that only ever sees one buffer at a time. In
 all of these the signal has to be processed block by block — and the filters
 must behave exactly as if they had seen the whole signal at once.
 
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing.svg" alt="Two lanes comparing block processing with the filter state carried across blocks, giving one continuous envelope, versus reset each block, where the envelope restarts from zero at every seam" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_dark.svg" alt="Two lanes comparing block processing with the filter state carried across blocks, giving one continuous envelope, versus reset each block, where the envelope restarts from zero at every seam" style="width:86%">
+
 The `OctaveFilterBank`, `WeightingFilter` (for A, C, or Z-weighting) and
 `TimeWeighting` classes support block (streaming) processing: the internal
 filter state is carried between calls, so concatenated block outputs match a
 single full-signal pass.
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing.svg" alt="Two lanes comparing block processing with the filter state carried across blocks, giving one continuous envelope, versus reset each block, where the envelope restarts from zero at every seam" style="width:86%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_dark.svg" alt="Two lanes comparing block processing with the filter state carried across blocks, giving one continuous envelope, versus reset each block, where the envelope restarts from zero at every seam" style="width:86%">
 
 <img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity.svg" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/block_processing_continuity_dark.svg" alt="Stateful block processing matching the continuous result versus independent blocks restarting the filter transient at each boundary" style="width:80%">
 
@@ -183,28 +206,6 @@ for x in audio_stream(block):            # your capture callback
 | `zero_phase` | unsupported | Forward-backward filtering needs the whole signal |
 | `high_accuracy` (weighting) | resolves to `False` by default — the legacy bilinear design, see [Frequency Weighting](/phonometry/guides/weighting/); explicitly passing `True` raises `ValueError` | The polyphase resampling inside is block-incompatible |
 | `steady_ic` | optional | Starts the filters in step-response steady state |
-
-## References
-
-- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
-  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
-  [Open Library record](https://openlibrary.org/isbn/9780131988422).
-  The direct-form filter structures and state recursion behind the carried
-  state equation above.
-
-## Standards
-
-IEC 61260-1:2014, *Electroacoustics — Octave-band and
-fractional-octave-band filters — Part 1: Specifications*, and IEC 61672-1:2013,
-*Electroacoustics — Sound level meters — Part 1: Specifications* — block
-processing adds no normative content of its own: the streamed filters are the
-same designs those standards govern (see
-[Filter Banks](/phonometry/guides/filter-banks/),
-[Frequency Weighting](/phonometry/guides/weighting/) and
-[Time Weighting](/phonometry/guides/time-weighting/)), and carrying the
-internal filter state across blocks is exactly what makes the concatenated
-output identical to a single full-signal pass, so every class and tolerance
-claim of the underlying pages holds unchanged in streaming use.
 
 ## See also
 

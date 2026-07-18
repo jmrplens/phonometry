@@ -1,6 +1,50 @@
 ---
 title: "Bancos de filtros"
 description: "Arquitecturas, respuestas en frecuencia, descomposición por bandas y filtrado de fase cero."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2014
+    title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications"
+    designation: "IEC 61260-1:2014"
+    url: "https://webstore.iec.ch/en/publication/5063"
+    note: "Las matemáticas de bordes de banda de la sección 1 (frecuencias centrales y bordes de banda en base 10, apartados 5.2-5.5), las etiquetas nominales de banda y los límites de aceptación de clase 1 / clase 2 de la Tabla 1 (con el mapeo de breakpoints a fraccionales y la interpolación en frecuencia logarítmica) verificados en la sección 6."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 1995
+    title: "Electroacoustics — Octave-band and fractional-octave-band filters"
+    designation: "IEC 61260:1995"
+    url: "https://webstore.iec.ch/en/publication/5065"
+    note: "La primera edición retirada cuya Tabla 1 aporta la máscara de clase 0 más estricta que ofrece edition=\"1995\", y el convenio de bordes de banda sobre el que cada banco sitúa sus puntos de −3 dB."
+  - type: standard
+    organization: "American National Standards Institute"
+    year: 2004
+    title: "Specification for octave-band and fractional-octave-band analog and digital filters"
+    designation: "ANSI S1.11-2004"
+    publisher: "Acoustical Society of America"
+    url: "https://webstore.ansi.org/standards/asa/ansis1112004"
+    note: "Sus límites de clase de la Tabla 1 son idénticos a los de IEC 61260:1995 y respaldan la misma máscara de clase 0."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Acoustics — Preferred frequencies"
+    designation: "ISO 266:1997"
+    url: "https://www.iso.org/standard/1350.html"
+    note: "La serie de frecuencias preferentes en la que se basan las etiquetas nominales de banda que devuelve nominal_frequencies."
+  - type: book
+    authors: ["Oppenheim, A. V.", "Schafer, R. W."]
+    year: 2010
+    title: "Discrete-time signal processing"
+    edition: "3.ª ed."
+    publisher: "Pearson"
+    url: "https://openlibrary.org/isbn/9780131988422"
+    note: "La teoría de polos y ceros, estabilidad y multitasa condensada en la sección 1: cascadas SOS, transformada bilineal y diezmado (ISBN 978-0-13-198842-2)."
+  - type: web
+    authors: ["Smith, J. O."]
+    title: "Introduction to digital filters with audio applications"
+    siteName: "Center for Computer Research in Music and Acoustics (CCRMA), Stanford University"
+    url: "https://ccrma.stanford.edu/~jos/filters/"
+    note: "Libro en línea gratuito y complementario sobre diseño y análisis de filtros digitales, de la geometría de polos y ceros a la estabilidad."
 ---
 
 phonometry soporta varios tipos de filtro, cada uno con su propia función de
@@ -773,41 +817,6 @@ plt.show()
 ```
 
 </details>
-
-## Referencias
-
-- International Electrotechnical Commission. (2014). *Electroacoustics —
-  Octave-band and fractional-octave-band filters — Part 1: Specifications*
-  (IEC 61260-1:2014).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/5063).
-  Las matemáticas de bordes de banda de la sección 1 y las máscaras de
-  aceptación de clase verificadas en la sección 6.
-- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
-  (3.ª ed.). Pearson. ISBN 978-0-13-198842-2.
-  [Ficha en Open Library](https://openlibrary.org/isbn/9780131988422).
-  La teoría de polos y ceros, estabilidad y multitasa condensada en la
-  sección 1: cascadas SOS, transformada bilineal y diezmado.
-- Smith, J. O. *Introduction to digital filters with audio applications*
-  (libro en línea). Center for Computer Research in Music and Acoustics
-  (CCRMA), Universidad de Stanford.
-  [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
-  Tratamiento gratuito y complementario del diseño y análisis de filtros
-  digitales, de la geometría de polos y ceros a la estabilidad.
-
-## Normas
-
-IEC 61260-1:2014, *Electroacoustics — Octave-band and
-fractional-octave-band filters — Part 1: Specifications* — las frecuencias
-centrales y los bordes de banda en base 10 del §1 (5.2-5.5), las etiquetas
-nominales de banda y los límites de aceptación de clase 1 / clase 2 de la
-Tabla 1 (con el mapeo de breakpoints a fraccionales y la interpolación en
-frecuencia logarítmica) verificados en el §6. IEC 61260:1995 y ANSI S1.11-2004,
-*Octave-Band and Fractional-Octave-Band … Filters* — la Tabla 1 de la edición
-retirada (idéntica entre ambas) aporta la máscara de clase 0 más estricta que
-ofrece `edition="1995"`, y el convenio de bordes de banda sobre el que cada
-banco sitúa sus puntos de −3 dB. ISO 266
-— la serie de frecuencias preferentes en la que se basan las etiquetas nominales de banda
-que devuelve `nominal_frequencies`.
 
 ## Véase también
 

@@ -1,6 +1,32 @@
 ---
 title: "Incertidumbre de medida (GUM y Monte Carlo)"
 description: "Los dos métodos de propagación de la GUM: la ley de propagación de la incertidumbre (ISO/IEC Guía 98-3:2008) y el método de Monte Carlo (Suplemento 1) — incertidumbre combinada y expandida, grados de libertad efectivos de Welch–Satterthwaite, evaluaciones de Tipo B e intervalos de cobertura simétricos en probabilidad."
+references:
+  - type: standard
+    organization: "Joint Committee for Guides in Metrology"
+    year: 2008
+    title: "Evaluation of measurement data — Guide to the expression of uncertainty in measurement"
+    designation: "JCGM 100:2008, la GUM"
+    publisher: "BIPM"
+    url: "https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf"
+    doi: "10.59161/JCGM100-2008E"
+    note: "La ley de propagación de la incertidumbre (cláusula 5), la evaluación de Tipo B (cláusula 4.3), la incertidumbre expandida y el factor de cobertura (cláusula 6, Anexo G), los grados de libertad efectivos de Welch–Satterthwaite (Anexo G.4) y los ejemplos resueltos del Anexo H que la sección 1 implementa y reproduce. Publicada también como ISO/IEC Guía 98-3:2008, Uncertainty of measurement — Part 3: Guide to the expression of uncertainty in measurement (GUM:1995). El PDF enlazado es la descarga gratuita."
+  - type: standard
+    organization: "Joint Committee for Guides in Metrology"
+    year: 2008
+    title: "Evaluation of measurement data — Supplement 1 to the \"Guide to the expression of uncertainty in measurement\" — Propagation of distributions using a Monte Carlo method"
+    designation: "JCGM 101:2008"
+    publisher: "BIPM"
+    url: "https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf"
+    doi: "10.59161/JCGM101-2008"
+    note: "La propagación de Monte Carlo de la sección 2, su intervalo de cobertura simétrico en probabilidad (cláusula 7) y la validación del marco de la GUM frente al resultado de Monte Carlo de la cláusula 8. Publicada también como ISO/IEC Guía 98-3-1:2008. El PDF enlazado es la descarga gratuita."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2020
+    title: "Acoustics — Determination and application of measurement uncertainties in building acoustics — Part 1: Sound insulation"
+    designation: "ISO 12999-1:2020"
+    url: "https://www.iso.org/standard/73930.html"
+    note: "El balance de reproducibilidad específico de la acústica de la edificación para magnitudes de número único, complemento aparte de la maquinaria general de la GUM."
 ---
 
 Todo resultado de medida está incompleto sin una declaración de su
@@ -198,43 +224,6 @@ muestras de salida (`samples`), y su `.plot()` dibuja el histograma de salida
 con el intervalo de cobertura marcado (el panel derecho de arriba). La incertidumbre de acústica de la edificación de
 ISO 12999-1 — que combina términos de reproducibilidad para una magnitud de
 número único — es un balance aparte, específico de ese dominio.
-
-## Referencias
-
-- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
-  data — Guide to the expression of uncertainty in measurement* (JCGM
-  100:2008, la GUM). BIPM.
-  [doi:10.59161/JCGM100-2008E](https://doi.org/10.59161/JCGM100-2008E),
-  [PDF gratuito](https://www.bipm.org/documents/20126/2071204/JCGM_100_2008_E.pdf).
-  La ley de propagación, las evaluaciones de Tipo B y los ejemplos resueltos
-  del Anexo H que la sección 1 implementa y reproduce.
-- Joint Committee for Guides in Metrology. (2008). *Evaluation of measurement
-  data — Supplement 1 to the "Guide to the expression of uncertainty in
-  measurement" — Propagation of distributions using a Monte Carlo method*
-  (JCGM 101:2008). BIPM.
-  [doi:10.59161/JCGM101-2008](https://doi.org/10.59161/JCGM101-2008),
-  [PDF gratuito](https://www.bipm.org/documents/20126/2071204/JCGM_101_2008_E.pdf).
-  La propagación de Monte Carlo de la sección 2, su intervalo de cobertura
-  simétrico en probabilidad y la validación del marco de la GUM frente al
-  resultado de Monte Carlo de la cláusula 8.
-- International Organization for Standardization. (2020). *Acoustics —
-  Determination and application of measurement uncertainties in building
-  acoustics — Part 1: Sound insulation* (ISO 12999-1:2020).
-  [Catálogo de iso.org](https://www.iso.org/standard/73930.html).
-  El balance de reproducibilidad específico de la acústica de la edificación
-  para magnitudes de número único, mencionado arriba como complemento aparte
-  de la maquinaria general de la GUM.
-
-## Normas
-
-ISO/IEC Guía 98-3:2008, *Uncertainty of measurement — Part 3: Guide
-to the expression of uncertainty in measurement (GUM:1995)* — la ley de
-propagación de la incertidumbre (cláusula 5), la evaluación de Tipo B
-(cláusula 4.3), la incertidumbre expandida y el factor de cobertura (cláusula 6,
-Anexo G) y los grados de libertad efectivos de Welch–Satterthwaite (Anexo G.4).
-ISO/IEC Guía 98-3-1:2008, *Supplement 1 — Propagation of distributions using a
-Monte Carlo method* — la propagación numérica y el intervalo de cobertura
-simétrico en probabilidad (cláusula 7).
 
 ## Véase también
 

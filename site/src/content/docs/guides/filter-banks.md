@@ -1,6 +1,50 @@
 ---
 title: "Filter Banks"
 description: "Architectures, frequency responses, band decomposition and zero-phase filtering."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2014
+    title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 1: Specifications"
+    designation: "IEC 61260-1:2014"
+    url: "https://webstore.iec.ch/en/publication/5063"
+    note: "The band-edge mathematics of section 1 (base-10 mid frequencies and band edges, clauses 5.2-5.5), the nominal band labels, and the Table 1 class 1/class 2 acceptance limits (with the fractional-octave breakpoint mapping and log-frequency interpolation) verified in section 6."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 1995
+    title: "Electroacoustics — Octave-band and fractional-octave-band filters"
+    designation: "IEC 61260:1995"
+    url: "https://webstore.iec.ch/en/publication/5065"
+    note: "The withdrawn first edition whose Table 1 supplies the stricter class 0 mask offered by edition=\"1995\", and the band-edge convention on which every bank places its −3 dB points."
+  - type: standard
+    organization: "American National Standards Institute"
+    year: 2004
+    title: "Specification for octave-band and fractional-octave-band analog and digital filters"
+    designation: "ANSI S1.11-2004"
+    publisher: "Acoustical Society of America"
+    url: "https://webstore.ansi.org/standards/asa/ansis1112004"
+    note: "Its Table 1 class limits are identical to those of IEC 61260:1995 and back the same class 0 mask."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Acoustics — Preferred frequencies"
+    designation: "ISO 266:1997"
+    url: "https://www.iso.org/standard/1350.html"
+    note: "The preferred-frequency series behind the nominal band labels reported by nominal_frequencies."
+  - type: book
+    authors: ["Oppenheim, A. V.", "Schafer, R. W."]
+    year: 2010
+    title: "Discrete-time signal processing"
+    edition: "3rd ed."
+    publisher: "Pearson"
+    url: "https://openlibrary.org/isbn/9780131988422"
+    note: "The pole-zero, stability and multirate theory condensed in section 1: SOS cascades, the bilinear transform and decimation (ISBN 978-0-13-198842-2)."
+  - type: web
+    authors: ["Smith, J. O."]
+    title: "Introduction to digital filters with audio applications"
+    siteName: "Center for Computer Research in Music and Acoustics (CCRMA), Stanford University"
+    url: "https://ccrma.stanford.edu/~jos/filters/"
+    note: "A free online-book companion treatment of digital-filter design and analysis, from pole-zero geometry to filter stability."
 ---
 
 phonometry supports several filter types, each with its own transfer function
@@ -750,40 +794,6 @@ plt.show()
 ```
 
 </details>
-
-## References
-
-- International Electrotechnical Commission. (2014). *Electroacoustics —
-  Octave-band and fractional-octave-band filters — Part 1: Specifications*
-  (IEC 61260-1:2014).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5063).
-  The band-edge mathematics of section 1 and the class acceptance masks
-  verified in section 6.
-- Oppenheim, A. V., & Schafer, R. W. (2010). *Discrete-time signal processing*
-  (3rd ed.). Pearson. ISBN 978-0-13-198842-2.
-  [Open Library record](https://openlibrary.org/isbn/9780131988422).
-  The pole-zero, stability and multirate theory condensed in section 1: SOS
-  cascades, the bilinear transform and decimation.
-- Smith, J. O. *Introduction to digital filters with audio applications*
-  (online book). Center for Computer Research in Music and Acoustics (CCRMA),
-  Stanford University.
-  [ccrma.stanford.edu/~jos/filters](https://ccrma.stanford.edu/~jos/filters/).
-  A free companion treatment of digital-filter design and analysis, from
-  pole-zero geometry to filter stability.
-
-## Standards
-
-IEC 61260-1:2014, *Electroacoustics — Octave-band and
-fractional-octave-band filters — Part 1: Specifications* — the base-10 mid
-frequencies and band edges of §1 (5.2-5.5), the nominal band labels, and the
-Table 1 class 1 / class 2 acceptance limits (with the fractional-octave
-breakpoint mapping and log-frequency interpolation) verified in §6.
-IEC 61260:1995 and ANSI S1.11-2004, *Octave-Band and Fractional-Octave-Band …
-Filters* — the withdrawn edition's Table 1 (identical between the two) supplies
-the stricter class 0 mask offered by `edition="1995"`, and the band-edge
-convention on which every bank places its −3 dB
-points. ISO 266 — the preferred-frequency series behind the nominal band
-labels reported by `nominal_frequencies`.
 
 ## See also
 

@@ -1,6 +1,38 @@
 ---
 title: "Ponderación frecuencial (A, C, G, Z)"
 description: "Ponderación frecuencial A/C/Z según IEC 61672-1 (clase 1, con modo de precisión en alta frecuencia) y ponderación G de infrasonido según ISO 7196."
+references:
+  - type: article
+    authors: ["Fletcher, H.", "Munson, W. A."]
+    year: 1933
+    title: "Loudness, its definition, measurement and calculation"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 5
+    issue: 2
+    pages: "82-108"
+    doi: "10.1121/1.1915637"
+    note: "Las mediciones originales de igual sonoridad; la curva A invierte su isófona de 40 fonios (sección 1)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2023
+    title: "Acoustics — Normal equal-loudness-level contours"
+    designation: "ISO 226:2023"
+    url: "https://www.iso.org/standard/83117.html"
+    note: "Las sucesoras modernas de las curvas de Fletcher y Munson, dibujadas en el diagrama de la sección 1."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    url: "https://webstore.iec.ch/en/publication/5708"
+    note: "Las curvas de ponderación frecuencial A, C y Z normativas (la definición analítica del Anexo E a partir de cuatro frecuencias de esquina, normalizadas a 0 dB en 1 kHz), las tolerancias de clase 1 que el diseño high_accuracy mantiene hasta 16 kHz y los límites de aceptación de clase 1 y clase 2 de la Tabla 3 que comprueba verify_weighting_class en la sección 7."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1995
+    title: "Acoustics — Frequency-weighting characteristic for infrasound measurements"
+    designation: "ISO 7196:1995"
+    url: "https://www.iso.org/standard/13813.html"
+    note: "La definición de polos y ceros de la ponderación G (Tabla 1), verificada frente a todos los valores nominales de respuesta de la Tabla 2 (0,25 Hz a 315 Hz)."
 ---
 
 Las curvas de ponderación frecuencial simulan la sensibilidad del oído humano.
@@ -382,36 +414,6 @@ plt.show()
 ```
 
 </details>
-
-## Referencias
-
-- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
-  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
-  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
-  Las mediciones originales de igual sonoridad; la curva A invierte su
-  isófona de 40 fonios (sección 1).
-- International Organization for Standardization. (2023). *Acoustics —
-  Normal equal-loudness-level contours* (ISO 226:2023).
-  [Catálogo iso.org](https://www.iso.org/standard/83117.html).
-  Las sucesoras modernas de las curvas de Fletcher y Munson, dibujadas en el
-  diagrama de la sección 1.
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/5708).
-  Las definiciones normativas de A/C/Z, las curvas analíticas del Anexo E y
-  los límites de aceptación de la Tabla 3 verificados en la sección 7.
-
-## Normas
-
-IEC 61672-1:2013, *Electroacoustics — Sound level meters —
-Part 1: Specifications* — las curvas de ponderación frecuencial A, C y Z (la
-definición analítica del Anexo E a partir de cuatro frecuencias de esquina,
-normalizadas a 0 dB en 1 kHz), las tolerancias de clase 1 que el diseño
-`high_accuracy` mantiene hasta 16 kHz y los límites de aceptación de clase 1 y
-clase 2 de la Tabla 3 que comprueba `verify_weighting_class`. ISO 7196:1995,
-*Acoustics — Frequency-weighting characteristic for infrasound measurements* — la
-definición de polos y ceros de la ponderación G (Tabla 1), verificada frente a
-todos los valores nominales de respuesta de la Tabla 2 (0,25 Hz a 315 Hz).
 
 ## Véase también
 

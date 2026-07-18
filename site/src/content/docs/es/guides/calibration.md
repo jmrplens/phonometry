@@ -1,11 +1,25 @@
 ---
 title: "Calibración y dBFS"
 description: "Calibración SPL física y análisis digital a fondo de escala."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2017
+    title: "Electroacoustics — Sound calibrators"
+    designation: "IEC 60942:2017"
+    url: "https://webstore.iec.ch/en/publication/30045"
+    note: "Los supuestos de nivel y clase del calibrador en sensitivity() (el nivel principal de 94 dB y las tolerancias de clase de la Tabla 1) y la comprobación de estabilidad por fluctuación de nivel a corto plazo de la grabación de referencia (apartado 5.3.3, límites de clase 1 de la Tabla 2 según la frecuencia nominal)."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 3: Periodic tests"
+    designation: "IEC 61672-3:2013"
+    url: "https://webstore.iec.ch/en/publication/5710"
+    note: "El procedimiento de verificación de laboratorio que sustenta las comprobaciones periódicas recomendadas."
 ---
 
 phonometry puede devolver resultados en **nivel de presión sonora físico
 (dB SPL)** o en **decibelios relativos a fondo de escala digital (dBFS)**.
-
 
 ## ¿Por qué calibrar? La teoría
 
@@ -29,6 +43,10 @@ nada cambie en la cadena — si tocas la ganancia, recalibra.
 
 ## Calibración física (sonómetro)
 
+Para obtener mediciones SPL precisas a partir de una grabación digital, primero
+debes calcular la sensibilidad de tu cadena de medición usando un tono de
+referencia (p. ej. 94 dB @ 1 kHz).
+
 ```mermaid
 flowchart LR
     A["Tono del calibrador\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Grabación\ncalibrator_recording"]
@@ -38,10 +56,6 @@ flowchart LR
     F["Grabación de\nmedición"] --> E
     E --> G["Niveles en dB SPL\n(re 20 µPa)"]
 ```
-
-Para obtener mediciones SPL precisas a partir de una grabación digital, primero
-debes calcular la sensibilidad de tu cadena de medición usando un tono de
-referencia (p. ej. 94 dB @ 1 kHz).
 
 ```python
 import numpy as np
@@ -247,29 +261,6 @@ Las señales enteras (p. ej. int16 de `scipy.io.wavfile.read`) se convierten
 internamente a float64 antes de cualquier elevación al cuadrado, así que la
 calibración y los niveles son idénticos tanto si pasas el array entero crudo
 como una conversión a float.
-
-## Referencias
-
-- International Electrotechnical Commission. (2017). *Electroacoustics —
-  Sound calibrators* (IEC 60942:2017).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/30045).
-  Las clases de calibrador, las tolerancias de nivel y el criterio de
-  estabilidad a corto plazo que `sensitivity()` aplica a la grabación de
-  referencia.
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/5710).
-  El procedimiento de verificación de laboratorio que sustenta las comprobaciones
-  periódicas recomendadas arriba.
-
-## Normas
-
-IEC 60942:2017, *Electroacoustics — Sound calibrators* — los
-supuestos de nivel y clase del calibrador en `sensitivity()` (el nivel
-principal de 94 dB y las tolerancias de clase de la Tabla 1) y la comprobación
-de estabilidad por fluctuación de nivel a corto plazo de la grabación de
-referencia (5.3.3, límites de clase 1 de la Tabla 2 según la frecuencia
-nominal).
 
 ## Véase también
 

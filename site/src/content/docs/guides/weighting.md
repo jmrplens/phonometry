@@ -1,6 +1,38 @@
 ---
 title: "Frequency Weighting (A, C, G, Z)"
 description: "A/C/Z frequency weighting per IEC 61672-1 (class 1, with a high-frequency accuracy mode) and G-weighting for infrasound per ISO 7196."
+references:
+  - type: article
+    authors: ["Fletcher, H.", "Munson, W. A."]
+    year: 1933
+    title: "Loudness, its definition, measurement and calculation"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 5
+    issue: 2
+    pages: "82-108"
+    doi: "10.1121/1.1915637"
+    note: "The original equal-loudness measurements whose 40-phon contour the A-curve inverts (section 1)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2023
+    title: "Acoustics — Normal equal-loudness-level contours"
+    designation: "ISO 226:2023"
+    url: "https://www.iso.org/standard/83117.html"
+    note: "The modern successors of the Fletcher-Munson curves, drawn in the diagram of section 1."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    url: "https://webstore.iec.ch/en/publication/5708"
+    note: "The normative A, C and Z frequency-weighting curves (the Annex E analytic definition from four corner frequencies, normalized to 0 dB at 1 kHz), the class 1 tolerances the high_accuracy design keeps up to 16 kHz, and the Table 3 class 1/class 2 acceptance limits checked by verify_weighting_class in section 7."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1995
+    title: "Acoustics — Frequency-weighting characteristic for infrasound measurements"
+    designation: "ISO 7196:1995"
+    url: "https://www.iso.org/standard/13813.html"
+    note: "The G-weighting pole/zero definition (Table 1), verified against every Table 2 nominal response value (0.25 Hz to 315 Hz)."
 ---
 
 Frequency weighting curves simulate the human ear's sensitivity. A, C and Z
@@ -375,35 +407,6 @@ plt.show()
 ```
 
 </details>
-
-## References
-
-- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
-  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
-  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
-  The original equal-loudness measurements whose 40-phon contour the A-curve
-  inverts (section 1).
-- International Organization for Standardization. (2023). *Acoustics —
-  Normal equal-loudness-level contours* (ISO 226:2023).
-  [iso.org catalogue](https://www.iso.org/standard/83117.html).
-  The modern successors of the Fletcher-Munson curves, drawn in the diagram
-  of section 1.
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5708).
-  The normative A/C/Z definitions, the analytic Annex E curves and the
-  Table 3 acceptance limits verified in section 7.
-
-## Standards
-
-IEC 61672-1:2013, *Electroacoustics — Sound level meters —
-Part 1: Specifications* — the A, C and Z frequency-weighting curves (the
-Annex E analytic definition from four corner frequencies, normalized to 0 dB
-at 1 kHz), the class 1 tolerances the `high_accuracy` design keeps up to
-16 kHz, and the Table 3 class 1/class 2 acceptance limits checked by
-`verify_weighting_class`. ISO 7196:1995, *Acoustics — Frequency-weighting characteristic for
-infrasound measurements* — the G-weighting pole/zero definition (Table 1),
-verified against every Table 2 nominal response value (0.25 Hz to 315 Hz).
 
 ## See also
 

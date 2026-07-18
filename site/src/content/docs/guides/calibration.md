@@ -1,6 +1,21 @@
 ---
 title: "Calibration and dBFS"
 description: "Physical SPL calibration and digital full-scale analysis."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2017
+    title: "Electroacoustics — Sound calibrators"
+    designation: "IEC 60942:2017"
+    url: "https://webstore.iec.ch/en/publication/30045"
+    note: "The calibrator level and class assumptions behind sensitivity() (the 94 dB principal level and the Table 1 class tolerances) and the short-term level-fluctuation stability check of the reference recording (clause 5.3.3, Table 2 class 1 limits per nominal frequency)."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 3: Periodic tests"
+    designation: "IEC 61672-3:2013"
+    url: "https://webstore.iec.ch/en/publication/5710"
+    note: "The laboratory verification procedure behind the recommended periodic checks."
 ---
 
 phonometry can return results in physical **Sound Pressure Level (dB SPL)** or
@@ -28,6 +43,10 @@ changes — touch the gain knob and you must recalibrate.
 
 ## Physical Calibration (Sound Level Meter)
 
+To get accurate SPL measurements from a digital recording, you must first
+calculate the sensitivity of your measurement chain using a reference tone
+(e.g., 94 dB @ 1 kHz).
+
 ```mermaid
 flowchart LR
     A["Calibrator tone\n94 dB @ 1 kHz\n(IEC 60942)"] --> B["Recording\ncalibrator_recording"]
@@ -37,10 +56,6 @@ flowchart LR
     F["Measurement\nrecording"] --> E
     E --> G["Levels in dB SPL\n(re 20 µPa)"]
 ```
-
-To get accurate SPL measurements from a digital recording, you must first
-calculate the sensitivity of your measurement chain using a reference tone
-(e.g., 94 dB @ 1 kHz).
 
 ```python
 import numpy as np
@@ -242,27 +257,6 @@ abruptly may read up to ~1 dB high. This is inherent to IIR band filters
 Integer signals (e.g. int16 from `scipy.io.wavfile.read`) are converted to
 float64 internally before any squaring, so calibration and level results are
 identical whether you pass the raw integer array or a float conversion.
-
-## References
-
-- International Electrotechnical Commission. (2017). *Electroacoustics —
-  Sound calibrators* (IEC 60942:2017).
-  [IEC webstore](https://webstore.iec.ch/en/publication/30045).
-  The calibrator classes, level tolerances and the short-term stability
-  criterion `sensitivity()` applies to the reference recording.
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 3: Periodic tests* (IEC 61672-3:2013).
-  [IEC webstore](https://webstore.iec.ch/en/publication/5710).
-  The laboratory verification procedure behind the periodic checks
-  recommended above.
-
-## Standards
-
-IEC 60942:2017, *Electroacoustics — Sound calibrators* — the
-calibrator level and class assumptions behind `sensitivity()` (the 94 dB
-principal level and the Table 1 class tolerances) and the short-term
-level-fluctuation stability check of the reference recording (5.3.3, Table 2
-class 1 limits per nominal frequency).
 
 ## See also
 

@@ -1,6 +1,36 @@
 ---
 title: "Niveles integrados y estadísticos"
 description: "Leq, LAeq, percentiles L10/L50/L90, LCpeak/SEL y dosis de ruido (IEC 61252), Lden y niveles de evaluación (ISO 1996-1), y espectrogramas de octava."
+references:
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 2013
+    title: "Electroacoustics — Sound level meters — Part 1: Specifications"
+    designation: "IEC 61672-1:2013"
+    url: "https://webstore.iec.ch/en/publication/5708"
+    note: "La balística de envolvente Fast/Slow/Impulse que sustenta los niveles percentiles, el pico ponderado C del apartado 5.13 (verificado contra las ráfagas de tono de la Tabla 5) y el nivel de exposición sonora verificado contra la columna LAE de la Tabla 4."
+  - type: standard
+    organization: "International Electrotechnical Commission"
+    year: 1993
+    title: "Electroacoustics — Specifications for personal sound exposure meters"
+    designation: "IEC 61252:1993"
+    url: "https://webstore.iec.ch/en/publication/5054"
+    note: "La exposición sonora E en Pa²h y el nivel normalizado a 8 h LEX,8h (≡ LEP,d), anclados en 3,2 Pa²h ⇔ exactamente 90 dB. Revisada después como IEC 61252:2025 (https://webstore.iec.ch/en/publication/68929); la primera edición es la implementada."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Acoustics — Description, measurement and assessment of environmental noise — Part 1: Basic quantities and assessment procedures"
+    designation: "ISO 1996-1:2016"
+    url: "https://www.iso.org/standard/59765.html"
+    note: "Lden (3.6.4), Ldn (3.6.5) y el nivel de evaluación compuesto de jornada completa del apartado 6.5 (Fórmulas 5-6, ajustes de la Tabla A.1)."
+  - type: book
+    authors: ["Kinsler, L. E.", "Frey, A. R.", "Coppens, A. B.", "Sanders, J. V."]
+    year: 2000
+    title: "Fundamentals of acoustics"
+    edition: "4.ª ed."
+    publisher: "Wiley"
+    url: "https://www.wiley.com/en-us/Fundamentals+of+Acoustics%2C+4th+Edition-p-9780471847892"
+    note: "Las definiciones de presión sonora, energía y nivel que sostienen Leq, SEL y las medidas de dosis (ISBN 978-0-471-84789-2)."
 ---
 
 Métricas de ruido ambiental calculadas directamente sobre la señal cruda
@@ -389,8 +419,6 @@ nivel de valoración y las penalizaciones por periodo están en ISO 1996-1 (arri
 ISO 1996-2 aporta el ajuste tonal, la corrección de ruido residual y el
 presupuesto de incertidumbre.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_es.svg" alt="Ajuste tonal Kt de ISO 1996-2 como función a tramos de la audibilidad tonal: cero por debajo de 4 dB, creciendo linealmente hasta 6 dB entre 4 y 10 dB, y 6 dB por encima, con los cuatro ejemplos resueltos del Anexo C.5 y un tono de rango medio marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_es_dark.svg" alt="Ajuste tonal Kt de ISO 1996-2 como función a tramos de la audibilidad tonal: cero por debajo de 4 dB, creciendo linealmente hasta 6 dB entre 4 y 10 dB, y 6 dB por encima, con los cuatro ejemplos resueltos del Anexo C.5 y un tono de rango medio marcados" style="width:80%">
-
 **Ajuste tonal (método de ingeniería, Anexo C).** A partir del nivel tonal
 sumado en energía $L_{pt}$ y el nivel de ruido enmascarante $L_{pn}$ en la banda
 crítica alrededor de un tono, la audibilidad sobre el umbral de enmascaramiento es
@@ -402,6 +430,24 @@ ancho de banda crítico es 100 Hz hasta 500 Hz y el 20 % de $f_c$ por encima
 marca una banda que supera a ambas vecinas en 15/8/5 dB (baja/media/alta), y
 `tonal_adjustment_from_mean_audibility` mapea la audibilidad media de ISO/PAS 20065
 a $K_t$ (Tabla J.1).
+
+<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_es.svg" alt="Ajuste tonal Kt de ISO 1996-2 como función a tramos de la audibilidad tonal: cero por debajo de 4 dB, creciendo linealmente hasta 6 dB entre 4 y 10 dB, y 6 dB por encima, con los cuatro ejemplos resueltos del Anexo C.5 y un tono de rango medio marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_es_dark.svg" alt="Ajuste tonal Kt de ISO 1996-2 como función a tramos de la audibilidad tonal: cero por debajo de 4 dB, creciendo linealmente hasta 6 dB entre 4 y 10 dB, y 6 dB por encima, con los cuatro ejemplos resueltos del Anexo C.5 y un tono de rango medio marcados" style="width:80%">
+
+<details>
+<summary>Mostrar el código de esta figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import environmental
+
+# ISO 1996-2:2007 Anexo C.5, Ejemplo 2 (dos tonos cerca de 400 Hz):
+res = environmental.assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
+                              centre_frequency=430.0)
+print(res.audibility, res.adjustment)   # ΔLta ≈ 11,1 dB -> Kt = 6 dB
+res.plot()
+plt.show()
+```
+</details>
 
 **Corrección de ruido residual (Cláusula 10.4).** `residual_sound_correction()`
 aplica $L = 10\lg(10^{L'/10} - 10^{L_\text{res}/10})$ (Fórmula (16)). Con un
@@ -422,22 +468,6 @@ de energía (Fórmulas (17)+(19)), con el sustituto en niveles de la Nota 2
 (Fórmula (20)) reportado al lado como `approximate_uncertainty` y un aviso
 cuando los niveles se dispersan más de 3 dB, donde el sustituto se infla
 groseramente.
-
-<details>
-<summary>Mostrar el código de esta figura</summary>
-
-```python
-import matplotlib.pyplot as plt
-from phonometry import environmental
-
-# ISO 1996-2:2007 Anexo C.5, Ejemplo 2 (dos tonos cerca de 400 Hz):
-res = environmental.assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
-                              centre_frequency=430.0)
-print(res.audibility, res.adjustment)   # ΔLta ≈ 11,1 dB -> Kt = 6 dB
-res.plot()
-plt.show()
-```
-</details>
 
 ```python
 from phonometry import environmental
@@ -519,29 +549,6 @@ plt.show()
 | `zero_phase` | bool | — | por defecto `False` | Filtrado hacia delante y atrás (solo offline) |
 | `calibration_factor` / `dbfs` | — | — | solo constructor | Se fijan en `OctaveFilterBank(...)`, no por llamada |
 
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.signal import chirp
-from phonometry import metrology
-
-# Barrido logarítmico de 80 Hz -> 8 kHz más dos ráfagas de tono, con algo de ruido
-fs = 48000
-t = np.arange(int(4.0 * fs)) / fs
-x = 0.5 * chirp(t, f0=80, t1=4.0, f1=8000, method="logarithmic")
-x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
-
-bank = metrology.OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[50.0, 12000.0])
-levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.5)
-
-fig, ax = plt.subplots()
-mesh = ax.pcolormesh(times, freq, levels, shading="auto")
-ax.set_yscale("log")
-ax.set_xlabel("Tiempo [s]")
-ax.set_ylabel("Frecuencia [Hz]")
-fig.colorbar(mesh, label="Nivel [dB]")
-```
-
 Consulta [Calibración y dBFS](/phonometry/es/guides/calibration/) para
 convertir unidades digitales a SPL físico, y
 [Ponderación temporal](/phonometry/es/guides/time-weighting/) para los
@@ -552,35 +559,6 @@ los veredictos de prominencia tonal de ECMA-418-1 en
 [Tonos discretos prominentes](/phonometry/es/guides/tone-prominence/), y las
 curvas isofónicas de ISO 226 viven con las métricas de percepción en
 [Sonoridad](/phonometry/es/guides/loudness/).
-
-## Referencias
-
-- International Electrotechnical Commission. (2013). *Electroacoustics —
-  Sound level meters — Part 1: Specifications* (IEC 61672-1:2013).
-  [Catálogo IEC](https://webstore.iec.ch/en/publication/5708).
-  Las balísticas de envolvente que sustentan los niveles percentiles, el pico
-  ponderado C y las referencias de ráfagas del SEL contra las que se
-  verifica la implementación.
-- Kinsler, L. E., Frey, A. R., Coppens, A. B., & Sanders, J. V. (2000).
-  *Fundamentals of acoustics* (4.ª ed.). Wiley. ISBN 978-0-471-84789-2.
-  [Página del editor](https://www.wiley.com/en-us/Fundamentals+of+Acoustics%2C+4th+Edition-p-9780471847892).
-  Las definiciones de presión sonora, energía y nivel que sostienen Leq, SEL
-  y las medidas de dosis.
-
-## Normas
-
-IEC 61672-1:2013, *Electroacoustics — Sound level meters —
-Part 1: Specifications* — la ponderación temporal Fast/Slow/Impulse de la
-envolvente de `ln_levels`, el pico ponderado C del §5.13 (verificado contra
-las ráfagas de tono de la Tabla 5) y el nivel de exposición sonora verificado
-contra la columna LAE de la Tabla 4. IEC 61252, *Electroacoustics —
-Specifications for personal sound exposure meters* — la exposición sonora E en
-Pa²h y el nivel normalizado a 8 h LEX,8h (≡ LEP,d), anclados en
-3,2 Pa²h ⇔ exactamente 90 dB. ISO 1996-1:2016, *Acoustics — Description,
-measurement and assessment of environmental noise — Part 1: Basic quantities
-and assessment procedures* — Lden (3.6.4), Ldn (3.6.5) y el nivel de
-evaluación compuesto de jornada completa del apartado 6.5 (Fórmulas 5-6,
-ajustes de la Tabla A.1).
 
 ## Véase también
 

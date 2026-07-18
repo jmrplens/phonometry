@@ -381,8 +381,6 @@ into a rating level and reported with its uncertainty. The rating-level *summati
 and the time-of-day penalties live in ISO 1996-1 (above); ISO 1996-2 supplies the
 tonal adjustment, the residual-noise correction and the uncertainty budget.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility.svg" alt="ISO 1996-2 tonal adjustment Kt as a piecewise function of the tonal audibility: zero below 4 dB, rising linearly to 6 dB between 4 and 10 dB, and 6 dB above, with the four Annex C.5 worked examples and a mid-range tone marked" width="80%"></picture>
-
 **Tonal adjustment (engineering method, Annex C).** From the energy-summed tone
 level $L_{pt}$ and the masking-noise level $L_{pn}$ in the critical band around a
 tone, the audibility above the masking threshold is
@@ -394,6 +392,24 @@ The one-third-octave **survey method** (`tonal_seeking_survey`) flags a band
 exceeding both neighbours by 15/8/5 dB (low/mid/high), and
 `tonal_adjustment_from_mean_audibility` maps the ISO/PAS 20065 mean audibility to
 $K_t$ (Table J.1).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonal_audibility.svg" alt="ISO 1996-2 tonal adjustment Kt as a piecewise function of the tonal audibility: zero below 4 dB, rising linearly to 6 dB between 4 and 10 dB, and 6 dB above, with the four Annex C.5 worked examples and a mid-range tone marked" width="80%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import environmental
+
+# ISO 1996-2:2007 Annex C.5, Example 2 (two tones near 400 Hz):
+res = environmental.assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
+                              centre_frequency=430.0)
+print(res.audibility, res.adjustment)   # ΔLta ≈ 11.1 dB -> Kt = 6 dB
+res.plot()
+plt.show()
+```
+</details>
 
 **Residual-noise correction (Clause 10.4).** `residual_sound_correction()`
 applies $L = 10\lg(10^{L'/10} - 10^{L_\text{res}/10})$ (Formula (16)). With a
@@ -412,22 +428,6 @@ repeated-measurement standard uncertainty — the primary energy-domain route
 (Formulae (17)+(19)), with the level-domain Note 2 substitute (Formula (20))
 reported alongside as `approximate_uncertainty` and a warning when the levels
 spread beyond 3 dB, where the substitute grossly inflates.
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-from phonometry import environmental
-
-# ISO 1996-2:2007 Annex C.5, Example 2 (two tones near 400 Hz):
-res = environmental.assess_tonal_audibility(tone_level=54.1, masking_noise_level=45.2,
-                              centre_frequency=430.0)
-print(res.audibility, res.adjustment)   # ΔLta ≈ 11.1 dB -> Kt = 6 dB
-res.plot()
-plt.show()
-```
-</details>
 
 ```python
 from phonometry import environmental
@@ -514,29 +514,6 @@ plt.show()
 | `detrend` | bool | — | default `True` | Remove each band's DC offset before the level (improves low-frequency accuracy) |
 | `zero_phase` | bool | — | default `False` | Forward-backward filtering (offline only) |
 | `calibration_factor` / `dbfs` | — | — | constructor-only | Set on `OctaveFilterBank(...)`, not per call |
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.signal import chirp
-from phonometry import metrology
-
-# Log sweep 80 Hz -> 8 kHz plus two tone bursts, in a little noise
-fs = 48000
-t = np.arange(int(4.0 * fs)) / fs
-x = 0.5 * chirp(t, f0=80, t1=4.0, f1=8000, method="logarithmic")
-x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
-
-bank = metrology.OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[50.0, 12000.0])
-levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.5)
-
-fig, ax = plt.subplots()
-mesh = ax.pcolormesh(times, freq, levels, shading="auto")
-ax.set_yscale("log")
-ax.set_xlabel("Time [s]")
-ax.set_ylabel("Frequency [Hz]")
-fig.colorbar(mesh, label="Level [dB]")
-```
 
 See [Calibration and dBFS](calibration.md) to convert digital units to physical
 SPL, and [Time Weighting](time-weighting.md) for the envelope details. The

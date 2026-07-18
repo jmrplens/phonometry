@@ -1,6 +1,25 @@
 ---
 title: "Correlación, retardo y envolvente"
 description: "Autocorrelación y correlación cruzada con las normalizaciones y errores aleatorios de Bendat y Piersol, estimación del retardo por el correlador directo, la pendiente de fase del espectro cruzado y la correlación cruzada generalizada de Knapp y Carter (Roth, SCOT, PHAT, máxima verosimilitud), retardo submuestral y alineación de respuestas al impulso, y la envolvente de Hilbert con fase y frecuencia instantáneas."
+references:
+  - type: book
+    authors: ["Bendat, J. S.", "Piersol, A. G."]
+    year: 2010
+    title: "Random data: Analysis and measurement procedures"
+    edition: "4.ª ed."
+    publisher: "Wiley"
+    doi: "10.1002/9781118032428"
+    note: "Secciones 5.1.4 y 5.2.6-5.2.7 (retardo por correlación y espectro cruzado), 8.4 (errores aleatorios de las estimaciones de correlación y de la localización del pico), 11.4 (cómputo FFT con relleno de ceros) y capítulo 13 (transformadas de Hilbert, envolvente y fase instantánea). ISBN 978-0-470-24877-5."
+  - type: article
+    authors: ["Knapp, C. H.", "Carter, G. C."]
+    year: 1976
+    title: "The generalized correlation method for estimation of time delay"
+    journal: "IEEE Transactions on Acoustics, Speech, and Signal Processing"
+    volume: 24
+    issue: 4
+    pages: "320-327"
+    doi: "10.1109/TASSP.1976.1162830"
+    note: "El marco GCC, las ponderaciones de la Tabla I con sus condiciones y el procesador de máxima verosimilitud (Hannan-Thomson)."
 ---
 
 Donde los [estimadores espectrales calibrados](/phonometry/es/guides/spectral-analysis/)
@@ -243,19 +262,3 @@ H1/H2, así que una GCC, una coherencia y un espectro cruzado calculados con
 la misma longitud de segmento coinciden bin a bin; el estimador `'phase'` es
 literalmente la pendiente de la fase del `CrossSpectralDensityResult`,
 ponderada como prescribe la ecuación 5.101b.
-
-## Referencias
-
-- Bendat, J. S., y Piersol, A. G. (2010). *Random Data: Analysis and
-  Measurement Procedures* (4.ª ed.). Wiley. ISBN 978-0-470-24877-5.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Secciones 5.1.4 y 5.2.6-5.2.7 (retardo por correlación y espectro
-  cruzado), 8.4 (errores aleatorios de las estimaciones de correlación y de
-  la localización del pico), 11.4 (cómputo FFT con relleno de ceros) y
-  capítulo 13 (transformadas de Hilbert, envolvente y fase instantánea).
-- Knapp, C. H., y Carter, G. C. (1976). The generalized correlation method
-  for estimation of time delay. *IEEE Transactions on Acoustics, Speech,
-  and Signal Processing*, 24(4), 320-327.
-  [doi:10.1109/TASSP.1976.1162830](https://doi.org/10.1109/TASSP.1976.1162830).
-  El marco GCC, las ponderaciones de la Tabla I con sus condiciones y el
-  procesador de máxima verosimilitud (Hannan-Thomson).

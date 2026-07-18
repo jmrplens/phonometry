@@ -1,6 +1,25 @@
 ---
 title: "Correlation, time delay and envelope"
 description: "Auto- and cross-correlation with the Bendat & Piersol normalizations and random errors, time-delay estimation by the direct correlator, the cross-spectrum phase slope and the Knapp & Carter generalized cross-correlation (Roth, SCOT, PHAT, maximum likelihood), sub-sample impulse-response delay and alignment, and the Hilbert envelope with instantaneous phase and frequency."
+references:
+  - type: book
+    authors: ["Bendat, J. S.", "Piersol, A. G."]
+    year: 2010
+    title: "Random data: Analysis and measurement procedures"
+    edition: "4th ed."
+    publisher: "Wiley"
+    doi: "10.1002/9781118032428"
+    note: "Sections 5.1.4 and 5.2.6-5.2.7 (time delay via correlation and cross-spectrum), 8.4 (random errors of correlation estimates and of the peak location), 11.4 (FFT computation with zero padding) and Chapter 13 (Hilbert transforms, envelope and instantaneous phase). ISBN 978-0-470-24877-5."
+  - type: article
+    authors: ["Knapp, C. H.", "Carter, G. C."]
+    year: 1976
+    title: "The generalized correlation method for estimation of time delay"
+    journal: "IEEE Transactions on Acoustics, Speech, and Signal Processing"
+    volume: 24
+    issue: 4
+    pages: "320-327"
+    doi: "10.1109/TASSP.1976.1162830"
+    note: "The GCC framework, the Table I weightings and their conditions, and the maximum-likelihood (Hannan-Thomson) processor."
 ---
 
 Where the [calibrated spectral estimators](/phonometry/guides/spectral-analysis/) describe a
@@ -231,19 +250,3 @@ overlap policy, detrend-off calibration, segment defaults — as
 and a cross-spectrum computed with the same segment length agree bin by bin;
 the `'phase'` estimator is literally the slope of the
 `CrossSpectralDensityResult` phase, weighted as Eq. 5.101b prescribes.
-
-## References
-
-- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
-  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
-  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
-  Sections 5.1.4 and 5.2.6-5.2.7 (time delay via correlation and
-  cross-spectrum), 8.4 (random errors of correlation estimates and of the
-  peak location), 11.4 (FFT computation with zero padding) and Chapter 13
-  (Hilbert transforms, envelope and instantaneous phase).
-- Knapp, C. H., & Carter, G. C. (1976). The generalized correlation method
-  for estimation of time delay. *IEEE Transactions on Acoustics, Speech,
-  and Signal Processing*, 24(4), 320-327.
-  [doi:10.1109/TASSP.1976.1162830](https://doi.org/10.1109/TASSP.1976.1162830).
-  The GCC framework, the Table I weightings and their conditions, and the
-  maximum-likelihood (Hannan-Thomson) processor.

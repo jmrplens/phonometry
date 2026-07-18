@@ -450,13 +450,13 @@ noise = underwater.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
 Para entornos independientes de la distancia el campo puede calcularse
 numéricamente con tres solvers (Jensen et al., *Computational Ocean Acoustics*):
 
-- **`normal_modes`** — el problema de autovalores de Sturm-Liouville separado en
+- **`normal_modes`**: el problema de autovalores de Sturm-Liouville separado en
   profundidad, resuelto por diferencias finitas y sumado en pérdida por
   transmisión (validado contra los modos exactos de la guía ideal).
-- **`ray_trace`** — las ecuaciones de trayectoria de rayos integradas con
+- **`ray_trace`**: las ecuaciones de trayectoria de rayos integradas con
   Runge-Kutta, vectorizadas sobre todos los rayos a la vez (validado contra los
   arcos de círculo de un gradiente lineal).
-- **`parabolic_equation`** — la PE estándar (Tappert) por el algoritmo split-step
+- **`parabolic_equation`**: la PE estándar (Tappert) por el algoritmo split-step
   de Fourier (validado contra el esparcimiento esférico en campo libre).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation_es.png" alt="Un perfil de velocidad del sonido de Munk, trayectorias de rayos formando zonas de convergencia, y la pérdida por transmisión de modos normales frente a la ecuación parabólica coincidiendo en tendencia" width="100%" />

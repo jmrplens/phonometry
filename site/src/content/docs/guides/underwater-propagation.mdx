@@ -449,13 +449,13 @@ noise = underwater.ocean_ambient_noise(ship.frequency, wind_speed_knots=10.0,
 For range-independent environments the field can be computed numerically with
 three solvers (Jensen et al., *Computational Ocean Acoustics*):
 
-- **`normal_modes`** — the depth-separated Sturm-Liouville eigenproblem solved by
+- **`normal_modes`**: the depth-separated Sturm-Liouville eigenproblem solved by
   finite differences, summed into transmission loss (validated against the ideal
   waveguide's exact modes).
-- **`ray_trace`** — the ray-trajectory equations integrated with Runge-Kutta,
+- **`ray_trace`**: the ray-trajectory equations integrated with Runge-Kutta,
   vectorised over all rays at once (validated against a linear gradient's
   circular arcs).
-- **`parabolic_equation`** — the standard (Tappert) PE via the split-step Fourier
+- **`parabolic_equation`**: the standard (Tappert) PE via the split-step Fourier
   algorithm (validated against free-field spherical spreading).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/numerical_propagation.png" alt="A Munk sound-speed profile, ray paths forming convergence zones, and normal-mode versus parabolic-equation transmission loss agreeing in trend" width="100%" />

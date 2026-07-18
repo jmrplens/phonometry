@@ -79,8 +79,8 @@ feeds a room prediction (EN 12354) or is checked against a noise-emission
 limit. This page covers the routes phonometry implements to obtain it
 and when to reach for each: an enveloping *pressure* surface in the field
 (ISO 3744/3746), the diffuse field of a *reverberation room* (ISO 3741),
-*intensity* scanning over a surface (ISO 9614-2), and — for the highest
-accuracy — the precision grades in an *anechoic room* (ISO 3745) and by
+*intensity* scanning over a surface (ISO 9614-2), and, for the highest
+accuracy, the precision grades in an *anechoic room* (ISO 3745) and by
 precision *intensity* scanning (ISO 9614-3).
 
 <Video
@@ -93,8 +93,8 @@ precision *intensity* scanning (ISO 9614-3).
 
 ## Choosing a method
 
-All deliver the same quantity — a per-band `LW` and an A-weighted total
-`LWA` — but under different environments, accuracy grades and practical
+All deliver the same quantity, a per-band `LW` and an A-weighted total
+`LWA`, but under different environments, accuracy grades and practical
 constraints.
 
 | Method | Standard | Measured quantity | Environment | Accuracy grade | Use when |
@@ -327,7 +327,7 @@ data (`reverberation_time` + `volume`, or `absorption_area`, or
 `mean_absorption_coefficient` + `room_surface`) enables `K2`; omit it and the
 field is treated as free (`K2 = 0`). If the background margin drops below the
 grade criterion or `K2` exceeds the validity limit, a `SoundPowerWarning`
-flags that the levels are upper bounds — the determination still returns.
+flags that the levels are upper bounds; the determination still returns.
 
 ### K1 and K2 pitfalls
 
@@ -541,7 +541,7 @@ fields are `NaN` for the comparison method).
 ## 3. Intensity scanning (ISO 9614-2)
 
 Sound **intensity** is the net energy flux, so it distinguishes energy
-*leaving* the source from steady energy merely passing through the surface —
+*leaving* the source from steady energy merely passing through the surface,
 which is why the intensity method tolerates background noise that would
 defeat the pressure methods. A p-p probe (see the
 [Sound Intensity guide](/phonometry/guides/intensity/)) is swept continuously over each of
@@ -871,7 +871,7 @@ result.plot()   # LW spectrum; the not-applicable band is hatched (needs matplot
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power.svg" alt="The precision intensity-scanning sound power level spectrum over five one-third-octave bands, four determinate bars and a hatched, greyed 250 Hz band flagged not-applicable because its net intensity is negative, with the A-weighted total of 80.6 dB(A) in the title" width="88%" />
 
 *The 250 Hz band nets negative (more energy flowing in than out), so ISO 9614-3
-declares it not-applicable — the figure hatches and greys it while the four
+declares it not-applicable; the figure hatches and greys it while the four
 determinate bands and the A-weighted total stand.*
 
 <details>
@@ -922,16 +922,16 @@ plt.show()
 
 ## See also
 
-- [Sound Intensity (p-p)](/phonometry/guides/intensity/) — the two-microphone probe, its
+- [Sound Intensity (p-p)](/phonometry/guides/intensity/): the two-microphone probe, its
   finite-difference bias and the ISO 9614-1 field indicators behind the
   scanning method.
-- [Room Acoustics](/phonometry/guides/room-acoustics/) — the reverberation time
+- [Room Acoustics](/phonometry/guides/room-acoustics/): the reverberation time
   and equivalent absorption area (ISO 354) that feed `K2` and the ISO 3741
   absorption area.
-- [Predicting Sound Insulation (EN 12354)](/phonometry/guides/insulation-prediction/) — the
+- [Predicting Sound Insulation (EN 12354)](/phonometry/guides/insulation-prediction/): the
   airborne and impact insulation ratings and the EN 12354 emission predictions
   that consume a source `LW`.
-- [Levels](/phonometry/guides/levels/) — energy averaging and the A-weighting behind `LWA`.
-- [Theory](/phonometry/reference/theory/environment-transport/) — the Waterhouse, K1/K2 and C1/C2 derivations.
+- [Levels](/phonometry/guides/levels/): energy averaging and the A-weighting behind `LWA`.
+- [Theory](/phonometry/reference/theory/environment-transport/): the Waterhouse, K1/K2 and C1/C2 derivations.
 - API reference: [`emission.sound_power`](/phonometry/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](/phonometry/reference/api/power/sound-power-reverberation/) and [`emission.sound_power_intensity`](/phonometry/reference/api/power/sound-power-intensity/).
 

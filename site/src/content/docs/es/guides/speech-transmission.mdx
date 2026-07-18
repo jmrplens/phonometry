@@ -23,7 +23,7 @@ references:
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-Un sistema de megafonía, un interfono, un aula reverberante — cada uno es un
+Un sistema de megafonía, un interfono, un aula reverberante: cada uno es un
 *canal de transmisión* entre la boca de quien habla y el oído de quien escucha,
 y cada uno degrada el habla a su manera. El **índice de transmisión del habla**
 (STI) de IEC 60268-16 califica ese canal con un único número en [0, 1] midiendo
@@ -33,8 +33,8 @@ una respuesta al impulso medida en la sala y la medición STIPA directa con su
 señal de ensayo normalizada.
 
 :::note
-**STI frente a SII.** El STI caracteriza un *canal de transmisión* — cuánta de
-la modulación del habla conserva una sala o un sistema de sonido —, mientras
+**STI frente a SII.** El STI caracteriza un *canal de transmisión* (cuánta de
+la modulación del habla conserva una sala o un sistema de sonido), mientras
 que el SII predice la inteligibilidad desde la *audibilidad*: cuánto del
 espectro del habla supera el ruido y el umbral de audición en el oído de quien
 escucha. Para esto último, consulta la
@@ -43,7 +43,7 @@ escucha. Para esto último, consulta la
 
 ## 1. La función de transferencia de modulación
 
-La reverberación y el ruido no amortiguan el habla de manera uniforme —
+La reverberación y el ruido no amortiguan el habla de manera uniforme;
 emborronan su *envolvente*: las modulaciones lentas de intensidad
 (0,63–12,5 Hz) que transportan las sílabas. El STI cuantifica cuánta de esa
 modulación sobrevive de la boca al oído, por banda de octava, como la
@@ -149,7 +149,7 @@ STI queda sesgado a la baja (un lazo ideal da STI ≈ 0,956 a 5 s frente a
 
 La implementación sigue la **Edición 5 (2020)**: el PDF normativo de la
 Edición 4 es la base y cada cambio de la Ed. 5 está atribuido a su fuente en el
-código — el único delta numérico es el espectro de habla masculina revisado del
+código; el único delta numérico es el espectro de habla masculina revisado del
 apartado A.6.1. CI comprueba los vectores de verificación de la propia norma:
 los seis pares de bandas de los factores de ponderación a ±0,001 STI, la tabla
 de correspondencia m ↔ STI, los puntos de control del enmascaramiento
@@ -217,14 +217,14 @@ Ambas devuelven `STIResult`: `sti`, `mti` (7 bandas), `mtf` (7×14 o 7×2),
 
 ## Véase también
 
-- [Acústica de salas](/phonometry/es/guides/room-acoustics/) — la respuesta al
+- [Acústica de salas](/phonometry/es/guides/room-acoustics/): la respuesta al
   impulso medida que consume el método indirecto, y las métricas de oficinas
   diáfanas (ISO 3382-3) construidas sobre el STI por posición.
-- [Índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/) —
+- [Índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligibility/):
   el índice basado en audibilidad de ANSI S3.5 que complementa al STI.
 - [Sonoridad](/phonometry/es/guides/loudness/) y
-  [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/) — sonoridad, sharpness,
+  [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/): sonoridad, sharpness,
   tonalidad y aspereza del sonido recibido.
-- [Teoría](/phonometry/es/reference/theory/perception/) — la derivación de la transferencia
+- [Teoría](/phonometry/es/reference/theory/perception/): la derivación de la transferencia
   de modulación y la correspondencia m ↔ STI.
 - Referencia de la API: [`hearing.sti`](/phonometry/es/reference/api/speech/sti/).

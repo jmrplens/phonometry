@@ -4,7 +4,7 @@
 
 Sound *pressure* tells you how loud a point is; sound **intensity** tells
 you where the energy is *going*. It is the acoustic power flux (W/m²), a
-signed vector quantity — which is why intensity probes can localize sources,
+signed vector quantity, which is why intensity probes can localize sources,
 separate them from background noise and measure sound power in situ
 (ISO 9614) where a pressure measurement alone cannot.
 
@@ -50,8 +50,8 @@ res.plot()   # Lp vs LI per band + the pressure-intensity index (needs matplotli
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo.svg" alt="Third-octave pressure and intensity levels for a plane progressive wave versus a standing wave" width="92%"></picture>
 
-*Left: in a plane progressive wave all pressure is transported —
-L_I ≈ L_p. Right: a standing wave carries (almost) no net energy — the
+*Left: in a plane progressive wave all pressure is transported, so
+L_I ≈ L_p. Right: a standing wave carries (almost) no net energy, so the
 pressure is high but the intensity collapses. The gap L_p − L_I is the
 **pressure-intensity index**, the fundamental quality indicator of every
 intensity measurement.*
@@ -115,7 +115,7 @@ Two physical limits bound every p-p measurement, and the result object
 carries both:
 
 - **High frequency**: the finite-difference gradient underestimates I by
-  $\sin(k\Delta r)/(k\Delta r)$ — verified in CI against IEC 61043 Table 3.
+  $\sin(k\Delta r)/(k\Delta r)$, verified in CI against IEC 61043 Table 3.
   `IntensityResult.bias_correction` provides the factor and
   `max_valid_frequency` (≈ 0.1·c/Δr; 2.9 kHz for a 12 mm spacer) the
   practical ceiling. Larger spacers reach lower frequencies, smaller ones
@@ -126,11 +126,11 @@ carries both:
 Over a measurement surface, the ISO 9614-1 Annex A field indicators grade the
 scan itself. **F2**, the surface pressure-intensity indicator, is the surface
 pressure level minus the level of the mean *magnitude* of the normal
-intensity — the larger it is, the closer the measurement sits to the probe's
+intensity: the larger it is, the closer the measurement sits to the probe's
 phase-error floor. **F3**, the negative partial power indicator, is the same
-difference taken with the *signed* mean intensity — F3 − F2 > 0 reveals power
+difference taken with the *signed* mean intensity: F3 − F2 > 0 reveals power
 flowing inward through parts of the surface. **F4**, the field non-uniformity
-indicator, is the normalised spread of the per-position intensities — the
+indicator, is the normalised spread of the per-position intensities: the
 larger it is, the more measurement positions the surface needs. Together with
 the dynamic-capability criterion they are available directly:
 
@@ -261,10 +261,10 @@ for absolute scaling of the two channels.
 
 IEC 61043:1993 (EN 61043:1994), *Electroacoustics —
 Instruments for the measurement of sound intensity — Measurements with pairs
-of pressure sensing microphones* — the two-microphone cross-spectral
+of pressure sensing microphones*: the two-microphone cross-spectral
 intensity estimator, the finite-difference bias correction and the
 usable-bandwidth bound (clause 7.3,
 Table 3). ISO 9614-1:1993, *Acoustics — Determination of sound power levels
 of noise sources using sound intensity — Part 1: Measurement at discrete
-points* — the pressure-intensity index, the Annex A field indicators F2, F3
+points*: the pressure-intensity index, the Annex A field indicators F2, F3
 and F4, and the dynamic-capability criterion (Annex B).

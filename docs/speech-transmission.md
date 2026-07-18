@@ -2,7 +2,7 @@
 
 # Speech Transmission Index (IEC 60268-16)
 
-A public-address system, an intercom, a reverberant lecture hall — each is a
+A public-address system, an intercom, a reverberant lecture hall: each is a
 *transmission channel* between a talker's mouth and a listener's ear, and each
 degrades speech in its own way. The **Speech Transmission Index** (STI) of
 IEC 60268-16 rates that channel with a single number in [0, 1] by measuring
@@ -12,15 +12,15 @@ measured room impulse response, and the direct STIPA measurement with its
 standardized test signal.
 
 > [!NOTE]
-> **STI vs SII.** The STI characterises a *transmission channel* — how much of
-> the speech modulation a room or sound system preserves — while the SII
+> **STI vs SII.** The STI characterises a *transmission channel* (how much of
+> the speech modulation a room or sound system preserves) while the SII
 > predicts intelligibility from *audibility*: how much of the speech spectrum
 > clears the noise and the hearing threshold at the listener's ear. For the
 > latter, see the [Speech Intelligibility Index guide](speech-intelligibility.md).
 
 ## 1. The modulation transfer function
 
-Reverberation and noise do not muffle speech uniformly — they blur its
+Reverberation and noise do not muffle speech uniformly; they blur its
 *envelope*: the slow (0.63–12.5 Hz) intensity modulations that carry
 syllables. STI quantifies how much of that modulation survives from mouth
 to ear, per octave band, as the **modulation transfer function** m(F). A
@@ -113,7 +113,7 @@ slow modulation components are averaged over too few periods and the STI is
 biased low (an ideal loopback gives STI ≈ 0.956 at 5 s vs ≈ 0.998 at 18 s).
 
 The implementation follows **Edition 5 (2020)**: Edition 4's normative PDF
-is the base and every Ed. 5 change is source-attributed in the code — the
+is the base and every Ed. 5 change is source-attributed in the code; the
 only numeric delta is the revised male speech spectrum of clause A.6.1.
 CI checks the standard's own verification vectors: the six weighting-factor
 band pairs to ±0.001 STI, the m ↔ STI mapping table, the level-dependent
@@ -178,14 +178,14 @@ Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
 
 ## See also
 
-- [Room Acoustics](room-acoustics.md) — the measured impulse response the
+- [Room Acoustics](room-acoustics.md): the measured impulse response the
   indirect method consumes, and the open-plan metrics (ISO 3382-3) built on
   per-position STI.
-- [Speech Intelligibility Index](speech-intelligibility.md) — the
+- [Speech Intelligibility Index](speech-intelligibility.md): the
   audibility-based ANSI S3.5 index that complements the STI.
-- [Loudness](loudness.md) and [Sound Quality Metrics](sound-quality.md) — loudness,
+- [Loudness](loudness.md) and [Sound Quality Metrics](sound-quality.md): loudness,
   sharpness, tonality and roughness of the received sound.
-- [Theory](theory-perception.md) — the modulation-transfer derivation and the m ↔ STI
+- [Theory](theory-perception.md): the modulation-transfer derivation and the m ↔ STI
   mapping.
 - API reference: [`hearing.sti`](https://jmrplens.github.io/phonometry/reference/api/speech/sti/).
 
@@ -202,7 +202,7 @@ Both return `STIResult`: `sti`, `mti` (7 bands), `mtf` (7×14 or 7×2),
 
 IEC 60268-16:2020 (Edition 5), *Sound system equipment —
 Part 16: Objective rating of speech intelligibility by speech transmission
-index* — the modulation transfer function and the m ↔ STI mapping, the STIPA
+index*: the modulation transfer function and the m ↔ STI mapping, the STIPA
 test signal and direct method, the indirect method from the impulse response,
 auditory masking and the reception threshold (Tables A.2/A.3), the revised
 male speech spectrum (clause A.6.1) and the Annex F rating letters.

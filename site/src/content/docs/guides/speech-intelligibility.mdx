@@ -29,13 +29,13 @@ audible, and therefore intelligible, to a listener in a given noise and hearing
 condition. It reduces a speech spectrum, a noise spectrum and a hearing
 threshold to a single number in `[0, 1]`: `0` when nothing useful reaches the
 listener, `1` when the whole speech-bearing spectrum is audible. This page
-covers the **one-third-octave-band method** of **ANSI S3.5-1997 (R2017)** — 18
+covers the **one-third-octave-band method** of **ANSI S3.5-1997 (R2017)**: 18
 bands from 160 Hz to 8000 Hz.
 
 :::note
-**SII vs STI.** The SII predicts intelligibility from *audibility* — how much
+**SII vs STI.** The SII predicts intelligibility from *audibility* (how much
 of the speech spectrum clears the noise and the hearing threshold at the
-listener's ear — while the STI characterises a *transmission channel*: how
+listener's ear) while the STI characterises a *transmission channel*: how
 much of the speech modulation a room or sound system preserves. For the
 latter, see the [Speech Transmission Index guide](/phonometry/guides/speech-transmission/).
 :::
@@ -107,7 +107,7 @@ A_i = \operatorname{clip}\!\left(\frac{E_i' - D_i + 15}{30},\; 0,\; 1\right).
 $$
 
 At speech levels well above normal effort a **level-distortion factor** of
-clause 5.7 — unity for the standard spectra used on this page — reduces $A_i$
+clause 5.7 (unity for the standard spectra used on this page) reduces $A_i$
 further; phonometry applies it automatically.
 
 ## 3. The index in noise
@@ -277,13 +277,13 @@ the STI side.
 
 ## See also
 
-- [Speech Transmission Index](/phonometry/guides/speech-transmission/) — the STI/STIPA
+- [Speech Transmission Index](/phonometry/guides/speech-transmission/): the STI/STIPA
   transmission index that the SII complements.
 - [Loudness](/phonometry/guides/loudness/) and
-  [Sound Quality Metrics](/phonometry/guides/sound-quality/) — loudness, sharpness and the
+  [Sound Quality Metrics](/phonometry/guides/sound-quality/): loudness, sharpness and the
   perception metrics of what the listener hears.
-- [Filter Banks](/phonometry/guides/filter-banks/) — the one-third-octave bands the SII is
+- [Filter Banks](/phonometry/guides/filter-banks/): the one-third-octave bands the SII is
   evaluated on.
-- [Levels](/phonometry/guides/levels/) — the spectrum and band levels behind the equivalent
+- [Levels](/phonometry/guides/levels/): the spectrum and band levels behind the equivalent
   spectrum-level inputs.
 - API reference: [`hearing.sii`](/phonometry/reference/api/speech/sii/).

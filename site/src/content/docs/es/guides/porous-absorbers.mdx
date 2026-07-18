@@ -84,8 +84,8 @@ references:
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-A partir de la **resistividad al flujo** de un material poroso — la magnitud
-que mide el [banco de flujo](/phonometry/es/guides/materials/) — los modelos
+A partir de la **resistividad al flujo** de un material poroso (la magnitud
+que mide el [banco de flujo](/phonometry/es/guides/materials/)) los modelos
 clásicos de fluido equivalente predicen su impedancia característica y su
 número de onda complejos, y una pila de capas por **matrices de
 transferencia** (mantas porosas, cámaras de aire, paneles perforados y
@@ -120,7 +120,7 @@ y un rango de ajuste declarado $0{,}01 < X < 1{,}0$ (porosidad cercana a
 uno). La biblioteca incluye también los juegos de la tabla D.1 ajustados a
 poliéster (`"garai_pompoli"`) y a espumas (`"dunn_davern"`, `"wu"`). Fuera
 del rango de ajuste se emite un `PorousAbsorberWarning` y los valores
-extrapolados se devuelven igualmente — el fallo clásico es una parte real
+extrapolados se devuelven igualmente; el fallo clásico es una parte real
 *negativa* de la impedancia de entrada de la capa a baja frecuencia (Mechel
 secc. G.12).
 
@@ -204,8 +204,8 @@ res.plot()   # alpha(f) con |R| superpuesto
 El solucionador evalúa las magnitudes físicas mediante una recursión de
 admitancias numéricamente robusta (inmune al desbordamiento
 $e^{|\mathrm{Im}(k_x)| d}$ de las entradas matriciales crudas en capas
-extremadamente atenuantes) y aun así expone la matriz de cadena completa —
-recíproca por construcción, $\det T = 1$ — en `transfer_matrix`, lista para
+extremadamente atenuantes) y aun así expone la matriz de cadena completa
+(recíproca por construcción, $\det T = 1$) en `transfer_matrix`, lista para
 la [maquinaria ASTM E2611](/phonometry/es/guides/materials/)
 (`TransferMatrix`).
 
@@ -215,7 +215,7 @@ la [maquinaria ASTM E2611](/phonometry/es/guides/materials/)
 funciona en banda ancha pero decae a baja frecuencia; los diseños
 microperforado, perforado y de membrana cambian ancho de banda por un pico
 resonante situado cada vez más abajo. Las líneas punteadas son las formas
-cerradas de cavidad poco profunda — el modelo completo queda por debajo
+cerradas de cavidad poco profunda; el modelo completo queda por debajo
 porque la masa viscosa del tapón de aire y la profundidad finita de la
 cámara no son despreciables.*
 
@@ -277,8 +277,8 @@ $$
 
 más las correcciones de extremo de la ec. 5 (resistencia superficial
 $\tfrac{1}{2}\sqrt{2\omega\rho_0\eta}$ y reactancia de pistón $0{,}85\,d$ en
-total), dividida por el área abierta. La constante de perforado $x$ — proporcional al
-radio del orificio sobre el espesor de la capa límite viscosa — lo gobierna
+total), dividida por el área abierta. La constante de perforado $x$ (proporcional al
+radio del orificio sobre el espesor de la capa límite viscosa) lo gobierna
 todo: en la resonancia $\omega_0 m = \cot(\omega_0 D/c_0)$ la absorción
 máxima es $4r/(1+r)^2$ y el ancho de banda de media absorción es
 $f_2/f_1 = \pi/\mathrm{arccot}(1+r) - 1$ (Maa, ecs. 9–21, tabla I).
@@ -312,7 +312,7 @@ respuesta completa en frecuencia sale de la misma pila de capas.
 `layered_absorber(..., angle=theta)` evalúa la pila completa de reacción
 volumétrica a cualquier ángulo polar; las láminas son de reacción local
 (independientes del ángulo) y las capas fluidas refractan según la ley de
-Snell — para un MPP sobre cámara esto reproduce exactamente la forma cerrada
+Snell; para un MPP sobre cámara esto reproduce exactamente la forma cerrada
 oblicua de Maa (ec. 23). El coeficiente de incidencia aleatoria es la
 integral de Paris (Mechel secc. D.5, ec. 9)
 
@@ -325,7 +325,7 @@ evaluada por cuadratura de Gauss–Legendre en `diffuse_field_absorption`
 (``angle_limit`` por defecto 90°; se usan truncamientos a 75–87°). Para una
 superficie de *reacción local* con impedancia normalizada conocida la
 integral tiene la forma cerrada de Mechel ec. 10, expuesta como
-`statistical_absorption` — su máximo sobre todas las impedancias pasivas es
+`statistical_absorption`; su máximo sobre todas las impedancias pasivas es
 el **0,951** publicado (en $z \approx 1{,}57$).
 
 ```python
@@ -354,7 +354,7 @@ $\alpha_\infty = 1$ sigue a Delany–Bazley dentro del rango de ajuste.
 
 **Reacción local frente a volumétrica.** El solucionador de capas es de
 reacción volumétrica (el sonido refracta y viaja dentro de las capas).
-`statistical_absorption` supone reacción local — buena aproximación para
+`statistical_absorption` supone reacción local, una buena aproximación para
 resistividades altas, cámaras compartimentadas o revestimientos resonantes
 delgados; para capas porosas gruesas y ligeras integre el modelo volumétrico
 con `diffuse_field_absorption` (Mechel secc. D.6).

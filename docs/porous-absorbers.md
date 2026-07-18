@@ -2,8 +2,8 @@
 
 # Porous and Multilayer Absorbers
 
-Given a porous material's **flow resistivity** — the quantity the
-[flow rig](materials.md) measures — the classical equivalent-fluid models
+Given a porous material's **flow resistivity** (the quantity the
+[flow rig](materials.md) measures) the classical equivalent-fluid models
 predict its complex characteristic impedance and wavenumber, and a
 **transfer-matrix** stack of layers (porous blankets, air gaps, perforated
 and microperforated panels, membranes) predicts the absorption coefficient
@@ -35,7 +35,7 @@ stated fit range $0.01 < X < 1.0$ (porosity close to one). The library also
 ships the Table D.1 presets fitted to polyester (`"garai_pompoli"`) and to
 foams (`"dunn_davern"`, `"wu"`). Outside the fit range a
 `PorousAbsorberWarning` is raised and the extrapolated values are still
-returned — the classic failure being a *negative* real part of the layer
+returned; the classic failure is a *negative* real part of the layer
 input impedance at low frequency (Mechel Sect. G.12).
 
 **Miki** (1990) refitted the same Delany–Bazley data under a passivity
@@ -115,7 +115,7 @@ res.plot()   # alpha(f) with |R| overlaid
 The solver evaluates the physical quantities through a numerically robust
 admittance recursion (immune to the $e^{|\mathrm{Im}(k_x)| d}$ overflow of
 raw matrix entries for extremely attenuating layers) and still exposes the
-full chain matrix — reciprocal by construction, $\det T = 1$ — in
+full chain matrix (reciprocal by construction, $\det T = 1$) in
 `transfer_matrix`, ready for the
 [ASTM E2611 machinery](materials.md) (`TransferMatrix`).
 
@@ -124,7 +124,7 @@ full chain matrix — reciprocal by construction, $\det T = 1$ — in
 *Four constructions, one 50 mm budget: the porous layer works broadband but
 fades at low frequency; the microperforated, perforated and membrane designs
 trade bandwidth for a resonant peak placed ever lower. The dotted lines are
-the shallow-cavity closed forms — the full model sits below them because the
+the shallow-cavity closed forms; the full model sits below them because the
 viscous plug mass and the finite cavity depth are not negligible.*
 
 <details>
@@ -183,8 +183,8 @@ $$
 
 plus the Eq. 5 end corrections (surface resistance
 $\tfrac{1}{2}\sqrt{2\omega\rho_0\eta}$ and piston reactance $0.85\,d$
-total), divided by the open area. The perforate constant $x$ — proportional to the
-hole radius over the viscous boundary-layer thickness — governs everything: at
+total), divided by the open area. The perforate constant $x$ (proportional to the
+hole radius over the viscous boundary-layer thickness) governs everything: at
 the resonance $\omega_0 m = \cot(\omega_0 D/c_0)$ the peak absorption is
 $4r/(1+r)^2$ and the half-absorption bandwidth is
 $f_2/f_1 = \pi/\mathrm{arccot}(1+r) - 1$ (Maa Eqs. 9–21, Table I).
@@ -217,7 +217,7 @@ same layer stack.
 
 `layered_absorber(..., angle=theta)` evaluates the full bulk-reacting stack
 at any polar angle; sheets are locally reacting (angle-independent), fluid
-layers refract per Snell's law — for an MPP over a cavity this reproduces
+layers refract per Snell's law; for an MPP over a cavity this reproduces
 Maa's oblique closed form (Eq. 23) exactly. The random-incidence coefficient
 is the Paris integral (Mechel Sect. D.5, Eq. 9)
 
@@ -229,7 +229,7 @@ $$
 evaluated by Gauss–Legendre quadrature in `diffuse_field_absorption`
 (``angle_limit`` defaults to 90°; truncations at 75–87° are in use). For a
 *locally reacting* surface with known normalised impedance the integral has
-the closed form of Mechel Eq. 10, exposed as `statistical_absorption` — its
+the closed form of Mechel Eq. 10, exposed as `statistical_absorption`; its
 maximum over all passive impedances is the published **0.951** (at
 $z \approx 1.57$).
 
@@ -259,7 +259,7 @@ $\alpha_\infty = 1$ it tracks Delany–Bazley over the fit range.
 
 **Local vs. bulk reaction.** The layer solver is bulk-reacting (sound
 refracts and travels inside the layers). `statistical_absorption` assumes
-local reaction — a good approximation for high flow resistivity, partitioned
+local reaction, a good approximation for high flow resistivity, partitioned
 cavities or thin resonant facings; for thick, light porous layers integrate
 the bulk model with `diffuse_field_absorption` instead (Mechel Sect. D.6).
 
@@ -321,6 +321,6 @@ No standard governs these prediction models; they are textbook and journal
 methods (Mechel; Bies, Hansen & Howard; Cox & D'Antonio; Attenborough & Van
 Renterghem; Miki 1990; Maa 1998; Johnson et al. 1987) implemented
 clean-room from the cited sources. The measurement standards they connect to
-— ISO 9053-1/-2 (flow resistivity), ISO 10534-1/-2 and ASTM E2611
-(impedance tube), ISO 354 / ISO 11654 (random-incidence absorption and
-rating) — live in [Acoustic Materials](materials.md).
+(ISO 9053-1/-2 for flow resistivity, ISO 10534-1/-2 and ASTM E2611
+for the impedance tube, ISO 354 / ISO 11654 for random-incidence absorption and
+rating) live in [Acoustic Materials](materials.md).

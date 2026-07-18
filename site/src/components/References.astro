@@ -5,15 +5,21 @@
  * "References" section at the end of the article. Injected on every page by
  * the MarkdownContent override; pages without `references` render nothing.
  * The matching "On this page" entry is added by src/routeData.ts.
+ *
+ * Web-flavoured APA: the title carries the link when a catalogue/store URL
+ * exists (descriptive link text instead of a bare URL), the DOI renders as
+ * its own https://doi.org link with nothing after it, and the optional note
+ * follows as an annotation line, annotated-bibliography style.
  */
 import type { CollectionEntry } from 'astro:content';
 
 type Reference = NonNullable<CollectionEntry<'docs'>['data']['references']>[number];
 
-/** One rendered fragment of a citation: plain, italic or linked text. */
+/** One rendered fragment of a citation: plain, italicized or linked text. */
 interface Part {
 	text: string;
-	italic?: boolean;
+	/** 'cite' for work titles, 'i' for typographic italics (journal volume). */
+	italic?: 'cite' | 'i';
 	href?: string;
 }
 
@@ -22,17 +28,25 @@ const references: Reference[] = entry.data.references ?? [];
 
 const t = Astro.locals.t;
 const HEADING_ID = 'references';
+const heading = t('phonometry.references.title');
 
-/** "Fastl, H." + "Zwicker, E." -> "Fastl, H., & Zwicker, E." */
+/**
+ * "Fastl, H." + "Zwicker, E." -> "Fastl, H., & Zwicker, E.". The Spanish
+ * adaptation of APA-7 joins the last author with "y" (and no comma) instead
+ * of the ampersand: "Fastl, H. y Zwicker, E."
+ */
 function joinAuthors(authors: readonly string[]): string {
 	if (authors.length === 1) return authors[0]!;
-	return `${authors.slice(0, -1).join(', ')}, & ${authors[authors.length - 1]}`;
+	const separator = lang.startsWith('es') ? ' y ' : ', & ';
+	return `${authors.slice(0, -1).join(', ')}${separator}${authors[authors.length - 1]}`;
 }
 
 function who(ref: Reference): string {
 	if ('authors' in ref && ref.authors?.length) return joinAuthors(ref.authors);
 	if ('organization' in ref && ref.organization) return ref.organization;
-	return ref.title; // APA: no author -> the title moves to the author position.
+	// The schema (superRefine in content.config.ts) guarantees an author
+	// position for every entry type, so this is unreachable for valid content.
+	throw new Error(`reference "${ref.title}" has neither authors nor organization`);
 }
 
 function yearLabel(ref: Reference): string {
@@ -71,9 +85,9 @@ function sourceParts(ref: Reference): Part[] {
 		case 'web':
 			return ref.siteName ? [{ text: ref.siteName }] : [];
 		case 'article': {
-			const parts: Part[] = [{ text: ref.journal, italic: true }];
+			const parts: Part[] = [{ text: ref.journal, italic: 'cite' }];
 			if (ref.volume !== undefined) {
-				parts.push({ text: ', ' }, { text: String(ref.volume), italic: true });
+				parts.push({ text: ', ' }, { text: String(ref.volume), italic: 'i' });
 				if (ref.issue !== undefined) parts.push({ text: `(${ref.issue})` });
 			}
 			if (ref.pages) parts.push({ text: `, ${ref.pages}` });
@@ -85,10 +99,8 @@ function sourceParts(ref: Reference): Part[] {
 /** Full citation as an ordered list of fragments, APA-7 punctuation included. */
 function citationParts(ref: Reference): Part[] {
 	const parts: Part[] = [];
-	// The schema guarantees an author position for every type (authors or
-	// organization), so the citation is always author-first.
 	const author = who(ref);
-	const italicTitle = ref.type !== 'article';
+	const italicTitle = ref.type === 'article' ? undefined : ('cite' as const);
 
 	parts.push({ text: author.endsWith('.') ? author : `${author}.` });
 	parts.push({ text: ` (${yearLabel(ref)}). ` });
@@ -103,16 +115,32 @@ function citationParts(ref: Reference): Part[] {
 		parts.push({ text: '. ' });
 	}
 	if (ref.doi) {
+		// APA-7: nothing follows a DOI, not even a period.
 		const doiUrl = `https://doi.org/${ref.doi}`;
 		parts.push({ text: doiUrl, href: doiUrl });
-		parts.push({ text: '. ' });
 	}
 	return parts;
 }
 
-/** APA orders alphabetically by first author surname or organization, then year. */
+/**
+ * Note text split so bare URLs become links (e.g. a revision or index page).
+ * The final character class keeps trailing sentence punctuation (".", ","...)
+ * out of the link when the URL ends a clause.
+ */
+function noteParts(note: string): Part[] {
+	return note
+		.split(/(https?:\/\/[^\s)]*[^\s.,;:)])/)
+		.filter((piece) => piece !== '')
+		.map((piece) => (piece.startsWith('http') ? { text: piece, href: piece } : { text: piece }));
+}
+
+/**
+ * APA orders alphabetically by first author surname or organization; no-date
+ * entries precede dated ones for the same author, then year, then title.
+ */
 function sortKey(ref: Reference): string {
-	return `${who(ref)} ${yearLabel(ref)} ${ref.title}`.toLowerCase();
+	const year = ref.year === undefined ? '' : String(ref.year);
+	return `${who(ref)} ${year} ${ref.title}`.toLowerCase();
 }
 
 const sorted = [...references].sort((a, b) =>
@@ -123,12 +151,33 @@ const sorted = [...references].sort((a, b) =>
 {
 	sorted.length > 0 && (
 		<section class="page-references" aria-labelledby={HEADING_ID}>
-			<h2 id={HEADING_ID}>{t('phonometry.references.title')}</h2>
+			{/* Replicates Starlight's heading wrapper so the injected heading gets
+			    the same hover anchor link as the authored ones. */}
+			<div class="sl-heading-wrapper level-h2">
+				<h2 id={HEADING_ID}>{heading}</h2>
+				<a class="sl-anchor-link" href={`#${HEADING_ID}`}>
+					<span aria-hidden="true" class="sl-anchor-icon">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+							<path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42" />
+						</svg>
+					</span>
+					<span class="sr-only" data-pagefind-ignore>
+						{t('heading.anchorLabel', { title: heading })}
+					</span>
+				</a>
+			</div>
 			<ul role="list">
 				{sorted.map((ref) => (
 					<li>
 						{citationParts(ref).map((part) => {
-							const inner = part.italic ? <cite>{part.text}</cite> : part.text;
+							const inner =
+								part.italic === 'cite' ? (
+									<cite>{part.text}</cite>
+								) : part.italic === 'i' ? (
+									<i>{part.text}</i>
+								) : (
+									part.text
+								);
 							return part.href ? (
 								<a href={part.href} rel="noopener">
 									{inner}
@@ -137,7 +186,19 @@ const sorted = [...references].sort((a, b) =>
 								inner
 							);
 						})}
-						{ref.note && <span class="ref-note">{ref.note}</span>}
+						{ref.note && (
+							<span class="ref-note">
+								{noteParts(ref.note).map((part) =>
+									part.href ? (
+										<a href={part.href} rel="noopener">
+											{part.text}
+										</a>
+									) : (
+										part.text
+									),
+								)}
+							</span>
+						)}
 					</li>
 				))}
 			</ul>
@@ -160,10 +221,15 @@ const sorted = [...references].sort((a, b) =>
 		margin-top: 0.75rem;
 	}
 	/* <cite> carries the APA italics; keep the surrounding size and colour. */
-	.page-references cite {
+	.page-references cite,
+	.page-references i {
 		font-style: italic;
 	}
+	/* Annotation line below the citation, annotated-bibliography style. */
 	.ref-note {
+		display: block;
+		text-indent: 0;
+		margin-top: 0.15rem;
 		color: var(--sl-color-gray-2);
 	}
 </style>

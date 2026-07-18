@@ -31,15 +31,22 @@ interface Props {
 	displayWidth?: string;
 	/** Optional visible caption below the animation. */
 	caption?: string;
+	/**
+	 * Override for the generated element ids (aria-describedby targets).
+	 * Only needed when the same clip is embedded more than once on a page,
+	 * to keep the ids unique.
+	 */
+	id?: string;
 }
 
 const IMAGES = 'https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images';
 
-const { name, title, description, width, height, displayWidth = '88%', caption } = Astro.props;
+const { name, title, description, width, height, displayWidth = '88%', caption, id } = Astro.props;
 const { lang } = Astro.locals.starlightRoute;
 const t = Astro.locals.t;
 
 const langSuffix = lang.startsWith('es') ? '_es' : '';
+const idBase = (id ?? name).replaceAll('_', '-');
 const variants = (['light', 'dark'] as const).map((theme) => {
 	const base = `${name}${langSuffix}${theme === 'dark' ? '_dark' : ''}`;
 	return {
@@ -47,7 +54,7 @@ const variants = (['light', 'dark'] as const).map((theme) => {
 		className: `${theme}-only`,
 		src: `${IMAGES}/${base}.webm`,
 		poster: `${IMAGES}/${base}_poster.jpg`,
-		descriptionId: `${name.replaceAll('_', '-')}-${theme}-desc`,
+		descriptionId: `${idBase}-${theme}-desc`,
 	};
 });
 ---
@@ -79,12 +86,13 @@ const variants = (['light', 'dark'] as const).map((theme) => {
 			<p class="sr-only" id={variant.descriptionId}>
 				{description}
 			</p>
-			{caption && <figcaption>{caption}</figcaption>}
 			<p class="video-download">
 				<a href={variant.src} download rel="noopener">
 					{t('phonometry.video.download')}
 				</a>
 			</p>
+			{/* Kept last: <figcaption> must be the first or last child of <figure>. */}
+			{caption && <figcaption>{caption}</figcaption>}
 		</figure>
 	))
 }

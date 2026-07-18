@@ -18,7 +18,7 @@ references:
     volume: 28
     pages: "050005"
     doi: "10.1121/2.0000410"
-    note: "The fluctuation-strength signal model implemented in section 3.2 (clean-room, with no numeric standard, calibrated to 1 vacil at the reference AM tone), including the Table 1 literature values used as its cross-check."
+    note: "The fluctuation-strength signal model implemented in section 3.2 (presented at ICA 2016; clean-room, with no numeric standard, calibrated to 1 vacil at the reference AM tone), including the Table 1 literature values used as its cross-check."
   - type: web
     authors: ["Felix Greco, G.", "Merino-Martínez, R.", "Osses, A.", "Lotinga, M. J. B."]
     year: 2025
@@ -241,7 +241,6 @@ pursued. For **AM broadband noise** the signal model overshoots the absolute
 level (it spreads the modulated energy across bands) — quote the closed form
 `fluctuation_strength_am_noise` (§3.1) for that stimulus.
 :::
-
 
 ## See also
 

@@ -29,13 +29,31 @@ const encoders = {
 	'.jpeg': (image) => image.jpeg({ mozjpeg: true, quality: 82 }),
 };
 
+// PNG IHDR colour type (byte 25): 3 = indexed/palette. An indexed PNG has
+// already been through the palette quantization; skip it so re-running the
+// postbuild by hand cannot re-quantize (and degrade) an optimized image.
+function isIndexedPng(file, buffer) {
+	return extname(file).toLowerCase() === '.png' && buffer.length > 25 && buffer[25] === 3;
+}
+
 let totalBefore = 0;
 let totalAfter = 0;
 for (const file of walk(dist)) {
 	const encode = encoders[extname(file).toLowerCase()];
 	if (!encode) continue;
 	const original = readFileSync(file);
-	const optimized = await encode(sharp(original)).toBuffer();
+	if (isIndexedPng(file, original)) continue;
+	let optimized;
+	try {
+		optimized = await encode(sharp(original)).toBuffer();
+	} catch (error) {
+		// A broken or mislabelled image must not kill the deploy: keep the
+		// original byte-for-byte and report which file failed.
+		console.warn(
+			`[optimize-images] skipping ${file.slice(dist.length + 1)}: ${error.message}`,
+		);
+		continue;
+	}
 	const kept = optimized.length < original.length ? optimized : original;
 	if (kept !== original) writeFileSync(file, kept);
 	totalBefore += original.length;
@@ -46,7 +64,7 @@ for (const file of walk(dist)) {
 	);
 }
 if (totalBefore === 0) {
-	console.log('[optimize-images] no raster images in dist/');
+	console.log('[optimize-images] nothing to recompress in dist/');
 } else {
 	const saved = ((1 - totalAfter / totalBefore) * 100).toFixed(0);
 	console.log(

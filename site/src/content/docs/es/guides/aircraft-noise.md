@@ -22,7 +22,7 @@ references:
     title: "Electroacoustics — Instruments for measurement of aircraft noise — Performance requirements for systems to measure one-third-octave-band sound pressure levels in noise certification of transport-category aeroplanes"
     designation: "IEC 61265:1995"
     url: "https://webstore.iec.ch/en/publication/5076"
-    note: "Las tolerancias del sistema de medida que comprueba el verificador. Revisada después como IEC 61265:2018; la edición de 1995 es la implementada."
+    note: "Las tolerancias del sistema de medida que comprueba el verificador. Revisada después como IEC 61265:2018 (https://webstore.iec.ch/en/publication/32635); la edición de 1995 es la implementada."
   - type: standard
     organization: "SAE International"
     year: 2013
@@ -50,14 +50,14 @@ references:
     title: "Report on standard method of computing noise contours around civil airports, Volume 2: Technical guide"
     number: "ECAC.CEAC Doc 29, 4.ª ed."
     url: "https://www.ecac-ceac.org/images/documents/ECAC-Doc_29_4th_edition_Dec_2016_Volume_2.pdf"
-    note: "La interpolación NPD del nivel de evento (sección 4.2) y el cálculo de evento único por segmentos (ajuste de impedancia, duración, instalación del motor, atenuación lateral, fracción de ruido, directividad de inicio de rodaje, suma) de las secciones de ruido de aeropuerto, hasta los contornos en malla de tierra. PDF gratuito en la página de documentos de ECAC."
+    note: "La interpolación NPD del nivel de evento (sección 4.2) y el cálculo de evento único por segmentos (ajuste de impedancia, duración, instalación del motor, atenuación lateral, fracción de ruido, directividad de inicio de rodaje, suma) de las secciones de ruido de aeropuerto, hasta los contornos en malla de tierra. El PDF enlazado es la descarga gratuita; los volúmenes están catalogados en la página de documentos de ECAC (https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements)."
   - type: report
     organization: "European Civil Aviation Conference"
     year: 2026
     title: "Report on standard method of computing noise contours around civil airports, Volume 3: Reference cases and verification framework"
     number: "ECAC.CEAC Doc 29, 5.ª ed."
     url: "https://www.ecac-ceac.org/images/documents/ECAC-CEAC-DOC_29_5th_Edition-REPORT_ON_STANDARD_METHOD_OF_COMPUTING_NOISE_CONTOURS_AROUND_CIVIL_AIRPORTS-Volume_3-REFERENCE_CASES_AND_VERIFICATION_FRAMEWORK.pdf"
-    note: "El workbook de referencia de la Parte 1 contra el que se valida la cadena de evento único. PDF gratuito en la página de documentos de ECAC."
+    note: "El workbook de referencia de la Parte 1 contra el que se valida la cadena de evento único. El PDF enlazado es la descarga gratuita; los volúmenes están catalogados en la página de documentos de ECAC (https://www.ecac-ceac.org/documents/ecac-documents-and-international-agreements)."
 ---
 
 El **nivel efectivo de ruido percibido (EPNL)** es la métrica de certificación
@@ -370,7 +370,6 @@ de signo de §4.5.2), la geometría lateral §4.5.5 al extremo más cercano detr
 del rodaje de despegue, la velocidad media Ec. 4-13b en segmentos de pista y el
 suelo recomendado de 30 m en las consultas NPD. Siete eventos de receptor del
 workbook de referencia se reproducen end-to-end en la suite de tests.
-
 
 ## Véase también
 

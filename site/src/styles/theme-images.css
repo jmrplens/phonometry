@@ -14,8 +14,8 @@
   display: none;
 }
 
-/* Tier-1 animations embedded as autoplaying, looping, muted WebM with native
-   controls (a keyboard-accessible pause/stop for the motion, WCAG 2.2.2).
+/* Tier-1 animations embedded as looping, muted, never-autoplaying WebM with
+   native controls (keyboard-accessible playback control, WCAG 2.2.2).
    Match the figure treatment: centred block, rounded, never wider than the
    reading column. Authored inline as <video style="width:88%">; the
    responsive tiers below give videos the same widths as the detailed

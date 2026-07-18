@@ -18,7 +18,7 @@ references:
     volume: 28
     pages: "050005"
     doi: "10.1121/2.0000410"
-    note: "El modelo de señal de la intensidad de fluctuación implementado en la sección 3.2 (clean-room, sin norma numérica, calibrado a 1 vacil en el tono AM de referencia), incluidos los valores de su Tabla 1 usados como contraste."
+    note: "El modelo de señal de la intensidad de fluctuación implementado en la sección 3.2 (presentado en el ICA 2016; clean-room, sin norma numérica, calibrado a 1 vacil en el tono AM de referencia), incluidos los valores de su Tabla 1 usados como contraste."
   - type: web
     authors: ["Felix Greco, G.", "Merino-Martínez, R.", "Osses, A.", "Lotinga, M. J. B."]
     year: 2025
@@ -246,7 +246,6 @@ Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absolu
 (reparte la energía modulada entre las bandas) — cite la forma cerrada
 `fluctuation_strength_am_noise` (§3.1) para ese estímulo.
 :::
-
 
 ## Véase también
 

@@ -152,8 +152,9 @@ def _resolve_impedance_array(impedance: ArrayLike | None, frequency: Real) -> Co
     """Broadcast a scalar/array normalized impedance to the frequency shape.
 
     The impedance is in the ``e^{-i omega t}`` convention (a passive ground has
-    ``Im(Z) < 0``); a zero impedance is rejected because ``1/Z`` enters the
-    numerical distance.
+    ``Im(Z) < 0``); a zero or non-finite impedance is rejected because ``1/Z``
+    enters the numerical distance (an infinite ``Z`` would give ``inf/inf`` NaN
+    rather than the intended hard-ground limit, which is a large finite ``Z``).
     """
     z = np.atleast_1d(np.asarray(impedance, dtype=np.complex128))
     if z.size == 1:
@@ -163,6 +164,8 @@ def _resolve_impedance_array(impedance: ArrayLike | None, frequency: Real) -> Co
             "'impedance' must be a scalar or match the frequency vector "
             f"(got {z.shape}, expected {frequency.shape})."
         )
+    if not np.all(np.isfinite(z)):
+        raise ValueError("'impedance' must be finite.")
     if not np.all(np.abs(z) > 0.0):
         raise ValueError("'impedance' must be non-zero.")
     return z
@@ -517,6 +520,42 @@ class BarrierInsertionLoss:
         return plot_barrier_insertion_loss(self, ax=ax, **kwargs)
 
 
+def _validate_barrier_geometry(
+    source_height: float,
+    barrier_distance: float,
+    barrier_height: float,
+    receiver_distance: float,
+    receiver_height: float,
+    thickness: float | None,
+) -> float | None:
+    """Validate the barrier geometry and return the checked top width.
+
+    :return: The validated ``thickness`` (positive and finite) or ``None`` for a
+        thin screen.
+    :raises ValueError: on a non-positive/ordered geometry, a barrier below the
+        line of sight, or a thick barrier whose far edge reaches the receiver.
+    """
+    if barrier_distance <= 0.0 or receiver_distance <= 0.0:
+        raise ValueError("Barrier and receiver distances must be positive.")
+    if receiver_distance <= barrier_distance:
+        raise ValueError("'receiver_distance' must exceed 'barrier_distance'.")
+    if barrier_height <= max(source_height, receiver_height):
+        raise ValueError(
+            "'barrier_height' must exceed the source and receiver heights "
+            "(the receiver must be in the geometric shadow)."
+        )
+    if thickness is None:
+        return None
+    # require_positive rejects NaN/inf as well as non-positive widths.
+    thickness = require_positive(thickness, "thickness")
+    if barrier_distance + thickness >= receiver_distance:
+        raise ValueError(
+            "'receiver_distance' must exceed 'barrier_distance + thickness' "
+            "(the receiver must lie beyond the barrier's far edge)."
+        )
+    return thickness
+
+
 def barrier_insertion_loss(
     frequencies: ArrayLike,
     source_height: float,
@@ -580,25 +619,10 @@ def barrier_insertion_loss(
     :raises ValueError: On a non-positive/ordered geometry, or if a ground is
         requested with ``method="kurze_anderson"``.
     """
-    if barrier_distance <= 0.0 or receiver_distance <= 0.0:
-        raise ValueError("Barrier and receiver distances must be positive.")
-    if receiver_distance <= barrier_distance:
-        raise ValueError("'receiver_distance' must exceed 'barrier_distance'.")
-    if barrier_height <= max(source_height, receiver_height):
-        raise ValueError(
-            "'barrier_height' must exceed the source and receiver heights "
-            "(the receiver must be in the geometric shadow)."
-        )
-    if thickness is not None:
-        if thickness <= 0.0:
-            raise ValueError(
-                "'thickness' must be positive; use None for a thin screen."
-            )
-        if barrier_distance + thickness >= receiver_distance:
-            raise ValueError(
-                "'receiver_distance' must exceed 'barrier_distance + thickness' "
-                "(the receiver must lie beyond the barrier's far edge)."
-            )
+    thickness = _validate_barrier_geometry(
+        source_height, barrier_distance, barrier_height, receiver_distance,
+        receiver_height, thickness,
+    )
     has_ground = ground_impedance is not None or ground_flow_resistivity is not None
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
     f = require_positive_array(frequencies, "frequencies")

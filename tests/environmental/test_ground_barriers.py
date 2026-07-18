@@ -136,6 +136,18 @@ def test_ground_effect_rejects_bad_geometry() -> None:
         ground_effect(_BANDS, 1.0, 1.0, 0.0, impedance=10.0)
 
 
+def test_ground_effect_rejects_non_finite_impedance() -> None:
+    # An infinite Z is not the hard-ground limit (that is a large finite Z); it
+    # would give inf/inf = NaN in Rp, so it is rejected outright.
+    with pytest.raises(ValueError, match="finite"):
+        ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=np.inf)
+    with pytest.raises(ValueError, match="finite"):
+        spherical_reflection_coefficient(_BANDS, complex(np.inf, 0.0),
+                                         1.0, 1.5, 50.0)
+    with pytest.raises(ValueError, match="non-zero"):
+        ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=0.0)
+
+
 def test_unknown_ground_model_raises() -> None:
     with pytest.raises(ValueError, match="unknown ground model"):
         ground_effect(_BANDS, 1.0, 1.0, 20.0, flow_resistivity=2e5, model="jca")  # type: ignore[arg-type]
@@ -268,3 +280,8 @@ def test_barrier_rejects_bad_geometry() -> None:
     with pytest.raises(ValueError, match="speed_of_sound"):
         barrier_insertion_loss(_BANDS, 1.0, 50.0, 4.0, 100.0, 1.5,
                                speed_of_sound=0.0)
+    for bad in (float("nan"), float("inf"), -1.0):
+        # thickness NaN/inf/<=0 are all rejected (NaN slips past a bare <= 0).
+        with pytest.raises(ValueError, match="thickness"):
+            barrier_insertion_loss(_BANDS, 1.0, 50.0, 4.0, 100.0, 1.5,
+                                   method="exact", thickness=bad)

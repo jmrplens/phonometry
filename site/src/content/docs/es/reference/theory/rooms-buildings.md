@@ -191,7 +191,7 @@ Esta página reúne la teoría de salas y edificación: la medición de respuest
 
 ## Criterios de ruido de salas (ANSI S12.2)
 
-ANSI/ASA S12.2-2019 valora el ruido de fondo estacionario de una sala frente a familias de curvas por bandas de octava (16 Hz – 8 kHz). El **índice NC** usa el método de tangencia sobre las curvas de la Tabla 1 (NC-15 a NC-70): cada banda medida se interpola frente a los valores tabulados de las curvas, el índice es el mayor valor por banda y la banda que lo fija es la banda determinante — la interpolación hace el índice continuo (un NC-42,5 se informa como tal, sin ajustarlo a una curva). El contorno **RC Mark II** (Anexo D) es una recta pura de −5 dB/octava anclada a su valor a 1000 Hz con un suelo en baja frecuencia de $\max(\mathrm{RC} + 25,\ 55)$ dB a 16/31,5 Hz; el índice es la media aritmética de los niveles a 500/1000/2000 Hz redondeada a un entero (cláusula D.4), y la etiqueta de calidad espectral compara el espectro con el contorno de referencia (cláusula D.3): retumbo "R" cuando alguna banda a 500 Hz o por debajo lo supera en más de 5 dB, siseo "H" cuando alguna banda a 1 kHz o por encima lo supera en más de 3 dB (ambos a la vez, "RH"), y neutro "N" en otro caso — informado como p. ej. RC-35(N). Los contornos RC generados reproducen la Tabla D.1 dígito a dígito, y realimentar cualquier curva NC de la Tabla 1 devuelve su propio índice. NCB, RNC (Anexo A) y el QAI (cláusula D.5) quedan deliberadamente fuera de alcance.
+ANSI/ASA S12.2-2019 valora el ruido de fondo estacionario de una sala frente a familias de curvas por bandas de octava (16 Hz – 8 kHz). El **índice NC** usa el método de tangencia sobre las curvas de la Tabla 1 (NC-15 a NC-70): cada banda medida se interpola frente a los valores tabulados de las curvas, el índice es el mayor valor por banda y la banda que lo fija es la banda determinante; la interpolación hace el índice continuo (un NC-42,5 se informa como tal, sin ajustarlo a una curva). El contorno **RC Mark II** (Anexo D) es una recta pura de −5 dB/octava anclada a su valor a 1000 Hz con un suelo en baja frecuencia de $\max(\mathrm{RC} + 25,\ 55)$ dB a 16/31,5 Hz; el índice es la media aritmética de los niveles a 500/1000/2000 Hz redondeada a un entero (cláusula D.4), y la etiqueta de calidad espectral compara el espectro con el contorno de referencia (cláusula D.3): retumbo "R" cuando alguna banda a 500 Hz o por debajo lo supera en más de 5 dB, siseo "H" cuando alguna banda a 1 kHz o por encima lo supera en más de 3 dB (ambos a la vez, "RH"), y neutro "N" en otro caso, informado como p. ej. RC-35(N). Los contornos RC generados reproducen la Tabla D.1 dígito a dígito, y realimentar cualquier curva NC de la Tabla 1 devuelve su propio índice. NCB, RNC (Anexo A) y el QAI (cláusula D.5) quedan deliberadamente fuera de alcance.
 
 Consulta la [guía de criterios de ruido de salas](/phonometry/es/guides/room-noise/) para su uso.
 
@@ -219,7 +219,7 @@ es decir, una suma acumulada invertida en tiempo discreto. La integración hacia
 
 ### Ventanas de regresión y validez (ISO 3382-2, Cláusula 6, Anexo B/C)
 
-El tiempo de reverberación es un ajuste por mínimos cuadrados $L = a + b t$ sobre una ventana, extrapolado a 60 dB mediante $T = -60/b$ (Anexo C): **EDT** de 0 a −10 dB, **T20** de −5 a −25 dB, **T30** de −5 a −35 dB. Un decaimiento de una sola pendiente da EDT = T20 = T30; una doble pendiente rápida al principio y lenta al final da EDT < T30. La validez se basa en la regla de rango dinámico de 5.3.3 — el ruido debe situarse al menos 25 dB por debajo del pico de la respuesta al impulso para EDT (rango de evaluación + 15 dB), aumentado a 46 dB para T20 y 54 dB para T30 de modo que el sesgo de compensación de cola de un valor marcado como válido se mantenga dentro del 5 % del JND — y la **curvatura** $C = 100\ (T_{30}/T_{20} - 1)$ % (Anexo B) señala un decaimiento no recto por encima del 10 %.
+El tiempo de reverberación es un ajuste por mínimos cuadrados $L = a + b t$ sobre una ventana, extrapolado a 60 dB mediante $T = -60/b$ (Anexo C): **EDT** de 0 a −10 dB, **T20** de −5 a −25 dB, **T30** de −5 a −35 dB. Un decaimiento de una sola pendiente da EDT = T20 = T30; una doble pendiente rápida al principio y lenta al final da EDT < T30. La validez se basa en la regla de rango dinámico de 5.3.3: el ruido debe situarse al menos 25 dB por debajo del pico de la respuesta al impulso para EDT (rango de evaluación + 15 dB), aumentado a 46 dB para T20 y 54 dB para T30 de modo que el sesgo de compensación de cola de un valor marcado como válido se mantenga dentro del 5 % del JND. La **curvatura** $C = 100\ (T_{30}/T_{20} - 1)$ % (Anexo B) señala un decaimiento no recto por encima del 10 %.
 
 ### Claridad, definición y tiempo central (ISO 3382-1, Anexo A)
 
@@ -229,7 +229,7 @@ $$
 C_{te} = 10 \log_{10} \frac{\int_0^{t_e} p^2\ dt}{\int_{t_e}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0{,}05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
 $$
 
-con $t_e = 50$ ms (C50, habla) o 80 ms (C80, música), y el **tiempo central** $T_s = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. Para un decaimiento puramente exponencial tienen formas cerradas $C_{te} = 10 \log_{10}(e^{a t_e} - 1)$ y $T_s = 1/a$; a $T = 1$ s ($a = 13{,}8155$) evalúan a C80 = 3,05 dB, C50 = −0,02 dB, D50 = 0,499 y Ts = 72,4 ms — los valores que reproduce la implementación. Las JND de la Tabla A.1 (EDT 5 %, C80 1 dB, D50 0,05, Ts 10 ms) acotan con qué finura merece la pena informar cada una.
+con $t_e = 50$ ms (C50, habla) o 80 ms (C80, música), y el **tiempo central** $T_s = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. Para un decaimiento puramente exponencial tienen formas cerradas $C_{te} = 10 \log_{10}(e^{a t_e} - 1)$ y $T_s = 1/a$; a $T = 1$ s ($a = 13{,}8155$) evalúan a C80 = 3,05 dB, C50 = −0,02 dB, D50 = 0,499 y Ts = 72,4 ms, los valores que reproduce la implementación. Las JND de la Tabla A.1 (EDT 5 %, C80 1 dB, D50 0,05, Ts 10 ms) acotan con qué finura merece la pena informar cada una.
 
 ### Decaimiento espacial en oficinas diáfanas (ISO 3382-3, Cláusula 6)
 
@@ -255,7 +255,7 @@ de signo se invierten. Los niveles de impactos estandarizado y normalizado son $
 (el término de reverberación se *resta*, al contrario que $D_{nT}$) y
 $L'_n = L_i + 10 \log_{10}(A/A_0)$ con $A_0 = 10$ m² y $A = 0{,}16\ V/T$. El índice
 de ISO 717-2 desplaza la curva de referencia de la Tabla 3 hasta que $\sum_i \max(0, \text{meas}_i - (\text{ref}_i + k))$
-es máxima pero $\le$ 32,0 dB (16 tercios) o 10,0 dB (5 octavas) —la desviación
+es máxima pero $\le$ 32,0 dB (16 tercios) o 10,0 dB (5 octavas); la desviación
 *desfavorable* cuenta ahora donde la **medición supera** la referencia (el ruido
 de impactos es peor cuanto más alto), la imagen especular de ISO 717-1. El
 índice es la referencia desplazada a 500 Hz, reducida en otros 5 dB para bandas
@@ -329,9 +329,9 @@ mejora combinada del trasdosado, $S_s$ la superficie del elemento separador,
 $l_f$ la longitud de acoplamiento de la unión y $l_0 = 1$ m la longitud de
 acoplamiento de referencia. $K_{ij}$ es el **índice de reducción vibracional** de
 la unión (Anexo E), una función empírica de la relación de masas
-$M = \log_{10}(m'_{\perp,i}/m'_i)$ — para una unión rígida en cruz
+$M = \log_{10}(m'_{\perp,i}/m'_i)$: para una unión rígida en cruz
 $K_{13} = 8{,}7 + 17{,}1 M + 5{,}7 M^2$ (a través) y $K_{12} = 8{,}7 + 5{,}7 M^2$
-(en esquina), leídos a 500 Hz — acotada en su mínimo $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
+(en esquina), leídos a 500 Hz, y acotada en su mínimo $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
 (1/S_i + 1/S_j)]$ (Fórmula 29). Dos trasdosados se combinan como
 $\max(a,b) + \min(a,b)/2$ (Fórmulas 30/31). La contrapartida a impactos
 (EN 12354-2, Fórmula 21) es la resta directa
@@ -408,8 +408,8 @@ Consulta las guías de [acústica de salas](/phonometry/es/guides/room-acoustics
 Una superficie rugosa reparte la energía reflejada en una parte especular y
 otra dispersa; el coeficiente de dispersión $s$ es la fracción de energía no
 especular. ISO 17497-1:2004+A1:2014 lo mide en una cámara reverberante con la
-muestra sobre una mesa giratoria: cuatro tiempos de reverberación — con la
-mesa parada y girando, cada uno sin y con la muestra (Tabla 2) — dan la
+muestra sobre una mesa giratoria: cuatro tiempos de reverberación, con la
+mesa parada y girando, cada uno sin y con la muestra (Tabla 2), dan la
 absorción a incidencia aleatoria $\alpha_s$ (cláusula 8.1.1, Fórmula 1) y la
 absorción *especular* $\alpha_{spec}$ (cláusula 8.1.2, Fórmula 4). La
 rotación decorrelaciona las reflexiones dispersas entre decaimientos, de modo
@@ -473,7 +473,7 @@ $$
 $$
 
 para la geometría obligatoria $d_s = 1{,}25$ m, $d_m = 0{,}25$ m
-(cláusula 4.2, Anexo C) — $K_r$ es el cociente de expansión esférica entre el
+(cláusula 4.2, Anexo C); $K_r$ es el cociente de expansión esférica entre el
 camino directo y el de la imagen. Referenciar la medición del pavimento a otra
 sobre una superficie muy reflectante cancela toda la cadena electroacústica
 junto con $K_r$ (Anexo B). La ventana de 5 ms acota el área muestreada (forma
@@ -481,7 +481,7 @@ cerrada del Anexo A: radio ≈ 1,34 m para la geometría normalizada) y el rango
 válido es de 250 Hz a 4 kHz en tercios de octava. ISO 13472-2:2010 (método
 puntual, 250–1600 Hz) acopla en cambio un pequeño tubo de impedancia a la
 superficie y remite las matemáticas al método de función de transferencia de
-ISO 10534-2 de más abajo (sus cláusulas 4/5.7/6.6) — la implementación
+ISO 10534-2 de más abajo (sus cláusulas 4/5.7/6.6); la implementación
 reutiliza ese módulo, añadiendo la geometría y los límites de validez de la
 Parte 2 ($f_u = 0{,}58\ c_0/d$; cotas de separación de micrófonos
 $0{,}45\ c_0/f_{max}$ y $0{,}05\ c_0/f_{min}$, cláusula 5.4) y la corrección
@@ -498,8 +498,8 @@ en un solo número. El coeficiente práctico $\alpha_p$ promedia los tres
 tercios de cada octava de 250 Hz a 4 kHz y redondea a pasos de 0,05
 (cláusula 4.1). La curva de referencia (0,80, 1,00, 1,00, 1,00, 0,90 en
 250–4000 Hz) se desplaza después hacia abajo en pasos de 0,05 hasta que la
-suma de desviaciones desfavorables — contadas solo donde la medición queda
-*por debajo* de la curva desplazada — es $\le 0{,}10$; $\alpha_w$ es la curva
+suma de desviaciones desfavorables, contadas solo donde la medición queda
+*por debajo* de la curva desplazada, es $\le 0{,}10$; $\alpha_w$ es la curva
 desplazada a 500 Hz (cláusula 4.2). Un indicador de forma señala el exceso de
 absorción $\ge 0{,}25$ sobre la curva desplazada: L a 250 Hz, M a
 500/1000 Hz, H a 2000/4000 Hz (cláusula 4.3), y el Anexo B informativo asigna
@@ -526,7 +526,7 @@ $$
 R = \kappa'\ \frac{p_s}{2 \pi f V}\ \frac{h_t}{h_s}\ 10^{(L_{ps} - L_{pt})/20}
 $$
 
-— solo entra una *diferencia* de niveles, así que el equipo de medición sonora
+Solo entra una *diferencia* de niveles, así que el equipo de medición sonora
 no necesita calibración absoluta. El exponente efectivo $\kappa'$ (Anexo A,
 Fórmula A.7) corrige el $\kappa$ adiabático por la conducción de calor a las
 paredes a través de la capa límite térmica $b = \sqrt{2 c_0 l_h / \omega}$
@@ -556,7 +556,7 @@ $k_0'' = 1{,}94 \times 10^{-2} \sqrt{f}/(c_0 d)$ (Ec. A.18). ISO 10534-1
 (método de la razón de onda estacionaria) es el clásico en forma cerrada:
 $|r| = (s - 1)/(s + 1)$ a partir de la razón máximo/mínimo
 $s = 10^{\Delta L/20}$ y la fase desde la posición del primer mínimo
-(Ecs. 12–26) — una SWR de 3 da exactamente $|r| = 0{,}5$ y
+(Ecs. 12–26); una SWR de 3 da exactamente $|r| = 0{,}5$ y
 $\alpha = 0{,}75$. ASTM E2611-19 añade la transmisión: cuatro micrófonos
 descomponen los campos aguas arriba y abajo en las ondas $A, B, C, D$
 (Ecs. 17–20) y una resolución con dos cargas (o con una carga para muestra

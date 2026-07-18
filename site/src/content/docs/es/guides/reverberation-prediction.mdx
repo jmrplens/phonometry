@@ -98,8 +98,8 @@ references:
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-El **tiempo de reverberación** $T$ — el tiempo que tarda el nivel de energía
-sonora en caer 60 dB tras detenerse la fuente — se predice aquí a partir del
+El **tiempo de reverberación** $T$, el tiempo que tarda el nivel de energía
+sonora en caer 60 dB tras detenerse la fuente, se predice aquí a partir del
 **volumen** de una sala, sus **áreas de contorno** y los **coeficientes de
 absorción** de sus superficies, mediante las fórmulas clásicas de la acústica
 estadística. Es la contraparte de diseño del tiempo de reverberación *medido* de
@@ -174,7 +174,7 @@ print(round(room.millington_sette_reverberation_time(120.0, surfaces), 3))  # 0.
 ```
 
 Para una distribución **uniforme**, Eyring y Millington-Sette coinciden, y ambos
-quedan por debajo de Sabine — la sobrestimación de Sabine con absorción alta es
+quedan por debajo de Sabine; la sobrestimación de Sabine con absorción alta es
 la razón de ser de Eyring. Cuando $\alpha \to 0$, Eyring se reduce a Sabine. La
 absorción del aire entra en todos los modelos a través del coeficiente de
 atenuación de potencia $m$ (en neper por metro, de la
@@ -208,8 +208,8 @@ resonancia es lo que Sabine y Eyring no pueden ver.
 
 ## 2. Fitzroy y Arau-Puchades (salas anisótropas)
 
-Cuando la absorción se concentra en un eje — un suelo enmoquetado y un techo
-acústico frente a paredes por lo demás duras — una única media $\bar\alpha$
+Cuando la absorción se concentra en un eje (un suelo enmoquetado y un techo
+acústico frente a paredes por lo demás duras), una única media $\bar\alpha$
 tergiversa el campo. **Fitzroy** y **Arau-Puchades** dividen una sala
 rectangular en los tres pares de paredes opuestas y combinan los tiempos de
 reverberación de Eyring *axiales* $T_i$ (cada uno con la superficie total $S$ y

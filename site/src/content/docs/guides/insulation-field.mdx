@@ -199,8 +199,8 @@ plt.show()
 </details>
 
 Compute `l1`, `l2` and `t2` on the same 16 one-third-octave bands from
-100 Hz to 3150 Hz — obtain `t2` from
-`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t30`, for example — and
+100 Hz to 3150 Hz (obtain `t2` from
+`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t30`, for example) and
 pass them to `airborne_insulation`. Feed that function's `dnt` (or `r_prime`)
 spectrum to `weighted_rating`, so every band aligns index-by-index with the
 ISO 717-1 reference curve.
@@ -263,7 +263,7 @@ print(one_dp.rating)   # 30.0, the 0.1 dB-step rating for uncertainty statements
 
 Footstep noise is rated the other way round. Instead of how much a floor
 *blocks*, impact insulation measures how much a standardized **tapping
-machine** on the floor above puts into the room below — so a *higher* number
+machine** on the floor above puts into the room below, so a *higher* number
 is *worse*. The energy-average impact sound pressure level $L_i$ in the
 receiving room is normalised like the airborne case, but with a sign flip on
 the reverberation term:
@@ -277,14 +277,14 @@ $$
 The **standardized** impact level $L'_{nT}$ ($T_0 = 0.5$ s for dwellings)
 needs only the receiving-room $T$, so with $T = 0.5$ s it equals $L_i$; the
 **normalized** level $L'_n$ (referenced to a 10 m² absorption area) also needs
-the receiving-room volume. Note the **minus** sign — more reverberation
+the receiving-room volume. Note the **minus** sign: more reverberation
 *lowers* $L'_{nT}$, opposite to the airborne $D_{nT}$.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup.svg" alt="Field impact insulation setup: a standardized tapping machine on the floor of the source room above, microphones energy-averaged in the receiving room below, and the receiving-room reverberation time" width="92%" />
 
 The single-number rating (ISO 717-2) shifts the same style of reference curve,
 but an **unfavourable deviation now occurs where the measurement *exceeds* the
-reference** (impact noise is worse when higher) — the sign opposite to
+reference** (impact noise is worse when higher), the sign opposite to
 ISO 717-1. The rating (`Ln,w`, `L'n,w`, `L'nT,w`) is the shifted reference read
 at 500 Hz; for octave bands it is then reduced by 5 dB. The spectrum
 adaptation term $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$ uses the energetic sum
@@ -389,7 +389,7 @@ values (thirds `L'nT,w = 79`, `CI = −11`; octave `54`, `CI = 0`).
 ### Field façade insulation (ISO 16283-3)
 
 The same source/receiver logic reaches the building **façade**, but now the
-source is *outdoors* — a loudspeaker at 45° or the road traffic itself. Rather
+source is *outdoors*: a loudspeaker at 45° or the road traffic itself. Rather
 than a level difference across an internal partition, ISO 16283-3 references the
 receiving-room level $L_2$ to the level **2 m in front of the façade**
 $L_{1,2m}$, giving the level difference $D_{2m}$ and, exactly as in the airborne
@@ -404,7 +404,7 @@ $$
 with $T_0 = 0.5$ s, $A_0 = 10$ m² and $A = 0.16\ V/T$ (dwellings). When the
 microphone sits **on the test element** (surface level $L_{1,s}$) the *element*
 method also yields an apparent sound reduction index, carrying a fixed
-angle-of-incidence correction — $-1.5$ dB for the 45° loudspeaker method,
+angle-of-incidence correction: $-1.5$ dB for the 45° loudspeaker method,
 $-3$ dB for the all-angle road-traffic method:
 
 $$
@@ -471,7 +471,7 @@ quantity to `weighted_rating` for its ISO 717-1 single number.
 
 A rating without an uncertainty is only half a result. ISO 12999-1 does not
 re-measure anything; it tabulates the **standard uncertainty** $u$ of every
-sound-insulation quantity — derived from inter-laboratory tests — and prescribes
+sound-insulation quantity, derived from inter-laboratory tests, and prescribes
 how to expand and combine it. Which standard deviation is $u$ depends on the
 **measurement situation** (Clause 5.2):
 
@@ -561,11 +561,11 @@ plt.show()
 
 ## Field survey method (ISO 10052)
 
-The engineering methods above buy accuracy with effort — swept microphones,
+The engineering methods above buy accuracy with effort: swept microphones,
 per-band reverberation times, careful background correction. For a quick check
 in a dwelling, ISO 10052 defines a **survey (control) method**: octave bands, a
-hand-held meter, and a single quantity — the **reverberation index**
-`k = 10 lg(T/T0)` (`T0 = 0.5 s`) — to carry the receiving-room correction. Every
+hand-held meter, and a single quantity, the **reverberation index**
+`k = 10 lg(T/T0)` (`T0 = 0.5 s`), to carry the receiving-room correction. Every
 survey quantity is then just an addition of `k`: the standardized level
 difference `DnT = D + k`, the normalized `Dn = D + k + 10 lg(A0 T0 / (0.16 V))`,
 the apparent `R' = D + k + 10 lg(S T0 / (0.16 V))` (using `V/7.5` for `S` where
@@ -574,12 +574,12 @@ that is larger), and, for impacts and façades, `L'nT = Li - k` and
 and the reverberation-index table are identical in the harmonized
 EN ISO 10052:2004+A1:2010.
 
-The reverberation index is either **measured** — feed the reverberation time to
-`reverberation_index(T)` — or, in a control survey, **estimated** from the room
+The reverberation index is either **measured** (feed the reverberation time to
+`reverberation_index(T)`) or, in a control survey, **estimated** from the room
 type and volume with `estimate_reverberation_index(V, room)` (Table 4:
 furnished `"kitchen"` / `"bathroom"` / `"furnished"`, or the unfurnished
 construction classes `"a"`–`"h"` and the mixed `"a+e"`…`"d+h"`). A fourth
-quantity unique to this method is **service-equipment noise** `LXY` — the
+quantity unique to this method is **service-equipment noise** `LXY`: the
 energy average of three A- or C-weighted positions.
 
 ```python
@@ -610,7 +610,7 @@ res.plot()   # DnT vs shifted ISO 717-1 reference (needs matplotlib)
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation.svg" alt="Survey-method airborne insulation: the raw level difference D and the standardized DnT across the five octave bands, with the reverberation-index correction k shaded between them" width="80%" />
 
 *The reverberation index `k = 10 lg(T/T0)` shifts the raw level difference `D`
-into the standardized `DnT` — up where the room is live (`T > T0`), down where
+into the standardized `DnT`: up where the room is live (`T > T0`), down where
 it is dead. The automatic rating is formed only for exactly 5 octave (or 16
 one-third-octave) values.*
 
@@ -643,7 +643,7 @@ plt.show()
 
 </details>
 
-### `survey_airborne_insulation()` and friends — parameters
+### `survey_airborne_insulation()` and friends: parameters
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -668,12 +668,12 @@ plt.show()
   ISO 10140 element characterisation these field quantities are compared against.
 - [Predicting Sound Insulation (EN 12354)](/phonometry/guides/insulation-prediction/):
   the in-situ performance predicted from laboratory element data.
-- [Room Acoustics](/phonometry/guides/room-acoustics/) — the impulse response,
+- [Room Acoustics](/phonometry/guides/room-acoustics/): the impulse response,
   room parameters and sound absorption that this guide's insulation chain builds on.
-- [Levels](/phonometry/guides/levels/) — energy averaging and the level metrics behind
+- [Levels](/phonometry/guides/levels/): energy averaging and the level metrics behind
   source/receiving-room levels.
-- [Filter Banks](/phonometry/guides/filter-banks/) — the IEC 61260 fractional-octave filters
+- [Filter Banks](/phonometry/guides/filter-banks/): the IEC 61260 fractional-octave filters
   used for the insulation spectra.
-- [Theory](/phonometry/reference/theory/rooms-buildings/) — the reference-curve derivation behind the
+- [Theory](/phonometry/reference/theory/rooms-buildings/): the reference-curve derivation behind the
   weighted single-number ratings.
 - API reference: [`building.insulation`](/phonometry/reference/api/building/insulation/), [`building.survey_insulation`](/phonometry/reference/api/building/survey-insulation/) and [`building.building_uncertainty`](/phonometry/reference/api/building/building-uncertainty/).

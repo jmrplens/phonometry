@@ -191,7 +191,7 @@ This page collects the theory behind rooms and buildings: impulse-response measu
 
 ## Room noise criteria (ANSI S12.2)
 
-ANSI/ASA S12.2-2019 rates steady background noise in rooms against families of octave-band curves (16 Hz – 8 kHz). The **NC rating** uses the tangency method on the Table 1 curves (NC-15 to NC-70): each measured band is interpolated against the tabulated curve values, the rating is the highest per-band index and the band that sets it is the governing band — the interpolation makes the rating continuous (an NC-42.5 is reported as such, not snapped to a curve). The **RC Mark II** contour (Annex D) is a pure −5 dB/octave line keyed to its 1000 Hz value with a low-frequency floor of $\max(\mathrm{RC} + 25,\ 55)$ dB at 16/31.5 Hz; the rating is the arithmetic mean of the 500/1000/2000 Hz levels rounded to an integer (clause D.4), and the spectral-quality tag compares the spectrum with the reference contour (clause D.3): rumble "R" when any band at or below 500 Hz exceeds it by more than 5 dB, hiss "H" when any band at or above 1 kHz exceeds it by more than 3 dB (both together "RH"), else neutral "N" — reported as e.g. RC-35(N). The generated RC contours reproduce Table D.1 digit for digit, and feeding any Table 1 NC curve back returns its own rating. NCB, RNC (Annex A) and the QAI (clause D.5) are deliberately out of scope.
+ANSI/ASA S12.2-2019 rates steady background noise in rooms against families of octave-band curves (16 Hz – 8 kHz). The **NC rating** uses the tangency method on the Table 1 curves (NC-15 to NC-70): each measured band is interpolated against the tabulated curve values, the rating is the highest per-band index and the band that sets it is the governing band; the interpolation makes the rating continuous (an NC-42.5 is reported as such, not snapped to a curve). The **RC Mark II** contour (Annex D) is a pure −5 dB/octave line keyed to its 1000 Hz value with a low-frequency floor of $\max(\mathrm{RC} + 25,\ 55)$ dB at 16/31.5 Hz; the rating is the arithmetic mean of the 500/1000/2000 Hz levels rounded to an integer (clause D.4), and the spectral-quality tag compares the spectrum with the reference contour (clause D.3): rumble "R" when any band at or below 500 Hz exceeds it by more than 5 dB, hiss "H" when any band at or above 1 kHz exceeds it by more than 3 dB (both together "RH"), else neutral "N", reported as e.g. RC-35(N). The generated RC contours reproduce Table D.1 digit for digit, and feeding any Table 1 NC curve back returns its own rating. NCB, RNC (Annex A) and the QAI (clause D.5) are deliberately out of scope.
 
 See the [Room Noise guide](/phonometry/guides/room-noise/) for usage.
 
@@ -219,7 +219,7 @@ i.e. a reversed cumulative sum in discrete time. Backward integration cancels th
 
 ### Regression windows and validity (ISO 3382-2, Clause 6, Annex B/C)
 
-Reverberation time is a least-squares fit $L = a + b t$ over a window, extrapolated to 60 dB via $T = -60/b$ (Annex C): **EDT** on 0 to −10 dB, **T20** on −5 to −25 dB, **T30** on −5 to −35 dB. A single-slope decay gives EDT = T20 = T30; a fast early / slow late double slope gives EDT < T30. Validity uses the dynamic-range rule of 5.3.3 — the noise must sit at least 25 dB below the IR peak for EDT (evaluation span + 15 dB), tightened to 46 dB for T20 and 54 dB for T30 so the tail-compensation bias of a flagged-valid value stays within the 5 % JND — and the **curvature** $C = 100\ (T_{30}/T_{20} - 1)$ % (Annex B) flags a non-straight decay above 10 %.
+Reverberation time is a least-squares fit $L = a + b t$ over a window, extrapolated to 60 dB via $T = -60/b$ (Annex C): **EDT** on 0 to −10 dB, **T20** on −5 to −25 dB, **T30** on −5 to −35 dB. A single-slope decay gives EDT = T20 = T30; a fast early / slow late double slope gives EDT < T30. Validity uses the dynamic-range rule of 5.3.3: the noise must sit at least 25 dB below the IR peak for EDT (evaluation span + 15 dB), tightened to 46 dB for T20 and 54 dB for T30 so the tail-compensation bias of a flagged-valid value stays within the 5 % JND. The **curvature** $C = 100\ (T_{30}/T_{20} - 1)$ % (Annex B) flags a non-straight decay above 10 %.
 
 ### Clarity, definition and centre time (ISO 3382-1, Annex A)
 
@@ -229,7 +229,7 @@ $$
 C_{te} = 10 \log_{10} \frac{\int_0^{t_e} p^2\ dt}{\int_{t_e}^{\infty} p^2\ dt}\ \text{dB}, \qquad D_{50} = \frac{\int_0^{0.05} p^2\ dt}{\int_0^{\infty} p^2\ dt}, \qquad C_{50} = 10 \log_{10} \frac{D_{50}}{1 - D_{50}},
 $$
 
-with $t_e = 50$ ms (C50, speech) or 80 ms (C80, music), and the **centre time** $T_s = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. For a pure exponential decay these have closed forms $C_{te} = 10 \log_{10}(e^{a t_e} - 1)$ and $T_s = 1/a$; at $T = 1$ s ($a = 13.8155$) they evaluate to C80 = 3.05 dB, C50 = −0.02 dB, D50 = 0.499 and Ts = 72.4 ms — the values the implementation reproduces. Table A.1 JNDs (EDT 5 %, C80 1 dB, D50 0.05, Ts 10 ms) bound how finely each is worth reporting.
+with $t_e = 50$ ms (C50, speech) or 80 ms (C80, music), and the **centre time** $T_s = \int_0^{\infty} t\ p^2\ dt / \int_0^{\infty} p^2\ dt$. For a pure exponential decay these have closed forms $C_{te} = 10 \log_{10}(e^{a t_e} - 1)$ and $T_s = 1/a$; at $T = 1$ s ($a = 13.8155$) they evaluate to C80 = 3.05 dB, C50 = −0.02 dB, D50 = 0.499 and Ts = 72.4 ms, the values the implementation reproduces. Table A.1 JNDs (EDT 5 %, C80 1 dB, D50 0.05, Ts 10 ms) bound how finely each is worth reporting.
 
 ### Open-plan spatial decay (ISO 3382-3, Clause 6)
 
@@ -255,7 +255,7 @@ standardized and normalized impact levels are $L'_{nT} = L_i - 10 \log_{10}(T/T_
 (the reverberation term is *subtracted*, opposite to $D_{nT}$) and
 $L'_n = L_i + 10 \log_{10}(A/A_0)$ with $A_0 = 10$ m² and $A = 0.16\ V/T$. The
 ISO 717-2 rating shifts the Table 3 reference curve until $\sum_i \max(0, \text{meas}_i - (\text{ref}_i + k))$
-is maximal but $\le$ 32.0 dB (16 thirds) or 10.0 dB (5 octaves) — the
+is maximal but $\le$ 32.0 dB (16 thirds) or 10.0 dB (5 octaves); the
 *unfavourable* deviation now counts where the **measurement exceeds** the
 reference (impact noise is worse when louder), the mirror image of ISO 717-1.
 The rating is the shifted reference at 500 Hz, reduced by a further 5 dB for
@@ -291,7 +291,7 @@ receiving-room level is corrected for background noise by the energy
 subtraction $L = 10 \log_{10}(10^{L_{sb}/10} - 10^{L_b/10})$ for a 6–15 dB
 signal-to-background margin, capped at a fixed $1.3$ dB (the limit of
 measurement) at or below 6 dB and omitted at or above 15 dB (ISO 10140-4,
-Clause 4.3) — the laboratory analogue of the 6/10 dB rule of ISO 16283-1. The
+Clause 4.3), the laboratory analogue of the 6/10 dB rule of ISO 16283-1. The
 façade extension (ISO 16283-3) replaces the source-room level by the level 2 m
 in front of the façade, $D_{2m} = L_{1,2m} - L_2$, and adds a fixed
 angle-of-incidence correction to the element sound reduction index, $-1.5$ dB
@@ -326,9 +326,9 @@ the junction ($i$ source side, $j$ receiving side), $\Delta R_{ij,w}$ the
 combined lining improvement, $S_s$ the separating-element area, $l_f$ the
 junction coupling length and $l_0 = 1$ m the reference coupling length. $K_{ij}$
 is the junction **vibration reduction index** (Annex E), an empirical function of
-the mass ratio $M = \log_{10}(m'_{\perp,i}/m'_i)$ — for a rigid cross-junction
+the mass ratio $M = \log_{10}(m'_{\perp,i}/m'_i)$: for a rigid cross-junction
 $K_{13} = 8.7 + 17.1 M + 5.7 M^2$ (through) and $K_{12} = 8.7 + 5.7 M^2$
-(corner), read at 500 Hz — floored at $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
+(corner), read at 500 Hz, and floored at $K_{ij,\min} = 10 \log_{10}[l_f\ l_0
 (1/S_i + 1/S_j)]$ (Formula 29). Two linings combine as $\max(a,b) + \min(a,b)/2$
 (Formulas 30/31). The impact counterpart (EN 12354-2, Formula 21) is the direct
 subtraction $L'_{n,w} = L_{n,w,eq} - \Delta L_w + K$, with the bare-floor
@@ -402,8 +402,8 @@ See the [Room Acoustics](/phonometry/guides/room-acoustics/) and
 A rough surface splits the reflected energy into a specular and a scattered
 part; the scattering coefficient $s$ is the non-specular energy fraction.
 ISO 17497-1:2004+A1:2014 measures it in a reverberation room with the test
-sample on a turntable: four reverberation times — stationary and rotating,
-each without and with the sample (Table 2) — give the random-incidence
+sample on a turntable: four reverberation times, stationary and rotating,
+each without and with the sample (Table 2), give the random-incidence
 absorption $\alpha_s$ (clause 8.1.1, Formula 1) and the *specular* absorption
 $\alpha_{spec}$ (clause 8.1.2, Formula 4). Rotation decorrelates the scattered
 reflections between decays, so they average out and register as extra
@@ -465,7 +465,7 @@ $$
 $$
 
 for the mandatory geometry $d_s = 1.25$ m, $d_m = 0.25$ m (clause 4.2,
-Annex C) — $K_r$ is the spherical-spreading ratio between the direct and the
+Annex C); $K_r$ is the spherical-spreading ratio between the direct and the
 image path. Ratioing the road measurement against one on a highly reflective
 reference surface cancels the entire electro-acoustic chain along with $K_r$
 (Annex B). The 5 ms window bounds the sampled area (Annex A closed form:
@@ -473,7 +473,7 @@ radius ≈ 1.34 m for the standard geometry) and the valid range is
 250 Hz – 4 kHz in one-third octaves. ISO 13472-2:2010 (spot method,
 250–1600 Hz) instead couples a small impedance tube to the surface and defers
 the mathematics to the ISO 10534-2 transfer-function method below (its
-clauses 4/5.7/6.6) — the implementation reuses that module, adding the Part 2
+clauses 4/5.7/6.6); the implementation reuses that module, adding the Part 2
 geometry and validity limits ($f_u = 0.58\ c_0/d$; microphone spacing bounds
 $0.45\ c_0/f_{max}$ and $0.05\ c_0/f_{min}$, clause 5.4) and the Annex A
 subtractive correction for internal system losses.
@@ -488,8 +488,8 @@ ISO 11654:1997 condenses an ISO 354 third-octave absorption curve into a
 single number. The practical coefficient $\alpha_p$ averages the three thirds
 of each octave 250 Hz – 4 kHz and rounds to steps of 0.05 (clause 4.1). The
 reference curve (0.80, 1.00, 1.00, 1.00, 0.90 at 250–4000 Hz) is then shifted
-downward in 0.05 steps until the sum of unfavourable deviations — counted only
-where the measurement falls *below* the shifted curve — is $\le 0.10$;
+downward in 0.05 steps until the sum of unfavourable deviations, counted only
+where the measurement falls *below* the shifted curve, is $\le 0.10$;
 $\alpha_w$ is the shifted curve at 500 Hz (clause 4.2). A shape indicator
 flags excess absorption $\ge 0.25$ above the shifted curve: L at 250 Hz, M at
 500/1000 Hz, H at 2000/4000 Hz (clause 4.3), and the informative Annex B maps
@@ -515,7 +515,7 @@ $$
 R = \kappa'\ \frac{p_s}{2 \pi f V}\ \frac{h_t}{h_s}\ 10^{(L_{ps} - L_{pt})/20}
 $$
 
-— only a level *difference* enters, so the sound-level device needs no
+Only a level *difference* enters, so the sound-level device needs no
 absolute calibration. The effective exponent $\kappa'$ (Annex A,
 Formula A.7) corrects the adiabatic $\kappa$ for wall heat conduction through
 the thermal boundary layer $b = \sqrt{2 c_0 l_h / \omega}$ (Formulae A.4/A.5).
@@ -544,7 +544,7 @@ with the complex wavenumber's attenuation lower bound
 $k_0'' = 1.94 \times 10^{-2} \sqrt{f}/(c_0 d)$ (Eq. A.18). ISO 10534-1
 (standing-wave-ratio method) is the closed-form classic:
 $|r| = (s - 1)/(s + 1)$ from the max/min ratio $s = 10^{\Delta L/20}$ and the
-phase from the first-minimum position (Eqs. 12–26) — an SWR of 3 gives exactly
+phase from the first-minimum position (Eqs. 12–26); an SWR of 3 gives exactly
 $|r| = 0.5$ and $\alpha = 0.75$. ASTM E2611-19 adds transmission: four
 microphones decompose the up- and downstream fields into the $A, B, C, D$
 waves (Eqs. 17–20) and a two-load (or symmetric one-load) solve yields the

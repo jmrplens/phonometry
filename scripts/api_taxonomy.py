@@ -168,6 +168,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         label_es="Acústica ambiental",
         modules=(
             "phonometry.environmental.outdoor_propagation",
+            "phonometry.environmental.ground_barriers",
             "phonometry.environmental.air_absorption",
             "phonometry.environmental.impulse_prominence",
             "phonometry.environmental.rating",

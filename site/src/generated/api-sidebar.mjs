@@ -119,6 +119,7 @@ export const apiSidebar = {
       translations: { es: 'Acústica ambiental' },
       items: [
         'reference/api/environment/outdoor-propagation',
+        'reference/api/environment/ground-barriers',
         'reference/api/environment/air-absorption',
         'reference/api/environment/impulse-prominence',
         'reference/api/environment/rating',

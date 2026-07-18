@@ -1,7 +1,39 @@
 ---
 title: "Rigidez dinámica de transferencia (ISO 10846)"
 description: "La rigidez dinámica de transferencia k₂₁ = F₂,b/u₁ de elementos resilientes según ISO 10846: el nivel Lₖ re 1 N/m y el factor de pérdidas (Partes 1-3), el método directo (Parte 2), el método indirecto k₂₁ = −(2πf)²(m₂+m_f)T a partir de la transmisibilidad de vibración (Parte 3, Fórmula 1) y la relación del Anexo A con la impedancia mecánica y la masa efectiva."
+references:
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "3.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/b137728"
+    note: "Teoría del aislamiento de vibraciones: por qué el comportamiento de un aislador depende de las movilidades de fuente y receptor, la física que sustenta la caracterización por fuerza bloqueada. ISBN 978-3-540-22696-3."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2008
+    title: "Acoustics and vibration — Laboratory measurement of vibro-acoustic transfer properties of resilient elements — Part 1: Principles and guidelines"
+    designation: "ISO 10846-1:2008"
+    url: "https://www.iso.org/standard/38936.html"
+    note: "La parte de principios de la serie: la idealización de fuerza de bloqueo y las relaciones FRF que implementa esta página: la rigidez dinámica de transferencia k₂₁ = F₂,b/u₁ y sus relaciones FRF (cláusula 5 y Anexo A / Tabla A.2) y la aproximación de la fuerza de bloqueo (Ecs. 6/7). Las partes 4 y 5 de la serie extienden las mismas magnitudes a elementos distintos de los soportes y al método de punto de excitación en baja frecuencia. La conformidad se ancla en la identidad en forma cerrada de la Tabla A.2 k = jω·Z y el cociente de fuerzas de la Ec. (6) 1/1,1."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2008
+    title: "Acoustics and vibration — Laboratory measurement of vibro-acoustic transfer properties of resilient elements — Part 2: Direct method for determination of the dynamic stiffness of resilient supports for translatory motion"
+    designation: "ISO 10846-2:2008"
+    url: "https://www.iso.org/standard/38937.html"
+    note: "El método directo y, con la Parte 3, el nivel L_k re 1 N/m y el factor de pérdidas (cláusulas 3.8/3.17). La conformidad se ancla en el nivel en forma cerrada de una década de rigidez."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2002
+    title: "Acoustics and vibration — Laboratory measurement of vibro-acoustic transfer properties of resilient elements — Part 3: Indirect method for determination of the dynamic stiffness of resilient supports for translatory motion"
+    designation: "ISO 10846-3:2002"
+    url: "https://www.iso.org/standard/34560.html"
+    note: "El método indirecto k₂₁ = −(2πf)²(m₂+m_f)T (Fórmula 1) con sus condiciones de validez (apartado 6: Desigualdades 2 y 3; linealidad del 7.6). La conformidad se ancla en la relación de inercia del método indirecto, el límite de validez |T| = 0,1 ↔ ΔL₁,₂ = 20 dB con su cota de exactitud de 1 dB (12 %) y el criterio de linealidad del 7.6."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La propiedad de transferencia vibroacústica de un elemento resiliente —un
 aislador de vibraciones, montura, fuelle o manguera— es su **rigidez dinámica de
@@ -19,7 +51,7 @@ de bloqueo (ISO 10846-1, Ec. 7), de modo que `k₂₁` es la magnitud que caract
 la transmisión del aislador. `k₂₁` alimenta las normas de fuente estructural y
 de predicción en edificación: ISO 9611, EN 15657 y EN 12354-5.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_stiffness_es.svg" alt="Nivel de rigidez dinámica de transferencia de un aislador Kelvin-Voigt: el nivel real y la estimación por el método indirecto, que diverge en la resonancia masa/resorte y converge por encima de ella" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_stiffness_es_dark.svg" alt="Nivel de rigidez dinámica de transferencia de un aislador Kelvin-Voigt: el nivel real y la estimación por el método indirecto, que diverge en la resonancia masa/resorte y converge por encima de ella" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_stiffness_es.svg" alt="Nivel de rigidez dinámica de transferencia de un aislador Kelvin-Voigt: el nivel real y la estimación por el método indirecto, que diverge en la resonancia masa/resorte y converge por encima de ella" width="82%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -86,7 +118,7 @@ situación para la que se diseña un aislador de vibración. Por eso ISO 10846
 intercala el aislador entre una masa de entrada excitada y una salida que
 está o bien bloqueada rígidamente o bien cargada con una masa conocida:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig_es.svg" alt="Bancos de rigidez de transferencia ISO 10846: el aislador bajo ensayo entre una masa de excitación y o bien una salida bloqueada con un transductor de fuerza, el método directo, o bien una masa de bloqueo sobre apoyos resilientes, el método indirecto" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig_es_dark.svg" alt="Bancos de rigidez de transferencia ISO 10846: el aislador bajo ensayo entre una masa de excitación y o bien una salida bloqueada con un transductor de fuerza, el método directo, o bien una masa de bloqueo sobre apoyos resilientes, el método indirecto" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_transfer_stiffness_rig_es.svg" alt="Bancos de rigidez de transferencia ISO 10846: el aislador bajo ensayo entre una masa de excitación y o bien una salida bloqueada con un transductor de fuerza, el método directo, o bien una masa de bloqueo sobre apoyos resilientes, el método indirecto" width="92%" />
 
 El **método directo** (ISO 10846-2) mide la fuerza de salida bloqueada y el
 desplazamiento de entrada, `k₂₁ = F₂,b/u₁`. El **método indirecto** (ISO 10846-3)
@@ -184,39 +216,6 @@ k = 1e6 + 5e4j                                  # N/m, a 250 Hz
 Z = vibration.convert_frf(k, 250.0, "dynamic_stiffness", "impedance")
 print(abs(complex(vibration.convert_frf(Z, 250.0, "impedance", "dynamic_stiffness"))))  # 1.0012e6
 ```
-
-## Referencias
-
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound: Structural vibrations and sound radiation at audio frequencies*
-  (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
-  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
-  Teoría del aislamiento de vibraciones: por qué el comportamiento de un
-  aislador depende de las movilidades de fuente y receptor, la física que sustenta la
-  caracterización por fuerza bloqueada.
-- International Organization for Standardization. (2008). *Acoustics and
-  vibration — Laboratory measurement of vibro-acoustic transfer properties of
-  resilient elements — Part 1: Principles and guidelines* (ISO 10846-1:2008).
-  [Catálogo iso.org](https://www.iso.org/standard/38936.html).
-  La parte de principios de la serie: la idealización de fuerza de bloqueo y
-  las relaciones FRF que implementa esta página.
-
-## Normas
-
-ISO 10846 (partes 1-5), *Acoustics and vibration — Laboratory
-measurement of vibro-acoustic transfer properties of resilient elements*: la
-rigidez dinámica de transferencia `k₂₁ = F₂,b/u₁` y sus relaciones FRF (Parte 1,
-cláusula 5 y Anexo A / Tabla A.2), el nivel `L_k` re 1 N/m y el factor de pérdidas
-(Partes 2 y 3, cláusulas 3.8/3.17), el método directo (Parte 2) y el método
-indirecto `k₂₁ = −(2πf)²(m₂+m_f)T` (Parte 3, Fórmula 1) con sus condiciones de
-validez (Parte 3, apartado 6: Desigualdades 2 y 3; linealidad del 7.6) y la
-aproximación de la fuerza de bloqueo (Parte 1, Ecs. 6/7). Las partes 4 y 5 extienden
-las mismas magnitudes a elementos distintos de los soportes y al método de punto
-de excitación en baja frecuencia. La conformidad se ancla en las definiciones en
-forma cerrada de la norma: el nivel de una década de rigidez, la relación de
-inercia del método indirecto, la identidad de la Tabla A.2 `k = jω·Z`, el límite
-de validez `|T| = 0,1 ↔ ΔL₁,₂ = 20 dB` con su cota de exactitud de 1 dB (12 %),
-el cociente de fuerzas de la Ec. (6) `1/1,1` y el criterio de linealidad del 7.6.
 
 ## Véase también
 

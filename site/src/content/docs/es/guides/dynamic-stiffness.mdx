@@ -1,7 +1,24 @@
 ---
 title: "Rigidez dinámica de materiales resilientes (EN 29052-1)"
 description: "La determinación según EN 29052-1:1992 de la rigidez dinámica por unidad de área de materiales resilientes bajo suelos flotantes a partir de la resonancia de la placa de carga: la rigidez aparente de la Fórmula 4, el término del gas encerrado de la Fórmula 7, los regímenes por resistividad al flujo de la cláusula 8.2 y la frecuencia natural del suelo flotante de la Fórmula 2."
+references:
+  - type: book
+    authors: ["Vigran, T. E."]
+    year: 2008
+    title: "Building acoustics"
+    publisher: "CRC Press"
+    doi: "10.1201/9781482266016"
+    note: "El diseño de suelos flotantes y el papel de la rigidez dinámica de la capa resiliente en la mejora a ruido de impactos. ISBN 978-0-415-42853-8."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1989
+    title: "Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings"
+    designation: "ISO 9052-1:1989"
+    url: "https://www.iso.org/standard/16620.html"
+    note: "El original internacional de EN 29052-1:1992, el método que implementa esta página: la rigidez dinámica por unidad de área (Fórmula 1), las relaciones de resonancia (Fórmulas 2-4), el término del gas encerrado (Fórmula 7, NOTA de la cláusula 8.2 s'a = 111/d MN/m³) y los regímenes por resistividad al flujo (Fórmulas 5-6). La conformidad se ancla en la NOTA numérica de la propia norma más valores en forma cerrada calculados a mano de las relaciones de resonancia."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Un **suelo flotante** es una losa pesada que descansa sobre una capa resiliente;
 ambos forman un sistema masa-resorte cuya **frecuencia natural** determina cuánto
@@ -14,7 +31,7 @@ modelo de impacto de EN 12354-2 tratado en
 ISO 16251-1 no aplica aquí: su alcance se limita a revestimientos blandos de
 reacción local y excluye expresamente los suelos flotantes.)
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness_es.svg" alt="Frecuencia natural del suelo flotante frente a la rigidez dinámica por unidad de área de la capa resiliente para un suelo flotante ligero y uno pesado, con un punto de diseño" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness_es_dark.svg" alt="Frecuencia natural del suelo flotante frente a la rigidez dinámica por unidad de área de la capa resiliente para un suelo flotante ligero y uno pesado, con un punto de diseño" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness_es.svg" alt="Frecuencia natural del suelo flotante frente a la rigidez dinámica por unidad de área de la capa resiliente para un suelo flotante ligero y uno pesado, con un punto de diseño" width="82%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -53,7 +70,7 @@ $$
 s'_t = 4\pi^2\,m'_t\,f_r^2 .
 $$
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dynamic_stiffness_rig_es.svg" alt="Banco de resonancia ISO 9052-1: un excitador vertical y un acelerómetro sobre la placa de carga encima de la probeta resiliente de 200 mm por 200 mm, leído como un sistema masa-resorte cuyo pico de respuesta da la frecuencia de resonancia y la rigidez dinámica aparente" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dynamic_stiffness_rig_es_dark.svg" alt="Banco de resonancia ISO 9052-1: un excitador vertical y un acelerómetro sobre la placa de carga encima de la probeta resiliente de 200 mm por 200 mm, leído como un sistema masa-resorte cuyo pico de respuesta da la frecuencia de resonancia y la rigidez dinámica aparente" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dynamic_stiffness_rig_es.svg" alt="Banco de resonancia ISO 9052-1: un excitador vertical y un acelerómetro sobre la placa de carga encima de la probeta resiliente de 200 mm por 200 mm, leído como un sistema masa-resorte cuyo pico de respuesta da la frecuencia de resonancia y la rigidez dinámica aparente" width="92%" />
 
 En la disposición de ensayo la probeta queda entre la base rígida y una placa
 de carga cuya masa total por unidad de área, placa más carga añadida, es de
@@ -140,30 +157,6 @@ La frecuencia natural que importa al final no es la $f_r$ del banco sino la
 $f_0$ del suelo instalado según la Fórmula 2: el suelo flotante solo mejora
 el aislamiento bastante por encima de $f_0$, y por eso una `s'` baja (una
 capa blanda bajo una losa pesada) es el objetivo de diseño.
-
-## Referencias
-
-- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
-  ISBN 978-0-415-42853-8.
-  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
-  El diseño de suelos flotantes y el papel de la rigidez dinámica de la capa
-  resiliente en la mejora a ruido de impactos.
-- International Organization for Standardization. (1989). *Acoustics —
-  Determination of dynamic stiffness — Part 1: Materials used under floating
-  floors in dwellings* (ISO 9052-1:1989).
-  [Catálogo iso.org](https://www.iso.org/standard/16620.html).
-  El original internacional de EN 29052-1, el método que implementa esta
-  página.
-
-## Normas
-
-EN 29052-1:1992 (= ISO 9052-1:1989), *Acoustics — Determination of
-dynamic stiffness — Part 1: Materials used under floating floors in dwellings*:
-la rigidez dinámica por unidad de área (Fórmula 1), las relaciones de resonancia
-(Fórmulas 2-4), el término del gas encerrado (Fórmula 7, NOTA de la cláusula 8.2
-`s'a = 111/d` MN/m³) y los regímenes por resistividad al flujo (Fórmulas 5-6). La
-conformidad se ancla en la NOTA numérica de la propia norma más valores en forma
-cerrada calculados a mano de las relaciones de resonancia.
 
 ## Véase también
 

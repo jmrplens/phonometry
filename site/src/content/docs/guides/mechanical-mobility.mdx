@@ -1,7 +1,32 @@
 ---
 title: "Mechanical mobility and the FRF family (ISO 7626-1)"
 description: "The ISO 7626-1:2011 family of motion-per-force frequency-response functions: receptance, mobility and accelerance with their dynamic-stiffness, impedance and apparent-mass reciprocals (Table 1), conversion through the receptance pivot, the closed-form SDOF resonator whose driving-point mobility peaks at 1/c on resonance, and the ISO 7626-2:2015 measurement-side acceptance criteria."
+references:
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "3rd ed."
+    publisher: "Springer"
+    doi: "10.1007/b137728"
+    note: "The standard monograph on structural vibration: point and transfer mobilities of beams and plates, and the power flow P = ½·Re{Y}·|F|² that makes mobility the working quantity of this page. ISBN 978-3-540-22696-3."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2011
+    title: "Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 1: Basic terms and definitions, and transducer specifications"
+    designation: "ISO 7626-1:2011"
+    url: "https://www.iso.org/standard/50426.html"
+    note: "The FRF family and its reciprocals (Table 1, the 3.1.2 mobility and 3.1.4 free-quantity definitions), the free/blocked distinctions and the driving-point / transfer distinction implemented here. Conformance is anchored on the closed-form SDOF identities consistent with those definitions: the driving-point mobility peak |Y(ω0)| = 1/c, the static receptance H(0) = 1/k and the exact Table-1 reciprocity impedance·mobility = 1."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2015
+    title: "Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 2: Measurements using single-point translation excitation with an attached vibration exciter"
+    designation: "ISO 7626-2:2015"
+    url: "https://www.iso.org/standard/62483.html"
+    note: "The measurement side: the 8.1.3 H1 processing of random excitation, the 7.5.2 rigid-mass operational calibration (±5 %) and the Annex A random-error criterion (< 5 % at resonances). Conformance is anchored on the rigid-mass calibration values (|A| = 0.100 1/kg for 10 kg; |Y| = 1.59155e-4 m/(N·s) at 100 Hz) and the Annex A example (γ² = 0.8, n = 75 → ε = 4.08 %)."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Mechanical **mobility** is the complex ratio of a velocity response to the
 force that produces it, `Y = v/F`. It is one member of a family of
@@ -15,7 +40,7 @@ FRF estimation from measured signals and its acceptance criteria. This FRF
 backbone underpins the structure-borne source and transmission standards —
 ISO 9611, ISO 10846, EN 15657 and EN 12354-5.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility.svg" alt="Normalized receptance, mobility and accelerance magnitudes of a single-degree-of-freedom resonator on a log-log frequency axis, all peaking at the resonance" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_dark.svg" alt="Normalized receptance, mobility and accelerance magnitudes of a single-degree-of-freedom resonator on a log-log frequency axis, all peaking at the resonance" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility.svg" alt="Normalized receptance, mobility and accelerance magnitudes of a single-degree-of-freedom resonator on a log-log frequency axis, all peaking at the resonance" width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -113,8 +138,6 @@ print(round(complex(vibration.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000
 
 ## 3. Measured FRFs and their acceptance criteria (ISO 7626-2)
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="ISO 7626 mobility measurement: a free-free beam on soft suspension driven by an exciter through an impedance head at the driving point, an accelerometer at a transfer point, and an impact hammer as the alternative excitation" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_dark.svg" alt="ISO 7626 mobility measurement: a free-free beam on soft suspension driven by an exciter through an impedance head at the driving point, an accelerometer at a transfer point, and an impact hammer as the alternative excitation" style="width:92%">
-
 In the usual ISO 7626-2 arrangement the structure hangs on a suspension soft
 enough that its rigid-body modes fall well below the first elastic resonance
 (the standard admits freely suspended or grounded structures; clause 5 asks
@@ -128,6 +151,8 @@ excitation with an exciter that is not attached to the structure, in
 practice usually an instrumented hammer: it trades the attached exciter's
 controlled spectrum for speed, with an excitation spectrum set by the
 impactor mass and tip stiffness.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="ISO 7626 mobility measurement: a free-free beam on soft suspension driven by an exciter through an impedance head at the driving point, an accelerometer at a transfer point, and an impact hammer as the alternative excitation" width="92%" />
 
 Processing measured random-excitation records per ISO 7626-2, 8.1.3 — the H1
 estimator `Ĥ = G(response, force)/G(force, force)` — and the ordinary coherence
@@ -171,46 +196,6 @@ res = vibration.sdof_mobility_result(f, mass=2.0, stiffness=8000.0, damping=5.0)
 z = res.to("impedance")                        # impedance = 1/Y per frequency
 print(res.frequencies[int(np.argmax(res.magnitude))].round(1))   # ~10.1 Hz
 ```
-
-## References
-
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound: Structural vibrations and sound radiation at audio frequencies*
-  (3rd ed.). Springer. ISBN 978-3-540-22696-3.
-  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
-  The standard monograph on structural vibration: point and transfer
-  mobilities of beams and plates, and the power flow `P = ½·Re{Y}·|F|²` that
-  makes mobility the working quantity of this page.
-- International Organization for Standardization. (2011). *Mechanical
-  vibration and shock — Experimental determination of mechanical mobility —
-  Part 1: Basic terms and definitions, and transducer specifications*
-  (ISO 7626-1:2011).
-  [iso.org catalogue](https://www.iso.org/standard/50426.html).
-  The Table 1 FRF family and the free/blocked distinctions implemented here.
-- International Organization for Standardization. (2015). *Mechanical
-  vibration and shock — Experimental determination of mechanical mobility —
-  Part 2: Measurements using single-point translation excitation with an
-  attached vibration exciter* (ISO 7626-2:2015).
-  [iso.org catalogue](https://www.iso.org/standard/62483.html).
-  The measurement side: H1 processing, rigid-mass calibration and the
-  random-error criterion.
-
-## Standards
-
-ISO 7626-1:2011, *Mechanical vibration and shock — Experimental
-determination of mechanical mobility — Part 1: Basic terms and definitions, and
-transducer specifications* — the FRF family and its reciprocals (Table 1, the
-3.1.2 mobility and 3.1.4 free-quantity definitions) and the driving-point /
-transfer distinction. ISO 7626-2:2015, *Part 2: Measurements using single-point
-translation excitation with an attached vibration exciter* — the 8.1.3 H1
-processing of random excitation, the 7.5.2 rigid-mass operational calibration
-(±5 %) and the Annex A random-error criterion (< 5 % at resonances).
-Conformance is anchored on the closed-form SDOF identities (consistent with the
-Table 1 / 3.1.2 definitions): the driving-point mobility peak `|Y(ω0)| = 1/c`,
-the static receptance `H(0) = 1/k`, the exact Table-1 reciprocity
-`impedance·mobility = 1`, the rigid-mass calibration values (`|A| = 0.100` 1/kg
-for 10 kg; `|Y| = 1.59155e-4` m/(N·s) at 100 Hz) and the Annex A example
-(γ² = 0.8, n = 75 → ε = 4.08 %).
 
 ## See also
 

@@ -1,7 +1,32 @@
 ---
 title: "Structure-borne sound power of equipment (EN 15657)"
 description: "The EN 15657:2018 reception-plate method for building service equipment: the plate-injected power L_Ws = 10 lg(2πfηmS) + L_v − 60 dB (Formula 14), and the plate-independent source quantities: equivalent blocked force (Formula 15), characteristic reception-plate power level (Formula 17), free velocity and source mobility (Formulae 18/19)."
+references:
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "3rd ed."
+    publisher: "Springer"
+    doi: "10.1007/b137728"
+    note: "The plate power balance and the source-receiver mobility framework behind the reception-plate method and its Formula 15-19 source quantities. ISBN 978-3-540-22696-3."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2018
+    title: "Acoustic properties of building elements and of buildings — Laboratory measurement of structure-borne sound from building service equipment for all installation conditions"
+    designation: "EN 15657:2018"
+    url: "https://www.une.org/encuentra-tu-norma/busca-tu-norma/norma?c=N0059781"
+    note: "The reception-plate method (clause 7): the spatial mean velocity level (Formula 12), the plate loss factor η = 2.2/(f·Ts) (Formula 13), the plate-injected power level L_Ws (Formula 14, plate velocity levels referred to v₀ = 10⁻⁹ m/s) and the source-quantity chain: equivalent blocked force (Formula 15), characteristic reception-plate power level (Formula 17, Y_R,∞,low = 5·10⁻⁶ m/(N·s)), equivalent free velocity (Formula 18) and source mobility (Formula 19). Conformance is anchored on the resonant-plate power balance P = ω·η·(m·S)·⟨v²⟩ (of which Formula 14 is the level), the loss-factor identity, and the EN 12354-5 Annex I.3 Table I.8 conversion of the flushing-cistern source. The linked catalogue record is the UNE page for UNE-EN 15657:2018."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Characterization of sources of structure-borne sound with respect to sound radiation from connected structures — Measurement of velocity at the contact points of machinery when resiliently mounted"
+    designation: "ISO 9611:1996"
+    url: "https://www.iso.org/standard/17424.html"
+    note: "The free-velocity source characterization that complements the reception-plate quantities: equation (9), reference velocity v₀ = 5·10⁻⁸ m/s."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Building service equipment — pumps, fans, boilers, sanitary appliances —
 injects **structure-borne sound power** into the building structure it is fixed
@@ -16,7 +41,7 @@ Formula 17; and the equivalent free velocity and source mobility,
 Formulae 18/19) are derived from it and are what the EN 12354-5
 installed-equipment prediction consumes.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power.svg" alt="Reception-plate structure-borne sound power level per one-third-octave band determined on a low-mobility and a high-mobility reception plate" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_dark.svg" alt="Reception-plate structure-borne sound power level per one-third-octave band determined on a low-mobility and a high-mobility reception plate" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power.svg" alt="Reception-plate structure-borne sound power level per one-third-octave band determined on a low-mobility and a high-mobility reception plate" width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -59,7 +84,7 @@ and then the power the plate dissipates equals the power the source injects,
 over all contacts and components at once. One spatial average of the plate
 velocity replaces the entire force-measurement problem.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate.svg" alt="EN 15657 reception plate: the source machine standing on a resiliently supported plate, accelerometers averaging the plate velocity, and the plate power balance converting the velocity level into the injected structure-borne power level" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate_dark.svg" alt="EN 15657 reception plate: the source machine standing on a resiliently supported plate, accelerometers averaging the plate velocity, and the plate power balance converting the velocity level into the injected structure-borne power level" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate.svg" alt="EN 15657 reception plate: the source machine standing on a resiliently supported plate, accelerometers averaging the plate velocity, and the plate power balance converting the velocity level into the injected structure-borne power level" width="92%" />
 
 The power a resonant plate dissipates is `P = ω·η·(m·S)·⟨v²⟩`, so the injected
 power level in one-third-octave bands is (Formula 14)
@@ -151,39 +176,6 @@ print(float(building.source_mobility_from_levels(lvf, lfb)))      # |Y_S,eq| in 
 The direct source-side counterpart is the ISO 9611 free velocity level (re
 `v₀ = 5·10⁻⁸ m/s`) measured at the contact points of resiliently mounted
 machinery; its equation (9) position average is `mean_free_velocity_level()`.
-
-## References
-
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound: Structural vibrations and sound radiation at audio frequencies*
-  (3rd ed.). Springer. ISBN 978-3-540-22696-3.
-  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
-  The plate power balance and the source-receiver mobility framework behind
-  the reception-plate method and its Formula 15-19 source quantities.
-- International Organization for Standardization. (1996). *Acoustics —
-  Characterization of sources of structure-borne sound with respect to sound
-  radiation from connected structures — Measurement of velocity at the
-  contact points of machinery when resiliently mounted* (ISO 9611:1996).
-  [iso.org catalogue](https://www.iso.org/standard/17424.html).
-  The free-velocity source characterization that complements the
-  reception-plate quantities.
-
-## Standards
-
-EN 15657:2018, *Acoustic properties of building elements and
-buildings — Laboratory measurement of structure-borne sound from building
-service equipment for all installation conditions*: the reception-plate method
-(clause 7), the spatial mean velocity level (Formula 12), the plate loss factor
-`η = 2.2/(f·Ts)` (Formula 13), the plate-injected power level `L_Ws`
-(Formula 14) and the source-quantity chain: equivalent blocked force
-(Formula 15), characteristic reception-plate power level (Formula 17,
-`Y_R,∞,low = 5·10⁻⁶ m/(N·s)`), equivalent free velocity (Formula 18) and
-source mobility (Formula 19). ISO 9611:1996: the free-velocity source
-characterization (equation (9), `v₀ = 5·10⁻⁸ m/s`). The plate velocity levels
-are referred to `v₀ = 10⁻⁹ m/s`. Conformance is anchored on the resonant-plate
-power balance `P = ω·η·(m·S)·⟨v²⟩` (of which Formula 14 is the level), the
-loss-factor identity, and the EN 12354-5 Annex I.3 Table I.8 conversion of the
-flushing-cistern source.
 
 ## See also
 

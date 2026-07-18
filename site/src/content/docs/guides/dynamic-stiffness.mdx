@@ -1,7 +1,24 @@
 ---
 title: "Dynamic stiffness of resilient materials (EN 29052-1)"
 description: "The EN 29052-1:1992 determination of the dynamic stiffness per unit area of resilient materials under floating floors from the load-plate resonance: the apparent stiffness of Formula 4, the enclosed-gas term of Formula 7, the airflow-resistivity regimes of clause 8.2, and the floating-floor natural frequency of Formula 2."
+references:
+  - type: book
+    authors: ["Vigran, T. E."]
+    year: 2008
+    title: "Building acoustics"
+    publisher: "CRC Press"
+    doi: "10.1201/9781482266016"
+    note: "Floating-floor design and the role of the resilient layer's dynamic stiffness in the impact-sound improvement. ISBN 978-0-415-42853-8."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1989
+    title: "Acoustics — Determination of dynamic stiffness — Part 1: Materials used under floating floors in dwellings"
+    designation: "ISO 9052-1:1989"
+    url: "https://www.iso.org/standard/16620.html"
+    note: "The international original of EN 29052-1:1992, the method this page implements: the dynamic stiffness per unit area (Formula 1), the resonance relations (Formulae 2-4), the enclosed-gas term (Formula 7, clause 8.2 NOTE s'a = 111/d MN/m³) and the airflow-resistivity regimes (Formulae 5-6). Conformance is anchored on the standard's own numeric NOTE plus hand-computed closed-form values of the resonance relations."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 A **floating floor** is a heavy floating slab resting on a resilient layer; the
 two form a mass-spring system whose **natural frequency** governs how much the
@@ -14,7 +31,7 @@ EN 12354-2 impact model covered in
 here: its scope is limited to soft, locally-reacting floor coverings and
 explicitly excludes floating floors.)
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness.svg" alt="Floating-floor natural frequency versus the resilient layer's dynamic stiffness per unit area for a light and a heavy floating floor, with a worked design point" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness_dark.svg" alt="Floating-floor natural frequency versus the resilient layer's dynamic stiffness per unit area for a light and a heavy floating floor, with a worked design point" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dynamic_stiffness.svg" alt="Floating-floor natural frequency versus the resilient layer's dynamic stiffness per unit area for a light and a heavy floating floor, with a worked design point" width="82%" loading="eager" />
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -51,7 +68,7 @@ $$
 s'_t = 4\pi^2\,m'_t\,f_r^2 .
 $$
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dynamic_stiffness_rig.svg" alt="ISO 9052-1 resonance rig: a vertical exciter and an accelerometer on the load plate over the 200 mm by 200 mm resilient specimen, read as a mass-spring system whose response peak gives the resonant frequency and the apparent dynamic stiffness" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dynamic_stiffness_rig_dark.svg" alt="ISO 9052-1 resonance rig: a vertical exciter and an accelerometer on the load plate over the 200 mm by 200 mm resilient specimen, read as a mass-spring system whose response peak gives the resonant frequency and the apparent dynamic stiffness" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dynamic_stiffness_rig.svg" alt="ISO 9052-1 resonance rig: a vertical exciter and an accelerometer on the load plate over the 200 mm by 200 mm resilient specimen, read as a mass-spring system whose response peak gives the resonant frequency and the apparent dynamic stiffness" width="92%" />
 
 In the test arrangement the specimen lies between the rigid foundation and a
 load plate whose total mass per unit area, plate plus added load, is
@@ -138,29 +155,6 @@ The natural frequency that matters in the end is not the rig's $f_r$ but the
 installed floor's $f_0$ from Formula 2: the floating floor only improves
 insulation well above $f_0$, which is why a low `s'` (a soft layer under a
 heavy slab) is the design goal.
-
-## References
-
-- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
-  ISBN 978-0-415-42853-8.
-  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
-  Floating-floor design and the role of the resilient layer's dynamic
-  stiffness in the impact-sound improvement.
-- International Organization for Standardization. (1989). *Acoustics —
-  Determination of dynamic stiffness — Part 1: Materials used under floating
-  floors in dwellings* (ISO 9052-1:1989).
-  [iso.org catalogue](https://www.iso.org/standard/16620.html).
-  The international original of EN 29052-1, the method this page implements.
-
-## Standards
-
-EN 29052-1:1992 (= ISO 9052-1:1989), *Acoustics — Determination
-of dynamic stiffness — Part 1: Materials used under floating floors in
-dwellings*: the dynamic stiffness per unit area (Formula 1), the resonance
-relations (Formulae 2-4), the enclosed-gas term (Formula 7, clause 8.2 NOTE
-`s'a = 111/d` MN/m³) and the airflow-resistivity regimes (Formulae 5-6).
-Conformance is anchored on the standard's own numeric NOTE plus hand-computed
-closed-form values of the resonance relations.
 
 ## See also
 

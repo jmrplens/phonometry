@@ -1,7 +1,32 @@
 ---
 title: "Potencia sonora estructural de equipos (EN 15657)"
 description: "El método de placa receptora de EN 15657:2018 para equipos de servicio del edificio: la potencia inyectada en la placa L_Ws = 10 lg(2πfηmS) + L_v − 60 dB (Fórmula 14) y las magnitudes de fuente independientes de la placa: fuerza bloqueada equivalente (Fórmula 15), nivel de potencia característico de placa receptora (Fórmula 17), velocidad libre y movilidad de la fuente (Fórmulas 18/19)."
+references:
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "3.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/b137728"
+    note: "El balance de potencia de la placa y el marco de movilidades fuente-receptor que sustentan el método de placa receptora y sus magnitudes de fuente de las Fórmulas 15-19. ISBN 978-3-540-22696-3."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2018
+    title: "Acoustic properties of building elements and of buildings — Laboratory measurement of structure-borne sound from building service equipment for all installation conditions"
+    designation: "EN 15657:2018"
+    url: "https://www.une.org/encuentra-tu-norma/busca-tu-norma/norma?c=N0059781"
+    note: "El método de la placa receptora (cláusula 7): el nivel de velocidad medio espacial (Fórmula 12), el factor de pérdida de la placa η = 2,2/(f·Ts) (Fórmula 13), el nivel de potencia inyectada en la placa L_Ws (Fórmula 14, niveles de velocidad de la placa referidos a v₀ = 10⁻⁹ m/s) y la cadena de magnitudes de fuente: fuerza bloqueada equivalente (Fórmula 15), nivel de potencia característico de placa receptora (Fórmula 17, Y_R,∞,baja = 5·10⁻⁶ m/(N·s)), velocidad libre equivalente (Fórmula 18) y movilidad de la fuente (Fórmula 19). La conformidad se ancla en el balance de potencia de la placa resonante P = ω·η·(m·S)·⟨v²⟩ (del cual la Fórmula 14 es el nivel), en la identidad del factor de pérdida y en la conversión de la fuente de la cisterna de la Tabla I.8 del Anexo I.3 de EN 12354-5. La ficha de catálogo enlazada es la página de UNE de UNE-EN 15657:2018."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Characterization of sources of structure-borne sound with respect to sound radiation from connected structures — Measurement of velocity at the contact points of machinery when resiliently mounted"
+    designation: "ISO 9611:1996"
+    url: "https://www.iso.org/standard/17424.html"
+    note: "La caracterización de fuente por velocidad libre que complementa las magnitudes de la placa receptora: ecuación (9), velocidad de referencia v₀ = 5·10⁻⁸ m/s."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Los equipos de servicio del edificio —bombas, ventiladores, calderas, aparatos
 sanitarios— inyectan **potencia sonora estructural** en la estructura del
@@ -17,7 +42,7 @@ Fórmula 17; y la velocidad libre y movilidad equivalentes de la fuente,
 Fórmulas 18/19) se derivan de ella y son lo que consume la predicción de
 equipos instalados de EN 12354-5.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_es.svg" alt="Nivel de potencia sonora estructural inyectada en placa receptora por banda de tercio de octava, determinado en una placa de baja movilidad y otra de alta movilidad" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_es_dark.svg" alt="Nivel de potencia sonora estructural inyectada en placa receptora por banda de tercio de octava, determinado en una placa de baja movilidad y otra de alta movilidad" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/structure_borne_power_es.svg" alt="Nivel de potencia sonora estructural inyectada en placa receptora por banda de tercio de octava, determinado en una placa de baja movilidad y otra de alta movilidad" width="82%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -61,7 +86,7 @@ que la placa disipa es igual a la potencia que la fuente inyecta, sumada
 sobre todos los contactos y componentes a la vez. Un promedio espacial de la
 velocidad de la placa sustituye todo el problema de medir fuerzas.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate_es.svg" alt="Placa receptora EN 15657: la máquina fuente sobre una placa con apoyos resilientes, acelerómetros que promedian la velocidad de la placa y el balance de potencia de la placa que convierte el nivel de velocidad en el nivel de potencia estructural inyectada" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate_es_dark.svg" alt="Placa receptora EN 15657: la máquina fuente sobre una placa con apoyos resilientes, acelerómetros que promedian la velocidad de la placa y el balance de potencia de la placa que convierte el nivel de velocidad en el nivel de potencia estructural inyectada" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_reception_plate_es.svg" alt="Placa receptora EN 15657: la máquina fuente sobre una placa con apoyos resilientes, acelerómetros que promedian la velocidad de la placa y el balance de potencia de la placa que convierte el nivel de velocidad en el nivel de potencia estructural inyectada" width="92%" />
 
 La potencia que disipa una placa resonante es `P = ω·η·(m·S)·⟨v²⟩`, de modo que
 el nivel de potencia inyectada en bandas de tercio de octava es (Fórmula 14)
@@ -157,41 +182,6 @@ El homólogo directo del lado de la fuente es el nivel de velocidad libre de
 ISO 9611 (re `v₀ = 5·10⁻⁸ m/s`) medido en los puntos de contacto de maquinaria
 montada elásticamente; su media por posiciones de la ecuación (9) es
 `mean_free_velocity_level()`.
-
-## Referencias
-
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound: Structural vibrations and sound radiation at audio frequencies*
-  (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
-  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
-  El balance de potencia de la placa y el marco de movilidades
-  fuente-receptor que sustentan el método de placa receptora y sus magnitudes de
-  fuente de las Fórmulas 15-19.
-- International Organization for Standardization. (1996). *Acoustics —
-  Characterization of sources of structure-borne sound with respect to sound
-  radiation from connected structures — Measurement of velocity at the
-  contact points of machinery when resiliently mounted* (ISO 9611:1996).
-  [Catálogo iso.org](https://www.iso.org/standard/17424.html).
-  La caracterización de fuente por velocidad libre que complementa las
-  magnitudes de la placa receptora.
-
-## Normas
-
-EN 15657:2018, *Acoustic properties of building elements and
-buildings — Laboratory measurement of structure-borne sound from building
-service equipment for all installation conditions*: el método de la placa
-receptora (cláusula 7), el nivel de velocidad medio espacial (Fórmula 12), el
-factor de pérdida de la placa `η = 2,2/(f·Ts)` (Fórmula 13), el nivel de
-potencia inyectada en la placa `L_Ws` (Fórmula 14) y la cadena de magnitudes de
-fuente: fuerza bloqueada equivalente (Fórmula 15), nivel de potencia
-característico de placa receptora (Fórmula 17, `Y_R,∞,baja = 5·10⁻⁶ m/(N·s)`),
-velocidad libre equivalente (Fórmula 18) y movilidad de la fuente
-(Fórmula 19). ISO 9611:1996: la caracterización de fuentes por velocidad libre
-(ecuación (9), `v₀ = 5·10⁻⁸ m/s`). Los niveles de velocidad de la placa se
-refieren a `v₀ = 10⁻⁹ m/s`. La conformidad se ancla en el balance de potencia
-de la placa resonante `P = ω·η·(m·S)·⟨v²⟩` (del cual la Fórmula 14 es el
-nivel), en la identidad del factor de pérdida y en la conversión de la fuente
-de la cisterna de la Tabla I.8 del Anexo I.3 de EN 12354-5.
 
 ## Véase también
 

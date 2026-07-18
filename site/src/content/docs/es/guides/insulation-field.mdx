@@ -1,7 +1,73 @@
 ---
 title: "Medición del aislamiento en campo e índices"
 description: "Aislamiento en campo a ruido aéreo, a impactos y de fachadas (ISO 16283-1/2/3) con índices ponderados de un solo número (ISO 717-1/2), la incertidumbre de medición que los cualifica (ISO 12999-1) y el método de control de ISO 10052."
+references:
+  - type: book
+    authors: ["Hopkins, C."]
+    year: 2007
+    title: "Sound insulation"
+    publisher: "Butterworth-Heinemann"
+    doi: "10.4324/9780080550473"
+    note: "El tratamiento exhaustivo del aislamiento a ruido aéreo y de impactos: las cadenas de medición, la estadística de salas que sustenta las magnitudes de campo y la interpretación de los índices globales. ISBN 978-0-7506-6526-1."
+  - type: book
+    authors: ["Vigran, T. E."]
+    year: 2008
+    title: "Building acoustics"
+    publisher: "CRC Press"
+    doi: "10.1201/9781482266016"
+    note: "Un manual compacto que acompaña la física de transmisión sonora que sustenta estas mediciones. ISBN 978-0-415-42853-8."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2014
+    title: "Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation"
+    designation: "ISO 16283-1:2014"
+    url: "https://www.iso.org/standard/55997.html"
+    note: "El método aéreo de campo que implementa esta página: las diferencias de nivel y normalizaciones."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2015
+    title: "Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 2: Impact sound insulation"
+    designation: "ISO 16283-2:2015"
+    url: "https://www.iso.org/standard/59747.html"
+    note: "El método de impactos de campo: los niveles de impactos estandarizado y normalizado."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Acoustics — Field measurement of sound insulation in buildings and of building elements — Part 3: Façade sound insulation"
+    designation: "ISO 16283-3:2016"
+    url: "https://www.iso.org/standard/59748.html"
+    note: "Los métodos de fachada de elemento y global en campo, con las correcciones por ángulo de incidencia."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2020
+    title: "Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation"
+    designation: "ISO 717-1:2020"
+    url: "https://www.iso.org/standard/77435.html"
+    note: "La calificación por curva de referencia y los términos de adaptación espectral C y Ctr interpretados arriba; también el motor de un solo número para la magnitud de fachada (Anexo F)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2020
+    title: "Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation"
+    designation: "ISO 717-2:2020"
+    url: "https://www.iso.org/standard/69867.html"
+    note: "La calificación de impactos por curva de referencia y el término de adaptación espectral CI, con el término de rango ampliado CI,50-2500."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2020
+    title: "Acoustics — Determination and application of measurement uncertainties in building acoustics — Part 1: Sound insulation"
+    designation: "ISO 12999-1:2020"
+    url: "https://www.iso.org/standard/73930.html"
+    note: "Las incertidumbres típicas por situación de medición (Cláusula 5.2) y los factores de cobertura de la Tabla 8; su marco de precisión se apoya en ISO 5725 (contexto, no implementada directamente)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2021
+    title: "Acoustics — Field measurements of airborne and impact sound insulation and of service equipment sound — Survey method"
+    designation: "ISO 10052:2021"
+    url: "https://www.iso.org/standard/76560.html"
+    note: "El método de control en campo: la corrección por índice de reverberación, las magnitudes aérea, de impacto y de fachada estandarizadas/normalizadas, y el ruido de equipos de servicio. Las fórmulas y la tabla del índice de reverberación son idénticas en la armonizada EN ISO 10052:2004+A1:2010."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Esta guía continúa desde la [guía de Acústica de salas](/phonometry/es/guides/room-acoustics/):
 la misma respuesta al impulso, medida a ambos lados de un cerramiento, da su
@@ -33,6 +99,8 @@ $$
 Las posiciones se promedian en energía con
 $L = 10 \log_{10}\left( \frac{1}{n} \sum_i 10^{L_i/10} \right)$.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_setup_es.svg" alt="Montaje de aislamiento a ruido aéreo en campo: un altavoz en la sala emisora, micrófonos promediados en energía en las salas emisora y receptora a través del cerramiento común" width="92%" loading="eager" />
+
 La prima de $R'$ es una convención, no un adorno: las magnitudes con prima
 ($R'$, $L'_n$, $L'_{nT}$) se miden **en el edificio** e incluyen todas las
 vías de flancos, mientras que las $R$ y $L_n$ sin prima son propiedades de
@@ -41,8 +109,6 @@ completo laboratorio-campo vive en
 [Medición del aislamiento en laboratorio](/phonometry/es/guides/insulation-lab/);
 la predicción que tiende el puente entre ambos es
 [EN 12354](/phonometry/es/guides/insulation-prediction/).
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_setup_es.svg" alt="Montaje de aislamiento a ruido aéreo en campo: un altavoz en la sala emisora, micrófonos promediados en energía en las salas emisora y receptora a través del cerramiento común" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_insulation_setup_es_dark.svg" alt="Montaje de aislamiento a ruido aéreo en campo: un altavoz en la sala emisora, micrófonos promediados en energía en las salas emisora y receptora a través del cerramiento común" style="width:92%">
 
 El espectro por bandas se reduce a un número mediante el **método de la curva
 de referencia** de ISO 717-1: una curva de referencia fija se desplaza en
@@ -78,7 +144,7 @@ fuente. Para leerlos:
   reglamentación lo diga) entre viviendas, los dos requisitos de ejemplo de
   ISO 717-1, 5.3.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es.svg" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es_dark.svg" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_rating_es.svg" alt="Índice de reducción sonora medido en tercios de octava con la curva de referencia de ISO 717-1 desplazada y el índice ponderado resultante a 500 Hz" width="80%" />
 
 ```python
 import numpy as np
@@ -220,7 +286,7 @@ $L_i$; el nivel **normalizado** $L'_n$ (referido a un área de absorción de
 **menos** —más reverberación *reduce* $L'_{nT}$, al contrario que el $D_{nT}$
 aéreo.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup_es.svg" alt="Montaje de aislamiento a impactos en campo: una máquina de impactos normalizada sobre el suelo de la sala emisora superior, micrófonos promediados en energía en la sala receptora inferior, y el tiempo de reverberación de la sala receptora" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup_es_dark.svg" alt="Montaje de aislamiento a impactos en campo: una máquina de impactos normalizada sobre el suelo de la sala emisora superior, micrófonos promediados en energía en la sala receptora inferior, y el tiempo de reverberación de la sala receptora" style="width:92%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup_es.svg" alt="Montaje de aislamiento a impactos en campo: una máquina de impactos normalizada sobre el suelo de la sala emisora superior, micrófonos promediados en energía en la sala receptora inferior, y el tiempo de reverberación de la sala receptora" width="92%" />
 
 El índice de un solo número (ISO 717-2) desplaza el mismo estilo de curva de
 referencia, pero una **desviación desfavorable se produce ahora donde la
@@ -235,7 +301,7 @@ $C_{I,50\text{–}2500}$ (NOTA de A.2.1) y, con `one_decimal=True`, el índice e
 pasos de 0,1 dB usado en las declaraciones de incertidumbre (reproduce los
 valores impresos $L_{n,r,0,w} = 77,6$ dB y $C_{I,r,0} = -10,3$ dB de A.2.2).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_es.svg" alt="Nivel de presión de ruido de impactos normalizado medido en tercios de octava con la curva de referencia de ISO 717-2 desplazada y el índice ponderado resultante leído a 500 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_es_dark.svg" alt="Nivel de presión de ruido de impactos normalizado medido en tercios de octava con la curva de referencia de ISO 717-2 desplazada y el índice ponderado resultante leído a 500 Hz" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impact_rating_es.svg" alt="Nivel de presión de ruido de impactos normalizado medido en tercios de octava con la curva de referencia de ISO 717-2 desplazada y el índice ponderado resultante leído a 500 Hz" width="80%" />
 
 ```python
 import numpy as np
@@ -426,9 +492,7 @@ $k$ de la Tabla 8. Un intervalo bilateral $Y = y \pm U$ (Fórmula 3, $k = 1{,}96
 95 %) *informa* un valor; el factor **unilateral** ($k = 1{,}65$ al 95 %) *declara
 conformidad* con un requisito (Fórmulas 4/5).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999_es.svg" alt="Flujo de incertidumbre ISO 12999-1: incertidumbre típica de las tablas, reducida por mediciones repetidas y combinada en cuadratura, y luego expandida por el factor de cobertura de la Tabla 8 en un informe bilateral o una decisión de conformidad unilateral" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999_es_dark.svg" alt="Flujo de incertidumbre ISO 12999-1: incertidumbre típica de las tablas, reducida por mediciones repetidas y combinada en cuadratura, y luego expandida por el factor de cobertura de la Tabla 8 en un informe bilateral o una decisión de conformidad unilateral" style="width:82%">
-
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es.svg" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es_dark.svg" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso12999_es.svg" alt="Flujo de incertidumbre ISO 12999-1: incertidumbre típica de las tablas, reducida por mediciones repetidas y combinada en cuadratura, y luego expandida por el factor de cobertura de la Tabla 8 en un informe bilateral o una decisión de conformidad unilateral" width="82%" />
 
 ```python
 from phonometry import building
@@ -455,6 +519,8 @@ son insensibles a mayúsculas y con alias (`rprime_w`/`dnt_w`→`r_w`,
 `lprime_n_w`→`ln_w`); combina componentes independientes en cuadratura con
 `combine_uncertainties`, y redúcelas por $m$ mediciones independientes con
 `reduce_by_independent_measurements` ($u/\sqrt{m}$).
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_es.svg" alt="Un índice ponderado informado con su incertidumbre expandida bilateral al 95 % en las situaciones A, B y C, con la incertidumbre de reproducibilidad más ancha y la de repetibilidad más estrecha" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -548,7 +614,7 @@ print(round(float(se.l_xy), 1), round(float(se.l_xy_nt), 1))   # 32.8 29.8
 res.plot()   # DnT vs curva de referencia ISO 717-1 desplazada (necesita matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation_es.svg" alt="Aislamiento aéreo por el método de control: la diferencia de niveles bruta D y la estandarizada DnT en las cinco bandas de octava, con la corrección por índice de reverberación k sombreada entre ambas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation_es_dark.svg" alt="Aislamiento aéreo por el método de control: la diferencia de niveles bruta D y la estandarizada DnT en las cinco bandas de octava, con la corrección por índice de reverberación k sombreada entre ambas" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation_es.svg" alt="Aislamiento aéreo por el método de control: la diferencia de niveles bruta D y la estandarizada DnT en las cinco bandas de octava, con la corrección por índice de reverberación k sombreada entre ambas" width="80%" />
 
 *El índice de reverberación `k = 10 lg(T/T0)` desplaza la diferencia de niveles
 bruta `D` hacia la estandarizada `DnT` — hacia arriba donde la sala es viva
@@ -602,45 +668,6 @@ plt.show()
 `survey_facade_insulation()` un `SurveyFacadeResult`;
 `survey_service_equipment_level()` un `SurveyServiceEquipmentResult` (`l_xy`,
 `l_xy_nt`, `l_xy_n`).
-
-## Referencias
-
-- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
-  ISBN 978-0-7506-6526-1.
-  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
-  El tratamiento exhaustivo del aislamiento a ruido aéreo y de impactos: las
-  cadenas de medición, la estadística de salas que sustenta las magnitudes de campo y
-  la interpretación de los índices globales.
-- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
-  ISBN 978-0-415-42853-8.
-  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
-  Un manual compacto que acompaña la física de transmisión sonora que sustenta estas
-  mediciones.
-- International Organization for Standardization. (2020). *Acoustics —
-  Rating of sound insulation in buildings and of building elements — Part 1:
-  Airborne sound insulation* (ISO 717-1:2020).
-  [Catálogo iso.org](https://www.iso.org/standard/77435.html).
-  La calificación por curva de referencia y los términos de adaptación
-  espectral interpretados arriba.
-- International Organization for Standardization. (2014). *Acoustics — Field
-  measurement of sound insulation in buildings and of building elements —
-  Part 1: Airborne sound insulation* (ISO 16283-1:2014).
-  [Catálogo iso.org](https://www.iso.org/standard/55997.html).
-  El método aéreo de campo que implementa esta página.
-
-## Normas
-
-ISO 16283-1:2014, ISO 16283-2 e ISO 16283-3:2016, *Acoustics —
-Field measurement of sound insulation in buildings and of building elements* —
-las diferencias de nivel, normalizaciones y métodos de elemento; ISO 717-1 e
-ISO 717-2 — los índices de un solo número por curva de referencia y los
-términos de adaptación espectral C, Ctr y CI; ISO 12999-1:2020 — las
-incertidumbres típicas por situación de medición y los factores de cobertura;
-su marco de precisión se apoya en ISO 5725 (contexto, no implementada
-directamente); ISO 10052:2021 (armonizada como EN ISO 10052:2004+A1:2010) — el
-método de control en campo: la corrección por índice de reverberación, las
-magnitudes aérea, de impacto y de fachada estandarizadas/normalizadas, y el
-ruido de equipos de servicio.
 
 ## Véase también
 

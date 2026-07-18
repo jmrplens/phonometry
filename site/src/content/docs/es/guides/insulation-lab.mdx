@@ -1,7 +1,101 @@
 ---
 title: "Medición del aislamiento en laboratorio"
 description: "Caracterización en laboratorio de elementos constructivos (ISO 10140), aislamiento acústico por intensidad (ISO 15186), mejora a impactos de revestimientos de suelo en maqueta pequeña (ISO 16251-1) y transmisión por flancos en laboratorio (ISO 10848)."
+references:
+  - type: book
+    authors: ["Hopkins, C."]
+    year: 2007
+    title: "Sound insulation"
+    publisher: "Butterworth-Heinemann"
+    doi: "10.4324/9780080550473"
+    note: "La monografía de referencia para la medición del aislamiento en laboratorio, la transmisión por flancos y el índice de reducción de vibraciones. ISBN 978-0-7506-6526-1."
+  - type: book
+    authors: ["Vigran, T. E."]
+    year: 2008
+    title: "Building acoustics"
+    publisher: "CRC Press"
+    doi: "10.1201/9781482266016"
+    note: "La teoría de transmisión de construcciones simples y dobles que cuantifican los índices de laboratorio. ISBN 978-0-415-42853-8."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 2: Measurement of airborne sound insulation"
+    designation: "ISO 10140-2:2010"
+    url: "https://www.iso.org/standard/42088.html"
+    note: "El índice de reducción sonora R de laboratorio con la corrección de ruido de fondo (Cláusula 4.3)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 3: Measurement of impact sound insulation"
+    designation: "ISO 10140-3:2010"
+    url: "https://www.iso.org/standard/42089.html"
+    note: "El nivel de impactos normalizado Ln de laboratorio."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Laboratory measurement of sound insulation of building elements — Part 4: Measurement procedures and requirements"
+    designation: "ISO 10140-4:2010"
+    url: "https://www.iso.org/standard/42090.html"
+    note: "Los procedimientos de medición y la corrección de ruido de fondo comunes al R aéreo y al Ln de impactos."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2000
+    title: "Acoustics — Measurement of sound insulation in buildings and of building elements using sound intensity — Part 1: Laboratory measurements"
+    designation: "ISO 15186-1:2000"
+    url: "https://www.iso.org/standard/26097.html"
+    note: "El índice de reducción sonora por intensidad R_I, su forma modificada por Kc y la diferencia de niveles normalizada por elemento (laboratorio); la herramienta preferida cuando la transmisión por flancos es alta (cláusula 1)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2003
+    title: "Acoustics — Measurement of sound insulation in buildings and of building elements using sound intensity — Part 2: Field measurements"
+    designation: "ISO 15186-2:2003"
+    url: "https://www.iso.org/standard/30105.html"
+    note: "La contraparte en campo del método por intensidad, que da el índice aparente R'_I."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2014
+    title: "Acoustics — Laboratory measurement of the reduction of transmitted impact noise by floor coverings on a small floor mock-up — Part 1: Heavyweight compact floor"
+    designation: "ISO 16251-1:2014"
+    url: "https://www.iso.org/standard/56017.html"
+    note: "El método de laboratorio en maqueta pequeña para la mejora a impactos ΔL de revestimientos de suelo blandos y de reacción local, con ΔL_w vía el suelo de referencia de ISO 717-2 y el término de adaptación CI,delta."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2020
+    title: "Acoustics — Rating of sound insulation in buildings and of building elements — Part 2: Impact sound insulation"
+    designation: "ISO 717-2:2020"
+    url: "https://www.iso.org/standard/69867.html"
+    note: "El motor de valoración de impactos de un solo número reutilizado aquí y el suelo de referencia L_n,r,0 (Tabla 4) detrás de ΔL_w, con el término de adaptación espectral CI,delta de la Fórmula (A.4)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2006
+    title: "Acoustics — Laboratory measurement of the flanking transmission of airborne and impact sound between adjoining rooms — Part 1: Frame document"
+    designation: "ISO 10848-1:2006"
+    url: "https://www.iso.org/standard/38284.html"
+    note: "El documento marco de la medición de la transmisión por flancos: definiciones, el índice de reducción vibracional Kij, la longitud de absorción equivalente y los descriptores de flanco normalizados D_n,f / L_n,f que alimentan la predicción EN 12354. Como ISO 10848 no contiene ningún ejemplo numérico resuelto, la conformidad se ancla en identidades de forma cerrada."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2006
+    title: "Acoustics — Laboratory measurement of the flanking transmission of airborne and impact sound between adjoining rooms — Part 2: Application to light elements when the junction has a small influence"
+    designation: "ISO 10848-2:2006"
+    url: "https://www.iso.org/standard/35004.html"
+    note: "Aplicación a elementos ligeros cuya unión tiene una influencia pequeña."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2006
+    title: "Acoustics — Laboratory measurement of the flanking transmission of airborne and impact sound between adjoining rooms — Part 3: Application to light elements when the junction has a substantial influence"
+    designation: "ISO 10848-3:2006"
+    url: "https://www.iso.org/standard/35003.html"
+    note: "Aplicación a elementos ligeros cuya unión tiene una influencia sustancial."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Laboratory measurement of the flanking transmission of airborne and impact sound between adjoining rooms — Part 4: Application to junctions with at least one heavy element"
+    designation: "ISO 10848-4:2010"
+    url: "https://www.iso.org/standard/45360.html"
+    note: "Aplicación a uniones con al menos un elemento pesado, con las comprobaciones de validez por densidad modal, número de modos por banda y solapamiento modal (bandas con M < 0,25 acotadas, Cláusula 9)."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Para valorar un elemento constructivo por sí solo (un tipo de pared, un suelo
 flotante, una ventana) se lleva a un laboratorio cualificado, donde la
@@ -162,7 +256,7 @@ print(round(float(fpi[0]), 1))               # 6.0
 res.plot()   # RI medido vs curva de referencia ISO 717-1 desplazada (necesita matplotlib)
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_es.svg" alt="Índice de reducción sonora por intensidad RI y el índice modificado RI,M a lo largo de las bandas de tercio de octava, con el aumento de adaptación del Anexo B sombreado entre las dos curvas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_es_dark.svg" alt="Índice de reducción sonora por intensidad RI y el índice modificado RI,M a lo largo de las bandas de tercio de octava, con el aumento de adaptación del Anexo B sombreado entre las dos curvas" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_es.svg" alt="Índice de reducción sonora por intensidad RI y el índice modificado RI,M a lo largo de las bandas de tercio de octava, con el aumento de adaptación del Anexo B sombreado entre las dos curvas" width="80%" loading="eager" />
 
 *El índice modificado $R_{I,M} = R_I + K_c$ eleva $R_I$ — más en las bandas
 bajas, donde $K_c$ es mayor — de modo que una medición por intensidad reproduce
@@ -235,8 +329,6 @@ la excita y se mide el **nivel de aceleración** estructural en la cara inferior
 y sin el revestimiento. Para revestimientos de reacción local, esa diferencia de
 niveles de aceleración equivale a la reducción de ruido de impactos de ISO 10140.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_es.svg" alt="Mejora a impacto de revestimientos de suelo ISO 16251-1: la mejora delta-L de una moqueta blanda creciendo con la frecuencia en bandas de tercio de octava de 100 Hz a 3150 Hz, con el área de mejora sombreada y el número único ponderado delta-Lw anotado" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_es_dark.svg" alt="Mejora a impacto de revestimientos de suelo ISO 16251-1: la mejora delta-L de una moqueta blanda creciendo con la frecuencia en bandas de tercio de octava de 100 Hz a 3150 Hz, con el área de mejora sombreada y el número único ponderado delta-Lw anotado" style="width:80%">
-
 **Nivel de aceleración (Fórmula (1)).** $L_a = 10\lg(\langle a^2\rangle / a_0^2)$ dB,
 referencia $a_0 = 10^{-6}\ \text{m/s}^2$. La **corrección de ruido de fondo
 (Fórmula (2))** sigue la regla de tres ramas de ISO 10140 (sin cambio si ≥ 15 dB;
@@ -256,6 +348,8 @@ opcionalmente ampliadas hasta 50 Hz); la valoración se forma sobre el subrango
 $C_{I,\Delta} = C_{I,r,0} - C_{I,r}$ (ISO 717-2:2020, Fórmula (A.4)), expuesto
 como `ci_delta` en el resultado y de forma independiente como
 `impact_improvement_adaptation_term()`.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_es.svg" alt="Mejora a impacto de revestimientos de suelo ISO 16251-1: la mejora delta-L de una moqueta blanda creciendo con la frecuencia en bandas de tercio de octava de 100 Hz a 3150 Hz, con el área de mejora sombreada y el número único ponderado delta-Lw anotado" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -307,8 +401,6 @@ toma como entrada, junto con los descriptores globales de flanco $D_{n,f}$
 (aéreo) y $L_{n,f}$ (impacto). Es la contraparte de medición de la función
 empírica `junction_vibration_reduction()` de esa predicción.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_es.svg" alt="Índice de reducción vibracional de unión Kij ISO 10848 creciendo entre 100 Hz y 5000 Hz en tercios de octava para una unión rígida en T de dos paredes pesadas, con el Kij medio de un solo número entre 200 y 1250 Hz en línea discontinua" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_es_dark.svg" alt="Índice de reducción vibracional de unión Kij ISO 10848 creciendo entre 100 Hz y 5000 Hz en tercios de octava para una unión rígida en T de dos paredes pesadas, con el Kij medio de un solo número entre 200 y 1250 Hz en línea discontinua" style="width:80%">
-
 **Índice de reducción vibracional (Fórmula (13)).**
 $K_{ij} = \overline{D}_{v,ij} + 10\lg\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, a
 partir de la diferencia de nivel de velocidad promediada en dirección
@@ -327,18 +419,7 @@ los motores de ISO 717. El número único $\overline{K}_{ij}$ es la media
 aritmética entre 200 y 1250 Hz en tercios de octava, o entre 125 y 1000 Hz en
 bandas de octava (Anexo A).
 
-**Validez.** $K_{ij}$ se apoya en una simplificación de análisis estadístico de
-energía: `strong_coupling_satisfied()` comprueba la desigualdad de la
-Fórmula (15), y —para las uniones pesadas de la Parte 4— `modal_density()`,
-`band_mode_count()` y `modal_overlap_factor()` (Fórmulas (5)/(4)/(6)) cuantifican
-dónde el número de modos es demasiado bajo para que $K_{ij}$ sea fiable. Pasa el
-factor de solapamiento modal por banda a
-`vibration_reduction_index(..., modal_overlap=M)`: las bandas con $M < 0.25$ se
-marcan en `result.bracketed` y quedan excluidas del número único
-$\overline{K}_{ij}$, como exige la Cláusula 9 de la Parte 4.
-Como ISO 10848 no contiene ningún ejemplo numérico resuelto, la conformidad se
-ancla en identidades de forma cerrada ($K_{ij}$ simplificado, $a_j$ a
-$f_\text{ref}$, $\eta$).
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_es.svg" alt="Índice de reducción vibracional de unión Kij ISO 10848 creciendo entre 100 Hz y 5000 Hz en tercios de octava para una unión rígida en T de dos paredes pesadas, con el Kij medio de un solo número entre 200 y 1250 Hz en línea discontinua" width="80%" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -363,6 +444,19 @@ plt.show()
 ```
 
 </details>
+
+**Validez.** $K_{ij}$ se apoya en una simplificación de análisis estadístico de
+energía: `strong_coupling_satisfied()` comprueba la desigualdad de la
+Fórmula (15), y —para las uniones pesadas de la Parte 4— `modal_density()`,
+`band_mode_count()` y `modal_overlap_factor()` (Fórmulas (5)/(4)/(6)) cuantifican
+dónde el número de modos es demasiado bajo para que $K_{ij}$ sea fiable. Pasa el
+factor de solapamiento modal por banda a
+`vibration_reduction_index(..., modal_overlap=M)`: las bandas con $M < 0.25$ se
+marcan en `result.bracketed` y quedan excluidas del número único
+$\overline{K}_{ij}$, como exige la Cláusula 9 de la Parte 4.
+Como ISO 10848 no contiene ningún ejemplo numérico resuelto, la conformidad se
+ancla en identidades de forma cerrada ($K_{ij}$ simplificado, $a_j$ a
+$f_\text{ref}$, $\eta$).
 
 ```python
 import numpy as np
@@ -392,35 +486,6 @@ res_m = building.vibration_reduction_index(dbar, lij, s_i, s_j, frequency=freqs,
                                   modal_overlap=m)   # bandas con M < 0.25 acotadas
 res_m.bracketed    # marcas por banda; las bandas acotadas salen del número único
 ```
-
-## Referencias
-
-- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
-  ISBN 978-0-7506-6526-1.
-  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
-  La monografía de referencia para la medición del aislamiento en
-  laboratorio, la transmisión por flancos y el índice de reducción de
-  vibraciones.
-- Vigran, T. E. (2008). *Building acoustics*. CRC Press.
-  ISBN 978-0-415-42853-8.
-  [doi:10.1201/9781482266016](https://doi.org/10.1201/9781482266016).
-  La teoría de transmisión de construcciones simples y dobles que cuantifican
-  los índices de laboratorio.
-
-## Normas
-
-ISO 10140-2:2010, ISO 10140-3:2010 e ISO 10140-4:2010 — los R y Ln
-de laboratorio con la corrección de ruido de fondo; ISO 15186-1:2000 e
-ISO 15186-2:2003 — el índice de reducción sonora por intensidad $R_I$, su forma
-modificada por $K_c$ y la diferencia de niveles normalizada por elemento
-(laboratorio y campo); ISO 16251-1:2014 — el método de laboratorio en maqueta
-pequeña para la mejora a impactos $\Delta L$ de revestimientos de suelo, con
-$\Delta L_w$ vía el suelo de referencia de ISO 717-2; ISO 10848-1:2006,
-ISO 10848-2:2006, ISO 10848-3:2006 e ISO 10848-4:2010 — la medición en
-laboratorio de la transmisión por flancos: el índice de reducción vibracional
-$K_{ij}$, la longitud de absorción equivalente, los descriptores de flanco
-normalizados $D_{n,f}$ / $L_{n,f}$ y las comprobaciones de validez por
-solapamiento modal que alimentan la predicción EN 12354.
 
 ## Véase también
 

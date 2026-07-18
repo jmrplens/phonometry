@@ -1,7 +1,46 @@
 ---
 title: "Predicción del aislamiento acústico (EN 12354)"
 description: "Predicción EN 12354 del aislamiento acústico in situ a partir de datos de elemento: transmisión por flancos aérea y de impactos (EN 12354-1/2), aislamiento de fachadas (EN 12354-3) y radiación al exterior (EN 12354-4)."
+references:
+  - type: book
+    authors: ["Hopkins, C."]
+    year: 2007
+    title: "Sound insulation"
+    publisher: "Butterworth-Heinemann"
+    doi: "10.4324/9780080550473"
+    note: "El tratamiento completo de la transmisión por flancos y del marco de predicción EN 12354, del índice de reducción de vibraciones a su base estadística. ISBN 978-0-7506-6526-1."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2000
+    title: "Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 1: Airborne sound insulation between rooms"
+    designation: "EN 12354-1:2000"
+    url: "https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-airborne-sound-insulation-between-rooms"
+    note: "La predicción simplificada de transmisión por flancos aérea (uniones del Anexo E, ejemplo resuelto H.3). La ficha de catálogo enlazada es la página de BSI Knowledge de BS EN 12354-1:2000."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2000
+    title: "Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 2: Impact sound insulation between rooms"
+    designation: "EN 12354-2:2000"
+    url: "https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-impact-sound-insulation-between-rooms"
+    note: "La predicción simplificada de transmisión por flancos de impactos (ejemplo resuelto E.3). La ficha de catálogo enlazada es la página de BSI Knowledge de BS EN 12354-2:2000."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2000
+    title: "Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 3: Airborne sound insulation against outdoor sound"
+    designation: "EN 12354-3:2000"
+    url: "https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-airborne-sound-insulation-against-outdoor-sound"
+    note: "La predicción de aislamiento acústico de fachada (ejemplo resuelto del Anexo F). La ficha de catálogo enlazada es la página de BSI Knowledge de BS EN 12354-3:2000."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2000
+    title: "Building acoustics — Estimation of acoustic performance of buildings from the performance of elements — Part 4: Transmission of indoor sound to the outside"
+    designation: "EN 12354-4:2000"
+    url: "https://knowledge.bsigroup.com/products/building-acoustics-estimation-of-acoustic-performance-in-buildings-from-the-performance-of-elements-transmission-of-indoor-sound-to-the-outside"
+    note: "La predicción de radiación al exterior (ejemplo resuelto del Anexo G). La ficha de catálogo enlazada es la página de BSI Knowledge de BS EN 12354-4:2000."
 ---
+
+import Video from '../../../../components/Video.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Un índice de laboratorio describe un elemento aislado; un edificio también
 transmite el sonido por cada camino de flancos. Esta página cubre la predicción
@@ -24,13 +63,21 @@ diferencia entre el $R$ de laboratorio y el $R'$ de campo. EN 12354 predice el
 índice aparente in situ a partir de los índices de laboratorio de los elementos
 más la transmisión vibratoria de sus uniones.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths_es.svg" alt="El camino directo Dd a través del elemento separador y los tres caminos de flanco Ff, Df y Fd en cada unión entre un elemento de flanco y el elemento separador" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths_es_dark.svg" alt="El camino directo Dd a través del elemento separador y los tres caminos de flanco Ff, Df y Fd en cada unión entre un elemento de flanco y el elemento separador" style="width:92%">
-
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: pulsos de energía salen de la sala emisora por el camino directo Dd y los caminos de flanco Ff, Fd y Df, encogiéndose en cada elemento y unión, y la etiqueta de cada camino se ilumina cuando su pulso vuelve a radiar en la sala receptora" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: pulsos de energía salen de la sala emisora por el camino directo Dd y los caminos de flanco Ff, Fd y Df, encogiéndose en cada elemento y unión, y la etiqueta de cada camino se ilumina cuando su pulso vuelve a radiar en la sala receptora" style="width:88%"></video>
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths_es.svg" alt="El camino directo Dd a través del elemento separador y los tres caminos de flanco Ff, Df y Fd en cada unión entre un elemento de flanco y el elemento separador" width="92%" loading="eager" />
 
 Cada unión entre un elemento de flanco y el elemento separador lleva tres
 caminos —$Ff$ (flanco→flanco), $Df$ (directo→flanco) y $Fd$ (flanco→directo)—
-junto al único camino directo $Dd$. El **modelo simplificado de un solo número**
+junto al único camino directo $Dd$.
+
+<Video
+  name="anim_flanking_paths"
+  width={2400}
+  height={1350}
+  title="Pulsos de energía por los caminos directo y de flancos"
+  description="Los pulsos de energía salen de la sala emisora por el camino directo Dd y los caminos de flanco Ff, Fd y Df, encogiéndose en cada elemento y unión, y la etiqueta de cada camino se ilumina cuando su pulso vuelve a radiar en la sala receptora."
+/>
+
+El **modelo simplificado de un solo número**
 los combina energéticamente (Fórmula 26):
 
 $$
@@ -52,7 +99,7 @@ de acoplamiento de la unión y $K_{ij}$ el **índice de reducción vibracional**
 la unión (Anexo E, empírico en la relación de masas
 $M = \log_{10}(m'_{\perp,i}/m'_i)$).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_es.svg" alt="Índices de reducción sonora por camino para el ejemplo del Anexo H.3 de EN 12354-1 y la fracción de energía transmitida de cada camino, mostrando el camino directo dominando en R'w = 52 dB" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_es_dark.svg" alt="Índices de reducción sonora por camino para el ejemplo del Anexo H.3 de EN 12354-1 y la fracción de energía transmitida de cada camino, mostrando el camino directo dominando en R'w = 52 dB" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/prediction_flanking_demo_es.svg" alt="Índices de reducción sonora por camino para el ejemplo del Anexo H.3 de EN 12354-1 y la fracción de energía transmitida de cada camino, mostrando el camino directo dominando en R'w = 52 dB" width="80%" />
 
 ```python
 import numpy as np
@@ -249,7 +296,7 @@ tabla de la Figura C.2 para galerías, balcones y terrazas, interpolando sobre
 la absorción del intradós $\alpha_w$). Los índices de un solo número reutilizan
 EN ISO 717-1 (`weighted_rating`).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_es.svg" alt="Índices de reducción sonora parciales por elemento y la reducción aparente de la fachada R' y la diferencia de nivel estandarizada D2m,nT resultantes para el ejemplo resuelto del Anexo F de EN 12354-3, con la entrada de aire limitando las bandas bajas" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_es_dark.svg" alt="Índices de reducción sonora parciales por elemento y la reducción aparente de la fachada R' y la diferencia de nivel estandarizada D2m,nT resultantes para el ejemplo resuelto del Anexo F de EN 12354-3, con la entrada de aire limitando las bandas bajas" style="width:80%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/facade_prediction_es.svg" alt="Índices de reducción sonora parciales por elemento y la reducción aparente de la fachada R' y la diferencia de nivel estandarizada D2m,nT resultantes para el ejemplo resuelto del Anexo F de EN 12354-3, con la entrada de aire limitando las bandas bajas" width="80%" />
 
 ```python
 from phonometry import building
@@ -267,6 +314,41 @@ fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
                              frequencies=[125, 250, 500, 1000, 2000], bands="octave")
 print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (Rtr,s,w / Ctr / D2m,nT,w)
 ```
+
+<details>
+<summary>Ver el código de esta figura</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import building
+
+# EN 12354-3 Anexo F: una fachada de 11.3 m² (V = 50 m³, plana con ΔLfs = 0) de una
+# doble hoja, una ventana, un pequeño tragaluz y una entrada de aire con
+# tratamiento acústico (un elemento Dn,e).
+elements = [
+    building.FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octava 125-2000
+    building.FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
+    building.FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
+    building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # elemento pequeño
+]
+fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
+                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
+
+x = np.arange(5)
+fig, ax = plt.subplots(figsize=(9, 5.5))
+for name, rp in fac.element_r.items():
+    ax.plot(x, rp, "--", alpha=0.6, marker=".", label=f"Rp — {name}")
+ax.plot(x, fac.r_prime, "k-", lw=2.5, marker="o", label="R′ (fachada)")
+ax.plot(x, fac.d_2m_nt, lw=2, marker="s", label="D2m,nT")
+ax.set_xticks(x); ax.set_xticklabels([125, 250, 500, 1000, 2000])
+ax.set_xlabel("Frecuencia [Hz]"); ax.set_ylabel("Índice / diferencia de nivel [dB]")
+ax.set_title("Aislamiento acústico de fachada EN 12354-3 (Anexo F)")
+ax.legend(ncol=2); ax.grid(alpha=0.4)
+fig.tight_layout(); plt.show()
+```
+
+</details>
 
 **Parte 4 — interior → exterior.** El nivel de potencia sonora radiada por un
 segmento (Fórmula 2) es $L_W = L_{p,in} + C_d - R' + 10 \log_{10}(S/S_0)$ con
@@ -305,41 +387,6 @@ print(round(a_tot, 1), round(building.outdoor_level(62.9, a_tot), 1))   # 26.3 3
 > fórmulas: reproduce exactamente las bandas bajas, todos los índices de un solo
 > número y toda la propagación del Anexo E.
 
-<details>
-<summary>Ver el código de esta figura</summary>
-
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from phonometry import building
-
-# EN 12354-3 Anexo F: una fachada de 11.3 m² (V = 50 m³, plana con ΔLfs = 0) de una
-# doble hoja, una ventana, un pequeño tragaluz y una entrada de aire con
-# tratamiento acústico (un elemento Dn,e).
-elements = [
-    building.FacadeElement("wall",     area=6.0, r=[41, 46, 52, 58, 64]),   # octava 125-2000
-    building.FacadeElement("window",   area=4.5, r=[23, 22, 30, 36, 37]),
-    building.FacadeElement("skylight", area=0.5, r=[24, 27, 30, 33, 30]),
-    building.FacadeElement("air inlet", dn_e=[28, 23, 25, 38, 44]),         # elemento pequeño
-]
-fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
-                             frequencies=[125, 250, 500, 1000, 2000], bands="octave")
-
-x = np.arange(5)
-fig, ax = plt.subplots(figsize=(9, 5.5))
-for name, rp in fac.element_r.items():
-    ax.plot(x, rp, "--", alpha=0.6, marker=".", label=f"Rp — {name}")
-ax.plot(x, fac.r_prime, "k-", lw=2.5, marker="o", label="R′ (fachada)")
-ax.plot(x, fac.d_2m_nt, lw=2, marker="s", label="D2m,nT")
-ax.set_xticks(x); ax.set_xticklabels([125, 250, 500, 1000, 2000])
-ax.set_xlabel("Frecuencia [Hz]"); ax.set_ylabel("Índice / diferencia de nivel [dB]")
-ax.set_title("Aislamiento acústico de fachada EN 12354-3 (Anexo F)")
-ax.legend(ncol=2); ax.grid(alpha=0.4)
-fig.tight_layout(); plt.show()
-```
-
-</details>
-
 ### Parámetros de `FacadeElement` / `facade_sound_reduction()` / `radiated_sound_power()`
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
@@ -361,23 +408,6 @@ fig.tight_layout(); plt.show()
 `r_tr_s`, `d_2m_nt`, `element_r`, y los números únicos `r_tr_s_w` / `d_2m_nt_w` /
 `c_tr`); `radiated_sound_power()` un `RadiatedPowerResult` (`l_w`, `r_prime`,
 `l_w_dba`). Ambos exponen `.plot()`.
-
-## Referencias
-
-- Hopkins, C. (2007). *Sound insulation*. Butterworth-Heinemann.
-  ISBN 978-0-7506-6526-1.
-  [doi:10.4324/9780080550473](https://doi.org/10.4324/9780080550473).
-  El tratamiento completo de la transmisión por flancos y del marco de
-  predicción EN 12354, del índice de reducción de vibraciones a su base
-  estadística.
-
-## Normas
-
-EN 12354-1:2000 y EN 12354-2:2000 — las predicciones simplificadas
-de transmisión por flancos (uniones del Anexo E, ejemplos resueltos H.3 y
-E.3); EN 12354-3:2000 y EN 12354-4:2000 — las predicciones de aislamiento de
-fachada y de radiación al exterior (ejemplos resueltos del Anexo F y del
-Anexo G).
 
 ## Véase también
 

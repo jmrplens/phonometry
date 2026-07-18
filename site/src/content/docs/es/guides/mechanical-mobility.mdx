@@ -1,7 +1,32 @@
 ---
 title: "Movilidad mecánica y la familia de FRF (ISO 7626-1)"
 description: "La familia de funciones de respuesta en frecuencia movimiento-por-fuerza de la ISO 7626-1:2011: receptancia, movilidad y acelerancia con sus recíprocas rigidez dinámica, impedancia y masa aparente (Tabla 1), la conversión a través de la receptancia como pivote, el resonador SDOF en forma cerrada cuya movilidad en el punto de excitación alcanza 1/c en resonancia y los criterios de aceptación del lado de medición de la ISO 7626-2:2015."
+references:
+  - type: book
+    authors: ["Cremer, L.", "Heckl, M.", "Petersson, B. A. T."]
+    year: 2005
+    title: "Structure-borne sound: Structural vibrations and sound radiation at audio frequencies"
+    edition: "3.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/b137728"
+    note: "La monografía de referencia sobre vibración estructural: movilidades de punto y de transferencia de vigas y placas, y el flujo de potencia P = ½·Re{Y}·|F|² que hace de la movilidad la magnitud de trabajo de esta página. ISBN 978-3-540-22696-3."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2011
+    title: "Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 1: Basic terms and definitions, and transducer specifications"
+    designation: "ISO 7626-1:2011"
+    url: "https://www.iso.org/standard/50426.html"
+    note: "La familia de FRF y sus recíprocas (Tabla 1, con las definiciones de movilidad del 3.1.2 y de magnitud libre del 3.1.4), las distinciones libre/bloqueada y la distinción punto de excitación / transferencia implementadas aquí. La conformidad se ancla en las identidades en forma cerrada del SDOF coherentes con esas definiciones: el máximo de movilidad en el punto de excitación |Y(ω0)| = 1/c, la receptancia estática H(0) = 1/k y la reciprocidad exacta de la Tabla 1 impedancia·movilidad = 1."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2015
+    title: "Mechanical vibration and shock — Experimental determination of mechanical mobility — Part 2: Measurements using single-point translation excitation with an attached vibration exciter"
+    designation: "ISO 7626-2:2015"
+    url: "https://www.iso.org/standard/62483.html"
+    note: "El lado de medición: el procesado H1 de excitación aleatoria del 8.1.3, la calibración operacional con masa rígida del 7.5.2 (±5 %) y el criterio de error aleatorio del Anexo A (< 5 % en las resonancias). La conformidad se ancla en los valores de la calibración con masa rígida (|A| = 0,100 1/kg para 10 kg; |Y| = 1,59155e-4 m/(N·s) a 100 Hz) y el ejemplo del Anexo A (γ² = 0,8, n = 75 → ε = 4,08 %)."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La **movilidad** mecánica es el cociente complejo entre una respuesta en
 velocidad y la fuerza que la produce, `Y = v/F`. Es un miembro de una familia de
@@ -15,7 +40,7 @@ añade el lado de medición: la estimación de FRF a partir de señales medidas 
 sus criterios de aceptación. Esta base de FRF sustenta las normas de fuente y
 transmisión de ruido estructural: ISO 9611, ISO 10846, EN 15657 y EN 12354-5.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_es.svg" alt="Magnitudes normalizadas de receptancia, movilidad y acelerancia de un resonador de un grado de libertad en un eje de frecuencia log-log, todas con máximo en la resonancia" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_es_dark.svg" alt="Magnitudes normalizadas de receptancia, movilidad y acelerancia de un resonador de un grado de libertad en un eje de frecuencia log-log, todas con máximo en la resonancia" style="width:82%">
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_es.svg" alt="Magnitudes normalizadas de receptancia, movilidad y acelerancia de un resonador de un grado de libertad en un eje de frecuencia log-log, todas con máximo en la resonancia" width="82%" loading="eager" />
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -116,8 +141,6 @@ print(round(complex(vibration.sdof_receptance(1e-6, m, k, c)).real, 7))  # 0.000
 
 ## 3. FRF medidas y sus criterios de aceptación (ISO 7626-2)
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_es.svg" alt="Medición de movilidad ISO 7626: una viga libre-libre en suspensión blanda excitada por un excitador a través de una cabeza de impedancia en el punto de excitación, un acelerómetro en un punto de transferencia y un martillo de impacto como excitación alternativa" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_es_dark.svg" alt="Medición de movilidad ISO 7626: una viga libre-libre en suspensión blanda excitada por un excitador a través de una cabeza de impedancia en el punto de excitación, un acelerómetro en un punto de transferencia y un martillo de impacto como excitación alternativa" style="width:92%">
-
 En la disposición habitual de ISO 7626-2 la estructura cuelga de una
 suspensión lo bastante blanda para que sus modos de sólido rígido queden muy
 por debajo de la primera resonancia elástica (la norma admite estructuras
@@ -133,6 +156,8 @@ con un excitador no unido a la estructura, en la práctica casi siempre un
 martillo instrumentado: cambia el espectro controlado del excitador acoplado
 por rapidez, con un espectro de excitación fijado por la masa del impactador
 y la rigidez de la punta.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_es.svg" alt="Medición de movilidad ISO 7626: una viga libre-libre en suspensión blanda excitada por un excitador a través de una cabeza de impedancia en el punto de excitación, un acelerómetro en un punto de transferencia y un martillo de impacto como excitación alternativa" width="92%" />
 
 El procesado de registros medidos con excitación aleatoria según la
 ISO 7626-2, 8.1.3 (el estimador H1,
@@ -178,49 +203,6 @@ res = vibration.sdof_mobility_result(f, mass=2.0, stiffness=8000.0, damping=5.0)
 z = res.to("impedance")                        # impedancia = 1/Y por frecuencia
 print(res.frequencies[int(np.argmax(res.magnitude))].round(1))   # ~10.1 Hz
 ```
-
-## Referencias
-
-- Cremer, L., Heckl, M., & Petersson, B. A. T. (2005). *Structure-borne
-  sound: Structural vibrations and sound radiation at audio frequencies*
-  (3.ª ed.). Springer. ISBN 978-3-540-22696-3.
-  [doi:10.1007/b137728](https://doi.org/10.1007/b137728).
-  La monografía de referencia sobre vibración estructural: movilidades de
-  punto y de transferencia de vigas y placas, y el flujo de potencia
-  `P = ½·Re{Y}·|F|²` que hace de la movilidad la magnitud de trabajo de esta
-  página.
-- International Organization for Standardization. (2011). *Mechanical
-  vibration and shock — Experimental determination of mechanical mobility —
-  Part 1: Basic terms and definitions, and transducer specifications*
-  (ISO 7626-1:2011).
-  [Catálogo iso.org](https://www.iso.org/standard/50426.html).
-  La familia de FRF de la Tabla 1 y las distinciones libre/bloqueada
-  implementadas aquí.
-- International Organization for Standardization. (2015). *Mechanical
-  vibration and shock — Experimental determination of mechanical mobility —
-  Part 2: Measurements using single-point translation excitation with an
-  attached vibration exciter* (ISO 7626-2:2015).
-  [Catálogo iso.org](https://www.iso.org/standard/62483.html).
-  El lado de medición: el procesado H1, la calibración con masa rígida y el
-  criterio de error aleatorio.
-
-## Normas
-
-ISO 7626-1:2011, *Mechanical vibration and shock — Experimental
-determination of mechanical mobility — Part 1: Basic terms and definitions, and
-transducer specifications* — la familia de FRF y sus recíprocas (Tabla 1, con
-las definiciones de movilidad del 3.1.2 y de magnitud libre del 3.1.4) y la
-distinción punto de excitación / transferencia. ISO 7626-2:2015, *Part 2:
-Measurements using single-point translation excitation with an attached
-vibration exciter* — el procesado H1 de excitación aleatoria del 8.1.3, la
-calibración operacional con masa rígida del 7.5.2 (±5 %) y el criterio de error
-aleatorio del Anexo A (< 5 % en las resonancias). La conformidad se ancla en
-las identidades en forma cerrada del SDOF (coherentes con las definiciones de
-la Tabla 1 / 3.1.2): el máximo de movilidad en el punto de excitación
-`|Y(ω0)| = 1/c`, la receptancia estática `H(0) = 1/k`, la reciprocidad exacta
-de la Tabla 1 `impedancia·movilidad = 1`, los valores de la calibración con
-masa rígida (`|A| = 0,100` 1/kg para 10 kg; `|Y| = 1,59155e-4` m/(N·s) a
-100 Hz) y el ejemplo del Anexo A (γ² = 0,8, n = 75 → ε = 4,08 %).
 
 ## Véase también
 

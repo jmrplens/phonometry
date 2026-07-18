@@ -169,6 +169,7 @@ export const apiSidebar = {
       items: [
         'reference/api/electroacoustics/distortion',
         'reference/api/electroacoustics/frequency-response',
+        'reference/api/electroacoustics/swept-sine',
       ],
     },
     {
@@ -191,6 +192,7 @@ export const apiSidebar = {
       items: [
         'reference/api/spectra/spectra',
         'reference/api/spectra/signals',
+        'reference/api/spectra/phase',
       ],
     },
     {

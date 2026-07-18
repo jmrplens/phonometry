@@ -518,14 +518,26 @@ def swept_sine_distortion(
         # spurious copy of H1.
         anticausal = sweep_samples - 1
         if delays_samples[-1] + window / 2.0 > anticausal:
-            raise ValueError(
-                f"method='farina' can only separate orders up to the sweep "
-                f"frequency ratio f2/f1 = {f2_v / f1_v:.2f}: order "
-                f"{n_orders} arrives {delays_samples[-1]:.0f} samples "
-                f"before the linear response, beyond the {anticausal}-sample "
-                "anticausal span of the linear deconvolution. Lower "
-                "'n_harmonics', widen the sweep band or shorten 'ir_length'."
-            )
+            if delays_samples[-1] > anticausal:
+                cause = (
+                    f"method='farina' can only separate orders up to the "
+                    f"sweep frequency ratio f2/f1 = {f2_v / f1_v:.2f}: "
+                    f"order {n_orders} arrives {delays_samples[-1]:.0f} "
+                    f"samples before the linear response, beyond the "
+                    f"{anticausal}-sample anticausal span of the linear "
+                    "deconvolution. Lower 'n_harmonics' or widen the "
+                    "sweep band."
+                )
+            else:
+                cause = (
+                    f"the {window}-sample window around the order-"
+                    f"{n_orders} arrival ({delays_samples[-1]:.0f} samples "
+                    f"before the linear response) does not fit the "
+                    f"{anticausal}-sample anticausal span of the linear "
+                    "Farina deconvolution. Shorten 'ir_length', lower "
+                    "'n_harmonics' or lengthen the sweep."
+                )
+            raise ValueError(cause)
 
     signal = rec / amplitude_v
     if remove_dc:

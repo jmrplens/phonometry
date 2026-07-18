@@ -307,6 +307,19 @@ def test_farina_rejects_orders_beyond_the_sweep_ratio() -> None:
     assert float(np.max(np.abs(res.harmonic_responses[2][band]))) < 0.05
 
 
+def test_farina_window_overrun_blames_the_window_not_the_ratio() -> None:
+    """When the order fits but its window does not, the message says so."""
+    fs, f1, seconds = 48000, 500.0, 1.0
+    f2 = f1 * float(np.e)  # ratio e: the order-2 arrival itself fits
+    x = ph.sweep_signal(fs, f1, f2, seconds)
+    rec = np.concatenate([x, np.zeros(65536)])
+    with pytest.raises(ValueError, match="window around the order-2 arrival"):
+        ph.swept_sine_distortion(
+            rec, fs, f1, f2, seconds, method="farina", n_harmonics=2,
+            ir_length=32768,
+        )
+
+
 def test_explicit_ir_length_below_minimum_has_its_own_message() -> None:
     x = ph.synchronized_sweep_signal(FS, F1, F2, SECONDS)
     with pytest.raises(ValueError, match="'ir_length' must be at least"):

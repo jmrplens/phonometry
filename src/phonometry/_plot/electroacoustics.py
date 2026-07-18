@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from ..electroacoustics.distortion import HarmonicDistortionResult
     from ..electroacoustics.frequency_response import FrequencyResponseResult
+    from ..electroacoustics.swept_sine import SweptSineDistortionResult
 
 def plot_harmonic_distortion(
     result: "HarmonicDistortionResult", ax: Axes | None = None, **kwargs: Any
@@ -117,4 +118,74 @@ def plot_frequency_response(
     axes[2].set_xlabel("Frequency [Hz]")
     axes[2].set_ylim(0.0, 1.05)
     axes[2].grid(True, which="both", alpha=0.3)
+    return axes
+
+
+def plot_swept_sine_distortion(
+    result: "SweptSineDistortionResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes | np.ndarray:
+    """Harmonic frequency responses and THD(f) of a swept-sine measurement.
+
+    Two stacked panels: the magnitudes of ``H1..HN`` in dB against their own
+    frequency axes (each order drawn over its valid deconvolved band), and
+    the total harmonic distortion in percent against the excitation
+    frequency. With ``ax`` given, only the THD panel is drawn on it.
+
+    :param result: A
+        :class:`~phonometry.electroacoustics.swept_sine.SweptSineDistortionResult`.
+    :param ax: Existing axes for the THD panel, or ``None`` for a fresh
+        two-panel figure.
+    :param kwargs: Forwarded to the THD ``plot`` call.
+    :return: The THD axes (``ax`` given) or the array of two axes.
+    """
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    tiny = np.finfo(np.float64).tiny
+    nyquist = result.fs / 2.0
+
+    def _thd_panel(axt: Axes) -> None:
+        kwargs.setdefault("color", _C_PRIMARY)
+        kwargs.setdefault("label", "THD(f)")
+        axt.loglog(
+            result.thd_frequencies,
+            100.0 * np.maximum(result.thd, tiny),
+            **kwargs,
+        )
+        axt.set_ylabel("THD [%]")
+        axt.grid(True, which="both", alpha=0.3)
+        axt.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+
+    if ax is not None:
+        _thd_panel(ax)
+        ax.set_xlabel("Excitation frequency [Hz]")
+        ax.set_title("Swept-sine THD (Farina / Novak)")
+        return ax
+
+    axes = _new_axes_column(2, sharex=False, figsize=(8.0, 6.4))
+    colors = (_C_PRIMARY, _C_SECONDARY, _C_TERTIARY)
+    for k in range(result.n_harmonics):
+        order = k + 1
+        top = result.f2 if result.method == "farina" else order * result.f2
+        band = (freqs >= order * result.f1) & (freqs <= min(top, nyquist))
+        if not np.any(band):
+            continue
+        level = 20.0 * np.log10(
+            np.maximum(np.abs(result.harmonic_responses[k][band]), tiny)
+        )
+        axes[0].semilogx(
+            freqs[band],
+            level,
+            color=colors[k % len(colors)],
+            ls="-" if k == 0 else "--",
+            lw=1.6 if k == 0 else 1.2,
+            label=f"$|H_{{{order}}}(f)|$",
+        )
+    axes[0].set_ylabel("Magnitude [dB]")
+    axes[0].set_xlabel("Frequency [Hz]")
+    axes[0].set_title(
+        f"Harmonic frequency responses ({result.method} sweep)"
+    )
+    axes[0].grid(True, which="both", alpha=0.3)
+    axes[0].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    _thd_panel(axes[1])
+    axes[1].set_xlabel("Excitation frequency [Hz]")
     return axes

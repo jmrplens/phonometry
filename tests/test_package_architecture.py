@@ -28,6 +28,9 @@ ALLOWED_EDGES: set[tuple[str, str]] = {
     ("hearing", "metrology"),         # sti filter reuse
     ("psychoacoustics", "metrology"),
     ("room", "metrology"),
+    # swept-sine distortion reuses the ISO 18233 sweep / Farina
+    # inverse-filter machinery of room_ir
+    ("electroacoustics", "room"),
 }
 
 

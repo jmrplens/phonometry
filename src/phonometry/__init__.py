@@ -216,6 +216,13 @@ from .metrology.correlation import (
     time_delay,
 )
 from .metrology.envelope import EnvelopeResult, envelope
+from .metrology.phase import (
+    PhaseDecompositionResult,
+    excess_phase,
+    group_delay,
+    minimum_phase,
+    phase_decomposition,
+)
 from .metrology.signals import noise_signal
 from .metrology.spectra import (
     CoherentOutputSpectrumResult,
@@ -282,6 +289,11 @@ from .electroacoustics.frequency_response import (
     FrequencyResponseResult,
     coherence,
     transfer_function,
+)
+from .electroacoustics.swept_sine import (
+    SweptSineDistortionResult,
+    swept_sine_distortion,
+    synchronized_sweep_signal,
 )
 from .broadcast.program_loudness import (
     DEFAULT_CHANNEL_WEIGHTS,
@@ -907,6 +919,9 @@ __all__ = [
     "transfer_function",
     "coherence",
     "FrequencyResponseResult",
+    "swept_sine_distortion",
+    "synchronized_sweep_signal",
+    "SweptSineDistortionResult",
     "program_loudness",
     "integrated_loudness",
     "loudness_range",
@@ -1160,6 +1175,11 @@ __all__ = [
     "TimeDelayResult",
     "AlignedImpulseResponseResult",
     "EnvelopeResult",
+    "minimum_phase",
+    "group_delay",
+    "excess_phase",
+    "phase_decomposition",
+    "PhaseDecompositionResult",
     "sweep_signal",
     "inverse_filter",
     "impulse_response",

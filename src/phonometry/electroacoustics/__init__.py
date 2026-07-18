@@ -19,11 +19,17 @@ from .distortion import (
     weighted_thd,
 )
 from .frequency_response import FrequencyResponseResult, coherence, transfer_function
+from .swept_sine import (
+    SweptSineDistortionResult,
+    swept_sine_distortion,
+    synchronized_sweep_signal,
+)
 
 __all__ = [
     "FrequencyResponseResult",
     "HarmonicDistortionResult",
     "ModulationDistortionResult",
+    "SweptSineDistortionResult",
     "coherence",
     "difference_frequency_distortion",
     "dynamic_intermodulation_distortion",
@@ -32,6 +38,8 @@ __all__ = [
     "itu_r_468_weighting",
     "modulation_distortion",
     "sinad",
+    "swept_sine_distortion",
+    "synchronized_sweep_signal",
     "thd",
     "thd_plus_noise",
     "total_difference_frequency_distortion",

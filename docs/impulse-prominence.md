@@ -31,6 +31,10 @@ adjustment "for sounds with onset rates larger than 10 dB/s" only):
 warns about them, and never lets them set the governing prominence or a
 `KI` (the adjustment is 0 dB when no event qualifies).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_onset_detection_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_onset_detection.gif" alt="Animation: a magnifier scans the A-weighted level history, highlights the onset stretch steeper than 10 dB per second, and the onset rate, level difference, prominence and adjustment KI boxes light up in turn" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_onset_detection.webm)
+
 ```python
 from phonometry import environmental
 
@@ -83,9 +87,10 @@ print(round(environmental.rating_level([72.0, 66.0], [7.6, 0.0], [30.0, 30.0], 6
 # 76.78 dB
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_onset_detection_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_onset_detection.gif" alt="Animation: a magnifier scans the A-weighted level history, highlights the onset stretch steeper than 10 dB per second, and the onset rate, level difference, prominence and adjustment KI boxes light up in turn" width="640" height="360" loading="lazy"></picture>
-
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_onset_detection.webm)
+The `ImpulseProminenceResult` carries the `per_impulse` prominences, the governing
+`prominence` and its `adjustment`, and its `.plot()` draws the `KI(P)` curve
+with the impulses marked. The method is a supplement to the environmental-noise
+measurement of ISO 1996-2.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_prominence_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_prominence.svg" alt="Two panels. Left: the predicted prominence P rising with onset rate (log axis) for level differences of 5, 15 and 30 dB, reaching about 15 for a very sudden, loud impulse. Right: the adjustment KI as a function of prominence, flat at zero up to the threshold P = 5 and then linear at 1.8 dB per unit, with three example impulses marked and the governing one at KI = 13 dB" width="96%"></picture>
 
@@ -110,11 +115,6 @@ plt.xscale("log"); plt.legend(); plt.show()
 ```
 
 </details>
-
-The `ImpulseProminenceResult` carries the `per_impulse` prominences, the governing
-`prominence` and its `adjustment`, and its `.plot()` draws the `KI(P)` curve
-with the impulses marked. The method is a supplement to the environmental-noise
-measurement of ISO 1996-2.
 
 ## 3. Where the method sits among the standards
 

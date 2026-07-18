@@ -1,7 +1,32 @@
 ---
 title: "Prominencia de sonidos impulsivos (NT ACOU 112)"
 description: "El método Nordtest NT ACOU 112:2002 para la prominencia de los sonidos impulsivos: la prominencia prevista P a partir de la tasa de crecimiento y la diferencia de nivel de cada impulso (cláusula 7), el ajuste graduado KI que se suma al LAeq (cláusula 8) y el nivel de evaluación sobre un intervalo de tiempo de referencia."
+references:
+  - type: standard
+    organization: "Nordtest"
+    year: 2002
+    title: "Acoustics: Prominence of impulsive sounds and for adjustment of LAeq"
+    designation: "NT ACOU 112:2002"
+    url: "https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/"
+    note: "El método implementado, descargable gratis del archivo Nordtest: la prominencia prevista (cláusula 7, Fórmula 1), el ajuste al LAeq (cláusula 8, Fórmula 2) y el nivel de evaluación (cláusula 8, Nota 1), con el arranque definido en las cláusulas 4.5-4.7."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Acoustics — Description, measurement and assessment of environmental noise — Part 1: Basic quantities and assessment procedures"
+    designation: "ISO 1996-1:2016"
+    url: "https://www.iso.org/standard/59765.html"
+    note: "El marco de evaluación y los ajustes por categoría de la Tabla A.1 (5 dB regular, 12 dB altamente impulsiva) frente a los que se calibra la prominencia medida."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2022
+    title: "Acoustics — Description, measurement and assessment of environmental noise — Part 3: Objective method for the measurement of prominence of impulsive sounds and for adjustment of LAeq"
+    designation: "ISO/PAS 1996-3:2022"
+    url: "https://www.iso.org/standard/77035.html"
+    note: "El sucesor ISO construido sobre la prominencia por tasa de crecimiento de la NT ACOU 112."
 ---
+
+import Video from '../../../../components/Video.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 El ruido con impulsos prominentes — martilleo, remachado, hinca de pilotes — es
 más molesto que un sonido estacionario del mismo nivel equivalente. **NT ACOU
@@ -11,7 +36,12 @@ prominencia se lee de dos propiedades del arranque de cada impulso en el
 historial de nivel ponderado A con ponderación temporal F: la rapidez con que
 crece (la **tasa de crecimiento**) y cuánto crece (la **diferencia de nivel**).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112_es.svg" alt="Flujo desde el historial de nivel ponderado A (un arranque es donde el gradiente supera 10 dB/s) hasta la tasa de crecimiento y la diferencia de nivel, la prominencia prevista P = 3 lg(OR) + 2 lg(LD), el ajuste KI = 1,8 (P - 5) para P mayor que 5, y el nivel de evaluación sobre el tiempo de referencia" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112_es_dark.svg" alt="Flujo desde el historial de nivel ponderado A (un arranque es donde el gradiente supera 10 dB/s) hasta la tasa de crecimiento y la diferencia de nivel, la prominencia prevista P = 3 lg(OR) + 2 lg(LD), el ajuste KI = 1,8 (P - 5) para P mayor que 5, y el nivel de evaluación sobre el tiempo de referencia" style="width:82%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ntacou112_es.svg"
+  alt="Flujo desde el historial de nivel ponderado A (un arranque es donde el gradiente supera 10 dB/s) hasta la tasa de crecimiento y la diferencia de nivel, la prominencia prevista P = 3 lg(OR) + 2 lg(LD), el ajuste KI = 1,8 (P - 5) para P mayor que 5, y el nivel de evaluación sobre el tiempo de referencia"
+  width="82%"
+  loading="eager"
+/>
 
 ## 1. Prominencia prevista (cláusula 7)
 
@@ -32,6 +62,14 @@ tasas de subida mayores de 10 dB/s»): `impulse_prominence` marca los eventos
 no cualificados en su máscara `qualifies`, avisa de ellos y nunca les permite
 fijar la prominencia determinante ni un `KI` (el ajuste es 0 dB cuando ningún
 evento cualifica).
+
+<Video
+  name="anim_onset_detection"
+  width={2400}
+  height={1350}
+  title="Detectar el arranque de un impulso en el historial de nivel"
+  description="Una lupa recorre el historial de nivel ponderado A con ponderación temporal F L_AF; donde el nivel sube más deprisa de 10 dB/s se resalta el tramo de arranque, y las casillas de tasa de crecimiento (200 dB/s), diferencia de nivel (30 dB), prominencia P y ajuste KI se van iluminando por turnos."
+/>
 
 ```python
 from phonometry import environmental
@@ -85,9 +123,16 @@ print(round(environmental.rating_level([72.0, 66.0], [7.6, 0.0], [30.0, 30.0], 6
 # 76.78 dB
 ```
 
-<video class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_onset_detection_es.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_onset_detection_es_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: una lupa recorre la historia del nivel ponderado A, resalta el tramo de inicio con pendiente superior a 10 dB por segundo y las casillas de tasa de inicio, diferencia de nivel, prominencia y ajuste KI se van iluminando" style="width:88%"></video><video class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_onset_detection_es_dark.webm" preload="none" poster="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_onset_detection_es_dark_poster.jpg" width="2400" height="1350" loop muted controls playsinline title="Animación: una lupa recorre la historia del nivel ponderado A, resalta el tramo de inicio con pendiente superior a 10 dB por segundo y las casillas de tasa de inicio, diferencia de nivel, prominencia y ajuste KI se van iluminando" style="width:88%"></video>
+El `ImpulseProminenceResult` lleva las prominencias `per_impulse`, la `prominence`
+determinante y su `adjustment`, y su `.plot()` dibuja la curva `KI(P)` con los
+impulsos marcados. El método es un complemento a la medida de ruido ambiental de
+[ISO 1996-2](/phonometry/es/guides/levels/).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_prominence_es.svg" alt="Izquierda: la prominencia prevista P creciendo con la tasa de crecimiento (eje logarítmico) para diferencias de nivel de 5, 15 y 30 dB, llegando a unos 15 en un impulso súbito e intenso. Derecha: el ajuste KI, plano en cero hasta el umbral P = 5 y luego lineal, con tres impulsos marcados y el determinante en KI = 13 dB" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_prominence_es_dark.svg" alt="Izquierda: la prominencia prevista P creciendo con la tasa de crecimiento (eje logarítmico) para diferencias de nivel de 5, 15 y 30 dB, llegando a unos 15 en un impulso súbito e intenso. Derecha: el ajuste KI, plano en cero hasta el umbral P = 5 y luego lineal, con tres impulsos marcados y el determinante en KI = 13 dB" style="width:96%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impulse_prominence_es.svg"
+  alt="Izquierda: la prominencia prevista P creciendo con la tasa de crecimiento (eje logarítmico) para diferencias de nivel de 5, 15 y 30 dB, llegando a unos 15 en un impulso súbito e intenso. Derecha: el ajuste KI, plano en cero hasta el umbral P = 5 y luego lineal, con tres impulsos marcados y el determinante en KI = 13 dB"
+  width="96%"
+/>
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -110,11 +155,6 @@ plt.xscale("log"); plt.legend(); plt.show()
 ```
 
 </details>
-
-El `ImpulseProminenceResult` lleva las prominencias `per_impulse`, la `prominence`
-determinante y su `adjustment`, y su `.plot()` dibuja la curva `KI(P)` con los
-impulsos marcados. El método es un complemento a la medida de ruido ambiental de
-[ISO 1996-2](/phonometry/es/guides/levels/).
 
 ## 3. Dónde encaja el método entre las normas
 
@@ -140,34 +180,6 @@ intervalos gruesos); de lo contrario, la tasa de crecimiento, y con ella $P$,
 se subestima. Y
 el método evalúa la *prominencia* de los impulsos, no su energía: $K_I$ se
 añade sobre el `LAeq` medido en el nivel de evaluación, nunca lo sustituye.
-
-## Referencias
-
-- Nordtest. (2002). *Acoustics: Prominence of impulsive sounds and for
-  adjustment of LAeq* (método Nordtest NT ACOU 112).
-  [nordtest.info](https://www.nordtest.info/wp/2002/05/01/acoustics-prominence-of-impulsive-sounds-and-for-adjustment-of-laeq-nt-acou-112/).
-  El método implementado, descargable gratis del archivo Nordtest.
-- International Organization for Standardization. (2016). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 1:
-  Basic quantities and assessment procedures* (ISO 1996-1:2016).
-  [Catálogo iso.org](https://www.iso.org/standard/59765.html).
-  El marco de evaluación y los ajustes por categoría de la Tabla A.1 (5 dB
-  regular, 12 dB altamente impulsiva) frente a los que se calibra la
-  prominencia medida.
-- International Organization for Standardization. (2022). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 3:
-  Objective method for the measurement of prominence of impulsive sounds and
-  for adjustment of LAeq* (ISO/PAS 1996-3:2022).
-  [Catálogo iso.org](https://www.iso.org/standard/77035.html).
-  El sucesor ISO construido sobre la prominencia por tasa de crecimiento de
-  la NT ACOU 112.
-
-## Normas
-
-NT ACOU 112:2002 (Nordtest), *Prominence of impulsive sounds and for
-adjustment of LAeq* — la prominencia prevista (cláusula 7, Fórmula 1), el ajuste
-al LAeq (cláusula 8, Fórmula 2) y el nivel de evaluación (cláusula 8, Nota 1),
-con el arranque definido en las cláusulas 4.5-4.7.
 
 ## Véase también
 

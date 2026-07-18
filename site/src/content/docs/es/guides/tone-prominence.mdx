@@ -1,7 +1,24 @@
 ---
 title: "Tonos discretos prominentes (ECMA-418-1)"
 description: "La relación tono-ruido y la relación de prominencia de ECMA-418-1: veredictos FFT de prominencia para tonos discretos frente a criterios dependientes de la frecuencia, con las posiciones de medida de ECMA-74."
+references:
+  - type: standard
+    organization: "Ecma International"
+    year: 2024
+    title: "Psychoacoustic metrics for ITT equipment — Part 1: Prominent discrete tones"
+    designation: "ECMA-418-1:2024 (3.ª ed.)"
+    url: "https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf"
+    note: "La norma implementada, de descarga gratuita (el PDF enlazado es la descarga gratuita): los métodos de relación tono-ruido (apartado 11) y relación de prominencia (apartado 12), el modelo de banda crítica y los criterios de prominencia dependientes de la frecuencia de la sección 1."
+  - type: standard
+    organization: "Ecma International"
+    year: 2025
+    title: "Measurement of airborne noise emitted by information technology and telecommunications equipment"
+    designation: "ECMA-74:2025 (22.ª ed.)"
+    url: "https://ecma-international.org/wp-content/uploads/ECMA-74_22nd_edition_december_2025.pdf"
+    note: "La norma de emisión matriz, de descarga gratuita (el PDF enlazado es la descarga gratuita): las posiciones de medida de operador y observador de la sección 2, con el Anexo D delegando la evaluación de tonos en ECMA-418-1."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Los componentes tonales del ruido de maquinaria molestan mucho más de lo que
 sugiere su nivel. ECMA-418-1:2024 (referenciada por el Anexo D de ECMA-74)
@@ -50,7 +67,12 @@ de las bandas críticas central, inferior y superior (por debajo de
 $f_t = 171{,}4$ Hz la banda inferior truncada se reescala a un ancho de banda
 de 100 Hz, Fórmula 24).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es.svg" alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es_dark.svg" alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia" style="width:80%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_spectrum_es.svg"
+  alt="Espectro promediado de un tono en ruido con la banda crítica sombreada y la relación tono-ruido anotada frente a su criterio de prominencia"
+  width="80%"
+  loading="eager"
+/>
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -107,7 +129,11 @@ cuando ronden sus criterios.
 
 ECMA-74 (que delega la evaluación tonal en ECMA-418-1) también fija dónde medir alrededor de un equipo — solo contexto: phonometry implementa las evaluaciones de ECMA-418-1, no el procedimiento de medida del Anexo D de ECMA-74:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_es.svg" alt="Posiciones de medida de emisión ECMA-74: micrófono del operador sentado a 0,25 m y 1,20 m, y las cuatro posiciones de observador a 1 m" style="width:92%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_es_dark.svg" alt="Posiciones de medida de emisión ECMA-74: micrófono del operador sentado a 0,25 m y 1,20 m, y las cuatro posiciones de observador a 1 m" style="width:92%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_es.svg"
+  alt="Posiciones de medida de emisión ECMA-74: micrófono del operador sentado a 0,25 m y 1,20 m, y las cuatro posiciones de observador a 1 m"
+  width="92%"
+/>
 
 Los tonos secundarios próximos en la misma banda crítica se combinan según el
 apartado 11.6; para complejos armónicos evalúa cada componente (`tone_freq=`).
@@ -139,24 +165,3 @@ Ambos devuelven un `ToneAssessment(frequency, ratio_db, criterion_db, prominent)
   derivación de los criterios.
 - Referencia de la API: [`psychoacoustics.tonality`](/phonometry/es/reference/api/psychoacoustics/tonality/).
 
-## Referencias
-
-- Ecma International. (2024). *ECMA-418-1: Psychoacoustic metrics for ITT
-  equipment — Part 1: Prominent discrete tones* (3.ª ed.).
-  [PDF gratuito](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf).
-  La norma implementada, de descarga gratuita: los métodos TNR (apartado 11) y
-  PR (apartado 12), el modelo de banda crítica y los criterios de prominencia
-  de la sección 1.
-- Ecma International. (2025). *ECMA-74: Measurement of airborne noise emitted
-  by information technology and telecommunications equipment* (22.ª ed.).
-  [PDF gratuito](https://ecma-international.org/wp-content/uploads/ECMA-74_22nd_edition_december_2025.pdf).
-  La norma de emisión matriz, de descarga gratuita: las posiciones de medida de
-  operador y observador de la sección 2, con el Anexo D delegando la evaluación
-  de tonos en ECMA-418-1.
-
-## Normas
-
-ECMA-418-1:2024 (3.ª edición), *Psychoacoustic metrics for ITT
-equipment — Part 1: Prominent discrete tones* — la relación tono-ruido
-(apartado 11), la relación de prominencia (apartado 12), el modelo de banda
-crítica y los criterios de prominencia dependientes de la frecuencia.

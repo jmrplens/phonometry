@@ -1,7 +1,52 @@
 ---
 title: "Programme loudness and true peak (BS.1770 / EBU R 128)"
 description: "The ITU-R BS.1770-5 programme-loudness algorithm and the EBU R 128 normalisation practice: K-weighting, gated integrated loudness in LUFS, the EBU Mode momentary and short-term meters of Tech 3341, the Tech 3342 loudness range and the oversampled true-peak level in dBTP."
+references:
+  - type: standard
+    organization: "International Telecommunication Union"
+    year: 2023
+    title: "Algorithms to measure audio programme loudness and true-peak audio level"
+    designation: "Recommendation ITU-R BS.1770-5 (11/2023)"
+    url: "https://www.itu.int/rec/R-REC-BS.1770"
+    note: "The K-weighting pre-filter (Annex 1, Tables 1-2), the channel-weighted loudness and two-stage gating (Annex 1, Formulae 1-7, Table 3), the true-peak estimation guidelines (Annex 2 and its Attachment 1 under-read bound) and the position-dependent channel weights for advanced sound systems (Annex 3, Tables 4-5)."
+  - type: standard
+    organization: "European Broadcasting Union"
+    year: 2023
+    title: "Loudness normalisation and permitted maximum level of audio signals"
+    designation: "EBU R 128"
+    url: "https://tech.ebu.ch/publications/r128"
+    note: "The −23.0 LUFS target level, the −1 dBTP ceiling and the normalisation practice."
+  - type: standard
+    organization: "European Broadcasting Union"
+    year: 2023
+    title: "Loudness metering: 'EBU Mode' metering to supplement loudness normalisation"
+    designation: "EBU Tech 3341"
+    url: "https://tech.ebu.ch/publications/tech3341"
+    note: "The EBU Mode momentary/short-term/integrated (M/S/I) time scales, validated against the synthesizable Table 1 minimum-requirements test signals with their official tolerances."
+  - type: standard
+    organization: "European Broadcasting Union"
+    year: 2023
+    title: "Loudness range: A measure to supplement loudness normalisation"
+    designation: "EBU Tech 3342"
+    url: "https://tech.ebu.ch/publications/tech3342"
+    note: "The loudness range (LRA) algorithm, its reference implementation and its test signals, validated against its Table 1 signals at ±1 LU."
+  - type: standard
+    organization: "European Broadcasting Union"
+    year: 2023
+    title: "Guidelines for production of programmes in accordance with EBU R 128"
+    designation: "EBU Tech 3343"
+    url: "https://tech.ebu.ch/publications/tech3343"
+    note: "The production practice around the numbers on this page."
+  - type: article
+    authors: ["Steinmetz, C. J.", "Reiss, J. D."]
+    year: 2021
+    title: "pyloudnorm: A simple yet flexible loudness meter in Python"
+    journal: "150th AES Convention"
+    url: "https://github.com/csteinmetz1/pyloudnorm"
+    note: "An independent BS.1770 implementation, useful as a cross-check."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 **ITU-R BS.1770-5** defines how broadcast and streaming measure the loudness
 of a programme: **K-weighting**, mean-square power in **gated 400 ms blocks**
@@ -121,7 +166,12 @@ time axes, the maxima, the thresholds, the LRA with its percentile edges,
 the per-channel true peaks and the channel weights; its `.plot()` draws the
 loudness trace of the programme:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/program_loudness.svg" alt="EBU R 128 metering of a one-minute synthetic programme with ambience, dialogue, music and fade-out sections: the grey momentary loudness breathes around the blue short-term trace, the red dashed integrated loudness sits exactly on the -23 LUFS target, and a shaded band marks the loudness range between its 10th and 95th percentile edges" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/program_loudness_dark.svg" alt="EBU R 128 metering of a one-minute synthetic programme with ambience, dialogue, music and fade-out sections: the grey momentary loudness breathes around the blue short-term trace, the red dashed integrated loudness sits exactly on the -23 LUFS target, and a shaded band marks the loudness range between its 10th and 95th percentile edges" style="width:96%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/program_loudness.svg"
+  alt="EBU R 128 metering of a one-minute synthetic programme with ambience, dialogue, music and fade-out sections: the grey momentary loudness breathes around the blue short-term trace, the red dashed integrated loudness sits exactly on the -23 LUFS target, and a shaded band marks the loudness range between its 10th and 95th percentile edges"
+  width="96%"
+  loading="eager"
+/>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -253,45 +303,3 @@ independent [pyloudnorm](https://github.com/csteinmetz1/pyloudnorm) meter is
 a useful cross-check for real recordings; it was not used as a source for
 this implementation.
 
-## References
-
-- International Telecommunication Union. (2023). *Algorithms to measure
-  audio programme loudness and true-peak audio level* (Recommendation
-  ITU-R BS.1770-5).
-  [ITU-R publication](https://www.itu.int/rec/R-REC-BS.1770).
-  The K-weighting, channel weights, gating and true-peak algorithms.
-- European Broadcasting Union. (2023). *Loudness normalisation and permitted
-  maximum level of audio signals* (EBU R 128).
-  [tech.ebu.ch/publications/r128](https://tech.ebu.ch/publications/r128).
-  The −23.0 LUFS target, the −1 dBTP ceiling and the normalisation practice.
-- European Broadcasting Union. (2023). *Loudness metering: 'EBU Mode'
-  metering to supplement loudness normalisation* (EBU Tech 3341).
-  [tech.ebu.ch/publications/tech3341](https://tech.ebu.ch/publications/tech3341).
-  The M/S/I time scales and the minimum-requirements test signals.
-- European Broadcasting Union. (2023). *Loudness range: A measure to
-  supplement loudness normalisation* (EBU Tech 3342).
-  [tech.ebu.ch/publications/tech3342](https://tech.ebu.ch/publications/tech3342).
-  The LRA algorithm, its reference implementation and its test signals.
-- European Broadcasting Union. (2023). *Guidelines for production of
-  programmes in accordance with EBU R 128* (EBU Tech 3343).
-  [tech.ebu.ch/publications/tech3343](https://tech.ebu.ch/publications/tech3343).
-  The production practice around the numbers on this page.
-- Steinmetz, C. J., & Reiss, J. D. (2021). *pyloudnorm: A simple yet
-  flexible loudness meter in Python*. 150th AES Convention.
-  [github.com/csteinmetz1/pyloudnorm](https://github.com/csteinmetz1/pyloudnorm).
-  An independent BS.1770 implementation, useful as a cross-check.
-
-## Standards
-
-ITU-R BS.1770-5 (11/2023), *Algorithms to measure audio programme loudness
-and true-peak audio level*: the K-weighting pre-filter (Annex 1, Tables
-1-2), the channel-weighted loudness and two-stage gating (Annex 1, Formulae
-1-7, Table 3), the true-peak estimation guidelines (Annex 2 and its
-Attachment 1 under-read bound) and the position-dependent channel weights
-for advanced sound systems (Annex 3, Tables 4-5). EBU R 128 (2023),
-*Loudness normalisation and permitted maximum level of audio signals*: the
-−23.0 LUFS target level and −1 dBTP maximum. EBU Tech 3341 (2023): the EBU
-Mode momentary/short-term/integrated time scales, validated against the
-synthesizable Table 1 minimum-requirements signals with their official
-tolerances. EBU Tech 3342 (2023): the loudness range, validated against its
-Table 1 signals at ±1 LU.

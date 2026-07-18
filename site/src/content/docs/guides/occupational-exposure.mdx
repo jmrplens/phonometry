@@ -1,7 +1,33 @@
 ---
 title: "Occupational Noise Exposure (ISO 9612)"
 description: "The ISO 9612 task-based, job-based and full-day measurement strategies for the daily noise exposure level LEX,8h, with the Annex C uncertainty budget and the one-sided 95 % upper limit."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2009
+    title: "Acoustics — Determination of occupational noise exposure — Engineering method"
+    designation: "ISO 9612:2009"
+    url: "https://www.iso.org/standard/41718.html"
+    note: "The implemented method: the task-based (Clause 9), job-based (Clause 10) and full-day (Clause 11) strategies, the microphone placement of Clause 12.3, the Annex C uncertainty budget (Formulae C.6, C.9 and C.12, Tables C.4/C.5) and the one-sided coverage factor k = 1.65 (Clause 14), validated against the worked examples of Annexes D, E and F."
+  - type: report
+    organization: "European Parliament and Council"
+    year: 2003
+    title: "Directive 2003/10/EC on the minimum health and safety requirements regarding the exposure of workers to the risks arising from physical agents (noise)"
+    number: "Directive 2003/10/EC"
+    institution: "Official Journal of the European Union"
+    url: "https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng"
+    note: "The EU exposure action values (80/85 dB) and limit value (87 dB) that the LEX,8h and its upper limit are assessed against."
+  - type: report
+    organization: "National Institute for Occupational Safety and Health"
+    year: 1998
+    title: "Criteria for a recommended standard: Occupational noise exposure — Revised criteria 1998"
+    number: "DHHS/NIOSH Publication No. 98-126"
+    doi: "10.26616/NIOSHPUB98126"
+    url: "https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf"
+    note: "The freely available criteria document (the linked PDF is the free download) behind the 85 dB(A) recommended exposure limit and the hearing-conservation rationale for measuring the daily dose."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 A working day is rarely measured in one take: the daily exposure level a
 regulation acts on has to be assembled from *samples* of a real shift, and
@@ -13,7 +39,12 @@ to attach the normative uncertainty every occupational-hygiene report needs. The
 `occupational_exposure` module adds the three **measurement strategies** and the
 **Annex C** uncertainty budget on top of the energy-average machinery.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612.svg" alt="Left: a worker wearing a personal sound exposure meter (IEC 61252), its microphone mounted about 0.04 m above the shoulder and at least 0.1 m from the entrance of the most-exposed ear canal, per ISO 9612 Clause 12.3. Right: the three measurement strategies drawn as timelines over an eight-hour working day — task-based (the day split into labelled tasks, at least three samples plus a duration each), job-based (five or more random samples spread over the homogeneous exposure group) and full-day (the whole shift measured at least three times) — all feeding the LEX,8h and its Annex C uncertainty, chosen by work pattern from Table B.1" style="width:94%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612_dark.svg" alt="Left: a worker wearing a personal sound exposure meter (IEC 61252), its microphone mounted about 0.04 m above the shoulder and at least 0.1 m from the entrance of the most-exposed ear canal, per ISO 9612 Clause 12.3. Right: the three measurement strategies drawn as timelines over an eight-hour working day — task-based (the day split into labelled tasks, at least three samples plus a duration each), job-based (five or more random samples spread over the homogeneous exposure group) and full-day (the whole shift measured at least three times) — all feeding the LEX,8h and its Annex C uncertainty, chosen by work pattern from Table B.1" style="width:94%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612.svg"
+  alt="Left: a worker wearing a personal sound exposure meter (IEC 61252), its microphone mounted about 0.04 m above the shoulder and at least 0.1 m from the entrance of the most-exposed ear canal, per ISO 9612 Clause 12.3. Right: the three measurement strategies drawn as timelines over an eight-hour working day — task-based (the day split into labelled tasks, at least three samples plus a duration each), job-based (five or more random samples spread over the homogeneous exposure group) and full-day (the whole shift measured at least three times) — all feeding the LEX,8h and its Annex C uncertainty, chosen by work pattern from Table B.1"
+  width="94%"
+  loading="eager"
+/>
 
 ## 1. The three measurement strategies (Clauses 9-11)
 
@@ -51,33 +82,6 @@ with task-based when you can, fall back to job-based for irregular work, and
 use full-day when the pattern defies description or an independent whole-shift
 check is wanted.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.svg" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty_dark.svg" alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it" style="width:80%">
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-from phonometry import hearing
-
-# The ISO 9612 Annex D welder's day of the next section.
-tasks = [
-    hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
-    hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
-         duration_range=(4.0, 6.0), label="welding"),
-    hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
-         duration_range=(1.0, 2.0), label="cutting/grinding"),
-]
-res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
-
-# One line: task contribution bars plus the LEX,8h and LEX,8h + U lines.
-res.plot()
-plt.show()
-```
-
-</details>
-
-
 ```python
 from phonometry import hearing
 
@@ -109,6 +113,36 @@ print(f"job      LEX,8h = {job.lex_8h:.1f} dB   U = {job.expanded_uncertainty:.1
 print(f"full-day LEX,8h = {full.lex_8h:.1f} dB   U = {full.expanded_uncertainty:.1f} dB")
 # full-day LEX,8h = 90.1 dB   U = 3.4 dB
 ```
+
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/exposure_uncertainty.svg"
+  alt="ISO 9612 Annex D task-based exposure: the three task LEX,8h contributions as bars, the energy-summed daily LEX,8h line and the one-sided 95 % upper limit LEX,8h + U band above it"
+  width="80%"
+/>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import hearing
+
+# The ISO 9612 Annex D welder's day of the previous snippet.
+tasks = [
+    hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
+    hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
+         duration_range=(4.0, 6.0), label="welding"),
+    hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
+         duration_range=(1.0, 2.0), label="cutting/grinding"),
+]
+res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
+
+# One line: task contribution bars plus the LEX,8h and LEX,8h + U lines.
+res.plot()
+plt.show()
+```
+
+</details>
 
 ## 2. The Annex C uncertainty budget
 
@@ -184,36 +218,3 @@ carry no per-task breakdown).
 - [Theory](/phonometry/reference/theory/environment-transport/) — the derivation of the strategy formulas and the
   Annex C budget.
 - API reference: [`hearing.occupational_exposure`](/phonometry/reference/api/hearing/occupational-exposure/).
-
-## References
-
-- International Organization for Standardization. (2009). *Acoustics —
-  Determination of occupational noise exposure — Engineering method*
-  (ISO 9612:2009). [iso.org catalogue](https://www.iso.org/standard/41718.html).
-  The implemented method: the three strategies, the microphone placement of
-  Clause 12.3, the Annex C uncertainty budget and the Annex D/E/F worked
-  examples.
-- European Parliament and Council. (2003). *Directive 2003/10/EC on the
-  minimum health and safety requirements regarding the exposure of workers to
-  the risks arising from physical agents (noise)*. Official Journal of the
-  European Union.
-  [eur-lex.europa.eu](https://eur-lex.europa.eu/eli/dir/2003/10/oj/eng).
-  The EU exposure action values (80/85 dB) and limit value (87 dB) that the
-  `LEX,8h` and its upper limit are assessed against.
-- National Institute for Occupational Safety and Health. (1998). *Criteria for
-  a recommended standard: Occupational noise exposure — Revised criteria 1998*
-  (DHHS/NIOSH Publication No. 98-126).
-  [doi:10.26616/NIOSHPUB98126](https://doi.org/10.26616/NIOSHPUB98126),
-  [free PDF](https://www.cdc.gov/niosh/docs/98-126/pdfs/98-126.pdf).
-  The freely available criteria document behind the 85 dB(A) recommended
-  exposure limit and the hearing-conservation rationale for measuring the
-  daily dose.
-
-## Standards
-
-ISO 9612:2009, *Acoustics — Determination of occupational noise
-exposure — Engineering method* — the task-based (Clause 9), job-based
-(Clause 10) and full-day (Clause 11) strategies, the Annex C uncertainty budget
-(Formulae C.6, C.9 and C.12, Tables C.4/C.5) and the one-sided coverage factor
-k = 1.65 (Clause 14), validated against the worked examples of Annexes D, E
-and F.

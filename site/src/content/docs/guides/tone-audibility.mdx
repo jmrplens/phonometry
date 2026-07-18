@@ -1,7 +1,31 @@
 ---
 title: "Objective audibility of tones in noise (ISO/PAS 20065)"
 description: "The ISO/PAS 20065:2016 engineering method for the audibility ΔL of a tone above the masking threshold: the critical band about the tone (Δfc, Formula 2), the critical-band masking level LG = LS + 10 lg(Δfc/Δf) (Formula 12), the masking index av = −2 − lg[1 + (f/502)²·⁵] (Formula 13), the audibility ΔL = LT − LG − av (Formula 14), and the decisive and energy-mean mean audibility (Formula 20)."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Acoustics — Objective method for assessing the audibility of tones in noise — Engineering method"
+    designation: "ISO/PAS 20065:2016"
+    url: "https://www.iso.org/standard/66941.html"
+    note: "The implemented engineering method: every formula on this page follows the 2016 PAS edition. The critical bandwidth Δfc (Formula 2) and its corner frequencies (Formulae 3–5), the critical-band level LG (Formula 12), the masking index av (Formula 13), the audibility ΔL = LT − LG − av (Formula 14) and the energy-mean mean audibility (Formula 20); the mean narrow-band level LS (Formula 6, iterative Annex D) and tone level LT (Formula 8) come from the critical-band spectrum, and analyze_spectrum adds peak detection (Clause 5.3.8) with the distinctness criteria (Clause 5.3.4), the multi-tone FG combination (Formula 17) and the separate evaluation of two tones below 1000 Hz (Formulae 18/19). Conformance is anchored on the Annex E combustion-engine worked example (Tables E.1/E.2/E.3). Withdrawn, superseded by ISO/TS 20065:2022 (https://www.iso.org/standard/81518.html)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Acoustics — Description, measurement and assessment of environmental noise — Part 2: Determination of sound pressure levels"
+    designation: "ISO 1996-2:2017"
+    url: "https://www.iso.org/standard/59766.html"
+    note: "The environmental-noise standard this method serves: its Annex J adopts the engineering method and maps the mean audibility to the tonal adjustment Kt (Table J.1) discussed in §3.1."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2005
+    title: "Akustik — Bestimmung der Tonhaltigkeit von Geräuschen und Ermittlung eines Tonzuschlages für die Beurteilung von Geräuschimmissionen"
+    designation: "DIN 45681:2005-03"
+    url: "https://www.dinmedia.de/en/standard/din-45681/76463232"
+    note: "The parent standard the −1.76 dB Hanning bandwidth correction, the iterative masking-level procedure and the detection/combination logic are confirmed against (its Annex J reference program)."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 A steady tone embedded in broadband noise stands out when it rises audibly above
 the noise that would otherwise mask it — the objective precondition for the tonal
@@ -13,7 +37,12 @@ detailed method that **ISO 1996-2:2017** defers to (the simpler Annex C route
 lives in [environmental measurement](/phonometry/guides/levels/)); the mean
 audibility `ΔL` it produces feeds the ISO 1996-2 tonal adjustment `Kt`.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility.svg" alt="Per-tone audibility ΔL of the nine tones of the ISO/PAS 20065 Annex E combustion-engine spectrum, with the decisive tone at 137.3 Hz highlighted and the ΔL = 0 dB threshold marked" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility_dark.svg" alt="Per-tone audibility ΔL of the nine tones of the ISO/PAS 20065 Annex E combustion-engine spectrum, with the decisive tone at 137.3 Hz highlighted and the ΔL = 0 dB threshold marked" style="width:82%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility.svg"
+  alt="Per-tone audibility ΔL of the nine tones of the ISO/PAS 20065 Annex E combustion-engine spectrum, with the decisive tone at 137.3 Hz highlighted and the ΔL = 0 dB threshold marked"
+  width="82%"
+  loading="eager"
+/>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -256,43 +285,6 @@ decision are implemented clean-room from the text and verified against the
 evaluated at the Annex E tones the threshold (`≈ 24 Hz` at 137.3 Hz) keeps them
 combined, consistent with that example's FG grouping.
 :::
-
-## References
-
-- International Organization for Standardization. (2016). *Acoustics —
-  Objective method for assessing the audibility of tones in noise —
-  Engineering method* (ISO/PAS 20065:2016; withdrawn, superseded by
-  [ISO/TS 20065:2022](https://www.iso.org/standard/81518.html)).
-  [iso.org catalogue](https://www.iso.org/standard/66941.html).
-  The implemented engineering method: every formula on this page, from the
-  critical band to the mean audibility and its uncertainty, follows the 2016
-  PAS edition.
-- International Organization for Standardization. (2017). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 2:
-  Determination of sound pressure levels* (ISO 1996-2:2017).
-  [iso.org catalogue](https://www.iso.org/standard/59766.html).
-  The environmental-noise standard this method serves: its Annex J adopts the
-  engineering method and maps the mean audibility to the tonal adjustment
-  `Kt` (Table J.1) discussed in §3.1.
-
-## Standards
-
-ISO/PAS 20065:2016, *Acoustics — Objective method for assessing the audibility
-of tones in noise — Engineering method*: the critical bandwidth `Δfc`
-(Formula 2) and its corner frequencies (Formulae 3–5), the critical-band level
-`LG` (Formula 12), the masking index `av` (Formula 13), the audibility
-`ΔL = LT − LG − av` (Formula 14) and the energy-mean mean audibility
-(Formula 20). The mean narrow-band level `LS` (Formula 6, iterative Annex D) and
-tone level `LT` (Formula 8) are computed from the critical-band spectrum, and
-`analyze_spectrum` adds peak detection (Clause 5.3.8) with the distinctness
-criteria (Clause 5.3.4) and the multi-tone `FG` combination (Formula 17), plus
-the separate evaluation of two tones below 1000 Hz (Formulae 18/19). The
-−1.76 dB Hanning bandwidth correction, the iterative masking-level procedure and
-the detection/combination logic are confirmed against the parent standard
-**DIN 45681:2005-03** (its Annex J reference program). Conformance is anchored on
-the Annex E combustion-engine worked example (Tables E.1/E.2/E.3): `LS` and `LT`
-from the spectrum, tone detection and the `FG` combined level, the per-tone
-audibility, the masking index and the mean audibility of the five spectra.
 
 ## See also
 

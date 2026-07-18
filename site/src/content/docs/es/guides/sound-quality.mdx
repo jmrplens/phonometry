@@ -1,7 +1,32 @@
 ---
 title: "Métricas de calidad sonora"
 description: "Sharpness en acum (DIN 45692) y la tonalidad (tu_HMS), la aspereza (asper) y la intensidad de fluctuación (vacil_HMS) del modelo de Sottek de ECMA-418-2."
+references:
+  - type: book
+    authors: ["Fastl, H.", "Zwicker, E."]
+    year: 2007
+    title: "Psychoacoustics: Facts and models"
+    edition: "3.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-68888-4"
+    note: "La psicoacústica de las sensaciones que cuantifica esta página: el énfasis en alta frecuencia que sustenta la agudeza y la percepción de modulación rápida que sustenta la aspereza."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2009
+    title: "Messtechnische Simulation der Hörempfindung Schärfe"
+    designation: "DIN 45692:2009"
+    url: "https://www.dinmedia.de/en/standard/din-45692/117635111"
+    note: "Sharpness en acum: la ponderación del apartado 6, las variantes von Bismarck y Aures del Anexo B y los objetivos de la Tabla A.2."
+  - type: standard
+    organization: "Ecma International"
+    year: 2025
+    title: "Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing human perception based on the Sottek Hearing Model)"
+    designation: "ECMA-418-2:2025"
+    url: "https://ecma-international.org/publications-and-standards/standards/ecma-418/"
+    note: "La tonalidad (tu_HMS, cláusula 6), la aspereza (asper, cláusula 7) y la intensidad de fluctuación (vacil_HMS, cláusula 9, el análisis de envolvente basado en HSA) del modelo de Sottek."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Dos sonidos igual de sonoros pueden diferir aún en cuán *afilados*, cuán
 *tonales*, cuán *ásperos* o cuán *fluctuantes* son. Esta página cubre las
@@ -27,7 +52,12 @@ $k$ normalizada para que el sonido de referencia — ruido de ancho de banda
 crítico a 1 kHz, 60 dB — sea exactamente **1,00 acum** (DIN 45692 apartado 6;
 la $k = 0{,}108$ derivada queda dentro de la ventana normativa 0,105–0,115).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es.svg" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es_dark.svg" alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados" style="width:80%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_es.svg"
+  alt="Ponderación de nitidez g(z) de DIN 45692 frente a la razón de banda crítica en eje logarítmico, comparando las curvas DIN, von Bismarck y Aures con los codos de 15,8 y 15 Bark marcados"
+  width="80%"
+  loading="eager"
+/>
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -142,7 +172,11 @@ print(f"R = {res.roughness:.4f} asper")   # 0.9999 asper (referencia: 1 asper)
 res.plot()   # aspereza R(l50) dependiente del tiempo + mapa de calor de aspereza específica
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es.svg" alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es_dark.svg" alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad" style="width:80%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_es.svg"
+  alt="Demostración de calidad sonora ECMA-418-2: un sonido tonal puntúa alta tonalidad y aspereza casi nula, mientras que un sonido modulado en amplitud a 70 Hz puntúa alta aspereza y baja tonalidad"
+  width="80%"
+/>
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -232,7 +266,11 @@ print(f"F = {res.fluctuation_strength:.4f} vacil_HMS")   # 0,9957 vacil_HMS (ref
 res.plot()   # F(l50) temporal + mapa de calor de la específica
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hms_modulation_bandpass_es.svg" alt="Percepción de modulación lenta vs rápida de ECMA-418-2: la intensidad de fluctuación forma un paso de banda sobre la frecuencia de modulación con máximo cerca de 4 a 6 Hz mientras que la aspereza de los mismos tonos de 1 kHz modulados en amplitud tiene su máximo cerca de 70 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hms_modulation_bandpass_es_dark.svg" alt="Percepción de modulación lenta vs rápida de ECMA-418-2: la intensidad de fluctuación forma un paso de banda sobre la frecuencia de modulación con máximo cerca de 4 a 6 Hz mientras que la aspereza de los mismos tonos de 1 kHz modulados en amplitud tiene su máximo cerca de 70 Hz" style="width:80%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hms_modulation_bandpass_es.svg"
+  alt="Percepción de modulación lenta vs rápida de ECMA-418-2: la intensidad de fluctuación forma un paso de banda sobre la frecuencia de modulación con máximo cerca de 4 a 6 Hz mientras que la aspereza de los mismos tonos de 1 kHz modulados en amplitud tiene su máximo cerca de 70 Hz"
+  width="80%"
+/>
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -292,26 +330,6 @@ para los veredictos TNR/PR de ECMA-418-1, el
 [índice de transmisión del habla](/phonometry/es/guides/speech-transmission/)
 para el STI/STIPA, y [Teoría](/phonometry/es/reference/theory/perception/) para la
 matemática subyacente.
-
-## Referencias
-
-- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
-  (3.ª ed.). Springer.
-  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
-  La psicoacústica de las sensaciones que cuantifica esta página: el énfasis
-  en alta frecuencia que sustenta la agudeza y la percepción de modulación rápida
-  que sustenta la aspereza.
-
-## Normas
-
-DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
-Schärfe* — sharpness en acum (ponderación del apartado 6, variantes von
-Bismarck y Aures del Anexo B, objetivos de la Tabla A.2). ECMA-418-2:2025,
-*Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing
-human perception based on the Sottek Hearing Model)* — la tonalidad (tu_HMS,
-cláusula 6), la aspereza (asper, cláusula 7) y la intensidad de fluctuación
-(vacil_HMS, cláusula 9, el análisis de envolvente basado en HSA) del modelo
-de Sottek.
 
 ## Véase también
 

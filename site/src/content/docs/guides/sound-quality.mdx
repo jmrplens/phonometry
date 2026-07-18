@@ -1,7 +1,32 @@
 ---
 title: "Sound Quality Metrics"
 description: "Sharpness in acum (DIN 45692) and the ECMA-418-2 Sottek Hearing Model tonality (tu_HMS), roughness (asper) and fluctuation strength (vacil_HMS)."
+references:
+  - type: book
+    authors: ["Fastl, H.", "Zwicker, E."]
+    year: 2007
+    title: "Psychoacoustics: Facts and models"
+    edition: "3rd ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-68888-4"
+    note: "The psychoacoustics of the sensations quantified on this page: the high-frequency emphasis behind sharpness and the fast-modulation percept behind roughness."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2009
+    title: "Messtechnische Simulation der Hörempfindung Schärfe"
+    designation: "DIN 45692:2009"
+    url: "https://www.dinmedia.de/en/standard/din-45692/117635111"
+    note: "Sharpness in acum: the clause 6 weighting, the Annex B von Bismarck and Aures variants and the Table A.2 targets."
+  - type: standard
+    organization: "Ecma International"
+    year: 2025
+    title: "Psychoacoustic metrics for ITT equipment — Part 2 (methods for describing human perception based on the Sottek Hearing Model)"
+    designation: "ECMA-418-2:2025"
+    url: "https://ecma-international.org/publications-and-standards/standards/ecma-418/"
+    note: "The Sottek Hearing Model tonality (tu_HMS, clause 6), roughness (asper, clause 7) and fluctuation strength (vacil_HMS, clause 9, the HSA-based envelope analysis)."
 ---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
 
 Two sounds of equal loudness can still differ in how *sharp*, how *tonal*,
 how *rough* or how strongly *fluctuating* they are. This page covers the
@@ -25,7 +50,12 @@ normalized so the reference sound — critical-band-wide noise at 1 kHz,
 60 dB — is exactly **1.00 acum** (DIN 45692 clause 6; the derived
 $k = 0.108$ sits inside the normative window 0.105–0.115).
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" style="width:80%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg"
+  alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked"
+  width="80%"
+  loading="eager"
+/>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -137,7 +167,11 @@ print(f"R = {res.roughness:.4f} asper")   # 0.9999 asper (reference: 1 asper)
 res.plot()   # time-dependent roughness R(l50) + specific-roughness heatmap
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.svg" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo_dark.svg" alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality" style="width:80%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tonality_roughness_demo.svg"
+  alt="ECMA-418-2 sound-quality demo: a tonal sound scores high tonality and near-zero roughness, while a 70 Hz amplitude-modulated sound scores high roughness and low tonality"
+  width="80%"
+/>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -224,7 +258,11 @@ print(f"F = {res.fluctuation_strength:.4f} vacil_HMS")   # 0.9957 vacil_HMS (ref
 res.plot()   # time-dependent F(l50) + specific-fluctuation-strength heatmap
 ```
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hms_modulation_bandpass.svg" alt="ECMA-418-2 slow vs fast modulation perception: fluctuation strength forms a band-pass over modulation frequency peaking near 4 to 6 Hz while roughness of the same 1 kHz amplitude-modulated tones peaks near 70 Hz" style="width:80%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hms_modulation_bandpass_dark.svg" alt="ECMA-418-2 slow vs fast modulation perception: fluctuation strength forms a band-pass over modulation frequency peaking near 4 to 6 Hz while roughness of the same 1 kHz amplitude-modulated tones peaks near 70 Hz" style="width:80%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hms_modulation_bandpass.svg"
+  alt="ECMA-418-2 slow vs fast modulation perception: fluctuation strength forms a band-pass over modulation frequency peaking near 4 to 6 Hz while roughness of the same 1 kHz amplitude-modulated tones peaks near 70 Hz"
+  width="80%"
+/>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -282,25 +320,6 @@ See [Prominent Discrete Tones](/phonometry/guides/tone-prominence/) for the
 ECMA-418-1 TNR/PR prominence verdicts,
 [Speech Transmission Index](/phonometry/guides/speech-transmission/) for
 STI/STIPA, and [Theory](/phonometry/reference/theory/perception/) for the underlying math.
-
-## References
-
-- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
-  (3rd ed.). Springer.
-  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
-  The psychoacoustics of the sensations quantified on this page: the
-  high-frequency emphasis behind sharpness and the fast-modulation percept
-  behind roughness.
-
-## Standards
-
-DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
-Schärfe* — sharpness in acum (clause 6 weighting, Annex B von Bismarck and
-Aures variants, Table A.2 targets). ECMA-418-2:2025, *Psychoacoustic metrics
-for ITT equipment — Part 2 (methods for describing human perception based on
-the Sottek Hearing Model)* — the Sottek Hearing Model tonality (tu_HMS,
-clause 6), roughness (asper, clause 7) and fluctuation strength (vacil_HMS,
-clause 9, the HSA-based envelope analysis).
 
 ## See also
 

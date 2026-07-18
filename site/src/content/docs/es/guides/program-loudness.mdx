@@ -1,7 +1,52 @@
 ---
 title: "Sonoridad de programa y pico verdadero (BS.1770 / R 128)"
 description: "El algoritmo de sonoridad de programa de la Rec. UIT-R BS.1770-5 y la práctica de normalización de EBU R 128: ponderación K, sonoridad integrada con puertas en LUFS, los medidores momentáneo y de corto plazo del modo EBU de Tech 3341, el rango de sonoridad de Tech 3342 y el nivel de pico verdadero por sobremuestreo en dBTP."
+references:
+  - type: standard
+    organization: "International Telecommunication Union"
+    year: 2023
+    title: "Algorithms to measure audio programme loudness and true-peak audio level"
+    designation: "Recomendación UIT-R BS.1770-5 (11/2023)"
+    url: "https://www.itu.int/rec/R-REC-BS.1770"
+    note: "El prefiltro de ponderación K (Anexo 1, Tablas 1-2), la sonoridad ponderada por canal y las puertas en dos etapas (Anexo 1, Fórmulas 1-7, Tabla 3), las directrices de estimación del pico verdadero (Anexo 2 y la cota de infravaloración de su Adjunto 1) y las ponderaciones de canal dependientes de la posición para sistemas de sonido avanzados (Anexo 3, Tablas 4-5)."
+  - type: standard
+    organization: "European Broadcasting Union"
+    year: 2023
+    title: "Loudness normalisation and permitted maximum level of audio signals"
+    designation: "EBU R 128"
+    url: "https://tech.ebu.ch/publications/r128"
+    note: "El nivel objetivo de −23,0 LUFS, el techo de −1 dBTP y la práctica de normalización."
+  - type: standard
+    organization: "European Broadcasting Union"
+    year: 2023
+    title: "Loudness metering: 'EBU Mode' metering to supplement loudness normalisation"
+    designation: "EBU Tech 3341"
+    url: "https://tech.ebu.ch/publications/tech3341"
+    note: "Las escalas temporales momentánea/corto plazo/integrada (M/S/I) del modo EBU, validadas frente a las señales sintetizables de requisitos mínimos de su Tabla 1 con sus tolerancias oficiales."
+  - type: standard
+    organization: "European Broadcasting Union"
+    year: 2023
+    title: "Loudness range: A measure to supplement loudness normalisation"
+    designation: "EBU Tech 3342"
+    url: "https://tech.ebu.ch/publications/tech3342"
+    note: "El algoritmo del rango de sonoridad (LRA), su implementación de referencia y sus señales de prueba, validado frente a las señales de su Tabla 1 con ±1 LU."
+  - type: standard
+    organization: "European Broadcasting Union"
+    year: 2023
+    title: "Guidelines for production of programmes in accordance with EBU R 128"
+    designation: "EBU Tech 3343"
+    url: "https://tech.ebu.ch/publications/tech3343"
+    note: "La práctica de producción alrededor de los números de esta página."
+  - type: article
+    authors: ["Steinmetz, C. J.", "Reiss, J. D."]
+    year: 2021
+    title: "pyloudnorm: A simple yet flexible loudness meter in Python"
+    journal: "150.ª Convención de la AES"
+    url: "https://github.com/csteinmetz1/pyloudnorm"
+    note: "Una implementación independiente de BS.1770, útil como contraste."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La **Rec. UIT-R BS.1770-5** define cómo miden la sonoridad de un programa la
 radiodifusión y el streaming: **ponderación K**, potencia cuadrática media en
@@ -124,7 +169,12 @@ tiempo, los máximos, los umbrales, el LRA con sus bordes percentiles, los
 picos verdaderos por canal y las ponderaciones de canal; su `.plot()` dibuja
 la traza de sonoridad del programa:
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/program_loudness_es.svg" alt="Medición EBU R 128 de un programa sintético de un minuto con secciones de ambiente, diálogo, música y fundido: la sonoridad momentánea gris respira alrededor de la traza azul de corto plazo, la sonoridad integrada discontinua roja cae exactamente sobre el objetivo de -23 LUFS y una banda sombreada marca el rango de sonoridad entre sus percentiles 10 y 95" style="width:96%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/program_loudness_es_dark.svg" alt="Medición EBU R 128 de un programa sintético de un minuto con secciones de ambiente, diálogo, música y fundido: la sonoridad momentánea gris respira alrededor de la traza azul de corto plazo, la sonoridad integrada discontinua roja cae exactamente sobre el objetivo de -23 LUFS y una banda sombreada marca el rango de sonoridad entre sus percentiles 10 y 95" style="width:96%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/program_loudness_es.svg"
+  alt="Medición EBU R 128 de un programa sintético de un minuto con secciones de ambiente, diálogo, música y fundido: la sonoridad momentánea gris respira alrededor de la traza azul de corto plazo, la sonoridad integrada discontinua roja cae exactamente sobre el objetivo de -23 LUFS y una banda sombreada marca el rango de sonoridad entre sus percentiles 10 y 95"
+  width="96%"
+  loading="eager"
+/>
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -259,51 +309,3 @@ gating y LRA de estos casos se ejecutan también en todas partes sin el
 audio. El medidor independiente
 [pyloudnorm](https://github.com/csteinmetz1/pyloudnorm) es un contraste útil
 con grabaciones reales; no se usó como fuente de esta implementación.
-
-## Referencias
-
-- Unión Internacional de Telecomunicaciones. (2023). *Algorithms to measure
-  audio programme loudness and true-peak audio level* (Recomendación
-  UIT-R BS.1770-5).
-  [Publicación UIT-R](https://www.itu.int/rec/R-REC-BS.1770).
-  La ponderación K, las ponderaciones de canal, las puertas y el algoritmo
-  de pico verdadero.
-- Unión Europea de Radiodifusión. (2023). *Loudness normalisation and
-  permitted maximum level of audio signals* (EBU R 128).
-  [tech.ebu.ch/publications/r128](https://tech.ebu.ch/publications/r128).
-  El objetivo de −23,0 LUFS, el techo de −1 dBTP y la práctica de
-  normalización.
-- Unión Europea de Radiodifusión. (2023). *Loudness metering: 'EBU Mode'
-  metering to supplement loudness normalisation* (EBU Tech 3341).
-  [tech.ebu.ch/publications/tech3341](https://tech.ebu.ch/publications/tech3341).
-  Las escalas temporales M/S/I y las señales de prueba de requisitos
-  mínimos.
-- Unión Europea de Radiodifusión. (2023). *Loudness range: A measure to
-  supplement loudness normalisation* (EBU Tech 3342).
-  [tech.ebu.ch/publications/tech3342](https://tech.ebu.ch/publications/tech3342).
-  El algoritmo del LRA, su implementación de referencia y sus señales de
-  prueba.
-- Unión Europea de Radiodifusión. (2023). *Guidelines for production of
-  programmes in accordance with EBU R 128* (EBU Tech 3343).
-  [tech.ebu.ch/publications/tech3343](https://tech.ebu.ch/publications/tech3343).
-  La práctica de producción alrededor de los números de esta página.
-- Steinmetz, C. J., y Reiss, J. D. (2021). *pyloudnorm: A simple yet
-  flexible loudness meter in Python*. 150.ª Convención de la AES.
-  [github.com/csteinmetz1/pyloudnorm](https://github.com/csteinmetz1/pyloudnorm).
-  Una implementación independiente de BS.1770, útil como contraste.
-
-## Normas
-
-Rec. UIT-R BS.1770-5 (11/2023), *Algorithms to measure audio programme
-loudness and true-peak audio level*: el prefiltro de ponderación K (Anexo 1,
-Tablas 1-2), la sonoridad ponderada por canal y las puertas en dos etapas
-(Anexo 1, Fórmulas 1-7, Tabla 3), las directrices de estimación del pico
-verdadero (Anexo 2 y la cota de infravaloración de su Adjunto 1) y las
-ponderaciones de canal dependientes de la posición para sistemas de sonido
-avanzados (Anexo 3, Tablas 4-5). EBU R 128 (2023), *Loudness normalisation
-and permitted maximum level of audio signals*: el nivel objetivo de
-−23,0 LUFS y el máximo de −1 dBTP. EBU Tech 3341 (2023): las escalas
-temporales momentánea/corto plazo/integrada del modo EBU, validadas frente a
-las señales sintetizables de requisitos mínimos de su Tabla 1 con sus
-tolerancias oficiales. EBU Tech 3342 (2023): el rango de sonoridad, validado
-frente a las señales de su Tabla 1 con ±1 LU.

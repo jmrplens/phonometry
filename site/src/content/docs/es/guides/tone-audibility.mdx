@@ -1,7 +1,31 @@
 ---
 title: "Audibilidad objetiva de tonos en ruido (ISO/PAS 20065)"
 description: "El método de ingeniería de ISO/PAS 20065:2016 para la audibilidad ΔL de un tono por encima del umbral de enmascaramiento: la banda crítica en torno al tono (Δfc, Fórmula 2), el nivel de banda crítica del enmascaramiento LG = LS + 10 lg(Δfc/Δf) (Fórmula 12), el índice de enmascaramiento av = −2 − lg[1 + (f/502)²·⁵] (Fórmula 13), la audibilidad ΔL = LT − LG − av (Fórmula 14) y la audibilidad decisiva y media energética (Fórmula 20)."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Acoustics — Objective method for assessing the audibility of tones in noise — Engineering method"
+    designation: "ISO/PAS 20065:2016"
+    url: "https://www.iso.org/standard/66941.html"
+    note: "El método de ingeniería implementado: todas las fórmulas de esta página siguen la edición PAS de 2016. El ancho de banda crítico Δfc (Fórmula 2) y sus frecuencias de esquina (Fórmulas 3–5), el nivel de banda crítica LG (Fórmula 12), el índice de enmascaramiento av (Fórmula 13), la audibilidad ΔL = LT − LG − av (Fórmula 14) y la audibilidad media energética (Fórmula 20); el nivel medio de banda estrecha LS (Fórmula 6, iterativa Anexo D) y el nivel del tono LT (Fórmula 8) se calculan desde el espectro de banda crítica, y analyze_spectrum añade la detección de picos (apartado 5.3.8) con los criterios de distinción (apartado 5.3.4), la combinación multitono FG (Fórmula 17) y la evaluación separada de dos tonos por debajo de 1000 Hz (Fórmulas 18/19). La conformidad se ancla en el ejemplo resuelto del motor de combustión del Anexo E (Tablas E.1/E.2/E.3). Retirada, sustituida por ISO/TS 20065:2022 (https://www.iso.org/standard/81518.html)."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Acoustics — Description, measurement and assessment of environmental noise — Part 2: Determination of sound pressure levels"
+    designation: "ISO 1996-2:2017"
+    url: "https://www.iso.org/standard/59766.html"
+    note: "La norma de ruido ambiental a la que sirve este método: su Anexo J adopta el método de ingeniería y convierte la audibilidad media en el ajuste tonal Kt (Tabla J.1) tratado en §3.1."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2005
+    title: "Akustik — Bestimmung der Tonhaltigkeit von Geräuschen und Ermittlung eines Tonzuschlages für die Beurteilung von Geräuschimmissionen"
+    designation: "DIN 45681:2005-03"
+    url: "https://www.dinmedia.de/en/standard/din-45681/76463232"
+    note: "La norma madre frente a la que se confirman la corrección de ancho de banda de Hanning de −1,76 dB, el procedimiento iterativo del nivel de enmascaramiento y la lógica de detección/combinación (su programa de referencia del Anexo J)."
 ---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Un tono estacionario inmerso en ruido de banda ancha resalta cuando emerge de
 forma audible por encima del ruido que de otro modo lo enmascararía —la
@@ -15,7 +39,12 @@ detallado al que remite **ISO 1996-2:2017** (la vía simplificada del Anexo C
 está en [medición ambiental](/phonometry/es/guides/levels/)); la audibilidad
 media `ΔL` que produce alimenta el ajuste tonal `Kt` de ISO 1996-2.
 
-<img class="light-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility_es.svg" alt="Audibilidad ΔL por tono de los nueve tonos del espectro del motor de combustión del Anexo E de ISO/PAS 20065, con el tono decisivo a 137,3 Hz resaltado y el umbral ΔL = 0 dB marcado" style="width:82%"><img class="dark-only" src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility_es_dark.svg" alt="Audibilidad ΔL por tono de los nueve tonos del espectro del motor de combustión del Anexo E de ISO/PAS 20065, con el tono decisivo a 137,3 Hz resaltado y el umbral ΔL = 0 dB marcado" style="width:82%">
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/tone_audibility_es.svg"
+  alt="Audibilidad ΔL por tono de los nueve tonos del espectro del motor de combustión del Anexo E de ISO/PAS 20065, con el tono decisivo a 137,3 Hz resaltado y el umbral ΔL = 0 dB marcado"
+  width="82%"
+  loading="eager"
+/>
 
 <details>
 <summary>Mostrar el código de esta figura</summary>
@@ -267,45 +296,6 @@ y se verifican contra el programa de referencia del Anexo J de
 1.8)`). Como refuerzo, evaluado en los tonos del Anexo E el umbral (`≈ 24 Hz` en
 137,3 Hz) los mantiene combinados, coherente con la agrupación FG de ese ejemplo.
 :::
-
-## Referencias
-
-- International Organization for Standardization. (2016). *Acoustics —
-  Objective method for assessing the audibility of tones in noise —
-  Engineering method* (ISO/PAS 20065:2016; retirada, sustituida por
-  [ISO/TS 20065:2022](https://www.iso.org/standard/81518.html)).
-  [Catálogo iso.org](https://www.iso.org/standard/66941.html).
-  El método de ingeniería implementado: todas las fórmulas de esta página, de
-  la banda crítica a la audibilidad media y su incertidumbre, siguen la edición
-  PAS de 2016.
-- International Organization for Standardization. (2017). *Acoustics —
-  Description, measurement and assessment of environmental noise — Part 2:
-  Determination of sound pressure levels* (ISO 1996-2:2017).
-  [Catálogo iso.org](https://www.iso.org/standard/59766.html).
-  La norma de ruido ambiental a la que sirve este método: su Anexo J adopta el
-  método de ingeniería y convierte la audibilidad media en el ajuste tonal
-  `Kt` (Tabla J.1) tratado en §3.1.
-
-## Normas
-
-ISO/PAS 20065:2016, *Acoustics — Objective method for assessing the audibility
-of tones in noise — Engineering method*: el ancho de banda crítico `Δfc`
-(Fórmula 2) y sus frecuencias de esquina (Fórmulas 3–5), el nivel de banda
-crítica `LG` (Fórmula 12), el índice de enmascaramiento `av` (Fórmula 13), la
-audibilidad `ΔL = LT − LG − av` (Fórmula 14) y la audibilidad media energética
-(Fórmula 20). El nivel medio de banda estrecha `LS` (Fórmula 6, iterativa Anexo
-D) y el nivel del tono `LT` (Fórmula 8) se calculan desde el espectro de banda
-crítica, y `analyze_spectrum` añade la detección de picos (apartado 5.3.8) con
-los criterios de distinción (apartado 5.3.4) y la combinación multitono `FG`
-(Fórmula 17), además de la evaluación separada de dos tonos por debajo de 1000 Hz
-(Fórmulas 18/19). La corrección de ancho de banda de Hanning de −1,76 dB, el
-procedimiento iterativo del nivel de enmascaramiento y la lógica de
-detección/combinación están confirmados frente a la norma madre
-**DIN 45681:2005-03** (su programa de referencia del Anexo J). La conformidad se
-ancla en el ejemplo resuelto del motor de combustión del Anexo E (Tablas
-E.1/E.2/E.3): `LS` y `LT` desde el espectro, la detección de tonos y el nivel
-combinado `FG`, la audibilidad por tono, el índice de enmascaramiento y la
-audibilidad media de los cinco espectros.
 
 ## Véase también
 

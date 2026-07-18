@@ -2,7 +2,7 @@
 
 # Structure-borne sound power of building equipment (EN 15657)
 
-Building service equipment — pumps, fans, boilers, sanitary appliances —
+Building service equipment (pumps, fans, boilers, sanitary appliances)
 injects **structure-borne sound power** into the building structure it is fixed
 to, which then re-radiates as airborne noise in adjoining rooms. **EN 15657:2018**
 measures it with the **reception-plate method**: the source is mounted on a

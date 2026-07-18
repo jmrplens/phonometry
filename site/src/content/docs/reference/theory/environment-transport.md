@@ -117,7 +117,7 @@ $$
 L_{den} = 10 \log_{10}\left\lbrace\frac{1}{24}\left[ t_d\ 10^{0.1 L_{day}} + t_e\ 10^{0.1 (L_{evening} + 5)} + t_n\ 10^{0.1 (L_{night} + 10)} \right]\right\rbrace
 $$
 
-with default period durations $(t_d, t_e, t_n) = (12, 4, 8)$ h — countries may define the periods differently (3.6.4 Note 1). The **day-night level** $L_{dn}$ (3.6.5) drops the evening period:
+with default period durations $(t_d, t_e, t_n) = (12, 4, 8)$ h; countries may define the periods differently (3.6.4 Note 1). The **day-night level** $L_{dn}$ (3.6.5) drops the evening period:
 
 $$
 L_{dn} = 10 \log_{10}\left\lbrace\frac{1}{24}\left[ t_d\ 10^{0.1 L_{day}} + t_n\ 10^{0.1 (L_{night} + 10)} \right]\right\rbrace, \qquad (t_d, t_n) = (15, 9)\ \text{h}
@@ -129,13 +129,13 @@ $$
 L_R = 10 \log_{10}\left[ \sum_i \frac{h_i}{24}\ 10^{0.1 (L_i + K_i)} \right], \qquad \sum_i h_i = 24\ \text{h}
 $$
 
-The adjustments $K_i$ cover time-of-day penalties (ISO 1996-1 Table A.1: evening 5 dB, night 10 dB) as well as source-character adjustments — e.g. tonal penalties, which the ECMA-418-1 TNR/PR assessments can justify objectively.
+The adjustments $K_i$ cover time-of-day penalties (ISO 1996-1 Table A.1: evening 5 dB, night 10 dB) as well as source-character adjustments (e.g. tonal penalties), which the ECMA-418-1 TNR/PR assessments can justify objectively.
 
 See the [Levels guide](/phonometry/guides/levels/) for usage.
 
 ## Impulsive-sound prominence (NT ACOU 112)
 
-An impulse annoys beyond its energy, so environmental surveys after ISO 1996-2 penalize periods containing prominent impulsive sounds; NT ACOU 112:2002 makes that penalty objective. From the A-weighted, time-weighting-F level history of a single event, the onset rate (dB/s) and the level difference (dB) of the onset — which qualifies when steeper than 10 dB/s (clauses 4.5–4.7) — predict the perceived prominence (clause 7, Formula 1):
+An impulse annoys beyond its energy, so environmental surveys after ISO 1996-2 penalize periods containing prominent impulsive sounds; NT ACOU 112:2002 makes that penalty objective. From the A-weighted, time-weighting-F level history of a single event, the onset rate (dB/s) and the level difference (dB) of the onset (which qualifies when steeper than 10 dB/s, clauses 4.5–4.7) predict the perceived prominence (clause 7, Formula 1):
 
 $$
 P = 3 \lg(\text{onset rate}) + 2 \lg(\text{level difference}),
@@ -202,7 +202,7 @@ $$
 The library implements the four general terms of Clause 7; the informative
 $A_{misc}$ (foliage, industrial sites, housing) and reflections are left to the
 caller. **Geometrical divergence** is spherical spreading from a point source,
-$A_{div} = 20 \log_{10}(d/d_0) + 11$ dB with $d_0 = 1$ m (Eq. (7)) — exactly
+$A_{div} = 20 \log_{10}(d/d_0) + 11$ dB with $d_0 = 1$ m (Eq. (7)): exactly
 51 dB at 100 m, +6 dB per distance doubling. **Atmospheric absorption** is
 $A_{atm} = \alpha\ d$ (Eq. (8)) with $\alpha$ the ISO 9613-1 coefficient above.
 **Ground effect** $A_{gr} = A_s + A_r + A_m$ (Eq. (9)) sums a source, receiver and
@@ -248,7 +248,7 @@ uncertainty is $u^2 = \sum c_i^2 u_i^2$ (C.1) and the expanded uncertainty is
 $U = k\ u$ with $k = 1.65$ for a **one-sided** 95 % interval (Clause 14), so the
 reported upper limit is $L_{EX,8h} + U$. The task and job methods differ in an
 instructive way: the task noise-sampling uncertainty $u_{1a}$ divides the summed
-squared deviations by $I(I-1)$ — the standard error of the mean (Eq. C.6) —
+squared deviations by $I(I-1)$ (the standard error of the mean, Eq. C.6)
 whereas the job/full-day sampling uncertainty $u_1$ is the plain sample standard
 deviation with denominator $N-1$ (Eq. C.12), so the same spread contributes more
 in the job method (fewer, coarser samples). The task budget (Eq. C.3) adds the
@@ -260,7 +260,7 @@ in quadrature. Peak levels $L_{p,Cpeak}$ are reported without an uncertainty:
 Annex C provides no method for them (Table C.5, Note 1). The three worked
 examples of Annexes D (task, $L_{EX,8h} = 84.3$ dB, $U = 2.7$ dB), E (job,
 $88.1$ dB, $3.8$ dB) and F (full-day, $90.1$ dB, $3.4$ dB) are reproduced to
-the standard's printed precision — every intermediate of Annex E is digit-exact,
+the standard's printed precision: every intermediate of Annex E is digit-exact,
 and its final level differs only by the standard's own pre-rounding of the
 effective-day level (see the [Occupational Noise Exposure guide](/phonometry/guides/occupational-exposure/)).
 
@@ -300,14 +300,14 @@ the corrections become meteorological. The power level is
 $L_W = \bar{L}_p + 10 \lg(S/S_0) + C_1 + C_2 + C_3$ (Eq. 14/15) over a full
 sphere $S = 4 \pi r^2$ or hemisphere $S = 2 \pi r^2$, with the background
 correction $K_{1i} = -10 \lg(1 - 10^{-0.1 \Delta L_{pi}})$ applied per
-microphone position *before* the energy average (Eq. 11) — no correction is
+microphone position *before* the energy average (Eq. 11); no correction is
 needed above a 15 dB margin, and below 10 dB (250 Hz – 5 kHz) or 6 dB (edge
 bands) the correction is clamped and the result flagged as an upper bound
 (clause 9.4.2). The meteorological terms are
 $C_1 = -10 \lg(p_s/p_{s0}) + 5 \lg[(273 + \theta)/\theta_0]$ and
 $C_2 = -10 \lg(p_s/p_{s0}) + 15 \lg[(273 + \theta)/\theta_1]$ with
-$\theta_0 = 314$ K, $\theta_1 = 296$ K — at the 23 °C / 101.325 kPa reference
-$C_2 = 0$ exactly and $C_1 = -0.128$ dB — and
+$\theta_0 = 314$ K, $\theta_1 = 296$ K: at the 23 °C / 101.325 kPa reference
+$C_2 = 0$ exactly and $C_1 = -0.128$ dB; and
 $C_3 = A_0 (1.0053 - 0.0012 A_0)^{1.6}$ with $A_0 = a(f)\ r$ restores the
 ISO 9613-1 air absorption over the measurement radius. The Annex D/E
 microphone arrays are built in as digit-exact coordinate tables (40 equal-area
@@ -339,7 +339,7 @@ Sound intensity is the net energy flux $\vec{I} = \overline{p\ \vec{u}}$, so by
 the divergence theorem the power through a closed surface is
 $P = \sum_i \langle I_{n,i} \rangle\ S_i$. A steady source *outside* the surface
 contributes zero net flux (its energy enters and leaves), which is why
-intensity rejects stationary background noise — but it can still drive a band's
+intensity rejects stationary background noise, but it can still drive a band's
 $P$ negative, in which case that band is not determinable. Two normative field
 indicators gate validity: the surface pressure-intensity indicator
 $F_{pI} = [L_p] - L_W + 10 \log_{10}(S/S_0)$ (reactivity) and the
@@ -355,7 +355,7 @@ and the two repeated sweeps agree within the Table 2 limit.
 ISO 9614-3:2002 upgrades the scanning method to precision grade with a tighter
 indicator machinery. The partial powers $P_i = I_{n,i} S_i$ (Eq. 5) sum as
 before, but validity now rests on the signed and unsigned pressure-intensity
-indicators $F_{pIn} = \bar{L}_p - L_{In}$ (Eqs. B.3/B.6 — the F2/F3 of
+indicators $F_{pIn} = \bar{L}_p - L_{In}$ (Eqs. B.3/B.6, the F2/F3 of
 ISO 9614-1) and the normalized intensity non-uniformity $F_S$ (Eq. B.8),
 through five acceptance criteria (Annex C): scan repeatability
 $|L_{In}(1) - L_{In}(2)| \le s/2$ (C.1), dynamic capability

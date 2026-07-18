@@ -33,8 +33,8 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 
 **ISO 1999:2013** estima la pérdida auditiva que sufre una población por el
 ruido laboral. Da el **desplazamiento permanente del umbral inducido por ruido**
-(NIPTS) — la pérdida auditiva adicional causada por el ruido, sobre la del
-envejecimiento — en función del nivel de exposición, la duración de la
+(NIPTS), la pérdida auditiva adicional causada por el ruido, sobre la del
+envejecimiento, en función del nivel de exposición, la duración de la
 exposición y la frecuencia audiométrica, junto con su dispersión en la
 población. Después combina la componente de ruido con la componente de edad (el
 umbral de ISO 7029, «base de datos A») en el **umbral de audición asociado a la
@@ -79,12 +79,12 @@ print(hearing.nipts(90.0, 20.0, fractile=0.9).value.round(1))
 ```
 
 El desplazamiento alcanza su máximo cerca de 4 kHz y se acentúa con el nivel y
-la duración. Por debajo del corte —aquí 500 Hz ($L_0 = 93$ dB) y 1000 Hz
-($L_0 = 89$ dB) a 90 dB— el ruido no produce desplazamiento permanente. Para
+la duración. Por debajo del corte (aquí 500 Hz, $L_0 = 93$ dB, y 1000 Hz,
+$L_0 = 89$ dB, a 90 dB) el ruido no produce desplazamiento permanente. Para
 duraciones menores de 10 años la mediana se extrapola del valor a 10 años
 (Fórmula 3); puede pedirse un subconjunto de frecuencias con `frequencies=`.
 
-## 2. Edad y ruido combinados — HTLAN (cláusula 6.1)
+## 2. Edad y ruido combinados: HTLAN (cláusula 6.1)
 
 La componente de ruido no se suma sin más a la de edad: la Fórmula (1) de
 ISO 1999 las combina con un término de compresión que importa cuando el total
@@ -148,14 +148,14 @@ plt.show()
 significa cada símbolo, porque es fácil confundirlos:
 
 - El **NIPTS** ($N$) es el *desplazamiento permanente del umbral inducido por
-  ruido* — la pérdida extra que causa el ruido, y nada más. Es lo que un
+  ruido*: la pérdida extra que causa el ruido, y nada más. Es lo que un
   programa ideal de conservación auditiva evitaría. Por sí solo no es un
   audiograma.
 - El **HTLA** ($H$) es el umbral por *edad* en solitario (la componente
   ISO 7029 de la guía de
   [umbral de audición](/phonometry/es/guides/hearing-threshold/)), la pérdida
   que tendría la misma persona sin ruido laboral.
-- El **HTLAN** ($H'$) es el umbral *total* — edad **y** ruido combinados por la
+- El **HTLAN** ($H'$) es el umbral *total*: edad **y** ruido combinados por la
   Fórmula (1). Es lo que mide un audiómetro, y el único de los tres comparable
   con un audiograma real.
 
@@ -171,15 +171,15 @@ términos son grandes.
 
 **Cautelas con el umbral de compensación (*fence*).** La ISO 1999 da umbrales
 y su distribución; *no* define una «discapacidad auditiva» ni un umbral
-indemnizable. Un ***fence*** es una línea de política — habitualmente una media
-de 25 dB sobre unas frecuencias elegidas — por encima de la cual la audición se
+indemnizable. Un ***fence*** es una línea de política (habitualmente una media
+de 25 dB sobre unas frecuencias elegidas) por encima de la cual la audición se
 considera dañada, y vive en la reglamentación nacional, no en esta norma. De
-ahí siguen dos cautelas. Primera: las frecuencias del *fence* importan —
+ahí siguen dos cautelas. Primera: las frecuencias del *fence* importan:
 promediar sobre 0,5/1/2 kHz (el clásico *fence* de habla) apenas ve la muesca
 de ruido de 3–6 kHz, así que infravalora el daño temprano por ruido que sí
 detectaría una media de 3/4/6 kHz. Segunda: el NIPTS y el HTLAN responden a
-preguntas de *fence* distintas — el NIPTS pregunta «cuánto añadió el ruido», el
-HTLAN «este oído, edad incluida, ¿supera la línea?» — y el *porcentaje de la
+preguntas de *fence* distintas: el NIPTS pregunta «cuánto añadió el ruido», el
+HTLAN «este oído, edad incluida, ¿supera la línea?»; y el *porcentaje de la
 población más allá del fence* depende de la dispersión de fractiles, no solo de
 la mediana, así que debe leerse de la distribución, nunca del umbral mediano en
 solitario.

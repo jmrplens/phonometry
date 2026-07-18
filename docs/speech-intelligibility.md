@@ -7,13 +7,13 @@ audible, and therefore intelligible, to a listener in a given noise and hearing
 condition. It reduces a speech spectrum, a noise spectrum and a hearing
 threshold to a single number in `[0, 1]`: `0` when nothing useful reaches the
 listener, `1` when the whole speech-bearing spectrum is audible. This page
-covers the **one-third-octave-band method** of **ANSI S3.5-1997 (R2017)** — 18
+covers the **one-third-octave-band method** of **ANSI S3.5-1997 (R2017)**: 18
 bands from 160 Hz to 8000 Hz.
 
 > [!NOTE]
-> **SII vs STI.** The SII predicts intelligibility from *audibility* — how much
+> **SII vs STI.** The SII predicts intelligibility from *audibility* (how much
 > of the speech spectrum clears the noise and the hearing threshold at the
-> listener's ear — while the STI characterises a *transmission channel*: how
+> listener's ear) while the STI characterises a *transmission channel*: how
 > much of the speech modulation a room or sound system preserves. For the
 > latter, see the [Speech Transmission Index guide](speech-transmission.md).
 
@@ -79,7 +79,7 @@ A_i = \operatorname{clip}\!\left(\frac{E_i' - D_i + 15}{30},\; 0,\; 1\right).
 $$
 
 At speech levels well above normal effort a **level-distortion factor** of
-clause 5.7 — unity for the standard spectra used on this page — reduces $A_i$
+clause 5.7 (unity for the standard spectra used on this page) reduces $A_i$
 further; phonometry applies it automatically.
 
 ## 3. The index in noise
@@ -169,7 +169,7 @@ for effort in hearing.sii.VOCAL_EFFORTS:
 print(hearing.standard_speech_spectrum("loud")[8])  # 42.16 dB SPL at 1 kHz
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.svg" alt="Two panels. Left: the four ANSI S3.5-1997 standard speech spectra — normal, raised, loud and shout — over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum. Right: the resulting Speech Intelligibility Index in a fixed broadband noise, rising from 0.12 (normal) through 0.36 and 0.59 to 0.79 (shout)" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sii_vocal_efforts.svg" alt="Two panels. Left: the four ANSI S3.5-1997 standard speech spectra (normal, raised, loud and shout) over the 18 one-third-octave bands from 160 Hz to 8000 Hz, each higher vocal effort lifting the whole spectrum. Right: the resulting Speech Intelligibility Index in a fixed broadband noise, rising from 0.12 (normal) through 0.36 and 0.59 to 0.79 (shout)" width="96%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -250,7 +250,7 @@ inputs are cheap once the room and the noise have been measured. See the
 ## Standards
 
 ANSI S3.5-1997 (R2017), *American National Standard Methods for
-the Calculation of the Speech Intelligibility Index* — the one-third-octave-band
+the Calculation of the Speech Intelligibility Index*: the one-third-octave-band
 method (18 bands), band-importance function (Table 3), standard speech spectrum
 level and reference internal noise (Table 3), and the masking, disturbance and
 band-audibility procedure (clause 5) and the index (clause 6).

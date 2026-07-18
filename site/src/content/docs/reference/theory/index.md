@@ -16,7 +16,7 @@ The theory reference explains the standards, the mathematics and the design deci
 - [G-weighting (ISO 7196)](/phonometry/reference/theory/signal-analysis/#g-weighting-iso-7196)
 - [Event and dose metrics](/phonometry/reference/theory/signal-analysis/#event-and-dose-metrics)
 - [Sound intensity (IEC 61043)](/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043)
-- [Measurement uncertainty (ISO/IEC Guide 98-3 — GUM and Supplement 1)](/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3--gum-and-supplement-1)
+- [Measurement uncertainty (ISO/IEC Guide 98-3: GUM and Supplement 1)](/phonometry/reference/theory/signal-analysis/#measurement-uncertainty-isoiec-guide-98-3-gum-and-supplement-1)
 
 ## [Perception and Hearing](/phonometry/reference/theory/perception/)
 

@@ -4,13 +4,13 @@
 
 Room acoustics starts from one measurement: the **impulse response** (IR)
 between a source and a receiver. Filter it into bands and integrate it, and
-it yields reverberation time, clarity and speech intelligibility — everything
+it yields reverberation time, clarity and speech intelligibility: everything
 about the sound field inside a single room. This page follows that chain in
-measurement order — acquiring the IR (ISO 18233), turning it into room
+measurement order: acquiring the IR (ISO 18233), turning it into room
 parameters (ISO 3382-1/2), spatial speech metrics for open-plan offices
 (ISO 3382-3) and, closing the loop, the sound absorption of a material in a
-reverberation room (ISO 354). For sound insulation *between* spaces — the same
-IR measured either side of a partition — see the companion
+reverberation room (ISO 354). For sound insulation *between* spaces (the same
+IR measured either side of a partition) see the companion
 [Field Insulation Measurement and Ratings guide](insulation-field.md).
 
 ## 1. Impulse-response acquisition (ISO 18233)
@@ -85,13 +85,13 @@ print(int(np.argmax(np.abs(ir_m))))                  # 100
 
 `sweep_signal`/`mls_signal` return plain arrays, ready to write to a WAV file
 and play. `impulse_response`/`mls_impulse_response` return an
-`ImpulseResponseResult` — a drop-in for the raw IR array (`np.asarray(ir)`,
+`ImpulseResponseResult`, a drop-in for the raw IR array (`np.asarray(ir)`,
 indexing and `ir.size` all keep working, so `room_parameters(ir, fs)` is
 unchanged) that also carries the sample rate and method and adds an `.plot()`.
 
 **The two excitations.** The exponential sweep sweeps its energy up the
 spectrum over the whole signal, while the MLS is a flat-spectrum two-level
-sequence — visible as the near-constant magnitude on the right.
+sequence, visible as the near-constant magnitude on the right.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals.png" alt="ISO 18233 excitation signals: the exponential sine sweep waveform and its spectrogram showing the exponential frequency rise, and a maximum-length sequence with its flat magnitude spectrum" width="96%"></picture>
 
@@ -128,7 +128,7 @@ ax2.set(xlabel="Frequency [Hz]", ylabel="Magnitude [dB]", title="MLS spectrum (f
 **The recovered impulse response.** Deconvolving the recording gives the
 broadband IR: the direct sound, discrete early reflections and the decaying
 diffuse tail. Its `.plot()` shows the waveform above and the log-magnitude
-envelope with the Schroeder energy-decay curve below — the straight decay
+envelope with the Schroeder energy-decay curve below: the straight decay
 whose slope becomes the reverberation time in §2.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_sweep_deconvolution.gif" alt="Animation: the exponential sweep crosses the room while its spectrogram builds with delayed copies from the reflections, then the inverse filter collapses the whole recording into the impulse response" width="640" height="360" loading="lazy"></picture>
@@ -596,19 +596,19 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
 ## See also
 
 - [Field](insulation-field.md), [laboratory](insulation-lab.md) and
-  [predicted](insulation-prediction.md) sound insulation — field,
+  [predicted](insulation-prediction.md) sound insulation: field,
   laboratory and predicted sound insulation between spaces, and its measurement uncertainty.
-- [Sound Power](sound-power.md) — the `LW` methods that consume the
+- [Sound Power](sound-power.md): the `LW` methods that consume the
   ISO 354 absorption area (the ISO 3744 `K2` and the ISO 3741 absorption term).
-- [Speech Transmission Index](speech-transmission.md) — the STI/STIPA
+- [Speech Transmission Index](speech-transmission.md): the STI/STIPA
   measurement that feeds the open-plan `sti_values`.
-- [Loudness](loudness.md) and [Sound Quality Metrics](sound-quality.md) — loudness,
+- [Loudness](loudness.md) and [Sound Quality Metrics](sound-quality.md): loudness,
   sharpness and the other perception metrics of what the room delivers.
-- [Filter Banks](filter-banks.md) — the IEC 61260 fractional-octave filters
+- [Filter Banks](filter-banks.md): the IEC 61260 fractional-octave filters
   used for band decay curves and insulation spectra.
-- [Levels](levels.md) — energy averaging and the level metrics behind
+- [Levels](levels.md): energy averaging and the level metrics behind
   source/receiving-room levels.
-- [Theory](theory-rooms-buildings.md) — Schroeder integration, regression windows and the
+- [Theory](theory-rooms-buildings.md): Schroeder integration, regression windows and the
   reference-curve derivation.
 - API reference: [`room.room_acoustics`](https://jmrplens.github.io/phonometry/reference/api/rooms/room-acoustics/), [`room.room_ir`](https://jmrplens.github.io/phonometry/reference/api/rooms/room-ir/) and [`room.open_plan`](https://jmrplens.github.io/phonometry/reference/api/rooms/open-plan/).
 
@@ -659,7 +659,7 @@ shape of `t60`; `absorption_coefficient()` returns `alpha_s`;
 
 ## Standards
 
-ISO 18233:2006 (application of new measurement methods — the
+ISO 18233:2006 (application of new measurement methods: the
 swept-sine and MLS acquisition of impulse responses); ISO 3382-1:2009 and
 ISO 3382-2:2008 (reverberation time and room parameters from the Schroeder
 decay); ISO 3382-3:2012 (open-plan office speech metrics); ISO 354:2003

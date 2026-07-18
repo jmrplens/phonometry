@@ -18,7 +18,7 @@ prediction that consumes these laboratory ratings in
 An [ISO 16283 field measurement](insulation-field.md) yields the primed
 quantities ($R'$, $L'_n$): the number a real building achieves, flanking
 transmission and all. To rate an
-element on its own — a wall type, a floating floor, a window — you take it to a
+element on its own (a wall type, a floating floor, a window), you take it to a
 qualified **laboratory** (ISO 10140), where suppressed flanking makes the
 *direct* transmission the whole story. The formulas lose their primes: the
 **sound reduction index** $R$ (not $R'$) and the **normalized impact level**
@@ -48,7 +48,7 @@ the same partition; a much larger gap says flanking dominates, and the
 [EN 12354 model](insulation-prediction.md) tells you which path carries it.
 
 The single-number ratings reuse the very same ISO 717-1/2 engines
-(`weighted_rating`, `weighted_impact_rating`) — an $R$ spectrum rates to $R_w$
+(`weighted_rating`, `weighted_impact_rating`): an $R$ spectrum rates to $R_w$
 exactly as an $R'$ spectrum rated to $R'_w$. Before forming the index the
 receiving-room levels must be **corrected for background noise** (Clause 4.3):
 the energy subtraction $10 \log_{10}(10^{L_{sb}/10} - 10^{L_b/10})$ applies for a
@@ -107,7 +107,7 @@ levels directly.
 ## Sound insulation by intensity (ISO 15186)
 
 The ISO 10140 laboratory method above reads the transmitted power *indirectly*, from the
-receiving-room level and its absorption area — which breaks down when flanking
+receiving-room level and its absorption area; this breaks down when flanking
 paths leak power the room integrates in anyway. The **sound-intensity** method
 (ISO 15186) sidesteps that: an intensity probe scans a measurement surface that
 encloses the specimen and measures the radiated power *directly*, so only the
@@ -156,8 +156,8 @@ res.plot()   # measured RI vs shifted ISO 717-1 reference (needs matplotlib)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_insulation.svg" alt="Intensity sound reduction index RI and the Kc-modified index RI,M across the one-third-octave bands, with the Annex B adaptation lift shaded between the two curves" width="80%"></picture>
 
-*The modified index $R_{I,M} = R_I + K_c$ lifts $R_I$ — most at the low bands,
-where $K_c$ is largest — so an intensity measurement reproduces the ISO 10140-2
+*The modified index $R_{I,M} = R_I + K_c$ lifts $R_I$ (most at the low bands,
+where $K_c$ is largest), so an intensity measurement reproduces the ISO 10140-2
 pressure result. The automatic rating is formed only for exactly 16
 one-third-octave or 5 octave values (`rating`/`rating_modified` are `None`
 otherwise). Subareas scanned separately are combined first with
@@ -237,7 +237,7 @@ $\Delta L_\text{oct} = -10\lg[\tfrac{1}{3}\sum 10^{-\Delta L_n/10}]$ (Formula (5
 **Weighted improvement.** $\Delta L_w$ is the ISO 717-2 weighted reduction: the
 improvement is applied to the heavyweight **reference floor** $L_{n,r,0}$
 (ISO 717-2 Table 4), $L_{n,r} = L_{n,r,0} - \Delta L$, and
-$\Delta L_w = 78 - L_{n,r,w}$ — computed by `weighted_impact_improvement()`, which
+$\Delta L_w = 78 - L_{n,r,w}$, computed by `weighted_impact_improvement()`, which
 reuses the verified ISO 717-2 rating engine. A clause 6.3 measurement spans 18
 bands (100–5000 Hz, optionally extended to 50 Hz); the rating is formed on the
 100–3150 Hz sub-range of whatever spectrum contains it. The statement of
@@ -342,8 +342,8 @@ plt.show()
 </details>
 
 **Validity.** $K_{ij}$ rests on a statistical-energy-analysis simplification:
-`strong_coupling_satisfied()` checks the Formula (15) inequality, and — for the
-heavy junctions of Part 4 — `modal_density()`, `band_mode_count()` and
+`strong_coupling_satisfied()` checks the Formula (15) inequality and, for the
+heavy junctions of Part 4, `modal_density()`, `band_mode_count()` and
 `modal_overlap_factor()` (Formulae (5)/(4)/(6)) quantify where the mode count
 is too low for $K_{ij}$ to be reliable. Pass the per-band modal overlap factor
 to `vibration_reduction_index(..., modal_overlap=M)`: bands with $M < 0.25$
@@ -396,14 +396,14 @@ res_m.bracketed    # per-band flags; bracketed bands leave the single number
 
 ## Standards
 
-ISO 10140-2:2010, ISO 10140-3:2010 and ISO 10140-4:2010 — the
+ISO 10140-2:2010, ISO 10140-3:2010 and ISO 10140-4:2010, which provide the
 laboratory R and Ln with the background-noise correction; ISO 15186-1:2000 and
-ISO 15186-2:2003 — the sound-intensity sound reduction index $R_I$, its
+ISO 15186-2:2003, which define the sound-intensity sound reduction index $R_I$, its
 $K_c$-modified form and the element normalized level difference (laboratory
-and field); ISO 16251-1:2014 — the small-mock-up laboratory method for the
+and field); ISO 16251-1:2014, which specifies the small-mock-up laboratory method for the
 impact-sound improvement $\Delta L$ of floor coverings, with $\Delta L_w$ via
 the ISO 717-2 reference floor; ISO 10848-1:2006, ISO 10848-2:2006,
-ISO 10848-3:2006 and ISO 10848-4:2010 — the laboratory measurement of flanking
+ISO 10848-3:2006 and ISO 10848-4:2010, which cover the laboratory measurement of flanking
 transmission: the vibration reduction index $K_{ij}$, the equivalent
 absorption length, the normalized flanking descriptors $D_{n,f}$ / $L_{n,f}$
 and the modal-overlap validity checks that feed the EN 12354 prediction.
@@ -415,6 +415,6 @@ and the modal-overlap validity checks that feed the EN 12354 prediction.
   ratings and their uncertainty.
 - [Predicting Sound Insulation (EN 12354)](insulation-prediction.md):
   the flanking model that consumes the laboratory $R$, $L_n$ and $K_{ij}$.
-- [Sound Power](sound-power.md) — the `LW` methods that share the
+- [Sound Power](sound-power.md): the `LW` methods that share the
   absorption-area machinery of the receiving room.
 - API reference: [`building.lab_insulation`](https://jmrplens.github.io/phonometry/reference/api/building/lab-insulation/), [`building.intensity_insulation`](https://jmrplens.github.io/phonometry/reference/api/building/intensity-insulation/) and [`building.flanking_transmission`](https://jmrplens.github.io/phonometry/reference/api/building/flanking-transmission/).

@@ -2,9 +2,9 @@
 
 # Surface Scattering, Diffusion and In-situ Absorption
 
-How a surface returns incident sound — how much it scatters away from the
+How a surface returns incident sound (how much it scatters away from the
 specular direction, how uniformly it spreads what it scatters, and how much it
-absorbs — is measured by a family of dedicated methods. The **reverberation
+absorbs) is measured by a family of dedicated methods. The **reverberation
 room** gives the random-incidence *scattering coefficient* of a surface by
 comparing decays with the sample held still and rotating (ISO 17497-1). A
 **free-field goniometer** measures the polar response of the reflected sound and
@@ -166,7 +166,7 @@ $$
 
 A perfectly uniform polar response ($L_i$ all equal) gives $d = 1$; a single
 sharp specular lobe gives $d = 0$. When receivers subtend unequal solid angles,
-Formula (6) area-weights each energy by $N_i$ from Formula (8) — and those area
+Formula (6) area-weights each energy by $N_i$ from Formula (8), and those area
 factors are evaluated in **radians**, which is why a 5° spacing at the zenith
 produces a weight near 1.57, not 51.9.
 
@@ -305,7 +305,7 @@ one-third-octave-band functions that generally rise once the surface relief is
 no longer small against the wavelength; a frequency-blind single number
 ("scatters 90 % of the sound") is neither of them.
 
-## 3. In-situ road absorption — subtraction technique (ISO 13472-1)
+## 3. In-situ road absorption: subtraction technique (ISO 13472-1)
 
 Out in the field there is no reverberation room. ISO 13472-1 measures the sound
 absorption of a road surface (or any extended flat surface) *in situ* by firing
@@ -356,7 +356,7 @@ print(round(float(band[2]), 3))    # 0.84  (alpha = 1 - 0.4^2 = 0.84)
 
 **Adrienne window (Clause 6.4).** The time window that isolates the reflection
 mandates only a sharp leading edge, a 5 ms flat portion and a cosine-squared or
-Blackman-Harris trailing edge — the exact durations are reported per measurement,
+Blackman-Harris trailing edge; the exact durations are reported per measurement,
 not fixed, so they are configurable here.
 
 ```python
@@ -368,9 +368,9 @@ print(w.shape[0])          # 504 samples at 48 kHz
 print(round(float(w.max()), 3))   # 1.0  (flat top and edges meet at unity)
 ```
 
-**End-to-end spectrum.** `insitu_absorption_spectrum` runs the whole chain — the
+**End-to-end spectrum.** `insitu_absorption_spectrum` runs the whole chain (the
 windowed incident and reflected impulse responses to the narrow-band absorption
-and on to one-third-octave bands — and returns a plottable
+and on to one-third-octave bands) and returns a plottable
 `InsituAbsorptionResult`:
 
 ```python
@@ -459,7 +459,7 @@ from phonometry import materials
 print(round(materials.max_sampled_area_radius(5.0e-3), 3))   # 1.343  (metres)
 ```
 
-## 4. In-situ road absorption — spot method (ISO 13472-2)
+## 4. In-situ road absorption: spot method (ISO 13472-2)
 
 For smaller patches, ISO 13472-2 seals a short circular tube onto the surface and
 measures the absorption with the two-microphone transfer-function method of
@@ -518,7 +518,7 @@ print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
 ISO 17497-1:2004+A1:2014 (scattering
 coefficient), ISO 17497-2:2012 (diffusion coefficient), ISO 13472-1:2002 (in-situ
 absorption, extended surface), ISO 13472-2:2010 (in-situ absorption, spot
-method), and ISO 9613-1:1993 — only the pure-tone attenuation coefficient
+method), and ISO 9613-1:1993, from which only the pure-tone attenuation coefficient
 α consumed by the ISO 17497-1 Clause 8 air-attenuation relations (Eqs. (2)/(3)); the
 full atmospheric-absorption model is covered in
 [Outdoor Sound Propagation](outdoor-propagation.md). Numerical conformance against the standards' worked examples and closed

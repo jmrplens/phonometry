@@ -11,7 +11,7 @@ same auditory front-end, lives in [Loudness](loudness.md).
 
 ## Sharpness in acum (DIN 45692)
 
-Two sounds can be equally loud yet one feels "sharper" — hissy, metallic —
+Two sounds can be equally loud yet one feels "sharper" (hissy, metallic)
 because its loudness sits higher on the Bark scale. Sharpness is the
 g(z)-weighted first moment of the specific loudness pattern:
 
@@ -20,8 +20,8 @@ S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz}\ \text{acum}
 $$
 
 with $g(z) = 1$ up to 15.8 Bark and rising exponentially beyond, and $k$
-normalized so the reference sound — critical-band-wide noise at 1 kHz,
-60 dB — is exactly **1.00 acum** (DIN 45692 clause 6; the derived
+normalized so the reference sound (critical-band-wide noise at 1 kHz,
+60 dB) is exactly **1.00 acum** (DIN 45692 clause 6; the derived
 $k = 0.108$ sits inside the normative window 0.105–0.115).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sharpness_weighting.svg" alt="DIN 45692 sharpness weighting g(z) against critical-band rate on a log axis, comparing the DIN, von Bismarck and Aures curves with the 15.8 and 15 Bark knees marked" width="80%"></picture>
@@ -71,7 +71,7 @@ CI verifies the Table A.2 target values (0.38 acum at 250 Hz up to
 
 ## Tonality (ECMA-418-2)
 
-A tonal component — a whistle, a fan's blade-passing tone — stands out even at
+A tonal component (a whistle, a fan's blade-passing tone) stands out even at
 low level. ECMA-418-2 quantifies it from the **autocorrelation function** (ACF)
 of each band's rectified signal: a periodic (tonal) component keeps a high ACF
 at nonzero lag, and the tonal-to-noise loudness ratio drives the specific
@@ -109,15 +109,15 @@ Returns an `EcmaTonality`: `tonality` (T, tu_HMS), `specific_tonality`
 (f_ton,z), `time`, `tonality_vs_time` (T(l)), `tonal_frequency_vs_time`,
 `field`.
 
-## Roughness (ECMA-418-2) — new capability
+## Roughness (ECMA-418-2): new capability
 
 Roughness is the harsh, buzzing sensation of fast amplitude modulation
-(roughly 20–300 Hz, peaking near 70 Hz) — the quality of a diesel idle or a
+(roughly 20–300 Hz, peaking near 70 Hz): the quality of a diesel idle or a
 distorted loudspeaker. It is a **new metric** for phonometry. ECMA-418-2
 extracts each band's envelope, weights its modulation spectrum by modulation
 rate and depth, and correlates the modulation across bands; the result R is in
 **asper**. The reference sound (1 kHz carrier, 100 % amplitude-modulated at
-70 Hz, overall level 60 dB SPL) is defined as 1 asper — this clean-room
+70 Hz, overall level 60 dB SPL) is defined as 1 asper; this clean-room
 implementation returns 0.9999 asper with the tabulated calibration constant
 c_R (Formula 104) used **without** reverse-fitting to the target.
 
@@ -188,21 +188,21 @@ R(l50)), `specific_roughness` (R′(z), 53 bands), `bark`, `centre_frequencies`,
 `time`, `roughness_vs_time` (R(l50)), `specific_roughness_vs_time`
 ((n_times, 53) array), `field`.
 
-## Fluctuation strength (ECMA-418-2) — new capability
+## Fluctuation strength (ECMA-418-2): new capability
 
 Fluctuation strength is the slow, wobbling sensation of amplitude or
-frequency modulation below about 20 Hz — a siren, beating tones, speech at
+frequency modulation below about 20 Hz: a siren, beating tones, speech at
 syllable rate. It is the slow counterpart of roughness: the same hearing
 model splits envelope modulation into a slow band-pass peaking near 4 Hz
 (fluctuation strength, in **vacil_HMS**) and a fast one peaking near 70 Hz
 (roughness). ECMA-418-2 Clause 9 analyses each band's envelope with
-High-resolution Spectral Analysis (HSA) — a least-squares fit of
+High-resolution Spectral Analysis (HSA), a least-squares fit of
 window-kernel spectral line pairs that resolves modulation rates far below
-the DFT bin width — using envelope-dependent analysis windows that skip
+the DFT bin width, using envelope-dependent analysis windows that skip
 quieter periods, then weights the dominant harmonic complex and scales it
 with an HSA-based specific loudness. The reference sound (1 kHz carrier,
 100 % amplitude-modulated at 4 Hz, overall level 60 dB SPL) is defined as
-1 vacil_HMS — this clean-room implementation converges to 0.9958 vacil_HMS
+1 vacil_HMS; this clean-room implementation converges to 0.9958 vacil_HMS
 by 12 s with the tabulated calibration constant c_F (Formula 163) used
 **without** reverse-fitting to the target (the 8 s example below prints
 0.9957). A signal whose single value F exceeds 0.2 vacil_HMS has a
@@ -293,9 +293,9 @@ STI/STIPA, and [Theory](theory-perception.md) for the underlying math.
 ## Standards
 
 DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
-Schärfe* — sharpness in acum (clause 6 weighting, Annex B von Bismarck and
+Schärfe*: sharpness in acum (clause 6 weighting, Annex B von Bismarck and
 Aures variants, Table A.2 targets). ECMA-418-2:2025, *Psychoacoustic metrics
 for ITT equipment — Part 2 (methods for describing human perception based on
-the Sottek Hearing Model)* — the Sottek Hearing Model tonality (tu_HMS,
+the Sottek Hearing Model)*: the Sottek Hearing Model tonality (tu_HMS,
 clause 6), roughness (asper, clause 7) and fluctuation strength (vacil_HMS,
 clause 9, the HSA-based envelope analysis).

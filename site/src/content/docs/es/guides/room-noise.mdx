@@ -41,8 +41,8 @@ references:
 
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-El ruido de fondo estacionario de una sala ocupada — de la ventilación, los
-difusores o el tráfico lejano — se califica frente a una familia de **curvas de
+El ruido de fondo estacionario de una sala ocupada (de la ventilación, los
+difusores o el tráfico lejano) se califica frente a una familia de **curvas de
 criterio por bandas de octava**. **ANSI/ASA S12.2-2019**, *Criteria for
 Evaluating Room Noise*, define dos calificaciones a partir de un espectro que
 phonometry implementa: la calificación **Noise Criteria (NC)** por el método de
@@ -52,15 +52,15 @@ banda de octava en las diez bandas de 16 Hz a 8000 Hz.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_noise_es.svg" alt="Los dos métodos de calificación de ANSI S12.2 a partir de un espectro por bandas de octava: a la izquierda el método de tangencia NC (de las curvas de la Tabla 1, el valor NC en cada banda, después NC es la curva más alta tocada, dando NC-NN con una banda determinante); a la derecha el método RC Mark II (la media de frecuencias medias LMF de los niveles de 500, 1000 y 2000 Hz redondeada para dar RC-NN, después la etiqueta espectral R de retumbo, H de siseo o N de neutro por las reglas de desviación de la cláusula D.3)" width="94%" loading="eager" />
 
-## 1. Criterios de ruido — el método de tangencia
+## 1. Criterios de ruido: el método de tangencia
 
 Las **curvas NC** (ANSI/ASA S12.2-2019, Tabla 1) son una familia de límites por
 banda de octava, cada una designada por su valor a 1000 Hz (de NC-15 hasta
 NC-70). El **método de tangencia** califica un espectro medido por el valor de
 la **curva NC más alta que toca**: para cada banda de octava se busca el índice
 NC cuya curva pasa por el nivel medido, y la calificación es el máximo entre
-bandas. La banda en la que se alcanza ese máximo — la que empuja el espectro
-contra las curvas — se reporta como **banda determinante**.
+bandas. La banda en la que se alcanza ese máximo, la que empuja el espectro
+contra las curvas, se reporta como **banda determinante**.
 
 ```python
 import numpy as np
@@ -80,13 +80,13 @@ suministrarse un subconjunto de las bandas de octava junto con sus frecuencias
 centrales (`room.noise_criterion(levels, frequencies)`), lo que resulta cómodo
 cuando solo se midieron las bandas de interferencia con el habla.
 
-## 2. Room Criteria Mark II — calificación y etiqueta espectral
+## 2. Room Criteria Mark II: calificación y etiqueta espectral
 
 Las curvas **RC Mark II** (ANSI/ASA S12.2-2019, Anexo D, Tabla D.1) tienen una
 pendiente constante de **−5 dB/octava**, ancladas a su valor a 1000 Hz, con el
 nivel de 16 Hz igual al de 31,5 Hz y un suelo de baja frecuencia de 55 dB. La
-calificación numérica es la **media de frecuencias medias** $\text{LMF}$ — la
-media de los niveles de 500, 1000 y 2000 Hz — redondeada al decibelio más
+calificación numérica es la **media de frecuencias medias** $\text{LMF}$, la
+media de los niveles de 500, 1000 y 2000 Hz, redondeada al decibelio más
 próximo (cláusula D.4):
 
 $$
@@ -114,7 +114,7 @@ print(rc.classification)    # R
 
 El fuerte contenido de baja frecuencia de este espectro eleva las bandas de
 63–250 Hz muy por encima de la curva de referencia, así que el ruido se etiqueta
-como $R$ (retumbo) — el "zumbido" subjetivo de una climatizadora sobredimensionada.
+como $R$ (retumbo): el "zumbido" subjetivo de una climatizadora sobredimensionada.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria_es.svg" alt="Dos paneles para el mismo espectro de sala dominado por la ventilación. Izquierda: los niveles medidos por banda de octava sobre la familia de curvas NC, con un rombo rojo que marca el punto de tangencia a 250 Hz que fija la calificación NC-42,5. Derecha: el mismo espectro sobre la curva de referencia RC-35, con las bandas de baja frecuencia atravesando la tolerancia de retumbo sombreada (más 5 dB por debajo de 500 Hz) de modo que el ruido se clasifica como RC-35(R), y la tolerancia de siseo (más 3 dB a 1000 Hz y por encima) sombreada para comparar" width="96%" />
 

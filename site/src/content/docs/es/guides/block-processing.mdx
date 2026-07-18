@@ -31,7 +31,7 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 Algunas mediciones nunca caben en memoria: una grabación ambiental de una hora,
 un monitor en vivo que debe informar niveles mientras el micrófono sigue
 capturando, o un registrador embebido que solo ve un búfer cada vez. En todos
-esos casos la señal tiene que procesarse bloque a bloque — y los filtros deben
+esos casos la señal tiene que procesarse bloque a bloque, y los filtros deben
 comportarse exactamente como si hubieran visto la señal completa de una vez.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_block_processing_es.svg" alt="Dos carriles que comparan el procesado por bloques conservando el estado del filtro entre bloques, con una envolvente continua, frente a reiniciarlo en cada bloque, donde la envolvente arranca desde cero en cada unión" width="86%" loading="eager" />
@@ -94,8 +94,8 @@ guía.
 ## Ejemplo
 
 Este ejemplo procesa un WAV por bloques con [`soundfile`](https://pysoundfile.readthedocs.io/),
-una dependencia opcional (`pip install soundfile`). Sirve cualquier fuente de bloques
-— `scipy.io.wavfile` con troceado manual, o una función de captura en vivo.
+una dependencia opcional (`pip install soundfile`). Sirve cualquier fuente de bloques:
+`scipy.io.wavfile` con troceado manual, o una función de captura en vivo.
 
 ```python
 import soundfile as sf
@@ -131,7 +131,7 @@ for block in audio_blocks:
     envelope = tw.process(block)
 ```
 
-O gestiona el estado tú mismo con la API funcional — consulta
+O gestiona el estado tú mismo con la API funcional; consulta
 [Ponderación temporal](/phonometry/es/guides/time-weighting/#6-procesado-por-bloques).
 
 ## Estado multicanal
@@ -187,8 +187,8 @@ $y[n-1]$, que es el mismo valor que la API funcional devuelve como
 
 ## Patrón de sonómetro en tiempo real
 
-El bucle de streaming canónico — ponderar, obtener la envolvente e informar
-bloque a bloque con todo el estado conservado entre llamadas:
+El bucle de streaming canónico pondera, obtiene la envolvente e informa
+bloque a bloque conservando todo el estado entre llamadas:
 
 ```python
 import numpy as np
@@ -211,7 +211,7 @@ for x in audio_stream(block):            # tu callback de captura
 | `detrend` | debe ser `False` | El detrending por bloque crea discontinuidades en las fronteras |
 | `resample` | debe ser `False` | El remuestreador no conserva estado |
 | `zero_phase` | no soportado | El filtrado bidireccional necesita la señal completa |
-| `high_accuracy` (ponderación) | por defecto se resuelve a `False` — el diseño bilineal clásico, consulta [Ponderación frecuencial](/phonometry/es/guides/weighting/); pasar `True` explícito lanza `ValueError` | El remuestreo polifásico interno es incompatible con bloques |
+| `high_accuracy` (ponderación) | por defecto se resuelve a `False` (el diseño bilineal clásico, consulta [Ponderación frecuencial](/phonometry/es/guides/weighting/)); pasar `True` explícito lanza `ValueError` | El remuestreo polifásico interno es incompatible con bloques |
 | `steady_ic` | opcional | Arranca los filtros en el régimen permanente de la respuesta al escalón |
 
 ## Véase también

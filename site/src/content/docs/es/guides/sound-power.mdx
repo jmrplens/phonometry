@@ -80,7 +80,7 @@ un límite de emisión de ruido. Esta página cubre las vías que phonometry
 implementa para obtenerlo y cuándo recurrir a cada una: una superficie
 envolvente de *presión* en campo (ISO 3744/3746), el campo difuso de una
 *sala reverberante* (ISO 3741), el *barrido* de intensidad sobre una
-superficie (ISO 9614-2) y —para la máxima exactitud— los grados de precisión
+superficie (ISO 9614-2) y, para la máxima exactitud, los grados de precisión
 en una *sala anecoica* (ISO 3745) y mediante el *barrido* de intensidad de
 precisión (ISO 9614-3).
 
@@ -94,8 +94,8 @@ precisión (ISO 9614-3).
 
 ## Elegir un método
 
-Todas proporcionan la misma magnitud —un `LW` por banda y un total
-ponderado A `LWA`— pero bajo entornos, grados de precisión y restricciones
+Todas proporcionan la misma magnitud, un `LW` por banda y un total
+ponderado A `LWA`, pero bajo entornos, grados de precisión y restricciones
 prácticas distintos.
 
 | Método | Norma | Magnitud medida | Entorno | Grado de precisión | Cuándo usarlo |
@@ -332,7 +332,7 @@ las correcciones de ponderación A del Anexo E de ISO 3744, así que necesita
 o `absorption_area`, o `mean_absorption_coefficient` + `room_surface`) habilita
 `K2`; omítelos y el campo se trata como libre (`K2 = 0`). Si el margen de fondo
 cae por debajo del criterio del grado o `K2` supera el límite de validez, un
-`SoundPowerWarning` avisa de que los niveles son cotas superiores —la
+`SoundPowerWarning` avisa de que los niveles son cotas superiores; la
 determinación se devuelve igualmente.
 
 ### Trampas de K1 y K2
@@ -552,7 +552,7 @@ absorción/Waterhouse/`c1` son `NaN` para el método de comparación).
 
 La **intensidad** sonora es el flujo neto de energía, así que distingue la
 energía que *sale* de la fuente de la energía estacionaria que solo atraviesa
-la superficie —por eso el método de intensidad tolera el ruido de fondo que
+la superficie; por eso el método de intensidad tolera el ruido de fondo que
 derrotaría a los métodos de presión. Una sonda p-p (véase la
 [guía de Intensidad sonora](/phonometry/es/guides/intensity/)) se barre de forma
 continua sobre cada uno de los `N` segmentos de una superficie que encierra la
@@ -887,7 +887,7 @@ result.plot()   # espectro LW; la banda no aplicable con trama (requiere matplot
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_es.svg" alt="El espectro de nivel de potencia sonora del barrido de intensidad de precisión sobre cinco bandas de tercio de octava, cuatro barras determinadas y una banda de 250 Hz con trama y en gris marcada como no aplicable porque su intensidad neta es negativa, con el total ponderado A de 80,6 dB(A) en el título" width="88%" />
 
 *La banda de 250 Hz da un neto negativo (más energía entrando que saliendo), así que
-ISO 9614-3 la declara no aplicable —la figura la trama y la agrisa mientras las
+ISO 9614-3 la declara no aplicable; la figura la trama y la agrisa mientras las
 cuatro bandas determinadas y el total ponderado A se mantienen.*
 
 <details>
@@ -938,18 +938,18 @@ plt.show()
 
 ## Véase también
 
-- [Intensidad sonora (p-p)](/phonometry/es/guides/intensity/) — la sonda de dos
+- [Intensidad sonora (p-p)](/phonometry/es/guides/intensity/): la sonda de dos
   micrófonos, su sesgo por diferencias finitas y los indicadores de campo de
   ISO 9614-1 que sustentan el método de barrido.
-- [Acústica de salas](/phonometry/es/guides/room-acoustics/) — el tiempo
+- [Acústica de salas](/phonometry/es/guides/room-acoustics/): el tiempo
   de reverberación y el área de absorción sonora equivalente (ISO 354) que
   alimentan `K2` y el área de absorción de ISO 3741.
-- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/guides/insulation-prediction/) — los
+- [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/guides/insulation-prediction/): los
   índices de aislamiento a ruido aéreo y a impactos y las predicciones de emisión
   de EN 12354 que consumen una `LW` de fuente.
-- [Niveles](/phonometry/es/guides/levels/) — el promediado en energía y la ponderación A
+- [Niveles](/phonometry/es/guides/levels/): el promediado en energía y la ponderación A
   que sustentan `LWA`.
-- [Teoría](/phonometry/es/reference/theory/environment-transport/) — las derivaciones de Waterhouse, K1/K2 y
+- [Teoría](/phonometry/es/reference/theory/environment-transport/): las derivaciones de Waterhouse, K1/K2 y
   C1/C2.
 - Referencia de la API: [`emission.sound_power`](/phonometry/es/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](/phonometry/es/reference/api/power/sound-power-reverberation/) y [`emission.sound_power_intensity`](/phonometry/es/reference/api/power/sound-power-intensity/).
 

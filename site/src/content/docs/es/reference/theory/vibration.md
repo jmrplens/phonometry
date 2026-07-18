@@ -34,9 +34,9 @@ una esquina en infinito colapsa su etapa a la unidad (NOTAs de la Tabla 3). Wk
 (cuerpo completo vertical) y Wd (horizontal) de ISO 2631-1, Wm (edificios,
 ISO 2631-2), Wb (ferrocarril, ISO 2631-4), Wc/We/Wj (respaldo, rotacional,
 cabeza) y Wh (mano-brazo, ISO 5349-1) más Wf (mareo) están implementadas desde
-la cascada exacta — el filtro se aplica como la respuesta compleja exacta vía
-FFT (magnitud *y* fase), no como una aproximación digital deformada por la
-bilineal — y las tablas de objetivos de diseño del Anexo B de ISO 8041-1
+la cascada exacta (el filtro se aplica como la respuesta compleja exacta vía
+FFT, magnitud *y* fase, no como una aproximación digital deformada por la
+bilineal) y las tablas de objetivos de diseño del Anexo B de ISO 8041-1
 (B.1–B.9) se reproducen al 0,1 %.
 
 Las métricas ponderadas siguen ISO 2631-1:1997: rms móvil con integración
@@ -62,7 +62,7 @@ Los choques repetidos dañan la columna lumbar por la compresión de pico y no
 por la energía media, así que ISO 2631-5:2018 sustituye la ponderación Wk por
 la función de transferencia asiento-columna de la cláusula 5.2 (Fórmula 1: un
 cero complejo y seis pares de polos complejos, unidad en continua, resonancia
-cerca de 5 Hz — $|H| \approx 1{,}54$ a 5 Hz) y acumula los picos positivos de la
+cerca de 5 Hz, $|H| \approx 1{,}54$ a 5 Hz) y acumula los picos positivos de la
 respuesta espinal con una dosis de sexta potencia (Palmgren-Miner)
 (cláusula 5.3, Fórmulas 3/4):
 

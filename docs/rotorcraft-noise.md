@@ -39,14 +39,14 @@ lv = aircraft.hemisphere_source_level(h, 0.0, 90.0)   # level per band abeam-bel
 The hemisphere level at 60 m is carried to the receiver by three adjustments
 (Doc 32 §A.4):
 
-- **`spherical_spreading_adjustment(r)`** — `ΔLs = −20·log10(r/60)` (Eq. 24).
-- **`atmospheric_adjustment(freqs, r)`** — `ΔLa = −α(f)·(r − 60)` with the
+- **`spherical_spreading_adjustment(r)`**: `ΔLs = −20·log10(r/60)` (Eq. 24).
+- **`atmospheric_adjustment(freqs, r)`**: `ΔLa = −α(f)·(r − 60)` with the
   ISO 9613-1 pure-tone coefficient at the exact band centre (Eq. 26/27), reusing
   the library's `air_attenuation`; this is what the NORAH2 reference
   implementation computes. The guidance's alternative SAE (Rickley) band mapping,
   tabulated in its Table 4, coincides below 3.15 kHz and deviates by up to
   2.2 dB/km at 8-10 kHz.
-- **`ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity=…)`** — the
+- **`ground_effect_adjustment(freqs, hs, hr, dp, flow_resistivity=…)`**: the
   interference between the direct and ground-reflected rays over an impedance
   plane (Chien-Soroka, Eq. 28-35), with the Delany-Bazley one-parameter impedance
   and the CNOSSOS flow-resistivity classes `"A"`-`"H"`.
@@ -397,7 +397,7 @@ itself rests on the closed-form anchors and its CNOSSOS-EU lineage.
 
 ECAC Doc 32, 1st ed., *Report on Standard Method of Computing
 Rotorcraft Noise Contours*; NORAH2 rotorcraft-noise modelling guidance
-(EASA.2020.FC.06 SC01.D1.5d), §A.3-A.5 — the noise hemisphere (§A.3.2), spherical
+(EASA.2020.FC.06 SC01.D1.5d), §A.3-A.5: the noise hemisphere (§A.3.2), spherical
 spreading (Eq. 24), atmospheric attenuation (Eq. 26/27, ISO 9613-1 coefficient,
 Table 4), ground effect (Chien-Soroka, Eq. 28-35, Delany-Bazley impedance,
 CNOSSOS flow resistivity), flight-condition interpolation (Eq. 3-10),

@@ -33,13 +33,13 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Lo *molesto* que resulta un sonido depende de algo más que de su sonoridad.
 Fastl y Zwicker, *Psychoacoustics: Facts and Models*, combinan cuatro
-sensaciones psicoacústicas — **sonoridad**, **nitidez**, **aspereza** e
-**intensidad de fluctuación** — en una única **molestia psicoacústica** `PA`, un
+sensaciones psicoacústicas (**sonoridad**, **nitidez**, **aspereza** e
+**intensidad de fluctuación**) en una única **molestia psicoacústica** `PA`, un
 escalar que crece con la sonoridad y se eleva aún más cuando el sonido es agudo,
 áspero o fluctúa lentamente. Esta página cubre el modelo exacto de `PA`
-(Ecs 16.2–16.4), la **intensidad de fluctuación** que consume — tanto la forma
+(Ecs 16.2–16.4), la **intensidad de fluctuación** que consume, tanto la forma
 cerrada para ruido de banda ancha modulado en amplitud (Ec. 10.2) como el modelo
-de señal de Osses et al. (2016) — y la utilidad que deriva las cuatro sensaciones
+de señal de Osses et al. (2016), y la utilidad que deriva las cuatro sensaciones
 a partir de una grabación.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance.svg" alt="Molestia psicoacústica PA frente a la sonoridad percentil N5 para tres perfiles de sensación: una base neutra donde PA es igual a N5, un sonido agudo y un sonido áspero y fluctuante ambos elevados sobre la base, con el ejemplo resuelto PA = 30,82 marcado" width="82%" loading="eager" />
@@ -78,14 +78,14 @@ plt.show()
 La molestia psicoacústica se apoya en cuatro sensaciones auditivas, cada una con
 su propio modelo y unidad en la biblioteca:
 
-- **Sonoridad** — la sonoridad percentil `N5` (la sonoridad superada el 5 % del
+- **Sonoridad**: la sonoridad percentil `N5` (la sonoridad superada el 5 % del
   tiempo), en **sonios**, del modelo Zwicker variable en el tiempo de la ISO
   532-1 (`loudness_zwicker`, véase [Sonoridad](/phonometry/es/guides/loudness/)).
-- **Nitidez** `S`, en **acum** — el balance espectral hacia las altas
+- **Nitidez** `S`, en **acum**: el balance espectral hacia las altas
   frecuencias, DIN 45692 (`sharpness_din`).
-- **Aspereza** `R`, en **asper** — la dureza de la modulación de amplitud rápida
+- **Aspereza** `R`, en **asper**: la dureza de la modulación de amplitud rápida
   (~70 Hz), modelo de Sottek ECMA-418-2 (`roughness_ecma`).
-- **Intensidad de fluctuación** `F`, en **vacil** — la sensación de fluctuación
+- **Intensidad de fluctuación** `F`, en **vacil**: la sensación de fluctuación
   lenta (~4 Hz) de la sonoridad (§3 más abajo).
 
 ## 2. Molestia psicoacústica (Ecs 16.2–16.4)
@@ -116,7 +116,7 @@ print(round(res.w_s, 4), round(res.w_fr, 4))   # 0.1001 0.2125
 
 La figura de arriba barre `PA` frente a `N5` para tres perfiles: una base neutra
 (`S = 1,75 acum`, `F = R = 0`, de modo que `PA = N5`), un sonido agudo y un
-sonido áspero y fluctuante — ambos elevados sobre la base — con el ejemplo
+sonido áspero y fluctuante, ambos elevados sobre la base, con el ejemplo
 resuelto marcado.
 
 ### 2.1 A partir de una señal (estimación de ingeniería)
@@ -136,7 +136,7 @@ print(res.annoyance, res.n5, res.sharpness, res.roughness, res.fluctuation_stren
 
 :::caution
 **Advertencia sobre la mezcla de modelos.** Este compuesto mezcla familias de
-modelos — `N5` y `S` de la familia Zwicker, `R` de Sottek y `F` de Osses. El
+modelos: `N5` y `S` de la familia Zwicker, `R` de Sottek y `F` de Osses. El
 modelo `PA` se calibró con sensaciones de la familia Zwicker, así que trate la
 utilidad de señal como una *estimación de ingeniería*. Para resultados exactos y
 reproducibles, calcule las cuatro magnitudes con los modelos en los que confíe y
@@ -149,7 +149,7 @@ argumentos es el modelo exacto).
 La **intensidad de fluctuación** `F` (vacil) cuantifica la percepción de la
 fluctuación *lenta* de la sonoridad. Como la aspereza, es una sensación de paso
 de banda de la frecuencia de modulación, pero su máximo se sitúa aproximadamente
-un orden de magnitud más abajo — en `fmod ≈ 4 Hz` en lugar del máximo de la
+un orden de magnitud más abajo, en `fmod ≈ 4 Hz` en lugar del máximo de la
 aspereza en ~70 Hz. Por definición, un tono de 1 kHz a 60 dB, modulado en
 amplitud al 100 % a 4 Hz, produce `1 vacil`. Esta página cubre los modelos de
 Fastl y Zwicker; la intensidad de fluctuación normativa del modelo de Sottek
@@ -245,7 +245,7 @@ En el barrido de tono AM a `70 dB` `fmod ∈ {1, 2, 4, 8, 16, 32} Hz` da
 `[0,39, 0,84, 1,25, 1,30, 0,36, 0,06]` (`r` de Pearson `= 0,98`, máximo correcto a
 `4 Hz`, dentro de ~2,1×). La exactitud para tonos FM no se persigue explícitamente.
 Para **ruido de banda ancha AM** el modelo de señal sobreestima el nivel absoluto
-(reparte la energía modulada entre las bandas) — cite la forma cerrada
+(reparte la energía modulada entre las bandas); cite la forma cerrada
 `fluctuation_strength_am_noise` (§3.1) para ese estímulo.
 :::
 

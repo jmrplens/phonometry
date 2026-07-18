@@ -82,12 +82,12 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 Caracterizar un absorbente o una partición es un ejercicio de laboratorio con
 tres instrumentos distintos detrás. La **cámara reverberante** entrega un espectro
 de coeficientes de absorción sonora que ISO 11654 condensa en un único número
-valorado $\alpha_w$ con una clase por letra. El **banco de flujo** —estacionario
-u oscilante— mide cuánto cuesta empujar aire a través de una muestra porosa, la
+valorado $\alpha_w$ con una clase por letra. El **banco de flujo** (estacionario
+u oscilante) mide cuánto cuesta empujar aire a través de una muestra porosa, la
 resistencia al flujo de aire que gobierna su comportamiento a baja frecuencia
 (ISO 9053-1/-2). Y el **tubo de impedancia** recupera, a incidencia normal, la
 impedancia superficial compleja completa, el factor de reflexión y la absorción
-de una muestra pequeña, y —con cuatro micrófonos— su pérdida por transmisión
+de una muestra pequeña, y, con cuatro micrófonos, su pérdida por transmisión
 (ISO 10534-1/-2, ASTM E2611). Esta página cubre las tres.
 
 ## 1. Valoración de la absorción sonora (ISO 11654)
@@ -114,9 +114,9 @@ por encima de $1{,}00$ se fijan en $1{,}00$. Las cinco bandas de valoración son
 **Absorción ponderada (cláusula 4.2).** Una curva de referencia fija
 $\{250{:}\,0{,}80,\ 500{:}\,1{,}00,\ 1000{:}\,1{,}00,\ 2000{:}\,1{,}00,\ 4000{:}\,0{,}90\}$
 se desplaza hacia abajo, hacia el $\alpha_p$ medido, en pasos de $0{,}05$ hasta que
-la suma de las desviaciones **desfavorables** —tomadas solo donde la medida
+la suma de las desviaciones **desfavorables** (tomadas solo donde la medida
 queda por debajo de la curva desplazada, con magnitud
-$(\text{curva} - \text{medida})$— no supera $0{,}10$. El coeficiente ponderado
+$(\text{curva} - \text{medida})$) no supera $0{,}10$. El coeficiente ponderado
 $\alpha_w$ es el valor de la curva desplazada leído a 500 Hz.
 
 **Indicadores de forma (cláusula 4.3).** Cuando un coeficiente práctico supera la
@@ -436,8 +436,8 @@ cualquier desajuste de micrófonos con `apply_mic_calibration`. Su `.plot()`
 dibuja el espectro de absorción $\alpha(f)$ con el módulo del factor de
 reflexión $|r|$ superpuesto.
 
-**Pérdida por transmisión (ASTM E2611).** Con cuatro micrófonos —dos aguas
-arriba, dos aguas abajo de la muestra— una medición de dos cargas (o de una
+**Pérdida por transmisión (ASTM E2611).** Con cuatro micrófonos (dos aguas
+arriba, dos aguas abajo de la muestra) una medición de dos cargas (o de una
 carga) recupera la matriz de transferencia de la muestra, cuyos elementos dan la
 pérdida por transmisión a incidencia normal, la reflexión y el número de onda:
 
@@ -569,8 +569,8 @@ Sabine o de EN 12354-6 subestima sistemáticamente la absorción instalada.
 Un coeficiente de absorción valorado significa poco sin su incertidumbre. La
 ISO 12999-2:2020 da la incertidumbre típica $u$ de las magnitudes que produce una
 medida en cámara reverberante (ISO 354) y sus valoraciones (ISO 11654, EN 1793-1),
-estimada a partir de ensayos interlaboratorio según ISO 5725. Es la compañera —
-en absorción sonora— de la incertidumbre de aislamiento de la ISO 12999-1
+estimada a partir de ensayos interlaboratorio según ISO 5725. Es la compañera,
+en absorción sonora, de la incertidumbre de aislamiento de la ISO 12999-1
 ([Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/)).
 
 **Bandas de tercio de octava (cláusula 5).** Para el coeficiente de absorción, la

@@ -66,7 +66,7 @@ What the numbers mean and how much to trust them.
   the law of propagation of uncertainty and the Monte Carlo method of
   ISO/IEC Guide 98-3, with expanded uncertainty and coverage intervals.
 - [Calibrated spectral analysis](/phonometry/guides/spectral-analysis/): the
-  Bendat & Piersol Welch estimators with their statistical quality — PSD and
+  Bendat & Piersol Welch estimators with their statistical quality: PSD and
   cross-spectral density with chi-square confidence intervals, the coherent
   output spectrum with the spectral SNR, 1/n-octave smoothing and
   exact-slope colored-noise generators.

@@ -31,7 +31,7 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La *presión* sonora dice cuánto suena un punto; la **intensidad sonora** dice
 hacia dónde *va* la energía. Es el flujo de potencia acústica (W/m²), una
-magnitud vectorial con signo — por eso las sondas de intensidad pueden
+magnitud vectorial con signo: por eso las sondas de intensidad pueden
 localizar fuentes, separarlas del ruido de fondo y medir potencia sonora in
 situ (ISO 9614) donde una medición de presión por sí sola no puede.
 
@@ -78,8 +78,8 @@ res.plot()   # Lp frente a LI por banda + el índice presión-intensidad (requie
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_demo_es.svg" alt="Niveles de presión e intensidad en tercios de octava para una onda plana progresiva frente a una onda estacionaria" width="92%" />
 
-*Izquierda: en una onda plana progresiva toda la presión se transporta —
-L_I ≈ L_p. Derecha: una onda estacionaria no transporta (casi) energía neta —
+*Izquierda: en una onda plana progresiva toda la presión se transporta, así que
+L_I ≈ L_p. Derecha: una onda estacionaria no transporta (casi) energía neta, así que
 la presión es alta pero la intensidad se desploma. La diferencia L_p − L_I es
 el **índice presión-intensidad**, el indicador de calidad fundamental de toda
 medición de intensidad.*
@@ -148,7 +148,7 @@ Dos límites físicos acotan toda medición p-p, y el objeto de resultado incluy
 ambos:
 
 - **Alta frecuencia**: el gradiente por diferencias finitas subestima I en el
-  factor $\sin(k\Delta r)/(k\Delta r)$ — verificado en CI contra la Tabla 3 de
+  factor $\sin(k\Delta r)/(k\Delta r)$, verificado en CI contra la Tabla 3 de
   IEC 61043. `IntensityResult.bias_correction` proporciona el factor y
   `max_valid_frequency` (≈ 0,1·c/Δr; 2,9 kHz para un separador de 12 mm) el
   techo práctico. Los separadores mayores alcanzan frecuencias más bajas; los
@@ -159,12 +159,12 @@ ambos:
 Sobre una superficie de medición, los indicadores de campo del Anexo A de
 ISO 9614-1 califican el propio barrido. **F2**, el indicador
 presión-intensidad de superficie, es el nivel de presión de superficie menos
-el nivel de la *magnitud* media de la intensidad normal — cuanto mayor es,
+el nivel de la *magnitud* media de la intensidad normal: cuanto mayor es,
 más cerca está la medición del suelo de error de fase de la sonda. **F3**, el
 indicador de potencia parcial negativa, es la misma diferencia tomada con la
-intensidad media *con signo* — F3 − F2 > 0 revela potencia que entra por
+intensidad media *con signo*: F3 − F2 > 0 revela potencia que entra por
 partes de la superficie. **F4**, el indicador de no uniformidad del campo, es
-la dispersión normalizada de las intensidades por posición — cuanto mayor es,
+la dispersión normalizada de las intensidades por posición: cuanto mayor es,
 más posiciones de medición necesita la superficie. Junto con el criterio de
 capacidad dinámica están disponibles directamente:
 

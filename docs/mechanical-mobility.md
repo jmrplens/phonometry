@@ -13,7 +13,7 @@ defines the whole family (Table 1, with the 3.1.2 mobility definition), and the
 classic closed-form single-degree-of-freedom (SDOF) resonator serves as the
 reference for those definitions. **ISO 7626-2:2015** adds the measurement side:
 FRF estimation from measured signals and its acceptance criteria. This FRF
-backbone underpins the structure-borne source and transmission standards —
+backbone underpins the structure-borne source and transmission standards:
 ISO 9611, ISO 10846, EN 15657 and EN 12354-5.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/mechanical_mobility.svg" alt="Normalized receptance, mobility and accelerance magnitudes of a single-degree-of-freedom resonator on a log-log frequency axis, all peaking at the resonance where the mobility is stiffness-controlled below and mass-controlled above" width="82%"></picture>
@@ -56,7 +56,7 @@ power of `jω`, and each has a force-per-motion reciprocal:
 `convert_frf` moves between any two of the six FRFs, pivoting through the
 receptance. A **driving-point** FRF has the response and force at the same point
 (`i = j`); a **transfer** FRF has them at different points. Note that the
-force-per-motion kinds are element-wise reciprocals — the *free* quantities of
+force-per-motion kinds are element-wise reciprocals: the *free* quantities of
 ISO 7626-1, 3.1.4; the *blocked* matrix quantities of Table 1 do not invert
 element-wise for multi-coordinate systems (Table 1 also names `F/a` the
 "effective mass", the quantity called apparent mass here).
@@ -87,8 +87,8 @@ fitting or from the half-power bandwidth.
 
 ## 2. The SDOF reference resonator (closed form)
 
-The canonical closed-form reference — expressed in the Table 1 / 3.1.2 FRF
-taxonomy — is a mass `m`, viscous damping `c` and stiffness `k`, whose
+The canonical closed-form reference, expressed in the Table 1 / 3.1.2 FRF
+taxonomy, is a mass `m`, viscous damping `c` and stiffness `k`, whose
 receptance is
 
 $$
@@ -97,7 +97,7 @@ H(\omega) = \frac{1}{k - \omega^2 m + j\,\omega c}, \qquad
 $$
 
 At the resonance `ω0` the driving-point mobility is **purely real** and equal to
-`1/c` — the mobility peak measures the damping — while the static receptance
+`1/c` (the mobility peak measures the damping) while the static receptance
 (`ω → 0`) is the compliance `1/k`:
 
 ```python
@@ -130,8 +130,8 @@ impactor mass and tip stiffness.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mobility_rig.svg" alt="ISO 7626 mobility measurement: a free-free beam on soft suspension driven by an exciter through an impedance head at the driving point, an accelerometer at a transfer point, and an impact hammer as the alternative excitation" width="92%"></picture>
 
-Processing measured random-excitation records per ISO 7626-2, 8.1.3 — the H1
-estimator `Ĥ = G(response, force)/G(force, force)` — and the ordinary coherence
+Processing measured random-excitation records per ISO 7626-2, 8.1.3 (the H1
+estimator `Ĥ = G(response, force)/G(force, force)`) and the ordinary coherence
 `γ² = |Gxy|²/(Gxx·Gyy)` used for its data-quality checks are the library's
 existing spectral estimators [`transfer_function` and
 `coherence`](electroacoustics.md) (H1 is their default). On top of them,
@@ -200,10 +200,10 @@ print(res.frequencies[int(np.argmax(res.magnitude))].round(1))   # ~10.1 Hz
 
 ISO 7626-1:2011, *Mechanical vibration and shock — Experimental
 determination of mechanical mobility — Part 1: Basic terms and definitions, and
-transducer specifications* — the FRF family and its reciprocals (Table 1, the
+transducer specifications*: the FRF family and its reciprocals (Table 1, the
 3.1.2 mobility and 3.1.4 free-quantity definitions) and the driving-point /
 transfer distinction. ISO 7626-2:2015, *Part 2: Measurements using single-point
-translation excitation with an attached vibration exciter* — the 8.1.3 H1
+translation excitation with an attached vibration exciter*: the 8.1.3 H1
 processing of random excitation, the 7.5.2 rigid-mass operational calibration
 (±5 %) and the Annex A random-error criterion (< 5 % at resonances).
 Conformance is anchored on the closed-form SDOF identities (consistent with the

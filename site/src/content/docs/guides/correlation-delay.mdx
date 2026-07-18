@@ -44,11 +44,11 @@ sign convention of the book's time-delay model: for
 `y(t) = α·x(t-τ0) + n(t)` the estimate peaks at `τ = +τ0` (Eq. 5.21). Three
 normalizations are available:
 
-- `'biased'` — the lag sums divided by `N`; tapers toward the record ends
+- `'biased'`: the lag sums divided by `N`; tapers toward the record ends
   and stays bounded by `[Rxx(0)·Ryy(0)]^1/2`;
-- `'unbiased'` — divided by `N-|r|` (Eq. 11.96), an unbiased estimate of
+- `'unbiased'`: divided by `N-|r|` (Eq. 11.96), an unbiased estimate of
   `Rxy(τ)` whose variance grows toward the ends;
-- `'coefficient'` — the correlation coefficient function
+- `'coefficient'`: the correlation coefficient function
   `ρxy(τ) = Cxy(τ)/(σx·σy)` in [-1, 1] over the mean-removed records
   (Eq. 5.16).
 
@@ -76,7 +76,7 @@ $$
 
 `res.random_error(signal_bandwidth)` evaluates it per lag with the measured
 coefficient, and the standalone `correlation_random_error` takes an explicit
-coefficient — with `ρ = S/√((S+M)(S+N)) = 1/11`, `B = 100` Hz and `T = 5` s
+coefficient; with `ρ = S/√((S+M)(S+N)) = 1/11`, `B = 100` Hz and `T = 5` s
 it reproduces the `ε ≈ 0.35` of the book's Example 8.5, one of the pinned
 conformance anchors. Two closed forms anchor the estimator itself in the
 tests: the autocorrelation of a sine, `(A²/2)·cos(2πf0τ)`, and the
@@ -88,14 +88,14 @@ tests: the autocorrelation of a sine, `(A²/2)·cos(2πf0τ)`, and the
 `time_delay` estimates the delay of `y` relative to `x` in the two-sensor
 model `y(t) = α·x(t-τ0) + n(t)` (B&P Section 5.1.4) by three routes:
 
-- **`'direct'`** — the peak of the full-record correlation coefficient
+- **`'direct'`**: the peak of the full-record correlation coefficient
   function;
-- **`'phase'`** — the `|Gxy|`-weighted least-squares slope of the
+- **`'phase'`**: the `|Gxy|`-weighted least-squares slope of the
   cross-spectrum phase (Eq. 5.101b): a pure delay has an exactly linear
   phase, so this estimator resolves fractional delays to better than 1e-3
   samples without any peak interpolation, as long as the unwrapped phase is
   unambiguous (clean, moderate delays);
-- **`'gcc'`** — the generalized cross-correlation of Knapp & Carter (1976):
+- **`'gcc'`**: the generalized cross-correlation of Knapp & Carter (1976):
   the Welch-averaged cross-spectrum is weighted by `ψ(f)` before the inverse
   transform, sharpening the peak that the signal's own autocorrelation would
   otherwise smear (their Eq. 9).
@@ -105,10 +105,10 @@ attaches to each:
 
 | `weighting` | `ψ(f)` | Behaviour and conditions |
 |---|---|---|
-| `'none'` | 1 | The plain correlator: the delta at the delay is convolved with the signal autocorrelation — broad peak on colored signals. |
+| `'none'` | 1 | The plain correlator: the delta at the delay is convolved with the signal autocorrelation, giving a broad peak on colored signals. |
 | `'roth'` | `1/Gxx` | Suppresses the bands where the *first* sensor is noisy; still smears unless that noise is spectrally similar to the signal. |
 | `'scot'` | `1/√(Gxx·Gyy)` | Prewhitens both channels symmetrically; equals Roth when the sensors match. |
-| `'phat'` | `1/|Gxy|` | Ideally a delta at the delay for uncorrelated noises (their Eq. 23) — but the weight ignores the signal-to-noise ratio, so bands without signal contribute unit-magnitude random phase. It needs signal power across the analysis band. |
+| `'phat'` | `1/|Gxy|` | Ideally a delta at the delay for uncorrelated noises (their Eq. 23), but the weight ignores the signal-to-noise ratio, so bands without signal contribute unit-magnitude random phase. It needs signal power across the analysis band. |
 | `'ml'` | `γ²/(|Gxy|·(1-γ²))` | The Hannan-Thomson maximum-likelihood processor: a PHAT weighted down by the phase variance each band actually carries. Attains the Cramér-Rao bound; the safe default when the signal does not fill the band. |
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay.svg" alt="Normalized cross-correlation of a colored two-sensor signal pair against lag in milliseconds: the direct correlator shows a broad peak around the true 20-sample delay while the GCC-PHAT curve collapses to a sharp spike exactly on the dashed true-delay line" width="82%" loading="eager" />
@@ -150,7 +150,7 @@ plt.show()
 The correlation-peak methods refine the sample peak by three-point parabolic
 interpolation, optionally after **band-limited local upsampling**
 (`upsample=16` resamples a window around the peak sixteenfold before the
-parabola). Sub-sample accuracy presumes the peak is oversampled — i.e. the
+parabola). Sub-sample accuracy presumes the peak is oversampled, i.e. the
 signals are band-limited below Nyquist; on a 0.4·fs band-limited pair the
 tests pin the achievable error at ≲0.1 sample for the parabola alone and
 ≲2e-3 samples with `upsample=16`. For GCC the delay must fit within half a
@@ -176,7 +176,7 @@ res.plot()                              # correlation with the delay marked
 ```
 
 The formula models the peak of the continuous correlation function, so treat
-the interval as a conservative order-of-magnitude bound — the seeded Monte
+the interval as a conservative order-of-magnitude bound; the seeded Monte
 Carlo in the test suite observes the actual scatter *below* the prediction.
 
 ## 3. Impulse-response delay and alignment
@@ -202,7 +202,7 @@ res.plot()                                     # reference vs aligned overlay
 
 `align_impulse_responses` removes the estimated delay with an exact
 band-limited fractional shift (a frequency-domain phase ramp over a
-zero-padded record, so nothing wraps around) — the tool for averaging IR
+zero-padded record, so nothing wraps around): the tool for averaging IR
 ensembles or comparing measurements taken at slightly different distances.
 The synthetic fractional-delay tests document the achievable accuracy on a
 smooth band-limited pulse: about 1e-2 samples with the parabola alone,
@@ -221,7 +221,7 @@ f(t) = \frac{1}{2\pi}\frac{d\theta}{dt} .
 $$
 
 For an amplitude-modulated carrier `u(t)·cos(2πf0t)` the envelope recovers
-`u(t)` exactly (Eq. 13.27) — the conformance suite pins the recovered AM
+`u(t)` exactly (Eq. 13.27); the conformance suite pins the recovered AM
 envelope and the Table 13.1 pair `cos → sin` at the 1e-9 level, and the
 instantaneous frequency of a chirp tracks its sweep.
 
@@ -237,7 +237,7 @@ slow = envelope(x, fs, decimation_factor=32)   # anti-aliased, fs/32
 
 The envelope of a band-limited signal is itself low-frequency, so the result
 offers optional **decimation**: a zero-phase FIR anti-alias filter by
-default, or plain subsampling with `antialias=False` — exactly the
+default, or plain subsampling with `antialias=False`, exactly the
 convention the ECMA-418-2 loudness/roughness chain of
 `phonometry.psychoacoustics` applies internally after its auditory bandpass
 (Formulae 65/119 of the standard), appropriate when the input is already
@@ -245,8 +245,8 @@ narrowband.
 
 ## Relation to the spectral estimators
 
-`time_delay` (GCC and phase methods) runs on the same Welch core — taper,
-overlap policy, detrend-off calibration, segment defaults — as
+`time_delay` (GCC and phase methods) runs on the same Welch core (taper,
+overlap policy, detrend-off calibration, segment defaults) as
 [`cross_spectral_density`](/phonometry/guides/spectral-analysis/) and the H1/H2
 [frequency-response estimators](/phonometry/guides/electroacoustics/), so a GCC, a coherence
 and a cross-spectrum computed with the same segment length agree bin by bin;

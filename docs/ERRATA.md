@@ -24,7 +24,7 @@ to the issuing body, with date and reference).
 
 ---
 
-## ISO 717-2:2020 — Annex C, example C.1 (CI of the bare floor)
+## ISO 717-2:2020, Annex C, example C.1 (CI of the bare floor)
 
 - **Location:** Annex C, Table C.1 and the accompanying CI computation.
 - **The print:** the 2020 reprint states CI = −10 for the bare-floor example.
@@ -41,7 +41,7 @@ to the issuing body, with date and reference).
   "ISO 717-2 Annex C, Table C.1").
 - **Status:** unreported.
 
-## ISO 717-2:2020 — Annex C, example C.2 (covered floor, 800 Hz value)
+## ISO 717-2:2020, Annex C, example C.2 (covered floor, 800 Hz value)
 
 - **Location:** Annex C, Table C.2.
 - **The print:** the 800 Hz value of the reference floor with covering is
@@ -56,7 +56,7 @@ to the issuing body, with date and reference).
   values; the conformance check notes the provenance explicitly.
 - **Status:** unreported.
 
-## ISO 2631-5:2018 — Annex C, NOTE 5 (female worked example)
+## ISO 2631-5:2018, Annex C, NOTE 5 (female worked example)
 
 - **Location:** Annex C, NOTE 5 (64 kg female, mz = 0,025 MPa/(m/s²)).
 - **The print:** R = 0,97.
@@ -87,7 +87,7 @@ to the issuing body, with date and reference).
   note in the docstring.
 - **Status:** unreported.
 
-## ISO 12354-1:2017 — E.3.5 (double-leaf junction K24 sign)
+## ISO 12354-1:2017, E.3.5 (double-leaf junction K24 sign)
 
 - **Location:** E.3.5, Figure E.7 (junction of lightweight double leaf wall
   and homogeneous elements), K24 formula.
@@ -104,7 +104,7 @@ to the issuing body, with date and reference).
   with a code note recording the 2017 contradiction.
 - **Status:** unreported.
 
-## EN 12354-2:2000 — Formula (3) vs Annex E.3 (standardized impact level)
+## EN 12354-2:2000, Formula (3) vs Annex E.3 (standardized impact level)
 
 - **Location:** Formula (3) and worked example E.3.
 - **The print:** Formula (3) defines L'nT = L'n − 10 lg(0,16·V/(A0·T0)), which
@@ -118,7 +118,7 @@ to the issuing body, with date and reference).
   annex's rounding.
 - **Status:** unreported.
 
-## EN 12354-3:2000 — Annex F (worked example internal inconsistencies)
+## EN 12354-3:2000, Annex F (worked example internal inconsistencies)
 
 - **Location:** Annex F worked example.
 - **The print:** (a) the printed D2m,nT row equals R' + 1,5 dB; (b) the
@@ -135,7 +135,7 @@ to the issuing body, with date and reference).
   inconsistencies next to the affected anchors.
 - **Status:** unreported.
 
-## ISO 12999-1:2020 — Table 4 (missing 500 Hz row)
+## ISO 12999-1:2020, Table 4 (missing 500 Hz row)
 
 - **Location:** Table 4 (in-situ uncertainties per band).
 - **The print:** the 2020 edition's table omits the 500 Hz row that the 2014
@@ -147,7 +147,7 @@ to the issuing body, with date and reference).
   omission documented in the module.
 - **Status:** unreported.
 
-## ISO 12999-2:2020 — Clause 8 wording vs Tables 4 and 5
+## ISO 12999-2:2020, Clause 8 wording vs Tables 4 and 5
 
 - **Location:** Clause 8 (expression of results) and Tables 4/5.
 - **The print:** the clause wording instructs rounding the standard
@@ -161,7 +161,7 @@ to the issuing body, with date and reference).
   documented and tested.
 - **Status:** unreported.
 
-## ISO 10052:2021 — Table 4 volume-range header
+## ISO 10052:2021, Table 4 volume-range header
 
 - **Location:** Table 4 (reverberation-index estimator), volume-range header.
 - **The print:** the header reads "60 ≤ V < 150" while the body text says the
@@ -173,7 +173,7 @@ to the issuing body, with date and reference).
   ambiguity noted.
 - **Status:** unreported.
 
-## ISO 17208-2:2019 — Clause 5 uncertainty band coverage
+## ISO 17208-2:2019, Clause 5 uncertainty band coverage
 
 - **Location:** Clause 5 (representative expanded uncertainties).
 - **The print:** 5 dB for the low-frequency bands (10 Hz to 100 Hz), 3 dB for
@@ -186,7 +186,7 @@ to the issuing body, with date and reference).
   just above 16 kHz, with the gap documented.
 - **Status:** unreported.
 
-## ECMA-418-1:2024 (3rd edition) — clause 4.1.2 (upper limit of the range of interest)
+## ECMA-418-1:2024 (3rd edition), clause 4.1.2 (upper limit of the range of interest)
 
 - **Location:** clause 4.1.2, the stated frequency range of interest for
   discrete tones.
@@ -202,7 +202,7 @@ to the issuing body, with date and reference).
   in [`tonality.py`](../src/phonometry/psychoacoustics/tonality.py).
 - **Status:** unreported.
 
-## ECMA-418-2:2025 (4th edition) — clause 5.1.5.2 (last block index)
+## ECMA-418-2:2025 (4th edition), clause 5.1.5.2 (last block index)
 
 - **Location:** clause 5.1.5.2, the segmentation of the zero-padded signal
   for the roughness/fluctuation-strength block sizes.
@@ -221,7 +221,7 @@ to the issuing body, with date and reference).
   note in [`roughness_ecma.py`](../src/phonometry/psychoacoustics/roughness_ecma.py).
 - **Status:** unreported.
 
-## ECMA-418-2:2025 (4th edition) — clause 9.1.4, Formula (127) (HSA kernel phase)
+## ECMA-418-2:2025 (4th edition), clause 9.1.4, Formula (127) (HSA kernel phase)
 
 - **Location:** clause 9.1.4, Formula (127), the spectral kernel of the
   envelope analysis window used by the High-resolution Spectral Analysis.
@@ -229,7 +229,7 @@ to the issuing body, with date and reference).
   exp(−j·2π·f_n(k)·(s̃_b − n_ze + n_zb − 1)).
 - **The problem:** the kernel is, by construction, the DFT of the
   rectangular analysis window of Formula (120) modulated to the candidate
-  rate — that is the model Formula (124) fits to the measured DFT spectrum.
+  rate; that is the model Formula (124) fits to the measured DFT spectrum.
   That DFT has the phase exp(−j·π·f_n·(s̃_b − n_ze + n_zb − 1)); the
   printed factor doubles it (and is also inconsistent with the π arguments
   of the printed sine terms of the same formula). With the printed phase
@@ -246,7 +246,7 @@ to the issuing body, with date and reference).
   test on the exact recovery of synthetic line pairs.
 - **Status:** unreported.
 
-## ECMA-418-2:2025 (4th edition) — clause 9.1.5, Formula (144) (bin offset)
+## ECMA-418-2:2025 (4th edition), clause 9.1.5, Formula (144) (bin offset)
 
 - **Location:** clause 9.1.5, Formula (144), the modulation rate of a local
   maximum of the envelope power spectrum.
@@ -255,7 +255,7 @@ to the issuing body, with date and reference).
 - **The problem:** clause 9.1.4 (below Formula (122)) defines the spectral
   index k as mapping to the modulation rate k·r̃_s/s̃_b with k starting at
   0. A symmetric local maximum at bin k has centroid k, and the printed
-  formula then assigns it the rate (k − 1)·Δf — one full bin (0,73 Hz) low,
+  formula then assigns it the rate (k − 1)·Δf, one full bin (0,73 Hz) low,
   which at fluctuation-strength rates is fatal (a true 1,46 Hz modulation
   would be reported as 0,73 Hz). The offset is only consistent with
   1-based spectral-line positions, contradicting the standard's own
@@ -266,7 +266,7 @@ to the issuing body, with date and reference).
   0-based k of Formula (122).
 - **Status:** unreported.
 
-## ECMA-418-2:2025 (4th edition) — clause 9.1.7 (units of the fine-tuning constants)
+## ECMA-418-2:2025 (4th edition), clause 9.1.7 (units of the fine-tuning constants)
 
 - **Location:** clause 9.1.7, Formulae (149)-(152), the damped Newton fine
   tuning of the dominant modulation rate.
@@ -277,7 +277,7 @@ to the issuing body, with date and reference).
 - **The problem:** the constants carry no units. Read in Hz, the damped
   step is capped at 5·10⁻⁵ Hz per iteration (2·10⁻³ Hz over all 40
   iterations), so the tuning cannot move appreciably and the 1,25·Δf
-  (≈ 0,92 Hz) failure check is unreachable — the whole clause would be
+  (≈ 0,92 Hz) failure check is unreachable; the whole clause would be
   inert. Read as normalized modulation rates f/r̃_s (the variable in which
   the Formula (127) kernel frequencies are expressed), the same constants
   give a 0,075 Hz damped per-iteration cap (≈ 2,9 Hz over the 39
@@ -289,7 +289,7 @@ to the issuing body, with date and reference).
   rates.
 - **Status:** unreported.
 
-## ECMA-418-2:2025 (4th edition) — clause 9 introduction (broken cross-reference)
+## ECMA-418-2:2025 (4th edition), clause 9 introduction (broken cross-reference)
 
 - **Location:** clause 9, third paragraph of the introduction, on the
   HSA-based loudness prediction.
@@ -302,11 +302,11 @@ to the issuing body, with date and reference).
   unambiguous).
 - **Status:** unreported.
 
-## ISO/PAS 20065:2016 — clause 5.3.4 (edge steepness of a distinct tone)
+## ISO/PAS 20065:2016, clause 5.3.4 (edge steepness of a distinct tone)
 
 - **Location:** clause 5.3.4, Formulae (10)/(11), the minimum edge steepness
   of a distinct tone.
-- **The print:** asymmetric formulas — the lower-edge steepness is scaled by
+- **The print:** asymmetric formulas: the lower-edge steepness is scaled by
   f_T/2 and the upper-edge steepness by f_T (no divisor).
 - **The problem:** the parent standard DIN 45681:2005-03 prints f_T/sqrt(2)
   on **both** edges, and its executable Annex J reference program does the
@@ -324,7 +324,7 @@ to the issuing body, with date and reference).
   [`tone_audibility.py`](../src/phonometry/psychoacoustics/tone_audibility.py).
 - **Status:** unreported.
 
-## DIN 45681:2005-03 — Anhang I, Tabelle I.6, row "6 FG"
+## DIN 45681:2005-03, Anhang I, Tabelle I.6, row "6 FG"
 
 - **Location:** Anhang I, Beispiel I.2 (combustion engine, spectrum j = 1),
   Tabelle I.6, the combined row "6 FG" for the three tones k = 6/7/8
@@ -338,7 +338,7 @@ to the issuing body, with date and reference).
   shared-line dedupe (the 629,8/643,3 Hz tonal runs overlap), which would
   give delta L = 7,35 dB. Every other FG row of the annex is internally
   consistent (e.g. "2 FG": L_T = 72,15, delta L = 9,18, both from the same
-  sum — no lines shared there).
+  sum; no lines shared there).
 - **Evidence:** recomputation of both readings from the printed per-tone
   levels of Tabelle I.6; the same-page "2 FG" row as the consistent control.
 - **Library behaviour:** `combined_tone_level` follows Anmerkung 2 (shared
@@ -347,14 +347,14 @@ to the issuing body, with date and reference).
   recorded in `tests/reference_data.py`.
 - **Status:** unreported.
 
-## IEC 60268-3:2013 — clause 14.12.9.2 f) (DIM denominator)
+## IEC 60268-3:2013, clause 14.12.9.2 f) (DIM denominator)
 
 - **Location:** clause 14.12.9.2, item f), the formula for the dynamic
   intermodulation distortion d_DIM.
 - **The print:** the denominator of the printed formula is "U2".
 - **The problem:** the defining clause 14.12.9.1 states the ratio of the
   r.m.s. sum of the Table 2 intermodulation product voltages "to the
-  amplitude of the output voltage at the frequency f_s" — i.e. the 15 kHz
+  amplitude of the output voltage at the frequency f_s", i.e. the 15 kHz
   sine component U_s, the Otala convention. The symbol U2 is used throughout
   14.12 for the total output voltage, which contradicts 14.12.9.1 (the test
   signal is dominated by the 3,15 kHz square wave, so the two denominators
@@ -368,7 +368,7 @@ to the issuing body, with date and reference).
   in [`distortion.py`](../src/phonometry/electroacoustics/distortion.py).
 - **Status:** unreported.
 
-## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06) — Eq. (27)
+## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06), Eq. (27)
 
 - **Location:** section A.4.2, Eq. (27) (atmospheric absorption coefficient).
 - **The print:** the coefficient 6,6928·10⁻⁶ is paired with the relaxation
@@ -384,7 +384,7 @@ to the issuing body, with date and reference).
   carries a defensive note so the misprint is not transcribed as a "fix".
 - **Status:** unreported.
 
-## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06) — Eq. (21)
+## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06), Eq. (21)
 
 - **Location:** section A.3.3, Eq. (21) (flight path angle).
 - **The print:** γ = acos(ΔZ/ΔS).
@@ -400,7 +400,7 @@ to the issuing body, with date and reference).
   ``atan`` form; the result docstring carries the defensive note.
 - **Status:** unreported.
 
-## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06) — §A.3.1 triangulation
+## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06), §A.3.1 triangulation
 
 - **Location:** section A.3.1, steps 2 to 4 (flight-condition interpolation),
   against the triangulation lookup tables shipped with the NORAH2 database
@@ -428,7 +428,7 @@ to the issuing body, with date and reference).
   implementation exactly.
 - **Status:** unreported.
 
-## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06) — Eq. (46)
+## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06), Eq. (46)
 
 - **Location:** section A.4.5, Eq. (46) (source-side ground effect weighted
   by diffraction).
@@ -445,7 +445,7 @@ to the issuing body, with date and reference).
   ΔL_d,s′ as defined by the prose.
 - **Status:** unreported.
 
-## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06) — §A.4.5 cross-references
+## NORAH2 rotorcraft guidance SC01.D1.5d (EASA.2020.FC.06), §A.4.5 cross-references
 
 - **Location:** section A.4.5, the definitions under Eq. (46) and Eq. (47).
 - **The print:** ΔL_d,s′, ΔL_d,s and ΔL_d,r′ are said to be "calculated as
@@ -459,7 +459,7 @@ to the issuing body, with date and reference).
   terms with Eq. (42), using Eq. (44) for C″ inside it.
 - **Status:** unreported.
 
-## RANDI 3.1 Physics Description (NRL, Breeding et al.) — Table 2
+## RANDI 3.1 Physics Description (NRL, Breeding et al.), Table 2
 
 - **Location:** Table 2 (representative ship source levels).
 - **The print:** two cells deviate from the report's own Eqs. (2) to (5)
@@ -475,7 +475,7 @@ to the issuing body, with date and reference).
   excludes the contradicting cells with the rationale in the test.
 - **Status:** unreported (technical report rather than a standard).
 
-## Osses, García & Kohlrausch (2016), fluctuation-strength model — Eq. (3)
+## Osses, García & Kohlrausch (2016), fluctuation-strength model, Eq. (3)
 
 - **Location:** Eq. (3), the critical-band-rate (Bark) transformation of the
   excitation-pattern front-end.
@@ -493,7 +493,7 @@ to the issuing body, with date and reference).
   value ([`fluctuation_strength.py`](../src/phonometry/psychoacoustics/fluctuation_strength.py)).
 - **Status:** unreported (conference paper rather than a standard).
 
-## Medwin & Clay, Fundamentals of Acoustical Oceanography (1998) — Eq. 3.4.29
+## Medwin & Clay, Fundamentals of Acoustical Oceanography (1998), Eq. 3.4.29
 
 - **Location:** the Francois-Garrison boric-acid term as transcribed by the
   textbook (Eq. 3.4.29).
@@ -511,12 +511,12 @@ to the issuing body, with date and reference).
 
 ---
 
-## Maa (1998), "Potential of microperforated panel absorber", JASA 104(5) — Eq. (5b)
+## Maa (1998), "Potential of microperforated panel absorber", JASA 104(5), Eq. (5b)
 
 - **Location:** Eq. (5b), the mass-reactance coefficient of the microperforated
   panel, printed as k_m = 1 + [1 + k²/2]^(−1/2) + 0,85 d/t.
 - **The print:** the first bracket term reads (1 + k²/2)^(−1/2).
-- **The problem:** the same paper's Eq. (4) — from which (5b) is factored —
+- **The problem:** the same paper's Eq. (4), from which (5b) is factored,
   prints the term as (3² + k²/2)^(−1/2), and only that form reproduces the
   Crandall low-k limit Z1 → (4/3)·jωρ0t of the paper's own Eq. (3a): at
   k → 0 the printed (5b) gives an internal mass factor of 2 instead of 4/3.
@@ -533,7 +533,7 @@ to the issuing body, with date and reference).
 - **Status:** unreported (journal paper; the correct form appears in Maa's
   earlier 1975/1987 papers and in secondary literature).
 
-## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021) — Table 5.1
+## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021), Table 5.1
 
 - **Location:** Table 5.1, "Coefficient and exponent values in the Delany and
   Bazley, Miki and modified Miki models", row "Miki [6,7]", coefficient r.
@@ -541,7 +541,7 @@ to the issuing body, with date and reference).
 - **The problem:** the original source (Miki 1990, J. Acoust. Soc. Jpn (E)
   11(1), Eq. (34)) prints beta(f) = (ω/c0)[1 + 0,109·(f/σ)^(−0,618)]; the
   table drops a digit. With 0,0109 the real part of the Miki wavenumber at
-  f/σ = 0,01 is 1,19 instead of 2,89 — inconsistent with the same table's
+  f/σ = 0,01 is 1,19 instead of 2,89, inconsistent with the same table's
   Delany-Bazley row (2,79 via ρ0 = 1,2) and with the "modified Miki" row
   the book itself derives from it.
 - **Evidence:** digit check against the original Miki (1990) paper (Eqs.
@@ -551,7 +551,7 @@ to the issuing body, with date and reference).
   conformance check "Miki 1990 Eqs. (30)-(34)".
 - **Status:** unreported (textbook rather than a standard).
 
-## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021) — Eq. (5.13)
+## Attenborough & Van Renterghem, Predicting Outdoor Sound 2e (2021), Eq. (5.13)
 
 - **Location:** Eq. (5.13), the Johnson-Champoux-Allard bulk complex density,
   with G(Λ) = sqrt(1 − 4iTηρ0ω/(R_S²Λ²Ω²)).
@@ -561,7 +561,7 @@ to the issuing body, with date and reference).
   first-power print breaks the high-frequency asymptote that defines the
   viscous characteristic length: with T² the density tends to
   (Tρ0/Ω)(1 + (1 − j)δ_v/Λ) with δ_v = sqrt(2η/ρ0ω), while the printed form
-  tends to a δ_v/(Λ·sqrt(T)) correction — for T = 2 an error of 29 % in the
+  tends to a δ_v/(Λ·sqrt(T)) correction, which for T = 2 means an error of 29 % in the
   boundary-layer term for the same Λ.
 - **Evidence:** asymptotic expansion of both variants against the Johnson
   et al. definition of Λ and against Cox & D'Antonio Eq. (6.19); the

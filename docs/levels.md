@@ -14,7 +14,7 @@ L_{eq} = 10\log_{10}\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\ dt\right) \t
 $$
 
 and $L_{Aeq}$ is the same integral after A-weighting the signal. $L_N$ is the
-level exceeded $N\ \%$ of the time — the $(100-N)$-th percentile of the
+level exceeded $N\ \%$ of the time: the $(100-N)$-th percentile of the
 time-weighted level distribution.
 
 ```python
@@ -38,7 +38,7 @@ Both accept 1D signals (returning a scalar) or 2D `[channels, samples]` arrays
 full-scale analysis (calibration does not apply in dBFS mode).
 
 Why the *energy* mean and not the arithmetic mean of dB values? Because sound
-doses add as energy: two periods at 60 dB and 80 dB do not average to 70 dB —
+doses add as energy: two periods at 60 dB and 80 dB do not average to 70 dB;
 the 80 dB half dominates and $L_{eq}$ = 77 dB. Averaging decibels directly
 underestimates every fluctuating noise. $L_{eq}$ is the level of the *steady*
 sound carrying the same energy as the real, fluctuating one, which is why
@@ -222,7 +222,7 @@ whole event.
 ### SEL: comparing events of different duration
 
 A 4 s train pass-by and a 30 s one cannot be compared by their $L_{Aeq}$
-alone — the longer event delivers more energy at the same level. The **sound
+alone: the longer event delivers more energy at the same level. The **sound
 exposure level** compresses the *whole* event energy into exactly one second:
 
 $$
@@ -272,8 +272,8 @@ plt.show()
 ### Noise dose: sound exposure and LEX,8h
 
 Occupational regulations limit the daily *dose*, not the level. IEC 61252
-expresses it as **sound exposure** $E$ in pascal-squared-hours — the time
-integral of the squared A-weighted pressure — and the equivalent
+expresses it as **sound exposure** $E$ in pascal-squared-hours (the time
+integral of the squared A-weighted pressure) and the equivalent
 **normalized 8 h level**:
 
 $$
@@ -295,14 +295,14 @@ is +3 dB.
 | `lex_8h(x, fs, duration_hours=None, ...)` | same sampling semantics | LEX,8h [dB] | IEC 61252 (≡ LEP,d) |
 
 `lex_8h` rates *one* recording; assembling a full working day from task or
-job samples — with the normative ISO 9612 uncertainty budget — continues in
+job samples, with the normative ISO 9612 uncertainty budget, continues in
 [Occupational Noise Exposure](occupational-exposure.md).
 
 ## Environmental noise: Lden, Ldn and rating levels (ISO 1996-1)
 
 Regulatory noise assessment weights evenings and nights more heavily.
 `lden()` implements the day-evening-night level of ISO 1996-1:2016 (3.6.4:
-+5 dB evening, +10 dB night, default 12/4/8 h periods — adjustable, since
++5 dB evening, +10 dB night, default 12/4/8 h periods, adjustable because
 countries define them differently), `ldn()` the day-night variant (3.6.5),
 and `composite_rating_level()` the general whole-day composite of clause 6.5
 (Formulae 5-6) for arbitrary periods with source or character adjustments
@@ -424,7 +424,7 @@ forms $u = \sqrt{\sum (c_j u_j)^2}$ (Formula (2)) and
 `environmental_expanded_uncertainty()` applies $k = 2$ (95 %) or $k = 1.3$ (80 %);
 `residual_correction_uncertainty()` carries the residual-correction sensitivity
 (Formulae (F.7)/(F.8)) and `uncertainty_from_repeated_measurements()` the
-repeated-measurement standard uncertainty — the primary energy-domain route
+repeated-measurement standard uncertainty: the primary energy-domain route
 (Formulae (17)+(19)), with the level-domain Note 2 substitute (Formula (20))
 reported alongside as `approximate_uncertainty` and a warning when the levels
 spread beyond 3 dB, where the substitute grossly inflates.
@@ -539,13 +539,13 @@ and the ISO 226 equal-loudness contours live with the perception metrics in
 ## Standards
 
 IEC 61672-1:2013, *Electroacoustics — Sound level meters —
-Part 1: Specifications* — the Fast/Slow/Impulse envelope ballistics behind
+Part 1: Specifications*: the Fast/Slow/Impulse envelope ballistics behind
 `ln_levels`, the C-weighted peak of §5.13 (verified against the Table 5 tone
 bursts) and the sound exposure level verified against the Table 4 LAE column.
 IEC 61252, *Electroacoustics — Specifications for personal sound exposure
-meters* — the sound exposure E in Pa²h and the normalized 8 h level LEX,8h
+meters*: the sound exposure E in Pa²h and the normalized 8 h level LEX,8h
 (≡ LEP,d), anchored at 3.2 Pa²h ⇔ exactly 90 dB. ISO 1996-1:2016, *Acoustics —
 Description, measurement and assessment of environmental noise — Part 1:
-Basic quantities and assessment procedures* — Lden (3.6.4), Ldn (3.6.5) and
+Basic quantities and assessment procedures*: Lden (3.6.4), Ldn (3.6.5) and
 the composite whole-day rating level of clause 6.5 (Formulae 5-6, Table A.1
 adjustments).

@@ -20,7 +20,7 @@ específicas. phonometry implementa las constantes de tiempo exactas de la norma
 
 ## 1. El detector exponencial
 
-La aguja de un sonómetro no puede seguir la forma de onda de presión — muestra
+La aguja de un sonómetro no puede seguir la forma de onda de presión: muestra
 un *valor cuadrático medio* móvil con memoria exponencial. Formalmente
 (IEC 61672-1, 3.8):
 
@@ -34,7 +34,7 @@ un paso-bajo de primer orden sobre la señal al cuadrado. La constante de tiempo
 τ fija el compromiso: **Fast** (125 ms) sigue fluctuaciones del tipo del habla
 y **Slow** (1 s) estabiliza la lectura para ruido cuasi estacionario. Tras un
 escalón, la envolvente alcanza el 63 % de su valor final en un τ y ~99,97 %
-tras 8τ — por eso los análisis de nivel descartan los primeros instantes de una
+tras 8τ; por eso los análisis de nivel descartan los primeros instantes de una
 grabación.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting_es.svg" alt="La cadena del detector exponencial: la presión de banda se eleva al cuadrado, se suaviza con un paso bajo RC de un polo con constante de tiempo tau y se convierte a decibelios, con las constantes de tiempo Fast, Slow e Impulse indicadas" width="88%" loading="eager" />
@@ -100,8 +100,8 @@ print(f"Nivel Fast en régimen permanente: {spl_t[-1]:.1f} dB SPL")
 # Nivel Fast en régimen permanente: 77.0 dB SPL
 ```
 
-La ponderación temporal Impulse asimétrica usa dos constantes — ataque rápido y caída
-lenta — conmutando por muestra según el signo del cambio:
+La ponderación temporal Impulse asimétrica usa dos constantes, ataque rápido y caída
+lenta, conmutando por muestra según el signo del cambio:
 
 $$
 y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
@@ -153,7 +153,7 @@ usa las funciones de nivel, que lo hacen por ti.
 ## 4. Respuesta temporal verificada (IEC 61672-1, Tabla 4)
 
 La respuesta de la envolvente Fast a ráfagas de tono de 4 kHz cae exactamente
-sobre los valores de referencia de la norma — el ejemplo de abajo verifica la
+sobre los valores de referencia de la norma: el ejemplo de abajo verifica la
 fila de la ráfaga Fast de 200 ms; la batería de CI cubre la Tabla 4 completa,
 de 1 s a 1 ms en F y de 1 s a 2 ms en S, con límites de aceptación de clase 1:
 

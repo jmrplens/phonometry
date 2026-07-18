@@ -241,7 +241,7 @@ The ambient-noise spectrum level (dB re 1 µPa²/Hz) is the energy sum of the tw
 physically grounded Wenz components: **wind / sea-surface** noise via the "rule
 of fives" ($51.02 - (5/3)\,10\,(\lg f_{\text{kHz}} - \lg(U/5))$: the historical "25 dB (5 × 5)" anchor at 1 kHz for 5 knots is re 20 µPa, i.e. $25 + 20 \lg 20 \approx 51.02$ dB re 1 µPa) and
 **Mellen thermal** noise ($4 \pi k T \rho f^2 / c$, dominant above ~50 kHz). A
-**shipping** spectrum may be supplied by the caller — for example one predicted
+**shipping** spectrum may be supplied by the caller, for example one predicted
 by the traffic model in §6.
 
 <picture>
@@ -520,12 +520,12 @@ surface.
 - Sonar equation: Urick, *Principles of Underwater Sound*.
 - Seabed reflection: Medwin & Clay, *Fundamentals of Acoustical Oceanography*
   (Rayleigh fluid–fluid reflection coefficient).
-- Ambient noise: Wenz (1962); Carey & Evans, *Ocean Ambient Noise* (2011) — the
+- Ambient noise: Wenz (1962); Carey & Evans, *Ocean Ambient Noise* (2011), for the
   wind "rule of fives" and the Mellen thermal-noise derivation.
 - Ship-traffic source level: MacGillivray & de Jong (2021),
   *J. Mar. Sci. Eng.* 9(4) 369 (CC-BY, JOMOPANS-ECHO), which also reproduces
   RANDI 3.1 and Wales & Heitmeyer (2002).
 - Numerical solvers: Jensen, Kuperman, Porter & Schmidt,
-  *Computational Ocean Acoustics* (2nd ed., Springer 2011) — normal modes
+  *Computational Ocean Acoustics* (2nd ed., Springer 2011), for normal modes
   (Ch. 5), ray tracing (Ch. 3) and the split-step Fourier parabolic equation
   (Ch. 6).

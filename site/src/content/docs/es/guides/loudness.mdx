@@ -76,9 +76,9 @@ el [índice de inteligibilidad del habla](/phonometry/es/guides/speech-intelligi
 Los decibelios comprimen la percepción: 10 dB más se leen como *el doble de
 sonoro*, y dos sonidos con el mismo dB(A) pueden diferir audiblemente según
 cómo se reparta su energía entre las **bandas críticas** del oído. El método de
-Zwicker modela explícitamente la cadena auditiva — transmisión del oído
+Zwicker modela explícitamente la cadena auditiva (transmisión del oído
 externo/medio, análisis en bandas críticas sobre la escala de 24 Bark,
-pendientes de enmascaramiento dependientes del nivel — y produce la
+pendientes de enmascaramiento dependientes del nivel) y produce la
 **sonoridad N en sonos**, una escala de razón: 4 sonos es el doble de sonoro
 que 2 sonos. Por definición, un tono de 1 kHz a 40 dB SPL es 1 sono, y cada
 +10 fonios duplica el valor en sonos.
@@ -169,7 +169,7 @@ plt.show()
 La implementación es un port de sala limpia del **programa de referencia
 normativo** de la norma (Anexo A.4): las doce tablas de datos son exactas
 dígito a dígito y el conjunto completo de validación del Anexo B se ejecuta en
-CI — el caso de prueba estacionario reproduce el valor publicado hasta el
+CI: el caso de prueba estacionario reproduce el valor publicado hasta el
 último dígito impreso, y las trazas N(t) de los pulsos de tono se mantienen
 dentro de la banda de tolerancia del 5 % por muestra que fija la norma.
 
@@ -231,7 +231,7 @@ plt.show()
 
 Validez según el apartado 4.1: 20–90 fonios (80 fonios por encima de 4 kHz); la
 implementación se verifica en CI contra las tablas del Anexo B. Ojo: esto es la
-sonoridad de *tonos puros* — la sonoridad de señales arbitrarias en sonos es lo
+sonoridad de *tonos puros*; la sonoridad de señales arbitrarias en sonos es lo
 que calculan los modelos ISO 532 de esta página.
 
 ## Modelos avanzados de sonoridad
@@ -441,10 +441,10 @@ Devuelve un `MooreGlasbergTimeVaryingLoudness`: `time` (rejilla de 1 ms),
 
 ### Sonoridad del modelo de Sottek (ECMA-418-2)
 
-ECMA-418-2:2025 especifica un único front-end auditivo — filtrado del oído
+ECMA-418-2:2025 especifica un único front-end auditivo (filtrado del oído
 externo/medio, un banco de 53 filtros de tipo gammatone sobre la escala Bark_HMS
-(z = 0,5 .. 26,5), rectificación de media onda, RMS de bloque y una no
-linealidad compresiva (Fórmula 23) — que **comparten** sus métricas de
+con z = 0,5 .. 26,5, rectificación de media onda, RMS de bloque y una no
+linealidad compresiva, Fórmula 23) que **comparten** sus métricas de
 sonoridad, tonalidad y aspereza. La sonoridad N se expresa en **sone_HMS**, y el
 mismo ancla de 1 kHz/40 dB calibra el front-end (nuestro valor de sala limpia
 0,984, con el promediado completo de bandas de la cláusula 6.2.3; el origen

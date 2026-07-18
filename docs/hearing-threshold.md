@@ -4,13 +4,13 @@
 
 Two standards describe where the hearing threshold sits. **ISO 7029:2017**
 gives the **statistical distribution of the hearing threshold with age** for an
-otologically normal population — the slow, high-frequency-first loss known as
+otologically normal population: the slow, high-frequency-first loss known as
 presbycusis. **ISO 389-7:2005** fixes the **reference threshold of hearing**,
 the audiometric zero (0 dB HL) expressed as a sound pressure level under
 free-field and diffuse-field listening. Both are defined over the audiometric
 frequencies from 125 Hz to 8000 Hz.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_threshold_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_threshold.svg" alt="The hearing-threshold model: age, sex and a population fractile feed the ISO 7029 chain — the median deviation from age 18 (a times (age minus 18) to the power b, from Table 1 by sex), the upper and lower spreads su and sl (degree-5 polynomials in age minus 18, Tables 2 to 5), and the fractile threshold (median plus the standard-normal quantile z of the fractile times the spread), giving the expected hearing threshold level in dB HL, which is referenced to the audiometric zero, the ISO 389-7 free-field or diffuse-field reference threshold" width="82%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_threshold_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_threshold.svg" alt="The hearing-threshold model: age, sex and a population fractile feed the ISO 7029 chain (the median deviation from age 18, a times (age minus 18) to the power b, from Table 1 by sex; the upper and lower spreads su and sl, degree-5 polynomials in age minus 18, Tables 2 to 5; and the fractile threshold, median plus the standard-normal quantile z of the fractile times the spread), giving the expected hearing threshold level in dB HL, which is referenced to the audiometric zero, the ISO 389-7 free-field or diffuse-field reference threshold" width="82%"></picture>
 
 ## 1. Age-related threshold (ISO 7029)
 
@@ -40,26 +40,26 @@ print(result.median[8].round(1))  # 26.2 dB at 4000 Hz
 print(hearing.age_threshold(65, "male", fractile=0.9).threshold[8].round(1))  # 50.3
 ```
 
-The loss is largest at the high frequencies and grows with age — the classic
+The loss is largest at the high frequencies and grows with age: the classic
 downward-sloping presbycusis audiogram. Men and women follow different
 coefficients (the `sex` argument), and a subset of the audiometric frequencies
 can be requested with `frequencies=`.
 
 **Who counts as "otologically normal".** The ISO 7029 population is not the
 general population: it is people screened to be in a normal state of health,
-free from signs or symptoms of ear disease and wax obstruction, and — the
-demanding part — with **no history of undue noise exposure**, ototoxic drugs
+free from signs or symptoms of ear disease and wax obstruction, and (the
+demanding part) with **no history of undue noise exposure**, ototoxic drugs
 or familial hearing loss. The model therefore isolates *pure ageing*: it is
 the baseline that other standards subtract from. A real, unscreened workforce
-tends to have higher thresholds on average — not necessarily at every age or
-frequency — which is why ISO 1999 supplies an unscreened population as an
+tends to have higher thresholds on average (not necessarily at every age or
+frequency), which is why ISO 1999 supplies an unscreened population as an
 alternate reference (its "database B") for studies whose goal is comparison
 with an actual population rather than isolating the noise effect.
 
 **Reading the percentiles.** A fractile is a population statement, not a
 prediction for a person: `fractile=0.9` returns the threshold that 90 % of
 otologically normal people of that age and sex are *better* than (only the
-worst-hearing tenth exceeds it), and `fractile=0.5` the median — half above,
+worst-hearing tenth exceeds it), and `fractile=0.5` the median: half above,
 half below. The spread is deliberately asymmetric (two half-Gaussians,
 $s_u > s_l$): ageing drags a minority far down while the better-hearing half
 stays bunched near the median, so the far percentiles on the bad side move
@@ -118,8 +118,8 @@ plt.show()
 The `AgeThresholdResult` carries the `median`, the `spread_upper` and
 `spread_lower`, and the `threshold` at the requested fractile, and its
 `.plot()` draws the median with the 10–90 % band. The noise-induced permanent
-threshold shift of ISO 1999 — which adds a noise component on top of this age
-component — is the subject of the
+threshold shift of ISO 1999, which adds a noise component on top of this age
+component, is the subject of the
 [noise-induced hearing loss](noise-induced-hearing-loss.md) guide.
 
 ## References
@@ -140,7 +140,7 @@ component — is the subject of the
 ## Standards
 
 ISO 7029:2017, *Statistical distribution of hearing thresholds
-related to age and gender* — the median (clause 4.2, Table 1), the spread
+related to age and gender*: the median (clause 4.2, Table 1), the spread
 around the median (clause 4.3, Tables 2–5) and its application (clause 4.4).
 ISO 389-7:2005, *Reference zero for the calibration of audiometric equipment —
 Reference threshold of hearing under free-field and diffuse-field listening

@@ -7,7 +7,7 @@ phonometry implements exact time constants per **IEC 61672-1:2013**.
 
 ## 1. The exponential detector
 
-A sound level meter's needle cannot follow the pressure waveform — it shows a
+A sound level meter's needle cannot follow the pressure waveform: it shows a
 running *mean square* with an exponential memory. Formally (IEC 61672-1, 3.8):
 
 $$
@@ -19,7 +19,7 @@ $$
 a first-order low-pass on the squared signal. The time constant τ sets the
 trade-off: **Fast** (125 ms) follows speech-like fluctuations, **Slow** (1 s)
 steadies the readout for quasi-stationary noise. After a step onset the
-envelope reaches 63 % of its final value in one τ and ~99.97 % after 8τ —
+envelope reaches 63 % of its final value in one τ and ~99.97 % after 8τ;
 that is why level analyses discard the first instants of a recording.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_time_weighting.svg" alt="The exponential-detector chain: the band pressure is squared, smoothed by a one-pole RC low-pass with time constant tau, and converted to decibels, with the Fast, Slow and Impulse time constants listed" width="88%"></picture>
@@ -81,8 +81,8 @@ print(f"Steady-state Fast level: {spl_t[-1]:.1f} dB SPL")
 # Steady-state Fast level: 77.0 dB SPL
 ```
 
-The asymmetric Impulse ballistics use two constants — a fast attack and a slow
-decay — switching per sample on the sign of the change:
+The asymmetric Impulse ballistics use two constants, a fast attack and a slow
+decay, switching per sample on the sign of the change:
 
 $$
 y[n] = y[n-1] + \alpha \ (x^2[n] - y[n-1]), \qquad
@@ -128,7 +128,7 @@ the level functions, which do it for you.
 ## 4. Verified ballistics (IEC 61672-1 Table 4)
 
 The Fast envelope's response to 4 kHz tonebursts lands exactly on the
-standard's reference values — the example below verifies the 200 ms Fast
+standard's reference values: the example below verifies the 200 ms Fast
 burst row; the CI suite covers the full Table 4, from 1 s down to 1 ms for F
 and 1 s down to 2 ms for S, at class 1 acceptance limits:
 
@@ -243,7 +243,7 @@ these envelopes, and [Why phonometry](why-phonometry.md) for the IEC
 ## Standards
 
 IEC 61672-1:2013, *Electroacoustics — Sound level meters —
-Part 1: Specifications* — the exponential time-weighting detector (clause 3.8)
+Part 1: Specifications*: the exponential time-weighting detector (clause 3.8)
 with the F and S time constants (clause 5.7), and the 4 kHz toneburst reference
 responses of Table 4 (class 1 acceptance limits) used to verify the ballistics
 in CI.

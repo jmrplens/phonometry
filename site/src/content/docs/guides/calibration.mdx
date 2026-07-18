@@ -39,7 +39,7 @@ where $L_\text{cal}$ is the calibrator's level (typically 94 dB, i.e. 1 Pa),
 $p_\text{ref} = 20\ \mu\text{Pa}$ and $\tilde{x}_\text{ref}$ is the RMS of
 the recorded calibration tone in digital units. `sensitivity()` is
 exactly that equation. The factor is valid as long as nothing in the chain
-changes — touch the gain knob and you must recalibrate.
+changes: touch the gain knob and you must recalibrate.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_calibration_setup.svg" alt="Calibration chain: sound calibrator coupled on the microphone, preamplifier, ADC and sensitivity producing pascals per digital unit" width="92%" loading="eager" />
 
@@ -91,9 +91,9 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
 - The default `target_spl=94.0` matches the common 94 dB @ 1 kHz calibrator
   output (the standard requires the principal level to be at least 90 dB re
   20 µPa; 94 dB and 114 dB are the usual choices).
-- The resulting sensitivity inherits the calibrator's class tolerance — e.g.
-  ±0.4 dB for a class 1 calibrator between 160 Hz and 1.25 kHz (IEC 60942
-  Table 1) — plus the RMS estimation error of your recording.
+- The resulting sensitivity inherits the calibrator's class tolerance (e.g.
+  ±0.4 dB for a class 1 calibrator between 160 Hz and 1.25 kHz, IEC 60942
+  Table 1) plus the RMS estimation error of your recording.
 - IEC 60942 specifies the generated level as a 20 s average: record a few
   seconds of *stable* tone (excluding handling noise at the start/end) for the
   RMS estimate to converge.
@@ -103,8 +103,8 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
 When you pass the sample rate (and `validate=True`, the default),
 `sensitivity(ref, fs=fs)` checks the recording the way
 IEC 60942:2017 checks the calibrator itself (5.3.3): the *short-term level
-fluctuation* — the absolute difference between each of the maximum and minimum
-F-time-weighted levels and the mean level — must not exceed the Table 2 class 1
+fluctuation*, the absolute difference between each of the maximum and minimum
+F-time-weighted levels and the mean level, must not exceed the Table 2 class 1
 limit for the calibrator's nominal frequency (0.07 dB at and above 160 Hz, relaxed
 to 0.10 dB below 160 Hz and 0.20 dB at or below 63 Hz, where the F
 time-weighting itself ripples). Pass `frequency=` to select the right row for non-1 kHz
@@ -115,8 +115,8 @@ envelope); shorter recordings get a warning instead of an unreliable verdict.
 Without `fs` the check is skipped. Override the limit with
 `max_fluctuation_db` or disable with `validate=False`.
 
-The check catches exactly what ruins field calibrations — a loose coupler,
-wind, handling noise:
+The check catches exactly what ruins field calibrations (a loose coupler,
+wind, handling noise):
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibration_stability.png" alt="F-weighted level of a stable calibration tone versus a 3 percent amplitude-modulated one against the plus-minus 0.07 dB IEC 60942 class 1 limit" width="80%" />
 

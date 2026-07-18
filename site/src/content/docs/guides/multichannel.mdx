@@ -96,7 +96,7 @@ spl, freq = metrology.octave_filter(stereo, fs, fraction=3)
 | list of floats | one channel (converted) | as 1D |
 | `(ch, n)` into `spectrogram` | multichannel STFT-style | `(ch, bands, frames)` |
 
-Everything vectorizes across the leading channel axis — one filter design is
+Everything vectorizes across the leading channel axis: one filter design is
 applied to all channels in a single SciPy call, so 8 channels cost far less
 than 8 separate runs. Convention: **channels first**, like most DSP code
 (`soundfile` returns `(n, ch)`: transpose with `x.T`).

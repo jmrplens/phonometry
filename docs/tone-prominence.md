@@ -25,7 +25,7 @@ pr = psychoacoustics.prominence_ratio(x, fs, tone_freq=1000.0)
 print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
 ```
 
-The methods hinge on the **critical band** — the ear's analysis bandwidth,
+The methods hinge on the **critical band**, the ear's analysis bandwidth,
 $\Delta f_c = 25 + 75\ [1 + 1.4(f/1000)^2]^{0.69}$ Hz (162 Hz at 1 kHz): a
 tone is masked only by the noise *inside* its critical band, so both methods
 focus on that band rather than the whole spectrum, but they use it
@@ -88,7 +88,7 @@ relative bands mask more.
 **When the two ratios disagree.** Near the criteria the verdicts can differ,
 because each ratio is fragile in a different situation. TNR has to *split*
 the critical band into tonal and noise lines first, so it degrades when that
-separation is ambiguous — a tone riding a steep noise slope, or closely
+separation is ambiguous: a tone riding a steep noise slope, or closely
 spaced components whose skirts overlap. PR needs no separation, which makes
 it the robust, automatable choice when **several tones share the critical
 band** (they all land in $W_M$); in exchange it reads low when a
@@ -100,7 +100,7 @@ band, and report both when they straddle their criteria.
 
 ## 2. Where to measure (ECMA-74) and practice
 
-ECMA-74 (which delegates its tone assessments to ECMA-418-1) also fixes where to measure around a device — context only: phonometry implements the ECMA-418-1 assessments, not the ECMA-74 Annex D measurement procedure:
+ECMA-74 (which delegates its tone assessments to ECMA-418-1) also fixes where to measure around a device (context only): phonometry implements the ECMA-418-1 assessments, not the ECMA-74 Annex D measurement procedure:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_tonality_positions.svg" alt="ECMA-74 emission measurement positions: seated operator microphone at 0.25 m and 1.20 m, and the four bystander positions at 1 m" width="92%"></picture>
 
@@ -122,13 +122,13 @@ Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
 
 ## See also
 
-- [Levels](levels.md) — the ISO 1996-1 rating levels whose tonal adjustments
+- [Levels](levels.md): the ISO 1996-1 rating levels whose tonal adjustments
   (Table A.1) these prominence verdicts justify objectively.
-- [Sound Quality Metrics](sound-quality.md) — the ECMA-418-2 psychoacoustic
+- [Sound Quality Metrics](sound-quality.md): the ECMA-418-2 psychoacoustic
   tonality T in tu_HMS, the hearing-model counterpart of these FFT ratios.
-- [Impulsive-sound prominence](impulse-prominence.md) — the NT ACOU 112
+- [Impulsive-sound prominence](impulse-prominence.md): the NT ACOU 112
   counterpart for impulsive (rather than tonal) character.
-- [Theory](theory-perception.md) — the critical-band model and criteria derivation.
+- [Theory](theory-perception.md): the critical-band model and criteria derivation.
 - API reference: [`psychoacoustics.tonality`](https://jmrplens.github.io/phonometry/reference/api/psychoacoustics/tonality/).
 
 ## References

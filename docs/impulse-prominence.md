@@ -2,7 +2,7 @@
 
 # Impulsive-sound prominence (NT ACOU 112)
 
-Noise with prominent impulses — hammering, riveting, pile driving — is more
+Noise with prominent impulses (hammering, riveting, pile driving) is more
 annoying than a steady sound of the same equivalent level. **NT ACOU 112:2002**
 (a Nordtest method) quantifies how *prominent* an impulse is and turns it into a
 graduated adjustment `KI` added to the measured `LAeq`. The prominence is read
@@ -161,6 +161,6 @@ rating level, it never replaces it.
 ## Standards
 
 NT ACOU 112:2002 (Nordtest), *Prominence of impulsive sounds and
-for adjustment of LAeq* — the predicted prominence (clause 7, Formula 1), the
+for adjustment of LAeq*: the predicted prominence (clause 7, Formula 1), the
 adjustment to LAeq (clause 8, Formula 2) and the rating level (clause 8,
 Note 1), with the onset defined in clauses 4.5-4.7.

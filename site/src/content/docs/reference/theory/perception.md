@@ -105,11 +105,11 @@ $$
 
 The three parameters come from Table 1 (p. 4), tabulated at the 29 preferred third-octave frequencies of ISO 266 from 20 Hz to 12.5 kHz:
 
-- $\alpha_f$ — exponent for loudness perception at frequency $f$,
-- $L_U$ — magnitude of the linear transfer function, normalized at 1 kHz ($L_U = 0$ at 1 kHz),
-- $T_f$ — threshold of hearing at $f$, in dB.
+- $\alpha_f$: exponent for loudness perception at frequency $f$,
+- $L_U$: magnitude of the linear transfer function, normalized at 1 kHz ($L_U = 0$ at 1 kHz),
+- $T_f$: threshold of hearing at $f$, in dB.
 
-The standard specifies **no interpolation** between the tabulated frequencies. Formula (1) is specified for **20 phon to 90 phon** between 20 Hz and 4 kHz, and only up to **80 phon between 5 kHz and 12.5 kHz** — above 80 phon the contour therefore stops at 4 kHz. Values outside these limits from Formula (2) are extrapolations the standard labels as informative only.
+The standard specifies **no interpolation** between the tabulated frequencies. Formula (1) is specified for **20 phon to 90 phon** between 20 Hz and 4 kHz, and only up to **80 phon between 5 kHz and 12.5 kHz**; above 80 phon the contour therefore stops at 4 kHz. Values outside these limits from Formula (2) are extrapolations the standard labels as informative only.
 
 See the [Loudness guide](/phonometry/guides/loudness/) for usage.
 
@@ -137,10 +137,10 @@ See the [Prominent Discrete Tones guide](/phonometry/guides/tone-prominence/) fo
 
 The ear analyzes sound in **critical bands**: frequency regions within which energy is summed before loudness is formed. The **Bark scale** maps frequency to critical-band rate $z$, 0 to 24 Bark, and ISO 532-1:2017 samples the specific loudness $N'(z)$ at 0.1-Bark steps (240 values). The implementation is a clean-room port of the standard's normative reference program (Annex A.4) and proceeds in stages:
 
-1. **One-third-octave levels** — 28 bands, 25 Hz to 12.5 kHz (the Annex A filterbank at 48 kHz, Tables A.1/A.2). For time-varying sounds the squared band outputs are smoothed by three cascaded low-passes with $\tau = 2/(3 f_c)$ ($f_c$ capped at 1 kHz) and sampled every 2 ms.
-2. **Low-frequency grouping** — the 11 bands up to 250 Hz receive the equal-loudness corrections of Table A.3 and are summed into the first three critical bands (25–80, 100–160, 200–250 Hz).
-3. **a0 transmission** — the outer/middle-ear transfer correction of Table A.4 (plus the diffuse-field difference of Table A.5 when `field='diffuse'`) yields the critical-band levels $L_E$.
-4. **Core loudness** — each of the 20 critical bands is transformed with the threshold-in-quiet levels $L_{TQ}$ of Table A.6 (after the bandwidth adaptation DCB of Table A.7):
+1. **One-third-octave levels**: 28 bands, 25 Hz to 12.5 kHz (the Annex A filterbank at 48 kHz, Tables A.1/A.2). For time-varying sounds the squared band outputs are smoothed by three cascaded low-passes with $\tau = 2/(3 f_c)$ ($f_c$ capped at 1 kHz) and sampled every 2 ms.
+2. **Low-frequency grouping**: the 11 bands up to 250 Hz receive the equal-loudness corrections of Table A.3 and are summed into the first three critical bands (25–80, 100–160, 200–250 Hz).
+3. **a0 transmission**: the outer/middle-ear transfer correction of Table A.4 (plus the diffuse-field difference of Table A.5 when `field='diffuse'`) yields the critical-band levels $L_E$.
+4. **Core loudness**: each of the 20 critical bands is transformed with the threshold-in-quiet levels $L_{TQ}$ of Table A.6 (after the bandwidth adaptation DCB of Table A.7):
 
    $$
    N_c = \max\left(0,\ 0.0635 \cdot 10^{0.025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0.25} - 1 \right]\right) \ \text{sone/Bark}, \qquad s = 0.25
@@ -148,7 +148,7 @@ The ear analyzes sound in **critical bands**: frequency regions within which ene
 
    (the reference program's form of Zwicker's loudness transformation; bands below threshold contribute zero).
 
-5. **Slopes** — level-dependent upper masking slopes (steepness per specific-loudness range and critical band, Tables A.8/A.9) attach decaying flanks toward higher $z$; the total loudness is the area under the pattern:
+5. **Slopes**: level-dependent upper masking slopes (steepness per specific-loudness range and critical band, Tables A.8/A.9) attach decaying flanks toward higher $z$; the total loudness is the area under the pattern:
 
    $$
    N = \int_0^{24} N'(z)\ dz \ \ \text{sone}
@@ -202,9 +202,9 @@ using a fast time constant on the attack and a slower one on the release. This y
 
 ### Sottek Hearing Model (ECMA-418-2:2025)
 
-ECMA-418-2 builds all three of its metrics on one auditory front-end (Clause 5): an outer/middle-ear filter, a bank of 53 overlapping gammatone-like band-pass filters spaced on the Bark_HMS scale ($z = 0.5$ to $26.5$), half-wave rectification, and a short-block RMS $\tilde{p}(l, z)$ per band $z$ and time block $l$. A compressive nonlinearity (Formula 23) turns the band RMS into the **specific basis loudness** $N'_{\mathrm{basis}}(l, z)$, whose calibration constant $c_N$ fixes a 1 kHz / 40 dB SPL tone at 1 sone_HMS. The loudness assembles the tonal and noise loudness (below) over bands and time (Formulae 113–117); it grows about $1.65\times$ per 10 dB, more slowly than Zwicker's factor of 2 — an intrinsic property of the Sottek summation.
+ECMA-418-2 builds all three of its metrics on one auditory front-end (Clause 5): an outer/middle-ear filter, a bank of 53 overlapping gammatone-like band-pass filters spaced on the Bark_HMS scale ($z = 0.5$ to $26.5$), half-wave rectification, and a short-block RMS $\tilde{p}(l, z)$ per band $z$ and time block $l$. A compressive nonlinearity (Formula 23) turns the band RMS into the **specific basis loudness** $N'_{\mathrm{basis}}(l, z)$, whose calibration constant $c_N$ fixes a 1 kHz / 40 dB SPL tone at 1 sone_HMS. The loudness assembles the tonal and noise loudness (below) over bands and time (Formulae 113–117); it grows about $1.65\times$ per 10 dB, more slowly than Zwicker's factor of 2, an intrinsic property of the Sottek summation.
 
-### Tonality — autocorrelation of the band signal (ECMA-418-2)
+### Tonality: autocorrelation of the band signal (ECMA-418-2)
 
 A tonal component is periodic, so it survives in the **autocorrelation function** (ACF) of a band's rectified signal while broadband noise decorrelates. For each band the unbiased ACF of the block is
 
@@ -220,7 +220,7 @@ $$
 
 and the single value $T$ (tu_HMS) is the gated time-average of the per-block maximum over bands (Formulae 61–64). The constant $c_T$ fixes the 1 kHz / 40 dB tone at 1 tu_HMS, and the band of the ACF peak gives the tonal frequency $f_{\mathrm{ton}}$.
 
-### Roughness — envelope modulation (ECMA-418-2)
+### Roughness: envelope modulation (ECMA-418-2)
 
 Roughness is the sensation of fast (roughly 20–300 Hz) amplitude modulation, strongest near 70 Hz. From each band's envelope $p_E(n)$ (Hilbert magnitude), a modulation spectrum is formed and weighted by a modulation-rate function peaking near 70 Hz and by the modulation depth; correlating the modulation across neighbouring bands and applying the specified temporal filtering yields the **specific roughness** $R'(l_{50}, z)$ and the time-dependent roughness
 
@@ -228,7 +228,7 @@ $$
 R(l_{50}) = \sum_z R'(l_{50}, z) \ \ \text{asper}
 $$
 
-(Formulae 65–111). The single value $R$ is the 90th percentile of $R(l_{50})$ over time (Clause 7.1.10); the constant $c_R$ (Formula 104) calibrates the reference sound — a 1 kHz carrier 100 % amplitude-modulated at 70 Hz at 60 dB SPL — to 1 asper.
+(Formulae 65–111). The single value $R$ is the 90th percentile of $R(l_{50})$ over time (Clause 7.1.10); the constant $c_R$ (Formula 104) calibrates the reference sound (a 1 kHz carrier 100 % amplitude-modulated at 70 Hz at 60 dB SPL) to 1 asper.
 
 ### Sharpness (DIN 45692)
 
@@ -239,7 +239,7 @@ S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz} \ \text{acum
 g(z) = \begin{cases} 1 & z \le 15.8\ \text{Bark} \\ 0.15\ e^{0.42 (z - 15.8)} + 0.85 & z > 15.8\ \text{Bark} \end{cases}
 $$
 
-evaluated on the same 240-bin, 0.1-Bark grid. The constant $k$ is not hard-coded but derived from the calibration requirement (clause 6): a critical-band-wide narrowband noise 920–1080 Hz at 60 dB SPL scores exactly 1 acum — the derived $k = 0.108$ lands inside the normative window $0.105 \le k < 0.115$ (clause 5.2). The informative Annex B weightings are provided under the same 1-acum anchor: von Bismarck (knee at 15 Bark, $0.2\ e^{0.308(z-15)} + 0.8$) and Aures (loudness-dependent, $g(z) = 0.078\ (e^{0.171 z}/z)\ N/\ln(0.05 N + 1)$). The Table A.2 narrow-band targets are reproduced within the clause 6 tolerance (5 % or 0.05 acum): 0.38 acum at 250 Hz, 1.00 at 1 kHz, 1.78 at 2.5 kHz, 2.82 at 4 kHz.
+evaluated on the same 240-bin, 0.1-Bark grid. The constant $k$ is not hard-coded but derived from the calibration requirement (clause 6): a critical-band-wide narrowband noise 920–1080 Hz at 60 dB SPL scores exactly 1 acum, and the derived $k = 0.108$ lands inside the normative window $0.105 \le k < 0.115$ (clause 5.2). The informative Annex B weightings are provided under the same 1-acum anchor: von Bismarck (knee at 15 Bark, $0.2\ e^{0.308(z-15)} + 0.8$) and Aures (loudness-dependent, $g(z) = 0.078\ (e^{0.171 z}/z)\ N/\ln(0.05 N + 1)$). The Table A.2 narrow-band targets are reproduced within the clause 6 tolerance (5 % or 0.05 acum): 0.38 acum at 250 Hz, 1.00 at 1 kHz, 1.78 at 2.5 kHz, 2.82 at 4 kHz.
 
 See the [Sound Quality Metrics guide](/phonometry/guides/sound-quality/) for usage.
 
@@ -293,13 +293,13 @@ See the [Speech Intelligibility guide](/phonometry/guides/speech-intelligibility
 
 ## Hearing thresholds and presbycusis (ISO 389-7, ISO 7029)
 
-ISO 389-7:2005 Table 1 fixes the reference threshold of hearing of otologically normal young adults — the free-field and diffuse-field SPL corresponding to 0 dB HL at the 11 audiometric frequencies 125 Hz – 8 kHz (22.1 dB at 125 Hz for both fields, 2.4/0.8 dB free/diffuse at 1 kHz, diverging at high frequency to 12.6 vs 6.8 dB at 8 kHz). ISO 7029:2017 describes how that threshold shifts statistically with age: the median deviation from age 18 is (clause 4.2, Table 1)
+ISO 389-7:2005 Table 1 fixes the reference threshold of hearing of otologically normal young adults: the free-field and diffuse-field SPL corresponding to 0 dB HL at the 11 audiometric frequencies 125 Hz – 8 kHz (22.1 dB at 125 Hz for both fields, 2.4/0.8 dB free/diffuse at 1 kHz, diverging at high frequency to 12.6 vs 6.8 dB at 8 kHz). ISO 7029:2017 describes how that threshold shifts statistically with age: the median deviation from age 18 is (clause 4.2, Table 1)
 
 $$
 \Delta H_{md} = a\ (Y - 18)^b \ \text{dB},
 $$
 
-and any fractile follows a two-sided Gaussian model (clause 4.4), $\Delta H_Q = \Delta H_{md} + z(Q)\ s$, using the upper spread $s_u$ for $z \ge 0$ (worse than median) and the lower spread $s_l$ otherwise — each a degree-5 polynomial in $Y - 18$ per sex and frequency (clause 4.3, Tables 2–5). At age 18 every deviation is zero by construction. The formulae are established to 80 years at and below 2 kHz and to 70 years above; beyond that the evaluation is an extrapolation. Anchors: at 60 years the medians evaluate to 7.85 dB (male, 1 kHz), 20.21 dB (male, 4 kHz) and 15.32 dB (female, 4 kHz) — the Table 1 formula to $10^{-3}$.
+and any fractile follows a two-sided Gaussian model (clause 4.4), $\Delta H_Q = \Delta H_{md} + z(Q)\ s$, using the upper spread $s_u$ for $z \ge 0$ (worse than median) and the lower spread $s_l$ otherwise, each a degree-5 polynomial in $Y - 18$ per sex and frequency (clause 4.3, Tables 2–5). At age 18 every deviation is zero by construction. The formulae are established to 80 years at and below 2 kHz and to 70 years above; beyond that the evaluation is an extrapolation. Anchors: at 60 years the medians evaluate to 7.85 dB (male, 1 kHz), 20.21 dB (male, 4 kHz) and 15.32 dB (female, 4 kHz), matching the Table 1 formula to $10^{-3}$.
 
 See the [Hearing Threshold guide](/phonometry/guides/hearing-threshold/) for usage.
 
@@ -311,7 +311,7 @@ $$
 N_{50} = \big[ u + v \lg(t/t_0) \big]\ (L_{EX,8h} - L_0)^2, \qquad t_0 = 1\ \text{yr},
 $$
 
-quadratic in the excess over the frequency-dependent onset level $L_0$ (75 dB at 4 kHz — the most sensitive band — up to 93 dB at 500 Hz) and zero below it; under 10 years it scales as $\lg(t+1)/\lg 11$ (Formula 3). Fractiles add the spread, $N_Q = N_{50} + z\ d_{u,l}$ with $d = (X + Y \lg t)(L_{EX,8h} - L_0)^2$ (clause 6.3.2, Formulae 4–7, Tables 2/3), clamped at zero; the convention counts the fraction of the population with the *smaller* shift, so $Q = 0.9$ is the most-susceptible decile (reliable range 0.05–0.95). The hearing threshold level associated with age and noise (HTLAN) combines NIPTS with the ISO 7029 age component at the same fractile through the compressed sum (clause 6.1, Formula 1):
+quadratic in the excess over the frequency-dependent onset level $L_0$ (75 dB at 4 kHz, the most sensitive band, up to 93 dB at 500 Hz) and zero below it; under 10 years it scales as $\lg(t+1)/\lg 11$ (Formula 3). Fractiles add the spread, $N_Q = N_{50} + z\ d_{u,l}$ with $d = (X + Y \lg t)(L_{EX,8h} - L_0)^2$ (clause 6.3.2, Formulae 4–7, Tables 2/3), clamped at zero; the convention counts the fraction of the population with the *smaller* shift, so $Q = 0.9$ is the most-susceptible decile (reliable range 0.05–0.95). The hearing threshold level associated with age and noise (HTLAN) combines NIPTS with the ISO 7029 age component at the same fractile through the compressed sum (clause 6.1, Formula 1):
 
 $$
 H' = H + N - \frac{H\ N}{120}.

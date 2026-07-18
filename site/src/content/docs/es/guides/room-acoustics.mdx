@@ -72,13 +72,13 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 
 La acústica de salas parte de una única medición: la **respuesta al impulso**
 (RI) entre una fuente y un receptor. Fíltrala en bandas e intégrala, y da el
-tiempo de reverberación, la claridad y la inteligibilidad del habla —todo
+tiempo de reverberación, la claridad y la inteligibilidad del habla: todo
 sobre el campo sonoro dentro de un único recinto. Esta página sigue esa cadena
 en orden de medición: adquirir la RI (ISO 18233), convertirla en parámetros de
 sala (ISO 3382-1/2), métricas espaciales del habla para oficinas diáfanas
 (ISO 3382-3) y, cerrando el ciclo, la absorción sonora de un material en una
-cámara reverberante (ISO 354). Para el aislamiento acústico *entre* recintos —la
-misma RI medida a ambos lados de un cerramiento— consulta la guía complementaria
+cámara reverberante (ISO 354). Para el aislamiento acústico *entre* recintos (la
+misma RI medida a ambos lados de un cerramiento) consulta la guía complementaria
 [Medición del aislamiento en campo e índices](/phonometry/es/guides/insulation-field/).
 
 ## 1. Adquisición de la respuesta al impulso (ISO 18233)
@@ -157,14 +157,14 @@ print(int(np.argmax(np.abs(ir_m))))                  # 100
 
 `sweep_signal`/`mls_signal` devuelven arrays simples, listos para escribir en
 un WAV y reproducir. `impulse_response`/`mls_impulse_response` devuelven ahora
-un `ImpulseResponseResult` — un sustituto directo del array de la RI
+un `ImpulseResponseResult`, un sustituto directo del array de la RI
 (`np.asarray(ir)`, la indexación y `ir.size` siguen funcionando, de modo que
 `room_parameters(ir, fs)` no cambia) que además guarda la frecuencia de
 muestreo y el método y añade un `.plot()`.
 
 **Las dos excitaciones.** El barrido exponencial desplaza su energía hacia
 frecuencias altas a lo largo de toda la señal, mientras que la MLS es una
-secuencia de dos niveles con espectro plano — visible como la magnitud
+secuencia de dos niveles con espectro plano, visible como la magnitud
 casi constante de la derecha.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_signals_es.png" alt="Señales de excitación ISO 18233: la forma de onda del barrido sinusoidal exponencial y su espectrograma con el ascenso exponencial de frecuencia, y una secuencia de longitud máxima con su espectro de magnitud plano" width="96%" />
@@ -203,7 +203,7 @@ ax2.set(xlabel="Frecuencia [Hz]", ylabel="Magnitud [dB]", title="Espectro de la 
 de banda ancha: el sonido directo, las reflexiones tempranas discretas y la
 cola difusa que decae. Su `.plot()` muestra la forma de onda arriba y la
 envolvente log-magnitud con la curva de decaimiento de energía de Schroeder
-abajo — el decaimiento recto cuya pendiente se convierte en el tiempo de
+abajo: el decaimiento recto cuya pendiente se convierte en el tiempo de
 reverberación del §2.
 
 <Video
@@ -704,22 +704,22 @@ con la forma de `t60`; `absorption_coefficient()` devuelve `alpha_s`;
 
 - Aislamiento acústico [en campo](/phonometry/es/guides/insulation-field/),
   [en laboratorio](/phonometry/es/guides/insulation-lab/) y
-  [de predicción](/phonometry/es/guides/insulation-prediction/) —
+  [de predicción](/phonometry/es/guides/insulation-prediction/):
   el aislamiento acústico entre recintos en campo, laboratorio y predicción, y su incertidumbre de medición.
-- [Potencia sonora](/phonometry/es/guides/sound-power/) — los métodos de `LW` que
+- [Potencia sonora](/phonometry/es/guides/sound-power/): los métodos de `LW` que
   consumen el área de absorción de ISO 354 (el `K2` de ISO 3744 y el término de
   absorción de ISO 3741).
-- [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) — la
+- [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/): la
   medición STI/STIPA que alimenta los `sti_values` de oficinas diáfanas.
 - [Sonoridad](/phonometry/es/guides/loudness/) y
-  [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/) — la sonoridad, el
+  [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/): la sonoridad, el
   sharpness y las demás métricas de percepción de lo que entrega la sala.
-- [Bancos de filtros](/phonometry/es/guides/filter-banks/) — los filtros de octava
+- [Bancos de filtros](/phonometry/es/guides/filter-banks/): los filtros de octava
   fraccionaria IEC 61260 usados para las curvas de decaimiento por banda y los espectros de
   aislamiento.
-- [Niveles](/phonometry/es/guides/levels/) — el promediado en energía y las métricas de
+- [Niveles](/phonometry/es/guides/levels/): el promediado en energía y las métricas de
   nivel que sustentan los niveles de las salas emisora/receptora.
-- [Teoría](/phonometry/es/reference/theory/rooms-buildings/) — la integración de Schroeder, las ventanas de
+- [Teoría](/phonometry/es/reference/theory/rooms-buildings/): la integración de Schroeder, las ventanas de
   regresión y la derivación de la curva de referencia.
 - [Informe de conformidad](https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md): los decaimientos en forma cerrada y las
   definiciones de parámetros frente a los que se validan las implementaciones de ISO 18233 / ISO 3382 / ISO 354.

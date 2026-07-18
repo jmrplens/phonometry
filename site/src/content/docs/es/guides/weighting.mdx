@@ -262,9 +262,9 @@ Nyquist: a fs = 48 kHz el error de la curva A a 12,5 kHz alcanza −2,7 dB, fuer
 de la tolerancia **clase 1** de IEC 61672-1 (+2,0/−2,5 dB).
 
 Por defecto (`high_accuracy=True`), phonometry diseña y ejecuta el filtro de
-ponderación a una frecuencia interna sobremuestreada —hasta 8×, alcanzando
-≥ 144 kHz a frecuencias de audio habituales (una entrada de 96 kHz funciona
-a ×2)— y diezma de vuelta, manteniendo la respuesta dentro de las tolerancias
+ponderación a una frecuencia interna sobremuestreada (hasta 8×, alcanzando
+≥ 144 kHz a frecuencias de audio habituales; una entrada de 96 kHz funciona
+a ×2) y diezma de vuelta, manteniendo la respuesta dentro de las tolerancias
 de clase 1 hasta 16 kHz (error ≈ −0,5 dB a 12,5 kHz para fs = 48 kHz).
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_es.svg" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño sobremuestreado, con error" width="80%" />
@@ -352,10 +352,10 @@ Tabla 3 se calculan en $f = 1000 \cdot 10^{n/10}$, p. ej. 15 848,9 Hz para
 «16 kHz»; la IEC 61672-3 ensaya en esas mismas frecuencias), resta la
 ponderación objetivo de diseño e informa de la clase de prestaciones por
 frecuencia con su margen en dB. Un barrido logarítmico denso impone además el
-apartado 5.5.7 *entre* las frecuencias nominales —la desviación respecto al
+apartado 5.5.7 *entre* las frecuencias nominales (la desviación respecto al
 objetivo analítico del anexo E debe mantenerse dentro del mayor de los dos
 límites adyacentes, de modo que una resonancia o un notch entre nominales no
-puede pasar— y, cuando filas de la Tabla 3 con límite inferior finito quedan
+puede pasar) y, cuando filas de la Tabla 3 con límite inferior finito quedan
 por encima de Nyquist, el veredicto se marca `range_limited` (atestigua solo
 las frecuencias comprobadas, no la conformidad completa de 10 Hz a 20 kHz):
 

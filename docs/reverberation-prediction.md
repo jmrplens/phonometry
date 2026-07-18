@@ -2,8 +2,8 @@
 
 # Reverberation-time prediction (Sabine · Eyring · Fitzroy · Arau-Puchades)
 
-The **reverberation time** $T$ — the time for the sound-energy level to fall by
-60 dB after the source stops — is predicted here from a room's **volume**,
+The **reverberation time** $T$, the time for the sound-energy level to fall by
+60 dB after the source stops, is predicted here from a room's **volume**,
 **boundary areas** and the **sound-absorption coefficients** of its surfaces,
 through the classical statistical-acoustics formulae. This is the design-stage
 counterpart of the *measured* reverberation time of
@@ -77,7 +77,7 @@ print(round(room.millington_sette_reverberation_time(120.0, surfaces), 3))  # 0.
 ```
 
 For a **uniform** distribution Eyring and Millington-Sette coincide, and both
-fall below Sabine — Sabine's over-estimate at high absorption is the reason
+fall below Sabine; Sabine's over-estimate at high absorption is the reason
 Eyring exists. As $\alpha \to 0$, $-S\ln(1-\bar\alpha) \to \sum_i S_i\alpha_i$
 and Eyring reduces to Sabine. Air absorption enters every model through the
 power-attenuation coefficient $m$ (in neper per metre, from the ISO 9613-1
@@ -105,8 +105,8 @@ builds up on resonance is what Sabine and Eyring cannot see.
 
 ## 2. Fitzroy and Arau-Puchades (anisotropic rooms)
 
-When the absorption is concentrated on one axis — a carpeted floor and an
-acoustic ceiling against otherwise hard walls — a single mean $\bar\alpha$
+When the absorption is concentrated on one axis (a carpeted floor and an
+acoustic ceiling against otherwise hard walls), a single mean $\bar\alpha$
 misrepresents the field. **Fitzroy** and **Arau-Puchades** split a rectangular
 (shoebox) room into the three pairs of opposing walls and combine the *axial*
 Eyring reverberation times $T_i$ (each using the whole surface $S$ and the mean

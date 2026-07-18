@@ -4,7 +4,7 @@
 
 Predicting the noise a distant source delivers to a receiver outdoors is a
 book-keeping exercise: start from the source **sound power** and subtract, band
-by band, every mechanism that attenuates the sound on its way — spherical
+by band, every mechanism that attenuates the sound on its way: spherical
 spreading, the air itself, the ground, and any barrier in between. This page
 covers the two parts of ISO 9613 that supply those terms: **ISO 9613-1**, the
 pure-tone atmospheric absorption coefficient $\alpha$, and **ISO 9613-2**, the
@@ -16,7 +16,7 @@ $m$ entirely to $\alpha$.
 ## 1. Atmospheric absorption (ISO 9613-1)
 
 Air is not lossless. A propagating tone bleeds energy into shear viscosity and
-heat conduction — the *classical and rotational* losses that grow as $f^2$ — and
+heat conduction (the *classical and rotational* losses that grow as $f^2$) and
 into the **vibrational relaxation** of the oxygen and nitrogen molecules, each an
 energy store that resonates near a humidity- and temperature-dependent
 relaxation frequency. ISO 9613-1:1993, Eq. (5) collects all of this into the
@@ -34,14 +34,14 @@ with the oxygen and nitrogen relaxation frequencies $f_{rO}$, $f_{rN}$
 relative humidity by the Annex B psychrometric conversion. Two features dominate
 the shape: at low frequency $\alpha \propto f^2$, so it rises steeply; and near
 each relaxation frequency the matching term peaks and rolls off. Between them
-$\alpha$ climbs about two decades from 50 Hz to 10 kHz, and — because humidity
-sets $f_{rO}$ — sweeping the humidity moves a relaxation peak across the band, so
+$\alpha$ climbs about two decades from 50 Hz to 10 kHz, and, because humidity
+sets $f_{rO}$, sweeping the humidity moves a relaxation peak across the band, so
 the driest air is not always the least absorbing.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/air_absorption_alpha.svg" alt="ISO 9613-1 pure-tone atmospheric attenuation coefficient alpha in dB/km against frequency on log-log axes, for four temperature and humidity combinations, showing the f-squared low-frequency growth and the humidity-dependent relaxation roll-off" width="80%"></picture>
 
 *The dry 20 °C / 10 % curve absorbs most at mid frequencies, but the humid
-curves overtake it below ~200 Hz — the relaxation signature.*
+curves overtake it below ~200 Hz: the relaxation signature.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -89,7 +89,7 @@ fully vectorized over `frequencies` with scalar temperature, humidity and
 pressure. Passing `exact_midband=True` snaps each requested frequency onto the
 exact one-third-octave midband $f_m = 1000 \cdot 10^{k/10}$ (Eq. (6), Note 5)
 used to compute Table 1, so the library reproduces every tabulated point to under
-0.4 % — the standard's own three-significant-figure precision, far inside its
+0.4 %, the standard's own three-significant-figure precision, far inside its
 stated $\pm 10$ % accuracy (Clause 7.1). Inputs outside the tabulated ranges
 (−20…+50 °C, 10…100 % RH, 50…10 000 Hz, or above the 200 kPa validity envelope)
 still compute but raise an `AtmosphericAbsorptionWarning`; non-physical inputs
@@ -127,10 +127,10 @@ directivity correction (directivity index plus a solid-angle index
 $D_\Omega$), and $A$ the total attenuation. The library implements the four
 general terms of Clause 7; the informative $A_{misc}$ (foliage, industrial
 sites, housing; Annex A) and reflections off vertical obstacles (Clause 7.5) are
-**not implemented** — the standard treats them as informative and they are left
+**not implemented**: the standard treats them as informative and they are left
 to the caller.
 
-The geometry of the screening term fixes the vocabulary — the diffraction edge
+The geometry of the screening term fixes the vocabulary: the diffraction edge
 splits the source-to-receiver distance into $d_{ss}$ and $d_{sr}$, and the extra
 path length over the edge is $z = d_{ss} + d_{sr} - d$. When the line of sight
 passes *above* the top edge, the standard gives $z$ a negative sign
@@ -147,13 +147,13 @@ grazing incidence to zero as the clearance deepens, never below zero.
   +6 dB per distance doubling. The $+11$ ($= 10 \lg 4\pi$) sets the level at the
   1 m reference distance.
 * **Atmospheric absorption** $A_{atm} = \alpha\ d$ (Eq. (8)) with $\alpha$ the
-  ISO 9613-1 coefficient — negligible at low frequency, dominant at 8 kHz over
+  ISO 9613-1 coefficient, negligible at low frequency and dominant at 8 kHz over
   long paths. $\alpha$ is evaluated at the *exact* base-10 midband behind each
   nominal band label (7 943.3 Hz for "8 kHz"), the convention behind the
   ISO 9613-2 Table 2 coefficients (the nominal-frequency evaluation runs
   ~1.3 % high at 8 kHz). The ISO 9613-2 functions default to 20 °C and 70 %
-  relative humidity — one of the Table 2 reference atmospheres the standard
-  tabulates — while `air_attenuation` itself defaults to the ISO 9613-1
+  relative humidity (one of the Table 2 reference atmospheres the standard
+  tabulates) while `air_attenuation` itself defaults to the ISO 9613-1
   usual 50 %.
 * **Ground effect** $A_{gr} = A_s + A_r + A_m$ (Eq. (9)) sums a source, receiver
   and middle region, each from the Table 3 functions $a'/b'/c'/d'$ and its
@@ -253,7 +253,7 @@ print(np.round(lp, 1))            # [28.8 26.7 24.  21.1 17.9 16.2 12.7 -1. ]
 `predicted_receiver_level` composes $L_{fT}(DW) = L_W + D_c - A$ with
 $D_c = $ `directivity_index` $+ $ `d_omega`. Pass `c0=` to subtract the
 meteorological correction $C_{met}$ (Eq. (21)/(22)) band by band for a long-term
-average — note the standard applies $C_{met}$ to the A-weighted level, so the
+average; note that the standard applies $C_{met}$ to the A-weighted level, so the
 per-band form here is a **convenience**, not a literal reading of Clause 8.
 
 ### Ground: the alternative A-weighted method
@@ -501,15 +501,15 @@ exposure that consumes A-weighted levels.
 
 ISO 9613-1:1993, *Acoustics — Attenuation of sound during
 propagation outdoors — Part 1: Calculation of the absorption of sound by the
-atmosphere* — the pure-tone attenuation coefficient $\alpha$ (Eq. (5)) with the
+atmosphere*: the pure-tone attenuation coefficient $\alpha$ (Eq. (5)) with the
 oxygen and nitrogen relaxation frequencies (Eq. (3)/(4)), the Annex B humidity
 conversion and the exact Table 1 midbands (Eq. (6), Note 5). ISO 9613-2:1996,
 *Acoustics — Attenuation of sound during propagation outdoors — Part 2: General
-method of calculation* — the downwind receiver level (Eq. (3)/(4)) assembled
+method of calculation*: the downwind receiver level (Eq. (3)/(4)) assembled
 from geometrical divergence (Eq. (7)), atmospheric absorption (Eq. (8)), the
 ground effect (Eq. (9), Table 3) with its A-weighted alternative
 (Eq. (10)/(11)), barrier screening (Eqs. (12)–(17)) and the meteorological
 correction (Eq. (21)/(22)). ISO 354:2003, *Acoustics — Measurement of sound
-absorption in a reverberation room* — only the clause 8.1.2.1 conversion
+absorption in a reverberation room*: only the clause 8.1.2.1 conversion
 $m = \alpha/(10 \lg e)$ behind `air_attenuation_m`; the reverberation-room
 method itself is covered in the [Room Acoustics guide](room-acoustics.md).

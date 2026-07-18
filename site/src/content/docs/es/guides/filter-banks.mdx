@@ -67,10 +67,10 @@ f_1 = f_m G^{-1/2b}, \quad f_2 = f_m G^{+1/2b}
 $$
 
 de modo que cada banda de tercio de octava abarca
-$G^{1/3} \approx 1{,}2589 \approx 10^{1/10}$ — diez bandas por década, y por eso
+$G^{1/3} \approx 1{,}2589 \approx 10^{1/10}$: diez bandas por década, y por eso
 las frecuencias nominales (25, 31,5, 40 …) se repiten escaladas por 10.
 phonometry diseña cada banda como una cascada SOS cuyos puntos de −3 dB caen
-exactamente en $f_1$ y $f_2$ en todas las arquitecturas — para Chebyshev II,
+exactamente en $f_1$ y $f_2$ en todas las arquitecturas; para Chebyshev II,
 Elíptico y Bessel eso exige pre-deformar (pre-warping) el mapeo analítico de los
 bordes de banda en lugar de confiar en la parametrización por defecto de SciPy.
 
@@ -98,8 +98,8 @@ $B / f_s$ en sí, es lo que arregla el diezmado.
 
 ### Diezmado multitasa
 
-Una banda de tercio de octava de 25 Hz a 48 kHz abarca unos 5,8 Hz — el
-0,024 % de Nyquist — con coeficientes tan rígidos que se vuelven
+Una banda de tercio de octava de 25 Hz a 48 kHz abarca unos 5,8 Hz, el
+0,024 % de Nyquist, con coeficientes tan rígidos que se vuelven
 numéricamente inestables. El banco lo evita filtrando las bandas bajas a una
 frecuencia diezmada:
 
@@ -480,7 +480,7 @@ print(result["bands"][0])
 
 La propia máscara de aceptación de la Tabla 1 también es pública:
 `class_limits(fraction, filter_class, omega)` devuelve los límites
-mínimo/máximo de atenuación relativa en frecuencias normalizadas Ω = f/fm —
+mínimo/máximo de atenuación relativa en frecuencias normalizadas Ω = f/fm,
 los mismos límites que usan el verificador y la figura de abajo.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay_es.svg" alt="Respuesta Butterworth serpenteando entre las regiones prohibidas de la máscara de clase 1 de IEC 61260-1" width="80%" />
@@ -625,8 +625,8 @@ calificaciones abstractas:
   un sonómetro de clase 1, y por eso las cadenas con calidad de instrumento
   especifican la clase de cada etapa en lugar de una única cifra global.
 
-**¿Qué arquitectura alcanza qué clase?** El **valor por defecto de la biblioteca
-— Butterworth de orden 6 — cumple clase 0** en las configuraciones que verifica
+**¿Qué arquitectura alcanza qué clase?** El **valor por defecto de la biblioteca,
+Butterworth de orden 6, cumple clase 0** en las configuraciones que verifica
 el conjunto de conformidad (bancos de octava y tercio de octava a 48 kHz), así
 que no hace falta ninguna configuración especial para bancos de laboratorio en
 ese rango. La tabla siguiente indica la mejor clase que alcanza cada arquitectura
@@ -636,7 +636,7 @@ quedan por debajo de clase 0 porque cambian la máscara IEC por otra propiedad
 
 | Arquitectura | Mejor clase (orden 6, fs 48 kHz) | Por qué |
 | :--- | :---: | :--- |
-| `butter` (por defecto) | **0** | Banda de paso máximamente plana, caída monótona — encaja en la máscara |
+| `butter` (por defecto) | **0** | Banda de paso máximamente plana, caída monótona; encaja en la máscara |
 | `cheby2` | 1 | Banda de paso plana pero la relación de la máscara limita en clase 1 |
 | `cheby1` | — | El rizado de banda de paso viola el límite de planitud |
 | `ellip` | — | Rizado en banda de paso y atenuada |
@@ -646,7 +646,7 @@ Así que el valor por defecto sensato es el habitual (Butterworth de orden 6):
 supera la clase 0 en las configuraciones verificadas, mientras que las
 arquitecturas alternativas son opciones deliberadas cuyo propósito (caída más
 abrupta, fase lineal) va en contra de la máscara de clase. Fuera de estos
-ajustes —`fraction` muy alto o bandas cercanas a Nyquist— vuelve a ejecutar
+ajustes (`fraction` muy alto o bandas cercanas a Nyquist), vuelve a ejecutar
 `verify_filter_class` para confirmar la clase que necesitas, y sube el orden si
 una banda necesita más margen.
 

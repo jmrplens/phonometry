@@ -203,8 +203,8 @@ plt.show()
 </details>
 
 Calcula `l1`, `l2` y `t2` en las mismas 16 bandas de tercio de octava de
-100 Hz a 3150 Hz — obtén `t2` de
-`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t30`, por ejemplo — y
+100 Hz a 3150 Hz (obtén `t2` de
+`room_parameters(ir, fs, limits=(100, 3150), fraction=3).t30`, por ejemplo) y
 pásalos a `airborne_insulation`. Alimenta el espectro `dnt` (o `r_prime`) de esa
 función a `weighted_rating`, de modo que cada banda quede alineada índice a
 índice con la curva de referencia ISO 717-1.
@@ -268,7 +268,7 @@ print(one_dp.rating)   # 30.0, el índice en pasos de 0,1 dB para incertidumbres
 
 El ruido de pisadas se califica al revés. En lugar de cuánto *bloquea* un
 forjado, el aislamiento a impactos mide cuánto introduce en la sala inferior
-una **máquina de impactos normalizada** situada en el forjado superior —así que
+una **máquina de impactos normalizada** situada en el forjado superior, así que
 un número *mayor* es *peor*. El nivel de presión de ruido de impactos $L_i$
 promediado en energía en la sala receptora se normaliza igual que el caso
 aéreo, pero con un cambio de signo en el término de reverberación:
@@ -283,7 +283,7 @@ El nivel de impactos **estandarizado** $L'_{nT}$ ($T_0 = 0{,}5$ s para viviendas
 solo necesita el $T$ de la sala receptora, así que con $T = 0{,}5$ s es igual a
 $L_i$; el nivel **normalizado** $L'_n$ (referido a un área de absorción de
 10 m²) necesita además el volumen de la sala receptora. Fíjate en el signo
-**menos** —más reverberación *reduce* $L'_{nT}$, al contrario que el $D_{nT}$
+**menos**: más reverberación *reduce* $L'_{nT}$, al contrario que el $D_{nT}$
 aéreo.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_impact_setup_es.svg" alt="Montaje de aislamiento a impactos en campo: una máquina de impactos normalizada sobre el suelo de la sala emisora superior, micrófonos promediados en energía en la sala receptora inferior, y el tiempo de reverberación de la sala receptora" width="92%" />
@@ -291,7 +291,7 @@ aéreo.
 El índice de un solo número (ISO 717-2) desplaza el mismo estilo de curva de
 referencia, pero una **desviación desfavorable se produce ahora donde la
 medición *supera* la referencia** (el ruido de impactos es peor cuanto más
-alto) —el signo opuesto a ISO 717-1. El índice (`Ln,w`, `L'n,w`, `L'nT,w`) es
+alto), el signo opuesto a ISO 717-1. El índice (`Ln,w`, `L'n,w`, `L'nT,w`) es
 la referencia desplazada leída a 500 Hz; para bandas de octava se reduce además
 en 5 dB. El término de adaptación espectral $C_I = L_{n,\text{sum}} - 15 - L_{n,w}$
 usa la suma energética sobre 100–2500 Hz (los primeros 15 tercios, excluyendo
@@ -477,7 +477,7 @@ fachada de 16 bandas a `weighted_rating` para su número único de ISO 717-1.
 
 Un índice sin incertidumbre es solo medio resultado. ISO 12999-1 no vuelve a
 medir nada; tabula la **incertidumbre típica** $u$ de cada magnitud de
-aislamiento acústico —derivada de ensayos interlaboratorio— y prescribe cómo
+aislamiento acústico, derivada de ensayos interlaboratorio, y prescribe cómo
 expandirla y combinarla. Qué desviación típica es $u$ depende de la **situación
 de medición** (Cláusula 5.2):
 
@@ -568,12 +568,12 @@ lectura `COVERAGE_FACTORS` expone la Tabla 8 indexada por `(confidence, one_side
 
 ## Método de control en campo (ISO 10052)
 
-Los métodos de ingeniería anteriores compran precisión con esfuerzo —
+Los métodos de ingeniería anteriores compran precisión con esfuerzo:
 micrófonos barridos, tiempos de reverberación por banda, corrección de ruido de
-fondo cuidadosa—. Para una comprobación rápida en una vivienda, ISO 10052 define
+fondo cuidadosa. Para una comprobación rápida en una vivienda, ISO 10052 define
 un **método de control (survey)**: bandas de octava, un sonómetro de mano y una
-sola magnitud — el **índice de reverberación** `k = 10 lg(T/T0)` (`T0 = 0,5 s`)
-— que arrastra la corrección de la sala receptora. Cada magnitud del control es
+sola magnitud, el **índice de reverberación** `k = 10 lg(T/T0)` (`T0 = 0,5 s`),
+que arrastra la corrección de la sala receptora. Cada magnitud del control es
 entonces una simple suma de `k`: la diferencia de niveles estandarizada
 `DnT = D + k`, la normalizada `Dn = D + k + 10 lg(A0 T0 / (0,16 V))`, la aparente
 `R' = D + k + 10 lg(S T0 / (0,16 V))` (usando `V/7,5` como `S` cuando es mayor) y,
@@ -581,12 +581,12 @@ para impactos y fachadas, `L'nT = Li - k` y `D2m,nT = D2m + k`. Las referencias 
 cláusulas siguen ISO 10052:2021; las fórmulas y la tabla del índice de
 reverberación son idénticas en la armonizada EN ISO 10052:2004+A1:2010.
 
-El índice de reverberación se **mide** —pasa el tiempo de reverberación a
-`reverberation_index(T)`— o, en un control, se **estima** a partir del tipo de
+El índice de reverberación se **mide** (pasa el tiempo de reverberación a
+`reverberation_index(T)`) o, en un control, se **estima** a partir del tipo de
 sala y el volumen con `estimate_reverberation_index(V, room)` (Tabla 4:
 amueblada `"kitchen"` / `"bathroom"` / `"furnished"`, o las clases de
 construcción sin amueblar `"a"`–`"h"` y las mixtas `"a+e"`…`"d+h"`). Una cuarta
-magnitud propia de este método es el **ruido de equipos de servicio** `LXY` — la
+magnitud propia de este método es el **ruido de equipos de servicio** `LXY`: la
 media energética de tres posiciones ponderadas A o C.
 
 ```python
@@ -617,7 +617,7 @@ res.plot()   # DnT vs curva de referencia ISO 717-1 desplazada (necesita matplot
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/survey_insulation_es.svg" alt="Aislamiento aéreo por el método de control: la diferencia de niveles bruta D y la estandarizada DnT en las cinco bandas de octava, con la corrección por índice de reverberación k sombreada entre ambas" width="80%" />
 
 *El índice de reverberación `k = 10 lg(T/T0)` desplaza la diferencia de niveles
-bruta `D` hacia la estandarizada `DnT` — hacia arriba donde la sala es viva
+bruta `D` hacia la estandarizada `DnT`: hacia arriba donde la sala es viva
 (`T > T0`), hacia abajo donde es apagada. El índice automático solo se forma con
 exactamente 5 valores de octava (o 16 de tercio de octava).*
 
@@ -676,12 +676,12 @@ plt.show()
   magnitudes de campo.
 - [Predicción del aislamiento acústico (EN 12354)](/phonometry/es/guides/insulation-prediction/):
   el comportamiento in situ predicho a partir de datos de elemento de laboratorio.
-- [Acústica de salas](/phonometry/es/guides/room-acoustics/) — la respuesta al impulso,
+- [Acústica de salas](/phonometry/es/guides/room-acoustics/): la respuesta al impulso,
   los parámetros de sala y la absorción sonora sobre los que se apoya la cadena de aislamiento de esta guía.
-- [Niveles](/phonometry/es/guides/levels/) — el promediado en energía y las métricas de
+- [Niveles](/phonometry/es/guides/levels/): el promediado en energía y las métricas de
   nivel que sustentan los niveles de las salas emisora/receptora.
-- [Bancos de filtros](/phonometry/es/guides/filter-banks/) — los filtros de octava
+- [Bancos de filtros](/phonometry/es/guides/filter-banks/): los filtros de octava
   fraccionaria IEC 61260 usados para los espectros de aislamiento.
-- [Teoría](/phonometry/es/reference/theory/rooms-buildings/) — la derivación de la curva de referencia que sustenta
+- [Teoría](/phonometry/es/reference/theory/rooms-buildings/): la derivación de la curva de referencia que sustenta
   los índices ponderados de un solo número.
 - Referencia de la API: [`building.insulation`](/phonometry/es/reference/api/building/insulation/), [`building.survey_insulation`](/phonometry/es/reference/api/building/survey-insulation/) y [`building.building_uncertainty`](/phonometry/es/reference/api/building/building-uncertainty/).

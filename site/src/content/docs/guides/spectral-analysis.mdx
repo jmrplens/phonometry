@@ -42,7 +42,7 @@ closed form from the book, verified by seeded Monte Carlo in the test suite.
 `power_spectral_density` estimates the one-sided autospectral density
 `Gxx(f)` by Welch's method: the record is split into tapered (Hann by
 default), 50 %-overlapped segments whose periodograms are averaged. No
-detrending is applied, so absolute calibration is preserved — a signal in
+detrending is applied, so absolute calibration is preserved: a signal in
 pascals yields `Pa²/Hz`. Two scalings are available: `'density'` (units²/Hz,
 integrates to the signal power) and `'spectrum'` (units², reads the power of
 discrete tones directly).
@@ -60,9 +60,9 @@ With overlapped, tapered segments the averages are correlated, so the result
 reports both the raw segment count (`n_segments`) and the **effective**
 number of independent averages (`n_averages`), computed with the
 window-correlation formula of Welch (1967) that Bendat & Piersol reference in
-Section 11.5.2.2 — for a Hann taper at 50 % overlap roughly 0.95 of the raw
+Section 11.5.2.2; for a Hann taper at 50 % overlap it is roughly 0.95 of the raw
 count. The random error and the confidence interval use the effective value.
-At DC — and at Nyquist for an even segment length — the one-sided spectrum
+At DC, and at Nyquist for an even segment length, the one-sided spectrum
 has a single real Fourier component, so those bins carry half the degrees of
 freedom and a correspondingly wider interval.
 
@@ -205,14 +205,14 @@ res.plot()                               # Gyy, Gvv, Gnn and the SNR panel
 ```
 
 The `coherence_bias` field reports the small positive bias of the coherence
-estimate, `b[γ̂²] ≈ (1-γ²)²/nd` (Eq. 9.75) — negligible once `nd` reaches a
+estimate, `b[γ̂²] ≈ (1-γ²)²/nd` (Eq. 9.75), negligible once `nd` reaches a
 few hundred, and another reason to average generously before trusting a low
 coherence.
 
 ## 4. Fractional-octave smoothing
 
 `fractional_octave_smoothing` averages a spectrum over a rectangular window
-of constant relative width — 1/n octave, `[f·2^(-1/2n), f·2^(+1/2n)]` around
+of constant relative width: 1/n octave, `[f·2^(-1/2n), f·2^(+1/2n)]` around
 each frequency. This is the constant-percentage resolution bandwidth that
 Bendat & Piersol recommend for the spectra of resonant systems
 (Section 8.5.3), and the de facto standard for presenting loudspeaker and
@@ -231,7 +231,7 @@ smooth_db = fractional_octave_smoothing(freqs, levels, 3.0, domain="db")  # dB c
 
 A single spectral line with PSD ordinate `P` (units²/Hz) in a bin of width
 `Δf` smooths to the closed-form level `P·Δf / (f₀·(2^{1/2n} - 2^{-1/2n}))`
-over one kernel width — the oracle pinned in the tests.
+over one kernel width, the oracle pinned in the tests.
 
 ## 5. Colored-noise generators
 
@@ -239,7 +239,7 @@ over one kernel width — the oracle pinned in the tests.
 exactly in expectation: seeded white noise is shaped in the frequency domain
 by the exact magnitude response `(f/f_ref)^{α/2}` bin by bin (a zero-phase
 filter applied circularly), so a measured slope deviates from the power law
-only by the random error of the spectral estimate — not the piecewise or
+only by the random error of the spectral estimate, not by the piecewise or
 few-pole pink approximations whose slope ripples by fractions of a dB. The
 record is zero-mean and rescaled to the requested RMS exactly, and the same
 seed reproduces the same record bit for bit.
@@ -261,7 +261,7 @@ white = noise_signal(48000, 10.0, color="white", rms=0.5, seed=7)
 
 Measured over three decades (20 Hz – 20 kHz) with the estimator of section 1,
 the regression slope of each color lands within a few thousandths of a
-dB/octave of the exact value — the conformance suite pins the pink slope at
+dB/octave of the exact value; the conformance suite pins the pink slope at
 -3.0116 against the exact -3.0103.
 
 ## Relation to the H1/H2 estimators

@@ -105,11 +105,11 @@ $$
 
 Los tres parámetros provienen de la Tabla 1 (p. 4), tabulados en las 29 frecuencias preferentes de tercio de octava de ISO 266 desde 20 Hz hasta 12,5 kHz:
 
-- $\alpha_f$ — exponente de la percepción de sonoridad a la frecuencia $f$,
-- $L_U$ — magnitud de la función de transferencia lineal, normalizada en 1 kHz ($L_U = 0$ en 1 kHz),
-- $T_f$ — umbral de audición en $f$, en dB.
+- $\alpha_f$: exponente de la percepción de sonoridad a la frecuencia $f$,
+- $L_U$: magnitud de la función de transferencia lineal, normalizada en 1 kHz ($L_U = 0$ en 1 kHz),
+- $T_f$: umbral de audición en $f$, en dB.
 
-La norma **no especifica interpolación** entre las frecuencias tabuladas. La Fórmula (1) está especificada para **20 fonios a 90 fonios** entre 20 Hz y 4 kHz, y solo hasta **80 fonios entre 5 kHz y 12,5 kHz** — por encima de 80 fonios la línea isofónica se detiene, por tanto, en 4 kHz. Los valores fuera de estos límites obtenidos con la Fórmula (2) son extrapolaciones que la norma califica de meramente informativas.
+La norma **no especifica interpolación** entre las frecuencias tabuladas. La Fórmula (1) está especificada para **20 fonios a 90 fonios** entre 20 Hz y 4 kHz, y solo hasta **80 fonios entre 5 kHz y 12,5 kHz**; por encima de 80 fonios la línea isofónica se detiene, por tanto, en 4 kHz. Los valores fuera de estos límites obtenidos con la Fórmula (2) son extrapolaciones que la norma califica de meramente informativas.
 
 Consulta la [guía de sonoridad](/phonometry/es/guides/loudness/) para su uso.
 
@@ -137,10 +137,10 @@ Consulta la [guía de tonos discretos prominentes](/phonometry/es/guides/tone-pr
 
 El oído analiza el sonido en **bandas críticas**: regiones de frecuencia dentro de las cuales la energía se suma antes de formarse la sonoridad. La **escala Bark** transforma la frecuencia en razón de banda crítica $z$, de 0 a 24 Bark, e ISO 532-1:2017 muestrea la sonoridad específica $N'(z)$ en pasos de 0,1 Bark (240 valores). La implementación es un port de sala limpia del programa de referencia normativo de la norma (Anexo A.4) y procede por etapas:
 
-1. **Niveles de tercio de octava** — 28 bandas, de 25 Hz a 12,5 kHz (el banco de filtros del Anexo A a 48 kHz, Tablas A.1/A.2). Para sonidos variables en el tiempo, las salidas de banda al cuadrado se suavizan con tres paso-bajos en cascada con $\tau = 2/(3 f_c)$ ($f_c$ limitada a 1 kHz) y se muestrean cada 2 ms.
-2. **Agrupación en baja frecuencia** — las 11 bandas hasta 250 Hz reciben las correcciones isofónicas de la Tabla A.3 y se suman en las tres primeras bandas críticas (25–80, 100–160, 200–250 Hz).
-3. **Transmisión a0** — la corrección de transferencia del oído externo/medio de la Tabla A.4 (más la diferencia de campo difuso de la Tabla A.5 con `field='diffuse'`) produce los niveles de banda crítica $L_E$.
-4. **Sonoridad núcleo** — cada una de las 20 bandas críticas se transforma con los niveles de umbral en silencio $L_{TQ}$ de la Tabla A.6 (tras la adaptación de ancho de banda DCB de la Tabla A.7):
+1. **Niveles de tercio de octava**: 28 bandas, de 25 Hz a 12,5 kHz (el banco de filtros del Anexo A a 48 kHz, Tablas A.1/A.2). Para sonidos variables en el tiempo, las salidas de banda al cuadrado se suavizan con tres paso-bajos en cascada con $\tau = 2/(3 f_c)$ ($f_c$ limitada a 1 kHz) y se muestrean cada 2 ms.
+2. **Agrupación en baja frecuencia**: las 11 bandas hasta 250 Hz reciben las correcciones isofónicas de la Tabla A.3 y se suman en las tres primeras bandas críticas (25–80, 100–160, 200–250 Hz).
+3. **Transmisión a0**: la corrección de transferencia del oído externo/medio de la Tabla A.4 (más la diferencia de campo difuso de la Tabla A.5 con `field='diffuse'`) produce los niveles de banda crítica $L_E$.
+4. **Sonoridad núcleo**: cada una de las 20 bandas críticas se transforma con los niveles de umbral en silencio $L_{TQ}$ de la Tabla A.6 (tras la adaptación de ancho de banda DCB de la Tabla A.7):
 
    $$
    N_c = \max\left(0,\ 0{,}0635 \cdot 10^{0{,}025 L_{TQ}} \left[ \left( 1 - s + s \cdot 10^{(L_E - L_{TQ})/10} \right)^{0{,}25} - 1 \right]\right) \ \text{sonos/Bark}, \qquad s = 0{,}25
@@ -148,7 +148,7 @@ El oído analiza el sonido en **bandas críticas**: regiones de frecuencia dentr
 
    (la forma que da el programa de referencia a la transformación de sonoridad de Zwicker; las bandas por debajo del umbral aportan cero).
 
-5. **Pendientes** — las pendientes superiores de enmascaramiento dependientes del nivel (inclinación por rango de sonoridad específica y banda crítica, Tablas A.8/A.9) añaden flancos decrecientes hacia $z$ mayores; la sonoridad total es el área bajo el patrón:
+5. **Pendientes**: las pendientes superiores de enmascaramiento dependientes del nivel (inclinación por rango de sonoridad específica y banda crítica, Tablas A.8/A.9) añaden flancos decrecientes hacia $z$ mayores; la sonoridad total es el área bajo el patrón:
 
    $$
    N = \int_0^{24} N'(z)\ dz \ \ \text{sonos}
@@ -202,9 +202,9 @@ usando una constante de tiempo rápida en el ataque y una más lenta en la relaj
 
 ### Modelo de Sottek (ECMA-418-2:2025)
 
-ECMA-418-2 construye sus tres métricas sobre un único front-end auditivo (Cláusula 5): un filtro de oído externo/medio, un banco de 53 filtros paso-banda solapados de tipo gammatone espaciados en la escala Bark_HMS ($z = 0{,}5$ a $26{,}5$), rectificación de media onda y un RMS de bloque corto $\tilde{p}(l, z)$ por banda $z$ y bloque temporal $l$. Una no linealidad compresiva (Fórmula 23) convierte el RMS de banda en la **sonoridad de base específica** $N'_{\mathrm{basis}}(l, z)$, cuya constante de calibración $c_N$ fija un tono de 1 kHz / 40 dB SPL en 1 sone_HMS. La sonoridad ensambla las sonoridades tonal y de ruido (abajo) sobre bandas y tiempo (Fórmulas 113–117); crece unas $1{,}65\times$ por cada 10 dB, más lentamente que el factor de 2 de Zwicker — una propiedad intrínseca de la suma de Sottek.
+ECMA-418-2 construye sus tres métricas sobre un único front-end auditivo (Cláusula 5): un filtro de oído externo/medio, un banco de 53 filtros paso-banda solapados de tipo gammatone espaciados en la escala Bark_HMS ($z = 0{,}5$ a $26{,}5$), rectificación de media onda y un RMS de bloque corto $\tilde{p}(l, z)$ por banda $z$ y bloque temporal $l$. Una no linealidad compresiva (Fórmula 23) convierte el RMS de banda en la **sonoridad de base específica** $N'_{\mathrm{basis}}(l, z)$, cuya constante de calibración $c_N$ fija un tono de 1 kHz / 40 dB SPL en 1 sone_HMS. La sonoridad ensambla las sonoridades tonal y de ruido (abajo) sobre bandas y tiempo (Fórmulas 113–117); crece unas $1{,}65\times$ por cada 10 dB, más lentamente que el factor de 2 de Zwicker, una propiedad intrínseca de la suma de Sottek.
 
-### Tonalidad — autocorrelación de la señal de banda (ECMA-418-2)
+### Tonalidad: autocorrelación de la señal de banda (ECMA-418-2)
 
 Una componente tonal es periódica, así que sobrevive en la **función de autocorrelación** (ACF) de la señal rectificada de una banda mientras que el ruido de banda ancha se descorrelaciona. Para cada banda, la ACF no sesgada del bloque es
 
@@ -220,7 +220,7 @@ $$
 
 y el valor único $T$ (tu_HMS) es el promedio temporal con compuerta del máximo por bloque sobre las bandas (Fórmulas 61–64). La constante $c_T$ fija el tono de 1 kHz / 40 dB en 1 tu_HMS, y la banda del pico de la ACF da la frecuencia tonal $f_{\mathrm{ton}}$.
 
-### Aspereza — modulación de la envolvente (ECMA-418-2)
+### Aspereza: modulación de la envolvente (ECMA-418-2)
 
 La aspereza es la sensación de modulación de amplitud rápida (aproximadamente 20–300 Hz), máxima cerca de 70 Hz. A partir de la envolvente de cada banda $p_E(n)$ (magnitud de Hilbert) se forma un espectro de modulación ponderado por una función de tasa de modulación con pico cerca de 70 Hz y por la profundidad de modulación; correlacionando la modulación entre bandas vecinas y aplicando el filtrado temporal especificado se obtiene la **aspereza específica** $R'(l_{50}, z)$ y la aspereza dependiente del tiempo
 
@@ -228,7 +228,7 @@ $$
 R(l_{50}) = \sum_z R'(l_{50}, z) \ \ \text{asper}
 $$
 
-(Fórmulas 65–111). El valor único $R$ es el percentil 90 de $R(l_{50})$ en el tiempo (Cláusula 7.1.10); la constante $c_R$ (Fórmula 104) calibra el sonido de referencia — un portador de 1 kHz modulado en amplitud al 100 % a 70 Hz y 60 dB SPL — a 1 asper.
+(Fórmulas 65–111). El valor único $R$ es el percentil 90 de $R(l_{50})$ en el tiempo (Cláusula 7.1.10); la constante $c_R$ (Fórmula 104) calibra el sonido de referencia (un portador de 1 kHz modulado en amplitud al 100 % a 70 Hz y 60 dB SPL) a 1 asper.
 
 ### Sharpness (DIN 45692)
 
@@ -239,7 +239,7 @@ S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz} \ \text{acum
 g(z) = \begin{cases} 1 & z \le 15{,}8\ \text{Bark} \\ 0{,}15\ e^{0{,}42 (z - 15{,}8)} + 0{,}85 & z > 15{,}8\ \text{Bark} \end{cases}
 $$
 
-evaluado sobre la misma malla de 240 puntos a 0,1 Bark. La constante $k$ no está codificada a mano, sino que se deriva del requisito de calibración (cláusula 6): un ruido de banda estrecha de una banda crítica de ancho, 920–1080 Hz a 60 dB SPL, puntúa exactamente 1 acum — la $k = 0{,}108$ derivada cae dentro de la ventana normativa $0{,}105 \le k < 0{,}115$ (cláusula 5.2). Las ponderaciones informativas del Anexo B se ofrecen bajo el mismo anclaje de 1 acum: von Bismarck (codo en 15 Bark, $0{,}2\ e^{0{,}308(z-15)} + 0{,}8$) y Aures (dependiente de la sonoridad, $g(z) = 0{,}078\ (e^{0{,}171 z}/z)\ N/\ln(0{,}05 N + 1)$). Los objetivos de banda estrecha de la Tabla A.2 se reproducen dentro de la tolerancia de la cláusula 6 (5 % o 0,05 acum): 0,38 acum a 250 Hz, 1,00 a 1 kHz, 1,78 a 2,5 kHz, 2,82 a 4 kHz.
+evaluado sobre la misma malla de 240 puntos a 0,1 Bark. La constante $k$ no está codificada a mano, sino que se deriva del requisito de calibración (cláusula 6): un ruido de banda estrecha de una banda crítica de ancho, 920–1080 Hz a 60 dB SPL, puntúa exactamente 1 acum, y la $k = 0{,}108$ derivada cae dentro de la ventana normativa $0{,}105 \le k < 0{,}115$ (cláusula 5.2). Las ponderaciones informativas del Anexo B se ofrecen bajo el mismo anclaje de 1 acum: von Bismarck (codo en 15 Bark, $0{,}2\ e^{0{,}308(z-15)} + 0{,}8$) y Aures (dependiente de la sonoridad, $g(z) = 0{,}078\ (e^{0{,}171 z}/z)\ N/\ln(0{,}05 N + 1)$). Los objetivos de banda estrecha de la Tabla A.2 se reproducen dentro de la tolerancia de la cláusula 6 (5 % o 0,05 acum): 0,38 acum a 250 Hz, 1,00 a 1 kHz, 1,78 a 2,5 kHz, 2,82 a 4 kHz.
 
 Consulta la [guía de métricas de calidad sonora](/phonometry/es/guides/sound-quality/) para su uso.
 
@@ -293,13 +293,13 @@ Consulta la [guía de inteligibilidad del habla](/phonometry/es/guides/speech-in
 
 ## Umbrales de audición y presbiacusia (ISO 389-7, ISO 7029)
 
-ISO 389-7:2005 Tabla 1 fija el umbral de audición de referencia de adultos jóvenes otológicamente normales — el SPL en campo libre y campo difuso que corresponde a 0 dB HL en las 11 frecuencias audiométricas de 125 Hz a 8 kHz (22,1 dB a 125 Hz en ambos campos, 2,4/0,8 dB libre/difuso a 1 kHz, divergiendo en alta frecuencia hasta 12,6 frente a 6,8 dB a 8 kHz). ISO 7029:2017 describe cómo se desplaza estadísticamente ese umbral con la edad: la desviación mediana respecto a los 18 años es (cláusula 4.2, Tabla 1)
+ISO 389-7:2005 Tabla 1 fija el umbral de audición de referencia de adultos jóvenes otológicamente normales: el SPL en campo libre y campo difuso que corresponde a 0 dB HL en las 11 frecuencias audiométricas de 125 Hz a 8 kHz (22,1 dB a 125 Hz en ambos campos, 2,4/0,8 dB libre/difuso a 1 kHz, divergiendo en alta frecuencia hasta 12,6 frente a 6,8 dB a 8 kHz). ISO 7029:2017 describe cómo se desplaza estadísticamente ese umbral con la edad: la desviación mediana respecto a los 18 años es (cláusula 4.2, Tabla 1)
 
 $$
 \Delta H_{md} = a\ (Y - 18)^b \ \text{dB},
 $$
 
-y cualquier fractil sigue un modelo gaussiano bilateral (cláusula 4.4), $\Delta H_Q = \Delta H_{md} + z(Q)\ s$, usando la dispersión superior $s_u$ para $z \ge 0$ (peor que la mediana) y la inferior $s_l$ en caso contrario — cada una un polinomio de grado 5 en $Y - 18$ por sexo y frecuencia (cláusula 4.3, Tablas 2–5). A los 18 años toda desviación es cero por construcción. Las fórmulas están establecidas hasta los 80 años a 2 kHz y por debajo, y hasta los 70 años por encima; más allá la evaluación es una extrapolación. Anclajes: a los 60 años las medianas evalúan a 7,85 dB (hombre, 1 kHz), 20,21 dB (hombre, 4 kHz) y 15,32 dB (mujer, 4 kHz) — la fórmula de la Tabla 1 a $10^{-3}$.
+y cualquier fractil sigue un modelo gaussiano bilateral (cláusula 4.4), $\Delta H_Q = \Delta H_{md} + z(Q)\ s$, usando la dispersión superior $s_u$ para $z \ge 0$ (peor que la mediana) y la inferior $s_l$ en caso contrario, cada una un polinomio de grado 5 en $Y - 18$ por sexo y frecuencia (cláusula 4.3, Tablas 2–5). A los 18 años toda desviación es cero por construcción. Las fórmulas están establecidas hasta los 80 años a 2 kHz y por debajo, y hasta los 70 años por encima; más allá la evaluación es una extrapolación. Anclajes: a los 60 años las medianas evalúan a 7,85 dB (hombre, 1 kHz), 20,21 dB (hombre, 4 kHz) y 15,32 dB (mujer, 4 kHz), reproduciendo la fórmula de la Tabla 1 a $10^{-3}$.
 
 Consulta la [guía de umbral de audición](/phonometry/es/guides/hearing-threshold/) para su uso.
 
@@ -311,7 +311,7 @@ $$
 N_{50} = \big[ u + v \lg(t/t_0) \big]\ (L_{EX,8h} - L_0)^2, \qquad t_0 = 1\ \text{año},
 $$
 
-cuadrático en el exceso sobre el nivel de inicio dependiente de la frecuencia $L_0$ (75 dB a 4 kHz — la banda más sensible — hasta 93 dB a 500 Hz) y cero por debajo; para menos de 10 años escala como $\lg(t+1)/\lg 11$ (Fórmula 3). Los fractiles añaden la dispersión, $N_Q = N_{50} + z\ d_{u,l}$ con $d = (X + Y \lg t)(L_{EX,8h} - L_0)^2$ (cláusula 6.3.2, Fórmulas 4–7, Tablas 2/3), acotada en cero; la convención cuenta la fracción de la población con el desplazamiento *menor*, así que $Q = 0{,}9$ es el decil más susceptible (rango fiable 0,05–0,95). El nivel de umbral de audición asociado a edad y ruido (HTLAN) combina el NIPTS con la componente de edad de ISO 7029 al mismo fractil mediante la suma comprimida (cláusula 6.1, Fórmula 1):
+cuadrático en el exceso sobre el nivel de inicio dependiente de la frecuencia $L_0$ (75 dB a 4 kHz, la banda más sensible, hasta 93 dB a 500 Hz) y cero por debajo; para menos de 10 años escala como $\lg(t+1)/\lg 11$ (Fórmula 3). Los fractiles añaden la dispersión, $N_Q = N_{50} + z\ d_{u,l}$ con $d = (X + Y \lg t)(L_{EX,8h} - L_0)^2$ (cláusula 6.3.2, Fórmulas 4–7, Tablas 2/3), acotada en cero; la convención cuenta la fracción de la población con el desplazamiento *menor*, así que $Q = 0{,}9$ es el decil más susceptible (rango fiable 0,05–0,95). El nivel de umbral de audición asociado a edad y ruido (HTLAN) combina el NIPTS con la componente de edad de ISO 7029 al mismo fractil mediante la suma comprimida (cláusula 6.1, Fórmula 1):
 
 $$
 H' = H + N - \frac{H\ N}{120}.

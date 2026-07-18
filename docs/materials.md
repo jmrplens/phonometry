@@ -5,11 +5,11 @@
 Characterising an absorber or a partition is a laboratory exercise with three
 distinct instruments behind it. The **reverberation room** delivers a spectrum of
 sound-absorption coefficients that ISO 11654 collapses into a single rated number
-$\alpha_w$ with a letter class. The **flow rig** — steady or oscillating —
+$\alpha_w$ with a letter class. The **flow rig** (steady or oscillating)
 measures how hard air is to push through a porous sample, the airflow resistance
 that governs its low-frequency behaviour (ISO 9053-1/-2). And the **impedance
 tube** recovers, at normal incidence, the full complex surface impedance,
-reflection factor and absorption of a small sample, and — with four microphones —
+reflection factor and absorption of a small sample, and, with four microphones,
 its transmission loss (ISO 10534-1/-2, ASTM E2611). This page covers all three.
 
 ## 1. Sound-absorption rating (ISO 11654)
@@ -35,8 +35,8 @@ $1.00$ are set to $1.00$. The five rating bands are 250, 500, 1000, 2000 and
 **Weighted absorption (Clause 4.2).** A fixed reference curve
 $\{250{:}\,0.80,\ 500{:}\,1.00,\ 1000{:}\,1.00,\ 2000{:}\,1.00,\ 4000{:}\,0.90\}$
 is shifted downwards, towards the measured $\alpha_p$, in steps of $0.05$ until
-the sum of the **unfavourable** deviations — taken only where the measurement
-lies below the shifted curve, with magnitude $(\text{curve} - \text{measured})$ —
+the sum of the **unfavourable** deviations (taken only where the measurement
+lies below the shifted curve, with magnitude $(\text{curve} - \text{measured})$)
 is no more than $0.10$. The weighted coefficient $\alpha_w$ is the shifted-curve
 value read at 500 Hz.
 
@@ -345,8 +345,8 @@ tube attenuation; correct any microphone mismatch beforehand with
 `apply_mic_calibration`. Its `.plot()` draws the absorption spectrum
 $\alpha(f)$ with the reflection-factor magnitude $|r|$ overlaid.
 
-**Transmission loss (ASTM E2611).** With four microphones — two upstream, two
-downstream of the sample — a two-load (or one-load) measurement recovers the
+**Transmission loss (ASTM E2611).** With four microphones (two upstream, two
+downstream of the sample) a two-load (or one-load) measurement recovers the
 sample's transfer matrix, whose entries give the normal-incidence transmission
 loss, reflection and wavenumber:
 

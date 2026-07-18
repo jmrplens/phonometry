@@ -64,8 +64,8 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Predecir el ruido que una fuente lejana entrega a un receptor en exteriores es
 un ejercicio de contabilidad: se parte de la **potencia sonora** de la fuente y
-se resta, banda a banda, cada mecanismo que atenúa el sonido en su camino —la
-divergencia esférica, el propio aire, el suelo y cualquier barrera intermedia—.
+se resta, banda a banda, cada mecanismo que atenúa el sonido en su camino: la
+divergencia esférica, el propio aire, el suelo y cualquier barrera intermedia.
 Esta página cubre las dos partes de la ISO 9613 que proporcionan esos términos:
 la **ISO 9613-1**, el coeficiente de absorción atmosférica de tono puro
 $\alpha$, y la **ISO 9613-2**, el método general que combina $\alpha$ con la
@@ -77,8 +77,8 @@ potencia del aire $m$ a $\alpha$.
 ## 1. Absorción atmosférica (ISO 9613-1)
 
 El aire no es un medio sin pérdidas. Un tono en propagación cede energía a la
-viscosidad de cizalla y a la conducción de calor —las pérdidas *clásicas y
-rotacionales*, que crecen como $f^2$— y a la **relajación vibracional** de las
+viscosidad de cizalla y a la conducción de calor (las pérdidas *clásicas y
+rotacionales*, que crecen como $f^2$) y a la **relajación vibracional** de las
 moléculas de oxígeno y nitrógeno, cada una un depósito de energía que resuena
 cerca de una frecuencia de relajación dependiente de la humedad y la
 temperatura. La ISO 9613-1:1993, Ec. (5) reúne todo esto en el coeficiente de
@@ -97,7 +97,7 @@ obtenida de la humedad relativa mediante la conversión psicrométrica del anexo
 Dominan la forma dos rasgos: a baja frecuencia $\alpha \propto f^2$, por lo que
 sube con fuerza; y cerca de cada frecuencia de relajación el término
 correspondiente alcanza un máximo y decae. Entre ambos, $\alpha$ crece unas dos
-décadas de 50 Hz a 10 kHz y —al fijar la humedad la $f_{rO}$— barrer la humedad
+décadas de 50 Hz a 10 kHz y, al fijar la humedad la $f_{rO}$, barrer la humedad
 desplaza un pico de relajación por la banda, así que el aire más seco no siempre
 es el que menos absorbe.
 
@@ -152,9 +152,9 @@ está totalmente vectorizada sobre `frequencies`, con temperatura, humedad y
 presión escalares. Pasar `exact_midband=True` ajusta cada frecuencia solicitada a
 la frecuencia central exacta de tercio de octava $f_m = 1000 \cdot 10^{k/10}$
 (Ec. (6), Nota 5) empleada para calcular la Tabla 1, de modo que la biblioteca
-reproduce cada punto tabulado con menos del 0,4 % —la propia precisión de tres
+reproduce cada punto tabulado con menos del 0,4 %, la propia precisión de tres
 cifras significativas del estándar, muy dentro de su exactitud declarada de
-$\pm 10$ % (apartado 7.1)—. Las entradas fuera de los rangos tabulados
+$\pm 10$ % (apartado 7.1). Las entradas fuera de los rangos tabulados
 (−20…+50 °C, 10…100 % HR, 50…10 000 Hz, o por encima de la envolvente de validez
 de 200 kPa) siguen calculándose pero emiten una `AtmosphericAbsorptionWarning`;
 las entradas no físicas (frecuencia no positiva, humedad fuera de 0…100 %,
@@ -193,8 +193,8 @@ $D_c$ la corrección de directividad (índice de directividad más un índice de
 ángulo sólido $D_\Omega$) y $A$ la atenuación total. La biblioteca implementa los
 cuatro términos generales del apartado 7; el $A_{misc}$ informativo (vegetación,
 zonas industriales, edificación; anexo A) y las reflexiones en obstáculos
-verticales (apartado 7.5) **no están implementados** —el estándar los trata como
-informativos y se dejan a criterio del usuario—.
+verticales (apartado 7.5) **no están implementados**: el estándar los trata como
+informativos y se dejan a criterio del usuario.
 
 La geometría del término de apantallamiento fija el vocabulario: el borde de
 difracción divide la distancia fuente-receptor en $d_{ss}$ y $d_{sr}$, y el
@@ -214,14 +214,14 @@ margen libre, sin bajar nunca de cero.
   100 m, +6 dB por cada duplicación de la distancia. El $+11$ ($= 10 \lg 4\pi$)
   fija el nivel a la distancia de referencia de 1 m.
 * **Absorción atmosférica** $A_{atm} = \alpha\ d$ (Ec. (8)) con $\alpha$ el
-  coeficiente de la ISO 9613-1 —despreciable a baja frecuencia, dominante a 8 kHz
-  en recorridos largos—. $\alpha$ se evalúa en la frecuencia central *exacta*
+  coeficiente de la ISO 9613-1, despreciable a baja frecuencia y dominante a 8 kHz
+  en recorridos largos. $\alpha$ se evalúa en la frecuencia central *exacta*
   en base 10 de cada banda nominal (7 943,3 Hz para «8 kHz»), la convención de
   los coeficientes de la Tabla 2 de la ISO 9613-2 (la evaluación en la
   frecuencia nominal queda ~1,3 % alta a 8 kHz). Las funciones de la ISO
   9613-2 usan por defecto 20 °C y
-  una humedad relativa del 70 % —una de las atmósferas de referencia que la norma
-  tabula en su Tabla 2—, mientras que `air_attenuation` usa por defecto el 50 %
+  una humedad relativa del 70 % (una de las atmósferas de referencia que la norma
+  tabula en su Tabla 2), mientras que `air_attenuation` usa por defecto el 50 %
   habitual de la ISO 9613-1.
 * **Efecto del suelo** $A_{gr} = A_s + A_r + A_m$ (Ec. (9)) suma una región
   fuente, receptor y media, cada una a partir de las funciones $a'/b'/c'/d'$ de
@@ -324,9 +324,9 @@ print(np.round(lp, 1))            # [28.8 26.7 24.  21.1 17.9 16.2 12.7 -1. ]
 `predicted_receiver_level` compone $L_{fT}(DW) = L_W + D_c - A$ con
 $D_c = $ `directivity_index` $+ $ `d_omega`. Pasa `c0=` para restar la corrección
 meteorológica $C_{met}$ (Ec. (21)/(22)) banda a banda y obtener una media a largo
-plazo —ten en cuenta que el estándar aplica $C_{met}$ al nivel ponderado A, así
+plazo; ten en cuenta que el estándar aplica $C_{met}$ al nivel ponderado A, así
 que la forma por bandas aquí es una **comodidad**, no una lectura literal del
-apartado 8—.
+apartado 8.
 
 ### Suelo: el método alternativo ponderado A
 

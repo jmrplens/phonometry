@@ -10,8 +10,8 @@ feeds a room prediction (EN 12354) or is checked against a noise-emission
 limit. This page covers the three routes phonometry implements to obtain it
 and when to reach for each: an enveloping *pressure* surface in the field
 (ISO 3744/3746), the diffuse field of a *reverberation room* (ISO 3741),
-*intensity* scanning over a surface (ISO 9614-2), and — for the highest
-accuracy — the precision grades in an *anechoic room* (ISO 3745) and by
+*intensity* scanning over a surface (ISO 9614-2), and, for the highest
+accuracy, the precision grades in an *anechoic room* (ISO 3745) and by
 precision *intensity* scanning (ISO 9614-3).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.gif" alt="Animation: the same source in an anechoic room and in a reverberation room produces different microphone pressures, and the free-field and diffuse-field formulas converge to the same sound power level L_W" width="640" height="360" loading="lazy"></picture>
@@ -20,8 +20,8 @@ precision *intensity* scanning (ISO 9614-3).
 
 ## Choosing a method
 
-All deliver the same quantity — a per-band `LW` and an A-weighted total
-`LWA` — but under different environments, accuracy grades and practical
+All deliver the same quantity, a per-band `LW` and an A-weighted total
+`LWA`, but under different environments, accuracy grades and practical
 constraints.
 
 | Method | Standard | Measured quantity | Environment | Accuracy grade | Use when |
@@ -254,7 +254,7 @@ data (`reverberation_time` + `volume`, or `absorption_area`, or
 `mean_absorption_coefficient` + `room_surface`) enables `K2`; omit it and the
 field is treated as free (`K2 = 0`). If the background margin drops below the
 grade criterion or `K2` exceeds the validity limit, a `SoundPowerWarning`
-flags that the levels are upper bounds — the determination still returns.
+flags that the levels are upper bounds; the determination still returns.
 
 ### K1 and K2 pitfalls
 
@@ -468,7 +468,7 @@ fields are `NaN` for the comparison method).
 ## 3. Intensity scanning (ISO 9614-2)
 
 Sound **intensity** is the net energy flux, so it distinguishes energy
-*leaving* the source from steady energy merely passing through the surface —
+*leaving* the source from steady energy merely passing through the surface,
 which is why the intensity method tolerates background noise that would
 defeat the pressure methods. A p-p probe (see the
 [Sound Intensity guide](intensity.md)) is swept continuously over each of
@@ -794,7 +794,7 @@ result.plot()   # LW spectrum; the not-applicable band is hatched (needs matplot
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intensity_scan_power.svg" alt="The precision intensity-scanning sound power level spectrum over five one-third-octave bands, four determinate bars and a hatched, greyed 250 Hz band flagged not-applicable because its net intensity is negative, with the A-weighted total of 80.6 dB(A) in the title" width="88%"></picture>
 
 *The 250 Hz band nets negative (more energy flowing in than out), so ISO 9614-3
-declares it not-applicable — the figure hatches and greys it while the four
+declares it not-applicable; the figure hatches and greys it while the four
 determinate bands and the A-weighted total stand.*
 
 <details>
@@ -845,14 +845,14 @@ plt.show()
 
 ## See also
 
-- [Sound Intensity (p-p)](intensity.md) — the two-microphone probe, its
+- [Sound Intensity (p-p)](intensity.md): the two-microphone probe, its
   finite-difference bias and the ISO 9614-1 field indicators behind the
   scanning method.
-- [Room Acoustics](room-acoustics.md) — the reverberation time
+- [Room Acoustics](room-acoustics.md): the reverberation time
   and equivalent absorption area (ISO 354) that feed `K2` and the ISO 3741
   absorption area; impact and airborne insulation.
-- [Levels](levels.md) — energy averaging and the A-weighting behind `LWA`.
-- [Theory](theory-environment-transport.md) — the Waterhouse, K1/K2 and C1/C2 derivations.
+- [Levels](levels.md): energy averaging and the A-weighting behind `LWA`.
+- [Theory](theory-environment-transport.md): the Waterhouse, K1/K2 and C1/C2 derivations.
 - API reference: [`emission.sound_power`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-reverberation/) and [`emission.sound_power_intensity`](https://jmrplens.github.io/phonometry/reference/api/power/sound-power-intensity/).
 
 ## References
@@ -898,20 +898,20 @@ plt.show()
 
 ISO 3744:2010, *Acoustics — Determination of sound power levels
 and sound energy levels of noise sources using sound pressure — Engineering
-methods for an essentially free field over a reflecting plane* — the
+methods for an essentially free field over a reflecting plane*: the
 enveloping-surface method: hemisphere and box surface areas, the `K1`/`K2`
 corrections, the Annex B microphone positions and the Annex E A-weighting.
 ISO 3746:2010, *… Survey method using an enveloping measurement surface over a
-reflecting plane* — the survey grade sharing the same formulae with coarser
-criteria. ISO 3741:2010, *… Precision methods for reverberation test rooms* —
+reflecting plane*: the survey grade sharing the same formulae with coarser
+criteria. ISO 3741:2010, *… Precision methods for reverberation test rooms*:
 the direct (Eq. 20) and comparison methods with the Waterhouse and
 meteorological corrections and the Table 1 qualification criteria.
 ISO 3745:2012, *… Precision methods for anechoic rooms and hemi-anechoic
-rooms* — the Clause 8 power level, the per-position background correction
+rooms*: the Clause 8 power level, the per-position background correction
 (Eq. 11), the meteorological corrections and the standardized microphone
 arrays. ISO 9614-2:1996, *Acoustics — Determination of sound power levels of
 noise sources using sound intensity — Part 2: Measurement by scanning* — the
 partial powers, the `FpI` and `F+/-` field indicators and the grade criteria.
-ISO 9614-3:2002, *… Part 3: Precision method for measurement by scanning* —
+ISO 9614-3:2002, *… Part 3: Precision method for measurement by scanning*:
 the grade-1 scanning method, its field indicators and the clause 9.2
 not-applicable flagging.

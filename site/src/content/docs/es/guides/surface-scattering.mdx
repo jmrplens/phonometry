@@ -50,9 +50,9 @@ references:
 import Video from '../../../../components/Video.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-Cómo devuelve una superficie el sonido incidente —cuánto dispersa fuera de la
+Cómo devuelve una superficie el sonido incidente (cuánto dispersa fuera de la
 dirección especular, con qué uniformidad reparte lo que dispersa y cuánto
-absorbe— se mide con una familia de métodos dedicados. La **cámara reverberante**
+absorbe) se mide con una familia de métodos dedicados. La **cámara reverberante**
 proporciona el *coeficiente de dispersión* de incidencia aleatoria de una
 superficie comparando las caídas con la muestra inmóvil y en rotación
 (ISO 17497-1). Un **goniómetro en campo libre** mide la respuesta polar del
@@ -219,7 +219,7 @@ $$
 Una respuesta polar perfectamente uniforme ($L_i$ todos iguales) da $d = 1$; un
 único lóbulo especular agudo da $d = 0$. Cuando los receptores subtienden ángulos
 sólidos desiguales, la fórmula (6) pondera por área cada energía con $N_i$ de la
-fórmula (8) —y esos factores de área se evalúan en **radianes**, razón por la que
+fórmula (8), y esos factores de área se evalúan en **radianes**, razón por la que
 un espaciado de 5° en el cenit produce un peso cercano a 1,57, no a 51,9.
 
 La animación siguiente ejecuta ese experimento de goniómetro numéricamente: el
@@ -367,7 +367,7 @@ crecen cuando el relieve de la superficie deja de ser pequeño frente a la
 longitud de onda; un número único ciego a la frecuencia ("dispersa el 90 % del
 sonido") no es ninguno de los dos.
 
-## 3. Absorción in situ de pavimentos — técnica de sustracción (ISO 13472-1)
+## 3. Absorción in situ de pavimentos: técnica de sustracción (ISO 13472-1)
 
 En campo no hay cámara reverberante. ISO 13472-1 mide la absorción sonora de un
 pavimento (o de cualquier superficie plana extensa) *in situ* disparando un
@@ -420,7 +420,7 @@ print(round(float(band[2]), 3))    # 0.84  (alpha = 1 - 0.4^2 = 0.84)
 
 **Ventana de Adrienne (cláusula 6.4).** La ventana temporal que aísla la
 reflexión solo exige un flanco de subida abrupto, una porción plana de 5 ms y un
-flanco de bajada de coseno cuadrado o Blackman-Harris —las duraciones exactas se
+flanco de bajada de coseno cuadrado o Blackman-Harris; las duraciones exactas se
 informan en cada medición, no son fijas, así que aquí son configurables.
 
 ```python
@@ -433,8 +433,8 @@ print(round(float(w.max()), 3))   # 1.0  (la meseta y los flancos se encuentran 
 ```
 
 **Espectro de principio a fin.** `insitu_absorption_spectrum` ejecuta toda la
-cadena —de las respuestas al impulso incidente y reflejada enventanadas a la
-absorción de banda estrecha y de ahí a las bandas de tercio de octava— y devuelve
+cadena (de las respuestas al impulso incidente y reflejada enventanadas a la
+absorción de banda estrecha y de ahí a las bandas de tercio de octava) y devuelve
 un `InsituAbsorptionResult` representable:
 
 ```python
@@ -523,7 +523,7 @@ from phonometry import materials
 print(round(materials.max_sampled_area_radius(5.0e-3), 3))   # 1.343  (metros)
 ```
 
-## 4. Absorción in situ de pavimentos — método puntual (ISO 13472-2)
+## 4. Absorción in situ de pavimentos: método puntual (ISO 13472-2)
 
 Para parches más pequeños, ISO 13472-2 sella un tubo circular corto sobre la
 superficie y mide la absorción con el método de la función de transferencia de

@@ -152,8 +152,10 @@ def test_no_decimation_keeps_the_full_rate() -> None:
 
 def test_envelope_rejects_invalid_inputs() -> None:
     x, _ = _am(1000.0, 10.0, 0.5)
+    two_dimensional = np.stack([x, x])
+    non_finite = np.full(4096, np.nan)
     with pytest.raises(ValueError, match="one-dimensional"):
-        ph.envelope(np.stack([x, x]), FS)
+        ph.envelope(two_dimensional, FS)
     with pytest.raises(ValueError, match="'fs'"):
         ph.envelope(x, 0.0)
     with pytest.raises(ValueError, match="decimation_factor"):
@@ -161,7 +163,16 @@ def test_envelope_rejects_invalid_inputs() -> None:
     with pytest.raises(ValueError, match="decimation_factor"):
         ph.envelope(x, FS, decimation_factor=x.size)
     with pytest.raises(ValueError, match="finite"):
-        ph.envelope(np.full(4096, np.nan), FS)
+        ph.envelope(non_finite, FS)
+
+
+def test_short_record_antialiased_decimation_is_supported() -> None:
+    """scipy's FIR decimator runs through resample_poly, so even the
+    32-sample minimum record decimates without a length cushion."""
+    x = np.sin(0.3 * np.arange(32))
+    res = ph.envelope(x, FS, decimation_factor=8)
+    assert res.envelope.size == 4
+    assert res.fs == pytest.approx(FS / 8.0)
 
 
 def test_result_is_frozen() -> None:

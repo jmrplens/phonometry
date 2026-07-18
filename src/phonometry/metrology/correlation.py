@@ -76,6 +76,9 @@ __all__ = [
 #: upsampling extracts around the coarse correlation peak.
 _UPSAMPLE_HALF_WINDOW = 32
 
+#: Validation context of the impulse-response delay utilities.
+_DELAY_CONTEXT = "a delay estimate"
+
 _Normalization = Literal["biased", "unbiased", "coefficient"]
 _Method = Literal["gcc", "direct", "phase"]
 _Weighting = Literal["none", "roth", "scot", "phat", "ml"]
@@ -113,7 +116,7 @@ def _coefficient_correlation(
     xc = x - float(np.mean(x))
     yc = y - float(np.mean(y))
     denom = float(np.std(xc)) * float(np.std(yc)) * x.size
-    if denom == 0.0:
+    if denom <= 0.0:  # a constant record: no covariance to normalize
         return np.zeros(2 * x.size - 1, dtype=np.float64)
     return _linear_correlation(xc, yc) / denom
 
@@ -295,9 +298,11 @@ def correlation_random_error(
     rho = float(coefficient)
     if not np.isfinite(rho) or abs(rho) > 1.0:
         raise ValueError("'coefficient' must be in [-1, 1].")
-    if rho == 0.0:
-        return float("inf")
-    return float(np.sqrt(1.0 + rho**-2) / np.sqrt(2.0 * b * t))
+    # IEEE division carries rho = 0 to the correct limit (an infinite
+    # error) without a floating-point equality branch.
+    with np.errstate(divide="ignore"):
+        ratio = float(np.divide(1.0, rho * rho))
+    return float(np.sqrt(1.0 + ratio) / np.sqrt(2.0 * b * t))
 
 
 def _peak_location_std(random_error: float, bandwidth: float) -> float:
@@ -331,26 +336,29 @@ def _upsampled_peak(
 ) -> tuple["NDArray[np.float64]", int, float, float]:
     """Band-limited local upsampling of ``curve`` around ``index``.
 
-    Extracts a window around the coarse peak, resamples it by ``factor``
-    with the FFT method and re-locates the maximum of the magnitude within
-    one coarse sample of the original peak (the resampling assumes a
-    periodic window, so its edges are unreliable but the centre is not).
+    Extracts a window around the coarse peak (clamped to the curve, so a
+    peak near a boundary keeps a full-size window rather than a shrunken
+    one), resamples it by ``factor`` with the FFT method and re-locates
+    the maximum of the magnitude within one coarse sample of the original
+    peak (the resampling assumes a periodic window, so its edges are
+    unreliable but the peak region is not).
 
     :return: ``(dense_window, dense_index, dense_step, refined_position)``
         where ``refined_position`` is in original-sample units.
     """
     from scipy import signal as sp_signal
 
-    half = min(_UPSAMPLE_HALF_WINDOW, index, curve.size - 1 - index)
-    window = curve[index - half : index + half + 1]
+    start = max(0, index - _UPSAMPLE_HALF_WINDOW)
+    stop = min(curve.size, index + _UPSAMPLE_HALF_WINDOW + 1)
+    window = curve[start:stop]
     dense = np.asarray(
         sp_signal.resample(window, window.size * factor), dtype=np.float64
     )
-    centre = half * factor
+    centre = (index - start) * factor
     lo = max(centre - factor, 0)
     hi = min(centre + factor + 1, dense.size)
     j = lo + int(np.argmax(np.abs(dense[lo:hi])))
-    return dense, j, 1.0 / factor, (index - half) + j / factor
+    return dense, j, 1.0 / factor, start + j / factor
 
 
 def _refine_peak(
@@ -496,7 +504,9 @@ def _delay_error(
     yc = ya - float(np.mean(ya))
     denom = float(np.std(xc)) * float(np.std(yc)) * xa.size
     rho = 0.0
-    if denom > 0.0:
+    # The phase-slope estimate is not bounded by a search window, so a
+    # noisy delay can exceed the record: no overlap, zero coefficient.
+    if denom > 0.0 and abs(r0) < xa.size:
         if r0 >= 0:
             overlap = float(np.dot(xc[: xa.size - r0], yc[r0:]))
         else:
@@ -532,7 +542,7 @@ def _phase_slope_delay(
     mag = np.abs(gxy)
     w = 2.0 * np.pi * freqs
     denom = float(np.sum(w * w * mag))
-    if denom == 0.0:
+    if denom <= 0.0:  # sum of non-negative terms: an empty cross-spectrum
         return 0.0
     return float(np.sum(w * mag * theta) / denom)
 
@@ -673,7 +683,7 @@ def time_delay(
     ya = _validate_signal(y, "y", context="a time-delay estimate")
     if xa.size != ya.size:
         raise ValueError("'x' and 'y' must have the same length.")
-    if float(np.std(xa)) == 0.0 or float(np.std(ya)) == 0.0:
+    if float(np.std(xa)) <= 0.0 or float(np.std(ya)) <= 0.0:
         raise ValueError(
             "'x' and 'y' must not be constant: there is no correlation "
             "peak to locate."
@@ -772,7 +782,7 @@ def impulse_response_delay(
     :return: Delay in seconds (relative to ``t = 0`` or to ``reference``).
     :raises ValueError: If the inputs or parameters are invalid.
     """
-    ira = _validate_signal(ir, "ir", context="a delay estimate")
+    ira = _validate_signal(ir, "ir", context=_DELAY_CONTEXT)
     fs_v = _positive(fs, "fs")
     factor = _validate_refinement(interpolation, upsample)
     if reference is not None:
@@ -861,9 +871,9 @@ def align_impulse_responses(
     :return: An :class:`AlignedImpulseResponseResult`.
     :raises ValueError: If the inputs or parameters are invalid.
     """
-    ira = _validate_signal(ir, "ir", context="a delay estimate")
+    ira = _validate_signal(ir, "ir", context=_DELAY_CONTEXT)
     refa = _validate_signal(
-        reference, "reference", context="a delay estimate"
+        reference, "reference", context=_DELAY_CONTEXT
     )
     if ira.size != refa.size:
         raise ValueError("'ir' and 'reference' must have the same length.")

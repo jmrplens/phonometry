@@ -446,6 +446,25 @@ def test_ir_pair_delay_and_alignment() -> None:
     assert residual < 1e-4 * float(np.max(np.abs(reference)))
 
 
+def test_single_ir_delay_near_the_record_start() -> None:
+    """A peak close to the boundary keeps a full-size (clamped) upsampling
+    window instead of a shrunken one."""
+    ir = _bandlimited_pulse(4096, 5.25, 0.15)
+    got = ph.impulse_response_delay(ir, FS) * FS
+    assert got == pytest.approx(5.25, abs=5e-3)
+
+
+def test_peak_coefficient_guard_for_out_of_record_delays() -> None:
+    """The phase-slope delay is not bounded by a search window; a delay
+    beyond the record length must yield a zero coefficient, not a crash."""
+    from phonometry.metrology.correlation import _delay_error
+
+    x = _white(25, n=4096)
+    rho, std, interval = _delay_error(x, x, 5000.0, None, FS)
+    assert rho == 0.0
+    assert std is None and interval is None
+
+
 def test_alignment_of_identical_irs_is_a_no_op() -> None:
     reference = _bandlimited_pulse(4096, 600.0, 0.15)
     res = ph.align_impulse_responses(reference, reference, FS)
@@ -470,8 +489,9 @@ def test_correlation_rejects_invalid_inputs() -> None:
         ph.correlation(x, fs=FS, max_lag=-1.0)
     with pytest.raises(ValueError, match="'fs'"):
         ph.correlation(x, fs=0.0)
+    res = ph.correlation(x, fs=FS)
     with pytest.raises(ValueError, match="signal_bandwidth"):
-        ph.correlation(x, fs=FS).random_error(0.0)
+        res.random_error(0.0)
 
 
 def test_time_delay_rejects_invalid_inputs() -> None:

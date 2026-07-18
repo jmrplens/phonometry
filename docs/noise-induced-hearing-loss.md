@@ -75,6 +75,36 @@ print(h.threshold.round(1))  # [ 6.5 10.7 23.  35.2 40.8 39.8]  age + noise
 At 4 kHz the age component (20.2 dB) and the noise component (24.8 dB) combine
 to 40.8 dB rather than their 45.0 dB sum — the compression term removes 4.2 dB.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss.svg" alt="Two panels. Left: the median NIPTS at 95 dB for 10, 20, 30 and 40 years on an inverted (audiogram) axis, with the 10 to 90 percent fractile band around the 40-year curve; the loss deepens toward a maximum near 4 kHz and grows with duration. Right: for a 60-year-old man exposed 30 years at 95 dB, the age component (HTLA), the noise component (NIPTS) and their HTLAN combination, which lies below the simple sum because of the compression term" width="96%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+from phonometry import hearing
+from phonometry.hearing.noise_induced_hearing_loss import NIPTS_FREQUENCIES as f
+
+# One line for the NIPTS spectrum with its fractile band:
+hearing.nipts(95.0, 40.0, 0.9).plot()
+plt.show()
+
+# By hand, both panels:
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 5.6))
+for yr in (10, 20, 30, 40):
+    ax1.plot(f, hearing.nipts(95.0, yr, 0.5).median, "o-", label=f"{yr} yr")
+ax1.set_xscale("log"); ax1.invert_yaxis(); ax1.legend()
+
+h = hearing.htlan(60, "male", 95.0, 30.0, 0.5)
+ax2.plot(f, h.htla, "o-", label="Age (HTLA)")
+ax2.plot(f, h.nipts, "^-", label="Noise (NIPTS)")
+ax2.plot(f, h.threshold, "s--", label="Age + noise (HTLAN)")
+ax2.set_xscale("log"); ax2.invert_yaxis(); ax2.legend()
+plt.show()
+```
+
+</details>
+
 **Three quantities, kept distinct.** It is worth being precise about what each
 symbol means, because they are easy to conflate:
 
@@ -109,36 +139,6 @@ did the noise add", HTLAN "is this ear, age included, over the line" — and a
 population's *percentage beyond fence* depends on the fractile spread, not just
 the median, so it must be read from the distribution, never from the median
 threshold alone.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/noise_induced_hearing_loss.svg" alt="Two panels. Left: the median NIPTS at 95 dB for 10, 20, 30 and 40 years on an inverted (audiogram) axis, with the 10 to 90 percent fractile band around the 40-year curve; the loss deepens toward a maximum near 4 kHz and grows with duration. Right: for a 60-year-old man exposed 30 years at 95 dB, the age component (HTLA), the noise component (NIPTS) and their HTLAN combination, which lies below the simple sum because of the compression term" width="96%"></picture>
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import matplotlib.pyplot as plt
-from phonometry import hearing
-from phonometry.hearing.noise_induced_hearing_loss import NIPTS_FREQUENCIES as f
-
-# One line for the NIPTS spectrum with its fractile band:
-hearing.nipts(95.0, 40.0, 0.9).plot()
-plt.show()
-
-# By hand, both panels:
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 5.6))
-for yr in (10, 20, 30, 40):
-    ax1.plot(f, hearing.nipts(95.0, yr, 0.5).median, "o-", label=f"{yr} yr")
-ax1.set_xscale("log"); ax1.invert_yaxis(); ax1.legend()
-
-h = hearing.htlan(60, "male", 95.0, 30.0, 0.5)
-ax2.plot(f, h.htla, "o-", label="Age (HTLA)")
-ax2.plot(f, h.nipts, "^-", label="Noise (NIPTS)")
-ax2.plot(f, h.threshold, "s--", label="Age + noise (HTLAN)")
-ax2.set_xscale("log"); ax2.invert_yaxis(); ax2.legend()
-plt.show()
-```
-
-</details>
 
 The `NiptsResult` carries the `median` (`N50`), the `spread_upper`/`spread_lower`
 and the `value` at the requested fractile; the `HtlanResult` carries `htla`,

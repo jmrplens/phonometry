@@ -1,6 +1,21 @@
 ---
 title: "Vibración"
 description: "Ponderaciones de vibración en humanos, métricas de cuerpo entero y mano-brazo y el modelo espinal de choques múltiples detrás de phonometry."
+references:
+  - type: book
+    authors: ["Griffin, M. J."]
+    year: 1996
+    title: "Handbook of human vibration"
+    publisher: "Academic Press"
+    url: "https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2"
+    note: "ISBN 978-0-12-303041-2. La evidencia biodinámica y de efectos sobre la salud que sustenta las ponderaciones de ISO 8041-1, las medidas de dosis rms/MTVV/VDV y el razonamiento de lesión espinal del modelo de choques múltiples."
+  - type: book
+    authors: ["Mansfield, N. J."]
+    year: 2004
+    title: "Human response to vibration"
+    publisher: "CRC Press"
+    url: "https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390"
+    note: "ISBN 978-0-415-28239-0. Un recorrido moderno y compacto por las cadenas de evaluación de cuerpo completo de ISO 2631-1 y mano-brazo de ISO 5349 resumidas en esta página."
 ---
 
 Esta página reúne la teoría de la vibración en humanos: las ponderaciones frecuenciales de ISO 8041-1, las métricas de cuerpo entero y mano-brazo de ISO 2631-1 e ISO 5349, los valores de acción y límite de la Directiva 2002/44/CE, y el modelo espinal de choques múltiples de ISO 2631-5. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).
@@ -71,17 +86,3 @@ $\Pi = 0{,}37$. El modelo espinal de elementos finitos del Anexo A
 
 Consulta la [guía de vibración en humanos](/phonometry/es/guides/human-vibration/) y la
 [guía de vibración con choques múltiples](/phonometry/es/guides/multiple-shock-vibration/) para su uso.
-
-## Referencias
-
-- Griffin, M. J. (1996). *Handbook of human vibration*. Academic Press.
-  ISBN 978-0-12-303041-2.
-  [Página del editor](https://shop.elsevier.com/books/handbook-of-human-vibration/griffin/978-0-12-303041-2).
-  La evidencia biodinámica y de efectos sobre la salud que sustenta las ponderaciones
-  de ISO 8041-1, las medidas de dosis rms/MTVV/VDV y el razonamiento de
-  lesión espinal del modelo de choques múltiples.
-- Mansfield, N. J. (2004). *Human response to vibration*. CRC Press.
-  ISBN 978-0-415-28239-0.
-  [Página del editor](https://www.routledge.com/Human-Response-to-Vibration/Mansfield/p/book/9780415282390).
-  Un recorrido moderno y compacto por las cadenas de evaluación de cuerpo
-  completo de ISO 2631-1 y mano-brazo de ISO 5349 resumidas en esta página.

@@ -24,14 +24,15 @@ junctions.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths.svg" alt="The direct path Dd through the separating element and the three flanking paths Ff, Df and Fd across each junction between a flanking element and the separating element" width="92%"></picture>
 
+Each junction between a flanking element and the separating element carries
+three paths — $Ff$ (flanking→flanking), $Df$ (direct→flanking) and $Fd$
+(flanking→direct) — alongside the single direct path $Dd$.
+
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths.gif" alt="Animation: energy pulses leave the source room over the direct Dd path and the flanking Ff, Fd and Df paths, shrinking at each element and junction, and every path label lights up as its pulse re-radiates into the receiving room" width="640" height="360" loading="lazy"></picture>
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths.webm)
 
-Each junction between a flanking element and the separating element carries
-three paths — $Ff$ (flanking→flanking), $Df$ (direct→flanking) and $Fd$
-(flanking→direct) — alongside the single direct path $Dd$. The **simplified
-single-number model** combines them energetically (Formula 26):
+The **simplified single-number model** combines them energetically (Formula 26):
 
 $$
 R'_w = -10 \log_{10}\Big[ 10^{-R_{Dd,w}/10}
@@ -264,40 +265,6 @@ fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0,
 print(fac.r_tr_s_w, fac.c_tr, fac.d_2m_nt_w)   # 31 -3 33  (Rtr,s,w / Ctr / D2m,nT,w)
 ```
 
-**Part 4 — indoor → outdoor.** The sound power level radiated by a segment
-(Formula 2) is $L_W = L_{p,in} + C_d - R' + 10 \log_{10}(S/S_0)$ with $S_0 = 1$ m²
-and the inside-field diffusivity term $C_d$ (Annex B; −6 dB ideal diffuse, −5 dB
-average industrial). Openings are elements whose "R" is the silencer insertion
-loss (a bare opening is 0 dB). The exterior level follows from the simplified
-Annex E attenuation $A_{tot}$ of a finite radiating side, $L_p = L_W - A_{tot}$.
-
-```python
-from phonometry import building
-
-# EN 12354-4 Annex G, side 1: a 10×20 m concrete wall segment with a 6×4 m
-# industrial door, inside level Lp,in, Cd = -5 dB. The 40 dB cap on R' is an
-# Annex G example footnote (field leaks), not part of Formula (2)/(3): pass it
-# explicitly to reproduce Annex G; by default no cap is applied.
-bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
-seg = building.radiated_sound_power(
-    [building.FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
-     building.FacadeElement("door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
-    lp_in=[70, 74, 76, 72, 70, 67, 62, 57], area=200.0, c_d=-5.0,
-    r_prime_cap=40.0, octave_bands=bands)
-print(round(seg.l_w[0], 1), round(seg.l_w[1], 1))     # 59.8 61.2  (LW at 63/125 Hz)
-
-# Exterior level 5 m in front of the centre of the 60×10 m side (LWA = 62.9 dB(A)).
-a_tot = building.outdoor_attenuation(width=60.0, height=10.0, distance=5.0)
-print(round(a_tot, 1), round(building.outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
-```
-
-> **Worked-example note.** The 2000 worked examples carry small internal rounding
-> inconsistencies at the higher octave bands (Part 3's printed $R'$ disagrees with
-> its own per-element partial indices at 1 k/2 k; Part 4's $R'$ rows above 500 Hz
-> disagree with its Table G.2 inputs). The implementation is faithful to the
-> formulas — it reproduces the low bands, every single-number rating and the whole
-> Annex E propagation exactly.
-
 <details>
 <summary>Show the code for this figure</summary>
 
@@ -332,6 +299,40 @@ fig.tight_layout(); plt.show()
 ```
 
 </details>
+
+**Part 4 — indoor → outdoor.** The sound power level radiated by a segment
+(Formula 2) is $L_W = L_{p,in} + C_d - R' + 10 \log_{10}(S/S_0)$ with $S_0 = 1$ m²
+and the inside-field diffusivity term $C_d$ (Annex B; −6 dB ideal diffuse, −5 dB
+average industrial). Openings are elements whose "R" is the silencer insertion
+loss (a bare opening is 0 dB). The exterior level follows from the simplified
+Annex E attenuation $A_{tot}$ of a finite radiating side, $L_p = L_W - A_{tot}$.
+
+```python
+from phonometry import building
+
+# EN 12354-4 Annex G, side 1: a 10×20 m concrete wall segment with a 6×4 m
+# industrial door, inside level Lp,in, Cd = -5 dB. The 40 dB cap on R' is an
+# Annex G example footnote (field leaks), not part of Formula (2)/(3): pass it
+# explicitly to reproduce Annex G; by default no cap is applied.
+bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]
+seg = building.radiated_sound_power(
+    [building.FacadeElement("wall", area=176.0, r=[32, 36, 36, 33, 39, 49, 57, 63]),
+     building.FacadeElement("door", area=24.0,  r=[21, 23, 28, 30, 30, 30, 30, 30])],
+    lp_in=[70, 74, 76, 72, 70, 67, 62, 57], area=200.0, c_d=-5.0,
+    r_prime_cap=40.0, octave_bands=bands)
+print(round(seg.l_w[0], 1), round(seg.l_w[1], 1))     # 59.8 61.2  (LW at 63/125 Hz)
+
+# Exterior level 5 m in front of the centre of the 60×10 m side (LWA = 62.9 dB(A)).
+a_tot = building.outdoor_attenuation(width=60.0, height=10.0, distance=5.0)
+print(round(a_tot, 1), round(building.outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
+```
+
+> **Worked-example note.** The 2000 worked examples carry small internal rounding
+> inconsistencies at the higher octave bands (Part 3's printed $R'$ disagrees with
+> its own per-element partial indices at 1 k/2 k; Part 4's $R'$ rows above 500 Hz
+> disagree with its Table G.2 inputs). The implementation is faithful to the
+> formulas — it reproduces the low bands, every single-number rating and the whole
+> Annex E propagation exactly.
 
 ### `FacadeElement` / `facade_sound_reduction()` / `radiated_sound_power()` parameters
 

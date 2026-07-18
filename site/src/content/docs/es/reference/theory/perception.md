@@ -1,6 +1,90 @@
 ---
 title: "Percepción y audición"
 description: "Líneas isofónicas, modelos de sonoridad, métricas de calidad sonora, prominencia tonal, inteligibilidad del habla y estadística de la audición detrás de phonometry."
+references:
+  - type: article
+    authors: ["Fletcher, H.", "Munson, W. A."]
+    year: 1933
+    title: "Loudness, its definition, measurement and calculation"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 5
+    issue: 2
+    pages: "82-108"
+    doi: "10.1121/1.1915637"
+    note: "Las mediciones originales de igual sonoridad que sustentan el concepto de isófona de la primera sección."
+  - type: book
+    authors: ["Fastl, H.", "Zwicker, E."]
+    year: 2007
+    title: "Psychoacoustics: Facts and models"
+    edition: "3.ª ed."
+    publisher: "Springer"
+    doi: "10.1007/978-3-540-68888-4"
+    note: "La psicoacústica de bandas críticas, enmascaramiento y sonoridad que subyace al modelo de Zwicker y a las sensaciones de agudeza y aspereza."
+  - type: article
+    authors: ["Houtgast, T.", "Steeneken, H. J. M."]
+    year: 1985
+    title: "A review of the MTF concept in room acoustics and its use for estimating speech intelligibility in auditoria"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 77
+    issue: 3
+    pages: "1069-1077"
+    doi: "10.1121/1.392224"
+    note: "El marco de transferencia de modulación de la sección del STI."
+  - type: article
+    authors: ["French, N. R.", "Steinberg, J. C."]
+    year: 1947
+    title: "Factors governing the intelligibility of speech sounds"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 19
+    issue: 1
+    pages: "90-119"
+    doi: "10.1121/1.1916407"
+    note: "Los experimentos por bandas de articulación que sustentan la función de importancia de banda del SII."
+  - type: article
+    authors: ["Passchier-Vermeer, W."]
+    year: 1974
+    title: "Hearing loss due to continuous exposure to steady-state broad-band noise"
+    journal: "The Journal of the Acoustical Society of America"
+    volume: 56
+    issue: 5
+    pages: "1585-1593"
+    doi: "10.1121/1.1903482"
+    note: "Un estudio de campo de las relaciones exposición-respuesta codificadas después en la ISO 1999."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2023
+    title: "Acoustics — Normal equal-loudness-level contours"
+    designation: "ISO 226:2023"
+    url: "https://www.iso.org/standard/83117.html"
+    note: "El modelo de isófonas de las Fórmulas (1)/(2) y los parámetros de la Tabla 1 de la sección de igual sonoridad."
+  - type: standard
+    organization: "Ecma International"
+    year: 2024
+    title: "Psychoacoustic metrics for ITT equipment — Part 1: Prominent discrete tones"
+    designation: "ECMA-418-1:2024 (3.ª ed.)"
+    url: "https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf"
+    note: "El modelo de banda crítica y los procedimientos TNR y PR de la sección de prominencia tonal. El PDF enlazado es la descarga gratuita."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2005
+    title: "Acoustics — Reference zero for the calibration of audiometric equipment — Part 7: Reference threshold of hearing under free-field and diffuse-field listening conditions"
+    designation: "ISO 389-7:2005"
+    url: "https://www.iso.org/standard/38976.html"
+    note: "Los umbrales de referencia de campo libre y campo difuso de la Tabla 1 de la sección de umbral de audición."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2017
+    title: "Acoustics — Statistical distribution of hearing thresholds related to age and gender"
+    designation: "ISO 7029:2017"
+    url: "https://www.iso.org/standard/42916.html"
+    note: "El desplazamiento mediano dependiente de la edad y las dispersiones por fractiles del modelo de presbiacusia."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2013
+    title: "Acoustics — Estimation of noise-induced hearing loss"
+    designation: "ISO 1999:2013"
+    url: "https://www.iso.org/standard/45103.html"
+    note: "El modelo de NIPTS, sus fractiles y la suma comprimida HTLAN de la sección de pérdida auditiva."
 ---
 
 Esta página reúne la teoría de la audición y la psicoacústica: las líneas isofónicas, los modelos de sonoridad de Zwicker, Moore-Glasberg y Sottek, las métricas de calidad sonora (tonalidad, aspereza y sharpness), la prominencia tonal, las métricas del habla STI y SII, y la estadística de los umbrales de audición y de la pérdida auditiva. Forma parte de la [referencia de teoría](/phonometry/es/reference/theory/).
@@ -236,60 +320,3 @@ $$
 Los ejemplos resueltos del Anexo D (Tablas D.1–D.4; p. ej. 100 dB / 40 años a 3 kHz: 29/38/60 dB en los fractiles 0,10/0,50/0,90) se reproducen exactamente con el redondeo a enteros de la norma, y el valor a mano de la Fórmula 2 a 4 kHz / 20 años / 90 dB es $N_{50} = 12{,}94$ dB.
 
 Consulta la [guía de pérdida auditiva inducida por ruido](/phonometry/es/guides/noise-induced-hearing-loss/) para su uso.
-
-## Referencias
-
-- Fletcher, H., & Munson, W. A. (1933). Loudness, its definition, measurement
-  and calculation. *The Journal of the Acoustical Society of America*, 5(2),
-  82-108. [doi:10.1121/1.1915637](https://doi.org/10.1121/1.1915637).
-  Las mediciones originales de igual sonoridad que sustentan el concepto de isófona
-  de la primera sección.
-- Fastl, H., & Zwicker, E. (2007). *Psychoacoustics: Facts and models*
-  (3.ª ed.). Springer.
-  [doi:10.1007/978-3-540-68888-4](https://doi.org/10.1007/978-3-540-68888-4).
-  La psicoacústica de bandas críticas, enmascaramiento y sonoridad que
-  subyace al modelo de Zwicker y a las sensaciones de agudeza y aspereza.
-- Houtgast, T., & Steeneken, H. J. M. (1985). A review of the MTF concept in
-  room acoustics and its use for estimating speech intelligibility in
-  auditoria. *The Journal of the Acoustical Society of America*, 77(3),
-  1069-1077. [doi:10.1121/1.392224](https://doi.org/10.1121/1.392224).
-  El marco de transferencia de modulación de la sección del STI.
-- French, N. R., & Steinberg, J. C. (1947). Factors governing the
-  intelligibility of speech sounds. *The Journal of the Acoustical Society of
-  America*, 19(1), 90-119.
-  [doi:10.1121/1.1916407](https://doi.org/10.1121/1.1916407).
-  Los experimentos por bandas de articulación que sustentan la función de importancia
-  de banda del SII.
-- Passchier-Vermeer, W. (1974). Hearing loss due to continuous exposure to
-  steady-state broad-band noise. *The Journal of the Acoustical Society of
-  America*, 56(5), 1585–1593.
-  [doi:10.1121/1.1903482](https://doi.org/10.1121/1.1903482).
-  Un estudio de campo de las relaciones exposición-respuesta codificadas
-  después en la ISO 1999.
-- International Organization for Standardization. (2023). *Acoustics —
-  Normal equal-loudness-level contours* (ISO 226:2023).
-  [Catálogo iso.org](https://www.iso.org/standard/83117.html).
-  El modelo de isófonas de las Fórmulas (1)/(2) y los parámetros de la
-  Tabla 1 de la sección de igual sonoridad.
-- Ecma International. (2024). *ECMA-418-1: Psychoacoustic metrics for ITT
-  equipment — Part 1: Prominent discrete tones* (3.ª ed.).
-  [PDF gratuito](https://ecma-international.org/wp-content/uploads/ECMA-418-1_3rd_edition_december_2024.pdf).
-  El modelo de banda crítica y los procedimientos TNR y PR de la sección de
-  prominencia tonal.
-- International Organization for Standardization. (2005). *Acoustics —
-  Reference zero for the calibration of audiometric equipment — Part 7:
-  Reference threshold of hearing under free-field and diffuse-field listening
-  conditions* (ISO 389-7:2005).
-  [Catálogo iso.org](https://www.iso.org/standard/38976.html).
-  Los umbrales de referencia de campo libre y campo difuso de la Tabla 1 de
-  la sección de umbral de audición.
-- International Organization for Standardization. (2017). *Acoustics —
-  Statistical distribution of hearing thresholds related to age and gender*
-  (ISO 7029:2017). [Catálogo iso.org](https://www.iso.org/standard/42916.html).
-  El desplazamiento mediano dependiente de la edad y las dispersiones por
-  fractiles del modelo de presbiacusia.
-- International Organization for Standardization. (2013). *Acoustics —
-  Estimation of noise-induced hearing loss* (ISO 1999:2013).
-  [Catálogo iso.org](https://www.iso.org/standard/45103.html).
-  El modelo de NIPTS, sus fractiles y la suma comprimida HTLAN de la sección
-  de pérdida auditiva.

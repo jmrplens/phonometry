@@ -64,19 +64,6 @@ broadside* value and must be quoted with its source depth.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_source_level_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ship_source_level.svg" alt="Ship radiated noise level and equivalent monopole source level versus frequency, with the Lloyd's-mirror surface correction on a twin axis showing its low-frequency divergence and its approach to −3 dB at high frequency" width="82%"></picture>
 
-```python
-from phonometry import underwater
-
-lrn = underwater.radiated_noise_level(2e-6, 100.0)   # p_rms = 2 µPa, r = 100 m
-res = underwater.monopole_source_level(lrn, 200.0, draught=6.0)
-print(res.source_level, res.surface_correction, res.source_depth)
-res.plot()   # RNL, Ls and ΔL vs frequency (needs matplotlib)
-```
-
-`hydrophone_depths` gives the three ISO 17208-1 measurement depths from the
-15°/30°/45° depression angles, and `source_level_uncertainty` the tabulated
-expanded uncertainty (5 dB ≤100 Hz, 3 dB 125 Hz–16 kHz, 4 dB >16 kHz).
-
 <details>
 <summary>Show the code for this figure</summary>
 
@@ -94,6 +81,19 @@ res.plot()
 
 </details>
 
+```python
+from phonometry import underwater
+
+lrn = underwater.radiated_noise_level(2e-6, 100.0)   # p_rms = 2 µPa, r = 100 m
+res = underwater.monopole_source_level(lrn, 200.0, draught=6.0)
+print(res.source_level, res.surface_correction, res.source_depth)
+res.plot()   # RNL, Ls and ΔL vs frequency (needs matplotlib)
+```
+
+`hydrophone_depths` gives the three ISO 17208-1 measurement depths from the
+15°/30°/45° depression angles, and `source_level_uncertainty` the tabulated
+expanded uncertainty (5 dB ≤100 Hz, 3 dB 125 Hz–16 kHz, 4 dB >16 kHz).
+
 ## 3. Pile-driving sound (ISO 18406)
 
 Percussive pile driving radiates one impulsive pulse per hammer strike. Each
@@ -106,20 +106,6 @@ $$
 $$
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pile_driving_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/pile_driving.svg" alt="A percussive pile-driving strike pressure waveform with its peak marked, and below it the cumulative sound exposure level growing as SEL_ss plus ten times the logarithm of the number of strikes" width="82%"></picture>
-
-```python
-from phonometry import underwater
-
-sel_ss = underwater.single_strike_sel(strike_pressure, fs)   # dB re 1 µPa²·s
-sel_cum = underwater.cumulative_sel_identical(sel_ss, 2000)   # 2000 strikes
-res = underwater.pile_strike_metrics(strike_pressure, fs)
-print(res.single_strike_sel, res.peak_spl, res.pulse_duration)
-res.plot()   # waveform + cumulative energy (needs matplotlib)
-```
-
-`pile_strike_metrics` bundles the single-strike SEL, the peak sound pressure
-level, the SPL/Leq and the 90 %-energy pulse duration for one recorded strike;
-`cumulative_sel` sums a sequence of differing per-strike SELs.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -137,6 +123,20 @@ res.plot()
 ```
 
 </details>
+
+```python
+from phonometry import underwater
+
+sel_ss = underwater.single_strike_sel(strike_pressure, fs)   # dB re 1 µPa²·s
+sel_cum = underwater.cumulative_sel_identical(sel_ss, 2000)   # 2000 strikes
+res = underwater.pile_strike_metrics(strike_pressure, fs)
+print(res.single_strike_sel, res.peak_spl, res.pulse_duration)
+res.plot()   # waveform + cumulative energy (needs matplotlib)
+```
+
+`pile_strike_metrics` bundles the single-strike SEL, the peak sound pressure
+level, the SPL/Leq and the 90 %-energy pulse duration for one recorded strike;
+`cumulative_sel` sums a sequence of differing per-strike SELs.
 
 ## References
 

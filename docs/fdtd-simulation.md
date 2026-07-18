@@ -137,7 +137,43 @@ paths, scattering from obstacles, modal behaviour of odd-shaped enclosures,
 refraction through a sound-speed gradient. One run captures **all
 frequencies at once** (a pulse excites the whole band; one FFT of a probe
 yields the spectrum), where a frequency-domain method needs one solve per
-frequency. Conversely, when a validated closed form exists (statistical
+frequency.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation.png" alt="Two panels. Left: a snapshot of the pressure field in a 3 by 2 metre domain with a thin vertical rigid barrier, showing the direct wavefront, the reflection travelling back towards the source and the wave diffracted around the barrier edge, with the source marked by a star and two probes by dots. Right: the pressure history at both probes; the line-of-sight probe shows the direct pulse and the barrier reflection, the shadowed probe a weaker, delayed diffracted arrival" width="96%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from phonometry import simulation
+
+# A 3.0 x 2.0 m free field (absorbing edges) with a thin rigid barrier:
+# probe A sees the direct pulse plus the barrier reflection, probe B sits
+# in the shadow and only receives the wave diffracted around the edge.
+mask = np.zeros((200, 300), dtype=bool)
+mask[60:, 150:154] = True
+res = simulation.fdtd_simulation(
+    343.0, 0.01, 9.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
+    probes=[(100, 100), (240, 100)],
+    obstacle_mask=mask,
+    boundaries="absorbing", absorbing_layer_cells=30,
+    snapshot_every=75,
+)
+
+fig, (ax_f, ax_p) = plt.subplots(
+    1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
+res.plot(kind="snapshot", frame=7, ax=ax_f)
+res.plot(ax=ax_p)
+plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+Conversely, when a validated closed form exists (statistical
 reverberation, ISO 9613-2 outdoor attenuation, image sources in a rectangular
 room) the closed form is thousands of times cheaper: this solver is the
 cross-check and the demonstrator, not the replacement. The oracle works both
@@ -204,40 +240,6 @@ refinement). The tests pin the
 solver to analytic oracles: box and duct eigenfrequencies, free-field
 arrival times and cylindrical decay, the rigid-wall image echo, the
 impedance reflection coefficient above and the dispersion relation itself.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation_dark.png"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_simulation.png" alt="Two panels. Left: a snapshot of the pressure field in a 3 by 2 metre domain with a thin vertical rigid barrier, showing the direct wavefront, the reflection travelling back towards the source and the wave diffracted around the barrier edge, with the source marked by a star and two probes by dots. Right: the pressure history at both probes; the line-of-sight probe shows the direct pulse and the barrier reflection, the shadowed probe a weaker, delayed diffracted arrival" width="96%"></picture>
-
-<details>
-<summary>Show the code for this figure</summary>
-
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-from phonometry import simulation
-
-# A 3.0 x 2.0 m free field (absorbing edges) with a thin rigid barrier:
-# probe A sees the direct pulse plus the barrier reflection, probe B sits
-# in the shadow and only receives the wave diffracted around the edge.
-mask = np.zeros((200, 300), dtype=bool)
-mask[60:, 150:154] = True
-res = simulation.fdtd_simulation(
-    343.0, 0.01, 9.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, width=3.0e-4)],
-    probes=[(100, 100), (240, 100)],
-    obstacle_mask=mask,
-    boundaries="absorbing", absorbing_layer_cells=30,
-    snapshot_every=75,
-)
-
-fig, (ax_f, ax_p) = plt.subplots(
-    1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
-res.plot(kind="snapshot", frame=7, ax=ax_f)
-res.plot(ax=ax_p)
-plt.tight_layout()
-plt.show()
-```
-
-</details>
 
 The frozen `FDTDResult` carries the time axis, the per-probe pressure
 histories, the probe positions in metres, the grid metadata, the sources,

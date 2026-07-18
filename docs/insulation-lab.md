@@ -226,8 +226,6 @@ concrete plate; a standard tapping machine excites it and the structure-borne
 covering. For locally-reacting coverings that acceleration-level difference
 equals the ISO 10140 impact sound reduction.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement.svg" alt="ISO 16251-1 floor-covering impact sound improvement: the improvement delta-L of a soft carpet rising with frequency across one-third-octave bands from 100 Hz to 3150 Hz, with the shaded improvement area and the weighted single-number delta-Lw annotated" width="80%"></picture>
-
 **Acceleration level (Formula (1)).** $L_a = 10\lg(\langle a^2\rangle / a_0^2)$ dB,
 reference $a_0 = 10^{-6}\ \text{m/s}^2$. **Background correction (Formula (2))**
 follows the ISO 10140 three-branch rule (unchanged ≥ 15 dB; energy subtraction
@@ -247,6 +245,8 @@ results (clause 8 e)) also carries the spectrum adaptation term
 $C_{I,\Delta} = C_{I,r,0} - C_{I,r}$ (ISO 717-2:2020 Formula (A.4)), exposed as
 `ci_delta` on the result and standalone as
 `impact_improvement_adaptation_term()`.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floor_covering_improvement.svg" alt="ISO 16251-1 floor-covering impact sound improvement: the improvement delta-L of a soft carpet rising with frequency across one-third-octave bands from 100 Hz to 3150 Hz, with the shaded improvement area and the weighted single-number delta-Lw annotated" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -298,8 +298,6 @@ as an input, together with the overall flanking descriptors $D_{n,f}$
 (airborne) and $L_{n,f}$ (impact). It is the measurement counterpart of the
 empirical `junction_vibration_reduction()` of that prediction.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission.svg" alt="ISO 10848 junction vibration reduction index Kij rising across one-third-octave bands from 100 Hz to 5000 Hz for a rigid T-junction of two heavy walls, with the single-number mean Kij over 200-1250 Hz drawn as a dashed line" width="80%"></picture>
-
 **Vibration reduction index (Formula (13)).**
 $K_{ij} = \overline{D}_{v,ij} + 10\lg\!\big(l_{ij} / \sqrt{a_i a_j}\big)$ dB, from
 the direction-averaged velocity level difference
@@ -317,16 +315,7 @@ ISO 717 rating engines. The single-number $\overline{K}_{ij}$ is the arithmetic
 mean over 200–1250 Hz for one-third-octave bands, or over 125–1000 Hz for
 octave bands (Annex A).
 
-**Validity.** $K_{ij}$ rests on a statistical-energy-analysis simplification:
-`strong_coupling_satisfied()` checks the Formula (15) inequality, and — for the
-heavy junctions of Part 4 — `modal_density()`, `band_mode_count()` and
-`modal_overlap_factor()` (Formulae (5)/(4)/(6)) quantify where the mode count
-is too low for $K_{ij}$ to be reliable. Pass the per-band modal overlap factor
-to `vibration_reduction_index(..., modal_overlap=M)`: bands with $M < 0.25$
-are flagged in `result.bracketed` and excluded from the single-number
-$\overline{K}_{ij}$, as Part 4 Clause 9 requires. Because ISO 10848 contains no
-worked numeric example, conformance is anchored on closed-form identities
-(simplified $K_{ij}$, $a_j$ at $f_\text{ref}$, $\eta$).
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flanking_transmission.svg" alt="ISO 10848 junction vibration reduction index Kij rising across one-third-octave bands from 100 Hz to 5000 Hz for a rigid T-junction of two heavy walls, with the single-number mean Kij over 200-1250 Hz drawn as a dashed line" width="80%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -351,6 +340,17 @@ plt.show()
 ```
 
 </details>
+
+**Validity.** $K_{ij}$ rests on a statistical-energy-analysis simplification:
+`strong_coupling_satisfied()` checks the Formula (15) inequality, and — for the
+heavy junctions of Part 4 — `modal_density()`, `band_mode_count()` and
+`modal_overlap_factor()` (Formulae (5)/(4)/(6)) quantify where the mode count
+is too low for $K_{ij}$ to be reliable. Pass the per-band modal overlap factor
+to `vibration_reduction_index(..., modal_overlap=M)`: bands with $M < 0.25$
+are flagged in `result.bracketed` and excluded from the single-number
+$\overline{K}_{ij}$, as Part 4 Clause 9 requires. Because ISO 10848 contains no
+worked numeric example, conformance is anchored on closed-form identities
+(simplified $K_{ij}$, $a_j$ at $f_\text{ref}$, $\eta$).
 
 ```python
 import numpy as np

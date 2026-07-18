@@ -584,6 +584,21 @@ _ES_EXACT = {
         "Respuesta en frecuencia y coherencia (Bendat y Piersol)",
     "True |H|": "|H| verdadero",
     "Estimated |H| (H1)": "|H| estimado (H1)",
+    # Swept-sine harmonic separation (Farina 2000 / Novak et al. 2015)
+    "Swept-Sine Harmonic Distortion by Order (Farina / Novak)":
+        "Distorsión armónica por orden con barrido sinusoidal "
+        "(Farina / Novak)",
+    "Excitation frequency [Hz]": "Frecuencia de excitación [Hz]",
+    "Distortion re fundamental [%]": "Distorsión respecto al fundamental [%]",
+    "Total THD(f)": "THD(f) total",
+    "2nd harmonic d₂(f)": "2º armónico d₂(f)",
+    "3rd harmonic d₃(f)": "3er armónico d₃(f)",
+    "Chebyshev asymptote (a₂/2)/H₁": "Asíntota de Chebyshev (a₂/2)/H₁",
+    "Chebyshev asymptote (a₃/4)/H₁": "Asíntota de Chebyshev (a₃/4)/H₁",
+    "one sweep separates every distortion order;\n"
+    "each rolls off where its product n·f crosses the 3 kHz corner":
+        "un solo barrido separa cada orden de distorsión;\n"
+        "cada uno cae donde su producto n·f cruza el corte de 3 kHz",
     # Calibrated spectral analysis (Bendat & Piersol PSD/CSD core)
     "Calibrated Spectral Density of Pink Noise (Bendat & Piersol)":
         "Densidad espectral calibrada de ruido rosa (Bendat y Piersol)",
@@ -3686,6 +3701,62 @@ def generate_frequency_response(output_dir: str) -> None:
     ax_coh.set_axisbelow(True)
     plt.tight_layout()
     save_figure(output_dir, "frequency_response.svg")
+    plt.close()
+
+
+def generate_swept_sine_thd(output_dir: str) -> None:
+    """THD(f) by order from one synchronized sweep (Farina / Novak)."""
+    print("Generating swept_sine_thd...")
+    from scipy import signal as sp_signal
+
+    from phonometry import swept_sine_distortion, synchronized_sweep_signal
+
+    fs = 48000
+    f1, f2, seconds = 20.0, 6000.0, 4.0
+    a2, a3 = 0.12, 0.08
+    # Hammerstein chain: a memoryless cubic polynomial (exact Chebyshev
+    # harmonic levels) followed by a 3 kHz low-pass, so each order rolls off
+    # where its own product n*f crosses the filter corner.
+    x = synchronized_sweep_signal(fs, f1, f2, seconds)
+    b, a = sp_signal.butter(2, 3000.0, fs=fs)
+    y = sp_signal.lfilter(b, a, x + a2 * x**2 + a3 * x**3)
+    res = swept_sine_distortion(y, fs, f1, f2, seconds, n_harmonics=3)
+
+    sel = (res.thd_frequencies >= 30.0) & (res.thd_frequencies <= 2800.0)
+    freqs = res.thd_frequencies[sel]
+    h1_ref = 1.0 + 3.0 * a3 / 4.0  # Chebyshev fundamental gain
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.loglog(freqs, 100.0 * res.thd[sel], color=COLOR_PRIMARY,
+              linewidth=2.0, label="Total THD(f)")
+    ax.loglog(freqs, 100.0 * res.distortion_ratios[0][sel],
+              color=COLOR_SECONDARY, linewidth=1.5, linestyle="--",
+              label="2nd harmonic d₂(f)")
+    ax.loglog(freqs, 100.0 * res.distortion_ratios[1][sel],
+              color=COLOR_TERTIARY, linewidth=1.5, linestyle="--",
+              label="3rd harmonic d₃(f)")
+    ax.axhline(100.0 * (a2 / 2.0) / h1_ref, color=COLOR_SECONDARY,
+               linestyle=":", linewidth=1.2, alpha=0.8,
+               label="Chebyshev asymptote (a₂/2)/H₁")
+    ax.axhline(100.0 * (a3 / 4.0) / h1_ref, color=COLOR_TERTIARY,
+               linestyle=":", linewidth=1.2, alpha=0.8,
+               label="Chebyshev asymptote (a₃/4)/H₁")
+    ax.set_xlabel("Excitation frequency [Hz]")
+    ax.set_ylabel("Distortion re fundamental [%]")
+    ax.set_title("Swept-Sine Harmonic Distortion by Order (Farina / Novak)",
+                 fontweight="bold", pad=12)
+    ax.set_xlim(30.0, 2800.0)
+    ax.set_ylim(0.05, 20.0)
+    ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", fontsize=9)
+    ax.text(0.985, 0.965,
+            "one sweep separates every distortion order;\n"
+            "each rolls off where its product n·f crosses the 3 kHz corner",
+            transform=ax.transAxes, va="top", ha="right", fontsize=8.5,
+            color=COLOR_FG)
+    plt.tight_layout()
+    save_figure(output_dir, "swept_sine_thd.svg")
     plt.close()
 
 
@@ -7089,6 +7160,9 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # frequency-response / coherence estimators (Bendat & Piersol).
     generate_distortion,
     generate_frequency_response,
+    # Swept-sine harmonic separation: THD(f) by order from one synchronized
+    # sweep (Farina 2000 / Novak et al. 2015).
+    generate_swept_sine_thd,
     # Calibrated spectral analysis: PSD with chi-square confidence interval
     # and 1/3-octave smoothing on exact-slope pink noise (Bendat & Piersol).
     generate_psd_confidence_smoothing,

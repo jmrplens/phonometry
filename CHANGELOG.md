@@ -59,6 +59,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   autocorrelations, the Example 8.5 published numbers, the ideal-delta
   GCC-PHAT of a noiseless delay and the exact AM envelope; seven new
   conformance checks.
+- Swept-sine harmonic-distortion separation (Farina 2000; Novak, Lotton &
+  Simon 2015): `synchronized_sweep_signal` (the synchronized exponential
+  sweep of Novak Eqs. 47/49, whose rounded rate makes a `L*ln(n)` time
+  shift exactly equivalent to the nth harmonic) and `swept_sine_distortion`
+  in `phonometry.electroacoustics`, which deconvolves a recorded sweep
+  response (closed-form analytic inverse spectrum for the synchronized
+  sweep, extending every harmonic band to `[n*f1, n*f2]`; the classical
+  Farina inverse filter for plain ESS recordings) and windows each
+  distortion order at its exact `L*ln(n)` advance with sub-sample
+  alignment, returning a frozen `SweptSineDistortionResult` with the
+  harmonic frequency responses `H1..HN`, their impulse responses, THD as a
+  function of the excitation frequency, per-order distortion ratios and
+  `.plot()`. With the synchronized sweep the harmonic phases are system
+  properties; with `method="farina"` the magnitudes are exact and the
+  phases are documented as excitation-dependent. Anchored on the Chebyshev
+  identities of a memoryless cubic polynomial (`|H1| = 1+3a3/4`,
+  `|H2| = a2/2` at phase -pi/2, `|H3| = a3/4` at phase pi, and the
+  closed-form THD), the pure-linear THD floor, a delayed/gained Hammerstein
+  composition, and agreement with the tone-by-tone `thd` analyzer on the
+  same nonlinearity.
+- Phase utilities in `phonometry.metrology` (Bendat & Piersol Sec. 13.1.4):
+  `minimum_phase` (the minimum-phase response of a magnitude via the real
+  cepstrum, with trigonometric-interpolation oversampling against cepstral
+  aliasing and documented sampling/zero-floor precautions), `group_delay`
+  (central-difference `-(1/2pi) dphi/df` of an unwrapped one-sided
+  response), `excess_phase` (measured minus minimum phase: the all-pass
+  part no stable causal equalizer can remove) and `phase_decomposition`
+  (frozen result bundling magnitude, the three phases and the total and
+  excess group delays, with `.plot()`). Anchored on a strictly
+  minimum-phase biquad reconstructed to better than 1e-12 rad, the exact
+  first-order-allpass group delay `(1-a^2)/(1+2a*cos(w)+a^2)`, and the
+  exact `-2*pi*f*t0` excess phase and constant excess group delay of a
+  pure fractional latency. Seven new conformance checks across both
+  features (306 total).
 - 2D FDTD wave simulation as a public API (new `phonometry.simulation`
   domain, promoting the engine behind the documentation animations):
   `fdtd_simulation` (deterministic staggered-grid pressure-velocity leapfrog

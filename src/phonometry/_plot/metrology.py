@@ -16,6 +16,7 @@ if TYPE_CHECKING:
         TimeDelayResult,
     )
     from ..metrology.envelope import EnvelopeResult
+    from ..metrology.phase import PhaseDecompositionResult
     from ..metrology.spectra import (
         CoherentOutputSpectrumResult,
         CrossSpectralDensityResult,
@@ -431,4 +432,70 @@ def plot_envelope(
     axes[1].set_ylabel("Instantaneous frequency [Hz]")
     axes[1].set_xlabel(_TIME_AXIS_LABEL)
     axes[1].grid(True, alpha=0.3)
+    return axes
+
+
+def plot_phase_decomposition(
+    result: "PhaseDecompositionResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes | np.ndarray:
+    """Magnitude, phase decomposition and group delay of a response.
+
+    Three stacked panels: ``|H|`` in dB, the measured / minimum / excess
+    phases in radians, and the total and excess group delays in
+    milliseconds. With ``ax`` given, only the phase panel is drawn on it.
+
+    :param result: A :class:`~phonometry.metrology.phase.PhaseDecompositionResult`.
+    :param ax: Existing axes for the phase panel, or ``None`` for a fresh
+        three-panel figure.
+    :param kwargs: Forwarded to the measured-phase ``plot`` call.
+    :return: The phase-panel axes (``ax`` given) or the array of three axes.
+    """
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    pos = freqs > 0.0
+
+    def _phase_panel(axp: Axes) -> None:
+        kwargs.setdefault("color", _C_PRIMARY)
+        kwargs.setdefault("label", "Measured phase")
+        axp.semilogx(freqs[pos], result.phase[pos], **kwargs)
+        axp.semilogx(
+            freqs[pos], result.minimum_phase[pos], color=_C_SECONDARY,
+            ls="--", label="Minimum phase (from |H|)",
+        )
+        axp.semilogx(
+            freqs[pos], result.excess_phase[pos], color=_C_MUTED,
+            label="Excess phase (all-pass)",
+        )
+        axp.set_ylabel("Phase [rad]")
+        axp.grid(True, which="both", alpha=0.3)
+        axp.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+
+    if ax is not None:
+        _phase_panel(ax)
+        ax.set_xlabel(_FREQ_LABEL)
+        ax.set_title("Phase decomposition")
+        return ax
+
+    axes = _new_axes_column(3, sharex=True, figsize=(8.0, 8.0))
+    tiny = np.finfo(np.float64).tiny
+    axes[0].semilogx(
+        freqs[pos],
+        20.0 * np.log10(np.maximum(result.magnitude[pos], tiny)),
+        color=_C_PRIMARY,
+    )
+    axes[0].set_ylabel("Magnitude [dB]")
+    axes[0].set_title("Minimum-phase / all-pass decomposition")
+    axes[0].grid(True, which="both", alpha=0.3)
+    _phase_panel(axes[1])
+    axes[2].semilogx(
+        freqs[pos], 1e3 * result.group_delay[pos], color=_C_PRIMARY,
+        label="Group delay",
+    )
+    axes[2].semilogx(
+        freqs[pos], 1e3 * result.excess_group_delay[pos], color=_C_MUTED,
+        label="Excess group delay",
+    )
+    axes[2].set_ylabel("Group delay [ms]")
+    axes[2].set_xlabel(_FREQ_LABEL)
+    axes[2].grid(True, which="both", alpha=0.3)
+    axes[2].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     return axes

@@ -37,6 +37,13 @@ from .parametric_filters import (
     time_weighting,
     weighting_filter,
 )
+from .phase import (
+    PhaseDecompositionResult,
+    excess_phase,
+    group_delay,
+    minimum_phase,
+    phase_decomposition,
+)
 from .signals import noise_signal
 from .spectra import (
     CoherentOutputSpectrumResult,
@@ -70,6 +77,7 @@ __all__ = [
     "FilterBankWarning",
     "MonteCarloResult",
     "OctaveFilterBank",
+    "PhaseDecompositionResult",
     "Quantity",
     "SpectralDensityResult",
     "TimeDelayResult",
@@ -86,8 +94,10 @@ __all__ = [
     "correlation_random_error",
     "cross_spectral_density",
     "envelope",
+    "excess_phase",
     "fractional_octave_smoothing",
     "getansifrequencies",
+    "group_delay",
     "impulse_response_delay",
     "laeq",
     "lc_peak",
@@ -95,6 +105,7 @@ __all__ = [
     "lex_8h",
     "linkwitz_riley",
     "ln_levels",
+    "minimum_phase",
     "monte_carlo",
     "noise_signal",
     "nominal_frequencies",
@@ -102,6 +113,7 @@ __all__ = [
     "normalizedfreq",
     "octave_filter",
     "octavefilter",
+    "phase_decomposition",
     "power_spectral_density",
     "rectangular",
     "resolution_bias_error",

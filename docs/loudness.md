@@ -17,8 +17,8 @@ Sharpness, tonality and roughness live in
 Decibels compress perception: 10 dB more reads as *twice as loud*, and two
 sounds with the same dB(A) can differ audibly depending on how their energy
 spreads over the ear's **critical bands**. The Zwicker method models the
-hearing chain explicitly — outer/middle-ear transmission, critical-band
-analysis on the 24 Bark scale, level-dependent masking slopes — and outputs
+hearing chain explicitly (outer/middle-ear transmission, critical-band
+analysis on the 24 Bark scale, level-dependent masking slopes) and outputs
 **loudness N in sones**, a ratio scale: 4 sones is twice as loud as 2 sones.
 By definition a 1 kHz tone at 40 dB SPL is 1 sone, and every +10 phon
 doubles the sone value.
@@ -101,7 +101,7 @@ plt.show()
 
 The implementation is a clean-room port of the standard's **normative
 reference program** (Annex A.4): all twelve data tables are digit-exact and
-the full Annex B validation set runs in CI — the stationary test case
+the full Annex B validation set runs in CI: the stationary test case
 reproduces the published value to every printed digit, and the tone-pulse
 N(t) traces stay inside the standard's per-sample 5 % tolerance band.
 
@@ -162,7 +162,7 @@ plt.show()
 
 Validity per clause 4.1: 20-90 phon (80 phon above 4 kHz); the implementation
 is verified against the Annex B tables in CI. Note this is the loudness of
-*pure tones* — the loudness of arbitrary signals in sones is what the ISO 532
+*pure tones*; the loudness of arbitrary signals in sones is what the ISO 532
 models on this page compute.
 
 ## Advanced loudness models
@@ -371,10 +371,10 @@ Returns a `MooreGlasbergTimeVaryingLoudness`: `time` (1 ms grid),
 
 ### Sottek Hearing Model loudness (ECMA-418-2)
 
-ECMA-418-2:2025 specifies a single auditory front-end — outer/middle-ear
+ECMA-418-2:2025 specifies a single auditory front-end (outer/middle-ear
 filtering, a 53-band gammatone-like filter bank on the Bark_HMS scale
-(z = 0.5 .. 26.5), half-wave rectification, block RMS and a compressive
-nonlinearity (Formula 23) — that is **shared** by its loudness, tonality and
+with z = 0.5 .. 26.5, half-wave rectification, block RMS and a compressive
+nonlinearity, Formula 23) that is **shared** by its loudness, tonality and
 roughness metrics. The loudness N is reported in **sone_HMS**, and the same
 1 kHz/40 dB anchor calibrates the front-end (our clean-room value 0.984,
 with the full Clause 6.2.3 band averaging; the residual's origin is
@@ -461,15 +461,15 @@ ISO 532-1:2017, *Acoustics — Methods for calculating
 loudness — Part 1: Zwicker method* — stationary and time-varying loudness in
 sones from the normative Annex A.4 reference program, with the N5/N10
 percentile loudness, validated against the Annex B set. ISO 532-2:2017,
-*... Part 2: Moore-Glasberg method* — stationary loudness from roex excitation
+*... Part 2: Moore-Glasberg method*: stationary loudness from roex excitation
 patterns on the ERB-number scale, with explicit binaural summation.
-ISO 532-3:2023, *... Part 3: Moore-Glasberg-Schlittenlacher method* —
+ISO 532-3:2023, *... Part 3: Moore-Glasberg-Schlittenlacher method*:
 time-varying short-term and long-term loudness and the peak N_max.
 ISO 226:2023, *Acoustics — Normal equal-loudness-level contours* — the
 contours (Formula 1), the loudness level of pure tones (Formula 2) and the
 hearing threshold. ECMA-418-2:2025, *Psychoacoustic metrics for ITT
 equipment — Part 2 (methods for describing human perception based on the
-Sottek Hearing Model)* — the Sottek Hearing Model loudness (sone_HMS).
+Sottek Hearing Model)*: the Sottek Hearing Model loudness (sone_HMS).
 
 ## See also
 

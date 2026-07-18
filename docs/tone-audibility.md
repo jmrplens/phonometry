@@ -3,10 +3,10 @@
 # Objective audibility of tones in noise (ISO/PAS 20065)
 
 A steady tone embedded in broadband noise stands out when it rises audibly above
-the noise that would otherwise mask it — the objective precondition for the tonal
+the noise that would otherwise mask it, the objective precondition for the tonal
 penalties applied in noise assessment. **ISO/PAS 20065:2016** is the *engineering
 method* that quantifies this audibility: from a narrow-band FFT spectrum it
-derives, for every prominent tone, the **audibility** `ΔL` — how many decibels
+derives, for every prominent tone, the **audibility** `ΔL`: how many decibels
 the tone level exceeds the masking threshold of the surrounding noise. (Whether a
 tone is *annoying* is a separate, downstream rating judgement.) It is the
 detailed method that **ISO 1996-2:2017** defers to (the simpler Annex C route
@@ -62,7 +62,7 @@ print(round(f1, 2), round(f2, 2))                            # 95.67 197.04
 The mean narrow-band level `LS` of the masking noise (Formula 6, an iterative
 energy average of the lines in the critical band) and the tone level `LT`
 (Formula 8, the energy sum of the tonal lines) are derived from the narrow-band
-spectrum — `mean_narrowband_level` and `tone_level` do this directly (see §4).
+spectrum; `mean_narrowband_level` and `tone_level` do this directly (see §4).
 The critical-band level of the masking noise spreads `LS` over the critical
 bandwidth (Formula 12), the masking index accounts for the ear (Formula 13) and
 the audibility is their difference (Formula 14):
@@ -77,7 +77,7 @@ A supplied tone is *audible* when `ΔL > 0`. `Δf` is the line spacing (frequenc
 resolution); the energy sums over `K > 1` lines carry a window correction of
 `10·lg(Δf/Δfe)` (`−1.76 dB` for the recommended Hanning window,
 `Δfe = 1.5·Δf`, Formula (8)), while a single-line tone (`K = 1`) takes its
-level unchanged (Formula (7) — no bandwidth correction).
+level unchanged (Formula (7), no bandwidth correction).
 
 ```python
 from phonometry import psychoacoustics
@@ -98,13 +98,13 @@ chain to a spectrum's tones and reports the decisive tone.
 
 **How the decisive band is selected.** The method does not scan a fixed set of
 bands: each detected *tone* defines its own critical band (§1), the audibility
-is evaluated tone by tone, and — after Step 3 has merged audible same-band
-tones into `FG` groups rated at their most audible member (§5) — the decisive
+is evaluated tone by tone, and, after Step 3 has merged audible same-band
+tones into `FG` groups rated at their most audible member (§5), the decisive
 audibility is simply the largest `ΔL` left standing (Step 4). The "decisive
 band" is therefore the critical band centred on whichever tone or group wins,
 and it is free to move from spectrum to spectrum as the source runs through
 its operating states; the energy mean of Formula 20 then lets the loudest
-(most audible) spectra dominate the reported value, which is deliberate — a
+(most audible) spectra dominate the reported value, which is deliberate: a
 tone that is clearly audible part of the time is not excused by intervals in
 which it disappears.
 
@@ -136,7 +136,7 @@ reproduces the printed Table E.2 column (for the 137.3 Hz tone,
 **How to read `U`.** A 90 % *bilateral* interval leaves 5 % in each tail, so
 `ΔL − U` is a one-sided 95 % statement: when the whole interval `ΔL ± U` sits
 above `0 dB` the tone is audible with at least 95 % confidence, and when the
-interval straddles zero the verdict is not statistically secured — the remedy
+interval straddles zero the verdict is not statistically secured; the remedy
 is more spectra, since `U` shrinks with the number averaged (which is exactly
 why clause 6 makes reporting it mandatory below 12 spectra). The same logic
 guards the downstream penalty: **ISO 1996-2:2017 Annex J** converts the mean
@@ -152,7 +152,7 @@ one borderline spectrum.
 Given the FFT lines of the critical band about a tone, `mean_narrowband_level`
 runs the iterative Formula 6 procedure (energy average, dropping any line more
 than 6 dB above the running `LS`, until stable within ±0.005 dB or fewer than
-five lines remain each side — Annex D) and `tone_level` sums the tonal lines
+five lines remain each side, Annex D) and `tone_level` sums the tonal lines
 contiguous with the peak (above both `LS + 6 dB` and `L_peak − 10 dB`). The
 mean always carries the −1.76 dB Hanning bandwidth correction; the tone level
 carries it only when the run spans more than one line (Formulae (7)/(8)).
@@ -178,14 +178,14 @@ print(round(psychoacoustics.tone_audibility(lt, ls, 137.3, 2.7), 2))   # 5.01 dB
 
 ## 5. Whole-spectrum detection
 
-`analyze_spectrum` runs the full front-end over a spectrum — mean narrow-band
+`analyze_spectrum` runs the full front-end over a spectrum (mean narrow-band
 level per line, peak detection (Clause 5.3.8 Step 1, a tone cannot sit on a
 slope), tone level, the distinctness test (Clause 5.3.4: bandwidth
-`≤ 26·(1 + 0.001·fT)` Hz and edge steepness `≥ 24 dB`) and audibility — and
+`≤ 26·(1 + 0.001·fT)` Hz and edge steepness `≥ 24 dB`, and audibility) and
 returns the distinct, audible tones. It then applies **Step 3**: audible
 tones sharing a critical band have their tone levels energy-summed
 (Formula 17, shared lines counted once, via `combined_tone_level`) into a
-combined "FG" entry rated at the most audible member — unless the
+combined "FG" entry rated at the most audible member, unless the
 exactly-two-tones-below-1000-Hz exception of §5.1 keeps them separate. The
 result's `group_sizes` tells individual tones (`1`) from FG entries (`N ≥ 2`),
 and the decisive audibility (Step 4) is the maximum over all entries.
@@ -228,8 +228,8 @@ example (the three tone frequencies and `LT = 72.15 dB`).
 ### 5.1 Two tones below 1000 Hz
 
 When **exactly two** tones share a critical band and both lie below 1000 Hz, the
-ear can still tell them apart — so they are rated *separately* rather than
-FG-combined — if their frequency difference `|fT1 − fT2|` (Formula 18) exceeds
+ear can still tell them apart (so they are rated *separately* rather than
+FG-combined) if their frequency difference `|fT1 − fT2|` (Formula 18) exceeds
 
 ```text
 fD = 21·10^(1.2·|lg(fT/212)|^1.8)  Hz     (Formula 19, 88 Hz < fT < 1000 Hz)
@@ -248,7 +248,7 @@ psychoacoustics.resolve_tones_separately(200.0, 260.0, 3.0, 2.0) # True  → rat
 psychoacoustics.resolve_tones_separately(118.4, 137.3, 4.0, 5.0) # False → combine (Δf < fD)
 ```
 
-> **No numeric oracle.** No ISO/PAS 20065 worked example exercises this branch —
+> **No numeric oracle.** No ISO/PAS 20065 worked example exercises this branch;
 > the Annex E band groups *three* tones, so the "exactly two tones" rule never
 > fires there. The formula and decision are implemented clean-room from the text
 > and verified against the **DIN 45681:2005-03** Annex J reference program

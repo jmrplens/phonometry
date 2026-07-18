@@ -28,11 +28,11 @@ references:
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
 Un tono estacionario inmerso en ruido de banda ancha resalta cuando emerge de
-forma audible por encima del ruido que de otro modo lo enmascararía —la
-condición objetiva previa a las penalizaciones tonales del análisis de ruido—.
+forma audible por encima del ruido que de otro modo lo enmascararía, la
+condición objetiva previa a las penalizaciones tonales del análisis de ruido.
 **ISO/PAS 20065:2016** es el *método de ingeniería* que cuantifica esa
 audibilidad: a partir de un espectro de banda estrecha (FFT) obtiene, para cada
-tono prominente, la **audibilidad** `ΔL` — cuántos decibelios supera el nivel
+tono prominente, la **audibilidad** `ΔL`: cuántos decibelios supera el nivel
 del tono al umbral de enmascaramiento del ruido circundante. (Que un tono sea
 *molesto* es un juicio de valoración posterior e independiente.) Es el método
 detallado al que remite **ISO 1996-2:2017** (la vía simplificada del Anexo C
@@ -93,7 +93,7 @@ print(round(f1, 2), round(f2, 2))                            # 95.67 197.04
 El nivel medio de banda estrecha `LS` del ruido enmascarante (Fórmula 6, un
 promedio energético iterativo de las líneas de la banda crítica) y el nivel del
 tono `LT` (Fórmula 8, la suma energética de las líneas tonales) se derivan del
-espectro de banda estrecha — `mean_narrowband_level` y `tone_level` lo hacen
+espectro de banda estrecha; `mean_narrowband_level` y `tone_level` lo hacen
 directamente (ver §4). El nivel de banda crítica del ruido enmascarante
 reparte `LS` sobre el ancho de banda crítico (Fórmula 12), el índice de
 enmascaramiento tiene en cuenta el oído (Fórmula 13) y la audibilidad es su
@@ -132,14 +132,14 @@ informa del tono decisivo.
 
 **Cómo se selecciona la banda decisiva.** El método no barre un conjunto fijo
 de bandas: cada *tono* detectado define su propia banda crítica (§1), la
-audibilidad se evalúa tono a tono y — después de que el Paso 3 haya fusionado
+audibilidad se evalúa tono a tono y, después de que el Paso 3 haya fusionado
 los tonos audibles de una misma banda en grupos `FG` calificados por su miembro
-más audible (§5) — la audibilidad decisiva es simplemente la mayor `ΔL` que
+más audible (§5), la audibilidad decisiva es simplemente la mayor `ΔL` que
 queda en pie (Paso 4). La «banda decisiva» es, por tanto, la banda crítica
 centrada en el tono o grupo que gana, y es libre de moverse de un espectro a
 otro conforme la fuente recorre sus estados de funcionamiento; la media
 energética de la Fórmula 20 deja después que dominen los espectros más
-ruidosos (más audibles), lo cual es deliberado — a un tono claramente audible
+ruidosos (más audibles), lo cual es deliberado: a un tono claramente audible
 parte del tiempo no lo disculpan los intervalos en los que desaparece.
 
 ```python
@@ -170,7 +170,7 @@ la propaga a la audibilidad media energética de un conjunto de espectros
 así que `ΔL − U` es un enunciado unilateral al 95 %: cuando todo el intervalo
 `ΔL ± U` queda por encima de `0 dB`, el tono es audible con al menos un 95 %
 de confianza, y cuando el intervalo cruza el cero el veredicto no está
-asegurado estadísticamente — el remedio son más espectros, porque `U` se
+asegurado estadísticamente; el remedio son más espectros, porque `U` se
 reduce con el número promediado (que es exactamente la razón de que la
 cláusula 6 obligue a declararla por debajo de 12 espectros). La misma lógica
 protege la penalización aguas abajo: el **Anexo J de la ISO 1996-2:2017**
@@ -186,8 +186,8 @@ si el ajuste es robusto o pende de un espectro al límite.
 Dadas las líneas FFT de la banda crítica en torno a un tono,
 `mean_narrowband_level` ejecuta el procedimiento iterativo de la Fórmula 6
 (media energética, descartando toda línea que supere en más de 6 dB la `LS` en
-curso, hasta estabilizarse en ±0,005 dB o quedar menos de cinco líneas por lado
-— Anexo D) y `tone_level` suma las líneas tonales contiguas al pico (por encima
+curso, hasta estabilizarse en ±0,005 dB o quedar menos de cinco líneas por lado,
+Anexo D) y `tone_level` suma las líneas tonales contiguas al pico (por encima
 de `LS + 6 dB` y de `L_pico − 10 dB`). La media lleva siempre la corrección de
 ancho de banda de Hanning de −1,76 dB; el nivel del tono solo cuando el tramo
 abarca más de una línea (Fórmulas (7)/(8)).
@@ -213,15 +213,15 @@ print(round(psychoacoustics.tone_audibility(lt, ls, 137.3, 2.7), 2))   # 5.01 dB
 
 ## 5. Detección sobre el espectro completo
 
-`analyze_spectrum` ejecuta todo el front-end sobre un espectro — nivel medio de
+`analyze_spectrum` ejecuta todo el front-end sobre un espectro (nivel medio de
 banda estrecha por línea, detección de picos (apartado 5.3.8 Paso 1, un tono no
 puede estar en un flanco), nivel del tono, el criterio de distinción (apartado
-5.3.4: ancho de banda `≤ 26·(1 + 0,001·fT)` Hz y pendiente de flanco `≥ 24 dB`)
-y la audibilidad — y devuelve los tonos distintos y audibles. Después aplica
+5.3.4: ancho de banda `≤ 26·(1 + 0,001·fT)` Hz y pendiente de flanco `≥ 24 dB`,
+y la audibilidad) y devuelve los tonos distintos y audibles. Después aplica
 el **Paso 3**: los tonos audibles que comparten una banda crítica suman
 energéticamente sus niveles de tono (Fórmula 17, líneas compartidas contadas
 una sola vez, vía `combined_tone_level`) en una entrada combinada «FG»
-valorada en el miembro más audible — salvo que la excepción de exactamente
+valorada en el miembro más audible, salvo que la excepción de exactamente
 dos tonos por debajo de 1000 Hz de §5.1 los mantenga separados. El
 `group_sizes` del resultado distingue tonos individuales (`1`) de entradas FG
 (`N ≥ 2`), y la audibilidad decisiva (Paso 4) es el máximo sobre todas las
@@ -266,8 +266,8 @@ verifican contra el ejemplo resuelto del Anexo E (las tres frecuencias de tono y
 ### 5.1 Dos tonos por debajo de 1000 Hz
 
 Cuando **exactamente dos** tonos comparten una banda crítica y ambos están por
-debajo de 1000 Hz, el oído todavía puede distinguirlos — y entonces se evalúan
-*por separado* en lugar de combinarse en FG — si su diferencia de frecuencia
+debajo de 1000 Hz, el oído todavía puede distinguirlos (y entonces se evalúan
+*por separado* en lugar de combinarse en FG) si su diferencia de frecuencia
 `|fT1 − fT2|` (Fórmula 18) supera
 
 ```text
@@ -288,7 +288,7 @@ psychoacoustics.resolve_tones_separately(118.4, 137.3, 4.0, 5.0) # False → com
 ```
 
 :::note
-Ningún ejemplo resuelto de ISO/PAS 20065 ejercita esta rama — la banda del Anexo
+Ningún ejemplo resuelto de ISO/PAS 20065 ejercita esta rama; la banda del Anexo
 E agrupa *tres* tonos, así que la regla de «exactamente dos tonos» nunca se
 dispara ahí. La fórmula y la decisión se implementan en clean-room desde el texto
 y se verifican contra el programa de referencia del Anexo J de

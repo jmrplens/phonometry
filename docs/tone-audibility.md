@@ -181,7 +181,7 @@ print(round(psychoacoustics.tone_audibility(lt, ls, 137.3, 2.7), 2))   # 5.01 dB
 `analyze_spectrum` runs the full front-end over a spectrum (mean narrow-band
 level per line, peak detection (Clause 5.3.8 Step 1, a tone cannot sit on a
 slope), tone level, the distinctness test (Clause 5.3.4: bandwidth
-`≤ 26·(1 + 0.001·fT)` Hz and edge steepness `≥ 24 dB`, and audibility) and
+`≤ 26·(1 + 0.001·fT)` Hz and edge steepness `≥ 24 dB`), and audibility) and
 returns the distinct, audible tones. It then applies **Step 3**: audible
 tones sharing a critical band have their tone levels energy-summed
 (Formula 17, shared lines counted once, via `combined_tone_level`) into a

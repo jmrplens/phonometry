@@ -182,7 +182,7 @@ Part 36 test window), over path lengths to 7620 m, and is reciprocal
 ## 6. Airport noise: the NPD engine (ECAC Doc 29)
 
 The ECAC Doc 29 airport-noise method describes an aircraft with **noise-power-
-distance (NPD)** tables give the event level (`LAmax` or `SEL`) of steady straight
+distance (NPD)** tables that give the event level (`LAmax` or `SEL`) of steady straight
 flight versus engine power and slant distance. `npd_level` reads an event level
 for an arbitrary power and distance, interpolating **linearly in power**
 (Eq. 4-3) and **log-linearly in distance** (Eq. 4-4), extrapolating from the

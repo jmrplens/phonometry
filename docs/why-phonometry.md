@@ -158,7 +158,7 @@ up to 16 kHz at common audio rates via internal oversampling (see
   the standards' tolerance tables.
 
 If your work needs numbers you can defend against a standard's tolerance
-table (measurement reports, environmental assessments, instrument
-cross-checks) that verification layer is what phonometry is for. The
+table, whether for measurement reports, environmental assessments or
+instrument cross-checks, that verification layer is what phonometry is for. The
 sources behind it are collected in the [Bibliography](references.md),
 every entry with a verified DOI or official publisher link.

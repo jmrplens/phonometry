@@ -216,7 +216,7 @@ print(round(psychoacoustics.tone_audibility(lt, ls, 137.3, 2.7), 2))   # 5.01 dB
 `analyze_spectrum` ejecuta todo el front-end sobre un espectro (nivel medio de
 banda estrecha por línea, detección de picos (apartado 5.3.8 Paso 1, un tono no
 puede estar en un flanco), nivel del tono, el criterio de distinción (apartado
-5.3.4: ancho de banda `≤ 26·(1 + 0,001·fT)` Hz y pendiente de flanco `≥ 24 dB`,
+5.3.4: ancho de banda `≤ 26·(1 + 0,001·fT)` Hz y pendiente de flanco `≥ 24 dB`),
 y la audibilidad) y devuelve los tonos distintos y audibles. Después aplica
 el **Paso 3**: los tonos audibles que comparten una banda crítica suman
 energéticamente sus niveles de tono (Fórmula 17, líneas compartidas contadas

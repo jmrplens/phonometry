@@ -660,7 +660,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
-| Attenborough 2e Eq. (2.40c) (spherical Q, hard-ground limit) | |Q| for |Z| -> inf (Rp -> 1 so (1 - Rp) -> 0 and Q -> 1) | 1 (+/-0.000001) | 1 | 0 | &#9989; |
+| Attenborough 2e Eq. (2.40c) (spherical Q, hard-ground limit) | abs(Q) as Z grows large (Rp -> 1 so (1 - Rp) -> 0 and Q -> 1) | 1 (+/-0.000001) | 1 | 0 | &#9989; |
 | Salomons 2001 Sec. 3.4 (two-ray field over a rigid ground) | dL enhancement at small path difference (constructive, +6 dB) | 6.0206 dB (+/-0.1 dB) | 6.0205 dB | 0 dB | &#9989; |
 | Salomons 2001 Eq. (D.59) (plane-wave Rp, grazing incidence) | Re(Rp) at grazing (hs, hr -> 0, cos(theta) -> 0 so Rp -> -1) | -1 (+/-0.001) | -1 | 0 | &#9989; |
 | Bies 5e Eq. (5.138) (Kurze-Anderson, N -> 0) | Barrier attenuation at the shadow boundary N = 0 | 5 dB (+/-0 dB) | 5 dB | 0 dB | &#9989; |

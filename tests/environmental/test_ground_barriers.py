@@ -25,6 +25,7 @@ Primary oracles (analytic limits + published statements):
 
 from __future__ import annotations
 
+import dataclasses
 import warnings
 
 import numpy as np
@@ -112,7 +113,7 @@ def test_ground_effect_result_is_frozen_and_has_plot() -> None:
     res = ground_effect(_BANDS, 1.0, 1.0, 20.0, impedance=10.0 - 5.0j)
     assert isinstance(res, SphericalGroundResult)
     assert res.r_reflected > res.r_direct
-    with pytest.raises(Exception):
+    with pytest.raises(dataclasses.FrozenInstanceError):
         res.excess_attenuation = np.zeros(1)  # type: ignore[misc]
 
 
@@ -234,10 +235,11 @@ def test_ground_coherent_barrier_impedance_paths_agree() -> None:
 
 
 def test_barrier_reciprocity_source_receiver_swap() -> None:
-    fwd = barrier_insertion_loss(_BANDS, 1.0, 50.0, 4.0, 100.0, 1.5, method="exact")
+    fwd = barrier_insertion_loss(_BANDS, 1.0, 30.0, 4.0, 100.0, 1.5, method="exact")
     # Swap the roles: source at the old receiver position (distance 100, h 1.5),
-    # receiver at the old source (h 1.0). Barrier distance mirrors to 50 m.
-    rev = barrier_insertion_loss(_BANDS, 1.5, 50.0, 4.0, 100.0, 1.0, method="exact")
+    # receiver at the old source (h 1.0). The barrier distance mirrors to 70 m
+    # (an asymmetric placement, so the swap genuinely exercises the geometry).
+    rev = barrier_insertion_loss(_BANDS, 1.5, 70.0, 4.0, 100.0, 1.0, method="exact")
     assert np.allclose(fwd.insertion_loss, rev.insertion_loss, atol=1e-9)
 
 
@@ -259,3 +261,10 @@ def test_barrier_rejects_bad_geometry() -> None:
                                method="kurze_anderson", ground_flow_resistivity=2e5)
     with pytest.raises(ValueError, match="unknown method"):
         barrier_insertion_loss(_BANDS, 1.0, 50.0, 4.0, 100.0, 1.5, method="utd")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="barrier_distance \\+ thickness"):
+        # A thick barrier whose far edge lies at/beyond the receiver.
+        barrier_insertion_loss(_BANDS, 1.0, 50.0, 4.0, 100.0, 1.5,
+                               method="exact", thickness=60.0)
+    with pytest.raises(ValueError, match="speed_of_sound"):
+        barrier_insertion_loss(_BANDS, 1.0, 50.0, 4.0, 100.0, 1.5,
+                               speed_of_sound=0.0)

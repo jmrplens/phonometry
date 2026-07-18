@@ -85,7 +85,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.special import fresnel, wofz
 
-from .._internal.validation import require_positive
+from .._internal.validation import require_positive, require_positive_array
 from ..materials.porous_absorber import delany_bazley, miki
 
 if TYPE_CHECKING:
@@ -144,7 +144,7 @@ def _normalized_ground_impedance(
             )
         return np.asarray(medium.normalized_impedance, dtype=np.complex128)
     if isinstance(impedance, PorousMediumResult):
-        return np.asarray(impedance.normalized_impedance, dtype=np.complex128)
+        impedance = impedance.normalized_impedance
     return _resolve_impedance_array(impedance, frequency)
 
 
@@ -163,7 +163,7 @@ def _resolve_impedance_array(impedance: ArrayLike | None, frequency: Real) -> Co
             "'impedance' must be a scalar or match the frequency vector "
             f"(got {z.shape}, expected {frequency.shape})."
         )
-    if np.any(z == 0.0):
+    if not np.all(np.abs(z) > 0.0):
         raise ValueError("'impedance' must be non-zero.")
     return z
 
@@ -243,9 +243,8 @@ def spherical_reflection_coefficient(
         raise ValueError("Source and receiver heights must be non-negative.")
     if distance <= 0.0:
         raise ValueError("'distance' must be positive.")
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    if np.any(f <= 0.0):
-        raise ValueError("'frequencies' must be positive.")
+    speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
+    f = require_positive_array(frequencies, "frequencies")
     z = _resolve_impedance_array(normalized_impedance, f)
     k = 2.0 * np.pi * f / speed_of_sound
     r2 = float(np.hypot(distance, source_height + receiver_height))
@@ -305,9 +304,8 @@ def ground_effect(
         raise ValueError("Source and receiver heights must be non-negative.")
     if distance <= 0.0:
         raise ValueError("'distance' must be positive.")
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    if np.any(f <= 0.0):
-        raise ValueError("'frequencies' must be positive.")
+    speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
+    f = require_positive_array(frequencies, "frequencies")
     z = _normalized_ground_impedance(f, impedance, flow_resistivity, model,
                                      speed_of_sound, air_density)
     k = 2.0 * np.pi * f / speed_of_sound
@@ -362,9 +360,8 @@ def fresnel_number(
                         ("direct_distance", direct_distance)):
         if value <= 0.0:
             raise ValueError(f"'{name}' must be positive.")
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    if np.any(f <= 0.0):
-        raise ValueError("'frequencies' must be positive.")
+    speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
+    f = require_positive_array(frequencies, "frequencies")
     lam = speed_of_sound / f
     delta = source_to_edge + edge_to_receiver - direct_distance
     return np.asarray(2.0 * delta / lam, dtype=np.float64)
@@ -390,14 +387,17 @@ def kurze_anderson_attenuation(fresnel_number: ArrayLike) -> Real:
     :return: Attenuation ``Delta``, in decibels (>= 0), matching the input shape.
     """
     n = np.asarray(fresnel_number, dtype=np.float64)
-    x = np.sqrt(2.0 * np.pi * n.astype(np.complex128))
+    # The formula is only meaningful for N > -0.2 (the illuminated-zone limit of
+    # Maekawa's curve); beyond it the diffraction is negligible (0 dB), so the
+    # intermediate argument is clipped at -0.2 to keep it clear of the tangent
+    # poles of the imaginary-argument branch (this cannot change the result,
+    # which is forced to 0 there below) instead of oscillating through them.
+    n_clipped = np.maximum(n, -0.2)
+    x = np.sqrt(2.0 * np.pi * n_clipped.astype(np.complex128))
     # x / tanh(x) is real for both real and imaginary x; take the real part.
     with np.errstate(divide="ignore", invalid="ignore"):
         ratio = np.where(np.abs(x) < 1e-9, 1.0 + 0.0j, x / np.tanh(x))
     delta = 5.0 + 20.0 * np.log10(np.abs(ratio))
-    # The formula is only meaningful for N > -0.2 (the illuminated-zone limit of
-    # Maekawa's curve); beyond it the diffraction is negligible (0 dB) and the
-    # closed form would spuriously oscillate through the tangent poles.
     delta = np.where(n <= -0.2, 0.0, delta)
     return np.asarray(np.maximum(delta, 0.0), dtype=np.float64)
 
@@ -589,12 +589,19 @@ def barrier_insertion_loss(
             "'barrier_height' must exceed the source and receiver heights "
             "(the receiver must be in the geometric shadow)."
         )
-    if thickness is not None and thickness <= 0.0:
-        raise ValueError("'thickness' must be positive; use None for a thin screen.")
+    if thickness is not None:
+        if thickness <= 0.0:
+            raise ValueError(
+                "'thickness' must be positive; use None for a thin screen."
+            )
+        if barrier_distance + thickness >= receiver_distance:
+            raise ValueError(
+                "'receiver_distance' must exceed 'barrier_distance + thickness' "
+                "(the receiver must lie beyond the barrier's far edge)."
+            )
     has_ground = ground_impedance is not None or ground_flow_resistivity is not None
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    if np.any(f <= 0.0):
-        raise ValueError("'frequencies' must be positive.")
+    speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
+    f = require_positive_array(frequencies, "frequencies")
     k = 2.0 * np.pi * f / speed_of_sound
 
     source = (0.0, source_height)
@@ -616,11 +623,21 @@ def barrier_insertion_loss(
             )
         il = kurze_anderson_attenuation(n)
     elif method == "exact":
-        il = _exact_barrier_il(
-            f, k, source, edge, far_edge, receiver, thickness,
-            has_ground, ground_impedance, ground_flow_resistivity,
-            ground_model, receiver_distance, speed_of_sound, air_density,
-        )
+        il = _exact_barrier_il(_ExactBarrierSetup(
+            frequencies=f,
+            wavenumber=k,
+            source=source,
+            near_edge=edge,
+            far_edge=far_edge,
+            receiver=receiver,
+            thickness=thickness,
+            receiver_distance=receiver_distance,
+            speed_of_sound=speed_of_sound,
+            air_density=air_density,
+            ground_impedance=ground_impedance,
+            ground_flow_resistivity=ground_flow_resistivity,
+            ground_model=ground_model,
+        ))
     else:
         raise ValueError(
             f"unknown method {method!r}; options: 'kurze_anderson', 'exact'."
@@ -649,24 +666,42 @@ def _diffracted_over_barrier(
     return _screen_field(source, near_edge, far_edge, receiver, k)
 
 
-def _exact_barrier_il(
-    f: Real,
-    k: Real,
-    source: tuple[float, float],
-    near_edge: tuple[float, float],
-    far_edge: tuple[float, float],
-    receiver: tuple[float, float],
-    thickness: float | None,
-    has_ground: bool,
-    ground_impedance: ArrayLike | "PorousMediumResult" | None,
-    ground_flow_resistivity: float | None,
-    ground_model: str,
-    receiver_distance: float,
-    speed_of_sound: float,
-    air_density: float,
-) -> Real:
+@dataclass(frozen=True)
+class _ExactBarrierSetup:
+    """Bundled geometry and environment for the wave-theoretic barrier field.
+
+    Groups the many inputs of :func:`_exact_barrier_il` into one object; ``2-D``
+    points are ``(horizontal, height)``.
+    """
+
+    frequencies: Real
+    wavenumber: Real
+    source: tuple[float, float]
+    near_edge: tuple[float, float]
+    far_edge: tuple[float, float]
+    receiver: tuple[float, float]
+    thickness: float | None
+    receiver_distance: float
+    speed_of_sound: float
+    air_density: float
+    ground_impedance: "ArrayLike | PorousMediumResult | None"
+    ground_flow_resistivity: float | None
+    ground_model: str
+
+    @property
+    def has_ground(self) -> bool:
+        """Whether the coherent four-path ground model applies."""
+        return (self.ground_impedance is not None
+                or self.ground_flow_resistivity is not None)
+
+
+def _exact_barrier_il(setup: _ExactBarrierSetup) -> Real:
     """Insertion loss from the wave-theoretic diffracted field (with/without ground)."""
-    if not has_ground:
+    k = setup.wavenumber
+    source, receiver = setup.source, setup.receiver
+    near_edge, far_edge = setup.near_edge, setup.far_edge
+    thickness = setup.thickness
+    if not setup.has_ground:
         p_diff = _diffracted_over_barrier(source, near_edge, far_edge, receiver,
                                           thickness, k)
         r_direct = float(np.hypot(source[0] - receiver[0], source[1] - receiver[1]))
@@ -674,15 +709,18 @@ def _exact_barrier_il(
         return np.asarray(-20.0 * np.log10(np.abs(p_diff) / np.abs(p_free)),
                           dtype=np.float64)
 
-    z = _normalized_ground_impedance(f, ground_impedance, ground_flow_resistivity,
-                                     ground_model, speed_of_sound, air_density)
+    z = _normalized_ground_impedance(
+        setup.frequencies, setup.ground_impedance, setup.ground_flow_resistivity,
+        setup.ground_model, setup.speed_of_sound, setup.air_density,
+    )
     hs, hr = source[1], receiver[1]
     src_img = (source[0], -hs)
     rec_img = (receiver[0], -hr)
     # Spherical-wave reflection coefficient for the source-side and receiver-side
     # ground bounces (evaluated over the full source-receiver geometry).
-    q_src = spherical_reflection_coefficient(f, z, hs, hr, receiver_distance,
-                                             speed_of_sound)
+    q_src = spherical_reflection_coefficient(setup.frequencies, z, hs, hr,
+                                             setup.receiver_distance,
+                                             setup.speed_of_sound)
     q_rec = q_src
     # Four diffracted paths: {source, source image} x {receiver, receiver image}.
     p_barrier = (
@@ -695,8 +733,8 @@ def _exact_barrier_il(
                                                    rec_img, thickness, k)
     )
     # Field without the barrier: the two-ray ground field.
-    r1 = float(np.hypot(receiver_distance, hs - hr))
-    r2 = float(np.hypot(receiver_distance, hs + hr))
+    r1 = float(np.hypot(setup.receiver_distance, hs - hr))
+    r2 = float(np.hypot(setup.receiver_distance, hs + hr))
     p_free_2ray = np.asarray(
         np.exp(1j * k * r1) / (4.0 * np.pi * r1)
         + q_src * np.exp(1j * k * r2) / (4.0 * np.pi * r2),

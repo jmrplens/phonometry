@@ -5371,7 +5371,7 @@ _GROUND_BARRIERS = "Spherical ground & barriers (Attenborough / Salomons / Bies)
 @register(
     _GROUND_BARRIERS,
     "Attenborough 2e Eq. (2.40c) (spherical Q, hard-ground limit)",
-    "|Q| for |Z| -> inf (Rp -> 1 so (1 - Rp) -> 0 and Q -> 1)",
+    "abs(Q) as Z grows large (Rp -> 1 so (1 - Rp) -> 0 and Q -> 1)",
 )
 def _chk_hard_ground_q_unity() -> Outcome:
     q = ph.spherical_reflection_coefficient([500.0], 1e12, 1.0, 1.5, 50.0)

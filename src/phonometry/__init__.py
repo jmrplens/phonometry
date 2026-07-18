@@ -205,6 +205,17 @@ from .metrology.uncertainty import (
     triangular,
     u_shaped,
 )
+from .metrology.correlation import (
+    AlignedImpulseResponseResult,
+    CorrelationResult,
+    TimeDelayResult,
+    align_impulse_responses,
+    correlation,
+    correlation_random_error,
+    impulse_response_delay,
+    time_delay,
+)
+from .metrology.envelope import EnvelopeResult, envelope
 from .metrology.signals import noise_signal
 from .metrology.spectra import (
     CoherentOutputSpectrumResult,
@@ -1139,6 +1150,16 @@ __all__ = [
     "SpectralDensityResult",
     "CrossSpectralDensityResult",
     "CoherentOutputSpectrumResult",
+    "correlation",
+    "correlation_random_error",
+    "time_delay",
+    "impulse_response_delay",
+    "align_impulse_responses",
+    "envelope",
+    "CorrelationResult",
+    "TimeDelayResult",
+    "AlignedImpulseResponseResult",
+    "EnvelopeResult",
     "sweep_signal",
     "inverse_filter",
     "impulse_response",

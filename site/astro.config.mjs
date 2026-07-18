@@ -345,6 +345,7 @@ export default defineConfig({
                 'guides/calibration',
                 'guides/gum-uncertainty',
                 'guides/spectral-analysis',
+                'guides/correlation-delay',
               ],
             },
           ],

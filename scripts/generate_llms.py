@@ -40,6 +40,7 @@ PAGES = [
     ("sound-power.md", "guides/sound-power"),
     ("calibration.md", "guides/calibration"),
     ("spectral-analysis.md", "guides/spectral-analysis"),
+    ("correlation-delay.md", "guides/correlation-delay"),
     ("block-processing.md", "guides/block-processing"),
     ("multichannel.md", "guides/multichannel"),
     ("api-reference.md", "reference/api"),

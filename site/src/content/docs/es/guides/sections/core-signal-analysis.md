@@ -75,3 +75,9 @@ Qué significan los números y cuánto fiarse de ellos.
   PSD y densidad espectral cruzada con intervalos de confianza chi-cuadrado,
   el espectro de salida coherente con la SNR espectral, suavizado en 1/n de
   octava y generadores de ruido de colores con pendiente exacta.
+- [Correlación, retardo y envolvente](/phonometry/es/guides/correlation-delay/):
+  estimaciones de correlación con los errores aleatorios de Bendat y
+  Piersol, estimación del retardo por correlación directa, pendiente de fase
+  del espectro cruzado y las ponderaciones GCC de Knapp y Carter, retardo
+  submuestral y alineación de respuestas al impulso, y la envolvente de
+  Hilbert.

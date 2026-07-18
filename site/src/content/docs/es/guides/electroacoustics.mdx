@@ -1,6 +1,6 @@
 ---
 title: "Electroacústica: distorsión y respuesta en frecuencia"
-description: "Distorsión IEC 60268-3 — distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por frecuencia diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468 — más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria, y las convenciones de sensibilidad de IEC 60268-4/-5 (dB re 1 V/Pa, la normalización de campo libre a 1 W / 1 m)."
+description: "Distorsión IEC 60268-3: distorsión armónica total y de orden n, THD+N y SINAD a través del ancho de banda de medición AES17, la intermodulación por órdenes de modulación y por frecuencia diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468, más los estimadores de respuesta en frecuencia H1/H2 de Bendat y Piersol y la coherencia ordinaria, y las convenciones de sensibilidad de IEC 60268-4/-5 (dB re 1 V/Pa, la normalización de campo libre a 1 W / 1 m)."
 references:
   - type: book
     authors: ["Beranek, L. L.", "Mellow, T. J."]
@@ -59,10 +59,10 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 Dos pilares de la caracterización de equipos de audio, a partir de una señal
 capturada: cuánto **distorsiona** un amplificador o un transductor un tono de
 prueba, y qué **respuesta en frecuencia** revela una medición de entrada/salida.
-Esta página cubre el conjunto de distorsión de la IEC 60268-3 — distorsión
+Esta página cubre el conjunto de distorsión de la IEC 60268-3: distorsión
 armónica total y de orden n, THD+N y SINAD a través del ancho de banda de
 medición AES17, la intermodulación por órdenes de modulación y por frecuencia
-diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468 — y
+diferencia, la intermodulación dinámica (DIM) y la THD ponderada ITU-R 468, y
 los estimadores de respuesta en frecuencia `H1`/`H2` de Bendat y
 Piersol con la coherencia ordinaria `γ²`. Toda magnitud tiene un oráculo
 analítico exacto (señales sintéticas con amplitudes armónicas y de
@@ -88,8 +88,8 @@ d_n = \frac{a_n}{\sqrt{\sum_{k\ge 1} a_k^2}}.
 $$
 
 `dₙ` es la distorsión armónica de orden n (el armónico n respecto al total). Los
-tonos deben caer en las líneas de la FFT — usa muestreo coherente (un número
-entero de periodos) o una ventana de baja fuga — para leer las amplitudes sin
+tonos deben caer en las líneas de la FFT: usa muestreo coherente (un número
+entero de periodos) o una ventana de baja fuga para leer las amplitudes sin
 fuga espectral.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion_es.svg" alt="Espectro de magnitud de un ensayo con tono único de 1 kHz en dB respecto al fundamental, con los cinco primeros armónicos marcados sobre un suelo de ruido de banda ancha, anotado con THD (F), THD (R), THD+N y SINAD" width="82%" loading="eager" />
@@ -139,7 +139,7 @@ plt.show()
 ## 2. THD+N y SINAD (AES17-2015 6.3)
 
 Mientras que la THD cuenta solo los armónicos, la **THD+N** compara *todo salvo
-el fundamental* — armónicos **y** ruido — con la señal total. AES17 elimina el
+el fundamental* (armónicos **y** ruido) con la señal total. AES17 elimina el
 fundamental con un filtro de muesca normalizado (`1,2 ≤ Q ≤ 3`, validado sobre
 la respuesta *aplicada* de fase cero según la cláusula 5.2.8) y toma la razón
 entre el residuo y el RMS total; el **SINAD** es su recíproco en dB:
@@ -149,8 +149,8 @@ $$
 \mathrm{SINAD} = -20\lg(\mathrm{THD{+}N})\ \mathrm{dB}.
 $$
 
-Ambas tensiones se miden a través del ancho de banda de medición AES17 — un paso
-alto de 20 Hz más el paso bajo normalizado en 20 kHz (cláusulas 5.2.5 y 6.3.1) —
+Ambas tensiones se miden a través del ancho de banda de medición AES17 (un paso
+alto de 20 Hz más el paso bajo normalizado en 20 kHz, cláusulas 5.2.5 y 6.3.1)
 de modo que un offset de continua o el ruido ultrasónico a frecuencias de
 muestreo altas no cuentan como "ruido". El borde de banda es configurable, y
 `bandwidth=None` desactiva la cadena y mide toda la banda de Nyquist.
@@ -166,7 +166,7 @@ wide = electroacoustics.thd_plus_noise(signal, fs, 1000.0, bandwidth=None)  # Ny
 
 Como la THD+N incluye el suelo de ruido en banda, es igual o mayor que la THD de
 solo armónicos; el `SINAD` es el correspondiente margen señal-a-ruido-y-distorsión
-en dB (una magnitud derivada de la THD+N de AES17 — la propia AES17 no define el
+en dB (una magnitud derivada de la THD+N de AES17; la propia AES17 no define el
 SINAD). La muesca descarta internamente un transitorio de arranque/parada, así
 que la medición requiere una captura estacionaria y suficientemente larga.
 
@@ -174,7 +174,7 @@ que la medición requiere una captura estacionaria y suficientemente larga.
 
 `weighted_thd` pondera en frecuencia el residuo tras la muesca antes de tomar la
 razón, de modo que se tiene en cuenta el énfasis perceptual de los productos de
-distorsión. La ponderación por defecto es la red que exige la cláusula — la
+distorsión. La ponderación por defecto es la red que exige la cláusula: la
 curva del Apéndice A de la IEC 60268-1, es decir la ITU-R BS.468-4, con su pico
 de +12,2 dB cerca de 6,3 kHz (expuesta como `itu_r_468_weighting`); `'A'` y
 `'C'` se mantienen como opciones etiquetadas. Según la cláusula, la medición
@@ -234,7 +234,7 @@ Dada una entrada `x` y la salida `y` de un dispositivo, la **respuesta en
 frecuencia** `H(f)` se estima a partir de los autoespectros y el espectro cruzado
 promediados con Welch. Bendat y Piersol (*Random Data*, 4ª ed.) dan dos
 estimadores, que difieren en qué canal soporta el ruido, más la **coherencia
-ordinaria** `γ²` — la fracción de la potencia de salida explicada linealmente por
+ordinaria** `γ²`, la fracción de la potencia de salida explicada linealmente por
 la entrada:
 
 $$
@@ -260,7 +260,7 @@ freqs, gamma2 = electroacoustics.coherence(x, y, fs)
 ```
 
 La coherencia necesita promediarse sobre varios segmentos de Welch para ser
-significativa — un único segmento da `γ² ≡ 1` por construcción.
+significativa; un único segmento da `γ² ≡ 1` por construcción.
 
 <details>
 <summary>Ver el código de esta figura</summary>

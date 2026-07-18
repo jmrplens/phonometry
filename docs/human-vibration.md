@@ -1,6 +1,6 @@
 ← [Documentation index](README.md)
 
-# Human Vibration — Whole-Body and Hand-Arm Exposure
+# Human Vibration: Whole-Body and Hand-Arm Exposure
 
 Vibration transmitted to a person is evaluated with the same measurement chain
 whatever its origin: the acceleration is **frequency-weighted** to reflect how
@@ -30,8 +30,8 @@ H(s) = H_h(s)\,H_l(s)\,H_t(s)\,H_s(s).
 $$
 
 A single Table 3 parameter set $(f_1, Q_1, f_2, Q_2, f_3, f_4, Q_4, f_5, Q_5,
-f_6, Q_6, K)$ realises all nine weightings — `Wb, Wc, Wd, We, Wf, Wh, Wj, Wk,
-Wm` — a corner set to infinity collapsing its stage to unity. The principal
+f_6, Q_6, K)$ realises all nine weightings (`Wb, Wc, Wd, We, Wf, Wh, Wj, Wk,
+Wm`) a corner set to infinity collapsing its stage to unity. The principal
 whole-body weighting is `Wk` (vertical, seat surface); `Wd` is the horizontal
 weighting, and `Wh` the hand-arm weighting.
 
@@ -123,7 +123,7 @@ acceleration. The factors are evaluated at exactly the frequencies you pass;
 note that the ISO tables (ISO 8041-1 Annex B, ISO 2631-1 Table 3, ISO 5349-1
 Table A.2) tabulate $W_i$ at the *true* one-third-octave centres
 $10^{n/10}$ Hz (6.31, 7.943, 15.85, ...), not at the nominal band labels
-(6.3, 8, 16, ...) — pass true centres when comparing against the tabulated
+(6.3, 8, 16, ...); pass true centres when comparing against the tabulated
 factors.
 
 ```python
@@ -241,7 +241,7 @@ as $A(8) = \sqrt{\sum_i A_i(8)^2}$ (ISO 5349-1 Eqs. (2)/(3); ISO 5349-2
 Eqs. (1)–(3)).
 
 `daily_vibration_exposure` builds the partial exposures, combines them and
-assesses the result against **Directive 2002/44/EC** — hand-arm action value
+assesses the result against **Directive 2002/44/EC**: hand-arm action value
 `A(8) = 2.5` and limit value `5` m/s²; whole-body action `0.5` and limit `1.15`
 m/s² (or a VDV of `9.1` / `21` m/s¹·⁷⁵):
 
@@ -309,7 +309,7 @@ from phonometry import vibration
 print(round(vibration.hav_vwf_lifetime_years(7.0), 1))   # 4.0 years (Table C.1)
 ```
 
-The standards deliberately define no safe limit — `A(8)` and the directive's
+The standards deliberately define no safe limit; `A(8)` and the directive's
 action and limit values are the basis for any exposure criterion. For whole-body
 exposure, `energy_equivalent_acceleration` gives the ISO 2631-1 Eq. (B.3)
 energy-equivalent magnitude across periods of different magnitude and duration.

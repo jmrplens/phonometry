@@ -1,6 +1,50 @@
 ---
 title: "Surface Scattering, Diffusion and In-situ Absorption"
 description: "How a surface returns incident sound: the random-incidence scattering coefficient in a reverberation room (ISO 17497-1), the autocorrelation diffusion coefficient from a free-field goniometer (ISO 17497-2), and in-situ road-surface absorption by the subtraction technique (ISO 13472-1) and the spot-tube method (ISO 13472-2)."
+references:
+  - type: book
+    authors: ["Cox, T. J.", "D'Antonio, P."]
+    year: 2017
+    title: "Acoustic absorbers and diffusers: Theory, design and application"
+    edition: "3rd ed."
+    publisher: "CRC Press"
+    doi: "10.1201/9781315369211"
+    note: "ISBN 978-1-4987-4099-9. The reference monograph on diffuser theory and design, by the authors behind the ISO 17497-2 diffusion-coefficient method: the scattering-versus-diffusion distinction, the measurement rigs and the design guidance this page condenses."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2004
+    title: "Acoustics — Sound-scattering properties of surfaces — Part 1: Measurement of the random-incidence scattering coefficient in a reverberation room"
+    designation: "ISO 17497-1:2004+A1:2014"
+    url: "https://www.iso.org/standard/31397.html"
+    note: "The edition implemented here: the turntable method of section 1 and the base-plate limits of the standard's Table 1."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2012
+    title: "Acoustics — Sound-scattering properties of surfaces — Part 2: Measurement of the directional diffusion coefficient in a free field"
+    designation: "ISO 17497-2:2012"
+    url: "https://www.iso.org/standard/55293.html"
+    note: "The goniometer autocorrelation coefficient behind section 2 of this page, its area weighting and the normalised d_n."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2002
+    title: "Acoustics — Measurement of sound absorption properties of road surfaces in situ — Part 1: Extended surface method"
+    designation: "ISO 13472-1:2002"
+    url: "https://www.iso.org/standard/35387.html"
+    note: "The in-situ absorption of an extended surface by the subtraction technique of section 3. Since revised as ISO 13472-1:2022 (https://www.iso.org/standard/77032.html); the 2002 edition is the implemented one."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Measurement of sound absorption properties of road surfaces in situ — Part 2: Spot method for reflective surfaces"
+    designation: "ISO 13472-2:2010"
+    url: "https://www.iso.org/standard/32304.html"
+    note: "The spot-tube method of section 4. Since revised as ISO 13472-2:2025 (https://www.iso.org/standard/84925.html); the 2010 edition is the implemented one."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1993
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 1: Calculation of the absorption of sound by the atmosphere"
+    designation: "ISO 9613-1:1993"
+    url: "https://www.iso.org/standard/17426.html"
+    note: "Only the pure-tone attenuation coefficient alpha consumed by the ISO 17497-1 Clause 8 air-attenuation relations (Eqs. (2)/(3)); the full atmospheric-absorption model lives in the Outdoor Sound Propagation guide."
 ---
 
 import Video from '../../../components/Video.astro';
@@ -497,40 +541,9 @@ s_min, s_max = materials.spot_microphone_spacing_bounds(
 print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
 ```
 
-## References
-
-- Cox, T. J., & D'Antonio, P. (2017). *Acoustic absorbers and diffusers:
-  Theory, design and application* (3rd ed.). CRC Press.
-  ISBN 978-1-4987-4099-9.
-  [doi:10.1201/9781315369211](https://doi.org/10.1201/9781315369211).
-  The reference monograph on diffuser theory and design, by the authors
-  behind the ISO 17497-2 diffusion-coefficient method: the
-  scattering-versus-diffusion distinction, the
-  measurement rigs and the design guidance this page condenses.
-- International Organization for Standardization. (2004). *Acoustics —
-  Sound-scattering properties of surfaces — Part 1: Measurement of the
-  random-incidence scattering coefficient in a reverberation room*
-  (ISO 17497-1:2004+A1:2014, the edition implemented here).
-  [iso.org catalogue](https://www.iso.org/standard/31397.html).
-  The turntable method implemented in section 1 of this page and the
-  base-plate limits of the standard's Table 1.
-- International Organization for Standardization. (2012). *Acoustics —
-  Sound-scattering properties of surfaces — Part 2: Measurement of the
-  directional diffusion coefficient in a free field* (ISO 17497-2:2012).
-  [iso.org catalogue](https://www.iso.org/standard/55293.html).
-  The goniometer autocorrelation coefficient behind section 2 of this page,
-  its area weighting and the normalised $d_n$.
-
-## Standards
-
-ISO 17497-1:2004+A1:2014 (scattering
-coefficient), ISO 17497-2:2012 (diffusion coefficient), ISO 13472-1:2002 (in-situ
-absorption, extended surface), ISO 13472-2:2010 (in-situ absorption, spot
-method), and ISO 9613-1:1993 — only the pure-tone attenuation coefficient
-α consumed by the ISO 17497-1 Clause 8 air-attenuation relations (Eqs. (2)/(3)); the
-full atmospheric-absorption model is covered in
-[Outdoor Sound Propagation](/phonometry/guides/outdoor-propagation/).
-
 ## See also
 
+- [Outdoor Sound Propagation](/phonometry/guides/outdoor-propagation/): the
+  full ISO 9613-1 atmospheric-absorption model whose pure-tone coefficient the
+  ISO 17497-1 air-attenuation relations consume.
 - API reference: [`materials.scattering_diffusion`](/phonometry/reference/api/materials/scattering-diffusion/) and [`materials.road_absorption`](/phonometry/reference/api/materials/road-absorption/).

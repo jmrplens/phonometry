@@ -1,0 +1,169 @@
+---
+/**
+ * Unified per-page bibliography, rendered from the typed `references` list in
+ * the page frontmatter (schema in src/content.config.ts) as one APA-7
+ * "References" section at the end of the article. Injected on every page by
+ * the MarkdownContent override; pages without `references` render nothing.
+ * The matching "On this page" entry is added by src/routeData.ts.
+ */
+import type { CollectionEntry } from 'astro:content';
+
+type Reference = NonNullable<CollectionEntry<'docs'>['data']['references']>[number];
+
+/** One rendered fragment of a citation: plain, italic or linked text. */
+interface Part {
+	text: string;
+	italic?: boolean;
+	href?: string;
+}
+
+const { entry, lang } = Astro.locals.starlightRoute;
+const references: Reference[] = entry.data.references ?? [];
+
+const t = Astro.locals.t;
+const HEADING_ID = 'references';
+
+/** "Fastl, H." + "Zwicker, E." -> "Fastl, H., & Zwicker, E." */
+function joinAuthors(authors: readonly string[]): string {
+	if (authors.length === 1) return authors[0]!;
+	return `${authors.slice(0, -1).join(', ')}, & ${authors[authors.length - 1]}`;
+}
+
+function who(ref: Reference): string {
+	if ('authors' in ref && ref.authors?.length) return joinAuthors(ref.authors);
+	if ('organization' in ref && ref.organization) return ref.organization;
+	return ref.title; // APA: no author -> the title moves to the author position.
+}
+
+function yearLabel(ref: Reference): string {
+	if (ref.year === undefined) return lang.startsWith('es') ? 's. f.' : 'n.d.';
+	return String(ref.year);
+}
+
+/** Parenthetical right after the title: edition, designation or report number. */
+function titleSuffix(ref: Reference): string | undefined {
+	switch (ref.type) {
+		case 'standard':
+			return ref.designation;
+		case 'book':
+			return ref.edition;
+		case 'report':
+			return ref.number;
+		default:
+			return undefined;
+	}
+}
+
+/** The source segment after the title: publisher, journal locator or site. */
+function sourceParts(ref: Reference): Part[] {
+	switch (ref.type) {
+		case 'book':
+			return [{ text: ref.publisher }];
+		case 'standard':
+			// APA omits the publisher when it repeats the authoring organization.
+			return ref.publisher && ref.publisher !== ref.organization
+				? [{ text: ref.publisher }]
+				: [];
+		case 'report':
+			return ref.institution && ref.institution !== ref.organization
+				? [{ text: ref.institution }]
+				: [];
+		case 'web':
+			return ref.siteName ? [{ text: ref.siteName }] : [];
+		case 'article': {
+			const parts: Part[] = [{ text: ref.journal, italic: true }];
+			if (ref.volume !== undefined) {
+				parts.push({ text: ', ' }, { text: String(ref.volume), italic: true });
+				if (ref.issue !== undefined) parts.push({ text: `(${ref.issue})` });
+			}
+			if (ref.pages) parts.push({ text: `, ${ref.pages}` });
+			return parts;
+		}
+	}
+}
+
+/** Full citation as an ordered list of fragments, APA-7 punctuation included. */
+function citationParts(ref: Reference): Part[] {
+	const parts: Part[] = [];
+	// The schema guarantees an author position for every type (authors or
+	// organization), so the citation is always author-first.
+	const author = who(ref);
+	const italicTitle = ref.type !== 'article';
+
+	parts.push({ text: author.endsWith('.') ? author : `${author}.` });
+	parts.push({ text: ` (${yearLabel(ref)}). ` });
+	parts.push({ text: ref.title, italic: italicTitle, href: ref.url });
+	const suffix = titleSuffix(ref);
+	if (suffix) parts.push({ text: ` (${suffix})` });
+	parts.push({ text: '. ' });
+
+	const source = sourceParts(ref);
+	if (source.length) {
+		parts.push(...source);
+		parts.push({ text: '. ' });
+	}
+	if (ref.doi) {
+		const doiUrl = `https://doi.org/${ref.doi}`;
+		parts.push({ text: doiUrl, href: doiUrl });
+		parts.push({ text: '. ' });
+	}
+	return parts;
+}
+
+/** APA orders alphabetically by first author surname or organization, then year. */
+function sortKey(ref: Reference): string {
+	return `${who(ref)} ${yearLabel(ref)} ${ref.title}`.toLowerCase();
+}
+
+const sorted = [...references].sort((a, b) =>
+	sortKey(a).localeCompare(sortKey(b), lang, { sensitivity: 'base' }),
+);
+---
+
+{
+	sorted.length > 0 && (
+		<section class="page-references" aria-labelledby={HEADING_ID}>
+			<h2 id={HEADING_ID}>{t('phonometry.references.title')}</h2>
+			<ul role="list">
+				{sorted.map((ref) => (
+					<li>
+						{citationParts(ref).map((part) => {
+							const inner = part.italic ? <cite>{part.text}</cite> : part.text;
+							return part.href ? (
+								<a href={part.href} rel="noopener">
+									{inner}
+								</a>
+							) : (
+								inner
+							);
+						})}
+						{ref.note && <span class="ref-note">{ref.note}</span>}
+					</li>
+				))}
+			</ul>
+		</section>
+	)
+}
+
+<style>
+	/* APA hanging indent; keep Starlight's content typography for the rest. */
+	.page-references ul {
+		list-style: none;
+		padding-inline-start: 0;
+	}
+	.page-references li {
+		padding-inline-start: 1.5rem;
+		text-indent: -1.5rem;
+		overflow-wrap: break-word;
+	}
+	.page-references li + li {
+		margin-top: 0.75rem;
+	}
+	/* <cite> carries the APA italics; keep the surrounding size and colour. */
+	.page-references cite {
+		font-style: italic;
+	}
+	.ref-note {
+		color: var(--sl-color-gray-2);
+	}
+</style>

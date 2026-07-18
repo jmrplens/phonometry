@@ -239,6 +239,9 @@ export default defineConfig({
         Header: './src/components/Header.astro',
         // Linked group labels + non-collapsible sidebar.
         Sidebar: './src/components/Sidebar.astro',
+        // Default article body plus the unified APA-7 references section
+        // rendered from the typed frontmatter bibliography.
+        MarkdownContent: './src/components/MarkdownContent.astro',
       },
       customCss: [
         './src/styles/katex.css',

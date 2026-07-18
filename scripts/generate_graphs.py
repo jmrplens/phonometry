@@ -25,6 +25,7 @@ from scipy import signal as scipy_signal  # noqa: E402
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 from phonometry import OctaveFilterBank  # noqa: E402
+from phonometry._plot.common import format_frequency_axis  # noqa: E402
 
 # Constants for professional styling
 # ---------------------------------------------------------------------------
@@ -2321,6 +2322,7 @@ def generate_weighting_class_mask(output_dir: str) -> None:
     ax.set_xscale("log")
     ax.set_xlim(10, 20000)
     ax.set_ylim(floor, ceil)
+    format_frequency_axis(ax, 10, 20000)
     ax.set_title("Weighting Deviation vs IEC 61672-1:2013 Table 3 Limits",
                  fontweight="bold", pad=12)
     ax.set_xlabel(LABEL_FREQ_HZ)
@@ -2844,6 +2846,7 @@ def generate_excitation_signals(output_dir: str) -> None:
     ax_ms.set_xlabel("Frequency [Hz]")
     ax_ms.set_ylabel("Magnitude [dB]")
     ax_ms.set_xlim(20.0, fs / 2)
+    format_frequency_axis(ax_ms, 20.0, fs / 2)
     ax_ms.set_ylim(-12.0, 12.0)
     ax_ms.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
 
@@ -3707,6 +3710,8 @@ def generate_frequency_response(output_dir: str) -> None:
     ax_coh.set_xlim(20.0, fs / 2.0)
     ax_coh.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_coh.set_axisbelow(True)
+    for _axf in (ax_mag, ax_coh):
+        format_frequency_axis(_axf, 20.0, fs / 2.0)
     plt.tight_layout()
     save_figure(output_dir, "frequency_response.svg")
     plt.close()
@@ -3755,6 +3760,7 @@ def generate_swept_sine_thd(output_dir: str) -> None:
                  fontweight="bold", pad=12)
     ax.set_xlim(30.0, 2800.0)
     ax.set_ylim(0.05, 20.0)
+    format_frequency_axis(ax, 30.0, 2800.0)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=9)
@@ -3805,6 +3811,7 @@ def generate_psd_confidence_smoothing(output_dir: str) -> None:
     ax.set_title("Calibrated Spectral Density of Pink Noise (Bendat & Piersol)",
                  fontweight="bold", pad=12)
     ax.set_xlim(20.0, 20000.0)
+    format_frequency_axis(ax, 20.0, 20000.0)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=9)
@@ -3975,6 +3982,9 @@ def generate_ship_source_level(output_dir: str) -> None:
     twin.semilogx(freqs, res.surface_correction, ":", color=COLOR_TERTIARY,
                   linewidth=2.0, label="Surface correction ΔL")
     twin.set_ylabel("Surface correction ΔL [dB]")
+    # After twinx() re-initialises the shared x-axis with the default log
+    # locator, so the octave-band labelling is not reset to 10^n ticks.
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
 
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
@@ -4269,6 +4279,7 @@ def generate_ocean_ambient_noise(output_dir: str) -> None:
     ax.set_title("Ocean Ambient Noise (Wenz)", fontweight="bold", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     ax.legend(loc="upper right", fontsize=9)
     plt.tight_layout()
     save_figure(output_dir, "ocean_ambient_noise.svg")
@@ -4307,6 +4318,8 @@ def generate_ship_traffic_noise(output_dir: str) -> None:
     ax.set_title("Ship Traffic Source Level (JOMOPANS-ECHO)", fontweight="bold", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
+    _sf = np.asarray(s.frequency, dtype=float)
+    format_frequency_axis(ax, float(_sf.min()), float(_sf.max()))
     ax.legend(loc="upper right", fontsize=9)
     plt.tight_layout()
     save_figure(output_dir, "ship_traffic_noise.svg")
@@ -4399,6 +4412,7 @@ def generate_aircraft_atmospheric_absorption(output_dir: str) -> None:
                  fontweight="bold", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     ax.legend(loc="upper left", fontsize=9)
     ax.text(0.98, 0.05, "25 °C, 70% RH\nsolid: SAE band, dashed: pure-tone mid-band",
             transform=ax.transAxes, va="bottom", ha="right", fontsize=9,
@@ -4552,6 +4566,7 @@ def generate_rotorcraft_ground_effect(output_dir: str) -> None:
                  fontweight="bold", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.6, which="both")
     ax.set_axisbelow(True)
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
     ax.legend(loc="lower left", fontsize=9)
     ax.text(0.98, 0.05, f"source {hs:.0f} m, receiver {hr:.1f} m, offset {dp:.0f} m",
             transform=ax.transAxes, ha="right", va="bottom", fontsize=9,
@@ -4646,6 +4661,7 @@ def generate_rotorcraft_terrain_screening(output_dir: str) -> None:
     ax2.set_ylabel("Ground and screening adjustment [dB]")
     ax2.grid(color=COLOR_GRID, linestyle="--", alpha=0.6, which="both")
     ax2.set_axisbelow(True)
+    format_frequency_axis(ax2, float(freqs.min()), float(freqs.max()))
     ax2.legend(loc="lower left", fontsize=9)
     plt.tight_layout()
     save_figure(output_dir, "rotorcraft_terrain_screening.svg")
@@ -5194,6 +5210,7 @@ def generate_mechanical_mobility(output_dir: str) -> None:
     ax.set_ylabel("Normalized FRF magnitude")
     ax.set_title("ISO 7626-1 Mechanical Mobility FRFs", fontweight="bold", pad=12)
     ax.set_xlim(freq[0], freq[-1])
+    format_frequency_axis(ax, float(freq[0]), float(freq[-1]))
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.legend(loc="lower center", fontsize=9, ncol=2)
 
@@ -5246,6 +5263,7 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     ax.set_ylabel(r"Transfer stiffness level $L_k$ [dB re 1 N/m]")
     ax.set_title("ISO 10846 Dynamic Transfer Stiffness", fontweight="bold", pad=12)
     ax.set_xlim(freq[0], freq[-1])
+    format_frequency_axis(ax, float(freq[0]), float(freq[-1]))
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.legend(loc="upper left", fontsize=9)
 
@@ -5635,6 +5653,7 @@ def generate_air_absorption_alpha(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Attenuation coefficient α [dB/km]")
     ax.set_xlim(50.0, 10000.0)
+    format_frequency_axis(ax, 50.0, 10000.0)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.legend(loc="upper left", fontsize=10)
     plt.tight_layout()
@@ -5727,6 +5746,7 @@ def generate_ground_effect_spherical(output_dir: str) -> None:
     ax.set_ylabel("Level re free field [dB]")
     ax.set_xlim(50.0, 4000.0)
     ax.set_ylim(-20.0, 8.0)
+    format_frequency_axis(ax, 50.0, 4000.0)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=9)
@@ -6731,6 +6751,7 @@ def generate_multiple_shock(output_dir: str) -> None:
     ax_h.set_title("Seat-to-spine transfer function", fontweight="bold", pad=10)
     ax_h.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_h.set_axisbelow(True)
+    format_frequency_axis(ax_h, float(freq[0]), float(freq[-1]))
     ax_h.legend(loc="upper right")
 
     # --- Right: injury probability Pi(R) with the Annex C male example. ---

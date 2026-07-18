@@ -200,5 +200,13 @@ export const apiSidebar = {
         'reference/api/simulation/fdtd',
       ],
     },
+    {
+      label: 'Correlation & envelope',
+      translations: { es: 'Correlación y envolvente' },
+      items: [
+        'reference/api/correlation/correlation',
+        'reference/api/correlation/envelope',
+      ],
+    },
   ],
 };

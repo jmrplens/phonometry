@@ -49,6 +49,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Sound Power](https://jmrplens.github.io/phonometry/guides/sound-power/)
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/guides/calibration/)
 - [Calibrated spectral analysis (Bendat & Piersol)](https://jmrplens.github.io/phonometry/guides/spectral-analysis/)
+- [Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)](https://jmrplens.github.io/phonometry/guides/correlation-delay/)
 - [Block Processing](https://jmrplens.github.io/phonometry/guides/block-processing/)
 - [Multichannel and Performance](https://jmrplens.github.io/phonometry/guides/multichannel/)
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/)
@@ -8250,6 +8251,258 @@ same segment length are mutually consistent bin by bin.
 ---
 
 
+<!-- source: docs/correlation-delay.md | canonical: https://jmrplens.github.io/phonometry/guides/correlation-delay/ -->
+
+# Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)
+
+Where the [calibrated spectral estimators](https://jmrplens.github.io/phonometry/guides/spectral-analysis/) describe a
+signal in frequency, this page covers their time-domain counterparts in
+`phonometry.metrology`: **auto- and cross-correlation** estimates with the
+three standard normalizations and their Bendat & Piersol random errors;
+**time-delay estimation** (TDE) by the direct correlator, the cross-spectrum
+phase slope and the **generalized cross-correlation** (GCC) of Knapp & Carter
+with the Roth, SCOT, PHAT and maximum-likelihood weightings; **sub-sample
+peak location** for impulse-response delays and alignment; and the **Hilbert
+envelope** with instantaneous phase and frequency. The GCC estimators run on
+the same Welch core as the spectral densities, so both views of a signal pair
+are mutually consistent bin by bin.
+
+## 1. Correlation estimates
+
+`correlation` computes the auto- or cross-correlation via zero-padded FFT so
+the circular product never wraps (Bendat & Piersol Section 11.4.2), with the
+sign convention of the book's time-delay model: for
+`y(t) = α·x(t-τ0) + n(t)` the estimate peaks at `τ = +τ0` (Eq. 5.21). Three
+normalizations are available:
+
+- `'biased'` — the lag sums divided by `N`; tapers toward the record ends
+  and stays bounded by `[Rxx(0)·Ryy(0)]^1/2`;
+- `'unbiased'` — divided by `N-|r|` (Eq. 11.96), an unbiased estimate of
+  `Rxy(τ)` whose variance grows toward the ends;
+- `'coefficient'` — the correlation coefficient function
+  `ρxy(τ) = Cxy(τ)/(σx·σy)` in [-1, 1] over the mean-removed records
+  (Eq. 5.16).
+
+```python
+import numpy as np
+from phonometry import correlation
+
+res = correlation(x, y, fs, normalization="coefficient", max_lag=0.05)
+peak = np.argmax(res.values)
+print(res.lags[peak], res.values[peak])   # delay and its coefficient
+res.plot()
+```
+
+The result always carries the coefficient function alongside the requested
+normalization, because the coefficient is what the error formulas need. For
+bandwidth-limited Gaussian data of bandwidth `B` observed for `T` seconds
+(Eqs. 8.109/8.112, valid for `T ≥ 10·|τ|` and `BT ≥ 5`):
+
+$$
+\varepsilon\!\left[\hat{R}_{xy}(\tau)\right] =
+\frac{\left[1 + \rho^{-2}_{xy}(\tau)\right]^{1/2}}{\sqrt{2BT}},
+\qquad
+\varepsilon\!\left[\hat{R}_{xx}(0)\right] = \frac{1}{\sqrt{BT}} .
+$$
+
+`res.random_error(signal_bandwidth)` evaluates it per lag with the measured
+coefficient, and the standalone `correlation_random_error` takes an explicit
+coefficient — with `ρ = S/√((S+M)(S+N)) = 1/11`, `B = 100` Hz and `T = 5` s
+it reproduces the `ε ≈ 0.35` of the book's Example 8.5, one of the pinned
+conformance anchors. Two closed forms anchor the estimator itself in the
+tests: the autocorrelation of a sine, `(A²/2)·cos(2πf0τ)`, and the
+`sin(2πBτ)/(2πBτ)` autocorrelation of bandwidth-limited white noise
+(Eq. 8.120).
+
+## 2. Time-delay estimation
+
+`time_delay` estimates the delay of `y` relative to `x` in the two-sensor
+model `y(t) = α·x(t-τ0) + n(t)` (B&P Section 5.1.4) by three routes:
+
+- **`'direct'`** — the peak of the full-record correlation coefficient
+  function;
+- **`'phase'`** — the `|Gxy|`-weighted least-squares slope of the
+  cross-spectrum phase (Eq. 5.101b): a pure delay has an exactly linear
+  phase, so this estimator resolves fractional delays to better than 1e-3
+  samples without any peak interpolation, as long as the unwrapped phase is
+  unambiguous (clean, moderate delays);
+- **`'gcc'`** — the generalized cross-correlation of Knapp & Carter (1976):
+  the Welch-averaged cross-spectrum is weighted by `ψ(f)` before the inverse
+  transform, sharpening the peak that the signal's own autocorrelation would
+  otherwise smear (their Eq. 9).
+
+The weightings of Knapp & Carter's Table I, with the conditions the paper
+attaches to each:
+
+| `weighting` | `ψ(f)` | Behaviour and conditions |
+|---|---|---|
+| `'none'` | 1 | The plain correlator: the delta at the delay is convolved with the signal autocorrelation — broad peak on colored signals. |
+| `'roth'` | `1/Gxx` | Suppresses the bands where the *first* sensor is noisy; still smears unless that noise is spectrally similar to the signal. |
+| `'scot'` | `1/√(Gxx·Gyy)` | Prewhitens both channels symmetrically; equals Roth when the sensors match. |
+| `'phat'` | `1/|Gxy|` | Ideally a delta at the delay for uncorrelated noises (their Eq. 23) — but the weight ignores the signal-to-noise ratio, so bands without signal contribute unit-magnitude random phase. It needs signal power across the analysis band. |
+| `'ml'` | `γ²/(|Gxy|·(1-γ²))` | The Hannan-Thomson maximum-likelihood processor: a PHAT weighted down by the phase variance each band actually carries. Attains the Cramér-Rao bound; the safe default when the signal does not fill the band. |
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay.svg" alt="Normalized cross-correlation of a colored two-sensor signal pair against lag in milliseconds: the direct correlator shows a broad peak around the true 20-sample delay while the GCC-PHAT curve collapses to a sharp spike exactly on the dashed true-delay line" width="82%"></picture>
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import signal as sp_signal
+from phonometry import noise_signal, time_delay
+
+fs = 8192.0
+delay = 20  # samples
+b, a = sp_signal.butter(2, 800.0 / (fs / 2.0))   # colored common signal
+s = sp_signal.lfilter(b, a, noise_signal(fs, 4.0, color="white", seed=10))
+x = s + noise_signal(fs, 4.0, color="white", rms=0.02, seed=11)
+y = np.roll(s, delay) + noise_signal(fs, 4.0, color="white", rms=0.02, seed=12)
+
+direct = time_delay(x, y, fs, method="direct", max_delay=0.01)
+phat = time_delay(x, y, fs, method="gcc", weighting="phat",
+                  nperseg=2048, max_delay=0.01)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(1e3 * direct.lags,
+        direct.correlation / np.max(np.abs(direct.correlation)),
+        label="Direct cross-correlation")
+ax.plot(1e3 * phat.lags, phat.correlation, label="GCC-PHAT")
+ax.axvline(1e3 * delay / fs, ls="--", color="k", label="True delay")
+ax.set_xlabel("Lag [ms]")
+ax.set_ylabel("Normalized correlation")
+ax.legend()
+plt.show()
+```
+
+</details>
+
+The correlation-peak methods refine the sample peak by three-point parabolic
+interpolation, optionally after **band-limited local upsampling**
+(`upsample=16` resamples a window around the peak sixteenfold before the
+parabola). Sub-sample accuracy presumes the peak is oversampled — i.e. the
+signals are band-limited below Nyquist; on a 0.4·fs band-limited pair the
+tests pin the achievable error at ≲0.1 sample for the parabola alone and
+≲2e-3 samples with `upsample=16`. For GCC the delay must fit within half a
+Welch segment; raise `nperseg` for longer delays.
+
+With `signal_bandwidth` given, the result also carries the **peak-location
+uncertainty** of B&P Eq. 8.129 and its ±2σ interval (Eq. 8.130):
+
+$$
+\sigma(\hat{\tau}_0) \approx
+\left(\tfrac{3}{4}\right)^{1/4}
+\frac{\sqrt{\varepsilon[\hat{R}_{xy}(\tau_0)]}}{\pi B} .
+$$
+
+```python
+from phonometry import time_delay
+
+res = time_delay(x, y, fs, method="gcc", weighting="ml",
+                 nperseg=2048, upsample=16, signal_bandwidth=1000.0)
+print(res.delay, res.delay_samples)     # seconds and fractional samples
+print(res.delay_std, res.delay_interval)  # Eq. 8.129 sigma, +/-2 sigma
+res.plot()                              # correlation with the delay marked
+```
+
+The formula models the peak of the continuous correlation function, so treat
+the interval as a conservative order-of-magnitude bound — the seeded Monte
+Carlo in the test suite observes the actual scatter *below* the prediction.
+
+## 3. Impulse-response delay and alignment
+
+The cross-correlation of an impulse response with an ideal unit impulse is
+the IR itself, so the sub-sample location of its peak magnitude is its
+arrival time. `impulse_response_delay` applies exactly the same refinement
+as the TDE peak (local band-limited upsampling, default ×8, plus the
+parabola), and with a `reference` IR it measures the delay between the pair
+from their full-record cross-correlation (one-shot transients are not
+stationary records, so the direct correlator is used rather than the
+Welch-averaged GCC):
+
+```python
+from phonometry import align_impulse_responses, impulse_response_delay
+
+t_arrival = impulse_response_delay(ir, fs)              # seconds from t = 0
+dt = impulse_response_delay(ir_b, fs, reference=ir_a)   # pair delay
+
+res = align_impulse_responses(ir_b, ir_a, fs)  # remove the estimated delay
+res.plot()                                     # reference vs aligned overlay
+```
+
+`align_impulse_responses` removes the estimated delay with an exact
+band-limited fractional shift (a frequency-domain phase ramp over a
+zero-padded record, so nothing wraps around) — the tool for averaging IR
+ensembles or comparing measurements taken at slightly different distances.
+The synthetic fractional-delay tests document the achievable accuracy on a
+smooth band-limited pulse: about 1e-2 samples with the parabola alone,
+1e-3 at the default `upsample=8`, below 1e-5 at ×32.
+
+## 4. Hilbert envelope and instantaneous frequency
+
+`envelope` builds the analytic signal `z(t) = x(t) + j·x̃(t)` by the
+one-sided spectrum construction that Bendat & Piersol recommend
+(Eq. 13.25) and returns the three Chapter 13 quantities on one time axis:
+
+$$
+A(t) = \left[x^2(t) + \tilde{x}^2(t)\right]^{1/2}, \qquad
+\theta(t) = \arctan\frac{\tilde{x}(t)}{x(t)}, \qquad
+f(t) = \frac{1}{2\pi}\frac{d\theta}{dt} .
+$$
+
+For an amplitude-modulated carrier `u(t)·cos(2πf0t)` the envelope recovers
+`u(t)` exactly (Eq. 13.27) — the conformance suite pins the recovered AM
+envelope and the Table 13.1 pair `cos → sin` at the 1e-9 level, and the
+instantaneous frequency of a chirp tracks its sweep.
+
+```python
+from phonometry import envelope
+
+res = envelope(x, fs)
+print(res.envelope, res.instantaneous_frequency)
+res.plot()               # signal + envelope, instantaneous frequency
+
+slow = envelope(x, fs, decimation_factor=32)   # anti-aliased, fs/32
+```
+
+The envelope of a band-limited signal is itself low-frequency, so the result
+offers optional **decimation**: a zero-phase FIR anti-alias filter by
+default, or plain subsampling with `antialias=False` — exactly the
+convention the ECMA-418-2 loudness/roughness chain of
+`phonometry.psychoacoustics` applies internally after its auditory bandpass
+(Formulae 65/119 of the standard), appropriate when the input is already
+narrowband.
+
+## Relation to the spectral estimators
+
+`time_delay` (GCC and phase methods) runs on the same Welch core — taper,
+overlap policy, detrend-off calibration, segment defaults — as
+[`cross_spectral_density`](https://jmrplens.github.io/phonometry/guides/spectral-analysis/) and the H1/H2
+[frequency-response estimators](electroacoustics.md), so a GCC, a coherence
+and a cross-spectrum computed with the same segment length agree bin by bin;
+the `'phase'` estimator is literally the slope of the
+`CrossSpectralDensityResult` phase, weighted as Eq. 5.101b prescribes.
+
+## References
+
+- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
+  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
+  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
+  Sections 5.1.4 and 5.2.6-5.2.7 (time delay via correlation and
+  cross-spectrum), 8.4 (random errors of correlation estimates and of the
+  peak location), 11.4 (FFT computation with zero padding) and Chapter 13
+  (Hilbert transforms, envelope and instantaneous phase).
+- Knapp, C. H., & Carter, G. C. (1976). The generalized correlation method
+  for estimation of time delay. *IEEE Transactions on Acoustics, Speech,
+  and Signal Processing*, 24(4), 320-327.
+  [doi:10.1109/TASSP.1976.1162830](https://doi.org/10.1109/TASSP.1976.1162830).
+  The GCC framework, the Table I weightings and their conditions, and the
+  maximum-likelihood (Hannan-Thomson) processor.
+
+---
+
+
 <!-- source: docs/block-processing.md | canonical: https://jmrplens.github.io/phonometry/guides/block-processing/ -->
 
 # Block Processing
@@ -9163,6 +9416,16 @@ cycle and warn on use; they are removed in 4.0.
 | `SpectralDensityResult` | `dataclass` | **Welch PSD with its statistical quality.**<br>• `frequencies`, `psd`, `ci_lower`/`ci_upper`, `confidence`<br>• `random_error` = 1/√nd, `n_segments`, `n_averages` (effective nd), `degrees_of_freedom`<br>• `resolution_bandwidth` Be [Hz]<br>• `.plot()`: PSD in dB with the CI band | `res.psd, res.n_averages, res.random_error` |
 | `CrossSpectralDensityResult` | `dataclass` | **Welch CSD with per-bin errors.**<br>• `csd` (complex), `magnitude`, `phase` (unwrapped), `coherence`<br>• `magnitude_random_error`, `phase_std` [rad]<br>• `.plot()`: magnitude, phase ±σ, coherence | `res.magnitude, res.phase_std` |
 | `CoherentOutputSpectrumResult` | `dataclass` | **SISO output decomposition.**<br>• `output_psd` Gyy, `coherent_psd` Gvv, `noise_psd` Gnn<br>• `snr`, `snr_db`, `random_error` (Eq. 9.73), `snr_random_error`, `coherence_bias`<br>• `.plot()`: spectra + SNR panel | `res.coherent_psd, res.snr_db` |
+| `correlation` | `function` | **Auto/cross-correlation via zero-padded FFT (B&P 11.4.2).**<br>• `x`, `y` (Default: None → autocorrelation), `fs`<br>• `normalization`: 'biased' (1/N) / 'unbiased' (1/(N−\|r\|)) / 'coefficient' (ρ ∈ [−1, 1]) (Default: 'unbiased')<br>• `max_lag` [s] (Default: full N−1) | `res = correlation(x, y, fs, normalization='coefficient')`<br><br>• `CorrelationResult` |
+| `correlation_random_error` | `function` | **ε[R̂xy(τ)] = [1+ρ⁻²]^½/√(2BT) (Eqs. 8.109/8.112).**<br>• `coefficient` ρxy(τ)<br>• `signal_bandwidth` B [Hz], `duration` T [s]<br>Valid for T ≥ 10·\|τ\|, BT ≥ 5 | `correlation_random_error(1/11, 100.0, 5.0)  # 0.349 (Example 8.5)` |
+| `time_delay` | `function` | **TDE: direct correlator, GCC (Knapp & Carter) or phase slope (Eq. 5.101b).**<br>• `x`, `y`, `fs`<br>• `method`: 'gcc' (Default) / 'direct' / 'phase'<br>• `weighting`: 'none'/'roth'/'scot'/'phat' (Default)/'ml' (Table I)<br>• `window`, `nperseg`, `overlap`: shared Welch core ('gcc'/'phase')<br>• `max_delay` [s], `interpolation`: 'parabolic' (Default)/'none', `upsample` (Default: 1)<br>• `signal_bandwidth` [Hz]: enables the Eq. 8.129 delay uncertainty | `res = time_delay(x, y, fs, weighting='phat', upsample=16)`<br><br>• `TimeDelayResult` |
+| `impulse_response_delay` | `function` | **Sub-sample IR delay [s]: peak location refined by local upsampling + parabola.**<br>• `ir`, `fs`<br>• `reference`: optional IR the delay is measured against (direct correlator)<br>• `interpolation` (Default: 'parabolic'), `upsample` (Default: 8) | `t0 = impulse_response_delay(ir, fs)  # ~1e-3-sample accuracy` |
+| `align_impulse_responses` | `function` | **Align an IR onto a reference by its estimated sub-sample delay.**<br>• `ir`, `reference`, `fs`<br>• `interpolation`, `upsample` as above<br>Exact band-limited fractional shift (zero-padded phase ramp) | `res = align_impulse_responses(ir_b, ir_a, fs)`<br><br>• `AlignedImpulseResponseResult` |
+| `envelope` | `function` | **Hilbert envelope, instantaneous phase & frequency (B&P Ch. 13).**<br>• `x`, `fs`<br>• `decimation_factor` (Default: 1)<br>• `antialias`: zero-phase FIR decimation (Default: True; False = plain subsampling, the ECMA-internal convention) | `res = envelope(x, fs, decimation_factor=32)`<br><br>• `EnvelopeResult` |
+| `CorrelationResult` | `dataclass` | **Correlation estimate.**<br>• `lags` [s], `values`, `coefficient` (always carried), `normalization`, `kind`<br>• `.random_error(signal_bandwidth)`: per-lag ε (Eqs. 8.109/8.112)<br>• `.plot()` | `res.lags, res.values, res.random_error(2000.0)` |
+| `TimeDelayResult` | `dataclass` | **Time-delay estimate.**<br>• `delay` [s], `delay_samples` (fractional), `method`, `weighting`<br>• `lags`, `correlation` (the searched curve), `peak_correlation` ρ̂xy<br>• `delay_std` (Eq. 8.129), `delay_interval` ±2σ (Eq. 8.130) with `signal_bandwidth`<br>• `.plot()`: correlation with the delay marked | `res.delay, res.delay_std` |
+| `AlignedImpulseResponseResult` | `dataclass` | **Aligned IR pair.**<br>• `aligned`, `reference`, `delay` [s], `delay_samples`<br>• `.plot()`: overlay | `res.aligned, res.delay_samples` |
+| `EnvelopeResult` | `dataclass` | **Envelope analysis.**<br>• `times` [s], `envelope`, `phase` [rad, unwrapped], `instantaneous_frequency` [Hz]<br>• `fs` (output rate), `signal`, `signal_fs`, `decimation_factor`, `antialias`<br>• `.plot()`: signal + envelope, instantaneous frequency | `res.envelope, res.instantaneous_frequency` |
 | `sound_power_anechoic` | `function` | **Precision sound power in an (hemi-)anechoic room (ISO 3745:2012).**<br>• `levels_positions`: (NM, NB) position levels [dB]<br>• `surface`: 'sphere'/'hemisphere'<br>• `radius` r [m]<br>• `background_levels` + `frequencies`: for K1i<br>• `areas`: partial areas Si (Eq. 13) (Default: equal-area Eq. 12)<br>• `temperature` [°C] (Default: 23), `static_pressure` [kPa] (Default: 101.325)<br>• `air_absorption_coefficient`: α(f) [dB/m] for C3<br>• `sigma_omc` [dB] (Default: 0), `coverage_factor` k (Default: 2.0) | `res = sound_power_anechoic(levels, 'hemisphere', radius=2.0, frequencies=f)`<br><br>• `PrecisionSoundPowerResult` |
 | `PrecisionSoundPowerResult` | `dataclass` | **ISO 3745 sound power result.**<br>• `sound_power_level` [dB], `sound_power_level_a` [dB]<br>• `surface_pressure_level`, `mean_pressure_level` [dB]<br>• `background_correction`: K1i (NM, NB) [dB]<br>• `c1`, `c2`, `c3`: meteorological corrections [dB]<br>• `directivity_index` DIi, `non_uniformity_index` VIr [dB]<br>• `surface_area` [m²], `surface`<br>• `uncertainty`, `uncertainty_bands`, `coverage_factor`<br>• `.plot()` | `res.sound_power_level, res.uncertainty` |
 | `precision_positions` | `function` | **ISO 3745 microphone coordinates (Annex D/E).**<br>• `surface`: 'sphere' (Table D.1) / 'hemisphere' (Tables E.1/E.2)<br>• `radius` r [m]<br>• `array`: 'general'/'broadband' (Default: 'general')<br>• `count`: 20 or 40 (Default: 40) | `xyz = precision_positions('hemisphere', radius=2.0)`<br><br>• (40, 3) coordinates [m] |

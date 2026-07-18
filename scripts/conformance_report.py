@@ -3931,6 +3931,129 @@ def _chk_smoothing_line_level() -> Outcome:
 
 
 # ===========================================================================
+# Correlation, time delay and envelope (Bendat & Piersol / Knapp & Carter)
+# ===========================================================================
+_CORRELATION = "Correlation, time delay and envelope (B&P / Knapp & Carter)"
+
+
+def _corr_fs() -> float:
+    return 8192.0
+
+
+def _corr_fractional_pair(
+    seed: int, shift: float
+) -> tuple[np.ndarray, np.ndarray]:
+    """White noise and its exact circular fractional delay by ``shift``."""
+    fs = _corr_fs()
+    x = ph.noise_signal(fs, 4.0, color="white", seed=seed)
+    ramp = np.exp(-2j * np.pi * np.fft.rfftfreq(x.size) * shift)
+    return x, np.fft.irfft(np.fft.rfft(x) * ramp, x.size)
+
+
+@register(
+    _CORRELATION,
+    "Bendat & Piersol, Random Data 4e Eq. (5.21)",
+    "Cross-correlation peak of a 16-sample pure delay, samples",
+)
+def _chk_tde_integer_delay() -> Outcome:
+    fs = _corr_fs()
+    x = ph.noise_signal(fs, 4.0, color="white", seed=40)
+    res = ph.time_delay(x, np.roll(x, 16), fs, method="direct")
+    return numeric(16.0, res.delay_samples, 1e-3, places=4)
+
+
+@register(
+    _CORRELATION,
+    "Knapp & Carter 1976, Table I (PHAT) + sub-sample interpolation",
+    "GCC-PHAT estimate of an exact 12.25-sample fractional delay, samples",
+)
+def _chk_tde_gcc_phat_fractional() -> Outcome:
+    x, y = _corr_fractional_pair(41, 12.25)
+    res = ph.time_delay(
+        x, y, _corr_fs(), method="gcc", weighting="phat", nperseg=2048,
+        upsample=16,
+    )
+    return numeric(12.25, res.delay_samples, 5e-3, places=4)
+
+
+@register(
+    _CORRELATION,
+    "Bendat & Piersol, Random Data 4e Eq. (5.101)",
+    "Cross-spectrum phase-slope estimate of the same fractional delay",
+)
+def _chk_tde_phase_slope_fractional() -> Outcome:
+    x, y = _corr_fractional_pair(41, 12.25)
+    res = ph.time_delay(x, y, _corr_fs(), method="phase", nperseg=2048)
+    return numeric(12.25, res.delay_samples, 1e-3, places=4)
+
+
+@register(
+    _CORRELATION,
+    "Bendat & Piersol, Random Data 4e Eq. (8.120)",
+    "BLWN autocorrelation coefficient at 3 samples vs sin(2piBt)/(2piBt)",
+)
+def _chk_blwn_autocorrelation_sinc() -> Outcome:
+    fs = _corr_fs()
+    bandwidth = fs / 5.0
+    x = ph.noise_signal(fs, 4.0, color="white", seed=41)
+    spectrum = np.fft.rfft(x)
+    spectrum[np.fft.rfftfreq(x.size, 1.0 / fs) > bandwidth] = 0.0
+    xb = np.fft.irfft(spectrum, x.size)
+    res = ph.correlation(xb, fs=fs, normalization="coefficient",
+                         max_lag=0.005)
+    lag = int(np.argmin(np.abs(res.lags))) + 3
+    arg = 2.0 * math.pi * bandwidth * res.lags[lag]
+    return numeric(
+        math.sin(arg) / arg, float(res.coefficient[lag]), 0.02, places=4
+    )
+
+
+@register(
+    _CORRELATION,
+    "Bendat & Piersol, Random Data 4e Example 8.5",
+    "Random error of the correlation peak: B=100 Hz, T=5 s, M/S=N/S=10",
+)
+def _chk_correlation_random_error_example_8_5() -> Outcome:
+    # rho_peak = S/sqrt((S+M)(S+N)) = 1/11 (Eq. 8.115); the book gives 0.35.
+    eps = ph.correlation_random_error(1.0 / 11.0, 100.0, 5.0)
+    return numeric(0.35, eps, 1e-3, places=4)
+
+
+@register(
+    _CORRELATION,
+    "Bendat & Piersol, Random Data 4e Table 13.1",
+    "Hilbert transform of cos recovers sin: max interior error",
+)
+def _chk_hilbert_cos_to_sin() -> Outcome:
+    fs = _corr_fs()
+    n = 16384
+    t = np.arange(n) / fs
+    res = ph.envelope(np.cos(2.0 * np.pi * 500.0 * t), fs)
+    interior = slice(1024, n - 1024)
+    reconstructed = res.envelope * np.sin(res.phase)
+    err = float(np.max(np.abs(
+        reconstructed[interior] - np.sin(2.0 * np.pi * 500.0 * t)[interior]
+    )))
+    return numeric(0.0, err, 1e-9, places=6)
+
+
+@register(
+    _CORRELATION,
+    "Bendat & Piersol, Random Data 4e Eq. (13.27)",
+    "Envelope of an AM waveform recovers 1 + m*cos(2pi*fm*t) exactly",
+)
+def _chk_am_envelope_exact() -> Outcome:
+    fs = _corr_fs()
+    n = 16384
+    t = np.arange(n) / fs
+    exact = 1.0 + 0.5 * np.cos(2.0 * np.pi * 10.0 * t)
+    res = ph.envelope(exact * np.cos(2.0 * np.pi * 1000.0 * t), fs)
+    interior = slice(1024, n - 1024)
+    err = float(np.max(np.abs(res.envelope[interior] - exact[interior])))
+    return numeric(0.0, err, 1e-9, places=6)
+
+
+# ===========================================================================
 # Underwater acoustics (ISO 18405 / 17208 / 18406)
 # ===========================================================================
 _UNDERWATER = "Underwater acoustics (ISO 18405/17208/18406)"

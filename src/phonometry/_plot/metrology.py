@@ -10,6 +10,12 @@ import numpy as np
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..metrology.correlation import (
+        AlignedImpulseResponseResult,
+        CorrelationResult,
+        TimeDelayResult,
+    )
+    from ..metrology.envelope import EnvelopeResult
     from ..metrology.spectra import (
         CoherentOutputSpectrumResult,
         CrossSpectralDensityResult,
@@ -269,4 +275,160 @@ def plot_coherent_output_spectrum(
     axes[1].set_ylabel("Spectral SNR [dB]")
     axes[1].set_xlabel(_FREQ_LABEL)
     axes[1].grid(True, which="both", alpha=0.3)
+    return axes
+
+
+_LAG_LABEL = "Lag [s]"
+_TIME_AXIS_LABEL = "Time [s]"
+
+
+def plot_correlation(
+    result: "CorrelationResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Correlation estimate against the lag in seconds.
+
+    :param result: A :class:`~phonometry.metrology.correlation.CorrelationResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    symbol = (
+        "\\hat{\\rho}" if result.normalization == "coefficient" else "\\hat{R}"
+    )
+    sub = "xx" if result.kind == "autocorrelation" else "xy"
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("label", f"${symbol}_{{{sub}}}(\\tau)$")
+    ax.plot(result.lags, result.values, **kwargs)
+    ax.axvline(0.0, color=_C_MUTED, ls=":", lw=1.0)
+    ax.set_xlabel(_LAG_LABEL)
+    ax.set_ylabel(
+        "Correlation coefficient"
+        if result.normalization == "coefficient"
+        else f"Correlation ({result.normalization})"
+    )
+    ax.set_title(f"{result.kind.capitalize()} estimate (Bendat & Piersol)")
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_time_delay(
+    result: "TimeDelayResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes:
+    """Correlation function with the estimated delay marked.
+
+    :param result: A :class:`~phonometry.metrology.correlation.TimeDelayResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the correlation ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    label = {
+        "direct": "$\\hat{\\rho}_{xy}(\\tau)$",
+        "gcc": f"GCC ({result.weighting})",
+        "phase": "$\\hat{R}_{xy}(\\tau)$ (context)",
+    }[result.method]
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("label", label)
+    ax.plot(result.lags, result.correlation, **kwargs)
+    if result.delay_interval is not None:
+        ax.axvspan(
+            result.delay_interval[0],
+            result.delay_interval[1],
+            color=_C_SECONDARY,
+            alpha=0.25,
+            lw=0.0,
+            label="95 % interval (Eq. 8.130)",
+        )
+    ax.axvline(
+        result.delay,
+        color=_C_REFERENCE,
+        ls="--",
+        label=f"$\\hat{{\\tau}}_0$ = {1e3 * result.delay:.4g} ms",
+    )
+    ax.set_xlabel(_LAG_LABEL)
+    ax.set_ylabel(
+        "Correlation coefficient"
+        if result.method == "direct"
+        else "Normalized correlation"
+    )
+    ax.set_title(f"Time-delay estimate — {result.method}")
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_aligned_impulse_response(
+    result: "AlignedImpulseResponseResult",
+    ax: Axes | None = None,
+    **kwargs: Any,
+) -> Axes:
+    """Reference and aligned impulse responses overlaid.
+
+    :param result: An
+        :class:`~phonometry.metrology.correlation.AlignedImpulseResponseResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param kwargs: Forwarded to the aligned-IR ``plot`` call.
+    :return: The axes.
+    """
+    ax = ax if ax is not None else _new_axes()
+    t = np.arange(result.reference.size) / result.fs
+    ax.plot(t, result.reference, color=_C_MUTED, lw=1.0, label="Reference IR")
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault(
+        "label", f"Aligned IR (delay {result.delay_samples:+.3f} samples)"
+    )
+    ax.plot(t, result.aligned, lw=1.2, **kwargs)
+    ax.set_xlabel(_TIME_AXIS_LABEL)
+    ax.set_ylabel("Amplitude")
+    ax.set_title("Impulse-response alignment (sub-sample)")
+    ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+    ax.grid(True, alpha=0.3)
+    return ax
+
+
+def plot_envelope(
+    result: "EnvelopeResult", ax: Axes | None = None, **kwargs: Any
+) -> Axes | np.ndarray:
+    """Signal with its Hilbert envelope, plus the instantaneous frequency.
+
+    With ``ax`` given, only the signal/envelope panel is drawn on it.
+
+    :param result: An :class:`~phonometry.metrology.envelope.EnvelopeResult`.
+    :param ax: Existing axes for the envelope panel, or ``None`` for a
+        fresh two-panel figure.
+    :param kwargs: Forwarded to the envelope ``plot`` call.
+    :return: The envelope axes (``ax`` given) or the array of two axes.
+    """
+    t_signal = np.arange(result.signal.size) / result.signal_fs
+
+    def _envelope_panel(axe: Axes) -> None:
+        axe.plot(
+            t_signal, result.signal, color=_C_MUTED, lw=0.7, label="Signal"
+        )
+        kwargs.setdefault("color", _C_PRIMARY)
+        kwargs.setdefault("label", "Envelope $A(t)$ (Eq. 13.17)")
+        axe.plot(result.times, result.envelope, lw=1.8, **kwargs)
+        axe.set_ylabel("Amplitude")
+        axe.grid(True, alpha=0.3)
+        axe.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+
+    if ax is not None:
+        _envelope_panel(ax)
+        ax.set_xlabel(_TIME_AXIS_LABEL)
+        return ax
+
+    axes = _new_axes_column(2, sharex=True, figsize=(8.0, 5.6))
+    _envelope_panel(axes[0])
+    axes[0].set_title("Hilbert envelope (Bendat & Piersol Ch. 13)")
+    axes[1].plot(
+        result.times,
+        result.instantaneous_frequency,
+        color=_C_SECONDARY,
+        lw=1.0,
+    )
+    axes[1].set_ylabel("Instantaneous frequency [Hz]")
+    axes[1].set_xlabel(_TIME_AXIS_LABEL)
+    axes[1].grid(True, alpha=0.3)
     return axes

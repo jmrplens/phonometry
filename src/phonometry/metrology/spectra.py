@@ -86,14 +86,17 @@ def _positive(value: float, name: str) -> float:
 
 
 def _validate_signal(
-    x: "NDArray[np.float64] | list[float]", name: str
+    x: "NDArray[np.float64] | list[float]",
+    name: str,
+    *,
+    context: str = "a spectral estimate",
 ) -> "NDArray[np.float64]":
     xa = np.asarray(x, dtype=np.float64)
     if xa.ndim != 1:
         raise ValueError(f"'{name}' must be one-dimensional.")
     if xa.size < _MIN_SAMPLES:
         raise ValueError(
-            f"Signal too short for a spectral estimate: {xa.size} samples."
+            f"Signal too short for {context}: {xa.size} samples."
         )
     if not np.all(np.isfinite(xa)):
         raise ValueError(f"'{name}' must be finite.")

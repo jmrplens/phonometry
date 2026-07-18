@@ -9,6 +9,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Correlation, time-delay estimation and Hilbert envelope (Bendat & Piersol,
+  Random Data 4e; Knapp & Carter 1976): `correlation` (auto/cross via
+  zero-padded FFT with the biased, unbiased and coefficient normalizations,
+  the coefficient always carried, and the per-lag random error of
+  Eqs. 8.109/8.112 as `.random_error()` / `correlation_random_error`),
+  `time_delay` (the direct correlator of Section 5.1.4, the Eq. 5.101b
+  cross-spectrum phase slope and the generalized cross-correlation with the
+  Knapp & Carter Table I weightings Roth/SCOT/PHAT/ML over the shared Welch
+  core, sub-sample peak refinement by parabolic interpolation with optional
+  band-limited local upsampling, and the Eq. 8.129 peak-location uncertainty
+  with its Eq. 8.130 interval), `impulse_response_delay` and
+  `align_impulse_responses` (sub-sample IR arrival/pair delay and exact
+  fractional-shift alignment) and `envelope` (analytic-signal envelope,
+  unwrapped instantaneous phase and frequency per Chapter 13, with optional
+  anti-aliased or ECMA-convention plain decimation), each returning a frozen
+  result with `.plot()`. Anchored on exact integer and synthetic fractional
+  delays (accuracy pinned from a few hundredths of a sample for the
+  parabola alone to 1e-5 at 32x upsampling), the closed-form sine and
+  bandwidth-limited-white
+  autocorrelations, the Example 8.5 published numbers, the ideal-delta
+  GCC-PHAT of a noiseless delay and the exact AM envelope; seven new
+  conformance checks.
 - 2D FDTD wave simulation as a public API (new `phonometry.simulation`
   domain, promoting the engine behind the documentation animations):
   `fdtd_simulation` (deterministic staggered-grid pressure-velocity leapfrog

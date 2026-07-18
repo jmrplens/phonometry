@@ -50,6 +50,20 @@ it; the list grows as guides gain their References sections.
   Free companion treatment of digital-filter design and analysis, a good next
   step after the filter-bank guides.
   Cited by [Filter Banks](filter-banks.md).
+- Bendat, J. S., & Piersol, A. G. (2010). *Random Data: Analysis and
+  Measurement Procedures* (4th ed.). Wiley. ISBN 978-0-470-24877-5.
+  [doi:10.1002/9781118032428](https://doi.org/10.1002/9781118032428).
+  The statistical error analysis behind the calibrated spectral estimators,
+  the correlation and time-delay formulas and the Hilbert-envelope chapter.
+  Cited by [Calibrated Spectral Analysis](spectral-analysis.md) and
+  [Correlation, Time Delay and Envelope](correlation-delay.md).
+- Knapp, C. H., & Carter, G. C. (1976). The generalized correlation method
+  for estimation of time delay. *IEEE Transactions on Acoustics, Speech,
+  and Signal Processing*, 24(4), 320-327.
+  [doi:10.1109/TASSP.1976.1162830](https://doi.org/10.1109/TASSP.1976.1162830).
+  The GCC framework and the Roth/SCOT/PHAT/maximum-likelihood weightings of
+  the time-delay estimators.
+  Cited by [Correlation, Time Delay and Envelope](correlation-delay.md).
 
 ## Measurement instrumentation
 

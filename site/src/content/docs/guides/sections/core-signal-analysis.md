@@ -70,3 +70,8 @@ What the numbers mean and how much to trust them.
   cross-spectral density with chi-square confidence intervals, the coherent
   output spectrum with the spectral SNR, 1/n-octave smoothing and
   exact-slope colored-noise generators.
+- [Correlation, time delay and envelope](/phonometry/guides/correlation-delay/):
+  correlation estimates with the Bendat & Piersol random errors, time-delay
+  estimation by direct correlation, cross-spectrum phase slope and the
+  Knapp & Carter GCC weightings, sub-sample impulse-response delay and
+  alignment, and the Hilbert envelope.

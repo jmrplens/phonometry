@@ -198,3 +198,10 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | Module | Summary |
 | :--- | :--- |
 | [`simulation.fdtd`](/phonometry/reference/api/simulation/fdtd/) | 2D acoustic finite-difference time-domain (FDTD) simulation. |
+
+## Correlation & envelope
+
+| Module | Summary |
+| :--- | :--- |
+| [`metrology.correlation`](/phonometry/reference/api/correlation/correlation/) | Correlation analysis and time-delay estimation. |
+| [`metrology.envelope`](/phonometry/reference/api/correlation/envelope/) | Envelope and instantaneous phase via the Hilbert transform. |

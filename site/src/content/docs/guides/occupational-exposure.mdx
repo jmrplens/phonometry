@@ -32,8 +32,8 @@ import ThemeImage from '../../../components/ThemeImage.astro';
 A working day is rarely measured in one take: the daily exposure level a
 regulation acts on has to be assembled from *samples* of a real shift, and
 reported with an uncertainty a hygienist can defend. `lex_8h` (in
-[Levels](/phonometry/guides/levels/)) turns *one* recording into a daily level. ISO 9612:2009 —
-the engineering method (accuracy grade 2) — is the survey design *around* that
+[Levels](/phonometry/guides/levels/)) turns *one* recording into a daily level. ISO 9612:2009,
+the engineering method (accuracy grade 2), is the survey design *around* that
 primitive: how to sample a real working day, how to combine the pieces, and how
 to attach the normative uncertainty every occupational-hygiene report needs. The
 `occupational_exposure` module adds the three **measurement strategies** and the
@@ -41,7 +41,7 @@ to attach the normative uncertainty every occupational-hygiene report needs. The
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612.svg"
-  alt="Left: a worker wearing a personal sound exposure meter (IEC 61252), its microphone mounted about 0.04 m above the shoulder and at least 0.1 m from the entrance of the most-exposed ear canal, per ISO 9612 Clause 12.3. Right: the three measurement strategies drawn as timelines over an eight-hour working day — task-based (the day split into labelled tasks, at least three samples plus a duration each), job-based (five or more random samples spread over the homogeneous exposure group) and full-day (the whole shift measured at least three times) — all feeding the LEX,8h and its Annex C uncertainty, chosen by work pattern from Table B.1"
+  alt="Left: a worker wearing a personal sound exposure meter (IEC 61252), its microphone mounted about 0.04 m above the shoulder and at least 0.1 m from the entrance of the most-exposed ear canal, per ISO 9612 Clause 12.3. Right: the three measurement strategies drawn as timelines over an eight-hour working day, task-based (the day split into labelled tasks, at least three samples plus a duration each), job-based (five or more random samples spread over the homogeneous exposure group) and full-day (the whole shift measured at least three times), all feeding the LEX,8h and its Annex C uncertainty, chosen by work pattern from Table B.1"
   width="94%"
   loading="eager"
 />
@@ -67,14 +67,14 @@ The **task-based** strategy is the recommended default when the day
 decomposes into a small number of well-defined tasks: because it measures each
 task separately, it explains *where* the dose comes from (the per-task
 breakdown above) and lets a short, loud task be sampled properly without
-dragging out the whole survey — but it needs a reliable work analysis, and its
+dragging out the whole survey, but it needs a reliable work analysis, and its
 uncertainty grows if the task durations are themselves uncertain. The
 **job-based** strategy suits a mobile worker with an unpredictable pattern or
 a homogeneous group doing "the same job": random samples across the group
 average over the variability instead of resolving it, which is robust when the
 day cannot be cleanly cut into tasks but blind to which activity dominates.
-The **full-day** strategy — a worn dosimeter capturing the entire shift,
-repeated on several days — needs the least analysis and captures everything
+The **full-day** strategy (a worn dosimeter capturing the entire shift,
+repeated on several days) needs the least analysis and captures everything
 including the unexpected, at the cost of the most wearer-days and the weakest
 diagnostic value (one number per day, no breakdown, and false contributions
 like knocks on the microphone are hard to spot). As a rule: resolve the dose
@@ -152,8 +152,8 @@ cares only about the *upper* bound: `res.upper_limit` = $L_{EX,8h} + U$ is the
 value 95 % of measurements fall below, the number compared against an action
 limit. Second, the task and job methods weight the *same* spread of samples
 differently. The task sampling uncertainty $u_{1a}$ (Eq. C.6) divides the summed
-squared deviations by $I(I-1)$ — the standard error of the mean, smaller by a
-factor $\sqrt{I}$ — whereas the job/full-day sampling uncertainty $u_1$ (Eq. C.12)
+squared deviations by $I(I-1)$ (the standard error of the mean, smaller by a
+factor $\sqrt{I}$), whereas the job/full-day sampling uncertainty $u_1$ (Eq. C.12)
 is the plain sample standard deviation with denominator $N-1$, whose contribution
 $c_1 u_1$ is then read from **Table C.4** as a function of $(N, u_1)$. The same
 raw scatter therefore inflates the job estimate more, which is the standard's
@@ -166,8 +166,8 @@ unrounded.)
 (Table C.1): the **sampling** uncertainty ($u_{1a}$/$u_1$), the **duration**
 uncertainty ($u_{1b}$, task-based only), the **instrument** ($u_2$, Table C.5)
 and the **microphone position** ($u_3$, Clause C.6). The last two are small
-and roughly fixed — $u_2 = 0.7$ dB for a class 1 sound level meter, 1.5 dB for
-a class 2 meter or a personal exposimeter, and $u_3 = 1.0$ dB by default — so
+and roughly fixed ($u_2 = 0.7$ dB for a class 1 sound level meter, 1.5 dB for
+a class 2 meter or a personal exposimeter, and $u_3 = 1.0$ dB by default), so
 in practice the **sampling term almost always dominates**: it scales with the
 scatter of the measured levels, which in a real workplace easily reaches
 several decibels and, entered in quadrature, swamps the sub-decibel
@@ -183,7 +183,7 @@ When a task's samples span **3 dB or more** (Clause 9.3), or the job contributio
 $c_1 u_1$ exceeds 3.5 dB (Clause 10.4), or too few workers are covered
 (Table 1 cumulative-duration), the result sets `sampling_advisory=True` and, with
 `warn=True`, emits an `OccupationalExposureWarning` recommending more measurements. Peak
-levels $L_{p,Cpeak}$ are reported **without** an uncertainty — Annex C gives no
+levels $L_{p,Cpeak}$ are reported **without** an uncertainty: Annex C gives no
 method for them (Table C.5, Note 1), so peak-uncertainty is out of scope. The
 three Annex D/E/F worked examples above are reproduced to the standard's printed
 precision (Annex E's final rounding is disclosed above), and the theory is
@@ -211,10 +211,10 @@ carry no per-task breakdown).
 
 ## See also
 
-- [Levels](/phonometry/guides/levels/) — the `lex_8h` / `sound_exposure` dose primitives
+- [Levels](/phonometry/guides/levels/): the `lex_8h` / `sound_exposure` dose primitives
   (IEC 61252) and the LCpeak these strategies report alongside.
-- [Measurement uncertainty](/phonometry/guides/gum-uncertainty/) — the GUM machinery behind
+- [Measurement uncertainty](/phonometry/guides/gum-uncertainty/): the GUM machinery behind
   combined and expanded uncertainties.
-- [Theory](/phonometry/reference/theory/environment-transport/) — the derivation of the strategy formulas and the
+- [Theory](/phonometry/reference/theory/environment-transport/): the derivation of the strategy formulas and the
   Annex C budget.
 - API reference: [`hearing.occupational_exposure`](/phonometry/reference/api/hearing/occupational-exposure/).

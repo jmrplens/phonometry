@@ -2,8 +2,8 @@
 
 # Multiple-shock whole-body vibration (ISO 2631-5)
 
-Vibration that contains repeated **mechanical shocks** — off-road vehicles,
-high-speed marine craft, earth-moving machinery — loads the lumbar spine far
+Vibration that contains repeated **mechanical shocks** (off-road vehicles,
+high-speed marine craft, earth-moving machinery) loads the lumbar spine far
 more than its equivalent r.m.s. level suggests. **ISO 2631-5:2018** predicts
 the resulting spinal response and the risk of lumbar injury from the measured
 vertical seat acceleration. phonometry implements the normative **Clause 5**
@@ -28,8 +28,8 @@ is quantitative: when the band-limited vertical peak acceleration exceeds
 
 ## 1. Spinal response (clause 5.2)
 
-A seat-to-spine transfer function ``H(f)`` — one complex zero and six complex
-poles, unity transmissibility at 0 Hz and a resonance near 5 Hz — maps the
+A seat-to-spine transfer function ``H(f)`` (one complex zero and six complex
+poles, unity transmissibility at 0 Hz and a resonance near 5 Hz) maps the
 measured seat acceleration to the vertical spinal response ``Az(t)``
 (Formula 1/2):
 
@@ -38,8 +38,8 @@ A_z(t) = \mathcal{F}^{-1}\!\left[H(f)\,\mathcal{F}[a_z(t)]\right].
 $$
 
 The input record must be **conditioned (DC-removed)**: because `H` is unity at
-0 Hz by design, a DC offset — e.g. the 1 g gravity component of a DC-coupled
-accelerometer — passes straight into `Az(t)` and corrupts the positive response
+0 Hz by design, a DC offset (e.g. the 1 g gravity component of a DC-coupled
+accelerometer) passes straight into `Az(t)` and corrupts the positive response
 peaks of the dose. Subtract the mean (or high-pass) before processing.
 
 ```python
@@ -170,7 +170,7 @@ running-r.m.s./MTVV and VDV metrics of [Human Vibration](human-vibration.md)
 
 ISO 2631-5:2018, *Mechanical vibration and shock — Evaluation of
 human exposure to whole-body vibration — Part 5: Method for evaluation of
-vibration containing multiple shocks* — the seat-to-spine transfer function
+vibration containing multiple shocks*: the seat-to-spine transfer function
 (clause 5.2, Formula 1), the acceleration and daily dose (clause 5.3,
 Formulae 3-5) and the Annex C assessment of adverse health effects (Formulae
 C.1, C.3-C.5, Tables C.1/C.2).

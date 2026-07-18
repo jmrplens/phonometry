@@ -1,6 +1,6 @@
 ---
 title: "Measurement uncertainty (GUM and Monte Carlo)"
-description: "The two propagation methods of the GUM: the law of propagation of uncertainty (ISO/IEC Guide 98-3:2008) and the Monte Carlo method (Supplement 1) — combined and expanded uncertainty, Welch–Satterthwaite effective degrees of freedom, Type B evaluations, and probabilistically symmetric coverage intervals."
+description: "The two propagation methods of the GUM: the law of propagation of uncertainty (ISO/IEC Guide 98-3:2008) and the Monte Carlo method (Supplement 1), covering combined and expanded uncertainty, Welch–Satterthwaite effective degrees of freedom, Type B evaluations, and probabilistically symmetric coverage intervals."
 references:
   - type: standard
     organization: "Joint Committee for Guides in Metrology"
@@ -56,7 +56,7 @@ u_c^2(y) = \sum_{i=1}^{N} \left(\frac{\partial f}{\partial x_i}\right)^2 u^2(x_i
 $$
 
 `combine_uncertainty` evaluates the sensitivities by central differences, so any
-callable model works — no hand-derived partials. Input quantities are described
+callable model works, with no hand-derived partials. Input quantities are described
 by a `Quantity` (best estimate, standard uncertainty, PDF, degrees of freedom).
 Type B evaluations from a half-width $a$ are built by `rectangular`
 ($a/\sqrt{3}$), `triangular` ($a/\sqrt{6}$) and `u_shaped` ($a/\sqrt{2}$)
@@ -115,9 +115,9 @@ Gaussian assumption for the output can be inaccurate. `monte_carlo` instead
 draws samples of each input from its PDF, evaluates the model over all trials
 and reports the mean, the standard deviation and the **probabilistically
 symmetric coverage interval** (equal probability in each tail, clause 7.7).
-The inputs are sampled independently — the Supplement's multivariate-Gaussian
+The inputs are sampled independently; the Supplement's multivariate-Gaussian
 path for non-independent quantities (6.4.8) is not implemented, so correlated
-budgets belong to `combine_uncertainty` — the number of trials is fixed (no
+budgets belong to `combine_uncertainty`. The number of trials is fixed (no
 adaptive 7.9 procedure, at least 2 trials) and the interval is the symmetric
 one, not the 5.3.4 shortest interval.
 
@@ -218,8 +218,8 @@ $(k, U)$. The `MonteCarloResult` carries the `value`, `standard_uncertainty`,
 the coverage `interval` and its `coverage`; with `keep_samples=True` it also
 retains the output `samples`, and its `.plot()` draws the output histogram
 with the coverage interval marked (the right panel above). The building-acoustics uncertainty
-of ISO 12999-1 — which combines reproducibility terms for a single-number
-rating — is a separate, domain-specific budget.
+of ISO 12999-1, which combines reproducibility terms for a single-number
+rating, is a separate, domain-specific budget.
 
 ## See also
 

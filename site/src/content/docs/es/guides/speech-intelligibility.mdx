@@ -29,13 +29,13 @@ es audible, y por tanto inteligible, para un oyente en una condición dada de
 ruido y audición. Reduce un espectro de habla, un espectro de ruido y un umbral
 auditivo a un único número en `[0, 1]`: `0` cuando nada útil alcanza al oyente,
 `1` cuando todo el espectro portador del habla es audible. Esta página cubre el
-**método por bandas de tercio de octava** de **ANSI S3.5-1997 (R2017)** — 18
+**método por bandas de tercio de octava** de **ANSI S3.5-1997 (R2017)**: 18
 bandas de 160 Hz a 8000 Hz.
 
 :::note
 **SII frente a STI.** El SII predice la inteligibilidad desde la
-*audibilidad* — cuánto del espectro del habla supera el ruido y el umbral de
-audición en el oído de quien escucha —, mientras que el STI caracteriza un
+*audibilidad* (cuánto del espectro del habla supera el ruido y el umbral de
+audición en el oído de quien escucha), mientras que el STI caracteriza un
 *canal de transmisión*: cuánta de la modulación del habla conserva una sala o
 un sistema de sonido. Para esto último, consulta la
 [guía del índice de transmisión del habla](/phonometry/es/guides/speech-transmission/).
@@ -111,8 +111,8 @@ A_i = \operatorname{clip}\!\left(\frac{E_i' - D_i + 15}{30},\; 0,\; 1\right).
 $$
 
 A niveles de habla muy por encima del esfuerzo normal, un **factor de distorsión
-de nivel** de la cláusula 5.7 —la unidad para los espectros estándar usados en
-esta página— reduce aún más $A_i$; phonometry lo aplica automáticamente.
+de nivel** de la cláusula 5.7 (la unidad para los espectros estándar usados en
+esta página) reduce aún más $A_i$; phonometry lo aplica automáticamente.
 
 ## 3. El índice en ruido
 
@@ -286,13 +286,13 @@ para el lado del STI.
 
 ## Véase también
 
-- [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/) — el
+- [Índice de transmisión del habla](/phonometry/es/guides/speech-transmission/): el
   índice de transmisión STI/STIPA que el SII complementa.
 - [Sonoridad](/phonometry/es/guides/loudness/) y
-  [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/) — la sonoridad, el
+  [Métricas de calidad sonora](/phonometry/es/guides/sound-quality/): la sonoridad, el
   sharpness y las métricas de percepción de lo que oye quien escucha.
-- [Bancos de filtros](/phonometry/es/guides/filter-banks/) — las bandas de tercio de octava
+- [Bancos de filtros](/phonometry/es/guides/filter-banks/): las bandas de tercio de octava
   sobre las que se evalúa el SII.
-- [Niveles](/phonometry/es/guides/levels/) — los niveles espectrales y de banda que sustentan las
+- [Niveles](/phonometry/es/guides/levels/): los niveles espectrales y de banda que sustentan las
   entradas de nivel espectral equivalente.
 - Referencia de la API: [`hearing.sii`](/phonometry/es/reference/api/speech/sii/).

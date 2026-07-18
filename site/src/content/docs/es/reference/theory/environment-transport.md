@@ -117,7 +117,7 @@ $$
 L_{den} = 10 \log_{10}\left\lbrace\frac{1}{24}\left[ t_d\ 10^{0{,}1 L_{day}} + t_e\ 10^{0{,}1 (L_{evening} + 5)} + t_n\ 10^{0{,}1 (L_{night} + 10)} \right]\right\rbrace
 $$
 
-con duraciones de periodo por defecto $(t_d, t_e, t_n) = (12, 4, 8)$ h — cada país puede definir los periodos de forma distinta (3.6.4 Nota 1). El **nivel día-noche** $L_{dn}$ (3.6.5) prescinde del periodo de tarde:
+con duraciones de periodo por defecto $(t_d, t_e, t_n) = (12, 4, 8)$ h; cada país puede definir los periodos de forma distinta (3.6.4 Nota 1). El **nivel día-noche** $L_{dn}$ (3.6.5) prescinde del periodo de tarde:
 
 $$
 L_{dn} = 10 \log_{10}\left\lbrace\frac{1}{24}\left[ t_d\ 10^{0{,}1 L_{day}} + t_n\ 10^{0{,}1 (L_{night} + 10)} \right]\right\rbrace, \qquad (t_d, t_n) = (15, 9)\ \text{h}
@@ -129,13 +129,13 @@ $$
 L_R = 10 \log_{10}\left[ \sum_i \frac{h_i}{24}\ 10^{0{,}1 (L_i + K_i)} \right], \qquad \sum_i h_i = 24\ \text{h}
 $$
 
-Los ajustes $K_i$ cubren las penalizaciones horarias (ISO 1996-1 Tabla A.1: tarde 5 dB, noche 10 dB) así como los ajustes por carácter de la fuente — p. ej. penalizaciones tonales, que las evaluaciones TNR/PR de ECMA-418-1 permiten justificar objetivamente.
+Los ajustes $K_i$ cubren las penalizaciones horarias (ISO 1996-1 Tabla A.1: tarde 5 dB, noche 10 dB) así como los ajustes por carácter de la fuente (p. ej. penalizaciones tonales), que las evaluaciones TNR/PR de ECMA-418-1 permiten justificar objetivamente.
 
 Consulta la [guía de niveles](/phonometry/es/guides/levels/) para su uso.
 
 ## Prominencia de sonidos impulsivos (NT ACOU 112)
 
-Un impulso molesta más allá de su energía, por lo que las evaluaciones ambientales según ISO 1996-2 penalizan los periodos con sonidos impulsivos prominentes; NT ACOU 112:2002 hace objetiva esa penalización. A partir del historial de nivel ponderado A con ponderación temporal F de un único evento, la tasa de crecimiento (dB/s) y la diferencia de nivel (dB) del arranque — que cualifica cuando supera los 10 dB/s (cláusulas 4.5–4.7) — predicen la prominencia percibida (cláusula 7, Fórmula 1):
+Un impulso molesta más allá de su energía, por lo que las evaluaciones ambientales según ISO 1996-2 penalizan los periodos con sonidos impulsivos prominentes; NT ACOU 112:2002 hace objetiva esa penalización. A partir del historial de nivel ponderado A con ponderación temporal F de un único evento, la tasa de crecimiento (dB/s) y la diferencia de nivel (dB) del arranque (que cualifica cuando supera los 10 dB/s, cláusulas 4.5–4.7) predicen la prominencia percibida (cláusula 7, Fórmula 1):
 
 $$
 P = 3 \lg(\text{tasa de crecimiento}) + 2 \lg(\text{diferencia de nivel}),
@@ -205,8 +205,8 @@ La biblioteca implementa los cuatro términos generales de la cláusula 7; el
 $A_{misc}$ informativo (vegetación, zonas industriales, edificación) y las
 reflexiones se dejan a criterio del usuario. La **divergencia geométrica** es la
 expansión esférica desde una fuente puntual,
-$A_{div} = 20 \log_{10}(d/d_0) + 11$ dB con $d_0 = 1$ m (Ec. (7)) —exactamente
-51 dB a 100 m, +6 dB por cada duplicación de la distancia—. La **absorción
+$A_{div} = 20 \log_{10}(d/d_0) + 11$ dB con $d_0 = 1$ m (Ec. (7)): exactamente
+51 dB a 100 m, +6 dB por cada duplicación de la distancia. La **absorción
 atmosférica** es $A_{atm} = \alpha\ d$ (Ec. (8)) con $\alpha$ el coeficiente de
 la ISO 9613-1 anterior. El **efecto del suelo** $A_{gr} = A_s + A_r + A_m$
 (Ec. (9)) suma una región fuente, receptor y media, cada una a partir de las
@@ -255,7 +255,7 @@ $U = k\ u$ con $k = 1{,}65$ para un intervalo **unilateral** al 95 %
 (cláusula 14), de modo que el límite superior declarado es $L_{EX,8h} + U$. Los
 métodos por tareas y por función difieren de forma instructiva: la incertidumbre
 de muestreo del ruido de la tarea $u_{1a}$ divide la suma de desviaciones al
-cuadrado entre $I(I-1)$ —el error típico de la media (Ec. C.6)—, mientras que la
+cuadrado entre $I(I-1)$ (el error típico de la media, Ec. C.6), mientras que la
 incertidumbre de muestreo por función/jornada completa $u_1$ es la desviación
 típica muestral simple con denominador $N-1$ (Ec. C.12), así que la misma
 dispersión contribuye más en el método por función (menos muestras, más gruesas).
@@ -310,15 +310,15 @@ $K_2$ y las correcciones pasan a ser meteorológicas. El nivel de potencia es
 $L_W = \bar{L}_p + 10 \lg(S/S_0) + C_1 + C_2 + C_3$ (Ec. 14/15) sobre una
 esfera completa $S = 4 \pi r^2$ o una semiesfera $S = 2 \pi r^2$, con la
 corrección por ruido de fondo $K_{1i} = -10 \lg(1 - 10^{-0{,}1 \Delta L_{pi}})$
-aplicada por posición de micrófono *antes* del promedio energético (Ec. 11) —
+aplicada por posición de micrófono *antes* del promedio energético (Ec. 11);
 no hace falta corrección por encima de un margen de 15 dB, y por debajo de
 10 dB (250 Hz – 5 kHz) o 6 dB (bandas extremas) la corrección se satura y el
 resultado se marca como cota superior (cláusula 9.4.2). Los términos
 meteorológicos son
 $C_1 = -10 \lg(p_s/p_{s0}) + 5 \lg[(273 + \theta)/\theta_0]$ y
 $C_2 = -10 \lg(p_s/p_{s0}) + 15 \lg[(273 + \theta)/\theta_1]$ con
-$\theta_0 = 314$ K, $\theta_1 = 296$ K — en la referencia de 23 °C /
-101,325 kPa, $C_2 = 0$ exactamente y $C_1 = -0{,}128$ dB — y
+$\theta_0 = 314$ K, $\theta_1 = 296$ K: en la referencia de 23 °C /
+101,325 kPa, $C_2 = 0$ exactamente y $C_1 = -0{,}128$ dB; y
 $C_3 = A_0 (1{,}0053 - 0{,}0012 A_0)^{1{,}6}$ con $A_0 = a(f)\ r$ restituye la
 absorción del aire de ISO 9613-1 sobre el radio de medición. Las
 disposiciones de micrófonos de los Anexos D/E están incorporadas como tablas de coordenadas
@@ -352,7 +352,7 @@ La intensidad sonora es el flujo neto de energía $\vec{I} = \overline{p\ \vec{u
 así que por el teorema de la divergencia la potencia que atraviesa una
 superficie cerrada es $P = \sum_i \langle I_{n,i} \rangle\ S_i$. Una fuente
 estacionaria *fuera* de la superficie aporta flujo neto nulo (su energía entra y
-sale), y por eso la intensidad rechaza el ruido de fondo estacionario —pero aún
+sale), y por eso la intensidad rechaza el ruido de fondo estacionario, pero aún
 puede llevar el $P$ de una banda a negativo, en cuyo caso esa banda es no
 determinable. Dos indicadores de campo normativos controlan la validez: el
 indicador superficial presión-intensidad $F_{pI} = [L_p] - L_W + 10 \log_{10}(S/S_0)$
@@ -370,7 +370,7 @@ ISO 9614-3:2002 eleva el método de barrido al grado de precisión con una
 maquinaria de indicadores más estricta. Las potencias parciales
 $P_i = I_{n,i} S_i$ (Ec. 5) se suman como antes, pero la validez descansa
 ahora en los indicadores presión-intensidad con y sin signo
-$F_{pIn} = \bar{L}_p - L_{In}$ (Ecs. B.3/B.6 — los F2/F3 de ISO 9614-1) y en
+$F_{pIn} = \bar{L}_p - L_{In}$ (Ecs. B.3/B.6, los F2/F3 de ISO 9614-1) y en
 la no uniformidad normalizada de la intensidad $F_S$ (Ec. B.8), a través de
 cinco criterios de aceptación (Anexo C): repetibilidad del barrido
 $|L_{In}(1) - L_{In}(2)| \le s/2$ (C.1), capacidad dinámica

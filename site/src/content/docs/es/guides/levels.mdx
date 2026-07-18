@@ -48,7 +48,7 @@ L_{eq} = 10\log_{10}\left(\frac{1}{T}\int_0^T \frac{p^2(t)}{p_0^2}\ dt\right) \t
 $$
 
 y $L_{Aeq}$ es la misma integral tras ponderar A la señal. $L_N$ es el nivel
-superado el $N\ \%$ del tiempo — el percentil $(100-N)$ de la distribución del
+superado el $N\ \%$ del tiempo: el percentil $(100-N)$ de la distribución del
 nivel con ponderación temporal.
 
 ```python
@@ -73,7 +73,7 @@ análisis digital a fondo de escala (la calibración no aplica en modo dBFS).
 
 ¿Por qué la media *energética* y no la media aritmética de los valores en dB?
 Porque las dosis sonoras se suman como energía: dos periodos a 60 dB y 80 dB no
-promedian 70 dB — la mitad a 80 dB domina y $L_{eq}$ = 77 dB. Promediar
+promedian 70 dB; la mitad a 80 dB domina y $L_{eq}$ = 77 dB. Promediar
 decibelios directamente subestima cualquier ruido fluctuante. $L_{eq}$ es el
 nivel del sonido *estacionario* que transporta la misma energía que el real,
 fluctuante, y por eso las normativas se redactan en términos de él.
@@ -258,7 +258,7 @@ de ese periodo de exposición; sin él, la entrada es el evento completo.
 ### SEL: comparar eventos de distinta duración
 
 Un paso de tren de 4 s y otro de 30 s no pueden compararse solo por su
-$L_{Aeq}$ — el evento más largo entrega más energía al mismo nivel. El **nivel
+$L_{Aeq}$: el evento más largo entrega más energía al mismo nivel. El **nivel
 de exposición sonora** comprime la energía del evento *completo* en
 exactamente un segundo:
 
@@ -309,8 +309,8 @@ plt.show()
 ### Dosis de ruido: exposición sonora y LEX,8h
 
 Las normativas laborales limitan la *dosis* diaria, no el nivel. IEC 61252 la
-expresa como **exposición sonora** $E$ en pascales al cuadrado por hora — la
-integral temporal de la presión ponderada A al cuadrado — y el **nivel
+expresa como **exposición sonora** $E$ en pascales al cuadrado por hora (la
+integral temporal de la presión ponderada A al cuadrado) y el **nivel
 normalizado a 8 h** equivalente:
 
 $$
@@ -332,15 +332,15 @@ duración al mismo nivel son +3 dB.
 | `lex_8h(x, fs, duration_hours=None, ...)` | misma semántica de muestreo | LEX,8h [dB] | IEC 61252 (≡ LEP,d) |
 
 `lex_8h` califica *una* grabación; componer una jornada laboral completa a
-partir de muestras por tarea o por función —con el presupuesto normativo de
-incertidumbre de la ISO 9612— continúa en
+partir de muestras por tarea o por función, con el presupuesto normativo de
+incertidumbre de la ISO 9612, continúa en
 [Exposición al ruido en el trabajo](/phonometry/es/guides/occupational-exposure/).
 
 ## Ruido ambiental: Lden, Ldn y niveles de evaluación (ISO 1996-1)
 
 La evaluación regulatoria del ruido pondera más las tardes y las noches.
 `lden()` implementa el nivel día-tarde-noche de ISO 1996-1:2016 (3.6.4:
-+5 dB tarde, +10 dB noche, periodos 12/4/8 h por defecto — ajustables, porque
++5 dB tarde, +10 dB noche, periodos 12/4/8 h por defecto, ajustables porque
 cada país los define distinto), `ldn()` la variante día-noche (3.6.5) y
 `composite_rating_level()` el compuesto general de jornada completa del
 apartado 6.5 (Fórmulas 5-6) para periodos arbitrarios con ajustes por fuente o
@@ -465,7 +465,7 @@ invertidas.
 y `environmental_expanded_uncertainty()` aplica $k = 2$ (95 %) o $k = 1.3$ (80 %);
 `residual_correction_uncertainty()` lleva la sensibilidad de la corrección residual
 (Fórmulas (F.7)/(F.8)) y `uncertainty_from_repeated_measurements()` la
-incertidumbre típica de mediciones repetidas — la vía primaria en el dominio
+incertidumbre típica de mediciones repetidas: la vía primaria en el dominio
 de energía (Fórmulas (17)+(19)), con el sustituto en niveles de la Nota 2
 (Fórmula (20)) reportado al lado como `approximate_uncertainty` y un aviso
 cuando los niveles se dispersan más de 3 dB, donde el sustituto se infla

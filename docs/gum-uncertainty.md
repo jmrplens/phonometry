@@ -27,7 +27,7 @@ u_c^2(y) = \sum_{i=1}^{N} \left(\frac{\partial f}{\partial x_i}\right)^2 u^2(x_i
 $$
 
 `combine_uncertainty` evaluates the sensitivities by central differences, so any
-callable model works — no hand-derived partials. Input quantities are described
+callable model works, with no hand-derived partials. Input quantities are described
 by a `Quantity` (best estimate, standard uncertainty, PDF, degrees of freedom).
 Type B evaluations from a half-width $a$ are built by `rectangular`
 ($a/\sqrt{3}$), `triangular` ($a/\sqrt{6}$) and `u_shaped` ($a/\sqrt{2}$)
@@ -86,9 +86,9 @@ Gaussian assumption for the output can be inaccurate. `monte_carlo` instead
 draws samples of each input from its PDF, evaluates the model over all trials
 and reports the mean, the standard deviation and the **probabilistically
 symmetric coverage interval** (equal probability in each tail, clause 7.7).
-The inputs are sampled independently — the Supplement's multivariate-Gaussian
+The inputs are sampled independently; the Supplement's multivariate-Gaussian
 path for non-independent quantities (6.4.8) is not implemented, so correlated
-budgets belong to `combine_uncertainty` — the number of trials is fixed (no
+budgets belong to `combine_uncertainty`. The number of trials is fixed (no
 adaptive 7.9 procedure, at least 2 trials) and the interval is the symmetric
 one, not the 5.3.4 shortest interval.
 
@@ -133,7 +133,7 @@ Supplement 1 (clause 8) treats the GUM framework as validated precisely when
 it agrees with the Monte Carlo result, and as superseded by it when it does
 not.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget.svg" alt="Two panels for the A-weighted level example. Left, the GUM uncertainty budget: a horizontal bar chart of the contribution of each input to the combined uncertainty — Reading contributes nothing, Calibration and Instrument the rectangular corrections, and the Position Type A term the most — with a dashed line marking the combined uncertainty uc of 0.407 dB. Right, the Monte Carlo output distribution as a histogram, overlaid with the GUM Gaussian of the same mean and standard deviation, and the shaded 95 percent coverage interval; the title reads Y equals 74.00 dB, U equals 0.86 dB, k equals 2.11" width="96%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget.svg" alt="Two panels for the A-weighted level example. Left, the GUM uncertainty budget: a horizontal bar chart of the contribution of each input to the combined uncertainty (Reading contributes nothing, Calibration and Instrument the rectangular corrections, and the Position Type A term the most), with a dashed line marking the combined uncertainty uc of 0.407 dB. Right, the Monte Carlo output distribution as a histogram, overlaid with the GUM Gaussian of the same mean and standard deviation, and the shaded 95 percent coverage interval; the title reads Y equals 74.00 dB, U equals 0.86 dB, k equals 2.11" width="96%"></picture>
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -189,8 +189,8 @@ $(k, U)$. The `MonteCarloResult` carries the `value`, `standard_uncertainty`,
 the coverage `interval` and its `coverage`; with `keep_samples=True` it also
 retains the output `samples`, and its `.plot()` draws the output histogram
 with the coverage interval marked (the right panel above). The building-acoustics uncertainty
-of ISO 12999-1 — which combines reproducibility terms for a single-number
-rating — is a separate, domain-specific budget.
+of ISO 12999-1, which combines reproducibility terms for a single-number
+rating, is a separate, domain-specific budget.
 
 ## References
 
@@ -221,10 +221,10 @@ rating — is a separate, domain-specific budget.
 ## Standards
 
 ISO/IEC Guide 98-3:2008, *Uncertainty of measurement — Part 3:
-Guide to the expression of uncertainty in measurement (GUM:1995)* — the law of
+Guide to the expression of uncertainty in measurement (GUM:1995)*: the law of
 propagation of uncertainty (clause 5), Type B evaluation (clause 4.3), the
 expanded uncertainty and coverage factor (clause 6, Annex G) and the
 Welch–Satterthwaite effective degrees of freedom (Annex G.4). ISO/IEC
 Guide 98-3-1:2008, *Supplement 1 — Propagation of distributions using a Monte
-Carlo method* — the numerical propagation and the probabilistically symmetric
+Carlo method*: the numerical propagation and the probabilistically symmetric
 coverage interval (clause 7).

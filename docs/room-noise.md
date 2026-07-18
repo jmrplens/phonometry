@@ -2,8 +2,8 @@
 
 # Room-noise criteria (NC / RC Mark II)
 
-Steady background noise in an occupied room — from ventilation, diffusers or
-distant traffic — is rated against a family of **octave-band criterion curves**.
+Steady background noise in an occupied room (from ventilation, diffusers or
+distant traffic) is rated against a family of **octave-band criterion curves**.
 **ANSI/ASA S12.2-2019**, *Criteria for Evaluating Room Noise*, defines two
 spectrum-in ratings that phonometry implements: the **Noise Criteria (NC)**
 rating by the tangency method, and the **Room Criteria Mark II (RC)** rating
@@ -12,15 +12,15 @@ levels over the ten bands from 16 Hz to 8000 Hz.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_noise_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_noise.svg" alt="The two ANSI S12.2 rating methods from one octave-band spectrum: on the left the NC tangency method (from the Table 1 curves, the NC value in each band, then NC equals the highest curve touched, giving NC-NN with a governing band); on the right the RC Mark II method (the mid-frequency average LMF of the 500, 1000 and 2000 Hz levels rounded to give RC-NN, then the spectral tag R for rumble, H for hiss or N for neutral by the clause D.3 deviation rules, giving RC-NN with a tag)" width="94%"></picture>
 
-## 1. Noise Criteria — the tangency method
+## 1. Noise Criteria: the tangency method
 
 The **NC curves** (ANSI/ASA S12.2-2019 Table 1) are a family of octave-band
 limits, each designated by its value at 1000 Hz (NC-15 up to NC-70). The
 **tangency method** rates a measured spectrum by the value of the **highest NC
 curve it touches**: for each octave band, the NC index whose curve passes
 through the measured level is found, and the rating is the maximum across bands.
-The band where that maximum occurs — the one that pushes the spectrum up against
-the curves — is reported as the **governing band**.
+The band where that maximum occurs, the one that pushes the spectrum up against
+the curves, is reported as the **governing band**.
 
 ```python
 import numpy as np
@@ -40,13 +40,13 @@ of the octave bands may be supplied together with their centre frequencies
 (`room.noise_criterion(levels, frequencies)`), which is convenient when only the
 speech-interference bands were measured.
 
-## 2. Room Criteria Mark II — rating and spectral tag
+## 2. Room Criteria Mark II: rating and spectral tag
 
 The **RC Mark II** curves (ANSI/ASA S12.2-2019 Annex D, Table D.1) have a
 constant slope of **−5 dB/octave**, keyed to their value at 1000 Hz, with the
 16 Hz level equal to the 31.5 Hz level and a low-frequency floor of 55 dB.
-The numerical rating is the **mid-frequency average** `LMF` — the mean of the
-500, 1000 and 2000 Hz levels — rounded to the nearest decibel (clause D.4):
+The numerical rating is the **mid-frequency average** `LMF`, the mean of the
+500, 1000 and 2000 Hz levels, rounded to the nearest decibel (clause D.4):
 
 $$
 \text{LMF} = \tfrac{1}{3}\left(L_{500} + L_{1000} + L_{2000}\right),
@@ -72,7 +72,7 @@ print(rc.classification)    # R
 ```
 
 The strong low-frequency content of this spectrum lifts the 63–250 Hz bands
-well above the reference curve, so the noise is tagged `R` (rumble) — the
+well above the reference curve, so the noise is tagged `R` (rumble): the
 subjective "throb" of an oversized air handler.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_noise_criteria.svg" alt="Two panels for the same ventilation-dominated room spectrum. Left: the measured octave-band levels over the NC curve family, with a red diamond marking the tangent point at 250 Hz that sets the NC-42.5 rating. Right: the same spectrum over the reference RC-35 curve, with the low-frequency bands rising through the shaded rumble tolerance (+5 dB below 500 Hz) so the noise is classified RC-35(R), and the hiss tolerance (+3 dB at and above 1000 Hz) shaded for comparison" width="96%"></picture>
@@ -193,7 +193,7 @@ character is right: reduce the whole spectrum rather than reshape it.
 
 ## Standards
 
-ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise* — the
+ANSI/ASA S12.2-2019, *Criteria for Evaluating Room Noise*: the
 normative NC curves and tangency method (Table 1), and, from the informative
 Annex D, the RC Mark II curves (Table D.1), the mid-frequency-average rating
 (clause D.4) and the neutral/rumble/hiss spectral tag (clause D.3).

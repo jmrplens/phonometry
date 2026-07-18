@@ -223,8 +223,8 @@ fs = 48 kHz the A-curve error at 12.5 kHz reaches −2.7 dB, outside the IEC
 61672-1 **class 1** tolerance (+2.0/−2.5 dB).
 
 By default (`high_accuracy=True`), phonometry designs and runs the weighting
-filter at an internally oversampled rate — up to 8×, reaching ≥ 144 kHz at
-common audio rates (a 96 kHz input runs ×2) — and decimates back, keeping
+filter at an internally oversampled rate (up to 8×, reaching ≥ 144 kHz at
+common audio rates; a 96 kHz input runs ×2) and decimates back, keeping
 the response within class 1 tolerances up to 16 kHz (error ≈ −0.5 dB at
 12.5 kHz for fs = 48 kHz).
 
@@ -311,9 +311,9 @@ Nyquist (Table 3's design goals are computed at $f = 1000 \cdot 10^{n/10}$,
 e.g. 15 848.9 Hz for "16 kHz"; IEC 61672-3 tests at the same frequencies),
 subtracts the design-goal weighting, and reports the performance class per
 frequency with its margin in dB. A dense logarithmic sweep additionally
-enforces subclause 5.5.7 *between* the nominal frequencies — the deviation
+enforces subclause 5.5.7 *between* the nominal frequencies (the deviation
 from the analytic Annex E goal must stay within the larger of the two
-adjacent limits, so a resonance or notch between nominals cannot pass — and
+adjacent limits, so a resonance or notch between nominals cannot pass), and
 when Table 3 rows with finite lower limits fall beyond Nyquist the verdict is
 flagged `range_limited` (it then attests the checked frequencies only, not
 full 10 Hz-20 kHz conformance):
@@ -396,10 +396,10 @@ plt.show()
 ## Standards
 
 IEC 61672-1:2013, *Electroacoustics — Sound level meters —
-Part 1: Specifications* — the A, C and Z frequency-weighting curves (the
+Part 1: Specifications*: the A, C and Z frequency-weighting curves (the
 Annex E analytic definition from four corner frequencies, normalized to 0 dB
 at 1 kHz), the class 1 tolerances the `high_accuracy` design keeps up to
 16 kHz, and the Table 3 class 1/class 2 acceptance limits checked by
 `verify_weighting_class`. ISO 7196:1995, *Acoustics — Frequency-weighting characteristic for
-infrasound measurements* — the G-weighting pole/zero definition (Table 1),
+infrasound measurements*: the G-weighting pole/zero definition (Table 1),
 verified against every Table 2 nominal response value (0.25 Hz to 315 Hz).

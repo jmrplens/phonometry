@@ -2,8 +2,8 @@
 
 # Dynamic transfer stiffness of resilient elements (ISO 10846)
 
-The vibro-acoustic transfer property of a resilient element — a vibration
-isolator, mount, bellows or hose — is its **dynamic transfer stiffness** `k₂₁`,
+The vibro-acoustic transfer property of a resilient element (a vibration
+isolator, mount, bellows or hose) is its **dynamic transfer stiffness** `k₂₁`,
 the frequency-dependent ratio of the *blocking force* on the output (receiver)
 side to the displacement on the input (source) side (ISO 10846-1, 3.7):
 
@@ -15,7 +15,7 @@ Because a vibration isolator is only effective between structures of large
 driving-point stiffness, the force it delivers to the receiver approximates this
 blocking force (ISO 10846-1, Eq. 7), so `k₂₁` is the quantity that characterises
 the isolator's transmission. `k₂₁` feeds the structure-borne source and building
-prediction standards — ISO 9611, EN 15657 and EN 12354-5.
+prediction standards: ISO 9611, EN 15657 and EN 12354-5.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_stiffness_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/transfer_stiffness.svg" alt="Dynamic transfer stiffness level of a Kelvin-Voigt isolator: the true level (flat at 120 dB, rising with the damping term at high frequency) and the indirect-method estimate, which diverges at the mass/spring resonance where the transmissibility is not small and converges to the true level above three times the resonance" width="82%"></picture>
 
@@ -133,7 +133,7 @@ within **1 dB** (12 % of the stiffness magnitude), which bounds the usable
 frequency range on both sides:
 
 * **Impedance mismatch (Inequality 2).** Valid only where
-  `ΔL₁,₂ = La₁ − La₂ ≥ 20 dB`, i.e. `|T| ≤ 0.1` — the constant
+  `ΔL₁,₂ = La₁ − La₂ ≥ 20 dB`, i.e. `|T| ≤ 0.1`, the constant
   `TRANSMISSIBILITY_LIMIT`. `transfer_stiffness_indirect` computes the
   per-band `|T|` and emits a `PhonometryWarning` when any band exceeds it
   (routine near or below the mass/spring resonance, as in the figure above).
@@ -146,7 +146,7 @@ frequency range on both sides:
 
 The blocking-force idealisation itself is quantified by ISO 10846-1, Eq. (6):
 for an isolator of output driving-point stiffness `k₂,₂` on a termination of
-stiffness `k_t`, the delivered force is `F₂/F₂,b = 1/(1 + k₂,₂/k_t)` — within
+stiffness `k_t`, the delivered force is `F₂/F₂,b = 1/(1 + k₂,₂/k_t)`, within
 10 % of the blocking force for `|k₂,₂| < 0.1 |k_t|` (Eq. 7):
 
 ```python

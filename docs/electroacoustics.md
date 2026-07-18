@@ -5,10 +5,10 @@
 Two staples of audio-equipment characterisation, from a captured signal: how much
 an amplifier or transducer **distorts** a test tone, and what **frequency
 response** an input/output measurement reveals. This page covers the IEC 60268-3
-distortion set — total and nth-order harmonic distortion, THD+N and SINAD
+distortion set: total and nth-order harmonic distortion, THD+N and SINAD
 through the AES17 measurement bandwidth, the per-order modulation and
 difference-frequency intermodulation, dynamic intermodulation (DIM) and the
-ITU-R 468 weighted THD — and the Bendat & Piersol frequency-response estimators
+ITU-R 468 weighted THD, and the Bendat & Piersol frequency-response estimators
 `H1`/`H2` with the ordinary coherence `γ²`. Every quantity has an exact analytic
 oracle, so the numbers are verifiable rather than tuned. A closing section
 covers the sensitivity conventions of IEC 60268-4 (microphones) and
@@ -29,8 +29,8 @@ d_n = \frac{a_n}{\sqrt{\sum_{k\ge 1} a_k^2}}.
 $$
 
 `dₙ` is the nth-order harmonic distortion (the nth harmonic relative to the
-total). The tones should fall on FFT bins — use coherent sampling (an integer
-number of periods) or a low-leakage window — so the amplitudes are read without
+total). The tones should fall on FFT bins: use coherent sampling (an integer
+number of periods) or a low-leakage window so the amplitudes are read without
 spectral leakage.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion.svg" alt="Magnitude spectrum of a 1 kHz single-tone test in dB relative to the fundamental, with the first five harmonics marked above a broadband noise floor, annotated with THD (F), THD (R), THD+N and SINAD" width="82%"></picture>
@@ -80,7 +80,7 @@ plt.show()
 ## 2. THD+N and SINAD (AES17-2015 6.3)
 
 Where THD counts only the harmonics, **THD+N** compares *everything but the
-fundamental* — harmonics **and** noise — with the total signal. AES17 removes the
+fundamental* (harmonics **and** noise) with the total signal. AES17 removes the
 fundamental with a standard notch filter (`1.2 ≤ Q ≤ 3`, validated on the
 *applied* zero-phase response per clause 5.2.8) and takes the ratio of the
 residual to the total RMS; **SINAD** is its reciprocal in dB:
@@ -90,8 +90,8 @@ $$
 \mathrm{SINAD} = -20\lg(\mathrm{THD{+}N})\ \mathrm{dB}.
 $$
 
-Both voltages are measured through the AES17 measurement bandwidth — a 20 Hz
-high-pass plus the standard low-pass at 20 kHz (clauses 5.2.5 and 6.3.1) — so a
+Both voltages are measured through the AES17 measurement bandwidth (a 20 Hz
+high-pass plus the standard low-pass at 20 kHz, clauses 5.2.5 and 6.3.1) so a
 DC offset or ultrasonic noise at a high sample rate does not count as "noise".
 The band edge is configurable, and `bandwidth=None` disables the chain and
 measures the full Nyquist band.
@@ -107,7 +107,7 @@ wide = electroacoustics.thd_plus_noise(signal, fs, 1000.0, bandwidth=None)  # fu
 
 Because THD+N counts the in-band noise floor, it is at or above the
 harmonic-only THD; `SINAD` is the corresponding signal-to-noise-and-distortion
-headroom in dB (a quantity derived from the AES17 THD+N — AES17 itself does not
+headroom in dB (a quantity derived from the AES17 THD+N; AES17 itself does not
 define SINAD). The notch discards a start/stop transient internally, so the
 measurement wants a steady, sufficiently long capture.
 
@@ -115,7 +115,7 @@ measurement wants a steady, sufficiently long capture.
 
 `weighted_thd` frequency-weights the notched residual before taking the ratio,
 so the perceptual emphasis of the distortion products is accounted for. The
-default weighting is the network the clause requires — the IEC 60268-1
+default weighting is the network the clause requires: the IEC 60268-1
 Appendix A curve, i.e. ITU-R BS.468-4, which peaks at +12.2 dB near 6.3 kHz
 (exposed as `itu_r_468_weighting`); `'A'` and `'C'` remain as labelled options.
 Per the clause, the weighted measurement is valid for fundamental frequencies
@@ -172,7 +172,7 @@ dim = electroacoustics.dynamic_intermodulation_distortion(signal, fs)           
 Given an input `x` and the output `y` of a device, the **frequency response**
 `H(f)` is estimated from the Welch-averaged cross- and auto-spectra. Bendat &
 Piersol (*Random Data*, 4th ed.) give two estimators, differing in which channel
-carries the noise, plus the **ordinary coherence** `γ²` — the fraction of the
+carries the noise, plus the **ordinary coherence** `γ²`, the fraction of the
 output power linearly explained by the input:
 
 $$
@@ -196,7 +196,7 @@ res.plot()   # Bode magnitude/phase + coherence (needs matplotlib)
 freqs, gamma2 = electroacoustics.coherence(x, y, fs)
 ```
 
-Coherence needs averaging over several Welch segments to be meaningful — a single
+Coherence needs averaging over several Welch segments to be meaningful; a single
 segment gives `γ² ≡ 1` by construction.
 
 <details>

@@ -34,7 +34,7 @@ diario sobre el que actúa la normativa hay que componerlo a partir de
 *muestras* de un turno real, y declararlo con una incertidumbre que un
 higienista pueda defender. `lex_8h` (en
 [Niveles](/phonometry/es/guides/levels/)) convierte *una* grabación en un nivel
-diario. La ISO 9612:2009 —el método de ingeniería (clase de exactitud 2)— es el
+diario. La ISO 9612:2009, el método de ingeniería (clase de exactitud 2), es el
 diseño de la medición *en torno* a esa primitiva: cómo muestrear una jornada
 laboral real, cómo combinar las partes y cómo adjuntar la incertidumbre
 normativa que necesita todo informe de higiene laboral. El módulo
@@ -44,7 +44,7 @@ en energía.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_dosimeter_iso9612_es.svg"
-  alt="Izquierda: un trabajador con un exposímetro sonoro personal (IEC 61252), con el micrófono montado unos 0,04 m por encima del hombro y a al menos 0,1 m de la entrada del canal auditivo del oído más expuesto, según el apartado 12.3 de la ISO 9612. Derecha: las tres estrategias de medición dibujadas como líneas de tiempo sobre una jornada de ocho horas — basada en tareas (la jornada dividida en tareas etiquetadas, al menos tres muestras y una duración por tarea), basada en la función (cinco o más muestras aleatorias repartidas sobre el grupo de exposición homogéneo) y jornada completa (todo el turno medido al menos tres veces) — que desembocan todas en el LEX,8h y su incertidumbre del anexo C, eligiendo por patrón de trabajo según la Tabla B.1"
+  alt="Izquierda: un trabajador con un exposímetro sonoro personal (IEC 61252), con el micrófono montado unos 0,04 m por encima del hombro y a al menos 0,1 m de la entrada del canal auditivo del oído más expuesto, según el apartado 12.3 de la ISO 9612. Derecha: las tres estrategias de medición dibujadas como líneas de tiempo sobre una jornada de ocho horas: basada en tareas (la jornada dividida en tareas etiquetadas, al menos tres muestras y una duración por tarea), basada en la función (cinco o más muestras aleatorias repartidas sobre el grupo de exposición homogéneo) y jornada completa (todo el turno medido al menos tres veces), que desembocan todas en el LEX,8h y su incertidumbre del anexo C, eligiendo por patrón de trabajo según la Tabla B.1"
   width="94%"
   loading="eager"
 />
@@ -72,15 +72,15 @@ esfuerzo. La estrategia **basada en tareas** es el valor por defecto
 recomendado cuando la jornada se descompone en un número pequeño de tareas bien
 definidas: como mide cada tarea por separado, explica *de dónde* sale la dosis
 (el desglose por tarea de más arriba) y permite muestrear bien una tarea corta
-y ruidosa sin alargar toda la campaña — pero necesita un análisis del trabajo
+y ruidosa sin alargar toda la campaña, pero necesita un análisis del trabajo
 fiable, y su incertidumbre crece si las duraciones de las tareas son a su vez
 inciertas. La estrategia **basada en la función** conviene al trabajador móvil
 con patrón impredecible o a un grupo homogéneo que hace «el mismo trabajo»: las
 muestras aleatorias sobre el grupo promedian la variabilidad en lugar de
 resolverla, lo que resulta robusto cuando la jornada no puede cortarse
 limpiamente en tareas, pero ciego a qué actividad domina. La estrategia de
-**jornada completa** — un dosímetro portado que captura todo el turno, repetido
-varios días — exige el mínimo análisis y lo captura todo, incluido lo
+**jornada completa** (un dosímetro portado que captura todo el turno, repetido
+varios días) exige el mínimo análisis y lo captura todo, incluido lo
 inesperado, a costa del mayor número de días de porte y del menor valor
 diagnóstico (un número por día, sin desglose, y las contribuciones falsas, como
 golpes al micrófono, son difíciles de detectar). Como regla: resuelve la dosis
@@ -162,7 +162,7 @@ debajo del cual queda el 95 % de las mediciones, el número que se compara con u
 valor de acción. Segundo, los métodos por tareas y por función ponderan de forma
 distinta la *misma* dispersión de muestras. La incertidumbre de muestreo de la
 tarea $u_{1a}$ (Ec. C.6) divide la suma de desviaciones al cuadrado entre
-$I(I-1)$ —el error típico de la media, menor en un factor $\sqrt{I}$—, mientras
+$I(I-1)$ (el error típico de la media, menor en un factor $\sqrt{I}$), mientras
 que la incertidumbre de muestreo por función/jornada completa $u_1$ (Ec. C.12) es
 la desviación típica muestral simple con denominador $N-1$, cuya contribución
 $c_1 u_1$ se lee luego de la **Tabla C.4** en función de $(N, u_1)$. La misma
@@ -176,9 +176,9 @@ de la normalización de la duración; la biblioteca lo mantiene sin redondear.)
 (Tabla C.1): la incertidumbre de **muestreo** ($u_{1a}$/$u_1$), la de
 **duración** ($u_{1b}$, solo por tareas), la del **instrumento** ($u_2$,
 Tabla C.5) y la de la **posición del micrófono** ($u_3$, apartado C.6). Las dos
-últimas son pequeñas y aproximadamente fijas — $u_2 = 0{,}7$ dB para un
+últimas son pequeñas y aproximadamente fijas ($u_2 = 0{,}7$ dB para un
 sonómetro de clase 1, 1,5 dB para uno de clase 2 o un exposímetro personal, y
-$u_3 = 1{,}0$ dB por defecto —, así que en la práctica **casi siempre domina el
+$u_3 = 1{,}0$ dB por defecto), así que en la práctica **casi siempre domina el
 término de muestreo**: escala con la dispersión de los niveles medidos, que en
 un puesto real alcanza con facilidad varios decibelios y, entrando en
 cuadratura, arrasa con los términos subdecibélicos de instrumento y posición.
@@ -196,7 +196,7 @@ contribución por función $c_1 u_1$ supera 3,5 dB (apartado 10.4), o se cubren
 demasiado pocos trabajadores (duración acumulada de la Tabla 1), el resultado fija
 `sampling_advisory=True` y, con `warn=True`, emite una `OccupationalExposureWarning` que
 recomienda más mediciones. Los niveles de pico $L_{p,Cpeak}$ se declaran **sin**
-incertidumbre —el anexo C no da método para ellos (Tabla C.5, Nota 1)—, así que
+incertidumbre (el anexo C no da método para ellos, Tabla C.5, Nota 1), así que
 la incertidumbre de pico queda fuera del alcance. Los tres ejemplos resueltos de
 los anexos D/E/F anteriores se reproducen con la precisión impresa de la norma
 (el redondeo final del anexo E se explica más arriba), y la teoría se deriva
@@ -224,11 +224,11 @@ otras estrategias no llevan desglose por tarea).
 
 ## Véase también
 
-- [Niveles](/phonometry/es/guides/levels/) — las primitivas de dosis `lex_8h` /
+- [Niveles](/phonometry/es/guides/levels/): las primitivas de dosis `lex_8h` /
   `sound_exposure` (IEC 61252) y el LCpeak que estas estrategias declaran al
   lado.
-- [Incertidumbre de medición](/phonometry/es/guides/gum-uncertainty/) — la
+- [Incertidumbre de medición](/phonometry/es/guides/gum-uncertainty/): la
   maquinaria GUM que sustenta las incertidumbres combinadas y expandidas.
-- [Teoría](/phonometry/es/reference/theory/environment-transport/) — la derivación de las fórmulas de
+- [Teoría](/phonometry/es/reference/theory/environment-transport/): la derivación de las fórmulas de
   las estrategias y del presupuesto del anexo C.
 - Referencia de la API: [`hearing.occupational_exposure`](/phonometry/es/reference/api/hearing/occupational-exposure/).

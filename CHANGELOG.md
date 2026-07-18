@@ -468,6 +468,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Docs prose: swept the remaining em-dashes out of the editorial text across
+  the GitHub guides, the EN and ES site guides, theory chapters, landings and
+  frontmatter descriptions, rewriting each sentence with standard punctuation
+  while preserving em-dashes inside official standard titles, citations and
+  table placeholders.
 - Docs site build and assets: a postbuild step recompresses the raster images
   the site serves (the social card drops from 663 KiB to 337 KiB, sources
   untouched), prerendered pages render four at a time, the pa11y audit covers

@@ -226,8 +226,8 @@ de banda**. Dos casos requieren tratamiento especial:
 
 - **Chebyshev II**: en scipy, `Wn` es el borde de la banda *atenuada*.
   phonometry mapea analíticamente los bordes de −3 dB deseados a bordes de
-  banda atenuada — la razón de transición del prototipo es
-  $\cosh(\operatorname{acosh}(\sqrt{10^{A/10}-1})/N)$ — aplicando la
+  banda atenuada (la razón de transición del prototipo es
+  $\cosh(\operatorname{acosh}(\sqrt{10^{A/10}-1})/N)$), aplicando la
   transformación paso-bajo→paso-banda en el dominio bilineal pre-warpeado, de
   modo que el mapeo es exacto incluso para bandas diezmadas cercanas a Nyquist.
 - **Bessel**: se diseña con `norm="mag"`, que define el punto de −3 dB
@@ -274,7 +274,7 @@ $$
 El filtro digital se obtiene de los polos/ceros analógicos mediante la
 transformación bilineal. Como esta comprime las frecuencias cerca de Nyquist, el
 modo `high_accuracy` por defecto diseña y ejecuta el filtro a una frecuencia
-interna sobremuestreada (≥ 144 kHz) — consulta
+interna sobremuestreada (≥ 144 kHz); consulta
 [Ponderación frecuencial](/phonometry/es/guides/weighting/).
 
 ## Integración temporal
@@ -312,7 +312,7 @@ $$
 k = \left| \frac{\prod_i (j\omega_{10} - p_i)}{\prod_i (j\omega_{10} - z_i)} \right|, \qquad \omega_{10} = 2\pi \cdot 10 \ \text{rad/s}
 $$
 
-Los cuatro ceros frente a ocho polos dan forma a la respuesta característica: una subida de aproximadamente **+12 dB/octava entre 1 Hz y 20 Hz**, con caídas de aproximadamente **24 dB/octava** por debajo de 1 Hz y por encima de 20 Hz. Los infrasonidos necesitan su propia curva porque, cerca del umbral de audición, la sonoridad percibida de los tonos de muy baja frecuencia crece con el nivel de presión sonora mucho más abruptamente que a frecuencias medias — un pequeño incremento en dB sobre el umbral produce un gran salto de sonoridad —, de modo que la curva A (anclada en 1 kHz) distorsiona por completo la molestia infrasónica.
+Los cuatro ceros frente a ocho polos dan forma a la respuesta característica: una subida de aproximadamente **+12 dB/octava entre 1 Hz y 20 Hz**, con caídas de aproximadamente **24 dB/octava** por debajo de 1 Hz y por encima de 20 Hz. Los infrasonidos necesitan su propia curva porque, cerca del umbral de audición, la sonoridad percibida de los tonos de muy baja frecuencia crece con el nivel de presión sonora mucho más abruptamente que a frecuencias medias (un pequeño incremento en dB sobre el umbral produce un gran salto de sonoridad), de modo que la curva A (anclada en 1 kHz) distorsiona por completo la molestia infrasónica.
 
 Como G actúa sobre 0,25 Hz – 315 Hz, muy por debajo de la frecuencia de Nyquist a tasas de audio, la deformación en frecuencia de la transformación bilineal simple (aplicada sin precompensación) es despreciable en ese rango: en torno al 0,014 % a 315 Hz con $f_s = 48$ kHz, menos de 0,01 dB en la respuesta. Por eso no se aplica el sobremuestreo interno usado en los diseños A/C (cuya acción se extiende hasta 16 kHz).
 
@@ -340,7 +340,7 @@ $$
 
 Es idéntico al $L_{EP,d}$ de la Directiva 86/188/CEE y al $L_{EX,8h}$ de ISO 1999 (IEC 61252, 3.3 NOTAS 5–6). El ancla de IEC 61252 (3.3 NOTA 4): una exposición de **3,2 Pa²h corresponde a un $L_{EX,8h}$ de exactamente 90 dB**.
 
-**LCpeak** (IEC 61672-1:2013, subcláusula 5.13) es el máximo absoluto de la presión sonora ponderada C expresado en dB, $L_{Cpeak} = 20\log_{10}(\max|p_C(t)|/p_0)$ — la magnitud detrás de los límites de acción laborales de 135/137/140 dB(C). La implementación se verifica contra las respuestas de referencia de un ciclo y de medio ciclo de la Tabla 5.
+**LCpeak** (IEC 61672-1:2013, subcláusula 5.13) es el máximo absoluto de la presión sonora ponderada C expresado en dB, $L_{Cpeak} = 20\log_{10}(\max|p_C(t)|/p_0)$, la magnitud detrás de los límites de acción laborales de 135/137/140 dB(C). La implementación se verifica contra las respuestas de referencia de un ciclo y de medio ciclo de la Tabla 5.
 
 Consulta la [guía de niveles](/phonometry/es/guides/levels/) para su uso y la [guía de calibración](/phonometry/es/guides/calibration/) para configurar la escala absoluta.
 
@@ -358,7 +358,7 @@ $$
 p = \frac{p_1 + p_2}{2}, \qquad u = -\frac{1}{\rho_0 \Delta r} \int (p_2 - p_1)\ dt, \qquad I = \overline{p\ u}
 $$
 
-Para señales estacionarias el mismo estimador tiene una forma exacta en el dominio de la frecuencia a través de la parte imaginaria del **espectro cruzado** unilateral $G_{12}$ de las dos presiones — la implementación lo estima con segmentos promediados tipo Welch con ventana de Hann:
+Para señales estacionarias el mismo estimador tiene una forma exacta en el dominio de la frecuencia a través de la parte imaginaria del **espectro cruzado** unilateral $G_{12}$ de las dos presiones; la implementación lo estima con segmentos promediados tipo Welch con ventana de Hann:
 
 $$
 I(f) = -\ \frac{\mathrm{Im}\lbrace G_{12}(f)\rbrace}{2 \pi f\ \rho_0\ \Delta r}
@@ -370,13 +370,13 @@ $$
 \frac{\sin(k \Delta r)}{k \Delta r}, \qquad k = \frac{2 \pi f}{c}
 $$
 
-— la cláusula 7.3 de IEC 61043 especifica la respuesta en intensidad de la sonda con exactamente este argumento y la Tabla 3 la tabula (p. ej. −10,5 dB a 6,3 kHz para un separador de 25 mm). Por debajo de $f = 0{,}1 c / \Delta r$ (es decir, $k \Delta r$ por debajo de 0,63) el sesgo se mantiene dentro de unos 0,3 dB; `bias_correction` proporciona el factor recíproco por banda y `max_valid_frequency` la cota.
+La cláusula 7.3 de IEC 61043 especifica la respuesta en intensidad de la sonda con exactamente este argumento y la Tabla 3 la tabula (p. ej. −10,5 dB a 6,3 kHz para un separador de 25 mm). Por debajo de $f = 0{,}1 c / \Delta r$ (es decir, $k \Delta r$ por debajo de 0,63) el sesgo se mantiene dentro de unos 0,3 dB; `bias_correction` proporciona el factor recíproco por banda y `max_valid_frequency` la cota.
 
 El **índice presión-intensidad** $\delta_{pI} = L_p - L_I$ mide cuán reactivo es el campo: en una onda plana progresiva libre vale $10 \log_{10}(\rho_0 c / 400) = 0{,}14$ dB, mientras que valores grandes delatan campos reactivos o ruidosos en los que domina el error de fase entre canales. El Anexo A de ISO 9614-1:1993 lo generaliza sobre una superficie de medición como el indicador F2 (con F3 para la potencia parcial negativa y F4 para la no uniformidad del campo), y la **capacidad dinámica** del instrumento $L_d = \delta_{pI0} - K$ (índice presión-intensidad residual menos el factor de error de sesgo: 10 dB para los grados 1/2, 7 dB para el grado 3) debe superar F2 para que la medición sea válida (criterio 1).
 
 Consulta la [guía de intensidad sonora](/phonometry/es/guides/intensity/) para su uso.
 
-## Incertidumbre de medida (ISO/IEC Guide 98-3 — GUM y Suplemento 1)
+## Incertidumbre de medida (ISO/IEC Guide 98-3: GUM y Suplemento 1)
 
 Los presupuestos de dominio como ISO 12999-1 y el Anexo C de ISO 9612 son
 instancias del marco general de la GUM (ISO/IEC Guide 98-3:2008). Dado un
@@ -405,11 +405,11 @@ El **Suplemento 1** (ISO/IEC Guide 98-3-1:2008) propaga en cambio las
 distribuciones completas: $10^6$ extracciones de Monte Carlo (cláusula 6.4) a
 través del mismo modelo dan $u(y)$ y el intervalo de cobertura
 probabilísticamente simétrico a partir de los fractiles
-$\frac{1}{2}(1 \mp p)$ (cláusula 7.7) — la vía cuando el modelo es no lineal o
+$\frac{1}{2}(1 \mp p)$ (cláusula 7.7): la vía cuando el modelo es no lineal o
 la salida visiblemente no gaussiana. Los ejemplos de las propias Guías se
 reproducen: el modelo aditivo de cuatro términos da $u_c = 2{,}0$ y el
 intervalo Monte Carlo al 95 % $\pm 3{,}88$ de la cláusula 9.2/Tabla 3 del
-Suplemento 1 (cuatro entradas rectangulares — la salida es casi trapezoidal,
+Suplemento 1 (cuatro entradas rectangulares; la salida es casi trapezoidal,
 no gaussiana, así que el intervalo es más estrecho que $\pm 1{,}96\,u$), y el
 ejemplo del bloque patrón del Anexo H.1 de la GUM da
 $k = t_{0{,}99}(\nu_{\mathrm{eff}} = 16) = 2{,}92$ y $U_{99} = 93$ nm.

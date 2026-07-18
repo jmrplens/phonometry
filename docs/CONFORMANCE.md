@@ -20,7 +20,7 @@
 <sub>Each row pins a standard clause to its expected normative value and the value the library computes. Every section below is collapsible and stays collapsed while all of its rows pass; a section with any failing row opens automatically.</sub>
 
 <details>
-<summary>&#9989; <b>Numerical validation - filters &amp; weightings</b> — class showcase (IEC 61260-1 · IEC 61672-1 · ISO 7196)</summary>
+<summary>&#9989; <b>Numerical validation - filters &amp; weightings</b>: class showcase (IEC 61260-1 · IEC 61672-1 · ISO 7196)</summary>
 
 **IEC 61260-1:2014 class per filter architecture** (order 6, one-third-octave, 100 Hz-10 kHz, fs = 48 kHz). For each architecture the table shows, at its *binding* band, the measured relative attenuation and the class-1 limit it must clear, so the number and the range it must sit in are both visible. A positive margin means the acceptance limits are met with that much room.
 
@@ -46,7 +46,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Filters &amp; weightings</b> — 100% (7/7)</summary>
+<summary>&#9989; <b>Filters &amp; weightings</b>: 100% (7/7)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -61,7 +61,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Levels &amp; dosimetry</b> — 100% (6/6)</summary>
+<summary>&#9989; <b>Levels &amp; dosimetry</b>: 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -75,7 +75,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room acoustics</b> — 100% (5/5)</summary>
+<summary>&#9989; <b>Room acoustics</b>: 100% (5/5)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -88,7 +88,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Psychoacoustics</b> — 100% (12/12)</summary>
+<summary>&#9989; <b>Psychoacoustics</b>: 100% (12/12)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -108,7 +108,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Speech transmission (IEC 60268-16)</b> — 100% (9/9)</summary>
+<summary>&#9989; <b>Speech transmission (IEC 60268-16)</b>: 100% (9/9)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -125,7 +125,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Intensity &amp; sound power</b> — 100% (4/4)</summary>
+<summary>&#9989; <b>Intensity &amp; sound power</b>: 100% (4/4)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -137,7 +137,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room &amp; building acoustics</b> — 100% (50/50)</summary>
+<summary>&#9989; <b>Room &amp; building acoustics</b>: 100% (50/50)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -195,7 +195,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Building prediction &amp; uncertainty</b> — 100% (15/15)</summary>
+<summary>&#9989; <b>Building prediction &amp; uncertainty</b>: 100% (15/15)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -218,7 +218,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Outdoor propagation &amp; occupational exposure</b> — 100% (10/10)</summary>
+<summary>&#9989; <b>Outdoor propagation &amp; occupational exposure</b>: 100% (10/10)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -236,7 +236,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Materials: absorption, airflow &amp; impedance</b> — 100% (6/6)</summary>
+<summary>&#9989; <b>Materials: absorption, airflow &amp; impedance</b>: 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -250,7 +250,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Scattering &amp; diffusion (ISO 17497)</b> — 100% (5/5)</summary>
+<summary>&#9989; <b>Scattering &amp; diffusion (ISO 17497)</b>: 100% (5/5)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -263,7 +263,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>In-situ road absorption (ISO 13472)</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>In-situ road absorption (ISO 13472)</b>: 100% (3/3)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -274,7 +274,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Precision sound power (ISO 3745 / 9614-3)</b> — 100% (4/4)</summary>
+<summary>&#9989; <b>Precision sound power (ISO 3745 / 9614-3)</b>: 100% (4/4)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -286,7 +286,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Human vibration (ISO 8041 / 2631 / 5349)</b> — 100% (15/15)</summary>
+<summary>&#9989; <b>Human vibration (ISO 8041 / 2631 / 5349)</b>: 100% (15/15)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -309,7 +309,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Speech intelligibility (ANSI S3.5-1997)</b> — 100% (7/7)</summary>
+<summary>&#9989; <b>Speech intelligibility (ANSI S3.5-1997)</b>: 100% (7/7)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -324,7 +324,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Impulsive-sound prominence (NT ACOU 112)</b> — 100% (2/2)</summary>
+<summary>&#9989; <b>Impulsive-sound prominence (NT ACOU 112)</b>: 100% (2/2)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -334,7 +334,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Room noise (ANSI S12.2-2019)</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>Room noise (ANSI S12.2-2019)</b>: 100% (3/3)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -345,7 +345,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Hearing threshold (ISO 7029 / ISO 389-7)</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>Hearing threshold (ISO 7029 / ISO 389-7)</b>: 100% (3/3)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -356,7 +356,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Measurement uncertainty (GUM / Supplement 1)</b> — 100% (7/7)</summary>
+<summary>&#9989; <b>Measurement uncertainty (GUM / Supplement 1)</b>: 100% (7/7)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -371,7 +371,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Noise-induced hearing loss (ISO 1999)</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>Noise-induced hearing loss (ISO 1999)</b>: 100% (3/3)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -382,7 +382,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Multiple-shock whole-body vibration (ISO 2631-5)</b> — 100% (6/6)</summary>
+<summary>&#9989; <b>Multiple-shock whole-body vibration (ISO 2631-5)</b>: 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -396,7 +396,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Sound absorption in enclosed spaces (EN 12354-6)</b> — 100% (2/2)</summary>
+<summary>&#9989; <b>Sound absorption in enclosed spaces (EN 12354-6)</b>: 100% (2/2)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -406,7 +406,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Prominent discrete tones (ECMA-418-1)</b> — 100% (2/2)</summary>
+<summary>&#9989; <b>Prominent discrete tones (ECMA-418-1)</b>: 100% (2/2)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -416,7 +416,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Tonal audibility (ISO/PAS 20065)</b> — 100% (11/11)</summary>
+<summary>&#9989; <b>Tonal audibility (ISO/PAS 20065)</b>: 100% (11/11)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -435,7 +435,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Psychoacoustic annoyance &amp; fluctuation strength (Fastl &amp; Zwicker)</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>Psychoacoustic annoyance &amp; fluctuation strength (Fastl &amp; Zwicker)</b>: 100% (3/3)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -446,7 +446,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b> — 100% (12/12)</summary>
+<summary>&#9989; <b>Electroacoustics: distortion &amp; frequency response</b>: 100% (12/12)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -466,7 +466,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Calibrated spectral analysis (Bendat &amp; Piersol)</b> — 100% (6/6)</summary>
+<summary>&#9989; <b>Calibrated spectral analysis (Bendat &amp; Piersol)</b>: 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -480,7 +480,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Correlation, time delay and envelope (B&amp;P / Knapp &amp; Carter)</b> — 100% (7/7)</summary>
+<summary>&#9989; <b>Correlation, time delay and envelope (B&amp;P / Knapp &amp; Carter)</b>: 100% (7/7)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -495,7 +495,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Underwater acoustics (ISO 18405/17208/18406)</b> — 100% (6/6)</summary>
+<summary>&#9989; <b>Underwater acoustics (ISO 18405/17208/18406)</b>: 100% (6/6)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -509,7 +509,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Underwater sound propagation (transmission loss)</b> — 100% (15/15)</summary>
+<summary>&#9989; <b>Underwater sound propagation (transmission loss)</b>: 100% (15/15)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -532,7 +532,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Underwater numerical propagation (modes / rays / PE)</b> — 100% (4/4)</summary>
+<summary>&#9989; <b>Underwater numerical propagation (modes / rays / PE)</b>: 100% (4/4)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -544,7 +544,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b> — 100% (14/14)</summary>
+<summary>&#9989; <b>Aircraft noise (ICAO Annex 16 / IEC 61265)</b>: 100% (14/14)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -566,7 +566,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Rotorcraft noise (ECAC Doc 32 / NORAH2)</b> — 100% (12/12)</summary>
+<summary>&#9989; <b>Rotorcraft noise (ECAC Doc 32 / NORAH2)</b>: 100% (12/12)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -586,7 +586,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Wind-turbine noise (IEC 61400-11)</b> — 100% (3/3)</summary>
+<summary>&#9989; <b>Wind-turbine noise (IEC 61400-11)</b>: 100% (3/3)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -597,7 +597,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Porous &amp; multilayer absorbers (Mechel / Bies / Cox &amp; D'Antonio)</b> — 100% (10/10)</summary>
+<summary>&#9989; <b>Porous &amp; multilayer absorbers (Mechel / Bies / Cox &amp; D'Antonio)</b>: 100% (10/10)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -615,7 +615,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>Program loudness (ITU-R BS.1770 / EBU R 128)</b> — 100% (8/8)</summary>
+<summary>&#9989; <b>Program loudness (ITU-R BS.1770 / EBU R 128)</b>: 100% (8/8)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|
@@ -631,7 +631,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary>&#9989; <b>2D FDTD wave simulation (Attenborough &amp; Van Renterghem 2021, Ch. 4)</b> — 100% (2/2)</summary>
+<summary>&#9989; <b>2D FDTD wave simulation (Attenborough &amp; Van Renterghem 2021, Ch. 4)</b>: 100% (2/2)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Status |
 |:---|:---|:---|:---|:---|:---:|

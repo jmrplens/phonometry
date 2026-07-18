@@ -153,8 +153,8 @@ For every architecture the bank places the **−3 dB points on the band edges**.
 Two cases need special handling:
 
 - **Chebyshev II**: scipy's `Wn` is the *stopband* edge. phonometry maps the
-  desired −3 dB edges to stopband edges analytically — the prototype transition
-  ratio is $\cosh(\operatorname{acosh}(\sqrt{10^{A/10}-1})/N)$ — applying the
+  desired −3 dB edges to stopband edges analytically (the prototype transition
+  ratio is $\cosh(\operatorname{acosh}(\sqrt{10^{A/10}-1})/N)$), applying the
   lowpass→bandpass transform in the pre-warped bilinear domain so the mapping
   stays exact for decimated bands close to Nyquist.
 - **Bessel**: designed with `norm="mag"`, which defines the −3 dB point exactly
@@ -201,7 +201,7 @@ $$
 The digital filter is obtained from the analog poles/zeros via the bilinear
 transform. Because the bilinear transform compresses frequencies near Nyquist,
 the default `high_accuracy` mode designs and runs the filter at an internally
-oversampled rate (≥ 144 kHz) — see [Frequency Weighting](weighting.md).
+oversampled rate (≥ 144 kHz); see [Frequency Weighting](weighting.md).
 
 ## Time Integration
 
@@ -237,7 +237,7 @@ $$
 k = \left| \frac{\prod_i (j\omega_{10} - p_i)}{\prod_i (j\omega_{10} - z_i)} \right|, \qquad \omega_{10} = 2\pi \cdot 10 \ \text{rad/s}
 $$
 
-The four zeros against eight poles shape the characteristic response: a rise of approximately **+12 dB/octave between 1 Hz and 20 Hz**, with roll-offs of approximately **24 dB/octave** below 1 Hz and above 20 Hz. Infrasound needs its own curve because near the hearing threshold the perceived loudness of very-low-frequency tones grows much more steeply with sound pressure level than at mid frequencies — a small dB increase above threshold produces a large loudness jump — so the A curve (anchored at 1 kHz) grossly misrepresents infrasonic annoyance.
+The four zeros against eight poles shape the characteristic response: a rise of approximately **+12 dB/octave between 1 Hz and 20 Hz**, with roll-offs of approximately **24 dB/octave** below 1 Hz and above 20 Hz. Infrasound needs its own curve because near the hearing threshold the perceived loudness of very-low-frequency tones grows much more steeply with sound pressure level than at mid frequencies (a small dB increase above threshold produces a large loudness jump), so the A curve (anchored at 1 kHz) grossly misrepresents infrasonic annoyance.
 
 Since G acts on 0.25 Hz – 315 Hz, far below the Nyquist frequency at audio rates, the frequency warping of the plain bilinear transform (applied without prewarping) is negligible there: about 0.014 % at 315 Hz for $f_s = 48$ kHz, under 0.01 dB on the response. The internal oversampling used for the A/C designs (whose action extends to 16 kHz) is therefore not applied.
 
@@ -265,7 +265,7 @@ $$
 
 It is identical to $L_{EP,d}$ of Directive 86/188/EEC and $L_{EX,8h}$ of ISO 1999 (IEC 61252, 3.3 NOTES 5–6). The anchor of IEC 61252 (3.3 NOTE 4): an exposure of **3.2 Pa²h corresponds to $L_{EX,8h}$ of exactly 90 dB**.
 
-**LCpeak** (IEC 61672-1:2013, subclause 5.13) is the absolute maximum of the C-weighted sound pressure expressed in dB, $L_{Cpeak} = 20\log_{10}(\max|p_C(t)|/p_0)$ — the quantity behind the 135/137/140 dB(C) occupational action limits. The implementation is verified against the one-cycle and half-cycle reference responses of Table 5.
+**LCpeak** (IEC 61672-1:2013, subclause 5.13) is the absolute maximum of the C-weighted sound pressure expressed in dB, $L_{Cpeak} = 20\log_{10}(\max|p_C(t)|/p_0)$, the quantity behind the 135/137/140 dB(C) occupational action limits. The implementation is verified against the one-cycle and half-cycle reference responses of Table 5.
 
 See the [Levels guide](levels.md) for usage and the [Calibration guide](calibration.md) for absolute-scale setup.
 
@@ -283,7 +283,7 @@ $$
 p = \frac{p_1 + p_2}{2}, \qquad u = -\frac{1}{\rho_0 \Delta r} \int (p_2 - p_1)\ dt, \qquad I = \overline{p\ u}
 $$
 
-For stationary signals the same estimator has an exact frequency-domain form through the imaginary part of the one-sided **cross spectrum** $G_{12}$ of the two pressures — the implementation estimates it with Welch-averaged, Hann-windowed segments:
+For stationary signals the same estimator has an exact frequency-domain form through the imaginary part of the one-sided **cross spectrum** $G_{12}$ of the two pressures; the implementation estimates it with Welch-averaged, Hann-windowed segments:
 
 $$
 I(f) = -\ \frac{\mathrm{Im}\lbrace G_{12}(f)\rbrace}{2 \pi f\ \rho_0\ \Delta r}
@@ -295,13 +295,13 @@ $$
 \frac{\sin(k \Delta r)}{k \Delta r}, \qquad k = \frac{2 \pi f}{c}
 $$
 
-— IEC 61043 clause 7.3 specifies the probe intensity response with exactly this argument and Table 3 tabulates it (e.g. −10.5 dB at 6.3 kHz for a 25 mm spacer). Below $f = 0.1 c / \Delta r$ (i.e. $k \Delta r$ under 0.63) the bias stays within about 0.3 dB; `bias_correction` provides the reciprocal factor per band and `max_valid_frequency` the bound.
+IEC 61043 clause 7.3 specifies the probe intensity response with exactly this argument and Table 3 tabulates it (e.g. −10.5 dB at 6.3 kHz for a 25 mm spacer). Below $f = 0.1 c / \Delta r$ (i.e. $k \Delta r$ under 0.63) the bias stays within about 0.3 dB; `bias_correction` provides the reciprocal factor per band and `max_valid_frequency` the bound.
 
 The **pressure-intensity index** $\delta_{pI} = L_p - L_I$ measures how reactive the field is: in a free plane progressive wave it equals $10 \log_{10}(\rho_0 c / 400) = 0.14$ dB, while large values flag reactive or noisy fields in which the inter-channel phase error dominates. ISO 9614-1:1993 Annex A generalizes it over a measurement surface as the indicator F2 (with F3 for negative partial power and F4 for field non-uniformity), and the instrument's **dynamic capability** $L_d = \delta_{pI0} - K$ (pressure-residual intensity index minus the bias error factor: 10 dB for grades 1/2, 7 dB for grade 3) must exceed F2 for the measurement to be valid (criterion 1).
 
 See the [Sound Intensity guide](intensity.md) for usage.
 
-## Measurement uncertainty (ISO/IEC Guide 98-3 — GUM and Supplement 1)
+## Measurement uncertainty (ISO/IEC Guide 98-3: GUM and Supplement 1)
 
 Domain budgets like ISO 12999-1 and ISO 9612 Annex C are instances of the
 general framework of the GUM (ISO/IEC Guide 98-3:2008). Given a measurement
@@ -329,11 +329,11 @@ $$
 **Supplement 1** (ISO/IEC Guide 98-3-1:2008) propagates the full distributions
 instead: $10^6$ Monte Carlo draws (clause 6.4) through the same model give
 $u(y)$ and the probabilistically symmetric coverage interval from the
-$\frac{1}{2}(1 \mp p)$ fractiles (clause 7.7) — the route when the model is
+$\frac{1}{2}(1 \mp p)$ fractiles (clause 7.7): the route when the model is
 non-linear or the output visibly non-Gaussian. The Guides' own examples are
 reproduced: the four-term additive model gives $u_c = 2.0$ and the Monte Carlo
 95 % interval $\pm 3.88$ of Supplement 1 clause 9.2/Table 3 (four rectangular
-inputs — the output is nearly trapezoidal, not Gaussian, so the interval is
+inputs; the output is nearly trapezoidal, not Gaussian, so the interval is
 narrower than $\pm 1.96\,u$), and the GUM Annex H.1 end-gauge example gives
 $k = t_{0.99}(\nu_{\mathrm{eff}} = 16) = 2.92$ and $U_{99} = 93$ nm.
 

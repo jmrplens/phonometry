@@ -17,10 +17,10 @@ f_m = 1000 \cdot G^{x/b} \quad (b\ \text{odd}), \qquad
 f_1 = f_m G^{-1/2b}, \quad f_2 = f_m G^{+1/2b}
 $$
 
-so every 1/3-octave band spans $G^{1/3} \approx 1.2589 \approx 10^{1/10}$ —
+so every 1/3-octave band spans $G^{1/3} \approx 1.2589 \approx 10^{1/10}$:
 ten bands per decade, which is why the nominal frequencies (25, 31.5, 40 …)
 repeat scaled by 10. phonometry designs each band as an SOS cascade whose
-−3 dB points land exactly on $f_1$ and $f_2$ for every architecture — for
+−3 dB points land exactly on $f_1$ and $f_2$ for every architecture; for
 Chebyshev II, Elliptic and Bessel that requires pre-warping the analytic
 band-edge mapping rather than trusting SciPy's default parametrization.
 
@@ -46,8 +46,8 @@ itself, is what decimation fixes.
 
 ### Multirate decimation
 
-A 25 Hz one-third-octave band at 48 kHz spans about 5.8 Hz — 0.024 %
-of Nyquist — coefficients so stiff they go numerically unstable. The bank
+A 25 Hz one-third-octave band at 48 kHz spans about 5.8 Hz, 0.024 %
+of Nyquist, with coefficients so stiff they go numerically unstable. The bank
 avoids that by filtering low bands at a decimated rate:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_multirate.svg" alt="Multirate decimation: high bands filtered at the input rate, low bands after anti-alias low-pass and decimation so the SOS sections stay numerically healthy" width="92%"></picture>
@@ -420,7 +420,7 @@ print(result["bands"][0])
 
 The Table 1 acceptance mask itself is public too: `class_limits(fraction,
 filter_class, omega)` returns the minimum/maximum relative-attenuation
-limits at normalized frequencies Ω = f/fm — the same limits the verifier
+limits at normalized frequencies Ω = f/fm, the same limits the verifier
 and the figure below use.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_overlay.svg" alt="Butterworth band response threading between the forbidden regions of the IEC 61260-1 class 1 acceptance mask" width="80%"></picture>
@@ -561,8 +561,8 @@ grades:
   terms, which is why instrument-grade chains specify the class of every
   stage rather than a single overall figure.
 
-**Which architecture reaches which class?** The library's **default — Butterworth
-order 6 — meets class 0** in the configurations the conformance suite verifies
+**Which architecture reaches which class?** The library's **default, Butterworth
+order 6, meets class 0** in the configurations the conformance suite verifies
 (octave and third-octave banks at 48 kHz), so no special setup is needed for
 laboratory-grade banks in that range. The table below reports the best class
 each architecture reaches under that same order-6 / 48 kHz setup; the other
@@ -571,7 +571,7 @@ different property *by construction*:
 
 | Architecture | Best class (order 6, fs 48 kHz) | Why |
 | :--- | :---: | :--- |
-| `butter` (default) | **0** | Maximally-flat pass-band, monotone roll-off — fits the mask |
+| `butter` (default) | **0** | Maximally-flat pass-band, monotone roll-off; fits the mask |
 | `cheby2` | 1 | Flat pass-band but the mask relationship binds at class 1 |
 | `cheby1` | — | Pass-band ripple violates the flatness limit |
 | `ellip` | — | Pass- and stop-band ripple |
@@ -580,8 +580,8 @@ different property *by construction*:
 So the sensible default is the common one (Butterworth order 6): it clears
 class 0 in the verified configurations, while the alternative architectures are
 deliberate opt-ins whose purpose (steeper roll-off, linear phase) works against
-the class mask. Away from these settings — very high `fraction` or near-Nyquist
-bands — always re-run `verify_filter_class` to confirm the class you need, and
+the class mask. Away from these settings (very high `fraction` or near-Nyquist
+bands), always re-run `verify_filter_class` to confirm the class you need, and
 raise the order if a band needs more margin.
 
 ## 7. Signal Decomposition and Stability
@@ -777,8 +777,8 @@ frequencies and band edges of §1 (5.2-5.5), the nominal band labels, and the
 Table 1 class 1 / class 2 acceptance limits (with the fractional-octave
 breakpoint mapping and log-frequency interpolation) verified in §6.
 IEC 61260:1995 and ANSI S1.11-2004, *Octave-Band and Fractional-Octave-Band …
-Filters* — the withdrawn edition's Table 1 (identical between the two) supplies
+Filters*: the withdrawn edition's Table 1 (identical between the two) supplies
 the stricter class 0 mask offered by ``edition="1995"``, and the band-edge
 convention on which every bank places its −3 dB
-points. ISO 266 — the preferred-frequency series behind the nominal band
+points. ISO 266: the preferred-frequency series behind the nominal band
 labels reported by `nominal_frequencies`.

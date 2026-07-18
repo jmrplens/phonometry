@@ -3,13 +3,13 @@
 # Psychoacoustic annoyance and fluctuation strength (Fastl & Zwicker)
 
 How *annoying* a sound is depends on more than how loud it is. Fastl & Zwicker,
-*Psychoacoustics: Facts and Models*, combine four psychoacoustic sensations —
-**loudness**, **sharpness**, **roughness** and **fluctuation strength** — into a
+*Psychoacoustics: Facts and Models*, combine four psychoacoustic sensations
+(**loudness**, **sharpness**, **roughness** and **fluctuation strength**) into a
 single **psychoacoustic annoyance** `PA`, a scalar that grows with loudness and
 is lifted further when the sound is sharp, rough or slowly fluctuating. This page
 covers the exact `PA` model (Eqs 16.2–16.4), the **fluctuation strength** it
-consumes — both the closed form for amplitude-modulated broadband noise
-(Eq. 10.2) and the Osses et al. (2016) signal model — and the signal
+consumes, both the closed form for amplitude-modulated broadband noise
+(Eq. 10.2) and the Osses et al. (2016) signal model, and the signal
 convenience that derives all four sensations from a recording.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/psychoacoustic_annoyance.svg" alt="Psychoacoustic annoyance PA against percentile loudness N5 for three sensation profiles: a neutral baseline where PA equals N5, a sharp sound and a rough-and-fluctuating sound both lifted above the baseline, with the worked example PA = 30.82 marked" width="82%"></picture>
@@ -48,14 +48,14 @@ plt.show()
 Psychoacoustic annoyance rests on four hearing sensations, each with its own
 model and unit in the library:
 
-- **Loudness** — the percentile loudness `N5` (the loudness exceeded 5 % of the
+- **Loudness**: the percentile loudness `N5` (the loudness exceeded 5 % of the
   time), in **sone**, from the ISO 532-1 Zwicker time-varying model
   (`loudness_zwicker`, see [Loudness](loudness.md)).
-- **Sharpness** `S`, in **acum** — the spectral balance towards high
+- **Sharpness** `S`, in **acum**: the spectral balance towards high
   frequencies, DIN 45692 (`sharpness_din`).
-- **Roughness** `R`, in **asper** — the harshness of fast (~70 Hz) amplitude
+- **Roughness** `R`, in **asper**: the harshness of fast (~70 Hz) amplitude
   modulation, ECMA-418-2 Sottek model (`roughness_ecma`).
-- **Fluctuation strength** `F`, in **vacil** — the sensation of slow (~4 Hz)
+- **Fluctuation strength** `F`, in **vacil**: the sensation of slow (~4 Hz)
   loudness fluctuation (§3 below).
 
 ## 2. Psychoacoustic annoyance (Eqs 16.2–16.4)
@@ -85,7 +85,7 @@ print(round(res.w_s, 4), round(res.w_fr, 4))   # 0.1001 0.2125
 
 The figure above sweeps `PA` against `N5` for three profiles: a neutral baseline
 (`S = 1.75 acum`, `F = R = 0`, so `PA = N5`), a sharp sound and a
-rough-and-fluctuating sound — both lifted above the baseline — with the worked
+rough-and-fluctuating sound, both lifted above the baseline, with the worked
 example marked.
 
 ### 2.1 From a signal (engineering estimate)
@@ -103,7 +103,7 @@ res = psychoacoustics.psychoacoustic_annoyance_from_signal(x, fs, field="free")
 print(res.annoyance, res.n5, res.sharpness, res.roughness, res.fluctuation_strength)
 ```
 
-> **Model-mixing caveat.** This composite mixes model families — Zwicker-family
+> **Model-mixing caveat.** This composite mixes model families: Zwicker-family
 > `N5` and `S`, Sottek `R` and Osses `F`. The `PA` model was calibrated with
 > Zwicker-family sensations, so treat the signal convenience as an *engineering
 > estimate*. For exact, reproducible results, compute the four quantities with
@@ -114,7 +114,7 @@ print(res.annoyance, res.n5, res.sharpness, res.roughness, res.fluctuation_stren
 
 **Fluctuation strength** `F` (vacil) quantifies the perception of *slow* loudness
 fluctuation. Like roughness it is a band-pass sensation of the modulation
-frequency, but it peaks about an order of magnitude lower — at `fmod ≈ 4 Hz`
+frequency, but it peaks about an order of magnitude lower, at `fmod ≈ 4 Hz`
 rather than the ~70 Hz roughness peak. By definition, a 1 kHz tone at 60 dB,
 100 % amplitude-modulated at 4 Hz, produces `1 vacil`. This page covers the
 Fastl & Zwicker models; the normative Sottek-model fluctuation strength of
@@ -207,7 +207,7 @@ res.plot()   # specific fluctuation strength F′(z) over the Bark axis (needs m
 > 0.09]` vacil against the literature `[0.39, 0.84, 1.25, 1.30, 0.36, 0.06]`
 > (Pearson `r = 0.98`, correct `4 Hz` peak, within ~2.1×). FM-tone accuracy is
 > explicitly not pursued. For **AM broadband noise** the signal model overshoots
-> the absolute level (it spreads the modulated energy across bands) — quote the
+> the absolute level (it spreads the modulated energy across bands); quote the
 > closed form `fluctuation_strength_am_noise` (§3.1) for that stimulus.
 
 ## References
@@ -238,7 +238,7 @@ sharpness weighting `wS` and roughness/fluctuation weighting `wFR`
 (Eqs 16.2–16.4; origin Widmann 1992), and the closed form for the fluctuation
 strength of amplitude-modulated broadband noise (Eq. 10.2). The fluctuation-
 strength signal model follows Osses García & Kohlrausch (2016), *Modelling the
-sensation of fluctuation strength* (ICA 2016) — clean-room, with no numeric
+sensation of fluctuation strength* (ICA 2016), clean-room and with no numeric
 standard: calibrated to `1 vacil` at the reference AM tone and cross-checked
 against the paper's Table 1 literature trends and the open SQAT reference oracle.
 The four sensations reuse the library's ISO 532-1 loudness, DIN 45692 sharpness

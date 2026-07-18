@@ -15,8 +15,8 @@ laboratory inputs come from
 ## Predicting performance (EN 12354)
 
 A laboratory rating describes an element in isolation, yet the sound a building
-actually transmits also travels *around* the partition — along the floor, up the
-façade, through the flanking walls — re-radiating into the receiving room. This
+actually transmits also travels *around* the partition (along the floor, up the
+façade, through the flanking walls), re-radiating into the receiving room. This
 **flanking transmission** is the whole difference between the laboratory $R$ and
 the field $R'$. EN 12354 predicts the in-situ apparent rating from the
 laboratory ratings of the elements plus the vibration transmission of their
@@ -25,8 +25,8 @@ junctions.
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_flanking_paths.svg" alt="The direct path Dd through the separating element and the three flanking paths Ff, Df and Fd across each junction between a flanking element and the separating element" width="92%"></picture>
 
 Each junction between a flanking element and the separating element carries
-three paths — $Ff$ (flanking→flanking), $Df$ (direct→flanking) and $Fd$
-(flanking→direct) — alongside the single direct path $Dd$.
+three paths, $Ff$ (flanking→flanking), $Df$ (direct→flanking) and $Fd$
+(flanking→direct), alongside the single direct path $Dd$.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths.gif" alt="Animation: energy pulses leave the source room over the direct Dd path and the flanking Ff, Fd and Df paths, shrinking at each element and junction, and every path label lights up as its pulse re-radiates into the receiving room" width="640" height="360" loading="lazy"></picture>
 
@@ -232,7 +232,7 @@ R' = -10 \log_{10}\!\Big( \sum_i \tfrac{S_i}{S}\,10^{-R_i/10}
                           + \sum_k \tfrac{A_0}{S}\,10^{-D_{n,e,k}/10} \Big).
 $$
 
-**Part 3 — outdoor → indoor.** From $R'$ (Formula 10) follow the loudspeaker- and
+**Part 3: outdoor → indoor.** From $R'$ (Formula 10) follow the loudspeaker- and
 traffic-referenced indices $R_{45} = R'+1$ and $R_{tr,s} = R'$, and the primary
 output, the standardized level difference at 2 m (Formula 13)
 
@@ -300,7 +300,7 @@ fig.tight_layout(); plt.show()
 
 </details>
 
-**Part 4 — indoor → outdoor.** The sound power level radiated by a segment
+**Part 4: indoor → outdoor.** The sound power level radiated by a segment
 (Formula 2) is $L_W = L_{p,in} + C_d - R' + 10 \log_{10}(S/S_0)$ with $S_0 = 1$ m²
 and the inside-field diffusivity term $C_d$ (Annex B; −6 dB ideal diffuse, −5 dB
 average industrial). Openings are elements whose "R" is the silencer insertion
@@ -331,7 +331,7 @@ print(round(a_tot, 1), round(building.outdoor_level(62.9, a_tot), 1))   # 26.3 3
 > inconsistencies at the higher octave bands (Part 3's printed $R'$ disagrees with
 > its own per-element partial indices at 1 k/2 k; Part 4's $R'$ rows above 500 Hz
 > disagree with its Table G.2 inputs). The implementation is faithful to the
-> formulas — it reproduces the low bands, every single-number rating and the whole
+> formulas: it reproduces the low bands, every single-number rating and the whole
 > Annex E propagation exactly.
 
 ### `FacadeElement` / `facade_sound_reduction()` / `radiated_sound_power()` parameters
@@ -366,9 +366,9 @@ numbers); `radiated_sound_power()` a `RadiatedPowerResult` (`l_w`, `r_prime`,
 
 ## Standards
 
-EN 12354-1:2000 and EN 12354-2:2000 — the simplified
+EN 12354-1:2000 and EN 12354-2:2000, which give the simplified
 flanking-transmission predictions (Annex E junctions, worked examples H.3 and
-E.3); EN 12354-3:2000 and EN 12354-4:2000 — the façade sound insulation and
+E.3); EN 12354-3:2000 and EN 12354-4:2000, which cover the façade sound insulation and
 outdoor-radiation predictions (Annex F and Annex G worked examples).
 
 ## See also

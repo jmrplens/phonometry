@@ -4,7 +4,7 @@
 
 **EN 12354-6:2003** predicts the **total equivalent sound absorption area** of a
 room and its **reverberation time** from the absorption of its surfaces and
-objects — the design counterpart of the measured reverberation time. It is the
+objects, the design counterpart of the measured reverberation time. It is the
 absorption member of the EN 12354 building-acoustics family (the airborne and
 impact insulation members live in
 [Predicting Sound Insulation (EN 12354)](insulation-prediction.md)).
@@ -181,6 +181,6 @@ alternatives for those cases live in
 
 EN 12354-6:2003, *Building acoustics — Estimation of acoustic
 performance of buildings from the performance of elements — Part 6: Sound
-absorption in enclosed spaces* — the total equivalent absorption area
+absorption in enclosed spaces*: the total equivalent absorption area
 (clause 4.3, Formulae 1-4, Table 1) and the reverberation time (clause 4.4,
 Formula 5), validated against the three worked cases of Annex E.
